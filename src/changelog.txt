@@ -1,0 +1,51 @@
+Sundog Database Refactoring Tool Changelog
+==========================================
+
+Changes in version 0.7.0
+-------------------------------------
+- Switched to LiquiBASE name, including all package structures
+- Moved code to SourceForge
+
+
+Changes in version 0.6.3 (2007.1.10)
+--------------------------------------
+- Fixed bug in create table refactoring where it ignored constraint clauses
+
+Changes in version 0.6.2 (2006.12.19)
+--------------------------------------
+- Fixed missing non-upper cased insert statement
+
+Changes in version 0.6.1 (2006.12.12)
+--------------------------------------
+- Classpath for command line migrator can now include .ear files
+- Can specify a "database.migrator.should.run" system property that blocks the migrator from running if set to "false"
+- Added a liquibase.migrator.servlet.MigratorStatusServlet servlet that can used to see the migrator logs
+- Added a MIGRATOR_FAIL_ON_ERROR web.xml context parameter that controls if an exception should be raised if an exception is thrown, or if the listener should just return.  Throws an exception by default
+- All database SQL is upper case.
+- Fixed issues with postgres schemas and getTables() call
+- Added retroweaver build for 1.4 JVMs
+- Misc. Bug fixes
+
+Changes in version 0.6 (2006.11.10)
+--------------------------------------
+- Added change log locking support, so multiple migrators running at the same time won't interfere with eachother
+- Fixed bug with command line parsing and URLs with '='s in them
+- Misc bug fixes
+
+Changes in version 0.5.1 (2006.10.18)
+--------------------------------------
+- Bugfixes related to running ant task
+
+Changes in version 0.5 (2006.10.16)
+--------------------------------------
+- LGPL Licence
+- Oracle uses Timestamp for datetime columns
+- Command line migrator can be run against WAR and EAR files
+- Command line migrator can be run via java -jar
+- ChangeSets can be marked as "runAlways" and "runOnChange"
+- ServletListener can be configured to only run on certain hostnames
+- Removed all dependencies
+- Improved MD5Sum generation.  To update your MD5Sums, run "update databasechangelog set md5sum=null"
+- MySQL Support
+- Misc bugfixes
+- Improved Documentation

@@ -1,0 +1,52 @@
+<databaseChangeLog
+        xmlns="http://www.sundog.net/xml/ns/dbchangelog/1.0"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.sundog.net/xml/ns/dbchangelog/1.0 http://www.sundog.net/xml/ns/dbchangelog/dbchangelog-1.0.xsd">
+
+    <changeSet id="1" author="Alice">
+        <createTable tableName="People">
+            <column name="id" type="int">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="firstname" type="varchar(255)"/>
+            <column name="lastname" type="varchar(255)"/>
+            <column name="username" type="varchar(255)">
+                <constraints unique="true" nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="2" author="Alice">
+        <insert tableName="People">
+            <column name="id" value="1"/>
+            <column name="username" value="root"/>
+        </insert>
+        <insert tableName="People">
+            <column name="id" value="2"/>
+            <column name="firstname" value="Fred"/>
+            <column name="lastname" value="Johnson"/>
+            <column name="username" value="fjohnson"/>
+        </insert>
+        <insert tableName="People">
+            <column name="id" value="3"/>
+            <column name="firstname" value="Susan"/>
+            <column name="lastname" value="Smith"/>
+            <column name="username" value="ssmith"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="2" author="Bob">
+        <insert tableName="People">
+            <column name="id" value="4"/>
+            <column name="firstname" value="John"/>
+            <column name="lastname" value="Doe"/>
+            <column name="username" value="jdoe"/>
+        </insert>
+        <insert tableName="People">
+            <column name="id" value="5"/>
+            <column name="firstname" value="Ed"/>
+            <column name="lastname" value="Jones"/>
+            <column name="username" value="ejones"/>
+        </insert>
+    </changeSet>
+</databaseChangeLog>
