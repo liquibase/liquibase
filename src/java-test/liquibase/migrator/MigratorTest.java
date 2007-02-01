@@ -45,7 +45,7 @@ public class MigratorTest extends TestCase {
         migrator.setUrl("jdbc:oracle:thin:@localhost:1521:latest");
         assertTrue(migrator.isSaveToRunMigration());
 
-        migrator.setUrl("jdbc:oracle:thin:@devoracle1.sundog.net:1521:latest");
+        migrator.setUrl("jdbc:oracle:thin:@liquibase:1521:latest");
         assertFalse(migrator.isSaveToRunMigration());
 
         migrator.setMode(Migrator.OUTPUT_SQL_MODE);
@@ -223,7 +223,7 @@ public class MigratorTest extends TestCase {
         private InputStream inputStream;
 
         public TestMigrator() throws SQLException, MigrationFailedException {
-            super("net/sundog/test.xml", new ClassLoaderFileOpener());
+            super("liquibase/test.xml", new ClassLoaderFileOpener());
             inputStream = createMock(InputStream.class);
             replay(inputStream);
         }

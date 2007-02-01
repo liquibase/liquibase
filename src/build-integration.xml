@@ -90,7 +90,7 @@
                 author="true"
                 version="true"
                 use="true"
-                windowtitle="Sundog Database Migrator API (${build.version})"
+                windowtitle="LiquiBASE API (${build.version})"
                 linksource="false"
                 useexternalfile="yes"
                 breakiterator="yes">

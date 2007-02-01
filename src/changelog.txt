@@ -1,4 +1,4 @@
-Sundog Database Refactoring Tool Changelog
+LiquiBASE Changelog
 ==========================================
 
 Changes in version 0.7.0

@@ -200,7 +200,7 @@ public class ChangeSetTest extends TestCase {
 //                return;
 //            }
 //        };
-//        changeLog.setInputFilePath("net/sundog/test/db.changelog.xml");
+//        changeLog.setInputFilePath("liquibase/test/db.changelog.xml");
 //        changeSet.setDatabaseChangeLog(changeLog);
 //        changeSet.setId("1512-12");
 //        changeSet.setAuthor("testAuthor");
