@@ -114,10 +114,10 @@ public class DatabaseMigratorTask extends Task {
         }
        
 
-        System.setProperty("javax.xml.parsers.DocumentBuilderFactory", "org.apache.xerces.jaxp.DocumentBuilderFactoryImpl");
-        System.setProperty("javax.xml.parsers.SAXParserFactory", "org.apache.xerces.jaxp.SAXParserFactoryImpl");
-        System.setProperty("javax.xml.transform.TransformerFactory", "org.apache.xalan.processor.TransformerFactoryImpl");
-        System.setProperty("org.xml.sax.driver", "org.apache.xerces.parsers.SAXParser");
+//        System.setProperty("javax.xml.parsers.DocumentBuilderFactory", "org.apache.xerces.jaxp.DocumentBuilderFactoryImpl");
+//        System.setProperty("javax.xml.parsers.SAXParserFactory", "org.apache.xerces.jaxp.SAXParserFactoryImpl");
+//        System.setProperty("javax.xml.transform.TransformerFactory", "org.apache.xalan.processor.TransformerFactoryImpl");
+//        System.setProperty("org.xml.sax.driver", "org.apache.xerces.parsers.SAXParser");
         Connection connection = null;
         try {
             String[] strings = classpath.list();
@@ -139,7 +139,7 @@ public class DatabaseMigratorTask extends Task {
                 migrator.init(connection);
 
                 if (isPromptOnNonDevDatabase() && !migrator.isSaveToRunMigration()) {
-                    if (JOptionPane.showConfirmDialog(null, "You are running a database refactoring against a non-development database.\n" +
+                    if (JOptionPane.showConfirmDialog(null, "You are running a database refactoring against a non-local database.\n" +
                             "Database URL is: " + migrator.getDatabase().getConnectionURL() + "\n" +
                             "Username is: " + migrator.getDatabase().getConnectionUsername() + "\n\n" +
                             "Area you sure you want to do this?",

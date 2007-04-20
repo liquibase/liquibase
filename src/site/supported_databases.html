@@ -1,0 +1,48 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+    <head>
+        <title>LiquiBase: Supported Databases</title>
+        <style type='text/css' media='screen'>@import "include/css/main.css";</style>
+    </head>
+    <body>
+        <img src="images/liquibase_logo.gif" alt="LiquiBase" class="topLogo"/>
+        
+        <p id="sitename">
+            <strong>LiquiBase: Database Refactoring</strong>
+        </p>
+
+        <div id="container">
+            <div id="navigation">
+                @NAV.MAIN@
+            </div>
+
+
+            <div id="content">
+                <div class="entry">
+                    <h2>Supported Databases</h2>
+                    <p>Unlike other database change tracking tools, LiquiBase will work with
+                        any JDBC-compliant database.</p>
+                    <p>
+                        However, the refactoring tags (such as createTable) may need to generate different SQL for
+                        different database systems and have been primarily tested with Oracle, MySQL, PostgreSQL, and
+                        MS-SQL.  Improved database support will be a highlight of the pre-1.0 release process.
+
+                        <br/>
+                    </p>
+                    <p>
+                        If you have problems with a particular tag on a particular database system,
+                        <a href="community.html">please report the problem</a>
+                    </p>
+                    <p>
+                        If you find a problem with the generated SQL for your database, or if you are using an unsupported database,
+                        you can always use the <a href="manual/sql_tag.html">&lt;sql&gt;</a> tag to code whatever change you need to make,
+                        regardless of the DBMS.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+    </body>
+</html>

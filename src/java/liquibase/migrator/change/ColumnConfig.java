@@ -15,6 +15,7 @@ public class ColumnConfig {
     private String value;
     private String defaultValue;
     private ConstraintsConfig constraints;
+    private Boolean autoIncrement;
 
     public String getName() {
         return name;
@@ -62,6 +63,14 @@ public class ColumnConfig {
         this.constraints = constraints;
     }
 
+    public Boolean isAutoIncrement() {
+        return autoIncrement;
+    }
+
+    public void setAutoIncrement(Boolean autoIncrement) {
+        this.autoIncrement = autoIncrement;
+    }
+
     public Element createNode(Document document) {
         Element element = document.createElement("column");
         element.setAttribute("name", getName());
@@ -73,6 +82,10 @@ public class ColumnConfig {
         }
         if (getValue() != null) {
             element.setAttribute("value", getValue());
+        }
+
+        if (isAutoIncrement() != null && isAutoIncrement().booleanValue()) {
+            element.setAttribute("autoIncrement", "true");
         }
 
         ConstraintsConfig constraints = getConstraints();

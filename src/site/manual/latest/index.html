@@ -1,0 +1,121 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+    <head>
+        <title>LiquiBase: Manual</title>
+        <style type='text/css' media='screen'>@import "../../include/css/main.css";</style>
+    </head>
+
+    <body>
+        <img src="../../images/liquibase_logo.gif" alt="LiquiBase" class="topLogo"/>
+        <p id="sitename">
+            <strong>LiquiBase: Database Refactoring</strong>
+        </p>
+
+        <div id="container">
+            <div id="navigation">
+                @NAV.MANUAL@
+            </div>
+
+
+            <div id="content">
+                <div class="entry">
+                    <h2>LiquiBase Manual for @BUILD.VERSION@</h2>
+
+                    <div class="toc">
+                        <ul>
+                            <li>Introduction
+                                <ul>
+                                    <li>
+                                        <a href="overview.html">Overview</a>
+                                    </li>
+                                </ul>
+                            </li>
+
+                            <li>Building Change-Logs
+                                <ul>
+                                    <li>
+                                    <ul>
+                                        <li><a href="changelog.html">&lt;DatabaseChangeLog&gt;</a></li>
+                                        <li><a href="changeset.html">&lt;ChangeSet&gt;</a></li>
+                                        <li><a href="include.html">&lt;Include&gt;</a></li>
+                                        <li><a href="preconditions.html">&lt;Preconditions&gt;</a></li>
+                                        <li><a href="refactorings.html">Refactorings</a></li>
+                                        <li><a href="contexts.html">Contexts</a></li>
+                                    </ul></li>
+                                    <li>Refactorings
+                                        <ul>
+                                        <li>Structural Refactorings
+                                            <ul>
+                                                <li><a href="add_column_change.html">Add Column</a></li>
+                                                <li><a href="rename_column_change.html">Rename Column</a></li>
+                                                <li><a href="modify_column_change.html">Modify Column</a></li>
+                                                <li><a href="drop_column_change.html">Drop Column</a></li>
+                                                <li><a href="create_table_change.html">Create Table</a></li>
+                                                <li><a href="rename_table_change.html">Rename Table</a></li>
+                                                <li><a href="drop_table_change.html">Drop Table</a></li>
+                                            </ul>
+                                        </li>
+                                        <li>Data Quality Refactorings
+                                            <ul>
+                                                <li><a href="add_not_null_constraint_change.html">Add Not-Null Constraint</a></li>
+                                                <li><a href="remove_not_null_constraint_change.html">Remove Not-Null Constraint</a></li>
+                                                <li><a href="create_sequence_change.html">Create Sequence</a></li>
+                                                <li><a href="alter_sequence_change.html">Alter Sequence</a></li>
+                                                <li><a href="drop_sequence_change.html">Drop Sequence</a></li>
+                                            </ul>
+                                        </li>
+                                        <li>Non-Refactoring Transformations
+                                            <ul>
+                                                <li><a href="insert_data_change.html">Insert Data</a></li>
+                                            </ul>
+                                        </li>
+                                        <li>Architectural Refactorings
+                                            <ul>
+                                                <li><a href="create_index_change.html">Create Index</a></li>
+                                                <li><a href="drop_index_change.html">Drop Index</a></li>
+                                            </ul>
+                                        </li>
+                                        <li><a href="sql_change.html">Custom SQL</a></li>                                        </ul>
+                                    </li>
+                                </ul>
+                            </li>
+
+                            <li>Running LiquiBase
+                                <ul>
+                                    <li>
+                                        <a href="ant.html">Ant Migrator</a>
+                                    </li>
+                                    <li>
+                                        <a href="maven.html">Maven Migrator</a>
+                                    </li>
+                                    <li>
+                                        <a href="servlet_listener_migrator.html">Servlet Listener Migrator</a>
+                                    </li>
+                                    <li>
+                                        <a href="command_line_migrator.html">Command Line Migrator</a>
+                                    </li>
+                                </ul>
+                            </li>
+                            <li>LiquiBase Development
+                                <ul>
+                                    <li>
+                                        <a href="development.html">Overview</a>
+                                    </li>
+                                    <li>
+                                        <a href="architecture.html">Architecture</a>
+                                    </li>
+                                    <li>
+                                        <a href="api/index.html">API (Javadoc)</a>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </body>
+</html>

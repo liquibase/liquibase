@@ -1,0 +1,49 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+    <head>
+        <title>LiquiBase: addColumn</title>
+        <style type='text/css' media='screen'>@import "../../include/css/main.css";</style>
+    </head>
+    <body>
+        <img src="../../images/liquibase_logo.gif" alt="LiquiBase" class="topLogo"/>
+        <p id="sitename">
+            <strong>LiquiBase: Database Refactoring</strong>
+        </p>
+
+        <div id="container">
+            <div id="navigation">
+                @NAV.MANUAL@
+            </div>
+
+
+            <div id="content">
+                <div class="entry">
+                    <h2>&lt;addColumn&gt; tag</h2>
+                    <p>
+                        Adds a new column to an existing table
+                    </p>
+                    <pre>
+&lt;addColumn tableName="person"&gt;
+    &lt;column name="firstname" type="varchar(255)"/&gt;
+&lt;/addColumn&gt;
+                    </pre>
+                    <p>
+                        Available attributes
+                    </p>
+                    <table border="1" cellpadding="5">
+                        <tr><th>tableName</th><td>Name of the table to add the column to</td></tr>
+                    </table>
+                    <p>
+                        Available tags
+                    </p>
+                    <table border="1" cellpadding="5">
+                        <tr><th>column</th><td>contain constraint and foreign key information.  See <a href="column.html">the column tag documentation</a> for more information</td></tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </body>
+</html>

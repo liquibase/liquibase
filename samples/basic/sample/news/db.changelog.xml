@@ -14,7 +14,7 @@
             <column name="newsDate" type="TIMESTAMP">
                 <constraints nullable="false"/>
             </column>
-            <column name="author" type="varchar(255)">
+            <column name="author" type="int">
                 <constraints nullable="false" foreignKeyName="fk_newsitem_person" references="People(id)"/>
             </column>
             <column name="content" type="CLOB">
@@ -23,7 +23,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="2" author="Bob">
+    <!--changeSet id="2" author="Bob">
         <insert tableName="NewsItems">
             <column name="id" value="1"/>
             <column name="title" value="First Post!"/>
@@ -38,12 +38,12 @@
             <column name="author" value="3"/>
             <column name="content" value="I can welcome you too"/>
         </insert>
-    </changeSet>
-    <changeSet id="3" author="Bob" runAlways="true">
+    </changeSet-->
+    <!--changeSet id="3" author="Bob" runAlways="true">
         <sql>update NewsItems set content=to_char(sysdate) where id=2</sql>
-    </changeSet>
-    <changeSet id="4" author="Bob" runOnChange="true">
+    </changeSet-->
+    <!--changeSet id="4" author="Bob" runOnChange="true">
         <sql>update NewsItems set title='Second Post 4', content=to_char(sysdate) where id=1</sql>
-    </changeSet>
+    </changeSet-->
 
 </databaseChangeLog>

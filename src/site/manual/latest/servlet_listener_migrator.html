@@ -1,0 +1,93 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+    <head>
+        <title>LiquiBase: Servlet Listener</title>
+        <style type='text/css' media='screen'>@import "../../include/css/main.css";</style>
+    </head>
+    <body>
+        <img src="../../images/liquibase_logo.gif" alt="LiquiBase" class="topLogo"/>
+        <p id="sitename">
+            <strong>LiquiBase: Database Refactoring</strong>
+        </p>
+
+        <div id="container">
+            <div id="navigation">
+                @NAV.MANUAL@
+            </div>
+
+
+            <div id="content">
+                <div class="entry">
+                <h2>Servlet Listener</h2>
+                <p>LiquiBase can be run via a servlet listener. This allows you to have your database be
+                    updated automatically whenever the site is deployed. Since LiquiBase uses distributed
+                    locking, this method will work just fine even if you have a cluster of application servers.
+                </p>
+
+                <p>
+                    To configure the servlet listener, simply add liquibase.migrator.jar to your WEB-INF/lib directory and the following to your web.xml file:
+                </p>
+                <pre>
+&lt;context-param&gt;
+    &lt;param-name&gt;MIGRATOR_FILE&lt;/param-name&gt;
+    &lt;param-value&gt;com/example/db.changelog.xml&lt;/param-value&gt;
+&lt;/context-param&gt;
+
+&lt;context-param&gt;
+    &lt;param-name&gt;MIGRATOR_DATA_SOURCE&lt;/param-name&gt;
+    &lt;param-value&gt;java:comp/env/jdbc/default&lt;/param-value&gt;
+&lt;/context-param&gt;
+
+&lt;context-param&gt;
+    &lt;param-name&gt;MIGRATOR_HOST_EXCLUDES&lt;/param-name&gt;
+    &lt;param-value&gt;production1.example.com, production2.example.com&lt;/param-value&gt;
+&lt;/context-param&gt;
+
+&lt;context-param&gt;
+    &lt;param-name&gt;MIGRATOR_FAIL_ON_ERROR&lt;/param-name&gt;
+    &lt;param-value&gt;true&lt;/param-value&gt;
+&lt;/context-param&gt;
+
+&lt;context-param&gt;
+    &lt;param-name&gt;MIGRATOR_CONTEXTS&lt;/param-name&gt;
+    &lt;param-value&gt;production&lt;/param-value&gt;
+&lt;/context-param&gt;
+
+&lt;listener&gt;
+    &lt;listener-class&gt;liquibase.migrator.ServletMigrator&lt;/listener-class&gt;
+&lt;/listener&gt;
+                </pre>
+                <p>
+                    Available context-parameters:
+                </p>
+                <table border="1" cellpadding="5">
+                    <tr><th>MIGRATOR_FILE</th><td>Specifies the changelog file to run [Required]</td></tr>
+                    <tr><th>MIGRATOR_DATA_SOURCE</th><td>JNDI datasource to use for running LiquiBase.  Note that the
+                    MIGRATOR_DATA_SOURCE can be different than the data source the rest of your web app uses if that
+                    data source does not have sufficient privileges to create/alter tables etc. [Required]</td></tr>
+                    <tr><th>MIGRATOR_HOST_EXCLUDES</th><td>Specify host names on which you do NO want the migrator to run.
+                        Specifying this parameter allows you to deploy the same WAR/EAR to multiple machines in different environments
+                    and not have LiquiBase run on all of them.</td></tr>
+                    <tr><th>MIGRATOR_HOST_INCLUDES</th><td>Specify the ONLY host names on which want the migrator to run.
+                        Specifying this parameter allows you to deploy the same WAR/EAR to multiple machines in different environments
+                    and not have LiquiBase run on all of them.</td></tr>
+                    <tr><th>MIGRATOR_FAIL_ON_ERROR</th><td>Specify if an exception is thrown by the
+                    migrator if an error occurs. Setting the value to "true" (default) will cause the
+                    exception to be thrown and keep the site from initializing properly.  Setting the value to
+                    "false" will allow the site to deploy as normal, but the database will be in an
+                    undefined state.</td></tr>
+                    <tr><th>MIGRATOR_CONTEXTS</th><td>A comma separated lists of the <a href="contexts.html">contexts</a> to run in.</td></tr>
+                </table>
+
+                <p>
+                    If you want to control servers run the migrator but don't want to set the MIGRATOR_HOST_EXCLUDES/MIGRATOR_HOST_INCLUDES attributes,
+                    you can specify the "database.migrator.should.run=[true/false]" system property.
+                </p>
+            </div>
+            </div>
+        </div>
+
+    </body>
+</html>

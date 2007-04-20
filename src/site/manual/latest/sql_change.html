@@ -1,0 +1,40 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+    <head>
+        <title>LiquiBase: sql</title>
+        <style type='text/css' media='screen'>@import "../../include/css/main.css";</style>
+    </head>
+    <body>
+        <img src="../../images/liquibase_logo.gif" alt="LiquiBase" class="topLogo"/>
+        <p id="sitename">
+            <strong>LiquiBase: Database Refactoring</strong>
+        </p>
+
+        <div id="container">
+            <div id="navigation">
+                @NAV.MANUAL@
+            </div>
+
+
+            <div id="content">
+                <div class="entry">
+                    <h2>&lt;sql&gt; tag</h2>
+                    <p>
+                        The "sql" tag allows you to specify whatever sql you want.
+                        It is useful for complex changes that aren't supported through LiquiBase's automated refactoring tags
+                        and to work around bugs and limitations of LiquiBase.
+                    </p>
+                    <p>
+                        Currently, the sql tag is the best way to create stored procedures and views.
+                    </p>
+                    <pre>
+&lt;sql&gt;insert into person (id, name) values (1, 'Bob') &lt;/sql&gt;
+                    </pre>
+                </div>
+            </div>
+        </div>
+
+    </body>
+</html>

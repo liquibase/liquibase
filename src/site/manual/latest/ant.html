@@ -1,0 +1,77 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+    <head>
+        <title>LiquiBase: Ant Task</title>
+        <style type='text/css' media='screen'>@import "../../include/css/main.css";</style>
+    </head>
+    <body>
+        <img src="../../images/liquibase_logo.gif" alt="LiquiBase" class="topLogo"/>
+        <p id="sitename">
+            <strong>LiquiBase: Database Refactoring</strong>
+        </p>
+
+        <div id="container">
+            <div id="navigation">
+                @NAV.MANUAL@
+            </div>
+
+
+            <div id="content">
+                <div class="entry">
+                    <h2>Ant Task</h2>
+                    <p>
+                        The LiquiBase Migrator can be controlled via an ant task.
+                        This is allows LiquiBase to keep your database up to date as part of your build process.
+                    </p>
+<pre>
+
+&lt;target name="migrate-database" depends="prepare"&gt;
+    &lt;fail unless="db.changelog.files"&gt;db.changelog.files not set&lt;/fail&gt;
+    &lt;fail unless="database.driver"&gt;database.driver not set&lt;/fail&gt;
+    &lt;fail unless="database.url"&gt;database.url not set&lt;/fail&gt;
+
+    &lt;fail unless="database.username"&gt;database.username not set&lt;/fail&gt;
+    &lt;fail unless="database.password"&gt;database.password not set&lt;/fail&gt;
+
+    &lt;taskdef resource="migratortasks.properties"&gt;
+        &lt;classpath refid="classpath"/&gt;
+
+    &lt;/taskdef&gt;
+    &lt;migrateDatabase
+            migrationFiles="${db.changelog.files}"
+            driver="${database.driver}"
+            url="${database.url}"
+            username="${database.username}"
+            password="${database.password}"
+            promptOnNonDevDatabase="${prompt.user.if.not.local.database}"
+            rebuildDatabase="false"
+            classpathref="classpath"
+            &gt;
+    &lt;/migrateDatabase&gt;
+&lt;/target&gt;
+</pre>
+<p>
+Simply add the liquibase.migrator.jar to your Ant lib directory or the classpath referenced by "classpathref"
+
+</p>
+                <p>
+                    Available Ant parameters:
+                </p>
+                <table border="1" cellpadding="5">
+                    <tr><th>migrationFiles</th><td>A comma-separated list of migration files to run</td></tr>
+                    <tr><th>driver</th><td>The name of the database driver to connect with</td></tr>
+                    <tr><th>url</th><td>The database URL</td></tr>
+                    <tr><th>username</th><td>The database username to connect with</td></tr>
+                    <tr><th>password</th><td>The password to use when connecting to the database</td></tr>
+                    <tr><th>promptOnNonDevDatabase</th><td>If set to true (default) a dialog box with warn you if you attempt to run the migrator against a database that is not on localhost</td></tr>
+                    <tr><th>rebuildDatabase</th><td>If set to true, LiquiBase will first drop all database objects owned by the connected user</td></tr>
+                    <tr><th>classpathref</th><td>A reference to the classpath that contains the database driver, liquibase.migrator.jar, and the changelog.xml files</td></tr>
+                    <tr><th>contexts</th><td>A comma separated list of <a href="contexts.html">contexts</a> to execute.  If not specified, all contexts are run.</td></tr>
+                </table>
+            </div>
+        </div>
+
+    </body>
+</html>

@@ -1,0 +1,44 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+    <head>
+        <title>LiquiBase: Samples</title>
+        <style type='text/css' media='screen'>@import "../include/css/main.css";</style>
+    </head>
+    <body>
+        <p id="sitename">
+            <strong>LiquiBase: Database Refactoring</strong>
+        </p>
+
+        <div id="container">
+            <div id="navigation">
+                @NAV.MAIN@
+            </div>
+
+
+            <div id="content">
+                <div class="entry">
+                    <h2>Sample Changelog File</h2>
+                    This is a sample db.changelog.xml file used by the migrator. Some things to notice include:
+                        <br/>
+                        <ul>
+                            <li>You can have multiple commands within a change set</li>
+
+                            <li>You can have have duplicate &#8220;id&#8221; tags because the unique identifier is the
+                                &#8220;id&#8221; tag AND the &#8220;author&#8221; tag AND the file name and
+                                location</li>
+                            <li>You can include other files</li>
+                            <li>You can use the pre-made tags like &#8220;createTable&#8221; or &#8220;insert&#8221;, or
+                                use can use raw SQL</li>
+
+                            <li>
+                            You can use the &#8220;runAlways&#8221; and &#8220;runOnChange&#8221; changelog attributes
+                            to control when a changelog will run</li>
+                        </ul>
+                    </div>
+            </div>
+        </div>
+
+    </body>
+</html>

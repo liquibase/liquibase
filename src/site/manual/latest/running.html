@@ -1,0 +1,51 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+    <head>
+        <title>LiquiBase: Running LiquiBase</title>
+        <style type='text/css' media='screen'>@import "../../include/css/main.css";</style>
+    </head>
+    <body>
+        <img src="../../images/liquibase_logo.gif" alt="LiquiBase" class="topLogo"/>
+        <p id="sitename">
+            <strong>LiquiBase: Database Refactoring</strong>
+        </p>
+
+        <div id="container">
+            <div id="navigation">
+                @NAV.MANUAL@
+            </div>
+
+
+            <div id="content">
+                <div class="entry">
+                    <h2>Running LiquiBase</h2>
+                    <p>
+                        There are four main ways to run LiquiBase:
+                    </p>
+                    <ul>
+                        <li><a href="ant.html">As an Ant task</a></li>
+                        <li><a href="maven.html">As a Maven plugin</a></li>
+                        <li><a href="servlet_listener_migrator.html">As part of an application server startup</a></li>
+                        <li><a href="command_line_migrator.html">Through a command line application</a></li>
+                    </ul>
+                    <p>
+                        All four ways have various strengths and weaknesses.
+                        The Ant/Maven runners work well for integrating changes into an existing build process.
+                        The servlet listener works well for making sure that a database is up-to-date each time a site is deployed.
+                        The command line tool works well outside a build environment when you want to do on-demand migrations of a database
+                        without any dependencies, or if you want to use LiquiBase's advanced execution options such as saving the migration SQL or
+                        controlling the changelog database lock.
+                    </p>
+                    <p>
+                        If none of the above ways work for you, or if you would like to integrate LiquiBase into your
+                        application, the primary front-end class is <a href="api/liquibase/migrator/Migrator.html">liquibase.migrator.Migrator</a>
+                    </p>
+
+                </div>
+            </div>
+        </div>
+
+    </body>
+</html>

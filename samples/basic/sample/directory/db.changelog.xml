@@ -5,7 +5,7 @@
 
     <changeSet id="1" author="Alice">
         <createTable tableName="People">
-            <column name="id" type="int">
+            <column name="id" type="int" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="firstname" type="varchar(255)"/>
@@ -18,17 +18,17 @@
 
     <changeSet id="2" author="Alice">
         <insert tableName="People">
-            <column name="id" value="1"/>
+            <!--column name="id" value="1"/-->
             <column name="username" value="root"/>
         </insert>
         <insert tableName="People">
-            <column name="id" value="2"/>
+            <!--column name="id" value="2"/-->
             <column name="firstname" value="Fred"/>
             <column name="lastname" value="Johnson"/>
             <column name="username" value="fjohnson"/>
         </insert>
         <insert tableName="People">
-            <column name="id" value="3"/>
+            <!--column name="id" value="3"/-->
             <column name="firstname" value="Susan"/>
             <column name="lastname" value="Smith"/>
             <column name="username" value="ssmith"/>
@@ -37,13 +37,13 @@
 
     <changeSet id="2" author="Bob">
         <insert tableName="People">
-            <column name="id" value="4"/>
+            <!--column name="id" value="4"/-->
             <column name="firstname" value="John"/>
             <column name="lastname" value="Doe"/>
             <column name="username" value="jdoe"/>
         </insert>
         <insert tableName="People">
-            <column name="id" value="5"/>
+            <!--column name="id" value="5"/-->
             <column name="firstname" value="Ed"/>
             <column name="lastname" value="Jones"/>
             <column name="username" value="ejones"/>

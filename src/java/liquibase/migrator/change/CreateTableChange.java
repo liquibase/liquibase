@@ -62,6 +62,10 @@ public class CreateTableChange extends AbstractChange {
                 buffer.append(" DEFAULT '").append(column.getDefaultValue()).append("'");
             }
 
+            if (column.isAutoIncrement() != null && column.isAutoIncrement().booleanValue()) {
+                buffer.append(" ").append(database.getAutoIncrementClause()).append(" ");
+            }
+
             if (iterator.hasNext()) {
                 buffer.append(", ");
             }

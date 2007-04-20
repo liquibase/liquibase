@@ -1,0 +1,68 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+    <head>
+        <title>LiquiBase: &lt;column&gt; Tag</title>
+        <style type='text/css' media='screen'>@import "../../include/css/main.css";</style>
+    </head>
+    <body>
+        <img src="../../images/liquibase_logo.gif" alt="LiquiBase" class="topLogo"/>
+        <p id="sitename">
+            <strong>LiquiBase: Database Refactoring</strong>
+        </p>
+
+        <div id="container">
+            <div id="navigation">
+                @NAV.MANUAL@
+            </div>
+
+
+            <div id="content">
+                <div class="entry">
+                    <h2>&lt;column&gt; tag</h2>
+                    <p>
+                        The "column" tag is a tag that is re-used throughout the LiquiBase XML when
+                        column definitions and column information is needed.  As a result, not all the
+                        attributes of column make sense in each context it is used in.
+                    </p>
+                    <p>
+                        Available Attributes
+                    </p>
+                    <table border="1" cellpadding="5">
+                        <tr><th>name</th><td>Name of the column</td></tr>
+                        <tr><th>type</th><td>Data type of the column</td></tr>
+                        <tr><th>value</th><td>Value to set the column to</td></tr>
+                        <tr><th>defaultValue</th><td>Default value for column</td></tr>
+                        <tr><th>autoIncrement</th><td>Is column an auto-increment column</td></tr>
+                    </table>
+                    <p>
+                        Available Tags
+                    </p>
+                    <table border="1" cellpadding="5">
+                        <tr><th>constraints</th><td>Constraint definitions</td></tr>
+                    </table>
+
+                    <h2>&lt;constraints&gt; tag</h2>
+                    <p>
+                        The "constraints" tag contains information about constraints on the column
+                    </p>
+                    <p>
+                        Available Attributes
+                    </p>
+                    <table border="1" cellpadding="5">
+                        <tr><th>nullable</th><td>Is column nullable?</td></tr>
+                        <tr><th>primaryKey</th><td>Is column a primary key?</td></tr>
+                        <tr><th>unique</th><td>Should a unique clause be applied</td></tr>
+                        <tr><th>references</th><td>Foreign key definition</td></tr>
+                        <tr><th>foreignKeyName</th><td>Foreign key name</td></tr>
+                        <tr><th>deleteCascade</th><td>Set delete cascade</td></tr>
+                        <tr><th>deferrable</th><td>Are constraints deferrable</td></tr>
+                        <tr><th>initiallyDeferred</th><td>Are constraints initially deferred</td></tr>
+                    </table>                   
+                </div>
+            </div>
+        </div>
+
+    </body>
+</html>

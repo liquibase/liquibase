@@ -103,7 +103,7 @@ public abstract class AbstractDatabase {
         try {
             rs = connection.getMetaData().getTables(getCatalogName(), getSchemaName(), getDatabaseChangeLogTableName(), null);
             if (!rs.next()) {
-                String createTableStatement = ("create table DATABASECHANGELOG (id varchar(255) not null, author varchar(255) not null, filename varchar(255) not null, dateExecuted " + getDateTimeType() + " not null, md5sum varchar(32) not null, primary key(id, author, filename))").toUpperCase();
+                String createTableStatement = ("create table DATABASECHANGELOG (id varchar(255) not null, author varchar(255) not null, filename varchar(255) not null, dateExecuted " + getDateTimeType() + " not null, md5sum varchar(32), primary key(id, author, filename))").toUpperCase();
                 // If there is no table in the database for recording change history create one.
                 if (migrator.getMode().equals(Migrator.EXECUTE_MODE)) {
                     statement = connection.createStatement();
@@ -258,6 +258,12 @@ public abstract class AbstractDatabase {
                 if (tableName.startsWith("BIN$")) { //oracle deleted table
                     continue;
                 }
+                if (tableName.startsWith("AQ$")) { //oracle AQ tables
+                    continue;
+                }
+                if (tableName.equals(getDatabaseChangeLogLockTableName())) { 
+                    continue;
+                }
                 String type = rs.getString("TABLE_TYPE");
                 String sql;
                 if ("TABLE".equals(type)) {
@@ -344,7 +350,7 @@ public abstract class AbstractDatabase {
         ResultSet rs = null;
         try {
             stmt = conn.createStatement();
-            rs = stmt.executeQuery("select locked from databasechangeloglock where id=1 for update".toUpperCase());
+            rs = stmt.executeQuery(getSelectChangeLogLockSQL());
             if (!rs.next()) {
                 throw new MigrationFailedException("Error checking database lock status");
             }
@@ -389,6 +395,10 @@ public abstract class AbstractDatabase {
             }
         }
 
+    }
+
+    protected String getSelectChangeLogLockSQL() {
+        return "select locked from databasechangeloglock where id=1".toUpperCase();
     }
 
     public String getLineComment() {
@@ -455,5 +465,9 @@ public abstract class AbstractDatabase {
                 }
             }
         }
+    }
+
+    public String getAutoIncrementClause() {
+        return "AUTO_INCREMENT";
     }
 }

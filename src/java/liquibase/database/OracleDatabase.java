@@ -60,4 +60,8 @@ public class OracleDatabase extends AbstractDatabase {
     public String getFalseBooleanValue() {
         return "0";
     }
+
+    protected String getSelectChangeLogLockSQL() {
+        return (super.getSelectChangeLogLockSQL()+" for update").toUpperCase();
+    }
 }

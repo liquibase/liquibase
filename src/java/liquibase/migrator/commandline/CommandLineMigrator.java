@@ -50,12 +50,12 @@ public class CommandLineMigrator {
         options = createOptions();
     }
 
-    private void parseOptions(String[] args) throws MalformedURLException, MigrationFailedException {
+    private void parseOptions(String[] args) throws MigrationFailedException {
         CommandLineParser parser = new GnuParser();
         try {
             cmd = parser.parse(options, args);
         } catch (ParseException e) {
-            new HelpFormatter().printHelp("java -jar sun.dbmigrator.jar", options);
+            new HelpFormatter().printHelp("java -jar liquibase.jar", options);
             System.exit(-1);
         }
         String[] classpath;
@@ -213,7 +213,7 @@ public class CommandLineMigrator {
 
 
             if (!migrator.isSaveToRunMigration()) {
-                if (JOptionPane.showConfirmDialog(null, "You are running a database refactoring against a non-development database.\n" +
+                if (JOptionPane.showConfirmDialog(null, "You are running a database refactoring against a non-local database.\n" +
                         "Database URL is: " + migrator.getDatabase().getConnectionURL() + "\n" +
                         "Username is: " + migrator.getDatabase().getConnectionUsername() + "\n\n" +
                         "Area you sure you want to do this?",

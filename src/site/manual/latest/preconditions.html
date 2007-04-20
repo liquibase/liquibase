@@ -1,0 +1,113 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+    <head>
+        <title>LiquiBase: &lt;preConditions&gt;</title>
+        <style type='text/css' media='screen'>@import "../../include/css/main.css";</style>
+    </head>
+    <body>
+        <img src="../../images/liquibase_logo.gif" alt="LiquiBase" class="topLogo"/>
+        <p id="sitename">
+            <strong>LiquiBase: Database Refactoring</strong>
+        </p>
+
+        <div id="container">
+            <div id="navigation">
+                @NAV.MANUAL@
+            </div>
+
+
+            <div id="content">
+                <div class="entry">
+                    <h2>LiquiBase: &lt;preConditions&gt;</h2>
+                    <p>
+                        There are two main reasons to use preconditions:<br/>
+                        1. Document what assumptions the writers of the changelog had when creating it.<br/>
+                        2. Enforce that those assumptions are not violated by users running the changelog<br/>
+                    </p>
+                    <h3>Sample With Preconditions</h3>
+                    <pre>
+&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+
+&lt;databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.0
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.0.xsd"&gt;
+    &lt;preConditions&gt;
+        &lt;dbms type="oracle" /&gt;
+        &lt;runningAs username="SYSTEM" /&gt;
+    &lt;/preConditions&gt;
+&lt;/databaseChangeLog&gt;
+                    </pre>
+                    <p>
+                        The above changelog will only run if the database executed against is Oracle
+                        and the database user executing the script is "SYSTEM"
+                    </p>
+                    <h2>Available Preconditions</h2>
+                    <h4>&lt;dbms&gt;</h4>
+                    <p>
+                        Specifies the expected database system.  Set the "type" attribute to "mysql","postgres","oracle" or "mssql"
+                    </p>
+                    <h4>&lt;runningAs&gt;</h4>
+                    <p>
+                        Specifies the expected user information.  Set the "username" attribute to the username of the database user
+                    </p>
+                    <h2>AND/OR/NOT Logic</h2>
+                    <p>
+                        Conditional logic can be applied to preconditions using nestable &lt;and&gt;, &lt;or&gt; and &lt;not&gt; tags.
+                        If no conditional tags are specified, it defaults to AND.
+                        <br/><br/>
+                        For example:
+                    </p>
+                       <pre>
+    &lt;preConditions&gt;
+        &lt;dbms type="oracle" /&gt;
+        &lt;runningAs username="SYSTEM" /&gt;
+    &lt;/preConditions&gt;
+                    </pre>
+                    <p>Will require running on Oracle AND with the SYSTEM user</p>
+                    <pre>
+ &lt;preConditions&gt;
+     &lt;dbms type="oracle" /&gt;
+     &lt;dbms type="mssql" /&gt;
+ &lt;/preConditions&gt;
+                 </pre>
+                 <p>Will require running on Oracle AND MS-SQL, which will always be false, unless a huge and unexpected merger takes place.</p>
+                    <pre>
+ &lt;preConditions&gt;
+     &lt;or&gt;
+         &lt;dbms type="oracle" /&gt;
+         &lt;dbms type="mssql" /&gt;
+     &lt;/or&gt;
+ &lt;/preConditions&gt;
+                 </pre>
+                 <p>Will require running on Oracle OR MS-SQL which makes more sense than the above example.</p>
+                    <pre>
+ &lt;preConditions&gt;
+     &lt;or&gt;
+         &lt;and&gt;
+            &lt;dbms type="oracle" /&gt;
+            &lt;runningAs username="SYSTEM" /&gt;
+         &lt;/and&gt;
+         &lt;and&gt;
+            &lt;dbms type="mssql" /&gt;
+            &lt;runningAs username="sa" /&gt;
+         &lt;/and&gt;
+     &lt;/or&gt;
+ &lt;/preConditions&gt;
+                 </pre>
+                 <p>Will require running as SYSTEM if executing against an Oracle database or running as SA if running against a MS-SQL database.</p>
+
+                <h2>Implementation Notes</h2>
+                <p>Preconditions are checked at the beginning of the execution of a particular changelog.
+                    If you use the "include" tag and only have preconditions on the child changelog,
+                    those preconditions will not be checked until the migrator reaches that file.
+                    This behavior may change in future releases, so don't rely on this behavior.</p>
+                </div>
+            </div>
+        </div>
+
+    </body>
+</html>

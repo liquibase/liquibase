@@ -1,0 +1,52 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+    <head>
+        <title>LiquiBase: createIndex</title>
+        <style type='text/css' media='screen'>@import "../../include/css/main.css";</style>
+    </head>
+    <body>
+        <img src="../../images/liquibase_logo.gif" alt="LiquiBase" class="topLogo"/>
+        <p id="sitename">
+            <strong>LiquiBase: Database Refactoring</strong>
+        </p>
+
+        <div id="container">
+            <div id="navigation">
+                @NAV.MANUAL@
+            </div>
+
+
+            <div id="content">
+                <div class="entry">
+                    <h2>&lt;createIndex&gt; tag</h2>
+                    <pre>
+&lt;createIndex tableName="user" indexName="idx_user_username"&gt;
+    &lt;column name="username"/&gt;
+&lt;/createIndex&gt;
+
+&lt;createIndex tableName="user" indexName="idx_person_name"&gt;
+    &lt;column name="firstname"/&gt;
+    &lt;column name="lastname"/&gt;
+&lt;/createIndex&gt;
+                    </pre>
+                       <p>
+                         Available attributes
+                     </p>
+                     <table border="1" cellpadding="5">
+                         <tr><th>tableName</th><td>Name of the table to add the index to [required]</td></tr>
+                         <tr><th>indexName</th><td>Name of the index to create [optional]</td></tr>
+                     </table>
+                  <p>
+                        Available tags
+                    </p>
+                    <table border="1" cellpadding="5">
+                        <tr><th>column</th><td>Column(s) to add to the index.  See <a href="column.html">the column tag documentation</a> for more information</td></tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </body>
+</html>

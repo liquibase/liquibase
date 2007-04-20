@@ -89,6 +89,7 @@
         <xsd:attribute name="type" type="xsd:string"/>
         <xsd:attribute name="value" type="xsd:string"/>
         <xsd:attribute name="defaultValue" type="xsd:string"/>
+        <xsd:attribute name="autoIncrement" type="xsd:boolean"/>
     </xsd:attributeGroup>
 
     <xsd:attributeGroup name="dropTableAttributes">

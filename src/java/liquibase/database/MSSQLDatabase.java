@@ -49,4 +49,7 @@ public class MSSQLDatabase extends AbstractDatabase {
         return "GETDATE()";
     }
 
+    public String getAutoIncrementClause() {
+        return "IDENTITY";
+    }
 }

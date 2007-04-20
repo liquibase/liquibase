@@ -124,14 +124,18 @@ public class ChangeLogHandler implements ContentHandler {
     }
 
     public void endElement(String uri, String localName, String qName) throws SAXException {
+        String textString = null;
+        if (text != null && text.length() > 0) {
+            textString = StringUtils.trimToNull(text.toString());
+        }
         try {
             if (changeSet != null && "changeSet".equals(qName)) {
                 changeSet.execute();
                 changeSet = null;
             } else if (change != null && qName.equals(change.getTagName())) {
-                if (text.length() > 0) {
+                if (textString != null) {
                     if (change instanceof RawSQLChange) {
-                        ((RawSQLChange) change).setSql(text.toString());
+                        ((RawSQLChange) change).setSql(textString);
                     } else {
                         throw new RuntimeException("Unexpected text in "+change.getTagName());
                     }
@@ -147,7 +151,7 @@ public class ChangeLogHandler implements ContentHandler {
 
     public void characters(char ch[], int start, int length) throws SAXException {
         if (text != null) {
-            text.append(StringUtils.trimToEmpty(new String(ch, start, length)));
+            text.append(new String(ch, start, length));
         }
     }
 

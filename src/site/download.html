@@ -1,0 +1,91 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+    <head>
+        <title>LiquiBase: Download</title>
+        <style type='text/css' media='screen'>@import "include/css/main.css";</style>
+    </head>
+    <body>
+        <img src="images/liquibase_logo.gif" alt="LiquiBase" class="topLogo"/>
+        <p id="sitename">
+            <strong>LiquiBase: Database Refactoring</strong>
+        </p>
+
+        <div id="container">
+            <div id="navigation">
+                @NAV.MAIN@
+            </div>
+
+
+            <div id="content">
+                <div class="entry">
+                    <h2>Download LiquiBase</h2>
+                    <p>The current version of the LiquiBase (was Sundog Database Refactoring Tool) is @BUILD.VERSION@.
+                        The XML changelog schema is ready for production use as any changes to the
+                        schema will be backwards compatible up to and through version 1.0.</p>
+                        <h2 style="margin-top:25px; margin-bottom:25px">
+                                <a href="http://sourceforge.net/project/showfiles.php?group_id=187970">Download Source And Binaries From SourceForge</a>
+                        </h2>
+                        <h4>Upgrade Notes:</h4>
+                    <ul>
+                        <li>Between 0.6.2 and 0.7.0 there was a change to how MD5Sums were generated for changelogs.
+                            When upgrading, you will need to run
+                            <em>update databasechangelog set md5sum=null</em>
+                            to clear existing MD5Sums. They will be re-generated with the correct values on the
+                            next migration</li>
+                        <li> Between 0.6.2 and 0.7.0 we began our transition our new "LiquiBase" name
+                            Package names changed which should have no impact on end-users beyond a change to the name
+                            of the ServletMigrator listener which is now
+                            <em>liquibase.migrator.servlet.ServletMigrator.</em></li>
+                    </ul>
+
+                    <h4>Requirements</h4>
+                    <p>
+                        None
+                    </p>
+                    <h4>Installation</h4>
+                    <p>
+                        Extract liquibase.zip. In it you will find a <em>liquibase.migrator.jar</em>
+                        This jar is all that is needed to run the migration tool from within
+                        <a href="manual/ant.html">ant</a>
+                        or a
+                        <a href="manual/servlet_listener_migrator.html">servlet container</a>.
+                        You can run the
+                        <a href="manual/command_line_migrator.html">command line</a>
+                        version of the migrator with the same jar file by simply using <em>java -jar
+                        liquibase.migrator.jar</em>.
+                    </p>
+                    <h4>Mailing List</h4>
+                    <p>
+                        Feature suggestions, bug reports, and general help should be directed to the
+                        <a href="community.html">mailling list</a>
+                    </p>
+
+                    <hr/>
+                    Copyright (C) 2006-2007 Sundog
+
+                    <p>
+                        This library is free software; you can redistribute it and/or
+                        <br/>
+                        modify it under the terms of the GNU Lesser General Public
+
+                        <br/>
+                        License as published by the Free Software Foundation;
+                        <br/>
+                        version 2.1 of the License.
+                    </p>
+                    <p/>
+                    This library is distributed in the hope that it will be useful,
+                    <br/>
+                    but WITHOUT ANY WARRANTY; without even the implied warranty of
+                    <br/>
+                    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.&nbsp; See the GNU
+                    <br/>
+                    Lesser General Public License for more details.
+                </div>
+            </div>
+        </div>
+
+    </body>
+</html>

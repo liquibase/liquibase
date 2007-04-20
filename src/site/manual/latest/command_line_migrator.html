@@ -1,0 +1,120 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+    <head>
+        <title>LiquiBase: Command Line Migrator</title>
+        <style type='text/css' media='screen'>@import "../../include/css/main.css";</style>
+    </head>
+    <body>
+        <img src="../../images/liquibase_logo.gif" alt="LiquiBase" class="topLogo"/>
+        <p id="sitename">
+            <strong>LiquiBase: Database Refactoring</strong>
+        </p>
+
+        <div id="container">
+            <div id="navigation">
+                @NAV.MANUAL@
+            </div>
+
+
+            <div id="content">
+                <div class="entry">
+                    <h2>Command Line Migrator</h2>
+                    <p>
+                        LiquiBase can be run from the command line by running "java -jar liquibase.migrator.jar".
+                        The command line migrator works well when you want to do migrations on demand, but don't
+                        have Ant or Maven available such as on servers.  The command line migrator also gives you more control
+                        over the process than the Ant, Maven, or Servlet migrators do, allowing you to do things like outputting SQL and
+                        listing/releasing database changelog locks.
+                    </p>
+                    <p>
+                        If you run the command line migrator without any arguments, you will get a help message listing
+                        these available parameters:
+                    </p>
+                    <table border="1" cellpadding="5">
+                        <tr><th>-classpath</th><td>The classpath that includes where the changelog files are located (can include packaged .jar, .ear, and .war files)</td></tr>
+                        <tr><th>-driver</th><td>The database driver to use (i.e. oracle.jdbc.OracleDriver). The driver class must be in the system classpath or the path specified by the -classpath arguement</td></tr>
+                        <tr><th>-dropAllFirst</th><td>Drops all database objects before migrating the database. Useful for refreshing a development database</td></tr>
+                        <tr><th>-execute</th><td>Runs all the statements against the databaset</td></tr>
+                        <tr><th>-migrationFile</th><td>Change log file and location in the classpath using standard java package notation (com/example/db.changelog.xml)</td></tr>
+                        <tr><th>-outputChangelogSQL</th><td>Don't actually run the statements, instead save the databasechangelog insert statements to a file. Useful for fixing out-of-sync a changelog table</td></tr>
+                        <tr><th>-outputSQL</th><td>Don't actually run the statements, instead save the databasechangelog insert statements and change SQL to a text file. Useful for allowing DBA sign-off before applying changes</td></tr>
+                        <tr><th>-password</th><td>Database Password</td></tr>
+                        <tr><th>-url</th><td>Database URL</td></tr>
+                        <tr><th>-username</th><td>Username</td></tr>
+                        <tr><th>-contexts</th><td>Comma-separated list of <a href="contexts.html">contexts</a> to execute</td></tr>
+                        <tr><th>-listLocks</th><td>	Don't attempt to migrate the database, simply list what machines have a lock on the change log table</td></tr>
+                        <tr><th>-releaseLocks</th><td>	Don't attempt to migrate the database, clear out any locks machines have on the change log table (only use if you KNOW the lock should have been released)</td></tr>
+                    </table>
+                    <h2>Examples</h2>
+                    <p>
+                        Standard Migrator Run
+                    </p>
+                    <pre>
+java -jar liquibase.migrator.jar \
+      -driver oracle.jdbc.OracleDriver \
+      -classpath \path\to\classes:jdbcdriver.jar \
+      -execute \
+      -migrationFile com/example/db.changelog.xml \
+      -url "jdbc:oracle:thin:@localhost:1521:oracle" \
+      -username scott \
+      -password tiger
+                    </pre>
+                    <p>
+                        Run Migrator pulling changelogs from a .WAR file
+                    </p>
+                    <pre>
+java -jar liquibase.migrator.jar \
+      -driver oracle.jdbc.OracleDriver \
+      -classpath website.war \
+      -execute
+      -migrationFile com/example/db.changelog.xml \
+      -url jdbc:oracle:thin:@localhost:1521:oracle \
+      -username scott \
+      -password tiger
+                    </pre>
+                    <p>
+                        Run Migrator pulling changelogs from an .EAR file
+                    </p>
+                    <pre>
+java -jar liquibase.migrator.jar \
+      -driver oracle.jdbc.OracleDriver \
+      -classpath application.ear \
+      -execute
+      -migrationFile com/example/db.changelog.xml \
+      -url jdbc:oracle:thin:@localhost:1521:oracle \
+      -username scott \
+      -password tiger
+                    </pre>
+                    <p>
+                        Don't execute changesets, save SQL to /tmp/migrate.sql
+                    </p>
+                    <pre>
+java -jar liquibase.migrator.jar \
+        -driver oracle.jdbc.OracleDriver \
+        -classpath jdbcdriver.jar \
+        -outputSQL /tmp/migrate.sql
+        -url jdbc:oracle:thin:@localhost:1521:oracle \
+        -username scott \
+        -password tiger \
+        -listLocks
+                    </pre>
+                    <p>
+                        List locks on the database change log
+                    </p>
+                    <pre>
+java -jar liquibase.migrator.jar \
+        -driver oracle.jdbc.OracleDriver \
+        -classpath jdbcdriver.jar \
+        -url jdbc:oracle:thin:@localhost:1521:oracle \
+        -username scott \
+        -password tiger \
+        -listLocks
+                    </pre>
+                </div>
+            </div>
+        </div>
+
+    </body>
+</html>
