@@ -188,6 +188,7 @@ public class Migrator {
             if (shouldDropDatabaseObjectsFirst()) {
                 log.info("Dropping Database Objects in " + getDatabase().getSchemaName());
                 getDatabase().dropDatabaseObjects();
+                checkDatabaseChangeLogTable();
                 log.finest("Objects dropped successfully");
             }
 

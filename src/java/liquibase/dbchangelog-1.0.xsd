@@ -105,10 +105,11 @@
 
     <xsd:attributeGroup name="sequenceAttributes">
         <xsd:attribute name="sequenceName" type="xsd:string"/>
-    </xsd:attributeGroup>
-
-    <xsd:attributeGroup name="optionsAttributes">
+        <xsd:attribute name="startValue" type="xsd:string"/>
         <xsd:attribute name="incrementBy" type="xsd:string"/>
+        <xsd:attribute name="maxValue" type="xsd:string"/>
+        <xsd:attribute name="minValue" type="xsd:string"/>
+        <xsd:attribute name="ordered" type="xsd:boolean"/>
     </xsd:attributeGroup>
 
     <xsd:attributeGroup name="indexName">
@@ -294,17 +295,8 @@
         </xsd:complexType>
     </xsd:element>
 
-    <xsd:element name="options">
-        <xsd:complexType>
-            <xsd:attributeGroup ref="optionsAttributes"/>
-        </xsd:complexType>
-    </xsd:element>
-
     <xsd:element name="alterSequence">
         <xsd:complexType>
-            <xsd:sequence>
-                <xsd:element ref="options" maxOccurs="unbounded" minOccurs="0"/>
-            </xsd:sequence>
             <xsd:attributeGroup ref="sequenceAttributes"/>
         </xsd:complexType>
     </xsd:element>

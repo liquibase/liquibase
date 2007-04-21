@@ -65,4 +65,20 @@ public class OracleDatabase extends AbstractDatabase {
     protected String getSelectChangeLogLockSQL() {
         return (super.getSelectChangeLogLockSQL()+" for update").toUpperCase();
     }
+
+    public String getRenameColumnSQL(String tableName, String oldColumnName, String newColumnName) {
+        return "ALTER TABLE "+tableName+" RENAME COLUMN "+oldColumnName+" TO "+newColumnName;
+    }
+
+    public String getDropNullConstraintSQL(String tableName, String columnName) {
+        return "ALTER TABLE "+tableName+" MODIFY "+columnName+" NULL";
+    }
+
+    public String getAddNullConstraintSQL(String tableName, String columnName, String defaultNullValue) {
+        return "ALTER TABLE "+tableName+" MODIFY "+columnName+" NOT NULL";
+    }
+
+    public String getDropIndexSQL(String tableName, String indexName) {
+        return "DROP INDEX "+indexName;
+    }
 }

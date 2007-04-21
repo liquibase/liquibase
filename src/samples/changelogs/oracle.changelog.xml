@@ -5,12 +5,12 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.0 http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.0.xsd">
     <preConditions>
-            <dbms type="mysql"/>
+            <dbms type="oracle"/>
     </preConditions>
 
     <changeSet id="1" author="nvoxland">
         <createTable tableName="person">
-            <column name="id" type="int" autoIncrement="true">
+            <column name="id" type="int">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="firstname" type="varchar(50)"/>
@@ -18,6 +18,9 @@
                 <constraints nullable="false"/>
             </column>
         </createTable>
+    </changeSet>
+    <changeSet id="1.1" author="nvoxland">
+        <createSequence sequenceName="seq_person"/>
     </changeSet>
     <changeSet id="2" author="nvoxland">
         <comment>Add a username column so we can use "person" for authentication</comment>
@@ -31,16 +34,19 @@
     </changeSet>
     <changeSet id="5" author="nvoxland" context="test">
         <insert tableName="person">
+            <column name="id" value="1"/>
             <column name="firstname" value="John"/>
             <column name="lastname" value="Doe"/>
             <column name="username" value="jdoe"/>
         </insert>
         <insert tableName="person">
+            <column name="id" value="2"/>
             <column name="firstname" value="Jane"/>
             <column name="lastname" value="Doe"/>
             <column name="username" value="janedoe"/>
         </insert>
         <insert tableName="person">
+            <column name="id" value="3"/>
             <column name="firstname" value="Bob"/>
             <column name="lastname" value="Johnson"/>
             <column name="username" value="bjohnson"/>
@@ -52,7 +58,7 @@
     </changeSet>
     <changeSet id="7" author="nvoxland">
         <createTable tableName="employee">
-            <column name="id" type="int" autoIncrement="true">
+            <column name="id" type="int">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="name" type="varchar(50)">
@@ -62,9 +68,11 @@
     </changeSet>
     <changeSet id="7" author="bjohnson" context="test">
         <insert tableName="employee">
+            <column name="id" value="1"/>
             <column name="name" value="ACME Corp"/>
         </insert>
         <insert tableName="employee">
+            <column name="id" value="2"/>
             <column name="name" value="Widgets Inc."/>
         </insert>
     </changeSet>
@@ -87,7 +95,7 @@
     </changeSet>
     <changeSet id="10" author="nvoxland">
         <createTable tableName="testtable">
-            <column name="id" type="int" autoIncrement="true">
+            <column name="id" type="int">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="value" type="varchar(50)">
@@ -126,5 +134,15 @@
 
     <changeSet id="15" author="nvoxland" runAlways="true">
         <sql>update liquibaseRunInfo set timesRan=timesRan+1</sql>
+    </changeSet>
+
+    <changeSet id="16" author="nvoxland">
+        <createSequence sequenceName="seq_test" startValue="1000" incrementBy="2" minValue="50" maxValue="100000" ordered="true"/>
+    </changeSet>
+    <changeSet id="17" author="nvoxland">
+        <alterSequence sequenceName="seq_test" incrementBy="2" minValue="50" maxValue="100000" ordered="true"/>
+    </changeSet>
+    <changeSet id="18" author="nvoxland">
+        <dropSequence sequenceName="seq_test"/>
     </changeSet>
 </databaseChangeLog>

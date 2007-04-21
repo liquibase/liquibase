@@ -17,7 +17,6 @@ public class DBMSPrecondition implements Precondition{
 
     public DBMSPrecondition() {
         productToTypeMap = new HashMap<String, String>();
-        //TODO: get real product names
         productToTypeMap.put(OracleDatabase.PRODUCT_NAME.toLowerCase(), "oracle");
         productToTypeMap.put(MySQLDatabase.PRODUCT_NAME.toLowerCase(), "mysql");
         productToTypeMap.put(PostgresDatabase.PRODUCT_NAME.toLowerCase(), "postgresql");

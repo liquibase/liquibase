@@ -188,9 +188,11 @@ public class ChangeLogHandler implements ContentHandler {
                 if (method.getParameterTypes().length == 1 && method.getParameterTypes()[0].equals(Boolean.class)) {
                     method.invoke(object, Boolean.valueOf(attributeValue));
                     return;
-                } else
-                if (method.getParameterTypes().length == 1 && method.getParameterTypes()[0].equals(String.class)) {
+                } else if (method.getParameterTypes().length == 1 && method.getParameterTypes()[0].equals(String.class)) {
                     method.invoke(object, attributeValue.toString());
+                    return;
+                } else if (method.getParameterTypes().length == 1 && method.getParameterTypes()[0].equals(Integer.class)) {
+                    method.invoke(object, Integer.valueOf(attributeValue.toString()));
                     return;
                 }
             }

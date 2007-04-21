@@ -100,4 +100,9 @@ public class MySQLDatabase extends AbstractDatabase {
         }
         return buffer.toString();
     }
+
+    public String getDropTableSQL(String tableName) {
+        return "DROP TABLE " + tableName;
+    }
+
 }

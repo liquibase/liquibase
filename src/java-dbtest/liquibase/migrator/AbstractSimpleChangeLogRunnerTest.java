@@ -34,9 +34,11 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
         Connection connection = driver.connect(url, info);
         migrator.init(connection);
 
+        migrator.setShouldDropDatabaseObjectsFirst(true);
         migrator.migrate();
 
         //run again to test changelog testing logic
+        migrator.setShouldDropDatabaseObjectsFirst(false);
         migrator.migrate();
     }
 

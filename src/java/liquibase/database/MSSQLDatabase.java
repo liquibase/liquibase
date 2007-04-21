@@ -2,9 +2,42 @@ package liquibase.database;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.HashSet;
+import java.util.Set;
 
 public class MSSQLDatabase extends AbstractDatabase {
     public static final String PRODUCT_NAME = "Microsoft SQL Server";
+    private Set<String> systemTablesAndViews = new HashSet<String>();
+
+    public MSSQLDatabase() {
+        systemTablesAndViews.add("syscolumns");
+        systemTablesAndViews.add("syscomments");
+        systemTablesAndViews.add("sysdepends");
+        systemTablesAndViews.add("sysfilegroups");
+        systemTablesAndViews.add("sysfiles");
+        systemTablesAndViews.add("sysfiles1");
+        systemTablesAndViews.add("sysforeignkeys");
+        systemTablesAndViews.add("sysfulltextcatalogs");
+        systemTablesAndViews.add("sysfulltextnotify");
+        systemTablesAndViews.add("sysindexes");
+        systemTablesAndViews.add("sysindexkeys");
+        systemTablesAndViews.add("sysmembers");
+        systemTablesAndViews.add("sysobjects");
+        systemTablesAndViews.add("syspermissions");
+        systemTablesAndViews.add("sysproperties");
+        systemTablesAndViews.add("sysprotects");
+        systemTablesAndViews.add("sysreferences");
+        systemTablesAndViews.add("systypes");
+        systemTablesAndViews.add("sysusers");
+
+        systemTablesAndViews.add("syssegments");
+        systemTablesAndViews.add("sysconstraints");        
+    }
+
+
+    public Set<String> getSystemTablesAndViews() {
+        return systemTablesAndViews;
+    }
 
     public boolean supportsInitiallyDeferrableColumns() {
         return false;
@@ -58,6 +91,10 @@ public class MSSQLDatabase extends AbstractDatabase {
         return "dbo";
     }
 
+    public String getCatalogName() throws SQLException {
+        return getConnectionUsername();
+    }
+
     public String getFalseBooleanValue() {
         return "0";
     }
@@ -74,5 +111,7 @@ public class MSSQLDatabase extends AbstractDatabase {
         return "DROP INDEX "+tableName+"."+indexName;
     }
 
-
+    public String getDropTableSQL(String tableName) {
+        return "DROP TABLE "+tableName;
+    }
 }

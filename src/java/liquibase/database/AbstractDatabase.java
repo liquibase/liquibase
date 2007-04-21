@@ -10,7 +10,11 @@ import java.sql.*;
 import java.util.logging.Logger;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Set;
+import java.util.HashSet;
 import java.net.InetAddress;
+
+import com.sun.media.jai.util.CaselessStringArrayTable;
 
 /**
  * This is an abstract class used to abstract the methods supported by all the
@@ -251,6 +255,7 @@ public abstract class AbstractDatabase {
 
     public void dropDatabaseObjects() throws SQLException, MigrationFailedException {
         Connection conn = getConnection();
+        conn.setAutoCommit(false);
         Statement selectStatement = null;
         Statement dropStatement = null;
 
@@ -260,22 +265,23 @@ public abstract class AbstractDatabase {
             dropStatement = conn.createStatement();
 
             //drop tables and their constraints
-            rs = conn.getMetaData().getTables(null, getSchemaName(), null, new String[]{"TABLE", "VIEW", "GLOBAL TEMPORARY", "LOCAL TEMPORARY", "ALIAS", "SYNONYM"});
+            rs = conn.getMetaData().getTables(getCatalogName(), getSchemaName(), null, new String[]{"TABLE", "VIEW", "GLOBAL TEMPORARY", "LOCAL TEMPORARY", "ALIAS", "SYNONYM"});
             while (rs.next()) {
                 String tableName = rs.getString("TABLE_NAME");
                 if (tableName.startsWith("BIN$")) { //oracle deleted table
                     continue;
-                }
-                if (tableName.startsWith("AQ$")) { //oracle AQ tables
+                } else if (tableName.startsWith("AQ$")) { //oracle AQ tables
+                    continue;
+                } else if (tableName.equals(getDatabaseChangeLogLockTableName())) {
+                    continue;
+                } else if (getSystemTablesAndViews().contains(tableName)) {
                     continue;
                 }
-                if (tableName.equals(getDatabaseChangeLogLockTableName())) {
-                    continue;
-                }
+
                 String type = rs.getString("TABLE_TYPE");
                 String sql;
                 if ("TABLE".equals(type)) {
-                    sql = "DROP TABLE " + tableName + " CASCADE CONSTRAINTS";
+                    sql = getDropTableSQL(tableName);
                 } else if ("VIEW".equals(type)) {
                     sql = "DROP VIEW " + tableName;
                 } else {
@@ -293,6 +299,8 @@ public abstract class AbstractDatabase {
             if (this.supportsSequences()) {
                 dropSequences(conn);
             }
+        } catch(Exception e) {
+            e.printStackTrace();
         } finally {
             if (rs != null) {
                 rs.close();
@@ -309,6 +317,14 @@ public abstract class AbstractDatabase {
         }
 
 
+    }
+
+    protected Set<String> getSystemTablesAndViews() {
+        return new HashSet<String>();
+    }
+
+    public String getDropTableSQL(String tableName) {
+        return "DROP TABLE " + tableName + " CASCADE CONSTRAINTS";
     }
 
     protected void dropSequences(Connection conn) throws SQLException, MigrationFailedException {

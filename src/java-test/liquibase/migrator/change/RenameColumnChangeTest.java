@@ -53,7 +53,7 @@ public class RenameColumnChangeTest extends AbstractChangeTest {
     }
 
     public void testGenerateStatement() throws Exception {
-        assertEquals( "alter table TABLE_NAME rename column oldColName  to newColName", refactoring.generateStatement(new OracleDatabase()));
+        assertEquals( "ALTER TABLE TABLE_NAME RENAME COLUMN oldColName TO newColName", refactoring.generateStatement(new OracleDatabase()));
     }
 
     public void testGetConfirmationMessage() throws Exception {
