@@ -22,6 +22,7 @@ public class MigratorTest extends TestCase {
     private Connection connectionForConstructor;
 
     public void setUp() throws Exception {
+        super.setUp();
         if (connectionForConstructor != null) {
             reset(connectionForConstructor);
         }
@@ -56,7 +57,7 @@ public class MigratorTest extends TestCase {
     public void testGetImplementedDatabases() throws Exception {
         Migrator migrator = new Migrator(null, new ClassLoaderFileOpener());
         List<AbstractDatabase> abstractDatabases = Arrays.asList(migrator.getImplementedDatabases());
-        assertTrue(abstractDatabases.size() == 4);
+        assertEquals(4, abstractDatabases.size());
 
         boolean foundOracle = false;
         boolean foundPostgres = false;

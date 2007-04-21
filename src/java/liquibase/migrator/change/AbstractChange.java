@@ -87,7 +87,7 @@ public abstract class AbstractChange {
         for (String key : attributeMap.keySet()) {
             buffer.append(" ").append(key).append("=\"").append(attributeMap.get(key)).append("\"");
         }
-        buffer.append(">"+ StringUtils.trimToEmpty(node.getTextContent()));
+        buffer.append(">").append(StringUtils.trimToEmpty(node.getTextContent()));
         NodeList childNodes = node.getChildNodes();
         for (int i=0; i<childNodes.getLength(); i++) {
             Node childNode = childNodes.item(i);

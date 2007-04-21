@@ -35,10 +35,10 @@ public class ModifyColumnChange extends AbstractChange {
 
     public String generateStatement(AbstractDatabase database) {
         StringBuffer buffer = new StringBuffer();
-        buffer.append("alter table " + getTableName());
+        buffer.append("alter table ").append(getTableName());
         buffer.append(" modify (");
         //buffer.append(" (");
-        buffer.append(getColumn().getName() + " ");
+        buffer.append(getColumn().getName()).append(" ");
         buffer.append(getColumn().getType());
         buffer.append(")");
         return buffer.toString();

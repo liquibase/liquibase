@@ -26,6 +26,8 @@ public class ChangeFactory {
                     RawSQLChange.class,
                     RenameColumnChange.class,
                     RenameTableChange.class,
+                    AddNotNullConstraintChange.class,
+                    DropNotNullConstraintChange.class,
             };
 
             try {

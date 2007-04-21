@@ -32,8 +32,8 @@ public class TableTest extends TestCase {
         DatabaseSystem databaseSystem = createMock(DatabaseSystem.class);
         replay(databaseSystem);
         Table table1 = new Table("name", "catalog", "schema", "type", "remarks", databaseSystem);
-        assertTrue(table1.equals(table1));
-        assertFalse(table1.equals(null));
+        assertEquals(table1, table1);
+        assertNotNull(table1);
         assertFalse(table1.equals(new String()));
 
     }

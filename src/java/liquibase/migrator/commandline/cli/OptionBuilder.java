@@ -141,7 +141,7 @@ public class OptionBuilder {
      * @return the OptionBuilder instance
      */
     public static OptionBuilder hasArg( boolean hasArg ) {
-        instance.numberOfArgs = ( hasArg == true ) ? 1 : Option.UNINITIALIZED;
+        instance.numberOfArgs = (hasArg ) ? 1 : Option.UNINITIALIZED;
         return instance;
     }
 

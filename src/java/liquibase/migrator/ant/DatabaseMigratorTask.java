@@ -30,6 +30,7 @@ public class DatabaseMigratorTask extends Task {
     private Path classpath;
     private boolean promptOnNonDevDatabase;
     private boolean rebuildDatabase;
+    private String contexts;
 
     public boolean isPromptOnNonDevDatabase() {
         return promptOnNonDevDatabase;
@@ -105,6 +106,14 @@ public class DatabaseMigratorTask extends Task {
     public void setDropFirst(boolean dropFirst) {
         this.dropFirst = dropFirst;
     }
+    
+    public String getContexts() {
+        return contexts;
+    }
+
+    public void setContexts(String cntx) {
+        this.contexts = cntx;
+    }
 
     public void execute() throws BuildException {
         String shouldRunProperty = System.getProperty(Migrator.SHOULD_RUN_SYSTEM_PROPERTY);
@@ -136,6 +145,7 @@ public class DatabaseMigratorTask extends Task {
             String[] migrationFiles = getMigrationFiles().split(",");
             for (String migrationFile : migrationFiles) {
                 Migrator migrator = new Migrator(migrationFile.trim(), new AntFileOpener(getProject(), classpath));
+                migrator.setContexts(getContexts());
                 migrator.init(connection);
 
                 if (isPromptOnNonDevDatabase() && !migrator.isSaveToRunMigration()) {

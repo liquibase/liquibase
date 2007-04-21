@@ -18,7 +18,8 @@ public class ModifyColumnChangeTest extends AbstractChangeTest {
 
     ModifyColumnChange change;
 
-    public void setUp() {
+    public void setUp() throws Exception {
+        super.setUp();
         change = new ModifyColumnChange();
         change.setTableName("TABLE_NAME");
 

@@ -94,7 +94,7 @@ public abstract class Parser implements CommandLineParser {
      * flattening when a non option has been encountered
      * @return a String array of the flattened arguments
      */
-    abstract protected String[] flatten( Options opts, 
+    protected abstract String[] flatten( Options opts,
                                          String[] arguments, 
                                          boolean stopAtNonOption );
 

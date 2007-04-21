@@ -62,6 +62,14 @@ public abstract class AbstractDatabase {
 
     protected abstract boolean supportsSequences();
 
+    protected String getDatabaseName() {
+        try {
+            return connection.getMetaData().getDatabaseProductName();
+        } catch (SQLException e) {
+            throw new RuntimeException("Cannot get database name");
+        }
+    }
+
     public String getDriverName() throws SQLException {
         return connection.getMetaData().getDriverName();
     }
@@ -215,7 +223,7 @@ public abstract class AbstractDatabase {
     }
 
     private String getChangeLogLockInsertSQL() {
-        return ("insert into DatabaseChangeLogLock (id, locked) values (1, "+getFalseBooleanValue()+")").toUpperCase();
+        return ("insert into DatabaseChangeLogLock (id, locked) values (1, " + getFalseBooleanValue() + ")").toUpperCase();
     }
 
     public String getFalseBooleanValue() {
@@ -261,7 +269,7 @@ public abstract class AbstractDatabase {
                 if (tableName.startsWith("AQ$")) { //oracle AQ tables
                     continue;
                 }
-                if (tableName.equals(getDatabaseChangeLogLockTableName())) { 
+                if (tableName.equals(getDatabaseChangeLogLockTableName())) {
                     continue;
                 }
                 String type = rs.getString("TABLE_TYPE");
@@ -412,8 +420,7 @@ public abstract class AbstractDatabase {
             try {
                 stmt = conn.prepareStatement("update databasechangeloglock set locked=?, lockgranted=null, lockedby=null where id=1".toUpperCase());
                 stmt.setBoolean(1, false);
-                if (stmt.executeUpdate() != 1)
-                {
+                if (stmt.executeUpdate() != 1) {
                     throw new MigrationFailedException("Did not update change log lock correctly");
                 }
                 conn.commit();
@@ -469,5 +476,60 @@ public abstract class AbstractDatabase {
 
     public String getAutoIncrementClause() {
         return "AUTO_INCREMENT";
+    }
+
+    public String getColumnDataType(String tableName, String columnName) throws SQLException {
+        ResultSet rs = null;
+        Statement selectStatement = null;
+        Connection connection = getConnection();
+        ResultSetMetaData rsdata;
+        int iColumnCount;
+        String strColumnType = "";
+        try {
+            selectStatement = connection.createStatement();
+            rs = selectStatement.executeQuery("SELECT * FROM " + tableName);  //todo: is there a more efficient way to do this?
+
+            rsdata = rs.getMetaData();
+            iColumnCount = rsdata.getColumnCount();
+            for (int i = 1; i <= iColumnCount; i++) {
+
+                if (columnName.equals(rsdata.getColumnName(i))) {
+
+                    strColumnType = rsdata.getColumnTypeName(i) + "(" + rsdata.getColumnDisplaySize(i) + ")";
+                    break;
+                }
+
+
+            }
+
+        } finally {
+            if (selectStatement != null) {
+                selectStatement.close();
+            }
+            if (rs != null) {
+                rs.close();
+            }
+        }
+
+        return strColumnType;
+    }
+
+    public void updateNullColumns(String tableName, String columnName, String defalutValue) throws SQLException {
+        Statement updateStatement = null;
+        Connection connection = getConnection();
+
+        try {
+            updateStatement = connection.createStatement();
+//          System.out.println( "update "+ tableName +" set "+ columnName + "='" + defalutValue +"' where " + columnName +"=\"\"  or "+ columnName +"='NULL'");
+            updateStatement.executeUpdate("update " + tableName + " set " + columnName + "='" + defalutValue + "' where " + columnName + "=\"\"  or " + columnName + " is NULL");
+//            System.out.println("iResult"+ iResult);
+
+        } finally {
+            if (updateStatement != null) {
+                updateStatement.close();
+            }
+        }
+
+
     }
 }

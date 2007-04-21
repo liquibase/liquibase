@@ -10,7 +10,7 @@ public class PostgresDatabase extends AbstractDatabase {
     }
 
     public boolean isCorrectDatabaseImplementation(Connection conn) throws SQLException {
-        return conn.getMetaData().getDatabaseProductName().equalsIgnoreCase("PostgreSQL");
+        return "PostgreSQL".equalsIgnoreCase(conn.getMetaData().getDatabaseProductName());
     }
 
     protected String getBooleanType() {

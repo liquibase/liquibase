@@ -1,6 +1,7 @@
 package liquibase.migrator;
 
 import liquibase.migrator.change.*;
+import liquibase.migrator.preconditions.*;
 import liquibase.util.StringUtils;
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
@@ -9,15 +10,19 @@ import org.xml.sax.SAXException;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Stack;
+import java.util.Set;
 
 public class ChangeLogHandler implements ContentHandler {
     private Migrator migrator;
     private DatabaseChangeLog changeLog;
     private AbstractChange change;
     private StringBuffer text;
-
+    private PreconditionSet precondition;
     private ChangeSet changeSet;
+    private DBMSPrecondition dbmsPrecondition;
+    private OrPrecondition orprecondition;
+    private NotPrecondition notprecondition;
+    private RunningAsPrecondition runningAs;
 
     public ChangeLogHandler(Migrator migrator) {
         this.migrator = migrator;
@@ -53,7 +58,7 @@ public class ChangeLogHandler implements ContentHandler {
                 if ("true".equalsIgnoreCase(atts.getValue("runOnChange"))) {
                     runOnChange = true;
                 }
-                changeSet = new ChangeSet(atts.getValue("id"), atts.getValue("author"), alwaysRun, runOnChange, changeLog);
+                changeSet = new ChangeSet(atts.getValue("id"), atts.getValue("author"), alwaysRun, runOnChange, changeLog, atts.getValue("context"));
             } else if (changeSet != null && change == null) {
                 change = ChangeFactory.getInstance().create(qName);
                 text = new StringBuffer();
@@ -79,7 +84,7 @@ public class ChangeLogHandler implements ContentHandler {
                 } else if (change instanceof InsertDataChange) {
                     ((InsertDataChange) change).addColumn(column);
                 } else {
-                    throw new RuntimeException("Unexpected column tag for "+change.getClass().getName());
+                    throw new RuntimeException("Unexpected column tag for " + change.getClass().getName());
                 }
             } else if (change != null && "constraints".equals(qName)) {
                 ConstraintsConfig constraints = new ConstraintsConfig();
@@ -94,9 +99,76 @@ public class ChangeLogHandler implements ContentHandler {
                 } else if (change instanceof CreateTableChange) {
                     lastColumn = ((CreateTableChange) change).getColumns().get(((CreateTableChange) change).getColumns().size() - 1);
                 } else {
-                    throw new RuntimeException("Unexpected change: "+change.getClass().getName());
+                    throw new RuntimeException("Unexpected change: " + change.getClass().getName());
                 }
                 lastColumn.setConstraints(constraints);
+            } else if ("preConditions".equals(qName)) {
+//                System.out.println(migrator);
+                precondition = new PreconditionSet(migrator);
+                //System.out.println("pre condition is true");
+
+            } else if ("dbms".equals(qName)) {
+                if (precondition != null) {
+                    dbmsPrecondition = new DBMSPrecondition();
+//                    System.out.println("dbms is true");
+                    for (int i = 0; i < atts.getLength(); i++) {
+                        String attributeName = atts.getQName(i);
+                        String attributeValue = atts.getValue(i);
+                        setProperty(dbmsPrecondition, attributeName, attributeValue);
+                    }
+//                    System.out.println("attributes added");
+                    if (orprecondition != null) {
+//                        System.out.println("orrprecondition");
+                        orprecondition.addDbms(dbmsPrecondition);
+                    } else if (notprecondition != null) {
+                        notprecondition.addDbms(dbmsPrecondition);
+                    } else {
+
+                        precondition.addDbms(dbmsPrecondition);
+                    }
+
+                } else {
+
+                    new RuntimeException("Unexpected Dbms tag");
+                }
+            } else if ("or".equals(qName)) {
+                if (precondition != null) {
+                    orprecondition = new OrPrecondition();
+                    if (notprecondition != null) {
+//                        System.out.println("not has ben creates");
+                        notprecondition.setOrprecondition(orprecondition);
+
+                    }
+
+
+                } else {
+
+                    new RuntimeException("Unexpected Or tag");
+                }
+
+            } else if ("not".equals(qName)) {
+                if (precondition != null) {
+                    notprecondition = new NotPrecondition();
+
+                } else {
+
+                    new RuntimeException("Unexpected Or tag");
+                }
+
+            } else if ("runningAs".equals(qName)) {
+                if (precondition != null) {
+                    runningAs = new RunningAsPrecondition();
+                    for (int i = 0; i < atts.getLength(); i++) {
+                        String attributeName = atts.getQName(i);
+                        String attributeValue = atts.getValue(i);
+                        setProperty(runningAs, attributeName, attributeValue);
+                    }
+
+                } else {
+
+                    new RuntimeException("Unexpected Or tag");
+                }
+
             } else {
                 throw new MigrationFailedException("Unexpected tag: " + qName);
             }
@@ -112,15 +184,16 @@ public class ChangeLogHandler implements ContentHandler {
             Method method = methods[i];
             if (method.getName().equals(methodName)) {
                 if (method.getParameterTypes().length == 1 && method.getParameterTypes()[0].equals(Boolean.class)) {
-                    method.invoke(object, new Object[]{Boolean.valueOf(attributeValue)});
+                    method.invoke(object, Boolean.valueOf(attributeValue));
                     return;
-                } else if (method.getParameterTypes().length == 1 && method.getParameterTypes()[0].equals(String.class)) {
-                    method.invoke(object, new Object[]{attributeValue.toString()});
+                } else
+                if (method.getParameterTypes().length == 1 && method.getParameterTypes()[0].equals(String.class)) {
+                    method.invoke(object, attributeValue.toString());
                     return;
                 }
             }
         }
-        throw new RuntimeException("Property not found: "+attributeName);
+        throw new RuntimeException("Property not found: " + attributeName);
     }
 
     public void endElement(String uri, String localName, String qName) throws SAXException {
@@ -128,16 +201,30 @@ public class ChangeLogHandler implements ContentHandler {
         if (text != null && text.length() > 0) {
             textString = StringUtils.trimToNull(text.toString());
         }
+
         try {
-            if (changeSet != null && "changeSet".equals(qName)) {
-                changeSet.execute();
+            if (precondition != null && "preConditions".equals(qName)) {
+                changeLog.setPreconditions(precondition);
+                precondition.checkConditions();
+            } else if (precondition != null && "or".equals(qName) && notprecondition == null) {
+                precondition.setOrPreCondition(orprecondition);
+            } else if (precondition != null && "not".equals(qName)) {
+                precondition.setNotPreCondition(notprecondition);
+            } else if (precondition != null && "runningAs".equals(qName)) {
+                precondition.setRunningAs(runningAs);
+            } else if (changeSet != null && "changeSet".equals(qName)) {
+                Set<String> requiredContexts = changeSet.getDatabaseChangeLog().getMigrator().getContexts();
+                String changeSetContext = changeSet.getContext();
+                if (changeSetContext == null || requiredContexts.contains(changeSetContext)) {
+                    changeSet.execute();
+                }
                 changeSet = null;
             } else if (change != null && qName.equals(change.getTagName())) {
                 if (textString != null) {
                     if (change instanceof RawSQLChange) {
                         ((RawSQLChange) change).setSql(textString);
                     } else {
-                        throw new RuntimeException("Unexpected text in "+change.getTagName());
+                        throw new RuntimeException("Unexpected text in " + change.getTagName());
                     }
                 }
                 text = null;

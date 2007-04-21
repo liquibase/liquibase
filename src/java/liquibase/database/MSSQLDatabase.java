@@ -14,7 +14,7 @@ public class MSSQLDatabase extends AbstractDatabase {
     }
 
     public boolean isCorrectDatabaseImplementation(Connection conn) throws SQLException {
-        return conn.getMetaData().getDatabaseProductName().equalsIgnoreCase("Microsoft SQL Server");
+        return "Microsoft SQL Server".equalsIgnoreCase(conn.getMetaData().getDatabaseProductName());
     }
 
     protected String getDateType() {

@@ -1,6 +1,8 @@
 package liquibase.migrator;
 
 import liquibase.database.*;
+import liquibase.migrator.commandline.cli.CommandLine;
+
 import org.xml.sax.*;
 
 import javax.xml.parsers.SAXParser;
@@ -13,6 +15,8 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.DateFormat;
 import java.util.Date;
+import java.util.Set;
+import java.util.HashSet;
 import java.util.logging.Logger;
 import java.net.URI;
 
@@ -39,6 +43,7 @@ public class Migrator {
     private boolean shouldDropDatabaseObjectsFirst;
     private AbstractDatabase database;
     private Logger log;
+    private Set<String> contexts;
 
     private boolean hasChangeLogLock = false;
     private long changeLogLockWaitTime = 1000 * 60 * 5;  //default to 5 mins
@@ -154,7 +159,7 @@ public class Migrator {
 
             boolean locked = false;
             long timeToGiveUp = new Date().getTime() + changeLogLockWaitTime;
-            while (locked == false && new Date().getTime() < timeToGiveUp) {
+            while (!locked && new Date().getTime() < timeToGiveUp) {
                 locked = aquireLock();
                 if (!locked) {
                     log.info("Waiting for changelog lock....");
@@ -300,5 +305,16 @@ public class Migrator {
 
     public void setChangeLogLockWaitTime(long changeLogLockWaitTime) {
         this.changeLogLockWaitTime = changeLogLockWaitTime;
+    }
+
+    public void setContexts(String contexts) {
+        this.contexts = new HashSet<String>();
+        String[] strings = contexts.split(",");
+        for (String string : strings) {
+            this.contexts.add(string.trim().toLowerCase());
+        }
+    }
+    public Set<String> getContexts() {
+        return contexts;
     }
 }

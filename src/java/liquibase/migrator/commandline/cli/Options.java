@@ -194,8 +194,11 @@ public class Options {
         Iterator iter = longOpts.values().iterator();
         while (iter.hasNext())
         {
-            Object item = iter.next();
-            if (!opts.contains(item))
+            
+        	
+        	Object item = iter.next();
+            System.out.println("sadasda"+item);
+        	if (!opts.contains(item))
             {
                 opts.add(item);
             }

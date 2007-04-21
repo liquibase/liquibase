@@ -148,7 +148,9 @@ public class CommandLineMigrator {
         options.addOption(OptionBuilder.withDescription("Drop All Database Objects First").isRequired(false).create("dropAllFirst"));
         options.addOption(OptionBuilder.withDescription("Display Change Log Lock").isRequired(false).create("listLocks"));
         options.addOption(OptionBuilder.withDescription("Release Change Log Locks").isRequired(false).create("releaseLocks"));
-        return options;
+        options.addOption(OptionBuilder.withArgName("value").hasArg().withDescription("Context of Deployment").isRequired(false).create("contexts"));
+        
+         return options;
     }
 
 
@@ -172,6 +174,7 @@ public class CommandLineMigrator {
         File outputSqlFile;
         try {
             Migrator migrator = new Migrator(cmd.getOptionValue("migrationFile"), new CommandLineFileOpener(classLoader));
+            migrator.setContexts(cmd.getOptionValue("contexts"));
             migrator.init(connection);
 
             if (cmd.hasOption("listLocks")) {
@@ -222,8 +225,7 @@ public class CommandLineMigrator {
                     System.exit(-1);
                 }
             }
-
-            migrator.migrate();
+                        migrator.migrate();
         } catch (Throwable e) {
             String message = e.getMessage();
             if (e.getCause() != null) {

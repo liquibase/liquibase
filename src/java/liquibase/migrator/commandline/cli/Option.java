@@ -92,10 +92,10 @@ import java.util.ArrayList;
 public class Option implements Cloneable {
 
     /** constant that specifies the number of argument values has not been specified */
-    public final static int UNINITIALIZED = -1;
+    public static final int UNINITIALIZED = -1;
     
     /** constant that specifies the number of argument values is infinite */
-    public final static int UNLIMITED_VALUES = -2;
+    public static final int UNLIMITED_VALUES = -2;
     
     /** opt the single character representation of the option */
     private String opt;

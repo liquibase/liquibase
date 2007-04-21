@@ -11,7 +11,7 @@ public class ColumnConfigTest extends TestCase {
         ColumnConfig column = new ColumnConfig();
 
         column.setValue(null);
-        assertEquals(null, column.getValue());
+        assertNull(column.getValue());
 
         column.setValue("abc");
         assertEquals("abc", column.getValue());

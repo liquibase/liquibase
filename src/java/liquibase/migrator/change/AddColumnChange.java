@@ -35,9 +35,9 @@ public class AddColumnChange extends AbstractChange {
 
     public String generateStatement(AbstractDatabase database) {
         StringBuffer buffer = new StringBuffer();
-        buffer.append("alter table " + getTableName());
+        buffer.append("alter table ").append(getTableName());
         buffer.append(" add ");
-        buffer.append(getColumn().getName() + " ");
+        buffer.append(getColumn().getName()).append(" ");
         buffer.append(database.getColumnType(getColumn()));
         return buffer.toString();
     }

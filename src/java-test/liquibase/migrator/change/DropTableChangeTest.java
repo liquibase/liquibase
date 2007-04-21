@@ -12,6 +12,7 @@ public class DropTableChangeTest extends AbstractChangeTest {
     private DropTableChange change;
 
     protected void setUp() throws Exception {
+        super.setUp();
         change = new DropTableChange();
         change.setTableName("TAB_NAME");
         change.setCascadeConstraints(true);

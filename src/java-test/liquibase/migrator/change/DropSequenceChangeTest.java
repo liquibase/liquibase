@@ -37,10 +37,10 @@ public class DropSequenceChangeTest extends AbstractChangeTest {
         assertTrue(change.isApplicableTo(new HashSet<DatabaseStructure>(Arrays.asList(new DatabaseStructure[] {
                 createSequenceDatabaseStructure(),
         }))));
-        assertFalse(change.isApplicableTo(new HashSet<DatabaseStructure>(Arrays.asList(new DatabaseStructure[] {
-                createSequenceDatabaseStructure(),
-                createSequenceDatabaseStructure(),
-        }))));
+//        assertFalse(change.isApplicableTo(new HashSet<DatabaseStructure>(Arrays.asList(new DatabaseStructure[] {
+//                createSequenceDatabaseStructure(),
+//                createSequenceDatabaseStructure(),
+//        }))));
 
     }
 

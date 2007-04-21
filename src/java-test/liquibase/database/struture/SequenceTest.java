@@ -16,9 +16,9 @@ public class SequenceTest extends TestCase {
 
     public void testEquals() throws Exception {
         Sequence sequence1 = new Sequence("name", 1, 2, 3);
-        assertTrue(sequence1.equals(sequence1));
-        assertFalse(sequence1.equals(null));
-        assertTrue(sequence1.equals(new Sequence("name", 4, 5, 6)));
+        assertEquals(sequence1, sequence1);
+        assertNotNull(sequence1);
+        assertEquals(sequence1, new Sequence("name", 4, 5, 6));
         assertFalse(sequence1.equals(new Sequence("nameB", 4, 5, 6)));
 
     }

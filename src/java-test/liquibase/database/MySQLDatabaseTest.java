@@ -10,7 +10,7 @@ public class MySQLDatabaseTest  extends AbstractDatabaseTest {
     }
 
     public void testSupportsInitiallyDeferrableColumns() {
-        assertEquals(false, getDatabase().supportsInitiallyDeferrableColumns());
+        assertFalse(getDatabase().supportsInitiallyDeferrableColumns());
     }
 
     public void testGetBooleanType() {
@@ -22,7 +22,7 @@ public class MySQLDatabaseTest  extends AbstractDatabaseTest {
     }
 
     public void testGetUUIDType() {
-        assertEquals(null, getDatabase().getUUIDType());
+        assertNull(getDatabase().getUUIDType());
     }
 
     public void testGetClobType() {

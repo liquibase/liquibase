@@ -20,9 +20,19 @@ public class ServletMigrator implements ServletContextListener {
 
     private String migrationFile;
     private String dataSource;
+    private String contexts;
+
 
     public String getMigrationFile() {
         return migrationFile;
+    }
+
+    public void setContexts(String ctxt) {
+        contexts = ctxt;
+    }
+
+    public String getContexts() {
+        return contexts;
     }
 
     public void setMigrationFile(String migrationFile) {
@@ -61,7 +71,7 @@ public class ServletMigrator implements ServletContextListener {
 
         String shouldRunProperty = System.getProperty(Migrator.SHOULD_RUN_SYSTEM_PROPERTY);
         if (shouldRunProperty != null && !Boolean.valueOf(shouldRunProperty)) {
-            Logger.getLogger(Migrator.DEFAULT_LOG_NAME).info("Migrator did not run on "+hostName+" because '"+Migrator.SHOULD_RUN_SYSTEM_PROPERTY+"' system property was set to false");
+            Logger.getLogger(Migrator.DEFAULT_LOG_NAME).info("Migrator did not run on " + hostName + " because '" + Migrator.SHOULD_RUN_SYSTEM_PROPERTY + "' system property was set to false");
             return;
         }
 
@@ -97,7 +107,7 @@ public class ServletMigrator implements ServletContextListener {
 
         setDataSource(servletContextEvent.getServletContext().getInitParameter("MIGRATOR_DATA_SOURCE"));
         setMigrationFile(servletContextEvent.getServletContext().getInitParameter("MIGRATOR_FILE"));
-
+        setContexts(servletContextEvent.getServletContext().getInitParameter("MIGRATOR_CONTEXTS"));
         if (getMigrationFile() == null) {
             throw new RuntimeException("Cannot run migrator, MIGRATOR_FILE is not set");
         }
@@ -115,6 +125,7 @@ public class ServletMigrator implements ServletContextListener {
                 connection = dataSource.getConnection();
                 Migrator migrator = new Migrator(getMigrationFile(), new ClassLoaderFileOpener());
                 migrator.init(connection);
+                migrator.setContexts(getContexts());
                 migrator.migrate();
             } finally {
                 if (ic != null) {

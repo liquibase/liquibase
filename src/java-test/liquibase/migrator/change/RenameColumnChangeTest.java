@@ -17,7 +17,8 @@ public class RenameColumnChangeTest extends AbstractChangeTest {
 
     RenameColumnChange refactoring;
 
-    public void setUp() {
+    public void setUp() throws Exception {
+        super.setUp();
         refactoring = new RenameColumnChange();
 
         refactoring.setTableName("TABLE_NAME");

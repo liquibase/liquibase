@@ -38,7 +38,7 @@ public class DropColumnChange extends AbstractChange {
 
     public String generateStatement(AbstractDatabase database) {
         StringBuffer buffer = new StringBuffer();
-        buffer.append("ALTER TABLE " + getTableName());
+        buffer.append("ALTER TABLE ").append(getTableName());
         buffer.append(" DROP COLUMN ");
         buffer.append(getColumnName());
         return buffer.toString();

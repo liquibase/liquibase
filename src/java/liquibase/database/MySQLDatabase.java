@@ -5,7 +5,7 @@ import java.sql.SQLException;
 
 public class MySQLDatabase extends AbstractDatabase {
     public boolean isCorrectDatabaseImplementation(Connection conn) throws SQLException {
-        return conn.getMetaData().getDatabaseProductName().equalsIgnoreCase("MySQL");
+        return "MySQL".equalsIgnoreCase(conn.getMetaData().getDatabaseProductName());
     }
 
     protected String getBooleanType() {

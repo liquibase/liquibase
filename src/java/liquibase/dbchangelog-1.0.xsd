@@ -1,33 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-           targetNamespace="http://www.liquibase.org/xml/ns/dbchangelog/1.0"
-           xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.0"
-           elementFormDefault="qualified">
+            targetNamespace="http://www.liquibase.org/xml/ns/dbchangelog/1.0"
+            xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.0"
+            elementFormDefault="qualified">
 
     <!-- This is the main (root) part of the xsd -->
     <xsd:element name="databaseChangeLog">
         <xsd:complexType>
             <xsd:sequence>
 
-                <!-- preconditions -->
-                <xsd:element name="preconditions" minOccurs="0" maxOccurs="1">
+
+                <xsd:element name="preConditions" minOccurs="0" maxOccurs="1">
                     <xsd:complexType>
-                        <xsd:sequence>
-
-                            <xsd:element name="DatabaseInfo" maxOccurs="unbounded">
-                                <xsd:complexType>
-                                    <xsd:attributeGroup ref="DatabaseInfoAttributes"/>
-                                </xsd:complexType>
-                            </xsd:element>
-
-                            <xsd:element name="userExists">
-                                <xsd:complexType>
-                                    <xsd:attribute name="username" type="xsd:string"/>
-                                </xsd:complexType>
-                            </xsd:element>
-
-                        </xsd:sequence>
+                        <xsd:choice>
+                            <xsd:group ref="PreConditionChildren" maxOccurs="unbounded"/>
+                        </xsd:choice>
                     </xsd:complexType>
                 </xsd:element>
 
@@ -47,6 +35,7 @@
                         <xsd:attribute name="file" type="xsd:string"/>
                     </xsd:complexType>
                 </xsd:element>
+
 
             </xsd:sequence>
         </xsd:complexType>
@@ -68,6 +57,7 @@
     <xsd:attributeGroup name="changeSetAttributes">
         <xsd:attribute name="id" type="xsd:string"/>
         <xsd:attribute name="author" type="xsd:string"/>
+        <xsd:attribute name="context" type="xsd:string"/>
         <xsd:attribute name="runOnChange" type="xsd:boolean"/>
         <xsd:attribute name="runAlways" type="xsd:boolean"/>
     </xsd:attributeGroup>
@@ -105,7 +95,7 @@
     <xsd:attributeGroup name="tableNameAttribute">
         <xsd:attribute name="tableName" type="xsd:string"/>
     </xsd:attributeGroup>
-    
+
     <xsd:attributeGroup name="renameColumnAttributes">
         <xsd:attributeGroup ref="tableNameAttribute"/>
         <xsd:attribute name="oldColumnName" type="xsd:string"/>
@@ -134,11 +124,86 @@
         <xsd:attributeGroup ref="indexName"/>
     </xsd:attributeGroup>
 
+
+    <xsd:attributeGroup name="addNotNullConstraintAttrib">
+        <xsd:attribute name="tableName" type="xsd:string"/>
+        <xsd:attribute name="columnName" type="xsd:string"/>
+        <xsd:attribute name="defaultNullValue" type="xsd:string"/>
+    </xsd:attributeGroup>
+
+
+    <xsd:element name="addNotNullConstraint">
+        <xsd:complexType>
+            <xsd:attributeGroup ref="addNotNullConstraintAttrib"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:attributeGroup name="dbmsAttrib">
+        <xsd:attribute name="type" type="xsd:string"/>
+    </xsd:attributeGroup>
+
+    <xsd:element name="dbms">
+        <xsd:complexType>
+            <xsd:attributeGroup ref="dbmsAttrib"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="or">
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element ref="dbms" minOccurs="0" maxOccurs="unbounded"/>
+            </xsd:sequence>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="not">
+        <xsd:complexType>
+
+            <xsd:choice>
+                <xsd:group ref="NotPreConditionChildren" maxOccurs="unbounded"/>
+            </xsd:choice>
+
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:attributeGroup name="runningAsAttrib">
+        <xsd:attribute name="username" type="xsd:string"/>
+    </xsd:attributeGroup>
+
+    <xsd:element name="runningAs">
+        <xsd:complexType>
+            <xsd:attributeGroup ref="runningAsAttrib"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="preConditions">
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element ref="dbms" minOccurs="0"/>
+            </xsd:sequence>
+        </xsd:complexType>
+    </xsd:element>
+
+
+    <xsd:attributeGroup name="dropNotNullConstraintAttrib">
+        <xsd:attribute name="tableName" type="xsd:string"/>
+        <xsd:attribute name="columnName" type="xsd:string"/>
+    </xsd:attributeGroup>
+
+
+    <xsd:element name="dropNotNullConstraint">
+        <xsd:complexType>
+            <xsd:attributeGroup ref="dropNotNullConstraintAttrib"/>
+        </xsd:complexType>
+    </xsd:element>
+
+
     <xsd:element name="constraints">
         <xsd:complexType>
             <xsd:attributeGroup ref="constraintsAttributes"/>
         </xsd:complexType>
     </xsd:element>
+
 
     <xsd:element name="column">
         <xsd:complexType mixed="true">
@@ -287,7 +352,38 @@
             <xsd:element ref="dropSequence" maxOccurs="unbounded"/>
             <xsd:element ref="createIndex" maxOccurs="unbounded"/>
             <xsd:element ref="dropIndex" maxOccurs="unbounded"/>
+            <xsd:element ref="addNotNullConstraint" maxOccurs="unbounded"/>
+            <xsd:element ref="dropNotNullConstraint" maxOccurs="unbounded"/>
+
         </xsd:choice>
     </xsd:group>
+
+    <!-- Children for Precondition -->
+    <xsd:group name="PreConditionChildren">
+        <xsd:sequence>
+            <xsd:choice>
+                <xsd:element ref="dbms" minOccurs="0" maxOccurs="unbounded"/>
+                <xsd:element ref="or" minOccurs="0" maxOccurs="1"/>
+                <xsd:element ref="not" minOccurs="0" maxOccurs="1"/>
+            </xsd:choice>
+            <xsd:element ref="runningAs" minOccurs="0" maxOccurs="1"/>
+        </xsd:sequence>
+
+    </xsd:group>
+
+
+    <!-- Children for Not Precondition -->
+    <xsd:group name="NotPreConditionChildren">
+        <xsd:sequence>
+            <xsd:choice>
+                <xsd:element ref="dbms" minOccurs="0" maxOccurs="unbounded"/>
+                <xsd:element ref="or" minOccurs="0" maxOccurs="1"/>
+
+            </xsd:choice>
+
+        </xsd:sequence>
+
+    </xsd:group>
+
 
 </xsd:schema>

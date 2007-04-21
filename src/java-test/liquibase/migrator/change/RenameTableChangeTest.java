@@ -49,7 +49,7 @@ public class RenameTableChangeTest extends AbstractChangeTest {
         refactoring.setOldTableName("OLD_NAME");
         refactoring.setNewTableName("NEW_NAME");
 
-        Element node = refactoring.createNode(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument());
+//        Element node = refactoring.createNode(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument());
         assertEquals("OLD_NAME", refactoring.getOldTableName());
         assertEquals("NEW_NAME", refactoring.getNewTableName());
     }

@@ -20,7 +20,7 @@ public class MSSQLDatabaseTest extends AbstractDatabaseTest {
     }
 
     public void testSupportsInitiallyDeferrableColumns() {
-        assertEquals(false, getDatabase().supportsInitiallyDeferrableColumns());
+        assertFalse(getDatabase().supportsInitiallyDeferrableColumns());
     }
 
     public void testGetBooleanType() {

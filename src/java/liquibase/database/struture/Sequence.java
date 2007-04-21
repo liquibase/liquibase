@@ -39,6 +39,10 @@ public class Sequence implements DatabaseStructure {
         return getName().equals(((Sequence) obj).getName());
     }
 
+    public int hashCode() {
+        return getName().hashCode();
+    }
+
     public int compareTo(Object o) {
         if (o instanceof Sequence) {
             return toString().compareTo(o.toString());

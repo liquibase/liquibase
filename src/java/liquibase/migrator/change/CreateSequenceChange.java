@@ -75,16 +75,16 @@ public class CreateSequenceChange extends AbstractChange {
         buffer.append("CREATE SEQUENCE ");
         buffer.append(getSequenceName());
         if (getStartValue() != null) {
-            buffer.append(" START WITH " + getStartValue());
+            buffer.append(" START WITH ").append(getStartValue());
         }
         if (getIncrementBy() != null) {
-            buffer.append(" INCREMENT BY " + getIncrementBy());
+            buffer.append(" INCREMENT BY ").append(getIncrementBy());
         }
         if (getMinValue() != null) {
-            buffer.append(" MINVALUE " + getMinValue());
+            buffer.append(" MINVALUE ").append(getMinValue());
         }
         if (getMaxValue() != null) {
-            buffer.append(" MAXVALUE " + getMaxValue());
+            buffer.append(" MAXVALUE ").append(getMaxValue());
         }
         if (isOrdered() != null && isOrdered()) {
             buffer.append(" ORDER ");

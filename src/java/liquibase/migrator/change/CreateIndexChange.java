@@ -54,8 +54,8 @@ public class CreateIndexChange extends AbstractChange {
     public String generateStatement(AbstractDatabase database) {
         StringBuffer buffer = new StringBuffer();
         buffer.append("CREATE INDEX ");
-        buffer.append(getIndexName() + " ON ");
-        buffer.append(getTableName() + "(");
+        buffer.append(getIndexName()).append(" ON ");
+        buffer.append(getTableName()).append("(");
         Iterator iterator = columns.iterator();
         while (iterator.hasNext()) {
             ColumnConfig column  = (ColumnConfig) iterator.next();

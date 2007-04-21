@@ -4,7 +4,7 @@ import java.security.MessageDigest;
 
 public class MD5Util {
     public static String computeMD5(String input) {
-        MessageDigest digest = null;
+        MessageDigest digest;
         try {
             digest = MessageDigest.getInstance("MD5");
             digest.update(input.getBytes("UTF-8"));

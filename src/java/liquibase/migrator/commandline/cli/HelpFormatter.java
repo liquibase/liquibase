@@ -218,7 +218,6 @@ public class HelpFormatter
     *
     * @param pw The PrintWriter to print the usage statement 
     * @param width ??
-    * @param appName The application name
     * @param options The command line Options
     *
     */
@@ -350,9 +349,9 @@ public class HelpFormatter
          option = (Option) i.next();
          optBuf = new StringBuffer(8);
 
-         if (option.getOpt().equals(" "))
+         if (" ".equals(option.getOpt()))
          {
-             optBuf.append(lpad).append("   " + defaultLongOptPrefix).append(option.getLongOpt());
+             optBuf.append(lpad).append("   ").append(defaultLongOptPrefix).append(option.getLongOpt());
          }
          else
          {
@@ -440,7 +439,6 @@ public class HelpFormatter
     * The wrap point is the last postion before startPos+width having a whitespace
     * character (space, \n, \r).
     *
-    * @param sb text to be analyzed
     * @param width width of the wrapped text
     * @param startPos position from which to start the lookup whitespace character
     * @return postion on which the text must be wrapped or -1 if the wrap position is at the end

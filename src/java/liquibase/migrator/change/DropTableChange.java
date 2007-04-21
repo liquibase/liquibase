@@ -35,7 +35,7 @@ public class DropTableChange extends AbstractChange {
 
     public String generateStatement(AbstractDatabase database) {
         StringBuffer buffer = new StringBuffer();
-        buffer.append("DROP TABLE " + getTableName());
+        buffer.append("DROP TABLE ").append(getTableName());
         if (isCascadeConstraints() != null && isCascadeConstraints()) {
             buffer.append(" CASCADE CONSTRAINTS");
         }

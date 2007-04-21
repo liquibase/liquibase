@@ -23,7 +23,7 @@ public class CreateTableChange extends AbstractChange {
 
     public String generateStatement(AbstractDatabase database) {
         StringBuffer buffer = new StringBuffer();
-        buffer.append("CREATE TABLE " + getTableName() + " ");
+        buffer.append("CREATE TABLE ").append(getTableName()).append(" ");
         buffer.append("(");
         Iterator iterator = getColumns().iterator();
         while (iterator.hasNext()) {

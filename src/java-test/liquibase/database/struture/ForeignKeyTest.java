@@ -36,10 +36,10 @@ public class ForeignKeyTest extends TestCase {
         Table fkTable2 = new Table("fkTable2", "cat", null, null, null, null);
         ForeignKey key1 = new ForeignKey(pkTable, "pkColName", fkTable, "fkColName", "fkName", "pkName");
 
-        assertTrue(key1.equals(key1));
-        assertFalse(key1.equals(null));
+        assertEquals(key1, key1);
+        assertNotNull(key1);
         assertFalse(key1.equals(new String()));
-        assertTrue(key1.equals(new ForeignKey(pkTable, "pkColName", fkTable, "fkColName", "fkName", "pkName")));
+        assertEquals(key1, new ForeignKey(pkTable, "pkColName", fkTable, "fkColName", "fkName", "pkName"));
         assertFalse(key1.equals(new ForeignKey(pkTable, "pkCol2", fkTable, "fkColName", "fkName", "pkName")));
         assertFalse(key1.equals(new ForeignKey(pkTable, "pkColName", fkTable, "fkColName2", "fkName", "pkName")));
         assertFalse(key1.equals(new ForeignKey(pkTable, "pkColName", fkTable2, "fkColName", "fkName", "pkName")));

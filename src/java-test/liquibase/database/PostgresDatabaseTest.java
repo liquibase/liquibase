@@ -17,7 +17,7 @@ public class PostgresDatabaseTest extends AbstractDatabaseTest {
     }
 
     public void testSupportsInitiallyDeferrableColumns() {
-        assertEquals(true, getDatabase().supportsInitiallyDeferrableColumns());
+        assertTrue(getDatabase().supportsInitiallyDeferrableColumns());
     }
 
     public void testGetBooleanType() {
@@ -29,7 +29,7 @@ public class PostgresDatabaseTest extends AbstractDatabaseTest {
     }
 
     public void testGetUUIDType() {
-        assertEquals(null, getDatabase().getUUIDType());
+        assertNull(getDatabase().getUUIDType());
     }
 
     public void testGetClobType() {

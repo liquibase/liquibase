@@ -14,7 +14,8 @@ public class InsertDataChangeTest extends AbstractChangeTest {
 
     InsertDataChange refactoring;
 
-    public void setUp() {
+    public void setUp() throws Exception {
+        super.setUp();
         refactoring = new InsertDataChange();
         refactoring.setTableName("TABLE_NAME");
 

@@ -12,11 +12,11 @@ public class ColumnTest extends TestCase {
 
     public void testEquals() throws Exception {
         Column column1 = new Column(new Table("table1", "catalog", "schem", null, null, null), "colName", -1, null, -1, -1, -1, null, null);
-        assertTrue(column1.equals(column1));
+        assertEquals(column1, column1);
         assertFalse(column1.equals(new String()));
-        assertFalse(column1.equals(null));
+        assertNotNull(column1);
 
-        assertTrue(column1.equals(new Column(new Table("table1", "catalog", "schem", null, null, null), "colName", -1, null, -1, -1, -1, null, null)));
+        assertEquals(column1, new Column(new Table("table1", "catalog", "schem", null, null, null), "colName", -1, null, -1, -1, -1, null, null));
 
         assertFalse(column1.equals(new Column(new Table("table2", "catalog", "schem", null, null, null), "colName", -1, null, -1, -1, -1, null, null)));
         assertFalse(column1.equals(new Column(new Table("table1", "catalog", "schem", null, null, null), "differentColName", -1, null, -1, -1, -1, null, null)));

@@ -2,6 +2,8 @@ package liquibase.migrator;
 
 import liquibase.database.AbstractDatabase;
 import liquibase.migrator.change.AbstractChange;
+import liquibase.migrator.preconditions.PreconditionFailedException;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -22,7 +24,8 @@ import java.util.logging.Logger;
  */
 public class ChangeSet {
 
-    private enum RunStatus { NOT_RAN, ALREADY_RAN, RUN_AGAIN }
+    private enum RunStatus {
+        NOT_RAN, ALREADY_RAN, RUN_AGAIN }
 
     private List<AbstractChange> refactorings;
     private String id;
@@ -32,6 +35,7 @@ public class ChangeSet {
     private String md5sum;
     private boolean alwaysRun;
     private boolean runOnChange;
+    private String context;
 
     public boolean shouldAlwaysRun() {
         return alwaysRun;
@@ -41,8 +45,7 @@ public class ChangeSet {
         return runOnChange;
     }
 
-
-    public ChangeSet(String id, String author, boolean alwaysRun, boolean runOnChange, DatabaseChangeLog databaseChangeLog) {
+    public ChangeSet(String id, String author, boolean alwaysRun, boolean runOnChange, DatabaseChangeLog databaseChangeLog, String context) {
         this.refactorings = new ArrayList<AbstractChange>();
         log = Logger.getLogger(Migrator.DEFAULT_LOG_NAME);
         this.id = id;
@@ -50,6 +53,7 @@ public class ChangeSet {
         this.databaseChangeLog = databaseChangeLog;
         this.alwaysRun = alwaysRun;
         this.runOnChange = runOnChange;
+        this.context = context.toLowerCase();
     }
 
 
@@ -79,9 +83,15 @@ public class ChangeSet {
      * if the change set has already been executed or not, if it is already executed then it will not execute
      * it again.
      */
-    public void execute() throws DatabaseHistoryException, MigrationFailedException {
+    public void execute() throws DatabaseHistoryException, MigrationFailedException, PreconditionFailedException {
         Migrator migrator = getDatabaseChangeLog().getMigrator();
         try {
+            //System.out.println("sdf");
+            //String vendor=  getDatabaseChangeLog().getPreconditions().getDbms().getVendor().toLowerCase();
+            //System.out.println("dbproduct" +dbproduct);
+            //System.out.println("vendor"+getDatabaseChangeLog().getPreconditions().getDbms().getVendor());
+            //String dbproduct = migrator.getDatabase().getConnection().getMetaData().getDatabaseProductName();
+            //if(getDatabaseChangeLog().getPreconditions() != null && getDatabaseChangeLog().getPreconditions().getDbms().checkVendor(dbproduct)) {
             RunStatus isChangeSetRan = isChangeSetRan();
             if (shouldAlwaysRun() || !isChangeSetRan.equals(RunStatus.ALREADY_RAN)) {
                 if (migrator.getMode().equals(Migrator.EXECUTE_MODE)) {
@@ -135,6 +145,11 @@ public class ChangeSet {
         return author;
     }
 
+    public String getContext() {
+        return context;
+    }
+
+
     /**
      * After the change set has been ran against the database this method will update the change log table
      * with the information.
@@ -161,7 +176,7 @@ public class ChangeSet {
 
     public void markChangeSetAsReRan() throws SQLException, IOException {
         String dateValue = getDatabaseChangeLog().getMigrator().getDatabase().getCurrentDateTimeFunction();
-        String sql = "UPDATE DATABASECHANGELOG SET DATEEXECUTED="+dateValue+", MD5SUM='?' WHERE ID='?' AND AUTHOR='?' AND FILENAME='?'";
+        String sql = "UPDATE DATABASECHANGELOG SET DATEEXECUTED=" + dateValue + ", MD5SUM='?' WHERE ID='?' AND AUTHOR='?' AND FILENAME='?'";
         sql = sql.replaceFirst("\\?", getMd5sum().replaceAll("'", "''"));
         sql = sql.replaceFirst("\\?", getId().replaceAll("'", "''"));
         sql = sql.replaceFirst("\\?", getAuthor().replaceAll("'", "''"));
@@ -187,6 +202,7 @@ public class ChangeSet {
      */
     public RunStatus isChangeSetRan() throws DatabaseHistoryException, SQLException {
         AbstractDatabase database = getDatabaseChangeLog().getMigrator().getDatabase();
+        //System.out.println(database.g)
         if (!database.doesChangeLogTableExist()) {
             return RunStatus.NOT_RAN;
         }

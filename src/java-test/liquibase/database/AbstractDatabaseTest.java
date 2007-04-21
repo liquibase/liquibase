@@ -206,7 +206,7 @@ public abstract class AbstractDatabaseTest extends TestCase {
 
         Statement statement = createMock(Statement.class);
         expect(connection.createStatement()).andReturn(statement);
-        expect(statement.executeUpdate(("create table DatabaseChangeLog (id varchar(255) not null, author varchar(255) not null, filename varchar(255) not null, dateExecuted " + database.getDateTimeType() + " not null, md5sum varchar(32) not null, primary key(id, author, filename))").toUpperCase())).andReturn(new Integer(1));
+        expect(statement.executeUpdate(("create table DatabaseChangeLog (id varchar(255) not null, author varchar(255) not null, filename varchar(255) not null, dateExecuted " + database.getDateTimeType() + " not null, md5sum varchar(32), primary key(id, author, filename))").toUpperCase())).andReturn(new Integer(1));
 
         connection.commit();
         expectLastCall();
