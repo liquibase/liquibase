@@ -81,7 +81,7 @@ public class CreateTableChange extends AbstractChange {
         }
 
         if (fkConstraints.length() > 0) {
-            buffer.append(", ").append(fkConstraints.toString().replace(",$",""));
+            buffer.append(", ").append(fkConstraints.toString().replaceFirst(",$",""));
         }
         buffer.append(")");
         return buffer.toString().trim();

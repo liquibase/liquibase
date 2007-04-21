@@ -62,7 +62,7 @@ public class CreateTableChangeTest extends AbstractChangeTest {
         column5.setConstraints(column5constraints);
         change.addColumn(column5);
 
-        assertEquals("CREATE TABLE TABLE_NAME (id int NOT NULL PRIMARY KEY, name varchar(255), state_id NOT NULL CONSTRAINT fk_tab_ref REFERENCES state(id) INITIALLY DEFERRED DEFERRABLE, phone varchar(255) DEFAULT 'NOPHONE', phone2 varchar(255) UNIQUE)", change.generateStatement(new OracleDatabase()));
+        assertEquals("CREATE TABLE TABLE_NAME (id int NOT NULL PRIMARY KEY, name varchar(255), state_id NOT NULL, phone varchar(255) DEFAULT 'NOPHONE', phone2 varchar(255) UNIQUE,  CONSTRAINT fk_tab_ref FOREIGN KEY (state_id) REFERENCES state(id) INITIALLY DEFERRED DEFERRABLE)", change.generateStatement(new OracleDatabase()));
     }
 
     public void testGetConfirmationMessage() throws Exception {

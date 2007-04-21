@@ -16,15 +16,17 @@ public class DropIndexChangeTest extends AbstractChangeTest {
     public void testGenerateStatement() throws Exception {
         DropIndexChange refactoring = new DropIndexChange();
         refactoring.setIndexName("IDX_NAME");
+        refactoring.setTableName("TABLE_NAME");
 
-        assertEquals("DROP INDEX IDX_NAME", refactoring.generateStatement(new OracleDatabase()));
+        assertEquals("DROP INDEX IDX_NAME ON TABLE_NAME", refactoring.generateStatement(new OracleDatabase()));
     }
 
     public void testGetConfirmationMessage() throws Exception {
         DropIndexChange refactoring = new DropIndexChange();
         refactoring.setIndexName("IDX_NAME");
+        refactoring.setTableName("TABLE_NAME");
 
-        assertEquals("Index IDX_NAME dropped", refactoring.getConfirmationMessage());
+        assertEquals("Index IDX_NAME dropped from table TABLE_NAME", refactoring.getConfirmationMessage());
     }
 
     public void testIsApplicableTo() throws Exception {
