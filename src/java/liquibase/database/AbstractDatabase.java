@@ -344,6 +344,22 @@ public abstract class AbstractDatabase {
 
     public abstract String getCurrentDateTimeFunction();
 
+    public String getRenameColumnSQL(String tableName, String oldColumnName, String newColumnName) {
+        StringBuffer buffer = new StringBuffer();
+        buffer.append("alter table ").append(tableName);
+        buffer.append(" rename column ");
+        buffer.append(oldColumnName).append(" ");
+        buffer.append(" to ").append(newColumnName);
+        return buffer.toString();
+    }
+
+    public String getRenameTableSQL(String oldTableName, String newTableName) {
+        StringBuffer buffer = new StringBuffer();
+        buffer.append("rename ").append(oldTableName).append(" to ").append(newTableName);
+        return buffer.toString();
+    }
+
+
     public boolean aquireLock(Migrator migrator) throws MigrationFailedException {
         if (!migrator.getDatabase().doesChangeLogLockTableExist()) {
             if (migrator.getMode().equals(Migrator.EXECUTE_MODE)) {
@@ -478,40 +494,50 @@ public abstract class AbstractDatabase {
         return "AUTO_INCREMENT";
     }
 
-    public String getColumnDataType(String tableName, String columnName) throws SQLException {
+    public String getColumnDataType(String tableName, String columnName) {
         ResultSet rs = null;
         Statement selectStatement = null;
         Connection connection = getConnection();
         ResultSetMetaData rsdata;
-        int iColumnCount;
-        String strColumnType = "";
+        int columnCount;
+        String columnType = "";
         try {
             selectStatement = connection.createStatement();
             rs = selectStatement.executeQuery("SELECT * FROM " + tableName);  //todo: is there a more efficient way to do this?
 
             rsdata = rs.getMetaData();
-            iColumnCount = rsdata.getColumnCount();
-            for (int i = 1; i <= iColumnCount; i++) {
+            columnCount = rsdata.getColumnCount();
+            for (int i = 1; i <= columnCount; i++) {
 
                 if (columnName.equals(rsdata.getColumnName(i))) {
 
-                    strColumnType = rsdata.getColumnTypeName(i) + "(" + rsdata.getColumnDisplaySize(i) + ")";
+                    columnType = rsdata.getColumnTypeName(i) + "(" + rsdata.getColumnDisplaySize(i) + ")";
                     break;
                 }
 
 
             }
 
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         } finally {
             if (selectStatement != null) {
-                selectStatement.close();
+                try {
+                    selectStatement.close();
+                } catch (SQLException e) {
+                    ;
+                }
             }
             if (rs != null) {
-                rs.close();
+                try {
+                    rs.close();
+                } catch (SQLException e) {
+                    ;
+                }
             }
         }
 
-        return strColumnType;
+        return columnType;
     }
 
     public void updateNullColumns(String tableName, String columnName, String defalutValue) throws SQLException {

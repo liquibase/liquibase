@@ -33,9 +33,7 @@ public class RenameTableChange extends AbstractChange {
     }
 
     public String generateStatement(AbstractDatabase database) {
-        StringBuffer buffer = new StringBuffer();
-        buffer.append("rename ").append(getOldTableName()).append(" to ").append(getNewTableName());
-        return buffer.toString();
+        return database.getRenameTableSQL(getOldTableName(), getNewTableName());
     }
 
     public String getConfirmationMessage() {

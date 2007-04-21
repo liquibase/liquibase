@@ -6,7 +6,7 @@ import org.xml.sax.InputSource;
 import java.io.IOException;
 
 public class MigratorSchemaResolver implements EntityResolver {
-    private static final String XSD_NAME = "migrator-1.0.xsd";
+    private static final String XSD_NAME = "dbchangelog-1.0.xsd";
 
     private static final String SEARCH_PACKAGE = "liquibase/";
 
@@ -20,6 +20,7 @@ public class MigratorSchemaResolver implements EntityResolver {
                 return source;
             }
             catch (Exception ex) {
+                throw new IOException(ex.getMessage());
             }
         }
         return null;

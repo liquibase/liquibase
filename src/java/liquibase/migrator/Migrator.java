@@ -20,6 +20,8 @@ import java.util.HashSet;
 import java.util.logging.Logger;
 import java.net.URI;
 
+import com.sun.org.apache.xalan.internal.xsltc.TransletException;
+
 public class Migrator {
     // These modes tell the program whether to execute the statements against the database
     // Or to output them in some file to be ran later manually
@@ -266,6 +268,8 @@ public class Migrator {
             inputStream.close();
         } catch (IOException e) {
             throw new MigrationFailedException("Error Reading Migration File: " + e.getMessage(), e);
+        } catch (SAXParseException e) {
+            throw new MigrationFailedException("Error parsing line "+e.getLineNumber()+" column "+e.getColumnNumber()+": "+e.getMessage());
         } catch (SAXException e) {
             Throwable parentCause = e.getException();
             while (parentCause != null) {
@@ -274,7 +278,12 @@ public class Migrator {
                 }
                 parentCause = parentCause.getCause();
             }
-            throw new MigrationFailedException("Invalid Migration File: " + e.getMessage(), e);
+            String reason = e.getMessage();
+            if (reason == null) {
+                reason = "Unknown Reason";
+            }
+
+            throw new MigrationFailedException("Invalid Migration File: " + reason, e);
         }
     }
 

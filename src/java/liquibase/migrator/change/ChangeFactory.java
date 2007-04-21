@@ -49,8 +49,12 @@ public class ChangeFactory {
     }
 
     public AbstractChange create(String tagName) {
+            Class aClass = tagToClassMap.get(tagName);
+            if (aClass == null) {
+                throw new RuntimeException("Unknown tag: "+tagName);
+            }
         try {
-            return (AbstractChange) tagToClassMap.get(tagName).newInstance();
+            return (AbstractChange) aClass.newInstance();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

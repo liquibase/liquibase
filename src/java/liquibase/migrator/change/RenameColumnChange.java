@@ -45,12 +45,7 @@ public class RenameColumnChange extends AbstractChange {
     }
 
     public String generateStatement(AbstractDatabase database) {
-        StringBuffer buffer = new StringBuffer();
-        buffer.append("alter table ").append(getTableName());
-        buffer.append(" rename column ");
-        buffer.append(getOldColumnName()).append(" ");
-        buffer.append(" to ").append(getNewColumnName());
-        return buffer.toString();
+        return database.getRenameColumnSQL(getTableName(), getOldColumnName(), getNewColumnName());
     }
 
     public String getConfirmationMessage() {

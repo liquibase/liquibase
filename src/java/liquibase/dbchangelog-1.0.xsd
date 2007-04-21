@@ -9,8 +9,6 @@
     <xsd:element name="databaseChangeLog">
         <xsd:complexType>
             <xsd:sequence>
-
-
                 <xsd:element name="preConditions" minOccurs="0" maxOccurs="1">
                     <xsd:complexType>
                         <xsd:choice>
@@ -35,8 +33,6 @@
                         <xsd:attribute name="file" type="xsd:string"/>
                     </xsd:complexType>
                 </xsd:element>
-
-
             </xsd:sequence>
         </xsd:complexType>
     </xsd:element>
@@ -330,6 +326,7 @@
 
     <xsd:element name="dropIndex">
         <xsd:complexType>
+            <xsd:attributeGroup ref="tableNameAttribute"/>
             <xsd:attributeGroup ref="indexName"/>
         </xsd:complexType>
     </xsd:element>

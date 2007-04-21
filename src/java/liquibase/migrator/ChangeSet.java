@@ -53,7 +53,9 @@ public class ChangeSet {
         this.databaseChangeLog = databaseChangeLog;
         this.alwaysRun = alwaysRun;
         this.runOnChange = runOnChange;
-        this.context = context.toLowerCase();
+        if (context != null) {
+            this.context = context.toLowerCase();
+        }
     }
 
 

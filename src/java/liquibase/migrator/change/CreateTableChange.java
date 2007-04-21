@@ -22,6 +22,8 @@ public class CreateTableChange extends AbstractChange {
     }
 
     public String generateStatement(AbstractDatabase database) {
+        StringBuffer fkConstraints = new StringBuffer();
+
         StringBuffer buffer = new StringBuffer();
         buffer.append("CREATE TABLE ").append(getTableName()).append(" ");
         buffer.append("(");
@@ -43,19 +45,26 @@ public class CreateTableChange extends AbstractChange {
                 }
 
                 if (constraints.getReferences() != null) {
-                    buffer.append(" CONSTRAINT ").append(constraints.getForeignKeyName()).append(" REFERENCES ").append(constraints.getReferences());
+                    fkConstraints.append(" CONSTRAINT ")
+                            .append(constraints.getForeignKeyName())
+                            .append(" FOREIGN KEY (")
+                            .append(column.getName())
+                            .append(") REFERENCES ")
+                            .append(constraints.getReferences());
+
+                    if (constraints.isInitiallyDeferred() != null && constraints.isInitiallyDeferred()) {
+                        fkConstraints.append(" INITIALLY DEFERRED");
+                    }
+                    if (constraints.isDeferrable() != null && constraints.isDeferrable()) {
+                        fkConstraints.append(" DEFERRABLE,");
+                    }
+//                    buffer.append(" CONSTRAINT FOREIGN KEY ").append(constraints.getForeignKeyName()).append(" REFERENCES ").append(constraints.getReferences());
                 }
 
                 if (constraints.isUnique() != null && constraints.isUnique()) {
                     buffer.append(" UNIQUE");
                 }
                 if (constraints.getCheck() != null) buffer.append(constraints.getCheck()).append(" ");
-                if (constraints.isInitiallyDeferred() != null && constraints.isInitiallyDeferred()) {
-                    buffer.append(" INITIALLY DEFERRED");
-                }
-                if (constraints.isDeferrable() != null && constraints.isDeferrable()) {
-                    buffer.append(" DEFERRABLE");
-                }
             }
 
             if (column.getDefaultValue() != null) {
@@ -69,6 +78,10 @@ public class CreateTableChange extends AbstractChange {
             if (iterator.hasNext()) {
                 buffer.append(", ");
             }
+        }
+
+        if (fkConstraints.length() > 0) {
+            buffer.append(", ").append(fkConstraints.toString().replace(",$",""));
         }
         buffer.append(")");
         return buffer.toString().trim();

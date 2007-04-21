@@ -3,8 +3,6 @@ package liquibase.migrator.change;
 import liquibase.database.AbstractDatabase;
 import liquibase.database.struture.Column;
 import liquibase.database.struture.DatabaseStructure;
-import liquibase.database.struture.Table;
-import liquibase.migrator.MigrationFailedException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -49,12 +47,12 @@ public class AddNotNullConstraintChange extends AbstractChange {
     public String generateStatement(AbstractDatabase database) {
         StringBuffer buffer = new StringBuffer();
         try {
-            String strColumnType = database.getColumnDataType(getTableName(), getColumnName());
+            String columnType = database.getColumnDataType(getTableName(), getColumnName());
             database.updateNullColumns(getTableName(), getColumnName(), getDefaultNullValue());
             buffer.append("alter table ").append(getTableName());
             buffer.append(" modify ");
             buffer.append(getColumnName()).append(" ");
-            buffer.append(strColumnType).append(" ");
+            buffer.append(columnType).append(" ");
             buffer.append("not null");
 //        System.out.println(buffer.toString());
         } catch (SQLException eSqlException) {

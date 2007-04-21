@@ -12,7 +12,7 @@ public class PreconditionSet {
     private NotPrecondition notprecond;
     private RunningAsPrecondition userexists;
     private Migrator migrator;
-    private String strExceptionMsg;
+    private String exceptionMsg;
 
 
     public PreconditionSet() {
@@ -78,7 +78,7 @@ public class PreconditionSet {
                     } else {
 
                         dbmsreturnvalue = false;
-                        strExceptionMsg = "DBMS Precondition failed";
+                        exceptionMsg = "DBMS Precondition failed";
                         break;
                     }
                 }
@@ -89,7 +89,7 @@ public class PreconditionSet {
                     orReturnValue = true;
                 } else {
                     orReturnValue = false;
-                    strExceptionMsg = "Or Precondition failed";
+                    exceptionMsg = "Or Precondition failed";
                 }
 
             } else if (notprecond != null) {
@@ -98,7 +98,7 @@ public class PreconditionSet {
                     notReturnValue = true;
                 } else {
                     notReturnValue = false;
-                    strExceptionMsg = "Not Precondition failed";
+                    exceptionMsg = "Not Precondition failed";
                 }
 
             }
@@ -109,7 +109,7 @@ public class PreconditionSet {
                     userExistsReturnValue = true;
                 } else {
                     userExistsReturnValue = false;
-                    strExceptionMsg = "UserExists Precondition failed";
+                    exceptionMsg = "UserExists Precondition failed";
                 }
 
             }
@@ -119,7 +119,7 @@ public class PreconditionSet {
             }
 
         } catch (PreconditionFailedException ePrecondExcep) {
-            throw new PreconditionFailedException("Unable to process change set:" + strExceptionMsg);
+            throw new PreconditionFailedException("Unable to process change set:" + exceptionMsg);
 
         } catch (Exception e) {
             throw new RuntimeException(e);

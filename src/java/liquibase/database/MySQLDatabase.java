@@ -51,4 +51,21 @@ public class MySQLDatabase extends AbstractDatabase {
     public String getLineComment() {
         return "==";
     }
+
+    public String getRenameColumnSQL(String tableName, String oldColumnName, String newColumnName) {
+        StringBuffer buffer = new StringBuffer();
+        buffer.append("alter table ").append(tableName);
+        buffer.append(" change ");
+        buffer.append(oldColumnName).append(" ");
+        buffer.append(newColumnName);
+        buffer.append(" ");
+        buffer.append(getColumnDataType(tableName, oldColumnName));
+        return buffer.toString();
+    }
+
+      public String getRenameTableSQL(String oldTableName, String newTableName) {
+        StringBuffer buffer = new StringBuffer();
+        buffer.append("alter table ").append(oldTableName).append(" rename ").append(newTableName);
+        return buffer.toString();
+    }
 }

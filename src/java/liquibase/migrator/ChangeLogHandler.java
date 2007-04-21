@@ -45,7 +45,9 @@ public class ChangeLogHandler implements ContentHandler {
 
     public void startElement(String uri, String localName, String qName, Attributes atts) throws SAXException {
         try {
-            if ("databaseChangeLog".equals(qName)) {
+            if ("comment".equals(qName)) {
+                //do nothing for now, maybe use it for future features
+            } else if ("databaseChangeLog".equals(qName)) {
                 changeLog = new DatabaseChangeLog(migrator);
             } else if ("include".equals(qName)) {
                 new IncludeMigrator(atts.getValue("file"), migrator).migrate();
@@ -83,6 +85,8 @@ public class ChangeLogHandler implements ContentHandler {
                     ((CreateTableChange) change).addColumn(column);
                 } else if (change instanceof InsertDataChange) {
                     ((InsertDataChange) change).addColumn(column);
+                } else if (change instanceof CreateIndexChange) {
+                    ((CreateIndexChange) change).addColumn(column);
                 } else {
                     throw new RuntimeException("Unexpected column tag for " + change.getClass().getName());
                 }
@@ -163,9 +167,7 @@ public class ChangeLogHandler implements ContentHandler {
                         String attributeValue = atts.getValue(i);
                         setProperty(runningAs, attributeName, attributeValue);
                     }
-
                 } else {
-
                     new RuntimeException("Unexpected Or tag");
                 }
 

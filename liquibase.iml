@@ -7,7 +7,8 @@
     <output-test url="file://$MODULE_DIR$/build-test" />
     <content url="file://$MODULE_DIR$">
       <sourceFolder url="file://$MODULE_DIR$/src/java" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/java-test" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/java-dbtest" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/src/java-test" isTestSource="true" />
       <excludeFolder url="file://$MODULE_DIR$/build-reports" />
       <excludeFolder url="file://$MODULE_DIR$/build-web" />
       <excludeFolder url="file://$MODULE_DIR$/lib-deps" />
@@ -69,6 +70,7 @@
         <SOURCES />
       </library>
     </orderEntry>
+    <orderEntry type="library" name="clover-idea5" level="application" />
     <orderEntryProperties />
   </component>
 </module>

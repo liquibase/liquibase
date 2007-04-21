@@ -11,6 +11,7 @@ import java.util.Set;
 public class DropIndexChange extends AbstractChange {
 
     private String indexName;
+    private String tableName;
 
     public DropIndexChange() {
         super("dropIndex", "Drop Index");
@@ -24,15 +25,25 @@ public class DropIndexChange extends AbstractChange {
         this.indexName = indexName;
     }
 
+    public String getTableName() {
+        return tableName;
+    }
+
+    public void setTableName(String tableName) {
+        this.tableName = tableName;
+    }
+
     public String generateStatement(AbstractDatabase database) {
         StringBuffer buffer = new StringBuffer();
         buffer.append("DROP INDEX ");
         buffer.append(getIndexName());
+        buffer.append(" ON ");
+        buffer.append(getTableName());
         return buffer.toString();
     }
 
     public String getConfirmationMessage() {
-        return "Index " + getIndexName() + " dropped";
+        return "Index " + getIndexName() + " dropped from table "+getTableName();
     }
 
     public boolean isApplicableTo(Set<DatabaseStructure> selectedDatabaseStructures) {
@@ -42,6 +53,7 @@ public class DropIndexChange extends AbstractChange {
     public Element createNode(Document currentMigrationFileDOM) {
         Element element = currentMigrationFileDOM.createElement("dropIndex");
         element.setAttribute("indexName", getIndexName());
+        element.setAttribute("tableName", getTableName());
 
         return element;
     }

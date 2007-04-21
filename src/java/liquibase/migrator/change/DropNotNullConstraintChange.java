@@ -3,7 +3,6 @@ package liquibase.migrator.change;
 import liquibase.database.AbstractDatabase;
 import liquibase.database.struture.Column;
 import liquibase.database.struture.DatabaseStructure;
-import liquibase.database.struture.Table;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -39,21 +38,17 @@ public class DropNotNullConstraintChange extends AbstractChange {
     public String generateStatement(AbstractDatabase database) {
 //    	System.out.println("inside generatesTatement");
         StringBuffer buffer = new StringBuffer();
-        try {
-            String strColumnType = database.getColumnDataType(getTableName(), getColumnName());
-            //database.updateNullColumns(getTableName(),getColumnName(),getDefaultNullValue());
-            buffer.append("alter table ");
-            buffer.append(getTableName());
-            buffer.append(" modify ");
-            buffer.append(getColumnName());
-            buffer.append(" ");
-            buffer.append(strColumnType);
-            buffer.append(" ");
-            buffer.append("default null");
+        String columnType = database.getColumnDataType(getTableName(), getColumnName());
+        //database.updateNullColumns(getTableName(),getColumnName(),getDefaultNullValue());
+        buffer.append("alter table ");
+        buffer.append(getTableName());
+        buffer.append(" modify ");
+        buffer.append(getColumnName());
+        buffer.append(" ");
+        buffer.append(columnType);
+        buffer.append(" ");
+        buffer.append("default null");
 //        System.out.println(buffer.toString());
-        } catch (SQLException eSqlException) {
-            throw new RuntimeException(eSqlException);
-        }
 //        System.out.println(buffer.toString());
         return buffer.toString();
     }
