@@ -45,21 +45,7 @@ public class AddNotNullConstraintChange extends AbstractChange {
 
 
     public String generateStatement(AbstractDatabase database) {
-        StringBuffer buffer = new StringBuffer();
-        try {
-            String columnType = database.getColumnDataType(getTableName(), getColumnName());
-            database.updateNullColumns(getTableName(), getColumnName(), getDefaultNullValue());
-            buffer.append("alter table ").append(getTableName());
-            buffer.append(" modify ");
-            buffer.append(getColumnName()).append(" ");
-            buffer.append(columnType).append(" ");
-            buffer.append("not null");
-//        System.out.println(buffer.toString());
-        } catch (SQLException eSqlException) {
-            throw new RuntimeException(eSqlException);
-        }
-//        System.out.println(buffer.toString());
-        return buffer.toString();
+        return database.getAddNullConstraintSQL(getTableName(), getColumnName(), getDefaultNullValue());
     }
 
     public String getConfirmationMessage() {

@@ -359,6 +359,41 @@ public abstract class AbstractDatabase {
         return buffer.toString();
     }
 
+    public String getDropIndexSQL(String tableName, String indexName) {
+        StringBuffer buffer = new StringBuffer();
+        buffer.append("DROP INDEX ");
+        buffer.append(indexName);
+        buffer.append(" ON ");
+        buffer.append(tableName);
+        return buffer.toString();
+    }
+
+    public String getDropNullConstraintSQL(String tableName, String columnName) {
+        StringBuffer buffer = new StringBuffer();
+        buffer.append("alter table ");
+        buffer.append(tableName);
+        buffer.append(" alter column  ");
+        buffer.append(columnName);
+        buffer.append(" ").append(getColumnDataType(tableName, columnName));
+        buffer.append(" null");
+        return buffer.toString();
+    }
+
+     public String getAddNullConstraintSQL(String tableName, String columnName, String defaultNullValue) {
+        StringBuffer buffer = new StringBuffer();
+        try {
+            String columnType = this.getColumnDataType(tableName, columnName);
+            this.updateNullColumns(tableName, columnName, defaultNullValue);
+            buffer.append("alter table ").append(tableName);
+            buffer.append(" alter column ");
+            buffer.append(columnName).append(" ");
+            buffer.append(columnType).append(" ");
+            buffer.append("not null");
+        } catch (SQLException eSqlException) {
+            throw new RuntimeException(eSqlException);
+        }
+        return buffer.toString();
+    }
 
     public boolean aquireLock(Migrator migrator) throws MigrationFailedException {
         if (!migrator.getDatabase().doesChangeLogLockTableExist()) {
@@ -546,16 +581,11 @@ public abstract class AbstractDatabase {
 
         try {
             updateStatement = connection.createStatement();
-//          System.out.println( "update "+ tableName +" set "+ columnName + "='" + defalutValue +"' where " + columnName +"=\"\"  or "+ columnName +"='NULL'");
-            updateStatement.executeUpdate("update " + tableName + " set " + columnName + "='" + defalutValue + "' where " + columnName + "=\"\"  or " + columnName + " is NULL");
-//            System.out.println("iResult"+ iResult);
-
+            updateStatement.executeUpdate("update " + tableName + " set " + columnName + "='" + defalutValue + "' where " + columnName + " is NULL");
         } finally {
             if (updateStatement != null) {
                 updateStatement.close();
             }
         }
-
-
-    }
+   }
 }

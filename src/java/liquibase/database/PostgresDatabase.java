@@ -4,13 +4,14 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 public class PostgresDatabase extends AbstractDatabase {
+    public static final String PRODUCT_NAME = "PostgreSQL";
 
     public boolean supportsInitiallyDeferrableColumns() {
         return true;
     }
 
     public boolean isCorrectDatabaseImplementation(Connection conn) throws SQLException {
-        return "PostgreSQL".equalsIgnoreCase(conn.getMetaData().getDatabaseProductName());
+        return PRODUCT_NAME.equalsIgnoreCase(conn.getMetaData().getDatabaseProductName());
     }
 
     protected String getBooleanType() {

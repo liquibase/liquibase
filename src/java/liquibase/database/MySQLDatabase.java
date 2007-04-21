@@ -4,8 +4,10 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 public class MySQLDatabase extends AbstractDatabase {
+    public static final String PRODUCT_NAME = "MySQL";
+
     public boolean isCorrectDatabaseImplementation(Connection conn) throws SQLException {
-        return "MySQL".equalsIgnoreCase(conn.getMetaData().getDatabaseProductName());
+        return PRODUCT_NAME.equalsIgnoreCase(conn.getMetaData().getDatabaseProductName());
     }
 
     protected String getBooleanType() {
@@ -66,6 +68,36 @@ public class MySQLDatabase extends AbstractDatabase {
       public String getRenameTableSQL(String oldTableName, String newTableName) {
         StringBuffer buffer = new StringBuffer();
         buffer.append("alter table ").append(oldTableName).append(" rename ").append(newTableName);
+        return buffer.toString();
+    }
+
+    public String getDropNullConstraintSQL(String tableName, String columnName) {
+        StringBuffer buffer = new StringBuffer();
+        String columnType = getColumnDataType(tableName, columnName);
+        buffer.append("alter table ");
+        buffer.append(tableName);
+        buffer.append(" modify ");
+        buffer.append(columnName);
+        buffer.append(" ");
+        buffer.append(columnType);
+        buffer.append(" ");
+        buffer.append("default null");
+        return buffer.toString();
+    }
+
+    public String getAddNullConstraintSQL(String tableName, String columnName, String defaultNullValue) {
+        StringBuffer buffer = new StringBuffer();
+        try {
+            String columnType = this.getColumnDataType(tableName, columnName);
+            this.updateNullColumns(tableName, columnName, defaultNullValue);
+            buffer.append("alter table ").append(tableName);
+            buffer.append(" modify ");
+            buffer.append(columnName).append(" ");
+            buffer.append(columnType).append(" ");
+            buffer.append("not null");
+        } catch (SQLException eSqlException) {
+            throw new RuntimeException(eSqlException);
+        }
         return buffer.toString();
     }
 }

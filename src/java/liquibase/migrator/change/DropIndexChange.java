@@ -34,12 +34,7 @@ public class DropIndexChange extends AbstractChange {
     }
 
     public String generateStatement(AbstractDatabase database) {
-        StringBuffer buffer = new StringBuffer();
-        buffer.append("DROP INDEX ");
-        buffer.append(getIndexName());
-        buffer.append(" ON ");
-        buffer.append(getTableName());
-        return buffer.toString();
+        return database.getDropIndexSQL(getTableName(), getIndexName());
     }
 
     public String getConfirmationMessage() {

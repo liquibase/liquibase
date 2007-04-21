@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 public class MSSQLDatabase extends AbstractDatabase {
+    public static final String PRODUCT_NAME = "Microsoft SQL Server";
 
     public boolean supportsInitiallyDeferrableColumns() {
         return false;
@@ -14,7 +15,7 @@ public class MSSQLDatabase extends AbstractDatabase {
     }
 
     public boolean isCorrectDatabaseImplementation(Connection conn) throws SQLException {
-        return "Microsoft SQL Server".equalsIgnoreCase(conn.getMetaData().getDatabaseProductName());
+        return PRODUCT_NAME.equalsIgnoreCase(conn.getMetaData().getDatabaseProductName());
     }
 
     protected String getDateType() {
@@ -52,4 +53,26 @@ public class MSSQLDatabase extends AbstractDatabase {
     public String getAutoIncrementClause() {
         return "IDENTITY";
     }
+
+    public String getSchemaName() throws SQLException {
+        return "dbo";
+    }
+
+    public String getFalseBooleanValue() {
+        return "0";
+    }
+
+    public String getRenameTableSQL(String oldTableName, String newTableName) {
+        return "sp_rename '"+oldTableName+"', "+newTableName;
+    }
+
+    public String getRenameColumnSQL(String tableName, String oldColumnName, String newColumnName) {
+        return "sp_rename '"+tableName+"."+oldColumnName+"', "+newColumnName;
+    }
+
+    public String getDropIndexSQL(String tableName, String indexName) {
+        return "DROP INDEX "+tableName+"."+indexName;
+    }
+
+
 }

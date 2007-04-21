@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.0"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.0 http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.0.xsd">
+    <preConditions>
+            <dbms type="mssql"/>
+    </preConditions>
+
+    <changeSet id="1" author="nvoxland">
+        <createTable tableName="person">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="firstname" type="varchar(50)"/>
+            <column name="lastname" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet id="2" author="nvoxland">
+        <comment>Add a username column so we can use "person" for authentication</comment>
+        <addColumn tableName="person">
+            <column name="usernae" type="varchar(8)"/>
+        </addColumn>
+    </changeSet>
+    <changeSet id="3" author="nvoxland">
+        <comment>Fix misspelled "username" column</comment>
+        <renameColumn tableName="person" oldColumnName="usernae" newColumnName="username"/>
+    </changeSet>
+    <changeSet id="5" author="nvoxland" context="test">
+        <insert tableName="person">
+            <column name="firstname" value="John"/>
+            <column name="lastname" value="Doe"/>
+            <column name="username" value="jdoe"/>
+        </insert>
+        <insert tableName="person">
+            <column name="firstname" value="Jane"/>
+            <column name="lastname" value="Doe"/>
+            <column name="username" value="janedoe"/>
+        </insert>
+        <insert tableName="person">
+            <column name="firstname" value="Bob"/>
+            <column name="lastname" value="Johnson"/>
+            <column name="username" value="bjohnson"/>
+        </insert>
+    </changeSet>
+    <changeSet id="6" author="nvoxland">
+        <comment>Don't keep username in the person table</comment>
+        <dropColumn tableName="person" columnName="username"/>
+    </changeSet>
+    <changeSet id="7" author="nvoxland">
+        <createTable tableName="employee">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet id="7" author="bjohnson" context="test">
+        <insert tableName="employee">
+            <column name="name" value="ACME Corp"/>
+        </insert>
+        <insert tableName="employee">
+            <column name="name" value="Widgets Inc."/>
+        </insert>
+    </changeSet>
+    <changeSet id="7a" author="nvoxland">
+        <addColumn tableName="employee">
+            <column name="company_id" type="int">
+                <constraints nullable="true" foreignKeyName="fk_employee_company" references="company(id)"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet id="8" author="bjohnson">
+        <dropNotNullConstraint tableName="employee" columnName="name"/>
+    </changeSet>
+    <changeSet id="8.1" author="bjohnson">
+        <comment>I guess name needs to be not-null</comment>
+        <addNotNullConstraint tableName='employee' columnName="name" defaultNullValue="UNKNOWN"/>
+    </changeSet>
+    <changeSet id="9" author="nvoxland">
+        <renameTable oldTableName="employee" newTableName="company"/>
+    </changeSet>
+    <changeSet id="10" author="nvoxland">
+        <createTable tableName="testtable">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="value" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="person_id" type="int">
+                <constraints nullable="false" foreignKeyName="fk_test_person" references="person(id)"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet id="11" author="nvoxland">
+        <dropTable tableName="testtable"/>
+    </changeSet>
+
+    <changeSet id="12" author="nvoxland">
+        <createIndex indexName="idx_company_name" tableName="company">
+            <column name="name"/>
+        </createIndex>
+        <createIndex indexName="idx_person_lastname" tableName="person">
+            <column name="lastname"/>
+        </createIndex>
+    </changeSet>
+
+    <changeSet id="13" author="nvoxland">
+        <dropIndex indexName="idx_person_lastname" tableName="person"/>
+    </changeSet>
+
+    <changeSet id="14" author="nvoxland">
+        <createTable tableName="liquibaseRunInfo">
+            <column name="timesRan" type="int"/>
+        </createTable>
+        <insert tableName="liquibaseRunInfo">
+            <column name="timesRan" value="1"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="15" author="nvoxland" runAlways="true">
+        <sql>update liquibaseRunInfo set timesRan=timesRan+1</sql>
+    </changeSet>
+</databaseChangeLog>

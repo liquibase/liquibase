@@ -36,21 +36,7 @@ public class DropNotNullConstraintChange extends AbstractChange {
 
 
     public String generateStatement(AbstractDatabase database) {
-//    	System.out.println("inside generatesTatement");
-        StringBuffer buffer = new StringBuffer();
-        String columnType = database.getColumnDataType(getTableName(), getColumnName());
-        //database.updateNullColumns(getTableName(),getColumnName(),getDefaultNullValue());
-        buffer.append("alter table ");
-        buffer.append(getTableName());
-        buffer.append(" modify ");
-        buffer.append(getColumnName());
-        buffer.append(" ");
-        buffer.append(columnType);
-        buffer.append(" ");
-        buffer.append("default null");
-//        System.out.println(buffer.toString());
-//        System.out.println(buffer.toString());
-        return buffer.toString();
+        return database.getDropNullConstraintSQL(getTableName(), getColumnName());
     }
 
     public String getConfirmationMessage() {

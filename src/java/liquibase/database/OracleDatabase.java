@@ -8,6 +8,7 @@ import java.sql.SQLException;
  * the methods to generate the statements specific for the oracle database.
  */
 public class OracleDatabase extends AbstractDatabase {
+    public static final String PRODUCT_NAME = "oracle";
 
     public boolean supportsInitiallyDeferrableColumns() {
         return true;
@@ -46,7 +47,7 @@ public class OracleDatabase extends AbstractDatabase {
     }
 
     public boolean isCorrectDatabaseImplementation(Connection conn) throws SQLException{
-        return "oracle".equalsIgnoreCase(conn.getMetaData().getDatabaseProductName());
+        return PRODUCT_NAME.equalsIgnoreCase(conn.getMetaData().getDatabaseProductName());
     }
 
     public String getCurrentDateTimeFunction() {

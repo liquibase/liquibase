@@ -8,9 +8,9 @@ import liquibase.migrator.Migrator;
 public class PreconditionSet {
 
     private List<DBMSPrecondition> dbmsArray = new ArrayList<DBMSPrecondition>();
-    private OrPrecondition orprecond;
-    private NotPrecondition notprecond;
-    private RunningAsPrecondition userexists;
+    private OrPrecondition or;
+    private NotPrecondition not;
+    private RunningAsPrecondition runningAs;
     private Migrator migrator;
     private String exceptionMsg;
 
@@ -36,29 +36,29 @@ public class PreconditionSet {
     }
 
     public void setOrPreCondition(OrPrecondition orPre) {
-        this.orprecond = orPre;
+        this.or = orPre;
 
     }
 
     public OrPrecondition gerOrPreCondition() {
-        return this.orprecond;
+        return this.or;
     }
 
     public void setNotPreCondition(NotPrecondition notPre) {
-        this.notprecond = notPre;
+        this.not = notPre;
 
     }
 
     public NotPrecondition getNotPreCondition() {
-        return this.notprecond;
+        return this.not;
     }
 
     public void setRunningAs(RunningAsPrecondition userExi) {
-        this.userexists = userExi;
+        this.runningAs = userExi;
     }
 
     public RunningAsPrecondition getRunningAs() {
-        return this.userexists;
+        return this.runningAs;
     }
 
     public void checkConditions() throws PreconditionFailedException {
@@ -76,15 +76,14 @@ public class PreconditionSet {
                     if (dbmsPrecondition.checkDatabaseType(migrator)) {
                         dbmsreturnvalue = true;
                     } else {
-
                         dbmsreturnvalue = false;
                         exceptionMsg = "DBMS Precondition failed";
                         break;
                     }
                 }
 
-            } else if (orprecond != null) {
-                if (orprecond.checkDbmsType(migrator)) {
+            } else if (or != null) {
+                if (or.checkDbmsType(migrator)) {
 
                     orReturnValue = true;
                 } else {
@@ -92,8 +91,8 @@ public class PreconditionSet {
                     exceptionMsg = "Or Precondition failed";
                 }
 
-            } else if (notprecond != null) {
-                if (notprecond.checkNotPrecondition(migrator)) {
+            } else if (not != null) {
+                if (not.checkNotPrecondition(migrator)) {
 
                     notReturnValue = true;
                 } else {
@@ -103,8 +102,8 @@ public class PreconditionSet {
 
             }
 
-            if (userexists != null) {
-                if (userexists.checkUserName(migrator)) {
+            if (runningAs != null) {
+                if (runningAs.checkUserName(migrator)) {
 
                     userExistsReturnValue = true;
                 } else {
@@ -119,7 +118,7 @@ public class PreconditionSet {
             }
 
         } catch (PreconditionFailedException ePrecondExcep) {
-            throw new PreconditionFailedException("Unable to process change set:" + exceptionMsg);
+            throw new PreconditionFailedException("Unable to process change set: " + exceptionMsg);
 
         } catch (Exception e) {
             throw new RuntimeException(e);
