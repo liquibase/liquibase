@@ -27,6 +27,8 @@
                         </h2>
                         <h4>Upgrade Notes:</h4>
                     <ul>
+                        <li>Betwen 0.7.0 and 0.8.0 the location and namespace of the XSD changed.  The old XSD will remain
+                        available, but does not contain the most current schema</li>
                         <li>Between 0.6.2 and 0.7.0 there was a change to how MD5Sums were generated for changelogs.
                             When upgrading, you will need to run
                             <em>update databasechangelog set md5sum=null</em>
