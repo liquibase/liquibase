@@ -1,7 +1,7 @@
 LiquiBASE Changelog
 ==========================================
 
-Changes in version 0.8.0
+Changes in version 0.8.0 (2007.4.22)
 -------------------------------------
 - Changelog Pre-conditions
 - Execution contexts

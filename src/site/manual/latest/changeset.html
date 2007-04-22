@@ -31,6 +31,7 @@
   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.0
          http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.0.xsd"&gt;
     &lt;changeSet id="1" author="bob"&gt;
+        &lt;comment&gt;A sample change log&lt;/comment&gt;
         &lt;createTable/&gt;
     &lt;/changeSet&gt;
     &lt;changeSet id="2" author="bob" alwaysRun="true"&gt;
@@ -58,6 +59,12 @@
                         Some databases will auto-commit statements which interferes with this transaction setup and could lead to an unexpected
                         database state.  Therefore, it is usually best to have just one refactoring per changeSet unless there is a group of non-auto-committing
                         changes that you want applied as a transaction such as inserting data.
+                    </p>
+                    <h3>Comments</h3>
+                    <p>
+                        If you want or need to add comments to a particular change set, the best way is to use the &lt;comment&gt; tag.
+                        While XML comments will provide the same benefit, future releases of LiquiBase may be able to make use of &lt;comment&gt; tag comments
+                        to generate documentation. 
                     </p>
                     <h3>ChangeSet MD5 Sums</h3>
                     <p>
