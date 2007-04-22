@@ -1,0 +1,88 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+    <head>
+        <title>LiquiBase: Older News</title>
+        <style type='text/css' media='screen'>@import "../include/css/main.css";</style>
+    </head>
+    <body>@ANALYTICS@
+        <img src="../images/liquibase_logo.gif" alt="LiquiBase" class="topLogo"/>
+        <p id="sitename">
+            <strong>LiquiBase: Database Refactoring</strong>
+        </p>
+
+        <div id="container">
+                @NAV.NEWS@
+
+
+            <div id="content">
+                <h1>Older LiquiBase News</h1>
+
+                <div class="newsEntry">
+                    <h2>10/18/2006 - Database Refactoring Tool 0.5.1 Released</h2>
+                    <p>Version 0.5.1 is a minor bugfix to 0.5 fixing an issue with reading the .xsd file in Ant.
+                    </p>
+                </div>
+
+                <div class="newsEntry">
+                    <h2>10/16/2006 - Database Refactoring Tool 0.5 Released, Now LGPL</h2>
+                    <p>After several months of development, the Sundog Database Refactoring tool version 0.5 has been
+                        released.
+                    </p>
+                    <p>
+                        The most significant change is switching to an LGPL license.
+                    </p>
+                    <p>
+                    Beyond licensing changes, major changes include:
+                    </p>
+                    <ul>
+                        <li>
+                        Major code cleanup, including removing all 3rd party dependencies
+                        </li>
+
+                        <li>Command line migrator can be run directly against WAR and EAR files</li>
+                        <li>Command line migrator can be run simply via "java -jar"</li>
+                        <li>ChangeSets can be marked as "runAlways" and "runOnChange"</li>
+                        <li>ServletListener can be configured to only run on certain hostnames</li>
+                        <li>Improved MD5Sum generation.
+                            <b>Note: the algorithm to compute MD5Sums changed thereby making existing values invalid.
+                                To update your MD5Sums, run "update databasechangelog set md5sum=null" then
+                                run the migrator like normal</b>
+                        </li>
+
+                        <li>Improved MySQL Support</li>
+                        <li>Many additional bugfixes</li>
+                        <li>Improved Documentation</li>
+                    </ul>
+                    <p>
+                        Additionally, the migrator now requires Java 5.  If there is a large cry for support of
+                        1.4, that can be re-evaluated.
+                    </p>
+                    <p>
+                        <a href="http://www.sundog.net/index.php/databaserefactoring/page/download/">Download</a>
+                        and/or
+                        <a href="http://www.sundog.net/index.php/databaserefactoring/page/community/">
+                        join
+                        </a>
+                        the mailing list today!
+
+                    </p>
+                </div>
+
+                <div class="newsEntry">
+                    <h2>4/15/2006 - Early Access Program Opens</h2>
+                    <p>The early access program for the Sundog Database Refactoring Tool has opened with EAP 1.
+                    </p>
+                    <p>
+                        This initial release focuses on the migrator system which allows you to document your database
+                        changes, then run it against any database via a servlet listener, ant task, or command line app.
+                        We have been using the migrator in production so it should be ready for general use.
+                    </p>
+                </div>
+
+                <div style="text-align:right; width:100%"><h2><a href="index.html">Current LiquiBase News</a></h2></div>
+            </div>
+        </div>
+    </body>
+</html>

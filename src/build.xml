@@ -12,6 +12,7 @@
 
         <mkdir dir="${build.dir}"/>
         <mkdir dir="${build.test.dir}"/>
+        <mkdir dir="${build.db.test.dir}"/>
         <mkdir dir="${release.dir}"/>
         <mkdir dir="${release.site.dir}"/>
         <mkdir dir="${lib.deps.dir}"/>
@@ -44,7 +45,7 @@
                         fullpath="liquibase-${build.version}.jar"/>
             <zipfileset dir="${release.dir}/../" includes="samples/**" excludes="**/.svn/**"/>
             <zipfileset dir="${src.dir}" includes="lgpl.txt" fullpath="lgpl.txt"/>
-            <zipfileset dir="${reports.dir}/api" prefix="docs/api"/>
+            <zipfileset dir="${release.site.dir}/" prefix="docs"/>
         </zip>
 
         <zip destfile="${release.dir}/liquibase-${build.version}-src.zip">
@@ -53,7 +54,7 @@
                         fullpath="release/liquibase-${build.version}.jar"/>
             <zipfileset dir="${release.dir}/../" includes="samples/**" excludes="**/.svn/**"/>
             <zipfileset dir="${src.dir}" includes="lgpl.txt" fullpath="lgpl.txt"/>
-            <zipfileset dir="${reports.dir}/api" prefix="docs/api"/>
+            <zipfileset dir="${release.site.dir}/" prefix="docs"/>
             <zipfileset dir="${src.dir}/java" excludes="**/.svn/**" prefix="src/java"/>
             <zipfileset dir="${src.dir}/java-test" excludes="**/.svn/**" prefix="src/java-test"/>
             <zipfileset dir="${src.dir}/../lib" excludes="**/.svn/**" prefix="lib"/>
@@ -87,7 +88,7 @@
                         fullpath="liquibase-${build.version}.jar"/>
             <zipfileset dir="${release.dir}/../" includes="samples/**" excludes="**/.svn/**"/>
             <zipfileset dir="${src.dir}" includes="lgpl.txt" fullpath="lgpl.txt"/>
-            <zipfileset dir="${reports.dir}/api" prefix="docs/api"/>
+            <zipfileset dir="${release.site.dir}/" prefix="docs"/>
             <zipfileset dir="${lib.14jvm.dir}" prefix="lib-14jvm"/>
         </zip>
 
@@ -123,6 +124,11 @@
                      includes="**/*.properties, **/*.xml, **/*.txt, **/*.config, **/*.tld, **/*.xsd"/>
         </copy>
 
+        <javac srcdir="${src.dir}/java-dbtest" destdir="${build.db.test.dir}" deprecation="${deprecation}"
+               debug="${debug}" optimize="${optimize}" source="1.5">
+            <classpath refid="classpath"/>
+        </javac>
+
         <propertyfile file="${build.dir}/buildinfo.properties">
             <entry key="build.version" value="${build.version}"/>
              <entry key="build.timestamp"
@@ -137,6 +143,7 @@
 
         <delete dir="${build.dir}"/>
         <delete dir="${build.test.dir}"/>
+        <delete dir="${build.db.test.dir}"/>
         <delete dir="${release.dir}"/>
         <delete dir="${lib.deps.dir}"/>
 
@@ -147,6 +154,8 @@
         <loadfile property="nav.main" srcFile="${src.dir}/site/nav/main.html"/>
         <loadfile property="nav.manual" srcFile="${src.dir}/site/nav/manual.html"/>
         <loadfile property="nav.ide" srcFile="${src.dir}/site/nav/ide.html"/>
+        <loadfile property="nav.news" srcFile="${src.dir}/site/nav/news.html"/>
+        <loadfile property="analytics" srcFile="${src.dir}/site/analytics.html"/>
 
         <copy todir="${release.site.dir}" filtering="true">
             <fileset dir="${src.dir}/site">
@@ -156,6 +165,8 @@
                 <filter token="NAV.MAIN" value="${nav.main}"/>
                 <filter token="NAV.MANUAL" value="${nav.manual}"/>
                 <filter token="NAV.IDE" value="${nav.ide}"/>
+                <filter token="NAV.NEWS" value="${nav.news}"/>
+                <filter token="ANALYTICS" value="${analytics}"/>
                 <filter token="BUILD.VERSION" value="${build.version}"/>
             </filterset>
         </copy>
@@ -169,6 +180,9 @@
             <fileset dir="${src.dir}/java/liquibase/">
                 <include name="*.xsd"/>
             </fileset>
+        </copy>
+        <copy todir="${release.site.dir}/samples/">
+            <fileset dir="${src.dir}/samples"/>
         </copy>
         <copy todir="${release.site.dir}/manual/latest/api">
             <fileset dir="${reports.dir}/api"/>
@@ -204,19 +218,21 @@
         <junit printsummary="yes" haltonfailure="${halt.on.junit.failure}" fork="yes" forkmode="once" reloading="false"
                failureproperty="unit.tests.failed"
                jvm="${java.home}/bin/java">
-            <jvmarg value="-Xmx256m"/>
+            <!--<jvmarg value="-Xmx256m"/>-->
             <env key="JAVA_HOME" path="${env.JAVA_HOME}"/>
             <classpath>
-                <pathelement path="${clover.build.dir}"/>
-                <pathelement path="${clover.build.test.dir}"/>
-                <fileset dir="${clover.home}/lib">
-                    <include name="clover*.jar"/>
-                </fileset>
+                <pathelement path="${build.dir}"/>
+                <pathelement path="${build.test.dir}"/>
                 <path refid="classpath"/>
             </classpath>
             <formatter type="xml"/>
             <batchtest todir="${reports.dir}/junit/${ant.project.name}">
-                <fileset dir="${clover.build.test.dir}">
+                <fileset dir="${build.test.dir}">
+                    <include name="**/*Test.class"/>
+                    <exclude name="**/Base*"/>
+                    <exclude name="**/Abstract*"/>
+                </fileset>
+                <fileset dir="${build.db.test.dir}">
                     <include name="**/*Test.class"/>
                     <exclude name="**/Base*"/>
                     <exclude name="**/Abstract*"/>
@@ -238,9 +254,9 @@
         <antcall target="clean" inheritAll="true" inheritRefs="true"/>
         <antcall target="prepare" inheritAll="true" inheritRefs="true"/>
         <antcall target="compile" inheritAll="true" inheritRefs="true"/>
-        <antcall target="junit" inheritAll="true" inheritRefs="true"/>
-        <antcall target="package" inheritAll="true" inheritRefs="true"/>
+        <!--<antcall target="junit" inheritAll="true" inheritRefs="true"/>-->
         <antcall target="javadoc" inheritAll="true" inheritRefs="true"/>
         <antcall target="site" inheritAll="true" inheritRefs="true"/>
+        <antcall target="package" inheritAll="true" inheritRefs="true"/>
     </target>
 </project>

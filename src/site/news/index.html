@@ -1,0 +1,95 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+    <head>
+        <title>LiquiBase: News</title>
+        <style type='text/css' media='screen'>@import "../include/css/main.css";</style>
+    </head>
+    <body>@ANALYTICS@
+        <img src="../images/liquibase_logo.gif" alt="LiquiBase" class="topLogo"/>
+        <p id="sitename">
+            <strong>LiquiBase: Database Refactoring</strong>
+        </p>
+
+        <div id="container">
+                @NAV.NEWS@
+
+
+            <div id="content">
+                <h1>LiquiBase News</h1>
+
+                <div class="newsEntry">
+                    <h2>3/16/2007 - LiquiBase 0.7 Released</h2>
+                    <p>
+                        We are proud to announce LiquiBase, the newly-renamed Sundog Database Refactoring Tool.  We were never really fond of the SDRT name and finally found one we like better.
+                    </p>
+                    <p>
+                        The 0.7 version is primarily focused around the name conversion.
+                        It has a new package structure based on liquibase.* rather than net.sundog.db.*.
+                        We are also working on updating our website and moving much of the project management information to
+                        <a  href="http://sourceforge.net/projects/liquibase">http://sourceforge.net/projects/liquibase</a>.
+                    </p>
+                    <p>
+                        Beyond the name change, the following changes were made:
+                    </p>
+                    <ul>
+                        <li>Added support for autoIncrement columns in createTableChange</li>
+                        <li>Better support for multi-line SQL scripts</li>
+                    </ul>
+                    <p>
+                        Note: DUE THE THE CHANGE IN MULTI-LINE SQL HANDLING, YOU MUST REBUILD YOUR MD5SUMS.
+                        Execute "update databasechangelog set md5sum=null" to clear out your past md5sums.
+                        They will be rebuilt with new correct new versions the next time your run the migrator.
+                    </p>
+                </div>
+
+                <div class="newsEntry">
+                    <h2>12/12/2006 - Database Refactoring Tool 0.6.1 Released</h2>
+
+                    <p>Version 0.6.1 of the LGPL Sundog Database Refactoring Tool has been released.  This is
+                        primarily a bug fix release with some minor feature additions.
+                    </p>
+                    <p>
+                    Issues resolved include:
+                    </p>
+                    <ul>
+                        <li>Classpath for command line migrator can now include .ear files</li>
+                        <li>Can specify a "database.migrator.should.run" system property that blocks the
+                            migrator from running if set to "false"</li>
+
+                        <li>Added a net.sundog.db.migrator.servlet.MigratorStatusServlet servlet that can used to see
+                            the migrator logs</li>
+                        <li>Added a MIGRATOR_FAIL_ON_ERROR web.xml context parameter that controls if an exception
+                            should be raised if an exception is thrown, or if the listener should just return.
+                            Throws an exception by default</li>
+                        <li>All database SQL is upper case.</li>
+                        <li>Fixed issues with postgres schemas and getTables() call</li>
+                        <li>Added retroweaver build for 1.4 JVMs</li>
+                    </ul>
+                </div>
+
+                <div class="newsEntry">
+                    <h2>11/10/2006 - Database Refactoring Tool 0.6 Released</h2>
+                    <p>Version 0.6 of the LGPL Sundog Database Refactoring Tool has been released.  The primary new
+                        feature of this release is support for distributed locking among processes.  This is
+                        especially useful when using the ServletMigrator with clustered application servers or other
+                        times you have multiple clients connecting to the same database.
+
+                    </p>
+                    <p>
+                        If, for some reason, a client crashes without cleaning up its lock, they can be queried and
+                        removed via the command-line migrator's "-listLocks" and "-releaseLocks"
+                        or by querying and updating the "DatabaseChangeLogLock" table.
+                    </p>
+                    <p>
+                        Beyond the locking system, this release includes several bug fixes including one that kept
+                        database URLs with "=" signs in them from working.
+
+                    </p>
+                </div>
+                <div style="text-align:right; width:100%"><h2><a href="old_news.html">Older LiquiBase News</a></h2></div>
+            </div>
+        </div>
+    </body>
+</html>

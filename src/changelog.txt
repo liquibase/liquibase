@@ -1,11 +1,23 @@
 LiquiBASE Changelog
 ==========================================
 
-Changes in version 0.7.0
+Changes in version 0.8.0
+-------------------------------------
+- Changelog Pre-conditions
+- Execution contexts
+- failOnError tag for changeSets
+- addNotNullConstraint / dropNotNullConstraint
+- allow "comment" tags
+- Improved documentation
+- Completed conversion to SourceForge
+- Improved automated tests
+
+
+Changes in version 0.7.0 (2007.3.16)
 -------------------------------------
 - Changed MD5Sum logic.  !! Need to run 'update databasechangelog set md5sum=null' !!
 - Added support for autoIncrement columns in createTableChange
-- Switched to LiquiBASE name, including all package structures
+- Switched to LiquiBase name, including all package structures
 - Moved code to SourceForge
 
 
