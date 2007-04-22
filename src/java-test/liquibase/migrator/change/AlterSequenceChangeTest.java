@@ -31,12 +31,12 @@ public class AlterSequenceChangeTest extends AbstractChangeTest {
 
         refactoring.setIncrementBy(null);
         refactoring.setOrdered(true);
-        assertEquals("ALTER SEQUENCE SEQ_NAME ORDER", refactoring.generateStatement(oracleDatabase));
+        assertEquals("ALTER SEQUENCE SEQ_NAME", refactoring.generateStatement(oracleDatabase));
 
         refactoring.setMinValue(1);
         refactoring.setMaxValue(2);
         refactoring.setIncrementBy(3);
-        assertEquals("ALTER SEQUENCE SEQ_NAME INCREMENT BY 3 MINVALUE 1 MAXVALUE 2 ORDER", refactoring.generateStatement(oracleDatabase));
+        assertEquals("ALTER SEQUENCE SEQ_NAME INCREMENT BY 3 MINVALUE 1 MAXVALUE 2", refactoring.generateStatement(oracleDatabase));
 
     }
 

@@ -54,8 +54,4 @@ public class DropNotNullConstraintChange extends AbstractChange {
         element.setAttribute("columnName", getColumnName());
         return element;
     }
-
-    public void doRefactoring() {
-        //To change body of created methods use File | Settings | File Templates.
-    }
 }

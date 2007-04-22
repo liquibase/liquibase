@@ -24,7 +24,7 @@ import com.sun.media.jai.util.CaselessStringArrayTable;
 public abstract class AbstractDatabase {
 
     private Connection connection;
-    private Logger log;
+    protected Logger log;
     private boolean changeLogTableExists;
     private boolean changeLogLockTableExists;
 
@@ -299,7 +299,7 @@ public abstract class AbstractDatabase {
             if (this.supportsSequences()) {
                 dropSequences(conn);
             }
-        } catch(Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         } finally {
             if (rs != null) {
@@ -315,8 +315,6 @@ public abstract class AbstractDatabase {
                 conn.commit();
             }
         }
-
-
     }
 
     protected Set<String> getSystemTablesAndViews() {
@@ -328,34 +326,7 @@ public abstract class AbstractDatabase {
     }
 
     protected void dropSequences(Connection conn) throws SQLException, MigrationFailedException {
-        ResultSet rs = null;
-        Statement selectStatement = null;
-        Statement dropStatement = null;
-        try {
-            selectStatement = conn.createStatement();
-            dropStatement = conn.createStatement();
-            rs = selectStatement.executeQuery("SELECT SEQUENCE_NAME FROM USER_SEQUENCES");
-            while (rs.next()) {
-                String sequenceName = rs.getString("SEQUENCE_NAME");
-                log.finest("Dropping sequence " + sequenceName);
-                String sql = "DROP SEQUENCE " + sequenceName;
-                try {
-                    dropStatement.executeUpdate(sql);
-                } catch (SQLException e) {
-                    throw new MigrationFailedException("Error dropping sequence '" + sequenceName + "': " + e.getMessage(), e);
-                }
-            }
-        } finally {
-            if (selectStatement != null) {
-                selectStatement.close();
-            }
-            if (dropStatement != null) {
-                dropStatement.close();
-            }
-            if (rs != null) {
-                rs.close();
-            }
-        }
+        ; //no default
     }
 
     public abstract String getCurrentDateTimeFunction();
@@ -395,7 +366,7 @@ public abstract class AbstractDatabase {
         return buffer.toString();
     }
 
-     public String getAddNullConstraintSQL(String tableName, String columnName, String defaultNullValue) {
+    public String getAddNullConstraintSQL(String tableName, String columnName, String defaultNullValue) {
         StringBuffer buffer = new StringBuffer();
         try {
             String columnType = this.getColumnDataType(tableName, columnName);
@@ -603,5 +574,44 @@ public abstract class AbstractDatabase {
                 updateStatement.close();
             }
         }
-   }
+    }
+
+    public String getCreateSequenceSQL(String sequenceName, Integer startValue, Integer incrementBy, Integer minValue, Integer maxValue, Boolean ordered) {
+        StringBuffer buffer = new StringBuffer();
+        buffer.append("CREATE SEQUENCE ");
+        buffer.append(sequenceName);
+        if (startValue != null) {
+            buffer.append(" START WITH ").append(startValue);
+        }
+        if (incrementBy != null) {
+            buffer.append(" INCREMENT BY ").append(incrementBy);
+        }
+        if (minValue != null) {
+            buffer.append(" MINVALUE ").append(minValue);
+        }
+        if (maxValue != null) {
+            buffer.append(" MAXVALUE ").append(maxValue);
+        }
+
+        return buffer.toString().trim();
+    }
+
+    public String getAlterSequenceSQL(String sequenceName, Integer incrementBy, Integer minValue, Integer maxValue, Boolean ordered) {
+        StringBuffer buffer = new StringBuffer();
+        buffer.append("ALTER SEQUENCE ");
+        buffer.append(sequenceName);
+
+        if (incrementBy != null) {
+            buffer.append(" INCREMENT BY ").append(incrementBy);
+        }
+        if (minValue != null) {
+            buffer.append(" MINVALUE ").append(minValue);
+        }
+        if (maxValue != null) {
+            buffer.append(" MAXVALUE ").append(maxValue);
+        }
+
+        return buffer.toString().trim();
+    }
+
 }

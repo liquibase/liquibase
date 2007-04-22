@@ -63,24 +63,7 @@ public class AlterSequenceChange extends AbstractChange {
     }
 
     public String generateStatement(AbstractDatabase database) {
-        StringBuffer buffer = new StringBuffer();
-        buffer.append("ALTER SEQUENCE ");
-        buffer.append(getSequenceName());
-
-        if (getIncrementBy() != null) {
-            buffer.append(" INCREMENT BY ").append(getIncrementBy());
-        }
-        if (getMinValue() != null) {
-            buffer.append(" MINVALUE ").append(getMinValue());
-        }
-        if (getMaxValue() != null) {
-            buffer.append(" MAXVALUE ").append(getMaxValue());
-        }
-        if (isOrdered() != null && isOrdered()) {
-            buffer.append(" ORDER ");
-        }
-
-        return buffer.toString().trim();
+        return database.getAlterSequenceSQL(getSequenceName(), getIncrementBy(), getMinValue(), getMaxValue(), isOrdered());
     }
 
     public String getConfirmationMessage() {

@@ -1,7 +1,11 @@
 package liquibase.database;
 
+import liquibase.migrator.MigrationFailedException;
+
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.ResultSet;
+import java.sql.Statement;
 
 /**
  * This class will handle all the database related tasks for the Oracle database. This class has
@@ -80,5 +84,53 @@ public class OracleDatabase extends AbstractDatabase {
 
     public String getDropIndexSQL(String tableName, String indexName) {
         return "DROP INDEX "+indexName;
+    }
+
+    protected void dropSequences(Connection conn) throws SQLException, MigrationFailedException {
+        ResultSet rs = null;
+        Statement selectStatement = null;
+        Statement dropStatement = null;
+        try {
+            selectStatement = conn.createStatement();
+            dropStatement = conn.createStatement();
+            rs = selectStatement.executeQuery("SELECT SEQUENCE_NAME FROM USER_SEQUENCES");
+            while (rs.next()) {
+                String sequenceName = rs.getString("SEQUENCE_NAME");
+                log.finest("Dropping sequence " + sequenceName);
+                String sql = "DROP SEQUENCE " + sequenceName;
+                try {
+                    dropStatement.executeUpdate(sql);
+                } catch (SQLException e) {
+                    throw new MigrationFailedException("Error dropping sequence '" + sequenceName + "': " + e.getMessage(), e);
+                }
+            }
+        } finally {
+            if (selectStatement != null) {
+                selectStatement.close();
+            }
+            if (dropStatement != null) {
+                dropStatement.close();
+            }
+            if (rs != null) {
+                rs.close();
+            }
+        }
+    }
+
+    public String getCreateSequenceSQL(String sequenceName, Integer startValue, Integer incrementBy, Integer minValue, Integer maxValue, Boolean ordered) {
+        String sql = super.getCreateSequenceSQL(sequenceName, startValue, incrementBy, minValue, maxValue, ordered);
+        if (ordered != null && ordered) {
+            sql += " ORDER ";
+        }
+        return sql;
+    }
+
+    public String getAlterSequenceSQL(String sequenceName, Integer startValue, Integer incrementBy, Integer minValue, Integer maxValue, Boolean ordered) {
+        String sql = super.getAlterSequenceSQL(sequenceName, incrementBy, minValue, maxValue, ordered);
+
+        if (ordered != null && ordered) {
+            sql += " ORDER ";
+        }
+        return sql;
     }
 }

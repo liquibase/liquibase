@@ -71,26 +71,7 @@ public class CreateSequenceChange extends AbstractChange {
     }
 
     public String generateStatement(AbstractDatabase database) {
-        StringBuffer buffer = new StringBuffer();
-        buffer.append("CREATE SEQUENCE ");
-        buffer.append(getSequenceName());
-        if (getStartValue() != null) {
-            buffer.append(" START WITH ").append(getStartValue());
-        }
-        if (getIncrementBy() != null) {
-            buffer.append(" INCREMENT BY ").append(getIncrementBy());
-        }
-        if (getMinValue() != null) {
-            buffer.append(" MINVALUE ").append(getMinValue());
-        }
-        if (getMaxValue() != null) {
-            buffer.append(" MAXVALUE ").append(getMaxValue());
-        }
-        if (isOrdered() != null && isOrdered()) {
-            buffer.append(" ORDER ");
-        }
-
-        return buffer.toString().trim();
+        return database.getCreateSequenceSQL(getSequenceName(), getStartValue(), getIncrementBy(), getMinValue(), getMaxValue(), isOrdered()).trim();
     }
 
     public String getConfirmationMessage() {
