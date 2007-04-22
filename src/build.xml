@@ -1,4 +1,4 @@
-<project name="liquibase" default="package">
+<project name="liquibase" default="all">
 
     <property file="build.properties"/>
 
