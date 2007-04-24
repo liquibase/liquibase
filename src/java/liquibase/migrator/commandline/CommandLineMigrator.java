@@ -216,6 +216,14 @@ public class CommandLineMigrator {
 
 
             if (!migrator.isSaveToRunMigration()) {
+//                if (migrator == null) {
+//                    System.out.println("Migrator is null");
+//                } else  if (migrator.getDatabase() == null) {
+//                    System.out.println("Database Is Null");
+//                } else {
+//                    System.out.println("Migrator and Database are not-null");
+//                }
+
                 if (JOptionPane.showConfirmDialog(null, "You are running a database refactoring against a non-local database.\n" +
                         "Database URL is: " + migrator.getDatabase().getConnectionURL() + "\n" +
                         "Username is: " + migrator.getDatabase().getConnectionUsername() + "\n\n" +
