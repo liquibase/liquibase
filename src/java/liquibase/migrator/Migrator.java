@@ -319,9 +319,11 @@ public class Migrator {
 
     public void setContexts(String contexts) {
         this.contexts = new HashSet<String>();
-        String[] strings = contexts.split(",");
-        for (String string : strings) {
-            this.contexts.add(string.trim().toLowerCase());
+        if (contexts != null) {
+            String[] strings = contexts.split(",");
+            for (String string : strings) {
+                this.contexts.add(string.trim().toLowerCase());
+            }
         }
     }
     public Set<String> getContexts() {
