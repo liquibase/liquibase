@@ -1,6 +1,13 @@
 LiquiBASE Changelog
 ==========================================
 
+Changes in version 0.8.1 (2007.4.22)
+-------------------------------------
+- Prompting for non-local database is now false by default
+- Ant non-local database prompt attribute changed to promptOnNonLocalDatabase from promptOnNonDevDatabase
+- Bug Fixes
+
+
 Changes in version 0.8.0 (2007.4.22)
 -------------------------------------
 - Changelog Pre-conditions
