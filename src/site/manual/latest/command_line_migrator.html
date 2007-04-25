@@ -42,8 +42,9 @@
                         <tr><th>-url</th><td>Database URL</td></tr>
                         <tr><th>-username</th><td>Username</td></tr>
                         <tr><th>-contexts</th><td>Comma-separated list of <a href="contexts.html">contexts</a> to execute</td></tr>
-                        <tr><th>-listLocks</th><td>	Don't attempt to migrate the database, simply list what machines have a lock on the change log table</td></tr>
-                        <tr><th>-releaseLocks</th><td>	Don't attempt to migrate the database, clear out any locks machines have on the change log table (only use if you KNOW the lock should have been released)</td></tr>
+                        <tr><th>-listLocks</th><td>Don't attempt to migrate the database, simply list what machines have a lock on the change log table</td></tr>
+                        <tr><th>-releaseLocks</th><td>Don't attempt to migrate the database, clear out any locks machines have on the change log table (only use if you KNOW the lock should have been released)</td></tr>
+                        <tr><th>-promptForNonLocalhostDatabase</th><td>If set to "false" (default is true) the migrator will prompt you with a dialog if you are attempting to run against a non-localhost database.</td></tr>
                     </table>
                     <h2>Examples</h2>
                     <p>

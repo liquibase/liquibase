@@ -95,7 +95,10 @@
     </target>
 
     <target name="compile" depends="prepare">
-        <copy todir="${build.dir}">
+        <copy todir="${build.dir}" filtering="true">
+            <filterset>
+                <filter token="BUILD.VERSION" value="${build.version}"/>
+            </filterset>
             <fileset dir="${src.dir}/java"
                      includes="**/*.properties, **/*.xml, **/*.config, **/*.txt, **/*.jdo, **/*.tld, **/*.xsd"/>
         </copy>

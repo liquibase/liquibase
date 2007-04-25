@@ -71,6 +71,15 @@
       </library>
     </orderEntry>
     <orderEntry type="library" name="clover-idea5" level="application" />
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib-compile/maven-core-2.0.6-uber.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
     <orderEntryProperties />
   </component>
 </module>

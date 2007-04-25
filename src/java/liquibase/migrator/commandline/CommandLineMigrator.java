@@ -149,7 +149,8 @@ public class CommandLineMigrator {
         options.addOption(OptionBuilder.withDescription("Display Change Log Lock").isRequired(false).create("listLocks"));
         options.addOption(OptionBuilder.withDescription("Release Change Log Locks").isRequired(false).create("releaseLocks"));
         options.addOption(OptionBuilder.withArgName("value").hasArg().withDescription("Context of Deployment").isRequired(false).create("contexts"));
-        
+        options.addOption(OptionBuilder.withArgName("true|false").hasArg().withDescription("Prompt For Non-localhost databases").isRequired(false).create("promptForNonLocalhostDatabase"));
+
          return options;
     }
 
@@ -215,7 +216,9 @@ public class CommandLineMigrator {
             }
 
 
-            if (!migrator.isSaveToRunMigration()) {
+            String promptForNonLocal = cmd.getOptionValue("promptForNonLocalhostDatabase");
+            if (promptForNonLocal != null && Boolean.valueOf(promptForNonLocal)) {
+                if (!migrator.isSaveToRunMigration()) {
 //                if (migrator == null) {
 //                    System.out.println("Migrator is null");
 //                } else  if (migrator.getDatabase() == null) {
@@ -224,16 +227,17 @@ public class CommandLineMigrator {
 //                    System.out.println("Migrator and Database are not-null");
 //                }
 
-                if (JOptionPane.showConfirmDialog(null, "You are running a database refactoring against a non-local database.\n" +
-                        "Database URL is: " + migrator.getDatabase().getConnectionURL() + "\n" +
-                        "Username is: " + migrator.getDatabase().getConnectionUsername() + "\n\n" +
-                        "Area you sure you want to do this?",
-                        "Confirm", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.NO_OPTION) {
-                    System.out.println("Chose not to run against non-production database");
-                    System.exit(-1);
+                    if (JOptionPane.showConfirmDialog(null, "You are running a database refactoring against a non-local database.\n" +
+                            "Database URL is: " + migrator.getDatabase().getConnectionURL() + "\n" +
+                            "Username is: " + migrator.getDatabase().getConnectionUsername() + "\n\n" +
+                            "Area you sure you want to do this?",
+                            "Confirm", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.NO_OPTION) {
+                        System.out.println("Chose not to run against non-production database");
+                        System.exit(-1);
+                    }
                 }
             }
-                        migrator.migrate();
+            migrator.migrate();
         } catch (Throwable e) {
             String message = e.getMessage();
             if (e.getCause() != null) {

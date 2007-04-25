@@ -63,7 +63,7 @@ Simply add the liquibase.migrator.jar to your Ant lib directory or the classpath
                     <tr><th>url</th><td>The database URL</td></tr>
                     <tr><th>username</th><td>The database username to connect with</td></tr>
                     <tr><th>password</th><td>The password to use when connecting to the database</td></tr>
-                    <tr><th>promptOnNonDevDatabase</th><td>If set to true (default) a dialog box with warn you if you attempt to run the migrator against a database that is not on localhost</td></tr>
+                    <tr><th>promptOnNonLocalDatabase</th><td>If set to true (default is false) a dialog box with warn you if you attempt to run the migrator against a database that is not on localhost</td></tr>
                     <tr><th>rebuildDatabase</th><td>If set to true, LiquiBase will first drop all database objects owned by the connected user</td></tr>
                     <tr><th>classpathref</th><td>A reference to the classpath that contains the database driver, liquibase.migrator.jar, and the changelog.xml files</td></tr>
                     <tr><th>contexts</th><td>A comma separated list of <a href="contexts.html">contexts</a> to execute.  If not specified, all contexts are run.</td></tr>
