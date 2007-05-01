@@ -2,6 +2,7 @@ package liquibase.database;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.ResultSet;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -88,11 +89,11 @@ public class MSSQLDatabase extends AbstractDatabase {
     }
 
     public String getSchemaName() throws SQLException {
-        return "dbo";
+        return null;
     }
 
     public String getCatalogName() throws SQLException {
-        return getConnectionUsername();
+        return getConnection().getCatalog();
     }
 
     public String getFalseBooleanValue() {

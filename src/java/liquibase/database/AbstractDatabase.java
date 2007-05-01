@@ -113,7 +113,7 @@ public abstract class AbstractDatabase {
         ResultSet rs = null;
         changeLogTableExists = true;
         try {
-            rs = connection.getMetaData().getTables(getCatalogName(), getSchemaName(), getDatabaseChangeLogTableName(), null);
+            rs = connection.getMetaData().getTables(getCatalogName(), getSchemaName(), getDatabaseChangeLogTableName(), new String[]{"TABLE"});
             if (!rs.next()) {
                 String createTableStatement = ("create table DATABASECHANGELOG (id varchar(255) not null, author varchar(255) not null, filename varchar(255) not null, dateExecuted " + getDateTimeType() + " not null, md5sum varchar(32), primary key(id, author, filename))").toUpperCase();
                 // If there is no table in the database for recording change history create one.
@@ -159,7 +159,7 @@ public abstract class AbstractDatabase {
         ResultSet rs = null;
         changeLogLockTableExists = true;
         try {
-            rs = connection.getMetaData().getTables(getCatalogName(), getSchemaName(), getDatabaseChangeLogLockTableName(), null);
+            rs = connection.getMetaData().getTables(getCatalogName(), getSchemaName(), getDatabaseChangeLogLockTableName(), new String[]{"TABLE"});
             if (!rs.next()) {
                 String createTableStatement = getCreateChangeLogLockSQL();
                 // If there is no table in the database for recording change history create one.

@@ -1,6 +1,10 @@
 LiquiBASE Changelog
 ==========================================
 
+Changes in version 0.8.2
+-------------------------------------
+- Bug fixes
+
 Changes in version 0.8.1 (2007.4.25)
 -------------------------------------
 - Prompting for non-local database is now false by default

@@ -8,16 +8,20 @@ import java.util.Properties;
 
 public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
 
-    private String changeLog;
-    private String driverName;
-    private String url;
-    private String driverDirectory;
+    protected String changeLog;
+    protected String driverName;
+    protected String url;
+    protected String driverDirectory;
+    protected String username;
+    protected String password;
 
     protected AbstractSimpleChangeLogRunnerTest(String changeLog, String driverDir, String driverName, String url) {
         this.changeLog = changeLog;
         this.driverName = driverName;
         this.url = url;
         this.driverDirectory = driverDir;
+        username = "liquibase";
+        password = "liquibase";
     }
 
 
@@ -29,8 +33,8 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
 
         Driver driver = (Driver) Class.forName(driverName, true, new JUnitJDBCDriverClassLoader(driverDirectory)).newInstance();
         Properties info = new Properties();
-        info.put("user", "liquibase");
-        info.put("password", "liquibase");
+        info.put("user", username);
+        info.put("password", password);
         Connection connection = driver.connect(url, info);
         migrator.init(connection);
 
