@@ -1,19 +1,25 @@
 package liquibase.migrator;
 
+import org.xml.sax.helpers.DefaultHandler;
+import org.xml.sax.Attributes;
+import org.xml.sax.SAXException;
+
+import java.util.logging.Logger;
+import java.util.logging.Level;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.sql.SQLException;
+import java.io.IOException;
+
 import liquibase.migrator.change.*;
 import liquibase.migrator.preconditions.*;
 import liquibase.util.StringUtils;
-import org.xml.sax.Attributes;
-import org.xml.sax.ContentHandler;
-import org.xml.sax.Locator;
-import org.xml.sax.SAXException;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.Set;
+public abstract class BaseChangeLogHandler extends DefaultHandler {
 
-public class ChangeLogHandler implements ContentHandler {
-    private Migrator migrator;
+    protected Migrator migrator;
+    protected Logger log;
+
     private DatabaseChangeLog changeLog;
     private AbstractChange change;
     private StringBuffer text;
@@ -24,29 +30,17 @@ public class ChangeLogHandler implements ContentHandler {
     private NotPrecondition notprecondition;
     private RunningAsPrecondition runningAs;
 
-    public ChangeLogHandler(Migrator migrator) {
+
+    public BaseChangeLogHandler(Migrator migrator) {
         this.migrator = migrator;
+        log = Logger.getLogger(Migrator.DEFAULT_LOG_NAME);
+
     }
 
-    public void setDocumentLocator(Locator locator) {
-    }
-
-    public void startDocument() throws SAXException {
-    }
-
-    public void endDocument() throws SAXException {
-    }
-
-    public void startPrefixMapping(String prefix, String uri) throws SAXException {
-    }
-
-    public void endPrefixMapping(String prefix) throws SAXException {
-    }
-
-    public void startElement(String uri, String localName, String qName, Attributes atts) throws SAXException {
+      public void startElement(String uri, String localName, String qName, Attributes atts) throws SAXException {
         try {
             if ("comment".equals(qName)) {
-                //do nothing for now, maybe use it for future features
+                text = new StringBuffer();
             } else if ("databaseChangeLog".equals(qName)) {
                 changeLog = new DatabaseChangeLog(migrator);
             } else if ("include".equals(qName)) {
@@ -61,6 +55,8 @@ public class ChangeLogHandler implements ContentHandler {
                     runOnChange = true;
                 }
                 changeSet = new ChangeSet(atts.getValue("id"), atts.getValue("author"), alwaysRun, runOnChange, changeLog, atts.getValue("context"));
+            } else if (changeSet != null && "rollback".equals(qName)) {
+                text = new StringBuffer();
             } else if (changeSet != null && change == null) {
                 change = ChangeFactory.getInstance().create(qName);
                 text = new StringBuffer();
@@ -188,10 +184,12 @@ public class ChangeLogHandler implements ContentHandler {
                 if (method.getParameterTypes().length == 1 && method.getParameterTypes()[0].equals(Boolean.class)) {
                     method.invoke(object, Boolean.valueOf(attributeValue));
                     return;
-                } else if (method.getParameterTypes().length == 1 && method.getParameterTypes()[0].equals(String.class)) {
+                } else
+                if (method.getParameterTypes().length == 1 && method.getParameterTypes()[0].equals(String.class)) {
                     method.invoke(object, attributeValue.toString());
                     return;
-                } else if (method.getParameterTypes().length == 1 && method.getParameterTypes()[0].equals(Integer.class)) {
+                } else
+                if (method.getParameterTypes().length == 1 && method.getParameterTypes()[0].equals(Integer.class)) {
                     method.invoke(object, Integer.valueOf(attributeValue.toString()));
                     return;
                 }
@@ -216,12 +214,12 @@ public class ChangeLogHandler implements ContentHandler {
                 precondition.setNotPreCondition(notprecondition);
             } else if (precondition != null && "runningAs".equals(qName)) {
                 precondition.setRunningAs(runningAs);
+            } else if (changeSet != null && "rollback".equals(qName)) {
+                changeSet.setRollBackSQL(textString);
+            } else if (changeSet != null && "comment".equals(qName)) {
+                changeSet.setComments(textString);
             } else if (changeSet != null && "changeSet".equals(qName)) {
-                Set<String> requiredContexts = changeSet.getDatabaseChangeLog().getMigrator().getContexts();
-                String changeSetContext = changeSet.getContext();
-                if (changeSetContext == null || requiredContexts.contains(changeSetContext)) {
-                    changeSet.execute();
-                }
+                handleChangeSet(changeSet);
                 changeSet = null;
             } else if (change != null && qName.equals(change.getTagName())) {
                 if (textString != null) {
@@ -236,9 +234,12 @@ public class ChangeLogHandler implements ContentHandler {
                 change = null;
             }
         } catch (Exception e) {
+            log.log(Level.SEVERE, "Error thrown as a SAXException: "+e.getMessage(), e);
             throw new SAXException(e);
         }
     }
+
+    protected abstract void handleChangeSet(ChangeSet changeSet) throws SQLException, DatabaseHistoryException, MigrationFailedException, PreconditionFailedException, IOException;
 
     public void characters(char ch[], int start, int length) throws SAXException {
         if (text != null) {
@@ -246,12 +247,4 @@ public class ChangeLogHandler implements ContentHandler {
         }
     }
 
-    public void ignorableWhitespace(char ch[], int start, int length) throws SAXException {
-    }
-
-    public void processingInstruction(String target, String data) throws SAXException {
-    }
-
-    public void skippedEntity(String name) throws SAXException {
-    }
 }

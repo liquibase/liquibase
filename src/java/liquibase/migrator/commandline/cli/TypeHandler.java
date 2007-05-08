@@ -62,20 +62,20 @@
 package liquibase.migrator.commandline.cli;
 
 import java.io.File;
-import java.net.URL;
 import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Date;
 
 
 /**
-  * This is a temporary implementation. TypeHandler will handle the 
-  * pluggableness of OptionTypes and it will direct all of these types 
-  * of conversion functionalities to ConvertUtils component in Commons 
-  * alreayd. BeanUtils I think.
-  *
-  * @author Henri Yandell (bayard @ generationjava.com)
-  * @version $Revision: 1.2 $
-  */    
+ * This is a temporary implementation. TypeHandler will handle the
+ * pluggableness of OptionTypes and it will direct all of these types
+ * of conversion functionalities to ConvertUtils component in Commons
+ * alreayd. BeanUtils I think.
+ *
+ * @author Henri Yandell (bayard @ generationjava.com)
+ * @version $Revision: 1.2 $
+ */
 public class TypeHandler {
 
     /**
@@ -85,47 +85,39 @@ public class TypeHandler {
      * @param str the command line value
      * @param obj the type of argument
      * @return The instance of <code>obj</code> initialised with
-     * the value of <code>str</code>.
+     *         the value of <code>str</code>.
      */
     public static Object createValue(String str, Object obj) {
-        return createValue(str, (Class)obj);
+        return createValue(str, (Class) obj);
     }
 
     /**
      * <p>Returns the <code>Object</code> of type <code>clazz</code>
      * with the value of <code>str</code>.</p>
      *
-     * @param str the command line value
+     * @param str   the command line value
      * @param clazz the type of argument
      * @return The instance of <code>clazz</code> initialised with
-     * the value of <code>str</code>.
+     *         the value of <code>str</code>.
      */
     public static Object createValue(String str, Class clazz) {
-        if( PatternOptionBuilder.STRING_VALUE == clazz) {
+        if (PatternOptionBuilder.STRING_VALUE == clazz) {
             return str;
-        } else
-        if( PatternOptionBuilder.OBJECT_VALUE == clazz) {
+        } else if (PatternOptionBuilder.OBJECT_VALUE == clazz) {
             return createObject(str);
-        } else
-        if( PatternOptionBuilder.NUMBER_VALUE == clazz) {
+        } else if (PatternOptionBuilder.NUMBER_VALUE == clazz) {
             return createNumber(str);
-        } else
-        if( PatternOptionBuilder.DATE_VALUE   == clazz) {
+        } else if (PatternOptionBuilder.DATE_VALUE == clazz) {
             return createDate(str);
-        } else
-        if( PatternOptionBuilder.CLASS_VALUE  == clazz) {
+        } else if (PatternOptionBuilder.CLASS_VALUE == clazz) {
             return createClass(str);
-        } else
-        if( PatternOptionBuilder.FILE_VALUE   == clazz) {
+        } else if (PatternOptionBuilder.FILE_VALUE == clazz) {
             return createFile(str);
-        } else
-        if( PatternOptionBuilder.EXISTING_FILE_VALUE   == clazz) {
+        } else if (PatternOptionBuilder.EXISTING_FILE_VALUE == clazz) {
             return createFile(str);
-        } else
-        if( PatternOptionBuilder.FILES_VALUE  == clazz) {
+        } else if (PatternOptionBuilder.FILES_VALUE == clazz) {
             return createFiles(str);
-        } else
-        if( PatternOptionBuilder.URL_VALUE    == clazz) {
+        } else if (PatternOptionBuilder.URL_VALUE == clazz) {
             return createURL(str);
         } else {
             return null;
@@ -133,17 +125,17 @@ public class TypeHandler {
     }
 
     /**
-      * <p>Create an Object from the classname and empty constructor.</p>
-      *
-      * @param str the argument value
-      * @return the initialised object, or null if it couldn't create the Object.
-      */
+     * <p>Create an Object from the classname and empty constructor.</p>
+     *
+     * @param str the argument value
+     * @return the initialised object, or null if it couldn't create the Object.
+     */
     public static Object createObject(String str) {
         Class cl = null;
         try {
             cl = Class.forName(str);
         } catch (ClassNotFoundException cnfe) {
-            System.err.println("Unable to find: "+str);
+            System.err.println("Unable to find: " + str);
             return null;
         }
 
@@ -152,11 +144,11 @@ public class TypeHandler {
         try {
             instance = cl.newInstance();
         } catch (InstantiationException cnfe) {
-            System.err.println("InstantiationException; Unable to create: "+str);
+            System.err.println("InstantiationException; Unable to create: " + str);
             return null;
         }
         catch (IllegalAccessException cnfe) {
-            System.err.println("IllegalAccessException; Unable to create: "+str);
+            System.err.println("IllegalAccessException; Unable to create: " + str);
             return null;
         }
 
@@ -168,7 +160,7 @@ public class TypeHandler {
      *
      * @param str the value
      * @return the number represented by <code>str</code>, if <code>str</code>
-     * is not a number, null is returned.
+     *         is not a number, null is returned.
      */
     public static Number createNumber(String str) {
         // Needs to be able to create
@@ -195,7 +187,7 @@ public class TypeHandler {
         try {
             return Class.forName(str);
         } catch (ClassNotFoundException cnfe) {
-            System.err.println("Unable to find: "+str);
+            System.err.println("Unable to find: " + str);
             return null;
         }
     }
@@ -205,12 +197,12 @@ public class TypeHandler {
      *
      * @param str the date string
      * @return The date if <code>str</code> is a valid date string,
-     * otherwise return null.
+     *         otherwise return null.
      */
     public static Date createDate(String str) {
         Date date = null;
-        if(date == null) {
-            System.err.println("Unable to parse: "+str);
+        if (date == null) {
+            System.err.println("Unable to parse: " + str);
         }
         return date;
     }
@@ -220,13 +212,13 @@ public class TypeHandler {
      *
      * @param str the URL string
      * @return The URL is <code>str</code> is well-formed, otherwise
-     * return null.
+     *         return null.
      */
     public static URL createURL(String str) {
         try {
             return new URL(str);
         } catch (MalformedURLException mue) {
-            System.err.println("Unable to parse: "+str);
+            System.err.println("Unable to parse: " + str);
             return null;
         }
     }

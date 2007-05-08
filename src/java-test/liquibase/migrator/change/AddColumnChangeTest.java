@@ -1,14 +1,11 @@
 package liquibase.migrator.change;
 
 import liquibase.database.OracleDatabase;
-import liquibase.database.struture.DatabaseStructure;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
 import javax.xml.parsers.DocumentBuilderFactory;
-import java.util.Arrays;
-import java.util.HashSet;
 
 public class AddColumnChangeTest extends AbstractChangeTest {
 
@@ -25,7 +22,7 @@ public class AddColumnChangeTest extends AbstractChangeTest {
         column.setType("TYP");
         refactoring.setColumn(column);
 
-        assertEquals("alter table TAB add NEWCOL TYP", refactoring.generateStatement(new OracleDatabase()));
+        assertEquals("ALTER TABLE TAB ADD NEWCOL TYP", refactoring.generateStatements(new OracleDatabase())[0]);
     }
 
     public void testGetConfirmationMessage() throws Exception {
@@ -37,14 +34,6 @@ public class AddColumnChangeTest extends AbstractChangeTest {
         refactoring.setColumn(column);
 
         assertEquals("Column NEWCOL(TYP) has been added to TAB", refactoring.getConfirmationMessage());
-    }
-
-    public void testIsApplicableTo() throws Exception {
-        AddColumnChange refactoring = new AddColumnChange();
-        assertTrue(refactoring.isApplicableTo(new HashSet<DatabaseStructure>(Arrays.asList(new DatabaseStructure[] {
-                createTableDatabaseStructure(),
-        }))));
-
     }
 
     public void testCreateNode() throws Exception {

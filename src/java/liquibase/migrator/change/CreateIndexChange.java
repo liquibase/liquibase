@@ -1,15 +1,14 @@
 package liquibase.migrator.change;
 
-import liquibase.database.AbstractDatabase;
-import liquibase.database.struture.DatabaseStructure;
-import liquibase.database.struture.Index;
+import liquibase.database.*;
+import liquibase.migrator.UnsupportedChangeException;
+import liquibase.migrator.RollbackImpossibleException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 public class CreateIndexChange extends AbstractChange {
 
@@ -51,29 +50,49 @@ public class CreateIndexChange extends AbstractChange {
         columns.add(column);
     }
 
-    public String generateStatement(AbstractDatabase database) {
+    private String[] generateStatements() {
         StringBuffer buffer = new StringBuffer();
         buffer.append("CREATE INDEX ");
         buffer.append(getIndexName()).append(" ON ");
         buffer.append(getTableName()).append("(");
         Iterator iterator = columns.iterator();
         while (iterator.hasNext()) {
-            ColumnConfig column  = (ColumnConfig) iterator.next();
+            ColumnConfig column = (ColumnConfig) iterator.next();
             buffer.append(column.getName());
             if (iterator.hasNext()) {
                 buffer.append(", ");
             }
         }
         buffer.append(")");
-        return buffer.toString();
+        return new String [] {buffer.toString()};
+    }
+
+    public String[] generateStatements(MSSQLDatabase database) {
+        return generateStatements();
+    }
+
+    public String[] generateStatements(OracleDatabase database) {
+        return generateStatements();
+    }
+
+    public String[] generateStatements(MySQLDatabase database) {
+        return generateStatements();
+    }
+
+    public String[] generateStatements(PostgresDatabase database) {
+        return generateStatements();
+    }
+
+    protected AbstractChange createInverse() {
+        DropIndexChange inverse = new DropIndexChange();
+        inverse.setTableName(getTableName());
+        inverse.setIndexName(getIndexName());
+
+        return inverse;
     }
 
     public String getConfirmationMessage() {
         return "Index " + indexName + " has been created";
-    }
-
-    public boolean isApplicableTo(Set<DatabaseStructure> selectedDatabaseStructures) {
-        return selectedDatabaseStructures.size() == 1 && (selectedDatabaseStructures.iterator().next() instanceof Index);
     }
 
     public Element createNode(Document currentMigrationFileDOM) {

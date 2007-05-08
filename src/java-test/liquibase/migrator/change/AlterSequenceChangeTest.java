@@ -1,12 +1,9 @@
 package liquibase.migrator.change;
 
 import liquibase.database.OracleDatabase;
-import liquibase.database.struture.DatabaseStructure;
 import org.w3c.dom.Element;
 
 import javax.xml.parsers.DocumentBuilderFactory;
-import java.util.Arrays;
-import java.util.HashSet;
 
 public class AlterSequenceChangeTest extends AbstractChangeTest {
     public void testGetRefactoringName() throws Exception {
@@ -19,24 +16,24 @@ public class AlterSequenceChangeTest extends AbstractChangeTest {
         OracleDatabase oracleDatabase = new OracleDatabase();
 
         refactoring.setMinValue(100);
-        assertEquals("ALTER SEQUENCE SEQ_NAME MINVALUE 100", refactoring.generateStatement(oracleDatabase));
+        assertEquals("ALTER SEQUENCE SEQ_NAME MINVALUE 100", refactoring.generateStatements(oracleDatabase)[0]);
 
         refactoring.setMinValue(null);
         refactoring.setMaxValue(1000);
-        assertEquals("ALTER SEQUENCE SEQ_NAME MAXVALUE 1000", refactoring.generateStatement(oracleDatabase));
+        assertEquals("ALTER SEQUENCE SEQ_NAME MAXVALUE 1000", refactoring.generateStatements(oracleDatabase)[0]);
 
         refactoring.setMaxValue(null);
         refactoring.setIncrementBy(50);
-        assertEquals("ALTER SEQUENCE SEQ_NAME INCREMENT BY 50", refactoring.generateStatement(oracleDatabase));
+        assertEquals("ALTER SEQUENCE SEQ_NAME INCREMENT BY 50", refactoring.generateStatements(oracleDatabase)[0]);
 
         refactoring.setIncrementBy(null);
         refactoring.setOrdered(true);
-        assertEquals("ALTER SEQUENCE SEQ_NAME", refactoring.generateStatement(oracleDatabase));
+        assertEquals("ALTER SEQUENCE SEQ_NAME ORDER", refactoring.generateStatements(oracleDatabase)[0]);
 
         refactoring.setMinValue(1);
         refactoring.setMaxValue(2);
         refactoring.setIncrementBy(3);
-        assertEquals("ALTER SEQUENCE SEQ_NAME INCREMENT BY 3 MINVALUE 1 MAXVALUE 2", refactoring.generateStatement(oracleDatabase));
+        assertEquals("ALTER SEQUENCE SEQ_NAME INCREMENT BY 3 MINVALUE 1 MAXVALUE 2 ORDER", refactoring.generateStatements(oracleDatabase)[0]);
 
     }
 
@@ -46,24 +43,6 @@ public class AlterSequenceChangeTest extends AbstractChangeTest {
 
         assertEquals("Sequence SEQ_NAME has been altered", refactoring.getConfirmationMessage());
     }
-
-    public void testIsApplicableTo() throws Exception {
-        AlterSequenceChange refactoring = new AlterSequenceChange();
-        assertFalse(refactoring.isApplicableTo(new HashSet<DatabaseStructure>(Arrays.asList(new DatabaseStructure[] {
-                createTableDatabaseStructure(),
-        }))));
-
-        assertTrue(refactoring.isApplicableTo(new HashSet<DatabaseStructure>(Arrays.asList(new DatabaseStructure[] {
-                createSequenceDatabaseStructure(),
-        }))));
-
-//        assertFalse(refactoring.isApplicableTo(new HashSet<DatabaseStructure>(Arrays.asList(new DatabaseStructure[] {
-//                createSequenceDatabaseStructure(),
-//                createSequenceDatabaseStructure(),
-//        }))));
-
-    }
-
 
     public void testCreateNode() throws Exception {
         AlterSequenceChange refactoring = new AlterSequenceChange();

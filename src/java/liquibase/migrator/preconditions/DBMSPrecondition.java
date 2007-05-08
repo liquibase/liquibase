@@ -1,18 +1,18 @@
 package liquibase.migrator.preconditions;
 
-import java.sql.SQLException;
-import java.util.Map;
-import java.util.HashMap;
-
-import liquibase.migrator.Migrator;
 import liquibase.database.MSSQLDatabase;
 import liquibase.database.MySQLDatabase;
 import liquibase.database.OracleDatabase;
 import liquibase.database.PostgresDatabase;
+import liquibase.migrator.Migrator;
 
-public class DBMSPrecondition implements Precondition{
+import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
+
+public class DBMSPrecondition implements Precondition {
     private String type;
-    private Map<String, String> productToTypeMap ;
+    private Map<String, String> productToTypeMap;
 
 
     public DBMSPrecondition() {

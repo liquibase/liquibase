@@ -1,12 +1,11 @@
 package liquibase.migrator.change;
 
-import liquibase.database.AbstractDatabase;
-import liquibase.database.struture.Column;
-import liquibase.database.struture.DatabaseStructure;
+import liquibase.database.*;
+import liquibase.migrator.UnsupportedChangeException;
+import liquibase.migrator.RollbackImpossibleException;
+import liquibase.migrator.MigrationFailedException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
-import java.util.Set;
 
 /**
  * This class is responsible for renaming the columns in a particular table.
@@ -15,6 +14,7 @@ public class RenameColumnChange extends AbstractChange {
     private String tableName;
     private String oldColumnName;
     private String newColumnName;
+    private String columnDataType;
 
     public RenameColumnChange() {
         super("renameColumn", "Rename Column");
@@ -44,16 +44,49 @@ public class RenameColumnChange extends AbstractChange {
         this.newColumnName = newColumnName;
     }
 
-    public String generateStatement(AbstractDatabase database) {
-        return database.getRenameColumnSQL(getTableName(), getOldColumnName(), getNewColumnName());
+    public String getColumnDataType() {
+        return columnDataType;
+    }
+
+    public void setColumnDataType(String columnDataType) {
+        this.columnDataType = columnDataType;
+    }
+
+    private String[] generateStatements() {
+        return new String[] { "ALTER TABLE " + tableName + " RENAME COLUMN " + oldColumnName + " TO " + newColumnName };
+    }
+
+    public String[] generateStatements(MSSQLDatabase database) {
+        return new String[] { "sp_rename '" + tableName + "." + oldColumnName + "', " + newColumnName };
+    }
+
+    public String[] generateStatements(OracleDatabase database) {
+        return generateStatements();
+    }
+
+    public String[] generateStatements(MySQLDatabase database) {
+        if (columnDataType == null) {
+            throw new RuntimeException("columnDataType is required to rename columns with MySQL");
+        }
+        return new String[] { "ALTER TABLE " + tableName + " CHANGE " + oldColumnName + " " + newColumnName + " " + columnDataType };
+    }
+
+    public String[] generateStatements(PostgresDatabase database) {
+        return generateStatements();
+    }
+
+    protected AbstractChange createInverse() {
+        RenameColumnChange inverse = new RenameColumnChange();
+        inverse.setTableName(getTableName());
+        inverse.setOldColumnName(getNewColumnName());
+        inverse.setNewColumnName(getOldColumnName());
+        inverse.setColumnDataType(getColumnDataType());
+
+        return inverse;
     }
 
     public String getConfirmationMessage() {
         return "Column with the name " + oldColumnName + " has been renamed to " + newColumnName;
-    }
-
-    public boolean isApplicableTo(Set<DatabaseStructure> selectedDatabaseStructures) {
-        return selectedDatabaseStructures.size() == 1 && (selectedDatabaseStructures.iterator().next() instanceof Column);
     }
 
     public Element createNode(Document currentMigrationFileDOM) {

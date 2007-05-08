@@ -1,34 +1,46 @@
 package liquibase.migrator.commandline;
 
+import liquibase.migrator.DatabaseChangeLogLock;
 import liquibase.migrator.MigrationFailedException;
 import liquibase.migrator.Migrator;
-import liquibase.migrator.DatabaseChangeLogLock;
-import liquibase.migrator.commandline.cli.*;
 
-import javax.swing.*;
 import java.io.*;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
 import java.sql.Connection;
 import java.sql.Driver;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Properties;
-import java.util.Enumeration;
-import java.util.zip.ZipFile;
-import java.util.zip.ZipEntry;
-import java.util.jar.JarFile;
 import java.util.jar.JarEntry;
-import java.util.logging.Logger;
+import java.util.jar.JarFile;
 import java.util.logging.Level;
-import java.text.DateFormat;
+import java.util.logging.Logger;
+import java.lang.reflect.Field;
 
 public class CommandLineMigrator {
-    private Options options;
-    private CommandLine cmd;
-    private ClassLoader classLoader;
+    protected ClassLoader classLoader;
+
+    protected String driver;
+    protected String username;
+    protected String password;
+    protected String url;
+    protected String migrationFile;
+    protected String classpath;
+    protected String contexts;
+    protected Boolean promptForNonLocalDatabase = null;
+    protected Boolean dropAllFirst = null;
+    protected Boolean includeSystemClasspath;
+
+    protected String command;
+    protected String commandParam;
+
+    protected String logLevel;
+
 
     public static void main(String args[]) throws Exception {
         String shouldRunProperty = System.getProperty(Migrator.SHOULD_RUN_SYSTEM_PROPERTY);
@@ -37,39 +49,216 @@ public class CommandLineMigrator {
             return;
         }
 
-
         CommandLineMigrator commandLineMigrator = new CommandLineMigrator();
         commandLineMigrator.parseOptions(args);
-        commandLineMigrator.doMigration();
 
-        System.exit(0);
+        File propertiesFile = new File("liquibase.properties");
+        if (propertiesFile.exists()) {
+            commandLineMigrator.parsePropertiesFile(new FileInputStream(propertiesFile));
+        }
+        if (!commandLineMigrator.checkSetup()) {
+            commandLineMigrator.printHelp(System.out);
+            return;
+        }
 
+        try {
+            commandLineMigrator.applyDefaults();
+            commandLineMigrator.configureClassLoader();
+            commandLineMigrator.doMigration();
+        } catch (Throwable e) {
+            String message = e.getMessage();
+            if (e.getCause() != null) {
+                message = e.getCause().getMessage();
+            }
+            if (message == null) {
+                message = "Unknown Reason";
+            }
+            System.out.println("Migration Failed: " + message);
+            Logger.getLogger(Migrator.DEFAULT_LOG_NAME).log(Level.SEVERE, message, e);
+            return;
+        }
+
+        if ("migrate".equals(commandLineMigrator.command)) {
+            System.out.println("Migration successful");
+        } else if ("rollback".equals(commandLineMigrator.command)) {
+            System.out.println("Rollback successful");
+        }
+    }
+
+    protected boolean checkSetup() {
+        if (classpath == null
+                || migrationFile == null
+                || username == null
+                || password == null
+                || url == null
+                || driver == null
+                || command == null) {
+            return false;
+        }
+        return isCommand(command);
+    }
+
+    private boolean isCommand(String arg) {
+        return "migrate".equals(arg)
+                || "migrateSQL".equals(arg)
+                || "rollbackSQL".equals(arg)
+                || "futureRollbackSQL".equals(arg)
+                || "listLocks".equals(arg)
+                || "listLocks".equals(arg)
+                || "releaseLocks".equals(arg);
+    }
+
+    protected void parsePropertiesFile(InputStream propertiesInputStream) throws IOException, CommandLineParsingException {
+        Properties props = new Properties();
+        props.load(propertiesInputStream);
+
+        for (Object property : props.keySet()) {
+            try {
+                Field field = getClass().getDeclaredField((String) property);
+                Object currentValue = field.get(this);
+
+                if (currentValue == null) {
+                    String value = (String) props.get(property);
+                    if (field.getType().equals(Boolean.class)) {
+                        field.set(this, Boolean.valueOf(value));
+                    } else {
+                        field.set(this, value);
+                    }
+                }
+            } catch (Exception e) {
+                throw new CommandLineParsingException("Unknown parameter: '" + property + "'");
+            }
+        }
+    }
+
+    protected void printHelp(PrintStream stream) {
+        stream.println("Usage: java -jar liquibase.jar [options] [command]");
+        stream.println("");
+        stream.println("Standard Commands:");
+        stream.println(" migrate                        Updates database to current version");
+        stream.println(" rollback <date/time>           Rolls back the database to the the state is was");
+        stream.println("                                at the given date/time");
+        stream.println(" migrateSQL                     Writes SQL to update database to current");
+        stream.println("                                version to STDOUT");
+        stream.println(" rollbackSQL <date/time>        Writes SQL to roll back the database to that");
+        stream.println("                                state it was in at the given date/time version");
+        stream.println("                                to STDOUT");
+        stream.println(" futureRollbackSQL              Writes SQL to roll back the database to the ");
+        stream.println("                                current state after the changes in the ");
+        stream.println("                                changeslog have been applied");
+        stream.println("");
+        stream.println("Maintenance Commands");
+        stream.println(" changelogSyncSQL          Writes SQL to mark all refactorings as executed ");
+        stream.println("                           in the database to STDOUT");
+        stream.println(" listLocks                 Lists who currently has locks on the");
+        stream.println("                           database changelog");
+        stream.println(" releaseLocks              Releases all locks on the database changelog");
+        stream.println("");
+        stream.println("Required Parameters:");
+        stream.println(" --classpath=<value>                        Classpath containing");
+        stream.println("                                            migration files and JDBC Driver");
+        stream.println(" --migrationFile=<path and filename>        Migration file");
+        stream.println(" --username=<value>                         Database username");
+        stream.println(" --password=<value>                         Database password");
+        stream.println(" --url=<value>                              Database URL");
+        stream.println(" --driver=<jdbc.driver.ClassName>           Database driver class name");
+        stream.println("");
+        stream.println("Optional Parameters:");
+        stream.println(" --contexts=<value>                         ChangeSet contexts to execute");
+        stream.println(" --defaultsFile=</path/to/file.properties>  File with default option values");
+        stream.println("                                            (default: ./liquibase.properties)");
+        stream.println(" --includeSystemClasspath=<true|false>      Include the system classpath");
+        stream.println("                                            in the LiquiBase classpath");
+        stream.println("                                            (default: true)");
+        stream.println(" --promptForNonLocalDatabase=<true|false>   Prompt if non-localhost");
+        stream.println("                                            databases (default: false)");
+        stream.println(" --dropAllFirst=<true|false>                Drop all database objects");
+        stream.println("                                            first (default: false)");
+        stream.println(" --logLevel=<level>                         Execution log level");
+        stream.println("                                            (finest, finer, fine, info,");
+        stream.println("                                            warning, severe)");
+        stream.println(" --help                                     Prints this message");
+        stream.println("");
+        stream.println("Default value for parameters can be stored in a file called");
+        stream.println("'liquibase.properties' that is read from the current working directory.");
+        stream.println("");
+        stream.println("Full documentation is available at http://www.liquibase.org/manual/latest/command_line_migrator.html");
+        stream.println("");
     }
 
     public CommandLineMigrator() {
-        options = createOptions();
+//        options = createOptions();
     }
 
-    private void parseOptions(String[] args) throws MigrationFailedException {
-        CommandLineParser parser = new GnuParser();
-        try {
-            cmd = parser.parse(options, args);
-        } catch (ParseException e) {
-            new HelpFormatter().printHelp("java -jar liquibase.jar", options);
-            System.exit(-1);
+    protected void parseOptions(String[] args) throws CommandLineParsingException {
+        boolean seenCommand = false;
+        for (int i = 0; i < args.length; i++) {
+            String arg = args[i];
+
+            if (isCommand(arg)) {
+                this.command = arg;
+                seenCommand = true;
+            } else if (seenCommand) {
+                if (commandParam == null) {
+                    commandParam = arg;
+                } else {
+                    throw new CommandLineParsingException("Only one command option is allowed");
+                }
+            } else if (arg.startsWith("--")) {
+                String[] splitArg = arg.split("=");
+                if (splitArg.length != 2) {
+                    throw new CommandLineParsingException("Could not parse '" + arg + "'");
+                }
+
+                String attributeName = splitArg[0].replaceFirst("--", "");
+                String value = splitArg[1];
+
+                try {
+                    Field field = getClass().getDeclaredField(attributeName);
+                    if (field.getType().equals(Boolean.class)) {
+                        field.set(this, Boolean.valueOf(value));
+                    } else {
+                        field.set(this, value);
+                    }
+                } catch (Exception e) {
+                    throw new CommandLineParsingException("Unknown parameter: '" + attributeName + "'");
+                }
+            } else {
+                throw new CommandLineParsingException("Parameters must start with a '--'");
+            }
         }
+
+    }
+
+    protected void applyDefaults() {
+        if (this.dropAllFirst == null) {
+            this.dropAllFirst = Boolean.FALSE;
+        }
+        if (this.promptForNonLocalDatabase == null) {
+            this.promptForNonLocalDatabase = Boolean.FALSE;
+        }
+        if (this.logLevel == null) {
+            this.logLevel = "off";
+        }
+        if (this.includeSystemClasspath == null) {
+            this.includeSystemClasspath = Boolean.TRUE;
+        }
+
+    }
+
+    protected void configureClassLoader() throws CommandLineParsingException {
         String[] classpath;
         if (isWindows()) {
-            classpath = cmd.getOptionValue("classpath").split(";");
+            classpath = this.classpath.split(";");
         } else {
-            classpath = cmd.getOptionValue("classpath").split(":");
+            classpath = this.classpath.split(":");
         }
 
         List<URL> urls = new ArrayList<URL>();
         for (String classpathEntry : classpath) {
             File classPathFile = new File(classpathEntry);
             if (!classPathFile.exists()) {
-                throw new MigrationFailedException(classPathFile.getAbsolutePath() + " does not exist");
+                throw new CommandLineParsingException(classPathFile.getAbsolutePath() + " does not exist");
             }
             try {
                 if (classpathEntry.endsWith(".war")) {
@@ -94,10 +283,14 @@ public class CommandLineMigrator {
                     urls.add(new File(classpathEntry).toURL());
                 }
             } catch (Exception e) {
-                throw new MigrationFailedException(e);
+                throw new CommandLineParsingException(e);
             }
         }
-        classLoader = new URLClassLoader(urls.toArray(new URL[urls.size()]), Thread.currentThread().getContextClassLoader());
+        if (includeSystemClasspath) {
+            classLoader = new URLClassLoader(urls.toArray(new URL[urls.size()]), Thread.currentThread().getContextClassLoader());
+        } else {
+            classLoader = new URLClassLoader(urls.toArray(new URL[urls.size()]));
+        }
     }
 
     private void addWarFileClasspathEntries(File classPathFile, List<URL> urls) throws IOException {
@@ -134,51 +327,47 @@ public class CommandLineMigrator {
         return tempFile;
     }
 
-    private Options createOptions() {
-        Options options = new Options();
-        options.addOption(OptionBuilder.withArgName("value").hasArg().withDescription("Database Driver").isRequired().create("driver"));
-        options.addOption(OptionBuilder.withArgName("value").hasArg().withDescription("Username").isRequired().create("username"));
-        options.addOption(OptionBuilder.withArgName("value").hasArg().withDescription("Database Password").isRequired().create("password"));
-        options.addOption(OptionBuilder.withArgName("value").hasArg().withDescription("Database URL").isRequired().create("url"));
-        options.addOption(OptionBuilder.withArgName("value").hasArg().withDescription("Migration File").isRequired(false).create("migrationFile"));
-        options.addOption(OptionBuilder.withArgName("value").hasArg().withDescription("Classpath").isRequired(false).create("classpath"));
-        options.addOption(OptionBuilder.withDescription("Execute Mode").isRequired(false).create("execute"));
-        options.addOption(OptionBuilder.withArgName("filename").hasArg().withDescription("Output SQL Mode").isRequired(false).create("outputSQL"));
-        options.addOption(OptionBuilder.withArgName("filename").hasArg().withDescription("Output Changelog SQL Only Mode").isRequired(false).create("outputChangelogSQL"));
-        options.addOption(OptionBuilder.withDescription("Drop All Database Objects First").isRequired(false).create("dropAllFirst"));
-        options.addOption(OptionBuilder.withDescription("Display Change Log Lock").isRequired(false).create("listLocks"));
-        options.addOption(OptionBuilder.withDescription("Release Change Log Locks").isRequired(false).create("releaseLocks"));
-        options.addOption(OptionBuilder.withArgName("value").hasArg().withDescription("Context of Deployment").isRequired(false).create("contexts"));
-        options.addOption(OptionBuilder.withArgName("true|false").hasArg().withDescription("Prompt For Non-localhost databases").isRequired(false).create("promptForNonLocalhostDatabase"));
+    protected void doMigration() throws Exception {
 
-         return options;
-    }
-
-
-    private void doMigration() throws Exception {
+        if ("finest".equalsIgnoreCase(logLevel)) {
+            Logger.getLogger(Migrator.DEFAULT_LOG_NAME).setLevel(Level.FINEST);
+        } else if ("finer".equalsIgnoreCase(logLevel)) {
+            Logger.getLogger(Migrator.DEFAULT_LOG_NAME).setLevel(Level.FINER);
+        } else if ("fine".equalsIgnoreCase(logLevel)) {
+            Logger.getLogger(Migrator.DEFAULT_LOG_NAME).setLevel(Level.FINE);
+        } else if ("info".equalsIgnoreCase(logLevel)) {
+            Logger.getLogger(Migrator.DEFAULT_LOG_NAME).setLevel(Level.INFO);
+        } else if ("warning".equalsIgnoreCase(logLevel)) {
+            Logger.getLogger(Migrator.DEFAULT_LOG_NAME).setLevel(Level.WARNING);
+        } else if ("severe".equalsIgnoreCase(logLevel)) {
+            Logger.getLogger(Migrator.DEFAULT_LOG_NAME).setLevel(Level.SEVERE);
+        } else if ("off".equalsIgnoreCase(logLevel)) {
+            Logger.getLogger(Migrator.DEFAULT_LOG_NAME).setLevel(Level.OFF);
+        } else {
+            throw new CommandLineParsingException("Unknown log level: "+logLevel);
+        }
 
         Driver driver;
         try {
-            driver = (Driver) Class.forName(cmd.getOptionValue("driver"), true, classLoader).newInstance();
+            driver = (Driver) Class.forName(this.driver, true, classLoader).newInstance();
         } catch (Exception e) {
             throw new RuntimeException("Cannot get database driver: " + e.getMessage());
         }
         Properties info = new Properties();
-        info.put("user", cmd.getOptionValue("username"));
-        info.put("password", cmd.getOptionValue("password"));
+        info.put("user", username);
+        info.put("password", password);
 
-        Connection connection = driver.connect(cmd.getOptionValue("url"), info);
+        Connection connection = driver.connect(url, info);
         if (connection == null) {
             throw new MigrationFailedException("Incorrect driver for URL");
         }
         Writer outputSQLFileWriter = null;
-        File outputSqlFile;
         try {
-            Migrator migrator = new Migrator(cmd.getOptionValue("migrationFile"), new CommandLineFileOpener(classLoader));
-            migrator.setContexts(cmd.getOptionValue("contexts"));
+            Migrator migrator = new Migrator(migrationFile, new CommandLineFileOpener(classLoader));
+            migrator.setContexts(contexts);
             migrator.init(connection);
 
-            if (cmd.hasOption("listLocks")) {
+            if ("listLocks".equalsIgnoreCase(command)) {
                 DatabaseChangeLogLock[] locks = migrator.listLocks();
                 System.out.println("Database change log locks for " + migrator.getDatabase().getConnectionUsername() + "@" + migrator.getDatabase().getConnectionURL());
                 if (locks.length == 0) {
@@ -188,72 +377,77 @@ public class CommandLineMigrator {
                     System.out.println(" - " + lock.getLockedBy() + " at " + DateFormat.getDateTimeInstance().format(lock.getLockGranted()));
                 }
                 return;
-            }
-
-            if (cmd.hasOption("releaseLocks")) {
+            } else if ("releaseLocks".equalsIgnoreCase(command)) {
                 migrator.forceReleaseLock();
                 System.out.println("Successfully released all database change log locks for " + migrator.getDatabase().getConnectionUsername() + "@" + migrator.getDatabase().getConnectionURL());
                 return;
             }
 
-            migrator.setMode(Migrator.EXECUTE_MODE);
-            if (cmd.hasOption("outputSQL") || cmd.hasOption("outputChangelogSQL")) {
-                if (cmd.hasOption("outputChangelogSQL")) {
-                    migrator.setMode(Migrator.OUTPUT_CHANGELOG_ONLY_SQL_MODE);
-                    outputSqlFile = new File(cmd.getOptionValue("outputChangelogSQL"));
-                } else {
-                    migrator.setMode(Migrator.OUTPUT_SQL_MODE);
-                    outputSqlFile = new File(cmd.getOptionValue("outputSQL"));
-                }
-                if (outputSqlFile.exists()) {
-                    throw new MigrationFailedException(outputSqlFile.getAbsolutePath() + " already exists");
-                }
-                outputSQLFileWriter = new BufferedWriter(new FileWriter(outputSqlFile));
-                migrator.setOutputSQLWriter(outputSQLFileWriter);
-            }
-            if (cmd.hasOption("dropAllFirst")) {
+            if (dropAllFirst) {
                 migrator.setShouldDropDatabaseObjectsFirst(true);
             }
 
-
-            String promptForNonLocal = cmd.getOptionValue("promptForNonLocalhostDatabase");
-            if (promptForNonLocal != null && Boolean.valueOf(promptForNonLocal)) {
-                if (!migrator.isSaveToRunMigration()) {
-//                if (migrator == null) {
-//                    System.out.println("Migrator is null");
-//                } else  if (migrator.getDatabase() == null) {
-//                    System.out.println("Database Is Null");
-//                } else {
-//                    System.out.println("Migrator and Database are not-null");
-//                }
-
-                    if (JOptionPane.showConfirmDialog(null, "You are running a database refactoring against a non-local database.\n" +
-                            "Database URL is: " + migrator.getDatabase().getConnectionURL() + "\n" +
-                            "Username is: " + migrator.getDatabase().getConnectionUsername() + "\n\n" +
-                            "Area you sure you want to do this?",
-                            "Confirm", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.NO_OPTION) {
-                        System.out.println("Chose not to run against non-production database");
-                        System.exit(-1);
+            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            try {
+                if ("migrate".equalsIgnoreCase(command)) {
+                    migrator.setMode(Migrator.EXECUTE_MODE);
+                } else if ("changelogSyncSQL".equalsIgnoreCase(command)) {
+                    migrator.setMode(Migrator.OUTPUT_CHANGELOG_ONLY_SQL_MODE);
+                    migrator.setOutputSQLWriter(getOutputWriter());
+                } else if ("migrateSQL".equalsIgnoreCase(command)) {
+                    migrator.setMode(Migrator.OUTPUT_SQL_MODE);
+                    migrator.setOutputSQLWriter(getOutputWriter());
+                } else if ("rollback".equalsIgnoreCase(command)) {
+                    migrator.setMode(Migrator.EXECUTE_ROLLBACK_MODE);
+                    if (commandParam == null) {
+                        throw new CommandLineParsingException("rollback requires a rollback date");
                     }
+                    migrator.setRollbackToDate(dateFormat.parse(commandParam));
+                } else if ("rollbackSQL".equalsIgnoreCase(command)) {
+                    migrator.setMode(Migrator.OUTPUT_ROLLBACK_SQL_MODE);
+                    migrator.setOutputSQLWriter(getOutputWriter());
+                    if (commandParam == null) {
+                        throw new CommandLineParsingException("rollbackSQL requires a rollback date");
+                    }
+                    migrator.setRollbackToDate(dateFormat.parse(commandParam));
+                } else if ("futureRollbackSQL".equalsIgnoreCase(command)) {
+                    migrator.setMode(Migrator.OUTPUT_FUTURE_ROLLBACK_SQL_MODE);
+                    migrator.setOutputSQLWriter(getOutputWriter());
+                } else {
+                    throw new CommandLineParsingException("Unknown command: "+command);
                 }
+            } catch (ParseException e) {
+                throw new CommandLineParsingException("Unexpected date/time format.  Use 'yyyy-MM-dd HH:mm:ss'");
             }
+
+//            String promptForNonLocal = cmd.getOptionValue("promptForNonLocalDatabase");
+//            if (promptForNonLocal != null && Boolean.valueOf(promptForNonLocal)) {
+//                if (!migrator.isSaveToRunMigration()) {
+//
+//                    if (JOptionPane.showConfirmDialog(null, "You are running a database refactoring against a non-local database.\n" +
+//                            "Database URL is: " + migrator.getDatabase().getConnectionURL() + "\n" +
+//                            "Username is: " + migrator.getDatabase().getConnectionUsername() + "\n\n" +
+//                            "Area you sure you want to do this?",
+//                            "Confirm", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.NO_OPTION) {
+//                        System.out.println("Chose not to run against non-production database");
+//                        System.exit(-1);
+//                    }
+//                }
+//            }
             migrator.migrate();
-        } catch (Throwable e) {
-            String message = e.getMessage();
-            if (e.getCause() != null) {
-                message = e.getCause().getMessage();
-            }
-            System.out.println("Migration Failed: " + message);
-            Logger.getLogger(Migrator.DEFAULT_LOG_NAME).log(Level.SEVERE, message, e);
-            System.exit(-1);
         } finally {
             if (connection != null) {
                 connection.close();
             }
             if (outputSQLFileWriter != null) {
+                outputSQLFileWriter.flush();
                 outputSQLFileWriter.close();
             }
         }
+    }
+
+    private Writer getOutputWriter() {
+        return new OutputStreamWriter(System.out);
     }
 
     public boolean isWindows() {

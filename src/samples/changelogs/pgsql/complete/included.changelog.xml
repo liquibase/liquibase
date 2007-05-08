@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.0"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.0 http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.0.xsd">
+    <preConditions>
+            <dbms type="postgresql"/>
+    </preConditions>
+    
+    <changeSet id="1" author="nvoxland">
+        <createTable tableName="news">
+            <column name="id" type="int">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="title" type="varchar(50)"/>            
+        </createTable>
+    </changeSet>
+
+    <changeSet id="12" author="nvoxland">
+        <createSequence sequenceName="seq_news"/>
+    </changeSet>
+</databaseChangeLog>

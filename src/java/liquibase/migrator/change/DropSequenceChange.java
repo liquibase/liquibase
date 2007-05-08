@@ -1,12 +1,10 @@
 package liquibase.migrator.change;
 
-import liquibase.database.AbstractDatabase;
-import liquibase.database.struture.DatabaseStructure;
-import liquibase.database.struture.Sequence;
+import liquibase.database.*;
+import liquibase.migrator.UnsupportedChangeException;
+import liquibase.migrator.RollbackImpossibleException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
-import java.util.Set;
 
 public class DropSequenceChange extends AbstractChange {
 
@@ -24,19 +22,28 @@ public class DropSequenceChange extends AbstractChange {
         this.sequenceName = sequenceName;
     }
 
-    public String generateStatement(AbstractDatabase database) {
-        StringBuffer buffer = new StringBuffer();
-        buffer.append("DROP SEQUENCE ");
-        buffer.append(getSequenceName());
-        return buffer.toString();
+    private String[] generateStatements() {
+        return new String[] { "DROP SEQUENCE " + getSequenceName() };
+    }
+
+    public String[] generateStatements(MSSQLDatabase database) {
+        return generateStatements();
+    }
+
+    public String[] generateStatements(OracleDatabase database) {
+        return generateStatements();
+    }
+
+    public String[] generateStatements(MySQLDatabase database) {
+        return generateStatements();
+    }
+
+    public String[] generateStatements(PostgresDatabase database) {
+        return generateStatements();
     }
 
     public String getConfirmationMessage() {
         return "Sequence " + getSequenceName() + " dropped";
-    }
-
-    public boolean isApplicableTo(Set<DatabaseStructure> selectedDatabaseStructures) {
-        return selectedDatabaseStructures.size() == 1 && (selectedDatabaseStructures.iterator().next() instanceof Sequence);
     }
 
     public Element createNode(Document currentMigrationFileDOM) {

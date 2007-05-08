@@ -1,9 +1,9 @@
 package liquibase.migrator.preconditions;
 
+import liquibase.migrator.Migrator;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import liquibase.migrator.Migrator;
 
 public class NotPrecondition implements PreconditionLogic {
     private List<DBMSPrecondition> dbmsArray = new ArrayList<DBMSPrecondition>();

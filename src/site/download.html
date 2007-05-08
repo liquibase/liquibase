@@ -27,6 +27,8 @@
                         </h2>
                         <h4>Upgrade Notes:</h4>
                     <ul>
+                        <li>Between 0.8.x and 0.9.0, the Ant task "migrationFiles" parameter changed to "changeLogFile"
+                            and no longer supports multiple change logs.</li>
                         <li>Between 0.8.0 and 0.8.1, LiquiBase no longer prompts you if you run it against a non-localhost database.  There is a flag
                         available in the command line migrator and the ant migrator that allows you to turn the functionality back on.</li>
                         <li>Between 0.7.0 and 0.8.0 the location and namespace of the XSD changed.  The old XSD will remain

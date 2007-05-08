@@ -67,18 +67,25 @@ import java.util.Iterator;
 
 /**
  * A group of mutually exclusive options.
+ *
  * @author John Keyes ( john at integralsource.com )
  * @version $Revision: 1.2 $
  */
 public class OptionGroup {
 
-    /** hold the options */
+    /**
+     * hold the options
+     */
     private HashMap optionMap = new HashMap();
 
-    /** the name of the selected option */
+    /**
+     * the name of the selected option
+     */
     private String selected;
 
-    /** specified whether this group is required */
+    /**
+     * specified whether this group is required
+     */
     private boolean required;
 
     /**
@@ -90,13 +97,13 @@ public class OptionGroup {
     public OptionGroup addOption(Option opt) {
         // key   - option name
         // value - the option
-        optionMap.put( "-" + opt.getOpt(), opt );
+        optionMap.put("-" + opt.getOpt(), opt);
         return this;
     }
 
     /**
-     * @return the names of the options in this group as a 
-     * <code>Collection</code>
+     * @return the names of the options in this group as a
+     *         <code>Collection</code>
      */
     public Collection getNames() {
         // the key set is the collection of names
@@ -113,22 +120,22 @@ public class OptionGroup {
 
     /**
      * set the selected option of this group to <code>name</code>.
+     *
      * @param opt the option that is selected
-     * @throws AlreadySelectedException if an option from this group has 
-     * already been selected.
+     * @throws AlreadySelectedException if an option from this group has
+     *                                  already been selected.
      */
     public void setSelected(Option opt) throws AlreadySelectedException {
         // if no option has already been selected or the 
         // same option is being reselected then set the
         // selected member variable
 
-        if ( this.selected == null || this.selected.equals( opt.getOpt() ) ) {
+        if (this.selected == null || this.selected.equals(opt.getOpt())) {
             this.selected = opt.getOpt();
-        }
-        else {
-            throw new AlreadySelectedException( "an option from this group has " + 
-                                                "already been selected: '" + 
-                                                selected + "'");
+        } else {
+            throw new AlreadySelectedException("an option from this group has " +
+                    "already been selected: '" +
+                    selected + "'");
         }
     }
 
@@ -142,7 +149,7 @@ public class OptionGroup {
     /**
      * @param required specifies if this group is required
      */
-    public void setRequired( boolean required ) {
+    public void setRequired(boolean required) {
         this.required = required;
     }
 
@@ -157,6 +164,7 @@ public class OptionGroup {
 
     /**
      * <p>Returns the stringified version of this OptionGroup.</p>
+     *
      * @return the stringified representation of this group
      */
     public String toString() {
@@ -164,20 +172,20 @@ public class OptionGroup {
 
         Iterator iter = getOptions().iterator();
 
-        buff.append( "[" );
-        while( iter.hasNext() ) {
-            Option option = (Option)iter.next();
+        buff.append("[");
+        while (iter.hasNext()) {
+            Option option = (Option) iter.next();
 
-            buff.append( "-" );
-            buff.append( option.getOpt() );
-            buff.append( " " );
-            buff.append( option.getDescription( ) );
+            buff.append("-");
+            buff.append(option.getOpt());
+            buff.append(" ");
+            buff.append(option.getDescription());
 
-            if( iter.hasNext() ) {
-                buff.append( ", " );
+            if (iter.hasNext()) {
+                buff.append(", ");
             }
         }
-        buff.append( "]" );
+        buff.append("]");
 
         return buff.toString();
     }

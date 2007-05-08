@@ -1,20 +1,18 @@
 package liquibase.database;
 
+import liquibase.migrator.DatabaseChangeLogLock;
 import liquibase.migrator.MigrationFailedException;
 import liquibase.migrator.Migrator;
-import liquibase.migrator.DatabaseChangeLogLock;
 import liquibase.migrator.change.ColumnConfig;
 
 import java.io.IOException;
-import java.sql.*;
-import java.util.logging.Logger;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Set;
-import java.util.HashSet;
 import java.net.InetAddress;
-
-import com.sun.media.jai.util.CaselessStringArrayTable;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.logging.Logger;
 
 /**
  * This is an abstract class used to abstract the methods supported by all the
@@ -27,6 +25,9 @@ public abstract class AbstractDatabase {
     protected Logger log;
     private boolean changeLogTableExists;
     private boolean changeLogLockTableExists;
+
+    private static boolean outputtedLockWarning = false;
+
 
     protected AbstractDatabase() {
         log = Logger.getLogger(Migrator.DEFAULT_LOG_NAME);
@@ -115,7 +116,7 @@ public abstract class AbstractDatabase {
         try {
             rs = connection.getMetaData().getTables(getCatalogName(), getSchemaName(), getDatabaseChangeLogTableName(), new String[]{"TABLE"});
             if (!rs.next()) {
-                String createTableStatement = ("create table DATABASECHANGELOG (id varchar(255) not null, author varchar(255) not null, filename varchar(255) not null, dateExecuted " + getDateTimeType() + " not null, md5sum varchar(32), primary key(id, author, filename))").toUpperCase();
+                String createTableStatement = ("CREATE TABLE DATABASECHANGELOG (id varchar(255) not null, author varchar(255) not null, filename varchar(255) not null, dateExecuted " + getDateTimeType() + " not null, md5sum varchar(32), primary key(id, author, filename))").toUpperCase();
                 // If there is no table in the database for recording change history create one.
                 if (migrator.getMode().equals(Migrator.EXECUTE_MODE)) {
                     statement = connection.createStatement();
@@ -123,7 +124,9 @@ public abstract class AbstractDatabase {
                     connection.commit();
                     log.info("Created database history table with name: DATABASECHANGELOG");
                 } else {
-                    migrator.getOutputSQLWriter().append(createTableStatement + ";\n\n");
+                    if (!migrator.getMode().equals(Migrator.OUTPUT_FUTURE_ROLLBACK_SQL_MODE)) {
+                        migrator.getOutputSQLWriter().append(createTableStatement + ";\n\n");
+                    }
                     changeLogTableExists = false;
                 }
             }
@@ -169,15 +172,20 @@ public abstract class AbstractDatabase {
                     connection.commit();
                     log.info("Created database lock table with name: DATABASECHANGELOGLOCK");
                 } else {
-                    migrator.getOutputSQLWriter().write(migrator.getDatabase().getLineComment() + "-----------------------------------------------------------------------------------------------\n");
-                    migrator.getOutputSQLWriter().write(migrator.getDatabase().getLineComment() + " DATABASECHANGELOGLOCK table does not exist.\n");
-                    migrator.getOutputSQLWriter().write(migrator.getDatabase().getLineComment() + " Race conditions may cause a corrupted sql script.\n");
-                    migrator.getOutputSQLWriter().write(migrator.getDatabase().getLineComment() + " Consider running: \n");
-                    migrator.getOutputSQLWriter().write(migrator.getDatabase().getLineComment() + " " + getCreateChangeLogLockSQL() + ";\n");
-                    migrator.getOutputSQLWriter().write(migrator.getDatabase().getLineComment() + " " + getChangeLogLockInsertSQL() + ";\n");
-                    migrator.getOutputSQLWriter().write(migrator.getDatabase().getLineComment() + "-----------------------------------------------------------------------------------------------\n\n");
+                    if (!migrator.getMode().equals(Migrator.OUTPUT_FUTURE_ROLLBACK_SQL_MODE)) {
+                        if (!outputtedLockWarning) {
+                            migrator.getOutputSQLWriter().write(migrator.getDatabase().getLineComment() + "-----------------------------------------------------------------------------------------------\n");
+                            migrator.getOutputSQLWriter().write(migrator.getDatabase().getLineComment() + " DATABASECHANGELOGLOCK table does not exist.\n");
+                            migrator.getOutputSQLWriter().write(migrator.getDatabase().getLineComment() + " Race conditions may cause a corrupted sql script.\n");
+                            migrator.getOutputSQLWriter().write(migrator.getDatabase().getLineComment() + " Consider running: \n");
+                            migrator.getOutputSQLWriter().write(migrator.getDatabase().getLineComment() + " " + getCreateChangeLogLockSQL() + ";\n");
+                            migrator.getOutputSQLWriter().write(migrator.getDatabase().getLineComment() + " " + getChangeLogLockInsertSQL() + ";\n");
+                            migrator.getOutputSQLWriter().write(migrator.getDatabase().getLineComment() + "-----------------------------------------------------------------------------------------------\n\n");
+                            outputtedLockWarning = true;
+                        }
 
-                    migrator.getOutputSQLWriter().append(createTableStatement + ";\n\n");
+                        migrator.getOutputSQLWriter().append(createTableStatement + ";\n\n");
+                    }
                     changeLogLockTableExists = false;
                 }
             }
@@ -299,6 +307,8 @@ public abstract class AbstractDatabase {
             if (this.supportsSequences()) {
                 dropSequences(conn);
             }
+
+            changeLogTableExists = false;
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -331,60 +341,10 @@ public abstract class AbstractDatabase {
 
     public abstract String getCurrentDateTimeFunction();
 
-    public String getRenameColumnSQL(String tableName, String oldColumnName, String newColumnName) {
-        StringBuffer buffer = new StringBuffer();
-        buffer.append("alter table ").append(tableName);
-        buffer.append(" rename column ");
-        buffer.append(oldColumnName).append(" ");
-        buffer.append(" to ").append(newColumnName);
-        return buffer.toString();
-    }
-
-    public String getRenameTableSQL(String oldTableName, String newTableName) {
-        StringBuffer buffer = new StringBuffer();
-        buffer.append("rename ").append(oldTableName).append(" to ").append(newTableName);
-        return buffer.toString();
-    }
-
-    public String getDropIndexSQL(String tableName, String indexName) {
-        StringBuffer buffer = new StringBuffer();
-        buffer.append("DROP INDEX ");
-        buffer.append(indexName);
-        buffer.append(" ON ");
-        buffer.append(tableName);
-        return buffer.toString();
-    }
-
-    public String getDropNullConstraintSQL(String tableName, String columnName) {
-        StringBuffer buffer = new StringBuffer();
-        buffer.append("alter table ");
-        buffer.append(tableName);
-        buffer.append(" alter column  ");
-        buffer.append(columnName);
-        buffer.append(" ").append(getColumnDataType(tableName, columnName));
-        buffer.append(" null");
-        return buffer.toString();
-    }
-
-    public String getAddNullConstraintSQL(String tableName, String columnName, String defaultNullValue) {
-        StringBuffer buffer = new StringBuffer();
-        try {
-            String columnType = this.getColumnDataType(tableName, columnName);
-            this.updateNullColumns(tableName, columnName, defaultNullValue);
-            buffer.append("alter table ").append(tableName);
-            buffer.append(" alter column ");
-            buffer.append(columnName).append(" ");
-            buffer.append(columnType).append(" ");
-            buffer.append("not null");
-        } catch (SQLException eSqlException) {
-            throw new RuntimeException(eSqlException);
-        }
-        return buffer.toString();
-    }
-
     public boolean aquireLock(Migrator migrator) throws MigrationFailedException {
         if (!migrator.getDatabase().doesChangeLogLockTableExist()) {
-            if (migrator.getMode().equals(Migrator.EXECUTE_MODE)) {
+            if (migrator.getMode().equals(Migrator.EXECUTE_MODE) || migrator.getMode().equals(Migrator.EXECUTE_ROLLBACK_MODE))
+            {
                 throw new MigrationFailedException("Could not aquire lock, table does not exist");
             } else {
                 return true;
@@ -515,103 +475,4 @@ public abstract class AbstractDatabase {
     public String getAutoIncrementClause() {
         return "AUTO_INCREMENT";
     }
-
-    public String getColumnDataType(String tableName, String columnName) {
-        ResultSet rs = null;
-        Statement selectStatement = null;
-        Connection connection = getConnection();
-        ResultSetMetaData rsdata;
-        int columnCount;
-        String columnType = "";
-        try {
-            selectStatement = connection.createStatement();
-            rs = selectStatement.executeQuery("SELECT * FROM " + tableName);  //todo: is there a more efficient way to do this?
-
-            rsdata = rs.getMetaData();
-            columnCount = rsdata.getColumnCount();
-            for (int i = 1; i <= columnCount; i++) {
-
-                if (columnName.equals(rsdata.getColumnName(i))) {
-
-                    columnType = rsdata.getColumnTypeName(i) + "(" + rsdata.getColumnDisplaySize(i) + ")";
-                    break;
-                }
-
-
-            }
-
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        } finally {
-            if (selectStatement != null) {
-                try {
-                    selectStatement.close();
-                } catch (SQLException e) {
-                    ;
-                }
-            }
-            if (rs != null) {
-                try {
-                    rs.close();
-                } catch (SQLException e) {
-                    ;
-                }
-            }
-        }
-
-        return columnType;
-    }
-
-    public void updateNullColumns(String tableName, String columnName, String defalutValue) throws SQLException {
-        Statement updateStatement = null;
-        Connection connection = getConnection();
-
-        try {
-            updateStatement = connection.createStatement();
-            updateStatement.executeUpdate("update " + tableName + " set " + columnName + "='" + defalutValue + "' where " + columnName + " is NULL");
-        } finally {
-            if (updateStatement != null) {
-                updateStatement.close();
-            }
-        }
-    }
-
-    public String getCreateSequenceSQL(String sequenceName, Integer startValue, Integer incrementBy, Integer minValue, Integer maxValue, Boolean ordered) {
-        StringBuffer buffer = new StringBuffer();
-        buffer.append("CREATE SEQUENCE ");
-        buffer.append(sequenceName);
-        if (startValue != null) {
-            buffer.append(" START WITH ").append(startValue);
-        }
-        if (incrementBy != null) {
-            buffer.append(" INCREMENT BY ").append(incrementBy);
-        }
-        if (minValue != null) {
-            buffer.append(" MINVALUE ").append(minValue);
-        }
-        if (maxValue != null) {
-            buffer.append(" MAXVALUE ").append(maxValue);
-        }
-
-        return buffer.toString().trim();
-    }
-
-    public String getAlterSequenceSQL(String sequenceName, Integer incrementBy, Integer minValue, Integer maxValue, Boolean ordered) {
-        StringBuffer buffer = new StringBuffer();
-        buffer.append("ALTER SEQUENCE ");
-        buffer.append(sequenceName);
-
-        if (incrementBy != null) {
-            buffer.append(" INCREMENT BY ").append(incrementBy);
-        }
-        if (minValue != null) {
-            buffer.append(" MINVALUE ").append(minValue);
-        }
-        if (maxValue != null) {
-            buffer.append(" MAXVALUE ").append(maxValue);
-        }
-
-        return buffer.toString().trim();
-    }
-
 }

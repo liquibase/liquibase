@@ -1,12 +1,10 @@
 package liquibase.migrator.change;
 
-import liquibase.database.AbstractDatabase;
-import liquibase.database.struture.Column;
-import liquibase.database.struture.DatabaseStructure;
+import liquibase.database.*;
+import liquibase.migrator.UnsupportedChangeException;
+import liquibase.migrator.RollbackImpossibleException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
-import java.util.Set;
 
 public class ModifyColumnChange extends AbstractChange {
 
@@ -33,23 +31,28 @@ public class ModifyColumnChange extends AbstractChange {
         this.column = column;
     }
 
-    public String generateStatement(AbstractDatabase database) {
-        StringBuffer buffer = new StringBuffer();
-        buffer.append("alter table ").append(getTableName());
-        buffer.append(" modify (");
-        //buffer.append(" (");
-        buffer.append(getColumn().getName()).append(" ");
-        buffer.append(getColumn().getType());
-        buffer.append(")");
-        return buffer.toString();
+    private String[] generateStatements() {
+        return new String[] { "ALTER TABLE " + getTableName() + " MODIFY (" + getColumn().getName() + " " + getColumn().getType() + ")" };
+    }
+
+    public String[] generateStatements(MSSQLDatabase database) {
+        return generateStatements();
+    }
+
+    public String[] generateStatements(OracleDatabase database) {
+        return generateStatements();
+    }
+
+    public String[] generateStatements(MySQLDatabase database) {
+        return generateStatements();
+    }
+
+    public String[] generateStatements(PostgresDatabase database) {
+        return generateStatements();
     }
 
     public String getConfirmationMessage() {
         return "Column with the name " + column.getName() + " has been modified.";
-    }
-
-    public boolean isApplicableTo(Set<DatabaseStructure> selectedDatabaseStructures) {
-        return selectedDatabaseStructures.size() == 1 && (selectedDatabaseStructures.iterator().next() instanceof Column);
     }
 
     public Element createNode(Document currentMigrationFileDOM) {

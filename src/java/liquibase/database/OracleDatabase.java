@@ -3,8 +3,8 @@ package liquibase.database;
 import liquibase.migrator.MigrationFailedException;
 
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 
 /**
@@ -27,7 +27,7 @@ public class OracleDatabase extends AbstractDatabase {
     }
 
     protected String getCurrencyType() {
-       return "NUMBER(15, 2)";
+        return "NUMBER(15, 2)";
     }
 
     protected String getUUIDType() {
@@ -50,7 +50,7 @@ public class OracleDatabase extends AbstractDatabase {
         return "TIMESTAMP";
     }
 
-    public boolean isCorrectDatabaseImplementation(Connection conn) throws SQLException{
+    public boolean isCorrectDatabaseImplementation(Connection conn) throws SQLException {
         return PRODUCT_NAME.equalsIgnoreCase(conn.getMetaData().getDatabaseProductName());
     }
 
@@ -67,23 +67,7 @@ public class OracleDatabase extends AbstractDatabase {
     }
 
     protected String getSelectChangeLogLockSQL() {
-        return (super.getSelectChangeLogLockSQL()+" for update").toUpperCase();
-    }
-
-    public String getRenameColumnSQL(String tableName, String oldColumnName, String newColumnName) {
-        return "ALTER TABLE "+tableName+" RENAME COLUMN "+oldColumnName+" TO "+newColumnName;
-    }
-
-    public String getDropNullConstraintSQL(String tableName, String columnName) {
-        return "ALTER TABLE "+tableName+" MODIFY "+columnName+" NULL";
-    }
-
-    public String getAddNullConstraintSQL(String tableName, String columnName, String defaultNullValue) {
-        return "ALTER TABLE "+tableName+" MODIFY "+columnName+" NOT NULL";
-    }
-
-    public String getDropIndexSQL(String tableName, String indexName) {
-        return "DROP INDEX "+indexName;
+        return (super.getSelectChangeLogLockSQL() + " for update").toUpperCase();
     }
 
     protected void dropSequences(Connection conn) throws SQLException, MigrationFailedException {
@@ -115,22 +99,5 @@ public class OracleDatabase extends AbstractDatabase {
                 rs.close();
             }
         }
-    }
-
-    public String getCreateSequenceSQL(String sequenceName, Integer startValue, Integer incrementBy, Integer minValue, Integer maxValue, Boolean ordered) {
-        String sql = super.getCreateSequenceSQL(sequenceName, startValue, incrementBy, minValue, maxValue, ordered);
-        if (ordered != null && ordered) {
-            sql += " ORDER ";
-        }
-        return sql;
-    }
-
-    public String getAlterSequenceSQL(String sequenceName, Integer startValue, Integer incrementBy, Integer minValue, Integer maxValue, Boolean ordered) {
-        String sql = super.getAlterSequenceSQL(sequenceName, incrementBy, minValue, maxValue, ordered);
-
-        if (ordered != null && ordered) {
-            sql += " ORDER ";
-        }
-        return sql;
     }
 }

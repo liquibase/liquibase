@@ -1,12 +1,10 @@
 package liquibase.migrator.change;
 
-import liquibase.database.AbstractDatabase;
-import liquibase.database.struture.DatabaseStructure;
-import liquibase.database.struture.Table;
+import liquibase.database.*;
+import liquibase.migrator.UnsupportedChangeException;
+import liquibase.migrator.RollbackImpossibleException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
-import java.util.Set;
 
 public class AddColumnChange extends AbstractChange {
 
@@ -33,21 +31,36 @@ public class AddColumnChange extends AbstractChange {
         this.column = column;
     }
 
-    public String generateStatement(AbstractDatabase database) {
-        StringBuffer buffer = new StringBuffer();
-        buffer.append("alter table ").append(getTableName());
-        buffer.append(" add ");
-        buffer.append(getColumn().getName()).append(" ");
-        buffer.append(database.getColumnType(getColumn()));
-        return buffer.toString();
+    private String[] generateStatements(AbstractDatabase database) {
+        return new String[] { "ALTER TABLE " + getTableName() + " ADD " + getColumn().getName() + " " + database.getColumnType(getColumn()) };
+    }
+
+    public String[] generateStatements(MSSQLDatabase database) {
+        return generateStatements(((AbstractDatabase) database));
+    }
+
+    public String[] generateStatements(OracleDatabase database) {
+        return generateStatements(((AbstractDatabase) database));
+    }
+
+    public String[] generateStatements(MySQLDatabase database) {
+        return generateStatements(((AbstractDatabase) database));
+    }
+
+    public String[] generateStatements(PostgresDatabase database) {
+        return generateStatements(((AbstractDatabase) database));
+    }
+
+    protected AbstractChange createInverse() {
+        DropColumnChange inverse = new DropColumnChange();
+        inverse.setColumnName(getColumn().getName());
+        inverse.setTableName(getTableName());
+
+        return inverse;
     }
 
     public String getConfirmationMessage() {
-        return "Column " + column.getName() + "("+column.getType()+") has been added to " + tableName;
-    }
-
-    public boolean isApplicableTo(Set<DatabaseStructure> selectedDatabaseStructures) {
-        return selectedDatabaseStructures.size() == 1 && (selectedDatabaseStructures.iterator().next() instanceof Table);
+        return "Column " + column.getName() + "(" + column.getType() + ") has been added to " + tableName;
     }
 
     public Element createNode(Document currentMigrationFileDOM) {

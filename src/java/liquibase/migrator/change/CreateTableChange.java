@@ -1,15 +1,14 @@
 package liquibase.migrator.change;
 
-import liquibase.database.AbstractDatabase;
-import liquibase.database.struture.DatabaseStructure;
-import liquibase.database.struture.DatabaseSystem;
+import liquibase.database.*;
+import liquibase.migrator.UnsupportedChangeException;
+import liquibase.migrator.RollbackImpossibleException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 public class CreateTableChange extends AbstractChange {
 
@@ -21,7 +20,7 @@ public class CreateTableChange extends AbstractChange {
         columns = new ArrayList<ColumnConfig>();
     }
 
-    public String generateStatement(AbstractDatabase database) {
+    private String[] generateStatements(AbstractDatabase database) {
         StringBuffer fkConstraints = new StringBuffer();
 
         StringBuffer buffer = new StringBuffer();
@@ -81,10 +80,33 @@ public class CreateTableChange extends AbstractChange {
         }
 
         if (fkConstraints.length() > 0) {
-            buffer.append(", ").append(fkConstraints.toString().replaceFirst(",$",""));
+            buffer.append(", ").append(fkConstraints.toString().replaceFirst(",$", ""));
         }
         buffer.append(")");
-        return buffer.toString().trim();
+        return new String[] { buffer.toString().trim() };
+    }
+
+    public String[] generateStatements(MSSQLDatabase database) {
+        return generateStatements(((AbstractDatabase) database));
+    }
+
+    public String[] generateStatements(OracleDatabase database) {
+        return generateStatements(((AbstractDatabase) database));
+    }
+
+    public String[] generateStatements(MySQLDatabase database) {
+        return generateStatements(((AbstractDatabase) database));
+    }
+
+    public String[] generateStatements(PostgresDatabase database) {
+        return generateStatements(((AbstractDatabase) database));
+    }
+
+    protected AbstractChange createInverse() {
+        DropTableChange inverse = new DropTableChange();
+        inverse.setTableName(getTableName());
+
+        return inverse;
     }
 
     public List<ColumnConfig> getColumns() {
@@ -110,10 +132,6 @@ public class CreateTableChange extends AbstractChange {
 
     public String getConfirmationMessage() {
         return "Table " + tableName + " created";
-    }
-
-    public boolean isApplicableTo(Set<DatabaseStructure> selectedDatabaseStructures) {
-        return selectedDatabaseStructures.size() == 1 && (selectedDatabaseStructures.iterator().next() instanceof DatabaseSystem);
     }
 
     public Element createNode(Document currentMigrationFileDOM) {

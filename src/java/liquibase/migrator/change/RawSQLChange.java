@@ -1,11 +1,10 @@
 package liquibase.migrator.change;
 
-import liquibase.database.AbstractDatabase;
-import liquibase.database.struture.DatabaseStructure;
+import liquibase.database.*;
+import liquibase.migrator.UnsupportedChangeException;
+import liquibase.migrator.RollbackImpossibleException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
-import java.util.Set;
 
 public class RawSQLChange extends AbstractChange {
 
@@ -32,16 +31,28 @@ public class RawSQLChange extends AbstractChange {
         this.comment = comment;
     }
 
-    public String generateStatement(AbstractDatabase database) {
-        return sql.replaceFirst(";$","");
+    private String[] generateStatements() {
+        return new String[] { sql.replaceFirst(";$", "") };
+    }
+
+    public String[] generateStatements(MSSQLDatabase database) {
+        return generateStatements();
+    }
+
+    public String[] generateStatements(OracleDatabase database) {
+        return generateStatements();
+    }
+
+    public String[] generateStatements(MySQLDatabase database) {
+        return generateStatements();
+    }
+
+    public String[] generateStatements(PostgresDatabase database) {
+        return generateStatements();
     }
 
     public String getConfirmationMessage() {
         return "Custom SQL has been executed";
-    }
-
-    public boolean isApplicableTo(Set<DatabaseStructure> selectedDatabaseStructures) {
-        return false;
     }
 
     public Element createNode(Document currentMigrationFileDOM) {

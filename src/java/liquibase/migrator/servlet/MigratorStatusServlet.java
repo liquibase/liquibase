@@ -1,17 +1,17 @@
 package liquibase.migrator.servlet;
 
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.ServletException;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.logging.LogRecord;
-import java.util.logging.Level;
-import java.util.List;
+import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.text.DateFormat;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
 
 public class MigratorStatusServlet extends HttpServlet {
 
@@ -45,7 +45,7 @@ public class MigratorStatusServlet extends HttpServlet {
                     + " " + getLevelLink(Level.FINE, currentLevel, httpServletRequest)
                     + " " + getLevelLink(Level.FINER, currentLevel, httpServletRequest)
                     + " " + getLevelLink(Level.FINEST, currentLevel, httpServletRequest)
-            +"</b>");
+                    + "</b>");
 
             writer.println("<hr>");
             writer.println("<b>Migrator started at " + DateFormat.getDateTimeInstance().format(new Date(migratorRunLog.get(0).getMillis())));
@@ -74,7 +74,7 @@ public class MigratorStatusServlet extends HttpServlet {
         if (currentLevel.equals(level)) {
             return level.getName();
         } else {
-            return "<a href=" + request.getRequestURI() + "?logLevel="+level.getName()+">" + level.getName() + "</a>";
+            return "<a href=" + request.getRequestURI() + "?logLevel=" + level.getName() + ">" + level.getName() + "</a>";
         }
     }
 }

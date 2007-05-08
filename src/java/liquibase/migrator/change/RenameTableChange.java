@@ -1,12 +1,10 @@
 package liquibase.migrator.change;
 
-import liquibase.database.AbstractDatabase;
-import liquibase.database.struture.DatabaseStructure;
-import liquibase.database.struture.Table;
+import liquibase.database.*;
+import liquibase.migrator.UnsupportedChangeException;
+import liquibase.migrator.RollbackImpossibleException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
-import java.util.Set;
 
 public class RenameTableChange extends AbstractChange {
     private String oldTableName;
@@ -32,16 +30,32 @@ public class RenameTableChange extends AbstractChange {
         this.newTableName = newTableName;
     }
 
-    public String generateStatement(AbstractDatabase database) {
-        return database.getRenameTableSQL(getOldTableName(), getNewTableName());
+    public String[] generateStatements(MSSQLDatabase database) {
+        return new String[] { "sp_rename '" + oldTableName + "', " + newTableName };
+    }
+
+    public String[] generateStatements(OracleDatabase database) {
+        return new String[] { "RENAME " + oldTableName + " TO " + newTableName };
+    }
+
+    public String[] generateStatements(MySQLDatabase database) {
+        return new String[] {  "ALTER TABLE " + oldTableName + " RENAME " + newTableName };
+    }
+
+    public String[] generateStatements(PostgresDatabase database) {
+        return new String[] { "ALTER TABLE " + oldTableName + " RENAME TO " + newTableName };
+    }
+
+    protected AbstractChange createInverse() {
+        RenameTableChange inverse = new RenameTableChange();
+        inverse.setOldTableName(getNewTableName());
+        inverse.setNewTableName(getOldTableName());
+
+        return inverse;
     }
 
     public String getConfirmationMessage() {
         return "Table with the name " + oldTableName + " has been renamed to " + newTableName;
-    }
-
-    public boolean isApplicableTo(Set<DatabaseStructure> selectedDatabaseStructures) {
-        return selectedDatabaseStructures.size() == 1 && (selectedDatabaseStructures.iterator().next() instanceof Table);
     }
 
     public Element createNode(Document currentMigrationFileDOM) {

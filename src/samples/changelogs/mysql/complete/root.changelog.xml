@@ -9,6 +9,11 @@
     </preConditions>
 
     <changeSet id="1" author="nvoxland">
+        <comment>
+            You can add comments to changeSets.
+            They can even be multiple lines if you would like.
+            They aren't used to compute the changeSet MD5Sum, so you can update them whenever you want without causing problems.
+        </comment>        
         <createTable tableName="person">
             <column name="id" type="int" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
@@ -27,7 +32,7 @@
     </changeSet>
     <changeSet id="3" author="nvoxland">
         <comment>Fix misspelled "username" column</comment>
-        <renameColumn tableName="person" oldColumnName="usernae" newColumnName="username"/>
+        <renameColumn tableName="person" oldColumnName="usernae" newColumnName="username" columnDataType="varchar(8)"/>
     </changeSet>
     <changeSet id="5" author="nvoxland" context="test">
         <insert tableName="person">
@@ -76,11 +81,11 @@
         </addColumn>
     </changeSet>
     <changeSet id="8" author="bjohnson">
-        <dropNotNullConstraint tableName="employee" columnName="name"/>
+        <dropNotNullConstraint tableName="employee" columnName="name" columnDataType="varchar(50)"/>
     </changeSet>
     <changeSet id="8.1" author="bjohnson">
         <comment>I guess name needs to be not-null</comment>
-        <addNotNullConstraint tableName='employee' columnName="name" defaultNullValue="UNKNOWN"/>
+        <addNotNullConstraint tableName='employee' columnName="name" defaultNullValue="UNKNOWN" columnDataType="varchar(50)"/>
     </changeSet>
     <changeSet id="9" author="nvoxland">
         <renameTable oldTableName="employee" newTableName="company"/>
@@ -127,4 +132,5 @@
     <changeSet id="15" author="nvoxland" runAlways="true">
         <sql>update liquibaseRunInfo set timesRan=timesRan+1</sql>
     </changeSet>
+    <include file="changelogs/mysql/complete/included.changelog.xml"/>
 </databaseChangeLog>

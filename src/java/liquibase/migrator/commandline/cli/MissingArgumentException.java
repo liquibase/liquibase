@@ -61,7 +61,7 @@
 
 package liquibase.migrator.commandline.cli;
 
-/** 
+/**
  * <p>Thrown when an option requiring an argument
  * is not provided with an argument.</p>
  *
@@ -69,14 +69,14 @@ package liquibase.migrator.commandline.cli;
  * @see ParseException
  */
 public class MissingArgumentException extends ParseException {
-    
-    /** 
-     * <p>Construct a new <code>MissingArgumentException</code> 
+
+    /**
+     * <p>Construct a new <code>MissingArgumentException</code>
      * with the specified detail message.</p>
      *
      * @param message the detail message
      */
-    public MissingArgumentException( String message ) {
-        super( message );
+    public MissingArgumentException(String message) {
+        super(message);
     }
 }

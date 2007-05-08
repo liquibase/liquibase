@@ -32,7 +32,7 @@ public class MSSQLDatabase extends AbstractDatabase {
         systemTablesAndViews.add("sysusers");
 
         systemTablesAndViews.add("syssegments");
-        systemTablesAndViews.add("sysconstraints");        
+        systemTablesAndViews.add("sysconstraints");
     }
 
 
@@ -100,19 +100,7 @@ public class MSSQLDatabase extends AbstractDatabase {
         return "0";
     }
 
-    public String getRenameTableSQL(String oldTableName, String newTableName) {
-        return "sp_rename '"+oldTableName+"', "+newTableName;
-    }
-
-    public String getRenameColumnSQL(String tableName, String oldColumnName, String newColumnName) {
-        return "sp_rename '"+tableName+"."+oldColumnName+"', "+newColumnName;
-    }
-
-    public String getDropIndexSQL(String tableName, String indexName) {
-        return "DROP INDEX "+tableName+"."+indexName;
-    }
-
     public String getDropTableSQL(String tableName) {
-        return "DROP TABLE "+tableName;
+        return "DROP TABLE " + tableName;
     }
 }

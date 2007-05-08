@@ -1,12 +1,10 @@
 package liquibase.migrator.change;
 
-import liquibase.database.AbstractDatabase;
-import liquibase.database.struture.DatabaseStructure;
-import liquibase.database.struture.Sequence;
+import liquibase.database.*;
+import liquibase.migrator.UnsupportedChangeException;
+import liquibase.migrator.RollbackImpossibleException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
-import java.util.Set;
 
 public class AlterSequenceChange extends AbstractChange {
 
@@ -62,16 +60,48 @@ public class AlterSequenceChange extends AbstractChange {
         this.ordered = ordered;
     }
 
-    public String generateStatement(AbstractDatabase database) {
-        return database.getAlterSequenceSQL(getSequenceName(), getIncrementBy(), getMinValue(), getMaxValue(), isOrdered());
+    private String[] generateStatements() {
+        StringBuffer buffer = new StringBuffer();
+        buffer.append("ALTER SEQUENCE ");
+        buffer.append(sequenceName);
+
+        if (incrementBy != null) {
+            buffer.append(" INCREMENT BY ").append(incrementBy);
+        }
+        if (minValue != null) {
+            buffer.append(" MINVALUE ").append(minValue);
+        }
+        if (maxValue != null) {
+            buffer.append(" MAXVALUE ").append(maxValue);
+        }
+
+        return new String[] { buffer.toString().trim() };
+    }
+
+    public String[] generateStatements(MSSQLDatabase database) throws UnsupportedChangeException {
+        throw new UnsupportedChangeException("Sequences do not exist in MSSQL");
+    }
+
+    public String[] generateStatements(OracleDatabase database) {
+        String[] statements = generateStatements();
+
+        if (ordered != null && ordered) {
+            statements[0] += " ORDER";
+        }
+        return statements;
+
+    }
+
+    public String[] generateStatements(MySQLDatabase database) throws UnsupportedChangeException {
+        throw new UnsupportedChangeException("Sequences do not exist in PostgreSQL");
+    }
+
+    public String[] generateStatements(PostgresDatabase database) {
+        return generateStatements();
     }
 
     public String getConfirmationMessage() {
         return "Sequence " + sequenceName + " has been altered";
-    }
-
-    public boolean isApplicableTo(Set<DatabaseStructure> selectedDatabaseStructures) {
-        return selectedDatabaseStructures.size() == 1 && (selectedDatabaseStructures.iterator().next() instanceof Sequence);
     }
 
     public Element createNode(Document currentMigrationFileDOM) {

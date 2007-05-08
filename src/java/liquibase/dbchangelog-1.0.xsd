@@ -96,6 +96,7 @@
         <xsd:attributeGroup ref="tableNameAttribute"/>
         <xsd:attribute name="oldColumnName" type="xsd:string"/>
         <xsd:attribute name="newColumnName" type="xsd:string"/>
+        <xsd:attribute name="columnDataType" type="xsd:string"/>        
     </xsd:attributeGroup>
 
     <xsd:attributeGroup name="dropColumnAttributes">
@@ -126,6 +127,7 @@
         <xsd:attribute name="tableName" type="xsd:string"/>
         <xsd:attribute name="columnName" type="xsd:string"/>
         <xsd:attribute name="defaultNullValue" type="xsd:string"/>
+        <xsd:attribute name="columnDataType" type="xsd:string"/>
     </xsd:attributeGroup>
 
 
@@ -185,6 +187,7 @@
     <xsd:attributeGroup name="dropNotNullConstraintAttrib">
         <xsd:attribute name="tableName" type="xsd:string"/>
         <xsd:attribute name="columnName" type="xsd:string"/>
+        <xsd:attribute name="columnDataType" type="xsd:string"/>
     </xsd:attributeGroup>
 
 
@@ -240,6 +243,8 @@
             <xsd:attributeGroup ref="tableNameAttribute"/>
         </xsd:complexType>
     </xsd:element>
+
+    <xsd:element name="rollback" type="xsd:string"/>
 
     <!-- comment  -->
     <xsd:element name="comment" type="xsd:string"/>
@@ -343,6 +348,7 @@
             <xsd:element ref="dropIndex" maxOccurs="unbounded"/>
             <xsd:element ref="addNotNullConstraint" maxOccurs="unbounded"/>
             <xsd:element ref="dropNotNullConstraint" maxOccurs="unbounded"/>
+            <xsd:element ref="rollback" maxOccurs="1"/>
 
         </xsd:choice>
     </xsd:group>

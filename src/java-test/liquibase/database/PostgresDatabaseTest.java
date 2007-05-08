@@ -1,12 +1,5 @@
 package liquibase.database;
 
-import junit.framework.*;
-import static org.easymock.classextension.EasyMock.*;
-import liquibase.database.PostgresDatabase;
-
-import java.sql.Connection;
-import java.sql.SQLException;
-
 public class PostgresDatabaseTest extends AbstractDatabaseTest {
     public PostgresDatabaseTest() {
         super(new PostgresDatabase());
@@ -48,7 +41,7 @@ public class PostgresDatabaseTest extends AbstractDatabaseTest {
         return "PostgreSQL";
     }
 
-   public void testGetCurrentDateTimeFunction() {
+    public void testGetCurrentDateTimeFunction() {
         assertEquals("CURRENT_DATE", getDatabase().getCurrentDateTimeFunction());
     }
 

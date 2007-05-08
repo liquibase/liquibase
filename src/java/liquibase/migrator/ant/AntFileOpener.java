@@ -20,7 +20,7 @@ public class AntFileOpener implements FileOpener {
     public InputStream getResourceAsStream(String file) throws IOException {
         URL resource = loader.getResource(file);
         if (resource == null) {
-            throw new IOException(file+" could not be found");
+            throw new IOException(file + " could not be found");
         }
         return resource.openStream();
     }

@@ -1,12 +1,9 @@
 package liquibase.migrator.change;
 
 import liquibase.database.OracleDatabase;
-import liquibase.database.struture.DatabaseStructure;
 import org.w3c.dom.Element;
 
 import javax.xml.parsers.DocumentBuilderFactory;
-import java.util.Arrays;
-import java.util.HashSet;
 
 public class DropTableChangeTest extends AbstractChangeTest {
     private DropTableChange change;
@@ -23,24 +20,17 @@ public class DropTableChangeTest extends AbstractChangeTest {
     }
 
     public void testGenerateStatement() throws Exception {
-        assertEquals("DROP TABLE TAB_NAME CASCADE CONSTRAINTS", change.generateStatement(new OracleDatabase()));
+        assertEquals("DROP TABLE TAB_NAME CASCADE CONSTRAINTS", change.generateStatements(new OracleDatabase())[0]);
 
         change.setCascadeConstraints(null);
-        assertEquals("DROP TABLE TAB_NAME", change.generateStatement(new OracleDatabase()));
+        assertEquals("DROP TABLE TAB_NAME", change.generateStatements(new OracleDatabase())[0]);
 
         change.setCascadeConstraints(false);
-        assertEquals("DROP TABLE TAB_NAME", change.generateStatement(new OracleDatabase()));
+        assertEquals("DROP TABLE TAB_NAME", change.generateStatements(new OracleDatabase())[0]);
     }
 
     public void testGetConfirmationMessage() throws Exception {
         assertEquals("Table TAB_NAME dropped", change.getConfirmationMessage());
-    }
-
-    public void testIsApplicableTo() throws Exception {
-        assertTrue(change.isApplicableTo(new HashSet<DatabaseStructure>(Arrays.asList(new DatabaseStructure[] {
-                createTableDatabaseStructure(),
-        }))));
-
     }
 
     public void testCreateNode() throws Exception {

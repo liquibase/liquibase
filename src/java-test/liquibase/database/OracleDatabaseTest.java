@@ -1,11 +1,5 @@
 package liquibase.database;
 
-import static org.easymock.EasyMock.*;
-
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.SQLException;
-
 public class OracleDatabaseTest extends AbstractDatabaseTest {
 
     public OracleDatabaseTest() {

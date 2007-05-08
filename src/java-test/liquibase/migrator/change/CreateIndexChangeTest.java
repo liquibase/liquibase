@@ -1,12 +1,9 @@
 package liquibase.migrator.change;
 
 import liquibase.database.OracleDatabase;
-import liquibase.database.struture.DatabaseStructure;
 import org.w3c.dom.Element;
 
 import javax.xml.parsers.DocumentBuilderFactory;
-import java.util.Arrays;
-import java.util.HashSet;
 
 public class CreateIndexChangeTest extends AbstractChangeTest {
 
@@ -23,13 +20,13 @@ public class CreateIndexChangeTest extends AbstractChangeTest {
         column1.setName("COL1");
         refactoring.addColumn(column1);
 
-        assertEquals("CREATE INDEX IDX_TEST ON TAB_NAME(COL1)", refactoring.generateStatement(new OracleDatabase()));
+        assertEquals("CREATE INDEX IDX_TEST ON TAB_NAME(COL1)", refactoring.generateStatements(new OracleDatabase())[0]);
 
         ColumnConfig column2 = new ColumnConfig();
         column2.setName("COL2");
         refactoring.addColumn(column2);
 
-        assertEquals("CREATE INDEX IDX_TEST ON TAB_NAME(COL1, COL2)", refactoring.generateStatement(new OracleDatabase()));
+        assertEquals("CREATE INDEX IDX_TEST ON TAB_NAME(COL1, COL2)", refactoring.generateStatements(new OracleDatabase())[0]);
     }
 
     public void testGetConfirmationMessage() throws Exception {
@@ -37,26 +34,6 @@ public class CreateIndexChangeTest extends AbstractChangeTest {
         refactoring.setIndexName("IDX_TEST");
 
         assertEquals("Index IDX_TEST has been created", refactoring.getConfirmationMessage());
-    }
-
-    public void testIsApplicableTo() throws Exception {
-        CreateIndexChange refactoring = new CreateIndexChange();
-        assertFalse(refactoring.isApplicableTo(new HashSet<DatabaseStructure>(Arrays.asList(new DatabaseStructure[]{
-                createTableDatabaseStructure(),
-        }))));
-
-        assertFalse(refactoring.isApplicableTo(new HashSet<DatabaseStructure>(Arrays.asList(new DatabaseStructure[]{
-                createSequenceDatabaseStructure(),
-        }))));
-
-        assertTrue(refactoring.isApplicableTo(new HashSet<DatabaseStructure>(Arrays.asList(new DatabaseStructure[]{
-                createIndexDatabaseStructure(),
-        }))));
-
-        assertFalse(refactoring.isApplicableTo(new HashSet<DatabaseStructure>(Arrays.asList(new DatabaseStructure[]{
-                createIndexDatabaseStructure(),
-                createIndexDatabaseStructure(),
-        }))));
     }
 
     public void testCreateNode() throws Exception {

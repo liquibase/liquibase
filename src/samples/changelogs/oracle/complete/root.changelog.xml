@@ -5,10 +5,15 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.0 http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.0.xsd">
     <preConditions>
-            <dbms type="postgresql"/>
+            <dbms type="oracle"/>
     </preConditions>
 
     <changeSet id="1" author="nvoxland">
+        <comment>
+            You can add comments to changeSets.
+            They can even be multiple lines if you would like.
+            They aren't used to compute the changeSet MD5Sum, so you can update them whenever you want without causing problems.
+        </comment>        
         <createTable tableName="person">
             <column name="id" type="int">
                 <constraints primaryKey="true" nullable="false"/>
@@ -145,4 +150,5 @@
     <changeSet id="18" author="nvoxland">
         <dropSequence sequenceName="seq_test"/>
     </changeSet>
+    <include file="changelogs/oracle/complete/included.changelog.xml"/>
 </databaseChangeLog>

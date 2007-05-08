@@ -61,22 +61,21 @@
 
 package liquibase.migrator.commandline.cli;
 
-/** 
+/**
  * <p>Base for Exceptions thrown during parsing of a command-line.</p>
  *
  * @author bob mcwhirter (bob @ werken.com)
  * @version $Revision: 1.2 $
  */
-public class ParseException extends Exception 
-{
-    
-    /** 
-     * <p>Construct a new <code>ParseException</code> 
+public class ParseException extends Exception {
+
+    /**
+     * <p>Construct a new <code>ParseException</code>
      * with the specified detail message.</p>
      *
      * @param message the detail message
      */
-    public ParseException( String message ) {
-        super( message );
+    public ParseException(String message) {
+        super(message);
     }
 }

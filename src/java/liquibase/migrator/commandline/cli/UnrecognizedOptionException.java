@@ -61,7 +61,7 @@
 
 package liquibase.migrator.commandline.cli;
 
-/** 
+/**
  * <p>Exception thrown during parsing signalling an unrecognized
  * option was seen.<p>
  *
@@ -69,14 +69,14 @@ package liquibase.migrator.commandline.cli;
  * @version $Revision: 1.2 $
  */
 public class UnrecognizedOptionException extends ParseException {
-    
-    /** 
-     * <p>Construct a new <code>UnrecognizedArgumentException</code> 
+
+    /**
+     * <p>Construct a new <code>UnrecognizedArgumentException</code>
      * with the specified detail message.</p>
      *
      * @param message the detail message
      */
-    public UnrecognizedOptionException( String message ) {
-        super( message );
+    public UnrecognizedOptionException(String message) {
+        super(message);
     }
 }

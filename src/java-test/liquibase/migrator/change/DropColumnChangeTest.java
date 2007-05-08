@@ -1,12 +1,9 @@
 package liquibase.migrator.change;
 
 import liquibase.database.OracleDatabase;
-import liquibase.database.struture.DatabaseStructure;
 import org.w3c.dom.Element;
 
 import javax.xml.parsers.DocumentBuilderFactory;
-import java.util.Arrays;
-import java.util.HashSet;
 
 public class DropColumnChangeTest extends AbstractChangeTest {
 
@@ -19,7 +16,7 @@ public class DropColumnChangeTest extends AbstractChangeTest {
         change.setTableName("TABLE_NAME");
         change.setColumnName("COL_HERE");
 
-        assertEquals("ALTER TABLE TABLE_NAME DROP COLUMN COL_HERE", change.generateStatement(new OracleDatabase()));
+        assertEquals("ALTER TABLE TABLE_NAME DROP COLUMN COL_HERE", change.generateStatements(new OracleDatabase())[0]);
     }
 
     public void testGetConfirmationMessage() throws Exception {
@@ -29,20 +26,6 @@ public class DropColumnChangeTest extends AbstractChangeTest {
 
         assertEquals("Column TABLE_NAME(COL_HERE) dropped", change.getConfirmationMessage());
     }
-
-    public void testIsApplicableTo() throws Exception {
-        DropColumnChange change = new DropColumnChange();
-        assertTrue(change.isApplicableTo(new HashSet<DatabaseStructure>(Arrays.asList(new DatabaseStructure[] {
-                createColumnDatabaseStructure(),
-        }))));
-
-        assertFalse(change.isApplicableTo(new HashSet<DatabaseStructure>(Arrays.asList(new DatabaseStructure[] {
-                createColumnDatabaseStructure(),
-                createColumnDatabaseStructure(),
-        }))));
-
-    }
-
 
     public void testCreateNode() throws Exception {
         DropColumnChange change = new DropColumnChange();

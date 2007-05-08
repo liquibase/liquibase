@@ -2,7 +2,7 @@
     <groupId>liquibase.maven.plugins</groupId>
     <artifactId>maven-liquibase-migrator-plugin</artifactId>
     <version>@BUILD.VERSION@</version>
-    <goalPrefix>migrate</goalPrefix>
+    <goalPrefix>liquibase</goalPrefix>
     <mojos>
         <mojo>
             <goal>migrate</goal>
@@ -18,11 +18,11 @@
             <executionStrategy>once-per-session</executionStrategy>
             <parameters>
                 <parameter>
-                    <name>migrationFiles</name>
+                    <name>changeLogFile</name>
                     <type>java.lang.String</type>
                     <required>true</required>
                     <editable>true</editable>
-                    <description>Name of changelogs to run (including package location)</description>
+                    <description>Name of changelog to run (including package location)</description>
                 </parameter>
                 <parameter>
                     <name>dropFirst = true</name>

@@ -5,9 +5,8 @@ import liquibase.migrator.MigrationFailedException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.ResultSet;
-import java.util.Set;
 import java.util.HashSet;
+import java.util.Set;
 
 public class PostgresDatabase extends AbstractDatabase {
     public static final String PRODUCT_NAME = "PostgreSQL";
@@ -101,36 +100,5 @@ public class PostgresDatabase extends AbstractDatabase {
         }
 
 
-    }
-
-    public String getDropNullConstraintSQL(String tableName, String columnName) {
-        StringBuffer buffer = new StringBuffer();
-        buffer.append("alter table ");
-        buffer.append(tableName);
-        buffer.append(" alter column  ");
-        buffer.append(columnName);
-        buffer.append(" drop not null");
-        return buffer.toString();
-    }
-
-    public String getAddNullConstraintSQL(String tableName, String columnName, String defaultNullValue) {
-        StringBuffer buffer = new StringBuffer();
-        buffer.append("alter table ");
-        buffer.append(tableName);
-        buffer.append(" alter column  ");
-        buffer.append(columnName);
-        buffer.append(" set not null");
-//        if (defaultNullValue != null) {
-//            buffer.append(" SET DEFAULT '").append(defaultNullValue).append("'");
-//        }
-        return buffer.toString();
-    }
-
-    public String getRenameTableSQL(String oldTableName, String newTableName) {
-        return "ALTER TABLE "+oldTableName+" RENAME TO "+newTableName;
-    }
-
-    public String getDropIndexSQL(String tableName, String indexName) {
-        return "DROP INDEX "+indexName;
     }
 }

@@ -60,7 +60,7 @@
  */
 package liquibase.migrator.commandline.cli;
 
-/** 
+/**
  * <p>Thrown when more than one option in an option group
  * has been provided.</p>
  *
@@ -69,13 +69,13 @@ package liquibase.migrator.commandline.cli;
  */
 public class AlreadySelectedException extends ParseException {
 
-    /** 
-     * <p>Construct a new <code>AlreadySelectedException</code> 
+    /**
+     * <p>Construct a new <code>AlreadySelectedException</code>
      * with the specified detail message.</p>
      *
      * @param message the detail message
      */
-    public AlreadySelectedException( String message ) {
-        super( message );
+    public AlreadySelectedException(String message) {
+        super(message);
     }
 }

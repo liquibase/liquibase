@@ -1,12 +1,9 @@
 package liquibase.migrator.change;
 
 import liquibase.database.OracleDatabase;
-import liquibase.database.struture.DatabaseStructure;
 import org.w3c.dom.Element;
 
 import javax.xml.parsers.DocumentBuilderFactory;
-import java.util.Arrays;
-import java.util.HashSet;
 
 public class CreateTableChangeTest extends AbstractChangeTest {
     private CreateTableChange change;
@@ -62,7 +59,7 @@ public class CreateTableChangeTest extends AbstractChangeTest {
         column5.setConstraints(column5constraints);
         change.addColumn(column5);
 
-        assertEquals("CREATE TABLE TABLE_NAME (id int NOT NULL PRIMARY KEY, name varchar(255), state_id NOT NULL, phone varchar(255) DEFAULT 'NOPHONE', phone2 varchar(255) UNIQUE,  CONSTRAINT fk_tab_ref FOREIGN KEY (state_id) REFERENCES state(id) INITIALLY DEFERRED DEFERRABLE)", change.generateStatement(new OracleDatabase()));
+        assertEquals("CREATE TABLE TABLE_NAME (id int NOT NULL PRIMARY KEY, name varchar(255), state_id NOT NULL, phone varchar(255) DEFAULT 'NOPHONE', phone2 varchar(255) UNIQUE,  CONSTRAINT fk_tab_ref FOREIGN KEY (state_id) REFERENCES state(id) INITIALLY DEFERRED DEFERRABLE)", change.generateStatements(new OracleDatabase())[0]);
     }
 
     public void testGetConfirmationMessage() throws Exception {
@@ -70,19 +67,8 @@ public class CreateTableChangeTest extends AbstractChangeTest {
         assertEquals("Table TAB_NAME created", change.getConfirmationMessage());
     }
 
-    public void testIsApplicableTo() throws Exception {
-        assertFalse(change.isApplicableTo(new HashSet<DatabaseStructure>(Arrays.asList(new DatabaseStructure[] {
-                createTableDatabaseStructure(),
-        }))));
-
-        assertTrue(change.isApplicableTo(new HashSet<DatabaseStructure>(Arrays.asList(new DatabaseStructure[] {
-                createDatabaseSystem(),
-        }))));
-
-    }
-
     public void testCreateNode() throws Exception {
-      change.setTableName("TABLE_NAME");
+        change.setTableName("TABLE_NAME");
 
         ColumnConfig column1 = new ColumnConfig();
         column1.setName("id");

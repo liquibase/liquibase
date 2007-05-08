@@ -79,12 +79,12 @@
                     <h4 style="margin-top: 20px;">Step 3: Run the ChangeSet</h4>
                     <pre>
 java -jar liquibase.migrator.jar -driver com.mysql.jdbc.Driver \
-     -classpath /path/to/classes:mysql.jar \
-     -execute \
-     -migrationFile com/example/db.changelog.xml \
-     -url "jdbc:mysql://localhost/example" \
-     -username user \
-     -password asdf
+     --classpath=/path/to/classes:mysql.jar \
+     --migrationFile-com/example/db.changelog.xml \
+     --url="jdbc:mysql://localhost/example" \
+     --username=user \
+     --password asdf \
+     migrate
                     </pre>
                     <p>
                         You will see that your database now contains a table called "department".

@@ -1,12 +1,10 @@
 package liquibase.migrator.change;
 
-import liquibase.database.AbstractDatabase;
-import liquibase.database.struture.DatabaseStructure;
-import liquibase.database.struture.Index;
+import liquibase.database.*;
+import liquibase.migrator.UnsupportedChangeException;
+import liquibase.migrator.RollbackImpossibleException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
-import java.util.Set;
 
 public class DropIndexChange extends AbstractChange {
 
@@ -33,16 +31,24 @@ public class DropIndexChange extends AbstractChange {
         this.tableName = tableName;
     }
 
-    public String generateStatement(AbstractDatabase database) {
-        return database.getDropIndexSQL(getTableName(), getIndexName());
+    public String[] generateStatements(MSSQLDatabase database) {
+        return new String[] { "DROP INDEX " + tableName + "." + indexName };
+    }
+
+    public String[] generateStatements(OracleDatabase database) {
+        return new String[] { "DROP INDEX " + indexName };
+    }
+
+    public String[] generateStatements(MySQLDatabase database) {
+        return new String[] { "DROP INDEX " + indexName + " ON " + tableName };
+    }
+
+    public String[] generateStatements(PostgresDatabase database) {
+        return new String[] { "DROP INDEX " + indexName };
     }
 
     public String getConfirmationMessage() {
-        return "Index " + getIndexName() + " dropped from table "+getTableName();
-    }
-
-    public boolean isApplicableTo(Set<DatabaseStructure> selectedDatabaseStructures) {
-        return selectedDatabaseStructures.size() == 1 && (selectedDatabaseStructures.iterator().next() instanceof Index);
+        return "Index " + getIndexName() + " dropped from table " + getTableName();
     }
 
     public Element createNode(Document currentMigrationFileDOM) {

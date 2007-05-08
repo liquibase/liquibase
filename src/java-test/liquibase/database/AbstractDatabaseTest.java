@@ -2,10 +2,11 @@ package liquibase.database;
 
 import junit.framework.TestCase;
 import liquibase.migrator.change.ColumnConfig;
-import liquibase.migrator.Migrator;
 import static org.easymock.EasyMock.*;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.SQLException;
 
 public abstract class AbstractDatabaseTest extends TestCase {
 

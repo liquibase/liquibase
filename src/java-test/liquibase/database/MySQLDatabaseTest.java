@@ -1,6 +1,6 @@
 package liquibase.database;
 
-public class MySQLDatabaseTest  extends AbstractDatabaseTest {
+public class MySQLDatabaseTest extends AbstractDatabaseTest {
     public MySQLDatabaseTest() {
         super(new MySQLDatabase());
     }

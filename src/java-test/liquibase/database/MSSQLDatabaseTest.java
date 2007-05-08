@@ -1,15 +1,5 @@
 package liquibase.database;
 
-import junit.framework.*;
-import static org.easymock.classextension.EasyMock.*;
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.replay;
-import liquibase.database.MSSQLDatabase;
-
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.DatabaseMetaData;
-
 public class MSSQLDatabaseTest extends AbstractDatabaseTest {
     public MSSQLDatabaseTest() {
         super(new MSSQLDatabase());

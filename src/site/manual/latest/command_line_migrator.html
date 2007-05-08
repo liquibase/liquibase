@@ -20,96 +20,133 @@
                 <div class="entry">
                     <h2>Command Line Migrator</h2>
                     <p>
-                        LiquiBase can be run from the command line by running "java -jar liquibase.migrator.jar".
+                        LiquiBase can be run from the command line by running "java -jar liquibase.migrator.jar [options] [command]".
                         The command line migrator works well when you want to do migrations on demand, but don't
                         have Ant or Maven available such as on servers.  The command line migrator also gives you more control
-                        over the process than the Ant, Maven, or Servlet migrators do, allowing you to do things like outputting SQL and
+                        over the process than the <a href="ant.html">Ant</a>, <a href="maven.html">Maven</a>, or
+                        <a href="servlet_listener_migrator.html">Servlet</a> migrators do, allowing you to run maintenance commands like outputting SQL and
                         listing/releasing database changelog locks.
+                    </p>
+                    <p>
+                        The command line migrator also allows you to <a href="rollback.html">perform rollback operations and
+                        generate rollback scripts</a>.
                     </p>
                     <p>
                         If you run the command line migrator without any arguments, you will get a help message listing
                         these available parameters:
                     </p>
                     <table border="1" cellpadding="5">
-                        <tr><th>-classpath</th><td>The classpath that includes where the changelog files are located (can include packaged .jar, .ear, and .war files)</td></tr>
-                        <tr><th>-driver</th><td>The database driver to use (i.e. oracle.jdbc.OracleDriver). The driver class must be in the system classpath or the path specified by the -classpath arguement</td></tr>
-                        <tr><th>-dropAllFirst</th><td>Drops all database objects before migrating the database. Useful for refreshing a development database</td></tr>
-                        <tr><th>-execute</th><td>Runs all the statements against the databaset</td></tr>
-                        <tr><th>-migrationFile</th><td>Change log file and location in the classpath using standard java package notation (com/example/db.changelog.xml)</td></tr>
-                        <tr><th>-outputChangelogSQL</th><td>Don't actually run the statements, instead save the databasechangelog insert statements to a file. Useful for fixing out-of-sync a changelog table</td></tr>
-                        <tr><th>-outputSQL</th><td>Don't actually run the statements, instead save the databasechangelog insert statements and change SQL to a text file. Useful for allowing DBA sign-off before applying changes</td></tr>
-                        <tr><th>-password</th><td>Database Password</td></tr>
-                        <tr><th>-url</th><td>Database URL</td></tr>
-                        <tr><th>-username</th><td>Username</td></tr>
-                        <tr><th>-contexts</th><td>Comma-separated list of <a href="contexts.html">contexts</a> to execute</td></tr>
-                        <tr><th>-listLocks</th><td>Don't attempt to migrate the database, simply list what machines have a lock on the change log table</td></tr>
-                        <tr><th>-releaseLocks</th><td>Don't attempt to migrate the database, clear out any locks machines have on the change log table (only use if you KNOW the lock should have been released)</td></tr>
-                        <tr><th>-promptForNonLocalhostDatabase</th><td>If set to "false" (default is true) the migrator will prompt you with a dialog if you are attempting to run against a non-localhost database.</td></tr>
+                        <tr><th colspan="2" style="text-align:center">Standard Commands:</th></tr>
+                        <tr><th>migrate</th><td>Updates database to current version</td></tr>
+                        <tr><th>rollback &lt;date/time&gt;</th><td>Rolls back the database to the the state is was at the given date/time</td></tr>
+                        <tr><th>migrateSQL</th><td>Writes SQL to update database to current version to STDOUT</td></tr>
+                        <tr><th>rollbackSQL &lt;date/time&gt;</th><td>Writes SQL to roll back the database to that state it was in at the given date/time version to STDOUT</td></tr>
+                        <tr><th>futureRollbackSQL</th><td>Writes SQL to roll back the database to the current state after the changes in the changeslog have been applied</td></tr>
+                        <tr><th colspan="2" style="text-align:center">Maintenance Commands</th></tr>
+                        <tr><th>changelogSyncSQL</th><td>Writes SQL to mark all refactorings as executed in the database to STDOUT</td></tr>
+                        <tr><th>listLocks</th><td>Lists who currently has locks on the database changelog</td></tr>
+                        <tr><th>releaseLocks</th><td>Releases all locks on the database changelog</td></tr>
+                        <tr><th colspan="2" style="text-align:center">Required Parameters</th></tr>
+                        <tr><th>--classpath=&lt;value&gt;</th><td>Classpath containing migration files and JDBC Driver</td></tr>
+                        <tr><th>--migrationFile=&lt;path and filename&gt;</th><td>Migration file</td></tr>
+                        <tr><th>--username=&lt;value&gt;</th><td>Database username</td></tr>
+                        <tr><th>--password=&lt;value></th><td>Database password</td></tr>
+                        <tr><th>--url=&lt;value&gt;</th><td>Database URL</td></tr>
+                        <tr><th>--driver=&lt;jdbc.driver.ClassName&gt;</th><td>Database driver class name</td></tr>
+                        <tr><th colspan="2" style="text-align:center">Optional Parameters:</th></tr>
+                        <tr><th>--contexts=&lt;value&gt;</th><td>ChangeSet contexts to execute</td></tr>
+                        <tr><th>--defaultsFile=&lt;/path/to/file&gt;</th><td>File containing default option values (default: ./liquibase.properties)</td></tr>
+                        <tr><th>--includeSystemClasspath=&lt;true|false&gt;</th><td>Include the system classpath in the LiquiBase classpath (default: true)</td></tr>
+                        <tr><th>--promptForNonLocalDatabase=&lt;true|false&gt;</th><td>Prompt if non-localhost databases (default: false)</td></tr>
+                        <tr><th>--dropAllFirst=&lt;true|false&gt;</th><td>Drop all database objects first (default: false)</td></tr>
+                        <tr><th>--logLevel=&lt;level&gt;</th><td>Execution log level (finest, finer, fine, info, warning, severe)</td></tr>
+                        <tr><th>--help=&lt;level&gt;</th><td>Execution log level (finest, finer, fine, info, warning, severe)</td></tr>
                     </table>
+                    <h2>Using a liquibase.properties file</h2>
+                    <p>
+                        If you do not want to always specify options on the command line, you can create a properties file
+                        that contains default values.  By default, LiquiBase will look for a file called "liquibase.properties"
+                        in the current working directory, but you can specify an alternate location with the --defaultsFile flag.
+                        If you have specify an option in a properties file and specify the same option on the command line, the
+                        value on the command line will override the properties file value.
+                    </p>
                     <h2>Examples</h2>
                     <p>
                         Standard Migrator Run
                     </p>
                     <pre>
 java -jar liquibase.migrator.jar \
-      -driver oracle.jdbc.OracleDriver \
-      -classpath \path\to\classes:jdbcdriver.jar \
-      -execute \
-      -migrationFile com/example/db.changelog.xml \
-      -url "jdbc:oracle:thin:@localhost:1521:oracle" \
-      -username scott \
-      -password tiger
+      -driver=oracle.jdbc.OracleDriver \
+      -classpath=\path\to\classes:jdbcdriver.jar \
+      -migrationFile=com/example/db.changelog.xml \
+      -url="jdbc:oracle:thin:@localhost:1521:oracle" \
+      -username=scott \
+      -password=tiger \
+      migrate
                     </pre>
                     <p>
                         Run Migrator pulling changelogs from a .WAR file
                     </p>
                     <pre>
 java -jar liquibase.migrator.jar \
-      -driver oracle.jdbc.OracleDriver \
-      -classpath website.war \
-      -execute
-      -migrationFile com/example/db.changelog.xml \
-      -url jdbc:oracle:thin:@localhost:1521:oracle \
-      -username scott \
-      -password tiger
+      -driver=oracle.jdbc.OracleDriver \
+      -classpath=website.war \
+      -migrationFile=com/example/db.changelog.xml \
+      -url=jdbc:oracle:thin:@localhost:1521:oracle \
+      -username=scott \
+      -password=tiger \
+      migrate
                     </pre>
                     <p>
                         Run Migrator pulling changelogs from an .EAR file
                     </p>
                     <pre>
 java -jar liquibase.migrator.jar \
-      -driver oracle.jdbc.OracleDriver \
-      -classpath application.ear \
-      -execute
-      -migrationFile com/example/db.changelog.xml \
-      -url jdbc:oracle:thin:@localhost:1521:oracle \
-      -username scott \
-      -password tiger
+      -driver=oracle.jdbc.OracleDriver \
+      -classpath=application.ear \
+      -migrationFile=com/example/db.changelog.xml \
+      -url=jdbc:oracle:thin:@localhost:1521:oracle \
+      -username=scott \
+      -password=tiger
                     </pre>
                     <p>
                         Don't execute changesets, save SQL to /tmp/migrate.sql
                     </p>
                     <pre>
 java -jar liquibase.migrator.jar \
-        -driver oracle.jdbc.OracleDriver \
-        -classpath jdbcdriver.jar \
-        -outputSQL /tmp/migrate.sql
-        -url jdbc:oracle:thin:@localhost:1521:oracle \
-        -username scott \
-        -password tiger \
-        -listLocks
+        -driver=oracle.jdbc.OracleDriver \
+        -classpath=jdbcdriver.jar \
+        -url=jdbc:oracle:thin:@localhost:1521:oracle \
+        -username=scott \
+        -password=tiger \
+        listLocks > /tmp/migrate.sql
                     </pre>
                     <p>
                         List locks on the database change log
                     </p>
                     <pre>
 java -jar liquibase.migrator.jar \
-        -driver oracle.jdbc.OracleDriver \
-        -classpath jdbcdriver.jar \
-        -url jdbc:oracle:thin:@localhost:1521:oracle \
-        -username scott \
-        -password tiger \
-        -listLocks
+        -driver=oracle.jdbc.OracleDriver \
+        -classpath=jdbcdriver.jar \
+        -url=jdbc:oracle:thin:@localhost:1521:oracle \
+        -username=scott \
+        -password=tiger \
+        listLocks
+                    </pre>
+                    <p>
+                        Runs LiquiBase using defaults from ./liquibase.properties
+                    </p>
+                    <pre>
+java -jar liquibase.migrator.jar migrate
+                    </pre>
+                    <pre>
+#liquibase.properties
+driver: oracle.jdbc.OracleDriver
+classpath: jdbcdriver.jar
+url: jdbc:oracle:thin:@localhost:1521:oracle
+username: scott
+password: tiger
+
                     </pre>
                 </div>
             </div>

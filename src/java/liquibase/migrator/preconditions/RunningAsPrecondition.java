@@ -1,10 +1,10 @@
 package liquibase.migrator.preconditions;
 
-import java.sql.SQLException;
-
 import liquibase.migrator.Migrator;
 
-public class RunningAsPrecondition implements Precondition{
+import java.sql.SQLException;
+
+public class RunningAsPrecondition implements Precondition {
 
     private String username;
 

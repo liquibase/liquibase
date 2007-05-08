@@ -19,7 +19,7 @@ import java.util.Properties;
  * @goal migrate
  */
 public class LiquibaseMojo extends AbstractMojo {
-    private String migrationFiles;
+    private String changeLogFile;
     private boolean dropFirst = true;
     private String driver;
     private String url;
@@ -78,12 +78,12 @@ public class LiquibaseMojo extends AbstractMojo {
         this.password = password;
     }
 
-    public String getMigrationFiles() {
-        return migrationFiles;
+    public String getChangeLogFile() {
+        return changeLogFile;
     }
 
-    public void setMigrationFiles(String migrationFiles) {
-        this.migrationFiles = migrationFiles;
+    public void setChangeLogFile(String changeLogFile) {
+        this.changeLogFile = changeLogFile;
     }
 
 //    public Path createClasspath() {
@@ -133,7 +133,7 @@ public class LiquibaseMojo extends AbstractMojo {
             info.put("password", getPassword());
             connection = driver.connect(getUrl(), info);
 
-            String[] migrationFiles = getMigrationFiles().split(",");
+            String[] migrationFiles = getChangeLogFile().split(",");
             for (String migrationFile : migrationFiles) {
                 Migrator migrator = new Migrator(migrationFile.trim(), new MavenFileOpener());
                 migrator.setContexts(getContexts());

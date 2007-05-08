@@ -1,12 +1,10 @@
 package liquibase.migrator.change;
 
-import liquibase.database.AbstractDatabase;
-import liquibase.database.struture.DatabaseStructure;
-import liquibase.database.struture.DatabaseSystem;
+import liquibase.database.*;
+import liquibase.migrator.UnsupportedChangeException;
+import liquibase.migrator.RollbackImpossibleException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
-import java.util.Set;
 
 public class CreateSequenceChange extends AbstractChange {
 
@@ -70,16 +68,55 @@ public class CreateSequenceChange extends AbstractChange {
         this.ordered = ordered;
     }
 
-    public String generateStatement(AbstractDatabase database) {
-        return database.getCreateSequenceSQL(getSequenceName(), getStartValue(), getIncrementBy(), getMinValue(), getMaxValue(), isOrdered()).trim();
+    private String[] generateStatements() {
+        StringBuffer buffer = new StringBuffer();
+        buffer.append("CREATE SEQUENCE ");
+        buffer.append(sequenceName);
+        if (startValue != null) {
+            buffer.append(" START WITH ").append(startValue);
+        }
+        if (incrementBy != null) {
+            buffer.append(" INCREMENT BY ").append(incrementBy);
+        }
+        if (minValue != null) {
+            buffer.append(" MINVALUE ").append(minValue);
+        }
+        if (maxValue != null) {
+            buffer.append(" MAXVALUE ").append(maxValue);
+        }
+
+        return new String[] {buffer.toString().trim()};
+    }
+
+    public String[] generateStatements(MSSQLDatabase database) throws UnsupportedChangeException {
+        throw new UnsupportedChangeException("MSSQL does not support sequences");
+    }
+
+    public String[] generateStatements(OracleDatabase database) {
+        String[] statements = generateStatements();
+        if (ordered != null && ordered) {
+            statements[0] += " ORDER";
+        }
+        return statements;
+    }
+
+    public String[] generateStatements(MySQLDatabase database) throws UnsupportedChangeException {
+        throw new UnsupportedChangeException("MySQL does not support sequences");
+    }
+
+    public String[] generateStatements(PostgresDatabase database) {
+        return generateStatements();
+    }
+
+    protected AbstractChange createInverse() {
+        DropSequenceChange inverse = new DropSequenceChange();
+        inverse.setSequenceName(getSequenceName());
+
+        return inverse;
     }
 
     public String getConfirmationMessage() {
-        return "Sequence " + getSequenceName()+ " has been created";
-    }
-
-    public boolean isApplicableTo(Set<DatabaseStructure> selectedDatabaseStructures) {
-        return selectedDatabaseStructures.size() == 1 && (selectedDatabaseStructures.iterator().next() instanceof DatabaseSystem);
+        return "Sequence " + getSequenceName() + " has been created";
     }
 
     public Element createNode(Document currentMigrationFileDOM) {

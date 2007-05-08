@@ -1,15 +1,12 @@
 package liquibase.migrator.change;
 
 import liquibase.database.OracleDatabase;
-import liquibase.database.struture.DatabaseStructure;
 import org.w3c.dom.Element;
 
 import javax.xml.parsers.DocumentBuilderFactory;
-import java.util.Arrays;
-import java.util.HashSet;
 
 public class CreateSequenceChangeTest extends AbstractChangeTest {
-        public void testGetRefactoringName() throws Exception {
+    public void testGetRefactoringName() throws Exception {
         assertEquals("Create Sequence", new CreateSequenceChange().getRefactoringName());
     }
 
@@ -19,25 +16,25 @@ public class CreateSequenceChangeTest extends AbstractChangeTest {
         OracleDatabase oracleDatabase = new OracleDatabase();
 
         change.setMinValue(100);
-        assertEquals("CREATE SEQUENCE SEQ_NAME MINVALUE 100", change.generateStatement(oracleDatabase));
+        assertEquals("CREATE SEQUENCE SEQ_NAME MINVALUE 100", change.generateStatements(oracleDatabase)[0]);
 
         change.setMinValue(null);
         change.setMaxValue(1000);
-        assertEquals("CREATE SEQUENCE SEQ_NAME MAXVALUE 1000", change.generateStatement(oracleDatabase));
+        assertEquals("CREATE SEQUENCE SEQ_NAME MAXVALUE 1000", change.generateStatements(oracleDatabase)[0]);
 
         change.setMaxValue(null);
         change.setIncrementBy(50);
-        assertEquals("CREATE SEQUENCE SEQ_NAME INCREMENT BY 50", change.generateStatement(oracleDatabase));
+        assertEquals("CREATE SEQUENCE SEQ_NAME INCREMENT BY 50", change.generateStatements(oracleDatabase)[0]);
 
         change.setIncrementBy(null);
         change.setOrdered(true);
-        assertEquals("CREATE SEQUENCE SEQ_NAME ORDER", change.generateStatement(oracleDatabase));
+        assertEquals("CREATE SEQUENCE SEQ_NAME ORDER", change.generateStatements(oracleDatabase)[0]);
 
         change.setMinValue(1);
         change.setMaxValue(2);
         change.setIncrementBy(3);
         change.setStartValue(4);
-        assertEquals("CREATE SEQUENCE SEQ_NAME START WITH 4 INCREMENT BY 3 MINVALUE 1 MAXVALUE 2 ORDER", change.generateStatement(oracleDatabase));
+        assertEquals("CREATE SEQUENCE SEQ_NAME START WITH 4 INCREMENT BY 3 MINVALUE 1 MAXVALUE 2 ORDER", change.generateStatements(oracleDatabase)[0]);
 
     }
 
@@ -46,27 +43,6 @@ public class CreateSequenceChangeTest extends AbstractChangeTest {
         change.setSequenceName("SEQ_NAME");
 
         assertEquals("Sequence SEQ_NAME has been created", change.getConfirmationMessage());
-    }
-
-    public void testIsApplicableTo() throws Exception {
-        CreateSequenceChange change = new CreateSequenceChange();
-        assertFalse(change.isApplicableTo(new HashSet<DatabaseStructure>(Arrays.asList(new DatabaseStructure[] {
-                createTableDatabaseStructure(),
-        }))));
-
-        assertFalse(change.isApplicableTo(new HashSet<DatabaseStructure>(Arrays.asList(new DatabaseStructure[] {
-                createSequenceDatabaseStructure(),
-        }))));
-
-        assertTrue(change.isApplicableTo(new HashSet<DatabaseStructure>(Arrays.asList(new DatabaseStructure[] {
-                createDatabaseSystem(),
-        }))));
-
-        assertFalse(change.isApplicableTo(new HashSet<DatabaseStructure>(Arrays.asList(new DatabaseStructure[] {
-                createDatabaseSystem(),
-                createDatabaseSystem(),
-        }))));
-
     }
 
     public void testCreateNode() throws Exception {

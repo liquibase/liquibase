@@ -9,8 +9,10 @@
       <sourceFolder url="file://$MODULE_DIR$/src/java" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/java-dbtest" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/src/java-test" isTestSource="true" />
+      <excludeFolder url="file://$MODULE_DIR$/build-dbtest" />
       <excludeFolder url="file://$MODULE_DIR$/build-reports" />
       <excludeFolder url="file://$MODULE_DIR$/build-web" />
+      <excludeFolder url="file://$MODULE_DIR$/ide" />
       <excludeFolder url="file://$MODULE_DIR$/lib-deps" />
       <excludeFolder url="file://$MODULE_DIR$/release" />
     </content>

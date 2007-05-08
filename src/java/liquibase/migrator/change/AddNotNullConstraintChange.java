@@ -1,18 +1,21 @@
 package liquibase.migrator.change;
 
-import liquibase.database.AbstractDatabase;
-import liquibase.database.struture.Column;
-import liquibase.database.struture.DatabaseStructure;
+import liquibase.database.MSSQLDatabase;
+import liquibase.database.MySQLDatabase;
+import liquibase.database.OracleDatabase;
+import liquibase.database.PostgresDatabase;
+import liquibase.migrator.UnsupportedChangeException;
+import liquibase.migrator.RollbackImpossibleException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import java.sql.SQLException;
-import java.util.Set;
 
 public class AddNotNullConstraintChange extends AbstractChange {
     private String tableName;
     private String columnName;
     private String defaultNullValue;
+    private String columnDataType;
 
 
     public AddNotNullConstraintChange() {
@@ -43,17 +46,64 @@ public class AddNotNullConstraintChange extends AbstractChange {
         this.defaultNullValue = defaultNullValue;
     }
 
+    public String getColumnDataType() {
+        return columnDataType;
+    }
 
-    public String generateStatement(AbstractDatabase database) {
-        return database.getAddNullConstraintSQL(getTableName(), getColumnName(), getDefaultNullValue());
+    public void setColumnDataType(String columnDataType) {
+        this.columnDataType = columnDataType;
+    }
+
+
+    private String generateUpdateStatement() {
+        return "UPDATE " + tableName + " SET " + columnName + "='" + defaultNullValue + "' WHERE " + columnName + " IS NULL";
+    }
+
+    public String[] generateStatements(MSSQLDatabase database) {
+        if (columnDataType == null) {
+            throw new RuntimeException("columnDataType is required to add not null constraints with MS-SQL");
+        }
+        return new String[]{
+                generateUpdateStatement(),
+                "ALTER TABLE " + getTableName() + " ALTER COLUMN " + getColumnName() + " " + columnDataType + " " + " NOT NULL"
+        };
+    }
+
+    public String[] generateStatements(MySQLDatabase database) {
+        if (columnDataType == null) {
+            throw new RuntimeException("columnDataType is required to add not null constraints with MySQL");
+        }
+        return new String[]{
+                generateUpdateStatement(),
+                "ALTER TABLE " + getTableName() + " MODIFY " + getColumnName() + " " + columnDataType + " NOT NULL"
+        };
+    }
+
+    public String[] generateStatements(OracleDatabase database) {
+        return new String[] {
+                generateUpdateStatement(),
+                "ALTER TABLE " + getTableName() + " MODIFY " + getColumnName() + " NOT NULL"
+        };
+    }
+
+    public String[] generateStatements(PostgresDatabase database) {
+        return new String[] {
+                generateUpdateStatement(),
+                "ALTER TABLE " + getTableName() + " ALTER COLUMN  " + getColumnName() + " SET NOT NULL"
+        };
+    }
+
+    protected AbstractChange createInverse() {
+        DropNotNullConstraintChange inverse = new DropNotNullConstraintChange();
+        inverse.setColumnName(getColumnName());
+        inverse.setTableName(getTableName());
+        inverse.setColumnDataType(getColumnDataType());
+
+        return inverse;
     }
 
     public String getConfirmationMessage() {
         return "Null Constraint has been added to the column " + getColumnName() + " of the table " + getTableName();
-    }
-
-    public boolean isApplicableTo(Set<DatabaseStructure> selectedDatabaseStructures) {
-        return selectedDatabaseStructures.size() == 1 && (selectedDatabaseStructures.iterator().next() instanceof Column);
     }
 
 
