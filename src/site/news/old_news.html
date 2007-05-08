@@ -18,6 +18,50 @@
 
             <div id="content">
                 <h1>Older LiquiBase News</h1>
+                <div class="newsEntry">
+                    <h2>12/12/2006 - Database Refactoring Tool 0.6.1 Released</h2>
+
+                    <p>Version 0.6.1 of the LGPL Sundog Database Refactoring Tool has been released. This is
+                        primarily a bug fix release with some minor feature additions.
+                    </p>
+                    <p>
+                        Issues resolved include:
+                    </p>
+                    <ul>
+                        <li>Classpath for command line migrator can now include .ear files</li>
+                        <li>Can specify a "database.migrator.should.run" system property that blocks the
+                            migrator from running if set to "false"</li>
+
+                        <li>Added a net.sundog.db.migrator.servlet.MigratorStatusServlet servlet that can used to see
+                            the migrator logs</li>
+                        <li>Added a MIGRATOR_FAIL_ON_ERROR web.xml context parameter that controls if an exception
+                            should be raised if an exception is thrown, or if the listener should just return.
+                            Throws an exception by default</li>
+                        <li>All database SQL is upper case.</li>
+                        <li>Fixed issues with postgres schemas and getTables() call</li>
+                        <li>Added retroweaver build for 1.4 JVMs</li>
+                    </ul>
+                </div>
+
+                <div class="newsEntry">
+                    <h2>11/10/2006 - Database Refactoring Tool 0.6 Released</h2>
+                    <p>Version 0.6 of the LGPL Sundog Database Refactoring Tool has been released. The primary new
+                        feature of this release is support for distributed locking among processes. This is
+                        especially useful when using the ServletMigrator with clustered application servers or other
+                        times you have multiple clients connecting to the same database.
+
+                    </p>
+                    <p>
+                        If, for some reason, a client crashes without cleaning up its lock, they can be queried and
+                        removed via the command-line migrator's "-listLocks" and "-releaseLocks"
+                        or by querying and updating the "DatabaseChangeLogLock" table.
+                    </p>
+                    <p>
+                        Beyond the locking system, this release includes several bug fixes including one that kept
+                        database URLs with "=" signs in them from working.
+
+                    </p>
+                </div>
 
                 <div class="newsEntry">
                     <h2>10/18/2006 - Database Refactoring Tool 0.5.1 Released</h2>

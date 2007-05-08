@@ -20,6 +20,44 @@
                 <h1>LiquiBase News</h1>
 
                 <div class="newsEntry">
+                    <h2>5/2007 - LiquiBase 0.9.0 Released</h2>
+                    <p>
+                        LiquiBase 0.9.0 has been released.  0.9.0 is feature complete and the last major release before the 1.0 release candidate series.
+                        Between 0.9 and 1.0-RC1 we are going focus on bug fixes and finalizing public APIs.
+                        We also hope to have a beta visual LiquiBase editor based on the <a href="http://squirrel-sql.sourceforge.net/">SQuirreL SQL client</a>
+                        available with the 1.0-RC1 release.  Other IDE plug-ins will become available after the 1.0 release.
+                    </p>
+                    <p>
+                        <b>Major changes in 0.9.0 include:</b>
+                    </p>
+                    <h3>Roll-Back Support</h3>
+                    <p>
+                        We have added support for custom and auto-generated rollback statements.
+                        This allows you to bring your database back to the state it was at an earler date.
+                        <a href="../manual/latest/rollback.html">Read More</a>
+                    </p>
+                    <h3>Maven Support</h3>
+                    <p>
+                        We have added beta support for Maven.  Although we followed the documentation on the Maven
+                        site for creating a plug-in, we we do not have the nessisary Maven experience to actually test it well.
+                        If you are interested in helping us test this functionality, please <a href="../community.html">contact us</a>.
+                    </p>
+                    <h3>Command-line migrator cleanup</h3>
+                    <p>
+                        We have changed the format of options and commands passed to the command line migrator
+                        to make it more user friendly.  We also removed logging by default, although it can be re-enabled with a flag.
+                        <a href="../manual/latest/command_line_migrator.html">Read More</a>
+                    </p>
+                    <h3>Ant changes</h3>
+                    <p>
+                        We changed the "migrationFiles" parameter changed to "changeLogFile" and no longer supports multiple change-logs.
+                    </p>
+                    <h3>Other</h3>
+                    <p>
+                        As we approach 1.0, we are continuing to fix bugs, improve performance, and improve documentation.
+                    </p>
+                </div>
+                <div class="newsEntry">
                     <h2>4/25/2007 - LiquiBase 0.8.1 Released</h2>
                     <p>
                         0.8.1 fixes a bug related to running LiquiBase without specifing an execution context.
@@ -123,50 +161,7 @@
                     </p>
                 </div>
 
-                <div class="newsEntry">
-                    <h2>12/12/2006 - Database Refactoring Tool 0.6.1 Released</h2>
 
-                    <p>Version 0.6.1 of the LGPL Sundog Database Refactoring Tool has been released. This is
-                        primarily a bug fix release with some minor feature additions.
-                    </p>
-                    <p>
-                        Issues resolved include:
-                    </p>
-                    <ul>
-                        <li>Classpath for command line migrator can now include .ear files</li>
-                        <li>Can specify a "database.migrator.should.run" system property that blocks the
-                            migrator from running if set to "false"</li>
-
-                        <li>Added a net.sundog.db.migrator.servlet.MigratorStatusServlet servlet that can used to see
-                            the migrator logs</li>
-                        <li>Added a MIGRATOR_FAIL_ON_ERROR web.xml context parameter that controls if an exception
-                            should be raised if an exception is thrown, or if the listener should just return.
-                            Throws an exception by default</li>
-                        <li>All database SQL is upper case.</li>
-                        <li>Fixed issues with postgres schemas and getTables() call</li>
-                        <li>Added retroweaver build for 1.4 JVMs</li>
-                    </ul>
-                </div>
-
-                <div class="newsEntry">
-                    <h2>11/10/2006 - Database Refactoring Tool 0.6 Released</h2>
-                    <p>Version 0.6 of the LGPL Sundog Database Refactoring Tool has been released. The primary new
-                        feature of this release is support for distributed locking among processes. This is
-                        especially useful when using the ServletMigrator with clustered application servers or other
-                        times you have multiple clients connecting to the same database.
-
-                    </p>
-                    <p>
-                        If, for some reason, a client crashes without cleaning up its lock, they can be queried and
-                        removed via the command-line migrator's "-listLocks" and "-releaseLocks"
-                        or by querying and updating the "DatabaseChangeLogLock" table.
-                    </p>
-                    <p>
-                        Beyond the locking system, this release includes several bug fixes including one that kept
-                        database URLs with "=" signs in them from working.
-
-                    </p>
-                </div>
                 <div style="text-align:right; width:100%">
                     <h2>
                         <a href="old_news.html">Older LiquiBase News</a>
