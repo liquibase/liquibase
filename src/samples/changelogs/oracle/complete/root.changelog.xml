@@ -177,6 +177,10 @@
         </createView>
     </changeSet>
 
+    <changeSet id="23" author="nvoxland">
+        <renameView oldViewName="personView" newViewName="v_person"/>
+    </changeSet>
+
     <include file="changelogs/oracle/complete/included.changelog.xml"/>
 
 </databaseChangeLog>

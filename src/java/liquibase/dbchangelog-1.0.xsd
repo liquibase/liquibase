@@ -88,6 +88,11 @@
         <xsd:attribute name="newTableName" type="xsd:string"/>
     </xsd:attributeGroup>
 
+    <xsd:attributeGroup name="renameViewAttributes">
+        <xsd:attribute name="oldViewName" type="xsd:string"/>
+        <xsd:attribute name="newViewName" type="xsd:string"/>
+    </xsd:attributeGroup>
+
     <xsd:attributeGroup name="tableNameAttribute">
         <xsd:attribute name="tableName" type="xsd:string"/>
     </xsd:attributeGroup>
@@ -270,6 +275,12 @@
         </xsd:complexType>
     </xsd:element>
 
+    <xsd:element name="renameView">
+        <xsd:complexType>
+            <xsd:attributeGroup ref="renameViewAttributes"/>
+        </xsd:complexType>
+    </xsd:element>
+
     <!-- dropTable -->
     <xsd:element name="dropTable">
         <xsd:complexType>
@@ -362,6 +373,7 @@
             <xsd:element ref="createTable" maxOccurs="unbounded"/>
             <xsd:element ref="dropTable" maxOccurs="unbounded"/>
             <xsd:element ref="createView" maxOccurs="unbounded"/>
+            <xsd:element ref="renameView" maxOccurs="unbounded"/>
             <xsd:element ref="dropView" maxOccurs="unbounded"/>
             <xsd:element ref="insert" maxOccurs="unbounded"/>
             <xsd:element ref="addColumn" maxOccurs="unbounded"/>

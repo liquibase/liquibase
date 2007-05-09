@@ -159,6 +159,9 @@
         </createView>
     </changeSet>
 
+    <changeSet id="21" author="nvoxland">
+        <renameView oldViewName="personView" newViewName="v_person"/>
+    </changeSet>
     <include file="changelogs/mssql/complete/included.changelog.xml"/>
 
 </databaseChangeLog>

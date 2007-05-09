@@ -31,6 +31,7 @@ public class ChangeFactory {
                     CreateViewChange.class,
                     DropViewChange.class,
                     MergeColumnChange.class,
+                    RenameViewChange.class,
             };
 
             try {

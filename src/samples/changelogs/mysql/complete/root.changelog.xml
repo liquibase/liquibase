@@ -159,6 +159,10 @@
         </createView>
     </changeSet>
 
+    <changeSet id="21" author="nvoxland">
+        <renameView oldViewName="personView" newViewName="v_person"/>
+    </changeSet>
+    
     <include file="changelogs/mysql/complete/included.changelog.xml"/>
 
 </databaseChangeLog>

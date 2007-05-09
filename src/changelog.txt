@@ -8,6 +8,7 @@ Changes in version 0.9.0
 - Performance improvements
 - New Database Refactorings:
   - Add View
+  - Rename View
   - Drop View
   - Merge Columns
 - Code refactorings

@@ -80,4 +80,8 @@
         </createView>
     </changeSet>
 
+    <changeSet id="11" author="nvoxland">
+        <renameView oldViewName="publicationView" newViewName="v_publication"/>
+    </changeSet>
+
 </databaseChangeLog>
