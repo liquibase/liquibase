@@ -1,9 +1,6 @@
 package liquibase.migrator.change;
 
 import liquibase.database.*;
-import liquibase.migrator.UnsupportedChangeException;
-import liquibase.migrator.RollbackImpossibleException;
-import liquibase.migrator.MigrationFailedException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -75,14 +72,16 @@ public class RenameColumnChange extends AbstractChange {
         return generateStatements();
     }
 
-    protected AbstractChange createInverse() {
+    protected AbstractChange[] createInverses() {
         RenameColumnChange inverse = new RenameColumnChange();
         inverse.setTableName(getTableName());
         inverse.setOldColumnName(getNewColumnName());
         inverse.setNewColumnName(getOldColumnName());
         inverse.setColumnDataType(getColumnDataType());
 
-        return inverse;
+        return new AbstractChange[] {
+                inverse
+        };
     }
 
     public String getConfirmationMessage() {

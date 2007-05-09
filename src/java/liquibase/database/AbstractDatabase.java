@@ -264,23 +264,41 @@ public abstract class AbstractDatabase {
     public void dropDatabaseObjects() throws SQLException, MigrationFailedException {
         Connection conn = getConnection();
         conn.setAutoCommit(false);
-        Statement selectStatement = null;
-        Statement dropStatement = null;
-
-        ResultSet rs = null;
         try {
-            selectStatement = conn.createStatement();
-            dropStatement = conn.createStatement();
 
-            //drop tables and their constraints
+            dropForeignKeys(conn);
+            dropTables(conn);
+
+            if (this.supportsSequences()) {
+                dropSequences(conn);
+            }
+
+            changeLogTableExists = false;
+        } finally {
+            if (conn != null) {
+                conn.commit();
+            }
+        }
+    }
+
+    protected void dropForeignKeys(Connection conn) throws SQLException {
+        //does nothing, assume tables will cascade constraints
+    }
+
+    protected ResultSet dropTables(Connection conn) throws SQLException, MigrationFailedException {
+        //drop tables and their constraints
+        ResultSet rs = null;
+        Statement dropStatement = null;
+        try {
             rs = conn.getMetaData().getTables(getCatalogName(), getSchemaName(), null, new String[]{"TABLE", "VIEW", "GLOBAL TEMPORARY", "LOCAL TEMPORARY", "ALIAS", "SYNONYM"});
+            dropStatement = conn.createStatement();
             while (rs.next()) {
                 String tableName = rs.getString("TABLE_NAME");
                 if (tableName.startsWith("BIN$")) { //oracle deleted table
                     continue;
                 } else if (tableName.startsWith("AQ$")) { //oracle AQ tables
                     continue;
-                } else if (tableName.equals(getDatabaseChangeLogLockTableName())) {
+                } else if (tableName.equalsIgnoreCase(getDatabaseChangeLogLockTableName())) {
                     continue;
                 } else if (getSystemTablesAndViews().contains(tableName)) {
                     continue;
@@ -302,27 +320,13 @@ public abstract class AbstractDatabase {
                     throw new MigrationFailedException("Error dropping table '" + tableName + "': " + e.getMessage(), e);
                 }
             }
-            rs.close();
-
-            if (this.supportsSequences()) {
-                dropSequences(conn);
-            }
-
-            changeLogTableExists = false;
-        } catch (Exception e) {
-            e.printStackTrace();
+            return rs;
         } finally {
-            if (rs != null) {
-                rs.close();
-            }
-            if (selectStatement != null) {
-                selectStatement.close();
-            }
             if (dropStatement != null) {
                 dropStatement.close();
             }
-            if (conn != null) {
-                conn.commit();
+            if (rs != null) {
+                rs.close();
             }
         }
     }

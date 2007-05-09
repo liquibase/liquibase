@@ -66,8 +66,30 @@ public class AddLookupTableChange extends AbstractChange {
         return constraintName;
     }
 
+    public String getFinalConstraintName() {
+        if (constraintName == null) {
+            return ("FK_"+getExistingTableName()+"_"+getNewTableName()).toUpperCase();
+        } else {
+            return constraintName;
+        }
+    }
+
     public void setConstraintName(String constraintName) {
         this.constraintName = constraintName;
+    }
+
+    protected AbstractChange[] createInverses() {
+        DropForeignKeyConstraintChange dropFK = new DropForeignKeyConstraintChange();
+        dropFK.setBaseTableName(getExistingTableName());
+        dropFK.setConstraintName(getFinalConstraintName());
+
+        DropTableChange dropTable = new DropTableChange();
+        dropTable.setTableName(getNewTableName());
+
+        return new AbstractChange[] {
+                dropFK,
+                dropTable,
+        };
     }
 
     private String[] generateCustomStatements(AbstractDatabase database) throws UnsupportedChangeException {
@@ -96,11 +118,7 @@ public class AddLookupTableChange extends AbstractChange {
         addFKChange.setReferencedTableName(getNewTableName());
         addFKChange.setReferencedColumnNames(getNewColumnName());
 
-        String constraintName = getConstraintName();
-        if (constraintName == null) {
-            constraintName = ("FK_"+getExistingTableName()+"_"+getNewTableName()).toUpperCase();
-        }
-        addFKChange.setConstraintName(constraintName);
+        addFKChange.setConstraintName(getFinalConstraintName());
         statements.addAll(Arrays.asList(addFKChange.generateStatements(database)));
 
         return statements.toArray(new String[statements.size()]);

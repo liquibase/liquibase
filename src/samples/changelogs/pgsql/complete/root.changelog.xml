@@ -210,7 +210,7 @@
     </changeSet>
 
     <changeSet id="27.1" author="nvoxland">
-        <addPrimaryKey tableName="address" columnNames="id"/>
+        <addPrimaryKey tableName="address" columnNames="id" constraintName="pk_address"/>
     </changeSet>
 
     <changeSet id="28" author="nvoxland">
@@ -249,6 +249,23 @@
             existingTableName="address" existingColumnName="state"
             newTableName="state" newColumnName="id" newColumnDataType="char(2)"/>
     </changeSet>
+
+    <changeSet id="30" author="nvoxland">
+        <addDefaultValue tableName="address" columnName="line2" defaultValue="N/A"/>
+    </changeSet>
+
+    <changeSet id="31" author="nvoxland">
+        <dropDefaultValue tableName="address" columnName="line2"/>
+    </changeSet>
+
+    <changeSet id="32" author="nvoxland">
+        <dropPrimaryKey tableName="address" constraintName="pk_address"/>
+    </changeSet>
+
+    <changeSet id="33" author="nvoxland">
+        <addPrimaryKey tableName="address" columnNames="id" constraintName="pk_address"/>
+    </changeSet>
+
 
     <include file="changelogs/pgsql/complete/included.changelog.xml"/>
 

@@ -211,7 +211,7 @@
     </changeSet>
 
     <changeSet id="27.1" author="nvoxland">
-        <addPrimaryKey tableName="address" columnNames="id"/>
+        <addPrimaryKey tableName="address" columnNames="id" constraintName="pk_address"/>
     </changeSet>
 
     <changeSet id="28" author="nvoxland">
@@ -238,7 +238,7 @@
             <column name="postalcode" value="58103"/>
         </insert>
         <insert tableName="address">
-            <column name="id" value="4"/>            
+            <column name="id" value="4"/>
             <column name="line1" value="123 Main Ave"/>
             <column name="city" value="City With No State"/>
             <column name="postalcode" value="00000"/>
@@ -250,6 +250,23 @@
             existingTableName="address" existingColumnName="state"
             newTableName="state" newColumnName="id" newColumnDataType="char(2)"/>
     </changeSet>
+
+    <changeSet id="30" author="nvoxland">
+        <addDefaultValue tableName="address" columnName="line2" defaultValue="N/A"/>
+    </changeSet>
+
+    <changeSet id="31" author="nvoxland">
+        <dropDefaultValue tableName="address" columnName="line2"/>
+    </changeSet>
+
+    <changeSet id="32" author="nvoxland">
+        <dropPrimaryKey tableName="address" constraintName="pk_address"/>
+    </changeSet>
+
+    <changeSet id="33" author="nvoxland">
+        <addPrimaryKey tableName="address" columnNames="id" constraintName="pk_address"/>
+    </changeSet>
+
 
     <include file="changelogs/oracle/complete/included.changelog.xml"/>
 

@@ -36,7 +36,10 @@ public class ChangeFactory {
                     DropForeignKeyConstraintChange.class,
                     AddLookupTableChange.class,
                     AddPrimaryKeyChange.class,
+                    DropPrimaryKeyChange.class,
                     AddAutoIncrementChange.class,
+                    AddDefaultValueChange.class,
+                    DropDefaultValueChange.class,
             };
 
             try {

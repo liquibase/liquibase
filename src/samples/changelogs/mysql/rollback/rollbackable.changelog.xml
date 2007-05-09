@@ -92,5 +92,30 @@
                 constraintName="fk_article_publication"
                 referencedTableName="publication" referencedColumnNames="id"/>
     </changeSet>
-    
+
+    <changeSet id="13" author="nvoxland">
+        <addLookupTable
+            existingTableName="publication" existingColumnName="isbn"
+            newTableName="isbn" newColumnName="code"
+            newColumnDataType="varchar(50)"/>
+    </changeSet>
+
+    <changeSet id="14" author="nvoxland">
+        <addDefaultValue tableName="publication" columnName="isbn" defaultValue="0000-0000"/>
+    </changeSet>
+
+    <changeSet id="15" author="nvoxland">
+        <createTable tableName="page">
+            <column name="id" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="text" type="text"/>
+            <column name="magazine_id" type="int"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="16" author="nvoxland">
+        <addPrimaryKey tableName="page" columnNames="id" constraintName="pk_page"/>
+    </changeSet>
+
 </databaseChangeLog>

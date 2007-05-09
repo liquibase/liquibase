@@ -196,7 +196,7 @@
     </changeSet>
 
     <changeSet id="25.2" author="nvoxland">
-        <addPrimaryKey tableName="address" columnNames="id"/>
+        <addPrimaryKey tableName="address" columnNames="id" constraintName="pk_address"/>
     </changeSet>
 
     <changeSet id="26" author="nvoxland">
@@ -230,6 +230,18 @@
         <addLookupTable
             existingTableName="address" existingColumnName="state"
             newTableName="state" newColumnName="id" newColumnDataType="char(2)"/>
+    </changeSet>
+
+    <changeSet id="28" author="nvoxland">
+        <addDefaultValue tableName="address" columnName="line2" defaultValue="N/A"/>
+    </changeSet>
+
+    <changeSet id="30" author="nvoxland">
+        <dropPrimaryKey tableName="address" constraintName="pk_address"/>
+    </changeSet>
+
+    <changeSet id="31" author="nvoxland">
+        <addPrimaryKey tableName="address" columnNames="id" constraintName="pk_address"/>
     </changeSet>
 
     <include file="changelogs/mssql/complete/included.changelog.xml"/>

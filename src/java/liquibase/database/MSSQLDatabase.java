@@ -1,8 +1,10 @@
 package liquibase.database;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.ResultSet;
+import liquibase.migrator.MigrationFailedException;
+import liquibase.migrator.UnsupportedChangeException;
+import liquibase.migrator.change.DropForeignKeyConstraintChange;
+
+import java.sql.*;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -106,5 +108,40 @@ public class MSSQLDatabase extends AbstractDatabase {
 
     public String getDropTableSQL(String tableName) {
         return "DROP TABLE " + tableName;
+    }
+
+    protected void dropForeignKeys(Connection conn) throws SQLException {
+        Statement dropStatement = null;
+        PreparedStatement fkStatement = null;
+        ResultSet rs = null;
+        try {
+            dropStatement = conn.createStatement();
+
+            fkStatement = conn.prepareStatement("select TABLE_NAME, CONSTRAINT_NAME from INFORMATION_SCHEMA.TABLE_CONSTRAINTS where CONSTRAINT_TYPE='FOREIGN KEY' AND TABLE_CATALOG=?");
+            fkStatement.setString(1, getCatalogName());
+            rs = fkStatement.executeQuery();
+            while (rs.next()) {
+                DropForeignKeyConstraintChange dropFK = new DropForeignKeyConstraintChange();
+                dropFK.setBaseTableName(rs.getString("TABLE_NAME"));
+                dropFK.setConstraintName(rs.getString("CONSTRAINT_NAME"));
+
+                try {
+                    dropStatement.execute(dropFK.generateStatements(this)[0]);
+                } catch (UnsupportedChangeException e) {
+                    throw new SQLException(e.getMessage());
+                }
+            }
+        } finally {
+            if (dropStatement != null) {
+                dropStatement.close();
+            }
+            if (fkStatement != null) {
+                fkStatement.close();
+            }
+            if (rs != null) {
+                rs.close();
+            }
+        }
+
     }
 }

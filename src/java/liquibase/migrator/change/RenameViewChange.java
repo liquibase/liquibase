@@ -47,12 +47,14 @@ public class RenameViewChange extends AbstractChange {
         return new String[] { "ALTER TABLE " + oldViewName + " RENAME TO " + newViewName };
     }
 
-    protected AbstractChange createInverse() {
+    protected AbstractChange[] createInverses() {
         RenameViewChange inverse = new RenameViewChange();
         inverse.setOldViewName(getNewViewName());
         inverse.setNewViewName(getOldViewName());
 
-        return inverse;
+        return new AbstractChange[] {
+                inverse
+        };
     }
 
     public String getConfirmationMessage() {

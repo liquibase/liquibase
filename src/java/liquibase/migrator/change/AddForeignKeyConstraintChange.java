@@ -108,12 +108,14 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
     }
 
 
-    protected AbstractChange createInverse() {
+    protected AbstractChange[] createInverses() {
         DropForeignKeyConstraintChange inverse = new DropForeignKeyConstraintChange();
         inverse.setBaseTableName(getBaseTableName());
         inverse.setConstraintName(getConstraintName());
 
-        return inverse;
+        return new AbstractChange[] {
+                inverse
+        };
     }
 
     public String getConfirmationMessage() {

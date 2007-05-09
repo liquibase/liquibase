@@ -1,8 +1,6 @@
 package liquibase.migrator.change;
 
 import liquibase.database.*;
-import liquibase.migrator.UnsupportedChangeException;
-import liquibase.migrator.RollbackImpossibleException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -46,12 +44,14 @@ public class RenameTableChange extends AbstractChange {
         return new String[] { "ALTER TABLE " + oldTableName + " RENAME TO " + newTableName };
     }
 
-    protected AbstractChange createInverse() {
+    protected AbstractChange[] createInverses() {
         RenameTableChange inverse = new RenameTableChange();
         inverse.setOldTableName(getNewTableName());
         inverse.setNewTableName(getOldTableName());
 
-        return inverse;
+        return new AbstractChange[] {
+                inverse
+        };
     }
 
     public String getConfirmationMessage() {

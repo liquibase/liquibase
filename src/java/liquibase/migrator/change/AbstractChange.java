@@ -14,8 +14,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.SortedMap;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.logging.Logger;
 
 /**
@@ -117,29 +116,37 @@ public abstract class AbstractChange {
     }
 
     protected String[] generateRollbackStatementsFromInverse(AbstractDatabase database) throws UnsupportedChangeException, RollbackImpossibleException {
-        AbstractChange inverse = createInverse();
-        if (inverse == null) {
+        AbstractChange[] inverses = createInverses();
+        if (inverses == null) {
             throw new RollbackImpossibleException("No inverse to "+getClass().getName()+" created");
-        } else if (database instanceof MSSQLDatabase) {
-            return inverse.generateStatements(((MSSQLDatabase) database));
-        } else if (database instanceof OracleDatabase) {
-            return inverse.generateStatements(((OracleDatabase) database));
-        } else if (database instanceof MySQLDatabase) {
-            return inverse.generateStatements(((MySQLDatabase) database));
-        } else if (database instanceof PostgresDatabase) {
-            return inverse.generateStatements(((PostgresDatabase) database));
-        } else {
-            throw new RuntimeException("Unknown database type: " + database.getClass().getName());
         }
+
+        List<String> statements = new ArrayList<String>();
+
+        for (AbstractChange inverse : inverses) {
+            if (database instanceof MSSQLDatabase) {
+                statements.addAll(Arrays.asList(inverse.generateStatements(((MSSQLDatabase) database))));
+            } else if (database instanceof OracleDatabase) {
+                statements.addAll(Arrays.asList(inverse.generateStatements(((OracleDatabase) database))));
+            } else if (database instanceof MySQLDatabase) {
+                statements.addAll(Arrays.asList(inverse.generateStatements(((MySQLDatabase) database))));
+            } else if (database instanceof PostgresDatabase) {
+                statements.addAll(Arrays.asList(inverse.generateStatements(((PostgresDatabase) database))));
+            } else {
+                throw new RuntimeException("Unknown database type: " + database.getClass().getName());
+            }
+        }
+
+        return statements.toArray(new String[statements.size()]);
     }
 
     public boolean canRollBack() {
-        return createInverse() != null;
+        return createInverses() != null;
     }
 
     public abstract String getConfirmationMessage();
 
-    protected AbstractChange createInverse() {
+    protected AbstractChange[] createInverses() {
         return null;
     }
 

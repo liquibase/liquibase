@@ -132,6 +132,14 @@
         <xsd:complexType>
             <xsd:attribute name="tableName" type="xsd:string"/>
             <xsd:attribute name="columnNames" type="xsd:string"/>
+            <xsd:attribute name="constraintName" type="xsd:string"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="dropPrimaryKey">
+        <xsd:complexType>
+            <xsd:attribute name="tableName" type="xsd:string"/>
+            <xsd:attribute name="constraintName" type="xsd:string"/>
         </xsd:complexType>
     </xsd:element>
 
@@ -151,6 +159,21 @@
             <xsd:attribute name="tableName" type="xsd:string"/>
             <xsd:attribute name="columnName" type="xsd:string"/>
             <xsd:attribute name="columnDataType" type="xsd:string"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="addDefaultValue">
+        <xsd:complexType>
+            <xsd:attribute name="tableName" type="xsd:string"/>
+            <xsd:attribute name="columnName" type="xsd:string"/>
+            <xsd:attribute name="defaultValue" type="xsd:string"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="dropDefaultValue">
+        <xsd:complexType>
+            <xsd:attribute name="tableName" type="xsd:string"/>
+            <xsd:attribute name="columnName" type="xsd:string"/>
         </xsd:complexType>
     </xsd:element>
 
@@ -447,8 +470,11 @@
             <xsd:element ref="addForeignKeyConstraint" maxOccurs="unbounded"/>
             <xsd:element ref="dropForeignKeyConstraint" maxOccurs="unbounded"/>
             <xsd:element ref="addPrimaryKey" maxOccurs="unbounded"/>
+            <xsd:element ref="dropPrimaryKey" maxOccurs="unbounded"/>
             <xsd:element ref="addLookupTable" maxOccurs="unbounded"/>
             <xsd:element ref="addAutoIncrement" maxOccurs="unbounded"/>
+            <xsd:element ref="addDefaultValue" maxOccurs="unbounded"/>
+            <xsd:element ref="dropDefaultValue" maxOccurs="unbounded"/>
             <xsd:element ref="rollback" maxOccurs="1"/>
 
         </xsd:choice>

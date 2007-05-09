@@ -2,7 +2,6 @@ package liquibase.migrator.change;
 
 import liquibase.database.*;
 import liquibase.migrator.UnsupportedChangeException;
-import liquibase.migrator.RollbackImpossibleException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -108,11 +107,13 @@ public class CreateSequenceChange extends AbstractChange {
         return generateStatements();
     }
 
-    protected AbstractChange createInverse() {
+    protected AbstractChange[] createInverses() {
         DropSequenceChange inverse = new DropSequenceChange();
         inverse.setSequenceName(getSequenceName());
 
-        return inverse;
+        return new AbstractChange[] {
+                inverse
+        };
     }
 
     public String getConfirmationMessage() {

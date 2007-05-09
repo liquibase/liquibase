@@ -16,6 +16,9 @@ Changes in version 0.9.0
   - Add Lookup Table
   - Add Primary Key
   - Add Auto-Increment
+  - Add Default Value
+  - Drop Default Value
+  - Drop Primary Key
 
 - Code refactorings
 

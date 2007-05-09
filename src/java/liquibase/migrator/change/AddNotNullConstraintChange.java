@@ -4,12 +4,9 @@ import liquibase.database.MSSQLDatabase;
 import liquibase.database.MySQLDatabase;
 import liquibase.database.OracleDatabase;
 import liquibase.database.PostgresDatabase;
-import liquibase.migrator.UnsupportedChangeException;
-import liquibase.migrator.RollbackImpossibleException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import java.sql.SQLException;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -109,13 +106,15 @@ public class AddNotNullConstraintChange extends AbstractChange {
         return statements.toArray(new String[statements.size()]);
     }
 
-    protected AbstractChange createInverse() {
+    protected AbstractChange[] createInverses() {
         DropNotNullConstraintChange inverse = new DropNotNullConstraintChange();
         inverse.setColumnName(getColumnName());
         inverse.setTableName(getTableName());
         inverse.setColumnDataType(getColumnDataType());
 
-        return inverse;
+        return new AbstractChange[] {
+                inverse
+        };
     }
 
     public String getConfirmationMessage() {

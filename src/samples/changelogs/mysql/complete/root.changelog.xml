@@ -196,7 +196,7 @@
     </changeSet>
 
     <changeSet id="25.2" author="nvoxland">
-        <addPrimaryKey tableName="address" columnNames="id"/>
+        <addPrimaryKey tableName="address" columnNames="id" constraintName="pk_address"/>
     </changeSet>
 
     <changeSet id="25.3" author="nvoxland">
@@ -234,6 +234,29 @@
         <addLookupTable
             existingTableName="address" existingColumnName="state"
             newTableName="state" newColumnName="id" newColumnDataType="char(2)"/>
+    </changeSet>
+
+    <changeSet id="28" author="nvoxland">
+        <addDefaultValue tableName="address" columnName="line2" defaultValue="N/A"/>
+    </changeSet>
+
+    <changeSet id="29" author="nvoxland">
+        <dropDefaultValue tableName="address" columnName="line2"/>
+    </changeSet>
+
+    <changeSet id="30" author="nvoxland">
+        <createTable tableName="pkTest">
+            <column name="id" type="int"/>
+            <column name="value" type="varchar(50)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="31" author="nvoxland">
+        <addPrimaryKey tableName="pkTest" columnNames="id" constraintName="pk_pktest"/>
+    </changeSet>
+
+    <changeSet id="32" author="nvoxland">
+        <dropPrimaryKey tableName="pkTest" constraintName="pk_pktest"/>
     </changeSet>
 
     <include file="changelogs/mysql/complete/included.changelog.xml"/>

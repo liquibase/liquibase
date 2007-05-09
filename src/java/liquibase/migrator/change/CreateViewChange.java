@@ -67,10 +67,12 @@ public class CreateViewChange extends AbstractChange {
         return element;
     }
 
-    protected AbstractChange createInverse() {
+    protected AbstractChange[] createInverses() {
         DropViewChange inverse = new DropViewChange();
         inverse.setViewName(getViewName());
 
-        return inverse;
+        return new AbstractChange[] {
+                inverse
+        };
     }
 }
