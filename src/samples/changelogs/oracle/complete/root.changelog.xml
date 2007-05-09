@@ -150,5 +150,33 @@
     <changeSet id="18" author="nvoxland">
         <dropSequence sequenceName="seq_test"/>
     </changeSet>
+
+    <changeSet id="19" author="nvoxland">
+        <createView viewName="personView">
+            select firstname, lastname from person
+        </createView>
+    </changeSet>
+
+    <changeSet id="20" author="nvoxland">
+        <dropView viewName="personView"/>
+    </changeSet>
+
+    <changeSet id="21" author="nvoxland">
+        <mergeColumns
+                tableName="person"
+                column1Name="firstname"
+                joinString=" "
+                column2Name="lastname"
+                finalColumnName="fullname"
+                finalColumnType="varchar(100)"/>
+    </changeSet>
+
+    <changeSet id="22" author="nvoxland">
+        <createView viewName="personView">
+            select id, fullname from person
+        </createView>
+    </changeSet>
+
     <include file="changelogs/oracle/complete/included.changelog.xml"/>
+
 </databaseChangeLog>

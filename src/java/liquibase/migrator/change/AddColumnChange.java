@@ -31,24 +31,24 @@ public class AddColumnChange extends AbstractChange {
         this.column = column;
     }
 
-    private String[] generateStatements(AbstractDatabase database) {
+    private String[] generateCommonStatements(AbstractDatabase database) {
         return new String[] { "ALTER TABLE " + getTableName() + " ADD " + getColumn().getName() + " " + database.getColumnType(getColumn()) };
     }
 
     public String[] generateStatements(MSSQLDatabase database) {
-        return generateStatements(((AbstractDatabase) database));
+        return generateCommonStatements(((AbstractDatabase) database));
     }
 
     public String[] generateStatements(OracleDatabase database) {
-        return generateStatements(((AbstractDatabase) database));
+        return generateCommonStatements(((AbstractDatabase) database));
     }
 
     public String[] generateStatements(MySQLDatabase database) {
-        return generateStatements(((AbstractDatabase) database));
+        return generateCommonStatements(((AbstractDatabase) database));
     }
 
     public String[] generateStatements(PostgresDatabase database) {
-        return generateStatements(((AbstractDatabase) database));
+        return generateCommonStatements(((AbstractDatabase) database));
     }
 
     protected AbstractChange createInverse() {

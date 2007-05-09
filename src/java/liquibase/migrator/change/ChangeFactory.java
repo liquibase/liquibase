@@ -28,6 +28,9 @@ public class ChangeFactory {
                     RenameTableChange.class,
                     AddNotNullConstraintChange.class,
                     DropNotNullConstraintChange.class,
+                    CreateViewChange.class,
+                    DropViewChange.class,
+                    MergeColumnChange.class,
             };
 
             try {

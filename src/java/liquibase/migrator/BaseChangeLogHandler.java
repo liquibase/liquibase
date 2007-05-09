@@ -225,6 +225,8 @@ public abstract class BaseChangeLogHandler extends DefaultHandler {
                 if (textString != null) {
                     if (change instanceof RawSQLChange) {
                         ((RawSQLChange) change).setSql(textString);
+                    } else if (change instanceof CreateViewChange) {
+                        ((CreateViewChange) change).setSelectQuery(textString);
                     } else {
                         throw new RuntimeException("Unexpected text in " + change.getTagName());
                     }

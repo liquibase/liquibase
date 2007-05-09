@@ -65,4 +65,11 @@
     <changeSet id="8" author="nvoxland">
         <addNotNullConstraint tableName="publication" columnName="title" columnDataType="varchar(50)" defaultNullValue="-1"/>
     </changeSet>
+
+    <changeSet id="9" author="nvoxland">
+        <createView viewName="publicationView">
+            select title, isbn from publication
+        </createView>
+    </changeSet>
+    
 </databaseChangeLog>

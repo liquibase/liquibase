@@ -6,6 +6,10 @@ import java.sql.SQLException;
 public class MySQLDatabase extends AbstractDatabase {
     public static final String PRODUCT_NAME = "MySQL";
 
+    public String getProductName() {
+        return "MySQL";
+    }
+
     public boolean isCorrectDatabaseImplementation(Connection conn) throws SQLException {
         return PRODUCT_NAME.equalsIgnoreCase(conn.getMetaData().getDatabaseProductName());
     }

@@ -14,6 +14,10 @@ import java.sql.Statement;
 public class OracleDatabase extends AbstractDatabase {
     public static final String PRODUCT_NAME = "oracle";
 
+    public String getProductName() {
+        return "Oracle";
+    }
+
     public boolean supportsInitiallyDeferrableColumns() {
         return true;
     }

@@ -182,7 +182,8 @@ public class CommandLineMigrator {
         stream.println("Default value for parameters can be stored in a file called");
         stream.println("'liquibase.properties' that is read from the current working directory.");
         stream.println("");
-        stream.println("Full documentation is available at http://www.liquibase.org/manual/latest/command_line_migrator.html");
+        stream.println("Full documentation is available at");
+        stream.println("http://www.liquibase.org/manual/latest/command_line_migrator.html");
         stream.println("");
     }
 

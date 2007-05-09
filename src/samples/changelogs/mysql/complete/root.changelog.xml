@@ -132,5 +132,33 @@
     <changeSet id="15" author="nvoxland" runAlways="true">
         <sql>update liquibaseRunInfo set timesRan=timesRan+1</sql>
     </changeSet>
+
+    <changeSet id="16" author="nvoxland">
+        <createView viewName="personView">
+            select firstname, lastname from person
+        </createView>
+    </changeSet>
+
+    <changeSet id="18" author="nvoxland">
+        <dropView viewName="personView"/>
+    </changeSet>
+
+    <changeSet id="19" author="nvoxland">
+        <mergeColumns
+                tableName="person"
+                column1Name="firstname"
+                joinString=" "
+                column2Name="lastname"
+                finalColumnName="fullname"
+                finalColumnType="varchar(100)"/>
+    </changeSet>
+
+    <changeSet id="20" author="nvoxland">
+        <createView viewName="personView">
+            select id, fullname from person
+        </createView>
+    </changeSet>
+
     <include file="changelogs/mysql/complete/included.changelog.xml"/>
+
 </databaseChangeLog>

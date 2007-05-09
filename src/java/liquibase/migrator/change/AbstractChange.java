@@ -64,7 +64,7 @@ public abstract class AbstractChange {
     }
 
 
-    private String[] generateStatements(AbstractDatabase database) throws UnsupportedChangeException {
+    public final String[] generateStatements(AbstractDatabase database) throws UnsupportedChangeException {
         if (database instanceof MSSQLDatabase) {
             return generateStatements(((MSSQLDatabase) database));
         } else if (database instanceof OracleDatabase) {

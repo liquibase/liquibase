@@ -20,7 +20,7 @@ public class CreateTableChange extends AbstractChange {
         columns = new ArrayList<ColumnConfig>();
     }
 
-    private String[] generateStatements(AbstractDatabase database) {
+    private String[] generateCommonStatements(AbstractDatabase database) {
         StringBuffer fkConstraints = new StringBuffer();
 
         StringBuffer buffer = new StringBuffer();
@@ -87,19 +87,19 @@ public class CreateTableChange extends AbstractChange {
     }
 
     public String[] generateStatements(MSSQLDatabase database) {
-        return generateStatements(((AbstractDatabase) database));
+        return generateCommonStatements(((AbstractDatabase) database));
     }
 
     public String[] generateStatements(OracleDatabase database) {
-        return generateStatements(((AbstractDatabase) database));
+        return generateCommonStatements(((AbstractDatabase) database));
     }
 
     public String[] generateStatements(MySQLDatabase database) {
-        return generateStatements(((AbstractDatabase) database));
+        return generateCommonStatements(((AbstractDatabase) database));
     }
 
     public String[] generateStatements(PostgresDatabase database) {
-        return generateStatements(((AbstractDatabase) database));
+        return generateCommonStatements(((AbstractDatabase) database));
     }
 
     protected AbstractChange createInverse() {

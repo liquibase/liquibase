@@ -74,4 +74,10 @@
         <createSequence sequenceName="seq_publication_id"/>
     </changeSet>
 
+    <changeSet id="10" author="nvoxland">
+        <createView viewName="publicationView">
+            select title, isbn from publication
+        </createView>
+    </changeSet>
+
 </databaseChangeLog>

@@ -17,6 +17,10 @@ public class PostgresDatabase extends AbstractDatabase {
         systemTablesAndViews.add("pg_logdir_ls");
     }
 
+    public String getProductName() {
+        return "PostgrSQL";
+    }
+
     public Set<String> getSystemTablesAndViews() {
         return systemTablesAndViews;
     }

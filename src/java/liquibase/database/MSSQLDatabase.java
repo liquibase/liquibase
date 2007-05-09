@@ -10,6 +10,10 @@ public class MSSQLDatabase extends AbstractDatabase {
     public static final String PRODUCT_NAME = "Microsoft SQL Server";
     private Set<String> systemTablesAndViews = new HashSet<String>();
 
+    public String getProductName() {
+        return "Microsoft SQL";
+    }
+
     public MSSQLDatabase() {
         systemTablesAndViews.add("syscolumns");
         systemTablesAndViews.add("syscomments");

@@ -224,6 +224,17 @@
         </xsd:complexType>
     </xsd:element>
 
+    <!-- Children for createView -->
+    <xsd:element name="createView">
+        <xsd:complexType>
+            <xsd:simpleContent>
+                <xsd:extension base="xsd:string">
+                    <xsd:attribute name="viewName" type="xsd:string"/>
+                </xsd:extension>
+            </xsd:simpleContent>
+        </xsd:complexType>
+    </xsd:element>
+
     <!-- Children for insert -->
     <xsd:element name="insert">
         <xsd:complexType>
@@ -266,6 +277,12 @@
         </xsd:complexType>
     </xsd:element>
 
+    <xsd:element name="dropView">
+        <xsd:complexType>
+            <xsd:attribute name="viewName" type="xsd:string"/>
+        </xsd:complexType>
+    </xsd:element>
+
     <!-- renameColumn -->
     <xsd:element name="renameColumn">
         <xsd:complexType>
@@ -285,6 +302,17 @@
                 <xsd:element ref="column" maxOccurs="unbounded"/>
             </xsd:sequence>
             <xsd:attributeGroup ref="tableNameAttribute"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="mergeColumns">
+        <xsd:complexType>
+            <xsd:attributeGroup ref="tableNameAttribute"/>
+            <xsd:attribute name="column1Name" type="xsd:string"/>
+            <xsd:attribute name="joinString" type="xsd:string"/>
+            <xsd:attribute name="column2Name" type="xsd:string"/>
+            <xsd:attribute name="finalColumnName" type="xsd:string"/>
+            <xsd:attribute name="finalColumnType" type="xsd:string"/>
         </xsd:complexType>
     </xsd:element>
 
@@ -333,6 +361,8 @@
         <xsd:choice>
             <xsd:element ref="createTable" maxOccurs="unbounded"/>
             <xsd:element ref="dropTable" maxOccurs="unbounded"/>
+            <xsd:element ref="createView" maxOccurs="unbounded"/>
+            <xsd:element ref="dropView" maxOccurs="unbounded"/>
             <xsd:element ref="insert" maxOccurs="unbounded"/>
             <xsd:element ref="addColumn" maxOccurs="unbounded"/>
             <xsd:element ref="comment" maxOccurs="unbounded"/>
@@ -341,6 +371,7 @@
             <xsd:element ref="renameColumn" maxOccurs="unbounded"/>
             <xsd:element ref="dropColumn" maxOccurs="unbounded"/>
             <xsd:element ref="modifyColumn" maxOccurs="unbounded"/>
+            <xsd:element ref="mergeColumns" maxOccurs="unbounded"/>
             <xsd:element ref="createSequence" maxOccurs="unbounded"/>
             <xsd:element ref="alterSequence" maxOccurs="unbounded"/>
             <xsd:element ref="dropSequence" maxOccurs="unbounded"/>

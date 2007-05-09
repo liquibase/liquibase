@@ -475,4 +475,6 @@ public abstract class AbstractDatabase {
     public String getAutoIncrementClause() {
         return "AUTO_INCREMENT";
     }
+
+    public abstract String getProductName();
 }

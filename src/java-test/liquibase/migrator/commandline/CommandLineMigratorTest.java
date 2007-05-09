@@ -11,15 +11,15 @@ public class CommandLineMigratorTest extends TestCase {
 
     public void testMigrateWithAllParameters() throws Exception {
         String[] args = new String[]{
-                "-driver=DRIVER",
-                "-username=USERNAME",
-                "-password=PASSWORD",
-                "-url=URL",
-                "-migrationFile=FILE",
-                "-classpath=CLASSPATH;CLASSPATH2",
-                "-contexts=CONTEXT1,CONTEXT2",
-                "-promptForNonLocalDatabase=true",
-                "-dropAllFirst=true",
+                "--driver=DRIVER",
+                "--username=USERNAME",
+                "--password=PASSWORD",
+                "--url=URL",
+                "--migrationFile=FILE",
+                "--classpath=CLASSPATH;CLASSPATH2",
+                "--contexts=CONTEXT1,CONTEXT2",
+                "--promptForNonLocalDatabase=true",
+                "--dropAllFirst=true",
                 "migrate",
         };
 
@@ -40,8 +40,8 @@ public class CommandLineMigratorTest extends TestCase {
 
     public void testFalseBooleanParameters() throws Exception {
         String[] args = new String[]{
-                "-promptForNonLocalDatabase=false",
-                "-dropAllFirst=false",
+                "--promptForNonLocalDatabase=false",
+                "--dropAllFirst=false",
                 "migrate",
         };
 
@@ -56,8 +56,8 @@ public class CommandLineMigratorTest extends TestCase {
 
     public void testTrueBooleanParameters() throws Exception {
         String[] args = new String[]{
-                "-promptForNonLocalDatabase=true",
-                "-dropAllFirst=true",
+                "--promptForNonLocalDatabase=true",
+                "--dropAllFirst=true",
                 "migrate",
         };
 
@@ -73,7 +73,7 @@ public class CommandLineMigratorTest extends TestCase {
     public void testParameterWithoutDash() throws Exception {
         String[] args = new String[]{
                 "promptForNonLocalDatabase=true",
-                "-dropAllFirst=true",
+                "--dropAllFirst=true",
                 "migrate",
         };
 
@@ -82,15 +82,15 @@ public class CommandLineMigratorTest extends TestCase {
             cli.parseOptions(args);
             fail("Should have thrown an exception");
         } catch (CommandLineParsingException e) {
-            assertEquals("Parameters must start with a '-'", e.getMessage());
+            assertEquals("Parameters must start with a '--'", e.getMessage());
         }
 
     }
 
     public void testParameterWithoutEquals() throws Exception {
         String[] args = new String[]{
-                "-promptForNonLocalDatabase", "true",
-                "-dropAllFirst=true",
+                "--promptForNonLocalDatabase", "true",
+                "--dropAllFirst=true",
                 "migrate",
         };
 
@@ -99,14 +99,14 @@ public class CommandLineMigratorTest extends TestCase {
             cli.parseOptions(args);
             fail("Should have thrown an exception");
         } catch (CommandLineParsingException e) {
-            assertEquals("Could not parse '-promptForNonLocalDatabase'", e.getMessage());
+            assertEquals("Could not parse '--promptForNonLocalDatabase'", e.getMessage());
         }
     }
 
     public void testUnknownParameter() throws Exception {
         String[] args = new String[]{
-                "-promptForNonLocalDatabase=true",
-                "-badParam=here",
+                "--promptForNonLocalDatabase=true",
+                "--badParam=here",
                 "migrate",
         };
 
@@ -135,7 +135,7 @@ public class CommandLineMigratorTest extends TestCase {
         CommandLineMigrator cli = new CommandLineMigrator();
         System.setProperty("os.name", "Windows XP");
         cli.classpath = "c:\\;c:\\windows\\";
-
+        cli.applyDefaults();
         cli.configureClassLoader();
 
         URL[] classloaderURLs = ((URLClassLoader) cli.classLoader).getURLs();
@@ -148,6 +148,7 @@ public class CommandLineMigratorTest extends TestCase {
         CommandLineMigrator cli = new CommandLineMigrator();
         System.setProperty("os.name", "Linux");
         cli.classpath = "/tmp:/";
+        cli.applyDefaults();
 
         cli.configureClassLoader();
 

@@ -6,6 +6,10 @@ Changes in version 0.9.0
 - Rollback support
 - Initial Maven support
 - Performance improvements
+- New Database Refactorings:
+  - Add View
+  - Drop View
+  - Merge Columns
 - Code refactorings
 
 Changes in version 0.8.2 (2007.4.30)
