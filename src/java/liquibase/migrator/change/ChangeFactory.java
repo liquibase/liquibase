@@ -32,6 +32,11 @@ public class ChangeFactory {
                     DropViewChange.class,
                     MergeColumnChange.class,
                     RenameViewChange.class,
+                    AddForeignKeyConstraintChange.class,
+                    DropForeignKeyConstraintChange.class,
+                    AddLookupTableChange.class,
+                    AddPrimaryKeyChange.class,
+                    AddAutoIncrementChange.class,
             };
 
             try {

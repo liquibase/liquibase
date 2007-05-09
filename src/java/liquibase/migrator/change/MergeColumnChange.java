@@ -71,7 +71,7 @@ public class MergeColumnChange extends AbstractChange {
         this.finalColumnType = finalColumnType;
     }
 
-    public String[] generateCommonStatements(AbstractDatabase database) throws UnsupportedChangeException {
+    private String[] generateCommonStatements(AbstractDatabase database) throws UnsupportedChangeException {
 
         List<String> statements = new ArrayList<String>();
 

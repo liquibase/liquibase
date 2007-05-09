@@ -76,4 +76,21 @@
         <renameView oldViewName="publicationView" newViewName="v_publication"/>
     </changeSet>
 
+    <changeSet id="11" author="nvoxland">
+        <createTable tableName="article">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="title" type="varchar(255)"/>
+            <column name="publication_id" type="int"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="12" author="nvoxland">
+        <addForeignKeyConstraint
+                baseTableName="article" baseColumnNames="publication_id"
+                constraintName="fk_article_publication"
+                referencedTableName="publication" referencedColumnNames="id"/>
+    </changeSet>
+
 </databaseChangeLog>

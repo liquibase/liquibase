@@ -11,6 +11,12 @@ Changes in version 0.9.0
   - Rename View
   - Drop View
   - Merge Columns
+  - Add Foreign-Key Constraint
+  - Drop Foreign-Key Constraint
+  - Add Lookup Table
+  - Add Primary Key
+  - Add Auto-Increment
+
 - Code refactorings
 
 Changes in version 0.8.2 (2007.4.30)

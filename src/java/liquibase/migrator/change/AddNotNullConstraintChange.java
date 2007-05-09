@@ -10,6 +10,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import java.sql.SQLException;
+import java.util.List;
+import java.util.ArrayList;
 
 public class AddNotNullConstraintChange extends AbstractChange {
     private String tableName;
@@ -63,34 +65,48 @@ public class AddNotNullConstraintChange extends AbstractChange {
         if (columnDataType == null) {
             throw new RuntimeException("columnDataType is required to add not null constraints with MS-SQL");
         }
-        return new String[]{
-                generateUpdateStatement(),
-                "ALTER TABLE " + getTableName() + " ALTER COLUMN " + getColumnName() + " " + columnDataType + " " + " NOT NULL"
-        };
+
+        List<String> statements = new ArrayList<String>();
+        if (defaultNullValue != null) {
+            statements.add(generateUpdateStatement());
+        }
+        statements.add("ALTER TABLE " + getTableName() + " ALTER COLUMN " + getColumnName() + " " + columnDataType + " " + " NOT NULL");
+
+        return statements.toArray(new String[statements.size()]);
     }
 
     public String[] generateStatements(MySQLDatabase database) {
         if (columnDataType == null) {
             throw new RuntimeException("columnDataType is required to add not null constraints with MySQL");
         }
-        return new String[]{
-                generateUpdateStatement(),
-                "ALTER TABLE " + getTableName() + " MODIFY " + getColumnName() + " " + columnDataType + " NOT NULL"
-        };
+
+        List<String> statements = new ArrayList<String>();
+        if (defaultNullValue != null) {
+            statements.add(generateUpdateStatement());
+        }
+        statements.add("ALTER TABLE " + getTableName() + " MODIFY " + getColumnName() + " " + columnDataType + " NOT NULL");
+
+        return statements.toArray(new String[statements.size()]);
     }
 
     public String[] generateStatements(OracleDatabase database) {
-        return new String[] {
-                generateUpdateStatement(),
-                "ALTER TABLE " + getTableName() + " MODIFY " + getColumnName() + " NOT NULL"
-        };
+        List<String> statements = new ArrayList<String>();
+        if (defaultNullValue != null) {
+            statements.add(generateUpdateStatement());
+        }
+        statements.add("ALTER TABLE " + getTableName() + " MODIFY " + getColumnName() + " NOT NULL");
+
+        return statements.toArray(new String[statements.size()]);
     }
 
     public String[] generateStatements(PostgresDatabase database) {
-        return new String[] {
-                generateUpdateStatement(),
-                "ALTER TABLE " + getTableName() + " ALTER COLUMN  " + getColumnName() + " SET NOT NULL"
-        };
+        List<String> statements = new ArrayList<String>();
+        if (defaultNullValue != null) {
+            statements.add(generateUpdateStatement());
+        }
+        statements.add("ALTER TABLE " + getTableName() + " ALTER COLUMN  " + getColumnName() + " SET NOT NULL");
+
+        return statements.toArray(new String[statements.size()]);
     }
 
     protected AbstractChange createInverse() {

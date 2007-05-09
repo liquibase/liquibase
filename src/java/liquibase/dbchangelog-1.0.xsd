@@ -128,6 +128,42 @@
     </xsd:attributeGroup>
 
 
+    <xsd:element name="addPrimaryKey">
+        <xsd:complexType>
+            <xsd:attribute name="tableName" type="xsd:string"/>
+            <xsd:attribute name="columnNames" type="xsd:string"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="addLookupTable">
+        <xsd:complexType>
+            <xsd:attribute name="existingTableName" type="xsd:string"/>
+            <xsd:attribute name="existingColumnName" type="xsd:string"/>
+            <xsd:attribute name="newTableName" type="xsd:string"/>
+            <xsd:attribute name="newColumnName" type="xsd:string"/>
+            <xsd:attribute name="newColumnDataType" type="xsd:string"/>
+            <xsd:attribute name="constraintName" type="xsd:string"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="addAutoIncrement">
+        <xsd:complexType>
+            <xsd:attribute name="tableName" type="xsd:string"/>
+            <xsd:attribute name="columnName" type="xsd:string"/>
+            <xsd:attribute name="columnDataType" type="xsd:string"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:attributeGroup name="addForeignKeyConstraintAttrib">
+        <xsd:attribute name="baseTableName" type="xsd:string"/>
+        <xsd:attribute name="baseColumnNames" type="xsd:string"/>
+        <xsd:attribute name="constraintName" type="xsd:string"/>
+        <xsd:attribute name="referencedTableName" type="xsd:string"/>
+        <xsd:attribute name="referencedColumnNames" type="xsd:string"/>
+        <xsd:attribute name="deferrable" type="xsd:boolean"/>
+        <xsd:attribute name="initiallyDeferred" type="xsd:boolean"/>
+    </xsd:attributeGroup>
+
     <xsd:attributeGroup name="addNotNullConstraintAttrib">
         <xsd:attribute name="tableName" type="xsd:string"/>
         <xsd:attribute name="columnName" type="xsd:string"/>
@@ -139,6 +175,12 @@
     <xsd:element name="addNotNullConstraint">
         <xsd:complexType>
             <xsd:attributeGroup ref="addNotNullConstraintAttrib"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="addForeignKeyConstraint">
+        <xsd:complexType>
+            <xsd:attributeGroup ref="addForeignKeyConstraintAttrib"/>
         </xsd:complexType>
     </xsd:element>
 
@@ -188,6 +230,17 @@
         </xsd:complexType>
     </xsd:element>
 
+
+    <xsd:attributeGroup name="dropForeignKeyConstraintAttrib">
+        <xsd:attribute name="baseTableName" type="xsd:string"/>
+        <xsd:attribute name="constraintName" type="xsd:string"/>
+    </xsd:attributeGroup>
+
+    <xsd:element name="dropForeignKeyConstraint">
+        <xsd:complexType>
+            <xsd:attributeGroup ref="dropForeignKeyConstraintAttrib"/>
+        </xsd:complexType>
+    </xsd:element>
 
     <xsd:attributeGroup name="dropNotNullConstraintAttrib">
         <xsd:attribute name="tableName" type="xsd:string"/>
@@ -391,6 +444,11 @@
             <xsd:element ref="dropIndex" maxOccurs="unbounded"/>
             <xsd:element ref="addNotNullConstraint" maxOccurs="unbounded"/>
             <xsd:element ref="dropNotNullConstraint" maxOccurs="unbounded"/>
+            <xsd:element ref="addForeignKeyConstraint" maxOccurs="unbounded"/>
+            <xsd:element ref="dropForeignKeyConstraint" maxOccurs="unbounded"/>
+            <xsd:element ref="addPrimaryKey" maxOccurs="unbounded"/>
+            <xsd:element ref="addLookupTable" maxOccurs="unbounded"/>
+            <xsd:element ref="addAutoIncrement" maxOccurs="unbounded"/>
             <xsd:element ref="rollback" maxOccurs="1"/>
 
         </xsd:choice>
