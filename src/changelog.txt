@@ -19,7 +19,6 @@ Changes in version 0.9.0
   - Add Default Value
   - Drop Default Value
   - Drop Primary Key
-
 - Code refactorings
 
 Changes in version 0.8.2 (2007.4.30)

@@ -1,0 +1,45 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+    <head>
+        <title>LiquiBase: addForeignKeyConstraint</title>
+        <style type='text/css' media='screen'>@import "../../include/css/main.css";</style>
+    </head>
+    <body>@ANALYTICS@
+        <img src="../../images/liquibase_logo.gif" alt="LiquiBase" class="topLogo"/>
+        <p id="sitename">
+            <strong>LiquiBase: Database Refactoring</strong>
+        </p>
+
+        <div id="container">
+                @NAV.MANUAL@
+
+
+            <div id="content">
+                <div class="entry">
+                    <h2>&lt;addForeignKeyConstraint&gt; tag</h2>
+                    <pre>
+&lt;addForeignKeyConstraint constraintName="fk_address_person"
+    baseTableName="address" baseColumnNames="person_id"
+    referencedTableName="person" referencedColumnNames="id"
+/&gt;
+                    </pre>
+                    <p>
+                        Available attributes
+                    </p>
+                    <table border="1" cellpadding="5">
+                        <tr><th>constraintName</th><td>Name of the new foreign-key constraint [required]</td></tr>
+                        <tr><th>baseTableName</th><td>Name of the table containing the foreign key [required]</td></tr>
+                        <tr><th>baseColumnNames</th><td>Name of column(s) (comma-separate if multiple) to place the foreign key on [required]</td></tr>
+                        <tr><th>referencedTableName</th><td>Name of table the foreign key points to [required]</td></tr>
+                        <tr><th>referencedColumnName</th><td>Column(s) (comma-separate if multiple) the foreign key points to [required]</td></tr>
+                        <tr><th>deferrable</th><td>Is the foreign key deferrable</td></tr>
+                        <tr><th>initiallyDeferred</th><td>Is the foreign key initially deferred</td></tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </body>
+</html>
