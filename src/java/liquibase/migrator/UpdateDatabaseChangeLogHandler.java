@@ -88,7 +88,7 @@ public class UpdateDatabaseChangeLogHandler extends BaseChangeLogHandler {
         if (changeSet.shouldAlwaysRun() || isChangeSetRan.equals(ChangeSet.RunStatus.NOT_RAN)  || isChangeSetRan.equals(ChangeSet.RunStatus.RUN_AGAIN)) {
             Set<String> requiredContexts = changeSet.getDatabaseChangeLog().getMigrator().getContexts();
             String changeSetContext = changeSet.getContext();
-            return changeSetContext == null || requiredContexts.contains(changeSetContext);
+            return changeSetContext == null || requiredContexts.size() == 0 || requiredContexts.contains(changeSetContext);
         } else {
             return false;
         }
