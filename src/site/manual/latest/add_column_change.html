@@ -3,7 +3,7 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
     <head>
-        <title>LiquiBase: addColumn</title>
+        <title>LiquiBase: Add Column</title>
         <style type='text/css' media='screen'>@import "../../include/css/main.css";</style>
     </head>
     <body>@ANALYTICS@
@@ -18,27 +18,33 @@
 
             <div id="content">
                 <div class="entry">
-                    <h2>&lt;addColumn&gt; tag</h2>
+                    <h2>"Add Column" Refactoring</h2>
                     <p>
-                        Adds a new column to an existing table
+                        Adds a new column to an existing table.
                     </p>
-                    <pre>
-&lt;addColumn tableName="person"&gt;
+                    <h3>Sample</h3>
+                    <pre>&lt;addColumn tableName="person"&gt;
     &lt;column name="firstname" type="varchar(255)"/&gt;
-&lt;/addColumn&gt;
-                    </pre>
-                    <p>
-                        Available attributes
-                    </p>
-                    <table border="1" cellpadding="5">
-                        <tr><th>tableName</th><td>Name of the table to add the column to</td></tr>
+&lt;/addColumn&gt;</pre>
+                    <h3>Available Attributes</h3>
+                    <table class="attributesTable">
+                        <tr><th>tableName</th><td>Name of the table to add the column to <em>[required]</em></td></tr>
                     </table>
-                    <p>
-                        Available tags
-                    </p>
-                    <table border="1" cellpadding="5">
-                        <tr><th>column</th><td>contain constraint and foreign key information.  See <a href="column.html">the column tag documentation</a> for more information</td></tr>
+
+                    <h3>Available Sub-Tags</h3>
+                    <table class="attributesTable">
+                        <tr><th>column</th><td>Column constraint and foreign key information.  See <a href="column.html">the column tag documentation</a> for more information <em>[required]</em></td></tr>
                     </table>
+
+                    <h3>Database Compatiblity</h3>
+                    <table class="databaseCompatibiltyTable">
+                        <tr><th>MySQL</th><td>No Issues</td></tr>
+                        <tr><th>PostgreSQL</th><td>No Issues</td></tr>
+                        <tr><th>Oracle</th><td>No Issues</td></tr>
+                        <tr><th>MS-SQL</th><td>No Issues</td></tr>
+                    </table>
+                    <h3>Automatic Rollback Support: <strong>YES</strong></h3>
+
                 </div>
             </div>
         </div>

@@ -74,8 +74,8 @@ h4
 
 #content pre
 {
-   font-size: 1.3em;
-   line-height: 1.5em;
+   font-size: 1.5em;
+   line-height: 1.8em;
    margin: 8px;
    padding: 8px;
    border: 1px dashed #666;
@@ -148,6 +148,63 @@ h4
 {
     border-bottom: 1px solid #aaa;    
 }
+
+.attributesTable {
+    width:100%;
+}
+
+.attributesTable td {
+    border-style:solid;
+    margin: 0px;
+    padding:5px;
+    border-width:1px;
+}
+
+.attributesTable th {
+    border-style:solid;
+    margin: 0px;
+    padding:5px;
+    border-width:1px;
+    text-align:left;
+    vertical-align:top;
+    width:25%;
+}
+
+.attributesTable tr {
+    margin:0px;
+    padding:0px;
+}
+
+.databaseCompatibiltyTable {
+    width:100%;
+}
+
+.databaseCompatibiltyTable td {
+    border-style:solid;
+    margin: 0px;
+    padding:5px;
+    border-width:1px;
+}
+
+.databaseCompatibiltyTable th {
+    border-style:solid;
+    margin: 0px;
+    padding:5px;
+    border-width:1px;
+    text-align:left;
+    vertical-align:top;
+    width:25%;
+}
+
+.databaseCompatibiltyTable tr {
+    margin:0px;
+    padding:0px;
+}
+
+.sampleXML {
+    font-size:200%;
+}
+
 /* =Support
 ------------------------------------------------------------- */
 

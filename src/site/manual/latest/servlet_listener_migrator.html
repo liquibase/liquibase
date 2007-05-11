@@ -60,11 +60,11 @@
                 <p>
                     Available context-parameters:
                 </p>
-                <table border="1" cellpadding="5">
-                    <tr><th>MIGRATOR_FILE</th><td>Specifies the changelog file to run [Required]</td></tr>
+                <table class="attributesTable">
+                    <tr><th>MIGRATOR_FILE</th><td>Specifies the changelog file to run <em>[required]</em></td></tr>
                     <tr><th>MIGRATOR_DATA_SOURCE</th><td>JNDI datasource to use for running LiquiBase.  Note that the
                     MIGRATOR_DATA_SOURCE can be different than the data source the rest of your web app uses if that
-                    data source does not have sufficient privileges to create/alter tables etc. [Required]</td></tr>
+                    data source does not have sufficient privileges to create/alter tables etc. <em>[required]</em></td></tr>
                     <tr><th>MIGRATOR_HOST_EXCLUDES</th><td>Specify host names on which you do NO want the migrator to run.
                         Specifying this parameter allows you to deploy the same WAR/EAR to multiple machines in different environments
                     and not have LiquiBase run on all of them.</td></tr>

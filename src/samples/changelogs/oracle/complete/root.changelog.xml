@@ -267,6 +267,14 @@
         <addPrimaryKey tableName="address" columnNames="id" constraintName="pk_address"/>
     </changeSet>
 
+    <changeSet id="34" author="nvoxland">
+        <addUniqueConstraint tableName="address" columnNames="line1, line2" constraintName="uq_address_line1line2"/>
+    </changeSet>
+
+    <changeSet id="35" author="nvoxland">
+        <dropUniqueConstraint tableName="address" constraintName="uq_address_line1line2"/>
+    </changeSet>
+
 
     <include file="changelogs/oracle/complete/included.changelog.xml"/>
 

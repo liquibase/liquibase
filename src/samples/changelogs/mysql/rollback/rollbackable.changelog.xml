@@ -118,4 +118,8 @@
         <addPrimaryKey tableName="page" columnNames="id" constraintName="pk_page"/>
     </changeSet>
 
+    <changeSet id="17" author="nvoxland">
+        <addUniqueConstraint tableName="publication" columnNames="title" constraintName="uq_publication_title"/>
+    </changeSet>
+
 </databaseChangeLog>

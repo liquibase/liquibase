@@ -3,7 +3,7 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
     <head>
-        <title>LiquiBase: sql</title>
+        <title>LiquiBase: Custom SQL</title>
         <style type='text/css' media='screen'>@import "../../include/css/main.css";</style>
     </head>
     <body>@ANALYTICS@
@@ -18,18 +18,29 @@
 
             <div id="content">
                 <div class="entry">
-                    <h2>&lt;sql&gt; tag</h2>
+                    <h2>"Custom SQL" Refactoring</h2>
                     <p>
                         The "sql" tag allows you to specify whatever sql you want.
                         It is useful for complex changes that aren't supported through LiquiBase's automated refactoring tags
-                        and to work around bugs and limitations of LiquiBase.
+                        and to work around bugs and limitations of LiquiBase.  The SQL contained in the sql tag can be multi-line.
                     </p>
                     <p>
-                        Currently, the sql tag is the best way to create stored procedures and views.
+                        Currently, the sql tag is the best way to create stored procedures.
                     </p>
-                    <pre>
-&lt;sql&gt;insert into person (id, name) values (1, 'Bob') &lt;/sql&gt;
-                    </pre>
+
+                    <h3>Sample</h3>
+                    <pre>&lt;sql&gt;insert into person (id, name) values (1, 'Bob')&lt;/sql&gt;</pre>
+
+                    <h3>Database Compatiblity</h3>
+                    <table class="databaseCompatibiltyTable">
+                        <tr><th>MySQL</th><td>No Issues</td></tr>
+                        <tr><th>PostgreSQL</th><td>No Issues</td></tr>
+                        <tr><th>Oracle</th><td>No Issues</td></tr>
+                        <tr><th>MS-SQL</th><td>No Issues</td></tr>
+                    </table>
+
+                    <h3>Automatic Rollback Support: <strong>NO</strong></h3>
+
                 </div>
             </div>
         </div>

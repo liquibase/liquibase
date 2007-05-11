@@ -3,7 +3,7 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
     <head>
-        <title>LiquiBase: Insert Data</title>
+        <title>LiquiBase: Drop Unique Constraint</title>
         <style type='text/css' media='screen'>@import "../../include/css/main.css";</style>
     </head>
     <body>@ANALYTICS@
@@ -18,26 +18,17 @@
 
             <div id="content">
                 <div class="entry">
-                    <h2>"Insert Data" Refactoring</h2>
-                    <p>Inserts data into an existing table</p>
-
+                    <h2>"Drop Unique Constraint" Refactoring</h2>
+                    <p>
+                        Drops an existing unique constraint.
+                    </p>
                     <h3>Sample</h3>
-                    <pre>&lt;insert tableName="People"&gt;
-    &lt;column name="id" value="2"/&gt;
-    &lt;column name="firstname" value="Fred"/&gt;
-    &lt;column name="lastname" value="Johnson"/&gt;
-    &lt;column name="username" value="fjohnson"/&gt;
-    &lt;column name="testid" value="2"/&gt;
-&lt;/insert&gt;</pre>
+                    <pre>&lt;dropUniqueConstraint tableName="person" constraintName="pk_person"/&gt;</pre>
 
                     <h3>Available Attributes</h3>
                     <table class="attributesTable">
-                        <tr><th>tableName</th><td>Name of the table to insert data into</td></tr>
-                    </table>
-
-                    <h3>Available Sub-Tags</h3>
-                    <table class="attributesTable">
-                        <tr><th>column</th><td>Data to insert into columns.  See <a href="column.html">the column tag documentation</a> for more information</td></tr>
+                        <tr><th>tableName</th><td>Name of the table to drop the unique constraint from <em>[required]</em></td></tr>
+                        <tr><th>constraintName</th><td>Name of unique constraint to drop <em>[required]</em></td></tr>
                     </table>
 
                     <h3>Database Compatiblity</h3>

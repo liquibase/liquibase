@@ -3,7 +3,7 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
     <head>
-        <title>LiquiBase: addNotNullConstraint</title>
+        <title>LiquiBase: Add Not-Null Constraint</title>
         <style type='text/css' media='screen'>@import "../../include/css/main.css";</style>
     </head>
     <body>@ANALYTICS@
@@ -18,26 +18,34 @@
 
             <div id="content">
                 <div class="entry">
-                    <h2>&lt;addNotNullConstraint&gt; tag</h2>
+                    <h2>"Add Not-Null Constraint" Refactoring</h2>
                     <p>
                         Adds a not-null constraint to an existing table.  If a defaultNullValue attribute is passed,
                         all null values for the column will be updated to the passed value before the constraint is applied.
                     </p>
-                    <pre>
-&lt;addNotNullConstraint
+                    <h3>Sample</h3>
+                    <pre>&lt;addNotNullConstraint
         tableName="employee"
         columnName="employer_id"
-        defaultNullValue="1" /&gt;
-                    </pre>
-                    <p>
-                        Available attributes
-                    </p>
-                    <table border="1" cellpadding="5">
-                        <tr><th>tableName</th><td>Name of the table to add the constraint to [required]</td></tr>
-                        <tr><th>columnName</th><td>Name of the column to add the constraint to [required]</td></tr>
+        defaultNullValue="1" /&gt;</pre>
+
+                    <h3>Available Attributes</h3>
+                    <table class="attributesTable">
+                        <tr><th>tableName</th><td>Name of the table to add the constraint to <em>[required]</em></td></tr>
+                        <tr><th>columnName</th><td>Name of the column to add the constraint to <em>[required]</em></td></tr>
                         <tr><th>defaultNullValue</th><td>Value to set all currently null values to.  If not set, change will fail if null values exist [optional]</td></tr>
                         <tr><th>columnDataType</th><td>Current data type of the column (MySQL &amp; MS-SQL only)</td></tr>
                     </table>
+
+                    <h3>Database Compatiblity</h3>
+                    <table class="databaseCompatibiltyTable">
+                        <tr><th>MySQL</th><td>No Issues</td></tr>
+                        <tr><th>PostgreSQL</th><td>No Issues</td></tr>
+                        <tr><th>Oracle</th><td>No Issues</td></tr>
+                        <tr><th>MS-SQL</th><td>No Issues</td></tr>
+                    </table>
+
+                    <h3>Automatic Rollback Support: <strong>YES</strong></h3>
 
                 </div>
             </div>

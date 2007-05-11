@@ -143,6 +143,21 @@
         </xsd:complexType>
     </xsd:element>
 
+    <xsd:element name="addUniqueConstraint">
+        <xsd:complexType>
+            <xsd:attribute name="tableName" type="xsd:string"/>
+            <xsd:attribute name="columnNames" type="xsd:string"/>
+            <xsd:attribute name="constraintName" type="xsd:string"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="dropUniqueConstraint">
+        <xsd:complexType>
+            <xsd:attribute name="tableName" type="xsd:string"/>
+            <xsd:attribute name="constraintName" type="xsd:string"/>
+        </xsd:complexType>
+    </xsd:element>
+
     <xsd:element name="addLookupTable">
         <xsd:complexType>
             <xsd:attribute name="existingTableName" type="xsd:string"/>
@@ -475,6 +490,8 @@
             <xsd:element ref="addAutoIncrement" maxOccurs="unbounded"/>
             <xsd:element ref="addDefaultValue" maxOccurs="unbounded"/>
             <xsd:element ref="dropDefaultValue" maxOccurs="unbounded"/>
+            <xsd:element ref="addUniqueConstraint" maxOccurs="unbounded"/>
+            <xsd:element ref="dropUniqueConstraint" maxOccurs="unbounded"/>
             <xsd:element ref="rollback" maxOccurs="1"/>
 
         </xsd:choice>

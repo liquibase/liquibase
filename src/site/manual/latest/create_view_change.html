@@ -3,7 +3,7 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
     <head>
-        <title>LiquiBase: Database Refactoring</title>
+        <title>LiquiBase: Create View</title>
         <style type='text/css' media='screen'>@import "../../include/css/main.css";</style>
     </head>
     <body>@ANALYTICS@
@@ -18,20 +18,31 @@
 
             <div id="content">
                 <div class="entry">
-                    <h2>&lt;createView&gt; tag</h2>
-                    <pre>
-&lt;createView viewName="personView"&gt;
-    select id, firstname from person
-&lt;/createView"&gt;
-
-                    </pre>
+                    <h2>"Create View" Refactoring</h2>
                     <p>
-                         Available attributes
-                     </p>
-                     <table border="1" cellpadding="5">
-                         <tr><th>viewName</th><td>Name of the view to create [required]</td></tr>
-                         <tr><th>TEXT</th><td>SQL for generating the view [required]</td></tr>
+                        Creates a new database view.
+                    </p>
+
+                    <h3>Sample</h3>
+                    <pre>&lt;createView viewName="personView"&gt;
+    select id, firstname from person
+&lt;/createView"&gt;</pre>
+
+                    <h3>Available Attributes</h3>
+                     <table class="attributesTable">
+                         <tr><th>viewName</th><td>Name of the view to create <em>[required]</em></td></tr>
+                         <tr><th>NESTED TEXT</th><td>SQL for generating the view <em>[required]</em></td></tr>
                      </table>
+
+                    <h3>Database Compatiblity</h3>
+                    <table class="databaseCompatibiltyTable">
+                        <tr><th>MySQL</th><td>No Issues</td></tr>
+                        <tr><th>PostgreSQL</th><td>No Issues</td></tr>
+                        <tr><th>Oracle</th><td>No Issues</td></tr>
+                        <tr><th>MS-SQL</th><td>No Issues</td></tr>
+                    </table>
+
+                    <h3>Automatic Rollback Support: <strong>YES</strong></h3>
 
                 </div>
             </div>

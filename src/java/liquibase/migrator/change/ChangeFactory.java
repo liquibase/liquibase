@@ -40,6 +40,8 @@ public class ChangeFactory {
                     AddAutoIncrementChange.class,
                     AddDefaultValueChange.class,
                     DropDefaultValueChange.class,
+                    AddUniqueConstraintChange.class,
+                    DropUniqueConstraintChange.class,
             };
 
             try {

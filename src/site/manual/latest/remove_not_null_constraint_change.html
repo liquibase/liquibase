@@ -3,7 +3,7 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
     <head>
-        <title>LiquiBase: removeNotNullConstraint</title>
+        <title>LiquiBase: Remove Not-Null Constraint</title>
         <style type='text/css' media='screen'>@import "../../include/css/main.css";</style>
     </head>
     <body>@ANALYTICS@
@@ -18,18 +18,31 @@
 
             <div id="content">
                 <div class="entry">
-                    <h2>&lt;removeNotNullConstraint&gt; tag</h2>
-                    <pre>
-&lt;removeNotNullConstraint tableName="employee" columnName="employer_id"/&gt;
-                    </pre>
-                      <p>
-                        Available attributes
+                    <h2>"Remove Not-Null Constraint"</h2>
+                    <p>
+                        Makes a column null-able.
                     </p>
-                    <table border="1" cellpadding="5">
-                        <tr><th>tableName</th><td>Name of the table containing that the column to remove the constraint from [required]</td></tr>
-                        <tr><th>columnName</th><td>Name of the column to remove the constraint from [required]</td></tr>
-                        <tr><th>columnDataType</th><td>Current data type of the column (MySQL &amp; MS-SQL only)</td></tr>                        
-                    </table>                  
+
+                    <h3>Sample</h3>
+                    <pre>&lt;removeNotNullConstraint tableName="employee" columnName="employer_id"/&gt;</pre>
+
+                      <h3>Available Attributes</h3>
+                    <table class="attributesTable">
+                        <tr><th>tableName</th><td>Name of the table containing that the column to remove the constraint from <em>[required]</em></td></tr>
+                        <tr><th>columnName</th><td>Name of the column to remove the constraint from <em>[required]</em></td></tr>
+                        <tr><th>columnDataType</th><td>Current data type of the column <em>[required for MySQL &amp; MS-SQL]</em></td></tr>
+                    </table>
+
+                    <h3>Database Compatiblity</h3>
+                    <table class="databaseCompatibiltyTable">
+                        <tr><th>MySQL</th><td>No Issues</td></tr>
+                        <tr><th>PostgreSQL</th><td>No Issues</td></tr>
+                        <tr><th>Oracle</th><td>No Issues</td></tr>
+                        <tr><th>MS-SQL</th><td>No Issues</td></tr>
+                    </table>
+
+                    <h3>Automatic Rollback Support: <strong>YES</strong></h3>
+                    
                 </div>
             </div>
         </div>

@@ -3,7 +3,7 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
     <head>
-        <title>LiquiBase: Database Refactoring</title>
+        <title>LiquiBase: Merge Columns</title>
         <style type='text/css' media='screen'>@import "../../include/css/main.css";</style>
     </head>
     <body>@ANALYTICS@
@@ -18,32 +18,39 @@
 
             <div id="content">
                 <div class="entry">
-                    <h2>&lt;mergeColumns&gt; tag</h2>
+                    <h2>"Merge Columns" Refactoring</h2>
                     <p>
                         Concatenates the values in two columns, joins them by with string, and stores
                         the resulting value in a new column.
                     </p>
-                    <pre>
-&lt;mergeColumns tableName="person"
+                    <h3>Sample</h3>
+                    <pre>&lt;mergeColumns tableName="person"
     column1Name="phoneAreaCode"
     joinString="-"
     column2Name="phoneSuffix"
     finalColumnName="phone
     finalColumnType="varchar(50)"
-/&gt;
+/&gt;</pre>
 
-                    </pre>
-                    <p>
-                         Available attributes
-                     </p>
-                     <table border="1" cellpadding="5">
-                         <tr><th>tableName</th><td>Name table containing the columns to join [required]</td></tr>
-                         <tr><th>column1Name</th><td>Name column containing the first half of the data [required]</td></tr>
-                         <tr><th>joinString</th><td>String to place include between the values from column1 and column2 (may be empty) [required]</td></tr>
-                         <tr><th>column2Name</th><td>Name column containing the second half of the data [required]</td></tr>
-                         <tr><th>finalColumnName</th><td>Name of the column to create [required]</td></tr>
-                         <tr><th>finalColumnType</th><td>Datatype of the column to create [required]</td></tr>
+                    <h3>Available Attributes</h3>
+                     <table class="attributesTable">
+                         <tr><th>tableName</th><td>Name table containing the columns to join <em>[required]</em></td></tr>
+                         <tr><th>column1Name</th><td>Name column containing the first half of the data <em>[required]</em></td></tr>
+                         <tr><th>joinString</th><td>String to place include between the values from column1 and column2 (may be empty) <em>[required]</em></td></tr>
+                         <tr><th>column2Name</th><td>Name column containing the second half of the data <em>[required]</em></td></tr>
+                         <tr><th>finalColumnName</th><td>Name of the column to create <em>[required]</em></td></tr>
+                         <tr><th>finalColumnType</th><td>Datatype of the column to create <em>[required]</em></td></tr>
                      </table>
+
+                    <h3>Database Compatiblity</h3>
+                    <table class="databaseCompatibiltyTable">
+                        <tr><th>MySQL</th><td>No Issues</td></tr>
+                        <tr><th>PostgreSQL</th><td>No Issues</td></tr>
+                        <tr><th>Oracle</th><td>No Issues</td></tr>
+                        <tr><th>MS-SQL</th><td>No Issues</td></tr>
+                    </table>
+
+                    <h3>Automatic Rollback Support: <strong>NO</strong></h3>
 
                 </div>
             </div>

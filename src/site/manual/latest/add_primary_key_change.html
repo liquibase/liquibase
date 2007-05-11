@@ -3,7 +3,7 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
     <head>
-        <title>LiquiBase: addPrimaryKey</title>
+        <title>LiquiBase: Add Primary Key</title>
         <style type='text/css' media='screen'>@import "../../include/css/main.css";</style>
     </head>
     <body>@ANALYTICS@
@@ -18,18 +18,31 @@
 
             <div id="content">
                 <div class="entry">
-                    <h2>&lt;addPrimaryKey&gt; tag</h2>
-                    <pre>
-&lt;addPrimaryKey tableName="person" columnName="id" constraintName="pk_person"/&gt;
-                    </pre>
+                    <h2>"Add Primary Key" Refactoring</h2>
                     <p>
-                        Available attributes
+                        Adds creates a primary key out of an existing column or set of columns.
                     </p>
-                    <table border="1" cellpadding="5">
-                        <tr><th>tableName</th><td>Name of the table to create the primary key on [required]</td></tr>
-                        <tr><th>columnName</th><td>Name of the column to create the primary key on [required]</td></tr>
-                        <tr><th>constraintName</th><td>Name of primary key constraint</td></tr>
+                    <pre>&lt;addPrimaryKey tableName="person"
+    columnNames="id"
+    constraintName="pk_person"/&gt;</pre>
+
+                    <h3>Available Attributes</h3>
+                    <table class="attributesTable">
+                        <tr><th>tableName</th><td>Name of the table to create the primary key on <em>[required]</em></td></tr>
+                        <tr><th>columnNames</th><td>Name of the column(s) (comma separated if multiple) to create the primary key on <em>[required]</em></td></tr>
+                        <tr><th>constraintName</th><td>Name of primary key constraint <em>[required]</em></td></tr>
                     </table>
+
+                    <h3>Database Compatiblity</h3>
+                    <table class="databaseCompatibiltyTable">
+                        <tr><th>MySQL</th><td>No Issues</td></tr>
+                        <tr><th>PostgreSQL</th><td>No Issues</td></tr>
+                        <tr><th>Oracle</th><td>No Issues</td></tr>
+                        <tr><th>MS-SQL</th><td>No Issues</td></tr>
+                    </table>
+
+                    <h3>Automatic Rollback Support: <strong>YES</strong></h3>
+
                 </div>
             </div>
         </div>

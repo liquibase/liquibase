@@ -3,7 +3,7 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
     <head>
-        <title>LiquiBase: addAutoIncrement</title>
+        <title>LiquiBase: Add Auto-Increment</title>
         <style type='text/css' media='screen'>@import "../../include/css/main.css";</style>
     </head>
     <body>@ANALYTICS@
@@ -18,22 +18,31 @@
 
             <div id="content">
                 <div class="entry">
-                    <h2>&lt;addAutoIncrement&gt; tag</h2>
-                    <pre>
-&lt;addAutoIncrement tableName="person" columnName="id" columnDataType="int"/&gt;
-                    </pre>
+                    <h2>"Add Auto-Increment" Refactoring</h2>
                     <p>
-                        Sets a column as auto-increment.  Currently, this refactoring is only available for MySQL.
+                        Converts an existing column to be an auto-increment column.
                     </p>
-                    <p>
-                        Available attributes
-                    </p>
-                    <table border="1" cellpadding="5">
-                        <tr><th>tableName</th><td>Name of the table to add the auto-increment to [required]</td></tr>
-                        <tr><th>columnName</th><td>Name of column to make auto-increment [required]</td></tr>
-                        <tr><th>columnDataType</th><td>Current data type of the column to make auto-increment [required]</td></tr>
+                    <h3>Sample</h3>
+                    <pre>&lt;addAutoIncrement tableName="person" columnName="id" columnDataType="int"/&gt;</pre>
+                    <h3>
+                        Available Attributes
+                    </h3>
+                    <table class="attributesTable">
+                        <tr><th>tableName</th><td>Name of the table to add the auto-increment to <em>[required]</em></td></tr>
+                        <tr><th>columnName</th><td>Name of column to make auto-increment <em>[required]</em></td></tr>
+                        <tr><th>columnDataType</th><td>Current data type of the column to make auto-increment <em>[required]</em></td></tr>
                     </table>
                 </div>
+                <h3>
+                    Database Compatiblity
+                </h3>
+                <table class="databaseCompatibiltyTable">
+                    <tr><th>MySQL</th><td>No Issues</td></tr>
+                    <tr><th>PostgreSQL</th><td>No Auto-Increment Support in Database</td></tr>
+                    <tr><th>Oracle</th><td>No Auto-Increment Support in Database</td></tr>
+                    <tr><th>MS-SQL</th><td>Not Currently Supported</td></tr>
+                </table>
+                <h3>Automatic Rollback Support: <strong>NO</strong></h3>
             </div>
         </div>
 

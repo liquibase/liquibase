@@ -3,7 +3,7 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
     <head>
-        <title>LiquiBase: renameTable</title>
+        <title>LiquiBase: Rename Table</title>
         <style type='text/css' media='screen'>@import "../../include/css/main.css";</style>
     </head>
     <body>@ANALYTICS@
@@ -18,17 +18,28 @@
 
             <div id="content">
                 <div class="entry">
-                    <h2>&lt;renameTable&gt; tag</h2>
-                    <pre>
-&lt;renameTable oldTableName="employee" newTableName="person"/&gt;
-                    </pre>
-                 <p>
-                      Available attributes
-                  </p>
-                    <table border="1" cellpadding="5">
-                        <tr><th>oldTableName</th><td>Existing name of the table to rename [required]</td></tr>
-                        <tr><th>newTableName</th><td>Name to rename the table to [required]</td></tr>
+                    <h2>"Rename Table" Refactoring</h2>
+                    <p>Renames an existing table.</p>
+
+                    <h3>Sample</h3>
+                    <pre>&lt;renameTable oldTableName="employee" newTableName="person"/&gt;</pre>
+
+                 <h3>Available Attributes</h3>
+                    <table class="attributesTable">
+                        <tr><th>oldTableName</th><td>Existing name of the table to rename <em>[required]</em></td></tr>
+                        <tr><th>newTableName</th><td>Name to rename the table to <em>[required]</em></td></tr>
                     </table>
+
+                    <h3>Database Compatiblity</h3>
+                    <table class="databaseCompatibiltyTable">
+                        <tr><th>MySQL</th><td>No Issues</td></tr>
+                        <tr><th>PostgreSQL</th><td>No Issues</td></tr>
+                        <tr><th>Oracle</th><td>No Issues</td></tr>
+                        <tr><th>MS-SQL</th><td>No Issues</td></tr>
+                    </table>
+
+                    <h3>Automatic Rollback Support: <strong>YES</strong></h3>
+                    
                 </div>
             </div>
         </div>

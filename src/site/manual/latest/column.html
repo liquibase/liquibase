@@ -3,7 +3,7 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
     <head>
-        <title>LiquiBase: &lt;column&gt; Tag</title>
+        <title>LiquiBase: &lt;column&gt; and &lt;constraints&gt;</title>
         <style type='text/css' media='screen'>@import "../../include/css/main.css";</style>
     </head>
     <body>@ANALYTICS@
@@ -24,20 +24,18 @@
                         column definitions and column information is needed.  As a result, not all the
                         attributes of column make sense in each context it is used in.
                     </p>
-                    <p>
-                        Available Attributes
-                    </p>
-                    <table border="1" cellpadding="5">
+
+                    <h3>Available Attributes</h3>
+                    <table class="attributesTable">
                         <tr><th>name</th><td>Name of the column</td></tr>
                         <tr><th>type</th><td>Data type of the column</td></tr>
                         <tr><th>value</th><td>Value to set the column to</td></tr>
                         <tr><th>defaultValue</th><td>Default value for column</td></tr>
                         <tr><th>autoIncrement</th><td>Is column an auto-increment column</td></tr>
                     </table>
-                    <p>
-                        Available Tags
-                    </p>
-                    <table border="1" cellpadding="5">
+
+                    <h3>Available Sub-Tags</h3>
+                    <table class="attributesTable">
                         <tr><th>constraints</th><td>Constraint definitions</td></tr>
                     </table>
 
@@ -45,10 +43,8 @@
                     <p>
                         The "constraints" tag contains information about constraints on the column
                     </p>
-                    <p>
-                        Available Attributes
-                    </p>
-                    <table border="1" cellpadding="5">
+                    <h3>Available Attributes</h3>
+                    <table class="attributesTable">
                         <tr><th>nullable</th><td>Is column nullable?</td></tr>
                         <tr><th>primaryKey</th><td>Is column a primary key?</td></tr>
                         <tr><th>unique</th><td>Should a unique clause be applied</td></tr>

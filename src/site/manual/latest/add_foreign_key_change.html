@@ -3,7 +3,7 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
     <head>
-        <title>LiquiBase: addForeignKeyConstraint</title>
+        <title>LiquiBase: Add Foreign Key Constraint</title>
         <style type='text/css' media='screen'>@import "../../include/css/main.css";</style>
     </head>
     <body>@ANALYTICS@
@@ -18,25 +18,37 @@
 
             <div id="content">
                 <div class="entry">
-                    <h2>&lt;addForeignKeyConstraint&gt; tag</h2>
-                    <pre>
-&lt;addForeignKeyConstraint constraintName="fk_address_person"
+                    <h2>"Add Foreign Key Constraint" Refactoring</h2>
+                    <p>
+                        Adds a foreign key constraint to an existing column.
+                    </p>
+                    <pre>&lt;addForeignKeyConstraint constraintName="fk_address_person"
     baseTableName="address" baseColumnNames="person_id"
     referencedTableName="person" referencedColumnNames="id"
-/&gt;
-                    </pre>
-                    <p>
-                        Available attributes
-                    </p>
-                    <table border="1" cellpadding="5">
-                        <tr><th>constraintName</th><td>Name of the new foreign-key constraint [required]</td></tr>
-                        <tr><th>baseTableName</th><td>Name of the table containing the foreign key [required]</td></tr>
-                        <tr><th>baseColumnNames</th><td>Name of column(s) (comma-separate if multiple) to place the foreign key on [required]</td></tr>
-                        <tr><th>referencedTableName</th><td>Name of table the foreign key points to [required]</td></tr>
-                        <tr><th>referencedColumnName</th><td>Column(s) (comma-separate if multiple) the foreign key points to [required]</td></tr>
+/&gt;</pre>
+                    <h3>
+                        Available Attributes
+                    </h3>
+                    <table class="attributesTable">
+                        <tr><th>constraintName</th><td>Name of the new foreign-key constraint <em>[required]</em></td></tr>
+                        <tr><th>baseTableName</th><td>Name of the table containing the foreign key <em>[required]</em></td></tr>
+                        <tr><th>baseColumnNames</th><td>Name of column(s) (comma-separate if multiple) to place the foreign key on <em>[required]</em></td></tr>
+                        <tr><th>referencedTableName</th><td>Name of table the foreign key points to <em>[required]</em></td></tr>
+                        <tr><th>referencedColumnName</th><td>Column(s) (comma-separate if multiple) the foreign key points to <em>[required]</em></td></tr>
                         <tr><th>deferrable</th><td>Is the foreign key deferrable</td></tr>
                         <tr><th>initiallyDeferred</th><td>Is the foreign key initially deferred</td></tr>
                     </table>
+
+                    <h3>Database Compatiblity</h3>
+                    <table class="databaseCompatibiltyTable">
+                        <tr><th>MySQL</th><td>No Issues</td></tr>
+                        <tr><th>PostgreSQL</th><td>No Issues</td></tr>
+                        <tr><th>Oracle</th><td>No Issues</td></tr>
+                        <tr><th>MS-SQL</th><td>No Issues</td></tr>
+                    </table>
+
+                    <h3>Automatic Rollback Support: <strong>YES</strong></h3>
+
                 </div>
             </div>
         </div>

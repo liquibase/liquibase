@@ -3,7 +3,7 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
     <head>
-        <title>LiquiBase: dropIndex</title>
+        <title>LiquiBase: Drop Index</title>
         <style type='text/css' media='screen'>@import "../../include/css/main.css";</style>
     </head>
     <body>@ANALYTICS@
@@ -18,16 +18,27 @@
 
             <div id="content">
                 <div class="entry">
-                    <h2>&lt;dropIndex&gt; tag</h2>
-                    <pre>
-&lt;dropIndex indexName="idx_user_username"/&gt;
-                    </pre>
-                      <p>
-                         Available attributes
-                     </p>
-                     <table border="1" cellpadding="5">
-                         <tr><th>indexName</th><td>Name of the index to drop [required]</td></tr>
+                    <h2>"Drop Index" Refactoring</h2>
+                    <p>Drops an existing index</p>
+
+                    <h3>Sample</h3>
+                    <pre>&lt;dropIndex indexName="idx_user_username"/&gt;</pre>
+
+                    <h3> Available Attributes</h3>
+                     <table class="attributesTable">
+                         <tr><th>indexName</th><td>Name of the index to drop <em>[required]</em></td></tr>
                      </table>
+
+                    <h3>Database Compatiblity</h3>
+                    <table class="databaseCompatibiltyTable">
+                        <tr><th>MySQL</th><td>No Issues</td></tr>
+                        <tr><th>PostgreSQL</th><td>No Issues</td></tr>
+                        <tr><th>Oracle</th><td>No Issues</td></tr>
+                        <tr><th>MS-SQL</th><td>No Issues</td></tr>
+                    </table>
+
+                    <h3>Automatic Rollback Support: <strong>NO</strong></h3>
+
                 </div>
             </div>
         </div>

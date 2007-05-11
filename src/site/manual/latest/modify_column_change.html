@@ -3,7 +3,7 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
     <head>
-        <title>LiquiBase: modifyColumn</title>
+        <title>LiquiBase: Modify Column</title>
         <style type='text/css' media='screen'>@import "../../include/css/main.css";</style>
     </head>
     <body>@ANALYTICS@
@@ -18,27 +18,36 @@
 
             <div id="content">
                 <div class="entry">
-                    <h2>&lt;modifyColumn&gt; tag</h2>
+                    <h2>"Modify Column" Refactoring</h2>
                     <p>
                         Makes changes to an existing column such as the data type.
                     </p>
-                    <pre>
-&lt;modifyColumn tableName="person"&gt;
+
+                    <h3>Sample</h3>
+                    <pre>&lt;modifyColumn tableName="person"&gt;
     &lt;column name="firstname" type="varchar(5000)"/&gt;
-&lt;/modifyColumn&gt;
-                    </pre>
-                    <p>
-                        Available attributes
-                    </p>
-                    <table border="1" cellpadding="5">
+&lt;/modifyColumn&gt;</pre>
+
+                    <h3>Available Attributes</h3>
+                    <table class="attributesTable">
                         <tr><th>tableName</th><td>Name of the table that the column to modify is in</td></tr>
                     </table>
-                    <p>
-                        Available tags
-                    </p>
-                    <table border="1" cellpadding="5">
+
+                    <h3>Available Sub-Tags</h3>
+                    <table class="attributesTable">
                         <tr><th>column</th><td>New column definition  See <a href="column.html">the column tag documentation</a> for more information</td></tr>
                     </table>
+
+                    <h3>Database Compatiblity</h3>
+                    <table class="databaseCompatibiltyTable">
+                        <tr><th>MySQL</th><td>No Issues</td></tr>
+                        <tr><th>PostgreSQL</th><td>No Issues</td></tr>
+                        <tr><th>Oracle</th><td>No Issues</td></tr>
+                        <tr><th>MS-SQL</th><td>No Issues</td></tr>
+                    </table>
+
+                    <h3>Automatic Rollback Support: <strong>NO</strong></h3>
+
                 </div>
             </div>
         </div>

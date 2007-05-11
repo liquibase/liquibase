@@ -3,7 +3,7 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
     <head>
-        <title>LiquiBase: addDefaultValue</title>
+        <title>LiquiBase: Add Default Value</title>
         <style type='text/css' media='screen'>@import "../../include/css/main.css";</style>
     </head>
     <body>@ANALYTICS@
@@ -18,18 +18,31 @@
 
             <div id="content">
                 <div class="entry">
-                    <h2>&lt;addDefaultValue&gt; tag</h2>
-                    <pre>
-&lt;addDefaultValue tableName="file" columnName="fileName" defaultValue="New File"/&gt;
-                    </pre>
+                    <h2>"Add Default Value" Refactoring</h2>
                     <p>
-                        Available attributes
+                        Adds a default value to the database definition for the specified column.
                     </p>
-                    <table border="1" cellpadding="5">
-                        <tr><th>tableName</th><td>Name of the table to containing the column [required]</td></tr>
-                        <tr><th>columnName</th><td>Name of column to add a default value to [required]</td></tr>
-                        <tr><th>defaultValue</th><td>Name of column to add a default value to [required]</td></tr>
+                    <h3>Sample</h3>
+                    <pre>&lt;addDefaultValue tableName="file"
+    columnName="fileName"
+    defaultValue="New File"/&gt;</pre>
+
+                    <h3>Available Attributes</h3>
+                    <table class="attributesTable">
+                        <tr><th>tableName</th><td>Name of the table to containing the column <em>[required]</em></td></tr>
+                        <tr><th>columnName</th><td>Name of column to add a default value to <em>[required]</em></td></tr>
+                        <tr><th>defaultValue</th><td>Name of column to add a default value to <em>[required]</em></td></tr>
                     </table>
+
+                    <h3>Database Compatiblity</h3>
+                    <table class="databaseCompatibiltyTable">
+                        <tr><th>MySQL</th><td>No Issues</td></tr>
+                        <tr><th>PostgreSQL</th><td>No Issues</td></tr>
+                        <tr><th>Oracle</th><td>No Issues</td></tr>
+                        <tr><th>MS-SQL</th><td>No Issues</td></tr>
+                    </table>
+
+                    <h3>Automatic Rollback Support: <strong>YES</strong></h3>
                 </div>
             </div>
         </div>

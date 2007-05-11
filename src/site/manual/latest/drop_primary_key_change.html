@@ -3,7 +3,7 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
     <head>
-        <title>LiquiBase: dropPrimaryKey</title>
+        <title>LiquiBase: Drop Primary Key</title>
         <style type='text/css' media='screen'>@import "../../include/css/main.css";</style>
     </head>
     <body>@ANALYTICS@
@@ -18,17 +18,28 @@
 
             <div id="content">
                 <div class="entry">
-                    <h2>&lt;dropPrimaryKey&gt; tag</h2>
-                    <pre>
-&lt;dropPrimaryKey tableName="person" constraintName="pk_person"/&gt;
-                    </pre>
-                    <p>
-                        Available attributes
-                    </p>
-                    <table border="1" cellpadding="5">
-                        <tr><th>tableName</th><td>Name of the table to drop the primary key of [required]</td></tr>
-                        <tr><th>constraintName</th><td>Name of primary key constraint to drop [required]</td></tr>
+                    <h2>"Drop Primary Key" Refactoring</h2>
+                    <p>Drops an existing primary key.</p>
+
+                    <h3>Sample</h3>
+                    <pre>&lt;dropPrimaryKey tableName="person" constraintName="pk_person"/&gt;</pre>
+
+                    <h3>Available Attributes</h3>
+                    <table class="attributesTable">
+                        <tr><th>tableName</th><td>Name of the table to drop the primary key of <em>[required]</em></td></tr>
+                        <tr><th>constraintName</th><td>Name of primary key constraint to drop <em>[required]</em></td></tr>
                     </table>
+
+                    <h3>Database Compatiblity</h3>
+                    <table class="databaseCompatibiltyTable">
+                        <tr><th>MySQL</th><td>No Issues</td></tr>
+                        <tr><th>PostgreSQL</th><td>No Issues</td></tr>
+                        <tr><th>Oracle</th><td>No Issues</td></tr>
+                        <tr><th>MS-SQL</th><td>No Issues</td></tr>
+                    </table>
+
+                    <h3>Automatic Rollback Support: <strong>NO</strong></h3>
+
                 </div>
             </div>
         </div>

@@ -3,7 +3,7 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
     <head>
-        <title>LiquiBase: alterSequence</title>
+        <title>LiquiBase: Alter Sequence</title>
         <style type='text/css' media='screen'>@import "../../include/css/main.css";</style>
     </head>
     <body>@ANALYTICS@
@@ -18,17 +18,26 @@
 
             <div id="content">
                 <div class="entry">
-                    <h2>&lt;alterSequence&gt; tag</h2>
-                    <pre>
-&lt;alterSequence sequenceName="seq_employee_id" incrementBy="10"/&gt;
-                    </pre>
-                    <p>
-                         Available attributes
-                     </p>
-                     <table border="1" cellpadding="5">
-                         <tr><th>sequenceName</th><td>Name of the sequence to alter [required]</td></tr>
-                         <tr><th>incrementBy</th><td>New "increment by" value [required]</td></tr>
+                    <h2>"Alter Sequence" Refactoring</h2>
+                    <p>Modifies properties of an existing sequence</p>
+                    
+                    <pre>&lt;alterSequence sequenceName="seq_employee_id" incrementBy="10"/&gt;</pre>
+
+                    <h3>Available Attributes</h3>
+                     <table class="attributesTable">
+                         <tr><th>sequenceName</th><td>Name of the sequence to alter <em>[required]</em></td></tr>
+                         <tr><th>incrementBy</th><td>New "increment by" value <em>[required]</em></td></tr>
                      </table>
+
+                    <h3>Database Compatiblity</h3>
+                    <table class="databaseCompatibiltyTable">
+                        <tr><th>MySQL</th><td>No Sequence Support in Database</td></tr>
+                        <tr><th>PostgreSQL</th><td>No Issues</td></tr>
+                        <tr><th>Oracle</th><td>No Issues</td></tr>
+                        <tr><th>MS-SQL</th><td>No Sequence Support in Database</td></tr>
+                    </table>
+
+                    <h3>Automatic Rollback Support: <strong>NO</strong></h3>
 
                 </div>
             </div>
