@@ -1,12 +1,26 @@
 package liquibase.migrator;
 
 import junit.framework.TestCase;
+import liquibase.migrator.change.InsertDataChange;
+import liquibase.migrator.change.CreateTableChange;
 
 public class ChangeSetTest extends TestCase {
 
-    public void testNothing() {
+    public void testGetDescription() {
+        ChangeSet changeSet = new ChangeSet("testId", "testAuthor", false, false, null, null);
 
+        assertEquals("Empty", changeSet.getDescription());
+
+        changeSet.addRefactoring(new InsertDataChange());
+        assertEquals("Insert Row", changeSet.getDescription());
+
+        changeSet.addRefactoring(new InsertDataChange());
+        assertEquals("Insert Row (x2)", changeSet.getDescription());
+
+        changeSet.addRefactoring(new CreateTableChange());
+        assertEquals("Insert Row (x2), Create Table", changeSet.getDescription());
     }
+
 //    public void testIsChangeSetRan() throws Exception {
 //        Connection conn = createMock(Connection.class);
 //

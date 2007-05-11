@@ -13,6 +13,7 @@ import java.text.DateFormat;
 import java.util.*;
 import java.util.Date;
 import java.util.logging.Logger;
+import java.net.URL;
 
 public class Migrator {
     // These modes tell the program whether to execute the statements against the database
@@ -47,6 +48,7 @@ public class Migrator {
     private long changeLogLockWaitTime = 1000 * 60 * 5;  //default to 5 mins
 
     private List<RanChangeSet> ranChangeSetList;
+    private String buildVersion;
 
     protected Migrator(String migrationFile, FileOpener fileOpener, boolean alreadyHasChangeLogLock) {
         log = Logger.getLogger(Migrator.DEFAULT_LOG_NAME);
@@ -83,6 +85,30 @@ public class Migrator {
         }
         setMode(EXECUTE_MODE);
         this.hasChangeLogLock = alreadyHasChangeLogLock;
+
+        this.buildVersion = findVersion();
+    }
+
+    private String findVersion() {
+        Properties buildInfo = new Properties();
+        URL buildInfoFile = Thread.currentThread().getContextClassLoader().getResource("buildinfo.properties");
+        try {
+            if (buildInfoFile == null) {
+                return "UNKNOWN";
+            } else {
+                InputStream in = buildInfoFile.openStream();
+
+                buildInfo.load(in);
+                String o = (String) buildInfo.get("build.version");
+                if (o == null) {
+                    return "UNKNOWN";
+                } else {
+                    return o;
+                }
+            }
+        } catch (IOException e) {
+            return "UNKNOWN";
+        }
     }
 
     public Migrator(String migrationFile, FileOpener fileOpener) {
@@ -115,6 +141,10 @@ public class Migrator {
                 new MSSQLDatabase(),
                 new MySQLDatabase(),
         };
+    }
+
+    public String getBuildVersion() {
+        return buildVersion;
     }
 
     public boolean shouldDropDatabaseObjectsFirst() {
@@ -236,7 +266,7 @@ public class Migrator {
                     } else if (mode.equals(OUTPUT_ROLLBACK_SQL_MODE)) {
                         outputSQLWriter.write("-- SQL to roll-back database to the state it was at "+DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(getRollbackToDate())+"\n");
                     } else if (mode.equals(OUTPUT_FUTURE_ROLLBACK_SQL_MODE)) {
-                        outputSQLWriter.write("-- SQL to roll-back database from an updated version back to current version\n");
+                        outputSQLWriter.write("-- SQL to roll-back database from an updated buildVersion back to current version\n");
                     } else {
                         throw new MigrationFailedException("Unexpected output mode: "+mode);
                     }

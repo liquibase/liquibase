@@ -69,6 +69,17 @@
                         <li><a href="../manual/latest/add_unique_constraint_change.html">Add Unique Constraint</a></li>
                         <li><a href="../manual/latest/drop_unique_constraint_change.html">Drop Unique Constraint</a></li>                        
                     </ul>
+                    <h3>DATABASECHANGELOG table changes</h3>
+                    <p>
+                        We added additional columns to better track changes.  If you are upgrading and have an existing
+                        databasechangelog table, you need to execute the following statements:<br/>
+                        <em>ALTER TABLE DATABASECHANGELOG ADD DESCRIPTION VARCHAR(255);</em><br/>
+                        <em>ALTER TABLE DATABASECHANGELOG ADD COMMENTS VARCHAR(255);</em><br/>
+                        <em>ALTER TABLE DATABASECHANGELOG ADD TAG VARCHAR(255);</em><br/>
+                        <em>ALTER TABLE DATABASECHANGELOG ADD LIQUIBASE VARCHAR(255);</em><br/>
+                        <br/>
+                        Future versions of LiquiBase will manage database updates better.
+                    </p>
                     <h3>Other</h3>
                     <p>
                         As we approach 1.0, we are continuing to fix bugs, improve performance, and improve documentation.

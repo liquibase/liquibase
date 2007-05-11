@@ -116,7 +116,7 @@ public abstract class AbstractDatabase {
         try {
             rs = connection.getMetaData().getTables(getCatalogName(), getSchemaName(), getDatabaseChangeLogTableName(), new String[]{"TABLE"});
             if (!rs.next()) {
-                String createTableStatement = ("CREATE TABLE DATABASECHANGELOG (id varchar(255) not null, author varchar(255) not null, filename varchar(255) not null, dateExecuted " + getDateTimeType() + " not null, md5sum varchar(32), primary key(id, author, filename))").toUpperCase();
+                String createTableStatement = ("CREATE TABLE DATABASECHANGELOG (id varchar(255) not null, author varchar(255) not null, filename varchar(255) not null, dateExecuted " + getDateTimeType() + " not null, md5sum varchar(32), description varchar(255), comments varchar(255), tag varchar(255), liquibase varchar(10), primary key(id, author, filename))").toUpperCase();
                 // If there is no table in the database for recording change history create one.
                 if (migrator.getMode().equals(Migrator.EXECUTE_MODE)) {
                     statement = connection.createStatement();

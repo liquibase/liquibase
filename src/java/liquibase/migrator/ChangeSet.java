@@ -237,7 +237,36 @@ public class ChangeSet {
             }
         }
         return true;
-
     }
 
+    public String getDescription() {
+        List<AbstractChange> refactorings = getRefactorings();
+        if (refactorings.size() == 0) {
+            return "Empty";
+        }
+
+        StringBuffer returnString = new StringBuffer();
+        Class lastRefactoringClass = null;
+        int refactoringCount = 0;
+        for (AbstractChange change : refactorings) {
+            if (change.getClass().equals(lastRefactoringClass)) {
+                refactoringCount++;
+            } else if (refactoringCount > 1) {
+                returnString.append(" (x").append(refactoringCount).append(")");
+                returnString.append(", ");
+                returnString.append(change.getRefactoringName());
+                refactoringCount = 1;
+            } else {
+                returnString.append(", ").append(change.getRefactoringName());
+                refactoringCount = 1;
+            }
+            lastRefactoringClass = change.getClass();
+        }
+
+        if (refactoringCount > 1) {
+            returnString.append(" (x").append(refactoringCount).append(")");
+        }
+
+        return returnString.toString().replaceFirst("^, ", "");
+    }
 }
