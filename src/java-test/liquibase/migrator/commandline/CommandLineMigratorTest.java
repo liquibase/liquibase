@@ -34,7 +34,6 @@ public class CommandLineMigratorTest extends TestCase {
         assertEquals("CLASSPATH;CLASSPATH2", cli.classpath);
         assertEquals("CONTEXT1,CONTEXT2", cli.contexts);
         assertEquals(Boolean.TRUE, cli.promptForNonLocalDatabase);
-        assertEquals(Boolean.TRUE, cli.dropAllFirst);
         assertEquals("migrate", cli.command);
     }
 
@@ -49,7 +48,6 @@ public class CommandLineMigratorTest extends TestCase {
         cli.parseOptions(args);
 
         assertEquals(Boolean.FALSE, cli.promptForNonLocalDatabase);
-        assertEquals(Boolean.FALSE, cli.dropAllFirst);
         assertEquals("migrate", cli.command);
 
     }
@@ -65,7 +63,6 @@ public class CommandLineMigratorTest extends TestCase {
         cli.parseOptions(args);
 
         assertEquals(Boolean.TRUE, cli.promptForNonLocalDatabase);
-        assertEquals(Boolean.TRUE, cli.dropAllFirst);
         assertEquals("migrate", cli.command);
 
     }
@@ -186,7 +183,6 @@ public class CommandLineMigratorTest extends TestCase {
         assertEquals("CLASSPAHT", cli.classpath);
         assertEquals("CONTEXTS", cli.contexts);
         assertEquals(Boolean.TRUE, cli.promptForNonLocalDatabase);
-        assertEquals(Boolean.TRUE, cli.dropAllFirst);
 
     }
 
@@ -220,7 +216,6 @@ public class CommandLineMigratorTest extends TestCase {
         assertEquals("CLASSPAHT", cli.classpath);
         assertEquals("CONTEXTS", cli.contexts);
         assertEquals(Boolean.TRUE, cli.promptForNonLocalDatabase);
-        assertEquals(Boolean.TRUE, cli.dropAllFirst);
 
     }
 
@@ -228,22 +223,16 @@ public class CommandLineMigratorTest extends TestCase {
         CommandLineMigrator cli = new CommandLineMigrator();
 
         cli.promptForNonLocalDatabase = Boolean.TRUE;
-        cli.dropAllFirst = Boolean.TRUE;
         cli.applyDefaults();
         assertEquals(Boolean.TRUE, cli.promptForNonLocalDatabase);
-        assertEquals(Boolean.TRUE, cli.dropAllFirst);
 
         cli.promptForNonLocalDatabase = Boolean.FALSE;
-        cli.dropAllFirst = Boolean.FALSE;
         cli.applyDefaults();
         assertEquals(Boolean.FALSE, cli.promptForNonLocalDatabase);
-        assertEquals(Boolean.FALSE, cli.dropAllFirst);
 
         cli.promptForNonLocalDatabase = null;
-        cli.dropAllFirst = null;
         cli.applyDefaults();
         assertEquals(Boolean.FALSE, cli.promptForNonLocalDatabase);
-        assertEquals(Boolean.FALSE, cli.dropAllFirst);
 
     }
 
@@ -299,4 +288,31 @@ public class CommandLineMigratorTest extends TestCase {
             }
         }
     }
+
+    public void testTag() throws Exception {
+        String[] args = new String[]{
+                "--driver=DRIVER",
+                "--username=USERNAME",
+                "--password=PASSWORD",
+                "--url=URL",
+                "--migrationFile=FILE",
+                "--classpath=CLASSPATH;CLASSPATH2",
+                "--contexts=CONTEXT1,CONTEXT2",
+                "tag", "TagHere"
+        };
+
+        CommandLineMigrator cli = new CommandLineMigrator();
+        cli.parseOptions(args);
+
+        assertEquals("DRIVER", cli.driver);
+        assertEquals("USERNAME", cli.username);
+        assertEquals("PASSWORD", cli.password);
+        assertEquals("URL", cli.url);
+        assertEquals("FILE", cli.migrationFile);
+        assertEquals("CLASSPATH;CLASSPATH2", cli.classpath);
+        assertEquals("CONTEXT1,CONTEXT2", cli.contexts);
+        assertEquals("tag", cli.command);
+        assertEquals("TagHere", cli.commandParam);
+    }
+
 }

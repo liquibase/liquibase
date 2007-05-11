@@ -38,8 +38,9 @@ public class Migrator {
     public String mode;
     private Writer outputSQLWriter;
     private Date rollbackToDate;
+    private String rollbackToTag;
+    private Integer rollbackCount;
 
-    private boolean shouldDropDatabaseObjectsFirst;
     private AbstractDatabase database;
     private Logger log;
     private Set<String> contexts;
@@ -147,14 +148,6 @@ public class Migrator {
         return buildVersion;
     }
 
-    public boolean shouldDropDatabaseObjectsFirst() {
-        return shouldDropDatabaseObjectsFirst;
-    }
-
-    public void setShouldDropDatabaseObjectsFirst(boolean shouldDropDatabaseObjectsFirst) {
-        this.shouldDropDatabaseObjectsFirst = shouldDropDatabaseObjectsFirst;
-    }
-
     public String getMode() {
         return mode;
     }
@@ -180,6 +173,22 @@ public class Migrator {
         this.rollbackToDate = rollbackToDate;
     }
 
+    public String getRollbackToTag() {
+        return rollbackToTag;
+    }
+
+    public void setRollbackToTag(String rollbackToTag) {
+        this.rollbackToTag = rollbackToTag;
+    }
+
+    public Integer getRollbackCount() {
+        return rollbackCount;
+    }
+
+    public void setRollbackCount(Integer rollbackCount) {
+        this.rollbackCount = rollbackCount;
+    }
+
     public String getMigrationFile() {
         return migrationFile;
     }
@@ -203,7 +212,8 @@ public class Migrator {
                     String id = rs.getString("id");
                     String md5sum = rs.getString("md5sum");
                     Date dateExecuted = rs.getTimestamp("dateExecuted");
-                    RanChangeSet ranChangeSet = new RanChangeSet(fileName, id, author, md5sum, dateExecuted);
+                    String tag = rs.getString("tag");
+                    RanChangeSet ranChangeSet = new RanChangeSet(fileName, id, author, md5sum, dateExecuted, tag);
                     ranChangeSetList.add(ranChangeSet);
                 }
                 rs.close();
@@ -245,12 +255,6 @@ public class Migrator {
                 log.severe("Could not aquire change log lock.  Currently locked by " + lockedBy);
                 return;
             }
-            if (shouldDropDatabaseObjectsFirst()) {
-                log.info("Dropping Database Objects in " + getDatabase().getSchemaName());
-                getDatabase().dropDatabaseObjects();
-                checkDatabaseChangeLogTable();
-                log.finest("Objects dropped successfully");
-            }
 
             Writer outputSQLWriter = getOutputSQLWriter();
 
@@ -264,7 +268,17 @@ public class Migrator {
                     } else if (mode.equals(OUTPUT_CHANGELOG_ONLY_SQL_MODE)) {
                         outputSQLWriter.write("-- SQL to add all changesets to database history table\n");
                     } else if (mode.equals(OUTPUT_ROLLBACK_SQL_MODE)) {
-                        outputSQLWriter.write("-- SQL to roll-back database to the state it was at "+DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(getRollbackToDate())+"\n");
+                        String stateDescription;
+                        if (getRollbackToTag() != null) {
+                            stateDescription = getRollbackToTag();
+                        } else if (getRollbackToDate() != null) {
+                            stateDescription = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(getRollbackToDate());
+                        } else if (getRollbackCount() != null) {
+                            stateDescription = getRollbackCount()+ " change set ago";
+                        } else {
+                            throw new RuntimeException("Unknown rollback type");
+                        }
+                        outputSQLWriter.write("-- SQL to roll-back database to the state it was at "+stateDescription +"\n");
                     } else if (mode.equals(OUTPUT_FUTURE_ROLLBACK_SQL_MODE)) {
                         outputSQLWriter.write("-- SQL to roll-back database from an updated buildVersion back to current version\n");
                     } else {
@@ -281,7 +295,20 @@ public class Migrator {
             if (mode.equals(EXECUTE_MODE) || mode.equals(OUTPUT_SQL_MODE) || mode.equals(OUTPUT_CHANGELOG_ONLY_SQL_MODE)) {
                 runChangeLogs(new UpdateDatabaseChangeLogHandler(this));
             } else if (mode.equals(EXECUTE_ROLLBACK_MODE) || mode.equals(OUTPUT_ROLLBACK_SQL_MODE)) {
-                RollbackDatabaseChangeLogHandler rollbackHandler = new RollbackDatabaseChangeLogHandler(this, getRollbackToDate());
+                RollbackDatabaseChangeLogHandler rollbackHandler;
+                if (getRollbackToDate() != null) {
+                    rollbackHandler = new RollbackDatabaseChangeLogHandler(this, getRollbackToDate());
+                } else if (getRollbackToTag() != null) {
+                    if (!getDatabase().doesTagExist(getRollbackToTag())) {
+                        throw new MigrationFailedException("'"+getRollbackToTag()+"' is not tag that exists in the database");
+                    }
+
+                    rollbackHandler = new RollbackDatabaseChangeLogHandler(this, getRollbackToTag());
+                } else if (getRollbackCount() != null) {
+                        rollbackHandler = new RollbackDatabaseChangeLogHandler(this, getRollbackCount());
+                } else {
+                    throw new RuntimeException("Don't know what to rollback to");
+                }
                 runChangeLogs(rollbackHandler);
                 ChangeSet unrollbackableChangeSet = rollbackHandler.getUnRollBackableChangeSet();
                 if (unrollbackableChangeSet == null) {
@@ -313,6 +340,52 @@ public class Migrator {
         }
     }
 
+    public final void dropAll() throws MigrationFailedException {
+        try {
+            if (!hasChangeLogLock) {
+                checkDatabaseChangeLogTable();
+            }
+
+            boolean locked = false;
+            long timeToGiveUp = new Date().getTime() + changeLogLockWaitTime;
+            while (!locked && new Date().getTime() < timeToGiveUp) {
+                locked = aquireLock();
+                if (!locked) {
+                    log.info("Waiting for changelog lock....");
+                    try {
+                        Thread.sleep(1000 * 10);
+                    } catch (InterruptedException e) {
+                        ;
+                    }
+                }
+            }
+
+            if (!locked) {
+                DatabaseChangeLogLock[] locks = listLocks();
+                String lockedBy;
+                if (locks.length > 0) {
+                    DatabaseChangeLogLock lock = locks[0];
+                    lockedBy = lock.getLockedBy() + " since " + DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(lock.getLockGranted());
+                } else {
+                    lockedBy = "UNKNOWN";
+                }
+                log.severe("Could not aquire change log lock.  Currently locked by " + lockedBy);
+                return;
+            }
+
+            log.info("Dropping Database Objects in " + getDatabase().getSchemaName());
+            getDatabase().dropDatabaseObjects();
+            checkDatabaseChangeLogTable();
+            log.finest("Objects dropped successfully");
+        } catch (MigrationFailedException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new MigrationFailedException(e);
+        } finally {
+            releaseLock();
+        }
+    }
+
     protected boolean aquireLock() throws MigrationFailedException {
         if (hasChangeLogLock) {
             return true;
@@ -335,6 +408,14 @@ public class Migrator {
 
         getDatabase().releaseLock(this);
     }
+
+    /**
+     * 'Tags' the database for future rollback
+     */
+    public void tag(String tagString) throws MigrationFailedException {
+        getDatabase().tag(tagString);
+    }
+
 
 
     protected void checkDatabaseChangeLogTable() throws SQLException, IOException {

@@ -15,6 +15,20 @@ public class RollbackDatabaseChangeLogHandler extends BaseChangeLogHandler {
     private List<RanChangeSet> ranChangesToRollback;
     private List<ChangeSet> allChangeSets;
 
+    public RollbackDatabaseChangeLogHandler(Migrator migrator, String rollbackToTag) throws SQLException {
+        super(migrator);
+        ranChangesToRollback = new ArrayList<RanChangeSet>();
+        int currentChangeSetCount = migrator.getRanChangeSetList().size();
+        for (int i = currentChangeSetCount - 1; i >= 0; i--) {
+            RanChangeSet ranChangeSet = migrator.getRanChangeSetList().get(i);
+            if (rollbackToTag.equals(ranChangeSet.getTag())){
+                break;
+            }
+            ranChangesToRollback.add(ranChangeSet);
+        }
+        allChangeSets = new ArrayList<ChangeSet>();
+    }
+
     public RollbackDatabaseChangeLogHandler(Migrator migrator, Date rollbackToDate) throws SQLException {
         super(migrator);
         ranChangesToRollback = new ArrayList<RanChangeSet>();
@@ -23,6 +37,20 @@ public class RollbackDatabaseChangeLogHandler extends BaseChangeLogHandler {
             RanChangeSet ranChangeSet = migrator.getRanChangeSetList().get(i);
             if (ranChangeSet.getDateExecuted().getTime() > rollbackToDate.getTime()) {
                 ranChangesToRollback.add(ranChangeSet);
+            }
+        }
+        allChangeSets = new ArrayList<ChangeSet>();
+    }
+
+    public RollbackDatabaseChangeLogHandler(Migrator migrator, Integer numberOfChangeSetsToRollback) throws SQLException {
+        super(migrator);
+        ranChangesToRollback = new ArrayList<RanChangeSet>();
+        int currentChangeSetCount = migrator.getRanChangeSetList().size();
+        for (int i = currentChangeSetCount - 1; i >= 0; i--) {
+            RanChangeSet ranChangeSet = migrator.getRanChangeSetList().get(i);
+            ranChangesToRollback.add(ranChangeSet);
+            if (ranChangesToRollback.size() >= numberOfChangeSetsToRollback) {
+                break;
             }
         }
         allChangeSets = new ArrayList<ChangeSet>();

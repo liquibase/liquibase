@@ -33,7 +33,6 @@ public class CommandLineMigrator {
     protected String classpath;
     protected String contexts;
     protected Boolean promptForNonLocalDatabase = null;
-    protected Boolean dropAllFirst = null;
     protected Boolean includeSystemClasspath;
 
     protected String command;
@@ -80,7 +79,7 @@ public class CommandLineMigrator {
 
         if ("migrate".equals(commandLineMigrator.command)) {
             System.out.println("Migration successful");
-        } else if ("rollback".equals(commandLineMigrator.command)) {
+        } else if (commandLineMigrator.command.startsWith("rollback") && !commandLineMigrator.command.endsWith("SQL")) {
             System.out.println("Rollback successful");
         }
     }
@@ -101,10 +100,16 @@ public class CommandLineMigrator {
     private boolean isCommand(String arg) {
         return "migrate".equals(arg)
                 || "migrateSQL".equals(arg)
+                || "rollback".equals(arg)
+                || "rollbackToDate".equals(arg)
+                || "rollbackLatest".equals(arg)
                 || "rollbackSQL".equals(arg)
+                || "rollbackToDateSQL".equals(arg)
+                || "rollbackLatestSQL".equals(arg)
                 || "futureRollbackSQL".equals(arg)
+                || "tag".equals(arg)
                 || "listLocks".equals(arg)
-                || "listLocks".equals(arg)
+                || "dropAll".equals(arg)
                 || "releaseLocks".equals(arg);
     }
 
@@ -136,23 +141,35 @@ public class CommandLineMigrator {
         stream.println("");
         stream.println("Standard Commands:");
         stream.println(" migrate                        Updates database to current version");
-        stream.println(" rollback <date/time>           Rolls back the database to the the state is was");
-        stream.println("                                at the given date/time");
+        stream.println(" rollback <tag>                 Rolls back the database to the the state is was");
+        stream.println("                                when the tag was applied");
+        stream.println(" rollbackToDate <date/time>     Rolls back the database to the the state is was");
+        stream.println("                                at the given date/time.");
+        stream.println("                                Date Format: yyyy-MM-dd HH:mm:ss");
+        stream.println(" rollbackLatest                 Rolls back the last change set");
+        stream.println("                                applied to the database");
         stream.println(" migrateSQL                     Writes SQL to update database to current");
         stream.println("                                version to STDOUT");
-        stream.println(" rollbackSQL <date/time>        Writes SQL to roll back the database to that");
+        stream.println(" rollbackSQL <tag>              Writes SQL to roll back the database to that");
+        stream.println("                                state it was in when the tag was applied");
+        stream.println("                                to STDOUT");
+        stream.println(" rollbackToDateSQL <date/time>  Writes SQL to roll back the database to that");
         stream.println("                                state it was in at the given date/time version");
         stream.println("                                to STDOUT");
+        stream.println(" rollbackLatestSQL              Writes SQL to roll back the last change set");
+        stream.println("                                applied to the database");
         stream.println(" futureRollbackSQL              Writes SQL to roll back the database to the ");
         stream.println("                                current state after the changes in the ");
         stream.println("                                changeslog have been applied");
         stream.println("");
         stream.println("Maintenance Commands");
+        stream.println(" tag <tag string>          'Tags' the current database state for future rollback");
         stream.println(" changelogSyncSQL          Writes SQL to mark all refactorings as executed ");
         stream.println("                           in the database to STDOUT");
         stream.println(" listLocks                 Lists who currently has locks on the");
         stream.println("                           database changelog");
         stream.println(" releaseLocks              Releases all locks on the database changelog");
+        stream.println(" dropAll                   Drop all database objects owned by user");
         stream.println("");
         stream.println("Required Parameters:");
         stream.println(" --classpath=<value>                        Classpath containing");
@@ -172,8 +189,6 @@ public class CommandLineMigrator {
         stream.println("                                            (default: true)");
         stream.println(" --promptForNonLocalDatabase=<true|false>   Prompt if non-localhost");
         stream.println("                                            databases (default: false)");
-        stream.println(" --dropAllFirst=<true|false>                Drop all database objects");
-        stream.println("                                            first (default: false)");
         stream.println(" --logLevel=<level>                         Execution log level");
         stream.println("                                            (finest, finer, fine, info,");
         stream.println("                                            warning, severe)");
@@ -232,9 +247,6 @@ public class CommandLineMigrator {
     }
 
     protected void applyDefaults() {
-        if (this.dropAllFirst == null) {
-            this.dropAllFirst = Boolean.FALSE;
-        }
         if (this.promptForNonLocalDatabase == null) {
             this.promptForNonLocalDatabase = Boolean.FALSE;
         }
@@ -382,11 +394,17 @@ public class CommandLineMigrator {
                 migrator.forceReleaseLock();
                 System.out.println("Successfully released all database change log locks for " + migrator.getDatabase().getConnectionUsername() + "@" + migrator.getDatabase().getConnectionURL());
                 return;
+            } else if ("tag".equalsIgnoreCase(command)) {
+                migrator.tag(commandParam);
+                System.out.println("Successfully tagged " + migrator.getDatabase().getConnectionUsername() + "@" + migrator.getDatabase().getConnectionURL());
+                return;
+            } else if ("dropAll".equals(command)) {
+                migrator.dropAll();
+                System.out.println("All objects dropped from " + migrator.getDatabase().getConnectionUsername() + "@" + migrator.getDatabase().getConnectionURL());
+                return;
             }
 
-            if (dropAllFirst) {
-                migrator.setShouldDropDatabaseObjectsFirst(true);
-            }
+
 
             DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             try {
@@ -401,16 +419,36 @@ public class CommandLineMigrator {
                 } else if ("rollback".equalsIgnoreCase(command)) {
                     migrator.setMode(Migrator.EXECUTE_ROLLBACK_MODE);
                     if (commandParam == null) {
+                        throw new CommandLineParsingException("rollback requires a rollback tag");
+                    }
+                    migrator.setRollbackToTag(commandParam);
+                } else if ("rollbackToDate".equalsIgnoreCase(command)) {
+                    migrator.setMode(Migrator.EXECUTE_ROLLBACK_MODE);
+                    if (commandParam == null) {
                         throw new CommandLineParsingException("rollback requires a rollback date");
                     }
                     migrator.setRollbackToDate(dateFormat.parse(commandParam));
+                } else if ("rollbackLatest".equalsIgnoreCase(command)) {
+                    migrator.setMode(Migrator.EXECUTE_ROLLBACK_MODE);
+                    migrator.setRollbackCount(new Integer(1));
                 } else if ("rollbackSQL".equalsIgnoreCase(command)) {
                     migrator.setMode(Migrator.OUTPUT_ROLLBACK_SQL_MODE);
                     migrator.setOutputSQLWriter(getOutputWriter());
                     if (commandParam == null) {
-                        throw new CommandLineParsingException("rollbackSQL requires a rollback date");
+                        throw new CommandLineParsingException("rollbackSQL requires a rollback tag");
+                    }
+                    migrator.setRollbackToTag(commandParam);
+                } else if ("rollbackToDateSQL".equalsIgnoreCase(command)) {
+                    migrator.setMode(Migrator.OUTPUT_ROLLBACK_SQL_MODE);
+                    migrator.setOutputSQLWriter(getOutputWriter());
+                    if (commandParam == null) {
+                        throw new CommandLineParsingException("rollbackToDateSQL requires a rollback date");
                     }
                     migrator.setRollbackToDate(dateFormat.parse(commandParam));
+                } else if ("rollbackLatestSQL".equalsIgnoreCase(command)) {
+                    migrator.setMode(Migrator.OUTPUT_ROLLBACK_SQL_MODE);
+                    migrator.setOutputSQLWriter(getOutputWriter());
+                    migrator.setRollbackCount(1);
                 } else if ("futureRollbackSQL".equalsIgnoreCase(command)) {
                     migrator.setMode(Migrator.OUTPUT_FUTURE_ROLLBACK_SQL_MODE);
                     migrator.setOutputSQLWriter(getOutputWriter());

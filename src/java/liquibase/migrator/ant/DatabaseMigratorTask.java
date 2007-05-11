@@ -60,7 +60,7 @@ public class DatabaseMigratorTask extends BaseLiquibaseTask {
             }
 
             if (isDropFirst()) {
-                migrator.setShouldDropDatabaseObjectsFirst(isRebuildDatabase());
+                migrator.dropAll();
             }
             migrator.migrate();
         } catch (Exception e) {

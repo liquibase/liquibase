@@ -13,6 +13,8 @@ public class IncludeMigrator extends Migrator {
         this.parentMigrator = parentMigrator;
         setMode(parentMigrator.getMode());
         setRollbackToDate(parentMigrator.getRollbackToDate());
+        setRollbackToTag(parentMigrator.getRollbackToTag());
+        setRollbackCount(parentMigrator.getRollbackCount());
         setOutputSQLWriter(parentMigrator.getOutputSQLWriter());
     }
 

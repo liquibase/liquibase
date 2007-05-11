@@ -151,7 +151,7 @@ public class LiquibaseMojo extends AbstractMojo {
                 }
 
                 if (isDropFirst()) {
-                    migrator.setShouldDropDatabaseObjectsFirst(isRebuildDatabase());
+                    migrator.dropAll();
                 }
                 migrator.migrate();
             }

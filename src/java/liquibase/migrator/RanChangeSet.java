@@ -8,6 +8,7 @@ public class RanChangeSet {
     private String author;
     private String md5sum;
     private Date dateExecuted;
+    private String tag;
 
     public RanChangeSet(ChangeSet changeSet) {
         this.changeLog = changeSet.getDatabaseChangeLog().getMigrator().getMigrationFile();
@@ -17,12 +18,13 @@ public class RanChangeSet {
         this.dateExecuted = new Date();
     }
 
-    public RanChangeSet(String changeLog, String id, String author, String md5sum, Date dateExecuted) {
+    public RanChangeSet(String changeLog, String id, String author, String md5sum, Date dateExecuted, String tag) {
         this.changeLog = changeLog;
         this.id = id;
         this.author = author;
         this.md5sum = md5sum;
         this.dateExecuted = dateExecuted;
+        this.tag = tag;
     }
 
     public String getChangeLog() {
@@ -43,6 +45,14 @@ public class RanChangeSet {
 
     public Date getDateExecuted() {
         return dateExecuted;
+    }
+
+    public String getTag() {
+        return tag;
+    }
+
+    public void setTag(String tag) {
+        this.tag = tag;
     }
 
     public boolean equals(Object o) {

@@ -48,20 +48,20 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
 
     public void testRunChangeLog() throws Exception {
         Migrator migrator = createMigrator(completeChangeLog);
-        migrator.setShouldDropDatabaseObjectsFirst(true);
-        migrator.migrate();
+        migrator.dropAll();
 
         //run again to test changelog testing logic
         migrator = createMigrator(completeChangeLog);
-        migrator.setShouldDropDatabaseObjectsFirst(false);
         migrator.migrate();
     }
 
     public void testOutputChangeLog() throws Exception {
         StringWriter output = new StringWriter();
         Migrator migrator = createMigrator(completeChangeLog);
+        migrator.dropAll();
+
+        migrator = createMigrator(completeChangeLog);
         migrator.setOutputSQLWriter(output);
-        migrator.setShouldDropDatabaseObjectsFirst(true);
         migrator.setMode(Migrator.OUTPUT_SQL_MODE);
         migrator.migrate();
 
@@ -70,9 +70,10 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
 
     public void testRollbackableChangeLog() throws Exception {
         Migrator migrator = createMigrator(rollbackChangeLog);
+        migrator.dropAll();
 
+        migrator = createMigrator(rollbackChangeLog);
         migrator.setMode(Migrator.EXECUTE_MODE);
-        migrator.setShouldDropDatabaseObjectsFirst(true);
         migrator.migrate();
 
         migrator = createMigrator(rollbackChangeLog);
@@ -92,9 +93,10 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
 
     public void testRollbackableChangeLogScriptOnExistingDatabase() throws Exception {
         Migrator migrator = createMigrator(rollbackChangeLog);
+        migrator.dropAll();
 
+        migrator = createMigrator(rollbackChangeLog);
         migrator.setMode(Migrator.EXECUTE_MODE);
-        migrator.setShouldDropDatabaseObjectsFirst(true);
         migrator.migrate();
 
         StringWriter writer = new StringWriter();
@@ -112,13 +114,25 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
         StringWriter writer = new StringWriter();
 
         Migrator migrator = createMigrator(rollbackChangeLog);
-        migrator.setShouldDropDatabaseObjectsFirst(true);
+        migrator.dropAll();
+
+        migrator = createMigrator(rollbackChangeLog);
         migrator.setMode(Migrator.OUTPUT_FUTURE_ROLLBACK_SQL_MODE);
         migrator.setOutputSQLWriter(writer);
         migrator.setRollbackToDate(new Date(0));
         migrator.migrate();
 
 //        System.out.println("Rollback SQL for future "+driverName+"\n\n"+writer.toString());
+    }
+
+    public void testTag() throws Exception{
+        Migrator migrator = createMigrator(completeChangeLog);
+        migrator.dropAll();
+
+        migrator= createMigrator(completeChangeLog);
+        migrator.migrate();
+
+        migrator.tag("Test Tag");
     }
 
 }

@@ -481,4 +481,65 @@ public abstract class AbstractDatabase {
     }
 
     public abstract String getProductName();
+
+    public void tag(String tagString) throws MigrationFailedException {
+        Connection conn = getConnection();
+        PreparedStatement stmt = null;
+        try {
+            stmt = conn.prepareStatement(createChangeToTagSQL());
+            ResultSet rs = stmt.executeQuery();
+            if (!rs.next()) {
+                throw new MigrationFailedException("Did not tag database correctly");
+            }
+            Timestamp lastExecutedDate = rs.getTimestamp(1);
+            rs.close();
+            stmt.close();
+
+            stmt = conn.prepareStatement(createTagSQL());
+            stmt.setString(1, tagString);
+            stmt.setTimestamp(2, lastExecutedDate);
+            int rowsUpdated = stmt.executeUpdate();
+            if (rowsUpdated == 0) {
+                throw new MigrationFailedException("Did not tag database change log correctly");
+            }
+            conn.commit();
+        } catch (Exception e) {
+            throw new MigrationFailedException(e);
+        } finally {
+            if (stmt != null) {
+                try {
+                    stmt.close();
+                } catch (SQLException e) {
+                    ;
+                }
+            }
+        }
+    }
+
+    protected String createChangeToTagSQL() {
+        return "SELECT MAX(DATEEXECUTED) FROM "+getDatabaseChangeLogTableName()+"";
+    }
+
+    protected String createTagSQL() {
+        return "UPDATE "+getDatabaseChangeLogTableName()+" SET TAG=? WHERE DATEEXECUTED=?";
+    }
+
+    public boolean doesTagExist(String tag) throws SQLException {
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+        try {
+            pstmt = getConnection().prepareStatement("SELECT COUNT(*) FROM "+getDatabaseChangeLogTableName()+" WHERE TAG=?");
+            pstmt.setString(1, tag);
+            rs = pstmt.executeQuery();
+            rs.next();
+            return rs.getInt(1) > 0;
+        } finally {
+            if (rs != null) {
+                rs.close();
+            }
+            if (pstmt != null) {
+                pstmt.close();
+            }
+        }
+    }
 }
