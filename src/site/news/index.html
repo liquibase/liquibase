@@ -20,7 +20,7 @@
                 <h1>LiquiBase News</h1>
 
                 <div class="newsEntry">
-                    <h2>5/2007 - LiquiBase 0.9.0 Released</h2>
+                    <h2>5/14/2007 - LiquiBase 0.9.0 Released</h2>
                     <p>
                         LiquiBase 0.9.0 has been released.  0.9.0 is feature complete and the last major release before the 1.0 release candidate series.
                         Between 0.9 and 1.0-RC1 we are going focus on bug fixes and finalizing public APIs.
@@ -42,16 +42,6 @@
                         site for creating a plug-in, we we do not have the nessisary Maven experience to actually test it well.
                         If you are interested in helping us test this functionality, please <a href="../community.html">contact us</a>.
                     </p>
-                    <h3>Command-line migrator cleanup</h3>
-                    <p>
-                        We have changed the format of options and commands passed to the command line migrator
-                        to make it more user friendly.  We also removed logging by default, although it can be re-enabled with a flag.
-                        <a href="../manual/latest/command_line_migrator.html">Read More</a>
-                    </p>
-                    <h3>Ant changes</h3>
-                    <p>
-                        We changed the "migrationFiles" parameter changed to "changeLogFile" and no longer supports multiple change-logs.
-                    </p>
                     <h3>New Refactorings</h3>
                     <ul>
                         <li><a href="../manual/latest/create_view_change.html">Create View</a></li>
@@ -67,8 +57,18 @@
                         <li><a href="../manual/latest/add_default_value_change.html">Add Default Value</a></li>
                         <li><a href="../manual/latest/drop_default_value_change.html">Drop Default Value</a></li>
                         <li><a href="../manual/latest/add_unique_constraint_change.html">Add Unique Constraint</a></li>
-                        <li><a href="../manual/latest/drop_unique_constraint_change.html">Drop Unique Constraint</a></li>                        
+                        <li><a href="../manual/latest/drop_unique_constraint_change.html">Drop Unique Constraint</a></li>
                     </ul>
+                    <h3>Command-line migrator cleanup</h3>
+                    <p>
+                        We have changed the format of options and commands passed to the command line migrator
+                        to make it more user friendly.  We also removed logging by default, although it can be re-enabled with a flag.
+                        <a href="../manual/latest/command_line_migrator.html">Read More</a>
+                    </p>
+                    <h3>Ant changes</h3>
+                    <p>
+                        We changed the "migrationFiles" parameter changed to "changeLogFile" and no longer supports multiple change-logs.
+                    </p>
                     <h3>DATABASECHANGELOG table changes</h3>
                     <p>
                         We added additional columns to better track changes.  LiquiBase will update your DATABASECHANGLOG table

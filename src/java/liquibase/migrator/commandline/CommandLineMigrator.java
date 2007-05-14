@@ -3,6 +3,7 @@ package liquibase.migrator.commandline;
 import liquibase.migrator.DatabaseChangeLogLock;
 import liquibase.migrator.MigrationFailedException;
 import liquibase.migrator.Migrator;
+import liquibase.StreamUtil;
 
 import java.io.*;
 import java.net.URL;
@@ -49,6 +50,14 @@ public class CommandLineMigrator {
         }
 
         CommandLineMigrator commandLineMigrator = new CommandLineMigrator();
+        if (args.length == 1 && "--help".equals(args[0])) {
+            commandLineMigrator.printHelp(System.out);
+            return;
+        } else if (args.length == 1 && "--version".equals(args[0])) {
+            System.out.println("LiquiBase Version: "+new Migrator(null, null).getBuildVersion()+ StreamUtil.getLineSeparator());
+            return;
+        }
+
         commandLineMigrator.parseOptions(args);
 
         File propertiesFile = new File("liquibase.properties");
@@ -194,6 +203,7 @@ public class CommandLineMigrator {
         stream.println("                                            (finest, finer, fine, info,");
         stream.println("                                            warning, severe)");
         stream.println(" --help                                     Prints this message");
+        stream.println(" --version                                  Prints this version information");
         stream.println("");
         stream.println("Default value for parameters can be stored in a file called");
         stream.println("'liquibase.properties' that is read from the current working directory.");
