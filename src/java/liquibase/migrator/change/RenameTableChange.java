@@ -29,7 +29,7 @@ public class RenameTableChange extends AbstractChange {
     }
 
     public String[] generateStatements(MSSQLDatabase database) {
-        return new String[] { "sp_rename '" + oldTableName + "', " + newTableName };
+        return new String[] { "exec sp_rename '" + oldTableName + "', " + newTableName };
     }
 
     public String[] generateStatements(OracleDatabase database) {

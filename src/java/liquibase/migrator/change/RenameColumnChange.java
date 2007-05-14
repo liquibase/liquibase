@@ -54,7 +54,7 @@ public class RenameColumnChange extends AbstractChange {
     }
 
     public String[] generateStatements(MSSQLDatabase database) {
-        return new String[] { "sp_rename '" + tableName + "." + oldColumnName + "', " + newColumnName };
+        return new String[] { "exec sp_rename '" + tableName + "." + oldColumnName + "', " + newColumnName };
     }
 
     public String[] generateStatements(OracleDatabase database) {

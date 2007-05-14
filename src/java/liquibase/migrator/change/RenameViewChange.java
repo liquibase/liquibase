@@ -32,7 +32,7 @@ public class RenameViewChange extends AbstractChange {
     }
 
     public String[] generateStatements(MSSQLDatabase database) {
-        return new String[] { "sp_rename '" + oldViewName + "', " + newViewName };
+        return new String[] { "exec sp_rename '" + oldViewName + "', " + newViewName };
     }
 
     public String[] generateStatements(OracleDatabase database) {

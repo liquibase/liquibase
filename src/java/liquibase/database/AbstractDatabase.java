@@ -595,4 +595,8 @@ public abstract class AbstractDatabase {
             }
         }
     }
+
+    public String getCommitSQL() {
+        return "COMMIT";
+    }
 }

@@ -106,6 +106,7 @@ public class ChangeSet {
                 for (AbstractChange change : getRefactorings()) {
                     change.saveStatement(getDatabaseChangeLog().getMigrator().getDatabase(), outputSQLWriter);
                 }
+//                outputSQLWriter.write(getDatabaseChangeLog().getMigrator().getDatabase().getCommitSQL()+";"+StreamUtil.getLineSeparator()+StreamUtil.getLineSeparator());
             } else if (migrator.getMode().equals(Migrator.EXECUTE_ROLLBACK_MODE)) {
                 log.finest("Rolling Back ChangeSet: " + toString());
                 if (rollBackStatements != null && rollBackStatements.length > 0) {
@@ -161,7 +162,7 @@ public class ChangeSet {
 
     private void writeComments(Writer writer) throws IOException {
         if (StringUtils.trimToNull(comments) != null) {
-            String[] commentLines = comments.split(StreamUtil.getLineSeparator());
+            String[] commentLines = comments.split("\n");
             for (String line : commentLines) {
                 writer.append("-- "+line.trim()+StreamUtil.getLineSeparator());
             }
