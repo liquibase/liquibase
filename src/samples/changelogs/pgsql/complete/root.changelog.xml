@@ -277,4 +277,6 @@
 
     <include file="changelogs/pgsql/complete/included.changelog.xml"/>
 
+    <include file="changelogs/pgsql/complete/renamed.changelog.xml"/>
+
 </databaseChangeLog>

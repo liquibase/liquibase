@@ -102,10 +102,10 @@ public class CommandLineMigrator {
                 || "migrateSQL".equals(arg)
                 || "rollback".equals(arg)
                 || "rollbackToDate".equals(arg)
-                || "rollbackLatest".equals(arg)
+                || "rollbackCount".equals(arg)
                 || "rollbackSQL".equals(arg)
                 || "rollbackToDateSQL".equals(arg)
-                || "rollbackLatestSQL".equals(arg)
+                || "rollbackCountSQL".equals(arg)
                 || "futureRollbackSQL".equals(arg)
                 || "tag".equals(arg)
                 || "listLocks".equals(arg)
@@ -146,7 +146,7 @@ public class CommandLineMigrator {
         stream.println(" rollbackToDate <date/time>     Rolls back the database to the the state is was");
         stream.println("                                at the given date/time.");
         stream.println("                                Date Format: yyyy-MM-dd HH:mm:ss");
-        stream.println(" rollbackLatest                 Rolls back the last change set");
+        stream.println(" rollbackCount <value>          Rolls back the last <value> change sets");
         stream.println("                                applied to the database");
         stream.println(" migrateSQL                     Writes SQL to update database to current");
         stream.println("                                version to STDOUT");
@@ -156,7 +156,8 @@ public class CommandLineMigrator {
         stream.println(" rollbackToDateSQL <date/time>  Writes SQL to roll back the database to that");
         stream.println("                                state it was in at the given date/time version");
         stream.println("                                to STDOUT");
-        stream.println(" rollbackLatestSQL              Writes SQL to roll back the last change set");
+        stream.println(" rollbackCountSQL <value>       Writes SQL to roll back the last");
+        stream.println("                                <value> change sets to STDOUT");
         stream.println("                                applied to the database");
         stream.println(" futureRollbackSQL              Writes SQL to roll back the database to the ");
         stream.println("                                current state after the changes in the ");
@@ -428,9 +429,9 @@ public class CommandLineMigrator {
                         throw new CommandLineParsingException("rollback requires a rollback date");
                     }
                     migrator.setRollbackToDate(dateFormat.parse(commandParam));
-                } else if ("rollbackLatest".equalsIgnoreCase(command)) {
+                } else if ("rollbackCount".equalsIgnoreCase(command)) {
                     migrator.setMode(Migrator.EXECUTE_ROLLBACK_MODE);
-                    migrator.setRollbackCount(new Integer(1));
+                    migrator.setRollbackCount(Integer.parseInt(commandParam));
                 } else if ("rollbackSQL".equalsIgnoreCase(command)) {
                     migrator.setMode(Migrator.OUTPUT_ROLLBACK_SQL_MODE);
                     migrator.setOutputSQLWriter(getOutputWriter());
@@ -445,10 +446,10 @@ public class CommandLineMigrator {
                         throw new CommandLineParsingException("rollbackToDateSQL requires a rollback date");
                     }
                     migrator.setRollbackToDate(dateFormat.parse(commandParam));
-                } else if ("rollbackLatestSQL".equalsIgnoreCase(command)) {
+                } else if ("rollbackCountSQL".equalsIgnoreCase(command)) {
                     migrator.setMode(Migrator.OUTPUT_ROLLBACK_SQL_MODE);
                     migrator.setOutputSQLWriter(getOutputWriter());
-                    migrator.setRollbackCount(1);
+                    migrator.setRollbackCount(Integer.valueOf(commandParam));
                 } else if ("futureRollbackSQL".equalsIgnoreCase(command)) {
                     migrator.setMode(Migrator.OUTPUT_FUTURE_ROLLBACK_SQL_MODE);
                     migrator.setOutputSQLWriter(getOutputWriter());

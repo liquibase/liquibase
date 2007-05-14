@@ -278,4 +278,6 @@
 
     <include file="changelogs/oracle/complete/included.changelog.xml"/>
 
+    <include file="changelogs/oracle/complete/renamed.changelog.xml"/>
+
 </databaseChangeLog>

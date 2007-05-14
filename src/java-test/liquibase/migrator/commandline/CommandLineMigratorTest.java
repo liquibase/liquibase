@@ -19,7 +19,6 @@ public class CommandLineMigratorTest extends TestCase {
                 "--classpath=CLASSPATH;CLASSPATH2",
                 "--contexts=CONTEXT1,CONTEXT2",
                 "--promptForNonLocalDatabase=true",
-                "--dropAllFirst=true",
                 "migrate",
         };
 
@@ -40,7 +39,6 @@ public class CommandLineMigratorTest extends TestCase {
     public void testFalseBooleanParameters() throws Exception {
         String[] args = new String[]{
                 "--promptForNonLocalDatabase=false",
-                "--dropAllFirst=false",
                 "migrate",
         };
 
@@ -55,7 +53,6 @@ public class CommandLineMigratorTest extends TestCase {
     public void testTrueBooleanParameters() throws Exception {
         String[] args = new String[]{
                 "--promptForNonLocalDatabase=true",
-                "--dropAllFirst=true",
                 "migrate",
         };
 
@@ -70,7 +67,6 @@ public class CommandLineMigratorTest extends TestCase {
     public void testParameterWithoutDash() throws Exception {
         String[] args = new String[]{
                 "promptForNonLocalDatabase=true",
-                "--dropAllFirst=true",
                 "migrate",
         };
 
@@ -87,7 +83,6 @@ public class CommandLineMigratorTest extends TestCase {
     public void testParameterWithoutEquals() throws Exception {
         String[] args = new String[]{
                 "--promptForNonLocalDatabase", "true",
-                "--dropAllFirst=true",
                 "migrate",
         };
 
@@ -168,7 +163,6 @@ public class CommandLineMigratorTest extends TestCase {
         props.setProperty("classpath", "CLASSPAHT");
         props.setProperty("contexts", "CONTEXTS");
         props.setProperty("promptForNonLocalDatabase", "TRUE");
-        props.setProperty("dropAllFirst", "TRUE");
 
         ByteArrayOutputStream propFile = new ByteArrayOutputStream();
         props.store(propFile, "");
@@ -201,7 +195,6 @@ public class CommandLineMigratorTest extends TestCase {
         props.setProperty("classpath", "CLASSPAHT");
         props.setProperty("contexts", "CONTEXTS");
         props.setProperty("promptForNonLocalDatabase", "TRUE");
-        props.setProperty("dropAllFirst", "TRUE");
 
         ByteArrayOutputStream propFile = new ByteArrayOutputStream();
         props.store(propFile, "");

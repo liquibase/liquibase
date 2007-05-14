@@ -111,31 +111,77 @@ public abstract class AbstractDatabase {
     public void checkDatabaseChangeLogTable(Migrator migrator) throws SQLException, IOException {
         Statement statement = null;
         Connection connection = getConnection();
-        ResultSet rs = null;
+        ResultSet checkTableRS = null;
+        ResultSet checkColumnsRS = null;
         changeLogTableExists = true;
+        List<String> statementsToExecute = new ArrayList<String>();
+
         try {
-            rs = connection.getMetaData().getTables(getCatalogName(), getSchemaName(), getDatabaseChangeLogTableName(), new String[]{"TABLE"});
-            if (!rs.next()) {
+            checkTableRS = connection.getMetaData().getTables(getCatalogName(), getSchemaName(), getDatabaseChangeLogTableName(), new String[]{"TABLE"});
+            if (checkTableRS.next()) {
+                checkColumnsRS = connection.getMetaData().getColumns(getCatalogName(), getSchemaName(), getDatabaseChangeLogTableName(), null);
+                boolean hasDescription = false;
+                boolean hasComments = false;
+                boolean hasTag = false;
+                boolean hasLiquibase = false;
+                while (checkColumnsRS.next()) {
+                    String columnName = checkColumnsRS.getString("COLUMN_NAME");
+                    if ("DESCRIPTION".equalsIgnoreCase(columnName)) {
+                        hasDescription = true;
+                    } else if ("COMMENTS".equalsIgnoreCase(columnName)) {
+                        hasComments = true;
+                    } else if ("TAG".equalsIgnoreCase(columnName)) {
+                        hasTag = true;
+                    } else if ("LIQUIBASE".equalsIgnoreCase(columnName)) {
+                        hasLiquibase = true;
+                    }
+                }
+
+                if (!hasDescription) {
+                    statementsToExecute.add("ALTER TABLE DATABASECHANGELOG ADD DESCRIPTION VARCHAR(255)");
+                }
+                if (!hasTag) {
+                    statementsToExecute.add("ALTER TABLE DATABASECHANGELOG ADD TAG VARCHAR(255)");
+                }
+                if (!hasComments) {
+                    statementsToExecute.add("ALTER TABLE DATABASECHANGELOG ADD COMMENTS VARCHAR(255)");
+                }
+                if (!hasLiquibase) {
+                    statementsToExecute.add("ALTER TABLE DATABASECHANGELOG ADD LIQUIBASE VARCHAR(255)");
+                }
+
+            } else {
                 String createTableStatement = ("CREATE TABLE DATABASECHANGELOG (id varchar(255) not null, author varchar(255) not null, filename varchar(255) not null, dateExecuted " + getDateTimeType() + " not null, md5sum varchar(32), description varchar(255), comments varchar(255), tag varchar(255), liquibase varchar(10), primary key(id, author, filename))").toUpperCase();
                 // If there is no table in the database for recording change history create one.
+                statementsToExecute.add(createTableStatement);
                 if (migrator.getMode().equals(Migrator.EXECUTE_MODE)) {
-                    statement = connection.createStatement();
-                    statement.executeUpdate(createTableStatement);
-                    connection.commit();
-                    log.info("Created database history table with name: DATABASECHANGELOG");
+                    log.info("Creating database history table with name: DATABASECHANGELOG");
                 } else {
-                    if (!migrator.getMode().equals(Migrator.OUTPUT_FUTURE_ROLLBACK_SQL_MODE)) {
-                        migrator.getOutputSQLWriter().append(createTableStatement + ";\n\n");
-                    }
                     changeLogTableExists = false;
                 }
             }
+
+            for (String sql : statementsToExecute) {
+                if (migrator.getMode().equals(Migrator.EXECUTE_MODE)) {
+                    statement = connection.createStatement();
+                    statement.executeUpdate(sql);
+                    connection.commit();
+                } else {
+                    if (!migrator.getMode().equals(Migrator.OUTPUT_FUTURE_ROLLBACK_SQL_MODE)) {
+                        migrator.getOutputSQLWriter().append(sql + ";\n");
+                    }
+                }
+            }
+
         } finally {
             if (statement != null) {
                 statement.close();
             }
-            if (rs != null) {
-                rs.close();
+            if (checkTableRS != null) {
+                checkTableRS.close();
+            }
+            if (checkColumnsRS!= null) {
+                checkColumnsRS.close();
             }
         }
     }
@@ -517,18 +563,18 @@ public abstract class AbstractDatabase {
     }
 
     protected String createChangeToTagSQL() {
-        return "SELECT MAX(DATEEXECUTED) FROM "+getDatabaseChangeLogTableName()+"";
+        return "SELECT MAX(DATEEXECUTED) FROM " + getDatabaseChangeLogTableName() + "";
     }
 
     protected String createTagSQL() {
-        return "UPDATE "+getDatabaseChangeLogTableName()+" SET TAG=? WHERE DATEEXECUTED=?";
+        return "UPDATE " + getDatabaseChangeLogTableName() + " SET TAG=? WHERE DATEEXECUTED=?";
     }
 
     public boolean doesTagExist(String tag) throws SQLException {
         PreparedStatement pstmt = null;
         ResultSet rs = null;
         try {
-            pstmt = getConnection().prepareStatement("SELECT COUNT(*) FROM "+getDatabaseChangeLogTableName()+" WHERE TAG=?");
+            pstmt = getConnection().prepareStatement("SELECT COUNT(*) FROM " + getDatabaseChangeLogTableName() + " WHERE TAG=?");
             pstmt.setString(1, tag);
             rs = pstmt.executeQuery();
             rs.next();

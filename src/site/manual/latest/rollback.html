@@ -33,18 +33,35 @@
                         Other refactorings such as "drop table" and "insert data" have no corresponding rollback commands that can be automatically generated.
                         In these cases, and cases where you want to override the default generated rollback commands, you can specify the rollback commands via the &lt;rollback/&gt; tag within the changeSet tag.
                     </p>
-                    <h2>Rollback Modes</h2>
-                    <p>LiquiBase has three modes for managing rollbacks</p>
+                    <h2>"Roll back To" Modes</h2>
+                    <p>You can specify what changes to rollback in three ways:</p>
+                    <h3>Date/Time</h3>
+                    <p>
+                        Specifying a date/time to rollback to will roll back all change-sets that were executed against the
+                        target database after the given date/time.
+                    </p>
+                    <h3>Tag</h3>
+                    <p>
+                        Specifying a tag to rollback to will roll back all change-sets that were executed against the
+                        target database after the given tag was applied.  See <a href="command_line_migrator.html">the command line migrator</a>
+                        for how to tag your database.
+                    </p>
+                    <h3>Number of Change Sets</h3>
+                    <p>
+                        You can specify the number of change-sets to rollback.
+                    </p>
+
+                    <h2>Roll back Execution Modes</h2>
+                    <p>LiquiBase has three modes for managing rollbacks:</p>
                     <h3>Execute Rollback Directly</h3>
                     <p>
-                        The rollback commands can be executed directly against the database by passing in a date/time that you
-                        want to rollback to.  If any changes cannot be rolled back, you will be notified and none of the changes
+                        The rollback commands can be executed directly against the target database.  If any changes cannot be rolled back, you will be notified and none of the changes
                         will roll back.
                     </p>
                     <h3>Generating a Rollback Script</h3>
                     <p>
-                        Rather than actually updating the database, the SQL required to roll back the database to the specified date/time
-                        can be generated.  This is useful if you want to preview what rollback commands will be executed before they are
+                        Rather than actually updating the database, the SQL required to roll back the database can be generated.
+                        This is useful if you want to preview what rollback commands will be executed before they are
                         actually run.
                     </p>
                     <h3>Generating a "Future Rollback" Script</h3>
@@ -54,6 +71,7 @@
                         database to the new version as well as the SQL to bring that new version back to the current version if needed.
                         This functionality is very useful when a DBA wants to control SQL going into the database, as well as
                         for applications that require rollback documentation for internal and/or <a href="http://en.wikipedia.org/wiki/Sarbanes-Oxley_Act">SOX-compliant</a> processes.
+                        You do not need to specify a rollback date, tag, or count in this mode.
                     </p>
                 </div>
             </div>

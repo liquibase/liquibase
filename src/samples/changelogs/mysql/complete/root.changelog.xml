@@ -276,4 +276,6 @@
 
     <include file="changelogs/mysql/complete/included.changelog.xml"/>
 
+    <include file="changelogs/mysql/complete/renamed.changelog.xml"/>
+
 </databaseChangeLog>

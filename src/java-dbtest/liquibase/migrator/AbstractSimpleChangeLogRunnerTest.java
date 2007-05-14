@@ -19,6 +19,7 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
     protected String driverName;
     protected String url;
     protected String driverDirectory;
+    private Connection connection;
 
     protected AbstractSimpleChangeLogRunnerTest(String changelogDir, String driverDir, String driverName, String url) {
         this.completeChangeLog = "changelogs/"+changelogDir+"/complete/root.changelog.xml";
@@ -32,16 +33,26 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
         Logger.getLogger(Migrator.DEFAULT_LOG_NAME).setLevel(Level.OFF);
     }
 
-    protected Migrator createMigrator(String changeLogFile) throws Exception {
-        JUnitFileOpener fileOpener = new JUnitFileOpener();
-        Migrator migrator = new Migrator(changeLogFile, fileOpener);
-        migrator.setContexts("test");
+    protected void setUp() throws Exception {
+        super.setUp();
 
         Driver driver = (Driver) Class.forName(driverName, true, new JUnitJDBCDriverClassLoader(driverDirectory)).newInstance();
         Properties info = new Properties();
         info.put("user", username);
         info.put("password", password);
-        Connection connection = driver.connect(url, info);
+        connection = driver.connect(url, info);
+    }
+
+    protected void tearDown() throws Exception {
+        super.tearDown();
+        connection.close();
+    }
+
+    protected Migrator createMigrator(String changeLogFile) throws Exception {
+        JUnitFileOpener fileOpener = new JUnitFileOpener();
+        Migrator migrator = new Migrator(changeLogFile, fileOpener);
+        migrator.setContexts("test");
+
         migrator.init(connection);
         return migrator;
     }

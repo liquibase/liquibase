@@ -90,6 +90,7 @@
             username="${database.username}"
             password="${database.password}"
             classpathref="classpath"
+            rollbackTag="release1.2"
             &gt;
     &lt;/migrateDatabase&gt;
 &lt;/target&gt;
@@ -105,6 +106,9 @@
                     <tr><th>password</th><td>The password to use when connecting to the database</td></tr>
                     <tr><th>classpathref</th><td>A reference to the classpath that contains the database driver, liquibase.migrator.jar, and the changelog.xml files</td></tr>
                     <tr><th>contexts</th><td>A comma separated list of <a href="contexts.html">contexts</a> to execute.  If not specified, all contexts are run.</td></tr>
+                    <tr><th>rollbackTag</th><td>Tag to roll back to</td></tr>
+                    <tr><th>rollbackDate</th><td>Date to roll back to</td></tr>
+                    <tr><th>rollbackCount</th><td>Number of changeSets to roll back</td></tr>
                 </table>
             </div>
         </div>

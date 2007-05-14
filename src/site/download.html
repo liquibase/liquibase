@@ -27,21 +27,8 @@
                         </h2>
                         <h4>Upgrade Notes (please read, LiquiBase may not work if you don't follow these directions):</h4>
                     <ul>
-                        <li>0.8.x -> 0.9.x
-                            <ul>
-                                <li>The DATABASECHANGELOG table had extra columns added to it.
-                                    Before running LiquiBase against an older DATABASECHANGELOG table, execute:
-                                    <ul>
-                                        <li>ALTER TABLE DATABASECHANGELOG ADD DESCRIPTION VARCHAR(255);</li>
-                                        <li>ALTER TABLE DATABASECHANGELOG ADD COMMENTS VARCHAR(255);</li>
-                                        <li>ALTER TABLE DATABASECHANGELOG ADD TAG VARCHAR(255);</li>
-                                        <li>ALTER TABLE DATABASECHANGELOG ADD LIQUIBASE VARCHAR(255);</li>
-                                    </ul>
-                                </li>
-                                <li>The Ant task "migrationFiles" parameter changed to "changeLogFile"
+                        <li>0.8.x -> 0.9.x: The Ant task "migrationFiles" parameter changed to "changeLogFile"
                                     and no longer supports multiple change logs.</li>
-                        </ul>
-                        </li>
                         <li>0.8.0 -> 0.8.1: LiquiBase no longer prompts you if you run it against a non-localhost database.  There is a flag
                         available in the command line migrator and the ant migrator that allows you to turn the functionality back on.</li>
                         <li>0.7.x -> 0.8.x: the location and namespace of the XSD changed.  The old XSD will remain
