@@ -1,6 +1,7 @@
 package liquibase.migrator;
 
 import liquibase.database.*;
+import liquibase.StreamUtil;
 import org.xml.sax.*;
 
 import javax.xml.parsers.SAXParser;
@@ -258,11 +259,11 @@ public class Migrator {
                 log.info("Reading changelog " + migrationFile);
             } else {
                 if (!outputtedHeader) {
-                    outputSQLWriter.write("--------------------------------------------------------------------------------------\n");
+                    outputSQLWriter.write("--------------------------------------------------------------------------------------"+ StreamUtil.getLineSeparator());
                     if (mode.equals(OUTPUT_SQL_MODE)) {
-                        outputSQLWriter.write("-- SQL to update database to newest version\n");
+                        outputSQLWriter.write("-- SQL to update database to newest version"+StreamUtil.getLineSeparator());
                     } else if (mode.equals(OUTPUT_CHANGELOG_ONLY_SQL_MODE)) {
-                        outputSQLWriter.write("-- SQL to add all changesets to database history table\n");
+                        outputSQLWriter.write("-- SQL to add all changesets to database history table"+StreamUtil.getLineSeparator());
                     } else if (mode.equals(OUTPUT_ROLLBACK_SQL_MODE)) {
                         String stateDescription;
                         if (getRollbackToTag() != null) {
@@ -274,16 +275,16 @@ public class Migrator {
                         } else {
                             throw new RuntimeException("Unknown rollback type");
                         }
-                        outputSQLWriter.write("-- SQL to roll-back database to the state it was at "+stateDescription +"\n");
+                        outputSQLWriter.write("-- SQL to roll-back database to the state it was at "+stateDescription +StreamUtil.getLineSeparator());
                     } else if (mode.equals(OUTPUT_FUTURE_ROLLBACK_SQL_MODE)) {
-                        outputSQLWriter.write("-- SQL to roll-back database from an updated buildVersion back to current version\n");
+                        outputSQLWriter.write("-- SQL to roll-back database from an updated buildVersion back to current version"+StreamUtil.getLineSeparator());
                     } else {
                         throw new MigrationFailedException("Unexpected output mode: "+mode);
                     }
-                    outputSQLWriter.write("-- Change Log: " + migrationFile + "\n");
-                    outputSQLWriter.write("-- Ran at: " + DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(new Date()) + "\n");
-                    outputSQLWriter.write("-- Against: " + getDatabase().getConnectionUsername() + "@" + getDatabase().getConnectionURL() + "\n");
-                    outputSQLWriter.write("--------------------------------------------------------------------------------------\n\n\n");
+                    outputSQLWriter.write("-- Change Log: " + migrationFile + StreamUtil.getLineSeparator());
+                    outputSQLWriter.write("-- Ran at: " + DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(new Date()) + StreamUtil.getLineSeparator());
+                    outputSQLWriter.write("-- Against: " + getDatabase().getConnectionUsername() + "@" + getDatabase().getConnectionURL() + StreamUtil.getLineSeparator());
+                    outputSQLWriter.write("--------------------------------------------------------------------------------------"+StreamUtil.getLineSeparator()+StreamUtil.getLineSeparator()+StreamUtil.getLineSeparator());
                     outputtedHeader = true;
                 }
             }

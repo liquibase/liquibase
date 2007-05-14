@@ -6,6 +6,7 @@ import liquibase.migrator.Migrator;
 import liquibase.migrator.UnsupportedChangeException;
 import liquibase.migrator.RollbackImpossibleException;
 import liquibase.util.StringUtils;
+import liquibase.StreamUtil;
 import org.w3c.dom.*;
 
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -163,7 +164,7 @@ public abstract class AbstractChange {
     public void saveStatement(AbstractDatabase database, Writer writer) throws IOException, UnsupportedChangeException {
         String[] statements = generateStatements(database);
         for (String statement : statements) {
-            writer.append(statement + ";\n\n");
+            writer.append(statement + ";"+ StreamUtil.getLineSeparator()+StreamUtil.getLineSeparator());
         }
     }
 

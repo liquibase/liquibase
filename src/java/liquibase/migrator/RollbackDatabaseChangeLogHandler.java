@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.Writer;
 
 import liquibase.migrator.preconditions.PreconditionFailedException;
+import liquibase.StreamUtil;
 
 public class RollbackDatabaseChangeLogHandler extends BaseChangeLogHandler {
     private List<RanChangeSet> ranChangesToRollback;
@@ -86,7 +87,7 @@ public class RollbackDatabaseChangeLogHandler extends BaseChangeLogHandler {
             statement.close();
             connection.commit();
         } else {
-            sqlOutputWriter.write(sql + ";\n\n");
+            sqlOutputWriter.write(sql + ";"+ StreamUtil.getLineSeparator()+StreamUtil.getLineSeparator());
         }
     }
 

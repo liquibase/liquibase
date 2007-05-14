@@ -4,6 +4,7 @@ import junit.framework.TestCase;
 import liquibase.database.*;
 import liquibase.migrator.UnsupportedChangeException;
 import liquibase.migrator.RollbackImpossibleException;
+import liquibase.StreamUtil;
 import static org.easymock.classextension.EasyMock.*;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -58,7 +59,7 @@ public abstract class AbstractChangeTest extends TestCase {
         OracleDatabase database = new OracleDatabase();
         change.saveStatement(database, stringWriter);
 
-        assertEquals("GENERATED STATEMENT;\n\n", stringWriter.getBuffer().toString());
+        assertEquals("GENERATED STATEMENT;"+ StreamUtil.getLineSeparator()+StreamUtil.getLineSeparator(), stringWriter.getBuffer().toString());
     }
 
     public void testExecuteStatement() throws Exception {

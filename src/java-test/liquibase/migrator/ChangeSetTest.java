@@ -238,7 +238,7 @@ public class ChangeSetTest extends TestCase {
 //        replay(refactoring1);
 //        replay(refactoring2);
 //
-//        writer.write("-- Changeset "+changeSet.toString()+"\n");
+//        writer.write("-- Changeset "+changeSet.toString()+StreamUtil.getLineSeparator());
 //        expectLastCall();
 //        replay(writer);
 //

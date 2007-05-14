@@ -4,6 +4,7 @@ import liquibase.migrator.DatabaseChangeLogLock;
 import liquibase.migrator.MigrationFailedException;
 import liquibase.migrator.Migrator;
 import liquibase.migrator.change.ColumnConfig;
+import liquibase.StreamUtil;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -115,6 +116,7 @@ public abstract class AbstractDatabase {
         ResultSet checkColumnsRS = null;
         changeLogTableExists = true;
         List<String> statementsToExecute = new ArrayList<String>();
+        boolean wroteToOutput = false;
 
         try {
             checkTableRS = connection.getMetaData().getTables(getCatalogName(), getSchemaName(), getDatabaseChangeLogTableName(), new String[]{"TABLE"});
@@ -168,9 +170,14 @@ public abstract class AbstractDatabase {
                     connection.commit();
                 } else {
                     if (!migrator.getMode().equals(Migrator.OUTPUT_FUTURE_ROLLBACK_SQL_MODE)) {
-                        migrator.getOutputSQLWriter().append(sql + ";\n");
+                        migrator.getOutputSQLWriter().append(sql + ";"+StreamUtil.getLineSeparator());
+                        wroteToOutput = true;
                     }
                 }
+            }
+
+            if (wroteToOutput) {
+                migrator.getOutputSQLWriter().append(StreamUtil.getLineSeparator());
             }
 
         } finally {
@@ -220,17 +227,17 @@ public abstract class AbstractDatabase {
                 } else {
                     if (!migrator.getMode().equals(Migrator.OUTPUT_FUTURE_ROLLBACK_SQL_MODE)) {
                         if (!outputtedLockWarning) {
-                            migrator.getOutputSQLWriter().write(migrator.getDatabase().getLineComment() + "-----------------------------------------------------------------------------------------------\n");
-                            migrator.getOutputSQLWriter().write(migrator.getDatabase().getLineComment() + " DATABASECHANGELOGLOCK table does not exist.\n");
-                            migrator.getOutputSQLWriter().write(migrator.getDatabase().getLineComment() + " Race conditions may cause a corrupted sql script.\n");
-                            migrator.getOutputSQLWriter().write(migrator.getDatabase().getLineComment() + " Consider running: \n");
-                            migrator.getOutputSQLWriter().write(migrator.getDatabase().getLineComment() + " " + getCreateChangeLogLockSQL() + ";\n");
-                            migrator.getOutputSQLWriter().write(migrator.getDatabase().getLineComment() + " " + getChangeLogLockInsertSQL() + ";\n");
-                            migrator.getOutputSQLWriter().write(migrator.getDatabase().getLineComment() + "-----------------------------------------------------------------------------------------------\n\n");
+                            migrator.getOutputSQLWriter().write(migrator.getDatabase().getLineComment() + "-----------------------------------------------------------------------------------------------"+StreamUtil.getLineSeparator());
+                            migrator.getOutputSQLWriter().write(migrator.getDatabase().getLineComment() + " DATABASECHANGELOGLOCK table does not exist."+ StreamUtil.getLineSeparator());
+                            migrator.getOutputSQLWriter().write(migrator.getDatabase().getLineComment() + " Race conditions may cause a corrupted sql script."+StreamUtil.getLineSeparator());
+                            migrator.getOutputSQLWriter().write(migrator.getDatabase().getLineComment() + " Consider running: "+StreamUtil.getLineSeparator());
+                            migrator.getOutputSQLWriter().write(migrator.getDatabase().getLineComment() + " " + getCreateChangeLogLockSQL() + ";"+StreamUtil.getLineSeparator());
+                            migrator.getOutputSQLWriter().write(migrator.getDatabase().getLineComment() + " " + getChangeLogLockInsertSQL() + ";"+StreamUtil.getLineSeparator());
+                            migrator.getOutputSQLWriter().write(migrator.getDatabase().getLineComment() + "-----------------------------------------------------------------------------------------------"+StreamUtil.getLineSeparator()+StreamUtil.getLineSeparator());
                             outputtedLockWarning = true;
                         }
 
-                        migrator.getOutputSQLWriter().append(createTableStatement + ";\n\n");
+                        migrator.getOutputSQLWriter().append(createTableStatement + ";"+StreamUtil.getLineSeparator()+StreamUtil.getLineSeparator());
                     }
                     changeLogLockTableExists = false;
                 }
@@ -253,7 +260,7 @@ public abstract class AbstractDatabase {
                         connection.commit();
                         log.info("Created database lock table with name: DATABASECHANGELOGLOCK");
                     } else {
-                        migrator.getOutputSQLWriter().append(insertRowStatment + ";\n\n");
+                        migrator.getOutputSQLWriter().append(insertRowStatment + ";"+StreamUtil.getLineSeparator()+StreamUtil.getLineSeparator());
                     }
                     rs.close();
                 }
@@ -261,7 +268,7 @@ public abstract class AbstractDatabase {
                 if (migrator.getMode().equals(Migrator.EXECUTE_MODE)) {
                     throw new SQLException("Change log lock table does not exist");
                 } else {
-                    migrator.getOutputSQLWriter().append(insertRowStatment + ";\n\n");
+                    migrator.getOutputSQLWriter().append(insertRowStatment + ";"+StreamUtil.getLineSeparator()+StreamUtil.getLineSeparator());
                 }
 
             }

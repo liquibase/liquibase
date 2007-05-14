@@ -2,6 +2,7 @@ package liquibase.migrator;
 
 import liquibase.migrator.change.AbstractChange;
 import liquibase.util.StringUtils;
+import liquibase.StreamUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -100,7 +101,7 @@ public class ChangeSet {
                 connection.commit();
                 log.finest("ChangeSet " + toString() + " has been successfully ran.");
             } else if (migrator.getMode().equals(Migrator.OUTPUT_SQL_MODE)) {
-                outputSQLWriter.write("-- Changeset " + toString() + "\n");
+                outputSQLWriter.write("-- Changeset " + toString() + StreamUtil.getLineSeparator());
                 writeComments(outputSQLWriter);
                 for (AbstractChange change : getRefactorings()) {
                     change.saveStatement(getDatabaseChangeLog().getMigrator().getDatabase(), outputSQLWriter);
@@ -130,11 +131,11 @@ public class ChangeSet {
                 connection.commit();
                 log.finest("ChangeSet " + toString() + " has been successfully rolled back.");
             } else if (migrator.getMode().equals(Migrator.OUTPUT_ROLLBACK_SQL_MODE) || migrator.getMode().equals(Migrator.OUTPUT_FUTURE_ROLLBACK_SQL_MODE)) {
-                outputSQLWriter.write("-- Changeset " + toString() + "\n");
+                outputSQLWriter.write("-- Changeset " + toString() + StreamUtil.getLineSeparator());
                 writeComments(outputSQLWriter);
                 if (rollBackStatements != null && rollBackStatements.length > 0) {
                     for (String statement : rollBackStatements) {
-                        outputSQLWriter.append(statement + ";\n\n");
+                        outputSQLWriter.append(statement + ";"+StreamUtil.getLineSeparator()+StreamUtil.getLineSeparator());
                     }
                 } else {
                     for (int i=refactorings.size()-1; i>=0; i--) {
@@ -160,9 +161,9 @@ public class ChangeSet {
 
     private void writeComments(Writer writer) throws IOException {
         if (StringUtils.trimToNull(comments) != null) {
-            String[] commentLines = comments.split("\n");
+            String[] commentLines = comments.split(StreamUtil.getLineSeparator());
             for (String line : commentLines) {
-                writer.append("-- "+line.trim()+"\n");
+                writer.append("-- "+line.trim()+StreamUtil.getLineSeparator());
             }
         }
     }

@@ -76,7 +76,7 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
         migrator.setMode(Migrator.OUTPUT_SQL_MODE);
         migrator.migrate();
 
-//        System.out.println(output.getBuffer().toString());
+        System.out.println(output.getBuffer().toString());
     }
 
     public void testRollbackableChangeLog() throws Exception {
@@ -118,7 +118,7 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
         migrator.setRollbackToDate(new Date(0));
         migrator.migrate();
 
-//        System.out.println("Rollback SQL for "+driverName+"\n\n"+writer.toString());
+//        System.out.println("Rollback SQL for "+driverName+StreamUtil.getLineSeparator()+StreamUtil.getLineSeparator()+writer.toString());
     }
 
     public void testRollbackableChangeLogScriptOnFutureDatabase() throws Exception {

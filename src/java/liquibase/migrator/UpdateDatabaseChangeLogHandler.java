@@ -4,6 +4,7 @@ import liquibase.migrator.change.*;
 import liquibase.migrator.preconditions.*;
 import liquibase.util.StringUtils;
 import liquibase.database.AbstractDatabase;
+import liquibase.StreamUtil;
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.Locator;
@@ -49,7 +50,7 @@ public class UpdateDatabaseChangeLogHandler extends BaseChangeLogHandler {
             statement.close();
             connection.commit();
         } else {
-            sqlOutputWriter.write(sql + ";\n\n");
+            sqlOutputWriter.write(sql + ";"+ StreamUtil.getLineSeparator()+StreamUtil.getLineSeparator());
         }
 
         migrator.getRanChangeSetList().add(new RanChangeSet(changeSet));
@@ -79,7 +80,7 @@ public class UpdateDatabaseChangeLogHandler extends BaseChangeLogHandler {
             statement.close();
             connection.commit();
         } else {
-            sqlOutputWriter.write(sql + ";\n\n");
+            sqlOutputWriter.write(sql + ";"+StreamUtil.getLineSeparator()+StreamUtil.getLineSeparator());
         }
     }
 

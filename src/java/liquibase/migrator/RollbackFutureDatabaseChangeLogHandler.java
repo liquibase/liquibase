@@ -1,6 +1,7 @@
 package liquibase.migrator;
 
 import liquibase.migrator.preconditions.PreconditionFailedException;
+import liquibase.StreamUtil;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -55,7 +56,7 @@ public class RollbackFutureDatabaseChangeLogHandler extends BaseChangeLogHandler
             statement.close();
             connection.commit();
         } else {
-            sqlOutputWriter.write(sql + ";\n\n");
+            sqlOutputWriter.write(sql + ";"+ StreamUtil.getLineSeparator()+StreamUtil.getLineSeparator());
         }
     }
 

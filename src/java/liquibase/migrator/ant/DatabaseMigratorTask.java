@@ -2,6 +2,7 @@ package liquibase.migrator.ant;
 
 import liquibase.migrator.MigrationFailedException;
 import liquibase.migrator.Migrator;
+import liquibase.StreamUtil;
 import org.apache.tools.ant.BuildException;
 
 import javax.swing.*;
@@ -50,9 +51,9 @@ public class DatabaseMigratorTask extends BaseLiquibaseTask {
             migrator.setMode(Migrator.EXECUTE_MODE);
 
             if (isPromptOnNonLocalDatabase() && !migrator.isSaveToRunMigration()) {
-                if (JOptionPane.showConfirmDialog(null, "You are running a database refactoring against a non-local database.\n" +
-                        "Database URL is: " + migrator.getDatabase().getConnectionURL() + "\n" +
-                        "Username is: " + migrator.getDatabase().getConnectionUsername() + "\n\n" +
+                if (JOptionPane.showConfirmDialog(null, "You are running a database refactoring against a non-local database." + StreamUtil.getLineSeparator()+
+                        "Database URL is: " + migrator.getDatabase().getConnectionURL() + StreamUtil.getLineSeparator() +
+                        "Username is: " + migrator.getDatabase().getConnectionUsername() + StreamUtil.getLineSeparator()+StreamUtil.getLineSeparator() +
                         "Area you sure you want to do this?",
                         "Confirm", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.NO_OPTION) {
                     throw new MigrationFailedException("Chose not to run against non-production database");
