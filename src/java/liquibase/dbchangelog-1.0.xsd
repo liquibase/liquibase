@@ -34,6 +34,7 @@
                     </xsd:complexType>
                 </xsd:element>
             </xsd:sequence>
+            <xsd:attributeGroup ref="changeLogAttributes"/>
         </xsd:complexType>
     </xsd:element>
 
@@ -47,6 +48,11 @@
         <xsd:attribute name="host" type="xsd:string"/>
         <xsd:attribute name="schemaName" type="xsd:string"/>
         <xsd:attribute name="driverName" type="xsd:string"/>
+    </xsd:attributeGroup>
+
+    <!-- Attributes for changeSet -->
+    <xsd:attributeGroup name="changeLogAttributes">
+        <xsd:attribute name="logicalFilePath" type="xsd:string"/>
     </xsd:attributeGroup>
 
     <!-- Attributes for changeSet -->

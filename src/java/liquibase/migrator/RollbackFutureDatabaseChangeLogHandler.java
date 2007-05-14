@@ -14,8 +14,8 @@ public class RollbackFutureDatabaseChangeLogHandler extends BaseChangeLogHandler
     private List<ChangeSet> changesToRollback;
     private List<RanChangeSet> ranChangeSets;
 
-    public RollbackFutureDatabaseChangeLogHandler(Migrator migrator) throws SQLException {
-        super(migrator);
+    public RollbackFutureDatabaseChangeLogHandler(Migrator migrator, String physicalFilePath) throws SQLException {
+        super(migrator, physicalFilePath);
         changesToRollback = new ArrayList<ChangeSet>();
         ranChangeSets = migrator.getRanChangeSetList();
     }
@@ -45,7 +45,7 @@ public class RollbackFutureDatabaseChangeLogHandler extends BaseChangeLogHandler
         String sql = "DELETE FROM DATABASECHANGELOG WHERE ID='?' AND AUTHOR='?' AND FILENAME='?'";
         sql = sql.replaceFirst("\\?", changeSet.getId().replaceAll("'", "''"));
         sql = sql.replaceFirst("\\?", changeSet.getAuthor().replaceAll("'", "''"));
-        sql = sql.replaceFirst("\\?", migrator.getMigrationFile().replaceAll("'", "''"));
+        sql = sql.replaceFirst("\\?", changeSet.getDatabaseChangeLog().getFilePath().replaceAll("'", "''"));
 
         Writer sqlOutputWriter = migrator.getOutputSQLWriter();
         if (sqlOutputWriter == null) {

@@ -11,7 +11,7 @@ public class RanChangeSet {
     private String tag;
 
     public RanChangeSet(ChangeSet changeSet) {
-        this.changeLog = changeSet.getDatabaseChangeLog().getMigrator().getMigrationFile();
+        this.changeLog = changeSet.getDatabaseChangeLog().getFilePath();
         this.id = changeSet.getId();
         this.author = changeSet.getAuthor();
         this.md5sum = changeSet.getMd5sum();
@@ -76,7 +76,7 @@ public class RanChangeSet {
     }
 
     public boolean isSameAs(ChangeSet changeSet) {
-        return  this.getChangeLog().equals(changeSet.getDatabaseChangeLog().getMigrator().getMigrationFile())
+        return  this.getChangeLog().equals(changeSet.getDatabaseChangeLog().getFilePath())
                 && this.getId().equals(changeSet.getId())
                 && this.getAuthor().equals(changeSet.getAuthor());
     }

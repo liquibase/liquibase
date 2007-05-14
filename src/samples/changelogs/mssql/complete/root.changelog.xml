@@ -254,4 +254,6 @@
 
     <include file="changelogs/mssql/complete/included.changelog.xml"/>
 
+    <include file="changelogs/mssql/complete/renamed.changelog.xml"/>
+
 </databaseChangeLog>

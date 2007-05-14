@@ -6,6 +6,7 @@ Changes in version 0.9.0
 - Rollback support
 - Initial Maven support
 - Performance improvements
+- Can have a logical file and path for changelogs
 - New Database Refactorings:
   - Add View
   - Rename View

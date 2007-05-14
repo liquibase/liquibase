@@ -29,10 +29,12 @@ public abstract class BaseChangeLogHandler extends DefaultHandler {
     private OrPrecondition orprecondition;
     private NotPrecondition notprecondition;
     private RunningAsPrecondition runningAs;
+    private String physicalChangeLogLocation;
 
 
-    public BaseChangeLogHandler(Migrator migrator) {
+    public BaseChangeLogHandler(Migrator migrator, String physicalChangeLogLocation) {
         this.migrator = migrator;
+        this.physicalChangeLogLocation = physicalChangeLogLocation;
         log = Logger.getLogger(Migrator.DEFAULT_LOG_NAME);
 
     }
@@ -42,7 +44,8 @@ public abstract class BaseChangeLogHandler extends DefaultHandler {
             if ("comment".equals(qName)) {
                 text = new StringBuffer();
             } else if ("databaseChangeLog".equals(qName)) {
-                changeLog = new DatabaseChangeLog(migrator);
+                changeLog = new DatabaseChangeLog(migrator, physicalChangeLogLocation);
+                changeLog.setLogicalFilePath(atts.getValue("logicalFilePath"));
             } else if ("include".equals(qName)) {
                 new IncludeMigrator(atts.getValue("file"), migrator).migrate();
             } else if (changeSet == null && "changeSet".equals(qName)) {

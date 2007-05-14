@@ -19,8 +19,8 @@ import java.io.Writer;
 
 public class UpdateDatabaseChangeLogHandler extends BaseChangeLogHandler {
 
-    public UpdateDatabaseChangeLogHandler(Migrator migrator) {
-        super(migrator);
+    public UpdateDatabaseChangeLogHandler(Migrator migrator, String physicalFilePath) {
+        super(migrator, physicalFilePath);
     }
 
     /**
@@ -35,7 +35,7 @@ public class UpdateDatabaseChangeLogHandler extends BaseChangeLogHandler {
         String sql = "INSERT INTO DATABASECHANGELOG (ID, AUTHOR, FILENAME, DATEEXECUTED, MD5SUM, DESCRIPTION, COMMENTS, LIQUIBASE) VALUES ('?', '?', '?', " + dateValue + ", '?', '?', '?', '?')";
         sql = sql.replaceFirst("\\?", changeSet.getId().replaceAll("'", "''"));
         sql = sql.replaceFirst("\\?", changeSet.getAuthor().replaceAll("'", "''"));
-        sql = sql.replaceFirst("\\?", migrator.getMigrationFile().replaceAll("'", "''"));
+        sql = sql.replaceFirst("\\?", changeSet.getDatabaseChangeLog().getFilePath().replaceAll("'", "''"));
         sql = sql.replaceFirst("\\?", changeSet.getMd5sum().replaceAll("'", "''"));
         sql = sql.replaceFirst("\\?", limitSize(changeSet.getDescription().replaceAll("'", "''")));
         sql = sql.replaceFirst("\\?", limitSize(StringUtils.trimToEmpty(changeSet.getComments()).replaceAll("'", "''")));
@@ -69,7 +69,7 @@ public class UpdateDatabaseChangeLogHandler extends BaseChangeLogHandler {
         sql = sql.replaceFirst("\\?", changeSet.getMd5sum().replaceAll("'", "''"));
         sql = sql.replaceFirst("\\?", changeSet.getId().replaceAll("'", "''"));
         sql = sql.replaceFirst("\\?", changeSet.getAuthor().replaceAll("'", "''"));
-        sql = sql.replaceFirst("\\?", changeSet.getDatabaseChangeLog().getMigrator().getMigrationFile().replaceAll("'", "''"));
+        sql = sql.replaceFirst("\\?", changeSet.getDatabaseChangeLog().getFilePath().replaceAll("'", "''"));
 
         Writer sqlOutputWriter = changeSet.getDatabaseChangeLog().getMigrator().getOutputSQLWriter();
         if (sqlOutputWriter == null) {

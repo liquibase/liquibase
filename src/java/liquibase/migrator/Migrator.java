@@ -189,10 +189,6 @@ public class Migrator {
         this.rollbackCount = rollbackCount;
     }
 
-    public String getMigrationFile() {
-        return migrationFile;
-    }
-
     public FileOpener getFileOpener() {
         return fileOpener;
     }
@@ -259,7 +255,7 @@ public class Migrator {
             Writer outputSQLWriter = getOutputSQLWriter();
 
             if (outputSQLWriter == null) {
-                log.info("Reading changelog " + getMigrationFile());
+                log.info("Reading changelog " + migrationFile);
             } else {
                 if (!outputtedHeader) {
                     outputSQLWriter.write("--------------------------------------------------------------------------------------\n");
@@ -284,7 +280,7 @@ public class Migrator {
                     } else {
                         throw new MigrationFailedException("Unexpected output mode: "+mode);
                     }
-                    outputSQLWriter.write("-- Change Log: " + getMigrationFile() + "\n");
+                    outputSQLWriter.write("-- Change Log: " + migrationFile + "\n");
                     outputSQLWriter.write("-- Ran at: " + DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(new Date()) + "\n");
                     outputSQLWriter.write("-- Against: " + getDatabase().getConnectionUsername() + "@" + getDatabase().getConnectionURL() + "\n");
                     outputSQLWriter.write("--------------------------------------------------------------------------------------\n\n\n");
@@ -293,19 +289,19 @@ public class Migrator {
             }
 
             if (mode.equals(EXECUTE_MODE) || mode.equals(OUTPUT_SQL_MODE) || mode.equals(OUTPUT_CHANGELOG_ONLY_SQL_MODE)) {
-                runChangeLogs(new UpdateDatabaseChangeLogHandler(this));
+                runChangeLogs(new UpdateDatabaseChangeLogHandler(this, migrationFile));
             } else if (mode.equals(EXECUTE_ROLLBACK_MODE) || mode.equals(OUTPUT_ROLLBACK_SQL_MODE)) {
                 RollbackDatabaseChangeLogHandler rollbackHandler;
                 if (getRollbackToDate() != null) {
-                    rollbackHandler = new RollbackDatabaseChangeLogHandler(this, getRollbackToDate());
+                    rollbackHandler = new RollbackDatabaseChangeLogHandler(this, migrationFile, getRollbackToDate());
                 } else if (getRollbackToTag() != null) {
                     if (!getDatabase().doesTagExist(getRollbackToTag())) {
                         throw new MigrationFailedException("'"+getRollbackToTag()+"' is not tag that exists in the database");
                     }
 
-                    rollbackHandler = new RollbackDatabaseChangeLogHandler(this, getRollbackToTag());
+                    rollbackHandler = new RollbackDatabaseChangeLogHandler(this, migrationFile, getRollbackToTag());
                 } else if (getRollbackCount() != null) {
-                        rollbackHandler = new RollbackDatabaseChangeLogHandler(this, getRollbackCount());
+                        rollbackHandler = new RollbackDatabaseChangeLogHandler(this, migrationFile, getRollbackCount());
                 } else {
                     throw new RuntimeException("Don't know what to rollback to");
                 }
@@ -317,7 +313,7 @@ public class Migrator {
                     throw new MigrationFailedException("Cannot roll back changelog to selected date due to change set "+unrollbackableChangeSet);
                 }
             } else if (mode.equals(OUTPUT_FUTURE_ROLLBACK_SQL_MODE)) {
-                RollbackFutureDatabaseChangeLogHandler rollbackHandler = new RollbackFutureDatabaseChangeLogHandler(this);
+                RollbackFutureDatabaseChangeLogHandler rollbackHandler = new RollbackFutureDatabaseChangeLogHandler(this, migrationFile);
                 runChangeLogs(rollbackHandler);
                 ChangeSet unrollbackableChangeSet = rollbackHandler.getUnRollBackableChangeSet();
                 if (unrollbackableChangeSet == null) {
@@ -425,9 +421,9 @@ public class Migrator {
 
     public void runChangeLogs(ContentHandler contentHandler) throws MigrationFailedException {
         try {
-            InputStream inputStream = getFileOpener().getResourceAsStream(getMigrationFile());
+            InputStream inputStream = getFileOpener().getResourceAsStream(migrationFile);
             if (inputStream == null) {
-                throw new MigrationFailedException(getMigrationFile() + " does not exist");
+                throw new MigrationFailedException(migrationFile + " does not exist");
             }
 
             xmlReader.setContentHandler(contentHandler);
@@ -521,7 +517,7 @@ public class Migrator {
                 updatePstmt.setString(1, changeSet.getMd5sum());
                 updatePstmt.setString(2, changeSet.getId());
                 updatePstmt.setString(3, changeSet.getAuthor());
-                updatePstmt.setString(4, migrator.getMigrationFile());
+                updatePstmt.setString(4, changeSet.getDatabaseChangeLog().getFilePath());
 
                 updatePstmt.executeUpdate();
                 updatePstmt.close();

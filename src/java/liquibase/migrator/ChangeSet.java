@@ -195,7 +195,7 @@ public class ChangeSet {
     }
 
     public String toString() {
-        return getDatabaseChangeLog().getMigrator().getMigrationFile() + " :: " + getId() + " :: " + getAuthor() + " :: (MD5Sum: " + getMd5sum() + ")";
+        return getDatabaseChangeLog().getFilePath() + " :: " + getId() + " :: " + getAuthor() + " :: (MD5Sum: " + getMd5sum() + ")";
     }
 
     public String getComments() {
