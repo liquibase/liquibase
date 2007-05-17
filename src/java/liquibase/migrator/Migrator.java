@@ -392,7 +392,7 @@ public class Migrator {
     }
 
     protected void releaseLock() throws MigrationFailedException {
-        getDatabase().releaseLock(this);
+        getDatabase().releaseLock();
     }
 
     /**
@@ -403,7 +403,7 @@ public class Migrator {
     public void forceReleaseLock() throws MigrationFailedException, SQLException, IOException {
         checkDatabaseChangeLogTable();
 
-        getDatabase().releaseLock(this);
+        getDatabase().releaseLock();
     }
 
     /**
@@ -469,7 +469,7 @@ public class Migrator {
     public DatabaseChangeLogLock[] listLocks() throws MigrationFailedException, SQLException, IOException {
         checkDatabaseChangeLogTable();
 
-        return getDatabase().listLocks(this);
+        return getDatabase().listLocks();
     }
 
     public long getChangeLogLockWaitTime() {

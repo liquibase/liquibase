@@ -23,7 +23,7 @@ import java.util.logging.Logger;
 public abstract class AbstractDatabase {
 
     private Connection connection;
-    private Logger log;
+    protected Logger log;
     private boolean changeLogTableExists;
     private boolean changeLogLockTableExists;
 
