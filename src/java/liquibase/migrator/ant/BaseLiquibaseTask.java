@@ -1,21 +1,21 @@
 package liquibase.migrator.ant;
 
+import liquibase.migrator.MigrationFailedException;
+import liquibase.migrator.Migrator;
 import org.apache.tools.ant.Task;
 import org.apache.tools.ant.types.Path;
 import org.apache.tools.ant.types.Reference;
-import liquibase.migrator.Migrator;
-import liquibase.migrator.MigrationFailedException;
 
+import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.sql.SQLException;
-import java.sql.Driver;
 import java.sql.Connection;
-import java.util.List;
+import java.sql.Driver;
+import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
-import java.io.File;
 
 public class BaseLiquibaseTask extends Task {
     private String changeLogFile;

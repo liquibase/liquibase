@@ -1,12 +1,12 @@
 package liquibase.migrator.change;
 
 import liquibase.database.MSSQLDatabase;
-import liquibase.database.OracleDatabase;
 import liquibase.database.MySQLDatabase;
+import liquibase.database.OracleDatabase;
 import liquibase.database.PostgresDatabase;
 import liquibase.migrator.UnsupportedChangeException;
-import org.w3c.dom.Element;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 public class AddUniqueConstraintChange extends AbstractChange {
 
@@ -43,8 +43,8 @@ public class AddUniqueConstraintChange extends AbstractChange {
     }
 
     public String[] generateCommonStatements() {
-        return new String[] {
-                "ALTER TABLE "+getTableName()+" ADD CONSTRAINT "+getConstraintName()+" UNIQUE ("+getColumnNames()+")"
+        return new String[]{
+                "ALTER TABLE " + getTableName() + " ADD CONSTRAINT " + getConstraintName() + " UNIQUE (" + getColumnNames() + ")"
         };
     }
 
@@ -73,7 +73,7 @@ public class AddUniqueConstraintChange extends AbstractChange {
         inverse.setTableName(getTableName());
         inverse.setConstraintName(getConstraintName());
 
-        return new AbstractChange[] {
+        return new AbstractChange[]{
                 inverse,
         };
     }

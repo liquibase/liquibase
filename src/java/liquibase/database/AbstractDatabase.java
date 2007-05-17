@@ -1,10 +1,10 @@
 package liquibase.database;
 
+import liquibase.StreamUtil;
 import liquibase.migrator.DatabaseChangeLogLock;
 import liquibase.migrator.MigrationFailedException;
 import liquibase.migrator.Migrator;
 import liquibase.migrator.change.ColumnConfig;
-import liquibase.StreamUtil;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -65,6 +65,7 @@ public abstract class AbstractDatabase {
     protected String getDateType() {
         return "DATE";
     }
+
     protected abstract String getDateTimeType();
 
     protected abstract boolean supportsSequences();
@@ -171,7 +172,7 @@ public abstract class AbstractDatabase {
                     connection.commit();
                 } else {
                     if (!migrator.getMode().equals(Migrator.OUTPUT_FUTURE_ROLLBACK_SQL_MODE)) {
-                        migrator.getOutputSQLWriter().append(sql + ";"+StreamUtil.getLineSeparator());
+                        migrator.getOutputSQLWriter().append(sql + ";" + StreamUtil.getLineSeparator());
                         wroteToOutput = true;
                     }
                 }
@@ -188,7 +189,7 @@ public abstract class AbstractDatabase {
             if (checkTableRS != null) {
                 checkTableRS.close();
             }
-            if (checkColumnsRS!= null) {
+            if (checkColumnsRS != null) {
                 checkColumnsRS.close();
             }
         }
@@ -228,17 +229,17 @@ public abstract class AbstractDatabase {
                 } else {
                     if (!migrator.getMode().equals(Migrator.OUTPUT_FUTURE_ROLLBACK_SQL_MODE)) {
                         if (!outputtedLockWarning) {
-                            migrator.getOutputSQLWriter().write(migrator.getDatabase().getLineComment() + "-----------------------------------------------------------------------------------------------"+StreamUtil.getLineSeparator());
-                            migrator.getOutputSQLWriter().write(migrator.getDatabase().getLineComment() + " DATABASECHANGELOGLOCK table does not exist."+ StreamUtil.getLineSeparator());
-                            migrator.getOutputSQLWriter().write(migrator.getDatabase().getLineComment() + " Race conditions may cause a corrupted sql script."+StreamUtil.getLineSeparator());
-                            migrator.getOutputSQLWriter().write(migrator.getDatabase().getLineComment() + " Consider running: "+StreamUtil.getLineSeparator());
-                            migrator.getOutputSQLWriter().write(migrator.getDatabase().getLineComment() + " " + getCreateChangeLogLockSQL() + ";"+StreamUtil.getLineSeparator());
-                            migrator.getOutputSQLWriter().write(migrator.getDatabase().getLineComment() + " " + getChangeLogLockInsertSQL() + ";"+StreamUtil.getLineSeparator());
-                            migrator.getOutputSQLWriter().write(migrator.getDatabase().getLineComment() + "-----------------------------------------------------------------------------------------------"+StreamUtil.getLineSeparator()+StreamUtil.getLineSeparator());
+                            migrator.getOutputSQLWriter().write(migrator.getDatabase().getLineComment() + "-----------------------------------------------------------------------------------------------" + StreamUtil.getLineSeparator());
+                            migrator.getOutputSQLWriter().write(migrator.getDatabase().getLineComment() + " DATABASECHANGELOGLOCK table does not exist." + StreamUtil.getLineSeparator());
+                            migrator.getOutputSQLWriter().write(migrator.getDatabase().getLineComment() + " Race conditions may cause a corrupted sql script." + StreamUtil.getLineSeparator());
+                            migrator.getOutputSQLWriter().write(migrator.getDatabase().getLineComment() + " Consider running: " + StreamUtil.getLineSeparator());
+                            migrator.getOutputSQLWriter().write(migrator.getDatabase().getLineComment() + " " + getCreateChangeLogLockSQL() + ";" + StreamUtil.getLineSeparator());
+                            migrator.getOutputSQLWriter().write(migrator.getDatabase().getLineComment() + " " + getChangeLogLockInsertSQL() + ";" + StreamUtil.getLineSeparator());
+                            migrator.getOutputSQLWriter().write(migrator.getDatabase().getLineComment() + "-----------------------------------------------------------------------------------------------" + StreamUtil.getLineSeparator() + StreamUtil.getLineSeparator());
                             outputtedLockWarning = true;
                         }
 
-                        migrator.getOutputSQLWriter().append(createTableStatement + ";"+StreamUtil.getLineSeparator()+StreamUtil.getLineSeparator());
+                        migrator.getOutputSQLWriter().append(createTableStatement + ";" + StreamUtil.getLineSeparator() + StreamUtil.getLineSeparator());
                     }
                     changeLogLockTableExists = false;
                 }
@@ -261,7 +262,7 @@ public abstract class AbstractDatabase {
                         connection.commit();
                         log.info("Created database lock table with name: DATABASECHANGELOGLOCK");
                     } else {
-                        migrator.getOutputSQLWriter().append(insertRowStatment + ";"+StreamUtil.getLineSeparator()+StreamUtil.getLineSeparator());
+                        migrator.getOutputSQLWriter().append(insertRowStatment + ";" + StreamUtil.getLineSeparator() + StreamUtil.getLineSeparator());
                     }
                     rs.close();
                 }
@@ -269,7 +270,7 @@ public abstract class AbstractDatabase {
                 if (migrator.getMode().equals(Migrator.EXECUTE_MODE)) {
                     throw new SQLException("Change log lock table does not exist");
                 } else {
-                    migrator.getOutputSQLWriter().append(insertRowStatment + ";"+StreamUtil.getLineSeparator()+StreamUtil.getLineSeparator());
+                    migrator.getOutputSQLWriter().append(insertRowStatment + ";" + StreamUtil.getLineSeparator() + StreamUtil.getLineSeparator());
                 }
 
             }

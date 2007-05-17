@@ -1,6 +1,9 @@
 package liquibase.migrator.change;
 
-import liquibase.database.*;
+import liquibase.database.MSSQLDatabase;
+import liquibase.database.MySQLDatabase;
+import liquibase.database.OracleDatabase;
+import liquibase.database.PostgresDatabase;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -29,19 +32,19 @@ public class RenameTableChange extends AbstractChange {
     }
 
     public String[] generateStatements(MSSQLDatabase database) {
-        return new String[] { "exec sp_rename '" + oldTableName + "', " + newTableName };
+        return new String[]{"exec sp_rename '" + oldTableName + "', " + newTableName};
     }
 
     public String[] generateStatements(OracleDatabase database) {
-        return new String[] { "RENAME " + oldTableName + " TO " + newTableName };
+        return new String[]{"RENAME " + oldTableName + " TO " + newTableName};
     }
 
     public String[] generateStatements(MySQLDatabase database) {
-        return new String[] {  "ALTER TABLE " + oldTableName + " RENAME " + newTableName };
+        return new String[]{"ALTER TABLE " + oldTableName + " RENAME " + newTableName};
     }
 
     public String[] generateStatements(PostgresDatabase database) {
-        return new String[] { "ALTER TABLE " + oldTableName + " RENAME TO " + newTableName };
+        return new String[]{"ALTER TABLE " + oldTableName + " RENAME TO " + newTableName};
     }
 
     protected AbstractChange[] createInverses() {
@@ -49,7 +52,7 @@ public class RenameTableChange extends AbstractChange {
         inverse.setOldTableName(getNewTableName());
         inverse.setNewTableName(getOldTableName());
 
-        return new AbstractChange[] {
+        return new AbstractChange[]{
                 inverse
         };
     }

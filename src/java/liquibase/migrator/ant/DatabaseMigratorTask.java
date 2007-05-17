@@ -1,21 +1,12 @@
 package liquibase.migrator.ant;
 
+import liquibase.StreamUtil;
 import liquibase.migrator.MigrationFailedException;
 import liquibase.migrator.Migrator;
-import liquibase.StreamUtil;
 import org.apache.tools.ant.BuildException;
 
 import javax.swing.*;
-import java.io.File;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.net.MalformedURLException;
-import java.sql.Connection;
-import java.sql.Driver;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
 
 public class DatabaseMigratorTask extends BaseLiquibaseTask {
     private boolean dropFirst = true;
@@ -51,9 +42,9 @@ public class DatabaseMigratorTask extends BaseLiquibaseTask {
             migrator.setMode(Migrator.EXECUTE_MODE);
 
             if (isPromptOnNonLocalDatabase() && !migrator.isSaveToRunMigration()) {
-                if (JOptionPane.showConfirmDialog(null, "You are running a database refactoring against a non-local database." + StreamUtil.getLineSeparator()+
+                if (JOptionPane.showConfirmDialog(null, "You are running a database refactoring against a non-local database." + StreamUtil.getLineSeparator() +
                         "Database URL is: " + migrator.getDatabase().getConnectionURL() + StreamUtil.getLineSeparator() +
-                        "Username is: " + migrator.getDatabase().getConnectionUsername() + StreamUtil.getLineSeparator()+StreamUtil.getLineSeparator() +
+                        "Username is: " + migrator.getDatabase().getConnectionUsername() + StreamUtil.getLineSeparator() + StreamUtil.getLineSeparator() +
                         "Area you sure you want to do this?",
                         "Confirm", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.NO_OPTION) {
                     throw new MigrationFailedException("Chose not to run against non-production database");

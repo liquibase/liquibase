@@ -107,7 +107,7 @@
         <xsd:attributeGroup ref="tableNameAttribute"/>
         <xsd:attribute name="oldColumnName" type="xsd:string"/>
         <xsd:attribute name="newColumnName" type="xsd:string"/>
-        <xsd:attribute name="columnDataType" type="xsd:string"/>        
+        <xsd:attribute name="columnDataType" type="xsd:string"/>
     </xsd:attributeGroup>
 
     <xsd:attributeGroup name="dropColumnAttributes">

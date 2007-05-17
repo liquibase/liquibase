@@ -1,8 +1,8 @@
 package liquibase.migrator;
 
 import junit.framework.TestCase;
-import liquibase.migrator.change.InsertDataChange;
 import liquibase.migrator.change.CreateTableChange;
+import liquibase.migrator.change.InsertDataChange;
 
 public class ChangeSetTest extends TestCase {
 

@@ -1,7 +1,7 @@
 package liquibase.database;
 
-import liquibase.migrator.change.DropForeignKeyConstraintChange;
 import liquibase.migrator.UnsupportedChangeException;
+import liquibase.migrator.change.DropForeignKeyConstraintChange;
 
 import java.sql.*;
 
@@ -68,7 +68,7 @@ public class MySQLDatabase extends AbstractDatabase {
             dropStatement = conn.createStatement();
 
             fkStatement = conn.prepareStatement("select TABLE_NAME, CONSTRAINT_NAME from INFORMATION_SCHEMA.TABLE_CONSTRAINTS where CONSTRAINT_TYPE='FOREIGN KEY' AND TABLE_SCHEMA=?");
-            String schemaNameWithoutHost = getSchemaName().replaceAll("\\@.*","");
+            String schemaNameWithoutHost = getSchemaName().replaceAll("\\@.*", "");
             fkStatement.setString(1, schemaNameWithoutHost);
             rs = fkStatement.executeQuery();
             while (rs.next()) {

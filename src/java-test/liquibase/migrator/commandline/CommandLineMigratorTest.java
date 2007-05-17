@@ -2,10 +2,10 @@ package liquibase.migrator.commandline;
 
 import junit.framework.TestCase;
 
-import java.net.URLClassLoader;
-import java.net.URL;
-import java.util.Properties;
 import java.io.*;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.util.Properties;
 
 public class CommandLineMigratorTest extends TestCase {
 
@@ -277,7 +277,7 @@ public class CommandLineMigratorTest extends TestCase {
         String line;
         while ((line = reader.readLine()) != null) {
             if (line.length() > 80) {
-                fail("'"+line+"' is longer than 80 chars");
+                fail("'" + line + "' is longer than 80 chars");
             }
         }
     }
@@ -311,7 +311,7 @@ public class CommandLineMigratorTest extends TestCase {
     public void testMigrateWithEqualsInParams() throws Exception {
         String url = "dbc:sqlserver://127.0.0.1;DatabaseName=dev_nn;user=ffdatabase;password=p!88worD";
         String[] args = new String[]{
-                "--url="+url,
+                "--url=" + url,
                 "migrate",
         };
 

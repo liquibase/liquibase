@@ -30,7 +30,7 @@ public class AddColumnChange extends AbstractChange {
     }
 
     private String[] generateCommonStatements(AbstractDatabase database) {
-        return new String[] { "ALTER TABLE " + getTableName() + " ADD " + getColumn().getName() + " " + database.getColumnType(getColumn()) };
+        return new String[]{"ALTER TABLE " + getTableName() + " ADD " + getColumn().getName() + " " + database.getColumnType(getColumn())};
     }
 
     public String[] generateStatements(MSSQLDatabase database) {
@@ -54,7 +54,7 @@ public class AddColumnChange extends AbstractChange {
         inverse.setColumnName(getColumn().getName());
         inverse.setTableName(getTableName());
 
-        return new AbstractChange[] {
+        return new AbstractChange[]{
                 inverse
         };
     }

@@ -7,8 +7,8 @@ import liquibase.database.PostgresDatabase;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 public class AddNotNullConstraintChange extends AbstractChange {
     private String tableName;
@@ -112,7 +112,7 @@ public class AddNotNullConstraintChange extends AbstractChange {
         inverse.setTableName(getTableName());
         inverse.setColumnDataType(getColumnDataType());
 
-        return new AbstractChange[] {
+        return new AbstractChange[]{
                 inverse
         };
     }

@@ -2,13 +2,12 @@ package liquibase.migrator.change;
 
 import liquibase.database.*;
 import liquibase.migrator.UnsupportedChangeException;
-import org.w3c.dom.Element;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
-import java.util.List;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Arrays;
+import java.util.List;
 
 public class MergeColumnChange extends AbstractChange {
 
@@ -91,9 +90,9 @@ public class MergeColumnChange extends AbstractChange {
         } else if (database instanceof MSSQLDatabase) {
             updateStatement = "UPDATE " + getTableName() + " SET " + getFinalColumnName() + " = " + getColumn1Name() + " + '" + getJoinString() + "' + " + getColumn2Name();
         } else if (database instanceof MySQLDatabase) {
-            updateStatement = "UPDATE " + getTableName() + " SET " + getFinalColumnName() + " = CONCAT_WS('"+getJoinString()+"', " + getColumn1Name() + ", " + getColumn2Name()+")";
+            updateStatement = "UPDATE " + getTableName() + " SET " + getFinalColumnName() + " = CONCAT_WS('" + getJoinString() + "', " + getColumn1Name() + ", " + getColumn2Name() + ")";
         } else {
-            throw new UnsupportedChangeException("Merge Column not supported for "+database.getProductName());
+            throw new UnsupportedChangeException("Merge Column not supported for " + database.getProductName());
         }
         statements.add(updateStatement);
 

@@ -1,11 +1,12 @@
 package liquibase.migrator.commandline;
 
+import liquibase.StreamUtil;
 import liquibase.migrator.DatabaseChangeLogLock;
 import liquibase.migrator.MigrationFailedException;
 import liquibase.migrator.Migrator;
-import liquibase.StreamUtil;
 
 import java.io.*;
+import java.lang.reflect.Field;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.sql.Connection;
@@ -18,7 +19,6 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.lang.reflect.Field;
 
 public class CommandLineMigrator {
     protected ClassLoader classLoader;
@@ -51,7 +51,7 @@ public class CommandLineMigrator {
             commandLineMigrator.printHelp(System.out);
             return;
         } else if (args.length == 1 && "--version".equals(args[0])) {
-            System.out.println("LiquiBase Version: "+new Migrator(null, null).getBuildVersion()+ StreamUtil.getLineSeparator());
+            System.out.println("LiquiBase Version: " + new Migrator(null, null).getBuildVersion() + StreamUtil.getLineSeparator());
             return;
         }
 
@@ -234,13 +234,13 @@ public class CommandLineMigrator {
                     throw new CommandLineParsingException("Could not parse '" + arg + "'");
                 } else if (splitArg.length > 2) {
                     StringBuffer secondHalf = new StringBuffer();
-                    for (int j=1; j<splitArg.length; j++) {
+                    for (int j = 1; j < splitArg.length; j++) {
                         secondHalf.append(splitArg[j]).append("=");
                     }
 
-                    splitArg = new String[] {
+                    splitArg = new String[]{
                             splitArg[0],
-                            secondHalf.toString().replaceFirst("=$","")
+                            secondHalf.toString().replaceFirst("=$", "")
                     };
                 }
 
@@ -375,7 +375,7 @@ public class CommandLineMigrator {
         } else if ("off".equalsIgnoreCase(logLevel)) {
             Logger.getLogger(Migrator.DEFAULT_LOG_NAME).setLevel(Level.OFF);
         } else {
-            throw new CommandLineParsingException("Unknown log level: "+logLevel);
+            throw new CommandLineParsingException("Unknown log level: " + logLevel);
         }
 
         Driver driver;
@@ -420,7 +420,6 @@ public class CommandLineMigrator {
                 System.out.println("All objects dropped from " + migrator.getDatabase().getConnectionUsername() + "@" + migrator.getDatabase().getConnectionURL());
                 return;
             }
-
 
 
             DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -470,7 +469,7 @@ public class CommandLineMigrator {
                     migrator.setMode(Migrator.OUTPUT_FUTURE_ROLLBACK_SQL_MODE);
                     migrator.setOutputSQLWriter(getOutputWriter());
                 } else {
-                    throw new CommandLineParsingException("Unknown command: "+command);
+                    throw new CommandLineParsingException("Unknown command: " + command);
                 }
             } catch (ParseException e) {
                 throw new CommandLineParsingException("Unexpected date/time format.  Use 'yyyy-MM-dd HH:mm:ss'");

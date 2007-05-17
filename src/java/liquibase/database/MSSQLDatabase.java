@@ -1,6 +1,5 @@
 package liquibase.database;
 
-import liquibase.migrator.MigrationFailedException;
 import liquibase.migrator.UnsupportedChangeException;
 import liquibase.migrator.change.DropForeignKeyConstraintChange;
 

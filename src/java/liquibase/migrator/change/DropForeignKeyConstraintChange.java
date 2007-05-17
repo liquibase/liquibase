@@ -1,9 +1,12 @@
 package liquibase.migrator.change;
 
-import liquibase.database.*;
+import liquibase.database.MSSQLDatabase;
+import liquibase.database.MySQLDatabase;
+import liquibase.database.OracleDatabase;
+import liquibase.database.PostgresDatabase;
 import liquibase.migrator.UnsupportedChangeException;
-import org.w3c.dom.Element;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 public class DropForeignKeyConstraintChange extends AbstractChange {
     private String baseTableName;
@@ -30,8 +33,8 @@ public class DropForeignKeyConstraintChange extends AbstractChange {
     }
 
     private String[] generateCommonStatements() {
-        return new String[] {
-                "ALTER TABLE "+getBaseTableName()+" DROP CONSTRAINT "+getConstraintName(),
+        return new String[]{
+                "ALTER TABLE " + getBaseTableName() + " DROP CONSTRAINT " + getConstraintName(),
         };
     }
 
@@ -44,8 +47,8 @@ public class DropForeignKeyConstraintChange extends AbstractChange {
     }
 
     public String[] generateStatements(MySQLDatabase database) throws UnsupportedChangeException {
-        return new String[] {
-                "ALTER TABLE "+getBaseTableName()+" DROP FOREIGN KEY "+getConstraintName(),
+        return new String[]{
+                "ALTER TABLE " + getBaseTableName() + " DROP FOREIGN KEY " + getConstraintName(),
         };
     }
 
@@ -54,7 +57,7 @@ public class DropForeignKeyConstraintChange extends AbstractChange {
     }
 
     public String getConfirmationMessage() {
-        return "Foreign Key "+getConstraintName()+" was dropped";
+        return "Foreign Key " + getConstraintName() + " was dropped";
     }
 
     public Element createNode(Document currentMigrationFileDOM) {

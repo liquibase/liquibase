@@ -1,6 +1,9 @@
 package liquibase.migrator.change;
 
-import liquibase.database.*;
+import liquibase.database.MSSQLDatabase;
+import liquibase.database.MySQLDatabase;
+import liquibase.database.OracleDatabase;
+import liquibase.database.PostgresDatabase;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -50,11 +53,11 @@ public class RenameColumnChange extends AbstractChange {
     }
 
     private String[] generateStatements() {
-        return new String[] { "ALTER TABLE " + tableName + " RENAME COLUMN " + oldColumnName + " TO " + newColumnName };
+        return new String[]{"ALTER TABLE " + tableName + " RENAME COLUMN " + oldColumnName + " TO " + newColumnName};
     }
 
     public String[] generateStatements(MSSQLDatabase database) {
-        return new String[] { "exec sp_rename '" + tableName + "." + oldColumnName + "', " + newColumnName };
+        return new String[]{"exec sp_rename '" + tableName + "." + oldColumnName + "', " + newColumnName};
     }
 
     public String[] generateStatements(OracleDatabase database) {
@@ -65,7 +68,7 @@ public class RenameColumnChange extends AbstractChange {
         if (columnDataType == null) {
             throw new RuntimeException("columnDataType is required to rename columns with MySQL");
         }
-        return new String[] { "ALTER TABLE " + tableName + " CHANGE " + oldColumnName + " " + newColumnName + " " + columnDataType };
+        return new String[]{"ALTER TABLE " + tableName + " CHANGE " + oldColumnName + " " + newColumnName + " " + columnDataType};
     }
 
     public String[] generateStatements(PostgresDatabase database) {
@@ -79,7 +82,7 @@ public class RenameColumnChange extends AbstractChange {
         inverse.setNewColumnName(getOldColumnName());
         inverse.setColumnDataType(getColumnDataType());
 
-        return new AbstractChange[] {
+        return new AbstractChange[]{
                 inverse
         };
     }

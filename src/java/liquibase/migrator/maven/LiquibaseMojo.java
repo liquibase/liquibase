@@ -1,8 +1,8 @@
 package liquibase.migrator.maven;
 
+import liquibase.StreamUtil;
 import liquibase.migrator.MigrationFailedException;
 import liquibase.migrator.Migrator;
-import liquibase.StreamUtil;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -143,7 +143,7 @@ public class LiquibaseMojo extends AbstractMojo {
                 if (isPromptOnNonLocalDatabase() && !migrator.isSaveToRunMigration()) {
                     if (JOptionPane.showConfirmDialog(null, "You are running a database refactoring against a non-local database." + StreamUtil.getLineSeparator() +
                             "Database URL is: " + migrator.getDatabase().getConnectionURL() + StreamUtil.getLineSeparator() +
-                            "Username is: " + migrator.getDatabase().getConnectionUsername() + StreamUtil.getLineSeparator()+StreamUtil.getLineSeparator() +
+                            "Username is: " + migrator.getDatabase().getConnectionUsername() + StreamUtil.getLineSeparator() + StreamUtil.getLineSeparator() +
                             "Area you sure you want to do this?",
                             "Confirm", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.NO_OPTION)
                     {

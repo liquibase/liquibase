@@ -1,7 +1,7 @@
 package liquibase.migrator;
 
-import liquibase.database.*;
 import liquibase.StreamUtil;
+import liquibase.database.*;
 import org.xml.sax.*;
 
 import javax.xml.parsers.SAXParser;
@@ -9,12 +9,12 @@ import javax.xml.parsers.SAXParserFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Writer;
+import java.net.URL;
 import java.sql.*;
 import java.text.DateFormat;
 import java.util.*;
 import java.util.Date;
 import java.util.logging.Logger;
-import java.net.URL;
 
 public class Migrator {
     // These modes tell the program whether to execute the statements against the database
@@ -259,11 +259,11 @@ public class Migrator {
                 log.info("Reading changelog " + migrationFile);
             } else {
                 if (!outputtedHeader) {
-                    outputSQLWriter.write("--------------------------------------------------------------------------------------"+ StreamUtil.getLineSeparator());
+                    outputSQLWriter.write("--------------------------------------------------------------------------------------" + StreamUtil.getLineSeparator());
                     if (mode.equals(OUTPUT_SQL_MODE)) {
-                        outputSQLWriter.write("-- SQL to update database to newest version"+StreamUtil.getLineSeparator());
+                        outputSQLWriter.write("-- SQL to update database to newest version" + StreamUtil.getLineSeparator());
                     } else if (mode.equals(OUTPUT_CHANGELOG_ONLY_SQL_MODE)) {
-                        outputSQLWriter.write("-- SQL to add all changesets to database history table"+StreamUtil.getLineSeparator());
+                        outputSQLWriter.write("-- SQL to add all changesets to database history table" + StreamUtil.getLineSeparator());
                     } else if (mode.equals(OUTPUT_ROLLBACK_SQL_MODE)) {
                         String stateDescription;
                         if (getRollbackToTag() != null) {
@@ -271,25 +271,26 @@ public class Migrator {
                         } else if (getRollbackToDate() != null) {
                             stateDescription = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(getRollbackToDate());
                         } else if (getRollbackCount() != null) {
-                            stateDescription = getRollbackCount()+ " change set ago";
+                            stateDescription = getRollbackCount() + " change set ago";
                         } else {
                             throw new RuntimeException("Unknown rollback type");
                         }
-                        outputSQLWriter.write("-- SQL to roll-back database to the state it was at "+stateDescription +StreamUtil.getLineSeparator());
+                        outputSQLWriter.write("-- SQL to roll-back database to the state it was at " + stateDescription + StreamUtil.getLineSeparator());
                     } else if (mode.equals(OUTPUT_FUTURE_ROLLBACK_SQL_MODE)) {
-                        outputSQLWriter.write("-- SQL to roll-back database from an updated buildVersion back to current version"+StreamUtil.getLineSeparator());
+                        outputSQLWriter.write("-- SQL to roll-back database from an updated buildVersion back to current version" + StreamUtil.getLineSeparator());
                     } else {
-                        throw new MigrationFailedException("Unexpected output mode: "+mode);
+                        throw new MigrationFailedException("Unexpected output mode: " + mode);
                     }
                     outputSQLWriter.write("-- Change Log: " + migrationFile + StreamUtil.getLineSeparator());
                     outputSQLWriter.write("-- Ran at: " + DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(new Date()) + StreamUtil.getLineSeparator());
                     outputSQLWriter.write("-- Against: " + getDatabase().getConnectionUsername() + "@" + getDatabase().getConnectionURL() + StreamUtil.getLineSeparator());
-                    outputSQLWriter.write("--------------------------------------------------------------------------------------"+StreamUtil.getLineSeparator()+StreamUtil.getLineSeparator()+StreamUtil.getLineSeparator());
+                    outputSQLWriter.write("--------------------------------------------------------------------------------------" + StreamUtil.getLineSeparator() + StreamUtil.getLineSeparator() + StreamUtil.getLineSeparator());
                     outputtedHeader = true;
                 }
             }
 
-            if (mode.equals(EXECUTE_MODE) || mode.equals(OUTPUT_SQL_MODE) || mode.equals(OUTPUT_CHANGELOG_ONLY_SQL_MODE)) {
+            if (mode.equals(EXECUTE_MODE) || mode.equals(OUTPUT_SQL_MODE) || mode.equals(OUTPUT_CHANGELOG_ONLY_SQL_MODE))
+            {
                 runChangeLogs(new UpdateDatabaseChangeLogHandler(this, migrationFile));
             } else if (mode.equals(EXECUTE_ROLLBACK_MODE) || mode.equals(OUTPUT_ROLLBACK_SQL_MODE)) {
                 RollbackDatabaseChangeLogHandler rollbackHandler;
@@ -297,12 +298,12 @@ public class Migrator {
                     rollbackHandler = new RollbackDatabaseChangeLogHandler(this, migrationFile, getRollbackToDate());
                 } else if (getRollbackToTag() != null) {
                     if (!getDatabase().doesTagExist(getRollbackToTag())) {
-                        throw new MigrationFailedException("'"+getRollbackToTag()+"' is not tag that exists in the database");
+                        throw new MigrationFailedException("'" + getRollbackToTag() + "' is not tag that exists in the database");
                     }
 
                     rollbackHandler = new RollbackDatabaseChangeLogHandler(this, migrationFile, getRollbackToTag());
                 } else if (getRollbackCount() != null) {
-                        rollbackHandler = new RollbackDatabaseChangeLogHandler(this, migrationFile, getRollbackCount());
+                    rollbackHandler = new RollbackDatabaseChangeLogHandler(this, migrationFile, getRollbackCount());
                 } else {
                     throw new RuntimeException("Don't know what to rollback to");
                 }
@@ -311,7 +312,7 @@ public class Migrator {
                 if (unrollbackableChangeSet == null) {
                     rollbackHandler.doRollback();
                 } else {
-                    throw new MigrationFailedException("Cannot roll back changelog to selected date due to change set "+unrollbackableChangeSet);
+                    throw new MigrationFailedException("Cannot roll back changelog to selected date due to change set " + unrollbackableChangeSet);
                 }
             } else if (mode.equals(OUTPUT_FUTURE_ROLLBACK_SQL_MODE)) {
                 RollbackFutureDatabaseChangeLogHandler rollbackHandler = new RollbackFutureDatabaseChangeLogHandler(this, migrationFile);
@@ -320,10 +321,10 @@ public class Migrator {
                 if (unrollbackableChangeSet == null) {
                     rollbackHandler.doRollback();
                 } else {
-                    throw new MigrationFailedException("Will not be able to rollback changes due to change set "+unrollbackableChangeSet);
+                    throw new MigrationFailedException("Will not be able to rollback changes due to change set " + unrollbackableChangeSet);
                 }
             } else {
-                throw new MigrationFailedException("Unknown mode: "+getMode());
+                throw new MigrationFailedException("Unknown mode: " + getMode());
             }
             if (outputSQLWriter != null) {
                 outputSQLWriter.flush();
@@ -412,7 +413,6 @@ public class Migrator {
     public void tag(String tagString) throws MigrationFailedException {
         getDatabase().tag(tagString);
     }
-
 
 
     protected void checkDatabaseChangeLogTable() throws SQLException, IOException {

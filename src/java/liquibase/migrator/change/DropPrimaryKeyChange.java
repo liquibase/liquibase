@@ -1,6 +1,9 @@
 package liquibase.migrator.change;
 
-import liquibase.database.*;
+import liquibase.database.MSSQLDatabase;
+import liquibase.database.MySQLDatabase;
+import liquibase.database.OracleDatabase;
+import liquibase.database.PostgresDatabase;
 import liquibase.migrator.UnsupportedChangeException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -30,8 +33,8 @@ public class DropPrimaryKeyChange extends AbstractChange {
     }
 
     private String[] generateCommonStatements() {
-        return new String[] {
-                "ALTER TABLE "+getTableName()+" DROP PRIMARY KEY",
+        return new String[]{
+                "ALTER TABLE " + getTableName() + " DROP PRIMARY KEY",
         };
     }
 
@@ -39,8 +42,8 @@ public class DropPrimaryKeyChange extends AbstractChange {
         if (getConstraintName() == null) {
             throw new UnsupportedChangeException("MS-SQL requires a constraint name to drop the primary key");
         }
-        return new String[] {
-                "ALTER TABLE "+getTableName()+" DROP CONSTRAINT "+getConstraintName(),
+        return new String[]{
+                "ALTER TABLE " + getTableName() + " DROP CONSTRAINT " + getConstraintName(),
         };
     }
 
@@ -56,8 +59,8 @@ public class DropPrimaryKeyChange extends AbstractChange {
         if (getConstraintName() == null) {
             throw new UnsupportedChangeException("PostgreSQL requires a constraint name to drop the primary key");
         }
-        return new String[] {
-                "ALTER TABLE "+getTableName()+" DROP CONSTRAINT "+getConstraintName(),
+        return new String[]{
+                "ALTER TABLE " + getTableName() + " DROP CONSTRAINT " + getConstraintName(),
         };
     }
 

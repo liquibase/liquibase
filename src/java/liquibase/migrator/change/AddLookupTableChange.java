@@ -2,12 +2,12 @@ package liquibase.migrator.change;
 
 import liquibase.database.*;
 import liquibase.migrator.UnsupportedChangeException;
-import org.w3c.dom.Element;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
-import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class AddLookupTableChange extends AbstractChange {
 
@@ -68,7 +68,7 @@ public class AddLookupTableChange extends AbstractChange {
 
     public String getFinalConstraintName() {
         if (constraintName == null) {
-            return ("FK_"+getExistingTableName()+"_"+getNewTableName()).toUpperCase();
+            return ("FK_" + getExistingTableName() + "_" + getNewTableName()).toUpperCase();
         } else {
             return constraintName;
         }
@@ -86,7 +86,7 @@ public class AddLookupTableChange extends AbstractChange {
         DropTableChange dropTable = new DropTableChange();
         dropTable.setTableName(getNewTableName());
 
-        return new AbstractChange[] {
+        return new AbstractChange[]{
                 dropFK,
                 dropTable,
         };
@@ -95,9 +95,9 @@ public class AddLookupTableChange extends AbstractChange {
     private String[] generateCustomStatements(AbstractDatabase database) throws UnsupportedChangeException {
         List<String> statements = new ArrayList<String>();
 
-        String createTablesSQL = "CREATE TABLE " + getNewTableName() + " AS SELECT DISTINCT " + getExistingColumnName() + " AS " + getNewColumnName() + " FROM " + getExistingTableName()+" WHERE "+getExistingColumnName()+" IS NOT NULL";
+        String createTablesSQL = "CREATE TABLE " + getNewTableName() + " AS SELECT DISTINCT " + getExistingColumnName() + " AS " + getNewColumnName() + " FROM " + getExistingTableName() + " WHERE " + getExistingColumnName() + " IS NOT NULL";
         if (database instanceof MSSQLDatabase) {
-            createTablesSQL = "SELECT DISTINCT "+getExistingColumnName()+" AS "+getNewColumnName()+" INTO "+getNewTableName()+" FROM "+getExistingTableName()+" WHERE "+getExistingColumnName()+" IS NOT NULL";
+            createTablesSQL = "SELECT DISTINCT " + getExistingColumnName() + " AS " + getNewColumnName() + " INTO " + getNewTableName() + " FROM " + getExistingTableName() + " WHERE " + getExistingColumnName() + " IS NOT NULL";
         }
         statements.add(createTablesSQL);
 

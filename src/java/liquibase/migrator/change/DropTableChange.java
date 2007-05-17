@@ -1,8 +1,9 @@
 package liquibase.migrator.change;
 
-import liquibase.database.*;
-import liquibase.migrator.UnsupportedChangeException;
-import liquibase.migrator.RollbackImpossibleException;
+import liquibase.database.MSSQLDatabase;
+import liquibase.database.MySQLDatabase;
+import liquibase.database.OracleDatabase;
+import liquibase.database.PostgresDatabase;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -37,7 +38,7 @@ public class DropTableChange extends AbstractChange {
         if (isCascadeConstraints() != null && isCascadeConstraints()) {
             buffer.append(" CASCADE CONSTRAINTS");
         }
-        return new String[] { buffer.toString() };
+        return new String[]{buffer.toString()};
     }
 
     public String[] generateStatements(MSSQLDatabase database) {

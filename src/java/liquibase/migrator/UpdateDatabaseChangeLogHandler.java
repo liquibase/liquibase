@@ -42,7 +42,7 @@ public class UpdateDatabaseChangeLogHandler extends BaseChangeLogHandler {
             statement.close();
             connection.commit();
         } else {
-            sqlOutputWriter.write(sql + ";"+ StreamUtil.getLineSeparator()+StreamUtil.getLineSeparator());
+            sqlOutputWriter.write(sql + ";" + StreamUtil.getLineSeparator() + StreamUtil.getLineSeparator());
         }
 
         migrator.getRanChangeSetList().add(new RanChangeSet(changeSet));
@@ -51,7 +51,7 @@ public class UpdateDatabaseChangeLogHandler extends BaseChangeLogHandler {
     private String limitSize(String string) {
         int maxLength = 255;
         if (string.length() > maxLength) {
-            return string.substring(0, maxLength-3)+"...";
+            return string.substring(0, maxLength - 3) + "...";
         }
         return string;
     }
@@ -72,13 +72,14 @@ public class UpdateDatabaseChangeLogHandler extends BaseChangeLogHandler {
             statement.close();
             connection.commit();
         } else {
-            sqlOutputWriter.write(sql + ";"+StreamUtil.getLineSeparator()+StreamUtil.getLineSeparator());
+            sqlOutputWriter.write(sql + ";" + StreamUtil.getLineSeparator() + StreamUtil.getLineSeparator());
         }
     }
 
     private boolean shouldRun(ChangeSet changeSet) throws SQLException, DatabaseHistoryException {
         ChangeSet.RunStatus isChangeSetRan = migrator.getRunStatus(changeSet);
-        if (changeSet.shouldAlwaysRun() || isChangeSetRan.equals(ChangeSet.RunStatus.NOT_RAN)  || isChangeSetRan.equals(ChangeSet.RunStatus.RUN_AGAIN)) {
+        if (changeSet.shouldAlwaysRun() || isChangeSetRan.equals(ChangeSet.RunStatus.NOT_RAN) || isChangeSetRan.equals(ChangeSet.RunStatus.RUN_AGAIN))
+        {
             Set<String> requiredContexts = changeSet.getDatabaseChangeLog().getMigrator().getContexts();
             String changeSetContext = changeSet.getContext();
             return changeSetContext == null || requiredContexts.size() == 0 || requiredContexts.contains(changeSetContext);

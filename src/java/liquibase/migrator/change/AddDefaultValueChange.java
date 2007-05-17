@@ -41,26 +41,26 @@ public class AddDefaultValueChange extends AbstractChange {
     }
 
     public String[] generateStatements(MSSQLDatabase database) {
-        return new String[] {
-                "ALTER TABLE " + getTableName() + " WITH NOCHECK ADD CONSTRAINT "+getColumnName()+"DefaultValue DEFAULT '"+getDefaultValue()+"' FOR " + getColumnName(),
+        return new String[]{
+                "ALTER TABLE " + getTableName() + " WITH NOCHECK ADD CONSTRAINT " + getColumnName() + "DefaultValue DEFAULT '" + getDefaultValue() + "' FOR " + getColumnName(),
         };
     }
 
     public String[] generateStatements(MySQLDatabase database) {
-        return new String[] {
-                "ALTER TABLE " + getTableName() + " ALTER " + getColumnName() + " SET DEFAULT '"+getDefaultValue()+"'",
+        return new String[]{
+                "ALTER TABLE " + getTableName() + " ALTER " + getColumnName() + " SET DEFAULT '" + getDefaultValue() + "'",
         };
     }
 
     public String[] generateStatements(OracleDatabase database) {
-        return new String[] {
-            "ALTER TABLE " + getTableName() + " MODIFY " + getColumnName() + " DEFAULT '"+getDefaultValue()+"'",
+        return new String[]{
+                "ALTER TABLE " + getTableName() + " MODIFY " + getColumnName() + " DEFAULT '" + getDefaultValue() + "'",
         };
     }
 
     public String[] generateStatements(PostgresDatabase database) {
-        return new String[] {
-                "ALTER TABLE " + getTableName() + " ALTER COLUMN  " + getColumnName() + " SET DEFAULT '"+getDefaultValue()+"'",
+        return new String[]{
+                "ALTER TABLE " + getTableName() + " ALTER COLUMN  " + getColumnName() + " SET DEFAULT '" + getDefaultValue() + "'",
         };
     }
 
@@ -69,7 +69,7 @@ public class AddDefaultValueChange extends AbstractChange {
         inverse.setTableName(getTableName());
         inverse.setColumnName(getColumnName());
 
-        return new AbstractChange[] {
+        return new AbstractChange[]{
                 inverse
         };
     }

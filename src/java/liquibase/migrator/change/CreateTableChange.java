@@ -81,7 +81,7 @@ public class CreateTableChange extends AbstractChange {
             buffer.append(", ").append(fkConstraints.toString().replaceFirst(",$", ""));
         }
         buffer.append(")");
-        return new String[] { buffer.toString().trim() };
+        return new String[]{buffer.toString().trim()};
     }
 
     public String[] generateStatements(MSSQLDatabase database) {
@@ -104,7 +104,7 @@ public class CreateTableChange extends AbstractChange {
         DropTableChange inverse = new DropTableChange();
         inverse.setTableName(getTableName());
 
-        return new AbstractChange[] {
+        return new AbstractChange[]{
                 inverse
         };
     }

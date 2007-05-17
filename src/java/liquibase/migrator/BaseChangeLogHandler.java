@@ -1,19 +1,18 @@
 package liquibase.migrator;
 
-import org.xml.sax.helpers.DefaultHandler;
-import org.xml.sax.Attributes;
-import org.xml.sax.SAXException;
-
-import java.util.logging.Logger;
-import java.util.logging.Level;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.sql.SQLException;
-import java.io.IOException;
-
 import liquibase.migrator.change.*;
 import liquibase.migrator.preconditions.*;
 import liquibase.util.StringUtils;
+import org.xml.sax.Attributes;
+import org.xml.sax.SAXException;
+import org.xml.sax.helpers.DefaultHandler;
+
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public abstract class BaseChangeLogHandler extends DefaultHandler {
 
@@ -38,7 +37,7 @@ public abstract class BaseChangeLogHandler extends DefaultHandler {
 
     }
 
-      public void startElement(String uri, String localName, String qName, Attributes atts) throws SAXException {
+    public void startElement(String uri, String localName, String qName, Attributes atts) throws SAXException {
         try {
             if ("comment".equals(qName)) {
                 text = new StringBuffer();
@@ -228,7 +227,7 @@ public abstract class BaseChangeLogHandler extends DefaultHandler {
                 change = null;
             }
         } catch (Exception e) {
-            log.log(Level.SEVERE, "Error thrown as a SAXException: "+e.getMessage(), e);
+            log.log(Level.SEVERE, "Error thrown as a SAXException: " + e.getMessage(), e);
             throw new SAXException(e);
         }
     }

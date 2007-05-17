@@ -76,7 +76,7 @@ public class RanChangeSet {
     }
 
     public boolean isSameAs(ChangeSet changeSet) {
-        return  this.getChangeLog().equals(changeSet.getDatabaseChangeLog().getFilePath())
+        return this.getChangeLog().equals(changeSet.getDatabaseChangeLog().getFilePath())
                 && this.getId().equals(changeSet.getId())
                 && this.getAuthor().equals(changeSet.getAuthor());
     }

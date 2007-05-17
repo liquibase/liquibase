@@ -1,14 +1,6 @@
 package liquibase.migrator.mssql;
 
 import liquibase.migrator.AbstractSimpleChangeLogRunnerTest;
-import liquibase.migrator.JUnitFileOpener;
-import liquibase.migrator.Migrator;
-import liquibase.migrator.JUnitJDBCDriverClassLoader;
-
-import java.sql.Driver;
-import java.sql.Connection;
-import java.util.Properties;
-import java.util.Date;
 
 public class MSSQLSampleChangeLogRunnerTest extends AbstractSimpleChangeLogRunnerTest {
 

@@ -1,10 +1,11 @@
 package liquibase.migrator.change;
 
 import junit.framework.TestCase;
-import liquibase.database.*;
-import liquibase.migrator.UnsupportedChangeException;
-import liquibase.migrator.RollbackImpossibleException;
 import liquibase.StreamUtil;
+import liquibase.database.MSSQLDatabase;
+import liquibase.database.MySQLDatabase;
+import liquibase.database.OracleDatabase;
+import liquibase.database.PostgresDatabase;
 import static org.easymock.classextension.EasyMock.*;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -26,7 +27,7 @@ public abstract class AbstractChangeTest extends TestCase {
     public void testSaveStatement() throws Exception {
         AbstractChange change = new AbstractChange("test", "Test Refactoring") {
             private String[] generateStatements() {
-                return new String[] { "GENERATED STATEMENT" };
+                return new String[]{"GENERATED STATEMENT"};
             }
 
             public String getConfirmationMessage() {
@@ -59,13 +60,13 @@ public abstract class AbstractChangeTest extends TestCase {
         OracleDatabase database = new OracleDatabase();
         change.saveStatement(database, stringWriter);
 
-        assertEquals("GENERATED STATEMENT;"+ StreamUtil.getLineSeparator()+StreamUtil.getLineSeparator(), stringWriter.getBuffer().toString());
+        assertEquals("GENERATED STATEMENT;" + StreamUtil.getLineSeparator() + StreamUtil.getLineSeparator(), stringWriter.getBuffer().toString());
     }
 
     public void testExecuteStatement() throws Exception {
         AbstractChange change = new AbstractChange("test", "Test Refactorign") {
             private String[] generateStatements() {
-                return new String[] { "GENERATED STATEMENT;" };
+                return new String[]{"GENERATED STATEMENT;"};
             }
 
             public String[] generateStatements(MSSQLDatabase database) {

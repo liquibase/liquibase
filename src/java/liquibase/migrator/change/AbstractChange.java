@@ -1,12 +1,12 @@
 package liquibase.migrator.change;
 
+import liquibase.StreamUtil;
 import liquibase.database.*;
 import liquibase.migrator.MD5Util;
 import liquibase.migrator.Migrator;
-import liquibase.migrator.UnsupportedChangeException;
 import liquibase.migrator.RollbackImpossibleException;
+import liquibase.migrator.UnsupportedChangeException;
 import liquibase.util.StringUtils;
-import liquibase.StreamUtil;
 import org.w3c.dom.*;
 
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -119,7 +119,7 @@ public abstract class AbstractChange {
     protected String[] generateRollbackStatementsFromInverse(AbstractDatabase database) throws UnsupportedChangeException, RollbackImpossibleException {
         AbstractChange[] inverses = createInverses();
         if (inverses == null) {
-            throw new RollbackImpossibleException("No inverse to "+getClass().getName()+" created");
+            throw new RollbackImpossibleException("No inverse to " + getClass().getName() + " created");
         }
 
         List<String> statements = new ArrayList<String>();
@@ -164,7 +164,7 @@ public abstract class AbstractChange {
     public void saveStatement(AbstractDatabase database, Writer writer) throws IOException, UnsupportedChangeException {
         String[] statements = generateStatements(database);
         for (String statement : statements) {
-            writer.append(statement + ";"+ StreamUtil.getLineSeparator()+StreamUtil.getLineSeparator());
+            writer.append(statement + ";" + StreamUtil.getLineSeparator() + StreamUtil.getLineSeparator());
         }
     }
 

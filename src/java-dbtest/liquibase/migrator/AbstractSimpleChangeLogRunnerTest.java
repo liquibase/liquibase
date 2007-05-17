@@ -2,13 +2,13 @@ package liquibase.migrator;
 
 import junit.framework.TestCase;
 
+import java.io.StringWriter;
 import java.sql.Connection;
 import java.sql.Driver;
-import java.util.Properties;
 import java.util.Date;
-import java.util.logging.Logger;
+import java.util.Properties;
 import java.util.logging.Level;
-import java.io.StringWriter;
+import java.util.logging.Logger;
 
 public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
 
@@ -22,8 +22,8 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
     private Connection connection;
 
     protected AbstractSimpleChangeLogRunnerTest(String changelogDir, String driverDir, String driverName, String url) {
-        this.completeChangeLog = "changelogs/"+changelogDir+"/complete/root.changelog.xml";
-        this.rollbackChangeLog = "changelogs/"+changelogDir+"/rollback/rollbackable.changelog.xml";
+        this.completeChangeLog = "changelogs/" + changelogDir + "/complete/root.changelog.xml";
+        this.rollbackChangeLog = "changelogs/" + changelogDir + "/rollback/rollbackable.changelog.xml";
         this.driverName = driverName;
         this.url = url;
         this.driverDirectory = driverDir;
@@ -136,11 +136,11 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
 //        System.out.println("Rollback SQL for future "+driverName+"\n\n"+writer.toString());
     }
 
-    public void testTag() throws Exception{
+    public void testTag() throws Exception {
         Migrator migrator = createMigrator(completeChangeLog);
         migrator.dropAll();
 
-        migrator= createMigrator(completeChangeLog);
+        migrator = createMigrator(completeChangeLog);
         migrator.migrate();
 
         migrator.tag("Test Tag");

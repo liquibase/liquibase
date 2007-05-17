@@ -1,16 +1,16 @@
 package liquibase.migrator;
 
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Date;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Connection;
+import liquibase.StreamUtil;
+import liquibase.migrator.preconditions.PreconditionFailedException;
+
 import java.io.IOException;
 import java.io.Writer;
-
-import liquibase.migrator.preconditions.PreconditionFailedException;
-import liquibase.StreamUtil;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 public class RollbackDatabaseChangeLogHandler extends BaseChangeLogHandler {
     private List<RanChangeSet> ranChangesToRollback;
@@ -22,7 +22,7 @@ public class RollbackDatabaseChangeLogHandler extends BaseChangeLogHandler {
         int currentChangeSetCount = migrator.getRanChangeSetList().size();
         for (int i = currentChangeSetCount - 1; i >= 0; i--) {
             RanChangeSet ranChangeSet = migrator.getRanChangeSetList().get(i);
-            if (rollbackToTag.equals(ranChangeSet.getTag())){
+            if (rollbackToTag.equals(ranChangeSet.getTag())) {
                 break;
             }
             ranChangesToRollback.add(ranChangeSet);
@@ -87,7 +87,7 @@ public class RollbackDatabaseChangeLogHandler extends BaseChangeLogHandler {
             statement.close();
             connection.commit();
         } else {
-            sqlOutputWriter.write(sql + ";"+ StreamUtil.getLineSeparator()+StreamUtil.getLineSeparator());
+            sqlOutputWriter.write(sql + ";" + StreamUtil.getLineSeparator() + StreamUtil.getLineSeparator());
         }
     }
 

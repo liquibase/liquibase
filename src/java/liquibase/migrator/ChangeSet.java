@@ -1,19 +1,21 @@
 package liquibase.migrator;
 
+import liquibase.StreamUtil;
 import liquibase.migrator.change.AbstractChange;
 import liquibase.util.StringUtils;
-import liquibase.StreamUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
-import java.sql.*;
+import java.io.IOException;
+import java.io.Writer;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.logging.Logger;
-import java.io.Writer;
-import java.io.IOException;
 
 /**
  * This class will serve the purpose of keeping track of the statements.
@@ -115,14 +117,14 @@ public class ChangeSet {
                         try {
                             statement.execute(rollback);
                         } catch (SQLException e) {
-                            throw new RollbackFailedException("Error executing custom SQL ["+rollback+"]");
+                            throw new RollbackFailedException("Error executing custom SQL [" + rollback + "]");
                         }
                     }
                     statement.close();
 
                 } else {
                     List<AbstractChange> refactorings = getRefactorings();
-                    for (int i=refactorings.size()-1; i>=0; i--) {
+                    for (int i = refactorings.size() - 1; i >= 0; i--) {
                         AbstractChange change = refactorings.get(i);
                         change.executeRollbackStatements(migrator.getDatabase());
                         log.finest(change.getConfirmationMessage());
@@ -131,15 +133,17 @@ public class ChangeSet {
 
                 connection.commit();
                 log.finest("ChangeSet " + toString() + " has been successfully rolled back.");
-            } else if (migrator.getMode().equals(Migrator.OUTPUT_ROLLBACK_SQL_MODE) || migrator.getMode().equals(Migrator.OUTPUT_FUTURE_ROLLBACK_SQL_MODE)) {
+            } else
+            if (migrator.getMode().equals(Migrator.OUTPUT_ROLLBACK_SQL_MODE) || migrator.getMode().equals(Migrator.OUTPUT_FUTURE_ROLLBACK_SQL_MODE))
+            {
                 outputSQLWriter.write("-- Changeset " + toString() + StreamUtil.getLineSeparator());
                 writeComments(outputSQLWriter);
                 if (rollBackStatements != null && rollBackStatements.length > 0) {
                     for (String statement : rollBackStatements) {
-                        outputSQLWriter.append(statement + ";"+StreamUtil.getLineSeparator()+StreamUtil.getLineSeparator());
+                        outputSQLWriter.append(statement + ";" + StreamUtil.getLineSeparator() + StreamUtil.getLineSeparator());
                     }
                 } else {
-                    for (int i=refactorings.size()-1; i>=0; i--) {
+                    for (int i = refactorings.size() - 1; i >= 0; i--) {
                         AbstractChange change = refactorings.get(i);
                         change.saveRollbackStatement(getDatabaseChangeLog().getMigrator().getDatabase(), outputSQLWriter);
                     }
@@ -147,7 +151,7 @@ public class ChangeSet {
             } else if (migrator.getMode().equals(Migrator.OUTPUT_CHANGELOG_ONLY_SQL_MODE)) {
                 //don't need to do anything
             } else {
-                throw new MigrationFailedException("Unexpected mode: "+migrator.getMode());
+                throw new MigrationFailedException("Unexpected mode: " + migrator.getMode());
             }
             connection.commit();
         } catch (Exception e) {
@@ -164,7 +168,7 @@ public class ChangeSet {
         if (StringUtils.trimToNull(comments) != null) {
             String[] commentLines = comments.split("\n");
             for (String line : commentLines) {
-                writer.append("-- "+line.trim()+StreamUtil.getLineSeparator());
+                writer.append("-- " + line.trim() + StreamUtil.getLineSeparator());
             }
         }
     }
@@ -219,7 +223,7 @@ public class ChangeSet {
             return;
         }
         this.rollBackStatements = sql.split(";");
-        for (int i=0; i<rollBackStatements.length; i++) {
+        for (int i = 0; i < rollBackStatements.length; i++) {
             rollBackStatements[i] = rollBackStatements[i].trim();
         }
     }
@@ -231,7 +235,7 @@ public class ChangeSet {
 
         for (AbstractChange change : getRefactorings()) {
             if (!change.canRollBack()) {
-                 return false;
+                return false;
             }
         }
         return true;

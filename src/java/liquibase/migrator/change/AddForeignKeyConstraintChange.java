@@ -1,9 +1,12 @@
 package liquibase.migrator.change;
 
-import liquibase.database.*;
+import liquibase.database.MSSQLDatabase;
+import liquibase.database.MySQLDatabase;
+import liquibase.database.OracleDatabase;
+import liquibase.database.PostgresDatabase;
 import liquibase.migrator.UnsupportedChangeException;
-import org.w3c.dom.Element;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 public class AddForeignKeyConstraintChange extends AbstractChange {
     private String baseTableName;
@@ -78,8 +81,8 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
     }
 
     private String[] generateCommonStatements() {
-        return new String[] {
-                "ALTER TABLE "+getBaseTableName()+" ADD CONSTRAINT "+getConstraintName()+" FOREIGN KEY ("+getBaseColumnNames()+") REFERENCES "+getReferencedTableName()+"("+getReferencedColumnNames()+")",
+        return new String[]{
+                "ALTER TABLE " + getBaseTableName() + " ADD CONSTRAINT " + getConstraintName() + " FOREIGN KEY (" + getBaseColumnNames() + ") REFERENCES " + getReferencedTableName() + "(" + getReferencedColumnNames() + ")",
         };
     }
 
@@ -113,7 +116,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
         inverse.setBaseTableName(getBaseTableName());
         inverse.setConstraintName(getConstraintName());
 
-        return new AbstractChange[] {
+        return new AbstractChange[]{
                 inverse
         };
     }
