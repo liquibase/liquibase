@@ -169,10 +169,6 @@ public class ChangeSet {
         }
     }
 
-    public void rollback() {
-    }
-
-
     /**
      * Returns an unmodifiable list of refactorings.  To add one, use the addRefactoing method.
      */

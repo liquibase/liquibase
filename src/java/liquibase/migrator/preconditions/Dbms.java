@@ -19,23 +19,10 @@ public class Dbms {
         this.type = atype.toLowerCase();
     }
 
-    public boolean checkDatabaseType(Migrator migrator) {
+    public boolean checkDatabaseType(Migrator migrator) throws SQLException {
 
-        String product;
-        boolean flag = true;
-        try {
-            product = migrator.getDatabase().getConnection().getMetaData().getDatabaseProductName();
+        String product = migrator.getDatabase().getConnection().getMetaData().getDatabaseProductName();
 
-            if (type.equals(product.toLowerCase()))
-                flag = true;
-            else
-                flag = false;
-
-        } catch (SQLException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-
-        return flag;
+        return type.equals(product.toLowerCase());
     }
 }

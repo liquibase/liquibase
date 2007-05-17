@@ -25,14 +25,13 @@ public abstract class BaseChangeLogHandler extends DefaultHandler {
     private StringBuffer text;
     private PreconditionSet precondition;
     private ChangeSet changeSet;
-    private DBMSPrecondition dbmsPrecondition;
     private OrPrecondition orprecondition;
     private NotPrecondition notprecondition;
     private RunningAsPrecondition runningAs;
     private String physicalChangeLogLocation;
 
 
-    public BaseChangeLogHandler(Migrator migrator, String physicalChangeLogLocation) {
+    protected BaseChangeLogHandler(Migrator migrator, String physicalChangeLogLocation) {
         this.migrator = migrator;
         this.physicalChangeLogLocation = physicalChangeLogLocation;
         log = Logger.getLogger(Migrator.DEFAULT_LOG_NAME);
@@ -112,7 +111,7 @@ public abstract class BaseChangeLogHandler extends DefaultHandler {
 
             } else if ("dbms".equals(qName)) {
                 if (precondition != null) {
-                    dbmsPrecondition = new DBMSPrecondition();
+                    DBMSPrecondition dbmsPrecondition = new DBMSPrecondition();
 //                    System.out.println("dbms is true");
                     for (int i = 0; i < atts.getLength(); i++) {
                         String attributeName = atts.getQName(i);

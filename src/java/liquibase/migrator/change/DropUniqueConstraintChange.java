@@ -29,18 +29,18 @@ public class DropUniqueConstraintChange extends AbstractChange {
         this.constraintName = constraintName;
     }
 
-    private String[] generateCommonStatements(AbstractDatabase database) {
+    private String[] generateCommonStatements() {
         return new String[] {
                 "ALTER TABLE "+getTableName()+" DROP CONSTRAINT "+getConstraintName(),
         };
     }
 
     public String[] generateStatements(MSSQLDatabase database) throws UnsupportedChangeException {
-        return generateCommonStatements(database);
+        return generateCommonStatements();
     }
 
     public String[] generateStatements(OracleDatabase database) throws UnsupportedChangeException {
-        return generateCommonStatements(database);
+        return generateCommonStatements();
     }
 
     public String[] generateStatements(MySQLDatabase database) throws UnsupportedChangeException {
@@ -50,7 +50,7 @@ public class DropUniqueConstraintChange extends AbstractChange {
     }
 
     public String[] generateStatements(PostgresDatabase database) throws UnsupportedChangeException {
-        return generateCommonStatements(database);
+        return generateCommonStatements();
     }
 
     public String getConfirmationMessage() {

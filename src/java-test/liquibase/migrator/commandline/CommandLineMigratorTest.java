@@ -308,4 +308,17 @@ public class CommandLineMigratorTest extends TestCase {
         assertEquals("TagHere", cli.commandParam);
     }
 
+    public void testMigrateWithEqualsInParams() throws Exception {
+        String url = "dbc:sqlserver://127.0.0.1;DatabaseName=dev_nn;user=ffdatabase;password=p!88worD";
+        String[] args = new String[]{
+                "--url="+url,
+                "migrate",
+        };
+
+        CommandLineMigrator cli = new CommandLineMigrator();
+        cli.parseOptions(args);
+
+        assertEquals(url, cli.url);
+    }
+
 }

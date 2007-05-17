@@ -77,18 +77,18 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
         this.initiallyDeferred = initiallyDeferred;
     }
 
-    private String[] generateCommonStatements(AbstractDatabase database) {
+    private String[] generateCommonStatements() {
         return new String[] {
                 "ALTER TABLE "+getBaseTableName()+" ADD CONSTRAINT "+getConstraintName()+" FOREIGN KEY ("+getBaseColumnNames()+") REFERENCES "+getReferencedTableName()+"("+getReferencedColumnNames()+")",
         };
     }
 
     public String[] generateStatements(MSSQLDatabase database) throws UnsupportedChangeException {
-        return generateCommonStatements(database);
+        return generateCommonStatements();
     }
 
     public String[] generateStatements(OracleDatabase database) throws UnsupportedChangeException {
-        String[] strings = generateCommonStatements(database);
+        String[] strings = generateCommonStatements();
         if (deferrable != null && deferrable) {
             strings[0] += " DEFERRABLE";
         }
@@ -100,11 +100,11 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
     }
 
     public String[] generateStatements(MySQLDatabase database) throws UnsupportedChangeException {
-        return generateCommonStatements(database);
+        return generateCommonStatements();
     }
 
     public String[] generateStatements(PostgresDatabase database) throws UnsupportedChangeException {
-        return generateCommonStatements(database);
+        return generateCommonStatements();
     }
 
 

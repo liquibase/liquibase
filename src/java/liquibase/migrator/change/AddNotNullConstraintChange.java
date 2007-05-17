@@ -129,8 +129,4 @@ public class AddNotNullConstraintChange extends AbstractChange {
         element.setAttribute("defaultNullValue", getDefaultNullValue());
         return element;
     }
-
-    public void doRefactoring() {
-        //To change body of created methods use File | Settings | File Templates.
-    }
 }

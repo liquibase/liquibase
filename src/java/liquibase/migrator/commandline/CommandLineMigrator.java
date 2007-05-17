@@ -233,8 +233,18 @@ public class CommandLineMigrator {
                 }
             } else if (arg.startsWith("--")) {
                 String[] splitArg = arg.split("=");
-                if (splitArg.length != 2) {
+                if (splitArg.length < 2) {
                     throw new CommandLineParsingException("Could not parse '" + arg + "'");
+                } else if (splitArg.length > 2) {
+                    StringBuffer secondHalf = new StringBuffer();
+                    for (int j=1; j<splitArg.length; j++) {
+                        secondHalf.append(splitArg[j]).append("=");
+                    }
+
+                    splitArg = new String[] {
+                            splitArg[0],
+                            secondHalf.toString().replaceFirst("=$","")
+                    };
                 }
 
                 String attributeName = splitArg[0].replaceFirst("--", "");
@@ -341,7 +351,7 @@ public class CommandLineMigrator {
         BufferedInputStream inStream = new BufferedInputStream(jar.getInputStream(entry));
         BufferedOutputStream outStream = new BufferedOutputStream(
                 new FileOutputStream(tempFile));
-        int status = -1;
+        int status;
         while ((status = inStream.read()) != -1) {
             outStream.write(status);
         }

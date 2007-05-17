@@ -85,19 +85,19 @@ public class CreateTableChange extends AbstractChange {
     }
 
     public String[] generateStatements(MSSQLDatabase database) {
-        return generateCommonStatements(((AbstractDatabase) database));
+        return generateCommonStatements(database);
     }
 
     public String[] generateStatements(OracleDatabase database) {
-        return generateCommonStatements(((AbstractDatabase) database));
+        return generateCommonStatements(database);
     }
 
     public String[] generateStatements(MySQLDatabase database) {
-        return generateCommonStatements(((AbstractDatabase) database));
+        return generateCommonStatements(database);
     }
 
     public String[] generateStatements(PostgresDatabase database) {
-        return generateCommonStatements(((AbstractDatabase) database));
+        return generateCommonStatements(database);
     }
 
     protected AbstractChange[] createInverses() {

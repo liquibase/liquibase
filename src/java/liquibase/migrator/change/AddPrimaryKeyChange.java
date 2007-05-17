@@ -39,7 +39,7 @@ public class AddPrimaryKeyChange extends AbstractChange {
         this.constraintName = constraintName;
     }
 
-    private String[] generateCommonStatements(AbstractDatabase database) {
+    private String[] generateCommonStatements() {
         if (getConstraintName() == null) {
             return new String[] {
                     "ALTER TABLE "+getTableName()+" ADD PRIMARY KEY ("+getColumnNames()+")",
@@ -52,19 +52,19 @@ public class AddPrimaryKeyChange extends AbstractChange {
     }
 
     public String[] generateStatements(MSSQLDatabase database) throws UnsupportedChangeException {
-        return generateCommonStatements(database);
+        return generateCommonStatements();
     }
 
     public String[] generateStatements(OracleDatabase database) throws UnsupportedChangeException {
-        return generateCommonStatements(database);
+        return generateCommonStatements();
     }
 
     public String[] generateStatements(MySQLDatabase database) throws UnsupportedChangeException {
-        return generateCommonStatements(database);
+        return generateCommonStatements();
     }
 
     public String[] generateStatements(PostgresDatabase database) throws UnsupportedChangeException {
-        return generateCommonStatements(database);
+        return generateCommonStatements();
     }
 
     protected AbstractChange[] createInverses() {

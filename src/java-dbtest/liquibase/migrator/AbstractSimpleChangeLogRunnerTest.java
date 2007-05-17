@@ -76,7 +76,7 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
         migrator.setMode(Migrator.OUTPUT_SQL_MODE);
         migrator.migrate();
 
-        System.out.println(output.getBuffer().toString());
+//        System.out.println(output.getBuffer().toString());
     }
 
     public void testRollbackableChangeLog() throws Exception {

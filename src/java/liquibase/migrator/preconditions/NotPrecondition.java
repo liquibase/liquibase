@@ -36,7 +36,6 @@ public class NotPrecondition implements PreconditionLogic {
     public boolean checkNotPrecondition(Migrator migrator) {
         boolean booldbmsRetVal = true;
         boolean boolOrRetVal = true;
-        boolean returnVal = true;
         if (dbmsArray.size() != 0) {
             booldbmsRetVal = checkDbmsType(migrator);
         }
@@ -45,16 +44,7 @@ public class NotPrecondition implements PreconditionLogic {
             boolOrRetVal = ! boolOrRetVal;
 
         }
-        if (boolOrRetVal && booldbmsRetVal) {
-            returnVal = true;
-
-        } else {
-
-            returnVal = false;
-        }
-
-        return returnVal;
-
+        return boolOrRetVal && booldbmsRetVal;
     }
 
     public boolean checkDbmsType(Migrator migrator) {
@@ -64,24 +54,13 @@ public class NotPrecondition implements PreconditionLogic {
             for (int i = 0; i < dbmsArray.size(); i++) {
                 DBMSPrecondition dbmsPrecondition = dbmsArray.get(i);
                 //String dbproduct = migrator.getDatabase().getConnection().getMetaData().getDatabaseProductName();
-                if (dbmsPrecondition.checkDatabaseType(migrator)) {
-                    boolReturnArray[i] = true;
-                } else {
-
-                    boolReturnArray[i] = false;
-                }
-
+                boolReturnArray[i] = dbmsPrecondition.checkDatabaseType(migrator);
             }
 
             for (int i = 0; i < dbmsArray.size(); i++) {
-
                 returnvalue = returnvalue && boolReturnArray[i];
-
-
             }
             returnvalue = ! returnvalue;
-
-
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

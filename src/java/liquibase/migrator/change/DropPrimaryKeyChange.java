@@ -29,7 +29,7 @@ public class DropPrimaryKeyChange extends AbstractChange {
         this.constraintName = constraintName;
     }
 
-    private String[] generateCommonStatements(AbstractDatabase database) {
+    private String[] generateCommonStatements() {
         return new String[] {
                 "ALTER TABLE "+getTableName()+" DROP PRIMARY KEY",
         };
@@ -45,11 +45,11 @@ public class DropPrimaryKeyChange extends AbstractChange {
     }
 
     public String[] generateStatements(OracleDatabase database) throws UnsupportedChangeException {
-        return generateCommonStatements(database);
+        return generateCommonStatements();
     }
 
     public String[] generateStatements(MySQLDatabase database) throws UnsupportedChangeException {
-        return generateCommonStatements(database);
+        return generateCommonStatements();
     }
 
     public String[] generateStatements(PostgresDatabase database) throws UnsupportedChangeException {

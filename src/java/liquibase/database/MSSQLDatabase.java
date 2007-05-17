@@ -58,10 +58,6 @@ public class MSSQLDatabase extends AbstractDatabase {
         return PRODUCT_NAME.equalsIgnoreCase(conn.getMetaData().getDatabaseProductName());
     }
 
-    protected String getDateType() {
-        return "DATE";
-    }
-
     protected String getDateTimeType() {
         return "DATETIME";
     }

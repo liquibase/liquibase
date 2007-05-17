@@ -53,10 +53,6 @@ public class PostgresDatabase extends AbstractDatabase {
         return "BYTEA";
     }
 
-    protected String getDateType() {
-        return "DATE";
-    }
-
     protected String getDateTimeType() {
         return "TIMESTAMP";
     }
@@ -94,8 +90,6 @@ public class PostgresDatabase extends AbstractDatabase {
         Statement dropStatement = conn.createStatement();
         try {
             dropStatement.executeUpdate("DROP OWNED BY " + getConnectionUsername());
-        } catch (Exception e) {
-            e.printStackTrace();
         } finally {
             if (dropStatement != null) {
                 dropStatement.close();

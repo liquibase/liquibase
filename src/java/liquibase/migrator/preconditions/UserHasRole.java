@@ -23,23 +23,11 @@ public class UserHasRole {
         return username;
     }
 
-    public boolean checkUserName(Migrator migrator) {
-        boolean flag = false;
-        try {
-            String loggedusername = migrator.getDatabase().getConnection().getMetaData().getUserName();
-            loggedusername = loggedusername.substring(0, loggedusername.indexOf("@"));
-            System.out.println("loggeduserna" + loggedusername);
-            if (username.equals(loggedusername))
-                flag = true;
-            else
-                flag = false;
+    public boolean checkUserName(Migrator migrator) throws SQLException {
+        String loggedusername = migrator.getDatabase().getConnection().getMetaData().getUserName();
+        loggedusername = loggedusername.substring(0, loggedusername.indexOf("@"));
 
-        } catch (SQLException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-
-        return flag;
+        return username.equals(loggedusername);
     }
 
 

@@ -23,7 +23,7 @@ import java.util.logging.Logger;
 public abstract class AbstractDatabase {
 
     private Connection connection;
-    protected Logger log;
+    private Logger log;
     private boolean changeLogTableExists;
     private boolean changeLogLockTableExists;
 
@@ -62,8 +62,9 @@ public abstract class AbstractDatabase {
 
     protected abstract String getBlobType();
 
-    protected abstract String getDateType();
-
+    protected String getDateType() {
+        return "DATE";
+    }
     protected abstract String getDateTimeType();
 
     protected abstract boolean supportsSequences();
@@ -328,9 +329,7 @@ public abstract class AbstractDatabase {
 
             changeLogTableExists = false;
         } finally {
-            if (conn != null) {
-                conn.commit();
-            }
+            conn.commit();
         }
     }
 
@@ -338,7 +337,7 @@ public abstract class AbstractDatabase {
         //does nothing, assume tables will cascade constraints
     }
 
-    protected ResultSet dropTables(Connection conn) throws SQLException, MigrationFailedException {
+    protected void dropTables(Connection conn) throws SQLException, MigrationFailedException {
         //drop tables and their constraints
         ResultSet rs = null;
         Statement dropStatement = null;
@@ -373,7 +372,6 @@ public abstract class AbstractDatabase {
                     throw new MigrationFailedException("Error dropping table '" + tableName + "': " + e.getMessage(), e);
                 }
             }
-            return rs;
         } finally {
             if (dropStatement != null) {
                 dropStatement.close();
@@ -468,7 +466,7 @@ public abstract class AbstractDatabase {
         return "--";
     }
 
-    public void releaseLock(Migrator migrator) throws MigrationFailedException {
+    public void releaseLock() throws MigrationFailedException {
         if (doesChangeLogLockTableExist()) {
             Connection conn = getConnection();
             PreparedStatement stmt = null;
@@ -494,7 +492,7 @@ public abstract class AbstractDatabase {
         }
     }
 
-    public DatabaseChangeLogLock[] listLocks(Migrator migrator) throws MigrationFailedException {
+    public DatabaseChangeLogLock[] listLocks() throws MigrationFailedException {
         Connection conn = getConnection();
         Statement stmt = null;
         ResultSet rs = null;

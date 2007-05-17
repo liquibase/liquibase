@@ -46,10 +46,6 @@ public class OracleDatabase extends AbstractDatabase {
         return "BLOB";
     }
 
-    protected String getDateType() {
-        return "DATE";
-    }
-
     protected String getDateTimeType() {
         return "TIMESTAMP";
     }
