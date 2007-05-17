@@ -90,7 +90,7 @@ public class ServletMigrator implements ServletContextListener {
             }
         } else if (machineExcludes != null) {
             shouldRun = true;
-            for (String machine : machineIncludes.split(",")) {
+            for (String machine : machineExcludes.split(",")) {
                 machine = machine.trim();
                 if (hostName.equalsIgnoreCase(machine)) {
                     shouldRun = false;

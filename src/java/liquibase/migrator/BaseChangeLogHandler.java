@@ -125,36 +125,26 @@ public abstract class BaseChangeLogHandler extends DefaultHandler {
                     } else if (notprecondition != null) {
                         notprecondition.addDbms(dbmsPrecondition);
                     } else {
-
                         precondition.addDbms(dbmsPrecondition);
                     }
-
                 } else {
-
-                    new RuntimeException("Unexpected Dbms tag");
+                    throw new RuntimeException("Unexpected Dbms tag");
                 }
             } else if ("or".equals(qName)) {
                 if (precondition != null) {
                     orprecondition = new OrPrecondition();
                     if (notprecondition != null) {
-//                        System.out.println("not has ben creates");
                         notprecondition.setOrprecondition(orprecondition);
-
                     }
-
-
                 } else {
-
-                    new RuntimeException("Unexpected Or tag");
+                    throw new RuntimeException("Unexpected Or tag");
                 }
 
             } else if ("not".equals(qName)) {
                 if (precondition != null) {
                     notprecondition = new NotPrecondition();
-
                 } else {
-
-                    new RuntimeException("Unexpected Or tag");
+                    throw new RuntimeException("Unexpected Or tag");
                 }
 
             } else if ("runningAs".equals(qName)) {
@@ -166,7 +156,7 @@ public abstract class BaseChangeLogHandler extends DefaultHandler {
                         setProperty(runningAs, attributeName, attributeValue);
                     }
                 } else {
-                    new RuntimeException("Unexpected Or tag");
+                    throw new RuntimeException("Unexpected Or tag");
                 }
 
             } else {
@@ -188,11 +178,11 @@ public abstract class BaseChangeLogHandler extends DefaultHandler {
                     return;
                 } else
                 if (method.getParameterTypes().length == 1 && method.getParameterTypes()[0].equals(String.class)) {
-                    method.invoke(object, attributeValue.toString());
+                    method.invoke(object, attributeValue);
                     return;
                 } else
                 if (method.getParameterTypes().length == 1 && method.getParameterTypes()[0].equals(Integer.class)) {
-                    method.invoke(object, Integer.valueOf(attributeValue.toString()));
+                    method.invoke(object, Integer.valueOf(attributeValue));
                     return;
                 }
             }
@@ -251,4 +241,7 @@ public abstract class BaseChangeLogHandler extends DefaultHandler {
         }
     }
 
+    protected String escapeStringForDatabase(String string) {
+        return string.replaceAll("'", "''");
+    }
 }

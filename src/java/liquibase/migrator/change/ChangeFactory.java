@@ -9,49 +9,47 @@ public class ChangeFactory {
     private static ChangeFactory instance;
 
     private ChangeFactory() {
-        if (tagToClassMap == null) {
-            tagToClassMap = new HashMap<String, Class>();
-            Class[] refactorings = new Class[]{
-                    AddColumnChange.class,
-                    AlterSequenceChange.class,
-                    CreateIndexChange.class,
-                    CreateSequenceChange.class,
-                    CreateTableChange.class,
-                    DropColumnChange.class,
-                    DropIndexChange.class,
-                    DropSequenceChange.class,
-                    DropTableChange.class,
-                    InsertDataChange.class,
-                    ModifyColumnChange.class,
-                    RawSQLChange.class,
-                    RenameColumnChange.class,
-                    RenameTableChange.class,
-                    AddNotNullConstraintChange.class,
-                    DropNotNullConstraintChange.class,
-                    CreateViewChange.class,
-                    DropViewChange.class,
-                    MergeColumnChange.class,
-                    RenameViewChange.class,
-                    AddForeignKeyConstraintChange.class,
-                    DropForeignKeyConstraintChange.class,
-                    AddLookupTableChange.class,
-                    AddPrimaryKeyChange.class,
-                    DropPrimaryKeyChange.class,
-                    AddAutoIncrementChange.class,
-                    AddDefaultValueChange.class,
-                    DropDefaultValueChange.class,
-                    AddUniqueConstraintChange.class,
-                    DropUniqueConstraintChange.class,
-            };
+        tagToClassMap = new HashMap<String, Class>();
+        Class[] refactorings = new Class[]{
+                AddColumnChange.class,
+                AlterSequenceChange.class,
+                CreateIndexChange.class,
+                CreateSequenceChange.class,
+                CreateTableChange.class,
+                DropColumnChange.class,
+                DropIndexChange.class,
+                DropSequenceChange.class,
+                DropTableChange.class,
+                InsertDataChange.class,
+                ModifyColumnChange.class,
+                RawSQLChange.class,
+                RenameColumnChange.class,
+                RenameTableChange.class,
+                AddNotNullConstraintChange.class,
+                DropNotNullConstraintChange.class,
+                CreateViewChange.class,
+                DropViewChange.class,
+                MergeColumnChange.class,
+                RenameViewChange.class,
+                AddForeignKeyConstraintChange.class,
+                DropForeignKeyConstraintChange.class,
+                AddLookupTableChange.class,
+                AddPrimaryKeyChange.class,
+                DropPrimaryKeyChange.class,
+                AddAutoIncrementChange.class,
+                AddDefaultValueChange.class,
+                DropDefaultValueChange.class,
+                AddUniqueConstraintChange.class,
+                DropUniqueConstraintChange.class,
+        };
 
-            try {
-                for (Class refactoringClass : refactorings) {
-                    AbstractChange change = (AbstractChange) refactoringClass.newInstance();
-                    tagToClassMap.put(change.getTagName(), refactoringClass);
-                }
-            } catch (Exception e) {
-                throw new RuntimeException(e);
+        try {
+            for (Class refactoringClass : refactorings) {
+                AbstractChange change = (AbstractChange) refactoringClass.newInstance();
+                tagToClassMap.put(change.getTagName(), refactoringClass);
             }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 

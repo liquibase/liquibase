@@ -1,22 +1,14 @@
 package liquibase.migrator;
 
-import liquibase.migrator.change.*;
-import liquibase.migrator.preconditions.*;
-import liquibase.util.StringUtils;
-import liquibase.database.AbstractDatabase;
 import liquibase.StreamUtil;
-import org.xml.sax.Attributes;
-import org.xml.sax.ContentHandler;
-import org.xml.sax.Locator;
-import org.xml.sax.SAXException;
+import liquibase.util.StringUtils;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.Set;
-import java.util.logging.Logger;
-import java.sql.*;
 import java.io.IOException;
 import java.io.Writer;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.Set;
 
 public class UpdateDatabaseChangeLogHandler extends BaseChangeLogHandler {
 
@@ -34,13 +26,13 @@ public class UpdateDatabaseChangeLogHandler extends BaseChangeLogHandler {
         Migrator migrator = changeSet.getDatabaseChangeLog().getMigrator();
         String dateValue = migrator.getDatabase().getCurrentDateTimeFunction();
         String sql = "INSERT INTO DATABASECHANGELOG (ID, AUTHOR, FILENAME, DATEEXECUTED, MD5SUM, DESCRIPTION, COMMENTS, LIQUIBASE) VALUES ('?', '?', '?', " + dateValue + ", '?', '?', '?', '?')";
-        sql = sql.replaceFirst("\\?", changeSet.getId().replaceAll("'", "''"));
-        sql = sql.replaceFirst("\\?", changeSet.getAuthor().replaceAll("'", "''"));
-        sql = sql.replaceFirst("\\?", changeSet.getDatabaseChangeLog().getFilePath().replaceAll("'", "''"));
-        sql = sql.replaceFirst("\\?", changeSet.getMd5sum().replaceAll("'", "''"));
-        sql = sql.replaceFirst("\\?", limitSize(changeSet.getDescription().replaceAll("'", "''")));
-        sql = sql.replaceFirst("\\?", limitSize(StringUtils.trimToEmpty(changeSet.getComments()).replaceAll("'", "''")));
-        sql = sql.replaceFirst("\\?", changeSet.getDatabaseChangeLog().getMigrator().getBuildVersion().replaceAll("'", "''"));
+        sql = sql.replaceFirst("\\?", escapeStringForDatabase(escapeStringForDatabase(changeSet.getId())));
+        sql = sql.replaceFirst("\\?", escapeStringForDatabase(changeSet.getAuthor()));
+        sql = sql.replaceFirst("\\?", escapeStringForDatabase(changeSet.getDatabaseChangeLog().getFilePath()));
+        sql = sql.replaceFirst("\\?", escapeStringForDatabase(changeSet.getMd5sum()));
+        sql = sql.replaceFirst("\\?", escapeStringForDatabase(limitSize(changeSet.getDescription())));
+        sql = sql.replaceFirst("\\?", escapeStringForDatabase(limitSize(StringUtils.trimToEmpty(changeSet.getComments()))));
+        sql = sql.replaceFirst("\\?", escapeStringForDatabase(changeSet.getDatabaseChangeLog().getMigrator().getBuildVersion()));
 
         Writer sqlOutputWriter = migrator.getOutputSQLWriter();
         if (sqlOutputWriter == null) {
@@ -67,10 +59,10 @@ public class UpdateDatabaseChangeLogHandler extends BaseChangeLogHandler {
     public void markChangeSetAsReRan(ChangeSet changeSet) throws SQLException, IOException {
         String dateValue = changeSet.getDatabaseChangeLog().getMigrator().getDatabase().getCurrentDateTimeFunction();
         String sql = "UPDATE DATABASECHANGELOG SET DATEEXECUTED=" + dateValue + ", MD5SUM='?' WHERE ID='?' AND AUTHOR='?' AND FILENAME='?'";
-        sql = sql.replaceFirst("\\?", changeSet.getMd5sum().replaceAll("'", "''"));
-        sql = sql.replaceFirst("\\?", changeSet.getId().replaceAll("'", "''"));
-        sql = sql.replaceFirst("\\?", changeSet.getAuthor().replaceAll("'", "''"));
-        sql = sql.replaceFirst("\\?", changeSet.getDatabaseChangeLog().getFilePath().replaceAll("'", "''"));
+        sql = sql.replaceFirst("\\?", escapeStringForDatabase(changeSet.getMd5sum()));
+        sql = sql.replaceFirst("\\?", escapeStringForDatabase(changeSet.getId()));
+        sql = sql.replaceFirst("\\?", escapeStringForDatabase(changeSet.getAuthor()));
+        sql = sql.replaceFirst("\\?", escapeStringForDatabase(changeSet.getDatabaseChangeLog().getFilePath()));
 
         Writer sqlOutputWriter = changeSet.getDatabaseChangeLog().getMigrator().getOutputSQLWriter();
         if (sqlOutputWriter == null) {

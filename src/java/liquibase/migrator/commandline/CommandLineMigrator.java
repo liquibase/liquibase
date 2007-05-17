@@ -13,10 +13,7 @@ import java.sql.Driver;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.logging.Level;
@@ -126,13 +123,13 @@ public class CommandLineMigrator {
         Properties props = new Properties();
         props.load(propertiesInputStream);
 
-        for (Object property : props.keySet()) {
+        for (Map.Entry entry : props.entrySet()) {
             try {
-                Field field = getClass().getDeclaredField((String) property);
+                Field field = getClass().getDeclaredField((String) entry.getKey());
                 Object currentValue = field.get(this);
 
                 if (currentValue == null) {
-                    String value = (String) props.get(property);
+                    String value = entry.getValue().toString();
                     if (field.getType().equals(Boolean.class)) {
                         field.set(this, Boolean.valueOf(value));
                     } else {
@@ -140,7 +137,7 @@ public class CommandLineMigrator {
                     }
                 }
             } catch (Exception e) {
-                throw new CommandLineParsingException("Unknown parameter: '" + property + "'");
+                throw new CommandLineParsingException("Unknown parameter: '" + entry.getKey() + "'");
             }
         }
     }
@@ -395,7 +392,6 @@ public class CommandLineMigrator {
         if (connection == null) {
             throw new MigrationFailedException("Incorrect driver for URL");
         }
-        Writer outputSQLFileWriter = null;
         try {
             Migrator migrator = new Migrator(migrationFile, new CommandLineFileOpener(classLoader));
             migrator.setContexts(contexts);
@@ -498,10 +494,6 @@ public class CommandLineMigrator {
         } finally {
             if (connection != null) {
                 connection.close();
-            }
-            if (outputSQLFileWriter != null) {
-                outputSQLFileWriter.flush();
-                outputSQLFileWriter.close();
             }
         }
     }
