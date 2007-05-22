@@ -91,7 +91,8 @@ public class CommandLineMigrator {
     }
 
     protected boolean checkSetup() {
-        if (migrationFile == null
+        if (classpath == null
+                || migrationFile == null
                 || username == null
                 || password == null
                 || url == null
