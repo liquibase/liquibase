@@ -1,0 +1,32 @@
+#! /bin/sh
+
+## resolve links - $0 may be a symlink
+PRG="$0"
+while [ -h "$PRG" ] ; do
+  ls=`ls -ld "$PRG"`
+  link=`expr "$ls" : '.*-> \(.*\)$'`
+  if expr "$link" : '/.*' > /dev/null; then
+  PRG="$link"
+  else
+  PRG=`dirname "$PRG"`"/$link"
+  fi
+done
+
+MIGRATE_HOME=`dirname "$PRG"`
+
+# make it fully qualified
+MIGRATE_HOME=`cd "$MIGRATE_HOME" && pwd`
+
+# build classpath from all jars in lib
+CP=
+for i in "$MIGRATE_HOME"/liquibase*.jar; do
+  CP="$CP":"$i"
+done
+for i in "$MIGRATE_HOME"/lib/*.jar; do
+  CP="$CP":"$i"
+done
+
+# add any JVM options here
+JAVA_OPTS=
+
+java -cp $CP $JAVA_OPTS liquibase.migrator.commandline.CommandLineMigrator $@
