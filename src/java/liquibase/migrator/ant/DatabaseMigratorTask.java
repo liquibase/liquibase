@@ -9,7 +9,7 @@ import javax.swing.*;
 import java.sql.SQLException;
 
 public class DatabaseMigratorTask extends BaseLiquibaseTask {
-    private boolean dropFirst = true;
+    private boolean dropFirst = false;
     private String contexts;
 
     public boolean isDropFirst() {

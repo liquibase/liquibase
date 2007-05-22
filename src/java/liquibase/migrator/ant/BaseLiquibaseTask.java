@@ -25,7 +25,6 @@ public class BaseLiquibaseTask extends Task {
     private String password;
     protected Path classpath;
     private boolean promptOnNonLocalDatabase = false;
-    private boolean rebuildDatabase;
 
     public boolean isPromptOnNonLocalDatabase() {
         return promptOnNonLocalDatabase;
@@ -33,14 +32,6 @@ public class BaseLiquibaseTask extends Task {
 
     public void setPromptOnNonLocalDatabase(boolean promptOnNonLocalDatabase) {
         this.promptOnNonLocalDatabase = promptOnNonLocalDatabase;
-    }
-
-    public boolean isRebuildDatabase() {
-        return rebuildDatabase;
-    }
-
-    public void setRebuildDatabase(boolean rebuildDatabase) {
-        this.rebuildDatabase = rebuildDatabase;
     }
 
     public String getDriver() {

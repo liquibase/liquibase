@@ -44,7 +44,7 @@ public class Migrator {
 
     private AbstractDatabase database;
     private Logger log;
-    private Set<String> contexts;
+    private Set<String> contexts = new HashSet<String>();
 
     private boolean hasChangeLogLock = false;
     private long changeLogLockWaitTime = 1000 * 60 * 5;  //default to 5 mins
@@ -481,7 +481,6 @@ public class Migrator {
     }
 
     public void setContexts(String contexts) {
-        this.contexts = new HashSet<String>();
         if (contexts != null) {
             String[] strings = contexts.split(",");
             for (String string : strings) {

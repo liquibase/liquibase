@@ -55,6 +55,7 @@ public class CreateTableChange extends AbstractChange {
                     if (constraints.isDeferrable() != null && constraints.isDeferrable()) {
                         fkConstraints.append(" DEFERRABLE,");
                     }
+                    fkConstraints.append(",");                    
 //                    buffer.append(" CONSTRAINT FOREIGN KEY ").append(constraints.getForeignKeyName()).append(" REFERENCES ").append(constraints.getReferences());
                 }
 
@@ -62,6 +63,7 @@ public class CreateTableChange extends AbstractChange {
                     buffer.append(" UNIQUE");
                 }
                 if (constraints.getCheck() != null) buffer.append(constraints.getCheck()).append(" ");
+
             }
 
             if (column.getDefaultValue() != null) {
