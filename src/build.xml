@@ -41,7 +41,7 @@
 
         <zip destfile="${release.dir}/liquibase-${build.version}.zip">
             <zipfileset dir="${src.dir}" includes="changelog.txt"/>
-            <zipfileset dir="${src.dir}" includes="migrate"/>
+            <zipfileset dir="${src.dir}/zip" excludes="**/.svn/**"/>
             <zipfileset dir="${release.dir}" includes="liquibase-SNAPSHOT.jar"
                         fullpath="liquibase-${build.version}.jar"/>
             <zipfileset dir="${release.dir}/../" includes="samples/**" excludes="**/.svn/**"/>
@@ -85,7 +85,7 @@
 
         <zip destfile="${release.dir}/liquibase-${build.version}-14jvm.zip">
             <zipfileset dir="${src.dir}" includes="changelog.txt"/>
-            <zipfileset dir="${src.dir}" includes="migrate"/>
+            <zipfileset dir="${src.dir}/zip" excludes="**/.svn/**"/>
             <zipfileset dir="${release.dir}" includes="liquibase-SNAPSHOT-14jvm.jar"
                         fullpath="liquibase-${build.version}.jar"/>
             <zipfileset dir="${release.dir}/../" includes="samples/**" excludes="**/.svn/**"/>

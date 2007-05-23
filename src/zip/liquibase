@@ -12,17 +12,17 @@ while [ -h "$PRG" ] ; do
   fi
 done
 
-MIGRATE_HOME=`dirname "$PRG"`
+LIQUIBASE_HOME=`dirname "$PRG"`
 
 # make it fully qualified
-MIGRATE_HOME=`cd "$MIGRATE_HOME" && pwd`
+LIQUIBASE_HOME=`cd "$LIQUIBASE_HOME" && pwd`
 
 # build classpath from all jars in lib
 CP=
-for i in "$MIGRATE_HOME"/liquibase*.jar; do
+for i in "$LIQUIBASE_HOME"/liquibase*.jar; do
   CP="$CP":"$i"
 done
-for i in "$MIGRATE_HOME"/lib/*.jar; do
+for i in "$LIQUIBASE_HOME"/lib/*.jar; do
   CP="$CP":"$i"
 done
 
