@@ -53,7 +53,7 @@ public class CreateTableChange extends AbstractChange {
                         fkConstraints.append(" INITIALLY DEFERRED");
                     }
                     if (constraints.isDeferrable() != null && constraints.isDeferrable()) {
-                        fkConstraints.append(" DEFERRABLE,");
+                        fkConstraints.append(" DEFERRABLE");
                     }
                     fkConstraints.append(",");                    
 //                    buffer.append(" CONSTRAINT FOREIGN KEY ").append(constraints.getForeignKeyName()).append(" REFERENCES ").append(constraints.getReferences());
