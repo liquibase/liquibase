@@ -4,6 +4,7 @@ import liquibase.database.AbstractDatabase;
 
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Set;
 
 public class IncludeMigrator extends Migrator {
     private Migrator parentMigrator;
@@ -38,5 +39,9 @@ public class IncludeMigrator extends Migrator {
 
     public List<RanChangeSet> getRanChangeSetList() throws SQLException {
         return parentMigrator.getRanChangeSetList();
+    }
+
+    public Set<String> getContexts() {
+        return parentMigrator.getContexts();
     }
 }

@@ -20,4 +20,23 @@
     <changeSet id="12" author="nvoxland">
         <createSequence sequenceName="seq_news"/>
     </changeSet>
+
+
+    <changeSet id="2" author="nvoxland" context="test">
+        <insert tableName="news">
+            <column name="id" value="1"/>
+            <column name="title" value="Liquibase 0.8 Released"/>
+        </insert>
+        <insert tableName="news">
+            <column name="id" value="2"/>
+            <column name="title" value="Liquibase 0.9 Released"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="3" author="nvoxland" context="demo">
+        <insert tableName="news">
+            <column name="id" value="3"/>            
+            <column name="title" value="Liquibase 1.0 Released"/>
+        </insert>
+    </changeSet>
 </databaseChangeLog>
