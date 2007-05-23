@@ -32,24 +32,20 @@ public class ModifyColumnChange extends AbstractChange {
         this.column = column;
     }
 
-    private String[] generateStatements() {
-        return new String[]{"ALTER TABLE " + getTableName() + " MODIFY (" + getColumn().getName() + " " + getColumn().getType() + ")"};
-    }
-
     public String[] generateStatements(MSSQLDatabase database) {
-        return generateStatements();
+        return new String[]{"ALTER TABLE " + getTableName() + " ALTER COLUMN " + getColumn().getName() + " " + getColumn().getType()};
     }
 
     public String[] generateStatements(OracleDatabase database) {
-        return generateStatements();
+        return new String[]{"ALTER TABLE " + getTableName() + " MODIFY (" + getColumn().getName() + " " + getColumn().getType() + ")"};
     }
 
     public String[] generateStatements(MySQLDatabase database) {
-        return generateStatements();
+        return new String[]{"ALTER TABLE " + getTableName() + " MODIFY COLUMN " + getColumn().getName() + " " + getColumn().getType()};
     }
 
     public String[] generateStatements(PostgresDatabase database) {
-        return generateStatements();
+        return new String[]{"ALTER TABLE " + getTableName() + " ALTER COLUMN " + getColumn().getName() + " TYPE " + getColumn().getType()};
     }
 
     public String getConfirmationMessage() {

@@ -275,6 +275,11 @@
         <dropUniqueConstraint tableName="address" constraintName="uq_address_line1line2"/>
     </changeSet>
 
+    <changeSet id="50" author="nvoxland">
+        <modifyColumn tableName="address">
+            <column name="postalcode" type="varchar(20)"/>
+        </modifyColumn>
+    </changeSet>    
 
     <include file="changelogs/oracle/complete/included.changelog.xml"/>
 

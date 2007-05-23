@@ -274,6 +274,12 @@
         </createTable>
     </changeSet>
 
+    <changeSet id="50" author="nvoxland">
+        <modifyColumn tableName="address">
+            <column name="postalcode" type="varchar(20)"/>
+        </modifyColumn>
+    </changeSet>
+    
     <include file="changelogs/mysql/complete/included.changelog.xml"/>
 
     <include file="changelogs/mysql/complete/renamed.changelog.xml"/>

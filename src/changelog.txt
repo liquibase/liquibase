@@ -1,6 +1,10 @@
 LiquiBASE Changelog
 ==========================================
 
+Changes in version 0.9.1 (2007.5.23)
+------------------------------------
+- Bug fixes
+
 Changes in version 0.9.0 (2007.5.14)
 ------------------------------------
 - Rollback support
