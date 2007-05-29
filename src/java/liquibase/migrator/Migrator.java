@@ -510,7 +510,7 @@ public class Migrator {
             return ChangeSet.RunStatus.NOT_RAN;
         } else {
             if (foundRan.getMd5sum() == null) {
-                log.info("Updating NULL md5sum for " + this.toString());
+                log.info("Updating NULL md5sum for " + changeSet.toString());
                 Migrator migrator = changeSet.getDatabaseChangeLog().getMigrator();
                 Connection connection = migrator.getDatabase().getConnection();
                 PreparedStatement updatePstmt = connection.prepareStatement("update DatabaseChangeLog set md5sum=? where id=? AND author=? AND filename=?".toUpperCase());
@@ -531,7 +531,7 @@ public class Migrator {
                     if (changeSet.shouldRunOnChange()) {
                         return ChangeSet.RunStatus.RUN_AGAIN;
                     } else {
-                        throw new DatabaseHistoryException("MD5 Check for " + toString() + " failed");
+                        throw new DatabaseHistoryException("MD5 Check for " + changeSet.toString() + " failed");
                     }
                 }
             }
