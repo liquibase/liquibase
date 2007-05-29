@@ -5,6 +5,9 @@ import liquibase.migrator.Migrator;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Class for controling "or" logic in preconditions.
+ */
 public class OrPrecondition implements PreconditionLogic {
     private List<DBMSPrecondition> dbmsArray = new ArrayList<DBMSPrecondition>();
 

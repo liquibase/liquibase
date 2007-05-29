@@ -8,6 +8,9 @@ import liquibase.migrator.UnsupportedChangeException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+/**
+ * Creates a new sequence.
+ */
 public class CreateSequenceChange extends AbstractChange {
 
     private String sequenceName;

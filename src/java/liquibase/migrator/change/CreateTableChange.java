@@ -8,6 +8,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+/**
+ * Creates a new table.
+ */
 public class CreateTableChange extends AbstractChange {
 
     private List<ColumnConfig> columns;

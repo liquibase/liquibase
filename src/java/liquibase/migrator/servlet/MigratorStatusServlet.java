@@ -13,6 +13,9 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 
+/**
+ * Servlet that can be registered via web.xml to view the log of the LiquiBase run from the ServletMigrator.
+ */
 public class MigratorStatusServlet extends HttpServlet {
 
     private static List<LogRecord> migratorRunLog = new ArrayList<LogRecord>();

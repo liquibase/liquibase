@@ -1,6 +1,6 @@
 package liquibase.migrator.change;
 
-import liquibase.StreamUtil;
+import liquibase.util.StreamUtil;
 import liquibase.database.*;
 import liquibase.migrator.MD5Util;
 import liquibase.migrator.Migrator;
@@ -19,9 +19,36 @@ import java.util.*;
 import java.util.logging.Logger;
 
 /**
- * This is an abstract class, other concrete classes extend this class to provide
- * the implementation of the executeStatement according to their usage. This class
- * knows about which database the statements should be executed against.
+ * Base class all changes (refactorings) implement.
+ * <p>
+ * <b>How changes are constructed and run when reading changelogs:</b>
+ * <ol>
+ *      <li>As the changelog handler gets to each element inside a changeSet, it passes the tag name to {@link liquibase.migrator.change.ChangeFactory}
+ *      which looks through all the registered changes until it finds one with matching specified tag name</li>
+ *      <li>The ChangeFactory then constructs a new instance of the change</li>
+ *      <li>For each attribute in the XML node, reflection is used to call a corresponding set* method on the change class</li>
+ *      <li>The correct generateStatements(*) method is called for the current database</li>
+ * </ol>
+ * <p>
+ * <b>To implement a new change:</b>
+ * <ol>
+ *      <li>Create a new class that extends AbstractChange</li>
+ *      <li>Implement the abstract generateStatements(*) methods which return the correct SQL calls for each database</li>
+ *      <li>Implement the createMessage() method to create a descriptive message for logs and dialogs
+ *      <li>Implement the createNode() method to generate an XML element based on the values in this change</li>
+ *      <li>Add the new class to the {@link liquibase.migrator.change.ChangeFactory}</li>
+ * </ol>
+ * <p><b>Implementing automatic rollback support</b><br><br>
+ * The easiest way to allow automatic rollback support is by overriding the createInverses() method.
+ * If there are no corresponding inverse changes, you can override the generateRollbackStatements(*) and canRollBack() methods.
+ * <p>
+ * <b>Notes for generated SQL:</b><br>
+ * Because migration and rollback scripts can be generated for execution at a different time, or against a different database,
+ * changes you implement cannot directly reference data in the database.  For example, you cannot implement a change that selects
+ * all rows from a database and modifies them based on the primary keys you find because when the SQL is actually run, those rows may not longer
+ * exist and/or new rows may have been added.
+ * <p>
+ * We chose the name "change" over "refactoring" because changes will sometimes change functionality whereas true refactoring will not.
  */
 public abstract class AbstractChange {
 

@@ -14,6 +14,10 @@ import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ * Base SAX Handler for all modes of reading change logs.  This class is subclassed depending on
+ * how the change log should be read (for migration, for rollback, etc).
+ */
 public abstract class BaseChangeLogHandler extends DefaultHandler {
 
     protected Migrator migrator;

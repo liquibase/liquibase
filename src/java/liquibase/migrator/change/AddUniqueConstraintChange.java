@@ -8,6 +8,9 @@ import liquibase.migrator.UnsupportedChangeException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+/**
+ * Adds a unique constraint to an existing column.
+ */
 public class AddUniqueConstraintChange extends AbstractChange {
 
     private String tableName;

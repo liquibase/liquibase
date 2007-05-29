@@ -7,6 +7,9 @@ import liquibase.database.PostgresDatabase;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+/**
+ * Drops a not-null constraint from an existing column.
+ */
 public class DropNotNullConstraintChange extends AbstractChange {
     private String tableName;
     private String columnName;

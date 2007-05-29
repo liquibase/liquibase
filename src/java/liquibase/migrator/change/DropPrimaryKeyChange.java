@@ -8,6 +8,9 @@ import liquibase.migrator.UnsupportedChangeException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+/**
+ * Removes an existing primary key.
+ */
 public class DropPrimaryKeyChange extends AbstractChange {
     private String tableName;
     private String constraintName;

@@ -1,6 +1,6 @@
 package liquibase.migrator;
 
-import liquibase.StreamUtil;
+import liquibase.util.StreamUtil;
 import liquibase.database.*;
 import org.xml.sax.*;
 
@@ -16,6 +16,20 @@ import java.util.*;
 import java.util.Date;
 import java.util.logging.Logger;
 
+/**
+ * Core class of the LiquiBase migrator.
+ * Although there are several ways of executing LiquiBase (Ant, command line, etc.) they are all wrappers around this class.
+ * <p>
+ * <b>Using Migrator directly</b>
+ * <ol>
+ *      <li>Construct an instance of Migrator passing in the changelog file and file opener.</li>
+ *      <li>Call migrator.init(connection)</li>
+ *      <li>Set any contexts with the setContexts() method</li>
+ *      <li>Set the execution mode with setMode()</li>
+ *      <li>Call migrate()</li>
+ * </ol>
+ *
+ */
 public class Migrator {
     // These modes tell the program whether to execute the statements against the database
     // Or to output them in some file to be ran later manually

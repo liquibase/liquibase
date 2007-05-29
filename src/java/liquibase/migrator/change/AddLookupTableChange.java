@@ -9,6 +9,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * Extracts data from an existing column to create a lookup table.
+ * A foreign key is created between the old column and the new lookup table.
+ */
 public class AddLookupTableChange extends AbstractChange {
 
     private String existingTableName;

@@ -1,7 +1,7 @@
 package liquibase.migrator.change;
 
 import junit.framework.TestCase;
-import liquibase.StreamUtil;
+import liquibase.util.StreamUtil;
 import liquibase.database.MSSQLDatabase;
 import liquibase.database.MySQLDatabase;
 import liquibase.database.OracleDatabase;

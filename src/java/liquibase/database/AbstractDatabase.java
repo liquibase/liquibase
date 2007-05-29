@@ -1,6 +1,6 @@
 package liquibase.database;
 
-import liquibase.StreamUtil;
+import liquibase.util.StreamUtil;
 import liquibase.migrator.DatabaseChangeLogLock;
 import liquibase.migrator.MigrationFailedException;
 import liquibase.migrator.Migrator;
@@ -16,9 +16,9 @@ import java.util.Set;
 import java.util.logging.Logger;
 
 /**
- * This is an abstract class used to abstract the methods supported by all the
- * databases. This class is extended by all the supporting databases and the methods
- * are overridden.
+ * AbstractDatabase is extended by all supported databases as a facade to the underlying database.
+ * The physical connectaion can be retrieved from the AbstractDatabase implementation, as well as any
+ * database-specific characteristics such as the datatype for "boolean" fields.
  */
 public abstract class AbstractDatabase {
 

@@ -8,6 +8,9 @@ import java.sql.Statement;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * Encapsulates PostgreSQL database support.
+ */
 public class PostgresDatabase extends AbstractDatabase {
     public static final String PRODUCT_NAME = "PostgreSQL";
 

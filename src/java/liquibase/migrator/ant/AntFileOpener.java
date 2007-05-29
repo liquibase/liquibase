@@ -10,6 +10,9 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.Enumeration;
 
+/**
+ * An implementation of FileOpener that is specific to how Ant works.
+ */
 public class AntFileOpener implements FileOpener {
     private AntClassLoader loader;
 

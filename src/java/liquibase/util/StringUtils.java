@@ -1,5 +1,8 @@
 package liquibase.util;
 
+/**
+ * Various utility methods for working with strings.
+ */
 public class StringUtils {
     public static String trimToEmpty(String string) {
         if (string == null) {

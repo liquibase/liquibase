@@ -1,6 +1,6 @@
 package liquibase.migrator.ant;
 
-import liquibase.StreamUtil;
+import liquibase.util.StreamUtil;
 import liquibase.migrator.MigrationFailedException;
 import liquibase.migrator.Migrator;
 import org.apache.tools.ant.BuildException;
@@ -8,6 +8,9 @@ import org.apache.tools.ant.BuildException;
 import javax.swing.*;
 import java.sql.SQLException;
 
+/**
+ * Ant task for migrating a database forward.
+ */
 public class DatabaseMigratorTask extends BaseLiquibaseTask {
     private boolean dropFirst = false;
     private String contexts;

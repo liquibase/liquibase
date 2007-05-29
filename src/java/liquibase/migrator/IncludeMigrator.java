@@ -6,6 +6,9 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * Subclass of {@link Migrator} for running included change logs.
+ */
 public class IncludeMigrator extends Migrator {
     private Migrator parentMigrator;
 

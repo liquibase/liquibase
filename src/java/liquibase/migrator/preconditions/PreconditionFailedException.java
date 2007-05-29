@@ -1,5 +1,8 @@
 package liquibase.migrator.preconditions;
 
+/**
+ * Thrown when a precondition failed.
+ */
 public class PreconditionFailedException extends Exception {
     public PreconditionFailedException() {
     }

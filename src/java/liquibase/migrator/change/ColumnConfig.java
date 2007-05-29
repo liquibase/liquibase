@@ -7,7 +7,7 @@ import org.w3c.dom.Element;
 /**
  * This class is the representation of the column tag in the XMl file
  * It has a reference to the Constraints object for getting information
- * about the columns constraints
+ * about the columns constraints.
  */
 public class ColumnConfig {
     private String name;

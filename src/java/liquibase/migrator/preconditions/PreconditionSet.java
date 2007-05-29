@@ -5,6 +5,9 @@ import liquibase.migrator.Migrator;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Container class for all preconditions on a change log.
+ */
 public class PreconditionSet {
 
     private List<DBMSPrecondition> dbmsArray = new ArrayList<DBMSPrecondition>();
@@ -108,7 +111,7 @@ public class PreconditionSet {
                     userExistsReturnValue = true;
                 } else {
                     userExistsReturnValue = false;
-                    exceptionMsg = "UserExists Precondition failed";
+                    exceptionMsg = "rnningAs Precondition failed";
                 }
 
             }

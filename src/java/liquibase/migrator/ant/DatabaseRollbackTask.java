@@ -6,6 +6,9 @@ import org.apache.tools.ant.BuildException;
 import java.sql.SQLException;
 import java.util.Date;
 
+/**
+ * Ant task for rolling back a database.
+ */
 public class DatabaseRollbackTask extends BaseLiquibaseTask {
 
     private Date rollbackDate;

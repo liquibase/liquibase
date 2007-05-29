@@ -8,6 +8,9 @@ import liquibase.migrator.UnsupportedChangeException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+/**
+ * Drops an existing view.
+ */
 public class DropViewChange extends AbstractChange {
     private String viewName;
 

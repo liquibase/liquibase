@@ -8,6 +8,9 @@ import liquibase.migrator.UnsupportedChangeException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+/**
+ * Creats a new view.
+ */
 public class CreateViewChange extends AbstractChange {
 
     private String viewName;

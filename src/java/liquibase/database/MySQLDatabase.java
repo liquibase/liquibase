@@ -5,6 +5,9 @@ import liquibase.migrator.change.DropForeignKeyConstraintChange;
 
 import java.sql.*;
 
+/**
+ * Encapsulates MySQL database support.
+ */
 public class MySQLDatabase extends AbstractDatabase {
     public static final String PRODUCT_NAME = "MySQL";
 

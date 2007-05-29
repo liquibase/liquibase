@@ -7,6 +7,9 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.Enumeration;
 
+/**
+ * Implementation of {@link liquibase.migrator.FileOpener} for the command line migrator.
+ */
 public class CommandLineFileOpener implements FileOpener {
     private ClassLoader loader;
 

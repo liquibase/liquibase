@@ -8,6 +8,9 @@ import liquibase.migrator.UnsupportedChangeException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+/**
+ * Creates a primary key out of an existing column or set of columns.
+ */
 public class AddPrimaryKeyChange extends AbstractChange {
 
     private String tableName;

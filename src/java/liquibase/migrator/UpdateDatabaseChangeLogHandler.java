@@ -1,6 +1,6 @@
 package liquibase.migrator;
 
-import liquibase.StreamUtil;
+import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
 
 import java.io.IOException;
@@ -10,6 +10,9 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Set;
 
+/**
+ * An implementation of {@link BaseChangeLogHandler} for generating statements to update a database. 
+ */
 public class UpdateDatabaseChangeLogHandler extends BaseChangeLogHandler {
 
     public UpdateDatabaseChangeLogHandler(Migrator migrator, String physicalFilePath) {

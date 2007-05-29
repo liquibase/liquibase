@@ -7,6 +7,9 @@ import java.sql.*;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * Encapsulates MS-SQL database support.
+ */
 public class MSSQLDatabase extends AbstractDatabase {
     public static final String PRODUCT_NAME = "Microsoft SQL Server";
     private Set<String> systemTablesAndViews = new HashSet<String>();

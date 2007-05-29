@@ -1,6 +1,6 @@
 package liquibase.migrator;
 
-import liquibase.StreamUtil;
+import liquibase.util.StreamUtil;
 import liquibase.migrator.preconditions.PreconditionFailedException;
 
 import java.io.IOException;
@@ -12,6 +12,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * An implementation of {@link BaseChangeLogHandler} for generating rollback statements.
+ */
 public class RollbackDatabaseChangeLogHandler extends BaseChangeLogHandler {
     private List<RanChangeSet> ranChangesToRollback;
     private List<ChangeSet> allChangeSets;

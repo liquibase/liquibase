@@ -11,6 +11,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+/**
+ * Creates an index on an existing column.
+ */
 public class CreateIndexChange extends AbstractChange {
 
     private String tableName;

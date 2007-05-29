@@ -8,6 +8,11 @@ import liquibase.migrator.UnsupportedChangeException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+/**
+ * Makes an existing column into an auto-increment column.
+ * This change is only valid for databases with auto-increment/identity columns.
+ * The current version does not support MS-SQL.
+ */
 public class AddAutoIncrementChange extends AbstractChange {
 
     private String tableName;

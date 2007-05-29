@@ -5,6 +5,9 @@ import liquibase.migrator.Migrator;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Class for controling "not" logic in preconditions.
+ */
 public class NotPrecondition implements PreconditionLogic {
     private List<DBMSPrecondition> dbmsArray = new ArrayList<DBMSPrecondition>();
     private OrPrecondition orprecondition;

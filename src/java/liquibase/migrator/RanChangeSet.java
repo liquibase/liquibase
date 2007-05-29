@@ -2,6 +2,9 @@ package liquibase.migrator;
 
 import java.util.Date;
 
+/**
+ * Encapsulates information about a previously-ran change set.  Used to build rollback statements. 
+ */
 public class RanChangeSet {
     private String changeLog;
     private String id;

@@ -8,6 +8,9 @@ import liquibase.migrator.UnsupportedChangeException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+/**
+ * Removes the default value from an existing column.
+ */
 public class DropDefaultValueChange extends AbstractChange {
     private String tableName;
     private String columnName;

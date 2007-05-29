@@ -1,5 +1,8 @@
-package liquibase;
+package liquibase.util;
 
+/**
+ * Utilities for working with streams.
+ */
 public class StreamUtil {
 
     public static String getLineSeparator() {

@@ -5,6 +5,9 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.Enumeration;
 
+/**
+ * Abstracts file access so they can be read in a variety of manners.
+ */
 public interface FileOpener {
     public InputStream getResourceAsStream(String file) throws IOException;
 

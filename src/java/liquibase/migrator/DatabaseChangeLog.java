@@ -2,6 +2,9 @@ package liquibase.migrator;
 
 import liquibase.migrator.preconditions.PreconditionSet;
 
+/**
+ * Encapsulates the information stored in the change log XML file.
+ */
 public class DatabaseChangeLog {
     private Migrator migrator;
     private PreconditionSet preconditions;

@@ -1,6 +1,6 @@
 package liquibase.migrator.commandline;
 
-import liquibase.StreamUtil;
+import liquibase.util.StreamUtil;
 import liquibase.migrator.DatabaseChangeLogLock;
 import liquibase.migrator.MigrationFailedException;
 import liquibase.migrator.Migrator;
@@ -20,6 +20,9 @@ import java.util.jar.JarFile;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ * Class for executing LiquiBase via the command line.
+ */
 public class CommandLineMigrator {
     protected ClassLoader classLoader;
 

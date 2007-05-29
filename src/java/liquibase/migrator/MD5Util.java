@@ -2,6 +2,9 @@ package liquibase.migrator;
 
 import java.security.MessageDigest;
 
+/**
+ * Generates md5-sums based on a string.
+ */
 public class MD5Util {
     public static String computeMD5(String input) {
         MessageDigest digest;

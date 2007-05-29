@@ -10,6 +10,9 @@ import org.w3c.dom.Element;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Adds a not-null constraint to an existing column.
+ */
 public class AddNotNullConstraintChange extends AbstractChange {
     private String tableName;
     private String columnName;

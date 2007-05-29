@@ -4,6 +4,9 @@ import liquibase.database.*;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+/**
+ * Adds a column to an existing table.
+ */
 public class AddColumnChange extends AbstractChange {
 
     private String tableName;

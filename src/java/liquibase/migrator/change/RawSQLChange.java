@@ -7,6 +7,10 @@ import liquibase.database.PostgresDatabase;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+/**
+ * Allows execution of arbitrary SQL.  This change can be used when existing changes are either don't exist,
+ * are not flexible enough, or buggy. 
+ */
 public class RawSQLChange extends AbstractChange {
 
     private String comment;

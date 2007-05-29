@@ -8,7 +8,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 /**
- * This class is responsible for renaming the columns in a particular table.
+ * Renames an existing column.
  */
 public class RenameColumnChange extends AbstractChange {
     private String tableName;

@@ -5,6 +5,9 @@ import org.xml.sax.InputSource;
 
 import java.io.IOException;
 
+/**
+ * Finds the LiquiBase schema from the classpath rather than fetching it over the Internet. 
+ */
 public class MigratorSchemaResolver implements EntityResolver {
     private static final String XSD_NAME = "dbchangelog-1.0.xsd";
 

@@ -17,6 +17,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
+/**
+ * Base class for all Ant LiquiBase tasks.  This class sets up the migrator and defines parameters
+ * that are common to all tasks.
+ */
 public class BaseLiquibaseTask extends Task {
     private String changeLogFile;
     private String driver;

@@ -8,7 +8,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 /**
- * This class is responsible for dropping a particular column in the specified table
+ * Drops an existing column from a table.
  */
 public class DropColumnChange extends AbstractChange {
 

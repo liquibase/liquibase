@@ -7,6 +7,9 @@ import liquibase.database.PostgresDatabase;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+/**
+ * Sets a new default value to an existing column.
+ */
 public class AddDefaultValueChange extends AbstractChange {
     private String tableName;
     private String columnName;

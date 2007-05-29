@@ -7,6 +7,9 @@ import liquibase.database.PostgresDatabase;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+/**
+ * Renames an existing table.
+ */
 public class RenameTableChange extends AbstractChange {
     private String oldTableName;
     private String newTableName;

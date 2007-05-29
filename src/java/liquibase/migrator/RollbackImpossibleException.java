@@ -1,5 +1,8 @@
 package liquibase.migrator;
 
+/**
+ * Thrown if a change is encountered that cannot be rolled back.
+ */
 public class RollbackImpossibleException extends Exception {
     public RollbackImpossibleException() {
     }

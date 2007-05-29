@@ -7,6 +7,9 @@ import liquibase.database.PostgresDatabase;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+/**
+ * Modifies the data type of an existing column.
+ */
 public class ModifyColumnChange extends AbstractChange {
 
     private String tableName;

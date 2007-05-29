@@ -7,6 +7,9 @@ import liquibase.database.PostgresDatabase;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+/**
+ * Renames an existing view.
+ */
 public class RenameViewChange extends AbstractChange {
     private String oldViewName;
     private String newViewName;

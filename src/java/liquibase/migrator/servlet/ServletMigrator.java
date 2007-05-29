@@ -15,6 +15,13 @@ import java.util.logging.Handler;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
+/**
+ * Servlet listener than can be added to web.xml to allow LiquiBase to run on every application server startup.
+ * Using this listener allows users to know that they always have the most up to date database, although it will
+ * slow down application server startup slightly.
+ * See the <a href="http://www.liquibase.org/manual/latest/servlet_listener_migrator.html">LiquiBase documentation</a> for
+ * more information.
+ */
 public class ServletMigrator implements ServletContextListener {
 
     private String migrationFile;

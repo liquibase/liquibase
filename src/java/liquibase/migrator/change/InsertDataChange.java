@@ -12,9 +12,7 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * This class will handle the insert statements encountered in the xml file.
- * It will also execute the statements against the specified database or provide
- * the String representation of the insert refactoring for the specified database.
+ * Inserts data into an existing table.
  */
 public class InsertDataChange extends AbstractChange {
 

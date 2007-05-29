@@ -8,8 +8,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 /**
- * This class will handle all the database related tasks for the Oracle database. This class has
- * the methods to generate the statements specific for the oracle database.
+ * Encapsulates Oracle database support.
  */
 public class OracleDatabase extends AbstractDatabase {
     public static final String PRODUCT_NAME = "oracle";

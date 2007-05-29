@@ -1,6 +1,6 @@
 package liquibase.migrator;
 
-import liquibase.StreamUtil;
+import liquibase.util.StreamUtil;
 import liquibase.migrator.change.AbstractChange;
 import liquibase.util.StringUtils;
 import org.w3c.dom.Document;
@@ -18,10 +18,7 @@ import java.util.List;
 import java.util.logging.Logger;
 
 /**
- * This class will serve the purpose of keeping track of the statements.
- * When statements element is encountered in the XML file, this class will
- * be invoked and the child elements of the statements tag will be added to
- * the arraylist as Statement objects.
+ * Encapsulates a changeSet and all its associated changes.
  */
 public class ChangeSet {
 

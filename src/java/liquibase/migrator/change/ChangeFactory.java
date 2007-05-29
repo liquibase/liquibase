@@ -3,6 +3,11 @@ package liquibase.migrator.change;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Factory class for constructing the correct {@link AbstractChange} implementation based on the tag name.
+ * It is currently implemented by a static array of AbstractChange implementations, although that may change in
+ * later revisions.
+ */
 public class ChangeFactory {
 
     private Map<String, Class> tagToClassMap;

@@ -4,6 +4,9 @@ import liquibase.migrator.Migrator;
 
 import java.sql.SQLException;
 
+/**
+ * Precondition that checks the name of the user executing the change log.
+ */
 public class RunningAsPrecondition implements Precondition {
 
     private String username;

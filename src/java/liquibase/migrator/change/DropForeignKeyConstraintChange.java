@@ -8,6 +8,9 @@ import liquibase.migrator.UnsupportedChangeException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+/**
+ * Drops an existing foreign key constraint.
+ */
 public class DropForeignKeyConstraintChange extends AbstractChange {
     private String baseTableName;
     private String constraintName;

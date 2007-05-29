@@ -2,6 +2,10 @@ package liquibase.migrator;
 
 import java.util.Date;
 
+/**
+ * Information about the database changelog lock which allows only one instance of LiquiBase to attempt to
+ * update a database at a time.
+ */
 public class DatabaseChangeLogLock {
     private int id;
     private Date lockGranted;

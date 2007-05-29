@@ -7,6 +7,9 @@ import liquibase.database.PostgresDatabase;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+/**
+ * Drops an existing table.
+ */
 public class DropTableChange extends AbstractChange {
 
     private String tableName;

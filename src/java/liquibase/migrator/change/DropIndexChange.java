@@ -7,6 +7,9 @@ import liquibase.database.PostgresDatabase;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+/**
+ * Drops an existing index.
+ */
 public class DropIndexChange extends AbstractChange {
 
     private String indexName;

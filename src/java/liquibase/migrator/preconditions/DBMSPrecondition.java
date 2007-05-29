@@ -10,6 +10,10 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Precondition for specifying the type of database (oracle, mysql, etc.).
+ */
+
 public class DBMSPrecondition implements Precondition {
     private String type;
     private Map<String, String> productToTypeMap;
