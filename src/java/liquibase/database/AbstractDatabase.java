@@ -18,7 +18,7 @@ import java.util.logging.Logger;
 /**
  * This is an abstract class used to abstract the methods supported by all the
  * databases. This class is extended by all the supporting databases and the methods
- * are overriden.
+ * are overridden.
  */
 public abstract class AbstractDatabase {
 
@@ -428,7 +428,7 @@ public abstract class AbstractDatabase {
                     throw new MigrationFailedException("Did not update change log lock correctly");
                 }
                 conn.commit();
-                log.info("Successfully aquired change log lock");
+                log.info("Successfully acquired change log lock");
                 return true;
             }
         } catch (Exception e) {
