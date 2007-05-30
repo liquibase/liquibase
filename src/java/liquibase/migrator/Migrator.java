@@ -10,6 +10,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Writer;
 import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.sql.*;
 import java.text.DateFormat;
 import java.util.*;
@@ -72,12 +74,29 @@ public class Migrator {
         this.migrationFile = migrationFile;
         this.fileOpener = fileOpener;
         SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
-        saxParserFactory.setValidating(true);
-        saxParserFactory.setNamespaceAware(true);
+        if (System.getProperty("java.vm.version").startsWith("1.4")) {
+            saxParserFactory.setValidating(false);
+            saxParserFactory.setNamespaceAware(false);
+        } else {
+            saxParserFactory.setValidating(true);
+            saxParserFactory.setNamespaceAware(true);
+        }
         try {
             SAXParser parser = saxParserFactory.newSAXParser();
-            parser.setProperty("http://java.sun.com/xml/jaxp/properties/schemaLanguage", "http://www.w3.org/2001/XMLSchema");
-            parser.setProperty("http://java.sun.com/xml/jaxp/properties/schemaSource", getClass().getClassLoader().getResource("liquibase/dbchangelog-1.0.xsd").toURI().toString());
+            try {
+                parser.setProperty("http://java.sun.com/xml/jaxp/properties/schemaLanguage", "http://www.w3.org/2001/XMLSchema");
+            } catch (SAXNotRecognizedException e) {
+                ; //ok, parser must not support it
+            } catch (SAXNotSupportedException e) {
+                ; //ok, parser must not support it
+            }
+            try {
+                parser.setProperty("http://java.sun.com/xml/jaxp/properties/schemaSource", new URI(getClass().getClassLoader().getResource("liquibase/dbchangelog-1.0.xsd").toExternalForm()).toString());
+            } catch (SAXNotRecognizedException e) {
+                ; //ok, parser must not support it
+            } catch (SAXNotSupportedException e) {
+                ; //ok, parser must not support it
+            }
             xmlReader = parser.getXMLReader();
             xmlReader.setEntityResolver(new MigratorSchemaResolver());
             xmlReader.setErrorHandler(new ErrorHandler() {

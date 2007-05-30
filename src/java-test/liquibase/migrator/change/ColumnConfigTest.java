@@ -32,7 +32,7 @@ public class ColumnConfigTest extends TestCase {
         column.setValue("some value here");
 
         ConstraintsConfig constraints = new ConstraintsConfig();
-        constraints.setDeferrable(true);
+        constraints.setDeferrable(Boolean.TRUE);
         constraints.setDeleteCascade(true);
         constraints.setForeignKeyName("FK_NAME");
         constraints.setInitiallyDeferred(true);

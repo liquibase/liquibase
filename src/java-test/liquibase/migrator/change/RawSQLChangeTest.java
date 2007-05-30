@@ -1,6 +1,7 @@
 package liquibase.migrator.change;
 
 import liquibase.database.OracleDatabase;
+import liquibase.util.XMLUtil;
 import org.w3c.dom.Element;
 
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -32,6 +33,6 @@ public class RawSQLChangeTest extends AbstractChangeTest {
         Element element = refactoring.createNode(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument());
         assertEquals("sql", element.getTagName());
 
-        assertEquals("SOME SQL HERE", element.getTextContent());
+        assertEquals("SOME SQL HERE", XMLUtil.getTextContent(element));
     }
 }

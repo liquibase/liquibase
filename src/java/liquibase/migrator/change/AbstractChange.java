@@ -7,6 +7,7 @@ import liquibase.migrator.Migrator;
 import liquibase.migrator.RollbackImpossibleException;
 import liquibase.migrator.UnsupportedChangeException;
 import liquibase.util.StringUtils;
+import liquibase.util.XMLUtil;
 import org.w3c.dom.*;
 
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -224,7 +225,7 @@ public abstract class AbstractChange {
         for (Map.Entry entry : attributeMap.entrySet()) {
             buffer.append(" ").append(entry.getKey()).append("=\"").append(attributeMap.get(entry.getValue())).append("\"");
         }
-        buffer.append(">").append(StringUtils.trimToEmpty(node.getTextContent()));
+        buffer.append(">").append(StringUtils.trimToEmpty(XMLUtil.getTextContent(node)));
         NodeList childNodes = node.getChildNodes();
         for (int i = 0; i < childNodes.getLength(); i++) {
             Node childNode = childNodes.item(i);
