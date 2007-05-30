@@ -1,8 +1,0 @@
-<project name="liquibase" default="integration-build">
-    <property file="build.properties"/>
-    <property file="build.integration.properties"/>
-
-    <import file="build.xml" optional="false"/>
-
-   
-</project>
