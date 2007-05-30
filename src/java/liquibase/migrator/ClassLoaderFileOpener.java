@@ -6,7 +6,9 @@ import java.net.URL;
 import java.util.Enumeration;
 
 /**
- * An implementation of {@link FileOpener} that opens file from the class loader.
+ * An implementation of liquibase.migrator.FileOpener that opens file from the class loader.
+ *
+ * @see liquibase.migrator.FileOpener
  */
 public class ClassLoaderFileOpener implements FileOpener {
     public InputStream getResourceAsStream(String file) throws IOException {

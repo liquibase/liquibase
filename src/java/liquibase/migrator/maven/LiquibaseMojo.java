@@ -16,8 +16,6 @@ import java.util.Properties;
 
 /**
  * Runs the LiquiBase Migrator through Maven
- *
- * @goal migrate
  */
 public class LiquibaseMojo extends AbstractMojo {
     private String changeLogFile;

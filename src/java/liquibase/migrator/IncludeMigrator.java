@@ -7,7 +7,9 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Subclass of {@link Migrator} for running included change logs.
+ * Subclass of Migrator for running included change logs.
+ *
+ * @see Migrator
  */
 public class IncludeMigrator extends Migrator {
     private Migrator parentMigrator;

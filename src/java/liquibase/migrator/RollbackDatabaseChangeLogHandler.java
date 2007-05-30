@@ -13,7 +13,9 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * An implementation of {@link BaseChangeLogHandler} for generating rollback statements.
+ * An implementation of BaseChangeLogHandler for generating rollback statements.
+ *
+ * @see BaseChangeLogHandler
  */
 public class RollbackDatabaseChangeLogHandler extends BaseChangeLogHandler {
     private List<RanChangeSet> ranChangesToRollback;

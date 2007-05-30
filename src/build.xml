@@ -18,6 +18,7 @@
         <mkdir dir="${lib.deps.dir}"/>
         <mkdir dir="${reports.dir}"/>
         <mkdir dir="${reports.dir}/api"/>
+        <mkdir dir="${reports.dir}/doxygen"/>
 
         <!-- Build classpath -->
         <path id="classpath">
@@ -219,6 +220,9 @@
         <copy todir="${release.site.dir}/manual/latest/api">
             <fileset dir="${reports.dir}/api"/>
         </copy>
+        <copy todir="${release.site.dir}/manual/latest/doxygen">
+            <fileset dir="${reports.dir}/doxygen"/>
+        </copy>
 
         <zip destfile="${release.dir}/site-${build.version}.zip">
             <zipfileset dir="${release.site.dir}"/>
@@ -242,6 +246,24 @@
             <classpath refid="classpath"/>
             <bottom><![CDATA[<i>Copyright &#169; 2006-2007 Sundog. All Rights Reserved.</i>]]></bottom>
         </javadoc>
+    </target>
+
+    <target name="doxygen" depends="prepare">
+        <taskdef name="doxygen" classname="org.doxygen.tools.DoxygenTask">
+            <classpath>
+                <fileset dir="${lib.dir}">
+                    <include name="*.jar"/>
+                </fileset>
+                <fileset dir="${lib.compile.dir}">
+                    <include name="*.jar"/>
+                </fileset>
+                <fileset dir="${lib.14jvm.dir}">
+                    <include name="*.jar"/>
+                </fileset>
+            </classpath>
+        </taskdef>
+
+            <doxygen configFilename="${basedir}/../Doxyfile" />
     </target>
 
     <target name="junit" depends="prepare">
@@ -288,6 +310,7 @@
         <antcall target="compile" inheritAll="true" inheritRefs="true"/>
         <!--<antcall target="junit" inheritAll="true" inheritRefs="true"/>-->
         <antcall target="javadoc" inheritAll="true" inheritRefs="true"/>
+        <antcall target="doxygen" inheritAll="true" inheritRefs="true"/>
         <antcall target="site" inheritAll="true" inheritRefs="true"/>
         <antcall target="package" inheritAll="true" inheritRefs="true"/>
     </target>

@@ -11,7 +11,9 @@ import java.sql.Statement;
 import java.util.Set;
 
 /**
- * An implementation of {@link BaseChangeLogHandler} for generating statements to update a database. 
+ * An implementation of BaseChangeLogHandler for generating statements to update a database.
+ *
+ * @see BaseChangeLogHandler 
  */
 public class UpdateDatabaseChangeLogHandler extends BaseChangeLogHandler {
 

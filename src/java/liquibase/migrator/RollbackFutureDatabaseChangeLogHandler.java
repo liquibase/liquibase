@@ -12,7 +12,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * An implementation of {@link BaseChangeLogHandler} for generating rollback statements of not-yet-ran changes. 
+ * An implementation of BaseChangeLogHandler for generating rollback statements of not-yet-ran changes.
+ *
+ * @see BaseChangeLogHandler 
  */
 public class RollbackFutureDatabaseChangeLogHandler extends BaseChangeLogHandler {
     private List<ChangeSet> changesToRollback;
