@@ -71,8 +71,8 @@ public class DropPrimaryKeyChange extends AbstractChange {
         return "Primary Key Dropped";
     }
 
-    public Element createNode(Document currentMigrationFileDOM) {
-        Element node = currentMigrationFileDOM.createElement(getTagName());
+    public Element createNode(Document currentChangeLogFileDOM) {
+        Element node = currentChangeLogFileDOM.createElement(getTagName());
         node.setAttribute("tableName", getTableName());
         return node;
     }

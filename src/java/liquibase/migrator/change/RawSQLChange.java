@@ -60,9 +60,9 @@ public class RawSQLChange extends AbstractChange {
         return "Custom SQL has been executed";
     }
 
-    public Element createNode(Document currentMigrationFileDOM) {
-        Element sqlElement = currentMigrationFileDOM.createElement("sql");
-        sqlElement.appendChild(currentMigrationFileDOM.createTextNode(getSql()));
+    public Element createNode(Document currentChangeLogFileDOM) {
+        Element sqlElement = currentChangeLogFileDOM.createElement("sql");
+        sqlElement.appendChild(currentChangeLogFileDOM.createTextNode(getSql()));
 
         return sqlElement;
     }

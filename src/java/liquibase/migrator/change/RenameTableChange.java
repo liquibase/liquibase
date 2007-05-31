@@ -64,8 +64,8 @@ public class RenameTableChange extends AbstractChange {
         return "Table with the name " + oldTableName + " has been renamed to " + newTableName;
     }
 
-    public Element createNode(Document currentMigrationFileDOM) {
-        Element element = currentMigrationFileDOM.createElement("renameTable");
+    public Element createNode(Document currentChangeLogFileDOM) {
+        Element element = currentChangeLogFileDOM.createElement("renameTable");
         element.setAttribute("oldTableName", getOldTableName());
         element.setAttribute("newTableName", getNewTableName());
 

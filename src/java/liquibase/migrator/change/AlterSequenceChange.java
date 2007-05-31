@@ -109,8 +109,8 @@ public class AlterSequenceChange extends AbstractChange {
         return "Sequence " + sequenceName + " has been altered";
     }
 
-    public Element createNode(Document currentMigrationFileDOM) {
-        Element node = currentMigrationFileDOM.createElement("alterSequence");
+    public Element createNode(Document currentChangeLogFileDOM) {
+        Element node = currentChangeLogFileDOM.createElement("alterSequence");
         node.setAttribute("sequenceName", getSequenceName());
         if (getMinValue() != null) {
             node.setAttribute("minValue", getMinValue().toString());

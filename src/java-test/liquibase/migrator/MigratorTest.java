@@ -7,7 +7,6 @@ import liquibase.database.OracleDatabase;
 import liquibase.database.PostgresDatabase;
 import static org.easymock.classextension.EasyMock.*;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.sql.Connection;
@@ -97,7 +96,7 @@ public class MigratorTest extends TestCase {
 //        expectLastCall();
 //        digester.push(null);
 //        expectLastCall();
-//        digester.push(migrator.getMigrationFile());
+//        digester.push(migrator.getChangeLogFile());
 //        expectLastCall();
 //        digester.push(Migrator.EXECUTE_MODE);
 //        expectLastCall();
@@ -131,7 +130,7 @@ public class MigratorTest extends TestCase {
 //
 //        digester.push(migrator);
 //        expectLastCall();
-//        digester.push(migrator.getMigrationFile());
+//        digester.push(migrator.getChangeLogFile());
 //        expectLastCall();
 //        digester.push(null);
 //        expectLastCall();
@@ -173,7 +172,7 @@ public class MigratorTest extends TestCase {
 //
 //        digester.push(migrator);
 //        expectLastCall();
-//        digester.push(migrator.getMigrationFile());
+//        digester.push(migrator.getChangeLogFile());
 //        expectLastCall();
 //        digester.push(Migrator.OUTPUT_SQL_MODE);
 //        expectLastCall();
@@ -199,7 +198,7 @@ public class MigratorTest extends TestCase {
 //
 //        writer.write("--------------------------------------------------------------------------------------\n");
 //        expectLastCall();
-//        writer.write("-- Migration file: "+migrator.getMigrationFile()+"\n");
+//        writer.write("-- Migration file: "+migrator.getChangeLogFile()+"\n");
 //        expectLastCall();
 //        writer.write("-- Run at: "+ DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(new Date())+"\n");
 //        expectLastCall();
@@ -223,7 +222,7 @@ public class MigratorTest extends TestCase {
         private AbstractDatabase database;
         private InputStream inputStream;
 
-        public TestMigrator() throws SQLException, MigrationFailedException {
+        public TestMigrator() {
             super("liquibase/test.xml", new ClassLoaderFileOpener());
             inputStream = createMock(InputStream.class);
             replay(inputStream);
@@ -232,11 +231,11 @@ public class MigratorTest extends TestCase {
         public AbstractDatabase getDatabase() {
             if (database == null) {
                 database = new OracleDatabase() {
-                    public String getConnectionURL() throws SQLException {
+                    public String getConnectionURL() {
                         return url;
                     }
 
-                    public String getConnectionUsername() throws SQLException {
+                    public String getConnectionUsername() {
                         return "testUser";
                     }
                 };
@@ -273,11 +272,11 @@ public class MigratorTest extends TestCase {
 
         public FileOpener getFileOpener() {
             return new FileOpener() {
-                public InputStream getResourceAsStream(String file) throws IOException {
+                public InputStream getResourceAsStream(String file) {
                     return inputStream;
                 }
 
-                public Enumeration<URL> getResources(String packageName) throws IOException {
+                public Enumeration<URL> getResources(String packageName) {
                     return null;
                 }
             };

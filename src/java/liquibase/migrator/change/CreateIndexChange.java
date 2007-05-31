@@ -101,13 +101,13 @@ public class CreateIndexChange extends AbstractChange {
         return "Index " + indexName + " has been created";
     }
 
-    public Element createNode(Document currentMigrationFileDOM) {
-        Element element = currentMigrationFileDOM.createElement("createIndex");
+    public Element createNode(Document currentChangeLogFileDOM) {
+        Element element = currentChangeLogFileDOM.createElement("createIndex");
         element.setAttribute("indexName", getIndexName());
         element.setAttribute("tableName", getTableName());
 
         for (ColumnConfig column : getColumns()) {
-            Element columnElement = currentMigrationFileDOM.createElement("column");
+            Element columnElement = currentChangeLogFileDOM.createElement("column");
             columnElement.setAttribute("name", column.getName());
             element.appendChild(columnElement);
         }

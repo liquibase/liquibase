@@ -55,8 +55,8 @@ public class DropIndexChange extends AbstractChange {
         return "Index " + getIndexName() + " dropped from table " + getTableName();
     }
 
-    public Element createNode(Document currentMigrationFileDOM) {
-        Element element = currentMigrationFileDOM.createElement("dropIndex");
+    public Element createNode(Document currentChangeLogFileDOM) {
+        Element element = currentChangeLogFileDOM.createElement("dropIndex");
         element.setAttribute("indexName", getIndexName());
         element.setAttribute("tableName", getTableName());
 

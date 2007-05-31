@@ -189,7 +189,7 @@ public abstract class AbstractChange {
         return tagName;
     }
 
-    public abstract Element createNode(Document currentMigrationFileDOM);
+    public abstract Element createNode(Document currentChangeLogDOM);
 
     public void saveStatement(AbstractDatabase database, Writer writer) throws IOException, UnsupportedChangeException {
         String[] statements = generateStatements(database);

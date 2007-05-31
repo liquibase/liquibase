@@ -98,12 +98,12 @@ public class InsertDataChange extends AbstractChange {
         return "New rows have been inserted into the table " + tableName;
     }
 
-    public Element createNode(Document currentMigrationFileDOM) {
-        Element node = currentMigrationFileDOM.createElement("insert");
+    public Element createNode(Document currentChangeLogFileDOM) {
+        Element node = currentChangeLogFileDOM.createElement("insert");
         node.setAttribute("tableName", getTableName());
 
         for (ColumnConfig col : getColumns()) {
-            Element subNode = col.createNode(currentMigrationFileDOM);
+            Element subNode = col.createNode(currentChangeLogFileDOM);
             node.appendChild(subNode);
         }
         return node;

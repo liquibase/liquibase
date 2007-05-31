@@ -70,8 +70,8 @@ public class AddAutoIncrementChange extends AbstractChange {
         return "Column Set as Auto-Increment";
     }
 
-    public Element createNode(Document currentMigrationFileDOM) {
-        Element node = currentMigrationFileDOM.createElement("addAutoIncrement");
+    public Element createNode(Document currentChangeLogFileDOM) {
+        Element node = currentChangeLogFileDOM.createElement("addAutoIncrement");
         node.setAttribute("tableName", getTableName());
         node.setAttribute("columnName", getColumnName());
 

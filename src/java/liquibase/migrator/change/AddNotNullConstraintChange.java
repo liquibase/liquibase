@@ -125,8 +125,8 @@ public class AddNotNullConstraintChange extends AbstractChange {
     }
 
 
-    public Element createNode(Document currentMigrationFileDOM) {
-        Element element = currentMigrationFileDOM.createElement("addNotNullConstraint");
+    public Element createNode(Document currentChangeLogFileDOM) {
+        Element element = currentChangeLogFileDOM.createElement("addNotNullConstraint");
         element.setAttribute("tableName", getTableName());
         element.setAttribute("columnName", getColumnName());
         element.setAttribute("defaultNullValue", getDefaultNullValue());

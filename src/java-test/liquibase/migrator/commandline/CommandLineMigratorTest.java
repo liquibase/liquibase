@@ -15,7 +15,7 @@ public class CommandLineMigratorTest extends TestCase {
                 "--username=USERNAME",
                 "--password=PASSWORD",
                 "--url=URL",
-                "--migrationFile=FILE",
+                "--changeLogFile=FILE",
                 "--classpath=CLASSPATH;CLASSPATH2",
                 "--contexts=CONTEXT1,CONTEXT2",
                 "--promptForNonLocalDatabase=true",
@@ -29,7 +29,7 @@ public class CommandLineMigratorTest extends TestCase {
         assertEquals("USERNAME", cli.username);
         assertEquals("PASSWORD", cli.password);
         assertEquals("URL", cli.url);
-        assertEquals("FILE", cli.migrationFile);
+        assertEquals("FILE", cli.changeLogFile);
         assertEquals("CLASSPATH;CLASSPATH2", cli.classpath);
         assertEquals("CONTEXT1,CONTEXT2", cli.contexts);
         assertEquals(Boolean.TRUE, cli.promptForNonLocalDatabase);
@@ -159,7 +159,7 @@ public class CommandLineMigratorTest extends TestCase {
         props.setProperty("username", "USERNAME");
         props.setProperty("password", "PASSWD");
         props.setProperty("url", "URL");
-        props.setProperty("migrationFile", "FILE");
+        props.setProperty("changeLogFile", "FILE");
         props.setProperty("classpath", "CLASSPAHT");
         props.setProperty("contexts", "CONTEXTS");
         props.setProperty("promptForNonLocalDatabase", "TRUE");
@@ -173,7 +173,7 @@ public class CommandLineMigratorTest extends TestCase {
         assertEquals("USERNAME", cli.username);
         assertEquals("PASSWD", cli.password);
         assertEquals("URL", cli.url);
-        assertEquals("FILE", cli.migrationFile);
+        assertEquals("FILE", cli.changeLogFile);
         assertEquals("CLASSPAHT", cli.classpath);
         assertEquals("CONTEXTS", cli.contexts);
         assertEquals(Boolean.TRUE, cli.promptForNonLocalDatabase);
@@ -191,7 +191,7 @@ public class CommandLineMigratorTest extends TestCase {
         props.setProperty("username", "USERNAME");
         props.setProperty("password", "PASSWD");
         props.setProperty("url", "URL");
-        props.setProperty("migrationFile", "FILE");
+        props.setProperty("changeLogFile", "FILE");
         props.setProperty("classpath", "CLASSPAHT");
         props.setProperty("contexts", "CONTEXTS");
         props.setProperty("promptForNonLocalDatabase", "TRUE");
@@ -205,7 +205,7 @@ public class CommandLineMigratorTest extends TestCase {
         assertEquals("PASSED USERNAME", cli.username);
         assertEquals("PASSED PASSWD", cli.password);
         assertEquals("URL", cli.url);
-        assertEquals("FILE", cli.migrationFile);
+        assertEquals("FILE", cli.changeLogFile);
         assertEquals("CLASSPAHT", cli.classpath);
         assertEquals("CONTEXTS", cli.contexts);
         assertEquals(Boolean.TRUE, cli.promptForNonLocalDatabase);
@@ -256,7 +256,7 @@ public class CommandLineMigratorTest extends TestCase {
         cli.username = "username";
         cli.password = "pwd";
         cli.url = "url";
-        cli.migrationFile = "file";
+        cli.changeLogFile = "file";
         cli.classpath = "classpath";
 
         assertFalse(cli.checkSetup());
@@ -288,7 +288,7 @@ public class CommandLineMigratorTest extends TestCase {
                 "--username=USERNAME",
                 "--password=PASSWORD",
                 "--url=URL",
-                "--migrationFile=FILE",
+                "--changeLogFile=FILE",
                 "--classpath=CLASSPATH;CLASSPATH2",
                 "--contexts=CONTEXT1,CONTEXT2",
                 "tag", "TagHere"
@@ -301,7 +301,7 @@ public class CommandLineMigratorTest extends TestCase {
         assertEquals("USERNAME", cli.username);
         assertEquals("PASSWORD", cli.password);
         assertEquals("URL", cli.url);
-        assertEquals("FILE", cli.migrationFile);
+        assertEquals("FILE", cli.changeLogFile);
         assertEquals("CLASSPATH;CLASSPATH2", cli.classpath);
         assertEquals("CONTEXT1,CONTEXT2", cli.contexts);
         assertEquals("tag", cli.command);

@@ -83,8 +83,8 @@ public class DropNotNullConstraintChange extends AbstractChange {
         return "Null Constraint has been dropped to the column " + getColumnName() + " of the table " + getTableName();
     }
 
-    public Element createNode(Document currentMigrationFileDOM) {
-        Element element = currentMigrationFileDOM.createElement("dropNotNullConstraint");
+    public Element createNode(Document currentChangeLogFileDOM) {
+        Element element = currentChangeLogFileDOM.createElement("dropNotNullConstraint");
         element.setAttribute("tableName", getTableName());
         element.setAttribute("columnName", getColumnName());
         return element;

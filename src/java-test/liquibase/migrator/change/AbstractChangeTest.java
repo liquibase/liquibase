@@ -34,7 +34,7 @@ public abstract class AbstractChangeTest extends TestCase {
                 return null;
             }
 
-            public Element createNode(Document currentMigrationFileDOM) {
+            public Element createNode(Document changeLogFileDOM) {
                 return null;
             }
 
@@ -89,7 +89,7 @@ public abstract class AbstractChangeTest extends TestCase {
                 return null;
             }
 
-            public Element createNode(Document currentMigrationFileDOM) {
+            public Element createNode(Document changeLogFileDOM) {
                 return null;
             }
         };

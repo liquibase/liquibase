@@ -126,8 +126,8 @@ public class CreateSequenceChange extends AbstractChange {
         return "Sequence " + getSequenceName() + " has been created";
     }
 
-    public Element createNode(Document currentMigrationFileDOM) {
-        Element node = currentMigrationFileDOM.createElement("createSequence");
+    public Element createNode(Document currentChangeLogFileDOM) {
+        Element node = currentChangeLogFileDOM.createElement("createSequence");
         node.setAttribute("sequenceName", getSequenceName());
         if (getMinValue() != null) {
             node.setAttribute("minValue", getMinValue().toString());

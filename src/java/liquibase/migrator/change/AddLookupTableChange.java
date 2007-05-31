@@ -148,8 +148,8 @@ public class AddLookupTableChange extends AbstractChange {
         return "Lookup table added";
     }
 
-    public Element createNode(Document currentMigrationFileDOM) {
-        Element node = currentMigrationFileDOM.createElement(getTagName());
+    public Element createNode(Document currentChangeLogFileDOM) {
+        Element node = currentChangeLogFileDOM.createElement(getTagName());
         node.setAttribute("existingTableName", getExistingTableName());
         node.setAttribute("existingColumnName", getExistingColumnName());
         node.setAttribute("newTableName", getNewTableName());

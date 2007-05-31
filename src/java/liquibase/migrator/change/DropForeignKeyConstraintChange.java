@@ -63,8 +63,8 @@ public class DropForeignKeyConstraintChange extends AbstractChange {
         return "Foreign Key " + getConstraintName() + " was dropped";
     }
 
-    public Element createNode(Document currentMigrationFileDOM) {
-        Element node = currentMigrationFileDOM.createElement(getTagName());
+    public Element createNode(Document currentChangeLogFileDOM) {
+        Element node = currentChangeLogFileDOM.createElement(getTagName());
         node.setAttribute("baseTableName", getBaseTableName());
         node.setAttribute("constraintName", getConstraintName());
 

@@ -81,8 +81,8 @@ public class AddUniqueConstraintChange extends AbstractChange {
         };
     }
 
-    public Element createNode(Document currentMigrationFileDOM) {
-        Element element = currentMigrationFileDOM.createElement(getTagName());
+    public Element createNode(Document currentChangeLogFileDOM) {
+        Element element = currentChangeLogFileDOM.createElement(getTagName());
         element.setAttribute("tableName", getTableName());
         element.setAttribute("columnNames", getColumnNames());
         element.setAttribute("constraintName", getConstraintName());

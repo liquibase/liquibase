@@ -64,8 +64,8 @@ public class DropTableChange extends AbstractChange {
         return "Table " + tableName + " dropped";
     }
 
-    public Element createNode(Document currentMigrationFileDOM) {
-        Element element = currentMigrationFileDOM.createElement("dropTable");
+    public Element createNode(Document currentChangeLogFileDOM) {
+        Element element = currentChangeLogFileDOM.createElement("dropTable");
         element.setAttribute("tableName", getTableName());
 
         if (isCascadeConstraints() != null) {

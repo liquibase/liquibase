@@ -91,8 +91,8 @@ public class RenameColumnChange extends AbstractChange {
         return "Column with the name " + oldColumnName + " has been renamed to " + newColumnName;
     }
 
-    public Element createNode(Document currentMigrationFileDOM) {
-        Element node = currentMigrationFileDOM.createElement("renameColumn");
+    public Element createNode(Document currentChangeLogFileDOM) {
+        Element node = currentChangeLogFileDOM.createElement("renameColumn");
         node.setAttribute("tableName", getTableName());
         node.setAttribute("oldColumnName", getOldColumnName());
         node.setAttribute("newColumnName", getNewColumnName());

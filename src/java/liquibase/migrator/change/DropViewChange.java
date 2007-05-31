@@ -52,8 +52,8 @@ public class DropViewChange extends AbstractChange {
         return "View Dropped";
     }
 
-    public Element createNode(Document currentMigrationFileDOM) {
-        Element element = currentMigrationFileDOM.createElement("dropView");
+    public Element createNode(Document currentChangeLogFileDOM) {
+        Element element = currentChangeLogFileDOM.createElement("dropView");
         element.setAttribute("viewName", getViewName());
 
         return element;

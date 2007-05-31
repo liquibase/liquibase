@@ -59,8 +59,8 @@ public class DropColumnChange extends AbstractChange {
         return "Column " + getTableName() + "(" + getColumnName() + ") dropped";
     }
 
-    public Element createNode(Document currentMigrationFileDOM) {
-        Element element = currentMigrationFileDOM.createElement("dropColumn");
+    public Element createNode(Document currentChangeLogFileDOM) {
+        Element element = currentChangeLogFileDOM.createElement("dropColumn");
         element.setAttribute("tableName", getTableName());
         element.setAttribute("columnName", getColumnName());
         return element;

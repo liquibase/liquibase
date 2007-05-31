@@ -128,8 +128,8 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
         return "Foreign Key Added";
     }
 
-    public Element createNode(Document currentMigrationFileDOM) {
-        Element node = currentMigrationFileDOM.createElement(getTagName());
+    public Element createNode(Document currentChangeLogFileDOM) {
+        Element node = currentChangeLogFileDOM.createElement(getTagName());
         node.setAttribute("baseTableName", getBaseTableName());
         node.setAttribute("baseColumnNames", getBaseColumnNames());
         node.setAttribute("constraintName", getConstraintName());

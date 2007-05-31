@@ -30,7 +30,7 @@ public class CommandLineMigrator {
     protected String username;
     protected String password;
     protected String url;
-    protected String migrationFile;
+    protected String changeLogFile;
     protected String classpath;
     protected String contexts;
     protected Boolean promptForNonLocalDatabase = null;
@@ -95,7 +95,7 @@ public class CommandLineMigrator {
 
     protected boolean checkSetup() {
         if (classpath == null
-                || migrationFile == null
+                || changeLogFile == null
                 || username == null
                 || password == null
                 || url == null
@@ -184,7 +184,7 @@ public class CommandLineMigrator {
         stream.println("Required Parameters:");
         stream.println(" --classpath=<value>                        Classpath containing");
         stream.println("                                            migration files and JDBC Driver");
-        stream.println(" --migrationFile=<path and filename>        Migration file");
+        stream.println(" --changeLogFile=<path and filename>        Migration file");
         stream.println(" --username=<value>                         Database username");
         stream.println(" --password=<value>                         Database password");
         stream.println(" --url=<value>                              Database URL");
@@ -396,7 +396,7 @@ public class CommandLineMigrator {
             throw new MigrationFailedException("Incorrect driver for URL");
         }
         try {
-            Migrator migrator = new Migrator(migrationFile, new CommandLineFileOpener(classLoader));
+            Migrator migrator = new Migrator(changeLogFile, new CommandLineFileOpener(classLoader));
             migrator.setContexts(contexts);
             migrator.init(connection);
 

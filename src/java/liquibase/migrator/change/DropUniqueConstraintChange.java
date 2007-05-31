@@ -63,8 +63,8 @@ public class DropUniqueConstraintChange extends AbstractChange {
         return "Unique Constraint Key Dropped";
     }
 
-    public Element createNode(Document currentMigrationFileDOM) {
-        Element node = currentMigrationFileDOM.createElement(getTagName());
+    public Element createNode(Document currentChangeLogFileDOM) {
+        Element node = currentChangeLogFileDOM.createElement(getTagName());
         node.setAttribute("tableName", getTableName());
         return node;
     }

@@ -132,9 +132,9 @@ public class LiquibaseMojo extends AbstractMojo {
             info.put("password", getPassword());
             connection = driver.connect(getUrl(), info);
 
-            String[] migrationFiles = getChangeLogFile().split(",");
-            for (String migrationFile : migrationFiles) {
-                Migrator migrator = new Migrator(migrationFile.trim(), new MavenFileOpener());
+            String[] changeLogFiles = getChangeLogFile().split(",");
+            for (String changeLogFile : changeLogFiles) {
+                Migrator migrator = new Migrator(changeLogFile.trim(), new MavenFileOpener());
                 migrator.setContexts(getContexts());
                 migrator.init(connection);
 

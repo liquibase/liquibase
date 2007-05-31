@@ -205,12 +205,12 @@ public class ChangeSet {
         this.comments = comments;
     }
 
-    public Node createNode(Document currentMigrationFileDOM) {
-        Element node = currentMigrationFileDOM.createElement("changeSet");
+    public Node createNode(Document currentChangeLogDOM) {
+        Element node = currentChangeLogDOM.createElement("changeSet");
         node.setAttribute("id", getId());
         node.setAttribute("author", getAuthor());
         for (AbstractChange change : getRefactorings()) {
-            node.appendChild(change.createNode(currentMigrationFileDOM));
+            node.appendChild(change.createNode(currentChangeLogDOM));
         }
         return node;
     }

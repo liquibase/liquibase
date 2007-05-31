@@ -139,11 +139,11 @@ public class CreateTableChange extends AbstractChange {
         return "Table " + tableName + " created";
     }
 
-    public Element createNode(Document currentMigrationFileDOM) {
-        Element element = currentMigrationFileDOM.createElement("createTable");
+    public Element createNode(Document currentChangeLogFileDOM) {
+        Element element = currentChangeLogFileDOM.createElement("createTable");
         element.setAttribute("name", getTableName());
         for (ColumnConfig column : getColumns()) {
-            element.appendChild(column.createNode(currentMigrationFileDOM));
+            element.appendChild(column.createNode(currentChangeLogFileDOM));
         }
         return element;
     }

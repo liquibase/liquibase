@@ -62,10 +62,10 @@ public class CreateViewChange extends AbstractChange {
         return "View Created";
     }
 
-    public Element createNode(Document currentMigrationFileDOM) {
-        Element element = currentMigrationFileDOM.createElement("createView");
+    public Element createNode(Document currentChangeLogFileDOM) {
+        Element element = currentChangeLogFileDOM.createElement("createView");
         element.setAttribute("viewName", getViewName());
-        element.appendChild(currentMigrationFileDOM.createTextNode(getSelectQuery()));
+        element.appendChild(currentChangeLogFileDOM.createTextNode(getSelectQuery()));
 
         return element;
     }

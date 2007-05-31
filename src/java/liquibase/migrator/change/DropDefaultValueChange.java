@@ -62,8 +62,8 @@ public class DropDefaultValueChange extends AbstractChange {
         return "Default Value Dropped";
     }
 
-    public Element createNode(Document currentMigrationFileDOM) {
-        Element node = currentMigrationFileDOM.createElement(getTagName());
+    public Element createNode(Document currentChangeLogFileDOM) {
+        Element node = currentChangeLogFileDOM.createElement(getTagName());
         node.setAttribute("tableName", getTableName());
         node.setAttribute("columnName", getColumnName());
 

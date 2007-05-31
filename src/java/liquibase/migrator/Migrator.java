@@ -11,7 +11,6 @@ import java.io.InputStream;
 import java.io.Writer;
 import java.net.URL;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.sql.*;
 import java.text.DateFormat;
 import java.util.*;
@@ -50,7 +49,7 @@ public class Migrator {
 
     private XMLReader xmlReader;
 
-    private String migrationFile;
+    private String changeLogFile;
     private FileOpener fileOpener;
     public String mode;
     private Writer outputSQLWriter;
@@ -68,10 +67,10 @@ public class Migrator {
     private List<RanChangeSet> ranChangeSetList;
     private String buildVersion;
 
-    protected Migrator(String migrationFile, FileOpener fileOpener, boolean alreadyHasChangeLogLock) {
+    protected Migrator(String changeLogFile, FileOpener fileOpener, boolean alreadyHasChangeLogLock) {
         log = Logger.getLogger(Migrator.DEFAULT_LOG_NAME);
 
-        this.migrationFile = migrationFile;
+        this.changeLogFile = changeLogFile;
         this.fileOpener = fileOpener;
         SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
         if (System.getProperty("java.vm.version").startsWith("1.4")) {
@@ -146,8 +145,8 @@ public class Migrator {
         }
     }
 
-    public Migrator(String migrationFile, FileOpener fileOpener) {
-        this(migrationFile, fileOpener, false);
+    public Migrator(String changeLogFile, FileOpener fileOpener) {
+        this(changeLogFile, fileOpener, false);
     }
 
     public void init(Connection connection) throws SQLException, MigrationFailedException {
@@ -289,7 +288,7 @@ public class Migrator {
             Writer outputSQLWriter = getOutputSQLWriter();
 
             if (outputSQLWriter == null) {
-                log.info("Reading changelog " + migrationFile);
+                log.info("Reading changelog " + changeLogFile);
             } else {
                 if (!outputtedHeader) {
                     outputSQLWriter.write("--------------------------------------------------------------------------------------" + StreamUtil.getLineSeparator());
@@ -314,7 +313,7 @@ public class Migrator {
                     } else {
                         throw new MigrationFailedException("Unexpected output mode: " + mode);
                     }
-                    outputSQLWriter.write("-- Change Log: " + migrationFile + StreamUtil.getLineSeparator());
+                    outputSQLWriter.write("-- Change Log: " + changeLogFile + StreamUtil.getLineSeparator());
                     outputSQLWriter.write("-- Ran at: " + DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(new Date()) + StreamUtil.getLineSeparator());
                     outputSQLWriter.write("-- Against: " + getDatabase().getConnectionUsername() + "@" + getDatabase().getConnectionURL() + StreamUtil.getLineSeparator());
                     outputSQLWriter.write("--------------------------------------------------------------------------------------" + StreamUtil.getLineSeparator() + StreamUtil.getLineSeparator() + StreamUtil.getLineSeparator());
@@ -324,19 +323,19 @@ public class Migrator {
 
             if (mode.equals(EXECUTE_MODE) || mode.equals(OUTPUT_SQL_MODE) || mode.equals(OUTPUT_CHANGELOG_ONLY_SQL_MODE))
             {
-                runChangeLogs(new UpdateDatabaseChangeLogHandler(this, migrationFile));
+                runChangeLogs(new UpdateDatabaseChangeLogHandler(this, changeLogFile));
             } else if (mode.equals(EXECUTE_ROLLBACK_MODE) || mode.equals(OUTPUT_ROLLBACK_SQL_MODE)) {
                 RollbackDatabaseChangeLogHandler rollbackHandler;
                 if (getRollbackToDate() != null) {
-                    rollbackHandler = new RollbackDatabaseChangeLogHandler(this, migrationFile, getRollbackToDate());
+                    rollbackHandler = new RollbackDatabaseChangeLogHandler(this, changeLogFile, getRollbackToDate());
                 } else if (getRollbackToTag() != null) {
                     if (!getDatabase().doesTagExist(getRollbackToTag())) {
                         throw new MigrationFailedException("'" + getRollbackToTag() + "' is not tag that exists in the database");
                     }
 
-                    rollbackHandler = new RollbackDatabaseChangeLogHandler(this, migrationFile, getRollbackToTag());
+                    rollbackHandler = new RollbackDatabaseChangeLogHandler(this, changeLogFile, getRollbackToTag());
                 } else if (getRollbackCount() != null) {
-                    rollbackHandler = new RollbackDatabaseChangeLogHandler(this, migrationFile, getRollbackCount());
+                    rollbackHandler = new RollbackDatabaseChangeLogHandler(this, changeLogFile, getRollbackCount());
                 } else {
                     throw new RuntimeException("Don't know what to rollback to");
                 }
@@ -348,7 +347,7 @@ public class Migrator {
                     throw new MigrationFailedException("Cannot roll back changelog to selected date due to change set " + unrollbackableChangeSet);
                 }
             } else if (mode.equals(OUTPUT_FUTURE_ROLLBACK_SQL_MODE)) {
-                RollbackFutureDatabaseChangeLogHandler rollbackHandler = new RollbackFutureDatabaseChangeLogHandler(this, migrationFile);
+                RollbackFutureDatabaseChangeLogHandler rollbackHandler = new RollbackFutureDatabaseChangeLogHandler(this, changeLogFile);
                 runChangeLogs(rollbackHandler);
                 ChangeSet unrollbackableChangeSet = rollbackHandler.getUnRollBackableChangeSet();
                 if (unrollbackableChangeSet == null) {
@@ -455,9 +454,9 @@ public class Migrator {
 
     public void runChangeLogs(ContentHandler contentHandler) throws MigrationFailedException {
         try {
-            InputStream inputStream = getFileOpener().getResourceAsStream(migrationFile);
+            InputStream inputStream = getFileOpener().getResourceAsStream(changeLogFile);
             if (inputStream == null) {
-                throw new MigrationFailedException(migrationFile + " does not exist");
+                throw new MigrationFailedException(changeLogFile + " does not exist");
             }
 
             xmlReader.setContentHandler(contentHandler);

@@ -66,10 +66,10 @@ public class AddColumnChange extends AbstractChange {
         return "Column " + column.getName() + "(" + column.getType() + ") has been added to " + tableName;
     }
 
-    public Element createNode(Document currentMigrationFileDOM) {
-        Element node = currentMigrationFileDOM.createElement("addColumn");
+    public Element createNode(Document currentChangeLogFileDOM) {
+        Element node = currentChangeLogFileDOM.createElement("addColumn");
         node.setAttribute("tableName", getTableName());
-        node.appendChild(getColumn().createNode(currentMigrationFileDOM));
+        node.appendChild(getColumn().createNode(currentChangeLogFileDOM));
 
         return node;
     }

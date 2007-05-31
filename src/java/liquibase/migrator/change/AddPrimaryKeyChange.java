@@ -87,8 +87,8 @@ public class AddPrimaryKeyChange extends AbstractChange {
         return "Primary Key Added";
     }
 
-    public Element createNode(Document currentMigrationFileDOM) {
-        Element node = currentMigrationFileDOM.createElement(getTagName());
+    public Element createNode(Document currentChangeLogFileDOM) {
+        Element node = currentChangeLogFileDOM.createElement(getTagName());
         node.setAttribute("tableName", getTableName());
         node.setAttribute("columnNames", getColumnNames());
         if (getConstraintName() == null) {

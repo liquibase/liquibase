@@ -50,8 +50,8 @@ public class DropSequenceChange extends AbstractChange {
         return "Sequence " + getSequenceName() + " dropped";
     }
 
-    public Element createNode(Document currentMigrationFileDOM) {
-        Element element = currentMigrationFileDOM.createElement("dropSequence");
+    public Element createNode(Document currentChangeLogFileDOM) {
+        Element element = currentChangeLogFileDOM.createElement("dropSequence");
         element.setAttribute("sequenceName", getSequenceName());
 
         return element;

@@ -55,10 +55,10 @@ public class ModifyColumnChange extends AbstractChange {
         return "Column with the name " + column.getName() + " has been modified.";
     }
 
-    public Element createNode(Document currentMigrationFileDOM) {
-        Element node = currentMigrationFileDOM.createElement("modifyColumn");
+    public Element createNode(Document currentChangeLogFileDOM) {
+        Element node = currentChangeLogFileDOM.createElement("modifyColumn");
         node.setAttribute("tableName", getTableName());
-        node.appendChild(getColumn().createNode(currentMigrationFileDOM));
+        node.appendChild(getColumn().createNode(currentChangeLogFileDOM));
 
         return node;
     }

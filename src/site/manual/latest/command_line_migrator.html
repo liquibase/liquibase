@@ -59,7 +59,7 @@
                     <h3>Required Parameters</h3>
                     <table class="attributesTable">
                         <tr><th>--classpath=&lt;value&gt;</th><td>Classpath containing migration files and JDBC Driver</td></tr>
-                        <tr><th>--migrationFile=&lt;path and filename&gt;</th><td>Migration file</td></tr>
+                        <tr><th>--changeLogFile=&lt;path and filename&gt;</th><td>The changelog file to use</td></tr>
                         <tr><th>--username=&lt;value&gt;</th><td>Database username</td></tr>
                         <tr><th>--password=&lt;value></th><td>Database password</td></tr>
                         <tr><th>--url=&lt;value&gt;</th><td>Database URL</td></tr>
@@ -87,7 +87,7 @@
                     <pre>java -jar liquibase.migrator.jar \
       -driver=oracle.jdbc.OracleDriver \
       -classpath=\path\to\classes:jdbcdriver.jar \
-      -migrationFile=com/example/db.changelog.xml \
+      -changeLogFile=com/example/db.changelog.xml \
       -url="jdbc:oracle:thin:@localhost:1521:oracle" \
       -username=scott \
       -password=tiger \
@@ -98,7 +98,7 @@
                     <pre>java -jar liquibase.migrator.jar \
       -driver=oracle.jdbc.OracleDriver \
       -classpath=website.war \
-      -migrationFile=com/example/db.changelog.xml \
+      -changeLogFile=com/example/db.changelog.xml \
       -url=jdbc:oracle:thin:@localhost:1521:oracle \
       -username=scott \
       -password=tiger \
@@ -109,7 +109,7 @@
                     <pre>java -jar liquibase.migrator.jar \
       -driver=oracle.jdbc.OracleDriver \
       -classpath=application.ear \
-      -migrationFile=com/example/db.changelog.xml \
+      -changeLogFile=com/example/db.changelog.xml \
       -url=jdbc:oracle:thin:@localhost:1521:oracle \
       -username=scott \
       -password=tiger</pre>

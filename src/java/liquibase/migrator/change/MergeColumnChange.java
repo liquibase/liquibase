@@ -133,8 +133,8 @@ public class MergeColumnChange extends AbstractChange {
         return "Columns Merged";
     }
 
-    public Element createNode(Document currentMigrationFileDOM) {
-        Element element = currentMigrationFileDOM.createElement(getTagName());
+    public Element createNode(Document currentChangeLogFileDOM) {
+        Element element = currentChangeLogFileDOM.createElement(getTagName());
         element.setAttribute("tableName", getTableName());
         element.setAttribute("column1Name", getColumn1Name());
         element.setAttribute("joinString", getJoinString());

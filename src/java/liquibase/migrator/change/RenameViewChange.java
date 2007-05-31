@@ -64,8 +64,8 @@ public class RenameViewChange extends AbstractChange {
         return "View with the name " + oldViewName + " has been renamed to " + newViewName;
     }
 
-    public Element createNode(Document currentMigrationFileDOM) {
-        Element element = currentMigrationFileDOM.createElement(getTagName());
+    public Element createNode(Document currentChangeLogFileDOM) {
+        Element element = currentChangeLogFileDOM.createElement(getTagName());
         element.setAttribute("oldViewName", getOldViewName());
         element.setAttribute("newViewName", getNewViewName());
 

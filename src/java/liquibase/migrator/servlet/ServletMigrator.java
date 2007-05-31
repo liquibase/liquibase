@@ -24,13 +24,13 @@ import java.util.logging.Logger;
  */
 public class ServletMigrator implements ServletContextListener {
 
-    private String migrationFile;
+    private String changeLogFile;
     private String dataSource;
     private String contexts;
 
 
-    public String getMigrationFile() {
-        return migrationFile;
+    public String getChangeLogFile() {
+        return changeLogFile;
     }
 
     public void setContexts(String ctxt) {
@@ -41,8 +41,8 @@ public class ServletMigrator implements ServletContextListener {
         return contexts;
     }
 
-    public void setMigrationFile(String migrationFile) {
-        this.migrationFile = migrationFile;
+    public void setChangeLogFile(String changeLogFile) {
+        this.changeLogFile = changeLogFile;
     }
 
     public String getDataSource() {
@@ -112,9 +112,9 @@ public class ServletMigrator implements ServletContextListener {
 
 
         setDataSource(servletContextEvent.getServletContext().getInitParameter("MIGRATOR_DATA_SOURCE"));
-        setMigrationFile(servletContextEvent.getServletContext().getInitParameter("MIGRATOR_FILE"));
+        setChangeLogFile(servletContextEvent.getServletContext().getInitParameter("MIGRATOR_FILE"));
         setContexts(servletContextEvent.getServletContext().getInitParameter("MIGRATOR_CONTEXTS"));
-        if (getMigrationFile() == null) {
+        if (getChangeLogFile() == null) {
             throw new RuntimeException("Cannot run migrator, MIGRATOR_FILE is not set");
         }
         if (getDataSource() == null) {
@@ -129,7 +129,7 @@ public class ServletMigrator implements ServletContextListener {
                 DataSource dataSource = (DataSource) ic.lookup(this.dataSource);
 
                 connection = dataSource.getConnection();
-                Migrator migrator = new Migrator(getMigrationFile(), new ClassLoaderFileOpener());
+                Migrator migrator = new Migrator(getChangeLogFile(), new ClassLoaderFileOpener());
                 migrator.init(connection);
                 migrator.setContexts(getContexts());
                 migrator.migrate();
