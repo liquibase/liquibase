@@ -66,6 +66,10 @@ public abstract class AbstractChange {
     public void executeStatements(AbstractDatabase database) throws SQLException, UnsupportedChangeException {
         String[] statements = generateStatements(database);
 
+        execute(statements, database);
+    }
+
+    private void execute(String[] statements, AbstractDatabase database) throws SQLException {
         for (String statement : statements) {
             Logger.getLogger(Migrator.DEFAULT_LOG_NAME).finest("Executing Statement: " + statement);
             try {
@@ -80,17 +84,7 @@ public abstract class AbstractChange {
 
     public void executeRollbackStatements(AbstractDatabase database) throws SQLException, UnsupportedChangeException, RollbackImpossibleException {
         String[] statements = generateRollbackStatements(database);
-
-        for (String statement : statements) {
-            Logger.getLogger(Migrator.DEFAULT_LOG_NAME).finest("Executing Statement: " + statement);
-            try {
-                Statement dbStatement = database.getConnection().createStatement();
-                dbStatement.execute(statement);
-                dbStatement.close();
-            } catch (SQLException e) {
-                throw new SQLException((e.getMessage() + " [" + statement + "]").replaceAll("\n", "").replaceAll("\r", ""));
-            }
-        }
+        execute(statements, database);
     }
 
 

@@ -6,6 +6,7 @@ import org.xml.sax.*;
 
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
+import javax.swing.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Writer;
@@ -254,34 +255,7 @@ public class Migrator {
 
     public final void migrate() throws MigrationFailedException {
         try {
-            if (!hasChangeLogLock) {
-                checkDatabaseChangeLogTable();
-            }
-
-            boolean locked = false;
-            long timeToGiveUp = new Date().getTime() + changeLogLockWaitTime;
-            while (!locked && new Date().getTime() < timeToGiveUp) {
-                locked = aquireLock();
-                if (!locked) {
-                    log.info("Waiting for changelog lock....");
-                    try {
-                        Thread.sleep(1000 * 10);
-                    } catch (InterruptedException e) {
-                        ;
-                    }
-                }
-            }
-
-            if (!locked) {
-                DatabaseChangeLogLock[] locks = listLocks();
-                String lockedBy;
-                if (locks.length > 0) {
-                    DatabaseChangeLogLock lock = locks[0];
-                    lockedBy = lock.getLockedBy() + " since " + DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(lock.getLockGranted());
-                } else {
-                    lockedBy = "UNKNOWN";
-                }
-                log.severe("Could not aquire change log lock.  Currently locked by " + lockedBy);
+            if (!waitForLock()) {
                 return;
             }
 
@@ -370,36 +344,45 @@ public class Migrator {
         }
     }
 
+    private boolean waitForLock() throws SQLException, MigrationFailedException, IOException {
+        if (!hasChangeLogLock) {
+            checkDatabaseChangeLogTable();
+        }
+
+        boolean locked = false;
+        long timeToGiveUp = new Date().getTime() + changeLogLockWaitTime;
+        while (!locked && new Date().getTime() < timeToGiveUp) {
+            locked = aquireLock();
+            if (!locked) {
+                log.info("Waiting for changelog lock....");
+                try {
+                    Thread.sleep(1000 * 10);
+                } catch (InterruptedException e) {
+                    ;
+                }
+            }
+        }
+
+        if (!locked) {
+            DatabaseChangeLogLock[] locks = listLocks();
+            String lockedBy;
+            if (locks.length > 0) {
+                DatabaseChangeLogLock lock = locks[0];
+                lockedBy = lock.getLockedBy() + " since " + DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(lock.getLockGranted());
+            } else {
+                lockedBy = "UNKNOWN";
+            }
+            log.severe("Could not aquire change log lock.  Currently locked by " + lockedBy);
+            return false;
+        }
+
+        return true;
+
+    }
+
     public final void dropAll() throws MigrationFailedException {
         try {
-            if (!hasChangeLogLock) {
-                checkDatabaseChangeLogTable();
-            }
-
-            boolean locked = false;
-            long timeToGiveUp = new Date().getTime() + changeLogLockWaitTime;
-            while (!locked && new Date().getTime() < timeToGiveUp) {
-                locked = aquireLock();
-                if (!locked) {
-                    log.info("Waiting for changelog lock....");
-                    try {
-                        Thread.sleep(1000 * 10);
-                    } catch (InterruptedException e) {
-                        ;
-                    }
-                }
-            }
-
-            if (!locked) {
-                DatabaseChangeLogLock[] locks = listLocks();
-                String lockedBy;
-                if (locks.length > 0) {
-                    DatabaseChangeLogLock lock = locks[0];
-                    lockedBy = lock.getLockedBy() + " since " + DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(lock.getLockGranted());
-                } else {
-                    lockedBy = "UNKNOWN";
-                }
-                log.severe("Could not aquire change log lock.  Currently locked by " + lockedBy);
+            if (!waitForLock()) {
                 return;
             }
 
@@ -569,4 +552,13 @@ public class Migrator {
             }
         }
     }
+
+    public boolean swingPromptForNonLocalDatabase() throws SQLException {
+        return JOptionPane.showConfirmDialog(null, "You are running a database refactoring against a non-local database." + StreamUtil.getLineSeparator() +
+                "Database URL is: " + this.getDatabase().getConnectionURL() + StreamUtil.getLineSeparator() +
+                "Username is: " + this.getDatabase().getConnectionUsername() + StreamUtil.getLineSeparator() + StreamUtil.getLineSeparator() +
+                "Area you sure you want to do this?",
+                "Confirm", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.NO_OPTION;
+    }
+
 }

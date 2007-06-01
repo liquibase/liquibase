@@ -3,14 +3,18 @@ package liquibase.migrator;
 import liquibase.migrator.change.*;
 import liquibase.migrator.preconditions.*;
 import liquibase.util.StringUtils;
+import liquibase.util.StreamUtil;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
 import java.io.IOException;
+import java.io.Writer;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.sql.SQLException;
+import java.sql.Connection;
+import java.sql.Statement;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -248,5 +252,24 @@ public abstract class BaseChangeLogHandler extends DefaultHandler {
 
     protected String escapeStringForDatabase(String string) {
         return string.replaceAll("'", "''");
+    }
+
+    protected void removeRanStatus(ChangeSet changeSet) throws SQLException, IOException {
+        Migrator migrator = changeSet.getDatabaseChangeLog().getMigrator();
+        String sql = "DELETE FROM DATABASECHANGELOG WHERE ID='?' AND AUTHOR='?' AND FILENAME='?'";
+        sql = sql.replaceFirst("\\?", escapeStringForDatabase(changeSet.getId()));
+        sql = sql.replaceFirst("\\?", escapeStringForDatabase(changeSet.getAuthor()));
+        sql = sql.replaceFirst("\\?", escapeStringForDatabase(changeSet.getDatabaseChangeLog().getFilePath()));
+
+        Writer sqlOutputWriter = migrator.getOutputSQLWriter();
+        if (sqlOutputWriter == null) {
+            Connection connection = migrator.getDatabase().getConnection();
+            Statement statement = connection.createStatement();
+            statement.executeUpdate(sql);
+            statement.close();
+            connection.commit();
+        } else {
+            sqlOutputWriter.write(sql + ";" + StreamUtil.getLineSeparator() + StreamUtil.getLineSeparator());
+        }
     }
 }
