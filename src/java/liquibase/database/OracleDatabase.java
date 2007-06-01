@@ -17,6 +17,10 @@ public class OracleDatabase extends AbstractDatabase {
         return "Oracle";
     }
 
+    public String getTypeName() {
+        return "oracle";
+    }
+
     public boolean supportsInitiallyDeferrableColumns() {
         return true;
     }

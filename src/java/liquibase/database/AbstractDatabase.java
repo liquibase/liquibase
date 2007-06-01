@@ -70,7 +70,16 @@ public abstract class AbstractDatabase {
 
     protected abstract boolean supportsSequences();
 
-    protected String getDatabaseName() {
+    /**
+     * Returns an all-lower-case short name of the product.  Used for end-user selecting of database type
+     * such as the DBMS precondition.
+     */
+    public abstract String getTypeName();
+
+    /**
+     * Returns the name of the database product according to the underlying database.
+     */
+    public String getDatabaseProductName() {
         try {
             return connection.getMetaData().getDatabaseProductName();
         } catch (SQLException e) {
@@ -107,9 +116,6 @@ public abstract class AbstractDatabase {
      * This method will check the database ChangeLog table used to keep track of
      * the changes in the file. If the table does not exist it will create one
      * otherwise it will not do anything besides outputting a log message.
-     *
-     * @param migrator
-     * @throws java.sql.SQLException
      */
     public void checkDatabaseChangeLogTable(Migrator migrator) throws SQLException, IOException {
         Statement statement = null;

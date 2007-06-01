@@ -248,7 +248,7 @@ public class MigratorTest extends TestCase {
         }
 
 
-        protected AbstractDatabase[] getImplementedDatabases() {
+        public AbstractDatabase[] getImplementedDatabases() {
             AbstractDatabase mockDatabase = createMock(AbstractDatabase.class);
             try {
 

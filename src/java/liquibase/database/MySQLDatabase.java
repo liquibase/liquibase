@@ -15,6 +15,10 @@ public class MySQLDatabase extends AbstractDatabase {
         return "MySQL";
     }
 
+    public String getTypeName() {
+        return "mysql";
+    }
+
     public boolean isCorrectDatabaseImplementation(Connection conn) throws SQLException {
         return PRODUCT_NAME.equalsIgnoreCase(conn.getMetaData().getDatabaseProductName());
     }

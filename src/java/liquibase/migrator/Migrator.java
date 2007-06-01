@@ -169,7 +169,7 @@ public class Migrator {
         }
     }
 
-    protected AbstractDatabase[] getImplementedDatabases() {
+    public AbstractDatabase[] getImplementedDatabases() {
         return new AbstractDatabase[]{
                 new OracleDatabase(),
                 new PostgresDatabase(),

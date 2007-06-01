@@ -21,7 +21,11 @@ public class PostgresDatabase extends AbstractDatabase {
     }
 
     public String getProductName() {
-        return "PostgrSQL";
+        return "PostgreSQL";
+    }
+
+    public String getTypeName() {
+        return "postgresql";
     }
 
     public Set<String> getSystemTablesAndViews() {

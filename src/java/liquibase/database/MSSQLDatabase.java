@@ -18,6 +18,10 @@ public class MSSQLDatabase extends AbstractDatabase {
         return "Microsoft SQL";
     }
 
+    public String getTypeName() {
+        return "mssql";
+    }
+
     public MSSQLDatabase() {
         systemTablesAndViews.add("syscolumns");
         systemTablesAndViews.add("syscomments");
