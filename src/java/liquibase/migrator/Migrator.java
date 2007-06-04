@@ -35,12 +35,15 @@ import java.util.logging.Logger;
 public class Migrator {
     // These modes tell the program whether to execute the statements against the database
     // Or to output them in some file to be ran later manually
-    public static final String EXECUTE_MODE = "execute";
-    public static final String EXECUTE_ROLLBACK_MODE = "execute_rollback";
-    public static final String OUTPUT_SQL_MODE = "save";
-    public static final String OUTPUT_ROLLBACK_SQL_MODE = "rollback_save";
-    public static final String OUTPUT_FUTURE_ROLLBACK_SQL_MODE = "rollback_future_save";
-    public static final String OUTPUT_CHANGELOG_ONLY_SQL_MODE = "changelog_save";
+
+    public enum Mode {
+        EXECUTE_MODE,
+        EXECUTE_ROLLBACK_MODE,
+        OUTPUT_SQL_MODE,
+        OUTPUT_ROLLBACK_SQL_MODE,
+        OUTPUT_FUTURE_ROLLBACK_SQL_MODE,
+        OUTPUT_CHANGELOG_ONLY_SQL_MODE,
+    }
 
     public static final String SHOULD_RUN_SYSTEM_PROPERTY = "database.migrator.should.run";
 
@@ -52,7 +55,7 @@ public class Migrator {
 
     private String changeLogFile;
     private FileOpener fileOpener;
-    public String mode;
+    private Mode mode;
     private Writer outputSQLWriter;
     private Date rollbackToDate;
     private String rollbackToTag;
@@ -67,6 +70,10 @@ public class Migrator {
 
     private List<RanChangeSet> ranChangeSetList;
     private String buildVersion;
+
+    public Migrator(String changeLogFile, FileOpener fileOpener) {
+        this(changeLogFile, fileOpener, false);
+    }
 
     protected Migrator(String changeLogFile, FileOpener fileOpener, boolean alreadyHasChangeLogLock) {
         log = Logger.getLogger(Migrator.DEFAULT_LOG_NAME);
@@ -118,7 +125,7 @@ public class Migrator {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        setMode(EXECUTE_MODE);
+        setMode(Mode.EXECUTE_MODE);
         this.hasChangeLogLock = alreadyHasChangeLogLock;
 
         this.buildVersion = findVersion();
@@ -146,10 +153,9 @@ public class Migrator {
         }
     }
 
-    public Migrator(String changeLogFile, FileOpener fileOpener) {
-        this(changeLogFile, fileOpener, false);
-    }
-
+    /**
+     * Initializes the Migrator with the given connection.  Needs to be called before actually using the Migrator.
+     */
     public void init(Connection connection) throws SQLException, MigrationFailedException {
         // Array Of all the implemented databases
         AbstractDatabase[] implementedDatabases = getImplementedDatabases();
@@ -169,6 +175,9 @@ public class Migrator {
         }
     }
 
+    /**
+     * Returns instances of all implemented database types.
+     */
     public AbstractDatabase[] getImplementedDatabases() {
         return new AbstractDatabase[]{
                 new OracleDatabase(),
@@ -182,15 +191,25 @@ public class Migrator {
         return buildVersion;
     }
 
-    public String getMode() {
+    public AbstractDatabase getDatabase() {
+        return database;
+    }
+
+    /**
+     * Sets the mode of opereration for the Migrator.
+     */
+    public Mode getMode() {
         return mode;
     }
 
-    public void setMode(String mode) {
+    public void setMode(Mode mode) {
         this.mode = mode;
     }
 
 
+    /**
+     * The Writer to append SQL if not executing directly against the database.
+     */
     public Writer getOutputSQLWriter() {
         return outputSQLWriter;
     }
@@ -199,6 +218,9 @@ public class Migrator {
         this.outputSQLWriter = outputSQLWriter;
     }
 
+    /**
+     * Date to rollback to if executing in rollback mode.
+     */
     public Date getRollbackToDate() {
         return rollbackToDate;
     }
@@ -207,6 +229,9 @@ public class Migrator {
         this.rollbackToDate = rollbackToDate;
     }
 
+    /**
+     * Tag to rollback to if executing in rollback mode.
+     */
     public String getRollbackToTag() {
         return rollbackToTag;
     }
@@ -215,6 +240,9 @@ public class Migrator {
         this.rollbackToTag = rollbackToTag;
     }
 
+    /**
+     * Number of statements to rollback to if executing in rollback mode.
+     */
     public Integer getRollbackCount() {
         return rollbackCount;
     }
@@ -223,11 +251,17 @@ public class Migrator {
         this.rollbackCount = rollbackCount;
     }
 
+    /**
+     * FileOpener to use for accessing changelog files.
+     */
     public FileOpener getFileOpener() {
         return fileOpener;
     }
 
-    public List<RanChangeSet> getRanChangeSetList() throws SQLException {
+    /**
+     * Returns the ChangeSets that have been run against the current database.
+     */
+    protected List<RanChangeSet> getRanChangeSetList() throws SQLException {
         String databaseChangeLogTableName = getDatabase().getDatabaseChangeLogTableName();
         if (ranChangeSetList == null) {
             ranChangeSetList = new ArrayList<RanChangeSet>();
@@ -253,6 +287,11 @@ public class Migrator {
         return ranChangeSetList;
     }
 
+    /**
+     * The primary method to call on Migrator to actually do work.
+     * To use the Migrator, initialize it with the init(Connection) method, set the mode, outputSQLWriter, etc. as need be,
+     * then call the migrate() method.
+     */
     public final void migrate() throws MigrationFailedException {
         try {
             if (!waitForLock()) {
@@ -266,11 +305,11 @@ public class Migrator {
             } else {
                 if (!outputtedHeader) {
                     outputSQLWriter.write("--------------------------------------------------------------------------------------" + StreamUtil.getLineSeparator());
-                    if (mode.equals(OUTPUT_SQL_MODE)) {
+                    if (mode.equals(Mode.OUTPUT_SQL_MODE)) {
                         outputSQLWriter.write("-- SQL to update database to newest version" + StreamUtil.getLineSeparator());
-                    } else if (mode.equals(OUTPUT_CHANGELOG_ONLY_SQL_MODE)) {
+                    } else if (mode.equals(Mode.OUTPUT_CHANGELOG_ONLY_SQL_MODE)) {
                         outputSQLWriter.write("-- SQL to add all changesets to database history table" + StreamUtil.getLineSeparator());
-                    } else if (mode.equals(OUTPUT_ROLLBACK_SQL_MODE)) {
+                    } else if (mode.equals(Mode.OUTPUT_ROLLBACK_SQL_MODE)) {
                         String stateDescription;
                         if (getRollbackToTag() != null) {
                             stateDescription = getRollbackToTag();
@@ -282,7 +321,7 @@ public class Migrator {
                             throw new RuntimeException("Unknown rollback type");
                         }
                         outputSQLWriter.write("-- SQL to roll-back database to the state it was at " + stateDescription + StreamUtil.getLineSeparator());
-                    } else if (mode.equals(OUTPUT_FUTURE_ROLLBACK_SQL_MODE)) {
+                    } else if (mode.equals(Mode.OUTPUT_FUTURE_ROLLBACK_SQL_MODE)) {
                         outputSQLWriter.write("-- SQL to roll-back database from an updated buildVersion back to current version" + StreamUtil.getLineSeparator());
                     } else {
                         throw new MigrationFailedException("Unexpected output mode: " + mode);
@@ -295,10 +334,9 @@ public class Migrator {
                 }
             }
 
-            if (mode.equals(EXECUTE_MODE) || mode.equals(OUTPUT_SQL_MODE) || mode.equals(OUTPUT_CHANGELOG_ONLY_SQL_MODE))
-            {
+            if (mode.equals(Mode.EXECUTE_MODE) || mode.equals(Mode.OUTPUT_SQL_MODE) || mode.equals(Mode.OUTPUT_CHANGELOG_ONLY_SQL_MODE)) {
                 runChangeLogs(new UpdateDatabaseChangeLogHandler(this, changeLogFile));
-            } else if (mode.equals(EXECUTE_ROLLBACK_MODE) || mode.equals(OUTPUT_ROLLBACK_SQL_MODE)) {
+            } else if (mode.equals(Mode.EXECUTE_ROLLBACK_MODE) || mode.equals(Mode.OUTPUT_ROLLBACK_SQL_MODE)) {
                 RollbackDatabaseChangeLogHandler rollbackHandler;
                 if (getRollbackToDate() != null) {
                     rollbackHandler = new RollbackDatabaseChangeLogHandler(this, changeLogFile, getRollbackToDate());
@@ -320,7 +358,7 @@ public class Migrator {
                 } else {
                     throw new MigrationFailedException("Cannot roll back changelog to selected date due to change set " + unrollbackableChangeSet);
                 }
-            } else if (mode.equals(OUTPUT_FUTURE_ROLLBACK_SQL_MODE)) {
+            } else if (mode.equals(Mode.OUTPUT_FUTURE_ROLLBACK_SQL_MODE)) {
                 RollbackFutureDatabaseChangeLogHandler rollbackHandler = new RollbackFutureDatabaseChangeLogHandler(this, changeLogFile);
                 runChangeLogs(rollbackHandler);
                 ChangeSet unrollbackableChangeSet = rollbackHandler.getUnRollBackableChangeSet();
@@ -380,6 +418,9 @@ public class Migrator {
 
     }
 
+    /**
+     * Drops all database objects owned by the current user.
+     */
     public final void dropAll() throws MigrationFailedException {
         try {
             if (!waitForLock()) {
@@ -399,7 +440,7 @@ public class Migrator {
         }
     }
 
-    protected boolean aquireLock() throws MigrationFailedException {
+    public boolean aquireLock() throws MigrationFailedException {
         if (hasChangeLogLock) {
             return true;
         }
@@ -407,7 +448,7 @@ public class Migrator {
         return getDatabase().aquireLock(this);
     }
 
-    protected void releaseLock() throws MigrationFailedException {
+    public void releaseLock() throws MigrationFailedException {
         getDatabase().releaseLock();
     }
 
@@ -435,7 +476,7 @@ public class Migrator {
         getDatabase().checkDatabaseChangeLogLockTable(this);
     }
 
-    public void runChangeLogs(ContentHandler contentHandler) throws MigrationFailedException {
+    private void runChangeLogs(ContentHandler contentHandler) throws MigrationFailedException {
         try {
             InputStream inputStream = getFileOpener().getResourceAsStream(changeLogFile);
             if (inputStream == null) {
@@ -466,20 +507,21 @@ public class Migrator {
         }
     }
 
-    public AbstractDatabase getDatabase() {
-        return database;
-    }
-
-
-    public boolean isSaveToRunMigration() throws SQLException {
-        if (OUTPUT_SQL_MODE.equals(getMode()) || OUTPUT_CHANGELOG_ONLY_SQL_MODE.equals(getMode())) {
+    /**
+     * Returns true if it is "save" to migrate the database.
+     * Currently, "safe" is defined as running in an output-sql mode or against a database on localhost.
+     * It is fine to run the migrator against a "non-safe" database, the method is mainly used to determine if the user
+     * should be prompted before continuing.
+     */
+    public boolean isSafeToRunMigration() throws SQLException {
+        if (Mode.OUTPUT_SQL_MODE.equals(getMode()) || Mode.OUTPUT_CHANGELOG_ONLY_SQL_MODE.equals(getMode())) {
             return true;
         }
         return getDatabase().getConnectionURL().indexOf("localhost") >= 0;
     }
 
     /**
-     * Display change log lock information
+     * Display change log lock information.
      */
     public DatabaseChangeLogLock[] listLocks() throws MigrationFailedException, SQLException, IOException {
         checkDatabaseChangeLogTable();
@@ -487,14 +529,9 @@ public class Migrator {
         return getDatabase().listLocks();
     }
 
-    public long getChangeLogLockWaitTime() {
-        return changeLogLockWaitTime;
-    }
-
-    public void setChangeLogLockWaitTime(long changeLogLockWaitTime) {
-        this.changeLogLockWaitTime = changeLogLockWaitTime;
-    }
-
+    /**
+     * Set the contexts to execute.  If more than once, comma separate them.
+     */
     public void setContexts(String contexts) {
         if (contexts != null) {
             String[] strings = contexts.split(",");
@@ -508,7 +545,10 @@ public class Migrator {
         return contexts;
     }
 
-    public ChangeSet.RunStatus getRunStatus(ChangeSet changeSet) throws SQLException, DatabaseHistoryException {
+    /**
+     * Returns the run status for the given ChangeSet
+     */
+    protected ChangeSet.RunStatus getRunStatus(ChangeSet changeSet) throws SQLException, DatabaseHistoryException {
         if (!getDatabase().doesChangeLogTableExist()) {
             return ChangeSet.RunStatus.NOT_RAN;
         }
@@ -553,6 +593,10 @@ public class Migrator {
         }
     }
 
+    /**
+     * Displays swing-based dialog about running against a non-localhost database.
+     * Returns true if the user selected that they are OK with that.
+     */
     public boolean swingPromptForNonLocalDatabase() throws SQLException {
         return JOptionPane.showConfirmDialog(null, "You are running a database refactoring against a non-local database." + StreamUtil.getLineSeparator() +
                 "Database URL is: " + this.getDatabase().getConnectionURL() + StreamUtil.getLineSeparator() +

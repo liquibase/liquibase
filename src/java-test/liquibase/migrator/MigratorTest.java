@@ -43,13 +43,13 @@ public class MigratorTest extends TestCase {
         TestMigrator migrator = testMigrator;
 
         migrator.setUrl("jdbc:oracle:thin:@localhost:1521:latest");
-        assertTrue(migrator.isSaveToRunMigration());
+        assertTrue(migrator.isSafeToRunMigration());
 
         migrator.setUrl("jdbc:oracle:thin:@liquibase:1521:latest");
-        assertFalse(migrator.isSaveToRunMigration());
+        assertFalse(migrator.isSafeToRunMigration());
 
-        migrator.setMode(Migrator.OUTPUT_SQL_MODE);
-        assertTrue("Safe to run if outputing sql, even if non-localhost URL", migrator.isSaveToRunMigration());
+        migrator.setMode(Migrator.Mode.OUTPUT_SQL_MODE);
+        assertTrue("Safe to run if outputing sql, even if non-localhost URL", migrator.isSafeToRunMigration());
 
     }
 

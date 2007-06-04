@@ -58,7 +58,7 @@ public abstract class AbstractChangeTest extends TestCase {
         StringWriter stringWriter = new StringWriter();
 
         OracleDatabase database = new OracleDatabase();
-        change.saveStatement(database, stringWriter);
+        change.saveStatements(database, stringWriter);
 
         assertEquals("GENERATED STATEMENT;" + StreamUtil.getLineSeparator() + StreamUtil.getLineSeparator(), stringWriter.getBuffer().toString());
     }

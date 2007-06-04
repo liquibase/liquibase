@@ -90,7 +90,7 @@ public class ChangeSet {
         Connection connection = migrator.getDatabase().getConnection();
         try {
             Writer outputSQLWriter = getDatabaseChangeLog().getMigrator().getOutputSQLWriter();
-            if (migrator.getMode().equals(Migrator.EXECUTE_MODE)) {
+            if (migrator.getMode().equals(Migrator.Mode.EXECUTE_MODE)) {
                 log.finest("Reading ChangeSet: " + toString());
                 for (AbstractChange change : getRefactorings()) {
                     change.executeStatements(migrator.getDatabase());
@@ -99,14 +99,14 @@ public class ChangeSet {
 
                 connection.commit();
                 log.finest("ChangeSet " + toString() + " has been successfully ran.");
-            } else if (migrator.getMode().equals(Migrator.OUTPUT_SQL_MODE)) {
+            } else if (migrator.getMode().equals(Migrator.Mode.OUTPUT_SQL_MODE)) {
                 outputSQLWriter.write("-- Changeset " + toString() + StreamUtil.getLineSeparator());
                 writeComments(outputSQLWriter);
                 for (AbstractChange change : getRefactorings()) {
-                    change.saveStatement(getDatabaseChangeLog().getMigrator().getDatabase(), outputSQLWriter);
+                    change.saveStatements(getDatabaseChangeLog().getMigrator().getDatabase(), outputSQLWriter);
                 }
 //                outputSQLWriter.write(getDatabaseChangeLog().getMigrator().getDatabase().getCommitSQL()+";"+StreamUtil.getLineSeparator()+StreamUtil.getLineSeparator());
-            } else if (migrator.getMode().equals(Migrator.EXECUTE_ROLLBACK_MODE)) {
+            } else if (migrator.getMode().equals(Migrator.Mode.EXECUTE_ROLLBACK_MODE)) {
                 log.finest("Rolling Back ChangeSet: " + toString());
                 if (rollBackStatements != null && rollBackStatements.length > 0) {
                     Statement statement = connection.createStatement();
@@ -131,7 +131,7 @@ public class ChangeSet {
                 connection.commit();
                 log.finest("ChangeSet " + toString() + " has been successfully rolled back.");
             } else
-            if (migrator.getMode().equals(Migrator.OUTPUT_ROLLBACK_SQL_MODE) || migrator.getMode().equals(Migrator.OUTPUT_FUTURE_ROLLBACK_SQL_MODE))
+            if (migrator.getMode().equals(Migrator.Mode.OUTPUT_ROLLBACK_SQL_MODE) || migrator.getMode().equals(Migrator.Mode.OUTPUT_FUTURE_ROLLBACK_SQL_MODE))
             {
                 outputSQLWriter.write("-- Changeset " + toString() + StreamUtil.getLineSeparator());
                 writeComments(outputSQLWriter);
@@ -145,7 +145,7 @@ public class ChangeSet {
                         change.saveRollbackStatement(getDatabaseChangeLog().getMigrator().getDatabase(), outputSQLWriter);
                     }
                 }
-            } else if (migrator.getMode().equals(Migrator.OUTPUT_CHANGELOG_ONLY_SQL_MODE)) {
+            } else if (migrator.getMode().equals(Migrator.Mode.OUTPUT_CHANGELOG_ONLY_SQL_MODE)) {
                 //don't need to do anything
             } else {
                 throw new MigrationFailedException("Unexpected mode: " + migrator.getMode());

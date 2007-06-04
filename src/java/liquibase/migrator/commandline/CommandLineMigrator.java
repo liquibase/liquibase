@@ -428,48 +428,48 @@ public class CommandLineMigrator {
             DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             try {
                 if ("migrate".equalsIgnoreCase(command)) {
-                    migrator.setMode(Migrator.EXECUTE_MODE);
+                    migrator.setMode(Migrator.Mode.EXECUTE_MODE);
                 } else if ("changelogSyncSQL".equalsIgnoreCase(command)) {
-                    migrator.setMode(Migrator.OUTPUT_CHANGELOG_ONLY_SQL_MODE);
+                    migrator.setMode(Migrator.Mode.OUTPUT_CHANGELOG_ONLY_SQL_MODE);
                     migrator.setOutputSQLWriter(getOutputWriter());
                 } else if ("migrateSQL".equalsIgnoreCase(command)) {
-                    migrator.setMode(Migrator.OUTPUT_SQL_MODE);
+                    migrator.setMode(Migrator.Mode.OUTPUT_SQL_MODE);
                     migrator.setOutputSQLWriter(getOutputWriter());
                 } else if ("rollback".equalsIgnoreCase(command)) {
-                    migrator.setMode(Migrator.EXECUTE_ROLLBACK_MODE);
+                    migrator.setMode(Migrator.Mode.EXECUTE_ROLLBACK_MODE);
                     if (commandParam == null) {
                         throw new CommandLineParsingException("rollback requires a rollback tag");
                     }
                     migrator.setRollbackToTag(commandParam);
                 } else if ("rollbackToDate".equalsIgnoreCase(command)) {
-                    migrator.setMode(Migrator.EXECUTE_ROLLBACK_MODE);
+                    migrator.setMode(Migrator.Mode.EXECUTE_ROLLBACK_MODE);
                     if (commandParam == null) {
                         throw new CommandLineParsingException("rollback requires a rollback date");
                     }
                     migrator.setRollbackToDate(dateFormat.parse(commandParam));
                 } else if ("rollbackCount".equalsIgnoreCase(command)) {
-                    migrator.setMode(Migrator.EXECUTE_ROLLBACK_MODE);
+                    migrator.setMode(Migrator.Mode.EXECUTE_ROLLBACK_MODE);
                     migrator.setRollbackCount(Integer.parseInt(commandParam));
                 } else if ("rollbackSQL".equalsIgnoreCase(command)) {
-                    migrator.setMode(Migrator.OUTPUT_ROLLBACK_SQL_MODE);
+                    migrator.setMode(Migrator.Mode.OUTPUT_ROLLBACK_SQL_MODE);
                     migrator.setOutputSQLWriter(getOutputWriter());
                     if (commandParam == null) {
                         throw new CommandLineParsingException("rollbackSQL requires a rollback tag");
                     }
                     migrator.setRollbackToTag(commandParam);
                 } else if ("rollbackToDateSQL".equalsIgnoreCase(command)) {
-                    migrator.setMode(Migrator.OUTPUT_ROLLBACK_SQL_MODE);
+                    migrator.setMode(Migrator.Mode.OUTPUT_ROLLBACK_SQL_MODE);
                     migrator.setOutputSQLWriter(getOutputWriter());
                     if (commandParam == null) {
                         throw new CommandLineParsingException("rollbackToDateSQL requires a rollback date");
                     }
                     migrator.setRollbackToDate(dateFormat.parse(commandParam));
                 } else if ("rollbackCountSQL".equalsIgnoreCase(command)) {
-                    migrator.setMode(Migrator.OUTPUT_ROLLBACK_SQL_MODE);
+                    migrator.setMode(Migrator.Mode.OUTPUT_ROLLBACK_SQL_MODE);
                     migrator.setOutputSQLWriter(getOutputWriter());
                     migrator.setRollbackCount(Integer.valueOf(commandParam));
                 } else if ("futureRollbackSQL".equalsIgnoreCase(command)) {
-                    migrator.setMode(Migrator.OUTPUT_FUTURE_ROLLBACK_SQL_MODE);
+                    migrator.setMode(Migrator.Mode.OUTPUT_FUTURE_ROLLBACK_SQL_MODE);
                     migrator.setOutputSQLWriter(getOutputWriter());
                 } else {
                     throw new CommandLineParsingException("Unknown command: " + command);

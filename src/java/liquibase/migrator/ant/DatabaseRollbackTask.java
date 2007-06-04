@@ -46,7 +46,7 @@ public class DatabaseRollbackTask extends BaseLiquibaseTask {
         Migrator migrator = null;
         try {
             migrator = createMigrator();
-            migrator.setMode(Migrator.EXECUTE_ROLLBACK_MODE);
+            migrator.setMode(Migrator.Mode.EXECUTE_ROLLBACK_MODE);
             migrator.setRollbackToDate(getRollbackDate());
             migrator.setRollbackToTag(getRollbackTag());
             migrator.setRollbackCount(getRollbackCount());

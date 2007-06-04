@@ -73,7 +73,7 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
 
         migrator = createMigrator(completeChangeLog);
         migrator.setOutputSQLWriter(output);
-        migrator.setMode(Migrator.OUTPUT_SQL_MODE);
+        migrator.setMode(Migrator.Mode.OUTPUT_SQL_MODE);
         migrator.migrate();
 
 //        System.out.println(output.getBuffer().toString());
@@ -84,20 +84,20 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
         migrator.dropAll();
 
         migrator = createMigrator(rollbackChangeLog);
-        migrator.setMode(Migrator.EXECUTE_MODE);
+        migrator.setMode(Migrator.Mode.EXECUTE_MODE);
         migrator.migrate();
 
         migrator = createMigrator(rollbackChangeLog);
-        migrator.setMode(Migrator.EXECUTE_ROLLBACK_MODE);
+        migrator.setMode(Migrator.Mode.EXECUTE_ROLLBACK_MODE);
         migrator.setRollbackToDate(new Date(0));
         migrator.migrate();
 
         migrator = createMigrator(rollbackChangeLog);
-        migrator.setMode(Migrator.EXECUTE_MODE);
+        migrator.setMode(Migrator.Mode.EXECUTE_MODE);
         migrator.migrate();
 
         migrator = createMigrator(rollbackChangeLog);
-        migrator.setMode(Migrator.EXECUTE_ROLLBACK_MODE);
+        migrator.setMode(Migrator.Mode.EXECUTE_ROLLBACK_MODE);
         migrator.setRollbackToDate(new Date(0));
         migrator.migrate();
     }
@@ -107,13 +107,13 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
         migrator.dropAll();
 
         migrator = createMigrator(rollbackChangeLog);
-        migrator.setMode(Migrator.EXECUTE_MODE);
+        migrator.setMode(Migrator.Mode.EXECUTE_MODE);
         migrator.migrate();
 
         StringWriter writer = new StringWriter();
 
         migrator = createMigrator(rollbackChangeLog);
-        migrator.setMode(Migrator.OUTPUT_ROLLBACK_SQL_MODE);
+        migrator.setMode(Migrator.Mode.OUTPUT_ROLLBACK_SQL_MODE);
         migrator.setOutputSQLWriter(writer);
         migrator.setRollbackToDate(new Date(0));
         migrator.migrate();
@@ -128,7 +128,7 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
         migrator.dropAll();
 
         migrator = createMigrator(rollbackChangeLog);
-        migrator.setMode(Migrator.OUTPUT_FUTURE_ROLLBACK_SQL_MODE);
+        migrator.setMode(Migrator.Mode.OUTPUT_FUTURE_ROLLBACK_SQL_MODE);
         migrator.setOutputSQLWriter(writer);
         migrator.setRollbackToDate(new Date(0));
         migrator.migrate();

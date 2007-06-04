@@ -1,10 +1,10 @@
 package liquibase.database;
 
-import liquibase.util.StreamUtil;
 import liquibase.migrator.DatabaseChangeLogLock;
 import liquibase.migrator.MigrationFailedException;
 import liquibase.migrator.Migrator;
 import liquibase.migrator.change.ColumnConfig;
+import liquibase.util.StreamUtil;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -17,7 +17,7 @@ import java.util.logging.Logger;
 
 /**
  * AbstractDatabase is extended by all supported databases as a facade to the underlying database.
- * The physical connectaion can be retrieved from the AbstractDatabase implementation, as well as any
+ * The physical connection can be retrieved from the AbstractDatabase implementation, as well as any
  * database-specific characteristics such as the datatype for "boolean" fields.
  */
 public abstract class AbstractDatabase {
@@ -29,13 +29,96 @@ public abstract class AbstractDatabase {
 
     private static boolean outputtedLockWarning = false;
 
-
     protected AbstractDatabase() {
         log = Logger.getLogger(Migrator.DEFAULT_LOG_NAME);
     }
 
+    // ------- DATABASE INFORMATION METHODS ---- //
+
+    /**
+     * Is this AbstractDatabase subclass the correct one to use for the given connection.
+     */
     public abstract boolean isCorrectDatabaseImplementation(Connection conn) throws SQLException;
 
+    public Connection getConnection() {
+        return connection;
+    }
+
+    public void setConnection(Connection conn) {
+        this.connection = conn;
+    }
+
+    /**
+     * Returns the name of the database product according to the underlying database.
+     */
+    public String getDatabaseProductName() {
+        try {
+            return connection.getMetaData().getDatabaseProductName();
+        } catch (SQLException e) {
+            throw new RuntimeException("Cannot get database name");
+        }
+    }
+
+    /**
+     * Returns the full database product name.  May be different than what the JDBC connection reports (getDatabaseProductName())
+     */
+    public abstract String getProductName();
+
+    /**
+     * Returns an all-lower-case short name of the product.  Used for end-user selecting of database type
+     * such as the DBMS precondition.
+     */
+    public abstract String getTypeName();
+
+    public String getDriverName() throws SQLException {
+        return connection.getMetaData().getDriverName();
+    }
+
+    public String getConnectionURL() throws SQLException {
+        return connection.getMetaData().getURL();
+    }
+
+    public String getConnectionUsername() throws SQLException {
+        return connection.getMetaData().getUserName();
+
+    }
+
+    public String getCatalogName() throws SQLException {
+        return null;
+    }
+
+    public String getSchemaName() throws SQLException {
+        return getConnectionUsername();
+    }
+
+    /**
+     * Returns system (undroppable) tables and views.
+     */
+    protected Set<String> getSystemTablesAndViews() {
+        return new HashSet<String>();
+    }
+
+
+    // ------- DATABASE FEATURE INFORMATION METHODS ---- //
+
+    /**
+     * Does the database type support sequence.
+     */
+    protected abstract boolean supportsSequences();
+
+    /**
+     * Returns whether this database support initially deferrable columns.
+     */
+    public abstract boolean supportsInitiallyDeferrableColumns();
+
+
+    // ------- DATABASE-SPECIFIC SQL METHODS ---- //
+
+    /**
+     * Returns the database-specific datatype for the given column configuration.
+     * This method will convert some generic column types (e.g. boolean, currency) to the correct type
+     * for the current database.
+     */
     public String getColumnType(ColumnConfig column) {
         if ("boolean".equalsIgnoreCase(column.getType())) {
             return getBooleanType();
@@ -52,64 +135,236 @@ public abstract class AbstractDatabase {
         }
     }
 
+    /**
+     * Returns the actual database-specific data type to use a "boolean" column.
+     */
     protected abstract String getBooleanType();
 
+    /**
+     * The database-specific value to use for "false" "boolean" columns.
+     */
+    public String getFalseBooleanValue() {
+        return "false";
+    }
+
+    /**
+     * The database-specific value to use for "true" "boolean" columns.
+     */
+    public String getTrueBooleanValue() {
+        return "true";
+    }
+
+    /**
+     * Returns the actual database-specific data type to use a "currency" column.
+     */
     protected abstract String getCurrencyType();
 
+    /**
+     * Returns the actual database-specific data type to use a "UUID" column.
+     */
     protected abstract String getUUIDType();
 
+    /**
+     * Returns the actual database-specific data type to use a "CLOB" column.
+     */
     protected abstract String getClobType();
 
+    /**
+     * Returns the actual database-specific data type to use a "BLOB" column.
+     */
     protected abstract String getBlobType();
 
+    /**
+     * Returns the actual database-specific data type to use a "date" (no time information) column.
+     */
     protected String getDateType() {
         return "DATE";
     }
 
+    /**
+     * Returns the actual database-specific data type to use a "datetime" column.
+     */
     protected abstract String getDateTimeType();
 
-    protected abstract boolean supportsSequences();
+    /**
+     * Returns database-specific function for generating the current date/time.
+     */
+    public abstract String getCurrentDateTimeFunction();
 
     /**
-     * Returns an all-lower-case short name of the product.  Used for end-user selecting of database type
-     * such as the DBMS precondition.
+     * Returns database-specific line comment string.
      */
-    public abstract String getTypeName();
+    public String getLineComment() {
+        return "--";
+    }
 
     /**
-     * Returns the name of the database product according to the underlying database.
+     * Returns database-specific auto-increment DDL clause.
      */
-    public String getDatabaseProductName() {
+    public String getAutoIncrementClause() {
+        return "AUTO_INCREMENT";
+    }
+
+    /**
+     * Returns database-specific commit command.
+     */
+    public String getCommitSQL() {
+        return "COMMIT";
+    }
+
+
+    // ------- DATABASECHANGELOG / DATABASECHANGELOGLOCK METHODS ---- //
+
+    public String getDatabaseChangeLogTableName() {
+        return "DatabaseChangeLog".toUpperCase();
+    }
+
+    public String getDatabaseChangeLogLockTableName() {
+        return "DatabaseChangeLogLock".toUpperCase();
+    }
+
+    private String getChangeLogLockInsertSQL() {
+        return ("insert into DatabaseChangeLogLock (id, locked) values (1, " + getFalseBooleanValue() + ")").toUpperCase();
+    }
+
+    private String getCreateChangeLogLockSQL() {
+        return ("create table DatabaseChangeLogLock (id int not null primary key, locked " + getBooleanType() + " not null, lockGranted " + getDateTimeType() + ", lockedby varchar(255))").toUpperCase();
+    }
+
+
+    public boolean aquireLock(Migrator migrator) throws MigrationFailedException {
+        if (!migrator.getDatabase().doesChangeLogLockTableExist()) {
+            if (migrator.getMode().equals(Migrator.Mode.EXECUTE_MODE) || migrator.getMode().equals(Migrator.Mode.EXECUTE_ROLLBACK_MODE))
+            {
+                throw new MigrationFailedException("Could not aquire lock, table does not exist");
+            } else {
+                return true;
+            }
+        }
+        Connection conn = getConnection();
+        Statement stmt = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
         try {
-            return connection.getMetaData().getDatabaseProductName();
-        } catch (SQLException e) {
-            throw new RuntimeException("Cannot get database name");
+            stmt = conn.createStatement();
+            rs = stmt.executeQuery(getSelectChangeLogLockSQL());
+            if (!rs.next()) {
+                throw new MigrationFailedException("Error checking database lock status");
+            }
+            boolean locked = rs.getBoolean(1);
+            if (locked) {
+                return false;
+            } else {
+                pstmt = conn.prepareStatement("update databasechangeloglock set locked=?, lockgranted=?, lockedby=? where id=1".toUpperCase());
+                pstmt.setBoolean(1, true);
+                pstmt.setTimestamp(2, new Timestamp(new java.util.Date().getTime()));
+                pstmt.setString(3, InetAddress.getLocalHost().getCanonicalHostName() + " (" + InetAddress.getLocalHost().getHostAddress() + ")");
+                if (pstmt.executeUpdate() != 1) {
+                    throw new MigrationFailedException("Did not update change log lock correctly");
+                }
+                conn.commit();
+                log.info("Successfully acquired change log lock");
+                return true;
+            }
+        } catch (Exception e) {
+            throw new MigrationFailedException(e);
+        } finally {
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException e) {
+                    ;
+                }
+            }
+            if (stmt != null) {
+                try {
+                    stmt.close();
+                } catch (SQLException e) {
+                    ;
+                }
+            }
+            if (pstmt != null) {
+                try {
+                    pstmt.close();
+                } catch (SQLException e) {
+                    ;
+                }
+            }
+        }
+
+    }
+
+    public void releaseLock() throws MigrationFailedException {
+        if (doesChangeLogLockTableExist()) {
+            Connection conn = getConnection();
+            PreparedStatement stmt = null;
+            try {
+                stmt = conn.prepareStatement("update databasechangeloglock set locked=?, lockgranted=null, lockedby=null where id=1".toUpperCase());
+                stmt.setBoolean(1, false);
+                if (stmt.executeUpdate() != 1) {
+                    throw new MigrationFailedException("Did not update change log lock correctly");
+                }
+                conn.commit();
+                log.info("Successfully released change log lock");
+            } catch (Exception e) {
+                throw new MigrationFailedException(e);
+            } finally {
+                if (stmt != null) {
+                    try {
+                        stmt.close();
+                    } catch (SQLException e) {
+                        ;
+                    }
+                }
+            }
         }
     }
 
-    public String getDriverName() throws SQLException {
-        return connection.getMetaData().getDriverName();
+    public DatabaseChangeLogLock[] listLocks() throws MigrationFailedException {
+        Connection conn = getConnection();
+        Statement stmt = null;
+        ResultSet rs = null;
+        try {
+            List<DatabaseChangeLogLock> allLocks = new ArrayList<DatabaseChangeLogLock>();
+            stmt = conn.createStatement();
+            rs = stmt.executeQuery("select id, locked, lockgranted, lockedby from databasechangeloglock".toUpperCase());
+            while (rs.next()) {
+                boolean locked = rs.getBoolean("locked");
+                if (locked) {
+                    allLocks.add(new DatabaseChangeLogLock(rs.getInt("ID"), rs.getTimestamp("LOCKGRANTED"), rs.getString("LOCKEDBY")));
+                }
+            }
+            return allLocks.toArray(new DatabaseChangeLogLock[allLocks.size()]);
+        } catch (Exception e) {
+            throw new MigrationFailedException(e);
+        } finally {
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException e) {
+                    ;
+                }
+            }
+            if (stmt != null) {
+                try {
+                    stmt.close();
+                } catch (SQLException e) {
+                    ;
+                }
+            }
+        }
     }
 
-    public String getConnectionURL() throws SQLException {
-        return connection.getMetaData().getURL();
+    protected String getSelectChangeLogLockSQL() {
+        return "select locked from databasechangeloglock where id=1".toUpperCase();
     }
 
-    public String getConnectionUsername() throws SQLException {
-        return connection.getMetaData().getUserName();
-
+    public boolean doesChangeLogTableExist() {
+        return changeLogTableExists;
     }
 
-    public String getSchemaName() throws SQLException {
-        return getConnectionUsername();
-    }
-
-    public Connection getConnection() {
-        return connection;
-    }
-
-    public void setConnection(Connection conn) {
-        this.connection = conn;
+    public boolean doesChangeLogLockTableExist() {
+        return changeLogLockTableExists;
     }
 
     /**
@@ -164,7 +419,7 @@ public abstract class AbstractDatabase {
                 String createTableStatement = ("CREATE TABLE DATABASECHANGELOG (id varchar(255) not null, author varchar(255) not null, filename varchar(255) not null, dateExecuted " + getDateTimeType() + " not null, md5sum varchar(32), description varchar(255), comments varchar(255), tag varchar(255), liquibase varchar(10), primary key(id, author, filename))").toUpperCase();
                 // If there is no table in the database for recording change history create one.
                 statementsToExecute.add(createTableStatement);
-                if (migrator.getMode().equals(Migrator.EXECUTE_MODE)) {
+                if (migrator.getMode().equals(Migrator.Mode.EXECUTE_MODE)) {
                     log.info("Creating database history table with name: DATABASECHANGELOG");
                 } else {
                     changeLogTableExists = false;
@@ -172,12 +427,12 @@ public abstract class AbstractDatabase {
             }
 
             for (String sql : statementsToExecute) {
-                if (migrator.getMode().equals(Migrator.EXECUTE_MODE)) {
+                if (migrator.getMode().equals(Migrator.Mode.EXECUTE_MODE)) {
                     statement = connection.createStatement();
                     statement.executeUpdate(sql);
                     connection.commit();
                 } else {
-                    if (!migrator.getMode().equals(Migrator.OUTPUT_FUTURE_ROLLBACK_SQL_MODE)) {
+                    if (!migrator.getMode().equals(Migrator.Mode.OUTPUT_FUTURE_ROLLBACK_SQL_MODE)) {
                         migrator.getOutputSQLWriter().append(sql + ";" + StreamUtil.getLineSeparator());
                         wroteToOutput = true;
                     }
@@ -201,21 +456,10 @@ public abstract class AbstractDatabase {
         }
     }
 
-    public String getDatabaseChangeLogTableName() {
-        return "DatabaseChangeLog".toUpperCase();
-    }
-
-    public String getCatalogName() throws SQLException {
-        return null;
-    }
-
     /**
      * This method will check the database ChangeLogLock table used to keep track of
      * if a machine is updating the database. If the table does not exist it will create one
      * otherwise it will not do anything besides outputting a log message.
-     *
-     * @param migrator
-     * @throws java.sql.SQLException
      */
     public void checkDatabaseChangeLogLockTable(Migrator migrator) throws SQLException, IOException {
         Statement statement = null;
@@ -227,13 +471,13 @@ public abstract class AbstractDatabase {
             if (!rs.next()) {
                 String createTableStatement = getCreateChangeLogLockSQL();
                 // If there is no table in the database for recording change history create one.
-                if (migrator.getMode().equals(Migrator.EXECUTE_MODE)) {
+                if (migrator.getMode().equals(Migrator.Mode.EXECUTE_MODE)) {
                     statement = connection.createStatement();
                     statement.executeUpdate(createTableStatement);
                     connection.commit();
                     log.info("Created database lock table with name: DATABASECHANGELOGLOCK");
                 } else {
-                    if (!migrator.getMode().equals(Migrator.OUTPUT_FUTURE_ROLLBACK_SQL_MODE)) {
+                    if (!migrator.getMode().equals(Migrator.Mode.OUTPUT_FUTURE_ROLLBACK_SQL_MODE)) {
                         if (!outputtedLockWarning) {
                             migrator.getOutputSQLWriter().write(migrator.getDatabase().getLineComment() + "-----------------------------------------------------------------------------------------------" + StreamUtil.getLineSeparator());
                             migrator.getOutputSQLWriter().write(migrator.getDatabase().getLineComment() + " DATABASECHANGELOGLOCK table does not exist." + StreamUtil.getLineSeparator());
@@ -262,7 +506,7 @@ public abstract class AbstractDatabase {
                 rs = statement.executeQuery("select * from DATABASECHANGELOGLOCK where id=1".toUpperCase());
                 if (!rs.next()) {
                     // If there is no table in the database for recording change history create one.
-                    if (migrator.getMode().equals(Migrator.EXECUTE_MODE)) {
+                    if (migrator.getMode().equals(Migrator.Mode.EXECUTE_MODE)) {
                         statement = connection.createStatement();
                         statement.executeUpdate(insertRowStatment);
                         connection.commit();
@@ -273,7 +517,7 @@ public abstract class AbstractDatabase {
                     rs.close();
                 }
             } else {
-                if (migrator.getMode().equals(Migrator.EXECUTE_MODE)) {
+                if (migrator.getMode().equals(Migrator.Mode.EXECUTE_MODE)) {
                     throw new SQLException("Change log lock table does not exist");
                 } else {
                     migrator.getOutputSQLWriter().append(insertRowStatment + ";" + StreamUtil.getLineSeparator() + StreamUtil.getLineSeparator());
@@ -291,37 +535,11 @@ public abstract class AbstractDatabase {
         }
     }
 
-    public String getDatabaseChangeLogLockTableName() {
-        return "DatabaseChangeLogLock".toUpperCase();
-    }
+    // ------- DATABASE OBJECT DROPPING METHODS ---- //
 
-    private String getChangeLogLockInsertSQL() {
-        return ("insert into DatabaseChangeLogLock (id, locked) values (1, " + getFalseBooleanValue() + ")").toUpperCase();
-    }
-
-    public String getFalseBooleanValue() {
-        return "false";
-    }
-
-    public String getTrueBooleanValue() {
-        return "true";
-    }
-
-    private String getCreateChangeLogLockSQL() {
-        return ("create table DatabaseChangeLogLock (id int not null primary key, locked " + getBooleanType() + " not null, lockGranted " + getDateTimeType() + ", lockedby varchar(255))").toUpperCase();
-    }
-
-
-    public abstract boolean supportsInitiallyDeferrableColumns();
-
-    public boolean doesChangeLogTableExist() {
-        return changeLogTableExists;
-    }
-
-    public boolean doesChangeLogLockTableExist() {
-        return changeLogLockTableExists;
-    }
-
+    /**
+     * Drops all objects owned by the connected user.
+     */
     public void dropDatabaseObjects() throws SQLException, MigrationFailedException {
         Connection conn = getConnection();
         conn.setAutoCommit(false);
@@ -389,10 +607,6 @@ public abstract class AbstractDatabase {
         }
     }
 
-    protected Set<String> getSystemTablesAndViews() {
-        return new HashSet<String>();
-    }
-
     public String getDropTableSQL(String tableName) {
         return "DROP TABLE " + tableName + " CASCADE CONSTRAINTS";
     }
@@ -401,145 +615,12 @@ public abstract class AbstractDatabase {
         ; //no default
     }
 
-    public abstract String getCurrentDateTimeFunction();
 
-    public boolean aquireLock(Migrator migrator) throws MigrationFailedException {
-        if (!migrator.getDatabase().doesChangeLogLockTableExist()) {
-            if (migrator.getMode().equals(Migrator.EXECUTE_MODE) || migrator.getMode().equals(Migrator.EXECUTE_ROLLBACK_MODE))
-            {
-                throw new MigrationFailedException("Could not aquire lock, table does not exist");
-            } else {
-                return true;
-            }
-        }
-        Connection conn = getConnection();
-        Statement stmt = null;
-        PreparedStatement pstmt = null;
-        ResultSet rs = null;
-        try {
-            stmt = conn.createStatement();
-            rs = stmt.executeQuery(getSelectChangeLogLockSQL());
-            if (!rs.next()) {
-                throw new MigrationFailedException("Error checking database lock status");
-            }
-            boolean locked = rs.getBoolean(1);
-            if (locked) {
-                return false;
-            } else {
-                pstmt = conn.prepareStatement("update databasechangeloglock set locked=?, lockgranted=?, lockedby=? where id=1".toUpperCase());
-                pstmt.setBoolean(1, true);
-                pstmt.setTimestamp(2, new Timestamp(new java.util.Date().getTime()));
-                pstmt.setString(3, InetAddress.getLocalHost().getCanonicalHostName() + " (" + InetAddress.getLocalHost().getHostAddress() + ")");
-                if (pstmt.executeUpdate() != 1) {
-                    throw new MigrationFailedException("Did not update change log lock correctly");
-                }
-                conn.commit();
-                log.info("Successfully acquired change log lock");
-                return true;
-            }
-        } catch (Exception e) {
-            throw new MigrationFailedException(e);
-        } finally {
-            if (rs != null) {
-                try {
-                    rs.close();
-                } catch (SQLException e) {
-                    ;
-                }
-            }
-            if (stmt != null) {
-                try {
-                    stmt.close();
-                } catch (SQLException e) {
-                    ;
-                }
-            }
-            if (pstmt != null) {
-                try {
-                    pstmt.close();
-                } catch (SQLException e) {
-                    ;
-                }
-            }
-        }
+    // ------- DATABASE TAGGING METHODS ---- //
 
-    }
-
-    protected String getSelectChangeLogLockSQL() {
-        return "select locked from databasechangeloglock where id=1".toUpperCase();
-    }
-
-    public String getLineComment() {
-        return "--";
-    }
-
-    public void releaseLock() throws MigrationFailedException {
-        if (doesChangeLogLockTableExist()) {
-            Connection conn = getConnection();
-            PreparedStatement stmt = null;
-            try {
-                stmt = conn.prepareStatement("update databasechangeloglock set locked=?, lockgranted=null, lockedby=null where id=1".toUpperCase());
-                stmt.setBoolean(1, false);
-                if (stmt.executeUpdate() != 1) {
-                    throw new MigrationFailedException("Did not update change log lock correctly");
-                }
-                conn.commit();
-                log.info("Successfully released change log lock");
-            } catch (Exception e) {
-                throw new MigrationFailedException(e);
-            } finally {
-                if (stmt != null) {
-                    try {
-                        stmt.close();
-                    } catch (SQLException e) {
-                        ;
-                    }
-                }
-            }
-        }
-    }
-
-    public DatabaseChangeLogLock[] listLocks() throws MigrationFailedException {
-        Connection conn = getConnection();
-        Statement stmt = null;
-        ResultSet rs = null;
-        try {
-            List<DatabaseChangeLogLock> allLocks = new ArrayList<DatabaseChangeLogLock>();
-            stmt = conn.createStatement();
-            rs = stmt.executeQuery("select id, locked, lockgranted, lockedby from databasechangeloglock".toUpperCase());
-            while (rs.next()) {
-                boolean locked = rs.getBoolean("locked");
-                if (locked) {
-                    allLocks.add(new DatabaseChangeLogLock(rs.getInt("ID"), rs.getTimestamp("LOCKGRANTED"), rs.getString("LOCKEDBY")));
-                }
-            }
-            return allLocks.toArray(new DatabaseChangeLogLock[allLocks.size()]);
-        } catch (Exception e) {
-            throw new MigrationFailedException(e);
-        } finally {
-            if (rs != null) {
-                try {
-                    rs.close();
-                } catch (SQLException e) {
-                    ;
-                }
-            }
-            if (stmt != null) {
-                try {
-                    stmt.close();
-                } catch (SQLException e) {
-                    ;
-                }
-            }
-        }
-    }
-
-    public String getAutoIncrementClause() {
-        return "AUTO_INCREMENT";
-    }
-
-    public abstract String getProductName();
-
+    /**
+     * Tags the database changelog with the given string.
+     */
     public void tag(String tagString) throws MigrationFailedException {
         Connection conn = getConnection();
         PreparedStatement stmt = null;
@@ -574,10 +655,20 @@ public abstract class AbstractDatabase {
         }
     }
 
+    /**
+     * Returns SQL to return the date of the most recient changeset execution.
+     */
     protected String createChangeToTagSQL() {
         return "SELECT MAX(DATEEXECUTED) FROM " + getDatabaseChangeLogTableName() + "";
     }
 
+    /**
+     * Returns SQL to tag the database.  SQL Contains two ?:
+     * <ol>
+     * <li>tag string</li>
+     * <li>date executed</li>
+     * </ol>
+     */
     protected String createTagSQL() {
         return "UPDATE " + getDatabaseChangeLogTableName() + " SET TAG=? WHERE DATEEXECUTED=?";
     }
@@ -599,9 +690,5 @@ public abstract class AbstractDatabase {
                 pstmt.close();
             }
         }
-    }
-
-    public String getCommitSQL() {
-        return "COMMIT";
     }
 }

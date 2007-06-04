@@ -1,11 +1,9 @@
 package liquibase.migrator.ant;
 
-import liquibase.util.StreamUtil;
 import liquibase.migrator.MigrationFailedException;
 import liquibase.migrator.Migrator;
 import org.apache.tools.ant.BuildException;
 
-import javax.swing.*;
 import java.sql.SQLException;
 
 /**
@@ -42,9 +40,9 @@ public class DatabaseMigratorTask extends BaseLiquibaseTask {
         try {
             migrator = createMigrator();
             migrator.setContexts(getContexts());
-            migrator.setMode(Migrator.EXECUTE_MODE);
+            migrator.setMode(Migrator.Mode.EXECUTE_MODE);
 
-            if (isPromptOnNonLocalDatabase() && !migrator.isSaveToRunMigration()) {
+            if (isPromptOnNonLocalDatabase() && !migrator.isSafeToRunMigration()) {
                 if (migrator.swingPromptForNonLocalDatabase()) {
                     throw new MigrationFailedException("Chose not to run against non-production database");
                 }

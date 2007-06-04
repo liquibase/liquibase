@@ -31,14 +31,14 @@ public class IncludeMigrator extends Migrator {
     /**
      * No-op, included files don't need a lock, the parent migrator already has one
      */
-    protected boolean aquireLock() throws MigrationFailedException {
+    public boolean aquireLock() throws MigrationFailedException {
         return true;
     }
 
     /**
      * No-op, included files don't need a to release lock, the parent migrator will
      */
-    protected void releaseLock() throws MigrationFailedException {
+    public void releaseLock() throws MigrationFailedException {
         ;
     }
 
