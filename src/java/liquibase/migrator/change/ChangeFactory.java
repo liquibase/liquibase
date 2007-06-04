@@ -12,7 +12,7 @@ import java.util.Map;
  */
 public class ChangeFactory {
 
-    private Map<String, Class> tagToClassMap;
+    private final Map<String, Class> tagToClassMap;
     private static ChangeFactory instance;
 
     private ChangeFactory() {
@@ -60,6 +60,9 @@ public class ChangeFactory {
         }
     }
 
+    /**
+     * Returns the ChangeFactory singleton.
+     */
     public static ChangeFactory getInstance() {
         if (instance == null) {
             instance = new ChangeFactory();
@@ -67,6 +70,9 @@ public class ChangeFactory {
         return instance;
     }
 
+    /**
+     * Create a new AbstractChange subclass based on the given tag name.
+     */
     public AbstractChange create(String tagName) {
         Class aClass = tagToClassMap.get(tagName);
         if (aClass == null) {
