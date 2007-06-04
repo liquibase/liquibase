@@ -1,4 +1,6 @@
-package liquibase.migrator.change;
+package liquibase.migrator.parser;
+
+import liquibase.migrator.change.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -6,16 +8,16 @@ import java.util.Map;
 /**
  * Factory class for constructing the correct liquibase.migrator.change.AbstractChange implementation based on the tag name.
  * It is currently implemented by a static array of AbstractChange implementations, although that may change in
- * later revisions.
+ * later revisions.  The best way to get an instance of ChangeFactory is off the Migrator.getChangeFactory() method.
  *
  * @see liquibase.migrator.change.AbstractChange
+ * @see liquibase.migrator.Migrator#getChangeFactory()
  */
 public class ChangeFactory {
 
     private final Map<String, Class> tagToClassMap;
-    private static ChangeFactory instance;
 
-    private ChangeFactory() {
+    public ChangeFactory() {
         tagToClassMap = new HashMap<String, Class>();
         Class[] refactorings = new Class[]{
                 AddColumnChange.class,
@@ -58,16 +60,6 @@ public class ChangeFactory {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-    }
-
-    /**
-     * Returns the ChangeFactory singleton.
-     */
-    public static ChangeFactory getInstance() {
-        if (instance == null) {
-            instance = new ChangeFactory();
-        }
-        return instance;
     }
 
     /**

@@ -1,6 +1,7 @@
 package liquibase.migrator;
 
 import junit.framework.TestCase;
+import liquibase.migrator.parser.MigratorSchemaResolver;
 
 public class MigratorSchemaResolverTest extends TestCase {
 

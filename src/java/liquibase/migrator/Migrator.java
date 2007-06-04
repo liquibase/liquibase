@@ -2,6 +2,7 @@ package liquibase.migrator;
 
 import liquibase.util.StreamUtil;
 import liquibase.database.*;
+import liquibase.migrator.parser.*;
 import org.xml.sax.*;
 
 import javax.xml.parsers.SAXParser;
@@ -50,6 +51,8 @@ public class Migrator {
     public static final String DEFAULT_LOG_NAME = "database.migrator";
 
     private static boolean outputtedHeader = false;
+
+    private ChangeFactory changeFactory = new ChangeFactory();
 
     private XMLReader xmlReader;
 
@@ -187,6 +190,13 @@ public class Migrator {
         };
     }
 
+    /**
+     * Returns the ChangeFactory for converting tag strings to AbstractChange implementations.
+     */
+    public ChangeFactory getChangeFactory() {
+        return changeFactory;
+    }
+
     public String getBuildVersion() {
         return buildVersion;
     }
@@ -261,7 +271,7 @@ public class Migrator {
     /**
      * Returns the ChangeSets that have been run against the current database.
      */
-    protected List<RanChangeSet> getRanChangeSetList() throws SQLException {
+    public List<RanChangeSet> getRanChangeSetList() throws SQLException {
         String databaseChangeLogTableName = getDatabase().getDatabaseChangeLogTableName();
         if (ranChangeSetList == null) {
             ranChangeSetList = new ArrayList<RanChangeSet>();
@@ -548,7 +558,7 @@ public class Migrator {
     /**
      * Returns the run status for the given ChangeSet
      */
-    protected ChangeSet.RunStatus getRunStatus(ChangeSet changeSet) throws SQLException, DatabaseHistoryException {
+    public ChangeSet.RunStatus getRunStatus(ChangeSet changeSet) throws SQLException, DatabaseHistoryException {
         if (!getDatabase().doesChangeLogTableExist()) {
             return ChangeSet.RunStatus.NOT_RAN;
         }

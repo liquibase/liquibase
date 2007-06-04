@@ -1,4 +1,4 @@
-package liquibase.migrator;
+package liquibase.migrator.parser;
 
 import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;

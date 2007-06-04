@@ -1,7 +1,9 @@
-package liquibase.migrator;
+package liquibase.migrator.parser;
 
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
+import liquibase.migrator.parser.BaseChangeLogHandler;
+import liquibase.migrator.*;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -13,7 +15,7 @@ import java.util.Set;
 /**
  * An implementation of BaseChangeLogHandler for generating statements to update a database.
  *
- * @see BaseChangeLogHandler 
+ * @see liquibase.migrator.parser.BaseChangeLogHandler
  */
 public class UpdateDatabaseChangeLogHandler extends BaseChangeLogHandler {
 

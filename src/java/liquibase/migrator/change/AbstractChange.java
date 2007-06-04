@@ -2,7 +2,7 @@ package liquibase.migrator.change;
 
 import liquibase.util.StreamUtil;
 import liquibase.database.*;
-import liquibase.migrator.MD5Util;
+import liquibase.util.MD5Util;
 import liquibase.migrator.Migrator;
 import liquibase.migrator.RollbackImpossibleException;
 import liquibase.migrator.UnsupportedChangeException;
@@ -24,7 +24,7 @@ import java.util.logging.Logger;
  * <p>
  * <b>How changes are constructed and run when reading changelogs:</b>
  * <ol>
- *      <li>As the changelog handler gets to each element inside a changeSet, it passes the tag name to liquibase.migrator.change.ChangeFactory
+ *      <li>As the changelog handler gets to each element inside a changeSet, it passes the tag name to liquibase.migrator.parser.ChangeFactory
  *      which looks through all the registered changes until it finds one with matching specified tag name</li>
  *      <li>The ChangeFactory then constructs a new instance of the change</li>
  *      <li>For each attribute in the XML node, reflection is used to call a corresponding set* method on the change class</li>
@@ -37,7 +37,7 @@ import java.util.logging.Logger;
  *      <li>Implement the abstract generateStatements(*) methods which return the correct SQL calls for each database</li>
  *      <li>Implement the createMessage() method to create a descriptive message for logs and dialogs
  *      <li>Implement the createNode() method to generate an XML element based on the values in this change</li>
- *      <li>Add the new class to the liquibase.migrator.change.ChangeFactory</li>
+ *      <li>Add the new class to the liquibase.migrator.parser.ChangeFactory</li>
  * </ol>
  * <p><b>Implementing automatic rollback support</b><br><br>
  * The easiest way to allow automatic rollback support is by overriding the createInverses() method.
@@ -51,7 +51,7 @@ import java.util.logging.Logger;
  * <p>
  * We chose the name "change" over "refactoring" because changes will sometimes change functionality whereas true refactoring will not.
  *
- * @see liquibase.migrator.change.ChangeFactory
+ * @see liquibase.migrator.parser.ChangeFactory
  */
 public abstract class AbstractChange {
 

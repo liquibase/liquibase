@@ -1,7 +1,8 @@
-package liquibase.migrator;
+package liquibase.migrator.parser;
 
 import liquibase.migrator.change.*;
 import liquibase.migrator.preconditions.*;
+import liquibase.migrator.*;
 import liquibase.util.StringUtils;
 import liquibase.util.StreamUtil;
 import org.xml.sax.Attributes;
@@ -67,7 +68,7 @@ public abstract class BaseChangeLogHandler extends DefaultHandler {
             } else if (changeSet != null && "rollback".equals(qName)) {
                 text = new StringBuffer();
             } else if (changeSet != null && change == null) {
-                change = ChangeFactory.getInstance().create(qName);
+                change = migrator.getChangeFactory().create(qName);
                 text = new StringBuffer();
                 if (change == null) {
                     throw new MigrationFailedException("Unknown refactoring: " + qName);

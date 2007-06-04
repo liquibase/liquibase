@@ -1,4 +1,4 @@
-package liquibase.migrator;
+package liquibase.util;
 
 import java.security.MessageDigest;
 
