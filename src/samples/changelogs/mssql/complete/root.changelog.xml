@@ -125,7 +125,7 @@
             <column name="timesRan" type="int"/>
         </createTable>
         <insert tableName="liquibaseRunInfo">
-            <column name="timesRan" value="1"/>
+            <column name="timesRan" valueNumeric="1"/>
         </insert>
     </changeSet>
 

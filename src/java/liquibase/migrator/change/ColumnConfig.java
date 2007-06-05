@@ -13,6 +13,8 @@ public class ColumnConfig {
     private String name;
     private String type;
     private String value;
+    private String valueNumeric;
+    private Boolean valueBoolean;
     private String defaultValue;
     private ConstraintsConfig constraints;
     private Boolean autoIncrement;
@@ -45,6 +47,22 @@ public class ColumnConfig {
         if (StringUtils.trimToNull(value) != null) {
             this.value = value;
         }
+    }
+
+    public String getValueNumeric() {
+        return valueNumeric;
+    }
+
+    public void setValueNumeric(String valueNumeric) {
+        this.valueNumeric = valueNumeric;
+    }
+
+    public Boolean getValueBoolean() {
+        return valueBoolean;
+    }
+
+    public void setValueBoolean(Boolean valueBoolean) {
+        this.valueBoolean = valueBoolean;
     }
 
     public String getDefaultValue() {
@@ -82,6 +100,12 @@ public class ColumnConfig {
         }
         if (getValue() != null) {
             element.setAttribute("value", getValue());
+        }
+        if (getValueNumeric() != null) {
+            element.setAttribute("valueNumeric", getValueNumeric());
+        }
+        if (getValueBoolean() != null) {
+            element.setAttribute("valueBoolean", getValueBoolean().toString());
         }
 
         if (isAutoIncrement() != null && isAutoIncrement().booleanValue()) {

@@ -80,6 +80,8 @@
         <xsd:attribute name="name" type="xsd:string"/>
         <xsd:attribute name="type" type="xsd:string"/>
         <xsd:attribute name="value" type="xsd:string"/>
+        <xsd:attribute name="valueNumeric" type="xsd:string"/>
+        <xsd:attribute name="valueBoolean" type="xsd:string"/>
         <xsd:attribute name="defaultValue" type="xsd:string"/>
         <xsd:attribute name="autoIncrement" type="xsd:boolean"/>
     </xsd:attributeGroup>

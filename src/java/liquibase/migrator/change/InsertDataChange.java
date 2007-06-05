@@ -1,9 +1,6 @@
 package liquibase.migrator.change;
 
-import liquibase.database.MSSQLDatabase;
-import liquibase.database.MySQLDatabase;
-import liquibase.database.OracleDatabase;
-import liquibase.database.PostgresDatabase;
+import liquibase.database.*;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -49,7 +46,7 @@ public class InsertDataChange extends AbstractChange {
     }
 
 
-    private String[] generateStatements() {
+    private String[] generateCommonStatements(AbstractDatabase database) {
         StringBuffer buffer = new StringBuffer();
         buffer.append("INSERT INTO ").append(getTableName()).append(" ");
         Iterator iterator = columns.iterator();
@@ -61,9 +58,9 @@ public class InsertDataChange extends AbstractChange {
         while (iterator.hasNext()) {
             ColumnConfig column = (ColumnConfig) iterator.next();
             columnNames.append(column.getName());
-            columnValues.append("'");
-            columnValues.append(column.getValue());
-            columnValues.append("'");
+
+            columnValues.append(getColumnValue(column, database));
+
             if (iterator.hasNext()) {
                 columnNames.append(", ");
                 columnValues.append(", ");
@@ -78,20 +75,37 @@ public class InsertDataChange extends AbstractChange {
         return new String[]{buffer.toString()};
     }
 
+    private String getColumnValue(ColumnConfig column, AbstractDatabase database) {
+        if (column.getValue() != null) {
+            return "'"+column.getValue().replaceAll("'","''")+"'";
+        } else if (column.getValueNumeric() != null) {
+            return column.getValueNumeric();
+        } else if (column.getValueBoolean() != null) {
+            if (column.getValueBoolean()) {
+                return database.getTrueBooleanValue();
+            } else {
+                return database.getFalseBooleanValue();
+            }
+        } else {
+            return "NULL";
+        }
+
+    }
+
     public String[] generateStatements(MSSQLDatabase database) {
-        return generateStatements();
+        return generateCommonStatements(database);
     }
 
     public String[] generateStatements(OracleDatabase database) {
-        return generateStatements();
+        return generateCommonStatements(database);
     }
 
     public String[] generateStatements(MySQLDatabase database) {
-        return generateStatements();
+        return generateCommonStatements(database);
     }
 
     public String[] generateStatements(PostgresDatabase database) {
-        return generateStatements();
+        return generateCommonStatements(database);
     }
 
     public String getConfirmationMessage() {
