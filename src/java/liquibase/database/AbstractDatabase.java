@@ -546,6 +546,7 @@ public abstract class AbstractDatabase {
         try {
 
             dropForeignKeys(conn);
+            dropViews(conn);
             dropTables(conn);
 
             if (this.supportsSequences()) {
@@ -567,7 +568,7 @@ public abstract class AbstractDatabase {
         ResultSet rs = null;
         Statement dropStatement = null;
         try {
-            rs = conn.getMetaData().getTables(getCatalogName(), getSchemaName(), null, new String[]{"TABLE", "VIEW", "GLOBAL TEMPORARY", "LOCAL TEMPORARY", "ALIAS", "SYNONYM"});
+            rs = conn.getMetaData().getTables(getCatalogName(), getSchemaName(), null, new String[]{"TABLE", "GLOBAL TEMPORARY", "LOCAL TEMPORARY", "ALIAS", "SYNONYM"});
             dropStatement = conn.createStatement();
             while (rs.next()) {
                 String tableName = rs.getString("TABLE_NAME");
@@ -595,6 +596,39 @@ public abstract class AbstractDatabase {
                     dropStatement.executeUpdate(sql);
                 } catch (SQLException e) {
                     throw new MigrationFailedException("Error dropping table '" + tableName + "': " + e.getMessage(), e);
+                }
+            }
+        } finally {
+            if (dropStatement != null) {
+                dropStatement.close();
+            }
+            if (rs != null) {
+                rs.close();
+            }
+        }
+    }
+
+        protected void dropViews(Connection conn) throws SQLException, MigrationFailedException {
+        //drop tables and their constraints
+        ResultSet rs = null;
+        Statement dropStatement = null;
+        try {
+            rs = conn.getMetaData().getTables(getCatalogName(), getSchemaName(), null, new String[]{"VIEW"});
+            dropStatement = conn.createStatement();
+            while (rs.next()) {
+                String tableName = rs.getString("TABLE_NAME");
+                if (getSystemTablesAndViews().contains(tableName)) {
+                    continue;
+                }
+
+                String type = rs.getString("TABLE_TYPE");
+                String sql = "DROP VIEW " + tableName;
+
+                try {
+                    log.finest("Dropping view " + tableName);
+                    dropStatement.executeUpdate(sql);
+                } catch (SQLException e) {
+                    throw new MigrationFailedException("Error dropping view '" + tableName + "': " + e.getMessage(), e);
                 }
             }
         } finally {
