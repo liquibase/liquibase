@@ -232,11 +232,11 @@ public abstract class AbstractDatabase {
     }
 
 
-    public boolean aquireLock(Migrator migrator) throws MigrationFailedException {
+    public boolean acquireLock(Migrator migrator) throws MigrationFailedException {
         if (!migrator.getDatabase().doesChangeLogLockTableExist()) {
             if (migrator.getMode().equals(Migrator.Mode.EXECUTE_MODE) || migrator.getMode().equals(Migrator.Mode.EXECUTE_ROLLBACK_MODE))
             {
-                throw new MigrationFailedException("Could not aquire lock, table does not exist");
+                throw new MigrationFailedException("Could not acquire lock, table does not exist");
             } else {
                 return true;
             }

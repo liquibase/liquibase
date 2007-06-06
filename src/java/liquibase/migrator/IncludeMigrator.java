@@ -31,7 +31,7 @@ public class IncludeMigrator extends Migrator {
     /**
      * No-op, included files don't need a lock, the parent migrator already has one
      */
-    public boolean aquireLock() throws MigrationFailedException {
+    public boolean acquireLock() throws MigrationFailedException {
         return true;
     }
 

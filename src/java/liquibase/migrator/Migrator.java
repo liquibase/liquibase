@@ -400,7 +400,7 @@ public class Migrator {
         boolean locked = false;
         long timeToGiveUp = new Date().getTime() + changeLogLockWaitTime;
         while (!locked && new Date().getTime() < timeToGiveUp) {
-            locked = aquireLock();
+            locked = acquireLock();
             if (!locked) {
                 log.info("Waiting for changelog lock....");
                 try {
@@ -420,7 +420,7 @@ public class Migrator {
             } else {
                 lockedBy = "UNKNOWN";
             }
-            log.severe("Could not aquire change log lock.  Currently locked by " + lockedBy);
+            log.severe("Could not acquire change log lock.  Currently locked by " + lockedBy);
             return false;
         }
 
@@ -450,12 +450,12 @@ public class Migrator {
         }
     }
 
-    public boolean aquireLock() throws MigrationFailedException {
+    public boolean acquireLock() throws MigrationFailedException {
         if (hasChangeLogLock) {
             return true;
         }
 
-        return getDatabase().aquireLock(this);
+        return getDatabase().acquireLock(this);
     }
 
     public void releaseLock() throws MigrationFailedException {
