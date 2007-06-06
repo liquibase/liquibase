@@ -1,11 +1,11 @@
 package liquibase.migrator.change;
 
-import liquibase.util.StreamUtil;
-import liquibase.database.*;
-import liquibase.util.MD5Util;
+import liquibase.database.AbstractDatabase;
 import liquibase.migrator.Migrator;
 import liquibase.migrator.RollbackImpossibleException;
 import liquibase.migrator.UnsupportedChangeException;
+import liquibase.util.MD5Util;
+import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
 import liquibase.util.XMLUtil;
 import org.w3c.dom.*;
@@ -122,91 +122,19 @@ public abstract class AbstractChange {
         }
     }
 
-
-
     /**
      * Generates the SQL statements required to run the change.
      */
-    public final String[] generateStatements(AbstractDatabase database) throws UnsupportedChangeException {
-        if (database instanceof MSSQLDatabase) {
-            return generateStatements(((MSSQLDatabase) database));
-        } else if (database instanceof OracleDatabase) {
-            return generateStatements(((OracleDatabase) database));
-        } else if (database instanceof MySQLDatabase) {
-            return generateStatements(((MySQLDatabase) database));
-        } else if (database instanceof PostgresDatabase) {
-            return generateStatements(((PostgresDatabase) database));
-        } else {
-            throw new RuntimeException("Unknown database type: " + database.getClass().getName());
-        }
-    }
+    public abstract String[] generateStatements(AbstractDatabase database) throws UnsupportedChangeException;
 
-    private String[] generateRollbackStatements(AbstractDatabase database) throws UnsupportedChangeException, RollbackImpossibleException {
-        if (database instanceof MSSQLDatabase) {
-            return generateRollbackStatements(((MSSQLDatabase) database));
-        } else if (database instanceof OracleDatabase) {
-            return generateRollbackStatements(((OracleDatabase) database));
-        } else if (database instanceof MySQLDatabase) {
-            return generateRollbackStatements(((MySQLDatabase) database));
-        } else if (database instanceof PostgresDatabase) {
-            return generateRollbackStatements(((PostgresDatabase) database));
-        } else {
-            throw new RuntimeException("Unknown database type: " + database.getClass().getName());
-        }
-    }
-
-    /**
-     * Generates the MS-SQL specific SQL statements required to run the change.
-     */
-    public abstract String[] generateStatements(MSSQLDatabase database) throws UnsupportedChangeException;
-
-    /**
-     * Generates the Oracle specific SQL statements required to run the change.
-     */
-    public abstract String[] generateStatements(OracleDatabase database) throws UnsupportedChangeException;
-
-    /**
-     * Generates the MySQL specific SQL statements required to run the change.
-     */
-    public abstract String[] generateStatements(MySQLDatabase database) throws UnsupportedChangeException;
-
-    /**
-     * Generates the Postgres specific SQL statements required to run the change.
-     */
-    public abstract String[] generateStatements(PostgresDatabase database) throws UnsupportedChangeException;
-
-    /**
-     * Generates the MS-SQL specific SQL statements required to roll back the change.
-     */
-    public String[] generateRollbackStatements(MSSQLDatabase database) throws UnsupportedChangeException, RollbackImpossibleException {
-        return generateRollbackStatementsFromInverse(database);
-    }
-
-    /**
-     * Generates the Oracle specific SQL statements required to roll back the change.
-     */
-    public String[] generateRollbackStatements(OracleDatabase database) throws UnsupportedChangeException, RollbackImpossibleException {
-        return generateRollbackStatementsFromInverse(database);
-    }
-
-    /**
-     * Generates the MySQL specific SQL statements required to roll back the change.
-     */
-    public String[] generateRollbackStatements(MySQLDatabase database) throws UnsupportedChangeException, RollbackImpossibleException {
-        return generateRollbackStatementsFromInverse(database);
-    }
-
-    /**
-     * Generates the PostgreSQL specific SQL statements required to roll back the change.
-     */
-    public String[] generateRollbackStatements(PostgresDatabase database) throws UnsupportedChangeException, RollbackImpossibleException {
+    public String[] generateRollbackStatements(AbstractDatabase database) throws UnsupportedChangeException, RollbackImpossibleException {
         return generateRollbackStatementsFromInverse(database);
     }
 
     /**
      * Generates rollback statements from the inverse changes returned by createInverses().
      */
-    protected String[] generateRollbackStatementsFromInverse(AbstractDatabase database) throws UnsupportedChangeException, RollbackImpossibleException {
+    private String[] generateRollbackStatementsFromInverse(AbstractDatabase database) throws UnsupportedChangeException, RollbackImpossibleException {
         AbstractChange[] inverses = createInverses();
         if (inverses == null) {
             throw new RollbackImpossibleException("No inverse to " + getClass().getName() + " created");
@@ -215,17 +143,7 @@ public abstract class AbstractChange {
         List<String> statements = new ArrayList<String>();
 
         for (AbstractChange inverse : inverses) {
-            if (database instanceof MSSQLDatabase) {
-                statements.addAll(Arrays.asList(inverse.generateStatements(((MSSQLDatabase) database))));
-            } else if (database instanceof OracleDatabase) {
-                statements.addAll(Arrays.asList(inverse.generateStatements(((OracleDatabase) database))));
-            } else if (database instanceof MySQLDatabase) {
-                statements.addAll(Arrays.asList(inverse.generateStatements(((MySQLDatabase) database))));
-            } else if (database instanceof PostgresDatabase) {
-                statements.addAll(Arrays.asList(inverse.generateStatements(((PostgresDatabase) database))));
-            } else {
-                throw new RuntimeException("Unknown database type: " + database.getClass().getName());
-            }
+            statements.addAll(Arrays.asList(inverse.generateStatements(database)));
         }
 
         return statements.toArray(new String[statements.size()]);

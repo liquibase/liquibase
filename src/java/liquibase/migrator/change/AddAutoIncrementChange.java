@@ -1,7 +1,7 @@
 package liquibase.migrator.change;
 
+import liquibase.database.AbstractDatabase;
 import liquibase.database.MSSQLDatabase;
-import liquibase.database.MySQLDatabase;
 import liquibase.database.OracleDatabase;
 import liquibase.database.PostgresDatabase;
 import liquibase.migrator.UnsupportedChangeException;
@@ -47,23 +47,18 @@ public class AddAutoIncrementChange extends AbstractChange {
         this.columnDataType = columnDataType;
     }
 
-    public String[] generateStatements(MSSQLDatabase database) throws UnsupportedChangeException {
-        throw new UnsupportedChangeException("MS-SQL does not support adding identities to existing tables");
-    }
+    public String[] generateStatements(AbstractDatabase database) throws UnsupportedChangeException {
+        if (database instanceof OracleDatabase) {
+            throw new UnsupportedChangeException("Oracle does not support auto-increment columns");
+        } else if (database instanceof MSSQLDatabase) {
+            throw new UnsupportedChangeException("MS-SQL does not support adding identities to existing tables");
+        } else if (database instanceof PostgresDatabase) {
+            throw new UnsupportedChangeException("Oracle does not support auto-increment columns");
+        }
 
-    public String[] generateStatements(OracleDatabase database) throws UnsupportedChangeException {
-        throw new UnsupportedChangeException("Oracle does not support auto-increment columns");
-    }
-
-    public String[] generateStatements(MySQLDatabase database) throws UnsupportedChangeException {
         return new String[]{
                 "ALTER TABLE " + getTableName() + " MODIFY " + getColumnName() + " " + getColumnDataType() + " AUTO_INCREMENT",
         };
-
-    }
-
-    public String[] generateStatements(PostgresDatabase database) throws UnsupportedChangeException {
-        throw new UnsupportedChangeException("Oracle does not support auto-increment columns");
     }
 
     public String getConfirmationMessage() {

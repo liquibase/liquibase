@@ -2,10 +2,8 @@ package liquibase.migrator.change;
 
 import junit.framework.TestCase;
 import liquibase.util.StreamUtil;
-import liquibase.database.MSSQLDatabase;
-import liquibase.database.MySQLDatabase;
-import liquibase.database.OracleDatabase;
-import liquibase.database.PostgresDatabase;
+import liquibase.database.*;
+import liquibase.migrator.UnsupportedChangeException;
 import static org.easymock.classextension.EasyMock.*;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -26,7 +24,7 @@ public abstract class AbstractChangeTest extends TestCase {
 
     public void testSaveStatement() throws Exception {
         AbstractChange change = new AbstractChange("test", "Test Refactoring") {
-            private String[] generateStatements() {
+            public String[] generateStatements(AbstractDatabase database) throws UnsupportedChangeException {
                 return new String[]{"GENERATED STATEMENT"};
             }
 
@@ -36,22 +34,6 @@ public abstract class AbstractChangeTest extends TestCase {
 
             public Element createNode(Document changeLogFileDOM) {
                 return null;
-            }
-
-            public String[] generateStatements(MSSQLDatabase database) {
-                return generateStatements();
-            }
-
-            public String[] generateStatements(OracleDatabase database) {
-                return generateStatements();
-            }
-
-            public String[] generateStatements(MySQLDatabase database) {
-                return generateStatements();
-            }
-
-            public String[] generateStatements(PostgresDatabase database) {
-                return generateStatements();
             }
         };
 
@@ -65,24 +47,8 @@ public abstract class AbstractChangeTest extends TestCase {
 
     public void testExecuteStatement() throws Exception {
         AbstractChange change = new AbstractChange("test", "Test Refactorign") {
-            private String[] generateStatements() {
+            public String[] generateStatements(AbstractDatabase database) throws UnsupportedChangeException {
                 return new String[]{"GENERATED STATEMENT;"};
-            }
-
-            public String[] generateStatements(MSSQLDatabase database) {
-                return generateStatements();
-            }
-
-            public String[] generateStatements(OracleDatabase database) {
-                return generateStatements();
-            }
-
-            public String[] generateStatements(MySQLDatabase database) {
-                return generateStatements();
-            }
-
-            public String[] generateStatements(PostgresDatabase database) {
-                return generateStatements();
             }
 
             public String getConfirmationMessage() {

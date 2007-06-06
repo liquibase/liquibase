@@ -1,9 +1,6 @@
 package liquibase.migrator.change;
 
-import liquibase.database.MSSQLDatabase;
-import liquibase.database.MySQLDatabase;
-import liquibase.database.OracleDatabase;
-import liquibase.database.PostgresDatabase;
+import liquibase.database.AbstractDatabase;
 import liquibase.migrator.UnsupportedChangeException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -83,36 +80,22 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
         this.initiallyDeferred = initiallyDeferred;
     }
 
-    private String[] generateCommonStatements() {
-        return new String[]{
+    public String[] generateStatements(AbstractDatabase database) throws UnsupportedChangeException {
+        String[] statements = new String[]{
                 "ALTER TABLE " + getBaseTableName() + " ADD CONSTRAINT " + getConstraintName() + " FOREIGN KEY (" + getBaseColumnNames() + ") REFERENCES " + getReferencedTableName() + "(" + getReferencedColumnNames() + ")",
         };
-    }
+        if (database.supportsInitiallyDeferrableColumns()) {
+            if (deferrable != null && deferrable) {
+                statements[0] += " DEFERRABLE";
+            }
 
-    public String[] generateStatements(MSSQLDatabase database) throws UnsupportedChangeException {
-        return generateCommonStatements();
-    }
-
-    public String[] generateStatements(OracleDatabase database) throws UnsupportedChangeException {
-        String[] strings = generateCommonStatements();
-        if (deferrable != null && deferrable) {
-            strings[0] += " DEFERRABLE";
+            if (initiallyDeferred != null && initiallyDeferred) {
+                statements[0] += " INITIALLY DEFERRED";
+            }
         }
 
-        if (initiallyDeferred != null && initiallyDeferred) {
-            strings[0] += " INITIALLY DEFERRED";
-        }
-        return strings;
+        return statements;
     }
-
-    public String[] generateStatements(MySQLDatabase database) throws UnsupportedChangeException {
-        return generateCommonStatements();
-    }
-
-    public String[] generateStatements(PostgresDatabase database) throws UnsupportedChangeException {
-        return generateCommonStatements();
-    }
-
 
     protected AbstractChange[] createInverses() {
         DropForeignKeyConstraintChange inverse = new DropForeignKeyConstraintChange();

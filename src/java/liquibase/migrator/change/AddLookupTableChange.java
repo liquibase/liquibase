@@ -1,6 +1,7 @@
 package liquibase.migrator.change;
 
-import liquibase.database.*;
+import liquibase.database.AbstractDatabase;
+import liquibase.database.MSSQLDatabase;
 import liquibase.migrator.UnsupportedChangeException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -96,7 +97,7 @@ public class AddLookupTableChange extends AbstractChange {
         };
     }
 
-    private String[] generateCustomStatements(AbstractDatabase database) throws UnsupportedChangeException {
+    public String[] generateStatements(AbstractDatabase database) throws UnsupportedChangeException {
         List<String> statements = new ArrayList<String>();
 
         String createTablesSQL = "CREATE TABLE " + getNewTableName() + " AS SELECT DISTINCT " + getExistingColumnName() + " AS " + getNewColumnName() + " FROM " + getExistingTableName() + " WHERE " + getExistingColumnName() + " IS NOT NULL";
@@ -126,22 +127,6 @@ public class AddLookupTableChange extends AbstractChange {
         statements.addAll(Arrays.asList(addFKChange.generateStatements(database)));
 
         return statements.toArray(new String[statements.size()]);
-    }
-
-    public String[] generateStatements(MSSQLDatabase database) throws UnsupportedChangeException {
-        return generateCustomStatements(database);
-    }
-
-    public String[] generateStatements(OracleDatabase database) throws UnsupportedChangeException {
-        return generateCustomStatements(database);
-    }
-
-    public String[] generateStatements(MySQLDatabase database) throws UnsupportedChangeException {
-        return generateCustomStatements(database);
-    }
-
-    public String[] generateStatements(PostgresDatabase database) throws UnsupportedChangeException {
-        return generateCustomStatements(database);
     }
 
     public String getConfirmationMessage() {

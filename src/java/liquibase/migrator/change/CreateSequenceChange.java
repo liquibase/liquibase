@@ -1,9 +1,9 @@
 package liquibase.migrator.change;
 
+import liquibase.database.AbstractDatabase;
 import liquibase.database.MSSQLDatabase;
 import liquibase.database.MySQLDatabase;
 import liquibase.database.OracleDatabase;
-import liquibase.database.PostgresDatabase;
 import liquibase.migrator.UnsupportedChangeException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -73,7 +73,13 @@ public class CreateSequenceChange extends AbstractChange {
         this.ordered = ordered;
     }
 
-    private String[] generateStatements() {
+    public String[] generateStatements(AbstractDatabase database) throws UnsupportedChangeException {
+        if (database instanceof MSSQLDatabase) {
+            throw new UnsupportedChangeException("MSSQL does not support sequences");
+        } else if (database instanceof MySQLDatabase) {
+            throw new UnsupportedChangeException("MySQL does not support sequences");
+        }
+
         StringBuffer buffer = new StringBuffer();
         buffer.append("CREATE SEQUENCE ");
         buffer.append(sequenceName);
@@ -90,27 +96,14 @@ public class CreateSequenceChange extends AbstractChange {
             buffer.append(" MAXVALUE ").append(maxValue);
         }
 
-        return new String[]{buffer.toString().trim()};
-    }
-
-    public String[] generateStatements(MSSQLDatabase database) throws UnsupportedChangeException {
-        throw new UnsupportedChangeException("MSSQL does not support sequences");
-    }
-
-    public String[] generateStatements(OracleDatabase database) {
-        String[] statements = generateStatements();
-        if (ordered != null && ordered) {
-            statements[0] += " ORDER";
+        String[] statements = new String[]{buffer.toString().trim()};
+        if (database instanceof OracleDatabase) {
+            if (ordered != null && ordered) {
+                statements[0] += " ORDER";
+            }
         }
+
         return statements;
-    }
-
-    public String[] generateStatements(MySQLDatabase database) throws UnsupportedChangeException {
-        throw new UnsupportedChangeException("MySQL does not support sequences");
-    }
-
-    public String[] generateStatements(PostgresDatabase database) {
-        return generateStatements();
     }
 
     protected AbstractChange[] createInverses() {

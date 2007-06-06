@@ -1,9 +1,10 @@
 package liquibase.migrator.change;
 
+import liquibase.database.AbstractDatabase;
 import liquibase.database.MSSQLDatabase;
 import liquibase.database.MySQLDatabase;
 import liquibase.database.OracleDatabase;
-import liquibase.database.PostgresDatabase;
+import liquibase.migrator.UnsupportedChangeException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -43,25 +44,15 @@ public class AddDefaultValueChange extends AbstractChange {
         this.defaultValue = defaultValue;
     }
 
-    public String[] generateStatements(MSSQLDatabase database) {
-        return new String[]{
-                "ALTER TABLE " + getTableName() + " WITH NOCHECK ADD CONSTRAINT " + getColumnName() + "DefaultValue DEFAULT '" + getDefaultValue() + "' FOR " + getColumnName(),
-        };
-    }
+    public String[] generateStatements(AbstractDatabase database) throws UnsupportedChangeException {
+        if (database instanceof MSSQLDatabase) {
+            return new String[]{ "ALTER TABLE " + getTableName() + " WITH NOCHECK ADD CONSTRAINT " + getColumnName() + "DefaultValue DEFAULT '" + getDefaultValue() + "' FOR " + getColumnName(), };
+        } else if (database instanceof MySQLDatabase) {
+            return new String[]{ "ALTER TABLE " + getTableName() + " ALTER " + getColumnName() + " SET DEFAULT '" + getDefaultValue() + "'", };
+        } else if (database instanceof OracleDatabase) {
+            return new String[]{ "ALTER TABLE " + getTableName() + " MODIFY " + getColumnName() + " DEFAULT '" + getDefaultValue() + "'", };
+        }
 
-    public String[] generateStatements(MySQLDatabase database) {
-        return new String[]{
-                "ALTER TABLE " + getTableName() + " ALTER " + getColumnName() + " SET DEFAULT '" + getDefaultValue() + "'",
-        };
-    }
-
-    public String[] generateStatements(OracleDatabase database) {
-        return new String[]{
-                "ALTER TABLE " + getTableName() + " MODIFY " + getColumnName() + " DEFAULT '" + getDefaultValue() + "'",
-        };
-    }
-
-    public String[] generateStatements(PostgresDatabase database) {
         return new String[]{
                 "ALTER TABLE " + getTableName() + " ALTER COLUMN  " + getColumnName() + " SET DEFAULT '" + getDefaultValue() + "'",
         };

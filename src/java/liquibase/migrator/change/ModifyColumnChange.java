@@ -1,9 +1,10 @@
 package liquibase.migrator.change;
 
+import liquibase.database.AbstractDatabase;
 import liquibase.database.MSSQLDatabase;
 import liquibase.database.MySQLDatabase;
 import liquibase.database.OracleDatabase;
-import liquibase.database.PostgresDatabase;
+import liquibase.migrator.UnsupportedChangeException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -35,19 +36,15 @@ public class ModifyColumnChange extends AbstractChange {
         this.column = column;
     }
 
-    public String[] generateStatements(MSSQLDatabase database) {
-        return new String[]{"ALTER TABLE " + getTableName() + " ALTER COLUMN " + getColumn().getName() + " " + getColumn().getType()};
-    }
+    public String[] generateStatements(AbstractDatabase database) throws UnsupportedChangeException {
+        if (database instanceof MSSQLDatabase) {
+            return new String[]{"ALTER TABLE " + getTableName() + " ALTER COLUMN " + getColumn().getName() + " " + getColumn().getType()};
+        } else if (database instanceof MySQLDatabase) {
+            return new String[]{"ALTER TABLE " + getTableName() + " MODIFY COLUMN " + getColumn().getName() + " " + getColumn().getType()};
+        } else if (database instanceof OracleDatabase) {
+            return new String[]{"ALTER TABLE " + getTableName() + " MODIFY (" + getColumn().getName() + " " + getColumn().getType() + ")"};
+        }
 
-    public String[] generateStatements(OracleDatabase database) {
-        return new String[]{"ALTER TABLE " + getTableName() + " MODIFY (" + getColumn().getName() + " " + getColumn().getType() + ")"};
-    }
-
-    public String[] generateStatements(MySQLDatabase database) {
-        return new String[]{"ALTER TABLE " + getTableName() + " MODIFY COLUMN " + getColumn().getName() + " " + getColumn().getType()};
-    }
-
-    public String[] generateStatements(PostgresDatabase database) {
         return new String[]{"ALTER TABLE " + getTableName() + " ALTER COLUMN " + getColumn().getName() + " TYPE " + getColumn().getType()};
     }
 

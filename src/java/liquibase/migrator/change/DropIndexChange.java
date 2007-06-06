@@ -1,9 +1,10 @@
 package liquibase.migrator.change;
 
+import liquibase.database.AbstractDatabase;
 import liquibase.database.MSSQLDatabase;
 import liquibase.database.MySQLDatabase;
 import liquibase.database.OracleDatabase;
-import liquibase.database.PostgresDatabase;
+import liquibase.migrator.UnsupportedChangeException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -35,19 +36,15 @@ public class DropIndexChange extends AbstractChange {
         this.tableName = tableName;
     }
 
-    public String[] generateStatements(MSSQLDatabase database) {
-        return new String[]{"DROP INDEX " + tableName + "." + indexName};
-    }
+    public String[] generateStatements(AbstractDatabase database) throws UnsupportedChangeException {
+        if (database instanceof MySQLDatabase) {
+            return new String[]{"DROP INDEX " + indexName + " ON " + tableName};
+        } else if (database instanceof MSSQLDatabase) {
+            return new String[]{"DROP INDEX " + tableName + "." + indexName};
+        } else if (database instanceof OracleDatabase) {
+            return new String[]{"DROP INDEX " + indexName};
+        }
 
-    public String[] generateStatements(OracleDatabase database) {
-        return new String[]{"DROP INDEX " + indexName};
-    }
-
-    public String[] generateStatements(MySQLDatabase database) {
-        return new String[]{"DROP INDEX " + indexName + " ON " + tableName};
-    }
-
-    public String[] generateStatements(PostgresDatabase database) {
         return new String[]{"DROP INDEX " + indexName};
     }
 

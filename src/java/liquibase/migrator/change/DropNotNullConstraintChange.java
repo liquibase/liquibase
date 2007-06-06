@@ -1,9 +1,10 @@
 package liquibase.migrator.change;
 
+import liquibase.database.AbstractDatabase;
 import liquibase.database.MSSQLDatabase;
 import liquibase.database.MySQLDatabase;
 import liquibase.database.OracleDatabase;
-import liquibase.database.PostgresDatabase;
+import liquibase.migrator.UnsupportedChangeException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -44,7 +45,18 @@ public class DropNotNullConstraintChange extends AbstractChange {
         this.columnDataType = columnDataType;
     }
 
-    public String[] generateStatements(MSSQLDatabase database) {
+    public String[] generateStatements(AbstractDatabase database) throws UnsupportedChangeException {
+        if (database instanceof MSSQLDatabase) {
+            return generateMSSQLStatements();
+        } else if (database instanceof MySQLDatabase) {
+            return generateMySQLStatements();
+        } else if (database instanceof OracleDatabase) {
+            return generateOracleStatements();
+        }
+        return new String[]{"ALTER TABLE " + tableName + " ALTER COLUMN " + columnName + " DROP NOT NULL"};
+    }
+
+    private String[] generateMSSQLStatements() {
         if (columnDataType == null) {
             throw new RuntimeException("columnDataType is required to drop not null constraints with MS-SQL");
         }
@@ -52,20 +64,16 @@ public class DropNotNullConstraintChange extends AbstractChange {
         return new String[]{"ALTER TABLE " + tableName + " ALTER COLUMN " + columnName + " " + columnDataType + " NULL"};
     }
 
-    public String[] generateStatements(OracleDatabase database) {
+    private String[] generateOracleStatements() {
         return new String[]{"ALTER TABLE " + tableName + " MODIFY " + columnName + " NULL"};
     }
 
-    public String[] generateStatements(MySQLDatabase database) {
+    private String[] generateMySQLStatements() {
         if (columnDataType == null) {
             throw new RuntimeException("columnDataType is required to drop not null constraints with MySQL");
         }
 
         return new String[]{"ALTER TABLE " + tableName + " MODIFY " + columnName + " " + columnDataType + " DEFAULT NULL"};
-    }
-
-    public String[] generateStatements(PostgresDatabase database) {
-        return new String[]{"ALTER TABLE " + tableName + " ALTER COLUMN " + columnName + " DROP NOT NULL"};
     }
 
     protected AbstractChange[] createInverses() {

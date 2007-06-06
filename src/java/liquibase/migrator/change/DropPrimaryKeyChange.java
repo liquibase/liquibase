@@ -1,8 +1,7 @@
 package liquibase.migrator.change;
 
+import liquibase.database.AbstractDatabase;
 import liquibase.database.MSSQLDatabase;
-import liquibase.database.MySQLDatabase;
-import liquibase.database.OracleDatabase;
 import liquibase.database.PostgresDatabase;
 import liquibase.migrator.UnsupportedChangeException;
 import org.w3c.dom.Document;
@@ -35,13 +34,19 @@ public class DropPrimaryKeyChange extends AbstractChange {
         this.constraintName = constraintName;
     }
 
-    private String[] generateCommonStatements() {
+    public String[] generateStatements(AbstractDatabase database) throws UnsupportedChangeException {
+        if (database instanceof MSSQLDatabase) {
+            return generateMSSQLStatements();
+        } else if (database instanceof PostgresDatabase) {
+            return generatePostgresStatements();
+        }
+
         return new String[]{
                 "ALTER TABLE " + getTableName() + " DROP PRIMARY KEY",
         };
     }
 
-    public String[] generateStatements(MSSQLDatabase database) throws UnsupportedChangeException {
+    private String[] generateMSSQLStatements() throws UnsupportedChangeException {
         if (getConstraintName() == null) {
             throw new UnsupportedChangeException("MS-SQL requires a constraint name to drop the primary key");
         }
@@ -50,15 +55,7 @@ public class DropPrimaryKeyChange extends AbstractChange {
         };
     }
 
-    public String[] generateStatements(OracleDatabase database) throws UnsupportedChangeException {
-        return generateCommonStatements();
-    }
-
-    public String[] generateStatements(MySQLDatabase database) throws UnsupportedChangeException {
-        return generateCommonStatements();
-    }
-
-    public String[] generateStatements(PostgresDatabase database) throws UnsupportedChangeException {
+    private String[] generatePostgresStatements() throws UnsupportedChangeException {
         if (getConstraintName() == null) {
             throw new UnsupportedChangeException("PostgreSQL requires a constraint name to drop the primary key");
         }

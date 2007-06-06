@@ -1,9 +1,9 @@
 package liquibase.migrator.change;
 
+import liquibase.database.AbstractDatabase;
 import liquibase.database.MSSQLDatabase;
 import liquibase.database.MySQLDatabase;
-import liquibase.database.OracleDatabase;
-import liquibase.database.PostgresDatabase;
+import liquibase.migrator.UnsupportedChangeException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -52,27 +52,18 @@ public class RenameColumnChange extends AbstractChange {
         this.columnDataType = columnDataType;
     }
 
-    private String[] generateStatements() {
-        return new String[]{"ALTER TABLE " + tableName + " RENAME COLUMN " + oldColumnName + " TO " + newColumnName};
-    }
-
-    public String[] generateStatements(MSSQLDatabase database) {
-        return new String[]{"exec sp_rename '" + tableName + "." + oldColumnName + "', " + newColumnName};
-    }
-
-    public String[] generateStatements(OracleDatabase database) {
-        return generateStatements();
-    }
-
-    public String[] generateStatements(MySQLDatabase database) {
-        if (columnDataType == null) {
-            throw new RuntimeException("columnDataType is required to rename columns with MySQL");
+    public String[] generateStatements(AbstractDatabase database) throws UnsupportedChangeException {
+        if (database instanceof MSSQLDatabase) {
+            return new String[]{"exec sp_rename '" + tableName + "." + oldColumnName + "', " + newColumnName};
+        } else if (database instanceof MySQLDatabase) {
+            if (columnDataType == null) {
+                throw new RuntimeException("columnDataType is required to rename columns with MySQL");
+            }
+            
+            return new String[]{"ALTER TABLE " + tableName + " CHANGE " + oldColumnName + " " + newColumnName + " " + columnDataType};
         }
-        return new String[]{"ALTER TABLE " + tableName + " CHANGE " + oldColumnName + " " + newColumnName + " " + columnDataType};
-    }
 
-    public String[] generateStatements(PostgresDatabase database) {
-        return generateStatements();
+        return new String[]{"ALTER TABLE " + tableName + " RENAME COLUMN " + oldColumnName + " TO " + newColumnName};
     }
 
     protected AbstractChange[] createInverses() {

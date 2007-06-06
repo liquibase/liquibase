@@ -1,9 +1,10 @@
 package liquibase.migrator.change;
 
+import liquibase.database.AbstractDatabase;
 import liquibase.database.MSSQLDatabase;
 import liquibase.database.MySQLDatabase;
-import liquibase.database.OracleDatabase;
 import liquibase.database.PostgresDatabase;
+import liquibase.migrator.UnsupportedChangeException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -34,20 +35,16 @@ public class RenameViewChange extends AbstractChange {
         this.newViewName = newViewName;
     }
 
-    public String[] generateStatements(MSSQLDatabase database) {
-        return new String[]{"exec sp_rename '" + oldViewName + "', " + newViewName};
-    }
+    public String[] generateStatements(AbstractDatabase database) throws UnsupportedChangeException {
+        if (database instanceof MSSQLDatabase) {
+            return new String[]{"exec sp_rename '" + oldViewName + "', " + newViewName};
+        } else if (database instanceof MySQLDatabase) {
+            return new String[]{"RENAME TABLE " + oldViewName + " TO " + newViewName};
+        } else if (database instanceof PostgresDatabase) {
+            return new String[]{"ALTER TABLE " + oldViewName + " RENAME TO " + newViewName};
+        }
 
-    public String[] generateStatements(OracleDatabase database) {
         return new String[]{"RENAME " + oldViewName + " TO " + newViewName};
-    }
-
-    public String[] generateStatements(MySQLDatabase database) {
-        return new String[]{"RENAME TABLE " + oldViewName + " TO " + newViewName};
-    }
-
-    public String[] generateStatements(PostgresDatabase database) {
-        return new String[]{"ALTER TABLE " + oldViewName + " RENAME TO " + newViewName};
     }
 
     protected AbstractChange[] createInverses() {

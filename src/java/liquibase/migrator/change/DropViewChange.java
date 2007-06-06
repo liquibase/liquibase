@@ -1,9 +1,6 @@
 package liquibase.migrator.change;
 
-import liquibase.database.MSSQLDatabase;
-import liquibase.database.MySQLDatabase;
-import liquibase.database.OracleDatabase;
-import liquibase.database.PostgresDatabase;
+import liquibase.database.AbstractDatabase;
 import liquibase.migrator.UnsupportedChangeException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -26,26 +23,10 @@ public class DropViewChange extends AbstractChange {
         this.viewName = viewName;
     }
 
-    private String[] generateStatements() {
+    public String[] generateStatements(AbstractDatabase database) throws UnsupportedChangeException {
         return new String[]{
                 "DROP VIEW " + viewName
         };
-    }
-
-    public String[] generateStatements(MSSQLDatabase database) throws UnsupportedChangeException {
-        return generateStatements();
-    }
-
-    public String[] generateStatements(OracleDatabase database) throws UnsupportedChangeException {
-        return generateStatements();
-    }
-
-    public String[] generateStatements(MySQLDatabase database) throws UnsupportedChangeException {
-        return generateStatements();
-    }
-
-    public String[] generateStatements(PostgresDatabase database) throws UnsupportedChangeException {
-        return generateStatements();
     }
 
     public String getConfirmationMessage() {

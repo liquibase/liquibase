@@ -1,9 +1,9 @@
 package liquibase.migrator.change;
 
+import liquibase.database.AbstractDatabase;
 import liquibase.database.MSSQLDatabase;
 import liquibase.database.MySQLDatabase;
 import liquibase.database.OracleDatabase;
-import liquibase.database.PostgresDatabase;
 import liquibase.migrator.UnsupportedChangeException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -65,7 +65,13 @@ public class AlterSequenceChange extends AbstractChange {
         this.ordered = ordered;
     }
 
-    private String[] generateStatements() {
+    public String[] generateStatements(AbstractDatabase database) throws UnsupportedChangeException {
+        if (database instanceof MySQLDatabase) {
+            throw new UnsupportedChangeException("Sequences do not exist in MySQL");
+        } else if (database instanceof MSSQLDatabase) {
+            throw new UnsupportedChangeException("Sequences do not exist in MSSQL");
+        }
+
         StringBuffer buffer = new StringBuffer();
         buffer.append("ALTER SEQUENCE ");
         buffer.append(sequenceName);
@@ -80,29 +86,14 @@ public class AlterSequenceChange extends AbstractChange {
             buffer.append(" MAXVALUE ").append(maxValue);
         }
 
-        return new String[]{buffer.toString().trim()};
-    }
-
-    public String[] generateStatements(MSSQLDatabase database) throws UnsupportedChangeException {
-        throw new UnsupportedChangeException("Sequences do not exist in MSSQL");
-    }
-
-    public String[] generateStatements(OracleDatabase database) {
-        String[] statements = generateStatements();
-
-        if (ordered != null && ordered) {
-            statements[0] += " ORDER";
+        String[] returnStrings = new String[]{buffer.toString().trim()};
+        if (database instanceof OracleDatabase) {
+            if (ordered != null && ordered) {
+                returnStrings[0] += " ORDER";
+            }
         }
-        return statements;
 
-    }
-
-    public String[] generateStatements(MySQLDatabase database) throws UnsupportedChangeException {
-        throw new UnsupportedChangeException("Sequences do not exist in PostgreSQL");
-    }
-
-    public String[] generateStatements(PostgresDatabase database) {
-        return generateStatements();
+        return returnStrings;
     }
 
     public String getConfirmationMessage() {

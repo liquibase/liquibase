@@ -73,7 +73,7 @@ public class MergeColumnChange extends AbstractChange {
         this.finalColumnType = finalColumnType;
     }
 
-    private String[] generateCommonStatements(AbstractDatabase database) throws UnsupportedChangeException {
+    public String[] generateStatements(AbstractDatabase database) throws UnsupportedChangeException {
 
         List<String> statements = new ArrayList<String>();
 
@@ -111,22 +111,6 @@ public class MergeColumnChange extends AbstractChange {
 
         return statements.toArray(new String[statements.size()]);
 
-    }
-
-    public String[] generateStatements(MSSQLDatabase database) throws UnsupportedChangeException {
-        return generateCommonStatements(database);
-    }
-
-    public String[] generateStatements(OracleDatabase database) throws UnsupportedChangeException {
-        return generateCommonStatements(database);
-    }
-
-    public String[] generateStatements(MySQLDatabase database) throws UnsupportedChangeException {
-        return generateCommonStatements(database);
-    }
-
-    public String[] generateStatements(PostgresDatabase database) throws UnsupportedChangeException {
-        return generateCommonStatements(database);
     }
 
     public String getConfirmationMessage() {

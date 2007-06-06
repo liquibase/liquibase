@@ -1,6 +1,7 @@
 package liquibase.migrator.change;
 
-import liquibase.database.*;
+import liquibase.database.AbstractDatabase;
+import liquibase.migrator.UnsupportedChangeException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -32,24 +33,8 @@ public class AddColumnChange extends AbstractChange {
         this.column = column;
     }
 
-    private String[] generateCommonStatements(AbstractDatabase database) {
+    public String[] generateStatements(AbstractDatabase database) throws UnsupportedChangeException {
         return new String[]{"ALTER TABLE " + getTableName() + " ADD " + getColumn().getName() + " " + database.getColumnType(getColumn())};
-    }
-
-    public String[] generateStatements(MSSQLDatabase database) {
-        return generateCommonStatements(database);
-    }
-
-    public String[] generateStatements(OracleDatabase database) {
-        return generateCommonStatements(database);
-    }
-
-    public String[] generateStatements(MySQLDatabase database) {
-        return generateCommonStatements(database);
-    }
-
-    public String[] generateStatements(PostgresDatabase database) {
-        return generateCommonStatements(database);
     }
 
     protected AbstractChange[] createInverses() {

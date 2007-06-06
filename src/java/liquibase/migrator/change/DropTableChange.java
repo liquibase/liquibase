@@ -1,9 +1,7 @@
 package liquibase.migrator.change;
 
-import liquibase.database.MSSQLDatabase;
-import liquibase.database.MySQLDatabase;
-import liquibase.database.OracleDatabase;
-import liquibase.database.PostgresDatabase;
+import liquibase.database.AbstractDatabase;
+import liquibase.migrator.UnsupportedChangeException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -35,29 +33,13 @@ public class DropTableChange extends AbstractChange {
         this.cascadeConstraints = cascadeConstraints;
     }
 
-    private String[] generateStatements() {
+    public String[] generateStatements(AbstractDatabase database) throws UnsupportedChangeException {
         StringBuffer buffer = new StringBuffer();
         buffer.append("DROP TABLE ").append(getTableName());
         if (isCascadeConstraints() != null && isCascadeConstraints()) {
             buffer.append(" CASCADE CONSTRAINTS");
         }
         return new String[]{buffer.toString()};
-    }
-
-    public String[] generateStatements(MSSQLDatabase database) {
-        return generateStatements();
-    }
-
-    public String[] generateStatements(OracleDatabase database) {
-        return generateStatements();
-    }
-
-    public String[] generateStatements(MySQLDatabase database) {
-        return generateStatements();
-    }
-
-    public String[] generateStatements(PostgresDatabase database) {
-        return generateStatements();
     }
 
     public String getConfirmationMessage() {
