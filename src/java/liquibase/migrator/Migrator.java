@@ -608,7 +608,7 @@ public class Migrator {
      * Returns true if the user selected that they are OK with that.
      */
     public boolean swingPromptForNonLocalDatabase() throws SQLException {
-        return JOptionPane.showConfirmDialog(null, "You are running a database refactoring against a non-local database." + StreamUtil.getLineSeparator() +
+        return JOptionPane.showConfirmDialog(null, "You are running a database migration against a non-local database." + StreamUtil.getLineSeparator() +
                 "Database URL is: " + this.getDatabase().getConnectionURL() + StreamUtil.getLineSeparator() +
                 "Username is: " + this.getDatabase().getConnectionUsername() + StreamUtil.getLineSeparator() + StreamUtil.getLineSeparator() +
                 "Area you sure you want to do this?",

@@ -8,7 +8,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 public class CreateIndexChangeTest extends AbstractChangeTest {
 
     public void testGetRefactoringName() throws Exception {
-        assertEquals("Create Index", new CreateIndexChange().getRefactoringName());
+        assertEquals("Create Index", new CreateIndexChange().getChangeName());
     }
 
     public void testGenerateStatement() throws Exception {

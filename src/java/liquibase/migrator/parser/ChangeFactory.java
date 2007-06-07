@@ -19,7 +19,7 @@ public class ChangeFactory {
 
     public ChangeFactory() {
         tagToClassMap = new HashMap<String, Class>();
-        Class[] refactorings = new Class[]{
+        Class[] changes = new Class[]{
                 AddColumnChange.class,
                 AlterSequenceChange.class,
                 CreateIndexChange.class,
@@ -53,9 +53,9 @@ public class ChangeFactory {
         };
 
         try {
-            for (Class refactoringClass : refactorings) {
-                Change change = (Change) refactoringClass.newInstance();
-                tagToClassMap.put(change.getTagName(), refactoringClass);
+            for (Class changeClass : changes) {
+                Change change = (Change) changeClass.newInstance();
+                tagToClassMap.put(change.getTagName(), changeClass);
             }
         } catch (Exception e) {
             throw new RuntimeException(e);

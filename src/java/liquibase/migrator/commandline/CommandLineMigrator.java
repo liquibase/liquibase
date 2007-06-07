@@ -174,7 +174,7 @@ public class CommandLineMigrator {
         stream.println("");
         stream.println("Maintenance Commands");
         stream.println(" tag <tag string>          'Tags' the current database state for future rollback");
-        stream.println(" changelogSyncSQL          Writes SQL to mark all refactorings as executed ");
+        stream.println(" changelogSyncSQL          Writes SQL to mark all changes as executed ");
         stream.println("                           in the database to STDOUT");
         stream.println(" listLocks                 Lists who currently has locks on the");
         stream.println("                           database changelog");

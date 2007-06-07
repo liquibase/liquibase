@@ -29,16 +29,16 @@ import java.util.logging.Logger;
  */
 public abstract class AbstractChange implements Change {
 
-    private String refactoringName;
+    private String changeName;
     private String tagName;
 
-    protected AbstractChange(String tagName, String refactoringName) {
+    protected AbstractChange(String tagName, String changeName) {
         this.tagName = tagName;
-        this.refactoringName = refactoringName;
+        this.changeName = changeName;
     }
 
-    public String getRefactoringName() {
-        return refactoringName;
+    public String getChangeName() {
+        return changeName;
     }
 
     public String getTagName() {

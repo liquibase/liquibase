@@ -16,7 +16,7 @@ public class DropTableChangeTest extends AbstractChangeTest {
     }
 
     public void testGetRefactoringName() throws Exception {
-        assertEquals("Drop Table", change.getRefactoringName());
+        assertEquals("Drop Table", change.getChangeName());
     }
 
     public void testGenerateStatement() throws Exception {

@@ -71,7 +71,7 @@ public abstract class BaseChangeLogHandler extends DefaultHandler {
                 change = migrator.getChangeFactory().create(qName);
                 text = new StringBuffer();
                 if (change == null) {
-                    throw new MigrationFailedException("Unknown refactoring: " + qName);
+                    throw new MigrationFailedException("Unknown change: " + qName);
                 }
                 for (int i = 0; i < atts.getLength(); i++) {
                     String attributeName = atts.getQName(i);
@@ -234,7 +234,7 @@ public abstract class BaseChangeLogHandler extends DefaultHandler {
                     }
                 }
                 text = null;
-                changeSet.addRefactoring(change);
+                changeSet.addChange(change);
                 change = null;
             }
         } catch (Exception e) {

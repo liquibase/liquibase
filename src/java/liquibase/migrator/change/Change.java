@@ -45,7 +45,7 @@ import java.sql.SQLException;
  * @see liquibase.migrator.parser.ChangeFactory
  */
 public interface Change {
-    String getRefactoringName();
+    String getChangeName();
 
     String getTagName();
 

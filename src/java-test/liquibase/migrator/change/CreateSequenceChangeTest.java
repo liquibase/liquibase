@@ -7,7 +7,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 
 public class CreateSequenceChangeTest extends AbstractChangeTest {
     public void testGetRefactoringName() throws Exception {
-        assertEquals("Create Sequence", new CreateSequenceChange().getRefactoringName());
+        assertEquals("Create Sequence", new CreateSequenceChange().getChangeName());
     }
 
     public void testGenerateStatement() throws Exception {

@@ -8,7 +8,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 public class DropColumnChangeTest extends AbstractChangeTest {
 
     public void testGetRefactoringName() throws Exception {
-        assertEquals("Drop Column", new DropColumnChange().getRefactoringName());
+        assertEquals("Drop Column", new DropColumnChange().getChangeName());
     }
 
     public void testGenerateStatement() throws Exception {

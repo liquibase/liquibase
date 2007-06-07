@@ -61,7 +61,7 @@ public class PostgresDatabase extends AbstractDatabase {
     }
 
     protected String getDateTimeType() {
-        return "TIMEZONEZ";
+        return "TIMESTAMP WITH TIME ZONE";
     }
 
     protected boolean supportsSequences() {

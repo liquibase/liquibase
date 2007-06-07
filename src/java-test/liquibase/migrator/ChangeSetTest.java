@@ -11,13 +11,13 @@ public class ChangeSetTest extends TestCase {
 
         assertEquals("Empty", changeSet.getDescription());
 
-        changeSet.addRefactoring(new InsertDataChange());
+        changeSet.addChange(new InsertDataChange());
         assertEquals("Insert Row", changeSet.getDescription());
 
-        changeSet.addRefactoring(new InsertDataChange());
+        changeSet.addChange(new InsertDataChange());
         assertEquals("Insert Row (x2)", changeSet.getDescription());
 
-        changeSet.addRefactoring(new CreateTableChange());
+        changeSet.addChange(new CreateTableChange());
         assertEquals("Insert Row (x2), Create Table", changeSet.getDescription());
     }
 

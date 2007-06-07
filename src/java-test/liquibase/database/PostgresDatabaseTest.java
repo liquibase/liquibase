@@ -34,7 +34,7 @@ public class PostgresDatabaseTest extends AbstractDatabaseTest {
     }
 
     public void testGetDateTimeType() {
-        assertEquals("TIMESTAMP", getDatabase().getDateTimeType());
+        assertEquals("TIMESTAMP WITH TIME ZONE", getDatabase().getDateTimeType());
     }
 
     protected String getProductNameString() {
@@ -42,7 +42,7 @@ public class PostgresDatabaseTest extends AbstractDatabaseTest {
     }
 
     public void testGetCurrentDateTimeFunction() {
-        assertEquals("CURRENT_DATE", getDatabase().getCurrentDateTimeFunction());
+        assertEquals("NOW()", getDatabase().getCurrentDateTimeFunction());
     }
 
     public void testDropDatabaseObjects() throws Exception {

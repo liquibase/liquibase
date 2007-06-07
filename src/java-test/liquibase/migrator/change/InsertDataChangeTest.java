@@ -34,7 +34,7 @@ public class InsertDataChangeTest extends AbstractChangeTest {
     }
 
     public void testGetRefactoringName() throws Exception {
-        assertEquals("Insert Row", refactoring.getRefactoringName());
+        assertEquals("Insert Row", refactoring.getChangeName());
     }
 
     public void testGenerateStatement() throws Exception {

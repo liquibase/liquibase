@@ -15,7 +15,7 @@ public class DropSequenceChangeTest extends AbstractChangeTest {
     }
 
     public void testGetRefactoringName() throws Exception {
-        assertEquals("Drop Sequence", new DropSequenceChange().getRefactoringName());
+        assertEquals("Drop Sequence", new DropSequenceChange().getChangeName());
     }
 
     public void testGenerateStatement() throws Exception {

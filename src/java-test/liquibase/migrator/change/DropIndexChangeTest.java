@@ -7,7 +7,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 
 public class DropIndexChangeTest extends AbstractChangeTest {
     public void testGetRefactoringName() throws Exception {
-        assertEquals("Drop Index", new DropIndexChange().getRefactoringName());
+        assertEquals("Drop Index", new DropIndexChange().getChangeName());
     }
 
     public void testGenerateStatement() throws Exception {

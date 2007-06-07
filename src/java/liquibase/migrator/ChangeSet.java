@@ -83,7 +83,7 @@ public class ChangeSet {
     }
 
     /**
-     * This method will actually execute each of the refactoring in the list against the
+     * This method will actually execute each of the changes in the list against the
      * specified database.
      */
     public void execute() throws DatabaseHistoryException, MigrationFailedException {
@@ -121,9 +121,9 @@ public class ChangeSet {
                     statement.close();
 
                 } else {
-                    List<Change> refactorings = getChanges();
-                    for (int i = refactorings.size() - 1; i >= 0; i--) {
-                        Change change = refactorings.get(i);
+                    List<Change> changes = getChanges();
+                    for (int i = changes.size() - 1; i >= 0; i--) {
+                        Change change = changes.get(i);
                         change.executeRollbackStatements(migrator.getDatabase());
                         log.finest(change.getConfirmationMessage());
                     }
@@ -178,7 +178,7 @@ public class ChangeSet {
         return Collections.unmodifiableList(changes);
     }
 
-    public void addRefactoring(Change change) {
+    public void addChange(Change change) {
         changes.add(change);
     }
 
@@ -240,31 +240,31 @@ public class ChangeSet {
     }
 
     public String getDescription() {
-        List<Change> refactorings = getChanges();
-        if (refactorings.size() == 0) {
+        List<Change> changes = getChanges();
+        if (changes.size() == 0) {
             return "Empty";
         }
 
         StringBuffer returnString = new StringBuffer();
-        Class lastRefactoringClass = null;
-        int refactoringCount = 0;
-        for (Change change : refactorings) {
-            if (change.getClass().equals(lastRefactoringClass)) {
-                refactoringCount++;
-            } else if (refactoringCount > 1) {
-                returnString.append(" (x").append(refactoringCount).append(")");
+        Class lastChangeClass = null;
+        int changeCount = 0;
+        for (Change change : changes) {
+            if (change.getClass().equals(lastChangeClass)) {
+                changeCount++;
+            } else if (changeCount > 1) {
+                returnString.append(" (x").append(changeCount).append(")");
                 returnString.append(", ");
-                returnString.append(change.getRefactoringName());
-                refactoringCount = 1;
+                returnString.append(change.getChangeName());
+                changeCount = 1;
             } else {
-                returnString.append(", ").append(change.getRefactoringName());
-                refactoringCount = 1;
+                returnString.append(", ").append(change.getChangeName());
+                changeCount = 1;
             }
-            lastRefactoringClass = change.getClass();
+            lastChangeClass = change.getClass();
         }
 
-        if (refactoringCount > 1) {
-            returnString.append(" (x").append(refactoringCount).append(")");
+        if (changeCount > 1) {
+            returnString.append(" (x").append(changeCount).append(")");
         }
 
         return returnString.toString().replaceFirst("^, ", "");

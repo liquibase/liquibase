@@ -8,7 +8,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 public class DropNotNullConstraintChangeTest extends AbstractChangeTest {
 
     public void testGetRefactoringName() throws Exception {
-        assertEquals("Drop Not-Null Constraint", new DropNotNullConstraintChange().getRefactoringName());
+        assertEquals("Drop Not-Null Constraint", new DropNotNullConstraintChange().getChangeName());
     }
 
     public void testGenerateStatement() throws Exception {

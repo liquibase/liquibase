@@ -15,7 +15,7 @@ public class RawSQLChangeTest extends AbstractChangeTest {
     }
 
     public void testGetRefactoringName() throws Exception {
-        assertEquals("Custom SQL", new RawSQLChange().getRefactoringName());
+        assertEquals("Custom SQL", new RawSQLChange().getChangeName());
     }
 
     public void testGenerateStatement() throws Exception {

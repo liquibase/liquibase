@@ -8,7 +8,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 public class AddNotNullConstraintChangeTest extends AbstractChangeTest {
 
     public void testGetRefactoringName() throws Exception {
-        assertEquals("Add Not-Null Constraint", new AddNotNullConstraintChange().getRefactoringName());
+        assertEquals("Add Not-Null Constraint", new AddNotNullConstraintChange().getChangeName());
     }
 
     public void testGenerateStatement() throws Exception {

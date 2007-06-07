@@ -11,7 +11,7 @@ public class AddColumnChangeTest extends AbstractChangeTest {
 
     public void testGetRefactoringName() throws Exception {
         AddColumnChange refactoring = new AddColumnChange();
-        assertEquals("Add Column", refactoring.getRefactoringName());
+        assertEquals("Add Column", refactoring.getChangeName());
     }
 
     public void testGenerateStatement() throws Exception {
