@@ -1,9 +1,10 @@
 package liquibase.migrator.change;
 
 import junit.framework.TestCase;
-import liquibase.util.StreamUtil;
-import liquibase.database.*;
+import liquibase.database.Database;
+import liquibase.database.OracleDatabase;
 import liquibase.migrator.UnsupportedChangeException;
+import liquibase.util.StreamUtil;
 import static org.easymock.classextension.EasyMock.*;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -23,8 +24,8 @@ public abstract class AbstractChangeTest extends TestCase {
     public abstract void testCreateNode() throws Exception;
 
     public void testSaveStatement() throws Exception {
-        AbstractChange change = new AbstractChange("test", "Test Refactoring") {
-            public String[] generateStatements(AbstractDatabase database) throws UnsupportedChangeException {
+        Change change = new AbstractChange("test", "Test Refactoring") {
+            public String[] generateStatements(Database database) throws UnsupportedChangeException {
                 return new String[]{"GENERATED STATEMENT"};
             }
 
@@ -46,8 +47,8 @@ public abstract class AbstractChangeTest extends TestCase {
     }
 
     public void testExecuteStatement() throws Exception {
-        AbstractChange change = new AbstractChange("test", "Test Refactorign") {
-            public String[] generateStatements(AbstractDatabase database) throws UnsupportedChangeException {
+        Change change = new AbstractChange("test", "Test Refactorign") {
+            public String[] generateStatements(Database database) throws UnsupportedChangeException {
                 return new String[]{"GENERATED STATEMENT;"};
             }
 

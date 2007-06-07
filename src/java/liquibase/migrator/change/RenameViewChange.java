@@ -1,6 +1,6 @@
 package liquibase.migrator.change;
 
-import liquibase.database.AbstractDatabase;
+import liquibase.database.Database;
 import liquibase.database.MSSQLDatabase;
 import liquibase.database.MySQLDatabase;
 import liquibase.database.PostgresDatabase;
@@ -35,7 +35,7 @@ public class RenameViewChange extends AbstractChange {
         this.newViewName = newViewName;
     }
 
-    public String[] generateStatements(AbstractDatabase database) throws UnsupportedChangeException {
+    public String[] generateStatements(Database database) throws UnsupportedChangeException {
         if (database instanceof MSSQLDatabase) {
             return new String[]{"exec sp_rename '" + oldViewName + "', " + newViewName};
         } else if (database instanceof MySQLDatabase) {
@@ -47,12 +47,12 @@ public class RenameViewChange extends AbstractChange {
         return new String[]{"RENAME " + oldViewName + " TO " + newViewName};
     }
 
-    protected AbstractChange[] createInverses() {
+    protected Change[] createInverses() {
         RenameViewChange inverse = new RenameViewChange();
         inverse.setOldViewName(getNewViewName());
         inverse.setNewViewName(getOldViewName());
 
-        return new AbstractChange[]{
+        return new Change[]{
                 inverse
         };
     }

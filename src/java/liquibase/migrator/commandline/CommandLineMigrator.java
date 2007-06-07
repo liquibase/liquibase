@@ -1,9 +1,9 @@
 package liquibase.migrator.commandline;
 
-import liquibase.util.StreamUtil;
 import liquibase.migrator.DatabaseChangeLogLock;
 import liquibase.migrator.MigrationFailedException;
 import liquibase.migrator.Migrator;
+import liquibase.util.StreamUtil;
 
 import java.io.*;
 import java.lang.reflect.Field;

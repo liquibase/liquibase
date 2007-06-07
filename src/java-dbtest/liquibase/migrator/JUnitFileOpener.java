@@ -3,9 +3,9 @@ package liquibase.migrator;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.net.URI;
 import java.util.Enumeration;
 
 public class JUnitFileOpener implements FileOpener {

@@ -2,9 +2,9 @@ package liquibase.migrator;
 
 import java.io.File;
 import java.io.FilenameFilter;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 

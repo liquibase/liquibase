@@ -1,6 +1,6 @@
 package liquibase.migrator.change;
 
-import liquibase.database.AbstractDatabase;
+import liquibase.database.Database;
 import liquibase.database.MySQLDatabase;
 import liquibase.migrator.UnsupportedChangeException;
 import org.w3c.dom.Document;
@@ -33,7 +33,7 @@ public class DropForeignKeyConstraintChange extends AbstractChange {
         this.constraintName = constraintName;
     }
 
-    public String[] generateStatements(AbstractDatabase database) throws UnsupportedChangeException {
+    public String[] generateStatements(Database database) throws UnsupportedChangeException {
         if (database instanceof MySQLDatabase) {
             return new String[]{ "ALTER TABLE " + getBaseTableName() + " DROP FOREIGN KEY " + getConstraintName(), };
         }

@@ -1,6 +1,6 @@
 package liquibase.migrator.change;
 
-import liquibase.database.AbstractDatabase;
+import liquibase.database.Database;
 import liquibase.migrator.UnsupportedChangeException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -22,7 +22,7 @@ public class CreateTableChange extends AbstractChange {
         columns = new ArrayList<ColumnConfig>();
     }
 
-    public String[] generateStatements(AbstractDatabase database) throws UnsupportedChangeException {
+    public String[] generateStatements(Database database) throws UnsupportedChangeException {
         StringBuffer fkConstraints = new StringBuffer();
 
         StringBuffer buffer = new StringBuffer();
@@ -90,11 +90,11 @@ public class CreateTableChange extends AbstractChange {
         return new String[]{buffer.toString().trim()};
     }
 
-    protected AbstractChange[] createInverses() {
+    protected Change[] createInverses() {
         DropTableChange inverse = new DropTableChange();
         inverse.setTableName(getTableName());
 
-        return new AbstractChange[]{
+        return new Change[]{
                 inverse
         };
     }

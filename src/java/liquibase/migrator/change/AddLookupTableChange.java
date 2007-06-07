@@ -1,6 +1,6 @@
 package liquibase.migrator.change;
 
-import liquibase.database.AbstractDatabase;
+import liquibase.database.Database;
 import liquibase.database.MSSQLDatabase;
 import liquibase.migrator.UnsupportedChangeException;
 import org.w3c.dom.Document;
@@ -83,7 +83,7 @@ public class AddLookupTableChange extends AbstractChange {
         this.constraintName = constraintName;
     }
 
-    protected AbstractChange[] createInverses() {
+    protected Change[] createInverses() {
         DropForeignKeyConstraintChange dropFK = new DropForeignKeyConstraintChange();
         dropFK.setBaseTableName(getExistingTableName());
         dropFK.setConstraintName(getFinalConstraintName());
@@ -91,13 +91,13 @@ public class AddLookupTableChange extends AbstractChange {
         DropTableChange dropTable = new DropTableChange();
         dropTable.setTableName(getNewTableName());
 
-        return new AbstractChange[]{
+        return new Change[]{
                 dropFK,
                 dropTable,
         };
     }
 
-    public String[] generateStatements(AbstractDatabase database) throws UnsupportedChangeException {
+    public String[] generateStatements(Database database) throws UnsupportedChangeException {
         List<String> statements = new ArrayList<String>();
 
         String createTablesSQL = "CREATE TABLE " + getNewTableName() + " AS SELECT DISTINCT " + getExistingColumnName() + " AS " + getNewColumnName() + " FROM " + getExistingTableName() + " WHERE " + getExistingColumnName() + " IS NOT NULL";

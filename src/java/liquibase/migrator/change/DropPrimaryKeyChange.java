@@ -1,6 +1,6 @@
 package liquibase.migrator.change;
 
-import liquibase.database.AbstractDatabase;
+import liquibase.database.Database;
 import liquibase.database.MSSQLDatabase;
 import liquibase.database.PostgresDatabase;
 import liquibase.migrator.UnsupportedChangeException;
@@ -34,7 +34,7 @@ public class DropPrimaryKeyChange extends AbstractChange {
         this.constraintName = constraintName;
     }
 
-    public String[] generateStatements(AbstractDatabase database) throws UnsupportedChangeException {
+    public String[] generateStatements(Database database) throws UnsupportedChangeException {
         if (database instanceof MSSQLDatabase) {
             return generateMSSQLStatements();
         } else if (database instanceof PostgresDatabase) {

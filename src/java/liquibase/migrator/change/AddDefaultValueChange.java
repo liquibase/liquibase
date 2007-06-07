@@ -1,6 +1,6 @@
 package liquibase.migrator.change;
 
-import liquibase.database.AbstractDatabase;
+import liquibase.database.Database;
 import liquibase.database.MSSQLDatabase;
 import liquibase.database.MySQLDatabase;
 import liquibase.database.OracleDatabase;
@@ -44,7 +44,7 @@ public class AddDefaultValueChange extends AbstractChange {
         this.defaultValue = defaultValue;
     }
 
-    public String[] generateStatements(AbstractDatabase database) throws UnsupportedChangeException {
+    public String[] generateStatements(Database database) throws UnsupportedChangeException {
         if (database instanceof MSSQLDatabase) {
             return new String[]{ "ALTER TABLE " + getTableName() + " WITH NOCHECK ADD CONSTRAINT " + getColumnName() + "DefaultValue DEFAULT '" + getDefaultValue() + "' FOR " + getColumnName(), };
         } else if (database instanceof MySQLDatabase) {
@@ -58,12 +58,12 @@ public class AddDefaultValueChange extends AbstractChange {
         };
     }
 
-    protected AbstractChange[] createInverses() {
+    protected Change[] createInverses() {
         DropDefaultValueChange inverse = new DropDefaultValueChange();
         inverse.setTableName(getTableName());
         inverse.setColumnName(getColumnName());
 
-        return new AbstractChange[]{
+        return new Change[]{
                 inverse
         };
     }

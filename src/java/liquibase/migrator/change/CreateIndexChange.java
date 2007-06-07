@@ -1,6 +1,6 @@
 package liquibase.migrator.change;
 
-import liquibase.database.AbstractDatabase;
+import liquibase.database.Database;
 import liquibase.migrator.UnsupportedChangeException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -52,7 +52,7 @@ public class CreateIndexChange extends AbstractChange {
         columns.add(column);
     }
 
-    public String[] generateStatements(AbstractDatabase database) throws UnsupportedChangeException {
+    public String[] generateStatements(Database database) throws UnsupportedChangeException {
         StringBuffer buffer = new StringBuffer();
         buffer.append("CREATE INDEX ");
         buffer.append(getIndexName()).append(" ON ");
@@ -69,12 +69,12 @@ public class CreateIndexChange extends AbstractChange {
         return new String []{buffer.toString()};
     }
 
-    protected AbstractChange[] createInverses() {
+    protected Change[] createInverses() {
         DropIndexChange inverse = new DropIndexChange();
         inverse.setTableName(getTableName());
         inverse.setIndexName(getIndexName());
 
-        return new AbstractChange[]{
+        return new Change[]{
                 inverse
         };
     }

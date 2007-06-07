@@ -1,16 +1,16 @@
 package liquibase.change;
 
 import junit.framework.TestCase;
-import liquibase.migrator.parser.ChangeFactory;
-import liquibase.migrator.change.AbstractChange;
+import liquibase.migrator.change.Change;
 import liquibase.migrator.change.CreateTableChange;
+import liquibase.migrator.parser.ChangeFactory;
 
 public class ChangeFactoryTest extends TestCase {
 
     public void testCreate() {
         ChangeFactory factory = new ChangeFactory();
 
-        AbstractChange createTableChange = factory.create("createTable");
+        Change createTableChange = factory.create("createTable");
         assertEquals(CreateTableChange.class, createTableChange.getClass());
 
 

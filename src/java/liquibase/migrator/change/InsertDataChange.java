@@ -1,6 +1,6 @@
 package liquibase.migrator.change;
 
-import liquibase.database.AbstractDatabase;
+import liquibase.database.Database;
 import liquibase.migrator.UnsupportedChangeException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -46,7 +46,7 @@ public class InsertDataChange extends AbstractChange {
         columns.remove(column);
     }
 
-    public String[] generateStatements(AbstractDatabase database) throws UnsupportedChangeException {
+    public String[] generateStatements(Database database) throws UnsupportedChangeException {
         StringBuffer buffer = new StringBuffer();
         buffer.append("INSERT INTO ").append(getTableName()).append(" ");
         Iterator iterator = columns.iterator();
@@ -75,7 +75,7 @@ public class InsertDataChange extends AbstractChange {
         return new String[]{buffer.toString()};
     }
 
-    private String getColumnValue(ColumnConfig column, AbstractDatabase database) {
+    private String getColumnValue(ColumnConfig column, Database database) {
         if (column.getValue() != null) {
             return "'"+column.getValue().replaceAll("'","''")+"'";
         } else if (column.getValueNumeric() != null) {

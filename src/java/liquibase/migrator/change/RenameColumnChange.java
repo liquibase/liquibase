@@ -1,6 +1,6 @@
 package liquibase.migrator.change;
 
-import liquibase.database.AbstractDatabase;
+import liquibase.database.Database;
 import liquibase.database.MSSQLDatabase;
 import liquibase.database.MySQLDatabase;
 import liquibase.migrator.UnsupportedChangeException;
@@ -52,7 +52,7 @@ public class RenameColumnChange extends AbstractChange {
         this.columnDataType = columnDataType;
     }
 
-    public String[] generateStatements(AbstractDatabase database) throws UnsupportedChangeException {
+    public String[] generateStatements(Database database) throws UnsupportedChangeException {
         if (database instanceof MSSQLDatabase) {
             return new String[]{"exec sp_rename '" + tableName + "." + oldColumnName + "', " + newColumnName};
         } else if (database instanceof MySQLDatabase) {
@@ -66,14 +66,14 @@ public class RenameColumnChange extends AbstractChange {
         return new String[]{"ALTER TABLE " + tableName + " RENAME COLUMN " + oldColumnName + " TO " + newColumnName};
     }
 
-    protected AbstractChange[] createInverses() {
+    protected Change[] createInverses() {
         RenameColumnChange inverse = new RenameColumnChange();
         inverse.setTableName(getTableName());
         inverse.setOldColumnName(getNewColumnName());
         inverse.setNewColumnName(getOldColumnName());
         inverse.setColumnDataType(getColumnDataType());
 
-        return new AbstractChange[]{
+        return new Change[]{
                 inverse
         };
     }

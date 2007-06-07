@@ -1,14 +1,6 @@
 package liquibase.migrator.preconditions;
 
-import liquibase.database.MSSQLDatabase;
-import liquibase.database.MySQLDatabase;
-import liquibase.database.OracleDatabase;
-import liquibase.database.PostgresDatabase;
 import liquibase.migrator.Migrator;
-
-import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Precondition for specifying the type of database (oracle, mysql, etc.).

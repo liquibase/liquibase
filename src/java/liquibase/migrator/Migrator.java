@@ -1,18 +1,18 @@
 package liquibase.migrator;
 
-import liquibase.util.StreamUtil;
 import liquibase.database.*;
 import liquibase.migrator.parser.*;
+import liquibase.util.StreamUtil;
 import org.xml.sax.*;
 
+import javax.swing.*;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
-import javax.swing.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Writer;
-import java.net.URL;
 import java.net.URI;
+import java.net.URL;
 import java.sql.*;
 import java.text.DateFormat;
 import java.util.*;
@@ -64,7 +64,7 @@ public class Migrator {
     private String rollbackToTag;
     private Integer rollbackCount;
 
-    private AbstractDatabase database;
+    private Database database;
     private Logger log;
     private Set<String> contexts = new HashSet<String>();
 
@@ -161,7 +161,7 @@ public class Migrator {
      */
     public void init(Connection connection) throws SQLException, MigrationFailedException {
         // Array Of all the implemented databases
-        AbstractDatabase[] implementedDatabases = getImplementedDatabases();
+        Database[] implementedDatabases = getImplementedDatabases();
 
         boolean foundImplementation = false;
         for (int i = 0; i < implementedDatabases.length; i++) {
@@ -181,8 +181,8 @@ public class Migrator {
     /**
      * Returns instances of all implemented database types.
      */
-    public AbstractDatabase[] getImplementedDatabases() {
-        return new AbstractDatabase[]{
+    public Database[] getImplementedDatabases() {
+        return new Database[]{
                 new OracleDatabase(),
                 new PostgresDatabase(),
                 new MSSQLDatabase(),
@@ -191,7 +191,7 @@ public class Migrator {
     }
 
     /**
-     * Returns the ChangeFactory for converting tag strings to AbstractChange implementations.
+     * Returns the ChangeFactory for converting tag strings to Change implementations.
      */
     public ChangeFactory getChangeFactory() {
         return changeFactory;
@@ -201,7 +201,7 @@ public class Migrator {
         return buildVersion;
     }
 
-    public AbstractDatabase getDatabase() {
+    public Database getDatabase() {
         return database;
     }
 

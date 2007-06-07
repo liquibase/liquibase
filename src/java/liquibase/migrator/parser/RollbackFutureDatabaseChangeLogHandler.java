@@ -1,8 +1,7 @@
 package liquibase.migrator.parser;
 
-import liquibase.migrator.preconditions.PreconditionFailedException;
-import liquibase.migrator.parser.BaseChangeLogHandler;
 import liquibase.migrator.*;
+import liquibase.migrator.preconditions.PreconditionFailedException;
 
 import java.io.IOException;
 import java.sql.SQLException;

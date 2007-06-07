@@ -20,7 +20,7 @@ import java.util.logging.Logger;
  * The physical connection can be retrieved from the AbstractDatabase implementation, as well as any
  * database-specific characteristics such as the datatype for "boolean" fields.
  */
-public abstract class AbstractDatabase {
+public abstract class AbstractDatabase implements Database {
 
     private Connection connection;
     protected Logger log;
@@ -34,11 +34,6 @@ public abstract class AbstractDatabase {
     }
 
     // ------- DATABASE INFORMATION METHODS ---- //
-
-    /**
-     * Is this AbstractDatabase subclass the correct one to use for the given connection.
-     */
-    public abstract boolean isCorrectDatabaseImplementation(Connection conn) throws SQLException;
 
     public Connection getConnection() {
         return connection;
@@ -58,17 +53,6 @@ public abstract class AbstractDatabase {
             throw new RuntimeException("Cannot get database name");
         }
     }
-
-    /**
-     * Returns the full database product name.  May be different than what the JDBC connection reports (getDatabaseProductName())
-     */
-    public abstract String getProductName();
-
-    /**
-     * Returns an all-lower-case short name of the product.  Used for end-user selecting of database type
-     * such as the DBMS precondition.
-     */
-    public abstract String getTypeName();
 
     public String getDriverName() throws SQLException {
         return connection.getMetaData().getDriverName();
@@ -105,11 +89,6 @@ public abstract class AbstractDatabase {
      * Does the database type support sequence.
      */
     protected abstract boolean supportsSequences();
-
-    /**
-     * Returns whether this database support initially deferrable columns.
-     */
-    public abstract boolean supportsInitiallyDeferrableColumns();
 
 
     // ------- DATABASE-SPECIFIC SQL METHODS ---- //
@@ -185,11 +164,6 @@ public abstract class AbstractDatabase {
      * Returns the actual database-specific data type to use a "datetime" column.
      */
     protected abstract String getDateTimeType();
-
-    /**
-     * Returns database-specific function for generating the current date/time.
-     */
-    public abstract String getCurrentDateTimeFunction();
 
     /**
      * Returns database-specific line comment string.

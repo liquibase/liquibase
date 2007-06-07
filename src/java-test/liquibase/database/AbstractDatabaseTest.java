@@ -80,7 +80,7 @@ public abstract class AbstractDatabaseTest extends TestCase {
         replay(connection);
         replay(metaData);
 
-        AbstractDatabase database = getDatabase();
+        Database database = getDatabase();
         database.setConnection(connection);
 
         assertEquals("DriverNameHere", database.getDriverName());
@@ -95,7 +95,7 @@ public abstract class AbstractDatabaseTest extends TestCase {
         replay(connection);
         replay(metaData);
 
-        AbstractDatabase database = getDatabase();
+        Database database = getDatabase();
         database.setConnection(connection);
 
         assertEquals("URLHere", database.getConnectionURL());
@@ -110,7 +110,7 @@ public abstract class AbstractDatabaseTest extends TestCase {
         replay(connection);
         replay(metaData);
 
-        AbstractDatabase database = getDatabase();
+        Database database = getDatabase();
         database.setConnection(connection);
 
         assertEquals("usernameHere", database.getConnectionUsername());

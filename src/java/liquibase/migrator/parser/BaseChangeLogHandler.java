@@ -1,10 +1,10 @@
 package liquibase.migrator.parser;
 
+import liquibase.migrator.*;
 import liquibase.migrator.change.*;
 import liquibase.migrator.preconditions.*;
-import liquibase.migrator.*;
-import liquibase.util.StringUtils;
 import liquibase.util.StreamUtil;
+import liquibase.util.StringUtils;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
@@ -13,8 +13,8 @@ import java.io.IOException;
 import java.io.Writer;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.sql.SQLException;
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -29,7 +29,7 @@ public abstract class BaseChangeLogHandler extends DefaultHandler {
     protected Logger log;
 
     private DatabaseChangeLog changeLog;
-    private AbstractChange change;
+    private Change change;
     private StringBuffer text;
     private PreconditionSet precondition;
     private ChangeSet changeSet;

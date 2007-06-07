@@ -1,7 +1,7 @@
 package liquibase.migrator;
 
 import junit.framework.TestCase;
-import liquibase.database.AbstractDatabase;
+import liquibase.database.Database;
 import liquibase.database.MSSQLDatabase;
 import liquibase.database.OracleDatabase;
 import liquibase.database.PostgresDatabase;
@@ -55,14 +55,14 @@ public class MigratorTest extends TestCase {
 
     public void testGetImplementedDatabases() throws Exception {
         Migrator migrator = new Migrator(null, new ClassLoaderFileOpener());
-        List<AbstractDatabase> abstractDatabases = Arrays.asList(migrator.getImplementedDatabases());
-        assertEquals(4, abstractDatabases.size());
+        List<Database> databases = Arrays.asList(migrator.getImplementedDatabases());
+        assertEquals(4, databases.size());
 
         boolean foundOracle = false;
         boolean foundPostgres = false;
         boolean foundMSSQL = false;
 
-        for (AbstractDatabase db : abstractDatabases) {
+        for (Database db : databases) {
             if (db instanceof OracleDatabase) {
                 foundOracle = true;
             } else if (db instanceof PostgresDatabase) {
@@ -219,7 +219,7 @@ public class MigratorTest extends TestCase {
 
     private class TestMigrator extends Migrator {
         private String url;
-        private AbstractDatabase database;
+        private Database database;
         private InputStream inputStream;
 
         public TestMigrator() {
@@ -228,7 +228,7 @@ public class MigratorTest extends TestCase {
             replay(inputStream);
         }
 
-        public AbstractDatabase getDatabase() {
+        public Database getDatabase() {
             if (database == null) {
                 database = new OracleDatabase() {
                     public String getConnectionURL() {
@@ -243,13 +243,13 @@ public class MigratorTest extends TestCase {
             return database;
         }
 
-        public void setDatabase(AbstractDatabase database) {
+        public void setDatabase(Database database) {
             this.database = database;
         }
 
 
-        public AbstractDatabase[] getImplementedDatabases() {
-            AbstractDatabase mockDatabase = createMock(AbstractDatabase.class);
+        public Database[] getImplementedDatabases() {
+            Database mockDatabase = createMock(Database.class);
             try {
 
                 expect(mockDatabase.isCorrectDatabaseImplementation(null)).andReturn(true).atLeastOnce();
@@ -258,7 +258,7 @@ public class MigratorTest extends TestCase {
                 expect(mockDatabase.getConnection()).andReturn(connectionForConstructor);
                 replay(mockDatabase);
 
-                return new AbstractDatabase[]{
+                return new Database[]{
                         mockDatabase,
                 };
             } catch (SQLException e) {

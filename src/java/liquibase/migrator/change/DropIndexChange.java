@@ -1,6 +1,6 @@
 package liquibase.migrator.change;
 
-import liquibase.database.AbstractDatabase;
+import liquibase.database.Database;
 import liquibase.database.MSSQLDatabase;
 import liquibase.database.MySQLDatabase;
 import liquibase.database.OracleDatabase;
@@ -36,7 +36,7 @@ public class DropIndexChange extends AbstractChange {
         this.tableName = tableName;
     }
 
-    public String[] generateStatements(AbstractDatabase database) throws UnsupportedChangeException {
+    public String[] generateStatements(Database database) throws UnsupportedChangeException {
         if (database instanceof MySQLDatabase) {
             return new String[]{"DROP INDEX " + indexName + " ON " + tableName};
         } else if (database instanceof MSSQLDatabase) {

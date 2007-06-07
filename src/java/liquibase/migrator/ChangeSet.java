@@ -1,9 +1,9 @@
 package liquibase.migrator;
 
-import liquibase.util.StreamUtil;
-import liquibase.migrator.change.AbstractChange;
-import liquibase.util.StringUtils;
+import liquibase.migrator.change.Change;
 import liquibase.util.MD5Util;
+import liquibase.util.StreamUtil;
+import liquibase.util.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -26,7 +26,7 @@ public class ChangeSet {
     public enum RunStatus {
         NOT_RAN, ALREADY_RAN, RUN_AGAIN }
 
-    private List<AbstractChange> refactorings;
+    private List<Change> changes;
     private String id;
     private String author;
     private DatabaseChangeLog databaseChangeLog;
@@ -49,7 +49,7 @@ public class ChangeSet {
     }
 
     public ChangeSet(String id, String author, boolean alwaysRun, boolean runOnChange, DatabaseChangeLog databaseChangeLog, String context) {
-        this.refactorings = new ArrayList<AbstractChange>();
+        this.changes = new ArrayList<Change>();
         log = Logger.getLogger(Migrator.DEFAULT_LOG_NAME);
         this.id = id;
         this.author = author;
@@ -73,7 +73,7 @@ public class ChangeSet {
     public String getMd5sum() {
         if (md5sum == null) {
             StringBuffer stringToMD5 = new StringBuffer();
-            for (AbstractChange change : getRefactorings()) {
+            for (Change change : getChanges()) {
                 stringToMD5.append(change.getMD5Sum()).append(":");
             }
 
@@ -93,7 +93,7 @@ public class ChangeSet {
             Writer outputSQLWriter = getDatabaseChangeLog().getMigrator().getOutputSQLWriter();
             if (migrator.getMode().equals(Migrator.Mode.EXECUTE_MODE)) {
                 log.finest("Reading ChangeSet: " + toString());
-                for (AbstractChange change : getRefactorings()) {
+                for (Change change : getChanges()) {
                     change.executeStatements(migrator.getDatabase());
                     log.finest(change.getConfirmationMessage());
                 }
@@ -103,7 +103,7 @@ public class ChangeSet {
             } else if (migrator.getMode().equals(Migrator.Mode.OUTPUT_SQL_MODE)) {
                 outputSQLWriter.write("-- Changeset " + toString() + StreamUtil.getLineSeparator());
                 writeComments(outputSQLWriter);
-                for (AbstractChange change : getRefactorings()) {
+                for (Change change : getChanges()) {
                     change.saveStatements(getDatabaseChangeLog().getMigrator().getDatabase(), outputSQLWriter);
                 }
 //                outputSQLWriter.write(getDatabaseChangeLog().getMigrator().getDatabase().getCommitSQL()+";"+StreamUtil.getLineSeparator()+StreamUtil.getLineSeparator());
@@ -121,9 +121,9 @@ public class ChangeSet {
                     statement.close();
 
                 } else {
-                    List<AbstractChange> refactorings = getRefactorings();
+                    List<Change> refactorings = getChanges();
                     for (int i = refactorings.size() - 1; i >= 0; i--) {
-                        AbstractChange change = refactorings.get(i);
+                        Change change = refactorings.get(i);
                         change.executeRollbackStatements(migrator.getDatabase());
                         log.finest(change.getConfirmationMessage());
                     }
@@ -141,8 +141,8 @@ public class ChangeSet {
                         outputSQLWriter.append(statement + ";" + StreamUtil.getLineSeparator() + StreamUtil.getLineSeparator());
                     }
                 } else {
-                    for (int i = refactorings.size() - 1; i >= 0; i--) {
-                        AbstractChange change = refactorings.get(i);
+                    for (int i = changes.size() - 1; i >= 0; i--) {
+                        Change change = changes.get(i);
                         change.saveRollbackStatement(getDatabaseChangeLog().getMigrator().getDatabase(), outputSQLWriter);
                     }
                 }
@@ -172,14 +172,14 @@ public class ChangeSet {
     }
 
     /**
-     * Returns an unmodifiable list of refactorings.  To add one, use the addRefactoing method.
+     * Returns an unmodifiable list of changes.  To add one, use the addRefactoing method.
      */
-    public List<AbstractChange> getRefactorings() {
-        return Collections.unmodifiableList(refactorings);
+    public List<Change> getChanges() {
+        return Collections.unmodifiableList(changes);
     }
 
-    public void addRefactoring(AbstractChange change) {
-        refactorings.add(change);
+    public void addRefactoring(Change change) {
+        changes.add(change);
     }
 
     public String getId() {
@@ -210,7 +210,7 @@ public class ChangeSet {
         Element node = currentChangeLogDOM.createElement("changeSet");
         node.setAttribute("id", getId());
         node.setAttribute("author", getAuthor());
-        for (AbstractChange change : getRefactorings()) {
+        for (Change change : getChanges()) {
             node.appendChild(change.createNode(currentChangeLogDOM));
         }
         return node;
@@ -231,7 +231,7 @@ public class ChangeSet {
             return true;
         }
 
-        for (AbstractChange change : getRefactorings()) {
+        for (Change change : getChanges()) {
             if (!change.canRollBack()) {
                 return false;
             }
@@ -240,7 +240,7 @@ public class ChangeSet {
     }
 
     public String getDescription() {
-        List<AbstractChange> refactorings = getRefactorings();
+        List<Change> refactorings = getChanges();
         if (refactorings.size() == 0) {
             return "Empty";
         }
@@ -248,7 +248,7 @@ public class ChangeSet {
         StringBuffer returnString = new StringBuffer();
         Class lastRefactoringClass = null;
         int refactoringCount = 0;
-        for (AbstractChange change : refactorings) {
+        for (Change change : refactorings) {
             if (change.getClass().equals(lastRefactoringClass)) {
                 refactoringCount++;
             } else if (refactoringCount > 1) {

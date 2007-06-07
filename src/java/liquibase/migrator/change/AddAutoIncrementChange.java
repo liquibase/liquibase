@@ -1,6 +1,6 @@
 package liquibase.migrator.change;
 
-import liquibase.database.AbstractDatabase;
+import liquibase.database.Database;
 import liquibase.database.MSSQLDatabase;
 import liquibase.database.OracleDatabase;
 import liquibase.database.PostgresDatabase;
@@ -47,7 +47,7 @@ public class AddAutoIncrementChange extends AbstractChange {
         this.columnDataType = columnDataType;
     }
 
-    public String[] generateStatements(AbstractDatabase database) throws UnsupportedChangeException {
+    public String[] generateStatements(Database database) throws UnsupportedChangeException {
         if (database instanceof OracleDatabase) {
             throw new UnsupportedChangeException("Oracle does not support auto-increment columns");
         } else if (database instanceof MSSQLDatabase) {

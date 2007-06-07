@@ -1,6 +1,6 @@
 package liquibase.migrator.change;
 
-import liquibase.database.AbstractDatabase;
+import liquibase.database.Database;
 import liquibase.database.MSSQLDatabase;
 import liquibase.database.MySQLDatabase;
 import liquibase.database.OracleDatabase;
@@ -35,7 +35,7 @@ public class DropDefaultValueChange extends AbstractChange {
         this.columnName = columnName;
     }
 
-    public String[] generateStatements(AbstractDatabase database) throws UnsupportedChangeException {
+    public String[] generateStatements(Database database) throws UnsupportedChangeException {
         if (database instanceof MSSQLDatabase) {
             //docs on how to at http://doc.ddart.net/mssql/sql70/de-dz_9.htm
             throw new UnsupportedChangeException("Dropping default values is not currently supported in MS-SQL");

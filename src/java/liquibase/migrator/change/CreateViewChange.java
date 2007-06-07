@@ -1,6 +1,6 @@
 package liquibase.migrator.change;
 
-import liquibase.database.AbstractDatabase;
+import liquibase.database.Database;
 import liquibase.migrator.UnsupportedChangeException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -33,7 +33,7 @@ public class CreateViewChange extends AbstractChange {
         this.selectQuery = selectQuery;
     }
 
-    public String[] generateStatements(AbstractDatabase database) throws UnsupportedChangeException {
+    public String[] generateStatements(Database database) throws UnsupportedChangeException {
         return new String[]{
                 "CREATE VIEW " + getViewName() + " AS " + selectQuery
         };
@@ -51,11 +51,11 @@ public class CreateViewChange extends AbstractChange {
         return element;
     }
 
-    protected AbstractChange[] createInverses() {
+    protected Change[] createInverses() {
         DropViewChange inverse = new DropViewChange();
         inverse.setViewName(getViewName());
 
-        return new AbstractChange[]{
+        return new Change[]{
                 inverse
         };
     }

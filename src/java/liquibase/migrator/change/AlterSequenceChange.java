@@ -1,6 +1,6 @@
 package liquibase.migrator.change;
 
-import liquibase.database.AbstractDatabase;
+import liquibase.database.Database;
 import liquibase.database.MSSQLDatabase;
 import liquibase.database.MySQLDatabase;
 import liquibase.database.OracleDatabase;
@@ -65,7 +65,7 @@ public class AlterSequenceChange extends AbstractChange {
         this.ordered = ordered;
     }
 
-    public String[] generateStatements(AbstractDatabase database) throws UnsupportedChangeException {
+    public String[] generateStatements(Database database) throws UnsupportedChangeException {
         if (database instanceof MySQLDatabase) {
             throw new UnsupportedChangeException("Sequences do not exist in MySQL");
         } else if (database instanceof MSSQLDatabase) {

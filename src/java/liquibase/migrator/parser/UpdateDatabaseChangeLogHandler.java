@@ -1,9 +1,8 @@
 package liquibase.migrator.parser;
 
+import liquibase.migrator.*;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
-import liquibase.migrator.parser.BaseChangeLogHandler;
-import liquibase.migrator.*;
 
 import java.io.IOException;
 import java.io.Writer;

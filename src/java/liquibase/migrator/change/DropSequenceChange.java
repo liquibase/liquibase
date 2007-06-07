@@ -1,6 +1,6 @@
 package liquibase.migrator.change;
 
-import liquibase.database.AbstractDatabase;
+import liquibase.database.Database;
 import liquibase.database.MSSQLDatabase;
 import liquibase.database.MySQLDatabase;
 import liquibase.migrator.UnsupportedChangeException;
@@ -26,7 +26,7 @@ public class DropSequenceChange extends AbstractChange {
         this.sequenceName = sequenceName;
     }
 
-    public String[] generateStatements(AbstractDatabase database) throws UnsupportedChangeException {
+    public String[] generateStatements(Database database) throws UnsupportedChangeException {
         if (database instanceof MSSQLDatabase) {
             throw new UnsupportedChangeException("Sequences not supported in MS SQL");
         } else if (database instanceof MySQLDatabase) {

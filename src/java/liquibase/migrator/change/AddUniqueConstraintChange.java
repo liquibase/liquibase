@@ -1,6 +1,6 @@
 package liquibase.migrator.change;
 
-import liquibase.database.AbstractDatabase;
+import liquibase.database.Database;
 import liquibase.migrator.UnsupportedChangeException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -42,7 +42,7 @@ public class AddUniqueConstraintChange extends AbstractChange {
         this.constraintName = constraintName;
     }
 
-    public String[] generateStatements(AbstractDatabase database) throws UnsupportedChangeException {
+    public String[] generateStatements(Database database) throws UnsupportedChangeException {
         return new String[]{
                 "ALTER TABLE " + getTableName() + " ADD CONSTRAINT " + getConstraintName() + " UNIQUE (" + getColumnNames() + ")"
         };
@@ -52,12 +52,12 @@ public class AddUniqueConstraintChange extends AbstractChange {
         return "Unique Constraint Added";
     }
 
-    protected AbstractChange[] createInverses() {
+    protected Change[] createInverses() {
         DropUniqueConstraintChange inverse = new DropUniqueConstraintChange();
         inverse.setTableName(getTableName());
         inverse.setConstraintName(getConstraintName());
 
-        return new AbstractChange[]{
+        return new Change[]{
                 inverse,
         };
     }

@@ -6,11 +6,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Factory class for constructing the correct liquibase.migrator.change.AbstractChange implementation based on the tag name.
- * It is currently implemented by a static array of AbstractChange implementations, although that may change in
+ * Factory class for constructing the correct liquibase.migrator.change.Change implementation based on the tag name.
+ * It is currently implemented by a static array of Change implementations, although that may change in
  * later revisions.  The best way to get an instance of ChangeFactory is off the Migrator.getChangeFactory() method.
  *
- * @see liquibase.migrator.change.AbstractChange
+ * @see liquibase.migrator.change.Change
  * @see liquibase.migrator.Migrator#getChangeFactory()
  */
 public class ChangeFactory {
@@ -54,7 +54,7 @@ public class ChangeFactory {
 
         try {
             for (Class refactoringClass : refactorings) {
-                AbstractChange change = (AbstractChange) refactoringClass.newInstance();
+                Change change = (Change) refactoringClass.newInstance();
                 tagToClassMap.put(change.getTagName(), refactoringClass);
             }
         } catch (Exception e) {
@@ -63,15 +63,15 @@ public class ChangeFactory {
     }
 
     /**
-     * Create a new AbstractChange subclass based on the given tag name.
+     * Create a new Change subclass based on the given tag name.
      */
-    public AbstractChange create(String tagName) {
+    public Change create(String tagName) {
         Class aClass = tagToClassMap.get(tagName);
         if (aClass == null) {
             throw new RuntimeException("Unknown tag: " + tagName);
         }
         try {
-            return (AbstractChange) aClass.newInstance();
+            return (Change) aClass.newInstance();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

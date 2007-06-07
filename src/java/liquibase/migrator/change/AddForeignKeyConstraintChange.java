@@ -1,6 +1,6 @@
 package liquibase.migrator.change;
 
-import liquibase.database.AbstractDatabase;
+import liquibase.database.Database;
 import liquibase.migrator.UnsupportedChangeException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -80,7 +80,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
         this.initiallyDeferred = initiallyDeferred;
     }
 
-    public String[] generateStatements(AbstractDatabase database) throws UnsupportedChangeException {
+    public String[] generateStatements(Database database) throws UnsupportedChangeException {
         String[] statements = new String[]{
                 "ALTER TABLE " + getBaseTableName() + " ADD CONSTRAINT " + getConstraintName() + " FOREIGN KEY (" + getBaseColumnNames() + ") REFERENCES " + getReferencedTableName() + "(" + getReferencedColumnNames() + ")",
         };
@@ -97,12 +97,12 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
         return statements;
     }
 
-    protected AbstractChange[] createInverses() {
+    protected Change[] createInverses() {
         DropForeignKeyConstraintChange inverse = new DropForeignKeyConstraintChange();
         inverse.setBaseTableName(getBaseTableName());
         inverse.setConstraintName(getConstraintName());
 
-        return new AbstractChange[]{
+        return new Change[]{
                 inverse
         };
     }

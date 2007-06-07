@@ -1,6 +1,6 @@
 package liquibase.migrator;
 
-import liquibase.database.AbstractDatabase;
+import liquibase.database.Database;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -24,7 +24,7 @@ public class IncludeMigrator extends Migrator {
         setOutputSQLWriter(parentMigrator.getOutputSQLWriter());
     }
 
-    public AbstractDatabase getDatabase() {
+    public Database getDatabase() {
         return parentMigrator.getDatabase();
     }
 
