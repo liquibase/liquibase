@@ -61,7 +61,7 @@ public class PostgresDatabase extends AbstractDatabase {
     }
 
     protected String getDateTimeType() {
-        return "TIMESTAMP";
+        return "TIMEZONEZ";
     }
 
     protected boolean supportsSequences() {
@@ -69,7 +69,7 @@ public class PostgresDatabase extends AbstractDatabase {
     }
 
     public String getCurrentDateTimeFunction() {
-        return "CURRENT_DATE";
+        return "NOW()";
     }
 
     public String getSchemaName() throws SQLException {
