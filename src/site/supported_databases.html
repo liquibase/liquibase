@@ -20,28 +20,26 @@
             <div id="content">
                 <div class="entry">
                     <h2>Supported Databases</h2>
-                    <p>Unlike other database change tracking tools, LiquiBase will work with
-                        any JDBC-compliant database.</p>
                     <p>
-                        However, the refactoring tags (such as createTable) may need to generate different SQL for
-                        different database systems and have been primarily tested with Oracle, MySQL, PostgreSQL, and
-                        MS-SQL.  Improved database support will be a highlight of the pre-1.0 release process.
-
-                        <br/>
+                        Due to variations in data types and SQL syntax, the following databases are currently supported:
+                    </p>
+                    <table class="databaseCompatibiltyTable">
+                        <tr><th>MySQL</th><td>No Issues</td></tr>
+                        <tr><th>PostgreSQL</th><td>8.2+ is required to use the "drop all database objects" functionality.</td></tr>
+                        <tr><th>Oracle</th><td>No Issues</td></tr>
+                        <tr><th>MS-SQL</th><td>No Issues</td></tr>
+                    </table>
+                    <p>
+                        Additional database support will be a highlight of future releases.
                     </p>
                     <p>
-                        If you have problems with a particular tag on a particular database system,
+                        If you have problems with a particular tag on a particular database system or want to suggest
+                        support for a currently unsupported database,
                         <a href="community.html">please report the problem</a>
                     </p>
                     <p>
-                        If you find a problem with the generated SQL for your database, or if you are using an unsupported database,
-                        you can always use the <a href="manual/sql_tag.html">&lt;sql&gt;</a> tag to code whatever change you need to make,
-                        regardless of the DBMS.
-                    </p>
-                    <h2>Database Notes</h2>
-                    <h3>Postgres</h3>
-                    <p>
-                        Postgres 8.2 is required to use the "drop all database objects" functionality.
+                        If you find a problem with the generated SQL for your database,
+                        you can always use the <a href="manual/sql_tag.html">&lt;sql&gt;</a> tag to code whatever change you need to make.
                     </p>
                 </div>
             </div>

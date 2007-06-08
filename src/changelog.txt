@@ -6,6 +6,7 @@ Changes in version 1.0 RC1
 - Added batch/shell scripts for command line migrator
 - Improved documentation
 - Bug fixes
+- Blog started at http://blog.liquibase.org
 
 Changes in version 0.9.1 (2007.5.23)
 ------------------------------------

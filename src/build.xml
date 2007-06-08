@@ -323,14 +323,9 @@ urchinTracker();
             </classpath>
         </taskdef>
 
-        <copy tofile="${reports.dir}/doxygen/Doxyfile-${build.version}" file="Doxyfile" filtering="true" overwrite="yes">
-            <filterset>
-                <filter token="BUILD.VERSION" value="${build.version}"/>
-                <filter token="OUTPUT.DIRECTORY" value="${reports.dir}/doxygen"/>
-            </filterset>
-        </copy>
-
-        <doxygen configfilename="${reports.dir}/doxygen/Doxyfile-${build.version}" verbose="true"/>
+        <doxygen configfilename="${src.dir}/../Doxyfile" verbose="true">
+            <property name="PROJECT_NUMBER" value="${build.version}" />
+        </doxygen>
     </target>
 
 	<!-- target: JUNIT -->
