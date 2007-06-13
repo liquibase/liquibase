@@ -120,7 +120,7 @@ public class CommandLineMigrator {
                 || "listLocks".equals(arg)
                 || "dropAll".equals(arg)
                 || "releaseLocks".equals(arg)
-                || "changelogSyncSQL".equals(org);
+                || "changelogSyncSQL".equals(arg);
     }
 
     protected void parsePropertiesFile(InputStream propertiesInputStream) throws IOException, CommandLineParsingException {
