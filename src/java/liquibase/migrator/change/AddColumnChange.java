@@ -5,6 +5,10 @@ import liquibase.migrator.UnsupportedChangeException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Arrays;
+
 /**
  * Adds a column to an existing table.
  */
@@ -34,7 +38,35 @@ public class AddColumnChange extends AbstractChange {
     }
 
     public String[] generateStatements(Database database) throws UnsupportedChangeException {
-        return new String[]{"ALTER TABLE " + getTableName() + " ADD " + getColumn().getName() + " " + database.getColumnType(getColumn())};
+        List<String> sql = new ArrayList<String>();
+        sql.add("ALTER TABLE " + getTableName() + " ADD " + getColumn().getName() + " " + database.getColumnType(getColumn()));
+
+        if (getColumn().getDefaultValue() != null) {
+            AddDefaultValueChange change = new AddDefaultValueChange();
+            change.setTableName(getTableName());
+            change.setColumnName(getColumn().getName());
+            change.setDefaultValue(getColumn().getDefaultValue());
+
+            sql.addAll(Arrays.asList(change.generateStatements(database)));
+        }
+
+        if (getColumn().getConstraints().isPrimaryKey()) {
+            AddPrimaryKeyChange change = new AddPrimaryKeyChange();
+            change.setTableName(getTableName());
+            change.setColumnNames(getColumn().getName());
+
+            sql.addAll(Arrays.asList(change.generateStatements(database)));
+        }
+
+        if (getColumn().getConstraints().isNullable() != null && !getColumn().getConstraints().isNullable()) {
+            AddNotNullConstraintChange change = new AddNotNullConstraintChange();
+            change.setTableName(getTableName());
+            change.setColumnName(getColumn().getName());
+
+            sql.addAll(Arrays.asList(change.generateStatements(database)));
+        }
+
+        return sql.toArray(new String[sql.size()]);
     }
 
     protected Change[] createInverses() {
