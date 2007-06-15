@@ -20,6 +20,13 @@ public class AddColumnChangeTest extends AbstractChangeTest {
         ColumnConfig column = new ColumnConfig();
         column.setName("NEWCOL");
         column.setType("TYP");
+        
+        ConstraintsConfig constraints = new ConstraintsConfig();
+        constraints.setPrimaryKey(Boolean.FALSE);
+        constraints.setNullable(Boolean.FALSE);
+        
+        column.setConstraints(constraints);
+        
         refactoring.setColumn(column);
 
         assertEquals("ALTER TABLE TAB ADD NEWCOL TYP", refactoring.generateStatements(new OracleDatabase())[0]);
