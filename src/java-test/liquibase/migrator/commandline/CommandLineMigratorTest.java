@@ -125,29 +125,37 @@ public class CommandLineMigratorTest extends TestCase {
 
     public void testWindowsConfigureClassLoaderLocation() throws Exception {
         CommandLineMigrator cli = new CommandLineMigrator();
-        System.setProperty("os.name", "Windows XP");
-        cli.classpath = "c:\\;c:\\windows\\";
-        cli.applyDefaults();
-        cli.configureClassLoader();
-
-        URL[] classloaderURLs = ((URLClassLoader) cli.classLoader).getURLs();
-        assertEquals(2, classloaderURLs.length);
-        assertEquals("file:/c:/", classloaderURLs[0].toExternalForm());
-        assertEquals("file:/c:/windows/", classloaderURLs[1].toExternalForm());
+       
+        if (cli.isWindows())
+        {
+          System.setProperty("os.name", "Windows XP");
+          cli.classpath = "c:\\;c:\\windows\\";
+          cli.applyDefaults();
+          cli.configureClassLoader();
+  
+          URL[] classloaderURLs = ((URLClassLoader) cli.classLoader).getURLs();
+          assertEquals(2, classloaderURLs.length);
+          assertEquals("file:/c:/", classloaderURLs[0].toExternalForm());
+          assertEquals("file:/c:/windows/", classloaderURLs[1].toExternalForm());
+        }
     }
 
     public void testUNIXConfigureClassLoaderLocation() throws Exception {
         CommandLineMigrator cli = new CommandLineMigrator();
-        System.setProperty("os.name", "Linux");
-        cli.classpath = "/tmp:/";
-        cli.applyDefaults();
-
-        cli.configureClassLoader();
-
-        URL[] classloaderURLs = ((URLClassLoader) cli.classLoader).getURLs();
-        assertEquals(2, classloaderURLs.length);
-        assertEquals("file:/C:/tmp/", classloaderURLs[0].toExternalForm());
-        assertEquals("file:/C:/", classloaderURLs[1].toExternalForm());
+        
+        if (!cli.isWindows())
+        {        
+          System.setProperty("os.name", "Linux");
+          cli.classpath = "/tmp:/";
+          cli.applyDefaults();
+  
+          cli.configureClassLoader();
+  
+          URL[] classloaderURLs = ((URLClassLoader) cli.classLoader).getURLs();
+          assertEquals(2, classloaderURLs.length);
+          assertEquals("file:/tmp/", classloaderURLs[0].toExternalForm());
+          assertEquals("file:/", classloaderURLs[1].toExternalForm());
+        }
     }
 
 
