@@ -4,16 +4,16 @@ import java.util.Date;
 
 /**
  * Information about the database changelog lock which allows only one instance of LiquiBase to attempt to
- * update a database at a time.
+ * update a database at a time. Immutable class
  */
 public class DatabaseChangeLogLock {
-    private int id;
-    private Date lockGranted;
-    private String lockedBy;
+    private final int id;
+    private final Date lockGranted;
+    private final String lockedBy;
 
     public DatabaseChangeLogLock(int id, Date lockGranted, String lockedBy) {
         this.id = id;
-        this.lockGranted = lockGranted;
+        this.lockGranted = new Date(lockGranted.getTime());
         this.lockedBy = lockedBy;
     }
 
@@ -22,7 +22,7 @@ public class DatabaseChangeLogLock {
     }
 
     public Date getLockGranted() {
-        return lockGranted;
+        return (Date) lockGranted.clone();
     }
 
     public String getLockedBy() {

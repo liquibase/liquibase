@@ -232,11 +232,11 @@ public class Migrator {
      * Date to rollback to if executing in rollback mode.
      */
     public Date getRollbackToDate() {
-        return rollbackToDate;
+        return (Date) rollbackToDate.clone();
     }
 
     public void setRollbackToDate(Date rollbackToDate) {
-        this.rollbackToDate = rollbackToDate;
+        this.rollbackToDate = new Date(rollbackToDate.getTime());
     }
 
     /**

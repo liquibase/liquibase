@@ -6,19 +6,20 @@ import java.util.Date;
  * Encapsulates information about a previously-ran change set.  Used to build rollback statements. 
  */
 public class RanChangeSet {
-    private String changeLog;
-    private String id;
-    private String author;
-    private String md5sum;
-    private Date dateExecuted;
+    private final String changeLog;
+    private final String id;
+    private final String author;
+    private final String md5sum;
+    private final Date dateExecuted;
     private String tag;
 
     public RanChangeSet(ChangeSet changeSet) {
-        this.changeLog = changeSet.getDatabaseChangeLog().getFilePath();
-        this.id = changeSet.getId();
-        this.author = changeSet.getAuthor();
-        this.md5sum = changeSet.getMd5sum();
-        this.dateExecuted = new Date();
+        this(changeSet.getDatabaseChangeLog().getFilePath(),
+             changeSet.getId(),
+             changeSet.getAuthor(),
+             changeSet.getMd5sum(),
+             new Date(),
+             null);
     }
 
     public RanChangeSet(String changeLog, String id, String author, String md5sum, Date dateExecuted, String tag) {
@@ -26,7 +27,7 @@ public class RanChangeSet {
         this.id = id;
         this.author = author;
         this.md5sum = md5sum;
-        this.dateExecuted = dateExecuted;
+        this.dateExecuted = new Date(dateExecuted.getTime());
         this.tag = tag;
     }
 
@@ -47,7 +48,7 @@ public class RanChangeSet {
     }
 
     public Date getDateExecuted() {
-        return dateExecuted;
+        return (Date) dateExecuted.clone();
     }
 
     public String getTag() {
