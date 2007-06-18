@@ -1,6 +1,9 @@
 package liquibase.migrator.parser;
 
 import liquibase.migrator.*;
+import liquibase.migrator.exception.DatabaseHistoryException;
+import liquibase.migrator.exception.MigrationFailedException;
+import liquibase.migrator.exception.JDBCException;
 import liquibase.migrator.change.*;
 import liquibase.migrator.preconditions.*;
 import liquibase.util.StreamUtil;
@@ -243,7 +246,7 @@ public abstract class BaseChangeLogHandler extends DefaultHandler {
         }
     }
 
-    protected abstract void handleChangeSet(ChangeSet changeSet) throws SQLException, DatabaseHistoryException, MigrationFailedException, PreconditionFailedException, IOException;
+    protected abstract void handleChangeSet(ChangeSet changeSet) throws JDBCException, DatabaseHistoryException, MigrationFailedException, PreconditionFailedException, IOException;
 
     public void characters(char ch[], int start, int length) throws SAXException {
         if (text != null) {
@@ -255,7 +258,7 @@ public abstract class BaseChangeLogHandler extends DefaultHandler {
         return string.replaceAll("'", "''");
     }
 
-    protected void removeRanStatus(ChangeSet changeSet) throws SQLException, IOException {
+    protected void removeRanStatus(ChangeSet changeSet) throws JDBCException, IOException {
         Migrator migrator = changeSet.getDatabaseChangeLog().getMigrator();
         String sql = "DELETE FROM DATABASECHANGELOG WHERE ID='?' AND AUTHOR='?' AND FILENAME='?'";
         sql = sql.replaceFirst("\\?", escapeStringForDatabase(changeSet.getId()));
@@ -265,10 +268,14 @@ public abstract class BaseChangeLogHandler extends DefaultHandler {
         Writer sqlOutputWriter = migrator.getOutputSQLWriter();
         if (sqlOutputWriter == null) {
             Connection connection = migrator.getDatabase().getConnection();
-            Statement statement = connection.createStatement();
-            statement.executeUpdate(sql);
-            statement.close();
-            connection.commit();
+            try {
+                Statement statement = connection.createStatement();
+                statement.executeUpdate(sql);
+                statement.close();
+                connection.commit();
+            } catch (SQLException e) {
+                throw new JDBCException(e);
+            }
         } else {
             sqlOutputWriter.write(sql + ";" + StreamUtil.getLineSeparator() + StreamUtil.getLineSeparator());
         }

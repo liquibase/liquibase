@@ -1,6 +1,7 @@
 package liquibase.migrator.ant;
 
-import liquibase.migrator.MigrationFailedException;
+import liquibase.migrator.exception.MigrationFailedException;
+import liquibase.migrator.exception.JDBCException;
 import liquibase.migrator.Migrator;
 import org.apache.tools.ant.Task;
 import org.apache.tools.ant.types.Path;
@@ -89,7 +90,7 @@ public class BaseLiquibaseTask extends Task {
         createClasspath().setRefid(r);
     }
 
-    protected Migrator createMigrator() throws MalformedURLException, ClassNotFoundException, SQLException, MigrationFailedException, IllegalAccessException, InstantiationException {
+    protected Migrator createMigrator() throws MalformedURLException, ClassNotFoundException, JDBCException, SQLException, MigrationFailedException, IllegalAccessException, InstantiationException {
 
         String[] strings = classpath.list();
         List<URL> taskClassPath = new ArrayList<URL>();

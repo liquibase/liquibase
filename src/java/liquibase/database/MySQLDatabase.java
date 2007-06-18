@@ -1,6 +1,7 @@
 package liquibase.database;
 
-import liquibase.migrator.UnsupportedChangeException;
+import liquibase.migrator.exception.UnsupportedChangeException;
+import liquibase.migrator.exception.JDBCException;
 import liquibase.migrator.change.DropForeignKeyConstraintChange;
 
 import java.sql.*;
@@ -19,8 +20,8 @@ public class MySQLDatabase extends AbstractDatabase {
         return "mysql";
     }
 
-    public boolean isCorrectDatabaseImplementation(Connection conn) throws SQLException {
-        return PRODUCT_NAME.equalsIgnoreCase(conn.getMetaData().getDatabaseProductName());
+    public boolean isCorrectDatabaseImplementation(Connection conn) throws JDBCException {
+        return PRODUCT_NAME.equalsIgnoreCase(getDatabaseProductName(conn));
     }
 
     protected String getBooleanType() {
@@ -67,7 +68,7 @@ public class MySQLDatabase extends AbstractDatabase {
         return "DROP TABLE " + tableName;
     }
 
-    protected void dropForeignKeys(Connection conn) throws SQLException {
+    protected void dropForeignKeys(Connection conn) throws JDBCException {
         Statement dropStatement = null;
         PreparedStatement fkStatement = null;
         ResultSet rs = null;
@@ -86,18 +87,24 @@ public class MySQLDatabase extends AbstractDatabase {
                 try {
                     dropStatement.execute(dropFK.generateStatements(this)[0]);
                 } catch (UnsupportedChangeException e) {
-                    throw new SQLException(e.getMessage());
+                    throw new JDBCException(e.getMessage());
                 }
             }
+        } catch (SQLException e) {
+            throw new JDBCException(e);
         } finally {
-            if (dropStatement != null) {
-                dropStatement.close();
-            }
-            if (fkStatement != null) {
-                fkStatement.close();
-            }
-            if (rs != null) {
-                rs.close();
+            try {
+                if (dropStatement != null) {
+                    dropStatement.close();
+                }
+                if (fkStatement != null) {
+                    fkStatement.close();
+                }
+                if (rs != null) {
+                    rs.close();
+                }
+            } catch (SQLException e) {
+                throw new JDBCException(e);
             }
         }
 

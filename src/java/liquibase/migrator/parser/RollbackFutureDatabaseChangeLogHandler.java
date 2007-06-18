@@ -1,10 +1,14 @@
 package liquibase.migrator.parser;
 
-import liquibase.migrator.*;
+import liquibase.migrator.ChangeSet;
+import liquibase.migrator.Migrator;
+import liquibase.migrator.RanChangeSet;
+import liquibase.migrator.exception.DatabaseHistoryException;
+import liquibase.migrator.exception.JDBCException;
+import liquibase.migrator.exception.MigrationFailedException;
 import liquibase.migrator.preconditions.PreconditionFailedException;
 
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,13 +21,13 @@ public class RollbackFutureDatabaseChangeLogHandler extends BaseChangeLogHandler
     private List<ChangeSet> changesToRollback;
     private List<RanChangeSet> ranChangeSets;
 
-    public RollbackFutureDatabaseChangeLogHandler(Migrator migrator, String physicalFilePath) throws SQLException {
+    public RollbackFutureDatabaseChangeLogHandler(Migrator migrator, String physicalFilePath) throws JDBCException {
         super(migrator, physicalFilePath);
         changesToRollback = new ArrayList<ChangeSet>();
         ranChangeSets = migrator.getRanChangeSetList();
     }
 
-    protected void handleChangeSet(ChangeSet changeSet) throws SQLException, DatabaseHistoryException, MigrationFailedException, PreconditionFailedException, IOException {
+    protected void handleChangeSet(ChangeSet changeSet) throws JDBCException, DatabaseHistoryException, MigrationFailedException, PreconditionFailedException, IOException {
         boolean alreadyRan = false;
         for (RanChangeSet cs : ranChangeSets) {
             if (cs.isSameAs(changeSet)) {
@@ -36,7 +40,7 @@ public class RollbackFutureDatabaseChangeLogHandler extends BaseChangeLogHandler
         }
     }
 
-    public void doRollback() throws MigrationFailedException, DatabaseHistoryException, SQLException, IOException {
+    public void doRollback() throws MigrationFailedException, DatabaseHistoryException, JDBCException, IOException {
         for (ChangeSet changeSet : changesToRollback) {
             changeSet.execute();
             removeRanStatus(changeSet);

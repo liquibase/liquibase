@@ -2,7 +2,8 @@ package liquibase.migrator.change;
 
 import liquibase.database.Database;
 import liquibase.database.MSSQLDatabase;
-import liquibase.migrator.UnsupportedChangeException;
+import liquibase.database.OracleDatabase;
+import liquibase.migrator.exception.UnsupportedChangeException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -106,11 +107,13 @@ public class AddLookupTableChange extends AbstractChange {
         }
         statements.add(createTablesSQL);
 
-        AddNotNullConstraintChange addNotNullChange = new AddNotNullConstraintChange();
-        addNotNullChange.setTableName(getNewTableName());
-        addNotNullChange.setColumnName(getNewColumnName());
-        addNotNullChange.setColumnDataType(getNewColumnDataType());
-        statements.addAll(Arrays.asList(addNotNullChange.generateStatements(database)));
+        if (!(database instanceof OracleDatabase)) {
+            AddNotNullConstraintChange addNotNullChange = new AddNotNullConstraintChange();
+            addNotNullChange.setTableName(getNewTableName());
+            addNotNullChange.setColumnName(getNewColumnName());
+            addNotNullChange.setColumnDataType(getNewColumnDataType());
+            statements.addAll(Arrays.asList(addNotNullChange.generateStatements(database)));
+        }
 
         AddPrimaryKeyChange addPKChange = new AddPrimaryKeyChange();
         addPKChange.setTableName(getNewTableName());

@@ -1,6 +1,9 @@
 package liquibase.migrator;
 
 import liquibase.database.*;
+import liquibase.migrator.exception.DatabaseHistoryException;
+import liquibase.migrator.exception.JDBCException;
+import liquibase.migrator.exception.MigrationFailedException;
 import liquibase.migrator.parser.*;
 import liquibase.util.StreamUtil;
 import org.xml.sax.*;
@@ -159,22 +162,26 @@ public class Migrator {
     /**
      * Initializes the Migrator with the given connection.  Needs to be called before actually using the Migrator.
      */
-    public void init(Connection connection) throws SQLException, MigrationFailedException {
+    public void init(Connection connection) throws JDBCException, MigrationFailedException {
         // Array Of all the implemented databases
-        Database[] implementedDatabases = getImplementedDatabases();
+        try {
+            Database[] implementedDatabases = getImplementedDatabases();
 
-        boolean foundImplementation = false;
-        for (int i = 0; i < implementedDatabases.length; i++) {
-            database = implementedDatabases[i];
-            if (database.isCorrectDatabaseImplementation(connection)) {
-                database.setConnection(connection);
-                database.getConnection().setAutoCommit(false);
-                foundImplementation = true;
-                break;
+            boolean foundImplementation = false;
+            for (int i = 0; i < implementedDatabases.length; i++) {
+                database = implementedDatabases[i];
+                if (database.isCorrectDatabaseImplementation(connection)) {
+                    database.setConnection(connection);
+                    database.getConnection().setAutoCommit(false);
+                    foundImplementation = true;
+                    break;
+                }
             }
-        }
-        if (!foundImplementation) {
-            throw new MigrationFailedException("Unknown database: " + connection.getMetaData().getDatabaseProductName());
+            if (!foundImplementation) {
+                throw new MigrationFailedException("Unknown database: " + connection.getMetaData().getDatabaseProductName());
+            }
+        } catch (SQLException e) {
+            throw new JDBCException(e);
         }
     }
 
@@ -232,11 +239,17 @@ public class Migrator {
      * Date to rollback to if executing in rollback mode.
      */
     public Date getRollbackToDate() {
+        if (rollbackToDate == null) {
+            return null;
+        }
         return (Date) rollbackToDate.clone();
+
     }
 
     public void setRollbackToDate(Date rollbackToDate) {
-        this.rollbackToDate = new Date(rollbackToDate.getTime());
+        if (rollbackToDate != null) {
+            this.rollbackToDate = new Date(rollbackToDate.getTime());
+        }
     }
 
     /**
@@ -271,30 +284,34 @@ public class Migrator {
     /**
      * Returns the ChangeSets that have been run against the current database.
      */
-    public List<RanChangeSet> getRanChangeSetList() throws SQLException {
-        String databaseChangeLogTableName = getDatabase().getDatabaseChangeLogTableName();
-        if (ranChangeSetList == null) {
-            ranChangeSetList = new ArrayList<RanChangeSet>();
-            if (getDatabase().doesChangeLogTableExist()) {
-                log.info("Reading from " + databaseChangeLogTableName);
-                String sql = "SELECT * FROM " + databaseChangeLogTableName + " ORDER BY dateExecuted asc";
-                Statement statement = getDatabase().getConnection().createStatement();
-                ResultSet rs = statement.executeQuery(sql);
-                while (rs.next()) {
-                    String fileName = rs.getString("filename");
-                    String author = rs.getString("author");
-                    String id = rs.getString("id");
-                    String md5sum = rs.getString("md5sum");
-                    Date dateExecuted = rs.getTimestamp("dateExecuted");
-                    String tag = rs.getString("tag");
-                    RanChangeSet ranChangeSet = new RanChangeSet(fileName, id, author, md5sum, dateExecuted, tag);
-                    ranChangeSetList.add(ranChangeSet);
+    public List<RanChangeSet> getRanChangeSetList() throws JDBCException {
+        try {
+            String databaseChangeLogTableName = getDatabase().getDatabaseChangeLogTableName();
+            if (ranChangeSetList == null) {
+                ranChangeSetList = new ArrayList<RanChangeSet>();
+                if (getDatabase().doesChangeLogTableExist()) {
+                    log.info("Reading from " + databaseChangeLogTableName);
+                    String sql = "SELECT * FROM " + databaseChangeLogTableName + " ORDER BY dateExecuted asc";
+                    Statement statement = getDatabase().getConnection().createStatement();
+                    ResultSet rs = statement.executeQuery(sql);
+                    while (rs.next()) {
+                        String fileName = rs.getString("filename");
+                        String author = rs.getString("author");
+                        String id = rs.getString("id");
+                        String md5sum = rs.getString("md5sum");
+                        Date dateExecuted = rs.getTimestamp("dateExecuted");
+                        String tag = rs.getString("tag");
+                        RanChangeSet ranChangeSet = new RanChangeSet(fileName, id, author, md5sum, dateExecuted, tag);
+                        ranChangeSetList.add(ranChangeSet);
+                    }
+                    rs.close();
+                    statement.close();
                 }
-                rs.close();
-                statement.close();
             }
+            return ranChangeSetList;
+        } catch (SQLException e) {
+            throw new JDBCException(e);
         }
-        return ranChangeSetList;
     }
 
     /**
@@ -392,7 +409,7 @@ public class Migrator {
         }
     }
 
-    private boolean waitForLock() throws SQLException, MigrationFailedException, IOException {
+    private boolean waitForLock() throws JDBCException, MigrationFailedException, IOException {
         if (!hasChangeLogLock) {
             checkDatabaseChangeLogTable();
         }
@@ -467,7 +484,7 @@ public class Migrator {
      *
      * @throws MigrationFailedException
      */
-    public void forceReleaseLock() throws MigrationFailedException, SQLException, IOException {
+    public void forceReleaseLock() throws MigrationFailedException, JDBCException, IOException {
         checkDatabaseChangeLogTable();
 
         getDatabase().releaseLock();
@@ -481,7 +498,7 @@ public class Migrator {
     }
 
 
-    protected void checkDatabaseChangeLogTable() throws SQLException, IOException {
+    protected void checkDatabaseChangeLogTable() throws JDBCException, IOException {
         getDatabase().checkDatabaseChangeLogTable(this);
         getDatabase().checkDatabaseChangeLogLockTable(this);
     }
@@ -523,7 +540,7 @@ public class Migrator {
      * It is fine to run the migrator against a "non-safe" database, the method is mainly used to determine if the user
      * should be prompted before continuing.
      */
-    public boolean isSafeToRunMigration() throws SQLException {
+    public boolean isSafeToRunMigration() throws JDBCException {
         if (Mode.OUTPUT_SQL_MODE.equals(getMode()) || Mode.OUTPUT_CHANGELOG_ONLY_SQL_MODE.equals(getMode())) {
             return true;
         }
@@ -533,7 +550,7 @@ public class Migrator {
     /**
      * Display change log lock information.
      */
-    public DatabaseChangeLogLock[] listLocks() throws MigrationFailedException, SQLException, IOException {
+    public DatabaseChangeLogLock[] listLocks() throws MigrationFailedException, JDBCException, IOException {
         checkDatabaseChangeLogTable();
 
         return getDatabase().listLocks();
@@ -558,7 +575,7 @@ public class Migrator {
     /**
      * Returns the run status for the given ChangeSet
      */
-    public ChangeSet.RunStatus getRunStatus(ChangeSet changeSet) throws SQLException, DatabaseHistoryException {
+    public ChangeSet.RunStatus getRunStatus(ChangeSet changeSet) throws JDBCException, DatabaseHistoryException {
         if (!getDatabase().doesChangeLogTableExist()) {
             return ChangeSet.RunStatus.NOT_RAN;
         }
@@ -575,18 +592,22 @@ public class Migrator {
             return ChangeSet.RunStatus.NOT_RAN;
         } else {
             if (foundRan.getMd5sum() == null) {
-                log.info("Updating NULL md5sum for " + changeSet.toString());
-                Migrator migrator = changeSet.getDatabaseChangeLog().getMigrator();
-                Connection connection = migrator.getDatabase().getConnection();
-                PreparedStatement updatePstmt = connection.prepareStatement("update DatabaseChangeLog set md5sum=? where id=? AND author=? AND filename=?".toUpperCase());
-                updatePstmt.setString(1, changeSet.getMd5sum());
-                updatePstmt.setString(2, changeSet.getId());
-                updatePstmt.setString(3, changeSet.getAuthor());
-                updatePstmt.setString(4, changeSet.getDatabaseChangeLog().getFilePath());
+                try {
+                    log.info("Updating NULL md5sum for " + changeSet.toString());
+                    Migrator migrator = changeSet.getDatabaseChangeLog().getMigrator();
+                    Connection connection = migrator.getDatabase().getConnection();
+                    PreparedStatement updatePstmt = connection.prepareStatement("update DatabaseChangeLog set md5sum=? where id=? AND author=? AND filename=?".toUpperCase());
+                    updatePstmt.setString(1, changeSet.getMd5sum());
+                    updatePstmt.setString(2, changeSet.getId());
+                    updatePstmt.setString(3, changeSet.getAuthor());
+                    updatePstmt.setString(4, changeSet.getDatabaseChangeLog().getFilePath());
 
-                updatePstmt.executeUpdate();
-                updatePstmt.close();
-                connection.commit();
+                    updatePstmt.executeUpdate();
+                    updatePstmt.close();
+                    connection.commit();
+                } catch (SQLException e) {
+                    throw new JDBCException(e);
+                }
 
                 return ChangeSet.RunStatus.ALREADY_RAN;
             } else {
@@ -607,7 +628,7 @@ public class Migrator {
      * Displays swing-based dialog about running against a non-localhost database.
      * Returns true if the user selected that they are OK with that.
      */
-    public boolean swingPromptForNonLocalDatabase() throws SQLException {
+    public boolean swingPromptForNonLocalDatabase() throws JDBCException {
         return JOptionPane.showConfirmDialog(null, "You are running a database migration against a non-local database." + StreamUtil.getLineSeparator() +
                 "Database URL is: " + this.getDatabase().getConnectionURL() + StreamUtil.getLineSeparator() +
                 "Username is: " + this.getDatabase().getConnectionUsername() + StreamUtil.getLineSeparator() + StreamUtil.getLineSeparator() +

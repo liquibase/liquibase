@@ -1,7 +1,7 @@
 package liquibase.migrator.change;
 
 import liquibase.database.Database;
-import liquibase.migrator.UnsupportedChangeException;
+import liquibase.migrator.exception.UnsupportedChangeException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -50,20 +50,23 @@ public class AddColumnChange extends AbstractChange {
             sql.addAll(Arrays.asList(change.generateStatements(database)));
         }
 
-        if (getColumn().getConstraints().isPrimaryKey()) {
-            AddPrimaryKeyChange change = new AddPrimaryKeyChange();
-            change.setTableName(getTableName());
-            change.setColumnNames(getColumn().getName());
+        if (getColumn().getConstraints() != null) {
+            if (getColumn().getConstraints().isPrimaryKey() != null && getColumn().getConstraints().isPrimaryKey()) {
+                AddPrimaryKeyChange change = new AddPrimaryKeyChange();
+                change.setTableName(getTableName());
+                change.setColumnNames(getColumn().getName());
 
-            sql.addAll(Arrays.asList(change.generateStatements(database)));
-        }
+                sql.addAll(Arrays.asList(change.generateStatements(database)));
+            }
 
-        if (getColumn().getConstraints().isNullable() != null && !getColumn().getConstraints().isNullable()) {
-            AddNotNullConstraintChange change = new AddNotNullConstraintChange();
-            change.setTableName(getTableName());
-            change.setColumnName(getColumn().getName());
+            if (getColumn().getConstraints().isNullable() != null && !getColumn().getConstraints().isNullable()) {
+                AddNotNullConstraintChange change = new AddNotNullConstraintChange();
+                change.setTableName(getTableName());
+                change.setColumnName(getColumn().getName());
+                change.setColumnDataType(getColumn().getType());
 
-            sql.addAll(Arrays.asList(change.generateStatements(database)));
+                sql.addAll(Arrays.asList(change.generateStatements(database)));
+            }
         }
 
         return sql.toArray(new String[sql.size()]);

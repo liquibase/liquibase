@@ -1,6 +1,7 @@
 package liquibase.migrator;
 
 import junit.framework.TestCase;
+import liquibase.migrator.exception.DuplicateStatementIdentifierException;
 
 public class DuplicateStatementIdentifierExceptionTest extends TestCase {
 

@@ -1,6 +1,9 @@
 package liquibase.migrator.parser;
 
 import liquibase.migrator.*;
+import liquibase.migrator.exception.DatabaseHistoryException;
+import liquibase.migrator.exception.MigrationFailedException;
+import liquibase.migrator.exception.JDBCException;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
 
@@ -25,10 +28,8 @@ public class UpdateDatabaseChangeLogHandler extends BaseChangeLogHandler {
     /**
      * After the change set has been ran against the database this method will update the change log table
      * with the information.
-     *
-     * @throws SQLException
      */
-    public void markChangeSetAsRan(ChangeSet changeSet) throws SQLException, IOException {
+    public void markChangeSetAsRan(ChangeSet changeSet) throws JDBCException, IOException {
         Migrator migrator = changeSet.getDatabaseChangeLog().getMigrator();
         String dateValue = migrator.getDatabase().getCurrentDateTimeFunction();
         String sql = "INSERT INTO DATABASECHANGELOG (ID, AUTHOR, FILENAME, DATEEXECUTED, MD5SUM, DESCRIPTION, COMMENTS, LIQUIBASE) VALUES ('?', '?', '?', " + dateValue + ", '?', '?', '?', '?')";
@@ -43,10 +44,14 @@ public class UpdateDatabaseChangeLogHandler extends BaseChangeLogHandler {
         Writer sqlOutputWriter = migrator.getOutputSQLWriter();
         if (sqlOutputWriter == null) {
             Connection connection = migrator.getDatabase().getConnection();
-            Statement statement = connection.createStatement();
-            statement.executeUpdate(sql);
-            statement.close();
-            connection.commit();
+            try {
+                Statement statement = connection.createStatement();
+                statement.executeUpdate(sql);
+                statement.close();
+                connection.commit();
+            } catch (SQLException e) {
+                throw new JDBCException(e);
+            }
         } else {
             sqlOutputWriter.write(sql + ";" + StreamUtil.getLineSeparator() + StreamUtil.getLineSeparator());
         }
@@ -62,7 +67,7 @@ public class UpdateDatabaseChangeLogHandler extends BaseChangeLogHandler {
         return string;
     }
 
-    public void markChangeSetAsReRan(ChangeSet changeSet) throws SQLException, IOException {
+    public void markChangeSetAsReRan(ChangeSet changeSet) throws JDBCException, IOException {
         String dateValue = changeSet.getDatabaseChangeLog().getMigrator().getDatabase().getCurrentDateTimeFunction();
         String sql = "UPDATE DATABASECHANGELOG SET DATEEXECUTED=" + dateValue + ", MD5SUM='?' WHERE ID='?' AND AUTHOR='?' AND FILENAME='?'";
         sql = sql.replaceFirst("\\?", escapeStringForDatabase(changeSet.getMd5sum()));
@@ -73,16 +78,20 @@ public class UpdateDatabaseChangeLogHandler extends BaseChangeLogHandler {
         Writer sqlOutputWriter = changeSet.getDatabaseChangeLog().getMigrator().getOutputSQLWriter();
         if (sqlOutputWriter == null) {
             Connection connection = changeSet.getDatabaseChangeLog().getMigrator().getDatabase().getConnection();
-            Statement statement = connection.createStatement();
-            statement.executeUpdate(sql);
-            statement.close();
-            connection.commit();
+            try {
+                Statement statement = connection.createStatement();
+                statement.executeUpdate(sql);
+                statement.close();
+                connection.commit();
+            } catch (SQLException e) {
+                throw new JDBCException(e);
+            }
         } else {
             sqlOutputWriter.write(sql + ";" + StreamUtil.getLineSeparator() + StreamUtil.getLineSeparator());
         }
     }
 
-    private boolean shouldRun(ChangeSet changeSet) throws SQLException, DatabaseHistoryException {
+    private boolean shouldRun(ChangeSet changeSet) throws JDBCException, DatabaseHistoryException {
         ChangeSet.RunStatus isChangeSetRan = migrator.getRunStatus(changeSet);
         if (changeSet.shouldAlwaysRun() || isChangeSetRan.equals(ChangeSet.RunStatus.NOT_RAN) || isChangeSetRan.equals(ChangeSet.RunStatus.RUN_AGAIN))
         {
@@ -94,7 +103,7 @@ public class UpdateDatabaseChangeLogHandler extends BaseChangeLogHandler {
         }
     }
 
-    protected void handleChangeSet(ChangeSet changeSet) throws SQLException, DatabaseHistoryException, MigrationFailedException, IOException {
+    protected void handleChangeSet(ChangeSet changeSet) throws JDBCException, DatabaseHistoryException, MigrationFailedException, IOException {
         if (shouldRun(changeSet)) {
             changeSet.execute();
             if (migrator.getRunStatus(changeSet).equals(ChangeSet.RunStatus.NOT_RAN)) {
@@ -102,7 +111,11 @@ public class UpdateDatabaseChangeLogHandler extends BaseChangeLogHandler {
             } else {
                 markChangeSetAsReRan(changeSet);
             }
-            migrator.getDatabase().getConnection().commit();
+            try {
+                migrator.getDatabase().getConnection().commit();
+            } catch (SQLException e) {
+                throw new JDBCException(e);
+            }
         }
 
     }

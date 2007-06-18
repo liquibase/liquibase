@@ -1,4 +1,4 @@
-package liquibase.migrator;
+package liquibase.migrator.exception;
 
 /**
  * Thrown if a change is encountered that cannot be rolled back.

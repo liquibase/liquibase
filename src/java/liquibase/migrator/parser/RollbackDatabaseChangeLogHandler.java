@@ -1,10 +1,14 @@
 package liquibase.migrator.parser;
 
-import liquibase.migrator.*;
+import liquibase.migrator.ChangeSet;
+import liquibase.migrator.Migrator;
+import liquibase.migrator.RanChangeSet;
+import liquibase.migrator.exception.DatabaseHistoryException;
+import liquibase.migrator.exception.JDBCException;
+import liquibase.migrator.exception.MigrationFailedException;
 import liquibase.migrator.preconditions.PreconditionFailedException;
 
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -18,7 +22,7 @@ public class RollbackDatabaseChangeLogHandler extends BaseChangeLogHandler {
     private List<RanChangeSet> ranChangesToRollback;
     private List<ChangeSet> allChangeSets;
 
-    public RollbackDatabaseChangeLogHandler(Migrator migrator, String physicalFilePath, String rollbackToTag) throws SQLException {
+    public RollbackDatabaseChangeLogHandler(Migrator migrator, String physicalFilePath, String rollbackToTag) throws JDBCException {
         super(migrator, physicalFilePath);
         ranChangesToRollback = new ArrayList<RanChangeSet>();
         int currentChangeSetCount = migrator.getRanChangeSetList().size();
@@ -32,7 +36,7 @@ public class RollbackDatabaseChangeLogHandler extends BaseChangeLogHandler {
         allChangeSets = new ArrayList<ChangeSet>();
     }
 
-    public RollbackDatabaseChangeLogHandler(Migrator migrator, String physicalFilePath, Date rollbackToDate) throws SQLException {
+    public RollbackDatabaseChangeLogHandler(Migrator migrator, String physicalFilePath, Date rollbackToDate) throws JDBCException {
         super(migrator, physicalFilePath);
         ranChangesToRollback = new ArrayList<RanChangeSet>();
         int currentChangeSetCount = migrator.getRanChangeSetList().size();
@@ -45,7 +49,7 @@ public class RollbackDatabaseChangeLogHandler extends BaseChangeLogHandler {
         allChangeSets = new ArrayList<ChangeSet>();
     }
 
-    public RollbackDatabaseChangeLogHandler(Migrator migrator, String physicalFilePath, Integer numberOfChangeSetsToRollback) throws SQLException {
+    public RollbackDatabaseChangeLogHandler(Migrator migrator, String physicalFilePath, Integer numberOfChangeSetsToRollback) throws JDBCException {
         super(migrator, physicalFilePath);
         ranChangesToRollback = new ArrayList<RanChangeSet>();
         int currentChangeSetCount = migrator.getRanChangeSetList().size();
@@ -59,7 +63,7 @@ public class RollbackDatabaseChangeLogHandler extends BaseChangeLogHandler {
         allChangeSets = new ArrayList<ChangeSet>();
     }
 
-    protected void handleChangeSet(ChangeSet changeSet) throws SQLException, DatabaseHistoryException, MigrationFailedException, PreconditionFailedException, IOException {
+    protected void handleChangeSet(ChangeSet changeSet) throws JDBCException, DatabaseHistoryException, MigrationFailedException, PreconditionFailedException, IOException {
         for (RanChangeSet cs : ranChangesToRollback) {
             if (cs.isSameAs(changeSet)) {
                 allChangeSets.add(0, changeSet);
@@ -67,7 +71,7 @@ public class RollbackDatabaseChangeLogHandler extends BaseChangeLogHandler {
         }
     }
 
-    public void doRollback() throws MigrationFailedException, DatabaseHistoryException, SQLException, IOException {
+    public void doRollback() throws MigrationFailedException, DatabaseHistoryException, JDBCException, IOException {
         for (ChangeSet changeSet : allChangeSets) {
             changeSet.execute();
             removeRanStatus(changeSet);

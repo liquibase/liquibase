@@ -1,7 +1,8 @@
 package liquibase.database;
 
 import liquibase.migrator.DatabaseChangeLogLock;
-import liquibase.migrator.MigrationFailedException;
+import liquibase.migrator.exception.MigrationFailedException;
+import liquibase.migrator.exception.JDBCException;
 import liquibase.migrator.Migrator;
 import liquibase.migrator.change.ColumnConfig;
 import liquibase.util.StreamUtil;
@@ -54,24 +55,43 @@ public abstract class AbstractDatabase implements Database {
         }
     }
 
-    public String getDriverName() throws SQLException {
-        return connection.getMetaData().getDriverName();
+    protected String getDatabaseProductName(Connection conn) throws JDBCException {
+        try {
+            return conn.getMetaData().getDatabaseProductName();
+        } catch (SQLException e) {
+            throw new JDBCException(e);
+        }
     }
 
-    public String getConnectionURL() throws SQLException {
-        return connection.getMetaData().getURL();
+    public String getDriverName() throws JDBCException {
+        try {
+            return connection.getMetaData().getDriverName();
+        } catch (SQLException e) {
+            throw new JDBCException(e);
+        }
     }
 
-    public String getConnectionUsername() throws SQLException {
-        return connection.getMetaData().getUserName();
-
+    public String getConnectionURL() throws JDBCException {
+        try {
+            return connection.getMetaData().getURL();
+        } catch (SQLException e) {
+            throw new JDBCException(e);
+        }
     }
 
-    public String getCatalogName() throws SQLException {
+    public String getConnectionUsername() throws JDBCException {
+        try {
+            return connection.getMetaData().getUserName();
+        } catch (SQLException e) {
+            throw new JDBCException(e);
+        }
+    }
+
+    public String getCatalogName() throws JDBCException {
         return null;
     }
 
-    public String getSchemaName() throws SQLException {
+    public String getSchemaName() throws JDBCException {
         return getConnectionUsername();
     }
 
@@ -346,7 +366,7 @@ public abstract class AbstractDatabase implements Database {
      * the changes in the file. If the table does not exist it will create one
      * otherwise it will not do anything besides outputting a log message.
      */
-    public void checkDatabaseChangeLogTable(Migrator migrator) throws SQLException, IOException {
+    public void checkDatabaseChangeLogTable(Migrator migrator) throws JDBCException, IOException {
         Statement statement = null;
         Connection connection = getConnection();
         ResultSet checkTableRS = null;
@@ -417,15 +437,29 @@ public abstract class AbstractDatabase implements Database {
                 migrator.getOutputSQLWriter().append(StreamUtil.getLineSeparator());
             }
 
+        } catch (SQLException e) {
+            throw new JDBCException(e);
         } finally {
             if (statement != null) {
-                statement.close();
+                try {
+                    statement.close();
+                } catch (SQLException e) {
+                    throw new JDBCException(e);
+                }
             }
             if (checkTableRS != null) {
-                checkTableRS.close();
+                try {
+                    checkTableRS.close();
+                } catch (SQLException e) {
+                    throw new JDBCException(e);
+                }
             }
             if (checkColumnsRS != null) {
-                checkColumnsRS.close();
+                try {
+                    checkColumnsRS.close();
+                } catch (SQLException e) {
+                    throw new JDBCException(e);
+                }
             }
         }
     }
@@ -435,7 +469,7 @@ public abstract class AbstractDatabase implements Database {
      * if a machine is updating the database. If the table does not exist it will create one
      * otherwise it will not do anything besides outputting a log message.
      */
-    public void checkDatabaseChangeLogLockTable(Migrator migrator) throws SQLException, IOException {
+    public void checkDatabaseChangeLogLockTable(Migrator migrator) throws JDBCException, IOException {
         Statement statement = null;
         Connection connection = getConnection();
         ResultSet rs = null;
@@ -492,19 +526,29 @@ public abstract class AbstractDatabase implements Database {
                 }
             } else {
                 if (migrator.getMode().equals(Migrator.Mode.EXECUTE_MODE)) {
-                    throw new SQLException("Change log lock table does not exist");
+                    throw new JDBCException("Change log lock table does not exist");
                 } else {
                     migrator.getOutputSQLWriter().append(insertRowStatment + ";" + StreamUtil.getLineSeparator() + StreamUtil.getLineSeparator());
                 }
 
             }
 
+        } catch (SQLException e) {
+            throw new JDBCException(e);
         } finally {
             if (statement != null) {
-                statement.close();
+                try {
+                    statement.close();
+                } catch (SQLException e) {
+                    throw new JDBCException(e);
+                }
             }
             if (rs != null) {
-                rs.close();
+                try {
+                    rs.close();
+                } catch (SQLException e) {
+                    throw new JDBCException(e);
+                }
             }
         }
     }
@@ -514,10 +558,10 @@ public abstract class AbstractDatabase implements Database {
     /**
      * Drops all objects owned by the connected user.
      */
-    public void dropDatabaseObjects() throws SQLException, MigrationFailedException {
+    public void dropDatabaseObjects() throws JDBCException, MigrationFailedException {
         Connection conn = getConnection();
-        conn.setAutoCommit(false);
         try {
+            conn.setAutoCommit(false);
 
             dropForeignKeys(conn);
             dropViews(conn);
@@ -528,16 +572,22 @@ public abstract class AbstractDatabase implements Database {
             }
 
             changeLogTableExists = false;
+        } catch (SQLException e) {
+            throw new JDBCException(e);
         } finally {
-            conn.commit();
+            try {
+                conn.commit();
+            } catch (SQLException e) {
+                throw new JDBCException(e);
+            }
         }
     }
 
-    protected void dropForeignKeys(Connection conn) throws SQLException {
+    protected void dropForeignKeys(Connection conn) throws JDBCException {
         //does nothing, assume tables will cascade constraints
     }
 
-    protected void dropTables(Connection conn) throws SQLException, MigrationFailedException {
+    protected void dropTables(Connection conn) throws JDBCException, MigrationFailedException {
         //drop tables and their constraints
         ResultSet rs = null;
         Statement dropStatement = null;
@@ -572,17 +622,27 @@ public abstract class AbstractDatabase implements Database {
                     throw new MigrationFailedException("Error dropping table '" + tableName + "': " + e.getMessage(), e);
                 }
             }
+        } catch (SQLException e) {
+            throw new JDBCException(e);
         } finally {
             if (dropStatement != null) {
-                dropStatement.close();
+                try {
+                    dropStatement.close();
+                } catch (SQLException e) {
+                    throw new JDBCException(e);
+                }
             }
             if (rs != null) {
-                rs.close();
+                try {
+                    rs.close();
+                } catch (SQLException e) {
+                    throw new JDBCException(e);
+                }
             }
         }
     }
 
-        protected void dropViews(Connection conn) throws SQLException, MigrationFailedException {
+        protected void dropViews(Connection conn) throws JDBCException, MigrationFailedException {
         //drop tables and their constraints
         ResultSet rs = null;
         Statement dropStatement = null;
@@ -595,7 +655,6 @@ public abstract class AbstractDatabase implements Database {
                     continue;
                 }
 
-                String type = rs.getString("TABLE_TYPE");
                 String sql = "DROP VIEW " + tableName;
 
                 try {
@@ -605,12 +664,22 @@ public abstract class AbstractDatabase implements Database {
                     throw new MigrationFailedException("Error dropping view '" + tableName + "': " + e.getMessage(), e);
                 }
             }
+        } catch (SQLException e) {
+            throw new JDBCException(e);
         } finally {
             if (dropStatement != null) {
-                dropStatement.close();
+                try {
+                    dropStatement.close();
+                } catch (SQLException e) {
+                    throw new JDBCException(e);
+                }
             }
             if (rs != null) {
-                rs.close();
+                try {
+                    rs.close();
+                } catch (SQLException e) {
+                    throw new JDBCException(e);
+                }
             }
         }
     }
@@ -619,7 +688,7 @@ public abstract class AbstractDatabase implements Database {
         return "DROP TABLE " + tableName + " CASCADE CONSTRAINTS";
     }
 
-    protected void dropSequences(Connection conn) throws SQLException, MigrationFailedException {
+    protected void dropSequences(Connection conn) throws JDBCException, MigrationFailedException {
         ; //no default
     }
 
@@ -681,7 +750,7 @@ public abstract class AbstractDatabase implements Database {
         return "UPDATE " + getDatabaseChangeLogTableName() + " SET TAG=? WHERE DATEEXECUTED=?";
     }
 
-    public boolean doesTagExist(String tag) throws SQLException {
+    public boolean doesTagExist(String tag) throws JDBCException {
         PreparedStatement pstmt = null;
         ResultSet rs = null;
         try {
@@ -690,12 +759,22 @@ public abstract class AbstractDatabase implements Database {
             rs = pstmt.executeQuery();
             rs.next();
             return rs.getInt(1) > 0;
+        } catch (SQLException e) {
+            throw new JDBCException(e);
         } finally {
             if (rs != null) {
-                rs.close();
+                try {
+                    rs.close();
+                } catch (SQLException e) {
+                    throw new JDBCException(e);
+                }
             }
             if (pstmt != null) {
-                pstmt.close();
+                try {
+                    pstmt.close();
+                } catch (SQLException e) {
+                    throw new JDBCException(e);
+                }
             }
         }
     }

@@ -1,6 +1,6 @@
 package liquibase.migrator.ant;
 
-import liquibase.migrator.MigrationFailedException;
+import liquibase.migrator.exception.MigrationFailedException;
 import liquibase.migrator.Migrator;
 import org.apache.tools.ant.BuildException;
 

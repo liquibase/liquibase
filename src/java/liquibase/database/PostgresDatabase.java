@@ -1,6 +1,7 @@
 package liquibase.database;
 
-import liquibase.migrator.MigrationFailedException;
+import liquibase.migrator.exception.MigrationFailedException;
+import liquibase.migrator.exception.JDBCException;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -36,8 +37,8 @@ public class PostgresDatabase extends AbstractDatabase {
         return true;
     }
 
-    public boolean isCorrectDatabaseImplementation(Connection conn) throws SQLException {
-        return PRODUCT_NAME.equalsIgnoreCase(conn.getMetaData().getDatabaseProductName());
+    public boolean isCorrectDatabaseImplementation(Connection conn) throws JDBCException {
+        return PRODUCT_NAME.equalsIgnoreCase(getDatabaseProductName(conn));
     }
 
     protected String getBooleanType() {
@@ -72,11 +73,11 @@ public class PostgresDatabase extends AbstractDatabase {
         return "NOW()";
     }
 
-    public String getSchemaName() throws SQLException {
+    public String getSchemaName() throws JDBCException {
         return null;
     }
 
-    public String getCatalogName() throws SQLException {
+    public String getCatalogName() throws JDBCException {
         return "PUBLIC";
     }
 
@@ -92,16 +93,23 @@ public class PostgresDatabase extends AbstractDatabase {
         return "DROP TABLE " + tableName;
     }
 
-    public void dropDatabaseObjects() throws SQLException, MigrationFailedException {
+    public void dropDatabaseObjects() throws JDBCException, MigrationFailedException {
         Connection conn = getConnection();
-        Statement dropStatement = conn.createStatement();
+        Statement dropStatement = null;
         try {
+            dropStatement = conn.createStatement();
             dropStatement.executeUpdate("DROP OWNED BY " + getConnectionUsername());
+        } catch (SQLException e) {
+            throw new JDBCException(e);
         } finally {
-            if (dropStatement != null) {
-                dropStatement.close();
+            try {
+                if (dropStatement != null) {
+                    dropStatement.close();
+                }
+                conn.commit();
+            } catch (SQLException e) {
+                throw new JDBCException(e);
             }
-            conn.commit();
         }
 
 

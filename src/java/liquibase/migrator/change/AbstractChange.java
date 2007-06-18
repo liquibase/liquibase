@@ -17,8 +17,9 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import liquibase.database.Database;
 import liquibase.migrator.Migrator;
-import liquibase.migrator.RollbackImpossibleException;
-import liquibase.migrator.UnsupportedChangeException;
+import liquibase.migrator.exception.RollbackImpossibleException;
+import liquibase.migrator.exception.UnsupportedChangeException;
+import liquibase.migrator.exception.JDBCException;
 import liquibase.util.MD5Util;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
@@ -48,7 +49,7 @@ public abstract class AbstractChange implements Change {
 
     /**
      * Constructor with tag name and name
-     * 
+     *
      * @param tagName the tag name for this change
      * @param changeName the name for this change
      */
@@ -75,7 +76,7 @@ public abstract class AbstractChange implements Change {
     /**
      * @see liquibase.migrator.change.Change#executeStatements(liquibase.database.Database)
      */
-    public void executeStatements(Database database) throws SQLException, UnsupportedChangeException {
+    public void executeStatements(Database database) throws JDBCException, UnsupportedChangeException {
         String[] statements = generateStatements(database);
 
         execute(statements, database);
@@ -94,7 +95,7 @@ public abstract class AbstractChange implements Change {
     /**
      * @see liquibase.migrator.change.Change#executeRollbackStatements(liquibase.database.Database)
      */
-    public void executeRollbackStatements(Database database) throws SQLException, UnsupportedChangeException, RollbackImpossibleException {
+    public void executeRollbackStatements(Database database) throws JDBCException, UnsupportedChangeException, RollbackImpossibleException {
         String[] statements = generateRollbackStatements(database);
         execute(statements, database);
     }
@@ -111,10 +112,10 @@ public abstract class AbstractChange implements Change {
 
     /*
      * Skipped by this skeletal implementation
-     * 
+     *
      * @see liquibase.migrator.change.Change#generateStatements(liquibase.database.Database)
      */
-    
+
     /**
      * @see liquibase.migrator.change.Change#generateRollbackStatements(liquibase.database.Database)
      */
@@ -128,16 +129,16 @@ public abstract class AbstractChange implements Change {
     public boolean canRollBack() {
         return createInverses() != null;
     }
-    
-    /* 
+
+    /*
      * Skipped by this skeletal implementation
-     * 
+     *
      * @see liquibase.migrator.change.Change#getConfirmationMessage()
      */
 
     /*
      * Skipped by this skeletal implementation
-     * 
+     *
      * @see liquibase.migrator.change.Change#createNode(org.w3c.dom.Document)
      */
 
@@ -153,8 +154,8 @@ public abstract class AbstractChange implements Change {
             throw new RuntimeException(e);
         }
     }
-    
-    //~ ------------------------------------------------------------------------------- private methods    
+
+    //~ ------------------------------------------------------------------------------- private methods
     /*
      * Generates rollback statements from the inverse changes returned by createInverses()
      *
@@ -192,7 +193,7 @@ public abstract class AbstractChange implements Change {
     /*
      * Creates a {@link String} using the XML element representation of this
      * change
-     * 
+     *
      * @param node the {@link Element} associated to this change
      * @param buffer a {@link StringBuffer} object used to hold the {@link String}
      *               representation of the change
@@ -221,15 +222,15 @@ public abstract class AbstractChange implements Change {
         }
         buffer.append("</").append(node.getNodeName()).append(">");
     }
-    
+
     /*
      * Executes the statements passed as argument to a target {@link Database}
-     * 
+     *
      * @param statements an array containing the SQL statements to be issued
      * @param database the target {@link Database}
-     * @throws SQLException if there were problems issuing the statements
+     * @throws JDBCException if there were problems issuing the statements
      */
-    private void execute(String[] statements, Database database) throws SQLException {
+    private void execute(String[] statements, Database database) throws JDBCException {
         for (String statement : statements) {
             Logger.getLogger(Migrator.DEFAULT_LOG_NAME).finest("Executing Statement: " + statement);
             try {
@@ -237,8 +238,8 @@ public abstract class AbstractChange implements Change {
                 dbStatement.execute(statement);
                 dbStatement.close();
             } catch (SQLException e) {
-                throw new SQLException((e.getMessage() + " [" + statement + "]").replaceAll("\n", "").replaceAll("\r", ""));
+                throw new JDBCException((e.getMessage() + " [" + statement + "]").replaceAll("\n", "").replaceAll("\r", ""));
             }
         }
-    }    
+    }
 }

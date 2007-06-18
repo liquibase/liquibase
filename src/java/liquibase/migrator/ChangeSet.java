@@ -1,6 +1,9 @@
 package liquibase.migrator;
 
 import liquibase.migrator.change.Change;
+import liquibase.migrator.exception.DatabaseHistoryException;
+import liquibase.migrator.exception.MigrationFailedException;
+import liquibase.migrator.exception.RollbackFailedException;
 import liquibase.util.MD5Util;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;

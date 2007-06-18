@@ -1,8 +1,9 @@
 package liquibase.migrator;
 
 import liquibase.database.Database;
+import liquibase.migrator.exception.JDBCException;
+import liquibase.migrator.exception.MigrationFailedException;
 
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Set;
 
@@ -14,7 +15,7 @@ import java.util.Set;
 public class IncludeMigrator extends Migrator {
     private Migrator parentMigrator;
 
-    public IncludeMigrator(String file, Migrator parentMigrator) throws SQLException, MigrationFailedException {
+    public IncludeMigrator(String file, Migrator parentMigrator) {
         super(file, parentMigrator.getFileOpener(), true);
         this.parentMigrator = parentMigrator;
         setMode(parentMigrator.getMode());
@@ -42,7 +43,7 @@ public class IncludeMigrator extends Migrator {
         ;
     }
 
-    public List<RanChangeSet> getRanChangeSetList() throws SQLException {
+    public List<RanChangeSet> getRanChangeSetList() throws JDBCException {
         return parentMigrator.getRanChangeSetList();
     }
 

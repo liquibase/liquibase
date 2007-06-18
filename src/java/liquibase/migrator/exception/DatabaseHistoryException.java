@@ -1,4 +1,4 @@
-package liquibase.migrator;
+package liquibase.migrator.exception;
 
 public class DatabaseHistoryException extends Exception {
     public DatabaseHistoryException(String message) {

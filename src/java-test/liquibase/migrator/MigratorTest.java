@@ -5,13 +5,13 @@ import liquibase.database.Database;
 import liquibase.database.MSSQLDatabase;
 import liquibase.database.OracleDatabase;
 import liquibase.database.PostgresDatabase;
+import liquibase.migrator.exception.JDBCException;
 import static org.easymock.classextension.EasyMock.*;
 
 import java.io.InputStream;
 import java.net.URL;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
-import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.List;
@@ -261,7 +261,7 @@ public class MigratorTest extends TestCase {
                 return new Database[]{
                         mockDatabase,
                 };
-            } catch (SQLException e) {
+            } catch (JDBCException e) {
                 throw new RuntimeException(e);
             }
         }

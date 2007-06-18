@@ -1,6 +1,7 @@
 package liquibase.database;
 
-import liquibase.migrator.MigrationFailedException;
+import liquibase.migrator.exception.MigrationFailedException;
+import liquibase.migrator.exception.JDBCException;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -53,8 +54,8 @@ public class OracleDatabase extends AbstractDatabase {
         return "TIMESTAMP";
     }
 
-    public boolean isCorrectDatabaseImplementation(Connection conn) throws SQLException {
-        return PRODUCT_NAME.equalsIgnoreCase(conn.getMetaData().getDatabaseProductName());
+    public boolean isCorrectDatabaseImplementation(Connection conn) throws JDBCException {
+        return PRODUCT_NAME.equalsIgnoreCase(getDatabaseProductName(conn));
     }
 
     public String getCurrentDateTimeFunction() {
@@ -73,7 +74,7 @@ public class OracleDatabase extends AbstractDatabase {
         return (super.getSelectChangeLogLockSQL() + " for update").toUpperCase();
     }
 
-    protected void dropSequences(Connection conn) throws SQLException, MigrationFailedException {
+    protected void dropSequences(Connection conn) throws JDBCException, MigrationFailedException {
         ResultSet rs = null;
         Statement selectStatement = null;
         Statement dropStatement = null;
@@ -91,15 +92,21 @@ public class OracleDatabase extends AbstractDatabase {
                     throw new MigrationFailedException("Error dropping sequence '" + sequenceName + "': " + e.getMessage(), e);
                 }
             }
+        } catch (SQLException e) {
+            throw new JDBCException(e);
         } finally {
-            if (selectStatement != null) {
-                selectStatement.close();
-            }
-            if (dropStatement != null) {
-                dropStatement.close();
-            }
-            if (rs != null) {
-                rs.close();
+            try {
+                if (selectStatement != null) {
+                    selectStatement.close();
+                }
+                if (dropStatement != null) {
+                    dropStatement.close();
+                }
+                if (rs != null) {
+                    rs.close();
+                }
+            } catch (SQLException e) {
+                throw new JDBCException(e);
             }
         }
     }
