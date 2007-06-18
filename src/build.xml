@@ -329,10 +329,10 @@ urchinTracker();
     </target>
 
 	<!-- target: JUNIT -->
-    <target name="junit" depends="prepare">
+    <target name="junit" depends="prepare, compile">
         <mkdir dir="${reports.dir}/junit/"/>
         <mkdir dir="${reports.dir}/junit/${ant.project.name}/"/>
-        <junit printsummary="yes" haltonfailure="${halt.on.junit.failure}" fork="yes" forkmode="once" reloading="false"
+        <junit printsummary="yes" haltonfailure="no" fork="yes" forkmode="once" reloading="false"
                failureproperty="unit.tests.failed"
                jvm="${java.home}/bin/java">
             <env key="JAVA_HOME" path="${env.JAVA_HOME}"/>
