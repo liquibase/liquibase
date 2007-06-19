@@ -2,6 +2,7 @@ package liquibase.migrator.commandline;
 
 import liquibase.migrator.DatabaseChangeLogLock;
 import liquibase.migrator.exception.MigrationFailedException;
+import liquibase.migrator.exception.JDBCException;
 import liquibase.migrator.Migrator;
 import liquibase.util.StreamUtil;
 
@@ -394,7 +395,7 @@ public class CommandLineMigrator {
 
         Connection connection = driver.connect(url, info);
         if (connection == null) {
-            throw new MigrationFailedException("Incorrect driver for URL");
+            throw new JDBCException("Connection could not be created to "+url+" with driver "+driver.getClass().getName()+".  Possibly the wrong driver for the given database URL");
         }
         try {
             Migrator migrator = new Migrator(changeLogFile, new CommandLineFileOpener(classLoader));
