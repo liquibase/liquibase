@@ -1,7 +1,13 @@
 LiquiBASE Changelog
 ==========================================
 
-Changes in version 1.0 RC1
+Changes in version 1.0 RC2 (2007.6.19)
+------------------------------------
+- Improved documentation
+- Bug fixes
+- Changes to exception throwing
+
+Changes in version 1.0 RC1 (2007.6.8)
 ------------------------------------
 - Added batch/shell scripts for command line migrator
 - Improved documentation
