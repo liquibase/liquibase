@@ -106,7 +106,7 @@ public class BaseLiquibaseTask extends Task {
         Connection connection = driver.connect(getUrl(), info);
 
         if (connection == null) {
-            throw new JDBCException("Connection could not be created.  Possibly the wrong driver for the given database URL");
+            throw new JDBCException("Connection could not be created to "+getUrl()+" with driver "+driver.getClass().getName()+".  Possibly the wrong driver for the given database URL");
         }
 
         Migrator migrator = new Migrator(getChangeLogFile().trim(), new AntFileOpener(getProject(), classpath));
