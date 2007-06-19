@@ -3,7 +3,10 @@ package liquibase.migrator.exception;
 /**
  * Thrown if a change is encountered that cannot be rolled back.
  */
-public class RollbackImpossibleException extends Exception {
+public class RollbackImpossibleException extends LiquibaseException {
+
+    private static final long serialVersionUID = 1L;
+    
     public RollbackImpossibleException() {
     }
 

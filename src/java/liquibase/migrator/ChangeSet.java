@@ -1,7 +1,6 @@
 package liquibase.migrator;
 
 import liquibase.migrator.change.Change;
-import liquibase.migrator.exception.DatabaseHistoryException;
 import liquibase.migrator.exception.MigrationFailedException;
 import liquibase.migrator.exception.RollbackFailedException;
 import liquibase.util.MD5Util;
@@ -89,7 +88,7 @@ public class ChangeSet {
      * This method will actually execute each of the changes in the list against the
      * specified database.
      */
-    public void execute() throws DatabaseHistoryException, MigrationFailedException {
+    public void execute() throws MigrationFailedException {
         Migrator migrator = getDatabaseChangeLog().getMigrator();
         Connection connection = migrator.getDatabase().getConnection();
         try {

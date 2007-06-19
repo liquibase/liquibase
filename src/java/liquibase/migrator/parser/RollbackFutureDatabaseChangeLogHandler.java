@@ -6,7 +6,6 @@ import liquibase.migrator.RanChangeSet;
 import liquibase.migrator.exception.DatabaseHistoryException;
 import liquibase.migrator.exception.JDBCException;
 import liquibase.migrator.exception.MigrationFailedException;
-import liquibase.migrator.preconditions.PreconditionFailedException;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -27,7 +26,7 @@ public class RollbackFutureDatabaseChangeLogHandler extends BaseChangeLogHandler
         ranChangeSets = migrator.getRanChangeSetList();
     }
 
-    protected void handleChangeSet(ChangeSet changeSet) throws JDBCException, DatabaseHistoryException, MigrationFailedException, PreconditionFailedException, IOException {
+    protected void handleChangeSet(ChangeSet changeSet) throws JDBCException, DatabaseHistoryException, MigrationFailedException, IOException {
         boolean alreadyRan = false;
         for (RanChangeSet cs : ranChangeSets) {
             if (cs.isSameAs(changeSet)) {

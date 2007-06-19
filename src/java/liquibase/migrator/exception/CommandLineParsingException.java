@@ -1,6 +1,9 @@
-package liquibase.migrator.commandline;
+package liquibase.migrator.exception;
 
 public class CommandLineParsingException extends Exception {
+
+    private static final long serialVersionUID = 1L;
+
     public CommandLineParsingException() {
     }
 

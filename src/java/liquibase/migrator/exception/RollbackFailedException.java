@@ -1,6 +1,9 @@
 package liquibase.migrator.exception;
 
-public class RollbackFailedException extends Exception {
+public class RollbackFailedException extends LiquibaseException {
+
+    private static final long serialVersionUID = 1L;
+    
     public RollbackFailedException() {
     }
 

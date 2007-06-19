@@ -1,9 +1,12 @@
-package liquibase.migrator.preconditions;
+package liquibase.migrator.exception;
 
 /**
  * Thrown when a precondition failed.
  */
 public class PreconditionFailedException extends Exception {
+
+    private static final long serialVersionUID = 1L;
+    
     public PreconditionFailedException() {
     }
 

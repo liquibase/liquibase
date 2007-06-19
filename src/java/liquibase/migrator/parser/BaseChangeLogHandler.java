@@ -246,7 +246,7 @@ public abstract class BaseChangeLogHandler extends DefaultHandler {
         }
     }
 
-    protected abstract void handleChangeSet(ChangeSet changeSet) throws JDBCException, DatabaseHistoryException, MigrationFailedException, PreconditionFailedException, IOException;
+    protected abstract void handleChangeSet(ChangeSet changeSet) throws JDBCException, DatabaseHistoryException, MigrationFailedException, IOException;
 
     public void characters(char ch[], int start, int length) throws SAXException {
         if (text != null) {

@@ -1,6 +1,9 @@
 package liquibase.migrator.exception;
 
-public class DuplicateStatementIdentifierException extends Exception {
+public class DuplicateStatementIdentifierException extends LiquibaseException {
+
+    private static final long serialVersionUID = 1L;
+    
     public DuplicateStatementIdentifierException(String message) {
         super(message);
     }

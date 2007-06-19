@@ -1,8 +1,8 @@
 package liquibase.migrator.commandline;
 
 import liquibase.migrator.DatabaseChangeLogLock;
-import liquibase.migrator.exception.MigrationFailedException;
 import liquibase.migrator.exception.JDBCException;
+import liquibase.migrator.exception.CommandLineParsingException;
 import liquibase.migrator.Migrator;
 import liquibase.util.StreamUtil;
 

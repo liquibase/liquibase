@@ -1,6 +1,7 @@
 package liquibase.migrator.preconditions;
 
 import liquibase.migrator.Migrator;
+import liquibase.migrator.exception.PreconditionFailedException;
 
 import java.util.ArrayList;
 import java.util.List;

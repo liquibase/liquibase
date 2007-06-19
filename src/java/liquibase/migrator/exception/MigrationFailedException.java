@@ -1,6 +1,9 @@
 package liquibase.migrator.exception;
 
-public class MigrationFailedException extends Exception {
+public class MigrationFailedException extends LiquibaseException {
+
+    private static final long serialVersionUID = 1L;
+    
     public MigrationFailedException() {
     }
 

@@ -1,6 +1,9 @@
 package liquibase.migrator.exception;
 
-public class JDBCException extends Exception {
+public class JDBCException extends LiquibaseException {
+
+    private static final long serialVersionUID = 1L;
+    
     public JDBCException() {
     }
 

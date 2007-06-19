@@ -7,6 +7,8 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Properties;
 
+import liquibase.migrator.exception.CommandLineParsingException;
+
 public class CommandLineMigratorTest extends TestCase {
 
     public void testMigrateWithAllParameters() throws Exception {
@@ -125,14 +127,14 @@ public class CommandLineMigratorTest extends TestCase {
 
     public void testWindowsConfigureClassLoaderLocation() throws Exception {
         CommandLineMigrator cli = new CommandLineMigrator();
-       
+
         if (cli.isWindows())
         {
           System.setProperty("os.name", "Windows XP");
           cli.classpath = "c:\\;c:\\windows\\";
           cli.applyDefaults();
           cli.configureClassLoader();
-  
+
           URL[] classloaderURLs = ((URLClassLoader) cli.classLoader).getURLs();
           assertEquals(2, classloaderURLs.length);
           assertEquals("file:/c:/", classloaderURLs[0].toExternalForm());
@@ -142,15 +144,15 @@ public class CommandLineMigratorTest extends TestCase {
 
     public void testUNIXConfigureClassLoaderLocation() throws Exception {
         CommandLineMigrator cli = new CommandLineMigrator();
-        
+
         if (!cli.isWindows())
-        {        
+        {
           System.setProperty("os.name", "Linux");
           cli.classpath = "/tmp:/";
           cli.applyDefaults();
-  
+
           cli.configureClassLoader();
-  
+
           URL[] classloaderURLs = ((URLClassLoader) cli.classLoader).getURLs();
           assertEquals(2, classloaderURLs.length);
           assertEquals("file:/tmp/", classloaderURLs[0].toExternalForm());
