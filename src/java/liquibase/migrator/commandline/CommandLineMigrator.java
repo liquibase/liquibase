@@ -20,6 +20,8 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 
 /**
  * Class for executing LiquiBase via the command line.
@@ -290,7 +292,7 @@ public class CommandLineMigrator {
             classpath = this.classpath.split(":");
         }
 
-        List<URL> urls = new ArrayList<URL>();
+        final List<URL> urls = new ArrayList<URL>();
         for (String classpathEntry : classpath) {
             File classPathFile = new File(classpathEntry);
             if (!classPathFile.exists()) {
@@ -323,9 +325,18 @@ public class CommandLineMigrator {
             }
         }
         if (includeSystemClasspath) {
-            classLoader = new URLClassLoader(urls.toArray(new URL[urls.size()]), Thread.currentThread().getContextClassLoader());
+            classLoader = AccessController.doPrivileged(new PrivilegedAction<URLClassLoader>() {
+                public URLClassLoader run() {
+                    return new URLClassLoader(urls.toArray(new URL[urls.size()]), Thread.currentThread().getContextClassLoader());
+                }
+            });
+
         } else {
-            classLoader = new URLClassLoader(urls.toArray(new URL[urls.size()]));
+            classLoader = AccessController.doPrivileged(new PrivilegedAction<URLClassLoader>() {
+                public URLClassLoader run() {
+                    return new URLClassLoader(urls.toArray(new URL[urls.size()]));
+                }
+            });
         }
     }
 

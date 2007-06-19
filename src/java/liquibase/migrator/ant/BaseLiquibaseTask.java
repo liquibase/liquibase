@@ -17,6 +17,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 
 /**
  * Base class for all Ant LiquiBase tasks.  This class sets up the migrator and defines parameters
@@ -93,12 +95,19 @@ public class BaseLiquibaseTask extends Task {
     protected Migrator createMigrator() throws MalformedURLException, ClassNotFoundException, JDBCException, SQLException, MigrationFailedException, IllegalAccessException, InstantiationException {
 
         String[] strings = classpath.list();
-        List<URL> taskClassPath = new ArrayList<URL>();
+        final List<URL> taskClassPath = new ArrayList<URL>();
         for (int i = 0; i < strings.length; i++) {
             URL url = new File(strings[i]).toURL();
             taskClassPath.add(url);
         }
-        Driver driver = (Driver) Class.forName(getDriver(), true, new URLClassLoader(taskClassPath.toArray(new URL[taskClassPath.size()]))).newInstance();
+
+        URLClassLoader loader = AccessController.doPrivileged(new PrivilegedAction<URLClassLoader>() {
+            public URLClassLoader run() {
+                return new URLClassLoader(taskClassPath.toArray(new URL[taskClassPath.size()]));
+            }
+        });
+
+        Driver driver = (Driver) Class.forName(getDriver(), true, loader).newInstance();
 
         Properties info = new Properties();
         info.put("user", getUsername());

@@ -9,6 +9,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Enumeration;
+import java.security.PrivilegedAction;
+import java.security.AccessController;
 
 /**
  * An implementation of FileOpener that is specific to how Ant works.
@@ -16,8 +18,12 @@ import java.util.Enumeration;
 public class AntFileOpener implements FileOpener {
     private AntClassLoader loader;
 
-    public AntFileOpener(Project project, Path classpath) {
-        loader = new AntClassLoader(project, classpath);
+    public AntFileOpener(final Project project, final Path classpath) {
+        loader = AccessController.doPrivileged(new PrivilegedAction<AntClassLoader>() {
+            public AntClassLoader run() {
+                return new AntClassLoader(project, classpath);
+            }
+        });
     }
 
     public InputStream getResourceAsStream(String file) throws IOException {

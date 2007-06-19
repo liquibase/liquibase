@@ -16,11 +16,17 @@ public class DatabaseRollbackTask extends BaseLiquibaseTask {
     private Integer rollbackCount;
 
     public Date getRollbackDate() {
-        return rollbackDate;
+        if (rollbackDate == null) {
+            return null;
+        }
+        
+        return (Date) rollbackDate.clone();
     }
 
     public void setRollbackDate(Date rollbackDate) {
-        this.rollbackDate = rollbackDate;
+        if (rollbackDate != null) {
+            this.rollbackDate = new Date(rollbackDate.getTime());
+        }
     }
 
     public String getRollbackTag() {
