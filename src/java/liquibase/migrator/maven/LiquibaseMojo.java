@@ -1,6 +1,7 @@
 package liquibase.migrator.maven;
 
 import liquibase.migrator.exception.MigrationFailedException;
+import liquibase.migrator.exception.JDBCException;
 import liquibase.migrator.Migrator;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -129,6 +130,10 @@ public class LiquibaseMojo extends AbstractMojo {
             info.put("user", getUsername());
             info.put("password", getPassword());
             connection = driver.connect(getUrl(), info);
+
+            if (connection == null) {
+                throw new JDBCException("Connection could not be created to "+getUrl()+" with driver "+driver.getClass().getName()+".  Possibly the wrong driver for the given database URL");
+            }
 
             String[] changeLogFiles = getChangeLogFile().split(",");
             for (String changeLogFile : changeLogFiles) {
