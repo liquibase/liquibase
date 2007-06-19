@@ -105,6 +105,10 @@ public class BaseLiquibaseTask extends Task {
         info.put("password", getPassword());
         Connection connection = driver.connect(getUrl(), info);
 
+        if (connection == null) {
+            throw new JDBCException("Connection could not be created.  Possibly the wrong driver for the given database URL");
+        }
+
         Migrator migrator = new Migrator(getChangeLogFile().trim(), new AntFileOpener(getProject(), classpath));
         migrator.init(connection);
 
