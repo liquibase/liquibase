@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-This is the main ant build script of Liquibase. The available targets at the current stage:
+This is the main ant build script of Liquibase. It requires Ant 1.7.0+.
+
+The available targets at the current stage:
 
  prepare:    creates the output folders, builds the classpath and
              sets some properties (reference to build.properties).
@@ -24,10 +26,11 @@ This is the main ant build script of Liquibase. The available targets at the cur
 
  doxygen:    doxygen documentation (under build-reports/doxygen)
 
- junit:      executes the tests
+ test:       executes the unit tests
+
+ test-int:   executes the integration tests (requires a running accesible db runtime)
 
  all:        performs a complete build of the project
-
 -->
 
 <project name="liquibase" default="all">
@@ -328,8 +331,8 @@ urchinTracker();
         </doxygen>
     </target>
 
-	<!-- target: JUNIT -->
-    <target name="junit" depends="prepare, compile">
+	<!-- target: TEST -->
+    <target name="test" depends="prepare, compile">
         <mkdir dir="${reports.dir}/junit/"/>
         <mkdir dir="${reports.dir}/junit/${ant.project.name}/"/>
         <junit printsummary="yes" haltonfailure="no" fork="yes" forkmode="once" reloading="false"
@@ -348,6 +351,35 @@ urchinTracker();
                     <exclude name="**/Base*"/>
                     <exclude name="**/Abstract*"/>
                 </fileset>
+            </batchtest>
+        </junit>
+
+        <mkdir dir="${reports.dir}/junit-report/"/>
+        <mkdir dir="${reports.dir}/junit-report/${ant.project.name}/"/>
+        <junitreport todir="${reports.dir}/junit-report/${ant.project.name}">
+            <fileset dir="${reports.dir}/junit/${ant.project.name}">
+                <include name="TEST-*.xml"/>
+            </fileset>
+            <report format="frames" todir="${reports.dir}/junit-report/${ant.project.name}"/>
+        </junitreport>
+    </target>
+
+	<!-- target: TEST-INT -->
+    <target name="test-int" depends="prepare, compile">
+    		<!-- TODO: we could use a property to choose the target database to be testes on execution time -->
+        <mkdir dir="${reports.dir}/junit/"/>
+        <mkdir dir="${reports.dir}/junit/${ant.project.name}/"/>
+        <junit printsummary="yes" haltonfailure="no" fork="yes" forkmode="once" reloading="false"
+               failureproperty="unit.tests.failed"
+               jvm="${java.home}/bin/java">
+            <env key="JAVA_HOME" path="${env.JAVA_HOME}"/>
+            <classpath>
+                <pathelement path="${build.dir}"/>
+                <pathelement path="${build.test.dir}"/>
+                <path refid="classpath"/>
+            </classpath>
+            <formatter type="xml"/>
+            <batchtest todir="${reports.dir}/junit/${ant.project.name}">
                 <fileset dir="${build.db.test.dir}">
                     <include name="**/*Test.class"/>
                     <exclude name="**/Base*"/>
