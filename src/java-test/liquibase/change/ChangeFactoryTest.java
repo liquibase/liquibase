@@ -1,23 +1,37 @@
 package liquibase.change;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
 import liquibase.migrator.change.Change;
 import liquibase.migrator.change.CreateTableChange;
 import liquibase.migrator.parser.ChangeFactory;
 
-public class ChangeFactoryTest extends TestCase {
+import org.junit.Before;
+import org.junit.Test;
 
-    public void testCreate() {
-        ChangeFactory factory = new ChangeFactory();
+/**
+ * Tests for {@link ChangeFactory}
+ */
+public class ChangeFactoryTest
+{
 
-        Change createTableChange = factory.create("createTable");
-        assertEquals(CreateTableChange.class, createTableChange.getClass());
+  private ChangeFactory factory;
 
+  @Before
+  public void setUp()
+  {
+    factory = new ChangeFactory();
+  }
 
-        try {
-            factory.create("invalidChange");
-        } catch (Exception e) {
-            ; //that's what we wanted
-        }
-    }
+  @Test
+  public void createTable()
+  {
+    Change createTableChange = factory.create("createTable");
+    assertEquals(CreateTableChange.class, createTableChange.getClass());
+  }
+
+  @Test(expected = RuntimeException.class)
+  public void createInvalidChange()
+  {
+    factory.create("invalidChange");
+  }
 }
