@@ -1,36 +1,48 @@
 package liquibase.migrator.change;
 
-import liquibase.database.OracleDatabase;
-import org.w3c.dom.Element;
+import static org.junit.Assert.assertEquals;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import liquibase.database.OracleDatabase;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.w3c.dom.Element;
+
+/**
+ * Tests for {@link DropSequenceChange}
+ */
 public class DropSequenceChangeTest extends AbstractChangeTest {
+
     private DropSequenceChange change;
 
-    protected void setUp() throws Exception {
-        super.setUp();
+    @Before
+    public void setUp() throws Exception {
         change = new DropSequenceChange();
         change.setSequenceName("SEQ_NAME");
     }
 
-    public void testGetRefactoringName() throws Exception {
+    @Test
+    public void getRefactoringName() throws Exception {
         assertEquals("Drop Sequence", new DropSequenceChange().getChangeName());
     }
 
-    public void testGenerateStatement() throws Exception {
+    @Test
+    public void generateStatement() throws Exception {
         assertEquals("DROP SEQUENCE SEQ_NAME", change.generateStatements(new OracleDatabase())[0]);
     }
 
-    public void testGetConfirmationMessage() throws Exception {
+    @Test
+    public void getConfirmationMessage() throws Exception {
         assertEquals("Sequence SEQ_NAME dropped", change.getConfirmationMessage());
     }
 
-    public void testCreateNode() throws Exception {
+    @Test
+    public void createNode() throws Exception {
         Element element = change.createNode(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument());
 
         assertEquals("dropSequence", element.getTagName());
         assertEquals("SEQ_NAME", element.getAttribute("sequenceName"));
     }
-
 }

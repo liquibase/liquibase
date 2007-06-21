@@ -19,47 +19,47 @@ public class PostgresDatabaseTest extends AbstractDatabaseTest {
     }
 
     @Test
-    public void testGetBlobType() {
+    public void getBlobType() {
         assertEquals("BYTEA", getDatabase().getBlobType());
     }
 
     @Test
-    public void testSupportsInitiallyDeferrableColumns() {
+    public void supportsInitiallyDeferrableColumns() {
         assertTrue(getDatabase().supportsInitiallyDeferrableColumns());
     }
 
     @Test
-    public void testGetBooleanType() {
+    public void getBooleanType() {
         assertEquals("BOOLEAN", getDatabase().getBooleanType());
     }
 
     @Test
-    public void testGetCurrencyType() {
+    public void getCurrencyType() {
         assertEquals("DECIMAL", getDatabase().getCurrencyType());
     }
 
     @Test
-    public void testGetUUIDType() {
+    public void getUUIDType() {
         assertNull(getDatabase().getUUIDType());
     }
 
     @Test
-    public void testGetClobType() {
+    public void getClobType() {
         assertEquals("TEXT", getDatabase().getClobType());
     }
 
     @Test
-    public void testGetDateType() {
+    public void getDateType() {
         assertEquals("DATE", getDatabase().getDateType());
     }
 
     @Test
-    public void testGetDateTimeType() {
+    public void getDateTimeType() {
         assertEquals("TIMESTAMP WITH TIME ZONE", getDatabase().getDateTimeType());
     }
 
     @Test
-    public void testGetCurrentDateTimeFunction() {
+    public void getCurrentDateTimeFunction() {
         assertEquals("NOW()", getDatabase().getCurrentDateTimeFunction());
     }
 

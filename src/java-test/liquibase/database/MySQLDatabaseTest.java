@@ -19,48 +19,48 @@ public class MySQLDatabaseTest extends AbstractDatabaseTest {
     }
 
     @Test
-    public void testGetBlobType() {
+    public void getBlobType() {
         assertEquals("BLOB", getDatabase().getBlobType());
     }
 
     @Test
-    public void testSupportsInitiallyDeferrableColumns() {
+    public void supportsInitiallyDeferrableColumns() {
         assertFalse(getDatabase().supportsInitiallyDeferrableColumns());
     }
 
     @Test
-    public void testGetBooleanType() {
+    public void getBooleanType() {
         assertEquals("TINYINT(1)", getDatabase().getBooleanType());
     }
 
     @Test
-    public void testGetCurrencyType() {
+    public void getCurrencyType() {
         assertEquals("DECIMAL", getDatabase().getCurrencyType());
     }
 
     @Test
-    public void testGetUUIDType() {
+    public void getUUIDType() {
         assertNull(getDatabase().getUUIDType());
     }
 
     @Test
-    public void testGetClobType() {
+    public void getClobType() {
         assertEquals("TEXT", getDatabase().getClobType());
     }
 
     @Test
-    public void testGetDateType() {
+    public void getDateType() {
         assertEquals("DATE", getDatabase().getDateType());
     }
 
     @Test
-    public void testGetDateTimeType() {
+    public void getDateTimeType() {
         assertEquals("DATETIME", getDatabase().getDateTimeType());
     }
 
 
     @Test
-    public void testGetCurrentDateTimeFunction() {
+    public void getCurrentDateTimeFunction() {
         assertEquals("NOW()", getDatabase().getCurrentDateTimeFunction());
     }
 }

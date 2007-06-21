@@ -1,12 +1,13 @@
 package liquibase.migrator;
 
-import junit.framework.TestCase;
-import liquibase.database.Database;
-import liquibase.database.MSSQLDatabase;
-import liquibase.database.OracleDatabase;
-import liquibase.database.PostgresDatabase;
-import liquibase.migrator.exception.JDBCException;
-import static org.easymock.classextension.EasyMock.*;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.expectLastCall;
+import static org.easymock.classextension.EasyMock.createMock;
+import static org.easymock.classextension.EasyMock.replay;
+import static org.easymock.classextension.EasyMock.reset;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.io.InputStream;
 import java.net.URL;
@@ -16,12 +17,25 @@ import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.List;
 
-public class MigratorTest extends TestCase {
+import liquibase.database.Database;
+import liquibase.database.MSSQLDatabase;
+import liquibase.database.OracleDatabase;
+import liquibase.database.PostgresDatabase;
+import liquibase.migrator.exception.JDBCException;
+
+import org.junit.Before;
+import org.junit.Test;
+
+/**
+ * Tests for {@link Migrator}
+ */
+public class MigratorTest {
+
     private TestMigrator testMigrator;
     private Connection connectionForConstructor;
 
+    @Before
     public void setUp() throws Exception {
-        super.setUp();
         if (connectionForConstructor != null) {
             reset(connectionForConstructor);
         }
@@ -39,7 +53,8 @@ public class MigratorTest extends TestCase {
         testMigrator = new TestMigrator();
     }
 
-    public void testIsSaveToRunMigration() throws Exception {
+    @Test
+    public void isSaveToRunMigration() throws Exception {
         TestMigrator migrator = testMigrator;
 
         migrator.setUrl("jdbc:oracle:thin:@localhost:1521:latest");
@@ -53,7 +68,8 @@ public class MigratorTest extends TestCase {
 
     }
 
-    public void testGetImplementedDatabases() throws Exception {
+    @Test
+    public void getImplementedDatabases() throws Exception {
         Migrator migrator = new Migrator(null, new ClassLoaderFileOpener());
         List<Database> databases = Arrays.asList(migrator.getImplementedDatabases());
         assertEquals(4, databases.size());
@@ -77,145 +93,6 @@ public class MigratorTest extends TestCase {
         assertTrue("Postgres not in Implemented Databases", foundPostgres);
     }
 
-//    public void testMigrate() throws Exception {
-//        Digester digester = createMock(Digester.class);
-//        AbstractDatabase database = createMock(AbstractDatabase.class);
-//        expect(database.getSchemaName()).andReturn("MockSchema").anyTimes();
-//        expect(database.getConnectionUsername()).andReturn("MockUsername").anyTimes();
-//
-//        final boolean[] migrationRulesSetup = new boolean[1];
-//        TestMigrator migrator = new TestMigrator() {
-//            public void setUpMigrationRules() {
-//                migrationRulesSetup[0] = true;
-//            }
-//        };
-//        migrator.setDigester(digester);
-//        migrator.setDatabase(database);
-//
-//        digester.push(migrator);
-//        expectLastCall();
-//        digester.push(null);
-//        expectLastCall();
-//        digester.push(migrator.getChangeLogFile());
-//        expectLastCall();
-//        digester.push(Migrator.EXECUTE_MODE);
-//        expectLastCall();
-//        digester.push(database);
-//        expectLastCall();
-//
-//        InputStream fileStream = migrator.getFileOpener().getResourceAsStream(null);
-//        reset(fileStream);
-//
-//        expect(digester.parse(isA(BufferedReader.class))).andStubReturn(null);
-//        expect(fileStream.read((byte[]) notNull(), anyInt(), anyInt()));
-////        expectLastCall().atLeastOnce();
-//        fileStream.close();
-//        expectLastCall();
-//
-//        replay(digester);
-//        replay(database);
-//        replay(fileStream);
-//
-//        migrator.migrate();
-//
-//        verify(database);
-//        verify(digester);
-//        assertTrue("Did not run setupMigrationRules", migrationRulesSetup[0]);
-//
-//        //-----------------TEST DROP FIRST
-//        migrationRulesSetup[0] = false;
-//        reset(digester);
-//        reset(database);
-//        reset(fileStream);
-//
-//        digester.push(migrator);
-//        expectLastCall();
-//        digester.push(migrator.getChangeLogFile());
-//        expectLastCall();
-//        digester.push(null);
-//        expectLastCall();
-//        digester.push(Migrator.EXECUTE_MODE);
-//        expectLastCall();
-//        digester.push(database);
-//        expectLastCall();
-//
-//        expect(digester.parse(isA(BufferedReader.class))).andStubReturn(null);
-//
-//        fileStream.close();
-//        expectLastCall();
-//
-//        expect(database.getSchemaName()).andReturn("testSchema").atLeastOnce();
-//        database.dropDatabaseObjects();
-//        expectLastCall();
-//
-//        replay(digester);
-//        replay(database);
-//        replay(fileStream);
-//
-//        migrator.setShouldDropDatabaseObjectsFirst(true);
-//        migrator.migrate();
-//
-//        verify(database);
-//        verify(digester);
-//        assertTrue("Did not run setupMigrationRules", migrationRulesSetup[0]);
-//
-//
-//        //-----------------TEST SAVE MODE FIRST
-//        Writer writer = createMock(Writer.class);
-//        migrator.setMode(Migrator.OUTPUT_SQL_MODE);
-//        migrator.setOutputSQLWriter(writer);
-//
-//        migrationRulesSetup[0] = false;
-//        reset(digester);
-//        reset(database);
-//        reset(fileStream);
-//
-//        digester.push(migrator);
-//        expectLastCall();
-//        digester.push(migrator.getChangeLogFile());
-//        expectLastCall();
-//        digester.push(Migrator.OUTPUT_SQL_MODE);
-//        expectLastCall();
-//        digester.push(writer);
-//        expectLastCall();
-//        digester.push(database);
-//        expectLastCall();
-//
-//        expect(digester.parse(isA(BufferedReader.class))).andStubReturn(null);
-//
-//        fileStream.close();
-//        expectLastCall();
-//
-//        expect(database.getSchemaName()).andReturn("testSchema").atLeastOnce();
-//        expect(database.getConnectionUsername()).andReturn("testUser").atLeastOnce();
-//        expect(database.getConnectionURL()).andReturn("jdbc:url:here").atLeastOnce();
-//        database.dropDatabaseObjects();
-//        expectLastCall();
-//
-//        replay(digester);
-//        replay(database);
-//        replay(fileStream);
-//
-//        writer.write("--------------------------------------------------------------------------------------\n");
-//        expectLastCall();
-//        writer.write("-- Migration file: "+migrator.getChangeLogFile()+"\n");
-//        expectLastCall();
-//        writer.write("-- Run at: "+ DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(new Date())+"\n");
-//        expectLastCall();
-//        writer.write("-- Against: "+database.getConnectionUsername()+"@"+database.getConnectionURL()+"\n");
-//        expectLastCall();
-//        writer.write("--------------------------------------------------------------------------------------\n\n\n");
-//        expectLastCall();
-//        replay(writer);
-//
-//        migrator.setShouldDropDatabaseObjectsFirst(true);
-//        migrator.migrate();
-//
-//        verify(database);
-//        verify(digester);
-//        verify(writer);
-//        assertTrue("Did not run setupMigrationRules", migrationRulesSetup[0]);
-//    }
 
     private class TestMigrator extends Migrator {
         private String url;

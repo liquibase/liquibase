@@ -1,10 +1,16 @@
 package liquibase.migrator.change;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertNull;
 
-public class ConstraintsConfigTest extends TestCase {
+import org.junit.Test;
 
-    public void testConstraints() throws Exception {
+/**
+ * Tests for {@link ConstraintsConfig}
+ */
+public class ConstraintsConfigTest {
+
+    @Test
+    public void constraints() throws Exception {
         ConstraintsConfig constraints = new ConstraintsConfig();
         assertNull(constraints.isDeleteCascade());
         assertNull(constraints.isInitiallyDeferred());

@@ -1,16 +1,27 @@
 package liquibase.migrator.change;
 
-import liquibase.database.OracleDatabase;
-import org.w3c.dom.Element;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import liquibase.database.OracleDatabase;
+
+import org.junit.Test;
+import org.w3c.dom.Element;
+
+/**
+ * Tests for {@link AlterSequenceChange}
+ */
 public class AlterSequenceChangeTest extends AbstractChangeTest {
-    public void testGetRefactoringName() throws Exception {
+
+    @Test
+    public void getRefactoringName() throws Exception {
         assertEquals("Alter Sequence", new AlterSequenceChange().getChangeName());
     }
 
-    public void testGenerateStatement() throws Exception {
+    @Test
+    public void generateStatement() throws Exception {
         AlterSequenceChange refactoring = new AlterSequenceChange();
         refactoring.setSequenceName("SEQ_NAME");
         OracleDatabase oracleDatabase = new OracleDatabase();
@@ -37,14 +48,16 @@ public class AlterSequenceChangeTest extends AbstractChangeTest {
 
     }
 
-    public void testGetConfirmationMessage() throws Exception {
+    @Test
+    public void getConfirmationMessage() throws Exception {
         AlterSequenceChange refactoring = new AlterSequenceChange();
         refactoring.setSequenceName("SEQ_NAME");
 
         assertEquals("Sequence SEQ_NAME has been altered", refactoring.getConfirmationMessage());
     }
 
-    public void testCreateNode() throws Exception {
+    @Test
+    public void createNode() throws Exception {
         AlterSequenceChange refactoring = new AlterSequenceChange();
         refactoring.setSequenceName("SEQ_NAME");
 

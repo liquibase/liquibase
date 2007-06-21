@@ -1,23 +1,34 @@
 package liquibase.migrator.change;
 
-import liquibase.database.OracleDatabase;
-import org.w3c.dom.Element;
+import static org.junit.Assert.assertEquals;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import liquibase.database.OracleDatabase;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.w3c.dom.Element;
+
+/**
+ * Tests for {@link CreateTableChange}
+ */
 public class CreateTableChangeTest extends AbstractChangeTest {
+
     private CreateTableChange change;
 
-    protected void setUp() throws Exception {
-        super.setUp();
+    @Before
+    public void setUp() throws Exception {
         change = new CreateTableChange();
     }
 
-    public void testGetRefactoringName() throws Exception {
+    @Test
+    public void getRefactoringName() throws Exception {
         assertEquals("Create Table", change.getChangeName());
     }
 
-    public void testGenerateStatement() throws Exception {
+    @Test
+    public void generateStatement() throws Exception {
         change.setTableName("TABLE_NAME");
 
         ColumnConfig column1 = new ColumnConfig();
@@ -62,12 +73,14 @@ public class CreateTableChangeTest extends AbstractChangeTest {
         assertEquals("CREATE TABLE TABLE_NAME (id int NOT NULL PRIMARY KEY, name varchar(255), state_id NOT NULL, phone varchar(255) DEFAULT 'NOPHONE', phone2 varchar(255) UNIQUE,  CONSTRAINT fk_tab_ref FOREIGN KEY (state_id) REFERENCES state(id) INITIALLY DEFERRED DEFERRABLE)", change.generateStatements(new OracleDatabase())[0]);
     }
 
-    public void testGetConfirmationMessage() throws Exception {
+    @Test
+    public void getConfirmationMessage() throws Exception {
         change.setTableName("TAB_NAME");
         assertEquals("Table TAB_NAME created", change.getConfirmationMessage());
     }
 
-    public void testCreateNode() throws Exception {
+    @Test
+    public void createNode() throws Exception {
         change.setTableName("TABLE_NAME");
 
         ColumnConfig column1 = new ColumnConfig();
@@ -154,5 +167,4 @@ public class CreateTableChangeTest extends AbstractChangeTest {
         assertEquals(1, constraintsElement.getAttributes().getLength());
         assertEquals("true", constraintsElement.getAttribute("unique"));
     }
-
 }

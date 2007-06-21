@@ -1,20 +1,30 @@
 package liquibase.migrator.change;
 
+import static org.junit.Assert.assertEquals;
 import liquibase.database.OracleDatabase;
 
+import org.junit.Before;
+import org.junit.Test;
+
+/**
+ * Tests for {@link RenameTableChange}
+ */
 public class RenameTableChangeTest extends AbstractChangeTest {
+
     private RenameTableChange refactoring;
 
-    protected void setUp() throws Exception {
-        super.setUp();
+    @Before
+    public void setUp() throws Exception {
         refactoring = new RenameTableChange();
     }
 
-    public void testGetRefactoringName() throws Exception {
+    @Test
+    public void getRefactoringName() throws Exception {
         assertEquals("Rename Table", refactoring.getChangeName());
     }
 
-    public void testGenerateStatement() throws Exception {
+    @Test
+    public void generateStatement() throws Exception {
         RenameTableChange refactoring = new RenameTableChange();
         refactoring.setOldTableName("OLD_NAME");
         refactoring.setNewTableName("NEW_NAME");
@@ -22,18 +32,19 @@ public class RenameTableChangeTest extends AbstractChangeTest {
         assertEquals("RENAME OLD_NAME TO NEW_NAME", refactoring.generateStatements(new OracleDatabase())[0]);
     }
 
-    public void testGetConfirmationMessage() throws Exception {
+    @Test
+    public void getConfirmationMessage() throws Exception {
         refactoring.setOldTableName("OLD_NAME");
         refactoring.setNewTableName("NEW_NAME");
 
         assertEquals("Table with the name OLD_NAME has been renamed to NEW_NAME", refactoring.getConfirmationMessage());
     }
 
-    public void testCreateNode() throws Exception {
+    @Test
+    public void createNode() throws Exception {
         refactoring.setOldTableName("OLD_NAME");
         refactoring.setNewTableName("NEW_NAME");
 
-//        Element node = refactoring.createNode(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument());
         assertEquals("OLD_NAME", refactoring.getOldTableName());
         assertEquals("NEW_NAME", refactoring.getNewTableName());
     }

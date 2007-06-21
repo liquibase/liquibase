@@ -1,18 +1,26 @@
 package liquibase.migrator.change;
 
+import static org.junit.Assert.assertEquals;
+
+import javax.xml.parsers.DocumentBuilderFactory;
+
 import liquibase.database.OracleDatabase;
+
+import org.junit.Before;
+import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
-import javax.xml.parsers.DocumentBuilderFactory;
-
+/**
+ * Tests for {@link ModifyColumnChange}
+ */
 public class ModifyColumnChangeTest extends AbstractChangeTest {
 
     ModifyColumnChange change;
 
+    @Before
     public void setUp() throws Exception {
-        super.setUp();
         change = new ModifyColumnChange();
         change.setTableName("TABLE_NAME");
 
@@ -23,19 +31,23 @@ public class ModifyColumnChangeTest extends AbstractChangeTest {
         change.setColumn(col1);
     }
 
-    public void testGetRefactoringName() throws Exception {
+    @Test
+    public void getRefactoringName() throws Exception {
         assertEquals("Modify Column", change.getChangeName());
     }
 
-    public void testGenerateStatement() throws Exception {
+    @Test
+    public void generateStatement() throws Exception {
         assertEquals("ALTER TABLE TABLE_NAME MODIFY (NAME integer(3))", change.generateStatements(new OracleDatabase())[0]);
     }
 
-    public void testGetConfirmationMessage() throws Exception {
+    @Test
+    public void getConfirmationMessage() throws Exception {
         assertEquals("Column with the name NAME has been modified.", change.getConfirmationMessage());
     }
 
-    public void testCreateNode() throws Exception {
+    @Test
+    public void createNode() throws Exception {
         Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
 
         Element node = change.createNode(document);

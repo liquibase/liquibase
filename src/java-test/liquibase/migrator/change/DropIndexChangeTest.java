@@ -1,16 +1,24 @@
 package liquibase.migrator.change;
 
 import liquibase.database.OracleDatabase;
-import org.w3c.dom.Element;
 
+import org.junit.Test;
+import org.w3c.dom.Element;
+import static org.junit.Assert.assertEquals;
 import javax.xml.parsers.DocumentBuilderFactory;
 
+/**
+ * Tests for {@link DropIndexChange}
+ */
 public class DropIndexChangeTest extends AbstractChangeTest {
-    public void testGetRefactoringName() throws Exception {
+
+    @Test
+    public void getRefactoringName() throws Exception {
         assertEquals("Drop Index", new DropIndexChange().getChangeName());
     }
 
-    public void testGenerateStatement() throws Exception {
+    @Test
+    public void generateStatement() throws Exception {
         DropIndexChange refactoring = new DropIndexChange();
         refactoring.setIndexName("IDX_NAME");
         refactoring.setTableName("TABLE_NAME");
@@ -18,7 +26,8 @@ public class DropIndexChangeTest extends AbstractChangeTest {
         assertEquals("DROP INDEX IDX_NAME", refactoring.generateStatements(new OracleDatabase())[0]);
     }
 
-    public void testGetConfirmationMessage() throws Exception {
+    @Test
+    public void getConfirmationMessage() throws Exception {
         DropIndexChange refactoring = new DropIndexChange();
         refactoring.setIndexName("IDX_NAME");
         refactoring.setTableName("TABLE_NAME");
@@ -26,7 +35,8 @@ public class DropIndexChangeTest extends AbstractChangeTest {
         assertEquals("Index IDX_NAME dropped from table TABLE_NAME", refactoring.getConfirmationMessage());
     }
 
-    public void testCreateNode() throws Exception {
+    @Test
+    public void createNode() throws Exception {
         DropIndexChange refactoring = new DropIndexChange();
         refactoring.setIndexName("IDX_NAME");
         Element element = refactoring.createNode(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument());

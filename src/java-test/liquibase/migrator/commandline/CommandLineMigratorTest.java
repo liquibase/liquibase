@@ -1,17 +1,30 @@
 package liquibase.migrator.commandline;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.fail;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+import java.io.StringReader;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Properties;
 
 import liquibase.migrator.exception.CommandLineParsingException;
 
-public class CommandLineMigratorTest extends TestCase {
+import org.junit.Test;
 
-    public void testMigrateWithAllParameters() throws Exception {
+/**
+ * Tests for {@link CommandLineMigrator}
+ */
+public class CommandLineMigratorTest {
+
+    @Test
+    public void migrateWithAllParameters() throws Exception {
         String[] args = new String[]{
                 "--driver=DRIVER",
                 "--username=USERNAME",
@@ -38,7 +51,8 @@ public class CommandLineMigratorTest extends TestCase {
         assertEquals("migrate", cli.command);
     }
 
-    public void testFalseBooleanParameters() throws Exception {
+    @Test
+    public void falseBooleanParameters() throws Exception {
         String[] args = new String[]{
                 "--promptForNonLocalDatabase=false",
                 "migrate",
@@ -52,7 +66,8 @@ public class CommandLineMigratorTest extends TestCase {
 
     }
 
-    public void testTrueBooleanParameters() throws Exception {
+    @Test
+    public void trueBooleanParameters() throws Exception {
         String[] args = new String[]{
                 "--promptForNonLocalDatabase=true",
                 "migrate",
@@ -66,38 +81,30 @@ public class CommandLineMigratorTest extends TestCase {
 
     }
 
-    public void testParameterWithoutDash() throws Exception {
+    @Test(expected = CommandLineParsingException.class)
+    public void parameterWithoutDash() throws Exception {
         String[] args = new String[]{
                 "promptForNonLocalDatabase=true",
                 "migrate",
         };
 
         CommandLineMigrator cli = new CommandLineMigrator();
-        try {
-            cli.parseOptions(args);
-            fail("Should have thrown an exception");
-        } catch (CommandLineParsingException e) {
-            assertEquals("Parameters must start with a '--'", e.getMessage());
-        }
-
+        cli.parseOptions(args);
     }
 
-    public void testParameterWithoutEquals() throws Exception {
+    @Test(expected = CommandLineParsingException.class)
+    public void parameterWithoutEquals() throws Exception {
         String[] args = new String[]{
                 "--promptForNonLocalDatabase", "true",
                 "migrate",
         };
 
         CommandLineMigrator cli = new CommandLineMigrator();
-        try {
-            cli.parseOptions(args);
-            fail("Should have thrown an exception");
-        } catch (CommandLineParsingException e) {
-            assertEquals("Could not parse '--promptForNonLocalDatabase'", e.getMessage());
-        }
+        cli.parseOptions(args);
     }
 
-    public void testUnknownParameter() throws Exception {
+    @Test(expected = CommandLineParsingException.class)
+    public void unknownParameter() throws Exception {
         String[] args = new String[]{
                 "--promptForNonLocalDatabase=true",
                 "--badParam=here",
@@ -105,27 +112,18 @@ public class CommandLineMigratorTest extends TestCase {
         };
 
         CommandLineMigrator cli = new CommandLineMigrator();
-        try {
-            cli.parseOptions(args);
-            fail("Should have thrown an exception");
-        } catch (CommandLineParsingException e) {
-            assertEquals("Unknown parameter: 'badParam'", e.getMessage());
-        }
+        cli.parseOptions(args);
     }
 
-    public void testConfigureNonExistantClassloaderLocation() throws Exception {
+    @Test(expected = CommandLineParsingException.class)
+    public void configureNonExistantClassloaderLocation() throws Exception {
         CommandLineMigrator cli = new CommandLineMigrator();
         cli.classpath = "badClasspathLocation";
-
-        try {
-            cli.configureClassLoader();
-            fail("Should have thrown an exception");
-        } catch (CommandLineParsingException e) {
-            assertTrue("Did not find message in " + e.getMessage(), e.getMessage().contains("badClasspathLocation does not exist"));
-        }
+        cli.configureClassLoader();
     }
 
-    public void testWindowsConfigureClassLoaderLocation() throws Exception {
+    @Test
+    public void windowsConfigureClassLoaderLocation() throws Exception {
         CommandLineMigrator cli = new CommandLineMigrator();
 
         if (cli.isWindows())
@@ -142,7 +140,8 @@ public class CommandLineMigratorTest extends TestCase {
         }
     }
 
-    public void testUNIXConfigureClassLoaderLocation() throws Exception {
+    @Test
+    public void unixConfigureClassLoaderLocation() throws Exception {
         CommandLineMigrator cli = new CommandLineMigrator();
 
         if (!cli.isWindows())
@@ -160,8 +159,8 @@ public class CommandLineMigratorTest extends TestCase {
         }
     }
 
-
-    public void testPropertiesFileWithNoOtherArgs() throws Exception {
+    @Test
+    public void propertiesFileWithNoOtherArgs() throws Exception {
         CommandLineMigrator cli = new CommandLineMigrator();
 
         Properties props = new Properties();
@@ -190,7 +189,8 @@ public class CommandLineMigratorTest extends TestCase {
 
     }
 
-    public void testPropertiesFileWithOtherArgs() throws Exception {
+    @Test
+    public void propertiesFileWithOtherArgs() throws Exception {
         CommandLineMigrator cli = new CommandLineMigrator();
         cli.username = "PASSED USERNAME";
         cli.password = "PASSED PASSWD";
@@ -222,7 +222,8 @@ public class CommandLineMigratorTest extends TestCase {
 
     }
 
-    public void testApplyDefaults() {
+    @Test
+    public void applyDefaults() {
         CommandLineMigrator cli = new CommandLineMigrator();
 
         cli.promptForNonLocalDatabase = Boolean.TRUE;
@@ -239,7 +240,8 @@ public class CommandLineMigratorTest extends TestCase {
 
     }
 
-    public void testPropertiesFileWithBadArgs() throws Exception {
+    @Test(expected = CommandLineParsingException.class)
+    public void propertiesFileWithBadArgs() throws Exception {
         CommandLineMigrator cli = new CommandLineMigrator();
 
         Properties props = new Properties();
@@ -250,15 +252,11 @@ public class CommandLineMigratorTest extends TestCase {
         ByteArrayOutputStream propFile = new ByteArrayOutputStream();
         props.store(propFile, "");
 
-        try {
-            cli.parsePropertiesFile(new ByteArrayInputStream(propFile.toByteArray()));
-            fail("Should have thrown an exception");
-        } catch (CommandLineParsingException e) {
-            assertEquals("Unknown parameter: 'badArg'", e.getMessage());
-        }
+        cli.parsePropertiesFile(new ByteArrayInputStream(propFile.toByteArray()));
     }
 
-    public void testCheckSetup() {
+    @Test
+    public void checkSetup() {
         CommandLineMigrator cli = new CommandLineMigrator();
         assertFalse(cli.checkSetup());
 
@@ -278,7 +276,8 @@ public class CommandLineMigratorTest extends TestCase {
         assertTrue(cli.checkSetup());
     }
 
-    public void testPrintHelp() throws Exception {
+    @Test
+    public void printHelp() throws Exception {
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         CommandLineMigrator cli = new CommandLineMigrator();
         cli.printHelp(new PrintStream(stream));
@@ -292,7 +291,8 @@ public class CommandLineMigratorTest extends TestCase {
         }
     }
 
-    public void testTag() throws Exception {
+    @Test
+    public void tag() throws Exception {
         String[] args = new String[]{
                 "--driver=DRIVER",
                 "--username=USERNAME",
@@ -318,7 +318,8 @@ public class CommandLineMigratorTest extends TestCase {
         assertEquals("TagHere", cli.commandParam);
     }
 
-    public void testMigrateWithEqualsInParams() throws Exception {
+    @Test
+    public void migrateWithEqualsInParams() throws Exception {
         String url = "dbc:sqlserver://127.0.0.1;DatabaseName=dev_nn;user=ffdatabase;password=p!88worD";
         String[] args = new String[]{
                 "--url=" + url,
@@ -330,5 +331,4 @@ public class CommandLineMigratorTest extends TestCase {
 
         assertEquals(url, cli.url);
     }
-
 }

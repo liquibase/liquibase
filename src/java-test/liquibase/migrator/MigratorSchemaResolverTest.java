@@ -1,14 +1,21 @@
 package liquibase.migrator;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import liquibase.migrator.parser.MigratorSchemaResolver;
 
-public class MigratorSchemaResolverTest extends TestCase {
+import org.junit.Test;
 
-    public void testResolveEntity() throws Exception {
+/**
+ * Tests for {@link MigratorSchemaResolver}
+ */
+public class MigratorSchemaResolverTest {
+
+    @Test
+    public void resolveEntity() throws Exception {
         MigratorSchemaResolver migratorSchemaResolver = new MigratorSchemaResolver();
-        assertNotNull(migratorSchemaResolver.resolveEntity(null, "http://www.liquibase.org/xml/ns/migrator/dbchangelog-1.0.xsd"));
 
+        assertNotNull(migratorSchemaResolver.resolveEntity(null, "http://www.liquibase.org/xml/ns/migrator/dbchangelog-1.0.xsd"));
         assertNull(migratorSchemaResolver.resolveEntity(null, "http://www.liquibase.org/xml/ns/migrator/invalid.xsd"));
     }
 }

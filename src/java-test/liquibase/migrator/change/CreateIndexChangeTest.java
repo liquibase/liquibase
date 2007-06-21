@@ -1,17 +1,26 @@
 package liquibase.migrator.change;
 
-import liquibase.database.OracleDatabase;
-import org.w3c.dom.Element;
+import static org.junit.Assert.assertEquals;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import liquibase.database.OracleDatabase;
+
+import org.junit.Test;
+import org.w3c.dom.Element;
+
+/**
+ * Tests for {@link CreateIndexChange}
+ */
 public class CreateIndexChangeTest extends AbstractChangeTest {
 
-    public void testGetRefactoringName() throws Exception {
+    @Test
+    public void getRefactoringName() throws Exception {
         assertEquals("Create Index", new CreateIndexChange().getChangeName());
     }
 
-    public void testGenerateStatement() throws Exception {
+    @Test
+    public void generateStatement() throws Exception {
         CreateIndexChange refactoring = new CreateIndexChange();
         refactoring.setIndexName("IDX_TEST");
         refactoring.setTableName("TAB_NAME");
@@ -29,14 +38,16 @@ public class CreateIndexChangeTest extends AbstractChangeTest {
         assertEquals("CREATE INDEX IDX_TEST ON TAB_NAME(COL1, COL2)", refactoring.generateStatements(new OracleDatabase())[0]);
     }
 
-    public void testGetConfirmationMessage() throws Exception {
+    @Test
+    public void getConfirmationMessage() throws Exception {
         CreateIndexChange refactoring = new CreateIndexChange();
         refactoring.setIndexName("IDX_TEST");
 
         assertEquals("Index IDX_TEST has been created", refactoring.getConfirmationMessage());
     }
 
-    public void testCreateNode() throws Exception {
+    @Test
+    public void createNode() throws Exception {
         CreateIndexChange refactoring = new CreateIndexChange();
         refactoring.setIndexName("IDX_TEST");
         refactoring.setTableName("TAB_NAME");
@@ -60,5 +71,4 @@ public class CreateIndexChangeTest extends AbstractChangeTest {
         assertEquals("column", ((Element) element.getChildNodes().item(1)).getTagName());
         assertEquals("COL2", ((Element) element.getChildNodes().item(1)).getAttribute("name"));
     }
-
 }

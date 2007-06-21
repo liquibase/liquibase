@@ -1,17 +1,25 @@
 package liquibase.migrator.change;
 
-import liquibase.database.OracleDatabase;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
+import static org.junit.Assert.assertEquals;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import liquibase.database.OracleDatabase;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
+/**
+ * Tests for {@link RenameColumnChange}
+ */
 public class RenameColumnChangeTest extends AbstractChangeTest {
 
     RenameColumnChange refactoring;
 
+    @Before
     public void setUp() throws Exception {
-        super.setUp();
         refactoring = new RenameColumnChange();
 
         refactoring.setTableName("TABLE_NAME");
@@ -19,19 +27,23 @@ public class RenameColumnChangeTest extends AbstractChangeTest {
         refactoring.setNewColumnName("newColName");
     }
 
-    public void testGetRefactoringName() throws Exception {
+    @Test
+    public void getRefactoringName() throws Exception {
         assertEquals("Rename Column", refactoring.getChangeName());
     }
 
-    public void testGenerateStatement() throws Exception {
+    @Test
+    public void generateStatement() throws Exception {
         assertEquals("ALTER TABLE TABLE_NAME RENAME COLUMN oldColName TO newColName", refactoring.generateStatements(new OracleDatabase())[0]);
     }
 
-    public void testGetConfirmationMessage() throws Exception {
+    @Test
+    public void getConfirmationMessage() throws Exception {
         assertEquals("Column with the name oldColName has been renamed to newColName", refactoring.getConfirmationMessage());
     }
 
-    public void testCreateNode() throws Exception {
+    @Test
+    public void createNode() throws Exception {
         Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
 
         Element node = refactoring.createNode(document);

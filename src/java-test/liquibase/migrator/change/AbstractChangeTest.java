@@ -1,29 +1,38 @@
 package liquibase.migrator.change;
 
-import junit.framework.TestCase;
-import liquibase.database.Database;
-import liquibase.database.OracleDatabase;
-import liquibase.migrator.exception.UnsupportedChangeException;
-import liquibase.util.StreamUtil;
-import static org.easymock.classextension.EasyMock.*;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.expectLastCall;
+import static org.easymock.classextension.EasyMock.createMock;
+import static org.easymock.classextension.EasyMock.replay;
+import static org.junit.Assert.assertEquals;
 
 import java.io.StringWriter;
 import java.sql.Connection;
 import java.sql.Statement;
 
-public abstract class AbstractChangeTest extends TestCase {
+import liquibase.database.Database;
+import liquibase.database.OracleDatabase;
+import liquibase.util.StreamUtil;
 
-    public abstract void testGetRefactoringName() throws Exception;
+import org.junit.Test;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
-    public abstract void testGenerateStatement() throws Exception;
+/**
+ * Base test class for changes
+ */
+public abstract class AbstractChangeTest {
 
-    public abstract void testGetConfirmationMessage() throws Exception;
+    public abstract void getRefactoringName() throws Exception;
 
-    public abstract void testCreateNode() throws Exception;
+    public abstract void generateStatement() throws Exception;
 
-    public void testSaveStatement() throws Exception {
+    public abstract void getConfirmationMessage() throws Exception;
+
+    public abstract void createNode() throws Exception;
+
+    @Test
+    public void saveStatement() throws Exception {
         Change change = new AbstractChange("test", "Test Refactoring") {
             public String[] generateStatements(Database database) {
                 return new String[]{"GENERATED STATEMENT"};
@@ -46,7 +55,8 @@ public abstract class AbstractChangeTest extends TestCase {
         assertEquals("GENERATED STATEMENT;" + StreamUtil.getLineSeparator() + StreamUtil.getLineSeparator(), stringWriter.getBuffer().toString());
     }
 
-    public void testExecuteStatement() throws Exception {
+    @Test
+    public void executeStatement() throws Exception {
         Change change = new AbstractChange("test", "Test Refactorign") {
             public String[] generateStatements(Database database) {
                 return new String[]{"GENERATED STATEMENT;"};

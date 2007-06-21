@@ -1,11 +1,17 @@
 package liquibase.migrator;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
 import liquibase.migrator.exception.DuplicateStatementIdentifierException;
 
-public class DuplicateStatementIdentifierExceptionTest extends TestCase {
+import org.junit.Test;
 
-    public void testDuplicateStatementIdentifierException() throws Exception {
+/**
+ * Tests for {@link DuplicateStatementIdentifierException}
+ */
+public class DuplicateStatementIdentifierExceptionTest {
+
+    @Test
+    public void duplicateStatementIdentifierException() throws Exception {
         DuplicateStatementIdentifierException ex = new DuplicateStatementIdentifierException("Message Here");
         assertEquals("Message Here", ex.getMessage());
     }

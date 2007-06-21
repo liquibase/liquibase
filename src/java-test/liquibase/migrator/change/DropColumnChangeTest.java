@@ -1,17 +1,26 @@
 package liquibase.migrator.change;
 
-import liquibase.database.OracleDatabase;
-import org.w3c.dom.Element;
+import static org.junit.Assert.assertEquals;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import liquibase.database.OracleDatabase;
+
+import org.junit.Test;
+import org.w3c.dom.Element;
+
+/**
+ * Tests for {@link DropColumnChange}
+ */
 public class DropColumnChangeTest extends AbstractChangeTest {
 
-    public void testGetRefactoringName() throws Exception {
+    @Test
+    public void getRefactoringName() throws Exception {
         assertEquals("Drop Column", new DropColumnChange().getChangeName());
     }
 
-    public void testGenerateStatement() throws Exception {
+    @Test
+    public void generateStatement() throws Exception {
         DropColumnChange change = new DropColumnChange();
         change.setTableName("TABLE_NAME");
         change.setColumnName("COL_HERE");
@@ -19,7 +28,8 @@ public class DropColumnChangeTest extends AbstractChangeTest {
         assertEquals("ALTER TABLE TABLE_NAME DROP COLUMN COL_HERE", change.generateStatements(new OracleDatabase())[0]);
     }
 
-    public void testGetConfirmationMessage() throws Exception {
+    @Test
+    public void getConfirmationMessage() throws Exception {
         DropColumnChange change = new DropColumnChange();
         change.setTableName("TABLE_NAME");
         change.setColumnName("COL_HERE");
@@ -27,7 +37,8 @@ public class DropColumnChangeTest extends AbstractChangeTest {
         assertEquals("Column TABLE_NAME(COL_HERE) dropped", change.getConfirmationMessage());
     }
 
-    public void testCreateNode() throws Exception {
+    @Test
+    public void createNode() throws Exception {
         DropColumnChange change = new DropColumnChange();
         change.setTableName("TABLE_NAME");
         change.setColumnName("COL_NAME");

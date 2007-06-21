@@ -1,18 +1,26 @@
 package liquibase.migrator.change;
 
+import static org.junit.Assert.assertEquals;
+
+import javax.xml.parsers.DocumentBuilderFactory;
+
 import liquibase.database.OracleDatabase;
+
+import org.junit.Before;
+import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
-import javax.xml.parsers.DocumentBuilderFactory;
-
+/**
+ * Tests for {@link InsertDataChange}
+ */
 public class InsertDataChangeTest extends AbstractChangeTest {
 
     InsertDataChange refactoring;
 
+    @Before
     public void setUp() throws Exception {
-        super.setUp();
         refactoring = new InsertDataChange();
         refactoring.setTableName("TABLE_NAME");
 
@@ -33,20 +41,24 @@ public class InsertDataChangeTest extends AbstractChangeTest {
         refactoring.addColumn(col3);
     }
 
-    public void testGetRefactoringName() throws Exception {
+    @Test
+    public void getRefactoringName() throws Exception {
         assertEquals("Insert Row", refactoring.getChangeName());
     }
 
-    public void testGenerateStatement() throws Exception {
+    @Test
+    public void generateStatement() throws Exception {
         assertEquals("INSERT INTO TABLE_NAME (id, name, age) VALUES ('123', 'Andrew', '21')",
                 refactoring.generateStatements(new OracleDatabase())[0]);
     }
 
-    public void testGetConfirmationMessage() throws Exception {
+    @Test
+    public void getConfirmationMessage() throws Exception {
         assertEquals("New rows have been inserted into the table TABLE_NAME", refactoring.getConfirmationMessage());
     }
 
-    public void testCreateNode() throws Exception {
+    @Test
+    public void createNode() throws Exception {
         Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
         Element node = refactoring.createNode(document);
 

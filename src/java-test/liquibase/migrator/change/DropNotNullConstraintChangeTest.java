@@ -1,17 +1,26 @@
 package liquibase.migrator.change;
 
-import liquibase.database.MySQLDatabase;
-import org.w3c.dom.Element;
+import static org.junit.Assert.assertEquals;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import liquibase.database.MySQLDatabase;
+
+import org.junit.Test;
+import org.w3c.dom.Element;
+
+/**
+ * Tests for {@link DropNotNullConstraintChange}
+ */
 public class DropNotNullConstraintChangeTest extends AbstractChangeTest {
 
-    public void testGetRefactoringName() throws Exception {
+    @Test
+    public void getRefactoringName() throws Exception {
         assertEquals("Drop Not-Null Constraint", new DropNotNullConstraintChange().getChangeName());
     }
 
-    public void testGenerateStatement() throws Exception {
+    @Test
+    public void generateStatement() throws Exception {
         DropNotNullConstraintChange change = new DropNotNullConstraintChange();
         change.setTableName("TABLE_NAME");
         change.setColumnName("COL_HERE");
@@ -19,7 +28,8 @@ public class DropNotNullConstraintChangeTest extends AbstractChangeTest {
         assertEquals("ALTER TABLE TABLE_NAME MODIFY COL_HERE varchar(200) DEFAULT NULL", change.generateStatements(new MySQLDatabase())[0]);
     }
 
-    public void testGetConfirmationMessage() throws Exception {
+    @Test
+    public void getConfirmationMessage() throws Exception {
         DropNotNullConstraintChange change = new DropNotNullConstraintChange();
         change.setTableName("TABLE_NAME");
         change.setColumnName("COL_HERE");
@@ -27,7 +37,8 @@ public class DropNotNullConstraintChangeTest extends AbstractChangeTest {
 
     }
 
-    public void testCreateNode() throws Exception {
+    @Test
+    public void createNode() throws Exception {
         DropNotNullConstraintChange change = new DropNotNullConstraintChange();
         change.setTableName("TABLE_NAME");
         change.setColumnName("COL_HERE");

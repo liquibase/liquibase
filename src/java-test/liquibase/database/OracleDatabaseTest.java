@@ -19,47 +19,47 @@ public class OracleDatabaseTest extends AbstractDatabaseTest {
     }
 
     @Test
-    public void testGetBlobType() {
+    public void getBlobType() {
         assertEquals("BLOB", getDatabase().getBlobType());
     }
 
     @Test
-    public void testSupportsInitiallyDeferrableColumns() {
+    public void supportsInitiallyDeferrableColumns() {
         assertTrue(getDatabase().supportsInitiallyDeferrableColumns());
     }
 
     @Test
-    public void testGetBooleanType() {
+    public void getBooleanType() {
         assertEquals("NUMBER(1)", getDatabase().getBooleanType());
     }
 
     @Test
-    public void testGetCurrencyType() {
+    public void getCurrencyType() {
         assertEquals("NUMBER(15, 2)", getDatabase().getCurrencyType());
     }
 
     @Test
-    public void testGetUUIDType() {
+    public void getUUIDType() {
         assertEquals("RAW(16)", getDatabase().getUUIDType());
     }
 
     @Test
-    public void testGetClobType() {
+    public void getClobType() {
         assertEquals("CLOB", getDatabase().getClobType());
     }
 
     @Test
-    public void testGetDateType() {
+    public void getDateType() {
         assertEquals("DATE", getDatabase().getDateType());
     }
 
     @Test
-    public void testGetDateTimeType() {
+    public void getDateTimeType() {
         assertEquals("TIMESTAMP", getDatabase().getDateTimeType());
     }
 
     @Test
-    public void testGetCurrentDateTimeFunction() {
+    public void getCurrentDateTimeFunction() {
         assertEquals("SYSDATE", getDatabase().getCurrentDateTimeFunction());
     }
 }

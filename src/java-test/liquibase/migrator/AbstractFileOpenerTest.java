@@ -1,39 +1,19 @@
 package liquibase.migrator;
 
-import junit.framework.TestCase;
+import org.junit.Before;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.util.Enumeration;
+/**
+ * Base test class for file openers
+ */
+public abstract class AbstractFileOpenerTest
+{
+  protected FileOpener fileOpener;
 
-public abstract class AbstractFileOpenerTest extends TestCase {
+  protected abstract FileOpener createFileOpener();
 
-    private FileOpener fileOpener;
-
-    protected abstract FileOpener createFileOpener();
-
-    protected void setUp() throws Exception {
-        super.setUp();
-        fileOpener = createFileOpener();
-    }
-
-    public void testGetResourceAsStream() throws Exception {
-        try {
-            fileOpener.getResourceAsStream("non/existant/file.txt");
-            fail("Exception should have been thrown");
-        } catch (IOException e) {
-            ; //what we wanted
-        }
-        InputStream inputStream = fileOpener.getResourceAsStream("liquibase/migrator/ant/AntFileOpenerTest.class");
-        assertNotNull(inputStream);
-    }
-
-
-    public void testGetResources() throws Exception {
-        Enumeration<URL> resources = fileOpener.getResources("liquibase/migrator/ant");
-        assertNotNull(resources);
-    }
-
-
+  @Before
+  public void setUp() throws Exception
+  {
+    fileOpener = createFileOpener();
+  }
 }

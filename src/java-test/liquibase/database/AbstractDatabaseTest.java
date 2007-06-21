@@ -32,26 +32,26 @@ public abstract class AbstractDatabaseTest {
 
     protected abstract String getProductNameString();
 
-    public abstract void testGetBlobType();
+    public abstract void getBlobType();
 
-    public abstract void testSupportsInitiallyDeferrableColumns();
+    public abstract void supportsInitiallyDeferrableColumns();
 
-    public abstract void testGetBooleanType();
+    public abstract void getBooleanType();
 
-    public abstract void testGetCurrencyType();
+    public abstract void getCurrencyType();
 
-    public abstract void testGetUUIDType();
+    public abstract void getUUIDType();
 
-    public abstract void testGetClobType();
+    public abstract void getClobType();
 
-    public abstract void testGetDateType();
+    public abstract void getDateType();
 
-    public abstract void testGetDateTimeType();
+    public abstract void getDateTimeType();
 
-    public abstract void testGetCurrentDateTimeFunction();
+    public abstract void getCurrentDateTimeFunction();
 
     @Test
-    public void testGetColumnType() {
+    public void getColumnType() {
         ColumnConfig column = new ColumnConfig();
 
         column.setType("boolean");
@@ -85,7 +85,7 @@ public abstract class AbstractDatabaseTest {
     }
 
     @Test
-    public void testGetDriverName() throws Exception {
+    public void getDriverName() throws Exception {
         Connection connection = createMock(Connection.class);
         DatabaseMetaData metaData = createMock(DatabaseMetaData.class);
 
@@ -101,7 +101,7 @@ public abstract class AbstractDatabaseTest {
     }
 
     @Test
-    public void testGetConnectionURL() throws Exception {
+    public void getConnectionURL() throws Exception {
         Connection connection = createMock(Connection.class);
         DatabaseMetaData metaData = createMock(DatabaseMetaData.class);
 
@@ -133,7 +133,7 @@ public abstract class AbstractDatabaseTest {
     }
 
     @Test
-    public void testIsCorrectDatabaseImplementation() throws Exception {
+    public void isCorrectDatabaseImplementation() throws Exception {
         assertTrue(getDatabase().isCorrectDatabaseImplementation(getMockConnection()));
     }
 

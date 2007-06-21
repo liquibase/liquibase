@@ -1,38 +1,48 @@
 package liquibase.migrator.change;
 
+import static org.junit.Assert.assertEquals;
+
+import javax.xml.parsers.DocumentBuilderFactory;
+
 import liquibase.database.OracleDatabase;
+
+import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
-import javax.xml.parsers.DocumentBuilderFactory;
-
+/**
+ * Tests for {@link AddColumnChange}
+ */
 public class AddColumnChangeTest extends AbstractChangeTest {
 
-    public void testGetRefactoringName() throws Exception {
+    @Test
+    public void getRefactoringName() throws Exception {
         AddColumnChange refactoring = new AddColumnChange();
         assertEquals("Add Column", refactoring.getChangeName());
     }
 
-    public void testGenerateStatement() throws Exception {
+    @Test
+    public void generateStatement() throws Exception {
         AddColumnChange refactoring = new AddColumnChange();
         refactoring.setTableName("TAB");
         ColumnConfig column = new ColumnConfig();
         column.setName("NEWCOL");
         column.setType("TYP");
-        
+
         ConstraintsConfig constraints = new ConstraintsConfig();
         constraints.setPrimaryKey(Boolean.FALSE);
         constraints.setNullable(Boolean.FALSE);
-        
+
         column.setConstraints(constraints);
-        
+
         refactoring.setColumn(column);
 
         assertEquals("ALTER TABLE TAB ADD NEWCOL TYP", refactoring.generateStatements(new OracleDatabase())[0]);
     }
 
-    public void testGetConfirmationMessage() throws Exception {
+    @Test
+    public void getConfirmationMessage() throws Exception {
         AddColumnChange refactoring = new AddColumnChange();
         refactoring.setTableName("TAB");
         ColumnConfig column = new ColumnConfig();
@@ -43,7 +53,8 @@ public class AddColumnChangeTest extends AbstractChangeTest {
         assertEquals("Column NEWCOL(TYP) has been added to TAB", refactoring.getConfirmationMessage());
     }
 
-    public void testCreateNode() throws Exception {
+    @Test
+    public void createNode() throws Exception {
         Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
 
         AddColumnChange refactoring = new AddColumnChange();

@@ -1,16 +1,27 @@
 package liquibase.migrator.change;
 
-import liquibase.database.OracleDatabase;
-import org.w3c.dom.Element;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 
+import liquibase.database.OracleDatabase;
+
+import org.junit.Test;
+import org.w3c.dom.Element;
+
+/**
+ * Tests for {@link CreateSequenceChange}
+ */
 public class CreateSequenceChangeTest extends AbstractChangeTest {
-    public void testGetRefactoringName() throws Exception {
+
+    @Test
+    public void getRefactoringName() throws Exception {
         assertEquals("Create Sequence", new CreateSequenceChange().getChangeName());
     }
 
-    public void testGenerateStatement() throws Exception {
+    @Test
+    public void generateStatement() throws Exception {
         CreateSequenceChange change = new CreateSequenceChange();
         change.setSequenceName("SEQ_NAME");
         OracleDatabase oracleDatabase = new OracleDatabase();
@@ -38,14 +49,16 @@ public class CreateSequenceChangeTest extends AbstractChangeTest {
 
     }
 
-    public void testGetConfirmationMessage() throws Exception {
+    @Test
+    public void getConfirmationMessage() throws Exception {
         CreateSequenceChange change = new CreateSequenceChange();
         change.setSequenceName("SEQ_NAME");
 
         assertEquals("Sequence SEQ_NAME has been created", change.getConfirmationMessage());
     }
 
-    public void testCreateNode() throws Exception {
+    @Test
+    public void createNode() throws Exception {
         CreateSequenceChange change = new CreateSequenceChange();
         change.setSequenceName("SEQ_NAME");
 

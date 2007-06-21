@@ -1,13 +1,20 @@
 package liquibase.migrator.change;
 
-import junit.framework.TestCase;
-import org.w3c.dom.Element;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 
-public class ColumnConfigTest extends TestCase {
+import org.junit.Test;
+import org.w3c.dom.Element;
 
-    public void testSetValue() throws Exception {
+/**
+ * Tests for {@link ColumnConfig}
+ */
+public class ColumnConfigTest {
+
+    @Test
+    public void setValue() throws Exception {
         ColumnConfig column = new ColumnConfig();
 
         column.setValue(null);
@@ -24,7 +31,8 @@ public class ColumnConfigTest extends TestCase {
 
     }
 
-    public void testCreateNode() throws Exception {
+    @Test
+    public void createNode() throws Exception {
         ColumnConfig column = new ColumnConfig();
         column.setName("id");
         column.setType("varchar(255)");

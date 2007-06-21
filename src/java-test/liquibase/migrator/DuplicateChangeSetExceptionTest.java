@@ -1,12 +1,17 @@
 package liquibase.migrator;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
 import liquibase.migrator.exception.DuplicateChangeSetException;
 
-public class DuplicateChangeSetExceptionTest extends TestCase {
+import org.junit.Test;
 
+/**
+ * Tests for {@link DuplicateChangeSetException}
+ */
+public class DuplicateChangeSetExceptionTest {
 
-    public void testDuplicateChangeSetException() throws Exception {
+    @Test
+    public void duplicateChangeSetException() throws Exception {
         DuplicateChangeSetException duplicateChangeSetException = new DuplicateChangeSetException("MESSAGE HERE");
         assertEquals("MESSAGE HERE", duplicateChangeSetException.getMessage());
     }

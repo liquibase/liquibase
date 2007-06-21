@@ -1,11 +1,17 @@
 package liquibase.migrator.ant;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
+
 import org.apache.tools.ant.Project;
+import org.junit.Test;
 
-public class DatabaseMigratorTaskTest extends TestCase {
+/**
+ * Tests for {@link DatabaseMigratorTask}
+ */
+public class DatabaseMigratorTaskTest {
 
-    public void testCreateClasspath() throws Exception {
+    @Test
+    public void createClasspath() throws Exception {
         DatabaseMigratorTask databaseMigratorTask = new DatabaseMigratorTask();
         Project project = new Project();
         databaseMigratorTask.setProject(project);
