@@ -18,6 +18,110 @@
 
             <div id="content">
                 <h1>Older LiquiBase News</h1>
+                                <div class="newsEntry">
+                    <h2>4/25/2007 - LiquiBase 0.8.1 Released</h2>
+                    <p>
+                        0.8.1 fixes a bug related to running LiquiBase without specifing an execution context.
+                    </p>
+                    <p>
+                        We also changed prompting on non-localhost databases to be "false" by default, but made it
+                        an option in the command-line migrator.
+                    </p>
+                </div>
+                <div class="newsEntry">
+                    <h2>4/22/2007 - LiquiBase 0.8 Released</h2>
+                    <p>
+                        With version 0.8, we have finished the LiquiBase name change and completed our move to
+                        SourceForge.
+                        We have also added many useful new features including:
+                    </p>
+                    <h3>Change Log Preconditions</h3>
+                    <p>
+                        Preconditions can be specified at the beginning of each change log to both document and enforce
+                        assumptions the writers of the changelog had when creating it.
+                    </p>
+                    <p>
+                        Currently supported preconditions check the type of database (MySQL vs. PostgreSQL)
+                        and the username of the database connection.
+                    </p>
+                    <p>
+                        <a href="../manual/latest/preconditions.html">More on preconditions</a>
+                    </p>
+                    <h3>Execution contexts</h3>
+                    <p>
+                        Change Sets can now be tagged with a "context" in which to run. This allows you to control
+                        which will be executed in any particular migration run.
+                    </p>
+                    <p>
+                        Contexts can be used to ease management of test data sets and to allow you to more easily
+                        create a single change log that is compatible with multiple DBMS systems.
+                    </p>
+                    <p>
+                        <a href="../manual/latest/contexts.html">More on contexts</a>
+                    </p>
+                    <h3>failOnError</h3>
+                    <p>
+                        ChangeSets can now have a "failOnError" attribute which controls if errors executing the
+                        changeset will cause the entire database migration to fail or not.
+                    </p>
+                    <h3>Add/Drop Not-Null Constraints</h3>
+                    <p>
+                        Two new refactorings have been added: "addNotNullConstraint" and "dropNotNullConstraint"
+                    </p>
+                    <h3>Comment tags in change sets</h3>
+                    <p>
+                        We have added a "comment" tag.  Currently it is just ignored, but future releases may
+                        make use of it.
+                    </p>
+                    <h3>Improved documentation</h3>
+                    <p>
+                        We have officially launched <a href="http://www.liquibase.org">http://www.liquibase.org</a>
+                        with greatly improved documentation.  The documentation is also included in the downloaded .zip
+                        files as well.
+                    </p>
+                    <h3>Many, Many Bug Fixes</h3>
+                    <p>
+                        As we approach 1.0, we have added an expanded set of unit and integration tests which have helped
+                        us flush out many bugs and will continue to make sure that old issues do not resurface.
+                    </p>
+                    <p>
+                        We would like to thank Thilak Kumar Rajaraman, Ramachandra Kadam, and Yashwanth Potla for the
+                        contributions they have made to this version of LiquiBase.
+                    </p>
+                    <p>
+                        <a href="../download.html">Download LiquiBase</a>
+                    </p>
+                </div>
+
+                <div class="newsEntry">
+                    <h2>3/16/2007 - LiquiBase 0.7 Released</h2>
+                    <p>
+                        We are proud to announce LiquiBase, the newly-renamed Sundog Database Refactoring Tool. We were
+                        never really fond of the SDRT name and finally found one we like better.
+                    </p>
+                    <p>
+                        The 0.7 version is primarily focused around the name conversion.
+                        It has a new package structure based on liquibase.* rather than net.sundog.db.*.
+                        We are also working on updating our website and moving much of the project management
+                        information to
+                        <a href="http://sourceforge.net/projects/liquibase">
+                            http://sourceforge.net/projects/liquibase</a>
+                        .
+                    </p>
+                    <p>
+                        Beyond the name change, the following changes were made:
+                    </p>
+                    <ul>
+                        <li>Added support for autoIncrement columns in createTableChange</li>
+                        <li>Better support for multi-line SQL scripts</li>
+                    </ul>
+                    <p>
+                        Note: DUE THE THE CHANGE IN MULTI-LINE SQL HANDLING, YOU MUST REBUILD YOUR MD5SUMS.
+                        Execute "update databasechangelog set md5sum=null" to clear out your past md5sums.
+                        They will be rebuilt with new correct new versions the next time your run the migrator.
+                    </p>
+                </div>
+                
                 <div class="newsEntry">
                     <h2>12/12/2006 - Database Refactoring Tool 0.6.1 Released</h2>
 

@@ -60,6 +60,16 @@
                         problem with the order that the statements are ran, but any issues you have can be easily solved
                         by re-ordering the changelog files.
                     </p>
+                    <p>
+                        <b>Why do I have to specify an "author" tag?  Why not just an "id" tag?</b>
+                        The main reason for both the author the id attribute tag is because it is too easy for 
+                        more than one person to a tag with the same "id" value--especially when using multiple branches.
+                        The source control system is going to resolve and merge two change sets added on different branches,
+                        but it won't care that there are two different changesets with the same "id",
+                        and once a change set has been run against a database with one id, you can't (easily) change it.
+                        By also determining change set uniqueness based on an author tag, the chance of duplicates is
+                        lowered.
+                    </p>
 
                 </div>
             </div>

@@ -1,6 +1,10 @@
 LiquiBASE Changelog
 ==========================================
 
+Changes in version 1.0 (2007.6.25)
+------------------------------------
+- Minor Bug Fixes
+
 Changes in version 1.0 RC2 (2007.6.19)
 ------------------------------------
 - Improved documentation
