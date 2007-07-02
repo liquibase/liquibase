@@ -279,7 +279,17 @@
             <column name="postalcode" type="varchar(20)"/>
         </modifyColumn>
     </changeSet>
-    
+
+    <changeSet id="51" author="nvoxland">
+        <createTable tableName="nulldefaulttest">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="firstname" type="varchar(50)"/>
+            <column name="test" type="bigint" defaultValue="null"/>
+        </createTable>
+    </changeSet>
+
     <include file="changelogs/mysql/complete/included.changelog.xml"/>
 
     <include file="changelogs/mysql/complete/renamed.changelog.xml"/>
