@@ -71,7 +71,11 @@ public class CreateTableChange extends AbstractChange {
             }
 
             if (column.getDefaultValue() != null) {
-                buffer.append(" DEFAULT '").append(column.getDefaultValue()).append("'");
+                if (column.getDefaultValue().equalsIgnoreCase("null")) {
+                    buffer.append(" DEFAULT NULL");
+                } else {
+                    buffer.append(" DEFAULT '").append(column.getDefaultValue()).append("'");
+                }
             }
 
             if (column.isAutoIncrement() != null && column.isAutoIncrement().booleanValue()) {
