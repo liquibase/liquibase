@@ -45,16 +45,25 @@ public class AddDefaultValueChange extends AbstractChange {
     }
 
     public String[] generateStatements(Database database) throws UnsupportedChangeException {
+
+        String maybeQuotedValue;
+        if ("NULL".equalsIgnoreCase(getDefaultValue())) {
+            maybeQuotedValue = getDefaultValue();
+        } else {
+            maybeQuotedValue = "'" + getDefaultValue() + "'";
+        }
+
+
         if (database instanceof MSSQLDatabase) {
-            return new String[]{ "ALTER TABLE " + getTableName() + " WITH NOCHECK ADD CONSTRAINT " + getColumnName() + "DefaultValue DEFAULT '" + getDefaultValue() + "' FOR " + getColumnName(), };
+            return new String[]{ "ALTER TABLE " + getTableName() + " WITH NOCHECK ADD CONSTRAINT " + getColumnName() + "DefaultValue DEFAULT "+maybeQuotedValue+" FOR " + getColumnName(), };
         } else if (database instanceof MySQLDatabase) {
-            return new String[]{ "ALTER TABLE " + getTableName() + " ALTER " + getColumnName() + " SET DEFAULT '" + getDefaultValue() + "'", };
+            return new String[]{ "ALTER TABLE " + getTableName() + " ALTER " + getColumnName() + " SET DEFAULT "+maybeQuotedValue, };
         } else if (database instanceof OracleDatabase) {
-            return new String[]{ "ALTER TABLE " + getTableName() + " MODIFY " + getColumnName() + " DEFAULT '" + getDefaultValue() + "'", };
+            return new String[]{ "ALTER TABLE " + getTableName() + " MODIFY " + getColumnName() + " DEFAULT "+maybeQuotedValue, };
         }
 
         return new String[]{
-                "ALTER TABLE " + getTableName() + " ALTER COLUMN  " + getColumnName() + " SET DEFAULT '" + getDefaultValue() + "'",
+                "ALTER TABLE " + getTableName() + " ALTER COLUMN  " + getColumnName() + " SET DEFAULT "+maybeQuotedValue,
         };
     }
 
