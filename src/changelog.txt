@@ -1,6 +1,11 @@
 LiquiBASE Changelog
 ==========================================
 
+Changes in version 1.0.1 (2007.7.07)
+------------------------------------
+- Do not quote "null" default values
+- Documentation fixes
+
 Changes in version 1.0 (2007.6.25)
 ------------------------------------
 - Minor Bug Fixes
