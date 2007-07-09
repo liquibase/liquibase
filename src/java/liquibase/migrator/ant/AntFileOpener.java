@@ -8,6 +8,8 @@ import org.apache.tools.ant.types.Path;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.Enumeration;
 import java.security.PrivilegedAction;
 import java.security.AccessController;

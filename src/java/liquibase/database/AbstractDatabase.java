@@ -1,11 +1,12 @@
 package liquibase.database;
 
 import liquibase.migrator.DatabaseChangeLogLock;
-import liquibase.migrator.exception.MigrationFailedException;
-import liquibase.migrator.exception.JDBCException;
 import liquibase.migrator.Migrator;
 import liquibase.migrator.change.ColumnConfig;
+import liquibase.migrator.exception.JDBCException;
+import liquibase.migrator.exception.MigrationFailedException;
 import liquibase.util.StreamUtil;
+import liquibase.database.structure.DatabaseSnapshot;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -29,6 +30,8 @@ public abstract class AbstractDatabase implements Database {
     private boolean changeLogLockTableExists;
 
     private static boolean outputtedLockWarning = false;
+
+    protected String currentDateTimeFunction;
 
     protected AbstractDatabase() {
         log = Logger.getLogger(Migrator.DEFAULT_LOG_NAME);
@@ -58,6 +61,15 @@ public abstract class AbstractDatabase implements Database {
     protected String getDatabaseProductName(Connection conn) throws JDBCException {
         try {
             return conn.getMetaData().getDatabaseProductName();
+        } catch (SQLException e) {
+            throw new JDBCException(e);
+        }
+    }
+
+
+    public String getDatabaseProductVersion() throws JDBCException {
+        try {
+            return connection.getMetaData().getDatabaseProductVersion();
         } catch (SQLException e) {
             throw new JDBCException(e);
         }
@@ -108,10 +120,18 @@ public abstract class AbstractDatabase implements Database {
     /**
      * Does the database type support sequence.
      */
-    protected abstract boolean supportsSequences();
+    public boolean supportsSequences() {
+        return true;
+    }
 
 
     // ------- DATABASE-SPECIFIC SQL METHODS ---- //
+
+    public void setCurrentDateTimeFunction(String function) {
+        if (function != null) {
+            this.currentDateTimeFunction = function;
+        }
+    }
 
     /**
      * Returns the database-specific datatype for the given column configuration.
@@ -129,6 +149,12 @@ public abstract class AbstractDatabase implements Database {
             return getBlobType();
         } else if ("CLOB".equalsIgnoreCase(column.getType())) {
             return getClobType();
+        } else if ("date".equalsIgnoreCase(column.getType())) {
+            return getDateType();
+        } else if ("time".equalsIgnoreCase(column.getType())) {
+            return getTimeType();
+        } else if ("dateTime".equalsIgnoreCase(column.getType())) {
+            return getDateTimeType();
         } else {
             return column.getType();
         }
@@ -151,6 +177,47 @@ public abstract class AbstractDatabase implements Database {
      */
     public String getTrueBooleanValue() {
         return "true";
+    }
+
+    /**
+     * Return a date literal with the same value as a string formatted using ISO 8601.
+     *
+     * Note: many databases accept date literals in ISO8601 format with the 'T' replaced with
+     * a space. Only databases which do not accept these strings should need to override this
+     * method.
+     *
+     * Implementation restriction:
+     * Currently, only the following subsets of ISO8601 are supported:
+     * YYYY-MM-DD
+     * hh:mm:ss
+     * YYYY-MM-DDThh:mm:ss
+     */
+    public String getDateLiteral(String isoDate) {
+        if (isDateOnly(isoDate) || isTimeOnly(isoDate)) {
+            return "'" + isoDate + "'";
+        } else if (isDateTime(isoDate)) {
+            StringBuffer val = new StringBuffer();
+            val.append("'");
+            val.append(isoDate.substring(0, 10));
+            val.append(" ");
+            val.append(isoDate.substring(11));
+            val.append("'");
+            return val.toString();
+        } else {
+            return "BAD_DATE_FORMAT:" + isoDate;
+        }
+    }
+
+    protected boolean isDateOnly(String isoDate) {
+        return isoDate.length() == "YYYY-MM-DD".length();
+    }
+
+    protected boolean isDateTime(String isoDate) {
+        return isoDate.length() == "YYYY-MM-DDThh:mm:ss".length();
+    }
+
+    protected boolean isTimeOnly(String isoDate) {
+        return isoDate.length() == "hh:mm:ss".length();
     }
 
     /**
@@ -186,6 +253,13 @@ public abstract class AbstractDatabase implements Database {
     protected abstract String getDateTimeType();
 
     /**
+     * Returns the actual database-specific data type to use a "time" column.
+     */
+    protected String getTimeType() {
+        return "TIME";
+    }
+
+    /**
      * Returns database-specific line comment string.
      */
     public String getLineComment() {
@@ -206,6 +280,14 @@ public abstract class AbstractDatabase implements Database {
         return "COMMIT";
     }
 
+    public String getConcatSql(String ... values) {
+        StringBuffer returnString = new StringBuffer();
+        for (String value : values) {
+            returnString.append(value).append(" || ");
+        }
+
+        return returnString.toString().replaceFirst(" \\|\\| $", "");
+    }
 
     // ------- DATABASECHANGELOG / DATABASECHANGELOGLOCK METHODS ---- //
 
@@ -427,7 +509,7 @@ public abstract class AbstractDatabase implements Database {
                     connection.commit();
                 } else {
                     if (!migrator.getMode().equals(Migrator.Mode.OUTPUT_FUTURE_ROLLBACK_SQL_MODE)) {
-                        migrator.getOutputSQLWriter().append(sql + ";" + StreamUtil.getLineSeparator());
+                        migrator.getOutputSQLWriter().append(sql).append(";").append(StreamUtil.getLineSeparator());
                         wroteToOutput = true;
                     }
                 }
@@ -497,7 +579,10 @@ public abstract class AbstractDatabase implements Database {
                             outputtedLockWarning = true;
                         }
 
-                        migrator.getOutputSQLWriter().append(createTableStatement + ";" + StreamUtil.getLineSeparator() + StreamUtil.getLineSeparator());
+                        migrator.getOutputSQLWriter().append(createTableStatement);
+                        migrator.getOutputSQLWriter().append(";");
+                        migrator.getOutputSQLWriter().append(StreamUtil.getLineSeparator());
+                        migrator.getOutputSQLWriter().append(StreamUtil.getLineSeparator());
                     }
                     changeLogLockTableExists = false;
                 }
@@ -520,7 +605,10 @@ public abstract class AbstractDatabase implements Database {
                         connection.commit();
                         log.info("Created database lock table with name: DATABASECHANGELOGLOCK");
                     } else {
-                        migrator.getOutputSQLWriter().append(insertRowStatment + ";" + StreamUtil.getLineSeparator() + StreamUtil.getLineSeparator());
+                        migrator.getOutputSQLWriter().append(insertRowStatment);
+                        migrator.getOutputSQLWriter().append(";");
+                        migrator.getOutputSQLWriter().append(StreamUtil.getLineSeparator());
+                        migrator.getOutputSQLWriter().append(StreamUtil.getLineSeparator());
                     }
                     rs.close();
                 }
@@ -528,7 +616,10 @@ public abstract class AbstractDatabase implements Database {
                 if (migrator.getMode().equals(Migrator.Mode.EXECUTE_MODE)) {
                     throw new JDBCException("Change log lock table does not exist");
                 } else {
-                    migrator.getOutputSQLWriter().append(insertRowStatment + ";" + StreamUtil.getLineSeparator() + StreamUtil.getLineSeparator());
+                    migrator.getOutputSQLWriter().append(insertRowStatment);
+                    migrator.getOutputSQLWriter().append(";");
+                    migrator.getOutputSQLWriter().append(StreamUtil.getLineSeparator());
+                    migrator.getOutputSQLWriter().append(StreamUtil.getLineSeparator());
                 }
 
             }
@@ -596,13 +687,7 @@ public abstract class AbstractDatabase implements Database {
             dropStatement = conn.createStatement();
             while (rs.next()) {
                 String tableName = rs.getString("TABLE_NAME");
-                if (tableName.startsWith("BIN$")) { //oracle deleted table
-                    continue;
-                } else if (tableName.startsWith("AQ$")) { //oracle AQ tables
-                    continue;
-                } else if (tableName.equalsIgnoreCase(getDatabaseChangeLogLockTableName())) {
-                    continue;
-                } else if (getSystemTablesAndViews().contains(tableName)) {
+                if (isSystemTable(tableName)) {
                     continue;
                 }
 
@@ -612,6 +697,8 @@ public abstract class AbstractDatabase implements Database {
                     sql = getDropTableSQL(tableName);
                 } else if ("VIEW".equals(type)) {
                     sql = "DROP VIEW " + tableName;
+                } else if ("SYSTEM TABLE".equals(type)) {
+                    continue; //don't drop it
                 } else {
                     throw new MigrationFailedException("Unknown type " + type + " for " + tableName);
                 }
@@ -642,7 +729,25 @@ public abstract class AbstractDatabase implements Database {
         }
     }
 
-        protected void dropViews(Connection conn) throws JDBCException, MigrationFailedException {
+    public boolean isSystemTable(String tableName) {
+        if (tableName.startsWith("BIN$")) { //oracle deleted table
+            return true;
+        } else if (tableName.startsWith("AQ$")) { //oracle AQ tables
+            return true;
+        } else if (tableName.equalsIgnoreCase(getDatabaseChangeLogLockTableName())) {
+            return true;
+        } else if (getSystemTablesAndViews().contains(tableName)) {
+            return true;
+        }
+        return false;
+    }
+
+    public boolean isLiquibaseTable(String tableName) {
+        return tableName.equals(this.getDatabaseChangeLogTableName()) || tableName.equals(this.getDatabaseChangeLogLockTableName());
+    }
+
+
+    protected void dropViews(Connection conn) throws JDBCException, MigrationFailedException {
         //drop tables and their constraints
         ResultSet rs = null;
         Statement dropStatement = null;
@@ -685,7 +790,7 @@ public abstract class AbstractDatabase implements Database {
     }
 
     public String getDropTableSQL(String tableName) {
-        return "DROP TABLE " + tableName + " CASCADE CONSTRAINTS";
+        return "DROP TABLE " + tableName;
     }
 
     protected void dropSequences(Connection conn) throws JDBCException, MigrationFailedException {
@@ -778,4 +883,9 @@ public abstract class AbstractDatabase implements Database {
             }
         }
     }
+
+    public DatabaseSnapshot getSnapshot() throws JDBCException {
+        return new DatabaseSnapshot(this);
+    }
+
 }

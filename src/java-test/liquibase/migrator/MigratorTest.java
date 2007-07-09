@@ -17,10 +17,7 @@ import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.List;
 
-import liquibase.database.Database;
-import liquibase.database.MSSQLDatabase;
-import liquibase.database.OracleDatabase;
-import liquibase.database.PostgresDatabase;
+import liquibase.database.*;
 import liquibase.migrator.exception.JDBCException;
 
 import org.junit.Before;
@@ -70,9 +67,8 @@ public class MigratorTest {
 
     @Test
     public void getImplementedDatabases() throws Exception {
-        Migrator migrator = new Migrator(null, new ClassLoaderFileOpener());
-        List<Database> databases = Arrays.asList(migrator.getImplementedDatabases());
-        assertEquals(4, databases.size());
+        List<Database> databases = Arrays.asList(DatabaseFactory.getInstance().getImplementedDatabases());
+        assertEquals(7, databases.size());
 
         boolean foundOracle = false;
         boolean foundPostgres = false;

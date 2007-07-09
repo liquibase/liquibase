@@ -14,6 +14,7 @@ public class ColumnConfig {
     private String type;
     private String value;
     private String valueNumeric;
+    private String valueDate;
     private Boolean valueBoolean;
     private String defaultValue;
     private ConstraintsConfig constraints;
@@ -65,6 +66,14 @@ public class ColumnConfig {
         this.valueBoolean = valueBoolean;
     }
 
+    public String getValueDate() {
+        return valueDate;
+    }
+
+    public void setValueDate(String valueDate) {
+        this.valueDate = valueDate;
+    }
+
     public String getDefaultValue() {
         return defaultValue;
     }
@@ -106,6 +115,9 @@ public class ColumnConfig {
         }
         if (getValueBoolean() != null) {
             element.setAttribute("valueBoolean", getValueBoolean().toString());
+        }
+        if (getValueDate() != null) {
+            element.setAttribute("valueDate", getValueDate());
         }
 
         if (isAutoIncrement() != null && isAutoIncrement().booleanValue()) {

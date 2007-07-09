@@ -1,9 +1,6 @@
 package liquibase.migrator.change;
 
-import liquibase.database.Database;
-import liquibase.database.MSSQLDatabase;
-import liquibase.database.MySQLDatabase;
-import liquibase.database.OracleDatabase;
+import liquibase.database.*;
 import liquibase.migrator.exception.UnsupportedChangeException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -69,6 +66,8 @@ public class AddNotNullConstraintChange extends AbstractChange {
             return generateMySQLStatements();
         } else if (database instanceof OracleDatabase) {
             return generateOracleStatements();
+        } else if (database instanceof DerbyDatabase) {
+            return generateDerbyStatements();
         }
 
         List<String> statements = new ArrayList<String>();
@@ -76,6 +75,10 @@ public class AddNotNullConstraintChange extends AbstractChange {
             statements.add(generateUpdateStatement());
         }
         statements.add("ALTER TABLE " + getTableName() + " ALTER COLUMN  " + getColumnName() + " SET NOT NULL");
+
+        if (database instanceof DB2Database) {
+            statements.add("CALL SYSPROC.ADMIN_CMD ('REORG TABLE "+getTableName()+"')");
+        }
 
         return statements.toArray(new String[statements.size()]);
 
@@ -115,6 +118,16 @@ public class AddNotNullConstraintChange extends AbstractChange {
             statements.add(generateUpdateStatement());
         }
         statements.add("ALTER TABLE " + getTableName() + " MODIFY " + getColumnName() + " NOT NULL");
+
+        return statements.toArray(new String[statements.size()]);
+    }
+
+    public String[] generateDerbyStatements() throws UnsupportedChangeException {
+        List<String> statements = new ArrayList<String>();
+        if (defaultNullValue != null) {
+            statements.add(generateUpdateStatement());
+        }
+        statements.add("ALTER TABLE " + getTableName() + " ALTER COLUMN  " + getColumnName() + " NOT NULL");
 
         return statements.toArray(new String[statements.size()]);
     }

@@ -158,7 +158,7 @@ The available targets at the current stage:
     </target>
 
 	<!-- target: PACKAGE -->
-    <target name="package" depends="prepare">
+    <target name="package" depends="compile">
         <jar destfile="${release.dir}/liquibase-SNAPSHOT.jar" basedir="${build.dir}"
              manifest="${src.dir}/java/META-INF/MANIFEST.MF"/>
 

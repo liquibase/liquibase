@@ -29,10 +29,10 @@
 &lt;?xml version="1.0" encoding="UTF-8"?&gt;
 
 &lt;databaseChangeLog
-  xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.0"
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.1"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.0
-         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.0.xsd"&gt;
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.1
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.1.xsd"&gt;
     &lt;preConditions&gt;
         &lt;dbms type="oracle" /&gt;
         &lt;runningAs username="SYSTEM" /&gt;
@@ -46,7 +46,7 @@
                     <h2>Available Preconditions</h2>
                     <h4>&lt;dbms&gt;</h4>
                     <p>
-                        Specifies the expected database system.  Set the "type" attribute to "mysql","postgres","oracle" or "mssql"
+                        Specifies the expected database system.  Set the "type" attribute to "mysql","postgres","oracle", "mssql", or "derby"
                     </p>
                     <h4>&lt;runningAs&gt;</h4>
                     <p>

@@ -43,6 +43,11 @@ public class IncludeMigrator extends Migrator {
         ;
     }
 
+
+    protected boolean wasValidationRan() {
+        return parentMigrator.wasValidationRan();
+    }
+
     public List<RanChangeSet> getRanChangeSetList() throws JDBCException {
         return parentMigrator.getRanChangeSetList();
     }

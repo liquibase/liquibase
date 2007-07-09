@@ -15,9 +15,7 @@ import java.io.Writer;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Logger;
 
 /**
@@ -25,8 +23,7 @@ import java.util.logging.Logger;
  */
 public class ChangeSet {
 
-    public enum RunStatus {
-        NOT_RAN, ALREADY_RAN, RUN_AGAIN }
+    public enum RunStatus { NOT_RAN, ALREADY_RAN, RUN_AGAIN, INVALID_MD5SUM }
 
     private List<Change> changes;
     private String id;
@@ -37,6 +34,7 @@ public class ChangeSet {
     private boolean alwaysRun;
     private boolean runOnChange;
     private String context;
+    private Set<String> dbmsSet;
 
     private String[] rollBackStatements;
 
@@ -50,7 +48,7 @@ public class ChangeSet {
         return runOnChange;
     }
 
-    public ChangeSet(String id, String author, boolean alwaysRun, boolean runOnChange, DatabaseChangeLog databaseChangeLog, String context) {
+    public ChangeSet(String id, String author, boolean alwaysRun, boolean runOnChange, DatabaseChangeLog databaseChangeLog, String context, String dbmsList) {
         this.changes = new ArrayList<Change>();
         log = Logger.getLogger(Migrator.DEFAULT_LOG_NAME);
         this.id = id;
@@ -59,10 +57,18 @@ public class ChangeSet {
         this.alwaysRun = alwaysRun;
         this.runOnChange = runOnChange;
         if (context != null) {
-            this.context = context.toLowerCase();
+            this.context = context.trim().toLowerCase();
+        }
+        if (dbmsList != null) {
+            String[] strings = dbmsList.split(",");
+            for (String string : strings) {
+                if (dbmsSet == null) {
+                    dbmsSet = new HashSet<String>();
+                }
+                dbmsSet.add(string.trim().toLowerCase());
+            }
         }
     }
-
 
     public DatabaseChangeLog getDatabaseChangeLog() {
         return databaseChangeLog;
@@ -140,7 +146,7 @@ public class ChangeSet {
                 writeComments(outputSQLWriter);
                 if (rollBackStatements != null && rollBackStatements.length > 0) {
                     for (String statement : rollBackStatements) {
-                        outputSQLWriter.append(statement + ";" + StreamUtil.getLineSeparator() + StreamUtil.getLineSeparator());
+                        outputSQLWriter.append(statement).append(";").append(StreamUtil.getLineSeparator()).append(StreamUtil.getLineSeparator());
                     }
                 } else {
                     for (int i = changes.size() - 1; i >= 0; i--) {
@@ -168,7 +174,7 @@ public class ChangeSet {
         if (StringUtils.trimToNull(comments) != null) {
             String[] commentLines = comments.split("\n");
             for (String line : commentLines) {
-                writer.append("-- " + line.trim() + StreamUtil.getLineSeparator());
+                writer.append("-- ").append(line.trim()).append(StreamUtil.getLineSeparator());
             }
         }
     }
@@ -196,8 +202,16 @@ public class ChangeSet {
         return context;
     }
 
+    public Set<String> getDbmsSet() {
+        return dbmsSet;
+    }
+
+    public String toString(boolean includeMD5Sum) {
+        return getDatabaseChangeLog().getFilePath() + " :: " + getId() + " :: " + getAuthor() + (includeMD5Sum?(" :: (MD5Sum: " + getMd5sum() + ")"):"");
+    }
+
     public String toString() {
-        return getDatabaseChangeLog().getFilePath() + " :: " + getId() + " :: " + getAuthor() + " :: (MD5Sum: " + getMd5sum() + ")";
+        return toString(true);
     }
 
     public String getComments() {

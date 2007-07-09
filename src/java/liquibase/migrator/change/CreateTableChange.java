@@ -37,6 +37,18 @@ public class CreateTableChange extends AbstractChange {
                 buffer.append(" ").append(database.getColumnType(column));
             }
 
+            if (column.getDefaultValue() != null) {
+                if ("null".equalsIgnoreCase(column.getDefaultValue())) {
+                    buffer.append(" DEFAULT NULL");
+                } else {
+                    buffer.append(" DEFAULT '").append(column.getDefaultValue()).append("'");
+                }
+            }
+            
+            if (column.isAutoIncrement() != null && column.isAutoIncrement().booleanValue()) {
+                buffer.append(" ").append(database.getAutoIncrementClause()).append(" ");
+            }
+
             if (constraints != null) {
                 if (constraints.isNullable() != null && !constraints.isNullable()) {
                     buffer.append(" NOT NULL");
@@ -59,7 +71,7 @@ public class CreateTableChange extends AbstractChange {
                     if (constraints.isDeferrable() != null && constraints.isDeferrable()) {
                         fkConstraints.append(" DEFERRABLE");
                     }
-                    fkConstraints.append(",");                    
+                    fkConstraints.append(",");
 //                    buffer.append(" CONSTRAINT FOREIGN KEY ").append(constraints.getForeignKeyName()).append(" REFERENCES ").append(constraints.getReferences());
                 }
 
@@ -68,18 +80,6 @@ public class CreateTableChange extends AbstractChange {
                 }
                 if (constraints.getCheck() != null) buffer.append(constraints.getCheck()).append(" ");
 
-            }
-
-            if (column.getDefaultValue() != null) {
-                if (column.getDefaultValue().equalsIgnoreCase("null")) {
-                    buffer.append(" DEFAULT NULL");
-                } else {
-                    buffer.append(" DEFAULT '").append(column.getDefaultValue()).append("'");
-                }
-            }
-
-            if (column.isAutoIncrement() != null && column.isAutoIncrement().booleanValue()) {
-                buffer.append(" ").append(database.getAutoIncrementClause()).append(" ");
             }
 
             if (iterator.hasNext()) {

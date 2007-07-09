@@ -1,8 +1,8 @@
 package liquibase.database;
 
-import liquibase.migrator.exception.UnsupportedChangeException;
-import liquibase.migrator.exception.JDBCException;
 import liquibase.migrator.change.DropForeignKeyConstraintChange;
+import liquibase.migrator.exception.JDBCException;
+import liquibase.migrator.exception.UnsupportedChangeException;
 
 import java.sql.*;
 import java.util.HashSet;
@@ -57,7 +57,7 @@ public class MSSQLDatabase extends AbstractDatabase {
         return false;
     }
 
-    protected boolean supportsSequences() {
+    public boolean supportsSequences() {
         return false;
     }
 
@@ -65,8 +65,27 @@ public class MSSQLDatabase extends AbstractDatabase {
         return PRODUCT_NAME.equalsIgnoreCase(getDatabaseProductName(conn));
     }
 
+    public String getDefaultDriver(String url) {
+        if (url.startsWith("jdbc:sqlserver")) {
+            return "com.microsoft.sqlserver.jdbc.SQLServerDriver";
+        } else if (url.startsWith("jdbc:jtds:sqlserver")) {
+            return "net.sourceforge.jtds.jdbc.Driver";
+        }
+        return null;
+    }
+
     protected String getDateTimeType() {
         return "DATETIME";
+    }
+
+
+    protected String getTimeType() {
+        return "DATETIME";
+    }
+
+
+    protected String getDateType() {
+        return "SMALLDATETIME";
     }
 
     protected String getBooleanType() {
@@ -115,6 +134,15 @@ public class MSSQLDatabase extends AbstractDatabase {
 
     public String getDropTableSQL(String tableName) {
         return "DROP TABLE " + tableName;
+    }
+
+    public String getConcatSql(String ... values) {
+        StringBuffer returnString = new StringBuffer();
+        for (String value : values) {
+            returnString.append(value).append(" + ");
+        }
+
+        return returnString.toString().replaceFirst(" \\+ $", "");
     }
 
     protected void dropForeignKeys(Connection conn) throws JDBCException {

@@ -1,9 +1,6 @@
 package liquibase.migrator.change;
 
-import liquibase.database.Database;
-import liquibase.database.MSSQLDatabase;
-import liquibase.database.MySQLDatabase;
-import liquibase.database.PostgresDatabase;
+import liquibase.database.*;
 import liquibase.migrator.exception.UnsupportedChangeException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -42,6 +39,12 @@ public class RenameViewChange extends AbstractChange {
             return new String[]{"RENAME TABLE " + oldViewName + " TO " + newViewName};
         } else if (database instanceof PostgresDatabase) {
             return new String[]{"ALTER TABLE " + oldViewName + " RENAME TO " + newViewName};
+        } else if (database instanceof DerbyDatabase) {
+            throw new UnsupportedChangeException("Derby does not currently support renaming views");
+        } else if (database instanceof HsqlDatabase) {
+            throw new UnsupportedChangeException("HSQL does not currently support renaming views");
+        } else if (database instanceof DB2Database) {
+            throw new UnsupportedChangeException("DB2 does not currently support renaming views");
         }
 
         return new String[]{"RENAME " + oldViewName + " TO " + newViewName};

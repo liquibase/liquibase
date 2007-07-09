@@ -2,6 +2,7 @@ package liquibase.database;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertNull;
 
 import org.junit.Test;
 
@@ -62,4 +63,14 @@ public class OracleDatabaseTest extends AbstractDatabaseTest {
     public void getCurrentDateTimeFunction() {
         assertEquals("SYSDATE", getDatabase().getCurrentDateTimeFunction());
     }
+
+    public void testGetDefaultDriver() {
+        Database database = new OracleDatabase();
+
+        assertEquals("oracle.jdbc.OracleDriver", database.getDefaultDriver("jdbc:oracle:thin:@localhost/XE"));
+
+        assertNull(database.getDefaultDriver("jdbc:db2://localhost;databaseName=liquibase"));
+    }
+
 }
+

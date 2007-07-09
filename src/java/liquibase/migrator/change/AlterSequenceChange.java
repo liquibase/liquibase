@@ -1,8 +1,7 @@
 package liquibase.migrator.change;
 
 import liquibase.database.Database;
-import liquibase.database.MSSQLDatabase;
-import liquibase.database.MySQLDatabase;
+import liquibase.database.HsqlDatabase;
 import liquibase.database.OracleDatabase;
 import liquibase.migrator.exception.UnsupportedChangeException;
 import org.w3c.dom.Document;
@@ -66,10 +65,10 @@ public class AlterSequenceChange extends AbstractChange {
     }
 
     public String[] generateStatements(Database database) throws UnsupportedChangeException {
-        if (database instanceof MySQLDatabase) {
-            throw new UnsupportedChangeException("Sequences do not exist in MySQL");
-        } else if (database instanceof MSSQLDatabase) {
-            throw new UnsupportedChangeException("Sequences do not exist in MSSQL");
+        if (!database.supportsSequences()) {
+            throw new UnsupportedChangeException("Sequences do not exist in "+database.getProductName());
+        } else if (database instanceof HsqlDatabase) {
+            return new String[] {"ALTER SEQUENCE "+sequenceName+" RESTART WITH "+minValue};
         }
 
         StringBuffer buffer = new StringBuffer();

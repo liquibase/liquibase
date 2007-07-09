@@ -1,8 +1,6 @@
 package liquibase.migrator.change;
 
-import liquibase.database.Database;
-import liquibase.database.MSSQLDatabase;
-import liquibase.database.OracleDatabase;
+import liquibase.database.*;
 import liquibase.migrator.exception.UnsupportedChangeException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -99,13 +97,25 @@ public class AddLookupTableChange extends AbstractChange {
     }
 
     public String[] generateStatements(Database database) throws UnsupportedChangeException {
+        if (database instanceof DerbyDatabase) {
+            throw new UnsupportedChangeException("Add Lookup Table currently not supported in Derby");
+        } else if (database instanceof HsqlDatabase) {
+                throw new UnsupportedChangeException("Add Lookup Table currently not supported in HSQLDB");
+        }
+
         List<String> statements = new ArrayList<String>();
 
-        String createTablesSQL = "CREATE TABLE " + getNewTableName() + " AS SELECT DISTINCT " + getExistingColumnName() + " AS " + getNewColumnName() + " FROM " + getExistingTableName() + " WHERE " + getExistingColumnName() + " IS NOT NULL";
+        String[] createTablesSQL = { "CREATE TABLE " + getNewTableName() + " AS SELECT DISTINCT " + getExistingColumnName() + " AS " + getNewColumnName() + " FROM " + getExistingTableName() + " WHERE " + getExistingColumnName() + " IS NOT NULL"};
         if (database instanceof MSSQLDatabase) {
-            createTablesSQL = "SELECT DISTINCT " + getExistingColumnName() + " AS " + getNewColumnName() + " INTO " + getNewTableName() + " FROM " + getExistingTableName() + " WHERE " + getExistingColumnName() + " IS NOT NULL";
+            createTablesSQL = new String[] {"SELECT DISTINCT " + getExistingColumnName() + " AS " + getNewColumnName() + " INTO " + getNewTableName() + " FROM " + getExistingTableName() + " WHERE " + getExistingColumnName() + " IS NOT NULL", };
+        } else if (database instanceof DB2Database) {
+           createTablesSQL = new String[] {
+                   "CREATE TABLE " + getNewTableName() + " AS (SELECT " + getExistingColumnName() + " AS " + getNewColumnName() + " FROM " + getExistingTableName() + ") WITH NO DATA",
+                   "INSERT INTO "+getNewTableName()+" SELECT DISTINCT " + getExistingColumnName() + " FROM " + getExistingTableName() + " WHERE " + getExistingColumnName() + " IS NOT NULL",
+           };
         }
-        statements.add(createTablesSQL);
+
+        statements.addAll(Arrays.asList(createTablesSQL));
 
         if (!(database instanceof OracleDatabase)) {
             AddNotNullConstraintChange addNotNullChange = new AddNotNullConstraintChange();
@@ -115,11 +125,19 @@ public class AddLookupTableChange extends AbstractChange {
             statements.addAll(Arrays.asList(addNotNullChange.generateStatements(database)));
         }
 
+        if (database instanceof DB2Database) {
+            statements.add("CALL SYSPROC.ADMIN_CMD ('REORG TABLE "+getNewTableName()+"')");
+        }
+
         AddPrimaryKeyChange addPKChange = new AddPrimaryKeyChange();
         addPKChange.setTableName(getNewTableName());
         addPKChange.setColumnNames(getNewColumnName());
         statements.addAll(Arrays.asList(addPKChange.generateStatements(database)));
 
+        if (database instanceof DB2Database) {
+            statements.add("CALL SYSPROC.ADMIN_CMD ('REORG TABLE "+getNewTableName()+"')");
+        }
+        
         AddForeignKeyConstraintChange addFKChange = new AddForeignKeyConstraintChange();
         addFKChange.setBaseTableName(getExistingTableName());
         addFKChange.setBaseColumnNames(getExistingColumnName());

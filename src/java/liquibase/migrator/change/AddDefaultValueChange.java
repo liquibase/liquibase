@@ -1,9 +1,6 @@
 package liquibase.migrator.change;
 
-import liquibase.database.Database;
-import liquibase.database.MSSQLDatabase;
-import liquibase.database.MySQLDatabase;
-import liquibase.database.OracleDatabase;
+import liquibase.database.*;
 import liquibase.migrator.exception.UnsupportedChangeException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -60,6 +57,8 @@ public class AddDefaultValueChange extends AbstractChange {
             return new String[]{ "ALTER TABLE " + getTableName() + " ALTER " + getColumnName() + " SET DEFAULT "+maybeQuotedValue, };
         } else if (database instanceof OracleDatabase) {
             return new String[]{ "ALTER TABLE " + getTableName() + " MODIFY " + getColumnName() + " DEFAULT "+maybeQuotedValue, };
+        } else if (database instanceof DerbyDatabase) {
+            return new String[]{ "ALTER TABLE " + getTableName() + " ALTER COLUMN  " + getColumnName() + " WITH DEFAULT '" + getDefaultValue() + "'", };
         }
 
         return new String[]{

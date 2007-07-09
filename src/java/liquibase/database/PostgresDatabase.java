@@ -1,7 +1,7 @@
 package liquibase.database;
 
-import liquibase.migrator.exception.MigrationFailedException;
 import liquibase.migrator.exception.JDBCException;
+import liquibase.migrator.exception.MigrationFailedException;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -41,6 +41,13 @@ public class PostgresDatabase extends AbstractDatabase {
         return PRODUCT_NAME.equalsIgnoreCase(getDatabaseProductName(conn));
     }
 
+    public String getDefaultDriver(String url) {
+        if (url.startsWith("jdbc:postgresql:")) {
+            return "org.postgresql.Driver";
+        }
+        return null;
+    }
+
     protected String getBooleanType() {
         return "BOOLEAN";
     }
@@ -65,7 +72,7 @@ public class PostgresDatabase extends AbstractDatabase {
         return "TIMESTAMP WITH TIME ZONE";
     }
 
-    protected boolean supportsSequences() {
+    public boolean supportsSequences() {
         return true;
     }
 

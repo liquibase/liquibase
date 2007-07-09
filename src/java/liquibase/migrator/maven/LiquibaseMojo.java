@@ -1,8 +1,8 @@
 package liquibase.migrator.maven;
 
-import liquibase.migrator.exception.MigrationFailedException;
-import liquibase.migrator.exception.JDBCException;
 import liquibase.migrator.Migrator;
+import liquibase.migrator.exception.JDBCException;
+import liquibase.migrator.exception.MigrationFailedException;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;

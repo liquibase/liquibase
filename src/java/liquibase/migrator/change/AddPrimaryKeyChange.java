@@ -1,5 +1,6 @@
 package liquibase.migrator.change;
 
+import liquibase.database.DB2Database;
 import liquibase.database.Database;
 import liquibase.migrator.exception.UnsupportedChangeException;
 import org.w3c.dom.Document;
@@ -43,15 +44,23 @@ public class AddPrimaryKeyChange extends AbstractChange {
     }
 
     public String[] generateStatements(Database database) throws UnsupportedChangeException {
+        String sql;
         if (getConstraintName() == null) {
-            return new String[]{
-                    "ALTER TABLE " + getTableName() + " ADD PRIMARY KEY (" + getColumnNames() + ")",
-            };
+            sql = "ALTER TABLE " + getTableName() + " ADD PRIMARY KEY (" + getColumnNames() + ")";
         } else {
-            return new String[]{
-                    "ALTER TABLE " + getTableName() + " ADD CONSTRAINT " + getConstraintName() + " PRIMARY KEY (" + getColumnNames() + ")",
+            sql = "ALTER TABLE " + getTableName() + " ADD CONSTRAINT " + getConstraintName() + " PRIMARY KEY (" + getColumnNames() + ")";
+        }
+
+        if (database instanceof DB2Database) {
+            return new String[] {
+                    sql,
+                    "CALL SYSPROC.ADMIN_CMD ('REORG TABLE "+getTableName()+"')",
             };
         }
+
+        return new String[] {
+                sql,
+        };
     }
 
     protected Change[] createInverses() {

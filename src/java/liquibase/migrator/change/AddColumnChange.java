@@ -1,13 +1,14 @@
 package liquibase.migrator.change;
 
+import liquibase.database.DB2Database;
 import liquibase.database.Database;
 import liquibase.migrator.exception.UnsupportedChangeException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * Adds a column to an existing table.
@@ -39,7 +40,11 @@ public class AddColumnChange extends AbstractChange {
 
     public String[] generateStatements(Database database) throws UnsupportedChangeException {
         List<String> sql = new ArrayList<String>();
+
         sql.add("ALTER TABLE " + getTableName() + " ADD " + getColumn().getName() + " " + database.getColumnType(getColumn()));
+        if (database instanceof DB2Database) {
+            sql.add("CALL SYSPROC.ADMIN_CMD ('REORG TABLE "+ getTableName() +"')");
+        }
 
         if (getColumn().getDefaultValue() != null) {
             AddDefaultValueChange change = new AddDefaultValueChange();

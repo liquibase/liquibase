@@ -2,9 +2,10 @@ package liquibase.migrator.mssql;
 
 import liquibase.migrator.AbstractSimpleChangeLogRunnerTest;
 
+@SuppressWarnings({"JUnitTestCaseWithNoTests"})
 public class MSSQLSampleChangeLogRunnerTest extends AbstractSimpleChangeLogRunnerTest {
 
-    public MSSQLSampleChangeLogRunnerTest() {
-        super("mssql", "mssql-2005-1.0", "com.microsoft.sqlserver.jdbc.SQLServerDriver", "jdbc:sqlserver://localhost;databaseName=liquibase");
+    public MSSQLSampleChangeLogRunnerTest() throws Exception {
+        super("mssql", "com.microsoft.sqlserver.jdbc.SQLServerDriver", "jdbc:sqlserver://localhost;databaseName=liquibase");
     }
 }

@@ -1,5 +1,6 @@
 package liquibase.migrator.preconditions;
 
+import liquibase.migrator.DatabaseChangeLog;
 import liquibase.migrator.Migrator;
 import liquibase.migrator.exception.PreconditionFailedException;
 
@@ -16,7 +17,7 @@ public class PreconditionSet {
     private NotPrecondition not;
     private RunningAsPrecondition runningAs;
     private Migrator migrator;
-    private String exceptionMsg;
+    private DatabaseChangeLog changeLog;
 
 
     public PreconditionSet() {
@@ -25,6 +26,11 @@ public class PreconditionSet {
 
     public PreconditionSet(Migrator aMigrator) {
         this.migrator = aMigrator;
+    }
+
+    public PreconditionSet(Migrator migrator, DatabaseChangeLog changeLog) {
+        this.migrator = migrator;
+        this.changeLog = changeLog;
     }
 
     public void setDbmsArray(List<DBMSPrecondition> dbmsArr) {
@@ -72,8 +78,9 @@ public class PreconditionSet {
         boolean notReturnValue = true;
         boolean userExistsReturnValue = true;
 
-        try {
+        List<FailedPrecondition> failedPreconditions = new ArrayList<FailedPrecondition>();
 
+        try {
             if (dbmsArray.size() > 0) {
                 for (int i = 0; i < dbmsArray.size(); i++) {
                     DBMSPrecondition dbmsPrecondition = dbmsArray.get(i);
@@ -81,7 +88,7 @@ public class PreconditionSet {
                         dbmsreturnvalue = true;
                     } else {
                         dbmsreturnvalue = false;
-                        exceptionMsg = "DBMS Precondition failed";
+                        failedPreconditions.add(new FailedPrecondition("DBMS Precondition failed", changeLog, dbmsPrecondition));
                         break;
                     }
                 }
@@ -92,7 +99,7 @@ public class PreconditionSet {
                     orReturnValue = true;
                 } else {
                     orReturnValue = false;
-                    exceptionMsg = "Or Precondition failed";
+                    failedPreconditions.add(new FailedPrecondition("Or Precondition failed", changeLog, or));
                 }
 
             } else if (not != null) {
@@ -101,7 +108,7 @@ public class PreconditionSet {
                     notReturnValue = true;
                 } else {
                     notReturnValue = false;
-                    exceptionMsg = "Not Precondition failed";
+                    failedPreconditions.add(new FailedPrecondition("Not Precondition failed", changeLog, not));
                 }
 
             }
@@ -112,17 +119,17 @@ public class PreconditionSet {
                     userExistsReturnValue = true;
                 } else {
                     userExistsReturnValue = false;
-                    exceptionMsg = "rnningAs Precondition failed";
+                    failedPreconditions.add(new FailedPrecondition("runningAs Precondition failed", changeLog, runningAs));
                 }
 
             }
 
             if (!(dbmsreturnvalue && orReturnValue && notReturnValue && userExistsReturnValue)) {
-                throw new PreconditionFailedException();
+                throw new PreconditionFailedException(failedPreconditions);
             }
 
         } catch (PreconditionFailedException ePrecondExcep) {
-            throw new PreconditionFailedException("Unable to process change set: " + exceptionMsg);
+            throw ePrecondExcep;
 
         } catch (Exception e) {
             throw new RuntimeException(e);

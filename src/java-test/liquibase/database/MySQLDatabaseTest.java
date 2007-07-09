@@ -63,4 +63,13 @@ public class MySQLDatabaseTest extends AbstractDatabaseTest {
     public void getCurrentDateTimeFunction() {
         assertEquals("NOW()", getDatabase().getCurrentDateTimeFunction());
     }
+
+    public void testGetDefaultDriver() {
+        Database database = new MySQLDatabase();
+
+        assertEquals("com.mysql.jdbc.Driver", database.getDefaultDriver("jdbc:mysql://localhost/liquibase"));
+
+        assertNull(database.getDefaultDriver("jdbc:db2://localhost;databaseName=liquibase"));
+    }
+
 }

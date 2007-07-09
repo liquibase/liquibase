@@ -4,26 +4,33 @@ import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 
 import java.io.IOException;
+import java.io.InputStream;
 
 /**
- * Finds the LiquiBase schema from the classpath rather than fetching it over the Internet. 
+ * Finds the LiquiBase schema from the classpath rather than fetching it over the Internet.
  */
 public class MigratorSchemaResolver implements EntityResolver {
-    private static final String XSD_NAME = "dbchangelog-1.0.xsd";
 
     private static final String SEARCH_PACKAGE = "liquibase/";
 
     public InputSource resolveEntity(String publicId, String systemId) throws IOException {
-        if (systemId != null && systemId.indexOf(XSD_NAME) > systemId.lastIndexOf("/")) {
-            String xsdFile = systemId.substring(systemId.indexOf(XSD_NAME));
-            try {
-                InputSource source = new InputSource(getClass().getClassLoader().getResourceAsStream(SEARCH_PACKAGE + xsdFile));
-                source.setPublicId(publicId);
-                source.setSystemId(systemId);
-                return source;
-            }
-            catch (Exception ex) {
-                throw new IOException(ex.getMessage());
+        if (systemId != null) {
+            int iSlash = systemId.lastIndexOf("/");
+            if (iSlash >= 0) {
+                String xsdFile = systemId.substring(iSlash + 1);
+                try {
+                    InputStream resourceAsStream = getClass().getClassLoader().getResourceAsStream(SEARCH_PACKAGE + xsdFile);
+                    if (resourceAsStream == null) {
+                        return null;
+                    }
+                    InputSource source = new InputSource(resourceAsStream);
+                    source.setPublicId(publicId);
+                    source.setSystemId(systemId);
+                    return source;
+                }
+                catch (Exception ex) {
+                    return null;    // We don't have the schema, try the network 
+                }
             }
         }
         return null;

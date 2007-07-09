@@ -26,10 +26,10 @@
 &lt;?xml version="1.0" encoding="UTF-8"?&gt;
 
 &lt;databaseChangeLog
-  xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.0"
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.1"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.0
-         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.0.xsd"&gt;
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.1
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.1.xsd"&gt;
     &lt;changeSet id="1" author="bob"&gt;
         &lt;comment&gt;A sample change log&lt;/comment&gt;
         &lt;createTable/&gt;
@@ -37,7 +37,7 @@
     &lt;changeSet id="2" author="bob" alwaysRun="true"&gt;
         &lt;alterTable/&gt;
     &lt;/changeSet&gt;
-    &lt;changeSet id="1" author="alice" failOnError="false"&gt;
+    &lt;changeSet id="1" author="alice" failOnError="false" dbms="oracle"&gt;
         &lt;alterTable/&gt;
     &lt;/changeSet&gt;
 &lt;/databaseChangeLog&gt;
@@ -46,6 +46,12 @@
                         Each changeSet tag is uniquely identified by the combination of the "id" tag, the "author" tag,
                         and the changelog file classpath name.  The id tag is only used as an identifier, it does not direct the
                         order that changes are run and does not even have to be an integer.
+                    </p>
+                    <p>
+                        A changeSet may include an optional "dbms" attribute. If this is included, then it specifies the
+                        type of a database which that changeSet is to be used for. When the migration step is running, it
+                        checks the database type against this attribute. Currently, the legal values include "db2", "derby",
+                        "hsqldb", "mssql", "mysql", "oracle" and "postgresql".
                     </p>
                     <p>
                         As LiquiBase executes the databaseChangeLog, it reads the changeSets in order and, for each one,

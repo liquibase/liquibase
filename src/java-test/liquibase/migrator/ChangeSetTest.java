@@ -14,7 +14,7 @@ public class ChangeSetTest {
 
     @Test
     public void getDescriptions() {
-        ChangeSet changeSet = new ChangeSet("testId", "testAuthor", false, false, null, null);
+        ChangeSet changeSet = new ChangeSet("testId", "testAuthor", false, false, null, null, null);
 
         assertEquals("Empty", changeSet.getDescription());
 

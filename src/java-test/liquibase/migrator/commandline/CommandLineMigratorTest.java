@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.fail;
+import liquibase.migrator.exception.CommandLineParsingException;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -14,9 +15,8 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Properties;
 
-import liquibase.migrator.exception.CommandLineParsingException;
-
 import org.junit.Test;
+
 
 /**
  * Tests for {@link CommandLineMigrator}
@@ -285,6 +285,7 @@ public class CommandLineMigratorTest {
         BufferedReader reader = new BufferedReader(new StringReader(new String(stream.toByteArray())));
         String line;
         while ((line = reader.readLine()) != null) {
+            //noinspection MagicNumber
             if (line.length() > 80) {
                 fail("'" + line + "' is longer than 80 chars");
             }
@@ -315,7 +316,7 @@ public class CommandLineMigratorTest {
         assertEquals("CLASSPATH;CLASSPATH2", cli.classpath);
         assertEquals("CONTEXT1,CONTEXT2", cli.contexts);
         assertEquals("tag", cli.command);
-        assertEquals("TagHere", cli.commandParam);
+        assertEquals("TagHere", cli.commandParams.iterator().next());
     }
 
     @Test

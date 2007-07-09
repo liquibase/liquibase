@@ -1,9 +1,6 @@
 package liquibase.migrator.change;
 
-import liquibase.database.Database;
-import liquibase.database.MSSQLDatabase;
-import liquibase.database.MySQLDatabase;
-import liquibase.database.PostgresDatabase;
+import liquibase.database.*;
 import liquibase.migrator.exception.UnsupportedChangeException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -43,6 +40,15 @@ public class RenameTableChange extends AbstractChange {
             return new String[]{"ALTER TABLE " + oldTableName + " RENAME " + newTableName};
         } else if (database instanceof PostgresDatabase) {
             return new String[]{"ALTER TABLE " + oldTableName + " RENAME TO " + newTableName};
+        } else if (database instanceof DerbyDatabase) {
+            return new String[]{"RENAME TABLE " + oldTableName + " TO " + newTableName};
+        } else if (database instanceof HsqlDatabase) {
+            return new String[]{"ALTER TABLE " + oldTableName + " RENAME TO " + newTableName};
+        } else if (database instanceof DB2Database) {
+            return new String[]{
+                    "RENAME " + oldTableName + " TO " + newTableName,
+                    "CALL SYSPROC.ADMIN_CMD ('REORG TABLE " + newTableName + "')",
+            };
         }
 
         return new String[]{"RENAME " + oldTableName + " TO " + newTableName};

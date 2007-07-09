@@ -1,9 +1,6 @@
 package liquibase.migrator.change;
 
-import liquibase.database.Database;
-import liquibase.database.MSSQLDatabase;
-import liquibase.database.MySQLDatabase;
-import liquibase.database.OracleDatabase;
+import liquibase.database.*;
 import liquibase.migrator.exception.UnsupportedChangeException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -52,7 +49,12 @@ public class DropNotNullConstraintChange extends AbstractChange {
             return generateMySQLStatements();
         } else if (database instanceof OracleDatabase) {
             return generateOracleStatements();
+        } else if (database instanceof DerbyDatabase) {
+            return new String[]{"ALTER TABLE " + tableName + " ALTER COLUMN " + columnName + " NULL"};
+        } else if (database instanceof HsqlDatabase) {
+            return new String[]{"ALTER TABLE " + tableName + " ALTER COLUMN " + columnName + " NULL"};
         }
+
         return new String[]{"ALTER TABLE " + tableName + " ALTER COLUMN " + columnName + " DROP NOT NULL"};
     }
 

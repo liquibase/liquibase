@@ -3,6 +3,8 @@ package liquibase.database;
 import liquibase.migrator.exception.UnsupportedChangeException;
 import liquibase.migrator.exception.JDBCException;
 import liquibase.migrator.change.DropForeignKeyConstraintChange;
+import liquibase.migrator.exception.JDBCException;
+import liquibase.migrator.exception.UnsupportedChangeException;
 
 import java.sql.*;
 
@@ -23,6 +25,14 @@ public class MySQLDatabase extends AbstractDatabase {
     public boolean isCorrectDatabaseImplementation(Connection conn) throws JDBCException {
         return PRODUCT_NAME.equalsIgnoreCase(getDatabaseProductName(conn));
     }
+
+    public String getDefaultDriver(String url) {
+        if (url.startsWith("jdbc:mysql")) {
+            return "com.mysql.jdbc.Driver";
+        }
+        return null;
+    }
+
 
     protected String getBooleanType() {
         return "TINYINT(1)";
@@ -48,7 +58,7 @@ public class MySQLDatabase extends AbstractDatabase {
         return "DATETIME";
     }
 
-    protected boolean supportsSequences() {
+    public boolean supportsSequences() {
         return false;
     }
 
@@ -66,6 +76,16 @@ public class MySQLDatabase extends AbstractDatabase {
 
     public String getDropTableSQL(String tableName) {
         return "DROP TABLE " + tableName;
+    }
+
+    public String getConcatSql(String ... values) {
+        StringBuffer returnString = new StringBuffer();
+        returnString.append("CONCAT_WS(");
+        for (String value : values) {
+            returnString.append(value).append(", ");
+        }
+
+        return returnString.toString().replaceFirst(", $", ")");
     }
 
     protected void dropForeignKeys(Connection conn) throws JDBCException {

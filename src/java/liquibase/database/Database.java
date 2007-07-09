@@ -1,10 +1,10 @@
 package liquibase.database;
 
 import liquibase.migrator.DatabaseChangeLogLock;
-import liquibase.migrator.exception.MigrationFailedException;
-import liquibase.migrator.exception.JDBCException;
 import liquibase.migrator.Migrator;
 import liquibase.migrator.change.ColumnConfig;
+import liquibase.migrator.exception.JDBCException;
+import liquibase.migrator.exception.MigrationFailedException;
 
 import java.io.IOException;
 import java.sql.Connection;
@@ -15,11 +15,18 @@ public interface Database {
      */
     boolean isCorrectDatabaseImplementation(Connection conn) throws JDBCException;
 
+    /**
+     * If this database understands the given url, return the default driver class name.  Otherwise return null.
+     */
+    String getDefaultDriver(String url);
+
     Connection getConnection();
 
     void setConnection(Connection conn);
 
     String getDatabaseProductName();
+
+    String getDatabaseProductVersion() throws JDBCException;
 
     /**
      * Returns the full database product name.  May be different than what the JDBC connection reports (getDatabaseProductName())
@@ -47,16 +54,23 @@ public interface Database {
      */
     boolean supportsInitiallyDeferrableColumns();
 
+    public boolean supportsSequences();
+
     String getColumnType(ColumnConfig column);
 
     String getFalseBooleanValue();
 
     String getTrueBooleanValue();
 
+    String getDateLiteral(String isoDate);
+
     /**
      * Returns database-specific function for generating the current date/time.
      */
     String getCurrentDateTimeFunction();
+
+    void setCurrentDateTimeFunction(String function);
+
 
     String getLineComment();
 
@@ -67,6 +81,11 @@ public interface Database {
     String getDatabaseChangeLogTableName();
 
     String getDatabaseChangeLogLockTableName();
+
+    /**
+     * Returns SQL to concat the passed values.
+     */
+    String getConcatSql(String ... values);
 
     boolean acquireLock(Migrator migrator) throws MigrationFailedException;
 
@@ -89,4 +108,8 @@ public interface Database {
     void tag(String tagString) throws MigrationFailedException;
 
     boolean doesTagExist(String tag) throws JDBCException;
+
+    boolean isSystemTable(String tableName);
+
+    boolean isLiquibaseTable(String tableName);
 }

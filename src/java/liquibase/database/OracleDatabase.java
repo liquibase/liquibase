@@ -1,7 +1,7 @@
 package liquibase.database;
 
-import liquibase.migrator.exception.MigrationFailedException;
 import liquibase.migrator.exception.JDBCException;
+import liquibase.migrator.exception.MigrationFailedException;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -26,7 +26,7 @@ public class OracleDatabase extends AbstractDatabase {
         return true;
     }
 
-    protected boolean supportsSequences() {
+    public boolean supportsSequences() {
         return true;
     }
 
@@ -54,8 +54,24 @@ public class OracleDatabase extends AbstractDatabase {
         return "TIMESTAMP";
     }
 
+
+    protected String getDateType() {
+        return "DATE";
+    }
+
+    protected String getTimeType() {
+        return "DATE";
+    }
+
     public boolean isCorrectDatabaseImplementation(Connection conn) throws JDBCException {
         return PRODUCT_NAME.equalsIgnoreCase(getDatabaseProductName(conn));
+    }
+
+    public String getDefaultDriver(String url) {
+        if (url.startsWith("jdbc:oracle")) {
+            return "oracle.jdbc.OracleDriver";
+        }
+        return null;
     }
 
     public String getCurrentDateTimeFunction() {
@@ -70,9 +86,51 @@ public class OracleDatabase extends AbstractDatabase {
         return "0";
     }
 
+    /**
+     * Return an Oracle date literal with the same value as a string formatted using ISO 8601.
+     *
+     * Convert an ISO8601 date string to one of the following results:
+     * to_date('1995-05-23', 'YYYY-MM-DD')
+     * to_date('1995-05-23 09:23:59', 'YYYY-MM-DD HH24:MI:SS')
+     *
+     * Implementation restriction:
+     * Currently, only the following subsets of ISO8601 are supported:
+     * YYYY-MM-DD
+     * YYYY-MM-DDThh:mm:ss
+     */
+    public String getDateLiteral(String isoDate) {
+        String normalLiteral = super.getDateLiteral(isoDate);
+
+        if (isDateOnly(isoDate)) {
+            StringBuffer val = new StringBuffer();
+            val.append("to_date(");
+            val.append(normalLiteral);
+            val.append(", 'YYYY-MM-DD')");
+            return val.toString();
+        } else if (isTimeOnly(isoDate)) {
+            StringBuffer val = new StringBuffer();
+            val.append("to_date(");
+            val.append(normalLiteral);
+            val.append(", 'HH24:MI:SS')");
+            return val.toString();
+        } else if (isDateTime(isoDate)) {
+            StringBuffer val = new StringBuffer();
+            val.append("to_date(");
+            val.append(normalLiteral);
+            val.append(", 'YYYY-MM-DD HH24:MI:SS')");
+            return val.toString();
+        } else {
+            return "UNSUPPORTED:" + isoDate;
+        }
+    }
+
     protected String getSelectChangeLogLockSQL() {
         return (super.getSelectChangeLogLockSQL() + " for update").toUpperCase();
     }
+
+    public String getDropTableSQL(String tableName) {
+        return "DROP TABLE " + tableName + " CASCADE CONSTRAINTS";
+    }    
 
     protected void dropSequences(Connection conn) throws JDBCException, MigrationFailedException {
         ResultSet rs = null;

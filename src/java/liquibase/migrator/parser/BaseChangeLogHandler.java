@@ -1,10 +1,13 @@
 package liquibase.migrator.parser;
 
-import liquibase.migrator.*;
-import liquibase.migrator.exception.DatabaseHistoryException;
-import liquibase.migrator.exception.MigrationFailedException;
-import liquibase.migrator.exception.JDBCException;
+import liquibase.migrator.ChangeSet;
+import liquibase.migrator.DatabaseChangeLog;
+import liquibase.migrator.IncludeMigrator;
+import liquibase.migrator.Migrator;
 import liquibase.migrator.change.*;
+import liquibase.migrator.exception.DatabaseHistoryException;
+import liquibase.migrator.exception.JDBCException;
+import liquibase.migrator.exception.MigrationFailedException;
 import liquibase.migrator.preconditions.*;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
@@ -19,6 +22,7 @@ import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -57,7 +61,8 @@ public abstract class BaseChangeLogHandler extends DefaultHandler {
                 changeLog = new DatabaseChangeLog(migrator, physicalChangeLogLocation);
                 changeLog.setLogicalFilePath(atts.getValue("logicalFilePath"));
             } else if ("include".equals(qName)) {
-                new IncludeMigrator(atts.getValue("file"), migrator).migrate();
+                String fileName = atts.getValue("file");
+                handleIncludedChangeLog(fileName);
             } else if (changeSet == null && "changeSet".equals(qName)) {
                 boolean alwaysRun = false;
                 boolean runOnChange = false;
@@ -67,7 +72,7 @@ public abstract class BaseChangeLogHandler extends DefaultHandler {
                 if ("true".equalsIgnoreCase(atts.getValue("runOnChange"))) {
                     runOnChange = true;
                 }
-                changeSet = new ChangeSet(atts.getValue("id"), atts.getValue("author"), alwaysRun, runOnChange, changeLog, atts.getValue("context"));
+                changeSet = new ChangeSet(atts.getValue("id"), atts.getValue("author"), alwaysRun, runOnChange, changeLog, atts.getValue("context"), atts.getValue("dbms"));
             } else if (changeSet != null && "rollback".equals(qName)) {
                 text = new StringBuffer();
             } else if (changeSet != null && change == null) {
@@ -119,7 +124,7 @@ public abstract class BaseChangeLogHandler extends DefaultHandler {
                 lastColumn.setConstraints(constraints);
             } else if ("preConditions".equals(qName)) {
 //                System.out.println(migrator);
-                precondition = new PreconditionSet(migrator);
+                precondition = new PreconditionSet(migrator, changeLog);
                 //System.out.println("pre condition is true");
 
             } else if ("dbms".equals(qName)) {
@@ -180,6 +185,10 @@ public abstract class BaseChangeLogHandler extends DefaultHandler {
         }
     }
 
+    protected void handleIncludedChangeLog(String fileName) throws MigrationFailedException, IOException, JDBCException {
+        new IncludeMigrator(fileName, migrator).migrate();
+    }
+
     private void setProperty(Object object, String attributeName, String attributeValue) throws IllegalAccessException, InvocationTargetException {
         String methodName = "set" + attributeName.substring(0, 1).toUpperCase() + attributeName.substring(1);
         Method[] methods = object.getClass().getMethods();
@@ -212,7 +221,7 @@ public abstract class BaseChangeLogHandler extends DefaultHandler {
         try {
             if (precondition != null && "preConditions".equals(qName)) {
                 changeLog.setPreconditions(precondition);
-                precondition.checkConditions();
+                handlePreCondition(precondition);
             } else if (precondition != null && "or".equals(qName) && notprecondition == null) {
                 precondition.setOrPreCondition(orprecondition);
             } else if (precondition != null && "not".equals(qName)) {
@@ -232,6 +241,9 @@ public abstract class BaseChangeLogHandler extends DefaultHandler {
                         ((RawSQLChange) change).setSql(textString);
                     } else if (change instanceof CreateViewChange) {
                         ((CreateViewChange) change).setSelectQuery(textString);
+                    } else if (change instanceof InsertDataChange) {
+                        List<ColumnConfig> columns = ((InsertDataChange) change).getColumns();
+                        columns.get(columns.size()-1).setValue(textString);                        
                     } else {
                         throw new RuntimeException("Unexpected text in " + change.getTagName());
                     }
@@ -242,8 +254,15 @@ public abstract class BaseChangeLogHandler extends DefaultHandler {
             }
         } catch (Exception e) {
             log.log(Level.SEVERE, "Error thrown as a SAXException: " + e.getMessage(), e);
-            throw new SAXException(e);
+            throw new SAXException(changeLog.getPhysicalFilePath()+": "+e.getMessage(), e);
         }
+    }
+
+    /**
+     * By defaultd does nothing.  Overridden in ValidatChangeLogHandler and anywhere else that is interested in them.
+     */
+    protected void handlePreCondition(PreconditionSet preconditions) {
+        ;
     }
 
     protected abstract void handleChangeSet(ChangeSet changeSet) throws JDBCException, DatabaseHistoryException, MigrationFailedException, IOException;

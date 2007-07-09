@@ -1,6 +1,7 @@
 package liquibase.migrator.change;
 
-import liquibase.database.*;
+import liquibase.database.Database;
+import liquibase.database.DerbyDatabase;
 import liquibase.migrator.exception.UnsupportedChangeException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -85,18 +86,8 @@ public class MergeColumnChange extends AbstractChange {
         addNewColumnChange.setColumn(columnConfig);
         statements.addAll(Arrays.asList(addNewColumnChange.generateStatements(database)));
 
-        String updateStatement;
-        if (database instanceof OracleDatabase) {
-            updateStatement = "UPDATE " + getTableName() + " SET " + getFinalColumnName() + " = " + getColumn1Name() + " || '" + getJoinString() + "' ||" + getColumn2Name();
-        } else if (database instanceof PostgresDatabase) {
-            updateStatement = "UPDATE " + getTableName() + " SET " + getFinalColumnName() + " = " + getColumn1Name() + " || '" + getJoinString() + "' ||" + getColumn2Name();
-        } else if (database instanceof MSSQLDatabase) {
-            updateStatement = "UPDATE " + getTableName() + " SET " + getFinalColumnName() + " = " + getColumn1Name() + " + '" + getJoinString() + "' + " + getColumn2Name();
-        } else if (database instanceof MySQLDatabase) {
-            updateStatement = "UPDATE " + getTableName() + " SET " + getFinalColumnName() + " = CONCAT_WS('" + getJoinString() + "', " + getColumn1Name() + ", " + getColumn2Name() + ")";
-        } else {
-            throw new UnsupportedChangeException("Merge Column not supported for " + database.getProductName());
-        }
+        String updateStatement = "UPDATE " + getTableName() + " SET " + getFinalColumnName() + " = " + database.getConcatSql(getColumn1Name(), "'"+getJoinString()+"'", getColumn2Name());
+
         statements.add(updateStatement);
 
         DropColumnChange dropColumn1Change = new DropColumnChange();
@@ -111,6 +102,10 @@ public class MergeColumnChange extends AbstractChange {
 
         return statements.toArray(new String[statements.size()]);
 
+    }
+
+    public String[] generateStatements(DerbyDatabase database) throws UnsupportedChangeException {
+        throw new UnsupportedChangeException("Derby does not currently support merging columns");
     }
 
     public String getConfirmationMessage() {

@@ -30,7 +30,6 @@
 
 &lt;target name="migrate-database" depends="prepare"&gt;
     &lt;fail unless="db.changelog.file"&gt;db.changelog.file not set&lt;/fail&gt;
-    &lt;fail unless="database.driver"&gt;database.driver not set&lt;/fail&gt;
     &lt;fail unless="database.url"&gt;database.url not set&lt;/fail&gt;
 
     &lt;fail unless="database.username"&gt;database.username not set&lt;/fail&gt;
@@ -66,6 +65,7 @@
                     <tr><th>dropFirst</th><td>If set to true, LiquiBase will first drop all database objects owned by the connected user [defaults to FALSE]</td></tr>
                     <tr><th>classpathref</th><td>A reference to the classpath that contains the database driver, liquibase.migrator.jar, and the changelog.xml file</td></tr>
                     <tr><th>contexts</th><td>A comma separated list of <a href="contexts.html">contexts</a> to execute.  If not specified, all contexts are run.</td></tr>
+                    <tr><th>currentDateTimeFunction</th><td>Overrides current date time function used in SQL.  Useful for unsupported databases</td></tr>
                 </table>
 
 <h2>rollbackDatabase Ant Task</h2>
@@ -73,7 +73,6 @@
 
 &lt;target name="rollback-database" depends="prepare"&gt;
     &lt;fail unless="db.changelog.file"&gt;db.changelog.files not set&lt;/fail&gt;
-    &lt;fail unless="database.driver"&gt;database.driver not set&lt;/fail&gt;
     &lt;fail unless="database.url"&gt;database.url not set&lt;/fail&gt;
 
     &lt;fail unless="database.username"&gt;database.username not set&lt;/fail&gt;

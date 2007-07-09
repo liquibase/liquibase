@@ -4,6 +4,7 @@ import liquibase.database.*;
 import liquibase.migrator.exception.DatabaseHistoryException;
 import liquibase.migrator.exception.JDBCException;
 import liquibase.migrator.exception.MigrationFailedException;
+import liquibase.migrator.exception.ValidationFailedException;
 import liquibase.migrator.parser.*;
 import liquibase.util.StreamUtil;
 import org.xml.sax.*;
@@ -14,7 +15,6 @@ import javax.xml.parsers.SAXParserFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Writer;
-import java.net.URI;
 import java.net.URL;
 import java.sql.*;
 import java.text.DateFormat;
@@ -25,18 +25,18 @@ import java.util.logging.Logger;
 /**
  * Core class of the LiquiBase migrator.
  * Although there are several ways of executing LiquiBase (Ant, command line, etc.) they are all wrappers around this class.
- * <p>
+ * <p/>
  * <b>Using Migrator directly</b>
  * <ol>
- *      <li>Construct an instance of Migrator passing in the changelog file and file opener.</li>
- *      <li>Call migrator.init(connection)</li>
- *      <li>Set any contexts with the setContexts() method</li>
- *      <li>Set the execution mode with setMode()</li>
- *      <li>Call migrate()</li>
+ * <li>Construct an instance of Migrator passing in the changelog file and file opener.</li>
+ * <li>Call migrator.init(connection)</li>
+ * <li>Set any contexts with the setContexts() method</li>
+ * <li>Set the execution mode with setMode()</li>
+ * <li>Call migrate()</li>
  * </ol>
- *
  */
 public class Migrator {
+
     // These modes tell the program whether to execute the statements against the database
     // Or to output them in some file to be ran later manually
 
@@ -47,6 +47,7 @@ public class Migrator {
         OUTPUT_ROLLBACK_SQL_MODE,
         OUTPUT_FUTURE_ROLLBACK_SQL_MODE,
         OUTPUT_CHANGELOG_ONLY_SQL_MODE,
+        FIND_UNRUN_CHANGESETS_MODE,
     }
 
     public static final String SHOULD_RUN_SYSTEM_PROPERTY = "database.migrator.should.run";
@@ -77,6 +78,8 @@ public class Migrator {
     private List<RanChangeSet> ranChangeSetList;
     private String buildVersion;
 
+    private boolean wasValidationRan = false;
+
     public Migrator(String changeLogFile, FileOpener fileOpener) {
         this(changeLogFile, fileOpener, false);
     }
@@ -98,13 +101,6 @@ public class Migrator {
             SAXParser parser = saxParserFactory.newSAXParser();
             try {
                 parser.setProperty("http://java.sun.com/xml/jaxp/properties/schemaLanguage", "http://www.w3.org/2001/XMLSchema");
-            } catch (SAXNotRecognizedException e) {
-                ; //ok, parser must not support it
-            } catch (SAXNotSupportedException e) {
-                ; //ok, parser must not support it
-            }
-            try {
-                parser.setProperty("http://java.sun.com/xml/jaxp/properties/schemaSource", new URI(getClass().getClassLoader().getResource("liquibase/dbchangelog-1.0.xsd").toExternalForm()).toString());
             } catch (SAXNotRecognizedException e) {
                 ; //ok, parser must not support it
             } catch (SAXNotSupportedException e) {
@@ -165,36 +161,12 @@ public class Migrator {
     public void init(Connection connection) throws JDBCException, MigrationFailedException {
         // Array Of all the implemented databases
         try {
-            Database[] implementedDatabases = getImplementedDatabases();
-
-            boolean foundImplementation = false;
-            for (int i = 0; i < implementedDatabases.length; i++) {
-                database = implementedDatabases[i];
-                if (database.isCorrectDatabaseImplementation(connection)) {
-                    database.setConnection(connection);
-                    database.getConnection().setAutoCommit(false);
-                    foundImplementation = true;
-                    break;
-                }
-            }
-            if (!foundImplementation) {
-                throw new MigrationFailedException("Unknown database: " + connection.getMetaData().getDatabaseProductName());
-            }
+            database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(connection);
+            database.setConnection(connection);
+            database.getConnection().setAutoCommit(false);
         } catch (SQLException e) {
             throw new JDBCException(e);
         }
-    }
-
-    /**
-     * Returns instances of all implemented database types.
-     */
-    public Database[] getImplementedDatabases() {
-        return new Database[]{
-                new OracleDatabase(),
-                new PostgresDatabase(),
-                new MSSQLDatabase(),
-                new MySQLDatabase(),
-        };
     }
 
     /**
@@ -282,6 +254,16 @@ public class Migrator {
     }
 
     /**
+     * Use this function to override the current date/time function used to insert dates into the database.
+     * Especially useful when using an unsupported database.
+     */
+    public void setCurrentDateTimeFunction(String currentDateTimeFunction) {
+        if (currentDateTimeFunction != null) {
+            this.database.setCurrentDateTimeFunction(currentDateTimeFunction);
+        }
+    }
+
+    /**
      * Returns the ChangeSets that have been run against the current database.
      */
     public List<RanChangeSet> getRanChangeSetList() throws JDBCException {
@@ -314,6 +296,28 @@ public class Migrator {
         }
     }
 
+
+
+
+    /**
+     * Checks changelogs for bad MD5Sums and preconditions before attempting a migration
+     */
+    public void validate() throws MigrationFailedException, IOException, JDBCException {
+        try {
+            if (!waitForLock()) {
+                return;
+            }
+
+            ValidateChangeLogHandler validateChangeLogHandler = new ValidateChangeLogHandler(this, changeLogFile);
+            runChangeLogs(validateChangeLogHandler);
+            if (!validateChangeLogHandler.validationPassed()) {
+                throw new ValidationFailedException(validateChangeLogHandler.getInvalidMD5Sums(), validateChangeLogHandler.getFailedPreconditions(), validateChangeLogHandler.getDuplicateChangeSets());
+            }
+        } finally {
+            releaseLock();
+        }
+    }
+
     /**
      * The primary method to call on Migrator to actually do work.
      * To use the Migrator, initialize it with the init(Connection) method, set the mode, outputSQLWriter, etc. as need be,
@@ -321,6 +325,11 @@ public class Migrator {
      */
     public final void migrate() throws MigrationFailedException {
         try {
+            if (!wasValidationRan()) {
+                validate();
+                wasValidationRan = true;
+            }
+
             if (!waitForLock()) {
                 return;
             }
@@ -394,6 +403,11 @@ public class Migrator {
                 } else {
                     throw new MigrationFailedException("Will not be able to rollback changes due to change set " + unrollbackableChangeSet);
                 }
+            } else if (mode.equals(Mode.FIND_UNRUN_CHANGESETS_MODE)) {
+                runChangeLogs(new FindChangeSetsHandler(this, changeLogFile));
+
+//                List<ChangeSet> unrunChangeSets = FindChangeSetsHandler.getUnrunChangeSets();
+//                System.out.println(unrunChangeSets.size()+" change sets have not been applied to "+getDatabase().getConnectionUsername() + "@" + getDatabase().getConnectionURL());
             } else {
                 throw new MigrationFailedException("Unknown mode: " + getMode());
             }
@@ -407,6 +421,10 @@ public class Migrator {
         } finally {
             releaseLock();
         }
+    }
+
+    protected ValidateChangeLogHandler getValidatChangeLogHandler() {
+        return new ValidateChangeLogHandler(this, changeLogFile);
     }
 
     private boolean waitForLock() throws JDBCException, MigrationFailedException, IOException {
@@ -445,6 +463,11 @@ public class Migrator {
 
     }
 
+
+    protected boolean wasValidationRan() {
+        return wasValidationRan;
+    }
+
     /**
      * Drops all database objects owned by the current user.
      */
@@ -468,11 +491,7 @@ public class Migrator {
     }
 
     public boolean acquireLock() throws MigrationFailedException {
-        if (hasChangeLogLock) {
-            return true;
-        }
-
-        return getDatabase().acquireLock(this);
+        return hasChangeLogLock || getDatabase().acquireLock(this);
     }
 
     public void releaseLock() throws MigrationFailedException {
@@ -617,7 +636,8 @@ public class Migrator {
                     if (changeSet.shouldRunOnChange()) {
                         return ChangeSet.RunStatus.RUN_AGAIN;
                     } else {
-                        throw new DatabaseHistoryException("MD5 Check for " + changeSet.toString() + " failed");
+                        return ChangeSet.RunStatus.INVALID_MD5SUM;
+//                        throw new DatabaseHistoryException("MD5 Check for " + changeSet.toString() + " failed");
                     }
                 }
             }
@@ -635,5 +655,23 @@ public class Migrator {
                 "Area you sure you want to do this?",
                 "Confirm", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.NO_OPTION;
     }
+
+    public boolean contextMatches(ChangeSet changeSet) {
+        Set<String> requiredContexts = getContexts();
+        String changeSetContext = changeSet.getContext();
+        return changeSetContext == null || requiredContexts.size() == 0 || requiredContexts.contains(changeSetContext);
+    }
+
+    public List<ChangeSet> listUnrunChangeSets() throws JDBCException {
+        setMode(Mode.FIND_UNRUN_CHANGESETS_MODE);
+        try {
+            migrate();
+        } catch (MigrationFailedException e) {
+            throw new JDBCException(e);
+        }
+
+        return FindChangeSetsHandler.getUnrunChangeSets();
+    }
+
 
 }

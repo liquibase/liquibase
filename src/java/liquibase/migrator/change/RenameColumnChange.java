@@ -1,8 +1,6 @@
 package liquibase.migrator.change;
 
-import liquibase.database.Database;
-import liquibase.database.MSSQLDatabase;
-import liquibase.database.MySQLDatabase;
+import liquibase.database.*;
 import liquibase.migrator.exception.UnsupportedChangeException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -61,6 +59,12 @@ public class RenameColumnChange extends AbstractChange {
             }
             
             return new String[]{"ALTER TABLE " + tableName + " CHANGE " + oldColumnName + " " + newColumnName + " " + columnDataType};
+        } else if (database instanceof DerbyDatabase) {
+            throw new UnsupportedChangeException("Derby does not currently support renaming columns");
+        } else if (database instanceof HsqlDatabase) {
+            return new String[]{"ALTER TABLE " + tableName + " ALTER COLUMN " + oldColumnName + " RENAME TO " + newColumnName};
+        } else if (database instanceof DB2Database) {
+            throw new UnsupportedChangeException("Rename Column not supported in DB2");
         }
 
         return new String[]{"ALTER TABLE " + tableName + " RENAME COLUMN " + oldColumnName + " TO " + newColumnName};

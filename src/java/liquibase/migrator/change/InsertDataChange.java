@@ -86,10 +86,11 @@ public class InsertDataChange extends AbstractChange {
             } else {
                 return database.getFalseBooleanValue();
             }
+        } else if (column.getValueDate() != null) {
+            return database.getDateLiteral(column.getValueDate());
         } else {
             return "NULL";
         }
-
     }
 
     public String getConfirmationMessage() {

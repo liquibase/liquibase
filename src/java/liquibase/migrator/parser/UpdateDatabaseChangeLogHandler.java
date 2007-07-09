@@ -1,9 +1,11 @@
 package liquibase.migrator.parser;
 
-import liquibase.migrator.*;
+import liquibase.migrator.ChangeSet;
+import liquibase.migrator.Migrator;
+import liquibase.migrator.RanChangeSet;
 import liquibase.migrator.exception.DatabaseHistoryException;
-import liquibase.migrator.exception.MigrationFailedException;
 import liquibase.migrator.exception.JDBCException;
+import liquibase.migrator.exception.MigrationFailedException;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
 
@@ -92,12 +94,20 @@ public class UpdateDatabaseChangeLogHandler extends BaseChangeLogHandler {
     }
 
     private boolean shouldRun(ChangeSet changeSet) throws JDBCException, DatabaseHistoryException {
+
+        // Ignore changeset completely if it's not for this type of database
+
+        String dbmsType = migrator.getDatabase().getTypeName();
+        Set<String> dbms = changeSet.getDbmsSet();
+        if (dbms != null && dbms.size() > 0) {
+            if (!dbms.contains(dbmsType)) {
+                return false;
+            }
+        }
+        
         ChangeSet.RunStatus isChangeSetRan = migrator.getRunStatus(changeSet);
-        if (changeSet.shouldAlwaysRun() || isChangeSetRan.equals(ChangeSet.RunStatus.NOT_RAN) || isChangeSetRan.equals(ChangeSet.RunStatus.RUN_AGAIN))
-        {
-            Set<String> requiredContexts = changeSet.getDatabaseChangeLog().getMigrator().getContexts();
-            String changeSetContext = changeSet.getContext();
-            return changeSetContext == null || requiredContexts.size() == 0 || requiredContexts.contains(changeSetContext);
+        if (changeSet.shouldAlwaysRun() || isChangeSetRan.equals(ChangeSet.RunStatus.NOT_RAN) || isChangeSetRan.equals(ChangeSet.RunStatus.RUN_AGAIN)) {
+            return migrator.contextMatches(changeSet);
         } else {
             return false;
         }

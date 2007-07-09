@@ -51,4 +51,8 @@ public class DatabaseChangeLog {
             return logicalFilePath;
         }
     }
+
+    public String toString() {
+        return getPhysicalFilePath();
+    }
 }

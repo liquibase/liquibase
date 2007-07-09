@@ -1,34 +1,27 @@
 package liquibase.migrator.change;
 
-import java.io.IOException;
-import java.io.Writer;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
-import java.util.logging.Logger;
-
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-
 import liquibase.database.Database;
 import liquibase.migrator.Migrator;
+import liquibase.migrator.exception.JDBCException;
 import liquibase.migrator.exception.RollbackImpossibleException;
 import liquibase.migrator.exception.UnsupportedChangeException;
-import liquibase.migrator.exception.JDBCException;
 import liquibase.util.MD5Util;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
 import liquibase.util.XMLUtil;
-
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
+import java.io.Writer;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.*;
+import java.util.logging.Logger;
 
 /**
  * Standard superclass for Changes to implement. This is a <i>skeletal implementation</i>,
@@ -88,7 +81,7 @@ public abstract class AbstractChange implements Change {
     public void saveStatements(Database database, Writer writer) throws IOException, UnsupportedChangeException {
         String[] statements = generateStatements(database);
         for (String statement : statements) {
-            writer.append(statement + ";" + StreamUtil.getLineSeparator() + StreamUtil.getLineSeparator());
+            writer.append(statement).append(";").append(StreamUtil.getLineSeparator()).append(StreamUtil.getLineSeparator());
         }
     }
 
@@ -106,7 +99,7 @@ public abstract class AbstractChange implements Change {
     public void saveRollbackStatement(Database database, Writer writer) throws IOException, UnsupportedChangeException, RollbackImpossibleException {
         String[] statements = generateRollbackStatements(database);
         for (String statement : statements) {
-            writer.append(statement + ";\n\n");
+            writer.append(statement).append(";\n\n");
         }
     }
 
@@ -181,7 +174,7 @@ public abstract class AbstractChange implements Change {
 
     /*
      * Create inverse changes that can roll back this change. This method is intended
-     * to be overriden by the subclasses (TODO: make it abstract?)
+     * to be overriden by the subclasses that can create inverses.
      *
      * @return an array of {@link Change}s containing the inverse
      *         changes that can roll back this change

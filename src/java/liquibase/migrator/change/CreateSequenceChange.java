@@ -1,8 +1,6 @@
 package liquibase.migrator.change;
 
 import liquibase.database.Database;
-import liquibase.database.MSSQLDatabase;
-import liquibase.database.MySQLDatabase;
 import liquibase.database.OracleDatabase;
 import liquibase.migrator.exception.UnsupportedChangeException;
 import org.w3c.dom.Document;
@@ -74,10 +72,8 @@ public class CreateSequenceChange extends AbstractChange {
     }
 
     public String[] generateStatements(Database database) throws UnsupportedChangeException {
-        if (database instanceof MSSQLDatabase) {
-            throw new UnsupportedChangeException("MSSQL does not support sequences");
-        } else if (database instanceof MySQLDatabase) {
-            throw new UnsupportedChangeException("MySQL does not support sequences");
+        if (!database.supportsSequences()) {
+            throw new UnsupportedChangeException(database.getProductName()+" does not support sequences");
         }
 
         StringBuffer buffer = new StringBuffer();

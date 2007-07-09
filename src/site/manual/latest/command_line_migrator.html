@@ -51,6 +51,8 @@
                     <h3>Maintenance Commands</h3>
                     <table class="attributesTable">
                         <tr><th>tag</th><td>'Tags' the current database state for future rollback</td></tr>
+                        <tr><th>status</th><td>Outputs count (list if --verbose) of unrun change sets</td></tr>
+                        <tr><th>validate</th><td>Checks the changelog for errors</td></tr>
                         <tr><th>changelogSyncSQL</th><td>Writes SQL to mark all changes as executed in the database to STDOUT</td></tr>
                         <tr><th>listLocks</th><td>Lists who currently has locks on the database changelog</td></tr>
                         <tr><th>releaseLocks</th><td>Releases all locks on the database changelog</td></tr>
@@ -58,7 +60,6 @@
                     </table>
                     <h3>Required Parameters</h3>
                     <table class="attributesTable">
-                        <tr><th>--classpath=&lt;value&gt;</th><td>Classpath containing migration files and JDBC Driver</td></tr>
                         <tr><th>--changeLogFile=&lt;path and filename&gt;</th><td>The changelog file to use</td></tr>
                         <tr><th>--username=&lt;value&gt;</th><td>Database username</td></tr>
                         <tr><th>--password=&lt;value></th><td>Database password</td></tr>
@@ -67,10 +68,12 @@
                     </table>
                     <h3>Optional Parameters</h3>
                     <table class="attributesTable">
+                        <tr><th>--classpath=&lt;value&gt;</th><td>Classpath containing migration files and JDBC Driver.</td></tr>
                         <tr><th>--contexts=&lt;value&gt;</th><td>ChangeSet contexts to execute</td></tr>
                         <tr><th>--defaultsFile=&lt;/path/to/file&gt;</th><td>File containing default option values (default: ./liquibase.properties)</td></tr>
                         <tr><th>--includeSystemClasspath=&lt;true|false&gt;</th><td>Include the system classpath in the LiquiBase classpath (default: true)</td></tr>
                         <tr><th>--promptForNonLocalDatabase=&lt;true|false&gt;</th><td>Prompt if non-localhost databases (default: false)</td></tr>
+                        <tr><th>--currentDateTimeFunction=&lt;value&gt;</th><td>Overrides current date time function used in SQL.  Useful for unsupported databases</td></tr>
                         <tr><th>--logLevel=&lt;level&gt;</th><td>Execution log level (finest, finer, fine, info, warning, severe)</td></tr>
                         <tr><th>--help=&lt;level&gt;</th><td>Execution log level (finest, finer, fine, info, warning, severe)</td></tr>
                     </table>
@@ -85,53 +88,53 @@
                     <h2>Examples</h2>
                     <h3>Standard Migrator Run</h3>
                     <pre>java -jar liquibase.migrator.jar \
-      -driver=oracle.jdbc.OracleDriver \
-      -classpath=\path\to\classes:jdbcdriver.jar \
-      -changeLogFile=com/example/db.changelog.xml \
-      -url="jdbc:oracle:thin:@localhost:1521:oracle" \
-      -username=scott \
-      -password=tiger \
+      --driver=oracle.jdbc.OracleDriver \
+      --classpath=\path\to\classes:jdbcdriver.jar \
+      --changeLogFile=com/example/db.changelog.xml \
+      --url="jdbc:oracle:thin:@localhost:1521:oracle" \
+      --username=scott \
+      --password=tiger \
       migrate</pre>
                     <h3>
                         Run Migrator pulling changelogs from a .WAR file
                     </h3>
                     <pre>java -jar liquibase.migrator.jar \
-      -driver=oracle.jdbc.OracleDriver \
-      -classpath=website.war \
-      -changeLogFile=com/example/db.changelog.xml \
-      -url=jdbc:oracle:thin:@localhost:1521:oracle \
-      -username=scott \
-      -password=tiger \
+      --driver=oracle.jdbc.OracleDriver \
+      --classpath=website.war \
+      --changeLogFile=com/example/db.changelog.xml \
+      --url=jdbc:oracle:thin:@localhost:1521:oracle \
+      --username=scott \
+      --password=tiger \
       migrate</pre>
                     <h3>
                         Run Migrator pulling changelogs from an .EAR file
                     </h3>
                     <pre>java -jar liquibase.migrator.jar \
-      -driver=oracle.jdbc.OracleDriver \
-      -classpath=application.ear \
-      -changeLogFile=com/example/db.changelog.xml \
-      -url=jdbc:oracle:thin:@localhost:1521:oracle \
-      -username=scott \
-      -password=tiger</pre>
+      --driver=oracle.jdbc.OracleDriver \
+      --classpath=application.ear \
+      --changeLogFile=com/example/db.changelog.xml \
+      --url=jdbc:oracle:thin:@localhost:1521:oracle \
+      --username=scott \
+      --password=tiger</pre>
                     <h3>
                         Don't execute changesets, save SQL to /tmp/migrate.sql
                     </h3>
                     <pre>java -jar liquibase.migrator.jar \
-        -driver=oracle.jdbc.OracleDriver \
-        -classpath=jdbcdriver.jar \
-        -url=jdbc:oracle:thin:@localhost:1521:oracle \
-        -username=scott \
-        -password=tiger \
+        --driver=oracle.jdbc.OracleDriver \
+        --classpath=jdbcdriver.jar \
+        --url=jdbc:oracle:thin:@localhost:1521:oracle \
+        --username=scott \
+        --password=tiger \
         listLocks > /tmp/migrate.sql</pre>
                     <h3>
                         List locks on the database change log
                     </h3>
                     <pre>java -jar liquibase.migrator.jar \
-        -driver=oracle.jdbc.OracleDriver \
-        -classpath=jdbcdriver.jar \
-        -url=jdbc:oracle:thin:@localhost:1521:oracle \
-        -username=scott \
-        -password=tiger \
+        --driver=oracle.jdbc.OracleDriver \
+        --classpath=jdbcdriver.jar \
+        --url=jdbc:oracle:thin:@localhost:1521:oracle \
+        --username=scott \
+        --password=tiger \
         listLocks</pre>
                     <h3>
                         Runs LiquiBase using defaults from ./liquibase.properties

@@ -1,6 +1,7 @@
 package liquibase.migrator;
 
 import junit.framework.TestCase;
+import liquibase.migrator.exception.ValidationFailedException;
 
 import java.io.StringWriter;
 import java.sql.Connection;
@@ -18,15 +19,14 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
     protected String password;
     protected String driverName;
     protected String url;
-    protected String driverDirectory;
-    private Connection connection;
+    protected Connection connection;
+    protected Driver driver;
 
-    protected AbstractSimpleChangeLogRunnerTest(String changelogDir, String driverDir, String driverName, String url) {
+    protected AbstractSimpleChangeLogRunnerTest(String changelogDir, String driverName, String url) {
         this.completeChangeLog = "changelogs/" + changelogDir + "/complete/root.changelog.xml";
         this.rollbackChangeLog = "changelogs/" + changelogDir + "/rollback/rollbackable.changelog.xml";
         this.driverName = driverName;
         this.url = url;
-        this.driverDirectory = driverDir;
         username = "liquibase";
         password = "liquibase";
 
@@ -36,16 +36,24 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
     protected void setUp() throws Exception {
         super.setUp();
 
-        Driver driver = (Driver) Class.forName(driverName, true, new JUnitJDBCDriverClassLoader(driverDirectory)).newInstance();
-        Properties info = new Properties();
+        JUnitJDBCDriverClassLoader jdbcDriverLoader = JUnitJDBCDriverClassLoader.getInstance();
+        driver = (Driver) Class.forName(driverName, true, jdbcDriverLoader).newInstance();
+        Properties info = createProperties();
         info.put("user", username);
         info.put("password", password);
         connection = driver.connect(url, info);
     }
 
+    protected Properties createProperties() {
+        return new Properties();
+    }
+
     protected void tearDown() throws Exception {
         super.tearDown();
         connection.close();
+        connection = null;
+        driver = null;
+
     }
 
     protected Migrator createMigrator(String changeLogFile) throws Exception {
@@ -63,7 +71,12 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
 
         //run again to test changelog testing logic
         migrator = createMigrator(completeChangeLog);
-        migrator.migrate();
+        try {
+            migrator.migrate();
+        } catch (ValidationFailedException e) {
+            e.printDescriptiveError(System.out);
+            throw e;
+        }
     }
 
     public void testOutputChangeLog() throws Exception {
@@ -144,6 +157,12 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
         migrator.migrate();
 
         migrator.tag("Test Tag");
+    }
+
+    public void testGetDefaultDriver() throws Exception {
+        Migrator migrator = createMigrator(completeChangeLog);
+
+        assertEquals(driverName, migrator.getDatabase().getDefaultDriver(url));
     }
 
 }

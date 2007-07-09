@@ -1,8 +1,9 @@
 package liquibase.migrator.ant;
 
-import liquibase.migrator.exception.MigrationFailedException;
-import liquibase.migrator.exception.JDBCException;
 import liquibase.migrator.Migrator;
+import liquibase.migrator.exception.JDBCException;
+import liquibase.migrator.exception.MigrationFailedException;
+import liquibase.database.DatabaseFactory;
 import org.apache.tools.ant.Task;
 import org.apache.tools.ant.types.Path;
 import org.apache.tools.ant.types.Reference;
@@ -11,14 +12,14 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 
 /**
  * Base class for all Ant LiquiBase tasks.  This class sets up the migrator and defines parameters
@@ -32,6 +33,7 @@ public class BaseLiquibaseTask extends Task {
     private String password;
     protected Path classpath;
     private boolean promptOnNonLocalDatabase = false;
+    private String currentDateTimeFunction;
 
     public boolean isPromptOnNonLocalDatabase() {
         return promptOnNonLocalDatabase;
@@ -92,7 +94,17 @@ public class BaseLiquibaseTask extends Task {
         createClasspath().setRefid(r);
     }
 
+    public String getCurrentDateTimeFunction() {
+        return currentDateTimeFunction;
+    }
+
+    public void setCurrentDateTimeFunction(String currentDateTimeFunction) {
+        this.currentDateTimeFunction = currentDateTimeFunction;
+    }
+
     protected Migrator createMigrator() throws MalformedURLException, ClassNotFoundException, JDBCException, SQLException, MigrationFailedException, IllegalAccessException, InstantiationException {
+
+        Migrator migrator = new Migrator(getChangeLogFile().trim(), new AntFileOpener(getProject(), classpath));
 
         String[] strings = classpath.list();
         final List<URL> taskClassPath = new ArrayList<URL>();
@@ -107,7 +119,16 @@ public class BaseLiquibaseTask extends Task {
             }
         });
 
-        Driver driver = (Driver) Class.forName(getDriver(), true, loader).newInstance();
+        String driverClassName = getDriver();
+        if (driverClassName == null) {
+            driverClassName = DatabaseFactory.getInstance().findDefaultDriver(getUrl());
+        }
+
+        if (driverClassName == null) {
+            throw new JDBCException("driver not specified and no default could be found for the given url");
+        }
+
+        Driver driver = (Driver) Class.forName(driverClassName, true, loader).newInstance();
 
         Properties info = new Properties();
         info.put("user", getUsername());
@@ -118,8 +139,8 @@ public class BaseLiquibaseTask extends Task {
             throw new JDBCException("Connection could not be created to "+getUrl()+" with driver "+driver.getClass().getName()+".  Possibly the wrong driver for the given database URL");
         }
 
-        Migrator migrator = new Migrator(getChangeLogFile().trim(), new AntFileOpener(getProject(), classpath));
         migrator.init(connection);
+        migrator.setCurrentDateTimeFunction(currentDateTimeFunction);
 
         return migrator;
     }
