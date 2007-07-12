@@ -43,6 +43,9 @@ public class DiffResult {
     private SortedSet<PrimaryKey> missingPrimaryKeys = new TreeSet<PrimaryKey>();
     private SortedSet<PrimaryKey> unexpectedPrimaryKeys = new TreeSet<PrimaryKey>();
 
+    private SortedSet<Sequence> missingSequences = new TreeSet<Sequence>();
+    private SortedSet<Sequence> unexpectedSequences = new TreeSet<Sequence>();
+
     public DiffResult(Database baseDatabase, Database targetDatabase) {
         this.baseDatabase = baseDatabase;
         this.targetDatabase = targetDatabase;
@@ -160,6 +163,22 @@ public class DiffResult {
         return unexpectedPrimaryKeys;
     }
 
+    public void addMissingSequence(Sequence sequence) {
+        missingSequences.add(sequence);
+    }
+
+    public SortedSet<Sequence> getMissingSequences() {
+        return missingSequences;
+    }
+
+    public void addUnexpectedSequence(Sequence sequence) {
+        unexpectedSequences.add(sequence);
+    }
+
+    public SortedSet<Sequence> getUnexpectedSequences() {
+        return unexpectedSequences;
+    }
+
     public void printResult(PrintStream out) throws JDBCException {
         out.println("Base Database: " + baseDatabase.getConnectionUsername() + " " + baseDatabase.getConnectionURL());
         out.println("Target Database: " + targetDatabase.getConnectionUsername() + " " + targetDatabase.getConnectionURL());
@@ -178,7 +197,8 @@ public class DiffResult {
         printSetComparison("Unexpected Primary Keys", getUnexpectedPrimaryKeys(), out);
         printSetComparison("Missing Indexes", getMissingIndexes(), out);
         printSetComparison("Unexpected Indexes", getUnexpectedIndexes(), out);
-
+        printSetComparison("Missing Sequences", getMissingSequences(), out);
+        printSetComparison("Unexpected Sequences", getUnexpectedSequences(), out);
     }
 
     private void printSetComparison(String title, SortedSet objects, PrintStream out) {
@@ -301,7 +321,7 @@ public class DiffResult {
             changes.add(change);
         }
     }
-    
+
     private void addUnexpectedForeignKeyChanges(List<Change> changes) {
         for (ForeignKey fk : getUnexpectedForeignKey()) {
 

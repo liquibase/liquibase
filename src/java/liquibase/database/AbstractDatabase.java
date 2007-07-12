@@ -734,6 +734,8 @@ public abstract class AbstractDatabase implements Database {
             return true;
         } else if (tableName.startsWith("AQ$")) { //oracle AQ tables
             return true;
+        } else if (tableName.startsWith("DR")) { //oracle index tables
+            return true;
         } else if (tableName.equalsIgnoreCase(getDatabaseChangeLogLockTableName())) {
             return true;
         } else if (getSystemTablesAndViews().contains(tableName)) {
@@ -855,6 +857,10 @@ public abstract class AbstractDatabase implements Database {
         return "UPDATE " + getDatabaseChangeLogTableName() + " SET TAG=? WHERE DATEEXECUTED=?";
     }
 
+    public String createFindSequencesSQL() throws JDBCException {
+        return null;
+    }
+
     public boolean doesTagExist(String tag) throws JDBCException {
         PreparedStatement pstmt = null;
         ResultSet rs = null;
@@ -888,4 +894,12 @@ public abstract class AbstractDatabase implements Database {
         return new DatabaseSnapshot(this);
     }
 
+
+    public String toString() {
+        try {
+            return getConnectionUsername()+" @ "+getConnectionURL();
+        } catch (JDBCException e) {
+            return super.toString();
+        }
+    }
 }

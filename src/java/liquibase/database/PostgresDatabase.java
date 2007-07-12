@@ -118,7 +118,10 @@ public class PostgresDatabase extends AbstractDatabase {
                 throw new JDBCException(e);
             }
         }
+    }
 
 
+    public String createFindSequencesSQL() throws JDBCException {
+        return "SELECT NULL AS SEQUENCE_SCHEMA, relname AS SEQUENCE_NAME FROM pg_class, pg_namespace WHERE relkind='S' AND pg_class.relnamespace = pg_namespace.oid AND nspname = '"+getSchemaName()+"'";
     }
 }

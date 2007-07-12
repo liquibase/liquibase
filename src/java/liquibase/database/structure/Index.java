@@ -35,17 +35,16 @@ public class Index implements Comparable<Index> {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        Index that = (Index) o;
+        Index index = (Index) o;
 
-        return !(columnName != null ? !columnName.equals(that.columnName) : that.columnName != null) && !(name != null ? !name.equals(that.name) : that.name != null) && !(tableName != null ? !tableName.equals(that.tableName) : that.tableName != null);
+        return columnName.equals(index.columnName) && tableName.equals(index.tableName);
 
     }
 
     public int hashCode() {
         int result;
-        result = (name != null ? name.hashCode() : 0);
-        result = 31 * result + (tableName != null ? tableName.hashCode() : 0);
-        result = 31 * result + (columnName != null ? columnName.hashCode() : 0);
+        result = tableName.hashCode();
+        result = 31 * result + columnName.hashCode();
         return result;
     }
 

@@ -86,6 +86,11 @@ public class OracleDatabase extends AbstractDatabase {
         return "0";
     }
 
+
+    public String getSchemaName() throws JDBCException {
+        return super.getSchemaName().toUpperCase();
+    }
+
     /**
      * Return an Oracle date literal with the same value as a string formatted using ISO 8601.
      *
@@ -167,5 +172,10 @@ public class OracleDatabase extends AbstractDatabase {
                 throw new JDBCException(e);
             }
         }
+    }
+
+
+    public String createFindSequencesSQL() throws JDBCException {
+         return "SELECT SEQUENCE_NAME FROM ALL_SEQUENCES WHERE SEQUENCE_OWNER = '"+getSchemaName()+"'";
     }
 }

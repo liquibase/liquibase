@@ -1,15 +1,16 @@
 package liquibase.migrator.commandline;
 
+import liquibase.database.DatabaseFactory;
 import liquibase.migrator.ChangeSet;
 import liquibase.migrator.DatabaseChangeLogLock;
 import liquibase.migrator.Migrator;
 import liquibase.migrator.diff.Diff;
 import liquibase.migrator.diff.DiffResult;
+import liquibase.migrator.diff.DiffStatusListener;
 import liquibase.migrator.exception.CommandLineParsingException;
 import liquibase.migrator.exception.JDBCException;
 import liquibase.migrator.exception.ValidationFailedException;
 import liquibase.util.StreamUtil;
-import liquibase.database.DatabaseFactory;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
@@ -657,14 +658,18 @@ public class CommandLineMigrator {
 
     private void doDiff(Connection baseDatabase, Connection targetDatabase) throws JDBCException {
         Diff diff = new Diff();
+        diff.addStatusListener(new OutDiffStatusListener());
         diff.init(baseDatabase, targetDatabase);
         DiffResult diffResult = diff.compare();
 
+        System.out.println("");
+        System.out.println("Diff Results:");
         diffResult.printResult(System.out);
     }
 
     private void doDiffToChangeLog(Connection baseDatabase, Connection targetDatabase) throws JDBCException, IOException, ParserConfigurationException {
         Diff diff = new Diff();
+        diff.addStatusListener(new OutDiffStatusListener());
         diff.init(baseDatabase, targetDatabase);
         DiffResult diffResult = diff.compare();
 
@@ -673,6 +678,7 @@ public class CommandLineMigrator {
 
     private void doGenerateChangeLog(Connection originalDatabase) throws JDBCException, IOException, ParserConfigurationException {
         Diff diff = new Diff();
+        diff.addStatusListener(new OutDiffStatusListener());
         diff.init(originalDatabase);
         DiffResult diffResult = diff.compare();
 
@@ -680,4 +686,9 @@ public class CommandLineMigrator {
     }
 
 
+    private static class OutDiffStatusListener implements DiffStatusListener {
+        public void statusUpdate(String message) {
+            System.err.println(message);
+        }
+    }
 }

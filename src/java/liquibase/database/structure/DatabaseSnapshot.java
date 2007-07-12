@@ -2,10 +2,12 @@ package liquibase.database.structure;
 
 import liquibase.database.Database;
 import liquibase.migrator.exception.JDBCException;
+import liquibase.migrator.diff.DiffStatusListener;
 
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -22,22 +24,30 @@ public class DatabaseSnapshot {
     private Set<ForeignKey> foreignKeys = new HashSet<ForeignKey>();
     private Set<Index> indexes = new HashSet<Index>();
     private Set<PrimaryKey> primaryKeys = new HashSet<PrimaryKey>();
+    private Set<Sequence> sequences = new HashSet<Sequence>();
 
 
     private Map<String, Table> tablesMap = new HashMap<String, Table>();
     private Map<String, View> viewsMap = new HashMap<String, View>();
     private Map<String, Column> columnsMap = new HashMap<String, Column>();
+    private Set<DiffStatusListener> statusListeners;
 
     public DatabaseSnapshot(Database database) throws JDBCException {
+        this(database,  null);
+    }
+
+    public DatabaseSnapshot(Database database, Set<DiffStatusListener> statusListeners) throws JDBCException {
         try {
             this.database = database;
             this.databaseMetaData = database.getConnection().getMetaData();
+            this.statusListeners = statusListeners;
 
             readTablesAndViews();
             readColumns();
             readForeignKeyInformation();
             readPrimaryKeys();
             readIndexes();
+            readSequences();
 
             this.tables = new HashSet<Table>(tablesMap.values());
             this.views = new HashSet<View>(viewsMap.values());
@@ -72,7 +82,13 @@ public class DatabaseSnapshot {
         return primaryKeys;
     }
 
+
+    public Set<Sequence> getSequences() {
+        return sequences;
+    }
+
     private void readTablesAndViews() throws SQLException, JDBCException {
+        updateListeners("Reading tables for "+database.toString()+" ...");
         ResultSet rs = databaseMetaData.getTables(database.getCatalogName(), database.getSchemaName(), null, new String[]{"TABLE", "VIEW"});
         while (rs.next()) {
             String type = rs.getString("TABLE_TYPE");
@@ -95,6 +111,8 @@ public class DatabaseSnapshot {
     }
 
     private void readColumns() throws SQLException, JDBCException {
+        updateListeners("Reading columns for "+database.toString()+" ...");
+
         ResultSet rs = databaseMetaData.getColumns(database.getCatalogName(), database.getSchemaName(), null, null);
         while (rs.next()) {
             Column columnInfo = new Column();
@@ -117,7 +135,7 @@ public class DatabaseSnapshot {
                 }
             } else {
                 columnInfo.setTable(table);
-                table.getColumns().add(columnInfo);                
+                table.getColumns().add(columnInfo);
             }
 
             columnInfo.setName(columnName);
@@ -140,6 +158,8 @@ public class DatabaseSnapshot {
     }
 
     private void readForeignKeyInformation() throws JDBCException, SQLException {
+        updateListeners("Reading foreign keys for "+database.toString()+" ...");
+
         for (Table table : tablesMap.values()) {
             ResultSet rs = databaseMetaData.getExportedKeys(database.getCatalogName(), database.getSchemaName(), table.getName());
             while (rs.next()) {
@@ -188,8 +208,15 @@ public class DatabaseSnapshot {
     }
 
     private void readIndexes() throws JDBCException, SQLException {
+        updateListeners("Reading indexes for "+database.toString()+" ...");
+
         for (Table table : tablesMap.values()) {
-            ResultSet rs = databaseMetaData.getIndexInfo(database.getCatalogName(), database.getSchemaName(), table.getName(), true, true);
+            ResultSet rs = null;
+            try {
+                rs = databaseMetaData.getIndexInfo(database.getCatalogName(), database.getSchemaName(), table.getName(), true, true);
+            } catch (SQLException e) {
+                throw e;
+            }
 
             while (rs.next()) {
                 Index indexInformation = new Index();
@@ -210,6 +237,8 @@ public class DatabaseSnapshot {
     }
 
     private void readPrimaryKeys() throws JDBCException, SQLException {
+        updateListeners("Reading primary keys for "+database.toString()+" ...");
+
         for (Table table : tablesMap.values()) {
             ResultSet rs = databaseMetaData.getPrimaryKeys(database.getCatalogName(), database.getSchemaName(), table.getName());
 
@@ -223,6 +252,33 @@ public class DatabaseSnapshot {
             }
 
             rs.close();
+        }
+    }
+
+    private void readSequences() throws JDBCException, SQLException {
+        updateListeners("Reading sequences for "+database.toString()+" ...");
+
+        if (database.supportsSequences()) {
+            Statement stmt = database.getConnection().createStatement();
+            ResultSet rs = stmt.executeQuery(database.createFindSequencesSQL());
+
+            while (rs.next()) {
+                Sequence seq = new Sequence();
+                seq.setName(rs.getString("SEQUENCE_NAME"));
+
+                sequences.add(seq);
+            }
+
+            rs.close();
+        }
+    }
+
+    private void updateListeners(String message) {
+        if (this.statusListeners == null) {
+            return;
+        }
+        for (DiffStatusListener listener : this.statusListeners) {
+            listener.statusUpdate(message);
         }
     }
 }

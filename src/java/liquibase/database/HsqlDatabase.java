@@ -103,4 +103,9 @@ public class HsqlDatabase extends AbstractDatabase {
         }
         return "'" + returnString + "'";
     }
+
+
+    public String createFindSequencesSQL() throws JDBCException {
+        return "SELECT SEQUENCE_NAME FROM INFORMATION_SCHEMA.SYSTEM_SEQUENCES WHERE SEQUENCE_SCHEMA = '"+getSchemaName()+"'";
+    }
 }

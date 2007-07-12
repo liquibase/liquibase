@@ -8,6 +8,8 @@ import liquibase.migrator.exception.JDBCException;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.HashSet;
+import java.util.Set;
 
 public class Diff {
 
@@ -16,6 +18,8 @@ public class Diff {
 
     private DatabaseSnapshot baseSnapshot;
     private DatabaseSnapshot targetSnapshot;
+
+    private Set<DiffStatusListener> statusListeners = new HashSet<DiffStatusListener>();
 
     public void init(Connection baseConnection, Connection targetConnection) throws JDBCException {
         try {
@@ -45,11 +49,18 @@ public class Diff {
 
     }
 
+    public void addStatusListener(DiffStatusListener listener) {
+        statusListeners.add(listener);
+    }
+
+    public void removeStatusListener(DiffStatusListener listener) {
+        statusListeners.remove(listener);
+    }
 
     public DiffResult compare() throws JDBCException {
         try {
-            baseSnapshot = new DatabaseSnapshot(baseDatabase);
-            targetSnapshot = new DatabaseSnapshot(targetDatabase);
+            baseSnapshot = new DatabaseSnapshot(baseDatabase, statusListeners);
+            targetSnapshot = new DatabaseSnapshot(targetDatabase, statusListeners);
 
             DiffResult diffResult = new DiffResult(baseDatabase, targetDatabase);
             checkVersionInfo(diffResult);
@@ -59,6 +70,7 @@ public class Diff {
             checkForeignKeys(diffResult);
             checkPrimaryKeys(diffResult);
             checkIndexes(diffResult);
+            checkSequences(diffResult);
 
             return diffResult;
         } catch (SQLException e) {
@@ -159,6 +171,20 @@ public class Diff {
         for (PrimaryKey targetPrimaryKey : targetSnapshot.getPrimaryKeys()) {
             if (!baseSnapshot.getPrimaryKeys().contains(targetPrimaryKey)) {
                 diffResult.addUnexpectedPrimaryKey(targetPrimaryKey);
+            }
+        }
+    }
+
+    private void checkSequences(DiffResult diffResult) {
+        for (Sequence baseSequence : baseSnapshot.getSequences()) {
+            if (!targetSnapshot.getSequences().contains(baseSequence)) {
+                diffResult.addMissingSequence(baseSequence);
+            }
+        }
+
+        for (Sequence targetSequence: targetSnapshot.getSequences()) {
+            if (!baseSnapshot.getSequences().contains(targetSequence)) {
+                diffResult.addUnexpectedSequence(targetSequence);
             }
         }
     }

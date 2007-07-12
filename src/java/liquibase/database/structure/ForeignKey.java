@@ -55,7 +55,7 @@ public class ForeignKey implements Comparable<ForeignKey> {
 
 
     public String toString() {
-        return getName();
+        return getName()+" ("+getPrimaryKeyColumn()+" -> "+getForeignKeyColumn()+")";
     }
 
 

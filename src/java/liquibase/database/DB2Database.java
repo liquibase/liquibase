@@ -151,4 +151,9 @@ public class DB2Database extends AbstractDatabase {
             }
         }
     }
+
+
+    public String createFindSequencesSQL() throws JDBCException {
+        return "SELECT SEQNAME AS SEQUENCE_NAME FROM SYSCAT.SEQUENCES WHERE SEQSCHEMA = '"+getSchemaName()+ "'";
+    }
 }

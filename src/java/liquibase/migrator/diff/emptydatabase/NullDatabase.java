@@ -179,4 +179,8 @@ public class NullDatabase implements Database {
         return false;
     }
 
+
+    public String createFindSequencesSQL() throws JDBCException {
+        return null;
+    }
 }

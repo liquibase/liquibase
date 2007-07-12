@@ -37,18 +37,16 @@ public class PrimaryKey implements Comparable<PrimaryKey> {
 
         PrimaryKey that = (PrimaryKey) o;
 
-        return columnNames.equals(that.columnNames) && !(name != null ? !name.equals(that.name) : that.name != null) && tableName.equals(that.tableName);
+        return columnNames.equals(that.columnNames) && tableName.equals(that.tableName);
 
     }
 
     public int hashCode() {
         int result;
-        result = (name != null ? name.hashCode() : 0);
-        result = 31 * result + columnNames.hashCode();
+        result = columnNames.hashCode();
         result = 31 * result + tableName.hashCode();
         return result;
     }
-
 
     public int compareTo(PrimaryKey o) {
         return this.getName().compareTo(o.getName());
