@@ -9,6 +9,7 @@ import liquibase.util.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
+import org.w3c.dom.Text;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -222,10 +223,39 @@ public class ChangeSet {
         this.comments = comments;
     }
 
-    public Node createNode(Document currentChangeLogDOM) {
+    public Element createNode(Document currentChangeLogDOM) {
         Element node = currentChangeLogDOM.createElement("changeSet");
         node.setAttribute("id", getId());
         node.setAttribute("author", getAuthor());
+
+        if (alwaysRun) {
+            node.setAttribute("alwaysRun", "true");
+        }
+
+        if (runOnChange) {
+            node.setAttribute("runOnChange", "true");
+        }
+
+        if (StringUtils.trimToNull(getContext()) != null) {
+            node.setAttribute("context", StringUtils.trimToEmpty(getContext()));
+        }
+
+        if (getDbmsSet() != null && getDbmsSet().size() > 0) {
+            StringBuffer dbmsString = new StringBuffer();
+            for (String dbms : getDbmsSet()) {
+                dbmsString.append(dbms).append(",");
+            }
+            node.setAttribute("dbms", dbmsString.toString().replaceFirst(",$",""));
+        }
+
+        if (StringUtils.trimToNull(getComments()) != null) {
+            Element commentsElement = currentChangeLogDOM.createElement("comments");
+            Text commentsText = currentChangeLogDOM.createTextNode(getComments());
+            commentsElement.appendChild(commentsText);
+            node.appendChild(commentsElement);
+        }
+
+
         for (Change change : getChanges()) {
             node.appendChild(change.createNode(currentChangeLogDOM));
         }
