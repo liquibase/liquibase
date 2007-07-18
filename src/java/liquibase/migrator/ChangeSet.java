@@ -60,7 +60,7 @@ public class ChangeSet {
         if (context != null) {
             this.context = context.trim().toLowerCase();
         }
-        if (dbmsList != null) {
+        if (StringUtils.trimToNull(dbmsList) != null) {
             String[] strings = dbmsList.split(",");
             for (String string : strings) {
                 if (dbmsSet == null) {
