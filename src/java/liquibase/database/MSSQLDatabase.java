@@ -128,6 +128,10 @@ public class MSSQLDatabase extends AbstractDatabase {
         }
     }
 
+    public String getTrueBooleanValue() {
+        return "1";
+    }
+    
     public String getFalseBooleanValue() {
         return "0";
     }

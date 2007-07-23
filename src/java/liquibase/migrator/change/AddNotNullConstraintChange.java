@@ -122,7 +122,7 @@ public class AddNotNullConstraintChange extends AbstractChange {
         return statements.toArray(new String[statements.size()]);
     }
 
-    public String[] generateDerbyStatements() throws UnsupportedChangeException {
+    public String[] generateDerbyStatements()  {
         List<String> statements = new ArrayList<String>();
         if (defaultNullValue != null) {
             statements.add(generateUpdateStatement());

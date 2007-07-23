@@ -211,7 +211,7 @@ public class DatabaseSnapshot {
         updateListeners("Reading indexes for "+database.toString()+" ...");
 
         for (Table table : tablesMap.values()) {
-            ResultSet rs = null;
+            ResultSet rs;
             try {
                 rs = databaseMetaData.getIndexInfo(database.getCatalogName(), database.getSchemaName(), table.getName(), true, true);
             } catch (SQLException e) {

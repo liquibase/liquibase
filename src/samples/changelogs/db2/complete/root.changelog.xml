@@ -16,7 +16,7 @@
         </comment>        
         <createTable tableName="person">
             <column name="id" type="int">
-                <constraints primaryKey="true" nullableAdd="false"/>
+                <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="firstname" type="varchar(50)"/>
             <column name="lastname" type="varchar(50)">
@@ -309,5 +309,7 @@
     <include file="changelogs/db2/complete/renamed.changelog.xml"/>
 
     <include file="changelogs/common/common.tests.changelog.xml" />
+
+    <include file="changelogs/common/autoincrement.tests.changelog.xml" />
     
 </databaseChangeLog>

@@ -101,6 +101,7 @@ public class Column implements Comparable<Column> {
 
     public int compareTo(Column o) {
         try {
+            //noinspection UnusedAssignment
             int returnValue = 0;
             if (this.getTable() != null && o.getTable() == null) {
                 return 1;
@@ -118,7 +119,6 @@ public class Column implements Comparable<Column> {
 
             return returnValue;
         } catch (Exception e) {
-            e.printStackTrace();
             throw new RuntimeException(e);
         }
     }

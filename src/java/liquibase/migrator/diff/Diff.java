@@ -78,7 +78,7 @@ public class Diff {
         }
     }
 
-    private void checkVersionInfo(DiffResult diffResult) throws SQLException, JDBCException {
+    private void checkVersionInfo(DiffResult diffResult) throws  JDBCException {
 
         diffResult.setProductName(new DiffComparison(baseDatabase.getDatabaseProductName(), targetDatabase.getDatabaseProductName()));
         diffResult.setProductVersion(new DiffComparison(baseDatabase.getDatabaseProductVersion(), targetDatabase.getDatabaseProductVersion()));
@@ -99,7 +99,7 @@ public class Diff {
         }
     }
 
-    private void checkViews(DiffResult diffResult) throws SQLException, JDBCException {
+    private void checkViews(DiffResult diffResult)  {
         for (View baseView : baseSnapshot.getViews()) {
             if (!targetSnapshot.getViews().contains(baseView)) {
                 diffResult.addMissingView(baseView);

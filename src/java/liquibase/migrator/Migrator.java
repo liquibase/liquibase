@@ -158,7 +158,7 @@ public class Migrator {
     /**
      * Initializes the Migrator with the given connection.  Needs to be called before actually using the Migrator.
      */
-    public void init(Connection connection) throws JDBCException, MigrationFailedException {
+    public void init(Connection connection) throws JDBCException {
         // Array Of all the implemented databases
         try {
             database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(connection);

@@ -81,10 +81,17 @@ public class InsertDataChange extends AbstractChange {
         } else if (column.getValueNumeric() != null) {
             return column.getValueNumeric();
         } else if (column.getValueBoolean() != null) {
+            String returnValue;
             if (column.getValueBoolean()) {
-                return database.getTrueBooleanValue();
+                returnValue = database.getTrueBooleanValue();
             } else {
-                return database.getFalseBooleanValue();
+                returnValue = database.getFalseBooleanValue();
+            }
+
+            if (returnValue.matches("\\d+")) {
+                return returnValue;
+            } else {
+                return "'"+returnValue+"'";
             }
         } else if (column.getValueDate() != null) {
             return database.getDateLiteral(column.getValueDate());

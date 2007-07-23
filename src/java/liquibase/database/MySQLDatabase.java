@@ -78,6 +78,15 @@ public class MySQLDatabase extends AbstractDatabase {
         return "DROP TABLE " + tableName;
     }
 
+
+    public String getFalseBooleanValue() {
+        return "0";
+    }
+
+    public String getTrueBooleanValue() {
+        return "1";
+    }
+
     public String getConcatSql(String ... values) {
         StringBuffer returnString = new StringBuffer();
         returnString.append("CONCAT_WS(");

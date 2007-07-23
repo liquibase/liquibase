@@ -303,4 +303,7 @@
     <include file="changelogs/mysql/complete/renamed.changelog.xml"/>
 
     <include file="changelogs/common/common.tests.changelog.xml" />
+
+    <include file="changelogs/common/autoincrement.tests.changelog.xml" />
+    
 </databaseChangeLog>

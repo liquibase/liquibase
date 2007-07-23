@@ -200,7 +200,7 @@ public abstract class AbstractChange implements Change {
             attributeMap.put(attribute.getNodeName(), attribute.getNodeValue());
         }
         for (Map.Entry entry : attributeMap.entrySet()) {
-            Object value = entry.getValue();
+            String value = (String) entry.getValue();
             if (value != null) {
                 buffer.append(" ").append(entry.getKey()).append("=\"").append(attributeMap.get(value)).append("\"");
             }

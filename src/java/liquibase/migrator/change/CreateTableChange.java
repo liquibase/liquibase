@@ -145,10 +145,17 @@ public class CreateTableChange extends AbstractChange {
         } else if (column.getDefaultValueNumeric() != null) {
             return column.getDefaultValueNumeric();
         } else if (column.getDefaultValueBoolean() != null) {
+            String returnValue;
             if (column.getDefaultValueBoolean()) {
-                return database.getTrueBooleanValue();
+                returnValue = database.getTrueBooleanValue();
             } else {
-                return database.getFalseBooleanValue();
+                returnValue = database.getFalseBooleanValue();
+            }
+
+            if (returnValue.matches("\\d+")) {
+                return returnValue;
+            } else {
+                return "'"+returnValue+"'";
             }
         } else if (column.getDefaultValueDate() != null) {
             return database.getDateLiteral(column.getDefaultValueDate());

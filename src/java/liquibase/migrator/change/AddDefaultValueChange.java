@@ -130,10 +130,16 @@ public class AddDefaultValueChange extends AbstractChange {
         } else if (getDefaultValueNumeric() != null) {
             return getDefaultValueNumeric();
         } else if (getDefaultValueBoolean() != null) {
+            String returnValue;
             if (getDefaultValueBoolean()) {
-                return database.getTrueBooleanValue();
+                returnValue = database.getTrueBooleanValue();
             } else {
-                return database.getFalseBooleanValue();
+                returnValue = database.getFalseBooleanValue();
+            }
+            if (returnValue.matches("\\d+")) {
+                return returnValue;
+            } else {
+                return "'"+returnValue+"'";
             }
         } else if (getDefaultValueDate() != null) {
             return database.getDateLiteral(getDefaultValueDate());

@@ -58,6 +58,6 @@
 
     <include file="changelogs/unsupported/complete/renamed.changelog.xml"/>
 
-    <include file="changelogs/common/common.tests.changelog.xml" />
+    <!--<include file="changelogs/common/common.tests.changelog.xml" />-->
     
 </databaseChangeLog>

@@ -28,13 +28,23 @@
                         <li>Support for additional databases: DB2, Derby, Sybase (not fully tested), and HSQL</li>
                         <li>Support for "unsupported" databases</li>
                         <li><a href="../manual/latest/diff.html">Database Diff Tool</a></li>
-                        <li><a href="../manual/latest/generate_changelogs.html">Database Creation Script Generator</a></li>
+                        <li><a href="../manual/latest/generate_changelog.html">Database Creation Script Generator</a></li>
                         <li>new DBMS attribute on change set tag that allows you to specify what databases to run the change set against</li>
                         <li>"verify" command that checks for change log problems without attempting to execute any</li>
                         <li>"status" command that shows information on unrun change sets</li>
                         <li>Handle date/time and numeric values better on inserts and setting default values</li>
                         <li>Bug Fixes</li>
                     </ul>
+                    <p>
+                        Upgrading is simply a matter of replacing the liquibase.jar file.  To take advantage of newer change log features,
+                        change your XSD declaration to:
+                    </p>
+                    <pre>
+&lt;databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.1"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.1
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.1.xsd"&gt;</pre>
                 </div>
 
                 <div class="newsEntry">

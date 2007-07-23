@@ -34,7 +34,16 @@ public class UnsupportedDatabase extends AbstractDatabase {
     }
 
     protected String getBooleanType() {
-        return "BOOLEAN";
+        return "INT";
+    }
+
+
+    public String getFalseBooleanValue() {
+        return "0";
+    }
+
+    public String getTrueBooleanValue() {
+        return "1";
     }
 
     protected String getCurrencyType() {

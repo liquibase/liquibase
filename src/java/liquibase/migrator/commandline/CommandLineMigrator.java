@@ -55,7 +55,7 @@ public class CommandLineMigrator {
     protected String logLevel;
 
 
-    public static void main(String args[]) throws Exception {
+    public static void main(String args[]) throws CommandLineParsingException, IOException {
         String shouldRunProperty = System.getProperty(Migrator.SHOULD_RUN_SYSTEM_PROPERTY);
         if (shouldRunProperty != null && !Boolean.valueOf(shouldRunProperty)) {
             System.out.println("Migrator did not run because '" + Migrator.SHOULD_RUN_SYSTEM_PROPERTY + "' system property was set to false");
@@ -609,7 +609,7 @@ public class CommandLineMigrator {
         }
     }
 
-    private Connection createConnectionFromCommandParams(Set<String> commandParams) throws CommandLineParsingException, ClassNotFoundException, SQLException, JDBCException {
+    private Connection createConnectionFromCommandParams(Set<String> commandParams) throws CommandLineParsingException,  SQLException, JDBCException {
         String driver = null;
         String url = null;
         String username = null;
