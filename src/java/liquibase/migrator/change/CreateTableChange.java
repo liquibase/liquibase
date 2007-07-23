@@ -37,12 +37,11 @@ public class CreateTableChange extends AbstractChange {
                 buffer.append(" ").append(database.getColumnType(column));
             }
 
-            if (column.getDefaultValue() != null) {
-                if ("null".equalsIgnoreCase(column.getDefaultValue())) {
-                    buffer.append(" DEFAULT NULL");
-                } else {
-                    buffer.append(" DEFAULT '").append(column.getDefaultValue()).append("'");
-                }
+            if (column.getDefaultValue() != null
+                    || column.getDefaultValueBoolean() != null
+                    || column.getDefaultValueDate() != null
+                    || column.getDefaultValueNumeric() != null) {
+                buffer.append(" DEFAULT ").append(getDefaultColumnValue(column, database));
             }
             
             if (column.isAutoIncrement() != null && column.isAutoIncrement().booleanValue()) {
@@ -136,4 +135,26 @@ public class CreateTableChange extends AbstractChange {
         }
         return element;
     }
+
+    private String getDefaultColumnValue(ColumnConfig column, Database database) {
+        if (column.getDefaultValue() != null) {
+            if ("null".equalsIgnoreCase(column.getDefaultValue())) {
+                return "NULL";
+            }
+            return "'" + column.getDefaultValue().replaceAll("'", "''") + "'";
+        } else if (column.getDefaultValueNumeric() != null) {
+            return column.getDefaultValueNumeric();
+        } else if (column.getDefaultValueBoolean() != null) {
+            if (column.getDefaultValueBoolean()) {
+                return database.getTrueBooleanValue();
+            } else {
+                return database.getFalseBooleanValue();
+            }
+        } else if (column.getDefaultValueDate() != null) {
+            return database.getDateLiteral(column.getDefaultValueDate());
+        } else {
+            return "NULL";
+        }
+    }
+
 }

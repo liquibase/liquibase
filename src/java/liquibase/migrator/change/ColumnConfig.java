@@ -16,7 +16,12 @@ public class ColumnConfig {
     private String valueNumeric;
     private String valueDate;
     private Boolean valueBoolean;
+
     private String defaultValue;
+    private String defaultValueNumeric;
+    private String defaultValueDate;
+    private Boolean defaultValueBoolean;
+
     private ConstraintsConfig constraints;
     private Boolean autoIncrement;
 
@@ -82,6 +87,31 @@ public class ColumnConfig {
         this.defaultValue = defaultValue;
     }
 
+
+    public String getDefaultValueNumeric() {
+        return defaultValueNumeric;
+    }
+
+    public void setDefaultValueNumeric(String defaultValueNumeric) {
+        this.defaultValueNumeric = defaultValueNumeric;
+    }
+
+    public String getDefaultValueDate() {
+        return defaultValueDate;
+    }
+
+    public void setDefaultValueDate(String defaultValueDate) {
+        this.defaultValueDate = defaultValueDate;
+    }
+
+    public Boolean getDefaultValueBoolean() {
+        return defaultValueBoolean;
+    }
+
+    public void setDefaultValueBoolean(Boolean defaultValueBoolean) {
+        this.defaultValueBoolean = defaultValueBoolean;
+    }
+
     public ConstraintsConfig getConstraints() {
         return constraints;
     }
@@ -104,9 +134,20 @@ public class ColumnConfig {
         if (getType() != null) {
             element.setAttribute("type", getType());
         }
+
         if (getDefaultValue() != null) {
             element.setAttribute("defaultValue", getDefaultValue());
         }
+        if (getDefaultValueNumeric() != null) {
+            element.setAttribute("defaultValueNumeric", getDefaultValueNumeric());
+        }
+        if (getDefaultValueDate() != null) {
+            element.setAttribute("defaultValueDate", getDefaultValueDate());
+        }
+        if (getDefaultValueBoolean() != null) {
+            element.setAttribute("defaultValueBoolean", getDefaultValueBoolean().toString());
+        }
+
         if (getValue() != null) {
             element.setAttribute("value", getValue());
         }

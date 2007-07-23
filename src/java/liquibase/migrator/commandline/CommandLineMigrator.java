@@ -141,6 +141,7 @@ public class CommandLineMigrator {
                 || "releaseLocks".equals(arg)
                 || "status".equals(arg)
                 || "validate".equals(arg)
+                || "help".equals(arg)
                 || "diff".equals(arg)
                 || "diffChangeLog".equals(arg)
                 || "generateChangeLog".equals(arg)
@@ -421,6 +422,10 @@ public class CommandLineMigrator {
     }
 
     protected void doMigration() throws Exception {
+        if ("help".equalsIgnoreCase(command)) {
+            printHelp(System.out);
+            return;
+        }
 
         if ("finest".equalsIgnoreCase(logLevel)) {
             Logger.getLogger(Migrator.DEFAULT_LOG_NAME).setLevel(Level.FINEST);

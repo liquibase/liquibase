@@ -24,4 +24,27 @@
             <column name="dateTimeCol" valueDate="2007-08-09T13:14:15"/>
         </insert>
     </changeSet>
+
+    <changeSet id="defaultValueTest-1" author="nvoxland">
+        <createTable tableName="defaultValueTest">
+            <column name="id" type="int"/>
+            <column name="int1" type="int"/>
+            <column name="text1" type="varchar(5)"/>
+            <column name="boolean1" type="boolean"/>
+            <column name="date1" type="date"/>
+            <column name="time1" type="time"/>
+            <column name="datetime1" type="datetime"/>
+        </createTable>
+
+        <addDefaultValue tableName="defaultValueTest" columnName="int1" defaultValueNumeric="1"/>
+        <addDefaultValue tableName="defaultValueTest" columnName="text1" defaultValue="a"/>
+        <addDefaultValue tableName="defaultValueTest" columnName="boolean1" defaultValueBoolean="true"/>
+        <addDefaultValue tableName="defaultValueTest" columnName="date1" defaultValueDate="2007-08-09"/>
+        <addDefaultValue tableName="defaultValueTest" columnName="time1" defaultValueDate="14:15:16"/>
+        <addDefaultValue tableName="defaultValueTest" columnName="datetime1" defaultValueDate="2007-08-09T10:11:12"/>
+
+        <insert tableName="defaultValueTest">
+            <column name="id" valueNumeric="1"/>
+        </insert>
+    </changeSet>
 </databaseChangeLog>

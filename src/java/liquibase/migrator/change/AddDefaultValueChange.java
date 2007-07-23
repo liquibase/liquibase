@@ -12,6 +12,9 @@ public class AddDefaultValueChange extends AbstractChange {
     private String tableName;
     private String columnName;
     private String defaultValue;
+    private String defaultValueNumeric;
+    private String defaultValueDate;
+    private Boolean defaultValueBoolean;
 
     public AddDefaultValueChange() {
         super("addDefaultValue", "Add Default Value");
@@ -41,28 +44,46 @@ public class AddDefaultValueChange extends AbstractChange {
         this.defaultValue = defaultValue;
     }
 
+
+    public String getDefaultValueNumeric() {
+        return defaultValueNumeric;
+    }
+
+    public void setDefaultValueNumeric(String defaultValueNumeric) {
+        this.defaultValueNumeric = defaultValueNumeric;
+    }
+
+    public String getDefaultValueDate() {
+        return defaultValueDate;
+    }
+
+    public void setDefaultValueDate(String defaultValueDate) {
+        this.defaultValueDate = defaultValueDate;
+    }
+
+
+    public Boolean getDefaultValueBoolean() {
+        return defaultValueBoolean;
+    }
+
+    public void setDefaultValueBoolean(Boolean defaultValueBoolean) {
+        this.defaultValueBoolean = defaultValueBoolean;
+    }
+
     public String[] generateStatements(Database database) throws UnsupportedChangeException {
 
-        String maybeQuotedValue;
-        if ("NULL".equalsIgnoreCase(getDefaultValue())) {
-            maybeQuotedValue = getDefaultValue();
-        } else {
-            maybeQuotedValue = "'" + getDefaultValue() + "'";
-        }
-
-
         if (database instanceof MSSQLDatabase) {
-            return new String[]{ "ALTER TABLE " + getTableName() + " WITH NOCHECK ADD CONSTRAINT " + getColumnName() + "DefaultValue DEFAULT "+maybeQuotedValue+" FOR " + getColumnName(), };
+            return new String[]{"ALTER TABLE " + getTableName() + " WITH NOCHECK ADD CONSTRAINT " + getColumnName() + "DefaultValue DEFAULT " + getColumnValue(database) + " FOR " + getColumnName(),};
         } else if (database instanceof MySQLDatabase) {
-            return new String[]{ "ALTER TABLE " + getTableName() + " ALTER " + getColumnName() + " SET DEFAULT "+maybeQuotedValue, };
+            return new String[]{"ALTER TABLE " + getTableName() + " ALTER " + getColumnName() + " SET DEFAULT " + getColumnValue(database),};
         } else if (database instanceof OracleDatabase) {
-            return new String[]{ "ALTER TABLE " + getTableName() + " MODIFY " + getColumnName() + " DEFAULT "+maybeQuotedValue, };
+            return new String[]{"ALTER TABLE " + getTableName() + " MODIFY " + getColumnName() + " DEFAULT " + getColumnValue(database),};
         } else if (database instanceof DerbyDatabase) {
-            return new String[]{ "ALTER TABLE " + getTableName() + " ALTER COLUMN  " + getColumnName() + " WITH DEFAULT '" + getDefaultValue() + "'", };
+            return new String[]{"ALTER TABLE " + getTableName() + " ALTER COLUMN  " + getColumnName() + " WITH DEFAULT " + getColumnValue(database),};
         }
 
         return new String[]{
-                "ALTER TABLE " + getTableName() + " ALTER COLUMN  " + getColumnName() + " SET DEFAULT "+maybeQuotedValue,
+                "ALTER TABLE " + getTableName() + " ALTER COLUMN  " + getColumnName() + " SET DEFAULT " + getColumnValue(database),
         };
     }
 
@@ -84,8 +105,40 @@ public class AddDefaultValueChange extends AbstractChange {
         Element node = currentChangeLogFileDOM.createElement(getTagName());
         node.setAttribute("tableName", getTableName());
         node.setAttribute("columnName", getColumnName());
-        node.setAttribute("defaultValue", getDefaultValue());
+        if (getDefaultValue() != null) {
+            node.setAttribute("defaultValue", getDefaultValue());
+        }
+        if (getDefaultValueNumeric() != null) {
+            node.setAttribute("defaultValueNumeric", getDefaultValueNumeric());
+        }
+        if (getDefaultValueDate() != null) {
+            node.setAttribute("defaultValueDate", getDefaultValueDate());
+        }
+        if (getDefaultValueBoolean() != null) {
+            node.setAttribute("defaultValueBoolean", getDefaultValueBoolean().toString());
+        }
 
         return node;
+    }
+
+    private String getColumnValue(Database database) {
+        if (getDefaultValue() != null) {
+            if ("null".equalsIgnoreCase(getDefaultValue())) {
+                return "NULL";
+            }
+            return "'" + getDefaultValue().replaceAll("'", "''") + "'";
+        } else if (getDefaultValueNumeric() != null) {
+            return getDefaultValueNumeric();
+        } else if (getDefaultValueBoolean() != null) {
+            if (getDefaultValueBoolean()) {
+                return database.getTrueBooleanValue();
+            } else {
+                return database.getFalseBooleanValue();
+            }
+        } else if (getDefaultValueDate() != null) {
+            return database.getDateLiteral(getDefaultValueDate());
+        } else {
+            return "NULL";
+        }
     }
 }

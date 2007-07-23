@@ -19,6 +19,10 @@ import java.io.PrintStream;
 import java.util.*;
 
 public class DiffResult {
+
+    private Long baseId = new Date().getTime();
+    private int changeNumber = 1;
+
     private Database baseDatabase;
     private Database targetDatabase;
 
@@ -257,7 +261,7 @@ public class DiffResult {
         for (Change change : changes) {
             Element changeSet = doc.createElement("changeSet");
             changeSet.setAttribute("author", "diff-generated");
-            changeSet.setAttribute("id", UUID.randomUUID().toString());
+            changeSet.setAttribute("id", generateId());
 
             changeSet.appendChild(change.createNode(doc));
             doc.getDocumentElement().appendChild(changeSet);
@@ -271,6 +275,10 @@ public class DiffResult {
         serializer.serialize(doc);
 
         out.flush();
+    }
+
+    private String generateId() {
+        return baseId.toString()+"-"+changeNumber++;
     }
 
     private void addUnexpectedIndexChanges(List<Change> changes) {

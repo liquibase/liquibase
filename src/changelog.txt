@@ -1,6 +1,18 @@
 LiquiBASE Changelog
 ==========================================
 
+Changes in versin 1.1 (2007.7.23)
+-----------------------------------
+- Support for additional databases: DB2, Derby, Sybase (not fully tested), and HSQL
+- Support for "unsupported" databases
+- Database Diff Tool
+- Database Creation Script Generator
+- new DBMS attribute on change set tag that allows you to specify what databases to run the change set against
+- "verify" command that checks for change log problems without attempting to execute any
+- "status" command that shows information on unrun change sets
+- Handle date/time and numeric values better on inserts and setting default values
+- Bug Fixes
+
 Changes in version 1.0.1 (2007.7.07)
 ------------------------------------
 - Do not quote "null" default values

@@ -29,9 +29,13 @@
                         listing/releasing database changelog locks.
                     </p>
                     <p>
-                        The command line migrator also allows you to <a href="rollback.html">perform rollback operations and
-                        generate rollback scripts</a>.
+                        The command line migrator also allows you to
                     </p>
+                        <ul>
+                            <li><a href="rollback.html">perform rollback operations and generate rollback scripts</a></li>
+                            <li><a href="diff.html">generate "diff"s</a></li>
+                            <li><a href="generate_changelog.html">generate creation scripts from existing databases</a></li>
+                        </ul>
                     <p>
                         If you run the command line migrator without any arguments, you will get a help message listing
                         these available parameters:
@@ -47,6 +51,12 @@
                         <tr><th>rollbackToDateSQL &lt;date/time&gt;</th><td>Writes SQL to roll back the database to that state it was in at the given date/time version to STDOUT</td></tr>
                         <tr><th>rollbackCountSQL &lt;value&gt;</th><td>Writes SQL to roll back the last &lt;value&gt; change sets to STDOUT</td></tr>
                         <tr><th>futureRollbackSQL</th><td>Writes SQL to roll back the database to the current state after the changes in the changeslog have been applied</td></tr>
+                        <tr><th>generateChangeLog</th><td>generateChangeLog of the database to standard out</td></tr>
+                    </table>
+                    <h3>Diff Commands</h3>
+                    <table class="attributesTable">
+                        <tr><th>diff [diff parameters]</th><td>Writes description of differences to standard out</td></tr>
+                        <tr><th>diffChangeLog [diff parameters]</th><td>Writes Change Log XML to update the base database to the target database to standard out</td></tr>
                     </table>
                     <h3>Maintenance Commands</h3>
                     <table class="attributesTable">
@@ -77,6 +87,18 @@
                         <tr><th>--logLevel=&lt;level&gt;</th><td>Execution log level (finest, finer, fine, info, warning, severe)</td></tr>
                         <tr><th>--help=&lt;level&gt;</th><td>Execution log level (finest, finer, fine, info, warning, severe)</td></tr>
                     </table>
+
+                    <h3>Required Diff Parameters</h3>
+                    <table class="attributesTable">
+                         <tr><th>--baseUsername=&lt;value&gt;</th><td>Base Database username</td></tr>
+                         <tr><th>--basePassword=&lt;value&gt;</th><td>Base Database password</td></tr>
+                         <tr><th>--baseUrl=&lt;value&gt;</th><td>Base Database URL</td></tr>
+                    </table>
+                    <h3>Optional Diff Parameters</h3>
+                    <table class="attributesTable">
+                        <tr><th>--baseDriver=&lt;jdbc.driver.ClassName&gt;</th><td>Base Database driver class name</td></tr>
+                    </table>
+
                     <h2>Using a liquibase.properties file</h2>
                     <p>
                         If you do not want to always specify options on the command line, you can create a properties file

@@ -46,11 +46,17 @@ public class AddColumnChange extends AbstractChange {
             sql.add("CALL SYSPROC.ADMIN_CMD ('REORG TABLE "+ getTableName() +"')");
         }
 
-        if (getColumn().getDefaultValue() != null) {
+        if (getColumn().getDefaultValue() != null
+                || getColumn().getDefaultValueBoolean() != null
+                || getColumn().getDefaultValueDate() != null
+                || getColumn().getDefaultValueNumeric() != null) {
             AddDefaultValueChange change = new AddDefaultValueChange();
             change.setTableName(getTableName());
             change.setColumnName(getColumn().getName());
             change.setDefaultValue(getColumn().getDefaultValue());
+            change.setDefaultValueNumeric(getColumn().getDefaultValueNumeric());
+            change.setDefaultValueDate(getColumn().getDefaultValueDate());
+            change.setDefaultValueBoolean(getColumn().getDefaultValueBoolean());
 
             sql.addAll(Arrays.asList(change.generateStatements(database)));
         }

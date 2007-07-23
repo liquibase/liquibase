@@ -87,6 +87,9 @@
         <xsd:attribute name="valueBoolean" type="xsd:string"/>
         <xsd:attribute name="valueDate" type="xsd:string"/>
         <xsd:attribute name="defaultValue" type="xsd:string"/>
+        <xsd:attribute name="defaultValueNumeric" type="xsd:string"/>
+        <xsd:attribute name="defaultValueDate" type="xsd:string"/>
+        <xsd:attribute name="defaultValueBoolean" type="xsd:boolean"/>
         <xsd:attribute name="autoIncrement" type="xsd:boolean"/>
     </xsd:attributeGroup>
 
@@ -194,6 +197,9 @@
             <xsd:attribute name="tableName" type="xsd:string"/>
             <xsd:attribute name="columnName" type="xsd:string"/>
             <xsd:attribute name="defaultValue" type="xsd:string"/>
+            <xsd:attribute name="defaultValueNumeric" type="xsd:string"/>
+            <xsd:attribute name="defaultValueDate" type="xsd:string"/>
+            <xsd:attribute name="defaultValueBoolean" type="xsd:string"/>
         </xsd:complexType>
     </xsd:element>
 
