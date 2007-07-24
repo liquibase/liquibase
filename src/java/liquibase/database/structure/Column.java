@@ -1,5 +1,12 @@
 package liquibase.database.structure;
 
+import liquibase.database.Database;
+import liquibase.database.PostgresDatabase;
+
+import java.util.List;
+import java.util.Arrays;
+import java.sql.Types;
+
 public class Column implements Comparable<Column> {
     private Table table;
     private View view;
@@ -62,7 +69,7 @@ public class Column implements Comparable<Column> {
         this.decimalDigits = decimalDigits;
     }
 
-    public Boolean getNullable() {
+    public Boolean isNullable() {
         return nullable;
     }
 
@@ -148,5 +155,84 @@ public class Column implements Comparable<Column> {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    /**
+     * Returns the type name and any parameters suitable for SQL.
+     */
+    public String getDataTypeString(Database database) {
+        List<Integer> noParens = Arrays.asList(
+                Types.ARRAY,
+                Types.BIGINT,
+                Types.BINARY,
+                Types.BIT,
+                Types.BLOB,
+                Types.BOOLEAN,
+                Types.CLOB,
+                Types.DATALINK,
+                Types.DATE,
+                Types.DISTINCT,
+                Types.INTEGER,
+                Types.JAVA_OBJECT,
+                Types.LONGVARBINARY,
+                Types.NULL,
+                Types.OTHER,
+                Types.REF,
+                Types.SMALLINT,
+                Types.STRUCT,
+                Types.TIME,
+                Types.TIMESTAMP,
+                Types.TINYINT,
+                Types.VARBINARY);
+
+        List<Integer> oneParam = Arrays.asList(
+                Types.CHAR,
+                Types.LONGVARCHAR,
+                Types.VARCHAR
+        );
+
+        List<Integer> twoParams = Arrays.asList(
+                Types.DECIMAL,
+                Types.DOUBLE,
+                Types.FLOAT,
+                Types.NUMERIC,
+                Types.REAL
+        );
+
+        String translatedTypeName = this.getTypeName();
+        if (database instanceof PostgresDatabase) {
+            if ("bpchar".equals(translatedTypeName)) {
+                translatedTypeName = "char";
+            }
+        }
+
+        String dataType;
+        if (noParens.contains(this.getDataType())) {
+            dataType = translatedTypeName;
+        } else if (oneParam.contains(this.getDataType())) {
+            dataType = translatedTypeName+"("+this.getColumnSize()+")";
+        } else if (twoParams.contains(this.getDataType())) {
+            dataType = translatedTypeName+"("+this.getColumnSize()+","+this.getDecimalDigits()+")";
+        } else {
+            throw new RuntimeException("Unknown Data Type: "+this.getDataType()+" ("+this.getTypeName()+")");
+        }
+        return dataType;
+    }
+
+    public boolean isNumeric() {
+        List<Integer> numericTypes = Arrays.asList(
+                Types.BIGINT,
+                Types.BIT,
+                Types.INTEGER,
+                Types.SMALLINT,
+                Types.TINYINT,
+                Types.DECIMAL,
+                Types.DOUBLE,
+                Types.FLOAT,
+                Types.NUMERIC,
+                Types.REAL
+        );
+
+        return numericTypes.contains(getDataType());
     }
 }

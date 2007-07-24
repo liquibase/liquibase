@@ -200,6 +200,7 @@ public abstract class AbstractDatabase implements Database {
             val.append("'");
             val.append(isoDate.substring(0, 10));
             val.append(" ");
+            //noinspection MagicNumber
             val.append(isoDate.substring(11));
             val.append("'");
             return val.toString();
@@ -687,7 +688,9 @@ public abstract class AbstractDatabase implements Database {
             dropStatement = conn.createStatement();
             while (rs.next()) {
                 String tableName = rs.getString("TABLE_NAME");
-                if (isSystemTable(tableName)) {
+                String schemaName = rs.getString("TABLE_SCHEM");
+                String catalogName = rs.getString("TABLE_CAT");
+                if (isSystemTable(catalogName, schemaName, tableName)) {
                     continue;
                 }
 
@@ -729,12 +732,8 @@ public abstract class AbstractDatabase implements Database {
         }
     }
 
-    public boolean isSystemTable(String tableName) {
-        if (tableName.startsWith("BIN$")) { //oracle deleted table
-            return true;
-        } else if (tableName.startsWith("AQ$")) { //oracle AQ tables
-            return true;
-        } else if (tableName.startsWith("DR")) { //oracle index tables
+    public boolean isSystemTable(String catalogName, String schemaName, String tableName) {
+        if ("information_schema".equalsIgnoreCase(schemaName)) {
             return true;
         } else if (tableName.equalsIgnoreCase(getDatabaseChangeLogLockTableName())) {
             return true;
@@ -745,7 +744,7 @@ public abstract class AbstractDatabase implements Database {
     }
 
     public boolean isLiquibaseTable(String tableName) {
-        return tableName.equals(this.getDatabaseChangeLogTableName()) || tableName.equals(this.getDatabaseChangeLogLockTableName());
+        return tableName.equalsIgnoreCase(this.getDatabaseChangeLogTableName()) || tableName.equalsIgnoreCase(this.getDatabaseChangeLogLockTableName());
     }
 
 
@@ -901,5 +900,10 @@ public abstract class AbstractDatabase implements Database {
         } catch (JDBCException e) {
             return super.toString();
         }
+    }
+
+
+    public boolean shouldQuoteValue(String value) {
+        return true;
     }
 }

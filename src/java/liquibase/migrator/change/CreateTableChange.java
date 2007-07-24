@@ -129,7 +129,7 @@ public class CreateTableChange extends AbstractChange {
 
     public Element createNode(Document currentChangeLogFileDOM) {
         Element element = currentChangeLogFileDOM.createElement("createTable");
-        element.setAttribute("name", getTableName());
+        element.setAttribute("tableName", getTableName());
         for (ColumnConfig column : getColumns()) {
             element.appendChild(column.createNode(currentChangeLogFileDOM));
         }
@@ -141,7 +141,11 @@ public class CreateTableChange extends AbstractChange {
             if ("null".equalsIgnoreCase(column.getDefaultValue())) {
                 return "NULL";
             }
-            return "'" + column.getDefaultValue().replaceAll("'", "''") + "'";
+            if (!database.shouldQuoteValue(column.getDefaultValue())) {
+                return column.getDefaultValue();
+            } else {
+                return "'" + column.getDefaultValue().replaceAll("'", "''") + "'";
+            }
         } else if (column.getDefaultValueNumeric() != null) {
             return column.getDefaultValueNumeric();
         } else if (column.getDefaultValueBoolean() != null) {

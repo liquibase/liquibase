@@ -678,7 +678,7 @@ public class CommandLineMigrator {
         diff.init(baseDatabase, targetDatabase);
         DiffResult diffResult = diff.compare();
 
-        diffResult.printChangeLog(System.out);
+        diffResult.printChangeLog(System.out, DatabaseFactory.getInstance().findCorrectDatabaseImplementation(targetDatabase));
     }
 
     private void doGenerateChangeLog(Connection originalDatabase) throws JDBCException, IOException, ParserConfigurationException {
@@ -687,7 +687,7 @@ public class CommandLineMigrator {
         diff.init(originalDatabase);
         DiffResult diffResult = diff.compare();
 
-        diffResult.printChangeLog(System.out);
+        diffResult.printChangeLog(System.out, DatabaseFactory.getInstance().findCorrectDatabaseImplementation(originalDatabase));
     }
 
 

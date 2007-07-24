@@ -93,11 +93,11 @@ public class OracleDatabase extends AbstractDatabase {
 
     /**
      * Return an Oracle date literal with the same value as a string formatted using ISO 8601.
-     *
+     * <p/>
      * Convert an ISO8601 date string to one of the following results:
      * to_date('1995-05-23', 'YYYY-MM-DD')
      * to_date('1995-05-23 09:23:59', 'YYYY-MM-DD HH24:MI:SS')
-     *
+     * <p/>
      * Implementation restriction:
      * Currently, only the following subsets of ISO8601 are supported:
      * YYYY-MM-DD
@@ -135,7 +135,7 @@ public class OracleDatabase extends AbstractDatabase {
 
     public String getDropTableSQL(String tableName) {
         return "DROP TABLE " + tableName + " CASCADE CONSTRAINTS";
-    }    
+    }
 
     protected void dropSequences(Connection conn) throws JDBCException, MigrationFailedException {
         ResultSet rs = null;
@@ -176,6 +176,25 @@ public class OracleDatabase extends AbstractDatabase {
 
 
     public String createFindSequencesSQL() throws JDBCException {
-         return "SELECT SEQUENCE_NAME FROM ALL_SEQUENCES WHERE SEQUENCE_OWNER = '"+getSchemaName()+"'";
+        return "SELECT SEQUENCE_NAME FROM ALL_SEQUENCES WHERE SEQUENCE_OWNER = '" + getSchemaName() + "'";
+    }
+
+
+    public boolean isSystemTable(String catalogName, String schemaName, String tableName) {
+        if (super.isSystemTable(catalogName, schemaName, tableName)) {
+            return true;
+        } else if (tableName.startsWith("BIN$")) { //oracle deleted table
+            return true;
+        } else if (tableName.startsWith("AQ$")) { //oracle AQ tables
+            return true;
+        } else if (tableName.startsWith("DR$")) { //oracle index tables
+            return true;
+        }
+        return false;
+    }
+
+
+    public boolean shouldQuoteValue(String value) {
+        return super.shouldQuoteValue(value) && !value.startsWith("to_date(");
     }
 }

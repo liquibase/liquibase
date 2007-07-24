@@ -131,7 +131,7 @@ public class DiffResult {
         unexpectedForeignKeys.add(fkName);
     }
 
-    public SortedSet<ForeignKey> getUnexpectedForeignKey() {
+    public SortedSet<ForeignKey> getUnexpectedForeignKeys() {
         return unexpectedForeignKeys;
     }
 
@@ -196,7 +196,7 @@ public class DiffResult {
         printSetComparison("Missing Columns", getMissingColumns(), out);
         printSetComparison("Unexpected Columns", getUnexpectedColumns(), out);
         printSetComparison("Missing Foreign Keys", getMissingForeignKeys(), out);
-        printSetComparison("Unexpected Foreign Keys", getUnexpectedForeignKey(), out);
+        printSetComparison("Unexpected Foreign Keys", getUnexpectedForeignKeys(), out);
         printSetComparison("Missing Primary Keys", getMissingPrimaryKeys(), out);
         printSetComparison("Unexpected Primary Keys", getUnexpectedPrimaryKeys(), out);
         printSetComparison("Missing Indexes", getMissingIndexes(), out);
@@ -232,7 +232,7 @@ public class DiffResult {
     /**
      * Prints changeLog that would bring the base database to be the same as the target database
      */
-    public void printChangeLog(PrintStream out) throws ParserConfigurationException, IOException {
+    public void printChangeLog(PrintStream out, Database targetDatabase) throws ParserConfigurationException, IOException {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder documentBuilder = factory.newDocumentBuilder();
         documentBuilder.setEntityResolver(new MigratorSchemaResolver());
@@ -247,16 +247,16 @@ public class DiffResult {
         doc.appendChild(changeLogElement);
 
         List<Change> changes = new ArrayList<Change>();
-        addMissingTableChanges(changes);
+        addMissingTableChanges(changes, targetDatabase);
         addUnexpectedTableChanges(changes);
-        addMissingColumnChanges(changes);
+        addMissingColumnChanges(changes, targetDatabase);
         addUnexpectedColumnChanges(changes);
-        addMissingForeignKeyChanges(changes);
-        addUnexpectedForeignKeyChanges(changes);
-        addMissingIndexChanges(changes);
-        addUnexpectedIndexChanges(changes);
         addMissingPrimaryKeyChanges(changes);
         addUnexpectedPrimaryKeyChanges(changes);
+        addMissingIndexChanges(changes);
+        addUnexpectedIndexChanges(changes);
+        addMissingForeignKeyChanges(changes);
+        addUnexpectedForeignKeyChanges(changes);
 
         for (Change change : changes) {
             Element changeSet = doc.createElement("changeSet");
@@ -331,7 +331,7 @@ public class DiffResult {
     }
 
     private void addUnexpectedForeignKeyChanges(List<Change> changes) {
-        for (ForeignKey fk : getUnexpectedForeignKey()) {
+        for (ForeignKey fk : getUnexpectedForeignKeys()) {
 
             DropForeignKeyConstraintChange change = new DropForeignKeyConstraintChange();
             change.setConstraintName(fk.getName());
@@ -347,11 +347,11 @@ public class DiffResult {
             AddForeignKeyConstraintChange change = new AddForeignKeyConstraintChange();
             change.setConstraintName(fk.getName());
 
-            change.setBaseTableName(fk.getPrimaryKeyTable().getName());
-            change.setBaseColumnNames(fk.getPrimaryKeyColumn());
+            change.setReferencedTableName(fk.getPrimaryKeyTable().getName());
+            change.setReferencedColumnNames(fk.getPrimaryKeyColumn());
 
-            change.setReferencedTableName(fk.getForeignKeyTable().getName());
-            change.setReferencedColumnNames(fk.getForeignKeyColumn());
+            change.setBaseTableName(fk.getForeignKeyTable().getName());
+            change.setBaseColumnNames(fk.getForeignKeyColumn());
 
             change.setDeferrable(fk.isDeferrable());
             change.setInitiallyDeferred(fk.isInitiallyDeferred());
@@ -374,7 +374,7 @@ public class DiffResult {
         }
     }
 
-    private void addMissingColumnChanges(List<Change> changes) {
+    private void addMissingColumnChanges(List<Change> changes, Database database) {
         for (Column column : getMissingColumns()) {
             if (baseDatabase.isLiquibaseTable(column.getTable().getName())) {
                 continue;
@@ -386,10 +386,9 @@ public class DiffResult {
             ColumnConfig columnConfig = new ColumnConfig();
             columnConfig.setName(column.getName());
 
-            String dataType = column.getTypeName();
-            dataType += "(" + column.getColumnSize();
-            dataType += "," + column.getDecimalDigits();
-            dataType += ")";
+
+            String dataType = column.getDataTypeString(database);
+
             columnConfig.setType(dataType);
 
             columnConfig.setDefaultValue(StringUtils.trimToNull(column.getDefaultValue()));
@@ -400,7 +399,7 @@ public class DiffResult {
         }
     }
 
-    private void addMissingTableChanges(List<Change> changes) {
+    private void addMissingTableChanges(List<Change> changes, Database database) {
         for (Table missingTable : getMissingTables()) {
             if (baseDatabase.isLiquibaseTable(missingTable.getName())) {
                 continue;
@@ -412,20 +411,33 @@ public class DiffResult {
             for (Column column : missingTable.getColumns()) {
                 ColumnConfig columnConfig = new ColumnConfig();
                 columnConfig.setName(column.getName());
+                columnConfig.setType(column.getDataTypeString(database));
 
-                String dataType = column.getTypeName();
-                dataType += "(" + column.getColumnSize();
-                dataType += "," + column.getDecimalDigits();
-                dataType += ")";
-                columnConfig.setType(dataType);
+                if (column.isNullable() != null && !column.isNullable()) {
+                    ConstraintsConfig constraintsConfig = new ConstraintsConfig();
+                    constraintsConfig.setNullable(false);
+                    columnConfig.setConstraints(constraintsConfig);
+                }
 
-                columnConfig.setDefaultValue(StringUtils.trimToNull(column.getDefaultValue()));
+                if (column.isNumeric()) {
+                    columnConfig.setDefaultValueNumeric(StringUtils.trimToNull(column.getDefaultValue()));
+                } else {
+                    columnConfig.setDefaultValue(StringUtils.trimToNull(translateDefaultValue(column.getDefaultValue())));
+                }
 
                 change.addColumn(columnConfig);
             }
 
             changes.add(change);
         }
+    }
+
+    private String translateDefaultValue(String defaultValue) {
+        if (defaultValue != null) {
+            defaultValue = defaultValue.replaceFirst("^'", "").replaceFirst("'$", "");
+            defaultValue = defaultValue.replaceFirst("'\\:\\:[a-zA-Z0-9 ]+$", "");
+        }
+        return defaultValue;
     }
 
     private void addUnexpectedTableChanges(List<Change> changes) {

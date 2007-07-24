@@ -19,9 +19,7 @@ public class UnsupportedDBSampleChangeLogRunnerTest extends AbstractSimpleChange
 
     protected void setUp() throws Exception {
         super.setUp();
-        connection = new ConnectionWrapper(connection) {
-
-        };
+        connection = new ConnectionWrapper(connection);
     }
 
     protected void tearDown() throws Exception {
@@ -870,5 +868,9 @@ public class UnsupportedDBSampleChangeLogRunnerTest extends AbstractSimpleChange
         public boolean supportsStatementPooling() throws SQLException {
             return delegate.supportsStatementPooling();
         }
+    }
+
+    protected boolean shouldRollBack() {
+        return false;
     }
 }

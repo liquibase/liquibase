@@ -41,17 +41,25 @@ public class PrimaryKey implements Comparable<PrimaryKey> {
 
     }
 
+
+    public int compareTo(PrimaryKey o) {
+        int returnValue = this.getTableName().compareTo(o.getTableName());
+        if (returnValue == 0) {
+            returnValue = this.getColumnNames().compareTo(o.getColumnNames());
+        }
+        if (returnValue == 0) {
+            returnValue = this.getName().compareTo(o.getName());
+        }
+
+        return returnValue;
+    }
+
     public int hashCode() {
         int result;
         result = columnNames.hashCode();
         result = 31 * result + tableName.hashCode();
         return result;
     }
-
-    public int compareTo(PrimaryKey o) {
-        return this.getName().compareTo(o.getName());
-    }
-
 
     public String toString() {
         return getName()+" on "+getTableName()+"("+getColumnNames()+")";

@@ -5,12 +5,9 @@ import liquibase.migrator.Migrator;
 import liquibase.migrator.change.ColumnConfig;
 import liquibase.migrator.exception.JDBCException;
 import liquibase.migrator.exception.MigrationFailedException;
-import liquibase.database.structure.Sequence;
 
 import java.io.IOException;
 import java.sql.Connection;
-import java.util.Collection;
-import java.util.Set;
 
 public interface Database {
     /**
@@ -112,9 +109,11 @@ public interface Database {
 
     boolean doesTagExist(String tag) throws JDBCException;
 
-    boolean isSystemTable(String tableName);
+    boolean isSystemTable(String catalogName, String schemaName, String tableName);
 
     boolean isLiquibaseTable(String tableName);
 
     String createFindSequencesSQL() throws JDBCException;
+
+    boolean shouldQuoteValue(String value);
 }

@@ -171,7 +171,8 @@ public class NullDatabase implements Database {
         return false;
     }
 
-    public boolean isSystemTable(String tableName) {
+
+    public boolean isSystemTable(String catalogName, String schemaName, String tableName) {        
         return false;
     }
 
@@ -182,5 +183,10 @@ public class NullDatabase implements Database {
 
     public String createFindSequencesSQL() throws JDBCException {
         return null;
+    }
+
+
+    public boolean shouldQuoteValue(String value) {
+        return false;
     }
 }

@@ -18,7 +18,54 @@ public class PostgresDatabase extends AbstractDatabase {
     private Set<String> systemTablesAndViews = new HashSet<String>();
 
     public PostgresDatabase() {
-        systemTablesAndViews.add("pg_logdir_ls");
+//        systemTablesAndViews.add("pg_logdir_ls");
+//        systemTablesAndViews.add("administrable_role_authorizations");
+//        systemTablesAndViews.add("applicable_roles");
+//        systemTablesAndViews.add("attributes");
+//        systemTablesAndViews.add("check_constraint_routine_usage");
+//        systemTablesAndViews.add("check_constraints");
+//        systemTablesAndViews.add("column_domain_usage");
+//        systemTablesAndViews.add("column_privileges");
+//        systemTablesAndViews.add("column_udt_usage");
+//        systemTablesAndViews.add("columns");
+//        systemTablesAndViews.add("constraint_column_usage");
+//        systemTablesAndViews.add("constraint_table_usage");
+//        systemTablesAndViews.add("data_type_privileges");
+//        systemTablesAndViews.add("domain_constraints");
+//        systemTablesAndViews.add("domain_udt_usage");
+//        systemTablesAndViews.add("domains");
+//        systemTablesAndViews.add("element_types");
+//        systemTablesAndViews.add("enabled_roles");
+//        systemTablesAndViews.add("key_column_usage");
+//        systemTablesAndViews.add("parameters");
+//        systemTablesAndViews.add("referential_constraints");
+//        systemTablesAndViews.add("role_column_grants");
+//        systemTablesAndViews.add("role_routine_grants");
+//        systemTablesAndViews.add("role_table_grants");
+//        systemTablesAndViews.add("role_usage_grants");
+//        systemTablesAndViews.add("routine_privileges");
+//        systemTablesAndViews.add("routines");
+//        systemTablesAndViews.add("schemata");
+//        systemTablesAndViews.add("sequences");
+//        systemTablesAndViews.add("sql_features");
+//        systemTablesAndViews.add("sql_implementation_info");
+//        systemTablesAndViews.add("sql_languages");
+//        systemTablesAndViews.add("sql_packages");
+//        systemTablesAndViews.add("sql_parts");
+//        systemTablesAndViews.add("sql_sizing");
+//        systemTablesAndViews.add("sql_sizing_profiles");
+//        systemTablesAndViews.add("table_constraints");
+//        systemTablesAndViews.add("table_privileges");
+//        systemTablesAndViews.add("tables");
+//        systemTablesAndViews.add("triggers");
+//        systemTablesAndViews.add("usage_privileges");
+//        systemTablesAndViews.add("view_column_usage");
+//        systemTablesAndViews.add("view_routine_usage");
+//        systemTablesAndViews.add("view_table_usage");
+//        systemTablesAndViews.add("views");
+//        systemTablesAndViews.add("information_schema_catalog_name");
+//        systemTablesAndViews.add("triggered_update_columns");
+//        systemTablesAndViews.add("book_pkey");
     }
 
     public String getProductName() {
@@ -122,6 +169,22 @@ public class PostgresDatabase extends AbstractDatabase {
 
 
     public String createFindSequencesSQL() throws JDBCException {
-        return "SELECT NULL AS SEQUENCE_SCHEMA, relname AS SEQUENCE_NAME FROM pg_class, pg_namespace WHERE relkind='S' AND pg_class.relnamespace = pg_namespace.oid AND nspname = '"+getSchemaName()+"'";
+        return "SELECT NULL AS SEQUENCE_SCHEMA, relname AS SEQUENCE_NAME FROM pg_class, pg_namespace WHERE relkind='S' AND pg_class.relnamespace = pg_namespace.oid AND nspname = '" + getSchemaName() + "'";
     }
+
+
+    public boolean isSystemTable(String catalogName, String schemaName, String tableName) {
+        return super.isSystemTable(catalogName, schemaName, tableName)
+                || "pg_catalog".equals(schemaName)
+                || "pg_toast".equals(schemaName)
+                || tableName.endsWith("_pkey")
+                || tableName.startsWith("idx_")
+                || tableName.startsWith("pk_");
+    }
+
+
+//    public boolean isSystemIndex(String catalogName, String schemaName, String indexName) {
+//        return super.isSystemIndex(catalogName, schemaName, indexName)
+//                || indexName.endsWith("_pkey");
+//    }
 }

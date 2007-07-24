@@ -16,6 +16,8 @@ public class JUnitFileOpener implements FileOpener {
         File srcDir = new File(thisClassFile.getParentFile().getParentFile().getParentFile().getParent(), "src");
         classLoader = new URLClassLoader(new URL[]{
                 new File(srcDir, "samples").toURL(),
+                new File(System.getProperty("java.io.tmpdir")).toURL(),
+
         });
 
     }

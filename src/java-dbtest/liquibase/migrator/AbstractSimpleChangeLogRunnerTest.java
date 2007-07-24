@@ -2,8 +2,11 @@ package liquibase.migrator;
 
 import junit.framework.TestCase;
 import liquibase.migrator.exception.ValidationFailedException;
+import liquibase.migrator.diff.Diff;
+import liquibase.migrator.diff.DiffResult;
+import liquibase.database.DatabaseFactory;
 
-import java.io.StringWriter;
+import java.io.*;
 import java.sql.Connection;
 import java.sql.Driver;
 import java.util.Date;
@@ -42,6 +45,7 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
         info.put("user", username);
         info.put("password", password);
         connection = driver.connect(url, info);
+        connection.setAutoCommit(false);
     }
 
     protected Properties createProperties() {
@@ -49,11 +53,18 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
     }
 
     protected void tearDown() throws Exception {
+        if (shouldRollBack()) {
+            connection.rollback();
+        }
         super.tearDown();
         connection.close();
         connection = null;
         driver = null;
 
+    }
+
+    protected boolean shouldRollBack() {
+        return true;
     }
 
     protected Migrator createMigrator(String changeLogFile) throws Exception {
@@ -66,6 +77,10 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
     }
 
     public void testRunChangeLog() throws Exception {
+        runCompleteChangeLog();
+    }
+
+    private void runCompleteChangeLog() throws Exception {
         Migrator migrator = createMigrator(completeChangeLog);
         migrator.dropAll();
 
@@ -165,4 +180,60 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
         assertEquals(driverName, migrator.getDatabase().getDefaultDriver(url));
     }
 
+    public void testDiff() throws Exception {
+        runCompleteChangeLog();
+
+        Diff diff = new Diff();
+        diff.init(connection, connection);
+        DiffResult diffResult = diff.compare();
+
+        assertEquals(0, diffResult.getMissingColumns().size());
+        assertEquals(0, diffResult.getMissingForeignKeys().size());
+        assertEquals(0, diffResult.getMissingIndexes().size());
+        assertEquals(0, diffResult.getMissingPrimaryKeys().size());
+        assertEquals(0, diffResult.getMissingSequences().size());
+        assertEquals(0, diffResult.getMissingColumns().size());
+        assertEquals(0, diffResult.getMissingTables().size());
+        assertEquals(0, diffResult.getMissingViews().size());
+
+        assertEquals(0, diffResult.getUnexpectedColumns().size());
+        assertEquals(0, diffResult.getUnexpectedForeignKeys().size());
+        assertEquals(0, diffResult.getUnexpectedIndexes().size());
+        assertEquals(0, diffResult.getUnexpectedPrimaryKeys().size());
+        assertEquals(0, diffResult.getUnexpectedSequences().size());
+        assertEquals(0, diffResult.getUnexpectedColumns().size());
+        assertEquals(0, diffResult.getUnexpectedTables().size());
+        assertEquals(0, diffResult.getUnexpectedViews().size());
+    }
+
+    public void testRerunDiffChangeLog() throws Exception {
+        runCompleteChangeLog();
+
+        Diff diff = new Diff();
+        diff.init(connection);
+        DiffResult diffResult = diff.compare();
+
+        File tempFile = File.createTempFile("liquibase-test", ".xml");
+
+        FileOutputStream output = new FileOutputStream(tempFile);
+        diffResult.printChangeLog(new PrintStream(output), DatabaseFactory.getInstance().findCorrectDatabaseImplementation(connection));
+        output.flush();
+        output.close();
+
+        Migrator migrator = createMigrator(tempFile.getName());
+        migrator.dropAll();
+
+        //run again to test changelog testing logic
+        migrator = createMigrator(tempFile.getName());
+        try {
+            migrator.migrate();
+        } catch (ValidationFailedException e) {
+            e.printDescriptiveError(System.out);
+            throw e;
+        }
+
+        tempFile.deleteOnExit();
+
+
+    }
 }

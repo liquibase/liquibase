@@ -3,15 +3,14 @@ package liquibase.database.structure;
 import liquibase.database.Database;
 import liquibase.migrator.exception.JDBCException;
 import liquibase.migrator.diff.DiffStatusListener;
+import liquibase.migrator.Migrator;
 
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 
 public class DatabaseSnapshot {
 
@@ -31,6 +30,8 @@ public class DatabaseSnapshot {
     private Map<String, View> viewsMap = new HashMap<String, View>();
     private Map<String, Column> columnsMap = new HashMap<String, Column>();
     private Set<DiffStatusListener> statusListeners;
+
+    private Logger log = Logger.getLogger(Migrator.DEFAULT_LOG_NAME);
 
     public DatabaseSnapshot(Database database) throws JDBCException {
         this(database,  null);
@@ -93,7 +94,10 @@ public class DatabaseSnapshot {
         while (rs.next()) {
             String type = rs.getString("TABLE_TYPE");
             String name = rs.getString("TABLE_NAME");
-            if (database.isSystemTable(name) || database.isLiquibaseTable(name)) {
+            String schemaName = rs.getString("TABLE_SCHEM");
+            String catalogName = rs.getString("TABLE_CAT");
+
+            if (database.isSystemTable(catalogName, schemaName, name) || database.isLiquibaseTable(name)) {
                 continue;
             }
 
@@ -119,8 +123,10 @@ public class DatabaseSnapshot {
 
             String tableName = rs.getString("TABLE_NAME");
             String columnName = rs.getString("COLUMN_NAME");
+            String schemaName = rs.getString("TABLE_SCHEM");
+            String catalogName = rs.getString("TABLE_CAT");
 
-            if (database.isSystemTable(tableName) || database.isLiquibaseTable(tableName)) {
+            if (database.isSystemTable(catalogName, schemaName, tableName) || database.isLiquibaseTable(tableName)) {
                 continue;
             }
 
@@ -128,7 +134,8 @@ public class DatabaseSnapshot {
             if (table == null) {
                 View view = viewsMap.get(tableName);
                 if (view == null) {
-                    throw new JDBCException("Could not find table or view " + tableName + " for column " + columnName);
+                    log.info("Could not find table or view " + tableName + " for column " + columnName);
+                    continue;
                 } else {
                     columnInfo.setView(view);
                     view.getColumns().add(columnInfo);
@@ -219,15 +226,32 @@ public class DatabaseSnapshot {
             }
 
             while (rs.next()) {
-                Index indexInformation = new Index();
-                indexInformation.setTableName(rs.getString("TABLE_NAME"));
+                String indexName = rs.getString("INDEX_NAME");
+                short type = rs.getShort("TYPE");
+                String tableName = rs.getString("TABLE_NAME");
                 String columnName = rs.getString("COLUMN_NAME");
+
+                boolean isPKIndex = false;
+                for (PrimaryKey pk : primaryKeys) {
+                    if (pk.getTableName().equalsIgnoreCase(tableName)
+                            && pk.getColumnNames().equalsIgnoreCase(columnName)) {
+                        isPKIndex = true;
+                        break;
+                    }
+                }
+
+                if (isPKIndex || type == DatabaseMetaData.tableIndexStatistic) {
+                    continue;
+                }
+
+                Index indexInformation = new Index();
+                indexInformation.setTableName(tableName);
                 if (columnName == null) {
                     //nothing to index, not sure why these come through sometimes
                     continue;
                 }
                 indexInformation.setColumnName(columnName);
-                indexInformation.setName(rs.getString("INDEX_NAME"));
+                indexInformation.setName(indexName);
 
                 indexes.add(indexInformation);
             }

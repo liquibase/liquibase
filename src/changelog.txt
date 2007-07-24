@@ -1,7 +1,11 @@
 LiquiBASE Changelog
 ==========================================
 
-Changes in versin 1.1 (2007.7.23)
+Changes in version 1.1.1 (2007.7.24)
+-----------------------------------
+- Bug fixes related to the diff tool
+
+Changes in version 1.1 (2007.7.23)
 -----------------------------------
 - Support for additional databases: DB2, Derby, Sybase (not fully tested), and HSQL
 - Support for "unsupported" databases

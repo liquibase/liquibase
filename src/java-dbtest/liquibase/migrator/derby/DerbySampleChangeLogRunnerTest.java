@@ -20,4 +20,9 @@ public class DerbySampleChangeLogRunnerTest extends AbstractSimpleChangeLogRunne
         }
         super.tearDown();
     }
+
+    protected boolean shouldRollBack() {
+        return false;
+    }
+    
 }
