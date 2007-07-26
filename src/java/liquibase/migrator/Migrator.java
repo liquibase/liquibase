@@ -674,4 +674,17 @@ public class Migrator {
     }
 
 
+    /**
+     * Sets checksums to null so they will be repopulated next run
+     */
+    public void clearCheckSums() throws JDBCException {
+        Connection connection = getDatabase().getConnection();
+        try {
+            Statement statement = connection.createStatement();
+            statement.execute("update databasechangelog set md5sum=null".toUpperCase());
+            connection.commit();
+        } catch (SQLException e) {
+            throw new JDBCException(e);
+        }
+    }
 }

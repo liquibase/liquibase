@@ -233,7 +233,10 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
         }
 
         tempFile.deleteOnExit();
+    }
 
-
+    public void testClearChecksums() throws Exception {
+        Migrator migrator = createMigrator(null);
+        migrator.clearCheckSums();
     }
 }

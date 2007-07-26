@@ -226,7 +226,6 @@ public abstract class AbstractChange implements Change {
     private void execute(String[] statements, Database database) throws JDBCException {
         for (String statement : statements) {
             Logger.getLogger(Migrator.DEFAULT_LOG_NAME).finest("Executing Statement: " + statement);
-            System.out.println("Executing Statement: " + statement);
             try {
                 Statement dbStatement = database.getConnection().createStatement();
                 dbStatement.execute(statement);

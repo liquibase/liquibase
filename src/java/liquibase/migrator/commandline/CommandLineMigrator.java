@@ -127,25 +127,26 @@ public class CommandLineMigrator {
 
     private boolean isCommand(String arg) {
         return "migrate".equals(arg)
-                || "migrateSQL".equals(arg)
-                || "rollback".equals(arg)
-                || "rollbackToDate".equals(arg)
-                || "rollbackCount".equals(arg)
-                || "rollbackSQL".equals(arg)
-                || "rollbackToDateSQL".equals(arg)
-                || "rollbackCountSQL".equals(arg)
-                || "futureRollbackSQL".equals(arg)
-                || "tag".equals(arg)
-                || "listLocks".equals(arg)
-                || "dropAll".equals(arg)
-                || "releaseLocks".equals(arg)
-                || "status".equals(arg)
-                || "validate".equals(arg)
-                || "help".equals(arg)
-                || "diff".equals(arg)
-                || "diffChangeLog".equals(arg)
-                || "generateChangeLog".equals(arg)
-                || "changelogSyncSQL".equals(arg);
+                || "migrateSQL".equalsIgnoreCase(arg)
+                || "rollback".equalsIgnoreCase(arg)
+                || "rollbackToDate".equalsIgnoreCase(arg)
+                || "rollbackCount".equalsIgnoreCase(arg)
+                || "rollbackSQL".equalsIgnoreCase(arg)
+                || "rollbackToDateSQL".equalsIgnoreCase(arg)
+                || "rollbackCountSQL".equalsIgnoreCase(arg)
+                || "futureRollbackSQL".equalsIgnoreCase(arg)
+                || "tag".equalsIgnoreCase(arg)
+                || "listLocks".equalsIgnoreCase(arg)
+                || "dropAll".equalsIgnoreCase(arg)
+                || "releaseLocks".equalsIgnoreCase(arg)
+                || "status".equalsIgnoreCase(arg)
+                || "validate".equalsIgnoreCase(arg)
+                || "help".equalsIgnoreCase(arg)
+                || "diff".equalsIgnoreCase(arg)
+                || "diffChangeLog".equalsIgnoreCase(arg)
+                || "generateChangeLog".equalsIgnoreCase(arg)
+                || "clearCheckSums".equalsIgnoreCase(arg)
+                || "changelogSyncSQL".equalsIgnoreCase(arg);
     }
 
     protected void parsePropertiesFile(InputStream propertiesInputStream) throws IOException, CommandLineParsingException {
@@ -211,6 +212,8 @@ public class CommandLineMigrator {
         stream.println(" tag <tag string>          'Tags' the current database state for future rollback");
         stream.println(" status [--verbose]        Outputs count (list if --verbose) of unrun changesets");
         stream.println(" validate                  Checks changelog for errors");
+        stream.println(" clearCheckSums            Removes all saved checksums from database log.");
+        stream.println("                           Useful for 'MD5Sum Check Failed' errors");
         stream.println(" changelogSyncSQL          Writes SQL to mark all changes as executed ");
         stream.println("                           in the database to STDOUT");
         stream.println(" listLocks                 Lists who currently has locks on the");
@@ -477,7 +480,7 @@ public class CommandLineMigrator {
         } else if ("diffChangeLog".equalsIgnoreCase(command)) {
             doDiffToChangeLog(connection, createConnectionFromCommandParams(commandParams));
             return;
-        } else if ("generateChangeLog".equals(command)) {
+        } else if ("generateChangeLog".equalsIgnoreCase(command)) {
             doGenerateChangeLog(connection);
             return;
         }
@@ -531,8 +534,10 @@ public class CommandLineMigrator {
                 }
                 System.out.println("No validation errors found");
                 return;
+            } else if ("clearCheckSums".equalsIgnoreCase(command)) {
+                migrator.clearCheckSums();
+                return;
             }
-
 
             DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             try {
