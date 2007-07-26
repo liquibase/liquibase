@@ -1,6 +1,7 @@
 package liquibase.migrator.parser;
 
 import liquibase.migrator.ChangeSet;
+import liquibase.migrator.FileOpener;
 import liquibase.migrator.Migrator;
 import liquibase.migrator.RanChangeSet;
 import liquibase.migrator.exception.DatabaseHistoryException;
@@ -20,8 +21,8 @@ public class RollbackFutureDatabaseChangeLogHandler extends BaseChangeLogHandler
     private List<ChangeSet> changesToRollback;
     private List<RanChangeSet> ranChangeSets;
 
-    public RollbackFutureDatabaseChangeLogHandler(Migrator migrator, String physicalFilePath) throws JDBCException {
-        super(migrator, physicalFilePath);
+    public RollbackFutureDatabaseChangeLogHandler(Migrator migrator, String physicalFilePath, FileOpener fileOpener) throws JDBCException {
+        super(migrator, physicalFilePath,fileOpener);
         changesToRollback = new ArrayList<ChangeSet>();
         ranChangeSets = migrator.getRanChangeSetList();
     }

@@ -133,7 +133,7 @@ The available targets at the current stage:
         </javac>
         <copy todir="${build.test.dir}">
             <fileset dir="${src.dir}/java-test"
-                     includes="**/*.properties, **/*.xml, **/*.txt, **/*.config, **/*.tld, **/*.xsd"/>
+                     includes="**/*.properties, **/*.xml, **/*.txt, **/*.config, **/*.tld, **/*.xsd,**/*.sql"/>
         </copy>
 
         <javac srcdir="${src.dir}/java-dbtest" destdir="${build.db.test.dir}" deprecation="${deprecation}"
@@ -375,7 +375,7 @@ urchinTracker();
             <env key="JAVA_HOME" path="${env.JAVA_HOME}"/>
             <classpath>
                 <pathelement path="${build.dir}"/>
-                <pathelement path="${build.test.dir}"/>
+                <pathelement path="${build.db.test.dir}"/>
                 <path refid="classpath"/>
             </classpath>
             <formatter type="xml"/>

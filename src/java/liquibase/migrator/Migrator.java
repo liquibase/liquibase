@@ -1,17 +1,20 @@
 package liquibase.migrator;
 
-import liquibase.database.*;
+import liquibase.database.Database;
+import liquibase.database.DatabaseFactory;
 import liquibase.migrator.exception.DatabaseHistoryException;
 import liquibase.migrator.exception.JDBCException;
 import liquibase.migrator.exception.MigrationFailedException;
 import liquibase.migrator.exception.ValidationFailedException;
 import liquibase.migrator.parser.*;
 import liquibase.util.StreamUtil;
+
 import org.xml.sax.*;
 
-import javax.swing.*;
+import javax.swing.JOptionPane;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Writer;
@@ -308,10 +311,10 @@ public class Migrator {
                 return;
             }
 
-            ValidateChangeLogHandler validateChangeLogHandler = new ValidateChangeLogHandler(this, changeLogFile);
+            ValidateChangeLogHandler validateChangeLogHandler = new ValidateChangeLogHandler(this, changeLogFile,fileOpener);
             runChangeLogs(validateChangeLogHandler);
             if (!validateChangeLogHandler.validationPassed()) {
-                throw new ValidationFailedException(validateChangeLogHandler.getInvalidMD5Sums(), validateChangeLogHandler.getFailedPreconditions(), validateChangeLogHandler.getDuplicateChangeSets());
+                throw new ValidationFailedException(validateChangeLogHandler);
             }
         } finally {
             releaseLock();
@@ -371,19 +374,19 @@ public class Migrator {
             }
 
             if (mode.equals(Mode.EXECUTE_MODE) || mode.equals(Mode.OUTPUT_SQL_MODE) || mode.equals(Mode.OUTPUT_CHANGELOG_ONLY_SQL_MODE)) {
-                runChangeLogs(new UpdateDatabaseChangeLogHandler(this, changeLogFile));
+                runChangeLogs(new UpdateDatabaseChangeLogHandler(this, changeLogFile,fileOpener));
             } else if (mode.equals(Mode.EXECUTE_ROLLBACK_MODE) || mode.equals(Mode.OUTPUT_ROLLBACK_SQL_MODE)) {
                 RollbackDatabaseChangeLogHandler rollbackHandler;
                 if (getRollbackToDate() != null) {
-                    rollbackHandler = new RollbackDatabaseChangeLogHandler(this, changeLogFile, getRollbackToDate());
+                    rollbackHandler = new RollbackDatabaseChangeLogHandler(this, changeLogFile, fileOpener, getRollbackToDate());
                 } else if (getRollbackToTag() != null) {
                     if (!getDatabase().doesTagExist(getRollbackToTag())) {
                         throw new MigrationFailedException("'" + getRollbackToTag() + "' is not tag that exists in the database");
                     }
 
-                    rollbackHandler = new RollbackDatabaseChangeLogHandler(this, changeLogFile, getRollbackToTag());
+                    rollbackHandler = new RollbackDatabaseChangeLogHandler(this, changeLogFile, fileOpener, getRollbackToTag());
                 } else if (getRollbackCount() != null) {
-                    rollbackHandler = new RollbackDatabaseChangeLogHandler(this, changeLogFile, getRollbackCount());
+                    rollbackHandler = new RollbackDatabaseChangeLogHandler(this, changeLogFile, fileOpener, getRollbackCount());
                 } else {
                     throw new RuntimeException("Don't know what to rollback to");
                 }
@@ -395,7 +398,8 @@ public class Migrator {
                     throw new MigrationFailedException("Cannot roll back changelog to selected date due to change set " + unrollbackableChangeSet);
                 }
             } else if (mode.equals(Mode.OUTPUT_FUTURE_ROLLBACK_SQL_MODE)) {
-                RollbackFutureDatabaseChangeLogHandler rollbackHandler = new RollbackFutureDatabaseChangeLogHandler(this, changeLogFile);
+                RollbackFutureDatabaseChangeLogHandler rollbackHandler = 
+                    new RollbackFutureDatabaseChangeLogHandler(this, changeLogFile,fileOpener);
                 runChangeLogs(rollbackHandler);
                 ChangeSet unrollbackableChangeSet = rollbackHandler.getUnRollBackableChangeSet();
                 if (unrollbackableChangeSet == null) {
@@ -404,7 +408,7 @@ public class Migrator {
                     throw new MigrationFailedException("Will not be able to rollback changes due to change set " + unrollbackableChangeSet);
                 }
             } else if (mode.equals(Mode.FIND_UNRUN_CHANGESETS_MODE)) {
-                runChangeLogs(new FindChangeSetsHandler(this, changeLogFile));
+                runChangeLogs(new FindChangeSetsHandler(this, changeLogFile,fileOpener));
 
 //                List<ChangeSet> unrunChangeSets = FindChangeSetsHandler.getUnrunChangeSets();
 //                System.out.println(unrunChangeSets.size()+" change sets have not been applied to "+getDatabase().getConnectionUsername() + "@" + getDatabase().getConnectionURL());
@@ -424,7 +428,7 @@ public class Migrator {
     }
 
     protected ValidateChangeLogHandler getValidatChangeLogHandler() {
-        return new ValidateChangeLogHandler(this, changeLogFile);
+        return new ValidateChangeLogHandler(this, changeLogFile,fileOpener);
     }
 
     private boolean waitForLock() throws JDBCException, MigrationFailedException, IOException {
@@ -545,8 +549,20 @@ public class Migrator {
                 parentCause = parentCause.getCause();
             }
             String reason = e.getMessage();
+            String causeReason = null;
+            if(e.getCause()!=null) {
+                causeReason = e.getCause().getMessage();
+            }
+
+//            if (reason == null && causeReason==null) {
+//                reason = "Unknown Reason";
+//            }
             if (reason == null) {
-                reason = "Unknown Reason";
+                if (causeReason != null) {
+                    reason = causeReason;
+                } else {
+                    reason = "Unknown Reason";
+                }
             }
 
             throw new MigrationFailedException("Invalid Migration File: " + reason, e);

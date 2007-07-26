@@ -3,12 +3,13 @@ package liquibase.migrator;
 import liquibase.migrator.change.Change;
 import liquibase.migrator.exception.MigrationFailedException;
 import liquibase.migrator.exception.RollbackFailedException;
+import liquibase.migrator.exception.SetupException;
 import liquibase.util.MD5Util;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.Node;
 import org.w3c.dom.Text;
 
 import java.io.IOException;
@@ -96,6 +97,15 @@ public class ChangeSet {
      * specified database.
      */
     public void execute() throws MigrationFailedException {
+        
+        for(Change change : changes) {
+            try {
+                change.setUp();
+            } catch(SetupException se) {
+                throw new MigrationFailedException(se);
+            }
+        }
+        
         Migrator migrator = getDatabaseChangeLog().getMigrator();
         Connection connection = migrator.getDatabase().getConnection();
         try {

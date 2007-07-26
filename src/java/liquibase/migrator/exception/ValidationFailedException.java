@@ -1,6 +1,7 @@
 package liquibase.migrator.exception;
 
 import liquibase.migrator.ChangeSet;
+import liquibase.migrator.parser.ValidateChangeLogHandler;
 import liquibase.migrator.preconditions.FailedPrecondition;
 
 import java.io.PrintStream;
@@ -8,14 +9,20 @@ import java.util.List;
 import java.util.Set;
 
 public class ValidationFailedException extends MigrationFailedException {
+
+    private static final long serialVersionUID = 1L;
+    
     private List<ChangeSet> invalidMD5Sums;
     private List<FailedPrecondition> failedPreconditions;
     private Set<ChangeSet> duplicateChangeSets;
+    private List<SetupException> setupExceptions;
 
-    public ValidationFailedException(List<ChangeSet> invalidMD5Sums, List<FailedPrecondition> failedPreconditions, Set<ChangeSet> duplicateChangeSets) {
-        this.invalidMD5Sums = invalidMD5Sums;
-        this.failedPreconditions = failedPreconditions;
-        this.duplicateChangeSets = duplicateChangeSets;
+    public ValidationFailedException(ValidateChangeLogHandler changeLogHandler) {
+        this.invalidMD5Sums = changeLogHandler.getInvalidMD5Sums();
+        this.failedPreconditions = changeLogHandler.getFailedPreconditions();
+        this.duplicateChangeSets = changeLogHandler.getDuplicateChangeSets();
+        this.setupExceptions = changeLogHandler.getSetupExceptions();
+        
     }
 
 
@@ -31,7 +38,10 @@ public class ValidationFailedException extends MigrationFailedException {
         if (duplicateChangeSets.size() > 0) {
             message.append(duplicateChangeSets.size()).append(" change sets had duplicate identifiers");
         }
-
+        if(setupExceptions.size() >0){
+            message.append(setupExceptions.size()).append(" changes have failures");
+        }
+        
         return message.toString();
     }
 
@@ -59,6 +69,13 @@ public class ValidationFailedException extends MigrationFailedException {
             out.println("     "+duplicateChangeSets.size()+" change sets had duplicate identifiers");
             for (ChangeSet duplicate : duplicateChangeSets) {
                 out.println("          "+duplicate.toString(false));
+            }
+        }
+        
+        if(setupExceptions.size() >0) {
+            out.println("     "+setupExceptions.size()+" changes had errors");
+            for (SetupException setupEx : setupExceptions) {
+                out.println("          "+setupEx.getMessage());
             }
         }
     }

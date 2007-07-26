@@ -1,14 +1,17 @@
 package liquibase.migrator.change;
 
 import liquibase.database.Database;
+import liquibase.migrator.FileOpener;
 import liquibase.migrator.Migrator;
 import liquibase.migrator.exception.JDBCException;
 import liquibase.migrator.exception.RollbackImpossibleException;
+import liquibase.migrator.exception.SetupException;
 import liquibase.migrator.exception.UnsupportedChangeException;
 import liquibase.util.MD5Util;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
 import liquibase.util.XMLUtil;
+
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
@@ -16,6 +19,7 @@ import org.w3c.dom.NodeList;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+
 import java.io.IOException;
 import java.io.Writer;
 import java.sql.SQLException;
@@ -39,6 +43,7 @@ public abstract class AbstractChange implements Change {
      */
     private final String changeName;
     private final String tagName;
+    private FileOpener fileOpener;
 
     /**
      * Constructor with tag name and name
@@ -234,5 +239,30 @@ public abstract class AbstractChange implements Change {
                 throw new JDBCException((e.getMessage() + " [" + statement + "]").replaceAll("\n", "").replaceAll("\r", ""));
             }
         }
+    }
+    
+    /**
+     * Default implementation that stores the file opener provided when the
+     * Change was created.
+     */
+    public void setFileOpener(FileOpener fileOpener) {
+        this.fileOpener = fileOpener;
+    }
+    
+    /**
+     * Returns the FileOpen as provided by the creating ChangeLog.
+     * 
+     * @return The file opener
+     */
+    public FileOpener getFileOpener() {
+        return fileOpener;
+    }
+    
+    /**
+     * Most Changes don't need to do any setup.
+     * This implements a no-op
+     */
+    public void setUp() throws SetupException {
+        
     }
 }

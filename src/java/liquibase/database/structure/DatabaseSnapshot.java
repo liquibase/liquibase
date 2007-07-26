@@ -1,11 +1,14 @@
 package liquibase.database.structure;
 
 import liquibase.database.Database;
-import liquibase.migrator.exception.JDBCException;
-import liquibase.migrator.diff.DiffStatusListener;
 import liquibase.migrator.Migrator;
+import liquibase.migrator.diff.DiffStatusListener;
+import liquibase.migrator.exception.JDBCException;
 
-import java.sql.*;
+import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;

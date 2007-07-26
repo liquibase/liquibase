@@ -4,7 +4,7 @@ if "%OS%" == "Windows_NT" setlocal
 rem %~dp0 is expanded pathname of the current script under NT
 set LIQUIBASE_HOME=%~dp0
 
-set CP=
+set CP=.
 for /R %LIQUIBASE_HOME% %%f in (liquibase*.jar) do set CP=%CP%;%%f
 for /R %LIQUIBASE_HOME%\lib %%f in (*.jar) do set CP=%CP%;%%f
 

@@ -1,6 +1,7 @@
 package liquibase.migrator.parser;
 
 import liquibase.migrator.ChangeSet;
+import liquibase.migrator.FileOpener;
 import liquibase.migrator.Migrator;
 import liquibase.migrator.RanChangeSet;
 import liquibase.migrator.exception.DatabaseHistoryException;
@@ -23,8 +24,8 @@ import java.util.Set;
  */
 public class UpdateDatabaseChangeLogHandler extends BaseChangeLogHandler {
 
-    public UpdateDatabaseChangeLogHandler(Migrator migrator, String physicalFilePath) {
-        super(migrator, physicalFilePath);
+    public UpdateDatabaseChangeLogHandler(Migrator migrator, String physicalFilePath,FileOpener fileOpener) {
+        super(migrator, physicalFilePath,fileOpener);
     }
 
     /**

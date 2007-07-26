@@ -1,12 +1,11 @@
 package liquibase.migrator.parser;
 
 import liquibase.migrator.ChangeSet;
+import liquibase.migrator.FileOpener;
 import liquibase.migrator.IncludeMigrator;
 import liquibase.migrator.Migrator;
-import liquibase.migrator.exception.DatabaseHistoryException;
-import liquibase.migrator.exception.JDBCException;
-import liquibase.migrator.exception.MigrationFailedException;
-import liquibase.migrator.exception.PreconditionFailedException;
+import liquibase.migrator.change.Change;
+import liquibase.migrator.exception.*;
 import liquibase.migrator.preconditions.FailedPrecondition;
 import liquibase.migrator.preconditions.PreconditionSet;
 
@@ -21,12 +20,13 @@ public class ValidateChangeLogHandler extends BaseChangeLogHandler {
     private static List<ChangeSet> invalidMD5Sums;
     private static List<FailedPrecondition> failedPreconditions;
     private static Set<ChangeSet> duplicateChangeSets;
+    private static List<SetupException> setupExceptions;
 
     private Set<String> seenChangeSets = new HashSet<String>();
 
 
-    public ValidateChangeLogHandler(Migrator migrator, String physicalChangeLogLocation) {
-        super(migrator, physicalChangeLogLocation);
+    public ValidateChangeLogHandler(Migrator migrator, String physicalChangeLogLocation, FileOpener fileOpener) {
+        super(migrator, physicalChangeLogLocation,fileOpener);
         if (invalidMD5Sums == null) {
             invalidMD5Sums = new ArrayList<ChangeSet>();
         }
@@ -38,9 +38,19 @@ public class ValidateChangeLogHandler extends BaseChangeLogHandler {
         if (duplicateChangeSets == null) {
             duplicateChangeSets = new HashSet<ChangeSet>();
         }
+        
+        setupExceptions = new ArrayList<SetupException>();
     }
 
     protected void handleChangeSet(ChangeSet changeSet) throws JDBCException, DatabaseHistoryException, MigrationFailedException, IOException {
+        for(Change change : changeSet.getChanges()) {
+            try {
+                change.setUp();
+            } catch(SetupException se) {
+                setupExceptions.add(se);
+            }
+        }
+        
         if (changeSet.getDatabaseChangeLog().getMigrator().getRunStatus(changeSet).equals(ChangeSet.RunStatus.INVALID_MD5SUM)) {
             invalidMD5Sums.add(changeSet);
         }
@@ -51,7 +61,6 @@ public class ValidateChangeLogHandler extends BaseChangeLogHandler {
         } else {
             seenChangeSets.add(changeSetString);
         }
-
     }
 
 
@@ -81,10 +90,15 @@ public class ValidateChangeLogHandler extends BaseChangeLogHandler {
     public Set<ChangeSet> getDuplicateChangeSets() {
         return duplicateChangeSets;
     }
+    
+    public static List<SetupException> getSetupExceptions() {
+        return setupExceptions;
+    }
 
     public boolean validationPassed() {
         return invalidMD5Sums.size() == 0
                 && failedPreconditions.size() == 0
-                && duplicateChangeSets.size() == 0;
+                && duplicateChangeSets.size() == 0 
+                && setupExceptions.size() ==0;
     }
 }

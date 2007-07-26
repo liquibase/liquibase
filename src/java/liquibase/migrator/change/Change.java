@@ -1,9 +1,12 @@
 package liquibase.migrator.change;
 
 import liquibase.database.Database;
+import liquibase.migrator.FileOpener;
 import liquibase.migrator.exception.JDBCException;
 import liquibase.migrator.exception.RollbackImpossibleException;
+import liquibase.migrator.exception.SetupException;
 import liquibase.migrator.exception.UnsupportedChangeException;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -151,4 +154,19 @@ public interface Change {
      * @return the MD5 hash
      */
     String getMD5Sum();
+    
+    /**
+     * Sets the fileOpener that should be used for any file loading and resource
+     * finding for files that are provided by the user.
+     */
+    void setFileOpener(FileOpener fileOpener);
+    
+    /**
+     * This method will be called after the no arg constructor and all of the
+     * properties have been set to allow the task to do any heavy tasks or
+     * more importantly generate any exceptions to report to the user about
+     * the settings provided.
+     * 
+     */
+    void setUp() throws SetupException;
 }

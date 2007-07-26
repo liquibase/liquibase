@@ -50,6 +50,7 @@ public class ChangeFactory {
                 DropDefaultValueChange.class,
                 AddUniqueConstraintChange.class,
                 DropUniqueConstraintChange.class,
+                SQLFileChange.class
         };
 
         try {

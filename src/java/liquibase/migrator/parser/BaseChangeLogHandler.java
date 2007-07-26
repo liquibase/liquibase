@@ -1,9 +1,6 @@
 package liquibase.migrator.parser;
 
-import liquibase.migrator.ChangeSet;
-import liquibase.migrator.DatabaseChangeLog;
-import liquibase.migrator.IncludeMigrator;
-import liquibase.migrator.Migrator;
+import liquibase.migrator.*;
 import liquibase.migrator.change.*;
 import liquibase.migrator.exception.DatabaseHistoryException;
 import liquibase.migrator.exception.JDBCException;
@@ -11,6 +8,7 @@ import liquibase.migrator.exception.MigrationFailedException;
 import liquibase.migrator.preconditions.*;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
+
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
@@ -45,13 +43,14 @@ public abstract class BaseChangeLogHandler extends DefaultHandler {
     private NotPrecondition notprecondition;
     private RunningAsPrecondition runningAs;
     private String physicalChangeLogLocation;
+    private FileOpener fileOpener;
 
 
-    protected BaseChangeLogHandler(Migrator migrator, String physicalChangeLogLocation) {
+    protected BaseChangeLogHandler(Migrator migrator, String physicalChangeLogLocation,FileOpener fileOpener) {
         this.migrator = migrator;
         this.physicalChangeLogLocation = physicalChangeLogLocation;
         log = Logger.getLogger(Migrator.DEFAULT_LOG_NAME);
-
+        this.fileOpener = fileOpener;
     }
 
     public void startElement(String uri, String localName, String qName, Attributes atts) throws SAXException {
@@ -82,6 +81,7 @@ public abstract class BaseChangeLogHandler extends DefaultHandler {
                 if (change == null) {
                     throw new MigrationFailedException("Unknown change: " + qName);
                 }
+                change.setFileOpener(fileOpener);
                 for (int i = 0; i < atts.getLength(); i++) {
                     String attributeName = atts.getQName(i);
                     String attributeValue = atts.getValue(i);
