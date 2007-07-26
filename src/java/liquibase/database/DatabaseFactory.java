@@ -33,7 +33,9 @@ public class DatabaseFactory {
                 new DerbyDatabase(),
                 new HsqlDatabase(),
                 new DB2Database(),
-        };    }
+                new SybaseDatabase(),
+        };
+    }
 
     public Database findCorrectDatabaseImplementation(Connection connection) throws JDBCException {
         Database database = null;

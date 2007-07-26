@@ -160,12 +160,12 @@ public class Migrator {
      */
     public void init(Connection connection) throws JDBCException {
         // Array Of all the implemented databases
+        database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(connection);
+        database.setConnection(connection);
         try {
-            database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(connection);
-            database.setConnection(connection);
             database.getConnection().setAutoCommit(false);
         } catch (SQLException e) {
-            throw new JDBCException(e);
+            //must not be able to set auto-commit, or is already set
         }
     }
 
@@ -273,7 +273,7 @@ public class Migrator {
                 ranChangeSetList = new ArrayList<RanChangeSet>();
                 if (getDatabase().doesChangeLogTableExist()) {
                     log.info("Reading from " + databaseChangeLogTableName);
-                    String sql = "SELECT * FROM " + databaseChangeLogTableName + " ORDER BY dateExecuted asc";
+                    String sql = "SELECT * FROM " + databaseChangeLogTableName + " ORDER BY dateExecuted asc".toUpperCase();
                     Statement statement = getDatabase().getConnection().createStatement();
                     ResultSet rs = statement.executeQuery(sql);
                     while (rs.next()) {

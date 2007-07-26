@@ -60,7 +60,9 @@ public class AddNotNullConstraintChange extends AbstractChange {
     }
 
     public String[] generateStatements(Database database) throws UnsupportedChangeException {
-        if (database instanceof MSSQLDatabase) {
+        if (database instanceof SybaseDatabase) {
+            return generateSybaseStatements();
+        } else if (database instanceof MSSQLDatabase) {
             return generateMSSQLStatements();
         } else if (database instanceof MySQLDatabase) {
             return generateMySQLStatements();
@@ -82,6 +84,17 @@ public class AddNotNullConstraintChange extends AbstractChange {
 
         return statements.toArray(new String[statements.size()]);
 
+    }
+
+    private String[] generateSybaseStatements() {
+        List<String> statements = new ArrayList<String>();
+        if (defaultNullValue != null) {
+            statements.add(generateUpdateStatement());
+        }
+        statements.add("COMMIT");
+        statements.add("ALTER TABLE " + getTableName() + " MODIFY " + getColumnName() + " NOT NULL");
+
+        return statements.toArray(new String[statements.size()]);
     }
 
     private String[] generateMSSQLStatements() {

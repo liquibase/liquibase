@@ -43,7 +43,9 @@ public class DropNotNullConstraintChange extends AbstractChange {
     }
 
     public String[] generateStatements(Database database) throws UnsupportedChangeException {
-        if (database instanceof MSSQLDatabase) {
+        if (database instanceof SybaseDatabase) {
+            return generateSybaseStatements();
+        } else if (database instanceof MSSQLDatabase) {
             return generateMSSQLStatements();
         } else if (database instanceof MySQLDatabase) {
             return generateMySQLStatements();
@@ -56,6 +58,10 @@ public class DropNotNullConstraintChange extends AbstractChange {
         }
 
         return new String[]{"ALTER TABLE " + tableName + " ALTER COLUMN " + columnName + " DROP NOT NULL"};
+    }
+
+    private String[] generateSybaseStatements() {
+        return new String[]{"ALTER TABLE " + tableName + " MODIFY " + columnName + " NULL"};
     }
 
     private String[] generateMSSQLStatements() {

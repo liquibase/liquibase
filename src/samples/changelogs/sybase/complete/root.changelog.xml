@@ -27,13 +27,13 @@
     <changeSet id="2" author="nvoxland">
         <comment>Add a username column so we can use "person" for authentication</comment>
         <addColumn tableName="person">
-            <column name="usernae" type="varchar(8)"/>
+            <column name="username" type="varchar(8)"/>
         </addColumn>
     </changeSet>
-    <changeSet id="3" author="nvoxland">
-        <comment>Fix misspelled "username" column</comment>
-        <renameColumn tableName="person" oldColumnName="usernae" newColumnName="username"/>
-    </changeSet>
+    <!--<changeSet id="3" author="nvoxland">-->
+        <!--<comment>Fix misspelled "username" column</comment>-->
+        <!--<renameColumn tableName="person" oldColumnName="usernae" newColumnName="username"/>-->
+    <!--</changeSet>-->
     <changeSet id="5" author="nvoxland" context="test">
         <insert tableName="person">
             <column name="firstname" value="John"/>
@@ -258,9 +258,9 @@
         </modifyColumn>
     </changeSet>
 
-    <include file="changelogs/mssql/complete/included.changelog.xml"/>
+    <include file="changelogs/sybase/complete/included.changelog.xml"/>
 
-    <include file="changelogs/mssql/complete/renamed.changelog.xml"/>
+    <include file="changelogs/sybase/complete/renamed.changelog.xml"/>
 
     <include file="changelogs/common/common.tests.changelog.xml" />
 

@@ -41,7 +41,15 @@ public class AddColumnChange extends AbstractChange {
     public String[] generateStatements(Database database) throws UnsupportedChangeException {
         List<String> sql = new ArrayList<String>();
 
-        sql.add("ALTER TABLE " + getTableName() + " ADD " + getColumn().getName() + " " + database.getColumnType(getColumn()));
+        String alterTable = "ALTER TABLE " + getTableName() + " ADD " + getColumn().getName() + " " + database.getColumnType(getColumn());
+
+        if (column.getConstraints() != null && column.getConstraints().isNullable() != null && !column.getConstraints().isNullable()) {
+            alterTable += " NOT NULL";
+        } else {
+            alterTable += " NULL";
+        }
+
+        sql.add(alterTable);
         if (database instanceof DB2Database) {
             sql.add("CALL SYSPROC.ADMIN_CMD ('REORG TABLE "+ getTableName() +"')");
         }

@@ -3,6 +3,7 @@ package liquibase.migrator.change;
 import liquibase.database.DB2Database;
 import liquibase.database.Database;
 import liquibase.database.DerbyDatabase;
+import liquibase.database.SybaseDatabase;
 import liquibase.migrator.exception.UnsupportedChangeException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -43,6 +44,8 @@ public class DropColumnChange extends AbstractChange {
                     "ALTER TABLE " + getTableName() + " DROP COLUMN " + getColumnName(),
                     "CALL SYSPROC.ADMIN_CMD ('REORG TABLE " + getTableName() + "')"
             };
+        } else if (database instanceof SybaseDatabase) {
+            return new String[]{"ALTER TABLE " + getTableName() + " DROP " + getColumnName()};            
         }
         return new String[]{"ALTER TABLE " + getTableName() + " DROP COLUMN " + getColumnName()};
     }

@@ -3,8 +3,10 @@ package liquibase.database;
 import liquibase.migrator.DatabaseChangeLogLock;
 import liquibase.migrator.Migrator;
 import liquibase.migrator.change.ColumnConfig;
+import liquibase.migrator.change.DropForeignKeyConstraintChange;
 import liquibase.migrator.exception.JDBCException;
 import liquibase.migrator.exception.MigrationFailedException;
+import liquibase.migrator.exception.UnsupportedChangeException;
 import liquibase.util.StreamUtil;
 import liquibase.database.structure.DatabaseSnapshot;
 
@@ -305,7 +307,7 @@ public abstract class AbstractDatabase implements Database {
     }
 
     private String getCreateChangeLogLockSQL() {
-        return ("create table DatabaseChangeLogLock (id int not null primary key, locked " + getBooleanType() + " not null, lockGranted " + getDateTimeType() + ", lockedby varchar(255))").toUpperCase();
+        return ("create table DatabaseChangeLogLock (id int not null primary key, locked " + getBooleanType() + " not null, lockGranted " + getDateTimeType() + " null, lockedby varchar(255) null)").toUpperCase();
     }
 
 
@@ -493,7 +495,7 @@ public abstract class AbstractDatabase implements Database {
                 }
 
             } else {
-                String createTableStatement = ("CREATE TABLE DATABASECHANGELOG (id varchar(255) not null, author varchar(255) not null, filename varchar(255) not null, dateExecuted " + getDateTimeType() + " not null, md5sum varchar(32), description varchar(255), comments varchar(255), tag varchar(255), liquibase varchar(10), primary key(id, author, filename))").toUpperCase();
+                String createTableStatement = ("CREATE TABLE DATABASECHANGELOG (id varchar(150) not null, author varchar(150) not null, filename varchar(255) not null, dateExecuted " + getDateTimeType() + " not null, md5sum varchar(32) null, description varchar(255) null, comments varchar(255) null, tag varchar(255) null, liquibase varchar(10) null, primary key(id, author, filename))").toUpperCase();
                 // If there is no table in the database for recording change history create one.
                 statementsToExecute.add(createTableStatement);
                 if (migrator.getMode().equals(Migrator.Mode.EXECUTE_MODE)) {
@@ -653,7 +655,11 @@ public abstract class AbstractDatabase implements Database {
     public void dropDatabaseObjects() throws JDBCException, MigrationFailedException {
         Connection conn = getConnection();
         try {
-            conn.setAutoCommit(false);
+            try {
+                conn.setAutoCommit(false);
+            } catch (SQLException e) {
+                //unable to set auto-commit.  May already be auto-commit or a non-auto-commit database
+            }
 
             dropForeignKeys(conn);
             dropViews(conn);
@@ -664,8 +670,6 @@ public abstract class AbstractDatabase implements Database {
             }
 
             changeLogTableExists = false;
-        } catch (SQLException e) {
-            throw new JDBCException(e);
         } finally {
             try {
                 conn.commit();
@@ -676,7 +680,51 @@ public abstract class AbstractDatabase implements Database {
     }
 
     protected void dropForeignKeys(Connection conn) throws JDBCException {
-        //does nothing, assume tables will cascade constraints
+        ResultSet tableRS = null;
+        ResultSet fkRS = null;
+        Statement dropStatement = null;
+        try {
+            tableRS = conn.getMetaData().getTables(getCatalogName(), getSchemaName(), null, new String[]{"TABLE", "GLOBAL TEMPORARY", "LOCAL TEMPORARY", "ALIAS", "SYNONYM"});
+            while (tableRS.next()) {
+                String tableName = tableRS.getString("TABLE_NAME");
+                String schemaName = tableRS.getString("TABLE_SCHEM");
+                String catalogName = tableRS.getString("TABLE_CAT");
+                if (isSystemTable(catalogName, schemaName, tableName)) {
+                    continue;
+                }
+
+                fkRS = conn.getMetaData().getExportedKeys(getCatalogName(), getSchemaName(), tableName);
+                dropStatement = conn.createStatement();
+                while (fkRS.next()) {
+                    DropForeignKeyConstraintChange dropFK = new DropForeignKeyConstraintChange();
+                    dropFK.setBaseTableName(fkRS.getString("FKTABLE_NAME"));
+                    dropFK.setConstraintName(fkRS.getString("FK_NAME"));
+
+                    try {
+                        dropStatement.execute(dropFK.generateStatements(this)[0]);
+                    } catch (UnsupportedChangeException e) {
+                        throw new JDBCException(e.getMessage());
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            throw new JDBCException(e);
+        } finally {
+            if (dropStatement != null) {
+                try {
+                    dropStatement.close();
+                } catch (SQLException e) {
+                    throw new JDBCException(e);
+                }
+            }
+            if (fkRS != null) {
+                try {
+                    fkRS.close();
+                } catch (SQLException e) {
+                    throw new JDBCException(e);
+                }
+            }
+        }
     }
 
     protected void dropTables(Connection conn) throws JDBCException, MigrationFailedException {

@@ -22,6 +22,6 @@ public class SybaseDatabase extends MSSQLDatabase {
 
 
     public boolean isCorrectDatabaseImplementation(Connection conn) throws JDBCException {
-        return "Sybase SQL Server".equals(getDatabaseProductName());
+        return "Adaptive Server Enterprise".equals(getDatabaseProductName(conn));
     }
 }

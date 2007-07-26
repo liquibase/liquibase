@@ -51,6 +51,8 @@ public class CreateTableChange extends AbstractChange {
             if (constraints != null) {
                 if (constraints.isNullable() != null && !constraints.isNullable()) {
                     buffer.append(" NOT NULL");
+                } else {
+                    buffer.append(" NULL");
                 }
                 if (constraints.isPrimaryKey() != null && constraints.isPrimaryKey()) {
                     buffer.append(" PRIMARY KEY");

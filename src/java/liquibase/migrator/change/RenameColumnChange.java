@@ -52,7 +52,7 @@ public class RenameColumnChange extends AbstractChange {
 
     public String[] generateStatements(Database database) throws UnsupportedChangeException {
         if (database instanceof MSSQLDatabase) {
-            return new String[]{"exec sp_rename '" + tableName + "." + oldColumnName + "', " + newColumnName};
+            return new String[]{"exec sp_rename '" + tableName + "." + oldColumnName + "', '" + newColumnName+"'"};
         } else if (database instanceof MySQLDatabase) {
             if (columnDataType == null) {
                 throw new RuntimeException("columnDataType is required to rename columns with MySQL");

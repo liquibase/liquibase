@@ -149,44 +149,44 @@ public class MSSQLDatabase extends AbstractDatabase {
         return returnString.toString().replaceFirst(" \\+ $", "");
     }
 
-    protected void dropForeignKeys(Connection conn) throws JDBCException {
-        Statement dropStatement = null;
-        PreparedStatement fkStatement = null;
-        ResultSet rs = null;
-        try {
-            dropStatement = conn.createStatement();
-
-            fkStatement = conn.prepareStatement("select TABLE_NAME, CONSTRAINT_NAME from INFORMATION_SCHEMA.TABLE_CONSTRAINTS where CONSTRAINT_TYPE='FOREIGN KEY' AND TABLE_CATALOG=?");
-            fkStatement.setString(1, getCatalogName());
-            rs = fkStatement.executeQuery();
-            while (rs.next()) {
-                DropForeignKeyConstraintChange dropFK = new DropForeignKeyConstraintChange();
-                dropFK.setBaseTableName(rs.getString("TABLE_NAME"));
-                dropFK.setConstraintName(rs.getString("CONSTRAINT_NAME"));
-
-                try {
-                    dropStatement.execute(dropFK.generateStatements(this)[0]);
-                } catch (UnsupportedChangeException e) {
-                    throw new JDBCException(e.getMessage());
-                }
-            }
-        } catch (SQLException e) {
-            throw new JDBCException(e);
-        } finally {
-            try {
-                if (dropStatement != null) {
-                    dropStatement.close();
-                }
-                if (fkStatement != null) {
-                    fkStatement.close();
-                }
-                if (rs != null) {
-                    rs.close();
-                }
-            } catch (SQLException e) {
-                throw new JDBCException(e);
-            }
-        }
-
-    }
+//    protected void dropForeignKeys(Connection conn) throws JDBCException {
+//        Statement dropStatement = null;
+//        PreparedStatement fkStatement = null;
+//        ResultSet rs = null;
+//        try {
+//            dropStatement = conn.createStatement();
+//
+//            fkStatement = conn.prepareStatement("select TABLE_NAME, CONSTRAINT_NAME from INFORMATION_SCHEMA.TABLE_CONSTRAINTS where CONSTRAINT_TYPE='FOREIGN KEY' AND TABLE_CATALOG=?");
+//            fkStatement.setString(1, getCatalogName());
+//            rs = fkStatement.executeQuery();
+//            while (rs.next()) {
+//                DropForeignKeyConstraintChange dropFK = new DropForeignKeyConstraintChange();
+//                dropFK.setBaseTableName(rs.getString("TABLE_NAME"));
+//                dropFK.setConstraintName(rs.getString("CONSTRAINT_NAME"));
+//
+//                try {
+//                    dropStatement.execute(dropFK.generateStatements(this)[0]);
+//                } catch (UnsupportedChangeException e) {
+//                    throw new JDBCException(e.getMessage());
+//                }
+//            }
+//        } catch (SQLException e) {
+//            throw new JDBCException(e);
+//        } finally {
+//            try {
+//                if (dropStatement != null) {
+//                    dropStatement.close();
+//                }
+//                if (fkStatement != null) {
+//                    fkStatement.close();
+//                }
+//                if (rs != null) {
+//                    rs.close();
+//                }
+//            } catch (SQLException e) {
+//                throw new JDBCException(e);
+//            }
+//        }
+//
+//    }
 }

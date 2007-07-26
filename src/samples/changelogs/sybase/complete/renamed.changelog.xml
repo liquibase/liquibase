@@ -5,7 +5,7 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.1 http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.1.xsd"
         
-        logicalFilePath="changelogs/mssql/complete/oldname.changelog.xml">
+        logicalFilePath="changelogs/sybase/complete/oldname.changelog.xml">
     <preConditions>
             <dbms type="sybase"/>
     </preConditions>
