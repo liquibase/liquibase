@@ -1,9 +1,7 @@
 package liquibase.migrator.commandline;
 
 import liquibase.database.DatabaseFactory;
-import liquibase.migrator.ChangeSet;
-import liquibase.migrator.DatabaseChangeLogLock;
-import liquibase.migrator.Migrator;
+import liquibase.migrator.*;
 import liquibase.migrator.diff.Diff;
 import liquibase.migrator.diff.DiffResult;
 import liquibase.migrator.diff.DiffStatusListener;
@@ -12,7 +10,6 @@ import liquibase.migrator.exception.JDBCException;
 import liquibase.migrator.exception.ValidationFailedException;
 import liquibase.util.StreamUtil;
 
-import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
 import java.lang.reflect.Field;
 import java.net.URL;
@@ -30,6 +27,8 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import javax.xml.parsers.ParserConfigurationException;
 
 /**
  * Class for executing LiquiBase via the command line.
@@ -448,8 +447,9 @@ public class CommandLineMigrator {
             throw new CommandLineParsingException("Unknown log level: " + logLevel);
         }
 
-
-        Migrator migrator = new Migrator(changeLogFile, new CommandLineFileOpener(classLoader));
+        FileSystemFileOpener fsOpener = new FileSystemFileOpener();
+        CommandLineFileOpener clOpener = new CommandLineFileOpener(classLoader);
+        Migrator migrator = new Migrator(changeLogFile, new CompositeFileOpener(fsOpener,clOpener));
         Driver driver;
         try {
             if (this.driver == null) {

@@ -1,8 +1,12 @@
 package liquibase.migrator.maven;
 
+import liquibase.migrator.CompositeFileOpener;
+import liquibase.migrator.FileOpener;
+import liquibase.migrator.FileSystemFileOpener;
 import liquibase.migrator.Migrator;
 import liquibase.migrator.exception.JDBCException;
 import liquibase.migrator.exception.MigrationFailedException;
+
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -137,7 +141,11 @@ public class LiquibaseMojo extends AbstractMojo {
 
             String[] changeLogFiles = getChangeLogFile().split(",");
             for (String changeLogFile : changeLogFiles) {
-                Migrator migrator = new Migrator(changeLogFile.trim(), new MavenFileOpener());
+                FileOpener mFO = new MavenFileOpener();
+                FileOpener fsFO = new FileSystemFileOpener();
+                
+                
+                Migrator migrator = new Migrator(changeLogFile.trim(), new CompositeFileOpener(mFO,fsFO));
                 migrator.setContexts(getContexts());
                 migrator.init(connection);
 

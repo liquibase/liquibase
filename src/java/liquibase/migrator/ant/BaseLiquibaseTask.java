@@ -1,9 +1,13 @@
 package liquibase.migrator.ant;
 
+import liquibase.database.DatabaseFactory;
+import liquibase.migrator.CompositeFileOpener;
+import liquibase.migrator.FileOpener;
+import liquibase.migrator.FileSystemFileOpener;
 import liquibase.migrator.Migrator;
 import liquibase.migrator.exception.JDBCException;
 import liquibase.migrator.exception.MigrationFailedException;
-import liquibase.database.DatabaseFactory;
+
 import org.apache.tools.ant.Task;
 import org.apache.tools.ant.types.Path;
 import org.apache.tools.ant.types.Reference;
@@ -103,8 +107,9 @@ public class BaseLiquibaseTask extends Task {
     }
 
     protected Migrator createMigrator() throws MalformedURLException, ClassNotFoundException, JDBCException, SQLException, MigrationFailedException, IllegalAccessException, InstantiationException {
-
-        Migrator migrator = new Migrator(getChangeLogFile().trim(), new AntFileOpener(getProject(), classpath));
+        FileOpener antFO = new AntFileOpener(getProject(), classpath);
+        FileOpener fsFO = new FileSystemFileOpener();
+        Migrator migrator = new Migrator(getChangeLogFile().trim(), new CompositeFileOpener(antFO,fsFO));
 
         String[] strings = classpath.list();
         final List<URL> taskClassPath = new ArrayList<URL>();

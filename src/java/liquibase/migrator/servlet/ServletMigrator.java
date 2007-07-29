@@ -1,19 +1,19 @@
 package liquibase.migrator.servlet;
 
-import liquibase.migrator.ClassLoaderFileOpener;
-import liquibase.migrator.Migrator;
+import liquibase.migrator.*;
 
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletContextListener;
-import javax.sql.DataSource;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.sql.Connection;
 import java.util.logging.Handler;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
+
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.servlet.ServletContextEvent;
+import javax.servlet.ServletContextListener;
+import javax.sql.DataSource;
 
 /**
  * Servlet listener than can be added to web.xml to allow LiquiBase to run on every application server startup.
@@ -129,7 +129,12 @@ public class ServletMigrator implements ServletContextListener {
                 DataSource dataSource = (DataSource) ic.lookup(this.dataSource);
 
                 connection = dataSource.getConnection();
-                Migrator migrator = new Migrator(getChangeLogFile(), new ClassLoaderFileOpener());
+                
+                FileOpener clFO = new ClassLoaderFileOpener();
+                FileOpener fsFO = new FileSystemFileOpener();
+                
+                
+                Migrator migrator = new Migrator(getChangeLogFile(), new CompositeFileOpener(clFO,fsFO));
                 migrator.init(connection);
                 migrator.setContexts(getContexts());
                 migrator.migrate();
