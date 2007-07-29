@@ -1,2 +1,2 @@
-select * from customer;
-select * from customer
+select * from person;
+select * from person
