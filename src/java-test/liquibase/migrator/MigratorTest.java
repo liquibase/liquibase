@@ -68,7 +68,7 @@ public class MigratorTest {
     @Test
     public void getImplementedDatabases() throws Exception {
         List<Database> databases = Arrays.asList(DatabaseFactory.getInstance().getImplementedDatabases());
-        assertEquals(8, databases.size());
+        assertEquals(9, databases.size());
 
         boolean foundOracle = false;
         boolean foundPostgres = false;

@@ -495,7 +495,7 @@ public abstract class AbstractDatabase implements Database {
                 }
 
             } else {
-                String createTableStatement = ("CREATE TABLE DATABASECHANGELOG (id varchar(150) not null, author varchar(150) not null, filename varchar(255) not null, dateExecuted " + getDateTimeType() + " not null, md5sum varchar(32) null, description varchar(255) null, comments varchar(255) null, tag varchar(255) null, liquibase varchar(10) null, primary key(id, author, filename))").toUpperCase();
+                String createTableStatement = ("CREATE TABLE DATABASECHANGELOG (id varchar(150) not null, author varchar(150) not null, filename varchar(255) not null, dateExecuted " + getDateTimeType() + " not null, md5sum varchar(32), description varchar(255), comments varchar(255), tag varchar(255), liquibase varchar(10), primary key(id, author, filename))").toUpperCase();
                 // If there is no table in the database for recording change history create one.
                 statementsToExecute.add(createTableStatement);
                 if (migrator.getMode().equals(Migrator.Mode.EXECUTE_MODE)) {
@@ -680,7 +680,7 @@ public abstract class AbstractDatabase implements Database {
     }
 
     protected void dropForeignKeys(Connection conn) throws JDBCException {
-        ResultSet tableRS = null;
+        ResultSet tableRS;
         ResultSet fkRS = null;
         Statement dropStatement = null;
         try {

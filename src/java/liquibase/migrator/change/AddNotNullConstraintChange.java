@@ -70,13 +70,16 @@ public class AddNotNullConstraintChange extends AbstractChange {
             return generateOracleStatements();
         } else if (database instanceof DerbyDatabase) {
             return generateDerbyStatements();
+        } else if (database instanceof H2Database) {
+            return generateH2Statements();
         }
 
         List<String> statements = new ArrayList<String>();
         if (defaultNullValue != null) {
             statements.add(generateUpdateStatement());
         }
-        statements.add("ALTER TABLE " + getTableName() + " ALTER COLUMN  " + getColumnName() + " SET NOT NULL");
+
+        statements.add("ALTER TABLE " + getTableName() + " ALTER COLUMN  " + getColumnName() + " SET NOT NULL ");
 
         if (database instanceof DB2Database) {
             statements.add("CALL SYSPROC.ADMIN_CMD ('REORG TABLE "+getTableName()+"')");
@@ -140,7 +143,17 @@ public class AddNotNullConstraintChange extends AbstractChange {
         if (defaultNullValue != null) {
             statements.add(generateUpdateStatement());
         }
-        statements.add("ALTER TABLE " + getTableName() + " ALTER COLUMN  " + getColumnName() + " NOT NULL");
+        statements.add("ALTER TABLE " + getTableName() + " ALTER COLUMN  " + getColumnName() + " "+getColumnDataType()+" NOT NULL");
+
+        return statements.toArray(new String[statements.size()]);
+    }
+
+    public String[] generateH2Statements()  {
+        List<String> statements = new ArrayList<String>();
+        if (defaultNullValue != null) {
+            statements.add(generateUpdateStatement());
+        }
+        statements.add("ALTER TABLE " + getTableName() + " ALTER COLUMN  " + getColumnName() + " "+getColumnDataType()+" NOT NULL");
 
         return statements.toArray(new String[statements.size()]);
     }

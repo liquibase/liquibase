@@ -43,10 +43,19 @@ public class AddColumnChange extends AbstractChange {
 
         String alterTable = "ALTER TABLE " + getTableName() + " ADD " + getColumn().getName() + " " + database.getColumnType(getColumn());
 
-        if (column.getConstraints() != null && column.getConstraints().isNullable() != null && !column.getConstraints().isNullable()) {
-            alterTable += " NOT NULL";
-        } else {
-            alterTable += " NULL";
+        if (column.getConstraints() != null) {
+            if (column.getConstraints().isNullable() != null && !column.getConstraints().isNullable()) {
+                alterTable += " NOT NULL";
+            } else {
+//                alterTable += " NULL";
+            }
+
+            if (column.getDefaultValue() != null
+                    || column.getDefaultValueBoolean() != null
+                    || column.getDefaultValueDate() != null
+                    || column.getDefaultValueNumeric() != null) {
+                alterTable += " DEFAULT "+column.getDefaultColumnValue(database);
+            }
         }
 
         sql.add(alterTable);
@@ -54,20 +63,20 @@ public class AddColumnChange extends AbstractChange {
             sql.add("CALL SYSPROC.ADMIN_CMD ('REORG TABLE "+ getTableName() +"')");
         }
 
-        if (getColumn().getDefaultValue() != null
-                || getColumn().getDefaultValueBoolean() != null
-                || getColumn().getDefaultValueDate() != null
-                || getColumn().getDefaultValueNumeric() != null) {
-            AddDefaultValueChange change = new AddDefaultValueChange();
-            change.setTableName(getTableName());
-            change.setColumnName(getColumn().getName());
-            change.setDefaultValue(getColumn().getDefaultValue());
-            change.setDefaultValueNumeric(getColumn().getDefaultValueNumeric());
-            change.setDefaultValueDate(getColumn().getDefaultValueDate());
-            change.setDefaultValueBoolean(getColumn().getDefaultValueBoolean());
-
-            sql.addAll(Arrays.asList(change.generateStatements(database)));
-        }
+//        if (getColumn().getDefaultValue() != null
+//                || getColumn().getDefaultValueBoolean() != null
+//                || getColumn().getDefaultValueDate() != null
+//                || getColumn().getDefaultValueNumeric() != null) {
+//            AddDefaultValueChange change = new AddDefaultValueChange();
+//            change.setTableName(getTableName());
+//            change.setColumnName(getColumn().getName());
+//            change.setDefaultValue(getColumn().getDefaultValue());
+//            change.setDefaultValueNumeric(getColumn().getDefaultValueNumeric());
+//            change.setDefaultValueDate(getColumn().getDefaultValueDate());
+//            change.setDefaultValueBoolean(getColumn().getDefaultValueBoolean());
+//
+//            sql.addAll(Arrays.asList(change.generateStatements(database)));
+//        }
 
         if (getColumn().getConstraints() != null) {
             if (getColumn().getConstraints().isPrimaryKey() != null && getColumn().getConstraints().isPrimaryKey()) {
@@ -78,27 +87,37 @@ public class AddColumnChange extends AbstractChange {
                 sql.addAll(Arrays.asList(change.generateStatements(database)));
             }
 
-            if (getColumn().getConstraints().isNullable() != null && !getColumn().getConstraints().isNullable()) {
-                AddNotNullConstraintChange change = new AddNotNullConstraintChange();
-                change.setTableName(getTableName());
-                change.setColumnName(getColumn().getName());
-                change.setColumnDataType(getColumn().getType());
-
-                sql.addAll(Arrays.asList(change.generateStatements(database)));
-            }
+//            if (getColumn().getConstraints().isNullable() != null && !getColumn().getConstraints().isNullable()) {
+//                AddNotNullConstraintChange change = new AddNotNullConstraintChange();
+//                change.setTableName(getTableName());
+//                change.setColumnName(getColumn().getName());
+//                change.setColumnDataType(getColumn().getType());
+//
+//                sql.addAll(Arrays.asList(change.generateStatements(database)));
+//            }
         }
 
         return sql.toArray(new String[sql.size()]);
     }
 
     protected Change[] createInverses() {
+        List<Change> inverses = new ArrayList<Change>();
+
+        if (column.hasDefaultValue()) {
+            DropDefaultValueChange dropChange = new DropDefaultValueChange();
+            dropChange.setTableName(getTableName());
+            dropChange.setColumnName(getColumn().getName());
+
+            inverses.add(dropChange);
+        }
+
+
         DropColumnChange inverse = new DropColumnChange();
         inverse.setColumnName(getColumn().getName());
         inverse.setTableName(getTableName());
+        inverses.add(inverse);
 
-        return new Change[]{
-                inverse
-        };
+        return inverses.toArray(new Change[inverses.size()]);
     }
 
     public String getConfirmationMessage() {

@@ -34,6 +34,7 @@ public class DatabaseFactory {
                 new HsqlDatabase(),
                 new DB2Database(),
                 new SybaseDatabase(),
+                new H2Database(),
         };
     }
 

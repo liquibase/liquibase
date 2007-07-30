@@ -236,7 +236,14 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
     }
 
     public void testClearChecksums() throws Exception {
-        Migrator migrator = createMigrator(null);
+        Migrator migrator = createMigrator(completeChangeLog);
+        migrator.dropAll();
+
+        migrator = createMigrator(completeChangeLog);
+        migrator.dropAll();
+
+        migrator.migrate();
+
         migrator.clearCheckSums();
     }
 }

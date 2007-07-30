@@ -1,6 +1,7 @@
 package liquibase.migrator.change;
 
 import liquibase.util.StringUtils;
+import liquibase.database.Database;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -201,5 +202,43 @@ public class ColumnConfig {
         return element;
     }
 
+    public String getDefaultColumnValue(Database database) {
+        if (this.getDefaultValue() != null) {
+            if ("null".equalsIgnoreCase(this.getDefaultValue())) {
+                return "NULL";
+            }
+            if (!database.shouldQuoteValue(this.getDefaultValue())) {
+                return this.getDefaultValue();
+            } else {
+                return "'" + this.getDefaultValue().replaceAll("'", "''") + "'";
+            }
+        } else if (this.getDefaultValueNumeric() != null) {
+            return this.getDefaultValueNumeric();
+        } else if (this.getDefaultValueBoolean() != null) {
+            String returnValue;
+            if (this.getDefaultValueBoolean()) {
+                returnValue = database.getTrueBooleanValue();
+            } else {
+                returnValue = database.getFalseBooleanValue();
+            }
+
+            if (returnValue.matches("\\d+")) {
+                return returnValue;
+            } else {
+                return "'"+returnValue+"'";
+            }
+        } else if (this.getDefaultValueDate() != null) {
+            return database.getDateLiteral(this.getDefaultValueDate());
+        } else {
+            return "NULL";
+        }
+    }
+
+    public boolean hasDefaultValue() {
+        return this.getDefaultValue() != null
+                || this.getDefaultValueBoolean() != null
+                || this.getDefaultValueDate() != null
+                || this.getDefaultValueNumeric() != null;
+    }
 
 }

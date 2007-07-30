@@ -19,7 +19,7 @@
     <changeSet id="2" author="nvoxland">
         <addColumn tableName="magazine">
             <column name="sku" type="varchar(50)">
-                <constraints nullable="false"/>
+                <constraints nullable="true"/>
             </column>
         </addColumn>
         <createIndex indexName="idx_magazine_sku" tableName="magazine">

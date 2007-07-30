@@ -1,9 +1,11 @@
 package liquibase.database.structure;
 
 import liquibase.database.Database;
+import liquibase.database.H2Database;
 import liquibase.migrator.Migrator;
 import liquibase.migrator.diff.DiffStatusListener;
 import liquibase.migrator.exception.JDBCException;
+import liquibase.util.StringUtils;
 
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -153,7 +155,9 @@ public class DatabaseSnapshot {
             columnInfo.setColumnSize(rs.getInt("COLUMN_SIZE"));
             columnInfo.setDecimalDigits(rs.getInt("DECIMAL_DIGITS"));
             columnInfo.setTypeName(rs.getString("TYPE_NAME"));
-            columnInfo.setDefaultValue(rs.getString("COLUMN_DEF"));
+            String defaultValue = rs.getString("COLUMN_DEF");
+            columnInfo.setAutoIncrement(isAutoIncrement(defaultValue, database));
+            columnInfo.setDefaultValue(translateDefaultValue(defaultValue, database));
 
             int nullable = rs.getInt("NULLABLE");
             if (nullable == DatabaseMetaData.columnNoNulls) {
@@ -165,6 +169,25 @@ public class DatabaseSnapshot {
             columnsMap.put(columnName, columnInfo);
         }
         rs.close();
+    }
+
+    private boolean isAutoIncrement(String defaultValue, Database database) {
+        if (database instanceof H2Database) {
+            if (StringUtils.trimToEmpty(defaultValue).startsWith("(NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_")) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private String translateDefaultValue(String defaultValue, Database database) {
+        if (database instanceof H2Database) {
+            if (StringUtils.trimToEmpty(defaultValue).startsWith("(NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_")) {
+                return null;
+            }
+            return defaultValue;
+        }
+        return defaultValue;
     }
 
     private void readForeignKeyInformation() throws JDBCException, SQLException {

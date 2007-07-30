@@ -41,7 +41,7 @@ public class CreateTableChange extends AbstractChange {
                     || column.getDefaultValueBoolean() != null
                     || column.getDefaultValueDate() != null
                     || column.getDefaultValueNumeric() != null) {
-                buffer.append(" DEFAULT ").append(getDefaultColumnValue(column, database));
+                buffer.append(" DEFAULT ").append(column.getDefaultColumnValue(database));
             }
             
             if (column.isAutoIncrement() != null && column.isAutoIncrement().booleanValue()) {
@@ -52,7 +52,7 @@ public class CreateTableChange extends AbstractChange {
                 if (constraints.isNullable() != null && !constraints.isNullable()) {
                     buffer.append(" NOT NULL");
                 } else {
-                    buffer.append(" NULL");
+//                    buffer.append(" NULL");
                 }
                 if (constraints.isPrimaryKey() != null && constraints.isPrimaryKey()) {
                     buffer.append(" PRIMARY KEY");
@@ -137,37 +137,4 @@ public class CreateTableChange extends AbstractChange {
         }
         return element;
     }
-
-    private String getDefaultColumnValue(ColumnConfig column, Database database) {
-        if (column.getDefaultValue() != null) {
-            if ("null".equalsIgnoreCase(column.getDefaultValue())) {
-                return "NULL";
-            }
-            if (!database.shouldQuoteValue(column.getDefaultValue())) {
-                return column.getDefaultValue();
-            } else {
-                return "'" + column.getDefaultValue().replaceAll("'", "''") + "'";
-            }
-        } else if (column.getDefaultValueNumeric() != null) {
-            return column.getDefaultValueNumeric();
-        } else if (column.getDefaultValueBoolean() != null) {
-            String returnValue;
-            if (column.getDefaultValueBoolean()) {
-                returnValue = database.getTrueBooleanValue();
-            } else {
-                returnValue = database.getFalseBooleanValue();
-            }
-
-            if (returnValue.matches("\\d+")) {
-                return returnValue;
-            } else {
-                return "'"+returnValue+"'";
-            }
-        } else if (column.getDefaultValueDate() != null) {
-            return database.getDateLiteral(column.getDefaultValueDate());
-        } else {
-            return "NULL";
-        }
-    }
-
 }

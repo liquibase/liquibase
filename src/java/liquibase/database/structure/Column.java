@@ -17,6 +17,7 @@ public class Column implements Comparable<Column> {
     private Boolean nullable;
     private String typeName;
     private String defaultValue;
+    private boolean autoIncrement = false;
 
 
     public Table getTable() {
@@ -234,5 +235,14 @@ public class Column implements Comparable<Column> {
         );
 
         return numericTypes.contains(getDataType());
+    }
+
+
+    public boolean isAutoIncrement() {
+        return autoIncrement;
+    }
+
+    public void setAutoIncrement(boolean autoIncrement) {
+        this.autoIncrement = autoIncrement;
     }
 }

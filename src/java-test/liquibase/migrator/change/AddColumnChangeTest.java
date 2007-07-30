@@ -38,7 +38,7 @@ public class AddColumnChangeTest extends AbstractChangeTest {
 
         refactoring.setColumn(column);
 
-        assertEquals("ALTER TABLE TAB ADD NEWCOL TYP", refactoring.generateStatements(new OracleDatabase())[0]);
+        assertEquals("ALTER TABLE TAB ADD NEWCOL TYP NOT NULL", refactoring.generateStatements(new OracleDatabase())[0]);
     }
 
     @Test
