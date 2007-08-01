@@ -3,7 +3,6 @@ package liquibase.migrator.diff;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.structure.*;
-import liquibase.migrator.diff.emptydatabase.NullDatabase;
 import liquibase.migrator.exception.JDBCException;
 
 import java.sql.Connection;
@@ -37,7 +36,7 @@ public class Diff {
 
     public void init(Connection originalDatabase) throws JDBCException {
         try {
-            targetDatabase = new NullDatabase();
+            targetDatabase = null;
 
             baseDatabase = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(originalDatabase);
             baseDatabase.setConnection(originalDatabase);
@@ -60,7 +59,12 @@ public class Diff {
     public DiffResult compare() throws JDBCException {
         try {
             baseSnapshot = new DatabaseSnapshot(baseDatabase, statusListeners);
-            targetSnapshot = new DatabaseSnapshot(targetDatabase, statusListeners);
+            if (targetDatabase == null) {
+                targetSnapshot = new DatabaseSnapshot();
+            } else {
+                targetSnapshot = new DatabaseSnapshot(targetDatabase, statusListeners);
+
+            }
 
             DiffResult diffResult = new DiffResult(baseDatabase, targetDatabase);
             checkVersionInfo(diffResult);
@@ -80,8 +84,10 @@ public class Diff {
 
     private void checkVersionInfo(DiffResult diffResult) throws  JDBCException {
 
-        diffResult.setProductName(new DiffComparison(baseDatabase.getDatabaseProductName(), targetDatabase.getDatabaseProductName()));
-        diffResult.setProductVersion(new DiffComparison(baseDatabase.getDatabaseProductVersion(), targetDatabase.getDatabaseProductVersion()));
+        if (targetDatabase != null) {
+            diffResult.setProductName(new DiffComparison(baseDatabase.getDatabaseProductName(), targetDatabase.getDatabaseProductName()));
+            diffResult.setProductVersion(new DiffComparison(baseDatabase.getDatabaseProductVersion(), targetDatabase.getDatabaseProductVersion()));
+        }
 
     }
 

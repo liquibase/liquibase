@@ -38,10 +38,23 @@ public class DatabaseSnapshot {
 
     private Logger log = Logger.getLogger(Migrator.DEFAULT_LOG_NAME);
 
+
+    /**
+     * Creates an empty database snapshot
+     */
+    public DatabaseSnapshot() {
+    }
+
+    /**
+     * Creates a snapshot of the given database with no status listeners
+     */
     public DatabaseSnapshot(Database database) throws JDBCException {
         this(database,  null);
     }
 
+    /**
+     * Creates a snapshot of the given database.
+     */
     public DatabaseSnapshot(Database database, Set<DiffStatusListener> statusListeners) throws JDBCException {
         try {
             this.database = database;
