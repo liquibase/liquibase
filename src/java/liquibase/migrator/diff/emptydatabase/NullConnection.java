@@ -2,6 +2,7 @@ package liquibase.migrator.diff.emptydatabase;
 
 import java.sql.*;
 import java.util.Map;
+import java.util.Properties;
 
 public class NullConnection implements Connection {
 
@@ -155,4 +156,55 @@ public class NullConnection implements Connection {
         return null;
     }
 
+
+    public Clob createClob() throws SQLException {
+        return null;
+    }
+
+    public Blob createBlob() throws SQLException {
+        return null;
+    }
+
+    public NClob createNClob() throws SQLException {
+        return null;
+    }
+
+    public SQLXML createSQLXML() throws SQLException {
+        return null;
+    }
+
+    public boolean isValid(int timeout) throws SQLException {
+        return false;
+    }
+
+    public void setClientInfo(String name, String value) throws SQLClientInfoException {
+
+    }
+
+    public void setClientInfo(Properties properties) throws SQLClientInfoException {
+    }
+
+    public String getClientInfo(String name) throws SQLException {
+        return null;
+    }
+
+    public Properties getClientInfo() throws SQLException {
+        return null;
+    }
+
+    public Array createArrayOf(String typeName, Object[] elements) throws SQLException {
+        return null;
+    }
+
+    public Struct createStruct(String typeName, Object[] attributes) throws SQLException {
+        return null;
+    }
+
+    public <T> T unwrap(Class<T> iface) throws SQLException {
+        return null;
+    }
+
+    public boolean isWrapperFor(Class<?> iface) throws SQLException {
+        return false;
+    }
 }

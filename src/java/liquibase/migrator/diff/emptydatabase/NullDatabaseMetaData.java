@@ -1,9 +1,6 @@
 package liquibase.migrator.diff.emptydatabase;
 
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 
 public class NullDatabaseMetaData implements DatabaseMetaData {
 
@@ -664,6 +661,43 @@ public class NullDatabaseMetaData implements DatabaseMetaData {
     }
 
     public boolean supportsStatementPooling() throws SQLException {
+        return false;
+    }
+
+
+    public RowIdLifetime getRowIdLifetime() throws SQLException {
+        return null;
+    }
+
+    public ResultSet getSchemas(String catalog, String schemaPattern) throws SQLException {
+        return null;
+    }
+
+    public boolean supportsStoredFunctionsUsingCallSyntax() throws SQLException {
+        return false;
+    }
+
+    public boolean autoCommitFailureClosesAllResultSets() throws SQLException {
+        return false;
+    }
+
+    public ResultSet getClientInfoProperties() throws SQLException {
+        return null;
+    }
+
+    public ResultSet getFunctions(String catalog, String schemaPattern, String functionNamePattern) throws SQLException {
+        return null;
+    }
+
+    public ResultSet getFunctionColumns(String catalog, String schemaPattern, String functionNamePattern, String columnNamePattern) throws SQLException {
+        return null;
+    }
+
+    public <T> T unwrap(Class<T> iface) throws SQLException {
+        return null;
+    }
+
+    public boolean isWrapperFor(Class<?> iface) throws SQLException {
         return false;
     }
 }

@@ -200,14 +200,72 @@ public class UnsupportedDBSampleChangeLogRunnerTest extends AbstractSimpleChange
         public PreparedStatement prepareStatement(String sql, String[] columnNames) throws SQLException {
             return delegateConnection.prepareStatement(sql, columnNames);
         }
+
+        public Clob createClob() throws SQLException {
+            return delegateConnection.createClob();
+        }
+
+        public Blob createBlob() throws SQLException {
+            return delegateConnection.createBlob();
+        }
+
+        public NClob createNClob() throws SQLException {
+            return delegateConnection.createNClob();
+        }
+
+        public SQLXML createSQLXML() throws SQLException {
+            return delegateConnection.createSQLXML();
+        }
+
+        public boolean isValid(int timeout) throws SQLException {
+            return delegateConnection.isValid(timeout);
+        }
+
+        public void setClientInfo(String name, String value) throws SQLClientInfoException {
+            delegateConnection.setClientInfo(name, value);
+        }
+
+        public void setClientInfo(Properties properties) throws SQLClientInfoException {
+            delegateConnection.setClientInfo(properties);
+        }
+
+        public String getClientInfo(String name) throws SQLException {
+            return delegateConnection.getClientInfo(name);
+        }
+
+        public Properties getClientInfo() throws SQLException {
+            return delegateConnection.getClientInfo();
+        }
+
+        public Array createArrayOf(String typeName, Object[] elements) throws SQLException {
+            return delegateConnection.createArrayOf(typeName, elements);
+        }
+
+        public Struct createStruct(String typeName, Object[] attributes) throws SQLException {
+            return delegateConnection.createStruct(typeName, attributes);
+        }
+
+        public <T> T unwrap(Class<T> iface) throws SQLException {
+            return delegateConnection.unwrap(iface);
+        }
+
+        public boolean isWrapperFor(Class<?> iface) throws SQLException {
+            return delegateConnection.isWrapperFor(iface);
+        }
     }
 
     private static class DatabaseMetaDataWrapper implements DatabaseMetaData {
         private DatabaseMetaData delegate;
 
+
         public DatabaseMetaDataWrapper(DatabaseMetaData delegate) {
             this.delegate = delegate;
         }
+
+        public String getDatabaseProductName() throws SQLException {
+            return "LiquiBase DB (Unsupported)";
+        }
+
 
         public boolean allProceduresAreCallable() throws SQLException {
             return delegate.allProceduresAreCallable();
@@ -243,10 +301,6 @@ public class UnsupportedDBSampleChangeLogRunnerTest extends AbstractSimpleChange
 
         public boolean nullsAreSortedAtEnd() throws SQLException {
             return delegate.nullsAreSortedAtEnd();
-        }
-
-        public String getDatabaseProductName() throws SQLException {
-            return "LiquiBase DB (Unsupported)";
         }
 
         public String getDatabaseProductVersion() throws SQLException {
@@ -737,8 +791,8 @@ public class UnsupportedDBSampleChangeLogRunnerTest extends AbstractSimpleChange
             return delegate.getExportedKeys(catalog, schema, table);
         }
 
-        public ResultSet getCrossReference(String primaryCatalog, String primarySchema, String primaryTable, String foreignCatalog, String foreignSchema, String foreignTable) throws SQLException {
-            return delegate.getCrossReference(primaryCatalog, primarySchema, primaryTable, foreignCatalog, foreignSchema, foreignTable);
+        public ResultSet getCrossReference(String parentCatalog, String parentSchema, String parentTable, String foreignCatalog, String foreignSchema, String foreignTable) throws SQLException {
+            return delegate.getCrossReference(parentCatalog, parentSchema, parentTable, foreignCatalog, foreignSchema, foreignTable);
         }
 
         public ResultSet getTypeInfo() throws SQLException {
@@ -867,6 +921,42 @@ public class UnsupportedDBSampleChangeLogRunnerTest extends AbstractSimpleChange
 
         public boolean supportsStatementPooling() throws SQLException {
             return delegate.supportsStatementPooling();
+        }
+
+        public RowIdLifetime getRowIdLifetime() throws SQLException {
+            return delegate.getRowIdLifetime();
+        }
+
+        public ResultSet getSchemas(String catalog, String schemaPattern) throws SQLException {
+            return delegate.getSchemas(catalog, schemaPattern);
+        }
+
+        public boolean supportsStoredFunctionsUsingCallSyntax() throws SQLException {
+            return delegate.supportsStoredFunctionsUsingCallSyntax();
+        }
+
+        public boolean autoCommitFailureClosesAllResultSets() throws SQLException {
+            return delegate.autoCommitFailureClosesAllResultSets();
+        }
+
+        public ResultSet getClientInfoProperties() throws SQLException {
+            return delegate.getClientInfoProperties();
+        }
+
+        public ResultSet getFunctions(String catalog, String schemaPattern, String functionNamePattern) throws SQLException {
+            return delegate.getFunctions(catalog, schemaPattern, functionNamePattern);
+        }
+
+        public ResultSet getFunctionColumns(String catalog, String schemaPattern, String functionNamePattern, String columnNamePattern) throws SQLException {
+            return delegate.getFunctionColumns(catalog, schemaPattern, functionNamePattern, columnNamePattern);
+        }
+
+        public <T> T unwrap(Class<T> iface) throws SQLException {
+            return delegate.unwrap(iface);
+        }
+
+        public boolean isWrapperFor(Class<?> iface) throws SQLException {
+            return delegate.isWrapperFor(iface);
         }
     }
 
