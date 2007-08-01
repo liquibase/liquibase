@@ -6,6 +6,7 @@ import liquibase.migrator.exception.SetupException;
 import liquibase.migrator.exception.UnsupportedChangeException;
 import liquibase.util.MD5Util;
 import liquibase.util.StreamUtil;
+import liquibase.util.StringUtils;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -163,7 +164,7 @@ public class SQLFileChange extends AbstractChange {
     public String[] generateStatements(Database database)
             throws UnsupportedChangeException {
         //strip ; from end of statements
-        String[] statements = sql.split(";|\ngo\\s*\n|\ngo$");
+        String[] statements = StringUtils.splitSQL(sql);
         
         return statements;
     }

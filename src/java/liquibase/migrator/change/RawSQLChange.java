@@ -2,6 +2,7 @@ package liquibase.migrator.change;
 
 import liquibase.database.Database;
 import liquibase.migrator.exception.UnsupportedChangeException;
+import liquibase.util.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -35,7 +36,7 @@ public class RawSQLChange extends AbstractChange {
     }
 
     public String[] generateStatements(Database database) throws UnsupportedChangeException {
-        return new String[]{sql.replaceFirst(";$", "")};
+        return StringUtils.splitSQL(sql);
     }
 
     public String getConfirmationMessage() {

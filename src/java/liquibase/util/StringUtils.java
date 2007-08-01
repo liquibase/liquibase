@@ -22,4 +22,11 @@ public class StringUtils {
             return returnString;
         }
     }
+
+    /**
+     * Splits a (possible) multi-line SQL statement along ;'s and "go"'s.
+     */
+    public static String[] splitSQL(String multiLineSQL) {
+        return multiLineSQL.split(";|\ngo\\s*\n|\ngo$");
+    }
 }
