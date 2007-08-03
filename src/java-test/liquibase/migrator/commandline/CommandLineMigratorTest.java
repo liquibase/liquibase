@@ -258,7 +258,7 @@ public class CommandLineMigratorTest {
     @Test
     public void checkSetup() {
         CommandLineMigrator cli = new CommandLineMigrator();
-        assertFalse(cli.checkSetup());
+        assertTrue(cli.checkSetup().size() > 0);
 
         cli.driver = "driver";
         cli.username = "username";
@@ -267,13 +267,13 @@ public class CommandLineMigratorTest {
         cli.changeLogFile = "file";
         cli.classpath = "classpath";
 
-        assertFalse(cli.checkSetup());
+        assertTrue(cli.checkSetup().size() > 0);
 
         cli.command = "BadCommand";
-        assertFalse(cli.checkSetup());
+        assertTrue(cli.checkSetup().size() > 0);
 
         cli.command = "migrate";
-        assertTrue(cli.checkSetup());
+        assertEquals(0, cli.checkSetup().size());
     }
 
     @Test

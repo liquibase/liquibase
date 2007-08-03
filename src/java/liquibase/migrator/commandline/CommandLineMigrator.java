@@ -10,6 +10,7 @@ import liquibase.migrator.exception.JDBCException;
 import liquibase.migrator.exception.ValidationFailedException;
 import liquibase.util.StreamUtil;
 
+import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
 import java.lang.reflect.Field;
 import java.net.URL;
@@ -27,8 +28,6 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import javax.xml.parsers.ParserConfigurationException;
 
 /**
  * Class for executing LiquiBase via the command line.
@@ -76,8 +75,9 @@ public class CommandLineMigrator {
         if (propertiesFile.exists()) {
             commandLineMigrator.parsePropertiesFile(new FileInputStream(propertiesFile));
         }
-        if (!commandLineMigrator.checkSetup()) {
-            commandLineMigrator.printHelp(System.out);
+        List<String> setupMessages = commandLineMigrator.checkSetup();
+        if (setupMessages.size() > 0) {
+            commandLineMigrator.printHelp(setupMessages, System.out);
             return;
         }
 
@@ -110,18 +110,31 @@ public class CommandLineMigrator {
         }
     }
 
-    protected boolean checkSetup() {
-        //noinspection SimplifiableIfStatement
-        if (classpath == null
-                || changeLogFile == null
-                || username == null
-                || password == null
-                || url == null
-                || driver == null
-                || command == null) {
-            return false;
+    protected List<String> checkSetup() {
+        List<String> messages = new ArrayList<String>();
+        if (command == null) {
+            messages.add("Command not passed");
+        } else  if (!isCommand(command)) {
+            messages.add("Unknown command: " + command);
+        } else {
+            if (username == null) {
+                messages.add("--username is required");
+            }
+            if (url == null) {
+                messages.add("--url is required");
+            }
+
+            if (isChangeLogRequired(command) && changeLogFile == null) {
+                messages.add("--changeLog is required");
+            }
         }
-        return isCommand(command);
+        return messages;
+    }
+
+    private boolean isChangeLogRequired(String command) {
+        return command.toLowerCase().startsWith("migrate")
+                || command.toLowerCase().startsWith("rollback")
+                || "validate".equals(command);
     }
 
     private boolean isCommand(String arg) {
@@ -169,6 +182,15 @@ public class CommandLineMigrator {
                 throw new CommandLineParsingException("Unknown parameter: '" + entry.getKey() + "'");
             }
         }
+    }
+
+    protected void printHelp(List<String> errorMessages, PrintStream stream) {
+        stream.println("Errors:");
+        for (String message : errorMessages) {
+            stream.println("  "+message);
+        }
+        stream.println();
+        printHelp(stream);
     }
 
     protected void printHelp(PrintStream stream) {
@@ -221,14 +243,14 @@ public class CommandLineMigrator {
         stream.println(" dropAll                   Drop all database objects owned by user");
         stream.println("");
         stream.println("Required Parameters:");
-        stream.println(" --classpath=<value>                        Classpath containing");
-        stream.println("                                            migration files and JDBC Driver");
         stream.println(" --changeLogFile=<path and filename>        Migration file");
         stream.println(" --username=<value>                         Database username");
         stream.println(" --password=<value>                         Database password");
         stream.println(" --url=<value>                              Database URL");
         stream.println("");
         stream.println("Optional Parameters:");
+        stream.println(" --classpath=<value>                        Classpath containing");
+        stream.println("                                            migration files and JDBC Driver");
         stream.println(" --driver=<jdbc.driver.ClassName>           Database driver class name");
         stream.println(" --contexts=<value>                         ChangeSet contexts to execute");
         stream.println(" --defaultsFile=</path/to/file.properties>  File with default option values");
@@ -334,43 +356,45 @@ public class CommandLineMigrator {
     }
 
     protected void configureClassLoader() throws CommandLineParsingException {
-        String[] classpath;
-        if (isWindows()) {
-            classpath = this.classpath.split(";");
-        } else {
-            classpath = this.classpath.split(":");
-        }
-
         final List<URL> urls = new ArrayList<URL>();
-        for (String classpathEntry : classpath) {
-            File classPathFile = new File(classpathEntry);
-            if (!classPathFile.exists()) {
-                throw new CommandLineParsingException(classPathFile.getAbsolutePath() + " does not exist");
+        if (this.classpath != null) {
+            String[] classpath;
+            if (isWindows()) {
+                classpath = this.classpath.split(";");
+            } else {
+                classpath = this.classpath.split(":");
             }
-            try {
-                if (classpathEntry.endsWith(".war")) {
-                    addWarFileClasspathEntries(classPathFile, urls);
-                } else if (classpathEntry.endsWith(".ear")) {
-                    JarFile earZip = new JarFile(classPathFile);
 
-                    Enumeration<? extends JarEntry> entries = earZip.entries();
-                    while (entries.hasMoreElements()) {
-                        JarEntry entry = entries.nextElement();
-                        if (entry.getName().toLowerCase().endsWith(".jar")) {
-                            File jar = extract(earZip, entry);
-                            urls.add(new URL("jar:" + jar.toURL() + "!/"));
-                            jar.deleteOnExit();
-                        } else if (entry.getName().toLowerCase().endsWith("war")) {
-                            File warFile = extract(earZip, entry);
-                            addWarFileClasspathEntries(warFile, urls);
-                        }
-                    }
-
-                } else {
-                    urls.add(new File(classpathEntry).toURL());
+            for (String classpathEntry : classpath) {
+                File classPathFile = new File(classpathEntry);
+                if (!classPathFile.exists()) {
+                    throw new CommandLineParsingException(classPathFile.getAbsolutePath() + " does not exist");
                 }
-            } catch (Exception e) {
-                throw new CommandLineParsingException(e);
+                try {
+                    if (classpathEntry.endsWith(".war")) {
+                        addWarFileClasspathEntries(classPathFile, urls);
+                    } else if (classpathEntry.endsWith(".ear")) {
+                        JarFile earZip = new JarFile(classPathFile);
+
+                        Enumeration<? extends JarEntry> entries = earZip.entries();
+                        while (entries.hasMoreElements()) {
+                            JarEntry entry = entries.nextElement();
+                            if (entry.getName().toLowerCase().endsWith(".jar")) {
+                                File jar = extract(earZip, entry);
+                                urls.add(new URL("jar:" + jar.toURL() + "!/"));
+                                jar.deleteOnExit();
+                            } else if (entry.getName().toLowerCase().endsWith("war")) {
+                                File warFile = extract(earZip, entry);
+                                addWarFileClasspathEntries(warFile, urls);
+                            }
+                        }
+
+                    } else {
+                        urls.add(new File(classpathEntry).toURL());
+                    }
+                } catch (Exception e) {
+                    throw new CommandLineParsingException(e);
+                }
             }
         }
         if (includeSystemClasspath) {
@@ -449,7 +473,7 @@ public class CommandLineMigrator {
 
         FileSystemFileOpener fsOpener = new FileSystemFileOpener();
         CommandLineFileOpener clOpener = new CommandLineFileOpener(classLoader);
-        Migrator migrator = new Migrator(changeLogFile, new CompositeFileOpener(fsOpener,clOpener));
+        Migrator migrator = new Migrator(changeLogFile, new CompositeFileOpener(fsOpener, clOpener));
         Driver driver;
         try {
             if (this.driver == null) {
@@ -466,7 +490,9 @@ public class CommandLineMigrator {
         }
         Properties info = new Properties();
         info.put("user", username);
-        info.put("password", password);
+        if (password != null) {
+            info.put("password", password);
+        }
 
         Connection connection = driver.connect(url, info);
         if (connection == null) {
@@ -614,7 +640,7 @@ public class CommandLineMigrator {
         }
     }
 
-    private Connection createConnectionFromCommandParams(Set<String> commandParams) throws CommandLineParsingException,  SQLException, JDBCException {
+    private Connection createConnectionFromCommandParams(Set<String> commandParams) throws CommandLineParsingException, SQLException, JDBCException {
         String driver = null;
         String url = null;
         String username = null;
