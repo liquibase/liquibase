@@ -306,10 +306,22 @@ public abstract class AbstractDatabase implements Database {
         return ("insert into DatabaseChangeLogLock (id, locked) values (1, " + getFalseBooleanValue() + ")").toUpperCase();
     }
 
-    private String getCreateChangeLogLockSQL() {
+    protected String getCreateChangeLogLockSQL() {
         return ("create table DatabaseChangeLogLock (id int not null primary key, locked " + getBooleanType() + " not null, lockGranted " + getDateTimeType() + " null, lockedby varchar(255) null)").toUpperCase();
     }
 
+    protected String getCreateChangeLogSQL() {
+        return ("CREATE TABLE DATABASECHANGELOG (id varchar(150) not null, " +
+                "author varchar(150) not null, " +
+                "filename varchar(255) not null, " +
+                "dateExecuted " + getDateTimeType() + " not null, " +
+                "md5sum varchar(32), " +
+                "description varchar(255), " +
+                "comments varchar(255), " +
+                "tag varchar(255), " +
+                "liquibase varchar(10), " +
+                "primary key(id, author, filename))").toUpperCase();
+    }
 
     public boolean acquireLock(Migrator migrator) throws MigrationFailedException {
         if (!migrator.getDatabase().doesChangeLogLockTableExist()) {
@@ -495,7 +507,7 @@ public abstract class AbstractDatabase implements Database {
                 }
 
             } else {
-                String createTableStatement = ("CREATE TABLE DATABASECHANGELOG (id varchar(150) not null, author varchar(150) not null, filename varchar(255) not null, dateExecuted " + getDateTimeType() + " not null, md5sum varchar(32), description varchar(255), comments varchar(255), tag varchar(255), liquibase varchar(10), primary key(id, author, filename))").toUpperCase();
+                String createTableStatement = getCreateChangeLogSQL();
                 // If there is no table in the database for recording change history create one.
                 statementsToExecute.add(createTableStatement);
                 if (migrator.getMode().equals(Migrator.Mode.EXECUTE_MODE)) {
