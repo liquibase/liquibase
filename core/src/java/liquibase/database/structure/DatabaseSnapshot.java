@@ -11,10 +11,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Logger;
 
 public class DatabaseSnapshot {
@@ -302,20 +299,39 @@ public class DatabaseSnapshot {
     private void readPrimaryKeys() throws JDBCException, SQLException {
         updateListeners("Reading primary keys for "+database.toString()+" ...");
 
+        //we can't add directly to the this.primaryKeys hashSet because adding columns to an exising PK changes the hashCode and .contains() fails
+        List<PrimaryKey> foundPKs = new ArrayList<PrimaryKey>();
+
         for (Table table : tablesMap.values()) {
             ResultSet rs = databaseMetaData.getPrimaryKeys(database.getCatalogName(), database.getSchemaName(), table.getName());
 
             while (rs.next()) {
-                PrimaryKey primaryKey = new PrimaryKey();
-                primaryKey.setTableName(rs.getString("TABLE_NAME"));
-                primaryKey.setColumnNames(rs.getString("COLUMN_NAME"));
-                primaryKey.setName(rs.getString("PK_NAME"));
+                String tableName = rs.getString("TABLE_NAME");
+                String columnName = rs.getString("COLUMN_NAME");
 
-                primaryKeys.add(primaryKey);
+                boolean foundExistingPK = false;
+                for (PrimaryKey pk : foundPKs) {
+                    if (pk.getTableName().equals(tableName)) {
+                        pk.addColumnName(columnName);
+
+                        foundExistingPK = true;
+                    }
+                }
+
+                if (!foundExistingPK) {
+                    PrimaryKey primaryKey = new PrimaryKey();
+                    primaryKey.setTableName(tableName);
+                    primaryKey.addColumnName(columnName);
+                    primaryKey.setName(rs.getString("PK_NAME"));
+
+                    foundPKs.add(primaryKey);
+                }
             }
 
             rs.close();
         }
+
+        this.primaryKeys.addAll(foundPKs);
     }
 
     private void readSequences() throws JDBCException, SQLException {

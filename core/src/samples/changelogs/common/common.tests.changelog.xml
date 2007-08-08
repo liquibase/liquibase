@@ -47,4 +47,16 @@
             <column name="id" valueNumeric="1"/>
         </insert>
     </changeSet>
+
+    <changeSet id="compoundPrimaryKeyTest" author="nvoxland">
+        <createTable tableName="compoundPKTest">
+            <column name="id1" type="int">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="id2" type="int">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="varchar(255)"/>
+        </createTable>
+    </changeSet>
 </databaseChangeLog>

@@ -2,12 +2,11 @@ package liquibase.migrator.change;
 
 import liquibase.database.Database;
 import liquibase.migrator.exception.UnsupportedChangeException;
+import liquibase.util.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 /**
  * Creates a new table.
@@ -23,6 +22,15 @@ public class CreateTableChange extends AbstractChange {
     }
 
     public String[] generateStatements(Database database) throws UnsupportedChangeException {
+
+        Set<String> pkColumns = new HashSet<String>();
+
+        for (ColumnConfig column : getColumns()) {
+            if (column.getConstraints() != null && column.getConstraints().isPrimaryKey() != null && column.getConstraints().isPrimaryKey()) {
+                pkColumns.add(column.getName());
+            }
+        }
+
         StringBuffer fkConstraints = new StringBuffer();
 
         StringBuffer buffer = new StringBuffer();
@@ -44,7 +52,7 @@ public class CreateTableChange extends AbstractChange {
                 buffer.append(" DEFAULT ").append(column.getDefaultColumnValue(database));
             }
             
-            if (column.isAutoIncrement() != null && column.isAutoIncrement().booleanValue()) {
+            if (column.isAutoIncrement() != null && column.isAutoIncrement()) {
                 buffer.append(" ").append(database.getAutoIncrementClause()).append(" ");
             }
 
@@ -54,7 +62,7 @@ public class CreateTableChange extends AbstractChange {
                 } else {
 //                    buffer.append(" NULL");
                 }
-                if (constraints.isPrimaryKey() != null && constraints.isPrimaryKey()) {
+                if (pkColumns.size() == 1 && constraints.isPrimaryKey() != null && constraints.isPrimaryKey()) {
                     buffer.append(" PRIMARY KEY");
                 }
 
@@ -92,7 +100,20 @@ public class CreateTableChange extends AbstractChange {
             buffer.append(", ").append(fkConstraints.toString().replaceFirst(",$", ""));
         }
         buffer.append(")");
-        return new String[]{buffer.toString().trim()};
+
+        List<String> statements = new ArrayList<String>();
+        statements.add(buffer.toString().trim());
+
+        if (pkColumns.size() > 1) {
+            AddPrimaryKeyChange addPKChange = new AddPrimaryKeyChange();
+            addPKChange.setTableName(getTableName());
+            addPKChange.setConstraintName(("PK_"+getTableName()).toUpperCase());
+            addPKChange.setColumnNames(StringUtils.join(pkColumns, ","));
+
+            statements.addAll(Arrays.asList(addPKChange.generateStatements(database)));
+        }
+
+        return statements.toArray(new String[statements.size()]);
     }
 
     protected Change[] createInverses() {
