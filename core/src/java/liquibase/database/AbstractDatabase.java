@@ -513,6 +513,12 @@ public abstract class AbstractDatabase implements Database {
 
             } else {
                 String createTableStatement = getCreateChangeLogSQL();
+                if (!canCreateChangeLogTable()) {
+                    throw new JDBCException("Cannot create DatabaseChangeLog table for your database.\n\n" +
+                            "Please construct it manually using the following SQL as a base and re-run LiquiBase:\n\n" +
+                            createTableStatement);
+                }
+
                 // If there is no table in the database for recording change history create one.
                 statementsToExecute.add(createTableStatement);
                 if (migrator.getMode().equals(Migrator.Mode.EXECUTE_MODE)) {
@@ -564,6 +570,10 @@ public abstract class AbstractDatabase implements Database {
                 }
             }
         }
+    }
+
+    protected boolean canCreateChangeLogTable() throws JDBCException {
+        return true;
     }
 
     /**
