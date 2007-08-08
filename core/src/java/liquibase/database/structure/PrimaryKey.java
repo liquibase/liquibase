@@ -1,8 +1,13 @@
 package liquibase.database.structure;
 
+import liquibase.util.StringUtils;
+
+import java.util.SortedSet;
+import java.util.TreeSet;
+
 public class PrimaryKey implements Comparable<PrimaryKey> {
     private String name;
-    private String columnNames;
+    private SortedSet<String> columnNames = new TreeSet<String>();
     private String tableName;
 
 
@@ -15,11 +20,11 @@ public class PrimaryKey implements Comparable<PrimaryKey> {
     }
 
     public String getColumnNames() {
-        return columnNames;
+        return StringUtils.join(columnNames, ", ");
     }
 
-    public void setColumnNames(String columnNames) {
-        this.columnNames = columnNames;
+    public void addColumnName(String columnName) {
+        this.columnNames.add(columnName);
     }
 
     public String getTableName() {
@@ -31,33 +36,33 @@ public class PrimaryKey implements Comparable<PrimaryKey> {
     }
 
 
+    public int compareTo(PrimaryKey o) {
+        int returnValue = this.getTableName().compareTo(o.getTableName());
+        if (returnValue == 0) {
+            returnValue = this.getColumnNames().compareTo(o.getColumnNames());
+        }
+//        if (returnValue == 0) {
+//            returnValue = this.getName().compareTo(o.getName());
+//        }
+
+        return returnValue;
+    }
+
+
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
         PrimaryKey that = (PrimaryKey) o;
 
-        return columnNames.equals(that.columnNames) && tableName.equals(that.tableName);
+        return !(getColumnNames() != null ? !getColumnNames().equals(that.getColumnNames()) : that.getColumnNames() != null) && !(tableName != null ? !tableName.equals(that.tableName) : that.tableName != null);
 
-    }
-
-
-    public int compareTo(PrimaryKey o) {
-        int returnValue = this.getTableName().compareTo(o.getTableName());
-        if (returnValue == 0) {
-            returnValue = this.getColumnNames().compareTo(o.getColumnNames());
-        }
-        if (returnValue == 0) {
-            returnValue = this.getName().compareTo(o.getName());
-        }
-
-        return returnValue;
     }
 
     public int hashCode() {
         int result;
-        result = columnNames.hashCode();
-        result = 31 * result + tableName.hashCode();
+        result = (getColumnNames() != null ? getColumnNames().hashCode() : 0);
+        result = 31 * result + (tableName != null ? tableName.hashCode() : 0);
         return result;
     }
 
