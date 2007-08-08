@@ -74,7 +74,7 @@ public class RollbackDatabaseChangeLogHandler extends BaseChangeLogHandler {
     public void doRollback() throws MigrationFailedException,  JDBCException, IOException {
         for (ChangeSet changeSet : allChangeSets) {
             changeSet.execute();
-            removeRanStatus(changeSet);
+            migrator.removeRanStatus(changeSet);
         }
     }
 

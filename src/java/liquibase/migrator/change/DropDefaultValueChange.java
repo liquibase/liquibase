@@ -1,7 +1,12 @@
 package liquibase.migrator.change;
 
-import liquibase.database.*;
+import liquibase.database.Database;
+import liquibase.database.DerbyDatabase;
+import liquibase.database.MSSQLDatabase;
+import liquibase.database.MySQLDatabase;
+import liquibase.database.OracleDatabase;
 import liquibase.migrator.exception.UnsupportedChangeException;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 

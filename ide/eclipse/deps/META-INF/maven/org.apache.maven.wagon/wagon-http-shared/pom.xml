@@ -1,0 +1,26 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <parent>
+    <artifactId>wagon-providers</artifactId>
+    <groupId>org.apache.maven.wagon</groupId>
+    <version>1.0-beta-2</version>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+  <artifactId>wagon-http-shared</artifactId>
+  <name>Maven Wagon HTTP Shared Library</name>
+  <description>
+    Shared Library for the wagon-http, and wagon-http-lightweight wagon providers.
+  </description>
+
+  <issueManagement>
+    <system>jira</system>
+    <url>http://jira.codehaus.org/browse/WAGONHTTP</url>
+  </issueManagement>
+
+  <dependencies>
+    <dependency>
+      <groupId>jtidy</groupId>
+      <artifactId>jtidy</artifactId>
+      <version>4aug2000r7-dev</version>
+    </dependency>
+  </dependencies>
+</project>

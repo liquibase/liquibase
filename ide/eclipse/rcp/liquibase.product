@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?pde version="3.1"?>
+
+<product name="LiquiBase IDE" id="org.liquibase.rcp.product" application="org.liquibase.rcp.application" useFeatures="true">
+
+   <configIni use="default"/>
+
+   <launcherArgs>
+      <vmArgsMac>-XstartOnFirstThread -Dorg.eclipse.swt.internal.carbon.smallFonts</vmArgsMac>
+   </launcherArgs>
+
+   <windowImages/>
+
+
+   <launcher name="liquibase">
+      <linux icon="/org.liquibase.rcp/icons/alt_launcher.xpm"/>
+      <macosx icon="/org.liquibase.rcp/icons/alt_launcher.icns"/>
+      <solaris/>
+      <win useIco="true">
+         <ico path="/org.liquibase.rcp/icons/alt_launcher.ico"/>
+         <bmp/>
+      </win>
+   </launcher>
+
+   <vm>
+   </vm>
+
+   <plugins>
+      <plugin id="com.ibm.icu"/>
+      <plugin id="com.ibm.icu36.data.update" fragment="true"/>
+      <plugin id="javax.servlet"/>
+      <plugin id="org.apache.commons.logging"/>
+      <plugin id="org.apache.lucene"/>
+      <plugin id="org.apache.lucene.analysis"/>
+      <plugin id="org.eclipse.ant.core"/>
+      <plugin id="org.eclipse.core.commands"/>
+      <plugin id="org.eclipse.core.contenttype"/>
+      <plugin id="org.eclipse.core.databinding"/>
+      <plugin id="org.eclipse.core.expressions"/>
+      <plugin id="org.eclipse.core.filebuffers"/>
+      <plugin id="org.eclipse.core.filesystem"/>
+      <plugin id="org.eclipse.core.filesystem.win32.x86" fragment="true"/>
+      <plugin id="org.eclipse.core.jobs"/>
+      <plugin id="org.eclipse.core.net"/>
+      <plugin id="org.eclipse.core.resources"/>
+      <plugin id="org.eclipse.core.resources.compatibility" fragment="true"/>
+      <plugin id="org.eclipse.core.resources.win32" fragment="true"/>
+      <plugin id="org.eclipse.core.runtime"/>
+      <plugin id="org.eclipse.core.runtime.compatibility.auth"/>
+      <plugin id="org.eclipse.core.runtime.compatibility.registry" fragment="true"/>
+      <plugin id="org.eclipse.core.variables"/>
+      <plugin id="org.eclipse.datatools.connectivity"/>
+      <plugin id="org.eclipse.datatools.connectivity.db.generic"/>
+      <plugin id="org.eclipse.datatools.connectivity.db.generic.ui"/>
+      <plugin id="org.eclipse.datatools.connectivity.sqm.core"/>
+      <plugin id="org.eclipse.datatools.connectivity.sqm.core.ui"/>
+      <plugin id="org.eclipse.datatools.connectivity.sqm.fe.ui"/>
+      <plugin id="org.eclipse.datatools.connectivity.sqm.fe.ui.actions"/>
+      <plugin id="org.eclipse.datatools.connectivity.sqm.server.ui"/>
+      <plugin id="org.eclipse.datatools.connectivity.ui"/>
+      <plugin id="org.eclipse.datatools.connectivity.ui.dse"/>
+      <plugin id="org.eclipse.datatools.doc.isv"/>
+      <plugin id="org.eclipse.datatools.doc.user"/>
+      <plugin id="org.eclipse.datatools.enablement.finfo"/>
+      <plugin id="org.eclipse.datatools.enablement.hsqldb"/>
+      <plugin id="org.eclipse.datatools.enablement.ibm.db2.iseries.dbdefinition"/>
+      <plugin id="org.eclipse.datatools.enablement.ibm.db2.iseries.profile"/>
+      <plugin id="org.eclipse.datatools.enablement.ibm.db2.luw.dbdefinition"/>
+      <plugin id="org.eclipse.datatools.enablement.ibm.db2.luw.profile"/>
+      <plugin id="org.eclipse.datatools.enablement.ibm.db2.zseries.dbdefinition"/>
+      <plugin id="org.eclipse.datatools.enablement.ibm.db2.zseries.profile"/>
+      <plugin id="org.eclipse.datatools.enablement.ibm.informix.dbdefinition"/>
+      <plugin id="org.eclipse.datatools.enablement.ibm.informix.profile"/>
+      <plugin id="org.eclipse.datatools.enablement.msft.sqlserver.dbdefinition"/>
+      <plugin id="org.eclipse.datatools.enablement.msft.sqlserver.profile"/>
+      <plugin id="org.eclipse.datatools.enablement.mysql"/>
+      <plugin id="org.eclipse.datatools.enablement.mysql.dbdefinition"/>
+      <plugin id="org.eclipse.datatools.enablement.mysql.profile"/>
+      <plugin id="org.eclipse.datatools.enablement.oracle.dbdefinition"/>
+      <plugin id="org.eclipse.datatools.enablement.oracle.profile"/>
+      <plugin id="org.eclipse.datatools.enablement.postgresql.dbdefinition"/>
+      <plugin id="org.eclipse.datatools.enablement.postgresql.profile"/>
+      <plugin id="org.eclipse.datatools.enablement.sybase"/>
+      <plugin id="org.eclipse.datatools.enablement.sybase.asa"/>
+      <plugin id="org.eclipse.datatools.enablement.sybase.asa.models"/>
+      <plugin id="org.eclipse.datatools.enablement.sybase.ase.dbdefinition"/>
+      <plugin id="org.eclipse.datatools.enablement.sybase.ase.profile"/>
+      <plugin id="org.eclipse.datatools.help"/>
+      <plugin id="org.eclipse.datatools.intro"/>
+      <plugin id="org.eclipse.datatools.lpg"/>
+      <plugin id="org.eclipse.datatools.modelbase.dbdefinition"/>
+      <plugin id="org.eclipse.datatools.modelbase.derby"/>
+      <plugin id="org.eclipse.datatools.modelbase.sql"/>
+      <plugin id="org.eclipse.datatools.modelbase.sql.edit"/>
+      <plugin id="org.eclipse.datatools.modelbase.sql.query"/>
+      <plugin id="org.eclipse.datatools.modelbase.sql.xml.query"/>
+      <plugin id="org.eclipse.datatools.source"/>
+      <plugin id="org.eclipse.datatools.sqltools.common.ui"/>
+      <plugin id="org.eclipse.datatools.sqltools.data.core"/>
+      <plugin id="org.eclipse.datatools.sqltools.data.ui"/>
+      <plugin id="org.eclipse.datatools.sqltools.db.derby"/>
+      <plugin id="org.eclipse.datatools.sqltools.db.generic"/>
+      <plugin id="org.eclipse.datatools.sqltools.debugger.core"/>
+      <plugin id="org.eclipse.datatools.sqltools.editor.core"/>
+      <plugin id="org.eclipse.datatools.sqltools.parsers.sql"/>
+      <plugin id="org.eclipse.datatools.sqltools.parsers.sql.lexer"/>
+      <plugin id="org.eclipse.datatools.sqltools.parsers.sql.query"/>
+      <plugin id="org.eclipse.datatools.sqltools.parsers.sql.xml.query"/>
+      <plugin id="org.eclipse.datatools.sqltools.plan"/>
+      <plugin id="org.eclipse.datatools.sqltools.result"/>
+      <plugin id="org.eclipse.datatools.sqltools.routineeditor"/>
+      <plugin id="org.eclipse.datatools.sqltools.sql"/>
+      <plugin id="org.eclipse.datatools.sqltools.sqleditor"/>
+      <plugin id="org.eclipse.datatools.sqltools.sqlscrapbook"/>
+      <plugin id="org.eclipse.datatools.sqltools.tabledataeditor"/>
+      <plugin id="org.eclipse.datatools.sqltools.tablewizard"/>
+      <plugin id="org.eclipse.debug.core"/>
+      <plugin id="org.eclipse.debug.ui"/>
+      <plugin id="org.eclipse.draw2d"/>
+      <plugin id="org.eclipse.emf.common"/>
+      <plugin id="org.eclipse.emf.common.ui"/>
+      <plugin id="org.eclipse.emf.commonj.sdo"/>
+      <plugin id="org.eclipse.emf.ecore"/>
+      <plugin id="org.eclipse.emf.ecore.change"/>
+      <plugin id="org.eclipse.emf.ecore.edit"/>
+      <plugin id="org.eclipse.emf.ecore.sdo"/>
+      <plugin id="org.eclipse.emf.ecore.xmi"/>
+      <plugin id="org.eclipse.emf.edit"/>
+      <plugin id="org.eclipse.emf.edit.ui"/>
+      <plugin id="org.eclipse.equinox.app"/>
+      <plugin id="org.eclipse.equinox.common"/>
+      <plugin id="org.eclipse.equinox.http.jetty"/>
+      <plugin id="org.eclipse.equinox.http.servlet"/>
+      <plugin id="org.eclipse.equinox.preferences"/>
+      <plugin id="org.eclipse.equinox.registry"/>
+      <plugin id="org.eclipse.help"/>
+      <plugin id="org.eclipse.help.base"/>
+      <plugin id="org.eclipse.jface"/>
+      <plugin id="org.eclipse.jface.databinding"/>
+      <plugin id="org.eclipse.jface.text"/>
+      <plugin id="org.eclipse.ltk.core.refactoring"/>
+      <plugin id="org.eclipse.osgi"/>
+      <plugin id="org.eclipse.osgi.services"/>
+      <plugin id="org.eclipse.swt"/>
+      <plugin id="org.eclipse.swt.win32.win32.x86" fragment="true"/>
+      <plugin id="org.eclipse.text"/>
+      <plugin id="org.eclipse.ui"/>
+      <plugin id="org.eclipse.ui.console"/>
+      <plugin id="org.eclipse.ui.editors"/>
+      <plugin id="org.eclipse.ui.forms"/>
+      <plugin id="org.eclipse.ui.ide"/>
+      <plugin id="org.eclipse.ui.navigator"/>
+      <plugin id="org.eclipse.ui.navigator.resources"/>
+      <plugin id="org.eclipse.ui.views"/>
+      <plugin id="org.eclipse.ui.views.properties.tabbed"/>
+      <plugin id="org.eclipse.ui.win32" fragment="true"/>
+      <plugin id="org.eclipse.ui.workbench"/>
+      <plugin id="org.eclipse.ui.workbench.texteditor"/>
+      <plugin id="org.eclipse.update.configurator"/>
+      <plugin id="org.eclipse.update.core"/>
+      <plugin id="org.eclipse.update.core.win32" fragment="true"/>
+      <plugin id="org.eclipse.update.scheduler"/>
+      <plugin id="org.eclipse.update.ui"/>
+      <plugin id="org.liquibase.ide.common"/>
+      <plugin id="org.liquibase.migrator"/>
+      <plugin id="org.liquibase.migrator.deps"/>
+      <plugin id="org.liquibase.rcp"/>
+      <plugin id="org.mortbay.jetty"/>
+   </plugins>
+
+   <features>
+      <feature id="org.liquibase.rcp.feature" version="0.1.0"/>
+   </features>
+
+</product>

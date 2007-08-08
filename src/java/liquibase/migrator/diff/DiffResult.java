@@ -1,22 +1,31 @@
 package liquibase.migrator.diff;
 
-import com.sun.org.apache.xml.internal.serialize.OutputFormat;
-import com.sun.org.apache.xml.internal.serialize.XMLSerializer;
-import liquibase.database.Database;
-import liquibase.database.structure.*;
-import liquibase.migrator.change.*;
-import liquibase.migrator.exception.JDBCException;
-import liquibase.migrator.parser.MigratorSchemaResolver;
-import liquibase.util.StringUtils;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.util.*;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.util.*;
+
+import liquibase.database.Database;
+import liquibase.database.structure.Column;
+import liquibase.database.structure.ForeignKey;
+import liquibase.database.structure.Index;
+import liquibase.database.structure.PrimaryKey;
+import liquibase.database.structure.Sequence;
+import liquibase.database.structure.Table;
+import liquibase.database.structure.View;
+import liquibase.migrator.change.*;
+import liquibase.migrator.exception.JDBCException;
+import liquibase.migrator.parser.MigratorSchemaResolver;
+import liquibase.util.StringUtils;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
+import com.sun.org.apache.xml.internal.serialize.OutputFormat;
+import com.sun.org.apache.xml.internal.serialize.XMLSerializer;
 
 public class DiffResult {
 

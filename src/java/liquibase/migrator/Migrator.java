@@ -1,29 +1,51 @@
 package liquibase.migrator;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Writer;
+import java.net.URL;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.text.DateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Properties;
+import java.util.Set;
+import java.util.logging.Logger;
+
+import javax.swing.JOptionPane;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
+
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.migrator.exception.DatabaseHistoryException;
 import liquibase.migrator.exception.JDBCException;
 import liquibase.migrator.exception.MigrationFailedException;
 import liquibase.migrator.exception.ValidationFailedException;
-import liquibase.migrator.parser.*;
+import liquibase.migrator.parser.ChangeFactory;
+import liquibase.migrator.parser.FindChangeSetsHandler;
+import liquibase.migrator.parser.MigratorSchemaResolver;
+import liquibase.migrator.parser.RollbackDatabaseChangeLogHandler;
+import liquibase.migrator.parser.RollbackFutureDatabaseChangeLogHandler;
+import liquibase.migrator.parser.UpdateDatabaseChangeLogHandler;
+import liquibase.migrator.parser.ValidateChangeLogHandler;
 import liquibase.util.StreamUtil;
+import liquibase.util.StringUtils;
 
-import org.xml.sax.*;
-
-import javax.swing.JOptionPane;
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.Writer;
-import java.net.URL;
-import java.sql.*;
-import java.text.DateFormat;
-import java.util.*;
-import java.util.Date;
-import java.util.logging.Logger;
+import org.xml.sax.ContentHandler;
+import org.xml.sax.ErrorHandler;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXNotRecognizedException;
+import org.xml.sax.SAXNotSupportedException;
+import org.xml.sax.SAXParseException;
+import org.xml.sax.XMLReader;
 
 /**
  * Core class of the LiquiBase migrator.
@@ -672,6 +694,7 @@ public class Migrator {
                 "Confirm", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.NO_OPTION;
     }
 
+
     public boolean contextMatches(ChangeSet changeSet) {
         Set<String> requiredContexts = getContexts();
         String changeSetContext = changeSet.getContext();
@@ -689,6 +712,96 @@ public class Migrator {
         return FindChangeSetsHandler.getUnrunChangeSets();
     }
 
+    /**
+     * After the change set has been ran against the database this method will update the change log table
+     * with the information.
+     */
+    public void markChangeSetAsRan(ChangeSet changeSet) throws JDBCException, IOException {
+        String dateValue = getDatabase().getCurrentDateTimeFunction();
+        String sql = "INSERT INTO DATABASECHANGELOG (ID, AUTHOR, FILENAME, DATEEXECUTED, MD5SUM, DESCRIPTION, COMMENTS, LIQUIBASE) VALUES ('?', '?', '?', " + dateValue + ", '?', '?', '?', '?')";
+        sql = sql.replaceFirst("\\?", escapeStringForDatabase(escapeStringForDatabase(changeSet.getId())));
+        sql = sql.replaceFirst("\\?", escapeStringForDatabase(changeSet.getAuthor()));
+        sql = sql.replaceFirst("\\?", escapeStringForDatabase(changeSet.getDatabaseChangeLog().getFilePath()));
+        sql = sql.replaceFirst("\\?", escapeStringForDatabase(changeSet.getMd5sum()));
+        sql = sql.replaceFirst("\\?", escapeStringForDatabase(limitSize(changeSet.getDescription())));
+        sql = sql.replaceFirst("\\?", escapeStringForDatabase(limitSize(StringUtils.trimToEmpty(changeSet.getComments()))));
+        sql = sql.replaceFirst("\\?", escapeStringForDatabase(changeSet.getDatabaseChangeLog().getMigrator().getBuildVersion()));
+
+        Writer sqlOutputWriter = getOutputSQLWriter();
+        if (sqlOutputWriter == null) {
+            Connection connection = getDatabase().getConnection();
+            try {
+                Statement statement = connection.createStatement();
+                statement.executeUpdate(sql);
+                statement.close();
+                connection.commit();
+            } catch (SQLException e) {
+                throw new JDBCException(e);
+            }
+        } else {
+            sqlOutputWriter.write(sql + ";" + StreamUtil.getLineSeparator() + StreamUtil.getLineSeparator());
+        }
+
+        getRanChangeSetList().add(new RanChangeSet(changeSet));
+    }
+    
+    public void markChangeSetAsReRan(ChangeSet changeSet) throws JDBCException, IOException {
+        String dateValue = changeSet.getDatabaseChangeLog().getMigrator().getDatabase().getCurrentDateTimeFunction();
+        String sql = "UPDATE DATABASECHANGELOG SET DATEEXECUTED=" + dateValue + ", MD5SUM='?' WHERE ID='?' AND AUTHOR='?' AND FILENAME='?'";
+        sql = sql.replaceFirst("\\?", escapeStringForDatabase(changeSet.getMd5sum()));
+        sql = sql.replaceFirst("\\?", escapeStringForDatabase(changeSet.getId()));
+        sql = sql.replaceFirst("\\?", escapeStringForDatabase(changeSet.getAuthor()));
+        sql = sql.replaceFirst("\\?", escapeStringForDatabase(changeSet.getDatabaseChangeLog().getFilePath()));
+
+        Writer sqlOutputWriter = getOutputSQLWriter();
+        if (sqlOutputWriter == null) {
+            Connection connection = getDatabase().getConnection();
+            try {
+                Statement statement = connection.createStatement();
+                statement.executeUpdate(sql);
+                statement.close();
+                connection.commit();
+            } catch (SQLException e) {
+                throw new JDBCException(e);
+            }
+        } else {
+            sqlOutputWriter.write(sql + ";" + StreamUtil.getLineSeparator() + StreamUtil.getLineSeparator());
+        }
+    }
+    
+    public void removeRanStatus(ChangeSet changeSet) throws JDBCException, IOException {
+        String sql = "DELETE FROM DATABASECHANGELOG WHERE ID='?' AND AUTHOR='?' AND FILENAME='?'";
+        sql = sql.replaceFirst("\\?", escapeStringForDatabase(changeSet.getId()));
+        sql = sql.replaceFirst("\\?", escapeStringForDatabase(changeSet.getAuthor()));
+        sql = sql.replaceFirst("\\?", escapeStringForDatabase(changeSet.getDatabaseChangeLog().getFilePath()));
+
+        Writer sqlOutputWriter = getOutputSQLWriter();
+        if (sqlOutputWriter == null) {
+            Connection connection = getDatabase().getConnection();
+            try {
+                Statement statement = connection.createStatement();
+                statement.executeUpdate(sql);
+                statement.close();
+                connection.commit();
+            } catch (SQLException e) {
+                throw new JDBCException(e);
+            }
+        } else {
+            sqlOutputWriter.write(sql + ";" + StreamUtil.getLineSeparator() + StreamUtil.getLineSeparator());
+        }
+    }
+
+    private String escapeStringForDatabase(String string) {
+        return string.replaceAll("'", "''");
+    }
+    
+    private String limitSize(String string) {
+        int maxLength = 255;
+        if (string.length() > maxLength) {
+            return string.substring(0, maxLength - 3) + "...";
+        }
+        return string;
+    }
 
     /**
      * Sets checksums to null so they will be repopulated next run

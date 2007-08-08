@@ -1,13 +1,19 @@
 package liquibase.migrator.change;
 
-import liquibase.database.*;
-import liquibase.migrator.exception.UnsupportedChangeException;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import liquibase.database.DB2Database;
+import liquibase.database.Database;
+import liquibase.database.DerbyDatabase;
+import liquibase.database.HsqlDatabase;
+import liquibase.database.MSSQLDatabase;
+import liquibase.database.OracleDatabase;
+import liquibase.migrator.exception.UnsupportedChangeException;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 /**
  * Extracts data from an existing column to create a lookup table.

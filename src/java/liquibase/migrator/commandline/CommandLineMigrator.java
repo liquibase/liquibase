@@ -1,17 +1,15 @@
 package liquibase.migrator.commandline;
 
-import liquibase.database.DatabaseFactory;
-import liquibase.migrator.*;
-import liquibase.migrator.diff.Diff;
-import liquibase.migrator.diff.DiffResult;
-import liquibase.migrator.diff.DiffStatusListener;
-import liquibase.migrator.exception.CommandLineParsingException;
-import liquibase.migrator.exception.JDBCException;
-import liquibase.migrator.exception.ValidationFailedException;
-import liquibase.util.StreamUtil;
-
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintStream;
+import java.io.Writer;
 import java.lang.reflect.Field;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -23,11 +21,29 @@ import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import javax.xml.parsers.ParserConfigurationException;
+
+import liquibase.database.DatabaseFactory;
+import liquibase.migrator.*;
+import liquibase.migrator.diff.Diff;
+import liquibase.migrator.diff.DiffResult;
+import liquibase.migrator.diff.DiffStatusListener;
+import liquibase.migrator.exception.CommandLineParsingException;
+import liquibase.migrator.exception.JDBCException;
+import liquibase.migrator.exception.ValidationFailedException;
+import liquibase.util.StreamUtil;
 
 /**
  * Class for executing LiquiBase via the command line.

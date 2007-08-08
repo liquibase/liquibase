@@ -1,9 +1,9 @@
 package liquibase.migrator.parser;
 
-import liquibase.migrator.change.*;
-
 import java.util.HashMap;
 import java.util.Map;
+
+import liquibase.migrator.change.*;
 
 /**
  * Factory class for constructing the correct liquibase.migrator.change.Change implementation based on the tag name.

@@ -1,12 +1,13 @@
 package liquibase.migrator.change;
 
-import liquibase.database.*;
-import liquibase.migrator.exception.UnsupportedChangeException;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import liquibase.database.*;
+import liquibase.migrator.exception.UnsupportedChangeException;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 /**
  * Adds a not-null constraint to an existing column.

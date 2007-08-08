@@ -1,14 +1,21 @@
 package liquibase.migrator.diff;
 
-import liquibase.database.Database;
-import liquibase.database.DatabaseFactory;
-import liquibase.database.structure.*;
-import liquibase.migrator.exception.JDBCException;
-
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Set;
+
+import liquibase.database.Database;
+import liquibase.database.DatabaseFactory;
+import liquibase.database.structure.Column;
+import liquibase.database.structure.DatabaseSnapshot;
+import liquibase.database.structure.ForeignKey;
+import liquibase.database.structure.Index;
+import liquibase.database.structure.PrimaryKey;
+import liquibase.database.structure.Sequence;
+import liquibase.database.structure.Table;
+import liquibase.database.structure.View;
+import liquibase.migrator.exception.JDBCException;
 
 public class Diff {
 

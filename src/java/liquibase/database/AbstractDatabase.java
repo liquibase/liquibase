@@ -1,5 +1,20 @@
 package liquibase.database;
 
+import java.io.IOException;
+import java.net.InetAddress;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.logging.Logger;
+
+import liquibase.database.structure.DatabaseSnapshot;
 import liquibase.migrator.DatabaseChangeLogLock;
 import liquibase.migrator.Migrator;
 import liquibase.migrator.change.ColumnConfig;
@@ -8,16 +23,6 @@ import liquibase.migrator.exception.JDBCException;
 import liquibase.migrator.exception.MigrationFailedException;
 import liquibase.migrator.exception.UnsupportedChangeException;
 import liquibase.util.StreamUtil;
-import liquibase.database.structure.DatabaseSnapshot;
-
-import java.io.IOException;
-import java.net.InetAddress;
-import java.sql.*;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.logging.Logger;
 
 /**
  * AbstractDatabase is extended by all supported databases as a facade to the underlying database.

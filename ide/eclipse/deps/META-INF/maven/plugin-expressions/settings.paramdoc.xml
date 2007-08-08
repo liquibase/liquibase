@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<paramdoc xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 ../../../../../../../maven-plugin-parameter-documenter/target/generated-site/xsd/paramdoc-1.0.0.xsd ">
+  <expressions>
+    <expression>
+      <syntax>settings.offline</syntax>
+      <configuration>
+        <![CDATA[
+    <offline>true</offline>
+    ]]></configuration>
+      <description>
+        <![CDATA[
+      Flags the system as offline, to prevent accessing the network to resolve artifacts or execute plugins.
+
+      NOTE: It's also possible to switch to offline mode on a per-build basis, using the '-o' command-line option.
+    ]]></description>
+    </expression>
+    <expression>
+      <syntax>settings.interactiveMode</syntax>
+      <configuration>
+        <![CDATA[
+    <interactiveMode>true</interactiveMode>
+    ]]></configuration>
+      <description>
+        <![CDATA[
+      If false, flags the system to skip prompting the user for any information, or holding up the build
+      waiting for any input.
+
+      NOTE: It's also possible to switch to batch (ie. non-interactive) mode using the '-B' command-line option.
+    ]]></description>
+    </expression>
+  </expressions>
+</paramdoc>
