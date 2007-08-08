@@ -1,18 +1,16 @@
 package liquibase.migrator.ant;
 
+import liquibase.migrator.AbstractFileOpenerTest;
+import liquibase.migrator.FileOpener;
+import org.apache.tools.ant.Project;
+import org.apache.tools.ant.types.Path;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import org.junit.Test;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Enumeration;
-
-import liquibase.migrator.AbstractFileOpenerTest;
-import liquibase.migrator.FileOpener;
-
-import org.apache.tools.ant.Project;
-import org.apache.tools.ant.types.Path;
-import org.junit.Test;
 
 /**
  * Tests for {@link AntFileOpener}
@@ -34,9 +32,9 @@ public class AntFileOpenerTest extends AbstractFileOpenerTest {
       assertNotNull(inputStream);
     }
 
-    @Test(expected = IOException.class)
+    @Test
     public void getResourceAsStreamNonExistantFile() throws Exception {
-      fileOpener.getResourceAsStream("non/existant/file.txt");
+      assertNull(fileOpener.getResourceAsStream("non/existant/file.txt"));
     }
 
     @Test
