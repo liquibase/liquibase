@@ -144,7 +144,7 @@ public class AddNotNullConstraintChange extends AbstractChange {
         if (defaultNullValue != null) {
             statements.add(generateUpdateStatement());
         }
-        statements.add("ALTER TABLE " + getTableName() + " ALTER COLUMN  " + getColumnName() + " "+getColumnDataType()+" NOT NULL");
+        statements.add("ALTER TABLE " + getTableName() + " ALTER COLUMN  " + getColumnName() + " NOT NULL");
 
         return statements.toArray(new String[statements.size()]);
     }
