@@ -28,7 +28,7 @@ public class DB2Database extends AbstractDatabase {
         return "db2";
     }
 
-    public String getSchemaName() throws JDBCException {
+    public String getSchemaName() throws JDBCException {//NOPMD
         return super.getSchemaName().toUpperCase();
     }
 
@@ -76,19 +76,19 @@ public class DB2Database extends AbstractDatabase {
             StringBuffer val = new StringBuffer();
             val.append("DATE(");
             val.append(normalLiteral);
-            val.append(")");
+            val.append(')');
             return val.toString();
         } else if (isTimeOnly(isoDate)) {
             StringBuffer val = new StringBuffer();
             val.append("TIME(");
             val.append(normalLiteral);
-            val.append(")");
+            val.append(')');
             return val.toString();
         } else if (isDateTime(isoDate)) {
             StringBuffer val = new StringBuffer();
             val.append("TIMESTAMP(");
             val.append(normalLiteral);
-            val.append(")");
+            val.append(')');
             return val.toString();
         } else {
             return "UNSUPPORTED:" + isoDate;

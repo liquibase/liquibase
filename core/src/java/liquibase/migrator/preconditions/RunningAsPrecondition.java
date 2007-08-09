@@ -26,10 +26,10 @@ public class RunningAsPrecondition implements Precondition {
     public boolean checkUserName(Migrator migrator) {
         try {
             String loggedusername = migrator.getDatabase().getConnection().getMetaData().getUserName();
-            loggedusername = loggedusername.substring(0, loggedusername.indexOf("@"));
+            loggedusername = loggedusername.substring(0, loggedusername.indexOf('@'));
             return username.equals(loggedusername);
         } catch (SQLException e) {
-            throw new RuntimeException("Cannot determine username");
+            throw new RuntimeException("Cannot determine username", e);
         }
     }
 

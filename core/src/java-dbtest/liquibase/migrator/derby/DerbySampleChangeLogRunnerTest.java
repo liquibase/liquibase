@@ -16,7 +16,7 @@ public class DerbySampleChangeLogRunnerTest extends AbstractSimpleChangeLogRunne
         try {
             driver.connect("jdbc:derby:liquibase;shutdown=true", new Properties());
         } catch (SQLException e) {
-            ;//clean shutdown throws exception.
+            ;//clean shutdown throws exception.//NOPMD
         }
         super.tearDown();
     }

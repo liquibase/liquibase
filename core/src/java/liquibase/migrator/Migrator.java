@@ -809,9 +809,16 @@ public class Migrator {
     public void clearCheckSums() throws JDBCException {
         Connection connection = getDatabase().getConnection();
         try {
-            Statement statement = connection.createStatement();
-            statement.execute("update databasechangelog set md5sum=null".toUpperCase());
-            connection.commit();
+            Statement statement = null;
+            try {
+                statement = connection.createStatement();
+                statement.execute("update databasechangelog set md5sum=null".toUpperCase());
+                connection.commit();
+            } finally {
+                if (statement != null) {
+                    statement.close();
+                }
+            }
         } catch (SQLException e) {
             throw new JDBCException(e);
         }

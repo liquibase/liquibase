@@ -52,7 +52,7 @@ public class StreamUtil {
         } finally {
             try {
                 reader.close();
-            } catch (IOException ioe) {
+            } catch (IOException ioe) {//NOPMD
                 // can safely ignore
             }
         }

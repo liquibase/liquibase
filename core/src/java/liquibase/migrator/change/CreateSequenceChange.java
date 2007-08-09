@@ -93,10 +93,9 @@ public class CreateSequenceChange extends AbstractChange {
         }
 
         String[] statements = new String[]{buffer.toString().trim()};
-        if (database instanceof OracleDatabase) {
-            if (ordered != null && ordered) {
+        if (database instanceof OracleDatabase
+            && ordered != null && ordered) {
                 statements[0] += " ORDER";
-            }
         }
 
         return statements;

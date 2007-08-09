@@ -15,11 +15,11 @@ public class MigratorSchemaResolver implements EntityResolver {
 
     public InputSource resolveEntity(String publicId, String systemId) throws IOException {
         if (systemId != null) {
-            int iSlash = systemId.lastIndexOf("/");
+            int iSlash = systemId.lastIndexOf('/');
             if (iSlash >= 0) {
                 String xsdFile = systemId.substring(iSlash + 1);
                 try {
-                    InputStream resourceAsStream = getClass().getClassLoader().getResourceAsStream(SEARCH_PACKAGE + xsdFile);
+                    InputStream resourceAsStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(SEARCH_PACKAGE + xsdFile);
                     if (resourceAsStream == null) {
                         return null;
                     }

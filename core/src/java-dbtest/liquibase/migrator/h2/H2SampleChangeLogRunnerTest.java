@@ -10,9 +10,4 @@ public class H2SampleChangeLogRunnerTest extends AbstractSimpleChangeLogRunnerTe
         username="sa";
         password="";
     }
-
-
-    protected void tearDown() throws Exception {
-        super.tearDown();
-    }
 }

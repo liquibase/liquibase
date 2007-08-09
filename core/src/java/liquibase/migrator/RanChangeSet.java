@@ -60,14 +60,16 @@ public class RanChangeSet {
     }
 
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
         final RanChangeSet that = (RanChangeSet) o;
 
-        if (!author.equals(that.author)) return false;
-        if (!changeLog.equals(that.changeLog)) return false;
-        return id.equals(that.id);
+        return author.equals(that.author) && changeLog.equals(that.changeLog) && id.equals(that.id);
 
     }
 

@@ -15,9 +15,15 @@ public class HsqlSampleChangeLogRunnerTest  extends AbstractSimpleChangeLogRunne
 
 
     protected void tearDown() throws Exception {
-        Statement statement = connection.createStatement();
-        statement.execute("SHUTDOWN");
-        statement.close();
+        Statement statement = null;
+        try {
+            statement = connection.createStatement();
+            statement.execute("SHUTDOWN");
+        } finally {
+            if (statement != null) {
+                statement.close();
+            }
+        }
 
         super.tearDown();
     }

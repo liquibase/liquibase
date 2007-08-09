@@ -338,17 +338,26 @@ public class DatabaseSnapshot {
         updateListeners("Reading sequences for "+database.toString()+" ...");
 
         if (database.supportsSequences()) {
-            Statement stmt = database.getConnection().createStatement();
-            ResultSet rs = stmt.executeQuery(database.createFindSequencesSQL());
+            ResultSet rs = null;
+            Statement stmt = null;
+            try {
+                stmt = database.getConnection().createStatement();
+                rs = stmt.executeQuery(database.createFindSequencesSQL());
 
-            while (rs.next()) {
-                Sequence seq = new Sequence();
-                seq.setName(rs.getString("SEQUENCE_NAME"));
+                while (rs.next()) {
+                    Sequence seq = new Sequence();
+                    seq.setName(rs.getString("SEQUENCE_NAME"));
 
-                sequences.add(seq);
+                    sequences.add(seq);
+                }
+            } finally {
+                if (rs != null) {
+                    rs.close();
+                }
+                if (stmt != null) {
+                    stmt.close();
+                }
             }
-
-            rs.close();
         }
     }
 

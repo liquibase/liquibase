@@ -113,7 +113,7 @@ public class CommandLineMigrator {
             if (e.getCause() instanceof ValidationFailedException) {
                 ((ValidationFailedException) e.getCause()).printDescriptiveError(System.out);
             } else {
-                System.out.println("Migration Failed: " + message + (Logger.getLogger(Migrator.DEFAULT_LOG_NAME).equals(Level.OFF) ? ".  For more information, use the --logLevel flag" : ""));
+                System.out.println("Migration Failed: " + message + (Logger.getLogger(Migrator.DEFAULT_LOG_NAME).getLevel().equals(Level.OFF) ? ".  For more information, use the --logLevel flag" : ""));
                 Logger.getLogger(Migrator.DEFAULT_LOG_NAME).log(Level.SEVERE, message, e);
             }
             return;
