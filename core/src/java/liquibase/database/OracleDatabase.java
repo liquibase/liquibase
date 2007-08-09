@@ -87,7 +87,7 @@ public class OracleDatabase extends AbstractDatabase {
     }
 
 
-    public String getSchemaName() throws JDBCException {
+    public String getSchemaName() throws JDBCException {//NOPMD
         return super.getSchemaName().toUpperCase();
     }
 
@@ -119,7 +119,7 @@ public class OracleDatabase extends AbstractDatabase {
             val.append(", 'HH24:MI:SS')");
             return val.toString();
         } else if (isDateTime(isoDate)) {
-            StringBuffer val = new StringBuffer();
+            StringBuffer val = new StringBuffer(26);
             val.append("to_date(");
             val.append(normalLiteral);
             val.append(", 'YYYY-MM-DD HH24:MI:SS')");

@@ -86,10 +86,9 @@ public class AlterSequenceChange extends AbstractChange {
         }
 
         String[] returnStrings = new String[]{buffer.toString().trim()};
-        if (database instanceof OracleDatabase) {
-            if (ordered != null && ordered) {
+        if (database instanceof OracleDatabase
+            && ordered != null && ordered) {
                 returnStrings[0] += " ORDER";
-            }
         }
 
         return returnStrings;

@@ -162,7 +162,7 @@ public class ColumnConfig {
             element.setAttribute("valueDate", getValueDate());
         }
 
-        if (isAutoIncrement() != null && isAutoIncrement().booleanValue()) {
+        if (isAutoIncrement() != null && isAutoIncrement()) {
             element.setAttribute("autoIncrement", "true");
         }
 

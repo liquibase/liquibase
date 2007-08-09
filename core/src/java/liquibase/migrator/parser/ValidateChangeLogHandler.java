@@ -38,8 +38,10 @@ public class ValidateChangeLogHandler extends BaseChangeLogHandler {
         if (duplicateChangeSets == null) {
             duplicateChangeSets = new HashSet<ChangeSet>();
         }
-        
-        setupExceptions = new ArrayList<SetupException>();
+
+        if (setupExceptions != null) {
+            setupExceptions = new ArrayList<SetupException>();
+        }
     }
 
     protected void handleChangeSet(ChangeSet changeSet) throws JDBCException, DatabaseHistoryException, MigrationFailedException, IOException {

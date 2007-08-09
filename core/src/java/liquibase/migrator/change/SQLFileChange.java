@@ -69,15 +69,18 @@ public class SQLFileChange extends AbstractChange {
     }
     
     public void setUp() throws SetupException {
-        if (file == null)
+        if (file == null) {
             throw new SetupException("<sqlfile> - No path specified");
+        }
         
         boolean loaded = loadFromClasspath(file);
-        if(!loaded)
+        if(!loaded) {
             loaded = loadFromFileSystem(file);
+        }
 
-        if (!loaded)
+        if (!loaded) {
             throw new SetupException("<sqlfile path="+file+"> - Could not find file");
+        }
     }
 
     /**
@@ -101,7 +104,7 @@ public class SQLFileChange extends AbstractChange {
             if (fis != null) {
                 try {
                     fis.close();
-                } catch (IOException ioe) {
+                } catch (IOException ioe) {//NOPMD
                     // safe to ignore
                 }
             }
@@ -122,12 +125,14 @@ public class SQLFileChange extends AbstractChange {
         InputStream in = null;
         try {
             FileOpener fo = getFileOpener();
-            if(fo== null)
+            if(fo== null) {
                 return false;
+            }
             
             in = fo.getResourceAsStream(file);
-            if (in == null)
+            if (in == null) {
                 return false;
+            }
             sql = StreamUtil.getStreamContents(in);
             return true;
         } catch (IOException ioe) {
@@ -136,7 +141,7 @@ public class SQLFileChange extends AbstractChange {
             if (in != null) {
                 try {
                     in.close();
-                } catch (IOException ioe) {
+                } catch (IOException ioe) {//NOPMD
                     // safe to ignore
                 }
             }
@@ -163,10 +168,9 @@ public class SQLFileChange extends AbstractChange {
      */
     public String[] generateStatements(Database database)
             throws UnsupportedChangeException {
+
         //strip ; from end of statements
-        String[] statements = StringUtils.splitSQL(sql);
-        
-        return statements;
+        return StringUtils.splitSQL(sql);
     }
 
     public String getConfirmationMessage() {

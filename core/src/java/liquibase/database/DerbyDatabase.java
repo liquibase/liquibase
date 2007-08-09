@@ -25,7 +25,7 @@ public class DerbyDatabase extends AbstractDatabase {
         return "derby";
     }
 
-    public String getSchemaName() throws JDBCException {
+    public String getSchemaName() throws JDBCException {//NOPMD
         return super.getSchemaName().toUpperCase();
     }
 
