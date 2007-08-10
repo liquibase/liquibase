@@ -620,4 +620,12 @@
          </action>
       </objectContribution>
    </extension>
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            class="org.liquibase.ide.common.preferences.GeneralPreferencesPage"
+            id="org.liquibase.preferences.liquibase"
+            name="LiquiBase">
+      </page>
+   </extension>
  </plugin>

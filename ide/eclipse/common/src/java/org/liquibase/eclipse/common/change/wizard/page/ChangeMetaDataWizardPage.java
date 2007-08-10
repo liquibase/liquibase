@@ -4,6 +4,8 @@ import java.util.Date;
 
 import liquibase.util.StringUtils;
 
+import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.preference.PreferenceDialog;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -11,10 +13,11 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.liquibase.eclipse.common.LiquibasePreferences;
+import org.liquibase.ide.common.preferences.GeneralPreferencesPage;
 
 public class ChangeMetaDataWizardPage extends RefactorWizardPage {
 
@@ -31,7 +34,7 @@ public class ChangeMetaDataWizardPage extends RefactorWizardPage {
 	
 	public ChangeMetaDataWizardPage() {
 		super("metaData");
-		setTitle("Change Information");
+		setTitle("Change Set Information");
 		setDescription("Set Additional Change Information");
 
 	}
@@ -48,7 +51,7 @@ public class ChangeMetaDataWizardPage extends RefactorWizardPage {
 		changeLogSelector.setLayout(new GridLayout(2, false));
 		
 		Label changeLogLabel = new Label(changeLogSelector, SWT.NONE);
-		changeLogLabel.setText(LiquibasePreferences.getCurrentChangeLogFileName());
+		changeLogLabel.setText(LiquibasePreferences.getCurrentChangeLog());
 		changeLogLabel.setLayoutData(new GridData(GridData.FILL, GridData.CENTER, true, false));
 		
 		Button selectChangeLogButton = new Button(changeLogSelector, SWT.PUSH);
@@ -135,17 +138,20 @@ public class ChangeMetaDataWizardPage extends RefactorWizardPage {
 		}
 
 		public void widgetSelected(SelectionEvent e) {
-			FileDialog fd = new FileDialog(changeLogLabel.getShell(), SWT.OPEN);
-	        fd.setText("Select Current Change Log");
-	        String[] filterExt = { "*.xml", "*.*" };
-	        fd.setFilterExtensions(filterExt);
-	        fd.setFileName(LiquibasePreferences.getCurrentChangeLogFileName());
-	        String selected = fd.open();
-	        
-	        if (selected != null) {
-	        	LiquibasePreferences.setCurrentChangeLogFileName(selected);
-	        	changeLogLabel.setText(selected);
-	        }
+//			FileDialog fd = new FileDialog(changeLogLabel.getShell(), SWT.OPEN);
+//	        fd.setText("Select Current Change Log");
+//	        String[] filterExt = { "*.xml", "*.*" };
+//	        fd.setFilterExtensions(filterExt);
+//	        fd.setFileName(LiquibasePreferences.getCurrentChangeLogFileName());
+//	        String selected = fd.open();
+
+			PreferenceDialog dialog = PreferencesUtil.createPreferenceDialogOn(changeLogLabel.getShell(), GeneralPreferencesPage.ID, null, null);
+			if (dialog.open() == Dialog.OK) {
+//	        if (selected != null) {
+//	        	LiquibasePreferences.setCurrentChangeLogFileName(selected);
+	        	changeLogLabel.setText(LiquibasePreferences.getCurrentChangeLog());
+//	        }
+			}
 		}
 		
 	}

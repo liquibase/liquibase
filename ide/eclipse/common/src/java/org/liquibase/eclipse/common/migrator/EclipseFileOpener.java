@@ -6,7 +6,9 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.List;
 
 import liquibase.migrator.FileOpener;
 
@@ -18,9 +20,11 @@ public class EclipseFileOpener implements FileOpener {
 
     public EclipseFileOpener()  {
         try {
-			this.loader = new URLClassLoader(new URL[] {
-					new File(LiquibasePreferences.getCurrentChangeLogFileName()).getParentFile().toURL(),
-			});
+    	List<URL> urls = new ArrayList<URL>();
+	    	for (File root : LiquibasePreferences.getRoots()) {
+	    		urls.add(root.toURI().toURL());
+	    	}
+			this.loader = new URLClassLoader(urls.toArray(new URL[urls.size()]));
 		} catch (MalformedURLException e) {
 			throw new RuntimeException(e);
 		}
