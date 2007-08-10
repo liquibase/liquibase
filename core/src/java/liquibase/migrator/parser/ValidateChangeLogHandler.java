@@ -39,7 +39,7 @@ public class ValidateChangeLogHandler extends BaseChangeLogHandler {
             duplicateChangeSets = new HashSet<ChangeSet>();
         }
 
-        if (setupExceptions != null) {
+        if (setupExceptions == null) {
             setupExceptions = new ArrayList<SetupException>();
         }
     }
