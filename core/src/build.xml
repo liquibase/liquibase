@@ -160,7 +160,7 @@ The available targets at the current stage:
 	<!-- target: PACKAGE -->
     <target name="package" depends="compile">
         <jar destfile="${release.dir}/liquibase-SNAPSHOT.jar" basedir="${build.dir}"
-             manifest="${src.dir}/META-INF/MANIFEST.MF"/>
+             manifest="${src.dir}/../META-INF/MANIFEST.MF"/>
 
         <copy tofile="${package.dir}/liquibase-${build.version}/liquibase-${build.version}.jar" file="${release.dir}/liquibase-SNAPSHOT.jar"/>
         <copy todir="${package.dir}/liquibase-${build.version}">
@@ -212,7 +212,7 @@ The available targets at the current stage:
         <retroweaver srcdir="${build.dir}"/>
 
         <jar destfile="${release.dir}/${ant.project.name}-SNAPSHOT-14jvm.jar"
-             manifest="${src.dir}/META-INF/MANIFEST.MF" index="true">
+             manifest="${src.dir}/../META-INF/MANIFEST.MF" index="true">
             <zipfileset dir="${build.dir}"/>
             <zipgroupfileset dir="${lib.14jvm.dir}" includes="retroweaver-rt-*.jar"/>
         </jar>
