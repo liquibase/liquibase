@@ -1,19 +1,5 @@
 package liquibase.database;
 
-import java.io.IOException;
-import java.net.InetAddress;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.logging.Logger;
-
 import liquibase.database.structure.DatabaseSnapshot;
 import liquibase.migrator.DatabaseChangeLogLock;
 import liquibase.migrator.Migrator;
@@ -23,6 +9,15 @@ import liquibase.migrator.exception.JDBCException;
 import liquibase.migrator.exception.MigrationFailedException;
 import liquibase.migrator.exception.UnsupportedChangeException;
 import liquibase.util.StreamUtil;
+
+import java.io.IOException;
+import java.net.InetAddress;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.logging.Logger;
 
 /**
  * AbstractDatabase is extended by all supported databases as a facade to the underlying database.
@@ -35,6 +30,8 @@ public abstract class AbstractDatabase implements Database {
     protected Logger log;
     private boolean changeLogTableExists;
     private boolean changeLogLockTableExists;
+    private boolean changeLogCreateAttempted;
+    private boolean changeLogLockCreateAttempted;
 
     private static boolean outputtedLockWarning = false;
 
@@ -473,13 +470,13 @@ public abstract class AbstractDatabase implements Database {
         Connection connection = getConnection();
         ResultSet checkTableRS = null;
         ResultSet checkColumnsRS = null;
-        changeLogTableExists = true;
         List<String> statementsToExecute = new ArrayList<String>();
         boolean wroteToOutput = false;
 
         try {
             checkTableRS = connection.getMetaData().getTables(getCatalogName(), getSchemaName(), getDatabaseChangeLogTableName(), new String[]{"TABLE"});
             if (checkTableRS.next()) {
+                changeLogTableExists = true;
                 checkColumnsRS = connection.getMetaData().getColumns(getCatalogName(), getSchemaName(), getDatabaseChangeLogTableName(), null);
                 boolean hasDescription = false;
                 boolean hasComments = false;
@@ -511,7 +508,8 @@ public abstract class AbstractDatabase implements Database {
                     statementsToExecute.add("ALTER TABLE DATABASECHANGELOG ADD LIQUIBASE VARCHAR(255)");
                 }
 
-            } else {
+            } else if (!changeLogCreateAttempted) {
+                changeLogCreateAttempted = true;
                 String createTableStatement = getCreateChangeLogSQL();
                 if (!canCreateChangeLogTable()) {
                     throw new JDBCException("Cannot create DatabaseChangeLog table for your database.\n\n" +
@@ -523,8 +521,7 @@ public abstract class AbstractDatabase implements Database {
                 statementsToExecute.add(createTableStatement);
                 if (migrator.getMode().equals(Migrator.Mode.EXECUTE_MODE)) {
                     log.info("Creating database history table with name: DATABASECHANGELOG");
-                } else {
-                    changeLogTableExists = false;
+                    changeLogTableExists = true;
                 }
             }
 
@@ -585,37 +582,41 @@ public abstract class AbstractDatabase implements Database {
         Statement statement = null;
         Connection connection = getConnection();
         ResultSet rs = null;
-        changeLogLockTableExists = true;
         try {
             rs = connection.getMetaData().getTables(getCatalogName(), getSchemaName(), getDatabaseChangeLogLockTableName(), new String[]{"TABLE"});
             if (!rs.next()) {
-                String createTableStatement = getCreateChangeLogLockSQL();
-                // If there is no table in the database for recording change history create one.
-                if (migrator.getMode().equals(Migrator.Mode.EXECUTE_MODE)) {
-                    statement = connection.createStatement();
-                    statement.executeUpdate(createTableStatement);
-                    connection.commit();
-                    log.info("Created database lock table with name: DATABASECHANGELOGLOCK");
-                } else {
-                    if (!migrator.getMode().equals(Migrator.Mode.OUTPUT_FUTURE_ROLLBACK_SQL_MODE)) {
-                        if (!outputtedLockWarning) {
-                            migrator.getOutputSQLWriter().write(migrator.getDatabase().getLineComment() + "-----------------------------------------------------------------------------------------------" + StreamUtil.getLineSeparator());
-                            migrator.getOutputSQLWriter().write(migrator.getDatabase().getLineComment() + " DATABASECHANGELOGLOCK table does not exist." + StreamUtil.getLineSeparator());
-                            migrator.getOutputSQLWriter().write(migrator.getDatabase().getLineComment() + " Race conditions may cause a corrupted sql script." + StreamUtil.getLineSeparator());
-                            migrator.getOutputSQLWriter().write(migrator.getDatabase().getLineComment() + " Consider running: " + StreamUtil.getLineSeparator());
-                            migrator.getOutputSQLWriter().write(migrator.getDatabase().getLineComment() + " " + getCreateChangeLogLockSQL() + ";" + StreamUtil.getLineSeparator());
-                            migrator.getOutputSQLWriter().write(migrator.getDatabase().getLineComment() + " " + getChangeLogLockInsertSQL() + ";" + StreamUtil.getLineSeparator());
-                            migrator.getOutputSQLWriter().write(migrator.getDatabase().getLineComment() + "-----------------------------------------------------------------------------------------------" + StreamUtil.getLineSeparator() + StreamUtil.getLineSeparator());
-                            outputtedLockWarning = true;
-                        }
+                if (!changeLogLockCreateAttempted) {
+                    changeLogLockCreateAttempted = true;
+                    String createTableStatement = getCreateChangeLogLockSQL();
+                    // If there is no table in the database for recording change history create one.
+                    if (migrator.getMode().equals(Migrator.Mode.EXECUTE_MODE)) {
+                        statement = connection.createStatement();
+                        statement.executeUpdate(createTableStatement);
+                        connection.commit();
+                        log.info("Created database lock table with name: DATABASECHANGELOGLOCK");
+                        changeLogLockTableExists = true;
+                    } else {
+                        if (!migrator.getMode().equals(Migrator.Mode.OUTPUT_FUTURE_ROLLBACK_SQL_MODE)) {
+                            if (!outputtedLockWarning) {
+                                migrator.getOutputSQLWriter().write(migrator.getDatabase().getLineComment() + "-----------------------------------------------------------------------------------------------" + StreamUtil.getLineSeparator());
+                                migrator.getOutputSQLWriter().write(migrator.getDatabase().getLineComment() + " DATABASECHANGELOGLOCK table does not exist." + StreamUtil.getLineSeparator());
+                                migrator.getOutputSQLWriter().write(migrator.getDatabase().getLineComment() + " Race conditions may cause a corrupted sql script." + StreamUtil.getLineSeparator());
+                                migrator.getOutputSQLWriter().write(migrator.getDatabase().getLineComment() + " Consider running: " + StreamUtil.getLineSeparator());
+                                migrator.getOutputSQLWriter().write(migrator.getDatabase().getLineComment() + " " + getCreateChangeLogLockSQL() + ";" + StreamUtil.getLineSeparator());
+                                migrator.getOutputSQLWriter().write(migrator.getDatabase().getLineComment() + " " + getChangeLogLockInsertSQL() + ";" + StreamUtil.getLineSeparator());
+                                migrator.getOutputSQLWriter().write(migrator.getDatabase().getLineComment() + "-----------------------------------------------------------------------------------------------" + StreamUtil.getLineSeparator() + StreamUtil.getLineSeparator());
+                                outputtedLockWarning = true;
+                            }
 
-                        migrator.getOutputSQLWriter().append(createTableStatement);
-                        migrator.getOutputSQLWriter().append(";");
-                        migrator.getOutputSQLWriter().append(StreamUtil.getLineSeparator());
-                        migrator.getOutputSQLWriter().append(StreamUtil.getLineSeparator());
+                            migrator.getOutputSQLWriter().append(createTableStatement);
+                            migrator.getOutputSQLWriter().append(";");
+                            migrator.getOutputSQLWriter().append(StreamUtil.getLineSeparator());
+                            migrator.getOutputSQLWriter().append(StreamUtil.getLineSeparator());
+                        }
                     }
-                    changeLogLockTableExists = false;
                 }
+            } else {
+                changeLogLockTableExists = true;
             }
             rs.close();
             if (statement != null) {
@@ -645,13 +646,7 @@ public abstract class AbstractDatabase implements Database {
             } else {
                 if (migrator.getMode().equals(Migrator.Mode.EXECUTE_MODE)) {
                     throw new JDBCException("Change log lock table does not exist");
-                } else {
-                    migrator.getOutputSQLWriter().append(insertRowStatment);
-                    migrator.getOutputSQLWriter().append(";");
-                    migrator.getOutputSQLWriter().append(StreamUtil.getLineSeparator());
-                    migrator.getOutputSQLWriter().append(StreamUtil.getLineSeparator());
                 }
-
             }
 
         } catch (SQLException e) {
