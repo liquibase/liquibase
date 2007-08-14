@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import liquibase.database.OracleDatabase;
+import liquibase.database.SybaseDatabase;
 
 import org.junit.Test;
 import org.w3c.dom.Document;
@@ -73,6 +74,56 @@ public class AddColumnChangeTest extends AbstractChangeTest {
         assertEquals("column", ((Element) columns.item(0)).getTagName());
         assertEquals("NEWCOL", ((Element) columns.item(0)).getAttribute("name"));
         assertEquals("TYP", ((Element) columns.item(0)).getAttribute("type"));
+
+    }
+    
+    @Test
+    public void sybaseNull() throws Exception {
+    	AddColumnChange refactoring = new AddColumnChange();
+    	refactoring.setTableName("TAB");
+    	ColumnConfig column = new ColumnConfig();
+        column.setName("NEWCOL");
+        column.setType("TYP");
+        refactoring.setColumn(column);
+        
+        assertEquals("ALTER TABLE TAB ADD NEWCOL TYP NULL", refactoring.generateStatements(new SybaseDatabase())[0]);
+    }
+    
+    @Test
+    public void sybaseNotNull() throws Exception{
+    	AddColumnChange refactoring = new AddColumnChange();
+    	refactoring.setTableName("TAB");
+    	ColumnConfig column = new ColumnConfig();
+        column.setName("NEWCOL");
+        column.setType("TYP");
+        refactoring.setColumn(column);
+        
+        ConstraintsConfig constraints = new ConstraintsConfig();
+        constraints.setPrimaryKey(Boolean.FALSE);
+        constraints.setNullable(Boolean.FALSE);
+        
+        column.setConstraints(constraints);
+        
+        assertEquals("ALTER TABLE TAB ADD NEWCOL TYP NOT NULL", refactoring.generateStatements(new SybaseDatabase())[0]);
+
+    }
+    
+    @Test
+    public void sybaseConstraintsNull() throws Exception{
+    	AddColumnChange refactoring = new AddColumnChange();
+    	refactoring.setTableName("TAB");
+    	ColumnConfig column = new ColumnConfig();
+        column.setName("NEWCOL");
+        column.setType("TYP");
+        refactoring.setColumn(column);
+        
+        ConstraintsConfig constraints = new ConstraintsConfig();
+        constraints.setPrimaryKey(Boolean.FALSE);
+        constraints.setNullable(Boolean.TRUE);
+        
+        column.setConstraints(constraints);
+        
+        assertEquals("ALTER TABLE TAB ADD NEWCOL TYP NULL", refactoring.generateStatements(new SybaseDatabase())[0]);
 
     }
 }

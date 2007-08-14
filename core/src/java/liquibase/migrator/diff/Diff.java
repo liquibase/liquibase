@@ -28,31 +28,18 @@ public class Diff {
     private Set<DiffStatusListener> statusListeners = new HashSet<DiffStatusListener>();
 
     public void init(Connection baseConnection, Connection targetConnection) throws JDBCException {
-        try {
             baseDatabase = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(baseConnection);
             baseDatabase.setConnection(baseConnection);
-            baseDatabase.getConnection().setAutoCommit(false);
 
             targetDatabase = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(targetConnection);
             targetDatabase.setConnection(targetConnection);
-            targetDatabase.getConnection().setAutoCommit(false);
-        } catch (SQLException e) {
-            throw new JDBCException(e);
-        }
     }
 
     public void init(Connection originalDatabase) throws JDBCException {
-        try {
             targetDatabase = null;
 
             baseDatabase = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(originalDatabase);
             baseDatabase.setConnection(originalDatabase);
-            baseDatabase.getConnection().setAutoCommit(false);
-
-        } catch (SQLException e) {
-            throw new JDBCException(e);
-        }
-
     }
 
     public void addStatusListener(DiffStatusListener listener) {

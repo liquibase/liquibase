@@ -2,6 +2,7 @@ package liquibase.database;
 
 import java.io.IOException;
 import java.sql.Connection;
+import java.sql.SQLException;
 
 import liquibase.migrator.DatabaseChangeLogLock;
 import liquibase.migrator.Migrator;
@@ -26,6 +27,13 @@ public interface Database {
     Connection getConnection();
 
     void setConnection(Connection conn);
+    
+    /**
+     * Determines if the database supports DDL within a transaction or not.
+     * 
+     * @return True if the database supports DDL within a transaction, otherwise false.
+     */
+    boolean supportsDDLInTransaction();
 
     String getDatabaseProductName();
 

@@ -2,6 +2,7 @@ package liquibase.migrator.change;
 
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.expectLastCall;
+import static org.easymock.EasyMock.verify;
 import static org.easymock.classextension.EasyMock.createMock;
 import static org.easymock.classextension.EasyMock.replay;
 import static org.junit.Assert.assertEquals;
@@ -73,7 +74,9 @@ public abstract class AbstractChangeTest {
 
         Connection conn = createMock(Connection.class);
         Statement statement = createMock(Statement.class);
+        conn.setAutoCommit(false);
         expect(conn.createStatement()).andReturn(statement);
+        
         expect(statement.execute("GENERATED STATEMENT;")).andStubReturn(true);
         statement.close();
         expectLastCall();
@@ -84,5 +87,8 @@ public abstract class AbstractChangeTest {
         database.setConnection(conn);
 
         change.executeStatements(database);
+        
+        verify(conn);
+        verify(statement);
     }
 }

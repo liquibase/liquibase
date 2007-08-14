@@ -5,6 +5,7 @@ import liquibase.database.DerbyDatabase;
 import liquibase.database.MSSQLDatabase;
 import liquibase.database.MySQLDatabase;
 import liquibase.database.OracleDatabase;
+import liquibase.database.SybaseDatabase;
 import liquibase.migrator.exception.UnsupportedChangeException;
 
 import org.w3c.dom.Document;
@@ -76,8 +77,10 @@ public class AddDefaultValueChange extends AbstractChange {
     }
 
     public String[] generateStatements(Database database) throws UnsupportedChangeException {
-
-        if (database instanceof MSSQLDatabase) {
+        
+        if(database instanceof SybaseDatabase) {
+            return new String[]{"ALTER TABLE " + getTableName() + " REPLACE " + getColumnName() + " DEFAULT " + getColumnValue(database),};
+        } else if (database instanceof MSSQLDatabase) {
             return new String[]{"ALTER TABLE " + getTableName() + " WITH NOCHECK ADD CONSTRAINT " + getColumnName() + "DefaultValue DEFAULT " + getColumnValue(database) + " FOR " + getColumnName(),};
         } else if (database instanceof MySQLDatabase) {
             return new String[]{"ALTER TABLE " + getTableName() + " ALTER " + getColumnName() + " SET DEFAULT " + getColumnValue(database),};

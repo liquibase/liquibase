@@ -27,7 +27,7 @@
     <changeSet id="2" author="nvoxland">
         <comment>Add a username column so we can use "person" for authentication</comment>
         <addColumn tableName="person">
-            <column name="username" type="varchar(8)"/>
+            <column name="username" type="varchar(8)" />
         </addColumn>
     </changeSet>
     <!--<changeSet id="3" author="nvoxland">-->
@@ -184,16 +184,27 @@
         <createTable tableName="address">
             <column name="id" type="int" autoIncrement="true"/>
             <column name="line1" type="varchar(255)"/>
-            <column name="line2" type="varchar(255)"/>
+            <column name="line2" type="varchar(255)">
+            	<constraints nullable="true"/>
+            </column>
             <column name="city" type="varchar(255)"/>
-            <column name="state" type="char(2)"/>
+            <column name="state" type="char(2)">
+            	<constraints nullable="true"/>
+            </column>
             <column name="postalcode" type="varchar(15)"/>
         </createTable>
     </changeSet>
 
-    <changeSet id="25.1" author="nvoxland">
+    <!-- 
+    TODO: This test does not work on Sybase because it results in no action.
+    Since its not possible to create an int column which is nullable this statement
+    wont work if the constraint is used above in the CreateTable (ID=25). As such
+    I removed this test.
+    
+    Paul Keeble
+    changeSet id="25.1" author="nvoxland">
         <addNotNullConstraint tableName="address" columnName="id" columnDataType="int"/>
-    </changeSet>
+    </changeSet-->
 
     <changeSet id="25.2" author="nvoxland">
         <addPrimaryKey tableName="address" columnNames="id" constraintName="pk_address"/>

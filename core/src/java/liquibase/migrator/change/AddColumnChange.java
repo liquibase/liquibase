@@ -2,7 +2,9 @@ package liquibase.migrator.change;
 
 import liquibase.database.DB2Database;
 import liquibase.database.Database;
+import liquibase.database.SybaseDatabase;
 import liquibase.migrator.exception.UnsupportedChangeException;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -43,20 +45,30 @@ public class AddColumnChange extends AbstractChange {
 
         String alterTable = "ALTER TABLE " + getTableName() + " ADD " + getColumn().getName() + " " + database.getColumnType(getColumn());
 
-        if (column.getConstraints() != null) {
+    	if (column.getConstraints() != null) {
             if (column.getConstraints().isNullable() != null && !column.getConstraints().isNullable()) {
                 alterTable += " NOT NULL";
             } else {
-//                alterTable += " NULL";
+            	if(database instanceof SybaseDatabase) {
+            		alterTable += " NULL";
+            	}
             }
-
-            if (column.getDefaultValue() != null
-                    || column.getDefaultValueBoolean() != null
-                    || column.getDefaultValueDate() != null
-                    || column.getDefaultValueNumeric() != null) {
-                alterTable += " DEFAULT "+column.getDefaultColumnValue(database);
-            }
+            
+        } else {
+        	//For Sybase only the null is not optional and hence if no constraints are specified we need to default the value
+        	//to nullable
+        	if(database instanceof SybaseDatabase) {
+        		alterTable += " NULL";
+        	}
         }
+        
+        if (column.getDefaultValue() != null
+                || column.getDefaultValueBoolean() != null
+                || column.getDefaultValueDate() != null
+                || column.getDefaultValueNumeric() != null) {
+            alterTable += " DEFAULT "+column.getDefaultColumnValue(database);
+        }
+        	
 
         sql.add(alterTable);
         if (database instanceof DB2Database) {

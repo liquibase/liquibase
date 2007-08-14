@@ -44,6 +44,7 @@ public class UpdateDatabaseChangeLogHandler extends BaseChangeLogHandler {
 
     protected void handleChangeSet(ChangeSet changeSet) throws JDBCException, DatabaseHistoryException, MigrationFailedException, IOException {
         if (shouldRun(changeSet)) {
+        	log.info("Running Changeset:" + changeSet);
             changeSet.execute();
             if (migrator.getRunStatus(changeSet).equals(ChangeSet.RunStatus.NOT_RAN)) {
                 migrator.markChangeSetAsRan(changeSet);

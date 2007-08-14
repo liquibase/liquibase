@@ -28,7 +28,9 @@
                         <tr><th>PostgreSQL</th><td>8.2+ is required to use the "drop all database objects" functionality.</td></tr>
                         <tr><th>Oracle</th><td>No Issues</td></tr>
                         <tr><th>MS-SQL</th><td>No Issues</td></tr>
-                        <tr><th>Sybase</th><td>ASE 12.0+ required.  "ddl in trans" database option needs to be set (including on tempdb). "select into" and "allow null by default" database options needs to be set.</td></tr>
+                        <tr><th>Sybase</th><td>ASE 12.0+ required. "select into" database option needs to be set. 
+                        						Best driver is JTDS. Sybase does not support transactions for DDL so rollbacks will not work on failures.
+                        						Foreign keys can not be dropped which can break the rollback or dropAll functionality.</td></tr>
                         <tr><th>DB2</th><td>No Issues.  Will auto-call REORG when nessisary.</td></tr>
                         <tr><th>Apache Derby</th><td>No Issues</td></tr>
                         <tr><th>HSQL</th><td>No Issues</td></tr>
