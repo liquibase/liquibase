@@ -15,6 +15,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.logging.Logger;
 
 /**
  * Represents a Change for custom SQL stored in a File.
@@ -28,6 +29,7 @@ import java.io.InputStream;
  * 
  */
 public class SQLFileChange extends AbstractChange {
+    private static Logger log = Logger.getLogger(SQLFileChange.class.toString());
     private String sql;
     private String file;
 
@@ -72,15 +74,16 @@ public class SQLFileChange extends AbstractChange {
         if (file == null) {
             throw new SetupException("<sqlfile> - No path specified");
         }
-        
+        log.fine("SQLFile file:" + file);
         boolean loaded = loadFromClasspath(file);
         if(!loaded) {
             loaded = loadFromFileSystem(file);
         }
-
+        
         if (!loaded) {
             throw new SetupException("<sqlfile path="+file+"> - Could not find file");
         }
+        log.finer("SQLFile file contents is:" + getSql());
     }
 
     /**
