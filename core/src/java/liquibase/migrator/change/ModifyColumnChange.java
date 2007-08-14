@@ -7,6 +7,7 @@ import liquibase.database.HsqlDatabase;
 import liquibase.database.MSSQLDatabase;
 import liquibase.database.MySQLDatabase;
 import liquibase.database.OracleDatabase;
+import liquibase.database.SybaseDatabase;
 import liquibase.migrator.exception.UnsupportedChangeException;
 
 import org.w3c.dom.Document;
@@ -41,6 +42,9 @@ public class ModifyColumnChange extends AbstractChange {
     }
 
     public String[] generateStatements(Database database) throws UnsupportedChangeException {
+        if(database instanceof SybaseDatabase) {
+            return new String[]{"ALTER TABLE " + getTableName() + " MODIFY " + getColumn().getName() + " " + getColumn().getType()};
+        }
         if (database instanceof MSSQLDatabase) {
             return new String[]{"ALTER TABLE " + getTableName() + " ALTER COLUMN " + getColumn().getName() + " " + getColumn().getType()};
         } else if (database instanceof MySQLDatabase) {

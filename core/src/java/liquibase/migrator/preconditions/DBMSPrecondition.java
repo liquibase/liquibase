@@ -22,6 +22,8 @@ public class DBMSPrecondition implements Precondition {
     }
 
     public boolean checkDatabaseType(Migrator migrator) {
-        return type.equals(migrator.getDatabase().getTypeName());
+        String dbType = migrator.getDatabase().getTypeName();
+        System.out.println("Checking precondition DBMS Type, dbtype is " + dbType);
+        return type.equals(dbType);
     }
 }

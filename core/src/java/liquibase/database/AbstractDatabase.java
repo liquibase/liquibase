@@ -9,6 +9,7 @@ import liquibase.migrator.exception.JDBCException;
 import liquibase.migrator.exception.MigrationFailedException;
 import liquibase.migrator.exception.UnsupportedChangeException;
 import liquibase.util.StreamUtil;
+import liquibase.database.structure.DatabaseSnapshot;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -28,7 +29,7 @@ public abstract class AbstractDatabase implements Database {
 
     private Connection connection;
     protected Logger log;
-    private boolean changeLogTableExists;
+    protected boolean changeLogTableExists;
     private boolean changeLogLockTableExists;
     private boolean changeLogCreateAttempted;
     private boolean changeLogLockCreateAttempted;
@@ -49,6 +50,19 @@ public abstract class AbstractDatabase implements Database {
 
     public void setConnection(Connection conn) {
         this.connection = conn;
+        try {
+        	connection.setAutoCommit(!supportsDDLInTransaction());
+        } catch(SQLException sqle) {
+        	log.warning("Can not set auto commit to " 
+        			+ !supportsDDLInTransaction() +" on connection");
+        }
+    }
+    
+    /**
+     * By default databases should support DDL within a transaction.
+     */
+    public boolean supportsDDLInTransaction() {
+    	return true;
     }
 
     /**
@@ -516,7 +530,6 @@ public abstract class AbstractDatabase implements Database {
                             "Please construct it manually using the following SQL as a base and re-run LiquiBase:\n\n" +
                             createTableStatement);
                 }
-
                 // If there is no table in the database for recording change history create one.
                 statementsToExecute.add(createTableStatement);
                 if (migrator.getMode().equals(Migrator.Mode.EXECUTE_MODE)) {
@@ -572,7 +585,6 @@ public abstract class AbstractDatabase implements Database {
     protected boolean canCreateChangeLogTable() throws JDBCException {
         return true;
     }
-
     /**
      * This method will check the database ChangeLogLock table used to keep track of
      * if a machine is updating the database. If the table does not exist it will create one
@@ -677,12 +689,6 @@ public abstract class AbstractDatabase implements Database {
     public void dropDatabaseObjects() throws JDBCException, MigrationFailedException {
         Connection conn = getConnection();
         try {
-            try {
-                conn.setAutoCommit(false);
-            } catch (SQLException e) {
-                //unable to set auto-commit.  May already be auto-commit or a non-auto-commit database
-            }
-
             dropForeignKeys(conn);
             dropViews(conn);
             dropTables(conn);

@@ -88,7 +88,8 @@ public abstract class AbstractDatabaseTest {
     public void getDriverName() throws Exception {
         Connection connection = createMock(Connection.class);
         DatabaseMetaData metaData = createMock(DatabaseMetaData.class);
-
+        
+        connection.setAutoCommit(false);
         expect(connection.getMetaData()).andReturn(metaData);
         expect(metaData.getDriverName()).andReturn("DriverNameHere");
         replay(connection);
@@ -104,7 +105,7 @@ public abstract class AbstractDatabaseTest {
     public void getConnectionURL() throws Exception {
         Connection connection = createMock(Connection.class);
         DatabaseMetaData metaData = createMock(DatabaseMetaData.class);
-
+        connection.setAutoCommit(false);
         expect(connection.getMetaData()).andReturn(metaData);
         expect(metaData.getURL()).andReturn("URLHere");
         replay(connection);
@@ -120,7 +121,8 @@ public abstract class AbstractDatabaseTest {
     public void testGetConnectionUsername() throws Exception {
         Connection connection = createMock(Connection.class);
         DatabaseMetaData metaData = createMock(DatabaseMetaData.class);
-
+        
+        connection.setAutoCommit(false);
         expect(connection.getMetaData()).andReturn(metaData);
         expect(metaData.getUserName()).andReturn("usernameHere");
         replay(connection);
@@ -140,8 +142,8 @@ public abstract class AbstractDatabaseTest {
     protected Connection getMockConnection() throws SQLException {
         Connection conn = createMock(Connection.class);
         DatabaseMetaData metaData = createMock(DatabaseMetaData.class);
-
         conn.setAutoCommit(false);
+        
         expectLastCall().anyTimes();
         expect(conn.getMetaData()).andReturn(metaData).anyTimes();
         expect(metaData.getDatabaseProductName()).andReturn(getProductNameString()).anyTimes();

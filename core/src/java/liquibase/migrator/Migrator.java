@@ -187,11 +187,6 @@ public class Migrator {
         // Array Of all the implemented databases
         database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(connection);
         database.setConnection(connection);
-        try {
-            database.getConnection().setAutoCommit(false);
-        } catch (SQLException e) {
-            //must not be able to set auto-commit, or is already set
-        }
     }
 
     /**

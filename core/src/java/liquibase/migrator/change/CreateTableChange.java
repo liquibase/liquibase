@@ -1,8 +1,10 @@
 package liquibase.migrator.change;
 
 import liquibase.database.Database;
+import liquibase.database.SybaseDatabase;
 import liquibase.migrator.exception.UnsupportedChangeException;
 import liquibase.util.StringUtils;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -60,7 +62,9 @@ public class CreateTableChange extends AbstractChange {
                 if (constraints.isNullable() != null && !constraints.isNullable()) {
                     buffer.append(" NOT NULL");
                 } else {
-//                    buffer.append(" NULL");
+                	if(database instanceof SybaseDatabase) {
+                		buffer.append(" NULL");
+                	}
                 }
                 if (pkColumns.size() == 1 && constraints.isPrimaryKey() != null && constraints.isPrimaryKey()) {
                     buffer.append(" PRIMARY KEY");
