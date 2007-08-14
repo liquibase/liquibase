@@ -23,7 +23,6 @@ public class DBMSPrecondition implements Precondition {
 
     public boolean checkDatabaseType(Migrator migrator) {
         String dbType = migrator.getDatabase().getTypeName();
-        System.out.println("Checking precondition DBMS Type, dbtype is " + dbType);
         return type.equals(dbType);
     }
 }
