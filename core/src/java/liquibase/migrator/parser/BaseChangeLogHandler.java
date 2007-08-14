@@ -81,6 +81,7 @@ public abstract class BaseChangeLogHandler extends DefaultHandler {
                     String attributeValue = atts.getValue(i);
                     setProperty(change, attributeName, attributeValue);
                 }
+                change.setUp();
             } else if (change != null && "column".equals(qName)) {
                 ColumnConfig column = new ColumnConfig();
                 for (int i = 0; i < atts.getLength(); i++) {
