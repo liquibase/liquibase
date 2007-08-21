@@ -242,6 +242,7 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
         migrator = createMigrator(completeChangeLog);
         migrator.dropAll();
 
+        migrator = createMigrator(completeChangeLog);
         migrator.migrate();
 
         migrator.clearCheckSums();

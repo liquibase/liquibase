@@ -14,10 +14,7 @@ import liquibase.database.structure.DatabaseSnapshot;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Logger;
 
 /**
@@ -412,10 +409,12 @@ public abstract class AbstractDatabase implements Database {
             Connection conn = getConnection();
             PreparedStatement stmt = null;
             try {
-                stmt = conn.prepareStatement("update databasechangeloglock set locked=?, lockgranted=null, lockedby=null where id=1".toUpperCase());
+                String releaseSQL = "update databasechangeloglock set locked=?, lockgranted=null, lockedby=null where id=1".toUpperCase();
+                stmt = conn.prepareStatement(releaseSQL);
                 stmt.setBoolean(1, false);
-                if (stmt.executeUpdate() != 1) {
-                    throw new MigrationFailedException("Did not update change log lock correctly");
+                int updatedRows = stmt.executeUpdate();
+                if (updatedRows != 1) {
+                    throw new MigrationFailedException("Did not update change log lock correctly.\n\n"+releaseSQL+" updated "+updatedRows+" instead of the expected 1 row.");
                 }
                 conn.commit();
                 log.info("Successfully released change log lock");
@@ -568,6 +567,7 @@ public abstract class AbstractDatabase implements Database {
                 try {
                     statement.close();
                 } catch (SQLException e) {
+                    //noinspection ThrowFromFinallyBlock
                     throw new JDBCException(e);
                 }
             }
@@ -575,6 +575,7 @@ public abstract class AbstractDatabase implements Database {
                 try {
                     checkTableRS.close();
                 } catch (SQLException e) {
+                    //noinspection ThrowFromFinallyBlock
                     throw new JDBCException(e);
                 }
             }
@@ -582,6 +583,7 @@ public abstract class AbstractDatabase implements Database {
                 try {
                     checkColumnsRS.close();
                 } catch (SQLException e) {
+                    //noinspection ThrowFromFinallyBlock
                     throw new JDBCException(e);
                 }
             }
@@ -674,6 +676,7 @@ public abstract class AbstractDatabase implements Database {
                 try {
                     statement.close();
                 } catch (SQLException e) {
+                    //noinspection ThrowFromFinallyBlock
                     throw new JDBCException(e);
                 }
             }
@@ -681,6 +684,7 @@ public abstract class AbstractDatabase implements Database {
                 try {
                     rs.close();
                 } catch (SQLException e) {
+                    //noinspection ThrowFromFinallyBlock
                     throw new JDBCException(e);
                 }
             }
@@ -708,6 +712,7 @@ public abstract class AbstractDatabase implements Database {
             try {
                 conn.commit();
             } catch (SQLException e) {
+                //noinspection ThrowFromFinallyBlock
                 throw new JDBCException(e);
             }
         }
@@ -718,7 +723,7 @@ public abstract class AbstractDatabase implements Database {
         ResultSet fkRS = null;
         Statement dropStatement = null;
         try {
-            tableRS = conn.getMetaData().getTables(getCatalogName(), getSchemaName(), null, new String[]{"TABLE", "GLOBAL TEMPORARY", "LOCAL TEMPORARY", "ALIAS", "SYNONYM"});
+            tableRS = conn.getMetaData().getTables(getCatalogName(), getSchemaName(), null, getTableTypes());
             while (tableRS.next()) {
                 String tableName = tableRS.getString("TABLE_NAME");
                 String schemaName = tableRS.getString("TABLE_SCHEM");
@@ -748,6 +753,7 @@ public abstract class AbstractDatabase implements Database {
                 try {
                     dropStatement.close();
                 } catch (SQLException e) {
+                    //noinspection ThrowFromFinallyBlock
                     throw new JDBCException(e);
                 }
             }
@@ -755,10 +761,35 @@ public abstract class AbstractDatabase implements Database {
                 try {
                     fkRS.close();
                 } catch (SQLException e) {
+                    //noinspection ThrowFromFinallyBlock
                     throw new JDBCException(e);
                 }
             }
         }
+    }
+
+    private String[] getTableTypes() throws JDBCException {
+        List<String> wantedTypes = new ArrayList<String>(Arrays.asList("TABLE", "GLOBAL TEMPORARY", "LOCAL TEMPORARY", "ALIAS", "SYNONYM"));
+        List<String> availableTypes = new ArrayList<String>();
+
+        try {
+            ResultSet types = connection.getMetaData().getTableTypes();
+            while (types.next()) {
+                availableTypes.add("TABLE_TYPE");
+            }
+        } catch (SQLException e) {
+            throw new JDBCException(e);
+        }
+
+        List<String> returnTypes = new ArrayList<String>();
+        for (String type : wantedTypes) {
+            if (availableTypes.contains(type)) {
+                returnTypes.add(type);
+            }
+        }
+
+        return returnTypes.toArray(new String[returnTypes.size()]);
+
     }
 
     protected void dropTables(Connection conn) throws JDBCException, MigrationFailedException {
@@ -766,7 +797,7 @@ public abstract class AbstractDatabase implements Database {
         ResultSet rs = null;
         Statement dropStatement = null;
         try {
-            rs = conn.getMetaData().getTables(getCatalogName(), getSchemaName(), null, new String[]{"TABLE", "GLOBAL TEMPORARY", "LOCAL TEMPORARY", "ALIAS", "SYNONYM"});
+            rs = conn.getMetaData().getTables(getCatalogName(), getSchemaName(), null, getTableTypes());
             dropStatement = conn.createStatement();
             while (rs.next()) {
                 String tableName = rs.getString("TABLE_NAME");
@@ -801,6 +832,7 @@ public abstract class AbstractDatabase implements Database {
                 try {
                     dropStatement.close();
                 } catch (SQLException e) {
+                    //noinspection ThrowFromFinallyBlock
                     throw new JDBCException(e);
                 }
             }
@@ -808,6 +840,7 @@ public abstract class AbstractDatabase implements Database {
                 try {
                     rs.close();
                 } catch (SQLException e) {
+                    //noinspection ThrowFromFinallyBlock
                     throw new JDBCException(e);
                 }
             }
@@ -859,6 +892,7 @@ public abstract class AbstractDatabase implements Database {
                 try {
                     dropStatement.close();
                 } catch (SQLException e) {
+                    //noinspection ThrowFromFinallyBlock
                     throw new JDBCException(e);
                 }
             }
@@ -866,6 +900,7 @@ public abstract class AbstractDatabase implements Database {
                 try {
                     rs.close();
                 } catch (SQLException e) {
+                    //noinspection ThrowFromFinallyBlock
                     throw new JDBCException(e);
                 }
             }
@@ -958,6 +993,7 @@ public abstract class AbstractDatabase implements Database {
                 try {
                     rs.close();
                 } catch (SQLException e) {
+                    //noinspection ThrowFromFinallyBlock
                     throw new JDBCException(e);
                 }
             }
@@ -965,6 +1001,7 @@ public abstract class AbstractDatabase implements Database {
                 try {
                     pstmt.close();
                 } catch (SQLException e) {
+                    //noinspection ThrowFromFinallyBlock
                     throw new JDBCException(e);
                 }
             }
