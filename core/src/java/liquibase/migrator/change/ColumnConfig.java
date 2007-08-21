@@ -2,6 +2,7 @@ package liquibase.migrator.change;
 
 import liquibase.util.StringUtils;
 import liquibase.database.Database;
+import liquibase.database.DerbyDatabase;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -94,7 +95,11 @@ public class ColumnConfig {
     }
 
     public void setDefaultValueNumeric(String defaultValueNumeric) {
-        this.defaultValueNumeric = defaultValueNumeric;
+        if ("GENERATED_BY_DEFAULT".equals(defaultValueNumeric)) {
+            setAutoIncrement(true);
+        } else {
+            this.defaultValueNumeric = defaultValueNumeric;
+        }
     }
 
     public String getDefaultValueDate() {

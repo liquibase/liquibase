@@ -59,4 +59,19 @@
             <column name="name" type="varchar(255)"/>
         </createTable>
     </changeSet>
+
+
+    <changeSet id="compoundIndexTest" author="nvoxland">
+        <createTable tableName="compoundIndexTest">
+            <column name="id" type="int">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="firstname" type="varchar(10)"/>
+            <column name="lastname" type="varchar(10)"/>
+        </createTable>
+        <createIndex indexName="idx_compoundtest" tableName="compoundIndexTest">
+            <column name="firstname"/>
+            <column name="lastname"/>
+        </createIndex>
+    </changeSet>
 </databaseChangeLog>
