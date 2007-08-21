@@ -2,6 +2,7 @@ package liquibase.migrator.change;
 
 import liquibase.database.Database;
 import liquibase.migrator.FileOpener;
+import liquibase.migrator.Migrator;
 import liquibase.migrator.exception.SetupException;
 import liquibase.migrator.exception.UnsupportedChangeException;
 import liquibase.util.MD5Util;
@@ -29,7 +30,7 @@ import java.util.logging.Logger;
  * 
  */
 public class SQLFileChange extends AbstractChange {
-    private static Logger log = Logger.getLogger(SQLFileChange.class.toString());
+    private static Logger log = Logger.getLogger(Migrator.DEFAULT_LOG_NAME);
     private String sql;
     private String file;
 
