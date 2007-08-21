@@ -29,6 +29,11 @@ public interface Database {
     void setConnection(Connection conn);
     
     /**
+     * Auto-commit mode to run in
+     */
+    public boolean getAutoCommitMode();
+
+    /**
      * Determines if the database supports DDL within a transaction or not.
      * 
      * @return True if the database supports DDL within a transaction, otherwise false.

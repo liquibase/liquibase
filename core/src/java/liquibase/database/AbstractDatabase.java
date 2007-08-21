@@ -51,13 +51,19 @@ public abstract class AbstractDatabase implements Database {
     public void setConnection(Connection conn) {
         this.connection = conn;
         try {
-        	connection.setAutoCommit(!supportsDDLInTransaction());
+        	connection.setAutoCommit(getAutoCommitMode());
         } catch(SQLException sqle) {
-        	log.warning("Can not set auto commit to " 
-        			+ !supportsDDLInTransaction() +" on connection");
+        	log.warning("Can not set auto commit to " + getAutoCommitMode() +" on connection");
         }
     }
-    
+
+    /**
+     * Auto-commit mode to run in
+     */
+    public boolean getAutoCommitMode() {
+        return !supportsDDLInTransaction();
+    }
+
     /**
      * By default databases should support DDL within a transaction.
      */
