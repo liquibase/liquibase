@@ -226,7 +226,7 @@ public class DatabaseSnapshot {
                 fkInfo.setForeignKeyTable(fkTable);
                 fkInfo.setForeignKeyColumn(fkColumn);
 
-                fkInfo.setName("FK_NAME");
+                fkInfo.setName(rs.getString("FK_NAME"));
 
                 if (database.supportsInitiallyDeferrableColumns()) {
                     short deferrablility = rs.getShort("DEFERRABILITY");
