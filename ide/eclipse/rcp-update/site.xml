@@ -3,5 +3,5 @@
    <description url="http://www.liquibase.org/update/eclipse/rcp">
       LiquiBase Update Site
    </description>
-   <feature url="features/org.liquibase.rcp.feature_0.1.0.jar" id="org.liquibase.rcp.feature" version="0.1.0"/>
+   <feature url="features/org.liquibase.rcp.feature_0.5.0.jar" id="org.liquibase.rcp.feature" version="0.5.0"/>
 </site>

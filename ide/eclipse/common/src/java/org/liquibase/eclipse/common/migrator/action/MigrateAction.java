@@ -14,7 +14,7 @@ import org.liquibase.eclipse.common.migrator.EclipseFileOpener;
 public class MigrateAction extends BaseDatabaseAction {
 	
 	public void run(IAction action) {
-		Migrator migrator = getMigrator();
+		Migrator migrator = getMigrator(LiquibasePreferences.getRootChangeLog());
 		try {
 			migrator.init(getSelectedConnection(getSelection()));
 			migrator.migrate();

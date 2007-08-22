@@ -214,7 +214,7 @@ public class DiffResult {
         printSetComparison("Unexpected Sequences", getUnexpectedSequences(), out);
     }
 
-    private void printSetComparison(String title, SortedSet objects, PrintStream out) {
+    private void printSetComparison(String title, SortedSet<?> objects, PrintStream out) {
         out.print(title + ": ");
         if (objects.size() == 0) {
             out.println("NONE");

@@ -21,7 +21,7 @@ public class TagDatabaseAction extends BaseDatabaseAction {
 			return;
 		}
 		
-		Migrator migrator = getMigrator();
+		Migrator migrator = getMigrator(LiquibasePreferences.getRootChangeLog());
 		try {
 			migrator.init(getSelectedConnection(getSelection()));
 			migrator.tag(dialog.getTagName());

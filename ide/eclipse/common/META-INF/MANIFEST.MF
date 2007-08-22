@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: LiquiBase IDE Common Classes
 Bundle-SymbolicName: org.liquibase.ide.common;singleton:=true
-Bundle-Version: 0.1.0
+Bundle-Version: 0.5.0
 Bundle-Vendor: LiquiBase.org
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.ui,
@@ -68,7 +68,6 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.datatools.sqltools.sqleditor,
  org.eclipse.datatools.sqltools.sqlscrapbook,
  org.eclipse.datatools.sqltools.tabledataeditor,
- org.liquibase.migrator.deps,
  org.eclipse.update.core,
  org.eclipse.update.scheduler,
  org.eclipse.update.ui

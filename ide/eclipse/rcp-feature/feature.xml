@@ -2,7 +2,7 @@
 <feature
       id="org.liquibase.rcp.feature"
       label="LiquiBase IDE"
-      version="0.1.0"
+      version="0.5.0"
       provider-name="LiquiBase.org">
 
    <description url="http://www.liquibase.com/">
@@ -1305,13 +1305,6 @@ changes and refactorings
          unpack="false"/>
 
    <plugin
-         id="org.liquibase.migrator.deps"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
          id="org.mortbay.jetty"
          download-size="0"
          install-size="0"
@@ -1338,5 +1331,19 @@ changes and refactorings
          install-size="0"
          version="0.0.0"
          unpack="false"/>
+
+   <plugin
+         id="org.eclipse.equinox.launcher"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.equinox.launcher.win32.win32.x86"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         fragment="true"/>
 
 </feature>

@@ -3,5 +3,5 @@
    <description url="http://www.liquibase.org/update/eclipse/plugin">
       LiquiBase Update Site
    </description>
-   <feature url="features/org.liquibase.eclipse.feature_0.1.0.jar" id="org.liquibase.eclipse.feature" version="0.1.0"/>
+   <feature url="features/org.liquibase.eclipse.feature_0.5.0.jar" id="org.liquibase.eclipse.feature" version="0.5.0"/>
 </site>

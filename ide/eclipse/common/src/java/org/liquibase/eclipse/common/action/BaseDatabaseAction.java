@@ -68,7 +68,7 @@ public abstract class BaseDatabaseAction implements IObjectActionDelegate, IWork
 	}
 
 	protected Database getSelectedDatabase(ISelection selection) {
-		List selectedObjects = ((TreeSelection) selection).toList();
+		List<?> selectedObjects = ((TreeSelection) selection).toList();
 		for (Object object : selectedObjects) {
 			if (object instanceof ICatalogObject) {
 				return ((ICatalogObject) object).getCatalogDatabase();
@@ -78,7 +78,7 @@ public abstract class BaseDatabaseAction implements IObjectActionDelegate, IWork
 	}
 
 	protected Connection getSelectedConnection(ISelection selection) {
-		List selectedObjects = ((TreeSelection) selection).toList();
+		List<?> selectedObjects = ((TreeSelection) selection).toList();
 		for (Object object : selectedObjects) {
 			if (object instanceof ICatalogObject) {
 				return ((ICatalogObject) object).getConnection();
@@ -88,7 +88,7 @@ public abstract class BaseDatabaseAction implements IObjectActionDelegate, IWork
 	}
 
 	protected Schema getSelectedSchema(ISelection selection) {
-		List selectedObjects = ((TreeSelection) selection).toList();
+		List<?> selectedObjects = ((TreeSelection) selection).toList();
 		for (Object object : selectedObjects) {
 			if (object instanceof Schema) {
 				return (Schema) object;
@@ -98,7 +98,7 @@ public abstract class BaseDatabaseAction implements IObjectActionDelegate, IWork
 	}
 
 	protected Table getSelectedTable(ISelection selection) {
-		List selectedObjects = ((TreeSelection) selection).toList();
+		List<?> selectedObjects = ((TreeSelection) selection).toList();
 		for (Object object : selectedObjects) {
 			if (object instanceof Table) {
 				return (Table) object;
@@ -108,7 +108,7 @@ public abstract class BaseDatabaseAction implements IObjectActionDelegate, IWork
 	}
 
 	protected Column getSelectedColumn(ISelection selection) {
-		List selectedObjects = ((TreeSelection) selection).toList();
+		List<?> selectedObjects = ((TreeSelection) selection).toList();
 		for (Object object : selectedObjects) {
 			if (object instanceof Column) {
 				return (Column) object;
@@ -118,7 +118,7 @@ public abstract class BaseDatabaseAction implements IObjectActionDelegate, IWork
 	}
 
 	protected ForeignKey getSelectedForeignKey(ISelection selection) {
-		List selectedObjects = ((TreeSelection) selection).toList();
+		List<?> selectedObjects = ((TreeSelection) selection).toList();
 		for (Object object : selectedObjects) {
 			if (object instanceof ForeignKey) {
 				return (ForeignKey) object;
@@ -128,7 +128,7 @@ public abstract class BaseDatabaseAction implements IObjectActionDelegate, IWork
 	}
 
 	protected Index getSelectedIndex(ISelection selection) {
-		List selectedObjects = ((TreeSelection) selection).toList();
+		List<?> selectedObjects = ((TreeSelection) selection).toList();
 		for (Object object : selectedObjects) {
 			if (object instanceof Index) {
 				return (Index) object;
@@ -138,7 +138,7 @@ public abstract class BaseDatabaseAction implements IObjectActionDelegate, IWork
 	}
 
 	protected ViewTable getSelectedView(ISelection selection) {
-		List selectedObjects = ((TreeSelection) selection).toList();
+		List<?> selectedObjects = ((TreeSelection) selection).toList();
 		for (Object object : selectedObjects) {
 			if (object instanceof ViewTable) {
 				return (ViewTable) object;
@@ -151,7 +151,7 @@ public abstract class BaseDatabaseAction implements IObjectActionDelegate, IWork
 		this.selection = selection;
 	}
 	
-	protected Migrator getMigrator() {
-		return new Migrator(LiquibasePreferences.getCurrentChangeLog(), new EclipseFileOpener());
+	protected Migrator getMigrator(String changeLogFile) {
+		return new Migrator(changeLogFile, new EclipseFileOpener());
 	}
 }

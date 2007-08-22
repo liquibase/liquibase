@@ -306,7 +306,7 @@ public class ChangeSet {
         }
 
         StringBuffer returnString = new StringBuffer();
-        Class lastChangeClass = null;
+        Class<? extends Change> lastChangeClass = null;
         int changeCount = 0;
         for (Change change : changes) {
             if (change.getClass().equals(lastChangeClass)) {

@@ -49,7 +49,7 @@ public class InsertDataChange extends AbstractChange {
     public String[] generateStatements(Database database) throws UnsupportedChangeException {
         StringBuffer buffer = new StringBuffer();
         buffer.append("INSERT INTO ").append(getTableName()).append(" ");
-        Iterator iterator = columns.iterator();
+        Iterator<ColumnConfig> iterator = columns.iterator();
         StringBuffer columnNames = new StringBuffer();
         StringBuffer columnValues = new StringBuffer();
 
