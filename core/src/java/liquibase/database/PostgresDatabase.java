@@ -182,6 +182,9 @@ public class PostgresDatabase extends AbstractDatabase {
                 || tableName.startsWith("pk_");
     }
 
+    @Override
+    protected void dropSequences(Connection conn) throws JDBCException, MigrationFailedException {
+    }
 
 //    public boolean isSystemIndex(String catalogName, String schemaName, String indexName) {
 //        return super.isSystemIndex(catalogName, schemaName, indexName)

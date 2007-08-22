@@ -650,9 +650,7 @@ public class CommandLineMigrator {
 //            }
             migrator.migrate();
         } finally {
-            if (connection != null) {
-                connection.close();
-            }
+            connection.close();
         }
     }
 

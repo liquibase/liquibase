@@ -8,6 +8,7 @@ import java.sql.Statement;
 
 import liquibase.migrator.change.DropForeignKeyConstraintChange;
 import liquibase.migrator.exception.JDBCException;
+import liquibase.migrator.exception.MigrationFailedException;
 import liquibase.migrator.exception.UnsupportedChangeException;
 import liquibase.migrator.exception.JDBCException;
 import liquibase.migrator.exception.UnsupportedChangeException;
@@ -141,6 +142,10 @@ public class MySQLDatabase extends AbstractDatabase {
             }
         }
 
+    }
+
+    @Override
+    protected void dropSequences(Connection conn) throws JDBCException, MigrationFailedException {
     }
 
 

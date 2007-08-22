@@ -257,8 +257,7 @@ public abstract class BaseChangeLogHandler extends DefaultHandler {
     /**
      * By defaultd does nothing.  Overridden in ValidatChangeLogHandler and anywhere else that is interested in them.
      */
-    protected void handlePreCondition(PreconditionSet preconditions) {
-        ;
+    protected void handlePreCondition(@SuppressWarnings("unused") PreconditionSet preconditions) {        
     }
 
     protected abstract void handleChangeSet(ChangeSet changeSet) throws JDBCException, DatabaseHistoryException, MigrationFailedException, IOException;

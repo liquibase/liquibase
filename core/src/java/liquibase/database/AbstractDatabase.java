@@ -911,9 +911,7 @@ public abstract class AbstractDatabase implements Database {
         return "DROP TABLE " + tableName;
     }
 
-    protected void dropSequences(Connection conn) throws JDBCException, MigrationFailedException {
-        ; //no default
-    }
+    abstract protected void dropSequences(Connection conn) throws JDBCException, MigrationFailedException;
 
 
     // ------- DATABASE TAGGING METHODS ---- //
@@ -949,7 +947,7 @@ public abstract class AbstractDatabase implements Database {
                 try {
                     stmt.close();
                 } catch (SQLException e) {
-                    ;
+                    
                 }
             }
         }
