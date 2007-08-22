@@ -16,7 +16,7 @@ public class OrPrecondition implements PreconditionLogic {
 
     }
 
-    public List getDbmsArray() {
+    public List<DBMSPrecondition> getDbmsArray() {
         return this.dbmsArray;
     }
 

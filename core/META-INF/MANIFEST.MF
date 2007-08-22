@@ -3,7 +3,7 @@ Main-Class: liquibase.migrator.commandline.CommandLineMigrator
 Bundle-ManifestVersion: 2
 Bundle-Name: LiquiBase Migrator Plug-in
 Bundle-SymbolicName: org.liquibase.migrator;singleton:=true
-Bundle-Version: 1.1.0
+Bundle-Version: 1.1.2
 Bundle-Vendor: LiquiBase.org
 Export-Package: liquibase,
  liquibase.database,
@@ -20,4 +20,12 @@ Export-Package: liquibase,
  liquibase.migrator.preconditions,
  liquibase.migrator.servlet,
  liquibase.util
-Require-Bundle: org.liquibase.migrator.deps
+Bundle-ClassPath: lib/cglib-nodep-2.1_3.jar,
+ lib/easymock-2.2.jar,
+ lib/easymockclassextension-2.2.jar,
+ lib/junit-4.1.jar,
+ lib-compile/ant_doxygen-1.4.jar,
+ lib-compile/ant-1.6.5.jar,
+ lib-compile/jsdk-2.4.jar,
+ lib-compile/maven-core-2.0.6-uber.jar,
+ .

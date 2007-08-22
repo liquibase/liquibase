@@ -33,6 +33,9 @@ public class GeneralPreferencesPage extends FieldEditorPreferencePage  implement
 		PathEditor classpathEditor = new PathEditor(LiquibasePreferences.CLASSPATHS, "Change Log Root Directories", "Select Directory", getFieldEditorParent());
 		addField(classpathEditor);
 		
+		FileFieldEditor rootChangeLogEditor = new FileFieldEditor(LiquibasePreferences.ROOT_CHANGE_LOG_FILE_NAME, "Root Change Log File", getFieldEditorParent());
+		addField(rootChangeLogEditor);
+		
 		FileFieldEditor changeLogEditor = new FileFieldEditor(LiquibasePreferences.CURRENT_CHANGE_LOG_FILE_NAME, "Current Change Log File", getFieldEditorParent());
 		addField(changeLogEditor);
 

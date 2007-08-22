@@ -2,7 +2,7 @@
 <feature
       id="org.liquibase.eclipse.feature"
       label="Feature Feature"
-      version="0.1.0"
+      version="0.5.0"
       provider-name="LiquiBase.org">
 
    <description url="http://www.liquibase.org/description">
@@ -980,13 +980,6 @@ changes and refactorings
 
    <plugin
          id="org.liquibase.migrator"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.liquibase.migrator.deps"
          download-size="0"
          install-size="0"
          version="0.0.0"

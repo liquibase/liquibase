@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: LiquiBase Eclipse Plug-in
 Bundle-SymbolicName: org.liquibase.eclipse; singleton:=true
-Bundle-Version: 0.0.1
+Bundle-Version: 0.5.0
 Bundle-Activator: org.liquibase.eclipse.Activator
 Bundle-Vendor: LiquiBase.org
 Require-Bundle: org.eclipse.ui,

@@ -15,9 +15,11 @@ import liquibase.migrator.change.*;
  */
 public class ChangeFactory {
 
-    private final Map<String, Class> tagToClassMap;
+    @SuppressWarnings("unchecked")
+	private final Map<String, Class> tagToClassMap;
 
-    public ChangeFactory() {
+    @SuppressWarnings("unchecked")
+	public ChangeFactory() {
         tagToClassMap = new HashMap<String, Class>();
         Class[] changes = new Class[]{
                 AddColumnChange.class,
@@ -54,7 +56,7 @@ public class ChangeFactory {
         };
 
         try {
-            for (Class changeClass : changes) {
+            for (Class<Change> changeClass : changes) {
                 Change change = (Change) changeClass.newInstance();
                 tagToClassMap.put(change.getTagName(), changeClass);
             }
@@ -67,7 +69,7 @@ public class ChangeFactory {
      * Create a new Change subclass based on the given tag name.
      */
     public Change create(String tagName) {
-        Class aClass = tagToClassMap.get(tagName);
+        Class<?> aClass = tagToClassMap.get(tagName);
         if (aClass == null) {
             throw new RuntimeException("Unknown tag: " + tagName);
         }

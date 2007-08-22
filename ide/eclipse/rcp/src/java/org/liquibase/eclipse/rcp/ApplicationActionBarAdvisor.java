@@ -119,6 +119,7 @@ public class ApplicationActionBarAdvisor extends ActionBarAdvisor {
 	
 	
 
+	@SuppressWarnings("restriction")
 	private void removeExtraneousActions() {
 
 		ActionSetRegistry reg = WorkbenchPlugin.getDefault().getActionSetRegistry();
@@ -133,6 +134,7 @@ public class ApplicationActionBarAdvisor extends ActionBarAdvisor {
 		removeStandardAction(reg, "org.eclipse.ui.WorkingSetActionSet");
 }
 
+	@SuppressWarnings("restriction")
 	private void removeStandardAction(ActionSetRegistry reg, String actionSetId) {
 
 		IActionSetDescriptor[] actionSets = reg.getActionSets();
