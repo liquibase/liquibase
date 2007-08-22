@@ -10,6 +10,7 @@ import java.util.Set;
 
 import liquibase.migrator.change.DropForeignKeyConstraintChange;
 import liquibase.migrator.exception.JDBCException;
+import liquibase.migrator.exception.MigrationFailedException;
 import liquibase.migrator.exception.UnsupportedChangeException;
 
 /**
@@ -151,6 +152,10 @@ public class MSSQLDatabase extends AbstractDatabase {
         }
 
         return returnString.toString().replaceFirst(" \\+ $", "");
+    }
+
+    @Override
+    protected void dropSequences(Connection conn) throws JDBCException, MigrationFailedException {
     }
 
 //    protected void dropForeignKeys(Connection conn) throws JDBCException {

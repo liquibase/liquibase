@@ -104,7 +104,7 @@ public class MergeColumnChange extends AbstractChange {
 
     }
 
-    public String[] generateStatements(DerbyDatabase database) throws UnsupportedChangeException {
+    public String[] generateStatements(@SuppressWarnings("unused") DerbyDatabase database) throws UnsupportedChangeException {
         throw new UnsupportedChangeException("Derby does not currently support merging columns");
     }
 

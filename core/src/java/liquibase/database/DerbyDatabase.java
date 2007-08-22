@@ -1,6 +1,7 @@
 package liquibase.database;
 
 import liquibase.migrator.exception.JDBCException;
+import liquibase.migrator.exception.MigrationFailedException;
 
 import java.sql.Connection;
 
@@ -90,5 +91,9 @@ public class DerbyDatabase extends AbstractDatabase {
         } else {
             return "TIMESTAMP("+super.getDateLiteral(isoDate)+")";
         }
+    }
+
+    @Override
+    protected void dropSequences(Connection conn) throws JDBCException, MigrationFailedException {
     }
 }

@@ -1,6 +1,7 @@
 package liquibase.database;
 
 import liquibase.migrator.exception.JDBCException;
+import liquibase.migrator.exception.MigrationFailedException;
 import liquibase.util.ISODateFormat;
 
 import java.sql.Connection;
@@ -123,5 +124,9 @@ public class HsqlDatabase extends AbstractDatabase {
 
     public String createFindSequencesSQL() throws JDBCException {
         return "SELECT SEQUENCE_NAME FROM INFORMATION_SCHEMA.SYSTEM_SEQUENCES WHERE SEQUENCE_SCHEMA = '" + getSchemaName() + "'";
+    }
+
+    @Override
+    protected void dropSequences(Connection conn) throws JDBCException, MigrationFailedException {
     }
 }

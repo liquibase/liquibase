@@ -93,7 +93,7 @@ public class ValidateChangeLogHandler extends BaseChangeLogHandler {
         return duplicateChangeSets;
     }
     
-    public static List<SetupException> getSetupExceptions() {
+    public List<SetupException> getSetupExceptions() {
         return setupExceptions;
     }
 
