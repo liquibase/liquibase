@@ -24,7 +24,7 @@ public class GeneralPreferencesPage extends FieldEditorPreferencePage  implement
 		
 	}
 	
-	@Override
+//	@Override
 	public void init(IWorkbench workbench) {		
 	}
 
