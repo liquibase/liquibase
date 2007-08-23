@@ -1,12 +1,15 @@
 package liquibase.migrator;
 
 import junit.framework.TestCase;
-import liquibase.migrator.exception.ValidationFailedException;
+import liquibase.database.DatabaseFactory;
 import liquibase.migrator.diff.Diff;
 import liquibase.migrator.diff.DiffResult;
-import liquibase.database.DatabaseFactory;
+import liquibase.migrator.exception.ValidationFailedException;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.PrintStream;
+import java.io.StringWriter;
 import java.sql.Connection;
 import java.sql.Driver;
 import java.util.Date;

@@ -1,7 +1,7 @@
 package liquibase.database.structure;
 
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 public class Table implements Comparable<Table> {
     private String name;

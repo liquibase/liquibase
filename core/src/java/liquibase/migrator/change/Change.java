@@ -6,7 +6,6 @@ import liquibase.migrator.exception.JDBCException;
 import liquibase.migrator.exception.RollbackImpossibleException;
 import liquibase.migrator.exception.SetupException;
 import liquibase.migrator.exception.UnsupportedChangeException;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 

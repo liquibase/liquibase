@@ -1,15 +1,15 @@
 package liquibase.migrator.parser;
 
-import java.io.IOException;
-import java.sql.SQLException;
-import java.util.Set;
-
 import liquibase.migrator.ChangeSet;
 import liquibase.migrator.FileOpener;
 import liquibase.migrator.Migrator;
 import liquibase.migrator.exception.DatabaseHistoryException;
 import liquibase.migrator.exception.JDBCException;
 import liquibase.migrator.exception.MigrationFailedException;
+
+import java.io.IOException;
+import java.sql.SQLException;
+import java.util.Set;
 
 /**
  * An implementation of BaseChangeLogHandler for generating statements to update a database.

@@ -1,15 +1,14 @@
 package org.liquibase.eclipse.common.change.wizard;
 
-import java.sql.Connection;
-
 import liquibase.migrator.change.Change;
 import liquibase.migrator.change.RenameViewChange;
-
 import org.eclipse.datatools.connectivity.sqm.core.rte.jdbc.JDBCSchema;
 import org.eclipse.datatools.modelbase.sql.schema.Database;
 import org.eclipse.datatools.modelbase.sql.tables.ViewTable;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.liquibase.eclipse.common.change.wizard.page.RenameViewWizardPage;
+
+import java.sql.Connection;
 
 public class RenameViewWizard extends BaseRefactorWizard {
 

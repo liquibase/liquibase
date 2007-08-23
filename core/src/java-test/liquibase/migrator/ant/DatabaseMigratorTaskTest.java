@@ -1,8 +1,7 @@
 package liquibase.migrator.ant;
 
-import static org.junit.Assert.assertEquals;
-
 import org.apache.tools.ant.Project;
+import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 /**

@@ -1,13 +1,13 @@
 package liquibase.migrator;
 
+import liquibase.database.*;
+import liquibase.migrator.exception.JDBCException;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.expectLastCall;
-import static org.easymock.classextension.EasyMock.createMock;
-import static org.easymock.classextension.EasyMock.replay;
-import static org.easymock.classextension.EasyMock.reset;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.easymock.classextension.EasyMock.*;
+import static org.junit.Assert.*;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.InputStream;
 import java.net.URL;
@@ -16,12 +16,6 @@ import java.sql.DatabaseMetaData;
 import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.List;
-
-import liquibase.database.*;
-import liquibase.migrator.exception.JDBCException;
-
-import org.junit.Before;
-import org.junit.Test;
 
 /**
  * Tests for {@link Migrator}

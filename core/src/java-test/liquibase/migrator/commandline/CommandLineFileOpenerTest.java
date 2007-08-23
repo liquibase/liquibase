@@ -1,16 +1,14 @@
 package liquibase.migrator.commandline;
 
+import liquibase.migrator.AbstractFileOpenerTest;
+import liquibase.migrator.FileOpener;
 import static org.junit.Assert.assertNotNull;
+import org.junit.Test;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Enumeration;
-
-import org.junit.Test;
-
-import liquibase.migrator.AbstractFileOpenerTest;
-import liquibase.migrator.FileOpener;
 
 /**
  * Tests for {@link CommandLineFileOpener}

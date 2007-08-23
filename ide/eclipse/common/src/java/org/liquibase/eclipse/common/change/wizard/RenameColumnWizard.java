@@ -1,15 +1,14 @@
 package org.liquibase.eclipse.common.change.wizard;
 
-import java.sql.Connection;
-
 import liquibase.migrator.change.Change;
 import liquibase.migrator.change.RenameColumnChange;
-
 import org.eclipse.datatools.connectivity.sqm.core.rte.jdbc.JDBCTable;
 import org.eclipse.datatools.modelbase.sql.schema.Database;
 import org.eclipse.datatools.modelbase.sql.tables.Column;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.liquibase.eclipse.common.change.wizard.page.RenameColumnWizardPage;
+
+import java.sql.Connection;
 
 public class RenameColumnWizard extends BaseRefactorWizard {
 

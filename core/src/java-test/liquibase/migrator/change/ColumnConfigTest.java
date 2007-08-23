@@ -2,11 +2,10 @@ package liquibase.migrator.change;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-
-import javax.xml.parsers.DocumentBuilderFactory;
-
 import org.junit.Test;
 import org.w3c.dom.Element;
+
+import javax.xml.parsers.DocumentBuilderFactory;
 
 /**
  * Tests for {@link ColumnConfig}

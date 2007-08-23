@@ -1,12 +1,9 @@
 package org.liquibase.eclipse.common.change.wizard;
 
-import java.sql.Connection;
-
 import liquibase.migrator.change.Change;
 import liquibase.migrator.change.ColumnConfig;
 import liquibase.migrator.change.ConstraintsConfig;
 import liquibase.migrator.change.CreateTableChange;
-
 import org.eclipse.datatools.connectivity.sqm.core.rte.jdbc.JDBCSchema;
 import org.eclipse.datatools.modelbase.sql.schema.Database;
 import org.eclipse.datatools.modelbase.sql.schema.Schema;
@@ -18,6 +15,8 @@ import org.eclipse.datatools.sqltools.tablewizard.ui.TableFormModel;
 import org.eclipse.datatools.sqltools.tablewizard.ui.wizardpages.columns.GenericColumnsPage;
 import org.eclipse.datatools.sqltools.tablewizard.ui.wizardpages.pk.GenericPrimaryKeyPage;
 import org.eclipse.jface.wizard.IWizardPage;
+
+import java.sql.Connection;
 
 @SuppressWarnings("restriction")
 public class AddTableWizard extends BaseRefactorWizard {

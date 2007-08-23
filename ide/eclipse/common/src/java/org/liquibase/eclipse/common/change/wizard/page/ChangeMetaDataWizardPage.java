@@ -1,9 +1,6 @@
 package org.liquibase.eclipse.common.change.wizard.page;
 
-import java.util.Date;
-
 import liquibase.util.StringUtils;
-
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.preference.PreferenceDialog;
 import org.eclipse.swt.SWT;
@@ -18,6 +15,8 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.liquibase.eclipse.common.LiquibasePreferences;
 import org.liquibase.ide.common.preferences.GeneralPreferencesPage;
+
+import java.util.Date;
 
 public class ChangeMetaDataWizardPage extends RefactorWizardPage {
 

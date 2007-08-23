@@ -1,7 +1,6 @@
 package liquibase.migrator.change;
 
 import static org.junit.Assert.assertNull;
-
 import org.junit.Test;
 
 /**

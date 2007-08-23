@@ -1,19 +1,14 @@
 package liquibase.database;
 
-import static org.easymock.EasyMock.createMock;
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.expectLastCall;
-import static org.easymock.EasyMock.replay;
+import liquibase.migrator.change.ColumnConfig;
+import static org.easymock.EasyMock.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import org.junit.Test;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
-
-import liquibase.migrator.change.ColumnConfig;
-
-import org.junit.Test;
 
 /**
  * Base test class for database-specific tests

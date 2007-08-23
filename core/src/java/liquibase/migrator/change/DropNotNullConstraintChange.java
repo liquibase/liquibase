@@ -2,7 +2,6 @@ package liquibase.migrator.change;
 
 import liquibase.database.*;
 import liquibase.migrator.exception.UnsupportedChangeException;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 

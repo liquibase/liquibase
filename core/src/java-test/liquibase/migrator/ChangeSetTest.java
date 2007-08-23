@@ -1,11 +1,9 @@
 package liquibase.migrator;
 
-import static org.junit.Assert.assertEquals;
-
-import org.junit.Test;
-
 import liquibase.migrator.change.CreateTableChange;
 import liquibase.migrator.change.InsertDataChange;
+import static org.junit.Assert.assertEquals;
+import org.junit.Test;
 
 /**
  * Tests for {@link ChangeSet}

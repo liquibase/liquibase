@@ -1,12 +1,12 @@
 package org.liquibase.eclipse.common;
 
-import java.io.File;
-import java.util.HashSet;
-import java.util.Set;
-
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.osgi.service.prefs.BackingStoreException;
+
+import java.io.File;
+import java.util.HashSet;
+import java.util.Set;
 
 public class LiquibasePreferences {
 

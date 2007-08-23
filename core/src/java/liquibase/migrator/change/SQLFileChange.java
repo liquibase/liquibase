@@ -8,7 +8,6 @@ import liquibase.migrator.exception.UnsupportedChangeException;
 import liquibase.util.MD5Util;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 

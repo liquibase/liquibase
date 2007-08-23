@@ -1,13 +1,6 @@
 package liquibase.database;
 
-import java.sql.CallableStatement;
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.SQLWarning;
-import java.sql.Savepoint;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.Map;
 
 /**

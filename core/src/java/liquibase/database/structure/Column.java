@@ -3,9 +3,9 @@ package liquibase.database.structure;
 import liquibase.database.Database;
 import liquibase.database.PostgresDatabase;
 
-import java.util.List;
-import java.util.Arrays;
 import java.sql.Types;
+import java.util.Arrays;
+import java.util.List;
 
 public class Column implements Comparable<Column> {
     private Table table;
