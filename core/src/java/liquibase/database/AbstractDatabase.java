@@ -11,6 +11,7 @@ import liquibase.migrator.exception.UnsupportedChangeException;
 import liquibase.util.StreamUtil;
 
 import java.io.IOException;
+import java.io.Writer;
 import java.net.InetAddress;
 import java.sql.*;
 import java.util.*;
@@ -549,8 +550,13 @@ public abstract class AbstractDatabase implements Database {
                     connection.commit();
                 } else {
                     if (!migrator.getMode().equals(Migrator.Mode.OUTPUT_FUTURE_ROLLBACK_SQL_MODE)) {
-                        migrator.getOutputSQLWriter().append(sql).append(";").append(StreamUtil.getLineSeparator());
-                        wroteToOutput = true;
+                        Writer writer = migrator.getOutputSQLWriter();
+                        if (writer == null) {
+                            wroteToOutput = false;
+                        } else {
+                            writer.append(sql).append(";").append(StreamUtil.getLineSeparator());
+                            wroteToOutput = true;
+                        }
                     }
                 }
             }
@@ -921,6 +927,8 @@ public abstract class AbstractDatabase implements Database {
     public void tag(String tagString) throws MigrationFailedException {
         Connection conn = getConnection();
         PreparedStatement stmt = null;
+        Statement countStatement = null;
+        ResultSet countRS = null;
         try {
             stmt = conn.prepareStatement(createChangeToTagSQL());
             ResultSet rs = stmt.executeQuery();
@@ -936,6 +944,14 @@ public abstract class AbstractDatabase implements Database {
             stmt.setTimestamp(2, lastExecutedDate);
             int rowsUpdated = stmt.executeUpdate();
             if (rowsUpdated == 0) {
+                countStatement = conn.createStatement();
+                countRS = countStatement.executeQuery("select count(*) from " + getDatabaseChangeLogTableName());
+                countRS.next();
+                if (countRS.getInt(1) == 0) {
+                    throw new MigrationFailedException("Cannot tag an empty database");
+                }
+                countRS.close();
+
                 throw new MigrationFailedException("Did not tag database change log correctly");
             }
             conn.commit();
@@ -946,7 +962,14 @@ public abstract class AbstractDatabase implements Database {
                 try {
                     stmt.close();
                 } catch (SQLException e) {
-                    
+                    ;
+                }
+            }
+            if (countStatement != null) {
+                try {
+                    countStatement.close();
+                } catch (SQLException e) {
+                    ;
                 }
             }
         }

@@ -5,6 +5,7 @@ import liquibase.database.DatabaseFactory;
 import liquibase.migrator.diff.Diff;
 import liquibase.migrator.diff.DiffResult;
 import liquibase.migrator.exception.ValidationFailedException;
+import liquibase.migrator.exception.MigrationFailedException;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -14,6 +15,7 @@ import java.sql.Connection;
 import java.sql.Driver;
 import java.util.Date;
 import java.util.Properties;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -249,5 +251,30 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
         migrator.migrate();
 
         migrator.clearCheckSums();
+    }
+
+    public void testTagEmptyDatabase() throws Exception {
+        Migrator migrator = createMigrator(completeChangeLog);
+        migrator.dropAll();
+
+        migrator = createMigrator(completeChangeLog);
+        migrator.checkDatabaseChangeLogTable();
+        try {
+            migrator.tag("empty");
+        } catch (MigrationFailedException e) {
+            assertEquals("liquibase.migrator.exception.MigrationFailedException: Cannot tag an empty database", e.getMessage());
+        }
+
+    }
+
+    public void testUnrunChangeSetsEmptyDatabase() throws Exception {
+        Migrator migrator = createMigrator(completeChangeLog);
+        migrator.dropAll();
+
+        migrator = createMigrator(completeChangeLog);
+        List<ChangeSet> list = migrator.listUnrunChangeSets();
+
+        assertTrue(list.size() > 0);
+
     }
 }
