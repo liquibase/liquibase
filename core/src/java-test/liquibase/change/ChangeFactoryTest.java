@@ -1,10 +1,9 @@
 package liquibase.change;
 
-import static org.junit.Assert.assertEquals;
 import liquibase.migrator.change.Change;
 import liquibase.migrator.change.CreateTableChange;
 import liquibase.migrator.parser.ChangeFactory;
-
+import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
 

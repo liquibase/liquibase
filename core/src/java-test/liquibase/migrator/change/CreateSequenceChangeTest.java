@@ -1,14 +1,12 @@
 package liquibase.migrator.change;
 
+import liquibase.database.OracleDatabase;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-
-import javax.xml.parsers.DocumentBuilderFactory;
-
-import liquibase.database.OracleDatabase;
-
 import org.junit.Test;
 import org.w3c.dom.Element;
+
+import javax.xml.parsers.DocumentBuilderFactory;
 
 /**
  * Tests for {@link CreateSequenceChange}

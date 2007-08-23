@@ -1,8 +1,7 @@
 package liquibase.migrator.change;
 
-import static org.junit.Assert.assertEquals;
 import liquibase.database.OracleDatabase;
-
+import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
 

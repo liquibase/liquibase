@@ -1,51 +1,28 @@
 package liquibase.migrator;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.Writer;
-import java.net.URL;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.text.DateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Properties;
-import java.util.Set;
-import java.util.logging.Logger;
-
-import javax.swing.JOptionPane;
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
-
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.migrator.exception.DatabaseHistoryException;
 import liquibase.migrator.exception.JDBCException;
 import liquibase.migrator.exception.MigrationFailedException;
 import liquibase.migrator.exception.ValidationFailedException;
-import liquibase.migrator.parser.ChangeFactory;
-import liquibase.migrator.parser.FindChangeSetsHandler;
-import liquibase.migrator.parser.MigratorSchemaResolver;
-import liquibase.migrator.parser.RollbackDatabaseChangeLogHandler;
-import liquibase.migrator.parser.RollbackFutureDatabaseChangeLogHandler;
-import liquibase.migrator.parser.UpdateDatabaseChangeLogHandler;
-import liquibase.migrator.parser.ValidateChangeLogHandler;
+import liquibase.migrator.parser.*;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
+import org.xml.sax.*;
 
-import org.xml.sax.ContentHandler;
-import org.xml.sax.ErrorHandler;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-import org.xml.sax.SAXNotRecognizedException;
-import org.xml.sax.SAXNotSupportedException;
-import org.xml.sax.SAXParseException;
-import org.xml.sax.XMLReader;
+import javax.swing.*;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Writer;
+import java.net.URL;
+import java.sql.*;
+import java.text.DateFormat;
+import java.util.*;
+import java.util.Date;
+import java.util.logging.Logger;
 
 /**
  * Core class of the LiquiBase migrator.

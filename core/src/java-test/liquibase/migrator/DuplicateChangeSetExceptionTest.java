@@ -1,8 +1,7 @@
 package liquibase.migrator;
 
-import static org.junit.Assert.assertEquals;
 import liquibase.migrator.exception.DuplicateChangeSetException;
-
+import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 /**

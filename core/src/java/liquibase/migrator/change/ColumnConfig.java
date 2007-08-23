@@ -1,8 +1,7 @@
 package liquibase.migrator.change;
 
-import liquibase.util.StringUtils;
 import liquibase.database.Database;
-import liquibase.database.DerbyDatabase;
+import liquibase.util.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 

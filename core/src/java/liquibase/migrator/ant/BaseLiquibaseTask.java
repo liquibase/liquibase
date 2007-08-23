@@ -7,7 +7,6 @@ import liquibase.migrator.FileSystemFileOpener;
 import liquibase.migrator.Migrator;
 import liquibase.migrator.exception.JDBCException;
 import liquibase.migrator.exception.MigrationFailedException;
-
 import org.apache.tools.ant.Task;
 import org.apache.tools.ant.types.Path;
 import org.apache.tools.ant.types.Reference;

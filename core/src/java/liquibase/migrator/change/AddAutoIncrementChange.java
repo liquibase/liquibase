@@ -1,13 +1,7 @@
 package liquibase.migrator.change;
 
-import liquibase.database.Database;
-import liquibase.database.DerbyDatabase;
-import liquibase.database.HsqlDatabase;
-import liquibase.database.MSSQLDatabase;
-import liquibase.database.OracleDatabase;
-import liquibase.database.PostgresDatabase;
+import liquibase.database.*;
 import liquibase.migrator.exception.UnsupportedChangeException;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 

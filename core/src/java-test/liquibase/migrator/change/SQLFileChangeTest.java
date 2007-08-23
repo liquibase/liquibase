@@ -1,15 +1,11 @@
 package liquibase.migrator.change;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
-
 import liquibase.database.MSSQLDatabase;
 import liquibase.database.OracleDatabase;
 import liquibase.migrator.ClassLoaderFileOpener;
 import liquibase.migrator.exception.SetupException;
 import liquibase.util.MD5Util;
-
+import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Element;

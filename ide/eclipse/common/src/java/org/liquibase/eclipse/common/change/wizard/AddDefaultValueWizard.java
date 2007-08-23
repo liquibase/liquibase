@@ -1,15 +1,14 @@
 package org.liquibase.eclipse.common.change.wizard;
 
-import java.sql.Connection;
-
 import liquibase.migrator.change.AddDefaultValueChange;
 import liquibase.migrator.change.Change;
-
 import org.eclipse.datatools.connectivity.sqm.core.rte.jdbc.JDBCColumn;
 import org.eclipse.datatools.modelbase.sql.schema.Database;
 import org.eclipse.datatools.modelbase.sql.tables.Column;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.liquibase.eclipse.common.change.wizard.page.AddDefaultValueWizardPage;
+
+import java.sql.Connection;
 
 public class AddDefaultValueWizard extends BaseRefactorWizard {
 

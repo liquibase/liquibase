@@ -1,10 +1,6 @@
 package org.liquibase.eclipse.common.action;
 
-import java.sql.Connection;
-import java.util.List;
-
 import liquibase.migrator.Migrator;
-
 import org.eclipse.datatools.connectivity.sqm.core.rte.ICatalogObject;
 import org.eclipse.datatools.modelbase.sql.constraints.ForeignKey;
 import org.eclipse.datatools.modelbase.sql.constraints.Index;
@@ -20,8 +16,10 @@ import org.eclipse.ui.IObjectActionDelegate;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
-import org.liquibase.eclipse.common.LiquibasePreferences;
 import org.liquibase.eclipse.common.migrator.EclipseFileOpener;
+
+import java.sql.Connection;
+import java.util.List;
 
 public abstract class BaseDatabaseAction implements IObjectActionDelegate, IWorkbenchWindowActionDelegate {
 	

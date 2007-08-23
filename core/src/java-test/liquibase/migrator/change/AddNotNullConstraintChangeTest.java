@@ -1,10 +1,10 @@
 package liquibase.migrator.change;
 
 import liquibase.database.MySQLDatabase;
-
+import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import org.w3c.dom.Element;
-import static org.junit.Assert.assertEquals;
+
 import javax.xml.parsers.DocumentBuilderFactory;
 
 /**

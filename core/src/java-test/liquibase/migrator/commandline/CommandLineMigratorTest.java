@@ -1,21 +1,13 @@
 package liquibase.migrator.commandline;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.fail;
 import liquibase.migrator.exception.CommandLineParsingException;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
-import java.io.StringReader;
+import java.io.*;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Properties;
-
-import org.junit.Test;
 
 
 /**

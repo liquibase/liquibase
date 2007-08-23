@@ -1,14 +1,7 @@
 package org.liquibase.eclipse.common.change.wizard;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.lang.reflect.InvocationTargetException;
-import java.sql.Connection;
-import java.sql.Statement;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-
+import com.sun.org.apache.xml.internal.serialize.OutputFormat;
+import com.sun.org.apache.xml.internal.serialize.XMLSerializer;
 import liquibase.database.DatabaseFactory;
 import liquibase.migrator.ChangeSet;
 import liquibase.migrator.DatabaseChangeLog;
@@ -16,7 +9,6 @@ import liquibase.migrator.Migrator;
 import liquibase.migrator.change.Change;
 import liquibase.migrator.parser.MigratorSchemaResolver;
 import liquibase.util.StringUtils;
-
 import org.eclipse.core.commands.operations.OperationStatus;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -32,8 +24,13 @@ import org.liquibase.eclipse.common.migrator.EclipseFileOpener;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import com.sun.org.apache.xml.internal.serialize.OutputFormat;
-import com.sun.org.apache.xml.internal.serialize.XMLSerializer;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.sql.Connection;
+import java.sql.Statement;
 
 public abstract class BaseRefactorWizard extends Wizard {
 

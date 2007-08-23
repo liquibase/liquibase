@@ -1,23 +1,19 @@
 package liquibase.migrator.change;
 
-import static org.easymock.EasyMock.expect;
-import static org.easymock.EasyMock.expectLastCall;
-import static org.easymock.EasyMock.verify;
+import liquibase.database.Database;
+import liquibase.database.OracleDatabase;
+import liquibase.util.StreamUtil;
+import static org.easymock.EasyMock.*;
 import static org.easymock.classextension.EasyMock.createMock;
 import static org.easymock.classextension.EasyMock.replay;
 import static org.junit.Assert.assertEquals;
+import org.junit.Test;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 import java.io.StringWriter;
 import java.sql.Connection;
 import java.sql.Statement;
-
-import liquibase.database.Database;
-import liquibase.database.OracleDatabase;
-import liquibase.util.StreamUtil;
-
-import org.junit.Test;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
 /**
  * Base test class for changes

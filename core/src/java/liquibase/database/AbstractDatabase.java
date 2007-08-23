@@ -9,7 +9,6 @@ import liquibase.migrator.exception.JDBCException;
 import liquibase.migrator.exception.MigrationFailedException;
 import liquibase.migrator.exception.UnsupportedChangeException;
 import liquibase.util.StreamUtil;
-import liquibase.database.structure.DatabaseSnapshot;
 
 import java.io.IOException;
 import java.net.InetAddress;

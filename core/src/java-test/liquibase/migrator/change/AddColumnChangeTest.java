@@ -1,16 +1,14 @@
 package liquibase.migrator.change;
 
-import static org.junit.Assert.assertEquals;
-
-import javax.xml.parsers.DocumentBuilderFactory;
-
 import liquibase.database.OracleDatabase;
 import liquibase.database.SybaseDatabase;
-
+import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
+
+import javax.xml.parsers.DocumentBuilderFactory;
 
 /**
  * Tests for {@link AddColumnChange}

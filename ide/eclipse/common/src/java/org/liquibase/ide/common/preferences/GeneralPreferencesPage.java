@@ -1,8 +1,5 @@
 package org.liquibase.ide.common.preferences;
 
-import java.io.IOException;
-
-import org.eclipse.core.runtime.preferences.ConfigurationScope;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.jface.preference.FileFieldEditor;

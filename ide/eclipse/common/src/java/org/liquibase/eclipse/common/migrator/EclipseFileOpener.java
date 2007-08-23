@@ -1,5 +1,8 @@
 package org.liquibase.eclipse.common.migrator;
 
+import liquibase.migrator.FileOpener;
+import org.liquibase.eclipse.common.LiquibasePreferences;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -9,10 +12,6 @@ import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
-
-import liquibase.migrator.FileOpener;
-
-import org.liquibase.eclipse.common.LiquibasePreferences;
 
 
 public class EclipseFileOpener implements FileOpener {

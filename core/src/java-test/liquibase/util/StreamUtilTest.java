@@ -1,7 +1,6 @@
 package liquibase.util;
 
 import static junit.framework.Assert.assertEquals;
-
 import org.junit.Test;
 
 import java.io.ByteArrayInputStream;

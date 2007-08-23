@@ -11,8 +11,6 @@ import java.net.URL;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.Enumeration;
-import java.security.PrivilegedAction;
-import java.security.AccessController;
 
 /**
  * An implementation of FileOpener that is specific to how Ant works.

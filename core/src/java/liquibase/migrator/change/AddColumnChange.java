@@ -4,7 +4,6 @@ import liquibase.database.DB2Database;
 import liquibase.database.Database;
 import liquibase.database.SybaseDatabase;
 import liquibase.migrator.exception.UnsupportedChangeException;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 

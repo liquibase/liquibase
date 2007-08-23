@@ -1,7 +1,7 @@
 package liquibase.database.structure;
 
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 public class View implements Comparable<View> {
     private String name;

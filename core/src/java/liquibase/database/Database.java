@@ -1,9 +1,5 @@
 package liquibase.database;
 
-import java.io.IOException;
-import java.sql.Connection;
-import java.sql.SQLException;
-
 import liquibase.migrator.DatabaseChangeLogLock;
 import liquibase.migrator.Migrator;
 import liquibase.migrator.change.ColumnConfig;

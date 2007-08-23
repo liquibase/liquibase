@@ -1,7 +1,6 @@
 package org.liquibase.eclipse.common.migrator.action;
 
 import liquibase.migrator.Migrator;
-
 import org.eclipse.core.commands.operations.OperationStatus;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.datatools.connectivity.sqm.core.rte.jdbc.JDBCDatabase;
@@ -9,7 +8,6 @@ import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.liquibase.eclipse.common.LiquibasePreferences;
 import org.liquibase.eclipse.common.action.BaseDatabaseAction;
-import org.liquibase.eclipse.common.migrator.EclipseFileOpener;
 
 public class MigrateAction extends BaseDatabaseAction {
 	
