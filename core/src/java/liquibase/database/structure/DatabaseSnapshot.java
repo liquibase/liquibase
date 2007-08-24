@@ -46,7 +46,7 @@ public class DatabaseSnapshot {
      * Creates a snapshot of the given database with no status listeners
      */
     public DatabaseSnapshot(Database database) throws JDBCException {
-        this(database,  null);
+        this(database, null);
     }
 
     /**
@@ -73,6 +73,10 @@ public class DatabaseSnapshot {
         }
     }
 
+
+    public Database getDatabase() {
+        return database;
+    }
 
     public Set<Table> getTables() {
         return tables;
@@ -104,7 +108,7 @@ public class DatabaseSnapshot {
     }
 
     private void readTablesAndViews() throws SQLException, JDBCException {
-        updateListeners("Reading tables for "+database.toString()+" ...");
+        updateListeners("Reading tables for " + database.toString() + " ...");
         ResultSet rs = databaseMetaData.getTables(database.getCatalogName(), database.getSchemaName(), null, new String[]{"TABLE", "VIEW"});
         while (rs.next()) {
             String type = rs.getString("TABLE_TYPE");
@@ -130,7 +134,7 @@ public class DatabaseSnapshot {
     }
 
     private void readColumns() throws SQLException, JDBCException {
-        updateListeners("Reading columns for "+database.toString()+" ...");
+        updateListeners("Reading columns for " + database.toString() + " ...");
 
         ResultSet rs = databaseMetaData.getColumns(database.getCatalogName(), database.getSchemaName(), null, null);
         while (rs.next()) {
@@ -176,7 +180,7 @@ public class DatabaseSnapshot {
                 columnInfo.setNullable(true);
             }
 
-            columnsMap.put(columnName, columnInfo);
+            columnsMap.put(tableName+"."+columnName, columnInfo);
         }
         rs.close();
     }
@@ -201,7 +205,7 @@ public class DatabaseSnapshot {
     }
 
     private void readForeignKeyInformation() throws JDBCException, SQLException {
-        updateListeners("Reading foreign keys for "+database.toString()+" ...");
+        updateListeners("Reading foreign keys for " + database.toString() + " ...");
 
         for (Table table : tablesMap.values()) {
             ResultSet rs = databaseMetaData.getExportedKeys(database.getCatalogName(), database.getSchemaName(), table.getName());
@@ -251,7 +255,7 @@ public class DatabaseSnapshot {
     }
 
     private void readIndexes() throws JDBCException, SQLException {
-        updateListeners("Reading indexes for "+database.toString()+" ...");
+        updateListeners("Reading indexes for " + database.toString() + " ...");
 
         for (Table table : tablesMap.values()) {
             ResultSet rs;
@@ -260,49 +264,53 @@ public class DatabaseSnapshot {
             } catch (SQLException e) {
                 throw e;
             }
-            Map<String,Index> indexMap = new HashMap<String,Index>();
+            Map<String, Index> indexMap = new HashMap<String, Index>();
             while (rs.next()) {
                 String indexName = rs.getString("INDEX_NAME");
                 short type = rs.getShort("TYPE");
                 String tableName = rs.getString("TABLE_NAME");
                 String columnName = rs.getString("COLUMN_NAME");
 
-                boolean isPKIndex = false;
-                for (PrimaryKey pk : primaryKeys) {
-                    if (pk.getTableName().equalsIgnoreCase(tableName)
-                            && pk.getColumnNames().equalsIgnoreCase(columnName)) {
-                        isPKIndex = true;
-                        break;
-                    }
-                }
-
-                if (isPKIndex || type == DatabaseMetaData.tableIndexStatistic) {
+                if (type == DatabaseMetaData.tableIndexStatistic) {
                     continue;
                 }
+
                 if (columnName == null) {
                     //nothing to index, not sure why these come through sometimes
                     continue;
                 }
                 Index indexInformation;
                 if (indexMap.containsKey(indexName)) {
-                	indexInformation = indexMap.get(indexName);
+                    indexInformation = indexMap.get(indexName);
                 } else {
-                	indexInformation = new Index();
-                	indexInformation.setTableName(tableName);
-                	indexInformation.setName(indexName);
-                	indexMap.put(indexName, indexInformation);
+                    indexInformation = new Index();
+                    indexInformation.setTableName(tableName);
+                    indexInformation.setName(indexName);
+                    indexMap.put(indexName, indexInformation);
                 }
                 indexInformation.getColumns().add(columnName);
             }
             for (String key : indexMap.keySet()) {
-            	indexes.add(indexMap.get(key));
+                indexes.add(indexMap.get(key));
             }
             rs.close();
         }
+
+        Set<Index> indexesToRemove = new HashSet<Index>();
+        //remove PK indexes
+        for (Index index : indexes) {
+            for (PrimaryKey pk : primaryKeys) {
+                if (index.getTableName().equalsIgnoreCase(pk.getTableName())
+                        && index.getColumnNames().equals(pk.getColumnNames())) {
+                    indexesToRemove.add(index);
+                }
+            }
+        }
+        indexes.removeAll(indexesToRemove);
     }
 
     private void readPrimaryKeys() throws JDBCException, SQLException {
-        updateListeners("Reading primary keys for "+database.toString()+" ...");
+        updateListeners("Reading primary keys for " + database.toString() + " ...");
 
         //we can't add directly to the this.primaryKeys hashSet because adding columns to an exising PK changes the hashCode and .contains() fails
         List<PrimaryKey> foundPKs = new ArrayList<PrimaryKey>();
@@ -340,7 +348,7 @@ public class DatabaseSnapshot {
     }
 
     private void readSequences() throws JDBCException, SQLException {
-        updateListeners("Reading sequences for "+database.toString()+" ...");
+        updateListeners("Reading sequences for " + database.toString() + " ...");
 
         if (database.supportsSequences()) {
             ResultSet rs = null;

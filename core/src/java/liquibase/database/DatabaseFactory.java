@@ -62,6 +62,7 @@ public class DatabaseFactory {
             database = new UnsupportedDatabase();
         }
 
+        database.setConnection(connection);
         return database;
     }
 

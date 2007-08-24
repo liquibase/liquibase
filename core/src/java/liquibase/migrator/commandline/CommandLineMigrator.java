@@ -54,6 +54,10 @@ public class CommandLineMigrator {
 
 
     public static void main(String args[]) throws CommandLineParsingException, IOException {
+        for (String arg : args) {
+            System.out.println(arg);
+        }
+
         String shouldRunProperty = System.getProperty(Migrator.SHOULD_RUN_SYSTEM_PROPERTY);
         if (shouldRunProperty != null && !Boolean.valueOf(shouldRunProperty)) {
             System.out.println("Migrator did not run because '" + Migrator.SHOULD_RUN_SYSTEM_PROPERTY + "' system property was set to false");
@@ -691,9 +695,8 @@ public class CommandLineMigrator {
     }
 
     private void doDiff(Connection baseDatabase, Connection targetDatabase) throws JDBCException {
-        Diff diff = new Diff();
+        Diff diff = new Diff(baseDatabase, targetDatabase);
         diff.addStatusListener(new OutDiffStatusListener());
-        diff.init(baseDatabase, targetDatabase);
         DiffResult diffResult = diff.compare();
 
         System.out.println("");
@@ -702,18 +705,16 @@ public class CommandLineMigrator {
     }
 
     private void doDiffToChangeLog(Connection baseDatabase, Connection targetDatabase) throws JDBCException, IOException, ParserConfigurationException {
-        Diff diff = new Diff();
+        Diff diff = new Diff(baseDatabase, targetDatabase);
         diff.addStatusListener(new OutDiffStatusListener());
-        diff.init(baseDatabase, targetDatabase);
         DiffResult diffResult = diff.compare();
 
         diffResult.printChangeLog(System.out, DatabaseFactory.getInstance().findCorrectDatabaseImplementation(targetDatabase));
     }
 
     private void doGenerateChangeLog(Connection originalDatabase) throws JDBCException, IOException, ParserConfigurationException {
-        Diff diff = new Diff();
+        Diff diff = new Diff(originalDatabase);
         diff.addStatusListener(new OutDiffStatusListener());
-        diff.init(originalDatabase);
         DiffResult diffResult = diff.compare();
 
         diffResult.printChangeLog(System.out, DatabaseFactory.getInstance().findCorrectDatabaseImplementation(originalDatabase));

@@ -13,7 +13,7 @@ import java.util.Set;
  */
 public class MSSQLDatabase extends AbstractDatabase {
     public static final String PRODUCT_NAME = "Microsoft SQL Server";
-    private Set<String> systemTablesAndViews = new HashSet<String>();
+    protected Set<String> systemTablesAndViews = new HashSet<String>();
 
     public String getProductName() {
         return "Microsoft SQL";

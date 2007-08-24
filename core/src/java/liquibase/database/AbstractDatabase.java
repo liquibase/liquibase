@@ -27,9 +27,9 @@ public abstract class AbstractDatabase implements Database {
     private Connection connection;
     protected Logger log;
     protected boolean changeLogTableExists;
-    private boolean changeLogLockTableExists;
-    private boolean changeLogCreateAttempted;
-    private boolean changeLogLockCreateAttempted;
+    protected boolean changeLogLockTableExists;
+    protected boolean changeLogCreateAttempted;
+    protected boolean changeLogLockCreateAttempted;
 
     private static boolean outputtedLockWarning = false;
 
@@ -326,7 +326,7 @@ public abstract class AbstractDatabase implements Database {
     }
 
     protected String getCreateChangeLogLockSQL() {
-        return ("create table DatabaseChangeLogLock (id int not null primary key, locked " + getBooleanType() + " not null, lockGranted " + getDateTimeType() + " null, lockedby varchar(255) null)").toUpperCase();
+        return ("create table DatabaseChangeLogLock (id int not null primary key, locked " + getBooleanType() + " not null, lockGranted " + getDateTimeType() + ", lockedby varchar(255))").toUpperCase();
     }
 
     protected String getCreateChangeLogSQL() {
@@ -780,7 +780,7 @@ public abstract class AbstractDatabase implements Database {
         try {
             ResultSet types = connection.getMetaData().getTableTypes();
             while (types.next()) {
-                availableTypes.add("TABLE_TYPE");
+                availableTypes.add(types.getString("TABLE_TYPE").trim());
             }
         } catch (SQLException e) {
             throw new JDBCException(e);
