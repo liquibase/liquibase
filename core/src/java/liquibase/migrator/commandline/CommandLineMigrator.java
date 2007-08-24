@@ -120,7 +120,7 @@ public class CommandLineMigrator {
             String arg = args[i];
             if (arg.startsWith("--") && !arg.contains("=")) {
                 String nextArg = args[i + 1];
-                if (arg.startsWith("--") && !isCommand(nextArg)) {
+                if (!nextArg.startsWith("--") && !isCommand(nextArg)) {
                     arg = arg+"="+nextArg;
                     i++;
                 }
@@ -314,9 +314,7 @@ public class CommandLineMigrator {
         args = fixupArgs(args);
 
         boolean seenCommand = false;
-        for (int i = 0; i < args.length; i++) {
-            String arg = args[i];
-
+        for (String arg : args) {
             if (isCommand(arg)) {
                 this.command = arg;
                 seenCommand = true;
