@@ -20,7 +20,7 @@ public class Diff {
 
     private Set<DiffStatusListener> statusListeners = new HashSet<DiffStatusListener>();
 
-    public void init(Connection baseConnection, Connection targetConnection) throws JDBCException {
+    public Diff(Connection baseConnection, Connection targetConnection) throws JDBCException {
             baseDatabase = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(baseConnection);
             baseDatabase.setConnection(baseConnection);
 
@@ -28,11 +28,17 @@ public class Diff {
             targetDatabase.setConnection(targetConnection);
     }
 
-    public void init(Connection originalDatabase) throws JDBCException {
+    public Diff(Connection originalDatabase) throws JDBCException {
             targetDatabase = null;
 
             baseDatabase = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(originalDatabase);
             baseDatabase.setConnection(originalDatabase);
+    }
+
+    public Diff(DatabaseSnapshot baseDatabaseSnapshot, DatabaseSnapshot targetDatabaseSnapshot) throws JDBCException {
+            this.baseSnapshot = baseDatabaseSnapshot;
+
+            this.targetSnapshot= targetDatabaseSnapshot;
     }
 
     public void addStatusListener(DiffStatusListener listener) {
@@ -45,12 +51,16 @@ public class Diff {
 
     public DiffResult compare() throws JDBCException {
         try {
-            baseSnapshot = new DatabaseSnapshot(baseDatabase, statusListeners);
-            if (targetDatabase == null) {
-                targetSnapshot = new DatabaseSnapshot();
-            } else {
-                targetSnapshot = new DatabaseSnapshot(targetDatabase, statusListeners);
+            if (baseSnapshot == null) {
+                baseSnapshot = new DatabaseSnapshot(baseDatabase, statusListeners);
+            }
 
+            if (targetSnapshot == null) {
+                if (targetDatabase == null) {
+                    targetSnapshot = new DatabaseSnapshot();
+                } else {
+                    targetSnapshot = new DatabaseSnapshot(targetDatabase, statusListeners);
+                }
             }
 
             DiffResult diffResult = new DiffResult(baseDatabase, targetDatabase);

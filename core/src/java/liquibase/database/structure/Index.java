@@ -1,9 +1,11 @@
 package liquibase.database.structure;
 
+import liquibase.util.StringUtils;
+
 import java.util.ArrayList;
 import java.util.List;
 
-public class Index implements Comparable<Index>{
+public class Index implements Comparable<Index> {
     private String name;
     private String tableName;
     private List<String> columns = new ArrayList<String>();
@@ -29,6 +31,10 @@ public class Index implements Comparable<Index>{
         return columns;
     }
 
+    public String getColumnNames() {
+        return StringUtils.join(columns, ", ");
+    }
+
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
@@ -36,9 +42,9 @@ public class Index implements Comparable<Index>{
         Index index = (Index) o;
         boolean equals = true;
         for (String column : index.getColumns()) {
-        	if (!columns.contains(column)) {
-        		equals = false;
-        	}
+            if (!columns.contains(column)) {
+                equals = false;
+            }
         }
 
         return equals && tableName.equals(index.tableName);
@@ -58,25 +64,24 @@ public class Index implements Comparable<Index>{
         if (returnValue == 0) {
             returnValue = this.getName().compareTo(o.getName());
         }
-        
+
         //We should not have two indexes that have the same name and tablename
         /*if (returnValue == 0) {
         	returnValue = this.getColumnName().compareTo(o.getColumnName());
         }*/
 
-        
 
         return returnValue;
     }
 
     public String toString() {
-    	StringBuffer stringBuffer = new StringBuffer();
-    	stringBuffer.append(getName() + " on " + getTableName() + "(");
-    	for (String column : columns) {
-    		stringBuffer.append(column + ", ");
-    	}
-    	stringBuffer.delete(stringBuffer.length()-2, stringBuffer.length());
-    	stringBuffer.append(")");
+        StringBuffer stringBuffer = new StringBuffer();
+        stringBuffer.append(getName() + " on " + getTableName() + "(");
+        for (String column : columns) {
+            stringBuffer.append(column + ", ");
+        }
+        stringBuffer.delete(stringBuffer.length() - 2, stringBuffer.length());
+        stringBuffer.append(")");
         return stringBuffer.toString();
     }
 

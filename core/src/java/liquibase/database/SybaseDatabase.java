@@ -7,6 +7,12 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 public class SybaseDatabase extends MSSQLDatabase {
+
+
+    public SybaseDatabase() {
+        systemTablesAndViews.add("sysquerymetrics");        
+    }
+
     public String getProductName() {
         return "Sybase SQL Server";
     }
@@ -47,6 +53,10 @@ public class SybaseDatabase extends MSSQLDatabase {
                 "tag varchar(255) null, " +
                 "liquibase varchar(10) null, " +
                 "primary key(id, author, filename))").toUpperCase();
+    }
+
+    protected String getCreateChangeLogLockSQL() {
+        return ("create table DatabaseChangeLogLock (id int not null primary key, locked " + getBooleanType() + " not null, lockGranted " + getDateTimeType() + " null, lockedby varchar(255) null)").toUpperCase();
     }
     
     /**

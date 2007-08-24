@@ -4,10 +4,12 @@ import liquibase.util.StringUtils;
 
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.List;
+import java.util.ArrayList;
 
 public class PrimaryKey implements Comparable<PrimaryKey> {
     private String name;
-    private SortedSet<String> columnNames = new TreeSet<String>();
+    private List<String> columnNames = new ArrayList<String>();
     private String tableName;
 
 

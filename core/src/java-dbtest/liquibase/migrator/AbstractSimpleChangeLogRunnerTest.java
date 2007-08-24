@@ -1,7 +1,9 @@
 package liquibase.migrator;
 
 import junit.framework.TestCase;
+import junit.framework.AssertionFailedError;
 import liquibase.database.DatabaseFactory;
+import liquibase.database.structure.DatabaseSnapshot;
 import liquibase.migrator.diff.Diff;
 import liquibase.migrator.diff.DiffResult;
 import liquibase.migrator.exception.ValidationFailedException;
@@ -188,8 +190,7 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
     public void testDiff() throws Exception {
         runCompleteChangeLog();
 
-        Diff diff = new Diff();
-        diff.init(connection, connection);
+        Diff diff = new Diff(connection, connection);
         DiffResult diffResult = diff.compare();
 
         assertEquals(0, diffResult.getMissingColumns().size());
@@ -214,8 +215,9 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
     public void testRerunDiffChangeLog() throws Exception {
         runCompleteChangeLog();
 
-        Diff diff = new Diff();
-        diff.init(connection);
+        DatabaseSnapshot originalSnapshot = new DatabaseSnapshot(DatabaseFactory.getInstance().findCorrectDatabaseImplementation(connection));
+
+        Diff diff = new Diff(connection);
         DiffResult diffResult = diff.compare();
 
         File tempFile = File.createTempFile("liquibase-test", ".xml");
@@ -238,6 +240,25 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
         }
 
         tempFile.deleteOnExit();
+
+        DatabaseSnapshot finalSnapshot = new DatabaseSnapshot(DatabaseFactory.getInstance().findCorrectDatabaseImplementation(connection));
+
+        DiffResult finalDiffResult = new Diff(originalSnapshot, finalSnapshot).compare();
+        assertEquals(0, finalDiffResult.getMissingColumns().size());
+        assertEquals(0, finalDiffResult.getMissingForeignKeys().size());
+        assertEquals(0, finalDiffResult.getMissingIndexes().size());
+        assertEquals(0, finalDiffResult.getMissingPrimaryKeys().size());
+//        assertEquals(0, finalDiffResult.getMissingSequences().size());  //disabled for now because we can't diff sequences
+        assertEquals(0, finalDiffResult.getMissingTables().size());
+//        assertEquals(0, finalDiffResult.getMissingViews().size());  //disabled for now because we can't diff views
+        assertEquals(0, finalDiffResult.getUnexpectedColumns().size());
+        assertEquals(0, finalDiffResult.getUnexpectedForeignKeys().size());
+        assertEquals(0, finalDiffResult.getUnexpectedIndexes().size());
+        assertEquals(0, finalDiffResult.getUnexpectedPrimaryKeys().size());
+        assertEquals(0, finalDiffResult.getUnexpectedSequences().size());
+        assertEquals(0, finalDiffResult.getUnexpectedTables().size());
+        assertEquals(0, finalDiffResult.getUnexpectedViews().size());
+
     }
 
     public void testClearChecksums() throws Exception {

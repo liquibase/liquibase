@@ -153,6 +153,10 @@ public class PostgresDatabase extends AbstractDatabase {
         try {
             dropStatement = conn.createStatement();
             dropStatement.executeUpdate("DROP OWNED BY " + getConnectionUsername());
+            changeLogTableExists = false;
+            changeLogLockTableExists = false;
+            changeLogCreateAttempted = false;
+            changeLogLockCreateAttempted = false;
         } catch (SQLException e) {
             throw new JDBCException(e);
         } finally {
