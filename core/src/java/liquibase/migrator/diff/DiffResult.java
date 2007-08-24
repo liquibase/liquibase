@@ -298,11 +298,12 @@ public class DiffResult {
             CreateIndexChange change = new CreateIndexChange();
             change.setTableName(index.getTableName());
             change.setIndexName(index.getName());
-
-            ColumnConfig column = new ColumnConfig();
-            column.setName(index.getColumnName());
-            change.addColumn(column);
-
+            
+            for (String columnName : index.getColumns()) {
+            	ColumnConfig column = new ColumnConfig();
+                column.setName(columnName);
+                change.addColumn(column);
+            }
             changes.add(change);
         }
     }

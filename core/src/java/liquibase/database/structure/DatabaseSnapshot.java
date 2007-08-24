@@ -260,7 +260,7 @@ public class DatabaseSnapshot {
             } catch (SQLException e) {
                 throw e;
             }
-
+            Map<String,Index> indexMap = new HashMap<String,Index>();
             while (rs.next()) {
                 String indexName = rs.getString("INDEX_NAME");
                 short type = rs.getShort("TYPE");
@@ -279,19 +279,24 @@ public class DatabaseSnapshot {
                 if (isPKIndex || type == DatabaseMetaData.tableIndexStatistic) {
                     continue;
                 }
-
-                Index indexInformation = new Index();
-                indexInformation.setTableName(tableName);
                 if (columnName == null) {
                     //nothing to index, not sure why these come through sometimes
                     continue;
                 }
-                indexInformation.setColumnName(columnName);
-                indexInformation.setName(indexName);
-
-                indexes.add(indexInformation);
+                Index indexInformation;
+                if (indexMap.containsKey(indexName)) {
+                	indexInformation = indexMap.get(indexName);
+                } else {
+                	indexInformation = new Index();
+                	indexInformation.setTableName(tableName);
+                	indexInformation.setName(indexName);
+                	indexMap.put(indexName, indexInformation);
+                }
+                indexInformation.getColumns().add(columnName);
             }
-
+            for (String key : indexMap.keySet()) {
+            	indexes.add(indexMap.get(key));
+            }
             rs.close();
         }
     }
