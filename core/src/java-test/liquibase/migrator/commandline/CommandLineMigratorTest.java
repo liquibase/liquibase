@@ -1,6 +1,7 @@
 package liquibase.migrator.commandline;
 
 import liquibase.migrator.exception.CommandLineParsingException;
+import liquibase.util.StringUtils;
 import static org.junit.Assert.*;
 import org.junit.Test;
 
@@ -8,6 +9,7 @@ import java.io.*;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Properties;
+import java.util.Arrays;
 
 
 /**
@@ -77,17 +79,6 @@ public class CommandLineMigratorTest {
     public void parameterWithoutDash() throws Exception {
         String[] args = new String[]{
                 "promptForNonLocalDatabase=true",
-                "migrate",
-        };
-
-        CommandLineMigrator cli = new CommandLineMigrator();
-        cli.parseOptions(args);
-    }
-
-    @Test(expected = CommandLineParsingException.class)
-    public void parameterWithoutEquals() throws Exception {
-        String[] args = new String[]{
-                "--promptForNonLocalDatabase", "true",
                 "migrate",
         };
 
@@ -323,5 +314,29 @@ public class CommandLineMigratorTest {
         cli.parseOptions(args);
 
         assertEquals(url, cli.url);
+    }
+    
+    @Test
+    public void fixArgs() {
+        CommandLineMigrator migrator = new CommandLineMigrator();
+        String[] fixedArgs = migrator.fixupArgs(new String[] {"--defaultsFile","liquibase.properties", "migrate"});
+        assertEquals("--defaultsFile=liquibase.properties migrate", StringUtils.join(Arrays.asList(fixedArgs), " "));
+
+        fixedArgs = migrator.fixupArgs(new String[] {"--defaultsFile=liquibase.properties", "migrate"});
+        assertEquals("--defaultsFile=liquibase.properties migrate", StringUtils.join(Arrays.asList(fixedArgs), " "));
+
+        fixedArgs = migrator.fixupArgs(new String[] {"--driver=DRIVER",
+                "--username=USERNAME",
+                "--password=PASSWORD",
+                "--url=URL",
+                "--changeLogFile=FILE",
+                "--classpath=CLASSPATH;CLASSPATH2",
+                "--contexts=CONTEXT1,CONTEXT2",
+                "--promptForNonLocalDatabase=true",
+                "migrate"
+        });
+        assertEquals("--driver=DRIVER --username=USERNAME --password=PASSWORD --url=URL --changeLogFile=FILE --classpath=CLASSPATH;CLASSPATH2 --contexts=CONTEXT1,CONTEXT2 --promptForNonLocalDatabase=true migrate", StringUtils.join(Arrays.asList(fixedArgs), " "));
+
+
     }
 }

@@ -54,10 +54,6 @@ public class CommandLineMigrator {
 
 
     public static void main(String args[]) throws CommandLineParsingException, IOException {
-        for (String arg : args) {
-            System.out.println(arg);
-        }
-
         String shouldRunProperty = System.getProperty(Migrator.SHOULD_RUN_SYSTEM_PROPERTY);
         if (shouldRunProperty != null && !Boolean.valueOf(shouldRunProperty)) {
             System.out.println("Migrator did not run because '" + Migrator.SHOULD_RUN_SYSTEM_PROPERTY + "' system property was set to false");
@@ -112,6 +108,27 @@ public class CommandLineMigrator {
         } else if (commandLineMigrator.command.startsWith("rollback") && !commandLineMigrator.command.endsWith("SQL")) {
             System.out.println("Rollback successful");
         }
+    }
+
+    /**
+     * On windows machines, it splits args on '=' signs.  Put it back like it was.
+     */
+    protected String[] fixupArgs(String[] args) {
+        List<String> fixedArgs = new ArrayList<String>();
+
+        for (int i=0; i< args.length; i++) {
+            String arg = args[i];
+            if (arg.startsWith("--") && !arg.contains("=")) {
+                String nextArg = args[i + 1];
+                if (arg.startsWith("--") && !isCommand(nextArg)) {
+                    arg = arg+"="+nextArg;
+                    i++;
+                }
+            }
+            fixedArgs.add(arg);
+        }
+
+        return fixedArgs.toArray(new String[fixedArgs.size()]);
     }
 
     protected List<String> checkSetup() {
@@ -294,6 +311,8 @@ public class CommandLineMigrator {
     }
 
     protected void parseOptions(String[] args) throws CommandLineParsingException {
+        args = fixupArgs(args);
+
         boolean seenCommand = false;
         for (int i = 0; i < args.length; i++) {
             String arg = args[i];
