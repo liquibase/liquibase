@@ -375,8 +375,15 @@
     <xsd:element name="comment" type="xsd:string"/>
 
     <!-- sql -->
-    <xsd:element name="sql" type="xsd:string"/>
-    
+    <xsd:element name="sql">
+        <xsd:complexType mixed="true">
+            <xsd:sequence>
+                <xsd:element ref="comment" minOccurs="0" maxOccurs="1"/>
+            </xsd:sequence>
+            <xsd:attributeGroup ref="tableNameAttribute"/>
+        </xsd:complexType>
+    </xsd:element>
+
     <xsd:element name="sqlFile">
         <xsd:complexType>
             <xsd:attribute name="path" type="xsd:string"/>

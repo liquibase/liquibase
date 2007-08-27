@@ -12,7 +12,7 @@ import org.w3c.dom.Element;
  */
 public class RawSQLChange extends AbstractChange {
 
-    private String comment;
+    private String comments;
     private String sql;
 
     public RawSQLChange() {
@@ -27,12 +27,12 @@ public class RawSQLChange extends AbstractChange {
         this.sql = sql;
     }
 
-    public String getComment() {
-        return comment;
+    public String getComments() {
+        return comments;
     }
 
-    public void setComment(String comment) {
-        this.comment = comment;
+    public void setComments(String comments) {
+        this.comments = comments;
     }
 
     public String[] generateStatements(Database database) throws UnsupportedChangeException {

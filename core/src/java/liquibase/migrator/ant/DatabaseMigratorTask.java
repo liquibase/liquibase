@@ -45,7 +45,7 @@ public class DatabaseMigratorTask extends BaseLiquibaseTask {
             if (isPromptOnNonLocalDatabase()
                     && !migrator.isSafeToRunMigration()
                     && migrator.swingPromptForNonLocalDatabase()) {
-                throw new MigrationFailedException("Chose not to run against non-production database");
+                throw new BuildException("Chose not to run against non-production database");
             }
 
             if (isDropFirst()) {

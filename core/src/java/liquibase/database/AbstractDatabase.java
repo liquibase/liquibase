@@ -6,6 +6,7 @@ import liquibase.migrator.Migrator;
 import liquibase.migrator.change.ColumnConfig;
 import liquibase.migrator.change.DropForeignKeyConstraintChange;
 import liquibase.migrator.exception.JDBCException;
+import liquibase.migrator.exception.LockException;
 import liquibase.migrator.exception.MigrationFailedException;
 import liquibase.migrator.exception.UnsupportedChangeException;
 import liquibase.util.StreamUtil;
@@ -342,11 +343,11 @@ public abstract class AbstractDatabase implements Database {
                 "primary key(id, author, filename))").toUpperCase();
     }
 
-    public boolean acquireLock(Migrator migrator) throws MigrationFailedException {
+    public boolean acquireLock(Migrator migrator) throws LockException {
         if (!migrator.getDatabase().doesChangeLogLockTableExist()) {
             if (migrator.getMode().equals(Migrator.Mode.EXECUTE_MODE) || migrator.getMode().equals(Migrator.Mode.EXECUTE_ROLLBACK_MODE))
             {
-                throw new MigrationFailedException("Could not acquire lock, table does not exist");
+                throw new LockException("Could not acquire lock, table does not exist");
             } else {
                 return true;
             }
@@ -359,7 +360,7 @@ public abstract class AbstractDatabase implements Database {
             stmt = conn.createStatement();
             rs = stmt.executeQuery(getSelectChangeLogLockSQL());
             if (!rs.next()) {
-                throw new MigrationFailedException("Error checking database lock status");
+                throw new LockException("Error checking database lock status");
             }
             boolean locked = rs.getBoolean(1);
             if (locked) {
@@ -370,14 +371,14 @@ public abstract class AbstractDatabase implements Database {
                 pstmt.setTimestamp(2, new Timestamp(new java.util.Date().getTime()));
                 pstmt.setString(3, InetAddress.getLocalHost().getCanonicalHostName() + " (" + InetAddress.getLocalHost().getHostAddress() + ")");
                 if (pstmt.executeUpdate() != 1) {
-                    throw new MigrationFailedException("Did not update change log lock correctly");
+                    throw new LockException("Did not update change log lock correctly");
                 }
                 conn.commit();
                 log.info("Successfully acquired change log lock");
                 return true;
             }
         } catch (Exception e) {
-            throw new MigrationFailedException(e);
+            throw new LockException(e);
         } finally {
             if (rs != null) {
                 try {
@@ -404,7 +405,7 @@ public abstract class AbstractDatabase implements Database {
 
     }
 
-    public void releaseLock() throws MigrationFailedException {
+    public void releaseLock() throws LockException {
         if (doesChangeLogLockTableExist()) {
             Connection conn = getConnection();
             PreparedStatement stmt = null;
@@ -414,12 +415,12 @@ public abstract class AbstractDatabase implements Database {
                 stmt.setBoolean(1, false);
                 int updatedRows = stmt.executeUpdate();
                 if (updatedRows != 1) {
-                    throw new MigrationFailedException("Did not update change log lock correctly.\n\n"+releaseSQL+" updated "+updatedRows+" instead of the expected 1 row.");
+                    throw new LockException("Did not update change log lock correctly.\n\n"+releaseSQL+" updated "+updatedRows+" instead of the expected 1 row.");
                 }
                 conn.commit();
                 log.info("Successfully released change log lock");
             } catch (Exception e) {
-                throw new MigrationFailedException(e);
+                throw new LockException(e);
             } finally {
                 if (stmt != null) {
                     try {
@@ -432,7 +433,7 @@ public abstract class AbstractDatabase implements Database {
         }
     }
 
-    public DatabaseChangeLogLock[] listLocks() throws MigrationFailedException {
+    public DatabaseChangeLogLock[] listLocks() throws LockException {
         Connection conn = getConnection();
         Statement stmt = null;
         ResultSet rs = null;
@@ -448,7 +449,7 @@ public abstract class AbstractDatabase implements Database {
             }
             return allLocks.toArray(new DatabaseChangeLogLock[allLocks.size()]);
         } catch (Exception e) {
-            throw new MigrationFailedException(e);
+            throw new LockException(e);
         } finally {
             if (rs != null) {
                 try {
@@ -701,7 +702,7 @@ public abstract class AbstractDatabase implements Database {
     /**
      * Drops all objects owned by the connected user.
      */
-    public void dropDatabaseObjects() throws JDBCException, MigrationFailedException {
+    public void dropDatabaseObjects() throws JDBCException {
         Connection conn = getConnection();
         try {
             dropForeignKeys(conn);
@@ -797,7 +798,7 @@ public abstract class AbstractDatabase implements Database {
 
     }
 
-    protected void dropTables(Connection conn) throws JDBCException, MigrationFailedException {
+    protected void dropTables(Connection conn) throws JDBCException {
         //drop tables and their constraints
         ResultSet rs = null;
         Statement dropStatement = null;
@@ -821,13 +822,13 @@ public abstract class AbstractDatabase implements Database {
                 } else if ("SYSTEM TABLE".equals(type)) {
                     continue; //don't drop it
                 } else {
-                    throw new MigrationFailedException("Unknown type " + type + " for " + tableName);
+                    throw new JDBCException("Unknown type " + type + " for " + tableName);
                 }
                 try {
                     log.finest("Dropping " + tableName);
                     dropStatement.executeUpdate(sql);
                 } catch (SQLException e) {
-                    throw new MigrationFailedException("Error dropping table '" + tableName + "': " + e.getMessage(), e);
+                    throw new JDBCException("Error dropping table '" + tableName + "': " + e.getMessage(), e);
                 }
             }
         } catch (SQLException e) {
@@ -868,7 +869,7 @@ public abstract class AbstractDatabase implements Database {
     }
 
 
-    protected void dropViews(Connection conn) throws JDBCException, MigrationFailedException {
+    protected void dropViews(Connection conn) throws JDBCException {
         //drop tables and their constraints
         ResultSet rs = null;
         Statement dropStatement = null;
@@ -887,7 +888,7 @@ public abstract class AbstractDatabase implements Database {
                     log.finest("Dropping view " + tableName);
                     dropStatement.executeUpdate(sql);
                 } catch (SQLException e) {
-                    throw new MigrationFailedException("Error dropping view '" + tableName + "': " + e.getMessage(), e);
+                    throw new JDBCException("Error dropping view '" + tableName + "': " + e.getMessage(), e);
                 }
             }
         } catch (SQLException e) {
@@ -916,7 +917,7 @@ public abstract class AbstractDatabase implements Database {
         return "DROP TABLE " + tableName;
     }
 
-    abstract protected void dropSequences(Connection conn) throws JDBCException, MigrationFailedException;
+    abstract protected void dropSequences(Connection conn) throws JDBCException;
 
 
     // ------- DATABASE TAGGING METHODS ---- //
@@ -924,16 +925,16 @@ public abstract class AbstractDatabase implements Database {
     /**
      * Tags the database changelog with the given string.
      */
-    public void tag(String tagString) throws MigrationFailedException {
+    public void tag(String tagString) throws JDBCException {
         Connection conn = getConnection();
         PreparedStatement stmt = null;
         Statement countStatement = null;
-        ResultSet countRS = null;
+        ResultSet countRS;
         try {
             stmt = conn.prepareStatement(createChangeToTagSQL());
             ResultSet rs = stmt.executeQuery();
             if (!rs.next()) {
-                throw new MigrationFailedException("Did not tag database correctly");
+                throw new JDBCException("Did not tag database correctly");
             }
             Timestamp lastExecutedDate = rs.getTimestamp(1);
             rs.close();
@@ -948,15 +949,15 @@ public abstract class AbstractDatabase implements Database {
                 countRS = countStatement.executeQuery("select count(*) from " + getDatabaseChangeLogTableName());
                 countRS.next();
                 if (countRS.getInt(1) == 0) {
-                    throw new MigrationFailedException("Cannot tag an empty database");
+                    throw new JDBCException("Cannot tag an empty database");
                 }
                 countRS.close();
 
-                throw new MigrationFailedException("Did not tag database change log correctly");
+                throw new JDBCException("Did not tag database change log correctly");
             }
             conn.commit();
         } catch (Exception e) {
-            throw new MigrationFailedException(e);
+            throw new JDBCException(e);
         } finally {
             if (stmt != null) {
                 try {

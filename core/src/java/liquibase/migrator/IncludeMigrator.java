@@ -3,6 +3,7 @@ package liquibase.migrator;
 import liquibase.database.Database;
 import liquibase.migrator.exception.JDBCException;
 import liquibase.migrator.exception.MigrationFailedException;
+import liquibase.migrator.exception.LockException;
 
 import java.util.List;
 import java.util.Set;
@@ -32,14 +33,14 @@ public class IncludeMigrator extends Migrator {
     /**
      * No-op, included files don't need a lock, the parent migrator already has one
      */
-    public boolean acquireLock() throws MigrationFailedException {
+    public boolean acquireLock() throws LockException {
         return true;
     }
 
     /**
      * No-op, included files don't need a to release lock, the parent migrator will
      */
-    public void releaseLock() throws MigrationFailedException {
+    public void releaseLock() throws LockException {
         ;
     }
 

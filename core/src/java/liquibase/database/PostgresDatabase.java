@@ -147,7 +147,7 @@ public class PostgresDatabase extends AbstractDatabase {
         return "DROP TABLE " + tableName;
     }
 
-    public void dropDatabaseObjects() throws JDBCException, MigrationFailedException {
+    public void dropDatabaseObjects() throws JDBCException {
         Connection conn = getConnection();
         Statement dropStatement = null;
         try {
@@ -187,7 +187,7 @@ public class PostgresDatabase extends AbstractDatabase {
     }
 
     @Override
-    protected void dropSequences(Connection conn) throws JDBCException, MigrationFailedException {
+    protected void dropSequences(Connection conn) throws JDBCException {
     }
 
 //    public boolean isSystemIndex(String catalogName, String schemaName, String indexName) {

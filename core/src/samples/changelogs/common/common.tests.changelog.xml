@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <databaseChangeLog
-        xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.1"
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.2"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.1 http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.1.xsd">
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.2 http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.2.xsd">
 
     <changeSet id="datatypetest-1" author="nvoxland">
         <createTable tableName="dataTypeTest">
@@ -73,5 +73,18 @@
             <column name="firstname"/>
             <column name="lastname"/>
         </createIndex>
+    </changeSet>
+
+    <changeSet id="commentTest" author="nvoxland">
+        <comment>Creates a table and updates a value with actual SQL.  Mainly for testing the comment tags</comment>
+        <createTable tableName="commentTest">
+            <column name="id" type="int"/>
+        </createTable>
+        <sql>
+            <comment>Insert value into commentTest</comment>
+            insert into commentTest (id) values (1);
+            insert into commentTest (id) values (2);
+            insert into commentTest (id) values (3);
+        </sql>
     </changeSet>
 </databaseChangeLog>

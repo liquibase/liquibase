@@ -5,6 +5,7 @@ import liquibase.migrator.change.*;
 import liquibase.migrator.exception.DatabaseHistoryException;
 import liquibase.migrator.exception.JDBCException;
 import liquibase.migrator.exception.MigrationFailedException;
+import liquibase.migrator.exception.LiquibaseException;
 import liquibase.migrator.preconditions.*;
 import liquibase.util.StringUtils;
 import org.xml.sax.Attributes;
@@ -73,7 +74,7 @@ public abstract class BaseChangeLogHandler extends DefaultHandler {
                 change = migrator.getChangeFactory().create(qName);
                 text = new StringBuffer();
                 if (change == null) {
-                    throw new MigrationFailedException("Unknown change: " + qName);
+                    throw new MigrationFailedException(changeSet, "Unknown change: " + qName);
                 }
                 change.setFileOpener(fileOpener);
                 for (int i = 0; i < atts.getLength(); i++) {
@@ -174,22 +175,21 @@ public abstract class BaseChangeLogHandler extends DefaultHandler {
                 }
 
             } else {
-                throw new MigrationFailedException("Unexpected tag: " + qName);
+                throw new MigrationFailedException(changeSet, "Unexpected tag: " + qName);
             }
         } catch (Exception e) {
             throw new SAXException(e);
         }
     }
 
-    protected void handleIncludedChangeLog(String fileName) throws MigrationFailedException, IOException, JDBCException {
+    protected void handleIncludedChangeLog(String fileName) throws LiquibaseException, IOException {
         new IncludeMigrator(fileName, migrator).migrate();
     }
 
     private void setProperty(Object object, String attributeName, String attributeValue) throws IllegalAccessException, InvocationTargetException {
         String methodName = "set" + attributeName.substring(0, 1).toUpperCase() + attributeName.substring(1);
         Method[] methods = object.getClass().getMethods();
-        for (int i = 0; i < methods.length; i++) {
-            Method method = methods[i];
+        for (Method method : methods) {
             if (method.getName().equals(methodName)) {
                 if (method.getParameterTypes().length == 1 && method.getParameterTypes()[0].equals(Boolean.class)) {
                     method.invoke(object, Boolean.valueOf(attributeValue));
@@ -226,8 +226,12 @@ public abstract class BaseChangeLogHandler extends DefaultHandler {
                 precondition.setRunningAs(runningAs);
             } else if (changeSet != null && "rollback".equals(qName)) {
                 changeSet.setRollBackSQL(textString);
+            } else if (change != null && change instanceof RawSQLChange && "comment".equals(qName)) {
+                ((RawSQLChange) change).setComments(textString);
+                text = new StringBuffer();
             } else if (changeSet != null && "comment".equals(qName)) {
                 changeSet.setComments(textString);
+                text = new StringBuffer();
             } else if (changeSet != null && "changeSet".equals(qName)) {
                 handleChangeSet(changeSet);
                 changeSet = null;

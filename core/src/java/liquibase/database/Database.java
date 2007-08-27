@@ -4,7 +4,7 @@ import liquibase.migrator.DatabaseChangeLogLock;
 import liquibase.migrator.Migrator;
 import liquibase.migrator.change.ColumnConfig;
 import liquibase.migrator.exception.JDBCException;
-import liquibase.migrator.exception.MigrationFailedException;
+import liquibase.migrator.exception.LockException;
 
 import java.io.IOException;
 import java.sql.Connection;
@@ -99,11 +99,11 @@ public interface Database {
      */
     String getConcatSql(String ... values);
 
-    boolean acquireLock(Migrator migrator) throws MigrationFailedException;
+    boolean acquireLock(Migrator migrator) throws LockException;
 
-    void releaseLock() throws MigrationFailedException;
+    void releaseLock() throws LockException;
 
-    DatabaseChangeLogLock[] listLocks() throws MigrationFailedException;
+    DatabaseChangeLogLock[] listLocks() throws LockException;
 
     boolean doesChangeLogTableExist();
 
@@ -113,11 +113,11 @@ public interface Database {
 
     void checkDatabaseChangeLogLockTable(Migrator migrator) throws JDBCException, IOException;
 
-    void dropDatabaseObjects() throws JDBCException, MigrationFailedException;
+    void dropDatabaseObjects() throws JDBCException;
 
     String getDropTableSQL(String tableName);
 
-    void tag(String tagString) throws MigrationFailedException;
+    void tag(String tagString) throws JDBCException;
 
     boolean doesTagExist(String tag) throws JDBCException;
 

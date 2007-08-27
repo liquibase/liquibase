@@ -74,7 +74,7 @@ public class ValidateChangeLogHandler extends BaseChangeLogHandler {
         }
     }
 
-    protected void handleIncludedChangeLog(String fileName) throws MigrationFailedException, IOException, JDBCException {
+    protected void handleIncludedChangeLog(String fileName) throws MigrationFailedException, IOException, JDBCException, LockException {
         new IncludeMigrator(fileName, migrator).validate();
     }
 

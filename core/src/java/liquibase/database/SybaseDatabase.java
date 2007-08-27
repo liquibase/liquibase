@@ -68,7 +68,7 @@ public class SybaseDatabase extends MSSQLDatabase {
      * http://sourceforge.net/tracker/index.php?func=detail&aid=1471425&group_id=33291&atid=407762
      * 
      */
-    public void dropDatabaseObjects() throws JDBCException, MigrationFailedException {
+    public void dropDatabaseObjects() throws JDBCException {
         Connection conn = getConnection();
         try {
             //dropForeignKeys(conn);
