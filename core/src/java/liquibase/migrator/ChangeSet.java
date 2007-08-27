@@ -101,7 +101,7 @@ public class ChangeSet {
             try {
                 change.setUp();
             } catch(SetupException se) {
-                throw new MigrationFailedException(se);
+                throw new MigrationFailedException(this, se);
             }
         }
         
@@ -167,16 +167,16 @@ public class ChangeSet {
             } else if (migrator.getMode().equals(Migrator.Mode.OUTPUT_CHANGELOG_ONLY_SQL_MODE)) {
                 //don't need to do anything
             } else {
-                throw new MigrationFailedException("Unexpected mode: " + migrator.getMode());
+                throw new MigrationFailedException(this, "Unexpected mode: " + migrator.getMode());
             }
             connection.commit();
         } catch (Exception e) {
             try {
                 connection.rollback();
             } catch (SQLException e1) {
-                throw new MigrationFailedException("Unable to process change set: " + toString() + ": " + e.getMessage(), e);
+                throw new MigrationFailedException(this, e);
             }
-            throw new MigrationFailedException("Unable to process change set: " + toString() + ": " + e.getMessage(), e);
+            throw new MigrationFailedException(this, e);
         }
     }
 

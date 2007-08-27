@@ -2,6 +2,7 @@ package liquibase.migrator.change;
 
 import liquibase.database.Database;
 import liquibase.migrator.FileOpener;
+import liquibase.migrator.ChangeSet;
 import liquibase.migrator.exception.JDBCException;
 import liquibase.migrator.exception.RollbackImpossibleException;
 import liquibase.migrator.exception.SetupException;

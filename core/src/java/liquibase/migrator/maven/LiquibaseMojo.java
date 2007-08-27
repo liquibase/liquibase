@@ -5,7 +5,7 @@ import liquibase.migrator.FileOpener;
 import liquibase.migrator.FileSystemFileOpener;
 import liquibase.migrator.Migrator;
 import liquibase.migrator.exception.JDBCException;
-import liquibase.migrator.exception.MigrationFailedException;
+import liquibase.migrator.exception.LiquibaseException;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -150,7 +150,7 @@ public class LiquibaseMojo extends AbstractMojo {
 
                 if (isPromptOnNonLocalDatabase() && !migrator.isSafeToRunMigration()) {
                     if (migrator.swingPromptForNonLocalDatabase()) {
-                        throw new MigrationFailedException("Chose not to run against non-production database");
+                        throw new LiquibaseException("Chose not to run against non-production database");
                     }
                 }
 
@@ -166,7 +166,7 @@ public class LiquibaseMojo extends AbstractMojo {
                 try {
                     connection.close();
                 } catch (SQLException e) {
-                    throw new BuildException(e);
+                    ;
                 }
             }
         }

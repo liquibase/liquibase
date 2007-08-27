@@ -115,7 +115,7 @@ public class DB2Database extends AbstractDatabase {
         return "TIMESTAMP";
     }
 
-        protected void dropSequences(Connection conn) throws JDBCException, MigrationFailedException {
+        protected void dropSequences(Connection conn) throws JDBCException {
         ResultSet rs = null;
         Statement selectStatement = null;
         Statement dropStatement = null;
@@ -130,7 +130,7 @@ public class DB2Database extends AbstractDatabase {
                 try {
                     dropStatement.executeUpdate(sql);
                 } catch (SQLException e) {
-                    throw new MigrationFailedException("Error dropping sequence '" + sequenceName + "': " + e.getMessage(), e);
+                    throw new JDBCException("Error dropping sequence '" + sequenceName + "': " + e.getMessage(), e);
                 }
             }
         } catch (SQLException e) {

@@ -127,6 +127,6 @@ public class HsqlDatabase extends AbstractDatabase {
     }
 
     @Override
-    protected void dropSequences(Connection conn) throws JDBCException, MigrationFailedException {
+    protected void dropSequences(Connection conn) throws JDBCException {
     }
 }

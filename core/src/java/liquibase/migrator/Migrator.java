@@ -2,10 +2,7 @@ package liquibase.migrator;
 
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
-import liquibase.migrator.exception.DatabaseHistoryException;
-import liquibase.migrator.exception.JDBCException;
-import liquibase.migrator.exception.MigrationFailedException;
-import liquibase.migrator.exception.ValidationFailedException;
+import liquibase.migrator.exception.*;
 import liquibase.migrator.parser.*;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
@@ -299,7 +296,7 @@ public class Migrator {
     /**
      * Checks changelogs for bad MD5Sums and preconditions before attempting a migration
      */
-    public void validate() throws MigrationFailedException, IOException, JDBCException {
+    public void validate() throws MigrationFailedException, IOException, JDBCException, LockException {
         try {
             if (!waitForLock()) {
                 return;
@@ -320,7 +317,7 @@ public class Migrator {
      * To use the Migrator, initialize it with the init(Connection) method, set the mode, outputSQLWriter, etc. as need be,
      * then call the migrate() method.
      */
-    public final void migrate() throws MigrationFailedException {
+    public final void migrate() throws LiquibaseException {
         try {
             if (!wasValidationRan()) {
                 validate();
@@ -357,7 +354,7 @@ public class Migrator {
                     } else if (mode.equals(Mode.OUTPUT_FUTURE_ROLLBACK_SQL_MODE)) {
                         outputSQLWriter.write("-- SQL to roll-back database from an updated buildVersion back to current version" + StreamUtil.getLineSeparator());
                     } else {
-                        throw new MigrationFailedException("Unexpected output mode: " + mode);
+                        throw new LiquibaseException("Unexpected output mode: " + mode);
                     }
                     outputSQLWriter.write("-- Change Log: " + changeLogFile + StreamUtil.getLineSeparator());
                     outputSQLWriter.write("-- Ran at: " + DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(new Date()) + StreamUtil.getLineSeparator());
@@ -375,7 +372,7 @@ public class Migrator {
                     rollbackHandler = new RollbackDatabaseChangeLogHandler(this, changeLogFile, fileOpener, getRollbackToDate());
                 } else if (getRollbackToTag() != null) {
                     if (!getDatabase().doesTagExist(getRollbackToTag())) {
-                        throw new MigrationFailedException("'" + getRollbackToTag() + "' is not tag that exists in the database");
+                        throw new LiquibaseException("'" + getRollbackToTag() + "' is not tag that exists in the database");
                     }
 
                     rollbackHandler = new RollbackDatabaseChangeLogHandler(this, changeLogFile, fileOpener, getRollbackToTag());
@@ -389,7 +386,7 @@ public class Migrator {
                 if (unrollbackableChangeSet == null) {
                     rollbackHandler.doRollback();
                 } else {
-                    throw new MigrationFailedException("Cannot roll back changelog to selected date due to change set " + unrollbackableChangeSet);
+                    throw new LiquibaseException("Cannot roll back changelog to selected date due to change set " + unrollbackableChangeSet);
                 }
             } else if (mode.equals(Mode.OUTPUT_FUTURE_ROLLBACK_SQL_MODE)) {
                 RollbackFutureDatabaseChangeLogHandler rollbackHandler = 
@@ -399,7 +396,7 @@ public class Migrator {
                 if (unrollbackableChangeSet == null) {
                     rollbackHandler.doRollback();
                 } else {
-                    throw new MigrationFailedException("Will not be able to rollback changes due to change set " + unrollbackableChangeSet);
+                    throw new LiquibaseException("Will not be able to rollback changes due to change set " + unrollbackableChangeSet);
                 }
             } else if (mode.equals(Mode.FIND_UNRUN_CHANGESETS_MODE)) {
                 runChangeLogs(new FindChangeSetsHandler(this, changeLogFile,fileOpener));
@@ -407,15 +404,15 @@ public class Migrator {
 //                List<ChangeSet> unrunChangeSets = FindChangeSetsHandler.getUnrunChangeSets();
 //                System.out.println(unrunChangeSets.size()+" change sets have not been applied to "+getDatabase().getConnectionUsername() + "@" + getDatabase().getConnectionURL());
             } else {
-                throw new MigrationFailedException("Unknown mode: " + getMode());
+                throw new LiquibaseException("Unknown mode: " + getMode());
             }
             if (outputSQLWriter != null) {
                 outputSQLWriter.flush();
             }
-        } catch (MigrationFailedException e) {
+        } catch (LiquibaseException e) {
             throw e;
         } catch (Exception e) {
-            throw new MigrationFailedException(e);
+            throw new LiquibaseException(e);
         } finally {
             releaseLock();
         }
@@ -425,7 +422,7 @@ public class Migrator {
         return new ValidateChangeLogHandler(this, changeLogFile,fileOpener);
     }
 
-    private boolean waitForLock() throws JDBCException, MigrationFailedException, IOException {
+    private boolean waitForLock() throws JDBCException, IOException, LockException {
         if (!hasChangeLogLock) {
             checkDatabaseChangeLogTable();
         }
@@ -469,7 +466,7 @@ public class Migrator {
     /**
      * Drops all database objects owned by the current user.
      */
-    public final void dropAll() throws MigrationFailedException {
+    public final void dropAll() throws JDBCException, LockException {
         try {
             if (!waitForLock()) {
                 return;
@@ -479,29 +476,27 @@ public class Migrator {
             getDatabase().dropDatabaseObjects();
             checkDatabaseChangeLogTable();
             log.finest("Objects dropped successfully");
-        } catch (MigrationFailedException e) {
+        } catch (JDBCException e) {
             throw e;
         } catch (Exception e) {
-            throw new MigrationFailedException(e);
+            throw new JDBCException(e);
         } finally {
             releaseLock();
         }
     }
 
-    public boolean acquireLock() throws MigrationFailedException {
+    public boolean acquireLock() throws LockException {
         return hasChangeLogLock || getDatabase().acquireLock(this);
     }
 
-    public void releaseLock() throws MigrationFailedException {
+    public void releaseLock() throws LockException {
         getDatabase().releaseLock();
     }
 
     /**
      * Releases whatever locks are on the database change log table
-     *
-     * @throws MigrationFailedException
      */
-    public void forceReleaseLock() throws MigrationFailedException, JDBCException, IOException {
+    public void forceReleaseLock() throws LockException, JDBCException, IOException {
         checkDatabaseChangeLogTable();
 
         getDatabase().releaseLock();
@@ -510,7 +505,7 @@ public class Migrator {
     /**
      * 'Tags' the database for future rollback
      */
-    public void tag(String tagString) throws MigrationFailedException {
+    public void tag(String tagString) throws JDBCException {
         getDatabase().tag(tagString);
     }
 
@@ -524,16 +519,16 @@ public class Migrator {
         try {
             InputStream inputStream = getFileOpener().getResourceAsStream(changeLogFile);
             if (inputStream == null) {
-                throw new MigrationFailedException(changeLogFile + " does not exist");
+                throw new MigrationFailedException(null, changeLogFile + " does not exist");
             }
 
             xmlReader.setContentHandler(contentHandler);
             xmlReader.parse(new InputSource(inputStream));
             inputStream.close();
         } catch (IOException e) {
-            throw new MigrationFailedException("Error Reading Migration File: " + e.getMessage(), e);
+            throw new MigrationFailedException(null, "Error Reading Migration File: " + e.getMessage(), e);
         } catch (SAXParseException e) {
-            throw new MigrationFailedException("Error parsing line " + e.getLineNumber() + " column " + e.getColumnNumber() + ": " + e.getMessage());
+            throw new MigrationFailedException(null, "Error parsing line " + e.getLineNumber() + " column " + e.getColumnNumber() + " of "+": " + e.getMessage());
         } catch (SAXException e) {
             Throwable parentCause = e.getException();
             while (parentCause != null) {
@@ -559,7 +554,7 @@ public class Migrator {
                 }
             }
 
-            throw new MigrationFailedException("Invalid Migration File: " + reason, e);
+            throw new MigrationFailedException(null, "Invalid Migration File: " + reason, e);
         }
     }
 
@@ -579,7 +574,7 @@ public class Migrator {
     /**
      * Display change log lock information.
      */
-    public DatabaseChangeLogLock[] listLocks() throws MigrationFailedException, JDBCException, IOException {
+    public DatabaseChangeLogLock[] listLocks() throws JDBCException, IOException, LockException {
         checkDatabaseChangeLogTable();
 
         return getDatabase().listLocks();
@@ -673,7 +668,7 @@ public class Migrator {
         return changeSetContext == null || requiredContexts.size() == 0 || requiredContexts.contains(changeSetContext);
     }
 
-    public List<ChangeSet> listUnrunChangeSets() throws JDBCException {
+    public List<ChangeSet> listUnrunChangeSets() throws LiquibaseException {
         setMode(Mode.FIND_UNRUN_CHANGESETS_MODE);
         try {
             migrate();
