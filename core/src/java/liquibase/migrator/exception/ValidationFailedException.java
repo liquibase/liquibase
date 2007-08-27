@@ -31,15 +31,31 @@ public class ValidationFailedException extends MigrationFailedException {
         message.append("Validation Failed:");
         if (invalidMD5Sums.size() > 0) {
             message.append(invalidMD5Sums.size()).append(" change sets failed MD5Sum Check");
+            for (int i=0; i< invalidMD5Sums.size(); i++) {
+                if (i > 25) {
+                    break;
+                }
+                ChangeSet invalid = invalidMD5Sums.get(i);
+                message.append("     ").append(invalid.toString(true));
+            }
         }
         if (failedPreconditions.size() > 0) {
             message.append(failedPreconditions.size()).append(" preconditions failed");
+            for (FailedPrecondition invalid : failedPreconditions) {
+                message.append("     ").append(invalid.toString());
+            }
         }
         if (duplicateChangeSets.size() > 0) {
             message.append(duplicateChangeSets.size()).append(" change sets had duplicate identifiers");
+            for (ChangeSet invalid : duplicateChangeSets) {
+                message.append("     ").append(invalid.toString(false));
+            }
         }
         if(setupExceptions.size() >0){
             message.append(setupExceptions.size()).append(" changes have failures");
+            for (SetupException invalid : setupExceptions) {
+                message.append("     ").append(invalid.toString());
+            }
         }
         
         return message.toString();
