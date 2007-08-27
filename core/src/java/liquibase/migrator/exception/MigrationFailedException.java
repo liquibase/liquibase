@@ -25,4 +25,15 @@ public class MigrationFailedException extends LiquibaseException {
         super(cause);
         this.failedChangeSet = failedChangeSet;
     }
+
+
+    public String getMessage() {
+        String message = "Migration failed";
+        if (failedChangeSet != null) {
+            message += " for change set "+failedChangeSet.toString(false);
+        }
+        message += ":\n     Reason: "+super.getMessage();
+
+        return message;
+    }
 }
