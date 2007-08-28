@@ -46,8 +46,8 @@ public class DatabaseFactory {
 
         Database[] implementedDatabases = getImplementedDatabases();
 
-        for (int i = 0; i < implementedDatabases.length; i++) {
-            database = implementedDatabases[i];
+        for (Database implementedDatabase : implementedDatabases) {
+            database = implementedDatabase;
             if (database.isCorrectDatabaseImplementation(connection)) {
                 foundImplementation = true;
                 break;
