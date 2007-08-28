@@ -45,6 +45,8 @@ public class RenameViewChange extends AbstractChange {
             throw new UnsupportedChangeException("HSQL does not currently support renaming views");
         } else if (database instanceof DB2Database) {
             throw new UnsupportedChangeException("DB2 does not currently support renaming views");
+        } else if (database instanceof CacheDatabase) {
+            throw new UnsupportedChangeException("Rename View not currently supported for Cache");
         }
 
         return new String[]{"RENAME " + oldViewName + " TO " + newViewName};

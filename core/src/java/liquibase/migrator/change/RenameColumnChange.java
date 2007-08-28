@@ -65,6 +65,8 @@ public class RenameColumnChange extends AbstractChange {
             return new String[]{"ALTER TABLE " + tableName + " ALTER COLUMN " + oldColumnName + " RENAME TO " + newColumnName};
         } else if (database instanceof DB2Database) {
             throw new UnsupportedChangeException("Rename Column not supported in DB2");
+        } else if (database instanceof CacheDatabase) {
+            throw new UnsupportedChangeException("Rename Column not currently supported for Cache");
         }
 
         return new String[]{"ALTER TABLE " + tableName + " RENAME COLUMN " + oldColumnName + " TO " + newColumnName};

@@ -49,6 +49,8 @@ public class RenameTableChange extends AbstractChange {
                     "RENAME " + oldTableName + " TO " + newTableName,
                     "CALL SYSPROC.ADMIN_CMD ('REORG TABLE " + newTableName + "')",
             };
+        } else if (database instanceof CacheDatabase) {
+            throw new UnsupportedChangeException("Rename table not currently supported for Cache");
         }
 
         return new String[]{"RENAME " + oldTableName + " TO " + newTableName};
