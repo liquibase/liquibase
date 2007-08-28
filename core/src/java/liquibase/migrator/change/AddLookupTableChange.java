@@ -101,6 +101,8 @@ public class AddLookupTableChange extends AbstractChange {
             throw new UnsupportedChangeException("Add Lookup Table currently not supported in Derby");
         } else if (database instanceof HsqlDatabase) {
                 throw new UnsupportedChangeException("Add Lookup Table currently not supported in HSQLDB");
+        } else if (database instanceof CacheDatabase) {
+            throw new UnsupportedChangeException("Add Lookup Table not currently supported for Cache");
         }
 
         List<String> statements = new ArrayList<String>();
