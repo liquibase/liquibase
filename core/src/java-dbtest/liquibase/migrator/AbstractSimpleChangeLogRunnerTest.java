@@ -1,14 +1,12 @@
 package liquibase.migrator;
 
 import junit.framework.TestCase;
-import junit.framework.AssertionFailedError;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.structure.DatabaseSnapshot;
 import liquibase.migrator.diff.Diff;
 import liquibase.migrator.diff.DiffResult;
-import liquibase.migrator.exception.ValidationFailedException;
-import liquibase.migrator.exception.MigrationFailedException;
 import liquibase.migrator.exception.JDBCException;
+import liquibase.migrator.exception.ValidationFailedException;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -17,8 +15,8 @@ import java.io.StringWriter;
 import java.sql.Connection;
 import java.sql.Driver;
 import java.util.Date;
-import java.util.Properties;
 import java.util.List;
+import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -54,6 +52,8 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
         info.put("password", password);
         connection = driver.connect(url, info);
         connection.setAutoCommit(false);
+
+        createMigrator(completeChangeLog).forceReleaseLock();
     }
 
     protected Properties createProperties() {

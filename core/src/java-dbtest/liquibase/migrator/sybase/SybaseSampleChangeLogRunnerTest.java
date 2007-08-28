@@ -16,4 +16,9 @@ public class SybaseSampleChangeLogRunnerTest extends AbstractSimpleChangeLogRunn
         super.setUp();
         connection.setAutoCommit(true);        
     }
+
+
+    protected void tearDown() throws Exception {
+        super.tearDown();
+    }
 }

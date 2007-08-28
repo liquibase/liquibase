@@ -469,7 +469,7 @@ public abstract class AbstractDatabase implements Database {
     }
 
     protected String getSelectChangeLogLockSQL() {
-        return "select locked from "+getDatabaseChangeLogLockTableName()+" where id=1".toUpperCase();
+        return ("select locked from "+getDatabaseChangeLogLockTableName()+" where id=1").toUpperCase();
     }
 
     public boolean doesChangeLogTableExist() {

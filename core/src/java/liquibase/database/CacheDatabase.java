@@ -5,92 +5,92 @@ import java.sql.Connection;
 import liquibase.migrator.exception.JDBCException;
 
 public class CacheDatabase extends AbstractDatabase {
-	public static final String PRODUCT_NAME = "cache";
-	
-	@Override
-	protected String getBlobType() {
-		return "LONGVARBINARY";
-	}
+    public static final String PRODUCT_NAME = "cache";
 
-	@Override
-	protected String getBooleanType() {
-		return "INTEGER";
-	}
+    @Override
+    protected String getBlobType() {
+        return "LONGVARBINARY";
+    }
 
-	@Override
-	protected String getClobType() {
-		return "LONGVARCHAR";
-	}
+    @Override
+    protected String getBooleanType() {
+        return "INTEGER";
+    }
 
-	@Override
-	protected String getCurrencyType() {
-		return "MONEY";
-	}
+    @Override
+    protected String getClobType() {
+        return "LONGVARCHAR";
+    }
 
-	@Override
-	protected String getDateTimeType() {
-		return "DATETIME";
-	}
+    @Override
+    protected String getCurrencyType() {
+        return "MONEY";
+    }
 
-	@Override
-	protected String getUUIDType() {
-		return "RAW";
-	}
+    @Override
+    protected String getDateTimeType() {
+        return "DATETIME";
+    }
 
-	public String getCurrentDateTimeFunction() {
-		return "SYSDATE";
-	}
+    @Override
+    protected String getUUIDType() {
+        return "RAW";
+    }
 
-	public String getDefaultDriver(String url) {
-		if (url.startsWith("jdbc:Cache")) {
-			return "com.intersys.jdbc.CacheDriver";
-		}
-		return null;
-	}
+    public String getCurrentDateTimeFunction() {
+        return "SYSDATE";
+    }
 
-	public String getProductName() {
-		return "Cache";
-	}
+    public String getDefaultDriver(String url) {
+        if (url.startsWith("jdbc:Cache")) {
+            return "com.intersys.jdbc.CacheDriver";
+        }
+        return null;
+    }
 
-	public String getTypeName() {
-		return "cache";
-	}
+    public String getProductName() {
+        return "Cache";
+    }
 
-	public boolean isCorrectDatabaseImplementation(Connection conn)
-			throws JDBCException {
-		return PRODUCT_NAME.equalsIgnoreCase(getDatabaseProductName(conn));
-	}
+    public String getTypeName() {
+        return "cache";
+    }
 
-	public boolean supportsInitiallyDeferrableColumns() {
-		return false;
-	}
+    public boolean isCorrectDatabaseImplementation(Connection conn)
+            throws JDBCException {
+        return PRODUCT_NAME.equalsIgnoreCase(getDatabaseProductName(conn));
+    }
 
-	@Override
-	public String getLineComment() {
+    public boolean supportsInitiallyDeferrableColumns() {
+        return false;
+    }
+
+    @Override
+    public String getLineComment() {
         return "--";
     }
-	
-	public String getFalseBooleanValue() {
+
+    public String getFalseBooleanValue() {
         return "0";
     }
 
     public String getTrueBooleanValue() {
         return "1";
     }
-    
+
     @Override
     public String getSchemaName() throws JDBCException {
-    	return "";        
+        return "";
     }
-    
+
     public boolean supportsSequences() {
         return false;
     }
 
-	@Override
-	protected void dropSequences(Connection conn) throws JDBCException {
-			
-	}
+    @Override
+    protected void dropSequences(Connection conn) throws JDBCException {
 
-	
+    }
+
+
 }
