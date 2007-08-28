@@ -72,6 +72,8 @@ public class AddNotNullConstraintChange extends AbstractChange {
             return generateDerbyStatements();
         } else if (database instanceof H2Database) {
             return generateH2Statements();
+        } else if (database instanceof CacheDatabase) {
+        	return generateCacheStatements();
         }
 
         List<String> statements = new ArrayList<String>();
@@ -89,6 +91,17 @@ public class AddNotNullConstraintChange extends AbstractChange {
 
     }
 
+    private String[] generateCacheStatements() {
+    	List<String> statements = new ArrayList<String>();
+    	if (defaultNullValue != null) {
+    		statements.add(generateUpdateStatement());
+    	}
+    	statements.add("COMMIT");
+    	statements.add("ALTER TABLE " + getTableName() + " ALTER COLUMN " + getColumnName() + " NOT NULL");
+    	
+    	return statements.toArray(new String[statements.size()]);
+    }
+    
     private String[] generateSybaseStatements() {
         List<String> statements = new ArrayList<String>();
         if (defaultNullValue != null) {
