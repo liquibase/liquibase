@@ -240,7 +240,6 @@ The available targets at the current stage:
         <loadfile property="nav.main" srcFile="${src.dir}/site/nav/main.html"/>
         <loadfile property="nav.manual" srcFile="${src.dir}/site/nav/manual.html"/>
         <loadfile property="nav.ide" srcFile="${src.dir}/site/nav/ide.html"/>
-        <loadfile property="nav.news" srcFile="${src.dir}/site/nav/news.html"/>
         <loadfile property="analytics" srcFile="${src.dir}/site/analytics.html"/>
 
         <copy todir="${release.site.dir}" filtering="true">

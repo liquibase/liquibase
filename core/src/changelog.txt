@@ -1,7 +1,7 @@
-LiquiBASE Changelog
+LiquiBase Core Changelog
 ==========================================
 
-Changes in version 1.2
+Changes in version 1.2 (2007.8.28)
 ----------------------
 - Added support for H2 database
 - Added support for InterSystems Cache` database
