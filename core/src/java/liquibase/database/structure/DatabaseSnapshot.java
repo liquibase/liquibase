@@ -1,5 +1,6 @@
 package liquibase.database.structure;
 
+import liquibase.database.CacheDatabase;
 import liquibase.database.Database;
 import liquibase.database.H2Database;
 import liquibase.migrator.Migrator;
@@ -198,8 +199,17 @@ public class DatabaseSnapshot {
         if (database instanceof H2Database) {
             if (StringUtils.trimToEmpty(defaultValue).startsWith("(NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_")) {
                 return null;
-            }
+            } 
             return defaultValue;
+        } else if (database instanceof CacheDatabase) {
+        	if (defaultValue != null) {
+        		if (defaultValue.charAt(0) == '"' && defaultValue.charAt(defaultValue.length() - 1)=='"') {
+            		defaultValue = defaultValue.substring(1, defaultValue.length()-2);
+            		return "'" + defaultValue + "'";
+            	} else if (defaultValue.startsWith("$")) {
+            		return "OBJECTSCRIPT '" + defaultValue + "'";
+            	}
+        	}
         }
         return defaultValue;
     }

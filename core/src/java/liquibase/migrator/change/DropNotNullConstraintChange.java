@@ -55,6 +55,8 @@ public class DropNotNullConstraintChange extends AbstractChange {
             return new String[]{"ALTER TABLE " + tableName + " ALTER COLUMN " + columnName + " NULL"};
         } else if (database instanceof HsqlDatabase) {
             return new String[]{"ALTER TABLE " + tableName + " ALTER COLUMN " + columnName + " NULL"};
+        } else if (database instanceof CacheDatabase) {
+        	return new String[]{"ALTER TABLE " + tableName + " ALTER COLUMN " + columnName + " NULL"};
         }
 
         return new String[]{"ALTER TABLE " + tableName + " ALTER COLUMN " + columnName + " DROP NOT NULL"};

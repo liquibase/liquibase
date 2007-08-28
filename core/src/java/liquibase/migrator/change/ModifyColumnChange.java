@@ -47,6 +47,8 @@ public class ModifyColumnChange extends AbstractChange {
             return new String[]{"ALTER TABLE " + getTableName() + " ALTER COLUMN "+getColumn().getName()+" SET DATA TYPE " + getColumn().getType()};
         } else if (database instanceof HsqlDatabase) {
             return new String[]{"ALTER TABLE " + getTableName() + " ALTER COLUMN "+getColumn().getName()+" "+getColumn().getType()};
+        } else if (database instanceof CacheDatabase) {
+        	return new String[]{"ALTER TABLE " + getTableName() + " ALTER COLUMN " + getColumn().getName() + " " + getColumn().getType()};
         } else if (database instanceof DB2Database) {
             return new String[]{
                     "ALTER TABLE " + getTableName() + " ALTER COLUMN " + getColumn().getName() + " SET DATA TYPE " + getColumn().getType(),
