@@ -3,6 +3,8 @@ package liquibase.database;
 import liquibase.migrator.exception.JDBCException;
 
 import java.sql.Connection;
+import java.sql.Statement;
+import java.sql.SQLException;
 
 public class H2Database extends HsqlDatabase {
     public String getProductName() {
@@ -27,5 +29,31 @@ public class H2Database extends HsqlDatabase {
 
     public String createFindSequencesSQL() throws JDBCException {
         return "SELECT SEQUENCE_NAME FROM INFORMATION_SCHEMA.SEQUENCES WHERE SEQUENCE_SCHEMA = '"+getSchemaName()+"' AND IS_GENERATED=FALSE";
+    }
+
+
+    public void dropDatabaseObjects() throws JDBCException {
+        Connection conn = getConnection();
+        Statement dropStatement = null;
+        try {
+            dropStatement = conn.createStatement();
+            dropStatement.executeUpdate("DROP ALL OBJECTS");
+            changeLogTableExists = false;
+            changeLogLockTableExists = false;
+            changeLogCreateAttempted = false;
+            changeLogLockCreateAttempted = false;
+        } catch (SQLException e) {
+            throw new JDBCException(e);
+        } finally {
+            try {
+                if (dropStatement != null) {
+                    dropStatement.close();
+                }
+                conn.commit();
+            } catch (SQLException e) {
+                ;
+            }
+        }
+
     }
 }
