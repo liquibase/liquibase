@@ -27,6 +27,19 @@
                     <p>
                         Currently, the sql tag is the best way to create stored procedures.
                     </p>
+                    <p>The "sqlfile" tag can also support multiline statements in the same file. Statements can either be split using a ; 
+                                               at the end of the last line of the SQL or a go on its own on the line between the statements can be used.Multiline SQL 
+                                               statements are also supported and only a ; or go statement will finsih a statement, a new line is not enough. Files containing 
+                                                a single statement do not need to use a ; or go.
+
+                    </p>
+
+                    <p>The sql file can also contain comments of either of the following formats:<br/>
+                       <ol>
+                           <li>A multiline comment that starts with /* and ends with */.
+                           <li>A single line comment starting with &lt;space&gt;--&lt;space&gt and finishing at the end of the line
+                       </ol>
+                    </p>
 
                     <h3>Sample</h3>
                     <pre>&lt;sql&gt;insert into person (id, name) values (1, 'Bob')&lt;/sql&gt;</pre>
