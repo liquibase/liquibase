@@ -1,14 +1,15 @@
 package org.liquibase.eclipse.common.change.wizard;
 
+import java.sql.Connection;
+
 import liquibase.migrator.change.Change;
 import liquibase.migrator.change.RenameTableChange;
-import org.eclipse.datatools.connectivity.sqm.core.rte.jdbc.JDBCSchema;
+
+import org.eclipse.datatools.connectivity.sqm.core.rte.ICatalogObject;
 import org.eclipse.datatools.modelbase.sql.schema.Database;
 import org.eclipse.datatools.modelbase.sql.tables.Table;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.liquibase.eclipse.common.change.wizard.page.RenameTableWizardPage;
-
-import java.sql.Connection;
 
 public class RenameTableWizard extends BaseRefactorWizard {
 
@@ -42,7 +43,7 @@ public class RenameTableWizard extends BaseRefactorWizard {
 	
 	@Override
 	protected void refresh() {
-		((JDBCSchema)table.getSchema()).refresh();		
+		((ICatalogObject)table.getSchema()).refresh();		
 	}
 
 }

@@ -87,6 +87,11 @@ public abstract class BaseDatabaseAction implements IObjectActionDelegate, IWork
 
 	protected Schema getSelectedSchema(ISelection selection) {
 		List<?> selectedObjects = ((TreeSelection) selection).toList();
+		
+		for (Object object : selectedObjects) {
+			System.out.println(object.getClass().getName());
+		}
+
 		for (Object object : selectedObjects) {
 			if (object instanceof Schema) {
 				return (Schema) object;
@@ -107,6 +112,11 @@ public abstract class BaseDatabaseAction implements IObjectActionDelegate, IWork
 
 	protected Column getSelectedColumn(ISelection selection) {
 		List<?> selectedObjects = ((TreeSelection) selection).toList();
+
+		for (Object object : selectedObjects) {
+			System.out.println(object.getClass().getName());
+		}
+
 		for (Object object : selectedObjects) {
 			if (object instanceof Column) {
 				return (Column) object;

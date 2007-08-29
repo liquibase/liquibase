@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
       id="org.liquibase.eclipse.feature"
-      label="Feature Feature"
+      label="LiquiBase Database Refactoring Plug-In"
       version="0.5.0"
       provider-name="LiquiBase.org">
 

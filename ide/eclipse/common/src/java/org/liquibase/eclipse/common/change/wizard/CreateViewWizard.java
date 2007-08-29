@@ -1,14 +1,15 @@
 package org.liquibase.eclipse.common.change.wizard;
 
+import java.sql.Connection;
+
 import liquibase.migrator.change.Change;
 import liquibase.migrator.change.CreateViewChange;
-import org.eclipse.datatools.connectivity.sqm.core.rte.jdbc.JDBCSchema;
+
+import org.eclipse.datatools.connectivity.sqm.core.rte.ICatalogObject;
 import org.eclipse.datatools.modelbase.sql.schema.Database;
 import org.eclipse.datatools.modelbase.sql.schema.Schema;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.liquibase.eclipse.common.change.wizard.page.CreateViewWizardPage;
-
-import java.sql.Connection;
 
 public class CreateViewWizard extends BaseRefactorWizard {
 	private CreateViewWizardPage page1;
@@ -37,6 +38,6 @@ public class CreateViewWizard extends BaseRefactorWizard {
 	
 	@Override
 	protected void refresh() {
-		((JDBCSchema)schema).refresh();		
+		((ICatalogObject)schema).refresh();		
 	}
 }
