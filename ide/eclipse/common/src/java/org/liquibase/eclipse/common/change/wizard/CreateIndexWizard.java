@@ -1,16 +1,17 @@
 package org.liquibase.eclipse.common.change.wizard;
 
+import java.sql.Connection;
+import java.util.Arrays;
+
 import liquibase.migrator.change.Change;
 import liquibase.migrator.change.ColumnConfig;
 import liquibase.migrator.change.CreateIndexChange;
-import org.eclipse.datatools.connectivity.sqm.core.rte.jdbc.JDBCColumn;
+
+import org.eclipse.datatools.connectivity.sqm.core.rte.ICatalogObject;
 import org.eclipse.datatools.modelbase.sql.schema.Database;
 import org.eclipse.datatools.modelbase.sql.tables.Column;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.liquibase.eclipse.common.change.wizard.page.CreateIndexWizardPage;
-
-import java.sql.Connection;
-import java.util.Arrays;
 
 public class CreateIndexWizard extends BaseRefactorWizard {
 
@@ -50,7 +51,7 @@ public class CreateIndexWizard extends BaseRefactorWizard {
 	
 	@Override
 	protected void refresh() {
-		((JDBCColumn)column).refresh();		
+		((ICatalogObject)column).refresh();		
 	}
 
 }

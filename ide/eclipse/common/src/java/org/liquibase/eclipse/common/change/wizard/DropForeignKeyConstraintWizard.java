@@ -1,14 +1,15 @@
 package org.liquibase.eclipse.common.change.wizard;
 
+import java.sql.Connection;
+
 import liquibase.migrator.change.Change;
 import liquibase.migrator.change.DropForeignKeyConstraintChange;
-import org.eclipse.datatools.connectivity.sqm.core.rte.jdbc.JDBCTable;
+
+import org.eclipse.datatools.connectivity.sqm.core.rte.ICatalogObject;
 import org.eclipse.datatools.modelbase.sql.constraints.ForeignKey;
 import org.eclipse.datatools.modelbase.sql.schema.Database;
 import org.eclipse.datatools.modelbase.sql.tables.Table;
 import org.eclipse.jface.wizard.IWizardPage;
-
-import java.sql.Connection;
 
 public class DropForeignKeyConstraintWizard extends BaseRefactorWizard {
 
@@ -39,7 +40,7 @@ public class DropForeignKeyConstraintWizard extends BaseRefactorWizard {
 
 	@Override
 	protected void refresh() {
-		((JDBCTable)baseTable).refresh();
-		((JDBCTable)referencedTable).refresh();
+		((ICatalogObject)baseTable).refresh();
+		((ICatalogObject)referencedTable).refresh();
 	}
 }
