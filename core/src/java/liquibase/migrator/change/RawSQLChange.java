@@ -36,7 +36,7 @@ public class RawSQLChange extends AbstractChange {
     }
 
     public String[] generateStatements(Database database) throws UnsupportedChangeException {
-        return StringUtils.splitSQL(sql);
+        return StringUtils.processMutliLineSQL(sql);
     }
 
     public String getConfirmationMessage() {
