@@ -173,7 +173,7 @@ public class SQLFileChange extends AbstractChange {
             throws UnsupportedChangeException {
 
         //strip ; from end of statements
-        return StringUtils.splitSQL(sql);
+        return StringUtils.processMutliLineSQL(sql);
     }
 
     public String getConfirmationMessage() {
