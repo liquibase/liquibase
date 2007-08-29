@@ -5,6 +5,9 @@ import liquibase.migrator.exception.MigrationFailedException;
 import liquibase.util.ISODateFormat;
 
 import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -128,5 +131,39 @@ public class HsqlDatabase extends AbstractDatabase {
 
     @Override
     protected void dropSequences(Connection conn) throws JDBCException {
+        ResultSet rs = null;
+        Statement selectStatement = null;
+        Statement dropStatement = null;
+        try {
+            selectStatement = conn.createStatement();
+            dropStatement = conn.createStatement();
+            rs = selectStatement.executeQuery("SELECT SEQUENCE_NAME FROM INFORMATION_SCHEMA.SYSTEM_SEQUENCES");
+            while (rs.next()) {
+                String sequenceName = rs.getString("SEQUENCE_NAME");
+                log.finest("Dropping sequence " + sequenceName);
+                String sql = "DROP SEQUENCE " + sequenceName;
+                try {
+                    dropStatement.executeUpdate(sql);
+                } catch (SQLException e) {
+                    throw new JDBCException("Error dropping sequence '" + sequenceName + "': " + e.getMessage(), e);
+                }
+            }
+        } catch (SQLException e) {
+            throw new JDBCException(e);
+        } finally {
+            try {
+                if (selectStatement != null) {
+                    selectStatement.close();
+                }
+                if (dropStatement != null) {
+                    dropStatement.close();
+                }
+                if (rs != null) {
+                    rs.close();
+                }
+            } catch (SQLException e) {
+                ;
+            }
+        }
     }
 }

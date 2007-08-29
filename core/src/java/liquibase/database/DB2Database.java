@@ -58,11 +58,11 @@ public class DB2Database extends AbstractDatabase {
 
     /**
      * Return an DB2 date literal with the same value as a string formatted using ISO 8601.
-     *
+     * <p/>
      * Convert an ISO8601 date string to one of the following results:
      * to_date('1995-05-23', 'YYYY-MM-DD')
      * to_date('1995-05-23 09:23:59', 'YYYY-MM-DD HH24:MI:SS')
-     *
+     * <p/>
      * Implementation restriction:
      * Currently, only the following subsets of ISO8601 are supported:
      * YYYY-MM-DD
@@ -115,14 +115,14 @@ public class DB2Database extends AbstractDatabase {
         return "TIMESTAMP";
     }
 
-        protected void dropSequences(Connection conn) throws JDBCException {
+    protected void dropSequences(Connection conn) throws JDBCException {
         ResultSet rs = null;
         Statement selectStatement = null;
         Statement dropStatement = null;
         try {
             selectStatement = conn.createStatement();
             dropStatement = conn.createStatement();
-            rs = selectStatement.executeQuery("SELECT SEQNAME FROM SYSIBM.SYSSEQUENCES WHERE SEQSCHEMA='"+getSchemaName()+"'");
+            rs = selectStatement.executeQuery("SELECT SEQNAME FROM SYSIBM.SYSSEQUENCES WHERE SEQSCHEMA='" + getSchemaName() + "'");
             while (rs.next()) {
                 String sequenceName = rs.getString("SEQNAME");
                 log.finest("Dropping sequence " + sequenceName);
@@ -154,7 +154,7 @@ public class DB2Database extends AbstractDatabase {
 
 
     public String createFindSequencesSQL() throws JDBCException {
-        return "SELECT SEQNAME AS SEQUENCE_NAME FROM SYSCAT.SEQUENCES WHERE SEQSCHEMA = '"+getSchemaName()+ "'";
+        return "SELECT SEQNAME AS SEQUENCE_NAME FROM SYSCAT.SEQUENCES WHERE SEQSCHEMA = '" + getSchemaName() + "'";
     }
 
 

@@ -257,6 +257,8 @@ public class DiffResult {
         addUnexpectedIndexChanges(changes);
         addMissingForeignKeyChanges(changes);
         addUnexpectedForeignKeyChanges(changes);
+        addMissingSequenceChanges(changes);
+        addUnexpectedSequenceChanges(changes);
 
         for (Change change : changes) {
             Element changeSet = doc.createElement("changeSet");
@@ -356,6 +358,26 @@ public class DiffResult {
 
             change.setDeferrable(fk.isDeferrable());
             change.setInitiallyDeferred(fk.isInitiallyDeferred());
+
+            changes.add(change);
+        }
+    }
+
+    private void addUnexpectedSequenceChanges(List<Change> changes) {
+        for (Sequence sequence : getUnexpectedSequences()) {
+
+            DropSequenceChange change = new DropSequenceChange();
+            change.setSequenceName(sequence.getName());
+
+            changes.add(change);
+        }
+    }
+
+    private void addMissingSequenceChanges(List<Change> changes) {
+        for (Sequence sequence : getMissingSequences()) {
+
+            CreateSequenceChange change = new CreateSequenceChange();
+            change.setSequenceName(sequence.getName());
 
             changes.add(change);
         }
