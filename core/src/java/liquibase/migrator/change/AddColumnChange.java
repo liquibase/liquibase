@@ -1,8 +1,6 @@
 package liquibase.migrator.change;
 
-import liquibase.database.DB2Database;
-import liquibase.database.Database;
-import liquibase.database.SybaseDatabase;
+import liquibase.database.*;
 import liquibase.migrator.exception.UnsupportedChangeException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -44,34 +42,33 @@ public class AddColumnChange extends AbstractChange {
 
         String alterTable = "ALTER TABLE " + getTableName() + " ADD " + getColumn().getName() + " " + database.getColumnType(getColumn());
 
-    	if (column.getConstraints() != null) {
+        if (defaultClauseBeforeNotNull(database)) {
+            alterTable += getDefaultClause(database);
+        }
+
+        if (column.getConstraints() != null) {
             if (column.getConstraints().isNullable() != null && !column.getConstraints().isNullable()) {
                 alterTable += " NOT NULL";
             } else {
-            	if(database instanceof SybaseDatabase) {
-            		alterTable += " NULL";
-            	}
+                if (database instanceof SybaseDatabase) {
+                    alterTable += " NULL";
+                }
             }
-            
         } else {
-        	//For Sybase only the null is not optional and hence if no constraints are specified we need to default the value
-        	//to nullable
-        	if(database instanceof SybaseDatabase) {
-        		alterTable += " NULL";
-        	}
+            //For Sybase only the null is not optional and hence if no constraints are specified we need to default the value
+            //to nullable
+            if (database instanceof SybaseDatabase) {
+                alterTable += " NULL";
+            }
         }
-        
-        if (column.getDefaultValue() != null
-                || column.getDefaultValueBoolean() != null
-                || column.getDefaultValueDate() != null
-                || column.getDefaultValueNumeric() != null) {
-            alterTable += " DEFAULT "+column.getDefaultColumnValue(database);
+
+        if (!defaultClauseBeforeNotNull(database)) {
+            alterTable += getDefaultClause(database);
         }
-        	
 
         sql.add(alterTable);
         if (database instanceof DB2Database) {
-            sql.add("CALL SYSPROC.ADMIN_CMD ('REORG TABLE "+ getTableName() +"')");
+            sql.add("CALL SYSPROC.ADMIN_CMD ('REORG TABLE " + getTableName() + "')");
         }
 
 //        if (getColumn().getDefaultValue() != null
@@ -109,6 +106,23 @@ public class AddColumnChange extends AbstractChange {
         }
 
         return sql.toArray(new String[sql.size()]);
+    }
+
+    private boolean defaultClauseBeforeNotNull(Database database) {
+        return database instanceof OracleDatabase
+                || database instanceof HsqlDatabase
+                || database instanceof DerbyDatabase
+                || database instanceof DB2Database;
+    }
+
+    private String getDefaultClause(Database database) {
+        if (column.getDefaultValue() != null
+                || column.getDefaultValueBoolean() != null
+                || column.getDefaultValueDate() != null
+                || column.getDefaultValueNumeric() != null) {
+            return " DEFAULT " + column.getDefaultColumnValue(database);
+        }
+        return "";
     }
 
     protected Change[] createInverses() {

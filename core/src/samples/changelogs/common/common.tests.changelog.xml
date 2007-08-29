@@ -76,7 +76,7 @@
     </changeSet>
 
     <changeSet id="commentTest" author="nvoxland">
-        <comment>Creates a table and updates a value with actual SQL.  Mainly for testing the comment tags</comment>
+        <comment>Creates a table and updates a value with actual SQL. Mainly for testing the comment tags</comment>
         <createTable tableName="commentTest">
             <column name="id" type="int"/>
         </createTable>
@@ -86,5 +86,17 @@
             insert into commentTest (id) values (2);
             insert into commentTest (id) values (3);
         </sql>
+    </changeSet>
+
+    <changeSet id="add-column-test1" author="alan">
+        <comment>Testing bug reported on mailing list</comment>
+        <createTable tableName="ADD_COLUMN_TEST_TABLE">
+            <column name="id" type="int"/>
+        </createTable>
+        <addColumn tableName="ADD_COLUMN_TEST_TABLE">
+            <column name="A_NEW_COLUMN" type="int" defaultValueNumeric="1">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
     </changeSet>
 </databaseChangeLog>
