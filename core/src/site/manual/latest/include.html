@@ -43,6 +43,12 @@
                         Included change-logs are run in the order they are found so care does need to be taken to make sure that the included changelogs are either completely independent, or that
                         any required changelogs are run first.
                     </p>
+                    <p>
+                        The reason to use the &lt;include&gt; tag rather than using XML's built-in include functionality is that
+                        with the built-in functionality the parser sees just one big XML document.  We uniquely identify each
+                        change with the id, the author, and the file name so you only have to ensure that the id/author combinations
+                        are unique within each file, not across all change logs.
+                    </p>
                     <h3>Implementation Notes</h3>
                     <p>
                         Currently there is no checking for looping changelogs or double inclusion of changelogs.
