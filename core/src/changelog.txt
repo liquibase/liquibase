@@ -1,6 +1,11 @@
 LiquiBase Core Changelog
 ==========================================
 
+Changes in version 1.2.1 (2007.8.31)
+----------------------
+- Include sequences in generateChangeLog
+- Fixed ordering of statements default and null clauses based on database
+
 Changes in version 1.2 (2007.8.28)
 ----------------------
 - Added support for H2 database

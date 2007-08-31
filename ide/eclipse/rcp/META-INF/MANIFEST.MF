@@ -2,13 +2,21 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: LiquiBase IDE
 Bundle-SymbolicName: org.liquibase.rcp;singleton:=true
-Bundle-Version: 0.5.0
+Bundle-Version: 0.6.0
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.ui,
- org.liquibase.migrator,
- org.eclipse.update.core,
- org.eclipse.update.scheduler,
  org.eclipse.update.ui,
  org.liquibase.ide.common,
- org.eclipse.datatools.modelbase.sql
+ org.liquibase.migrator
 Bundle-Vendor: LiquiBase.org
+Export-Package: org,
+ org.liquibase,
+ org.liquibase.eclipse,
+ org.liquibase.eclipse.rcp,
+ org.liquibase.eclipse.rcp.action,
+ org.liquibase.eclipse.rcp.change,
+ org.liquibase.eclipse.rcp.change.action,
+ org.liquibase.eclipse.rcp.change.wizard,
+ org.liquibase.eclipse.rcp.change.wizard.page,
+ org.liquibase.eclipse.rcp.migrator,
+ org.liquibase.eclipse.rcp.migrator.action
