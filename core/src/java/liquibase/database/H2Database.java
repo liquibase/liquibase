@@ -33,7 +33,7 @@ public class H2Database extends HsqlDatabase {
 
 
     public void dropDatabaseObjects() throws JDBCException {
-        Connection conn = getConnection();
+        DatabaseConnection conn = getConnection();
         Statement dropStatement = null;
         try {
             dropStatement = conn.createStatement();

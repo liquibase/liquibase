@@ -150,7 +150,7 @@ public class MSSQLDatabase extends AbstractDatabase {
     }
 
     @Override
-    protected void dropSequences(Connection conn) throws JDBCException {
+    protected void dropSequences(DatabaseConnection conn) throws JDBCException {
     }
 
 //    protected void dropForeignKeys(Connection conn) throws JDBCException {

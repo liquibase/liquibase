@@ -1,6 +1,7 @@
 package liquibase.migrator.commandline;
 
 import liquibase.database.DatabaseFactory;
+import liquibase.database.SQLConnectionDelegate;
 import liquibase.migrator.*;
 import liquibase.migrator.diff.Diff;
 import liquibase.migrator.diff.DiffResult;
@@ -11,6 +12,7 @@ import liquibase.migrator.exception.ValidationFailedException;
 import liquibase.util.StreamUtil;
 
 import javax.xml.parsers.ParserConfigurationException;
+
 import java.io.*;
 import java.lang.reflect.Field;
 import java.net.URL;

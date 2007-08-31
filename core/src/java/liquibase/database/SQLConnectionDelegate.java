@@ -4,176 +4,184 @@ import java.sql.*;
 import java.util.Map;
 
 /**
- * A Sybase specific Delegate that removes the calls to commit
- * and rollback as Sybase requires that autocommit be set to true.
+ * A ConnectionWrapper implementation which delegates completely to an
+ * underlying java.sql.connection.
  * 
  * @author <a href="mailto:csuml@yahoo.co.uk">Paul Keeble</a>
- *
  */
-public class SybaseConnection implements Connection {
-    Connection delegate;
+public class SQLConnectionDelegate implements DatabaseConnection {
+    java.sql.Connection con;
+
+    public SQLConnectionDelegate(java.sql.Connection connection) {
+        this.con = connection;
+    }
     
-    public SybaseConnection(Connection delegate) {
-        this.delegate = delegate;
+    /**
+     * Returns the connection that this Delegate is using.
+     * 
+     * @return The connection originally passed in the constructor
+     */
+    public Connection getWrappedConnection() {
+        return con;
     }
 
     public void clearWarnings() throws SQLException {
-        delegate.clearWarnings();
+        con.clearWarnings();
     }
 
     public void close() throws SQLException {
-        delegate.close();
+        con.close();
     }
 
     public void commit() throws SQLException {
-        
+        con.commit();
     }
 
     public Statement createStatement() throws SQLException {
-        return delegate.createStatement();
+        return con.createStatement();
     }
 
     public Statement createStatement(int resultSetType,
             int resultSetConcurrency, int resultSetHoldability)
             throws SQLException {
-        return delegate.createStatement(resultSetType, resultSetConcurrency,
+        return con.createStatement(resultSetType, resultSetConcurrency,
                 resultSetHoldability);
     }
 
     public Statement createStatement(int resultSetType, int resultSetConcurrency)
             throws SQLException {
-        return delegate.createStatement(resultSetType, resultSetConcurrency);
+        return con.createStatement(resultSetType, resultSetConcurrency);
     }
 
     public boolean getAutoCommit() throws SQLException {
-        return delegate.getAutoCommit();
+        return con.getAutoCommit();
     }
 
     public String getCatalog() throws SQLException {
-        return delegate.getCatalog();
+        return con.getCatalog();
     }
 
     public int getHoldability() throws SQLException {
-        return delegate.getHoldability();
+        return con.getHoldability();
     }
 
     public DatabaseMetaData getMetaData() throws SQLException {
-        return delegate.getMetaData();
+        return con.getMetaData();
     }
 
     public int getTransactionIsolation() throws SQLException {
-        return delegate.getTransactionIsolation();
+        return con.getTransactionIsolation();
     }
 
     public Map<String, Class<?>> getTypeMap() throws SQLException {
-        return delegate.getTypeMap();
+        return con.getTypeMap();
     }
 
     public SQLWarning getWarnings() throws SQLException {
-        return delegate.getWarnings();
+        return con.getWarnings();
     }
 
     public boolean isClosed() throws SQLException {
-        return delegate.isClosed();
+        return con.isClosed();
     }
 
     public boolean isReadOnly() throws SQLException {
-        return delegate.isReadOnly();
+        return con.isReadOnly();
     }
 
     public String nativeSQL(String sql) throws SQLException {
-        return delegate.nativeSQL(sql);
+        return con.nativeSQL(sql);
     }
 
     public CallableStatement prepareCall(String sql, int resultSetType,
             int resultSetConcurrency, int resultSetHoldability)
             throws SQLException {
-        return delegate.prepareCall(sql, resultSetType, resultSetConcurrency,
+        return con.prepareCall(sql, resultSetType, resultSetConcurrency,
                 resultSetHoldability);
     }
 
     public CallableStatement prepareCall(String sql, int resultSetType,
             int resultSetConcurrency) throws SQLException {
-        return delegate.prepareCall(sql, resultSetType, resultSetConcurrency);
+        return con.prepareCall(sql, resultSetType, resultSetConcurrency);
     }
 
     public CallableStatement prepareCall(String sql) throws SQLException {
-        return delegate.prepareCall(sql);
+        return con.prepareCall(sql);
     }
 
     public PreparedStatement prepareStatement(String sql, int resultSetType,
             int resultSetConcurrency, int resultSetHoldability)
             throws SQLException {
-        return delegate.prepareStatement(sql, resultSetType,
-                resultSetConcurrency, resultSetHoldability);
+        return con.prepareStatement(sql, resultSetType, resultSetConcurrency,
+                resultSetHoldability);
     }
 
     public PreparedStatement prepareStatement(String sql, int resultSetType,
             int resultSetConcurrency) throws SQLException {
-        return delegate.prepareStatement(sql, resultSetType,
-                resultSetConcurrency);
+        return con.prepareStatement(sql, resultSetType, resultSetConcurrency);
     }
 
     public PreparedStatement prepareStatement(String sql, int autoGeneratedKeys)
             throws SQLException {
-        return delegate.prepareStatement(sql, autoGeneratedKeys);
+        return con.prepareStatement(sql, autoGeneratedKeys);
     }
 
     public PreparedStatement prepareStatement(String sql, int[] columnIndexes)
             throws SQLException {
-        return delegate.prepareStatement(sql, columnIndexes);
+        return con.prepareStatement(sql, columnIndexes);
     }
 
     public PreparedStatement prepareStatement(String sql, String[] columnNames)
             throws SQLException {
-        return delegate.prepareStatement(sql, columnNames);
+        return con.prepareStatement(sql, columnNames);
     }
 
     public PreparedStatement prepareStatement(String sql) throws SQLException {
-        return delegate.prepareStatement(sql);
+        return con.prepareStatement(sql);
     }
 
     public void releaseSavepoint(Savepoint savepoint) throws SQLException {
-        delegate.releaseSavepoint(savepoint);
+        con.releaseSavepoint(savepoint);
     }
 
     public void rollback() throws SQLException {
-        
+        con.rollback();
     }
 
     public void rollback(Savepoint savepoint) throws SQLException {
-        
+        con.rollback(savepoint);
     }
 
     public void setAutoCommit(boolean autoCommit) throws SQLException {
-        delegate.setAutoCommit(autoCommit);
+        con.setAutoCommit(autoCommit);
     }
 
     public void setCatalog(String catalog) throws SQLException {
-        delegate.setCatalog(catalog);
+        con.setCatalog(catalog);
     }
 
     public void setHoldability(int holdability) throws SQLException {
-        delegate.setHoldability(holdability);
+        con.setHoldability(holdability);
     }
 
     public void setReadOnly(boolean readOnly) throws SQLException {
-        delegate.setReadOnly(readOnly);
+        con.setReadOnly(readOnly);
     }
 
     public Savepoint setSavepoint() throws SQLException {
-        return delegate.setSavepoint();
+        return con.setSavepoint();
     }
 
     public Savepoint setSavepoint(String name) throws SQLException {
-        return delegate.setSavepoint(name);
+        return con.setSavepoint(name);
     }
 
     public void setTransactionIsolation(int level) throws SQLException {
-        delegate.setTransactionIsolation(level);
+        con.setTransactionIsolation(level);
     }
 
     public void setTypeMap(Map<String, Class<?>> map) throws SQLException {
-        delegate.setTypeMap(map);
+        con.setTypeMap(map);
     }
+
 }

@@ -23,14 +23,14 @@ import java.util.List;
 public class MigratorTest {
 
     private TestMigrator testMigrator;
-    private Connection connectionForConstructor;
+    private DatabaseConnection connectionForConstructor;
 
     @Before
     public void setUp() throws Exception {
         if (connectionForConstructor != null) {
             reset(connectionForConstructor);
         }
-        connectionForConstructor = createMock(Connection.class);
+        connectionForConstructor = createMock(DatabaseConnection.class);
         connectionForConstructor.setAutoCommit(false);
         expectLastCall().atLeastOnce();
 
@@ -120,7 +120,7 @@ public class MigratorTest {
             try {
 
                 expect(mockDatabase.isCorrectDatabaseImplementation(null)).andReturn(true).atLeastOnce();
-                mockDatabase.setConnection(null);
+                mockDatabase.setConnection((DatabaseConnection)null);
                 expectLastCall();
                 expect(mockDatabase.getConnection()).andReturn(connectionForConstructor);
                 replay(mockDatabase);

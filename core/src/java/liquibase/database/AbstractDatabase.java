@@ -25,7 +25,7 @@ import java.util.logging.Logger;
  */
 public abstract class AbstractDatabase implements Database {
 
-    private Connection connection;
+    private DatabaseConnection connection;
     protected Logger log;
     protected boolean changeLogTableExists;
     protected boolean changeLogLockTableExists;
@@ -42,16 +42,25 @@ public abstract class AbstractDatabase implements Database {
 
     // ------- DATABASE INFORMATION METHODS ---- //
 
-    public Connection getConnection() {
+    public DatabaseConnection getConnection() {
         return connection;
     }
 
     public void setConnection(Connection conn) {
-        this.connection = conn;
+        this.connection = new SQLConnectionDelegate(conn);
         try {
         	connection.setAutoCommit(getAutoCommitMode());
         } catch(SQLException sqle) {
         	log.warning("Can not set auto commit to " + getAutoCommitMode() +" on connection");
+        }
+    }
+    
+    public void setConnection(DatabaseConnection conn) {
+        this.connection = conn;
+        try {
+            connection.setAutoCommit(getAutoCommitMode());
+        } catch(SQLException sqle) {
+            log.warning("Can not set auto commit to " + getAutoCommitMode() +" on connection");
         }
     }
 
@@ -352,7 +361,7 @@ public abstract class AbstractDatabase implements Database {
                 return true;
             }
         }
-        Connection conn = getConnection();
+        DatabaseConnection conn = getConnection();
         Statement stmt = null;
         PreparedStatement pstmt = null;
         ResultSet rs = null;
@@ -407,7 +416,7 @@ public abstract class AbstractDatabase implements Database {
 
     public void releaseLock() throws LockException {
         if (doesChangeLogLockTableExist()) {
-            Connection conn = getConnection();
+            DatabaseConnection conn = getConnection();
             PreparedStatement stmt = null;
             try {
                 String releaseSQL = ("update "+getDatabaseChangeLogLockTableName()+" set locked=?, lockgranted=null, lockedby=null where id=1").toUpperCase();
@@ -434,7 +443,7 @@ public abstract class AbstractDatabase implements Database {
     }
 
     public DatabaseChangeLogLock[] listLocks() throws LockException {
-        Connection conn = getConnection();
+        DatabaseConnection conn = getConnection();
         Statement stmt = null;
         ResultSet rs = null;
         try {
@@ -487,7 +496,7 @@ public abstract class AbstractDatabase implements Database {
      */
     public void checkDatabaseChangeLogTable(Migrator migrator) throws JDBCException, IOException {
         Statement statement = null;
-        Connection connection = getConnection();
+        DatabaseConnection connection = getConnection();
         ResultSet checkTableRS = null;
         ResultSet checkColumnsRS = null;
         List<String> statementsToExecute = new ArrayList<String>();
@@ -606,7 +615,7 @@ public abstract class AbstractDatabase implements Database {
      */
     public void checkDatabaseChangeLogLockTable(Migrator migrator) throws JDBCException, IOException {
         Statement statement = null;
-        Connection connection = getConnection();
+        DatabaseConnection connection = getConnection();
         ResultSet rs = null;
         try {
             rs = connection.getMetaData().getTables(getCatalogName(), getSchemaName(), getDatabaseChangeLogLockTableName(), new String[]{"TABLE"});
@@ -703,7 +712,7 @@ public abstract class AbstractDatabase implements Database {
      * Drops all objects owned by the connected user.
      */
     public void dropDatabaseObjects() throws JDBCException {
-        Connection conn = getConnection();
+        DatabaseConnection conn = getConnection();
         try {
             dropForeignKeys(conn);
             dropViews(conn);
@@ -724,7 +733,7 @@ public abstract class AbstractDatabase implements Database {
         }
     }
 
-    protected void dropForeignKeys(Connection conn) throws JDBCException {
+    protected void dropForeignKeys(DatabaseConnection conn) throws JDBCException {
         ResultSet tableRS;
         ResultSet fkRS = null;
         Statement dropStatement = null;
@@ -798,7 +807,7 @@ public abstract class AbstractDatabase implements Database {
 
     }
 
-    protected void dropTables(Connection conn) throws JDBCException {
+    protected void dropTables(DatabaseConnection conn) throws JDBCException {
         //drop tables and their constraints
         ResultSet rs = null;
         Statement dropStatement = null;
@@ -869,7 +878,7 @@ public abstract class AbstractDatabase implements Database {
     }
 
 
-    protected void dropViews(Connection conn) throws JDBCException {
+    protected void dropViews(DatabaseConnection conn) throws JDBCException {
         //drop tables and their constraints
         ResultSet rs = null;
         Statement dropStatement = null;
@@ -917,7 +926,7 @@ public abstract class AbstractDatabase implements Database {
         return "DROP TABLE " + tableName;
     }
 
-    abstract protected void dropSequences(Connection conn) throws JDBCException;
+    abstract protected void dropSequences(DatabaseConnection conn) throws JDBCException;
 
 
     // ------- DATABASE TAGGING METHODS ---- //
@@ -926,7 +935,7 @@ public abstract class AbstractDatabase implements Database {
      * Tags the database changelog with the given string.
      */
     public void tag(String tagString) throws JDBCException {
-        Connection conn = getConnection();
+        DatabaseConnection conn = getConnection();
         PreparedStatement stmt = null;
         Statement countStatement = null;
         ResultSet countRS;

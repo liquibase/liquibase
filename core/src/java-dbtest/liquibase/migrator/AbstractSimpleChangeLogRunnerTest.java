@@ -1,7 +1,8 @@
 package liquibase.migrator;
 
-import junit.framework.TestCase;
+import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
+import liquibase.database.SQLConnectionDelegate;
 import liquibase.database.structure.DatabaseSnapshot;
 import liquibase.migrator.diff.Diff;
 import liquibase.migrator.diff.DiffResult;
@@ -19,6 +20,8 @@ import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import junit.framework.TestCase;
 
 public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
 
@@ -52,7 +55,6 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
         info.put("password", password);
         connection = driver.connect(url, info);
         connection.setAutoCommit(false);
-
         createMigrator(completeChangeLog).forceReleaseLock();
     }
 
