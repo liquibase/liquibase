@@ -259,7 +259,7 @@ public class ChangeSet {
         }
 
         if (StringUtils.trimToNull(getComments()) != null) {
-            Element commentsElement = currentChangeLogDOM.createElement("comments");
+            Element commentsElement = currentChangeLogDOM.createElement("comment");
             Text commentsText = currentChangeLogDOM.createTextNode(getComments());
             commentsElement.appendChild(commentsText);
             node.appendChild(commentsElement);
