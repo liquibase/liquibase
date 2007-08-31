@@ -141,14 +141,14 @@ public abstract class BaseRefactorWizard extends Wizard {
 									.createElement("databaseChangeLog");
 							changeLogElement
 									.setAttribute("xmlns",
-											"http://www.liquibase.org/xml/ns/dbchangelog/1.1");
+											"http://www.liquibase.org/xml/ns/dbchangelog/1.2");
 							changeLogElement
 									.setAttribute("xmlns:xsi",
 											"http://www.w3.org/2001/XMLSchema-instance");
 							changeLogElement
 									.setAttribute(
 											"xsi:schemaLocation",
-											"http://www.liquibase.org/xml/ns/dbchangelog/1.1 http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.1.xsd");
+											"http://www.liquibase.org/xml/ns/dbchangelog/1.2 http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.2.xsd");
 
 							doc.appendChild(changeLogElement);
 						} else {

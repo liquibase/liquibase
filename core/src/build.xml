@@ -245,12 +245,12 @@ The available targets at the current stage:
         <copy todir="${release.site.dir}" filtering="true">
             <fileset dir="${src.dir}/site">
                 <include name="**/*.html"/>
+                <include name="**/*.htm"/>
             </fileset>
             <filterset>
                 <filter token="NAV.MAIN" value="${nav.main}"/>
                 <filter token="NAV.MANUAL" value="${nav.manual}"/>
                 <filter token="NAV.IDE" value="${nav.ide}"/>
-                <filter token="NAV.NEWS" value="${nav.news}"/>
                 <filter token="ANALYTICS" value="${analytics}"/>
                 <filter token="BUILD.VERSION" value="${build.version}"/>
             </filterset>
@@ -258,7 +258,8 @@ The available targets at the current stage:
 
         <copy todir="${release.site.dir}">
             <fileset dir="${src.dir}/site">
-                <exclude name="*.html"/>
+                <exclude name="**/*.html"/>
+                <exclude name="**/*.wnk"/>
             </fileset>
         </copy>
         <copy todir="${release.site.dir}/xml/ns/dbchangelog">
