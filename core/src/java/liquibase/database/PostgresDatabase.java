@@ -148,7 +148,7 @@ public class PostgresDatabase extends AbstractDatabase {
     }
 
     public void dropDatabaseObjects() throws JDBCException {
-        Connection conn = getConnection();
+        DatabaseConnection conn = getConnection();
         Statement dropStatement = null;
         try {
             dropStatement = conn.createStatement();
@@ -187,7 +187,7 @@ public class PostgresDatabase extends AbstractDatabase {
     }
 
     @Override
-    protected void dropSequences(Connection conn) throws JDBCException {
+    protected void dropSequences(DatabaseConnection conn) throws JDBCException {
     }
 
 //    public boolean isSystemIndex(String catalogName, String schemaName, String indexName) {

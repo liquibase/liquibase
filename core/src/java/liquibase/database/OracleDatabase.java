@@ -137,7 +137,7 @@ public class OracleDatabase extends AbstractDatabase {
         return "DROP TABLE " + tableName + " CASCADE CONSTRAINTS";
     }
 
-    protected void dropSequences(Connection conn) throws JDBCException {
+    protected void dropSequences(DatabaseConnection conn) throws JDBCException {
         ResultSet rs = null;
         Statement selectStatement = null;
         Statement dropStatement = null;

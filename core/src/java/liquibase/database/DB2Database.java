@@ -115,7 +115,7 @@ public class DB2Database extends AbstractDatabase {
         return "TIMESTAMP";
     }
 
-    protected void dropSequences(Connection conn) throws JDBCException {
+    protected void dropSequences(DatabaseConnection conn) throws JDBCException {
         ResultSet rs = null;
         Statement selectStatement = null;
         Statement dropStatement = null;

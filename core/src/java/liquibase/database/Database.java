@@ -20,9 +20,11 @@ public interface Database {
      */
     String getDefaultDriver(String url);
 
-    Connection getConnection();
+    DatabaseConnection getConnection();
 
     void setConnection(Connection conn);
+    
+    void setConnection(DatabaseConnection conn);
     
     /**
      * Auto-commit mode to run in

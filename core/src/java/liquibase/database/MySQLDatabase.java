@@ -96,7 +96,7 @@ public class MySQLDatabase extends AbstractDatabase {
         return returnString.toString().replaceFirst(", $", ")");
     }
 
-    protected void dropForeignKeys(Connection conn) throws JDBCException {
+    protected void dropForeignKeys(DatabaseConnection conn) throws JDBCException {
         Statement dropStatement = null;
         PreparedStatement fkStatement = null;
         ResultSet rs = null;
@@ -139,7 +139,7 @@ public class MySQLDatabase extends AbstractDatabase {
     }
 
     @Override
-    protected void dropSequences(Connection conn) throws JDBCException {
+    protected void dropSequences(DatabaseConnection conn) throws JDBCException {
     }
 
 

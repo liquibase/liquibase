@@ -1,5 +1,6 @@
 package liquibase.migrator;
 
+import liquibase.database.DatabaseConnection;
 import liquibase.migrator.change.Change;
 import liquibase.migrator.exception.MigrationFailedException;
 import liquibase.migrator.exception.RollbackFailedException;
@@ -7,13 +8,13 @@ import liquibase.migrator.exception.SetupException;
 import liquibase.util.MD5Util;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Text;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.*;
@@ -106,7 +107,7 @@ public class ChangeSet {
         }
         
         Migrator migrator = getDatabaseChangeLog().getMigrator();
-        Connection connection = migrator.getDatabase().getConnection();
+        DatabaseConnection connection = migrator.getDatabase().getConnection();
         try {
             Writer outputSQLWriter = getDatabaseChangeLog().getMigrator().getOutputSQLWriter();
             if (migrator.getMode().equals(Migrator.Mode.EXECUTE_MODE)) {

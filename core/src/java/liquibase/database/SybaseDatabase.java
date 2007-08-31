@@ -22,7 +22,7 @@ public class SybaseDatabase extends MSSQLDatabase {
     }
     
     public void setConnection(Connection connection) {
-        super.setConnection(new SybaseConnection(connection));
+        super.setConnection(new SybaseConnectionDelegate(connection));
     }
 
     public String getDefaultDriver(String url) {
@@ -69,7 +69,7 @@ public class SybaseDatabase extends MSSQLDatabase {
      * 
      */
     public void dropDatabaseObjects() throws JDBCException {
-        Connection conn = getConnection();
+        DatabaseConnection conn = getConnection();
         try {
             //dropForeignKeys(conn);
             dropViews(conn);

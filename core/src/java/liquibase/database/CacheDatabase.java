@@ -88,7 +88,7 @@ public class CacheDatabase extends AbstractDatabase {
     }
 
     @Override
-    protected void dropSequences(Connection conn) throws JDBCException {
+    protected void dropSequences(DatabaseConnection conn) throws JDBCException {
 
     }
 

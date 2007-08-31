@@ -1,16 +1,20 @@
 package liquibase.migrator;
 
+import liquibase.database.DatabaseConnection;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
+import liquibase.database.SQLConnectionDelegate;
 import liquibase.migrator.exception.*;
 import liquibase.migrator.parser.*;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
+
 import org.xml.sax.*;
 
-import javax.swing.*;
+import javax.swing.JOptionPane;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Writer;
@@ -619,7 +623,7 @@ public class Migrator {
                 try {
                     log.info("Updating NULL md5sum for " + changeSet.toString());
                     Migrator migrator = changeSet.getDatabaseChangeLog().getMigrator();
-                    Connection connection = migrator.getDatabase().getConnection();
+                    DatabaseConnection connection = migrator.getDatabase().getConnection();
                     PreparedStatement updatePstmt = connection.prepareStatement("update DatabaseChangeLog set md5sum=? where id=? AND author=? AND filename=?".toUpperCase());
                     updatePstmt.setString(1, changeSet.getMd5sum());
                     updatePstmt.setString(2, changeSet.getId());
@@ -696,7 +700,7 @@ public class Migrator {
 
         Writer sqlOutputWriter = getOutputSQLWriter();
         if (sqlOutputWriter == null) {
-            Connection connection = getDatabase().getConnection();
+            DatabaseConnection connection = getDatabase().getConnection();
             try {
                 Statement statement = connection.createStatement();
                 statement.executeUpdate(sql);
@@ -722,7 +726,7 @@ public class Migrator {
 
         Writer sqlOutputWriter = getOutputSQLWriter();
         if (sqlOutputWriter == null) {
-            Connection connection = getDatabase().getConnection();
+            DatabaseConnection connection = getDatabase().getConnection();
             try {
                 Statement statement = connection.createStatement();
                 statement.executeUpdate(sql);
@@ -744,7 +748,7 @@ public class Migrator {
 
         Writer sqlOutputWriter = getOutputSQLWriter();
         if (sqlOutputWriter == null) {
-            Connection connection = getDatabase().getConnection();
+            DatabaseConnection connection = getDatabase().getConnection();
             try {
                 Statement statement = connection.createStatement();
                 statement.executeUpdate(sql);
@@ -774,7 +778,7 @@ public class Migrator {
      * Sets checksums to null so they will be repopulated next run
      */
     public void clearCheckSums() throws JDBCException {
-        Connection connection = getDatabase().getConnection();
+        DatabaseConnection connection = getDatabase().getConnection();
         try {
             Statement statement = null;
             try {

@@ -2,6 +2,7 @@ package liquibase.migrator.diff;
 
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
+import liquibase.database.SQLConnectionDelegate;
 import liquibase.database.structure.*;
 import liquibase.migrator.exception.JDBCException;
 

@@ -1,9 +1,14 @@
 package liquibase.database;
 
-import liquibase.migrator.change.ColumnConfig;
-import static org.easymock.EasyMock.*;
+import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.expectLastCall;
+import static org.easymock.EasyMock.replay;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+
+import liquibase.migrator.change.ColumnConfig;
+
 import org.junit.Test;
 
 import java.sql.Connection;
@@ -133,7 +138,7 @@ public abstract class AbstractDatabaseTest {
     public void isCorrectDatabaseImplementation() throws Exception {
         assertTrue(getDatabase().isCorrectDatabaseImplementation(getMockConnection()));
     }
-
+    
     protected Connection getMockConnection() throws SQLException {
         Connection conn = createMock(Connection.class);
         DatabaseMetaData metaData = createMock(DatabaseMetaData.class);
