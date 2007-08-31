@@ -11,6 +11,7 @@
 
    <windowImages/>
 
+
    <launcher name="liquibase">
       <linux icon="/org.liquibase.rcp/icons/alt_launcher.xpm"/>
       <macosx icon="/org.liquibase.rcp/icons/alt_launcher.icns"/>
@@ -168,7 +169,7 @@
    </plugins>
 
    <features>
-      <feature id="org.liquibase.rcp.feature" version="0.5.0"/>
+      <feature id="org.liquibase.rcp.feature" version="0.6.0"/>
    </features>
 
 </product>
