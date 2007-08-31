@@ -836,14 +836,6 @@ changes and refactorings
          unpack="false"/>
 
    <plugin
-         id="org.eclipse.swt.win32.win32.x86"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
          id="org.eclipse.text"
          download-size="0"
          install-size="0"

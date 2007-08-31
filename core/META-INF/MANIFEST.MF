@@ -28,3 +28,4 @@ Bundle-ClassPath: .,
  lib-compile/ant-1.6.5.jar,
  lib-compile/jsdk-2.4.jar,
  lib-compile/maven-core-2.0.6-uber.jar
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
