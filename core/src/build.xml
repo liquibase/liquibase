@@ -397,7 +397,36 @@ urchinTracker();
             <report format="frames" todir="${reports.dir}/junit-report/${ant.project.name}"/>
         </junitreport>
     </target>
-
+	<!--
+		Runs generic integration tests which do not require any database setup locally.
+		These should be run before committing any changes to check to make sure liquibase as a whole is still running.
+	 -->
+	<target name="test-int-generic" description="Integration tests that can be run on any computer without any setup" depends="prepare,compile">
+		<mkdir dir="${reports.dir}/junit/"/>
+		<mkdir dir="${reports.dir}/junit/${ant.project.name}/"/>
+		<junit printsummary="yes" haltonfailure="yes" fork="yes" forkmode="once" reloading="false"
+               failureproperty="unit.tests.failed"
+               jvm="${java.home}/bin/java">
+            <env key="JAVA_HOME" path="${env.JAVA_HOME}"/>
+            <classpath>
+                <pathelement path="${build.dir}"/>
+                <pathelement path="${build.db.test.dir}"/>
+                <path refid="classpath"/>
+            </classpath>
+            <formatter type="xml"/>
+            <batchtest todir="${reports.dir}/junit/${ant.project.name}">
+                <fileset dir="${build.db.test.dir}">
+                    <include name="**/DerbySampleChangeLogRunnerTest.class"/>
+                	<include name="**/H2SampleChangeLogRunnerTest.class"/>
+                    <include name="**/HsqlSampleChangeLogRunnerTest.class"/>
+                </fileset>
+            </batchtest>
+        </junit>
+	</target>
+	
+	<target name="continuous-build" description="Used by the continuous build server and runs the generic tests"
+		depends="prepare,compile,test,test-int-generic"/>
+	
 	<!-- target: ALL -->
     <target name="all" depends="prepare">
         <antcall target="clean" inheritAll="true" inheritRefs="true"/>
