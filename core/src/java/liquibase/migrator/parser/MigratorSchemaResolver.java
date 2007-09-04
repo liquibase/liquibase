@@ -20,6 +20,11 @@ public class MigratorSchemaResolver implements EntityResolver {
                 String xsdFile = systemId.substring(iSlash + 1);
                 try {
                     InputStream resourceAsStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(SEARCH_PACKAGE + xsdFile);
+
+                    if (resourceAsStream == null) {
+                       resourceAsStream = this.getClass().getClassLoader().getResourceAsStream(SEARCH_PACKAGE + xsdFile);
+                    }
+
                     if (resourceAsStream == null) {
                         return null;
                     }
@@ -29,7 +34,7 @@ public class MigratorSchemaResolver implements EntityResolver {
                     return source;
                 }
                 catch (Exception ex) {
-                    return null;    // We don't have the schema, try the network 
+                    return null;    // We don't have the schema, try the network
                 }
             }
         }
