@@ -194,4 +194,9 @@ public class PostgresDatabase extends AbstractDatabase {
 //        return super.isSystemIndex(catalogName, schemaName, indexName)
 //                || indexName.endsWith("_pkey");
 //    }
+
+    public boolean supportsTablespaces() {
+        return true;
+    }
+
 }

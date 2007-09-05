@@ -2,6 +2,8 @@ package liquibase.migrator.change;
 
 import liquibase.database.Database;
 import liquibase.database.SybaseDatabase;
+import liquibase.database.MSSQLDatabase;
+import liquibase.database.DB2Database;
 import liquibase.migrator.exception.UnsupportedChangeException;
 import liquibase.util.StringUtils;
 import org.w3c.dom.Document;
@@ -16,6 +18,7 @@ public class CreateTableChange extends AbstractChange {
 
     private List<ColumnConfig> columns;
     private String tableName;
+    private String tablespace;
 
     public CreateTableChange() {
         super("createTable", "Create Table");
@@ -52,7 +55,7 @@ public class CreateTableChange extends AbstractChange {
                     || column.getDefaultValueNumeric() != null) {
                 buffer.append(" DEFAULT ").append(column.getDefaultColumnValue(database));
             }
-            
+
             if (column.isAutoIncrement() != null && column.isAutoIncrement()) {
                 buffer.append(" ").append(database.getAutoIncrementClause()).append(" ");
             }
@@ -61,9 +64,9 @@ public class CreateTableChange extends AbstractChange {
                 if (constraints.isNullable() != null && !constraints.isNullable()) {
                     buffer.append(" NOT NULL");
                 } else {
-                	if(database instanceof SybaseDatabase) {
-                		buffer.append(" NULL");
-                	}
+                    if (database instanceof SybaseDatabase) {
+                        buffer.append(" NULL");
+                    }
                 }
                 if (pkColumns.size() == 1 && constraints.isPrimaryKey() != null && constraints.isPrimaryKey()) {
                     buffer.append(" PRIMARY KEY");
@@ -104,13 +107,23 @@ public class CreateTableChange extends AbstractChange {
         }
         buffer.append(")");
 
+        if (StringUtils.trimToNull(tablespace) != null && database.supportsTablespaces()) {
+            if (database instanceof MSSQLDatabase) {
+                buffer.append(" ON ").append(tablespace);
+            } else if (database instanceof DB2Database) {
+                buffer.append(" IN ").append(tablespace);
+            } else {
+                buffer.append(" TABLESPACE ").append(tablespace);
+            }
+        }
+
         List<String> statements = new ArrayList<String>();
         statements.add(buffer.toString().trim());
 
         if (pkColumns.size() > 1) {
             AddPrimaryKeyChange addPKChange = new AddPrimaryKeyChange();
             addPKChange.setTableName(getTableName());
-            addPKChange.setConstraintName(("PK_"+getTableName()).toUpperCase());
+            addPKChange.setConstraintName(("PK_" + getTableName()).toUpperCase());
             addPKChange.setColumnNames(StringUtils.join(pkColumns, ","));
 
             statements.addAll(Arrays.asList(addPKChange.generateStatements(database)));
@@ -144,6 +157,15 @@ public class CreateTableChange extends AbstractChange {
         this.tableName = tableName;
     }
 
+
+    public String getTablespace() {
+        return tablespace;
+    }
+
+    public void setTablespace(String tablespace) {
+        this.tablespace = tablespace;
+    }
+
     public void addColumn(ColumnConfig column) {
         columns.add(column);
     }
@@ -156,6 +178,9 @@ public class CreateTableChange extends AbstractChange {
     public Element createNode(Document currentChangeLogFileDOM) {
         Element element = currentChangeLogFileDOM.createElement("createTable");
         element.setAttribute("tableName", getTableName());
+        if (StringUtils.trimToNull(tablespace) != null) {
+            element.setAttribute("tablespace", tablespace);
+        }
         for (ColumnConfig column : getColumns()) {
             element.appendChild(column.createNode(currentChangeLogFileDOM));
         }

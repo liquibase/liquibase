@@ -93,4 +93,7 @@ public class CacheDatabase extends AbstractDatabase {
     }
 
 
+    public boolean supportsTablespaces() {
+        return false;
+    }
 }

@@ -95,4 +95,9 @@ public class SybaseDatabase extends MSSQLDatabase {
         return "Adaptive Server Enterprise".equals(dbProductName) ||
             "sql server".equals(dbProductName);
     }
+
+    public boolean supportsTablespaces() {
+        return true;
+    }
+
 }

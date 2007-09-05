@@ -96,4 +96,8 @@ public class DerbyDatabase extends AbstractDatabase {
     @Override
     protected void dropSequences(DatabaseConnection conn) throws JDBCException {
     }
+
+    public boolean supportsTablespaces() {
+        return false;
+    }
 }

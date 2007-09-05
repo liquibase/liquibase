@@ -166,4 +166,9 @@ public class HsqlDatabase extends AbstractDatabase {
             }
         }
     }
+
+    public boolean supportsTablespaces() {
+        return false;
+    }
+
 }

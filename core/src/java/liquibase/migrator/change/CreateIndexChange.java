@@ -1,7 +1,10 @@
 package liquibase.migrator.change;
 
 import liquibase.database.Database;
+import liquibase.database.MSSQLDatabase;
+import liquibase.database.DB2Database;
 import liquibase.migrator.exception.UnsupportedChangeException;
+import liquibase.util.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -16,6 +19,7 @@ public class CreateIndexChange extends AbstractChange {
 
     private String tableName;
     private String indexName;
+    private String tablespace;
     private List<ColumnConfig> columns;
 
 
@@ -52,6 +56,15 @@ public class CreateIndexChange extends AbstractChange {
         columns.add(column);
     }
 
+
+    public String getTablespace() {
+        return tablespace;
+    }
+
+    public void setTablespace(String tablespace) {
+        this.tablespace = tablespace;
+    }
+
     public String[] generateStatements(Database database) throws UnsupportedChangeException {
         StringBuffer buffer = new StringBuffer();
         buffer.append("CREATE INDEX ");
@@ -66,6 +79,16 @@ public class CreateIndexChange extends AbstractChange {
             }
         }
         buffer.append(")");
+
+        if (StringUtils.trimToNull(tablespace) != null && database.supportsTablespaces()) {
+            if (database instanceof MSSQLDatabase) {
+                buffer.append(" ON ").append(tablespace);
+            } else if (database instanceof DB2Database) {
+                // cannot add indexes to tablespace in DB2
+            } else {
+                buffer.append(" TABLESPACE ").append(tablespace);
+            }
+        }
         return new String []{buffer.toString()};
     }
 
