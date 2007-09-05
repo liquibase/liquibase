@@ -56,4 +56,8 @@ public class H2Database extends HsqlDatabase {
         }
 
     }
+
+    public boolean supportsTablespaces() {
+        return false;
+    }
 }

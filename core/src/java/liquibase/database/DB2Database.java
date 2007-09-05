@@ -162,4 +162,9 @@ public class DB2Database extends AbstractDatabase {
         return super.shouldQuoteValue(value)
                 && !value.startsWith("\"SYSIBM\"");
     }
+
+
+    public boolean supportsTablespaces() {
+        return true;
+    }
 }

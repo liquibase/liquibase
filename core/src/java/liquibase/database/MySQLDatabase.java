@@ -142,5 +142,8 @@ public class MySQLDatabase extends AbstractDatabase {
     protected void dropSequences(DatabaseConnection conn) throws JDBCException {
     }
 
+    public boolean supportsTablespaces() {
+        return false;
+    }
 
 }

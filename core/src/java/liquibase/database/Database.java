@@ -130,4 +130,6 @@ public interface Database {
     String createFindSequencesSQL() throws JDBCException;
 
     boolean shouldQuoteValue(String value);
+
+    boolean supportsTablespaces();
 }

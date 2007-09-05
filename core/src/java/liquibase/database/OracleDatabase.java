@@ -197,4 +197,9 @@ public class OracleDatabase extends AbstractDatabase {
     public boolean shouldQuoteValue(String value) {
         return super.shouldQuoteValue(value) && !value.startsWith("to_date(");
     }
+
+    public boolean supportsTablespaces() {
+        return true;
+    }
+
 }

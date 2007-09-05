@@ -193,4 +193,9 @@ public class MSSQLDatabase extends AbstractDatabase {
 //        }
 //
 //    }
+
+    public boolean supportsTablespaces() {
+        return true;
+    }
+
 }
