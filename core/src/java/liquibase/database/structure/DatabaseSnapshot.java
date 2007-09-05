@@ -280,6 +280,7 @@ public class DatabaseSnapshot {
                 short type = rs.getShort("TYPE");
                 String tableName = rs.getString("TABLE_NAME");
                 String columnName = rs.getString("COLUMN_NAME");
+                short position = rs.getShort("ORDINAL_POSITION");
 
                 if (type == DatabaseMetaData.tableIndexStatistic) {
                     continue;
@@ -298,7 +299,7 @@ public class DatabaseSnapshot {
                     indexInformation.setName(indexName);
                     indexMap.put(indexName, indexInformation);
                 }
-                indexInformation.getColumns().add(columnName);
+                indexInformation.getColumns().add(position-1, columnName);
             }
             for (String key : indexMap.keySet()) {
                 indexes.add(indexMap.get(key));
@@ -331,11 +332,12 @@ public class DatabaseSnapshot {
             while (rs.next()) {
                 String tableName = rs.getString("TABLE_NAME");
                 String columnName = rs.getString("COLUMN_NAME");
+                short position = rs.getShort("KEY_SEQ");
 
                 boolean foundExistingPK = false;
                 for (PrimaryKey pk : foundPKs) {
                     if (pk.getTableName().equals(tableName)) {
-                        pk.addColumnName(columnName);
+                        pk.addColumnName(position-1, columnName);
 
                         foundExistingPK = true;
                     }
@@ -344,7 +346,7 @@ public class DatabaseSnapshot {
                 if (!foundExistingPK) {
                     PrimaryKey primaryKey = new PrimaryKey();
                     primaryKey.setTableName(tableName);
-                    primaryKey.addColumnName(columnName);
+                    primaryKey.addColumnName(position-1, columnName);
                     primaryKey.setName(rs.getString("PK_NAME"));
 
                     foundPKs.add(primaryKey);
