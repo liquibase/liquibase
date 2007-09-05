@@ -25,8 +25,12 @@ public class PrimaryKey implements Comparable<PrimaryKey> {
         return StringUtils.join(columnNames, ", ");
     }
 
-    public void addColumnName(String columnName) {
-        this.columnNames.add(columnName);
+    public void addColumnName(int position, String columnName) {
+        if (position > columnNames.size()) {
+            columnNames.add(columnName);
+        } else {
+            this.columnNames.add(position, columnName);
+        }
     }
 
     public String getTableName() {

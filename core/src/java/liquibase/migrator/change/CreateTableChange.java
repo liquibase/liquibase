@@ -27,7 +27,7 @@ public class CreateTableChange extends AbstractChange {
 
     public String[] generateStatements(Database database) throws UnsupportedChangeException {
 
-        Set<String> pkColumns = new HashSet<String>();
+        List<String> pkColumns = new ArrayList<String>();
 
         for (ColumnConfig column : getColumns()) {
             if (column.getConstraints() != null && column.getConstraints().isPrimaryKey() != null && column.getConstraints().isPrimaryKey()) {
@@ -42,7 +42,7 @@ public class CreateTableChange extends AbstractChange {
         buffer.append("(");
         Iterator<ColumnConfig> iterator = getColumns().iterator();
         while (iterator.hasNext()) {
-            ColumnConfig column = (ColumnConfig) iterator.next();
+            ColumnConfig column = iterator.next();
             ConstraintsConfig constraints = column.getConstraints();
             buffer.append(column.getName());
             if (column.getType() != null) {
