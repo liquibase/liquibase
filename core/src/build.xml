@@ -413,6 +413,7 @@ urchinTracker();
                 <pathelement path="${build.db.test.dir}"/>
                 <path refid="classpath"/>
             </classpath>
+			<formatter type="brief" usefile="false" />
             <formatter type="xml"/>
             <batchtest todir="${reports.dir}/junit/${ant.project.name}">
                 <fileset dir="${build.db.test.dir}">
