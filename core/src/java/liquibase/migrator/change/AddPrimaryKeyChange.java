@@ -2,7 +2,9 @@ package liquibase.migrator.change;
 
 import liquibase.database.DB2Database;
 import liquibase.database.Database;
+import liquibase.database.MSSQLDatabase;
 import liquibase.migrator.exception.UnsupportedChangeException;
+import liquibase.util.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -12,6 +14,7 @@ import org.w3c.dom.Element;
 public class AddPrimaryKeyChange extends AbstractChange {
 
     private String tableName;
+    private String tablespace;
     private String columnNames;
     private String constraintName;
 
@@ -43,12 +46,31 @@ public class AddPrimaryKeyChange extends AbstractChange {
         this.constraintName = constraintName;
     }
 
+
+    public String getTablespace() {
+        return tablespace;
+    }
+
+    public void setTablespace(String tablespace) {
+        this.tablespace = tablespace;
+    }
+
     public String[] generateStatements(Database database) throws UnsupportedChangeException {
         String sql;
         if (getConstraintName() == null) {
             sql = "ALTER TABLE " + getTableName() + " ADD PRIMARY KEY (" + getColumnNames() + ")";
         } else {
             sql = "ALTER TABLE " + getTableName() + " ADD CONSTRAINT " + getConstraintName() + " PRIMARY KEY (" + getColumnNames() + ")";
+        }
+
+        if (StringUtils.trimToNull(getTablespace()) != null && database.supportsTablespaces()) {
+            if (database instanceof MSSQLDatabase) {
+                sql += " ON "+getTablespace();
+            } else if (database instanceof DB2Database) {
+                ; //not supported in DB2
+            } else {
+                sql += " USING INDEX TABLESPACE "+getTablespace();
+            }
         }
 
         if (database instanceof DB2Database) {
