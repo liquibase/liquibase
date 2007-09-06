@@ -101,13 +101,21 @@
     </changeSet>
 
     <changeSet id="tablespace-test1" author="alan">
-        <comment>Test tablespace support.  Ignored if database does not support tablespaces</comment>
+        <comment>Test tablespace support. Ignored if database does not support tablespaces</comment>
         <createTable tableName="TABLESPACE_TEST_TABLE" tablespace="liquibase2">
-            <column name="id" type="int"/>
+            <column name="id" type="int">
+                <constraints nullable="false"/>
+            </column>
             <column name="name" type="varchar(255)"/>
+            <column name="username" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
         </createTable>
         <createIndex indexName="tablespace_index_test" tableName="TABLESPACE_TEST_TABLE" tablespace="liquibase2">
             <column name="id"/>
         </createIndex>
+        <addPrimaryKey tableName="TABLESPACE_TEST_TABLE" columnNames="id" constraintName="pk_tablespacetest"
+                       tablespace="liquibase2"/>
+        <addUniqueConstraint tableName="TABLESPACE_TEST_TABLE" columnNames="username" constraintName="uq_tbsptest_usern" tablespace="liquibase2"/>        
     </changeSet>
 </databaseChangeLog>

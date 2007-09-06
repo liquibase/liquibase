@@ -1,7 +1,10 @@
 package liquibase.migrator.change;
 
 import liquibase.database.Database;
+import liquibase.database.MSSQLDatabase;
+import liquibase.database.DB2Database;
 import liquibase.migrator.exception.UnsupportedChangeException;
+import liquibase.util.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -13,6 +16,7 @@ public class AddUniqueConstraintChange extends AbstractChange {
     private String tableName;
     private String columnNames;
     private String constraintName;
+    private String tablespace;
 
     public AddUniqueConstraintChange() {
         super("addUniqueConstraint", "Add Unique Constraint");
@@ -42,9 +46,31 @@ public class AddUniqueConstraintChange extends AbstractChange {
         this.constraintName = constraintName;
     }
 
+
+    public String getTablespace() {
+        return tablespace;
+    }
+
+    public void setTablespace(String tablespace) {
+        this.tablespace = tablespace;
+    }
+
     public String[] generateStatements(Database database) throws UnsupportedChangeException {
+        String sql = "ALTER TABLE " + getTableName() + " ADD CONSTRAINT " + getConstraintName() + " UNIQUE (" + getColumnNames() + ")";
+
+        if (StringUtils.trimToNull(getTablespace()) != null && database.supportsTablespaces()) {
+            if (database instanceof MSSQLDatabase) {
+                sql += " ON "+getTablespace();
+            } else if (database instanceof DB2Database) {
+                ; //not supported in DB2
+            } else {
+                sql += " USING INDEX TABLESPACE "+getTablespace();
+            }
+        }
+        
+
         return new String[]{
-                "ALTER TABLE " + getTableName() + " ADD CONSTRAINT " + getConstraintName() + " UNIQUE (" + getColumnNames() + ")"
+                sql
         };
     }
 

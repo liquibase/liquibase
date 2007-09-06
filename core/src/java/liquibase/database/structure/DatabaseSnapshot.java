@@ -270,7 +270,7 @@ public class DatabaseSnapshot {
         for (Table table : tablesMap.values()) {
             ResultSet rs;
             try {
-                rs = databaseMetaData.getIndexInfo(database.getCatalogName(), database.getSchemaName(), table.getName(), true, true);
+                rs = databaseMetaData.getIndexInfo(database.getCatalogName(), database.getSchemaName(), table.getName(), false, true);
             } catch (SQLException e) {
                 throw e;
             }
