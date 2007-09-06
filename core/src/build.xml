@@ -296,18 +296,20 @@ The available targets at the current stage:
                 useexternalfile="yes"
                 breakiterator="yes">
 
-            <fileset dir="${src.dir}/java" defaultexcludes="yes"/>
+            <fileset dir="${src.dir}/java" defaultexcludes="yes">
+                <include name="**/*.java"/>
+            </fileset>
             <classpath refid="classpath"/>
-            <bottom><![CDATA[
-<i>Copyright &#169; 2006-2007 Sundog. All Rights Reserved.</i>
-<script src="http://www.google-analytics.com/urchin.js" type="text/javascript">
-</script>
-<script type="text/javascript">
-_uacct = "UA-1719178-1";
-urchinTracker();
-</script>
-            ]]>
-            </bottom>
+            <!--<bottom><![CDATA[-->
+<!--<i>Copyright &#169; 2006-2007 Sundog. All Rights Reserved.</i>-->
+<!--<script src="http://www.google-analytics.com/urchin.js" type="text/javascript">-->
+<!--</script>-->
+<!--<script type="text/javascript">-->
+<!--_uacct = "UA-1719178-1";-->
+<!--urchinTracker();-->
+<!--</script>-->
+            <!--]]>-->
+            <!--</bottom>-->
         </javadoc>
     </target>
 
