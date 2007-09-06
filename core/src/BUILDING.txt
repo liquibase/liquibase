@@ -1,0 +1,23 @@
+LiquiBase core is currently built using Ant.
+
+The main end-builder Ant targets are:
+
+  package:          builds the output artifacts (*.jar, *.zip, *.tar.gz). Both sources
+                    and binary artifacts are packaged, including jdk1.4 targeted ones
+
+  compile:          compiles the sources (1.5 bytecode)
+
+  clean:            cleans the output folders and all the previously generated artifacts
+
+  site:             builds the project's site from static resources (*.html)
+
+  test:             executes the unit tests
+
+  test-int:         executes the integration tests (requires a running accesible db runtime)
+
+  all (default):    performs a complete build of the project
+
+
+If you wish to override any of the standard build properties for your paticular environment,
+please create a build.local.properties file in src and do not check it into SVN
+(it should already be marked as SVN ignore).
