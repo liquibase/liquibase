@@ -1,13 +1,12 @@
 package liquibase.database;
 
 import liquibase.migrator.exception.JDBCException;
-import liquibase.migrator.exception.MigrationFailedException;
 import liquibase.util.ISODateFormat;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
-import java.sql.Statement;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -171,4 +170,8 @@ public class HsqlDatabase extends AbstractDatabase {
         return false;
     }
 
+
+    public void setConnection(Connection conn) {
+        super.setConnection(new HSQLConnectionDelegate(conn));
+    }
 }
