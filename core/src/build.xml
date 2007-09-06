@@ -35,6 +35,7 @@ The available targets at the current stage:
 
 <project name="liquibase" default="all">
 
+    <property file="build.local.properties"/>
     <property file="build.properties"/>
 
 	<!-- target: PREPARE -->
@@ -311,7 +312,7 @@ urchinTracker();
     </target>
 
 	<!-- target: DOXYGEN -->
-    <target name="doxygen" depends="prepare">
+    <target name="doxygen" depends="prepare" if="run.doxygen">
         <taskdef name="doxygen" classname="org.doxygen.tools.DoxygenTask">
             <classpath>
                 <fileset dir="${lib.dir}">
