@@ -172,6 +172,6 @@ public class HsqlDatabase extends AbstractDatabase {
 
 
     public void setConnection(Connection conn) {
-        super.setConnection(new HSQLConnectionDelegate(conn));
+        super.setConnection(new HsqlConnectionDelegate(conn));
     }
 }
