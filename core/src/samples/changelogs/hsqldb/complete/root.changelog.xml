@@ -186,7 +186,8 @@
         <addForeignKeyConstraint
                 baseTableName="person" baseColumnNames="employer_id"
                 constraintName="fk_person_employer"
-                referencedTableName="company" referencedColumnNames="id"/>
+                referencedTableName="company" referencedColumnNames="id"
+                deleteCascade="true"/>
     </changeSet>
 
     <changeSet id="24" author="nvoxland">

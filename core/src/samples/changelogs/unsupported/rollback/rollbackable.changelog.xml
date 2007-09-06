@@ -49,7 +49,8 @@
         <addForeignKeyConstraint
                 baseTableName="article" baseColumnNames="publication_id"
                 constraintName="fk_article_publication"
-                referencedTableName="magazine" referencedColumnNames="id"/>
+                referencedTableName="magazine" referencedColumnNames="id"
+                deleteCascade="true"/>
     </changeSet>
 
     <changeSet id="15" author="nvoxland">

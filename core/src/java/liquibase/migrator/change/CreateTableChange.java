@@ -80,6 +80,11 @@ public class CreateTableChange extends AbstractChange {
                             .append(") REFERENCES ")
                             .append(constraints.getReferences());
 
+                    if (constraints.isDeleteCascade() != null && constraints.isDeleteCascade()) {
+                        fkConstraints.append(" ON DELETE CASCADE");
+                    }
+
+
                     if (constraints.isInitiallyDeferred() != null && constraints.isInitiallyDeferred()) {
                         fkConstraints.append(" INITIALLY DEFERRED");
                     }

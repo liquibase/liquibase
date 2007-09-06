@@ -77,7 +77,8 @@
         <addForeignKeyConstraint
                 baseTableName="article" baseColumnNames="publication_id"
                 constraintName="fk_article_publication"
-                referencedTableName="publication" referencedColumnNames="id"/>
+                referencedTableName="publication" referencedColumnNames="id"
+                deleteCascade="true"/>
     </changeSet>
 
     <!-- broken in derby 10.2.2 -->

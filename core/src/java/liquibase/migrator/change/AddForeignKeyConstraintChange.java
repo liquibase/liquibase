@@ -20,6 +20,8 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
     private Boolean deferrable;
     private Boolean initiallyDeferred;
 
+    private Boolean deleteCascade;
+
     public AddForeignKeyConstraintChange() {
         super("addForeignKeyConstraint", "Add Foreign Key Constraint");
     }
@@ -80,10 +82,24 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
         this.initiallyDeferred = initiallyDeferred;
     }
 
+
+    public Boolean getDeleteCascade() {
+        return deleteCascade;
+    }
+
+    public void setDeleteCascade(Boolean deleteCascade) {
+        this.deleteCascade = deleteCascade;
+    }
+
     public String[] generateStatements(Database database) throws UnsupportedChangeException {
         String[] statements = new String[]{
                 "ALTER TABLE " + getBaseTableName() + " ADD CONSTRAINT " + getConstraintName() + " FOREIGN KEY (" + getBaseColumnNames() + ") REFERENCES " + getReferencedTableName() + "(" + getReferencedColumnNames() + ")",
         };
+
+        if (deleteCascade != null && deleteCascade) {
+            statements[0] += " ON DELETE CASCADE";
+        }
+
         if (database.supportsInitiallyDeferrableColumns()) {
             if (deferrable != null && deferrable) {
                 statements[0] += " DEFERRABLE";
