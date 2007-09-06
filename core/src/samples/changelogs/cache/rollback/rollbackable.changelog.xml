@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <databaseChangeLog
-        xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.1"
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.3"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.1 http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.1.xsd">
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.3 http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.3.xsd">
     <preConditions>
             <dbms type="cache"/>
     </preConditions>
@@ -96,7 +96,8 @@
         <addForeignKeyConstraint
                 baseTableName="article" baseColumnNames="magazine_id"
                 constraintName="fk_article_magazine"
-                referencedTableName="magazine" referencedColumnNames="id"/>
+                referencedTableName="magazine" referencedColumnNames="id"
+                deleteCascade="true"/>
     </changeSet>
     <!-- Cache does not support lookup tables
     <changeSet id="13" author="nvoxland">

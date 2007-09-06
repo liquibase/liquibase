@@ -192,7 +192,8 @@
                 baseTableName="person" baseColumnNames="employer_id"
                 constraintName="fk_person_employer"
                 referencedTableName="company" referencedColumnNames="id"
-                deferrable="true" initiallyDeferred="true"/>
+                deferrable="true" initiallyDeferred="true"
+                deleteCascade="true"/>
     </changeSet>
 
     <changeSet id="26" author="nvoxland">

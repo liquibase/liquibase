@@ -221,6 +221,7 @@
         <xsd:attribute name="referencedColumnNames" type="xsd:string"/>
         <xsd:attribute name="deferrable" type="xsd:boolean"/>
         <xsd:attribute name="initiallyDeferred" type="xsd:boolean"/>
+        <xsd:attribute name="deleteCascade" type="xsd:boolean"/>
     </xsd:attributeGroup>
 
     <xsd:attributeGroup name="addNotNullConstraintAttrib">
