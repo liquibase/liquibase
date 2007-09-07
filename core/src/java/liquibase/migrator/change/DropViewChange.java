@@ -1,9 +1,15 @@
 package liquibase.migrator.change;
 
 import liquibase.database.Database;
+import liquibase.database.structure.DatabaseObject;
+import liquibase.database.structure.View;
 import liquibase.migrator.exception.UnsupportedChangeException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Drops an existing view.
@@ -39,4 +45,12 @@ public class DropViewChange extends AbstractChange {
 
         return element;
     }
+
+    public Set<DatabaseObject> getAffectedDatabaseObjects() {
+        View dbObject = new View();
+        dbObject.setName(viewName);
+
+        return new HashSet<DatabaseObject>(Arrays.asList(dbObject));
+    }
+
 }

@@ -1,9 +1,12 @@
 package liquibase.migrator.change;
 
-import liquibase.database.Database;
-import liquibase.database.SybaseDatabase;
-import liquibase.database.MSSQLDatabase;
 import liquibase.database.DB2Database;
+import liquibase.database.Database;
+import liquibase.database.MSSQLDatabase;
+import liquibase.database.SybaseDatabase;
+import liquibase.database.structure.Column;
+import liquibase.database.structure.DatabaseObject;
+import liquibase.database.structure.Table;
 import liquibase.migrator.exception.UnsupportedChangeException;
 import liquibase.util.StringUtils;
 import org.w3c.dom.Document;
@@ -190,5 +193,23 @@ public class CreateTableChange extends AbstractChange {
             element.appendChild(column.createNode(currentChangeLogFileDOM));
         }
         return element;
+    }
+
+    public Set<DatabaseObject> getAffectedDatabaseObjects() {
+        Set<DatabaseObject> returnSet = new HashSet<DatabaseObject>();
+
+        Table table = new Table();
+        table.setName(tableName);
+        returnSet.add(table);
+
+        for (ColumnConfig columnConfig : getColumns()) {
+            Column column = new Column();
+            column.setTable(table);
+            column.setName(columnConfig.getName());
+
+            returnSet.add(column);
+        }
+
+        return returnSet;
     }
 }

@@ -1,16 +1,17 @@
 package liquibase.migrator.change;
 
+import liquibase.database.DB2Database;
 import liquibase.database.Database;
 import liquibase.database.MSSQLDatabase;
-import liquibase.database.DB2Database;
+import liquibase.database.structure.DatabaseObject;
+import liquibase.database.structure.Index;
+import liquibase.database.structure.Table;
 import liquibase.migrator.exception.UnsupportedChangeException;
 import liquibase.util.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 /**
  * Creates an index on an existing column.
@@ -118,6 +119,17 @@ public class CreateIndexChange extends AbstractChange {
         }
 
         return element;
+    }
+
+    public Set<DatabaseObject> getAffectedDatabaseObjects() {
+        Index index = new Index();
+        index.setTableName(tableName);
+        index.setName(indexName);
+
+        Table table= new Table();
+        table.setName(tableName);
+        
+        return new HashSet<DatabaseObject>(Arrays.asList(index, table));
     }
 
 }

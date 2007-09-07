@@ -1,7 +1,6 @@
 package liquibase.migrator.commandline;
 
 import liquibase.database.DatabaseFactory;
-import liquibase.database.SQLConnectionDelegate;
 import liquibase.migrator.*;
 import liquibase.migrator.diff.Diff;
 import liquibase.migrator.diff.DiffResult;
@@ -12,7 +11,6 @@ import liquibase.migrator.exception.ValidationFailedException;
 import liquibase.util.StreamUtil;
 
 import javax.xml.parsers.ParserConfigurationException;
-
 import java.io.*;
 import java.lang.reflect.Field;
 import java.net.URL;
@@ -183,6 +181,7 @@ public class CommandLineMigrator {
                 || "diffChangeLog".equalsIgnoreCase(arg)
                 || "generateChangeLog".equalsIgnoreCase(arg)
                 || "clearCheckSums".equalsIgnoreCase(arg)
+                || "dbDoc".equalsIgnoreCase(arg)
                 || "changelogSyncSQL".equalsIgnoreCase(arg);
     }
 
@@ -587,6 +586,9 @@ public class CommandLineMigrator {
                 return;
             } else if ("clearCheckSums".equalsIgnoreCase(command)) {
                 migrator.clearCheckSums();
+                return;
+            } else if ("dbdoc".equalsIgnoreCase(command)) {
+                migrator.generateDocumentation();
                 return;
             }
 

@@ -1,6 +1,7 @@
 package liquibase.migrator.change;
 
 import liquibase.database.Database;
+import liquibase.database.structure.DatabaseObject;
 import liquibase.migrator.FileOpener;
 import liquibase.migrator.Migrator;
 import liquibase.migrator.exception.SetupException;
@@ -15,6 +16,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Set;
 import java.util.logging.Logger;
 
 /**
@@ -178,5 +180,10 @@ public class SQLFileChange extends AbstractChange {
 
     public String getConfirmationMessage() {
         return "SQL File " + file + " has been executed";
+    }
+
+
+    public Set<DatabaseObject> getAffectedDatabaseObjects() {
+        return null;
     }
 }

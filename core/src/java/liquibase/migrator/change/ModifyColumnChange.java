@@ -1,9 +1,16 @@
 package liquibase.migrator.change;
 
 import liquibase.database.*;
+import liquibase.database.structure.Column;
+import liquibase.database.structure.DatabaseObject;
+import liquibase.database.structure.Table;
 import liquibase.migrator.exception.UnsupportedChangeException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Modifies the data type of an existing column.
@@ -70,4 +77,16 @@ public class ModifyColumnChange extends AbstractChange {
 
         return node;
     }
+
+    public Set<DatabaseObject> getAffectedDatabaseObjects() {
+        Table table = new Table();
+        table.setName(this.getTableName());
+
+        Column column = new Column();
+        column.setTable(table);
+        column.setName(this.column.getName());
+
+        return new HashSet<DatabaseObject>(Arrays.asList(column));
+    }
+
 }

@@ -1,6 +1,6 @@
 package liquibase.database.structure;
 
-public class Sequence implements Comparable<Sequence> {
+public class Sequence implements DatabaseObject, Comparable<Sequence> {
     private String name;
 
 
@@ -24,11 +24,11 @@ public class Sequence implements Comparable<Sequence> {
 
         Sequence sequence = (Sequence) o;
 
-        return !(name != null ? !name.equals(sequence.name) : sequence.name != null);
+        return !(name != null ? !name.equalsIgnoreCase(sequence.name) : sequence.name != null);
 
     }
 
     public int hashCode() {
-        return (name != null ? name.hashCode() : 0);
+        return (name != null ? name.toUpperCase().hashCode() : 0);
     }
 }

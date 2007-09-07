@@ -1,8 +1,8 @@
 package liquibase.database;
 
-import java.sql.Connection;
-
 import liquibase.migrator.exception.JDBCException;
+
+import java.sql.Connection;
 
 public class CacheDatabase extends AbstractDatabase {
     public static final String PRODUCT_NAME = "cache";

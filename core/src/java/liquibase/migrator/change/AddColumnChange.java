@@ -1,13 +1,14 @@
 package liquibase.migrator.change;
 
 import liquibase.database.*;
+import liquibase.database.structure.Column;
+import liquibase.database.structure.DatabaseObject;
+import liquibase.database.structure.Table;
 import liquibase.migrator.exception.UnsupportedChangeException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 /**
  * Adds a column to an existing table.
@@ -155,5 +156,18 @@ public class AddColumnChange extends AbstractChange {
         node.appendChild(getColumn().createNode(currentChangeLogFileDOM));
 
         return node;
+    }
+
+    public Set<DatabaseObject> getAffectedDatabaseObjects() {
+        Column column = new Column();
+
+        Table table = new Table();
+        table.setName(tableName);
+        column.setTable(table);
+
+        column.setName(this.column.getName());
+
+        return new HashSet<DatabaseObject>(Arrays.asList(table, column));
+
     }
 }

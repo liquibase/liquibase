@@ -2,9 +2,14 @@ package liquibase.migrator.change;
 
 import liquibase.database.Database;
 import liquibase.database.MySQLDatabase;
+import liquibase.database.structure.DatabaseObject;
+import liquibase.database.structure.Table;
 import liquibase.migrator.exception.UnsupportedChangeException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Removes an existing unique constraint.
@@ -50,7 +55,19 @@ public class DropUniqueConstraintChange extends AbstractChange {
     public Element createNode(Document currentChangeLogFileDOM) {
         Element node = currentChangeLogFileDOM.createElement(getTagName());
         node.setAttribute("tableName", getTableName());
+        node.setAttribute("constraintName", constraintName);
         return node;
     }
 
+    public Set<DatabaseObject> getAffectedDatabaseObjects() {
+
+        Set<DatabaseObject> returnSet = new HashSet<DatabaseObject>();
+
+        Table table = new Table();
+        table.setName(tableName);
+        returnSet.add(table);
+
+        return returnSet;
+
+    }
 }

@@ -1,7 +1,8 @@
 package liquibase.database;
 
-import java.sql.*;
-import java.util.Map;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Savepoint;
 
 /**
  * A Sybase specific Delegate that removes the calls to commit

@@ -1,9 +1,6 @@
 package liquibase.util;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
+import java.io.*;
 
 /**
  * Utilities for working with streams.
@@ -17,12 +14,10 @@ public class StreamUtil {
     /**
      * Reads a stream until the end of file into a String and uses the machines
      * default encoding to convert to characters the bytes from the Stream.
-     * 
-     * @param ins
-     *            The InputStream to read.
+     *
+     * @param ins The InputStream to read.
      * @return The contents of the input stream as a String
-     * @throws IOException
-     *             If there is an error reading the stream.
+     * @throws IOException If there is an error reading the stream.
      */
     public static String getStreamContents(InputStream ins) throws IOException {
 
@@ -32,12 +27,10 @@ public class StreamUtil {
 
     /**
      * Reads all the characters into a String.
-     * 
-     * @param reader
-     *            The Reader to read.
+     *
+     * @param reader The Reader to read.
      * @return The contents of the input stream as a String
-     * @throws IOException
-     *             If there is an error reading the stream.
+     * @throws IOException If there is an error reading the stream.
      */
     public static String getReaderContents(Reader reader) throws IOException {
         try {
@@ -55,6 +48,15 @@ public class StreamUtil {
             } catch (IOException ioe) {//NOPMD
                 // can safely ignore
             }
+        }
+    }
+
+    public static void copy(InputStream inputStream, OutputStream outputStream) throws IOException {
+        byte[] bytes = new byte[1024];
+        int r = inputStream.read(bytes);
+        while (r > 0) {
+            outputStream.write(bytes, 0, r);
+            r = inputStream.read(bytes);
         }
     }
 }

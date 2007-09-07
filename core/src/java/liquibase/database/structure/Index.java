@@ -5,7 +5,7 @@ import liquibase.util.StringUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Index implements Comparable<Index> {
+public class Index implements DatabaseObject, Comparable<Index> {
     private String name;
     private String tableName;
     private List<String> columns = new ArrayList<String>();
@@ -47,13 +47,13 @@ public class Index implements Comparable<Index> {
             }
         }
 
-        return equals && tableName.equals(index.tableName);
+        return equals && tableName.equalsIgnoreCase(index.tableName);
 
     }
 
     public int hashCode() {
         int result;
-        result = tableName.hashCode();
+        result = tableName.toUpperCase().hashCode();
         result = 31 * result + columns.hashCode();
         return result;
     }

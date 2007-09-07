@@ -4,9 +4,16 @@ import liquibase.database.Database;
 import liquibase.database.MSSQLDatabase;
 import liquibase.database.MySQLDatabase;
 import liquibase.database.OracleDatabase;
+import liquibase.database.structure.DatabaseObject;
+import liquibase.database.structure.Index;
+import liquibase.database.structure.Table;
 import liquibase.migrator.exception.UnsupportedChangeException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Drops an existing index.
@@ -59,4 +66,16 @@ public class DropIndexChange extends AbstractChange {
 
         return element;
     }
+
+    public Set<DatabaseObject> getAffectedDatabaseObjects() {
+        Index index = new Index();
+        index.setTableName(tableName);
+        index.setName(indexName);
+
+        Table table= new Table();
+        table.setName(tableName);
+
+        return new HashSet<DatabaseObject>(Arrays.asList(index, table));
+    }
+    
 }

@@ -7,7 +7,6 @@ import liquibase.migrator.change.ColumnConfig;
 import liquibase.migrator.change.DropForeignKeyConstraintChange;
 import liquibase.migrator.exception.JDBCException;
 import liquibase.migrator.exception.LockException;
-import liquibase.migrator.exception.MigrationFailedException;
 import liquibase.migrator.exception.UnsupportedChangeException;
 import liquibase.util.StreamUtil;
 

@@ -1,9 +1,16 @@
 package liquibase.migrator.change;
 
 import liquibase.database.*;
+import liquibase.database.structure.Column;
+import liquibase.database.structure.DatabaseObject;
+import liquibase.database.structure.Table;
 import liquibase.migrator.exception.UnsupportedChangeException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Renames an existing column.
@@ -96,4 +103,22 @@ public class RenameColumnChange extends AbstractChange {
 
         return node;
     }
+
+    public Set<DatabaseObject> getAffectedDatabaseObjects() {
+
+        Table table = new Table();
+        table.setName(tableName);
+
+        Column oldColumn = new Column();
+        oldColumn.setTable(table);
+        oldColumn.setName(getOldColumnName());
+
+        Column newColumn = new Column();
+        newColumn.setTable(table);
+        newColumn.setName(getNewColumnName());
+
+        return new HashSet<DatabaseObject>(Arrays.asList(table, oldColumn, newColumn));
+
+    }
+
 }

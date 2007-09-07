@@ -5,7 +5,7 @@ import liquibase.migrator.preconditions.PreconditionSet;
 /**
  * Encapsulates the information stored in the change log XML file.
  */
-public class DatabaseChangeLog {
+public class DatabaseChangeLog implements Comparable<DatabaseChangeLog> {
     private Migrator migrator;
     private PreconditionSet preconditions;
     private String physicalFilePath;
@@ -53,6 +53,10 @@ public class DatabaseChangeLog {
     }
 
     public String toString() {
-        return getPhysicalFilePath();
+        return getFilePath();
+    }
+
+    public int compareTo(DatabaseChangeLog o) {
+        return getFilePath().compareTo(o.getFilePath());
     }
 }

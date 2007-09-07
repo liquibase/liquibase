@@ -1,7 +1,6 @@
 package liquibase.database;
 
 import liquibase.migrator.exception.JDBCException;
-import liquibase.migrator.exception.MigrationFailedException;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -83,7 +82,7 @@ public class UnsupportedDatabase extends AbstractDatabase {
                 try {
                     typeInfo.close();
                 } catch (SQLException e) {
-                    
+                    ;
                 }
             }
         }

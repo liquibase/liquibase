@@ -3,10 +3,16 @@ package liquibase.migrator.change;
 import liquibase.database.DB2Database;
 import liquibase.database.Database;
 import liquibase.database.MSSQLDatabase;
+import liquibase.database.structure.Column;
+import liquibase.database.structure.DatabaseObject;
+import liquibase.database.structure.Table;
 import liquibase.migrator.exception.UnsupportedChangeException;
 import liquibase.util.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Creates a primary key out of an existing column or set of columns.
@@ -109,4 +115,25 @@ public class AddPrimaryKeyChange extends AbstractChange {
 
         return node;
     }
+
+    public Set<DatabaseObject> getAffectedDatabaseObjects() {
+
+        Set<DatabaseObject> dbObjects = new HashSet<DatabaseObject>();
+
+        Table table = new Table();
+        table.setName(tableName);
+        dbObjects.add(table);
+
+        for (String columnName : columnNames.split(",")) {
+            Column column = new Column();
+            column.setTable(table);
+            column.setName(columnName.trim());
+
+            dbObjects.add(column);
+        }
+
+        return dbObjects;
+
+    }
+
 }

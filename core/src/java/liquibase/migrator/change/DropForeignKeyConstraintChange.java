@@ -2,9 +2,15 @@ package liquibase.migrator.change;
 
 import liquibase.database.Database;
 import liquibase.database.MySQLDatabase;
+import liquibase.database.structure.DatabaseObject;
+import liquibase.database.structure.ForeignKey;
+import liquibase.database.structure.Table;
 import liquibase.migrator.exception.UnsupportedChangeException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Drops an existing foreign key constraint.
@@ -54,4 +60,21 @@ public class DropForeignKeyConstraintChange extends AbstractChange {
 
         return node;
     }
+
+    public Set<DatabaseObject> getAffectedDatabaseObjects() {
+        Set<DatabaseObject> returnSet = new HashSet<DatabaseObject>();
+
+        Table baseTable = new Table();
+        baseTable.setName(baseTableName);
+        returnSet.add(baseTable);
+
+        ForeignKey fk = new ForeignKey();
+        fk.setName(constraintName);
+        fk.setForeignKeyTable(baseTable);
+        returnSet.add(fk);
+
+        return returnSet;
+
+    }
+
 }

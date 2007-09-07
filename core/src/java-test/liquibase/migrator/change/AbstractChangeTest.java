@@ -2,6 +2,7 @@ package liquibase.migrator.change;
 
 import liquibase.database.Database;
 import liquibase.database.OracleDatabase;
+import liquibase.database.structure.DatabaseObject;
 import liquibase.util.StreamUtil;
 import static org.easymock.EasyMock.*;
 import static org.easymock.classextension.EasyMock.createMock;
@@ -14,6 +15,7 @@ import org.w3c.dom.Element;
 import java.io.StringWriter;
 import java.sql.Connection;
 import java.sql.Statement;
+import java.util.Set;
 
 /**
  * Base test class for changes
@@ -42,6 +44,11 @@ public abstract class AbstractChangeTest {
             public Element createNode(Document changeLogFileDOM) {
                 return null;
             }
+
+
+            public Set<DatabaseObject> getAffectedDatabaseObjects() {
+                return null;
+            }
         };
 
         StringWriter stringWriter = new StringWriter();
@@ -64,6 +71,11 @@ public abstract class AbstractChangeTest {
             }
 
             public Element createNode(Document changeLogFileDOM) {
+                return null;
+            }
+
+
+            public Set<DatabaseObject> getAffectedDatabaseObjects() {
                 return null;
             }
         };

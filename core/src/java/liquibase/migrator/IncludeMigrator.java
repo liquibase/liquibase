@@ -2,7 +2,6 @@ package liquibase.migrator;
 
 import liquibase.database.Database;
 import liquibase.migrator.exception.JDBCException;
-import liquibase.migrator.exception.MigrationFailedException;
 import liquibase.migrator.exception.LockException;
 
 import java.util.List;
