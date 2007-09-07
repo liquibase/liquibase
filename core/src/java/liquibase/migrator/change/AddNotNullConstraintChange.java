@@ -1,12 +1,14 @@
 package liquibase.migrator.change;
 
 import liquibase.database.*;
+import liquibase.database.structure.Column;
+import liquibase.database.structure.DatabaseObject;
+import liquibase.database.structure.Table;
 import liquibase.migrator.exception.UnsupportedChangeException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * Adds a not-null constraint to an existing column.
@@ -193,5 +195,20 @@ public class AddNotNullConstraintChange extends AbstractChange {
         element.setAttribute("columnName", getColumnName());
         element.setAttribute("defaultNullValue", getDefaultNullValue());
         return element;
+    }
+
+    public Set<DatabaseObject> getAffectedDatabaseObjects() {
+
+        Table table = new Table();
+        table.setName(tableName);
+
+        Column column = new Column();
+        column.setTable(table);
+        column.setName(columnName);
+
+
+
+        return new HashSet<DatabaseObject>(Arrays.asList(table, column));
+
     }
 }

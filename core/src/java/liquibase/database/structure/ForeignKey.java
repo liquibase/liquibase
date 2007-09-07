@@ -1,6 +1,6 @@
 package liquibase.database.structure;
 
-public class ForeignKey implements Comparable<ForeignKey> {
+public class ForeignKey implements DatabaseObject, Comparable<ForeignKey> {
     private Table primaryKeyTable;
     private String primaryKeyColumn;
 
@@ -82,37 +82,52 @@ public class ForeignKey implements Comparable<ForeignKey> {
 
         ForeignKey that = (ForeignKey) o;
 
-        return foreignKeyColumn.equals(that.foreignKeyColumn)
+        return foreignKeyColumn.equalsIgnoreCase(that.foreignKeyColumn)
                 && foreignKeyTable.equals(that.foreignKeyTable)
                 && !(name != null ? !name.equals(that.name) : that.name != null)
-                && primaryKeyColumn.equals(that.primaryKeyColumn)
+                && primaryKeyColumn.equalsIgnoreCase(that.primaryKeyColumn)
                 && primaryKeyTable.equals(that.primaryKeyTable);
 
     }
 
     public int hashCode() {
-        int result;
-        result = primaryKeyTable.hashCode();
-        result = 31 * result + primaryKeyColumn.hashCode();
-        result = 31 * result + foreignKeyTable.hashCode();
-        result = 31 * result + foreignKeyColumn.hashCode();
+        int result = 0;
+        if (primaryKeyTable != null) {
+            result = primaryKeyTable.hashCode();
+        }
+
+        if (primaryKeyColumn != null) {
+            result = 31 * result + primaryKeyColumn.toUpperCase().hashCode();
+        }
+
+        if (foreignKeyTable != null) {
+            result = 31 * result + foreignKeyTable.hashCode();
+        }
+
+        if (foreignKeyColumn != null) {
+            result = 31 * result + foreignKeyColumn.toUpperCase().hashCode();
+        }
+
         result = 31 * result + (name != null ? name.hashCode() : 0);
         return result;
     }
 
 
     public int compareTo(ForeignKey o) {
-        int returnValue = this.getForeignKeyTable().compareTo(o.getPrimaryKeyTable());
+        int returnValue = 0;
+        if (this.getForeignKeyTable() != null & o.getForeignKeyTable() != null) {
+            returnValue = this.getForeignKeyTable().compareTo(o.getForeignKeyTable());
+        }
 
-        if (returnValue == 0) {
+        if (returnValue == 0 && this.getForeignKeyColumn() != null & o.getForeignKeyColumn() != null) {
             returnValue = this.getForeignKeyColumn().compareTo(o.getForeignKeyColumn());
         }
 
-        if (returnValue == 0) {
+        if (returnValue == 0 && this.getPrimaryKeyTable() != null & o.getPrimaryKeyTable() != null) {
             returnValue = this.getPrimaryKeyTable().compareTo(o.getPrimaryKeyTable());
         }
 
-        if (returnValue == 0) {
+        if (returnValue == 0 && this.getPrimaryKeyColumn() != null & o.getPrimaryKeyColumn() != null) {
             returnValue = this.getPrimaryKeyColumn().compareTo(o.getPrimaryKeyColumn());
         }
 

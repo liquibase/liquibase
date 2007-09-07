@@ -7,7 +7,7 @@ import java.sql.Types;
 import java.util.Arrays;
 import java.util.List;
 
-public class Column implements Comparable<Column> {
+public class Column implements DatabaseObject, Comparable<Column> {
     private Table table;
     private View view;
     private String name;
@@ -139,7 +139,7 @@ public class Column implements Comparable<Column> {
 
             Column column = (Column) o;
 
-            return name.equals(column.name) && !(table != null ? !table.equals(column.table) : column.table != null) && !(view != null ? !view.equals(column.view) : column.view != null);
+            return name.equalsIgnoreCase(column.name) && !(table != null ? !table.equals(column.table) : column.table != null) && !(view != null ? !view.equals(column.view) : column.view != null);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -151,7 +151,7 @@ public class Column implements Comparable<Column> {
             int result;
             result = (table != null ? table.hashCode() : 0);
             result = 31 * result + (view != null ? view.hashCode() : 0);
-            result = 31 * result + name.hashCode();
+            result = 31 * result + name.toUpperCase().hashCode();
             return result;
         } catch (Exception e) {
             throw new RuntimeException(e);

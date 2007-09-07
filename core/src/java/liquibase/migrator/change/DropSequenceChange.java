@@ -1,9 +1,15 @@
 package liquibase.migrator.change;
 
 import liquibase.database.Database;
+import liquibase.database.structure.DatabaseObject;
+import liquibase.database.structure.Sequence;
 import liquibase.migrator.exception.UnsupportedChangeException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Drops an existing sequence.
@@ -42,4 +48,12 @@ public class DropSequenceChange extends AbstractChange {
 
         return element;
     }
+
+    public Set<DatabaseObject> getAffectedDatabaseObjects() {
+        Sequence dbObject = new Sequence();
+        dbObject.setName(sequenceName);
+
+        return new HashSet<DatabaseObject>(Arrays.asList(dbObject));
+    }
+
 }

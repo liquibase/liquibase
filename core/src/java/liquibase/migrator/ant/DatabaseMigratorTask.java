@@ -1,7 +1,6 @@
 package liquibase.migrator.ant;
 
 import liquibase.migrator.Migrator;
-import liquibase.migrator.exception.MigrationFailedException;
 import org.apache.tools.ant.BuildException;
 
 import java.sql.SQLException;
@@ -59,7 +58,7 @@ public class DatabaseMigratorTask extends BaseLiquibaseTask {
                 try {
                     migrator.getDatabase().getConnection().close();
                 } catch (SQLException e) {
-                    throw new BuildException(e);
+                    ;
                 }
             }
         }

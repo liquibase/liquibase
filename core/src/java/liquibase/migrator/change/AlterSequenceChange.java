@@ -3,9 +3,15 @@ package liquibase.migrator.change;
 import liquibase.database.Database;
 import liquibase.database.HsqlDatabase;
 import liquibase.database.OracleDatabase;
+import liquibase.database.structure.DatabaseObject;
+import liquibase.database.structure.Sequence;
 import liquibase.migrator.exception.UnsupportedChangeException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Modifies properties of an existing sequence.
@@ -115,5 +121,12 @@ public class AlterSequenceChange extends AbstractChange {
         }
 
         return node;
+    }
+
+    public Set<DatabaseObject> getAffectedDatabaseObjects() {
+        Sequence dbObject = new Sequence();
+        dbObject.setName(sequenceName);
+
+        return new HashSet<DatabaseObject>(Arrays.asList(dbObject));
     }
 }

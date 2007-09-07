@@ -1,6 +1,7 @@
 package liquibase.migrator.change;
 
 import liquibase.database.Database;
+import liquibase.migrator.ChangeSet;
 import liquibase.migrator.FileOpener;
 import liquibase.migrator.Migrator;
 import liquibase.migrator.exception.JDBCException;
@@ -43,6 +44,8 @@ public abstract class AbstractChange implements Change {
     private final String tagName;
     private FileOpener fileOpener;
 
+    private ChangeSet changeSet;
+
     /**
      * Constructor with tag name and name
      *
@@ -55,6 +58,15 @@ public abstract class AbstractChange implements Change {
     }
 
     //~ ------------------------------------------------------------------------------- public interface
+
+    public ChangeSet getChangeSet() {
+        return changeSet;
+    }
+
+    public void setChangeSet(ChangeSet changeSet) {
+        this.changeSet = changeSet;
+    }
+
     /**
      * @see liquibase.migrator.change.Change#getChangeName()
      */

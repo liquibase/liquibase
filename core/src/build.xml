@@ -110,7 +110,7 @@ The available targets at the current stage:
                 <filter token="BUILD.VERSION" value="${build.version}"/>
             </filterset>
             <fileset dir="${src.dir}/java"
-                     includes="**/*.properties, **/*.xml, **/*.config, **/*.txt, **/*.jdo, **/*.tld, **/*.xsd"/>
+                     includes="**/*.properties, **/*.xml, **/*.config, **/*.txt, **/*.jdo, **/*.tld, **/*.xsd, **/*.css"/>
         </copy>
         <copy todir="${build.dir}">
             <fileset dir="${src.dir}/java" includes="**/*.jpg, **/*.png, **/*.gif"/>
@@ -134,7 +134,7 @@ The available targets at the current stage:
         </javac>
         <copy todir="${build.test.dir}">
             <fileset dir="${src.dir}/java-test"
-                     includes="**/*.properties, **/*.xml, **/*.txt, **/*.config, **/*.tld, **/*.xsd,**/*.sql"/>
+                     includes="**/*.properties, **/*.xml, **/*.txt, **/*.config, **/*.tld, **/*.xsd,**/*.sql,**/*.css"/>
         </copy>
 
         <javac srcdir="${src.dir}/java-dbtest" destdir="${build.db.test.dir}" deprecation="${deprecation}"

@@ -4,8 +4,8 @@ import liquibase.migrator.*;
 import liquibase.migrator.change.*;
 import liquibase.migrator.exception.DatabaseHistoryException;
 import liquibase.migrator.exception.JDBCException;
-import liquibase.migrator.exception.MigrationFailedException;
 import liquibase.migrator.exception.LiquibaseException;
+import liquibase.migrator.exception.MigrationFailedException;
 import liquibase.migrator.preconditions.*;
 import liquibase.util.StringUtils;
 import org.xml.sax.Attributes;
@@ -72,6 +72,7 @@ public abstract class BaseChangeLogHandler extends DefaultHandler {
                 text = new StringBuffer();
             } else if (changeSet != null && change == null) {
                 change = migrator.getChangeFactory().create(qName);
+                change.setChangeSet(changeSet);
                 text = new StringBuffer();
                 if (change == null) {
                     throw new MigrationFailedException(changeSet, "Unknown change: " + qName);

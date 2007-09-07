@@ -1,13 +1,13 @@
 package liquibase.migrator.change;
 
 import liquibase.database.Database;
+import liquibase.database.structure.DatabaseObject;
+import liquibase.database.structure.Table;
 import liquibase.migrator.exception.UnsupportedChangeException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 /**
  * Inserts data into an existing table.
@@ -114,4 +114,12 @@ public class InsertDataChange extends AbstractChange {
         }
         return node;
     }
+
+    public Set<DatabaseObject> getAffectedDatabaseObjects() {
+        Table dbObject = new Table();
+        dbObject.setName(tableName);
+
+        return new HashSet<DatabaseObject>(Arrays.asList(dbObject));
+    }
+    
 }

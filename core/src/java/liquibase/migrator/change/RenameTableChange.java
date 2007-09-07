@@ -1,9 +1,15 @@
 package liquibase.migrator.change;
 
 import liquibase.database.*;
+import liquibase.database.structure.DatabaseObject;
+import liquibase.database.structure.Table;
 import liquibase.migrator.exception.UnsupportedChangeException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Renames an existing table.
@@ -76,5 +82,16 @@ public class RenameTableChange extends AbstractChange {
         element.setAttribute("newTableName", getNewTableName());
 
         return element;
+    }
+
+
+    public Set<DatabaseObject> getAffectedDatabaseObjects() {
+        Table oldTable = new Table();
+        oldTable.setName(oldTableName);
+
+        Table newTable = new Table();
+        newTable.setName(newTableName);
+
+        return new HashSet<DatabaseObject>(Arrays.asList(oldTable, newTable));
     }
 }

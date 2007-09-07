@@ -3,7 +3,7 @@ package liquibase.database.structure;
 import java.util.ArrayList;
 import java.util.List;
 
-public class View implements Comparable<View> {
+public class View implements DatabaseObject, Comparable<View> {
     private String name;
     private List<Column> columns = new ArrayList<Column>();
 
@@ -30,12 +30,12 @@ public class View implements Comparable<View> {
 
         View view = (View) o;
 
-        return name.equals(view.name);
+        return name.equalsIgnoreCase(view.name);
 
     }
 
     public int hashCode() {
-        return name.hashCode();
+        return name.toUpperCase().hashCode();
     }
 
     public int compareTo(View o) {

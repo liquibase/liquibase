@@ -1,7 +1,6 @@
 package liquibase.database;
 
 import liquibase.migrator.exception.JDBCException;
-import liquibase.migrator.exception.MigrationFailedException;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -169,7 +168,7 @@ public class OracleDatabase extends AbstractDatabase {
                     rs.close();
                 }
             } catch (SQLException e) {
-                throw new JDBCException(e);
+                ;
             }
         }
     }

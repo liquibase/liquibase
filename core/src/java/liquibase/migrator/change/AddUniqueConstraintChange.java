@@ -1,12 +1,18 @@
 package liquibase.migrator.change;
 
+import liquibase.database.DB2Database;
 import liquibase.database.Database;
 import liquibase.database.MSSQLDatabase;
-import liquibase.database.DB2Database;
+import liquibase.database.structure.Column;
+import liquibase.database.structure.DatabaseObject;
+import liquibase.database.structure.Table;
 import liquibase.migrator.exception.UnsupportedChangeException;
 import liquibase.util.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Adds a unique constraint to an existing column.
@@ -96,4 +102,25 @@ public class AddUniqueConstraintChange extends AbstractChange {
 
         return element;
     }
+
+    public Set<DatabaseObject> getAffectedDatabaseObjects() {
+
+        Set<DatabaseObject> returnSet = new HashSet<DatabaseObject>();
+
+        Table table = new Table();
+        table.setName(tableName);
+        returnSet.add(table);
+
+        for (String columnName : getColumnNames().split(",")) {
+            Column column = new Column();
+            column.setTable(table);
+            column.setName(columnName.trim());
+
+            returnSet.add(column);
+        }
+
+        return returnSet;
+
+    }
+
 }

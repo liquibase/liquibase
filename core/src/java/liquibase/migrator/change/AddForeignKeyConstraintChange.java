@@ -1,9 +1,16 @@
 package liquibase.migrator.change;
 
 import liquibase.database.Database;
+import liquibase.database.structure.Column;
+import liquibase.database.structure.DatabaseObject;
+import liquibase.database.structure.ForeignKey;
+import liquibase.database.structure.Table;
 import liquibase.migrator.exception.UnsupportedChangeException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Adds a foreign key constraint to an existing column.
@@ -136,6 +143,45 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
         node.setAttribute("referencedColumnNames", getReferencedColumnNames());
 
         return node;
+    }
+
+    public Set<DatabaseObject> getAffectedDatabaseObjects() {
+        Set<DatabaseObject> returnSet = new HashSet<DatabaseObject>();
+
+        Table baseTable = new Table();
+        baseTable.setName(baseTableName);
+        returnSet.add(baseTable);
+
+        for (String columnName : getBaseColumnNames().split(",")) {
+            Column baseColumn = new Column();
+            baseColumn.setTable(baseTable);
+            baseColumn.setName(columnName.trim());
+
+            returnSet.add(baseColumn);
+        }
+
+        Table referencedTable = new Table();
+        referencedTable.setName(referencedTableName);
+        returnSet.add(referencedTable);
+
+        for (String columnName : getReferencedColumnNames().split(",")) {
+            Column referencedColumn = new Column();
+            referencedColumn.setTable(baseTable);
+            referencedColumn.setName(columnName.trim());
+
+            returnSet.add(referencedColumn);
+        }
+
+        ForeignKey fk = new ForeignKey();
+        fk.setName(constraintName);
+        fk.setForeignKeyTable(baseTable);
+        fk.setForeignKeyColumn(baseColumnNames);
+        fk.setPrimaryKeyTable(referencedTable);
+        fk.setPrimaryKeyColumn(referencedColumnNames);
+        returnSet.add(fk);
+
+        return returnSet;
+
     }
 
 }

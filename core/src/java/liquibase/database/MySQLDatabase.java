@@ -2,7 +2,6 @@ package liquibase.database;
 
 import liquibase.migrator.change.DropForeignKeyConstraintChange;
 import liquibase.migrator.exception.JDBCException;
-import liquibase.migrator.exception.MigrationFailedException;
 import liquibase.migrator.exception.UnsupportedChangeException;
 
 import java.sql.*;
@@ -132,7 +131,7 @@ public class MySQLDatabase extends AbstractDatabase {
                     rs.close();
                 }
             } catch (SQLException e) {
-                throw new JDBCException(e);
+                ;
             }
         }
 

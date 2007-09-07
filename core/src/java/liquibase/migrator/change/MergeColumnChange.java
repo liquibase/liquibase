@@ -2,13 +2,14 @@ package liquibase.migrator.change;
 
 import liquibase.database.Database;
 import liquibase.database.DerbyDatabase;
+import liquibase.database.structure.Column;
+import liquibase.database.structure.DatabaseObject;
+import liquibase.database.structure.Table;
 import liquibase.migrator.exception.UnsupportedChangeException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 /**
  * Combines data from two existing columns into a new column and drops the original columns.
@@ -123,4 +124,24 @@ public class MergeColumnChange extends AbstractChange {
 
         return element;
     }
+
+    public Set<DatabaseObject> getAffectedDatabaseObjects() {
+        Set<DatabaseObject> returnSet = new HashSet<DatabaseObject>();
+        Table table = new Table();
+        table.setName(tableName);
+        returnSet.add(table);
+
+        Column column1 = new Column();
+        column1.setTable(table);
+        column1.setName(column1Name);
+        returnSet.add(column1);
+
+        Column column2 = new Column();
+        column2.setTable(table);
+        column2.setName(column2Name);
+        returnSet.add(column2);
+
+        return returnSet;
+    }
+
 }

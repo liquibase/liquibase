@@ -3,8 +3,8 @@ package liquibase.database;
 import liquibase.migrator.exception.JDBCException;
 
 import java.sql.Connection;
-import java.sql.Statement;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 public class H2Database extends HsqlDatabase {
     public String getProductName() {

@@ -2,12 +2,10 @@ package liquibase.database.structure;
 
 import liquibase.util.StringUtils;
 
-import java.util.SortedSet;
-import java.util.TreeSet;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
-public class PrimaryKey implements Comparable<PrimaryKey> {
+public class PrimaryKey implements DatabaseObject, Comparable<PrimaryKey> {
     private String name;
     private List<String> columnNames = new ArrayList<String>();
     private String tableName;
@@ -61,14 +59,14 @@ public class PrimaryKey implements Comparable<PrimaryKey> {
 
         PrimaryKey that = (PrimaryKey) o;
 
-        return !(getColumnNames() != null ? !getColumnNames().equals(that.getColumnNames()) : that.getColumnNames() != null) && !(tableName != null ? !tableName.equals(that.tableName) : that.tableName != null);
+        return !(getColumnNames() != null ? !getColumnNames().equalsIgnoreCase(that.getColumnNames()) : that.getColumnNames() != null) && !(tableName != null ? !tableName.equalsIgnoreCase(that.tableName) : that.tableName != null);
 
     }
 
     public int hashCode() {
         int result;
-        result = (getColumnNames() != null ? getColumnNames().hashCode() : 0);
-        result = 31 * result + (tableName != null ? tableName.hashCode() : 0);
+        result = (getColumnNames() != null ? getColumnNames().toUpperCase().hashCode() : 0);
+        result = 31 * result + (tableName != null ? tableName.toUpperCase().hashCode() : 0);
         return result;
     }
 

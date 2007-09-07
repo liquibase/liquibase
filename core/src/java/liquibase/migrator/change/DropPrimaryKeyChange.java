@@ -3,9 +3,14 @@ package liquibase.migrator.change;
 import liquibase.database.Database;
 import liquibase.database.MSSQLDatabase;
 import liquibase.database.PostgresDatabase;
+import liquibase.database.structure.DatabaseObject;
+import liquibase.database.structure.Table;
 import liquibase.migrator.exception.UnsupportedChangeException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Removes an existing primary key.
@@ -73,4 +78,17 @@ public class DropPrimaryKeyChange extends AbstractChange {
         node.setAttribute("tableName", getTableName());
         return node;
     }
+
+    public Set<DatabaseObject> getAffectedDatabaseObjects() {
+
+        Set<DatabaseObject> dbObjects = new HashSet<DatabaseObject>();
+
+        Table table = new Table();
+        table.setName(tableName);
+        dbObjects.add(table);
+
+        return dbObjects;
+
+    }
+
 }

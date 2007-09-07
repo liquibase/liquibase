@@ -1,9 +1,16 @@
 package liquibase.migrator.change;
 
 import liquibase.database.*;
+import liquibase.database.structure.Column;
+import liquibase.database.structure.DatabaseObject;
+import liquibase.database.structure.Table;
 import liquibase.migrator.exception.UnsupportedChangeException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Makes an existing column into an auto-increment column.
@@ -75,4 +82,18 @@ public class AddAutoIncrementChange extends AbstractChange {
 
         return node;
     }
+
+    public Set<DatabaseObject> getAffectedDatabaseObjects() {
+        Column column = new Column();
+
+        Table table = new Table();
+        table.setName(tableName);
+        column.setTable(table);
+
+        column.setName(columnName);
+
+        return new HashSet<DatabaseObject>(Arrays.asList(table, column));
+
+    }
+    
 }

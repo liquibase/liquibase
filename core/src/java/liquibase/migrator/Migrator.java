@@ -1,20 +1,17 @@
 package liquibase.migrator;
 
-import liquibase.database.DatabaseConnection;
 import liquibase.database.Database;
+import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
-import liquibase.database.SQLConnectionDelegate;
 import liquibase.migrator.exception.*;
 import liquibase.migrator.parser.*;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
-
 import org.xml.sax.*;
 
-import javax.swing.JOptionPane;
+import javax.swing.*;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Writer;
@@ -608,13 +605,7 @@ public class Migrator {
             return ChangeSet.RunStatus.NOT_RAN;
         }
 
-        RanChangeSet foundRan = null;
-        for (RanChangeSet ranChange : getRanChangeSetList()) {
-            if (ranChange.isSameAs(changeSet)) {
-                foundRan = ranChange;
-                break;
-            }
-        }
+        RanChangeSet foundRan = getRanChangeSet(changeSet);
 
         if (foundRan == null) {
             return ChangeSet.RunStatus.NOT_RAN;
@@ -652,6 +643,31 @@ public class Migrator {
             }
         }
     }
+
+    private RanChangeSet getRanChangeSet(ChangeSet changeSet) throws JDBCException, DatabaseHistoryException {        
+        if (!getDatabase().doesChangeLogTableExist()) {
+            throw new DatabaseHistoryException("Database change table does not exist");
+        }
+
+        RanChangeSet foundRan = null;
+        for (RanChangeSet ranChange : getRanChangeSetList()) {
+            if (ranChange.isSameAs(changeSet)) {
+                foundRan = ranChange;
+                break;
+            }
+        }
+        return foundRan;
+    }
+
+    public Date getRanDate(ChangeSet changeSet) throws JDBCException, DatabaseHistoryException {
+        RanChangeSet ranChange = getRanChangeSet(changeSet);
+        if (ranChange == null) {
+            return null;
+        } else {
+            return ranChange.getDateExecuted();
+        }
+    }
+
 
     /**
      * Displays swing-based dialog about running against a non-localhost database.
@@ -794,4 +810,20 @@ public class Migrator {
             throw new JDBCException(e);
         }
     }
+
+    public void generateDocumentation() throws LockException, IOException, JDBCException, MigrationFailedException, DatabaseHistoryException {
+        try {
+            if (!waitForLock()) {
+                return;
+            }
+
+            DBDocChangeLogHandler changeLogHandler = new DBDocChangeLogHandler(this, changeLogFile,fileOpener);
+            runChangeLogs(changeLogHandler);
+
+            changeLogHandler.writeHTML(this);
+        } finally {
+            releaseLock();
+        }
+    }
+
 }

@@ -1,9 +1,15 @@
 package liquibase.migrator.change;
 
 import liquibase.database.*;
+import liquibase.database.structure.DatabaseObject;
+import liquibase.database.structure.View;
 import liquibase.migrator.exception.UnsupportedChangeException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Renames an existing view.
@@ -72,6 +78,16 @@ public class RenameViewChange extends AbstractChange {
         element.setAttribute("newViewName", getNewViewName());
 
         return element;
+    }
+
+    public Set<DatabaseObject> getAffectedDatabaseObjects() {
+        View oldView = new View();
+        oldView.setName(oldViewName);
+
+        View newView = new View();
+        newView.setName(newViewName);
+
+        return new HashSet<DatabaseObject>(Arrays.asList(oldView, newView));
     }
 
 }

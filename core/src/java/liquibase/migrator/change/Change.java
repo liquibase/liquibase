@@ -1,8 +1,9 @@
 package liquibase.migrator.change;
 
 import liquibase.database.Database;
-import liquibase.migrator.FileOpener;
+import liquibase.database.structure.DatabaseObject;
 import liquibase.migrator.ChangeSet;
+import liquibase.migrator.FileOpener;
 import liquibase.migrator.exception.JDBCException;
 import liquibase.migrator.exception.RollbackImpossibleException;
 import liquibase.migrator.exception.SetupException;
@@ -12,6 +13,7 @@ import org.w3c.dom.Element;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.Set;
 
 /**
  * Interface all changes (refactorings) implement.
@@ -169,4 +171,10 @@ public interface Change {
      * 
      */
     void setUp() throws SetupException;
+
+    Set<DatabaseObject> getAffectedDatabaseObjects();
+
+    ChangeSet getChangeSet();
+
+    void setChangeSet(ChangeSet changeSet);
 }
