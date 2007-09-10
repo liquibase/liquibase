@@ -23,7 +23,8 @@ public class DropNotNullConstraintChangeTest extends AbstractChangeTest {
         change.setTableName("TABLE_NAME");
         change.setColumnName("COL_HERE");
         change.setColumnDataType("varchar(200)");
-        assertEquals("ALTER TABLE TABLE_NAME MODIFY COL_HERE varchar(200) DEFAULT NULL", change.generateStatements(new MySQLDatabase())[0]);
+        MySQLDatabase db = new MySQLDatabase();
+        assertEquals("ALTER TABLE TABLE_NAME MODIFY COL_HERE varchar(200) DEFAULT NULL", change.generateStatements(db)[0].getSqlStatement(db));
     }
 
     @Test

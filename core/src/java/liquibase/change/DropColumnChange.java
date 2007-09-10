@@ -4,6 +4,8 @@ import liquibase.database.DB2Database;
 import liquibase.database.Database;
 import liquibase.database.DerbyDatabase;
 import liquibase.database.SybaseDatabase;
+import liquibase.database.sql.SqlStatement;
+import liquibase.database.sql.RawSqlStatement;
 import liquibase.database.structure.Column;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Table;
@@ -43,18 +45,18 @@ public class DropColumnChange extends AbstractChange {
         this.tableName = tableName;
     }
 
-    public String[] generateStatements(Database database) throws UnsupportedChangeException {
+    public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
         if (database instanceof DerbyDatabase) {
             throw new UnsupportedChangeException("Derby does not currently support dropping columns");
         } else if (database instanceof DB2Database) {
-            return new String[]{
-                    "ALTER TABLE " + getTableName() + " DROP COLUMN " + getColumnName(),
-                    "CALL SYSPROC.ADMIN_CMD ('REORG TABLE " + getTableName() + "')"
+            return new SqlStatement[]{
+                    new RawSqlStatement("ALTER TABLE " + getTableName() + " DROP COLUMN " + getColumnName()),
+                    new RawSqlStatement("CALL SYSPROC.ADMIN_CMD ('REORG TABLE " + getTableName() + "')")
             };
         } else if (database instanceof SybaseDatabase) {
-            return new String[]{"ALTER TABLE " + getTableName() + " DROP " + getColumnName()};            
+            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + getTableName() + " DROP " + getColumnName())};
         }
-        return new String[]{"ALTER TABLE " + getTableName() + " DROP COLUMN " + getColumnName()};
+        return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + getTableName() + " DROP COLUMN " + getColumnName())};
     }
 
     public String getConfirmationMessage() {

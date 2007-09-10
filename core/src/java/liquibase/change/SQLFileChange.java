@@ -1,6 +1,8 @@
 package liquibase.change;
 
 import liquibase.database.Database;
+import liquibase.database.sql.SqlStatement;
+import liquibase.database.sql.RawSqlStatement;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.FileOpener;
 import liquibase.migrator.Migrator;
@@ -17,6 +19,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Set;
+import java.util.List;
+import java.util.ArrayList;
 import java.util.logging.Logger;
 
 /**
@@ -171,11 +175,16 @@ public class SQLFileChange extends AbstractChange {
     /**
      * Generates a single statement for all of the SQL in the file.
      */
-    public String[] generateStatements(Database database)
+    public SqlStatement[] generateStatements(Database database)
             throws UnsupportedChangeException {
 
+        List<SqlStatement> returnStatements = new ArrayList<SqlStatement>();
         //strip ; from end of statements
-        return StringUtils.processMutliLineSQL(sql);
+        String[] statements = StringUtils.processMutliLineSQL(sql);
+        for (String statement : statements) {
+            returnStatements.add(new RawSqlStatement(statement));
+        }
+        return returnStatements.toArray(new SqlStatement[returnStatements.size()]);
     }
 
     public String getConfirmationMessage() {

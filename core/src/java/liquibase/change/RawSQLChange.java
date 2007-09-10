@@ -1,6 +1,8 @@
 package liquibase.change;
 
 import liquibase.database.Database;
+import liquibase.database.sql.SqlStatement;
+import liquibase.database.sql.RawSqlStatement;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.exception.UnsupportedChangeException;
 import liquibase.util.StringUtils;
@@ -8,6 +10,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import java.util.Set;
+import java.util.List;
+import java.util.ArrayList;
 
 /**
  * Allows execution of arbitrary SQL.  This change can be used when existing changes are either don't exist,
@@ -38,8 +42,13 @@ public class RawSQLChange extends AbstractChange {
         this.comments = comments;
     }
 
-    public String[] generateStatements(Database database) throws UnsupportedChangeException {
-        return StringUtils.processMutliLineSQL(sql);
+    public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
+        List<SqlStatement> statements = new ArrayList<SqlStatement>();
+        for (String sql : StringUtils.processMutliLineSQL(this.sql)) {
+            statements.add(new RawSqlStatement(sql));
+        }
+
+        return statements.toArray(new SqlStatement[statements.size()]);
     }
 
     public String getConfirmationMessage() {

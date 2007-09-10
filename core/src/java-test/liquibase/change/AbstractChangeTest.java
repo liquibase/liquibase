@@ -2,6 +2,8 @@ package liquibase.change;
 
 import liquibase.database.Database;
 import liquibase.database.OracleDatabase;
+import liquibase.database.sql.SqlStatement;
+import liquibase.database.sql.RawSqlStatement;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.util.StreamUtil;
 import static org.easymock.EasyMock.*;
@@ -33,8 +35,8 @@ public abstract class AbstractChangeTest {
     @Test
     public void saveStatement() throws Exception {
         Change change = new AbstractChange("test", "Test Refactoring") {
-            public String[] generateStatements(Database database) {
-                return new String[]{"GENERATED STATEMENT"};
+            public SqlStatement[] generateStatements(Database database) {
+                return new SqlStatement[]{new RawSqlStatement("GENERATED STATEMENT")};
             }
 
             public String getConfirmationMessage() {
@@ -62,8 +64,8 @@ public abstract class AbstractChangeTest {
     @Test
     public void executeStatement() throws Exception {
         Change change = new AbstractChange("test", "Test Refactorign") {
-            public String[] generateStatements(Database database) {
-                return new String[]{"GENERATED STATEMENT;"};
+            public SqlStatement[] generateStatements(Database database) {
+                return new SqlStatement[]{new RawSqlStatement("GENERATED STATEMENT;")};
             }
 
             public String getConfirmationMessage() {

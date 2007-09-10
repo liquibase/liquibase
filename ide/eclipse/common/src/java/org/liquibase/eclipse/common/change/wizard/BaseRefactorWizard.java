@@ -3,6 +3,7 @@ package org.liquibase.eclipse.common.change.wizard;
 import com.sun.org.apache.xml.internal.serialize.OutputFormat;
 import com.sun.org.apache.xml.internal.serialize.XMLSerializer;
 import liquibase.database.DatabaseFactory;
+import liquibase.database.sql.SqlStatement;
 import liquibase.ChangeSet;
 import liquibase.DatabaseChangeLog;
 import liquibase.migrator.Migrator;
@@ -111,9 +112,9 @@ public abstract class BaseRefactorWizard extends Wizard {
 								.findCorrectDatabaseImplementation(connection);
 						Statement statement = connection.createStatement();
 						for (Change change : changeSet.getChanges()) {
-							for (String sql : change
+							for (SqlStatement sql : change
 									.generateStatements(liquibaseDatabase)) {
-								statement.execute(sql);
+								statement.execute(sql.getSqlStatement(liquibaseDatabase));
 							}
 						}
 						statement.close();

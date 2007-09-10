@@ -1,6 +1,8 @@
 package liquibase.change;
 
 import liquibase.database.*;
+import liquibase.database.sql.SqlStatement;
+import liquibase.database.sql.RawSqlStatement;
 import liquibase.database.structure.Column;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Table;
@@ -49,7 +51,7 @@ public class DropNotNullConstraintChange extends AbstractChange {
         this.columnDataType = columnDataType;
     }
 
-    public String[] generateStatements(Database database) throws UnsupportedChangeException {
+    public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
         if (database instanceof SybaseDatabase) {
             return generateSybaseStatements();
         } else if (database instanceof MSSQLDatabase) {
@@ -59,38 +61,38 @@ public class DropNotNullConstraintChange extends AbstractChange {
         } else if (database instanceof OracleDatabase) {
             return generateOracleStatements();
         } else if (database instanceof DerbyDatabase) {
-            return new String[]{"ALTER TABLE " + tableName + " ALTER COLUMN " + columnName + " NULL"};
+            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + tableName + " ALTER COLUMN " + columnName + " NULL")};
         } else if (database instanceof HsqlDatabase) {
-            return new String[]{"ALTER TABLE " + tableName + " ALTER COLUMN " + columnName + " NULL"};
+            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + tableName + " ALTER COLUMN " + columnName + " NULL")};
         } else if (database instanceof CacheDatabase) {
-        	return new String[]{"ALTER TABLE " + tableName + " ALTER COLUMN " + columnName + " NULL"};
+        	return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + tableName + " ALTER COLUMN " + columnName + " NULL")};
         }
 
-        return new String[]{"ALTER TABLE " + tableName + " ALTER COLUMN " + columnName + " DROP NOT NULL"};
+        return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + tableName + " ALTER COLUMN " + columnName + " DROP NOT NULL")};
     }
 
-    private String[] generateSybaseStatements() {
-        return new String[]{"ALTER TABLE " + tableName + " MODIFY " + columnName + " NULL"};
+    private SqlStatement[] generateSybaseStatements() {
+        return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + tableName + " MODIFY " + columnName + " NULL")};
     }
 
-    private String[] generateMSSQLStatements() {
+    private SqlStatement[] generateMSSQLStatements() {
         if (columnDataType == null) {
             throw new RuntimeException("columnDataType is required to drop not null constraints with MS-SQL");
         }
 
-        return new String[]{"ALTER TABLE " + tableName + " ALTER COLUMN " + columnName + " " + columnDataType + " NULL"};
+        return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + tableName + " ALTER COLUMN " + columnName + " " + columnDataType + " NULL")};
     }
 
-    private String[] generateOracleStatements() {
-        return new String[]{"ALTER TABLE " + tableName + " MODIFY " + columnName + " NULL"};
+    private SqlStatement[] generateOracleStatements() {
+        return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + tableName + " MODIFY " + columnName + " NULL")};
     }
 
-    private String[] generateMySQLStatements() {
+    private SqlStatement[] generateMySQLStatements() {
         if (columnDataType == null) {
             throw new RuntimeException("columnDataType is required to drop not null constraints with MySQL");
         }
 
-        return new String[]{"ALTER TABLE " + tableName + " MODIFY " + columnName + " " + columnDataType + " DEFAULT NULL"};
+        return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + tableName + " MODIFY " + columnName + " " + columnDataType + " DEFAULT NULL")};
     }
 
     protected Change[] createInverses() {

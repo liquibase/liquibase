@@ -1,6 +1,7 @@
 package liquibase.change;
 
 import liquibase.database.Database;
+import liquibase.database.sql.SqlStatement;
 import liquibase.ChangeSet;
 import liquibase.FileOpener;
 import liquibase.migrator.Migrator;
@@ -85,7 +86,7 @@ public abstract class AbstractChange implements Change {
      * @see liquibase.change.Change#executeStatements(liquibase.database.Database)
      */
     public void executeStatements(Database database) throws JDBCException, UnsupportedChangeException {
-        String[] statements = generateStatements(database);
+        SqlStatement[] statements = generateStatements(database);
 
         execute(statements, database);
     }
@@ -94,9 +95,9 @@ public abstract class AbstractChange implements Change {
      * @see liquibase.change.Change#saveStatements(liquibase.database.Database, java.io.Writer)
      */
     public void saveStatements(Database database, Writer writer) throws IOException, UnsupportedChangeException {
-        String[] statements = generateStatements(database);
-        for (String statement : statements) {
-            writer.append(statement).append(";").append(StreamUtil.getLineSeparator()).append(StreamUtil.getLineSeparator());
+        SqlStatement[] statements = generateStatements(database);
+        for (SqlStatement statement : statements) {
+            writer.append(statement.getSqlStatement(database)).append(";").append(StreamUtil.getLineSeparator()).append(StreamUtil.getLineSeparator());
         }
     }
 
@@ -104,7 +105,7 @@ public abstract class AbstractChange implements Change {
      * @see liquibase.change.Change#executeRollbackStatements(liquibase.database.Database)
      */
     public void executeRollbackStatements(Database database) throws JDBCException, UnsupportedChangeException, RollbackImpossibleException {
-        String[] statements = generateRollbackStatements(database);
+        SqlStatement[] statements = generateRollbackStatements(database);
         execute(statements, database);
     }
 
@@ -112,9 +113,9 @@ public abstract class AbstractChange implements Change {
      * @see liquibase.change.Change#saveRollbackStatement(liquibase.database.Database, java.io.Writer)
      */
     public void saveRollbackStatement(Database database, Writer writer) throws IOException, UnsupportedChangeException, RollbackImpossibleException {
-        String[] statements = generateRollbackStatements(database);
-        for (String statement : statements) {
-            writer.append(statement).append(";\n\n");
+        SqlStatement[] statements = generateRollbackStatements(database);
+        for (SqlStatement statement : statements) {
+            writer.append(statement.getSqlStatement(database)).append(";\n\n");
         }
     }
 
@@ -127,7 +128,7 @@ public abstract class AbstractChange implements Change {
     /**
      * @see liquibase.change.Change#generateRollbackStatements(liquibase.database.Database)
      */
-    public String[] generateRollbackStatements(Database database) throws UnsupportedChangeException, RollbackImpossibleException {
+    public SqlStatement[] generateRollbackStatements(Database database) throws UnsupportedChangeException, RollbackImpossibleException {
         return generateRollbackStatementsFromInverse(database);
     }
 
@@ -172,19 +173,19 @@ public abstract class AbstractChange implements Change {
      * @throws UnsupportedChangeException if this change is not supported by the {@link Database} passed as argument
      * @throws RollbackImpossibleException if rollback is not supported for this change
      */
-    private String[] generateRollbackStatementsFromInverse(Database database) throws UnsupportedChangeException, RollbackImpossibleException {
+    private SqlStatement[] generateRollbackStatementsFromInverse(Database database) throws UnsupportedChangeException, RollbackImpossibleException {
         Change[] inverses = createInverses();
         if (inverses == null) {
             throw new RollbackImpossibleException("No inverse to " + getClass().getName() + " created");
         }
 
-        List<String> statements = new ArrayList<String>();
+        List<SqlStatement> statements = new ArrayList<SqlStatement>();
 
         for (Change inverse : inverses) {
             statements.addAll(Arrays.asList(inverse.generateStatements(database)));
         }
 
-        return statements.toArray(new String[statements.size()]);
+        return statements.toArray(new SqlStatement[statements.size()]);
     }
 
     /*
@@ -238,12 +239,12 @@ public abstract class AbstractChange implements Change {
      * @param database the target {@link Database}
      * @throws JDBCException if there were problems issuing the statements
      */
-    private void execute(String[] statements, Database database) throws JDBCException {
-        for (String statement : statements) {
+    private void execute(SqlStatement[] statements, Database database) throws JDBCException {
+        for (SqlStatement statement : statements) {
             Logger.getLogger(Migrator.DEFAULT_LOG_NAME).finest("Executing Statement: " + statement);
             try {
                 Statement dbStatement = database.getConnection().createStatement();
-                dbStatement.execute(statement);
+                dbStatement.execute(statement.getSqlStatement(database));
                 dbStatement.close();
             } catch (SQLException e) {
                 throw new JDBCException((e.getMessage() + " [" + statement + "]").replaceAll("\n", "").replaceAll("\r", ""));

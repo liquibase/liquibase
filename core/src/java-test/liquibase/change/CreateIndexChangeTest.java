@@ -27,13 +27,14 @@ public class CreateIndexChangeTest extends AbstractChangeTest {
         column1.setName("COL1");
         refactoring.addColumn(column1);
 
-        assertEquals("CREATE INDEX IDX_TEST ON TAB_NAME(COL1)", refactoring.generateStatements(new OracleDatabase())[0]);
+        OracleDatabase database = new OracleDatabase();
+        assertEquals("CREATE INDEX IDX_TEST ON TAB_NAME(COL1)", refactoring.generateStatements(database)[0].getSqlStatement(database));
 
         ColumnConfig column2 = new ColumnConfig();
         column2.setName("COL2");
         refactoring.addColumn(column2);
 
-        assertEquals("CREATE INDEX IDX_TEST ON TAB_NAME(COL1, COL2)", refactoring.generateStatements(new OracleDatabase())[0]);
+        assertEquals("CREATE INDEX IDX_TEST ON TAB_NAME(COL1, COL2)", refactoring.generateStatements(database)[0].getSqlStatement(database));
     }
 
     @Test

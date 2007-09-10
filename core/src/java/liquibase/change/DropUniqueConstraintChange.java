@@ -2,6 +2,8 @@ package liquibase.change;
 
 import liquibase.database.Database;
 import liquibase.database.MySQLDatabase;
+import liquibase.database.sql.SqlStatement;
+import liquibase.database.sql.RawSqlStatement;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Table;
 import liquibase.exception.UnsupportedChangeException;
@@ -38,13 +40,13 @@ public class DropUniqueConstraintChange extends AbstractChange {
         this.constraintName = constraintName;
     }
 
-    public String[] generateStatements(Database database) throws UnsupportedChangeException {
+    public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
         if (database instanceof MySQLDatabase) {
-            return new String[]{ "ALTER TABLE " + getTableName() + " DROP KEY " + getConstraintName(), };
+            return new SqlStatement[]{ new RawSqlStatement("ALTER TABLE " + getTableName() + " DROP KEY " + getConstraintName()), };
         }
 
-        return new String[]{
-                "ALTER TABLE " + getTableName() + " DROP CONSTRAINT " + getConstraintName(),
+        return new SqlStatement[]{
+                new RawSqlStatement("ALTER TABLE " + getTableName() + " DROP CONSTRAINT " + getConstraintName()),
         };
     }
 

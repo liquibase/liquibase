@@ -59,7 +59,7 @@ public class ServletMigrator implements ServletContextListener {
     public void contextInitialized(ServletContextEvent servletContextEvent) {
         Logger.getLogger(Migrator.DEFAULT_LOG_NAME).addHandler(new Handler() {
             public synchronized void publish(LogRecord record) {
-                liquibase.migrator.servlet.MigratorStatusServlet.logMessage(record);
+                MigratorStatusServlet.logMessage(record);
             }
 
             public void flush() {

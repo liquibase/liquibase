@@ -1,6 +1,8 @@
 package liquibase.change;
 
 import liquibase.database.Database;
+import liquibase.database.sql.SqlStatement;
+import liquibase.database.sql.RawSqlStatement;
 import liquibase.database.structure.Column;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.ForeignKey;
@@ -98,26 +100,26 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
         this.deleteCascade = deleteCascade;
     }
 
-    public String[] generateStatements(Database database) throws UnsupportedChangeException {
-        String[] statements = new String[]{
-                "ALTER TABLE " + getBaseTableName() + " ADD CONSTRAINT " + getConstraintName() + " FOREIGN KEY (" + getBaseColumnNames() + ") REFERENCES " + getReferencedTableName() + "(" + getReferencedColumnNames() + ")",
-        };
+    public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
+        String sql = "ALTER TABLE " + getBaseTableName() + " ADD CONSTRAINT " + getConstraintName() + " FOREIGN KEY (" + getBaseColumnNames() + ") REFERENCES " + getReferencedTableName() + "(" + getReferencedColumnNames() + ")";
 
         if (deleteCascade != null && deleteCascade) {
-            statements[0] += " ON DELETE CASCADE";
+            sql += " ON DELETE CASCADE";
         }
 
         if (database.supportsInitiallyDeferrableColumns()) {
             if (deferrable != null && deferrable) {
-                statements[0] += " DEFERRABLE";
+                sql += " DEFERRABLE";
             }
 
             if (initiallyDeferred != null && initiallyDeferred) {
-                statements[0] += " INITIALLY DEFERRED";
+                sql += " INITIALLY DEFERRED";
             }
         }
 
-        return statements;
+        return new SqlStatement[] {
+                new RawSqlStatement(sql),
+        };
     }
 
     protected Change[] createInverses() {

@@ -1,6 +1,8 @@
 package liquibase.change;
 
 import liquibase.database.*;
+import liquibase.database.sql.SqlStatement;
+import liquibase.database.sql.RawSqlStatement;
 import liquibase.database.structure.Column;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Table;
@@ -57,11 +59,11 @@ public class AddNotNullConstraintChange extends AbstractChange {
     }
 
 
-    private String generateUpdateStatement() {
-        return "UPDATE " + tableName + " SET " + columnName + "='" + defaultNullValue + "' WHERE " + columnName + " IS NULL";
+    private SqlStatement generateUpdateStatement() {
+        return new RawSqlStatement("UPDATE " + tableName + " SET " + columnName + "='" + defaultNullValue + "' WHERE " + columnName + " IS NULL");
     }
 
-    public String[] generateStatements(Database database) throws UnsupportedChangeException {
+    public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
         if (database instanceof SybaseDatabase) {
             return generateSybaseStatements();
         } else if (database instanceof MSSQLDatabase) {
@@ -78,99 +80,99 @@ public class AddNotNullConstraintChange extends AbstractChange {
         	return generateCacheStatements();
         }
 
-        List<String> statements = new ArrayList<String>();
+        List<SqlStatement> statements = new ArrayList<SqlStatement>();
         if (defaultNullValue != null) {
             statements.add(generateUpdateStatement());
         }
 
-        statements.add("ALTER TABLE " + getTableName() + " ALTER COLUMN  " + getColumnName() + " SET NOT NULL ");
+        statements.add(new RawSqlStatement("ALTER TABLE " + getTableName() + " ALTER COLUMN  " + getColumnName() + " SET NOT NULL "));
 
         if (database instanceof DB2Database) {
-            statements.add("CALL SYSPROC.ADMIN_CMD ('REORG TABLE "+getTableName()+"')");
+            statements.add(new RawSqlStatement("CALL SYSPROC.ADMIN_CMD ('REORG TABLE "+getTableName()+"')"));
         }
 
-        return statements.toArray(new String[statements.size()]);
+        return statements.toArray(new SqlStatement[statements.size()]);
 
     }
 
-    private String[] generateCacheStatements() {
-    	List<String> statements = new ArrayList<String>();
+    private SqlStatement[] generateCacheStatements() {
+    	List<SqlStatement> statements = new ArrayList<SqlStatement>();
     	if (defaultNullValue != null) {
     		statements.add(generateUpdateStatement());
     	}
-    	statements.add("COMMIT");
-    	statements.add("ALTER TABLE " + getTableName() + " ALTER COLUMN " + getColumnName() + " NOT NULL");
+    	statements.add(new RawSqlStatement("COMMIT"));
+    	statements.add(new RawSqlStatement("ALTER TABLE " + getTableName() + " ALTER COLUMN " + getColumnName() + " NOT NULL"));
     	
-    	return statements.toArray(new String[statements.size()]);
+    	return statements.toArray(new SqlStatement[statements.size()]);
     }
     
-    private String[] generateSybaseStatements() {
-        List<String> statements = new ArrayList<String>();
+    private SqlStatement[] generateSybaseStatements() {
+        List<SqlStatement> statements = new ArrayList<SqlStatement>();
         if (defaultNullValue != null) {
             statements.add(generateUpdateStatement());
         }
-        statements.add("COMMIT");
-        statements.add("ALTER TABLE " + getTableName() + " MODIFY " + getColumnName() + " NOT NULL");
+        statements.add(new RawSqlStatement("COMMIT"));
+        statements.add(new RawSqlStatement("ALTER TABLE " + getTableName() + " MODIFY " + getColumnName() + " NOT NULL"));
 
-        return statements.toArray(new String[statements.size()]);
+        return statements.toArray(new SqlStatement[statements.size()]);
     }
 
-    private String[] generateMSSQLStatements() {
+    private SqlStatement[] generateMSSQLStatements() {
         if (columnDataType == null) {
             throw new RuntimeException("columnDataType is required to add not null constraints with MS-SQL");
         }
 
-        List<String> statements = new ArrayList<String>();
+        List<SqlStatement> statements = new ArrayList<SqlStatement>();
         if (defaultNullValue != null) {
             statements.add(generateUpdateStatement());
         }
-        statements.add("ALTER TABLE " + getTableName() + " ALTER COLUMN " + getColumnName() + " " + columnDataType + " " + " NOT NULL");
+        statements.add(new RawSqlStatement("ALTER TABLE " + getTableName() + " ALTER COLUMN " + getColumnName() + " " + columnDataType + " " + " NOT NULL"));
 
-        return statements.toArray(new String[statements.size()]);
+        return statements.toArray(new SqlStatement[statements.size()]);
     }
 
-    private String[] generateMySQLStatements() {
+    private SqlStatement[] generateMySQLStatements() {
         if (columnDataType == null) {
             throw new RuntimeException("columnDataType is required to add not null constraints with MySQL");
         }
 
-        List<String> statements = new ArrayList<String>();
+        List<SqlStatement> statements = new ArrayList<SqlStatement>();
         if (defaultNullValue != null) {
             statements.add(generateUpdateStatement());
         }
-        statements.add("ALTER TABLE " + getTableName() + " MODIFY " + getColumnName() + " " + columnDataType + " NOT NULL");
+        statements.add(new RawSqlStatement("ALTER TABLE " + getTableName() + " MODIFY " + getColumnName() + " " + columnDataType + " NOT NULL"));
 
-        return statements.toArray(new String[statements.size()]);
+        return statements.toArray(new SqlStatement[statements.size()]);
     }
 
-    private String[] generateOracleStatements() {
-        List<String> statements = new ArrayList<String>();
+    private SqlStatement[] generateOracleStatements() {
+        List<SqlStatement> statements = new ArrayList<SqlStatement>();
         if (defaultNullValue != null) {
             statements.add(generateUpdateStatement());
         }
-        statements.add("ALTER TABLE " + getTableName() + " MODIFY " + getColumnName() + " NOT NULL");
+        statements.add(new RawSqlStatement("ALTER TABLE " + getTableName() + " MODIFY " + getColumnName() + " NOT NULL"));
 
-        return statements.toArray(new String[statements.size()]);
+        return statements.toArray(new SqlStatement[statements.size()]);
     }
 
-    public String[] generateDerbyStatements()  {
-        List<String> statements = new ArrayList<String>();
+    public SqlStatement[] generateDerbyStatements()  {
+        List<SqlStatement> statements = new ArrayList<SqlStatement>();
         if (defaultNullValue != null) {
             statements.add(generateUpdateStatement());
         }
-        statements.add("ALTER TABLE " + getTableName() + " ALTER COLUMN  " + getColumnName() + " NOT NULL");
+        statements.add(new RawSqlStatement("ALTER TABLE " + getTableName() + " ALTER COLUMN  " + getColumnName() + " NOT NULL"));
 
-        return statements.toArray(new String[statements.size()]);
+        return statements.toArray(new SqlStatement[statements.size()]);
     }
 
-    public String[] generateH2Statements()  {
-        List<String> statements = new ArrayList<String>();
+    public SqlStatement[] generateH2Statements()  {
+        List<SqlStatement> statements = new ArrayList<SqlStatement>();
         if (defaultNullValue != null) {
             statements.add(generateUpdateStatement());
         }
-        statements.add("ALTER TABLE " + getTableName() + " ALTER COLUMN  " + getColumnName() + " "+getColumnDataType()+" NOT NULL");
+        statements.add(new RawSqlStatement("ALTER TABLE " + getTableName() + " ALTER COLUMN  " + getColumnName() + " "+getColumnDataType()+" NOT NULL"));
 
-        return statements.toArray(new String[statements.size()]);
+        return statements.toArray(new SqlStatement[statements.size()]);
     }
 
     protected Change[] createInverses() {

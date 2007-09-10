@@ -754,7 +754,7 @@ public abstract class AbstractDatabase implements Database {
                     dropFK.setConstraintName(fkRS.getString("FK_NAME"));
 
                     try {
-                        dropStatement.execute(dropFK.generateStatements(this)[0]);
+                        dropStatement.execute(dropFK.generateStatements(this)[0].getSqlStatement(this));
                     } catch (UnsupportedChangeException e) {
                         throw new JDBCException(e.getMessage());
                     }

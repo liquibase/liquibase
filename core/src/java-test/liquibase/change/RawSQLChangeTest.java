@@ -29,7 +29,8 @@ public class RawSQLChangeTest extends AbstractChangeTest {
     @Test
     public void generateStatement() throws Exception {
         refactoring.setSql("SQL STATEMENT HERE");
-        assertEquals("SQL STATEMENT HERE", refactoring.generateStatements(new OracleDatabase())[0]);
+        OracleDatabase database = new OracleDatabase();
+        assertEquals("SQL STATEMENT HERE", refactoring.generateStatements(database)[0].getSqlStatement(database));
     }
 
     @Test

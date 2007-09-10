@@ -2,6 +2,8 @@ package liquibase.change;
 
 import liquibase.database.Database;
 import liquibase.database.OracleDatabase;
+import liquibase.database.sql.SqlStatement;
+import liquibase.database.sql.RawSqlStatement;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Sequence;
 import liquibase.exception.UnsupportedChangeException;
@@ -77,7 +79,7 @@ public class CreateSequenceChange extends AbstractChange {
         this.ordered = ordered;
     }
 
-    public String[] generateStatements(Database database) throws UnsupportedChangeException {
+    public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
         if (!database.supportsSequences()) {
             throw new UnsupportedChangeException(database.getProductName()+" does not support sequences");
         }
@@ -98,13 +100,15 @@ public class CreateSequenceChange extends AbstractChange {
             buffer.append(" MAXVALUE ").append(maxValue);
         }
 
-        String[] statements = new String[]{buffer.toString().trim()};
+        String sql = buffer.toString().trim();
         if (database instanceof OracleDatabase
             && ordered != null && ordered) {
-                statements[0] += " ORDER";
+                sql += " ORDER";
         }
 
-        return statements;
+        return new SqlStatement[] {
+                new RawSqlStatement(sql)
+        };
     }
 
     protected Change[] createInverses() {

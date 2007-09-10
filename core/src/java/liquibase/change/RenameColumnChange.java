@@ -1,6 +1,8 @@
 package liquibase.change;
 
 import liquibase.database.*;
+import liquibase.database.sql.SqlStatement;
+import liquibase.database.sql.RawSqlStatement;
 import liquibase.database.structure.Column;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Table;
@@ -57,26 +59,26 @@ public class RenameColumnChange extends AbstractChange {
         this.columnDataType = columnDataType;
     }
 
-    public String[] generateStatements(Database database) throws UnsupportedChangeException {
+    public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
         if (database instanceof MSSQLDatabase) {
-            return new String[]{"exec sp_rename '" + tableName + "." + oldColumnName + "', '" + newColumnName+"'"};
+            return new SqlStatement[]{new RawSqlStatement("exec sp_rename '" + tableName + "." + oldColumnName + "', '" + newColumnName+"'")};
         } else if (database instanceof MySQLDatabase) {
             if (columnDataType == null) {
                 throw new RuntimeException("columnDataType is required to rename columns with MySQL");
             }
             
-            return new String[]{"ALTER TABLE " + tableName + " CHANGE " + oldColumnName + " " + newColumnName + " " + columnDataType};
+            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + tableName + " CHANGE " + oldColumnName + " " + newColumnName + " " + columnDataType)};
         } else if (database instanceof DerbyDatabase) {
             throw new UnsupportedChangeException("Derby does not currently support renaming columns");
         } else if (database instanceof HsqlDatabase) {
-            return new String[]{"ALTER TABLE " + tableName + " ALTER COLUMN " + oldColumnName + " RENAME TO " + newColumnName};
+            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + tableName + " ALTER COLUMN " + oldColumnName + " RENAME TO " + newColumnName)};
         } else if (database instanceof DB2Database) {
             throw new UnsupportedChangeException("Rename Column not supported in DB2");
         } else if (database instanceof CacheDatabase) {
             throw new UnsupportedChangeException("Rename Column not currently supported for Cache");
         }
 
-        return new String[]{"ALTER TABLE " + tableName + " RENAME COLUMN " + oldColumnName + " TO " + newColumnName};
+        return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + tableName + " RENAME COLUMN " + oldColumnName + " TO " + newColumnName)};
     }
 
     protected Change[] createInverses() {

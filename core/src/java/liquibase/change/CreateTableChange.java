@@ -4,6 +4,8 @@ import liquibase.database.DB2Database;
 import liquibase.database.Database;
 import liquibase.database.MSSQLDatabase;
 import liquibase.database.SybaseDatabase;
+import liquibase.database.sql.SqlStatement;
+import liquibase.database.sql.RawSqlStatement;
 import liquibase.database.structure.Column;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Table;
@@ -28,7 +30,7 @@ public class CreateTableChange extends AbstractChange {
         columns = new ArrayList<ColumnConfig>();
     }
 
-    public String[] generateStatements(Database database) throws UnsupportedChangeException {
+    public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
 
         List<String> pkColumns = new ArrayList<String>();
 
@@ -125,8 +127,8 @@ public class CreateTableChange extends AbstractChange {
             }
         }
 
-        List<String> statements = new ArrayList<String>();
-        statements.add(buffer.toString().trim());
+        List<SqlStatement> statements = new ArrayList<SqlStatement>();
+        statements.add(new RawSqlStatement(buffer.toString().trim()));
 
         if (pkColumns.size() > 1) {
             AddPrimaryKeyChange addPKChange = new AddPrimaryKeyChange();
@@ -137,7 +139,7 @@ public class CreateTableChange extends AbstractChange {
             statements.addAll(Arrays.asList(addPKChange.generateStatements(database)));
         }
 
-        return statements.toArray(new String[statements.size()]);
+        return statements.toArray(new SqlStatement[statements.size()]);
     }
 
     protected Change[] createInverses() {

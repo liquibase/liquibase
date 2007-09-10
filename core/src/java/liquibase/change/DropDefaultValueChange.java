@@ -1,6 +1,8 @@
 package liquibase.change;
 
 import liquibase.database.*;
+import liquibase.database.sql.SqlStatement;
+import liquibase.database.sql.RawSqlStatement;
 import liquibase.database.structure.Column;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Table;
@@ -39,20 +41,20 @@ public class DropDefaultValueChange extends AbstractChange {
         this.columnName = columnName;
     }
 
-    public String[] generateStatements(Database database) throws UnsupportedChangeException {
+    public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
         if (database instanceof MSSQLDatabase) {
             //docs on how to at http://doc.ddart.net/mssql/sql70/de-dz_9.htm
             throw new UnsupportedChangeException("Dropping default values is not currently supported in MS-SQL");
         } else if (database instanceof MySQLDatabase) {
-            return new String[]{"ALTER TABLE " + getTableName() + " ALTER " + getColumnName() + " DROP DEFAULT",};
+            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + getTableName() + " ALTER " + getColumnName() + " DROP DEFAULT"),};
         } else if (database instanceof OracleDatabase) {
-            return new String[]{"ALTER TABLE " + getTableName() + " MODIFY " + getColumnName() + " DEFAULT NULL",};
+            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + getTableName() + " MODIFY " + getColumnName() + " DEFAULT NULL"),};
         } else if (database instanceof DerbyDatabase) {
-            return new String[]{"ALTER TABLE " + getTableName() + " ALTER COLUMN  " + getColumnName() + " WITH DEFAULT NULL",};
+            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + getTableName() + " ALTER COLUMN  " + getColumnName() + " WITH DEFAULT NULL"),};
         }
 
-        return new String[]{
-                "ALTER TABLE " + getTableName() + " ALTER COLUMN  " + getColumnName() + " SET DEFAULT NULL",
+        return new SqlStatement[]{
+                new RawSqlStatement("ALTER TABLE " + getTableName() + " ALTER COLUMN  " + getColumnName() + " SET DEFAULT NULL"),
         };
     }
 

@@ -1,6 +1,8 @@
 package liquibase.change;
 
 import liquibase.database.Database;
+import liquibase.database.sql.SqlStatement;
+import liquibase.database.sql.RawSqlStatement;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Sequence;
 import liquibase.exception.UnsupportedChangeException;
@@ -30,12 +32,12 @@ public class DropSequenceChange extends AbstractChange {
         this.sequenceName = sequenceName;
     }
 
-    public String[] generateStatements(Database database) throws UnsupportedChangeException {
+    public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
         if (!database.supportsSequences()) {
             throw new UnsupportedChangeException("Sequences not supported in "+database.getProductName());
         }
 
-        return new String[]{"DROP SEQUENCE " + getSequenceName()};
+        return new SqlStatement[]{new RawSqlStatement("DROP SEQUENCE " + getSequenceName())};
     }
 
     public String getConfirmationMessage() {

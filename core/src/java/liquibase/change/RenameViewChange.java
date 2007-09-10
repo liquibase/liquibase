@@ -1,6 +1,8 @@
 package liquibase.change;
 
 import liquibase.database.*;
+import liquibase.database.sql.SqlStatement;
+import liquibase.database.sql.RawSqlStatement;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.View;
 import liquibase.exception.UnsupportedChangeException;
@@ -38,13 +40,13 @@ public class RenameViewChange extends AbstractChange {
         this.newViewName = newViewName;
     }
 
-    public String[] generateStatements(Database database) throws UnsupportedChangeException {
+    public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
         if (database instanceof MSSQLDatabase) {
-            return new String[]{"exec sp_rename '" + oldViewName + "', " + newViewName};
+            return new SqlStatement[]{new RawSqlStatement("exec sp_rename '" + oldViewName + "', " + newViewName)};
         } else if (database instanceof MySQLDatabase) {
-            return new String[]{"RENAME TABLE " + oldViewName + " TO " + newViewName};
+            return new SqlStatement[]{new RawSqlStatement("RENAME TABLE " + oldViewName + " TO " + newViewName)};
         } else if (database instanceof PostgresDatabase) {
-            return new String[]{"ALTER TABLE " + oldViewName + " RENAME TO " + newViewName};
+            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + oldViewName + " RENAME TO " + newViewName)};
         } else if (database instanceof DerbyDatabase) {
             throw new UnsupportedChangeException("Derby does not currently support renaming views");
         } else if (database instanceof HsqlDatabase) {
@@ -55,7 +57,7 @@ public class RenameViewChange extends AbstractChange {
             throw new UnsupportedChangeException("Rename View not currently supported for Cache");
         }
 
-        return new String[]{"RENAME " + oldViewName + " TO " + newViewName};
+        return new SqlStatement[]{new RawSqlStatement("RENAME " + oldViewName + " TO " + newViewName)};
     }
 
     protected Change[] createInverses() {
