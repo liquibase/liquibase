@@ -2,10 +2,10 @@ package org.liquibase.eclipse.common.change.wizard;
 
 import java.sql.Connection;
 
-import liquibase.migrator.change.Change;
-import liquibase.migrator.change.ColumnConfig;
-import liquibase.migrator.change.ConstraintsConfig;
-import liquibase.migrator.change.CreateTableChange;
+import liquibase.change.Change;
+import liquibase.change.ColumnConfig;
+import liquibase.change.ConstraintsConfig;
+import liquibase.change.CreateTableChange;
 
 import org.eclipse.datatools.connectivity.sqm.core.rte.ICatalogObject;
 import org.eclipse.datatools.modelbase.sql.datatypes.BinaryStringDataType;

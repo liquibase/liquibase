@@ -1,7 +1,7 @@
 package liquibase.database;
 
 import liquibase.migrator.Migrator;
-import liquibase.migrator.exception.JDBCException;
+import liquibase.exception.JDBCException;
 
 import java.sql.Connection;
 import java.sql.SQLException;

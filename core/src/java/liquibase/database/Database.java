@@ -1,10 +1,10 @@
 package liquibase.database;
 
-import liquibase.migrator.DatabaseChangeLogLock;
+import liquibase.DatabaseChangeLogLock;
 import liquibase.migrator.Migrator;
-import liquibase.migrator.change.ColumnConfig;
-import liquibase.migrator.exception.JDBCException;
-import liquibase.migrator.exception.LockException;
+import liquibase.change.ColumnConfig;
+import liquibase.exception.JDBCException;
+import liquibase.exception.LockException;
 
 import java.io.IOException;
 import java.sql.Connection;

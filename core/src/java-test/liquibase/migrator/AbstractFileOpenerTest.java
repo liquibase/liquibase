@@ -1,6 +1,7 @@
 package liquibase.migrator;
 
 import org.junit.Before;
+import liquibase.FileOpener;
 
 /**
  * Base test class for file openers

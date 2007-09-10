@@ -12,6 +12,9 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Enumeration;
 
+import liquibase.FileSystemFileOpener;
+import liquibase.FileOpener;
+
 
 public class FileSystemFileOpenerTest {
     FileSystemFileOpener opener;
