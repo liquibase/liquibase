@@ -1,6 +1,8 @@
 package liquibase.change;
 
 import liquibase.database.*;
+import liquibase.database.sql.SqlStatement;
+import liquibase.database.sql.RawSqlStatement;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Table;
 import liquibase.exception.UnsupportedChangeException;
@@ -39,27 +41,27 @@ public class RenameTableChange extends AbstractChange {
     }
 
 
-    public String[] generateStatements(Database database) throws UnsupportedChangeException {
+    public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
         if (database instanceof MSSQLDatabase) {
-            return new String[]{"exec sp_rename '" + oldTableName + "', " + newTableName};
+            return new SqlStatement[]{new RawSqlStatement("exec sp_rename '" + oldTableName + "', " + newTableName)};
         } else if (database instanceof MySQLDatabase) {
-            return new String[]{"ALTER TABLE " + oldTableName + " RENAME " + newTableName};
+            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + oldTableName + " RENAME " + newTableName)};
         } else if (database instanceof PostgresDatabase) {
-            return new String[]{"ALTER TABLE " + oldTableName + " RENAME TO " + newTableName};
+            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + oldTableName + " RENAME TO " + newTableName)};
         } else if (database instanceof DerbyDatabase) {
-            return new String[]{"RENAME TABLE " + oldTableName + " TO " + newTableName};
+            return new SqlStatement[]{new RawSqlStatement("RENAME TABLE " + oldTableName + " TO " + newTableName)};
         } else if (database instanceof HsqlDatabase) {
-            return new String[]{"ALTER TABLE " + oldTableName + " RENAME TO " + newTableName};
+            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + oldTableName + " RENAME TO " + newTableName)};
         } else if (database instanceof DB2Database) {
-            return new String[]{
-                    "RENAME " + oldTableName + " TO " + newTableName,
-                    "CALL SYSPROC.ADMIN_CMD ('REORG TABLE " + newTableName + "')",
+            return new SqlStatement[]{
+                    new RawSqlStatement("RENAME " + oldTableName + " TO " + newTableName),
+                    new RawSqlStatement("CALL SYSPROC.ADMIN_CMD ('REORG TABLE " + newTableName + "')"),
             };
         } else if (database instanceof CacheDatabase) {
             throw new UnsupportedChangeException("Rename table not currently supported for Cache");
         }
 
-        return new String[]{"RENAME " + oldTableName + " TO " + newTableName};
+        return new SqlStatement[]{new RawSqlStatement("RENAME " + oldTableName + " TO " + newTableName)};
     }
 
     protected Change[] createInverses() {

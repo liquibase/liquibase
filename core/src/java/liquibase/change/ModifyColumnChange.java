@@ -1,6 +1,8 @@
 package liquibase.change;
 
 import liquibase.database.*;
+import liquibase.database.sql.SqlStatement;
+import liquibase.database.sql.RawSqlStatement;
 import liquibase.database.structure.Column;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Table;
@@ -40,30 +42,30 @@ public class ModifyColumnChange extends AbstractChange {
         this.column = column;
     }
 
-    public String[] generateStatements(Database database) throws UnsupportedChangeException {
+    public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
         if(database instanceof SybaseDatabase) {
-            return new String[]{"ALTER TABLE " + getTableName() + " MODIFY " + getColumn().getName() + " " + getColumn().getType()};
+            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + getTableName() + " MODIFY " + getColumn().getName() + " " + getColumn().getType())};
         }
         if (database instanceof MSSQLDatabase) {
-            return new String[]{"ALTER TABLE " + getTableName() + " ALTER COLUMN " + getColumn().getName() + " " + getColumn().getType()};
+            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + getTableName() + " ALTER COLUMN " + getColumn().getName() + " " + getColumn().getType())};
         } else if (database instanceof MySQLDatabase) {
-            return new String[]{"ALTER TABLE " + getTableName() + " MODIFY COLUMN " + getColumn().getName() + " " + getColumn().getType()};
+            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + getTableName() + " MODIFY COLUMN " + getColumn().getName() + " " + getColumn().getType())};
         } else if (database instanceof OracleDatabase) {
-            return new String[]{"ALTER TABLE " + getTableName() + " MODIFY (" + getColumn().getName() + " " + getColumn().getType() + ")"};
+            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + getTableName() + " MODIFY (" + getColumn().getName() + " " + getColumn().getType() + ")")};
         } else if (database instanceof DerbyDatabase) {
-            return new String[]{"ALTER TABLE " + getTableName() + " ALTER COLUMN "+getColumn().getName()+" SET DATA TYPE " + getColumn().getType()};
+            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + getTableName() + " ALTER COLUMN "+getColumn().getName()+" SET DATA TYPE " + getColumn().getType())};
         } else if (database instanceof HsqlDatabase) {
-            return new String[]{"ALTER TABLE " + getTableName() + " ALTER COLUMN "+getColumn().getName()+" "+getColumn().getType()};
+            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + getTableName() + " ALTER COLUMN "+getColumn().getName()+" "+getColumn().getType())};
         } else if (database instanceof CacheDatabase) {
-        	return new String[]{"ALTER TABLE " + getTableName() + " ALTER COLUMN " + getColumn().getName() + " " + getColumn().getType()};
+        	return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + getTableName() + " ALTER COLUMN " + getColumn().getName() + " " + getColumn().getType())};
         } else if (database instanceof DB2Database) {
-            return new String[]{
-                    "ALTER TABLE " + getTableName() + " ALTER COLUMN " + getColumn().getName() + " SET DATA TYPE " + getColumn().getType(),
-                    "CALL SYSPROC.ADMIN_CMD ('REORG TABLE "+getTableName()+"')"
+            return new SqlStatement[]{
+                    new RawSqlStatement("ALTER TABLE " + getTableName() + " ALTER COLUMN " + getColumn().getName() + " SET DATA TYPE " + getColumn().getType()),
+                    new RawSqlStatement("CALL SYSPROC.ADMIN_CMD ('REORG TABLE "+getTableName()+"')")
             };
         }
 
-        return new String[]{"ALTER TABLE " + getTableName() + " ALTER COLUMN " + getColumn().getName() + " TYPE " + getColumn().getType()};
+        return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + getTableName() + " ALTER COLUMN " + getColumn().getName() + " TYPE " + getColumn().getType())};
     }
 
     public String getConfirmationMessage() {

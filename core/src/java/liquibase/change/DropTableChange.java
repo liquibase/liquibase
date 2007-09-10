@@ -1,6 +1,8 @@
 package liquibase.change;
 
 import liquibase.database.Database;
+import liquibase.database.sql.SqlStatement;
+import liquibase.database.sql.RawSqlStatement;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Table;
 import liquibase.exception.UnsupportedChangeException;
@@ -39,13 +41,13 @@ public class DropTableChange extends AbstractChange {
         this.cascadeConstraints = cascadeConstraints;
     }
 
-    public String[] generateStatements(Database database) throws UnsupportedChangeException {
+    public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
         StringBuffer buffer = new StringBuffer(31);
         buffer.append("DROP TABLE ").append(getTableName());
         if (isCascadeConstraints() != null && isCascadeConstraints()) {
             buffer.append(" CASCADE CONSTRAINTS");
         }
-        return new String[]{buffer.toString()};
+        return new SqlStatement[]{new RawSqlStatement(buffer.toString())};
     }
 
     public String getConfirmationMessage() {

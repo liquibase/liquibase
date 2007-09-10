@@ -29,13 +29,14 @@ public class DropTableChangeTest extends AbstractChangeTest {
 
     @Test
     public void generateStatement() throws Exception {
-        assertEquals("DROP TABLE TAB_NAME CASCADE CONSTRAINTS", change.generateStatements(new OracleDatabase())[0]);
+        OracleDatabase database = new OracleDatabase();
+        assertEquals("DROP TABLE TAB_NAME CASCADE CONSTRAINTS", change.generateStatements(database)[0].getSqlStatement(database));
 
         change.setCascadeConstraints(null);
-        assertEquals("DROP TABLE TAB_NAME", change.generateStatements(new OracleDatabase())[0]);
+        assertEquals("DROP TABLE TAB_NAME", change.generateStatements(database)[0].getSqlStatement(database));
 
         change.setCascadeConstraints(false);
-        assertEquals("DROP TABLE TAB_NAME", change.generateStatements(new OracleDatabase())[0]);
+        assertEquals("DROP TABLE TAB_NAME", change.generateStatements(database)[0].getSqlStatement(database));
     }
 
     @Test

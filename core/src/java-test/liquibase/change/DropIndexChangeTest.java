@@ -23,7 +23,8 @@ public class DropIndexChangeTest extends AbstractChangeTest {
         refactoring.setIndexName("IDX_NAME");
         refactoring.setTableName("TABLE_NAME");
 
-        assertEquals("DROP INDEX IDX_NAME", refactoring.generateStatements(new OracleDatabase())[0]);
+        OracleDatabase database = new OracleDatabase();
+        assertEquals("DROP INDEX IDX_NAME", refactoring.generateStatements(database)[0].getSqlStatement(database));
     }
 
     @Test

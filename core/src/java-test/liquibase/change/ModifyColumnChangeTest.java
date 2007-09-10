@@ -36,7 +36,8 @@ public class ModifyColumnChangeTest extends AbstractChangeTest {
 
     @Test
     public void generateStatement() throws Exception {
-        assertEquals("ALTER TABLE TABLE_NAME MODIFY (NAME integer(3))", change.generateStatements(new OracleDatabase())[0]);
+        OracleDatabase database = new OracleDatabase();
+        assertEquals("ALTER TABLE TABLE_NAME MODIFY (NAME integer(3))", change.generateStatements(database)[0].getSqlStatement(database));
     }
 
     @Test

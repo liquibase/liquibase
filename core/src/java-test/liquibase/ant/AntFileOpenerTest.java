@@ -28,7 +28,7 @@ public class AntFileOpenerTest extends AbstractFileOpenerTest {
 
     @Test
     public void getResourceAsStream() throws Exception {
-      InputStream inputStream = fileOpener.getResourceAsStream("liquibase/migrator/ant/AntFileOpenerTest.class");
+      InputStream inputStream = fileOpener.getResourceAsStream("liquibase/ant/AntFileOpenerTest.class");
       assertNotNull(inputStream);
     }
 
@@ -39,7 +39,7 @@ public class AntFileOpenerTest extends AbstractFileOpenerTest {
 
     @Test
     public void getResources() throws Exception {
-      Enumeration<URL> resources = fileOpener.getResources("liquibase/migrator/ant");
+      Enumeration<URL> resources = fileOpener.getResources("liquibase/ant");
       assertNotNull(resources);
     }
 }

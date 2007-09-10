@@ -3,6 +3,8 @@ package liquibase.change;
 import liquibase.database.DB2Database;
 import liquibase.database.Database;
 import liquibase.database.MSSQLDatabase;
+import liquibase.database.sql.SqlStatement;
+import liquibase.database.sql.RawSqlStatement;
 import liquibase.database.structure.Column;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Table;
@@ -61,7 +63,7 @@ public class AddPrimaryKeyChange extends AbstractChange {
         this.tablespace = tablespace;
     }
 
-    public String[] generateStatements(Database database) throws UnsupportedChangeException {
+    public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
         String sql;
         if (getConstraintName() == null) {
             sql = "ALTER TABLE " + getTableName() + " ADD PRIMARY KEY (" + getColumnNames() + ")";
@@ -80,14 +82,14 @@ public class AddPrimaryKeyChange extends AbstractChange {
         }
 
         if (database instanceof DB2Database) {
-            return new String[] {
-                    sql,
-                    "CALL SYSPROC.ADMIN_CMD ('REORG TABLE "+getTableName()+"')",
+            return new SqlStatement[] {
+                    new RawSqlStatement(sql),
+                    new RawSqlStatement("CALL SYSPROC.ADMIN_CMD ('REORG TABLE "+getTableName()+"')"),
             };
         }
 
-        return new String[] {
-                sql,
+        return new SqlStatement[] {
+                new RawSqlStatement(sql),
         };
     }
 

@@ -1,6 +1,8 @@
 package liquibase.change;
 
 import liquibase.database.Database;
+import liquibase.database.sql.SqlStatement;
+import liquibase.database.sql.RawSqlStatement;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.View;
 import liquibase.exception.UnsupportedChangeException;
@@ -39,9 +41,9 @@ public class CreateViewChange extends AbstractChange {
         this.selectQuery = selectQuery;
     }
 
-    public String[] generateStatements(Database database) throws UnsupportedChangeException {
-        return new String[]{
-                "CREATE VIEW " + getViewName() + " AS " + selectQuery
+    public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
+        return new SqlStatement[]{
+                new RawSqlStatement("CREATE VIEW " + getViewName() + " AS " + selectQuery)
         };
     }
 

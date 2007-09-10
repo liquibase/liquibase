@@ -4,6 +4,8 @@ import liquibase.database.Database;
 import liquibase.database.MSSQLDatabase;
 import liquibase.database.MySQLDatabase;
 import liquibase.database.OracleDatabase;
+import liquibase.database.sql.SqlStatement;
+import liquibase.database.sql.RawSqlStatement;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Index;
 import liquibase.database.structure.Table;
@@ -43,16 +45,16 @@ public class DropIndexChange extends AbstractChange {
         this.tableName = tableName;
     }
 
-    public String[] generateStatements(Database database) throws UnsupportedChangeException {
+    public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
         if (database instanceof MySQLDatabase) {
-            return new String[]{"DROP INDEX " + indexName + " ON " + tableName};
+            return new SqlStatement[]{new RawSqlStatement("DROP INDEX " + indexName + " ON " + tableName)};
         } else if (database instanceof MSSQLDatabase) {
-            return new String[]{"DROP INDEX " + tableName + "." + indexName};
+            return new SqlStatement[]{new RawSqlStatement("DROP INDEX " + tableName + "." + indexName)};
         } else if (database instanceof OracleDatabase) {
-            return new String[]{"DROP INDEX " + indexName};
+            return new SqlStatement[]{new RawSqlStatement("DROP INDEX " + indexName)};
         }
 
-        return new String[]{"DROP INDEX " + indexName};
+        return new SqlStatement[]{new RawSqlStatement("DROP INDEX " + indexName)};
     }
 
     public String getConfirmationMessage() {

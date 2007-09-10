@@ -37,7 +37,8 @@ public class AddColumnChangeTest extends AbstractChangeTest {
 
         refactoring.setColumn(column);
 
-        assertEquals("ALTER TABLE TAB ADD NEWCOL TYP NOT NULL", refactoring.generateStatements(new OracleDatabase())[0]);
+        OracleDatabase db = new OracleDatabase();
+        assertEquals("ALTER TABLE TAB ADD NEWCOL TYP NOT NULL", refactoring.generateStatements(db)[0].getSqlStatement(db));
     }
 
     @Test
@@ -83,8 +84,9 @@ public class AddColumnChangeTest extends AbstractChangeTest {
         column.setName("NEWCOL");
         column.setType("TYP");
         refactoring.setColumn(column);
-        
-        assertEquals("ALTER TABLE TAB ADD NEWCOL TYP NULL", refactoring.generateStatements(new SybaseDatabase())[0]);
+
+        SybaseDatabase db = new SybaseDatabase();
+        assertEquals("ALTER TABLE TAB ADD NEWCOL TYP NULL", refactoring.generateStatements(db)[0].getSqlStatement(db));
     }
     
     @Test
@@ -101,8 +103,9 @@ public class AddColumnChangeTest extends AbstractChangeTest {
         constraints.setNullable(Boolean.FALSE);
         
         column.setConstraints(constraints);
-        
-        assertEquals("ALTER TABLE TAB ADD NEWCOL TYP NOT NULL", refactoring.generateStatements(new SybaseDatabase())[0]);
+
+        SybaseDatabase database = new SybaseDatabase();
+        assertEquals("ALTER TABLE TAB ADD NEWCOL TYP NOT NULL", refactoring.generateStatements(database)[0].getSqlStatement(database));
 
     }
     
@@ -120,8 +123,9 @@ public class AddColumnChangeTest extends AbstractChangeTest {
         constraints.setNullable(Boolean.TRUE);
         
         column.setConstraints(constraints);
-        
-        assertEquals("ALTER TABLE TAB ADD NEWCOL TYP NULL", refactoring.generateStatements(new SybaseDatabase())[0]);
+
+        SybaseDatabase database = new SybaseDatabase();
+        assertEquals("ALTER TABLE TAB ADD NEWCOL TYP NULL", refactoring.generateStatements(database)[0].getSqlStatement(database));
 
     }
 }

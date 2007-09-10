@@ -1,6 +1,8 @@
 package liquibase.change;
 
 import liquibase.database.*;
+import liquibase.database.sql.SqlStatement;
+import liquibase.database.sql.RawSqlStatement;
 import liquibase.database.structure.Column;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.ForeignKey;
@@ -98,7 +100,7 @@ public class AddLookupTableChange extends AbstractChange {
         };
     }
 
-    public String[] generateStatements(Database database) throws UnsupportedChangeException {
+    public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
         if (database instanceof DerbyDatabase) {
             throw new UnsupportedChangeException("Add Lookup Table currently not supported in Derby");
         } else if (database instanceof HsqlDatabase) {
@@ -107,15 +109,15 @@ public class AddLookupTableChange extends AbstractChange {
             throw new UnsupportedChangeException("Add Lookup Table not currently supported for Cache");
         }
 
-        List<String> statements = new ArrayList<String>();
+        List<SqlStatement> statements = new ArrayList<SqlStatement>();
 
-        String[] createTablesSQL = {"CREATE TABLE " + getNewTableName() + " AS SELECT DISTINCT " + getExistingColumnName() + " AS " + getNewColumnName() + " FROM " + getExistingTableName() + " WHERE " + getExistingColumnName() + " IS NOT NULL"};
+        SqlStatement[] createTablesSQL = {new RawSqlStatement("CREATE TABLE " + getNewTableName() + " AS SELECT DISTINCT " + getExistingColumnName() + " AS " + getNewColumnName() + " FROM " + getExistingTableName() + " WHERE " + getExistingColumnName() + " IS NOT NULL")};
         if (database instanceof MSSQLDatabase) {
-            createTablesSQL = new String[]{"SELECT DISTINCT " + getExistingColumnName() + " AS " + getNewColumnName() + " INTO " + getNewTableName() + " FROM " + getExistingTableName() + " WHERE " + getExistingColumnName() + " IS NOT NULL",};
+            createTablesSQL = new SqlStatement[]{new RawSqlStatement("SELECT DISTINCT " + getExistingColumnName() + " AS " + getNewColumnName() + " INTO " + getNewTableName() + " FROM " + getExistingTableName() + " WHERE " + getExistingColumnName() + " IS NOT NULL"),};
         } else if (database instanceof DB2Database) {
-            createTablesSQL = new String[]{
-                    "CREATE TABLE " + getNewTableName() + " AS (SELECT " + getExistingColumnName() + " AS " + getNewColumnName() + " FROM " + getExistingTableName() + ") WITH NO DATA",
-                    "INSERT INTO " + getNewTableName() + " SELECT DISTINCT " + getExistingColumnName() + " FROM " + getExistingTableName() + " WHERE " + getExistingColumnName() + " IS NOT NULL",
+            createTablesSQL = new SqlStatement[]{
+                    new RawSqlStatement("CREATE TABLE " + getNewTableName() + " AS (SELECT " + getExistingColumnName() + " AS " + getNewColumnName() + " FROM " + getExistingTableName() + ") WITH NO DATA"),
+                    new RawSqlStatement("INSERT INTO " + getNewTableName() + " SELECT DISTINCT " + getExistingColumnName() + " FROM " + getExistingTableName() + " WHERE " + getExistingColumnName() + " IS NOT NULL"),
             };
         }
 
@@ -130,7 +132,7 @@ public class AddLookupTableChange extends AbstractChange {
         }
 
         if (database instanceof DB2Database) {
-            statements.add("CALL SYSPROC.ADMIN_CMD ('REORG TABLE " + getNewTableName() + "')");
+            statements.add(new RawSqlStatement("CALL SYSPROC.ADMIN_CMD ('REORG TABLE " + getNewTableName() + "')"));
         }
 
         AddPrimaryKeyChange addPKChange = new AddPrimaryKeyChange();
@@ -139,7 +141,7 @@ public class AddLookupTableChange extends AbstractChange {
         statements.addAll(Arrays.asList(addPKChange.generateStatements(database)));
 
         if (database instanceof DB2Database) {
-            statements.add("CALL SYSPROC.ADMIN_CMD ('REORG TABLE " + getNewTableName() + "')");
+            statements.add(new RawSqlStatement("CALL SYSPROC.ADMIN_CMD ('REORG TABLE " + getNewTableName() + "')"));
         }
 
         AddForeignKeyConstraintChange addFKChange = new AddForeignKeyConstraintChange();
@@ -151,7 +153,7 @@ public class AddLookupTableChange extends AbstractChange {
         addFKChange.setConstraintName(getFinalConstraintName());
         statements.addAll(Arrays.asList(addFKChange.generateStatements(database)));
 
-        return statements.toArray(new String[statements.size()]);
+        return statements.toArray(new SqlStatement[statements.size()]);
     }
 
     public String getConfirmationMessage() {

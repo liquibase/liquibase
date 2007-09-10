@@ -26,8 +26,8 @@ public class AddNotNullConstraintChangeTest extends AbstractChangeTest {
         change.setColumnDataType("varchar(200)");
         MySQLDatabase database = new MySQLDatabase();
 
-        assertEquals("UPDATE TABLE_NAME SET COL_HERE='DEFAULT_VALUE' WHERE COL_HERE IS NULL", change.generateStatements(database)[0]);
-        assertEquals("ALTER TABLE TABLE_NAME MODIFY COL_HERE varchar(200) NOT NULL", change.generateStatements(database)[1]);
+        assertEquals("UPDATE TABLE_NAME SET COL_HERE='DEFAULT_VALUE' WHERE COL_HERE IS NULL", change.generateStatements(database)[0].getSqlStatement(database));
+        assertEquals("ALTER TABLE TABLE_NAME MODIFY COL_HERE varchar(200) NOT NULL", change.generateStatements(database)[1].getSqlStatement(database));
     }
 
     @Test

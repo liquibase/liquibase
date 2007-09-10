@@ -112,7 +112,7 @@ public class MySQLDatabase extends AbstractDatabase {
                 dropFK.setConstraintName(rs.getString("CONSTRAINT_NAME"));
 
                 try {
-                    dropStatement.execute(dropFK.generateStatements(this)[0]);
+                    dropStatement.execute(dropFK.generateStatements(this)[0].getSqlStatement(this));
                 } catch (UnsupportedChangeException e) {
                     throw new JDBCException(e.getMessage());
                 }

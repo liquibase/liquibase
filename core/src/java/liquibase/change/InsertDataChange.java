@@ -1,6 +1,8 @@
 package liquibase.change;
 
 import liquibase.database.Database;
+import liquibase.database.sql.SqlStatement;
+import liquibase.database.sql.RawSqlStatement;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Table;
 import liquibase.exception.UnsupportedChangeException;
@@ -46,7 +48,7 @@ public class InsertDataChange extends AbstractChange {
         columns.remove(column);
     }
 
-    public String[] generateStatements(Database database) throws UnsupportedChangeException {
+    public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
         StringBuffer buffer = new StringBuffer();
         buffer.append("INSERT INTO ").append(getTableName()).append(" ");
         Iterator<ColumnConfig> iterator = columns.iterator();
@@ -72,7 +74,7 @@ public class InsertDataChange extends AbstractChange {
         buffer.append(" VALUES ");
         buffer.append(columnValues);
 
-        return new String[]{buffer.toString()};
+        return new SqlStatement[]{new RawSqlStatement(buffer.toString())};
     }
 
     private String getColumnValue(ColumnConfig column, Database database) {

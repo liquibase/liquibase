@@ -3,6 +3,8 @@ package liquibase.change;
 import liquibase.database.DB2Database;
 import liquibase.database.Database;
 import liquibase.database.MSSQLDatabase;
+import liquibase.database.sql.SqlStatement;
+import liquibase.database.sql.RawSqlStatement;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Index;
 import liquibase.database.structure.Table;
@@ -66,7 +68,7 @@ public class CreateIndexChange extends AbstractChange {
         this.tablespace = tablespace;
     }
 
-    public String[] generateStatements(Database database) throws UnsupportedChangeException {
+    public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
         StringBuffer buffer = new StringBuffer();
         buffer.append("CREATE INDEX ");
         buffer.append(getIndexName()).append(" ON ");
@@ -90,7 +92,7 @@ public class CreateIndexChange extends AbstractChange {
                 buffer.append(" TABLESPACE ").append(tablespace);
             }
         }
-        return new String []{buffer.toString()};
+        return new SqlStatement []{new RawSqlStatement(buffer.toString())};
     }
 
     protected Change[] createInverses() {

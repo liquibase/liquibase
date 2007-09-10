@@ -2,6 +2,8 @@ package liquibase.change;
 
 import liquibase.database.Database;
 import liquibase.database.DerbyDatabase;
+import liquibase.database.sql.SqlStatement;
+import liquibase.database.sql.RawSqlStatement;
 import liquibase.database.structure.Column;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Table;
@@ -75,9 +77,9 @@ public class MergeColumnChange extends AbstractChange {
         this.finalColumnType = finalColumnType;
     }
 
-    public String[] generateStatements(Database database) throws UnsupportedChangeException {
+    public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
 
-        List<String> statements = new ArrayList<String>();
+        List<SqlStatement> statements = new ArrayList<SqlStatement>();
 
         AddColumnChange addNewColumnChange = new AddColumnChange();
         addNewColumnChange.setTableName(getTableName());
@@ -89,7 +91,7 @@ public class MergeColumnChange extends AbstractChange {
 
         String updateStatement = "UPDATE " + getTableName() + " SET " + getFinalColumnName() + " = " + database.getConcatSql(getColumn1Name(), "'"+getJoinString()+"'", getColumn2Name());
 
-        statements.add(updateStatement);
+        statements.add(new RawSqlStatement(updateStatement));
 
         DropColumnChange dropColumn1Change = new DropColumnChange();
         dropColumn1Change.setTableName(getTableName());
@@ -101,11 +103,11 @@ public class MergeColumnChange extends AbstractChange {
         dropColumn2Change.setColumnName(getColumn2Name());
         statements.addAll(Arrays.asList(dropColumn2Change.generateStatements(database)));
 
-        return statements.toArray(new String[statements.size()]);
+        return statements.toArray(new SqlStatement[statements.size()]);
 
     }
 
-    public String[] generateStatements(@SuppressWarnings("unused") DerbyDatabase database) throws UnsupportedChangeException {
+    public SqlStatement[] generateStatements(@SuppressWarnings("unused") DerbyDatabase database) throws UnsupportedChangeException {
         throw new UnsupportedChangeException("Derby does not currently support merging columns");
     }
 

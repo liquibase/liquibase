@@ -46,8 +46,9 @@ public class InsertDataChangeTest extends AbstractChangeTest {
 
     @Test
     public void generateStatement() throws Exception {
+        OracleDatabase db = new OracleDatabase();
         assertEquals("INSERT INTO TABLE_NAME (id, name, age) VALUES ('123', 'Andrew', '21')",
-                refactoring.generateStatements(new OracleDatabase())[0]);
+                refactoring.generateStatements(db)[0].getSqlStatement(db));
     }
 
     @Test

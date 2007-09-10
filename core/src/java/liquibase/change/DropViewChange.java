@@ -1,6 +1,8 @@
 package liquibase.change;
 
 import liquibase.database.Database;
+import liquibase.database.sql.SqlStatement;
+import liquibase.database.sql.RawSqlStatement;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.View;
 import liquibase.exception.UnsupportedChangeException;
@@ -29,9 +31,9 @@ public class DropViewChange extends AbstractChange {
         this.viewName = viewName;
     }
 
-    public String[] generateStatements(Database database) throws UnsupportedChangeException {
-        return new String[]{
-                "DROP VIEW " + viewName
+    public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
+        return new SqlStatement[]{
+                new RawSqlStatement("DROP VIEW " + viewName),
         };
     }
 

@@ -22,28 +22,28 @@ public class CreateSequenceChangeTest extends AbstractChangeTest {
     public void generateStatement() throws Exception {
         CreateSequenceChange change = new CreateSequenceChange();
         change.setSequenceName("SEQ_NAME");
-        OracleDatabase oracleDatabase = new OracleDatabase();
+        OracleDatabase database = new OracleDatabase();
 
         change.setMinValue(100);
-        assertEquals("CREATE SEQUENCE SEQ_NAME MINVALUE 100", change.generateStatements(oracleDatabase)[0]);
+        assertEquals("CREATE SEQUENCE SEQ_NAME MINVALUE 100", change.generateStatements(database)[0].getSqlStatement(database));
 
         change.setMinValue(null);
         change.setMaxValue(1000);
-        assertEquals("CREATE SEQUENCE SEQ_NAME MAXVALUE 1000", change.generateStatements(oracleDatabase)[0]);
+        assertEquals("CREATE SEQUENCE SEQ_NAME MAXVALUE 1000", change.generateStatements(database)[0].getSqlStatement(database));
 
         change.setMaxValue(null);
         change.setIncrementBy(50);
-        assertEquals("CREATE SEQUENCE SEQ_NAME INCREMENT BY 50", change.generateStatements(oracleDatabase)[0]);
+        assertEquals("CREATE SEQUENCE SEQ_NAME INCREMENT BY 50", change.generateStatements(database)[0].getSqlStatement(database));
 
         change.setIncrementBy(null);
         change.setOrdered(true);
-        assertEquals("CREATE SEQUENCE SEQ_NAME ORDER", change.generateStatements(oracleDatabase)[0]);
+        assertEquals("CREATE SEQUENCE SEQ_NAME ORDER", change.generateStatements(database)[0].getSqlStatement(database));
 
         change.setMinValue(1);
         change.setMaxValue(2);
         change.setIncrementBy(3);
         change.setStartValue(4);
-        assertEquals("CREATE SEQUENCE SEQ_NAME START WITH 4 INCREMENT BY 3 MINVALUE 1 MAXVALUE 2 ORDER", change.generateStatements(oracleDatabase)[0]);
+        assertEquals("CREATE SEQUENCE SEQ_NAME START WITH 4 INCREMENT BY 3 MINVALUE 1 MAXVALUE 2 ORDER", change.generateStatements(database)[0].getSqlStatement(database));
 
     }
 

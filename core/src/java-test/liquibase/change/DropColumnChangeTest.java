@@ -23,7 +23,9 @@ public class DropColumnChangeTest extends AbstractChangeTest {
         change.setTableName("TABLE_NAME");
         change.setColumnName("COL_HERE");
 
-        assertEquals("ALTER TABLE TABLE_NAME DROP COLUMN COL_HERE", change.generateStatements(new OracleDatabase())[0]);
+        OracleDatabase database = new OracleDatabase();
+        assertEquals("ALTER TABLE TABLE_NAME DROP COLUMN COL_HERE",
+                change.generateStatements(database)[0].getSqlStatement(database));
     }
 
     @Test

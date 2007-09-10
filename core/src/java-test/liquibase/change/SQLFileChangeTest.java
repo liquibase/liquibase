@@ -2,6 +2,7 @@ package liquibase.change;
 
 import liquibase.database.MSSQLDatabase;
 import liquibase.database.OracleDatabase;
+import liquibase.database.sql.SqlStatement;
 import liquibase.ClassLoaderFileOpener;
 import liquibase.exception.SetupException;
 import liquibase.util.MD5Util;
@@ -52,8 +53,9 @@ public class SQLFileChangeTest extends AbstractChangeTest {
     @Test
 	public void generateStatement() throws Exception {
 		assertEquals(fileName,change.getPath());
-		
-    	assertEquals("TESTDATA",change.generateStatements(new OracleDatabase())[0]);
+
+        OracleDatabase database = new OracleDatabase();
+        assertEquals("TESTDATA",change.generateStatements(database)[0].getSqlStatement(database));
     	
     	assertEquals(MD5Util.computeMD5(change.getSql()), change.getMD5Sum());
 	}
@@ -76,38 +78,42 @@ public class SQLFileChangeTest extends AbstractChangeTest {
         SQLFileChange change2 = new SQLFileChange();
         change2.setSql("SELECT * FROM customer;" +
                 "SELECT * from table;");
-        String[] statements = change2.generateStatements(new OracleDatabase());
+        OracleDatabase database = new OracleDatabase();
+        SqlStatement[] statements = change2.generateStatements(database);
         
         assertEquals(2,statements.length);
-        assertEquals("SELECT * FROM customer",statements[0]);
-        assertEquals("SELECT * from table",statements[1]);
+        assertEquals("SELECT * FROM customer",statements[0].getSqlStatement(database));
+        assertEquals("SELECT * from table",statements[1].getSqlStatement(database));
     }
     
     @Test
     public void singleLineEndInSemiColon() throws Exception {
         SQLFileChange change2 = new SQLFileChange();
         change2.setSql("SELECT * FROM customer;");
-        String[] statements = change2.generateStatements(new OracleDatabase());
+        OracleDatabase database = new OracleDatabase();
+        SqlStatement[] statements = change2.generateStatements(database);
         assertEquals(1,statements.length);
-        assertEquals("SELECT * FROM customer",statements[0]);
+        assertEquals("SELECT * FROM customer",statements[0].getSqlStatement(database));
     }
     
     @Test
     public void singleLineEndGo() throws Exception {
         SQLFileChange change2 = new SQLFileChange();
         change2.setSql("SELECT * FROM customer\ngo");
-        String[] statements = change2.generateStatements(new MSSQLDatabase());
+        MSSQLDatabase database = new MSSQLDatabase();
+        SqlStatement[] statements = change2.generateStatements(database);
         assertEquals(1,statements.length);
-        assertEquals("SELECT * FROM customer",statements[0]);
+        assertEquals("SELECT * FROM customer",statements[0].getSqlStatement(database));
     }
     
     @Test
     public void singleLineBeginGo() throws Exception {
         SQLFileChange change2 = new SQLFileChange();
         change2.setSql("goSELECT * FROM customer\ngo");
-        String[] statements = change2.generateStatements(new MSSQLDatabase());
+        MSSQLDatabase database = new MSSQLDatabase();
+        SqlStatement[] statements = change2.generateStatements(database);
         assertEquals(1,statements.length);
-        assertEquals("goSELECT * FROM customer",statements[0]);
+        assertEquals("goSELECT * FROM customer",statements[0].getSqlStatement(database));
     }
     
     @Test
@@ -115,10 +121,11 @@ public class SQLFileChangeTest extends AbstractChangeTest {
         SQLFileChange change2 = new SQLFileChange();
         change2.setSql("SELECT * FROM customer\ngo\n" +
                 "SELECT * from table\ngo");
-        String[] statements = change2.generateStatements(new MSSQLDatabase());
+        MSSQLDatabase database = new MSSQLDatabase();
+        SqlStatement[] statements = change2.generateStatements(database);
         assertEquals(2,statements.length);
-        assertEquals("SELECT * FROM customer",statements[0]);
-        assertEquals("SELECT * from table",statements[1]);
+        assertEquals("SELECT * FROM customer",statements[0].getSqlStatement(database));
+        assertEquals("SELECT * from table",statements[1].getSqlStatement(database));
     }
     
     @Test
@@ -126,11 +133,12 @@ public class SQLFileChangeTest extends AbstractChangeTest {
         SQLFileChange change2 = new SQLFileChange();
         change2.setSql("SELECT * FROM go\ngo\n" +
                 "SELECT * from gogo\ngo\n");
-        String[] statements = change2.generateStatements(new MSSQLDatabase());
+        MSSQLDatabase database = new MSSQLDatabase();
+        SqlStatement[] statements = change2.generateStatements(database);
         
         assertEquals(2,statements.length);
-        assertEquals("SELECT * FROM go",statements[0]);
-        assertEquals("SELECT * from gogo",statements[1]);
+        assertEquals("SELECT * FROM go",statements[0].getSqlStatement(database));
+        assertEquals("SELECT * from gogo",statements[1].getSqlStatement(database));
     }
 
     @Test

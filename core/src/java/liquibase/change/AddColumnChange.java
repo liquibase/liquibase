@@ -1,6 +1,8 @@
 package liquibase.change;
 
 import liquibase.database.*;
+import liquibase.database.sql.SqlStatement;
+import liquibase.database.sql.RawSqlStatement;
 import liquibase.database.structure.Column;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Table;
@@ -38,8 +40,8 @@ public class AddColumnChange extends AbstractChange {
         this.column = column;
     }
 
-    public String[] generateStatements(Database database) throws UnsupportedChangeException {
-        List<String> sql = new ArrayList<String>();
+    public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
+        List<SqlStatement> sql = new ArrayList<SqlStatement>();
 
         String alterTable = "ALTER TABLE " + getTableName() + " ADD " + getColumn().getName() + " " + database.getColumnType(getColumn());
 
@@ -67,9 +69,9 @@ public class AddColumnChange extends AbstractChange {
             alterTable += getDefaultClause(database);
         }
 
-        sql.add(alterTable);
+        sql.add(new RawSqlStatement(alterTable));
         if (database instanceof DB2Database) {
-            sql.add("CALL SYSPROC.ADMIN_CMD ('REORG TABLE " + getTableName() + "')");
+            sql.add(new RawSqlStatement("CALL SYSPROC.ADMIN_CMD ('REORG TABLE " + getTableName() + "')"));
         }
 
 //        if (getColumn().getDefaultValue() != null
@@ -106,7 +108,7 @@ public class AddColumnChange extends AbstractChange {
 //            }
         }
 
-        return sql.toArray(new String[sql.size()]);
+        return sql.toArray(new SqlStatement[sql.size()]);
     }
 
     private boolean defaultClauseBeforeNotNull(Database database) {

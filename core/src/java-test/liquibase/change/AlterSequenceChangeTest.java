@@ -22,27 +22,27 @@ public class AlterSequenceChangeTest extends AbstractChangeTest {
     public void generateStatement() throws Exception {
         AlterSequenceChange refactoring = new AlterSequenceChange();
         refactoring.setSequenceName("SEQ_NAME");
-        OracleDatabase oracleDatabase = new OracleDatabase();
+        OracleDatabase database = new OracleDatabase();
 
         refactoring.setMinValue(100);
-        assertEquals("ALTER SEQUENCE SEQ_NAME MINVALUE 100", refactoring.generateStatements(oracleDatabase)[0]);
+        assertEquals("ALTER SEQUENCE SEQ_NAME MINVALUE 100", refactoring.generateStatements(database)[0].getSqlStatement(database));
 
         refactoring.setMinValue(null);
         refactoring.setMaxValue(1000);
-        assertEquals("ALTER SEQUENCE SEQ_NAME MAXVALUE 1000", refactoring.generateStatements(oracleDatabase)[0]);
+        assertEquals("ALTER SEQUENCE SEQ_NAME MAXVALUE 1000", refactoring.generateStatements(database)[0].getSqlStatement(database));
 
         refactoring.setMaxValue(null);
         refactoring.setIncrementBy(50);
-        assertEquals("ALTER SEQUENCE SEQ_NAME INCREMENT BY 50", refactoring.generateStatements(oracleDatabase)[0]);
+        assertEquals("ALTER SEQUENCE SEQ_NAME INCREMENT BY 50", refactoring.generateStatements(database)[0].getSqlStatement(database));
 
         refactoring.setIncrementBy(null);
         refactoring.setOrdered(true);
-        assertEquals("ALTER SEQUENCE SEQ_NAME ORDER", refactoring.generateStatements(oracleDatabase)[0]);
+        assertEquals("ALTER SEQUENCE SEQ_NAME ORDER", refactoring.generateStatements(database)[0].getSqlStatement(database));
 
         refactoring.setMinValue(1);
         refactoring.setMaxValue(2);
         refactoring.setIncrementBy(3);
-        assertEquals("ALTER SEQUENCE SEQ_NAME INCREMENT BY 3 MINVALUE 1 MAXVALUE 2 ORDER", refactoring.generateStatements(oracleDatabase)[0]);
+        assertEquals("ALTER SEQUENCE SEQ_NAME INCREMENT BY 3 MINVALUE 1 MAXVALUE 2 ORDER", refactoring.generateStatements(database)[0].getSqlStatement(database));
 
     }
 

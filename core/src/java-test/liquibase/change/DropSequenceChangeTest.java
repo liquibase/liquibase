@@ -28,7 +28,8 @@ public class DropSequenceChangeTest extends AbstractChangeTest {
 
     @Test
     public void generateStatement() throws Exception {
-        assertEquals("DROP SEQUENCE SEQ_NAME", change.generateStatements(new OracleDatabase())[0]);
+        OracleDatabase database = new OracleDatabase();
+        assertEquals("DROP SEQUENCE SEQ_NAME", change.generateStatements(database)[0].getSqlStatement(database));
     }
 
     @Test
