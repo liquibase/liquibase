@@ -3,10 +3,14 @@ package liquibase.migrator;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
-import liquibase.migrator.exception.*;
-import liquibase.migrator.parser.*;
+import liquibase.exception.*;
+import liquibase.parser.*;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
+import liquibase.RanChangeSet;
+import liquibase.ChangeSet;
+import liquibase.FileOpener;
+import liquibase.DatabaseChangeLogLock;
 import org.xml.sax.*;
 
 import javax.swing.*;

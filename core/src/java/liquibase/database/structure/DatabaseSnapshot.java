@@ -4,8 +4,8 @@ import liquibase.database.CacheDatabase;
 import liquibase.database.Database;
 import liquibase.database.H2Database;
 import liquibase.migrator.Migrator;
-import liquibase.migrator.diff.DiffStatusListener;
-import liquibase.migrator.exception.JDBCException;
+import liquibase.diff.DiffStatusListener;
+import liquibase.exception.JDBCException;
 import liquibase.util.StringUtils;
 
 import java.sql.DatabaseMetaData;

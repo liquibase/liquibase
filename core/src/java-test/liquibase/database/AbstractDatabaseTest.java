@@ -7,7 +7,7 @@ import static org.easymock.EasyMock.replay;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import liquibase.migrator.change.ColumnConfig;
+import liquibase.change.ColumnConfig;
 
 import org.junit.Test;
 

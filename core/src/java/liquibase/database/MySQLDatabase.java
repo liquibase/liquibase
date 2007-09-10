@@ -1,8 +1,8 @@
 package liquibase.database;
 
-import liquibase.migrator.change.DropForeignKeyConstraintChange;
-import liquibase.migrator.exception.JDBCException;
-import liquibase.migrator.exception.UnsupportedChangeException;
+import liquibase.change.DropForeignKeyConstraintChange;
+import liquibase.exception.JDBCException;
+import liquibase.exception.UnsupportedChangeException;
 
 import java.sql.*;
 

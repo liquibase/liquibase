@@ -1,7 +1,8 @@
 package liquibase.migrator;
 
-import liquibase.migrator.change.CreateTableChange;
-import liquibase.migrator.change.InsertDataChange;
+import liquibase.change.CreateTableChange;
+import liquibase.change.InsertDataChange;
+import liquibase.ChangeSet;
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 

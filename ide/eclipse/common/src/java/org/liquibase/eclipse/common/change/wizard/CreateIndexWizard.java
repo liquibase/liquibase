@@ -3,9 +3,9 @@ package org.liquibase.eclipse.common.change.wizard;
 import java.sql.Connection;
 import java.util.Arrays;
 
-import liquibase.migrator.change.Change;
-import liquibase.migrator.change.ColumnConfig;
-import liquibase.migrator.change.CreateIndexChange;
+import liquibase.change.Change;
+import liquibase.change.ColumnConfig;
+import liquibase.change.CreateIndexChange;
 
 import org.eclipse.datatools.connectivity.sqm.core.rte.ICatalogObject;
 import org.eclipse.datatools.modelbase.sql.schema.Database;

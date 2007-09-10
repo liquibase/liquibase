@@ -1,8 +1,9 @@
 package liquibase.migrator;
 
 import liquibase.database.Database;
-import liquibase.migrator.exception.JDBCException;
-import liquibase.migrator.exception.LockException;
+import liquibase.exception.JDBCException;
+import liquibase.exception.LockException;
+import liquibase.RanChangeSet;
 
 import java.util.List;
 import java.util.Set;

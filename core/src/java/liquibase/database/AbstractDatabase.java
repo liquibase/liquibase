@@ -1,13 +1,13 @@
 package liquibase.database;
 
 import liquibase.database.structure.DatabaseSnapshot;
-import liquibase.migrator.DatabaseChangeLogLock;
+import liquibase.DatabaseChangeLogLock;
 import liquibase.migrator.Migrator;
-import liquibase.migrator.change.ColumnConfig;
-import liquibase.migrator.change.DropForeignKeyConstraintChange;
-import liquibase.migrator.exception.JDBCException;
-import liquibase.migrator.exception.LockException;
-import liquibase.migrator.exception.UnsupportedChangeException;
+import liquibase.change.ColumnConfig;
+import liquibase.change.DropForeignKeyConstraintChange;
+import liquibase.exception.JDBCException;
+import liquibase.exception.LockException;
+import liquibase.exception.UnsupportedChangeException;
 import liquibase.util.StreamUtil;
 
 import java.io.IOException;

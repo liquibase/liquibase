@@ -12,6 +12,9 @@ import java.net.URL;
 import java.util.Enumeration;
 import java.util.Vector;
 
+import liquibase.FileOpener;
+import liquibase.CompositeFileOpener;
+
 public class CompositeFileOpenerTest {
     FileOpener first;
     FileOpener second;

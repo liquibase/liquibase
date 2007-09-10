@@ -1,5 +1,5 @@
 Manifest-Version: 1.0
-Main-Class: liquibase.migrator.commandline.CommandLineMigrator
+Main-Class: liquibase.commandline.CommandLineMigrator
 Bundle-ManifestVersion: 2
 Bundle-Name: LiquiBase Migrator Plug-in
 Bundle-SymbolicName: org.liquibase.migrator;singleton:=true
@@ -9,14 +9,14 @@ Export-Package: liquibase,
  liquibase.database,
  liquibase.database.structure,
  liquibase.migrator,
- liquibase.migrator.ant,
- liquibase.migrator.change,
- liquibase.migrator.commandline,
- liquibase.migrator.diff,
- liquibase.migrator.exception,
- liquibase.migrator.maven,
- liquibase.migrator.parser,
- liquibase.migrator.preconditions,
+ liquibase.ant,
+ liquibase.change,
+ liquibase.commandline,
+ liquibase.diff,
+ liquibase.exception,
+ liquibase.maven,
+ liquibase.parser,
+ liquibase.preconditions,
  liquibase.migrator.servlet,
  liquibase.util
 Bundle-ClassPath: .,

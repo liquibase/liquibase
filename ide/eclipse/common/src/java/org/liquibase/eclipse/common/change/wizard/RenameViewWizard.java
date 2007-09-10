@@ -2,8 +2,8 @@ package org.liquibase.eclipse.common.change.wizard;
 
 import java.sql.Connection;
 
-import liquibase.migrator.change.Change;
-import liquibase.migrator.change.RenameViewChange;
+import liquibase.change.Change;
+import liquibase.change.RenameViewChange;
 
 import org.eclipse.datatools.connectivity.sqm.core.rte.ICatalogObject;
 import org.eclipse.datatools.modelbase.sql.schema.Database;

@@ -12,7 +12,7 @@
             <aggregator>false</aggregator>
             <requiresOnline>false</requiresOnline>
             <inheritedByDefault>true</inheritedByDefault>
-            <implementation>liquibase.migrator.maven.LiquibaseMojo</implementation>
+            <implementation>liquibase.maven.LiquibaseMojo</implementation>
             <language>java</language>
             <instantiationStrategy>per-lookup</instantiationStrategy>
             <executionStrategy>once-per-session</executionStrategy>

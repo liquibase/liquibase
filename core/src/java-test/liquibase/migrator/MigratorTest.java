@@ -1,7 +1,9 @@
 package liquibase.migrator;
 
 import liquibase.database.*;
-import liquibase.migrator.exception.JDBCException;
+import liquibase.exception.JDBCException;
+import liquibase.ClassLoaderFileOpener;
+import liquibase.FileOpener;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.expectLastCall;
 import static org.easymock.classextension.EasyMock.*;
@@ -11,7 +13,6 @@ import org.junit.Test;
 
 import java.io.InputStream;
 import java.net.URL;
-import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.util.Arrays;
 import java.util.Enumeration;
