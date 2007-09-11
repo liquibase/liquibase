@@ -247,7 +247,7 @@ public abstract class AbstractChange implements Change {
                 dbStatement.execute(statement.getSqlStatement(database));
                 dbStatement.close();
             } catch (SQLException e) {
-                throw new JDBCException((e.getMessage() + " [" + statement + "]").replaceAll("\n", "").replaceAll("\r", ""));
+                throw new JDBCException((e.getMessage() + " [" + statement.getSqlStatement(database) + "]").replaceAll("\n", "").replaceAll("\r", ""));
             }
         }
     }
