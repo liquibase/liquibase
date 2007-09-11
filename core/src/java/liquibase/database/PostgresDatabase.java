@@ -198,4 +198,8 @@ public class PostgresDatabase extends AbstractDatabase {
         return true;
     }
 
+
+    protected String getViewDefinitionSql(String name) throws JDBCException {
+        return "select definition from pg_views where viewname='"+name+"'";
+    }
 }

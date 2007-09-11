@@ -132,4 +132,6 @@ public interface Database {
     boolean shouldQuoteValue(String value);
 
     boolean supportsTablespaces();
+
+    String getViewDefinition(String name) throws JDBCException;
 }

@@ -128,7 +128,10 @@ public class DatabaseSnapshot {
             } else if ("VIEW".equals(type)) {
                 View view = new View();
                 view.setName(name);
+                view.setDefinition(database.getViewDefinition(name));
+
                 viewsMap.put(name, view);
+
             }
         }
         rs.close();

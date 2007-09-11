@@ -259,6 +259,8 @@ public class DiffResult {
         addUnexpectedForeignKeyChanges(changes);
         addMissingSequenceChanges(changes);
         addUnexpectedSequenceChanges(changes);
+        addMissingViewChanges(changes);
+        addUnexpectedViewChanges(changes);
 
         for (Change change : changes) {
             Element changeSet = doc.createElement("changeSet");
@@ -396,6 +398,28 @@ public class DiffResult {
             changes.add(change);
         }
     }
+
+    private void addMissingViewChanges(List<Change> changes) {
+        for (View view : getMissingViews()) {
+
+            CreateViewChange change = new CreateViewChange();
+            change.setViewName(view.getName());
+            change.setSelectQuery(view.getDefinition());
+
+            changes.add(change);
+        }
+    }
+
+    private void addUnexpectedViewChanges(List<Change> changes) {
+        for (View view : getUnexpectedViews()) {
+
+            DropViewChange change = new DropViewChange();
+            change.setViewName(view.getName());
+
+            changes.add(change);
+        }
+    }
+
 
     private void addMissingColumnChanges(List<Change> changes, Database database) {
         for (Column column : getMissingColumns()) {

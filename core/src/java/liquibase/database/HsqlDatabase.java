@@ -174,4 +174,9 @@ public class HsqlDatabase extends AbstractDatabase {
     public void setConnection(Connection conn) {
         super.setConnection(new HsqlConnectionDelegate(conn));
     }
+
+
+    protected String getViewDefinitionSql(String name) throws JDBCException {
+        return "SELECT VIEW_DEFINITION FROM INFORMATION_SCHEMA.SYSTEM_VIEWS WHERE TABLE_NAME = '"+name+"'";
+    }
 }
