@@ -166,4 +166,13 @@ public class DB2Database extends AbstractDatabase {
     public boolean supportsTablespaces() {
         return true;
     }
+
+    protected String getViewDefinitionSql(String name) throws JDBCException {
+        return "select view_definition from SYSIBM.VIEWS where TABLE_NAME='" + name + "' and TABLE_SCHEMA='" + getSchemaName() + "'";
+    }
+
+    public String getViewDefinition(String name) throws JDBCException {
+        return super.getViewDefinition(name).replaceFirst("CREATE VIEW \\w+ AS ", ""); //db2 returns "create view....as select
+    }
+
 }

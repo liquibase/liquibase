@@ -48,18 +48,18 @@ public abstract class AbstractDatabase implements Database {
     public void setConnection(Connection conn) {
         this.connection = new SQLConnectionDelegate(conn);
         try {
-        	connection.setAutoCommit(getAutoCommitMode());
-        } catch(SQLException sqle) {
-        	log.warning("Can not set auto commit to " + getAutoCommitMode() +" on connection");
+            connection.setAutoCommit(getAutoCommitMode());
+        } catch (SQLException sqle) {
+            log.warning("Can not set auto commit to " + getAutoCommitMode() + " on connection");
         }
     }
-    
+
     public void setConnection(DatabaseConnection conn) {
         this.connection = conn;
         try {
             connection.setAutoCommit(getAutoCommitMode());
-        } catch(SQLException sqle) {
-            log.warning("Can not set auto commit to " + getAutoCommitMode() +" on connection");
+        } catch (SQLException sqle) {
+            log.warning("Can not set auto commit to " + getAutoCommitMode() + " on connection");
         }
     }
 
@@ -74,7 +74,7 @@ public abstract class AbstractDatabase implements Database {
      * By default databases should support DDL within a transaction.
      */
     public boolean supportsDDLInTransaction() {
-    	return true;
+        return true;
     }
 
     /**
@@ -144,7 +144,6 @@ public abstract class AbstractDatabase implements Database {
         return new HashSet<String>();
     }
 
-
     // ------- DATABASE FEATURE INFORMATION METHODS ---- //
 
     /**
@@ -153,7 +152,6 @@ public abstract class AbstractDatabase implements Database {
     public boolean supportsSequences() {
         return true;
     }
-
 
     // ------- DATABASE-SPECIFIC SQL METHODS ---- //
 
@@ -211,11 +209,11 @@ public abstract class AbstractDatabase implements Database {
 
     /**
      * Return a date literal with the same value as a string formatted using ISO 8601.
-     *
+     * <p/>
      * Note: many databases accept date literals in ISO8601 format with the 'T' replaced with
      * a space. Only databases which do not accept these strings should need to override this
      * method.
-     *
+     * <p/>
      * Implementation restriction:
      * Currently, only the following subsets of ISO8601 are supported:
      * YYYY-MM-DD
@@ -311,7 +309,7 @@ public abstract class AbstractDatabase implements Database {
         return "COMMIT";
     }
 
-    public String getConcatSql(String ... values) {
+    public String getConcatSql(String... values) {
         StringBuffer returnString = new StringBuffer();
         for (String value : values) {
             returnString.append(value).append(" || ");
@@ -331,15 +329,15 @@ public abstract class AbstractDatabase implements Database {
     }
 
     private String getChangeLogLockInsertSQL() {
-        return ("insert into "+getDatabaseChangeLogLockTableName()+" (id, locked) values (1, " + getFalseBooleanValue() + ")").toUpperCase();
+        return ("insert into " + getDatabaseChangeLogLockTableName() + " (id, locked) values (1, " + getFalseBooleanValue() + ")").toUpperCase();
     }
 
     protected String getCreateChangeLogLockSQL() {
-        return ("create table "+getDatabaseChangeLogLockTableName()+" (id int not null primary key, locked " + getBooleanType() + " not null, lockGranted " + getDateTimeType() + ", lockedby varchar(255))").toUpperCase();
+        return ("create table " + getDatabaseChangeLogLockTableName() + " (id int not null primary key, locked " + getBooleanType() + " not null, lockGranted " + getDateTimeType() + ", lockedby varchar(255))").toUpperCase();
     }
 
     protected String getCreateChangeLogSQL() {
-        return ("CREATE TABLE "+getDatabaseChangeLogTableName()+" (id varchar(150) not null, " +
+        return ("CREATE TABLE " + getDatabaseChangeLogTableName() + " (id varchar(150) not null, " +
                 "author varchar(150) not null, " +
                 "filename varchar(255) not null, " +
                 "dateExecuted " + getDateTimeType() + " not null, " +
@@ -353,8 +351,7 @@ public abstract class AbstractDatabase implements Database {
 
     public boolean acquireLock(Migrator migrator) throws LockException {
         if (!migrator.getDatabase().doesChangeLogLockTableExist()) {
-            if (migrator.getMode().equals(Migrator.Mode.EXECUTE_MODE) || migrator.getMode().equals(Migrator.Mode.EXECUTE_ROLLBACK_MODE))
-            {
+            if (migrator.getMode().equals(Migrator.Mode.EXECUTE_MODE) || migrator.getMode().equals(Migrator.Mode.EXECUTE_ROLLBACK_MODE)) {
                 throw new LockException("Could not acquire lock, table does not exist");
             } else {
                 return true;
@@ -374,7 +371,7 @@ public abstract class AbstractDatabase implements Database {
             if (locked) {
                 return false;
             } else {
-                pstmt = conn.prepareStatement("update "+getDatabaseChangeLogLockTableName()+" set locked=?, lockgranted=?, lockedby=? where id=1".toUpperCase());
+                pstmt = conn.prepareStatement("update " + getDatabaseChangeLogLockTableName() + " set locked=?, lockgranted=?, lockedby=? where id=1".toUpperCase());
                 pstmt.setBoolean(1, true);
                 pstmt.setTimestamp(2, new Timestamp(new java.util.Date().getTime()));
                 pstmt.setString(3, InetAddress.getLocalHost().getCanonicalHostName() + " (" + InetAddress.getLocalHost().getHostAddress() + ")");
@@ -418,12 +415,12 @@ public abstract class AbstractDatabase implements Database {
             DatabaseConnection conn = getConnection();
             PreparedStatement stmt = null;
             try {
-                String releaseSQL = ("update "+getDatabaseChangeLogLockTableName()+" set locked=?, lockgranted=null, lockedby=null where id=1").toUpperCase();
+                String releaseSQL = ("update " + getDatabaseChangeLogLockTableName() + " set locked=?, lockgranted=null, lockedby=null where id=1").toUpperCase();
                 stmt = conn.prepareStatement(releaseSQL);
                 stmt.setBoolean(1, false);
                 int updatedRows = stmt.executeUpdate();
                 if (updatedRows != 1) {
-                    throw new LockException("Did not update change log lock correctly.\n\n"+releaseSQL+" updated "+updatedRows+" instead of the expected 1 row.");
+                    throw new LockException("Did not update change log lock correctly.\n\n" + releaseSQL + " updated " + updatedRows + " instead of the expected 1 row.");
                 }
                 conn.commit();
                 log.info("Successfully released change log lock");
@@ -448,7 +445,7 @@ public abstract class AbstractDatabase implements Database {
         try {
             List<DatabaseChangeLogLock> allLocks = new ArrayList<DatabaseChangeLogLock>();
             stmt = conn.createStatement();
-            rs = stmt.executeQuery(("select id, locked, lockgranted, lockedby from "+getDatabaseChangeLogLockTableName()).toUpperCase());
+            rs = stmt.executeQuery(("select id, locked, lockgranted, lockedby from " + getDatabaseChangeLogLockTableName()).toUpperCase());
             while (rs.next()) {
                 boolean locked = rs.getBoolean("locked");
                 if (locked) {
@@ -477,7 +474,7 @@ public abstract class AbstractDatabase implements Database {
     }
 
     protected String getSelectChangeLogLockSQL() {
-        return ("select locked from "+getDatabaseChangeLogLockTableName()+" where id=1").toUpperCase();
+        return ("select locked from " + getDatabaseChangeLogLockTableName() + " where id=1").toUpperCase();
     }
 
     public boolean doesChangeLogTableExist() {
@@ -524,30 +521,30 @@ public abstract class AbstractDatabase implements Database {
                 }
 
                 if (!hasDescription) {
-                    statementsToExecute.add("ALTER TABLE "+getDatabaseChangeLogTableName()+" ADD DESCRIPTION VARCHAR(255)");
+                    statementsToExecute.add("ALTER TABLE " + getDatabaseChangeLogTableName() + " ADD DESCRIPTION VARCHAR(255)");
                 }
                 if (!hasTag) {
-                    statementsToExecute.add("ALTER TABLE "+getDatabaseChangeLogTableName()+" ADD TAG VARCHAR(255)");
+                    statementsToExecute.add("ALTER TABLE " + getDatabaseChangeLogTableName() + " ADD TAG VARCHAR(255)");
                 }
                 if (!hasComments) {
-                    statementsToExecute.add("ALTER TABLE "+getDatabaseChangeLogTableName()+" ADD COMMENTS VARCHAR(255)");
+                    statementsToExecute.add("ALTER TABLE " + getDatabaseChangeLogTableName() + " ADD COMMENTS VARCHAR(255)");
                 }
                 if (!hasLiquibase) {
-                    statementsToExecute.add("ALTER TABLE "+getDatabaseChangeLogTableName()+" ADD LIQUIBASE VARCHAR(255)");
+                    statementsToExecute.add("ALTER TABLE " + getDatabaseChangeLogTableName() + " ADD LIQUIBASE VARCHAR(255)");
                 }
 
             } else if (!changeLogCreateAttempted) {
                 changeLogCreateAttempted = true;
                 String createTableStatement = getCreateChangeLogSQL();
                 if (!canCreateChangeLogTable()) {
-                    throw new JDBCException("Cannot create "+getDatabaseChangeLogTableName()+" table for your database.\n\n" +
+                    throw new JDBCException("Cannot create " + getDatabaseChangeLogTableName() + " table for your database.\n\n" +
                             "Please construct it manually using the following SQL as a base and re-run LiquiBase:\n\n" +
                             createTableStatement);
                 }
                 // If there is no table in the database for recording change history create one.
                 statementsToExecute.add(createTableStatement);
                 if (migrator.getMode().equals(Migrator.Mode.EXECUTE_MODE)) {
-                    log.info("Creating database history table with name: "+getDatabaseChangeLogTableName());
+                    log.info("Creating database history table with name: " + getDatabaseChangeLogTableName());
                     changeLogTableExists = true;
                 }
             }
@@ -607,6 +604,7 @@ public abstract class AbstractDatabase implements Database {
     protected boolean canCreateChangeLogTable() throws JDBCException {
         return true;
     }
+
     /**
      * This method will check the database ChangeLogLock table used to keep track of
      * if a machine is updating the database. If the table does not exist it will create one
@@ -627,13 +625,13 @@ public abstract class AbstractDatabase implements Database {
                         statement = connection.createStatement();
                         statement.executeUpdate(createTableStatement);
                         connection.commit();
-                        log.info("Created database lock table with name: "+getDatabaseChangeLogLockTableName());
+                        log.info("Created database lock table with name: " + getDatabaseChangeLogLockTableName());
                         changeLogLockTableExists = true;
                     } else {
                         if (!migrator.getMode().equals(Migrator.Mode.OUTPUT_FUTURE_ROLLBACK_SQL_MODE)) {
                             if (!outputtedLockWarning) {
                                 migrator.getOutputSQLWriter().write(migrator.getDatabase().getLineComment() + "-----------------------------------------------------------------------------------------------" + StreamUtil.getLineSeparator());
-                                migrator.getOutputSQLWriter().write(migrator.getDatabase().getLineComment() + " "+getDatabaseChangeLogLockTableName()+" table does not exist." + StreamUtil.getLineSeparator());
+                                migrator.getOutputSQLWriter().write(migrator.getDatabase().getLineComment() + " " + getDatabaseChangeLogLockTableName() + " table does not exist." + StreamUtil.getLineSeparator());
                                 migrator.getOutputSQLWriter().write(migrator.getDatabase().getLineComment() + " Race conditions may cause a corrupted sql script." + StreamUtil.getLineSeparator());
                                 migrator.getOutputSQLWriter().write(migrator.getDatabase().getLineComment() + " Consider running: " + StreamUtil.getLineSeparator());
                                 migrator.getOutputSQLWriter().write(migrator.getDatabase().getLineComment() + " " + getCreateChangeLogLockSQL() + ";" + StreamUtil.getLineSeparator());
@@ -661,14 +659,14 @@ public abstract class AbstractDatabase implements Database {
             if (changeLogLockTableExists) {
                 statement = connection.createStatement();
 
-                rs = statement.executeQuery("select * from "+getDatabaseChangeLogLockTableName()+" where id=1".toUpperCase());
+                rs = statement.executeQuery("select * from " + getDatabaseChangeLogLockTableName() + " where id=1".toUpperCase());
                 if (!rs.next()) {
                     // If there is no table in the database for recording change history create one.
                     if (migrator.getMode().equals(Migrator.Mode.EXECUTE_MODE)) {
                         statement = connection.createStatement();
                         statement.executeUpdate(insertRowStatment);
                         connection.commit();
-                        log.info("Created database lock table with name: "+getDatabaseChangeLogLockTableName());
+                        log.info("Created database lock table with name: " + getDatabaseChangeLogLockTableName());
                     } else {
                         migrator.getOutputSQLWriter().append(insertRowStatment);
                         migrator.getOutputSQLWriter().append(";");
@@ -927,7 +925,6 @@ public abstract class AbstractDatabase implements Database {
 
     abstract protected void dropSequences(DatabaseConnection conn) throws JDBCException;
 
-
     // ------- DATABASE TAGGING METHODS ---- //
 
     /**
@@ -1044,7 +1041,7 @@ public abstract class AbstractDatabase implements Database {
 
     public String toString() {
         try {
-            return getConnectionUsername()+" @ "+getConnectionURL();
+            return getConnectionUsername() + " @ " + getConnectionURL();
         } catch (JDBCException e) {
             return super.toString();
         }
@@ -1054,4 +1051,53 @@ public abstract class AbstractDatabase implements Database {
     public boolean shouldQuoteValue(String value) {
         return true;
     }
+
+    public String getViewDefinition(String name) throws JDBCException {
+        Statement stmt = null;
+        ResultSet resultSet = null;
+        try {
+            String definition;
+            stmt = getConnection().createStatement();
+            resultSet = stmt.executeQuery(getViewDefinitionSql(name));
+            if (resultSet.next()) {
+                definition = resultSet.getString(1);
+            } else {
+                throw new JDBCException("Could not retrieve definition for view " + name);
+            }
+            if (resultSet.next()) {
+                throw new JDBCException("Found too many definitions for " + name);
+            }
+            return definition;
+        } catch (SQLException e) {
+            throw new JDBCException(e);
+        } finally {
+            if (resultSet != null) {
+                try {
+                    resultSet.close();
+                } catch (SQLException e) {
+                    ;
+                }
+            }
+            if (stmt != null) {
+                try {
+                    stmt.close();
+                } catch (SQLException e) {
+                    ;
+                }
+            }
+        }
+    }
+
+    protected String getViewDefinitionSql(String name) throws JDBCException {
+        String sql = "select view_definition from information_schema.views where upper(table_name)='" + name.toUpperCase() + "'";
+        if (getSchemaName() != null) {
+            sql += " and table_schema='" + getSchemaName() + "'";
+        }
+        if (getCatalogName() != null) {
+            sql +=  " and table_catalog='"+getCatalogName()+"'";
+
+        }
+        return sql;
+    }
+
 }

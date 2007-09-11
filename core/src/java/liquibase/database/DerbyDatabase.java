@@ -99,4 +99,8 @@ public class DerbyDatabase extends AbstractDatabase {
     public boolean supportsTablespaces() {
         return false;
     }
+
+    protected String getViewDefinitionSql(String name) throws JDBCException {
+        return "select V.VIEWDEFINITION from SYS.SYSVIEWS V, SYS.SYSTABLES T WHERE  V.TABLEID=T.TABLEID AND T.TABLENAME='"+name+"'";
+    }
 }

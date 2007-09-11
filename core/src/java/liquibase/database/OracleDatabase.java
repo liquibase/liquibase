@@ -201,4 +201,7 @@ public class OracleDatabase extends AbstractDatabase {
         return true;
     }
 
+    protected String getViewDefinitionSql(String name) {
+        return "SELECT TEXT FROM USER_VIEWS WHERE upper(VIEW_NAME)='"+name.toUpperCase()+"'";
+    }
 }

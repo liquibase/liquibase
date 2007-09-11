@@ -145,4 +145,8 @@ public class MySQLDatabase extends AbstractDatabase {
         return false;
     }
 
+
+    public String getSchemaName() throws JDBCException {
+        return super.getSchemaName().replaceFirst("\\@.*","");
+    }
 }

@@ -5,6 +5,7 @@ import liquibase.exception.JDBCException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.ResultSet;
 
 public class H2Database extends HsqlDatabase {
     public String getProductName() {
@@ -60,4 +61,13 @@ public class H2Database extends HsqlDatabase {
     public boolean supportsTablespaces() {
         return false;
     }
+
+    public String getViewDefinition(String name) throws JDBCException {
+        return super.getViewDefinition(name).replaceFirst(".*?\n", ""); //h2 returns "create view....as\nselect
+    }
+
+    protected String getViewDefinitionSql(String name) throws JDBCException {
+        return "SELECT VIEW_DEFINITION FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_NAME = '"+name+"'";
+    }
+
 }

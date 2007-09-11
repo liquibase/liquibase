@@ -6,6 +6,7 @@ import java.util.List;
 public class View implements DatabaseObject, Comparable<View> {
     private String name;
     private List<Column> columns = new ArrayList<Column>();
+    private String definition;
 
     public String getName() {
         return name;
@@ -22,6 +23,15 @@ public class View implements DatabaseObject, Comparable<View> {
 
     public void addColumn(Column column) {
         columns.add(column);
+    }
+
+
+    public String getDefinition() {
+        return definition;
+    }
+
+    public void setDefinition(String definition) {
+        this.definition = definition;
     }
 
     public boolean equals(Object o) {

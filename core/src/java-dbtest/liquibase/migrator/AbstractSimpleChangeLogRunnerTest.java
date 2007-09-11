@@ -252,7 +252,7 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
         assertEquals(0, finalDiffResult.getMissingPrimaryKeys().size());
         assertEquals(0, finalDiffResult.getMissingSequences().size());
         assertEquals(0, finalDiffResult.getMissingTables().size());
-//        assertEquals(0, finalDiffResult.getMissingViews().size());  //disabled for now because we can't diff views
+        assertEquals(0, finalDiffResult.getMissingViews().size());
         assertEquals(0, finalDiffResult.getUnexpectedColumns().size());
         assertEquals(0, finalDiffResult.getUnexpectedForeignKeys().size());
         assertEquals(0, finalDiffResult.getUnexpectedIndexes().size());
