@@ -103,4 +103,9 @@ public class DerbyDatabase extends AbstractDatabase {
     protected String getViewDefinitionSql(String name) throws JDBCException {
         return "select V.VIEWDEFINITION from SYS.SYSVIEWS V, SYS.SYSTABLES T WHERE  V.TABLEID=T.TABLEID AND T.TABLENAME='"+name+"'";
     }
+
+
+    public String getViewDefinition(String name) throws JDBCException {
+        return super.getViewDefinition(name).replaceFirst("CREATE VIEW \\w+ AS ","");
+    }
 }
