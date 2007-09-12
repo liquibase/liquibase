@@ -26,10 +26,10 @@
 &lt;?xml version="1.0" encoding="UTF-8"?&gt;
 
 &lt;databaseChangeLog
-  xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.1"
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.3"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.1
-         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.1.xsd"&gt;
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.3
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.3.xsd"&gt;
     &lt;changeSet id="1" author="bob"&gt;
         &lt;comment&gt;A sample change log&lt;/comment&gt;
         &lt;createTable/&gt;
@@ -46,6 +46,7 @@
                         Each changeSet tag is uniquely identified by the combination of the "id" tag, the "author" tag,
                         and the changelog file classpath name.  The id tag is only used as an identifier, it does not direct the
                         order that changes are run and does not even have to be an integer.
+                        If you do not know or do not wish to save the actual author, simply use a placeholder value such as "UNKNOWN".
                     </p>
                     <p>
                         A changeSet may include an optional "dbms" attribute. If this is included, then it specifies the
