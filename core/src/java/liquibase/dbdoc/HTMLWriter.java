@@ -12,6 +12,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.util.List;
+import java.util.Date;
 
 public abstract class HTMLWriter {
     protected File outputDir;
@@ -29,7 +30,7 @@ public abstract class HTMLWriter {
         return new FileWriter(new File(outputDir, object.toString().toLowerCase() + ".html"));
     }
 
-    public void writeHTML(Object object, List<Change> changes, Migrator migrator) throws IOException, DatabaseHistoryException, JDBCException {
+    public void writeHTML(Object object, List<Change> ranChanges, List<Change> changesToRun, Migrator migrator, String changeLog) throws IOException, DatabaseHistoryException, JDBCException {
         FileWriter fileWriter = createFileWriter(object);
 
 
@@ -42,8 +43,9 @@ public abstract class HTMLWriter {
 
             fileWriter.append("<H2>").append(createTitle(object)).append("</H2>\n");
 
-            writeCustomHTML(fileWriter, object, changes);
-            writeChanges(fileWriter, object, changes, migrator);
+            writeBody(fileWriter, object, ranChanges, changesToRun, migrator);
+
+            writeFooter(fileWriter, migrator, changeLog);
 
             fileWriter.append("</body>");
             fileWriter.append("</html>");
@@ -51,6 +53,21 @@ public abstract class HTMLWriter {
             fileWriter.close();
         }
 
+    }
+
+    private void writeFooter(FileWriter fileWriter, Migrator migrator, String changeLog) throws IOException {
+        fileWriter.append("<hr>Generated: ");
+        fileWriter.append(DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(new Date()));
+        fileWriter.append("<BR>Against: ");
+        fileWriter.append(migrator.getDatabase().toString());
+        fileWriter.append("<BR>Change Log: ");
+        fileWriter.append(changeLog);
+    }
+
+    protected void writeBody(FileWriter fileWriter, Object object, List<Change> ranChanges, List<Change> changesToRun, Migrator migrator) throws IOException, DatabaseHistoryException, JDBCException {
+        writeCustomHTML(fileWriter, object, ranChanges);
+        writeChanges("Pending Changes", fileWriter, object, changesToRun, migrator);
+        writeChanges("Past Changes", fileWriter, object, ranChanges, migrator);
     }
 
     protected void writeTable(String title, List<List<String>> cells, FileWriter fileWriter) throws IOException {
@@ -153,12 +170,12 @@ public abstract class HTMLWriter {
 
     protected abstract String createTitle(Object object);
 
-    private void writeChanges(FileWriter fileWriter,Object object, List<Change> changes, Migrator migrator) throws IOException, DatabaseHistoryException, JDBCException {
+    protected void writeChanges(String title, FileWriter fileWriter, Object object, List<Change> changes, Migrator migrator) throws IOException, DatabaseHistoryException, JDBCException {
         fileWriter.append("<p><TABLE BORDER=\"1\" WIDTH=\"100%\" CELLPADDING=\"3\" CELLSPACING=\"0\" SUMMARY=\"\">\n");
         fileWriter.append("<TR BGCOLOR=\"#CCCCFF\" CLASS=\"TableHeadingColor\">\n");
         fileWriter.append("<TD COLSPAN='4'><FONT SIZE=\"+2\">\n");
         fileWriter.append("<B>");
-        fileWriter.append("Changes Affecting \"");
+        fileWriter.append(title).append(" For \"");
         fileWriter.append(String.valueOf(object));
         fileWriter.append("\"");
         fileWriter.append("</B></FONT></TD>\n");
@@ -178,7 +195,8 @@ public abstract class HTMLWriter {
 
                     ChangeSet.RunStatus runStatus = migrator.getRunStatus(change.getChangeSet());
                     if (runStatus.equals(ChangeSet.RunStatus.NOT_RAN)) {
-                        writeTD(fileWriter, "NOT YET RAN");
+                        String anchor = change.getChangeSet().toString(false).replaceAll("\\W","_");
+                        writeTD(fileWriter, "NOT YET RAN [<a href='../pending/sql.html#"+ anchor +"'>SQL</a>]");
                     } else if (runStatus.equals(ChangeSet.RunStatus.INVALID_MD5SUM)) {
                         writeTD(fileWriter, "INVALID MD5SUM");
                     } else if (runStatus.equals(ChangeSet.RunStatus.ALREADY_RAN)) {
