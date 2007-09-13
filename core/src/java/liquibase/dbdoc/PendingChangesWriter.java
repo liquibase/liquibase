@@ -4,6 +4,7 @@ import liquibase.change.Change;
 import liquibase.migrator.Migrator;
 import liquibase.exception.DatabaseHistoryException;
 import liquibase.exception.JDBCException;
+import liquibase.database.Database;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -21,10 +22,10 @@ public class PendingChangesWriter extends HTMLWriter {
     }
 
     protected void writeBody(FileWriter fileWriter, Object object, List<Change> ranChanges, List<Change> changesToRun, Migrator migrator) throws IOException, DatabaseHistoryException, JDBCException {
-        writeCustomHTML(fileWriter, object, ranChanges);
+        writeCustomHTML(fileWriter, object, ranChanges, migrator.getDatabase());
         writeChanges("Pending Changes", fileWriter, object, changesToRun, migrator);
     }
 
-    protected void writeCustomHTML(FileWriter fileWriter, Object object, List<Change> changes) throws IOException {
+    protected void writeCustomHTML(FileWriter fileWriter, Object object, List<Change> changes, Database database) throws IOException {
     }
 }

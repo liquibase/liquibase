@@ -1,6 +1,7 @@
 package liquibase.dbdoc;
 
 import liquibase.change.Change;
+import liquibase.database.Database;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -17,6 +18,6 @@ public class AuthorWriter extends HTMLWriter {
         return object.toString() + " (Author)";
     }
 
-    protected void writeCustomHTML(FileWriter fileWriter, Object object, List<Change> changes) throws IOException {
+    protected void writeCustomHTML(FileWriter fileWriter, Object object, List<Change> changes, Database database) throws IOException {
     }
 }
