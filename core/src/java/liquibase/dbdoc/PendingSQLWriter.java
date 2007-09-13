@@ -7,6 +7,7 @@ import liquibase.exception.JDBCException;
 import liquibase.exception.UnsupportedChangeException;
 import liquibase.exception.MigrationFailedException;
 import liquibase.database.sql.SqlStatement;
+import liquibase.database.Database;
 import liquibase.ChangeSet;
 
 import java.io.File;
@@ -49,6 +50,6 @@ public class PendingSQLWriter extends HTMLWriter {
         fileWriter.append("</pre></code>");
     }
 
-    protected void writeCustomHTML(FileWriter fileWriter, Object object, List<Change> changes) throws IOException {
+    protected void writeCustomHTML(FileWriter fileWriter, Object object, List<Change> changes, Database database) throws IOException {
     }
 }

@@ -2,6 +2,7 @@ package liquibase.dbdoc;
 
 import liquibase.database.structure.Column;
 import liquibase.database.structure.Table;
+import liquibase.database.Database;
 import liquibase.change.Change;
 
 import java.io.File;
@@ -21,15 +22,15 @@ public class TableWriter extends HTMLWriter {
         return object.toString() + " (Table)";
     }
 
-    protected void writeCustomHTML(FileWriter fileWriter, Object object, List<Change> changes) throws IOException {
-        writeColumns(fileWriter, ((Table) object));
+    protected void writeCustomHTML(FileWriter fileWriter, Object object, List<Change> changes, Database database) throws IOException {
+        writeColumns(fileWriter, ((Table) object), database);
     }
 
-    private void writeColumns(FileWriter fileWriter, Table table) throws IOException {
+    private void writeColumns(FileWriter fileWriter, Table table, Database database) throws IOException {
         List<List<String>> cells = new ArrayList<List<String>>();
 
         for (Column column : table.getColumns()) {
-            cells.add(Arrays.asList(column.getTypeName(),
+            cells.add(Arrays.asList(column.getDataTypeString(database),
                     "<A HREF=\"../columns/" + table.getName() + "." + column.getName() + ".html" + "\">" + column.getName() + "</A>"));
             //todo: add foreign key info to columns?
         }

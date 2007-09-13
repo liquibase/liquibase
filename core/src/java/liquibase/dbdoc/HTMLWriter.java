@@ -1,6 +1,7 @@
 package liquibase.dbdoc;
 
 import liquibase.ChangeSet;
+import liquibase.database.Database;
 import liquibase.migrator.Migrator;
 import liquibase.change.Change;
 import liquibase.exception.DatabaseHistoryException;
@@ -24,7 +25,7 @@ public abstract class HTMLWriter {
         }
     }
 
-    protected abstract void writeCustomHTML(FileWriter fileWriter, Object object, List<Change> changes) throws IOException;
+    protected abstract void writeCustomHTML(FileWriter fileWriter, Object object, List<Change> changes, Database database) throws IOException;
 
     private FileWriter createFileWriter(Object object) throws IOException {
         return new FileWriter(new File(outputDir, object.toString().toLowerCase() + ".html"));
@@ -65,7 +66,7 @@ public abstract class HTMLWriter {
     }
 
     protected void writeBody(FileWriter fileWriter, Object object, List<Change> ranChanges, List<Change> changesToRun, Migrator migrator) throws IOException, DatabaseHistoryException, JDBCException {
-        writeCustomHTML(fileWriter, object, ranChanges);
+        writeCustomHTML(fileWriter, object, ranChanges, migrator.getDatabase());
         writeChanges("Pending Changes", fileWriter, object, changesToRun, migrator);
         writeChanges("Past Changes", fileWriter, object, ranChanges, migrator);
     }
