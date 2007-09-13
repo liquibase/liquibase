@@ -39,8 +39,11 @@ public class ChangeLogWriter {
         xmlFile.getParentFile().mkdirs();
 
         FileOutputStream changeLogStream = new FileOutputStream(xmlFile, false);
-        StreamUtil.copy(stylesheet, changeLogStream);
-        changeLogStream.close();
+        try {
+            StreamUtil.copy(stylesheet, changeLogStream);
+        } finally {
+            changeLogStream.close();
+        }
 
     }
 

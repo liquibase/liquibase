@@ -36,7 +36,7 @@ public class DBDocChangeLogHandler extends BaseChangeLogHandler {
     private ChangeLogWriter changeLogWriter;
 
 
-    public DBDocChangeLogHandler(Migrator migrator, String physicalChangeLogLocation, FileOpener fileOpener) {
+    public DBDocChangeLogHandler(String outputDirectory, Migrator migrator, String physicalChangeLogLocation, FileOpener fileOpener) {
         super(migrator, physicalChangeLogLocation, fileOpener);
 
         changesByObject = new HashMap<DatabaseObject, List<Change>>();
@@ -44,9 +44,9 @@ public class DBDocChangeLogHandler extends BaseChangeLogHandler {
         changeLogs = new TreeSet<DatabaseChangeLog>();
         changesToRun = new ArrayList<Change>();
 
-        rootOutputDir = new File("/tmp/dbdoc");
+        rootOutputDir = new File(outputDirectory);
         if (!rootOutputDir.exists()) {
-            rootOutputDir.mkdir();
+            rootOutputDir.mkdirs();
         }
 
         changeLogWriter = new ChangeLogWriter(migrator.getFileOpener(), rootOutputDir);
@@ -92,10 +92,10 @@ public class DBDocChangeLogHandler extends BaseChangeLogHandler {
     }
 
     public void writeHTML(Migrator migrator) throws IOException, JDBCException, DatabaseHistoryException {
-        copyFile("liquibase/migrator/dbdoc/stylesheet.css");
-        copyFile("liquibase/migrator/dbdoc/index.html");
-        copyFile("liquibase/migrator/dbdoc/globalnav.html");
-        copyFile("liquibase/migrator/dbdoc/overview-summary.html");
+        copyFile("liquibase/dbdoc/stylesheet.css");
+        copyFile("liquibase/dbdoc/index.html");
+        copyFile("liquibase/dbdoc/globalnav.html");
+        copyFile("liquibase/dbdoc/overview-summary.html");
 
         DatabaseSnapshot snapshot = new DatabaseSnapshot(migrator.getDatabase());
 
@@ -122,12 +122,18 @@ public class DBDocChangeLogHandler extends BaseChangeLogHandler {
     }
 
     private void copyFile(String fileToCopy) throws IOException {
-        InputStream stylesheet = getClass().getClassLoader().getResourceAsStream(fileToCopy);
-        if (stylesheet == null) {
-            throw new IOException("Can not find " + fileToCopy);
+        InputStream inputStream = getClass().getClassLoader().getResourceAsStream(fileToCopy);
+        FileOutputStream outputStream = null;
+        try {
+            if (inputStream == null) {
+                throw new IOException("Can not find " + fileToCopy);
+            }
+            outputStream = new FileOutputStream(new File(rootOutputDir, fileToCopy.replaceFirst(".*\\/", "")), false);
+            StreamUtil.copy(inputStream, outputStream);
+        } finally {
+            if (outputStream != null) {
+                outputStream.close();
+            }
         }
-        FileOutputStream stylesheetOutputStream = new FileOutputStream(new File(rootOutputDir, fileToCopy.replaceFirst(".*\\/", "")), false);
-        StreamUtil.copy(stylesheet, stylesheetOutputStream);
-        stylesheetOutputStream.close();
     }
 }

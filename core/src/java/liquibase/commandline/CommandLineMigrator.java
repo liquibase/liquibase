@@ -465,12 +465,15 @@ public class CommandLineMigrator {
         BufferedInputStream inStream = new BufferedInputStream(jar.getInputStream(entry));
         BufferedOutputStream outStream = new BufferedOutputStream(
                 new FileOutputStream(tempFile));
-        int status;
-        while ((status = inStream.read()) != -1) {
-            outStream.write(status);
+        try {
+            int status;
+            while ((status = inStream.read()) != -1) {
+                outStream.write(status);
+            }
+        } finally {
+            outStream.close();
+            inStream.close();
         }
-        outStream.close();
-        inStream.close();
 
         return tempFile;
     }
@@ -592,7 +595,10 @@ public class CommandLineMigrator {
                 migrator.clearCheckSums();
                 return;
             } else if ("dbdoc".equalsIgnoreCase(command)) {
-                migrator.generateDocumentation();
+                if (commandParams.size() == 0) {
+                    throw new CommandLineParsingException("dbdoc requires an output directory");
+                }
+                migrator.generateDocumentation(commandParams.iterator().next());
                 return;
             }
 

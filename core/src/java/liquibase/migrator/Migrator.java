@@ -521,15 +521,15 @@ public class Migrator {
     }
 
     private void runChangeLogs(ContentHandler contentHandler) throws MigrationFailedException {
+        InputStream inputStream = null;
         try {
-            InputStream inputStream = getFileOpener().getResourceAsStream(changeLogFile);
+            inputStream = getFileOpener().getResourceAsStream(changeLogFile);
             if (inputStream == null) {
                 throw new MigrationFailedException(null, changeLogFile + " does not exist");
             }
 
             xmlReader.setContentHandler(contentHandler);
             xmlReader.parse(new InputSource(inputStream));
-            inputStream.close();
         } catch (IOException e) {
             throw new MigrationFailedException(null, "Error Reading Migration File: " + e.getMessage(), e);
         } catch (SAXParseException e) {
@@ -560,6 +560,14 @@ public class Migrator {
             }
 
             throw new MigrationFailedException(null, "Invalid Migration File: " + reason, e);
+        } finally {
+            if (inputStream != null) {
+                try {
+                    inputStream.close();
+                } catch (IOException e) {
+                    ;
+                }
+            }
         }
     }
 
@@ -815,13 +823,13 @@ public class Migrator {
         }
     }
 
-    public void generateDocumentation() throws LockException, IOException, JDBCException, MigrationFailedException, DatabaseHistoryException {
+    public void generateDocumentation(String outputDirectory) throws LockException, IOException, JDBCException, MigrationFailedException, DatabaseHistoryException {
         try {
             if (!waitForLock()) {
                 return;
             }
 
-            DBDocChangeLogHandler changeLogHandler = new DBDocChangeLogHandler(this, changeLogFile,fileOpener);
+            DBDocChangeLogHandler changeLogHandler = new DBDocChangeLogHandler(outputDirectory, this, changeLogFile,fileOpener);
             runChangeLogs(changeLogHandler);
 
             changeLogHandler.writeHTML(this);

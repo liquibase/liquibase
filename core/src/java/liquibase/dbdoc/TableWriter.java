@@ -25,24 +25,6 @@ public class TableWriter extends HTMLWriter {
         writeColumns(fileWriter, ((Table) object));
     }
 
-    private void writeChanges(FileWriter fileWriter, Table table, List<Change> changes) throws IOException {
-        List<List<String>> cells = new ArrayList<List<String>>();
-
-        if (changes == null) {
-            cells.add(Arrays.asList("None Found"));
-        } else {
-            for (Change change : changes) {
-                cells.add(Arrays.asList(change.getChangeSet().getDatabaseChangeLog().getLogicalFilePath(),
-                        change.getChangeSet().getId(),
-                        change.getChangeSet().getAuthor(),
-                        change.getConfirmationMessage()));
-            }
-        }
-
-        writeTable("Changes Affecting \""+table+"\"", cells, fileWriter);
-
-    }
-
     private void writeColumns(FileWriter fileWriter, Table table) throws IOException {
         List<List<String>> cells = new ArrayList<List<String>>();
 
