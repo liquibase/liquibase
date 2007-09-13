@@ -18,6 +18,9 @@ public abstract class HTMLWriter {
 
     public HTMLWriter(File outputDir) {
         this.outputDir = outputDir;
+        if (!outputDir.exists()) {
+            outputDir.mkdirs();
+        }
     }
 
     protected abstract void writeCustomHTML(FileWriter fileWriter, Object object, List<Change> changes) throws IOException;
@@ -30,20 +33,23 @@ public abstract class HTMLWriter {
         FileWriter fileWriter = createFileWriter(object);
 
 
-        fileWriter.append("<html>");
-        writeHeader(object, fileWriter);
-        fileWriter.append("<body BGCOLOR=\"white\" onload=\"windowTitle();\">");
+        try {
+            fileWriter.append("<html>");
+            writeHeader(object, fileWriter);
+            fileWriter.append("<body BGCOLOR=\"white\" onload=\"windowTitle();\">");
 
-        writeNav(fileWriter);
+            writeNav(fileWriter);
 
-        fileWriter.append("<H2>").append(createTitle(object)).append("</H2>\n");
+            fileWriter.append("<H2>").append(createTitle(object)).append("</H2>\n");
 
-        writeCustomHTML(fileWriter, object, changes);
-        writeChanges(fileWriter, object, changes, migrator);
+            writeCustomHTML(fileWriter, object, changes);
+            writeChanges(fileWriter, object, changes, migrator);
 
-        fileWriter.append("</body>");
-        fileWriter.append("</html>");
-        fileWriter.close();
+            fileWriter.append("</body>");
+            fileWriter.append("</html>");
+        } finally {
+            fileWriter.close();
+        }
 
     }
 

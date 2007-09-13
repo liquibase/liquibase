@@ -225,9 +225,12 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
         File tempFile = File.createTempFile("liquibase-test", ".xml");
 
         FileOutputStream output = new FileOutputStream(tempFile);
-        diffResult.printChangeLog(new PrintStream(output), DatabaseFactory.getInstance().findCorrectDatabaseImplementation(connection));
-        output.flush();
-        output.close();
+        try {
+            diffResult.printChangeLog(new PrintStream(output), DatabaseFactory.getInstance().findCorrectDatabaseImplementation(connection));
+            output.flush();
+        } finally {
+            output.close();
+        }
 
         Migrator migrator = createMigrator(tempFile.getName());
         migrator.dropAll();
