@@ -387,6 +387,10 @@ public class DiffResult {
 
     private void addUnexpectedColumnChanges(List<Change> changes) {
         for (Column column : getUnexpectedColumns()) {
+            if (column.getView() != null) {
+                continue; //it's a view
+            }
+
             if (baseDatabase.isLiquibaseTable(column.getTable().getName())) {
                 continue;
             }
@@ -423,6 +427,10 @@ public class DiffResult {
 
     private void addMissingColumnChanges(List<Change> changes, Database database) {
         for (Column column : getMissingColumns()) {
+            if (column.getView() != null) { //it's a view, not a table
+                continue;
+            }
+
             if (baseDatabase.isLiquibaseTable(column.getTable().getName())) {
                 continue;
             }
