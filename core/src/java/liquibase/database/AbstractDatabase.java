@@ -1089,7 +1089,7 @@ public abstract class AbstractDatabase implements Database {
     }
 
     protected String getViewDefinitionSql(String name) throws JDBCException {
-        String sql = "select view_definition from information_schema.views where upper(table_name)='" + name.toUpperCase() + "'";
+        String sql = "select view_definition from information_schema.views where upper(table_name)='" + name + "'";
         if (getSchemaName() != null) {
             sql += " and table_schema='" + getSchemaName() + "'";
         }

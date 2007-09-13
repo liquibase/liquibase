@@ -310,5 +310,16 @@
     <include file="changelogs/common/common.tests.changelog.xml" />
 
     <include file="changelogs/common/autoincrement.tests.changelog.xml" />
-    
+
+    <changeSet id="54" author="nvoxland">
+        <addColumn tableName="address">
+            <column name="newcol" type="varchar(255)"/>
+        </addColumn>
+    </changeSet>
+    <changeSet id="55" author="nvoxland">
+        <addColumn tableName="address">
+            <column name="newcol2" type="varchar(255)"/>
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>

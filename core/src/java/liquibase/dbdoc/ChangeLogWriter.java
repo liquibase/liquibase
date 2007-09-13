@@ -19,7 +19,7 @@ public class ChangeLogWriter {
     }
 
     public void writeChangeLog(DatabaseChangeLog changeLog) throws IOException {
-        InputStream stylesheet = fileOpener.getResourceAsStream(changeLog.getFilePath());
+        InputStream stylesheet = fileOpener.getResourceAsStream(changeLog.getPhysicalFilePath());
         if (stylesheet == null) {
             throw new IOException("Can not find "+changeLog.getFilePath());
         }
