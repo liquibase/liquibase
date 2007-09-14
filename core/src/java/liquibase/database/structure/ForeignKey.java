@@ -84,7 +84,6 @@ public class ForeignKey implements DatabaseObject, Comparable<ForeignKey> {
 
         return foreignKeyColumn.equalsIgnoreCase(that.foreignKeyColumn)
                 && foreignKeyTable.equals(that.foreignKeyTable)
-                && !(name != null ? !name.equals(that.name) : that.name != null)
                 && primaryKeyColumn.equalsIgnoreCase(that.primaryKeyColumn)
                 && primaryKeyTable.equals(that.primaryKeyTable);
 
@@ -108,7 +107,6 @@ public class ForeignKey implements DatabaseObject, Comparable<ForeignKey> {
             result = 31 * result + foreignKeyColumn.toUpperCase().hashCode();
         }
 
-        result = 31 * result + (name != null ? name.hashCode() : 0);
         return result;
     }
 
@@ -131,10 +129,6 @@ public class ForeignKey implements DatabaseObject, Comparable<ForeignKey> {
             returnValue = this.getPrimaryKeyColumn().compareTo(o.getPrimaryKeyColumn());
         }
 
-        if (returnValue == 0) {
-            returnValue = this.getName().compareTo(o.getName());
-        }
-        
         return returnValue;
     }
 }

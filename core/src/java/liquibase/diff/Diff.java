@@ -63,7 +63,7 @@ public class Diff {
                 }
             }
 
-            DiffResult diffResult = new DiffResult(baseDatabase, targetDatabase);
+            DiffResult diffResult = new DiffResult(baseSnapshot, targetSnapshot);
             checkVersionInfo(diffResult);
             checkTables(diffResult);
             checkViews(diffResult);
@@ -132,6 +132,12 @@ public class Diff {
                     && (targetColumn.getView() == null || !diffResult.getUnexpectedViews().contains(targetColumn.getView()))
                     ) {
                 diffResult.addUnexpectedColumn(targetColumn);
+            } else if (targetColumn.getTable() != null) {
+                Column baseColumn = baseSnapshot.getColumn(targetColumn.getTable().getName(), targetColumn.getName());
+
+                if (targetColumn.isDifferent(baseColumn)) {
+                    diffResult.addChangedColumn(targetColumn);
+                }
             }
         }
     }

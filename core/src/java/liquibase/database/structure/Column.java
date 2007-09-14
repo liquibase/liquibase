@@ -245,4 +245,29 @@ public class Column implements DatabaseObject, Comparable<Column> {
     public void setAutoIncrement(boolean autoIncrement) {
         this.autoIncrement = autoIncrement;
     }
+
+    public boolean isDataTypeDifferent(Column otherColumn) {
+        return this.getDataType() != otherColumn.getDataType()
+                || this.getColumnSize() != otherColumn.getColumnSize()
+                || this.getDecimalDigits() != otherColumn.getDecimalDigits();
+    }
+
+    @SuppressWarnings({"SimplifiableIfStatement"})
+    public boolean isNullabilityDifferent(Column otherColumn) {
+        if (this.isNullable() == null && otherColumn.isNullable() == null) {
+            return false;
+        }
+        if (this.isNullable() == null & otherColumn.isNullable() != null) {
+            return true;
+        }
+        if (this.isNullable() != null & otherColumn.isNullable() == null) {
+            return true;
+        }
+        return !this.isNullable().equals(otherColumn.isNullable());
+    }
+
+    public boolean isDifferent(Column otherColumn) {
+        return isDataTypeDifferent(otherColumn) || isNullabilityDifferent(otherColumn);
+    }
+
 }

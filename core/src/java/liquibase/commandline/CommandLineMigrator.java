@@ -713,7 +713,12 @@ public class CommandLineMigrator {
         info.put("user", username);
         info.put("password", password);
 
-        Connection connection = driverObject.connect(url, info);
+        Connection connection = null;
+        try {
+            connection = driverObject.connect(url, info);
+        } catch (SQLException e) {
+            throw new JDBCException("Connection could not be created to " + url + ": "+e.getMessage(), e);
+        }
         if (connection == null) {
             throw new JDBCException("Connection could not be created to " + url + " with driver " + driver.getClass().getName() + ".  Possibly the wrong driver for the given database URL");
         }

@@ -31,4 +31,9 @@ public class Sequence implements DatabaseObject, Comparable<Sequence> {
     public int hashCode() {
         return (name != null ? name.toUpperCase().hashCode() : 0);
     }
+
+
+    public String toString() {
+        return getName();
+    }
 }
