@@ -9,6 +9,7 @@ import liquibase.exception.CommandLineParsingException;
 import liquibase.exception.JDBCException;
 import liquibase.exception.ValidationFailedException;
 import liquibase.util.StreamUtil;
+import liquibase.util.StringUtils;
 import liquibase.ChangeSet;
 import liquibase.FileSystemFileOpener;
 import liquibase.DatabaseChangeLogLock;
@@ -122,12 +123,12 @@ public class CommandLineMigrator {
     protected String[] fixupArgs(String[] args) {
         List<String> fixedArgs = new ArrayList<String>();
 
-        for (int i=0; i< args.length; i++) {
+        for (int i = 0; i < args.length; i++) {
             String arg = args[i];
             if (arg.startsWith("--") && !arg.contains("=")) {
                 String nextArg = args[i + 1];
                 if (!nextArg.startsWith("--") && !isCommand(nextArg)) {
-                    arg = arg+"="+nextArg;
+                    arg = arg + "=" + nextArg;
                     i++;
                 }
             }
@@ -141,7 +142,7 @@ public class CommandLineMigrator {
         List<String> messages = new ArrayList<String>();
         if (command == null) {
             messages.add("Command not passed");
-        } else  if (!isCommand(command)) {
+        } else if (!isCommand(command)) {
             messages.add("Unknown command: " + command);
         } else {
             if (username == null) {
@@ -215,7 +216,7 @@ public class CommandLineMigrator {
     protected void printHelp(List<String> errorMessages, PrintStream stream) {
         stream.println("Errors:");
         for (String message : errorMessages) {
-            stream.println("  "+message);
+            stream.println("  " + message);
         }
         stream.println();
         printHelp(stream);
@@ -749,13 +750,14 @@ public class CommandLineMigrator {
         Diff diff = new Diff(originalDatabase);
         diff.addStatusListener(new OutDiffStatusListener());
         DiffResult diffResult = diff.compare();
-        if (changeLogFile != null) {
-        	File changeFile = new File(changeLogFile);
-        	PrintStream changeLogFilePrintStream = new PrintStream(changeFile);
-        	diffResult.printChangeLog(changeLogFilePrintStream, 
-        			DatabaseFactory.getInstance().findCorrectDatabaseImplementation(originalDatabase));
+
+        PrintStream outputStream = System.out;
+
+        if (StringUtils.trimToNull(changeLogFile) != null) {
+            File changeFile = new File(changeLogFile);
+            outputStream = new PrintStream(changeFile);
         }
-        diffResult.printChangeLog(System.out, DatabaseFactory.getInstance().findCorrectDatabaseImplementation(originalDatabase));
+        diffResult.printChangeLog(outputStream, DatabaseFactory.getInstance().findCorrectDatabaseImplementation(originalDatabase));
     }
 
 
