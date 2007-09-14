@@ -749,7 +749,12 @@ public class CommandLineMigrator {
         Diff diff = new Diff(originalDatabase);
         diff.addStatusListener(new OutDiffStatusListener());
         DiffResult diffResult = diff.compare();
-
+        if (changeLogFile != null) {
+        	File changeFile = new File(changeLogFile);
+        	PrintStream changeLogFilePrintStream = new PrintStream(changeFile);
+        	diffResult.printChangeLog(changeLogFilePrintStream, 
+        			DatabaseFactory.getInstance().findCorrectDatabaseImplementation(originalDatabase));
+        }
         diffResult.printChangeLog(System.out, DatabaseFactory.getInstance().findCorrectDatabaseImplementation(originalDatabase));
     }
 
