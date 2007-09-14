@@ -26,12 +26,12 @@
                     <p>
                         The primary worker class for LiquiBase is <a href="api/liquibase/migrator/Migrator.html">liquibase.migrator.Migrator</a>.
                         All the various ways of interacting with LiquiBase
-                        (<a href="api/liquibase/migrator/commandline/CommandLineFileOpener.html">command line</a>,
-                        <a href="api/liquibase/migrator/ant/DatabaseMigratorTask.html">ant</a>, etc) are thin wrappers around the Migrator class.
+                        (<a href="api/liquibase/commandline/CommandLineFileOpener.html">command line</a>,
+                        <a href="api/liquibase/ant/DatabaseMigratorTask.html">ant</a>, etc) are thin wrappers around the Migrator class.
                     </p>
                     <p>
                         Each database refactoring/change is implemented by a class in the
-                        <a href="api/liquibase/migrator/change/package-summary.html">liquibase.change</a> package.
+                        <a href="api/liquibase/change/package-summary.html">liquibase.change</a> package.
                         As the LiquiBase migrator runs, it uses a SAX XML parser to parse the change logs, instantiate the necessary
                         change class, and run or save the corresponding SQL.
                     </p>

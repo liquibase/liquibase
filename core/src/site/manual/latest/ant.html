@@ -20,7 +20,7 @@
                 <div class="entry">
                     <h2>LiquiBase Ant Tasks</h2>
                     <p>
-                        LiquiBase can be controlled via ant Tasks.  To use, simply add the liquibase.migrator.jar to your Ant lib directory or the classpath referenced by "classpathref".
+                        LiquiBase can be controlled via ant Tasks.  To use, simply add the liquibase.jar to your Ant lib directory or the classpath referenced by "classpathref".
                     </p>
                     <p>
                         Additional LiquiBase commands are supported by the <a href="command_line_migrator.html">command line migrator</a> that are not supported by the Ant tasks.
@@ -63,7 +63,7 @@
                     <tr><th>password</th><td>The password to use when connecting to the database</td></tr>
                     <tr><th>promptOnNonLocalDatabase</th><td>If set to true (default is false) a dialog box with warn you if you attempt to run the migrator against a database that is not on localhost</td></tr>
                     <tr><th>dropFirst</th><td>If set to true, LiquiBase will first drop all database objects owned by the connected user [defaults to FALSE]</td></tr>
-                    <tr><th>classpathref</th><td>A reference to the classpath that contains the database driver, liquibase.migrator.jar, and the changelog.xml file</td></tr>
+                    <tr><th>classpathref</th><td>A reference to the classpath that contains the database driver, liquibase.jar, and the changelog.xml file</td></tr>
                     <tr><th>contexts</th><td>A comma separated list of <a href="contexts.html">contexts</a> to execute.  If not specified, all contexts are run.</td></tr>
                     <tr><th>currentDateTimeFunction</th><td>Overrides current date time function used in SQL.  Useful for unsupported databases</td></tr>
                 </table>
@@ -103,7 +103,7 @@
                     <tr><th>url</th><td>The database URL</td></tr>
                     <tr><th>username</th><td>The database username to connect with</td></tr>
                     <tr><th>password</th><td>The password to use when connecting to the database</td></tr>
-                    <tr><th>classpathref</th><td>A reference to the classpath that contains the database driver, liquibase.migrator.jar, and the changelog.xml files</td></tr>
+                    <tr><th>classpathref</th><td>A reference to the classpath that contains the database driver, liquibase.jar, and the changelog.xml files</td></tr>
                     <tr><th>contexts</th><td>A comma separated list of <a href="contexts.html">contexts</a> to execute.  If not specified, all contexts are run.</td></tr>
                     <tr><th>rollbackTag</th><td>Tag to roll back to</td></tr>
                     <tr><th>rollbackDate</th><td>Date to roll back to</td></tr>

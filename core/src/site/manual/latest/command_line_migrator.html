@@ -109,7 +109,7 @@
                     </p>
                     <h2>Examples</h2>
                     <h3>Standard Migrator Run</h3>
-                    <pre>java -jar liquibase.migrator.jar \
+                    <pre>java -jar liquibase.jar \
       --driver=oracle.jdbc.OracleDriver \
       --classpath=\path\to\classes:jdbcdriver.jar \
       --changeLogFile=com/example/db.changelog.xml \
@@ -120,7 +120,7 @@
                     <h3>
                         Run Migrator pulling changelogs from a .WAR file
                     </h3>
-                    <pre>java -jar liquibase.migrator.jar \
+                    <pre>java -jar liquibase.jar \
       --driver=oracle.jdbc.OracleDriver \
       --classpath=website.war \
       --changeLogFile=com/example/db.changelog.xml \
@@ -131,7 +131,7 @@
                     <h3>
                         Run Migrator pulling changelogs from an .EAR file
                     </h3>
-                    <pre>java -jar liquibase.migrator.jar \
+                    <pre>java -jar liquibase.jar \
       --driver=oracle.jdbc.OracleDriver \
       --classpath=application.ear \
       --changeLogFile=com/example/db.changelog.xml \
@@ -141,7 +141,7 @@
                     <h3>
                         Don't execute changesets, save SQL to /tmp/migrate.sql
                     </h3>
-                    <pre>java -jar liquibase.migrator.jar \
+                    <pre>java -jar liquibase.jar \
         --driver=oracle.jdbc.OracleDriver \
         --classpath=jdbcdriver.jar \
         --url=jdbc:oracle:thin:@localhost:1521:oracle \
@@ -151,7 +151,7 @@
                     <h3>
                         List locks on the database change log
                     </h3>
-                    <pre>java -jar liquibase.migrator.jar \
+                    <pre>java -jar liquibase.jar \
         --driver=oracle.jdbc.OracleDriver \
         --classpath=jdbcdriver.jar \
         --url=jdbc:oracle:thin:@localhost:1521:oracle \
@@ -161,7 +161,7 @@
                     <h3>
                         Runs LiquiBase using defaults from ./liquibase.properties
                     </h3>
-                    <pre>java -jar liquibase.migrator.jar migrate</pre>
+                    <pre>java -jar liquibase.jar migrate</pre>
                     <pre>#liquibase.properties
 driver: oracle.jdbc.OracleDriver
 classpath: jdbcdriver.jar

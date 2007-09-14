@@ -25,7 +25,7 @@
                 </p>
 
                 <p>
-                    To configure the servlet listener, simply add liquibase.migrator.jar to your WEB-INF/lib directory and the following to your web.xml file:
+                    To configure the servlet listener, simply add liquibase.jar to your WEB-INF/lib directory and the following to your web.xml file:
                 </p>
                 <pre>
 &lt;context-param&gt;
@@ -54,7 +54,7 @@
 &lt;/context-param&gt;
 
 &lt;listener&gt;
-    &lt;listener-class&gt;liquibase.migrator.ServletMigrator&lt;/listener-class&gt;
+    &lt;listener-class&gt;liquibase.servlet.ServletMigrator&lt;/listener-class&gt;
 &lt;/listener&gt;
                 </pre>
                 <p>
