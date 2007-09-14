@@ -26,6 +26,9 @@ public class DiffResult {
     private Database baseDatabase;
     private Database targetDatabase;
 
+    private DatabaseSnapshot baseSnapshot;
+    private DatabaseSnapshot targetSnapshot;
+
     private DiffComparison productName;
     private DiffComparison productVersion;
 
@@ -37,6 +40,7 @@ public class DiffResult {
 
     private SortedSet<Column> missingColumns = new TreeSet<Column>();
     private SortedSet<Column> unexpectedColumns = new TreeSet<Column>();
+    private SortedSet<Column> changedColumns = new TreeSet<Column>();
 
     private SortedSet<ForeignKey> missingForeignKeys = new TreeSet<ForeignKey>();
     private SortedSet<ForeignKey> unexpectedForeignKeys = new TreeSet<ForeignKey>();
@@ -50,9 +54,12 @@ public class DiffResult {
     private SortedSet<Sequence> missingSequences = new TreeSet<Sequence>();
     private SortedSet<Sequence> unexpectedSequences = new TreeSet<Sequence>();
 
-    public DiffResult(Database baseDatabase, Database targetDatabase) {
-        this.baseDatabase = baseDatabase;
-        this.targetDatabase = targetDatabase;
+    public DiffResult(DatabaseSnapshot baseDatabase, DatabaseSnapshot targetDatabase) {
+        this.baseDatabase = baseDatabase.getDatabase();
+        this.targetDatabase = targetDatabase.getDatabase();
+
+        this.baseSnapshot = baseDatabase;
+        this.targetSnapshot = targetDatabase;
     }
 
     public DiffComparison getProductName() {
@@ -117,6 +124,14 @@ public class DiffResult {
 
     public SortedSet<Column> getUnexpectedColumns() {
         return unexpectedColumns;
+    }
+
+    public void addChangedColumn(Column columnName) {
+        changedColumns.add(columnName);
+    }
+
+    public SortedSet<Column> getChangedColumns() {
+        return changedColumns;
     }
 
     public void addMissingForeignKey(ForeignKey fkName) {
@@ -195,6 +210,7 @@ public class DiffResult {
         printSetComparison("Unexpected Views", getUnexpectedViews(), out);
         printSetComparison("Missing Columns", getMissingColumns(), out);
         printSetComparison("Unexpected Columns", getUnexpectedColumns(), out);
+        printColumnComparison(getChangedColumns(), out);
         printSetComparison("Missing Foreign Keys", getMissingForeignKeys(), out);
         printSetComparison("Unexpected Foreign Keys", getUnexpectedForeignKeys(), out);
         printSetComparison("Missing Primary Keys", getMissingPrimaryKeys(), out);
@@ -213,6 +229,33 @@ public class DiffResult {
             out.println();
             for (Object object : objects) {
                 out.println("     " + object);
+            }
+        }
+    }
+
+    private void printColumnComparison(SortedSet<Column> changedColumns, PrintStream out) {
+        out.print("Changed Columns: ");
+        if (changedColumns.size() == 0) {
+            out.println("NONE");
+        } else {
+            out.println();
+            for (Column column : changedColumns) {
+                out.println("     " + column);
+                Column baseColumn = baseSnapshot.getColumn(column);
+                if (baseColumn.isDataTypeDifferent(column)) {
+                    out.println("           from " + baseColumn.getDataTypeString(baseDatabase) + " to " + targetSnapshot.getColumn(column).getDataTypeString(targetDatabase));
+                }
+                if (baseColumn.isNullabilityDifferent(column)) {
+                    Boolean nowNullable = targetSnapshot.getColumn(column).isNullable();
+                    if (nowNullable == null) {
+                        nowNullable = Boolean.TRUE;
+                    }
+                    if (nowNullable) {
+                        out.println("           now nullable");
+                    } else {
+                        out.println("           now not null");
+                    }
+                }
             }
         }
     }
@@ -251,6 +294,7 @@ public class DiffResult {
         addUnexpectedTableChanges(changes);
         addMissingColumnChanges(changes, targetDatabase);
         addUnexpectedColumnChanges(changes);
+        addChangedColumnChanges(changes);
         addMissingPrimaryKeyChanges(changes);
         addUnexpectedPrimaryKeyChanges(changes);
         addMissingIndexChanges(changes);
@@ -282,7 +326,7 @@ public class DiffResult {
     }
 
     private String generateId() {
-        return baseId.toString()+"-"+changeNumber++;
+        return baseId.toString() + "-" + changeNumber++;
     }
 
     private void addUnexpectedIndexChanges(List<Change> changes) {
@@ -302,9 +346,9 @@ public class DiffResult {
             CreateIndexChange change = new CreateIndexChange();
             change.setTableName(index.getTableName());
             change.setIndexName(index.getName());
-            
+
             for (String columnName : index.getColumns()) {
-            	ColumnConfig column = new ColumnConfig();
+                ColumnConfig column = new ColumnConfig();
                 column.setName(columnName);
                 change.addColumn(column);
             }
@@ -387,11 +431,7 @@ public class DiffResult {
 
     private void addUnexpectedColumnChanges(List<Change> changes) {
         for (Column column : getUnexpectedColumns()) {
-            if (column.getView() != null) {
-                continue; //it's a view
-            }
-
-            if (baseDatabase.isLiquibaseTable(column.getTable().getName())) {
+            if (!shouldModifyColumn(column)) {
                 continue;
             }
 
@@ -414,6 +454,53 @@ public class DiffResult {
         }
     }
 
+    private void addChangedColumnChanges(List<Change> changes) {
+        for (Column column : getChangedColumns()) {
+            if (!shouldModifyColumn(column)) {
+                continue;
+            }
+
+            Column baseColumn = baseSnapshot.getColumn(column);
+            if (column.isDataTypeDifferent(baseColumn)) {
+                ColumnConfig columnConfig = new ColumnConfig();
+                columnConfig.setName(column.getName());
+                columnConfig.setType(baseColumn.getDataTypeString(targetDatabase));
+
+                ModifyColumnChange change = new ModifyColumnChange();
+                change.setTableName(column.getTable().getName());
+                change.setColumn(columnConfig);
+
+                changes.add(change);
+            }
+            if (column.isNullabilityDifferent(baseColumn)) {
+                if (baseColumn.isNullable() == null || baseColumn.isNullable()) {
+                    DropNotNullConstraintChange change = new DropNotNullConstraintChange();
+                    change.setTableName(column.getTable().getName());
+                    change.setColumnName(column.getName());
+                    change.setColumnDataType(baseColumn.getDataTypeString(targetDatabase));
+
+                    changes.add(change);
+                } else {
+                    AddNotNullConstraintChange change = new AddNotNullConstraintChange();
+                    change.setTableName(column.getTable().getName());
+                    change.setColumnName(column.getName());
+                    change.setColumnDataType(baseColumn.getDataTypeString(targetDatabase));
+                    
+                    changes.add(change);
+                }
+
+            } else {
+                throw new RuntimeException("Unknown difference");
+            }
+        }
+    }
+
+    private boolean shouldModifyColumn(Column column) {
+        return column.getView() == null
+                && !baseDatabase.isLiquibaseTable(column.getTable().getName());
+
+    }
+
     private void addUnexpectedViewChanges(List<Change> changes) {
         for (View view : getUnexpectedViews()) {
 
@@ -427,11 +514,7 @@ public class DiffResult {
 
     private void addMissingColumnChanges(List<Change> changes, Database database) {
         for (Column column : getMissingColumns()) {
-            if (column.getView() != null) { //it's a view, not a table
-                continue;
-            }
-
-            if (baseDatabase.isLiquibaseTable(column.getTable().getName())) {
+            if (!shouldModifyColumn(column)) {
                 continue;
             }
 

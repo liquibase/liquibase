@@ -87,6 +87,18 @@ public class DatabaseSnapshot {
         return views;
     }
 
+    public Column getColumn(Column column) {
+        if (column.getTable() == null) {
+            return columnsMap.get(column.getView().getName()+"."+column.getName());
+        } else {
+            return columnsMap.get(column.getTable().getName()+"."+column.getName());
+        }
+    }
+
+    public Column getColumn(String tableName, String columnName) {
+        return columnsMap.get(tableName+"."+columnName);
+    }
+
     public Set<Column> getColumns() {
         return columns;
     }
