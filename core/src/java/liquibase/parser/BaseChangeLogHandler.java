@@ -1,23 +1,24 @@
 package liquibase.parser;
 
-import liquibase.migrator.*;
-import liquibase.change.*;
-import liquibase.exception.DatabaseHistoryException;
-import liquibase.exception.JDBCException;
-import liquibase.exception.LiquibaseException;
-import liquibase.exception.MigrationFailedException;
-import liquibase.preconditions.*;
-import liquibase.util.StringUtils;
+import liquibase.ChangeSet;
 import liquibase.DatabaseChangeLog;
 import liquibase.FileOpener;
-import liquibase.ChangeSet;
+import liquibase.change.*;
+import liquibase.exception.*;
+import liquibase.migrator.IncludeMigrator;
+import liquibase.migrator.Migrator;
+import liquibase.preconditions.AndPrecondition;
+import liquibase.preconditions.Precondition;
+import liquibase.preconditions.PreconditionLogic;
+import liquibase.preconditions.SqlPrecondition;
+import liquibase.util.ObjectUtil;
+import liquibase.util.StringUtils;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Stack;
 import java.util.logging.Level;
@@ -146,6 +147,12 @@ public abstract class BaseChangeLogHandler extends DefaultHandler {
                 if ("sqlCheck".equals(qName)) {
                     text = new StringBuffer();                    
                 }
+            } else if ("param".equals(qName)) {
+                if (change instanceof CustomChangeWrapper) {
+                    ((CustomChangeWrapper) change).setParam(atts.getValue("name"), atts.getValue("value"));
+                } else {
+                    throw new MigrationFailedException(changeSet, "'param' unexpected in "+qName);
+                }
             } else {
                 throw new MigrationFailedException(changeSet, "Unexpected tag: " + qName);
             }
@@ -158,26 +165,16 @@ public abstract class BaseChangeLogHandler extends DefaultHandler {
         new IncludeMigrator(fileName, migrator).migrate();
     }
 
-    private void setProperty(Object object, String attributeName, String attributeValue) throws IllegalAccessException, InvocationTargetException {
-        String methodName = "set" + attributeName.substring(0, 1).toUpperCase() + attributeName.substring(1);
-        Method[] methods = object.getClass().getMethods();
-        for (Method method : methods) {
-            if (method.getName().equals(methodName)) {
-                if (method.getParameterTypes().length == 1 && method.getParameterTypes()[0].equals(Boolean.class)) {
-                    method.invoke(object, Boolean.valueOf(attributeValue));
-                    return;
-                } else
-                if (method.getParameterTypes().length == 1 && method.getParameterTypes()[0].equals(String.class)) {
-                    method.invoke(object, attributeValue);
-                    return;
-                } else
-                if (method.getParameterTypes().length == 1 && method.getParameterTypes()[0].equals(Integer.class)) {
-                    method.invoke(object, Integer.valueOf(attributeValue));
-                    return;
-                }
+    private void setProperty(Object object, String attributeName, String attributeValue) throws IllegalAccessException, InvocationTargetException, CustomChangeException {
+        if (object instanceof CustomChangeWrapper) {
+            if (attributeName.equals("class")) {
+                ((CustomChangeWrapper) object).setClass(attributeValue);
+            } else {
+                ((CustomChangeWrapper) object).setParam(attributeName, attributeValue);
             }
+        } else {
+            ObjectUtil.setProperty(object, attributeName,  attributeValue);
         }
-        throw new RuntimeException("Property not found: " + attributeName);
     }
 
     public void endElement(String uri, String localName, String qName) throws SAXException {

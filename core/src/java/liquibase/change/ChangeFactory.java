@@ -1,7 +1,5 @@
 package liquibase.change;
 
-import liquibase.change.*;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -52,12 +50,13 @@ public class ChangeFactory {
                 DropDefaultValueChange.class,
                 AddUniqueConstraintChange.class,
                 DropUniqueConstraintChange.class,
-                SQLFileChange.class
+                SQLFileChange.class,
+                CustomChangeWrapper.class,
         };
 
         try {
             for (Class<Change> changeClass : changes) {
-                Change change = (Change) changeClass.newInstance();
+                Change change = changeClass.newInstance();
                 tagToClassMap.put(change.getTagName(), changeClass);
             }
         } catch (Exception e) {
