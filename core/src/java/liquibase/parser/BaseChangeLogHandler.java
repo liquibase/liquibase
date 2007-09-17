@@ -35,12 +35,12 @@ public abstract class BaseChangeLogHandler extends DefaultHandler {
     private DatabaseChangeLog changeLog;
     private Change change;
     private StringBuffer text;
-    private PreconditionSet precondition;
+    private AndPrecondition precondition;
     private ChangeSet changeSet;
     private OrPrecondition orprecondition;
     private NotPrecondition notprecondition;
     private RunningAsPrecondition runningAs;
-    private String physicalChangeLogLocation;
+    protected String physicalChangeLogLocation;
     private FileOpener fileOpener;
 
 
@@ -125,7 +125,7 @@ public abstract class BaseChangeLogHandler extends DefaultHandler {
                 lastColumn.setConstraints(constraints);
             } else if ("preConditions".equals(qName)) {
 //                System.out.println(migrator);
-                precondition = new PreconditionSet(migrator, changeLog);
+                precondition = new AndPrecondition();
                 //System.out.println("pre condition is true");
 
             } else if ("dbms".equals(qName)) {
@@ -140,11 +140,11 @@ public abstract class BaseChangeLogHandler extends DefaultHandler {
 //                    System.out.println("attributes added");
                     if (orprecondition != null) {
 //                        System.out.println("orrprecondition");
-                        orprecondition.addDbms(dbmsPrecondition);
+                        orprecondition.addNestedPrecondition(dbmsPrecondition);
                     } else if (notprecondition != null) {
-                        notprecondition.addDbms(dbmsPrecondition);
+                        notprecondition.addNestedPrecondition(dbmsPrecondition);
                     } else {
-                        precondition.addDbms(dbmsPrecondition);
+                        precondition.addNestedPrecondition(dbmsPrecondition);
                     }
                 } else {
                     throw new RuntimeException("Unexpected Dbms tag");
@@ -153,7 +153,7 @@ public abstract class BaseChangeLogHandler extends DefaultHandler {
                 if (precondition != null) {
                     orprecondition = new OrPrecondition();
                     if (notprecondition != null) {
-                        notprecondition.setOrprecondition(orprecondition);
+                        notprecondition.addNestedPrecondition(orprecondition);
                     }
                 } else {
                     throw new RuntimeException("Unexpected Or tag");
@@ -165,7 +165,6 @@ public abstract class BaseChangeLogHandler extends DefaultHandler {
                 } else {
                     throw new RuntimeException("Unexpected Or tag");
                 }
-
             } else if ("runningAs".equals(qName)) {
                 if (precondition != null) {
                     runningAs = new RunningAsPrecondition();
@@ -223,11 +222,11 @@ public abstract class BaseChangeLogHandler extends DefaultHandler {
                 changeLog.setPreconditions(precondition);
                 handlePreCondition(precondition);
             } else if (precondition != null && "or".equals(qName) && notprecondition == null) {
-                precondition.setOrPreCondition(orprecondition);
+                precondition.addNestedPrecondition(orprecondition);
             } else if (precondition != null && "not".equals(qName)) {
-                precondition.setNotPreCondition(notprecondition);
+                precondition.addNestedPrecondition(notprecondition);
             } else if (precondition != null && "runningAs".equals(qName)) {
-                precondition.setRunningAs(runningAs);
+                precondition.addNestedPrecondition(runningAs);
             } else if (changeSet != null && "rollback".equals(qName)) {
                 changeSet.setRollBackSQL(textString);
             } else if (change != null && change instanceof RawSQLChange && "comment".equals(qName)) {
@@ -265,7 +264,7 @@ public abstract class BaseChangeLogHandler extends DefaultHandler {
     /**
      * By defaultd does nothing.  Overridden in ValidatChangeLogHandler and anywhere else that is interested in them.
      */
-    protected void handlePreCondition(@SuppressWarnings("unused") PreconditionSet preconditions) {        
+    protected void handlePreCondition(@SuppressWarnings("unused")Precondition precondition) {
     }
 
     protected abstract void handleChangeSet(ChangeSet changeSet) throws JDBCException, DatabaseHistoryException, MigrationFailedException, IOException;

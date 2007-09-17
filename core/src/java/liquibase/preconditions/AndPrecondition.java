@@ -1,31 +1,30 @@
 package liquibase.preconditions;
 
-import liquibase.migrator.Migrator;
 import liquibase.DatabaseChangeLog;
+import liquibase.migrator.Migrator;
 import liquibase.exception.PreconditionFailedException;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Class for controling "not" logic in preconditions.
+ * Container class for all preconditions on a change log.
  */
-public class NotPrecondition extends PreconditionLogic {
-
+public class AndPrecondition extends PreconditionLogic {
 
     public void check(Migrator migrator, DatabaseChangeLog changeLog) throws PreconditionFailedException {
+        boolean allPassed = true;
+        List<FailedPrecondition> failures = new ArrayList<FailedPrecondition>();
         for (Precondition precondition : getNestedPreconditions()) {
-            boolean threwException = false;
             try {
                 precondition.check(migrator, changeLog);
             } catch (PreconditionFailedException e) {
-                ; //that's what we want with a Not precondition
-                threwException = true;
+                failures.addAll(e.getFailedPreconditions());
+                allPassed = false;
             }
-
-            if (!threwException) {
-                throw new PreconditionFailedException(new FailedPrecondition("Not precondition failed", changeLog, this));
-            }
+        }
+        if (!allPassed) {
+            throw new PreconditionFailedException(failures);
         }
     }
 }

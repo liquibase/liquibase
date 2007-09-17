@@ -1,6 +1,8 @@
 package liquibase.preconditions;
 
 import liquibase.migrator.Migrator;
+import liquibase.DatabaseChangeLog;
+import liquibase.exception.PreconditionFailedException;
 
 import java.sql.SQLException;
 
@@ -23,11 +25,14 @@ public class RunningAsPrecondition implements Precondition {
         return username;
     }
 
-    public boolean checkUserName(Migrator migrator) {
+
+    public void check(Migrator migrator, DatabaseChangeLog changeLog) throws PreconditionFailedException {
         try {
             String loggedusername = migrator.getDatabase().getConnection().getMetaData().getUserName();
             loggedusername = loggedusername.substring(0, loggedusername.indexOf('@'));
-            return username.equals(loggedusername);
+            if (!username.equals(loggedusername)) {
+                throw new PreconditionFailedException(new FailedPrecondition("RunningAs Precondition failed: expected "+username+", was "+loggedusername, changeLog, this));
+            }
         } catch (SQLException e) {
             throw new RuntimeException("Cannot determine username", e);
         }

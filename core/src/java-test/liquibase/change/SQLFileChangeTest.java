@@ -28,7 +28,7 @@ public class SQLFileChangeTest extends AbstractChangeTest {
 	@Before
     public void setUp() throws Exception {
 	    //file contains contents "TESTDATA"
-    	fileName="liquibase/migrator/change/SQLFileTestData.sql";
+    	fileName="liquibase/change/SQLFileTestData.sql";
         change = new SQLFileChange();
         ClassLoaderFileOpener opener = new ClassLoaderFileOpener();
         change.setFileOpener(opener);

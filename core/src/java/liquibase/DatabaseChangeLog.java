@@ -1,6 +1,6 @@
 package liquibase;
 
-import liquibase.preconditions.PreconditionSet;
+import liquibase.preconditions.AndPrecondition;
 import liquibase.migrator.Migrator;
 
 /**
@@ -8,7 +8,7 @@ import liquibase.migrator.Migrator;
  */
 public class DatabaseChangeLog implements Comparable<DatabaseChangeLog> {
     private Migrator migrator;
-    private PreconditionSet preconditions;
+    private AndPrecondition preconditions;
     private String physicalFilePath;
     private String logicalFilePath;
 
@@ -21,11 +21,11 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog> {
         return migrator;
     }
 
-    public PreconditionSet getPreconditions() {
+    public AndPrecondition getPreconditions() {
         return preconditions;
     }
 
-    public void setPreconditions(PreconditionSet precond) {
+    public void setPreconditions(AndPrecondition precond) {
         preconditions = precond;
     }
 
