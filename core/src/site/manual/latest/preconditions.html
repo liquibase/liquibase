@@ -52,6 +52,11 @@
                     <p>
                         Specifies the expected user information.  Set the "username" attribute to the username of the database user
                     </p>
+                    <h4>&lt;sqlCheck&gt;SQL CODE HERE&lt;/sqlCheck&gt;</h4>
+                    <p>
+                        Executes an SQL string and checks the returned value.  <br/><br/>
+                        The SQL statement must return a single value in a single row.  Set the "expectedResult" attribute to the value that you want the precondition to pass for.
+                    </p>
                     <h2>AND/OR/NOT Logic</h2>
                     <p>
                         Conditional logic can be applied to preconditions using nestable &lt;and&gt;, &lt;or&gt; and &lt;not&gt; tags.
