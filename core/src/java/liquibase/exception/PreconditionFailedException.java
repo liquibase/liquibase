@@ -1,6 +1,8 @@
 package liquibase.exception;
 
 import liquibase.preconditions.FailedPrecondition;
+import liquibase.preconditions.Precondition;
+import liquibase.DatabaseChangeLog;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -12,6 +14,10 @@ public class PreconditionFailedException extends Exception {
 
     private static final long serialVersionUID = 1L;
     private List<FailedPrecondition> failedPreconditions;
+
+    public PreconditionFailedException(String message, DatabaseChangeLog changeLog, Precondition precondition) {
+        this(new FailedPrecondition(message, changeLog, precondition));
+    }
 
     public PreconditionFailedException(FailedPrecondition failedPrecondition) {
         super("Preconditions Failed");

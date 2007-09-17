@@ -41,6 +41,7 @@ public abstract class BaseChangeLogHandler extends DefaultHandler {
     private ChangeSet changeSet;
     protected String physicalChangeLogLocation;
     private FileOpener fileOpener;
+    private Precondition currentPrecondition;
 
 
     protected BaseChangeLogHandler(Migrator migrator, String physicalChangeLogLocation, FileOpener fileOpener) {
@@ -129,20 +130,22 @@ public abstract class BaseChangeLogHandler extends DefaultHandler {
                 //System.out.println("pre condition is true");
 
             } else if (rootPrecondition != null) {
-                Precondition currentPrecondition = migrator.getPreconditionFactory().create(qName);
+                currentPrecondition = migrator.getPreconditionFactory().create(qName);
 
                 for (int i = 0; i < atts.getLength(); i++) {
                     String attributeName = atts.getQName(i);
                     String attributeValue = atts.getValue(i);
                     setProperty(currentPrecondition, attributeName, attributeValue);
                 }
-
                 preconditionLogicStack.peek().addNestedPrecondition(currentPrecondition);
 
                 if (currentPrecondition instanceof PreconditionLogic) {
                     preconditionLogicStack.push(((PreconditionLogic) currentPrecondition));
                 }
 
+                if ("sqlCheck".equals(qName)) {
+                    text = new StringBuffer();                    
+                }
             } else {
                 throw new MigrationFailedException(changeSet, "Unexpected tag: " + qName);
             }
@@ -191,11 +194,18 @@ public abstract class BaseChangeLogHandler extends DefaultHandler {
                     rootPrecondition = null;
                 } else if ("and".equals(qName)) {
                     preconditionLogicStack.pop();
+                    currentPrecondition = null;
                 } else if ("or".equals(qName)) {
                     preconditionLogicStack.pop();
+                    currentPrecondition = null;
                 } else if ("not".equals(qName)) {
                     preconditionLogicStack.pop();
+                    currentPrecondition = null;
+                } else if (qName.equals("sqlCheck")) {
+                    ((SqlPrecondition) currentPrecondition).setSql(textString);
+                    currentPrecondition = null;
                 }
+
             } else if (changeSet != null && "rollback".equals(qName)) {
                 changeSet.setRollBackSQL(textString);
             } else if (change != null && change instanceof RawSQLChange && "comment".equals(qName)) {

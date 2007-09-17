@@ -27,7 +27,7 @@ public class DBMSPrecondition implements Precondition {
     public void check(Migrator migrator, DatabaseChangeLog changeLog) throws PreconditionFailedException {
         String dbType = migrator.getDatabase().getTypeName();
         if (!type.equals(dbType)) {
-            throw new PreconditionFailedException(new FailedPrecondition("DBMS Precondition failed: expected "+dbType+", got "+type, changeLog, this));
+            throw new PreconditionFailedException("DBMS Precondition failed: expected "+dbType+", got "+type, changeLog, this);
         }
     }
 
