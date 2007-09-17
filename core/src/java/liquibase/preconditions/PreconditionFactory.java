@@ -16,6 +16,7 @@ public class PreconditionFactory {
                 NotPrecondition.class,
                 DBMSPrecondition.class,
                 RunningAsPrecondition.class,
+                SqlPrecondition.class,
         };
 
         try {

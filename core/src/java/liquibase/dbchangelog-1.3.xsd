@@ -13,7 +13,7 @@
                     <xsd:element name="preConditions" minOccurs="0" maxOccurs="1">
                         <xsd:complexType>
                             <xsd:choice>
-                                <xsd:group ref="PreConditionChildren"/>
+                                <xsd:group ref="PreConditionChildren"  maxOccurs="unbounded"/>
                             </xsd:choice>
                         </xsd:complexType>
                     </xsd:element>
@@ -254,21 +254,33 @@
         </xsd:complexType>
     </xsd:element>
 
+    <xsd:element name="sqlCheck">
+        <xsd:complexType mixed="true">
+            <xsd:attribute name="expectedResult" type="xsd:string"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="and">
+        <xsd:complexType>
+            <xsd:choice>
+                <xsd:group ref="PreConditionChildren" maxOccurs="unbounded"/>
+            </xsd:choice>
+        </xsd:complexType>
+    </xsd:element>
+
     <xsd:element name="or">
         <xsd:complexType>
-            <xsd:sequence>
-                <xsd:element ref="dbms" minOccurs="0" maxOccurs="unbounded"/>
-            </xsd:sequence>
+            <xsd:choice>
+                <xsd:group ref="PreConditionChildren" maxOccurs="unbounded"/>
+            </xsd:choice>
         </xsd:complexType>
     </xsd:element>
 
     <xsd:element name="not">
         <xsd:complexType>
-
             <xsd:choice>
-                <xsd:group ref="NotPreConditionChildren" maxOccurs="unbounded"/>
+                <xsd:group ref="PreConditionChildren" maxOccurs="unbounded"/>
             </xsd:choice>
-
         </xsd:complexType>
     </xsd:element>
 
@@ -281,15 +293,6 @@
             <xsd:attributeGroup ref="runningAsAttrib"/>
         </xsd:complexType>
     </xsd:element>
-
-    <xsd:element name="preConditions">
-        <xsd:complexType>
-            <xsd:sequence>
-                <xsd:element ref="dbms" minOccurs="0"/>
-            </xsd:sequence>
-        </xsd:complexType>
-    </xsd:element>
-
 
     <xsd:attributeGroup name="dropForeignKeyConstraintAttrib">
         <xsd:attribute name="baseTableName" type="xsd:string"/>
@@ -537,28 +540,14 @@
     <xsd:group name="PreConditionChildren">
         <xsd:sequence>
             <xsd:choice>
-                <xsd:element ref="dbms" minOccurs="0" maxOccurs="unbounded"/>
-                <xsd:element ref="or" minOccurs="0" maxOccurs="1"/>
-                <xsd:element ref="not" minOccurs="0" maxOccurs="1"/>
+                <xsd:element ref="and" maxOccurs="unbounded"/>
+                <xsd:element ref="or" maxOccurs="unbounded"/>
+                <xsd:element ref="not" maxOccurs="unbounded"/>
+                <xsd:element ref="dbms" maxOccurs="unbounded"/>
+                <xsd:element ref="runningAs" maxOccurs="unbounded"/>
+                <xsd:element ref="sqlCheck" maxOccurs="unbounded"/>
             </xsd:choice>
-            <xsd:element ref="runningAs" minOccurs="0" maxOccurs="1"/>
         </xsd:sequence>
 
     </xsd:group>
-
-
-    <!-- Children for Not Precondition -->
-    <xsd:group name="NotPreConditionChildren">
-        <xsd:sequence>
-            <xsd:choice>
-                <xsd:element ref="dbms" minOccurs="0" maxOccurs="unbounded"/>
-                <xsd:element ref="or" minOccurs="0" maxOccurs="1"/>
-
-            </xsd:choice>
-
-        </xsd:sequence>
-
-    </xsd:group>
-
-
 </xsd:schema>

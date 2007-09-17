@@ -24,7 +24,7 @@ public class NotPrecondition extends PreconditionLogic {
             }
 
             if (!threwException) {
-                throw new PreconditionFailedException(new FailedPrecondition("Not precondition failed", changeLog, this));
+                throw new PreconditionFailedException("Not precondition failed", changeLog, this);
             }
         }
     }
