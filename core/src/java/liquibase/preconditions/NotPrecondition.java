@@ -28,4 +28,8 @@ public class NotPrecondition extends PreconditionLogic {
             }
         }
     }
+
+    public String getTagName() {
+        return "not";
+    }
 }

@@ -2,7 +2,7 @@ package liquibase.change;
 
 import liquibase.change.Change;
 import liquibase.change.CreateTableChange;
-import liquibase.parser.ChangeFactory;
+import liquibase.change.ChangeFactory;
 import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;

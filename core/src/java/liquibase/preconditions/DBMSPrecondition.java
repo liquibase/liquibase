@@ -30,4 +30,9 @@ public class DBMSPrecondition implements Precondition {
             throw new PreconditionFailedException(new FailedPrecondition("DBMS Precondition failed: expected "+dbType+", got "+type, changeLog, this));
         }
     }
+
+    public String getTagName() {
+        return "dbms";
+    }
+
 }

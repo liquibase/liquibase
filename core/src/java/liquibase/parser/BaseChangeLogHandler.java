@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.Stack;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -35,16 +36,14 @@ public abstract class BaseChangeLogHandler extends DefaultHandler {
     private DatabaseChangeLog changeLog;
     private Change change;
     private StringBuffer text;
-    private AndPrecondition precondition;
+    private AndPrecondition rootPrecondition;
+    private Stack<PreconditionLogic> preconditionLogicStack = new Stack<PreconditionLogic>();
     private ChangeSet changeSet;
-    private OrPrecondition orprecondition;
-    private NotPrecondition notprecondition;
-    private RunningAsPrecondition runningAs;
     protected String physicalChangeLogLocation;
     private FileOpener fileOpener;
 
 
-    protected BaseChangeLogHandler(Migrator migrator, String physicalChangeLogLocation,FileOpener fileOpener) {
+    protected BaseChangeLogHandler(Migrator migrator, String physicalChangeLogLocation, FileOpener fileOpener) {
         this.migrator = migrator;
         this.physicalChangeLogLocation = physicalChangeLogLocation;
         log = Logger.getLogger(Migrator.DEFAULT_LOG_NAME);
@@ -125,56 +124,23 @@ public abstract class BaseChangeLogHandler extends DefaultHandler {
                 lastColumn.setConstraints(constraints);
             } else if ("preConditions".equals(qName)) {
 //                System.out.println(migrator);
-                precondition = new AndPrecondition();
+                rootPrecondition = new AndPrecondition();
+                preconditionLogicStack.push(rootPrecondition);
                 //System.out.println("pre condition is true");
 
-            } else if ("dbms".equals(qName)) {
-                if (precondition != null) {
-                    DBMSPrecondition dbmsPrecondition = new DBMSPrecondition();
-//                    System.out.println("dbms is true");
-                    for (int i = 0; i < atts.getLength(); i++) {
-                        String attributeName = atts.getQName(i);
-                        String attributeValue = atts.getValue(i);
-                        setProperty(dbmsPrecondition, attributeName, attributeValue);
-                    }
-//                    System.out.println("attributes added");
-                    if (orprecondition != null) {
-//                        System.out.println("orrprecondition");
-                        orprecondition.addNestedPrecondition(dbmsPrecondition);
-                    } else if (notprecondition != null) {
-                        notprecondition.addNestedPrecondition(dbmsPrecondition);
-                    } else {
-                        precondition.addNestedPrecondition(dbmsPrecondition);
-                    }
-                } else {
-                    throw new RuntimeException("Unexpected Dbms tag");
-                }
-            } else if ("or".equals(qName)) {
-                if (precondition != null) {
-                    orprecondition = new OrPrecondition();
-                    if (notprecondition != null) {
-                        notprecondition.addNestedPrecondition(orprecondition);
-                    }
-                } else {
-                    throw new RuntimeException("Unexpected Or tag");
+            } else if (rootPrecondition != null) {
+                Precondition currentPrecondition = migrator.getPreconditionFactory().create(qName);
+
+                for (int i = 0; i < atts.getLength(); i++) {
+                    String attributeName = atts.getQName(i);
+                    String attributeValue = atts.getValue(i);
+                    setProperty(currentPrecondition, attributeName, attributeValue);
                 }
 
-            } else if ("not".equals(qName)) {
-                if (precondition != null) {
-                    notprecondition = new NotPrecondition();
-                } else {
-                    throw new RuntimeException("Unexpected Or tag");
-                }
-            } else if ("runningAs".equals(qName)) {
-                if (precondition != null) {
-                    runningAs = new RunningAsPrecondition();
-                    for (int i = 0; i < atts.getLength(); i++) {
-                        String attributeName = atts.getQName(i);
-                        String attributeValue = atts.getValue(i);
-                        setProperty(runningAs, attributeName, attributeValue);
-                    }
-                } else {
-                    throw new RuntimeException("Unexpected Or tag");
+                preconditionLogicStack.peek().addNestedPrecondition(currentPrecondition);
+
+                if (currentPrecondition instanceof PreconditionLogic) {
+                    preconditionLogicStack.push(((PreconditionLogic) currentPrecondition));
                 }
 
             } else {
@@ -218,15 +184,18 @@ public abstract class BaseChangeLogHandler extends DefaultHandler {
         }
 
         try {
-            if (precondition != null && "preConditions".equals(qName)) {
-                changeLog.setPreconditions(precondition);
-                handlePreCondition(precondition);
-            } else if (precondition != null && "or".equals(qName) && notprecondition == null) {
-                precondition.addNestedPrecondition(orprecondition);
-            } else if (precondition != null && "not".equals(qName)) {
-                precondition.addNestedPrecondition(notprecondition);
-            } else if (precondition != null && "runningAs".equals(qName)) {
-                precondition.addNestedPrecondition(runningAs);
+            if (rootPrecondition != null) {
+                if ("preConditions".equals(qName)) {
+                    changeLog.setPreconditions(rootPrecondition);
+                    handlePreCondition(rootPrecondition);
+                    rootPrecondition = null;
+                } else if ("and".equals(qName)) {
+                    preconditionLogicStack.pop();
+                } else if ("or".equals(qName)) {
+                    preconditionLogicStack.pop();
+                } else if ("not".equals(qName)) {
+                    preconditionLogicStack.pop();
+                }
             } else if (changeSet != null && "rollback".equals(qName)) {
                 changeSet.setRollBackSQL(textString);
             } else if (change != null && change instanceof RawSQLChange && "comment".equals(qName)) {
@@ -246,7 +215,7 @@ public abstract class BaseChangeLogHandler extends DefaultHandler {
                         ((CreateViewChange) change).setSelectQuery(textString);
                     } else if (change instanceof InsertDataChange) {
                         List<ColumnConfig> columns = ((InsertDataChange) change).getColumns();
-                        columns.get(columns.size()-1).setValue(textString);                        
+                        columns.get(columns.size() - 1).setValue(textString);
                     } else {
                         throw new RuntimeException("Unexpected text in " + change.getTagName());
                     }
@@ -257,7 +226,7 @@ public abstract class BaseChangeLogHandler extends DefaultHandler {
             }
         } catch (Exception e) {
             log.log(Level.SEVERE, "Error thrown as a SAXException: " + e.getMessage(), e);
-            throw new SAXException(changeLog.getPhysicalFilePath()+": "+e.getMessage(), e);
+            throw new SAXException(changeLog.getPhysicalFilePath() + ": " + e.getMessage(), e);
         }
     }
 

@@ -1,4 +1,4 @@
-package liquibase.parser;
+package liquibase.change;
 
 import liquibase.change.*;
 
