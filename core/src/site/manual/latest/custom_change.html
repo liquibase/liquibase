@@ -1,0 +1,63 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+    <head>
+        <title>LiquiBase: Custom Change</title>
+        <style type='text/css' media='screen'>@import "../../include/css/main.css";</style>
+    </head>
+    <body>@ANALYTICS@
+        <img src="../../images/liquibase_logo.gif" alt="LiquiBase" class="topLogo"/>
+        <p id="sitename">
+            <strong>LiquiBase: Database Refactoring</strong>
+        </p>
+
+        <div id="container">
+                @NAV.MANUAL@
+
+
+            <div id="content">
+                <div class="entry">
+                    <h2>Custom Refactoring</h2>
+                    <p>Although LiquiBase tries to provide a wide range of database refactorings,
+                    there are times you may want to create your own custom refactoring class.</p>
+                    <p>
+                        To create your own custom refactoring, simply create a class that implements
+                        the <a href="api/liquibase/change/CustomChange.html">liquibase.change.CustomChange</a> interface
+                        and use the &lt;custom&gt; tag in your change set.
+                    </p>
+                    <p>
+                        For a sample custom change class, see <a href="http://liquibase.svn.sourceforge.net/viewvc/liquibase/trunk/core/src/java-test/liquibase/change/ExampleCustomChange.java?view=markup">liquibase.change.ExampleCustomChange</a>
+                    </p>
+
+                    <h3>Sample</h3>
+                    <pre>&lt;custom className="com.example.ExampleCustomChange"&gt;
+    &lt;param name="tableName" value="person"/&gt;
+    &lt;param name="columnName" value="employee_id"/&gt;
+&lt;/custom&gt;</pre>
+                    <pre>&lt;custom className="com.example.ExampleCustomChange"
+    tableName="person"
+    columnName="employee_id"/&gt;</pre>
+
+                    <h3>Available Attributes</h3>
+                    <table class="attributesTable">
+                        <tr><th>class</th><td>Name class that implements the custom change. <em>[required]</em></td></tr>
+                        <tr><th>any parameter on custom change subclass</th><td>You can specify parameters on your custom class by passing them as attributes to the &lt;custom&gt; tag</td></tr>
+                    </table>
+
+                    <h3>Nested "param" Tags</h3>
+                    <p>
+                        Instead of passing parameters to your custom chagne class as attributes on the &lt;custom&gt; tag,
+                        you can use nested &lt;param&gt; paramters, or a combination of both.
+                    </p>
+                    <table class="attributesTable">
+                        <tr><th>name</th><td>Name of the custom change class parameter to set. <em>[required]</em></td></tr>
+                        <tr><th>value</th><td>Value to set the parameter to. <em>[required]</em></td></tr>
+                    </table>
+
+                </div>
+            </div>
+        </div>
+
+    </body>
+</html>

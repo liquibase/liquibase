@@ -496,6 +496,22 @@
         </xsd:complexType>
     </xsd:element>
 
+    <xsd:element name="customChange">
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element name="param" minOccurs="0" maxOccurs="unbounded">
+                    <xsd:complexType>
+                        <xsd:attribute name="name" type="xsd:string"/>
+                        <xsd:attribute name="value" type="xsd:string"/>
+                    </xsd:complexType>
+                </xsd:element>
+            </xsd:sequence>
+            <xsd:attribute name="class" type="xsd:string"/>
+            <xsd:anyAttribute processContents="lax"/>
+        </xsd:complexType>
+    </xsd:element>
+
+
     <!-- Children for changeSet -->
     <xsd:group name="changeSetChildren">
         <xsd:choice>
@@ -531,6 +547,7 @@
             <xsd:element ref="dropDefaultValue" maxOccurs="unbounded"/>
             <xsd:element ref="addUniqueConstraint" maxOccurs="unbounded"/>
             <xsd:element ref="dropUniqueConstraint" maxOccurs="unbounded"/>
+            <xsd:element ref="customChange" maxOccurs="unbounded"/>
             <xsd:element ref="rollback" maxOccurs="1"/>
 
         </xsd:choice>
