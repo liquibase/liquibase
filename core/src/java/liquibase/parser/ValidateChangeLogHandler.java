@@ -2,12 +2,14 @@ package liquibase.parser;
 
 import liquibase.ChangeSet;
 import liquibase.FileOpener;
+import liquibase.DatabaseChangeLog;
 import liquibase.migrator.IncludeMigrator;
 import liquibase.migrator.Migrator;
 import liquibase.change.Change;
 import liquibase.exception.*;
 import liquibase.preconditions.FailedPrecondition;
-import liquibase.preconditions.PreconditionSet;
+import liquibase.preconditions.AndPrecondition;
+import liquibase.preconditions.Precondition;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -66,9 +68,9 @@ public class ValidateChangeLogHandler extends BaseChangeLogHandler {
     }
 
 
-    protected void handlePreCondition(PreconditionSet preconditions) {
+    protected void handlePreCondition(Precondition preconditions) {
         try {
-            preconditions.checkConditions();
+            preconditions.check(migrator, new DatabaseChangeLog(migrator, physicalChangeLogLocation));
         } catch (PreconditionFailedException e) {
             failedPreconditions.addAll(e.getFailedPreconditions());
         }

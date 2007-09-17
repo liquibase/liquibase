@@ -1,6 +1,8 @@
 package liquibase.preconditions;
 
 import liquibase.migrator.Migrator;
+import liquibase.exception.PreconditionFailedException;
+import liquibase.DatabaseChangeLog;
 
 /**
  * Precondition for specifying the type of database (oracle, mysql, etc.).
@@ -21,8 +23,11 @@ public class DBMSPrecondition implements Precondition {
         this.type = atype.toLowerCase();
     }
 
-    public boolean checkDatabaseType(Migrator migrator) {
+
+    public void check(Migrator migrator, DatabaseChangeLog changeLog) throws PreconditionFailedException {
         String dbType = migrator.getDatabase().getTypeName();
-        return type.equals(dbType);
+        if (!type.equals(dbType)) {
+            throw new PreconditionFailedException(new FailedPrecondition("DBMS Precondition failed: expected "+dbType+", got "+type, changeLog, this));
+        }
     }
 }

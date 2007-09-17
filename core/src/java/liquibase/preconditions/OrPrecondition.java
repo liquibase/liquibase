@@ -1,6 +1,8 @@
 package liquibase.preconditions;
 
 import liquibase.migrator.Migrator;
+import liquibase.DatabaseChangeLog;
+import liquibase.exception.PreconditionFailedException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,39 +10,22 @@ import java.util.List;
 /**
  * Class for controling "or" logic in preconditions.
  */
-public class OrPrecondition implements PreconditionLogic {
-    private List<DBMSPrecondition> dbmsArray = new ArrayList<DBMSPrecondition>();
-
-    public void setDbmsArray(List<DBMSPrecondition> dbmsArr) {
-        this.dbmsArray = dbmsArr;
-
-    }
-
-    public List<DBMSPrecondition> getDbmsArray() {
-        return this.dbmsArray;
-    }
-
-    public void addDbms(DBMSPrecondition dbmsPrecondition) {
-        dbmsArray.add(dbmsPrecondition);
-    }
-
-    public boolean checkDbmsType(Migrator migrator) {
-        boolean returnvalue = false;
-        try {
-            for (int i = 0; i < dbmsArray.size(); i++) {
-                DBMSPrecondition dbmsPrecondition = dbmsArray.get(i);
-                //String dbproduct = migrator.getDatabase().getConnection().getMetaData().getDatabaseProductName();
-                if (dbmsPrecondition.checkDatabaseType(migrator)) {
-                    returnvalue = true;
-                    break;
-                }
+public class OrPrecondition extends PreconditionLogic {
 
 
+    public void check(Migrator migrator, DatabaseChangeLog changeLog) throws PreconditionFailedException {
+        boolean onePassed = false;
+        List<FailedPrecondition> failures = new ArrayList<FailedPrecondition>();
+        for (Precondition precondition : getNestedPreconditions()) {
+            try {
+                precondition.check(migrator, changeLog);
+                onePassed = true;
+            } catch (PreconditionFailedException e) {
+                failures.addAll(e.getFailedPreconditions());
             }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
         }
-        return returnvalue;
-
+        if (!onePassed) {
+            throw new PreconditionFailedException(failures);
+        }
     }
 }
