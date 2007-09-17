@@ -102,7 +102,7 @@ public class UnsupportedDatabase extends AbstractDatabase {
     }
 
     public String getTypeName() {
-        return "unknown";
+        return getDatabaseProductName().toLowerCase().replaceAll("\\W","");
     }
 
     public boolean supportsInitiallyDeferrableColumns() {
