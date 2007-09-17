@@ -11,6 +11,8 @@ import liquibase.RanChangeSet;
 import liquibase.ChangeSet;
 import liquibase.FileOpener;
 import liquibase.DatabaseChangeLogLock;
+import liquibase.preconditions.PreconditionFactory;
+import liquibase.change.ChangeFactory;
 import org.xml.sax.*;
 
 import javax.swing.*;
@@ -61,6 +63,7 @@ public class Migrator {
     private static boolean outputtedHeader = false;
 
     private ChangeFactory changeFactory = new ChangeFactory();
+    private PreconditionFactory preconditionFactory = new PreconditionFactory();
 
     private XMLReader xmlReader;
 
@@ -173,6 +176,10 @@ public class Migrator {
      */
     public ChangeFactory getChangeFactory() {
         return changeFactory;
+    }
+
+    public PreconditionFactory getPreconditionFactory() {
+        return preconditionFactory;
     }
 
     public String getBuildVersion() {

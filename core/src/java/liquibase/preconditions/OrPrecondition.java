@@ -28,4 +28,8 @@ public class OrPrecondition extends PreconditionLogic {
             throw new PreconditionFailedException(failures);
         }
     }
+
+    public String getTagName() {
+        return "or";
+    }
 }

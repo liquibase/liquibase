@@ -27,4 +27,9 @@ public class AndPrecondition extends PreconditionLogic {
             throw new PreconditionFailedException(failures);
         }
     }
+
+
+    public String getTagName() {
+        return "and";
+    }
 }

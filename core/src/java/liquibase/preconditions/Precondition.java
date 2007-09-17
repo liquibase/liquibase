@@ -9,4 +9,6 @@ import liquibase.DatabaseChangeLog;
  */
 public interface Precondition {
     public void check(Migrator migrator, DatabaseChangeLog changeLog) throws PreconditionFailedException;
+
+    public String getTagName();
 }

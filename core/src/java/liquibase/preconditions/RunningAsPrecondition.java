@@ -38,5 +38,8 @@ public class RunningAsPrecondition implements Precondition {
         }
     }
 
+    public String getTagName() {
+        return "runningAs";
+    }
 
 }
