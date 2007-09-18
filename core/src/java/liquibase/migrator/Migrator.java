@@ -703,8 +703,20 @@ public class Migrator {
 
     public boolean contextMatches(ChangeSet changeSet) {
         Set<String> requiredContexts = getContexts();
-        String changeSetContext = changeSet.getContext();
-        return changeSetContext == null || requiredContexts.size() == 0 || requiredContexts.contains(changeSetContext);
+        Set<String> changeSetContexts = changeSet.getContexts();
+        if (changeSetContexts == null || changeSetContexts.size() == 0) {
+            return true;
+        }
+        if (requiredContexts == null || requiredContexts.size() == 0) {
+            return true;
+        }
+
+        for (String required : requiredContexts) {
+            if (changeSetContexts.contains(required)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public List<ChangeSet> listUnrunChangeSets() throws LiquibaseException {

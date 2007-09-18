@@ -49,13 +49,15 @@
                         If you had a set of test data that was created and simply added after the database is set up, you would be
                         constantly manually updating your test data scripts to keep them in line with the current database schema.
                     </p>
+                    <h2>Multiple contexts per change set</h2>
+                    <p>
+                        If you want to have a change set tagged with multiple contexts, simply comma-separate them.  If you specify
+                        multiple contexts in a change set, only one of them needs to match one of the contexts passed to the migrator.
+                    </p>
                     <h2>Using Contexts for Multi-DBMS Change Logs</h2>
                     <p>
-                        If you are creating a product that is designed to work on multiple DBMS systems, you may
-                        be able to have a single change log that can be applied to different DBMS systems.
-                        Most of the refactorings will generate DMBS-specific code from DBMS-independent XML descriptions,
-                        but there are some exceptions.  If you add contexts such as "oracle","mssql", or "mysql" to DBMS-specific
-                        changeSets, you may be able to limit the number of change logs you need to maintain.
+                        You can use contexts to control which change sets run on which databases, but the better option
+                        is to use the built-in "dbms" tag on the changeSet tag.
                     </p>
 
                 </div>

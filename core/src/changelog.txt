@@ -5,7 +5,8 @@ Changes in version 1.3
 ----------------------
 - Added tablespace support to createTable, createIndex, addPrimaryKey, and addUniqueConstraint
 - Restored Java 6 Support
-- added defaultCascade attribute to addForeignKeyConstraint
+- Added defaultCascade attribute to addForeignKeyConstraint
+- Can have multiple comma-separated contexts per change set 
 
 Changes in version 1.2.1 (2007.8.31)
 ----------------------

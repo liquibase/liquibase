@@ -118,4 +118,37 @@
                        tablespace="liquibase2"/>
         <addUniqueConstraint tableName="TABLESPACE_TEST_TABLE" columnNames="username" constraintName="uq_tbsptest_usern" tablespace="liquibase2"/>        
     </changeSet>
+
+    <changeSet id="contextstest-1" author="nvoxland">
+        <comment>Test how contexts work</comment>
+        <createTable tableName="contextsTest">
+            <column name="id" type="varchar(255)"/>
+        </createTable>
+    </changeSet>
+    <changeSet id="contextstest-2" author="nvoxland" context="context-a">
+        <insert tableName="contextsTest">
+            <column name="id" value="context a"/>
+        </insert>
+    </changeSet>
+    <changeSet id="contextstest-3" author="nvoxland" context="context-a, context-b">
+        <insert tableName="contextsTest">
+            <column name="id" value="a and b"/>
+        </insert>
+    </changeSet>
+    <changeSet id="contextstest-4" author="nvoxland" context="context-b">
+        <insert tableName="contextsTest">
+            <column name="id" value="context b"/>
+        </insert>
+    </changeSet>
+    <changeSet id="contextstest-5" author="nvoxland" context="">
+        <insert tableName="contextsTest">
+            <column name="id" value="empty contexts"/>
+        </insert>
+    </changeSet>
+    <changeSet id="contextstest-6" author="nvoxland">
+        <insert tableName="contextsTest">
+            <column name="id" value="null contexts"/>
+        </insert>
+    </changeSet>
+
 </databaseChangeLog>

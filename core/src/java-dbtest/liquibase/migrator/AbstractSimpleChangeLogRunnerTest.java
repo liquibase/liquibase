@@ -79,7 +79,7 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
     protected Migrator createMigrator(String changeLogFile) throws Exception {
         JUnitFileOpener fileOpener = new JUnitFileOpener();
         Migrator migrator = new Migrator(changeLogFile, fileOpener);
-        migrator.setContexts("test");
+        migrator.setContexts("test, context-b");
 
         migrator.init(connection);
         return migrator;
