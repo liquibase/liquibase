@@ -35,7 +35,7 @@ public class ChangeSet {
     private String md5sum;
     private boolean alwaysRun;
     private boolean runOnChange;
-    private String context;
+    private Set<String> contexts;
     private Set<String> dbmsSet;
 
     private String[] rollBackStatements;
@@ -50,7 +50,7 @@ public class ChangeSet {
         return runOnChange;
     }
 
-    public ChangeSet(String id, String author, boolean alwaysRun, boolean runOnChange, DatabaseChangeLog databaseChangeLog, String context, String dbmsList) {
+    public ChangeSet(String id, String author, boolean alwaysRun, boolean runOnChange, DatabaseChangeLog databaseChangeLog, String contextList, String dbmsList) {
         this.changes = new ArrayList<Change>();
         log = Logger.getLogger(Migrator.DEFAULT_LOG_NAME);
         this.id = id;
@@ -58,15 +58,21 @@ public class ChangeSet {
         this.databaseChangeLog = databaseChangeLog;
         this.alwaysRun = alwaysRun;
         this.runOnChange = runOnChange;
-        if (context != null) {
-            this.context = context.trim().toLowerCase();
+        if (StringUtils.trimToNull(contextList) != null) {
+            String[] strings = contextList.toLowerCase().split(",");
+            if (contexts == null) {
+                contexts = new HashSet<String>();
+            }
+            for (String string : strings) {
+                contexts.add(string.trim().toLowerCase());
+            }
         }
         if (StringUtils.trimToNull(dbmsList) != null) {
-            String[] strings = dbmsList.split(",");
+            String[] strings = dbmsList.toLowerCase().split(",");
+            if (dbmsSet == null) {
+                dbmsSet = new HashSet<String>();
+            }
             for (String string : strings) {
-                if (dbmsSet == null) {
-                    dbmsSet = new HashSet<String>();
-                }
                 dbmsSet.add(string.trim().toLowerCase());
             }
         }
@@ -209,8 +215,8 @@ public class ChangeSet {
         return author;
     }
 
-    public String getContext() {
-        return context;
+    public Set<String> getContexts() {
+        return contexts;
     }
 
     public Set<String> getDbmsSet() {
@@ -246,8 +252,12 @@ public class ChangeSet {
             node.setAttribute("runOnChange", "true");
         }
 
-        if (StringUtils.trimToNull(getContext()) != null) {
-            node.setAttribute("context", StringUtils.trimToEmpty(getContext()));
+        if (getContexts() != null && getContexts().size() > 0) {
+            StringBuffer contextString = new StringBuffer();
+            for (String context : getContexts()) {
+                contextString.append(context).append(",");
+            }
+            node.setAttribute("context", contextString.toString().replaceFirst(",$",""));
         }
 
         if (getDbmsSet() != null && getDbmsSet().size() > 0) {
