@@ -295,5 +295,16 @@
     <include file="changelogs/common/common.tests.changelog.xml" />
 
     <include file="changelogs/common/autoincrement.tests.changelog.xml" />
+
+    <changeSet id="56" author="nvoxland">
+        <customChange class="liquibase.change.ExampleCustomChange">
+            <param name="tableName" value="person"/>
+            <param name="columnName" value="employer_id"/>
+            <param name="newValue" value="3"/>
+        </customChange>
+    </changeSet>
+    <changeSet id="57" author="nvoxland">
+        <customChange class="liquibase.change.ExampleCustomChange" tableName="person" columnName="employer_id" newValue="4"/>
+    </changeSet>
     
 </databaseChangeLog>

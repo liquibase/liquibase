@@ -57,7 +57,7 @@ public class AddAutoIncrementChange extends AbstractChange {
         if (database instanceof OracleDatabase) {
             throw new UnsupportedChangeException("Oracle does not support auto-increment columns");
         } else if (database instanceof MSSQLDatabase) {
-            throw new UnsupportedChangeException("MS SQL Server does not support auto-increment columns");
+            throw new UnsupportedChangeException("MS SQL Server does not support marking existing columns as auto-increment");
         } else if (database instanceof PostgresDatabase) {
             throw new UnsupportedChangeException("PostgreSQL does not support auto-increment columns");
         } else if (database instanceof DerbyDatabase) {

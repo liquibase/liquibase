@@ -7,6 +7,7 @@ import liquibase.database.structure.DatabaseObject;
 import liquibase.exception.UnsupportedChangeException;
 import liquibase.exception.RollbackImpossibleException;
 import liquibase.exception.SetupException;
+import liquibase.FileOpener;
 
 import java.util.Set;
 
@@ -15,6 +16,9 @@ public class ExampleCustomChange implements CustomChange {
     private String tableName;
     private String columnName;
     private String newValue;
+
+    @SuppressWarnings({"UnusedDeclaration", "FieldCanBeLocal"})
+    private FileOpener fileOpener;
 
 
     public String getTableName() {
@@ -66,5 +70,10 @@ public class ExampleCustomChange implements CustomChange {
 
     public Set<DatabaseObject> getAffectedDatabaseObjects() {
         return null;
+    }
+
+
+    public void setFileOpener(FileOpener fileOpener) {
+        this.fileOpener = fileOpener;
     }
 }
