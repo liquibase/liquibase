@@ -378,6 +378,7 @@ The available targets at the current stage:
             <env key="JAVA_HOME" path="${env.JAVA_HOME}"/>
             <classpath>
                 <pathelement path="${build.dir}"/>
+                <pathelement path="${build.test.dir}"/>
                 <pathelement path="${build.db.test.dir}"/>
                 <path refid="classpath"/>
             </classpath>
