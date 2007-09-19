@@ -7,12 +7,12 @@ import liquibase.exception.UnsupportedChangeException;
 import liquibase.exception.CustomChangeException;
 import liquibase.exception.RollbackImpossibleException;
 import liquibase.util.ObjectUtil;
+import liquibase.change.custom.CustomChangeRollback;
+import liquibase.change.custom.CustomChange;
 import org.w3c.dom.Element;
 import org.w3c.dom.Document;
 
 import java.util.*;
-import java.lang.reflect.Method;
-import java.lang.reflect.InvocationTargetException;
 
 public class CustomChangeWrapper extends AbstractChange {
 
@@ -61,12 +61,12 @@ public class CustomChangeWrapper extends AbstractChange {
         } catch (CustomChangeException e) {
             throw new UnsupportedChangeException(e);
         }
-        return customChange.generateRollbackStatements(database);
+        return ((CustomChangeRollback) customChange).generateRollbackStatements(database);
     }
 
 
     public boolean canRollBack() {
-        return customChange.canRollBack();
+        return customChange instanceof CustomChangeRollback;
     }
 
     private void configureCustomChange() throws CustomChangeException {

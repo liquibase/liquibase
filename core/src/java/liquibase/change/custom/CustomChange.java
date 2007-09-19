@@ -1,4 +1,4 @@
-package liquibase.change;
+package liquibase.change.custom;
 
 import liquibase.database.Database;
 import liquibase.database.structure.DatabaseObject;
@@ -31,23 +31,6 @@ public interface CustomChange {
      * @throws UnsupportedChangeException if this change is not supported by the {@link Database} passed as argument
      */
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException;
-
-    /**
-     * Generates the SQL statements required to roll back the change
-     *
-     * @param database database databasethe target {@link Database} associated to this change's rollback statements
-     * @return an array of {@link String}s with the rollback statements
-     * @throws UnsupportedChangeException if this change is not supported by the {@link Database} passed as argument
-     * @throws RollbackImpossibleException if rollback is not supported for this change
-     */
-    public SqlStatement[] generateRollbackStatements(Database database) throws UnsupportedChangeException, RollbackImpossibleException;
-
-    /**
-     * Can this change be rolled back
-     *
-     * @return <i>true</i> if rollback is supported, <i>false</i> otherwise
-     */
-    public boolean canRollBack();
 
     /**
      * Confirmation message to be displayed after the change is executed

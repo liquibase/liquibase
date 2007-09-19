@@ -6,7 +6,15 @@ Changes in version 1.3
 - Added tablespace support to createTable, createIndex, addPrimaryKey, and addUniqueConstraint
 - Restored Java 6 Support
 - Added defaultCascade attribute to addForeignKeyConstraint
-- Can have multiple comma-separated contexts per change set 
+- Can have multiple comma-separated contexts per change set
+- Created <custom> change
+- Added sqlCheck precondition
+- Database Diff checks column types and nullability
+- DiffChangeLog will write to a file specified with the --changeLog flag
+- Added dbdoc documentation generator
+- Database Diff checks views
+- Package re-organization
+- Misc bug fixes
 
 Changes in version 1.2.1 (2007.8.31)
 ----------------------

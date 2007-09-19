@@ -8,10 +8,12 @@ import liquibase.exception.UnsupportedChangeException;
 import liquibase.exception.RollbackImpossibleException;
 import liquibase.exception.SetupException;
 import liquibase.FileOpener;
+import liquibase.change.custom.CustomChangeRollback;
+import liquibase.change.custom.CustomChange;
 
 import java.util.Set;
 
-public class ExampleCustomChange implements CustomChange {
+public class ExampleCustomChange implements CustomChange, CustomChangeRollback {
 
     private String tableName;
     private String columnName;
@@ -55,10 +57,6 @@ public class ExampleCustomChange implements CustomChange {
         return new SqlStatement[]{
                 new RawSqlStatement("update "+tableName+" set "+columnName+" = null")
         };
-    }
-
-    public boolean canRollBack() {
-        return true;
     }
 
     public String getConfirmationMessage() {
