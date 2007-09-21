@@ -1,14 +1,12 @@
 package liquibase.dbdoc;
 
+import liquibase.ChangeSet;
 import liquibase.change.Change;
-import liquibase.migrator.Migrator;
+import liquibase.database.Database;
 import liquibase.exception.DatabaseHistoryException;
 import liquibase.exception.JDBCException;
-import liquibase.exception.UnsupportedChangeException;
 import liquibase.exception.MigrationFailedException;
-import liquibase.database.sql.SqlStatement;
-import liquibase.database.Database;
-import liquibase.ChangeSet;
+import liquibase.migrator.Migrator;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -26,6 +24,10 @@ public class PendingSQLWriter extends HTMLWriter {
     }
 
     protected void writeBody(FileWriter fileWriter, Object object, List<Change> ranChanges, List<Change> changesToRun, Migrator migrator) throws IOException, DatabaseHistoryException, JDBCException {
+        if (changesToRun.size() == 0) {
+            fileWriter.append("<b>NONE</b>");
+        }
+
         fileWriter.append("<code><pre>");
 
         ChangeSet lastRunChangeSet = null;

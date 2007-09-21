@@ -35,6 +35,7 @@
                             <li><a href="rollback.html">perform rollback operations and generate rollback scripts</a></li>
                             <li><a href="diff.html">generate "diff"s</a></li>
                             <li><a href="generate_changelog.html">generate creation scripts from existing databases</a></li>
+                            <li><a href="dbdoc.html">generate database change documentation</a></li>
                         </ul>
                     <p>
                         If you run the command line migrator without any arguments, you will get a help message listing
@@ -57,6 +58,10 @@
                     <table class="attributesTable">
                         <tr><th>diff [diff parameters]</th><td>Writes description of differences to standard out</td></tr>
                         <tr><th>diffChangeLog [diff parameters]</th><td>Writes Change Log XML to update the base database to the target database to standard out</td></tr>
+                    </table>
+                    <h3>Documentation Commands</h3>
+                    <table class="attributesTable">
+                        <tr><th>dbDoc &lt;outputDirectory&gt;</th><td>Generates Javadoc-like documentation based on current database and change log</td></tr>
                     </table>
                     <h3>Maintenance Commands</h3>
                     <table class="attributesTable">

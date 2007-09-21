@@ -35,7 +35,7 @@ public class RawSQLChangeTest extends AbstractChangeTest {
 
     @Test
     public void getConfirmationMessage() throws Exception {
-        assertEquals("Custom SQL has been executed", refactoring.getConfirmationMessage());
+        assertEquals("Custom SQL executed", refactoring.getConfirmationMessage());
     }
 
     @Test

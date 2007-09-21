@@ -1,19 +1,19 @@
 package liquibase.commandline;
 
+import liquibase.ChangeSet;
+import liquibase.CompositeFileOpener;
+import liquibase.DatabaseChangeLogLock;
+import liquibase.FileSystemFileOpener;
 import liquibase.database.DatabaseFactory;
-import liquibase.migrator.*;
 import liquibase.diff.Diff;
 import liquibase.diff.DiffResult;
 import liquibase.diff.DiffStatusListener;
 import liquibase.exception.CommandLineParsingException;
 import liquibase.exception.JDBCException;
 import liquibase.exception.ValidationFailedException;
+import liquibase.migrator.Migrator;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
-import liquibase.ChangeSet;
-import liquibase.FileSystemFileOpener;
-import liquibase.DatabaseChangeLogLock;
-import liquibase.CompositeFileOpener;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
@@ -257,6 +257,10 @@ public class CommandLineMigrator {
         stream.println(" diffChangeLog [diff parameters] Writes Change Log XML to update");
         stream.println("                                 the base database");
         stream.println("                                 to the target database to standard out");
+        stream.println("");
+        stream.println("Documentation Commands");
+        stream.println(" dbDoc <outputDirectory>         Generates Javadoc-like documentation");
+        stream.println("                                 based on current database and change log");
         stream.println("");
         stream.println("Maintenance Commands");
         stream.println(" tag <tag string>          'Tags' the current database state for future rollback");
@@ -713,7 +717,7 @@ public class CommandLineMigrator {
         info.put("user", username);
         info.put("password", password);
 
-        Connection connection = null;
+        Connection connection;
         try {
             connection = driverObject.connect(url, info);
         } catch (SQLException e) {

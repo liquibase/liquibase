@@ -2,8 +2,8 @@ package liquibase.change;
 
 import liquibase.database.Database;
 import liquibase.database.OracleDatabase;
-import liquibase.database.sql.SqlStatement;
 import liquibase.database.sql.RawSqlStatement;
+import liquibase.database.sql.SqlStatement;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Sequence;
 import liquibase.exception.UnsupportedChangeException;
@@ -121,7 +121,7 @@ public class CreateSequenceChange extends AbstractChange {
     }
 
     public String getConfirmationMessage() {
-        return "Sequence " + getSequenceName() + " has been created";
+        return "Sequence " + getSequenceName() + " created";
     }
 
     public Element createNode(Document currentChangeLogFileDOM) {

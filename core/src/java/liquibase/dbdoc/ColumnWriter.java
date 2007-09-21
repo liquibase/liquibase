@@ -16,7 +16,7 @@ public class ColumnWriter extends HTMLWriter {
     }
 
     protected String createTitle(Object object) {
-        return object.toString() + " (Column)";
+        return "Changes affecting column \""+object.toString() + "\"";
     }
 
     protected void writeCustomHTML(FileWriter fileWriter, Object object, List<Change> changes, Database database) throws IOException {

@@ -34,7 +34,7 @@ public class DropColumnChangeTest extends AbstractChangeTest {
         change.setTableName("TABLE_NAME");
         change.setColumnName("COL_HERE");
 
-        assertEquals("Column TABLE_NAME(COL_HERE) dropped", change.getConfirmationMessage());
+        assertEquals("Column TABLE_NAME.COL_HERE dropped", change.getConfirmationMessage());
     }
 
     @Test

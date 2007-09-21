@@ -42,7 +42,7 @@ public class CreateIndexChangeTest extends AbstractChangeTest {
         CreateIndexChange refactoring = new CreateIndexChange();
         refactoring.setIndexName("IDX_TEST");
 
-        assertEquals("Index IDX_TEST has been created", refactoring.getConfirmationMessage());
+        assertEquals("Index IDX_TEST created", refactoring.getConfirmationMessage());
     }
 
     @Test

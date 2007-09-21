@@ -1,12 +1,11 @@
 package liquibase.database.sql;
 
-import liquibase.database.DatabaseConnection;
 import liquibase.database.Database;
 
 import java.sql.CallableStatement;
 import java.sql.SQLException;
 
-public interface CallableSqlStatement {
+public interface CallableSqlStatement extends SqlStatement {
 
     /**
      * Create a callable statement in this connection. Allows implementations to use

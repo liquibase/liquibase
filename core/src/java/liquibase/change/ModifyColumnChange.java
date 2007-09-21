@@ -1,8 +1,8 @@
 package liquibase.change;
 
 import liquibase.database.*;
-import liquibase.database.sql.SqlStatement;
 import liquibase.database.sql.RawSqlStatement;
+import liquibase.database.sql.SqlStatement;
 import liquibase.database.structure.Column;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Table;
@@ -69,7 +69,7 @@ public class ModifyColumnChange extends AbstractChange {
     }
 
     public String getConfirmationMessage() {
-        return "Column with the name " + column.getName() + " has been modified.";
+        return "Column " + getTableName()+"."+column.getName() + " modified";
     }
 
     public Element createNode(Document currentChangeLogFileDOM) {

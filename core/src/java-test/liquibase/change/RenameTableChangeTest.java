@@ -37,7 +37,7 @@ public class RenameTableChangeTest extends AbstractChangeTest {
         refactoring.setOldTableName("OLD_NAME");
         refactoring.setNewTableName("NEW_NAME");
 
-        assertEquals("Table with the name OLD_NAME has been renamed to NEW_NAME", refactoring.getConfirmationMessage());
+        assertEquals("Table OLD_NAME renamed to NEW_NAME", refactoring.getConfirmationMessage());
     }
 
     @Test

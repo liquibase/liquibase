@@ -1,8 +1,8 @@
 package liquibase.change;
 
 import liquibase.database.*;
-import liquibase.database.sql.SqlStatement;
 import liquibase.database.sql.RawSqlStatement;
+import liquibase.database.sql.SqlStatement;
 import liquibase.database.structure.Column;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Table;
@@ -59,7 +59,7 @@ public class DropDefaultValueChange extends AbstractChange {
     }
 
     public String getConfirmationMessage() {
-        return "Default Value Dropped";
+        return "Default value dropped from "+getTableName()+"."+getColumnName();
     }
 
     public Element createNode(Document currentChangeLogFileDOM) {

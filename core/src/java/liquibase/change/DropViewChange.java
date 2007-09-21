@@ -1,8 +1,8 @@
 package liquibase.change;
 
 import liquibase.database.Database;
-import liquibase.database.sql.SqlStatement;
 import liquibase.database.sql.RawSqlStatement;
+import liquibase.database.sql.SqlStatement;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.View;
 import liquibase.exception.UnsupportedChangeException;
@@ -38,7 +38,7 @@ public class DropViewChange extends AbstractChange {
     }
 
     public String getConfirmationMessage() {
-        return "View Dropped";
+        return "View "+getViewName()+" dropped";
     }
 
     public Element createNode(Document currentChangeLogFileDOM) {

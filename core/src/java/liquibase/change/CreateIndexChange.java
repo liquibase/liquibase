@@ -3,8 +3,8 @@ package liquibase.change;
 import liquibase.database.DB2Database;
 import liquibase.database.Database;
 import liquibase.database.MSSQLDatabase;
-import liquibase.database.sql.SqlStatement;
 import liquibase.database.sql.RawSqlStatement;
+import liquibase.database.sql.SqlStatement;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Index;
 import liquibase.database.structure.Table;
@@ -75,7 +75,7 @@ public class CreateIndexChange extends AbstractChange {
         buffer.append(getTableName()).append("(");
         Iterator<ColumnConfig> iterator = columns.iterator();
         while (iterator.hasNext()) {
-            ColumnConfig column = (ColumnConfig) iterator.next();
+            ColumnConfig column = iterator.next();
             buffer.append(column.getName());
             if (iterator.hasNext()) {
                 buffer.append(", ");
@@ -106,7 +106,7 @@ public class CreateIndexChange extends AbstractChange {
     }
 
     public String getConfirmationMessage() {
-        return "Index " + indexName + " has been created";
+        return "Index " + getIndexName() + " created";
     }
 
     public Element createNode(Document currentChangeLogFileDOM) {

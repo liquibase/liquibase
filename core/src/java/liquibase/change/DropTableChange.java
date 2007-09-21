@@ -1,8 +1,8 @@
 package liquibase.change;
 
 import liquibase.database.Database;
-import liquibase.database.sql.SqlStatement;
 import liquibase.database.sql.RawSqlStatement;
+import liquibase.database.sql.SqlStatement;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Table;
 import liquibase.exception.UnsupportedChangeException;
@@ -51,7 +51,7 @@ public class DropTableChange extends AbstractChange {
     }
 
     public String getConfirmationMessage() {
-        return "Table " + tableName + " dropped";
+        return "Table " + getTableName() + " dropped";
     }
 
     public Element createNode(Document currentChangeLogFileDOM) {

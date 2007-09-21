@@ -53,7 +53,7 @@ public class InsertDataChangeTest extends AbstractChangeTest {
 
     @Test
     public void getConfirmationMessage() throws Exception {
-        assertEquals("New rows have been inserted into the table TABLE_NAME", refactoring.getConfirmationMessage());
+        assertEquals("New row inserted into TABLE_NAME", refactoring.getConfirmationMessage());
     }
 
     @Test

@@ -1,0 +1,50 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+    <head>
+        <title>LiquiBase: Database Documentation</title>
+        <style type='text/css' media='screen'>@import "../../include/css/main.css";</style>
+    </head>
+    <body>@ANALYTICS@
+        <img src="../../images/liquibase_logo.gif" alt="LiquiBase" class="topLogo"/>
+        <p id="sitename">
+            <strong>LiquiBase: Database Refactoring</strong>
+        </p>
+
+        <div id="container">
+                @NAV.MANUAL@
+
+
+            <div id="content">
+                <div class="entry">
+                    <h2>Database Documentation Generator</h2>
+                    <p>
+                        Using change information stored in the change logs and an existing database, LiquiBase can generate
+                        database change documentation.
+
+                    </p>
+                    <h2>Running DBDoc</h2>
+                    <p>
+                        The dbDoc command support is currently available through the <a href="command_line_migrator.html">command line migrator</a> only.
+                    </p>
+                    <h3>Example</h3>
+                    <pre>
+liqubase.sh --driver=oracle.jdbc.OracleDriver \
+        --url=jdbc:oracle:thin:@testdb:1521:test \
+        --username=bob \
+        --password=bob \
+    dbDoc \
+        /docs/dbdoc</pre>
+                    <h2>Sample Output</h2>
+                    <p>
+                        The documentation output is based on a "JavaDoc" style documentation.
+                        The report of changes from our sample changelog is available <a href="dbdoc/index.html" target="TOP">here</a>.
+                    </p>
+
+                </div>
+            </div>
+        </div>
+
+    </body>
+</html>

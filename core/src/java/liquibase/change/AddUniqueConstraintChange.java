@@ -3,8 +3,8 @@ package liquibase.change;
 import liquibase.database.DB2Database;
 import liquibase.database.Database;
 import liquibase.database.MSSQLDatabase;
-import liquibase.database.sql.SqlStatement;
 import liquibase.database.sql.RawSqlStatement;
+import liquibase.database.sql.SqlStatement;
 import liquibase.database.structure.Column;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Table;
@@ -83,7 +83,7 @@ public class AddUniqueConstraintChange extends AbstractChange {
     }
 
     public String getConfirmationMessage() {
-        return "Unique Constraint Added";
+        return "Unique constraint added to "+getTableName()+"("+getColumnNames()+")";
     }
 
     protected Change[] createInverses() {

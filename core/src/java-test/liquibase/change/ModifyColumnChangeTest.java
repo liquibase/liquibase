@@ -42,7 +42,7 @@ public class ModifyColumnChangeTest extends AbstractChangeTest {
 
     @Test
     public void getConfirmationMessage() throws Exception {
-        assertEquals("Column with the name NAME has been modified.", change.getConfirmationMessage());
+        assertEquals("Column TABLE_NAME.NAME modified", change.getConfirmationMessage());
     }
 
     @Test

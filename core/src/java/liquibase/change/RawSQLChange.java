@@ -1,17 +1,17 @@
 package liquibase.change;
 
 import liquibase.database.Database;
-import liquibase.database.sql.SqlStatement;
 import liquibase.database.sql.RawSqlStatement;
+import liquibase.database.sql.SqlStatement;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.exception.UnsupportedChangeException;
 import liquibase.util.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import java.util.Set;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Allows execution of arbitrary SQL.  This change can be used when existing changes are either don't exist,
@@ -52,7 +52,7 @@ public class RawSQLChange extends AbstractChange {
     }
 
     public String getConfirmationMessage() {
-        return "Custom SQL has been executed";
+        return "Custom SQL executed";
     }
 
     public Element createNode(Document currentChangeLogFileDOM) {

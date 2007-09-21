@@ -1,20 +1,21 @@
 package liquibase.parser;
 
+import liquibase.ChangeSet;
+import liquibase.DatabaseChangeLog;
+import liquibase.FileOpener;
+import liquibase.change.Change;
 import liquibase.database.structure.Column;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.DatabaseSnapshot;
 import liquibase.database.structure.Table;
-import liquibase.migrator.*;
-import liquibase.change.Change;
 import liquibase.dbdoc.*;
 import liquibase.exception.DatabaseHistoryException;
 import liquibase.exception.JDBCException;
 import liquibase.exception.LockException;
 import liquibase.exception.MigrationFailedException;
+import liquibase.migrator.IncludeMigrator;
+import liquibase.migrator.Migrator;
 import liquibase.util.StreamUtil;
-import liquibase.ChangeSet;
-import liquibase.FileOpener;
-import liquibase.DatabaseChangeLog;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -33,15 +34,19 @@ public class DBDocChangeLogHandler extends BaseChangeLogHandler {
     private static Map<DatabaseObject, List<Change>> changesToRunByObject;
     private static Map<String, List<Change>> changesToRunByAuthor;
     private static List<Change> changesToRun;
+    private static List<Change> recentChanges;
 
     private static File rootOutputDir;
     private static HTMLWriter tableWriter;
     private static HTMLWriter columnWriter;
     private static HTMLWriter authorWriter;
     private static HTMLWriter pendingChangesWriter;
+    private static HTMLWriter recentChangesWriter;
     private static HTMLWriter pendingSQLWriter;
     private static ChangeLogWriter changeLogWriter;
     private static String rootChangeLog;
+
+    private static final int MAX_RECENT_CHANGE = 50;
 
 
     public DBDocChangeLogHandler(String outputDirectory, Migrator migrator, String physicalChangeLogLocation, FileOpener fileOpener) {
@@ -57,6 +62,7 @@ public class DBDocChangeLogHandler extends BaseChangeLogHandler {
             changesToRunByObject = new HashMap<DatabaseObject, List<Change>>();
             changesToRunByAuthor = new HashMap<String, List<Change>>();
             changesToRun = new ArrayList<Change>();
+            recentChanges = new ArrayList<Change>();
 
             rootOutputDir = new File(outputDirectory);
             if (!rootOutputDir.exists()) {
@@ -68,6 +74,7 @@ public class DBDocChangeLogHandler extends BaseChangeLogHandler {
             tableWriter = new TableWriter(rootOutputDir);
             columnWriter = new ColumnWriter(rootOutputDir);
             pendingChangesWriter = new PendingChangesWriter(rootOutputDir);
+            recentChangesWriter = new RecentChangesWriter(rootOutputDir);
             pendingSQLWriter = new PendingSQLWriter(rootOutputDir);
 
             this.migrator = migrator;
@@ -93,6 +100,7 @@ public class DBDocChangeLogHandler extends BaseChangeLogHandler {
                 changesToRun.add(change);
             } else {
                 changesByAuthor.get(changeSet.getAuthor()).add(change);
+                recentChanges.add(0, change);
             }
         }
 
@@ -159,6 +167,11 @@ public class DBDocChangeLogHandler extends BaseChangeLogHandler {
 
         pendingChangesWriter.writeHTML("index", null, changesToRun, migrator, rootChangeLog);
         pendingSQLWriter.writeHTML("sql", null, changesToRun, migrator, rootChangeLog);
+
+        if (recentChanges.size() > MAX_RECENT_CHANGE) {
+            recentChanges = recentChanges.subList(0, MAX_RECENT_CHANGE);
+        }
+        recentChangesWriter.writeHTML("index", recentChanges, null, migrator, rootChangeLog);
 
     }
 

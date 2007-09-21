@@ -1,8 +1,8 @@
 package liquibase.change;
 
 import liquibase.database.Database;
-import liquibase.database.sql.SqlStatement;
 import liquibase.database.sql.RawSqlStatement;
+import liquibase.database.sql.SqlStatement;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.View;
 import liquibase.exception.UnsupportedChangeException;
@@ -48,7 +48,7 @@ public class CreateViewChange extends AbstractChange {
     }
 
     public String getConfirmationMessage() {
-        return "View Created";
+        return "View "+getViewName()+" created";
     }
 
     public Element createNode(Document currentChangeLogFileDOM) {

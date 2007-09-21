@@ -1,8 +1,8 @@
 package liquibase.change;
 
 import liquibase.database.*;
-import liquibase.database.sql.SqlStatement;
 import liquibase.database.sql.RawSqlStatement;
+import liquibase.database.sql.SqlStatement;
 import liquibase.database.structure.Column;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Table;
@@ -109,7 +109,7 @@ public class AddDefaultValueChange extends AbstractChange {
     }
 
     public String getConfirmationMessage() {
-        return "Default Value Added";
+        return "Default value added to "+getTableName()+"."+getColumnName();
     }
 
     public Element createNode(Document currentChangeLogFileDOM) {

@@ -1,8 +1,8 @@
 package liquibase.change;
 
 import liquibase.database.Database;
-import liquibase.database.sql.SqlStatement;
 import liquibase.database.sql.RawSqlStatement;
+import liquibase.database.sql.SqlStatement;
 import liquibase.database.structure.Column;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.ForeignKey;
@@ -133,7 +133,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
     }
 
     public String getConfirmationMessage() {
-        return "Foreign Key Added";
+        return "Foreign key contraint added to "+getBaseTableName()+" ("+getBaseColumnNames()+")";
     }
 
     public Element createNode(Document currentChangeLogFileDOM) {

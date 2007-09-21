@@ -3,8 +3,8 @@ package liquibase.change;
 import liquibase.database.DB2Database;
 import liquibase.database.Database;
 import liquibase.database.MSSQLDatabase;
-import liquibase.database.sql.SqlStatement;
 import liquibase.database.sql.RawSqlStatement;
+import liquibase.database.sql.SqlStatement;
 import liquibase.database.structure.Column;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Table;
@@ -104,7 +104,7 @@ public class AddPrimaryKeyChange extends AbstractChange {
     }
 
     public String getConfirmationMessage() {
-        return "Primary Key Added";
+        return "Primary key added to "+getTableName()+" ("+getColumnNames()+")";
     }
 
     public Element createNode(Document currentChangeLogFileDOM) {
