@@ -1,14 +1,11 @@
 package liquibase.database.template;
 
-import java.sql.SQLException;
-import java.sql.PreparedStatement;
-import java.sql.Types;
-import java.math.BigDecimal;
-import java.util.Calendar;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Iterator;
 import java.io.StringWriter;
+import java.math.BigDecimal;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.Types;
+import java.util.Calendar;
 
 /**
  * Utility methods for PreparedStatementSetter/Creator and CallableStatementCreator
@@ -18,14 +15,11 @@ import java.io.StringWriter;
  * <p>Used by PreparedStatementCreatorFactory and CallableStatementCreatorFactory,
  * but also available for direct use in custom setter/creator implementations.
  *
- * @author Thomas Risberg
- * @author Juergen Hoeller
+ * @author Spring Framework
  * @see PreparedStatementSetter
- * @see PreparedStatementCreator
  * @see SqlParameter
- * @since 1.1
  */
-public abstract class StatementCreatorUtils {
+abstract class StatementCreatorUtils {
 
     /**
      * Set the value for a parameter. The method used is based on the SQL type
@@ -59,25 +53,6 @@ public abstract class StatementCreatorUtils {
             throws SQLException {
 
         setParameterValueInternal(ps, paramIndex, sqlType, null, null, inValue);
-    }
-
-    /**
-     * Set the value for a parameter. The method used is based on the SQL type
-     * of the parameter and we can handle complex types like arrays and LOBs.
-     *
-     * @param ps         the prepared statement or callable statement
-     * @param paramIndex index of the parameter we are setting
-     * @param sqlType    the SQL type of the parameter
-     * @param typeName   the type name of the parameter
-     *                   (optional, only used for SQL NULL and SqlTypeValue)
-     * @param inValue    the value to set (plain value or a SqlTypeValue)
-     * @throws SQLException if thrown by PreparedStatement methods
-     */
-    public static void setParameterValue(
-            PreparedStatement ps, int paramIndex, int sqlType, String typeName, Object inValue)
-            throws SQLException {
-
-        setParameterValueInternal(ps, paramIndex, sqlType, typeName, null, inValue);
     }
 
     /**
@@ -126,7 +101,7 @@ public abstract class StatementCreatorUtils {
                 if (inValue instanceof BigDecimal) {
                     ps.setBigDecimal(paramIndex, (BigDecimal) inValue);
                 } else if (scale != null) {
-                    ps.setObject(paramIndex, inValue, sqlType, scale.intValue());
+                    ps.setObject(paramIndex, inValue, sqlType, scale);
                 } else {
                     ps.setObject(paramIndex, inValue, sqlType);
                 }
@@ -203,35 +178,5 @@ public abstract class StatementCreatorUtils {
         return (inValue instanceof java.util.Date && !(inValue instanceof java.sql.Date ||
                 inValue instanceof java.sql.Time || inValue instanceof java.sql.Timestamp));
     }
-
-    /**
-     * Clean up all resources held by parameter values which were passed to an
-     * execute method. This is for example important for closing LOB values.
-     *
-     * @param paramValues parameter values supplied. May be <code>null</code>.
-     */
-    public static void cleanupParameters(Object[] paramValues) {
-        if (paramValues != null) {
-            cleanupParameters(Arrays.asList(paramValues));
-        }
-    }
-
-    /**
-     * Clean up all resources held by parameter values which were passed to an
-     * execute method. This is for example important for closing LOB values.
-     *
-     * @param paramValues parameter values supplied. May be <code>null</code>.
-     */
-    
-    public static void cleanupParameters(Collection paramValues) {
-        if (paramValues != null) {
-            for (Iterator it = paramValues.iterator(); it.hasNext();) {
-				Object inValue = it.next();
-				if (inValue instanceof DisposableSqlTypeValue) {
-					((DisposableSqlTypeValue) inValue).cleanup();
-				}
-			}
-		}
-	}
 
 }

@@ -3,10 +3,10 @@ package liquibase.database.template;
 import liquibase.util.JdbcUtils;
 
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.ResultSetMetaData;
-import java.util.Map;
+import java.sql.SQLException;
 import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * {@link RowMapper} implementation that creates a <code>java.util.Map</code>
@@ -17,17 +17,11 @@ import java.util.LinkedHashMap;
  * in the column Map can be customized through overriding
  * {@link #createColumnMap} and {@link #getColumnKey}, respectively.
  * <p/>
- * <p><b>Note:</b> By default, ColumnMapRowMapper will try to build a linked Map
- * with case-insensitive keys, to preserve column order as well as allow any
- * casing to be used for column names. This requires Commons Collections on the
- * classpath (which will be autodetected). Else, the fallback is a standard linked
- * HashMap, which will still preserve column order but requires the application
- * to specify the column names in the same casing as exposed by the driver.
  *
- * @author Juergen Hoeller
- * @since 1.2
+ * @author Spring Framework
  */
-public class ColumnMapRowMapper implements RowMapper {
+@SuppressWarnings({"unchecked"})
+class ColumnMapRowMapper implements RowMapper {
 
     public Object mapRow(ResultSet rs, int rowNum) throws SQLException {
         ResultSetMetaData rsmd = rs.getMetaData();
@@ -43,9 +37,6 @@ public class ColumnMapRowMapper implements RowMapper {
 
     /**
      * Create a Map instance to be used as column map.
-     * <p>By default, a linked case-insensitive Map will be created if possible,
-     * else a plain HashMap (see Spring's CollectionFactory).
-     *
      * @param columnCount the column count, to be used as initial
      *                    capacity for the Map
      * @return the new Map instance
@@ -76,7 +67,7 @@ public class ColumnMapRowMapper implements RowMapper {
      * @return the Object returned
      */
     protected Object getColumnValue(ResultSet rs, int index) throws SQLException {
-		return JdbcUtils.getResultSetValue(rs, index);
-	}
+        return JdbcUtils.getResultSetValue(rs, index);
+    }
 
 }

@@ -15,10 +15,9 @@ import java.sql.*;
  * The value for the single column will be extracted from the ResultSet
  * and converted into the specified target type.
  *
- * @author Juergen Hoeller
- * @since 1.2
+ * @author Spring Framework
  */
-public class SingleColumnRowMapper implements RowMapper {
+class SingleColumnRowMapper implements RowMapper {
 
     private Class requiredType;
 
