@@ -50,7 +50,7 @@ public class AddColumnChangeTest extends AbstractChangeTest {
         column.setType("TYP");
         refactoring.setColumn(column);
 
-        assertEquals("Column NEWCOL(TYP) has been added to TAB", refactoring.getConfirmationMessage());
+        assertEquals("Column NEWCOL(TYP) added to TAB", refactoring.getConfirmationMessage());
     }
 
     @Test

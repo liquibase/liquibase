@@ -1,19 +1,19 @@
 package liquibase.dbdoc;
 
 import liquibase.ChangeSet;
-import liquibase.database.Database;
-import liquibase.migrator.Migrator;
 import liquibase.change.Change;
+import liquibase.database.Database;
 import liquibase.exception.DatabaseHistoryException;
 import liquibase.exception.JDBCException;
+import liquibase.migrator.Migrator;
 import liquibase.util.StringUtils;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.text.DateFormat;
-import java.util.List;
 import java.util.Date;
+import java.util.List;
 
 public abstract class HTMLWriter {
     protected File outputDir;
@@ -178,14 +178,12 @@ public abstract class HTMLWriter {
         fileWriter.append("<TR BGCOLOR=\"#CCCCFF\" CLASS=\"TableHeadingColor\">\n");
         fileWriter.append("<TD COLSPAN='4'><FONT SIZE=\"+2\">\n");
         fileWriter.append("<B>");
-        fileWriter.append(title).append(" For \"");
-        fileWriter.append(String.valueOf(object));
-        fileWriter.append("\"");
+        fileWriter.append(title);
         fileWriter.append("</B></FONT></TD>\n");
         fileWriter.append("</TR>\n");
 
         ChangeSet lastChangeSet = null;
-        if (changes == null) {
+        if (changes == null || changes.size() == 0) {
             fileWriter.append("<tr><td>None Found</td></tr>");
         } else {
             for (Change change : changes) {

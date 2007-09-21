@@ -1,8 +1,8 @@
 package liquibase.change;
 
 import liquibase.database.Database;
-import liquibase.database.sql.SqlStatement;
 import liquibase.database.sql.RawSqlStatement;
+import liquibase.database.sql.SqlStatement;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Table;
 import liquibase.exception.UnsupportedChangeException;
@@ -58,7 +58,7 @@ public class InsertDataChange extends AbstractChange {
         columnNames.append("(");
         columnValues.append("(");
         while (iterator.hasNext()) {
-            ColumnConfig column = (ColumnConfig) iterator.next();
+            ColumnConfig column = iterator.next();
             columnNames.append(column.getName());
 
             columnValues.append(getColumnValue(column, database));
@@ -103,7 +103,7 @@ public class InsertDataChange extends AbstractChange {
     }
 
     public String getConfirmationMessage() {
-        return "New rows have been inserted into the table " + tableName;
+        return "New row inserted into " + getTableName();
     }
 
     public Element createNode(Document currentChangeLogFileDOM) {

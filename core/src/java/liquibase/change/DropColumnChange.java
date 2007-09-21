@@ -4,8 +4,8 @@ import liquibase.database.DB2Database;
 import liquibase.database.Database;
 import liquibase.database.DerbyDatabase;
 import liquibase.database.SybaseDatabase;
-import liquibase.database.sql.SqlStatement;
 import liquibase.database.sql.RawSqlStatement;
+import liquibase.database.sql.SqlStatement;
 import liquibase.database.structure.Column;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Table;
@@ -60,7 +60,7 @@ public class DropColumnChange extends AbstractChange {
     }
 
     public String getConfirmationMessage() {
-        return "Column " + getTableName() + "(" + getColumnName() + ") dropped";
+        return "Column " + getTableName() + "." + getColumnName() + " dropped";
     }
 
     public Element createNode

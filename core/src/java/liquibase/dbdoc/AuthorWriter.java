@@ -15,7 +15,7 @@ public class AuthorWriter extends HTMLWriter {
     }
 
     protected String createTitle(Object object) {
-        return object.toString() + " (Author)";
+        return "Changes created by author "+object.toString();
     }
 
     protected void writeCustomHTML(FileWriter fileWriter, Object object, List<Change> changes, Database database) throws IOException {

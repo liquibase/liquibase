@@ -52,7 +52,7 @@ public class CreateSequenceChangeTest extends AbstractChangeTest {
         CreateSequenceChange change = new CreateSequenceChange();
         change.setSequenceName("SEQ_NAME");
 
-        assertEquals("Sequence SEQ_NAME has been created", change.getConfirmationMessage());
+        assertEquals("Sequence SEQ_NAME created", change.getConfirmationMessage());
     }
 
     @Test

@@ -1,9 +1,9 @@
 package liquibase.change;
 
+import liquibase.ClassLoaderFileOpener;
 import liquibase.database.MSSQLDatabase;
 import liquibase.database.OracleDatabase;
 import liquibase.database.sql.SqlStatement;
-import liquibase.ClassLoaderFileOpener;
 import liquibase.exception.SetupException;
 import liquibase.util.MD5Util;
 import static org.junit.Assert.*;
@@ -144,7 +144,7 @@ public class SQLFileChangeTest extends AbstractChangeTest {
     @Test
 	public void getConfirmationMessage() throws Exception {
     	change.setPath(fileName);
-		assertEquals("SQL File " + fileName + " has been executed", change.getConfirmationMessage());
+		assertEquals("SQL in file " + fileName + " executed", change.getConfirmationMessage());
 	}
 
     @Test

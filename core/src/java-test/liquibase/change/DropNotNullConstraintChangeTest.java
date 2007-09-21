@@ -32,7 +32,7 @@ public class DropNotNullConstraintChangeTest extends AbstractChangeTest {
         DropNotNullConstraintChange change = new DropNotNullConstraintChange();
         change.setTableName("TABLE_NAME");
         change.setColumnName("COL_HERE");
-        assertEquals("Null Constraint has been dropped to the column COL_HERE of the table TABLE_NAME", change.getConfirmationMessage());
+        assertEquals("Null constraint dropped from TABLE_NAME.COL_HERE", change.getConfirmationMessage());
 
     }
 

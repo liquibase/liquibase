@@ -1,8 +1,8 @@
 package liquibase.change;
 
 import liquibase.database.*;
-import liquibase.database.sql.SqlStatement;
 import liquibase.database.sql.RawSqlStatement;
+import liquibase.database.sql.SqlStatement;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Table;
 import liquibase.exception.UnsupportedChangeException;
@@ -75,7 +75,7 @@ public class RenameTableChange extends AbstractChange {
     }
 
     public String getConfirmationMessage() {
-        return "Table with the name " + oldTableName + " has been renamed to " + newTableName;
+        return "Table " + oldTableName + " renamed to " + newTableName;
     }
 
     public Element createNode(Document currentChangeLogFileDOM) {

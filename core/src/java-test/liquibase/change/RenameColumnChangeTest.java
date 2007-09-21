@@ -38,7 +38,7 @@ public class RenameColumnChangeTest extends AbstractChangeTest {
 
     @Test
     public void getConfirmationMessage() throws Exception {
-        assertEquals("Column with the name oldColName has been renamed to newColName", refactoring.getConfirmationMessage());
+        assertEquals("Column TABLE_NAME.oldColName renamed to newColName", refactoring.getConfirmationMessage());
     }
 
     @Test

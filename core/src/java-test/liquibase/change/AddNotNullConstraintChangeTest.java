@@ -36,7 +36,7 @@ public class AddNotNullConstraintChangeTest extends AbstractChangeTest {
         change.setTableName("TABLE_NAME");
         change.setColumnName("COL_HERE");
 
-        assertEquals("Null Constraint has been added to the column COL_HERE of the table TABLE_NAME", change.getConfirmationMessage());
+        assertEquals("Null constraint has been added to TABLE_NAME.COL_HERE", change.getConfirmationMessage());
     }
 
     @Test

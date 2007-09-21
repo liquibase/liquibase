@@ -1,8 +1,8 @@
 package liquibase.change;
 
 import liquibase.database.*;
-import liquibase.database.sql.SqlStatement;
 import liquibase.database.sql.RawSqlStatement;
+import liquibase.database.sql.SqlStatement;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.View;
 import liquibase.exception.UnsupportedChangeException;
@@ -71,7 +71,7 @@ public class RenameViewChange extends AbstractChange {
     }
 
     public String getConfirmationMessage() {
-        return "View with the name " + oldViewName + " has been renamed to " + newViewName;
+        return "View " + oldViewName + " renamed to " + newViewName;
     }
 
     public Element createNode(Document currentChangeLogFileDOM) {

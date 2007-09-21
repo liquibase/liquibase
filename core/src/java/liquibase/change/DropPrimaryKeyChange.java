@@ -3,8 +3,8 @@ package liquibase.change;
 import liquibase.database.Database;
 import liquibase.database.MSSQLDatabase;
 import liquibase.database.PostgresDatabase;
-import liquibase.database.sql.SqlStatement;
 import liquibase.database.sql.RawSqlStatement;
+import liquibase.database.sql.SqlStatement;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Table;
 import liquibase.exception.UnsupportedChangeException;
@@ -72,7 +72,7 @@ public class DropPrimaryKeyChange extends AbstractChange {
     }
 
     public String getConfirmationMessage() {
-        return "Primary Key Dropped";
+        return "Primary key dropped from "+getTableName();
     }
 
     public Element createNode(Document currentChangeLogFileDOM) {

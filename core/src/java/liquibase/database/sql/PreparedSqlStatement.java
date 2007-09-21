@@ -1,12 +1,11 @@
 package liquibase.database.sql;
 
-import liquibase.database.DatabaseConnection;
 import liquibase.database.Database;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-public interface PreparedSqlStatement {
+public interface PreparedSqlStatement extends SqlStatement {
     /**
      * Create a statement in this connection. Allows implementations to use
      * PreparedStatements. The JdbcTemplate will close the created statement.

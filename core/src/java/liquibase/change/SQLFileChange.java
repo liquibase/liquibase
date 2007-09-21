@@ -1,13 +1,13 @@
 package liquibase.change;
 
-import liquibase.database.Database;
-import liquibase.database.sql.SqlStatement;
-import liquibase.database.sql.RawSqlStatement;
-import liquibase.database.structure.DatabaseObject;
 import liquibase.FileOpener;
-import liquibase.migrator.Migrator;
+import liquibase.database.Database;
+import liquibase.database.sql.RawSqlStatement;
+import liquibase.database.sql.SqlStatement;
+import liquibase.database.structure.DatabaseObject;
 import liquibase.exception.SetupException;
 import liquibase.exception.UnsupportedChangeException;
+import liquibase.migrator.Migrator;
 import liquibase.util.MD5Util;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
@@ -18,9 +18,9 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Set;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 import java.util.logging.Logger;
 
 /**
@@ -188,7 +188,7 @@ public class SQLFileChange extends AbstractChange {
     }
 
     public String getConfirmationMessage() {
-        return "SQL File " + file + " has been executed";
+        return "SQL in file " + file + " executed";
     }
 
 

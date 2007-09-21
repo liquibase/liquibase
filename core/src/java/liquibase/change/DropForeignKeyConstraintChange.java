@@ -2,8 +2,8 @@ package liquibase.change;
 
 import liquibase.database.Database;
 import liquibase.database.MySQLDatabase;
-import liquibase.database.sql.SqlStatement;
 import liquibase.database.sql.RawSqlStatement;
+import liquibase.database.sql.SqlStatement;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.ForeignKey;
 import liquibase.database.structure.Table;
@@ -52,7 +52,7 @@ public class DropForeignKeyConstraintChange extends AbstractChange {
     }
 
     public String getConfirmationMessage() {
-        return "Foreign Key " + getConstraintName() + " was dropped";
+        return "Foreign key " + getConstraintName() + " dropped";
     }
 
     public Element createNode(Document currentChangeLogFileDOM) {

@@ -3,8 +3,8 @@ package liquibase.change;
 import liquibase.database.Database;
 import liquibase.database.HsqlDatabase;
 import liquibase.database.OracleDatabase;
-import liquibase.database.sql.SqlStatement;
 import liquibase.database.sql.RawSqlStatement;
+import liquibase.database.sql.SqlStatement;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Sequence;
 import liquibase.exception.UnsupportedChangeException;
@@ -105,7 +105,7 @@ public class AlterSequenceChange extends AbstractChange {
     }
 
     public String getConfirmationMessage() {
-        return "Sequence " + sequenceName + " has been altered";
+        return "Sequence " + getSequenceName() + " altered";
     }
 
     public Element createNode(Document currentChangeLogFileDOM) {

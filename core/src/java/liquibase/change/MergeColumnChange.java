@@ -2,8 +2,8 @@ package liquibase.change;
 
 import liquibase.database.Database;
 import liquibase.database.DerbyDatabase;
-import liquibase.database.sql.SqlStatement;
 import liquibase.database.sql.RawSqlStatement;
+import liquibase.database.sql.SqlStatement;
 import liquibase.database.structure.Column;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Table;
@@ -112,7 +112,7 @@ public class MergeColumnChange extends AbstractChange {
     }
 
     public String getConfirmationMessage() {
-        return "Columns Merged";
+        return "Columns "+getTableName()+"."+getColumn1Name()+" and "+getTableName()+"."+getColumn2Name()+" merged";
     }
 
     public Element createNode(Document currentChangeLogFileDOM) {

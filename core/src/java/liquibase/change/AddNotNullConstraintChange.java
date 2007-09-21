@@ -1,8 +1,8 @@
 package liquibase.change;
 
 import liquibase.database.*;
-import liquibase.database.sql.SqlStatement;
 import liquibase.database.sql.RawSqlStatement;
+import liquibase.database.sql.SqlStatement;
 import liquibase.database.structure.Column;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Table;
@@ -187,7 +187,7 @@ public class AddNotNullConstraintChange extends AbstractChange {
     }
 
     public String getConfirmationMessage() {
-        return "Null Constraint has been added to the column " + getColumnName() + " of the table " + getTableName();
+        return "Null constraint has been added to " + getTableName() + "." + getColumnName();
     }
 
 

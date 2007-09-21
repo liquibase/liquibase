@@ -1,8 +1,8 @@
 package liquibase.change;
 
 import liquibase.database.*;
-import liquibase.database.sql.SqlStatement;
 import liquibase.database.sql.RawSqlStatement;
+import liquibase.database.sql.SqlStatement;
 import liquibase.database.structure.Column;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Table;
@@ -94,7 +94,7 @@ public class RenameColumnChange extends AbstractChange {
     }
 
     public String getConfirmationMessage() {
-        return "Column with the name " + oldColumnName + " has been renamed to " + newColumnName;
+        return "Column "+tableName+"."+ oldColumnName + " renamed to " + newColumnName;
     }
 
     public Element createNode(Document currentChangeLogFileDOM) {

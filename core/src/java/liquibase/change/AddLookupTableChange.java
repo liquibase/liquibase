@@ -1,8 +1,8 @@
 package liquibase.change;
 
 import liquibase.database.*;
-import liquibase.database.sql.SqlStatement;
 import liquibase.database.sql.RawSqlStatement;
+import liquibase.database.sql.SqlStatement;
 import liquibase.database.structure.Column;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.ForeignKey;
@@ -157,7 +157,7 @@ public class AddLookupTableChange extends AbstractChange {
     }
 
     public String getConfirmationMessage() {
-        return "Lookup table added";
+        return "Lookup table added for "+getExistingTableName()+"."+getExistingColumnName();
     }
 
     public Element createNode(Document currentChangeLogFileDOM) {

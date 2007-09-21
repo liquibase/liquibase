@@ -1,9 +1,9 @@
 package liquibase.dbdoc;
 
+import liquibase.change.Change;
+import liquibase.database.Database;
 import liquibase.database.structure.Column;
 import liquibase.database.structure.Table;
-import liquibase.database.Database;
-import liquibase.change.Change;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -19,7 +19,7 @@ public class TableWriter extends HTMLWriter {
     }
 
     protected String createTitle(Object object) {
-        return object.toString() + " (Table)";
+        return "Changes affecting table \""+object.toString() + "\"";
     }
 
     protected void writeCustomHTML(FileWriter fileWriter, Object object, List<Change> changes, Database database) throws IOException {

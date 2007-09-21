@@ -51,7 +51,7 @@ public class AlterSequenceChangeTest extends AbstractChangeTest {
         AlterSequenceChange refactoring = new AlterSequenceChange();
         refactoring.setSequenceName("SEQ_NAME");
 
-        assertEquals("Sequence SEQ_NAME has been altered", refactoring.getConfirmationMessage());
+        assertEquals("Sequence SEQ_NAME altered", refactoring.getConfirmationMessage());
     }
 
     @Test
