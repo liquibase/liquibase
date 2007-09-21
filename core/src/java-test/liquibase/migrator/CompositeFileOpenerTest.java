@@ -1,5 +1,7 @@
 package liquibase.migrator;
 
+import liquibase.CompositeFileOpener;
+import liquibase.FileOpener;
 import static org.easymock.EasyMock.*;
 import org.junit.After;
 import static org.junit.Assert.*;
@@ -11,9 +13,6 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.Enumeration;
 import java.util.Vector;
-
-import liquibase.FileOpener;
-import liquibase.CompositeFileOpener;
 
 public class CompositeFileOpenerTest {
     FileOpener first;

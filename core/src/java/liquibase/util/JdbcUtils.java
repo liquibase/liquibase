@@ -2,7 +2,6 @@ package liquibase.util;
 
 import liquibase.exception.JDBCException;
 
-import javax.sql.DataSource;
 import java.sql.*;
 import java.util.Collection;
 

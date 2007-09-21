@@ -1,12 +1,12 @@
 package liquibase.change.custom;
 
+import liquibase.FileOpener;
 import liquibase.database.Database;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.exception.CustomChangeException;
-import liquibase.exception.UnsupportedChangeException;
-import liquibase.exception.SetupException;
 import liquibase.exception.RollbackImpossibleException;
-import liquibase.FileOpener;
+import liquibase.exception.SetupException;
+import liquibase.exception.UnsupportedChangeException;
 
 import java.util.Set;
 

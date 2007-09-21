@@ -1,11 +1,8 @@
 package liquibase.preconditions;
 
-import liquibase.migrator.Migrator;
 import liquibase.DatabaseChangeLog;
 import liquibase.exception.PreconditionFailedException;
-
-import java.util.ArrayList;
-import java.util.List;
+import liquibase.migrator.Migrator;
 
 /**
  * Class for controling "not" logic in preconditions.

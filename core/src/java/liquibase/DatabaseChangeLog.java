@@ -1,7 +1,7 @@
 package liquibase;
 
-import liquibase.preconditions.AndPrecondition;
 import liquibase.migrator.Migrator;
+import liquibase.preconditions.AndPrecondition;
 
 /**
  * Encapsulates the information stored in the change log XML file.

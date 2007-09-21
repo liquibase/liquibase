@@ -1,9 +1,9 @@
 package liquibase.change.custom;
 
 import liquibase.database.Database;
-import liquibase.exception.UnsupportedChangeException;
-import liquibase.exception.RollbackImpossibleException;
 import liquibase.exception.CustomChangeException;
+import liquibase.exception.RollbackImpossibleException;
+import liquibase.exception.UnsupportedChangeException;
 
 public interface CustomTaskRollback {
 

@@ -1,22 +1,22 @@
 package liquibase.servlet;
 
-import liquibase.migrator.*;
+import liquibase.ClassLoaderFileOpener;
 import liquibase.CompositeFileOpener;
 import liquibase.FileOpener;
 import liquibase.FileSystemFileOpener;
-import liquibase.ClassLoaderFileOpener;
+import liquibase.migrator.Migrator;
 
-import javax.servlet.ServletContextListener;
-import javax.servlet.ServletContextEvent;
 import javax.naming.Context;
 import javax.naming.InitialContext;
+import javax.servlet.ServletContextEvent;
+import javax.servlet.ServletContextListener;
 import javax.sql.DataSource;
-import java.util.logging.Logger;
-import java.util.logging.Handler;
-import java.util.logging.LogRecord;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.sql.Connection;
+import java.util.logging.Handler;
+import java.util.logging.LogRecord;
+import java.util.logging.Logger;
 
 /**
  * Servlet listener than can be added to web.xml to allow LiquiBase to run on every application server startup.

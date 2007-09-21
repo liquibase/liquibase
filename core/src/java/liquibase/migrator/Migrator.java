@@ -1,18 +1,18 @@
 package liquibase.migrator;
 
+import liquibase.ChangeSet;
+import liquibase.DatabaseChangeLogLock;
+import liquibase.FileOpener;
+import liquibase.RanChangeSet;
+import liquibase.change.ChangeFactory;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
 import liquibase.exception.*;
 import liquibase.parser.*;
+import liquibase.preconditions.PreconditionFactory;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
-import liquibase.RanChangeSet;
-import liquibase.ChangeSet;
-import liquibase.FileOpener;
-import liquibase.DatabaseChangeLogLock;
-import liquibase.preconditions.PreconditionFactory;
-import liquibase.change.ChangeFactory;
 import org.xml.sax.*;
 
 import javax.swing.*;

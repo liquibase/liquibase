@@ -2,9 +2,9 @@ package liquibase;
 
 import liquibase.change.Change;
 import liquibase.database.DatabaseConnection;
-import liquibase.database.template.JdbcTemplate;
 import liquibase.database.sql.RawSqlStatement;
 import liquibase.database.sql.SqlStatement;
+import liquibase.database.template.JdbcTemplate;
 import liquibase.exception.JDBCException;
 import liquibase.exception.MigrationFailedException;
 import liquibase.exception.RollbackFailedException;

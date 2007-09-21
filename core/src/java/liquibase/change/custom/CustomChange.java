@@ -1,21 +1,10 @@
 package liquibase.change.custom;
 
-import liquibase.database.Database;
-import liquibase.database.structure.DatabaseObject;
-import liquibase.database.sql.SqlStatement;
-import liquibase.exception.JDBCException;
-import liquibase.exception.UnsupportedChangeException;
-import liquibase.exception.RollbackImpossibleException;
-import liquibase.exception.SetupException;
 import liquibase.FileOpener;
-import liquibase.ChangeSet;
+import liquibase.database.structure.DatabaseObject;
+import liquibase.exception.SetupException;
 
-import java.io.Writer;
-import java.io.IOException;
 import java.util.Set;
-
-import org.w3c.dom.Element;
-import org.w3c.dom.Document;
 
 /**
  * Interface to implement when creating a custom change.  Actual custom changes implementations need to

@@ -1,7 +1,7 @@
 package liquibase.ant;
 
-import liquibase.migrator.AbstractFileOpenerTest;
 import liquibase.FileOpener;
+import liquibase.migrator.AbstractFileOpenerTest;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.types.Path;
 import static org.junit.Assert.assertNotNull;

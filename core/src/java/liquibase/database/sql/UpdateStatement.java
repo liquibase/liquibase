@@ -1,11 +1,9 @@
 package liquibase.database.sql;
 
 import liquibase.database.Database;
-import liquibase.database.DatabaseConnection;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.sql.Types;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

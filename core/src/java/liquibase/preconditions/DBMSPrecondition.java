@@ -1,8 +1,8 @@
 package liquibase.preconditions;
 
-import liquibase.migrator.Migrator;
-import liquibase.exception.PreconditionFailedException;
 import liquibase.DatabaseChangeLog;
+import liquibase.exception.PreconditionFailedException;
+import liquibase.migrator.Migrator;
 
 /**
  * Precondition for specifying the type of database (oracle, mysql, etc.).

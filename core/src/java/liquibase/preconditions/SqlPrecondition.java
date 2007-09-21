@@ -1,12 +1,12 @@
 package liquibase.preconditions;
 
-import liquibase.migrator.Migrator;
 import liquibase.DatabaseChangeLog;
 import liquibase.exception.PreconditionFailedException;
+import liquibase.migrator.Migrator;
 
-import java.sql.Statement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 public class SqlPrecondition implements Precondition {
 
