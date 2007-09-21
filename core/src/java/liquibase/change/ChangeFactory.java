@@ -54,6 +54,7 @@ public class ChangeFactory {
                 DropUniqueConstraintChange.class,
                 SQLFileChange.class,
                 CustomChangeWrapper.class,
+                CreateProcedureChange.class,
         };
 
         try {

@@ -301,6 +301,19 @@
     <changeSet id="58" author="nvoxland">
         <customChange class="liquibase.change.custom.ExampleCustomTaskChange" helloTo="world"/>
     </changeSet>
-    
+
+    <changeSet id="59" author="nvoxland">
+        <createProcedure>
+            CREATE OR REPLACE PROCEDURE testHello
+            IS
+            BEGIN
+              DBMS_OUTPUT.PUT_LINE('Hello From Oracle!');
+            END;
+        </createProcedure>
+    </changeSet>
+    <changeSet id="60" author="nvoxland">
+        <customChange class="liquibase.change.custom.ExampleCustomProcCallChange"/>
+    </changeSet>
+
     
 </databaseChangeLog>
