@@ -3,6 +3,7 @@ package liquibase.database;
 import liquibase.exception.JDBCException;
 
 import java.sql.Connection;
+import java.sql.Types;
 
 public class CacheDatabase extends AbstractDatabase {
     public static final String PRODUCT_NAME = "cache";

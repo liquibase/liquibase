@@ -1,6 +1,7 @@
 package liquibase.database;
 
 import liquibase.DatabaseChangeLogLock;
+import liquibase.database.sql.SqlStatement;
 import liquibase.migrator.Migrator;
 import liquibase.change.ColumnConfig;
 import liquibase.exception.JDBCException;
@@ -90,7 +91,7 @@ public interface Database {
 
     String getAutoIncrementClause();
 
-    String getCommitSQL();
+    SqlStatement getCommitSQL();
 
     String getDatabaseChangeLogTableName();
 
@@ -117,8 +118,6 @@ public interface Database {
 
     void dropDatabaseObjects() throws JDBCException;
 
-    String getDropTableSQL(String tableName);
-
     void tag(String tagString) throws JDBCException;
 
     boolean doesTagExist(String tag) throws JDBCException;
@@ -127,11 +126,13 @@ public interface Database {
 
     boolean isLiquibaseTable(String tableName);
 
-    String createFindSequencesSQL() throws JDBCException;
+    SqlStatement createFindSequencesSQL() throws JDBCException;
 
     boolean shouldQuoteValue(String value);
 
     boolean supportsTablespaces();
 
     String getViewDefinition(String name) throws JDBCException;
+
+    int getDatabaseType(int type);
 }

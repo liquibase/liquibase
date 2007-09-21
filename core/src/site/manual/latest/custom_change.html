@@ -27,11 +27,15 @@
                         and use the &lt;custom&gt; tag in your change set.
                     </p>
                     <p>
-                        If your change can be rolled back, implement the <a href="api/liquibase/change/custom/CustomChangeRollback.html">liquibase.change.custom.CustomChangeRollback</a> interface
+                        If your change can be rolled back, implement the <a href="api/liquibase/change/custom/CustomChangeRollback.html">
+                        liquibase.change.custom.CustomSqlRollback
+                    </a> interface
                         as well.
                     </p>
                     <p>
-                        For a sample custom change class, see <a href="http://liquibase.svn.sourceforge.net/viewvc/liquibase/trunk/core/src/java-test/liquibase/change/ExampleCustomChange.java?view=markup">liquibase.change.ExampleCustomChange</a>
+                        For a sample custom change class, see <a href="http://liquibase.svn.sourceforge.net/viewvc/liquibase/trunk/core/src/java-test/liquibase/change/ExampleCustomChange.java?view=markup">
+                        liquibase.change.custom.ExampleCustomSqlChange
+                    </a>
                     </p>
 
                     <h3>Sample</h3>

@@ -1,11 +1,10 @@
 package liquibase.database;
 
 import liquibase.exception.JDBCException;
+import liquibase.database.sql.RawSqlStatement;
+import liquibase.database.sql.SqlStatement;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 
 public class DB2Database extends AbstractDatabase {
     public boolean isCorrectDatabaseImplementation(Connection conn) throws JDBCException {
@@ -152,8 +151,8 @@ public class DB2Database extends AbstractDatabase {
     }
 
 
-    public String createFindSequencesSQL() throws JDBCException {
-        return "SELECT SEQNAME AS SEQUENCE_NAME FROM SYSCAT.SEQUENCES WHERE SEQSCHEMA = '" + getSchemaName() + "'";
+    public SqlStatement createFindSequencesSQL() throws JDBCException {
+        return new RawSqlStatement("SELECT SEQNAME AS SEQUENCE_NAME FROM SYSCAT.SEQUENCES WHERE SEQSCHEMA = '" + getSchemaName() + "'");
     }
 
 
@@ -167,8 +166,8 @@ public class DB2Database extends AbstractDatabase {
         return true;
     }
 
-    protected String getViewDefinitionSql(String name) throws JDBCException {
-        return "select view_definition from SYSIBM.VIEWS where TABLE_NAME='" + name + "' and TABLE_SCHEMA='" + getSchemaName() + "'";
+    protected SqlStatement getViewDefinitionSql(String name) throws JDBCException {
+        return new RawSqlStatement("select view_definition from SYSIBM.VIEWS where TABLE_NAME='" + name + "' and TABLE_SCHEMA='" + getSchemaName() + "'");
     }
 
     public String getViewDefinition(String name) throws JDBCException {

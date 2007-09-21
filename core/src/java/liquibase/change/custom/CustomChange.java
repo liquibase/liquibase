@@ -18,19 +18,13 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Document;
 
 /**
- * Interface to implement when creating a custom change.  See http://www.liquibase.org/manual/latest/custom_change.html
- * for more information. 
+ * Interface to implement when creating a custom change.  Actual custom changes implementations need to
+ * implement CustomSqlChange or CustomTaskChange.
+ * <br><br>
+ * See http://www.liquibase.org/manual/latest/custom_change.html for more information.
  */
-public interface CustomChange {
+interface CustomChange {
 
-    /**
-     * Generates the SQL statements required to run the change
-     *
-     * @param database databasethe target {@link Database} associated to this change's statements
-     * @return an array of {@link String}s with the statements
-     * @throws UnsupportedChangeException if this change is not supported by the {@link Database} passed as argument
-     */
-    public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException;
 
     /**
      * Confirmation message to be displayed after the change is executed

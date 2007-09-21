@@ -1,11 +1,12 @@
 package liquibase.database;
 
+import liquibase.database.sql.RawSqlStatement;
+import liquibase.database.sql.SqlStatement;
 import liquibase.exception.JDBCException;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.ResultSet;
 
 public class H2Database extends HsqlDatabase {
     public String getProductName() {
@@ -28,8 +29,8 @@ public class H2Database extends HsqlDatabase {
         return "H2".equals(getDatabaseProductName(conn));
     }
 
-    public String createFindSequencesSQL() throws JDBCException {
-        return "SELECT SEQUENCE_NAME FROM INFORMATION_SCHEMA.SEQUENCES WHERE SEQUENCE_SCHEMA = '"+getSchemaName()+"' AND IS_GENERATED=FALSE";
+    public SqlStatement createFindSequencesSQL() throws JDBCException {
+        return new RawSqlStatement("SELECT SEQUENCE_NAME FROM INFORMATION_SCHEMA.SEQUENCES WHERE SEQUENCE_SCHEMA = '"+getSchemaName()+"' AND IS_GENERATED=FALSE");
     }
 
 
@@ -66,8 +67,8 @@ public class H2Database extends HsqlDatabase {
         return super.getViewDefinition(name).replaceFirst(".*?\n", ""); //h2 returns "create view....as\nselect
     }
 
-    protected String getViewDefinitionSql(String name) throws JDBCException {
-        return "SELECT VIEW_DEFINITION FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_NAME = '"+name+"'";
+    protected SqlStatement getViewDefinitionSql(String name) throws JDBCException {
+        return new RawSqlStatement("SELECT VIEW_DEFINITION FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_NAME = '"+name+"'");
     }
 
 }

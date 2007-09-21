@@ -67,4 +67,11 @@
         <addPrimaryKey tableName="page" columnNames="id" constraintName="pk_page"/>
     </changeSet>
 
+    <changeSet id="20" author="nvoxland">
+        <customChange class="liquibase.change.custom.ExampleCustomSqlChange" tableName="page" columnName="magazine_id" newValue="4"/>
+    </changeSet>
+    <changeSet id="21" author="nvoxland">
+        <customChange class="liquibase.change.custom.ExampleCustomTaskChange" helloTo="world"/>
+    </changeSet>
+    
 </databaseChangeLog>

@@ -4,6 +4,7 @@ import liquibase.ChangeSet;
 import liquibase.DatabaseChangeLog;
 import liquibase.FileOpener;
 import liquibase.change.*;
+import liquibase.change.custom.CustomChangeWrapper;
 import liquibase.exception.*;
 import liquibase.migrator.IncludeMigrator;
 import liquibase.migrator.Migrator;

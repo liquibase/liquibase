@@ -1,6 +1,8 @@
 package liquibase.database;
 
 import liquibase.exception.JDBCException;
+import liquibase.database.sql.SqlStatement;
+import liquibase.database.sql.RawSqlStatement;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -41,8 +43,8 @@ public class SybaseDatabase extends MSSQLDatabase {
     	return false;
     }
     
-    protected String getCreateChangeLogSQL() {
-        return ("CREATE TABLE DATABASECHANGELOG (id varchar(150) not null, " +
+    protected SqlStatement getCreateChangeLogSQL() {
+        return new RawSqlStatement(("CREATE TABLE DATABASECHANGELOG (id varchar(150) not null, " +
                 "author varchar(150) not null, " +
                 "filename varchar(255) not null, " +
                 "dateExecuted " + getDateTimeType() + " not null, " +
@@ -51,11 +53,11 @@ public class SybaseDatabase extends MSSQLDatabase {
                 "comments varchar(255) null, " +
                 "tag varchar(255) null, " +
                 "liquibase varchar(10) null, " +
-                "primary key(id, author, filename))").toUpperCase();
+                "primary key(id, author, filename))").toUpperCase());
     }
 
-    protected String getCreateChangeLogLockSQL() {
-        return ("create table DatabaseChangeLogLock (id int not null primary key, locked " + getBooleanType() + " not null, lockGranted " + getDateTimeType() + " null, lockedby varchar(255) null)").toUpperCase();
+    protected SqlStatement getCreateChangeLogLockSQL() {
+        return new RawSqlStatement(("create table DatabaseChangeLogLock (id int not null primary key, locked " + getBooleanType() + " not null, lockGranted " + getDateTimeType() + " null, lockedby varchar(255) null)").toUpperCase());
     }
     
     /**

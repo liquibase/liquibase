@@ -1,7 +1,11 @@
 package liquibase.database;
 
 import liquibase.exception.JDBCException;
+import liquibase.exception.UnsupportedChangeException;
 import liquibase.util.ISODateFormat;
+import liquibase.database.sql.SqlStatement;
+import liquibase.database.sql.RawSqlStatement;
+import liquibase.change.DropSequenceChange;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -124,46 +128,8 @@ public class HsqlDatabase extends AbstractDatabase {
     }
 
 
-    public String createFindSequencesSQL() throws JDBCException {
-        return "SELECT SEQUENCE_NAME FROM INFORMATION_SCHEMA.SYSTEM_SEQUENCES WHERE SEQUENCE_SCHEMA = '" + getSchemaName() + "'";
-    }
-
-    @Override
-    protected void dropSequences(DatabaseConnection conn) throws JDBCException {
-        ResultSet rs = null;
-        Statement selectStatement = null;
-        Statement dropStatement = null;
-        try {
-            selectStatement = conn.createStatement();
-            dropStatement = conn.createStatement();
-            rs = selectStatement.executeQuery("SELECT SEQUENCE_NAME FROM INFORMATION_SCHEMA.SYSTEM_SEQUENCES");
-            while (rs.next()) {
-                String sequenceName = rs.getString("SEQUENCE_NAME");
-                log.finest("Dropping sequence " + sequenceName);
-                String sql = "DROP SEQUENCE " + sequenceName;
-                try {
-                    dropStatement.executeUpdate(sql);
-                } catch (SQLException e) {
-                    throw new JDBCException("Error dropping sequence '" + sequenceName + "': " + e.getMessage(), e);
-                }
-            }
-        } catch (SQLException e) {
-            throw new JDBCException(e);
-        } finally {
-            try {
-                if (selectStatement != null) {
-                    selectStatement.close();
-                }
-                if (dropStatement != null) {
-                    dropStatement.close();
-                }
-                if (rs != null) {
-                    rs.close();
-                }
-            } catch (SQLException e) {
-                ;
-            }
-        }
+    public SqlStatement createFindSequencesSQL() throws JDBCException {
+        return new RawSqlStatement("SELECT SEQUENCE_NAME FROM INFORMATION_SCHEMA.SYSTEM_SEQUENCES WHERE SEQUENCE_SCHEMA = '" + getSchemaName() + "'");
     }
 
     public boolean supportsTablespaces() {
@@ -176,7 +142,7 @@ public class HsqlDatabase extends AbstractDatabase {
     }
 
 
-    protected String getViewDefinitionSql(String name) throws JDBCException {
-        return "SELECT VIEW_DEFINITION FROM INFORMATION_SCHEMA.SYSTEM_VIEWS WHERE TABLE_NAME = '"+name+"'";
+    protected SqlStatement getViewDefinitionSql(String name) throws JDBCException {
+        return new RawSqlStatement("SELECT VIEW_DEFINITION FROM INFORMATION_SCHEMA.SYSTEM_VIEWS WHERE TABLE_NAME = '"+name+"'");
     }
 }

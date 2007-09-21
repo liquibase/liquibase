@@ -4,6 +4,7 @@ import liquibase.exception.JDBCException;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.HashSet;
 import java.util.Set;
 
