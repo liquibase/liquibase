@@ -1,0 +1,61 @@
+package liquibase.change;
+
+import liquibase.database.Database;
+import liquibase.database.sql.RawSqlStatement;
+import liquibase.database.sql.SqlStatement;
+import liquibase.database.structure.DatabaseObject;
+import liquibase.exception.UnsupportedChangeException;
+import liquibase.util.StringUtils;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
+public class CreateProcedureChange extends AbstractChange {
+    private String comments;
+    private String procedureBody;
+
+    public CreateProcedureChange() {
+        super("createProcedure", "Create procedure");
+    }
+
+    public String getProcedureBody() {
+        return procedureBody;
+    }
+
+    public void setProcedureBody(String procedureBody) {
+        this.procedureBody = procedureBody;
+    }
+
+    public String getComments() {
+        return comments;
+    }
+
+    public void setComments(String comments) {
+        this.comments = comments;
+    }
+
+    public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
+        return new SqlStatement[] {
+                new RawSqlStatement(getProcedureBody()),
+        };
+    }
+
+    public String getConfirmationMessage() {
+        return "Stored procedure created";
+    }
+
+    public Element createNode(Document currentChangeLogFileDOM) {
+        Element sqlElement = currentChangeLogFileDOM.createElement("sql");
+        sqlElement.appendChild(currentChangeLogFileDOM.createTextNode(getProcedureBody()));
+
+        return sqlElement;
+    }
+
+
+    public Set<DatabaseObject> getAffectedDatabaseObjects() {
+        return null;
+    }
+}

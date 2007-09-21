@@ -3,7 +3,7 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
     <head>
-        <title>LiquiBase: Custom SQL</title>
+        <title>LiquiBase: Create Procedure</title>
         <style type='text/css' media='screen'>@import "../../include/css/main.css";</style>
     </head>
     <body>@ANALYTICS@
@@ -18,31 +18,21 @@
 
             <div id="content">
                 <div class="entry">
-                    <h2>"Custom SQL" Refactoring</h2>
+                    <h2>"Create Procedure" Refactoring</h2>
                     <p>
-                        The "sql" tag allows you to specify whatever sql you want.
-                        It is useful for complex changes that aren't supported through LiquiBase's automated refactoring tags
-                        and to work around bugs and limitations of LiquiBase.  The SQL contained in the sql tag can be multi-line.
-                    </p>
-                    <p>
-                        The createProcedure tag is the best way to create stored procedures.
-                    </p>
-                    <p>The "sqlfile" tag can also support multiline statements in the same file. Statements can either be split using a ; 
-                                               at the end of the last line of the SQL or a go on its own on the line between the statements can be used.Multiline SQL 
-                                               statements are also supported and only a ; or go statement will finsih a statement, a new line is not enough. Files containing 
-                                                a single statement do not need to use a ; or go.
-
-                    </p>
-
-                    <p>The sql file can also contain comments of either of the following formats:<br/>
-                       <ol>
-                           <li>A multiline comment that starts with /* and ends with */.
-                           <li>A single line comment starting with &lt;space&gt;--&lt;space&gt and finishing at the end of the line
-                       </ol>
+                        The "createProcedure" tag allows you to define the create (or create and replace) definition for a
+                        stored procedure.  This tag is better to use for creating procedures than the "sql" tag because
+                        it will not attempt to strip comments or break up lines.
                     </p>
 
                     <h3>Sample</h3>
-                    <pre>&lt;sql&gt;insert into person (id, name) values (1, 'Bob')&lt;/sql&gt;</pre>
+                    <pre>&lt;createProcedure&gt;
+    CREATE OR REPLACE PROCEDURE testHello
+    IS
+    BEGIN
+      DBMS_OUTPUT.PUT_LINE('Hello From The Database!');
+    END;
+&lt;/createProcedure&gt;</pre>
 
                     <h3>Database Compatiblity</h3>
                     <table class="databaseCompatibiltyTable">

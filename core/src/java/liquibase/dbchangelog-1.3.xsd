@@ -391,6 +391,14 @@
         </xsd:complexType>
     </xsd:element>
 
+    <xsd:element name="createProcedure">
+        <xsd:complexType mixed="true">
+            <xsd:sequence>
+                <xsd:element ref="comment" minOccurs="0" maxOccurs="1"/>
+            </xsd:sequence>
+        </xsd:complexType>
+    </xsd:element>
+
     <xsd:element name="sqlFile">
         <xsd:complexType>
             <xsd:attribute name="path" type="xsd:string"/>
@@ -524,6 +532,7 @@
             <xsd:element ref="insert" maxOccurs="unbounded"/>
             <xsd:element ref="addColumn" maxOccurs="unbounded"/>
             <xsd:element ref="sql" maxOccurs="unbounded"/>
+            <xsd:element ref="createProcedure" maxOccurs="unbounded"/>
             <xsd:element ref="sqlFile" maxOccurs="unbounded"/>
             <xsd:element ref="renameTable" maxOccurs="unbounded"/>
             <xsd:element ref="renameColumn" maxOccurs="unbounded"/>

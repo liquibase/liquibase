@@ -8,10 +8,9 @@ import liquibase.database.sql.SqlStatement;
 import liquibase.exception.JDBCException;
 import liquibase.util.JdbcUtils;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -58,7 +57,8 @@ public class JdbcTemplate {
         if (sql instanceof PreparedSqlStatement) {
             throw new JDBCException("Direct execution of PreparedSqlStatement not currently implemented");
         } else if (sql instanceof CallableSqlStatement) {
-            throw new JDBCException("Execution of CallableSqlStatement not currently implemented");
+            call(((CallableSqlStatement) sql), new ArrayList());
+            return;
         }
 
 
@@ -343,6 +343,43 @@ public class JdbcTemplate {
 
     public int update(PreparedSqlStatement sql, Object[] args) throws JDBCException {
         return update(sql, new ArgPreparedStatementSetter(args));
+    }
+
+    //-------------------------------------------------------------------------
+    // Methods dealing with callable statements
+    //-------------------------------------------------------------------------
+
+    public Object execute(CallableSqlStatement csc, CallableStatementCallback action) throws JDBCException {
+        CallableStatement cs = null;
+        try {
+            cs = csc.createCallableStatement(database);
+            CallableStatement csToUse = cs;
+            return action.doInCallableStatement(csToUse);
+        }
+        catch (SQLException ex) {
+            throw new JDBCException("Error executing callable statement", ex);
+        }
+        finally {
+            JdbcUtils.closeStatement(cs);
+        }
+
+    }
+
+    public Map call(CallableSqlStatement csc, final List declaredParameters) throws JDBCException {
+        return (Map) execute(csc, new CallableStatementCallback() {
+            public Object doInCallableStatement(CallableStatement cs) throws SQLException {
+                //not currently doing anything with returned results
+//                boolean retVal = cs.execute();
+//                int updateCount = cs.getUpdateCount();
+//                Map returnedResults = new HashMap();
+//                if (retVal || updateCount != -1) {
+//                    returnedResults.putAll(extractReturnedResultSets(cs, declaredParameters, updateCount));
+//                }
+//                returnedResults.putAll(extractOutputParameters(cs, declaredParameters));
+                cs.execute();
+                return new HashMap();
+            }
+        });
     }
 
     /**

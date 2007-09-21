@@ -51,15 +51,15 @@ liqubase.sh --driver=oracle.jdbc.OracleDriver \
                         <li>Missing/unexpected foreign Keys</li>
                         <li>Missing/unexpected sequences</li>
                         <li>Missing/unexpected indexes</li>
+                        <li>Column definition differences (data type, auto-increment, etc.)</li>
+                        <li>View definition differences</li>
                     </ul>
                     <p>
                         It does not (currently) check
                     </p>
                     <ul>
-                        <li>Column definition differences (data type, auto-increment, etc.)</li>
                         <li>Non-foreign key constraints (unique, etc)</li>
                         <li>Stored Procedures</li>
-                        <li>View definition differences</li>
                         <li>Data differences</li>
                     </ul>
                     <p>

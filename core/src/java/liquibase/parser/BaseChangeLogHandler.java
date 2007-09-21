@@ -146,13 +146,13 @@ public abstract class BaseChangeLogHandler extends DefaultHandler {
                 }
 
                 if ("sqlCheck".equals(qName)) {
-                    text = new StringBuffer();                    
+                    text = new StringBuffer();
                 }
             } else if ("param".equals(qName)) {
                 if (change instanceof CustomChangeWrapper) {
                     ((CustomChangeWrapper) change).setParam(atts.getValue("name"), atts.getValue("value"));
                 } else {
-                    throw new MigrationFailedException(changeSet, "'param' unexpected in "+qName);
+                    throw new MigrationFailedException(changeSet, "'param' unexpected in " + qName);
                 }
             } else {
                 throw new MigrationFailedException(changeSet, "Unexpected tag: " + qName);
@@ -174,7 +174,7 @@ public abstract class BaseChangeLogHandler extends DefaultHandler {
                 ((CustomChangeWrapper) object).setParam(attributeName, attributeValue);
             }
         } else {
-            ObjectUtil.setProperty(object, attributeName,  attributeValue);
+            ObjectUtil.setProperty(object, attributeName, attributeValue);
         }
     }
 
@@ -209,6 +209,9 @@ public abstract class BaseChangeLogHandler extends DefaultHandler {
             } else if (change != null && change instanceof RawSQLChange && "comment".equals(qName)) {
                 ((RawSQLChange) change).setComments(textString);
                 text = new StringBuffer();
+            } else if (change != null && change instanceof CreateProcedureChange && "comment".equals(qName)) {
+                ((CreateProcedureChange) change).setComments(textString);
+                text = new StringBuffer();
             } else if (changeSet != null && "comment".equals(qName)) {
                 changeSet.setComments(textString);
                 text = new StringBuffer();
@@ -219,6 +222,8 @@ public abstract class BaseChangeLogHandler extends DefaultHandler {
                 if (textString != null) {
                     if (change instanceof RawSQLChange) {
                         ((RawSQLChange) change).setSql(textString);
+                    } else if (change instanceof CreateProcedureChange) {
+                        ((CreateProcedureChange) change).setProcedureBody(textString);
                     } else if (change instanceof CreateViewChange) {
                         ((CreateViewChange) change).setSelectQuery(textString);
                     } else if (change instanceof InsertDataChange) {
