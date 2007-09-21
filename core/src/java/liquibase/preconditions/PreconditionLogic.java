@@ -1,7 +1,7 @@
 package liquibase.preconditions;
 
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Marker interface for precondition logic tags (and,or, not)

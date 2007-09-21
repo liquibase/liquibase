@@ -2,11 +2,11 @@ package liquibase.parser;
 
 import liquibase.ChangeSet;
 import liquibase.FileOpener;
-import liquibase.migrator.Migrator;
 import liquibase.RanChangeSet;
 import liquibase.exception.DatabaseHistoryException;
 import liquibase.exception.JDBCException;
 import liquibase.exception.MigrationFailedException;
+import liquibase.migrator.Migrator;
 
 import java.io.IOException;
 import java.util.ArrayList;

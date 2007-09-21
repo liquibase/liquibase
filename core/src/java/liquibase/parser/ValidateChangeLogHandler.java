@@ -1,14 +1,13 @@
 package liquibase.parser;
 
 import liquibase.ChangeSet;
-import liquibase.FileOpener;
 import liquibase.DatabaseChangeLog;
-import liquibase.migrator.IncludeMigrator;
-import liquibase.migrator.Migrator;
+import liquibase.FileOpener;
 import liquibase.change.Change;
 import liquibase.exception.*;
+import liquibase.migrator.IncludeMigrator;
+import liquibase.migrator.Migrator;
 import liquibase.preconditions.FailedPrecondition;
-import liquibase.preconditions.AndPrecondition;
 import liquibase.preconditions.Precondition;
 
 import java.io.IOException;

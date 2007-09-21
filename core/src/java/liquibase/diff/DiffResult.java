@@ -2,9 +2,9 @@ package liquibase.diff;
 
 import com.sun.org.apache.xml.internal.serialize.OutputFormat;
 import com.sun.org.apache.xml.internal.serialize.XMLSerializer;
+import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.database.structure.*;
-import liquibase.change.*;
 import liquibase.exception.JDBCException;
 import liquibase.parser.MigratorSchemaResolver;
 import liquibase.util.StringUtils;

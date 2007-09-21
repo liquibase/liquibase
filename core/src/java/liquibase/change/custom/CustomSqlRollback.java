@@ -1,10 +1,10 @@
 package liquibase.change.custom;
 
-import liquibase.database.sql.SqlStatement;
 import liquibase.database.Database;
-import liquibase.exception.UnsupportedChangeException;
-import liquibase.exception.RollbackImpossibleException;
+import liquibase.database.sql.SqlStatement;
 import liquibase.exception.CustomChangeException;
+import liquibase.exception.RollbackImpossibleException;
+import liquibase.exception.UnsupportedChangeException;
 
 /**
  * Interface to implement that allows rollback of a custom sql change.

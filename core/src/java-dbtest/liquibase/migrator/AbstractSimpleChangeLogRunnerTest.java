@@ -1,12 +1,13 @@
 package liquibase.migrator;
 
+import junit.framework.TestCase;
+import liquibase.ChangeSet;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.structure.DatabaseSnapshot;
 import liquibase.diff.Diff;
 import liquibase.diff.DiffResult;
 import liquibase.exception.JDBCException;
 import liquibase.exception.ValidationFailedException;
-import liquibase.ChangeSet;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -19,8 +20,6 @@ import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import junit.framework.TestCase;
 
 public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
 

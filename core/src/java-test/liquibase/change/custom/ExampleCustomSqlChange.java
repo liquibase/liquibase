@@ -1,8 +1,6 @@
 package liquibase.change.custom;
 
 import liquibase.FileOpener;
-import liquibase.change.custom.CustomSqlChange;
-import liquibase.change.custom.CustomSqlRollback;
 import liquibase.database.Database;
 import liquibase.database.sql.RawSqlStatement;
 import liquibase.database.sql.SqlStatement;

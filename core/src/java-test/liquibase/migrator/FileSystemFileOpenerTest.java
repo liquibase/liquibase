@@ -1,5 +1,7 @@
 package liquibase.migrator;
 
+import liquibase.FileOpener;
+import liquibase.FileSystemFileOpener;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import org.junit.Before;
@@ -11,9 +13,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Enumeration;
-
-import liquibase.FileSystemFileOpener;
-import liquibase.FileOpener;
 
 
 public class FileSystemFileOpenerTest {

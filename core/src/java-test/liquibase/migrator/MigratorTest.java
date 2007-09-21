@@ -1,9 +1,9 @@
 package liquibase.migrator;
 
-import liquibase.database.*;
-import liquibase.exception.JDBCException;
 import liquibase.ClassLoaderFileOpener;
 import liquibase.FileOpener;
+import liquibase.database.*;
+import liquibase.exception.JDBCException;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.expectLastCall;
 import static org.easymock.classextension.EasyMock.*;

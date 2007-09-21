@@ -1,9 +1,5 @@
 package liquibase.migrator.sybase;
 
-import liquibase.migrator.AbstractSimpleChangeLogRunnerTest;
-
-import java.net.InetAddress;
-
 @SuppressWarnings({"JUnitTestCaseWithNoTests"})
 public class SybaseSampleChangeLogRunnerTest { //extends AbstractSimpleChangeLogRunnerTest {
 

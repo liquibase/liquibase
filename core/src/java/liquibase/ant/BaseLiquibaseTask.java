@@ -1,12 +1,12 @@
 package liquibase.ant;
 
-import liquibase.database.DatabaseFactory;
 import liquibase.CompositeFileOpener;
 import liquibase.FileOpener;
 import liquibase.FileSystemFileOpener;
-import liquibase.migrator.Migrator;
+import liquibase.database.DatabaseFactory;
 import liquibase.exception.JDBCException;
 import liquibase.exception.MigrationFailedException;
+import liquibase.migrator.Migrator;
 import org.apache.tools.ant.Task;
 import org.apache.tools.ant.types.Path;
 import org.apache.tools.ant.types.Reference;

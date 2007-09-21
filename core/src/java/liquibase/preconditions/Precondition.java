@@ -1,8 +1,8 @@
 package liquibase.preconditions;
 
-import liquibase.migrator.Migrator;
-import liquibase.exception.PreconditionFailedException;
 import liquibase.DatabaseChangeLog;
+import liquibase.exception.PreconditionFailedException;
+import liquibase.migrator.Migrator;
 
 /**
  * Marker interface for preconditions.  May become an annotation in the future.

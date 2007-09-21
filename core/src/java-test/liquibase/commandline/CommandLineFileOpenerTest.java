@@ -1,7 +1,7 @@
 package liquibase.commandline;
 
-import liquibase.migrator.AbstractFileOpenerTest;
 import liquibase.FileOpener;
+import liquibase.migrator.AbstractFileOpenerTest;
 import static org.junit.Assert.assertNotNull;
 import org.junit.Test;
 

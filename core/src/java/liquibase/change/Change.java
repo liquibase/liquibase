@@ -1,10 +1,10 @@
 package liquibase.change;
 
+import liquibase.ChangeSet;
+import liquibase.FileOpener;
 import liquibase.database.Database;
 import liquibase.database.sql.SqlStatement;
 import liquibase.database.structure.DatabaseObject;
-import liquibase.ChangeSet;
-import liquibase.FileOpener;
 import liquibase.exception.JDBCException;
 import liquibase.exception.RollbackImpossibleException;
 import liquibase.exception.SetupException;

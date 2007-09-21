@@ -1,8 +1,8 @@
 package liquibase.database;
 
-import liquibase.exception.JDBCException;
-import liquibase.database.sql.SqlStatement;
 import liquibase.database.sql.RawSqlStatement;
+import liquibase.database.sql.SqlStatement;
+import liquibase.exception.JDBCException;
 
 import java.sql.Connection;
 import java.sql.SQLException;

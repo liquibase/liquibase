@@ -1,7 +1,5 @@
 package liquibase.migrator.sybase;
 
-import liquibase.migrator.AbstractSimpleChangeLogRunnerTest;
-
 @SuppressWarnings({"JUnitTestCaseWithNoTests"})
 public class JTDSSampleChangeLogRunnerTest { // extends AbstractSimpleChangeLogRunnerTest {
 

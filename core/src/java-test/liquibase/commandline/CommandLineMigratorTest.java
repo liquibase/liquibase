@@ -8,8 +8,8 @@ import org.junit.Test;
 import java.io.*;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.Properties;
 import java.util.Arrays;
+import java.util.Properties;
 
 
 /**

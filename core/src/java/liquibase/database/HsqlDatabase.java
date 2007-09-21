@@ -1,16 +1,11 @@
 package liquibase.database;
 
-import liquibase.exception.JDBCException;
-import liquibase.exception.UnsupportedChangeException;
-import liquibase.util.ISODateFormat;
-import liquibase.database.sql.SqlStatement;
 import liquibase.database.sql.RawSqlStatement;
-import liquibase.change.DropSequenceChange;
+import liquibase.database.sql.SqlStatement;
+import liquibase.exception.JDBCException;
+import liquibase.util.ISODateFormat;
 
 import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;

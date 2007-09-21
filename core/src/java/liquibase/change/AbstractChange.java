@@ -1,16 +1,15 @@
 package liquibase.change;
 
-import liquibase.database.Database;
-import liquibase.database.template.JdbcTemplate;
-import liquibase.database.sql.SqlStatement;
-import liquibase.database.sql.StoredProcedureStatement;
 import liquibase.ChangeSet;
 import liquibase.FileOpener;
-import liquibase.migrator.Migrator;
+import liquibase.database.Database;
+import liquibase.database.sql.SqlStatement;
+import liquibase.database.template.JdbcTemplate;
 import liquibase.exception.JDBCException;
 import liquibase.exception.RollbackImpossibleException;
 import liquibase.exception.SetupException;
 import liquibase.exception.UnsupportedChangeException;
+import liquibase.migrator.Migrator;
 import liquibase.util.MD5Util;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
@@ -24,9 +23,6 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.io.Writer;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.CallableStatement;
 import java.util.*;
 import java.util.logging.Logger;
 

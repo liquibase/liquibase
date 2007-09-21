@@ -1,9 +1,9 @@
 package liquibase.change.custom;
 
-import liquibase.database.sql.SqlStatement;
 import liquibase.database.Database;
-import liquibase.exception.UnsupportedChangeException;
+import liquibase.database.sql.SqlStatement;
 import liquibase.exception.CustomChangeException;
+import liquibase.exception.UnsupportedChangeException;
 
 /**
  * Interface to implement when creating a custom change that generates SQL.  When updating a database,

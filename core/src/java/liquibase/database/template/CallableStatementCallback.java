@@ -2,8 +2,8 @@ package liquibase.database.template;
 
 import liquibase.exception.JDBCException;
 
-import java.sql.SQLException;
 import java.sql.CallableStatement;
+import java.sql.SQLException;
 
 /**
  * Generic callback interface for code that operates on a CallableStatement.
