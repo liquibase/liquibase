@@ -1,7 +1,9 @@
 package liquibase.change;
 
 import liquibase.database.Database;
+import liquibase.database.template.JdbcTemplate;
 import liquibase.database.sql.SqlStatement;
+import liquibase.database.sql.StoredProcedureStatement;
 import liquibase.ChangeSet;
 import liquibase.FileOpener;
 import liquibase.migrator.Migrator;
@@ -24,6 +26,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.CallableStatement;
 import java.util.*;
 import java.util.logging.Logger;
 
@@ -242,13 +245,7 @@ public abstract class AbstractChange implements Change {
     private void execute(SqlStatement[] statements, Database database) throws JDBCException {
         for (SqlStatement statement : statements) {
             Logger.getLogger(Migrator.DEFAULT_LOG_NAME).finest("Executing Statement: " + statement);
-            try {
-                Statement dbStatement = database.getConnection().createStatement();
-                dbStatement.execute(statement.getSqlStatement(database));
-                dbStatement.close();
-            } catch (SQLException e) {
-                throw new JDBCException((e.getMessage() + " [" + statement.getSqlStatement(database) + "]").replaceAll("\n", "").replaceAll("\r", ""));
-            }
+            new JdbcTemplate(database).execute(statement);
         }
     }
     

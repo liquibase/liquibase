@@ -3,15 +3,15 @@ package liquibase.database.structure;
 import liquibase.database.CacheDatabase;
 import liquibase.database.Database;
 import liquibase.database.H2Database;
-import liquibase.migrator.Migrator;
+import liquibase.database.template.JdbcTemplate;
 import liquibase.diff.DiffStatusListener;
 import liquibase.exception.JDBCException;
+import liquibase.migrator.Migrator;
 import liquibase.util.StringUtils;
 
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.*;
 import java.util.logging.Logger;
 
@@ -89,14 +89,14 @@ public class DatabaseSnapshot {
 
     public Column getColumn(Column column) {
         if (column.getTable() == null) {
-            return columnsMap.get(column.getView().getName()+"."+column.getName());
+            return columnsMap.get(column.getView().getName() + "." + column.getName());
         } else {
-            return columnsMap.get(column.getTable().getName()+"."+column.getName());
+            return columnsMap.get(column.getTable().getName() + "." + column.getName());
         }
     }
 
     public Column getColumn(String tableName, String columnName) {
-        return columnsMap.get(tableName+"."+columnName);
+        return columnsMap.get(tableName + "." + columnName);
     }
 
     public Set<Column> getColumns() {
@@ -196,7 +196,7 @@ public class DatabaseSnapshot {
                 columnInfo.setNullable(true);
             }
 
-            columnsMap.put(tableName+"."+columnName, columnInfo);
+            columnsMap.put(tableName + "." + columnName, columnInfo);
         }
         rs.close();
     }
@@ -214,17 +214,17 @@ public class DatabaseSnapshot {
         if (database instanceof H2Database) {
             if (StringUtils.trimToEmpty(defaultValue).startsWith("(NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_")) {
                 return null;
-            } 
+            }
             return defaultValue;
         } else if (database instanceof CacheDatabase) {
-        	if (defaultValue != null) {
-        		if (defaultValue.charAt(0) == '"' && defaultValue.charAt(defaultValue.length() - 1)=='"') {
-            		defaultValue = defaultValue.substring(1, defaultValue.length()-2);
-            		return "'" + defaultValue + "'";
-            	} else if (defaultValue.startsWith("$")) {
-            		return "OBJECTSCRIPT '" + defaultValue + "'";
-            	}
-        	}
+            if (defaultValue != null) {
+                if (defaultValue.charAt(0) == '"' && defaultValue.charAt(defaultValue.length() - 1) == '"') {
+                    defaultValue = defaultValue.substring(1, defaultValue.length() - 2);
+                    return "'" + defaultValue + "'";
+                } else if (defaultValue.startsWith("$")) {
+                    return "OBJECTSCRIPT '" + defaultValue + "'";
+                }
+            }
         }
         return defaultValue;
     }
@@ -314,7 +314,7 @@ public class DatabaseSnapshot {
                     indexInformation.setName(indexName);
                     indexMap.put(indexName, indexInformation);
                 }
-                indexInformation.getColumns().add(position-1, columnName);
+                indexInformation.getColumns().add(position - 1, columnName);
             }
             for (String key : indexMap.keySet()) {
                 indexes.add(indexMap.get(key));
@@ -352,7 +352,7 @@ public class DatabaseSnapshot {
                 boolean foundExistingPK = false;
                 for (PrimaryKey pk : foundPKs) {
                     if (pk.getTableName().equals(tableName)) {
-                        pk.addColumnName(position-1, columnName);
+                        pk.addColumnName(position - 1, columnName);
 
                         foundExistingPK = true;
                     }
@@ -361,7 +361,7 @@ public class DatabaseSnapshot {
                 if (!foundExistingPK) {
                     PrimaryKey primaryKey = new PrimaryKey();
                     primaryKey.setTableName(tableName);
-                    primaryKey.addColumnName(position-1, columnName);
+                    primaryKey.addColumnName(position - 1, columnName);
                     primaryKey.setName(rs.getString("PK_NAME"));
 
                     foundPKs.add(primaryKey);
@@ -378,25 +378,14 @@ public class DatabaseSnapshot {
         updateListeners("Reading sequences for " + database.toString() + " ...");
 
         if (database.supportsSequences()) {
-            ResultSet rs = null;
-            Statement stmt = null;
-            try {
-                stmt = database.getConnection().createStatement();
-                rs = stmt.executeQuery(database.createFindSequencesSQL());
+            //noinspection unchecked
+            List<String> sequenceNamess = (List<String>) new JdbcTemplate(database).queryForList(database.createFindSequencesSQL(), String.class);
 
-                while (rs.next()) {
-                    Sequence seq = new Sequence();
-                    seq.setName(rs.getString("SEQUENCE_NAME"));
+            for (String sequenceName : sequenceNamess) {
+                Sequence seq = new Sequence();
+                seq.setName(sequenceName);
 
-                    sequences.add(seq);
-                }
-            } finally {
-                if (rs != null) {
-                    rs.close();
-                }
-                if (stmt != null) {
-                    stmt.close();
-                }
+                sequences.add(seq);
             }
         }
     }

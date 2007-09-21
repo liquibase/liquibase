@@ -1,8 +1,11 @@
 package liquibase.database;
 
 import liquibase.exception.JDBCException;
+import liquibase.database.sql.RawSqlStatement;
+import liquibase.database.sql.SqlStatement;
 
 import java.sql.Connection;
+import java.sql.Types;
 
 public class DerbyDatabase extends AbstractDatabase {
 
@@ -100,8 +103,8 @@ public class DerbyDatabase extends AbstractDatabase {
         return false;
     }
 
-    protected String getViewDefinitionSql(String name) throws JDBCException {
-        return "select V.VIEWDEFINITION from SYS.SYSVIEWS V, SYS.SYSTABLES T WHERE  V.TABLEID=T.TABLEID AND T.TABLENAME='"+name+"'";
+    protected SqlStatement getViewDefinitionSql(String name) throws JDBCException {
+        return new RawSqlStatement("select V.VIEWDEFINITION from SYS.SYSVIEWS V, SYS.SYSTABLES T WHERE  V.TABLEID=T.TABLEID AND T.TABLENAME='"+name+"'");
     }
 
 

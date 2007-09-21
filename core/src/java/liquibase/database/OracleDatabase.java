@@ -1,11 +1,10 @@
 package liquibase.database;
 
 import liquibase.exception.JDBCException;
+import liquibase.database.sql.SqlStatement;
+import liquibase.database.sql.RawSqlStatement;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 
 /**
  * Encapsulates Oracle database support.
@@ -128,54 +127,12 @@ public class OracleDatabase extends AbstractDatabase {
         }
     }
 
-    protected String getSelectChangeLogLockSQL() {
-        return (super.getSelectChangeLogLockSQL() + " for update").toUpperCase();
+    protected SqlStatement getSelectChangeLogLockSQL() {
+        return new RawSqlStatement((super.getSelectChangeLogLockSQL().getSqlStatement(this) + " for update").toUpperCase());
     }
 
-    public String getDropTableSQL(String tableName) {
-        return "DROP TABLE " + tableName + " CASCADE CONSTRAINTS";
-    }
-
-    protected void dropSequences(DatabaseConnection conn) throws JDBCException {
-        ResultSet rs = null;
-        Statement selectStatement = null;
-        Statement dropStatement = null;
-        try {
-            selectStatement = conn.createStatement();
-            dropStatement = conn.createStatement();
-            rs = selectStatement.executeQuery("SELECT SEQUENCE_NAME FROM USER_SEQUENCES");
-            while (rs.next()) {
-                String sequenceName = rs.getString("SEQUENCE_NAME");
-                log.finest("Dropping sequence " + sequenceName);
-                String sql = "DROP SEQUENCE " + sequenceName;
-                try {
-                    dropStatement.executeUpdate(sql);
-                } catch (SQLException e) {
-                    throw new JDBCException("Error dropping sequence '" + sequenceName + "': " + e.getMessage(), e);
-                }
-            }
-        } catch (SQLException e) {
-            throw new JDBCException(e);
-        } finally {
-            try {
-                if (selectStatement != null) {
-                    selectStatement.close();
-                }
-                if (dropStatement != null) {
-                    dropStatement.close();
-                }
-                if (rs != null) {
-                    rs.close();
-                }
-            } catch (SQLException e) {
-                ;
-            }
-        }
-    }
-
-
-    public String createFindSequencesSQL() throws JDBCException {
-        return "SELECT SEQUENCE_NAME FROM ALL_SEQUENCES WHERE SEQUENCE_OWNER = '" + getSchemaName() + "'";
+    public SqlStatement createFindSequencesSQL() throws JDBCException {
+        return new RawSqlStatement("SELECT SEQUENCE_NAME FROM ALL_SEQUENCES WHERE SEQUENCE_OWNER = '" + getSchemaName() + "'");
     }
 
 
@@ -201,7 +158,7 @@ public class OracleDatabase extends AbstractDatabase {
         return true;
     }
 
-    protected String getViewDefinitionSql(String name) {
-        return "SELECT TEXT FROM USER_VIEWS WHERE upper(VIEW_NAME)='"+name.toUpperCase()+"'";
-    }
+    protected SqlStatement getViewDefinitionSql(String name) {
+        return new RawSqlStatement("SELECT TEXT FROM USER_VIEWS WHERE upper(VIEW_NAME)='"+name.toUpperCase()+"'");
+    }   
 }

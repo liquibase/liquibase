@@ -1,14 +1,18 @@
 package liquibase;
 
-import liquibase.database.DatabaseConnection;
 import liquibase.change.Change;
+import liquibase.database.DatabaseConnection;
+import liquibase.database.template.JdbcTemplate;
+import liquibase.database.sql.RawSqlStatement;
+import liquibase.database.sql.SqlStatement;
+import liquibase.exception.JDBCException;
 import liquibase.exception.MigrationFailedException;
 import liquibase.exception.RollbackFailedException;
 import liquibase.exception.SetupException;
+import liquibase.migrator.Migrator;
 import liquibase.util.MD5Util;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
-import liquibase.migrator.Migrator;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Text;
@@ -16,7 +20,6 @@ import org.w3c.dom.Text;
 import java.io.IOException;
 import java.io.Writer;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.*;
 import java.util.logging.Logger;
 
@@ -38,7 +41,7 @@ public class ChangeSet {
     private Set<String> contexts;
     private Set<String> dbmsSet;
 
-    private String[] rollBackStatements;
+    private SqlStatement[] rollBackStatements;
 
     private String comments;
 
@@ -135,15 +138,13 @@ public class ChangeSet {
             } else if (migrator.getMode().equals(Migrator.Mode.EXECUTE_ROLLBACK_MODE)) {
                 log.finest("Rolling Back ChangeSet: " + toString());
                 if (rollBackStatements != null && rollBackStatements.length > 0) {
-                    Statement statement = connection.createStatement();
-                    for (String rollback : rollBackStatements) {
+                    for (SqlStatement rollback : rollBackStatements) {
                         try {
-                            statement.execute(rollback);
-                        } catch (SQLException e) {
+                            new JdbcTemplate(migrator.getDatabase()).execute(rollback);
+                        } catch (JDBCException e) {
                             throw new RollbackFailedException("Error executing custom SQL [" + rollback + "]");
                         }
                     }
-                    statement.close();
 
                 } else {
                     List<Change> changes = getChanges();
@@ -162,8 +163,8 @@ public class ChangeSet {
                 outputSQLWriter.write("-- Changeset " + toString() + StreamUtil.getLineSeparator());
                 writeComments(outputSQLWriter);
                 if (rollBackStatements != null && rollBackStatements.length > 0) {
-                    for (String statement : rollBackStatements) {
-                        outputSQLWriter.append(statement).append(";").append(StreamUtil.getLineSeparator()).append(StreamUtil.getLineSeparator());
+                    for (SqlStatement statement : rollBackStatements) {
+                        outputSQLWriter.append(statement.getSqlStatement(migrator.getDatabase())).append(";").append(StreamUtil.getLineSeparator()).append(StreamUtil.getLineSeparator());
                     }
                 } else {
                     for (int i = changes.size() - 1; i >= 0; i--) {
@@ -286,9 +287,11 @@ public class ChangeSet {
         if (sql == null) {
             return;
         }
-        this.rollBackStatements = sql.split(";");
+        String[] sqlStatements = sql.split(";");
+        this.rollBackStatements = new SqlStatement[sqlStatements.length];
+
         for (int i = 0; i < rollBackStatements.length; i++) {
-            rollBackStatements[i] = rollBackStatements[i].trim();
+            rollBackStatements[i] = new RawSqlStatement(sqlStatements[i].trim());
         }
     }
 

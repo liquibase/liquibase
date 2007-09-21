@@ -1,10 +1,12 @@
 package liquibase.database;
 
+import liquibase.database.sql.RawSqlStatement;
+import liquibase.database.sql.SqlStatement;
+import liquibase.database.template.JdbcTemplate;
 import liquibase.exception.JDBCException;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -147,32 +149,24 @@ public class PostgresDatabase extends AbstractDatabase {
     }
 
     public void dropDatabaseObjects() throws JDBCException {
-        DatabaseConnection conn = getConnection();
-        Statement dropStatement = null;
         try {
-            dropStatement = conn.createStatement();
-            dropStatement.executeUpdate("DROP OWNED BY " + getConnectionUsername());
+            new JdbcTemplate(this).execute(new RawSqlStatement("DROP OWNED BY " + getConnectionUsername()));
+
+            getConnection().commit();
+
             changeLogTableExists = false;
             changeLogLockTableExists = false;
             changeLogCreateAttempted = false;
             changeLogLockCreateAttempted = false;
+
         } catch (SQLException e) {
             throw new JDBCException(e);
-        } finally {
-            try {
-                if (dropStatement != null) {
-                    dropStatement.close();
-                }
-                conn.commit();
-            } catch (SQLException e) {
-                ;
-            }
         }
     }
 
 
-    public String createFindSequencesSQL() throws JDBCException {
-        return "SELECT NULL AS SEQUENCE_SCHEMA, relname AS SEQUENCE_NAME FROM pg_class, pg_namespace WHERE relkind='S' AND pg_class.relnamespace = pg_namespace.oid AND nspname = '" + getSchemaName() + "'";
+    public SqlStatement createFindSequencesSQL() throws JDBCException {
+        return new RawSqlStatement("SELECT NULL AS SEQUENCE_SCHEMA, relname AS SEQUENCE_NAME FROM pg_class, pg_namespace WHERE relkind='S' AND pg_class.relnamespace = pg_namespace.oid AND nspname = '" + getSchemaName() + "'");
     }
 
 
@@ -185,21 +179,12 @@ public class PostgresDatabase extends AbstractDatabase {
                 || tableName.startsWith("pk_");
     }
 
-    @Override
-    protected void dropSequences(DatabaseConnection conn) throws JDBCException {
-    }
-
-//    public boolean isSystemIndex(String catalogName, String schemaName, String indexName) {
-//        return super.isSystemIndex(catalogName, schemaName, indexName)
-//                || indexName.endsWith("_pkey");
-//    }
-
     public boolean supportsTablespaces() {
         return true;
     }
 
 
-    protected String getViewDefinitionSql(String name) throws JDBCException {
-        return "select definition from pg_views where viewname='"+name+"'";
+    protected SqlStatement getViewDefinitionSql(String name) throws JDBCException {
+        return new RawSqlStatement("select definition from pg_views where viewname='"+name+"'");
     }
 }

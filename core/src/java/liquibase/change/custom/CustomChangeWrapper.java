@@ -1,19 +1,25 @@
-package liquibase.change;
+package liquibase.change.custom;
 
-import liquibase.database.sql.SqlStatement;
+import liquibase.change.AbstractChange;
 import liquibase.database.Database;
+import liquibase.database.sql.SqlStatement;
 import liquibase.database.structure.DatabaseObject;
-import liquibase.exception.UnsupportedChangeException;
 import liquibase.exception.CustomChangeException;
 import liquibase.exception.RollbackImpossibleException;
+import liquibase.exception.UnsupportedChangeException;
 import liquibase.util.ObjectUtil;
-import liquibase.change.custom.CustomChangeRollback;
-import liquibase.change.custom.CustomChange;
-import org.w3c.dom.Element;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 import java.util.*;
 
+/**
+ * Adapts CustomChange implementations to the standard change system used by LiquiBase.
+ * Custom change implementations should implement CustomSqlChange or CustomTaskChange
+ *
+ * @see liquibase.change.custom.CustomSqlChange
+ * @see liquibase.change.custom.CustomTaskChange
+ */
 public class CustomChangeWrapper extends AbstractChange {
 
     private CustomChange customChange;
@@ -46,27 +52,52 @@ public class CustomChangeWrapper extends AbstractChange {
 
 
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
+        SqlStatement[] statements = null;
         try {
             configureCustomChange();
+            if (customChange instanceof CustomSqlChange) {
+                statements = ((CustomSqlChange) customChange).generateStatements(database);
+            } else if (customChange instanceof CustomTaskChange) {
+                ((CustomTaskChange) customChange).execute(database);
+            } else {
+                throw new UnsupportedChangeException(customChange.getClass().getName() + " does not implement " + CustomSqlChange.class.getName() + " or " + CustomTaskChange.class.getName());
+            }
         } catch (CustomChangeException e) {
             throw new UnsupportedChangeException(e);
         }
-        return customChange.generateStatements(database);
+
+        if (statements == null) {
+            statements = new SqlStatement[0];
+        }
+        return statements;
     }
 
 
     public SqlStatement[] generateRollbackStatements(Database database) throws UnsupportedChangeException, RollbackImpossibleException {
+        SqlStatement[] statements = null;
         try {
             configureCustomChange();
+            if (customChange instanceof CustomSqlRollback) {
+                statements = ((CustomSqlRollback) customChange).generateRollbackStatements(database);
+            } else if (customChange instanceof CustomTaskRollback) {
+                ((CustomTaskRollback) customChange).rollback(database);
+            } else {
+                throw new UnsupportedChangeException("Unknown rollback type: "+customChange.getClass().getName());
+            }
         } catch (CustomChangeException e) {
             throw new UnsupportedChangeException(e);
         }
-        return ((CustomChangeRollback) customChange).generateRollbackStatements(database);
+
+        if (statements == null) {
+            statements = new SqlStatement[0];
+        }
+        return statements;
+
     }
 
 
     public boolean canRollBack() {
-        return customChange instanceof CustomChangeRollback;
+        return customChange instanceof CustomSqlRollback || customChange instanceof CustomTaskRollback;
     }
 
     private void configureCustomChange() throws CustomChangeException {

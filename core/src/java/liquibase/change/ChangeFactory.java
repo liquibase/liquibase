@@ -1,5 +1,7 @@
 package liquibase.change;
 
+import liquibase.change.custom.CustomChangeWrapper;
+
 import java.util.HashMap;
 import java.util.Map;
 
