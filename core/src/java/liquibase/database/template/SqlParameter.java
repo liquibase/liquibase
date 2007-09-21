@@ -1,20 +1,15 @@
 package liquibase.database.template;
 
-import java.util.List;
-import java.util.LinkedList;
-
 /**
  * Object to represent a SQL parameter definition.
  * <p/>
  * <p>Parameters may be anonymous, in which case "name" is <code>null</code>.
  * However, all parameters must define a SQL type according to {@link java.sql.Types}.
  *
- * @author Rod Johnson
- * @author Thomas Risberg
- * @author Juergen Hoeller
+ * @author Spring Framework
  * @see java.sql.Types
  */
-public class SqlParameter {
+class SqlParameter {
 
     /**
      * The name of the parameter, if any
@@ -67,7 +62,7 @@ public class SqlParameter {
      */
     public SqlParameter(int sqlType, int scale) {
         this.sqlType = sqlType;
-        this.scale = new Integer(scale);
+        this.scale = scale;
     }
 
     /**
@@ -105,7 +100,7 @@ public class SqlParameter {
     public SqlParameter(String name, int sqlType, int scale) {
         this.name = name;
         this.sqlType = sqlType;
-        this.scale = new Integer(scale);
+        this.scale = scale;
     }
 
     /**
@@ -167,20 +162,4 @@ public class SqlParameter {
     public boolean isResultsParameter() {
         return false;
     }
-
-
-    /**
-     * Convert a list of JDBC types, as defined in <code>java.sql.Types</code>,
-     * to a List of SqlParameter objects as used in this package.
-     */
-    public static List sqlTypesToAnonymousParameterList(int[] types) {
-        List result = new LinkedList();
-        if (types != null) {
-			for (int i = 0; i < types.length; i++) {
-				result.add(new SqlParameter(types[i]));
-			}
-		}
-		return result;
-	}
-
 }
