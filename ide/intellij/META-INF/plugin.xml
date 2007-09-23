@@ -1,0 +1,19 @@
+<!DOCTYPE idea-plugin PUBLIC "Plugin/DTD" "http://plugins.intellij.net/plugin.dtd">
+<idea-plugin>
+  <name>Plugin name here</name>
+  <description>short description of the plugin</description>
+  <version>1.0</version>
+  <vendor>YourCompany</vendor>
+  <idea-version since-build="3000"/>
+    <project-components>
+        <component>
+            <implementation-class>org.liquibase.intellij.plugin.LiquibaseProjectComponent</implementation-class>
+        </component>
+    </project-components>
+    <actions>
+        <action id="SayHello" class="org.liquibase.intellij.plugin.SayHelloAction" text="Say Hello"
+                description="Says Hello">
+            <add-to-group group-id="WindowMenu" anchor="first"/>
+        </action>
+    </actions>
+</idea-plugin>
