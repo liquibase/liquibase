@@ -388,6 +388,7 @@
                 <xsd:element ref="comment" minOccurs="0" maxOccurs="1"/>
             </xsd:sequence>
             <xsd:attributeGroup ref="tableNameAttribute"/>
+            <xsd:attribute name="stripComments" type="xsd:boolean"/>
         </xsd:complexType>
     </xsd:element>
 
@@ -402,6 +403,7 @@
     <xsd:element name="sqlFile">
         <xsd:complexType>
             <xsd:attribute name="path" type="xsd:string"/>
+            <xsd:attribute name="stripComments" type="xsd:boolean"/>
         </xsd:complexType>
     </xsd:element>
 

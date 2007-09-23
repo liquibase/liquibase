@@ -87,4 +87,24 @@ public class StringUtilsTest {
         String result = StringUtils.stripComments(total);
         assertEquals(sql + "\n" + sql,result);
     }
+    
+    @Test
+    public void shouldStripComments() {
+        String sql = "some sql";
+        String comment = "/*Some text\nmore text*/" ;
+        String total = sql + comment + sql;
+        String[] result = StringUtils.processMutliLineSQL(total,true);
+        assertEquals(1,result.length);
+        assertEquals(sql+"\n"+sql,result[0]);
+    }
+    
+    @Test
+    public void shouldNotStripComments() {
+        String sql = "some sql";
+        String comment = "/*Some text\nmore text*/" ;
+        String total = sql + comment + sql;
+        String[] result = StringUtils.processMutliLineSQL(total,false);
+        assertEquals(1,result.length);
+        assertEquals(total,result[0]);
+    }
 }

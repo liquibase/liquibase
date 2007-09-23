@@ -26,13 +26,15 @@ public class StringUtils {
     }
     
     /**
-     * Removes any comments from multiline SQL using {@link #stripComments(String)}
+     * Removes any comments from multiple line SQL using {@link #stripComments(String)}
      *  and then extracts each individual statement using {@link #splitSQL(String)}.
      * 
-     * @param multiLineSQL
+     * @param multiLineSQL A String containing all the SQL statements
+     * @param stripComments If true then comments will be stripped, if false then they will be left in the code
      */
-    public static String[] processMutliLineSQL(String multiLineSQL) {
-        String stripped = stripComments(multiLineSQL);
+    public static String[] processMutliLineSQL(String multiLineSQL,boolean stripComments) {
+        
+        String stripped = stripComments ? stripComments(multiLineSQL) : multiLineSQL;
         return splitSQL(stripped);
     }
 

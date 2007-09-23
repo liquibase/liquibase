@@ -301,7 +301,7 @@
     </changeSet>
 
     <changeSet id="52" author="pkeeble">
-        <sqlFile path="changelogs/mysql/complete/sample.sql"/>
+        <sqlFile path="changelogs/mysql/complete/sample.sql" stripComments="true"/>
     </changeSet>
 
     <include file="changelogs/mysql/complete/included.changelog.xml"/>
