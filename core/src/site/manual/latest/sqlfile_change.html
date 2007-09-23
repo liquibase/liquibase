@@ -21,19 +21,18 @@
                     <h2>"SQL File" Refactoring</h2>
                     <p>
                         The "sqlfile" tag allows you to specify any sql statements and have it stored external in a file.
-                                               It is useful for complex changes that are not supported through LiquiBase's automated refactoring tags such as stored procedures. 
-                                        </p>
-                                        <p>
-                                               The sqlfile refactoring finds the file by searching in the following order:
-                                               <ol>
-                                                          <li>The file is searched for in the classpath. This can be manually set and by default the liquibase startup script adds the current directory when run.</li>
-                                                          <li>The file is searched for using the file attribute as a file name. This allows absolute paths to be used or relative paths to the working directory to be used.</li>
-                                               </ol>
-                                        </p>
-                                        <p>The "sqlfile" tag can also support multiline statements in the same file. Statements can either be split using a ; 
-                                               at the end of the last line of the SQL or a go on its own on the line between the statements can be used.Multiline SQL 
-                                               statements are also supported and only a ; or go statement will finsih a statement, a new line is not enough. Files containing 
-                                                a single statement do not need to use a ; or go.
+                        It is useful for complex changes that are not supported through LiquiBase's automated refactoring tags such as stored procedures. 
+                    </p>
+                    <p> The sqlfile refactoring finds the file by searching in the following order:
+                         <ol>
+                              <li>The file is searched for in the classpath. This can be manually set and by default the liquibase startup script adds the current directory when run.</li>
+                              <li>The file is searched for using the file attribute as a file name. This allows absolute paths to be used or relative paths to the working directory to be used.</li>
+                         </ol>
+                    </p>
+                    <p>The "sqlfile" tag can also support multiline statements in the same file. Statements can either be split using a ; 
+                           at the end of the last line of the SQL or a go on its own on the line between the statements can be used.Multiline SQL 
+                           statements are also supported and only a ; or go statement will finsih a statement, a new line is not enough. Files containing 
+                           a single statement do not need to use a ; or go.
 
                     </p>
                     <p>The sql file can also contain comments of either of the following formats:<br/>
@@ -64,6 +63,7 @@ values (2, 'Jim')
                     <h3>Available Attributes</h3>
                     <table class="attributesTable">
                         <tr><th>path</th><td>The name of the SQL file to load</td></tr>
+                        <tr><th>stripComments</th><td>Set to <i>true</i> to remove any comments in the SQL before executing, otherwise false. Defaults to false if not set</td></tr>
                     </table>
 
                     <h3>Database Compatiblity</h3>
@@ -72,7 +72,7 @@ values (2, 'Jim')
                         <tr><th>PostgreSQL</th><td>No Issues</td></tr>
                         <tr><th>Oracle</th><td>No Issues</td></tr>
                         <tr><th>MS-SQL</th><td>No Issues</td></tr>
-                        <tr><th>Sybase</th><td>No Issues</td></tr>
+                        <tr><th>Sybase</th><td>Sybase might require stripComments to be set to true for multiline sql</td></tr>
                         <tr><th>DB2</th><td>No Issues</td></tr>
                         <tr><th>HSQL</th><td>No Issues</td></tr>                                                
                         <tr><th>Derby</th><td>No Issues</td></tr>

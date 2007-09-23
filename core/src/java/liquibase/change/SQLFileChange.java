@@ -38,9 +38,11 @@ public class SQLFileChange extends AbstractChange {
     private static Logger log = Logger.getLogger(Migrator.DEFAULT_LOG_NAME);
     private String sql;
     private String file;
+    private boolean stripComments;
 
     public SQLFileChange() {
         super("sqlFile", "SQL From File");
+        stripComments = false;
     }
 
     public String getSql() {
@@ -61,19 +63,21 @@ public class SQLFileChange extends AbstractChange {
     }
 
     /**
-     * Sets the file name and loads the SQL from the file.
-     * 
-     * The file name is searched in the following order: 
-     * 1. The file is searched for in the classpath 
-     * 2. If not found in the classpath it is loaded from
-     * the file system. 
-     * 3. If no file is found an Exception is thrown.
+     * Sets the file name but setUp must be called for the change to have impact.
      * 
      * @param fileName The file to use
-     * @throws IllegalArgumentException If null was passed as the fileName
      */
     public void setPath(String fileName) {
         file = fileName;
+    }
+    
+
+    public void setStripComments(Boolean stripComments) {
+        this.stripComments = stripComments.booleanValue();
+    }
+    
+    public boolean isStrippingComments() {
+        return stripComments;
     }
     
     public void setUp() throws SetupException {
@@ -180,7 +184,7 @@ public class SQLFileChange extends AbstractChange {
 
         List<SqlStatement> returnStatements = new ArrayList<SqlStatement>();
         //strip ; from end of statements
-        String[] statements = StringUtils.processMutliLineSQL(sql);
+        String[] statements = StringUtils.processMutliLineSQL(sql,isStrippingComments());
         for (String statement : statements) {
             returnStatements.add(new RawSqlStatement(statement));
         }

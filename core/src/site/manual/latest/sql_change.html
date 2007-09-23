@@ -27,14 +27,14 @@
                     <p>
                         The createProcedure tag is the best way to create stored procedures.
                     </p>
-                    <p>The "sqlfile" tag can also support multiline statements in the same file. Statements can either be split using a ; 
+                    <p>The "sql" tag can also support multiline statements in the same file. Statements can either be split using a ; 
                                                at the end of the last line of the SQL or a go on its own on the line between the statements can be used.Multiline SQL 
                                                statements are also supported and only a ; or go statement will finsih a statement, a new line is not enough. Files containing 
                                                 a single statement do not need to use a ; or go.
 
                     </p>
 
-                    <p>The sql file can also contain comments of either of the following formats:<br/>
+                    <p>The sql change can also contain comments of either of the following formats:<br/>
                        <ol>
                            <li>A multiline comment that starts with /* and ends with */.
                            <li>A single line comment starting with &lt;space&gt;--&lt;space&gt and finishing at the end of the line
@@ -44,13 +44,18 @@
                     <h3>Sample</h3>
                     <pre>&lt;sql&gt;insert into person (id, name) values (1, 'Bob')&lt;/sql&gt;</pre>
 
+                     <h3>Available Attributes</h3>
+                     <table class="attributesTable">
+                         <tr><th>stripComments</th><td>Set to <i>true</i> to remove any comments in the SQL before executing, otherwise false. Defaults to false if not set</td></tr>
+                     </table>
+
                     <h3>Database Compatiblity</h3>
                     <table class="databaseCompatibiltyTable">
                         <tr><th>MySQL</th><td>No Issues</td></tr>
                         <tr><th>PostgreSQL</th><td>No Issues</td></tr>
                         <tr><th>Oracle</th><td>No Issues</td></tr>
                         <tr><th>MS-SQL</th><td>No Issues</td></tr>
-                        <tr><th>Sybase</th><td>No Issues</td></tr>
+                        <tr><th>Sybase</th><td>Sybase might require stripComments to be set to true for multiline sql</td></tr>
                         <tr><th>DB2</th><td>No Issues</td></tr>
                         <tr><th>HSQL</th><td>No Issues</td></tr>                                                
                         <tr><th>Derby</th><td>No Issues</td></tr>
