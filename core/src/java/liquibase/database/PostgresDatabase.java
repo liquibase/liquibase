@@ -1,5 +1,6 @@
 package liquibase.database;
 
+import liquibase.change.ColumnConfig;
 import liquibase.database.sql.RawSqlStatement;
 import liquibase.database.sql.SqlStatement;
 import liquibase.database.template.JdbcTemplate;
@@ -185,6 +186,24 @@ public class PostgresDatabase extends AbstractDatabase {
 
 
     protected SqlStatement getViewDefinitionSql(String name) throws JDBCException {
-        return new RawSqlStatement("select definition from pg_views where viewname='"+name+"'");
+        return new RawSqlStatement("select definition from pg_views where viewname='" + name + "'");
+    }
+
+
+    public String getColumnType(ColumnConfig column) {
+        String type = super.getColumnType(column);
+
+        if (column.isAutoIncrement()) {
+            if ("integer".equals(type.toLowerCase())) {
+                return "serial";
+            } else if ("bigint".equals(type.toLowerCase())) {
+                return "bigserial";
+            } else {
+                // Unknown integer type, default to "serial"
+                return "serial";
+            }
+        }
+
+        return type;
     }
 }
