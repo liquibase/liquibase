@@ -193,7 +193,7 @@ public class PostgresDatabase extends AbstractDatabase {
     public String getColumnType(ColumnConfig column) {
         String type = super.getColumnType(column);
 
-        if (column.isAutoIncrement()) {
+        if (column.isAutoIncrement() != null && column.isAutoIncrement()) {
             if ("integer".equals(type.toLowerCase())) {
                 return "serial";
             } else if ("bigint".equals(type.toLowerCase())) {
