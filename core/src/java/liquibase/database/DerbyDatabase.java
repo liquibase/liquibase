@@ -110,4 +110,9 @@ public class DerbyDatabase extends AbstractDatabase {
     public String getViewDefinition(String name) throws JDBCException {
         return super.getViewDefinition(name).replaceFirst("CREATE VIEW \\w+ AS ","");
     }
+
+    public void setConnection(Connection conn) {
+        super.setConnection(new DerbyConnectionDelegate(conn));
+    }
+
 }
