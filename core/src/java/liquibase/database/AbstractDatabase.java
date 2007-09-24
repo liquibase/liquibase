@@ -178,9 +178,12 @@ public abstract class AbstractDatabase implements Database {
             return getCurrencyType();
         } else if ("UUID".equalsIgnoreCase(column.getType())) {
             return getUUIDType();
-        } else if ("BLOB".equalsIgnoreCase(column.getType())) {
+        } else if ("BLOB".equalsIgnoreCase(column.getType())
+                || "LONGVARBINARY".equalsIgnoreCase(column.getType())) {
             return getBlobType();
-        } else if ("CLOB".equalsIgnoreCase(column.getType())) {
+        } else if ("CLOB".equalsIgnoreCase(column.getType())
+                || "TEXT".equalsIgnoreCase(column.getType())
+                || "LONGVARCHAR".equalsIgnoreCase(column.getType())) {
             return getClobType();
         } else if ("date".equalsIgnoreCase(column.getType())) {
             return getDateType();
@@ -893,8 +896,8 @@ public abstract class AbstractDatabase implements Database {
     }
 
     public boolean doesTagExist(String tag) throws JDBCException {
-            int count = new JdbcTemplate(this).queryForInt(new RawSqlStatement("SELECT COUNT(*) FROM " + getDatabaseChangeLogTableName() + " WHERE TAG='" + tag + "'"));
-            return count > 0;
+        int count = new JdbcTemplate(this).queryForInt(new RawSqlStatement("SELECT COUNT(*) FROM " + getDatabaseChangeLogTableName() + " WHERE TAG='" + tag + "'"));
+        return count > 0;
     }
 
     public DatabaseSnapshot getSnapshot() throws JDBCException {
@@ -933,13 +936,13 @@ public abstract class AbstractDatabase implements Database {
 
 
     public int getDatabaseType(int type) {
-            int returnType = type;
-            if (returnType == Types.BOOLEAN) {
-                String booleanType = getBooleanType();
-                if (!booleanType.equalsIgnoreCase("boolean")) {
-                    returnType = Types.TINYINT;
-                }
+        int returnType = type;
+        if (returnType == Types.BOOLEAN) {
+            String booleanType = getBooleanType();
+            if (!booleanType.equalsIgnoreCase("boolean")) {
+                returnType = Types.TINYINT;
             }
+        }
 
         return returnType;
     }
