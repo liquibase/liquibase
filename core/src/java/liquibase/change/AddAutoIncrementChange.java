@@ -59,7 +59,12 @@ public class AddAutoIncrementChange extends AbstractChange {
         } else if (database instanceof MSSQLDatabase) {
             throw new UnsupportedChangeException("MS SQL Server does not support marking existing columns as auto-increment");
         } else if (database instanceof PostgresDatabase) {
-            throw new UnsupportedChangeException("PostgreSQL does not support auto-increment columns");
+            String sequenceName = (getTableName()+"_"+getColumnName()+"_seq").toLowerCase();
+            return new SqlStatement[]{
+                    new RawSqlStatement("CREATE SEQUENCE "+sequenceName),
+                    new RawSqlStatement("ALTER TABLE "+getTableName()+" ALTER COLUMN "+getColumnName()+" SET NOT NULL"),
+                    new RawSqlStatement("ALTER TABLE "+getTableName()+" ALTER COLUMN "+getColumnName()+" SET DEFAULT nextval ('"+sequenceName+"')"),
+            };
         } else if (database instanceof DerbyDatabase) {
             throw new UnsupportedChangeException("Derby does not support adding auto-increment to existing columns");
         } else if (database instanceof HsqlDatabase) {
