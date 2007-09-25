@@ -88,7 +88,7 @@ public class CacheDatabaseTest extends AbstractDatabaseTest{
 
 	@Test
 	public void getUUIDType() {
-		assertEquals("RAW", database.getUUIDType());
+		assertEquals("CHAR(36)", database.getUUIDType());
 	}
 
 	@Test

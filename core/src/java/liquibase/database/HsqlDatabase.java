@@ -63,11 +63,11 @@ public class HsqlDatabase extends AbstractDatabase {
     }
 
     protected String getClobType() {
-        return "CLOB";
+        return "LONGVARCHAR";
     }
 
     protected String getBlobType() {
-        return "BLOB";
+        return "LONGVARBINARY";
     }
 
     protected String getDateTimeType() {

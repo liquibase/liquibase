@@ -97,7 +97,7 @@ public class DB2Database extends AbstractDatabase {
     }
 
     protected String getCurrencyType() {
-        return "DECIMAL";
+        return "DECIMAL(19,4)";
     }
 
     protected String getUUIDType() {

@@ -171,6 +171,41 @@ public class Migrator {
         database.setConnection(connection);
     }
 
+//    public void init(String driverClass, String url, String username, String password, ClassLoader driverClassLoader) throws JDBCException {
+//        Driver driver = null;
+//        try {
+//            if (driverClass == null) {
+//                driverClass = DatabaseFactory.getInstance().findDefaultDriver(url);
+//            }
+//
+//            if (driverClass == null) {
+//                throw new RuntimeException("Driver class was not specified and could not be determined from the url");
+//            }
+//
+//            driver = (Driver) Class.forName(driverClass, true, driverClassLoader).newInstance();
+//        } catch (Exception e) {
+//            throw new RuntimeException("Cannot get database driver: " + e.getMessage());
+//        }
+//        Properties info = new Properties();
+//        info.put("user", username);
+//        if (password != null) {
+//            info.put("password", password);
+//        }
+//
+//        Connection connection = null;
+//        try {
+//            connection = driver.connect(url, info);
+//
+//            init(connection);
+//        } catch (SQLException e) {
+//            throw new JDBCException(e);
+//        }
+//        if (connection == null) {
+//            throw new JDBCException("Connection could not be created to " + url + " with driver " + driver.getClass().getName() + ".  Possibly the wrong driver for the given database URL");
+//        }
+//
+//    }
+
     /**
      * Returns the ChangeFactory for converting tag strings to Change implementations.
      */
@@ -585,10 +620,7 @@ public class Migrator {
      * should be prompted before continuing.
      */
     public boolean isSafeToRunMigration() throws JDBCException {
-        if (Mode.OUTPUT_SQL_MODE.equals(getMode()) || Mode.OUTPUT_CHANGELOG_ONLY_SQL_MODE.equals(getMode())) {
-            return true;
-        }
-        return getDatabase().getConnectionURL().indexOf("localhost") >= 0;
+        return Mode.OUTPUT_SQL_MODE.equals(getMode()) || Mode.OUTPUT_CHANGELOG_ONLY_SQL_MODE.equals(getMode()) || getDatabase().getConnectionURL().indexOf("localhost") >= 0;
     }
 
     /**

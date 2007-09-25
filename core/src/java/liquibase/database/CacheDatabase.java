@@ -34,7 +34,7 @@ public class CacheDatabase extends AbstractDatabase {
 
     @Override
     protected String getUUIDType() {
-        return "RAW";
+        return "CHAR(36)";
     }
 
     public String getCurrentDateTimeFunction() {

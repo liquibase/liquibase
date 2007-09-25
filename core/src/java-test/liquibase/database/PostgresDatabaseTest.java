@@ -38,7 +38,7 @@ public class PostgresDatabaseTest extends AbstractDatabaseTest {
 
     @Test
     public void getUUIDType() {
-        assertNull(getDatabase().getUUIDType());
+        assertEquals("CHAR(36)", getDatabase().getUUIDType());
     }
 
     @Test

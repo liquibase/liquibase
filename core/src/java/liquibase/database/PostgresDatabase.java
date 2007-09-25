@@ -106,7 +106,7 @@ public class PostgresDatabase extends AbstractDatabase {
     }
 
     protected String getUUIDType() {
-        return null;
+        return "CHAR(36)";
     }
 
     protected String getClobType() {

@@ -184,12 +184,12 @@ public class Column implements DatabaseObject, Comparable<Column> {
                 Types.TIME,
                 Types.TIMESTAMP,
                 Types.TINYINT,
-                Types.VARBINARY);
+                Types.LONGVARCHAR);
 
         List<Integer> oneParam = Arrays.asList(
                 Types.CHAR,
-                Types.LONGVARCHAR,
-                Types.VARCHAR
+                Types.VARCHAR,
+                Types.VARBINARY
         );
 
         List<Integer> twoParams = Arrays.asList(
