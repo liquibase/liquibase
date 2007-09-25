@@ -107,6 +107,8 @@ public class CustomChangeWrapper extends AbstractChange {
             for (String param : params) {
                 ObjectUtil.setProperty(customChange, param, paramValues.get(param));
             }
+            customChange.setFileOpener(getFileOpener());
+            customChange.setUp();
         } catch (Exception e) {
             throw new CustomChangeException(e);
         }
@@ -137,12 +139,10 @@ public class CustomChangeWrapper extends AbstractChange {
 
 
     public void setUp() throws SetupException {
-        customChange.setUp();
     }
 
 
     public void setFileOpener(FileOpener fileOpener) {
         super.setFileOpener(fileOpener);
-        customChange.setFileOpener(fileOpener);
     }
 }
