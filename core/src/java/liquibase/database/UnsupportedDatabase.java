@@ -51,7 +51,7 @@ public class UnsupportedDatabase extends AbstractDatabase {
     }
 
     protected String getUUIDType() {
-        return "VARCHAR(36)";
+        return "CHAR(36)";
     }
 
     protected String getClobType() {

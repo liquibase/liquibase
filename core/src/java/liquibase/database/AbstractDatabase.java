@@ -918,12 +918,12 @@ public abstract class AbstractDatabase implements Database {
         return true;
     }
 
-    public String getViewDefinition(String name) throws JDBCException {
-        return (String) new JdbcTemplate(this).queryForObject(getViewDefinitionSql(name), String.class);
+    public String getViewDefinition(String viewName) throws JDBCException {
+        return (String) new JdbcTemplate(this).queryForObject(getViewDefinitionSql(viewName), String.class);
     }
 
-    protected SqlStatement getViewDefinitionSql(String name) throws JDBCException {
-        String sql = "select view_definition from information_schema.views where upper(table_name)='" + name + "'";
+    protected SqlStatement getViewDefinitionSql(String viewName) throws JDBCException {
+        String sql = "select view_definition from information_schema.views where upper(table_name)='" + viewName + "'";
         if (getSchemaName() != null) {
             sql += " and table_schema='" + getSchemaName() + "'";
         }

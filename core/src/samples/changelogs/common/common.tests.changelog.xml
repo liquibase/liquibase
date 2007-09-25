@@ -151,4 +151,17 @@
         </insert>
     </changeSet>
 
+    <changeSet id="datatype-conversion-teset" author="nvoxland">
+        <createTable tableName="datatypeConversionTest">
+            <column name="booleanColumn" type="boolean"/>
+            <column name="currencyColumn" type="currency"/>
+            <column name="uuidColumn" type="uuid"/>
+            <column name="blobColumn" type="blob"/>
+            <column name="clobColumn" type="clob"/>
+            <column name="dateColumn" type="date"/>
+            <column name="timeColumn" type="time"/>
+            <column name="datetimeColumn" type="datetime"/>
+        </createTable>
+    </changeSet>
+
 </databaseChangeLog>
