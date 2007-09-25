@@ -65,7 +65,7 @@ public class DropNotNullConstraintChange extends AbstractChange {
         } else if (database instanceof HsqlDatabase) {
             return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + tableName + " ALTER COLUMN " + columnName + " NULL")};
         } else if (database instanceof CacheDatabase) {
-        	return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + tableName + " ALTER COLUMN " + columnName + " NULL")};
+            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + tableName + " ALTER COLUMN " + columnName + " NULL")};
         }
 
         return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + tableName + " ALTER COLUMN " + columnName + " DROP NOT NULL")};
@@ -125,7 +125,6 @@ public class DropNotNullConstraintChange extends AbstractChange {
         Column column = new Column();
         column.setTable(table);
         column.setName(columnName);
-
 
 
         return new HashSet<DatabaseObject>(Arrays.asList(table, column));

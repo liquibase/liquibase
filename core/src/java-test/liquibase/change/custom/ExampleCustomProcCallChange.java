@@ -27,8 +27,7 @@ public class ExampleCustomProcCallChange implements CustomSqlChange {
     }
 
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
-        StoredProcedureStatement procedureStatement = new StoredProcedureStatement();
-        procedureStatement.setProcedureName("testHello");
+        StoredProcedureStatement procedureStatement = new StoredProcedureStatement("testHello");
         return new SqlStatement[]{
                 procedureStatement,
         };

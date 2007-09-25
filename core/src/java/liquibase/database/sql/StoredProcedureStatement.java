@@ -15,14 +15,14 @@ public class StoredProcedureStatement implements SqlStatement, CallableSqlStatem
     private List<Integer> types = new ArrayList<Integer>();
 
 
+    public StoredProcedureStatement(String procedureName) {
+        this.procedureName = procedureName;
+    }
+
     public String getProcedureName() {
         return procedureName;
     }
 
-
-    public void setProcedureName(String procedureName) {
-        this.procedureName = procedureName;
-    }
 
     public List<String> getParameters() {
         return Collections.unmodifiableList(parameters);
