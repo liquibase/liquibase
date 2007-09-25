@@ -3,7 +3,9 @@ package liquibase.migrator.firebird;
 import liquibase.migrator.AbstractSimpleChangeLogRunnerTest;
 
 /**
- * create tablespace liquibase2 datafile 'C:\ORACLEXE\ORADATA\XE\LIQUIBASE2.DBF' SIZE 5M autoextend on next 5M
+ * To configure database:
+ * create database 'c:\firebird\liquibase.fdb' page_size 8192;
+ * user 'liquibase' password 'liquibase'; 
  */
 @SuppressWarnings({"JUnitTestCaseWithNoTests"})
 public class FirebirdSampleChangeLogRunnerTest extends AbstractSimpleChangeLogRunnerTest {
