@@ -132,7 +132,7 @@ public class CustomChangeWrapper extends AbstractChange {
     }
 
     public Set<DatabaseObject> getAffectedDatabaseObjects() {
-        return customChange.getAffectedDatabaseObjects();
+        return null;
     }
 
 

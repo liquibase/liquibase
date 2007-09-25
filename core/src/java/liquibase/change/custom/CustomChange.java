@@ -31,8 +31,6 @@ interface CustomChange {
      */
     public void setUp() throws SetupException;
 
-    public Set<DatabaseObject> getAffectedDatabaseObjects();
-
     /**
      * Sets the fileOpener that should be used for any file loading and resource
      * finding for files that are provided by the user.
