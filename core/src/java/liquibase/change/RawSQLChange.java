@@ -1,41 +1,21 @@
 package liquibase.change;
 
-import liquibase.database.Database;
-import liquibase.database.sql.RawSqlStatement;
-import liquibase.database.sql.SqlStatement;
 import liquibase.database.structure.DatabaseObject;
-import liquibase.exception.UnsupportedChangeException;
-import liquibase.util.StringUtils;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 
 /**
  * Allows execution of arbitrary SQL.  This change can be used when existing changes are either don't exist,
  * are not flexible enough, or buggy. 
  */
-public class RawSQLChange extends AbstractChange {
+public class RawSQLChange extends AbstractSQLChange {
 
     private String comments;
-    private String sql;
-    private boolean stripComments;
-    private boolean splitStatements;
-
     public RawSQLChange() {
         super("sql", "Custom SQL");
-        stripComments = false;
-        splitStatements = true;
-    }
-
-    public String getSql() {
-        return sql;
-    }
-
-    public void setSql(String sql) {
-        this.sql = sql;
     }
 
     public String getComments() {
@@ -44,36 +24,6 @@ public class RawSQLChange extends AbstractChange {
 
     public void setComments(String comments) {
         this.comments = comments;
-    }
-    
-    public void setStripComments(Boolean stripComments) {
-        this.stripComments = stripComments;
-    }
-    
-    public boolean isStrippingComments() {
-        return stripComments;
-    }
-
-
-    public boolean isSplitStatements() {
-        return splitStatements;
-    }
-
-    public void setSplitStatements(boolean splitStatements) {
-        this.splitStatements = splitStatements;
-    }
-
-    public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
-        List<SqlStatement> statements = new ArrayList<SqlStatement>();
-        if (splitStatements) {
-            for (String sql : StringUtils.processMutliLineSQL(this.sql,isStrippingComments())) {
-                statements.add(new RawSqlStatement(sql));
-            }
-        } else {
-            statements.add(new RawSqlStatement(this.sql));
-        }
-
-        return statements.toArray(new SqlStatement[statements.size()]);
     }
 
     public String getConfirmationMessage() {

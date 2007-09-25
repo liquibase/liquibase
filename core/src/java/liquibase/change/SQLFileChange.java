@@ -1,16 +1,12 @@
 package liquibase.change;
 
 import liquibase.FileOpener;
-import liquibase.database.Database;
-import liquibase.database.sql.RawSqlStatement;
-import liquibase.database.sql.SqlStatement;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.exception.SetupException;
-import liquibase.exception.UnsupportedChangeException;
 import liquibase.migrator.Migrator;
 import liquibase.util.MD5Util;
 import liquibase.util.StreamUtil;
-import liquibase.util.StringUtils;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -18,8 +14,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
 
@@ -34,28 +28,12 @@ import java.util.logging.Logger;
  * @author <a href="mailto:csuml@yahoo.co.uk">Paul Keeble</a>
  * 
  */
-public class SQLFileChange extends AbstractChange {
+public class SQLFileChange extends AbstractSQLChange {
     private static Logger log = Logger.getLogger(Migrator.DEFAULT_LOG_NAME);
-    private String sql;
     private String file;
-    private boolean stripComments;
-
+    
     public SQLFileChange() {
         super("sqlFile", "SQL From File");
-        stripComments = false;
-    }
-
-    public String getSql() {
-        return sql;
-    }
-    
-    /**
-     * Used only for testing, this should not be used in code.
-     * 
-     * @param sql
-     */
-    protected void setSql(String sql) {
-       this.sql = sql;
     }
 
     public String getPath() {
@@ -72,14 +50,6 @@ public class SQLFileChange extends AbstractChange {
     }
     
 
-    public void setStripComments(Boolean stripComments) {
-        this.stripComments = stripComments.booleanValue();
-    }
-    
-    public boolean isStrippingComments() {
-        return stripComments;
-    }
-    
     public void setUp() throws SetupException {
         if (file == null) {
             throw new SetupException("<sqlfile> - No path specified");
@@ -107,7 +77,7 @@ public class SQLFileChange extends AbstractChange {
         FileInputStream fis = null;
         try {
             fis = new FileInputStream(file);
-            sql = StreamUtil.getStreamContents(fis);
+            setSql( StreamUtil.getStreamContents(fis) );
             return true;
         } catch (FileNotFoundException fnfe) {
             return false;
@@ -146,7 +116,7 @@ public class SQLFileChange extends AbstractChange {
             if (in == null) {
                 return false;
             }
-            sql = StreamUtil.getStreamContents(in);
+            setSql( StreamUtil.getStreamContents(in));
             return true;
         } catch (IOException ioe) {
             throw new SetupException("<sqlfile path="+file+"> -Unable to read file", ioe);
@@ -174,21 +144,6 @@ public class SQLFileChange extends AbstractChange {
         Element sqlElement = currentChangeLogDOM.createElement("sqlFile");
         sqlElement.setAttribute("path", file);
         return sqlElement;
-    }
-
-    /**
-     * Generates a single statement for all of the SQL in the file.
-     */
-    public SqlStatement[] generateStatements(Database database)
-            throws UnsupportedChangeException {
-
-        List<SqlStatement> returnStatements = new ArrayList<SqlStatement>();
-        //strip ; from end of statements
-        String[] statements = StringUtils.processMutliLineSQL(sql,isStrippingComments());
-        for (String statement : statements) {
-            returnStatements.add(new RawSqlStatement(statement));
-        }
-        return returnStatements.toArray(new SqlStatement[returnStatements.size()]);
     }
 
     public String getConfirmationMessage() {
