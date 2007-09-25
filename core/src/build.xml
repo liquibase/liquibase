@@ -458,7 +458,7 @@ The available targets at the current stage:
 		depends="-coverage-post-compile,test" description="Generates code coverage reports for the unit tests">
 		
 		<emma enabled="true" >
-			<report sourcepath="${src.dir}" >
+			<report sourcepath="${src.dir}/java" >
 				<fileset dir="${coverage.output.dir}" >
 					<include name="*.emma" />
 				</fileset>
