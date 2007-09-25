@@ -22,10 +22,12 @@ public class RawSQLChange extends AbstractChange {
     private String comments;
     private String sql;
     private boolean stripComments;
+    private boolean splitStatements;
 
     public RawSQLChange() {
         super("sql", "Custom SQL");
         stripComments = false;
+        splitStatements = true;
     }
 
     public String getSql() {
@@ -45,17 +47,30 @@ public class RawSQLChange extends AbstractChange {
     }
     
     public void setStripComments(Boolean stripComments) {
-        this.stripComments = stripComments.booleanValue();
+        this.stripComments = stripComments;
     }
     
     public boolean isStrippingComments() {
         return stripComments;
     }
 
+
+    public boolean isSplitStatements() {
+        return splitStatements;
+    }
+
+    public void setSplitStatements(boolean splitStatements) {
+        this.splitStatements = splitStatements;
+    }
+
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
         List<SqlStatement> statements = new ArrayList<SqlStatement>();
-        for (String sql : StringUtils.processMutliLineSQL(this.sql,isStrippingComments())) {
-            statements.add(new RawSqlStatement(sql));
+        if (splitStatements) {
+            for (String sql : StringUtils.processMutliLineSQL(this.sql,isStrippingComments())) {
+                statements.add(new RawSqlStatement(sql));
+            }
+        } else {
+            statements.add(new RawSqlStatement(this.sql));
         }
 
         return statements.toArray(new SqlStatement[statements.size()]);

@@ -389,6 +389,7 @@
             </xsd:sequence>
             <xsd:attributeGroup ref="tableNameAttribute"/>
             <xsd:attribute name="stripComments" type="xsd:boolean"/>
+            <xsd:attribute name="splitStatements" type="xsd:boolean"/>
         </xsd:complexType>
     </xsd:element>
 
