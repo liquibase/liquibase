@@ -88,6 +88,7 @@ The available targets at the current stage:
                 </fileset>
             </classpath>
         </taskdef>
+    	
     </target>
 
 	<!-- target: CLEAN -->
@@ -101,6 +102,7 @@ The available targets at the current stage:
         <delete dir="${lib.deps.dir}"/>
         <delete dir="${reports.dir}"/>
         <delete dir="${package.dir}"/>
+    	<delete dir="${coverage.build.dir}"/>
     </target>
 
 	<!-- target: COMPILE -->
@@ -343,10 +345,12 @@ The available targets at the current stage:
                jvm="${java.home}/bin/java">
             <env key="JAVA_HOME" path="${env.JAVA_HOME}"/>
             <classpath>
+            	<pathelement location="${coverage.build.dir}"/>
                 <pathelement path="${build.dir}"/>
                 <pathelement path="${build.test.dir}"/>
                 <path refid="classpath"/>
             </classpath>
+        	<jvmarg value="-Demma.coverage.out.file=${coverage.output.dir}/coverage.emma"/>
             <formatter type="xml"/>
             <batchtest todir="${reports.dir}/junit/${ant.project.name}">
                 <fileset dir="${build.test.dir}">
@@ -428,6 +432,41 @@ The available targets at the current stage:
                 </fileset>
             </batchtest>
         </junit>
+	</target>
+	
+	<target name="-coverage-post-compile" depends="compile">
+		<taskdef resource="emma_ant.properties">
+			<classpath>
+		    	<pathelement location="${lib.compile.dir}/emma.jar"/>
+				<pathelement location="${lib.compile.dir}/emma_ant.jar"/>
+			</classpath>
+		</taskdef>
+		<path id="build.path">
+			<pathelement path="${build.dir}"/>
+		</path>
+		<emma enabled="true" >
+			<instr 
+				instrpathref="build.path"
+				destdir="${coverage.build.dir}"	
+				metadatafile="${coverage.output.dir}/metadata.emma"
+				merge="true"
+			/>
+	    </emma>
+	</target>
+	
+	<target name="code-coverage" 
+		depends="-coverage-post-compile,test" description="Generates code coverage reports for the unit tests">
+		
+		<emma enabled="true" >
+			<report sourcepath="${src.dir}" >
+				<fileset dir="${coverage.output.dir}" >
+					<include name="*.emma" />
+				</fileset>
+				
+				<txt outfile="${reports.dir}/coverage-report/coverage.txt" />
+				<html outfile="${reports.dir}/coverage-report/coverage.html" />
+			</report>
+		</emma>
 	</target>
 	
 	<target name="continuous-build" description="Used by the continuous build server and runs the generic tests"
