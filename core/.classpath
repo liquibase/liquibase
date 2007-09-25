@@ -13,5 +13,8 @@
 	<classpathentry kind="lib" path="lib-compile/ant-1.6.5.jar"/>
 	<classpathentry kind="lib" path="lib-compile/jsdk-2.4.jar"/>
 	<classpathentry kind="lib" path="lib-compile/maven-core-2.0.6-uber.jar"/>
+	<classpathentry kind="lib" path="lib-compile/spring-2.0.6.jar"/>
+	<classpathentry kind="lib" path="lib-compile/spring-aspects-2.0.6.jar"/>
+	<classpathentry kind="lib" path="lib-compile/spring-mock-2.0.6.jar"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>
