@@ -72,6 +72,8 @@ public class RenameColumnChange extends AbstractChange {
             throw new UnsupportedChangeException("Derby does not currently support renaming columns");
         } else if (database instanceof HsqlDatabase) {
             return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + tableName + " ALTER COLUMN " + oldColumnName + " RENAME TO " + newColumnName)};
+        } else if (database instanceof FirebirdDatabase) {
+            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + tableName + " ALTER COLUMN " + oldColumnName + " TO " + newColumnName)};
         } else if (database instanceof DB2Database) {
             throw new UnsupportedChangeException("Rename Column not supported in DB2");
         } else if (database instanceof CacheDatabase) {

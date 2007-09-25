@@ -1,9 +1,6 @@
 package liquibase.change;
 
-import liquibase.database.DB2Database;
-import liquibase.database.Database;
-import liquibase.database.DerbyDatabase;
-import liquibase.database.SybaseDatabase;
+import liquibase.database.*;
 import liquibase.database.sql.RawSqlStatement;
 import liquibase.database.sql.SqlStatement;
 import liquibase.database.structure.Column;
@@ -54,6 +51,8 @@ public class DropColumnChange extends AbstractChange {
                     new RawSqlStatement("CALL SYSPROC.ADMIN_CMD ('REORG TABLE " + getTableName() + "')")
             };
         } else if (database instanceof SybaseDatabase) {
+            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + getTableName() + " DROP " + getColumnName())};
+        } else if (database instanceof FirebirdDatabase) {
             return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + getTableName() + " DROP " + getColumnName())};
         }
         return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + getTableName() + " DROP COLUMN " + getColumnName())};
