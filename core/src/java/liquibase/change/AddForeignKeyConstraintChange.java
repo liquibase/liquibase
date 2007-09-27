@@ -101,7 +101,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
     }
 
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
-        String sql = "ALTER TABLE " + getBaseTableName() + " ADD CONSTRAINT " + getConstraintName() + " FOREIGN KEY (" + getBaseColumnNames() + ") REFERENCES " + getReferencedTableName() + "(" + getReferencedColumnNames() + ")";
+        String sql = "ALTER TABLE " + escapeTableName(getBaseTableName(), database) + " ADD CONSTRAINT " + getConstraintName() + " FOREIGN KEY (" + getBaseColumnNames() + ") REFERENCES " + escapeTableName(getReferencedTableName(), database) + "(" + getReferencedColumnNames() + ")";
 
         if (deleteCascade != null && deleteCascade) {
             sql += " ON DELETE CASCADE";

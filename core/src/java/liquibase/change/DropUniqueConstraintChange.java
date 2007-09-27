@@ -42,11 +42,11 @@ public class DropUniqueConstraintChange extends AbstractChange {
 
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
         if (database instanceof MySQLDatabase) {
-            return new SqlStatement[]{ new RawSqlStatement("ALTER TABLE " + getTableName() + " DROP KEY " + getConstraintName()), };
+            return new SqlStatement[]{ new RawSqlStatement("ALTER TABLE " + escapeTableName(getTableName(), database) + " DROP KEY " + getConstraintName()), };
         }
 
         return new SqlStatement[]{
-                new RawSqlStatement("ALTER TABLE " + getTableName() + " DROP CONSTRAINT " + getConstraintName()),
+                new RawSqlStatement("ALTER TABLE " + escapeTableName(getTableName(), database) + " DROP CONSTRAINT " + getConstraintName()),
         };
     }
 

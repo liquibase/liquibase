@@ -43,11 +43,11 @@ public class DropForeignKeyConstraintChange extends AbstractChange {
 
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
         if (database instanceof MySQLDatabase) {
-            return new SqlStatement[]{ new RawSqlStatement("ALTER TABLE " + getBaseTableName() + " DROP FOREIGN KEY " + getConstraintName()), };
+            return new SqlStatement[]{ new RawSqlStatement("ALTER TABLE " + escapeTableName(getBaseTableName(), database) + " DROP FOREIGN KEY " + getConstraintName()), };
         }
 
         return new SqlStatement[]{
-                new RawSqlStatement("ALTER TABLE " + getBaseTableName() + " DROP CONSTRAINT " + getConstraintName()),
+                new RawSqlStatement("ALTER TABLE " + escapeTableName(getBaseTableName(), database) + " DROP CONSTRAINT " + getConstraintName()),
         };
     }
 

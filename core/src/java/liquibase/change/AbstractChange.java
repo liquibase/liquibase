@@ -2,7 +2,7 @@ package liquibase.change;
 
 import liquibase.ChangeSet;
 import liquibase.FileOpener;
-import liquibase.database.Database;
+import liquibase.database.*;
 import liquibase.database.sql.SqlStatement;
 import liquibase.database.template.JdbcTemplate;
 import liquibase.exception.JDBCException;
@@ -96,7 +96,7 @@ public abstract class AbstractChange implements Change {
     public void saveStatements(Database database, Writer writer) throws IOException, UnsupportedChangeException {
         SqlStatement[] statements = generateStatements(database);
         for (SqlStatement statement : statements) {
-            writer.append(statement.getSqlStatement(database)).append(";").append(StreamUtil.getLineSeparator()).append(StreamUtil.getLineSeparator());
+            writer.append(statement.getSqlStatement(database)).append(statement.getEndDelimiter(database)).append(StreamUtil.getLineSeparator()).append(StreamUtil.getLineSeparator());
         }
     }
 
@@ -268,5 +268,18 @@ public abstract class AbstractChange implements Change {
      */
     public void setUp() throws SetupException {
         
+    }
+
+    /**
+     * Escapes the table name in a database-dependent manner so reserved words can be used as a table name (i.e. "order").
+     * Currently only escapes MS-SQL because other DBMSs store table names case-sensitively when escaping is used which
+     * could confuse end-users.
+     */
+    protected String escapeTableName(String tableName, Database database) {
+        if (database instanceof MSSQLDatabase) {
+            return "["+tableName+"]";
+        } else {
+            return tableName;
+        }
     }
 }

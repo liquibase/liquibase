@@ -47,15 +47,15 @@ public class DropColumnChange extends AbstractChange {
             throw new UnsupportedChangeException("Derby does not currently support dropping columns");
         } else if (database instanceof DB2Database) {
             return new SqlStatement[]{
-                    new RawSqlStatement("ALTER TABLE " + getTableName() + " DROP COLUMN " + getColumnName()),
+                    new RawSqlStatement("ALTER TABLE " + escapeTableName(getTableName(), database) + " DROP COLUMN " + getColumnName()),
                     new RawSqlStatement("CALL SYSPROC.ADMIN_CMD ('REORG TABLE " + getTableName() + "')")
             };
         } else if (database instanceof SybaseDatabase) {
-            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + getTableName() + " DROP " + getColumnName())};
+            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + escapeTableName(getTableName(), database) + " DROP " + getColumnName())};
         } else if (database instanceof FirebirdDatabase) {
-            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + getTableName() + " DROP " + getColumnName())};
+            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + escapeTableName(getTableName(), database) + " DROP " + getColumnName())};
         }
-        return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + getTableName() + " DROP COLUMN " + getColumnName())};
+        return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + escapeTableName(getTableName(), database) + " DROP COLUMN " + getColumnName())};
     }
 
     public String getConfirmationMessage() {

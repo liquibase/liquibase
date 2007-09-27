@@ -53,46 +53,46 @@ public class DropNotNullConstraintChange extends AbstractChange {
 
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
         if (database instanceof SybaseDatabase) {
-            return generateSybaseStatements();
+            return generateSybaseStatements((SybaseDatabase) database);
         } else if (database instanceof MSSQLDatabase) {
-            return generateMSSQLStatements();
+            return generateMSSQLStatements((MSSQLDatabase) database);
         } else if (database instanceof MySQLDatabase) {
-            return generateMySQLStatements();
+            return generateMySQLStatements((MySQLDatabase) database);
         } else if (database instanceof OracleDatabase) {
-            return generateOracleStatements();
+            return generateOracleStatements((OracleDatabase) database);
         } else if (database instanceof DerbyDatabase) {
-            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + tableName + " ALTER COLUMN " + columnName + " NULL")};
+            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + escapeTableName(tableName, database) + " ALTER COLUMN " + columnName + " NULL")};
         } else if (database instanceof HsqlDatabase) {
-            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + tableName + " ALTER COLUMN " + columnName + " NULL")};
+            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + escapeTableName(tableName, database) + " ALTER COLUMN " + columnName + " NULL")};
         } else if (database instanceof CacheDatabase) {
-            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + tableName + " ALTER COLUMN " + columnName + " NULL")};
+            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + escapeTableName(tableName, database) + " ALTER COLUMN " + columnName + " NULL")};
         }
 
-        return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + tableName + " ALTER COLUMN " + columnName + " DROP NOT NULL")};
+        return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + escapeTableName(tableName, database) + " ALTER COLUMN " + columnName + " DROP NOT NULL")};
     }
 
-    private SqlStatement[] generateSybaseStatements() {
-        return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + tableName + " MODIFY " + columnName + " NULL")};
+    private SqlStatement[] generateSybaseStatements(SybaseDatabase database) {
+        return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + escapeTableName(tableName, database) + " MODIFY " + columnName + " NULL")};
     }
 
-    private SqlStatement[] generateMSSQLStatements() {
+    private SqlStatement[] generateMSSQLStatements(MSSQLDatabase database) {
         if (columnDataType == null) {
             throw new RuntimeException("columnDataType is required to drop not null constraints with MS-SQL");
         }
 
-        return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + tableName + " ALTER COLUMN " + columnName + " " + columnDataType + " NULL")};
+        return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + escapeTableName(tableName, database) + " ALTER COLUMN " + columnName + " " + columnDataType + " NULL")};
     }
 
-    private SqlStatement[] generateOracleStatements() {
-        return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + tableName + " MODIFY " + columnName + " NULL")};
+    private SqlStatement[] generateOracleStatements(OracleDatabase database) {
+        return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + escapeTableName(tableName, database) + " MODIFY " + columnName + " NULL")};
     }
 
-    private SqlStatement[] generateMySQLStatements() {
+    private SqlStatement[] generateMySQLStatements(MySQLDatabase database) {
         if (columnDataType == null) {
             throw new RuntimeException("columnDataType is required to drop not null constraints with MySQL");
         }
 
-        return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + tableName + " MODIFY " + columnName + " " + columnDataType + " DEFAULT NULL")};
+        return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + escapeTableName(tableName, database) + " MODIFY " + columnName + " " + columnDataType + " DEFAULT NULL")};
     }
 
     protected Change[] createInverses() {

@@ -78,4 +78,9 @@ public class StoredProcedureStatement implements SqlStatement, CallableSqlStatem
 
         return pstmt;
     }
+
+
+    public String getEndDelimiter(Database database) {
+        return ";";
+    }
 }

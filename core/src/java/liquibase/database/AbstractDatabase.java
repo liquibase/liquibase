@@ -520,7 +520,7 @@ public abstract class AbstractDatabase implements Database {
                         if (writer == null) {
                             wroteToOutput = false;
                         } else {
-                            writer.append(sql.getSqlStatement(this)).append(";").append(StreamUtil.getLineSeparator());
+                            writer.append(sql.getSqlStatement(this)).append(sql.getEndDelimiter(this)).append(StreamUtil.getLineSeparator());
                             wroteToOutput = true;
                         }
                     }

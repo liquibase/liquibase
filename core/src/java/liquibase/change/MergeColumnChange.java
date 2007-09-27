@@ -89,7 +89,7 @@ public class MergeColumnChange extends AbstractChange {
         addNewColumnChange.setColumn(columnConfig);
         statements.addAll(Arrays.asList(addNewColumnChange.generateStatements(database)));
 
-        String updateStatement = "UPDATE " + getTableName() + " SET " + getFinalColumnName() + " = " + database.getConcatSql(getColumn1Name(), "'"+getJoinString()+"'", getColumn2Name());
+        String updateStatement = "UPDATE " + escapeTableName(getTableName(), database) + " SET " + getFinalColumnName() + " = " + database.getConcatSql(getColumn1Name(), "'"+getJoinString()+"'", getColumn2Name());
 
         statements.add(new RawSqlStatement(updateStatement));
 

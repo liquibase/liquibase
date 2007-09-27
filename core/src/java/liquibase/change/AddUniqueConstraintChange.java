@@ -64,7 +64,7 @@ public class AddUniqueConstraintChange extends AbstractChange {
     }
 
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
-        String sql = "ALTER TABLE " + getTableName() + " ADD CONSTRAINT " + getConstraintName() + " UNIQUE (" + getColumnNames() + ")";
+        String sql = "ALTER TABLE " + escapeTableName(getTableName(), database) + " ADD CONSTRAINT " + getConstraintName() + " UNIQUE (" + getColumnNames() + ")";
 
         if (StringUtils.trimToNull(getTablespace()) != null && database.supportsTablespaces()) {
             if (database instanceof MSSQLDatabase) {

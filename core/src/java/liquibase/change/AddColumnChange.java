@@ -43,7 +43,7 @@ public class AddColumnChange extends AbstractChange {
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
         List<SqlStatement> sql = new ArrayList<SqlStatement>();
 
-        String alterTable = "ALTER TABLE " + getTableName() + " ADD " + getColumn().getName() + " " + database.getColumnType(getColumn());
+        String alterTable = "ALTER TABLE " + escapeTableName(getTableName(), database) + " ADD " + getColumn().getName() + " " + database.getColumnType(getColumn());
 
         if (defaultClauseBeforeNotNull(database)) {
             alterTable += getDefaultClause(database);
