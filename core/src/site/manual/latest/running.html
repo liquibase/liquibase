@@ -25,13 +25,14 @@
                     <ul>
                         <li><a href="ant.html">As an Ant task</a></li>
                         <li><a href="maven.html">As a Maven plugin</a></li>
+                        <li><a href="spring_migrator.html">As part of a Spring-based application</a></li>
                         <li><a href="servlet_listener_migrator.html">As part of an application server startup</a></li>
                         <li><a href="command_line_migrator.html">Through a command line application</a></li>
                     </ul>
                     <p>
                         All four ways have various strengths and weaknesses.
                         The Ant/Maven runners work well for integrating changes into an existing build process.
-                        The servlet listener works well for making sure that a database is up-to-date each time a site is deployed.
+                        The Spring migrator and servlet listener works well for making sure that a database is up-to-date each time a site is deployed.
                         The command line tool works well outside a build environment when you want to do on-demand migrations of a database
                         without any dependencies, or if you want to use LiquiBase's advanced execution options such as saving the migration SQL or
                         controlling the changelog database lock.
