@@ -322,6 +322,8 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
         absolutePathOfChangeLog = absolutePathOfChangeLog.replaceFirst("file:\\/","");
         if (System.getProperty("os.name").startsWith("Windows ")) {
             absolutePathOfChangeLog = absolutePathOfChangeLog.replace('/', '\\');
+        } else {
+            absolutePathOfChangeLog = "/" + absolutePathOfChangeLog;
         }
         Migrator migrator = createMigrator(absolutePathOfChangeLog, new FileSystemFileOpener());
         migrator.dropAll();
