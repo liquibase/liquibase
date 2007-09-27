@@ -336,7 +336,5 @@ public class CommandLineMigratorTest {
                 "migrate"
         });
         assertEquals("--driver=DRIVER --username=USERNAME --password=PASSWORD --url=URL --changeLogFile=FILE --classpath=CLASSPATH;CLASSPATH2 --contexts=CONTEXT1,CONTEXT2 --promptForNonLocalDatabase=true migrate", StringUtils.join(Arrays.asList(fixedArgs), " "));
-
-
     }
 }

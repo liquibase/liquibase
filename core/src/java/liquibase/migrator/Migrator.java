@@ -94,7 +94,7 @@ public class Migrator {
     protected Migrator(String changeLogFile, FileOpener fileOpener, boolean alreadyHasChangeLogLock) {
         log = Logger.getLogger(Migrator.DEFAULT_LOG_NAME);
 
-        this.changeLogFile = changeLogFile;
+        this.changeLogFile = changeLogFile.replace("\\","/");  //convert to standard / if usign absolute path on windows
         this.fileOpener = fileOpener;
         SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
         if (System.getProperty("java.vm.version").startsWith("1.4")) {
@@ -771,7 +771,7 @@ public class Migrator {
         String sql = "INSERT INTO DATABASECHANGELOG (ID, AUTHOR, FILENAME, DATEEXECUTED, MD5SUM, DESCRIPTION, COMMENTS, LIQUIBASE) VALUES ('?', '?', '?', " + dateValue + ", '?', '?', '?', '?')";
         sql = sql.replaceFirst("\\?", escapeStringForDatabase(escapeStringForDatabase(changeSet.getId())));
         sql = sql.replaceFirst("\\?", escapeStringForDatabase(changeSet.getAuthor()));
-        sql = sql.replaceFirst("\\?", escapeStringForDatabase(changeSet.getDatabaseChangeLog().getFilePath()));
+        sql = sql.replaceFirst("\\?", escapeStringForDatabase(changeSet.getDatabaseChangeLog().getFilePath().replace("\\","\\\\")));
         sql = sql.replaceFirst("\\?", escapeStringForDatabase(changeSet.getMd5sum()));
         sql = sql.replaceFirst("\\?", escapeStringForDatabase(limitSize(changeSet.getDescription())));
         sql = sql.replaceFirst("\\?", escapeStringForDatabase(limitSize(StringUtils.trimToEmpty(changeSet.getComments()))));
