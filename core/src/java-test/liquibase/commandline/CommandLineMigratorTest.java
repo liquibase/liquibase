@@ -337,4 +337,10 @@ public class CommandLineMigratorTest {
         });
         assertEquals("--driver=DRIVER --username=USERNAME --password=PASSWORD --url=URL --changeLogFile=FILE --classpath=CLASSPATH;CLASSPATH2 --contexts=CONTEXT1,CONTEXT2 --promptForNonLocalDatabase=true migrate", StringUtils.join(Arrays.asList(fixedArgs), " "));
     }
+
+    @Test
+    public void testVersionArg() throws IOException, CommandLineParsingException {
+        CommandLineMigrator.main(new String[] {"--version"});
+
+    }
 }

@@ -63,18 +63,14 @@ public class ChangeSet {
         this.runOnChange = runOnChange;
         if (StringUtils.trimToNull(contextList) != null) {
             String[] strings = contextList.toLowerCase().split(",");
-            if (contexts == null) {
-                contexts = new HashSet<String>();
-            }
+            contexts = new HashSet<String>();
             for (String string : strings) {
                 contexts.add(string.trim().toLowerCase());
             }
         }
         if (StringUtils.trimToNull(dbmsList) != null) {
             String[] strings = dbmsList.toLowerCase().split(",");
-            if (dbmsSet == null) {
-                dbmsSet = new HashSet<String>();
-            }
+            dbmsSet = new HashSet<String>();
             for (String string : strings) {
                 dbmsSet.add(string.trim().toLowerCase());
             }

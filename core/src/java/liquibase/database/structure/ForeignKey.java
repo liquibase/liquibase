@@ -113,19 +113,19 @@ public class ForeignKey implements DatabaseObject, Comparable<ForeignKey> {
 
     public int compareTo(ForeignKey o) {
         int returnValue = 0;
-        if (this.getForeignKeyTable() != null & o.getForeignKeyTable() != null) {
+        if (this.getForeignKeyTable() != null && o.getForeignKeyTable() != null) {
             returnValue = this.getForeignKeyTable().compareTo(o.getForeignKeyTable());
         }
 
-        if (returnValue == 0 && this.getForeignKeyColumn() != null & o.getForeignKeyColumn() != null) {
+        if (returnValue == 0 && this.getForeignKeyColumn() != null && o.getForeignKeyColumn() != null) {
             returnValue = this.getForeignKeyColumn().compareTo(o.getForeignKeyColumn());
         }
 
-        if (returnValue == 0 && this.getPrimaryKeyTable() != null & o.getPrimaryKeyTable() != null) {
+        if (returnValue == 0 && this.getPrimaryKeyTable() != null && o.getPrimaryKeyTable() != null) {
             returnValue = this.getPrimaryKeyTable().compareTo(o.getPrimaryKeyTable());
         }
 
-        if (returnValue == 0 && this.getPrimaryKeyColumn() != null & o.getPrimaryKeyColumn() != null) {
+        if (returnValue == 0 && this.getPrimaryKeyColumn() != null && o.getPrimaryKeyColumn() != null) {
             returnValue = this.getPrimaryKeyColumn().compareTo(o.getPrimaryKeyColumn());
         }
 
