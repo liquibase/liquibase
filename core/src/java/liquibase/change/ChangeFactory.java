@@ -55,6 +55,7 @@ public class ChangeFactory {
                 SQLFileChange.class,
                 CustomChangeWrapper.class,
                 CreateProcedureChange.class,
+                ExecuteShellCommandChange.class,
         };
 
         try {

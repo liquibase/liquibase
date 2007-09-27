@@ -280,5 +280,12 @@
     <changeSet id="58" author="nvoxland">
         <customChange class="liquibase.change.custom.ExampleCustomTaskChange" helloTo="world"/>
     </changeSet>    
-    
+
+    <changeSet id="60" author="nvoxland">
+        <executeCommand executable="getmac" os="Windows XP">
+            <arg value="/FO"/>
+            <arg value="CSV"/>
+        </executeCommand>
+    </changeSet>
+
 </databaseChangeLog>

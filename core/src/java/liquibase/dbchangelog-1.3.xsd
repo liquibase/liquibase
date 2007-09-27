@@ -401,6 +401,20 @@
         </xsd:complexType>
     </xsd:element>
 
+    <xsd:element name="executeCommand">
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element name="arg" minOccurs="0" maxOccurs="unbounded">
+                    <xsd:complexType>
+                        <xsd:attribute name="value" type="xsd:string"/>
+                    </xsd:complexType>
+                </xsd:element>
+            </xsd:sequence>
+            <xsd:attribute name="executable" type="xsd:string"/>
+            <xsd:attribute name="os" type="xsd:string"/>
+        </xsd:complexType>
+    </xsd:element>
+
     <xsd:element name="sqlFile">
         <xsd:complexType>
             <xsd:attribute name="path" type="xsd:string"/>
@@ -560,6 +574,7 @@
             <xsd:element ref="addUniqueConstraint" maxOccurs="unbounded"/>
             <xsd:element ref="dropUniqueConstraint" maxOccurs="unbounded"/>
             <xsd:element ref="customChange" maxOccurs="unbounded"/>
+            <xsd:element ref="executeCommand" maxOccurs="unbounded"/>
             <xsd:element ref="rollback" maxOccurs="1"/>
 
         </xsd:choice>

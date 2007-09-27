@@ -46,7 +46,7 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
         username = "liquibase";
         password = "liquibase";
 
-        Logger.getLogger(Migrator.DEFAULT_LOG_NAME).setLevel(Level.OFF);
+        Logger.getLogger(Migrator.DEFAULT_LOG_NAME).setLevel(Level.SEVERE);
     }
 
     protected void setUp() throws Exception {
