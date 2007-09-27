@@ -25,8 +25,8 @@ public abstract class AbstractSQLChange extends AbstractChange {
 
     protected AbstractSQLChange(String tagName, String changeName) {
         super(tagName, changeName);
-        setStripComments( false);
-        setSplitStatements( true);
+        stripComments= false;
+        splitStatements =true;
     }
 
     /**

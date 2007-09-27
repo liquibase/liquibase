@@ -11,7 +11,7 @@ public class DatabaseFactory {
 
     private static DatabaseFactory instance = new DatabaseFactory();
 
-    private Logger log = Logger.getLogger(Migrator.DEFAULT_LOG_NAME);
+    private static final Logger log = Logger.getLogger(Migrator.DEFAULT_LOG_NAME);
 
 
     private DatabaseFactory() {

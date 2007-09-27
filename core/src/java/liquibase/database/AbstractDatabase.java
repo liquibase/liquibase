@@ -30,7 +30,7 @@ import java.util.logging.Logger;
 public abstract class AbstractDatabase implements Database {
 
     private DatabaseConnection connection;
-    protected Logger log;
+    static final protected Logger log = Logger.getLogger(Migrator.DEFAULT_LOG_NAME);
     protected boolean changeLogTableExists;
     protected boolean changeLogLockTableExists;
     protected boolean changeLogCreateAttempted;
@@ -41,7 +41,6 @@ public abstract class AbstractDatabase implements Database {
     protected String currentDateTimeFunction;
 
     protected AbstractDatabase() {
-        log = Logger.getLogger(Migrator.DEFAULT_LOG_NAME);
     }
 
     // ------- DATABASE INFORMATION METHODS ---- //

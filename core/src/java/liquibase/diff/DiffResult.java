@@ -571,11 +571,12 @@ public class DiffResult {
     }
 
     private String translateDefaultValue(String defaultValue) {
+        String result = defaultValue;
         if (defaultValue != null) {
-            defaultValue = defaultValue.replaceFirst("^'", "").replaceFirst("'$", "");
-            defaultValue = defaultValue.replaceFirst("'\\:\\:[a-zA-Z0-9 ]+$", "");
+            result = defaultValue.replaceFirst("^'", "").replaceFirst("'$", "");
+            result = result.replaceFirst("'\\:\\:[a-zA-Z0-9 ]+$", "");
         }
-        return defaultValue;
+        return result;
     }
 
     private void addUnexpectedTableChanges(List<Change> changes) {
