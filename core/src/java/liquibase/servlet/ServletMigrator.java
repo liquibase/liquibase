@@ -63,11 +63,9 @@ public class ServletMigrator implements ServletContextListener {
             }
 
             public void flush() {
-                ;
             }
 
             public void close() throws SecurityException {
-                ;
             }
         });
         String hostName;

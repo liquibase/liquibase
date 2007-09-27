@@ -34,7 +34,7 @@ public class DatabaseSnapshot {
     private Map<String, Column> columnsMap = new HashMap<String, Column>();
     private Set<DiffStatusListener> statusListeners;
 
-    private Logger log = Logger.getLogger(Migrator.DEFAULT_LOG_NAME);
+    private static final Logger log = Logger.getLogger(Migrator.DEFAULT_LOG_NAME);
 
 
     /**

@@ -29,7 +29,7 @@ import java.util.logging.Logger;
  * 
  */
 public class SQLFileChange extends AbstractSQLChange {
-    private static Logger log = Logger.getLogger(Migrator.DEFAULT_LOG_NAME);
+    private static final Logger log = Logger.getLogger(Migrator.DEFAULT_LOG_NAME);
     private String file;
     
     public SQLFileChange() {
