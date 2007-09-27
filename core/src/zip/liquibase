@@ -29,4 +29,4 @@ done
 # add any JVM options here
 JAVA_OPTS=
 
-java -cp $CP $JAVA_OPTS liquibase.migrator.commandline.CommandLineMigrator $@
+java -cp $CP $JAVA_OPTS liquibase.commandline.CommandLineMigrator $@
