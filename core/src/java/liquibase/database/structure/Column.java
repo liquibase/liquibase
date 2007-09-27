@@ -264,10 +264,10 @@ public class Column implements DatabaseObject, Comparable<Column> {
         if (this.isNullable() == null && otherColumn.isNullable() == null) {
             return false;
         }
-        if (this.isNullable() == null & otherColumn.isNullable() != null) {
+        if (this.isNullable() == null && otherColumn.isNullable() != null) {
             return true;
         }
-        if (this.isNullable() != null & otherColumn.isNullable() == null) {
+        if (this.isNullable() != null && otherColumn.isNullable() == null) {
             return true;
         }
         return !this.isNullable().equals(otherColumn.isNullable());

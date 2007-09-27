@@ -94,7 +94,9 @@ public class Migrator {
     protected Migrator(String changeLogFile, FileOpener fileOpener, boolean alreadyHasChangeLogLock) {
         log = Logger.getLogger(Migrator.DEFAULT_LOG_NAME);
 
-        this.changeLogFile = changeLogFile.replace("\\","/");  //convert to standard / if usign absolute path on windows
+        if (changeLogFile != null) {
+            this.changeLogFile = changeLogFile.replace("\\","/");  //convert to standard / if usign absolute path on windows
+        }
         this.fileOpener = fileOpener;
         SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
         if (System.getProperty("java.vm.version").startsWith("1.4")) {

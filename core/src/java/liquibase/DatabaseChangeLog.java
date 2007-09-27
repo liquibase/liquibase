@@ -60,4 +60,19 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog> {
     public int compareTo(DatabaseChangeLog o) {
         return getFilePath().compareTo(o.getFilePath());
     }
+
+
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        DatabaseChangeLog that = (DatabaseChangeLog) o;
+
+        return getFilePath().equals(that.getFilePath());
+
+    }
+
+    public int hashCode() {
+        return getFilePath().hashCode();
+    }
 }
