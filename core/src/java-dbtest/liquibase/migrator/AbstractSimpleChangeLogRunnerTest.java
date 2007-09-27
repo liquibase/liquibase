@@ -2,6 +2,8 @@ package liquibase.migrator;
 
 import junit.framework.TestCase;
 import liquibase.ChangeSet;
+import liquibase.FileOpener;
+import liquibase.FileSystemFileOpener;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.structure.DatabaseSnapshot;
 import liquibase.diff.Diff;
@@ -18,13 +20,16 @@ import java.sql.Driver;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
+import java.util.Enumeration;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.net.URL;
 
 public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
 
     private String completeChangeLog;
     private String rollbackChangeLog;
+    private String includedChangeLog;
     protected String username;
     protected String password;
     protected String driverName;
@@ -35,6 +40,7 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
     protected AbstractSimpleChangeLogRunnerTest(String changelogDir, String driverName, String url) {
         this.completeChangeLog = "changelogs/" + changelogDir + "/complete/root.changelog.xml";
         this.rollbackChangeLog = "changelogs/" + changelogDir + "/rollback/rollbackable.changelog.xml";
+        this.includedChangeLog = "changelogs/" + changelogDir + "/complete/included.changelog.xml";
         this.driverName = driverName;
         this.url = url;
         username = "liquibase";
@@ -77,6 +83,10 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
 
     protected Migrator createMigrator(String changeLogFile) throws Exception {
         JUnitFileOpener fileOpener = new JUnitFileOpener();
+        return createMigrator(changeLogFile, fileOpener);
+    }
+
+    private Migrator createMigrator(String changeLogFile, FileOpener fileOpener) throws JDBCException {
         Migrator migrator = new Migrator(changeLogFile, fileOpener);
         migrator.setContexts("test, context-b");
 
@@ -301,5 +311,25 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
 
         assertTrue(list.size() > 0);
 
+    }
+
+    public void testAbsolutePathChangeLog() throws Exception {
+
+        Enumeration<URL> urls = new JUnitFileOpener().getResources(includedChangeLog);
+        URL completeChangeLogURL = urls.nextElement();
+
+        String absolutePathOfChangeLog = completeChangeLogURL.toExternalForm();
+        absolutePathOfChangeLog = absolutePathOfChangeLog.replaceFirst("file:\\/","");
+        if (System.getProperty("os.name").startsWith("Windows ")) {
+            absolutePathOfChangeLog = absolutePathOfChangeLog.replace('/', '\\');
+        }
+        Migrator migrator = createMigrator(absolutePathOfChangeLog, new FileSystemFileOpener());
+        migrator.dropAll();
+
+        migrator.migrate();
+
+        migrator.migrate(); //try again, make sure there are no errors
+
+        migrator.dropAll();
     }
 }

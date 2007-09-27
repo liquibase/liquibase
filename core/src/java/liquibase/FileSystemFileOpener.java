@@ -73,8 +73,8 @@ public class FileSystemFileOpener implements FileOpener {
         }
         
         final Iterator<URL> it = results.iterator();
-        Enumeration<URL> eURL = new Enumeration<URL>() {
-            
+        return new Enumeration<URL>() {
+
             public boolean hasMoreElements() {
                 return it.hasNext();
             }
@@ -82,9 +82,8 @@ public class FileSystemFileOpener implements FileOpener {
             public URL nextElement() {
                 return it.next();
             }
-            
+
         };
-        return eURL;
     }
 
    
