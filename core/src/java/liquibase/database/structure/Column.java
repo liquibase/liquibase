@@ -211,9 +211,16 @@ public class Column implements DatabaseObject, Comparable<Column> {
         if (noParens.contains(this.getDataType())) {
             dataType = translatedTypeName;
         } else if (oneParam.contains(this.getDataType())) {
+            if (database instanceof PostgresDatabase && translatedTypeName.equals("text")) {
+                return translatedTypeName;
+            }
             dataType = translatedTypeName+"("+this.getColumnSize()+")";
         } else if (twoParams.contains(this.getDataType())) {
-            dataType = translatedTypeName+"("+this.getColumnSize()+","+this.getDecimalDigits()+")";
+            if (database instanceof PostgresDatabase && this.getColumnSize() == 131089 ) {
+                dataType = "DECIMAL";
+            } else {
+                dataType = translatedTypeName+"("+this.getColumnSize()+","+this.getDecimalDigits()+")";
+            }
         } else {
             throw new RuntimeException("Unknown Data Type: "+this.getDataType()+" ("+this.getTypeName()+")");
         }
