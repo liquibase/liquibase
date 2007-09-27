@@ -315,5 +315,11 @@
         <customChange class="liquibase.change.custom.ExampleCustomProcCallChange"/>
     </changeSet>
 
-    
+    <changeSet id="61" author="nvoxland">
+        <executeCommand executable="getmac" os="Windows XP">
+            <arg value="/FO"/>
+            <arg value="CSV"/>
+        </executeCommand>
+    </changeSet>
+
 </databaseChangeLog>

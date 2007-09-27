@@ -1,6 +1,8 @@
 package liquibase.util;
 
 import java.util.Collection;
+import java.util.List;
+import java.util.ArrayList;
 
 /**
  * Various utility methods for working with strings.
@@ -60,6 +62,14 @@ public class StringUtils {
     }
 
     public static String join(Collection<String> collection, String delimiter) {
+        if (collection == null) {
+            return null;
+        }
+
+        if (collection.size() == 0) {
+            return "";
+        }
+        
         StringBuffer buffer = new StringBuffer();
         for (String val : collection) {
             buffer.append(val).append(delimiter);
@@ -67,5 +77,19 @@ public class StringUtils {
 
         String returnString = buffer.toString();
         return returnString.substring(0, returnString.length()-delimiter.length());
+    }
+
+    public static List<String> splitAndTrim(String s, String regex) {
+        if (s == null) {
+            return null;
+        }
+        List<String> returnList = new ArrayList<String>();
+        for (String string : s.split(regex)) {
+            returnList.add(string.trim());
+        }
+
+        return returnList;
+
+
     }
 }

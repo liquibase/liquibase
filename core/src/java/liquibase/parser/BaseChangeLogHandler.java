@@ -154,10 +154,13 @@ public abstract class BaseChangeLogHandler extends DefaultHandler {
                 } else {
                     throw new MigrationFailedException(changeSet, "'param' unexpected in " + qName);
                 }
+            } else if (change instanceof ExecuteShellCommandChange && "arg".equals(qName)) {
+                ((ExecuteShellCommandChange) change).addArg(atts.getValue("value"));
             } else {
                 throw new MigrationFailedException(changeSet, "Unexpected tag: " + qName);
             }
         } catch (Exception e) {
+            log.log(Level.SEVERE, "Error thrown as a SAXException: " + e.getMessage(), e);
             throw new SAXException(e);
         }
     }
