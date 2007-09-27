@@ -47,7 +47,7 @@ public class DropIndexChange extends AbstractChange {
 
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
         if (database instanceof MySQLDatabase) {
-            return new SqlStatement[]{new RawSqlStatement("DROP INDEX " + indexName + " ON " + tableName)};
+            return new SqlStatement[]{new RawSqlStatement("DROP INDEX " + indexName + " ON " + escapeTableName(tableName, database))};
         } else if (database instanceof MSSQLDatabase) {
             return new SqlStatement[]{new RawSqlStatement("DROP INDEX " + tableName + "." + indexName)};
         } else if (database instanceof OracleDatabase) {

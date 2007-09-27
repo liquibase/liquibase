@@ -43,7 +43,7 @@ public class CreateTableChange extends AbstractChange {
         StringBuffer fkConstraints = new StringBuffer();
 
         StringBuffer buffer = new StringBuffer();
-        buffer.append("CREATE TABLE ").append(getTableName()).append(" ");
+        buffer.append("CREATE TABLE ").append(escapeTableName(getTableName(), database)).append(" ");
         buffer.append("(");
         Iterator<ColumnConfig> iterator = getColumns().iterator();
         while (iterator.hasNext()) {

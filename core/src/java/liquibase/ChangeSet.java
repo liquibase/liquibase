@@ -164,7 +164,7 @@ public class ChangeSet {
                 writeComments(outputSQLWriter);
                 if (rollBackStatements != null && rollBackStatements.length > 0) {
                     for (SqlStatement statement : rollBackStatements) {
-                        outputSQLWriter.append(statement.getSqlStatement(migrator.getDatabase())).append(";").append(StreamUtil.getLineSeparator()).append(StreamUtil.getLineSeparator());
+                        outputSQLWriter.append(statement.getSqlStatement(migrator.getDatabase())).append(statement.getEndDelimiter(migrator.getDatabase())).append(StreamUtil.getLineSeparator()).append(StreamUtil.getLineSeparator());
                     }
                 } else {
                     for (int i = changes.size() - 1; i >= 0; i--) {

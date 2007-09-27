@@ -109,4 +109,9 @@ public class UpdateStatement implements SqlStatement, PreparedSqlStatement {
 
         return pstmt;
     }
+
+
+    public String getEndDelimiter(Database database) {
+        return ";";
+    }
 }

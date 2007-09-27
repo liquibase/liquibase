@@ -43,31 +43,31 @@ public class DropPrimaryKeyChange extends AbstractChange {
 
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
         if (database instanceof MSSQLDatabase) {
-            return generateMSSQLStatements();
+            return generateMSSQLStatements((MSSQLDatabase) database);
         } else if (database instanceof PostgresDatabase) {
-            return generatePostgresStatements();
+            return generatePostgresStatements((PostgresDatabase) database);
         }
 
         return new SqlStatement[]{
-                new RawSqlStatement("ALTER TABLE " + getTableName() + " DROP PRIMARY KEY"),
+                new RawSqlStatement("ALTER TABLE " + escapeTableName(getTableName(),database) + " DROP PRIMARY KEY"),
         };
     }
 
-    private SqlStatement[] generateMSSQLStatements() throws UnsupportedChangeException {
+    private SqlStatement[] generateMSSQLStatements(MSSQLDatabase database) throws UnsupportedChangeException {
         if (getConstraintName() == null) {
             throw new UnsupportedChangeException("MS-SQL requires a constraint name to drop the primary key");
         }
         return new SqlStatement[]{
-                new RawSqlStatement("ALTER TABLE " + getTableName() + " DROP CONSTRAINT " + getConstraintName()),
+                new RawSqlStatement("ALTER TABLE " + escapeTableName(getTableName(), database) + " DROP CONSTRAINT " + getConstraintName()),
         };
     }
 
-    private SqlStatement[] generatePostgresStatements() throws UnsupportedChangeException {
+    private SqlStatement[] generatePostgresStatements(PostgresDatabase database) throws UnsupportedChangeException {
         if (getConstraintName() == null) {
             throw new UnsupportedChangeException("PostgreSQL requires a constraint name to drop the primary key");
         }
         return new SqlStatement[]{
-                new RawSqlStatement("ALTER TABLE " + getTableName() + " DROP CONSTRAINT " + getConstraintName()),
+                new RawSqlStatement("ALTER TABLE " + escapeTableName(getTableName(), database) + " DROP CONSTRAINT " + getConstraintName()),
         };
     }
 

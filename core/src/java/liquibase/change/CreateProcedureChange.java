@@ -1,10 +1,12 @@
 package liquibase.change;
 
 import liquibase.database.Database;
+import liquibase.database.OracleDatabase;
 import liquibase.database.sql.RawSqlStatement;
 import liquibase.database.sql.SqlStatement;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.exception.UnsupportedChangeException;
+import liquibase.util.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -35,8 +37,12 @@ public class CreateProcedureChange extends AbstractChange {
     }
 
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
+        String endDelimiter = ";";
+        if (database instanceof OracleDatabase) {
+            endDelimiter = "\n/";
+        }
         return new SqlStatement[] {
-                new RawSqlStatement(getProcedureBody()),
+                new RawSqlStatement(getProcedureBody(), endDelimiter),
         };
     }
 

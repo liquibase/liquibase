@@ -4,4 +4,7 @@ import liquibase.database.Database;
 
 public interface SqlStatement {
     public String getSqlStatement(Database database);
+
+    public String getEndDelimiter(Database database);
+
 }

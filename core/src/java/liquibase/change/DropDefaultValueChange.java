@@ -46,15 +46,15 @@ public class DropDefaultValueChange extends AbstractChange {
             //docs on how to at http://doc.ddart.net/mssql/sql70/de-dz_9.htm
             throw new UnsupportedChangeException("Dropping default values is not currently supported in MS-SQL");
         } else if (database instanceof MySQLDatabase) {
-            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + getTableName() + " ALTER " + getColumnName() + " DROP DEFAULT"),};
+            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + escapeTableName(getTableName(), database) + " ALTER " + getColumnName() + " DROP DEFAULT"),};
         } else if (database instanceof OracleDatabase) {
-            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + getTableName() + " MODIFY " + getColumnName() + " DEFAULT NULL"),};
+            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + escapeTableName(getTableName(), database) + " MODIFY " + getColumnName() + " DEFAULT NULL"),};
         } else if (database instanceof DerbyDatabase) {
-            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + getTableName() + " ALTER COLUMN  " + getColumnName() + " WITH DEFAULT NULL"),};
+            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + escapeTableName(getTableName(), database) + " ALTER COLUMN  " + getColumnName() + " WITH DEFAULT NULL"),};
         }
 
         return new SqlStatement[]{
-                new RawSqlStatement("ALTER TABLE " + getTableName() + " ALTER COLUMN  " + getColumnName() + " SET DEFAULT NULL"),
+                new RawSqlStatement("ALTER TABLE " + escapeTableName(getTableName(), database) + " ALTER COLUMN  " + getColumnName() + " SET DEFAULT NULL"),
         };
     }
 

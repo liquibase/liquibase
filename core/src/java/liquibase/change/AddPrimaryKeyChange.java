@@ -66,9 +66,9 @@ public class AddPrimaryKeyChange extends AbstractChange {
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
         String sql;
         if (getConstraintName() == null) {
-            sql = "ALTER TABLE " + getTableName() + " ADD PRIMARY KEY (" + getColumnNames() + ")";
+            sql = "ALTER TABLE " + escapeTableName(getTableName(), database) + " ADD PRIMARY KEY (" + getColumnNames() + ")";
         } else {
-            sql = "ALTER TABLE " + getTableName() + " ADD CONSTRAINT " + getConstraintName() + " PRIMARY KEY (" + getColumnNames() + ")";
+            sql = "ALTER TABLE " + escapeTableName(getTableName(), database) + " ADD CONSTRAINT " + getConstraintName() + " PRIMARY KEY (" + getColumnNames() + ")";
         }
 
         if (StringUtils.trimToNull(getTablespace()) != null && database.supportsTablespaces()) {

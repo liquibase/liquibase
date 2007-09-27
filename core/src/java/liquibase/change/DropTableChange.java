@@ -43,7 +43,7 @@ public class DropTableChange extends AbstractChange {
 
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
         StringBuffer buffer = new StringBuffer(31);
-        buffer.append("DROP TABLE ").append(getTableName());
+        buffer.append("DROP TABLE ").append(escapeTableName(getTableName(),database));
         if (isCascadeConstraints() != null && isCascadeConstraints()) {
             buffer.append(" CASCADE CONSTRAINTS");
         }

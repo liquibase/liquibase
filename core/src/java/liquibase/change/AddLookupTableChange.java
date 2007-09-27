@@ -111,13 +111,13 @@ public class AddLookupTableChange extends AbstractChange {
 
         List<SqlStatement> statements = new ArrayList<SqlStatement>();
 
-        SqlStatement[] createTablesSQL = {new RawSqlStatement("CREATE TABLE " + getNewTableName() + " AS SELECT DISTINCT " + getExistingColumnName() + " AS " + getNewColumnName() + " FROM " + getExistingTableName() + " WHERE " + getExistingColumnName() + " IS NOT NULL")};
+        SqlStatement[] createTablesSQL = {new RawSqlStatement("CREATE TABLE " + escapeTableName(getNewTableName(), database) + " AS SELECT DISTINCT " + getExistingColumnName() + " AS " + getNewColumnName() + " FROM " + escapeTableName(getExistingTableName(), database) + " WHERE " + getExistingColumnName() + " IS NOT NULL")};
         if (database instanceof MSSQLDatabase) {
-            createTablesSQL = new SqlStatement[]{new RawSqlStatement("SELECT DISTINCT " + getExistingColumnName() + " AS " + getNewColumnName() + " INTO " + getNewTableName() + " FROM " + getExistingTableName() + " WHERE " + getExistingColumnName() + " IS NOT NULL"),};
+            createTablesSQL = new SqlStatement[]{new RawSqlStatement("SELECT DISTINCT " + getExistingColumnName() + " AS " + getNewColumnName() + " INTO " + escapeTableName(getNewTableName(), database) + " FROM " + escapeTableName(getExistingTableName(), database) + " WHERE " + getExistingColumnName() + " IS NOT NULL"),};
         } else if (database instanceof DB2Database) {
             createTablesSQL = new SqlStatement[]{
-                    new RawSqlStatement("CREATE TABLE " + getNewTableName() + " AS (SELECT " + getExistingColumnName() + " AS " + getNewColumnName() + " FROM " + getExistingTableName() + ") WITH NO DATA"),
-                    new RawSqlStatement("INSERT INTO " + getNewTableName() + " SELECT DISTINCT " + getExistingColumnName() + " FROM " + getExistingTableName() + " WHERE " + getExistingColumnName() + " IS NOT NULL"),
+                    new RawSqlStatement("CREATE TABLE " + escapeTableName(getNewTableName(), database) + " AS (SELECT " + getExistingColumnName() + " AS " + getNewColumnName() + " FROM " + escapeTableName(getExistingTableName(), database) + ") WITH NO DATA"),
+                    new RawSqlStatement("INSERT INTO " + escapeTableName(getNewTableName(), database) + " SELECT DISTINCT " + getExistingColumnName() + " FROM " + escapeTableName(getExistingTableName(), database) + " WHERE " + getExistingColumnName() + " IS NOT NULL"),
             };
         }
 
