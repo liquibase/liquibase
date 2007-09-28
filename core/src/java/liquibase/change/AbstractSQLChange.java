@@ -50,7 +50,7 @@ public abstract class AbstractSQLChange extends AbstractChange {
      * 
      * @param splitStatements set true if the SQL should be split, otherwise false
      */
-    public void setSplitStatements(boolean splitStatements) {
+    public void setSplitStatements(Boolean splitStatements) {
         this.splitStatements = splitStatements;
     }
     
