@@ -36,7 +36,7 @@ public class DatabaseFactory {
                 new SybaseDatabase(),
                 new H2Database(),
                 new CacheDatabase(),
-//net yet officially released                new FirebirdDatabase(),
+                new FirebirdDatabase(),
         };
     }
 

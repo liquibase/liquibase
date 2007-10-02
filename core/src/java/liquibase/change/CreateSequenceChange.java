@@ -89,16 +89,32 @@ public class CreateSequenceChange extends AbstractChange {
         buffer.append("CREATE SEQUENCE ");
         buffer.append(sequenceName);
         if (startValue != null) {
-            buffer.append(" START WITH ").append(startValue);
+            if (database instanceof FirebirdDatabase) {
+                throw new UnsupportedChangeException("Firebird does not support creating sequences with startValue");
+            } else {
+                buffer.append(" START WITH ").append(startValue);
+            }
         }
         if (incrementBy != null) {
-            buffer.append(" INCREMENT BY ").append(incrementBy);
+            if (database instanceof FirebirdDatabase) {
+                throw new UnsupportedChangeException("Firebird does not support creating sequences with increments");
+            } else {
+                buffer.append(" INCREMENT BY ").append(incrementBy);
+            }
         }
         if (minValue != null) {
-            buffer.append(" MINVALUE ").append(minValue);
+            if (database instanceof FirebirdDatabase) {
+                throw new UnsupportedChangeException("Firebird does not support creating sequences with minValue");
+            } else {
+                buffer.append(" MINVALUE ").append(minValue);
+            }
         }
         if (maxValue != null) {
-            buffer.append(" MAXVALUE ").append(maxValue);
+            if (database instanceof FirebirdDatabase) {
+                throw new UnsupportedChangeException("Firebird does not support creating sequences with maxValue");
+            } else {
+                buffer.append(" MAXVALUE ").append(maxValue);
+            }
         }
 
         String sql = buffer.toString().trim();

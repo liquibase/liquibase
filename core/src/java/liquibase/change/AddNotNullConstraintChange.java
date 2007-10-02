@@ -78,6 +78,8 @@ public class AddNotNullConstraintChange extends AbstractChange {
             return generateH2Statements((H2Database) database);
         } else if (database instanceof CacheDatabase) {
             return generateCacheStatements((CacheDatabase) database);
+        } else if (database instanceof FirebirdDatabase) {
+            throw new UnsupportedChangeException("LiquiBase does not currently support adding null constraints in Firebird");
         }
 
         List<SqlStatement> statements = new ArrayList<SqlStatement>();

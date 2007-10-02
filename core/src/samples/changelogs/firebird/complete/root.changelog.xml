@@ -62,7 +62,7 @@
         <dropColumn tableName="person" columnName="username"/>
     </changeSet>
     <changeSet id="7" author="nvoxland">
-        <createTable tableName="employee">
+        <createTable tableName="company">
             <column name="id" type="int">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
@@ -72,38 +72,38 @@
         </createTable>
     </changeSet>
     <changeSet id="7" author="bjohnson" context="test">
-        <insert tableName="employee">
+        <insert tableName="company">
             <column name="id" value="1"/>
             <column name="name" value="ACME Corp"/>
         </insert>
-        <insert tableName="employee">
+        <insert tableName="company">
             <column name="id" value="2"/>
             <column name="name" value="Widgets Inc."/>
         </insert>
     </changeSet>
     <changeSet id="7a" author="nvoxland">
-        <addColumn tableName="employee">
+        <addColumn tableName="company">
             <column name="company_id" type="int">
                 <constraints nullable="true" foreignKeyName="fk_employee_company" references="company(id)"/>
             </column>
         </addColumn>
     </changeSet>
-    <changeSet id="8" author="bjohnson">
-        <dropNotNullConstraint tableName="employee" columnName="name" columnDataType="varchar(50)"/>
-    </changeSet>
-    <changeSet id="8.1" author="bjohnson">
-        <comment>I guess name needs to be not-null</comment>
-        <addNotNullConstraint tableName='employee' columnName="name" defaultNullValue="UNKNOWN"/>
-    </changeSet>
-    <changeSet id="9" author="nvoxland">
-        <renameTable oldTableName="employee" newTableName="company"/>
-    </changeSet>
+    <!--<changeSet id="8" author="bjohnson">-->
+        <!--<dropNotNullConstraint tableName="employee" columnName="name" columnDataType="varchar(50)"/>-->
+    <!--</changeSet>-->
+    <!--<changeSet id="8.1" author="bjohnson">-->
+        <!--<comment>I guess name needs to be not-null</comment>-->
+        <!--<addNotNullConstraint tableName='employee' columnName="name" defaultNullValue="UNKNOWN"/>-->
+    <!--</changeSet>-->
+    <!--<changeSet id="9" author="nvoxland">-->
+        <!--<renameTable oldTableName="employee" newTableName="company"/>-->
+    <!--</changeSet>-->
     <changeSet id="10" author="nvoxland">
         <createTable tableName="testtable">
             <column name="id" type="int">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="value" type="varchar(50)">
+            <column name="value1" type="varchar(50)">
                 <constraints nullable="false"/>
             </column>
             <column name="person_id" type="int">
@@ -132,6 +132,8 @@
         <createTable tableName="liquibaseRunInfo">
             <column name="timesRan" type="int"/>
         </createTable>
+    </changeSet>
+    <changeSet id="14.1" author="nvoxland">
         <insert tableName="liquibaseRunInfo">
             <column name="timesRan" valueNumeric="1"/>
         </insert>
@@ -142,10 +144,10 @@
     </changeSet>
 
     <changeSet id="16" author="nvoxland">
-        <createSequence sequenceName="seq_test" startValue="1000" incrementBy="2" minValue="50" maxValue="100000" ordered="true"/>
+        <createSequence sequenceName="seq_test"/>
     </changeSet>
     <changeSet id="17" author="nvoxland">
-        <alterSequence sequenceName="seq_test" incrementBy="2" minValue="50" maxValue="100000" ordered="true"/>
+        <alterSequence sequenceName="seq_test" minValue="50"/>
     </changeSet>
     <changeSet id="18" author="nvoxland">
         <dropSequence sequenceName="seq_test"/>
@@ -177,9 +179,9 @@
         </createView>
     </changeSet>
 
-    <changeSet id="23" author="nvoxland">
-        <renameView oldViewName="personView" newViewName="v_person"/>
-    </changeSet>
+    <!--<changeSet id="23" author="nvoxland">-->
+        <!--<renameView oldViewName="personView" newViewName="v_person"/>-->
+    <!--</changeSet>-->
 
     <changeSet id="24" author="nvoxland">
         <addColumn tableName="person">
@@ -202,7 +204,9 @@
 
     <changeSet id="27" author="nvoxland">
         <createTable tableName="address">
-            <column name="id" type="int"/>
+            <column name="id" type="int">
+                <constraints nullable="false"/>
+            </column>
             <column name="line1" type="varchar(255)"/>
             <column name="line2" type="varchar(255)"/>
             <column name="city" type="varchar(255)"/>
@@ -246,11 +250,11 @@
         </insert>
     </changeSet>
 
-    <changeSet id="29" author="nvoxland">
-        <addLookupTable
-            existingTableName="address" existingColumnName="state"
-            newTableName="state" newColumnName="id" newColumnDataType="char(2)"/>
-    </changeSet>
+    <!--<changeSet id="29" author="nvoxland">-->
+        <!--<addLookupTable-->
+            <!--existingTableName="address" existingColumnName="state"-->
+            <!--newTableName="state" newColumnName="id" newColumnDataType="char(2)"/>-->
+    <!--</changeSet>-->
 
     <changeSet id="30" author="nvoxland">
         <addDefaultValue tableName="address" columnName="line2" defaultValue="N/A"/>

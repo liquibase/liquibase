@@ -138,7 +138,7 @@ public class ChangeSet {
                         try {
                             new JdbcTemplate(migrator.getDatabase()).execute(rollback);
                         } catch (JDBCException e) {
-                            throw new RollbackFailedException("Error executing custom SQL [" + rollback + "]");
+                            throw new RollbackFailedException("Error executing custom SQL [" + rollback.getSqlStatement(migrator.getDatabase()) + "]");
                         }
                     }
 

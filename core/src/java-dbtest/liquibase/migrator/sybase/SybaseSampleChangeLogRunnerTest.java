@@ -17,4 +17,9 @@ public class SybaseSampleChangeLogRunnerTest { //extends AbstractSimpleChangeLog
 //    protected void tearDown() throws Exception {
 //        super.tearDown();
 //    }
+
+    protected boolean shouldRollBack() {
+        return false;
+    }
+    
 }

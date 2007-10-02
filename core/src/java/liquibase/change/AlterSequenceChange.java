@@ -3,6 +3,7 @@ package liquibase.change;
 import liquibase.database.Database;
 import liquibase.database.HsqlDatabase;
 import liquibase.database.OracleDatabase;
+import liquibase.database.FirebirdDatabase;
 import liquibase.database.sql.RawSqlStatement;
 import liquibase.database.sql.SqlStatement;
 import liquibase.database.structure.DatabaseObject;
@@ -84,13 +85,25 @@ public class AlterSequenceChange extends AbstractChange {
         buffer.append(sequenceName);
 
         if (incrementBy != null) {
-            buffer.append(" INCREMENT BY ").append(incrementBy);
+            if (database instanceof FirebirdDatabase) {
+                throw new UnsupportedChangeException("Firebird does not support creating sequences with increment");
+            } else {
+                buffer.append(" INCREMENT BY ").append(incrementBy);
+            }
         }
         if (minValue != null) {
-            buffer.append(" MINVALUE ").append(minValue);
+            if (database instanceof FirebirdDatabase) {
+                buffer.append(" RESTART WITH ").append(minValue);
+            } else {
+                buffer.append(" MINVALUE ").append(minValue);
+            }
         }
         if (maxValue != null) {
-            buffer.append(" MAXVALUE ").append(maxValue);
+            if (database instanceof FirebirdDatabase) {
+                throw new UnsupportedChangeException("Firebird does not support creating sequences with maxValue");
+            } else {
+                buffer.append(" MAXVALUE ").append(maxValue);
+            }
         }
 
         String sql = buffer.toString().trim();

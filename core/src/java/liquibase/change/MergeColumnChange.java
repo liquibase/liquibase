@@ -2,6 +2,7 @@ package liquibase.change;
 
 import liquibase.database.Database;
 import liquibase.database.DerbyDatabase;
+import liquibase.database.FirebirdDatabase;
 import liquibase.database.sql.RawSqlStatement;
 import liquibase.database.sql.SqlStatement;
 import liquibase.database.structure.Column;

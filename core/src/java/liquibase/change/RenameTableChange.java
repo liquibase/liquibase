@@ -59,6 +59,8 @@ public class RenameTableChange extends AbstractChange {
             };
         } else if (database instanceof CacheDatabase) {
             throw new UnsupportedChangeException("Rename table not currently supported for Cache");
+        } else if (database instanceof FirebirdDatabase) {
+            throw new UnsupportedChangeException("Rename table not currently supported for Firebird");
         }
 
         return new SqlStatement[]{new RawSqlStatement("RENAME " +escapeTableName(oldTableName, database) + " TO " + escapeTableName(newTableName, database))};

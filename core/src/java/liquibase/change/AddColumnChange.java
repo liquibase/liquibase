@@ -115,7 +115,8 @@ public class AddColumnChange extends AbstractChange {
         return database instanceof OracleDatabase
                 || database instanceof HsqlDatabase
                 || database instanceof DerbyDatabase
-                || database instanceof DB2Database;
+                || database instanceof DB2Database
+                || database instanceof FirebirdDatabase;
     }
 
     private String getDefaultClause(Database database) {
