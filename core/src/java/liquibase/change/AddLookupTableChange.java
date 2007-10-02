@@ -107,6 +107,8 @@ public class AddLookupTableChange extends AbstractChange {
             throw new UnsupportedChangeException("Add Lookup Table currently not supported in HSQLDB");
         } else if (database instanceof CacheDatabase) {
             throw new UnsupportedChangeException("Add Lookup Table not currently supported for Cache");
+        } else if (database instanceof FirebirdDatabase) {
+            throw new UnsupportedChangeException("Add Lookup Table not currently supported for Firebird");
         }
 
         List<SqlStatement> statements = new ArrayList<SqlStatement>();

@@ -34,7 +34,9 @@ public class SQLConnectionDelegate implements DatabaseConnection {
     }
 
     public void commit() throws SQLException {
-        con.commit();
+        if (!con.getAutoCommit()) {
+            con.commit();
+        }
     }
 
     public Statement createStatement() throws SQLException {

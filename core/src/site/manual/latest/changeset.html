@@ -52,7 +52,7 @@
                         A changeSet may include an optional "dbms" attribute. If this is included, then it specifies the
                         type of a database which that changeSet is to be used for. When the migration step is running, it
                         checks the database type against this attribute. Currently, the legal values include "db2", "derby",
-                        "hsqldb", "mssql", "mysql", "oracle" and "postgresql".
+                        "hsqldb", "h2", "mssql", "mysql", "oracle", "postgresql", "cache", and "firebird".
                     </p>
                     <p>
                         As LiquiBase executes the databaseChangeLog, it reads the changeSets in order and, for each one,

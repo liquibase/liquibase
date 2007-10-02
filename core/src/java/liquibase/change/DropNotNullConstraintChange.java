@@ -66,6 +66,8 @@ public class DropNotNullConstraintChange extends AbstractChange {
             return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + escapeTableName(tableName, database) + " ALTER COLUMN " + columnName + " NULL")};
         } else if (database instanceof CacheDatabase) {
             return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + escapeTableName(tableName, database) + " ALTER COLUMN " + columnName + " NULL")};
+        } else if (database instanceof FirebirdDatabase) {
+            throw new UnsupportedChangeException("LiquiBase does not currently support dropping null constraints in Firebird");
         }
 
         return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + escapeTableName(tableName, database) + " ALTER COLUMN " + columnName + " DROP NOT NULL")};

@@ -12,4 +12,8 @@ public class JTDSSampleChangeLogRunnerTest { // extends AbstractSimpleChangeLogR
 //        connection.setAutoCommit(true);
 //    }
 
+    protected boolean shouldRollBack() {
+        return false;
+    }
+    
 }

@@ -3,6 +3,7 @@ package liquibase.change;
 import liquibase.database.Database;
 import liquibase.database.MSSQLDatabase;
 import liquibase.database.PostgresDatabase;
+import liquibase.database.FirebirdDatabase;
 import liquibase.database.sql.RawSqlStatement;
 import liquibase.database.sql.SqlStatement;
 import liquibase.database.structure.DatabaseObject;
@@ -46,6 +47,10 @@ public class DropPrimaryKeyChange extends AbstractChange {
             return generateMSSQLStatements((MSSQLDatabase) database);
         } else if (database instanceof PostgresDatabase) {
             return generatePostgresStatements((PostgresDatabase) database);
+        } else if (database instanceof FirebirdDatabase) {
+            return new SqlStatement[]{
+                    new RawSqlStatement("ALTER TABLE " + escapeTableName(getTableName(),database) + " DROP CONSTRAINT "+getConstraintName()),
+            };
         }
 
         return new SqlStatement[]{

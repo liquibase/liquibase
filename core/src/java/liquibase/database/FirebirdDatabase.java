@@ -6,6 +6,10 @@ import liquibase.database.sql.RawSqlStatement;
 
 import java.sql.Connection;
 
+/**
+ * Firebird database implementation.
+ * SQL Syntax ref: http://www.ibphoenix.com/main.nfs?a=ibphoenix&page=ibp_60_sqlref
+ */
 public class FirebirdDatabase extends AbstractDatabase {
 
     public boolean isCorrectDatabaseImplementation(Connection conn) throws JDBCException {
@@ -45,7 +49,7 @@ public class FirebirdDatabase extends AbstractDatabase {
     }
 
     protected String getClobType() {
-        return "CLOB";
+        return "BLOB SUB_TYPE TEXT";
     }
 
     protected String getBlobType() {
@@ -57,7 +61,7 @@ public class FirebirdDatabase extends AbstractDatabase {
     }
 
     public boolean supportsInitiallyDeferrableColumns() {
-        return true;
+        return false;
     }
 
     public String getCurrentDateTimeFunction() {
@@ -65,11 +69,37 @@ public class FirebirdDatabase extends AbstractDatabase {
     }
 
     public boolean supportsTablespaces() {
-        return true;
+        return false;
     }
 
 
     public SqlStatement createFindSequencesSQL() throws JDBCException {
         return new RawSqlStatement("SELECT RDB$GENERATOR_NAME FROM RDB$GENERATORS WHERE RDB$SYSTEM_FLAG IS NULL OR RDB$SYSTEM_FLAG = 0");
+    }
+
+    protected SqlStatement getViewDefinitionSql(String viewName) throws JDBCException {
+        String sql = "select rdb$view_source from rdb$relations where upper(rdb$relation_name)='" + viewName + "'";
+        if (getSchemaName() != null) {
+            sql += " and rdb$owner_name='" + getSchemaName().toUpperCase() + "'";
+        }
+//        if (getCatalogName() != null) {
+//            sql += " and table_catalog='" + getCatalogName() + "'";
+//
+//        }
+        return new RawSqlStatement(sql);
+    }
+
+
+    public boolean supportsDDLInTransaction() {
+        return false;
+    }
+
+
+    public String getTrueBooleanValue() {
+        return "1";
+    }
+
+    public String getFalseBooleanValue() {
+        return "0";
     }
 }
