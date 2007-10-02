@@ -11,7 +11,7 @@ import org.eclipse.datatools.modelbase.sql.schema.Database;
 import org.eclipse.datatools.modelbase.sql.tables.Table;
 import org.eclipse.jface.wizard.IWizardPage;
 
-public class DropIndexWizard extends BaseRefactorWizard {
+public class DropIndexWizard extends BaseEclipseRefactorWizard {
 
 	private Index index;
 	private Table table;

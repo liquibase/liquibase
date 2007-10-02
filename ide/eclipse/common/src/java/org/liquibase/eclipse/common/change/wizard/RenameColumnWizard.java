@@ -11,7 +11,7 @@ import org.eclipse.datatools.modelbase.sql.tables.Column;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.liquibase.eclipse.common.change.wizard.page.RenameColumnWizardPage;
 
-public class RenameColumnWizard extends BaseRefactorWizard {
+public class RenameColumnWizard extends BaseEclipseRefactorWizard {
 
 	private Column column;
 	private RenameColumnWizardPage page1;

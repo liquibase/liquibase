@@ -13,7 +13,7 @@ import org.eclipse.datatools.modelbase.sql.tables.Column;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.liquibase.eclipse.common.change.wizard.page.CreateIndexWizardPage;
 
-public class CreateIndexWizard extends BaseRefactorWizard {
+public class CreateIndexWizard extends BaseEclipseRefactorWizard {
 
 	private Column column;
 	private CreateIndexWizardPage page1;

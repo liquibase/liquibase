@@ -321,5 +321,14 @@
             <arg value="CSV"/>
         </executeCommand>
     </changeSet>
+    <changeSet id="t1.1" author="nvoxland">
+        <sql splitStatements="false" stripComments="false">
+CREATE OR REPLACE PROCEDURE testSP
+IS
+BEGIN
+    DBMS_OUTPUT.PUT_LINE('Hello From Oracle!');
+END testSP;
+        </sql>
+    </changeSet>
 
 </databaseChangeLog>

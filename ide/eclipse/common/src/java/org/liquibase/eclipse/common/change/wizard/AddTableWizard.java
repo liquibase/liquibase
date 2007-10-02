@@ -24,7 +24,7 @@ import org.eclipse.datatools.sqltools.tablewizard.ui.wizardpages.pk.GenericPrima
 import org.eclipse.jface.wizard.IWizardPage;
 
 @SuppressWarnings("restriction")
-public class AddTableWizard extends BaseRefactorWizard {
+public class AddTableWizard extends BaseEclipseRefactorWizard {
 	private GenericColumnsPage page1;
 	private GenericPrimaryKeyPage page2;
 	

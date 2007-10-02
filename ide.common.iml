@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module version="4" relativePaths="true" type="JAVA_MODULE">
+  <component name="ModuleRootManager" />
+  <component name="NewModuleRootManager" inherit-compiler-output="false">
+    <output url="file://$MODULE_DIR$/ide/common/build" />
+    <exclude-output />
+    <output-test url="file://$MODULE_DIR$/ide/common/build-test" />
+    <content url="file://$MODULE_DIR$/ide/common">
+      <sourceFolder url="file://$MODULE_DIR$/ide/common/src/java" isTestSource="false" />
+    </content>
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="Groovy from GroovyJ 0.1.9 (Demetra)" level="application" />
+    <orderEntryProperties />
+  </component>
+</module>
+

@@ -10,7 +10,7 @@ import org.eclipse.datatools.modelbase.sql.schema.Database;
 import org.eclipse.datatools.modelbase.sql.tables.Column;
 import org.eclipse.jface.wizard.IWizardPage;
 
-public class AddAutoIncrementWizard extends BaseRefactorWizard {
+public class AddAutoIncrementWizard extends BaseEclipseRefactorWizard {
 
 	private Column column;
 	

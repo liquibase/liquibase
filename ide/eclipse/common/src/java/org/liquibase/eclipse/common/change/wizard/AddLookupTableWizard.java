@@ -11,7 +11,7 @@ import org.eclipse.datatools.modelbase.sql.tables.Column;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.liquibase.eclipse.common.change.wizard.page.AddLookupTableWizardPage;
 
-public class AddLookupTableWizard extends BaseRefactorWizard {
+public class AddLookupTableWizard extends BaseEclipseRefactorWizard {
 
 	private Column column;
 
