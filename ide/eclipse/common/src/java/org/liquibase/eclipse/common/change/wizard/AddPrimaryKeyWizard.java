@@ -11,7 +11,7 @@ import org.eclipse.datatools.modelbase.sql.tables.Column;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.liquibase.eclipse.common.change.wizard.page.AddPrimaryKeyWizardPage;
 
-public class AddPrimaryKeyWizard extends BaseRefactorWizard {
+public class AddPrimaryKeyWizard extends BaseEclipseRefactorWizard {
 
 	private Column column;
 	private AddPrimaryKeyWizardPage page1;

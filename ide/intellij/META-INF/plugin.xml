@@ -1,19 +1,33 @@
 <!DOCTYPE idea-plugin PUBLIC "Plugin/DTD" "http://plugins.intellij.net/plugin.dtd">
 <idea-plugin>
-  <name>Plugin name here</name>
-  <description>short description of the plugin</description>
-  <version>1.0</version>
-  <vendor>YourCompany</vendor>
-  <idea-version since-build="3000"/>
+    <depends>DBHelper</depends>
+    <name>LiquiBase</name>
+    <description>LiquiBase Database Refactoring Plug-in for IntelliJ IDEA</description>
+    <version>0.1</version>
+    <vendor>liquibase.org</vendor>
+    <idea-version since-build="3000"/>
     <project-components>
         <component>
             <implementation-class>org.liquibase.intellij.plugin.LiquibaseProjectComponent</implementation-class>
         </component>
     </project-components>
     <actions>
-        <action id="SayHello" class="org.liquibase.intellij.plugin.SayHelloAction" text="Say Hello"
-                description="Says Hello">
-            <add-to-group group-id="WindowMenu" anchor="first"/>
-        </action>
+        <group id="LiquibaseActionGroup"  text="LiquiBase" description="LiquiBase Actions" popup="true">
+            <add-to-group group-id="MainMenu" anchor="before" relative-to-action="WindowMenu"/>
+
+            <action id="LiquibaseMigrate" class="org.liquibase.intellij.plugin.action.MigrateAction" text="Migrate"
+                    description="Updates database">
+                <!--<add-to-group group-id="WindowMenu" anchor="first"/>-->
+            </action>
+            <action id="TagAction" class="org.liquibase.intellij.plugin.action.TagAction" text="Tag Database"
+                    description="Tags database for later rollback">
+                <!--<add-to-group group-id="MainMenu" anchor="before" relative-to-action="WindowMenu"/>-->
+            </action>
+        </group>
+
+        <!--<group id="LiquibaseRefactorActionGroup"  text="Refactor" description="Refactor Database" popup="true">-->
+            <!--<add-to-group group-id="MainMenu" anchor="before" relative-to-action="WindowMenu"/>-->
+            <!--<action id="CreateTable" class="org.liquibase.intellij.plugin.change.action.AddTableAction" text="Create Table..." description="Create Table"/>-->
+        <!--</group>-->
     </actions>
 </idea-plugin>

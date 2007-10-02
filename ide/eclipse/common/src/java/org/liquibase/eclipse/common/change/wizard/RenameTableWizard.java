@@ -11,7 +11,7 @@ import org.eclipse.datatools.modelbase.sql.tables.Table;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.liquibase.eclipse.common.change.wizard.page.RenameTableWizardPage;
 
-public class RenameTableWizard extends BaseRefactorWizard {
+public class RenameTableWizard extends BaseEclipseRefactorWizard {
 
 	private Table table;
 	private RenameTableWizardPage page1;

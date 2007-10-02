@@ -12,7 +12,7 @@ import org.eclipse.datatools.modelbase.sql.tables.Table;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.liquibase.eclipse.common.change.wizard.page.AddColumnWizardPage;
 
-public class AddColumnWizard extends BaseRefactorWizard {
+public class AddColumnWizard extends BaseEclipseRefactorWizard {
 
 	private Table table;
 

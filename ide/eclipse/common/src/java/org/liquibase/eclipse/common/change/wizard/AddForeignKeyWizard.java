@@ -11,7 +11,7 @@ import org.eclipse.datatools.modelbase.sql.tables.Column;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.liquibase.eclipse.common.change.wizard.page.AddForeignKeyWizardPage;
 
-public class AddForeignKeyWizard extends BaseRefactorWizard {
+public class AddForeignKeyWizard extends BaseEclipseRefactorWizard {
 
 	private Column column;
 

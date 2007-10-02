@@ -10,7 +10,7 @@ import org.eclipse.datatools.modelbase.sql.schema.Database;
 import org.eclipse.datatools.modelbase.sql.tables.Table;
 import org.eclipse.jface.wizard.IWizardPage;
 
-public class DropTableWizard extends BaseRefactorWizard {
+public class DropTableWizard extends BaseEclipseRefactorWizard {
 
 	private Table table;
 	

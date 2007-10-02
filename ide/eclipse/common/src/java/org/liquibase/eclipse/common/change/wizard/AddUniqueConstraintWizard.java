@@ -11,7 +11,7 @@ import org.eclipse.datatools.modelbase.sql.tables.Column;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.liquibase.eclipse.common.change.wizard.page.AddUniqueConstraintWizardPage;
 
-public class AddUniqueConstraintWizard extends BaseRefactorWizard {
+public class AddUniqueConstraintWizard extends BaseEclipseRefactorWizard {
 
 	private Column column;
 	private AddUniqueConstraintWizardPage page1;

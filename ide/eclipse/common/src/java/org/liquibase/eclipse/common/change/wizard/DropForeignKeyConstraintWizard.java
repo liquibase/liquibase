@@ -11,7 +11,7 @@ import org.eclipse.datatools.modelbase.sql.schema.Database;
 import org.eclipse.datatools.modelbase.sql.tables.Table;
 import org.eclipse.jface.wizard.IWizardPage;
 
-public class DropForeignKeyConstraintWizard extends BaseRefactorWizard {
+public class DropForeignKeyConstraintWizard extends BaseEclipseRefactorWizard {
 
 	private ForeignKey fk;
 	private Table baseTable;
