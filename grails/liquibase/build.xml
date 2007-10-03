@@ -1,4 +1,4 @@
-<project name="liquibase" default="test">
+<project name="liquibase" default="all">
 
     <condition property="grails" value="grails.bat">
         <os family="windows"/>
@@ -37,5 +37,9 @@
          ================================= -->
     <target name="deploy" depends="war" description="--> The deploy target (initially empty)">
         <!-- TODO -->
+    </target>
+
+    <target name="all">
+        
     </target>
 </project>

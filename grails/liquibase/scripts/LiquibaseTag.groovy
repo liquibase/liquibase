@@ -1,15 +1,25 @@
 import org.codehaus.groovy.grails.compiler.support.*
+import liquibase.migrator.Migrator;
+import liquibase.CompositeFileOpener;
+import liquibase.FileOpener;
+import liquibase.FileSystemFileOpener;
+import org.liquibase.grails.GrailsFileOpener;
+import java.io.OutputStreamWriter;
 
 Ant.property(environment: "env")
 grailsHome = Ant.antProject.properties."env.GRAILS_HOME"
 includeTargets << new File("scripts/LiquibaseSetup.groovy")
 
-task ('default':"Updates a database to the current version.") {
+task ('default':'''Tags the current database state for future rollback.
+Example: grails tag aTag
+''') {
     depends(setup)
 
     try {
-        System.out.println("Migrating ${grailsEnv} database");
-        migrator.migrate()
+        if (args == null) {
+            throw new RuntimeException("tag requires a tag arguement");
+        }
+        migrator.tag(args);
 //            if (migrate.migrate()) {
 //                System.out.println("Database migrated");
 //            } else {

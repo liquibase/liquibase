@@ -1,9 +1,6 @@
 import org.codehaus.groovy.grails.compiler.support.*
-import liquibase.migrator.Migrator;
-import liquibase.CompositeFileOpener;
-import liquibase.FileOpener;
-import liquibase.FileSystemFileOpener;
-import org.liquibase.grails.GrailsFileOpener;
+import java.sql.*;
+import liquibase.exception.*;
 
 Ant.property(environment: "env")
 grailsHome = Ant.antProject.properties."env.GRAILS_HOME"
@@ -67,10 +64,35 @@ task ('setup' : "Migrates the current database to the latest") {
         p.packageName = "grails-app.migrations"
         p.auto = "true";
 
-        migrator = new Migrator("grails-app/migrations/changelog.xml", new CompositeFileOpener(new GrailsFileOpener(),new FileSystemFileOpener()));
-        println "Migrator: "+migrator.toString();
-        println "Data soruce"+config.dataSource.getClass().getName()
-        migrator.init(p.driverClassName, p.url, p.username, p.password, classLoader)
+        Driver driver;
+        try {
+            if (p.driver == null) {
+                p.driver = DatabaseFactory.getInstance().findDefaultDriver(p.url);
+            }
+
+            if (p.driver == null) {
+                throw new RuntimeException("Driver class was not specified and could not be determined from the url");
+            }
+
+            driver = (Driver) Class.forName(p.driver, true, classLoader).newInstance();
+        } catch (Exception e) {
+            throw new RuntimeException("Cannot get database driver: " + e.getMessage());
+        }
+        Properties info = new Properties();
+        info.put("user", p.username);
+        if (p.password != null) {
+            info.put("password", p.password);
+        }
+
+        Connection connection = driver.connect(p.url, info);
+        if (connection == null) {
+            throw new JDBCException("Connection could not be created to " + p.url + " with driver " + driver.getClass().getName() + ".  Possibly the wrong driver for the given database URL");
+        }
+
+        migrator = classLoader.loadClass("liquibase.migrator.Migrator").getConstructor(String.class, classLoader.loadClass("liquibase.FileOpener")).newInstance("grails-app/migrations/changelog.xml", classLoader.loadClass("liquibase.migrator.Migrator").getConstructor(String.class, classLoader.loadClass("org.liquibase.grails.GrailsFileOpener")).newInstance()));
+        //println "Migrator: "+migrator.toString();
+        //println "Data soruce"+config.dataSource.getClass().getName()
+        migrator.init(connection)
     }
 }
 
