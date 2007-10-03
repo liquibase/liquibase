@@ -1,12 +1,12 @@
 
 class LiquibaseGrailsPlugin {
-	def version = 0.1
+	def version = 0.9
 	def author = "Nathan Voxland"
 	def authorEmail = "nathan@voxland.net"
-	def title = "This plugin adds ActiveRecord::Migration-like functionality via the LiquiBase project"
+	def title = "This plugin adds ActiveRecord::Migration-like functionality via the LiquiBase project."
 	def documentation = "http://www.liquibase.org"
 
-   def version = grails.util.GrailsUtil.getGrailsVersion()
+//   def version = grails.util.GrailsUtil.getGrailsVersion()
 	def dependsOn = [dataSource:version]
 
 	def doWithSpring = {
