@@ -405,7 +405,7 @@ public abstract class AbstractDatabase implements Database {
                 releaseStatement.addNewColumnValue("LOCKEDBY", null, Types.VARCHAR);
                 releaseStatement.setWhereClause(" ID = 1");
 
-                int updatedRows = new JdbcTemplate(this).update((PreparedSqlStatement) releaseStatement);
+                int updatedRows = new JdbcTemplate(this).update(releaseStatement);
                 if (updatedRows != 1) {
                     throw new LockException("Did not update change log lock correctly.\n\n" + releaseStatement + " updated " + updatedRows + " instead of the expected 1 row.");
                 }
@@ -905,6 +905,9 @@ public abstract class AbstractDatabase implements Database {
 
 
     public String toString() {
+        if (getConnection() == null) {
+            return getProductName()+" Database";
+        }
         try {
             return getConnectionUsername() + " @ " + getConnectionURL();
         } catch (JDBCException e) {
