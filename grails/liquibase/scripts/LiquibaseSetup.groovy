@@ -10,6 +10,7 @@ includeTargets << new File("${grailsHome}/scripts/Compile.groovy")
 config = new ConfigObject()
 
 migrator = null
+migratorClass = null;
 
 task ('setup' : "Migrates the current database to the latest") {
     profile("compiling config") {
@@ -86,12 +87,19 @@ task ('setup' : "Migrates the current database to the latest") {
 
         Connection connection = driver.connect(p.url, info);
         if (connection == null) {
-            throw new JDBCException("Connection could not be created to " + p.url + " with driver " + driver.getClass().getName() + ".  Possibly the wrong driver for the given database URL");
+            throw new RuntimeException("Connection could not be created to " + p.url + " with driver " + driver.getClass().getName() + ".  Possibly the wrong driver for the given database URL");
         }
 
-        migrator = classLoader.loadClass("liquibase.migrator.Migrator").getConstructor(String.class, classLoader.loadClass("liquibase.FileOpener")).newInstance("grails-app/migrations/changelog.xml", classLoader.loadClass("liquibase.migrator.Migrator").getConstructor(String.class, classLoader.loadClass("org.liquibase.grails.GrailsFileOpener")).newInstance()));
-        //println "Migrator: "+migrator.toString();
-        //println "Data soruce"+config.dataSource.getClass().getName()
+        try {
+            def fileOpener = classLoader.loadClass("org.liquibase.grails.GrailsFileOpener").getConstructor().newInstance()
+            migratorClass = classLoader.loadClass("liquibase.migrator.Migrator")
+            println "Mode: "+classLoader.loadClass("liquibase.migrator.Migrator$Mode")
+            migrator = migratorClass.getConstructor(String.class, classLoader.loadClass("liquibase.FileOpener")).newInstance("changelog.xml", fileOpener);
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+        println "Migrator: "+migrator.toString();
+        println "Data soruce"+config.dataSource.getClass().getName()
         migrator.init(connection)
     }
 }

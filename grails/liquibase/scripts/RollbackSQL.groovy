@@ -1,9 +1,4 @@
 import org.codehaus.groovy.grails.compiler.support.*
-import liquibase.migrator.Migrator;
-import liquibase.CompositeFileOpener;
-import liquibase.FileOpener;
-import liquibase.FileSystemFileOpener;
-import org.liquibase.grails.GrailsFileOpener;
 import java.io.OutputStreamWriter;
 
 Ant.property(environment: "env")

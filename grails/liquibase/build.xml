@@ -1,45 +1,122 @@
-<project name="liquibase" default="all">
+<project name="grails-liquibase" default="test">
 
-    <condition property="grails" value="grails.bat">
+    <condition property="grails" value="c:\grails\bin\grails.bat">
         <os family="windows"/>
     </condition>
-    <property name="grails" value="grails" />
+    <property name="grails" value="grails"/>
 
-	<!-- ================================= 
-          target: clean              
-         ================================= -->
-    <target name="clean" description="--> Cleans a Grails application">
-		<exec executable="${grails}" failonerror="true">
-			<arg value="clean"/>
-		</exec>                               
+
+    <!-- target: PREPARE -->
+    <target name="prepare" description="Creation of the output folders, classpath">
+        <property file="build.local.properties"/>
+        <property file="build.properties"/>
+        <property file="../../core/src/build.properties"/>
+
+
+        <tstamp>
+            <format property="build.start" pattern="MM/DD/yyyy hh:mm aa"></format>
+        </tstamp>
+
+        <mkdir dir="${build.dir}"/>
+        <mkdir dir="${build.test.dir}"/>
+        <!--<mkdir dir="${build.db.test.dir}"/>-->
+        <!--<mkdir dir="${package.dir}/liquibase-${build.version}"/>-->
+        <!--<mkdir dir="${package.dir}/liquibase-${build.version}-src"/>-->
+        <!--<mkdir dir="${release.dir}"/>-->
+        <!--<mkdir dir="${release.site.dir}"/>-->
+        <!--<mkdir dir="${lib.deps.dir}"/>-->
+        <!--<mkdir dir="${reports.dir}"/>-->
+        <!--<mkdir dir="${reports.dir}/api"/>-->
+        <!--<mkdir dir="${reports.dir}/doxygen"/>-->
+
+        <!-- Build classpath -->
+        <path id="classpath">
+            <fileset dir="${lib.dir}">
+                <include name="**/*.jar"/>
+            </fileset>
+            <pathelement location="${build.dir}"/>
+            <pathelement path="${user.home}/.IntelliJIdea50/config/plugins/clover-idea5.jar"/>
+        </path>
     </target>
 
-	<!-- ================================= 
-          target: war              
-         ================================= -->
+    <!-- =================================
+    target: clean
+   ================================= -->
+    <target name="clean" depends="prepare" description="--> Cleans a Grails application">
+        <exec executable="${grails}" failonerror="true">
+            <env key="JAVA_HOME" value="${java.home}"/>
+            <arg value="clean"/>
+        </exec>
+        <delete dir="${export.dir}"/>
+    </target>
+
+    <!-- =================================
+    target: war
+   ================================= -->
     <target name="war" description="--> Creates a WAR of a Grails application">
-		<exec executable="${grails}" failonerror="true">
-			<arg value="war"/>
-		</exec>                               
+        <exec executable="${grails}" failonerror="true">
+            <arg value="war"/>
+        </exec>
     </target>
-	
-	<!-- ================================= 
-          target: test              
-         ================================= -->
+
+    <!-- =================================
+    target: test
+   ================================= -->
     <target name="test" description="--> Run a Grails applications unit tests">
-		<exec executable="${grails}" failonerror="true">
-			<arg value="test-app"/>
-		</exec>                               
+        <exec executable="${grails}" failonerror="true">
+            <arg value="test-app"/>
+        </exec>
     </target>
-	
-	<!-- ================================= 
-          target: deploy              
-         ================================= -->
+
+    <!-- =================================
+    target: deploy
+   ================================= -->
     <target name="deploy" depends="war" description="--> The deploy target (initially empty)">
         <!-- TODO -->
     </target>
 
-    <target name="all">
-        
+
+    <target name="compile" depends="prepare">
+        <copy todir="${build.dir}" filtering="true">
+            <fileset dir="${src.dir}/java"
+                     includes="**/*.properties, **/*.xml, **/*.config, **/*.txt, **/*.jdo, **/*.tld, **/*.xsd, **/*.css"/>
+        </copy>
+        <copy todir="${build.dir}">
+            <fileset dir="${src.dir}/java" includes="**/*.jpg, **/*.png, **/*.gif"/>
+        </copy>
+        <copy todir="${build.dir}">
+            <fileset dir="${src.dir}/java" includes="**/help/**"/>
+        </copy>
+        <copy todir="${build.dir}/liquibase/">
+            <fileset dir="${src.dir}" includes="buildinfo.properties"/>
+        </copy>
+
+        <javac srcdir="${src.dir}/java" destdir="${build.dir}" deprecation="${deprecation}" debug="${debug}"
+               optimize="${optimize}" source="1.5">
+            <classpath refid="classpath"/>
+        </javac>
+
+        <mkdir dir="${build.test.dir}"/>
+        <!--<javac srcdir="${src.dir}/java-test" destdir="${build.test.dir}" deprecation="${deprecation}"-->
+               <!--debug="${debug}" optimize="${optimize}" source="1.5">-->
+            <!--<classpath refid="classpath"/>-->
+        <!--</javac>-->
+        <!--<copy todir="${build.test.dir}">-->
+            <!--<fileset dir="${src.dir}/java-test"-->
+                     <!--includes="**/*.properties, **/*.xml, **/*.txt, **/*.config, **/*.tld, **/*.xsd,**/*.sql,**/*.css"/>-->
+        <!--</copy>-->
+    </target>
+
+    <target name="export" depends="compile">
+        <copy todir="${export.dir}">
+            <fileset dir="${basedir}" excludes="build/**,build-test/**"/>
+        </copy>
+
+        <jar destfile="${export.dir}/lib/liquibase-grails-SNAPSHOT.jar" basedir="${build.dir}"/>
+
+        <exec executable="${grails}" failonerror="true" dir="${export.dir}">
+            <env key="JAVA_HOME" value="${java.home}"/>
+            <arg value="package-plugin"/>
+        </exec>
     </target>
 </project>
