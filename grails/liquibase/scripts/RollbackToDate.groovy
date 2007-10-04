@@ -1,21 +1,25 @@
 import org.codehaus.groovy.grails.compiler.support.*
+import liquibase.migrator.Migrator;
 import java.io.OutputStreamWriter;
+import java.util.*;
+import java.text.*;
 
 Ant.property(environment: "env")
 grailsHome = Ant.antProject.properties."env.GRAILS_HOME"
 includeTargets << new File("scripts/LiquibaseSetup.groovy")
 
-task ('default':'''Rolls back the to a specific tag.
-Example: grails rollback aTag
+task ('default':'''Rolls back the specified date.
+Example: grails rollbackToDate 2007-05-15 18:15:12 
 ''') {
     depends(setup)
 
     try {
         migrator.setMode(Migrator.Mode.EXECUTE_ROLLBACK_MODE);
-        if (args == null) {
-            throw new RuntimeException("rollback requires a rollback tag");
+        if (commandParams == null) {
+            throw new RuntimeException("rollbackToDate requires a rollback date");
         }
-        migrator.setRollbackToTag(args);
+        def DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        migrator.setRollbackToDate(dateFormat.parse(args));
         migrator.migrate()
 //            if (migrate.migrate()) {
 //                System.out.println("Database migrated");
@@ -29,5 +33,5 @@ Example: grails rollback aTag
         exit(1)
     } finally {
         migrator.getDatabase().getConnection().close();
-    }
+    }                                                         
 }
