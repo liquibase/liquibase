@@ -10,17 +10,15 @@ Ant.property(environment: "env")
 grailsHome = Ant.antProject.properties."env.GRAILS_HOME"
 includeTargets << new File("scripts/LiquibaseSetup.groovy")
 
-task ('default':'''Rolls back the to a specific tag.
-Example: grails liquibase-rollback aTag
+task ('default':'''Writes SQL to roll back the specified number of changes to STDOUT.
+Example: grails rollbackCount 3
 ''') {
     depends(setup)
 
     try {
-        migrator.setMode(Migrator.Mode.EXECUTE_ROLLBACK_MODE);
-        if (args == null) {
-            throw new RuntimeException("rollback requires a rollback tag");
-        }
-        migrator.setRollbackToTag(args);
+        migrator.setMode(Migrator.Mode.OUTPUT_ROLLBACK_SQL_MODE);
+        migrator.setOutputSQLWriter(new OutputStreamWriter(System.out));
+        migrator.setRollbackCount(Integer.parseInt(args));
         migrator.migrate()
 //            if (migrate.migrate()) {
 //                System.out.println("Database migrated");
