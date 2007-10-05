@@ -467,6 +467,85 @@ public class Migrator {
         }
     }
 
+    public void changelogSyncSQL(Writer outputWriter) throws LiquibaseException {
+        this.setMode(Migrator.Mode.OUTPUT_CHANGELOG_ONLY_SQL_MODE);
+        this.setOutputSQLWriter(outputWriter);
+
+        this.migrate();
+    }
+
+    public void migrateSQL(Writer outputWriter) throws LiquibaseException {
+        this.setMode(Migrator.Mode.OUTPUT_SQL_MODE);
+        this.setOutputSQLWriter(outputWriter);
+
+        this.migrate();
+    }
+
+    public void rollback(String tag) throws LiquibaseException {
+        this.setMode(Migrator.Mode.EXECUTE_ROLLBACK_MODE);
+        if (tag == null) {
+            throw new LiquibaseException("rollback requires a rollback tag");
+        }
+        this.setRollbackToTag(tag);
+
+        migrate();
+    }
+
+    public void rollbackToDate(Date date) throws LiquibaseException {
+        this.setMode(Migrator.Mode.EXECUTE_ROLLBACK_MODE);
+        if (date == null) {
+            throw new LiquibaseException("rollback requires a rollback date");
+        }
+        this.setRollbackToDate(date);
+
+        migrate();
+    }
+
+    public void rollbackCount(int changesToRollback) throws LiquibaseException {
+        this.setMode(Migrator.Mode.EXECUTE_ROLLBACK_MODE);
+        this.setRollbackCount(changesToRollback);
+
+        migrate();
+    }
+
+    public void rollbackSQL(String tagToRollBackTo, Writer output) throws LiquibaseException {
+        this.setMode(Migrator.Mode.OUTPUT_ROLLBACK_SQL_MODE);
+        this.setOutputSQLWriter(output);
+        if (tagToRollBackTo == null) {
+            throw new LiquibaseException("rollbackSQL requires a rollback tag");
+        }
+        this.setRollbackToTag(tagToRollBackTo);
+
+        migrate();
+    }
+
+    public void rollbackToDateSQL(Date date, Writer output) throws LiquibaseException {
+        setMode(Migrator.Mode.OUTPUT_ROLLBACK_SQL_MODE);
+        setOutputSQLWriter(output);
+        if (date == null) {
+            throw new LiquibaseException("rollbackToDateSQL requires a rollback date");
+        }
+        setRollbackToDate(date);
+
+        migrate();
+    }
+
+    public void rollbackCountSQL(int changesToRollback, Writer output) throws LiquibaseException {
+        setMode(Migrator.Mode.OUTPUT_ROLLBACK_SQL_MODE);
+        setOutputSQLWriter(output);
+        setRollbackCount(changesToRollback);
+
+        migrate();
+    }
+    
+    public void futureRollbackSQL(Writer output) throws LiquibaseException {
+        setMode(Migrator.Mode.OUTPUT_FUTURE_ROLLBACK_SQL_MODE);
+        setOutputSQLWriter(output);
+
+        migrate();
+    }
+
+
     protected ValidateChangeLogHandler getValidatChangeLogHandler() {
         return new ValidateChangeLogHandler(this, changeLogFile,fileOpener);
     }
