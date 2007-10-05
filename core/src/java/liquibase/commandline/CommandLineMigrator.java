@@ -104,7 +104,7 @@ public class CommandLineMigrator {
             if (e.getCause() instanceof ValidationFailedException) {
                 ((ValidationFailedException) e.getCause()).printDescriptiveError(System.out);
             } else {
-                System.out.println("Migration Failed: " + message + ((Logger.getLogger(Migrator.DEFAULT_LOG_NAME) == null || (Logger.getLogger(Migrator.DEFAULT_LOG_NAME).getLevel().equals(Level.OFF))) ? ".  For more information, use the --logLevel flag" : ""));
+                System.out.println("Migration Failed: " + message + generateLogLevelWarningMessage());
                 Logger.getLogger(Migrator.DEFAULT_LOG_NAME).log(Level.SEVERE, message, e);
             }
             return;
@@ -114,6 +114,15 @@ public class CommandLineMigrator {
             System.out.println("Migration successful");
         } else if (commandLineMigrator.command.startsWith("rollback") && !commandLineMigrator.command.endsWith("SQL")) {
             System.out.println("Rollback successful");
+        }
+    }
+
+    private static String generateLogLevelWarningMessage() {
+        Logger logger = Logger.getLogger(Migrator.DEFAULT_LOG_NAME);
+        if (logger == null || (logger.getLevel().equals(Level.OFF))) {
+            return null;
+        } else {
+            return ".  For more information, use the --logLevel flag)";
         }
     }
 
@@ -468,7 +477,7 @@ public class CommandLineMigrator {
         File tempFile = File.createTempFile("migrator.tmp", null);
         // read from jar and write to the tempJar file
         BufferedInputStream inStream = null;
-        
+
         BufferedOutputStream outStream = null;
         try {
             inStream = new BufferedInputStream(jar.getInputStream(entry));
@@ -479,15 +488,17 @@ public class CommandLineMigrator {
                 outStream.write(status);
             }
         } finally {
-            if(outStream !=null) {
+            if (outStream != null) {
                 try {
                     outStream.close();
-                } catch(IOException ioe) {}
+                } catch (IOException ioe) {
+                }
             }
-            if(inStream !=null) {
+            if (inStream != null) {
                 try {
                     inStream.close();
-                } catch(IOException ioe) {}
+                } catch (IOException ioe) {
+                }
             }
         }
 
@@ -732,7 +743,7 @@ public class CommandLineMigrator {
         try {
             connection = driverObject.connect(url, info);
         } catch (SQLException e) {
-            throw new JDBCException("Connection could not be created to " + url + ": "+e.getMessage(), e);
+            throw new JDBCException("Connection could not be created to " + url + ": " + e.getMessage(), e);
         }
         if (connection == null) {
             throw new JDBCException("Connection could not be created to " + url + " with driver " + driver.getClass().getName() + ".  Possibly the wrong driver for the given database URL");
