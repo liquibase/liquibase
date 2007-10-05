@@ -11,8 +11,7 @@ import org.liquibase.intellij.plugin.LiquibaseProjectComponent;
 
 public class TagAction extends AnAction {
     public void actionPerformed(AnActionEvent e) {
-        Project application = ProjectManager.getInstance().getDefaultProject();
-        LiquibaseProjectComponent liquibaseComponent = application.getComponent(LiquibaseProjectComponent.class);
+        LiquibaseProjectComponent liquibaseComponent = LiquibaseProjectComponent.getInstance();
 
         String tag = Messages.showInputDialog(((Project) e.getDataContext().getData(DataConstants.PROJECT)),
                 "Tag: ",

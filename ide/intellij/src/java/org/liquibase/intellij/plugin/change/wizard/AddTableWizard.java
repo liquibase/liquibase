@@ -3,6 +3,9 @@ package org.liquibase.intellij.plugin.change.wizard;
 import com.intellij.ide.wizard.Step;
 import com.intellij.openapi.project.Project;
 import dbhelp.db.Database;
+import dbhelp.db.IDBObject;
+import dbhelp.db.INamedDBObject;
+import dbhelp.db.model.AbstractDBObject;
 import liquibase.change.Change;
 import liquibase.change.ColumnConfig;
 import liquibase.change.ConstraintsConfig;
@@ -14,9 +17,11 @@ import java.sql.Connection;
 
 public class AddTableWizard extends BaseIntellijRefactorWizard {
     private AddTableWizardPage wizardPage;
+    private AbstractDBObject selectedObject;
 
-    public AddTableWizard(Project project, Database database, Connection connection) {
+    public AddTableWizard(Project project, Database database, Connection connection, AbstractDBObject selectedObject) {
         super("Create Table", project, database, connection);
+        this.selectedObject = selectedObject;
     }
 
 
@@ -39,6 +44,6 @@ public class AddTableWizard extends BaseIntellijRefactorWizard {
     }
 
     protected void refresh() {
-        ;
+        selectedObject.refresh();
     }
 }

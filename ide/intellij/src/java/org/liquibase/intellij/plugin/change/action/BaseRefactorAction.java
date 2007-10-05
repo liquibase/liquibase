@@ -4,6 +4,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectManager;
 import org.liquibase.intellij.plugin.action.BaseDatabaseAction;
 import org.liquibase.intellij.plugin.change.wizard.BaseIntellijRefactorWizard;
+import org.liquibase.intellij.plugin.LiquibaseProjectComponent;
 
 import java.awt.event.ActionEvent;
 
@@ -14,7 +15,7 @@ public abstract class BaseRefactorAction extends BaseDatabaseAction {
     }
 
     public void actionPerformed(ActionEvent actionEvent) {
-        Project project = ProjectManager.getInstance().getDefaultProject();
+        Project project = LiquibaseProjectComponent.getInstance().getProject();
         BaseIntellijRefactorWizard wizard = createWizard(project);
 
         wizard.pack();

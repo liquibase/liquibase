@@ -2,8 +2,9 @@ package org.liquibase.intellij.plugin.change.wizard;
 
 import com.intellij.ide.wizard.AbstractWizard;
 import com.intellij.ide.wizard.Step;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.project.ProjectManager;
+import com.intellij.openapi.vfs.VirtualFile;
 import dbhelp.db.Database;
 import liquibase.ChangeSet;
 import liquibase.DatabaseChangeLog;
@@ -12,16 +13,23 @@ import liquibase.database.DatabaseFactory;
 import liquibase.database.sql.SqlStatement;
 import liquibase.database.template.JdbcTemplate;
 import liquibase.migrator.Migrator;
+import liquibase.parser.MigratorSchemaResolver;
 import liquibase.util.StringUtils;
+import org.apache.xml.serialize.OutputFormat;
+import org.apache.xml.serialize.XMLSerializer;
 import org.liquibase.intellij.plugin.LiquibaseProjectComponent;
 import org.liquibase.intellij.plugin.change.wizard.page.ChangeMetaDataWizardPage;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
-import java.awt.event.ActionListener;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.sql.Connection;
 
 public abstract class BaseIntellijRefactorWizard extends AbstractWizard<Step> {
-    private ChangeMetaDataWizardPage metaDataPage = new ChangeMetaDataWizardPage();
+    private ChangeMetaDataWizardPage metaDataPage;
     private Database database;
     private Connection connection;
 
@@ -35,6 +43,7 @@ public abstract class BaseIntellijRefactorWizard extends AbstractWizard<Step> {
             addStep(page);
         }
 
+        metaDataPage = new ChangeMetaDataWizardPage(project);
         addStep(metaDataPage);
 
         getFinishButton().addActionListener(new FinishListener());
@@ -70,9 +79,7 @@ public abstract class BaseIntellijRefactorWizard extends AbstractWizard<Step> {
 //                    monitor.beginTask("Refactoring Database", 100);
 //
 //                    try {
-//                        Migrator migrator = new Migrator(LiquibasePreferences
-//                                .getCurrentChangeLog(), new EclipseFileOpener());
-//                        migrator.init(getConnection());
+//                        Migrator migrator = LiquibaseProjectComponent.getInstance().getMigrator(getConnection());
 //
 //                        monitor.subTask("Checking Control Tables");
 //                        migrator.getDatabase().checkDatabaseChangeLogTable(
@@ -85,7 +92,7 @@ public abstract class BaseIntellijRefactorWizard extends AbstractWizard<Step> {
 //                        monitor.subTask("Executing Change");
                 DatabaseChangeLog changeLog = new DatabaseChangeLog(getMigrator(), getCurrentChangeLog());
 
-                ChangeSet changeSet = new ChangeSet(StringUtils.trimToEmpty(metaDataPage.getId()),
+                final ChangeSet changeSet = new ChangeSet(StringUtils.trimToEmpty(metaDataPage.getId()),
                         StringUtils.trimToEmpty(metaDataPage.getAuthor()),
                         metaDataPage.isAlwaysRun(),
                         metaDataPage.isRunOnChange(),
@@ -109,50 +116,44 @@ public abstract class BaseIntellijRefactorWizard extends AbstractWizard<Step> {
 //
 //                        monitor.subTask("Marking Change Set As Ran");
                 getMigrator().markChangeSetAsRan(changeSet);
+
 //                        monitor.worked(25);
 //
 //                        monitor.subTask("Writing to Change Log");
-//                        DocumentBuilderFactory factory = DocumentBuilderFactory
-//                                .newInstance();
-//                        DocumentBuilder documentBuilder = factory
-//                                .newDocumentBuilder();
-//                        documentBuilder
-//                                .setEntityResolver(new MigratorSchemaResolver());
-//
-//                        File file = new File(LiquibasePreferences
-//                                .getCurrentChangeLogFileName());
-//                        Document doc;
-//                        if (!file.exists() || file.length() == 0) {
-//                            doc = documentBuilder.newDocument();
-//
-//                            Element changeLogElement = doc
-//                                    .createElement("databaseChangeLog");
-//                            changeLogElement
-//                                    .setAttribute("xmlns",
-//                                            "http://www.liquibase.org/xml/ns/dbchangelog/1.2");
-//                            changeLogElement
-//                                    .setAttribute("xmlns:xsi",
-//                                            "http://www.w3.org/2001/XMLSchema-instance");
-//                            changeLogElement
-//                                    .setAttribute(
-//                                            "xsi:schemaLocation",
-//                                            "http://www.liquibase.org/xml/ns/dbchangelog/1.2 http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.2.xsd");
-//
-//                            doc.appendChild(changeLogElement);
-//                        } else {
-//                            doc = documentBuilder.parse(file);
-//                        }
-//
-//                        doc.getDocumentElement().appendChild(
-//                                changeSet.createNode(doc));
-//
-//                        FileOutputStream out = new FileOutputStream(file);
-//                        OutputFormat format = new OutputFormat(doc);
-//                        format.setIndenting(true);
-//                        XMLSerializer serializer = new XMLSerializer(out,
-//                                format);
-//                        serializer.asDOMSerializer();
-//                        serializer.serialize(doc);
+                ApplicationManager.getApplication().runWriteAction(new Runnable() {
+                    public void run() {
+                        try {
+                            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+                            DocumentBuilder documentBuilder = factory.newDocumentBuilder();
+                            documentBuilder.setEntityResolver(new MigratorSchemaResolver());
+
+                            VirtualFile file = LiquibaseProjectComponent.getInstance().getChangeLogFile().getVirtualFile();
+                            Document doc;
+                            if (!file.isValid() || file.getLength() == 0) {
+                                doc = documentBuilder.newDocument();
+
+                                Element changeLogElement = doc.createElement("databaseChangeLog");
+                                changeLogElement.setAttribute("xmlns", "http://www.liquibase.org/xml/ns/dbchangelog/1.3");
+                                changeLogElement.setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
+                                changeLogElement.setAttribute("xsi:schemaLocation", "http://www.liquibase.org/xml/ns/dbchangelog/1.3 http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.3.xsd");
+
+                                doc.appendChild(changeLogElement);
+                            } else {
+                                doc = documentBuilder.parse(file.getInputStream());
+                            }
+
+                            doc.getDocumentElement().appendChild(changeSet.createNode(doc));
+
+                            OutputFormat format = new OutputFormat(doc);
+                            format.setIndenting(true);
+                            XMLSerializer serializer = new XMLSerializer(file.getOutputStream(null), format);
+                            serializer.asDOMSerializer();
+                            serializer.serialize(doc);
+                        } catch (Exception e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                });
 //
 //                        monitor.done();
 //                    } catch (Exception e) {
@@ -161,7 +162,7 @@ public abstract class BaseIntellijRefactorWizard extends AbstractWizard<Step> {
 //
 //                }
 //            });
-//            refresh();
+                refresh();
             } catch (Throwable e) {
                 e.printStackTrace();
 //            IStatus status = new OperationStatus(IStatus.ERROR,
@@ -178,16 +179,13 @@ public abstract class BaseIntellijRefactorWizard extends AbstractWizard<Step> {
     }
 
     private String getCurrentChangeLog() {
-        Project project = ProjectManager.getInstance().getDefaultProject();
-        LiquibaseProjectComponent liquibaseComponent = project.getComponent(LiquibaseProjectComponent.class);
+        LiquibaseProjectComponent liquibaseComponent = LiquibaseProjectComponent.getInstance();
         return liquibaseComponent.getCurrentChangeLog();
     }
 
     private Migrator getMigrator() {
-        Project project = ProjectManager.getInstance().getDefaultProject();
-        LiquibaseProjectComponent liquibaseComponent = project.getComponent(LiquibaseProjectComponent.class);
-        Migrator migrator = liquibaseComponent.getMigrator(getConnection());
-        return migrator;
+        LiquibaseProjectComponent liquibaseComponent = LiquibaseProjectComponent.getInstance();
+        return liquibaseComponent.getMigrator(getConnection());
 
     }
 

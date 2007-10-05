@@ -8,8 +8,7 @@ import org.liquibase.intellij.plugin.LiquibaseProjectComponent;
 
 public class MigrateAction extends AnAction {
     public void actionPerformed(AnActionEvent e) {
-        Project application = ProjectManager.getInstance().getDefaultProject();
-        LiquibaseProjectComponent liquibaseComponent = application.getComponent( LiquibaseProjectComponent.class);
+        LiquibaseProjectComponent liquibaseComponent = LiquibaseProjectComponent.getInstance();
         liquibaseComponent.migrate(null);
     }
 }
