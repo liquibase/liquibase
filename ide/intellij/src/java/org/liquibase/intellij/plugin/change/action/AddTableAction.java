@@ -10,6 +10,7 @@ import dbhelp.db.model.AbstractDBObject;
 import java.awt.event.ActionEvent;
 
 import org.liquibase.intellij.plugin.change.wizard.AddTableWizard;
+import org.liquibase.intellij.plugin.LiquibaseProjectComponent;
 
 import javax.swing.tree.TreePath;
 
@@ -21,7 +22,7 @@ public class AddTableAction extends BaseRefactorAction {
     }
 
     public void actionPerformed(ActionEvent actionEvent) {
-        Project project = ProjectManager.getInstance().getDefaultProject();
+        Project project = LiquibaseProjectComponent.getInstance().getProject();
 //        LiquibaseProjectComponent liquibaseComponent = project.getComponent( LiquibaseProjectComponent.class);
 //        liquibaseComponent.sayHello();
         AddTableWizard wizard = createWizard(project);
@@ -31,7 +32,7 @@ public class AddTableAction extends BaseRefactorAction {
     }
 
     protected AddTableWizard createWizard(Project project) {
-        return new AddTableWizard(project, getSelectedDatabase(), getSelectedConnection());
+        return new AddTableWizard(project, getSelectedDatabase(), getSelectedConnection(), getSelectedObject());
     }
 
 //    public void actionPerformed(AnActionEvent e) {

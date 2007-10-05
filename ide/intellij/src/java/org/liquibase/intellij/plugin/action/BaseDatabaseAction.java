@@ -46,4 +46,11 @@ public abstract class BaseDatabaseAction extends PortableAction {
             throw new RuntimeException(e);
         }
     }
+
+    public AbstractDBObject getSelectedObject() {
+        TreePath selectionPath = ((DBTree) getUserData()).getSelectionModel().getLeadSelectionPath();
+
+        return (AbstractDBObject) selectionPath.getLastPathComponent();
+
+    }
 }
