@@ -925,7 +925,7 @@ public abstract class AbstractDatabase implements Database {
     }
 
     protected SqlStatement getViewDefinitionSql(String viewName) throws JDBCException {
-        String sql = "select view_definition from information_schema.views where upper(table_name)='" + viewName + "'";
+        String sql = "select view_definition from information_schema.views where upper(table_name)='" + viewName.toUpperCase() + "'";
         if (getSchemaName() != null) {
             sql += " and table_schema='" + getSchemaName() + "'";
         }
@@ -933,6 +933,7 @@ public abstract class AbstractDatabase implements Database {
             sql += " and table_catalog='" + getCatalogName() + "'";
 
         }
+//        log.info("GetViewDefinitionSQL: "+sql);
         return new RawSqlStatement(sql);
     }
 
