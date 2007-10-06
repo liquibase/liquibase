@@ -1,9 +1,0 @@
-<plugin name='liquibase' version='0.9'>
-  <author>Nathan Voxland</author>
-  <authorEmail>nathan@voxland.net</authorEmail>
-  <title>This plugin adds ActiveRecord::Migration-like functionality via the LiquiBase project.</title>
-  <documentation>http://www.liquibase.org</documentation>
-  <resources>
-    <resource>DataSource</resource>
-  </resources>
-</plugin>
