@@ -1,0 +1,75 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+    <head>
+        <title>LiquiBase: Grails Integration</title>
+        <style type='text/css' media='screen'>@import "../../include/css/main.css";</style>
+    </head>
+    <body>@ANALYTICS@
+        <img src="../../images/liquibase_logo.gif" alt="LiquiBase" class="topLogo"/>
+        <p id="sitename">
+            <strong>LiquiBase: Database Refactoring</strong>
+        </p>
+
+        <div id="container">
+                @NAV.MANUAL@
+
+
+            <div id="content">
+                <div class="entry">
+                    <h2>LiquiBase Grails Integration</h2>
+                    <p>
+                        LiquiBase can be used as a <a href="http://grails.codehaus.org/">Grails</a> plug-in.
+                        To install, simply run <b>grails install-plugin liquibase</b> and create your <a href="changelog.html">change log XML file</a>
+                        in grails-app/migrations/changelog.xml
+                    </p>
+                    <h2>Is there a non-XML way to write change logs?</h2>
+                    <p>
+                        Currently not, althouh we are working on a LiquiBase domain specific language alternative to XML.
+                        If you really don't like working with XML, you may want to look at the <a href="../../refactoring_ide/">LiquiBase IDE or Eclipse Plugin</a>
+                    </p>
+                    <h2>Available Commands</h2>
+                    <p>The following commands are available via the Grails plug-in:</p>
+                <h3>Update/Rollback Commands</h3>
+                <table class="attributesTable">
+                    <tr><th>migrate</th><td>Updates database to current version</td></tr>
+                    <tr><th>migrate-sql</th><td>Writes SQL to update database to current version to STDOUT</td></tr>
+                    <tr><th>rollback &lt;tag&gt;</th><td>Rolls back the database to the the state is was when the tag was applied</td></tr>
+                    <tr><th>rollback-sql &lt;tag&gt;</th><td>Writes SQL to roll back the database to that state it was in when the tag was applied to STDOUT</td></tr>
+                    <tr><th>rollback-count &lt;num&gt;</th><td>Rolls back the last &lt;value&gt; change sets applied to the database</td></tr>
+                    <tr><th>rollback-count-sql &lt;num&gt;</th><td>Writes SQL to roll back the last "num" change sets to STDOUT applied to the database</td></tr>
+                    <tr><th>rollback-to-date &lt;date&gt;</th><td>Rolls back the database to the the state is was at the given date/time. Date Format: yyyy-MM-dd HH:mm:ss</td></tr>
+                    <tr><th>rollback-to-date-sql &lt;date&gt;</th><td>Writes SQL to roll back the database to that state it was in at the given date/time version to STDOUT</td></tr>
+                    <tr><th>future-rollback-sql</th><td>Writes SQL to roll back the database to the current state after the changes in the changeslog have been applied</td></tr>
+                </table>
+
+                <h3>Misc Commands</h3>
+                <table class="attributesTable">
+                    <tr><th>db-doc</th><td>Generates Javadoc-like documentation based on current database and change log</td></tr>
+                    <tr><th>generate-changelog</th><td>Writes Change Log XML to copy the current state of the database to standard out</td></tr>
+                </table>
+
+                <h3>Maintenance Commands</h3>
+                <table class="attributesTable">
+                    <tr><th>tag</th><td>'Tags' the current database state for future rollback</td></tr>
+                    <tr><th>changelog-sync-sql</th><td>Writes SQL to mark all changes as executed in the database to STDOUT</td></tr>
+                    <tr><th>clear-checksums</th><td>Removes all saved checksums from database log. Useful for 'MD5Sum Check Failed' errors</td></tr>
+                    <tr><th>drop-all</th><td>Drop all database objects owned by user</td></tr>
+                    <tr><th>list-locks</th><td>Lists who currently has locks on the database changelog</td></tr>
+                    <tr><th>release-locks</th><td>Releases all locks on the database changelog</td></tr>
+                    <tr><th>status</th><td>Outputs list of unrun changesets</td></tr>
+                    <tr><th>validate-changelog</th><td>Checks changelog for errors</td></tr>
+                </table>
+                <h2>Version Naming Convention</h2>
+                <p>
+                    The Grails plugin is versioned based off the core LiquiBase version.
+                    For example, a Grails plug-in version of "1.3.2.0" is the first Grails plug-in release based on the
+                    1.3.2 version of LiquiBase.  If there is a patch to the Grails plug-in, but not the core LiquiBase library,
+                    the version will change to "1.3.2.1".  
+                </p>
+            </div>
+        </div>
+       </div>
+    </body>
+</html>

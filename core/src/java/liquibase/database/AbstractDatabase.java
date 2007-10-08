@@ -424,7 +424,7 @@ public abstract class AbstractDatabase implements Database {
             List<Map> rows = new JdbcTemplate(this).queryForList(sqlStatement);
             for (Map columnMap : rows) {
                 Boolean locked = (Boolean) columnMap.get("locked");
-                if (locked) {
+                if (locked != null && locked) {
                     allLocks.add(new DatabaseChangeLogLock((Integer) columnMap.get("id"), (Date) columnMap.get("LOCKGRANTED"), (String) columnMap.get("LOCKEDBY")));
                 }
             }
