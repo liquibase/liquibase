@@ -1,13 +1,13 @@
 package liquibase.diff;
 
-import com.sun.org.apache.xml.internal.serialize.OutputFormat;
-import com.sun.org.apache.xml.internal.serialize.XMLSerializer;
 import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.database.structure.*;
 import liquibase.exception.JDBCException;
 import liquibase.parser.MigratorSchemaResolver;
 import liquibase.util.StringUtils;
+import liquibase.xml.DefaultXmlWriter;
+import liquibase.xml.XmlWriter;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -272,10 +272,13 @@ public class DiffResult {
 
     }
 
+    public void printChangeLog(PrintStream out, Database targetDatabase) throws ParserConfigurationException, IOException {
+        this.printChangeLog(out, targetDatabase, new DefaultXmlWriter());
+    }
     /**
      * Prints changeLog that would bring the base database to be the same as the target database
      */
-    public void printChangeLog(PrintStream out, Database targetDatabase) throws ParserConfigurationException, IOException {
+    public void printChangeLog(PrintStream out, Database targetDatabase, XmlWriter xmlWriter) throws ParserConfigurationException, IOException {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder documentBuilder = factory.newDocumentBuilder();
         documentBuilder.setEntityResolver(new MigratorSchemaResolver());
@@ -316,11 +319,7 @@ public class DiffResult {
         }
 
 
-        OutputFormat format = new OutputFormat(doc);
-        format.setIndenting(true);
-        XMLSerializer serializer = new XMLSerializer(out, format);
-        serializer.asDOMSerializer();
-        serializer.serialize(doc);
+        xmlWriter.write(doc, out);
 
         out.flush();
     }

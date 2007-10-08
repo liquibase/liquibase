@@ -21,6 +21,7 @@ import javax.xml.parsers.SAXParserFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Writer;
+import java.io.PrintStream;
 import java.net.URL;
 import java.sql.*;
 import java.text.DateFormat;
@@ -713,6 +714,18 @@ public class Migrator {
         return getDatabase().listLocks();
     }
 
+    public void reportLocks(PrintStream out) throws LockException, IOException, JDBCException {
+        DatabaseChangeLogLock[] locks = listLocks();
+        out.println("Database change log locks for " + getDatabase().getConnectionUsername() + "@" + getDatabase().getConnectionURL());
+        if (locks.length == 0) {
+            out.println(" - No locks");
+        }
+        for (DatabaseChangeLogLock lock : locks) {
+            out.println(" - " + lock.getLockedBy() + " at " + DateFormat.getDateTimeInstance().format(lock.getLockGranted()));
+        }
+
+    }    
+
     /**
      * Set the contexts to execute.  If more than once, comma separate them.
      */
@@ -842,6 +855,17 @@ public class Migrator {
 
         return FindChangeSetsHandler.getUnrunChangeSets();
     }
+
+    public void reportStatus(boolean verbose, PrintStream out) throws LiquibaseException {
+        List<ChangeSet> unrunChangeSets = listUnrunChangeSets();
+        out.println(unrunChangeSets.size() + " change sets have not been applied to " + getDatabase().getConnectionUsername() + "@" + getDatabase().getConnectionURL());
+        if (verbose) {
+            for (ChangeSet changeSet : unrunChangeSets) {
+                System.out.println("     " + changeSet.toString(false));
+            }
+        }
+
+    }    
 
     /**
      * After the change set has been ran against the database this method will update the change log table

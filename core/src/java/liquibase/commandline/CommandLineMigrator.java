@@ -574,14 +574,7 @@ public class CommandLineMigrator {
             migrator.init(connection);
 
             if ("listLocks".equalsIgnoreCase(command)) {
-                DatabaseChangeLogLock[] locks = migrator.listLocks();
-                System.out.println("Database change log locks for " + migrator.getDatabase().getConnectionUsername() + "@" + migrator.getDatabase().getConnectionURL());
-                if (locks.length == 0) {
-                    System.out.println(" - No locks");
-                }
-                for (DatabaseChangeLogLock lock : locks) {
-                    System.out.println(" - " + lock.getLockedBy() + " at " + DateFormat.getDateTimeInstance().format(lock.getLockGranted()));
-                }
+                migrator.reportLocks(System.out);
                 return;
             } else if ("releaseLocks".equalsIgnoreCase(command)) {
                 migrator.forceReleaseLock();
@@ -601,13 +594,7 @@ public class CommandLineMigrator {
                 if (commandParams.contains("--verbose")) {
                     runVerbose = true;
                 }
-                List<ChangeSet> unrunChangeSets = migrator.listUnrunChangeSets();
-                System.out.println(unrunChangeSets.size() + " change sets have not been applied to " + migrator.getDatabase().getConnectionUsername() + "@" + migrator.getDatabase().getConnectionURL());
-                if (runVerbose) {
-                    for (ChangeSet changeSet : unrunChangeSets) {
-                        System.out.println("     " + changeSet.toString(false));
-                    }
-                }
+                migrator.reportStatus(runVerbose, System.out);
                 return;
             } else if ("validate".equalsIgnoreCase(command)) {
                 try {
