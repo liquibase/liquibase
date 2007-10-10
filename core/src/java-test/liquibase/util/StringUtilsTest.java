@@ -107,4 +107,22 @@ public class StringUtilsTest {
         assertEquals(1,result.length);
         assertEquals(total,result[0]);
     }
+    
+    @Test
+    public void splitOngo() {
+        String sql = "some sql\ngo\nmore sql";
+        String[] result = StringUtils.splitSQL(sql);
+        assertEquals(2,result.length);
+        assertEquals("some sql",result[0]);
+        assertEquals("more sql",result[1]);
+    }
+    
+    @Test
+    public void splitOnGO() {
+        String sql = "some sql\nGO\nmore sql";
+        String[] result = StringUtils.splitSQL(sql);
+        assertEquals(2,result.length);
+        assertEquals("some sql",result[0]);
+        assertEquals("more sql",result[1]);
+    }
 }
