@@ -97,27 +97,27 @@ public class PostgresDatabase extends AbstractDatabase {
         return null;
     }
 
-    protected String getBooleanType() {
+    public String getBooleanType() {
         return "BOOLEAN";
     }
 
-    protected String getCurrencyType() {
+    public String getCurrencyType() {
         return "DECIMAL";
     }
 
-    protected String getUUIDType() {
+    public String getUUIDType() {
         return "CHAR(36)";
     }
 
-    protected String getClobType() {
+    public String getClobType() {
         return "TEXT";
     }
 
-    protected String getBlobType() {
+    public String getBlobType() {
         return "BYTEA";
     }
 
-    protected String getDateTimeType() {
+    public String getDateTimeType() {
         return "TIMESTAMP WITH TIME ZONE";
     }
 
@@ -175,6 +175,8 @@ public class PostgresDatabase extends AbstractDatabase {
         return super.isSystemTable(catalogName, schemaName, tableName)
                 || "pg_catalog".equals(schemaName)
                 || "pg_toast".equals(schemaName)
+                || tableName.endsWith("_id_seq")
+                || tableName.endsWith("_key")
                 || tableName.endsWith("_pkey")
                 || tableName.startsWith("idx_")
                 || tableName.startsWith("pk_");
@@ -190,10 +192,10 @@ public class PostgresDatabase extends AbstractDatabase {
     }
 
 
-    public String getColumnType(ColumnConfig column) {
-        String type = super.getColumnType(column);
+    public String getColumnType(String columnType, Boolean autoIncrement) {
+        String type = super.getColumnType(columnType, autoIncrement);
 
-        if (column.isAutoIncrement() != null && column.isAutoIncrement()) {
+        if (autoIncrement != null && autoIncrement) {
             if ("integer".equals(type.toLowerCase())) {
                 return "serial";
             } else if ("bigint".equals(type.toLowerCase())) {
@@ -205,5 +207,10 @@ public class PostgresDatabase extends AbstractDatabase {
         }
 
         return type;
+    }
+
+
+    public String getAutoIncrementClause() {
+        return "";
     }
 }

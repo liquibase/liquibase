@@ -36,27 +36,27 @@ public class FirebirdDatabase extends AbstractDatabase {
         return true;
     }
 
-    protected String getBooleanType() {
+    public String getBooleanType() {
         return "SMALLINT";
     }
 
-    protected String getCurrencyType() {
+    public String getCurrencyType() {
         return "DECIMAL(18, 4)";
     }
 
-    protected String getUUIDType() {
+    public String getUUIDType() {
         return "CHAR(36)";
     }
 
-    protected String getClobType() {
+    public String getClobType() {
         return "BLOB SUB_TYPE TEXT";
     }
 
-    protected String getBlobType() {
+    public String getBlobType() {
         return "BLOB";
     }
 
-    protected String getDateTimeType() {
+    public String getDateTimeType() {
         return "TIMESTAMP";
     }
 
@@ -101,5 +101,18 @@ public class FirebirdDatabase extends AbstractDatabase {
 
     public String getFalseBooleanValue() {
         return "0";
+    }
+
+
+    public boolean isSystemTable(String catalogName, String schemaName, String tableName) {
+        if (tableName.startsWith("RDB$")) {
+            return true;
+        }
+        return super.isSystemTable(catalogName, schemaName, tableName);
+    }
+
+
+    public boolean supportsAutoIncrement() {
+        return false;
     }
 }

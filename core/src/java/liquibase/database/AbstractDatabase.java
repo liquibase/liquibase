@@ -92,7 +92,7 @@ public abstract class AbstractDatabase implements Database {
         }
     }
 
-    protected String getDatabaseProductName(Connection conn) throws JDBCException {
+    public String getDatabaseProductName(Connection conn) throws JDBCException {
         try {
             return conn.getMetaData().getDatabaseProductName();
         } catch (SQLException e) {
@@ -157,6 +157,11 @@ public abstract class AbstractDatabase implements Database {
         return true;
     }
 
+    public boolean supportsAutoIncrement() {
+        return true;
+    }
+
+
     // ------- DATABASE-SPECIFIC SQL METHODS ---- //
 
     public void setCurrentDateTimeFunction(String function) {
@@ -170,35 +175,34 @@ public abstract class AbstractDatabase implements Database {
      * This method will convert some generic column types (e.g. boolean, currency) to the correct type
      * for the current database.
      */
-    public String getColumnType(ColumnConfig column) {
-        if ("boolean".equalsIgnoreCase(column.getType())) {
+    public String getColumnType(String columnType, Boolean autoIncrement) {
+        if ("boolean".equalsIgnoreCase(columnType)) {
             return getBooleanType();
-        } else if ("currency".equalsIgnoreCase(column.getType())) {
+        } else if ("currency".equalsIgnoreCase(columnType)) {
             return getCurrencyType();
-        } else if ("UUID".equalsIgnoreCase(column.getType())) {
+        } else if ("UUID".equalsIgnoreCase(columnType)) {
             return getUUIDType();
-        } else if ("BLOB".equalsIgnoreCase(column.getType())
-                || "LONGVARBINARY".equalsIgnoreCase(column.getType())) {
+        } else if ("BLOB".equalsIgnoreCase(columnType)
+                || "LONGVARBINARY".equalsIgnoreCase(columnType)) {
             return getBlobType();
-        } else if ("CLOB".equalsIgnoreCase(column.getType())
-                || "TEXT".equalsIgnoreCase(column.getType())
-                || "LONGVARCHAR".equalsIgnoreCase(column.getType())) {
+        } else if ("CLOB".equalsIgnoreCase(columnType)
+                || "TEXT".equalsIgnoreCase(columnType)
+                || "LONGVARCHAR".equalsIgnoreCase(columnType)) {
             return getClobType();
-        } else if ("date".equalsIgnoreCase(column.getType())) {
+        } else if ("date".equalsIgnoreCase(columnType)) {
             return getDateType();
-        } else if ("time".equalsIgnoreCase(column.getType())) {
+        } else if ("time".equalsIgnoreCase(columnType)) {
             return getTimeType();
-        } else if ("dateTime".equalsIgnoreCase(column.getType())) {
+        } else if ("dateTime".equalsIgnoreCase(columnType)) {
             return getDateTimeType();
         } else {
-            return column.getType();
+            return columnType;
         }
     }
 
-    /**
-     * Returns the actual database-specific data type to use a "boolean" column.
-     */
-    protected abstract String getBooleanType();
+    public final String getColumnType(ColumnConfig columnConfig) {
+        return getColumnType(columnConfig.getType(), columnConfig.isAutoIncrement());
+    }
 
     /**
      * The database-specific value to use for "false" "boolean" columns.
@@ -257,41 +261,16 @@ public abstract class AbstractDatabase implements Database {
     }
 
     /**
-     * Returns the actual database-specific data type to use a "currency" column.
-     */
-    protected abstract String getCurrencyType();
-
-    /**
-     * Returns the actual database-specific data type to use a "UUID" column.
-     */
-    protected abstract String getUUIDType();
-
-    /**
-     * Returns the actual database-specific data type to use a "CLOB" column.
-     */
-    protected abstract String getClobType();
-
-    /**
-     * Returns the actual database-specific data type to use a "BLOB" column.
-     */
-    protected abstract String getBlobType();
-
-    /**
      * Returns the actual database-specific data type to use a "date" (no time information) column.
      */
-    protected String getDateType() {
+    public String getDateType() {
         return "DATE";
     }
 
     /**
-     * Returns the actual database-specific data type to use a "datetime" column.
-     */
-    protected abstract String getDateTimeType();
-
-    /**
      * Returns the actual database-specific data type to use a "time" column.
      */
-    protected String getTimeType() {
+    public String getTimeType() {
         return "TIME";
     }
 

@@ -10,6 +10,7 @@ import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Table;
 import liquibase.exception.UnsupportedChangeException;
 import liquibase.util.StringUtils;
+import liquibase.util.SqlUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -64,7 +65,7 @@ public class AddUniqueConstraintChange extends AbstractChange {
     }
 
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
-        String sql = "ALTER TABLE " + escapeTableName(getTableName(), database) + " ADD CONSTRAINT " + getConstraintName() + " UNIQUE (" + getColumnNames() + ")";
+        String sql = "ALTER TABLE " + SqlUtil.escapeTableName(getTableName(), database) + " ADD CONSTRAINT " + getConstraintName() + " UNIQUE (" + getColumnNames() + ")";
 
         if (StringUtils.trimToNull(getTablespace()) != null && database.supportsTablespaces()) {
             if (database instanceof MSSQLDatabase) {

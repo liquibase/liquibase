@@ -7,6 +7,7 @@ import liquibase.database.structure.Column;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Table;
 import liquibase.exception.UnsupportedChangeException;
+import liquibase.util.SqlUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -43,7 +44,7 @@ public class AddColumnChange extends AbstractChange {
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
         List<SqlStatement> sql = new ArrayList<SqlStatement>();
 
-        String alterTable = "ALTER TABLE " + escapeTableName(getTableName(), database) + " ADD " + getColumn().getName() + " " + database.getColumnType(getColumn());
+        String alterTable = "ALTER TABLE " + SqlUtil.escapeTableName(getTableName(), database) + " ADD " + getColumn().getName() + " " + database.getColumnType(getColumn().getType(), getColumn().isAutoIncrement());
 
         if (defaultClauseBeforeNotNull(database)) {
             alterTable += getDefaultClause(database);

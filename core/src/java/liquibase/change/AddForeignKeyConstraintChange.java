@@ -8,6 +8,7 @@ import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.ForeignKey;
 import liquibase.database.structure.Table;
 import liquibase.exception.UnsupportedChangeException;
+import liquibase.util.SqlUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -101,7 +102,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
     }
 
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
-        String sql = "ALTER TABLE " + escapeTableName(getBaseTableName(), database) + " ADD CONSTRAINT " + getConstraintName() + " FOREIGN KEY (" + getBaseColumnNames() + ") REFERENCES " + escapeTableName(getReferencedTableName(), database) + "(" + getReferencedColumnNames() + ")";
+        String sql = "ALTER TABLE " + SqlUtil.escapeTableName(getBaseTableName(), database) + " ADD CONSTRAINT " + getConstraintName() + " FOREIGN KEY (" + getBaseColumnNames() + ") REFERENCES " + SqlUtil.escapeTableName(getReferencedTableName(), database) + "(" + getReferencedColumnNames() + ")";
 
         if (deleteCascade != null && deleteCascade) {
             sql += " ON DELETE CASCADE";

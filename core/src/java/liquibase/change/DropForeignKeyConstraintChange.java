@@ -8,6 +8,7 @@ import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.ForeignKey;
 import liquibase.database.structure.Table;
 import liquibase.exception.UnsupportedChangeException;
+import liquibase.util.SqlUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -43,11 +44,11 @@ public class DropForeignKeyConstraintChange extends AbstractChange {
 
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
         if (database instanceof MySQLDatabase) {
-            return new SqlStatement[]{ new RawSqlStatement("ALTER TABLE " + escapeTableName(getBaseTableName(), database) + " DROP FOREIGN KEY " + getConstraintName()), };
+            return new SqlStatement[]{ new RawSqlStatement("ALTER TABLE " + SqlUtil.escapeTableName(getBaseTableName(), database) + " DROP FOREIGN KEY " + getConstraintName()), };
         }
 
         return new SqlStatement[]{
-                new RawSqlStatement("ALTER TABLE " + escapeTableName(getBaseTableName(), database) + " DROP CONSTRAINT " + getConstraintName()),
+                new RawSqlStatement("ALTER TABLE " + SqlUtil.escapeTableName(getBaseTableName(), database) + " DROP CONSTRAINT " + getConstraintName()),
         };
     }
 

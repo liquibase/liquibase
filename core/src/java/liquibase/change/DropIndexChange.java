@@ -10,6 +10,7 @@ import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Index;
 import liquibase.database.structure.Table;
 import liquibase.exception.UnsupportedChangeException;
+import liquibase.util.SqlUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -47,7 +48,7 @@ public class DropIndexChange extends AbstractChange {
 
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
         if (database instanceof MySQLDatabase) {
-            return new SqlStatement[]{new RawSqlStatement("DROP INDEX " + indexName + " ON " + escapeTableName(tableName, database))};
+            return new SqlStatement[]{new RawSqlStatement("DROP INDEX " + indexName + " ON " + SqlUtil.escapeTableName(tableName, database))};
         } else if (database instanceof MSSQLDatabase) {
             return new SqlStatement[]{new RawSqlStatement("DROP INDEX " + tableName + "." + indexName)};
         } else if (database instanceof OracleDatabase) {

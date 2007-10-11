@@ -73,37 +73,37 @@ public class MSSQLDatabase extends AbstractDatabase {
         return null;
     }
 
-    protected String getDateTimeType() {
+    public String getDateTimeType() {
         return "DATETIME";
     }
 
 
-    protected String getTimeType() {
+    public String getTimeType() {
         return "DATETIME";
     }
 
 
-    protected String getDateType() {
+    public String getDateType() {
         return "SMALLDATETIME";
     }
 
-    protected String getBooleanType() {
+    public String getBooleanType() {
         return "BIT";
     }
 
-    protected String getCurrencyType() {
+    public String getCurrencyType() {
         return "MONEY";
     }
 
-    protected String getUUIDType() {
+    public String getUUIDType() {
         return "UNIQUEIDENTIFIER";
     }
 
-    protected String getClobType() {
+    public String getClobType() {
         return "TEXT";
     }
 
-    protected String getBlobType() {
+    public String getBlobType() {
         return "IMAGE";
     }
 

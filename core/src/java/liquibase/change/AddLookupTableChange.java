@@ -8,6 +8,7 @@ import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.ForeignKey;
 import liquibase.database.structure.Table;
 import liquibase.exception.UnsupportedChangeException;
+import liquibase.util.SqlUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -113,13 +114,13 @@ public class AddLookupTableChange extends AbstractChange {
 
         List<SqlStatement> statements = new ArrayList<SqlStatement>();
 
-        SqlStatement[] createTablesSQL = {new RawSqlStatement("CREATE TABLE " + escapeTableName(getNewTableName(), database) + " AS SELECT DISTINCT " + getExistingColumnName() + " AS " + getNewColumnName() + " FROM " + escapeTableName(getExistingTableName(), database) + " WHERE " + getExistingColumnName() + " IS NOT NULL")};
+        SqlStatement[] createTablesSQL = {new RawSqlStatement("CREATE TABLE " + SqlUtil.escapeTableName(getNewTableName(), database) + " AS SELECT DISTINCT " + getExistingColumnName() + " AS " + getNewColumnName() + " FROM " + SqlUtil.escapeTableName(getExistingTableName(), database) + " WHERE " + getExistingColumnName() + " IS NOT NULL")};
         if (database instanceof MSSQLDatabase) {
-            createTablesSQL = new SqlStatement[]{new RawSqlStatement("SELECT DISTINCT " + getExistingColumnName() + " AS " + getNewColumnName() + " INTO " + escapeTableName(getNewTableName(), database) + " FROM " + escapeTableName(getExistingTableName(), database) + " WHERE " + getExistingColumnName() + " IS NOT NULL"),};
+            createTablesSQL = new SqlStatement[]{new RawSqlStatement("SELECT DISTINCT " + getExistingColumnName() + " AS " + getNewColumnName() + " INTO " + SqlUtil.escapeTableName(getNewTableName(), database) + " FROM " + SqlUtil.escapeTableName(getExistingTableName(), database) + " WHERE " + getExistingColumnName() + " IS NOT NULL"),};
         } else if (database instanceof DB2Database) {
             createTablesSQL = new SqlStatement[]{
-                    new RawSqlStatement("CREATE TABLE " + escapeTableName(getNewTableName(), database) + " AS (SELECT " + getExistingColumnName() + " AS " + getNewColumnName() + " FROM " + escapeTableName(getExistingTableName(), database) + ") WITH NO DATA"),
-                    new RawSqlStatement("INSERT INTO " + escapeTableName(getNewTableName(), database) + " SELECT DISTINCT " + getExistingColumnName() + " FROM " + escapeTableName(getExistingTableName(), database) + " WHERE " + getExistingColumnName() + " IS NOT NULL"),
+                    new RawSqlStatement("CREATE TABLE " + SqlUtil.escapeTableName(getNewTableName(), database) + " AS (SELECT " + getExistingColumnName() + " AS " + getNewColumnName() + " FROM " + SqlUtil.escapeTableName(getExistingTableName(), database) + ") WITH NO DATA"),
+                    new RawSqlStatement("INSERT INTO " + SqlUtil.escapeTableName(getNewTableName(), database) + " SELECT DISTINCT " + getExistingColumnName() + " FROM " + SqlUtil.escapeTableName(getExistingTableName(), database) + " WHERE " + getExistingColumnName() + " IS NOT NULL"),
             };
         }
 

@@ -1,11 +1,7 @@
 package liquibase.change;
 
-import liquibase.database.DB2Database;
 import liquibase.database.Database;
-import liquibase.database.MSSQLDatabase;
-import liquibase.database.SybaseDatabase;
-import liquibase.database.sql.RawSqlStatement;
-import liquibase.database.sql.SqlStatement;
+import liquibase.database.sql.*;
 import liquibase.database.structure.Column;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Table;
@@ -14,7 +10,10 @@ import liquibase.util.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Creates a new table.
@@ -32,112 +31,51 @@ public class CreateTableChange extends AbstractChange {
 
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
 
-        List<String> pkColumns = new ArrayList<String>();
-
+        CreateTableStatement statement = new CreateTableStatement(tableName);
         for (ColumnConfig column : getColumns()) {
-            if (column.getConstraints() != null && column.getConstraints().isPrimaryKey() != null && column.getConstraints().isPrimaryKey()) {
-                pkColumns.add(column.getName());
-            }
-        }
-
-        StringBuffer fkConstraints = new StringBuffer();
-
-        StringBuffer buffer = new StringBuffer();
-        buffer.append("CREATE TABLE ").append(escapeTableName(getTableName(), database)).append(" ");
-        buffer.append("(");
-        Iterator<ColumnConfig> iterator = getColumns().iterator();
-        while (iterator.hasNext()) {
-            ColumnConfig column = iterator.next();
             ConstraintsConfig constraints = column.getConstraints();
-            buffer.append(column.getName());
-            if (column.getType() != null) {
-                buffer.append(" ").append(database.getColumnType(column));
+            if (constraints != null && constraints.isPrimaryKey() != null && constraints.isPrimaryKey()) {
+                boolean isAutoIncrement = column.isAutoIncrement() != null && column.isAutoIncrement();
+
+                statement.addPrimaryKeyColumn(column.getName(),
+                        database.getColumnType(column.getType(), column.isAutoIncrement()),
+                        isAutoIncrement);
+
+            } else {
+                String defaultValue = null;
+                if (column.hasDefaultValue()) {
+                    defaultValue = StringUtils.trimToNull(column.getDefaultColumnValue(database));
+                }
+                statement.addColumn(column.getName(),
+                        database.getColumnType(column.getType(), column.isAutoIncrement()),
+                        defaultValue);
             }
 
-            if (column.getDefaultValue() != null
-                    || column.getDefaultValueBoolean() != null
-                    || column.getDefaultValueDate() != null
-                    || column.getDefaultValueNumeric() != null) {
-                buffer.append(" DEFAULT ").append(column.getDefaultColumnValue(database));
-            }
-
-            if (column.isAutoIncrement() != null && column.isAutoIncrement()) {
-                buffer.append(" ").append(database.getAutoIncrementClause()).append(" ");
-            }
 
             if (constraints != null) {
                 if (constraints.isNullable() != null && !constraints.isNullable()) {
-                    buffer.append(" NOT NULL");
-                } else {
-                    if (database instanceof SybaseDatabase) {
-                        buffer.append(" NULL");
-                    }
-                }
-                if (pkColumns.size() == 1 && constraints.isPrimaryKey() != null && constraints.isPrimaryKey()) {
-                    buffer.append(" PRIMARY KEY");
+                    statement.addColumnConstraint(new NotNullConstraint(column.getName()));
                 }
 
                 if (constraints.getReferences() != null) {
-                    fkConstraints.append(" CONSTRAINT ")
-                            .append(constraints.getForeignKeyName())
-                            .append(" FOREIGN KEY (")
-                            .append(column.getName())
-                            .append(") REFERENCES ")
-                            .append(constraints.getReferences());
-
-                    if (constraints.isDeleteCascade() != null && constraints.isDeleteCascade()) {
-                        fkConstraints.append(" ON DELETE CASCADE");
-                    }
-
-
-                    if (constraints.isInitiallyDeferred() != null && constraints.isInitiallyDeferred()) {
-                        fkConstraints.append(" INITIALLY DEFERRED");
-                    }
-                    if (constraints.isDeferrable() != null && constraints.isDeferrable()) {
-                        fkConstraints.append(" DEFERRABLE");
-                    }
-                    fkConstraints.append(",");
-//                    buffer.append(" CONSTRAINT FOREIGN KEY ").append(constraints.getForeignKeyName()).append(" REFERENCES ").append(constraints.getReferences());
+                    ForeignKeyConstraint fkConstraint = new ForeignKeyConstraint(constraints.getForeignKeyName(), constraints.getReferences());
+                    fkConstraint.setColumn(column.getName());
+                    fkConstraint.setDeleteCascade(constraints.isDeleteCascade() != null && constraints.isDeleteCascade());
+                    fkConstraint.setInitiallyDeferred(constraints.isInitiallyDeferred() != null && constraints.isInitiallyDeferred());
+                    fkConstraint.setDeferrable(constraints.isDeferrable() != null && constraints.isDeferrable());
+                    statement.addColumnConstraint(fkConstraint);
                 }
 
                 if (constraints.isUnique() != null && constraints.isUnique()) {
-                    buffer.append(" UNIQUE");
+                    statement.addColumnConstraint(new UniqueConstraint().addColumns(column.getName()));
                 }
-                if (constraints.getCheck() != null) buffer.append(constraints.getCheck()).append(" ");
-
-            }
-
-            if (iterator.hasNext()) {
-                buffer.append(", ");
             }
         }
 
-        if (fkConstraints.length() > 0) {
-            buffer.append(", ").append(fkConstraints.toString().replaceFirst(",$", ""));
-        }
-        buffer.append(")");
-
-        if (StringUtils.trimToNull(tablespace) != null && database.supportsTablespaces()) {
-            if (database instanceof MSSQLDatabase) {
-                buffer.append(" ON ").append(tablespace);
-            } else if (database instanceof DB2Database) {
-                buffer.append(" IN ").append(tablespace);
-            } else {
-                buffer.append(" TABLESPACE ").append(tablespace);
-            }
-        }
+        statement.setTablespace(StringUtils.trimToNull(getTablespace()));
 
         List<SqlStatement> statements = new ArrayList<SqlStatement>();
-        statements.add(new RawSqlStatement(buffer.toString().trim()));
-
-        if (pkColumns.size() > 1) {
-            AddPrimaryKeyChange addPKChange = new AddPrimaryKeyChange();
-            addPKChange.setTableName(getTableName());
-            addPKChange.setConstraintName(("PK_" + getTableName()).toUpperCase());
-            addPKChange.setColumnNames(StringUtils.join(pkColumns, ","));
-
-            statements.addAll(Arrays.asList(addPKChange.generateStatements(database)));
-        }
+        statements.add(statement);
 
         return statements.toArray(new SqlStatement[statements.size()]);
     }
@@ -153,10 +91,6 @@ public class CreateTableChange extends AbstractChange {
 
     public List<ColumnConfig> getColumns() {
         return columns;
-    }
-
-    public void setColumns(List<ColumnConfig> columns) {
-        this.columns = columns;
     }
 
     public String getTableName() {

@@ -6,6 +6,7 @@ import liquibase.database.sql.SqlStatement;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Table;
 import liquibase.exception.UnsupportedChangeException;
+import liquibase.util.SqlUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -43,18 +44,18 @@ public class RenameTableChange extends AbstractChange {
 
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
         if (database instanceof MSSQLDatabase) {
-            return new SqlStatement[]{new RawSqlStatement("exec sp_rename '" + escapeTableName(oldTableName, database) + "', " + escapeTableName(newTableName, database))};
+            return new SqlStatement[]{new RawSqlStatement("exec sp_rename '" + SqlUtil.escapeTableName(oldTableName, database) + "', " + SqlUtil.escapeTableName(newTableName, database))};
         } else if (database instanceof MySQLDatabase) {
-            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + escapeTableName(oldTableName, database) + " RENAME " + escapeTableName(newTableName, database))};
+            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + SqlUtil.escapeTableName(oldTableName, database) + " RENAME " + SqlUtil.escapeTableName(newTableName, database))};
         } else if (database instanceof PostgresDatabase) {
-            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + escapeTableName(oldTableName, database) + " RENAME TO " + escapeTableName(newTableName, database))};
+            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + SqlUtil.escapeTableName(oldTableName, database) + " RENAME TO " + SqlUtil.escapeTableName(newTableName, database))};
         } else if (database instanceof DerbyDatabase) {
-            return new SqlStatement[]{new RawSqlStatement("RENAME TABLE " + escapeTableName(oldTableName, database) + " TO " + escapeTableName(newTableName, database))};
+            return new SqlStatement[]{new RawSqlStatement("RENAME TABLE " + SqlUtil.escapeTableName(oldTableName, database) + " TO " + SqlUtil.escapeTableName(newTableName, database))};
         } else if (database instanceof HsqlDatabase) {
-            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + escapeTableName(oldTableName, database) + " RENAME TO " + escapeTableName(newTableName, database))};
+            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + SqlUtil.escapeTableName(oldTableName, database) + " RENAME TO " + SqlUtil.escapeTableName(newTableName, database))};
         } else if (database instanceof DB2Database) {
             return new SqlStatement[]{
-                    new RawSqlStatement("RENAME " + escapeTableName(oldTableName, database) + " TO " + escapeTableName(newTableName, database)),
+                    new RawSqlStatement("RENAME " + SqlUtil.escapeTableName(oldTableName, database) + " TO " + SqlUtil.escapeTableName(newTableName, database)),
                     new RawSqlStatement("CALL SYSPROC.ADMIN_CMD ('REORG TABLE " + newTableName + "')"),
             };
         } else if (database instanceof CacheDatabase) {
@@ -63,7 +64,7 @@ public class RenameTableChange extends AbstractChange {
             throw new UnsupportedChangeException("Rename table not currently supported for Firebird");
         }
 
-        return new SqlStatement[]{new RawSqlStatement("RENAME " +escapeTableName(oldTableName, database) + " TO " + escapeTableName(newTableName, database))};
+        return new SqlStatement[]{new RawSqlStatement("RENAME " + SqlUtil.escapeTableName(oldTableName, database) + " TO " + SqlUtil.escapeTableName(newTableName, database))};
     }
 
     protected Change[] createInverses() {

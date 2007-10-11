@@ -37,27 +37,27 @@ public class MySQLDatabase extends AbstractDatabase {
     }
 
 
-    protected String getBooleanType() {
+    public String getBooleanType() {
         return "TINYINT(1)";
     }
 
-    protected String getCurrencyType() {
+    public String getCurrencyType() {
         return "DECIMAL";
     }
 
-    protected String getUUIDType() {
+    public String getUUIDType() {
         return "CHAR(36)";
     }
 
-    protected String getClobType() {
+    public String getClobType() {
         return "TEXT";
     }
 
-    protected String getBlobType() {
+    public String getBlobType() {
         return "BLOB";
     }
 
-    protected String getDateTimeType() {
+    public String getDateTimeType() {
         return "DATETIME";
     }
 

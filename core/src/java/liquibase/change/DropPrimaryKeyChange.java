@@ -9,6 +9,7 @@ import liquibase.database.sql.SqlStatement;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Table;
 import liquibase.exception.UnsupportedChangeException;
+import liquibase.util.SqlUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -49,12 +50,12 @@ public class DropPrimaryKeyChange extends AbstractChange {
             return generatePostgresStatements((PostgresDatabase) database);
         } else if (database instanceof FirebirdDatabase) {
             return new SqlStatement[]{
-                    new RawSqlStatement("ALTER TABLE " + escapeTableName(getTableName(),database) + " DROP CONSTRAINT "+getConstraintName()),
+                    new RawSqlStatement("ALTER TABLE " + SqlUtil.escapeTableName(getTableName(),database) + " DROP CONSTRAINT "+getConstraintName()),
             };
         }
 
         return new SqlStatement[]{
-                new RawSqlStatement("ALTER TABLE " + escapeTableName(getTableName(),database) + " DROP PRIMARY KEY"),
+                new RawSqlStatement("ALTER TABLE " + SqlUtil.escapeTableName(getTableName(),database) + " DROP PRIMARY KEY"),
         };
     }
 
@@ -63,7 +64,7 @@ public class DropPrimaryKeyChange extends AbstractChange {
             throw new UnsupportedChangeException("MS-SQL requires a constraint name to drop the primary key");
         }
         return new SqlStatement[]{
-                new RawSqlStatement("ALTER TABLE " + escapeTableName(getTableName(), database) + " DROP CONSTRAINT " + getConstraintName()),
+                new RawSqlStatement("ALTER TABLE " + SqlUtil.escapeTableName(getTableName(), database) + " DROP CONSTRAINT " + getConstraintName()),
         };
     }
 
@@ -72,7 +73,7 @@ public class DropPrimaryKeyChange extends AbstractChange {
             throw new UnsupportedChangeException("PostgreSQL requires a constraint name to drop the primary key");
         }
         return new SqlStatement[]{
-                new RawSqlStatement("ALTER TABLE " + escapeTableName(getTableName(), database) + " DROP CONSTRAINT " + getConstraintName()),
+                new RawSqlStatement("ALTER TABLE " + SqlUtil.escapeTableName(getTableName(), database) + " DROP CONSTRAINT " + getConstraintName()),
         };
     }
 

@@ -1,7 +1,5 @@
 package org.liquibase.eclipse.common.change.wizard;
 
-import com.sun.org.apache.xml.internal.serialize.OutputFormat;
-import com.sun.org.apache.xml.internal.serialize.XMLSerializer;
 import liquibase.ChangeSet;
 import liquibase.DatabaseChangeLog;
 import liquibase.change.Change;
@@ -10,6 +8,7 @@ import liquibase.database.sql.SqlStatement;
 import liquibase.migrator.Migrator;
 import liquibase.parser.MigratorSchemaResolver;
 import liquibase.util.StringUtils;
+import liquibase.xml.DefaultXmlWriter;
 import org.eclipse.core.commands.operations.OperationStatus;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -160,12 +159,7 @@ public abstract class BaseEclipseRefactorWizard extends Wizard {
                                 changeSet.createNode(doc));
 
                         FileOutputStream out = new FileOutputStream(file);
-                        OutputFormat format = new OutputFormat(doc);
-                        format.setIndenting(true);
-                        XMLSerializer serializer = new XMLSerializer(out,
-                                format);
-                        serializer.asDOMSerializer();
-                        serializer.serialize(doc);
+                        new DefaultXmlWriter().write(doc, out);
 
                         monitor.done();
                     } catch (Exception e) {

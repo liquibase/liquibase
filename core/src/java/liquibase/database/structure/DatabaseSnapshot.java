@@ -3,15 +3,14 @@ package liquibase.database.structure;
 import liquibase.database.CacheDatabase;
 import liquibase.database.Database;
 import liquibase.database.H2Database;
+import liquibase.database.DerbyDatabase;
 import liquibase.database.template.JdbcTemplate;
 import liquibase.diff.DiffStatusListener;
 import liquibase.exception.JDBCException;
 import liquibase.migrator.Migrator;
 import liquibase.util.StringUtils;
 
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.*;
 import java.util.logging.Logger;
 
@@ -60,9 +59,9 @@ public class DatabaseSnapshot {
             this.statusListeners = statusListeners;
 
             readTablesAndViews();
-            readColumns();
             readForeignKeyInformation();
             readPrimaryKeys();
+            readColumns();
             readIndexes();
             readSequences();
 
@@ -152,6 +151,7 @@ public class DatabaseSnapshot {
     private void readColumns() throws SQLException, JDBCException {
         updateListeners("Reading columns for " + database.toString() + " ...");
 
+        Statement selectStatement = database.getConnection().createStatement();
         ResultSet rs = databaseMetaData.getColumns(database.getCatalogName(), database.getSchemaName(), null, null);
         while (rs.next()) {
             Column columnInfo = new Column();
@@ -186,7 +186,6 @@ public class DatabaseSnapshot {
             columnInfo.setDecimalDigits(rs.getInt("DECIMAL_DIGITS"));
             columnInfo.setTypeName(rs.getString("TYPE_NAME"));
             String defaultValue = rs.getString("COLUMN_DEF");
-            columnInfo.setAutoIncrement(isAutoIncrement(defaultValue, database));
             columnInfo.setDefaultValue(translateDefaultValue(defaultValue, database));
 
             int nullable = rs.getInt("NULLABLE");
@@ -196,9 +195,36 @@ public class DatabaseSnapshot {
                 columnInfo.setNullable(true);
             }
 
+            columnInfo.setPrimaryKey(isPrimaryKey(columnInfo));
+
+            ResultSet selectRS = null;
+            try {
+                selectRS = selectStatement.executeQuery("SELECT "+columnName+" FROM "+tableName+" WHERE 1 = 0");
+                ResultSetMetaData meta = selectRS.getMetaData();
+                columnInfo.setAutoIncrement(meta.isAutoIncrement(1));
+            } finally {
+                if (selectRS != null) {
+                    selectRS.close();
+                }
+            }
+
+
             columnsMap.put(tableName + "." + columnName, columnInfo);
         }
         rs.close();
+        selectStatement.close();
+    }
+
+    private boolean isPrimaryKey(Column columnInfo) {
+        for (PrimaryKey pk : getPrimaryKeys()) {
+            if (pk.getTableName().equalsIgnoreCase(pk.getTableName())) {
+                if (pk.getColumnNamesAsList().contains(columnInfo.getName())) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     private boolean isAutoIncrement(String defaultValue, Database database) {
@@ -206,6 +232,8 @@ public class DatabaseSnapshot {
             if (StringUtils.trimToEmpty(defaultValue).startsWith("(NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_")) {
                 return true;
             }
+        } else if (database instanceof DerbyDatabase) {
+            return defaultValue.equals("GENERATED_BY_DEFAULT");
         }
         return false;
     }
@@ -219,7 +247,7 @@ public class DatabaseSnapshot {
         } else if (database instanceof CacheDatabase) {
             if (defaultValue != null) {
                 if (defaultValue.charAt(0) == '"' && defaultValue.charAt(defaultValue.length() - 1) == '"') {
-                    defaultValue = defaultValue.substring(1, defaultValue.length() - 2);
+                    defaultValue = defaultValue.substring(1, defaultValue.length() - 1);
                     return "'" + defaultValue + "'";
                 } else if (defaultValue.startsWith("$")) {
                     return "OBJECTSCRIPT '" + defaultValue + "'";
@@ -397,5 +425,26 @@ public class DatabaseSnapshot {
         for (DiffStatusListener listener : this.statusListeners) {
             listener.statusUpdate(message);
         }
+    }
+
+    /**
+     * Returns the table object for the given tableName.  If table does not exist, returns null
+     */
+    public Table getTable(String tableName) {
+        for (Table table : getTables()) {
+            if (table.getName().equalsIgnoreCase(tableName)) {
+                return table;
+            }
+        }
+        return null;
+    }
+
+    public ForeignKey getForeignKey(String foreignKeyName) {
+        for (ForeignKey fk : getForeignKeys()) {
+            if (fk.getName().equalsIgnoreCase(foreignKeyName)) {
+                return fk;
+            }
+        }
+        return null;
     }
 }

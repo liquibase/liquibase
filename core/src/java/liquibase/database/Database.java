@@ -71,7 +71,9 @@ public interface Database {
 
     public boolean supportsSequences();
 
-    String getColumnType(ColumnConfig column);
+    public boolean supportsAutoIncrement();
+
+    String getColumnType(String columnType, Boolean autoIncrement);
 
     String getFalseBooleanValue();
 
@@ -135,4 +137,40 @@ public interface Database {
     String getViewDefinition(String name) throws JDBCException;
 
     int getDatabaseType(int type);
+
+    String getDatabaseProductName(Connection conn) throws JDBCException;
+
+    /**
+     * Returns the actual database-specific data type to use a "boolean" column.
+     */
+    String getBooleanType();
+
+    /**
+     * Returns the actual database-specific data type to use a "currency" column.
+     */
+    String getCurrencyType();
+
+    /**
+     * Returns the actual database-specific data type to use a "UUID" column.
+     */
+    String getUUIDType();
+
+    /**
+     * Returns the actual database-specific data type to use a "CLOB" column.
+     */
+    String getClobType();
+
+    /**
+     * Returns the actual database-specific data type to use a "BLOB" column.
+     */
+    String getBlobType();
+
+    String getDateType();
+
+    /**
+     * Returns the actual database-specific data type to use a "datetime" column.
+     */
+    String getDateTimeType();
+
+    String getTimeType();
 }
