@@ -2,13 +2,13 @@ package liquibase.change;
 
 import liquibase.database.Database;
 import liquibase.database.DerbyDatabase;
-import liquibase.database.FirebirdDatabase;
 import liquibase.database.sql.RawSqlStatement;
 import liquibase.database.sql.SqlStatement;
 import liquibase.database.structure.Column;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Table;
 import liquibase.exception.UnsupportedChangeException;
+import liquibase.util.SqlUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -90,7 +90,7 @@ public class MergeColumnChange extends AbstractChange {
         addNewColumnChange.setColumn(columnConfig);
         statements.addAll(Arrays.asList(addNewColumnChange.generateStatements(database)));
 
-        String updateStatement = "UPDATE " + escapeTableName(getTableName(), database) + " SET " + getFinalColumnName() + " = " + database.getConcatSql(getColumn1Name(), "'"+getJoinString()+"'", getColumn2Name());
+        String updateStatement = "UPDATE " + SqlUtil.escapeTableName(getTableName(), database) + " SET " + getFinalColumnName() + " = " + database.getConcatSql(getColumn1Name(), "'"+getJoinString()+"'", getColumn2Name());
 
         statements.add(new RawSqlStatement(updateStatement));
 

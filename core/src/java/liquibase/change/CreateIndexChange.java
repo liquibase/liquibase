@@ -10,6 +10,7 @@ import liquibase.database.structure.Index;
 import liquibase.database.structure.Table;
 import liquibase.exception.UnsupportedChangeException;
 import liquibase.util.StringUtils;
+import liquibase.util.SqlUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -72,7 +73,7 @@ public class CreateIndexChange extends AbstractChange {
         StringBuffer buffer = new StringBuffer();
         buffer.append("CREATE INDEX ");
         buffer.append(getIndexName()).append(" ON ");
-        buffer.append(escapeTableName(getTableName(), database)).append("(");
+        buffer.append(SqlUtil.escapeTableName(getTableName(), database)).append("(");
         Iterator<ColumnConfig> iterator = columns.iterator();
         while (iterator.hasNext()) {
             ColumnConfig column = iterator.next();

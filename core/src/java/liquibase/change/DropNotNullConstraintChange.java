@@ -7,6 +7,7 @@ import liquibase.database.structure.Column;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Table;
 import liquibase.exception.UnsupportedChangeException;
+import liquibase.util.SqlUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -61,20 +62,20 @@ public class DropNotNullConstraintChange extends AbstractChange {
         } else if (database instanceof OracleDatabase) {
             return generateOracleStatements((OracleDatabase) database);
         } else if (database instanceof DerbyDatabase) {
-            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + escapeTableName(tableName, database) + " ALTER COLUMN " + columnName + " NULL")};
+            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + SqlUtil.escapeTableName(tableName, database) + " ALTER COLUMN " + columnName + " NULL")};
         } else if (database instanceof HsqlDatabase) {
-            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + escapeTableName(tableName, database) + " ALTER COLUMN " + columnName + " NULL")};
+            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + SqlUtil.escapeTableName(tableName, database) + " ALTER COLUMN " + columnName + " NULL")};
         } else if (database instanceof CacheDatabase) {
-            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + escapeTableName(tableName, database) + " ALTER COLUMN " + columnName + " NULL")};
+            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + SqlUtil.escapeTableName(tableName, database) + " ALTER COLUMN " + columnName + " NULL")};
         } else if (database instanceof FirebirdDatabase) {
             throw new UnsupportedChangeException("LiquiBase does not currently support dropping null constraints in Firebird");
         }
 
-        return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + escapeTableName(tableName, database) + " ALTER COLUMN " + columnName + " DROP NOT NULL")};
+        return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + SqlUtil.escapeTableName(tableName, database) + " ALTER COLUMN " + columnName + " DROP NOT NULL")};
     }
 
     private SqlStatement[] generateSybaseStatements(SybaseDatabase database) {
-        return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + escapeTableName(tableName, database) + " MODIFY " + columnName + " NULL")};
+        return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + SqlUtil.escapeTableName(tableName, database) + " MODIFY " + columnName + " NULL")};
     }
 
     private SqlStatement[] generateMSSQLStatements(MSSQLDatabase database) {
@@ -82,11 +83,11 @@ public class DropNotNullConstraintChange extends AbstractChange {
             throw new RuntimeException("columnDataType is required to drop not null constraints with MS-SQL");
         }
 
-        return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + escapeTableName(tableName, database) + " ALTER COLUMN " + columnName + " " + columnDataType + " NULL")};
+        return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + SqlUtil.escapeTableName(tableName, database) + " ALTER COLUMN " + columnName + " " + columnDataType + " NULL")};
     }
 
     private SqlStatement[] generateOracleStatements(OracleDatabase database) {
-        return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + escapeTableName(tableName, database) + " MODIFY " + columnName + " NULL")};
+        return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + SqlUtil.escapeTableName(tableName, database) + " MODIFY " + columnName + " NULL")};
     }
 
     private SqlStatement[] generateMySQLStatements(MySQLDatabase database) {
@@ -94,7 +95,7 @@ public class DropNotNullConstraintChange extends AbstractChange {
             throw new RuntimeException("columnDataType is required to drop not null constraints with MySQL");
         }
 
-        return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + escapeTableName(tableName, database) + " MODIFY " + columnName + " " + columnDataType + " DEFAULT NULL")};
+        return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + SqlUtil.escapeTableName(tableName, database) + " MODIFY " + columnName + " " + columnDataType + " DEFAULT NULL")};
     }
 
     protected Change[] createInverses() {

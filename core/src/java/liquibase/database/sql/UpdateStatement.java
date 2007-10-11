@@ -51,11 +51,14 @@ public class UpdateStatement implements SqlStatement, PreparedSqlStatement {
         for (String column : newColumnValues.keySet()) {
             sql.append(" ").append(column).append(" = ");
             Object newValue = newColumnValues.get(column);
-            if (newValue instanceof String && database.shouldQuoteValue(((String) newValue))) {
-                sql.append("'").append(newValue).append("',");
+            if (newValue == null) {
+                sql.append("NULL");
+            } else if (newValue instanceof String && database.shouldQuoteValue(((String) newValue))) {
+                sql.append("'").append(newValue).append("'");
             } else {
-                sql.append(newValue).append(",");
+                sql.append(newValue);
             }
+            sql.append(",");
         }
 
         sql.deleteCharAt(sql.lastIndexOf(","));

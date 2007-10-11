@@ -45,7 +45,7 @@ public class DB2Database extends AbstractDatabase {
         return "CURRENT TIMESTAMP";
     }
 
-    protected String getBooleanType() {
+    public String getBooleanType() {
         return "SMALLINT";
     }
 
@@ -96,23 +96,23 @@ public class DB2Database extends AbstractDatabase {
         }
     }
 
-    protected String getCurrencyType() {
+    public String getCurrencyType() {
         return "DECIMAL(19,4)";
     }
 
-    protected String getUUIDType() {
+    public String getUUIDType() {
         return "VARCHAR(36)";
     }
 
-    protected String getClobType() {
+    public String getClobType() {
         return "CLOB";
     }
 
-    protected String getBlobType() {
+    public String getBlobType() {
         return "BLOB";
     }
 
-    protected String getDateTimeType() {
+    public String getDateTimeType() {
         return "TIMESTAMP";
     }
 

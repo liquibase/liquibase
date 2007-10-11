@@ -6,6 +6,7 @@ import liquibase.database.sql.SqlStatement;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Table;
 import liquibase.exception.UnsupportedChangeException;
+import liquibase.util.SqlUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -50,7 +51,7 @@ public class InsertDataChange extends AbstractChange {
 
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
         StringBuffer buffer = new StringBuffer();
-        buffer.append("INSERT INTO ").append(escapeTableName(getTableName(), database)).append(" ");
+        buffer.append("INSERT INTO ").append(SqlUtil.escapeTableName(getTableName(), database)).append(" ");
         Iterator<ColumnConfig> iterator = columns.iterator();
         StringBuffer columnNames = new StringBuffer();
         StringBuffer columnValues = new StringBuffer();

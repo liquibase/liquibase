@@ -7,33 +7,27 @@ import java.sql.Connection;
 public class CacheDatabase extends AbstractDatabase {
     public static final String PRODUCT_NAME = "cache";
 
-    @Override
-    protected String getBlobType() {
+    public String getBlobType() {
         return "LONGVARBINARY";
     }
 
-    @Override
-    protected String getBooleanType() {
+    public String getBooleanType() {
         return "INTEGER";
     }
 
-    @Override
-    protected String getClobType() {
+    public String getClobType() {
         return "LONGVARCHAR";
     }
 
-    @Override
-    protected String getCurrencyType() {
+    public String getCurrencyType() {
         return "MONEY";
     }
 
-    @Override
-    protected String getDateTimeType() {
+    public String getDateTimeType() {
         return "DATETIME";
     }
 
-    @Override
-    protected String getUUIDType() {
+    public String getUUIDType() {
         return "CHAR(36)";
     }
 
@@ -96,4 +90,10 @@ public class CacheDatabase extends AbstractDatabase {
     public boolean supportsTablespaces() {
         return false;
     }
+
+    public boolean supportsAutoIncrement() {
+        return false;
+    }
+
+    
 }

@@ -6,6 +6,7 @@ import liquibase.database.sql.SqlStatement;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Table;
 import liquibase.exception.UnsupportedChangeException;
+import liquibase.util.SqlUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -43,7 +44,7 @@ public class DropTableChange extends AbstractChange {
 
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
         StringBuffer buffer = new StringBuffer(31);
-        buffer.append("DROP TABLE ").append(escapeTableName(getTableName(),database));
+        buffer.append("DROP TABLE ").append(SqlUtil.escapeTableName(getTableName(),database));
         if (isCascadeConstraints() != null && isCascadeConstraints()) {
             buffer.append(" CASCADE CONSTRAINTS");
         }

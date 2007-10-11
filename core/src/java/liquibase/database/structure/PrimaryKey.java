@@ -4,6 +4,9 @@ import liquibase.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Arrays;
+
+import com.sun.javaws.util.VersionString;
 
 public class PrimaryKey implements DatabaseObject, Comparable<PrimaryKey> {
     private String name;
@@ -72,5 +75,9 @@ public class PrimaryKey implements DatabaseObject, Comparable<PrimaryKey> {
 
     public String toString() {
         return getName()+" on "+getTableName()+"("+getColumnNames()+")";
+    }
+
+    public List<String> getColumnNamesAsList() {
+        return Arrays.asList(getColumnNames().split("\\s+,\\s+"));
     }
 }

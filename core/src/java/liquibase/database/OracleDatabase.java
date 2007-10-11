@@ -28,36 +28,36 @@ public class OracleDatabase extends AbstractDatabase {
         return true;
     }
 
-    protected String getBooleanType() {
+    public String getBooleanType() {
         return "NUMBER(1)";
     }
 
-    protected String getCurrencyType() {
+    public String getCurrencyType() {
         return "NUMBER(15, 2)";
     }
 
-    protected String getUUIDType() {
+    public String getUUIDType() {
         return "RAW(16)";
     }
 
-    protected String getClobType() {
+    public String getClobType() {
         return "CLOB";
     }
 
-    protected String getBlobType() {
+    public String getBlobType() {
         return "BLOB";
     }
 
-    protected String getDateTimeType() {
+    public String getDateTimeType() {
         return "TIMESTAMP";
     }
 
 
-    protected String getDateType() {
+    public String getDateType() {
         return "DATE";
     }
 
-    protected String getTimeType() {
+    public String getTimeType() {
         return "DATE";
     }
 
@@ -160,5 +160,10 @@ public class OracleDatabase extends AbstractDatabase {
 
     protected SqlStatement getViewDefinitionSql(String name) {
         return new RawSqlStatement("SELECT TEXT FROM USER_VIEWS WHERE upper(VIEW_NAME)='"+name.toUpperCase()+"'");
-    }   
+    }
+
+    public boolean supportsAutoIncrement() {
+        return false;
+    }
+    
 }

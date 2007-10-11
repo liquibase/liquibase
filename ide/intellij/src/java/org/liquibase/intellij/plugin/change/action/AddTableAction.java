@@ -23,8 +23,6 @@ public class AddTableAction extends BaseRefactorAction {
 
     public void actionPerformed(ActionEvent actionEvent) {
         Project project = LiquibaseProjectComponent.getInstance().getProject();
-//        LiquibaseProjectComponent liquibaseComponent = project.getComponent( LiquibaseProjectComponent.class);
-//        liquibaseComponent.sayHello();
         AddTableWizard wizard = createWizard(project);
 
         wizard.pack();

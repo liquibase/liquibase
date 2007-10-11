@@ -39,27 +39,27 @@ public class DerbyDatabase extends AbstractDatabase {
         return false;
     }
 
-    protected String getBooleanType() {
+    public String getBooleanType() {
         return "SMALLINT";
     }
 
-    protected String getCurrencyType() {
+    public String getCurrencyType() {
         return "DECIMAL";
     }
 
-    protected String getUUIDType() {
+    public String getUUIDType() {
         return "CHAR(36)";
     }
 
-    protected String getClobType() {
+    public String getClobType() {
         return "CLOB";
     }
 
-    protected String getBlobType() {
+    public String getBlobType() {
         return "BLOB";
     }
 
-    protected String getDateTimeType() {
+    public String getDateTimeType() {
         return "TIMESTAMP";
     }
 

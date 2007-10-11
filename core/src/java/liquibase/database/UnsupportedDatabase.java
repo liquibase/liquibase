@@ -33,7 +33,7 @@ public class UnsupportedDatabase extends AbstractDatabase {
         return null;
     }
 
-    protected String getBooleanType() {
+    public String getBooleanType() {
         return "INT";
     }
 
@@ -46,23 +46,23 @@ public class UnsupportedDatabase extends AbstractDatabase {
         return "1";
     }
 
-    protected String getCurrencyType() {
+    public String getCurrencyType() {
         return "DECIMAL";
     }
 
-    protected String getUUIDType() {
+    public String getUUIDType() {
         return "CHAR(36)";
     }
 
-    protected String getClobType() {
+    public String getClobType() {
         return "CLOB";
     }
 
-    protected String getBlobType() {
+    public String getBlobType() {
         return "BLOB";
     }
 
-    protected String getDateTimeType() {
+    public String getDateTimeType() {
         return dateTimeType;
     }
 

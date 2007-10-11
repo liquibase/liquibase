@@ -7,6 +7,7 @@ import liquibase.database.structure.Column;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Table;
 import liquibase.exception.UnsupportedChangeException;
+import liquibase.util.SqlUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -82,19 +83,19 @@ public class AddDefaultValueChange extends AbstractChange {
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
         
         if(database instanceof SybaseDatabase) {
-            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + escapeTableName(getTableName(), database) + " REPLACE " + getColumnName() + " DEFAULT " + getColumnValue(database)),};
+            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + SqlUtil.escapeTableName(getTableName(), database) + " REPLACE " + getColumnName() + " DEFAULT " + getColumnValue(database)),};
         } else if (database instanceof MSSQLDatabase) {
-            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + escapeTableName(getTableName(), database) + " WITH NOCHECK ADD CONSTRAINT " + getColumnName() + "DefaultValue DEFAULT " + getColumnValue(database) + " FOR " + getColumnName()),};
+            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + SqlUtil.escapeTableName(getTableName(), database) + " WITH NOCHECK ADD CONSTRAINT " + getColumnName() + "DefaultValue DEFAULT " + getColumnValue(database) + " FOR " + getColumnName()),};
         } else if (database instanceof MySQLDatabase) {
-            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + escapeTableName(getTableName(), database) + " ALTER " + getColumnName() + " SET DEFAULT " + getColumnValue(database)),};
+            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + SqlUtil.escapeTableName(getTableName(), database) + " ALTER " + getColumnName() + " SET DEFAULT " + getColumnValue(database)),};
         } else if (database instanceof OracleDatabase) {
-            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + escapeTableName(getTableName(), database) + " MODIFY " + getColumnName() + " DEFAULT " + getColumnValue(database)),};
+            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + SqlUtil.escapeTableName(getTableName(), database) + " MODIFY " + getColumnName() + " DEFAULT " + getColumnValue(database)),};
         } else if (database instanceof DerbyDatabase) {
-            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + escapeTableName(getTableName(), database) + " ALTER COLUMN  " + getColumnName() + " WITH DEFAULT " + getColumnValue(database)),};
+            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + SqlUtil.escapeTableName(getTableName(), database) + " ALTER COLUMN  " + getColumnName() + " WITH DEFAULT " + getColumnValue(database)),};
         }
 
         return new SqlStatement[]{
-                new RawSqlStatement("ALTER TABLE " + escapeTableName(getTableName(), database) + " ALTER COLUMN  " + getColumnName() + " SET DEFAULT " + getColumnValue(database)),
+                new RawSqlStatement("ALTER TABLE " + SqlUtil.escapeTableName(getTableName(), database) + " ALTER COLUMN  " + getColumnName() + " SET DEFAULT " + getColumnValue(database)),
         };
     }
 

@@ -18,6 +18,7 @@ public class Column implements DatabaseObject, Comparable<Column> {
     private String typeName;
     private String defaultValue;
     private boolean autoIncrement = false;
+    private boolean primaryKey = false;
 
 
     public Table getTable() {
@@ -277,4 +278,12 @@ public class Column implements DatabaseObject, Comparable<Column> {
         return isDataTypeDifferent(otherColumn) || isNullabilityDifferent(otherColumn);
     }
 
+
+    public boolean isPrimaryKey() {
+        return primaryKey;
+    }
+
+    public void setPrimaryKey(boolean primaryKey) {
+        this.primaryKey = primaryKey;
+    }
 }

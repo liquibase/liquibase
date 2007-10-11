@@ -1,12 +1,20 @@
 package liquibase.change;
 
-import liquibase.database.OracleDatabase;
-import static org.junit.Assert.assertEquals;
+import liquibase.database.MockDatabase;
+import liquibase.database.structure.DatabaseObject;
+import liquibase.database.structure.Table;
+import liquibase.database.structure.Column;
+import liquibase.database.sql.SqlStatement;
+import liquibase.database.sql.CreateTableStatement;
+import liquibase.database.sql.UniqueConstraint;
+import liquibase.database.sql.ForeignKeyConstraint;
+import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Element;
 
 import javax.xml.parsers.DocumentBuilderFactory;
+import java.util.Set;
 
 /**
  * Tests for {@link CreateTableChange}
@@ -68,9 +76,34 @@ public class CreateTableChangeTest extends AbstractChangeTest {
         column5.setConstraints(column5constraints);
         change.addColumn(column5);
 
-        OracleDatabase database = new OracleDatabase();
-        assertEquals("CREATE TABLE TABLE_NAME (id int NOT NULL PRIMARY KEY, name varchar(255), state_id NOT NULL, phone varchar(255) DEFAULT 'NOPHONE', phone2 varchar(255) UNIQUE,  CONSTRAINT fk_tab_ref FOREIGN KEY (state_id) REFERENCES state(id) INITIALLY DEFERRED DEFERRABLE)"
-                , change.generateStatements(database)[0].getSqlStatement(database));
+
+        SqlStatement[] statements = change.generateStatements(new MockDatabase());
+        assertEquals(1, statements.length);
+        assertTrue(statements[0] instanceof CreateTableStatement);
+        CreateTableStatement statement = (CreateTableStatement) statements[0];
+        assertEquals("TABLE_NAME", statement.getTableName());
+        assertTrue(statement.getColumns().contains("id"));
+        assertTrue(statement.getColumns().contains("state_id"));
+        assertTrue(statement.getColumns().contains("phone"));
+        assertTrue(statement.getColumns().contains("phone2"));
+
+        assertEquals(1, statement.getPrimaryKeyConstraint().getColumns().size());
+        assertEquals("id", statement.getPrimaryKeyConstraint().getColumns().iterator().next());
+
+        assertEquals(1, statement.getUniqueConstraints().size());
+        UniqueConstraint uniqueConstraint = statement.getUniqueConstraints().iterator().next();
+        assertEquals(1, uniqueConstraint.getColumns().size());
+        assertEquals("phone2", uniqueConstraint.getColumns().iterator().next());
+
+        assertEquals(2, statement.getNotNullColumns().size());
+
+        assertEquals(1, statement.getForeignKeyConstraints().size());
+        ForeignKeyConstraint keyConstraint = statement.getForeignKeyConstraints().iterator().next();
+        assertEquals("fk_tab_ref", keyConstraint.getForeignKeyName());
+        assertEquals("state_id", keyConstraint.getColumn());
+        assertEquals("state(id)", keyConstraint.getReferences());
+        assertTrue(keyConstraint.isDeferrable());
+        assertTrue(keyConstraint.isInitiallyDeferred());
     }
 
     @Test
@@ -166,5 +199,170 @@ public class CreateTableChangeTest extends AbstractChangeTest {
         assertEquals("constraints", constraintsElement.getTagName());
         assertEquals(1, constraintsElement.getAttributes().getLength());
         assertEquals("true", constraintsElement.getAttribute("unique"));
+    }
+
+    @Test
+    public void defaultValue_none() throws Exception {
+        CreateTableChange change = new CreateTableChange();
+        ColumnConfig columnConfig = new ColumnConfig();
+        columnConfig.setName("id");
+        change.addColumn(columnConfig);
+
+        CreateTableStatement statement = (CreateTableStatement) change.generateStatements(new MockDatabase())[0];
+        assertNull(statement.getDefaultValue("id"));
+    }
+    
+    @Test
+    public void defaultValue_string() throws Exception {
+        CreateTableChange change = new CreateTableChange();
+        ColumnConfig columnConfig = new ColumnConfig();
+        columnConfig.setName("id");
+        columnConfig.setDefaultValue("DEFAULTVALUE");
+        change.addColumn(columnConfig);
+
+        CreateTableStatement statement = (CreateTableStatement) change.generateStatements(new MockDatabase())[0];
+        assertEquals("'DEFAULTVALUE'", statement.getDefaultValue("id"));
+    }
+
+    @Test
+    public void defaultValue_boolean() throws Exception {
+        CreateTableChange change = new CreateTableChange();
+        ColumnConfig columnConfig = new ColumnConfig();
+        columnConfig.setName("id");
+        columnConfig.setDefaultValueBoolean(Boolean.TRUE);
+        change.addColumn(columnConfig);
+
+        CreateTableStatement statement = (CreateTableStatement) change.generateStatements(new MockDatabase())[0];
+        assertEquals("'"+new MockDatabase().getTrueBooleanValue()+"'", statement.getDefaultValue("id"));
+    }
+
+    @Test
+    public void defaultValue_numeric() throws Exception {
+        CreateTableChange change = new CreateTableChange();
+        ColumnConfig columnConfig = new ColumnConfig();
+        columnConfig.setName("id");
+        columnConfig.setDefaultValueNumeric("42");
+        change.addColumn(columnConfig);
+
+        CreateTableStatement statement = (CreateTableStatement) change.generateStatements(new MockDatabase())[0];
+        assertEquals("42", statement.getDefaultValue("id"));
+    }
+
+    @Test
+    public void defaultValue_date() throws Exception {
+        CreateTableChange change = new CreateTableChange();
+        ColumnConfig columnConfig = new ColumnConfig();
+        columnConfig.setName("id");
+        columnConfig.setDefaultValueDate("2007-01-02");
+        change.addColumn(columnConfig);
+
+        CreateTableStatement statement = (CreateTableStatement) change.generateStatements(new MockDatabase())[0];
+        assertEquals("2007-01-02", statement.getDefaultValue("id"));
+    }
+
+    @Test
+    public void createInverse() {
+        CreateTableChange change = new CreateTableChange();
+        change.setTableName("TestTable");
+
+        Change[] inverses = change.createInverses();
+        assertEquals(1, inverses.length);
+        assertTrue(inverses[0] instanceof DropTableChange);
+        assertEquals("TestTable", ((DropTableChange) inverses[0]).getTableName());
+    }
+
+    @Test
+    public void tableSpace_none() throws Exception {
+        CreateTableChange change = new CreateTableChange();
+
+        CreateTableStatement statement = (CreateTableStatement) change.generateStatements(new MockDatabase())[0];
+        assertNull(statement.getTablespace());
+    }
+
+    @Test
+    public void tableSpace_set() throws Exception {
+        CreateTableChange change = new CreateTableChange();
+        change.setTablespace("TESTTABLESPACE");
+
+        CreateTableStatement statement = (CreateTableStatement) change.generateStatements(new MockDatabase())[0];
+        assertEquals("TESTTABLESPACE", statement.getTablespace());
+    }
+
+    @Test
+    public void getAffectedDatabaseObjects() {
+        CreateTableChange change = new CreateTableChange();
+        change.setTableName("testTable");
+
+        ColumnConfig column = new ColumnConfig();
+        column.setName("id");
+        change.addColumn(column);
+
+        column = new ColumnConfig();
+        column.setName("id2");
+        change.addColumn(column);
+
+        Set<DatabaseObject> affectedDatabaseObjects = change.getAffectedDatabaseObjects();
+        assertEquals(3, affectedDatabaseObjects.size());
+        for (DatabaseObject object : affectedDatabaseObjects) {
+            if (object instanceof Table) {
+                assertEquals("testTable", ((Table) object).getName());
+            } else {
+                assertEquals("testTable", ((Column) object).getTable().getName());
+                String columnName = ((Column) object).getName();
+                assertTrue(columnName.equals("id") || columnName.equals("id2"));
+            }
+        }
+    }
+
+    @Test
+    public void foreignKey_deferrable() throws Exception {
+        CreateTableChange change = new CreateTableChange();
+        ColumnConfig columnConfig = new ColumnConfig();
+        columnConfig.setName("id");
+        ConstraintsConfig constraints = new ConstraintsConfig();
+        constraints.setReferences("test(id)");
+        constraints.setDeferrable(true);
+        constraints.setInitiallyDeferred(true);
+        columnConfig.setConstraints(constraints);
+        change.addColumn(columnConfig);
+
+        CreateTableStatement statement = (CreateTableStatement) change.generateStatements(new MockDatabase())[0];
+        ForeignKeyConstraint keyConstraint = statement.getForeignKeyConstraints().iterator().next();
+        assertTrue(keyConstraint.isDeferrable());
+        assertTrue(keyConstraint.isInitiallyDeferred());
+    }
+
+    @Test
+    public void foreignKey_notDeferrable() throws Exception {
+        CreateTableChange change = new CreateTableChange();
+        ColumnConfig columnConfig = new ColumnConfig();
+        columnConfig.setName("id");
+        ConstraintsConfig constraints = new ConstraintsConfig();
+        constraints.setReferences("test(id)");
+        constraints.setDeferrable(false);
+        constraints.setInitiallyDeferred(false);
+        columnConfig.setConstraints(constraints);
+        change.addColumn(columnConfig);
+
+        CreateTableStatement statement = (CreateTableStatement) change.generateStatements(new MockDatabase())[0];
+        ForeignKeyConstraint keyConstraint = statement.getForeignKeyConstraints().iterator().next();
+        assertFalse(keyConstraint.isDeferrable());
+        assertFalse(keyConstraint.isInitiallyDeferred());
+    }
+
+    @Test
+    public void foreignKey_defaultDeferrable() throws Exception {
+        CreateTableChange change = new CreateTableChange();
+        ColumnConfig columnConfig = new ColumnConfig();
+        columnConfig.setName("id");
+        ConstraintsConfig constraints = new ConstraintsConfig();
+        constraints.setReferences("test(id)");
+        columnConfig.setConstraints(constraints);
+        change.addColumn(columnConfig);
+
+        CreateTableStatement statement = (CreateTableStatement) change.generateStatements(new MockDatabase())[0];
+        ForeignKeyConstraint keyConstraint = statement.getForeignKeyConstraints().iterator().next();
+        assertFalse(keyConstraint.isDeferrable());
+        assertFalse(keyConstraint.isInitiallyDeferred());
     }
 }

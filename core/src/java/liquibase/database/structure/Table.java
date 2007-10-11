@@ -44,4 +44,17 @@ public class Table implements DatabaseObject, Comparable<Table> {
     public String toString() {
         return getName();
     }
+
+    /**
+     * Returns the column object for the given columnName.  If the column does not exist in this table,
+     * return null.
+     */
+    public Column getColumn(String columnName) {
+        for (Column column : getColumns()) {
+            if (column.getName().equalsIgnoreCase(columnName)) {
+                return column;
+            }
+        }
+        return null;
+    }
 }

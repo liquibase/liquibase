@@ -50,27 +50,27 @@ public class HsqlDatabase extends AbstractDatabase {
         return "PUBLIC";
     }
 
-    protected String getBooleanType() {
+    public String getBooleanType() {
         return "BOOLEAN";
     }
 
-    protected String getCurrencyType() {
+    public String getCurrencyType() {
         return "DECIMAL";
     }
 
-    protected String getUUIDType() {
+    public String getUUIDType() {
         return "VARCHAR(36)";
     }
 
-    protected String getClobType() {
+    public String getClobType() {
         return "LONGVARCHAR";
     }
 
-    protected String getBlobType() {
+    public String getBlobType() {
         return "LONGVARBINARY";
     }
 
-    protected String getDateTimeType() {
+    public String getDateTimeType() {
         return "DATETIME";
     }
 
