@@ -14,7 +14,7 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AddTableWizardPage implements Step {
+public class AddTableWizardPage extends BaseRefactorWizardPage {
     private JTable columnTable;
     private JTextField tableNameTextField;
     private JTextField columnNameTextField;
@@ -41,18 +41,6 @@ public class AddTableWizardPage implements Step {
         addColumnButton.addActionListener(new AddColumnActionListener());
 
         return mainPanel;
-    }
-
-    public void _init() {
-        ;
-    }
-
-    public void _commit(boolean b) throws CommitStepException {
-        ;
-    }
-
-    public Icon getIcon() {
-        return null;
     }
 
     public JComponent getComponent() {

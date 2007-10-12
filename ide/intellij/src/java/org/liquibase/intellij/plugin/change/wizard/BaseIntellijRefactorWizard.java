@@ -6,6 +6,7 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import dbhelp.db.Database;
+import dbhelp.db.model.AbstractDBObject;
 import liquibase.ChangeSet;
 import liquibase.DatabaseChangeLog;
 import liquibase.change.Change;
@@ -32,11 +33,13 @@ public abstract class BaseIntellijRefactorWizard extends AbstractWizard<Step> {
     private ChangeMetaDataWizardPage metaDataPage;
     private Database database;
     private Connection connection;
+    private Object selectedObject;
 
-    public BaseIntellijRefactorWizard(String title, Project project, Database database, Connection connection) {
+    public BaseIntellijRefactorWizard(String title, Project project, Database database, Connection connection, Object selectedObject) {
         super(title, project);
         this.database = database;
         this.connection = connection;
+        this.selectedObject = selectedObject;
         System.out.println("Database is: " + database);
 
         for (Step page : createPages()) {
@@ -189,6 +192,10 @@ public abstract class BaseIntellijRefactorWizard extends AbstractWizard<Step> {
 
     }
 
-    protected abstract void refresh();
+    protected void refresh() {
+        if (selectedObject instanceof AbstractDBObject) {
+            ((AbstractDBObject) selectedObject).refresh();
+        }
+    }
 
 }

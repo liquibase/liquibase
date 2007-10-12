@@ -25,7 +25,7 @@ import java.awt.event.ActionEvent;
 import liquibase.util.StringUtils;
 import org.liquibase.intellij.plugin.LiquibaseProjectComponent;
 
-public class ChangeMetaDataWizardPage implements Step {
+public class ChangeMetaDataWizardPage extends BaseRefactorWizardPage {
     private JTextArea commentsTextArea;
     private JTextField idTextField;
     private JTextField authorTextField;
@@ -41,18 +41,6 @@ public class ChangeMetaDataWizardPage implements Step {
 
     public ChangeMetaDataWizardPage(Project project) {
         this.project = project;
-    }
-
-    public void _init() {
-        ;
-    }
-
-    public void _commit(boolean b) throws CommitStepException {
-        ;
-    }
-
-    public Icon getIcon() {
-        return null;
     }
 
     public JComponent getComponent() {
