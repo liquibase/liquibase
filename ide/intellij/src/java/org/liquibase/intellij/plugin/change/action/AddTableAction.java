@@ -21,22 +21,7 @@ public class AddTableAction extends BaseRefactorAction {
         super("Create Table");
     }
 
-    public void actionPerformed(ActionEvent actionEvent) {
-        Project project = LiquibaseProjectComponent.getInstance().getProject();
-        AddTableWizard wizard = createWizard(project);
-
-        wizard.pack();
-        wizard.show();
-    }
-
     protected AddTableWizard createWizard(Project project) {
         return new AddTableWizard(project, getSelectedDatabase(), getSelectedConnection(), getSelectedObject());
     }
-
-//    public void actionPerformed(AnActionEvent e) {
-//        Project application = ProjectManager.getInstance().getDefaultProject();
-//        LiquibaseProjectComponent liquibaseComponent = application.getComponent( LiquibaseProjectComponent.class);
-//        liquibaseComponent.sayHello();
-//    }
-
 }

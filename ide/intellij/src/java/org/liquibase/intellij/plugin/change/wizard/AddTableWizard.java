@@ -17,11 +17,9 @@ import java.sql.Connection;
 
 public class AddTableWizard extends BaseIntellijRefactorWizard {
     private AddTableWizardPage wizardPage;
-    private AbstractDBObject selectedObject;
 
-    public AddTableWizard(Project project, Database database, Connection connection, AbstractDBObject selectedObject) {
-        super("Create Table", project, database, connection);
-        this.selectedObject = selectedObject;
+    public AddTableWizard(Project project, Database database, Connection connection, Object selectedObject) {
+        super("Create Table", project, database, connection, selectedObject);
     }
 
 
@@ -41,9 +39,5 @@ public class AddTableWizard extends BaseIntellijRefactorWizard {
         }
 
         return new Change[]{change};
-    }
-
-    protected void refresh() {
-        selectedObject.refresh();
     }
 }

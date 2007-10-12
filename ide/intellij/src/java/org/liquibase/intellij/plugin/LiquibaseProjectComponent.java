@@ -5,16 +5,17 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.psi.xml.XmlFile;
 import dbhelp.db.Table;
+import dbhelp.db.Column;
 import dbhelp.db.ui.DBTree;
 import dbhelp.plugin.action.portable.ActionGroup;
 import dbhelp.plugin.action.portable.PopupMenuManager;
-import dbhelp.plugin.idea.ProjectMain;
 import dbhelp.plugin.idea.utils.IDEAUtils;
-import liquibase.exception.JDBCException;
 import liquibase.exception.LiquibaseException;
 import liquibase.migrator.Migrator;
 import org.jetbrains.annotations.NotNull;
 import org.liquibase.intellij.plugin.change.action.AddTableAction;
+import org.liquibase.intellij.plugin.change.action.AddAutoIncrementAction;
+import org.liquibase.intellij.plugin.change.action.AddColumnAction;
 
 import java.sql.Connection;
 import java.util.Map;
@@ -51,8 +52,10 @@ public class LiquibaseProjectComponent implements ProjectComponent {
 
         ActionGroup refactorActionGroup = new ActionGroup("Refactor");
         refactorActionGroup.addAction(new AddTableAction());
+        refactorActionGroup.addAction(new AddColumnAction());
+        refactorActionGroup.addAction(new AddAutoIncrementAction());
 
-        PopupMenuManager.getInstance().addAction(refactorActionGroup, DBTree.class, Table.class);
+        PopupMenuManager.getInstance().addAction(refactorActionGroup, DBTree.class, Table.class, Column.class);
 
 //        PopupMenuManager.getInstance().getActions(DBTree.class)
     }
@@ -107,7 +110,8 @@ public class LiquibaseProjectComponent implements ProjectComponent {
         Migrator migrator = new Migrator("changelog.xml", new IntellijFileOpener());
         try {
             migrator.init(connection);
-        } catch (JDBCException e) {
+            migrator.checkDatabaseChangeLogTable();
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
         return migrator;

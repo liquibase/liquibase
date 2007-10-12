@@ -639,7 +639,7 @@ public class Migrator {
     }
 
 
-    protected void checkDatabaseChangeLogTable() throws JDBCException, IOException {
+    public void checkDatabaseChangeLogTable() throws JDBCException, IOException {
         getDatabase().checkDatabaseChangeLogTable(this);
         getDatabase().checkDatabaseChangeLogLockTable(this);
     }
