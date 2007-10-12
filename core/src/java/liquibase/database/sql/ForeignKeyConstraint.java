@@ -21,8 +21,9 @@ public class ForeignKeyConstraint implements ColumnConstraint {
         return column;
     }
 
-    public void setColumn(String column) {
+    public ForeignKeyConstraint setColumn(String column) {
         this.column = column;
+        return this;
     }
 
 
@@ -34,23 +35,26 @@ public class ForeignKeyConstraint implements ColumnConstraint {
         return deleteCascade;
     }
 
-    public void setDeleteCascade(boolean deleteCascade) {
+    public ForeignKeyConstraint setDeleteCascade(boolean deleteCascade) {
         this.deleteCascade = deleteCascade;
+        return this;
     }
 
     public boolean isInitiallyDeferred() {
         return initiallyDeferred;
     }
 
-    public void setInitiallyDeferred(boolean initiallyDeferred) {
+    public ForeignKeyConstraint setInitiallyDeferred(boolean initiallyDeferred) {
         this.initiallyDeferred = initiallyDeferred;
+        return this;
     }
 
     public boolean isDeferrable() {
         return deferrable;
     }
 
-    public void setDeferrable(boolean deferrable) {
+    public ForeignKeyConstraint setDeferrable(boolean deferrable) {
         this.deferrable = deferrable;
+        return this;
     }
 }

@@ -1,6 +1,5 @@
 package liquibase.database.sql;
 
-import liquibase.change.ConstraintsConfig;
 import liquibase.database.Database;
 import liquibase.database.HsqlDatabase;
 import liquibase.database.structure.DatabaseSnapshot;
@@ -20,11 +19,19 @@ import org.junit.Test;
 public class CreateTableStatementTest {
 
     private static final String TABLE_NAME = "createTableStatementTest".toUpperCase();
+    private static final String FK_TABLE_NAME = "fk_table".toUpperCase();
 
     @Before
     @After
     public void dropTable() throws Exception {
         for (Database database : TestContext.getInstance().getAvailableDatabases()) {
+            try {
+                new JdbcTemplate(database).execute(new RawSqlStatement("drop table " + FK_TABLE_NAME));
+            } catch (JDBCException e) {
+                if (!database.getAutoCommitMode()) {
+                    database.getConnection().rollback();
+                }
+            }
             try {
                 new JdbcTemplate(database).execute(new RawSqlStatement("drop table " + TABLE_NAME));
             } catch (JDBCException e) {
@@ -96,7 +103,7 @@ public class CreateTableStatementTest {
 
             public void performTest(Database database) throws JDBCException {
                 String foreignKeyName = "fk_test_parent";
-                ForeignKeyConstraint fkConstraint = new ForeignKeyConstraint(foreignKeyName, TABLE_NAME+"(id)");
+                ForeignKeyConstraint fkConstraint = new ForeignKeyConstraint(foreignKeyName, TABLE_NAME + "(id)");
                 CreateTableStatement statement = new CreateTableStatement(TABLE_NAME)
                         .addPrimaryKeyColumn("id", "int", false)
                         .addColumn("name", "varchar(255)")
@@ -129,7 +136,7 @@ public class CreateTableStatementTest {
                 }
 
                 String foreignKeyName = "fk_test_parent";
-                ForeignKeyConstraint fkConstraint = new ForeignKeyConstraint(foreignKeyName, TABLE_NAME+"(id)");
+                ForeignKeyConstraint fkConstraint = new ForeignKeyConstraint(foreignKeyName, TABLE_NAME + "(id)");
                 fkConstraint.setDeferrable(true);
                 fkConstraint.setInitiallyDeferred(true);
 
@@ -153,6 +160,44 @@ public class CreateTableStatementTest {
                 assertEquals("PARENT_ID", foundForeignKey.getForeignKeyColumn().toUpperCase());
                 assertTrue(foundForeignKey.isDeferrable());
                 assertTrue(foundForeignKey.isInitiallyDeferred());
+            }
+        });
+    }
+
+    @Test
+    public void createTable_deleteCascadeForeignKeyColumn() throws Exception {
+        new DatabaseTestTemplate().testOnAvailableDatabases(new DatabaseTest() {
+
+            public void performTest(Database database) throws JDBCException {
+                CreateTableStatement statement = new CreateTableStatement(FK_TABLE_NAME)
+                        .addPrimaryKeyColumn("id", "int", false)
+                        .addColumn("name", "varchar(255)");
+
+                new JdbcTemplate(database).execute(statement);
+
+                String foreignKeyName = "fk_test_parent";
+                ForeignKeyConstraint fkConstraint = new ForeignKeyConstraint(foreignKeyName, FK_TABLE_NAME + "(id)");
+                fkConstraint.setDeleteCascade(true);
+
+                statement = new CreateTableStatement(TABLE_NAME)
+                        .addPrimaryKeyColumn("id", "int", false)
+                        .addColumn("name", "varchar(255)")
+                        .addColumn("parent_id", "int", fkConstraint);
+
+                new JdbcTemplate(database).execute(statement);
+
+                DatabaseSnapshot snapshot = new DatabaseSnapshot(database);
+                Table table = snapshot.getTable(TABLE_NAME);
+                assertEquals(TABLE_NAME.toUpperCase(), table.getName().toUpperCase());
+                assertNotNull(table.getColumn("id"));
+
+                ForeignKey foundForeignKey = snapshot.getForeignKey(foreignKeyName);
+                assertNotNull(foundForeignKey);
+                assertEquals(FK_TABLE_NAME, foundForeignKey.getPrimaryKeyTable().getName().toUpperCase());
+                assertEquals("ID", foundForeignKey.getPrimaryKeyColumn().toUpperCase());
+                assertEquals(TABLE_NAME, foundForeignKey.getForeignKeyTable().getName().toUpperCase());
+                assertEquals("PARENT_ID", foundForeignKey.getForeignKeyColumn().toUpperCase());
+//TODO: test when tested by diff                assertTrue(foundForeignKey.isDeleteCascade());
             }
         });
     }
@@ -185,5 +230,96 @@ public class CreateTableStatementTest {
         });
     }
 
+    @Test
+    public void addPrimaryKeyColumn_oneColumn() {
+        CreateTableStatement statement = new CreateTableStatement("tableName");
+        statement.addPrimaryKeyColumn("id", "int", false);
 
+        assertEquals(1, statement.getPrimaryKeyConstraint().getColumns().size());
+    }
+
+    @Test
+    public void addPrimaryKeyColumn_multiColumn() {
+        CreateTableStatement statement = new CreateTableStatement("tableName");
+        statement.addPrimaryKeyColumn("id1", "int", false);
+        statement.addPrimaryKeyColumn("id2", "int", false);
+
+        assertEquals(2, statement.getPrimaryKeyConstraint().getColumns().size());
+    }
+
+    @Test
+    public void addColumnConstraint_notNullConstraint() {
+        CreateTableStatement statement = new CreateTableStatement("tableName");
+        statement.addColumn("id", "int");
+
+        assertFalse(statement.getNotNullColumns().contains("id"));
+
+        statement.addColumnConstraint(new NotNullConstraint("id"));
+
+        assertTrue(statement.getNotNullColumns().contains("id"));
+    }
+
+    @Test
+    public void addColumnConstraint_ForeignKeyConstraint() {
+        CreateTableStatement statement = new CreateTableStatement("tableName");
+        statement.addColumn("id", "int");
+
+        assertEquals(0, statement.getForeignKeyConstraints().size());
+
+        statement.addColumnConstraint(new ForeignKeyConstraint("fk_test", "fkTable(id)").setColumn("id"));
+
+        assertEquals(1, statement.getForeignKeyConstraints().size());
+        assertEquals("fk_test", statement.getForeignKeyConstraints().iterator().next().getForeignKeyName());
+    }
+
+    @Test
+    public void addColumnConstraint_UniqueConstraint() {
+        CreateTableStatement statement = new CreateTableStatement("tableName");
+        statement.addColumn("id", "int");
+
+        assertEquals(0, statement.getUniqueConstraints().size());
+
+        statement.addColumnConstraint(new UniqueConstraint("uq_test").addColumns("id"));
+
+        assertEquals(1, statement.getUniqueConstraints().size());
+        assertEquals("uq_test", statement.getUniqueConstraints().iterator().next().getConstraintName());
+    }
+
+    @Test
+    public void createTable_tablespace() throws Exception {
+        new DatabaseTestTemplate().testOnAvailableDatabases(new DatabaseTest() {
+
+            public void performTest(Database database) throws JDBCException {
+                if (!database.supportsTablespaces()) {
+                    return;
+                }
+
+                CreateTableStatement statement = new CreateTableStatement(TABLE_NAME)
+                        .addPrimaryKeyColumn("id", "int", false)
+                        .addColumn("name", "varchar(255)")
+                        .addColumn("username", "varchar(255)", "'NEWUSER'")
+                        .setTablespace("liquibase2");
+
+                new JdbcTemplate(database).execute(statement);
+
+                DatabaseSnapshot snapshot = new DatabaseSnapshot(database);
+                Table table = snapshot.getTable(TABLE_NAME);
+                assertEquals(TABLE_NAME.toUpperCase(), table.getName().toUpperCase());
+
+                //todo: test that tablespace is correct when diff returns it
+            }
+        });
+    }
+
+    @Test
+    public void getEndDelimiter() throws Exception {
+        new DatabaseTestTemplate().testOnAllDatabases(new DatabaseTest() {
+
+            public void performTest(Database database) throws JDBCException {
+
+                CreateTableStatement statement = new CreateTableStatement("testTable");
+                assertEquals(";", statement.getEndDelimiter(database));
+            }
+        });
+    }
 }
