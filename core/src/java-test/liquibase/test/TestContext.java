@@ -27,7 +27,7 @@ public class TestContext {
             "jdbc:h2:mem:liquibase",
             "jdbc:hsqldb:mem:liquibase",
             "jdbc:jtds:sqlserver://localhost;databaseName=liquibase",
-            "jdbc:jtds:sqlserver://windev1.sundog.net;instance=latest;DatabaseName=liquibase",
+//            "jdbc:jtds:sqlserver://windev1.sundog.net;instance=latest;DatabaseName=liquibase",
             "jdbc:sqlserver://localhost;databaseName=liquibase",
             "jdbc:mysql://localhost/liquibase",
             "jdbc:oracle:thin:@localhost/XE",
@@ -36,7 +36,7 @@ public class TestContext {
 //            "jdbc:sybase:Tds:"+ InetAddress.getLocalHost().getHostName()+":5000/liquibase",
     };
 
-    private Connection openConnection(String url) throws Exception {
+    private Connection openConnection(final String url) throws Exception {
         String username = getUsername(url);
         String password = getPassword(url);
 
@@ -49,7 +49,7 @@ public class TestContext {
             info.put("password", password);
         }
 
-        Connection connection;
+        final Connection connection;
         try {
             connection = driver.connect(url, info);
         } catch (SQLException e) {
@@ -59,6 +59,20 @@ public class TestContext {
         if (connection == null) {
             throw new JDBCException("Connection could not be created to " + url + " with driver " + driver.getClass().getName() + ".  Possibly the wrong driver for the given database URL");
         }
+
+        Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+
+            public void run() {
+                try {
+                    connection.close();
+//                    System.out.println(url+" closed successfully");
+                } catch (SQLException e) {
+                    System.out.println("Could not close "+url);
+                    e.printStackTrace();
+                }
+            }
+        }));
+
         return connection;
     }
 

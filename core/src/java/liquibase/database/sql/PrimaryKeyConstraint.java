@@ -11,7 +11,6 @@ public class PrimaryKeyConstraint implements ColumnConstraint {
     
     private List<String> columns = new ArrayList<String>();
 
-
     public PrimaryKeyConstraint(String constraintName) {
         this.constraintName = constraintName;
     }

@@ -40,8 +40,9 @@ public class CreateTableStatement implements SqlStatement {
         return tablespace;
     }
 
-    public void setTablespace(String tablespace) {
+    public CreateTableStatement setTablespace(String tablespace) {
         this.tablespace = tablespace;
+        return this;
     }
 
 
@@ -63,7 +64,7 @@ public class CreateTableStatement implements SqlStatement {
     }
 
     public CreateTableStatement addPrimaryKeyColumn(String columnName, String columnType, boolean autoIncrement) {
-        String pkName = "PK_" + tableName.toUpperCase();
+        String pkName = "PK_" + getTableName().toUpperCase();
         if (pkName.length() > 18) {
             pkName = pkName.substring(0, 17);
         }
@@ -92,7 +93,7 @@ public class CreateTableStatement implements SqlStatement {
     }
 
     public CreateTableStatement addColumn(String columnName, String columnType, String defaultValue, ColumnConstraint... constraints) {
-        this.columns.add(columnName);
+        this.getColumns().add(columnName);
         this.columnTypes.put(columnName, columnType);
         if (defaultValue != null) {
             defaultValues.put(columnName, defaultValue);
@@ -100,21 +101,21 @@ public class CreateTableStatement implements SqlStatement {
         if (constraints != null) {
             for (ColumnConstraint constraint : constraints) {
                 if (constraint instanceof PrimaryKeyConstraint) {
-                    if (this.primaryKeyConstraint == null) {
+                    if (this.getPrimaryKeyConstraint() == null) {
                         this.primaryKeyConstraint = (PrimaryKeyConstraint) constraint;
                     } else {
                         for (String column : ((PrimaryKeyConstraint) constraint).getColumns()) {
-                            this.primaryKeyConstraint.addColumns(column);
+                            this.getPrimaryKeyConstraint().addColumns(column);
                         }
                     }
                 } else if (constraint instanceof NotNullConstraint) {
-                    notNullColumns.add(columnName);
+                    getNotNullColumns().add(columnName);
                 } else if (constraint instanceof ForeignKeyConstraint) {
                     ((ForeignKeyConstraint) constraint).setColumn(columnName);
-                    foreignKeyConstraints.add(((ForeignKeyConstraint) constraint));
+                    getForeignKeyConstraints().add(((ForeignKeyConstraint) constraint));
                 } else if (constraint instanceof UniqueConstraint) {
                     ((UniqueConstraint) constraint).addColumns(columnName);
-                    uniqueConstraints.add(((UniqueConstraint) constraint));
+                    getUniqueConstraints().add(((UniqueConstraint) constraint));
                 } else {
                     throw new RuntimeException("Unknown constraint type: " + constraint.getClass().getName());
                 }
@@ -129,9 +130,9 @@ public class CreateTableStatement implements SqlStatement {
 //        StringBuffer fkConstraints = new StringBuffer();
 
         StringBuffer buffer = new StringBuffer();
-        buffer.append("CREATE TABLE ").append(SqlUtil.escapeTableName(tableName, database)).append(" ");
+        buffer.append("CREATE TABLE ").append(SqlUtil.escapeTableName(getTableName(), database)).append(" ");
         buffer.append("(");
-        Iterator<String> columnIterator = columns.iterator();
+        Iterator<String> columnIterator = getColumns().iterator();
         while (columnIterator.hasNext()) {
             String column = columnIterator.next();
             boolean isAutoIncrement = autoIncrementColumns.contains(column);
@@ -147,7 +148,7 @@ public class CreateTableStatement implements SqlStatement {
                 buffer.append(" ").append(database.getAutoIncrementClause()).append(" ");
             }
 
-            if (notNullColumns.contains(column)) {
+            if (getNotNullColumns().contains(column)) {
                 buffer.append(" NOT NULL");
             } else {
                 if (database instanceof SybaseDatabase) {
@@ -160,14 +161,14 @@ public class CreateTableStatement implements SqlStatement {
             }
         }
 
-        if (primaryKeyConstraint != null && primaryKeyConstraint.getColumns().size() > 0) {
-            buffer.append(", CONSTRAINT ").append(StringUtils.trimToEmpty(primaryKeyConstraint.getConstraintName())).append(" PRIMARY KEY (");
-            buffer.append(StringUtils.join(primaryKeyConstraint.getColumns(), ", "));
+        if (getPrimaryKeyConstraint() != null && getPrimaryKeyConstraint().getColumns().size() > 0) {
+            buffer.append(", CONSTRAINT ").append(StringUtils.trimToEmpty(getPrimaryKeyConstraint().getConstraintName())).append(" PRIMARY KEY (");
+            buffer.append(StringUtils.join(getPrimaryKeyConstraint().getColumns(), ", "));
             buffer.append(")");
             buffer.append(",");
         }
 
-        for (ForeignKeyConstraint fkConstraint : foreignKeyConstraints) {
+        for (ForeignKeyConstraint fkConstraint : getForeignKeyConstraints()) {
             buffer.append(" CONSTRAINT ")
                     .append(fkConstraint.getForeignKeyName())
                     .append(" FOREIGN KEY (")
@@ -189,7 +190,7 @@ public class CreateTableStatement implements SqlStatement {
             buffer.append(",");
         }
 
-        for (UniqueConstraint uniqueConstraint : uniqueConstraints) {
+        for (UniqueConstraint uniqueConstraint : getUniqueConstraints()) {
             buffer.append(" CONSTRAINT ");
             buffer.append(uniqueConstraint.getConstraintName());
             buffer.append(" UNIQUE (");
@@ -214,13 +215,13 @@ public class CreateTableStatement implements SqlStatement {
 //            }
 //        }
 
-        if (tablespace != null && database.supportsTablespaces()) {
+        if (getTablespace() != null && database.supportsTablespaces()) {
             if (database instanceof MSSQLDatabase) {
-                sql += " ON " + tablespace;
+                sql += " ON " + getTablespace();
             } else if (database instanceof DB2Database) {
-                sql += " IN " + tablespace;
+                sql += " IN " + getTablespace();
             } else {
-                sql += " TABLESPACE " + tablespace;
+                sql += " TABLESPACE " + getTablespace();
             }
         }
         return sql;
@@ -234,15 +235,18 @@ public class CreateTableStatement implements SqlStatement {
         return ";";
     }
 
-    public void addColumnConstraint(NotNullConstraint notNullConstraint) {
-        notNullColumns.add(notNullConstraint.getColumnName());
+    public CreateTableStatement addColumnConstraint(NotNullConstraint notNullConstraint) {
+        getNotNullColumns().add(notNullConstraint.getColumnName());
+        return this;
     }
 
-    public void addColumnConstraint(ForeignKeyConstraint fkConstraint) {
-        foreignKeyConstraints.add(fkConstraint);
+    public CreateTableStatement addColumnConstraint(ForeignKeyConstraint fkConstraint) {
+        getForeignKeyConstraints().add(fkConstraint);
+        return this;
     }
 
-    public void addColumnConstraint(UniqueConstraint uniqueConstraint) {
-        uniqueConstraints.add(uniqueConstraint);
+    public CreateTableStatement addColumnConstraint(UniqueConstraint uniqueConstraint) {
+        getUniqueConstraints().add(uniqueConstraint);
+        return this;
     }
 }
