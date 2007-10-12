@@ -3,10 +3,8 @@ package liquibase.database.structure;
 import liquibase.util.StringUtils;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Arrays;
-
-import com.sun.javaws.util.VersionString;
+import java.util.List;
 
 public class PrimaryKey implements DatabaseObject, Comparable<PrimaryKey> {
     private String name;
