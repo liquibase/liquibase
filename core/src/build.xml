@@ -141,7 +141,11 @@ The available targets at the current stage:
 
         <javac srcdir="${src.dir}/java-dbtest" destdir="${build.db.test.dir}" deprecation="${deprecation}"
                debug="${debug}" optimize="${optimize}" source="1.5">
-            <classpath refid="classpath"/>
+            <classpath>
+                <pathelement path="${build.dir}"/>
+                <pathelement path="${build.test.dir}"/>
+                <path refid="classpath"/>
+            </classpath>
         </javac>
 
         <propertyfile file="${build.dir}/buildinfo.properties">
