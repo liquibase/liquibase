@@ -3,7 +3,7 @@ package liquibase.test;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.exception.JDBCException;
-import liquibase.migrator.JUnitJDBCDriverClassLoader;
+import liquibase.test.JUnitJDBCDriverClassLoader;
 
 import java.sql.Connection;
 import java.sql.Driver;

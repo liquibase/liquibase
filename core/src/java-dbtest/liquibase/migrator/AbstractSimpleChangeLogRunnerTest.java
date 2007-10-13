@@ -4,6 +4,8 @@ import junit.framework.TestCase;
 import liquibase.ChangeSet;
 import liquibase.FileOpener;
 import liquibase.FileSystemFileOpener;
+import liquibase.test.JUnitFileOpener;
+import liquibase.test.JUnitJDBCDriverClassLoader;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.structure.DatabaseSnapshot;
 import liquibase.diff.Diff;
