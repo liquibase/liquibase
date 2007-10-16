@@ -7,6 +7,7 @@ import java.io.IOException;
 
 import com.sun.org.apache.xml.internal.serialize.OutputFormat;
 import com.sun.org.apache.xml.internal.serialize.XMLSerializer;
+import liquibase.DatabaseChangeLog;
 
 public class DefaultXmlWriter implements XmlWriter {
 

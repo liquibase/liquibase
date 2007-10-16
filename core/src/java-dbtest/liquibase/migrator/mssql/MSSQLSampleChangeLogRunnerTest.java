@@ -6,6 +6,6 @@ import liquibase.migrator.AbstractSimpleChangeLogRunnerTest;
 public class MSSQLSampleChangeLogRunnerTest extends AbstractSimpleChangeLogRunnerTest {
 
     public MSSQLSampleChangeLogRunnerTest() throws Exception {
-        super("mssql", "com.microsoft.sqlserver.jdbc.SQLServerDriver", "jdbc:sqlserver://localhost;databaseName=liquibase");
+        super("mssql", "com.microsoft.sqlserver.jdbc.SQLServerDriver", "jdbc:sqlserver://127.0.0.1;databaseName=liquibase");
     }
 }

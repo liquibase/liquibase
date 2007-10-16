@@ -48,7 +48,7 @@ public class CreateTableStatementTest {
 
             public void performTest(Database database) throws JDBCException {
                 CreateTableStatement statement = new CreateTableStatement(TABLE_NAME)
-                        .addPrimaryKeyColumn("id", "int", false)
+                        .addPrimaryKeyColumn("id", "int")
                         .addColumn("name", "varchar(255)")
                         .addColumn("username", "varchar(255)", "'NEWUSER'");
 
@@ -81,9 +81,10 @@ public class CreateTableStatementTest {
                 }
 
                 CreateTableStatement statement = new CreateTableStatement(TABLE_NAME)
-                        .addPrimaryKeyColumn("id", "int", true)
+                        .addPrimaryKeyColumn("id", "int")
                         .addColumn("name", "varchar(255)")
                         .addColumn("username", "varchar(255)", "'NEWUSER'");
+                statement.addColumnConstraint(new AutoIncrementConstraint("id"));
 
                 new JdbcTemplate(database).execute(statement);
 
@@ -105,7 +106,7 @@ public class CreateTableStatementTest {
                 String foreignKeyName = "fk_test_parent";
                 ForeignKeyConstraint fkConstraint = new ForeignKeyConstraint(foreignKeyName, TABLE_NAME + "(id)");
                 CreateTableStatement statement = new CreateTableStatement(TABLE_NAME)
-                        .addPrimaryKeyColumn("id", "int", false)
+                        .addPrimaryKeyColumn("id", "int")
                         .addColumn("name", "varchar(255)")
                         .addColumn("parent_id", "int", fkConstraint);
 
@@ -141,7 +142,7 @@ public class CreateTableStatementTest {
                 fkConstraint.setInitiallyDeferred(true);
 
                 CreateTableStatement statement = new CreateTableStatement(TABLE_NAME)
-                        .addPrimaryKeyColumn("id", "int", false)
+                        .addPrimaryKeyColumn("id", "int")
                         .addColumn("name", "varchar(255)")
                         .addColumn("parent_id", "int", fkConstraint);
 
@@ -170,7 +171,7 @@ public class CreateTableStatementTest {
 
             public void performTest(Database database) throws JDBCException {
                 CreateTableStatement statement = new CreateTableStatement(FK_TABLE_NAME)
-                        .addPrimaryKeyColumn("id", "int", false)
+                        .addPrimaryKeyColumn("id", "int")
                         .addColumn("name", "varchar(255)");
 
                 new JdbcTemplate(database).execute(statement);
@@ -180,7 +181,7 @@ public class CreateTableStatementTest {
                 fkConstraint.setDeleteCascade(true);
 
                 statement = new CreateTableStatement(TABLE_NAME)
-                        .addPrimaryKeyColumn("id", "int", false)
+                        .addPrimaryKeyColumn("id", "int")
                         .addColumn("name", "varchar(255)")
                         .addColumn("parent_id", "int", fkConstraint);
 
@@ -214,7 +215,7 @@ public class CreateTableStatementTest {
                 UniqueConstraint uniqueConstraint = new UniqueConstraint("UQ_TESTCT_ID");
                 NotNullConstraint notNullConstraint = new NotNullConstraint();
                 CreateTableStatement statement = new CreateTableStatement(TABLE_NAME)
-                        .addPrimaryKeyColumn("id", "int", false)
+                        .addPrimaryKeyColumn("id", "int")
                         .addColumn("name", "varchar(255)")
                         .addColumn("username", "int", uniqueConstraint, notNullConstraint);
 
@@ -233,7 +234,7 @@ public class CreateTableStatementTest {
     @Test
     public void addPrimaryKeyColumn_oneColumn() {
         CreateTableStatement statement = new CreateTableStatement("tableName");
-        statement.addPrimaryKeyColumn("id", "int", false);
+        statement.addPrimaryKeyColumn("id", "int");
 
         assertEquals(1, statement.getPrimaryKeyConstraint().getColumns().size());
     }
@@ -241,8 +242,8 @@ public class CreateTableStatementTest {
     @Test
     public void addPrimaryKeyColumn_multiColumn() {
         CreateTableStatement statement = new CreateTableStatement("tableName");
-        statement.addPrimaryKeyColumn("id1", "int", false);
-        statement.addPrimaryKeyColumn("id2", "int", false);
+        statement.addPrimaryKeyColumn("id1", "int");
+        statement.addPrimaryKeyColumn("id2", "int");
 
         assertEquals(2, statement.getPrimaryKeyConstraint().getColumns().size());
     }
@@ -295,7 +296,7 @@ public class CreateTableStatementTest {
                 }
 
                 CreateTableStatement statement = new CreateTableStatement(TABLE_NAME)
-                        .addPrimaryKeyColumn("id", "int", false)
+                        .addPrimaryKeyColumn("id", "int")
                         .addColumn("name", "varchar(255)")
                         .addColumn("username", "varchar(255)", "'NEWUSER'")
                         .setTablespace("liquibase2");

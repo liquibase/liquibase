@@ -95,5 +95,16 @@ public class CacheDatabase extends AbstractDatabase {
         return false;
     }
 
-    
+    public String translateDefaultValue(String defaultValue) {
+        if (defaultValue != null) {
+            if (defaultValue.charAt(0) == '"' && defaultValue.charAt(defaultValue.length() - 1) == '"') {
+                defaultValue = defaultValue.substring(1, defaultValue.length() - 1);
+                return "'" + defaultValue + "'";
+            } else if (defaultValue.startsWith("$")) {
+                return "OBJECTSCRIPT '" + defaultValue + "'";
+            }
+        }
+        return defaultValue;
+    }
+
 }

@@ -221,7 +221,14 @@ public class ChangeSet {
     }
 
     public String toString(boolean includeMD5Sum) {
-        return getDatabaseChangeLog().getFilePath() + " :: " + getId() + " :: " + getAuthor() + (includeMD5Sum?(" :: (MD5Sum: " + getMd5sum() + ")"):"");
+        String filePath;
+        DatabaseChangeLog databaseChangeLog = getDatabaseChangeLog();
+        if (databaseChangeLog == null) {
+            filePath = "UNKNOWN CHANGE LOG";
+        } else {
+            filePath = databaseChangeLog.getFilePath();
+        }
+        return filePath + " :: " + getId() + " :: " + getAuthor() + (includeMD5Sum?(" :: (MD5Sum: " + getMd5sum() + ")"):"");
     }
 
     public String toString() {

@@ -63,7 +63,7 @@ public class CreateTableStatement implements SqlStatement {
         return notNullColumns;
     }
 
-    public CreateTableStatement addPrimaryKeyColumn(String columnName, String columnType, boolean autoIncrement) {
+    public CreateTableStatement addPrimaryKeyColumn(String columnName, String columnType, ColumnConstraint... constraints) {
         String pkName = "PK_" + getTableName().toUpperCase();
         if (pkName.length() > 18) {
             pkName = pkName.substring(0, 17);
@@ -71,11 +71,13 @@ public class CreateTableStatement implements SqlStatement {
         PrimaryKeyConstraint pkConstraint = new PrimaryKeyConstraint(pkName);
         pkConstraint.addColumns(columnName);
 
-        if (autoIncrement) {
-            autoIncrementColumns.add(columnName);
-        }
+        List<ColumnConstraint> allConstraints = new ArrayList<ColumnConstraint>();
+        allConstraints.addAll(Arrays.asList(constraints));
+        allConstraints.add(new NotNullConstraint(columnName));
+        allConstraints.add(pkConstraint);
 
-        addColumn(columnName, columnType, pkConstraint, new NotNullConstraint(columnName));
+
+        addColumn(columnName, columnType, allConstraints.toArray(new ColumnConstraint[allConstraints.size()]));
 
         return this;
     }
@@ -116,6 +118,8 @@ public class CreateTableStatement implements SqlStatement {
                 } else if (constraint instanceof UniqueConstraint) {
                     ((UniqueConstraint) constraint).addColumns(columnName);
                     getUniqueConstraints().add(((UniqueConstraint) constraint));
+                } else if (constraint instanceof AutoIncrementConstraint) {
+                    autoIncrementColumns.add(columnName);
                 } else {
                     throw new RuntimeException("Unknown constraint type: " + constraint.getClass().getName());
                 }
@@ -247,6 +251,11 @@ public class CreateTableStatement implements SqlStatement {
 
     public CreateTableStatement addColumnConstraint(UniqueConstraint uniqueConstraint) {
         getUniqueConstraints().add(uniqueConstraint);
+        return this;
+    }
+
+    public CreateTableStatement addColumnConstraint(AutoIncrementConstraint autoIncrementConstraint) {
+        autoIncrementColumns.add(autoIncrementConstraint.getColumnName());
         return this;
     }
 }
