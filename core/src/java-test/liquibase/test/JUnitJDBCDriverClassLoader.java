@@ -33,7 +33,7 @@ public class JUnitJDBCDriverClassLoader extends URLClassLoader {
         try {
             List<URL> urls = new ArrayList<URL>();
 
-            File thisClassFile = new File(new URI(Thread.currentThread().getContextClassLoader().getResource("liquibase/migrator/JUnitJDBCDriverClassLoader.class").toExternalForm()));
+            File thisClassFile = new File(new URI(Thread.currentThread().getContextClassLoader().getResource("liquibase/test/JUnitJDBCDriverClassLoader.class").toExternalForm()));
             File jdbcLib = new File(thisClassFile.getParentFile().getParentFile().getParentFile().getParent(), "lib-jdbc");
 
             for (File driverDir : jdbcLib.listFiles(new FileFilter() {
