@@ -174,6 +174,13 @@ public class Migrator {
         database.setConnection(connection);
     }
 
+    /**
+     * Initializes the Migrator with the given database.  Needs to be called before actually using the Migrator.
+     */
+    public void init(Database database) throws JDBCException {
+        this.database = database;
+    }
+
 //    public void init(String driverClass, String url, String username, String password, ClassLoader driverClassLoader) throws JDBCException {
 //        Driver driver = null;
 //        try {

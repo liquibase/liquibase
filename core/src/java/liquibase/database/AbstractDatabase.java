@@ -13,6 +13,7 @@ import liquibase.exception.LockException;
 import liquibase.exception.UnsupportedChangeException;
 import liquibase.migrator.Migrator;
 import liquibase.util.StreamUtil;
+import liquibase.util.StringUtils;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -766,6 +767,15 @@ public abstract class AbstractDatabase implements Database {
         return false;
     }
 
+    public boolean isSystemView(String catalogName, String schemaName, String viewName) {
+        if ("information_schema".equalsIgnoreCase(schemaName)) {
+            return true;
+        } else if (getSystemTablesAndViews().contains(viewName)) {
+            return true;
+        }
+        return false;
+    }
+
     public boolean isLiquibaseTable(String tableName) {
         return tableName.equalsIgnoreCase(this.getDatabaseChangeLogTableName()) || tableName.equalsIgnoreCase(this.getDatabaseChangeLogLockTableName());
     }
@@ -778,7 +788,10 @@ public abstract class AbstractDatabase implements Database {
             rs = conn.getMetaData().getTables(getCatalogName(), getSchemaName(), null, new String[]{"VIEW"});
             while (rs.next()) {
                 String tableName = rs.getString("TABLE_NAME");
-                if (getSystemTablesAndViews().contains(tableName)) {
+                String schemaName = rs.getString("TABLE_SCHEM");
+                String catalogName = rs.getString("TABLE_CAT");
+
+                if (isSystemView(catalogName, schemaName, tableName)) {
                     continue;
                 }
 
@@ -900,7 +913,8 @@ public abstract class AbstractDatabase implements Database {
     }
 
     public String getViewDefinition(String viewName) throws JDBCException {
-        return (String) new JdbcTemplate(this).queryForObject(getViewDefinitionSql(viewName), String.class);
+        String definition = (String) new JdbcTemplate(this).queryForObject(getViewDefinitionSql(viewName), String.class);
+        return definition.replaceFirst("^CREATE VIEW \\w+ AS", "");
     }
 
     protected SqlStatement getViewDefinitionSql(String viewName) throws JDBCException {
@@ -912,6 +926,7 @@ public abstract class AbstractDatabase implements Database {
             sql += " and table_catalog='" + getCatalogName() + "'";
 
         }
+
 //        log.info("GetViewDefinitionSQL: "+sql);
         return new RawSqlStatement(sql);
     }
@@ -927,5 +942,9 @@ public abstract class AbstractDatabase implements Database {
         }
 
         return returnType;
+    }
+
+    public String translateDefaultValue(String defaultValue) {
+        return defaultValue;
     }
 }

@@ -34,12 +34,11 @@ public class CreateTableChange extends AbstractChange {
         CreateTableStatement statement = new CreateTableStatement(tableName);
         for (ColumnConfig column : getColumns()) {
             ConstraintsConfig constraints = column.getConstraints();
+            boolean isAutoIncrement = column.isAutoIncrement() != null && column.isAutoIncrement();
             if (constraints != null && constraints.isPrimaryKey() != null && constraints.isPrimaryKey()) {
-                boolean isAutoIncrement = column.isAutoIncrement() != null && column.isAutoIncrement();
 
                 statement.addPrimaryKeyColumn(column.getName(),
-                        database.getColumnType(column.getType(), column.isAutoIncrement()),
-                        isAutoIncrement);
+                        database.getColumnType(column.getType(), isAutoIncrement));
 
             } else {
                 String defaultValue = null;
@@ -69,6 +68,10 @@ public class CreateTableChange extends AbstractChange {
                 if (constraints.isUnique() != null && constraints.isUnique()) {
                     statement.addColumnConstraint(new UniqueConstraint().addColumns(column.getName()));
                 }
+            }
+
+            if (isAutoIncrement) {
+                statement.addColumnConstraint(new AutoIncrementConstraint(column.getName()));
             }
         }
 

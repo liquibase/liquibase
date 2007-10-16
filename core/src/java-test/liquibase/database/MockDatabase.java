@@ -5,6 +5,7 @@ import liquibase.exception.LockException;
 import liquibase.database.sql.SqlStatement;
 import liquibase.migrator.Migrator;
 import liquibase.DatabaseChangeLogLock;
+import liquibase.util.StringUtils;
 
 import java.sql.Connection;
 import java.io.IOException;
@@ -172,6 +173,11 @@ public class MockDatabase implements Database {
         return false;
     }
 
+
+    public boolean isSystemView(String catalogName, String schemaName, String name) {
+        return false;
+    }
+
     public boolean isLiquibaseTable(String tableName) {
         return false;
     }
@@ -232,4 +238,7 @@ public class MockDatabase implements Database {
         return "TIME";
     }
 
+    public String translateDefaultValue(String defaultValue) {
+        return defaultValue;
+    }
 }

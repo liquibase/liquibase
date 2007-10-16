@@ -197,4 +197,8 @@ public class MSSQLDatabase extends AbstractDatabase {
         return true;
     }
 
+
+    public boolean isSystemView(String catalogName, String schemaName, String viewName) {
+        return super.isSystemView(catalogName, schemaName, viewName) || schemaName.equals("sys");
+    }
 }

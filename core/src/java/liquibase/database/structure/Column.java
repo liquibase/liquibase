@@ -2,6 +2,7 @@ package liquibase.database.structure;
 
 import liquibase.database.Database;
 import liquibase.database.PostgresDatabase;
+import liquibase.database.MSSQLDatabase;
 
 import java.sql.Types;
 import java.util.Arrays;
@@ -214,11 +215,15 @@ public class Column implements DatabaseObject, Comparable<Column> {
         } else if (oneParam.contains(this.getDataType())) {
             if (database instanceof PostgresDatabase && translatedTypeName.equals("text")) {
                 return translatedTypeName;
+            } else if (database instanceof MSSQLDatabase && translatedTypeName.equals("uniqueidentifier")) {
+                return translatedTypeName;
             }
             dataType = translatedTypeName+"("+this.getColumnSize()+")";
         } else if (twoParams.contains(this.getDataType())) {
             if (database instanceof PostgresDatabase && this.getColumnSize() == 131089 ) {
                 dataType = "DECIMAL";
+            } else if (database instanceof MSSQLDatabase && translatedTypeName.equalsIgnoreCase("money")) {
+                dataType = translatedTypeName.toUpperCase();
             } else {
                 dataType = translatedTypeName+"("+this.getColumnSize()+","+this.getDecimalDigits()+")";
             }

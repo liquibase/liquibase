@@ -1,6 +1,5 @@
 package liquibase.database.structure;
 
-import liquibase.database.CacheDatabase;
 import liquibase.database.Database;
 import liquibase.database.H2Database;
 import liquibase.database.DerbyDatabase;
@@ -128,7 +127,7 @@ public class DatabaseSnapshot {
             String schemaName = rs.getString("TABLE_SCHEM");
             String catalogName = rs.getString("TABLE_CAT");
 
-            if (database.isSystemTable(catalogName, schemaName, name) || database.isLiquibaseTable(name)) {
+            if (database.isSystemTable(catalogName, schemaName, name) || database.isLiquibaseTable(name) || database.isSystemView(catalogName, schemaName, name)) {
                 continue;
             }
 
@@ -186,7 +185,7 @@ public class DatabaseSnapshot {
             columnInfo.setDecimalDigits(rs.getInt("DECIMAL_DIGITS"));
             columnInfo.setTypeName(rs.getString("TYPE_NAME"));
             String defaultValue = rs.getString("COLUMN_DEF");
-            columnInfo.setDefaultValue(translateDefaultValue(defaultValue, database));
+            columnInfo.setDefaultValue(database.translateDefaultValue(defaultValue));
 
             int nullable = rs.getInt("NULLABLE");
             if (nullable == DatabaseMetaData.columnNoNulls) {
@@ -236,25 +235,6 @@ public class DatabaseSnapshot {
             return defaultValue.equals("GENERATED_BY_DEFAULT");
         }
         return false;
-    }
-
-    private String translateDefaultValue(String defaultValue, Database database) {
-        if (database instanceof H2Database) {
-            if (StringUtils.trimToEmpty(defaultValue).startsWith("(NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_")) {
-                return null;
-            }
-            return defaultValue;
-        } else if (database instanceof CacheDatabase) {
-            if (defaultValue != null) {
-                if (defaultValue.charAt(0) == '"' && defaultValue.charAt(defaultValue.length() - 1) == '"') {
-                    defaultValue = defaultValue.substring(1, defaultValue.length() - 1);
-                    return "'" + defaultValue + "'";
-                } else if (defaultValue.startsWith("$")) {
-                    return "OBJECTSCRIPT '" + defaultValue + "'";
-                }
-            }
-        }
-        return defaultValue;
     }
 
     private void readForeignKeyInformation() throws JDBCException, SQLException {

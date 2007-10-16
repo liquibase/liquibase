@@ -3,6 +3,7 @@ package liquibase.database;
 import liquibase.database.sql.RawSqlStatement;
 import liquibase.database.sql.SqlStatement;
 import liquibase.exception.JDBCException;
+import liquibase.util.StringUtils;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -30,7 +31,7 @@ public class H2Database extends HsqlDatabase {
     }
 
     public SqlStatement createFindSequencesSQL() throws JDBCException {
-        return new RawSqlStatement("SELECT SEQUENCE_NAME FROM INFORMATION_SCHEMA.SEQUENCES WHERE SEQUENCE_SCHEMA = '"+getSchemaName()+"' AND IS_GENERATED=FALSE");
+        return new RawSqlStatement("SELECT SEQUENCE_NAME FROM INFORMATION_SCHEMA.SEQUENCES WHERE SEQUENCE_SCHEMA = '" + getSchemaName() + "' AND IS_GENERATED=FALSE");
     }
 
 
@@ -68,7 +69,14 @@ public class H2Database extends HsqlDatabase {
     }
 
     protected SqlStatement getViewDefinitionSql(String name) throws JDBCException {
-        return new RawSqlStatement("SELECT VIEW_DEFINITION FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_NAME = '"+name+"'");
+        return new RawSqlStatement("SELECT VIEW_DEFINITION FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_NAME = '" + name + "'");
+    }
+
+    public String translateDefaultValue(String defaultValue) {
+        if (StringUtils.trimToEmpty(defaultValue).startsWith("(NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_")) {
+            return null;
+        }
+        return defaultValue;
     }
 
 }

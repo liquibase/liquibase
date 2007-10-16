@@ -3,6 +3,7 @@ package liquibase.database;
 import liquibase.DatabaseChangeLogLock;
 import liquibase.change.ColumnConfig;
 import liquibase.database.sql.SqlStatement;
+import liquibase.database.structure.DatabaseObject;
 import liquibase.exception.JDBCException;
 import liquibase.exception.LockException;
 import liquibase.migrator.Migrator;
@@ -10,7 +11,7 @@ import liquibase.migrator.Migrator;
 import java.io.IOException;
 import java.sql.Connection;
 
-public interface Database {
+public interface Database extends DatabaseObject {
     /**
      * Is this AbstractDatabase subclass the correct one to use for the given connection.
      */
@@ -173,4 +174,8 @@ public interface Database {
     String getDateTimeType();
 
     String getTimeType();
+
+    String translateDefaultValue(String defaultValue);
+
+    boolean isSystemView(String catalogName, String schemaName, String name);
 }
