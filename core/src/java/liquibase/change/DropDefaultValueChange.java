@@ -44,8 +44,7 @@ public class DropDefaultValueChange extends AbstractChange {
 
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
         if (database instanceof MSSQLDatabase) {
-            //docs on how to at http://doc.ddart.net/mssql/sql70/de-dz_9.htm
-            throw new UnsupportedChangeException("Dropping default values is not currently supported in MS-SQL");
+            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + SqlUtil.escapeTableName(getTableName(), database) + " DROP CONSTRAINT DF_" + getTableName()+"_"+getColumnName()),};
         } else if (database instanceof MySQLDatabase) {
             return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + SqlUtil.escapeTableName(getTableName(), database) + " ALTER " + getColumnName() + " DROP DEFAULT"),};
         } else if (database instanceof OracleDatabase) {

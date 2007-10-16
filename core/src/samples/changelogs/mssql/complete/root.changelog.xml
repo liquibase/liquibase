@@ -237,6 +237,10 @@
         <addDefaultValue tableName="address" columnName="line2" defaultValue="N/A"/>
     </changeSet>
 
+    <changeSet id="29" author="nvoxland">
+        <dropDefaultValue tableName="address" columnName="line2"/>
+    </changeSet>
+
     <changeSet id="30" author="nvoxland">
         <dropPrimaryKey tableName="address" constraintName="pk_address"/>
     </changeSet>
