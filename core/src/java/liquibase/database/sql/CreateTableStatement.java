@@ -145,7 +145,11 @@ public class CreateTableStatement implements SqlStatement {
             buffer.append(" ").append(database.getColumnType(columnTypes.get(column), isAutoIncrement));
 
             if (getDefaultValue(column) != null) {
-                buffer.append(" DEFAULT ").append(getDefaultValue(column));
+                if (database instanceof MSSQLDatabase) {
+                    buffer.append(" CONSTRAINT ").append(((MSSQLDatabase) database).generateDefaultConstraintName(tableName, column));
+                }
+                buffer.append(" DEFAULT ");
+                buffer.append(getDefaultValue(column));
             }
 
             if (isAutoIncrement) {
