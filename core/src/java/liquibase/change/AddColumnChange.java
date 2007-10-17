@@ -121,13 +121,17 @@ public class AddColumnChange extends AbstractChange {
     }
 
     private String getDefaultClause(Database database) {
+        String clause = "";
         if (column.getDefaultValue() != null
                 || column.getDefaultValueBoolean() != null
                 || column.getDefaultValueDate() != null
                 || column.getDefaultValueNumeric() != null) {
-            return " DEFAULT " + column.getDefaultColumnValue(database);
+            if (database instanceof MSSQLDatabase) {
+                clause += " CONSTRAINT "+ ((MSSQLDatabase) database).generateDefaultConstraintName(tableName, column.getName());
+            }
+            clause += " DEFAULT " + column.getDefaultColumnValue(database);
         }
-        return "";
+        return clause;
     }
 
     protected Change[] createInverses() {

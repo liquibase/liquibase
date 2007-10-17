@@ -201,4 +201,8 @@ public class MSSQLDatabase extends AbstractDatabase {
     public boolean isSystemView(String catalogName, String schemaName, String viewName) {
         return super.isSystemView(catalogName, schemaName, viewName) || schemaName.equals("sys");
     }
+
+    public String generateDefaultConstraintName(String tableName, String columnName) {
+        return "DF_" + tableName+"_"+columnName;
+    }
 }

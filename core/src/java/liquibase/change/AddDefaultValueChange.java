@@ -85,7 +85,7 @@ public class AddDefaultValueChange extends AbstractChange {
         if(database instanceof SybaseDatabase) {
             return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + SqlUtil.escapeTableName(getTableName(), database) + " REPLACE " + getColumnName() + " DEFAULT " + getColumnValue(database)),};
         } else if (database instanceof MSSQLDatabase) {
-            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + SqlUtil.escapeTableName(getTableName(), database) + " ADD CONSTRAINT DF_" +getTableName()+"_"+ getColumnName() + " DEFAULT " + getColumnValue(database) + " FOR " + getColumnName()),};
+            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + SqlUtil.escapeTableName(getTableName(), database) + " ADD CONSTRAINT "+ ((MSSQLDatabase) database).generateDefaultConstraintName(getTableName(), getColumnName()) + " DEFAULT " + getColumnValue(database) + " FOR " + getColumnName()),};
         } else if (database instanceof MySQLDatabase) {
             return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + SqlUtil.escapeTableName(getTableName(), database) + " ALTER " + getColumnName() + " SET DEFAULT " + getColumnValue(database)),};
         } else if (database instanceof OracleDatabase) {
