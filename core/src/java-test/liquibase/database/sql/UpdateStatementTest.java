@@ -1,22 +1,19 @@
 package liquibase.database.sql;
 
-import liquibase.database.Database;
-import liquibase.test.TestContext;
-import liquibase.test.DatabaseTestTemplate;
-import liquibase.test.DatabaseTest;
 import liquibase.change.CreateTableChange;
-import liquibase.change.ColumnConfig;
+import liquibase.database.Database;
+import liquibase.test.DatabaseTest;
+import liquibase.test.DatabaseTestTemplate;
+import liquibase.test.TestContext;
+import static org.junit.Assert.assertEquals;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.sql.Types;
-import java.util.List;
-
-import org.junit.Test;
-import org.junit.BeforeClass;
-import static org.junit.Assert.*;
 
 public class UpdateStatementTest {
 
-    @BeforeClass
+    @Before
     public void setupTable() throws Exception {
         for (Database database : TestContext.getInstance().getAvailableDatabases()) {
             CreateTableChange createTableChange = new CreateTableChange();

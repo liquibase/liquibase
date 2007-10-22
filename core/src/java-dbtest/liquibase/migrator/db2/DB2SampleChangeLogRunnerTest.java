@@ -8,7 +8,7 @@ import java.util.Properties;
 public class DB2SampleChangeLogRunnerTest extends AbstractSimpleChangeLogRunnerTest {
 
     public DB2SampleChangeLogRunnerTest() throws Exception {
-        super("db2","com.ibm.db2.jcc.DB2Driver", "jdbc:db2://localhost:50000/liquibas");
+        super("db2", "jdbc:db2://localhost:50000/liquibas");
     }
 
     protected Properties createProperties() {

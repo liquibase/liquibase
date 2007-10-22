@@ -5,10 +5,12 @@ import liquibase.exception.LockException;
 import liquibase.database.sql.SqlStatement;
 import liquibase.migrator.Migrator;
 import liquibase.DatabaseChangeLogLock;
-import liquibase.util.StringUtils;
 
 import java.sql.Connection;
+import java.sql.Time;
+import java.sql.Timestamp;
 import java.io.IOException;
+import java.util.Date;
 
 public class MockDatabase implements Database {
 
@@ -102,13 +104,25 @@ public class MockDatabase implements Database {
         return isoDate;
     }
 
+
+    public String getDateLiteral(java.sql.Date date) {
+        return date.toString();
+    }
+
+    public String getDateLiteral(Time time) {
+        return time.toString();
+    }
+
+    public String getDateLiteral(Timestamp timeStamp) {
+        return timeStamp.toString();
+    }
+
     public String getCurrentDateTimeFunction() {
         return "DATETIME()";
     }
 
     public void setCurrentDateTimeFunction(String function) {
-        ;
-    }    
+    }
 
     public String getLineComment() {
         return null;
@@ -238,7 +252,15 @@ public class MockDatabase implements Database {
         return "TIME";
     }
 
-    public String translateDefaultValue(String defaultValue) {
+    public Object convertDatabaseValueToJavaObject(Object defaultValue, int dataType, int columnSize, int decimalDigits) {
         return defaultValue;
+    }
+
+    public String convertJavaObjectToString(Object value) {
+        return value.toString();
+    }
+
+    public String getDateLiteral(Date defaultDateValue) {
+        return defaultDateValue.toString();
     }
 }

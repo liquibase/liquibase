@@ -528,7 +528,7 @@ public class DiffResult {
 
             columnConfig.setType(dataType);
 
-            columnConfig.setDefaultValue(StringUtils.trimToNull(column.getDefaultValue()));
+            columnConfig.setDefaultValue(database.convertJavaObjectToString(column.getDefaultValue()));
 
             change.setColumn(columnConfig);
 
@@ -556,10 +556,17 @@ public class DiffResult {
                     columnConfig.setConstraints(constraintsConfig);
                 }
 
-                if (column.isNumeric()) {
-                    columnConfig.setDefaultValueNumeric(StringUtils.trimToNull(column.getDefaultValue()));
-                } else {
-                    columnConfig.setDefaultValue(StringUtils.trimToNull(translateDefaultValue(column.getDefaultValue())));
+                Object defaultValue = column.getDefaultValue();
+                if (defaultValue == null) {
+                    //do nothing
+                } else if (defaultValue instanceof Date) {
+                    columnConfig.setDefaultValueDate((Date) defaultValue);
+                } else if (defaultValue instanceof Boolean) {
+                    columnConfig.setDefaultValueBoolean(((Boolean) defaultValue));
+                } else if (defaultValue instanceof Number) {
+                    columnConfig.setDefaultValueNumeric(((Number) defaultValue));
+                } else  {
+                    columnConfig.setDefaultValue(defaultValue.toString());
                 }
 
                 change.addColumn(columnConfig);
@@ -567,15 +574,6 @@ public class DiffResult {
 
             changes.add(change);
         }
-    }
-
-    private String translateDefaultValue(String defaultValue) {
-        String result = defaultValue;
-        if (defaultValue != null) {
-            result = defaultValue.replaceFirst("^'", "").replaceFirst("'$", "");
-            result = result.replaceFirst("'\\:\\:[a-zA-Z0-9 ]+$", "");
-        }
-        return result;
     }
 
     private void addUnexpectedTableChanges(List<Change> changes) {

@@ -63,8 +63,8 @@ public class CreateTableStatementTest {
 
                 assertTrue(table.getColumn("id").isPrimaryKey());
 
-                assertNull(StringUtils.trimToNull(table.getColumn("name").getDefaultValue()));
-                assertTrue(table.getColumn("username").getDefaultValue().indexOf("NEWUSER") >= 0);
+                assertNull(table.getColumn("name").getDefaultValue());
+                assertTrue(table.getColumn("username").getDefaultValue().toString().indexOf("NEWUSER") >= 0);
 
                 assertFalse(table.getColumn("id").isAutoIncrement());
             }

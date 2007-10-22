@@ -14,7 +14,7 @@ import liquibase.migrator.AbstractSimpleChangeLogRunnerTest;
 public class FirebirdSampleChangeLogRunnerTest extends AbstractSimpleChangeLogRunnerTest {
 
     public FirebirdSampleChangeLogRunnerTest() throws Exception {
-        super("firebird", "org.firebirdsql.jdbc.FBDriver", "jdbc:firebirdsql:localhost/3050:c:\\firebird\\liquibase.fdb");
+        super("firebird", "jdbc:firebirdsql:localhost/3050:c:\\firebird\\liquibase.fdb");
     }
 
     protected boolean shouldRollBack() {

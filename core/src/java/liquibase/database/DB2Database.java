@@ -4,10 +4,9 @@ import liquibase.database.sql.RawSqlStatement;
 import liquibase.database.sql.SqlStatement;
 import liquibase.exception.JDBCException;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 
 public class DB2Database extends AbstractDatabase {
     public boolean isCorrectDatabaseImplementation(Connection conn) throws JDBCException {
@@ -175,6 +174,36 @@ public class DB2Database extends AbstractDatabase {
 
     public String getViewDefinition(String name) throws JDBCException {
         return super.getViewDefinition(name).replaceFirst("CREATE VIEW \\w+ AS ", ""); //db2 returns "create view....as select
+    }
+
+    public Object convertDatabaseValueToJavaObject(Object defaultValue, int dataType, int columnSize, int decimalDigits) throws ParseException {
+        if (defaultValue != null && defaultValue instanceof String) {
+            if (dataType == Types.TIMESTAMP) {
+                defaultValue = ((String) defaultValue).replaceFirst("^\"SYSIBM\".\"TIMESTAMP\"\\('", "").replaceFirst("'\\)", "");
+            } else if (dataType == Types.TIME) {
+                defaultValue = ((String) defaultValue).replaceFirst("^\"SYSIBM\".\"TIME\"\\('", "").replaceFirst("'\\)", "");
+            } else if (dataType == Types.DATE) {
+                defaultValue = ((String) defaultValue).replaceFirst("^\"SYSIBM\".\"DATE\"\\('", "").replaceFirst("'\\)", "");
+            }
+        }
+        return super.convertDatabaseValueToJavaObject(defaultValue, dataType, columnSize, decimalDigits);
+    }
+
+    protected java.util.Date parseDate(String dateAsString) throws ParseException {
+        if (dateAsString.indexOf(" ") > 0) {
+            return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(dateAsString);
+        } else if (dateAsString.indexOf(".") > 0 && dateAsString.indexOf("-") > 0) {
+            return new SimpleDateFormat("yyyy-MM-dd-HH.mm.ss.SSSSSS").parse(dateAsString);
+
+        } else {
+            if (dateAsString.indexOf(":") > 0) {
+                return new SimpleDateFormat("HH:mm:ss").parse(dateAsString);
+            } else if (dateAsString.indexOf(".") > 0) {
+                return new SimpleDateFormat("HH.mm.ss").parse(dateAsString);
+            } else {
+                return new SimpleDateFormat("yyyy-MM-dd").parse(dateAsString);
+            }
+        }
     }
 
 }

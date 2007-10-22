@@ -3,14 +3,12 @@ package liquibase.test;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.exception.JDBCException;
-import liquibase.test.JUnitJDBCDriverClassLoader;
 
 import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.SQLException;
-import java.util.HashSet;
-import java.util.Properties;
-import java.util.Set;
+import java.sql.Statement;
+import java.util.*;
 
 public class TestContext {
     private static TestContext instance = new TestContext();
@@ -36,12 +34,20 @@ public class TestContext {
 //            "jdbc:sybase:Tds:"+ InetAddress.getLocalHost().getHostName()+":5000/liquibase",
     };
 
+    private Map<String, Connection> connectionsByUrl = new HashMap<String, Connection>();
+    private Map<String, Boolean> connectionsAttempted = new HashMap<String, Boolean>();
+
     private Connection openConnection(final String url) throws Exception {
+        if (connectionsAttempted.containsKey(url)) {
+            return connectionsByUrl.get(url);
+        }
+        connectionsAttempted.put(url, Boolean.TRUE);
+
         String username = getUsername(url);
         String password = getPassword(url);
 
         JUnitJDBCDriverClassLoader jdbcDriverLoader = JUnitJDBCDriverClassLoader.getInstance();
-        Driver driver = (Driver) Class.forName(DatabaseFactory.getInstance().findDefaultDriver(url), true, jdbcDriverLoader).newInstance();
+        final Driver driver = (Driver) Class.forName(DatabaseFactory.getInstance().findDefaultDriver(url), true, jdbcDriverLoader).newInstance();
 
         Properties info = new Properties();
         info.put("user", username);
@@ -52,6 +58,7 @@ public class TestContext {
         final Connection connection;
         try {
             connection = driver.connect(url, info);
+            connection.setAutoCommit(false);
         } catch (SQLException e) {
             System.out.println("Could not connect to " + url + ": Will not test against");
             return null; //could not connect
@@ -59,11 +66,37 @@ public class TestContext {
         if (connection == null) {
             throw new JDBCException("Connection could not be created to " + url + " with driver " + driver.getClass().getName() + ".  Possibly the wrong driver for the given database URL");
         }
+        connectionsByUrl.put(url, connection);
 
         Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
 
             public void run() {
                 try {
+                    try {
+                        if (!connection.getAutoCommit()) {
+                            connection.rollback();
+                        }
+                    } catch (SQLException e) {
+                        ;
+                    }
+
+                    if (connection.getMetaData().getURL().startsWith("jdbc:derby")) {
+                        try {
+                            driver.connect("jdbc:derby:liquibase;shutdown=true", new Properties());
+                        } catch (SQLException e) {
+                            ;//clean shutdown throws exception.//NOPMD
+                        }
+                    } else if (connection.getMetaData().getURL().startsWith("jdbc:hsqldb")) {
+                        try {
+                            Statement statement = connection.createStatement();
+                            statement.execute("SHUTDOWN");
+                            statement.close();
+                        } catch (SQLException e) {
+                            ;
+                        }
+
+                    }
+
                     connection.close();
 //                    System.out.println(url+" closed successfully");
                 } catch (SQLException e) {
@@ -138,5 +171,9 @@ public class TestContext {
         }
 
         return availableConnections;
+    }
+
+    public Connection getConnection(String url) throws Exception {
+        return openConnection(url);
     }
 }

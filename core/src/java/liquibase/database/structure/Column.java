@@ -1,8 +1,9 @@
 package liquibase.database.structure;
 
 import liquibase.database.Database;
-import liquibase.database.PostgresDatabase;
 import liquibase.database.MSSQLDatabase;
+import liquibase.database.PostgresDatabase;
+import liquibase.util.SqlUtil;
 
 import java.sql.Types;
 import java.util.Arrays;
@@ -17,7 +18,7 @@ public class Column implements DatabaseObject, Comparable<Column> {
     private int decimalDigits;
     private Boolean nullable;
     private String typeName;
-    private String defaultValue;
+    private Object defaultValue;
     private boolean autoIncrement = false;
     private boolean primaryKey = false;
 
@@ -90,11 +91,11 @@ public class Column implements DatabaseObject, Comparable<Column> {
     }
 
 
-    public String getDefaultValue() {
+    public Object getDefaultValue() {
         return defaultValue;
     }
 
-    public void setDefaultValue(String defaultValue) {
+    public void setDefaultValue(Object defaultValue) {
         this.defaultValue = defaultValue;
     }
 
@@ -234,20 +235,7 @@ public class Column implements DatabaseObject, Comparable<Column> {
     }
 
     public boolean isNumeric() {
-        List<Integer> numericTypes = Arrays.asList(
-                Types.BIGINT,
-                Types.BIT,
-                Types.INTEGER,
-                Types.SMALLINT,
-                Types.TINYINT,
-                Types.DECIMAL,
-                Types.DOUBLE,
-                Types.FLOAT,
-                Types.NUMERIC,
-                Types.REAL
-        );
-
-        return numericTypes.contains(getDataType());
+        return SqlUtil.isNumeric(getDataType());
     }
 
 

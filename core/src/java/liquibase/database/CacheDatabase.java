@@ -3,6 +3,7 @@ package liquibase.database;
 import liquibase.exception.JDBCException;
 
 import java.sql.Connection;
+import java.text.ParseException;
 
 public class CacheDatabase extends AbstractDatabase {
     public static final String PRODUCT_NAME = "cache";
@@ -95,16 +96,19 @@ public class CacheDatabase extends AbstractDatabase {
         return false;
     }
 
-    public String translateDefaultValue(String defaultValue) {
+    public Object convertDatabaseValueToJavaObject(Object defaultValue, int dataType, int columnSize, int decimalDigits) throws ParseException {
         if (defaultValue != null) {
-            if (defaultValue.charAt(0) == '"' && defaultValue.charAt(defaultValue.length() - 1) == '"') {
-                defaultValue = defaultValue.substring(1, defaultValue.length() - 1);
-                return "'" + defaultValue + "'";
-            } else if (defaultValue.startsWith("$")) {
-                return "OBJECTSCRIPT '" + defaultValue + "'";
+            if (defaultValue instanceof String) {
+                String stringDefaultValue = (String) defaultValue;
+                if (stringDefaultValue.charAt(0) == '"' && stringDefaultValue.charAt(stringDefaultValue.length() - 1) == '"') {
+                    defaultValue = stringDefaultValue.substring(1, stringDefaultValue.length() - 1);
+                } else if (stringDefaultValue.startsWith("$")) {
+                    defaultValue = "OBJECTSCRIPT '" + ((String) defaultValue) + "'";
+                }
             }
         }
-        return defaultValue;
+        return super.convertDatabaseValueToJavaObject(defaultValue, dataType, columnSize, decimalDigits);
+
     }
 
 }

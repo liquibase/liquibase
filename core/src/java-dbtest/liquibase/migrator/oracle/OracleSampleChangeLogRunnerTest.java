@@ -9,6 +9,6 @@ import liquibase.migrator.AbstractSimpleChangeLogRunnerTest;
 public class OracleSampleChangeLogRunnerTest extends AbstractSimpleChangeLogRunnerTest {
 
     public OracleSampleChangeLogRunnerTest() throws Exception {
-        super("oracle", "oracle.jdbc.OracleDriver", "jdbc:oracle:thin:@localhost/XE");
+        super("oracle", "jdbc:oracle:thin:@localhost/XE");
     }
 }
