@@ -1,21 +1,51 @@
 package liquibase.util;
 
-import java.text.DateFormat;
-import java.text.FieldPosition;
-import java.text.ParsePosition;
+import java.sql.Time;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class ISODateFormat extends DateFormat {
+public class ISODateFormat {
 
-    private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-mm-dd'T'HH:MM:ss");
+    private SimpleDateFormat dateTimeFormat = new SimpleDateFormat(DATE_TIME_FORMAT_STRING);
+    private SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
+    private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+    private static final String DATE_TIME_FORMAT_STRING = "yyyy-MM-dd'T'HH:mm:ss";
 
 
-    public StringBuffer format(Date date, StringBuffer toAppendTo, FieldPosition fieldPosition) {
-        return dateFormat.format(date, toAppendTo, fieldPosition);
+    public String format(java.sql.Date date) {
+        return dateFormat.format(date);
     }
 
-    public Date parse(String source, ParsePosition pos) {
-        return dateFormat.parse(source, pos);
+    public String format(java.sql.Time date) {
+        return timeFormat.format(date);
+    }
+
+    public String format(java.sql.Timestamp date) {
+        return dateTimeFormat.format(date);
+    }
+
+    public String format(Date date) {
+        if (date instanceof java.sql.Date) {
+            return format(((java.sql.Date) date));
+        } else if (date instanceof Time) {
+            return format(((java.sql.Time) date));
+        } else if (date instanceof java.sql.Timestamp) {
+            return format(((java.sql.Timestamp) date));
+        } else {
+            throw new RuntimeException("Unknown type: "+date.getClass().getName());
+        }
+    }
+
+    public Date parse(String dateAsString) throws ParseException {
+        if (dateAsString.length() == DATE_TIME_FORMAT_STRING.length()-2) { //subtract 2 to not count the 's
+            return new java.sql.Timestamp(dateTimeFormat.parse(dateAsString).getTime());
+        } else {
+            if (dateAsString.indexOf(":") > 0) {
+                return new java.sql.Time(timeFormat.parse(dateAsString).getTime());
+            } else {
+                return new java.sql.Date(dateFormat.parse(dateAsString).getTime());
+            }
+        }
     }
 }

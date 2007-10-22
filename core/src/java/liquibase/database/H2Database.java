@@ -8,8 +8,12 @@ import liquibase.util.StringUtils;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class H2Database extends HsqlDatabase {
+
     public String getProductName() {
         return "H2 Database";
     }
@@ -72,11 +76,28 @@ public class H2Database extends HsqlDatabase {
         return new RawSqlStatement("SELECT VIEW_DEFINITION FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_NAME = '" + name + "'");
     }
 
-    public String translateDefaultValue(String defaultValue) {
-        if (StringUtils.trimToEmpty(defaultValue).startsWith("(NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_")) {
-            return null;
+    public Object convertDatabaseValueToJavaObject(Object defaultValue, int dataType, int columnSize, int decimalDigits) throws ParseException {
+        if (defaultValue != null && defaultValue instanceof String) {
+            if (StringUtils.trimToEmpty(((String) defaultValue)).startsWith("(NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_")) {
+                return null;
+            }
+            if (StringUtils.trimToNull(((String) defaultValue)) == null) {
+                return null;
+            }
         }
-        return defaultValue;
+        return super.convertDatabaseValueToJavaObject(defaultValue, dataType, columnSize, decimalDigits);
+    }
+
+    protected Date parseDate(String dateAsString) throws ParseException {
+        if (dateAsString.indexOf(" ") > 0) {
+            return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSSSSSSS").parse(dateAsString);
+        } else {
+            if (dateAsString.indexOf(":") > 0) {
+                return new SimpleDateFormat("HH:mm:ss").parse(dateAsString);
+            } else {
+                return new SimpleDateFormat("yyyy-MM-dd").parse(dateAsString);
+            }
+        }
     }
 
 }

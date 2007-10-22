@@ -4,49 +4,43 @@ import junit.framework.TestCase;
 import liquibase.ChangeSet;
 import liquibase.FileOpener;
 import liquibase.FileSystemFileOpener;
-import liquibase.test.JUnitFileOpener;
-import liquibase.test.JUnitJDBCDriverClassLoader;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.structure.DatabaseSnapshot;
 import liquibase.diff.Diff;
 import liquibase.diff.DiffResult;
 import liquibase.exception.JDBCException;
 import liquibase.exception.ValidationFailedException;
+import liquibase.test.JUnitFileOpener;
+import liquibase.test.JUnitJDBCDriverClassLoader;
+import liquibase.test.TestContext;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.io.StringWriter;
+import java.net.URL;
 import java.sql.Connection;
 import java.sql.Driver;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Properties;
-import java.util.Enumeration;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.net.URL;
 
 public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
 
     private String completeChangeLog;
     private String rollbackChangeLog;
     private String includedChangeLog;
-    protected String username;
-    protected String password;
-    protected String driverName;
-    protected String url;
     protected Connection connection;
-    protected Driver driver;
 
-    protected AbstractSimpleChangeLogRunnerTest(String changelogDir, String driverName, String url) {
+    protected AbstractSimpleChangeLogRunnerTest(String changelogDir, String url) throws Exception {
         this.completeChangeLog = "changelogs/" + changelogDir + "/complete/root.changelog.xml";
         this.rollbackChangeLog = "changelogs/" + changelogDir + "/rollback/rollbackable.changelog.xml";
         this.includedChangeLog = "changelogs/" + changelogDir + "/complete/included.changelog.xml";
-        this.driverName = driverName;
-        this.url = url;
-        username = "liquibase";
-        password = "liquibase";
+
+        this.connection = TestContext.getInstance().getConnection(url);
 
         Logger.getLogger(Migrator.DEFAULT_LOG_NAME).setLevel(Level.SEVERE);
     }
@@ -54,13 +48,6 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
     protected void setUp() throws Exception {
         super.setUp();
 
-        JUnitJDBCDriverClassLoader jdbcDriverLoader = JUnitJDBCDriverClassLoader.getInstance();
-        driver = (Driver) Class.forName(driverName, true, jdbcDriverLoader).newInstance();
-        Properties info = createProperties();
-        info.put("user", username);
-        info.put("password", password);
-        connection = driver.connect(url, info);
-        connection.setAutoCommit(false);
         createMigrator(completeChangeLog).forceReleaseLock();
     }
 
@@ -73,10 +60,6 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
             connection.rollback();
         }
         super.tearDown();
-        connection.close();
-        connection = null;
-        driver = null;
-
     }
 
     protected boolean shouldRollBack() {
@@ -194,11 +177,11 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
         migrator.tag("Test Tag");
     }
 
-    public void testGetDefaultDriver() throws Exception {
-        Migrator migrator = createMigrator(completeChangeLog);
-
-        assertEquals(driverName, migrator.getDatabase().getDefaultDriver(url));
-    }
+//    public void testGetDefaultDriver() throws Exception {
+//        Migrator migrator = createMigrator(completeChangeLog);
+//
+//        assertEquals(driverName, migrator.getDatabase().getDefaultDriver(url));
+//    }
 
     public void testDiff() throws Exception {
         runCompleteChangeLog();

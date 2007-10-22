@@ -4,6 +4,7 @@ import liquibase.exception.JDBCException;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.text.ParseException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -130,7 +131,7 @@ public class MSSQLDatabase extends AbstractDatabase {
     public String getTrueBooleanValue() {
         return "1";
     }
-    
+
     public String getFalseBooleanValue() {
         return "0";
     }
@@ -139,7 +140,7 @@ public class MSSQLDatabase extends AbstractDatabase {
         return "DROP TABLE " + tableName;
     }
 
-    public String getConcatSql(String ... values) {
+    public String getConcatSql(String... values) {
         StringBuffer returnString = new StringBuffer();
         for (String value : values) {
             returnString.append(value).append(" + ");
@@ -198,11 +199,34 @@ public class MSSQLDatabase extends AbstractDatabase {
     }
 
 
+    public boolean isSystemTable(String catalogName, String schemaName, String tableName) {
+        return super.isSystemTable(catalogName, schemaName, tableName) || schemaName.equals("sys");
+    }
+
     public boolean isSystemView(String catalogName, String schemaName, String viewName) {
         return super.isSystemView(catalogName, schemaName, viewName) || schemaName.equals("sys");
     }
 
     public String generateDefaultConstraintName(String tableName, String columnName) {
-        return "DF_" + tableName+"_"+columnName;
+        return "DF_" + tableName + "_" + columnName;
+    }
+
+
+    public Object convertDatabaseValueToJavaObject(Object defaultValue, int dataType, int columnSize, int decimalDigits) throws ParseException {
+        if (defaultValue == null) {
+            return null;
+        }
+
+        if (defaultValue instanceof String) {
+            if (((String) defaultValue).startsWith("('")) {
+                defaultValue = ((String) defaultValue).replaceFirst("^\\('", "").replaceFirst("'\\)$", "");
+            } else if (((String) defaultValue).startsWith("((")) {
+                defaultValue = ((String) defaultValue).replaceFirst("^\\(\\(", "").replaceFirst("\\)\\)$", "");
+            }
+        }
+
+        defaultValue = super.convertDatabaseValueToJavaObject(defaultValue, dataType, columnSize, decimalDigits);
+        
+        return defaultValue;
     }
 }

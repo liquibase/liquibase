@@ -5,6 +5,8 @@ import liquibase.database.sql.SqlStatement;
 import liquibase.exception.JDBCException;
 
 import java.sql.Connection;
+import java.sql.Types;
+import java.text.ParseException;
 
 public class DerbyDatabase extends AbstractDatabase {
 
@@ -86,11 +88,11 @@ public class DerbyDatabase extends AbstractDatabase {
 
     public String getDateLiteral(String isoDate) {
         if (isDateOnly(isoDate)) {
-            return "DATE("+super.getDateLiteral(isoDate)+")";
+            return "DATE(" + super.getDateLiteral(isoDate) + ")";
         } else if (isTimeOnly(isoDate)) {
-            return "TIME("+super.getDateLiteral(isoDate)+")";
+            return "TIME(" + super.getDateLiteral(isoDate) + ")";
         } else {
-            return "TIMESTAMP("+super.getDateLiteral(isoDate)+")";
+            return "TIMESTAMP(" + super.getDateLiteral(isoDate) + ")";
         }
     }
 
@@ -103,16 +105,28 @@ public class DerbyDatabase extends AbstractDatabase {
     }
 
     protected SqlStatement getViewDefinitionSql(String name) throws JDBCException {
-        return new RawSqlStatement("select V.VIEWDEFINITION from SYS.SYSVIEWS V, SYS.SYSTABLES T WHERE  V.TABLEID=T.TABLEID AND T.TABLENAME='"+name+"'");
+        return new RawSqlStatement("select V.VIEWDEFINITION from SYS.SYSVIEWS V, SYS.SYSTABLES T WHERE  V.TABLEID=T.TABLEID AND T.TABLENAME='" + name + "'");
     }
 
 
     public String getViewDefinition(String name) throws JDBCException {
-        return super.getViewDefinition(name).replaceFirst("CREATE VIEW \\w+ AS ","");
+        return super.getViewDefinition(name).replaceFirst("CREATE VIEW \\w+ AS ", "");
     }
 
     public void setConnection(Connection conn) {
         super.setConnection(new DerbyConnectionDelegate(conn));
     }
 
+    public Object convertDatabaseValueToJavaObject(Object defaultValue, int dataType, int columnSize, int decimalDigits) throws ParseException {
+        if (defaultValue != null && defaultValue instanceof String) {
+            if (dataType == Types.TIMESTAMP) {
+                defaultValue = ((String) defaultValue).replaceFirst("^TIMESTAMP\\('", "").replaceFirst("'\\)", "");
+            } else if (dataType == Types.DATE) {
+                defaultValue = ((String) defaultValue).replaceFirst("^DATE\\('", "").replaceFirst("'\\)", "");
+            } else if (dataType == Types.TIME) {
+                defaultValue = ((String) defaultValue).replaceFirst("^TIME\\('", "").replaceFirst("'\\)", "");
+            }
+        }
+        return super.convertDatabaseValueToJavaObject(defaultValue, dataType, columnSize, decimalDigits);
+    }
 }

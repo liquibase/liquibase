@@ -1,6 +1,7 @@
 package liquibase.test;
 
 import liquibase.database.Database;
+import liquibase.database.DatabaseConnection;
 import liquibase.exception.JDBCException;
 import org.junit.ComparisonFailure;
 
@@ -37,6 +38,19 @@ public class DatabaseTestTemplate {
                 AssertionError newError = new AssertionError(newMessage);
                 newError.setStackTrace(e.getStackTrace());
                 throw newError;
+            } catch (Exception e) {
+                String newMessage = "Database Test Exception on " + database;
+                if (e.getMessage() != null) {
+                    newMessage += ": " + e.getMessage();
+                }
+                
+                Exception newError = e.getClass().getConstructor(String.class).newInstance(newMessage);
+                newError.setStackTrace(e.getStackTrace());
+                throw newError;
+            } finally {
+                if (database.getConnection() != null && !database.getAutoCommitMode()) {
+                    database.getConnection().rollback();
+                }
             }
         }
     }

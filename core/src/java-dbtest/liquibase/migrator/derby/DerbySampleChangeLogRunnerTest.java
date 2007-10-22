@@ -9,16 +9,7 @@ import java.util.Properties;
 public class DerbySampleChangeLogRunnerTest extends AbstractSimpleChangeLogRunnerTest {
 
     public DerbySampleChangeLogRunnerTest() throws Exception {
-        super("derby",  "org.apache.derby.jdbc.EmbeddedDriver", "jdbc:derby:liquibase;create=true");
-    }
-
-    protected void tearDown() throws Exception {
-        try {
-            driver.connect("jdbc:derby:liquibase;shutdown=true", new Properties());
-        } catch (SQLException e) {
-            ;//clean shutdown throws exception.//NOPMD
-        }
-        super.tearDown();
+        super("derby", "jdbc:derby:liquibase;create=true");
     }
 
     protected boolean shouldRollBack() {

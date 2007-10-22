@@ -10,6 +10,8 @@ import liquibase.migrator.Migrator;
 
 import java.io.IOException;
 import java.sql.Connection;
+import java.util.Date;
+import java.text.ParseException;
 
 public interface Database extends DatabaseObject {
     /**
@@ -175,7 +177,17 @@ public interface Database extends DatabaseObject {
 
     String getTimeType();
 
-    String translateDefaultValue(String defaultValue);
+    Object convertDatabaseValueToJavaObject(Object defaultValue, int dataType, int columnSize, int decimalDigits) throws ParseException;
+
+    String convertJavaObjectToString(Object value);
 
     boolean isSystemView(String catalogName, String schemaName, String name);
+
+    String getDateLiteral(java.sql.Date date);
+
+    String getDateLiteral(java.sql.Time time);
+
+    String getDateLiteral(java.sql.Timestamp timeStamp);
+
+    String getDateLiteral(Date defaultDateValue);
 }

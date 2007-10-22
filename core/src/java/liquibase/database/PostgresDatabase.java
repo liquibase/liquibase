@@ -1,6 +1,5 @@
 package liquibase.database;
 
-import liquibase.change.ColumnConfig;
 import liquibase.database.sql.RawSqlStatement;
 import liquibase.database.sql.SqlStatement;
 import liquibase.database.template.JdbcTemplate;
@@ -8,6 +7,8 @@ import liquibase.exception.JDBCException;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.Types;
+import java.text.ParseException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -212,5 +213,21 @@ public class PostgresDatabase extends AbstractDatabase {
 
     public String getAutoIncrementClause() {
         return "";
+    }
+
+
+    public Object convertDatabaseValueToJavaObject(Object defaultValue, int dataType, int columnSize, int decimalDigits) throws ParseException {
+        if (defaultValue != null) {
+            if (defaultValue instanceof String) {
+                defaultValue = ((String) defaultValue).replaceAll("'::[\\w\\s]+$", "'");
+
+                if (dataType == Types.DATE || dataType == Types.TIME || dataType == Types.TIMESTAMP) {
+                    //remove trailing time zone info
+                    defaultValue = ((String) defaultValue).replaceFirst("-\\d+$", "");
+                }
+            }
+        }
+        return super.convertDatabaseValueToJavaObject(defaultValue, dataType, columnSize, decimalDigits);
+
     }
 }

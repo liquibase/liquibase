@@ -2,7 +2,7 @@ package liquibase.database;
 
 import liquibase.DatabaseChangeLogLock;
 import liquibase.change.*;
-import liquibase.database.sql.PreparedSqlStatement;
+import liquibase.database.sql.ComputedNumericValue;
 import liquibase.database.sql.RawSqlStatement;
 import liquibase.database.sql.SqlStatement;
 import liquibase.database.sql.UpdateStatement;
@@ -12,13 +12,17 @@ import liquibase.exception.JDBCException;
 import liquibase.exception.LockException;
 import liquibase.exception.UnsupportedChangeException;
 import liquibase.migrator.Migrator;
+import liquibase.util.ISODateFormat;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.math.BigInteger;
 import java.net.InetAddress;
 import java.sql.*;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Date;
 import java.util.logging.Logger;
@@ -162,7 +166,6 @@ public abstract class AbstractDatabase implements Database {
         return true;
     }
 
-
     // ------- DATABASE-SPECIFIC SQL METHODS ---- //
 
     public void setCurrentDateTimeFunction(String function) {
@@ -228,9 +231,9 @@ public abstract class AbstractDatabase implements Database {
      * <p/>
      * Implementation restriction:
      * Currently, only the following subsets of ISO8601 are supported:
-     * YYYY-MM-DD
+     * yyyy-MM-dd
      * hh:mm:ss
-     * YYYY-MM-DDThh:mm:ss
+     * yyyy-MM-ddThh:mm:ss
      */
     public String getDateLiteral(String isoDate) {
         if (isDateOnly(isoDate) || isTimeOnly(isoDate)) {
@@ -249,12 +252,49 @@ public abstract class AbstractDatabase implements Database {
         }
     }
 
+
+    public String getDateLiteral(java.sql.Timestamp date) {
+        return getDateLiteral(new ISODateFormat().format(date).replaceFirst("^'", "").replaceFirst("'$", ""));
+    }
+
+    public String getDateLiteral(java.sql.Date date) {
+        return getDateLiteral(new ISODateFormat().format(date).replaceFirst("^'", "").replaceFirst("'$", ""));
+    }
+
+    public String getDateLiteral(java.sql.Time date) {
+        return getDateLiteral(new ISODateFormat().format(date).replaceFirst("^'", "").replaceFirst("'$", ""));
+    }
+
+    public String getDateLiteral(Date date) {
+        if (date instanceof java.sql.Date) {
+            return getDateLiteral(((java.sql.Date) date));
+        } else if (date instanceof java.sql.Time) {
+            return getDateLiteral(((java.sql.Time) date));
+        } else if (date instanceof Timestamp) {
+            return getDateLiteral(((Timestamp) date));
+        } else {
+            throw new RuntimeException("Unexpected type: "+date.getClass().getName());
+        }
+    }
+
+    protected Date parseDate(String dateAsString) throws ParseException {
+        if (dateAsString.indexOf(" ") > 0) {
+            return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(dateAsString);
+        } else {
+            if (dateAsString.indexOf(":") > 0) {
+                return new SimpleDateFormat("HH:mm:ss").parse(dateAsString);
+            } else {
+                return new SimpleDateFormat("yyyy-MM-dd").parse(dateAsString);
+            }
+        }
+    }
+
     protected boolean isDateOnly(String isoDate) {
-        return isoDate.length() == "YYYY-MM-DD".length();
+        return isoDate.length() == "yyyy-MM-dd".length();
     }
 
     protected boolean isDateTime(String isoDate) {
-        return isoDate.length() == "YYYY-MM-DDThh:mm:ss".length();
+        return isoDate.length() == "yyyy-MM-ddThh:mm:ss".length();
     }
 
     protected boolean isTimeOnly(String isoDate) {
@@ -346,7 +386,7 @@ public abstract class AbstractDatabase implements Database {
         }
 
         try {
-            Boolean locked = null;
+            Boolean locked;
             try {
                 locked = (Boolean) new JdbcTemplate(this).queryForObject(getSelectChangeLogLockSQL(), Boolean.class);
             } catch (JDBCException e) {
@@ -362,7 +402,7 @@ public abstract class AbstractDatabase implements Database {
                 updateStatement.addNewColumnValue("LOCKEDBY", InetAddress.getLocalHost().getCanonicalHostName() + " (" + InetAddress.getLocalHost().getHostAddress() + ")", Types.VARCHAR);
                 updateStatement.setWhereClause("ID  = 1");
 
-                if (new JdbcTemplate(this).update((PreparedSqlStatement) updateStatement) != 1) {
+                if (new JdbcTemplate(this).update(updateStatement) != 1) {
                     throw new LockException("Did not update change log lock correctly");
                 }
                 getConnection().commit();
@@ -898,7 +938,7 @@ public abstract class AbstractDatabase implements Database {
 
     public String toString() {
         if (getConnection() == null) {
-            return getProductName()+" Database";
+            return getProductName() + " Database";
         }
         try {
             return getConnectionUsername() + " @ " + getConnectionURL();
@@ -944,7 +984,112 @@ public abstract class AbstractDatabase implements Database {
         return returnType;
     }
 
-    public String translateDefaultValue(String defaultValue) {
-        return defaultValue;
+    public Object convertDatabaseValueToJavaObject(Object defaultValue, int dataType, int columnSize, int decimalDigits) throws ParseException {
+        if (defaultValue == null) {
+            return null;
+        } else if (defaultValue instanceof String) {
+            return convertToCorrectJavaType(((String) defaultValue).replaceFirst("^'", "").replaceFirst("'$", ""), dataType, columnSize, decimalDigits);
+        } else {
+            return defaultValue;
+        }
+    }
+
+    protected Object convertToCorrectJavaType(String value, int dataType, int columnSize, int decimalDigits) throws ParseException {
+        if (value == null) {
+            return null;
+        }
+        if (dataType == Types.CLOB || dataType == Types.VARCHAR || dataType == Types.CHAR || dataType == Types.LONGVARCHAR) {
+            if (value.equalsIgnoreCase("NULL")) {
+                return null;
+            } else {
+                return value;
+            }
+        }
+
+        value = StringUtils.trimToNull(value);
+        if (value == null) {
+            return null;
+        }
+
+        try {
+            if (dataType == Types.DATE) {
+                return new java.sql.Date(parseDate(value).getTime());
+            } else if (dataType == Types.TIMESTAMP) {
+                return new Timestamp(parseDate(value).getTime());
+            } else if (dataType == Types.TIME) {
+                return new Time(parseDate(value).getTime());
+            } else if (dataType == Types.BIGINT) {
+                return new BigInteger(value);
+            } else if (dataType == Types.BIT) {
+                if (value.equalsIgnoreCase("true")) {
+                    return Boolean.TRUE;
+                } else if (value.equalsIgnoreCase("false")) {
+                    return Boolean.FALSE;
+                } else if (value.equals("1")) {
+                    return Boolean.TRUE;
+                } else if (value.equals("0")) {
+                    return Boolean.FALSE;
+                }
+                throw new ParseException("Unknown bit value: "+value, 0);
+            } else if (dataType == Types.BOOLEAN) {
+                return Boolean.valueOf(value);
+            } else if (dataType == Types.DECIMAL) {
+                if (decimalDigits == 0) {
+                    return new Integer(value);
+                }
+                return new Double(value);
+            } else if (dataType == Types.DOUBLE) {
+                return new Double(value);
+            } else if (dataType == Types.FLOAT) {
+                return new Float(value);
+            } else if (dataType == Types.INTEGER) {
+                return new Integer(value);
+            } else if (dataType == Types.NULL) {
+                return null;
+            } else if (dataType == Types.REAL) {
+                return new Float(value);
+            } else if (dataType == Types.SMALLINT) {
+                return new Integer(value);
+            } else {
+                throw new RuntimeException("Cannot convert type: " + dataType);
+            }
+        } catch (NumberFormatException e) {
+            return new ComputedNumericValue(value);
+        }
+    }
+
+    public String convertJavaObjectToString(Object value) {
+        if (value != null) {
+            if (value instanceof String) {
+                if ("null".equalsIgnoreCase(((String) value))) {
+                    return null;
+                }
+                return "'" + ((String) value).replaceAll("'", "''") + "'";
+            } else if (value instanceof Number) {
+                return value.toString();
+            } else if (value instanceof Boolean) {
+                String returnValue;
+                if (((Boolean) value)) {
+                    returnValue = this.getTrueBooleanValue();
+                } else {
+                    returnValue = this.getFalseBooleanValue();
+                }
+                if (returnValue.matches("\\d+")) {
+                    return returnValue;
+                } else {
+                    return "'" + returnValue + "'";
+                }
+            } else if (value instanceof java.sql.Date) {
+                return this.getDateLiteral(((java.sql.Date) value));
+            } else if (value instanceof java.sql.Time) {
+                return this.getDateLiteral(((java.sql.Time) value));
+            } else if (value instanceof java.sql.Timestamp) {
+                return this.getDateLiteral(((java.sql.Timestamp) value));
+            } else {
+                throw new RuntimeException("Unknown default value type: " + value.getClass().getName());
+            }
+        } else {
+            return null;
+        }
     }
 }

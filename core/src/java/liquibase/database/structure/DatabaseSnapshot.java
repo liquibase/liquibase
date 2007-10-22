@@ -1,8 +1,6 @@
 package liquibase.database.structure;
 
-import liquibase.database.Database;
-import liquibase.database.H2Database;
-import liquibase.database.DerbyDatabase;
+import liquibase.database.*;
 import liquibase.database.template.JdbcTemplate;
 import liquibase.diff.DiffStatusListener;
 import liquibase.exception.JDBCException;
@@ -12,6 +10,7 @@ import liquibase.util.StringUtils;
 import java.sql.*;
 import java.util.*;
 import java.util.logging.Logger;
+import java.text.ParseException;
 
 public class DatabaseSnapshot {
 
@@ -184,8 +183,12 @@ public class DatabaseSnapshot {
             columnInfo.setColumnSize(rs.getInt("COLUMN_SIZE"));
             columnInfo.setDecimalDigits(rs.getInt("DECIMAL_DIGITS"));
             columnInfo.setTypeName(rs.getString("TYPE_NAME"));
-            String defaultValue = rs.getString("COLUMN_DEF");
-            columnInfo.setDefaultValue(database.translateDefaultValue(defaultValue));
+            Object defaultValue = rs.getObject("COLUMN_DEF");
+            try {
+                columnInfo.setDefaultValue(database.convertDatabaseValueToJavaObject(defaultValue, columnInfo.getDataType(), columnInfo.getColumnSize(), columnInfo.getDecimalDigits()));
+            } catch (ParseException e) {
+                throw new JDBCException(e);
+            }
 
             int nullable = rs.getInt("NULLABLE");
             if (nullable == DatabaseMetaData.columnNoNulls) {
@@ -198,7 +201,7 @@ public class DatabaseSnapshot {
 
             ResultSet selectRS = null;
             try {
-                selectRS = selectStatement.executeQuery("SELECT "+columnName+" FROM "+tableName+" WHERE 1 = 0");
+                selectRS = selectStatement.executeQuery("SELECT " + columnName + " FROM " + tableName + " WHERE 1 = 0");
                 ResultSetMetaData meta = selectRS.getMetaData();
                 columnInfo.setAutoIncrement(meta.isAutoIncrement(1));
             } finally {
@@ -223,17 +226,6 @@ public class DatabaseSnapshot {
             }
         }
 
-        return false;
-    }
-
-    private boolean isAutoIncrement(String defaultValue, Database database) {
-        if (database instanceof H2Database) {
-            if (StringUtils.trimToEmpty(defaultValue).startsWith("(NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_")) {
-                return true;
-            }
-        } else if (database instanceof DerbyDatabase) {
-            return defaultValue.equals("GENERATED_BY_DEFAULT");
-        }
         return false;
     }
 
@@ -292,11 +284,7 @@ public class DatabaseSnapshot {
 
         for (Table table : tablesMap.values()) {
             ResultSet rs;
-            try {
-                rs = databaseMetaData.getIndexInfo(database.getCatalogName(), database.getSchemaName(), table.getName(), false, true);
-            } catch (SQLException e) {
-                throw e;
-            }
+            rs = databaseMetaData.getIndexInfo(database.getCatalogName(), database.getSchemaName(), table.getName(), false, true);
             Map<String, Index> indexMap = new HashMap<String, Index>();
             while (rs.next()) {
                 String indexName = rs.getString("INDEX_NAME");

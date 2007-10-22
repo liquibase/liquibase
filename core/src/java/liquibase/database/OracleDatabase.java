@@ -5,6 +5,8 @@ import liquibase.database.sql.SqlStatement;
 import liquibase.exception.JDBCException;
 
 import java.sql.Connection;
+import java.sql.Types;
+import java.text.ParseException;
 
 /**
  * Encapsulates Oracle database support.
@@ -165,5 +167,21 @@ public class OracleDatabase extends AbstractDatabase {
     public boolean supportsAutoIncrement() {
         return false;
     }
-    
+
+    public Object convertDatabaseValueToJavaObject(Object defaultValue, int dataType, int columnSize, int decimalDigits) throws ParseException {
+        if (defaultValue != null) {
+            if (defaultValue instanceof String) {
+                if (dataType == Types.DATE || dataType == Types.TIME || dataType == Types.TIMESTAMP) {
+                    if (((String) defaultValue).indexOf("YYYY-MM-DD HH") > 0) {
+                        defaultValue = ((String) defaultValue).replaceFirst("^to_date\\('","").replaceFirst("', 'YYYY-MM-DD HH24:MI:SS'\\)$","");
+                    } else if (((String) defaultValue).indexOf("YYYY-MM-DD") > 0) {
+                        defaultValue = ((String) defaultValue).replaceFirst("^to_date\\('","").replaceFirst("', 'YYYY-MM-DD'\\)$","");
+                    } else {
+                        defaultValue = ((String) defaultValue).replaceFirst("^to_date\\('","").replaceFirst("', 'HH24:MI:SS'\\)$","");
+                    }
+                }
+            }
+        }
+        return super.convertDatabaseValueToJavaObject(defaultValue, dataType, columnSize, decimalDigits);
+    }
 }

@@ -6,6 +6,6 @@ import liquibase.migrator.AbstractSimpleChangeLogRunnerTest;
 public class MySQLSampleChangeLogRunnerTest extends AbstractSimpleChangeLogRunnerTest {
 
     public MySQLSampleChangeLogRunnerTest() throws Exception {
-        super("mysql", "com.mysql.jdbc.Driver", "jdbc:mysql://localhost/liquibase");
+        super("mysql", "jdbc:mysql://localhost/liquibase");
     }
 }

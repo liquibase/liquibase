@@ -6,6 +6,6 @@ import liquibase.migrator.AbstractSimpleChangeLogRunnerTest;
 public class PostgreSQLSampleChangeLogRunnerTest extends AbstractSimpleChangeLogRunnerTest {
 
     public PostgreSQLSampleChangeLogRunnerTest() throws Exception {
-        super("pgsql", "org.postgresql.Driver", "jdbc:postgresql://localhost/liquibase");
+        super("pgsql", "jdbc:postgresql://localhost/liquibase");
     }
 }

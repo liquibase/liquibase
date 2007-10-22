@@ -1,9 +1,14 @@
 package liquibase.change;
 
 import liquibase.database.Database;
+import liquibase.util.ISODateFormat;
 import liquibase.util.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+import java.text.NumberFormat;
+import java.text.ParseException;
+import java.util.Date;
 
 /**
  * This class is the representation of the column tag in the XMl file
@@ -19,8 +24,8 @@ public class ColumnConfig {
     private Boolean valueBoolean;
 
     private String defaultValue;
-    private String defaultValueNumeric;
-    private String defaultValueDate;
+    private Number defaultValueNumeric;
+    private Date defaultValueDate;
     private Boolean defaultValueBoolean;
 
     private ConstraintsConfig constraints;
@@ -89,23 +94,35 @@ public class ColumnConfig {
     }
 
 
-    public String getDefaultValueNumeric() {
+    public Number getDefaultValueNumeric() {
         return defaultValueNumeric;
     }
 
-    public void setDefaultValueNumeric(String defaultValueNumeric) {
-        if ("GENERATED_BY_DEFAULT".equals(defaultValueNumeric)) {
-            setAutoIncrement(true);
+    public void setDefaultValueNumeric(Number defaultValueNumeric) {
+        this.defaultValueNumeric = defaultValueNumeric;
+    }
+
+    public void setDefaultValueNumeric(String defaultValueNumeric) throws ParseException {
+        if (defaultValueNumeric == null) {
+            this.defaultValueNumeric = null;
         } else {
-            this.defaultValueNumeric = defaultValueNumeric;
+            if ("GENERATED_BY_DEFAULT".equals(defaultValueNumeric)) {
+                setAutoIncrement(true);
+            } else {
+                this.defaultValueNumeric = NumberFormat.getInstance().parse(defaultValueNumeric);
+            }
         }
     }
 
-    public String getDefaultValueDate() {
+    public Date getDefaultValueDate() {
         return defaultValueDate;
     }
 
-    public void setDefaultValueDate(String defaultValueDate) {
+    public void setDefaultValueDate(String defaultValueDate) throws ParseException {
+        this.defaultValueDate = new ISODateFormat().parse(defaultValueDate);
+    }
+
+    public void setDefaultValueDate(Date defaultValueDate) {
         this.defaultValueDate = defaultValueDate;
     }
 
@@ -144,10 +161,10 @@ public class ColumnConfig {
             element.setAttribute("defaultValue", getDefaultValue());
         }
         if (getDefaultValueNumeric() != null) {
-            element.setAttribute("defaultValueNumeric", getDefaultValueNumeric());
+            element.setAttribute("defaultValueNumeric", getDefaultValueNumeric().toString());
         }
         if (getDefaultValueDate() != null) {
-            element.setAttribute("defaultValueDate", getDefaultValueDate());
+            element.setAttribute("defaultValueDate", new ISODateFormat().format(getDefaultValueDate()));
         }
         if (getDefaultValueBoolean() != null) {
             element.setAttribute("defaultValueBoolean", getDefaultValueBoolean().toString());
@@ -217,7 +234,7 @@ public class ColumnConfig {
                 return "'" + this.getDefaultValue().replaceAll("'", "''") + "'";
             }
         } else if (this.getDefaultValueNumeric() != null) {
-            return this.getDefaultValueNumeric();
+            return this.getDefaultValueNumeric().toString();
         } else if (this.getDefaultValueBoolean() != null) {
             String returnValue;
             if (this.getDefaultValueBoolean()) {
@@ -229,10 +246,11 @@ public class ColumnConfig {
             if (returnValue.matches("\\d+")) {
                 return returnValue;
             } else {
-                return "'"+returnValue+"'";
+                return "'" + returnValue + "'";
             }
         } else if (this.getDefaultValueDate() != null) {
-            return database.getDateLiteral(this.getDefaultValueDate());
+            Date defaultDateValue = this.getDefaultValueDate();
+            return database.getDateLiteral(defaultDateValue);
         } else {
             return "NULL";
         }

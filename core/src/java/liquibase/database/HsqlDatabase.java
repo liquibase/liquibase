@@ -11,6 +11,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Date;
 
 public class HsqlDatabase extends AbstractDatabase {
     private static String START_CONCAT = "CONCAT(";
@@ -112,16 +113,27 @@ public class HsqlDatabase extends AbstractDatabase {
         String returnString = isoDate;
         try {
             if (isDateTime(isoDate)) {
-                DateFormat isoTimestampFormat = new ISODateFormat();
-                DateFormat dbTimestampFormat = new SimpleDateFormat("yyyy-mm-dd HH:MM:ss.000000000");
+                ISODateFormat isoTimestampFormat = new ISODateFormat();
+                DateFormat dbTimestampFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S");
                 returnString = dbTimestampFormat.format(isoTimestampFormat.parse(isoDate));
             }
         } catch (ParseException e) {
-            throw new RuntimeException("Unexpected date format");
+            throw new RuntimeException("Unexpected date format: "+isoDate, e);
         }
         return "'" + returnString + "'";
     }
 
+    protected Date parseDate(String dateAsString) throws ParseException {
+        if (dateAsString.indexOf(" ") > 0) {
+            return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S").parse(dateAsString);
+        } else {
+            if (dateAsString.indexOf(":") > 0) {
+                return new SimpleDateFormat("HH:mm:ss").parse(dateAsString);
+            } else {
+                return new SimpleDateFormat("yyyy-MM-dd").parse(dateAsString);                
+            }
+        }
+    }
 
     public SqlStatement createFindSequencesSQL() throws JDBCException {
         return new RawSqlStatement("SELECT SEQUENCE_NAME FROM INFORMATION_SCHEMA.SYSTEM_SEQUENCES WHERE SEQUENCE_SCHEMA = '" + getSchemaName() + "'");
