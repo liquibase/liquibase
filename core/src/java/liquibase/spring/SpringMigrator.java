@@ -6,9 +6,12 @@ import liquibase.database.DatabaseFactory;
 import liquibase.exception.JDBCException;
 import liquibase.exception.LiquibaseException;
 import liquibase.migrator.Migrator;
+import liquibase.util.StringUtils;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
 
 import javax.sql.DataSource;
 import java.io.File;
@@ -44,7 +47,7 @@ import java.util.logging.Logger;
  *
  *      &lt;property name=&quot;dataSource&quot; ref=&quot;myDataSource&quot; /&gt;
  *
- *      &lt;property name=&quot;changeLogResource&quot; value=&quot;classpath:db-changelog.xml&quot; /&gt;
+ *      &lt;property name=&quot;changeLog&quot; value=&quot;classpath:db-changelog.xml&quot; /&gt;
  *
  *      &lt;!-- The following configuration options are optional --&gt;
  *
@@ -67,26 +70,48 @@ import java.util.logging.Logger;
  * </pre>
  *
  * @author Rob Schoening
- *
  */
-public class SpringMigrator implements InitializingBean, BeanNameAware {
-
-
+public class SpringMigrator implements InitializingBean, BeanNameAware, ResourceLoaderAware {
     public class SpringResourceOpener implements FileOpener {
+        private String parentFile;
 
-        public InputStream getResourceAsStream(String arg0) throws IOException {
-            return getChangeLogResource().getInputStream();
+        public SpringResourceOpener(String parentFile) {
+            this.parentFile = parentFile;
         }
 
-        public Enumeration<URL> getResources(String arg0) throws IOException {
+
+        public InputStream getResourceAsStream(String file) throws IOException {
+            Resource resource = getResource(file);
+
+            return resource.getInputStream();
+        }
+
+        public Enumeration<URL> getResources(String packageName) throws IOException {
             Vector<URL> tmp = new Vector<URL>();
-            tmp.add(getChangeLogResource().getURL());
+
+            tmp.add(getResource(packageName).getURL());
+
             return tmp.elements();
         }
 
+        public Resource getResource(String file) {
+            return getResourceLoader().getResource(adjustClasspath(file));
+        }
+
+        private String adjustClasspath(String file) {
+            return isClasspathPrefixPresent(parentFile) && !isClasspathPrefixPresent(file)
+                    ? ResourceLoader.CLASSPATH_URL_PREFIX + file
+                    : file;
+        }
+
+        public boolean isClasspathPrefixPresent(String file) {
+            return file.startsWith(ResourceLoader.CLASSPATH_URL_PREFIX);
+        }
     }
 
     private String beanName;
+
+    private ResourceLoader resourceLoader;
 
     private DataSource dataSource;
 
@@ -96,7 +121,9 @@ public class SpringMigrator implements InitializingBean, BeanNameAware {
 
     private Logger log = Logger.getLogger(SpringMigrator.class.getName());
 
-    private Resource changeLogResource;
+    private String changeLog;
+
+    private String contexts;
 
     private File sqlOutputDir;
 
@@ -109,7 +136,8 @@ public class SpringMigrator implements InitializingBean, BeanNameAware {
         String name = "unknown";
         try {
             connection = getDataSource().getConnection();
-            Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(dataSource.getConnection());
+            Database database =
+                    DatabaseFactory.getInstance().findCorrectDatabaseImplementation(dataSource.getConnection());
             name = database.getDatabaseProductName();
         } catch (SQLException e) {
             throw new JDBCException(e);
@@ -197,17 +225,25 @@ public class SpringMigrator implements InitializingBean, BeanNameAware {
      *
      * @return
      */
-    public Resource getChangeLogResource() {
-        return changeLogResource;
+    public String getChangeLog() {
+        return changeLog;
     }
 
     /**
      * Sets a Spring Resource that is able to resolve to a file or classpath resource.
      * An example might be <code>classpath:db-changelog.xml</code>.
      */
-    public void setChangeLogResource(Resource dataModel) {
+    public void setChangeLog(String dataModel) {
 
-        this.changeLogResource = dataModel;
+        this.changeLog = dataModel;
+    }
+
+    public String getContexts() {
+        return contexts;
+    }
+
+    public void setContexts(String contexts) {
+        this.contexts = contexts;
     }
 
     /**
@@ -219,7 +255,9 @@ public class SpringMigrator implements InitializingBean, BeanNameAware {
             c = getDataSource().getConnection();
             Migrator migrator = createMigrator(c);
 
-            migrator.init(c);
+            if (StringUtils.trimToNull(contexts) != null) {
+                migrator.setContexts(contexts);
+            }
 
             // First, run patchChangeLog() which allows md5sum values to be set to NULL
             setup(migrator);
@@ -269,6 +307,7 @@ public class SpringMigrator implements InitializingBean, BeanNameAware {
      * so configured.
      *
      * @param migrator
+     *
      * @throws SQLException
      * @throws IOException
      * @throws LiquibaseException
@@ -304,7 +343,7 @@ public class SpringMigrator implements InitializingBean, BeanNameAware {
     }
 
     private Migrator createMigrator(Connection c) throws IOException, JDBCException {
-        Migrator m = new Migrator(getChangeLogResource().getURL().toString(), new SpringResourceOpener());
+        Migrator m = new Migrator(getChangeLog(), new SpringResourceOpener(getChangeLog()));
         m.init(c);
         return m;
     }
@@ -313,6 +352,7 @@ public class SpringMigrator implements InitializingBean, BeanNameAware {
      * This method will actually execute the changesets.
      *
      * @param migrator
+     *
      * @throws SQLException
      * @throws IOException
      */
@@ -354,4 +394,11 @@ public class SpringMigrator implements InitializingBean, BeanNameAware {
         return beanName;
     }
 
+    public void setResourceLoader(ResourceLoader resourceLoader) {
+        this.resourceLoader = resourceLoader;
+    }
+
+    public ResourceLoader getResourceLoader() {
+        return resourceLoader;
+    }
 }
