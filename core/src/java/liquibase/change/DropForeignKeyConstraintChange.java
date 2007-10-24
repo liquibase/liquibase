@@ -19,11 +19,20 @@ import java.util.Set;
  * Drops an existing foreign key constraint.
  */
 public class DropForeignKeyConstraintChange extends AbstractChange {
+    private String baseTableSchemaName;
     private String baseTableName;
     private String constraintName;
 
     public DropForeignKeyConstraintChange() {
         super("dropForeignKeyConstraint", "Drop Foreign Key Constraint");
+    }
+
+    public String getBaseTableSchemaName() {
+        return baseTableSchemaName;
+    }
+
+    public void setBaseTableSchemaName(String baseTableSchemaName) {
+        this.baseTableSchemaName = baseTableSchemaName;
     }
 
     public String getBaseTableName() {
@@ -44,11 +53,11 @@ public class DropForeignKeyConstraintChange extends AbstractChange {
 
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
         if (database instanceof MySQLDatabase) {
-            return new SqlStatement[]{ new RawSqlStatement("ALTER TABLE " + SqlUtil.escapeTableName(getBaseTableName(), database) + " DROP FOREIGN KEY " + getConstraintName()), };
+            return new SqlStatement[]{ new RawSqlStatement("ALTER TABLE " + database.escapeTableName(getBaseTableSchemaName(), getBaseTableName()) + " DROP FOREIGN KEY " + getConstraintName()), };
         }
 
         return new SqlStatement[]{
-                new RawSqlStatement("ALTER TABLE " + SqlUtil.escapeTableName(getBaseTableName(), database) + " DROP CONSTRAINT " + getConstraintName()),
+                new RawSqlStatement("ALTER TABLE " + database.escapeTableName(getBaseTableSchemaName(), getBaseTableName()) + " DROP CONSTRAINT " + getConstraintName()),
         };
     }
 
@@ -58,6 +67,11 @@ public class DropForeignKeyConstraintChange extends AbstractChange {
 
     public Element createNode(Document currentChangeLogFileDOM) {
         Element node = currentChangeLogFileDOM.createElement(getTagName());
+
+        if (getBaseTableSchemaName() != null) {
+            node.setAttribute("baseTableSchemaName", getBaseTableSchemaName());
+        }
+
         node.setAttribute("baseTableName", getBaseTableName());
         node.setAttribute("constraintName", getConstraintName());
 
@@ -67,8 +81,7 @@ public class DropForeignKeyConstraintChange extends AbstractChange {
     public Set<DatabaseObject> getAffectedDatabaseObjects() {
         Set<DatabaseObject> returnSet = new HashSet<DatabaseObject>();
 
-        Table baseTable = new Table();
-        baseTable.setName(baseTableName);
+        Table baseTable = new Table(getBaseTableName());
         returnSet.add(baseTable);
 
         ForeignKey fk = new ForeignKey();

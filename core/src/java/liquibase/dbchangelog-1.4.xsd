@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-            targetNamespace="http://www.liquibase.org/xml/ns/dbchangelog/1.3"
-            xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.3"
+            targetNamespace="http://www.liquibase.org/xml/ns/dbchangelog/1.4"
+            xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.4"
             elementFormDefault="qualified">
 
     <!-- This is the main (root) part of the xsd -->
@@ -94,11 +94,13 @@
     </xsd:attributeGroup>
 
     <xsd:attributeGroup name="dropTableAttributes">
+        <xsd:attribute name="schemaName" type="xsd:string"/>
         <xsd:attribute name="tableName" type="xsd:string"/>
         <xsd:attribute name="cascadeConstraints" type="xsd:boolean"/>
     </xsd:attributeGroup>
 
     <xsd:attributeGroup name="renameTableAttributes">
+        <xsd:attribute name="schemaName" type="xsd:string"/>
         <xsd:attribute name="oldTableName" type="xsd:string"/>
         <xsd:attribute name="newTableName" type="xsd:string"/>
     </xsd:attributeGroup>
@@ -109,6 +111,7 @@
     </xsd:attributeGroup>
 
     <xsd:attributeGroup name="tableNameAttribute">
+        <xsd:attribute name="schemaName" type="xsd:string"/>
         <xsd:attribute name="tableName" type="xsd:string"/>
         <xsd:attribute name="tablespace" type="xsd:string"/>
     </xsd:attributeGroup>
@@ -146,6 +149,7 @@
 
     <xsd:element name="addPrimaryKey">
         <xsd:complexType>
+            <xsd:attribute name="schemaName" type="xsd:string"/>
             <xsd:attribute name="tableName" type="xsd:string"/>
             <xsd:attribute name="columnNames" type="xsd:string"/>
             <xsd:attribute name="constraintName" type="xsd:string"/>
@@ -155,6 +159,7 @@
 
     <xsd:element name="dropPrimaryKey">
         <xsd:complexType>
+            <xsd:attribute name="schemaName" type="xsd:string"/>
             <xsd:attribute name="tableName" type="xsd:string"/>
             <xsd:attribute name="constraintName" type="xsd:string"/>
         </xsd:complexType>
@@ -162,6 +167,7 @@
 
     <xsd:element name="addUniqueConstraint">
         <xsd:complexType>
+            <xsd:attribute name="schemaName" type="xsd:string"/>
             <xsd:attribute name="tableName" type="xsd:string"/>
             <xsd:attribute name="columnNames" type="xsd:string"/>
             <xsd:attribute name="constraintName" type="xsd:string"/>
@@ -171,6 +177,7 @@
 
     <xsd:element name="dropUniqueConstraint">
         <xsd:complexType>
+            <xsd:attribute name="schemaName" type="xsd:string"/>
             <xsd:attribute name="tableName" type="xsd:string"/>
             <xsd:attribute name="constraintName" type="xsd:string"/>
         </xsd:complexType>
@@ -178,8 +185,10 @@
 
     <xsd:element name="addLookupTable">
         <xsd:complexType>
+            <xsd:attribute name="existingTableSchemaName" type="xsd:string"/>
             <xsd:attribute name="existingTableName" type="xsd:string"/>
             <xsd:attribute name="existingColumnName" type="xsd:string"/>
+            <xsd:attribute name="newTableSchemaName" type="xsd:string"/>
             <xsd:attribute name="newTableName" type="xsd:string"/>
             <xsd:attribute name="newColumnName" type="xsd:string"/>
             <xsd:attribute name="newColumnDataType" type="xsd:string"/>
@@ -189,6 +198,7 @@
 
     <xsd:element name="addAutoIncrement">
         <xsd:complexType>
+            <xsd:attribute name="schemaName" type="xsd:string"/>
             <xsd:attribute name="tableName" type="xsd:string"/>
             <xsd:attribute name="columnName" type="xsd:string"/>
             <xsd:attribute name="columnDataType" type="xsd:string"/>
@@ -197,6 +207,7 @@
 
     <xsd:element name="addDefaultValue">
         <xsd:complexType>
+            <xsd:attribute name="schemaName" type="xsd:string"/>
             <xsd:attribute name="tableName" type="xsd:string"/>
             <xsd:attribute name="columnName" type="xsd:string"/>
             <xsd:attribute name="defaultValue" type="xsd:string"/>
@@ -208,15 +219,18 @@
 
     <xsd:element name="dropDefaultValue">
         <xsd:complexType>
+            <xsd:attribute name="schemaName" type="xsd:string"/>
             <xsd:attribute name="tableName" type="xsd:string"/>
             <xsd:attribute name="columnName" type="xsd:string"/>
         </xsd:complexType>
     </xsd:element>
 
     <xsd:attributeGroup name="addForeignKeyConstraintAttrib">
+        <xsd:attribute name="baseTableSchemaName" type="xsd:string"/>
         <xsd:attribute name="baseTableName" type="xsd:string"/>
         <xsd:attribute name="baseColumnNames" type="xsd:string"/>
         <xsd:attribute name="constraintName" type="xsd:string"/>
+        <xsd:attribute name="referencedTableSchemaName" type="xsd:string"/>
         <xsd:attribute name="referencedTableName" type="xsd:string"/>
         <xsd:attribute name="referencedColumnNames" type="xsd:string"/>
         <xsd:attribute name="deferrable" type="xsd:boolean"/>
@@ -225,6 +239,7 @@
     </xsd:attributeGroup>
 
     <xsd:attributeGroup name="addNotNullConstraintAttrib">
+        <xsd:attribute name="schemaName" type="xsd:string"/>
         <xsd:attribute name="tableName" type="xsd:string"/>
         <xsd:attribute name="columnName" type="xsd:string"/>
         <xsd:attribute name="defaultNullValue" type="xsd:string"/>
@@ -295,6 +310,7 @@
     </xsd:element>
 
     <xsd:attributeGroup name="dropForeignKeyConstraintAttrib">
+        <xsd:attribute name="baseTableSchemaName" type="xsd:string"/>
         <xsd:attribute name="baseTableName" type="xsd:string"/>
         <xsd:attribute name="constraintName" type="xsd:string"/>
     </xsd:attributeGroup>
@@ -306,6 +322,7 @@
     </xsd:element>
 
     <xsd:attributeGroup name="dropNotNullConstraintAttrib">
+        <xsd:attribute name="schemaName" type="xsd:string"/>
         <xsd:attribute name="tableName" type="xsd:string"/>
         <xsd:attribute name="columnName" type="xsd:string"/>
         <xsd:attribute name="columnDataType" type="xsd:string"/>

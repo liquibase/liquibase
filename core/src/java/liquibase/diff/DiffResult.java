@@ -286,9 +286,9 @@ public class DiffResult {
         Document doc = documentBuilder.newDocument();
 
         Element changeLogElement = doc.createElement("databaseChangeLog");
-        changeLogElement.setAttribute("xmlns", "http://www.liquibase.org/xml/ns/dbchangelog/1.3");
+        changeLogElement.setAttribute("xmlns", "http://www.liquibase.org/xml/ns/dbchangelog/1.4");
         changeLogElement.setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
-        changeLogElement.setAttribute("xsi:schemaLocation", "http://www.liquibase.org/xml/ns/dbchangelog/1.3 http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.3.xsd");
+        changeLogElement.setAttribute("xsi:schemaLocation", "http://www.liquibase.org/xml/ns/dbchangelog/1.4 http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.4.xsd");
 
         doc.appendChild(changeLogElement);
 
@@ -447,7 +447,11 @@ public class DiffResult {
 
             CreateViewChange change = new CreateViewChange();
             change.setViewName(view.getName());
-            change.setSelectQuery(view.getDefinition());
+            String selectQuery = view.getDefinition();
+            if (selectQuery == null) {
+                selectQuery = "COULD NOT DETERMINE VIEW QUERY";
+            }
+            change.setSelectQuery(selectQuery);
 
             changes.add(change);
         }

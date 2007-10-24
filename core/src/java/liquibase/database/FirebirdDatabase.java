@@ -73,14 +73,14 @@ public class FirebirdDatabase extends AbstractDatabase {
     }
 
 
-    public SqlStatement createFindSequencesSQL() throws JDBCException {
+    public SqlStatement createFindSequencesSQL(String schema) throws JDBCException {
         return new RawSqlStatement("SELECT RDB$GENERATOR_NAME FROM RDB$GENERATORS WHERE RDB$SYSTEM_FLAG IS NULL OR RDB$SYSTEM_FLAG = 0");
     }
 
-    protected SqlStatement getViewDefinitionSql(String viewName) throws JDBCException {
+    public SqlStatement getViewDefinitionSql(String schemaName, String viewName) throws JDBCException {
         String sql = "select rdb$view_source from rdb$relations where upper(rdb$relation_name)='" + viewName + "'";
-        if (getSchemaName() != null) {
-            sql += " and rdb$owner_name='" + getSchemaName().toUpperCase() + "'";
+        if (schemaName != null) {
+            sql += " and rdb$owner_name='" + schemaName.toUpperCase() + "'";
         }
 //        if (getCatalogName() != null) {
 //            sql += " and table_catalog='" + getCatalogName() + "'";
@@ -115,4 +115,9 @@ public class FirebirdDatabase extends AbstractDatabase {
     public boolean supportsAutoIncrement() {
         return false;
     }
+
+    public boolean supportsSchemas() {
+        return false;
+    }
+
 }

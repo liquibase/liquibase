@@ -25,4 +25,8 @@ public class RawSqlStatement implements SqlStatement {
     public String getEndDelimiter(Database database) {
         return endDelimiter;
     }
+
+    public String toString() {
+        return sql;
+    }
 }

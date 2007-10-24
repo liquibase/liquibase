@@ -21,6 +21,7 @@ import java.util.Set;
 public class CreateTableChange extends AbstractChange {
 
     private List<ColumnConfig> columns;
+    private String schemaName;
     private String tableName;
     private String tablespace;
 
@@ -31,7 +32,7 @@ public class CreateTableChange extends AbstractChange {
 
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
 
-        CreateTableStatement statement = new CreateTableStatement(tableName);
+        CreateTableStatement statement = new CreateTableStatement(getSchemaName(), getTableName());
         for (ColumnConfig column : getColumns()) {
             ConstraintsConfig constraints = column.getConstraints();
             boolean isAutoIncrement = column.isAutoIncrement() != null && column.isAutoIncrement();
@@ -96,6 +97,14 @@ public class CreateTableChange extends AbstractChange {
         return columns;
     }
 
+    public String getSchemaName() {
+        return schemaName;
+    }
+
+    public void setSchemaName(String schemaName) {
+        this.schemaName = schemaName;
+    }
+
     public String getTableName() {
         return tableName;
     }
@@ -124,6 +133,10 @@ public class CreateTableChange extends AbstractChange {
 
     public Element createNode(Document currentChangeLogFileDOM) {
         Element element = currentChangeLogFileDOM.createElement("createTable");
+        if (getSchemaName() != null) {
+            element.setAttribute("schemaName", getSchemaName());
+        }
+
         element.setAttribute("tableName", getTableName());
         if (StringUtils.trimToNull(tablespace) != null) {
             element.setAttribute("tablespace", tablespace);
@@ -137,8 +150,7 @@ public class CreateTableChange extends AbstractChange {
     public Set<DatabaseObject> getAffectedDatabaseObjects() {
         Set<DatabaseObject> returnSet = new HashSet<DatabaseObject>();
 
-        Table table = new Table();
-        table.setName(tableName);
+        Table table = new Table(getTableName());
         returnSet.add(table);
 
         for (ColumnConfig columnConfig : getColumns()) {

@@ -29,7 +29,7 @@ public class RenameTableChangeTest extends AbstractChangeTest {
         refactoring.setNewTableName("NEW_NAME");
 
         OracleDatabase database = new OracleDatabase();
-        assertEquals("RENAME OLD_NAME TO NEW_NAME", refactoring.generateStatements(database)[0].getSqlStatement(database));
+        assertEquals("ALTER TABLE OLD_NAME RENAME TO NEW_NAME", refactoring.generateStatements(database)[0].getSqlStatement(database));
     }
 
     @Test

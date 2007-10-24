@@ -288,6 +288,8 @@
 
     <include file="changelogs/common/common.tests.changelog.xml" />
 
+    <include file="changelogs/common/schema.tests.changelog.xml" />
+
     <changeSet id="56" author="nvoxland">
         <customChange class="liquibase.change.custom.ExampleCustomSqlChange">
             <param name="tableName" value="person"/>

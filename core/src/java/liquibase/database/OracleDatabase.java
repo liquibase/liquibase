@@ -2,11 +2,18 @@ package liquibase.database;
 
 import liquibase.database.sql.RawSqlStatement;
 import liquibase.database.sql.SqlStatement;
+import liquibase.database.structure.Table;
+import liquibase.database.structure.UniqueConstraint;
+import liquibase.database.template.JdbcTemplate;
 import liquibase.exception.JDBCException;
 
 import java.sql.Connection;
 import java.sql.Types;
 import java.text.ParseException;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Encapsulates Oracle database support.
@@ -133,8 +140,8 @@ public class OracleDatabase extends AbstractDatabase {
         return new RawSqlStatement((super.getSelectChangeLogLockSQL().getSqlStatement(this) + " for update").toUpperCase());
     }
 
-    public SqlStatement createFindSequencesSQL() throws JDBCException {
-        return new RawSqlStatement("SELECT SEQUENCE_NAME FROM ALL_SEQUENCES WHERE SEQUENCE_OWNER = '" + getSchemaName() + "'");
+    public SqlStatement createFindSequencesSQL(String schema) throws JDBCException {
+        return new RawSqlStatement("SELECT SEQUENCE_NAME FROM ALL_SEQUENCES WHERE SEQUENCE_OWNER = '" + schema + "'");
     }
 
 
@@ -160,7 +167,7 @@ public class OracleDatabase extends AbstractDatabase {
         return true;
     }
 
-    protected SqlStatement getViewDefinitionSql(String name) {
+    public SqlStatement getViewDefinitionSql(String schemaName, String name) {
         return new RawSqlStatement("SELECT TEXT FROM USER_VIEWS WHERE upper(VIEW_NAME)='"+name.toUpperCase()+"'");
     }
 
@@ -184,4 +191,24 @@ public class OracleDatabase extends AbstractDatabase {
         }
         return super.convertDatabaseValueToJavaObject(defaultValue, dataType, columnSize, decimalDigits);
     }
+
+//    public Set<UniqueConstraint> findUniqueConstraints(String schema) throws JDBCException {
+//        Set<UniqueConstraint> returnSet = new HashSet<UniqueConstraint>();
+//
+//        List<Map> maps = new JdbcTemplate(this).queryForList(new RawSqlStatement("SELECT UC.CONSTRAINT_NAME, UCC.TABLE_NAME, UCC.COLUMN_NAME FROM USER_CONSTRAINTS UC, USER_CONS_COLUMNS UCC WHERE UC.CONSTRAINT_NAME=UCC.CONSTRAINT_NAME AND CONSTRAINT_TYPE='U' ORDER BY UC.CONSTRAINT_NAME"));
+//
+//        UniqueConstraint constraint = null;
+//        for (Map map : maps) {
+//            if (constraint == null || !constraint.getName().equals(constraint.getName())) {
+//                returnSet.add(constraint);
+//                Table table = new Table((String) map.get("TABLE_NAME"));
+//                constraint = new UniqueConstraint(map.get("CONSTRAINT_NAME").toString(), table);
+//            }
+//        }
+//        if (constraint != null) {
+//            returnSet.add(constraint);
+//        }
+//
+//        return returnSet;
+//    }
 }

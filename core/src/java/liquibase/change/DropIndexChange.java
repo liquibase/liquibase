@@ -23,11 +23,20 @@ import java.util.Set;
  */
 public class DropIndexChange extends AbstractChange {
 
+    private String schemaName;
     private String indexName;
     private String tableName;
 
     public DropIndexChange() {
         super("dropIndex", "Drop Index");
+    }
+
+    public String getSchemaName() {
+        return schemaName;
+    }
+
+    public void setSchemaName(String schemaName) {
+        this.schemaName = schemaName;
     }
 
     public String getIndexName() {
@@ -48,14 +57,14 @@ public class DropIndexChange extends AbstractChange {
 
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
         if (database instanceof MySQLDatabase) {
-            return new SqlStatement[]{new RawSqlStatement("DROP INDEX " + indexName + " ON " + SqlUtil.escapeTableName(tableName, database))};
+            return new SqlStatement[]{new RawSqlStatement("DROP INDEX " + indexName + " ON " + database.escapeTableName(getSchemaName(), getTableName()))};
         } else if (database instanceof MSSQLDatabase) {
-            return new SqlStatement[]{new RawSqlStatement("DROP INDEX " + tableName + "." + indexName)};
+            return new SqlStatement[]{new RawSqlStatement("DROP INDEX " + database.escapeTableName(getSchemaName(), getTableName()) + "." + indexName)};
         } else if (database instanceof OracleDatabase) {
             return new SqlStatement[]{new RawSqlStatement("DROP INDEX " + indexName)};
         }
 
-        return new SqlStatement[]{new RawSqlStatement("DROP INDEX " + indexName)};
+        return new SqlStatement[]{new RawSqlStatement("DROP INDEX " + database.escapeTableName(getSchemaName(), getIndexName()))};
     }
 
     public String getConfirmationMessage() {
@@ -64,6 +73,10 @@ public class DropIndexChange extends AbstractChange {
 
     public Element createNode(Document currentChangeLogFileDOM) {
         Element element = currentChangeLogFileDOM.createElement("dropIndex");
+        if (getSchemaName() != null) {
+            element.setAttribute("schemaName", getSchemaName());
+        }
+
         element.setAttribute("indexName", getIndexName());
         element.setAttribute("tableName", getTableName());
 
@@ -75,8 +88,7 @@ public class DropIndexChange extends AbstractChange {
         index.setTableName(tableName);
         index.setName(indexName);
 
-        Table table= new Table();
-        table.setName(tableName);
+        Table table= new Table(getTableName());
 
         return new HashSet<DatabaseObject>(Arrays.asList(index, table));
     }

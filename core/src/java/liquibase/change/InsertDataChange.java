@@ -17,12 +17,21 @@ import java.util.*;
  */
 public class InsertDataChange extends AbstractChange {
 
+    private String schemaName;
     private String tableName;
     private List<ColumnConfig> columns;
 
     public InsertDataChange() {
         super("insert", "Insert Row");
         columns = new ArrayList<ColumnConfig>();
+    }
+
+    public String getSchemaName() {
+        return schemaName;
+    }
+
+    public void setSchemaName(String schemaName) {
+        this.schemaName = schemaName;
     }
 
     public String getTableName() {
@@ -51,7 +60,7 @@ public class InsertDataChange extends AbstractChange {
 
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
         StringBuffer buffer = new StringBuffer();
-        buffer.append("INSERT INTO ").append(SqlUtil.escapeTableName(getTableName(), database)).append(" ");
+        buffer.append("INSERT INTO ").append(database.escapeTableName(getSchemaName(), getTableName())).append(" ");
         Iterator<ColumnConfig> iterator = columns.iterator();
         StringBuffer columnNames = new StringBuffer();
         StringBuffer columnValues = new StringBuffer();
@@ -109,6 +118,10 @@ public class InsertDataChange extends AbstractChange {
 
     public Element createNode(Document currentChangeLogFileDOM) {
         Element node = currentChangeLogFileDOM.createElement("insert");
+        if (getSchemaName() != null) {
+            node.setAttribute("schemaName", getSchemaName());
+        }
+        
         node.setAttribute("tableName", getTableName());
 
         for (ColumnConfig col : getColumns()) {
@@ -119,8 +132,7 @@ public class InsertDataChange extends AbstractChange {
     }
 
     public Set<DatabaseObject> getAffectedDatabaseObjects() {
-        Table dbObject = new Table();
-        dbObject.setName(tableName);
+        Table dbObject = new Table(getTableName());
 
         return new HashSet<DatabaseObject>(Arrays.asList(dbObject));
     }

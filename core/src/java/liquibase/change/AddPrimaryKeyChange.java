@@ -3,6 +3,7 @@ package liquibase.change;
 import liquibase.database.DB2Database;
 import liquibase.database.Database;
 import liquibase.database.MSSQLDatabase;
+import liquibase.database.MySQLDatabase;
 import liquibase.database.sql.RawSqlStatement;
 import liquibase.database.sql.SqlStatement;
 import liquibase.database.structure.Column;
@@ -10,7 +11,6 @@ import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Table;
 import liquibase.exception.UnsupportedChangeException;
 import liquibase.util.StringUtils;
-import liquibase.util.SqlUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -22,6 +22,7 @@ import java.util.Set;
  */
 public class AddPrimaryKeyChange extends AbstractChange {
 
+    private String schemaName;
     private String tableName;
     private String tablespace;
     private String columnNames;
@@ -37,6 +38,14 @@ public class AddPrimaryKeyChange extends AbstractChange {
 
     public void setTableName(String tableName) {
         this.tableName = tableName;
+    }
+
+    public String getSchemaName() {
+        return schemaName;
+    }
+
+    public void setSchemaName(String schemaName) {
+        this.schemaName = schemaName;
     }
 
     public String getColumnNames() {
@@ -66,10 +75,10 @@ public class AddPrimaryKeyChange extends AbstractChange {
 
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
         String sql;
-        if (getConstraintName() == null) {
-            sql = "ALTER TABLE " + SqlUtil.escapeTableName(getTableName(), database) + " ADD PRIMARY KEY (" + getColumnNames() + ")";
+        if (getConstraintName() == null  || database instanceof MySQLDatabase) {
+            sql = "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ADD PRIMARY KEY (" + getColumnNames() + ")";
         } else {
-            sql = "ALTER TABLE " + SqlUtil.escapeTableName(getTableName(), database) + " ADD CONSTRAINT " + getConstraintName() + " PRIMARY KEY (" + getColumnNames() + ")";
+            sql = "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ADD CONSTRAINT " + getConstraintName() + " PRIMARY KEY (" + getColumnNames() + ")";
         }
 
         if (StringUtils.trimToNull(getTablespace()) != null && database.supportsTablespaces()) {
@@ -85,7 +94,7 @@ public class AddPrimaryKeyChange extends AbstractChange {
         if (database instanceof DB2Database) {
             return new SqlStatement[] {
                     new RawSqlStatement(sql),
-                    new RawSqlStatement("CALL SYSPROC.ADMIN_CMD ('REORG TABLE "+getTableName()+"')"),
+                    new RawSqlStatement("CALL SYSPROC.ADMIN_CMD ('REORG TABLE "+database.escapeTableName(getSchemaName(), getTableName())+"')"),
             };
         }
 
@@ -110,9 +119,12 @@ public class AddPrimaryKeyChange extends AbstractChange {
 
     public Element createNode(Document currentChangeLogFileDOM) {
         Element node = currentChangeLogFileDOM.createElement(getTagName());
+        if (getSchemaName() != null) {
+            node.setAttribute("schemaName", getSchemaName());
+        }
         node.setAttribute("tableName", getTableName());
         node.setAttribute("columnNames", getColumnNames());
-        if (getConstraintName() == null) {
+        if (getConstraintName() != null) {
             node.setAttribute("constraintName", getConstraintName());
         }
 
@@ -123,8 +135,7 @@ public class AddPrimaryKeyChange extends AbstractChange {
 
         Set<DatabaseObject> dbObjects = new HashSet<DatabaseObject>();
 
-        Table table = new Table();
-        table.setName(tableName);
+        Table table = new Table(getTableName());
         dbObjects.add(table);
 
         for (String columnName : columnNames.split(",")) {

@@ -34,12 +34,12 @@ public class H2Database extends HsqlDatabase {
         return "H2".equals(getDatabaseProductName(conn));
     }
 
-    public SqlStatement createFindSequencesSQL() throws JDBCException {
-        return new RawSqlStatement("SELECT SEQUENCE_NAME FROM INFORMATION_SCHEMA.SEQUENCES WHERE SEQUENCE_SCHEMA = '" + getSchemaName() + "' AND IS_GENERATED=FALSE");
+    public SqlStatement createFindSequencesSQL(String schema) throws JDBCException {
+        return new RawSqlStatement("SELECT SEQUENCE_NAME FROM INFORMATION_SCHEMA.SEQUENCES WHERE SEQUENCE_SCHEMA = '" + schema + "' AND IS_GENERATED=FALSE");
     }
 
 
-    public void dropDatabaseObjects() throws JDBCException {
+    public void dropDatabaseObjects(String schema) throws JDBCException {
         DatabaseConnection conn = getConnection();
         Statement dropStatement = null;
         try {
@@ -68,11 +68,11 @@ public class H2Database extends HsqlDatabase {
         return false;
     }
 
-    public String getViewDefinition(String name) throws JDBCException {
-        return super.getViewDefinition(name).replaceFirst(".*?\n", ""); //h2 returns "create view....as\nselect
+    public String getViewDefinition(String schemaName, String name) throws JDBCException {
+        return super.getViewDefinition(schemaName, name).replaceFirst(".*?\n", ""); //h2 returns "create view....as\nselect
     }
 
-    protected SqlStatement getViewDefinitionSql(String name) throws JDBCException {
+    public SqlStatement getViewDefinitionSql(String schemaName, String name) throws JDBCException {
         return new RawSqlStatement("SELECT VIEW_DEFINITION FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_NAME = '" + name + "'");
     }
 

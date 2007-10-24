@@ -19,11 +19,21 @@ import java.util.Set;
  * Removes the default value from an existing column.
  */
 public class DropDefaultValueChange extends AbstractChange {
+
+    private String schemaName;
     private String tableName;
     private String columnName;
 
     public DropDefaultValueChange() {
         super("dropDefaultValue", "Drop Default Value");
+    }
+
+    public String getSchemaName() {
+        return schemaName;
+    }
+
+    public void setSchemaName(String schemaName) {
+        this.schemaName = schemaName;
     }
 
     public String getTableName() {
@@ -45,17 +55,17 @@ public class DropDefaultValueChange extends AbstractChange {
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
         if (database instanceof MSSQLDatabase) {
 //smarter drop        return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + SqlUtil.escapeTableName(getTableName(), database) + " DROP CONSTRAINT select d.name from syscolumns c,sysobjects d, sysobjects t where c.id=t.id AND d.parent_obj=t.id AND d.type='D' AND t.type='U' AND c.name='"+getColumnName()+"' AND t.name='"+getTableName()+"'"),};
-            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + SqlUtil.escapeTableName(getTableName(), database) + " DROP CONSTRAINT "+((MSSQLDatabase) database).generateDefaultConstraintName(getTableName(), getColumnName())),};
+            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " DROP CONSTRAINT "+((MSSQLDatabase) database).generateDefaultConstraintName(getTableName(), getColumnName())),};
         } else if (database instanceof MySQLDatabase) {
-            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + SqlUtil.escapeTableName(getTableName(), database) + " ALTER " + getColumnName() + " DROP DEFAULT"),};
+            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ALTER " + getColumnName() + " DROP DEFAULT"),};
         } else if (database instanceof OracleDatabase) {
-            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + SqlUtil.escapeTableName(getTableName(), database) + " MODIFY " + getColumnName() + " DEFAULT NULL"),};
+            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " MODIFY " + getColumnName() + " DEFAULT NULL"),};
         } else if (database instanceof DerbyDatabase) {
-            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + SqlUtil.escapeTableName(getTableName(), database) + " ALTER COLUMN  " + getColumnName() + " WITH DEFAULT NULL"),};
+            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ALTER COLUMN  " + getColumnName() + " WITH DEFAULT NULL"),};
         }
 
         return new SqlStatement[]{
-                new RawSqlStatement("ALTER TABLE " + SqlUtil.escapeTableName(getTableName(), database) + " ALTER COLUMN  " + getColumnName() + " SET DEFAULT NULL"),
+                new RawSqlStatement("ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ALTER COLUMN  " + getColumnName() + " SET DEFAULT NULL"),
         };
     }
 
@@ -65,6 +75,11 @@ public class DropDefaultValueChange extends AbstractChange {
 
     public Element createNode(Document currentChangeLogFileDOM) {
         Element node = currentChangeLogFileDOM.createElement(getTagName());
+
+        if (getSchemaName() != null) {
+            node.setAttribute("schemaName", getSchemaName());
+        }
+
         node.setAttribute("tableName", getTableName());
         node.setAttribute("columnName", getColumnName());
 
@@ -74,8 +89,7 @@ public class DropDefaultValueChange extends AbstractChange {
     public Set<DatabaseObject> getAffectedDatabaseObjects() {
         Column column = new Column();
 
-        Table table = new Table();
-        table.setName(tableName);
+        Table table = new Table(getTableName());
         column.setTable(table);
 
         column.setName(columnName);

@@ -47,7 +47,7 @@ public class CreateTableStatementTest {
         new DatabaseTestTemplate().testOnAvailableDatabases(new DatabaseTest() {
 
             public void performTest(Database database) throws JDBCException {
-                CreateTableStatement statement = new CreateTableStatement(TABLE_NAME)
+                CreateTableStatement statement = new CreateTableStatement(null, TABLE_NAME)
                         .addPrimaryKeyColumn("id", "int")
                         .addColumn("name", "varchar(255)")
                         .addColumn("username", "varchar(255)", "'NEWUSER'");
@@ -80,7 +80,7 @@ public class CreateTableStatementTest {
                     return;
                 }
 
-                CreateTableStatement statement = new CreateTableStatement(TABLE_NAME)
+                CreateTableStatement statement = new CreateTableStatement(null, TABLE_NAME)
                         .addPrimaryKeyColumn("id", "int")
                         .addColumn("name", "varchar(255)")
                         .addColumn("username", "varchar(255)", "'NEWUSER'");
@@ -105,7 +105,7 @@ public class CreateTableStatementTest {
             public void performTest(Database database) throws JDBCException {
                 String foreignKeyName = "fk_test_parent";
                 ForeignKeyConstraint fkConstraint = new ForeignKeyConstraint(foreignKeyName, TABLE_NAME + "(id)");
-                CreateTableStatement statement = new CreateTableStatement(TABLE_NAME)
+                CreateTableStatement statement = new CreateTableStatement(null, TABLE_NAME)
                         .addPrimaryKeyColumn("id", "int")
                         .addColumn("name", "varchar(255)")
                         .addColumn("parent_id", "int", fkConstraint);
@@ -141,7 +141,7 @@ public class CreateTableStatementTest {
                 fkConstraint.setDeferrable(true);
                 fkConstraint.setInitiallyDeferred(true);
 
-                CreateTableStatement statement = new CreateTableStatement(TABLE_NAME)
+                CreateTableStatement statement = new CreateTableStatement(null, TABLE_NAME)
                         .addPrimaryKeyColumn("id", "int")
                         .addColumn("name", "varchar(255)")
                         .addColumn("parent_id", "int", fkConstraint);
@@ -170,7 +170,7 @@ public class CreateTableStatementTest {
         new DatabaseTestTemplate().testOnAvailableDatabases(new DatabaseTest() {
 
             public void performTest(Database database) throws JDBCException {
-                CreateTableStatement statement = new CreateTableStatement(FK_TABLE_NAME)
+                CreateTableStatement statement = new CreateTableStatement(null, FK_TABLE_NAME)
                         .addPrimaryKeyColumn("id", "int")
                         .addColumn("name", "varchar(255)");
 
@@ -180,7 +180,7 @@ public class CreateTableStatementTest {
                 ForeignKeyConstraint fkConstraint = new ForeignKeyConstraint(foreignKeyName, FK_TABLE_NAME + "(id)");
                 fkConstraint.setDeleteCascade(true);
 
-                statement = new CreateTableStatement(TABLE_NAME)
+                statement = new CreateTableStatement(null, TABLE_NAME)
                         .addPrimaryKeyColumn("id", "int")
                         .addColumn("name", "varchar(255)")
                         .addColumn("parent_id", "int", fkConstraint);
@@ -214,7 +214,7 @@ public class CreateTableStatementTest {
 
                 UniqueConstraint uniqueConstraint = new UniqueConstraint("UQ_TESTCT_ID");
                 NotNullConstraint notNullConstraint = new NotNullConstraint();
-                CreateTableStatement statement = new CreateTableStatement(TABLE_NAME)
+                CreateTableStatement statement = new CreateTableStatement(null, TABLE_NAME)
                         .addPrimaryKeyColumn("id", "int")
                         .addColumn("name", "varchar(255)")
                         .addColumn("username", "int", uniqueConstraint, notNullConstraint);
@@ -233,7 +233,7 @@ public class CreateTableStatementTest {
 
     @Test
     public void addPrimaryKeyColumn_oneColumn() {
-        CreateTableStatement statement = new CreateTableStatement("tableName");
+        CreateTableStatement statement = new CreateTableStatement(null, "tableName");
         statement.addPrimaryKeyColumn("id", "int");
 
         assertEquals(1, statement.getPrimaryKeyConstraint().getColumns().size());
@@ -241,7 +241,7 @@ public class CreateTableStatementTest {
 
     @Test
     public void addPrimaryKeyColumn_multiColumn() {
-        CreateTableStatement statement = new CreateTableStatement("tableName");
+        CreateTableStatement statement = new CreateTableStatement(null, "tableName");
         statement.addPrimaryKeyColumn("id1", "int");
         statement.addPrimaryKeyColumn("id2", "int");
 
@@ -250,7 +250,7 @@ public class CreateTableStatementTest {
 
     @Test
     public void addColumnConstraint_notNullConstraint() {
-        CreateTableStatement statement = new CreateTableStatement("tableName");
+        CreateTableStatement statement = new CreateTableStatement(null, "tableName");
         statement.addColumn("id", "int");
 
         assertFalse(statement.getNotNullColumns().contains("id"));
@@ -262,7 +262,7 @@ public class CreateTableStatementTest {
 
     @Test
     public void addColumnConstraint_ForeignKeyConstraint() {
-        CreateTableStatement statement = new CreateTableStatement("tableName");
+        CreateTableStatement statement = new CreateTableStatement(null, "tableName");
         statement.addColumn("id", "int");
 
         assertEquals(0, statement.getForeignKeyConstraints().size());
@@ -275,7 +275,7 @@ public class CreateTableStatementTest {
 
     @Test
     public void addColumnConstraint_UniqueConstraint() {
-        CreateTableStatement statement = new CreateTableStatement("tableName");
+        CreateTableStatement statement = new CreateTableStatement(null, "tableName");
         statement.addColumn("id", "int");
 
         assertEquals(0, statement.getUniqueConstraints().size());
@@ -295,7 +295,7 @@ public class CreateTableStatementTest {
                     return;
                 }
 
-                CreateTableStatement statement = new CreateTableStatement(TABLE_NAME)
+                CreateTableStatement statement = new CreateTableStatement(null, TABLE_NAME)
                         .addPrimaryKeyColumn("id", "int")
                         .addColumn("name", "varchar(255)")
                         .addColumn("username", "varchar(255)", "'NEWUSER'")
@@ -318,7 +318,7 @@ public class CreateTableStatementTest {
 
             public void performTest(Database database) throws JDBCException {
 
-                CreateTableStatement statement = new CreateTableStatement("testTable");
+                CreateTableStatement statement = new CreateTableStatement(null, "testTable");
                 assertEquals(";", statement.getEndDelimiter(database));
             }
         });

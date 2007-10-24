@@ -603,21 +603,34 @@ public class Migrator {
      * Drops all database objects owned by the current user.
      */
     public final void dropAll() throws JDBCException, LockException {
+        dropAll(getDatabase().getSchemaName());
+    }
+
+    /**
+     * Drops all database objects owned by the current user.
+     */
+    public final void dropAll(String... schemas) throws JDBCException, LockException {
         try {
             if (!waitForLock()) {
                 return;
             }
 
-            log.info("Dropping Database Objects in " + getDatabase().getSchemaName());
-            getDatabase().dropDatabaseObjects();
-            checkDatabaseChangeLogTable();
-            log.finest("Objects dropped successfully");
+            for (String schema : schemas) {
+                log.info("Dropping Database Objects in " + schema);
+                getDatabase().dropDatabaseObjects(schema);
+                checkDatabaseChangeLogTable();
+                log.finest("Objects dropped successfully");
+            }
         } catch (JDBCException e) {
             throw e;
         } catch (Exception e) {
             throw new JDBCException(e);
         } finally {
-            releaseLock();
+            try {
+                releaseLock();
+            } catch (LockException e) {
+                log.severe("Unable to release lock: "+e.getMessage());
+            }
         }
     }
 

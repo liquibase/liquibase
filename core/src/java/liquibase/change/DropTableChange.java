@@ -19,11 +19,21 @@ import java.util.Set;
  */
 public class DropTableChange extends AbstractChange {
 
+    private String schemaName;
     private String tableName;
     private Boolean cascadeConstraints;
 
     public DropTableChange() {
         super("dropTable", "Drop Table");
+    }
+
+
+    public String getSchemaName() {
+        return schemaName;
+    }
+
+    public void setSchemaName(String schemaName) {
+        this.schemaName = schemaName;
     }
 
     public String getTableName() {
@@ -44,7 +54,7 @@ public class DropTableChange extends AbstractChange {
 
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
         StringBuffer buffer = new StringBuffer(31);
-        buffer.append("DROP TABLE ").append(SqlUtil.escapeTableName(getTableName(),database));
+        buffer.append("DROP TABLE ").append(database.escapeTableName(getSchemaName(), getTableName()));
         if (isCascadeConstraints() != null && isCascadeConstraints()) {
             buffer.append(" CASCADE CONSTRAINTS");
         }
@@ -57,6 +67,10 @@ public class DropTableChange extends AbstractChange {
 
     public Element createNode(Document currentChangeLogFileDOM) {
         Element element = currentChangeLogFileDOM.createElement("dropTable");
+        if (getSchemaName() != null) {
+            element.setAttribute("schemaName", getSchemaName());
+        }
+
         element.setAttribute("tableName", getTableName());
 
         if (isCascadeConstraints() != null) {
@@ -67,8 +81,7 @@ public class DropTableChange extends AbstractChange {
     }
 
     public Set<DatabaseObject> getAffectedDatabaseObjects() {
-        Table dbObject = new Table();
-        dbObject.setName(tableName);
+        Table dbObject = new Table(getTableName());
 
         return new HashSet<DatabaseObject>(Arrays.asList(dbObject));
     }

@@ -64,7 +64,11 @@ public class JdbcTemplate {
 
         class ExecuteStatementCallback implements StatementCallback {
             public Object doInStatement(Statement stmt) throws SQLException {
-                stmt.execute(sql.getSqlStatement(database));
+                try {
+                    stmt.execute(sql.getSqlStatement(database));
+                } catch (SQLException e) {
+                    throw e;
+                }
                 return null;
             }
 

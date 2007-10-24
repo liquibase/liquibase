@@ -7,13 +7,12 @@ public class Table implements DatabaseObject, Comparable<Table> {
     private String name;
     private List<Column> columns = new ArrayList<Column>();
 
+    public Table(String name) {
+        this.name = name;
+    }
 
     public String getName() {
         return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public List<Column> getColumns() {

@@ -21,6 +21,7 @@ import java.util.*;
  */
 public class CreateIndexChange extends AbstractChange {
 
+    private String schemaName;
     private String tableName;
     private String indexName;
     private String tablespace;
@@ -38,6 +39,14 @@ public class CreateIndexChange extends AbstractChange {
 
     public void setIndexName(String indexName) {
         this.indexName = indexName;
+    }
+
+    public String getSchemaName() {
+        return schemaName;
+    }
+
+    public void setSchemaName(String schemaName) {
+        this.schemaName = schemaName;
     }
 
     public String getTableName() {
@@ -73,7 +82,7 @@ public class CreateIndexChange extends AbstractChange {
         StringBuffer buffer = new StringBuffer();
         buffer.append("CREATE INDEX ");
         buffer.append(getIndexName()).append(" ON ");
-        buffer.append(SqlUtil.escapeTableName(getTableName(), database)).append("(");
+        buffer.append(database.escapeTableName(getSchemaName(), getTableName())).append("(");
         Iterator<ColumnConfig> iterator = columns.iterator();
         while (iterator.hasNext()) {
             ColumnConfig column = iterator.next();
@@ -113,6 +122,10 @@ public class CreateIndexChange extends AbstractChange {
     public Element createNode(Document currentChangeLogFileDOM) {
         Element element = currentChangeLogFileDOM.createElement("createIndex");
         element.setAttribute("indexName", getIndexName());
+        if (getSchemaName() != null) {
+            element.setAttribute("schemaName", getSchemaName());
+        }
+
         element.setAttribute("tableName", getTableName());
 
         for (ColumnConfig column : getColumns()) {
@@ -129,9 +142,8 @@ public class CreateIndexChange extends AbstractChange {
         index.setTableName(tableName);
         index.setName(indexName);
 
-        Table table= new Table();
-        table.setName(tableName);
-        
+        Table table= new Table(getTableName());
+
         return new HashSet<DatabaseObject>(Arrays.asList(index, table));
     }
 

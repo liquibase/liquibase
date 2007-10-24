@@ -4,6 +4,7 @@ import liquibase.database.sql.RawSqlStatement;
 import liquibase.database.sql.SqlStatement;
 import liquibase.database.template.JdbcTemplate;
 import liquibase.exception.JDBCException;
+import liquibase.util.StringUtils;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -150,25 +151,28 @@ public class PostgresDatabase extends AbstractDatabase {
         return "DROP TABLE " + tableName;
     }
 
-    public void dropDatabaseObjects() throws JDBCException {
-        try {
-            new JdbcTemplate(this).execute(new RawSqlStatement("DROP OWNED BY " + getConnectionUsername()));
+//    public void dropDatabaseObjects(String schema) throws JDBCException {
+//        try {
+//            if (schema == null) {
+//                schema = getConnectionUsername();
+//            }
+//            new JdbcTemplate(this).execute(new RawSqlStatement("DROP OWNED BY " + schema));
+//
+//            getConnection().commit();
+//
+//            changeLogTableExists = false;
+//            changeLogLockTableExists = false;
+//            changeLogCreateAttempted = false;
+//            changeLogLockCreateAttempted = false;
+//
+//        } catch (SQLException e) {
+//            throw new JDBCException(e);
+//        }
+//    }
 
-            getConnection().commit();
 
-            changeLogTableExists = false;
-            changeLogLockTableExists = false;
-            changeLogCreateAttempted = false;
-            changeLogLockCreateAttempted = false;
-
-        } catch (SQLException e) {
-            throw new JDBCException(e);
-        }
-    }
-
-
-    public SqlStatement createFindSequencesSQL() throws JDBCException {
-        return new RawSqlStatement("SELECT NULL AS SEQUENCE_SCHEMA, relname AS SEQUENCE_NAME FROM pg_class, pg_namespace WHERE relkind='S' AND pg_class.relnamespace = pg_namespace.oid AND nspname = '" + getSchemaName() + "'");
+    public SqlStatement createFindSequencesSQL(String schema) throws JDBCException {
+        return new RawSqlStatement("SELECT relname AS SEQUENCE_NAME FROM pg_class, pg_namespace WHERE relkind='S' AND pg_class.relnamespace = pg_namespace.oid AND nspname = '" + convertRequestedSchemaToSchema(schema) + "'");
     }
 
 
@@ -188,7 +192,7 @@ public class PostgresDatabase extends AbstractDatabase {
     }
 
 
-    protected SqlStatement getViewDefinitionSql(String name) throws JDBCException {
+    public SqlStatement getViewDefinitionSql(String schemaName, String name) throws JDBCException {
         return new RawSqlStatement("select definition from pg_views where viewname='" + name + "'");
     }
 
@@ -230,4 +234,13 @@ public class PostgresDatabase extends AbstractDatabase {
         return super.convertDatabaseValueToJavaObject(defaultValue, dataType, columnSize, decimalDigits);
 
     }
+
+    public String convertRequestedSchemaToSchema(String requestedSchema) throws JDBCException {
+        if (getSchemaName() == null) {
+            return "public";
+        } else {
+            return StringUtils.trimToNull(requestedSchema);
+        }
+    }
+
 }

@@ -81,11 +81,11 @@ public class TestContext {
                     }
 
                     if (connection.getMetaData().getURL().startsWith("jdbc:derby")) {
-                        try {
-                            driver.connect("jdbc:derby:liquibase;shutdown=true", new Properties());
-                        } catch (SQLException e) {
-                            ;//clean shutdown throws exception.//NOPMD
-                        }
+//                        try {
+//                            driver.connect("jdbc:derby:liquibase;shutdown=true", new Properties());
+//                        } catch (SQLException e) {
+//                            ;//clean shutdown throws exception.//NOPMD
+//                        }
                     } else if (connection.getMetaData().getURL().startsWith("jdbc:hsqldb")) {
                         try {
                             Statement statement = connection.createStatement();

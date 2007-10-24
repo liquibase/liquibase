@@ -9,6 +9,7 @@ public class Index implements DatabaseObject, Comparable<Index> {
     private String name;
     private String tableName;
     private List<String> columns = new ArrayList<String>();
+    private String filterCondition;
 
 
     public String getName() {
@@ -33,6 +34,14 @@ public class Index implements DatabaseObject, Comparable<Index> {
 
     public String getColumnNames() {
         return StringUtils.join(columns, ", ");
+    }
+
+    public String getFilterCondition() {
+        return filterCondition;
+    }
+
+    public void setFilterCondition(String filterCondition) {
+        this.filterCondition = filterCondition;
     }
 
     public boolean equals(Object o) {

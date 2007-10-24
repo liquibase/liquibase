@@ -19,6 +19,8 @@ import java.util.Set;
  * Renames an existing column.
  */
 public class RenameColumnChange extends AbstractChange {
+
+    private String schemaName;
     private String tableName;
     private String oldColumnName;
     private String newColumnName;
@@ -26,6 +28,15 @@ public class RenameColumnChange extends AbstractChange {
 
     public RenameColumnChange() {
         super("renameColumn", "Rename Column");
+    }
+
+
+    public String getSchemaName() {
+        return schemaName;
+    }
+
+    public void setSchemaName(String schemaName) {
+        this.schemaName = schemaName;
     }
 
     public String getTableName() {
@@ -62,26 +73,26 @@ public class RenameColumnChange extends AbstractChange {
 
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
         if (database instanceof MSSQLDatabase) {
-            return new SqlStatement[]{new RawSqlStatement("exec sp_rename '" + SqlUtil.escapeTableName(tableName, database) + "." + oldColumnName + "', '" + newColumnName+"'")};
+            return new SqlStatement[]{new RawSqlStatement("exec sp_rename '" + database.escapeTableName(getSchemaName(), tableName) + "." + oldColumnName + "', '" + newColumnName+"'")};
         } else if (database instanceof MySQLDatabase) {
             if (columnDataType == null) {
                 throw new RuntimeException("columnDataType is required to rename columns with MySQL");
             }
             
-            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + SqlUtil.escapeTableName(tableName, database) + " CHANGE " + oldColumnName + " " + newColumnName + " " + columnDataType)};
+            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + database.escapeTableName(getSchemaName(), tableName) + " CHANGE " + oldColumnName + " " + newColumnName + " " + columnDataType)};
         } else if (database instanceof DerbyDatabase) {
             throw new UnsupportedChangeException("Derby does not currently support renaming columns");
         } else if (database instanceof HsqlDatabase) {
-            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + SqlUtil.escapeTableName(tableName, database) + " ALTER COLUMN " + oldColumnName + " RENAME TO " + newColumnName)};
+            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + database.escapeTableName(getSchemaName(), tableName) + " ALTER COLUMN " + oldColumnName + " RENAME TO " + newColumnName)};
         } else if (database instanceof FirebirdDatabase) {
-            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + SqlUtil.escapeTableName(tableName, database) + " ALTER COLUMN " + oldColumnName + " TO " + newColumnName)};
+            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + database.escapeTableName(getSchemaName(), tableName) + " ALTER COLUMN " + oldColumnName + " TO " + newColumnName)};
         } else if (database instanceof DB2Database) {
             throw new UnsupportedChangeException("Rename Column not supported in DB2");
         } else if (database instanceof CacheDatabase) {
             throw new UnsupportedChangeException("Rename Column not currently supported for Cache");
         }
 
-        return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + SqlUtil.escapeTableName(tableName, database) + " RENAME COLUMN " + oldColumnName + " TO " + newColumnName)};
+        return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + database.escapeTableName(getSchemaName(), tableName) + " RENAME COLUMN " + oldColumnName + " TO " + newColumnName)};
     }
 
     protected Change[] createInverses() {
@@ -102,6 +113,10 @@ public class RenameColumnChange extends AbstractChange {
 
     public Element createNode(Document currentChangeLogFileDOM) {
         Element node = currentChangeLogFileDOM.createElement("renameColumn");
+        if (getSchemaName() != null) {
+            node.setAttribute("schemaName", getSchemaName());
+        }
+        
         node.setAttribute("tableName", getTableName());
         node.setAttribute("oldColumnName", getOldColumnName());
         node.setAttribute("newColumnName", getNewColumnName());
@@ -111,8 +126,7 @@ public class RenameColumnChange extends AbstractChange {
 
     public Set<DatabaseObject> getAffectedDatabaseObjects() {
 
-        Table table = new Table();
-        table.setName(tableName);
+        Table table = new Table(getTableName());
 
         Column oldColumn = new Column();
         oldColumn.setTable(table);

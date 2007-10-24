@@ -20,6 +20,7 @@ import java.util.Set;
  */
 public class DropColumnChange extends AbstractChange {
 
+    private String schemaName;
     private String tableName;
     private String columnName;
 
@@ -35,6 +36,15 @@ public class DropColumnChange extends AbstractChange {
         this.columnName = columnName;
     }
 
+
+    public String getSchemaName() {
+        return schemaName;
+    }
+
+    public void setSchemaName(String schemaName) {
+        this.schemaName = schemaName;
+    }
+
     public String getTableName() {
         return tableName;
     }
@@ -48,25 +58,27 @@ public class DropColumnChange extends AbstractChange {
             throw new UnsupportedChangeException("Derby does not currently support dropping columns");
         } else if (database instanceof DB2Database) {
             return new SqlStatement[]{
-                    new RawSqlStatement("ALTER TABLE " + SqlUtil.escapeTableName(getTableName(), database) + " DROP COLUMN " + getColumnName()),
-                    new RawSqlStatement("CALL SYSPROC.ADMIN_CMD ('REORG TABLE " + getTableName() + "')")
+                    new RawSqlStatement("ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " DROP COLUMN " + getColumnName()),
+                    new RawSqlStatement("CALL SYSPROC.ADMIN_CMD ('REORG TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + "')")
             };
         } else if (database instanceof SybaseDatabase) {
-            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + SqlUtil.escapeTableName(getTableName(), database) + " DROP " + getColumnName())};
+            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " DROP " + getColumnName())};
         } else if (database instanceof FirebirdDatabase) {
-            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + SqlUtil.escapeTableName(getTableName(), database) + " DROP " + getColumnName())};
+            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " DROP " + getColumnName())};
         }
-        return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + SqlUtil.escapeTableName(getTableName(), database) + " DROP COLUMN " + getColumnName())};
+        return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " DROP COLUMN " + getColumnName())};
     }
 
     public String getConfirmationMessage() {
         return "Column " + getTableName() + "." + getColumnName() + " dropped";
     }
 
-    public Element createNode
-            (Document
-                    currentChangeLogFileDOM) {
+    public Element createNode (Document currentChangeLogFileDOM) {
         Element element = currentChangeLogFileDOM.createElement("dropColumn");
+        if (getSchemaName() != null) {
+            element.setAttribute("schemaName", getSchemaName());
+        }
+
         element.setAttribute("tableName", getTableName());
         element.setAttribute("columnName", getColumnName());
         return element;
@@ -75,8 +87,7 @@ public class DropColumnChange extends AbstractChange {
     public Set<DatabaseObject> getAffectedDatabaseObjects() {
 
 
-        Table table = new Table();
-        table.setName(tableName);
+        Table table = new Table(getTableName());
 
         Column column = new Column();
         column.setTable(table);

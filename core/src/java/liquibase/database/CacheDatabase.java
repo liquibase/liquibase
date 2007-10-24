@@ -82,12 +82,6 @@ public class CacheDatabase extends AbstractDatabase {
         return false;
     }
 
-    @Override
-    protected void dropSequences(DatabaseConnection conn) throws JDBCException {
-
-    }
-
-
     public boolean supportsTablespaces() {
         return false;
     }
@@ -111,4 +105,7 @@ public class CacheDatabase extends AbstractDatabase {
 
     }
 
+    public String getViewDefinition(String schemaName, String viewName) throws JDBCException {
+        return null;
+    }
 }

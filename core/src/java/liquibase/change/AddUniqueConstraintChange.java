@@ -22,6 +22,7 @@ import java.util.Set;
  */
 public class AddUniqueConstraintChange extends AbstractChange {
 
+    private String schemaName;
     private String tableName;
     private String columnNames;
     private String constraintName;
@@ -29,6 +30,14 @@ public class AddUniqueConstraintChange extends AbstractChange {
 
     public AddUniqueConstraintChange() {
         super("addUniqueConstraint", "Add Unique Constraint");
+    }
+
+    public String getSchemaName() {
+        return schemaName;
+    }
+
+    public void setSchemaName(String schemaName) {
+        this.schemaName = schemaName;
     }
 
     public String getTableName() {
@@ -65,7 +74,7 @@ public class AddUniqueConstraintChange extends AbstractChange {
     }
 
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
-        String sql = "ALTER TABLE " + SqlUtil.escapeTableName(getTableName(), database) + " ADD CONSTRAINT " + getConstraintName() + " UNIQUE (" + getColumnNames() + ")";
+        String sql = "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ADD CONSTRAINT " + getConstraintName() + " UNIQUE (" + getColumnNames() + ")";
 
         if (StringUtils.trimToNull(getTablespace()) != null && database.supportsTablespaces()) {
             if (database instanceof MSSQLDatabase) {
@@ -99,6 +108,10 @@ public class AddUniqueConstraintChange extends AbstractChange {
 
     public Element createNode(Document currentChangeLogFileDOM) {
         Element element = currentChangeLogFileDOM.createElement(getTagName());
+        if (getSchemaName() != null) {
+            element.setAttribute("schemaName", getSchemaName());
+        }
+
         element.setAttribute("tableName", getTableName());
         element.setAttribute("columnNames", getColumnNames());
         element.setAttribute("constraintName", getConstraintName());
@@ -110,8 +123,7 @@ public class AddUniqueConstraintChange extends AbstractChange {
 
         Set<DatabaseObject> returnSet = new HashSet<DatabaseObject>();
 
-        Table table = new Table();
-        table.setName(tableName);
+        Table table = new Table(getTableName());
         returnSet.add(table);
 
         for (String columnName : getColumnNames().split(",")) {

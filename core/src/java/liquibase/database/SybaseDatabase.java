@@ -67,28 +67,28 @@ public class SybaseDatabase extends MSSQLDatabase {
      * 
      * Unfortunately it appears to be a problem with the Drivers, see the JTDS driver page.
      * http://sourceforge.net/tracker/index.php?func=detail&aid=1471425&group_id=33291&atid=407762
-     * 
+     *
      */
-    public void dropDatabaseObjects() throws JDBCException {
-        DatabaseConnection conn = getConnection();
-        try {
-            //dropForeignKeys(conn);
-            dropViews(conn);
-            dropTables(conn);
-
-            if (this.supportsSequences()) {
-                dropSequences(conn);
-            }
-
-            changeLogTableExists = false;
-        } finally {
-            try {
-                conn.commit();
-            } catch (SQLException e) {
-                ;
-            }
-        }
-    }
+//    public void dropDatabaseObjects(String schema) throws JDBCException {
+//        DatabaseConnection conn = getConnection();
+//        try {
+//            //dropForeignKeys(conn);
+//            dropViews(schema, conn);
+//            dropTables(schema, conn);
+//
+//            if (this.supportsSequences()) {
+//                dropSequences(schema, conn);
+//            }
+//
+//            changeLogTableExists = false;
+//        } finally {
+//            try {
+//                conn.commit();
+//            } catch (SQLException e) {
+//                ;
+//            }
+//        }
+//    }
 
 
     public boolean isCorrectDatabaseImplementation(Connection conn) throws JDBCException {

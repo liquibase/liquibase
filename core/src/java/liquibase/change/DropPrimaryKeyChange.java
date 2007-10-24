@@ -20,11 +20,20 @@ import java.util.Set;
  * Removes an existing primary key.
  */
 public class DropPrimaryKeyChange extends AbstractChange {
+    private String schemaName;
     private String tableName;
     private String constraintName;
 
     public DropPrimaryKeyChange() {
         super("dropPrimaryKey", "Drop Primary Key");
+    }
+
+    public String getSchemaName() {
+        return schemaName;
+    }
+
+    public void setSchemaName(String schemaName) {
+        this.schemaName = schemaName;
     }
 
     public String getTableName() {
@@ -50,12 +59,12 @@ public class DropPrimaryKeyChange extends AbstractChange {
             return generatePostgresStatements((PostgresDatabase) database);
         } else if (database instanceof FirebirdDatabase) {
             return new SqlStatement[]{
-                    new RawSqlStatement("ALTER TABLE " + SqlUtil.escapeTableName(getTableName(),database) + " DROP CONSTRAINT "+getConstraintName()),
+                    new RawSqlStatement("ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " DROP CONSTRAINT "+getConstraintName()),
             };
         }
 
         return new SqlStatement[]{
-                new RawSqlStatement("ALTER TABLE " + SqlUtil.escapeTableName(getTableName(),database) + " DROP PRIMARY KEY"),
+                new RawSqlStatement("ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " DROP PRIMARY KEY"),
         };
     }
 
@@ -64,7 +73,7 @@ public class DropPrimaryKeyChange extends AbstractChange {
             throw new UnsupportedChangeException("MS-SQL requires a constraint name to drop the primary key");
         }
         return new SqlStatement[]{
-                new RawSqlStatement("ALTER TABLE " + SqlUtil.escapeTableName(getTableName(), database) + " DROP CONSTRAINT " + getConstraintName()),
+                new RawSqlStatement("ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " DROP CONSTRAINT " + getConstraintName()),
         };
     }
 
@@ -73,7 +82,7 @@ public class DropPrimaryKeyChange extends AbstractChange {
             throw new UnsupportedChangeException("PostgreSQL requires a constraint name to drop the primary key");
         }
         return new SqlStatement[]{
-                new RawSqlStatement("ALTER TABLE " + SqlUtil.escapeTableName(getTableName(), database) + " DROP CONSTRAINT " + getConstraintName()),
+                new RawSqlStatement("ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " DROP CONSTRAINT " + getConstraintName()),
         };
     }
 
@@ -83,6 +92,10 @@ public class DropPrimaryKeyChange extends AbstractChange {
 
     public Element createNode(Document currentChangeLogFileDOM) {
         Element node = currentChangeLogFileDOM.createElement(getTagName());
+        if (getSchemaName() != null) {
+            node.setAttribute("schemaName", getSchemaName());
+        }
+        
         node.setAttribute("tableName", getTableName());
         return node;
     }
@@ -91,8 +104,7 @@ public class DropPrimaryKeyChange extends AbstractChange {
 
         Set<DatabaseObject> dbObjects = new HashSet<DatabaseObject>();
 
-        Table table = new Table();
-        table.setName(tableName);
+        Table table = new Table(getTableName());
         dbObjects.add(table);
 
         return dbObjects;

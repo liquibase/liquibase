@@ -19,6 +19,7 @@ import java.util.*;
  */
 public class MergeColumnChange extends AbstractChange {
 
+    private String schemaName;
     private String tableName;
     private String column1Name;
     private String joinString;
@@ -28,6 +29,14 @@ public class MergeColumnChange extends AbstractChange {
 
     public MergeColumnChange() {
         super("mergeColumns", "Merge Column");
+    }
+
+    public String getSchemaName() {
+        return schemaName;
+    }
+
+    public void setSchemaName(String schemaName) {
+        this.schemaName = schemaName;
     }
 
     public String getTableName() {
@@ -83,6 +92,7 @@ public class MergeColumnChange extends AbstractChange {
         List<SqlStatement> statements = new ArrayList<SqlStatement>();
 
         AddColumnChange addNewColumnChange = new AddColumnChange();
+        addNewColumnChange.setSchemaName(getSchemaName());
         addNewColumnChange.setTableName(getTableName());
         ColumnConfig columnConfig = new ColumnConfig();
         columnConfig.setName(getFinalColumnName());
@@ -90,16 +100,18 @@ public class MergeColumnChange extends AbstractChange {
         addNewColumnChange.setColumn(columnConfig);
         statements.addAll(Arrays.asList(addNewColumnChange.generateStatements(database)));
 
-        String updateStatement = "UPDATE " + SqlUtil.escapeTableName(getTableName(), database) + " SET " + getFinalColumnName() + " = " + database.getConcatSql(getColumn1Name(), "'"+getJoinString()+"'", getColumn2Name());
+        String updateStatement = "UPDATE " + database.escapeTableName(getSchemaName(), getTableName()) + " SET " + getFinalColumnName() + " = " + database.getConcatSql(getColumn1Name(), "'"+getJoinString()+"'", getColumn2Name());
 
         statements.add(new RawSqlStatement(updateStatement));
 
         DropColumnChange dropColumn1Change = new DropColumnChange();
+        dropColumn1Change.setSchemaName(getSchemaName());
         dropColumn1Change.setTableName(getTableName());
         dropColumn1Change.setColumnName(getColumn1Name());
         statements.addAll(Arrays.asList(dropColumn1Change.generateStatements(database)));
 
         DropColumnChange dropColumn2Change = new DropColumnChange();
+        dropColumn2Change.setSchemaName(getSchemaName());
         dropColumn2Change.setTableName(getTableName());
         dropColumn2Change.setColumnName(getColumn2Name());
         statements.addAll(Arrays.asList(dropColumn2Change.generateStatements(database)));
@@ -118,6 +130,10 @@ public class MergeColumnChange extends AbstractChange {
 
     public Element createNode(Document currentChangeLogFileDOM) {
         Element element = currentChangeLogFileDOM.createElement(getTagName());
+        if (getSchemaName() != null) {
+            element.setAttribute("schemaName", getSchemaName());
+        }
+
         element.setAttribute("tableName", getTableName());
         element.setAttribute("column1Name", getColumn1Name());
         element.setAttribute("joinString", getJoinString());
@@ -130,8 +146,7 @@ public class MergeColumnChange extends AbstractChange {
 
     public Set<DatabaseObject> getAffectedDatabaseObjects() {
         Set<DatabaseObject> returnSet = new HashSet<DatabaseObject>();
-        Table table = new Table();
-        table.setName(tableName);
+        Table table = new Table(getTableName());
         returnSet.add(table);
 
         Column column1 = new Column();

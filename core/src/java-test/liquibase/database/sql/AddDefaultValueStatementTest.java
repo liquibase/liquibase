@@ -44,7 +44,7 @@ public class AddDefaultValueStatementTest {
         new DatabaseTestTemplate().testOnAllDatabases(new DatabaseTest() {
 
             public void performTest(Database database) throws Exception {
-                assertEquals(";", new AddDefaultValueStatement(null, null, null).getEndDelimiter(database));
+                assertEquals(";", new AddDefaultValueStatement(null, null, null, null).getEndDelimiter(database));
             }
         });
     }
@@ -54,14 +54,14 @@ public class AddDefaultValueStatementTest {
         new DatabaseTestTemplate().testOnAvailableDatabases(new DatabaseTest() {
 
             public void performTest(Database database) throws Exception {
-                new JdbcTemplate(database).execute(new CreateTableStatement(TABLE_NAME)
+                new JdbcTemplate(database).execute(new CreateTableStatement(null, TABLE_NAME)
                         .addColumn("id", "int")
                         .addColumn(COLUMN_NAME, "varchar(50)"));
 
                 DatabaseSnapshot snapshot = new DatabaseSnapshot(database);
                 assertNull(snapshot.getTable(TABLE_NAME).getColumn(COLUMN_NAME).getDefaultValue());
 
-                new JdbcTemplate(database).execute(new AddDefaultValueStatement(TABLE_NAME, COLUMN_NAME, "New Default Value"));
+                new JdbcTemplate(database).execute(new AddDefaultValueStatement(null, TABLE_NAME, COLUMN_NAME, "New Default Value"));
 
                 snapshot = new DatabaseSnapshot(database);
                 assertEquals("New Default Value", snapshot.getTable(TABLE_NAME).getColumn(COLUMN_NAME).getDefaultValue());
@@ -74,14 +74,14 @@ public class AddDefaultValueStatementTest {
         new DatabaseTestTemplate().testOnAvailableDatabases(new DatabaseTest() {
 
             public void performTest(Database database) throws Exception {
-                new JdbcTemplate(database).execute(new CreateTableStatement(TABLE_NAME)
+                new JdbcTemplate(database).execute(new CreateTableStatement(null, TABLE_NAME)
                         .addColumn("id", "int")
                         .addColumn(COLUMN_NAME, database.getBooleanType()));
 
                 DatabaseSnapshot snapshot = new DatabaseSnapshot(database);
                 assertNull(snapshot.getTable(TABLE_NAME).getColumn(COLUMN_NAME).getDefaultValue());
 
-                new JdbcTemplate(database).execute(new AddDefaultValueStatement(TABLE_NAME, COLUMN_NAME, Boolean.TRUE));
+                new JdbcTemplate(database).execute(new AddDefaultValueStatement(null, TABLE_NAME, COLUMN_NAME, Boolean.TRUE));
 
                 snapshot = new DatabaseSnapshot(database);
                 if (database instanceof MySQLDatabase || database instanceof MSSQLDatabase) {
@@ -98,14 +98,14 @@ public class AddDefaultValueStatementTest {
         new DatabaseTestTemplate().testOnAvailableDatabases(new DatabaseTest() {
 
             public void performTest(Database database) throws Exception {
-                new JdbcTemplate(database).execute(new CreateTableStatement(TABLE_NAME)
+                new JdbcTemplate(database).execute(new CreateTableStatement(null, TABLE_NAME)
                         .addColumn("id", "int")
                         .addColumn(COLUMN_NAME, "int"));
 
                 DatabaseSnapshot snapshot = new DatabaseSnapshot(database);
                 assertNull(snapshot.getTable(TABLE_NAME).getColumn(COLUMN_NAME).getDefaultValue());
 
-                new JdbcTemplate(database).execute(new AddDefaultValueStatement(TABLE_NAME, COLUMN_NAME, 42));
+                new JdbcTemplate(database).execute(new AddDefaultValueStatement(null, TABLE_NAME, COLUMN_NAME, 42));
 
                 snapshot = new DatabaseSnapshot(database);
                 assertEquals(42, new Integer(snapshot.getTable(TABLE_NAME).getColumn(COLUMN_NAME).getDefaultValue().toString()));
@@ -118,14 +118,14 @@ public class AddDefaultValueStatementTest {
         new DatabaseTestTemplate().testOnAvailableDatabases(new DatabaseTest() {
 
             public void performTest(Database database) throws Exception {
-                new JdbcTemplate(database).execute(new CreateTableStatement(TABLE_NAME)
+                new JdbcTemplate(database).execute(new CreateTableStatement(null, TABLE_NAME)
                         .addColumn("id", "int")
                         .addColumn(COLUMN_NAME, "float"));
 
                 DatabaseSnapshot snapshot = new DatabaseSnapshot(database);
                 assertNull(snapshot.getTable(TABLE_NAME).getColumn(COLUMN_NAME).getDefaultValue());
 
-                new JdbcTemplate(database).execute(new AddDefaultValueStatement(TABLE_NAME, COLUMN_NAME, 42.56));
+                new JdbcTemplate(database).execute(new AddDefaultValueStatement(null, TABLE_NAME, COLUMN_NAME, 42.56));
 
                 snapshot = new DatabaseSnapshot(database);
                 assertEquals(42.56f, new Float(snapshot.getTable(TABLE_NAME).getColumn(COLUMN_NAME).getDefaultValue().toString()));
@@ -138,7 +138,7 @@ public class AddDefaultValueStatementTest {
         new DatabaseTestTemplate().testOnAvailableDatabases(new DatabaseTest() {
 
             public void performTest(Database database) throws Exception {
-                new JdbcTemplate(database).execute(new CreateTableStatement(TABLE_NAME)
+                new JdbcTemplate(database).execute(new CreateTableStatement(null, TABLE_NAME)
                         .addColumn("id", "int")
                         .addColumn(COLUMN_NAME, database.getDateTimeType()));
 
@@ -147,7 +147,7 @@ public class AddDefaultValueStatementTest {
 
                 java.sql.Timestamp date = new java.sql.Timestamp(new Date().getTime());
 
-                new JdbcTemplate(database).execute(new AddDefaultValueStatement(TABLE_NAME, COLUMN_NAME, date));
+                new JdbcTemplate(database).execute(new AddDefaultValueStatement(null, TABLE_NAME, COLUMN_NAME, date));
 
                 snapshot = new DatabaseSnapshot(database);
                 assertEquals(date.getTime() / 1000, ((Date) snapshot.getTable(TABLE_NAME).getColumn(COLUMN_NAME).getDefaultValue()).getTime() / 1000);
@@ -160,7 +160,7 @@ public class AddDefaultValueStatementTest {
         new DatabaseTestTemplate().testOnAvailableDatabases(new DatabaseTest() {
 
             public void performTest(Database database) throws Exception {
-                new JdbcTemplate(database).execute(new CreateTableStatement(TABLE_NAME)
+                new JdbcTemplate(database).execute(new CreateTableStatement(null, TABLE_NAME)
                         .addColumn("id", "int")
                         .addColumn(COLUMN_NAME, database.getDateType()));
 
@@ -169,7 +169,7 @@ public class AddDefaultValueStatementTest {
 
                 java.sql.Date date = new java.sql.Date(new Date().getTime());
 
-                new JdbcTemplate(database).execute(new AddDefaultValueStatement(TABLE_NAME, COLUMN_NAME, date));
+                new JdbcTemplate(database).execute(new AddDefaultValueStatement(null, TABLE_NAME, COLUMN_NAME, date));
 
                 snapshot = new DatabaseSnapshot(database);
                 Object defaultValue = snapshot.getTable(TABLE_NAME).getColumn(COLUMN_NAME).getDefaultValue();
@@ -193,7 +193,7 @@ public class AddDefaultValueStatementTest {
         new DatabaseTestTemplate().testOnAvailableDatabases(new DatabaseTest() {
 
             public void performTest(Database database) throws Exception {
-                new JdbcTemplate(database).execute(new CreateTableStatement(TABLE_NAME)
+                new JdbcTemplate(database).execute(new CreateTableStatement(null, TABLE_NAME)
                         .addColumn("id", "int")
                         .addColumn(COLUMN_NAME, database.getTimeType()));
 
@@ -202,7 +202,7 @@ public class AddDefaultValueStatementTest {
 
                 java.sql.Time time = new java.sql.Time(new Date().getTime());
 
-                new JdbcTemplate(database).execute(new AddDefaultValueStatement(TABLE_NAME, COLUMN_NAME, time));
+                new JdbcTemplate(database).execute(new AddDefaultValueStatement(null, TABLE_NAME, COLUMN_NAME, time));
 
                 snapshot = new DatabaseSnapshot(database);
                 Object defaultValue = snapshot.getTable(TABLE_NAME).getColumn(COLUMN_NAME).getDefaultValue();

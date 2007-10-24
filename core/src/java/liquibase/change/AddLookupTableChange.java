@@ -20,8 +20,11 @@ import java.util.*;
  */
 public class AddLookupTableChange extends AbstractChange {
 
+    private String existingTableSchemaName;
     private String existingTableName;
     private String existingColumnName;
+
+    private String newTableSchemaName;
     private String newTableName;
     private String newColumnName;
     private String newColumnDataType;
@@ -29,6 +32,14 @@ public class AddLookupTableChange extends AbstractChange {
 
     public AddLookupTableChange() {
         super("addLookupTable", "Add Lookup Table");
+    }
+
+    public String getExistingTableSchemaName() {
+        return existingTableSchemaName;
+    }
+
+    public void setExistingTableSchemaName(String existingTableSchemaName) {
+        this.existingTableSchemaName = existingTableSchemaName;
     }
 
     public String getExistingTableName() {
@@ -45,6 +56,15 @@ public class AddLookupTableChange extends AbstractChange {
 
     public void setExistingColumnName(String existingColumnName) {
         this.existingColumnName = existingColumnName;
+    }
+
+
+    public String getNewTableSchemaName() {
+        return newTableSchemaName;
+    }
+
+    public void setNewTableSchemaName(String newTableSchemaName) {
+        this.newTableSchemaName = newTableSchemaName;
     }
 
     public String getNewTableName() {
@@ -89,10 +109,12 @@ public class AddLookupTableChange extends AbstractChange {
 
     protected Change[] createInverses() {
         DropForeignKeyConstraintChange dropFK = new DropForeignKeyConstraintChange();
+        dropFK.setBaseTableSchemaName(getExistingTableSchemaName());
         dropFK.setBaseTableName(getExistingTableName());
         dropFK.setConstraintName(getFinalConstraintName());
 
         DropTableChange dropTable = new DropTableChange();
+        dropTable.setSchemaName(getNewTableSchemaName());
         dropTable.setTableName(getNewTableName());
 
         return new Change[]{
@@ -114,13 +136,13 @@ public class AddLookupTableChange extends AbstractChange {
 
         List<SqlStatement> statements = new ArrayList<SqlStatement>();
 
-        SqlStatement[] createTablesSQL = {new RawSqlStatement("CREATE TABLE " + SqlUtil.escapeTableName(getNewTableName(), database) + " AS SELECT DISTINCT " + getExistingColumnName() + " AS " + getNewColumnName() + " FROM " + SqlUtil.escapeTableName(getExistingTableName(), database) + " WHERE " + getExistingColumnName() + " IS NOT NULL")};
+        SqlStatement[] createTablesSQL = {new RawSqlStatement("CREATE TABLE " + database.escapeTableName(getNewTableSchemaName(), getNewTableName()) + " AS SELECT DISTINCT " + getExistingColumnName() + " AS " + getNewColumnName() + " FROM " + database.escapeTableName(getExistingTableSchemaName(), getExistingTableName()) + " WHERE " + getExistingColumnName() + " IS NOT NULL")};
         if (database instanceof MSSQLDatabase) {
-            createTablesSQL = new SqlStatement[]{new RawSqlStatement("SELECT DISTINCT " + getExistingColumnName() + " AS " + getNewColumnName() + " INTO " + SqlUtil.escapeTableName(getNewTableName(), database) + " FROM " + SqlUtil.escapeTableName(getExistingTableName(), database) + " WHERE " + getExistingColumnName() + " IS NOT NULL"),};
+            createTablesSQL = new SqlStatement[]{new RawSqlStatement("SELECT DISTINCT " + getExistingColumnName() + " AS " + getNewColumnName() + " INTO " + database.escapeTableName(getNewTableSchemaName(), getNewTableName()) + " FROM " + database.escapeTableName(getExistingTableSchemaName(), getExistingTableName()) + " WHERE " + getExistingColumnName() + " IS NOT NULL"),};
         } else if (database instanceof DB2Database) {
             createTablesSQL = new SqlStatement[]{
-                    new RawSqlStatement("CREATE TABLE " + SqlUtil.escapeTableName(getNewTableName(), database) + " AS (SELECT " + getExistingColumnName() + " AS " + getNewColumnName() + " FROM " + SqlUtil.escapeTableName(getExistingTableName(), database) + ") WITH NO DATA"),
-                    new RawSqlStatement("INSERT INTO " + SqlUtil.escapeTableName(getNewTableName(), database) + " SELECT DISTINCT " + getExistingColumnName() + " FROM " + SqlUtil.escapeTableName(getExistingTableName(), database) + " WHERE " + getExistingColumnName() + " IS NOT NULL"),
+                    new RawSqlStatement("CREATE TABLE " + database.escapeTableName(getNewTableSchemaName(), getNewTableName()) + " AS (SELECT " + getExistingColumnName() + " AS " + getNewColumnName() + " FROM " + database.escapeTableName(getExistingTableSchemaName(), getExistingTableName()) + ") WITH NO DATA"),
+                    new RawSqlStatement("INSERT INTO " + database.escapeTableName(getNewTableSchemaName(), getNewTableName()) + " SELECT DISTINCT " + getExistingColumnName() + " FROM " + database.escapeTableName(getExistingTableSchemaName(), getExistingTableName()) + " WHERE " + getExistingColumnName() + " IS NOT NULL"),
             };
         }
 
@@ -128,6 +150,7 @@ public class AddLookupTableChange extends AbstractChange {
 
         if (!(database instanceof OracleDatabase)) {
             AddNotNullConstraintChange addNotNullChange = new AddNotNullConstraintChange();
+            addNotNullChange.setSchemaName(getNewTableSchemaName());
             addNotNullChange.setTableName(getNewTableName());
             addNotNullChange.setColumnName(getNewColumnName());
             addNotNullChange.setColumnDataType(getNewColumnDataType());
@@ -135,21 +158,24 @@ public class AddLookupTableChange extends AbstractChange {
         }
 
         if (database instanceof DB2Database) {
-            statements.add(new RawSqlStatement("CALL SYSPROC.ADMIN_CMD ('REORG TABLE " + getNewTableName() + "')"));
+            statements.add(new RawSqlStatement("CALL SYSPROC.ADMIN_CMD ('REORG TABLE " + database.escapeTableName(getNewTableSchemaName(), getNewTableName()) + "')"));
         }
 
         AddPrimaryKeyChange addPKChange = new AddPrimaryKeyChange();
+        addPKChange.setSchemaName(getNewTableSchemaName());
         addPKChange.setTableName(getNewTableName());
         addPKChange.setColumnNames(getNewColumnName());
         statements.addAll(Arrays.asList(addPKChange.generateStatements(database)));
 
         if (database instanceof DB2Database) {
-            statements.add(new RawSqlStatement("CALL SYSPROC.ADMIN_CMD ('REORG TABLE " + getNewTableName() + "')"));
+            statements.add(new RawSqlStatement("CALL SYSPROC.ADMIN_CMD ('REORG TABLE " + database.escapeTableName(getNewTableSchemaName(), getNewTableName()) + "')"));
         }
 
         AddForeignKeyConstraintChange addFKChange = new AddForeignKeyConstraintChange();
+        addFKChange.setBaseTableSchemaName(getExistingTableSchemaName());
         addFKChange.setBaseTableName(getExistingTableName());
         addFKChange.setBaseColumnNames(getExistingColumnName());
+        addFKChange.setReferencedTableSchemaName(getNewTableSchemaName());
         addFKChange.setReferencedTableName(getNewTableName());
         addFKChange.setReferencedColumnNames(getNewColumnName());
 
@@ -165,8 +191,16 @@ public class AddLookupTableChange extends AbstractChange {
 
     public Element createNode(Document currentChangeLogFileDOM) {
         Element node = currentChangeLogFileDOM.createElement(getTagName());
+        if (getExistingTableSchemaName() != null) {
+            node.setAttribute("newTableSchemaName", getExistingTableSchemaName());
+        }
         node.setAttribute("existingTableName", getExistingTableName());
         node.setAttribute("existingColumnName", getExistingColumnName());
+
+        if (getNewTableSchemaName() != null) {
+            node.setAttribute("newTableSchemaName", getNewTableSchemaName());
+        }
+
         node.setAttribute("newTableName", getNewTableName());
         node.setAttribute("newColumnName", getNewColumnName());
         node.setAttribute("constraintName", getConstraintName());
@@ -177,8 +211,7 @@ public class AddLookupTableChange extends AbstractChange {
     public Set<DatabaseObject> getAffectedDatabaseObjects() {
         Set<DatabaseObject> returnSet = new HashSet<DatabaseObject>();
 
-        Table existingTable = new Table();
-        existingTable.setName(existingTableName);
+        Table existingTable = new Table(getExistingTableName());
         returnSet.add(existingTable);
 
         Column existingColumn = new Column();
@@ -186,8 +219,7 @@ public class AddLookupTableChange extends AbstractChange {
         existingColumn.setName(getExistingColumnName());
         returnSet.add(existingColumn);
 
-        Table newTable = new Table();
-        newTable.setName(getNewColumnName());
+        Table newTable = new Table(getNewTableName());
         returnSet.add(newTable);
 
         Column newColumn = new Column();

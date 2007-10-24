@@ -6,8 +6,9 @@ import liquibase.database.sql.ComputedNumericValue;
 import liquibase.database.sql.RawSqlStatement;
 import liquibase.database.sql.SqlStatement;
 import liquibase.database.sql.UpdateStatement;
-import liquibase.database.structure.DatabaseSnapshot;
+import liquibase.database.structure.*;
 import liquibase.database.template.JdbcTemplate;
+import liquibase.diff.DiffStatusListener;
 import liquibase.exception.JDBCException;
 import liquibase.exception.LockException;
 import liquibase.exception.UnsupportedChangeException;
@@ -273,7 +274,7 @@ public abstract class AbstractDatabase implements Database {
         } else if (date instanceof Timestamp) {
             return getDateLiteral(((Timestamp) date));
         } else {
-            throw new RuntimeException("Unexpected type: "+date.getClass().getName());
+            throw new RuntimeException("Unexpected type: " + date.getClass().getName());
         }
     }
 
@@ -662,65 +663,84 @@ public abstract class AbstractDatabase implements Database {
 
     /**
      * Drops all objects owned by the connected user.
+     *
+     * @param schema
      */
-    public void dropDatabaseObjects() throws JDBCException {
+    public void dropDatabaseObjects(String schema) throws JDBCException {
         DatabaseConnection conn = getConnection();
         try {
-            dropForeignKeys(conn);
-            dropViews(conn);
-            dropTables(conn);
+            DatabaseSnapshot snapshot = new DatabaseSnapshot(this, new HashSet<DiffStatusListener>(), schema);
 
-            if (this.supportsSequences()) {
-                dropSequences(conn);
+            List<Change> dropChanges = new ArrayList<Change>();
+
+            for (ForeignKey fk : snapshot.getForeignKeys()) {
+                DropForeignKeyConstraintChange dropFK = new DropForeignKeyConstraintChange();
+                dropFK.setBaseTableSchemaName(schema);
+                dropFK.setBaseTableName(fk.getForeignKeyTable().getName());
+                dropFK.setConstraintName(fk.getName());
+
+                dropChanges.add(dropFK);
             }
 
-            changeLogTableExists = false;
+            for (View view : snapshot.getViews()) {
+                DropViewChange dropChange = new DropViewChange();
+                dropChange.setViewName(view.getName());
+                dropChange.setSchemaName(schema);
+
+                dropChanges.add(dropChange);
+            }
+
+//            for (Index index : snapshot.getIndexes()) {
+//                DropIndexChange dropChange = new DropIndexChange();
+//                dropChange.setIndexName(index.getName());
+//                dropChange.setSchemaName(schema);
+//                dropChange.setTableName(index.getTableName());
+//
+//                dropChanges.add(dropChange);
+//            }
+
+            for (Table table : snapshot.getTables()) {
+                DropTableChange dropChange = new DropTableChange();
+                dropChange.setSchemaName(schema);
+                dropChange.setTableName(table.getName());
+
+                dropChanges.add(dropChange);
+            }
+
+            if (this.supportsSequences()) {
+                for (Sequence seq : snapshot.getSequences()) {
+                    DropSequenceChange dropChange = new DropSequenceChange();
+                    dropChange.setSequenceName(seq.getName());
+                    dropChange.setSchemaName(schema);
+
+                    dropChanges.add(dropChange);
+                }
+            }
+
+
+            RawSQLChange clearChangeLogChange = new RawSQLChange();
+            clearChangeLogChange.setSql("DELETE FROM " + getDatabaseChangeLogTableName());
+            dropChanges.add(clearChangeLogChange);
+            try {
+                for (Change change : dropChanges) {
+                    for (SqlStatement statement : change.generateStatements(this)) {
+                        try {
+                            new JdbcTemplate(this).execute(statement);
+                        } catch (JDBCException e) {
+                            throw e;
+                        }
+                    }
+                }
+            } catch (UnsupportedChangeException e) {
+                throw new JDBCException(e);
+            }
+
         } finally {
             try {
                 conn.commit();
             } catch (SQLException e) {
                 //noinspection ThrowFromFinallyBlock
                 throw new JDBCException(e);
-            }
-        }
-    }
-
-    protected void dropForeignKeys(DatabaseConnection conn) throws JDBCException {
-        ResultSet tableRS;
-        ResultSet fkRS = null;
-        try {
-            tableRS = conn.getMetaData().getTables(getCatalogName(), getSchemaName(), null, getTableTypes());
-            while (tableRS.next()) {
-                String tableName = tableRS.getString("TABLE_NAME");
-                String schemaName = tableRS.getString("TABLE_SCHEM");
-                String catalogName = tableRS.getString("TABLE_CAT");
-                if (isSystemTable(catalogName, schemaName, tableName)) {
-                    continue;
-                }
-
-                fkRS = conn.getMetaData().getExportedKeys(getCatalogName(), getSchemaName(), tableName);
-                while (fkRS.next()) {
-                    DropForeignKeyConstraintChange dropFK = new DropForeignKeyConstraintChange();
-                    dropFK.setBaseTableName(fkRS.getString("FKTABLE_NAME"));
-                    dropFK.setConstraintName(fkRS.getString("FK_NAME"));
-
-                    try {
-                        new JdbcTemplate(this).execute(dropFK.generateStatements(this)[0]);
-                    } catch (UnsupportedChangeException e) {
-                        throw new JDBCException(e.getMessage());
-                    }
-                }
-            }
-        } catch (SQLException e) {
-            throw new JDBCException(e);
-        } finally {
-            if (fkRS != null) {
-                try {
-                    fkRS.close();
-                } catch (SQLException e) {
-                    //noinspection ThrowFromFinallyBlock
-                    throw new JDBCException(e);
-                }
             }
         }
     }
@@ -749,53 +769,6 @@ public abstract class AbstractDatabase implements Database {
 
     }
 
-    protected void dropTables(DatabaseConnection conn) throws JDBCException {
-        //drop tables and their constraints
-        ResultSet rs = null;
-        try {
-            rs = conn.getMetaData().getTables(getCatalogName(), getSchemaName(), null, getTableTypes());
-            while (rs.next()) {
-                String tableName = rs.getString("TABLE_NAME");
-                String schemaName = rs.getString("TABLE_SCHEM");
-                String catalogName = rs.getString("TABLE_CAT");
-                if (isSystemTable(catalogName, schemaName, tableName)) {
-                    continue;
-                }
-
-                String type = rs.getString("TABLE_TYPE");
-                Change dropChange;
-                if ("TABLE".equals(type)) {
-                    dropChange = new DropTableChange();
-                    ((DropTableChange) dropChange).setTableName(tableName);
-                } else if ("VIEW".equals(type)) {
-                    dropChange = new DropViewChange();
-                    ((DropViewChange) dropChange).setViewName(tableName);
-                } else if ("SYSTEM TABLE".equals(type)) {
-                    continue; //don't drop it
-                } else {
-                    throw new JDBCException("Unknown type " + type + " for " + tableName);
-                }
-                try {
-                    log.finest("Dropping " + tableName);
-                    dropChange.executeStatements(this);
-                } catch (UnsupportedChangeException e) {
-                    throw new JDBCException("Error dropping table '" + tableName + "': " + e.getMessage(), e);
-                }
-            }
-        } catch (SQLException e) {
-            throw new JDBCException(e);
-        } finally {
-            if (rs != null) {
-                try {
-                    rs.close();
-                } catch (SQLException e) {
-                    //noinspection ThrowFromFinallyBlock
-                    throw new JDBCException(e);
-                }
-            }
-        }
-    }
-
     public boolean isSystemTable(String catalogName, String schemaName, String tableName) {
         if ("information_schema".equalsIgnoreCase(schemaName)) {
             return true;
@@ -818,60 +791,6 @@ public abstract class AbstractDatabase implements Database {
 
     public boolean isLiquibaseTable(String tableName) {
         return tableName.equalsIgnoreCase(this.getDatabaseChangeLogTableName()) || tableName.equalsIgnoreCase(this.getDatabaseChangeLogLockTableName());
-    }
-
-
-    protected void dropViews(DatabaseConnection conn) throws JDBCException {
-        //drop tables and their constraints
-        ResultSet rs = null;
-        try {
-            rs = conn.getMetaData().getTables(getCatalogName(), getSchemaName(), null, new String[]{"VIEW"});
-            while (rs.next()) {
-                String tableName = rs.getString("TABLE_NAME");
-                String schemaName = rs.getString("TABLE_SCHEM");
-                String catalogName = rs.getString("TABLE_CAT");
-
-                if (isSystemView(catalogName, schemaName, tableName)) {
-                    continue;
-                }
-
-                DropViewChange dropChange = new DropViewChange();
-                dropChange.setViewName(tableName);
-
-                try {
-                    log.finest("Dropping view " + tableName);
-                    dropChange.executeStatements(this);
-                } catch (UnsupportedChangeException e) {
-                    throw new JDBCException("Error dropping view '" + tableName + "': " + e.getMessage(), e);
-                }
-            }
-        } catch (SQLException e) {
-            throw new JDBCException(e);
-        } finally {
-            if (rs != null) {
-                try {
-                    rs.close();
-                } catch (SQLException e) {
-                    //noinspection ThrowFromFinallyBlock
-                    throw new JDBCException(e);
-                }
-            }
-        }
-    }
-
-    protected void dropSequences(DatabaseConnection conn) throws JDBCException {
-        //noinspection unchecked
-        List<String> sequences = (List<String>) new JdbcTemplate(this).queryForList(createFindSequencesSQL(), String.class);
-        for (String sequenceName : sequences) {
-            log.finest("Dropping sequence " + sequenceName);
-            DropSequenceChange dropChange = new DropSequenceChange();
-            dropChange.setSequenceName(sequenceName);
-            try {
-                dropChange.executeStatements(this);
-            } catch (UnsupportedChangeException e) {
-                throw new JDBCException("Error dropping sequence '" + sequenceName + "': " + e.getMessage(), e);
-            }
-        }
     }
 
     // ------- DATABASE TAGGING METHODS ---- //
@@ -922,7 +841,7 @@ public abstract class AbstractDatabase implements Database {
         return statement;
     }
 
-    public SqlStatement createFindSequencesSQL() throws JDBCException {
+    public SqlStatement createFindSequencesSQL(String schema) throws JDBCException {
         return null;
     }
 
@@ -952,19 +871,20 @@ public abstract class AbstractDatabase implements Database {
         return true;
     }
 
-    public String getViewDefinition(String viewName) throws JDBCException {
-        String definition = (String) new JdbcTemplate(this).queryForObject(getViewDefinitionSql(viewName), String.class);
+    public String getViewDefinition(String schemaName, String viewName) throws JDBCException {
+        if (schemaName == null) {
+            schemaName = convertRequestedSchemaToSchema(schemaName);
+        }
+        String definition = (String) new JdbcTemplate(this).queryForObject(getViewDefinitionSql(schemaName, viewName), String.class);
         return definition.replaceFirst("^CREATE VIEW \\w+ AS", "");
     }
 
-    protected SqlStatement getViewDefinitionSql(String viewName) throws JDBCException {
+    public SqlStatement getViewDefinitionSql(String schemaName, String viewName) throws JDBCException {
         String sql = "select view_definition from information_schema.views where upper(table_name)='" + viewName.toUpperCase() + "'";
-        if (getSchemaName() != null) {
-            sql += " and table_schema='" + getSchemaName() + "'";
-        }
-        if (getCatalogName() != null) {
-            sql += " and table_catalog='" + getCatalogName() + "'";
-
+        if (convertRequestedSchemaToCatalog(schemaName) != null) {
+            sql += " and table_schema='" + convertRequestedSchemaToSchema(schemaName) + "'";
+        } else if (convertRequestedSchemaToCatalog(schemaName) != null) {
+            sql += " and table_catalog='" + convertRequestedSchemaToCatalog(schemaName) + "'";
         }
 
 //        log.info("GetViewDefinitionSQL: "+sql);
@@ -1030,7 +950,7 @@ public abstract class AbstractDatabase implements Database {
                 } else if (value.equals("0")) {
                     return Boolean.FALSE;
                 }
-                throw new ParseException("Unknown bit value: "+value, 0);
+                throw new ParseException("Unknown bit value: " + value, 0);
             } else if (dataType == Types.BOOLEAN) {
                 return Boolean.valueOf(value);
             } else if (dataType == Types.DECIMAL) {
@@ -1091,5 +1011,39 @@ public abstract class AbstractDatabase implements Database {
         } else {
             return null;
         }
+    }
+
+    public String escapeTableName(String schemaName, String tableName) {
+        if (StringUtils.trimToNull(schemaName) == null || !supportsSchemas()) {
+            return tableName;
+        } else {
+            return schemaName + "." + tableName;
+        }
+    }
+
+    public String convertRequestedSchemaToCatalog(String requestedSchema) throws JDBCException {
+        if (getCatalogName() == null) {
+            return null;
+        } else {
+            if (requestedSchema == null) {
+                return getCatalogName();
+            }
+            return StringUtils.trimToNull(requestedSchema);
+        }
+    }
+
+    public String convertRequestedSchemaToSchema(String requestedSchema) throws JDBCException {
+        if (getSchemaName() == null) {
+            return null;
+        } else {
+            if (requestedSchema == null) {
+                return getSchemaName();
+            }
+            return StringUtils.trimToNull(requestedSchema);
+        }
+    }
+
+    public boolean supportsSchemas() {
+        return true;
     }
 }

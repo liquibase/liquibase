@@ -83,7 +83,7 @@ public abstract class AbstractDatabaseTest {
     public void getDriverName() throws Exception {
         Connection connection = createMock(Connection.class);
         DatabaseMetaData metaData = createMock(DatabaseMetaData.class);
-        
+
         connection.setAutoCommit(false);
         expect(connection.getMetaData()).andReturn(metaData);
         expect(metaData.getDriverName()).andReturn("DriverNameHere");
@@ -116,7 +116,7 @@ public abstract class AbstractDatabaseTest {
     public void testGetConnectionUsername() throws Exception {
         Connection connection = createMock(Connection.class);
         DatabaseMetaData metaData = createMock(DatabaseMetaData.class);
-        
+
         connection.setAutoCommit(false);
         expect(connection.getMetaData()).andReturn(metaData);
         expect(metaData.getUserName()).andReturn("usernameHere");
@@ -133,17 +133,29 @@ public abstract class AbstractDatabaseTest {
     public void isCorrectDatabaseImplementation() throws Exception {
         assertTrue(getDatabase().isCorrectDatabaseImplementation(getMockConnection()));
     }
-    
+
     protected Connection getMockConnection() throws SQLException {
         Connection conn = createMock(Connection.class);
         DatabaseMetaData metaData = createMock(DatabaseMetaData.class);
         conn.setAutoCommit(false);
-        
+
         expectLastCall().anyTimes();
         expect(conn.getMetaData()).andReturn(metaData).anyTimes();
         expect(metaData.getDatabaseProductName()).andReturn(getProductNameString()).anyTimes();
         replay(conn);
         replay(metaData);
         return conn;
+    }
+
+    @Test
+    public void escapeTableName_noSchema() {
+        Database database = getDatabase();
+        assertEquals("tableName", database.escapeTableName(null, "tableName"));
+    }
+
+    @Test
+    public void escapeTableName_withSchema() {
+        Database database = getDatabase();
+        assertEquals("schemaName.tableName", database.escapeTableName("schemaName", "tableName"));
     }
 }
