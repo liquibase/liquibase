@@ -21,6 +21,8 @@ import java.util.Set;
  * Sets a new default value to an existing column.
  */
 public class AddDefaultValueChange extends AbstractChange {
+
+    private String schemaName;
     private String tableName;
     private String columnName;
     private String defaultValue;
@@ -30,6 +32,14 @@ public class AddDefaultValueChange extends AbstractChange {
 
     public AddDefaultValueChange() {
         super("addDefaultValue", "Add Default Value");
+    }
+
+    public String getSchemaName() {
+        return schemaName;
+    }
+
+    public void setSchemaName(String schemaName) {
+        this.schemaName = schemaName;
     }
 
     public String getTableName() {
@@ -99,7 +109,7 @@ public class AddDefaultValueChange extends AbstractChange {
         }
 
         return new SqlStatement[] {
-                new AddDefaultValueStatement(getTableName(), getColumnName(), defaultValue)
+                new AddDefaultValueStatement(getSchemaName(), getTableName(), getColumnName(), defaultValue)
         };
     }
 
@@ -119,6 +129,9 @@ public class AddDefaultValueChange extends AbstractChange {
 
     public Element createNode(Document currentChangeLogFileDOM) {
         Element node = currentChangeLogFileDOM.createElement(getTagName());
+        if (getSchemaName() != null) {
+            node.setAttribute("schemaName", getSchemaName());
+        }
         node.setAttribute("tableName", getTableName());
         node.setAttribute("columnName", getColumnName());
         if (getDefaultValue() != null) {
@@ -140,8 +153,7 @@ public class AddDefaultValueChange extends AbstractChange {
     public Set<DatabaseObject> getAffectedDatabaseObjects() {
         Column column = new Column();
 
-        Table table = new Table();
-        table.setName(tableName);
+        Table table = new Table(getTableName());
         column.setTable(table);
 
         column.setName(columnName);

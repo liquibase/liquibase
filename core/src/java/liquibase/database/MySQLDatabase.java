@@ -3,6 +3,8 @@ package liquibase.database;
 import liquibase.change.DropForeignKeyConstraintChange;
 import liquibase.exception.JDBCException;
 import liquibase.exception.UnsupportedChangeException;
+import liquibase.database.sql.SqlStatement;
+import liquibase.database.sql.RawSqlStatement;
 
 import java.sql.*;
 
@@ -100,52 +102,6 @@ public class MySQLDatabase extends AbstractDatabase {
         return returnString.toString().replaceFirst(", $", ")");
     }
 
-    protected void dropForeignKeys(DatabaseConnection conn) throws JDBCException {
-        Statement dropStatement = null;
-        PreparedStatement fkStatement = null;
-        ResultSet rs = null;
-        try {
-            dropStatement = conn.createStatement();
-
-            fkStatement = conn.prepareStatement("select TABLE_NAME, CONSTRAINT_NAME from INFORMATION_SCHEMA.TABLE_CONSTRAINTS where CONSTRAINT_TYPE='FOREIGN KEY' AND TABLE_SCHEMA=?");
-            String schemaNameWithoutHost = getSchemaName().replaceAll("\\@.*", "");
-            fkStatement.setString(1, schemaNameWithoutHost);
-            rs = fkStatement.executeQuery();
-            while (rs.next()) {
-                DropForeignKeyConstraintChange dropFK = new DropForeignKeyConstraintChange();
-                dropFK.setBaseTableName(rs.getString("TABLE_NAME"));
-                dropFK.setConstraintName(rs.getString("CONSTRAINT_NAME"));
-
-                try {
-                    dropStatement.execute(dropFK.generateStatements(this)[0].getSqlStatement(this));
-                } catch (UnsupportedChangeException e) {
-                    throw new JDBCException(e.getMessage());
-                }
-            }
-        } catch (SQLException e) {
-            throw new JDBCException(e);
-        } finally {
-            try {
-                if (dropStatement != null) {
-                    dropStatement.close();
-                }
-                if (fkStatement != null) {
-                    fkStatement.close();
-                }
-                if (rs != null) {
-                    rs.close();
-                }
-            } catch (SQLException e) {
-                ;
-            }
-        }
-
-    }
-
-    @Override
-    protected void dropSequences(DatabaseConnection conn) throws JDBCException {
-    }
-
     public boolean supportsTablespaces() {
         return false;
     }
@@ -153,5 +109,24 @@ public class MySQLDatabase extends AbstractDatabase {
 
     public String getSchemaName() throws JDBCException {
         return super.getSchemaName().replaceFirst("\\@.*","");
+    }
+
+    public String getCatalogName() throws JDBCException {
+        return super.getCatalogName();
+    }
+
+    public String convertRequestedSchemaToSchema(String requestedSchema) throws JDBCException {
+        if (requestedSchema == null) {
+            return getSchemaName();
+        }
+        return requestedSchema;
+    }
+
+    public String convertRequestedSchemaToCatalog(String requestedSchema) throws JDBCException {
+        return requestedSchema;
+    }
+
+    public SqlStatement getViewDefinitionSql(String schemaName, String viewName) throws JDBCException {
+        return new RawSqlStatement("select view_definition from information_schema.views where upper(table_name)='" + viewName.toUpperCase() + "'  and table_schema='" + convertRequestedSchemaToSchema(schemaName) + "'");
     }
 }

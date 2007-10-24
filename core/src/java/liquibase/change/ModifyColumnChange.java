@@ -20,11 +20,20 @@ import java.util.Set;
  */
 public class ModifyColumnChange extends AbstractChange {
 
+    private String schemaName;
     private String tableName;
     private ColumnConfig column;
 
     public ModifyColumnChange() {
         super("modifyColumn", "Modify Column");
+    }
+
+    public String getSchemaName() {
+        return schemaName;
+    }
+
+    public void setSchemaName(String schemaName) {
+        this.schemaName = schemaName;
     }
 
     public String getTableName() {
@@ -45,28 +54,28 @@ public class ModifyColumnChange extends AbstractChange {
 
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
         if(database instanceof SybaseDatabase) {
-            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + SqlUtil.escapeTableName(getTableName(), database) + " MODIFY " + getColumn().getName() + " " + getColumn().getType())};
+            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " MODIFY " + getColumn().getName() + " " + getColumn().getType())};
         }
         if (database instanceof MSSQLDatabase) {
-            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + SqlUtil.escapeTableName(getTableName(), database) + " ALTER COLUMN " + getColumn().getName() + " " + getColumn().getType())};
+            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ALTER COLUMN " + getColumn().getName() + " " + getColumn().getType())};
         } else if (database instanceof MySQLDatabase) {
-            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + SqlUtil.escapeTableName(getTableName(),database) + " MODIFY COLUMN " + getColumn().getName() + " " + getColumn().getType())};
+            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " MODIFY COLUMN " + getColumn().getName() + " " + getColumn().getType())};
         } else if (database instanceof OracleDatabase) {
-            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + SqlUtil.escapeTableName(getTableName(),database) + " MODIFY (" + getColumn().getName() + " " + getColumn().getType() + ")")};
+            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " MODIFY (" + getColumn().getName() + " " + getColumn().getType() + ")")};
         } else if (database instanceof DerbyDatabase) {
-            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + SqlUtil.escapeTableName(getTableName(), database) + " ALTER COLUMN "+getColumn().getName()+" SET DATA TYPE " + getColumn().getType())};
+            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ALTER COLUMN "+getColumn().getName()+" SET DATA TYPE " + getColumn().getType())};
         } else if (database instanceof HsqlDatabase) {
-            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + SqlUtil.escapeTableName(getTableName(), database) + " ALTER COLUMN "+getColumn().getName()+" "+getColumn().getType())};
+            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ALTER COLUMN "+getColumn().getName()+" "+getColumn().getType())};
         } else if (database instanceof CacheDatabase) {
-        	return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + SqlUtil.escapeTableName(getTableName(), database) + " ALTER COLUMN " + getColumn().getName() + " " + getColumn().getType())};
+        	return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ALTER COLUMN " + getColumn().getName() + " " + getColumn().getType())};
         } else if (database instanceof DB2Database) {
             return new SqlStatement[]{
-                    new RawSqlStatement("ALTER TABLE " + SqlUtil.escapeTableName(getTableName(), database) + " ALTER COLUMN " + getColumn().getName() + " SET DATA TYPE " + getColumn().getType()),
-                    new RawSqlStatement("CALL SYSPROC.ADMIN_CMD ('REORG TABLE "+ SqlUtil.escapeTableName(getTableName(), database)+"')")
+                    new RawSqlStatement("ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ALTER COLUMN " + getColumn().getName() + " SET DATA TYPE " + getColumn().getType()),
+                    new RawSqlStatement("CALL SYSPROC.ADMIN_CMD ('REORG TABLE "+ database.escapeTableName(getSchemaName(), getTableName())+"')")
             };
         }
 
-        return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + SqlUtil.escapeTableName(getTableName(), database) + " ALTER COLUMN " + getColumn().getName() + " TYPE " + getColumn().getType())};
+        return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ALTER COLUMN " + getColumn().getName() + " TYPE " + getColumn().getType())};
     }
 
     public String getConfirmationMessage() {
@@ -75,6 +84,10 @@ public class ModifyColumnChange extends AbstractChange {
 
     public Element createNode(Document currentChangeLogFileDOM) {
         Element node = currentChangeLogFileDOM.createElement("modifyColumn");
+        if (getSchemaName() != null) {
+            node.setAttribute("schemaName", getSchemaName());
+        }
+        
         node.setAttribute("tableName", getTableName());
         node.appendChild(getColumn().createNode(currentChangeLogFileDOM));
 
@@ -82,8 +95,7 @@ public class ModifyColumnChange extends AbstractChange {
     }
 
     public Set<DatabaseObject> getAffectedDatabaseObjects() {
-        Table table = new Table();
-        table.setName(this.getTableName());
+        Table table = new Table(getTableName());
 
         Column column = new Column();
         column.setTable(table);

@@ -18,11 +18,20 @@ import java.util.*;
  */
 public class AddColumnChange extends AbstractChange {
 
+    private String schemaName;
     private String tableName;
     private ColumnConfig column;
 
     public AddColumnChange() {
         super("addColumn", "Add Column");
+    }
+
+    public String getSchemaName() {
+        return schemaName;
+    }
+
+    public void setSchemaName(String schemaName) {
+        this.schemaName = schemaName;
     }
 
     public String getTableName() {
@@ -44,7 +53,7 @@ public class AddColumnChange extends AbstractChange {
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
         List<SqlStatement> sql = new ArrayList<SqlStatement>();
 
-        String alterTable = "ALTER TABLE " + SqlUtil.escapeTableName(getTableName(), database) + " ADD " + getColumn().getName() + " " + database.getColumnType(getColumn().getType(), getColumn().isAutoIncrement());
+        String alterTable = "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ADD " + getColumn().getName() + " " + database.getColumnType(getColumn().getType(), getColumn().isAutoIncrement());
 
         if (defaultClauseBeforeNotNull(database)) {
             alterTable += getDefaultClause(database);
@@ -72,7 +81,7 @@ public class AddColumnChange extends AbstractChange {
 
         sql.add(new RawSqlStatement(alterTable));
         if (database instanceof DB2Database) {
-            sql.add(new RawSqlStatement("CALL SYSPROC.ADMIN_CMD ('REORG TABLE " + getTableName() + "')"));
+            sql.add(new RawSqlStatement("CALL SYSPROC.ADMIN_CMD ('REORG TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + "')"));
         }
 
 //        if (getColumn().getDefaultValue() != null
@@ -160,6 +169,9 @@ public class AddColumnChange extends AbstractChange {
 
     public Element createNode(Document currentChangeLogFileDOM) {
         Element node = currentChangeLogFileDOM.createElement("addColumn");
+        if (getSchemaName() != null) {
+            node.setAttribute("schemaName", getSchemaName());
+        }
         node.setAttribute("tableName", getTableName());
         node.appendChild(getColumn().createNode(currentChangeLogFileDOM));
 
@@ -169,8 +181,7 @@ public class AddColumnChange extends AbstractChange {
     public Set<DatabaseObject> getAffectedDatabaseObjects() {
         Column column = new Column();
 
-        Table table = new Table();
-        table.setName(tableName);
+        Table table = new Table(getTableName());
         column.setTable(table);
 
         column.setName(this.column.getName());

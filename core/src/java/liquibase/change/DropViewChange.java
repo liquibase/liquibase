@@ -17,10 +17,19 @@ import java.util.Set;
  * Drops an existing view.
  */
 public class DropViewChange extends AbstractChange {
+    private String schemaName;
     private String viewName;
 
     public DropViewChange() {
         super("dropView", "Drop View");
+    }
+
+    public String getSchemaName() {
+        return schemaName;
+    }
+
+    public void setSchemaName(String schemaName) {
+        this.schemaName = schemaName;
     }
 
     public String getViewName() {
@@ -43,6 +52,9 @@ public class DropViewChange extends AbstractChange {
 
     public Element createNode(Document currentChangeLogFileDOM) {
         Element element = currentChangeLogFileDOM.createElement("dropView");
+        if (getSchemaName() != null) {
+            element.setAttribute("schemaName", getSchemaName());
+        }
         element.setAttribute("viewName", getViewName());
 
         return element;

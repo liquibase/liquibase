@@ -17,6 +17,7 @@ import java.util.*;
  * Adds a not-null constraint to an existing column.
  */
 public class AddNotNullConstraintChange extends AbstractChange {
+    private String schemaName;
     private String tableName;
     private String columnName;
     private String defaultNullValue;
@@ -25,6 +26,14 @@ public class AddNotNullConstraintChange extends AbstractChange {
 
     public AddNotNullConstraintChange() {
         super("addNotNullConstraint", "Add Not-Null Constraint");
+    }
+
+    public String getSchemaName() {
+        return schemaName;
+    }
+
+    public void setSchemaName(String schemaName) {
+        this.schemaName = schemaName;
     }
 
     public String getTableName() {
@@ -61,7 +70,7 @@ public class AddNotNullConstraintChange extends AbstractChange {
 
 
     private SqlStatement generateUpdateStatement(Database database) {
-        return new RawSqlStatement("UPDATE " + SqlUtil.escapeTableName(tableName, database) + " SET " + columnName + "='" + defaultNullValue + "' WHERE " + columnName + " IS NULL");
+        return new RawSqlStatement("UPDATE " + database.escapeTableName(getSchemaName(), tableName) + " SET " + columnName + "='" + defaultNullValue + "' WHERE " + columnName + " IS NULL");
     }
 
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
@@ -88,10 +97,10 @@ public class AddNotNullConstraintChange extends AbstractChange {
             statements.add(generateUpdateStatement(database));
         }
 
-        statements.add(new RawSqlStatement("ALTER TABLE " + SqlUtil.escapeTableName(getTableName(), database) + " ALTER COLUMN  " + getColumnName() + " SET NOT NULL "));
+        statements.add(new RawSqlStatement("ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ALTER COLUMN  " + getColumnName() + " SET NOT NULL "));
 
         if (database instanceof DB2Database) {
-            statements.add(new RawSqlStatement("CALL SYSPROC.ADMIN_CMD ('REORG TABLE " + getTableName() + "')"));
+            statements.add(new RawSqlStatement("CALL SYSPROC.ADMIN_CMD ('REORG TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + "')"));
         }
 
         return statements.toArray(new SqlStatement[statements.size()]);
@@ -104,7 +113,7 @@ public class AddNotNullConstraintChange extends AbstractChange {
             statements.add(generateUpdateStatement(database));
         }
         statements.add(new RawSqlStatement("COMMIT"));
-        statements.add(new RawSqlStatement("ALTER TABLE " + SqlUtil.escapeTableName(getTableName(), database) + " ALTER COLUMN " + getColumnName() + " NOT NULL"));
+        statements.add(new RawSqlStatement("ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ALTER COLUMN " + getColumnName() + " NOT NULL"));
 
         return statements.toArray(new SqlStatement[statements.size()]);
     }
@@ -115,7 +124,7 @@ public class AddNotNullConstraintChange extends AbstractChange {
             statements.add(generateUpdateStatement(database));
         }
         statements.add(new RawSqlStatement("COMMIT"));
-        statements.add(new RawSqlStatement("ALTER TABLE " + SqlUtil.escapeTableName(getTableName(), database) + " MODIFY " + getColumnName() + " NOT NULL"));
+        statements.add(new RawSqlStatement("ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " MODIFY " + getColumnName() + " NOT NULL"));
 
         return statements.toArray(new SqlStatement[statements.size()]);
     }
@@ -129,7 +138,7 @@ public class AddNotNullConstraintChange extends AbstractChange {
         if (defaultNullValue != null) {
             statements.add(generateUpdateStatement(database));
         }
-        statements.add(new RawSqlStatement("ALTER TABLE " + SqlUtil.escapeTableName(getTableName(), database) + " ALTER COLUMN " + getColumnName() + " " + columnDataType + " " + " NOT NULL"));
+        statements.add(new RawSqlStatement("ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ALTER COLUMN " + getColumnName() + " " + columnDataType + " " + " NOT NULL"));
 
         return statements.toArray(new SqlStatement[statements.size()]);
     }
@@ -143,7 +152,7 @@ public class AddNotNullConstraintChange extends AbstractChange {
         if (defaultNullValue != null) {
             statements.add(generateUpdateStatement(database));
         }
-        statements.add(new RawSqlStatement("ALTER TABLE " + SqlUtil.escapeTableName(getTableName(), database) + " MODIFY " + getColumnName() + " " + columnDataType + " NOT NULL"));
+        statements.add(new RawSqlStatement("ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " MODIFY " + getColumnName() + " " + columnDataType + " NOT NULL"));
 
         return statements.toArray(new SqlStatement[statements.size()]);
     }
@@ -153,7 +162,7 @@ public class AddNotNullConstraintChange extends AbstractChange {
         if (defaultNullValue != null) {
             statements.add(generateUpdateStatement(database));
         }
-        statements.add(new RawSqlStatement("ALTER TABLE " + SqlUtil.escapeTableName(getTableName(), database) + " MODIFY " + getColumnName() + " NOT NULL"));
+        statements.add(new RawSqlStatement("ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " MODIFY " + getColumnName() + " NOT NULL"));
 
         return statements.toArray(new SqlStatement[statements.size()]);
     }
@@ -163,7 +172,7 @@ public class AddNotNullConstraintChange extends AbstractChange {
         if (defaultNullValue != null) {
             statements.add(generateUpdateStatement(database));
         }
-        statements.add(new RawSqlStatement("ALTER TABLE " + SqlUtil.escapeTableName(getTableName(), database) + " ALTER COLUMN  " + getColumnName() + " NOT NULL"));
+        statements.add(new RawSqlStatement("ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ALTER COLUMN  " + getColumnName() + " NOT NULL"));
 
         return statements.toArray(new SqlStatement[statements.size()]);
     }
@@ -173,7 +182,7 @@ public class AddNotNullConstraintChange extends AbstractChange {
         if (defaultNullValue != null) {
             statements.add(generateUpdateStatement(database));
         }
-        statements.add(new RawSqlStatement("ALTER TABLE " + SqlUtil.escapeTableName(getTableName(), database) + " ALTER COLUMN  " + getColumnName() + " " + getColumnDataType() + " NOT NULL"));
+        statements.add(new RawSqlStatement("ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ALTER COLUMN  " + getColumnName() + " " + getColumnDataType() + " NOT NULL"));
 
         return statements.toArray(new SqlStatement[statements.size()]);
     }
@@ -196,6 +205,10 @@ public class AddNotNullConstraintChange extends AbstractChange {
 
     public Element createNode(Document currentChangeLogFileDOM) {
         Element element = currentChangeLogFileDOM.createElement("addNotNullConstraint");
+        if (getSchemaName() != null) {
+            element.setAttribute("schemaName", getSchemaName());
+        }
+
         element.setAttribute("tableName", getTableName());
         element.setAttribute("columnName", getColumnName());
         element.setAttribute("defaultNullValue", getDefaultNullValue());
@@ -204,12 +217,11 @@ public class AddNotNullConstraintChange extends AbstractChange {
 
     public Set<DatabaseObject> getAffectedDatabaseObjects() {
 
-        Table table = new Table();
-        table.setName(tableName);
+        Table table = new Table(getTableName());
 
         Column column = new Column();
         column.setTable(table);
-        column.setName(columnName);
+        column.setName(getColumnName());
 
 
         return new HashSet<DatabaseObject>(Arrays.asList(table, column));

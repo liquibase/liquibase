@@ -10,6 +10,7 @@ import liquibase.util.StringUtils;
 import java.util.*;
 
 public class CreateTableStatement implements SqlStatement {
+    private String schemaName;
     private String tableName;
     private String tablespace;
     private List<String> columns = new ArrayList<String>();
@@ -23,10 +24,14 @@ public class CreateTableStatement implements SqlStatement {
     private Set<UniqueConstraint> uniqueConstraints = new HashSet<UniqueConstraint>();
 
 
-    public CreateTableStatement(String tableName) {
+    public CreateTableStatement(String schemaName, String tableName) {
+        this.schemaName = schemaName;
         this.tableName = tableName;
     }
 
+    public String getSchemaName() {
+        return schemaName;
+    }
 
     public String getTableName() {
         return tableName;
@@ -134,7 +139,7 @@ public class CreateTableStatement implements SqlStatement {
 //        StringBuffer fkConstraints = new StringBuffer();
 
         StringBuffer buffer = new StringBuffer();
-        buffer.append("CREATE TABLE ").append(SqlUtil.escapeTableName(getTableName(), database)).append(" ");
+        buffer.append("CREATE TABLE ").append(database.escapeTableName(getSchemaName(), getTableName())).append(" ");
         buffer.append("(");
         Iterator<String> columnIterator = getColumns().iterator();
         while (columnIterator.hasNext()) {

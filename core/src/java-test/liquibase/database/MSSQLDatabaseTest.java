@@ -61,7 +61,8 @@ public class MSSQLDatabaseTest extends AbstractDatabaseTest {
         assertEquals("GETDATE()", getDatabase().getCurrentDateTimeFunction());
     }
 
-    public void testGetDefaultDriver() {
+    @Test
+    public void getDefaultDriver() {
         Database database = new MSSQLDatabase();
 
         assertEquals("com.microsoft.sqlserver.jdbc.SQLServerDriver", database.getDefaultDriver("jdbc:sqlserver://localhost;databaseName=liquibase"));
@@ -69,5 +70,17 @@ public class MSSQLDatabaseTest extends AbstractDatabaseTest {
         assertEquals("net.sourceforge.jtds.jdbc.Driver", database.getDefaultDriver("jdbc:jtds:sqlserver://windev1.sundog.net;instance=latest;DatabaseName=liquibase"));
 
         assertNull(database.getDefaultDriver("jdbc:oracle:thin://localhost;databaseName=liquibase"));
+    }
+
+    @Test
+    public void escapeTableName_noSchema() {
+        Database database = new MSSQLDatabase();
+        assertEquals("[tableName]", database.escapeTableName(null, "tableName"));
+    }
+
+    @Test
+    public void escapeTableName_withSchema() {
+        Database database = new MSSQLDatabase();
+        assertEquals("[schemaName].[tableName]", database.escapeTableName("schemaName", "tableName"));
     }
 }

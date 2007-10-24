@@ -4,6 +4,7 @@ import junit.framework.TestCase;
 import liquibase.ChangeSet;
 import liquibase.FileOpener;
 import liquibase.FileSystemFileOpener;
+import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.structure.DatabaseSnapshot;
 import liquibase.diff.Diff;
@@ -11,7 +12,6 @@ import liquibase.diff.DiffResult;
 import liquibase.exception.JDBCException;
 import liquibase.exception.ValidationFailedException;
 import liquibase.test.JUnitFileOpener;
-import liquibase.test.JUnitJDBCDriverClassLoader;
 import liquibase.test.TestContext;
 
 import java.io.File;
@@ -20,7 +20,6 @@ import java.io.PrintStream;
 import java.io.StringWriter;
 import java.net.URL;
 import java.sql.Connection;
-import java.sql.Driver;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.List;
@@ -85,7 +84,7 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
 
     private void runCompleteChangeLog() throws Exception {
         Migrator migrator = createMigrator(completeChangeLog);
-        migrator.dropAll();
+        migrator.dropAll(getSchemasToDrop());
 
         //run again to test changelog testing logic
         migrator = createMigrator(completeChangeLog);
@@ -97,10 +96,17 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
         }
     }
 
+    private String[] getSchemasToDrop() throws JDBCException {
+        return new String[] {
+                DatabaseFactory.getInstance().findCorrectDatabaseImplementation(connection).getSchemaName(),
+                "liquibaseb".toUpperCase()
+        };
+    }
+
     public void testOutputChangeLog() throws Exception {
         StringWriter output = new StringWriter();
         Migrator migrator = createMigrator(completeChangeLog);
-        migrator.dropAll();
+        migrator.dropAll(getSchemasToDrop());
 
         migrator = createMigrator(completeChangeLog);
         migrator.setOutputSQLWriter(output);
@@ -112,7 +118,7 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
 
     public void testRollbackableChangeLog() throws Exception {
         Migrator migrator = createMigrator(rollbackChangeLog);
-        migrator.dropAll();
+        migrator.dropAll(getSchemasToDrop());
 
         migrator = createMigrator(rollbackChangeLog);
         migrator.setMode(Migrator.Mode.EXECUTE_MODE);
@@ -135,7 +141,7 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
 
     public void testRollbackableChangeLogScriptOnExistingDatabase() throws Exception {
         Migrator migrator = createMigrator(rollbackChangeLog);
-        migrator.dropAll();
+        migrator.dropAll(getSchemasToDrop());
 
         migrator = createMigrator(rollbackChangeLog);
         migrator.setMode(Migrator.Mode.EXECUTE_MODE);
@@ -156,7 +162,7 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
         StringWriter writer = new StringWriter();
 
         Migrator migrator = createMigrator(rollbackChangeLog);
-        migrator.dropAll();
+        migrator.dropAll(getSchemasToDrop());
 
         migrator = createMigrator(rollbackChangeLog);
         migrator.setMode(Migrator.Mode.OUTPUT_FUTURE_ROLLBACK_SQL_MODE);
@@ -169,7 +175,7 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
 
     public void testTag() throws Exception {
         Migrator migrator = createMigrator(completeChangeLog);
-        migrator.dropAll();
+        migrator.dropAll(getSchemasToDrop());
 
         migrator = createMigrator(completeChangeLog);
         migrator.migrate();
@@ -227,7 +233,7 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
         }
 
         Migrator migrator = createMigrator(tempFile.getName());
-        migrator.dropAll();
+        migrator.dropAll(getSchemasToDrop());
 
         //run again to test changelog testing logic
         migrator = createMigrator(tempFile.getName());
@@ -262,10 +268,10 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
 
     public void testClearChecksums() throws Exception {
         Migrator migrator = createMigrator(completeChangeLog);
-        migrator.dropAll();
+        migrator.dropAll(getSchemasToDrop());
 
         migrator = createMigrator(completeChangeLog);
-        migrator.dropAll();
+        migrator.dropAll(getSchemasToDrop());
 
         migrator = createMigrator(completeChangeLog);
         migrator.migrate();
@@ -275,7 +281,7 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
 
     public void testTagEmptyDatabase() throws Exception {
         Migrator migrator = createMigrator(completeChangeLog);
-        migrator.dropAll();
+        migrator.dropAll(getSchemasToDrop());
 
         migrator = createMigrator(completeChangeLog);
         migrator.checkDatabaseChangeLogTable();
@@ -289,7 +295,7 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
 
     public void testUnrunChangeSetsEmptyDatabase() throws Exception {
         Migrator migrator = createMigrator(completeChangeLog);
-        migrator.dropAll();
+        migrator.dropAll(getSchemasToDrop());
 
         migrator = createMigrator(completeChangeLog);
         List<ChangeSet> list = migrator.listUnrunChangeSets();
@@ -311,12 +317,12 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
             absolutePathOfChangeLog = "/" + absolutePathOfChangeLog;
         }
         Migrator migrator = createMigrator(absolutePathOfChangeLog, new FileSystemFileOpener());
-        migrator.dropAll();
+        migrator.dropAll(getSchemasToDrop());
 
         migrator.migrate();
 
         migrator.migrate(); //try again, make sure there are no errors
 
-        migrator.dropAll();
+        migrator.dropAll(getSchemasToDrop());
     }
 }

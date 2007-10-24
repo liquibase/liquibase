@@ -115,46 +115,8 @@ public class DB2Database extends AbstractDatabase {
         return "TIMESTAMP";
     }
 
-    protected void dropSequences(DatabaseConnection conn) throws JDBCException {
-        ResultSet rs = null;
-        Statement selectStatement = null;
-        Statement dropStatement = null;
-        try {
-            selectStatement = conn.createStatement();
-            dropStatement = conn.createStatement();
-            rs = selectStatement.executeQuery("SELECT SEQNAME FROM SYSIBM.SYSSEQUENCES WHERE SEQSCHEMA='" + getSchemaName() + "'");
-            while (rs.next()) {
-                String sequenceName = rs.getString("SEQNAME");
-                log.finest("Dropping sequence " + sequenceName);
-                String sql = "DROP SEQUENCE " + sequenceName;
-                try {
-                    dropStatement.executeUpdate(sql);
-                } catch (SQLException e) {
-                    throw new JDBCException("Error dropping sequence '" + sequenceName + "': " + e.getMessage(), e);
-                }
-            }
-        } catch (SQLException e) {
-            throw new JDBCException(e);
-        } finally {
-            try {
-                if (selectStatement != null) {
-                    selectStatement.close();
-                }
-                if (dropStatement != null) {
-                    dropStatement.close();
-                }
-                if (rs != null) {
-                    rs.close();
-                }
-            } catch (SQLException e) {
-                ;
-            }
-        }
-    }
-
-
-    public SqlStatement createFindSequencesSQL() throws JDBCException {
-        return new RawSqlStatement("SELECT SEQNAME AS SEQUENCE_NAME FROM SYSCAT.SEQUENCES WHERE SEQSCHEMA = '" + getSchemaName() + "'");
+    public SqlStatement createFindSequencesSQL(String schema) throws JDBCException {
+        return new RawSqlStatement("SELECT SEQNAME AS SEQUENCE_NAME FROM SYSCAT.SEQUENCES WHERE SEQTYPE='S' AND SEQSCHEMA = '" + schema + "'");
     }
 
 
@@ -168,12 +130,12 @@ public class DB2Database extends AbstractDatabase {
         return true;
     }
 
-    protected SqlStatement getViewDefinitionSql(String name) throws JDBCException {
-        return new RawSqlStatement("select view_definition from SYSIBM.VIEWS where TABLE_NAME='" + name + "' and TABLE_SCHEMA='" + getSchemaName() + "'");
+    public SqlStatement getViewDefinitionSql(String schemaName, String name) throws JDBCException {
+        return new RawSqlStatement("select view_definition from SYSIBM.VIEWS where TABLE_NAME='" + name + "' and TABLE_SCHEMA='" + convertRequestedSchemaToSchema(schemaName) + "'");
     }
 
-    public String getViewDefinition(String name) throws JDBCException {
-        return super.getViewDefinition(name).replaceFirst("CREATE VIEW \\w+ AS ", ""); //db2 returns "create view....as select
+    public String getViewDefinition(String schemaName, String name) throws JDBCException {
+        return super.getViewDefinition(schemaName, name).replaceFirst("CREATE VIEW \\w+ AS ", ""); //db2 returns "create view....as select
     }
 
     public Object convertDatabaseValueToJavaObject(Object defaultValue, int dataType, int columnSize, int decimalDigits) throws ParseException {
@@ -206,4 +168,15 @@ public class DB2Database extends AbstractDatabase {
         }
     }
 
+    public String convertRequestedSchemaToSchema(String requestedSchema) throws JDBCException {
+        if (requestedSchema == null) {
+            return getSchemaName();
+        } else {
+            return requestedSchema;
+        }
+    }
+
+    public String convertRequestedSchemaToCatalog(String requestedSchema) throws JDBCException {
+        return null;
+    }
 }

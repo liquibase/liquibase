@@ -19,6 +19,8 @@ import java.util.Set;
  * Drops a not-null constraint from an existing column.
  */
 public class DropNotNullConstraintChange extends AbstractChange {
+
+    private String schemaName;
     private String tableName;
     private String columnName;
     private String columnDataType;
@@ -26,6 +28,14 @@ public class DropNotNullConstraintChange extends AbstractChange {
 
     public DropNotNullConstraintChange() {
         super("dropNotNullConstraint", "Drop Not-Null Constraint");
+    }
+
+    public String getSchemaName() {
+        return schemaName;
+    }
+
+    public void setSchemaName(String schemaName) {
+        this.schemaName = schemaName;
     }
 
     public String getTableName() {
@@ -62,20 +72,20 @@ public class DropNotNullConstraintChange extends AbstractChange {
         } else if (database instanceof OracleDatabase) {
             return generateOracleStatements((OracleDatabase) database);
         } else if (database instanceof DerbyDatabase) {
-            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + SqlUtil.escapeTableName(tableName, database) + " ALTER COLUMN " + columnName + " NULL")};
+            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ALTER COLUMN " + columnName + " NULL")};
         } else if (database instanceof HsqlDatabase) {
-            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + SqlUtil.escapeTableName(tableName, database) + " ALTER COLUMN " + columnName + " NULL")};
+            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ALTER COLUMN " + columnName + " NULL")};
         } else if (database instanceof CacheDatabase) {
-            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + SqlUtil.escapeTableName(tableName, database) + " ALTER COLUMN " + columnName + " NULL")};
+            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ALTER COLUMN " + columnName + " NULL")};
         } else if (database instanceof FirebirdDatabase) {
             throw new UnsupportedChangeException("LiquiBase does not currently support dropping null constraints in Firebird");
         }
 
-        return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + SqlUtil.escapeTableName(tableName, database) + " ALTER COLUMN " + columnName + " DROP NOT NULL")};
+        return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ALTER COLUMN " + getColumnName() + " DROP NOT NULL")};
     }
 
     private SqlStatement[] generateSybaseStatements(SybaseDatabase database) {
-        return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + SqlUtil.escapeTableName(tableName, database) + " MODIFY " + columnName + " NULL")};
+        return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " MODIFY " + getColumnName() + " NULL")};
     }
 
     private SqlStatement[] generateMSSQLStatements(MSSQLDatabase database) {
@@ -83,11 +93,11 @@ public class DropNotNullConstraintChange extends AbstractChange {
             throw new RuntimeException("columnDataType is required to drop not null constraints with MS-SQL");
         }
 
-        return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + SqlUtil.escapeTableName(tableName, database) + " ALTER COLUMN " + columnName + " " + columnDataType + " NULL")};
+        return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ALTER COLUMN " + getColumnName() + " " + getColumnDataType() + " NULL")};
     }
 
     private SqlStatement[] generateOracleStatements(OracleDatabase database) {
-        return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + SqlUtil.escapeTableName(tableName, database) + " MODIFY " + columnName + " NULL")};
+        return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " MODIFY " + getColumnName() + " NULL")};
     }
 
     private SqlStatement[] generateMySQLStatements(MySQLDatabase database) {
@@ -95,7 +105,7 @@ public class DropNotNullConstraintChange extends AbstractChange {
             throw new RuntimeException("columnDataType is required to drop not null constraints with MySQL");
         }
 
-        return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + SqlUtil.escapeTableName(tableName, database) + " MODIFY " + columnName + " " + columnDataType + " DEFAULT NULL")};
+        return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " MODIFY " + getColumnName() + " " + getColumnDataType() + " DEFAULT NULL")};
     }
 
     protected Change[] createInverses() {
@@ -115,6 +125,10 @@ public class DropNotNullConstraintChange extends AbstractChange {
 
     public Element createNode(Document currentChangeLogFileDOM) {
         Element element = currentChangeLogFileDOM.createElement("dropNotNullConstraint");
+        if (getSchemaName() != null) {
+            element.setAttribute("schemaName", getSchemaName());
+        }
+
         element.setAttribute("tableName", getTableName());
         element.setAttribute("columnName", getColumnName());
         return element;
@@ -122,8 +136,7 @@ public class DropNotNullConstraintChange extends AbstractChange {
 
     public Set<DatabaseObject> getAffectedDatabaseObjects() {
 
-        Table table = new Table();
-        table.setName(tableName);
+        Table table = new Table(getTableName());
 
         Column column = new Column();
         column.setTable(table);

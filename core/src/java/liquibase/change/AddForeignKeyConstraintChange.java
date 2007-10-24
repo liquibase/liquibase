@@ -19,9 +19,11 @@ import java.util.Set;
  * Adds a foreign key constraint to an existing column.
  */
 public class AddForeignKeyConstraintChange extends AbstractChange {
+    private String baseTableSchemaName;
     private String baseTableName;
     private String baseColumnNames;
 
+    private String referencedTableSchemaName;
     private String referencedTableName;
     private String referencedColumnNames;
 
@@ -34,6 +36,14 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
 
     public AddForeignKeyConstraintChange() {
         super("addForeignKeyConstraint", "Add Foreign Key Constraint");
+    }
+
+    public String getBaseTableSchemaName() {
+        return baseTableSchemaName;
+    }
+
+    public void setBaseTableSchemaName(String baseTableSchemaName) {
+        this.baseTableSchemaName = baseTableSchemaName;
     }
 
     public String getBaseTableName() {
@@ -50,6 +60,14 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
 
     public void setBaseColumnNames(String baseColumnNames) {
         this.baseColumnNames = baseColumnNames;
+    }
+
+    public String getReferencedTableSchemaName() {
+        return referencedTableSchemaName;
+    }
+
+    public void setReferencedTableSchemaName(String referencedTableSchemaName) {
+        this.referencedTableSchemaName = referencedTableSchemaName;
     }
 
     public String getReferencedTableName() {
@@ -102,7 +120,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
     }
 
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
-        String sql = "ALTER TABLE " + SqlUtil.escapeTableName(getBaseTableName(), database) + " ADD CONSTRAINT " + getConstraintName() + " FOREIGN KEY (" + getBaseColumnNames() + ") REFERENCES " + SqlUtil.escapeTableName(getReferencedTableName(), database) + "(" + getReferencedColumnNames() + ")";
+        String sql = "ALTER TABLE " + database.escapeTableName(getBaseTableSchemaName(), getBaseTableName()) + " ADD CONSTRAINT " + getConstraintName() + " FOREIGN KEY (" + getBaseColumnNames() + ") REFERENCES " + database.escapeTableName(getReferencedTableSchemaName(), getReferencedTableName()) + "(" + getReferencedColumnNames() + ")";
 
         if (deleteCascade != null && deleteCascade) {
             sql += " ON DELETE CASCADE";
@@ -139,9 +157,18 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
 
     public Element createNode(Document currentChangeLogFileDOM) {
         Element node = currentChangeLogFileDOM.createElement(getTagName());
+
+        if (getBaseTableSchemaName() != null) {
+            node.setAttribute("baseTableSchemaName", getBaseTableSchemaName());
+        }
+
         node.setAttribute("baseTableName", getBaseTableName());
         node.setAttribute("baseColumnNames", getBaseColumnNames());
         node.setAttribute("constraintName", getConstraintName());
+
+        if (getReferencedTableSchemaName() != null) {
+            node.setAttribute("baseTableSchemaName", getReferencedTableSchemaName());
+        }
         node.setAttribute("referencedTableName", getReferencedTableName());
         node.setAttribute("referencedColumnNames", getReferencedColumnNames());
 
@@ -151,8 +178,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
     public Set<DatabaseObject> getAffectedDatabaseObjects() {
         Set<DatabaseObject> returnSet = new HashSet<DatabaseObject>();
 
-        Table baseTable = new Table();
-        baseTable.setName(baseTableName);
+        Table baseTable = new Table(getBaseTableName());
         returnSet.add(baseTable);
 
         for (String columnName : getBaseColumnNames().split(",")) {
@@ -163,8 +189,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
             returnSet.add(baseColumn);
         }
 
-        Table referencedTable = new Table();
-        referencedTable.setName(referencedTableName);
+        Table referencedTable = new Table(getReferencedTableName());
         returnSet.add(referencedTable);
 
         for (String columnName : getReferencedColumnNames().split(",")) {

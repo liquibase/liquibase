@@ -1,17 +1,18 @@
 package liquibase.database;
 
 import liquibase.DatabaseChangeLogLock;
-import liquibase.change.ColumnConfig;
 import liquibase.database.sql.SqlStatement;
 import liquibase.database.structure.DatabaseObject;
+import liquibase.database.structure.UniqueConstraint;
 import liquibase.exception.JDBCException;
 import liquibase.exception.LockException;
 import liquibase.migrator.Migrator;
 
 import java.io.IOException;
 import java.sql.Connection;
-import java.util.Date;
 import java.text.ParseException;
+import java.util.Date;
+import java.util.Set;
 
 public interface Database extends DatabaseObject {
     /**
@@ -121,7 +122,7 @@ public interface Database extends DatabaseObject {
 
     void checkDatabaseChangeLogLockTable(Migrator migrator) throws JDBCException, IOException;
 
-    void dropDatabaseObjects() throws JDBCException;
+    void dropDatabaseObjects(String schema) throws JDBCException;
 
     void tag(String tagString) throws JDBCException;
 
@@ -131,13 +132,13 @@ public interface Database extends DatabaseObject {
 
     boolean isLiquibaseTable(String tableName);
 
-    SqlStatement createFindSequencesSQL() throws JDBCException;
+    SqlStatement createFindSequencesSQL(String schema) throws JDBCException;
 
     boolean shouldQuoteValue(String value);
 
     boolean supportsTablespaces();
 
-    String getViewDefinition(String name) throws JDBCException;
+    String getViewDefinition(String schemaName, String name) throws JDBCException;
 
     int getDatabaseType(int type);
 
@@ -190,4 +191,19 @@ public interface Database extends DatabaseObject {
     String getDateLiteral(java.sql.Timestamp timeStamp);
 
     String getDateLiteral(Date defaultDateValue);
+
+    /**
+     * Escapes the table name in a database-dependent manner so reserved words can be used as a table name (i.e. "order").
+     * Currently only escapes MS-SQL because other DBMSs store table names case-sensitively when escaping is used which
+     * could confuse end-users.  Pass null to schemaName to use the default schema
+     */
+    String escapeTableName(String schemaName, String tableName);
+
+//    Set<UniqueConstraint> findUniqueConstraints(String schema) throws JDBCException;
+
+    String convertRequestedSchemaToSchema(String requestedSchema) throws JDBCException;
+
+    String convertRequestedSchemaToCatalog(String requestedSchema) throws JDBCException;
+
+    boolean supportsSchemas();
 }

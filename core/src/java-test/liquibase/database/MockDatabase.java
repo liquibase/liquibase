@@ -173,7 +173,7 @@ public class MockDatabase implements Database {
     public void checkDatabaseChangeLogLockTable(Migrator migrator) throws JDBCException, IOException {
     }
 
-    public void dropDatabaseObjects() throws JDBCException {
+    public void dropDatabaseObjects(String schema) throws JDBCException {
     }
 
     public void tag(String tagString) throws JDBCException {
@@ -196,7 +196,7 @@ public class MockDatabase implements Database {
         return false;
     }
 
-    public SqlStatement createFindSequencesSQL() throws JDBCException {
+    public SqlStatement createFindSequencesSQL(String schema) throws JDBCException {
         return null;
     }
 
@@ -208,7 +208,7 @@ public class MockDatabase implements Database {
         return false;
     }
 
-    public String getViewDefinition(String name) throws JDBCException {
+    public String getViewDefinition(String schemaName, String name) throws JDBCException {
         return null;
     }
 
@@ -263,4 +263,24 @@ public class MockDatabase implements Database {
     public String getDateLiteral(Date defaultDateValue) {
         return defaultDateValue.toString();
     }
+
+    public String escapeTableName(String schemaName, String tableName) {
+        if (schemaName == null) {
+            return tableName;
+        } else {
+            return schemaName+"."+tableName;
+        }
+    }
+
+    public String convertRequestedSchemaToSchema(String requestedSchema) throws JDBCException {
+        return requestedSchema;
+    }
+
+    public String convertRequestedSchemaToCatalog(String requestedSchema) throws JDBCException {
+        return null;
+    }
+
+    public boolean supportsSchemas() {
+        return true;
+    }    
 }

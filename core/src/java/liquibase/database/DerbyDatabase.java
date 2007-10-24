@@ -96,21 +96,17 @@ public class DerbyDatabase extends AbstractDatabase {
         }
     }
 
-    @Override
-    protected void dropSequences(DatabaseConnection conn) throws JDBCException {
-    }
-
     public boolean supportsTablespaces() {
         return false;
     }
 
-    protected SqlStatement getViewDefinitionSql(String name) throws JDBCException {
+    public SqlStatement getViewDefinitionSql(String schemaName, String name) throws JDBCException {
         return new RawSqlStatement("select V.VIEWDEFINITION from SYS.SYSVIEWS V, SYS.SYSTABLES T WHERE  V.TABLEID=T.TABLEID AND T.TABLENAME='" + name + "'");
     }
 
 
-    public String getViewDefinition(String name) throws JDBCException {
-        return super.getViewDefinition(name).replaceFirst("CREATE VIEW \\w+ AS ", "");
+    public String getViewDefinition(String schemaName, String name) throws JDBCException {
+        return super.getViewDefinition(schemaName, name).replaceFirst("CREATE VIEW \\w+ AS ", "");
     }
 
     public void setConnection(Connection conn) {

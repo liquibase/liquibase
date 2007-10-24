@@ -1,6 +1,9 @@
 package liquibase.database;
 
+import liquibase.database.sql.RawSqlStatement;
+import liquibase.database.sql.SqlStatement;
 import liquibase.exception.JDBCException;
+import liquibase.util.StringUtils;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -149,10 +152,6 @@ public class MSSQLDatabase extends AbstractDatabase {
         return returnString.toString().replaceFirst(" \\+ $", "");
     }
 
-    @Override
-    protected void dropSequences(DatabaseConnection conn) throws JDBCException {
-    }
-
 //    protected void dropForeignKeys(Connection conn) throws JDBCException {
 //        Statement dropStatement = null;
 //        PreparedStatement fkStatement = null;
@@ -229,4 +228,31 @@ public class MSSQLDatabase extends AbstractDatabase {
         
         return defaultValue;
     }
+
+    public String escapeTableName(String schemaName, String tableName) {
+        if (schemaName == null) {
+            return "["+tableName+"]";
+        } else {
+            return "["+schemaName+"].["+tableName+"]";
+        }
+    }
+
+    public String convertRequestedSchemaToCatalog(String requestedSchema) throws JDBCException {
+        return getCatalogName();
+    }
+
+    public String convertRequestedSchemaToSchema(String requestedSchema) throws JDBCException {
+        return requestedSchema;
+    }
+
+    public SqlStatement getViewDefinitionSql(String schemaName, String viewName) throws JDBCException {
+        String sql = "select view_definition from information_schema.views where upper(table_name)='" + viewName.toUpperCase() + "'";
+        if (StringUtils.trimToNull(schemaName) != null) {
+            sql += " and table_schema='" + schemaName + "'";
+        }
+
+//        log.info("GetViewDefinitionSQL: "+sql);
+        return new RawSqlStatement(sql);
+    }
+
 }

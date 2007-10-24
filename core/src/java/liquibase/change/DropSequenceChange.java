@@ -18,10 +18,19 @@ import java.util.Set;
  */
 public class DropSequenceChange extends AbstractChange {
 
+    private String schemaName;
     private String sequenceName;
 
     public DropSequenceChange() {
         super("dropSequence", "Drop Sequence");
+    }
+
+    public String getSchemaName() {
+        return schemaName;
+    }
+
+    public void setSchemaName(String schemaName) {
+        this.schemaName = schemaName;
     }
 
     public String getSequenceName() {
@@ -46,6 +55,9 @@ public class DropSequenceChange extends AbstractChange {
 
     public Element createNode(Document currentChangeLogFileDOM) {
         Element element = currentChangeLogFileDOM.createElement("dropSequence");
+        if (getSchemaName() != null) {
+            element.setAttribute("schemaName", getSchemaName());
+        }
         element.setAttribute("sequenceName", getSequenceName());
 
         return element;
@@ -57,5 +69,4 @@ public class DropSequenceChange extends AbstractChange {
 
         return new HashSet<DatabaseObject>(Arrays.asList(dbObject));
     }
-
 }

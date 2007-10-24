@@ -135,8 +135,8 @@ public class HsqlDatabase extends AbstractDatabase {
         }
     }
 
-    public SqlStatement createFindSequencesSQL() throws JDBCException {
-        return new RawSqlStatement("SELECT SEQUENCE_NAME FROM INFORMATION_SCHEMA.SYSTEM_SEQUENCES WHERE SEQUENCE_SCHEMA = '" + getSchemaName() + "'");
+    public SqlStatement createFindSequencesSQL(String schema) throws JDBCException {
+        return new RawSqlStatement("SELECT SEQUENCE_NAME FROM INFORMATION_SCHEMA.SYSTEM_SEQUENCES WHERE SEQUENCE_SCHEMA = '" + schema + "'");
     }
 
     public boolean supportsTablespaces() {
@@ -149,7 +149,7 @@ public class HsqlDatabase extends AbstractDatabase {
     }
 
 
-    protected SqlStatement getViewDefinitionSql(String name) throws JDBCException {
+    public SqlStatement getViewDefinitionSql(String schemaName, String name) throws JDBCException {
         return new RawSqlStatement("SELECT VIEW_DEFINITION FROM INFORMATION_SCHEMA.SYSTEM_VIEWS WHERE TABLE_NAME = '"+name+"'");
     }
 }
