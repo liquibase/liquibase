@@ -236,11 +236,14 @@ public class PostgresDatabase extends AbstractDatabase {
     }
 
     public String convertRequestedSchemaToSchema(String requestedSchema) throws JDBCException {
-        if (getSchemaName() == null) {
+        if (requestedSchema == null) {
             return "public";
         } else {
-            return StringUtils.trimToNull(requestedSchema);
+            return StringUtils.trimToNull(requestedSchema).toLowerCase();
         }
     }
 
+    public String convertRequestedSchemaToCatalog(String requestedSchema) throws JDBCException {
+        return null;
+    }
 }

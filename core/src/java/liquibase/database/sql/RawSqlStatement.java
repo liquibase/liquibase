@@ -17,6 +17,10 @@ public class RawSqlStatement implements SqlStatement {
         this.endDelimiter = endDelimiter;
     }
 
+    public boolean supportsDatabase(Database database) {
+        return true;
+    }
+
     public String getSqlStatement(Database database) {
         return sql;
     }

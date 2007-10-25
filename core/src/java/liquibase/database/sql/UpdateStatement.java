@@ -46,6 +46,10 @@ public class UpdateStatement implements SqlStatement, PreparedSqlStatement {
     }
 
 
+    public boolean supportsDatabase(Database database) {
+        return true;
+    }
+
     public String getSqlStatement(Database database) {
         StringBuffer sql = new StringBuffer("UPDATE "+tableName+" SET");
         for (String column : newColumnValues.keySet()) {

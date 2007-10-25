@@ -4,11 +4,8 @@ public class AutoIncrementConstraint implements ColumnConstraint {
     private String columnName;
 
 
-    public AutoIncrementConstraint() {
-    }
-
     public AutoIncrementConstraint(String columnName) {
-        this.columnName = columnName;
+        setColumnName(columnName);
     }
 
 

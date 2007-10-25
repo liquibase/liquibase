@@ -24,6 +24,10 @@ public class CreateTableStatement implements SqlStatement {
     private Set<UniqueConstraint> uniqueConstraints = new HashSet<UniqueConstraint>();
 
 
+    public CreateTableStatement(String tableName) {
+        this(null, tableName);
+    }
+
     public CreateTableStatement(String schemaName, String tableName) {
         this.schemaName = schemaName;
         this.tableName = tableName;
@@ -99,6 +103,10 @@ public class CreateTableStatement implements SqlStatement {
         return addColumn(columnName, columnType, null, constraints);
     }
 
+    public boolean supportsDatabase(Database database) {
+        return true;
+    }
+
     public CreateTableStatement addColumn(String columnName, String columnType, String defaultValue, ColumnConstraint... constraints) {
         this.getColumns().add(columnName);
         this.columnTypes.put(columnName, columnType);
@@ -116,6 +124,7 @@ public class CreateTableStatement implements SqlStatement {
                         }
                     }
                 } else if (constraint instanceof NotNullConstraint) {
+                    ((NotNullConstraint) constraint).setColumnName(columnName);
                     getNotNullColumns().add(columnName);
                 } else if (constraint instanceof ForeignKeyConstraint) {
                     ((ForeignKeyConstraint) constraint).setColumn(columnName);

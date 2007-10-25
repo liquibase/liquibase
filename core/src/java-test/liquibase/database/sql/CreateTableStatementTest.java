@@ -39,6 +39,13 @@ public class CreateTableStatementTest {
                     database.getConnection().rollback();
                 }
             }
+            try {
+                new JdbcTemplate(database).execute(new RawSqlStatement("drop table " + TestContext.ALT_SCHEMA+"."+TABLE_NAME));
+            } catch (JDBCException e) {
+                if (!database.getAutoCommitMode()) {
+                    database.getConnection().rollback();
+                }
+            }
         }
     }
 
@@ -213,11 +220,10 @@ public class CreateTableStatementTest {
                 }
 
                 UniqueConstraint uniqueConstraint = new UniqueConstraint("UQ_TESTCT_ID");
-                NotNullConstraint notNullConstraint = new NotNullConstraint();
                 CreateTableStatement statement = new CreateTableStatement(null, TABLE_NAME)
                         .addPrimaryKeyColumn("id", "int")
                         .addColumn("name", "varchar(255)")
-                        .addColumn("username", "int", uniqueConstraint, notNullConstraint);
+                        .addColumn("username", "int", uniqueConstraint, new NotNullConstraint());
 
                 new JdbcTemplate(database).execute(statement);
 
@@ -320,6 +326,33 @@ public class CreateTableStatementTest {
 
                 CreateTableStatement statement = new CreateTableStatement(null, "testTable");
                 assertEquals(";", statement.getEndDelimiter(database));
+            }
+        });
+    }
+
+        @Test
+    public void createTable_altSchema() throws Exception {
+        new DatabaseTestTemplate().testOnAvailableDatabases(new DatabaseTest() {
+
+            public void performTest(Database database) throws JDBCException {
+                if (!database.supportsSchemas()) {
+                    return;
+                }
+
+                DatabaseSnapshot snapshot = new DatabaseSnapshot(database, TestContext.ALT_SCHEMA);
+                assertNull(snapshot.getTable(TABLE_NAME));
+
+                CreateTableStatement statement = new CreateTableStatement(TestContext.ALT_SCHEMA, TABLE_NAME)
+                        .addPrimaryKeyColumn("id", "int")
+                        .addColumn("name", "varchar(255)")
+                        .addColumn("username", "varchar(255)", "'NEWUSER'");
+
+                new JdbcTemplate(database).execute(statement);
+
+                snapshot = new DatabaseSnapshot(database, TestContext.ALT_SCHEMA);
+                Table table = snapshot.getTable(TABLE_NAME);
+                assertNotNull(table);
+                assertEquals(TABLE_NAME.toUpperCase(), table.getName().toUpperCase());
             }
         });
     }

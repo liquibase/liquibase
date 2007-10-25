@@ -5,10 +5,7 @@ import liquibase.FileOpener;
 import liquibase.database.Database;
 import liquibase.database.sql.SqlStatement;
 import liquibase.database.structure.DatabaseObject;
-import liquibase.exception.JDBCException;
-import liquibase.exception.RollbackImpossibleException;
-import liquibase.exception.SetupException;
-import liquibase.exception.UnsupportedChangeException;
+import liquibase.exception.*;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -85,7 +82,7 @@ public interface Change {
      * @throws IOException if there were problems appending the statements to the writer
      * @throws UnsupportedChangeException if this change is not supported by the {@link Database} passed as argument
      */
-    public void saveStatements(Database database, Writer writer) throws IOException, UnsupportedChangeException;
+    public void saveStatements(Database database, Writer writer) throws IOException, UnsupportedChangeException, StatementNotSupportedOnDatabaseException;
 
     /**
      * Rolls back the statements in this change against the {@link Database} passed as argument
@@ -106,7 +103,7 @@ public interface Change {
      * @throws UnsupportedChangeException if this change is not supported by the {@link Database} passed as argument
      * @throws RollbackImpossibleException if rollback is not supported for this change
      */
-    public void saveRollbackStatement(Database database, Writer writer) throws IOException, UnsupportedChangeException, RollbackImpossibleException;
+    public void saveRollbackStatement(Database database, Writer writer) throws IOException, UnsupportedChangeException, RollbackImpossibleException, StatementNotSupportedOnDatabaseException;
 
     /**
      * Generates the SQL statements required to run the change

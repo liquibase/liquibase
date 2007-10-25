@@ -8,7 +8,7 @@ public class NotNullConstraint implements ColumnConstraint {
     }
 
     public NotNullConstraint(String columnName) {
-        this.columnName = columnName;
+        setColumnName(columnName);
     }
 
 

@@ -455,7 +455,7 @@ public abstract class AbstractDatabase implements Database {
         }
     }
 
-    protected SqlStatement getSelectChangeLogLockSQL() {
+    protected SqlStatement getSelectChangeLogLockSQL() throws JDBCException {
         return new RawSqlStatement(("select locked from " + getDatabaseChangeLogLockTableName() + " where id=1").toUpperCase());
     }
 

@@ -5,10 +5,7 @@ import liquibase.FileOpener;
 import liquibase.database.*;
 import liquibase.database.sql.SqlStatement;
 import liquibase.database.template.JdbcTemplate;
-import liquibase.exception.JDBCException;
-import liquibase.exception.RollbackImpossibleException;
-import liquibase.exception.SetupException;
-import liquibase.exception.UnsupportedChangeException;
+import liquibase.exception.*;
 import liquibase.migrator.Migrator;
 import liquibase.util.MD5Util;
 import liquibase.util.StreamUtil;
@@ -93,7 +90,7 @@ public abstract class AbstractChange implements Change {
     /**
      * @see liquibase.change.Change#saveStatements(liquibase.database.Database, java.io.Writer)
      */
-    public void saveStatements(Database database, Writer writer) throws IOException, UnsupportedChangeException {
+    public void saveStatements(Database database, Writer writer) throws IOException, UnsupportedChangeException, StatementNotSupportedOnDatabaseException {
         SqlStatement[] statements = generateStatements(database);
         for (SqlStatement statement : statements) {
             writer.append(statement.getSqlStatement(database)).append(statement.getEndDelimiter(database)).append(StreamUtil.getLineSeparator()).append(StreamUtil.getLineSeparator());
@@ -111,7 +108,7 @@ public abstract class AbstractChange implements Change {
     /**
      * @see liquibase.change.Change#saveRollbackStatement(liquibase.database.Database, java.io.Writer)
      */
-    public void saveRollbackStatement(Database database, Writer writer) throws IOException, UnsupportedChangeException, RollbackImpossibleException {
+    public void saveRollbackStatement(Database database, Writer writer) throws IOException, UnsupportedChangeException, RollbackImpossibleException, StatementNotSupportedOnDatabaseException {
         SqlStatement[] statements = generateRollbackStatements(database);
         for (SqlStatement statement : statements) {
             writer.append(statement.getSqlStatement(database)).append(";\n\n");

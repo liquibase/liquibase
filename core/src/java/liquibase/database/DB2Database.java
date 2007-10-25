@@ -172,7 +172,7 @@ public class DB2Database extends AbstractDatabase {
         if (requestedSchema == null) {
             return getSchemaName();
         } else {
-            return requestedSchema;
+            return requestedSchema.toUpperCase();
         }
     }
 

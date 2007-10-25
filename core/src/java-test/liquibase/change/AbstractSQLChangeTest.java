@@ -6,6 +6,7 @@ import liquibase.database.MSSQLDatabase;
 import liquibase.database.OracleDatabase;
 import liquibase.database.sql.SqlStatement;
 import liquibase.exception.UnsupportedChangeException;
+import liquibase.exception.StatementNotSupportedOnDatabaseException;
 import liquibase.util.XMLUtil;
 
 import org.junit.Before;
@@ -119,7 +120,7 @@ public class AbstractSQLChangeTest extends AbstractChangeTest {
     }
     
     @Test
-    public void stripComments() throws UnsupportedChangeException {
+    public void stripComments() throws UnsupportedChangeException, StatementNotSupportedOnDatabaseException {
         SQLFileChange change2 = new SQLFileChange();
         change2.setSql("SELECT * FROM x\n -- A comment");
         change2.setStripComments(true);
@@ -131,7 +132,7 @@ public class AbstractSQLChangeTest extends AbstractChangeTest {
     }
     
     @Test
-    public void turnOffSplitting() throws UnsupportedChangeException {
+    public void turnOffSplitting() throws UnsupportedChangeException, StatementNotSupportedOnDatabaseException {
         SQLFileChange change2 = new SQLFileChange();
         change2.setSql("SELECT * FROM x;SELECT * FROM x;");
         change2.setSplitStatements(false);
@@ -143,7 +144,7 @@ public class AbstractSQLChangeTest extends AbstractChangeTest {
     }
     
     @Test
-    public void defaultSplittingAndNoStripping() throws UnsupportedChangeException{
+    public void defaultSplittingAndNoStripping() throws Exception{
         SQLFileChange change2 = new SQLFileChange();
         change2.setSql("SELECT * FROM x;/*A Comment*/SELECT * FROM x;");
 

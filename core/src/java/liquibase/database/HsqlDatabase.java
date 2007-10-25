@@ -152,4 +152,8 @@ public class HsqlDatabase extends AbstractDatabase {
     public SqlStatement getViewDefinitionSql(String schemaName, String name) throws JDBCException {
         return new RawSqlStatement("SELECT VIEW_DEFINITION FROM INFORMATION_SCHEMA.SYSTEM_VIEWS WHERE TABLE_NAME = '"+name+"'");
     }
+
+    public String convertRequestedSchemaToSchema(String requestedSchema) throws JDBCException {
+        return super.convertRequestedSchemaToSchema(requestedSchema).toUpperCase();
+    }
 }

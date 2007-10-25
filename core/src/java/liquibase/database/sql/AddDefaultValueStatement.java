@@ -19,6 +19,10 @@ public class AddDefaultValueStatement implements SqlStatement {
         this.defaultValue = defaultValue;
     }
 
+    public boolean supportsDatabase(Database database) {
+        return true;
+    }
+
     public String getSqlStatement(Database database) {
         if (database instanceof SybaseDatabase) {
             return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " REPLACE " + getColumnName() + " DEFAULT " + database.convertJavaObjectToString(getDefaultValue());

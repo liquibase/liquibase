@@ -30,6 +30,7 @@ public class DatabaseTestTemplate {
                 newError.setStackTrace(e.getStackTrace());
                 throw newError;
             } catch (AssertionError e) {
+                e.printStackTrace();
                 String newMessage = "Database Test Failure on " + database;
                 if (e.getMessage() != null) {
                     newMessage += ": " + e.getMessage();
@@ -39,13 +40,18 @@ public class DatabaseTestTemplate {
                 newError.setStackTrace(e.getStackTrace());
                 throw newError;
             } catch (Exception e) {
+                e.printStackTrace();
                 String newMessage = "Database Test Exception on " + database;
                 if (e.getMessage() != null) {
                     newMessage += ": " + e.getMessage();
                 }
                 
                 Exception newError = e.getClass().getConstructor(String.class).newInstance(newMessage);
-                newError.setStackTrace(e.getStackTrace());
+                if (e.getCause() == null) {
+                    newError.setStackTrace(e.getStackTrace());
+                } else {
+                    newError.setStackTrace(e.getCause().getStackTrace());                    
+                }
                 throw newError;
             } finally {
                 if (database.getConnection() != null && !database.getAutoCommitMode()) {
