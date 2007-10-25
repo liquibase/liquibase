@@ -6,6 +6,7 @@ import liquibase.database.sql.CallableSqlStatement;
 import liquibase.database.sql.PreparedSqlStatement;
 import liquibase.database.sql.SqlStatement;
 import liquibase.exception.JDBCException;
+import liquibase.exception.StatementNotSupportedOnDatabaseException;
 import liquibase.util.JdbcUtils;
 
 import java.sql.*;
@@ -63,12 +64,8 @@ public class JdbcTemplate {
 
 
         class ExecuteStatementCallback implements StatementCallback {
-            public Object doInStatement(Statement stmt) throws SQLException {
-                try {
-                    stmt.execute(sql.getSqlStatement(database));
-                } catch (SQLException e) {
-                    throw e;
-                }
+            public Object doInStatement(Statement stmt) throws SQLException, JDBCException {
+                stmt.execute(sql.getSqlStatement(database));
                 return null;
             }
 
@@ -147,7 +144,7 @@ public class JdbcTemplate {
         }
 
         class UpdateStatementCallback implements StatementCallback {
-            public Object doInStatement(Statement stmt) throws SQLException {
+            public Object doInStatement(Statement stmt) throws SQLException, JDBCException {
                 return stmt.executeUpdate(sql.getSqlStatement(database));
             }
 

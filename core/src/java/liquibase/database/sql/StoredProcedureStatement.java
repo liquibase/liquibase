@@ -33,6 +33,9 @@ public class StoredProcedureStatement implements SqlStatement, CallableSqlStatem
         types.add(type);
     }
 
+    public boolean supportsDatabase(Database database) {
+        return true;
+    }
 
     public String getSqlStatement(Database database) {
         StringBuffer string = new StringBuffer();

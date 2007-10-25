@@ -2,6 +2,9 @@ package liquibase.test;
 
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
+import liquibase.database.HsqlDatabase;
+import liquibase.database.sql.RawSqlStatement;
+import liquibase.database.template.JdbcTemplate;
 import liquibase.exception.JDBCException;
 
 import java.sql.Connection;
@@ -36,6 +39,7 @@ public class TestContext {
 
     private Map<String, Connection> connectionsByUrl = new HashMap<String, Connection>();
     private Map<String, Boolean> connectionsAttempted = new HashMap<String, Boolean>();
+    public static final String ALT_SCHEMA = "LIQUIBASEB";
 
     private Connection openConnection(final String url) throws Exception {
         if (connectionsAttempted.containsKey(url)) {
@@ -66,6 +70,24 @@ public class TestContext {
         if (connection == null) {
             throw new JDBCException("Connection could not be created to " + url + " with driver " + driver.getClass().getName() + ".  Possibly the wrong driver for the given database URL");
         }
+
+        try {
+            if (url.startsWith("jdbc:hsql")) {
+                connection.createStatement().execute("CREATE SCHEMA " + ALT_SCHEMA + " AUTHORIZATION DBA");
+            } else if (url.startsWith("jdbc:sqlserver")
+                    || url.startsWith("jdbc:postgresql")
+                    || url.startsWith("jdbc:h2")) {
+                connection.createStatement().execute("CREATE SCHEMA " + ALT_SCHEMA);
+            }
+            if (!connection.getAutoCommit()) {
+                connection.commit();
+            }
+        } catch (SQLException e) {
+//            e.printStackTrace();
+            ; //schema already exists
+        }
+
+
         connectionsByUrl.put(url, connection);
 
         Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
@@ -80,27 +102,27 @@ public class TestContext {
                         ;
                     }
 
-                    if (connection.getMetaData().getURL().startsWith("jdbc:derby")) {
+//                    if (connection.getMetaData().getURL().startsWith("jdbc:derby")) {
 //                        try {
 //                            driver.connect("jdbc:derby:liquibase;shutdown=true", new Properties());
 //                        } catch (SQLException e) {
 //                            ;//clean shutdown throws exception.//NOPMD
 //                        }
-                    } else if (connection.getMetaData().getURL().startsWith("jdbc:hsqldb")) {
-                        try {
-                            Statement statement = connection.createStatement();
-                            statement.execute("SHUTDOWN");
-                            statement.close();
-                        } catch (SQLException e) {
-                            ;
-                        }
-
-                    }
+//                    } else if (connection.getMetaData().getURL().startsWith("jdbc:hsqldb")) {
+//                        try {
+//                            Statement statement = connection.createStatement();
+//                            statement.execute("SHUTDOWN");
+//                            statement.close();
+//                        } catch (SQLException e) {
+//                            ;
+//                        }
+//
+//                    }
 
                     connection.close();
 //                    System.out.println(url+" closed successfully");
                 } catch (SQLException e) {
-                    System.out.println("Could not close "+url);
+                    System.out.println("Could not close " + url);
                     e.printStackTrace();
                 }
             }
