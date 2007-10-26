@@ -1,13 +1,11 @@
 package liquibase.change;
 
 import liquibase.database.*;
-import liquibase.database.sql.RawSqlStatement;
-import liquibase.database.sql.SqlStatement;
+import liquibase.database.sql.*;
 import liquibase.database.structure.Column;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Table;
 import liquibase.exception.UnsupportedChangeException;
-import liquibase.util.SqlUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -53,94 +51,38 @@ public class AddColumnChange extends AbstractChange {
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
         List<SqlStatement> sql = new ArrayList<SqlStatement>();
 
-        String alterTable = "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ADD " + getColumn().getName() + " " + database.getColumnType(getColumn().getType(), getColumn().isAutoIncrement());
-
-        if (defaultClauseBeforeNotNull(database)) {
-            alterTable += getDefaultClause(database);
-        }
+        Set<ColumnConstraint> constraints = new HashSet<ColumnConstraint>();
 
         if (column.getConstraints() != null) {
-            if (column.getConstraints().isNullable() != null && !column.getConstraints().isNullable()) {
-                alterTable += " NOT NULL";
-            } else {
-                if (database instanceof SybaseDatabase) {
-                    alterTable += " NULL";
-                }
-            }
-        } else {
-            //For Sybase only the null is not optional and hence if no constraints are specified we need to default the value
-            //to nullable
-            if (database instanceof SybaseDatabase) {
-                alterTable += " NULL";
+            if (column.getConstraints().isNullable()!= null && !column.getConstraints().isNullable()) {
+                constraints.add(new NotNullConstraint());
             }
         }
 
-        if (!defaultClauseBeforeNotNull(database)) {
-            alterTable += getDefaultClause(database);
-        }
+        AddColumnStatement addColumnStatement = new AddColumnStatement(getSchemaName(),
+                getTableName(),
+                getColumn().getName(),
+                getColumn().getType(),
+                getColumn().getDefaultValueObject(),
+                constraints.toArray(new ColumnConstraint[constraints.size()]));
 
-        sql.add(new RawSqlStatement(alterTable));
+        sql.add(addColumnStatement);
         if (database instanceof DB2Database) {
-            sql.add(new RawSqlStatement("CALL SYSPROC.ADMIN_CMD ('REORG TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + "')"));
+            sql.add(new ReorganizeTableStatement(getSchemaName(), getTableName()));
         }
-
-//        if (getColumn().getDefaultValue() != null
-//                || getColumn().getDefaultValueBoolean() != null
-//                || getColumn().getDefaultValueDate() != null
-//                || getColumn().getDefaultValueNumeric() != null) {
-//            AddDefaultValueChange change = new AddDefaultValueChange();
-//            change.setTableName(getTableName());
-//            change.setColumnName(getColumn().getName());
-//            change.setDefaultValue(getColumn().getDefaultValue());
-//            change.setDefaultValueNumeric(getColumn().getDefaultValueNumeric());
-//            change.setDefaultValueDate(getColumn().getDefaultValueDate());
-//            change.setDefaultValueBoolean(getColumn().getDefaultValueBoolean());
-//
-//            sql.addAll(Arrays.asList(change.generateStatements(database)));
-//        }
 
         if (getColumn().getConstraints() != null) {
             if (getColumn().getConstraints().isPrimaryKey() != null && getColumn().getConstraints().isPrimaryKey()) {
                 AddPrimaryKeyChange change = new AddPrimaryKeyChange();
+                change.setSchemaName(getSchemaName());
                 change.setTableName(getTableName());
                 change.setColumnNames(getColumn().getName());
 
                 sql.addAll(Arrays.asList(change.generateStatements(database)));
             }
-
-//            if (getColumn().getConstraints().isNullable() != null && !getColumn().getConstraints().isNullable()) {
-//                AddNotNullConstraintChange change = new AddNotNullConstraintChange();
-//                change.setTableName(getTableName());
-//                change.setColumnName(getColumn().getName());
-//                change.setColumnDataType(getColumn().getType());
-//
-//                sql.addAll(Arrays.asList(change.generateStatements(database)));
-//            }
         }
 
         return sql.toArray(new SqlStatement[sql.size()]);
-    }
-
-    private boolean defaultClauseBeforeNotNull(Database database) {
-        return database instanceof OracleDatabase
-                || database instanceof HsqlDatabase
-                || database instanceof DerbyDatabase
-                || database instanceof DB2Database
-                || database instanceof FirebirdDatabase;
-    }
-
-    private String getDefaultClause(Database database) {
-        String clause = "";
-        if (column.getDefaultValue() != null
-                || column.getDefaultValueBoolean() != null
-                || column.getDefaultValueDate() != null
-                || column.getDefaultValueNumeric() != null) {
-            if (database instanceof MSSQLDatabase) {
-                clause += " CONSTRAINT "+ ((MSSQLDatabase) database).generateDefaultConstraintName(tableName, column.getName());
-            }
-            clause += " DEFAULT " + column.getDefaultColumnValue(database);
-        }
-        return clause;
     }
 
     protected Change[] createInverses() {

@@ -134,6 +134,19 @@ public class ColumnConfig {
         this.defaultValueBoolean = defaultValueBoolean;
     }
 
+    public Object getDefaultValueObject() {
+        if (getDefaultValue() != null) {
+            return getDefaultValue();
+        } else if (getDefaultValueBoolean() != null) {
+            return getDefaultValueBoolean();
+        } else if (getDefaultValueNumeric() != null) {
+            return getDefaultValueNumeric();
+        } else if (getDefaultValueDate() != null) {
+            return getDefaultValueDate();
+        }
+        return null;
+    }
+
     public ConstraintsConfig getConstraints() {
         return constraints;
     }

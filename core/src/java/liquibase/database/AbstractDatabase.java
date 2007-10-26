@@ -1046,4 +1046,13 @@ public abstract class AbstractDatabase implements Database {
     public boolean supportsSchemas() {
         return true;
     }
+
+    public String generatePrimaryKeyName(String tableName) {
+        String pkName = "PK_" +tableName.toUpperCase();
+        if (pkName.length() > 18) {
+            pkName = pkName.substring(0, 17);
+        }
+        return pkName;
+    }
+
 }

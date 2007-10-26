@@ -206,4 +206,7 @@ public interface Database extends DatabaseObject {
     String convertRequestedSchemaToCatalog(String requestedSchema) throws JDBCException;
 
     boolean supportsSchemas();
+
+    String generatePrimaryKeyName(String tableName);
+
 }
