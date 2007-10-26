@@ -21,6 +21,7 @@ public class Column implements DatabaseObject, Comparable<Column> {
     private Object defaultValue;
     private boolean autoIncrement = false;
     private boolean primaryKey = false;
+    private boolean unique = false;
 
 
     public Table getTable() {
@@ -238,6 +239,13 @@ public class Column implements DatabaseObject, Comparable<Column> {
         return SqlUtil.isNumeric(getDataType());
     }
 
+    public boolean isUnique() {
+        return unique;
+    }
+
+    public void setUnique(boolean unique) {
+        this.unique = unique;
+    }
 
     public boolean isAutoIncrement() {
         return autoIncrement;

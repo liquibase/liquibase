@@ -18,7 +18,6 @@ public class AddAutoIncrementStatementTest {
     private static final String TABLE_NAME = "AddAutoIncTest";
     private static final String COLUMN_NAME = "testCol";
     private static final String COLUMN_TYPE = "int";
-    private static final String ALT_SCHEMA = "liquibaseb";
 
     @Before
     @After
@@ -31,7 +30,7 @@ public class AddAutoIncrementStatementTest {
             }
             try {
                 if (database.supportsSchemas()) {
-                    new JdbcTemplate(database).execute(new RawSqlStatement("drop table "+ALT_SCHEMA+"." + TABLE_NAME));
+                    new JdbcTemplate(database).execute(new RawSqlStatement("drop table "+TestContext.ALT_SCHEMA+"." + TABLE_NAME));
                 }
             } catch (JDBCException e) {
                 ;
@@ -105,20 +104,20 @@ public class AddAutoIncrementStatementTest {
         new DatabaseTestTemplate().testOnAvailableDatabases(new DatabaseTest() {
 
             public void performTest(Database database) throws Exception {
-                AddAutoIncrementStatement statement = new AddAutoIncrementStatement(ALT_SCHEMA, TABLE_NAME, COLUMN_NAME, COLUMN_TYPE);
+                AddAutoIncrementStatement statement = new AddAutoIncrementStatement(TestContext.ALT_SCHEMA, TABLE_NAME, COLUMN_NAME, COLUMN_TYPE);
 
                 if (statement.supportsDatabase(database)) {
 
-                    new JdbcTemplate(database).execute(new CreateTableStatement(ALT_SCHEMA, TABLE_NAME)
+                    new JdbcTemplate(database).execute(new CreateTableStatement(TestContext.ALT_SCHEMA, TABLE_NAME)
                             .addPrimaryKeyColumn(COLUMN_NAME, COLUMN_TYPE)
                             .addColumn("otherColumn", "varchar(50)"));
 
-                    DatabaseSnapshot snapshot = new DatabaseSnapshot(database, ALT_SCHEMA);
+                    DatabaseSnapshot snapshot = new DatabaseSnapshot(database, TestContext.ALT_SCHEMA);
                     assertFalse(snapshot.getTable(TABLE_NAME).getColumn(COLUMN_NAME).isAutoIncrement());
 
                     new JdbcTemplate(database).execute(statement);
 
-                    snapshot = new DatabaseSnapshot(database, ALT_SCHEMA);
+                    snapshot = new DatabaseSnapshot(database, TestContext.ALT_SCHEMA);
                     assertTrue(snapshot.getTable(TABLE_NAME).getColumn(COLUMN_NAME).isAutoIncrement());
                 } else {
                     try {

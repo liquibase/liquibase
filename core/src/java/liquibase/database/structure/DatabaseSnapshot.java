@@ -164,32 +164,32 @@ public class DatabaseSnapshot {
         rs.close();
 
         /* useful for troubleshooting table reading */
-        if (tablesMap.size() == 0) {
-            System.out.println("No tables found, all tables:");
-
-            String convertedCatalog = database.convertRequestedSchemaToCatalog(schema);
-            String convertedSchema = database.convertRequestedSchemaToSchema(schema);
-
-            System.out.println("Tried: "+convertedCatalog+"."+convertedSchema);
-            convertedCatalog = null;
-            convertedSchema = null;
-
-            rs = databaseMetaData.getTables(convertedCatalog, convertedSchema, null, new String[]{"TABLE", "VIEW"});
-            while (rs.next()) {
-                String type = rs.getString("TABLE_TYPE");
-                String name = rs.getString("TABLE_NAME");
-                String schemaName = rs.getString("TABLE_SCHEM");
-                String catalogName = rs.getString("TABLE_CAT");
-
-                if (database.isSystemTable(catalogName, schemaName, name) || database.isLiquibaseTable(name) || database.isSystemView(catalogName, schemaName, name)) {
-                    continue;
-                }
-
-                System.out.println(catalogName+"."+schemaName+"."+name+":"+type);
-
-            }
-            rs.close();
-        }
+//        if (tablesMap.size() == 0) {
+//            System.out.println("No tables found, all tables:");
+//
+//            String convertedCatalog = database.convertRequestedSchemaToCatalog(schema);
+//            String convertedSchema = database.convertRequestedSchemaToSchema(schema);
+//
+//            System.out.println("Tried: "+convertedCatalog+"."+convertedSchema);
+//            convertedCatalog = null;
+//            convertedSchema = null;
+//
+//            rs = databaseMetaData.getTables(convertedCatalog, convertedSchema, null, new String[]{"TABLE", "VIEW"});
+//            while (rs.next()) {
+//                String type = rs.getString("TABLE_TYPE");
+//                String name = rs.getString("TABLE_NAME");
+//                String schemaName = rs.getString("TABLE_SCHEM");
+//                String catalogName = rs.getString("TABLE_CAT");
+//
+//                if (database.isSystemTable(catalogName, schemaName, name) || database.isLiquibaseTable(name) || database.isSystemView(catalogName, schemaName, name)) {
+//                    continue;
+//                }
+//
+//                System.out.println(catalogName+"."+schemaName+"."+name+":"+type);
+//
+//            }
+//            rs.close();
+//        }
     }
 
     private void readColumns(String schema) throws SQLException, JDBCException {
