@@ -9,8 +9,8 @@ public class ForeignKey implements DatabaseObject, Comparable<ForeignKey> {
 
     private String name;
 
-    private Boolean deferrable;
-    private Boolean initiallyDeferred;
+    private boolean deferrable;
+    private boolean initiallyDeferred;
 
 
     public Table getPrimaryKeyTable() {
@@ -59,20 +59,20 @@ public class ForeignKey implements DatabaseObject, Comparable<ForeignKey> {
     }
 
 
-    public Boolean isDeferrable() {
+    public boolean isDeferrable() {
         return deferrable;
     }
 
-    public void setDeferrable(Boolean deferrable) {
+    public void setDeferrable(boolean deferrable) {
         this.deferrable = deferrable;
     }
 
 
-    public Boolean isInitiallyDeferred() {
+    public boolean isInitiallyDeferred() {
         return initiallyDeferred;
     }
 
-    public void setInitiallyDeferred(Boolean initiallyDeferred) {
+    public void setInitiallyDeferred(boolean initiallyDeferred) {
         this.initiallyDeferred = initiallyDeferred;
     }
 
