@@ -31,7 +31,7 @@ public class ReorganizeTableStatement implements SqlStatement {
 
     public String getSqlStatement(Database database) throws StatementNotSupportedOnDatabaseException {
         if (!supportsDatabase(database)) {
-            throw new StatementNotSupportedOnDatabaseException("Do not need to reorganize table", this, database);
+            throw new StatementNotSupportedOnDatabaseException("Cannot reorganize table", this, database);
         }
         return "CALL SYSPROC.ADMIN_CMD ('REORG TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + "')";
     }

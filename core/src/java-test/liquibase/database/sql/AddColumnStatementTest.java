@@ -4,7 +4,6 @@ import liquibase.database.*;
 import liquibase.database.structure.Column;
 import liquibase.database.structure.DatabaseSnapshot;
 import liquibase.database.template.JdbcTemplate;
-import liquibase.exception.JDBCException;
 import liquibase.exception.StatementNotSupportedOnDatabaseException;
 import liquibase.test.DatabaseTest;
 import liquibase.test.DatabaseTestTemplate;
@@ -13,9 +12,7 @@ import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.sql.SQLException;
-
-public class AddColumnStatementTest {
+public class AddColumnStatementTest extends AbstractSqlStatementTest {
 
     private static final String TABLE_NAME = "AddColTest";
     private static final String NEW_COLUMN_NAME = "NewCol";
@@ -28,31 +25,6 @@ public class AddColumnStatementTest {
             if (database.supportsSchemas()) {
                 dropAndCreateTable(new CreateTableStatement(TestContext.ALT_SCHEMA, TABLE_NAME).addColumn("existingCol", "int"), database);
             }
-        }
-
-    }
-
-    private void dropAndCreateTable(CreateTableStatement statement, Database database) throws SQLException, JDBCException {
-        String schema = "";
-        if (statement.getSchemaName() != null) {
-            schema = statement.getSchemaName()+".";
-        }
-
-        if (!database.getAutoCommitMode()) {
-            database.getConnection().commit();
-        }
-        
-        try {
-            new JdbcTemplate(database).execute(new RawSqlStatement("drop table " + schema+statement.getTableName()));
-        } catch (JDBCException e) {
-            if (!database.getConnection().getAutoCommit()) {
-                database.getConnection().rollback();
-            }
-        }
-        new JdbcTemplate(database).execute(statement);
-
-        if (!database.getAutoCommitMode()) {
-            database.getConnection().commit();
         }
 
     }
