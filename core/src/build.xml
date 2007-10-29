@@ -474,7 +474,9 @@ The available targets at the current stage:
 	</target>
 	
 	<target name="continuous-build" description="Used by the continuous build server and runs the generic tests"
-		depends="prepare,compile,test,test-int-generic"/>
+		depends="prepare,compile,test,test-int-generic">
+            <fail if="unit.tests.failed"/>
+      </target>
 	
 	<!-- target: ALL -->
     <target name="all" depends="prepare">
