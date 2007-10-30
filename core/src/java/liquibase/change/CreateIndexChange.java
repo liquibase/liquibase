@@ -107,6 +107,7 @@ public class CreateIndexChange extends AbstractChange {
 
     protected Change[] createInverses() {
         DropIndexChange inverse = new DropIndexChange();
+        inverse.setSchemaName(getSchemaName());
         inverse.setTableName(getTableName());
         inverse.setIndexName(getIndexName());
 

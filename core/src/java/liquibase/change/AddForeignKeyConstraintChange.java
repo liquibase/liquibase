@@ -143,6 +143,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
 
     protected Change[] createInverses() {
         DropForeignKeyConstraintChange inverse = new DropForeignKeyConstraintChange();
+        inverse.setBaseTableSchemaName(getBaseTableSchemaName());
         inverse.setBaseTableName(getBaseTableName());
         inverse.setConstraintName(getConstraintName());
 

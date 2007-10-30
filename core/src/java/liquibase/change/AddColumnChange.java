@@ -98,6 +98,7 @@ public class AddColumnChange extends AbstractChange {
 
 
         DropColumnChange inverse = new DropColumnChange();
+        inverse.setSchemaName(getSchemaName());
         inverse.setColumnName(getColumn().getName());
         inverse.setTableName(getTableName());
         inverses.add(inverse);

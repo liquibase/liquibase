@@ -105,6 +105,7 @@ public class AddPrimaryKeyChange extends AbstractChange {
 
     protected Change[] createInverses() {
         DropPrimaryKeyChange inverse = new DropPrimaryKeyChange();
+        inverse.setSchemaName(getSchemaName());
         inverse.setTableName(getTableName());
         inverse.setConstraintName(getConstraintName());
 

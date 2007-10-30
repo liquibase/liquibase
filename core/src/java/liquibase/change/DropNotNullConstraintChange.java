@@ -68,6 +68,7 @@ public class DropNotNullConstraintChange extends AbstractChange {
     protected Change[] createInverses() {
         AddNotNullConstraintChange inverse = new AddNotNullConstraintChange();
         inverse.setColumnName(getColumnName());
+        inverse.setSchemaName(getSchemaName());
         inverse.setTableName(getTableName());
         inverse.setColumnDataType(getColumnDataType());
 
