@@ -396,8 +396,7 @@ public abstract class AbstractDatabase implements Database {
             if (locked) {
                 return false;
             } else {
-                UpdateStatement updateStatement = new UpdateStatement();
-                updateStatement.setTableName(getDatabaseChangeLogLockTableName());
+                UpdateStatement updateStatement = new UpdateStatement(null, getDatabaseChangeLogLockTableName());
                 updateStatement.addNewColumnValue("LOCKED", true, Types.BOOLEAN);
                 updateStatement.addNewColumnValue("LOCKGRANTED", new Timestamp(new java.util.Date().getTime()), Types.TIMESTAMP);
                 updateStatement.addNewColumnValue("LOCKEDBY", InetAddress.getLocalHost().getCanonicalHostName() + " (" + InetAddress.getLocalHost().getHostAddress() + ")", Types.VARCHAR);
@@ -419,8 +418,7 @@ public abstract class AbstractDatabase implements Database {
     public void releaseLock() throws LockException {
         if (doesChangeLogLockTableExist()) {
             try {
-                UpdateStatement releaseStatement = new UpdateStatement();
-                releaseStatement.setTableName(getDatabaseChangeLogLockTableName());
+                UpdateStatement releaseStatement = new UpdateStatement(null, getDatabaseChangeLogLockTableName());
                 releaseStatement.addNewColumnValue("LOCKED", false, Types.BOOLEAN);
                 releaseStatement.addNewColumnValue("LOCKGRANTED", null, Types.TIMESTAMP);
                 releaseStatement.addNewColumnValue("LOCKEDBY", null, Types.VARCHAR);
@@ -832,8 +830,7 @@ public abstract class AbstractDatabase implements Database {
      * </ol>
      */
     protected SqlStatement createTagSQL(String tagName, Date dateExecuted) {
-        UpdateStatement statement = new UpdateStatement();
-        statement.setTableName(getDatabaseChangeLogTableName());
+        UpdateStatement statement = new UpdateStatement(null, getDatabaseChangeLogTableName());
         statement.addNewColumnValue("TAG", tagName, Types.VARCHAR);
         statement.setWhereClause("DATEEXECUTED = ?");
         statement.addWhereParameter(dateExecuted, Types.TIMESTAMP);

@@ -1,7 +1,9 @@
 package liquibase.change;
 
-import liquibase.database.MySQLDatabase;
-import static org.junit.Assert.assertEquals;
+import liquibase.database.MockDatabase;
+import liquibase.database.sql.SetNullableStatement;
+import liquibase.database.sql.SqlStatement;
+import static org.junit.Assert.*;
 import org.junit.Test;
 import org.w3c.dom.Element;
 
@@ -20,11 +22,19 @@ public class DropNotNullConstraintChangeTest extends AbstractChangeTest {
     @Test
     public void generateStatement() throws Exception {
         DropNotNullConstraintChange change = new DropNotNullConstraintChange();
+        change.setSchemaName("SCHEMA_NAME");
         change.setTableName("TABLE_NAME");
         change.setColumnName("COL_HERE");
         change.setColumnDataType("varchar(200)");
-        MySQLDatabase db = new MySQLDatabase();
-        assertEquals("ALTER TABLE TABLE_NAME MODIFY COL_HERE varchar(200) DEFAULT NULL", change.generateStatements(db)[0].getSqlStatement(db));
+
+        SqlStatement[] sqlStatements = change.generateStatements(new MockDatabase());
+        assertEquals(1, sqlStatements.length);
+        assertTrue(sqlStatements[0] instanceof SetNullableStatement);
+        assertEquals("SCHEMA_NAME", ((SetNullableStatement) sqlStatements[0]).getSchemaName());
+        assertEquals("TABLE_NAME", ((SetNullableStatement) sqlStatements[0]).getTableName());
+        assertEquals("COL_HERE", ((SetNullableStatement) sqlStatements[0]).getColumnName());
+        assertEquals("varchar(200)", ((SetNullableStatement) sqlStatements[0]).getColumnDataType());
+        assertTrue(((SetNullableStatement) sqlStatements[0]).isNullable());
     }
 
     @Test

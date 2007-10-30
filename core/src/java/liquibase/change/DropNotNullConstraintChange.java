@@ -1,13 +1,12 @@
 package liquibase.change;
 
-import liquibase.database.*;
-import liquibase.database.sql.RawSqlStatement;
+import liquibase.database.Database;
+import liquibase.database.sql.SetNullableStatement;
 import liquibase.database.sql.SqlStatement;
 import liquibase.database.structure.Column;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Table;
 import liquibase.exception.UnsupportedChangeException;
-import liquibase.util.SqlUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -63,49 +62,7 @@ public class DropNotNullConstraintChange extends AbstractChange {
     }
 
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
-        if (database instanceof SybaseDatabase) {
-            return generateSybaseStatements((SybaseDatabase) database);
-        } else if (database instanceof MSSQLDatabase) {
-            return generateMSSQLStatements((MSSQLDatabase) database);
-        } else if (database instanceof MySQLDatabase) {
-            return generateMySQLStatements((MySQLDatabase) database);
-        } else if (database instanceof OracleDatabase) {
-            return generateOracleStatements((OracleDatabase) database);
-        } else if (database instanceof DerbyDatabase) {
-            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ALTER COLUMN " + columnName + " NULL")};
-        } else if (database instanceof HsqlDatabase) {
-            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ALTER COLUMN " + columnName + " NULL")};
-        } else if (database instanceof CacheDatabase) {
-            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ALTER COLUMN " + columnName + " NULL")};
-        } else if (database instanceof FirebirdDatabase) {
-            throw new UnsupportedChangeException("LiquiBase does not currently support dropping null constraints in Firebird");
-        }
-
-        return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ALTER COLUMN " + getColumnName() + " DROP NOT NULL")};
-    }
-
-    private SqlStatement[] generateSybaseStatements(SybaseDatabase database) {
-        return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " MODIFY " + getColumnName() + " NULL")};
-    }
-
-    private SqlStatement[] generateMSSQLStatements(MSSQLDatabase database) {
-        if (columnDataType == null) {
-            throw new RuntimeException("columnDataType is required to drop not null constraints with MS-SQL");
-        }
-
-        return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ALTER COLUMN " + getColumnName() + " " + getColumnDataType() + " NULL")};
-    }
-
-    private SqlStatement[] generateOracleStatements(OracleDatabase database) {
-        return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " MODIFY " + getColumnName() + " NULL")};
-    }
-
-    private SqlStatement[] generateMySQLStatements(MySQLDatabase database) {
-        if (columnDataType == null) {
-            throw new RuntimeException("columnDataType is required to drop not null constraints with MySQL");
-        }
-
-        return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " MODIFY " + getColumnName() + " " + getColumnDataType() + " DEFAULT NULL")};
+        return new SqlStatement[]{new SetNullableStatement(getSchemaName(), getTableName(), getColumnName(), getColumnDataType(), true)};
     }
 
     protected Change[] createInverses() {

@@ -26,8 +26,7 @@ public class UpdateStatementTest {
         new DatabaseTestTemplate().testOnAllDatabases(new DatabaseTest() {
 
             public void performTest(Database database) {
-                UpdateStatement statement = new UpdateStatement();
-                statement.setTableName("tableName");
+                UpdateStatement statement = new UpdateStatement(null, "tableName");
                 statement.addNewColumnValue("colName", null, Types.VARCHAR);
 
                 assertEquals("UPDATE tableName SET colName = NULL", statement.getSqlStatement(database));

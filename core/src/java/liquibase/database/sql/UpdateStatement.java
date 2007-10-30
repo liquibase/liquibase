@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 public class UpdateStatement implements SqlStatement, PreparedSqlStatement {
+    private String schemaName;
     private String tableName;
     private Map<String, Object> newColumnValues = new HashMap<String, Object>();
     private Map<String, Integer> newColumnTypes = new HashMap<String, Integer>();
@@ -18,26 +19,34 @@ public class UpdateStatement implements SqlStatement, PreparedSqlStatement {
     private List<Integer> whereParameterTypes = new ArrayList<Integer>();
 
 
+    public UpdateStatement(String schemaName, String tableName) {
+        this.schemaName = schemaName;
+        this.tableName = tableName;
+    }
+
+    public String getSchemaName() {
+        return schemaName;
+    }
+
     public String getTableName() {
         return tableName;
     }
 
-    public void setTableName(String tableName) {
-        this.tableName = tableName;
-    }
-
-    public void addNewColumnValue(String columnName, Object newValue, int type) {
+    public UpdateStatement addNewColumnValue(String columnName, Object newValue, int type) {
         newColumnValues.put(columnName, newValue);
         newColumnTypes.put(columnName, type);
 
+        return this;
     }
 
     public String getWhereClause() {
         return whereClause;
     }
 
-    public void setWhereClause(String whereClause) {
+    public UpdateStatement setWhereClause(String whereClause) {
         this.whereClause = whereClause;
+
+        return this;
     }
 
     public void addWhereParameter(Object value, int type) {
@@ -48,6 +57,10 @@ public class UpdateStatement implements SqlStatement, PreparedSqlStatement {
 
     public boolean supportsDatabase(Database database) {
         return true;
+    }
+
+    public Map<String, Object> getNewColumnValues() {
+        return newColumnValues;
     }
 
     public String getSqlStatement(Database database) {
