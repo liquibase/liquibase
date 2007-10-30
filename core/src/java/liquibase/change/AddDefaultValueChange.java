@@ -115,6 +115,7 @@ public class AddDefaultValueChange extends AbstractChange {
 
     protected Change[] createInverses() {
         DropDefaultValueChange inverse = new DropDefaultValueChange();
+        inverse.setSchemaName(getSchemaName());
         inverse.setTableName(getTableName());
         inverse.setColumnName(getColumnName());
 

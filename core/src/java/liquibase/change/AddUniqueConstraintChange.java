@@ -98,6 +98,7 @@ public class AddUniqueConstraintChange extends AbstractChange {
 
     protected Change[] createInverses() {
         DropUniqueConstraintChange inverse = new DropUniqueConstraintChange();
+        inverse.setSchemaName(getSchemaName());
         inverse.setTableName(getTableName());
         inverse.setConstraintName(getConstraintName());
 

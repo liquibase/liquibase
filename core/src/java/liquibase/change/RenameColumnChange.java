@@ -97,6 +97,7 @@ public class RenameColumnChange extends AbstractChange {
 
     protected Change[] createInverses() {
         RenameColumnChange inverse = new RenameColumnChange();
+        inverse.setSchemaName(getSchemaName());
         inverse.setTableName(getTableName());
         inverse.setOldColumnName(getNewColumnName());
         inverse.setNewColumnName(getOldColumnName());

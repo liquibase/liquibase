@@ -82,6 +82,7 @@ public class RenameTableChange extends AbstractChange {
 
     protected Change[] createInverses() {
         RenameTableChange inverse = new RenameTableChange();
+        inverse.setSchemaName(getSchemaName());
         inverse.setOldTableName(getNewTableName());
         inverse.setNewTableName(getOldTableName());
 

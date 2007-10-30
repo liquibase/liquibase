@@ -86,6 +86,7 @@ public class CreateTableChange extends AbstractChange {
 
     protected Change[] createInverses() {
         DropTableChange inverse = new DropTableChange();
+        inverse.setSchemaName(getSchemaName());
         inverse.setTableName(getTableName());
 
         return new Change[]{
