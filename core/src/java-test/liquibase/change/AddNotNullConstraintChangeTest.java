@@ -1,7 +1,13 @@
 package liquibase.change;
 
-import liquibase.database.MySQLDatabase;
-import static org.junit.Assert.assertEquals;
+import liquibase.database.Database;
+import liquibase.database.MockDatabase;
+import liquibase.database.sql.SetNullableStatement;
+import liquibase.database.sql.SqlStatement;
+import liquibase.database.sql.UpdateStatement;
+import liquibase.test.DatabaseTest;
+import liquibase.test.DatabaseTestTemplate;
+import static org.junit.Assert.*;
 import org.junit.Test;
 import org.w3c.dom.Element;
 
@@ -19,15 +25,33 @@ public class AddNotNullConstraintChangeTest extends AbstractChangeTest {
 
     @Test
     public void generateStatement() throws Exception {
-        AddNotNullConstraintChange change = new AddNotNullConstraintChange();
-        change.setTableName("TABLE_NAME");
-        change.setColumnName("COL_HERE");
-        change.setDefaultNullValue("DEFAULT_VALUE");
-        change.setColumnDataType("varchar(200)");
-        MySQLDatabase database = new MySQLDatabase();
 
-        assertEquals("UPDATE TABLE_NAME SET COL_HERE='DEFAULT_VALUE' WHERE COL_HERE IS NULL", change.generateStatements(database)[0].getSqlStatement(database));
-        assertEquals("ALTER TABLE TABLE_NAME MODIFY COL_HERE varchar(200) NOT NULL", change.generateStatements(database)[1].getSqlStatement(database));
+        new DatabaseTestTemplate().testOnAllDatabases(new DatabaseTest() {
+            public void performTest(Database database) throws Exception {
+                AddNotNullConstraintChange change = new AddNotNullConstraintChange();
+                change.setSchemaName("SCHEMA_NAME");
+                change.setTableName("TABLE_NAME");
+                change.setColumnName("COL_HERE");
+                change.setDefaultNullValue("DEFAULT_VALUE");
+                change.setColumnDataType("varchar(200)");
+
+                SqlStatement[] sqlStatements = change.generateStatements(new MockDatabase());
+                assertEquals(2, sqlStatements.length);
+                assertTrue(sqlStatements[0] instanceof UpdateStatement);
+                assertTrue(sqlStatements[1] instanceof SetNullableStatement);
+
+                assertEquals("SCHEMA_NAME", ((UpdateStatement) sqlStatements[0]).getSchemaName());
+                assertEquals("TABLE_NAME", ((UpdateStatement) sqlStatements[0]).getTableName());
+                assertEquals("COL_HERE IS NULL", ((UpdateStatement) sqlStatements[0]).getWhereClause());
+                assertEquals("DEFAULT_VALUE", ((UpdateStatement) sqlStatements[0]).getNewColumnValues().get("COL_HERE"));
+
+                assertEquals("SCHEMA_NAME", ((SetNullableStatement) sqlStatements[1]).getSchemaName());
+                assertEquals("TABLE_NAME", ((SetNullableStatement) sqlStatements[1]).getTableName());
+                assertEquals("COL_HERE", ((SetNullableStatement) sqlStatements[1]).getColumnName());
+                assertEquals("varchar(200)", ((SetNullableStatement) sqlStatements[1]).getColumnDataType());
+                assertFalse(((SetNullableStatement) sqlStatements[1]).isNullable());
+            }
+        });
     }
 
     @Test

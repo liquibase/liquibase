@@ -1,16 +1,15 @@
 package liquibase.change;
 
 import liquibase.database.*;
-import liquibase.database.sql.RawSqlStatement;
-import liquibase.database.sql.SqlStatement;
+import liquibase.database.sql.*;
 import liquibase.database.structure.Column;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Table;
 import liquibase.exception.UnsupportedChangeException;
-import liquibase.util.SqlUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import java.sql.Types;
 import java.util.*;
 
 /**
@@ -69,122 +68,23 @@ public class AddNotNullConstraintChange extends AbstractChange {
     }
 
 
-    private SqlStatement generateUpdateStatement(Database database) {
-        return new RawSqlStatement("UPDATE " + database.escapeTableName(getSchemaName(), tableName) + " SET " + columnName + "='" + defaultNullValue + "' WHERE " + columnName + " IS NULL");
-    }
-
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
-        if (database instanceof SybaseDatabase) {
-            return generateSybaseStatements((SybaseDatabase) database);
-        } else if (database instanceof MSSQLDatabase) {
-            return generateMSSQLStatements((MSSQLDatabase) database);
-        } else if (database instanceof MySQLDatabase) {
-            return generateMySQLStatements((MySQLDatabase) database);
-        } else if (database instanceof OracleDatabase) {
-            return generateOracleStatements((OracleDatabase) database);
-        } else if (database instanceof DerbyDatabase) {
-            return generateDerbyStatements((DerbyDatabase) database);
-        } else if (database instanceof H2Database) {
-            return generateH2Statements((H2Database) database);
-        } else if (database instanceof CacheDatabase) {
-            return generateCacheStatements((CacheDatabase) database);
-        } else if (database instanceof FirebirdDatabase) {
-            throw new UnsupportedChangeException("LiquiBase does not currently support adding null constraints in Firebird");
-        }
-
         List<SqlStatement> statements = new ArrayList<SqlStatement>();
+
         if (defaultNullValue != null) {
-            statements.add(generateUpdateStatement(database));
+            statements.add(new UpdateStatement(getSchemaName(), getTableName())
+                    .addNewColumnValue(getColumnName(), getDefaultNullValue(), Types.VARCHAR)
+                    .setWhereClause(getColumnName() + " IS NULL"));
         }
 
-        statements.add(new RawSqlStatement("ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ALTER COLUMN  " + getColumnName() + " SET NOT NULL "));
+        statements.add(new SetNullableStatement(getSchemaName(), getTableName(), getColumnName(), getColumnDataType(), false));
 
         if (database instanceof DB2Database) {
-            statements.add(new RawSqlStatement("CALL SYSPROC.ADMIN_CMD ('REORG TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + "')"));
+            statements.add(new ReorganizeTableStatement(getSchemaName(), getTableName()));
         }
 
         return statements.toArray(new SqlStatement[statements.size()]);
 
-    }
-
-    private SqlStatement[] generateCacheStatements(CacheDatabase database) {
-        List<SqlStatement> statements = new ArrayList<SqlStatement>();
-        if (defaultNullValue != null) {
-            statements.add(generateUpdateStatement(database));
-        }
-        statements.add(new RawSqlStatement("COMMIT"));
-        statements.add(new RawSqlStatement("ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ALTER COLUMN " + getColumnName() + " NOT NULL"));
-
-        return statements.toArray(new SqlStatement[statements.size()]);
-    }
-
-    private SqlStatement[] generateSybaseStatements(SybaseDatabase database) {
-        List<SqlStatement> statements = new ArrayList<SqlStatement>();
-        if (defaultNullValue != null) {
-            statements.add(generateUpdateStatement(database));
-        }
-        statements.add(new RawSqlStatement("COMMIT"));
-        statements.add(new RawSqlStatement("ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " MODIFY " + getColumnName() + " NOT NULL"));
-
-        return statements.toArray(new SqlStatement[statements.size()]);
-    }
-
-    private SqlStatement[] generateMSSQLStatements(MSSQLDatabase database) {
-        if (columnDataType == null) {
-            throw new RuntimeException("columnDataType is required to add not null constraints with MS-SQL");
-        }
-
-        List<SqlStatement> statements = new ArrayList<SqlStatement>();
-        if (defaultNullValue != null) {
-            statements.add(generateUpdateStatement(database));
-        }
-        statements.add(new RawSqlStatement("ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ALTER COLUMN " + getColumnName() + " " + columnDataType + " " + " NOT NULL"));
-
-        return statements.toArray(new SqlStatement[statements.size()]);
-    }
-
-    private SqlStatement[] generateMySQLStatements(MySQLDatabase database) {
-        if (columnDataType == null) {
-            throw new RuntimeException("columnDataType is required to add not null constraints with MySQL");
-        }
-
-        List<SqlStatement> statements = new ArrayList<SqlStatement>();
-        if (defaultNullValue != null) {
-            statements.add(generateUpdateStatement(database));
-        }
-        statements.add(new RawSqlStatement("ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " MODIFY " + getColumnName() + " " + columnDataType + " NOT NULL"));
-
-        return statements.toArray(new SqlStatement[statements.size()]);
-    }
-
-    private SqlStatement[] generateOracleStatements(OracleDatabase database) {
-        List<SqlStatement> statements = new ArrayList<SqlStatement>();
-        if (defaultNullValue != null) {
-            statements.add(generateUpdateStatement(database));
-        }
-        statements.add(new RawSqlStatement("ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " MODIFY " + getColumnName() + " NOT NULL"));
-
-        return statements.toArray(new SqlStatement[statements.size()]);
-    }
-
-    public SqlStatement[] generateDerbyStatements(DerbyDatabase database) {
-        List<SqlStatement> statements = new ArrayList<SqlStatement>();
-        if (defaultNullValue != null) {
-            statements.add(generateUpdateStatement(database));
-        }
-        statements.add(new RawSqlStatement("ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ALTER COLUMN  " + getColumnName() + " NOT NULL"));
-
-        return statements.toArray(new SqlStatement[statements.size()]);
-    }
-
-    public SqlStatement[] generateH2Statements(H2Database database) {
-        List<SqlStatement> statements = new ArrayList<SqlStatement>();
-        if (defaultNullValue != null) {
-            statements.add(generateUpdateStatement(database));
-        }
-        statements.add(new RawSqlStatement("ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ALTER COLUMN  " + getColumnName() + " " + getColumnDataType() + " NOT NULL"));
-
-        return statements.toArray(new SqlStatement[statements.size()]);
     }
 
     protected Change[] createInverses() {

@@ -2,13 +2,13 @@ package liquibase.change;
 
 import liquibase.database.*;
 import liquibase.database.sql.RawSqlStatement;
+import liquibase.database.sql.ReorganizeTableStatement;
 import liquibase.database.sql.SqlStatement;
 import liquibase.database.structure.Column;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.ForeignKey;
 import liquibase.database.structure.Table;
 import liquibase.exception.UnsupportedChangeException;
-import liquibase.util.SqlUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -158,7 +158,7 @@ public class AddLookupTableChange extends AbstractChange {
         }
 
         if (database instanceof DB2Database) {
-            statements.add(new RawSqlStatement("CALL SYSPROC.ADMIN_CMD ('REORG TABLE " + database.escapeTableName(getNewTableSchemaName(), getNewTableName()) + "')"));
+            statements.add(new ReorganizeTableStatement(getNewTableSchemaName(), getNewTableName()));
         }
 
         AddPrimaryKeyChange addPKChange = new AddPrimaryKeyChange();
@@ -168,7 +168,7 @@ public class AddLookupTableChange extends AbstractChange {
         statements.addAll(Arrays.asList(addPKChange.generateStatements(database)));
 
         if (database instanceof DB2Database) {
-            statements.add(new RawSqlStatement("CALL SYSPROC.ADMIN_CMD ('REORG TABLE " + database.escapeTableName(getNewTableSchemaName(), getNewTableName()) + "')"));
+            statements.add(new ReorganizeTableStatement(getNewTableSchemaName(), getNewTableName()));
         }
 
         AddForeignKeyConstraintChange addFKChange = new AddForeignKeyConstraintChange();
