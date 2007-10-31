@@ -79,9 +79,9 @@ public class FirebirdDatabase extends AbstractDatabase {
 
     public SqlStatement getViewDefinitionSql(String schemaName, String viewName) throws JDBCException {
         String sql = "select rdb$view_source from rdb$relations where upper(rdb$relation_name)='" + viewName + "'";
-        if (schemaName != null) {
-            sql += " and rdb$owner_name='" + schemaName.toUpperCase() + "'";
-        }
+//        if (schemaName != null) {
+//            sql += " and rdb$owner_name='" + schemaName.toUpperCase() + "'";
+//        }
 //        if (getCatalogName() != null) {
 //            sql += " and table_catalog='" + getCatalogName() + "'";
 //
@@ -120,4 +120,11 @@ public class FirebirdDatabase extends AbstractDatabase {
         return false;
     }
 
+    public String convertRequestedSchemaToSchema(String requestedSchema) throws JDBCException {
+        if (requestedSchema == null) {
+            return getSchemaName();
+        } else {
+            return requestedSchema.toUpperCase();
+        }
+    }
 }

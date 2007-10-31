@@ -267,7 +267,10 @@ public class DatabaseSnapshot {
 
     private boolean isPrimaryKey(Column columnInfo) {
         for (PrimaryKey pk : getPrimaryKeys()) {
-            if (pk.getTableName().equalsIgnoreCase(pk.getTableName())) {
+            if (columnInfo.getTable() == null) {
+                continue;
+            }
+            if (pk.getTableName().equalsIgnoreCase(columnInfo.getTable().getName())) {
                 if (pk.getColumnNamesAsList().contains(columnInfo.getName())) {
                     return true;
                 }

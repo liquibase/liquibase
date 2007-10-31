@@ -2,15 +2,13 @@ package liquibase.change;
 
 import liquibase.database.DB2Database;
 import liquibase.database.Database;
-import liquibase.database.MSSQLDatabase;
-import liquibase.database.MySQLDatabase;
-import liquibase.database.sql.RawSqlStatement;
+import liquibase.database.sql.AddPrimaryKeyStatement;
+import liquibase.database.sql.ReorganizeTableStatement;
 import liquibase.database.sql.SqlStatement;
 import liquibase.database.structure.Column;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Table;
 import liquibase.exception.UnsupportedChangeException;
-import liquibase.util.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -74,32 +72,18 @@ public class AddPrimaryKeyChange extends AbstractChange {
     }
 
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
-        String sql;
-        if (getConstraintName() == null  || database instanceof MySQLDatabase) {
-            sql = "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ADD PRIMARY KEY (" + getColumnNames() + ")";
-        } else {
-            sql = "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ADD CONSTRAINT " + getConstraintName() + " PRIMARY KEY (" + getColumnNames() + ")";
-        }
-
-        if (StringUtils.trimToNull(getTablespace()) != null && database.supportsTablespaces()) {
-            if (database instanceof MSSQLDatabase) {
-                sql += " ON "+getTablespace();
-            } else if (database instanceof DB2Database) {
-                ; //not supported in DB2
-            } else {
-                sql += " USING INDEX TABLESPACE "+getTablespace();
-            }
-        }
+        AddPrimaryKeyStatement statement = new AddPrimaryKeyStatement(getSchemaName(), getTableName(), getColumnNames(), getConstraintName());
+        statement.setTablespace(getTablespace());
 
         if (database instanceof DB2Database) {
-            return new SqlStatement[] {
-                    new RawSqlStatement(sql),
-                    new RawSqlStatement("CALL SYSPROC.ADMIN_CMD ('REORG TABLE "+database.escapeTableName(getSchemaName(), getTableName())+"')"),
+            return new SqlStatement[]{
+                    statement,
+                    new ReorganizeTableStatement(getSchemaName(), getTableName())
             };
         }
 
-        return new SqlStatement[] {
-                new RawSqlStatement(sql),
+        return new SqlStatement[]{
+                statement
         };
     }
 
@@ -115,7 +99,7 @@ public class AddPrimaryKeyChange extends AbstractChange {
     }
 
     public String getConfirmationMessage() {
-        return "Primary key added to "+getTableName()+" ("+getColumnNames()+")";
+        return "Primary key added to " + getTableName() + " (" + getColumnNames() + ")";
     }
 
     public Element createNode(Document currentChangeLogFileDOM) {
@@ -127,6 +111,9 @@ public class AddPrimaryKeyChange extends AbstractChange {
         node.setAttribute("columnNames", getColumnNames());
         if (getConstraintName() != null) {
             node.setAttribute("constraintName", getConstraintName());
+        }
+        if (getTablespace() != null) {
+            node.setAttribute("tablespace", getTablespace());
         }
 
         return node;
