@@ -3,7 +3,6 @@ package liquibase.database.structure;
 import liquibase.util.StringUtils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class PrimaryKey implements DatabaseObject, Comparable<PrimaryKey> {
@@ -25,11 +24,12 @@ public class PrimaryKey implements DatabaseObject, Comparable<PrimaryKey> {
     }
 
     public void addColumnName(int position, String columnName) {
-        if (position > columnNames.size()) {
-            columnNames.add(columnName);
-        } else {
-            this.columnNames.add(position, columnName);
+        if (position >= columnNames.size()) {
+            for (int i = columnNames.size()-1; i < position; i++) {
+                this.columnNames.add(null);
+            }
         }
+        this.columnNames.set(position, columnName);
     }
 
     public String getTableName() {
@@ -72,10 +72,10 @@ public class PrimaryKey implements DatabaseObject, Comparable<PrimaryKey> {
     }
 
     public String toString() {
-        return getName()+" on "+getTableName()+"("+getColumnNames()+")";
+        return getName() + " on " + getTableName() + "(" + getColumnNames() + ")";
     }
 
     public List<String> getColumnNamesAsList() {
-        return Arrays.asList(getColumnNames().split("\\s+,\\s+"));
+        return columnNames;
     }
 }

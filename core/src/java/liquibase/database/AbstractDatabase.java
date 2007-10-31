@@ -884,7 +884,7 @@ public abstract class AbstractDatabase implements Database {
             sql += " and table_catalog='" + convertRequestedSchemaToCatalog(schemaName) + "'";
         }
 
-//        log.info("GetViewDefinitionSQL: "+sql);
+        log.info("GetViewDefinitionSQL: "+sql);
         return new RawSqlStatement(sql);
     }
 

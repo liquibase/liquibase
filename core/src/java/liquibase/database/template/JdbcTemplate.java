@@ -55,9 +55,7 @@ public class JdbcTemplate {
     }
 
     public void execute(final SqlStatement sql) throws JDBCException {
-        if (sql instanceof PreparedSqlStatement) {
-            throw new JDBCException("Direct execution of PreparedSqlStatement not currently implemented");
-        } else if (sql instanceof CallableSqlStatement) {
+        if (sql instanceof CallableSqlStatement) {
             call(((CallableSqlStatement) sql), new ArrayList());
             return;
         }
