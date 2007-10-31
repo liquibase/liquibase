@@ -2,15 +2,11 @@ package liquibase.test;
 
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
-import liquibase.database.HsqlDatabase;
-import liquibase.database.sql.RawSqlStatement;
-import liquibase.database.template.JdbcTemplate;
 import liquibase.exception.JDBCException;
 
 import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.*;
 
 public class TestContext {
@@ -40,6 +36,7 @@ public class TestContext {
     private Map<String, Connection> connectionsByUrl = new HashMap<String, Connection>();
     private Map<String, Boolean> connectionsAttempted = new HashMap<String, Boolean>();
     public static final String ALT_SCHEMA = "LIQUIBASEB";
+    public static final String ALT_TABLESPACE = "LIQUIBASE2";
 
     private Connection openConnection(final String url) throws Exception {
         if (connectionsAttempted.containsKey(url)) {
@@ -62,7 +59,6 @@ public class TestContext {
         final Connection connection;
         try {
             connection = driver.connect(url, info);
-            connection.setAutoCommit(false);
         } catch (SQLException e) {
             System.out.println("Could not connect to " + url + ": Will not test against");
             return null; //could not connect
@@ -70,6 +66,7 @@ public class TestContext {
         if (connection == null) {
             throw new JDBCException("Connection could not be created to " + url + " with driver " + driver.getClass().getName() + ".  Possibly the wrong driver for the given database URL");
         }
+        connection.setAutoCommit(false);
 
         try {
             if (url.startsWith("jdbc:hsql")) {
@@ -162,9 +159,7 @@ public class TestContext {
         if (allDatabases == null) {
             allDatabases = new HashSet<Database>();
 
-            for (Database database : DatabaseFactory.getInstance().getImplementedDatabases()) {
-                allDatabases.add(database);
-            }
+            allDatabases.addAll(Arrays.asList(DatabaseFactory.getInstance().getImplementedDatabases()));
 
         }
         return allDatabases;
@@ -185,6 +180,9 @@ public class TestContext {
         if (availableConnections == null) {
             availableConnections = new HashSet<Connection>();
             for (String url : getTestUrls()) {
+//                if (url.indexOf("jtds") >= 0) {
+//                    continue;
+//                }
                 Connection connection = openConnection(url);
                 if (connection != null) {
                     availableConnections.add(connection);

@@ -13,7 +13,7 @@ import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
-public class AddAutoIncrementStatementTest {
+public class AddAutoIncrementStatementTest extends AbstractSqlStatementTest {
 
     private static final String TABLE_NAME = "AddAutoIncTest";
     private static final String COLUMN_NAME = "testCol";
@@ -23,28 +23,21 @@ public class AddAutoIncrementStatementTest {
     @After
     public void dropTable() throws Exception {
         for (Database database : TestContext.getInstance().getAvailableDatabases()) {
-            try {
-                new JdbcTemplate(database).execute(new RawSqlStatement("drop table " + TABLE_NAME));
-            } catch (JDBCException e) {
-                ;
-            }
-            try {
-                if (database.supportsSchemas()) {
-                    new JdbcTemplate(database).execute(new RawSqlStatement("drop table "+TestContext.ALT_SCHEMA+"." + TABLE_NAME));
-                }
-            } catch (JDBCException e) {
-                ;
+
+            dropAndCreateTable(new CreateTableStatement(TABLE_NAME)
+                            .addPrimaryKeyColumn(COLUMN_NAME, COLUMN_TYPE)
+                            .addColumn("otherColumn", "varchar(50)"), database);
+
+            if (database.supportsSchemas()) {
+                dropAndCreateTable(new CreateTableStatement(TestContext.ALT_SCHEMA, TABLE_NAME)
+                                .addPrimaryKeyColumn(COLUMN_NAME, COLUMN_TYPE)
+                                .addColumn("otherColumn", "varchar(50)"), database);
             }
         }
     }
 
-    @Test
-    public void getEndDelimiter() throws Exception {
-        new DatabaseTestTemplate().testOnAllDatabases(new DatabaseTest() {
-            public void performTest(Database database) throws Exception {
-                assertEquals(";", new AddAutoIncrementStatement(null, null, null, null).getEndDelimiter(database));
-            }
-        });
+    protected AddAutoIncrementStatement generateTestStatement() {
+        return new AddAutoIncrementStatement(null, null, null, null);
     }
 
     @Test
@@ -76,10 +69,6 @@ public class AddAutoIncrementStatementTest {
 
                 if (statement.supportsDatabase(database)) {
 
-                    new JdbcTemplate(database).execute(new CreateTableStatement(TABLE_NAME)
-                            .addPrimaryKeyColumn(COLUMN_NAME, COLUMN_TYPE)
-                            .addColumn("otherColumn", "varchar(50)"));
-
                     DatabaseSnapshot snapshot = new DatabaseSnapshot(database);
                     assertFalse(snapshot.getTable(TABLE_NAME).getColumn(COLUMN_NAME).isAutoIncrement());
 
@@ -107,10 +96,6 @@ public class AddAutoIncrementStatementTest {
                 AddAutoIncrementStatement statement = new AddAutoIncrementStatement(TestContext.ALT_SCHEMA, TABLE_NAME, COLUMN_NAME, COLUMN_TYPE);
 
                 if (statement.supportsDatabase(database)) {
-
-                    new JdbcTemplate(database).execute(new CreateTableStatement(TestContext.ALT_SCHEMA, TABLE_NAME)
-                            .addPrimaryKeyColumn(COLUMN_NAME, COLUMN_TYPE)
-                            .addColumn("otherColumn", "varchar(50)"));
 
                     DatabaseSnapshot snapshot = new DatabaseSnapshot(database, TestContext.ALT_SCHEMA);
                     assertFalse(snapshot.getTable(TABLE_NAME).getColumn(COLUMN_NAME).isAutoIncrement());

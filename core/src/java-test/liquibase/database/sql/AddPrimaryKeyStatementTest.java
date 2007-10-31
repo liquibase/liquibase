@@ -36,15 +36,8 @@ public class AddPrimaryKeyStatementTest extends AbstractSqlStatementTest {
         }
     }
 
-    @Test
-    public void getEndDelimiter() throws Exception {
-
-        new DatabaseTestTemplate().testOnAllDatabases(new DatabaseTest() {
-
-            public void performTest(Database database) throws Exception {
-                assertEquals(";", new AddPrimaryKeyStatement(null, null, null, null).getEndDelimiter(database));
-            }
-        });
+    protected SqlStatement generateTestStatement() {
+        return new AddPrimaryKeyStatement(null, null, null, null);
     }
 
     @Test
