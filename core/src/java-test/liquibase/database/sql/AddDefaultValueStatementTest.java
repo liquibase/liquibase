@@ -19,7 +19,7 @@ import org.junit.Test;
 import java.util.Calendar;
 import java.util.Date;
 
-public class AddDefaultValueStatementTest {
+public class AddDefaultValueStatementTest extends AbstractSqlStatementTest {
 
     private static final String TABLE_NAME = "AddDVSTest";
     private static final String COLUMN_NAME = "testCol";
@@ -28,25 +28,12 @@ public class AddDefaultValueStatementTest {
     @After
     public void dropTable() throws Exception {
         for (Database database : TestContext.getInstance().getAvailableDatabases()) {
-            try {
-                new JdbcTemplate(database).execute(new RawSqlStatement("drop table " + TABLE_NAME));
-            } catch (JDBCException e) {
-                if (!database.getAutoCommitMode()) {
-                    database.getConnection().rollback();
-                }
-            }
+            dropTableIfExists(null, TABLE_NAME, database);
         }
     }
 
-    @Test
-    public void getEndDelimiter() throws Exception {
-
-        new DatabaseTestTemplate().testOnAllDatabases(new DatabaseTest() {
-
-            public void performTest(Database database) throws Exception {
-                assertEquals(";", new AddDefaultValueStatement(null, null, null, null).getEndDelimiter(database));
-            }
-        });
+    protected SqlStatement generateTestStatement() {
+        return new AddDefaultValueStatement(null, null, null, null);
     }
 
     @Test

@@ -16,7 +16,7 @@ import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
-public class CreateTableStatementTest {
+public class CreateTableStatementTest extends AbstractSqlStatementTest {
 
     private static final String TABLE_NAME = "createTableStatementTest".toUpperCase();
     private static final String FK_TABLE_NAME = "fk_table".toUpperCase();
@@ -39,14 +39,21 @@ public class CreateTableStatementTest {
                     database.getConnection().rollback();
                 }
             }
-            try {
-                new JdbcTemplate(database).execute(new RawSqlStatement("drop table " + TestContext.ALT_SCHEMA+"."+TABLE_NAME));
-            } catch (JDBCException e) {
-                if (!database.getAutoCommitMode()) {
-                    database.getConnection().rollback();
+
+            if (database.supportsSchemas()) {
+                try {
+                    new JdbcTemplate(database).execute(new RawSqlStatement("drop table " + TestContext.ALT_SCHEMA+"."+TABLE_NAME));
+                } catch (JDBCException e) {
+                    if (!database.getAutoCommitMode()) {
+                        database.getConnection().rollback();
+                    }
                 }
             }
         }
+    }
+
+    protected SqlStatement generateTestStatement() {
+        return new CreateTableStatement(null);
     }
 
     @Test

@@ -29,13 +29,8 @@ public class ReorganizeTableStatementTest extends AbstractSqlStatementTest {
 
     }
 
-    @Test
-    public void getEndDelimiter() throws Exception {
-        new DatabaseTestTemplate().testOnAllDatabases(new DatabaseTest() {
-            public void performTest(Database database) throws Exception {
-                assertEquals(";", new ReorganizeTableStatement(null, null).getEndDelimiter(database));
-            }
-        });
+    protected SqlStatement generateTestStatement() {
+        return new ReorganizeTableStatement(null, null);
     }
 
     @Test

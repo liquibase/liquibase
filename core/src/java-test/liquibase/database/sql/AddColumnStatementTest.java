@@ -29,22 +29,8 @@ public class AddColumnStatementTest extends AbstractSqlStatementTest {
 
     }
 
-    @Test
-    public void getEndDelimiter() throws Exception {
-        new DatabaseTestTemplate().testOnAllDatabases(new DatabaseTest() {
-            public void performTest(Database database) throws Exception {
-                assertEquals(";", new AddColumnStatement(null, null, null, null, null).getEndDelimiter(database));
-            }
-        });
-    }
-
-    @Test
-    public void supportsDatabase() throws Exception {
-        new DatabaseTestTemplate().testOnAllDatabases(new DatabaseTest() {
-            public void performTest(Database database) throws Exception {
-                assertTrue(new AddColumnStatement(null, null, null, null, null).supportsDatabase(database));
-            }
-        });
+    protected AddColumnStatement generateTestStatement() {
+        return new AddColumnStatement(null, null, null, null, null);
     }
 
     @Test

@@ -6,7 +6,11 @@ import liquibase.test.DatabaseTest;
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
-public class RawSqlStatementTest {
+public class RawSqlStatementTest extends AbstractSqlStatementTest {
+
+    protected SqlStatement generateTestStatement() {
+        return new RawSqlStatement(null);
+    }
 
     @Test
     public void constructorWithNoDelimiterPassed() throws Exception {

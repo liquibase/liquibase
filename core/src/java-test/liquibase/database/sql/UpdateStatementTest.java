@@ -8,17 +8,34 @@ import liquibase.test.TestContext;
 import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.After;
 
 import java.sql.Types;
 
-public class UpdateStatementTest {
+public class UpdateStatementTest extends AbstractSqlStatementTest {
+
+    private static final String TABLE_NAME = "UpdateTest";
+    private static final String COLUMN_NAME = "testCol";
 
     @Before
-    public void setupTable() throws Exception {
+    @After
+    public void dropTable() throws Exception {
         for (Database database : TestContext.getInstance().getAvailableDatabases()) {
-            CreateTableChange createTableChange = new CreateTableChange();
-            createTableChange.setTableName("updateStatementTest");
+
+            dropAndCreateTable(new CreateTableStatement(null, TABLE_NAME)
+                    .addColumn("id", "int")
+                    .addColumn(COLUMN_NAME, "varchar(50)"), database);
+
+            if (database.supportsSchemas()) {
+                dropAndCreateTable(new CreateTableStatement(TestContext.ALT_SCHEMA, TABLE_NAME)
+                        .addColumn("id", "int")
+                        .addColumn(COLUMN_NAME, "varchar(50)"), database);
+            }
         }
+    }
+
+    protected SqlStatement generateTestStatement() {
+        return new UpdateStatement(null, null);
     }
 
     @Test
@@ -26,10 +43,10 @@ public class UpdateStatementTest {
         new DatabaseTestTemplate().testOnAllDatabases(new DatabaseTest() {
 
             public void performTest(Database database) {
-                UpdateStatement statement = new UpdateStatement(null, "tableName");
-                statement.addNewColumnValue("colName", null, Types.VARCHAR);
+                UpdateStatement statement = new UpdateStatement(null, TABLE_NAME);
+                statement.addNewColumnValue(COLUMN_NAME, null, Types.VARCHAR);
 
-                assertEquals("UPDATE tableName SET colName = NULL", statement.getSqlStatement(database));
+                assertEquals("UPDATE "+TABLE_NAME+" SET "+COLUMN_NAME+" = NULL", statement.getSqlStatement(database));
             }
         });
     }

@@ -14,7 +14,7 @@ import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
-public class SetNullableStatementTest {
+public class SetNullableStatementTest extends AbstractSqlStatementTest {
 
     private static final String NULLABLE_TABLE_NAME = "DropNotNullTest";
     private static final String NOTNULL_TABLE_NAME = "AddNotNullTest";
@@ -24,50 +24,30 @@ public class SetNullableStatementTest {
     @After
     public void dropTable() throws Exception {
         for (Database database : TestContext.getInstance().getAvailableDatabases()) {
-            try {
-                new JdbcTemplate(database).execute(new RawSqlStatement("drop table " + NOTNULL_TABLE_NAME));
-            } catch (JDBCException e) {
-                if (!database.getAutoCommitMode()) {
-                    database.getConnection().rollback();
-                }
-            }
+
+            dropAndCreateTable(new CreateTableStatement(null, NOTNULL_TABLE_NAME)
+                        .addColumn("id", "int")
+                        .addColumn(COLUMN_NAME, "varchar(50)"), database);
+
+            dropAndCreateTable(new CreateTableStatement(null, NULLABLE_TABLE_NAME)
+                        .addColumn("id", "int")
+                        .addColumn(COLUMN_NAME, "varchar(50)", new NotNullConstraint()), database);
+
             if (database.supportsSchemas()) {
-                try {
-                    new JdbcTemplate(database).execute(new RawSqlStatement("drop table " + TestContext.ALT_SCHEMA + "." + NOTNULL_TABLE_NAME));
-                } catch (JDBCException e) {
-                    if (!database.getAutoCommitMode()) {
-                        database.getConnection().rollback();
-                    }
-                }
-            }
-            try {
-                new JdbcTemplate(database).execute(new RawSqlStatement("drop table " + NULLABLE_TABLE_NAME));
-            } catch (JDBCException e) {
-                if (!database.getAutoCommitMode()) {
-                    database.getConnection().rollback();
-                }
-            }
-            if (database.supportsSchemas()) {
-                try {
-                    new JdbcTemplate(database).execute(new RawSqlStatement("drop table " + TestContext.ALT_SCHEMA + "." + NULLABLE_TABLE_NAME));
-                } catch (JDBCException e) {
-                    if (!database.getAutoCommitMode()) {
-                        database.getConnection().rollback();
-                    }
-                }
+                dropAndCreateTable(new CreateTableStatement(TestContext.ALT_SCHEMA, NOTNULL_TABLE_NAME)
+                            .addColumn("id", "int")
+                            .addColumn(COLUMN_NAME, "varchar(50)"), database);
+
+                dropAndCreateTable(new CreateTableStatement(TestContext.ALT_SCHEMA, NULLABLE_TABLE_NAME)
+                            .addColumn("id", "int")
+                            .addColumn(COLUMN_NAME, "varchar(50)", new NotNullConstraint()), database);
             }
         }
+
     }
 
-    @Test
-    public void getEndDelimiter() throws Exception {
-
-        new DatabaseTestTemplate().testOnAllDatabases(new DatabaseTest() {
-
-            public void performTest(Database database) throws Exception {
-                assertEquals(";", new SetNullableStatement(null, null, null, null, true).getEndDelimiter(database));
-            }
-        });
+    protected SetNullableStatement generateTestStatement() {
+        return new SetNullableStatement(null, null, null, null, true);
     }
 
     @Test
@@ -75,7 +55,7 @@ public class SetNullableStatementTest {
         new DatabaseTestTemplate().testOnAllDatabases(new DatabaseTest() {
 
             public void performTest(Database database) throws Exception {
-                SetNullableStatement statement = new SetNullableStatement(null, null, null, null, true);
+                SetNullableStatement statement = generateTestStatement();
 
                 if (database instanceof FirebirdDatabase) {
                     assertFalse(statement.supportsDatabase(database));
@@ -101,10 +81,6 @@ public class SetNullableStatementTest {
                     }
                     return;
                 }
-
-                new JdbcTemplate(database).execute(new CreateTableStatement(null, NOTNULL_TABLE_NAME)
-                        .addColumn("id", "int")
-                        .addColumn(COLUMN_NAME, "varchar(50)"));
 
                 DatabaseSnapshot snapshot = new DatabaseSnapshot(database);
                 assertTrue(snapshot.getTable(NOTNULL_TABLE_NAME).getColumn(COLUMN_NAME).isNullable());
@@ -138,10 +114,6 @@ public class SetNullableStatementTest {
                     return;
                 }
 
-                new JdbcTemplate(database).execute(new CreateTableStatement(TestContext.ALT_SCHEMA, NOTNULL_TABLE_NAME)
-                        .addColumn("id", "int")
-                        .addColumn(COLUMN_NAME, "varchar(50)"));
-
                 DatabaseSnapshot snapshot = new DatabaseSnapshot(database, TestContext.ALT_SCHEMA);
                 assertTrue(snapshot.getTable(NOTNULL_TABLE_NAME).getColumn(COLUMN_NAME).isNullable());
 
@@ -168,10 +140,6 @@ public class SetNullableStatementTest {
                     }
                     return;
                 }
-
-                new JdbcTemplate(database).execute(new CreateTableStatement(null, NULLABLE_TABLE_NAME)
-                        .addColumn("id", "int")
-                        .addColumn(COLUMN_NAME, "varchar(50)", new NotNullConstraint()));
 
                 DatabaseSnapshot snapshot = new DatabaseSnapshot(database);
                 assertFalse(snapshot.getTable(NULLABLE_TABLE_NAME).getColumn(COLUMN_NAME).isNullable());
@@ -204,10 +172,6 @@ public class SetNullableStatementTest {
                     }
                     return;
                 }
-
-                new JdbcTemplate(database).execute(new CreateTableStatement(TestContext.ALT_SCHEMA, NULLABLE_TABLE_NAME)
-                        .addColumn("id", "int")
-                        .addColumn(COLUMN_NAME, "varchar(50)", new NotNullConstraint()));
 
                 DatabaseSnapshot snapshot = new DatabaseSnapshot(database, TestContext.ALT_SCHEMA);
                 assertFalse(snapshot.getTable(NULLABLE_TABLE_NAME).getColumn(COLUMN_NAME).isNullable());

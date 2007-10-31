@@ -42,25 +42,10 @@ public class AddForeignKeyConstraintChangeStatementTest extends AbstractSqlState
                         .addColumn("existingCol", "int"), database);
             }
         }
-
     }
 
-    @Test
-    public void getEndDelimiter() throws Exception {
-        new DatabaseTestTemplate().testOnAllDatabases(new DatabaseTest() {
-            public void performTest(Database database) throws Exception {
-                assertEquals(";", new AddForeignKeyConstraintChangeStatement(null, null, null, null, null, null, null).getEndDelimiter(database));
-            }
-        });
-    }
-
-    @Test
-    public void supportsDatabase() throws Exception {
-        new DatabaseTestTemplate().testOnAllDatabases(new DatabaseTest() {
-            public void performTest(Database database) throws Exception {
-                assertTrue(new AddForeignKeyConstraintChangeStatement(null, null, null, null, null, null, null).supportsDatabase(database));
-            }
-        });
+    protected AddForeignKeyConstraintChangeStatement generateTestStatement() {
+        return new AddForeignKeyConstraintChangeStatement(null, null, null, null, null, null, null);
     }
 
     @Test
