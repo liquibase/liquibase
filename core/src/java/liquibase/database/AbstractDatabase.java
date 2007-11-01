@@ -1018,6 +1018,14 @@ public abstract class AbstractDatabase implements Database {
         }
     }
 
+    public String escapeSequenceName(String schemaName, String sequenceName) {
+        if (StringUtils.trimToNull(schemaName) == null || !supportsSchemas()) {
+            return sequenceName;
+        } else {
+            return schemaName + "." + sequenceName;
+        }
+    }
+
     public String convertRequestedSchemaToCatalog(String requestedSchema) throws JDBCException {
         if (getCatalogName() == null) {
             return null;

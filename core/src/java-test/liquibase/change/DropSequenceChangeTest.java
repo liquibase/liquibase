@@ -1,7 +1,12 @@
 package liquibase.change;
 
-import liquibase.database.OracleDatabase;
-import static org.junit.Assert.assertEquals;
+import liquibase.database.Database;
+import liquibase.database.sql.AddUniqueConstraintStatement;
+import liquibase.database.sql.DropSequenceStatement;
+import liquibase.database.sql.SqlStatement;
+import liquibase.test.DatabaseTest;
+import liquibase.test.DatabaseTestTemplate;
+import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Element;
@@ -28,8 +33,26 @@ public class DropSequenceChangeTest extends AbstractChangeTest {
 
     @Test
     public void generateStatement() throws Exception {
-        OracleDatabase database = new OracleDatabase();
-        assertEquals("DROP SEQUENCE SEQ_NAME", change.generateStatements(database)[0].getSqlStatement(database));
+
+        new DatabaseTestTemplate().testOnAllDatabases(new DatabaseTest() {
+            public void performTest(Database database) throws Exception {
+                if (!database.supportsSequences()) {
+                    return;
+                }
+
+                DropSequenceChange change = new DropSequenceChange();
+                change.setSchemaName("SCHEMA_NAME");
+                change.setSequenceName("SEQ_NAME");
+
+                SqlStatement[] sqlStatements = change.generateStatements(database);
+                assertEquals(1, sqlStatements.length);
+                assertTrue(sqlStatements[0] instanceof DropSequenceStatement);
+
+                assertEquals("SCHEMA_NAME", ((DropSequenceStatement) sqlStatements[0]).getSchemaName());
+                assertEquals("SEQ_NAME", ((DropSequenceStatement) sqlStatements[0]).getSequenceName());
+
+            }
+        });
     }
 
     @Test

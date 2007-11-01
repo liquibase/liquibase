@@ -81,11 +81,11 @@ public class MockDatabase implements Database {
     }
 
     public boolean supportsSequences() {
-        return false;
+        return true;
     }
 
     public boolean supportsAutoIncrement() {
-        return false;
+        return true;
     }
 
     public String getColumnType(String columnType, Boolean autoIncrement) {
@@ -269,6 +269,14 @@ public class MockDatabase implements Database {
             return tableName;
         } else {
             return schemaName+"."+tableName;
+        }
+    }
+
+    public String escapeSequenceName(String schemaName, String sequenceName) {
+        if (sequenceName == null) {
+            return sequenceName;
+        } else {
+            return schemaName+"."+sequenceName;
         }
     }
 

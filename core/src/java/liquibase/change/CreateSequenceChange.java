@@ -1,9 +1,7 @@
 package liquibase.change;
 
 import liquibase.database.Database;
-import liquibase.database.OracleDatabase;
-import liquibase.database.FirebirdDatabase;
-import liquibase.database.sql.RawSqlStatement;
+import liquibase.database.sql.CreateSequenceStatement;
 import liquibase.database.sql.SqlStatement;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Sequence;
@@ -20,6 +18,7 @@ import java.util.Set;
  */
 public class CreateSequenceChange extends AbstractChange {
 
+    private String schemaName;
     private String sequenceName;
     private Integer startValue;
     private Integer incrementBy;
@@ -30,6 +29,14 @@ public class CreateSequenceChange extends AbstractChange {
 
     public CreateSequenceChange() {
         super("createSequence", "Create Sequence");
+    }
+
+    public String getSchemaName() {
+        return schemaName;
+    }
+
+    public void setSchemaName(String schemaName) {
+        this.schemaName = schemaName;
     }
 
     public String getSequenceName() {
@@ -81,50 +88,13 @@ public class CreateSequenceChange extends AbstractChange {
     }
 
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
-        if (!database.supportsSequences()) {
-            throw new UnsupportedChangeException(database.getProductName()+" does not support sequences");
-        }
-
-        StringBuffer buffer = new StringBuffer();
-        buffer.append("CREATE SEQUENCE ");
-        buffer.append(sequenceName);
-        if (startValue != null) {
-            if (database instanceof FirebirdDatabase) {
-                throw new UnsupportedChangeException("Firebird does not support creating sequences with startValue");
-            } else {
-                buffer.append(" START WITH ").append(startValue);
-            }
-        }
-        if (incrementBy != null) {
-            if (database instanceof FirebirdDatabase) {
-                throw new UnsupportedChangeException("Firebird does not support creating sequences with increments");
-            } else {
-                buffer.append(" INCREMENT BY ").append(incrementBy);
-            }
-        }
-        if (minValue != null) {
-            if (database instanceof FirebirdDatabase) {
-                throw new UnsupportedChangeException("Firebird does not support creating sequences with minValue");
-            } else {
-                buffer.append(" MINVALUE ").append(minValue);
-            }
-        }
-        if (maxValue != null) {
-            if (database instanceof FirebirdDatabase) {
-                throw new UnsupportedChangeException("Firebird does not support creating sequences with maxValue");
-            } else {
-                buffer.append(" MAXVALUE ").append(maxValue);
-            }
-        }
-
-        String sql = buffer.toString().trim();
-        if (database instanceof OracleDatabase
-            && ordered != null && ordered) {
-                sql += " ORDER";
-        }
-
         return new SqlStatement[] {
-                new RawSqlStatement(sql)
+                new CreateSequenceStatement(getSchemaName(), getSequenceName())
+                .setIncrementBy(getIncrementBy())
+                .setMaxValue(getMaxValue())
+                .setMinValue(getMinValue())
+                .setOrdered(isOrdered())
+                .setStartValue(getStartValue())
         };
     }
 

@@ -13,7 +13,7 @@ import java.sql.SQLException;
 public abstract class AbstractSqlStatementTest {
 
     protected void dropAndCreateTable(CreateTableStatement statement, Database database) throws SQLException, JDBCException {
-        dropTableIfExists(statement.getSchemaName(), statement.getSchemaName(), database);
+        dropTableIfExists(statement.getSchemaName(), statement.getTableName(), database);
 
         new JdbcTemplate(database).execute(statement);
 
@@ -40,6 +40,36 @@ public abstract class AbstractSqlStatementTest {
                 database.getConnection().commit();
             }
             
+        } catch (JDBCException e) {
+            if (!database.getConnection().getAutoCommit()) {
+                database.getConnection().rollback();
+            }
+        }
+    }
+
+    protected void dropAndCreateSequence(CreateSequenceStatement statement, Database database) throws SQLException, JDBCException {
+        dropSequenceIfExists(statement.getSchemaName(), statement.getSequenceName(), database);
+
+        new JdbcTemplate(database).execute(statement);
+
+        if (!database.getAutoCommitMode()) {
+            database.getConnection().commit();
+        }
+
+    }
+
+    protected void dropSequenceIfExists(String schemaName, String sequenceName, Database database) throws SQLException {
+        if (!database.getAutoCommitMode()) {
+            database.getConnection().commit();
+        }
+
+        try {
+            new JdbcTemplate(database).execute(new DropSequenceStatement(schemaName, sequenceName));
+
+            if (!database.getAutoCommitMode()) {
+                database.getConnection().commit();
+            }
+
         } catch (JDBCException e) {
             if (!database.getConnection().getAutoCommit()) {
                 database.getConnection().rollback();

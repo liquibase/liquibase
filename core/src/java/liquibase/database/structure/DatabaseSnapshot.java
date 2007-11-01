@@ -444,9 +444,10 @@ public class DatabaseSnapshot {
             //noinspection unchecked
             List<String> sequenceNamess = (List<String>) new JdbcTemplate(database).queryForList(database.createFindSequencesSQL(schema), String.class);
 
+
             for (String sequenceName : sequenceNamess) {
                 Sequence seq = new Sequence();
-                seq.setName(sequenceName);
+                seq.setName(sequenceName.trim());
 
                 sequences.add(seq);
             }
@@ -478,6 +479,15 @@ public class DatabaseSnapshot {
         for (ForeignKey fk : getForeignKeys()) {
             if (fk.getName().equalsIgnoreCase(foreignKeyName)) {
                 return fk;
+            }
+        }
+        return null;
+    }
+
+    public Sequence getSequence(String sequenceName) {
+        for (Sequence sequence : getSequences()) {
+            if (sequence.getName().equalsIgnoreCase(sequenceName)) {
+                return sequence;
             }
         }
         return null;

@@ -47,6 +47,10 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
     protected void setUp() throws Exception {
         super.setUp();
 
+        if (!connection.getAutoCommit()) {
+            connection.rollback();
+        }
+
         createMigrator(completeChangeLog).forceReleaseLock();
     }
 

@@ -3,6 +3,7 @@ package liquibase.change;
 import liquibase.database.DB2Database;
 import liquibase.database.Database;
 import liquibase.database.MSSQLDatabase;
+import liquibase.database.sql.AddUniqueConstraintStatement;
 import liquibase.database.sql.RawSqlStatement;
 import liquibase.database.sql.SqlStatement;
 import liquibase.database.structure.Column;
@@ -10,7 +11,6 @@ import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Table;
 import liquibase.exception.UnsupportedChangeException;
 import liquibase.util.StringUtils;
-import liquibase.util.SqlUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -74,22 +74,10 @@ public class AddUniqueConstraintChange extends AbstractChange {
     }
 
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
-        String sql = "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ADD CONSTRAINT " + getConstraintName() + " UNIQUE (" + getColumnNames() + ")";
+        AddUniqueConstraintStatement statement = new AddUniqueConstraintStatement(getSchemaName(), getTableName(), getColumnNames(), getConstraintName());
+        statement.setTablespace(getTablespace());
 
-        if (StringUtils.trimToNull(getTablespace()) != null && database.supportsTablespaces()) {
-            if (database instanceof MSSQLDatabase) {
-                sql += " ON "+getTablespace();
-            } else if (database instanceof DB2Database) {
-                ; //not supported in DB2
-            } else {
-                sql += " USING INDEX TABLESPACE "+getTablespace();
-            }
-        }
-        
-
-        return new SqlStatement[]{
-                new RawSqlStatement(sql)
-        };
+        return new SqlStatement[] { statement };
     }
 
     public String getConfirmationMessage() {
@@ -111,6 +99,9 @@ public class AddUniqueConstraintChange extends AbstractChange {
         Element element = currentChangeLogFileDOM.createElement(getTagName());
         if (getSchemaName() != null) {
             element.setAttribute("schemaName", getSchemaName());
+        }
+        if (getTablespace() != null) {
+            element.setAttribute("tablespace", getTablespace());            
         }
 
         element.setAttribute("tableName", getTableName());
