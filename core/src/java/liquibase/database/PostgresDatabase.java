@@ -180,7 +180,7 @@ public class PostgresDatabase extends AbstractDatabase {
         return super.isSystemTable(catalogName, schemaName, tableName)
                 || "pg_catalog".equals(schemaName)
                 || "pg_toast".equals(schemaName)
-                || tableName.endsWith("_id_seq")
+                || tableName.endsWith("_seq")
                 || tableName.endsWith("_key")
                 || tableName.endsWith("_pkey")
                 || tableName.startsWith("idx_")

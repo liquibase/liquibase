@@ -1,8 +1,12 @@
 package liquibase.change;
 
-import liquibase.database.OracleDatabase;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import liquibase.database.Database;
+import liquibase.database.sql.CreateSequenceStatement;
+import liquibase.database.sql.DropSequenceStatement;
+import liquibase.database.sql.SqlStatement;
+import liquibase.test.DatabaseTest;
+import liquibase.test.DatabaseTestTemplate;
+import static org.junit.Assert.*;
 import org.junit.Test;
 import org.w3c.dom.Element;
 
@@ -20,31 +24,34 @@ public class CreateSequenceChangeTest extends AbstractChangeTest {
 
     @Test
     public void generateStatement() throws Exception {
-        CreateSequenceChange change = new CreateSequenceChange();
-        change.setSequenceName("SEQ_NAME");
-        OracleDatabase database = new OracleDatabase();
+        new DatabaseTestTemplate().testOnAllDatabases(new DatabaseTest() {
+            public void performTest(Database database) throws Exception {
+                if (!database.supportsSequences()) {
+                    return;
+                }
 
-        change.setMinValue(100);
-        assertEquals("CREATE SEQUENCE SEQ_NAME MINVALUE 100", change.generateStatements(database)[0].getSqlStatement(database));
+                CreateSequenceChange change = new CreateSequenceChange();
+                change.setSchemaName("SCHEMA_NAME");
+                change.setSequenceName("SEQ_NAME");
+                change.setIncrementBy(1);
+                change.setMinValue(2);
+                change.setMaxValue(3);
+                change.setOrdered(true);
+                change.setStartValue(4);
 
-        change.setMinValue(null);
-        change.setMaxValue(1000);
-        assertEquals("CREATE SEQUENCE SEQ_NAME MAXVALUE 1000", change.generateStatements(database)[0].getSqlStatement(database));
+                SqlStatement[] sqlStatements = change.generateStatements(database);
+                assertEquals(1, sqlStatements.length);
+                assertTrue(sqlStatements[0] instanceof CreateSequenceStatement);
 
-        change.setMaxValue(null);
-        change.setIncrementBy(50);
-        assertEquals("CREATE SEQUENCE SEQ_NAME INCREMENT BY 50", change.generateStatements(database)[0].getSqlStatement(database));
-
-        change.setIncrementBy(null);
-        change.setOrdered(true);
-        assertEquals("CREATE SEQUENCE SEQ_NAME ORDER", change.generateStatements(database)[0].getSqlStatement(database));
-
-        change.setMinValue(1);
-        change.setMaxValue(2);
-        change.setIncrementBy(3);
-        change.setStartValue(4);
-        assertEquals("CREATE SEQUENCE SEQ_NAME START WITH 4 INCREMENT BY 3 MINVALUE 1 MAXVALUE 2 ORDER", change.generateStatements(database)[0].getSqlStatement(database));
-
+                assertEquals("SCHEMA_NAME", ((CreateSequenceStatement) sqlStatements[0]).getSchemaName());
+                assertEquals("SEQ_NAME", ((CreateSequenceStatement) sqlStatements[0]).getSequenceName());
+                assertEquals(1, ((CreateSequenceStatement) sqlStatements[0]).getIncrementBy());
+                assertEquals(2, ((CreateSequenceStatement) sqlStatements[0]).getMinValue());
+                assertEquals(3, ((CreateSequenceStatement) sqlStatements[0]).getMaxValue());
+                assertEquals(4, ((CreateSequenceStatement) sqlStatements[0]).getStartValue());
+                assertEquals(true, ((CreateSequenceStatement) sqlStatements[0]).getOrdered());
+            }
+        });
     }
 
     @Test

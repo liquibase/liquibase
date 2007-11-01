@@ -1,10 +1,7 @@
 package liquibase.change;
 
 import liquibase.database.Database;
-import liquibase.database.HsqlDatabase;
-import liquibase.database.OracleDatabase;
-import liquibase.database.FirebirdDatabase;
-import liquibase.database.sql.RawSqlStatement;
+import liquibase.database.sql.AlterSequenceStatement;
 import liquibase.database.sql.SqlStatement;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Sequence;
@@ -21,6 +18,7 @@ import java.util.Set;
  */
 public class AlterSequenceChange extends AbstractChange {
 
+    private String schemaName;
     private String sequenceName;
     private Integer incrementBy;
     private Integer maxValue;
@@ -30,6 +28,14 @@ public class AlterSequenceChange extends AbstractChange {
 
     public AlterSequenceChange() {
         super("alterSequence", "Alter Sequence");
+    }
+
+    public String getSchemaName() {
+        return schemaName;
+    }
+
+    public void setSchemaName(String schemaName) {
+        this.schemaName = schemaName;
     }
 
     public String getSequenceName() {
@@ -76,44 +82,14 @@ public class AlterSequenceChange extends AbstractChange {
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
         if (!database.supportsSequences()) {
             throw new UnsupportedChangeException("Sequences do not exist in "+database.getProductName());
-        } else if (database instanceof HsqlDatabase) {
-            return new SqlStatement[] {new RawSqlStatement("ALTER SEQUENCE "+sequenceName+" RESTART WITH "+minValue)};
-        }
-
-        StringBuffer buffer = new StringBuffer();
-        buffer.append("ALTER SEQUENCE ");
-        buffer.append(sequenceName);
-
-        if (incrementBy != null) {
-            if (database instanceof FirebirdDatabase) {
-                throw new UnsupportedChangeException("Firebird does not support creating sequences with increment");
-            } else {
-                buffer.append(" INCREMENT BY ").append(incrementBy);
-            }
-        }
-        if (minValue != null) {
-            if (database instanceof FirebirdDatabase) {
-                buffer.append(" RESTART WITH ").append(minValue);
-            } else {
-                buffer.append(" MINVALUE ").append(minValue);
-            }
-        }
-        if (maxValue != null) {
-            if (database instanceof FirebirdDatabase) {
-                throw new UnsupportedChangeException("Firebird does not support creating sequences with maxValue");
-            } else {
-                buffer.append(" MAXVALUE ").append(maxValue);
-            }
-        }
-
-        String sql = buffer.toString().trim();
-        if (database instanceof OracleDatabase
-            && ordered != null && ordered) {
-                sql += " ORDER";
         }
 
         return new SqlStatement[] {
-                new RawSqlStatement(sql),
+                new AlterSequenceStatement(getSchemaName(), getSequenceName())
+                .setIncrementBy(getIncrementBy())
+                .setMaxValue(getMaxValue())
+                .setMinValue(getMinValue())
+                .setOrdered(isOrdered())
         };
     }
 
@@ -124,6 +100,9 @@ public class AlterSequenceChange extends AbstractChange {
     public Element createNode(Document currentChangeLogFileDOM) {
         Element node = currentChangeLogFileDOM.createElement("alterSequence");
         node.setAttribute("sequenceName", getSequenceName());
+        if (getSchemaName() != null) {
+            node.setAttribute("schemaName", getSchemaName());
+        }
         if (getMinValue() != null) {
             node.setAttribute("minValue", getMinValue().toString());
         }
