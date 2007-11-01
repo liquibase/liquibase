@@ -355,6 +355,7 @@ The available targets at the current stage:
                 <path refid="classpath"/>
             </classpath>
         	<jvmarg value="-Demma.coverage.out.file=${coverage.output.dir}/coverage.emma"/>
+            <formatter type="brief" usefile="false" />
             <formatter type="xml"/>
             <batchtest todir="${reports.dir}/junit/${ant.project.name}">
                 <fileset dir="${build.test.dir}">
