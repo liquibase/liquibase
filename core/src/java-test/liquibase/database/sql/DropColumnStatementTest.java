@@ -5,10 +5,11 @@ import liquibase.database.DerbyDatabase;
 import liquibase.database.MSSQLDatabase;
 import liquibase.database.structure.DatabaseSnapshot;
 import liquibase.database.template.JdbcTemplate;
+import liquibase.exception.StatementNotSupportedOnDatabaseException;
+import liquibase.test.SqlStatementDatabaseTest;
 import liquibase.test.DatabaseTest;
 import liquibase.test.DatabaseTestTemplate;
 import liquibase.test.TestContext;
-import liquibase.exception.StatementNotSupportedOnDatabaseException;
 import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
@@ -18,22 +19,16 @@ public class DropColumnStatementTest extends AbstractSqlStatementTest {
     private static final String TABLE_NAME = "DropColumnTest";
     private static final String COLUMN_NAME = "testCol";
 
-    @Before
-    public void setupTable() throws Exception {
-        for (Database database : TestContext.getInstance().getAvailableDatabases()) {
-
+    protected void setupDatabase(Database database) throws Exception {
             dropAndCreateTable(new CreateTableStatement(TABLE_NAME)
                     .addPrimaryKeyColumn("id", "int")
                     .addColumn(COLUMN_NAME, "varchar(50)")
                     , database);
 
-            if (database.supportsSchemas()) {
-                dropAndCreateTable(new CreateTableStatement(TestContext.ALT_SCHEMA, TABLE_NAME)
-                        .addPrimaryKeyColumn("id", "int")
-                        .addColumn(COLUMN_NAME, "varchar(50)")
-                        , database);
-            }
-        }
+            dropAndCreateTable(new CreateTableStatement(TestContext.ALT_SCHEMA, TABLE_NAME)
+                    .addPrimaryKeyColumn("id", "int")
+                    .addColumn(COLUMN_NAME, "varchar(50)")
+                    , database);
     }
 
     @Test
@@ -55,63 +50,38 @@ public class DropColumnStatementTest extends AbstractSqlStatementTest {
 
     @Test
     public void execute_defaultSchema() throws Exception {
-        new DatabaseTestTemplate().testOnAvailableDatabases(new DatabaseTest() {
+        new DatabaseTestTemplate().testOnAvailableDatabases(
+                new SqlStatementDatabaseTest(null, new DropColumnStatement(null, TABLE_NAME, COLUMN_NAME)) {
 
-            public void performTest(Database database) throws Exception {
-                DropColumnStatement statement = new DropColumnStatement(null, TABLE_NAME, COLUMN_NAME);
-                if (!statement.supportsDatabase(database)) {
-                    try {
-                        statement.getSqlStatement(database);
-                        fail("did not throw exception");
-                    } catch (StatementNotSupportedOnDatabaseException e) {
-                        return; //what we expected
+                    protected boolean supportsTest(Database database) {
+                        return !(database instanceof MSSQLDatabase); //for some reason, the metadata isn't updated by mssql
                     }
-                }
 
-                DatabaseSnapshot snapshot = new DatabaseSnapshot(database);
-                assertNotNull(snapshot.getTable(TABLE_NAME).getColumn(COLUMN_NAME));
+                    protected void preExecuteAssert(DatabaseSnapshot snapshot) {
+                        assertNotNull(snapshot.getTable(TABLE_NAME).getColumn(COLUMN_NAME));
+                    }
 
-                new JdbcTemplate(database).execute(statement);
+                    protected void postExecuteAssert(DatabaseSnapshot snapshot) {
+                        assertNull(snapshot.getTable(TABLE_NAME).getColumn(COLUMN_NAME));
+                    }
 
-                if (database instanceof MSSQLDatabase) {
-                    return; //mssql does not seem to be updating the metadata fast enough and it is failing
-                }
-                snapshot = new DatabaseSnapshot(database);
-                assertNull(snapshot.getTable(TABLE_NAME).getColumn(COLUMN_NAME));
-            }
-        });
+                });
     }
 
     @Test
     public void execute_altSchema() throws Exception {
-        new DatabaseTestTemplate().testOnAvailableDatabases(new DatabaseTest() {
+        new DatabaseTestTemplate().testOnAvailableDatabases(
+                new SqlStatementDatabaseTest(TestContext.ALT_SCHEMA, new DropColumnStatement(TestContext.ALT_SCHEMA, TABLE_NAME, COLUMN_NAME)) {
 
-            public void performTest(Database database) throws Exception {
-                if (!database.supportsSchemas()) {
-                    return;
-                }
-
-                DropColumnStatement statement = new DropColumnStatement(TestContext.ALT_SCHEMA, TABLE_NAME, COLUMN_NAME);
-                if (!statement.supportsDatabase(database)) {
-                    try {
-                        statement.getSqlStatement(database);
-                        fail("did not throw exception");
-                    } catch (StatementNotSupportedOnDatabaseException e) {
-                        return; //what we expected
+                    protected void preExecuteAssert(DatabaseSnapshot snapshot) {
+                        assertNotNull(snapshot.getTable(TABLE_NAME).getColumn(COLUMN_NAME));
                     }
-                }
 
-                DatabaseSnapshot snapshot = new DatabaseSnapshot(database, TestContext.ALT_SCHEMA);
-                assertNotNull(snapshot.getTable(TABLE_NAME).getColumn(COLUMN_NAME));
+                    protected void postExecuteAssert(DatabaseSnapshot snapshot) {
+                        assertNull(snapshot.getTable(TABLE_NAME).getColumn(COLUMN_NAME));
+                    }
 
-                new JdbcTemplate(database).execute(statement);
+                });
 
-                if (database instanceof MSSQLDatabase) {
-                    return; //mssql does not seem to be updating the metadata fast enough and it is failing
-                }
-                snapshot = new DatabaseSnapshot(database, TestContext.ALT_SCHEMA);
-                assertNull(snapshot.getTable(TABLE_NAME).getColumn(COLUMN_NAME));
-            }
-        });
     }
 }

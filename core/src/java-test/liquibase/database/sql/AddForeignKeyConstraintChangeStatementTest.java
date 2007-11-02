@@ -1,13 +1,12 @@
 package liquibase.database.sql;
 
 import liquibase.database.Database;
-import liquibase.database.OracleDatabase;
 import liquibase.database.structure.DatabaseSnapshot;
 import liquibase.database.structure.ForeignKey;
-import liquibase.database.template.JdbcTemplate;
-import liquibase.test.DatabaseTest;
 import liquibase.test.DatabaseTestTemplate;
+import liquibase.test.SqlStatementDatabaseTest;
 import liquibase.test.TestContext;
+import liquibase.exception.JDBCException;
 import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
@@ -21,9 +20,7 @@ public class AddForeignKeyConstraintChangeStatementTest extends AbstractSqlState
     private static final String BASE_COLUMN_NAME = "NewCol";
     private static final String REF_COL_NAME = "id";
 
-    @Before
-    public void dropAndCreateTable() throws Exception {
-        for (Database database : TestContext.getInstance().getAvailableDatabases()) {
+    protected void setupDatabase(Database database) throws Exception {
             dropAndCreateTable(new CreateTableStatement(BASE_TABLE_NAME)
                     .addPrimaryKeyColumn("id", "int")
                     .addColumn(BASE_COLUMN_NAME, "int"), database);
@@ -32,16 +29,13 @@ public class AddForeignKeyConstraintChangeStatementTest extends AbstractSqlState
                     .addPrimaryKeyColumn(REF_COL_NAME, "int")
                     .addColumn("existingCol", "int"), database);
 
-            if (database.supportsSchemas()) {
-                dropAndCreateTable(new CreateTableStatement(TestContext.ALT_SCHEMA, BASE_TABLE_NAME)
-                        .addPrimaryKeyColumn("id", "int")
-                        .addColumn(BASE_COLUMN_NAME, "int"), database);
+            dropAndCreateTable(new CreateTableStatement(TestContext.ALT_SCHEMA, BASE_TABLE_NAME)
+                    .addPrimaryKeyColumn("id", "int")
+                    .addColumn(BASE_COLUMN_NAME, "int"), database);
 
-                dropAndCreateTable(new CreateTableStatement(TestContext.ALT_SCHEMA, REF_TABLE_NAME)
-                        .addPrimaryKeyColumn(REF_COL_NAME, "int")
-                        .addColumn("existingCol", "int"), database);
-            }
-        }
+            dropAndCreateTable(new CreateTableStatement(TestContext.ALT_SCHEMA, REF_TABLE_NAME)
+                    .addPrimaryKeyColumn(REF_COL_NAME, "int")
+                    .addColumn("existingCol", "int"), database);
     }
 
     protected AddForeignKeyConstraintChangeStatement generateTestStatement() {
@@ -50,73 +44,67 @@ public class AddForeignKeyConstraintChangeStatementTest extends AbstractSqlState
 
     @Test
     public void execute() throws Exception {
-        new DatabaseTestTemplate().testOnAvailableDatabases(new DatabaseTest() {
-            public void performTest(Database database) throws Exception {
-                DatabaseSnapshot snapshot = new DatabaseSnapshot(database);
-                assertNull(snapshot.getForeignKey(FK_NAME));
-
-                new JdbcTemplate(database).execute(new AddForeignKeyConstraintChangeStatement(FK_NAME,
+        new DatabaseTestTemplate().testOnAvailableDatabases(
+                new SqlStatementDatabaseTest(null, new AddForeignKeyConstraintChangeStatement(FK_NAME,
                         null, BASE_TABLE_NAME, BASE_COLUMN_NAME,
-                        null, REF_TABLE_NAME, REF_COL_NAME));
+                        null, REF_TABLE_NAME, REF_COL_NAME)) {
+                    protected void preExecuteAssert(DatabaseSnapshot snapshot) {
+                        assertNull(snapshot.getForeignKey(FK_NAME));
+                    }
 
-                snapshot = new DatabaseSnapshot(database);
-                ForeignKey fkSnapshot = snapshot.getForeignKey(FK_NAME);
-                assertNotNull(fkSnapshot);
-                assertEquals(BASE_TABLE_NAME.toUpperCase(), fkSnapshot.getForeignKeyTable().getName().toUpperCase());
-                assertEquals(BASE_COLUMN_NAME.toUpperCase(), fkSnapshot.getForeignKeyColumn().toUpperCase());
-                assertEquals(REF_TABLE_NAME.toUpperCase(), fkSnapshot.getPrimaryKeyTable().getName().toUpperCase());
-                assertEquals(REF_COL_NAME.toUpperCase(), fkSnapshot.getPrimaryKeyColumn().toUpperCase());
-                assertFalse(fkSnapshot.isDeferrable());
-                assertFalse(fkSnapshot.isInitiallyDeferred());
-            }
-        });
+                    protected void postExecuteAssert(DatabaseSnapshot snapshot) {
+                        ForeignKey fkSnapshot = snapshot.getForeignKey(FK_NAME);
+                        assertNotNull(fkSnapshot);
+                        assertEquals(BASE_TABLE_NAME.toUpperCase(), fkSnapshot.getForeignKeyTable().getName().toUpperCase());
+                        assertEquals(BASE_COLUMN_NAME.toUpperCase(), fkSnapshot.getForeignKeyColumn().toUpperCase());
+                        assertEquals(REF_TABLE_NAME.toUpperCase(), fkSnapshot.getPrimaryKeyTable().getName().toUpperCase());
+                        assertEquals(REF_COL_NAME.toUpperCase(), fkSnapshot.getPrimaryKeyColumn().toUpperCase());
+                        assertFalse(fkSnapshot.isDeferrable());
+                        assertFalse(fkSnapshot.isInitiallyDeferred());
+                    }
+
+                });
     }
 
     @Test
     public void execute_deferrable() throws Exception {
-        new DatabaseTestTemplate().testOnAvailableDatabases(new DatabaseTest() {
-            public void performTest(Database database) throws Exception {
-                if (!database.supportsInitiallyDeferrableColumns()) {
-                    return;
-                }
-                DatabaseSnapshot snapshot = new DatabaseSnapshot(database);
-                assertNull(snapshot.getForeignKey(FK_NAME));
-
-                AddForeignKeyConstraintChangeStatement constraint = new AddForeignKeyConstraintChangeStatement(FK_NAME,
+        new DatabaseTestTemplate().testOnAvailableDatabases(
+                new SqlStatementDatabaseTest(null, new AddForeignKeyConstraintChangeStatement(FK_NAME,
                         null, BASE_TABLE_NAME, BASE_COLUMN_NAME,
-                        null, REF_TABLE_NAME, REF_COL_NAME);
-                constraint.setDeferrable(true);
-                constraint.setInitiallyDeferred(true);
+                        null, REF_TABLE_NAME, REF_COL_NAME)
+                        .setDeferrable(true)
+                        .setInitiallyDeferred(true)) {
+                    protected boolean expectedException(Database database, JDBCException exception) {
+                        return !database.supportsInitiallyDeferrableColumns();
+                    }
 
-                new JdbcTemplate(database).execute(constraint);
+                    protected void preExecuteAssert(DatabaseSnapshot snapshot) {
+                        assertNull(snapshot.getForeignKey(FK_NAME));
+                    }
 
-                snapshot = new DatabaseSnapshot(database);
-                ForeignKey fkSnapshot = snapshot.getForeignKey(FK_NAME);
-                assertNotNull(fkSnapshot);
-                assertEquals(BASE_TABLE_NAME.toUpperCase(), fkSnapshot.getForeignKeyTable().getName().toUpperCase());
-                assertEquals(BASE_COLUMN_NAME.toUpperCase(), fkSnapshot.getForeignKeyColumn().toUpperCase());
-                assertEquals(REF_TABLE_NAME.toUpperCase(), fkSnapshot.getPrimaryKeyTable().getName().toUpperCase());
-                assertEquals(REF_COL_NAME.toUpperCase(), fkSnapshot.getPrimaryKeyColumn().toUpperCase());
-                assertTrue(fkSnapshot.isDeferrable());
-                assertTrue(fkSnapshot.isInitiallyDeferred());
-            }
-        });
+                    protected void postExecuteAssert(DatabaseSnapshot snapshot) {
+                        ForeignKey fkSnapshot = snapshot.getForeignKey(FK_NAME);
+                        assertNotNull(fkSnapshot);
+                        assertEquals(BASE_TABLE_NAME.toUpperCase(), fkSnapshot.getForeignKeyTable().getName().toUpperCase());
+                        assertEquals(BASE_COLUMN_NAME.toUpperCase(), fkSnapshot.getForeignKeyColumn().toUpperCase());
+                        assertEquals(REF_TABLE_NAME.toUpperCase(), fkSnapshot.getPrimaryKeyTable().getName().toUpperCase());
+                        assertEquals(REF_COL_NAME.toUpperCase(), fkSnapshot.getPrimaryKeyColumn().toUpperCase());
+                        assertTrue(fkSnapshot.isDeferrable());
+                        assertTrue(fkSnapshot.isInitiallyDeferred());
+                    }
+                });
     }
 
     @Test
     public void execute_deleteCascade() throws Exception {
-        new DatabaseTestTemplate().testOnAvailableDatabases(new DatabaseTest() {
-            public void performTest(Database database) throws Exception {
-                DatabaseSnapshot snapshot = new DatabaseSnapshot(database);
+        new DatabaseTestTemplate().testOnAvailableDatabases(new SqlStatementDatabaseTest(null, new AddForeignKeyConstraintChangeStatement(FK_NAME,
+                null, BASE_TABLE_NAME, BASE_COLUMN_NAME,
+                null, REF_TABLE_NAME, REF_COL_NAME).setDeleteCascade(true)) {
+            protected void preExecuteAssert(DatabaseSnapshot snapshot) {
                 assertNull(snapshot.getForeignKey(FK_NAME));
+            }
 
-                AddForeignKeyConstraintChangeStatement statement = new AddForeignKeyConstraintChangeStatement(FK_NAME,
-                        null, BASE_TABLE_NAME, BASE_COLUMN_NAME,
-                        null, REF_TABLE_NAME, REF_COL_NAME);
-                statement.setDeleteCascade(true);
-                new JdbcTemplate(database).execute(statement);
-
-                snapshot = new DatabaseSnapshot(database);
+            protected void postExecuteAssert(DatabaseSnapshot snapshot) {
                 ForeignKey fkSnapshot = snapshot.getForeignKey(FK_NAME);
                 assertNotNull(fkSnapshot);
                 assertEquals(BASE_TABLE_NAME.toUpperCase(), fkSnapshot.getForeignKeyTable().getName().toUpperCase());
@@ -126,30 +114,31 @@ public class AddForeignKeyConstraintChangeStatementTest extends AbstractSqlState
                 assertFalse(fkSnapshot.isDeferrable());
                 assertFalse(fkSnapshot.isInitiallyDeferred());
             }
+
         });
     }
 
     @Test
     public void execute_altSchema() throws Exception {
-        new DatabaseTestTemplate().testOnAvailableDatabases(new DatabaseTest() {
-            public void performTest(Database database) throws Exception {
-                DatabaseSnapshot snapshot = new DatabaseSnapshot(database, TestContext.ALT_SCHEMA);
-                assertNull(snapshot.getForeignKey(FK_NAME));
-
-                new JdbcTemplate(database).execute(new AddForeignKeyConstraintChangeStatement(FK_NAME,
+        new DatabaseTestTemplate().testOnAvailableDatabases(
+                new SqlStatementDatabaseTest(TestContext.ALT_SCHEMA, new AddForeignKeyConstraintChangeStatement(FK_NAME,
                         TestContext.ALT_SCHEMA, BASE_TABLE_NAME, BASE_COLUMN_NAME,
-                        TestContext.ALT_SCHEMA, REF_TABLE_NAME, REF_COL_NAME));
+                        TestContext.ALT_SCHEMA, REF_TABLE_NAME, REF_COL_NAME)) {
+                    protected void preExecuteAssert(DatabaseSnapshot snapshot) {
+                        assertNull(snapshot.getForeignKey(FK_NAME));
+                    }
 
-                snapshot = new DatabaseSnapshot(database, TestContext.ALT_SCHEMA);
-                ForeignKey fkSnapshot = snapshot.getForeignKey(FK_NAME);
-                assertNotNull(fkSnapshot);
-                assertEquals(BASE_TABLE_NAME.toUpperCase(), fkSnapshot.getForeignKeyTable().getName().toUpperCase());
-                assertEquals(BASE_COLUMN_NAME.toUpperCase(), fkSnapshot.getForeignKeyColumn().toUpperCase());
-                assertEquals(REF_TABLE_NAME.toUpperCase(), fkSnapshot.getPrimaryKeyTable().getName().toUpperCase());
-                assertEquals(REF_COL_NAME.toUpperCase(), fkSnapshot.getPrimaryKeyColumn().toUpperCase());
-                assertFalse(fkSnapshot.isDeferrable());
-                assertFalse(fkSnapshot.isInitiallyDeferred());
-            }
-        });
+                    protected void postExecuteAssert(DatabaseSnapshot snapshot) {
+                        ForeignKey fkSnapshot = snapshot.getForeignKey(FK_NAME);
+                        assertNotNull(fkSnapshot);
+                        assertEquals(BASE_TABLE_NAME.toUpperCase(), fkSnapshot.getForeignKeyTable().getName().toUpperCase());
+                        assertEquals(BASE_COLUMN_NAME.toUpperCase(), fkSnapshot.getForeignKeyColumn().toUpperCase());
+                        assertEquals(REF_TABLE_NAME.toUpperCase(), fkSnapshot.getPrimaryKeyTable().getName().toUpperCase());
+                        assertEquals(REF_COL_NAME.toUpperCase(), fkSnapshot.getPrimaryKeyColumn().toUpperCase());
+                        assertFalse(fkSnapshot.isDeferrable());
+                        assertFalse(fkSnapshot.isInitiallyDeferred());
+                    }
+
+                });
     }
 }

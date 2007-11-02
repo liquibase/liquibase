@@ -101,7 +101,7 @@ public class DerbyDatabase extends AbstractDatabase {
     }
 
     public SqlStatement getViewDefinitionSql(String schemaName, String name) throws JDBCException {
-        return new RawSqlStatement("select V.VIEWDEFINITION from SYS.SYSVIEWS V, SYS.SYSTABLES T WHERE  V.TABLEID=T.TABLEID AND T.TABLENAME='" + name + "'");
+        return new RawSqlStatement("select V.VIEWDEFINITION from SYS.SYSVIEWS V, SYS.SYSTABLES T, SYS.SYSSCHEMAS S WHERE  V.TABLEID=T.TABLEID AND T.SCHEMAID=S.SCHEMAID AND T.TABLETYPE='V' AND T.TABLENAME='" + name + "' AND S.SCHEMANAME='"+convertRequestedSchemaToSchema(schemaName)+"'");
     }
 
 

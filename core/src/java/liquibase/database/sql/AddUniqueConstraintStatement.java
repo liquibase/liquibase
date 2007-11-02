@@ -41,8 +41,9 @@ public class AddUniqueConstraintStatement implements SqlStatement {
         return tablespace;
     }
 
-    public void setTablespace(String tablespace) {
+    public AddUniqueConstraintStatement setTablespace(String tablespace) {
         this.tablespace = tablespace;
+        return this;
     }
 
     public String getSqlStatement(Database database) throws StatementNotSupportedOnDatabaseException {
