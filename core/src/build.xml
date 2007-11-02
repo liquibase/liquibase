@@ -362,6 +362,7 @@ The available targets at the current stage:
                     <include name="**/*Test.class"/>
                     <exclude name="**/Base*"/>
                     <exclude name="**/Abstract*"/>
+                    <exclude name="liquibase/test/DatabaseTest"/>
                 </fileset>
             </batchtest>
         </junit>
