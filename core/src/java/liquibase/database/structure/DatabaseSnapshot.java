@@ -492,4 +492,22 @@ public class DatabaseSnapshot {
         }
         return null;
     }
+
+    public Index getIndex(String indexName) {
+        for (Index index : getIndexes()) {
+            if (index.getName().equalsIgnoreCase(indexName)) {
+                return index;
+            }
+        }
+        return null;
+    }
+
+    public View getView(String viewName) {
+        for (View view : getViews()) {
+            if (view.getName().equalsIgnoreCase(viewName)) {
+                return view;
+            }
+        }
+        return null;
+    }
 }

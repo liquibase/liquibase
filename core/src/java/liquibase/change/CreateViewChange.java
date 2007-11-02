@@ -1,7 +1,7 @@
 package liquibase.change;
 
 import liquibase.database.Database;
-import liquibase.database.sql.RawSqlStatement;
+import liquibase.database.sql.CreateViewStatement;
 import liquibase.database.sql.SqlStatement;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.View;
@@ -18,11 +18,20 @@ import java.util.Set;
  */
 public class CreateViewChange extends AbstractChange {
 
+    private String schemaName;
     private String viewName;
     private String selectQuery;
 
     public CreateViewChange() {
         super("createView", "Create View");
+    }
+
+    public String getSchemaName() {
+        return schemaName;
+    }
+
+    public void setSchemaName(String schemaName) {
+        this.schemaName = schemaName;
     }
 
     public String getViewName() {
@@ -43,7 +52,7 @@ public class CreateViewChange extends AbstractChange {
 
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
         return new SqlStatement[]{
-                new RawSqlStatement("CREATE VIEW " + getViewName() + " AS " + selectQuery)
+                new CreateViewStatement(getSchemaName(), getViewName(), getSelectQuery())
         };
     }
 
@@ -53,6 +62,11 @@ public class CreateViewChange extends AbstractChange {
 
     public Element createNode(Document currentChangeLogFileDOM) {
         Element element = currentChangeLogFileDOM.createElement("createView");
+
+        if (getSchemaName() != null) {
+            element.setAttribute("schemaName", getSchemaName());
+        }
+
         element.setAttribute("viewName", getViewName());
         element.appendChild(currentChangeLogFileDOM.createTextNode(getSelectQuery()));
 

@@ -210,4 +210,6 @@ public interface Database extends DatabaseObject {
     String generatePrimaryKeyName(String tableName);
 
     String escapeSequenceName(String schemaName, String sequenceName);
+
+    String escapeViewName(String schemaName, String viewName);
 }

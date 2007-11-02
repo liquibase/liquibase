@@ -295,4 +295,8 @@ public class MockDatabase implements Database {
     public String generatePrimaryKeyName(String tableName) {
         return "PK_"+tableName;
     }
+
+    public String escapeViewName(String schemaName, String viewName) {
+        return escapeTableName(schemaName, viewName);
+    }
 }

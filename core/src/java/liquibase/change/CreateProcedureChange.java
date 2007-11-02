@@ -17,7 +17,7 @@ public class CreateProcedureChange extends AbstractChange {
     private String procedureBody;
 
     public CreateProcedureChange() {
-        super("createProcedure", "Create procedure");
+        super("createProcedure", "Create Procedure");
     }
 
     public String getProcedureBody() {
@@ -51,7 +51,7 @@ public class CreateProcedureChange extends AbstractChange {
     }
 
     public Element createNode(Document currentChangeLogFileDOM) {
-        Element sqlElement = currentChangeLogFileDOM.createElement("sql");
+        Element sqlElement = currentChangeLogFileDOM.createElement(getTagName());
         sqlElement.appendChild(currentChangeLogFileDOM.createTextNode(getProcedureBody()));
 
         return sqlElement;

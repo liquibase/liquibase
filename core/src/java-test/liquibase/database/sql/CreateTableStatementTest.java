@@ -22,7 +22,6 @@ public class CreateTableStatementTest extends AbstractSqlStatementTest {
     private static final String FK_TABLE_NAME = "fk_table".toUpperCase();
 
     @Before
-    @After
     public void dropTable() throws Exception {
         for (Database database : TestContext.getInstance().getAvailableDatabases()) {
             try {

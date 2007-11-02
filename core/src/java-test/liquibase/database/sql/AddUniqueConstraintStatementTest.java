@@ -16,7 +16,6 @@ public class AddUniqueConstraintStatementTest extends AbstractSqlStatementTest {
     private static final String COLUMN_NAME = "colToMakeUQ";
 
     @Before
-    @After
     public void dropAndCreateTable() throws Exception {
         for (Database database : TestContext.getInstance().getAvailableDatabases()) {
 
