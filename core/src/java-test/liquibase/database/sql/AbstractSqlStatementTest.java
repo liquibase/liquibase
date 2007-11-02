@@ -1,18 +1,37 @@
 package liquibase.database.sql;
 
 import liquibase.database.Database;
+import liquibase.database.DerbyDatabase;
+import liquibase.database.PostgresDatabase;
 import liquibase.database.template.JdbcTemplate;
 import liquibase.exception.JDBCException;
 import liquibase.test.DatabaseTest;
 import liquibase.test.DatabaseTestTemplate;
+import liquibase.test.TestContext;
 import static org.junit.Assert.*;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.sql.SQLException;
 
 public abstract class AbstractSqlStatementTest {
 
+    @Before
+    public void setupAvailableDatabases() throws Exception {
+        for (Database database : TestContext.getInstance().getAvailableDatabases()) {
+            if (generateTestStatement().supportsDatabase(database)) {
+                setupDatabase(database);
+            }
+        }
+    }
+
+    protected abstract void setupDatabase(Database database) throws Exception;
+
     protected void dropAndCreateTable(CreateTableStatement statement, Database database) throws SQLException, JDBCException {
+        if (statement.getSchemaName() != null && !database.supportsSchemas()) {
+            return;
+        }
+
         dropTableIfExists(statement.getSchemaName(), statement.getTableName(), database);
 
         new JdbcTemplate(database).execute(statement);
@@ -24,6 +43,10 @@ public abstract class AbstractSqlStatementTest {
     }
 
     protected void dropTableIfExists(String schemaName, String tableName, Database database) throws SQLException {
+        if (schemaName != null && !database.supportsSchemas()) {
+            return;
+        }
+
         if (!database.getAutoCommitMode()) {
             database.getConnection().commit();
         }
@@ -34,13 +57,19 @@ public abstract class AbstractSqlStatementTest {
         }
 
         try {
-            new JdbcTemplate(database).execute(new RawSqlStatement("drop table " + schema + tableName));
+            String sql = "drop table " + schema + tableName;
+            if (database instanceof PostgresDatabase) {
+                sql += " cascade";
+            }
+            new JdbcTemplate(database).execute(new RawSqlStatement(sql));
 
             if (!database.getAutoCommitMode()) {
                 database.getConnection().commit();
             }
 
         } catch (JDBCException e) {
+//            System.out.println("Error dropping table "+database.escapeTableName(schemaName, tableName)+" on "+database);
+//            e.printStackTrace();
             if (!database.getConnection().getAutoCommit()) {
                 database.getConnection().rollback();
             }
@@ -48,6 +77,10 @@ public abstract class AbstractSqlStatementTest {
     }
 
     protected void dropAndCreateSequence(CreateSequenceStatement statement, Database database) throws SQLException, JDBCException {
+        if (statement.getSchemaName() != null && !database.supportsSchemas()) {
+            return;
+        }
+
         dropSequenceIfExists(statement.getSchemaName(), statement.getSequenceName(), database);
 
         new JdbcTemplate(database).execute(statement);
@@ -59,6 +92,10 @@ public abstract class AbstractSqlStatementTest {
     }
 
     protected void dropSequenceIfExists(String schemaName, String sequenceName, Database database) throws SQLException {
+        if (schemaName != null && !database.supportsSchemas()) {
+            return;
+        }
+        
         if (!database.getAutoCommitMode()) {
             database.getConnection().commit();
         }
@@ -71,13 +108,24 @@ public abstract class AbstractSqlStatementTest {
             }
 
         } catch (JDBCException e) {
+//            System.out.println("Error dropping sequence "+database.escapeSequenceName(schemaName, sequenceName));
+//            e.printStackTrace();
             if (!database.getConnection().getAutoCommit()) {
                 database.getConnection().rollback();
             }
         }
+        if (!database.getAutoCommitMode()) {
+            database.getConnection().commit();
+        }
+
+
     }
 
     protected void dropViewIfExists(String schemaName, String viewName, Database database) throws SQLException {
+        if (schemaName != null && !database.supportsSchemas()) {
+            return;
+        }
+
         if (!database.getAutoCommitMode()) {
             database.getConnection().commit();
         }
@@ -95,10 +143,17 @@ public abstract class AbstractSqlStatementTest {
             }
 
         } catch (JDBCException e) {
+//            System.out.println("Cannot drop view "+database.escapeViewName(schemaName, viewName)+" on "+database);
+//            e.printStackTrace();
             if (!database.getConnection().getAutoCommit()) {
                 database.getConnection().rollback();
             }
         }
+
+        if (!database.getAutoCommitMode()) {
+            database.getConnection().commit();
+        }
+        
     }
 
     protected abstract SqlStatement generateTestStatement();

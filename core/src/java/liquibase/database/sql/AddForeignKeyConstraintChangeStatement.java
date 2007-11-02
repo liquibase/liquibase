@@ -62,24 +62,27 @@ public class AddForeignKeyConstraintChangeStatement implements SqlStatement {
         return deferrable;
     }
 
-    public void setDeferrable(boolean deferrable) {
+    public AddForeignKeyConstraintChangeStatement setDeferrable(boolean deferrable) {
         this.deferrable = deferrable;
+        return this;
     }
 
     public boolean isInitiallyDeferred() {
         return initiallyDeferred;
     }
 
-    public void setInitiallyDeferred(boolean initiallyDeferred) {
+    public AddForeignKeyConstraintChangeStatement setInitiallyDeferred(boolean initiallyDeferred) {
         this.initiallyDeferred = initiallyDeferred;
+        return this;
     }
 
     public boolean isDeleteCascade() {
         return deleteCascade;
     }
 
-    public void setDeleteCascade(boolean deleteCascade) {
+    public AddForeignKeyConstraintChangeStatement setDeleteCascade(boolean deleteCascade) {
         this.deleteCascade = deleteCascade;
+        return this;
     }
 
     public String getSqlStatement(Database database) throws StatementNotSupportedOnDatabaseException {
@@ -89,7 +92,11 @@ public class AddForeignKeyConstraintChangeStatement implements SqlStatement {
             sql += " ON DELETE CASCADE";
         }
 
-        if (database.supportsInitiallyDeferrableColumns()) {
+        if (isDeferrable() || isInitiallyDeferred()) {
+            if (!database.supportsInitiallyDeferrableColumns()) {
+                throw new StatementNotSupportedOnDatabaseException("Database does not support deferrable foreign keys", this, database);
+            }
+
             if (isDeferrable()) {
                 sql += " DEFERRABLE";
             }

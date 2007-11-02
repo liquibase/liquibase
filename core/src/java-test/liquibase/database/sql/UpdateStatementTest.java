@@ -17,20 +17,14 @@ public class UpdateStatementTest extends AbstractSqlStatementTest {
     private static final String TABLE_NAME = "UpdateTest";
     private static final String COLUMN_NAME = "testCol";
 
-    @Before
-    public void dropTable() throws Exception {
-        for (Database database : TestContext.getInstance().getAvailableDatabases()) {
+    protected void setupDatabase(Database database) throws Exception {
+        dropAndCreateTable(new CreateTableStatement(null, TABLE_NAME)
+                .addColumn("id", "int")
+                .addColumn(COLUMN_NAME, "varchar(50)"), database);
 
-            dropAndCreateTable(new CreateTableStatement(null, TABLE_NAME)
-                    .addColumn("id", "int")
-                    .addColumn(COLUMN_NAME, "varchar(50)"), database);
-
-            if (database.supportsSchemas()) {
-                dropAndCreateTable(new CreateTableStatement(TestContext.ALT_SCHEMA, TABLE_NAME)
-                        .addColumn("id", "int")
-                        .addColumn(COLUMN_NAME, "varchar(50)"), database);
-            }
-        }
+        dropAndCreateTable(new CreateTableStatement(TestContext.ALT_SCHEMA, TABLE_NAME)
+                .addColumn("id", "int")
+                .addColumn(COLUMN_NAME, "varchar(50)"), database);
     }
 
     protected SqlStatement generateTestStatement() {
@@ -45,7 +39,7 @@ public class UpdateStatementTest extends AbstractSqlStatementTest {
                 UpdateStatement statement = new UpdateStatement(null, TABLE_NAME);
                 statement.addNewColumnValue(COLUMN_NAME, null, Types.VARCHAR);
 
-                assertEquals("UPDATE "+TABLE_NAME+" SET "+COLUMN_NAME+" = NULL", statement.getSqlStatement(database));
+                assertEquals("UPDATE " + TABLE_NAME + " SET " + COLUMN_NAME + " = NULL", statement.getSqlStatement(database));
             }
         });
     }

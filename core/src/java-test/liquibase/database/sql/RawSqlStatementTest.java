@@ -12,6 +12,10 @@ public class RawSqlStatementTest extends AbstractSqlStatementTest {
         return new RawSqlStatement(null);
     }
 
+    protected void setupDatabase(Database database) throws Exception {
+        ; //nothing to set up
+    }
+
     @Test
     public void constructorWithNoDelimiterPassed() throws Exception {
         new DatabaseTestTemplate().testOnAllDatabases(new DatabaseTest() {

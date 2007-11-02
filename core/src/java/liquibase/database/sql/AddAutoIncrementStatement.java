@@ -10,10 +10,6 @@ public class AddAutoIncrementStatement implements SqlStatement {
     private String columnName;
     private String columnDataType;
 
-    public AddAutoIncrementStatement(String tableName, String columnName, String columnDataType) {
-        this(null, tableName, columnName, columnDataType);
-    }
-
     public AddAutoIncrementStatement(String schemaName, String tableName, String columnName, String columnDataType) {
         this.schemaName = schemaName;
         this.tableName = tableName;

@@ -4,8 +4,10 @@ import liquibase.database.*;
 import liquibase.database.structure.DatabaseSnapshot;
 import liquibase.database.template.JdbcTemplate;
 import liquibase.exception.StatementNotSupportedOnDatabaseException;
+import liquibase.exception.JDBCException;
 import liquibase.test.DatabaseTest;
 import liquibase.test.DatabaseTestTemplate;
+import liquibase.test.SqlStatementDatabaseTest;
 import liquibase.test.TestContext;
 import static org.junit.Assert.*;
 import org.junit.Before;
@@ -15,17 +17,9 @@ public class AlterSequenceStatementTest extends AbstractSqlStatementTest {
 
     private static final String SEQ_NAME = "altertest_seq".toUpperCase();
 
-    @Before
-    public void dropAndCreateSequence() throws Exception {
-        for (Database database : TestContext.getInstance().getAvailableDatabases()) {
-            if (database.supportsSequences()) {
-                dropAndCreateSequence(new CreateSequenceStatement(null, SEQ_NAME), database);
-
-                if (database.supportsSchemas()) {
-                    dropAndCreateSequence(new CreateSequenceStatement(TestContext.ALT_SCHEMA, SEQ_NAME), database);
-                }
-            }
-        }
+    protected void setupDatabase(Database database) throws Exception {
+        dropAndCreateSequence(new CreateSequenceStatement(null, SEQ_NAME), database);
+        dropAndCreateSequence(new CreateSequenceStatement(TestContext.ALT_SCHEMA, SEQ_NAME), database);
     }
 
     protected SqlStatement generateTestStatement() {
@@ -45,141 +39,80 @@ public class AlterSequenceStatementTest extends AbstractSqlStatementTest {
 
     @Test
     public void execute_incrementBy() throws Exception {
-        new DatabaseTestTemplate().testOnAvailableDatabases(new DatabaseTest() {
-            public void performTest(Database database) throws Exception {
-                if (!database.supportsSequences()) {
-                    try {
-                        generateTestStatement().getSqlStatement(database);
-                        fail("Should have thrown exception");
-                    } catch (StatementNotSupportedOnDatabaseException e) {
-                        return; //what we wanted
+        new DatabaseTestTemplate().testOnAvailableDatabases(
+                new SqlStatementDatabaseTest(null, new AlterSequenceStatement(null, SEQ_NAME).setIncrementBy(5)) {
+                    protected boolean expectedException(Database database, JDBCException exception) {
+                        return database instanceof FirebirdDatabase || database instanceof HsqlDatabase;
                     }
-                }
 
-                AlterSequenceStatement statement = new AlterSequenceStatement(null, SEQ_NAME).setIncrementBy(5);
-
-                if (database instanceof FirebirdDatabase || database instanceof HsqlDatabase) {
-                    try {
-                        statement.getSqlStatement(database);
-                        fail("Should have thrown exception");
-                    } catch (StatementNotSupportedOnDatabaseException e) {
-                        return; //what we wanted
+                    protected void preExecuteAssert(DatabaseSnapshot snapshot) {
+                        assertNotNull(snapshot.getSequence(SEQ_NAME));
+                        //todo: assert increment by is 1
                     }
-                }
 
-                DatabaseSnapshot snapshot = new DatabaseSnapshot(database);
-                assertNotNull(snapshot.getSequence(SEQ_NAME));
-                //todo: assert increment by is 1
-
-                new JdbcTemplate(database).execute(statement);
-
-                snapshot = new DatabaseSnapshot(database);
-                assertNotNull(snapshot.getSequence(SEQ_NAME));
-                //todo: assert increment by value
-            }
-        });
+                    protected void postExecuteAssert(DatabaseSnapshot snapshot) {
+                        assertNotNull(snapshot.getSequence(SEQ_NAME));
+                        //todo: assert increment by value
+                    }
+                });
     }
 
     @Test
     public void execute_minValue() throws Exception {
-        new DatabaseTestTemplate().testOnAvailableDatabases(new DatabaseTest() {
-            public void performTest(Database database) throws Exception {
-                if (!database.supportsSequences()) {
-                    try {
-                        generateTestStatement().getSqlStatement(database);
-                        fail("Should have thrown exception");
-                    } catch (StatementNotSupportedOnDatabaseException e) {
-                        return; //what we wanted
+        new DatabaseTestTemplate().testOnAvailableDatabases(
+                new SqlStatementDatabaseTest(null, new AlterSequenceStatement(null, SEQ_NAME).setMinValue(0)) {
+                    protected void preExecuteAssert(DatabaseSnapshot snapshot) {
+                        assertNotNull(snapshot.getSequence(SEQ_NAME));
+                        //todo; assert minValue is 1
                     }
-                }
 
-                AlterSequenceStatement statement = new AlterSequenceStatement(null, SEQ_NAME).setMinValue(0);
-
-                DatabaseSnapshot snapshot = new DatabaseSnapshot(database);
-                assertNotNull(snapshot.getSequence(SEQ_NAME));
-                //todo; assert minValue is 1
-
-                new JdbcTemplate(database).execute(statement);
-
-                snapshot = new DatabaseSnapshot(database);
-                assertNotNull(snapshot.getSequence(SEQ_NAME));
-                //todo: assert min valuevalue
-            }
-        });
+                    protected void postExecuteAssert(DatabaseSnapshot snapshot) {
+                        assertNotNull(snapshot.getSequence(SEQ_NAME));
+                        //todo: assert min valuevalue
+                    }
+                });
     }
 
     @Test
     public void execute_maxValue() throws Exception {
-        new DatabaseTestTemplate().testOnAvailableDatabases(new DatabaseTest() {
-            public void performTest(Database database) throws Exception {
-                if (!database.supportsSequences()) {
-                    try {
-                        generateTestStatement().getSqlStatement(database);
-                        fail("Should have thrown exception");
-                    } catch (StatementNotSupportedOnDatabaseException e) {
-                        return; //what we wanted
+        new DatabaseTestTemplate().testOnAvailableDatabases(
+                new SqlStatementDatabaseTest(null, new AlterSequenceStatement(null, SEQ_NAME).setMaxValue(50)) {
+
+                    protected boolean expectedException(Database database, JDBCException exception) {
+                        return database instanceof FirebirdDatabase || database instanceof HsqlDatabase;
                     }
-                }
 
-                AlterSequenceStatement statement = new AlterSequenceStatement(null, SEQ_NAME).setMaxValue(50);
-
-                if (database instanceof FirebirdDatabase || database instanceof HsqlDatabase) {
-                    try {
-                        statement.getSqlStatement(database);
-                        fail("Should have thrown exception");
-                    } catch (StatementNotSupportedOnDatabaseException e) {
-                        return; //what we wanted
+                    protected void preExecuteAssert(DatabaseSnapshot snapshot) {
+                        assertNotNull(snapshot.getSequence(SEQ_NAME));
+                        //todo: assert initial max value
                     }
-                }
 
-                DatabaseSnapshot snapshot = new DatabaseSnapshot(database);
-                assertNotNull(snapshot.getSequence(SEQ_NAME));
-                //todo: assert initial max value
-
-                new JdbcTemplate(database).execute(statement);
-
-                snapshot = new DatabaseSnapshot(database);
-                assertNotNull(snapshot.getSequence(SEQ_NAME));
-                //todo: assert max value
-            }
-        });
+                    protected void postExecuteAssert(DatabaseSnapshot snapshot) {
+                        assertNotNull(snapshot.getSequence(SEQ_NAME));
+                        //todo: assert max value
+                    }
+                });
     }
 
     @Test
     public void execute_order() throws Exception {
-        new DatabaseTestTemplate().testOnAvailableDatabases(new DatabaseTest() {
-            public void performTest(Database database) throws Exception {
-                if (!database.supportsSequences()) {
-                    try {
-                        generateTestStatement().getSqlStatement(database);
-                        fail("Should have thrown exception");
-                    } catch (StatementNotSupportedOnDatabaseException e) {
-                        return; //what we wanted
+        new DatabaseTestTemplate().testOnAvailableDatabases(
+                new SqlStatementDatabaseTest(null, new AlterSequenceStatement(null, SEQ_NAME).setOrdered(true)) {
+
+                    protected boolean expectedException(Database database, JDBCException exception) {
+                        return !(database instanceof OracleDatabase || database instanceof DB2Database);
                     }
-                }
 
-                AlterSequenceStatement statement = new AlterSequenceStatement(null, SEQ_NAME).setOrdered(true);
-
-                if (!(database instanceof OracleDatabase || database instanceof DB2Database)) {
-                    try {
-                        statement.getSqlStatement(database);
-                        fail("Should have thrown exception");
-                    } catch (StatementNotSupportedOnDatabaseException e) {
-                        return; //what we wanted
+                    protected void preExecuteAssert(DatabaseSnapshot snapshot) {
+                        assertNotNull(snapshot.getSequence(SEQ_NAME));
+                        //todo: assert order default
                     }
-                }
 
-                DatabaseSnapshot snapshot = new DatabaseSnapshot(database);
-                assertNotNull(snapshot.getSequence(SEQ_NAME));
-                //todo: assert order default
-
-                new JdbcTemplate(database).execute(statement);
-
-                snapshot = new DatabaseSnapshot(database);
-                assertNotNull(snapshot.getSequence(SEQ_NAME));
-                //todo: assert max value
-            }
-        });
+                    protected void postExecuteAssert(DatabaseSnapshot snapshot) {
+                        assertNotNull(snapshot.getSequence(SEQ_NAME));
+                        //todo: assert max value
+                    }
+                });
     }
 
 }

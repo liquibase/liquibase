@@ -4,13 +4,15 @@ import liquibase.database.Database;
 import liquibase.database.HsqlDatabase;
 import liquibase.database.structure.DatabaseSnapshot;
 import liquibase.database.structure.View;
-import liquibase.database.template.JdbcTemplate;
-import liquibase.test.DatabaseTest;
 import liquibase.test.DatabaseTestTemplate;
+import liquibase.test.SqlStatementDatabaseTest;
 import liquibase.test.TestContext;
+import liquibase.exception.JDBCException;
 import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.sql.SQLException;
 
 public class CreateViewStatementTest extends AbstractSqlStatementTest {
 
@@ -21,72 +23,56 @@ public class CreateViewStatementTest extends AbstractSqlStatementTest {
         return new CreateViewStatement(null, null, null);
     }
 
-    @Before
-    public void dropView() throws Exception {
-        for (Database database : TestContext.getInstance().getAvailableDatabases()) {
+    protected void setupDatabase(Database database) throws Exception {
 
-            dropViewIfExists(null, VIEW_NAME, database);
+        dropViewIfExists(null, VIEW_NAME, database);
 
-            dropAndCreateTable(new CreateTableStatement(TABLE_NAME)
-                    .addPrimaryKeyColumn("id", "int")
-                    .addColumn("name", "varchar(50)")
-                    , database);
+        dropViewIfExists(TestContext.ALT_SCHEMA, VIEW_NAME, database);
 
-            if (database.supportsSchemas()) {
-                dropViewIfExists(TestContext.ALT_SCHEMA, VIEW_NAME, database);
-
-                dropAndCreateTable(new CreateTableStatement(TestContext.ALT_SCHEMA, TABLE_NAME)
-                        .addPrimaryKeyColumn("id", "int")
-                        .addColumn("name", "varchar(50)")
-                        , database);
-            }
-        }
+        dropAndCreateTable(new CreateTableStatement(TABLE_NAME)
+                .addPrimaryKeyColumn("id", "int")
+                .addColumn("name", "varchar(50)")
+                , database);
     }
 
     @Test
     public void execute_defaultSchema() throws Exception {
-        new DatabaseTestTemplate().testOnAvailableDatabases(new DatabaseTest() {
+        final String definition = "SELECT * FROM " + TABLE_NAME;
 
-            public void performTest(Database database) throws Exception {
-                String definition = "SELECT * FROM " + TABLE_NAME;
-                CreateViewStatement statement = new CreateViewStatement(null, VIEW_NAME, definition);
+        new DatabaseTestTemplate().testOnAvailableDatabases(
+                new SqlStatementDatabaseTest(null, new CreateViewStatement(null, VIEW_NAME, definition)) {
+                    protected void preExecuteAssert(DatabaseSnapshot snapshot) {
+                        assertNull(snapshot.getView(VIEW_NAME));
+                    }
 
-                DatabaseSnapshot snapshot = new DatabaseSnapshot(database);
-                assertNull(snapshot.getView(VIEW_NAME));
+                    protected void postExecuteAssert(DatabaseSnapshot snapshot) {
+                        View view = snapshot.getView(VIEW_NAME);
+                        assertNotNull(view);
+                        assertEquals(2, view.getColumns().size());
+                    }
 
-                new JdbcTemplate(database).execute(statement);
-
-                snapshot = new DatabaseSnapshot(database);
-                View view = snapshot.getView(VIEW_NAME);
-                assertNotNull(view);
-                assertEquals(2, view.getColumns().size());
-            }
-        });
+                });
     }
-    
-     @Test
+
+    @Test
     public void execute_altSchema() throws Exception {
-        new DatabaseTestTemplate().testOnAvailableDatabases(new DatabaseTest() {
+        final String definition = "SELECT * FROM " + TABLE_NAME;
+        new DatabaseTestTemplate().testOnAvailableDatabases(
+                new SqlStatementDatabaseTest(TestContext.ALT_SCHEMA, new CreateViewStatement(TestContext.ALT_SCHEMA, VIEW_NAME, definition)) {
+                    protected boolean supportsTest(Database database) {
+                        return !(database instanceof HsqlDatabase);
+                    }
 
-            public void performTest(Database database) throws Exception {
-                if (!database.supportsSchemas() || database instanceof HsqlDatabase) {
-                    return;
-                }
-                
-                String definition = "SELECT * FROM " + TABLE_NAME;
-                CreateViewStatement statement = new CreateViewStatement(TestContext.ALT_SCHEMA, VIEW_NAME, definition);
+                    protected void preExecuteAssert(DatabaseSnapshot snapshot) {
+                        assertNull(snapshot.getView(VIEW_NAME));
+                    }
 
-                DatabaseSnapshot snapshot = new DatabaseSnapshot(database, TestContext.ALT_SCHEMA);
-                assertNull(snapshot.getView(VIEW_NAME));
+                    protected void postExecuteAssert(DatabaseSnapshot snapshot) {
+                        View view = snapshot.getView(VIEW_NAME);
+                        assertNotNull(view);
+                        assertEquals(2, view.getColumns().size());
+                    }
 
-                new JdbcTemplate(database).execute(statement);
-
-                snapshot = new DatabaseSnapshot(database, TestContext.ALT_SCHEMA);
-
-                View view = snapshot.getView(VIEW_NAME);
-                assertNotNull(view);
-                assertEquals(2, view.getColumns().size());
-            }
-        });
+                });
     }
 }

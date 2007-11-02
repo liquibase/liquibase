@@ -1,16 +1,14 @@
 package liquibase.database.sql;
 
-import static org.junit.Assert.*;
-import org.junit.Test;
-import org.junit.Before;
-import org.junit.After;
 import liquibase.database.Database;
-import liquibase.database.template.JdbcTemplate;
 import liquibase.database.structure.DatabaseSnapshot;
-import liquibase.test.TestContext;
-import liquibase.test.DatabaseTestTemplate;
 import liquibase.test.DatabaseTest;
-import liquibase.exception.StatementNotSupportedOnDatabaseException;
+import liquibase.test.DatabaseTestTemplate;
+import liquibase.test.SqlStatementDatabaseTest;
+import liquibase.test.TestContext;
+import static org.junit.Assert.*;
+import org.junit.Before;
+import org.junit.Test;
 
 public class DropSequenceStatementTest extends AbstractSqlStatementTest {
 
@@ -20,17 +18,9 @@ public class DropSequenceStatementTest extends AbstractSqlStatementTest {
 
     private static final String SEQ_NAME = "DROPTEST_SEQ";
 
-    @Before
-    public void dropAndCreateSequence() throws Exception {
-        for (Database database : TestContext.getInstance().getAvailableDatabases()) {
-            if (database.supportsSequences()) {
+    protected void setupDatabase(Database database) throws Exception {
                 dropAndCreateSequence(new CreateSequenceStatement(null, SEQ_NAME), database);
-
-                if (database.supportsSchemas()) {
-                    dropAndCreateSequence(new CreateSequenceStatement(TestContext.ALT_SCHEMA, SEQ_NAME), database);
-                }
-            }
-        }
+                dropAndCreateSequence(new CreateSequenceStatement(TestContext.ALT_SCHEMA, SEQ_NAME), database);
     }
 
     @Test
@@ -48,49 +38,29 @@ public class DropSequenceStatementTest extends AbstractSqlStatementTest {
 
     @Test
     public void execute_noSchema() throws Exception {
-        new DatabaseTestTemplate().testOnAvailableDatabases(new DatabaseTest() {
-            public void performTest(Database database) throws Exception {
-                if (!database.supportsSequences()) {
-                    try {
-                        generateTestStatement().getSqlStatement(database);
-                        fail("Should have thrown exception");
-                    } catch (StatementNotSupportedOnDatabaseException e) {
-                        return; //what we wanted
+        new DatabaseTestTemplate().testOnAvailableDatabases(
+                new SqlStatementDatabaseTest(null, new DropSequenceStatement(null, SEQ_NAME)) {
+                    protected void preExecuteAssert(DatabaseSnapshot snapshot) {
+                        assertNotNull(snapshot.getSequence(SEQ_NAME));
                     }
-                }
 
-                DatabaseSnapshot snapshot = new DatabaseSnapshot(database);
-                assertNotNull(snapshot.getSequence(SEQ_NAME));
-
-                new JdbcTemplate(database).execute(new DropSequenceStatement(null, SEQ_NAME));
-
-                snapshot = new DatabaseSnapshot(database);
-                assertNull(snapshot.getSequence(SEQ_NAME));
-            }
-        });
+                    protected void postExecuteAssert(DatabaseSnapshot snapshot) {
+                        assertNull(snapshot.getSequence(SEQ_NAME));
+                    }
+                });
     }
 
     @Test
     public void execute_withSchema() throws Exception {
-        new DatabaseTestTemplate().testOnAvailableDatabases(new DatabaseTest() {
-            public void performTest(Database database) throws Exception {
-                if (!database.supportsSequences()) {
-                    try {
-                        generateTestStatement().getSqlStatement(database);
-                        fail("Should have thrown exception");
-                    } catch (StatementNotSupportedOnDatabaseException e) {
-                        return; //what we wanted
+        new DatabaseTestTemplate().testOnAvailableDatabases(
+                new SqlStatementDatabaseTest(TestContext.ALT_SCHEMA, new DropSequenceStatement(TestContext.ALT_SCHEMA, SEQ_NAME)) {
+                    protected void preExecuteAssert(DatabaseSnapshot snapshot) {
+                        assertNotNull(snapshot.getSequence(SEQ_NAME));
                     }
-                }
 
-                DatabaseSnapshot snapshot = new DatabaseSnapshot(database, TestContext.ALT_SCHEMA);
-                assertNotNull(snapshot.getSequence(SEQ_NAME));
-
-                new JdbcTemplate(database).execute(new DropSequenceStatement(TestContext.ALT_SCHEMA, SEQ_NAME));
-
-                snapshot = new DatabaseSnapshot(database, TestContext.ALT_SCHEMA);
-                assertNull(snapshot.getSequence(SEQ_NAME));
-            }
-        });
+                    protected void postExecuteAssert(DatabaseSnapshot snapshot) {
+                        assertNull(snapshot.getSequence(SEQ_NAME));
+                    }
+                });
     }
 }
