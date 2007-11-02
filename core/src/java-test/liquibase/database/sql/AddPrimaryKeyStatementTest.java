@@ -20,7 +20,6 @@ public class AddPrimaryKeyStatementTest extends AbstractSqlStatementTest {
     private static final String COLUMN2_NAME = "id2";
 
     @Before
-    @After
     public void dropAndCreateTable() throws Exception {
         for (Database database : TestContext.getInstance().getAvailableDatabases()) {
 

@@ -1,7 +1,11 @@
 package liquibase.change;
 
-import liquibase.database.OracleDatabase;
-import static org.junit.Assert.assertEquals;
+import liquibase.database.Database;
+import liquibase.database.sql.CreateIndexStatement;
+import liquibase.database.sql.SqlStatement;
+import liquibase.test.DatabaseTest;
+import liquibase.test.DatabaseTestTemplate;
+import static org.junit.Assert.*;
 import org.junit.Test;
 import org.w3c.dom.Element;
 
@@ -19,22 +23,35 @@ public class CreateIndexChangeTest extends AbstractChangeTest {
 
     @Test
     public void generateStatement() throws Exception {
-        CreateIndexChange refactoring = new CreateIndexChange();
-        refactoring.setIndexName("IDX_TEST");
-        refactoring.setTableName("TAB_NAME");
+        new DatabaseTestTemplate().testOnAllDatabases(new DatabaseTest() {
+            public void performTest(Database database) throws Exception {
+                CreateIndexChange change = new CreateIndexChange();
+                change.setIndexName("IDX_NAME");
+                change.setSchemaName("SCHEMA_NAME");
+                change.setTableName("TABLE_NAME");
+                change.setTablespace("TABLESPACE_NAME");
 
-        ColumnConfig column1 = new ColumnConfig();
-        column1.setName("COL1");
-        refactoring.addColumn(column1);
+                ColumnConfig column = new ColumnConfig();
+                column.setName("COL_NAME");
+                change.addColumn(column);
 
-        OracleDatabase database = new OracleDatabase();
-        assertEquals("CREATE INDEX IDX_TEST ON TAB_NAME(COL1)", refactoring.generateStatements(database)[0].getSqlStatement(database));
+                ColumnConfig column2 = new ColumnConfig();
+                column2.setName("COL2_NAME");
+                change.addColumn(column2);
 
-        ColumnConfig column2 = new ColumnConfig();
-        column2.setName("COL2");
-        refactoring.addColumn(column2);
+                SqlStatement[] sqlStatements = change.generateStatements(database);
+                assertEquals(1, sqlStatements.length);
+                assertTrue(sqlStatements[0] instanceof CreateIndexStatement);
 
-        assertEquals("CREATE INDEX IDX_TEST ON TAB_NAME(COL1, COL2)", refactoring.generateStatements(database)[0].getSqlStatement(database));
+                assertEquals("IDX_NAME", ((CreateIndexStatement) sqlStatements[0]).getIndexName());
+                assertEquals("SCHEMA_NAME", ((CreateIndexStatement) sqlStatements[0]).getTableSchemaName());
+                assertEquals("TABLE_NAME", ((CreateIndexStatement) sqlStatements[0]).getTableName());
+                assertEquals("TABLESPACE_NAME", ((CreateIndexStatement) sqlStatements[0]).getTablespace());
+                assertEquals(2, ((CreateIndexStatement) sqlStatements[0]).getColumns().length);
+                assertEquals("COL_NAME", ((CreateIndexStatement) sqlStatements[0]).getColumns()[0]);
+                assertEquals("COL2_NAME", ((CreateIndexStatement) sqlStatements[0]).getColumns()[1]);
+            }
+        });
     }
 
     @Test

@@ -21,7 +21,6 @@ public class SetNullableStatementTest extends AbstractSqlStatementTest {
     private static final String COLUMN_NAME = "testCol";
 
     @Before
-    @After
     public void dropTable() throws Exception {
         for (Database database : TestContext.getInstance().getAvailableDatabases()) {
 

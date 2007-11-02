@@ -1,13 +1,12 @@
 package liquibase.change;
 
-import liquibase.database.*;
-import liquibase.database.sql.RawSqlStatement;
+import liquibase.database.Database;
+import liquibase.database.sql.DropColumnStatement;
 import liquibase.database.sql.SqlStatement;
 import liquibase.database.structure.Column;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Table;
 import liquibase.exception.UnsupportedChangeException;
-import liquibase.util.SqlUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -54,19 +53,9 @@ public class DropColumnChange extends AbstractChange {
     }
 
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
-        if (database instanceof DerbyDatabase) {
-            throw new UnsupportedChangeException("Derby does not currently support dropping columns");
-        } else if (database instanceof DB2Database) {
-            return new SqlStatement[]{
-                    new RawSqlStatement("ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " DROP COLUMN " + getColumnName()),
-                    new RawSqlStatement("CALL SYSPROC.ADMIN_CMD ('REORG TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + "')")
-            };
-        } else if (database instanceof SybaseDatabase) {
-            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " DROP " + getColumnName())};
-        } else if (database instanceof FirebirdDatabase) {
-            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " DROP " + getColumnName())};
-        }
-        return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " DROP COLUMN " + getColumnName())};
+        return new SqlStatement[]{
+                new DropColumnStatement(getSchemaName(), getTableName(), getColumnName())
+        };
     }
 
     public String getConfirmationMessage() {

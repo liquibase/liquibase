@@ -17,7 +17,6 @@ public class CreateSequenceStatementTest extends AbstractSqlStatementTest {
     private static final String SEQ_NAME = "createtest_seq".toUpperCase();
 
     @Before
-    @After
     public void dropSequence() throws Exception {
         for (Database database : TestContext.getInstance().getAvailableDatabases()) {
             if (database.supportsSequences()) {

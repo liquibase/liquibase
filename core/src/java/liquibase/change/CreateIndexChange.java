@@ -1,16 +1,12 @@
 package liquibase.change;
 
-import liquibase.database.DB2Database;
 import liquibase.database.Database;
-import liquibase.database.MSSQLDatabase;
-import liquibase.database.sql.RawSqlStatement;
+import liquibase.database.sql.CreateIndexStatement;
 import liquibase.database.sql.SqlStatement;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Index;
 import liquibase.database.structure.Table;
 import liquibase.exception.UnsupportedChangeException;
-import liquibase.util.StringUtils;
-import liquibase.util.SqlUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -79,30 +75,14 @@ public class CreateIndexChange extends AbstractChange {
     }
 
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
-        StringBuffer buffer = new StringBuffer();
-        buffer.append("CREATE INDEX ");
-        buffer.append(getIndexName()).append(" ON ");
-        buffer.append(database.escapeTableName(getSchemaName(), getTableName())).append("(");
-        Iterator<ColumnConfig> iterator = columns.iterator();
-        while (iterator.hasNext()) {
-            ColumnConfig column = iterator.next();
-            buffer.append(column.getName());
-            if (iterator.hasNext()) {
-                buffer.append(", ");
-            }
+        List<String> columns = new ArrayList<String>();
+        for (ColumnConfig column : getColumns()) {
+            columns.add(column.getName());
         }
-        buffer.append(")");
 
-        if (StringUtils.trimToNull(tablespace) != null && database.supportsTablespaces()) {
-            if (database instanceof MSSQLDatabase) {
-                buffer.append(" ON ").append(tablespace);
-            } else if (database instanceof DB2Database) {
-                // cannot add indexes to tablespace in DB2
-            } else {
-                buffer.append(" TABLESPACE ").append(tablespace);
-            }
-        }
-        return new SqlStatement []{new RawSqlStatement(buffer.toString())};
+        return new SqlStatement []{
+                new CreateIndexStatement(getIndexName(), getSchemaName(), getTableName(), columns.toArray(new String[getColumns().size()])).setTablespace(getTablespace())
+        };
     }
 
     protected Change[] createInverses() {

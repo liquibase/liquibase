@@ -39,7 +39,7 @@ public abstract class AbstractSqlStatementTest {
             if (!database.getAutoCommitMode()) {
                 database.getConnection().commit();
             }
-            
+
         } catch (JDBCException e) {
             if (!database.getConnection().getAutoCommit()) {
                 database.getConnection().rollback();
@@ -65,6 +65,30 @@ public abstract class AbstractSqlStatementTest {
 
         try {
             new JdbcTemplate(database).execute(new DropSequenceStatement(schemaName, sequenceName));
+
+            if (!database.getAutoCommitMode()) {
+                database.getConnection().commit();
+            }
+
+        } catch (JDBCException e) {
+            if (!database.getConnection().getAutoCommit()) {
+                database.getConnection().rollback();
+            }
+        }
+    }
+
+    protected void dropViewIfExists(String schemaName, String viewName, Database database) throws SQLException {
+        if (!database.getAutoCommitMode()) {
+            database.getConnection().commit();
+        }
+
+        String schema = "";
+        if (schemaName != null) {
+            schema = schemaName + ".";
+        }
+
+        try {
+            new JdbcTemplate(database).execute(new RawSqlStatement("drop view " + schema + viewName));
 
             if (!database.getAutoCommitMode()) {
                 database.getConnection().commit();

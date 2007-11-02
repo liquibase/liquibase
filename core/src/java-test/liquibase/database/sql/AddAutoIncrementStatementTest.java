@@ -20,7 +20,6 @@ public class AddAutoIncrementStatementTest extends AbstractSqlStatementTest {
     private static final String COLUMN_TYPE = "int";
 
     @Before
-    @After
     public void dropTable() throws Exception {
         for (Database database : TestContext.getInstance().getAvailableDatabases()) {
 

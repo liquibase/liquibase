@@ -167,8 +167,8 @@ public class OracleDatabase extends AbstractDatabase {
         return true;
     }
 
-    public SqlStatement getViewDefinitionSql(String schemaName, String name) {
-        return new RawSqlStatement("SELECT TEXT FROM USER_VIEWS WHERE upper(VIEW_NAME)='"+name.toUpperCase()+"'");
+    public SqlStatement getViewDefinitionSql(String schemaName, String name) throws JDBCException {
+        return new RawSqlStatement("SELECT TEXT FROM ALL_VIEWS WHERE upper(VIEW_NAME)='"+name.toUpperCase()+"' AND OWNER='"+convertRequestedSchemaToSchema(schemaName)+"'" );
     }
 
     public boolean supportsAutoIncrement() {

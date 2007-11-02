@@ -1060,4 +1060,7 @@ public abstract class AbstractDatabase implements Database {
         return pkName;
     }
 
+    public String escapeViewName(String schemaName, String viewName) {
+        return escapeTableName(schemaName, viewName);
+    }
 }
