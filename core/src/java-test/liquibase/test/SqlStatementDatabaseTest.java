@@ -36,6 +36,11 @@ public abstract class SqlStatementDatabaseTest implements DatabaseTest {
     }
 
     protected boolean expectedException(Database database, JDBCException exception) {
+        if (schema != null && !database.supportsSchemas()) {
+            if (exception instanceof StatementNotSupportedOnDatabaseException) {
+                return true;
+            }
+        }
         return false;
     }
 

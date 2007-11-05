@@ -24,12 +24,16 @@ import java.util.Set;
  */
 public abstract class AbstractChangeTest {
 
+    @Test
     public abstract void getRefactoringName() throws Exception;
 
+    @Test
     public abstract void generateStatement() throws Exception;
 
+    @Test
     public abstract void getConfirmationMessage() throws Exception;
 
+    @Test
     public abstract void createNode() throws Exception;
 
     @Test

@@ -88,6 +88,9 @@ public class AddAutoIncrementChange extends AbstractChange {
         if (getSchemaName() != null) {
             node.setAttribute("schemaName", getSchemaName());
         }
+        if (getColumnDataType() != null) {
+            node.setAttribute("columnDataType", getColumnDataType());
+        }
 
         return node;
     }

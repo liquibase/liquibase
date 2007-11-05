@@ -284,7 +284,9 @@ public class DatabaseSnapshot {
         updateListeners("Reading foreign keys for " + database.toString() + " ...");
 
         for (Table table : tablesMap.values()) {
-            ResultSet rs = databaseMetaData.getExportedKeys(database.convertRequestedSchemaToCatalog(schema), database.convertRequestedSchemaToSchema(schema), table.getName());
+            String dbCatalog = database.convertRequestedSchemaToCatalog(schema);
+            String dbSchema = database.convertRequestedSchemaToSchema(schema);
+            ResultSet rs = databaseMetaData.getExportedKeys(dbCatalog, dbSchema, table.getName());
             while (rs.next()) {
                 ForeignKey fkInfo = new ForeignKey();
 
@@ -506,6 +508,15 @@ public class DatabaseSnapshot {
         for (View view : getViews()) {
             if (view.getName().equalsIgnoreCase(viewName)) {
                 return view;
+            }
+        }
+        return null;
+    }
+
+    public PrimaryKey getPrimaryKey(String pkName) {
+        for (PrimaryKey pk : getPrimaryKeys()) {
+            if (pk.getName().equalsIgnoreCase(pkName)) {
+                return pk;
             }
         }
         return null;

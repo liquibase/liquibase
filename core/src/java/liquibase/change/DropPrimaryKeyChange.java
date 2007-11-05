@@ -3,13 +3,12 @@ package liquibase.change;
 import liquibase.database.Database;
 import liquibase.database.MSSQLDatabase;
 import liquibase.database.PostgresDatabase;
-import liquibase.database.FirebirdDatabase;
+import liquibase.database.sql.DropPrimaryKeyStatement;
 import liquibase.database.sql.RawSqlStatement;
 import liquibase.database.sql.SqlStatement;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Table;
 import liquibase.exception.UnsupportedChangeException;
-import liquibase.util.SqlUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -53,36 +52,8 @@ public class DropPrimaryKeyChange extends AbstractChange {
     }
 
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
-        if (database instanceof MSSQLDatabase) {
-            return generateMSSQLStatements((MSSQLDatabase) database);
-        } else if (database instanceof PostgresDatabase) {
-            return generatePostgresStatements((PostgresDatabase) database);
-        } else if (database instanceof FirebirdDatabase) {
-            return new SqlStatement[]{
-                    new RawSqlStatement("ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " DROP CONSTRAINT "+getConstraintName()),
-            };
-        }
-
         return new SqlStatement[]{
-                new RawSqlStatement("ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " DROP PRIMARY KEY"),
-        };
-    }
-
-    private SqlStatement[] generateMSSQLStatements(MSSQLDatabase database) throws UnsupportedChangeException {
-        if (getConstraintName() == null) {
-            throw new UnsupportedChangeException("MS-SQL requires a constraint name to drop the primary key");
-        }
-        return new SqlStatement[]{
-                new RawSqlStatement("ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " DROP CONSTRAINT " + getConstraintName()),
-        };
-    }
-
-    private SqlStatement[] generatePostgresStatements(PostgresDatabase database) throws UnsupportedChangeException {
-        if (getConstraintName() == null) {
-            throw new UnsupportedChangeException("PostgreSQL requires a constraint name to drop the primary key");
-        }
-        return new SqlStatement[]{
-                new RawSqlStatement("ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " DROP CONSTRAINT " + getConstraintName()),
+                new DropPrimaryKeyStatement(getSchemaName(), getTableName(), getConstraintName()),
         };
     }
 
@@ -97,6 +68,9 @@ public class DropPrimaryKeyChange extends AbstractChange {
         }
         
         node.setAttribute("tableName", getTableName());
+        if (getConstraintName() != null) {
+            node.setAttribute("constraintName", getConstraintName());
+        }
         return node;
     }
 
