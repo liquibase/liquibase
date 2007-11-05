@@ -10,8 +10,11 @@ import liquibase.test.DatabaseTestTemplate;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
+import org.w3c.dom.Element;
 
-public class AddAutoIncrementChangeTest {
+import javax.xml.parsers.DocumentBuilderFactory;
+
+public class AddAutoIncrementChangeTest extends AbstractChangeTest {
 
     @Test
     public void constructor() {
@@ -19,9 +22,9 @@ public class AddAutoIncrementChangeTest {
         assertEquals("addAutoIncrement", change.getTagName());
         assertEquals("Set Column as Auto-Increment", change.getChangeName());
     }
-    
+
     @Test
-    public void generateStatements() throws Exception {
+    public void generateStatement() throws Exception {
         new DatabaseTestTemplate().testOnAllDatabases(new DatabaseTest() {
             public void performTest(Database database) throws Exception {
                 AddAutoIncrementChange change = new AddAutoIncrementChange();
@@ -49,4 +52,35 @@ public class AddAutoIncrementChangeTest {
         });
     }
 
+    @Test
+    public void getRefactoringName() throws Exception {
+        assertEquals("Set Column as Auto-Increment", new AddAutoIncrementChange().getChangeName());
+    }
+
+    @Test
+    public void getConfirmationMessage() throws Exception {
+        AddAutoIncrementChange change = new AddAutoIncrementChange();
+        change.setSchemaName("SCHEMA_NAME");
+        change.setTableName("TABLE_NAME");
+        change.setColumnName("COLUMN_NAME");
+        change.setColumnDataType("DATATYPE(255)");
+
+        assertEquals("Auto-increment added to TABLE_NAME.COLUMN_NAME", change.getConfirmationMessage());
+    }
+
+    @Test
+    public void createNode() throws Exception {
+        AddAutoIncrementChange change = new AddAutoIncrementChange();
+        change.setSchemaName("SCHEMA_NAME");
+        change.setTableName("TABLE_NAME");
+        change.setColumnName("COLUMN_NAME");
+        change.setColumnDataType("DATATYPE(255)");
+
+        Element node = change.createNode(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument());
+        assertEquals("addAutoIncrement", node.getTagName());
+        assertEquals("SCHEMA_NAME", node.getAttribute("schemaName"));
+        assertEquals("TABLE_NAME", node.getAttribute("tableName"));
+        assertEquals("COLUMN_NAME", node.getAttribute("columnName"));
+        assertEquals("DATATYPE(255)", node.getAttribute("columnDataType"));
+    }
 }

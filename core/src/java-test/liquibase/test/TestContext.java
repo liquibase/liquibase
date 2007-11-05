@@ -3,6 +3,7 @@ package liquibase.test;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.exception.JDBCException;
+import liquibase.migrator.Migrator;
 
 import java.sql.Connection;
 import java.sql.Driver;
@@ -84,6 +85,12 @@ public class TestContext {
             ; //schema already exists
         }
 
+//        Migrator migrator = new Migrator(null, null);
+//        migrator.init(connection);
+//        migrator.dropAll();
+//        if (migrator.getDatabase().supportsSchemas()) {
+//            migrator.dropAll(TestContext.ALT_SCHEMA);
+//        }
 
         connectionsByUrl.put(url, connection);
 

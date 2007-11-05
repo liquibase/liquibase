@@ -1,7 +1,9 @@
 package liquibase.change;
 
-import liquibase.database.OracleDatabase;
-import static org.junit.Assert.assertEquals;
+import liquibase.database.MockDatabase;
+import liquibase.database.sql.DropIndexStatement;
+import liquibase.database.sql.SqlStatement;
+import static org.junit.Assert.*;
 import org.junit.Test;
 import org.w3c.dom.Element;
 
@@ -22,9 +24,14 @@ public class DropIndexChangeTest extends AbstractChangeTest {
         DropIndexChange refactoring = new DropIndexChange();
         refactoring.setIndexName("IDX_NAME");
         refactoring.setTableName("TABLE_NAME");
+        refactoring.setSchemaName("SCHEMA_NAME");
 
-        OracleDatabase database = new OracleDatabase();
-        assertEquals("DROP INDEX IDX_NAME", refactoring.generateStatements(database)[0].getSqlStatement(database));
+        SqlStatement[] sqlStatements = refactoring.generateStatements(new MockDatabase());
+        assertEquals(1, sqlStatements.length);
+        assertTrue(sqlStatements[0] instanceof DropIndexStatement);
+        assertEquals("SCHEMA_NAME", ((DropIndexStatement) sqlStatements[0]).getTableSchemaName());
+        assertEquals("TABLE_NAME", ((DropIndexStatement) sqlStatements[0]).getTableName());
+        assertEquals("IDX_NAME", ((DropIndexStatement) sqlStatements[0]).getIndexName());
     }
 
     @Test

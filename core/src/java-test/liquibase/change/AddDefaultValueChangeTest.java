@@ -8,13 +8,17 @@ import liquibase.test.DatabaseTest;
 import liquibase.test.DatabaseTestTemplate;
 import liquibase.util.ISODateFormat;
 import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 import org.junit.Test;
+import org.w3c.dom.Element;
 
+import javax.xml.parsers.DocumentBuilderFactory;
 import java.util.Date;
 
-public class AddDefaultValueChangeTest {
+public class AddDefaultValueChangeTest extends AbstractChangeTest {
+
     @Test
-    public void generateStatements_stringDefaultValue() throws Exception {
+    public void generateStatement() throws Exception {
         AddDefaultValueChange change = new AddDefaultValueChange();
         change.setTableName("TABLE_NAME");
         change.setColumnName("COLUMN_NAME");
@@ -126,5 +130,42 @@ public class AddDefaultValueChangeTest {
                 assertEquals(date.toString(), statement.getDefaultValue().toString());
             }
         });
+    }
+
+    public void getRefactoringName() throws Exception {
+        assertEquals("Add Default Value", new AddDefaultValueChange().getChangeName());
+    }
+
+    @Test
+    public void getConfirmationMessage() throws Exception {
+        AddDefaultValueChange change = new AddDefaultValueChange();
+        change.setSchemaName("SCHEMA_NAME");
+        change.setTableName("TABLE_NAME");
+        change.setColumnName("COLUMN_NAME");
+
+        assertEquals("Default value added to TABLE_NAME.COLUMN_NAME", change.getConfirmationMessage());
+    }
+
+    @Test
+    public void createNode() throws Exception {
+        AddDefaultValueChange change = new AddDefaultValueChange();
+        change.setSchemaName("SCHEMA_NAME");
+        change.setTableName("TABLE_NAME");
+        change.setColumnName("COLUMN_NAME");
+        change.setDefaultValue("DEF STRING");
+        change.setDefaultValueNumeric("42");
+        change.setDefaultValueBoolean(true);
+        change.setDefaultValueDate("2007-01-02");
+
+        Element node = change.createNode(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument());
+        assertEquals("addDefaultValue", node.getTagName());
+        assertEquals("SCHEMA_NAME", node.getAttribute("schemaName"));
+        assertEquals("TABLE_NAME", node.getAttribute("tableName"));
+        assertEquals("COLUMN_NAME", node.getAttribute("columnName"));
+        assertEquals("DEF STRING", node.getAttribute("defaultValue"));
+        assertEquals("42", node.getAttribute("defaultValueNumeric"));
+        assertEquals("true", node.getAttribute("defaultValueBoolean"));
+        assertEquals("2007-01-02", node.getAttribute("defaultValueDate"));
+
     }
 }
