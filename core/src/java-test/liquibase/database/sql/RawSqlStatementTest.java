@@ -35,4 +35,24 @@ public class RawSqlStatementTest extends AbstractSqlStatementTest {
             }
         });
     }
+
+    @Test
+    public void constructorWithDelimiterPassed() throws Exception {
+        new DatabaseTestTemplate().testOnAllDatabases(new DatabaseTest() {
+            public void performTest(Database database) {
+                RawSqlStatement statement = new RawSqlStatement("statement here", "GO\n");
+                assertEquals("GO\n", statement.getEndDelimiter(database));
+            }
+        });
+    }
+
+    @Test
+    public void testToString() throws Exception {
+        new DatabaseTestTemplate().testOnAllDatabases(new DatabaseTest() {
+            public void performTest(Database database) {
+                RawSqlStatement statement = new RawSqlStatement("statement here");
+                assertEquals("statement here", statement.toString());
+            }
+        });
+    }
 }

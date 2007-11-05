@@ -147,10 +147,6 @@ public class PostgresDatabase extends AbstractDatabase {
         return super.getDatabaseChangeLogLockTableName().toLowerCase();
     }
 
-    public String getDropTableSQL(String tableName) {
-        return "DROP TABLE " + tableName;
-    }
-
 //    public void dropDatabaseObjects(String schema) throws JDBCException {
 //        try {
 //            if (schema == null) {

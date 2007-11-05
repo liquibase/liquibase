@@ -94,7 +94,7 @@ public class AddColumnStatement implements SqlStatement {
     }
 
     private boolean isAutoIncrement() {
-        for (ColumnConstraint constraint : constraints) {
+        for (ColumnConstraint constraint : getConstraints()) {
             if (constraint instanceof AutoIncrementConstraint) {
                 return true;
             }
@@ -103,7 +103,7 @@ public class AddColumnStatement implements SqlStatement {
     }
 
     public boolean isPrimaryKey() {
-        for (ColumnConstraint constraint : constraints) {
+        for (ColumnConstraint constraint : getConstraints()) {
             if (constraint instanceof PrimaryKeyConstraint) {
                 return true;
             }
@@ -142,7 +142,7 @@ public class AddColumnStatement implements SqlStatement {
         if (isPrimaryKey()) {
             return false;
         }
-        for (ColumnConstraint constraint : constraints) {
+        for (ColumnConstraint constraint : getConstraints()) {
             if (constraint instanceof NotNullConstraint) {
                 return false;
             }

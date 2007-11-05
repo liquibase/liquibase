@@ -139,10 +139,6 @@ public class MSSQLDatabase extends AbstractDatabase {
         return "0";
     }
 
-    public String getDropTableSQL(String tableName) {
-        return "DROP TABLE " + tableName;
-    }
-
     public String getConcatSql(String... values) {
         StringBuffer returnString = new StringBuffer();
         for (String value : values) {

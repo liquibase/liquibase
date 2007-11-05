@@ -1,14 +1,13 @@
 package liquibase.database.sql;
 
-import liquibase.change.CreateTableChange;
 import liquibase.database.Database;
+import liquibase.database.structure.DatabaseSnapshot;
 import liquibase.test.DatabaseTest;
 import liquibase.test.DatabaseTestTemplate;
+import liquibase.test.SqlStatementDatabaseTest;
 import liquibase.test.TestContext;
-import static org.junit.Assert.assertEquals;
-import org.junit.Before;
+import static org.junit.Assert.*;
 import org.junit.Test;
-import org.junit.After;
 
 import java.sql.Types;
 
@@ -40,6 +39,19 @@ public class UpdateStatementTest extends AbstractSqlStatementTest {
                 statement.addNewColumnValue(COLUMN_NAME, null, Types.VARCHAR);
 
                 assertEquals("UPDATE " + TABLE_NAME + " SET " + COLUMN_NAME + " = NULL", statement.getSqlStatement(database));
+            }
+        });
+    }
+
+    @Test
+    public void execute_altSchema() throws Exception {
+        new DatabaseTestTemplate().testOnAvailableDatabases(new SqlStatementDatabaseTest(TestContext.ALT_SCHEMA, new UpdateStatement(TestContext.ALT_SCHEMA, TABLE_NAME).addNewColumnValue(COLUMN_NAME, null, Types.VARCHAR)) {
+            protected void preExecuteAssert(DatabaseSnapshot snapshot) {
+                //nothing to test
+            }
+
+            protected void postExecuteAssert(DatabaseSnapshot snapshot) {
+                //nothing to test
             }
         });
     }

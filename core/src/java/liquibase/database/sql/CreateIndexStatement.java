@@ -65,13 +65,13 @@ public class CreateIndexStatement implements SqlStatement {
         }
         buffer.append(")");
 
-        if (StringUtils.trimToNull(tablespace) != null && database.supportsTablespaces()) {
+        if (StringUtils.trimToNull(getTablespace()) != null && database.supportsTablespaces()) {
             if (database instanceof MSSQLDatabase) {
-                buffer.append(" ON ").append(tablespace);
+                buffer.append(" ON ").append(getTablespace());
             } else if (database instanceof DB2Database) {
                 // cannot add indexes to tablespace in DB2
             } else {
-                buffer.append(" TABLESPACE ").append(tablespace);
+                buffer.append(" TABLESPACE ").append(getTablespace());
             }
         }
 

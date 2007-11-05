@@ -7,6 +7,7 @@ import liquibase.test.DatabaseTest;
 import liquibase.test.DatabaseTestTemplate;
 import liquibase.test.SqlStatementDatabaseTest;
 import liquibase.test.TestContext;
+import liquibase.exception.JDBCException;
 import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
@@ -96,6 +97,29 @@ public class AddPrimaryKeyStatementTest extends AbstractSqlStatementTest {
                         assertTrue(snapshot.getTable(TABLE_NAME).getColumn(COLUMN_NAME).isPrimaryKey());
                         assertTrue(snapshot.getTable(TABLE_NAME).getColumn(COLUMN2_NAME).isPrimaryKey());
                     }
+                });
+    }
+
+    @Test
+    public void execute_withTablespace() throws Exception {
+
+        new DatabaseTestTemplate().testOnAvailableDatabases(
+                new SqlStatementDatabaseTest(null, new AddPrimaryKeyStatement(null, TABLE_NAME, COLUMN_NAME, "PK_addpktest").setTablespace(TestContext.ALT_TABLESPACE)) {
+
+                    protected boolean expectedException(Database database, JDBCException exception) {
+                        return !database.supportsTablespaces();
+                    }
+
+                    protected void preExecuteAssert(DatabaseSnapshot snapshot) {
+                        assertFalse(snapshot.getTable(TABLE_NAME).getColumn(COLUMN_NAME).isPrimaryKey());
+                        assertFalse(snapshot.getTable(TABLE_NAME).getColumn(COLUMN2_NAME).isPrimaryKey());
+                    }
+
+                    protected void postExecuteAssert(DatabaseSnapshot snapshot) {
+                        assertTrue(snapshot.getTable(TABLE_NAME).getColumn(COLUMN_NAME).isPrimaryKey());
+                        assertFalse(snapshot.getTable(TABLE_NAME).getColumn(COLUMN2_NAME).isPrimaryKey());
+                    }
+
                 });
     }
 }
