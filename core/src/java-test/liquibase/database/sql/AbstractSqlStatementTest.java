@@ -51,17 +51,12 @@ public abstract class AbstractSqlStatementTest {
             database.getConnection().commit();
         }
 
-        String schema = "";
-        if (schemaName != null) {
-            schema = schemaName + ".";
-        }
-
         try {
-            String sql = "drop table " + schema + tableName;
+            boolean cascade = false;
             if (database instanceof PostgresDatabase) {
-                sql += " cascade";
+                cascade = true;
             }
-            new JdbcTemplate(database).execute(new RawSqlStatement(sql));
+            new JdbcTemplate(database).execute(new DropTableStatement(schemaName, tableName, cascade));
 
             if (!database.getAutoCommitMode()) {
                 database.getConnection().commit();

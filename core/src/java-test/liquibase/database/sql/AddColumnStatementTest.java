@@ -5,6 +5,7 @@ import liquibase.database.structure.Column;
 import liquibase.database.structure.DatabaseSnapshot;
 import liquibase.database.template.JdbcTemplate;
 import liquibase.exception.StatementNotSupportedOnDatabaseException;
+import liquibase.exception.JDBCException;
 import liquibase.test.DatabaseTest;
 import liquibase.test.DatabaseTestTemplate;
 import liquibase.test.SqlStatementDatabaseTest;
@@ -121,8 +122,8 @@ public class AddColumnStatementTest extends AbstractSqlStatementTest {
         new DatabaseTestTemplate().testOnAvailableDatabases(
                 new SqlStatementDatabaseTest(null, new AddColumnStatement(null, TABLE_NAME, NEW_COLUMN_NAME, "int", null, new PrimaryKeyConstraint())) {
 
-                    protected boolean supportsTest(Database database) {
-                        return !(database instanceof DB2Database
+                    protected boolean expectedException(Database database, JDBCException exception) {
+                        return (database instanceof DB2Database
                                 || database instanceof DerbyDatabase
                                 || database instanceof H2Database
                                 || database instanceof CacheDatabase);

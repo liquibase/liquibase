@@ -115,4 +115,24 @@ public class AlterSequenceStatementTest extends AbstractSqlStatementTest {
                 });
     }
 
+    @Test
+    public void execute_schemaSet() throws Exception {
+        new DatabaseTestTemplate().testOnAvailableDatabases(
+                new SqlStatementDatabaseTest(TestContext.ALT_SCHEMA, new AlterSequenceStatement(TestContext.ALT_SCHEMA, SEQ_NAME).setIncrementBy(5)) {
+                    protected boolean expectedException(Database database, JDBCException exception) {
+                        return database instanceof FirebirdDatabase || database instanceof HsqlDatabase;
+                    }
+
+                    protected void preExecuteAssert(DatabaseSnapshot snapshot) {
+                        assertNotNull(snapshot.getSequence(SEQ_NAME));
+                        //todo: assert increment by is 1
+                    }
+
+                    protected void postExecuteAssert(DatabaseSnapshot snapshot) {
+                        assertNotNull(snapshot.getSequence(SEQ_NAME));
+                        //todo: assert increment by value
+                    }
+                });
+    }
+
 }

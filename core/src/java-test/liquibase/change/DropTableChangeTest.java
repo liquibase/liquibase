@@ -1,8 +1,9 @@
 package liquibase.change;
 
-import liquibase.database.OracleDatabase;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import liquibase.database.MockDatabase;
+import liquibase.database.sql.DropTableStatement;
+import liquibase.database.sql.SqlStatement;
+import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Element;
@@ -18,6 +19,7 @@ public class DropTableChangeTest extends AbstractChangeTest {
     @Before
     public void setUp() throws Exception {
         change = new DropTableChange();
+        change.setSchemaName("SCHEMA_NAME");
         change.setTableName("TAB_NAME");
         change.setCascadeConstraints(true);
     }
@@ -29,14 +31,19 @@ public class DropTableChangeTest extends AbstractChangeTest {
 
     @Test
     public void generateStatement() throws Exception {
-        OracleDatabase database = new OracleDatabase();
-        assertEquals("DROP TABLE TAB_NAME CASCADE CONSTRAINTS", change.generateStatements(database)[0].getSqlStatement(database));
+        SqlStatement[] sqlStatements = change.generateStatements(new MockDatabase());
+        assertEquals(1, sqlStatements.length);
+        assertTrue(sqlStatements[0] instanceof DropTableStatement);
+        assertEquals("SCHEMA_NAME", ((DropTableStatement) sqlStatements[0]).getSchemaName());
+        assertEquals("TAB_NAME", ((DropTableStatement) sqlStatements[0]).getTableName());
+        assertTrue(((DropTableStatement) sqlStatements[0]).isCascadeConstraints());
+    }
 
+    @Test
+    public void generateStatement_nullCascadeConstraints() throws Exception {
         change.setCascadeConstraints(null);
-        assertEquals("DROP TABLE TAB_NAME", change.generateStatements(database)[0].getSqlStatement(database));
-
-        change.setCascadeConstraints(false);
-        assertEquals("DROP TABLE TAB_NAME", change.generateStatements(database)[0].getSqlStatement(database));
+        SqlStatement[] sqlStatements = change.generateStatements(new MockDatabase());
+        assertFalse(((DropTableStatement) sqlStatements[0]).isCascadeConstraints());
     }
 
     @Test
@@ -50,11 +57,22 @@ public class DropTableChangeTest extends AbstractChangeTest {
         assertEquals("dropTable", element.getTagName());
         assertEquals("TAB_NAME", element.getAttribute("tableName"));
         assertEquals("true", element.getAttribute("cascadeConstraints"));
+    }
 
-        change.setCascadeConstraints(null);
-        element = change.createNode(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument());
+    @Test
+    public void createNode_withSchema() throws Exception {
+        Element element = change.createNode(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument());
         assertEquals("dropTable", element.getTagName());
         assertEquals("TAB_NAME", element.getAttribute("tableName"));
+        assertEquals("true", element.getAttribute("cascadeConstraints"));
+        assertTrue(element.hasAttribute("schemaName"));
+    }
+
+    @Test
+    public void createNode_nullConstraint() throws Exception {
+        change.setCascadeConstraints(null);
+        Element element = change.createNode(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument());
+        assertEquals("dropTable", element.getTagName());
         assertFalse(element.hasAttribute("cascadeConstraints"));
     }
 }

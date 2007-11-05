@@ -79,11 +79,6 @@ public class MySQLDatabase extends AbstractDatabase {
         return "==";
     }
 
-    public String getDropTableSQL(String tableName) {
-        return "DROP TABLE " + tableName;
-    }
-
-
     public String getFalseBooleanValue() {
         return "0";
     }
