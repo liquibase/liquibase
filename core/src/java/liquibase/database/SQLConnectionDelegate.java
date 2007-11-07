@@ -186,4 +186,7 @@ public class SQLConnectionDelegate implements DatabaseConnection {
         con.setTypeMap(map);
     }
 
+    public Connection getUnderlyingConnection() {
+        return con;
+    }
 }

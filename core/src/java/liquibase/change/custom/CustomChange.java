@@ -1,10 +1,7 @@
 package liquibase.change.custom;
 
 import liquibase.FileOpener;
-import liquibase.database.structure.DatabaseObject;
 import liquibase.exception.SetupException;
-
-import java.util.Set;
 
 /**
  * Interface to implement when creating a custom change.  Actual custom changes implementations need to

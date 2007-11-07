@@ -1,11 +1,10 @@
 package liquibase.database.sql;
 
 import liquibase.database.Database;
+import liquibase.database.FirebirdDatabase;
 import liquibase.database.MSSQLDatabase;
 import liquibase.database.PostgresDatabase;
-import liquibase.database.FirebirdDatabase;
 import liquibase.exception.StatementNotSupportedOnDatabaseException;
-import liquibase.exception.UnsupportedChangeException;
 
 public class DropPrimaryKeyStatement implements SqlStatement {
 

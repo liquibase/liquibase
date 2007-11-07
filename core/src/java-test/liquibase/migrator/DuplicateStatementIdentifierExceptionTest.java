@@ -1,12 +1,13 @@
 package liquibase.migrator;
 
 import liquibase.exception.DuplicateStatementIdentifierException;
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 import org.junit.Test;
 
 /**
  * Tests for {@link DuplicateStatementIdentifierException}
  */
+@SuppressWarnings({"ThrowableInstanceNeverThrown"})
 public class DuplicateStatementIdentifierExceptionTest {
 
     @Test

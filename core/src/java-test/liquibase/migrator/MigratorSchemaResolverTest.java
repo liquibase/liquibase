@@ -1,8 +1,7 @@
 package liquibase.migrator;
 
 import liquibase.parser.MigratorSchemaResolver;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 import org.junit.Test;
 
 /**

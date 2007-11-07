@@ -1,21 +1,26 @@
 package liquibase.test;
 
 import liquibase.database.Database;
+import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
 import liquibase.exception.JDBCException;
-import liquibase.migrator.Migrator;
 
 import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.SQLException;
 import java.util.*;
 
+/**
+ * Controls the database connections for running tests.
+ * For times we aren't wanting to run the database-hitting tests, set the "test.databases" system property
+ * to be a comma-separated list of the databses we want to test against.  The string is checked against the database url.  
+ */
 public class TestContext {
     private static TestContext instance = new TestContext();
 
-    private Set<Database> availableDatabases;
+    private Set<Database> availableDatabases = new HashSet<Database>();
     private Set<Database> allDatabases;
-    private Set<Connection> availableConnections;
+    private Set<DatabaseConnection> availableConnections;
 
     private final String[] DEFAULT_TEST_URLS = new String[]{
             "jdbc:Cache://127.0.0.1:1972/liquibase",
@@ -25,8 +30,7 @@ public class TestContext {
             "jdbc:h2:mem:liquibase",
             "jdbc:hsqldb:mem:liquibase",
             "jdbc:jtds:sqlserver://localhost;databaseName=liquibase",
-//            "jdbc:jtds:sqlserver://windev1.sundog.net;instance=latest;DatabaseName=liquibase",
-            "jdbc:sqlserver://localhost;databaseName=liquibase",
+//            "jdbc:sqlserver://localhost;databaseName=liquibase",
             "jdbc:mysql://localhost/liquibase",
             "jdbc:oracle:thin:@localhost/XE",
             "jdbc:postgresql://localhost/liquibase",
@@ -34,16 +38,30 @@ public class TestContext {
 //            "jdbc:sybase:Tds:"+ InetAddress.getLocalHost().getHostName()+":5000/liquibase",
     };
 
-    private Map<String, Connection> connectionsByUrl = new HashMap<String, Connection>();
+    private Map<String, DatabaseConnection> connectionsByUrl = new HashMap<String, DatabaseConnection>();
     private Map<String, Boolean> connectionsAttempted = new HashMap<String, Boolean>();
     public static final String ALT_SCHEMA = "LIQUIBASEB";
     public static final String ALT_TABLESPACE = "LIQUIBASE2";
 
-    private Connection openConnection(final String url) throws Exception {
+    private DatabaseConnection openConnection(final String url) throws Exception {
         if (connectionsAttempted.containsKey(url)) {
             return connectionsByUrl.get(url);
         }
         connectionsAttempted.put(url, Boolean.TRUE);
+
+        if (System.getProperty("test.databases") != null) {
+            boolean shouldTest = false;
+            String[] databasesToTest = System.getProperty("test.databases").split("\\s*,\\s*");
+            for (String database : databasesToTest) {
+                if (url.indexOf(database) >= 0) {
+                    shouldTest = true;
+                }
+            }
+            if (!shouldTest) {
+                System.out.println("test.databases system property forbids testing against " + url);
+                return null;
+            }
+        }
 
         String username = getUsername(url);
         String password = getPassword(url);
@@ -92,7 +110,9 @@ public class TestContext {
 //            migrator.dropAll(TestContext.ALT_SCHEMA);
 //        }
 
-        connectionsByUrl.put(url, connection);
+        Database availableDatabase = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(connection);
+        DatabaseConnection databaseConnection = availableDatabase.getConnection();
+        connectionsByUrl.put(url, databaseConnection);
 
         Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
 
@@ -132,14 +152,12 @@ public class TestContext {
             }
         }));
 
-        return connection;
+        return databaseConnection;
     }
 
     private String getUsername(String url) {
         if (url.startsWith("jdbc:hsqldb")) {
             return "sa";
-        } else if (url.indexOf("windev1") > 0) {
-            return "sundog";
         }
         return "liquibase";
     }
@@ -147,8 +165,6 @@ public class TestContext {
     private String getPassword(String url) {
         if (url.startsWith("jdbc:hsqldb")) {
             return "";
-        } else if (url.indexOf("windev1") > 0) {
-            return "sundog";
         }
         return "liquibase";
     }
@@ -175,7 +191,7 @@ public class TestContext {
     public Set<Database> getAvailableDatabases() throws Exception {
         if (availableDatabases == null) {
             availableDatabases = new HashSet<Database>();
-            for (Connection conn : getAvailableConnections()) {
+            for (DatabaseConnection conn : getAvailableConnections()) {
                 availableDatabases.add(DatabaseFactory.getInstance().findCorrectDatabaseImplementation(conn));
             }
         }
@@ -183,14 +199,14 @@ public class TestContext {
     }
 
 
-    public Set<Connection> getAvailableConnections() throws Exception {
+    public Set<DatabaseConnection> getAvailableConnections() throws Exception {
         if (availableConnections == null) {
-            availableConnections = new HashSet<Connection>();
+            availableConnections = new HashSet<DatabaseConnection>();
             for (String url : getTestUrls()) {
 //                if (url.indexOf("jtds") >= 0) {
 //                    continue;
 //                }
-                Connection connection = openConnection(url);
+                DatabaseConnection connection = openConnection(url);
                 if (connection != null) {
                     availableConnections.add(connection);
                 }
@@ -200,7 +216,7 @@ public class TestContext {
         return availableConnections;
     }
 
-    public Connection getConnection(String url) throws Exception {
+    public DatabaseConnection getConnection(String url) throws Exception {
         return openConnection(url);
     }
 }

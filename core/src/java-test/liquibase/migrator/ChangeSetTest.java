@@ -3,7 +3,7 @@ package liquibase.migrator;
 import liquibase.ChangeSet;
 import liquibase.change.CreateTableChange;
 import liquibase.change.InsertDataChange;
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 import org.junit.Test;
 
 /**

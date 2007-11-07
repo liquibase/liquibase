@@ -1,14 +1,12 @@
 package liquibase.change;
 
-import static org.junit.Assert.assertEquals;
-
 import liquibase.database.MSSQLDatabase;
 import liquibase.database.OracleDatabase;
 import liquibase.database.sql.SqlStatement;
-import liquibase.exception.UnsupportedChangeException;
 import liquibase.exception.StatementNotSupportedOnDatabaseException;
+import liquibase.exception.UnsupportedChangeException;
 import liquibase.util.XMLUtil;
-
+import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Element;

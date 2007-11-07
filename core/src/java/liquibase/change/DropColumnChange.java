@@ -1,7 +1,9 @@
 package liquibase.change;
 
+import liquibase.database.DB2Database;
 import liquibase.database.Database;
 import liquibase.database.sql.DropColumnStatement;
+import liquibase.database.sql.ReorganizeTableStatement;
 import liquibase.database.sql.SqlStatement;
 import liquibase.database.structure.Column;
 import liquibase.database.structure.DatabaseObject;
@@ -10,9 +12,7 @@ import liquibase.exception.UnsupportedChangeException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Drops an existing column from a table.
@@ -53,9 +53,12 @@ public class DropColumnChange extends AbstractChange {
     }
 
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
-        return new SqlStatement[]{
-                new DropColumnStatement(getSchemaName(), getTableName(), getColumnName())
-        };
+        List<SqlStatement> statements = new ArrayList<SqlStatement>();
+        statements.add(new DropColumnStatement(getSchemaName(), getTableName(), getColumnName()));
+        if (database instanceof DB2Database) {
+            statements.add(new ReorganizeTableStatement(getSchemaName(), getTableName()));
+        }
+        return statements.toArray(new SqlStatement[statements.size()]);
     }
 
     public String getConfirmationMessage() {

@@ -5,7 +5,6 @@ import liquibase.database.sql.SqlStatement;
 import liquibase.exception.JDBCException;
 
 import java.sql.Connection;
-import java.sql.SQLException;
 
 public class SybaseDatabase extends MSSQLDatabase {
 

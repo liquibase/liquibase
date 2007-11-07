@@ -20,8 +20,8 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.Writer;
 import java.io.PrintStream;
+import java.io.Writer;
 import java.net.URL;
 import java.sql.*;
 import java.text.DateFormat;
@@ -169,6 +169,15 @@ public class Migrator {
      * Initializes the Migrator with the given connection.  Needs to be called before actually using the Migrator.
      */
     public void init(Connection connection) throws JDBCException {
+        // Array Of all the implemented databases
+        database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(connection);
+        database.setConnection(connection);
+    }
+
+    /**
+     * Initializes the Migrator with the given connection.  Needs to be called before actually using the Migrator.
+     */
+    public void init(DatabaseConnection connection) throws JDBCException {
         // Array Of all the implemented databases
         database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(connection);
         database.setConnection(connection);

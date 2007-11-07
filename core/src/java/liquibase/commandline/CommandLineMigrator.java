@@ -1,8 +1,6 @@
 package liquibase.commandline;
 
-import liquibase.ChangeSet;
 import liquibase.CompositeFileOpener;
-import liquibase.DatabaseChangeLogLock;
 import liquibase.FileSystemFileOpener;
 import liquibase.database.DatabaseFactory;
 import liquibase.diff.Diff;
@@ -492,12 +490,14 @@ public class CommandLineMigrator {
                 try {
                     outStream.close();
                 } catch (IOException ioe) {
+                    ;
                 }
             }
             if (inStream != null) {
                 try {
                     inStream.close();
                 } catch (IOException ioe) {
+                    ;
                 }
             }
         }

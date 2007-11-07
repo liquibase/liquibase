@@ -1,7 +1,6 @@
 package liquibase.change;
 
 import liquibase.database.structure.DatabaseObject;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 

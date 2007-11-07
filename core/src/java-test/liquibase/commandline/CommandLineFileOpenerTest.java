@@ -2,7 +2,7 @@ package liquibase.commandline;
 
 import liquibase.FileOpener;
 import liquibase.migrator.AbstractFileOpenerTest;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 import org.junit.Test;
 
 import java.io.IOException;

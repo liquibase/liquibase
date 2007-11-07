@@ -2,7 +2,6 @@ package liquibase.change;
 
 import liquibase.database.Database;
 import liquibase.database.sql.CreateSequenceStatement;
-import liquibase.database.sql.DropSequenceStatement;
 import liquibase.database.sql.SqlStatement;
 import liquibase.test.DatabaseTest;
 import liquibase.test.DatabaseTestTemplate;

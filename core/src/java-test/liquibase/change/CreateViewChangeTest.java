@@ -1,7 +1,6 @@
 package liquibase.change;
 
 import liquibase.database.Database;
-import liquibase.database.sql.AddPrimaryKeyStatement;
 import liquibase.database.sql.CreateViewStatement;
 import liquibase.database.sql.SqlStatement;
 import liquibase.test.DatabaseTest;

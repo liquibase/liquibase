@@ -1,7 +1,7 @@
 package liquibase.change;
 
 import liquibase.database.Database;
-import liquibase.database.sql.RawSqlStatement;
+import liquibase.database.sql.DropViewStatement;
 import liquibase.database.sql.SqlStatement;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.View;
@@ -42,7 +42,7 @@ public class DropViewChange extends AbstractChange {
 
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
         return new SqlStatement[]{
-                new RawSqlStatement("DROP VIEW " + viewName),
+                new DropViewStatement(getSchemaName(), getViewName()),
         };
     }
 

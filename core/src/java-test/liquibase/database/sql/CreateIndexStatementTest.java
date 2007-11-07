@@ -2,13 +2,10 @@ package liquibase.database.sql;
 
 import liquibase.database.Database;
 import liquibase.database.structure.DatabaseSnapshot;
-import liquibase.database.template.JdbcTemplate;
-import liquibase.test.DatabaseTest;
 import liquibase.test.DatabaseTestTemplate;
 import liquibase.test.SqlStatementDatabaseTest;
 import liquibase.test.TestContext;
 import static org.junit.Assert.*;
-import org.junit.Before;
 import org.junit.Test;
 
 public class CreateIndexStatementTest extends AbstractSqlStatementTest {

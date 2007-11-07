@@ -1,9 +1,7 @@
 package liquibase.change;
 
-import liquibase.database.DB2Database;
 import liquibase.database.Database;
 import liquibase.database.sql.AddUniqueConstraintStatement;
-import liquibase.database.sql.ReorganizeTableStatement;
 import liquibase.database.sql.SqlStatement;
 import liquibase.test.DatabaseTest;
 import liquibase.test.DatabaseTestTemplate;

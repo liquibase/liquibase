@@ -4,7 +4,7 @@ import junit.framework.TestCase;
 import liquibase.ChangeSet;
 import liquibase.FileOpener;
 import liquibase.FileSystemFileOpener;
-import liquibase.database.Database;
+import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.structure.DatabaseSnapshot;
 import liquibase.diff.Diff;
@@ -19,7 +19,6 @@ import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.io.StringWriter;
 import java.net.URL;
-import java.sql.Connection;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.List;
@@ -32,7 +31,7 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
     private String completeChangeLog;
     private String rollbackChangeLog;
     private String includedChangeLog;
-    protected Connection connection;
+    protected DatabaseConnection connection;
 
     protected AbstractSimpleChangeLogRunnerTest(String changelogDir, String url) throws Exception {
         this.completeChangeLog = "changelogs/" + changelogDir + "/complete/root.changelog.xml";
@@ -47,11 +46,13 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
     protected void setUp() throws Exception {
         super.setUp();
 
-        if (!connection.getAutoCommit()) {
-            connection.rollback();
-        }
+        if (connection != null) {
+            if (!connection.getAutoCommit()) {
+                connection.rollback();
+            }
 
-        createMigrator(completeChangeLog).forceReleaseLock();
+            createMigrator(completeChangeLog).forceReleaseLock();
+        }
     }
 
     protected Properties createProperties() {
@@ -59,8 +60,10 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
     }
 
     protected void tearDown() throws Exception {
-        if (shouldRollBack()) {
-            connection.rollback();
+        if (connection != null) {
+            if (shouldRollBack()) {
+                connection.rollback();
+            }
         }
         super.tearDown();
     }
@@ -83,6 +86,10 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
     }
 
     public void testRunChangeLog() throws Exception {
+        if (connection == null) {
+            return;
+        }
+        
         runCompleteChangeLog();
     }
 
@@ -100,14 +107,18 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
         }
     }
 
-    private String[] getSchemasToDrop() throws JDBCException {
+    protected String[] getSchemasToDrop() throws JDBCException {
         return new String[] {
+                "liquibaseb".toUpperCase(),
                 DatabaseFactory.getInstance().findCorrectDatabaseImplementation(connection).getSchemaName(),
-                "liquibaseb".toUpperCase()
         };
     }
 
     public void testOutputChangeLog() throws Exception {
+        if (connection == null) {
+            return;
+        }
+
         StringWriter output = new StringWriter();
         Migrator migrator = createMigrator(completeChangeLog);
         migrator.dropAll(getSchemasToDrop());
@@ -121,6 +132,10 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
     }
 
     public void testRollbackableChangeLog() throws Exception {
+        if (connection == null) {
+            return;
+        }
+
         Migrator migrator = createMigrator(rollbackChangeLog);
         migrator.dropAll(getSchemasToDrop());
 
@@ -144,6 +159,10 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
     }
 
     public void testRollbackableChangeLogScriptOnExistingDatabase() throws Exception {
+        if (connection == null) {
+            return;
+        }
+
         Migrator migrator = createMigrator(rollbackChangeLog);
         migrator.dropAll(getSchemasToDrop());
 
@@ -163,6 +182,10 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
     }
 
     public void testRollbackableChangeLogScriptOnFutureDatabase() throws Exception {
+        if (connection == null) {
+            return;
+        }
+
         StringWriter writer = new StringWriter();
 
         Migrator migrator = createMigrator(rollbackChangeLog);
@@ -178,6 +201,10 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
     }
 
     public void testTag() throws Exception {
+        if (connection == null) {
+            return;
+        }
+
         Migrator migrator = createMigrator(completeChangeLog);
         migrator.dropAll(getSchemasToDrop());
 
@@ -194,6 +221,10 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
 //    }
 
     public void testDiff() throws Exception {
+        if (connection == null) {
+            return;
+        }
+
         runCompleteChangeLog();
 
         Diff diff = new Diff(connection, connection);
@@ -219,6 +250,10 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
     }
 
     public void testRerunDiffChangeLog() throws Exception {
+        if (connection == null) {
+            return;
+        }
+
         runCompleteChangeLog();
 
         DatabaseSnapshot originalSnapshot = new DatabaseSnapshot(DatabaseFactory.getInstance().findCorrectDatabaseImplementation(connection));
@@ -271,6 +306,10 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
     }
 
     public void testClearChecksums() throws Exception {
+        if (connection == null) {
+            return;
+        }
+
         Migrator migrator = createMigrator(completeChangeLog);
         migrator.dropAll(getSchemasToDrop());
 
@@ -284,6 +323,10 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
     }
 
     public void testTagEmptyDatabase() throws Exception {
+        if (connection == null) {
+            return;
+        }
+
         Migrator migrator = createMigrator(completeChangeLog);
         migrator.dropAll(getSchemasToDrop());
 
@@ -298,6 +341,10 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
     }
 
     public void testUnrunChangeSetsEmptyDatabase() throws Exception {
+        if (connection == null) {
+            return;
+        }
+
         Migrator migrator = createMigrator(completeChangeLog);
         migrator.dropAll(getSchemasToDrop());
 
@@ -309,6 +356,10 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
     }
 
     public void testAbsolutePathChangeLog() throws Exception {
+        if (connection == null) {
+            return;
+        }
+        
 
         Enumeration<URL> urls = new JUnitFileOpener().getResources(includedChangeLog);
         URL completeChangeLogURL = urls.nextElement();

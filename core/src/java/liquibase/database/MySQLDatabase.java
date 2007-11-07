@@ -1,12 +1,10 @@
 package liquibase.database;
 
-import liquibase.change.DropForeignKeyConstraintChange;
-import liquibase.exception.JDBCException;
-import liquibase.exception.UnsupportedChangeException;
-import liquibase.database.sql.SqlStatement;
 import liquibase.database.sql.RawSqlStatement;
+import liquibase.database.sql.SqlStatement;
+import liquibase.exception.JDBCException;
 
-import java.sql.*;
+import java.sql.Connection;
 
 /**
  * Encapsulates MySQL database support.

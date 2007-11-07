@@ -1,7 +1,6 @@
 package liquibase.change;
 
 import liquibase.database.Database;
-import liquibase.database.sql.AddUniqueConstraintStatement;
 import liquibase.database.sql.DropSequenceStatement;
 import liquibase.database.sql.SqlStatement;
 import liquibase.test.DatabaseTest;

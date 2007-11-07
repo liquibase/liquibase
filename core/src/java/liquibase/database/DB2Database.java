@@ -4,7 +4,8 @@ import liquibase.database.sql.RawSqlStatement;
 import liquibase.database.sql.SqlStatement;
 import liquibase.exception.JDBCException;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.Types;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 

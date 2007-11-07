@@ -1,8 +1,8 @@
 package liquibase.database;
 
-import liquibase.exception.JDBCException;
-import liquibase.database.sql.SqlStatement;
 import liquibase.database.sql.RawSqlStatement;
+import liquibase.database.sql.SqlStatement;
+import liquibase.exception.JDBCException;
 
 import java.sql.Connection;
 
@@ -105,10 +105,7 @@ public class FirebirdDatabase extends AbstractDatabase {
 
 
     public boolean isSystemTable(String catalogName, String schemaName, String tableName) {
-        if (tableName.startsWith("RDB$")) {
-            return true;
-        }
-        return super.isSystemTable(catalogName, schemaName, tableName);
+        return tableName.startsWith("RDB$") || super.isSystemTable(catalogName, schemaName, tableName);
     }
 
 

@@ -1,8 +1,8 @@
 package liquibase.database.sql;
 
+import liquibase.database.DB2Database;
 import liquibase.database.Database;
 import liquibase.database.MSSQLDatabase;
-import liquibase.database.DB2Database;
 import liquibase.exception.StatementNotSupportedOnDatabaseException;
 import liquibase.util.StringUtils;
 

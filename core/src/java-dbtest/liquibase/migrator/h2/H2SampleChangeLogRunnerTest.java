@@ -2,8 +2,6 @@ package liquibase.migrator.h2;
 
 import liquibase.migrator.AbstractSimpleChangeLogRunnerTest;
 
-import java.sql.SQLException;
-
 @SuppressWarnings({"JUnitTestCaseWithNoTests"})
 public class H2SampleChangeLogRunnerTest extends AbstractSimpleChangeLogRunnerTest {
 
@@ -13,16 +11,9 @@ public class H2SampleChangeLogRunnerTest extends AbstractSimpleChangeLogRunnerTe
 
     protected void setUp() throws Exception {
         super.setUp();
-        try {
-            connection.createStatement().execute("CREATE SCHEMA LIQUIBASEB");
-            connection.commit();
-        } catch (SQLException e) {
-            ; //already exists
-        }
     }
 
     protected void tearDown() throws Exception {
-//        connection.createStatement().execute("DROP SCHEMA LIQUIBASEB");
         super.tearDown();
     }
 }

@@ -1,13 +1,12 @@
 package liquibase.change;
 
-import liquibase.database.*;
-import liquibase.database.sql.RawSqlStatement;
+import liquibase.database.Database;
+import liquibase.database.sql.RenameColumnStatement;
 import liquibase.database.sql.SqlStatement;
 import liquibase.database.structure.Column;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Table;
 import liquibase.exception.UnsupportedChangeException;
-import liquibase.util.SqlUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -72,27 +71,9 @@ public class RenameColumnChange extends AbstractChange {
     }
 
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
-        if (database instanceof MSSQLDatabase) {
-            return new SqlStatement[]{new RawSqlStatement("exec sp_rename '" + database.escapeTableName(getSchemaName(), tableName) + "." + oldColumnName + "', '" + newColumnName+"'")};
-        } else if (database instanceof MySQLDatabase) {
-            if (columnDataType == null) {
-                throw new RuntimeException("columnDataType is required to rename columns with MySQL");
-            }
-            
-            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + database.escapeTableName(getSchemaName(), tableName) + " CHANGE " + oldColumnName + " " + newColumnName + " " + columnDataType)};
-        } else if (database instanceof DerbyDatabase) {
-            throw new UnsupportedChangeException("Derby does not currently support renaming columns");
-        } else if (database instanceof HsqlDatabase) {
-            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + database.escapeTableName(getSchemaName(), tableName) + " ALTER COLUMN " + oldColumnName + " RENAME TO " + newColumnName)};
-        } else if (database instanceof FirebirdDatabase) {
-            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + database.escapeTableName(getSchemaName(), tableName) + " ALTER COLUMN " + oldColumnName + " TO " + newColumnName)};
-        } else if (database instanceof DB2Database) {
-            throw new UnsupportedChangeException("Rename Column not supported in DB2");
-        } else if (database instanceof CacheDatabase) {
-            throw new UnsupportedChangeException("Rename Column not currently supported for Cache");
-        }
-
-        return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + database.escapeTableName(getSchemaName(), tableName) + " RENAME COLUMN " + oldColumnName + " TO " + newColumnName)};
+        return new SqlStatement[] {
+                new RenameColumnStatement(getSchemaName(), getTableName(), getOldColumnName(), getNewColumnName(), getColumnDataType())
+        };
     }
 
     protected Change[] createInverses() {

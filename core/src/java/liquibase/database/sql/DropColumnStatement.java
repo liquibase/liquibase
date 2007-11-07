@@ -2,7 +2,6 @@ package liquibase.database.sql;
 
 import liquibase.database.*;
 import liquibase.exception.StatementNotSupportedOnDatabaseException;
-import liquibase.exception.UnsupportedChangeException;
 
 public class DropColumnStatement implements SqlStatement {
 

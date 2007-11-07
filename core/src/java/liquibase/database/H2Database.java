@@ -6,8 +6,6 @@ import liquibase.exception.JDBCException;
 import liquibase.util.StringUtils;
 
 import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -39,30 +37,30 @@ public class H2Database extends HsqlDatabase {
     }
 
 
-    public void dropDatabaseObjects(String schema) throws JDBCException {
-        DatabaseConnection conn = getConnection();
-        Statement dropStatement = null;
-        try {
-            dropStatement = conn.createStatement();
-            dropStatement.executeUpdate("DROP ALL OBJECTS");
-            changeLogTableExists = false;
-            changeLogLockTableExists = false;
-            changeLogCreateAttempted = false;
-            changeLogLockCreateAttempted = false;
-        } catch (SQLException e) {
-            throw new JDBCException(e);
-        } finally {
-            try {
-                if (dropStatement != null) {
-                    dropStatement.close();
-                }
-                conn.commit();
-            } catch (SQLException e) {
-                ;
-            }
-        }
-
-    }
+//    public void dropDatabaseObjects(String schema) throws JDBCException {
+//        DatabaseConnection conn = getConnection();
+//        Statement dropStatement = null;
+//        try {
+//            dropStatement = conn.createStatement();
+//            dropStatement.executeUpdate("DROP ALL OBJECTS");
+//            changeLogTableExists = false;
+//            changeLogLockTableExists = false;
+//            changeLogCreateAttempted = false;
+//            changeLogLockCreateAttempted = false;
+//        } catch (SQLException e) {
+//            throw new JDBCException(e);
+//        } finally {
+//            try {
+//                if (dropStatement != null) {
+//                    dropStatement.close();
+//                }
+//                conn.commit();
+//            } catch (SQLException e) {
+//                ;
+//            }
+//        }
+//
+//    }
 
     public boolean supportsTablespaces() {
         return false;
@@ -73,7 +71,7 @@ public class H2Database extends HsqlDatabase {
     }
 
     public SqlStatement getViewDefinitionSql(String schemaName, String name) throws JDBCException {
-        return new RawSqlStatement("SELECT VIEW_DEFINITION FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_NAME = '" + name + "'");
+        return new RawSqlStatement("SELECT VIEW_DEFINITION FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_NAME = '" + name + "' AND TABLE_SCHEMA='"+convertRequestedSchemaToSchema(schemaName)+"'");
     }
 
     public Object convertDatabaseValueToJavaObject(Object defaultValue, int dataType, int columnSize, int decimalDigits) throws ParseException {

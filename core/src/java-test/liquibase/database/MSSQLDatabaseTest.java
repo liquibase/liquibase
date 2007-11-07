@@ -67,8 +67,6 @@ public class MSSQLDatabaseTest extends AbstractDatabaseTest {
 
         assertEquals("com.microsoft.sqlserver.jdbc.SQLServerDriver", database.getDefaultDriver("jdbc:sqlserver://localhost;databaseName=liquibase"));
 
-        assertEquals("net.sourceforge.jtds.jdbc.Driver", database.getDefaultDriver("jdbc:jtds:sqlserver://windev1.sundog.net;instance=latest;DatabaseName=liquibase"));
-
         assertNull(database.getDefaultDriver("jdbc:oracle:thin://localhost;databaseName=liquibase"));
     }
 

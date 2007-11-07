@@ -1,9 +1,9 @@
 package liquibase.database.sql;
 
 import liquibase.database.Database;
-import liquibase.test.DatabaseTestTemplate;
 import liquibase.test.DatabaseTest;
-import static org.junit.Assert.assertEquals;
+import liquibase.test.DatabaseTestTemplate;
+import static org.junit.Assert.*;
 import org.junit.Test;
 
 public class RawSqlStatementTest extends AbstractSqlStatementTest {

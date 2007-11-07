@@ -1,7 +1,11 @@
 package liquibase.change;
 
-import liquibase.database.*;
-import liquibase.database.sql.*;
+import liquibase.database.DB2Database;
+import liquibase.database.Database;
+import liquibase.database.sql.ReorganizeTableStatement;
+import liquibase.database.sql.SetNullableStatement;
+import liquibase.database.sql.SqlStatement;
+import liquibase.database.sql.UpdateStatement;
 import liquibase.database.structure.Column;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Table;

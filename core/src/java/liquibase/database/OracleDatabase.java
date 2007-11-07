@@ -2,18 +2,11 @@ package liquibase.database;
 
 import liquibase.database.sql.RawSqlStatement;
 import liquibase.database.sql.SqlStatement;
-import liquibase.database.structure.Table;
-import liquibase.database.structure.UniqueConstraint;
-import liquibase.database.template.JdbcTemplate;
 import liquibase.exception.JDBCException;
 
 import java.sql.Connection;
 import java.sql.Types;
 import java.text.ParseException;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * Encapsulates Oracle database support.

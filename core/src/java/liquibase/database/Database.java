@@ -3,7 +3,6 @@ package liquibase.database;
 import liquibase.DatabaseChangeLogLock;
 import liquibase.database.sql.SqlStatement;
 import liquibase.database.structure.DatabaseObject;
-import liquibase.database.structure.UniqueConstraint;
 import liquibase.exception.JDBCException;
 import liquibase.exception.LockException;
 import liquibase.migrator.Migrator;
@@ -12,7 +11,6 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.text.ParseException;
 import java.util.Date;
-import java.util.Set;
 
 public interface Database extends DatabaseObject {
     /**
@@ -96,8 +94,6 @@ public interface Database extends DatabaseObject {
     String getLineComment();
 
     String getAutoIncrementClause();
-
-    SqlStatement getCommitSQL();
 
     String getDatabaseChangeLogTableName();
 

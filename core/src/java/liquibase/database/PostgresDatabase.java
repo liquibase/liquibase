@@ -2,12 +2,10 @@ package liquibase.database;
 
 import liquibase.database.sql.RawSqlStatement;
 import liquibase.database.sql.SqlStatement;
-import liquibase.database.template.JdbcTemplate;
 import liquibase.exception.JDBCException;
 import liquibase.util.StringUtils;
 
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.sql.Types;
 import java.text.ParseException;
 import java.util.HashSet;
@@ -189,7 +187,7 @@ public class PostgresDatabase extends AbstractDatabase {
 
 
     public SqlStatement getViewDefinitionSql(String schemaName, String name) throws JDBCException {
-        return new RawSqlStatement("select definition from pg_views where viewname='" + name + "'");
+        return new RawSqlStatement("select definition from pg_views where viewname='" + name + "' AND schemaname='"+convertRequestedSchemaToSchema(schemaName)+"'");
     }
 
 

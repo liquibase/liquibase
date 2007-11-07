@@ -106,7 +106,7 @@
             <column name="id" type="int">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="value" type="varchar(50)">
+            <column name="valueCol" type="varchar(50)">
                 <constraints nullable="false"/>
             </column>
             <column name="person_id" type="int">
@@ -164,11 +164,11 @@
                 finalColumnType="varchar(100)"/>
     </changeSet>
 
-    <changeSet id="20" author="nvoxland">
-        <createView viewName="personView">
-            select id, fullname from person
-        </createView>
-    </changeSet>
+    <!--<changeSet id="20" author="nvoxland">-->
+        <!--<createView viewName="personView">-->
+            <!--select id, fullname from person-->
+        <!--</createView>-->
+    <!--</changeSet>-->
     <!-- Cache does not support renaming a view
     <changeSet id="21" author="nvoxland">
         <renameView oldViewName="personView" newViewName="v_person"/>
@@ -263,7 +263,7 @@
     <changeSet id="30" author="nvoxland">
         <createTable tableName="pkTest">
             <column name="id" type="int"/>
-            <column name="value" type="varchar(50)"/>
+            <column name="valueCol" type="varchar(50)"/>
         </createTable>
     </changeSet>
 

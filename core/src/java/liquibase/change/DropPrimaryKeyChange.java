@@ -1,10 +1,7 @@
 package liquibase.change;
 
 import liquibase.database.Database;
-import liquibase.database.MSSQLDatabase;
-import liquibase.database.PostgresDatabase;
 import liquibase.database.sql.DropPrimaryKeyStatement;
-import liquibase.database.sql.RawSqlStatement;
 import liquibase.database.sql.SqlStatement;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Table;

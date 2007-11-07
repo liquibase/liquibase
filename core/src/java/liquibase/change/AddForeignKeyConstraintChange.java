@@ -1,14 +1,13 @@
 package liquibase.change;
 
 import liquibase.database.Database;
-import liquibase.database.sql.RawSqlStatement;
+import liquibase.database.sql.AddForeignKeyConstraintStatement;
 import liquibase.database.sql.SqlStatement;
 import liquibase.database.structure.Column;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.ForeignKey;
 import liquibase.database.structure.Table;
 import liquibase.exception.UnsupportedChangeException;
-import liquibase.util.SqlUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -120,24 +119,32 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
     }
 
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
-        String sql = "ALTER TABLE " + database.escapeTableName(getBaseTableSchemaName(), getBaseTableName()) + " ADD CONSTRAINT " + getConstraintName() + " FOREIGN KEY (" + getBaseColumnNames() + ") REFERENCES " + database.escapeTableName(getReferencedTableSchemaName(), getReferencedTableName()) + "(" + getReferencedColumnNames() + ")";
-
-        if (deleteCascade != null && deleteCascade) {
-            sql += " ON DELETE CASCADE";
+        boolean deferrable = false;
+        if (getDeferrable() != null) {
+            deferrable = getDeferrable();
         }
 
-        if (database.supportsInitiallyDeferrableColumns()) {
-            if (deferrable != null && deferrable) {
-                sql += " DEFERRABLE";
-            }
-
-            if (initiallyDeferred != null && initiallyDeferred) {
-                sql += " INITIALLY DEFERRED";
-            }
+        boolean initiallyDeferred = false;
+        if (getInitiallyDeferred() != null) {
+            initiallyDeferred = getInitiallyDeferred();
         }
 
-        return new SqlStatement[] {
-                new RawSqlStatement(sql),
+        boolean deleteCascade = false;
+        if (getDeleteCascade() != null) {
+            deleteCascade = getDeleteCascade();
+        }
+        
+        return new SqlStatement[]{
+                new AddForeignKeyConstraintStatement(getConstraintName(),
+                        getBaseTableSchemaName(),
+                        getBaseTableName(),
+                        getBaseColumnNames(),
+                        getReferencedTableSchemaName(),
+                        getReferencedTableName(),
+                        getReferencedColumnNames())
+                .setDeferrable(deferrable)
+                .setInitiallyDeferred(initiallyDeferred)
+                .setDeleteCascade(deleteCascade)
         };
     }
 
@@ -153,7 +160,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
     }
 
     public String getConfirmationMessage() {
-        return "Foreign key contraint added to "+getBaseTableName()+" ("+getBaseColumnNames()+")";
+        return "Foreign key contraint added to " + getBaseTableName() + " (" + getBaseColumnNames() + ")";
     }
 
     public Element createNode(Document currentChangeLogFileDOM) {
@@ -168,11 +175,22 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
         node.setAttribute("constraintName", getConstraintName());
 
         if (getReferencedTableSchemaName() != null) {
-            node.setAttribute("baseTableSchemaName", getReferencedTableSchemaName());
+            node.setAttribute("referencedTableSchemaName", getReferencedTableSchemaName());
         }
         node.setAttribute("referencedTableName", getReferencedTableName());
         node.setAttribute("referencedColumnNames", getReferencedColumnNames());
 
+        if (getDeferrable() != null) {
+            node.setAttribute("deferrable", getDeferrable().toString());
+        }
+
+        if (getInitiallyDeferred() != null) {
+            node.setAttribute("initiallyDeferred", getInitiallyDeferred().toString());
+        }
+
+        if (getDeleteCascade() != null) {
+            node.setAttribute("deleteCascade", getDeleteCascade().toString());
+        }
         return node;
     }
 

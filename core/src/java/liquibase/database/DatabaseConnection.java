@@ -64,4 +64,6 @@ public interface DatabaseConnection {
     public void rollback() throws SQLException;
 
     public void setAutoCommit(boolean autoCommit) throws SQLException;
+
+    public Connection getUnderlyingConnection();
 }

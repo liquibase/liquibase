@@ -1,9 +1,14 @@
 package liquibase.change;
 
-import liquibase.database.OracleDatabase;
-import static org.junit.Assert.assertEquals;
+import liquibase.database.MockDatabase;
+import liquibase.database.sql.RenameTableStatement;
+import liquibase.database.sql.SqlStatement;
+import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
+import org.w3c.dom.Element;
+
+import javax.xml.parsers.DocumentBuilderFactory;
 
 /**
  * Tests for {@link RenameTableChange}
@@ -25,11 +30,17 @@ public class RenameTableChangeTest extends AbstractChangeTest {
     @Test
     public void generateStatement() throws Exception {
         RenameTableChange refactoring = new RenameTableChange();
+        refactoring.setSchemaName("SCHEMA_NAME");
         refactoring.setOldTableName("OLD_NAME");
         refactoring.setNewTableName("NEW_NAME");
 
-        OracleDatabase database = new OracleDatabase();
-        assertEquals("ALTER TABLE OLD_NAME RENAME TO NEW_NAME", refactoring.generateStatements(database)[0].getSqlStatement(database));
+
+        SqlStatement[] sqlStatements = refactoring.generateStatements(new MockDatabase());
+        assertEquals(1, sqlStatements.length);
+        assertTrue(sqlStatements[0] instanceof RenameTableStatement);
+        assertEquals("SCHEMA_NAME", ((RenameTableStatement) sqlStatements[0]).getSchemaName());
+        assertEquals("OLD_NAME", ((RenameTableStatement) sqlStatements[0]).getOldTableName());
+        assertEquals("NEW_NAME", ((RenameTableStatement) sqlStatements[0]).getNewTableName());
     }
 
     @Test
@@ -42,10 +53,14 @@ public class RenameTableChangeTest extends AbstractChangeTest {
 
     @Test
     public void createNode() throws Exception {
+        refactoring.setSchemaName("SCHEMA_NAME");
         refactoring.setOldTableName("OLD_NAME");
         refactoring.setNewTableName("NEW_NAME");
 
-        assertEquals("OLD_NAME", refactoring.getOldTableName());
-        assertEquals("NEW_NAME", refactoring.getNewTableName());
+        Element node = refactoring.createNode(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument());
+        assertEquals("renameTable", node.getTagName());
+        assertEquals("SCHEMA_NAME", node.getAttribute("schemaName"));
+        assertEquals("OLD_NAME", node.getAttribute("oldTableName"));
+        assertEquals("NEW_NAME", node.getAttribute("newTableName"));
     }
 }

@@ -7,13 +7,10 @@ import liquibase.database.structure.ForeignKey;
 import liquibase.database.structure.Table;
 import liquibase.database.template.JdbcTemplate;
 import liquibase.exception.JDBCException;
-import liquibase.test.DatabaseTest;
 import liquibase.test.DatabaseTestTemplate;
 import liquibase.test.SqlStatementDatabaseTest;
 import liquibase.test.TestContext;
 import static org.junit.Assert.*;
-import static org.junit.Assert.assertEquals;
-import org.junit.Before;
 import org.junit.Test;
 
 public class CreateTableStatementTest extends AbstractSqlStatementTest {

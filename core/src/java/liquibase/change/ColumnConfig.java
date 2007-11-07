@@ -19,8 +19,8 @@ public class ColumnConfig {
     private String name;
     private String type;
     private String value;
-    private String valueNumeric;
-    private String valueDate;
+    private Number valueNumeric;
+    private Date valueDate;
     private Boolean valueBoolean;
 
     private String defaultValue;
@@ -61,11 +61,20 @@ public class ColumnConfig {
         }
     }
 
-    public String getValueNumeric() {
+    public Number getValueNumeric() {
         return valueNumeric;
     }
 
-    public void setValueNumeric(String valueNumeric) {
+
+    public void setValueNumeric(String valueNumeric) throws ParseException {
+        if (valueNumeric == null) {
+            this.valueNumeric = null;
+        } else {
+            this.valueNumeric = NumberFormat.getInstance().parse(valueNumeric);
+        }
+    }
+
+    public void setValueNumeric(Number valueNumeric) {
         this.valueNumeric = valueNumeric;
     }
 
@@ -77,13 +86,31 @@ public class ColumnConfig {
         this.valueBoolean = valueBoolean;
     }
 
-    public String getValueDate() {
+    public Date getValueDate() {
         return valueDate;
     }
 
-    public void setValueDate(String valueDate) {
+    public void setValueDate(Date valueDate) {
         this.valueDate = valueDate;
     }
+
+    public void setValueDate(String valueDate) throws ParseException {
+        this.valueDate = new ISODateFormat().parse(valueDate);
+    }
+
+    public Object getValueObject() {
+        if (getValue() != null) {
+            return getValue();
+        } else if (getValueBoolean() != null) {
+            return getValueBoolean();
+        } else if (getValueNumeric() != null) {
+            return getValueNumeric();
+        } else if (getValueDate() != null) {
+            return getValueDate();
+        }
+        return null;
+    }
+
 
     public String getDefaultValue() {
         return defaultValue;
@@ -187,13 +214,13 @@ public class ColumnConfig {
             element.setAttribute("value", getValue());
         }
         if (getValueNumeric() != null) {
-            element.setAttribute("valueNumeric", getValueNumeric());
+            element.setAttribute("valueNumeric", getValueNumeric().toString());
         }
         if (getValueBoolean() != null) {
             element.setAttribute("valueBoolean", getValueBoolean().toString());
         }
         if (getValueDate() != null) {
-            element.setAttribute("valueDate", getValueDate());
+            element.setAttribute("valueDate", new ISODateFormat().format(getValueDate()));
         }
 
         if (isAutoIncrement() != null && isAutoIncrement()) {

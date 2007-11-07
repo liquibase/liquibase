@@ -1,15 +1,15 @@
 package liquibase.database;
 
+import liquibase.DatabaseChangeLogLock;
+import liquibase.database.sql.SqlStatement;
 import liquibase.exception.JDBCException;
 import liquibase.exception.LockException;
-import liquibase.database.sql.SqlStatement;
 import liquibase.migrator.Migrator;
-import liquibase.DatabaseChangeLogLock;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.Time;
 import java.sql.Timestamp;
-import java.io.IOException;
 import java.util.Date;
 
 public class MockDatabase implements Database {

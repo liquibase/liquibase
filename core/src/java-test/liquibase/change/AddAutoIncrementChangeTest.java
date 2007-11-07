@@ -2,13 +2,10 @@ package liquibase.change;
 
 import liquibase.database.Database;
 import liquibase.database.PostgresDatabase;
-import liquibase.database.sql.AddAutoIncrementStatement;
-import liquibase.database.sql.RawSqlStatement;
-import liquibase.database.sql.SqlStatement;
+import liquibase.database.sql.*;
 import liquibase.test.DatabaseTest;
 import liquibase.test.DatabaseTestTemplate;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import org.junit.Test;
 import org.w3c.dom.Element;
 
@@ -37,9 +34,9 @@ public class AddAutoIncrementChangeTest extends AbstractChangeTest {
                 if (database instanceof PostgresDatabase) {
                     assertEquals(3, sqlStatements.length);
                     //todo: improve test as statements are no longer raw statements
-                    assertTrue(sqlStatements[0] instanceof RawSqlStatement);
-                    assertTrue(sqlStatements[1] instanceof RawSqlStatement);
-                    assertTrue(sqlStatements[2] instanceof RawSqlStatement);
+                    assertTrue(sqlStatements[0] instanceof CreateSequenceStatement);
+                    assertTrue(sqlStatements[1] instanceof SetNullableStatement);
+                    assertTrue(sqlStatements[2] instanceof AddDefaultValueStatement);
                 } else {
                     assertEquals(1, sqlStatements.length);
                     assertTrue(sqlStatements[0] instanceof AddAutoIncrementStatement);

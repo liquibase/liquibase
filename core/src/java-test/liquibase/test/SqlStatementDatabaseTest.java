@@ -1,15 +1,11 @@
 package liquibase.test;
 
 import liquibase.database.Database;
-import liquibase.database.MSSQLDatabase;
 import liquibase.database.sql.SqlStatement;
 import liquibase.database.structure.DatabaseSnapshot;
 import liquibase.database.template.JdbcTemplate;
-import liquibase.exception.StatementNotSupportedOnDatabaseException;
 import liquibase.exception.JDBCException;
-
-import java.sql.SQLException;
-import static junit.framework.Assert.*;
+import liquibase.exception.StatementNotSupportedOnDatabaseException;
 
 public abstract class SqlStatementDatabaseTest implements DatabaseTest {
 
@@ -44,15 +40,15 @@ public abstract class SqlStatementDatabaseTest implements DatabaseTest {
         return false;
     }
 
-    protected abstract void preExecuteAssert(DatabaseSnapshot snapshot);
+    protected abstract void preExecuteAssert(DatabaseSnapshot snapshot) throws Exception;
 
-    protected abstract void postExecuteAssert(DatabaseSnapshot snapshot);
+    protected abstract void postExecuteAssert(DatabaseSnapshot snapshot) throws Exception;
 
     public final void performTest(Database database) throws Exception {
         if (!supportsTest(database)) {
             return;
         }
-        
+
         if (!statement.supportsDatabase(database)) {
             try {
                 statement.getSqlStatement(database);

@@ -1,15 +1,16 @@
 package liquibase.database.structure;
 
-import liquibase.database.*;
+import liquibase.database.AbstractDatabase;
+import liquibase.database.Database;
 import liquibase.database.template.JdbcTemplate;
 import liquibase.diff.DiffStatusListener;
 import liquibase.exception.JDBCException;
 import liquibase.migrator.Migrator;
 
 import java.sql.*;
+import java.text.ParseException;
 import java.util.*;
 import java.util.logging.Logger;
-import java.text.ParseException;
 
 public class DatabaseSnapshot {
 
@@ -250,8 +251,6 @@ public class DatabaseSnapshot {
                 selectRS = selectStatement.executeQuery("SELECT " + columnName + " FROM " + database.escapeTableName(schema, tableName) + " WHERE 1 = 0");
                 ResultSetMetaData meta = selectRS.getMetaData();
                 columnInfo.setAutoIncrement(meta.isAutoIncrement(1));
-            } catch (SQLException e) {
-                throw e;
             } finally {
                 if (selectRS != null) {
                     selectRS.close();

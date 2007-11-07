@@ -1,15 +1,15 @@
 package liquibase.change.custom;
 
+import liquibase.FileOpener;
 import liquibase.change.AbstractChange;
 import liquibase.database.Database;
 import liquibase.database.sql.SqlStatement;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.exception.CustomChangeException;
 import liquibase.exception.RollbackImpossibleException;
-import liquibase.exception.UnsupportedChangeException;
 import liquibase.exception.SetupException;
+import liquibase.exception.UnsupportedChangeException;
 import liquibase.util.ObjectUtil;
-import liquibase.FileOpener;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 

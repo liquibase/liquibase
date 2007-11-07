@@ -1,13 +1,13 @@
 package liquibase.change;
 
 import liquibase.database.MockDatabase;
+import liquibase.database.sql.CreateTableStatement;
+import liquibase.database.sql.ForeignKeyConstraint;
+import liquibase.database.sql.SqlStatement;
+import liquibase.database.sql.UniqueConstraint;
+import liquibase.database.structure.Column;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Table;
-import liquibase.database.structure.Column;
-import liquibase.database.sql.SqlStatement;
-import liquibase.database.sql.CreateTableStatement;
-import liquibase.database.sql.UniqueConstraint;
-import liquibase.database.sql.ForeignKeyConstraint;
 import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;

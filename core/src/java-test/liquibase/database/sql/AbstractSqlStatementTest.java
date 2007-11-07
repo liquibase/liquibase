@@ -1,7 +1,6 @@
 package liquibase.database.sql;
 
 import liquibase.database.Database;
-import liquibase.database.DerbyDatabase;
 import liquibase.database.PostgresDatabase;
 import liquibase.database.template.JdbcTemplate;
 import liquibase.exception.JDBCException;
@@ -113,6 +112,22 @@ public abstract class AbstractSqlStatementTest {
             database.getConnection().commit();
         }
 
+
+    }
+
+
+    protected void dropAndCreateView(CreateViewStatement statement, Database database) throws SQLException, JDBCException {
+        if (statement.getSchemaName() != null && !database.supportsSchemas()) {
+            return;
+        }
+
+        dropViewIfExists(statement.getSchemaName(), statement.getViewName(), database);
+
+        new JdbcTemplate(database).execute(statement);
+
+        if (!database.getAutoCommitMode()) {
+            database.getConnection().commit();
+        }
 
     }
 

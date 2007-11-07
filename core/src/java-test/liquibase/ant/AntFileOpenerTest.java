@@ -4,8 +4,7 @@ import liquibase.FileOpener;
 import liquibase.migrator.AbstractFileOpenerTest;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.types.Path;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 import org.junit.Test;
 
 import java.io.InputStream;

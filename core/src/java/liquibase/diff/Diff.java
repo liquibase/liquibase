@@ -1,6 +1,7 @@
 package liquibase.diff;
 
 import liquibase.database.Database;
+import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.structure.*;
 import liquibase.exception.JDBCException;
@@ -21,6 +22,14 @@ public class Diff {
     private Set<DiffStatusListener> statusListeners = new HashSet<DiffStatusListener>();
 
     public Diff(Connection baseConnection, Connection targetConnection) throws JDBCException {
+        baseDatabase = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(baseConnection);
+        baseDatabase.setConnection(baseConnection);
+
+        targetDatabase = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(targetConnection);
+        targetDatabase.setConnection(targetConnection);
+    }
+
+    public Diff(DatabaseConnection baseConnection, DatabaseConnection targetConnection) throws JDBCException {
             baseDatabase = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(baseConnection);
             baseDatabase.setConnection(baseConnection);
 
@@ -29,6 +38,13 @@ public class Diff {
     }
 
     public Diff(Connection originalDatabase) throws JDBCException {
+            targetDatabase = null;
+
+            baseDatabase = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(originalDatabase);
+            baseDatabase.setConnection(originalDatabase);
+    }
+
+    public Diff(DatabaseConnection originalDatabase) throws JDBCException {
             targetDatabase = null;
 
             baseDatabase = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(originalDatabase);

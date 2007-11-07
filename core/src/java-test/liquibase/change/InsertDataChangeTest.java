@@ -1,7 +1,9 @@
 package liquibase.change;
 
-import liquibase.database.OracleDatabase;
-import static org.junit.Assert.assertEquals;
+import liquibase.database.MockDatabase;
+import liquibase.database.sql.InsertStatement;
+import liquibase.database.sql.SqlStatement;
+import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Document;
@@ -24,7 +26,7 @@ public class InsertDataChangeTest extends AbstractChangeTest {
 
         ColumnConfig col1 = new ColumnConfig();
         col1.setName("id");
-        col1.setValue("123");
+        col1.setValueNumeric("123");
 
         ColumnConfig col2 = new ColumnConfig();
         col2.setName("name");
@@ -32,7 +34,7 @@ public class InsertDataChangeTest extends AbstractChangeTest {
 
         ColumnConfig col3 = new ColumnConfig();
         col3.setName("age");
-        col3.setValue("21");
+        col3.setValueNumeric("21");
 
         refactoring.addColumn(col1);
         refactoring.addColumn(col2);
@@ -46,9 +48,12 @@ public class InsertDataChangeTest extends AbstractChangeTest {
 
     @Test
     public void generateStatement() throws Exception {
-        OracleDatabase db = new OracleDatabase();
-        assertEquals("INSERT INTO TABLE_NAME (id, name, age) VALUES ('123', 'Andrew', '21')",
-                refactoring.generateStatements(db)[0].getSqlStatement(db));
+        SqlStatement[] sqlStatements = refactoring.generateStatements(new MockDatabase());
+        assertEquals(1, sqlStatements.length);
+        assertTrue(sqlStatements[0] instanceof InsertStatement);
+        assertEquals("123", ((InsertStatement) sqlStatements[0]).getColumnValue("id").toString());
+        assertEquals("Andrew", ((InsertStatement) sqlStatements[0]).getColumnValue("name").toString());
+        assertEquals("21", ((InsertStatement) sqlStatements[0]).getColumnValue("age").toString());
     }
 
     @Test
@@ -69,7 +74,7 @@ public class InsertDataChangeTest extends AbstractChangeTest {
 
         assertEquals("column", ((Element) columns.item(0)).getTagName());
         assertEquals("id", ((Element) columns.item(0)).getAttribute("name"));
-        assertEquals("123", ((Element) columns.item(0)).getAttribute("value"));
+        assertEquals("123", ((Element) columns.item(0)).getAttribute("valueNumeric"));
 
         assertEquals("column", ((Element) columns.item(1)).getTagName());
         assertEquals("name", ((Element) columns.item(1)).getAttribute("name"));
@@ -77,6 +82,6 @@ public class InsertDataChangeTest extends AbstractChangeTest {
 
         assertEquals("column", ((Element) columns.item(2)).getTagName());
         assertEquals("age", ((Element) columns.item(2)).getAttribute("name"));
-        assertEquals("21", ((Element) columns.item(2)).getAttribute("value"));
+        assertEquals("21", ((Element) columns.item(2)).getAttribute("valueNumeric"));
     }
 }
