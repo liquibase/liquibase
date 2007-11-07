@@ -1,9 +1,6 @@
 package liquibase.database.sql;
 
 import liquibase.database.*;
-import liquibase.util.SqlUtil;
-
-import java.util.Date;
 
 public class AddDefaultValueStatement implements SqlStatement {
     private String schemaName;

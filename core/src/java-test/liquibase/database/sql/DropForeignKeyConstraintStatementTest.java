@@ -2,10 +2,10 @@ package liquibase.database.sql;
 
 import liquibase.database.Database;
 import liquibase.database.structure.DatabaseSnapshot;
+import liquibase.exception.JDBCException;
 import liquibase.test.DatabaseTestTemplate;
 import liquibase.test.SqlStatementDatabaseTest;
 import liquibase.test.TestContext;
-import liquibase.exception.JDBCException;
 import static org.junit.Assert.*;
 import org.junit.Test;
 

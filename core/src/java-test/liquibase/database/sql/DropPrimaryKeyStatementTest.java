@@ -1,8 +1,6 @@
 package liquibase.database.sql;
 
-import liquibase.database.CacheDatabase;
 import liquibase.database.Database;
-import liquibase.database.H2Database;
 import liquibase.database.structure.DatabaseSnapshot;
 import liquibase.test.DatabaseTestTemplate;
 import liquibase.test.SqlStatementDatabaseTest;

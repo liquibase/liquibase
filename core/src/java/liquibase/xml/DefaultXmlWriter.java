@@ -1,13 +1,11 @@
 package liquibase.xml;
 
-import org.w3c.dom.Document;
-
-import java.io.OutputStream;
-import java.io.IOException;
-
 import com.sun.org.apache.xml.internal.serialize.OutputFormat;
 import com.sun.org.apache.xml.internal.serialize.XMLSerializer;
-import liquibase.DatabaseChangeLog;
+import org.w3c.dom.Document;
+
+import java.io.IOException;
+import java.io.OutputStream;
 
 public class DefaultXmlWriter implements XmlWriter {
 

@@ -1,12 +1,11 @@
 package liquibase.change;
 
 import liquibase.database.Database;
-import liquibase.database.sql.RawSqlStatement;
+import liquibase.database.sql.InsertStatement;
 import liquibase.database.sql.SqlStatement;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Table;
 import liquibase.exception.UnsupportedChangeException;
-import liquibase.util.SqlUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -59,57 +58,16 @@ public class InsertDataChange extends AbstractChange {
     }
 
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
-        StringBuffer buffer = new StringBuffer();
-        buffer.append("INSERT INTO ").append(database.escapeTableName(getSchemaName(), getTableName())).append(" ");
-        Iterator<ColumnConfig> iterator = columns.iterator();
-        StringBuffer columnNames = new StringBuffer();
-        StringBuffer columnValues = new StringBuffer();
 
-        columnNames.append("(");
-        columnValues.append("(");
-        while (iterator.hasNext()) {
-            ColumnConfig column = iterator.next();
-            columnNames.append(column.getName());
+        InsertStatement statement = new InsertStatement(getSchemaName(), getTableName());
 
-            columnValues.append(getColumnValue(column, database));
-
-            if (iterator.hasNext()) {
-                columnNames.append(", ");
-                columnValues.append(", ");
-            }
+        for (ColumnConfig column : columns) {
+            statement.addColumnValue(column.getName(), column.getValueObject());
         }
-        columnNames.append(")");
-        columnValues.append(")");
-        buffer.append(columnNames);
-        buffer.append(" VALUES ");
-        buffer.append(columnValues);
 
-        return new SqlStatement[]{new RawSqlStatement(buffer.toString())};
-    }
-
-    private String getColumnValue(ColumnConfig column, Database database) {
-        if (column.getValue() != null) {
-            return "'"+column.getValue().replaceAll("'","''")+"'";
-        } else if (column.getValueNumeric() != null) {
-            return column.getValueNumeric();
-        } else if (column.getValueBoolean() != null) {
-            String returnValue;
-            if (column.getValueBoolean()) {
-                returnValue = database.getTrueBooleanValue();
-            } else {
-                returnValue = database.getFalseBooleanValue();
-            }
-
-            if (returnValue.matches("\\d+")) {
-                return returnValue;
-            } else {
-                return "'"+returnValue+"'";
-            }
-        } else if (column.getValueDate() != null) {
-            return database.getDateLiteral(column.getValueDate());
-        } else {
-            return "NULL";
-        }
+        return new SqlStatement[]{
+                statement
+        };
     }
 
     public String getConfirmationMessage() {
@@ -121,7 +79,7 @@ public class InsertDataChange extends AbstractChange {
         if (getSchemaName() != null) {
             node.setAttribute("schemaName", getSchemaName());
         }
-        
+
         node.setAttribute("tableName", getTableName());
 
         for (ColumnConfig col : getColumns()) {
@@ -136,5 +94,5 @@ public class InsertDataChange extends AbstractChange {
 
         return new HashSet<DatabaseObject>(Arrays.asList(dbObject));
     }
-    
+
 }

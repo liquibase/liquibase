@@ -1,7 +1,7 @@
 package liquibase.change;
 
-import liquibase.database.*;
-import liquibase.database.sql.RawSqlStatement;
+import liquibase.database.Database;
+import liquibase.database.sql.RenameViewStatement;
 import liquibase.database.sql.SqlStatement;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.View;
@@ -17,11 +17,20 @@ import java.util.Set;
  * Renames an existing view.
  */
 public class RenameViewChange extends AbstractChange {
+    private String schemaName;
     private String oldViewName;
     private String newViewName;
 
     public RenameViewChange() {
         super("renameView", "Rename View");
+    }
+
+    public String getSchemaName() {
+        return schemaName;
+    }
+
+    public void setSchemaName(String schemaName) {
+        this.schemaName = schemaName;
     }
 
     public String getOldViewName() {
@@ -41,25 +50,7 @@ public class RenameViewChange extends AbstractChange {
     }
 
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
-        if (database instanceof MSSQLDatabase) {
-            return new SqlStatement[]{new RawSqlStatement("exec sp_rename '" + oldViewName + "', " + newViewName)};
-        } else if (database instanceof MySQLDatabase) {
-            return new SqlStatement[]{new RawSqlStatement("RENAME TABLE " + oldViewName + " TO " + newViewName)};
-        } else if (database instanceof PostgresDatabase) {
-            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + oldViewName + " RENAME TO " + newViewName)};
-        } else if (database instanceof DerbyDatabase) {
-            throw new UnsupportedChangeException("Derby does not currently support renaming views");
-        } else if (database instanceof HsqlDatabase) {
-            throw new UnsupportedChangeException("HSQL does not currently support renaming views");
-        } else if (database instanceof DB2Database) {
-            throw new UnsupportedChangeException("DB2 does not currently support renaming views");
-        } else if (database instanceof CacheDatabase) {
-            throw new UnsupportedChangeException("Rename View not currently supported for Cache");
-        } else if (database instanceof FirebirdDatabase) {
-            throw new UnsupportedChangeException("Rename View not currently supported for Firebird");
-        }
-
-        return new SqlStatement[]{new RawSqlStatement("RENAME " + oldViewName + " TO " + newViewName)};
+        return new SqlStatement[]{new RenameViewStatement(getSchemaName(), getOldViewName(), getNewViewName())};
     }
 
     protected Change[] createInverses() {
@@ -78,6 +69,9 @@ public class RenameViewChange extends AbstractChange {
 
     public Element createNode(Document currentChangeLogFileDOM) {
         Element element = currentChangeLogFileDOM.createElement(getTagName());
+        if (getSchemaName() != null) {
+            element.setAttribute("schemaName", getSchemaName());
+        }
         element.setAttribute("oldViewName", getOldViewName());
         element.setAttribute("newViewName", getNewViewName());
 

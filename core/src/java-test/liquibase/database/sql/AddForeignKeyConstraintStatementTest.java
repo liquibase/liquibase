@@ -3,15 +3,14 @@ package liquibase.database.sql;
 import liquibase.database.Database;
 import liquibase.database.structure.DatabaseSnapshot;
 import liquibase.database.structure.ForeignKey;
+import liquibase.exception.JDBCException;
 import liquibase.test.DatabaseTestTemplate;
 import liquibase.test.SqlStatementDatabaseTest;
 import liquibase.test.TestContext;
-import liquibase.exception.JDBCException;
 import static org.junit.Assert.*;
-import org.junit.Before;
 import org.junit.Test;
 
-public class AddForeignKeyConstraintChangeStatementTest extends AbstractSqlStatementTest {
+public class AddForeignKeyConstraintStatementTest extends AbstractSqlStatementTest {
 
     private static final String FK_NAME = "FK_ADDTEST";
 
@@ -38,14 +37,14 @@ public class AddForeignKeyConstraintChangeStatementTest extends AbstractSqlState
                     .addColumn("existingCol", "int"), database);
     }
 
-    protected AddForeignKeyConstraintChangeStatement generateTestStatement() {
-        return new AddForeignKeyConstraintChangeStatement(null, null, null, null, null, null, null);
+    protected AddForeignKeyConstraintStatement generateTestStatement() {
+        return new AddForeignKeyConstraintStatement(null, null, null, null, null, null, null);
     }
 
     @Test
     public void execute() throws Exception {
         new DatabaseTestTemplate().testOnAvailableDatabases(
-                new SqlStatementDatabaseTest(null, new AddForeignKeyConstraintChangeStatement(FK_NAME,
+                new SqlStatementDatabaseTest(null, new AddForeignKeyConstraintStatement(FK_NAME,
                         null, BASE_TABLE_NAME, BASE_COLUMN_NAME,
                         null, REF_TABLE_NAME, REF_COL_NAME)) {
                     protected void preExecuteAssert(DatabaseSnapshot snapshot) {
@@ -69,7 +68,7 @@ public class AddForeignKeyConstraintChangeStatementTest extends AbstractSqlState
     @Test
     public void execute_deferrable() throws Exception {
         new DatabaseTestTemplate().testOnAvailableDatabases(
-                new SqlStatementDatabaseTest(null, new AddForeignKeyConstraintChangeStatement(FK_NAME,
+                new SqlStatementDatabaseTest(null, new AddForeignKeyConstraintStatement(FK_NAME,
                         null, BASE_TABLE_NAME, BASE_COLUMN_NAME,
                         null, REF_TABLE_NAME, REF_COL_NAME)
                         .setDeferrable(true)
@@ -97,7 +96,7 @@ public class AddForeignKeyConstraintChangeStatementTest extends AbstractSqlState
 
     @Test
     public void execute_deleteCascade() throws Exception {
-        new DatabaseTestTemplate().testOnAvailableDatabases(new SqlStatementDatabaseTest(null, new AddForeignKeyConstraintChangeStatement(FK_NAME,
+        new DatabaseTestTemplate().testOnAvailableDatabases(new SqlStatementDatabaseTest(null, new AddForeignKeyConstraintStatement(FK_NAME,
                 null, BASE_TABLE_NAME, BASE_COLUMN_NAME,
                 null, REF_TABLE_NAME, REF_COL_NAME).setDeleteCascade(true)) {
             protected void preExecuteAssert(DatabaseSnapshot snapshot) {
@@ -121,7 +120,7 @@ public class AddForeignKeyConstraintChangeStatementTest extends AbstractSqlState
     @Test
     public void execute_altSchema() throws Exception {
         new DatabaseTestTemplate().testOnAvailableDatabases(
-                new SqlStatementDatabaseTest(TestContext.ALT_SCHEMA, new AddForeignKeyConstraintChangeStatement(FK_NAME,
+                new SqlStatementDatabaseTest(TestContext.ALT_SCHEMA, new AddForeignKeyConstraintStatement(FK_NAME,
                         TestContext.ALT_SCHEMA, BASE_TABLE_NAME, BASE_COLUMN_NAME,
                         TestContext.ALT_SCHEMA, REF_TABLE_NAME, REF_COL_NAME)) {
                     protected void preExecuteAssert(DatabaseSnapshot snapshot) {

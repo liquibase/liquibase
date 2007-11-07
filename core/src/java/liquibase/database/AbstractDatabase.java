@@ -2,10 +2,7 @@ package liquibase.database;
 
 import liquibase.DatabaseChangeLogLock;
 import liquibase.change.*;
-import liquibase.database.sql.ComputedNumericValue;
-import liquibase.database.sql.RawSqlStatement;
-import liquibase.database.sql.SqlStatement;
-import liquibase.database.sql.UpdateStatement;
+import liquibase.database.sql.*;
 import liquibase.database.structure.*;
 import liquibase.database.template.JdbcTemplate;
 import liquibase.diff.DiffStatusListener;
@@ -330,13 +327,6 @@ public abstract class AbstractDatabase implements Database {
         return "AUTO_INCREMENT";
     }
 
-    /**
-     * Returns database-specific commit command.
-     */
-    public SqlStatement getCommitSQL() {
-        return new RawSqlStatement("COMMIT");
-    }
-
     public String getConcatSql(String... values) {
         StringBuffer returnString = new StringBuffer();
         for (String value : values) {
@@ -357,24 +347,30 @@ public abstract class AbstractDatabase implements Database {
     }
 
     private SqlStatement getChangeLogLockInsertSQL() {
-        return new RawSqlStatement(("insert into " + getDatabaseChangeLogLockTableName() + " (id, locked) values (1, " + getFalseBooleanValue() + ")").toUpperCase());
+        return new InsertStatement(null, getDatabaseChangeLogLockTableName())
+                .addColumnValue("id", 1)
+                .addColumnValue("locked", Boolean.FALSE);
     }
 
     protected SqlStatement getCreateChangeLogLockSQL() {
-        return new RawSqlStatement(("create table " + getDatabaseChangeLogLockTableName() + " (id int not null primary key, locked " + getBooleanType() + " not null, lockGranted " + getDateTimeType() + ", lockedby varchar(255))").toUpperCase());
+        return new CreateTableStatement(null, getDatabaseChangeLogLockTableName())
+                .addPrimaryKeyColumn("id", "int", new NotNullConstraint())
+                .addColumn("locked", getBooleanType(), new NotNullConstraint())
+                .addColumn("lockGranted", getDateTimeType())
+                .addColumn("lockedby", "varchar(255)");
     }
 
     protected SqlStatement getCreateChangeLogSQL() {
-        return new RawSqlStatement(("CREATE TABLE " + getDatabaseChangeLogTableName() + " (id varchar(150) not null, " +
-                "author varchar(150) not null, " +
-                "filename varchar(255) not null, " +
-                "dateExecuted " + getDateTimeType() + " not null, " +
-                "md5sum varchar(32), " +
-                "description varchar(255), " +
-                "comments varchar(255), " +
-                "tag varchar(255), " +
-                "liquibase varchar(10), " +
-                "primary key(id, author, filename))").toUpperCase());
+        return new CreateTableStatement(null, getDatabaseChangeLogTableName())
+                .addPrimaryKeyColumn("id","varchar(150)", new NotNullConstraint())
+                .addPrimaryKeyColumn("author","varchar(150)", new NotNullConstraint())
+                .addPrimaryKeyColumn("filename","varchar(255)", new NotNullConstraint())
+                .addColumn("dateExecuted", getDateTimeType(), new NotNullConstraint())
+                .addColumn("md5sum","varchar(32)")
+                .addColumn("description","varchar(255)")
+                .addColumn("comments","varchar(255)")
+                .addColumn("tag","varchar(255)")
+                .addColumn("liquibase","varchar(10)");
     }
 
     public boolean acquireLock(Migrator migrator) throws LockException {
@@ -500,16 +496,16 @@ public abstract class AbstractDatabase implements Database {
                 }
 
                 if (!hasDescription) {
-                    statementsToExecute.add(new RawSqlStatement("ALTER TABLE " + getDatabaseChangeLogTableName() + " ADD DESCRIPTION VARCHAR(255)"));
+                    statementsToExecute.add(new AddColumnStatement(null, getDatabaseChangeLogTableName(), "DESCRIPTION", "VARCHAR(255)", null));
                 }
                 if (!hasTag) {
-                    statementsToExecute.add(new RawSqlStatement("ALTER TABLE " + getDatabaseChangeLogTableName() + " ADD TAG VARCHAR(255)"));
+                    statementsToExecute.add(new AddColumnStatement(null, getDatabaseChangeLogTableName(), "TAG", "VARCHAR(255)", null));
                 }
                 if (!hasComments) {
-                    statementsToExecute.add(new RawSqlStatement("ALTER TABLE " + getDatabaseChangeLogTableName() + " ADD COMMENTS VARCHAR(255)"));
+                    statementsToExecute.add(new AddColumnStatement(null, getDatabaseChangeLogTableName(), "COMMENTS", "VARCHAR(255)", null));
                 }
                 if (!hasLiquibase) {
-                    statementsToExecute.add(new RawSqlStatement("ALTER TABLE " + getDatabaseChangeLogTableName() + " ADD LIQUIBASE VARCHAR(255)"));
+                    statementsToExecute.add(new AddColumnStatement(null, getDatabaseChangeLogTableName(), "LIQUIBASE", "VARCHAR(255)", null));
                 }
 
             } else if (!changeLogCreateAttempted) {
@@ -722,11 +718,7 @@ public abstract class AbstractDatabase implements Database {
             try {
                 for (Change change : dropChanges) {
                     for (SqlStatement statement : change.generateStatements(this)) {
-                        try {
-                            new JdbcTemplate(this).execute(statement);
-                        } catch (JDBCException e) {
-                            throw e;
-                        }
+                        new JdbcTemplate(this).execute(statement);
                     }
                 }
             } catch (UnsupportedChangeException e) {
@@ -741,30 +733,6 @@ public abstract class AbstractDatabase implements Database {
                 throw new JDBCException(e);
             }
         }
-    }
-
-    private String[] getTableTypes() throws JDBCException {
-        List<String> wantedTypes = new ArrayList<String>(Arrays.asList("TABLE", "GLOBAL TEMPORARY", "LOCAL TEMPORARY", "ALIAS", "SYNONYM"));
-        List<String> availableTypes = new ArrayList<String>();
-
-        try {
-            ResultSet types = connection.getMetaData().getTableTypes();
-            while (types.next()) {
-                availableTypes.add(types.getString("TABLE_TYPE").trim());
-            }
-        } catch (SQLException e) {
-            throw new JDBCException(e);
-        }
-
-        List<String> returnTypes = new ArrayList<String>();
-        for (String type : wantedTypes) {
-            if (availableTypes.contains(type)) {
-                returnTypes.add(type);
-            }
-        }
-
-        return returnTypes.toArray(new String[returnTypes.size()]);
-
     }
 
     public boolean isSystemTable(String catalogName, String schemaName, String tableName) {
@@ -873,7 +841,7 @@ public abstract class AbstractDatabase implements Database {
             schemaName = convertRequestedSchemaToSchema(schemaName);
         }
         String definition = (String) new JdbcTemplate(this).queryForObject(getViewDefinitionSql(schemaName, viewName), String.class);
-        return definition.replaceFirst("^CREATE VIEW \\w+ AS", "");
+        return definition.replaceFirst("^CREATE VIEW [\\S]+ AS", "");
     }
 
     public SqlStatement getViewDefinitionSql(String schemaName, String viewName) throws JDBCException {

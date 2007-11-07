@@ -14,6 +14,16 @@ public class DerbyConnectionDelegate extends SQLConnectionDelegate {
     public void commit() throws SQLException {
         super.commit();
 
+        checkPoint();
+    }
+
+    public void rollback() throws SQLException {
+        super.rollback();
+
+        checkPoint();
+    }
+
+    private void checkPoint() throws SQLException {
         Statement st = null;
         try {
             st = createStatement();

@@ -4,7 +4,6 @@ import liquibase.database.DB2Database;
 import liquibase.database.Database;
 import liquibase.database.MSSQLDatabase;
 import liquibase.database.SybaseDatabase;
-import liquibase.util.SqlUtil;
 import liquibase.util.StringUtils;
 
 import java.util.*;
@@ -73,11 +72,11 @@ public class CreateTableStatement implements SqlStatement {
     }
 
     public CreateTableStatement addPrimaryKeyColumn(String columnName, String columnType, ColumnConstraint... constraints) {
-        String pkName = "PK_" + getTableName().toUpperCase();
-        if (pkName.length() > 18) {
-            pkName = pkName.substring(0, 17);
-        }
-        PrimaryKeyConstraint pkConstraint = new PrimaryKeyConstraint(pkName);
+//        String pkName = "PK_" + getTableName().toUpperCase();
+////        if (pkName.length() > 18) {
+////            pkName = pkName.substring(0, 17);
+////        }
+        PrimaryKeyConstraint pkConstraint = new PrimaryKeyConstraint(null);
         pkConstraint.addColumns(columnName);
 
         List<ColumnConstraint> allConstraints = new ArrayList<ColumnConstraint>();
@@ -184,7 +183,12 @@ public class CreateTableStatement implements SqlStatement {
         }
 
         if (getPrimaryKeyConstraint() != null && getPrimaryKeyConstraint().getColumns().size() > 0) {
-            buffer.append(", CONSTRAINT ").append(StringUtils.trimToEmpty(getPrimaryKeyConstraint().getConstraintName())).append(" PRIMARY KEY (");
+            buffer.append(",");
+            if (getPrimaryKeyConstraint().getConstraintName() != null) {
+                buffer.append(" CONSTRAINT ");
+                buffer.append(StringUtils.trimToEmpty(getPrimaryKeyConstraint().getConstraintName()));
+            }
+            buffer.append(" PRIMARY KEY (");
             buffer.append(StringUtils.join(getPrimaryKeyConstraint().getColumns(), ", "));
             buffer.append(")");
             buffer.append(",");

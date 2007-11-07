@@ -6,7 +6,6 @@ import liquibase.exception.SetupException;
 import liquibase.migrator.Migrator;
 import liquibase.util.MD5Util;
 import liquibase.util.StreamUtil;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 

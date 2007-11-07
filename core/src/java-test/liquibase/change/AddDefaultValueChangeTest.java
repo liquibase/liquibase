@@ -8,7 +8,6 @@ import liquibase.test.DatabaseTest;
 import liquibase.test.DatabaseTestTemplate;
 import liquibase.util.ISODateFormat;
 import static org.junit.Assert.*;
-import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import org.w3c.dom.Element;
 

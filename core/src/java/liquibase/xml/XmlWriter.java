@@ -2,10 +2,8 @@ package liquibase.xml;
 
 import org.w3c.dom.Document;
 
-import java.io.OutputStream;
 import java.io.IOException;
-
-import liquibase.DatabaseChangeLog;
+import java.io.OutputStream;
 
 public interface XmlWriter {
     public void write(Document doc, OutputStream outputStream) throws IOException;

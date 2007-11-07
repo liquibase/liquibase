@@ -1,5 +1,6 @@
 package liquibase.migrator.firebird;
 
+import liquibase.exception.JDBCException;
 import liquibase.migrator.AbstractSimpleChangeLogRunnerTest;
 
 /**
@@ -20,5 +21,11 @@ public class FirebirdSampleChangeLogRunnerTest extends AbstractSimpleChangeLogRu
     protected boolean shouldRollBack() {
         return false;
     }
-    
+
+    protected String[] getSchemasToDrop() throws JDBCException {
+        return new String[] {
+                null,
+        };
+    }
+
 }

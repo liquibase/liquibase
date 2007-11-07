@@ -1,8 +1,8 @@
 package liquibase.database.sql;
 
 import liquibase.database.Database;
-import liquibase.database.MySQLDatabase;
 import liquibase.database.MSSQLDatabase;
+import liquibase.database.MySQLDatabase;
 import liquibase.database.OracleDatabase;
 import liquibase.exception.StatementNotSupportedOnDatabaseException;
 

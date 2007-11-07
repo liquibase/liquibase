@@ -5,7 +5,6 @@ import liquibase.database.Database;
 import liquibase.database.structure.*;
 import liquibase.exception.JDBCException;
 import liquibase.parser.MigratorSchemaResolver;
-import liquibase.util.StringUtils;
 import liquibase.xml.DefaultXmlWriter;
 import liquibase.xml.XmlWriter;
 import org.w3c.dom.Document;

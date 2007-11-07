@@ -6,7 +6,6 @@ import liquibase.database.sql.CallableSqlStatement;
 import liquibase.database.sql.PreparedSqlStatement;
 import liquibase.database.sql.SqlStatement;
 import liquibase.exception.JDBCException;
-import liquibase.exception.StatementNotSupportedOnDatabaseException;
 import liquibase.util.JdbcUtils;
 
 import java.sql.*;

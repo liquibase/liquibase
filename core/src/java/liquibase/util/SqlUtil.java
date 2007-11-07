@@ -1,11 +1,8 @@
 package liquibase.util;
 
-import liquibase.database.Database;
-import liquibase.database.MSSQLDatabase;
-
-import java.util.List;
-import java.util.Arrays;
 import java.sql.Types;
+import java.util.Arrays;
+import java.util.List;
 
 public class SqlUtil {
 

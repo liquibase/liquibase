@@ -2,9 +2,7 @@ package liquibase.change;
 
 import liquibase.database.Database;
 import liquibase.database.PostgresDatabase;
-import liquibase.database.sql.AddAutoIncrementStatement;
-import liquibase.database.sql.RawSqlStatement;
-import liquibase.database.sql.SqlStatement;
+import liquibase.database.sql.*;
 import liquibase.database.structure.Column;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Table;
@@ -68,9 +66,9 @@ public class AddAutoIncrementChange extends AbstractChange {
         if (database instanceof PostgresDatabase) {
             String sequenceName = (getTableName()+"_"+getColumnName()+"_seq").toLowerCase();
             return new SqlStatement[]{
-                    new RawSqlStatement("CREATE SEQUENCE "+sequenceName),
-                    new RawSqlStatement("ALTER TABLE "+database.escapeTableName(getSchemaName(), getTableName())+" ALTER COLUMN "+getColumnName()+" SET NOT NULL"),
-                    new RawSqlStatement("ALTER TABLE "+database.escapeTableName(getSchemaName(), getTableName())+" ALTER COLUMN "+getColumnName()+" SET DEFAULT nextval ('"+sequenceName+"')"),
+                    new CreateSequenceStatement(getSchemaName(), sequenceName),
+                    new SetNullableStatement(getSchemaName(), getTableName(), getColumnName(), null, false),
+                    new AddDefaultValueStatement(getSchemaName(), getTableName(), getColumnName(), sequenceName),
             };
         } else {
             return new SqlStatement[] { new AddAutoIncrementStatement(getSchemaName(), getTableName(), getColumnName(), getColumnDataType())};

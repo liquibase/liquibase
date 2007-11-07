@@ -10,8 +10,8 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Date;
+import java.util.List;
 
 public class HsqlDatabase extends AbstractDatabase {
     private static String START_CONCAT = "CONCAT(";
@@ -146,7 +146,7 @@ public class HsqlDatabase extends AbstractDatabase {
 
 
     public SqlStatement getViewDefinitionSql(String schemaName, String name) throws JDBCException {
-        return new RawSqlStatement("SELECT VIEW_DEFINITION FROM INFORMATION_SCHEMA.SYSTEM_VIEWS WHERE TABLE_NAME = '"+name+"'");
+        return new RawSqlStatement("SELECT VIEW_DEFINITION FROM INFORMATION_SCHEMA.SYSTEM_VIEWS WHERE TABLE_NAME = '"+name+"' AND TABLE_SCHEMA='"+convertRequestedSchemaToSchema(schemaName)+"'");
     }
 
     public String convertRequestedSchemaToSchema(String requestedSchema) throws JDBCException {

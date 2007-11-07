@@ -2,7 +2,6 @@ package liquibase.change;
 
 import liquibase.database.MockDatabase;
 import liquibase.database.sql.DropPrimaryKeyStatement;
-import liquibase.database.sql.SetNullableStatement;
 import liquibase.database.sql.SqlStatement;
 import static org.junit.Assert.*;
 import org.junit.Test;

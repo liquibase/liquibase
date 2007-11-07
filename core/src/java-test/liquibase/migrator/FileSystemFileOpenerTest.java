@@ -2,8 +2,7 @@ package liquibase.migrator;
 
 import liquibase.FileOpener;
 import liquibase.FileSystemFileOpener;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 

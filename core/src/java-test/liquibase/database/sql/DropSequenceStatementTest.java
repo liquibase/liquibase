@@ -7,7 +7,6 @@ import liquibase.test.DatabaseTestTemplate;
 import liquibase.test.SqlStatementDatabaseTest;
 import liquibase.test.TestContext;
 import static org.junit.Assert.*;
-import org.junit.Before;
 import org.junit.Test;
 
 public class DropSequenceStatementTest extends AbstractSqlStatementTest {

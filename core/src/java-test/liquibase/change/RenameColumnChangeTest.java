@@ -1,7 +1,9 @@
 package liquibase.change;
 
-import liquibase.database.OracleDatabase;
-import static org.junit.Assert.assertEquals;
+import liquibase.database.MockDatabase;
+import liquibase.database.sql.RenameColumnStatement;
+import liquibase.database.sql.SqlStatement;
+import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Document;
@@ -20,6 +22,7 @@ public class RenameColumnChangeTest extends AbstractChangeTest {
     public void setUp() throws Exception {
         refactoring = new RenameColumnChange();
 
+        refactoring.setSchemaName("SCHEMA_NAME");
         refactoring.setTableName("TABLE_NAME");
         refactoring.setOldColumnName("oldColName");
         refactoring.setNewColumnName("newColName");
@@ -32,8 +35,13 @@ public class RenameColumnChangeTest extends AbstractChangeTest {
 
     @Test
     public void generateStatement() throws Exception {
-        OracleDatabase database = new OracleDatabase();
-        assertEquals("ALTER TABLE TABLE_NAME RENAME COLUMN oldColName TO newColName", refactoring.generateStatements(database)[0].getSqlStatement(database));
+        SqlStatement[] sqlStatements = refactoring.generateStatements(new MockDatabase());
+        assertEquals(1, sqlStatements.length);
+        assertTrue(sqlStatements[0] instanceof RenameColumnStatement);
+        assertEquals("SCHEMA_NAME", ((RenameColumnStatement) sqlStatements[0]).getSchemaName());
+        assertEquals("TABLE_NAME", ((RenameColumnStatement) sqlStatements[0]).getTableName());
+        assertEquals("oldColName", ((RenameColumnStatement) sqlStatements[0]).getOldColumnName());
+        assertEquals("newColName", ((RenameColumnStatement) sqlStatements[0]).getNewColumnName());
     }
 
     @Test
@@ -47,6 +55,7 @@ public class RenameColumnChangeTest extends AbstractChangeTest {
 
         Element node = refactoring.createNode(document);
         assertEquals("renameColumn", node.getTagName());
+        assertEquals("SCHEMA_NAME", node.getAttribute("schemaName"));
         assertEquals("TABLE_NAME", node.getAttribute("tableName"));
         assertEquals("oldColName", node.getAttribute("oldColumnName"));
         assertEquals("newColName", node.getAttribute("newColumnName"));

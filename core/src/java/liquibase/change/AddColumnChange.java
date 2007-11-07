@@ -1,6 +1,7 @@
 package liquibase.change;
 
-import liquibase.database.*;
+import liquibase.database.DB2Database;
+import liquibase.database.Database;
 import liquibase.database.sql.*;
 import liquibase.database.structure.Column;
 import liquibase.database.structure.DatabaseObject;

@@ -5,14 +5,12 @@ import liquibase.database.MSSQLDatabase;
 import liquibase.database.MySQLDatabase;
 import liquibase.database.structure.DatabaseSnapshot;
 import liquibase.database.template.JdbcTemplate;
+import liquibase.exception.JDBCException;
 import liquibase.test.DatabaseTest;
 import liquibase.test.DatabaseTestTemplate;
 import liquibase.test.SqlStatementDatabaseTest;
-import liquibase.test.TestContext;
 import liquibase.util.ISODateFormat;
-import liquibase.exception.JDBCException;
 import static org.junit.Assert.*;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Calendar;

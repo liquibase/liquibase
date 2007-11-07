@@ -1,9 +1,9 @@
 package liquibase.database.sql;
 
-import liquibase.database.Database;
-import liquibase.database.MySQLDatabase;
-import liquibase.database.MSSQLDatabase;
 import liquibase.database.DB2Database;
+import liquibase.database.Database;
+import liquibase.database.MSSQLDatabase;
+import liquibase.database.MySQLDatabase;
 import liquibase.exception.StatementNotSupportedOnDatabaseException;
 import liquibase.util.StringUtils;
 

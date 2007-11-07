@@ -64,7 +64,7 @@ public class UpdateStatement implements SqlStatement, PreparedSqlStatement {
     }
 
     public String getSqlStatement(Database database) {
-        StringBuffer sql = new StringBuffer("UPDATE "+tableName+" SET");
+        StringBuffer sql = new StringBuffer("UPDATE "+database.escapeTableName(getSchemaName(), getTableName())+" SET");
         for (String column : newColumnValues.keySet()) {
             sql.append(" ").append(column).append(" = ");
             Object newValue = newColumnValues.get(column);
@@ -119,11 +119,7 @@ public class UpdateStatement implements SqlStatement, PreparedSqlStatement {
             if (param == null) {
                 pstmt.setNull(i+1, type);
             } else {
-                try {
-                    pstmt.setObject(i+1, param, type);
-                } catch (SQLException e) {
-                    throw e;
-                }
+                pstmt.setObject(i+1, param, type);
             }
         }
 

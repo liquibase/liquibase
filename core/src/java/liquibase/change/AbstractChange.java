@@ -2,7 +2,7 @@ package liquibase.change;
 
 import liquibase.ChangeSet;
 import liquibase.FileOpener;
-import liquibase.database.*;
+import liquibase.database.Database;
 import liquibase.database.sql.SqlStatement;
 import liquibase.database.template.JdbcTemplate;
 import liquibase.exception.*;

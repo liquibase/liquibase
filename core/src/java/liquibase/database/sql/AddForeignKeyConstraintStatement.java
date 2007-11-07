@@ -3,7 +3,7 @@ package liquibase.database.sql;
 import liquibase.database.Database;
 import liquibase.exception.StatementNotSupportedOnDatabaseException;
 
-public class AddForeignKeyConstraintChangeStatement implements SqlStatement {
+public class AddForeignKeyConstraintStatement implements SqlStatement {
 
     private String baseTableSchemaName;
     private String baseTableName;
@@ -20,7 +20,7 @@ public class AddForeignKeyConstraintChangeStatement implements SqlStatement {
 
     private boolean deleteCascade;
 
-    public AddForeignKeyConstraintChangeStatement(String constraintName, String baseTableSchemaName, String baseTableName, String baseColumnNames, String referencedTableSchemaName, String referencedTableName, String referencedColumnNames) {
+    public AddForeignKeyConstraintStatement(String constraintName, String baseTableSchemaName, String baseTableName, String baseColumnNames, String referencedTableSchemaName, String referencedTableName, String referencedColumnNames) {
         this.baseTableSchemaName = baseTableSchemaName;
         this.baseTableName = baseTableName;
         this.baseColumnNames = baseColumnNames;
@@ -62,7 +62,7 @@ public class AddForeignKeyConstraintChangeStatement implements SqlStatement {
         return deferrable;
     }
 
-    public AddForeignKeyConstraintChangeStatement setDeferrable(boolean deferrable) {
+    public AddForeignKeyConstraintStatement setDeferrable(boolean deferrable) {
         this.deferrable = deferrable;
         return this;
     }
@@ -71,7 +71,7 @@ public class AddForeignKeyConstraintChangeStatement implements SqlStatement {
         return initiallyDeferred;
     }
 
-    public AddForeignKeyConstraintChangeStatement setInitiallyDeferred(boolean initiallyDeferred) {
+    public AddForeignKeyConstraintStatement setInitiallyDeferred(boolean initiallyDeferred) {
         this.initiallyDeferred = initiallyDeferred;
         return this;
     }
@@ -80,7 +80,7 @@ public class AddForeignKeyConstraintChangeStatement implements SqlStatement {
         return deleteCascade;
     }
 
-    public AddForeignKeyConstraintChangeStatement setDeleteCascade(boolean deleteCascade) {
+    public AddForeignKeyConstraintStatement setDeleteCascade(boolean deleteCascade) {
         this.deleteCascade = deleteCascade;
         return this;
     }

@@ -68,6 +68,10 @@ public class DatabaseFactory {
         return database;
     }
 
+    public Database findCorrectDatabaseImplementation(DatabaseConnection connection) throws JDBCException {
+        return findCorrectDatabaseImplementation(connection.getUnderlyingConnection());
+    }
+
     public String findDefaultDriver(String url) {
         for (Database database : this.getImplementedDatabases()) {
             String defaultDriver = database.getDefaultDriver(url);

@@ -1,8 +1,6 @@
 package liquibase.test;
 
 import liquibase.database.Database;
-import liquibase.database.DatabaseConnection;
-import liquibase.exception.JDBCException;
 import org.junit.ComparisonFailure;
 
 import java.util.Set;
