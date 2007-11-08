@@ -4,22 +4,22 @@ import com.intellij.openapi.components.ProjectComponent;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.psi.xml.XmlFile;
-import dbhelp.db.Table;
 import dbhelp.db.Column;
+import dbhelp.db.Table;
 import dbhelp.db.ui.DBTree;
 import dbhelp.plugin.action.portable.ActionGroup;
 import dbhelp.plugin.action.portable.PopupMenuManager;
 import dbhelp.plugin.idea.utils.IDEAUtils;
+import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
 import liquibase.migrator.Migrator;
 import org.jetbrains.annotations.NotNull;
-import org.liquibase.intellij.plugin.change.action.AddTableAction;
-import org.liquibase.intellij.plugin.change.action.AddAutoIncrementAction;
-import org.liquibase.intellij.plugin.change.action.AddColumnAction;
+import org.liquibase.intellij.plugin.IntellijActionWrapper;
+import org.liquibase.ide.common.change.action.AddColumnAction;
+import org.liquibase.ide.common.change.action.AddTableAction;
 
-import java.sql.Connection;
-import java.util.Map;
 import java.util.HashMap;
+import java.util.Map;
 
 public class LiquibaseProjectComponent implements ProjectComponent {
 
@@ -51,9 +51,10 @@ public class LiquibaseProjectComponent implements ProjectComponent {
 //        ProjectMain dbHelperProjectMain = ((ProjectMain) dbHelperComponent);
 
         ActionGroup refactorActionGroup = new ActionGroup("Refactor");
-        refactorActionGroup.addAction(new AddTableAction());
-        refactorActionGroup.addAction(new AddColumnAction());
-        refactorActionGroup.addAction(new AddAutoIncrementAction());
+//        refactorActionGroup.addAction(new AddTableAction());
+        refactorActionGroup.addAction(new IntellijActionWrapper(new AddColumnAction()));
+        refactorActionGroup.addAction(new IntellijActionWrapper(new AddTableAction()));
+//        refactorActionGroup.addAction(new AddAutoIncrementAction());
 
         PopupMenuManager.getInstance().addAction(refactorActionGroup, DBTree.class, Table.class, Column.class);
 
@@ -83,17 +84,17 @@ public class LiquibaseProjectComponent implements ProjectComponent {
         // called when project is being closed
     }
 
-    public void migrate(Connection conn) {
+    public void migrate(Database database) {
         try {
-            getMigrator(conn).migrate();
+            getMigrator(database).migrate();
         } catch (LiquibaseException e) {
             displayError(e);
         }
     }
 
-    public void tag(String tag, Connection conn) {
+    public void tag(String tag, Database database) {
         try {
-            getMigrator(conn).tag(tag);
+            getMigrator(database).tag(tag);
         } catch (LiquibaseException e) {
             displayError(e);
         }
@@ -106,10 +107,13 @@ public class LiquibaseProjectComponent implements ProjectComponent {
                 "LiquiBase Error");
     }
 
-    public Migrator getMigrator(Connection connection) {
+    public Migrator getMigrator(Database database) {
         Migrator migrator = new Migrator("changelog.xml", new IntellijFileOpener());
+        if (database == null) {
+            return migrator;
+        }
         try {
-            migrator.init(connection);
+            migrator.init(database);
             migrator.checkDatabaseChangeLogTable();
         } catch (Exception e) {
             throw new RuntimeException(e);
