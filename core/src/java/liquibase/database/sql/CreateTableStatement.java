@@ -23,10 +23,6 @@ public class CreateTableStatement implements SqlStatement {
     private Set<UniqueConstraint> uniqueConstraints = new HashSet<UniqueConstraint>();
 
 
-    public CreateTableStatement(String tableName) {
-        this(null, tableName);
-    }
-
     public CreateTableStatement(String schemaName, String tableName) {
         this.schemaName = schemaName;
         this.tableName = tableName;

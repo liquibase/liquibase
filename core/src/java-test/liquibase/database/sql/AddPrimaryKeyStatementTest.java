@@ -16,7 +16,7 @@ public class AddPrimaryKeyStatementTest extends AbstractSqlStatementTest {
     private static final String COLUMN2_NAME = "id2";
 
     protected void setupDatabase(Database database) throws Exception {
-            dropAndCreateTable(new CreateTableStatement(TABLE_NAME)
+            dropAndCreateTable(new CreateTableStatement(null, TABLE_NAME)
                     .addColumn(COLUMN_NAME, "int", new NotNullConstraint())
                     .addColumn(COLUMN2_NAME, "int", new NotNullConstraint()), database);
 

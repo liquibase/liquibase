@@ -19,7 +19,7 @@ public class DropViewStatementTest extends AbstractSqlStatementTest {
 
         dropViewIfExists(TestContext.ALT_SCHEMA, VIEW_NAME, database);
 
-        dropAndCreateTable(new CreateTableStatement(TABLE_NAME)
+        dropAndCreateTable(new CreateTableStatement(null, TABLE_NAME)
                 .addPrimaryKeyColumn("id", "int")
                 , database);
 

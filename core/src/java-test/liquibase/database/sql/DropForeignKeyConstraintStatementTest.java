@@ -19,12 +19,12 @@ public class DropForeignKeyConstraintStatementTest extends AbstractSqlStatementT
     protected void setupDatabase(Database database) throws Exception {
         dropTableIfExists(null, TABLE_NAME, database);
 
-        dropAndCreateTable(new CreateTableStatement(FK_TABLE_NAME)
+        dropAndCreateTable(new CreateTableStatement(null, FK_TABLE_NAME)
                 .addPrimaryKeyColumn("id", "int")
                 .addColumn("name", "varchar(50)")
                 , database);
 
-        dropAndCreateTable(new CreateTableStatement(TABLE_NAME)
+        dropAndCreateTable(new CreateTableStatement(null, TABLE_NAME)
                 .addPrimaryKeyColumn("id", "int")
                 .addColumn("test_id", "int", new ForeignKeyConstraint(CONSTRAINT_NAME, FK_TABLE_NAME + "(id)"))
                 .addColumn("otherCol", "varchar(50)")

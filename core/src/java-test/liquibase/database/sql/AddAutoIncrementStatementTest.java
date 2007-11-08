@@ -16,7 +16,7 @@ public class AddAutoIncrementStatementTest extends AbstractSqlStatementTest {
     private static final String COLUMN_TYPE = "int";
 
     protected void setupDatabase(Database database) throws Exception {
-        dropAndCreateTable(new CreateTableStatement(TABLE_NAME)
+        dropAndCreateTable(new CreateTableStatement(null, TABLE_NAME)
                 .addPrimaryKeyColumn(COLUMN_NAME, COLUMN_TYPE)
                 .addColumn("otherColumn", "varchar(50)"), database);
 

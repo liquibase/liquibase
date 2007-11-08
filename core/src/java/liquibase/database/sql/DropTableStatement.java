@@ -33,6 +33,7 @@ public class DropTableStatement implements SqlStatement {
         if (isCascadeConstraints()) {
             if (database instanceof DerbyDatabase
                     || database instanceof DB2Database
+                    || database instanceof MSSQLDatabase
                     || database instanceof FirebirdDatabase) {
                 throw new StatementNotSupportedOnDatabaseException("Database does not support drop with cascade", this, database);
             }

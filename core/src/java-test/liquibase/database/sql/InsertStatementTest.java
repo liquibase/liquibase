@@ -19,7 +19,7 @@ public class InsertStatementTest extends AbstractSqlStatementTest {
     private static final String FLOAT_COL_NAME = "colName_f";
 
     protected void setupDatabase(Database database) throws Exception {
-        dropAndCreateTable(new CreateTableStatement(TABLE_NAME)
+        dropAndCreateTable(new CreateTableStatement(null, TABLE_NAME)
                 .addColumn(VARCHAR_COL_NAME, "varchar(50)")
                 .addColumn(DATE_COL_NAME, "varchar(50)")
                 .addColumn(BOOLEAN_COL_NAME, database.getBooleanType())

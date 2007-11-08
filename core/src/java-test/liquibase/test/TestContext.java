@@ -4,6 +4,7 @@ import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
 import liquibase.exception.JDBCException;
+import liquibase.migrator.Migrator;
 
 import java.sql.Connection;
 import java.sql.Driver;
@@ -25,7 +26,7 @@ public class TestContext {
     private final String[] DEFAULT_TEST_URLS = new String[]{
             "jdbc:Cache://127.0.0.1:1972/liquibase",
             "jdbc:db2://localhost:50000/liquibas",
-            "jdbc:derby:liquibase;create=true",
+//            "jdbc:derby:liquibase;create=true",
             "jdbc:firebirdsql:localhost/3050:c:\\firebird\\liquibase.fdb",
             "jdbc:h2:mem:liquibase",
             "jdbc:hsqldb:mem:liquibase",
@@ -75,7 +76,7 @@ public class TestContext {
             info.put("password", password);
         }
 
-        final Connection connection;
+        Connection connection;
         try {
             connection = driver.connect(url, info);
         } catch (SQLException e) {
@@ -85,18 +86,22 @@ public class TestContext {
         if (connection == null) {
             throw new JDBCException("Connection could not be created to " + url + " with driver " + driver.getClass().getName() + ".  Possibly the wrong driver for the given database URL");
         }
-        connection.setAutoCommit(false);
+
+        Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(connection);
+        final DatabaseConnection databaseConnection = database.getConnection();
+
+        databaseConnection.setAutoCommit(false);
 
         try {
             if (url.startsWith("jdbc:hsql")) {
-                connection.createStatement().execute("CREATE SCHEMA " + ALT_SCHEMA + " AUTHORIZATION DBA");
+                databaseConnection.createStatement().execute("CREATE SCHEMA " + ALT_SCHEMA + " AUTHORIZATION DBA");
             } else if (url.startsWith("jdbc:sqlserver")
                     || url.startsWith("jdbc:postgresql")
                     || url.startsWith("jdbc:h2")) {
-                connection.createStatement().execute("CREATE SCHEMA " + ALT_SCHEMA);
+                databaseConnection.createStatement().execute("CREATE SCHEMA " + ALT_SCHEMA);
             }
-            if (!connection.getAutoCommit()) {
-                connection.commit();
+            if (!databaseConnection.getAutoCommit()) {
+                databaseConnection.commit();
             }
         } catch (SQLException e) {
 //            e.printStackTrace();
@@ -104,23 +109,29 @@ public class TestContext {
         }
 
 //        Migrator migrator = new Migrator(null, null);
-//        migrator.init(connection);
+//        migrator.init(databaseConnection);
 //        migrator.dropAll();
 //        if (migrator.getDatabase().supportsSchemas()) {
 //            migrator.dropAll(TestContext.ALT_SCHEMA);
 //        }
 
-        Database availableDatabase = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(connection);
-        DatabaseConnection databaseConnection = availableDatabase.getConnection();
         connectionsByUrl.put(url, databaseConnection);
+
+//        Migrator migrator = new Migrator(null, null);
+//        migrator.init(connection);
+//        if (database.supportsSchemas()) {
+//            migrator.dropAll(ALT_SCHEMA, database.getSchemaName());
+//        } else {
+//            migrator.dropAll(new String[]{null});
+//        }
 
         Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
 
             public void run() {
                 try {
                     try {
-                        if (!connection.getAutoCommit()) {
-                            connection.rollback();
+                        if (!databaseConnection.getAutoCommit()) {
+                            databaseConnection.rollback();
                         }
                     } catch (SQLException e) {
                         ;
@@ -143,7 +154,7 @@ public class TestContext {
 //
 //                    }
 
-                    connection.close();
+                    databaseConnection.close();
 //                    System.out.println(url+" closed successfully");
                 } catch (SQLException e) {
                     System.out.println("Could not close " + url);
@@ -189,8 +200,7 @@ public class TestContext {
     }
 
     public Set<Database> getAvailableDatabases() throws Exception {
-        if (availableDatabases == null) {
-            availableDatabases = new HashSet<Database>();
+        if (availableDatabases.size() == 0) {
             for (DatabaseConnection conn : getAvailableConnections()) {
                 availableDatabases.add(DatabaseFactory.getInstance().findCorrectDatabaseImplementation(conn));
             }

@@ -13,7 +13,7 @@ public class AddUniqueConstraintStatementTest extends AbstractSqlStatementTest {
     private static final String COLUMN_NAME = "colToMakeUQ";
 
     protected void setupDatabase(Database database) throws Exception {
-            dropAndCreateTable(new CreateTableStatement(TABLE_NAME)
+            dropAndCreateTable(new CreateTableStatement(null, TABLE_NAME)
                     .addColumn("id", "int", new NotNullConstraint())
                     .addColumn(COLUMN_NAME, "int", new NotNullConstraint()), database);
 

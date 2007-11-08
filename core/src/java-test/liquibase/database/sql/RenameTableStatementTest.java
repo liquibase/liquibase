@@ -20,7 +20,7 @@ public class RenameTableStatementTest  extends AbstractSqlStatementTest {
         dropTableIfExists(null, NEW_TABLE_NAME, database);
         dropTableIfExists(TestContext.ALT_SCHEMA, NEW_TABLE_NAME, database);
 
-        dropAndCreateTable(new CreateTableStatement(TABLE_NAME)
+        dropAndCreateTable(new CreateTableStatement(null, TABLE_NAME)
                 .addPrimaryKeyColumn("id", "int")
                 , database);
 

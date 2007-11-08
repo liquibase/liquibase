@@ -14,7 +14,7 @@ public class ReorganizeTableStatementTest extends AbstractSqlStatementTest {
     private static final String TABLE_NAME = "AddReorgTableTest";
 
     protected void setupDatabase(Database database) throws Exception {
-        dropAndCreateTable(new CreateTableStatement(TABLE_NAME).addColumn("existingCol", "int"), database);
+        dropAndCreateTable(new CreateTableStatement(null, TABLE_NAME).addColumn("existingCol", "int"), database);
         dropAndCreateTable(new CreateTableStatement(TestContext.ALT_SCHEMA, TABLE_NAME).addColumn("existingCol", "int"), database);
     }
 

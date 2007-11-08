@@ -238,14 +238,18 @@ public class MSSQLDatabase extends AbstractDatabase {
     }
 
     public String convertRequestedSchemaToSchema(String requestedSchema) throws JDBCException {
+        if (requestedSchema == null) {
+            return "dbo";
+        }
         return requestedSchema;
     }
 
     public SqlStatement getViewDefinitionSql(String schemaName, String viewName) throws JDBCException {
         String sql = "select view_definition from information_schema.views where upper(table_name)='" + viewName.toUpperCase() + "'";
-        if (StringUtils.trimToNull(schemaName) != null) {
-            sql += " and table_schema='" + schemaName + "'";
-        }
+//        if (StringUtils.trimToNull(schemaName) != null) {
+            sql += " and table_schema='" + convertRequestedSchemaToSchema(schemaName) + "'";
+            sql += " and table_catalog='" + getCatalogName() + "'";
+//        }
 
 //        log.info("GetViewDefinitionSQL: "+sql);
         return new RawSqlStatement(sql);

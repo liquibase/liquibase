@@ -20,11 +20,11 @@ public class AddForeignKeyConstraintStatementTest extends AbstractSqlStatementTe
     private static final String REF_COL_NAME = "id";
 
     protected void setupDatabase(Database database) throws Exception {
-            dropAndCreateTable(new CreateTableStatement(BASE_TABLE_NAME)
+            dropAndCreateTable(new CreateTableStatement(null, BASE_TABLE_NAME)
                     .addPrimaryKeyColumn("id", "int")
                     .addColumn(BASE_COLUMN_NAME, "int"), database);
 
-            dropAndCreateTable(new CreateTableStatement(REF_TABLE_NAME)
+            dropAndCreateTable(new CreateTableStatement(null, REF_TABLE_NAME)
                     .addPrimaryKeyColumn(REF_COL_NAME, "int")
                     .addColumn("existingCol", "int"), database);
 

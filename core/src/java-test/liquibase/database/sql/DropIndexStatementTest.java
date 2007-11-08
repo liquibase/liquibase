@@ -16,7 +16,7 @@ public class DropIndexStatementTest extends AbstractSqlStatementTest {
     private static final String ALT_IDX_NAME = "idx_altdindextest";
 
     protected void setupDatabase(Database database) throws Exception {
-        dropAndCreateTable(new CreateTableStatement(TABLE_NAME)
+        dropAndCreateTable(new CreateTableStatement(null, TABLE_NAME)
                 .addPrimaryKeyColumn("id", "int")
                 .addColumn(COLUMN_NAME, "varchar(50)", new NotNullConstraint())
                 , database);
