@@ -12,7 +12,7 @@ public class DropUniqueConstraintStatementTest  extends AbstractSqlStatementTest
     private static final String CONSTRAINT_NAME = "UQ_dropUQ";
 
     protected void setupDatabase(Database database) throws Exception {
-        dropAndCreateTable(new CreateTableStatement(TABLE_NAME)
+        dropAndCreateTable(new CreateTableStatement(null, TABLE_NAME)
                 .addPrimaryKeyColumn("id", "int")
                 .addColumn(COL_NAME, "varchar(50)", new NotNullConstraint(), new UniqueConstraint(CONSTRAINT_NAME))
                 , database);

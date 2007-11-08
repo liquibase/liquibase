@@ -1,9 +1,6 @@
 package liquibase.database.sql;
 
-import liquibase.database.DB2Database;
-import liquibase.database.Database;
-import liquibase.database.DerbyDatabase;
-import liquibase.database.FirebirdDatabase;
+import liquibase.database.*;
 import liquibase.database.structure.DatabaseSnapshot;
 import liquibase.exception.JDBCException;
 import liquibase.test.DatabaseTestTemplate;
@@ -16,7 +13,7 @@ public class DropTableStatementTest extends AbstractSqlStatementTest {
     private static final String TABLE_NAME = "DropTableTest";
 
     protected void setupDatabase(Database database) throws Exception {
-        dropAndCreateTable(new CreateTableStatement(TABLE_NAME)
+        dropAndCreateTable(new CreateTableStatement(null, TABLE_NAME)
                 .addPrimaryKeyColumn("id", "int")
                 , database);
 
@@ -53,7 +50,8 @@ public class DropTableStatementTest extends AbstractSqlStatementTest {
                     protected boolean expectedException(Database database, JDBCException exception) {
                         return database instanceof DerbyDatabase
                                 || database instanceof DB2Database
-                                || database instanceof FirebirdDatabase;
+                                || database instanceof FirebirdDatabase
+                                || database instanceof MSSQLDatabase;
                     }
                     
                     protected void preExecuteAssert(DatabaseSnapshot snapshot) {

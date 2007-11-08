@@ -21,7 +21,7 @@ public class RenameViewStatementTest extends AbstractSqlStatementTest {
 
         dropViewIfExists(TestContext.ALT_SCHEMA, NEW_VIEW_NAME, database);
 
-        dropAndCreateTable(new CreateTableStatement(TABLE_NAME)
+        dropAndCreateTable(new CreateTableStatement(null, TABLE_NAME)
                 .addPrimaryKeyColumn("id", "int")
                 , database);
 

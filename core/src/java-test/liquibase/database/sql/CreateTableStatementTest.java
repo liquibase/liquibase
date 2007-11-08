@@ -25,7 +25,7 @@ public class CreateTableStatementTest extends AbstractSqlStatementTest {
     }
 
     protected SqlStatement generateTestStatement() {
-        return new CreateTableStatement(null);
+        return new CreateTableStatement(null, null);
     }
 
     @Test

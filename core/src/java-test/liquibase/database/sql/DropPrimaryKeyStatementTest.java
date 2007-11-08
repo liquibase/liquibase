@@ -15,7 +15,7 @@ public class DropPrimaryKeyStatementTest extends AbstractSqlStatementTest {
     private static final String PK_NAME = "pk_dropPkTest";
 
     protected void setupDatabase(Database database) throws Exception {
-        dropAndCreateTable(new CreateTableStatement(TABLE_NAME)
+        dropAndCreateTable(new CreateTableStatement(null, TABLE_NAME)
                 .addColumn(COLUMN_NAME, "int", new PrimaryKeyConstraint(PK_NAME).addColumns(COLUMN_NAME), new NotNullConstraint())
                 .addColumn("otherCol", "varchar(50)")
                 , database);

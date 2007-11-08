@@ -15,7 +15,7 @@ public class CreateIndexStatementTest extends AbstractSqlStatementTest {
     private static final String COLUMN_NAME2 = "testCol2";
 
     protected void setupDatabase(Database database) throws Exception {
-            dropAndCreateTable(new CreateTableStatement(TABLE_NAME)
+            dropAndCreateTable(new CreateTableStatement(null, TABLE_NAME)
                     .addPrimaryKeyColumn("id", "int")
                     .addColumn(COLUMN_NAME, "varchar(50)")
                     .addColumn(COLUMN_NAME2, "varchar(50)")
