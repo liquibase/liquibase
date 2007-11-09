@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<module version="4" relativePaths="true" type="JAVA_MODULE">
-  <component name="ModuleRootManager" />
+<module relativePaths="true" type="JAVA_MODULE" version="4">
   <component name="NewModuleRootManager" inherit-compiler-output="false">
     <output url="file://$MODULE_DIR$/core/build" />
     <exclude-output />
@@ -82,15 +81,6 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/core/lib-compile/maven-core-2.0.6-uber.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
           <root url="jar://$MODULE_DIR$/core/lib-compile/spring-2.0.6.jar!/" />
         </CLASSES>
         <JAVADOC />
@@ -110,6 +100,15 @@
       <library>
         <CLASSES>
           <root url="jar://$MODULE_DIR$/core/lib-compile/spring-mock-2.0.6.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/core/lib-compile/maven-ant-tasks-2.0.7.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
