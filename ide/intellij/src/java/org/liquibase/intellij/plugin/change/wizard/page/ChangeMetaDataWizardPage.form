@@ -66,7 +66,7 @@
       </component>
       <component id="59bf6" class="javax.swing.JLabel">
         <constraints>
-          <grid row="7" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+          <grid row="7" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="9" fill="0" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
           <text value="Comments"/>
@@ -81,7 +81,9 @@
         <children>
           <component id="6e79e" class="javax.swing.JTextArea" binding="commentsTextArea">
             <constraints/>
-            <properties/>
+            <properties>
+              <rows value="5"/>
+            </properties>
           </component>
         </children>
       </scrollpane>
@@ -133,37 +135,12 @@
         </constraints>
         <properties/>
       </component>
-      <grid id="b3816" layout-manager="GridLayoutManager" row-count="1" column-count="3" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
-        <margin top="0" left="0" bottom="0" right="0"/>
+      <component id="a9aa8" class="com.intellij.openapi.ui.TextFieldWithBrowseButton" binding="changeLogFile">
         <constraints>
-          <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+          <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="7" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties/>
-        <border type="none"/>
-        <children>
-          <component id="40001" class="javax.swing.JLabel">
-            <constraints>
-              <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-            </constraints>
-            <properties>
-              <text value="/path/to/changelog.xml"/>
-            </properties>
-          </component>
-          <hspacer id="ec315">
-            <constraints>
-              <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-            </constraints>
-          </hspacer>
-          <component id="92e" class="javax.swing.JButton" binding="selectChangeLogButton">
-            <constraints>
-              <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-            </constraints>
-            <properties>
-              <text value="Select"/>
-            </properties>
-          </component>
-        </children>
-      </grid>
+      </component>
     </children>
   </grid>
 </form>

@@ -26,9 +26,10 @@ public class IntellijActionWrapper extends PortableAction {
     private BaseDatabaseAction action;
 
 
-    public IntellijActionWrapper(BaseDatabaseAction action) {
+    public IntellijActionWrapper(BaseDatabaseAction action, Class objectType) {
         super(action.getTitle());
         this.action = action;
+        setEnabled(action.isApplicableTo(objectType));
     }
 
     public void actionPerformed(ActionEvent actionEvent) {

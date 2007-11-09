@@ -3,7 +3,11 @@ package org.liquibase.intellij.plugin;
 import com.intellij.openapi.components.ProjectComponent;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.Messages;
-import com.intellij.psi.xml.XmlFile;
+import com.intellij.openapi.util.DefaultJDOMExternalizer;
+import com.intellij.openapi.util.InvalidDataException;
+import com.intellij.openapi.util.JDOMExternalizable;
+import com.intellij.openapi.util.WriteExternalException;
+import com.intellij.openapi.vfs.VirtualFile;
 import dbhelp.db.Column;
 import dbhelp.db.Table;
 import dbhelp.db.ui.DBTree;
@@ -11,22 +15,25 @@ import dbhelp.plugin.action.portable.ActionGroup;
 import dbhelp.plugin.action.portable.PopupMenuManager;
 import dbhelp.plugin.idea.utils.IDEAUtils;
 import liquibase.database.Database;
+import liquibase.database.structure.DatabaseObject;
 import liquibase.exception.LiquibaseException;
 import liquibase.migrator.Migrator;
+import liquibase.util.StringUtils;
+import org.jdom.Element;
 import org.jetbrains.annotations.NotNull;
-import org.liquibase.intellij.plugin.IntellijActionWrapper;
+import org.liquibase.ide.common.change.action.AddAutoIncrementAction;
 import org.liquibase.ide.common.change.action.AddColumnAction;
 import org.liquibase.ide.common.change.action.AddTableAction;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class LiquibaseProjectComponent implements ProjectComponent {
+public class LiquibaseProjectComponent implements ProjectComponent, JDOMExternalizable {
 
     private static Map<Project, LiquibaseProjectComponent> _context = new HashMap<Project, LiquibaseProjectComponent>();
 
     private Project project;
-    private XmlFile changeLogFile;
+    public String changeLogFile; //externalized
 //    private ProjectMain projectMain;
 
     public LiquibaseProjectComponent(Project project) {
@@ -50,15 +57,19 @@ public class LiquibaseProjectComponent implements ProjectComponent {
 
 //        ProjectMain dbHelperProjectMain = ((ProjectMain) dbHelperComponent);
 
-        ActionGroup refactorActionGroup = new ActionGroup("Refactor");
-//        refactorActionGroup.addAction(new AddTableAction());
-        refactorActionGroup.addAction(new IntellijActionWrapper(new AddColumnAction()));
-        refactorActionGroup.addAction(new IntellijActionWrapper(new AddTableAction()));
-//        refactorActionGroup.addAction(new AddAutoIncrementAction());
-
-        PopupMenuManager.getInstance().addAction(refactorActionGroup, DBTree.class, Table.class, Column.class);
+        PopupMenuManager.getInstance().addAction(createRefactorMenu(liquibase.database.Database.class), DBTree.class);
+        PopupMenuManager.getInstance().addAction(createRefactorMenu(liquibase.database.structure.Table.class), Table.class);
+        PopupMenuManager.getInstance().addAction(createRefactorMenu(liquibase.database.structure.Column.class), Column.class);
 
 //        PopupMenuManager.getInstance().getActions(DBTree.class)
+    }
+
+    private ActionGroup createRefactorMenu(Class dbObjectType) {
+        ActionGroup refactorActionGroup = new ActionGroup("Refactor");
+        refactorActionGroup.addAction(new IntellijActionWrapper(new AddTableAction(), dbObjectType));
+        refactorActionGroup.addAction(new IntellijActionWrapper(new AddColumnAction(), dbObjectType));
+        refactorActionGroup.addAction(new IntellijActionWrapper(new AddAutoIncrementAction(), dbObjectType));
+        return refactorActionGroup;
     }
 
     public void initComponent() {
@@ -126,11 +137,24 @@ public class LiquibaseProjectComponent implements ProjectComponent {
     }
 
 
-    public XmlFile getChangeLogFile() {
+    public String getChangeLogFile() {
         return changeLogFile;
     }
 
-    public void setChangeLogFile(XmlFile changeLogFile) {
-        this.changeLogFile = changeLogFile;
+    public void setChangeLogFile(String changeLogFile) {
+        this.changeLogFile = StringUtils.trimToNull(changeLogFile);
+    }
+
+    public VirtualFile getChangeLogVirtualFile() {
+        return null;
+    }
+
+
+    public void readExternal(Element element) throws InvalidDataException {
+        DefaultJDOMExternalizer.readExternal(this, element);
+    }
+
+    public void writeExternal(Element element) throws WriteExternalException {
+        DefaultJDOMExternalizer.writeExternal(this, element);
     }
 }

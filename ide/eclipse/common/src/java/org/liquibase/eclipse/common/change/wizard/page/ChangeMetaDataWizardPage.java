@@ -14,7 +14,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.liquibase.eclipse.common.LiquibasePreferences;
-import org.liquibase.ide.common.preferences.GeneralPreferencesPage;
 
 import java.util.Date;
 
@@ -144,7 +143,7 @@ public class ChangeMetaDataWizardPage extends RefactorWizardPage {
 //	        fd.setFileName(LiquibasePreferences.getCurrentChangeLogFileName());
 //	        String selected = fd.open();
 
-			PreferenceDialog dialog = PreferencesUtil.createPreferenceDialogOn(changeLogLabel.getShell(), GeneralPreferencesPage.ID, null, null);
+			PreferenceDialog dialog = PreferencesUtil.createPreferenceDialogOn(changeLogLabel.getShell(), LiquibasePreferences.PREFERENCES_ID, null, null);
 			if (dialog.open() == Dialog.OK) {
 //	        if (selected != null) {
 //	        	LiquibasePreferences.setCurrentChangeLogFileName(selected);

@@ -1,29 +1,19 @@
 package org.liquibase.intellij.plugin.change.wizard.page;
 
-import com.intellij.ide.wizard.Step;
 import com.intellij.ide.wizard.CommitStepException;
-import com.intellij.ide.util.TreeClassChooserFactory;
-import com.intellij.ide.util.TreeClassChooser;
-import com.intellij.ide.util.TreeFileChooser;
+import com.intellij.ide.wizard.Step;
 import com.intellij.openapi.fileChooser.FileChooserDescriptor;
-import com.intellij.openapi.fileChooser.FileChooser;
-import com.intellij.openapi.fileChooser.FileChooserFactory;
-import com.intellij.openapi.fileChooser.FileChooserDialog;
+import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.project.ProjectManager;
-import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.openapi.fileTypes.StdFileTypes;
-import com.intellij.psi.PsiFile;
-import com.intellij.psi.PsiManager;
+import com.intellij.openapi.ui.TextFieldWithBrowseButton;
 import com.intellij.psi.xml.XmlFile;
-
-import javax.swing.*;
-import java.util.Date;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
-
 import liquibase.util.StringUtils;
 import org.liquibase.intellij.plugin.LiquibaseProjectComponent;
+
+import javax.swing.*;
+import javax.swing.event.DocumentListener;
+import javax.swing.event.DocumentEvent;
+import java.util.Date;
 
 public class ChangeMetaDataWizardPage implements org.liquibase.ide.common.change.wizard.page.ChangeMetaDataWizardPage, Step {
     private JTextArea commentsTextArea;
@@ -34,7 +24,7 @@ public class ChangeMetaDataWizardPage implements org.liquibase.ide.common.change
     private JTextField contextsTextField;
     private JTextField dbmsTextField;
     private JPanel mainPanel;
-    private JButton selectChangeLogButton;
+    private TextFieldWithBrowseButton changeLogFile;
 
     private Project project;
 
@@ -60,30 +50,56 @@ public class ChangeMetaDataWizardPage implements org.liquibase.ide.common.change
         idTextField.setText(String.valueOf(new Date().getTime()));
         authorTextField.setText(StringUtils.trimToEmpty(System.getProperty("user.name")));
 
-        selectChangeLogButton.addActionListener(new ActionListener() {
+        Project project = LiquibaseProjectComponent.getInstance().getProject();
 
-            public void actionPerformed(ActionEvent actionEvent) {
-//                TreeFileChooser.PsiFileFilter filter = new TreeFileChooser.PsiFileFilter() {
-//
-//                    public boolean accept(PsiFile psiFile) {
-//                        return psiFile.getFileType().getDefaultExtension().equalsIgnoreCase("xml");
-//                    }
-//                };
-//
-//                TreeFileChooser chooser = TreeClassChooserFactory.getInstance(project).createFileChooser("Select Change Log File to Write To", null, StdFileTypes.XML, null);
-//                PsiFile psiFile = chooser.getSelectedFile();
-//                if (psiFile != null) {
-//                    System.out.println("file : "+psiFile.toString());
-//                }
+        final FileChooserDescriptor fileChooser = FileChooserDescriptorFactory.createSingleLocalFileDescriptor();
+        String currentChangeLogFile = LiquibaseProjectComponent.getInstance().getChangeLogFile();
+        if (currentChangeLogFile != null) {
+            changeLogFile.setText(currentChangeLogFile);
+        }
+        changeLogFile.setTextFieldPreferredWidth(100);
+        changeLogFile.addBrowseFolderListener("Select Change Log File", null, project, fileChooser);
+        changeLogFile.getTextField().getDocument().addDocumentListener(new DocumentListener() {
+            public void insertUpdate(DocumentEvent e) {
+                updatePreference();
+            }
 
-                FileChooserDescriptor descriptor = new FileChooserDescriptor(true, false, false, false, true, false);
-                FileChooserDialog dialog = FileChooserFactory.getInstance().createFileChooser(descriptor, project);
-                VirtualFile[] files = dialog.choose(project.getWorkspaceFile(), project);
-                if (files != null && files.length > 0) {
-                    LiquibaseProjectComponent.getInstance().setChangeLogFile((XmlFile) PsiManager.getInstance(project).findFile(files[files.length-1]));
-                }
+            public void removeUpdate(DocumentEvent e) {
+                updatePreference();
+            }
+
+            public void changedUpdate(DocumentEvent e) {
+                updatePreference();
+            }
+
+            private void updatePreference() {
+                LiquibaseProjectComponent.getInstance().setChangeLogFile(changeLogFile.getTextField().getText());
             }
         });
+//        changeLogFile.addActionListener(new ActionListener() {
+//
+//            public void actionPerformed(ActionEvent actionEvent) {
+////                TreeFileChooser.PsiFileFilter filter = new TreeFileChooser.PsiFileFilter() {
+////
+////                    public boolean accept(PsiFile psiFile) {
+////                        return psiFile.getFileType().getDefaultExtension().equalsIgnoreCase("xml");
+////                    }
+////                };
+////
+////                TreeFileChooser chooser = TreeClassChooserFactory.getInstance(project).createFileChooser("Select Change Log File to Write To", null, StdFileTypes.XML, null);
+////                PsiFile psiFile = chooser.getSelectedFile();
+////                if (psiFile != null) {
+////                    System.out.println("file : "+psiFile.toString());
+////                }
+//
+////                FileChooserDescriptor descriptor = new FileChooserDescriptor(true, false, false, false, true, false);
+////                FileChooserDialog dialog = FileChooserFactory.getInstance().createFileChooser(descriptor, project);
+//                VirtualFile[] files = dialog.choose(project.getWorkspaceFile(), project);
+//                if (files != null && files.length > 0) {
+//                    LiquibaseProjectComponent.getInstance().setChangeLogFile((XmlFile) PsiManager.getInstance(project).findFile(files[files.length-1]));
+//                }
+//            }
+//        });
 
         return mainPanel;
     }

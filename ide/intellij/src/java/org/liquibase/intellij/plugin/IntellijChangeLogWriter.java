@@ -23,7 +23,7 @@ public class IntellijChangeLogWriter implements ChangeLogWriter {
                     DocumentBuilder documentBuilder = factory.newDocumentBuilder();
                     documentBuilder.setEntityResolver(new MigratorSchemaResolver());
 
-                    VirtualFile file = LiquibaseProjectComponent.getInstance().getChangeLogFile().getVirtualFile();
+                    VirtualFile file = LiquibaseProjectComponent.getInstance().getChangeLogVirtualFile();
                     if (file == null) {
                         throw new RuntimeException("Could not find file");
                     }
