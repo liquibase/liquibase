@@ -38,7 +38,7 @@ The available targets at the current stage:
     <property file="build.local.properties"/>
     <property file="build.properties"/>
 
-	<!-- target: PREPARE -->
+    <!-- target: PREPARE -->
     <target name="prepare" description="Creation of the output folders, classpath">
         <property file="build.local.properties"/>
         <property file="build.properties"/>
@@ -88,10 +88,10 @@ The available targets at the current stage:
                 </fileset>
             </classpath>
         </taskdef>
-    	
+
     </target>
 
-	<!-- target: CLEAN -->
+    <!-- target: CLEAN -->
     <target name="clean">
         <property file="build.properties"/>
 
@@ -102,10 +102,10 @@ The available targets at the current stage:
         <delete dir="${lib.deps.dir}"/>
         <delete dir="${reports.dir}"/>
         <delete dir="${package.dir}"/>
-    	<delete dir="${coverage.build.dir}"/>
+        <delete dir="${coverage.build.dir}"/>
     </target>
 
-	<!-- target: COMPILE -->
+    <!-- target: COMPILE -->
     <target name="compile" depends="prepare">
         <copy todir="${build.dir}" filtering="true">
             <filterset>
@@ -157,19 +157,20 @@ The available targets at the current stage:
         </propertyfile>
     </target>
 
-	<!-- target: RETROWEAVE -->
+    <!-- target: RETROWEAVE -->
     <target name="retroweave" depends="prepare">
         <retroweaver srcdir="${build.dir}"/>
         <retroweaver srcdir="${build.test.dir}"/>
         <retroweaver srcdir="${build.db.test.dir}"/>
     </target>
 
-	<!-- target: PACKAGE -->
+    <!-- target: PACKAGE -->
     <target name="package" depends="compile">
         <jar destfile="${release.dir}/liquibase-SNAPSHOT.jar" basedir="${build.dir}"
              manifest="${src.dir}/../META-INF/MANIFEST.MF"/>
 
-        <copy tofile="${package.dir}/liquibase-${build.version}/liquibase-${build.version}.jar" file="${release.dir}/liquibase-SNAPSHOT.jar"/>
+        <copy tofile="${package.dir}/liquibase-${build.version}/liquibase-${build.version}.jar"
+              file="${release.dir}/liquibase-SNAPSHOT.jar"/>
         <copy todir="${package.dir}/liquibase-${build.version}">
             <fileset file="${src.dir}/changelog.txt"/>
             <fileset file="${src.dir}/lgpl.txt"/>
@@ -182,10 +183,13 @@ The available targets at the current stage:
         </copy>
         <chmod file="${package.dir}/liquibase-${build.version}/liquibase" perm="a+x"/>
 
-        <zip destfile="${release.dir}/liquibase-${build.version}.zip" basedir="${package.dir}" includes="liquibase-${build.version}/**"/>
+        <zip destfile="${release.dir}/liquibase-${build.version}.zip" basedir="${package.dir}"
+             includes="liquibase-${build.version}/**"/>
         <tar destfile="${release.dir}/liquibase-${build.version}.tar.gz" longfile="gnu" compression="gzip">
-            <tarfileset dir="${package.dir}/liquibase-${build.version}" prefix="liquibase-${build.version}" excludes="liquibase"/>
-            <tarfileset dir="${package.dir}/liquibase-${build.version}" prefix="liquibase-${build.version}" includes="liquibase" mode="755"/>
+            <tarfileset dir="${package.dir}/liquibase-${build.version}" prefix="liquibase-${build.version}"
+                        excludes="liquibase"/>
+            <tarfileset dir="${package.dir}/liquibase-${build.version}" prefix="liquibase-${build.version}"
+                        includes="liquibase" mode="755"/>
         </tar>
 
         <copy todir="${package.dir}/liquibase-${build.version}-src">
@@ -210,10 +214,13 @@ The available targets at the current stage:
         </copy>
         <chmod file="${package.dir}/liquibase-${build.version}-src/liquibase" perm="a+x"/>
 
-        <zip destfile="${release.dir}/liquibase-${build.version}-src.zip" basedir="${package.dir}" includes="liquibase-${build.version}-src/**"/>
+        <zip destfile="${release.dir}/liquibase-${build.version}-src.zip" basedir="${package.dir}"
+             includes="liquibase-${build.version}-src/**"/>
         <tar destfile="${release.dir}/liquibase-${build.version}-src.tar.gz" longfile="gnu" compression="gzip">
-            <tarfileset dir="${package.dir}/liquibase-${build.version}-src" prefix="liquibase-${build.version}" excludes="liquibase"/>
-            <tarfileset dir="${package.dir}/liquibase-${build.version}-src" prefix="liquibase-${build.version}" includes="liquibase" mode="755"/>
+            <tarfileset dir="${package.dir}/liquibase-${build.version}-src" prefix="liquibase-${build.version}"
+                        excludes="liquibase"/>
+            <tarfileset dir="${package.dir}/liquibase-${build.version}-src" prefix="liquibase-${build.version}"
+                        includes="liquibase" mode="755"/>
         </tar>
 
         <retroweaver srcdir="${build.dir}"/>
@@ -235,14 +242,17 @@ The available targets at the current stage:
         </copy>
         <chmod file="${package.dir}/liquibase-${build.version}-14jvm/liquibase" perm="a+x"/>
 
-        <zip destfile="${release.dir}/liquibase-${build.version}-14jvm.zip" basedir="${package.dir}" includes="liquibase-${build.version}-14jvm/**"/>
+        <zip destfile="${release.dir}/liquibase-${build.version}-14jvm.zip" basedir="${package.dir}"
+             includes="liquibase-${build.version}-14jvm/**"/>
         <tar destfile="${release.dir}/liquibase-${build.version}-14jvm.tar.gz" longfile="gnu" compression="gzip">
-            <tarfileset dir="${package.dir}/liquibase-${build.version}-14jvm" prefix="liquibase-${build.version}" excludes="liquibase"/>
-            <tarfileset dir="${package.dir}/liquibase-${build.version}-14jvm" prefix="liquibase-${build.version}" includes="liquibase" mode="755"/>
+            <tarfileset dir="${package.dir}/liquibase-${build.version}-14jvm" prefix="liquibase-${build.version}"
+                        excludes="liquibase"/>
+            <tarfileset dir="${package.dir}/liquibase-${build.version}-14jvm" prefix="liquibase-${build.version}"
+                        includes="liquibase" mode="755"/>
         </tar>
     </target>
 
-	<!-- target: SITE -->
+    <!-- target: SITE -->
     <target name="site" depends="prepare">
         <loadfile property="nav.main" srcFile="${src.dir}/site/nav/main.html"/>
         <loadfile property="nav.manual" srcFile="${src.dir}/site/nav/manual.html"/>
@@ -290,7 +300,7 @@ The available targets at the current stage:
 
     </target>
 
-	<!-- target: JAVADOC -->
+    <!-- target: JAVADOC -->
     <target name="javadoc" depends="prepare">
         <javadoc
                 destdir="${reports.dir}/api"
@@ -307,19 +317,19 @@ The available targets at the current stage:
             </fileset>
             <classpath refid="classpath"/>
             <!--<bottom><![CDATA[-->
-<!--<i>Copyright &#169; 2006-2007 Sundog. All Rights Reserved.</i>-->
-<!--<script src="http://www.google-analytics.com/urchin.js" type="text/javascript">-->
-<!--</script>-->
-<!--<script type="text/javascript">-->
-<!--_uacct = "UA-1719178-1";-->
-<!--urchinTracker();-->
-<!--</script>-->
+            <!--<i>Copyright &#169; 2006-2007 Sundog. All Rights Reserved.</i>-->
+            <!--<script src="http://www.google-analytics.com/urchin.js" type="text/javascript">-->
+            <!--</script>-->
+            <!--<script type="text/javascript">-->
+            <!--_uacct = "UA-1719178-1";-->
+            <!--urchinTracker();-->
+            <!--</script>-->
             <!--]]>-->
             <!--</bottom>-->
         </javadoc>
     </target>
 
-	<!-- target: DOXYGEN -->
+    <!-- target: DOXYGEN -->
     <target name="doxygen" depends="prepare" if="run.doxygen">
         <taskdef name="doxygen" classname="org.doxygen.tools.DoxygenTask">
             <classpath>
@@ -336,11 +346,11 @@ The available targets at the current stage:
         </taskdef>
 
         <doxygen configfilename="${src.dir}/../Doxyfile" verbose="true">
-            <property name="PROJECT_NUMBER" value="${build.version}" />
+            <property name="PROJECT_NUMBER" value="${build.version}"/>
         </doxygen>
     </target>
 
-	<!-- target: TEST -->
+    <!-- target: TEST -->
     <target name="test" depends="prepare, compile">
         <mkdir dir="${reports.dir}/junit/"/>
         <mkdir dir="${reports.dir}/junit/${ant.project.name}/"/>
@@ -349,13 +359,13 @@ The available targets at the current stage:
                jvm="${java.home}/bin/java">
             <env key="JAVA_HOME" path="${env.JAVA_HOME}"/>
             <classpath>
-            	<pathelement location="${coverage.build.dir}"/>
+                <pathelement location="${coverage.build.dir}"/>
                 <pathelement path="${build.dir}"/>
                 <pathelement path="${build.test.dir}"/>
                 <path refid="classpath"/>
             </classpath>
-        	<jvmarg value="-Demma.coverage.out.file=${coverage.output.dir}/coverage.emma"/>
-            <formatter type="brief" usefile="false" />
+            <jvmarg value="-Demma.coverage.out.file=${coverage.output.dir}/coverage.emma"/>
+            <formatter type="brief" usefile="false"/>
             <formatter type="xml"/>
             <batchtest todir="${reports.dir}/junit/${ant.project.name}">
                 <fileset dir="${build.test.dir}">
@@ -377,9 +387,9 @@ The available targets at the current stage:
         </junitreport>
     </target>
 
-	<!-- target: TEST-INT -->
+    <!-- target: TEST-INT -->
     <target name="test-int" depends="prepare, compile">
-    		<!-- TODO: we could use a property to choose the target database to be testes on execution time -->
+        <!-- TODO: we could use a property to choose the target database to be testes on execution time -->
         <mkdir dir="${reports.dir}/junit/"/>
         <mkdir dir="${reports.dir}/junit/${ant.project.name}/"/>
         <junit printsummary="yes" haltonfailure="no" fork="yes" forkmode="once" reloading="false"
@@ -411,76 +421,124 @@ The available targets at the current stage:
             <report format="frames" todir="${reports.dir}/junit-report/${ant.project.name}"/>
         </junitreport>
     </target>
-	<!--
-		Runs generic integration tests which do not require any database setup locally.
-		These should be run before committing any changes to check to make sure liquibase as a whole is still running.
-	 -->
-	<target name="test-int-generic" description="Integration tests that can be run on any computer without any setup" depends="prepare,compile">
-		<mkdir dir="${reports.dir}/junit/"/>
-		<mkdir dir="${reports.dir}/junit/${ant.project.name}/"/>
-		<junit printsummary="yes" haltonfailure="yes" fork="yes" forkmode="once" reloading="false"
+    <!--
+         Runs generic integration tests which do not require any database setup locally.
+         These should be run before committing any changes to check to make sure liquibase as a whole is still running.
+      -->
+    <target name="test-int-generic" description="Integration tests that can be run on any computer without any setup"
+            depends="prepare,compile">
+        <mkdir dir="${reports.dir}/junit/"/>
+        <mkdir dir="${reports.dir}/junit/${ant.project.name}/"/>
+        <junit printsummary="yes" haltonfailure="yes" fork="yes" forkmode="once" reloading="false"
                failureproperty="unit.tests.failed"
                jvm="${java.home}/bin/java">
             <env key="JAVA_HOME" path="${env.JAVA_HOME}"/>
             <classpath>
                 <pathelement path="${build.dir}"/>
-                <pathelement path="${build.test.dir}"/>                
+                <pathelement path="${build.test.dir}"/>
                 <pathelement path="${build.db.test.dir}"/>
                 <path refid="classpath"/>
             </classpath>
-			<formatter type="brief" usefile="false" />
+            <formatter type="brief" usefile="false"/>
             <formatter type="xml"/>
             <batchtest todir="${reports.dir}/junit/${ant.project.name}">
                 <fileset dir="${build.db.test.dir}">
                     <include name="**/DerbySampleChangeLogRunnerTest.class"/>
-                	<include name="**/H2SampleChangeLogRunnerTest.class"/>
+                    <include name="**/H2SampleChangeLogRunnerTest.class"/>
                     <include name="**/HsqlSampleChangeLogRunnerTest.class"/>
                 </fileset>
             </batchtest>
         </junit>
-	</target>
-	
-	<target name="-coverage-post-compile" depends="compile">
-		<taskdef resource="emma_ant.properties">
-			<classpath>
-		    	<pathelement location="${lib.compile.dir}/emma.jar"/>
-				<pathelement location="${lib.compile.dir}/emma_ant.jar"/>
-			</classpath>
-		</taskdef>
-		<path id="build.path">
-			<pathelement path="${build.dir}"/>
-		</path>
-		<emma enabled="true" >
-			<instr 
-				instrpathref="build.path"
-				destdir="${coverage.build.dir}"	
-				metadatafile="${coverage.output.dir}/metadata.emma"
-				merge="true"
-			/>
-	    </emma>
-	</target>
-	
-	<target name="code-coverage" 
-		depends="-coverage-post-compile,test" description="Generates code coverage reports for the unit tests">
-		
-		<emma enabled="true" >
-			<report sourcepath="${src.dir}/java" >
-				<fileset dir="${coverage.output.dir}" >
-					<include name="*.emma" />
-				</fileset>
-				
-				<txt outfile="${reports.dir}/coverage-report/coverage.txt" />
-				<html outfile="${reports.dir}/coverage-report/coverage.html" />
-			</report>
-		</emma>
-	</target>
-	
-	<target name="continuous-build" description="Used by the continuous build server and runs the generic tests"
-		depends="prepare,compile,test,test-int-generic">
-            <fail if="unit.tests.failed"/>
-      </target>
-	
-	<!-- target: ALL -->
+    </target>
+
+    <target name="-coverage-post-compile" depends="compile">
+        <taskdef resource="emma_ant.properties">
+            <classpath>
+                <pathelement location="${lib.compile.dir}/emma.jar"/>
+                <pathelement location="${lib.compile.dir}/emma_ant.jar"/>
+            </classpath>
+        </taskdef>
+        <path id="build.path">
+            <pathelement path="${build.dir}"/>
+        </path>
+        <emma enabled="true">
+            <instr
+                    instrpathref="build.path"
+                    destdir="${coverage.build.dir}"
+                    metadatafile="${coverage.output.dir}/metadata.emma"
+                    merge="true"
+                    />
+        </emma>
+    </target>
+
+    <target name="code-coverage"
+            depends="-coverage-post-compile,test" description="Generates code coverage reports for the unit tests">
+
+        <emma enabled="true">
+            <report sourcepath="${src.dir}/java">
+                <fileset dir="${coverage.output.dir}">
+                    <include name="*.emma"/>
+                </fileset>
+
+                <txt outfile="${reports.dir}/coverage-report/coverage.txt"/>
+                <html outfile="${reports.dir}/coverage-report/coverage.html"/>
+            </report>
+        </emma>
+    </target>
+
+    <target name="continuous-build" description="Used by the continuous build server and runs the generic tests"
+            depends="prepare,compile,test,test-int-generic">
+        <fail if="unit.tests.failed"/>
+    </target>
+
+    <target name="maven" depends="prepare">
+        <copy file="${basedir}/../pom.base.xml" tofile="${basedir}/../pom.xml" filtering="true">
+            <filterset>
+                <filter token="BUILD.VERSION" value="${build.version}"/>
+            </filterset>
+        </copy>
+        <copy file="${maven.basedir}/pom.base.xml" tofile="${maven.basedir}/pom.xml" filtering="true">
+            <filterset>
+                <filter token="BUILD.VERSION" value="${build.version}"/>
+            </filterset>
+        </copy>
+
+        <typedef resource="org/apache/maven/artifact/ant/antlib.xml">
+            <classpath>
+                <fileset dir="${lib.compile.dir}">
+                    <include name="*.jar"/>
+                </fileset>
+                <fileset dir="${maven.basedir}/lib">
+                    <include name="*.jar"/>
+                </fileset>
+            </classpath>
+        </typedef>
+
+        <pom id="core.maven.project" file="${basedir}/../pom.xml"/>
+        <pom id="plugin.maven.project" file="${maven.basedir}/pom.xml"/>
+
+        <deploy file="${package.dir}/liquibase-${build.version}/liquibase-${build.version}.jar">
+            <remoteRepository url="file://${maven.repository}"/>
+            <pom refid="core.maven.project"/>
+        </deploy>
+
+
+        <exec dir="${maven.basedir}" executable="cmd">
+            <env key="JAVA_HOME" value="\Program Files\Java\jdk1.5.0_12"/>
+            <arg value="/c"/>
+            <arg value="c:\maven-2.0.7\bin\mvn.bat"/>
+            <arg value="package"/>
+            <arg value="-Durl=file://${maven.repository}"/>
+        </exec>
+
+        <deploy file="${maven.basedir}/target/liquibase-plugin-${build.version}.0.jar">
+            <remoteRepository url="file://${maven.repository}"/>
+            <pom refid="plugin.maven.project"/>
+        </deploy>
+
+    </target>
+
+    <!-- target: ALL -->
     <target name="all" depends="prepare">
         <antcall target="clean" inheritAll="true" inheritRefs="true"/>
         <antcall target="prepare" inheritAll="true" inheritRefs="true"/>

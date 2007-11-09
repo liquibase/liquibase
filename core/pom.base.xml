@@ -1,0 +1,27 @@
+<project>
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.liquibase</groupId>
+  <artifactId>liquibase-core</artifactId>
+  <version>@BUILD.VERSION@</version>
+
+  <!--<dependencies>-->
+    <!--<dependency>-->
+      <!--<groupId>org.apache.maven.wagon</groupId>-->
+      <!--<artifactId>wagon-provider-api</artifactId>-->
+      <!--<version>1.0-alpha-2</version>-->
+    <!--</dependency>-->
+
+    <!--<dependency>-->
+      <!--<groupId>org.codehaus.modello</groupId>-->
+      <!--<artifactId>modello-core</artifactId>-->
+      <!--<version>1.0-alpha-2-SNAPSHOT</version>-->
+    <!--</dependency>-->
+
+    <!--<dependency>-->
+      <!--<groupId>javax.servlet</groupId>-->
+      <!--<artifactId>servlet-api</artifactId>-->
+      <!--<version>2.4</version>-->
+      <!--<scope>provided</scope>-->
+    <!--</dependency>-->
+  <!--</dependencies>-->
+</project>
