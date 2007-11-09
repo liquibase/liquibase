@@ -2,14 +2,14 @@ package org.liquibase.intellij.plugin.change.wizard;
 
 import com.intellij.ide.wizard.AbstractWizard;
 import com.intellij.ide.wizard.Step;
+import com.intellij.openapi.ui.Messages;
 import liquibase.database.Database;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.exception.MigrationFailedException;
+import org.liquibase.ide.common.change.action.BaseRefactorAction;
 import org.liquibase.ide.common.change.wizard.RefactorChangeExecutor;
 import org.liquibase.ide.common.change.wizard.RefactorWizard;
 import org.liquibase.ide.common.change.wizard.page.RefactorWizardPage;
-import org.liquibase.ide.common.change.action.BaseRefactorAction;
-import org.liquibase.ide.common.action.BaseDatabaseAction;
 import org.liquibase.intellij.plugin.IntellijFacade;
 import org.liquibase.intellij.plugin.LiquibaseProjectComponent;
 import org.liquibase.intellij.plugin.change.wizard.page.ChangeMetaDataWizardPage;
@@ -78,7 +78,9 @@ public class IntellijRefactorWizard extends AbstractWizard<Step> {
         public void actionPerformed(ActionEvent actionEvent) {
             try {
                 new RefactorChangeExecutor().executeChangeSet(new IntellijFacade(), database, metaDataPage, action.createChanges(selectedObject, pages));
-            } catch (MigrationFailedException e) {
+            } catch (Exception e) {
+                String message;
+                Messages.showErrorDialog(LiquibaseProjectComponent.getInstance().getProject(), e.getMessage(), "Error Executing Change");
                 e.printStackTrace();
             }
         }

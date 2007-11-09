@@ -17,7 +17,7 @@ public class AddColumnAction extends BaseTableRefactorAction {
         super("Add Column");
     }
 
-    public RefactorWizard createRefactorWizard(DatabaseObject dbObject) {
+    public RefactorWizard createRefactorWizard(Table dbObject) {
         return new RefactorWizard("Add column to "+ ((Table) dbObject).getName(), new AddColumnWizardPageImpl());
     }
 
