@@ -6,13 +6,14 @@ import com.intellij.openapi.fileChooser.FileChooserDescriptor;
 import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.TextFieldWithBrowseButton;
-import com.intellij.psi.xml.XmlFile;
 import liquibase.util.StringUtils;
 import org.liquibase.intellij.plugin.LiquibaseProjectComponent;
 
 import javax.swing.*;
-import javax.swing.event.DocumentListener;
 import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 import java.util.Date;
 
 public class ChangeMetaDataWizardPage implements org.liquibase.ide.common.change.wizard.page.ChangeMetaDataWizardPage, Step {
@@ -84,7 +85,11 @@ public class ChangeMetaDataWizardPage implements org.liquibase.ide.common.change
     private void createUIComponents() {
         Project project = LiquibaseProjectComponent.getInstance().getProject();
 
-        changeLogFile = new TextFieldWithBrowseButton(); 
+        changeLogFile = new TextFieldWithBrowseButton(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                System.out.println(e.getSource());
+            }
+        });
         final FileChooserDescriptor fileChooser = FileChooserDescriptorFactory.createSingleLocalFileDescriptor();
         String currentChangeLogFile = LiquibaseProjectComponent.getInstance().getChangeLogFile();
         if (currentChangeLogFile != null) {
