@@ -3,10 +3,7 @@ package liquibase;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.List;
-import java.util.Vector;
+import java.util.*;
 
 /**
  * A FileOpener that will search in a List of other FileOpeners until it finds
@@ -30,13 +27,11 @@ public class CompositeFileOpener implements FileOpener {
     
     /**
      * Creates a CompositeFileOpener with 2 entries.
-     * @param first The first FileOpener to search
-     * @param second The second FileOpener to search
+     *
+     * @param openers The list of Openers to use
      */
-    public CompositeFileOpener(FileOpener first, FileOpener second) {
-        openers = new ArrayList<FileOpener>();
-        openers.add(first);
-        openers.add(second);
+    public CompositeFileOpener(FileOpener... openers) {
+        this.openers = Arrays.asList(openers);
     }
     
     /**
