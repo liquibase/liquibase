@@ -135,7 +135,7 @@
         </constraints>
         <properties/>
       </component>
-      <component id="a9aa8" class="com.intellij.openapi.ui.TextFieldWithBrowseButton" binding="changeLogFile">
+      <component id="a9aa8" class="com.intellij.openapi.ui.TextFieldWithBrowseButton" binding="changeLogFile" custom-create="true">
         <constraints>
           <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="7" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
         </constraints>
