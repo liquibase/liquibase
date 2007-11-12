@@ -50,8 +50,41 @@ public class ChangeMetaDataWizardPage implements org.liquibase.ide.common.change
         idTextField.setText(String.valueOf(new Date().getTime()));
         authorTextField.setText(StringUtils.trimToEmpty(System.getProperty("user.name")));
 
+        return mainPanel;
+    }
+
+    public String getId() {
+        return idTextField.getText();
+    }
+
+    public String getAuthor() {
+        return authorTextField.getText();
+    }
+
+    public boolean isAlwaysRun() {
+        return alwaysRunCheckBox.isSelected();
+    }
+
+    public boolean isRunOnChange() {
+        return runOnChangeCheckBox.isSelected();
+    }
+
+    public String getContext() {
+        return contextsTextField.getText();
+    }
+
+    public String getDbms() {
+        return dbmsTextField.getText();
+    }
+
+    public String getComments() {
+        return commentsTextArea.getText();
+    }
+
+    private void createUIComponents() {
         Project project = LiquibaseProjectComponent.getInstance().getProject();
 
+        changeLogFile = new TextFieldWithBrowseButton(); 
         final FileChooserDescriptor fileChooser = FileChooserDescriptorFactory.createSingleLocalFileDescriptor();
         String currentChangeLogFile = LiquibaseProjectComponent.getInstance().getChangeLogFile();
         if (currentChangeLogFile != null) {
@@ -100,35 +133,5 @@ public class ChangeMetaDataWizardPage implements org.liquibase.ide.common.change
 //                }
 //            }
 //        });
-
-        return mainPanel;
-    }
-
-    public String getId() {
-        return idTextField.getText();
-    }
-
-    public String getAuthor() {
-        return authorTextField.getText();
-    }
-
-    public boolean isAlwaysRun() {
-        return alwaysRunCheckBox.isSelected();
-    }
-
-    public boolean isRunOnChange() {
-        return runOnChangeCheckBox.isSelected();
-    }
-
-    public String getContext() {
-        return contextsTextField.getText();
-    }
-
-    public String getDbms() {
-        return dbmsTextField.getText();
-    }
-
-    public String getComments() {
-        return commentsTextArea.getText();
     }
 }
