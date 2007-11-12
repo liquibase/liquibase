@@ -6,6 +6,7 @@ import org.liquibase.ide.common.change.wizard.page.ChangeMetaDataWizardPage;
 import org.liquibase.ide.common.change.wizard.RefactorWizard;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Table;
+import liquibase.database.Database;
 import liquibase.change.Change;
 
 public abstract class BaseRefactorAction extends BaseDatabaseAction {

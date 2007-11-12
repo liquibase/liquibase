@@ -11,7 +11,10 @@ import liquibase.database.DatabaseFactory;
 import liquibase.database.structure.Column;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Table;
+import liquibase.migrator.Migrator;
+import liquibase.exception.LiquibaseException;
 import org.liquibase.ide.common.action.BaseDatabaseAction;
+import org.liquibase.ide.common.action.MigratorAction;
 import org.liquibase.ide.common.change.action.BaseRefactorAction;
 import org.liquibase.intellij.plugin.change.wizard.IntellijRefactorWizard;
 
@@ -21,6 +24,8 @@ import java.awt.event.ActionEvent;
 import java.sql.Connection;
 import java.sql.ResultSetMetaData;
 import java.text.ParseException;
+
+import com.intellij.openapi.ui.Messages;
 
 public class IntellijActionWrapper extends PortableAction {
     private BaseDatabaseAction action;
@@ -33,12 +38,20 @@ public class IntellijActionWrapper extends PortableAction {
     }
 
     public void actionPerformed(ActionEvent actionEvent) {
-        if (action instanceof BaseRefactorAction) {
-            IntellijRefactorWizard wizard = new IntellijRefactorWizard(((BaseRefactorAction) action).createRefactorWizard(getSelectedDatabaseObject()), getSelectedDatabaseObject(), getSelectedDatabase(), ((BaseRefactorAction) action));
-            wizard.pack();
-            wizard.show();
-        } else {
-//            action.actionPerform();
+        try {
+            DatabaseObject selectedDatabaseObject = getSelectedDatabaseObject();
+            Database selectedDatabase = getSelectedDatabase();
+            if (action instanceof BaseRefactorAction) {
+                IntellijRefactorWizard wizard = new IntellijRefactorWizard(((BaseRefactorAction) action).createRefactorWizard(selectedDatabaseObject), selectedDatabaseObject, selectedDatabase, ((BaseRefactorAction) action));
+                wizard.pack();
+                wizard.show();
+            } else if (action instanceof MigratorAction) {
+                Migrator migrator = LiquibaseProjectComponent.getInstance().getMigrator(selectedDatabase);
+                ((MigratorAction) action).actionPerform(migrator);
+            }
+        } catch (LiquibaseException e) {
+            Messages.showErrorDialog(LiquibaseProjectComponent.getInstance().getProject(), e.getMessage(), "Error Executing Change");
+            e.printStackTrace();
         }
     }
 

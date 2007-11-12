@@ -17,12 +17,15 @@ import dbhelp.db.Table;
 import dbhelp.plugin.action.portable.ActionGroup;
 import dbhelp.plugin.action.portable.PopupMenuManager;
 import dbhelp.plugin.idea.utils.IDEAUtils;
+import liquibase.CompositeFileOpener;
+import liquibase.FileSystemFileOpener;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
 import liquibase.migrator.Migrator;
 import liquibase.util.StringUtils;
 import org.jdom.Element;
 import org.jetbrains.annotations.NotNull;
+import org.liquibase.ide.common.action.MigrateDatabaseAction;
 import org.liquibase.ide.common.change.action.*;
 
 import java.util.HashMap;
@@ -57,12 +60,23 @@ public class LiquibaseProjectComponent implements ProjectComponent, JDOMExternal
 
 //        ProjectMain dbHelperProjectMain = ((ProjectMain) dbHelperComponent);
 
+        PopupMenuManager.getInstance().addAction(createLiquibaseMenu(liquibase.database.Database.class), Catalog.class);
+
         PopupMenuManager.getInstance().addAction(createRefactorMenu(liquibase.database.Database.class), Catalog.class);
         PopupMenuManager.getInstance().addAction(createRefactorMenu(liquibase.database.Database.class), Schema.class);
         PopupMenuManager.getInstance().addAction(createRefactorMenu(liquibase.database.structure.Table.class), Table.class);
         PopupMenuManager.getInstance().addAction(createRefactorMenu(liquibase.database.structure.Column.class), Column.class);
 
 //        PopupMenuManager.getInstance().getActions(DBTree.class)
+    }
+
+    private ActionGroup createLiquibaseMenu(Class dbObjectType) {
+        ActionGroup actionGroup = new ActionGroup("LiquiBase");
+        //database actions
+        actionGroup.addAction(new IntellijActionWrapper(new MigrateDatabaseAction(), dbObjectType));
+
+
+        return actionGroup;
     }
 
     private ActionGroup createRefactorMenu(Class dbObjectType) {
@@ -101,7 +115,7 @@ public class LiquibaseProjectComponent implements ProjectComponent, JDOMExternal
         _context.put(project, this);
 
 //        ProjectMain.getInstance().getPopupMenuManager().addAction(new AddTableAction(), DBTree.class);
-        addActions();        
+        addActions();
     }
 
     public void projectClosed() {
@@ -132,7 +146,7 @@ public class LiquibaseProjectComponent implements ProjectComponent, JDOMExternal
     }
 
     public Migrator getMigrator(Database database) {
-        Migrator migrator = new Migrator("changelog.xml", new IntellijFileOpener());
+        Migrator migrator = new Migrator(getChangeLogFile(), new CompositeFileOpener(new IntellijFileOpener(), new FileSystemFileOpener()));
         if (database == null) {
             return migrator;
         }
