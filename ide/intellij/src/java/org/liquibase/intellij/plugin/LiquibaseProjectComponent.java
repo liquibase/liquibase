@@ -7,23 +7,23 @@ import com.intellij.openapi.util.DefaultJDOMExternalizer;
 import com.intellij.openapi.util.InvalidDataException;
 import com.intellij.openapi.util.JDOMExternalizable;
 import com.intellij.openapi.util.WriteExternalException;
+import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.openapi.vfs.VirtualFileManager;
+import dbhelp.db.Catalog;
 import dbhelp.db.Column;
+import dbhelp.db.Schema;
 import dbhelp.db.Table;
-import dbhelp.db.ui.DBTree;
 import dbhelp.plugin.action.portable.ActionGroup;
 import dbhelp.plugin.action.portable.PopupMenuManager;
 import dbhelp.plugin.idea.utils.IDEAUtils;
 import liquibase.database.Database;
-import liquibase.database.structure.DatabaseObject;
 import liquibase.exception.LiquibaseException;
 import liquibase.migrator.Migrator;
 import liquibase.util.StringUtils;
 import org.jdom.Element;
 import org.jetbrains.annotations.NotNull;
-import org.liquibase.ide.common.change.action.AddAutoIncrementAction;
-import org.liquibase.ide.common.change.action.AddColumnAction;
-import org.liquibase.ide.common.change.action.AddTableAction;
+import org.liquibase.ide.common.change.action.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -57,7 +57,8 @@ public class LiquibaseProjectComponent implements ProjectComponent, JDOMExternal
 
 //        ProjectMain dbHelperProjectMain = ((ProjectMain) dbHelperComponent);
 
-        PopupMenuManager.getInstance().addAction(createRefactorMenu(liquibase.database.Database.class), DBTree.class);
+        PopupMenuManager.getInstance().addAction(createRefactorMenu(liquibase.database.Database.class), Catalog.class);
+        PopupMenuManager.getInstance().addAction(createRefactorMenu(liquibase.database.Database.class), Schema.class);
         PopupMenuManager.getInstance().addAction(createRefactorMenu(liquibase.database.structure.Table.class), Table.class);
         PopupMenuManager.getInstance().addAction(createRefactorMenu(liquibase.database.structure.Column.class), Column.class);
 
@@ -66,9 +67,21 @@ public class LiquibaseProjectComponent implements ProjectComponent, JDOMExternal
 
     private ActionGroup createRefactorMenu(Class dbObjectType) {
         ActionGroup refactorActionGroup = new ActionGroup("Refactor");
+        //database actions
         refactorActionGroup.addAction(new IntellijActionWrapper(new AddTableAction(), dbObjectType));
+
+        //table actions
         refactorActionGroup.addAction(new IntellijActionWrapper(new AddColumnAction(), dbObjectType));
+
+        //column actions
         refactorActionGroup.addAction(new IntellijActionWrapper(new AddAutoIncrementAction(), dbObjectType));
+        refactorActionGroup.addAction(new IntellijActionWrapper(new AddDefaultValueAction(), dbObjectType));
+        refactorActionGroup.addAction(new IntellijActionWrapper(new AddForeignKeyConstraintAction(), dbObjectType));
+        refactorActionGroup.addAction(new IntellijActionWrapper(new AddLookupTableAction(), dbObjectType));
+        refactorActionGroup.addAction(new IntellijActionWrapper(new AddNotNullConstraintAction(), dbObjectType));
+        refactorActionGroup.addAction(new IntellijActionWrapper(new AddPrimaryKeyAction(), dbObjectType));
+        refactorActionGroup.addAction(new IntellijActionWrapper(new AddUniqueConstraintAction(), dbObjectType));
+
         return refactorActionGroup;
     }
 
@@ -146,7 +159,8 @@ public class LiquibaseProjectComponent implements ProjectComponent, JDOMExternal
     }
 
     public VirtualFile getChangeLogVirtualFile() {
-        return null;
+        VirtualFileManager virtualFileManager = VirtualFileManager.getInstance();
+        return virtualFileManager.refreshAndFindFileByUrl(VirtualFileManager.constructUrl(LocalFileSystem.PROTOCOL, getChangeLogFile()));
     }
 
 
