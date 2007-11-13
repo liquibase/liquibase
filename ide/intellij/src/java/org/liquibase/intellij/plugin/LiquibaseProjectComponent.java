@@ -2,7 +2,6 @@ package org.liquibase.intellij.plugin;
 
 import com.intellij.openapi.components.ProjectComponent;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.util.DefaultJDOMExternalizer;
 import com.intellij.openapi.util.InvalidDataException;
 import com.intellij.openapi.util.JDOMExternalizable;
@@ -17,15 +16,11 @@ import dbhelp.db.Table;
 import dbhelp.plugin.action.portable.ActionGroup;
 import dbhelp.plugin.action.portable.PopupMenuManager;
 import dbhelp.plugin.idea.utils.IDEAUtils;
-import liquibase.CompositeFileOpener;
-import liquibase.FileSystemFileOpener;
-import liquibase.database.Database;
-import liquibase.exception.LiquibaseException;
-import liquibase.migrator.Migrator;
 import liquibase.util.StringUtils;
 import org.jdom.Element;
 import org.jetbrains.annotations.NotNull;
-import org.liquibase.ide.common.action.MigrateDatabaseAction;
+import org.liquibase.ide.common.IdeFacade;
+import org.liquibase.ide.common.action.*;
 import org.liquibase.ide.common.change.action.*;
 
 import java.util.HashMap;
@@ -36,11 +31,15 @@ public class LiquibaseProjectComponent implements ProjectComponent, JDOMExternal
     private static Map<Project, LiquibaseProjectComponent> _context = new HashMap<Project, LiquibaseProjectComponent>();
 
     private Project project;
-    public String changeLogFile; //externalized
+    public String outputChangeLogFile; //externalized
+    public String rootChangeLogFile; //externalized
 //    private ProjectMain projectMain;
+
+    private IdeFacade ideFacade;
 
     public LiquibaseProjectComponent(Project project) {
         this.project = project;
+        this.ideFacade = new IntellijFacade();
 
     }
 
@@ -73,7 +72,28 @@ public class LiquibaseProjectComponent implements ProjectComponent, JDOMExternal
     private ActionGroup createLiquibaseMenu(Class dbObjectType) {
         ActionGroup actionGroup = new ActionGroup("LiquiBase");
         //database actions
-        actionGroup.addAction(new IntellijActionWrapper(new MigrateDatabaseAction(), dbObjectType));
+        actionGroup.addAction(new IntellijActionWrapper(new MigrateAction(), dbObjectType));
+        actionGroup.addAction(new IntellijActionWrapper(new MigrateSqlAction(), dbObjectType));
+
+        actionGroup.addAction(new IntellijActionWrapper(new TagDatabaseAction(), dbObjectType));
+        actionGroup.addAction(new IntellijActionWrapper(new RollbackCountAction(), dbObjectType));
+        actionGroup.addAction(new IntellijActionWrapper(new RollbackCountSqlAction(), dbObjectType));
+        actionGroup.addAction(new IntellijActionWrapper(new RollbackFutureSqlAction(), dbObjectType));
+        actionGroup.addAction(new IntellijActionWrapper(new RollbackToDateAction(), dbObjectType));
+        actionGroup.addAction(new IntellijActionWrapper(new RollbackToDateSqlAction(), dbObjectType));
+        actionGroup.addAction(new IntellijActionWrapper(new RollbackToTagAction(), dbObjectType));
+        actionGroup.addAction(new IntellijActionWrapper(new RollbackToTagSqlAction(), dbObjectType));
+
+        actionGroup.addAction(new IntellijActionWrapper(new GenerateChangelogAction(), dbObjectType));
+
+        actionGroup.addAction(new IntellijActionWrapper(new GenerateDbDocAction(), dbObjectType));
+
+        actionGroup.addAction(new IntellijActionWrapper(new StatusAction(), dbObjectType));
+        actionGroup.addAction(new IntellijActionWrapper(new ValidateAction(), dbObjectType));
+        actionGroup.addAction(new IntellijActionWrapper(new ClearChecksumsAction(), dbObjectType));
+        actionGroup.addAction(new IntellijActionWrapper(new ListLocksAction(), dbObjectType));
+        actionGroup.addAction(new IntellijActionWrapper(new ReleaseLocksAction(), dbObjectType));
+        actionGroup.addAction(new IntellijActionWrapper(new DropAllAction(), dbObjectType));
 
 
         return actionGroup;
@@ -95,6 +115,7 @@ public class LiquibaseProjectComponent implements ProjectComponent, JDOMExternal
         refactorActionGroup.addAction(new IntellijActionWrapper(new AddNotNullConstraintAction(), dbObjectType));
         refactorActionGroup.addAction(new IntellijActionWrapper(new AddPrimaryKeyAction(), dbObjectType));
         refactorActionGroup.addAction(new IntellijActionWrapper(new AddUniqueConstraintAction(), dbObjectType));
+        refactorActionGroup.addAction(new IntellijActionWrapper(new CreateIndexAction(), dbObjectType));
 
         return refactorActionGroup;
     }
@@ -121,60 +142,29 @@ public class LiquibaseProjectComponent implements ProjectComponent, JDOMExternal
     public void projectClosed() {
         // called when project is being closed
     }
-
-    public void migrate(Database database) {
-        try {
-            getMigrator(database).migrate();
-        } catch (LiquibaseException e) {
-            displayError(e);
+    
+    public String getRootChangeLog() {
+        if (rootChangeLogFile != null) {
+            return rootChangeLogFile;
         }
-    }
-
-    public void tag(String tag, Database database) {
-        try {
-            getMigrator(database).tag(tag);
-        } catch (LiquibaseException e) {
-            displayError(e);
+        if (outputChangeLogFile != null) {
+            return outputChangeLogFile;
         }
-    }
-
-    public void displayError(Exception e) {
-        // Show dialog with message
-        Messages.showErrorDialog(this.project,
-                e.getMessage(),
-                "LiquiBase Error");
-    }
-
-    public Migrator getMigrator(Database database) {
-        Migrator migrator = new Migrator(getChangeLogFile(), new CompositeFileOpener(new IntellijFileOpener(), new FileSystemFileOpener()));
-        if (database == null) {
-            return migrator;
-        }
-        try {
-            migrator.init(database);
-            migrator.checkDatabaseChangeLogTable();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-        return migrator;
-    }
-
-    public String getCurrentChangeLog() {
-        return "changelog.xml";
+        return null;
     }
 
 
-    public String getChangeLogFile() {
-        return changeLogFile;
+    public String getOutputChangeLogFile() {
+        return outputChangeLogFile;
     }
 
-    public void setChangeLogFile(String changeLogFile) {
-        this.changeLogFile = StringUtils.trimToNull(changeLogFile);
+    public void setOutputChangeLogFile(String outputChangeLogFile) {
+        this.outputChangeLogFile = StringUtils.trimToNull(outputChangeLogFile);
     }
 
     public VirtualFile getChangeLogVirtualFile() {
         VirtualFileManager virtualFileManager = VirtualFileManager.getInstance();
-        return virtualFileManager.refreshAndFindFileByUrl(VirtualFileManager.constructUrl(LocalFileSystem.PROTOCOL, getChangeLogFile()));
+        return virtualFileManager.refreshAndFindFileByUrl(VirtualFileManager.constructUrl(LocalFileSystem.PROTOCOL, getOutputChangeLogFile()));
     }
 
 
@@ -184,5 +174,9 @@ public class LiquibaseProjectComponent implements ProjectComponent, JDOMExternal
 
     public void writeExternal(Element element) throws WriteExternalException {
         DefaultJDOMExternalizer.writeExternal(this, element);
+    }
+
+    public IdeFacade getIdeFacade() {
+        return ideFacade;
     }
 }

@@ -3,13 +3,11 @@ package org.liquibase.ide.common.change.action;
 import liquibase.change.AddColumnChange;
 import liquibase.change.Change;
 import liquibase.change.ColumnConfig;
-import liquibase.database.structure.Column;
 import liquibase.database.structure.Table;
-import liquibase.database.structure.DatabaseObject;
+import org.liquibase.ide.common.change.wizard.RefactorWizard;
 import org.liquibase.ide.common.change.wizard.page.AddColumnWizardPage;
 import org.liquibase.ide.common.change.wizard.page.AddColumnWizardPageImpl;
 import org.liquibase.ide.common.change.wizard.page.RefactorWizardPage;
-import org.liquibase.ide.common.change.wizard.RefactorWizard;
 
 public class AddColumnAction extends BaseTableRefactorAction {
 

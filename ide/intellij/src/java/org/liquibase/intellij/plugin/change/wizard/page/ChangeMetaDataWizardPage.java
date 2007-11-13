@@ -12,8 +12,8 @@ import org.liquibase.intellij.plugin.LiquibaseProjectComponent;
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.Date;
 
 public class ChangeMetaDataWizardPage implements org.liquibase.ide.common.change.wizard.page.ChangeMetaDataWizardPage, Step {
@@ -83,7 +83,8 @@ public class ChangeMetaDataWizardPage implements org.liquibase.ide.common.change
     }
 
     private void createUIComponents() {
-        Project project = LiquibaseProjectComponent.getInstance().getProject();
+        final LiquibaseProjectComponent liquibaseProjectComponent = LiquibaseProjectComponent.getInstance();
+        Project project = liquibaseProjectComponent.getProject();
 
         changeLogFile = new TextFieldWithBrowseButton(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -91,7 +92,7 @@ public class ChangeMetaDataWizardPage implements org.liquibase.ide.common.change
             }
         });
         final FileChooserDescriptor fileChooser = FileChooserDescriptorFactory.createSingleLocalFileDescriptor();
-        String currentChangeLogFile = LiquibaseProjectComponent.getInstance().getChangeLogFile();
+        String currentChangeLogFile = liquibaseProjectComponent.getOutputChangeLogFile();
         if (currentChangeLogFile != null) {
             changeLogFile.setText(currentChangeLogFile);
         }
@@ -111,7 +112,7 @@ public class ChangeMetaDataWizardPage implements org.liquibase.ide.common.change
             }
 
             private void updatePreference() {
-                LiquibaseProjectComponent.getInstance().setChangeLogFile(changeLogFile.getTextField().getText());
+                liquibaseProjectComponent.setOutputChangeLogFile(changeLogFile.getTextField().getText());
             }
         });
 //        changeLogFile.addActionListener(new ActionListener() {
