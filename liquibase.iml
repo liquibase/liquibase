@@ -10,6 +10,8 @@
       <sourceFolder url="file://$MODULE_DIR$/core/src/java-test" isTestSource="true" />
       <excludeFolder url="file://$MODULE_DIR$/core/build-dbtest" />
       <excludeFolder url="file://$MODULE_DIR$/core/build-reports" />
+      <excludeFolder url="file://$MODULE_DIR$/core/lib-deps" />
+      <excludeFolder url="file://$MODULE_DIR$/core/maven-repository" />
       <excludeFolder url="file://$MODULE_DIR$/core/package" />
       <excludeFolder url="file://$MODULE_DIR$/core/release" />
     </content>
