@@ -153,6 +153,9 @@ public class LiquibaseProjectComponent implements ProjectComponent, JDOMExternal
         return null;
     }
 
+    public void setRootChangeLog(String rootChangeLogFile) {
+        this.rootChangeLogFile = rootChangeLogFile;
+    }
 
     public String getOutputChangeLogFile() {
         return outputChangeLogFile;

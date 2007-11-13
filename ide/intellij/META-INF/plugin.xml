@@ -3,7 +3,7 @@
     <depends>DBHelper</depends>
     <name>LiquiBase</name>
     <description>LiquiBase Database Refactoring Plug-in for IntelliJ IDEA</description>
-    <version>0.1</version>
+    <version>0.9</version>
     <vendor>liquibase.org</vendor>
     <idea-version since-build="3000"/>
     <project-components>
@@ -12,18 +12,18 @@
         </component>
     </project-components>
     <actions>
-        <group id="LiquibaseActionGroup"  text="LiquiBase" description="LiquiBase Actions" popup="true">
-            <add-to-group group-id="MainMenu" anchor="before" relative-to-action="WindowMenu"/>
+        <!--<group id="LiquibaseActionGroup"  text="LiquiBase" description="LiquiBase Actions" popup="true">-->
+            <!--<add-to-group group-id="MainMenu" anchor="before" relative-to-action="WindowMenu"/>-->
 
-            <action id="LiquibaseMigrate" class="org.liquibase.intellij.plugin.action.MigrateAction" text="Migrate"
-                    description="Updates database">
+            <!--<action id="LiquibaseMigrate" class="org.liquibase.intellij.plugin.action.MigrateAction" text="Migrate"-->
+                    <!--description="Updates database">-->
                 <!--<add-to-group group-id="WindowMenu" anchor="first"/>-->
-            </action>
-            <action id="TagAction" class="org.liquibase.intellij.plugin.action.TagAction" text="Tag Database"
-                    description="Tags database for later rollback">
+            <!--</action>-->
+            <!--<action id="TagAction" class="org.liquibase.intellij.plugin.action.TagAction" text="Tag Database"-->
+                    <!--description="Tags database for later rollback">-->
                 <!--<add-to-group group-id="MainMenu" anchor="before" relative-to-action="WindowMenu"/>-->
-            </action>
-        </group>
+            <!--</action>-->
+        <!--</group>-->
 
         <!--<group id="LiquibaseRefactorActionGroup"  text="Refactor" description="Refactor Database" popup="true">-->
             <!--<add-to-group group-id="MainMenu" anchor="before" relative-to-action="WindowMenu"/>-->
