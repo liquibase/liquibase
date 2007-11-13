@@ -4,10 +4,9 @@ import com.intellij.openapi.project.Project;
 import dbhelp.db.Column;
 import liquibase.change.AddAutoIncrementChange;
 import liquibase.change.Change;
+import org.liquibase.intellij.plugin.change.wizard.page.BaseRefactorWizardPage;
 
 import java.sql.Connection;
-
-import org.liquibase.intellij.plugin.change.wizard.page.BaseRefactorWizardPage;
 
 public class AddAutoIncrementWizard extends IntellijRefactorWizard {
     private Column selectedColumn;

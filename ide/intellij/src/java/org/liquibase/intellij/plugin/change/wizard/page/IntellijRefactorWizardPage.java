@@ -1,11 +1,10 @@
 package org.liquibase.intellij.plugin.change.wizard.page;
 
-import com.intellij.ide.wizard.Step;
 import com.intellij.ide.wizard.CommitStepException;
+import com.intellij.ide.wizard.Step;
+import org.liquibase.ide.common.change.wizard.page.RefactorWizardPage;
 
 import javax.swing.*;
-
-import org.liquibase.ide.common.change.wizard.page.RefactorWizardPage;
 
 public class IntellijRefactorWizardPage implements Step {
 

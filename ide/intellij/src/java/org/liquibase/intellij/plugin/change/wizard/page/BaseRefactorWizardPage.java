@@ -1,7 +1,7 @@
 package org.liquibase.intellij.plugin.change.wizard.page;
 
-import com.intellij.ide.wizard.Step;
 import com.intellij.ide.wizard.CommitStepException;
+import com.intellij.ide.wizard.Step;
 
 import javax.swing.*;
 

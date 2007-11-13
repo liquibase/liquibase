@@ -1,11 +1,10 @@
 package org.liquibase.ide.common.action;
 
-import java.util.List;
-import java.util.ArrayList;
-import java.net.URL;
-import java.net.URISyntaxException;
 import java.io.File;
 import java.io.FilenameFilter;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ActionFactory {
     private static final ActionFactory instance = new ActionFactory();

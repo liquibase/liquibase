@@ -2,15 +2,13 @@ package org.liquibase.intellij.plugin.change.wizard;
 
 import com.intellij.ide.wizard.AbstractWizard;
 import com.intellij.ide.wizard.Step;
-import com.intellij.openapi.ui.Messages;
 import liquibase.database.Database;
 import liquibase.database.structure.DatabaseObject;
-import liquibase.exception.MigrationFailedException;
 import org.liquibase.ide.common.change.action.BaseRefactorAction;
 import org.liquibase.ide.common.change.wizard.RefactorChangeExecutor;
 import org.liquibase.ide.common.change.wizard.RefactorWizard;
 import org.liquibase.ide.common.change.wizard.page.RefactorWizardPage;
-import org.liquibase.intellij.plugin.IntellijFacade;
+import org.liquibase.ide.common.IdeFacade;
 import org.liquibase.intellij.plugin.LiquibaseProjectComponent;
 import org.liquibase.intellij.plugin.change.wizard.page.ChangeMetaDataWizardPage;
 import org.liquibase.intellij.plugin.change.wizard.page.IntellijRefactorWizardPage;
@@ -76,12 +74,11 @@ public class IntellijRefactorWizard extends AbstractWizard<Step> {
     private class FinishListener implements ActionListener {
 
         public void actionPerformed(ActionEvent actionEvent) {
+            IdeFacade facade = LiquibaseProjectComponent.getInstance().getIdeFacade();
             try {
-                new RefactorChangeExecutor().executeChangeSet(new IntellijFacade(), database, metaDataPage, action.createChanges(selectedObject, pages));
+                new RefactorChangeExecutor().executeChangeSet(facade, database, metaDataPage, action.createChanges(selectedObject, pages));
             } catch (Exception e) {
-                String message;
-                Messages.showErrorDialog(LiquibaseProjectComponent.getInstance().getProject(), e.getMessage(), "Error Executing Change");
-                e.printStackTrace();
+                facade.showError("Error Executing Change", e);
             }
         }
 

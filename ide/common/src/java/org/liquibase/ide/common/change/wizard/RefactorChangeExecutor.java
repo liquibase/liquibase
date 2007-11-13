@@ -3,9 +3,9 @@ package org.liquibase.ide.common.change.wizard;
 import liquibase.ChangeSet;
 import liquibase.DatabaseChangeLog;
 import liquibase.change.Change;
+import liquibase.database.Database;
 import liquibase.database.sql.SqlStatement;
 import liquibase.database.template.JdbcTemplate;
-import liquibase.database.Database;
 import liquibase.exception.MigrationFailedException;
 import liquibase.migrator.Migrator;
 import liquibase.util.StringUtils;
@@ -14,15 +14,13 @@ import org.liquibase.ide.common.IdeFacade;
 import org.liquibase.ide.common.ProgressMonitor;
 import org.liquibase.ide.common.change.wizard.page.ChangeMetaDataWizardPage;
 
-import java.sql.Connection;
-
 public class RefactorChangeExecutor {
     public void executeChangeSet(IdeFacade ide, Database database, ChangeMetaDataWizardPage metaDataPage, Change... changes) throws MigrationFailedException {
 
         ProgressMonitor monitor = ide.getProgressMonitor();
         Migrator migrator = ide.getMigrator(database);
         ChangeLogWriter changeLogWriter = ide.getChangeLogWriter();
-        DatabaseChangeLog changeLog = ide.getChangeLog();
+        DatabaseChangeLog changeLog = ide.getRootChangeLog();
 
         monitor.beginTask("Refactoring Database", 100);
 

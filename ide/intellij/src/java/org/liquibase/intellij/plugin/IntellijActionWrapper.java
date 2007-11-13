@@ -11,11 +11,12 @@ import liquibase.database.DatabaseFactory;
 import liquibase.database.structure.Column;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Table;
-import liquibase.migrator.Migrator;
 import liquibase.exception.LiquibaseException;
+import liquibase.migrator.Migrator;
 import org.liquibase.ide.common.action.BaseDatabaseAction;
 import org.liquibase.ide.common.action.MigratorAction;
 import org.liquibase.ide.common.change.action.BaseRefactorAction;
+import org.liquibase.ide.common.IdeFacade;
 import org.liquibase.intellij.plugin.change.wizard.IntellijRefactorWizard;
 
 import javax.swing.*;
@@ -25,16 +26,16 @@ import java.sql.Connection;
 import java.sql.ResultSetMetaData;
 import java.text.ParseException;
 
-import com.intellij.openapi.ui.Messages;
-
 public class IntellijActionWrapper extends PortableAction {
     private BaseDatabaseAction action;
+    private IdeFacade ideFacade;
 
 
     public IntellijActionWrapper(BaseDatabaseAction action, Class objectType) {
         super(action.getTitle());
         this.action = action;
         setEnabled(action.isApplicableTo(objectType));
+        ideFacade = LiquibaseProjectComponent.getInstance().getIdeFacade();
     }
 
     public void actionPerformed(ActionEvent actionEvent) {
@@ -46,12 +47,10 @@ public class IntellijActionWrapper extends PortableAction {
                 wizard.pack();
                 wizard.show();
             } else if (action instanceof MigratorAction) {
-                Migrator migrator = LiquibaseProjectComponent.getInstance().getMigrator(selectedDatabase);
-                ((MigratorAction) action).actionPerform(migrator);
+                ((MigratorAction) action).actionPerform(selectedDatabase, ideFacade);
             }
         } catch (LiquibaseException e) {
-            Messages.showErrorDialog(LiquibaseProjectComponent.getInstance().getProject(), e.getMessage(), "Error Executing Change");
-            e.printStackTrace();
+            ideFacade.showError("Error Executing Change", e);
         }
     }
 

@@ -1,12 +1,5 @@
 package org.liquibase.ide.common.action;
 
-import liquibase.database.Database;
-import liquibase.database.structure.*;
-
-import java.sql.Connection;
-
-import org.liquibase.ide.common.change.wizard.RefactorWizard;
-
 public abstract class BaseDatabaseAction {
     private String title;
 
