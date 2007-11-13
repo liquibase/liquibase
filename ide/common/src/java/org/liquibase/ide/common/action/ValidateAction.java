@@ -18,7 +18,12 @@ public class ValidateAction extends MigratorAction {
         String message;
 
         try {
-            ideFacade.getMigrator(database).validate();
+            String changeLogFile = ideFacade.selectChangeLogFile();
+            if (changeLogFile == null) {
+                return;
+            }
+
+            ideFacade.getMigrator(changeLogFile, database).validate();
             message = "No validation errors found";
         } catch (ValidationFailedException e) {
             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
@@ -31,5 +36,10 @@ public class ValidateAction extends MigratorAction {
         ideFacade.displayOutput("Change Log Status", message);
 
     }
+
+    public boolean needsRefresh() {
+        return false;
+    }
+
 
 }

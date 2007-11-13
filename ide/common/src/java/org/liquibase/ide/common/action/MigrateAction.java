@@ -12,6 +12,15 @@ public class MigrateAction extends MigratorAction {
     }
 
     public void actionPerform(Database database, IdeFacade ideFacade) throws LiquibaseException {
-        ideFacade.getMigrator(database).migrate();
+        String changeLogFile = ideFacade.selectChangeLogFile();
+        if (changeLogFile == null) {
+            return;
+        }
+        ideFacade.getMigrator(changeLogFile, database).migrate();
     }
+
+    public boolean needsRefresh() {
+        return true;
+    }
+
 }

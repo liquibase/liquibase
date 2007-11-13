@@ -18,7 +18,7 @@ public class RefactorChangeExecutor {
     public void executeChangeSet(IdeFacade ide, Database database, ChangeMetaDataWizardPage metaDataPage, Change... changes) throws MigrationFailedException {
 
         ProgressMonitor monitor = ide.getProgressMonitor();
-        Migrator migrator = ide.getMigrator(database);
+        Migrator migrator = ide.getMigrator(null, database);
         ChangeLogWriter changeLogWriter = ide.getChangeLogWriter();
         DatabaseChangeLog changeLog = ide.getRootChangeLog();
 

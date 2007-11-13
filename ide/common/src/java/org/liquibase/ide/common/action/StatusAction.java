@@ -15,10 +15,21 @@ public class StatusAction extends MigratorAction {
 
     public void actionPerform(Database database, IdeFacade ideFacade) throws LiquibaseException {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        ideFacade.getMigrator(database).reportStatus(true, new PrintStream(byteArrayOutputStream));
+
+        String changeLogFile = ideFacade.selectChangeLogFile();
+        if (changeLogFile == null) {
+            return;
+        }
+
+        ideFacade.getMigrator(changeLogFile, database).reportStatus(true, new PrintStream(byteArrayOutputStream));
 
         ideFacade.displayOutput("Check Change Log Status", byteArrayOutputStream.toString());
 
     }
+
+    public boolean needsRefresh() {
+        return false;
+    }
+
 
 }

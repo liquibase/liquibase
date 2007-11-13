@@ -17,10 +17,14 @@ public class RollbackCountSqlAction extends MigratorAction {
         Integer input = ideFacade.promptForInteger(getTitle(), "Enter number of changes to rollback", 1);
         if (input != null) {
             StringWriter writer = new StringWriter();
-            ideFacade.getMigrator(database).rollbackCountSQL(input, writer);
+            ideFacade.getMigrator(null, database).rollbackCountSQL(input, writer);
 
             ideFacade.displayOutput("Rollback SQL", writer.toString());
         }
     }
 
+    public boolean needsRefresh() {
+        return true;
+    }
+    
 }

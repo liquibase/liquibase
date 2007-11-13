@@ -15,8 +15,19 @@ public class MigrateSqlAction extends MigratorAction {
 
     public void actionPerform(Database database, IdeFacade ideFacade) throws LiquibaseException {
         StringWriter stringWriter = new StringWriter();
-        ideFacade.getMigrator(database).migrateSQL(stringWriter);
+
+        String changeLogFile = ideFacade.selectChangeLogFile();
+        if (changeLogFile == null) {
+            return;
+        }
+
+        ideFacade.getMigrator(changeLogFile, database).migrateSQL(stringWriter);
 
         ideFacade.displayOutput("Migration SQL", stringWriter.toString());
     }
+
+    public boolean needsRefresh() {
+        return true;
+    }
+    
 }

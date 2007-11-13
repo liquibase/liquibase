@@ -10,7 +10,7 @@ import java.io.File;
 public interface IdeFacade {
     ProgressMonitor getProgressMonitor();
 
-    Migrator getMigrator(Database database);
+    Migrator getMigrator(String changeLogFile, Database database);
 
     DatabaseChangeLog getRootChangeLog();
 
@@ -31,6 +31,8 @@ public interface IdeFacade {
     void showError(Exception exception);
 
     File promptForDirectory(String title, String message, File defaultFile);
+
+    String selectChangeLogFile();
 
     boolean confirm(String title, String message);
 }

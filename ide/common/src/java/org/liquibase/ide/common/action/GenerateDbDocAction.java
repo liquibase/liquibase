@@ -17,12 +17,22 @@ public class GenerateDbDocAction extends MigratorAction {
         File input = ideFacade.promptForDirectory(getTitle(), "Select Output Directory", null);
         if (input != null) {
             try {
-                ideFacade.getMigrator(database).generateDocumentation(input.getCanonicalPath());
+
+                String changeLogFile = ideFacade.selectChangeLogFile();
+                if (changeLogFile == null) {
+                    return;
+                }
+
+                ideFacade.getMigrator(null, database).generateDocumentation(input.getCanonicalPath());
             } catch (IOException e) {
                 throw new LiquibaseException(e);
             }
         }
 
+    }
+
+    public boolean needsRefresh() {
+        return false;
     }
 
 }

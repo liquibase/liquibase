@@ -36,4 +36,9 @@ public class GenerateChangelogAction extends MigratorAction {
     }
 
 
+    public boolean needsRefresh() {
+        return false;
+    }
+
+
 }
