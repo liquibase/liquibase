@@ -1,12 +1,12 @@
 package org.liquibase.intellij.plugin;
 
-import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory;
-import com.intellij.openapi.fileChooser.FileChooserFactory;
 import com.intellij.openapi.fileChooser.FileChooserDescriptor;
+import com.intellij.openapi.fileChooser.FileChooserDescriptorFactory;
 import com.intellij.openapi.fileChooser.FileChooserDialog;
+import com.intellij.openapi.fileChooser.FileChooserFactory;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.InputValidator;
 import com.intellij.openapi.ui.Messages;
-import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import liquibase.CompositeFileOpener;
 import liquibase.DatabaseChangeLog;
@@ -19,6 +19,7 @@ import liquibase.xml.XmlWriter;
 import org.liquibase.ide.common.ChangeLogWriter;
 import org.liquibase.ide.common.IdeFacade;
 import org.liquibase.ide.common.ProgressMonitor;
+import org.liquibase.intellij.plugin.dialog.SelectChangeLogDialog;
 
 import java.io.File;
 import java.text.ParseException;
@@ -34,7 +35,19 @@ public class IntellijFacade implements IdeFacade {
     public Migrator getMigrator(Database database) {
         LiquibaseProjectComponent liquibaseProjectComponent = LiquibaseProjectComponent.getInstance();
 
-        Migrator migrator = new Migrator(liquibaseProjectComponent.getRootChangeLog(), new CompositeFileOpener(new IntellijFileOpener(), new FileSystemFileOpener()));
+        String rootChangeLog = liquibaseProjectComponent.getRootChangeLog();
+
+        if (rootChangeLog == null) {
+            String changeLogFile = new SelectChangeLogDialog().selectChangeLogFile();
+            if (changeLogFile == null) {
+                return null;
+            }
+            liquibaseProjectComponent.setRootChangeLog(changeLogFile);
+
+
+        }
+
+        Migrator migrator = new Migrator(rootChangeLog, new CompositeFileOpener(new IntellijFileOpener(), new FileSystemFileOpener()));
         if (database == null) {
             return migrator;
         }

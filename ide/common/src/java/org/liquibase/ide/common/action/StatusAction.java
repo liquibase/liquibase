@@ -17,7 +17,7 @@ public class StatusAction extends MigratorAction {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         ideFacade.getMigrator(database).reportStatus(true, new PrintStream(byteArrayOutputStream));
 
-        ideFacade.displayOutput("Change Log Status", byteArrayOutputStream.toString());
+        ideFacade.displayOutput("Check Change Log Status", byteArrayOutputStream.toString());
 
     }
 
