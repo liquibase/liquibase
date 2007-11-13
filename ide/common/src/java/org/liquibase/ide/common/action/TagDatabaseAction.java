@@ -14,7 +14,12 @@ public class TagDatabaseAction extends MigratorAction {
     public void actionPerform(Database database, IdeFacade ideFacade) throws LiquibaseException {
         String input = ideFacade.promptForString(getTitle(), "Enter database tag", null);
         if (input != null) {
-            ideFacade.getMigrator(database).tag(input);
+            ideFacade.getMigrator(null, database).tag(input);
         }
     }
+
+    public boolean needsRefresh() {
+        return false;
+    }
+
 }

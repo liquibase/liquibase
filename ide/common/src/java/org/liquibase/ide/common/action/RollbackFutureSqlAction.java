@@ -15,7 +15,18 @@ public class RollbackFutureSqlAction extends MigratorAction {
 
     public void actionPerform(Database database, IdeFacade ideFacade) throws LiquibaseException {
         StringWriter writer = new StringWriter();
-        ideFacade.getMigrator(database).futureRollbackSQL(writer);
+
+        String changeLogFile = ideFacade.selectChangeLogFile();
+        if (changeLogFile == null) {
+            return;
+        }
+
+        ideFacade.getMigrator(changeLogFile, database).futureRollbackSQL(writer);
         ideFacade.displayOutput("Rollback SQL", writer.toString());
     }
+
+    public boolean needsRefresh() {
+        return true;
+    }
+    
 }

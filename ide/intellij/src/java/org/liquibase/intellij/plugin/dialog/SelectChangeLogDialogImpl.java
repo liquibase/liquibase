@@ -11,12 +11,14 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.*;
 
-public class SelectChangeLogDialog {
+public class SelectChangeLogDialogImpl {
     private TextFieldWithBrowseButton changeLogSelect;
     private JPanel mainPanel;
+    private JCheckBox dontShowThis;
 
     public String selectChangeLogFile() {
-        DialogBuilder builder = new DialogBuilder(LiquibaseProjectComponent.getInstance().getProject());
+        LiquibaseProjectComponent liquibaseProjectComponent = LiquibaseProjectComponent.getInstance();
+        DialogBuilder builder = new DialogBuilder(liquibaseProjectComponent.getProject());
         builder.addOkAction();
         builder.addCancelAction();
         builder.setTitle("Select Change Log");
@@ -27,6 +29,9 @@ public class SelectChangeLogDialog {
         builder.showModal(true);
         int i = builder.show();
         if (i == 0) {
+            if (dontShowThis.isSelected()) {
+                liquibaseProjectComponent.setPromptForChangeLog(false);
+            }
             return changeLogSelect.getText();
         } else {
             return null;

@@ -17,10 +17,14 @@ public class RollbackToTagSqlAction extends MigratorAction {
         String input = ideFacade.promptForString(getTitle(), "Enter database tag to roll back to", null);
         if (input != null) {
             StringWriter writer = new StringWriter();
-            ideFacade.getMigrator(database).rollbackSQL(input, writer);
+            ideFacade.getMigrator(null, database).rollbackSQL(input, writer);
 
             ideFacade.displayOutput("Rollback SQL", writer.toString());
         }
+    }
+
+    public boolean needsRefresh() {
+        return true;
     }
 
 }

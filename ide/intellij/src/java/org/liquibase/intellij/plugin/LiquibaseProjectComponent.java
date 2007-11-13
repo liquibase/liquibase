@@ -13,6 +13,7 @@ import dbhelp.db.Catalog;
 import dbhelp.db.Column;
 import dbhelp.db.Schema;
 import dbhelp.db.Table;
+import dbhelp.db.ui.DBTree;
 import dbhelp.plugin.action.portable.ActionGroup;
 import dbhelp.plugin.action.portable.PopupMenuManager;
 import dbhelp.plugin.idea.utils.IDEAUtils;
@@ -33,6 +34,7 @@ public class LiquibaseProjectComponent implements ProjectComponent, JDOMExternal
     private Project project;
     public String outputChangeLogFile; //externalized
     public String rootChangeLogFile; //externalized
+    public Boolean promptForChangeLog; //externalized
 //    private ProjectMain projectMain;
 
     private IdeFacade ideFacade;
@@ -59,13 +61,12 @@ public class LiquibaseProjectComponent implements ProjectComponent, JDOMExternal
 
 //        ProjectMain dbHelperProjectMain = ((ProjectMain) dbHelperComponent);
 
-        PopupMenuManager.getInstance().addAction(createLiquibaseMenu(liquibase.database.Database.class), Catalog.class);
+        PopupMenuManager.getInstance().addAction(createLiquibaseMenu(liquibase.database.Database.class), DBTree.class);
 
         PopupMenuManager.getInstance().addAction(createRefactorMenu(liquibase.database.Database.class), Catalog.class);
         PopupMenuManager.getInstance().addAction(createRefactorMenu(liquibase.database.Database.class), Schema.class);
         PopupMenuManager.getInstance().addAction(createRefactorMenu(liquibase.database.structure.Table.class), Table.class);
         PopupMenuManager.getInstance().addAction(createRefactorMenu(liquibase.database.structure.Column.class), Column.class);
-
 //        PopupMenuManager.getInstance().getActions(DBTree.class)
     }
 
@@ -143,7 +144,7 @@ public class LiquibaseProjectComponent implements ProjectComponent, JDOMExternal
         // called when project is being closed
     }
     
-    public String getRootChangeLog() {
+    public String getRootChangeLogFile() {
         if (rootChangeLogFile != null) {
             return rootChangeLogFile;
         }
@@ -153,7 +154,7 @@ public class LiquibaseProjectComponent implements ProjectComponent, JDOMExternal
         return null;
     }
 
-    public void setRootChangeLog(String rootChangeLogFile) {
+    public void setRootChangeLogFile(String rootChangeLogFile) {
         this.rootChangeLogFile = rootChangeLogFile;
     }
 
@@ -182,4 +183,15 @@ public class LiquibaseProjectComponent implements ProjectComponent, JDOMExternal
     public IdeFacade getIdeFacade() {
         return ideFacade;
     }
+
+
+    public boolean getPromptForChangeLog() {
+        return promptForChangeLog == null || promptForChangeLog;
+    }
+
+    public void setPromptForChangeLog(boolean shouldPrompt) {
+        this.promptForChangeLog = shouldPrompt;
+    }
+
+
 }
