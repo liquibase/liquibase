@@ -26,7 +26,7 @@ public class AddLookupTableAction  extends BaseColumnRefactorAction {
 
         change.setNewTableName(((AddLookupTableWizardPage) pages[0]).getNewTableName());
         change.setNewColumnName(((AddLookupTableWizardPage) pages[0]).getNewColumnName());
-        change.setNewColumnDataType(column.getTypeName());
+        change.setNewColumnDataType(column.getDataTypeString(column.getTable().getDatabase()));
 
         return new Change[] { change };
     }

@@ -96,6 +96,7 @@ public class LiquibaseProjectComponent implements ProjectComponent, JDOMExternal
         actionGroup.addAction(new IntellijActionWrapper(new ReleaseLocksAction(), dbObjectType));
         actionGroup.addAction(new IntellijActionWrapper(new DropAllAction(), dbObjectType));
 
+        actionGroup.addAction(new IntellijActionWrapper(new CreateEmptyChangeLogAction(), dbObjectType));
 
         return actionGroup;
     }

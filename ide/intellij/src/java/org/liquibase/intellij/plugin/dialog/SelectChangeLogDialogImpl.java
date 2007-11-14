@@ -25,8 +25,8 @@ public class SelectChangeLogDialogImpl {
 
         builder.setCenterPanel(mainPanel);
 
-        builder.getDialogWrapper().pack();
-        builder.showModal(true);
+//        builder.getDialogWrapper().pack();
+//        builder.showModal(true);
         int i = builder.show();
         if (i == 0) {
             if (dontShowThis.isSelected()) {

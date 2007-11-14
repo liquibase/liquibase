@@ -13,7 +13,7 @@ public class ClearChecksumsAction extends MigratorAction {
     public void actionPerform(Database database, IdeFacade ideFacade) throws LiquibaseException {
         ideFacade.getMigrator(null, database).clearCheckSums();
 
-        ideFacade.displayMessage("Result", "Checksums cleared");
+        ideFacade.showMessage("Result", "Checksums cleared");
 
     }
 

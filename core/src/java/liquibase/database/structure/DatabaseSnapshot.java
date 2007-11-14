@@ -147,6 +147,7 @@ public class DatabaseSnapshot {
 
             if ("TABLE".equals(type)) {
                 Table table = new Table(name);
+                table.setDatabase(database);
                 tablesMap.put(name, table);
             } else if ("VIEW".equals(type)) {
                 View view = new View();

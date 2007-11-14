@@ -13,7 +13,7 @@ public class ReleaseLocksAction extends MigratorAction {
     public void actionPerform(Database database, IdeFacade ideFacade) throws LiquibaseException {
         ideFacade.getMigrator(null, database).releaseLock();
 
-        ideFacade.displayMessage("Result", "All locks released successfully");
+        ideFacade.showMessage("Result", "All locks released successfully");
 
     }
 

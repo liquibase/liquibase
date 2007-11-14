@@ -1,7 +1,6 @@
 package org.liquibase.ide.common.action;
 
 import liquibase.exception.LiquibaseException;
-import liquibase.migrator.Migrator;
 import liquibase.database.Database;
 import org.liquibase.ide.common.IdeFacade;
 
@@ -16,13 +15,13 @@ public class RollbackFutureSqlAction extends MigratorAction {
     public void actionPerform(Database database, IdeFacade ideFacade) throws LiquibaseException {
         StringWriter writer = new StringWriter();
 
-        String changeLogFile = ideFacade.selectChangeLogFile();
+        String changeLogFile = ideFacade.promptForChangeLogFile();
         if (changeLogFile == null) {
             return;
         }
 
         ideFacade.getMigrator(changeLogFile, database).futureRollbackSQL(writer);
-        ideFacade.displayOutput("Rollback SQL", writer.toString());
+        ideFacade.showOutput("Rollback SQL", writer.toString());
     }
 
     public boolean needsRefresh() {

@@ -4,7 +4,6 @@ import liquibase.database.Database;
 import liquibase.diff.Diff;
 import liquibase.diff.DiffResult;
 import liquibase.exception.LiquibaseException;
-import liquibase.migrator.Migrator;
 import org.liquibase.ide.common.IdeFacade;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -32,7 +31,7 @@ public class GenerateChangelogAction extends MigratorAction {
             throw new LiquibaseException(e);
         }
 
-        ideFacade.displayOutput("Rollback SQL", out.toString());
+        ideFacade.showOutput("Rollback SQL", out.toString());
     }
 
 

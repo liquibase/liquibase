@@ -21,7 +21,7 @@ public class AddNotNullConstraintAction extends BaseColumnRefactorAction {
         AddNotNullConstraintChange change = new AddNotNullConstraintChange();
         change.setTableName(column.getTable().getName());
         change.setColumnName(column.getName());
-        change.setColumnDataType(column.getTypeName());
+        change.setColumnDataType(column.getDataTypeString(column.getTable().getDatabase()));
         change.setDefaultNullValue(((AddNotNullConstraintWizardPage) pages[0]).getDefaultNullValue());
 
         return new Change[] { change };

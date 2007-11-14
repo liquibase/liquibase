@@ -47,16 +47,15 @@ public class IntellijActionWrapper extends PortableAction {
         try {
             DatabaseObject selectedDatabaseObject = getSelectedDatabaseObject();
             Database selectedDatabase = getSelectedDatabase();
-            boolean needsRefresh = true;
             if (action instanceof BaseRefactorAction) {
                 IntellijRefactorWizard wizard = new IntellijRefactorWizard(((BaseRefactorAction) action).createRefactorWizard(selectedDatabaseObject), selectedDatabaseObject, selectedDatabase, ((BaseRefactorAction) action));
                 wizard.pack();
                 wizard.show();
             } else if (action instanceof MigratorAction) {
                 ((MigratorAction) action).actionPerform(selectedDatabase, ideFacade);
-                needsRefresh = ((MigratorAction) action).needsRefresh();
             }
-            if (needsRefresh) {
+
+            if (action.needsRefresh()) {
                 refresh();
             }
         } catch (LiquibaseException e) {
@@ -65,7 +64,13 @@ public class IntellijActionWrapper extends PortableAction {
     }
 
     private void refresh() {
-        DBTree tree = (DBTree) getUserData();
+        Object userData = getUserData();
+        if (!(userData instanceof DBTree)) {
+            LiquibaseProjectComponent.getInstance().getIdeFacade().showMessage("Operation Complete", "Could not auto-refresh the database display\n\nPlease refresh it manually");
+            return;
+        }
+
+        DBTree tree = (DBTree) userData;
         Enumeration<TreePath> expandedPaths = tree.getExpandedDescendants(tree.getSelectionPath());
         Object c = tree.getLastSelectedPathComponent();
         if (c instanceof IDBNode) {
@@ -136,10 +141,9 @@ public class IntellijActionWrapper extends PortableAction {
     }
 
     private Column createColumnObject
-            (dbhelp.db.Column
-                    selectedColumn, Database
-                    database, Table
-                    table) throws ParseException {
+            (dbhelp.db.Column selectedColumn,
+             Database database,
+             Table table) throws ParseException {
         Column column = new Column();
         column.setName(selectedColumn.getName());
         column.setAutoIncrement(selectedColumn.isAutoIncrement());
@@ -154,16 +158,14 @@ public class IntellijActionWrapper extends PortableAction {
         return column;
     }
 
-    private Table createTableObject
-            (dbhelp.db.Table
-                    selectedTable) {
+    private Table createTableObject(dbhelp.db.Table selectedTable) {
         Table table = new Table(selectedTable.getName());
+        table.setDatabase(getSelectedDatabase());
         return table;
     }
 
 
-    public Database getSelectedDatabase
-            () {
+    public Database getSelectedDatabase() {
         Object selectedObject = getUserData();
         if (selectedObject instanceof DBTree) {
             TreePath selectionPath = ((DBTree) getUserData()).getSelectionModel().getLeadSelectionPath();
@@ -173,26 +175,26 @@ public class IntellijActionWrapper extends PortableAction {
 
         try {
             Connection connection;
-        if (selectedObject instanceof dbhelp.db.Database) {
-            connection = ((dbhelp.db.Database) selectedObject).getConnection();
-        } else if (selectedObject instanceof Catalog) {
-            connection = ((Catalog) selectedObject).getDatabase().getConnection();
-        } else if (selectedObject instanceof dbhelp.db.Column) {
-            connection = ((dbhelp.db.Column) selectedObject).getTable().getDatabase().getConnection();
-        } else if (selectedObject instanceof Schema) {
-            connection = ((Schema) selectedObject).getDatabase().getConnection();
-        } else if (selectedObject instanceof dbhelp.db.Table) {
-            connection = ((dbhelp.db.Table) selectedObject).getDatabase().getConnection();
-        } else if (selectedObject instanceof AbstractDBObject.ProfileNode) {
-            connection = ((AbstractDBObject.ProfileNode) selectedObject).getDatabase().getConnection();
-        } else {
-            throw new RuntimeException("Unknown object type: " + selectedObject.getClass().getName());
+            if (selectedObject instanceof dbhelp.db.Database) {
+                connection = ((dbhelp.db.Database) selectedObject).getConnection();
+            } else if (selectedObject instanceof Catalog) {
+                connection = ((Catalog) selectedObject).getDatabase().getConnection();
+            } else if (selectedObject instanceof dbhelp.db.Column) {
+                connection = ((dbhelp.db.Column) selectedObject).getTable().getDatabase().getConnection();
+            } else if (selectedObject instanceof Schema) {
+                connection = ((Schema) selectedObject).getDatabase().getConnection();
+            } else if (selectedObject instanceof dbhelp.db.Table) {
+                connection = ((dbhelp.db.Table) selectedObject).getDatabase().getConnection();
+            } else if (selectedObject instanceof AbstractDBObject.ProfileNode) {
+                connection = ((AbstractDBObject.ProfileNode) selectedObject).getDatabase().getConnection();
+            } else {
+                throw new RuntimeException("Unknown object type: " + selectedObject.getClass().getName());
+            }
+            return DatabaseFactory.getInstance().findCorrectDatabaseImplementation(connection);
+        } catch (Exception
+                e) {
+            throw new RuntimeException(e);
         }
-        return DatabaseFactory.getInstance().findCorrectDatabaseImplementation(connection);
-    }catch(Exception
-        e){
-        throw new RuntimeException(e);
-    }
     }
 
     public Column getSelectedColumn

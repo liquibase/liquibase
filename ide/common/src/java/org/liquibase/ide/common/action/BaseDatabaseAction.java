@@ -28,4 +28,6 @@ public abstract class BaseDatabaseAction {
 //    View getSelectedView();
 
     public abstract boolean isApplicableTo(Class objectType);
+
+    public abstract boolean needsRefresh();    
 }

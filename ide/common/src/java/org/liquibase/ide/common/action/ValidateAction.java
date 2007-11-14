@@ -18,7 +18,7 @@ public class ValidateAction extends MigratorAction {
         String message;
 
         try {
-            String changeLogFile = ideFacade.selectChangeLogFile();
+            String changeLogFile = ideFacade.promptForChangeLogFile();
             if (changeLogFile == null) {
                 return;
             }
@@ -33,7 +33,7 @@ public class ValidateAction extends MigratorAction {
             throw new LiquibaseException(e);
         }
 
-        ideFacade.displayOutput("Change Log Status", message);
+        ideFacade.showOutput("Change Log Status", message);
 
     }
 

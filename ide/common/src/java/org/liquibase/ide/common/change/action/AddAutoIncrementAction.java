@@ -3,6 +3,7 @@ package org.liquibase.ide.common.change.action;
 import liquibase.change.AddAutoIncrementChange;
 import liquibase.change.Change;
 import liquibase.database.structure.Column;
+import liquibase.database.Database;
 import org.liquibase.ide.common.change.wizard.RefactorWizard;
 import org.liquibase.ide.common.change.wizard.page.RefactorWizardPage;
 
@@ -19,7 +20,7 @@ public class AddAutoIncrementAction extends BaseColumnRefactorAction {
         AddAutoIncrementChange change = new AddAutoIncrementChange();
         change.setTableName(column.getTable().getName());
         change.setColumnName(column.getName());
-        change.setColumnDataType(column.getTypeName());
+        change.setColumnDataType(column.getDataTypeString(column.getTable().getDatabase()));
 
         return new Change[] { change };
     }

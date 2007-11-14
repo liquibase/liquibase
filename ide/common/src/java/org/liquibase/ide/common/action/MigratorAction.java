@@ -16,6 +16,4 @@ public abstract class MigratorAction extends BaseDatabaseAction {
 
 
     public abstract void actionPerform(Database database, IdeFacade ideFacade) throws LiquibaseException;
-
-    public abstract boolean needsRefresh();
 }
