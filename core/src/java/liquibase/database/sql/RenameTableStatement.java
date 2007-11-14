@@ -37,7 +37,7 @@ public class RenameTableStatement implements SqlStatement {
             return "ALTER TABLE " + database.escapeTableName(getSchemaName(), oldTableName) + " RENAME " + database.escapeTableName(getSchemaName(), getNewTableName());
         } else if (database instanceof PostgresDatabase) {
             return "ALTER TABLE " + database.escapeTableName(getSchemaName(), oldTableName) + " RENAME TO " + database.escapeTableName(null, newTableName);
-        } else if (database instanceof DerbyDatabase) {
+        } else if ((database instanceof DerbyDatabase) || ((database instanceof MaxDBDatabase))) {
             return "RENAME TABLE " + database.escapeTableName(getSchemaName(), oldTableName) + " TO " + database.escapeTableName(null, newTableName);
         } else if (database instanceof HsqlDatabase) {
             return "ALTER TABLE " + database.escapeTableName(getSchemaName(), oldTableName) + " RENAME TO " + database.escapeTableName(null, newTableName);

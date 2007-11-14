@@ -37,6 +37,8 @@ public class DropDefaultValueStatement implements SqlStatement {
             return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " MODIFY " + getColumnName() + " DEFAULT NULL";
         } else if (database instanceof DerbyDatabase) {
             return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ALTER COLUMN  " + getColumnName() + " WITH DEFAULT NULL";
+        } else if (database instanceof MaxDBDatabase) {
+          	return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " COLUMN  " + getColumnName() + " DROP DEFAULT";
         }
 
         return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ALTER COLUMN  " + getColumnName() + " SET DEFAULT NULL";

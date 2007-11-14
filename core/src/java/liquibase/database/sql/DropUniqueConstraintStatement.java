@@ -1,6 +1,7 @@
 package liquibase.database.sql;
 
 import liquibase.database.Database;
+import liquibase.database.MaxDBDatabase;
 import liquibase.database.MySQLDatabase;
 import liquibase.exception.StatementNotSupportedOnDatabaseException;
 
@@ -31,7 +32,10 @@ public class DropUniqueConstraintStatement implements SqlStatement {
     public String getSqlStatement(Database database) throws StatementNotSupportedOnDatabaseException {
         if (database instanceof MySQLDatabase) {
             return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " DROP KEY " + getConstraintName();
+        } else if (database instanceof MaxDBDatabase) {
+            return "DROP INDEX " + getConstraintName() + " ON " + database.escapeTableName(getSchemaName(), getTableName());
         }
+
 
         return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " DROP CONSTRAINT " + getConstraintName();
     }
