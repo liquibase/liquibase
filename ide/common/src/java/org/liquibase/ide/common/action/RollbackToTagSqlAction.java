@@ -1,7 +1,6 @@
 package org.liquibase.ide.common.action;
 
 import liquibase.exception.LiquibaseException;
-import liquibase.migrator.Migrator;
 import liquibase.database.Database;
 import org.liquibase.ide.common.IdeFacade;
 
@@ -19,7 +18,7 @@ public class RollbackToTagSqlAction extends MigratorAction {
             StringWriter writer = new StringWriter();
             ideFacade.getMigrator(null, database).rollbackSQL(input, writer);
 
-            ideFacade.displayOutput("Rollback SQL", writer.toString());
+            ideFacade.showOutput("Rollback SQL", writer.toString());
         }
     }
 

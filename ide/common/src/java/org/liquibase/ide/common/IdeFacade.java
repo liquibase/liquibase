@@ -20,11 +20,13 @@ public interface IdeFacade {
 
     Integer promptForInteger(String title, String message, Integer defaultValue);
 
+    String promptForChangeLogFile();
+
     Date promptForDateTime(String title, String message, Date defaultValue);
 
-    void displayOutput(String title, String output);
+    void showOutput(String title, String output);
 
-    void displayMessage(String title, String message);
+    void showMessage(String title, String message);
 
     void showError(String title, Exception exception);
 
@@ -32,7 +34,6 @@ public interface IdeFacade {
 
     File promptForDirectory(String title, String message, File defaultFile);
 
-    String selectChangeLogFile();
 
     boolean confirm(String title, String message);
 }

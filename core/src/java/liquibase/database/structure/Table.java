@@ -1,9 +1,13 @@
 package liquibase.database.structure;
 
+import liquibase.database.Database;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class Table implements DatabaseObject, Comparable<Table> {
+
+    private Database database;
     private String name;
     private List<Column> columns = new ArrayList<Column>();
 
@@ -13,6 +17,14 @@ public class Table implements DatabaseObject, Comparable<Table> {
 
     public String getName() {
         return name;
+    }
+
+    public Database getDatabase() {
+        return database;
+    }
+
+    public void setDatabase(Database database) {
+        this.database = database;
     }
 
     public List<Column> getColumns() {

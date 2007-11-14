@@ -18,7 +18,7 @@ public class GenerateDbDocAction extends MigratorAction {
         if (input != null) {
             try {
 
-                String changeLogFile = ideFacade.selectChangeLogFile();
+                String changeLogFile = ideFacade.promptForChangeLogFile();
                 if (changeLogFile == null) {
                     return;
                 }

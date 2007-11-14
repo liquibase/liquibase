@@ -16,14 +16,14 @@ public class StatusAction extends MigratorAction {
     public void actionPerform(Database database, IdeFacade ideFacade) throws LiquibaseException {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 
-        String changeLogFile = ideFacade.selectChangeLogFile();
+        String changeLogFile = ideFacade.promptForChangeLogFile();
         if (changeLogFile == null) {
             return;
         }
 
         ideFacade.getMigrator(changeLogFile, database).reportStatus(true, new PrintStream(byteArrayOutputStream));
 
-        ideFacade.displayOutput("Check Change Log Status", byteArrayOutputStream.toString());
+        ideFacade.showOutput("Check Change Log Status", byteArrayOutputStream.toString());
 
     }
 

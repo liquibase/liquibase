@@ -21,7 +21,7 @@ public class AddTableWizardPageImpl implements AddTableWizardPage {
     private JPanel mainPanel;
     private JCheckBox primaryKeyCheckBox;
     private JCheckBox autoIncrementCheckBox;
-    private JCheckBox nullableCheckBox;
+    private JCheckBox notNullCheckBox;
     private JTextField defaultValueTextField;
 
 
@@ -93,7 +93,7 @@ public class AddTableWizardPageImpl implements AddTableWizardPage {
                 tableModel.addRow(new Object[]{
                         columnNameTextField.getText(),
                         dataTypeTextField.getText(),
-                        nullableCheckBox.isSelected(),
+                        !notNullCheckBox.isSelected(),
                         primaryKeyCheckBox.isSelected(),
                         autoIncrementCheckBox.isSelected(),
                         defaultValueTextField.getText(),
@@ -101,7 +101,7 @@ public class AddTableWizardPageImpl implements AddTableWizardPage {
 
                 columnNameTextField.setText("");
                 dataTypeTextField.setText("");
-                nullableCheckBox.setSelected(false);
+                notNullCheckBox.setSelected(false);
                 primaryKeyCheckBox.setSelected(false);
                 autoIncrementCheckBox.setSelected(false);
                 defaultValueTextField.setText("");

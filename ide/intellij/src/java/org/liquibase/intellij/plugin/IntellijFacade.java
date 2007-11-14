@@ -19,6 +19,7 @@ import liquibase.xml.XmlWriter;
 import org.liquibase.ide.common.ChangeLogWriter;
 import org.liquibase.ide.common.IdeFacade;
 import org.liquibase.ide.common.ProgressMonitor;
+import org.liquibase.intellij.plugin.dialog.DisplayOutputDialogImpl;
 import org.liquibase.intellij.plugin.dialog.SelectChangeLogDialogImpl;
 
 import java.io.File;
@@ -158,12 +159,12 @@ public class IntellijFacade implements IdeFacade {
         showError("Unexpected Error", exception);
     }
 
-    public void displayMessage(String title, String message) {
+    public void showMessage(String title, String message) {
         Messages.showInfoMessage(message, title);
     }
 
-    public void displayOutput(String title, String output) {
-        Messages.showInfoMessage(output, title);
+    public void showOutput(String title, String output) {
+        DisplayOutputDialogImpl.showOutputDialog(title, output);
     }
 
     public boolean confirm(String title, String message) {
@@ -172,7 +173,7 @@ public class IntellijFacade implements IdeFacade {
         return result == 0;
     }
 
-    public String selectChangeLogFile() {
+    public String promptForChangeLogFile() {
         LiquibaseProjectComponent liquibaseProjectComponent = LiquibaseProjectComponent.getInstance();
         if (liquibaseProjectComponent.getPromptForChangeLog()) {
             return new SelectChangeLogDialogImpl().selectChangeLogFile();

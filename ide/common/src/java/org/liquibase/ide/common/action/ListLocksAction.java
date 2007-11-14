@@ -23,7 +23,7 @@ public class ListLocksAction extends MigratorAction {
                 output += "Locked by "+lock.getLockedBy()+" since "+ DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(lock.getLockGranted())+"\n";
             }
 
-            ideFacade.displayOutput("LiquiBase Logs", output);
+            ideFacade.showOutput("LiquiBase Logs", output);
         } catch (IOException e) {
             throw new LiquibaseException(e);
         }
