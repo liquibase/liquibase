@@ -14,7 +14,7 @@ public class RenameTableAction extends BaseTableRefactorAction {
     }
 
     public RefactorWizard createRefactorWizard(Table selectedTable) {
-        return new RefactorWizard("Rename "+selectedTable, new SingleValueWizardPageImpl("New Table Name"));
+        return new RefactorWizard("Rename "+selectedTable, new SingleValueWizardPageImpl("New Table Name", selectedTable.getName()));
     }
 
     protected Change[] createChanges(Table table, RefactorWizardPage... pages) {

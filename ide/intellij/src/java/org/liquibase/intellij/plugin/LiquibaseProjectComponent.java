@@ -13,9 +13,11 @@ import dbhelp.db.Catalog;
 import dbhelp.db.Column;
 import dbhelp.db.Schema;
 import dbhelp.db.Table;
+import dbhelp.db.model.IDBNode;
 import dbhelp.db.ui.DBTree;
 import dbhelp.plugin.action.portable.ActionGroup;
 import dbhelp.plugin.action.portable.PopupMenuManager;
+import dbhelp.plugin.idea.ProjectMain;
 import dbhelp.plugin.idea.utils.IDEAUtils;
 import liquibase.util.StringUtils;
 import org.jdom.Element;
@@ -24,7 +26,13 @@ import org.liquibase.ide.common.IdeFacade;
 import org.liquibase.ide.common.action.*;
 import org.liquibase.ide.common.change.action.*;
 
+import javax.swing.*;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
+import javax.swing.tree.TreePath;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class LiquibaseProjectComponent implements ProjectComponent, JDOMExternalizable {
@@ -36,6 +44,8 @@ public class LiquibaseProjectComponent implements ProjectComponent, JDOMExternal
     public String rootChangeLogFile; //externalized
     public Boolean promptForChangeLog; //externalized
 //    private ProjectMain projectMain;
+
+    private DBTree dbTree;
 
     private IdeFacade ideFacade;
 
@@ -68,6 +78,18 @@ public class LiquibaseProjectComponent implements ProjectComponent, JDOMExternal
         PopupMenuManager.getInstance().addAction(createRefactorMenu(liquibase.database.structure.Table.class), Table.class);
         PopupMenuManager.getInstance().addAction(createRefactorMenu(liquibase.database.structure.Column.class), Column.class);
 //        PopupMenuManager.getInstance().getActions(DBTree.class)
+
+        try {
+            //this is ugly, but I don't see any way to access the DBTree nicely
+            this.dbTree = (DBTree) ((JScrollPane) ((JSplitPane) ((JTabbedPane) ProjectMain.getInstance().getBrowser().getComponent(0)).getComponentAt(0)).getComponent(1)).getViewport().getComponent(0);
+        } catch (Exception e) {
+            System.out.println("Unable to find DBTree");
+            e.printStackTrace();
+        }
+//        Component[] components = ProjectMain.getInstance().getBrowser().getComponents();
+//        for (Component c : components) {
+//            System.out.println("Component: "+c.getClass().getName());
+//        }
     }
 
     private ActionGroup createLiquibaseMenu(Class dbObjectType) {
@@ -203,5 +225,7 @@ public class LiquibaseProjectComponent implements ProjectComponent, JDOMExternal
         this.promptForChangeLog = shouldPrompt;
     }
 
-
+    public DBTree getDbTree() {
+        return dbTree;
+    }
 }
