@@ -9,10 +9,10 @@ import org.liquibase.ide.common.change.wizard.page.AddTableWizardPage;
 import org.liquibase.ide.common.change.wizard.page.AddTableWizardPageImpl;
 import org.liquibase.ide.common.change.wizard.page.RefactorWizardPage;
 
-public class AddTableAction extends BaseDatabaseRefactorAction {
+public class CreateTableAction extends BaseDatabaseRefactorAction {
 
 
-    public AddTableAction() {
+    public CreateTableAction() {
         super("Add Table");
     }
 

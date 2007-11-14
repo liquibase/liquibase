@@ -104,10 +104,12 @@ public class LiquibaseProjectComponent implements ProjectComponent, JDOMExternal
     private ActionGroup createRefactorMenu(Class dbObjectType) {
         ActionGroup refactorActionGroup = new ActionGroup("Refactor");
         //database actions
-        refactorActionGroup.addAction(new IntellijActionWrapper(new AddTableAction(), dbObjectType));
+        refactorActionGroup.addAction(new IntellijActionWrapper(new CreateTableAction(), dbObjectType));
 
         //table actions
         refactorActionGroup.addAction(new IntellijActionWrapper(new AddColumnAction(), dbObjectType));
+        refactorActionGroup.addAction(new IntellijActionWrapper(new DropTableAction(), dbObjectType));
+        refactorActionGroup.addAction(new IntellijActionWrapper(new RenameTableAction(), dbObjectType));        
 
         //column actions
         refactorActionGroup.addAction(new IntellijActionWrapper(new AddAutoIncrementAction(), dbObjectType));
@@ -118,6 +120,13 @@ public class LiquibaseProjectComponent implements ProjectComponent, JDOMExternal
         refactorActionGroup.addAction(new IntellijActionWrapper(new AddPrimaryKeyAction(), dbObjectType));
         refactorActionGroup.addAction(new IntellijActionWrapper(new AddUniqueConstraintAction(), dbObjectType));
         refactorActionGroup.addAction(new IntellijActionWrapper(new CreateIndexAction(), dbObjectType));
+        refactorActionGroup.addAction(new IntellijActionWrapper(new DropColumnAction(), dbObjectType));
+        refactorActionGroup.addAction(new IntellijActionWrapper(new DropDefaultValueAction(), dbObjectType));
+        refactorActionGroup.addAction(new IntellijActionWrapper(new DropNotNullConstraintAction(), dbObjectType));
+        refactorActionGroup.addAction(new IntellijActionWrapper(new RenameColumnAction(), dbObjectType));
+
+
+
 
         return refactorActionGroup;
     }
@@ -137,7 +146,7 @@ public class LiquibaseProjectComponent implements ProjectComponent, JDOMExternal
     public void projectOpened() {
         _context.put(project, this);
 
-//        ProjectMain.getInstance().getPopupMenuManager().addAction(new AddTableAction(), DBTree.class);
+//        ProjectMain.getInstance().getPopupMenuManager().addAction(new CreateTableAction(), DBTree.class);
         addActions();
     }
 
