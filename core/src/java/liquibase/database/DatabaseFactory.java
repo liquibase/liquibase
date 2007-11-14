@@ -37,6 +37,7 @@ public class DatabaseFactory {
                 new H2Database(),
                 new CacheDatabase(),
                 new FirebirdDatabase(),
+                new MaxDBDatabase()
         };
     }
 

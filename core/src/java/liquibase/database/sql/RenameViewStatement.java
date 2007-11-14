@@ -38,6 +38,8 @@ public class RenameViewStatement implements SqlStatement {
             return "RENAME TABLE " + database.escapeViewName(getSchemaName(), getOldViewName()) + " TO " + database.escapeTableName(getSchemaName(), getNewViewName());
         } else if (database instanceof PostgresDatabase) {
             return "ALTER TABLE " + database.escapeViewName(getSchemaName(), getOldViewName()) + " RENAME TO " + getNewViewName();
+        } else if (database instanceof MaxDBDatabase) {
+          return "RENAME VIEW " + database.escapeViewName(getSchemaName(), getOldViewName()) + " TO " + getNewViewName();
         }
 
         if (getSchemaName() != null && database instanceof OracleDatabase) {

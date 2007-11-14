@@ -37,6 +37,7 @@ public class TestContext {
             "jdbc:postgresql://localhost/liquibase",
 //            "jdbc:jtds:sybase://localhost/nathan:5000",
 //            "jdbc:sybase:Tds:"+ InetAddress.getLocalHost().getHostName()+":5000/liquibase",
+            "jdbc:sapdb://localhost/liquibas",
     };
 
     private Map<String, DatabaseConnection> connectionsByUrl = new HashMap<String, DatabaseConnection>();

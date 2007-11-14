@@ -59,7 +59,7 @@ public class ModifyColumnChange extends AbstractChange {
             return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ALTER COLUMN " + getColumn().getName() + " " + getColumn().getType())};
         } else if (database instanceof MySQLDatabase) {
             return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " MODIFY COLUMN " + getColumn().getName() + " " + getColumn().getType())};
-        } else if (database instanceof OracleDatabase) {
+        } else if (database instanceof OracleDatabase || database instanceof MaxDBDatabase) {
             return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " MODIFY (" + getColumn().getName() + " " + getColumn().getType() + ")")};
         } else if (database instanceof DerbyDatabase) {
             return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ALTER COLUMN "+getColumn().getName()+" SET DATA TYPE " + getColumn().getType())};

@@ -77,6 +77,8 @@ public class RenameColumnStatement implements SqlStatement {
             return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ALTER COLUMN " + getOldColumnName() + " RENAME TO " + getNewColumnName();
         } else if (database instanceof FirebirdDatabase) {
             return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ALTER COLUMN " + getOldColumnName() + " TO " + getNewColumnName();
+        } else if (database instanceof MaxDBDatabase) {
+          return "RENAME COLUMN " + database.escapeTableName(getSchemaName(), getTableName()) + "." + getOldColumnName() + " TO " + getNewColumnName();
         }
 
         return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " RENAME COLUMN " + getOldColumnName() + " TO " + getNewColumnName();

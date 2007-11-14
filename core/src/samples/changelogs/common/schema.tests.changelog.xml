@@ -87,7 +87,7 @@
             <column name="id" type="int">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
-            <column name="value" type="varchar(50)">
+            <column name="valueCol" type="varchar(50)">
                 <constraints nullable="false"/>
             </column>
             <column name="person_id" type="int">
@@ -208,7 +208,7 @@
     <changeSet id="30" author="nvoxland">
         <createTable schemaName="liquibaseb" tableName="pkTest2">
             <column name="id" type="int"/>
-            <column name="value" type="varchar(50)"/>
+            <column name="valueCol" type="varchar(50)"/>
         </createTable>
     </changeSet>
 

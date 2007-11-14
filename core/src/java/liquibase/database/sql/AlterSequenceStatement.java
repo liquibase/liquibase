@@ -94,7 +94,7 @@ public class AlterSequenceStatement implements SqlStatement {
         }
 
         if (getOrdered() != null) {
-            if (database instanceof OracleDatabase || database instanceof DB2Database) {
+            if (database instanceof OracleDatabase || database instanceof DB2Database || database instanceof MaxDBDatabase) {
                 if (getOrdered()) {
                     buffer.append(" ORDER");
                 }

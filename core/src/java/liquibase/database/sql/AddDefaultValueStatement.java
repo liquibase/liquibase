@@ -31,6 +31,8 @@ public class AddDefaultValueStatement implements SqlStatement {
             return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " MODIFY " + getColumnName() + " DEFAULT " + database.convertJavaObjectToString(getDefaultValue());
         } else if (database instanceof DerbyDatabase) {
             return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ALTER COLUMN  " + getColumnName() + " WITH DEFAULT " + database.convertJavaObjectToString(getDefaultValue());
+        } else if (database instanceof MaxDBDatabase) {
+        		return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " COLUMN  " + getColumnName() + " ADD DEFAULT " + database.convertJavaObjectToString(getDefaultValue());
         }
 
         return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ALTER COLUMN  " + getColumnName() + " SET DEFAULT " + database.convertJavaObjectToString(getDefaultValue());
