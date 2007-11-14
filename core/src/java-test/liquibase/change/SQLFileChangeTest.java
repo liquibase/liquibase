@@ -6,6 +6,7 @@ import liquibase.database.OracleDatabase;
 import liquibase.database.sql.SqlStatement;
 import liquibase.exception.SetupException;
 import liquibase.util.MD5Util;
+import liquibase.util.StreamUtil;
 import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
@@ -76,14 +77,16 @@ public class SQLFileChangeTest extends AbstractChangeTest {
     @Test
     public void multiLineSQLFileSemiColon() throws Exception {
         SQLFileChange change2 = new SQLFileChange();
-        change2.setSql("SELECT * FROM customer;" +
-                "SELECT * from table;");
+        change2.setSql("SELECT * FROM customer;" 
+        				+ StreamUtil.getLineSeparator() +
+                "SELECT * from table;" + "SELECT * from table2;" + StreamUtil.getLineSeparator());
         OracleDatabase database = new OracleDatabase();
         SqlStatement[] statements = change2.generateStatements(database);
         
-        assertEquals(2,statements.length);
+        assertEquals(3,statements.length);
         assertEquals("SELECT * FROM customer",statements[0].getSqlStatement(database));
         assertEquals("SELECT * from table",statements[1].getSqlStatement(database));
+        assertEquals("SELECT * from table2",statements[2].getSqlStatement(database));
     }
     
     @Test
