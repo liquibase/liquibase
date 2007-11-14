@@ -14,7 +14,7 @@ public class DropAllAction extends MigratorAction {
 
         if (ideFacade.confirm(getTitle(), "Are you sure you want to drop all database objects?")) {
             ideFacade.getMigrator(null, database).dropAll();
-            ideFacade.showOutput("Result", "All database objects dropped");
+            ideFacade.showMessage("Result", "All database objects dropped");
         }
 
     }

@@ -16,7 +16,12 @@ public class SingleValueWizardPageImpl implements SingleValueWizardPage {
     }
 
     public SingleValueWizardPageImpl(String label) {
+        this(label, null);
+    }
+
+    public SingleValueWizardPageImpl(String label, String defaultValue) {
         this.label.setText(label);
+        this.value.setText(defaultValue);
     }
 
     public String getValue() {

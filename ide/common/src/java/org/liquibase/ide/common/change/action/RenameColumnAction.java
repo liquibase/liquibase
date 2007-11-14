@@ -14,7 +14,7 @@ public class RenameColumnAction extends BaseColumnRefactorAction {
     }
 
     public RefactorWizard createRefactorWizard(Column selectedColumn) {
-        return new RefactorWizard("Rename "+selectedColumn, new SingleValueWizardPageImpl("New Column Name"));
+        return new RefactorWizard("Rename "+selectedColumn, new SingleValueWizardPageImpl("New Column Name", selectedColumn.getName()));
     }
 
     protected Change[] createChanges(Column column, RefactorWizardPage... pages) {

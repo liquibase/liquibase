@@ -64,20 +64,21 @@ public class IntellijActionWrapper extends PortableAction {
     }
 
     private void refresh() {
-        Object userData = getUserData();
-        if (!(userData instanceof DBTree)) {
-            LiquibaseProjectComponent.getInstance().getIdeFacade().showMessage("Operation Complete", "Could not auto-refresh the database display\n\nPlease refresh it manually");
+        LiquibaseProjectComponent liquibaseProjectComponent = LiquibaseProjectComponent.getInstance();
+        DBTree tree = liquibaseProjectComponent.getDbTree();
+        if (tree == null) {
+            liquibaseProjectComponent.getIdeFacade().showMessage("Operation Complete", "Could not auto-refresh the database display\n\nPlease refresh it manually");
             return;
         }
 
-        DBTree tree = (DBTree) userData;
-        Enumeration<TreePath> expandedPaths = tree.getExpandedDescendants(tree.getSelectionPath());
-        Object c = tree.getLastSelectedPathComponent();
+        TreePath pathToRefresh = tree.getSelectionPath().getParentPath();
+        Enumeration<TreePath> expandedPaths = tree.getExpandedDescendants(new TreePath(tree.getModel().getRoot()));
+        Object c = pathToRefresh.getLastPathComponent();
         if (c instanceof IDBNode) {
             IDBNode dbObject = (IDBNode) c;
             dbObject.refresh();
             DBTreeModel m = (DBTreeModel) tree.getModel();
-            m.fireTreeNodeChange(new TreeModelEvent(this, tree.getSelectionPath()));
+            m.fireTreeNodeChange(new TreeModelEvent(this, pathToRefresh));
             while (!(dbObject instanceof AbstractDBObject.ProfileNode) && null != dbObject) {
                 dbObject = dbObject.getParent();
             }
@@ -86,12 +87,12 @@ public class IntellijActionWrapper extends PortableAction {
                 try {
                     dbNode.getDatabase().getResolver().refresh();
                 } catch (Exception e1) {
-                    LiquibaseProjectComponent.getInstance().getIdeFacade().showError(e1);
+                    liquibaseProjectComponent.getIdeFacade().showError(e1);
                 }
             }
         }
 
-        while (expandedPaths.hasMoreElements()) {
+        while (expandedPaths != null && expandedPaths.hasMoreElements()) {
             TreePath path = expandedPaths.nextElement();
             tree.expandPath(path);
             TreeExpansionListener[] expansionListeners = tree.getListeners(TreeExpansionListener.class);
