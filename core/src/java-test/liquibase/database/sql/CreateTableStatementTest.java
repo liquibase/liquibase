@@ -106,9 +106,9 @@ public class CreateTableStatementTest extends AbstractSqlStatementTest {
                         ForeignKey foundForeignKey = snapshot.getForeignKey(foreignKeyName);
                         assertNotNull(foundForeignKey);
                         assertEquals(TABLE_NAME, foundForeignKey.getPrimaryKeyTable().getName().toUpperCase());
-                        assertEquals("ID", foundForeignKey.getPrimaryKeyColumn().toUpperCase());
+                        assertEquals("ID", foundForeignKey.getPrimaryKeyColumns().toUpperCase());
                         assertEquals(TABLE_NAME, foundForeignKey.getForeignKeyTable().getName().toUpperCase());
-                        assertEquals("PARENT_ID", foundForeignKey.getForeignKeyColumn().toUpperCase());
+                        assertEquals("PARENT_ID", foundForeignKey.getForeignKeyColumns().toUpperCase());
 
                     }
 
@@ -144,9 +144,9 @@ public class CreateTableStatementTest extends AbstractSqlStatementTest {
                         ForeignKey foundForeignKey = snapshot.getForeignKey(foreignKeyName);
                         assertNotNull(foundForeignKey);
                         assertEquals(TABLE_NAME, foundForeignKey.getPrimaryKeyTable().getName().toUpperCase());
-                        assertEquals("ID", foundForeignKey.getPrimaryKeyColumn().toUpperCase());
+                        assertEquals("ID", foundForeignKey.getPrimaryKeyColumns().toUpperCase());
                         assertEquals(TABLE_NAME, foundForeignKey.getForeignKeyTable().getName().toUpperCase());
-                        assertEquals("PARENT_ID", foundForeignKey.getForeignKeyColumn().toUpperCase());
+                        assertEquals("PARENT_ID", foundForeignKey.getForeignKeyColumns().toUpperCase());
                         assertTrue(foundForeignKey.isDeferrable());
                         assertTrue(foundForeignKey.isInitiallyDeferred());
                     }
@@ -183,9 +183,9 @@ public class CreateTableStatementTest extends AbstractSqlStatementTest {
                         ForeignKey foundForeignKey = snapshot.getForeignKey(foreignKeyName);
                         assertNotNull(foundForeignKey);
                         assertEquals(FK_TABLE_NAME, foundForeignKey.getPrimaryKeyTable().getName().toUpperCase());
-                        assertEquals("ID", foundForeignKey.getPrimaryKeyColumn().toUpperCase());
+                        assertEquals("ID", foundForeignKey.getPrimaryKeyColumns().toUpperCase());
                         assertEquals(TABLE_NAME, foundForeignKey.getForeignKeyTable().getName().toUpperCase());
-                        assertEquals("PARENT_ID", foundForeignKey.getForeignKeyColumn().toUpperCase());
+                        assertEquals("PARENT_ID", foundForeignKey.getForeignKeyColumns().toUpperCase());
                         //TODO: test when tested by diff                assertTrue(foundForeignKey.isDeleteCascade());
                     }
 
