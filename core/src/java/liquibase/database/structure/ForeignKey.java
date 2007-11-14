@@ -55,7 +55,7 @@ public class ForeignKey implements DatabaseObject, Comparable<ForeignKey> {
 
 
     public String toString() {
-        return getName()+" ("+getPrimaryKeyColumn()+" -> "+getForeignKeyColumn()+")";
+        return getName()+"("+getForeignKeyTable()+"."+getForeignKeyColumn()+" ->"+getPrimaryKeyTable()+"."+getPrimaryKeyColumn()+")";
     }
 
 
