@@ -148,7 +148,7 @@ public class Diff {
                     && (targetColumn.getView() == null || !diffResult.getUnexpectedViews().contains(targetColumn.getView()))
                     ) {
                 diffResult.addUnexpectedColumn(targetColumn);
-            } else if (targetColumn.getTable() != null) {
+            } else if (targetColumn.getTable() != null && !diffResult.getUnexpectedTables().contains(targetColumn.getTable())) {
                 Column baseColumn = baseSnapshot.getColumn(targetColumn.getTable().getName(), targetColumn.getName());
 
                 if (targetColumn.isDifferent(baseColumn)) {
