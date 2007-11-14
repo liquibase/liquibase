@@ -1,11 +1,13 @@
 package liquibase.database.structure;
 
+import java.util.List;
+
 public class ForeignKey implements DatabaseObject, Comparable<ForeignKey> {
     private Table primaryKeyTable;
-    private String primaryKeyColumn;
+    private String primaryKeyColumns;
 
     private Table foreignKeyTable;
-    private String foreignKeyColumn;
+    private String foreignKeyColumns;
 
     private String name;
 
@@ -21,12 +23,22 @@ public class ForeignKey implements DatabaseObject, Comparable<ForeignKey> {
         this.primaryKeyTable = primaryKeyTable;
     }
 
-    public String getPrimaryKeyColumn() {
-        return primaryKeyColumn;
+    public String getPrimaryKeyColumns() {
+        return primaryKeyColumns;
     }
 
-    public void setPrimaryKeyColumn(String primaryKeyColumn) {
-        this.primaryKeyColumn = primaryKeyColumn;
+    public void addPrimaryKeyColumn(String primaryKeyColumn) {
+    	if ((this.primaryKeyColumns == null)
+				|| (this.primaryKeyColumns.length() == 0)) {
+			this.primaryKeyColumns = primaryKeyColumn;
+		} else {
+			this.primaryKeyColumns = this.primaryKeyColumns + ", "
+					+ primaryKeyColumn;
+		}
+    }
+
+    public void setPrimaryKeyColumns(String primaryKeyColumns) {
+        this.primaryKeyColumns = primaryKeyColumns;
     }
 
     public Table getForeignKeyTable() {
@@ -37,12 +49,22 @@ public class ForeignKey implements DatabaseObject, Comparable<ForeignKey> {
         this.foreignKeyTable = foreignKeyTable;
     }
 
-    public String getForeignKeyColumn() {
-        return foreignKeyColumn;
+    public String getForeignKeyColumns() {
+        return foreignKeyColumns;
     }
 
-    public void setForeignKeyColumn(String foreignKeyColumn) {
-        this.foreignKeyColumn = foreignKeyColumn;
+    public void addForeignKeyColumn(String foreignKeyColumn) {
+    	if ((this.foreignKeyColumns == null)
+				|| (this.foreignKeyColumns.length() == 0)) {
+			this.foreignKeyColumns = foreignKeyColumn;
+		} else {
+			this.foreignKeyColumns = this.foreignKeyColumns + ", "
+					+ foreignKeyColumn;
+		}
+    }
+
+    public void setForeignKeyColumns(String foreignKeyColumns) {
+        this.foreignKeyColumns = foreignKeyColumns;
     }
 
     public String getName() {
@@ -55,7 +77,7 @@ public class ForeignKey implements DatabaseObject, Comparable<ForeignKey> {
 
 
     public String toString() {
-        return getName()+"("+getForeignKeyTable()+"."+getForeignKeyColumn()+" ->"+getPrimaryKeyTable()+"."+getPrimaryKeyColumn()+")";
+        return getName()+"("+getForeignKeyTable()+"."+getForeignKeyColumns()+" ->"+getPrimaryKeyTable()+"."+getPrimaryKeyColumns()+")";
     }
 
 
@@ -82,9 +104,9 @@ public class ForeignKey implements DatabaseObject, Comparable<ForeignKey> {
 
         ForeignKey that = (ForeignKey) o;
 
-        return foreignKeyColumn.equalsIgnoreCase(that.foreignKeyColumn)
+        return getForeignKeyColumns().equalsIgnoreCase(that.getForeignKeyColumns())
                 && foreignKeyTable.equals(that.foreignKeyTable)
-                && primaryKeyColumn.equalsIgnoreCase(that.primaryKeyColumn)
+                && getPrimaryKeyColumns().equalsIgnoreCase(that.getPrimaryKeyColumns())
                 && primaryKeyTable.equals(that.primaryKeyTable);
 
     }
@@ -95,16 +117,16 @@ public class ForeignKey implements DatabaseObject, Comparable<ForeignKey> {
             result = primaryKeyTable.hashCode();
         }
 
-        if (primaryKeyColumn != null) {
-            result = 31 * result + primaryKeyColumn.toUpperCase().hashCode();
+        if (primaryKeyColumns != null) {
+            result = 31 * result + primaryKeyColumns.toUpperCase().hashCode();
         }
 
         if (foreignKeyTable != null) {
             result = 31 * result + foreignKeyTable.hashCode();
         }
 
-        if (foreignKeyColumn != null) {
-            result = 31 * result + foreignKeyColumn.toUpperCase().hashCode();
+        if (foreignKeyColumns != null) {
+            result = 31 * result + foreignKeyColumns.toUpperCase().hashCode();
         }
 
         return result;
@@ -117,18 +139,33 @@ public class ForeignKey implements DatabaseObject, Comparable<ForeignKey> {
             returnValue = this.getForeignKeyTable().compareTo(o.getForeignKeyTable());
         }
 
-        if (returnValue == 0 && this.getForeignKeyColumn() != null && o.getForeignKeyColumn() != null) {
-            returnValue = this.getForeignKeyColumn().compareTo(o.getForeignKeyColumn());
+        if (returnValue == 0 && this.getForeignKeyColumns() != null && o.getForeignKeyColumns() != null) {
+            returnValue = this.getForeignKeyColumns().compareTo(o.getForeignKeyColumns());
         }
 
         if (returnValue == 0 && this.getPrimaryKeyTable() != null && o.getPrimaryKeyTable() != null) {
             returnValue = this.getPrimaryKeyTable().compareTo(o.getPrimaryKeyTable());
         }
 
-        if (returnValue == 0 && this.getPrimaryKeyColumn() != null && o.getPrimaryKeyColumn() != null) {
-            returnValue = this.getPrimaryKeyColumn().compareTo(o.getPrimaryKeyColumn());
+        if (returnValue == 0 && this.getPrimaryKeyColumns() != null && o.getPrimaryKeyColumns() != null) {
+            returnValue = this.getPrimaryKeyColumns().compareTo(o.getPrimaryKeyColumns());
         }
 
         return returnValue;
+    }
+    
+    private String toDisplayString(List<String> columnsNames)
+    {
+    	StringBuilder sb = new StringBuilder();
+    	int i = 0;
+    	for (String columnName : columnsNames) {			
+    		i++;
+    		sb.append(columnName);
+    		if (i < columnsNames.size())
+    		{
+    			sb.append(", ");
+    		}
+		}
+    	return sb.toString();
     }
 }

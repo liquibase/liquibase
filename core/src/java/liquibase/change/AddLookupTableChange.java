@@ -229,9 +229,9 @@ public class AddLookupTableChange extends AbstractChange {
 
         ForeignKey fk = new ForeignKey();
         fk.setForeignKeyTable(existingTable);
-        fk.setForeignKeyColumn(existingColumn.getName());
+        fk.setForeignKeyColumns(existingColumn.getName());
         fk.setPrimaryKeyTable(newTable);
-        fk.setPrimaryKeyColumn(newColumn.getName());
+        fk.setPrimaryKeyColumns(newColumn.getName());
         returnSet.add(fk);
 
         return returnSet;

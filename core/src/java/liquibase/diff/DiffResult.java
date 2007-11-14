@@ -395,10 +395,10 @@ public class DiffResult {
             change.setConstraintName(fk.getName());
 
             change.setReferencedTableName(fk.getPrimaryKeyTable().getName());
-            change.setReferencedColumnNames(fk.getPrimaryKeyColumn());
+            change.setReferencedColumnNames(fk.getPrimaryKeyColumns());
 
             change.setBaseTableName(fk.getForeignKeyTable().getName());
-            change.setBaseColumnNames(fk.getForeignKeyColumn());
+            change.setBaseColumnNames(fk.getForeignKeyColumns());
 
             change.setDeferrable(fk.isDeferrable());
             change.setInitiallyDeferred(fk.isInitiallyDeferred());

@@ -222,9 +222,9 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
         ForeignKey fk = new ForeignKey();
         fk.setName(constraintName);
         fk.setForeignKeyTable(baseTable);
-        fk.setForeignKeyColumn(baseColumnNames);
+        fk.setForeignKeyColumns(baseColumnNames);
         fk.setPrimaryKeyTable(referencedTable);
-        fk.setPrimaryKeyColumn(referencedColumnNames);
+        fk.setPrimaryKeyColumns(referencedColumnNames);
         returnSet.add(fk);
 
         return returnSet;

@@ -286,17 +286,24 @@ public class DatabaseSnapshot {
             String dbCatalog = database.convertRequestedSchemaToCatalog(schema);
             String dbSchema = database.convertRequestedSchemaToSchema(schema);
             ResultSet rs = databaseMetaData.getExportedKeys(dbCatalog, dbSchema, table.getName());
+            ForeignKey fkInfo = null;
             while (rs.next()) {
-                ForeignKey fkInfo = new ForeignKey();
-
                 String pkTableName = rs.getString("PKTABLE_NAME");
                 String pkColumn = rs.getString("PKCOLUMN_NAME");
                 Table pkTable = tablesMap.get(pkTableName);
                 if (pkTable == null) {
                     throw new JDBCException("Could not find table " + pkTableName + " for column " + pkColumn);
                 }
+                int keySeq = rs.getInt("KEY_SEQ");
+                //Simple (non-composite) keys have KEY_SEQ=1, so create the ForeignKey.
+                //In case of subsequent parts of composite keys (KEY_SEQ>1) don't create new instance, just reuse the one from previous call.
+                //According to #getExportedKeys() contract, the result set rows are properly sorted, so the reuse of previous FK instance is safe.
+                if (keySeq == 1) {
+                	fkInfo = new ForeignKey();
+                }
+                
                 fkInfo.setPrimaryKeyTable(pkTable);
-                fkInfo.setPrimaryKeyColumn(pkColumn);
+                fkInfo.addPrimaryKeyColumn(pkColumn);
 
                 String fkTableName = rs.getString("FKTABLE_NAME");
                 String fkColumn = rs.getString("FKCOLUMN_NAME");
@@ -305,7 +312,7 @@ public class DatabaseSnapshot {
                     throw new JDBCException("Could not find table " + fkTableName + " for column " + fkColumn);
                 }
                 fkInfo.setForeignKeyTable(fkTable);
-                fkInfo.setForeignKeyColumn(fkColumn);
+                fkInfo.addForeignKeyColumn(fkColumn);
 
                 fkInfo.setName(rs.getString("FK_NAME"));
 
@@ -323,8 +330,10 @@ public class DatabaseSnapshot {
                     }
                 }
 
-
-                foreignKeys.add(fkInfo);
+                //Add only if the key was created in this iteration (updating the instance values changes hashCode so it cannot be re-inserted into set) 
+                if (keySeq == 1) {
+                	foreignKeys.add(fkInfo);
+                }
             }
 
             rs.close();

@@ -55,9 +55,9 @@ public class AddForeignKeyConstraintStatementTest extends AbstractSqlStatementTe
                         ForeignKey fkSnapshot = snapshot.getForeignKey(FK_NAME);
                         assertNotNull(fkSnapshot);
                         assertEquals(BASE_TABLE_NAME.toUpperCase(), fkSnapshot.getForeignKeyTable().getName().toUpperCase());
-                        assertEquals(BASE_COLUMN_NAME.toUpperCase(), fkSnapshot.getForeignKeyColumn().toUpperCase());
+                        assertEquals(BASE_COLUMN_NAME.toUpperCase(), fkSnapshot.getForeignKeyColumns().toUpperCase());
                         assertEquals(REF_TABLE_NAME.toUpperCase(), fkSnapshot.getPrimaryKeyTable().getName().toUpperCase());
-                        assertEquals(REF_COL_NAME.toUpperCase(), fkSnapshot.getPrimaryKeyColumn().toUpperCase());
+                        assertEquals(REF_COL_NAME.toUpperCase(), fkSnapshot.getPrimaryKeyColumns().toUpperCase());
                         assertFalse(fkSnapshot.isDeferrable());
                         assertFalse(fkSnapshot.isInitiallyDeferred());
                     }
@@ -85,9 +85,9 @@ public class AddForeignKeyConstraintStatementTest extends AbstractSqlStatementTe
                         ForeignKey fkSnapshot = snapshot.getForeignKey(FK_NAME);
                         assertNotNull(fkSnapshot);
                         assertEquals(BASE_TABLE_NAME.toUpperCase(), fkSnapshot.getForeignKeyTable().getName().toUpperCase());
-                        assertEquals(BASE_COLUMN_NAME.toUpperCase(), fkSnapshot.getForeignKeyColumn().toUpperCase());
+                        assertEquals(BASE_COLUMN_NAME.toUpperCase(), fkSnapshot.getForeignKeyColumns().toUpperCase());
                         assertEquals(REF_TABLE_NAME.toUpperCase(), fkSnapshot.getPrimaryKeyTable().getName().toUpperCase());
-                        assertEquals(REF_COL_NAME.toUpperCase(), fkSnapshot.getPrimaryKeyColumn().toUpperCase());
+                        assertEquals(REF_COL_NAME.toUpperCase(), fkSnapshot.getPrimaryKeyColumns().toUpperCase());
                         assertTrue(fkSnapshot.isDeferrable());
                         assertTrue(fkSnapshot.isInitiallyDeferred());
                     }
@@ -107,9 +107,9 @@ public class AddForeignKeyConstraintStatementTest extends AbstractSqlStatementTe
                 ForeignKey fkSnapshot = snapshot.getForeignKey(FK_NAME);
                 assertNotNull(fkSnapshot);
                 assertEquals(BASE_TABLE_NAME.toUpperCase(), fkSnapshot.getForeignKeyTable().getName().toUpperCase());
-                assertEquals(BASE_COLUMN_NAME.toUpperCase(), fkSnapshot.getForeignKeyColumn().toUpperCase());
+                assertEquals(BASE_COLUMN_NAME.toUpperCase(), fkSnapshot.getForeignKeyColumns().toUpperCase());
                 assertEquals(REF_TABLE_NAME.toUpperCase(), fkSnapshot.getPrimaryKeyTable().getName().toUpperCase());
-                assertEquals(REF_COL_NAME.toUpperCase(), fkSnapshot.getPrimaryKeyColumn().toUpperCase());
+                assertEquals(REF_COL_NAME.toUpperCase(), fkSnapshot.getPrimaryKeyColumns().toUpperCase());
                 assertFalse(fkSnapshot.isDeferrable());
                 assertFalse(fkSnapshot.isInitiallyDeferred());
             }
@@ -131,9 +131,9 @@ public class AddForeignKeyConstraintStatementTest extends AbstractSqlStatementTe
                         ForeignKey fkSnapshot = snapshot.getForeignKey(FK_NAME);
                         assertNotNull(fkSnapshot);
                         assertEquals(BASE_TABLE_NAME.toUpperCase(), fkSnapshot.getForeignKeyTable().getName().toUpperCase());
-                        assertEquals(BASE_COLUMN_NAME.toUpperCase(), fkSnapshot.getForeignKeyColumn().toUpperCase());
+                        assertEquals(BASE_COLUMN_NAME.toUpperCase(), fkSnapshot.getForeignKeyColumns().toUpperCase());
                         assertEquals(REF_TABLE_NAME.toUpperCase(), fkSnapshot.getPrimaryKeyTable().getName().toUpperCase());
-                        assertEquals(REF_COL_NAME.toUpperCase(), fkSnapshot.getPrimaryKeyColumn().toUpperCase());
+                        assertEquals(REF_COL_NAME.toUpperCase(), fkSnapshot.getPrimaryKeyColumns().toUpperCase());
                         assertFalse(fkSnapshot.isDeferrable());
                         assertFalse(fkSnapshot.isInitiallyDeferred());
                     }
