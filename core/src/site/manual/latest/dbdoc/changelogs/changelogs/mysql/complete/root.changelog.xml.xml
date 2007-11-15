@@ -278,11 +278,11 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="50" author="nvoxland">
-        <modifyColumn tableName="address">
-            <column name="postalcode" type="varchar(20)"/>
-        </modifyColumn>
-    </changeSet>
+    <!--<changeSet id="50" author="nvoxland">-->
+        <!--<modifyColumn tableName="address">-->
+            <!--<column name="postalcode" type="varchar(20)"/>-->
+        <!--</modifyColumn>-->
+    <!--</changeSet>-->
 
     <changeSet id="51" author="nvoxland">
         <createTable tableName="nulldefaulttest">
@@ -301,7 +301,7 @@
     </changeSet>
 
     <changeSet id="52" author="pkeeble">
-        <sqlFile path="changelogs/mysql/complete/sample.sql"/>
+        <sqlFile path="changelogs/mysql/complete/sample.sql" stripComments="true"/>
     </changeSet>
 
     <include file="changelogs/mysql/complete/included.changelog.xml"/>
@@ -311,6 +311,8 @@
     <include file="changelogs/common/common.tests.changelog.xml" />
 
     <include file="changelogs/common/autoincrement.tests.changelog.xml" />
+
+    <include file="changelogs/common/schema.tests.changelog.xml" />
 
     <changeSet id="54" author="nvoxland">
         <addColumn tableName="address">
@@ -323,18 +325,25 @@
         </addColumn>
     </changeSet>
 
-    <changeSet id="56" author="nvoxland">
-        <customChange class="liquibase.change.custom.ExampleCustomSqlChange">
-            <param name="tableName" value="person"/>
-            <param name="columnName" value="employer_id"/>
-            <param name="newValue" value="3"/>
-        </customChange>
-    </changeSet>
-    <changeSet id="57" author="nvoxland">
-        <customChange class="liquibase.change.custom.ExampleCustomSqlChange" tableName="person" columnName="employer_id" newValue="4"/>
-    </changeSet>
-    <changeSet id="58" author="nvoxland">
-        <customChange class="liquibase.change.custom.ExampleCustomTaskChange" helloTo="world"/>
-    </changeSet>
+    <!--<changeSet id="56" author="nvoxland">-->
+        <!--<customChange class="liquibase.change.custom.ExampleCustomSqlChange">-->
+            <!--<param name="tableName" value="person"/>-->
+            <!--<param name="columnName" value="employer_id"/>-->
+            <!--<param name="newValue" value="3"/>-->
+        <!--</customChange>-->
+    <!--</changeSet>-->
+    <!--<changeSet id="57" author="nvoxland">-->
+        <!--<customChange class="liquibase.change.custom.ExampleCustomSqlChange" tableName="person" columnName="employer_id" newValue="4"/>-->
+    <!--</changeSet>-->
+    <!--<changeSet id="58" author="nvoxland">-->
+        <!--<customChange class="liquibase.change.custom.ExampleCustomTaskChange" helloTo="world"/>-->
+    <!--</changeSet>-->
+
+    <!--<changeSet id="60" author="nvoxland">-->
+        <!--<executeCommand executable="getmac" os="Windows XP">-->
+            <!--<arg value="/FO"/>-->
+            <!--<arg value="CSV"/>-->
+        <!--</executeCommand>-->
+    <!--</changeSet>-->
 
 </databaseChangeLog>

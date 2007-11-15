@@ -29,7 +29,7 @@ public class AddColumnAction extends BaseTableRefactorAction {
         config.setName(wizardPage.getColumnName());
         config.setType(wizardPage.getColumnType());
 
-        change.setColumn(config);
+        change.addColumn(config);
         return new Change[]{change};
     }
 }

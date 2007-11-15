@@ -2,9 +2,9 @@
 <idea-plugin>
     <depends>DBHelper</depends>
     <name>LiquiBase</name>
-    <description>LiquiBase Database Refactoring Plug-in for IntelliJ IDEA</description>
-    <version>0.9</version>
-    <vendor>liquibase.org</vendor>
+    <description>LiquiBase Database Refactoring Plug-in for IntelliJ IDEA.  Requires DBHelper plugin.</description>
+    <version>1.3.3.1</version>
+    <vendor url="http://www.liquibase.org" email="nathan@voxland.net">liquibase.org</vendor>
     <idea-version since-build="3000"/>
     <project-components>
         <component>

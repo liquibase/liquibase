@@ -35,7 +35,7 @@ public class AddColumnWizard extends BaseEclipseRefactorWizard {
 		columnConfig.setType(page1.getDataType());
 		columnConfig.setDefaultValue(page1.getDefaultValue());
 
-		change.setColumn(columnConfig);
+		change.addColumn(columnConfig);
 
 		return new Change[] { change };
 	}

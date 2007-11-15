@@ -97,7 +97,7 @@ public abstract class BaseChangeLogHandler extends DefaultHandler {
                     setProperty(column, attributeName, attributeValue);
                 }
                 if (change instanceof AddColumnChange) {
-                    ((AddColumnChange) change).setColumn(column);
+                    ((AddColumnChange) change).addColumn(column);
                 } else if (change instanceof CreateTableChange) {
                     ((CreateTableChange) change).addColumn(column);
                 } else if (change instanceof InsertDataChange) {
@@ -118,7 +118,7 @@ public abstract class BaseChangeLogHandler extends DefaultHandler {
                 }
                 ColumnConfig lastColumn;
                 if (change instanceof AddColumnChange) {
-                    lastColumn = ((AddColumnChange) change).getColumn();
+                    lastColumn = ((AddColumnChange) change).getLastColumn();
                 } else if (change instanceof CreateTableChange) {
                     lastColumn = ((CreateTableChange) change).getColumns().get(((CreateTableChange) change).getColumns().size() - 1);
                 } else {
