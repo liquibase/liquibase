@@ -28,28 +28,42 @@ public class AddColumnChangeTest extends AbstractChangeTest {
         AddColumnChange refactoring = new AddColumnChange();
         refactoring.setSchemaName("SCHEMA");
         refactoring.setTableName("TAB");
+        
         ColumnConfig column = new ColumnConfig();
         column.setName("NEWCOL");
         column.setType("TYP");
 
         ConstraintsConfig constraints = new ConstraintsConfig();
-//        constraints.setPrimaryKey(Boolean.FALSE);
-//        constraints.setNullable(Boolean.FALSE);
+        constraints.setNullable(Boolean.FALSE);
 
         column.setConstraints(constraints);
 
-        refactoring.setColumn(column);
+        refactoring.addColumn(column);
+
+        //Add the second column def to the same refactoring
+        column = new ColumnConfig();
+        column.setName("NEWCOL2");
+        column.setType("TYP2");
+        column.setConstraints(new ConstraintsConfig());
+        refactoring.addColumn(column);
 
         SqlStatement[] sqlStatements = refactoring.generateStatements(new MockDatabase());
-        assertEquals(1, sqlStatements.length);
+        assertEquals(2, sqlStatements.length);
         assertTrue(sqlStatements[0] instanceof AddColumnStatement);
+        assertTrue(sqlStatements[1] instanceof AddColumnStatement);
 
         assertEquals("SCHEMA", ((AddColumnStatement) sqlStatements[0]).getSchemaName());
         assertEquals("TAB", ((AddColumnStatement) sqlStatements[0]).getTableName());
         assertEquals("NEWCOL", ((AddColumnStatement) sqlStatements[0]).getColumnName());
         assertEquals("TYP", ((AddColumnStatement) sqlStatements[0]).getColumnType());
         assertFalse(((AddColumnStatement) sqlStatements[0]).isPrimaryKey());
-        assertTrue(((AddColumnStatement) sqlStatements[0]).isNullable());
+        assertFalse(((AddColumnStatement) sqlStatements[0]).isNullable());
+
+        assertEquals("SCHEMA", ((AddColumnStatement) sqlStatements[1]).getSchemaName());
+        assertEquals("TAB", ((AddColumnStatement) sqlStatements[1]).getTableName());
+        assertEquals("NEWCOL2", ((AddColumnStatement) sqlStatements[1]).getColumnName());
+        assertEquals("TYP2", ((AddColumnStatement) sqlStatements[1]).getColumnType());
+        assertTrue(((AddColumnStatement) sqlStatements[1]).isNullable());
     }
 
     @Test
@@ -66,7 +80,7 @@ public class AddColumnChangeTest extends AbstractChangeTest {
 
         column.setConstraints(constraints);
 
-        refactoring.setColumn(column);
+        refactoring.addColumn(column);
 
         SqlStatement[] sqlStatements = refactoring.generateStatements(new MockDatabase());
         assertEquals(1, sqlStatements.length);
@@ -94,7 +108,7 @@ public class AddColumnChangeTest extends AbstractChangeTest {
 
         column.setConstraints(constraints);
 
-        refactoring.setColumn(column);
+        refactoring.addColumn(column);
 
         SqlStatement[] sqlStatements = refactoring.generateStatements(new MockDatabase());
         assertEquals(1, sqlStatements.length);
@@ -123,7 +137,7 @@ public class AddColumnChangeTest extends AbstractChangeTest {
 
         column.setConstraints(constraints);
 
-        refactoring.setColumn(column);
+        refactoring.addColumn(column);
 
         SqlStatement[] sqlStatements = refactoring.generateStatements(new MockDatabase());
         assertEquals(2, sqlStatements.length);
@@ -149,7 +163,7 @@ public class AddColumnChangeTest extends AbstractChangeTest {
 
         column.setConstraints(constraints);
 
-        refactoring.setColumn(column);
+        refactoring.addColumn(column);
 
         SqlStatement[] sqlStatements = refactoring.generateStatements(new MockDatabase());
         assertEquals(2, sqlStatements.length);
@@ -166,9 +180,9 @@ public class AddColumnChangeTest extends AbstractChangeTest {
         ColumnConfig column = new ColumnConfig();
         column.setName("NEWCOL");
         column.setType("TYP");
-        refactoring.setColumn(column);
+        refactoring.addColumn(column);
 
-        assertEquals("Column NEWCOL(TYP) added to TAB", refactoring.getConfirmationMessage());
+        assertEquals("Columns NEWCOL(TYP) added to TAB", refactoring.getConfirmationMessage());
     }
 
     @Test
@@ -180,7 +194,7 @@ public class AddColumnChangeTest extends AbstractChangeTest {
         ColumnConfig column = new ColumnConfig();
         column.setName("NEWCOL");
         column.setType("TYP");
-        refactoring.setColumn(column);
+        refactoring.addColumn(column);
 
         Element node = refactoring.createNode(document);
         assertEquals("addColumn", node.getTagName());
@@ -201,7 +215,7 @@ public class AddColumnChangeTest extends AbstractChangeTest {
         ColumnConfig column = new ColumnConfig();
         column.setName("NEWCOL");
         column.setType("TYP");
-        refactoring.setColumn(column);
+        refactoring.addColumn(column);
 
         SybaseDatabase db = new SybaseDatabase();
         assertEquals("ALTER TABLE [TAB] ADD NEWCOL TYP NULL", refactoring.generateStatements(db)[0].getSqlStatement(db));
@@ -214,7 +228,7 @@ public class AddColumnChangeTest extends AbstractChangeTest {
         ColumnConfig column = new ColumnConfig();
         column.setName("NEWCOL");
         column.setType("TYP");
-        refactoring.setColumn(column);
+        refactoring.addColumn(column);
 
         ConstraintsConfig constraints = new ConstraintsConfig();
         constraints.setPrimaryKey(Boolean.FALSE);
@@ -234,7 +248,7 @@ public class AddColumnChangeTest extends AbstractChangeTest {
         ColumnConfig column = new ColumnConfig();
         column.setName("NEWCOL");
         column.setType("TYP");
-        refactoring.setColumn(column);
+        refactoring.addColumn(column);
 
         ConstraintsConfig constraints = new ConstraintsConfig();
         constraints.setPrimaryKey(Boolean.FALSE);

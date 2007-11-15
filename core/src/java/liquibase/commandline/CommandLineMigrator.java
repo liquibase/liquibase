@@ -117,8 +117,8 @@ public class CommandLineMigrator {
 
     private static String generateLogLevelWarningMessage() {
         Logger logger = Logger.getLogger(Migrator.DEFAULT_LOG_NAME);
-        if (logger == null || (logger.getLevel().equals(Level.OFF))) {
-            return null;
+        if (logger == null || logger.getLevel() == null || (logger.getLevel().equals(Level.OFF))) {
+            return "";
         } else {
             return ".  For more information, use the --logLevel flag)";
         }

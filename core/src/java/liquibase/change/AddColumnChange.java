@@ -7,6 +7,8 @@ import liquibase.database.structure.Column;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Table;
 import liquibase.exception.UnsupportedChangeException;
+import liquibase.util.StringUtils;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -19,10 +21,11 @@ public class AddColumnChange extends AbstractChange {
 
     private String schemaName;
     private String tableName;
-    private ColumnConfig column;
+    private List<ColumnConfig> columns;
 
     public AddColumnChange() {
         super("addColumn", "Add Column");
+        columns = new ArrayList<ColumnConfig>();
     }
 
     public String getSchemaName() {
@@ -41,74 +44,93 @@ public class AddColumnChange extends AbstractChange {
         this.tableName = tableName;
     }
 
-    public ColumnConfig getColumn() {
-        return column;
+    public List<ColumnConfig> getColumns() {
+        return columns;
     }
 
-    public void setColumn(ColumnConfig column) {
-        this.column = column;
+    public ColumnConfig getLastColumn() {
+        return (columns.size() > 0) ? columns.get(columns.size() - 1) : null;
+    }
+
+    public void addColumn(ColumnConfig column) {
+        columns.add(column);
+    }
+
+    public void removeColumn(ColumnConfig column) {
+        columns.remove(column);
     }
 
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
         List<SqlStatement> sql = new ArrayList<SqlStatement>();
 
-        Set<ColumnConstraint> constraints = new HashSet<ColumnConstraint>();
+        for (ColumnConfig aColumn : columns) {
+            Set<ColumnConstraint> constraints = new HashSet<ColumnConstraint>();
+            if (aColumn.getConstraints() != null) {
+                if (aColumn.getConstraints().isNullable() != null && !aColumn.getConstraints().isNullable()) {
+                    constraints.add(new NotNullConstraint());
+                }
+            }
 
-        if (column.getConstraints() != null) {
-            if (column.getConstraints().isNullable()!= null && !column.getConstraints().isNullable()) {
-                constraints.add(new NotNullConstraint());
+            AddColumnStatement addColumnStatement = new AddColumnStatement(getSchemaName(),
+                    getTableName(),
+                    aColumn.getName(),
+                    aColumn.getType(),
+                    aColumn.getDefaultValueObject(),
+                    constraints.toArray(new ColumnConstraint[constraints.size()]));
+
+            sql.add(addColumnStatement);
+        }
+
+        for (ColumnConfig aColumn : columns) {
+            if (aColumn.getConstraints() != null) {
+                if (aColumn.getConstraints().isPrimaryKey() != null && aColumn.getConstraints().isPrimaryKey()) {
+                    AddPrimaryKeyChange change = new AddPrimaryKeyChange();
+                    change.setSchemaName(getSchemaName());
+                    change.setTableName(getTableName());
+                    change.setColumnNames(aColumn.getName());
+
+                    sql.addAll(Arrays.asList(change.generateStatements(database)));
+                }
             }
         }
 
-        AddColumnStatement addColumnStatement = new AddColumnStatement(getSchemaName(),
-                getTableName(),
-                getColumn().getName(),
-                getColumn().getType(),
-                getColumn().getDefaultValueObject(),
-                constraints.toArray(new ColumnConstraint[constraints.size()]));
-
-        sql.add(addColumnStatement);
         if (database instanceof DB2Database) {
             sql.add(new ReorganizeTableStatement(getSchemaName(), getTableName()));
         }
-
-        if (getColumn().getConstraints() != null) {
-            if (getColumn().getConstraints().isPrimaryKey() != null && getColumn().getConstraints().isPrimaryKey()) {
-                AddPrimaryKeyChange change = new AddPrimaryKeyChange();
-                change.setSchemaName(getSchemaName());
-                change.setTableName(getTableName());
-                change.setColumnNames(getColumn().getName());
-
-                sql.addAll(Arrays.asList(change.generateStatements(database)));
-            }
-        }
-
+        
         return sql.toArray(new SqlStatement[sql.size()]);
     }
 
     protected Change[] createInverses() {
         List<Change> inverses = new ArrayList<Change>();
 
-        if (column.hasDefaultValue()) {
-            DropDefaultValueChange dropChange = new DropDefaultValueChange();
-            dropChange.setTableName(getTableName());
-            dropChange.setColumnName(getColumn().getName());
+        for (ColumnConfig aColumn : columns) {
+            if (aColumn.hasDefaultValue()) {
+                DropDefaultValueChange dropChange = new DropDefaultValueChange();
+                dropChange.setTableName(getTableName());
+                dropChange.setColumnName(aColumn.getName());
 
-            inverses.add(dropChange);
+                inverses.add(dropChange);
+            }
+
+
+            DropColumnChange inverse = new DropColumnChange();
+            inverse.setSchemaName(getSchemaName());
+            inverse.setColumnName(aColumn.getName());
+            inverse.setTableName(getTableName());
+            inverses.add(inverse);
         }
-
-
-        DropColumnChange inverse = new DropColumnChange();
-        inverse.setSchemaName(getSchemaName());
-        inverse.setColumnName(getColumn().getName());
-        inverse.setTableName(getTableName());
-        inverses.add(inverse);
 
         return inverses.toArray(new Change[inverses.size()]);
     }
 
     public String getConfirmationMessage() {
-        return "Column " + column.getName() + "(" + column.getType() + ") added to " + tableName;
+        List<String> names = new ArrayList<String>(columns.size());
+        for (ColumnConfig col : columns) {
+            names.add(col.getName() + "(" + col.getType() + ")");
+        }
+
+        return "Columns " + StringUtils.join(names, ",") + " added to " + tableName;
     }
 
     public Element createNode(Document currentChangeLogFileDOM) {
@@ -117,20 +139,27 @@ public class AddColumnChange extends AbstractChange {
             node.setAttribute("schemaName", getSchemaName());
         }
         node.setAttribute("tableName", getTableName());
-        node.appendChild(getColumn().createNode(currentChangeLogFileDOM));
+
+        for (ColumnConfig col : getColumns()) {
+            Element subNode = col.createNode(currentChangeLogFileDOM);
+            node.appendChild(subNode);
+        }
 
         return node;
     }
 
     public Set<DatabaseObject> getAffectedDatabaseObjects() {
-        Column column = new Column();
+        List<DatabaseObject> result = new ArrayList<DatabaseObject>(columns.size());
 
         Table table = new Table(getTableName());
-        column.setTable(table);
+        result.add(table);
+        for (ColumnConfig aColumn : columns) {
+            Column each = new Column();
+            each.setTable(table);
+            each.setName(aColumn.getName());
+            result.add(each);
+        }
 
-        column.setName(this.column.getName());
-
-        return new HashSet<DatabaseObject>(Arrays.asList(table, column));
-
+        return new HashSet<DatabaseObject>(result);
     }
 }

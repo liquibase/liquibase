@@ -533,7 +533,7 @@ public class DiffResult {
 
             columnConfig.setDefaultValue(database.convertJavaObjectToString(column.getDefaultValue()));
 
-            change.setColumn(columnConfig);
+            change.addColumn(columnConfig);
 
             changes.add(change);
         }
