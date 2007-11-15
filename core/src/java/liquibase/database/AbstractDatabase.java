@@ -6,6 +6,7 @@ import liquibase.database.sql.*;
 import liquibase.database.structure.*;
 import liquibase.database.template.JdbcTemplate;
 import liquibase.diff.DiffStatusListener;
+import liquibase.exception.DateParseException;
 import liquibase.exception.JDBCException;
 import liquibase.exception.LockException;
 import liquibase.exception.UnsupportedChangeException;
@@ -275,15 +276,19 @@ public abstract class AbstractDatabase implements Database {
         }
     }
 
-    protected Date parseDate(String dateAsString) throws ParseException {
-        if (dateAsString.indexOf(" ") > 0) {
-            return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(dateAsString);
-        } else {
-            if (dateAsString.indexOf(":") > 0) {
-                return new SimpleDateFormat("HH:mm:ss").parse(dateAsString);
+    protected Date parseDate(String dateAsString) throws DateParseException {
+        try {
+            if (dateAsString.indexOf(" ") > 0) {
+                return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(dateAsString);
             } else {
-                return new SimpleDateFormat("yyyy-MM-dd").parse(dateAsString);
+                if (dateAsString.indexOf(":") > 0) {
+                    return new SimpleDateFormat("HH:mm:ss").parse(dateAsString);
+                } else {
+                    return new SimpleDateFormat("yyyy-MM-dd").parse(dateAsString);
+                }
             }
+        } catch (ParseException e) {
+            throw new DateParseException(dateAsString);
         }
     }
 
@@ -938,6 +943,8 @@ public abstract class AbstractDatabase implements Database {
             } else {
                 throw new RuntimeException("Cannot convert type: " + dataType);
             }
+        } catch (DateParseException e) {
+            return new ComputedDateValue(value);
         } catch (NumberFormatException e) {
             return new ComputedNumericValue(value);
         }
