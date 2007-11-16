@@ -2,6 +2,7 @@ package liquibase.database.structure;
 
 import liquibase.database.AbstractDatabase;
 import liquibase.database.Database;
+import liquibase.database.OracleDatabase;
 import liquibase.database.template.JdbcTemplate;
 import liquibase.diff.DiffStatusListener;
 import liquibase.exception.JDBCException;
@@ -346,7 +347,15 @@ public class DatabaseSnapshot {
 
         for (Table table : tablesMap.values()) {
             ResultSet rs;
-            rs = databaseMetaData.getIndexInfo(database.convertRequestedSchemaToCatalog(schema), database.convertRequestedSchemaToSchema(schema), table.getName(), false, true);
+            Statement statement = null;
+            if (database instanceof OracleDatabase) {
+                //oracle getIndexInfo is buggy and slow.  See Issue 1824548 and http://forums.oracle.com/forums/thread.jspa?messageID=578383&#578383  
+                statement = database.getConnection().createStatement();
+                String sql = "SELECT INDEX_NAME, 3 AS TYPE, TABLE_NAME, COLUMN_NAME, COLUMN_POSITION AS ORDINAL_POSITION, null AS FILTER_CONDITION FROM ALL_IND_COLUMNS WHERE TABLE_OWNER='" + database.convertRequestedSchemaToSchema(schema) + "' AND TABLE_NAME='" + table.getName() + "'";
+                rs = statement.executeQuery(sql);
+            } else {
+                rs = databaseMetaData.getIndexInfo(database.convertRequestedSchemaToCatalog(schema), database.convertRequestedSchemaToSchema(schema), table.getName(), false, true);
+            }
             Map<String, Index> indexMap = new HashMap<String, Index>();
             while (rs.next()) {
                 String indexName = rs.getString("INDEX_NAME");
@@ -380,6 +389,9 @@ public class DatabaseSnapshot {
                 indexes.add(indexMap.get(key));
             }
             rs.close();
+            if (statement != null) {
+                statement.close();
+            }
         }
 
         Set<Index> indexesToRemove = new HashSet<Index>();
