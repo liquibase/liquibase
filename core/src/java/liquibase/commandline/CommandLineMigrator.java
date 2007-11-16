@@ -612,6 +612,9 @@ public class CommandLineMigrator {
                 if (commandParams.size() == 0) {
                     throw new CommandLineParsingException("dbdoc requires an output directory");
                 }
+                if (changeLogFile == null) {
+                    throw new CommandLineParsingException("dbdoc requires a changeLog parameter");
+                }
                 migrator.generateDocumentation(commandParams.iterator().next());
                 return;
             }
