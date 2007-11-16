@@ -7,6 +7,7 @@
     <preConditions>
         <dbms type="mysql"/>
         <sqlCheck expectedResult="1">select 1</sqlCheck>
+        <runningAs username="liquibase"/>
     </preConditions>
 
     <changeSet id="1" author="nvoxland">
