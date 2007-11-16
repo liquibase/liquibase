@@ -5,7 +5,7 @@ import org.junit.Test;
 
 public class CacheDatabaseTest extends AbstractDatabaseTest{
 
-	public CacheDatabaseTest() {
+	public CacheDatabaseTest() throws Exception {
         super(new CacheDatabase());
     }
 	

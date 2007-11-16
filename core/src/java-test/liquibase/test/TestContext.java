@@ -3,6 +3,7 @@ package liquibase.test;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
+import liquibase.database.AbstractDatabase;
 import liquibase.exception.JDBCException;
 import liquibase.migrator.Migrator;
 
@@ -44,6 +45,7 @@ public class TestContext {
     private Map<String, Boolean> connectionsAttempted = new HashMap<String, Boolean>();
     public static final String ALT_SCHEMA = "LIQUIBASEB";
     public static final String ALT_TABLESPACE = "LIQUIBASE2";
+    private static final String TEST_DATABASES_PROPERTY = "test.databases";
 
     private DatabaseConnection openConnection(final String url) throws Exception {
         if (connectionsAttempted.containsKey(url)) {
@@ -51,9 +53,9 @@ public class TestContext {
         }
         connectionsAttempted.put(url, Boolean.TRUE);
 
-        if (System.getProperty("test.databases") != null) {
+        if (System.getProperty(TEST_DATABASES_PROPERTY) != null) {
             boolean shouldTest = false;
-            String[] databasesToTest = System.getProperty("test.databases").split("\\s*,\\s*");
+            String[] databasesToTest = System.getProperty(TEST_DATABASES_PROPERTY).split("\\s*,\\s*");
             for (String database : databasesToTest) {
                 if (url.indexOf(database) >= 0) {
                     shouldTest = true;
@@ -229,5 +231,14 @@ public class TestContext {
 
     public DatabaseConnection getConnection(String url) throws Exception {
         return openConnection(url);
+    }
+
+    public String getTestUrl(Database database) {
+        for (String url : getTestUrls()) {
+            if (database.getDefaultDriver(url) != null) {
+                return url;
+            }
+        }
+        throw new RuntimeException("Could not find url for "+database);
     }
 }

@@ -1,8 +1,10 @@
 package liquibase.database;
 
 import liquibase.change.ColumnConfig;
+import liquibase.test.TestContext;
 import static org.easymock.EasyMock.*;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 import java.sql.Connection;
@@ -16,8 +18,13 @@ public abstract class AbstractDatabaseTest {
 
     protected AbstractDatabase database;
 
-    protected AbstractDatabaseTest(AbstractDatabase database) {
+    protected AbstractDatabaseTest(AbstractDatabase database) throws Exception {
         this.database = database;
+        TestContext context = TestContext.getInstance();
+        DatabaseConnection connection = context.getConnection(context.getTestUrl(database));
+        if (connection != null) {
+            database.setConnection(connection);
+        }
     }
 
     public AbstractDatabase getDatabase() {
@@ -156,5 +163,15 @@ public abstract class AbstractDatabaseTest {
     public void escapeTableName_withSchema() {
         Database database = getDatabase();
         assertEquals("schemaName.tableName", database.escapeTableName("schemaName", "tableName"));
+    }
+
+    @Test
+    public void getColumnType_javaTypes() {
+        Database database = getDatabase();
+        if (database.getConnection() != null) {
+            assertEquals(database.getDateTimeType(), database.getColumnType("java.sql.Types.TIMESTAMP", false));
+            assertEquals(database.getBooleanType(), database.getColumnType("java.sql.Types.BOOLEAN", false));
+            assertEquals("VARCHAR(255)", database.getColumnType("java.sql.Types.VARCHAR(255)", false));
+        }
     }
 }

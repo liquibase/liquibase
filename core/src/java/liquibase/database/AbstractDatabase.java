@@ -179,7 +179,45 @@ public abstract class AbstractDatabase implements Database {
      * for the current database.
      */
     public String getColumnType(String columnType, Boolean autoIncrement) {
-        if ("boolean".equalsIgnoreCase(columnType)) {
+        if (columnType.startsWith("java.sql.Types")) {
+            ResultSet resultSet = null;
+            try {
+                DatabaseConnection connection = getConnection();
+                if (connection == null) {
+                    throw new RuntimeException("Cannot evaluate java.sql.Types without a connection");
+                }
+                resultSet = connection.getMetaData().getTypeInfo();
+                String dataTypeName = columnType.substring(columnType.lastIndexOf(".")+1);
+                String precision = null;
+                if (dataTypeName.indexOf("(") >= 0) {
+                    precision = dataTypeName.substring(dataTypeName.indexOf("(")+1, dataTypeName.indexOf(")"));
+                    dataTypeName = dataTypeName.substring(0, dataTypeName.indexOf("("));
+                }
+                while (resultSet.next()) {
+                    String typeName = resultSet.getString("TYPE_NAME");
+                    int dataType = resultSet.getInt("DATA_TYPE");
+                    Integer requestedType = (Integer) Class.forName("java.sql.Types").getDeclaredField(dataTypeName).get(null);
+                    if  (requestedType == dataType) {
+                        if (precision == null) {
+                            return typeName;
+                        } else {
+                            return typeName+"("+precision+")";
+                        }
+                    }
+                }
+                throw new RuntimeException("Could not find java.sql.Types value for "+dataTypeName);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            } finally {
+                if (resultSet != null) {
+                    try {
+                        resultSet.close();
+                    } catch (SQLException e) {
+                        ;
+                    }
+                }
+            }
+        } else if ("boolean".equalsIgnoreCase(columnType)) {
             return getBooleanType();
         } else if ("currency".equalsIgnoreCase(columnType)) {
             return getCurrencyType();

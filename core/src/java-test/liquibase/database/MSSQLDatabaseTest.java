@@ -8,7 +8,7 @@ import org.junit.Test;
  */
 public class MSSQLDatabaseTest extends AbstractDatabaseTest {
 
-    public MSSQLDatabaseTest() {
+    public MSSQLDatabaseTest() throws Exception {
         super(new MSSQLDatabase());
     }
 

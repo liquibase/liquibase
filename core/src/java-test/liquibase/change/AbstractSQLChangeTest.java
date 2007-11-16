@@ -52,7 +52,7 @@ public class AbstractSQLChangeTest extends AbstractChangeTest {
     @Test
     public void multiLineSQLFileSemiColon() throws Exception {
         SQLFileChange change2 = new SQLFileChange();
-        change2.setSql("SELECT * FROM customer;" +
+        change2.setSql("SELECT * FROM customer;\n" +
                 "SELECT * from table;");
         OracleDatabase database = new OracleDatabase();
         SqlStatement[] statements = change2.generateStatements(database);
@@ -144,7 +144,7 @@ public class AbstractSQLChangeTest extends AbstractChangeTest {
     @Test
     public void defaultSplittingAndNoStripping() throws Exception{
         SQLFileChange change2 = new SQLFileChange();
-        change2.setSql("SELECT * FROM x;/*A Comment*/SELECT * FROM x;");
+        change2.setSql("SELECT * FROM x;\n/*A Comment*/SELECT * FROM x;");
 
         MSSQLDatabase database = new MSSQLDatabase();
         SqlStatement[] statements = change2.generateStatements(database);

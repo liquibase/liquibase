@@ -8,7 +8,7 @@ import org.junit.Test;
  */
 public class MySQLDatabaseTest extends AbstractDatabaseTest {
 
-    public MySQLDatabaseTest() {
+    public MySQLDatabaseTest() throws Exception {
         super(new MySQLDatabase());
     }
 

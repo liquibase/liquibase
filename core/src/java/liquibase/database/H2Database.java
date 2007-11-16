@@ -103,4 +103,7 @@ public class H2Database extends HsqlDatabase {
         }
     }
 
+    public String getDateTimeType() {
+        return "TIMESTAMP";
+    }
 }
