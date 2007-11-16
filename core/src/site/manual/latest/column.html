@@ -39,6 +39,11 @@
                             <li>DATETIME</li>
                             <li>TIME</li>
                         </ul>
+                            Also, specifying a java.sql.Types.* type will be converted to the correct type as well.  If needed, precision can be included
+                            <ul>
+                                <li>java.sql.Types.TIMESTAMP</li>
+                                <li>java.sql.VARCHAR(255)</li>
+                            </ul>
                         </td></tr>
                         <tr><th>value</th><td>Value to set the column to.  The value will be surrounded by quote marks and nested quote marks will be escaped.</td></tr>
                         <tr><th>valueNumeric</th><td>Numeric value to set the column to.  The value will not be escaped and will not be nested in quote marks.</td></tr>

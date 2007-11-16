@@ -164,4 +164,13 @@
         </createTable>
     </changeSet>
 
+    <changeSet id="standardTypes-test" author="nvoxland">
+        <createTable tableName="standardTypesTest">
+            <column name="timestampColumn" type="java.sql.Types.TIMESTAMP"/>
+            <column name="varcharColumn" type="java.sql.Types.VARCHAR(255)"/>
+            <column name="blobColumn" type="java.sql.Types.BLOB"/>
+            <column name="booleanColumn" type="java.sql.Types.BOOLEAN"/>
+        </createTable>
+    </changeSet>
+
 </databaseChangeLog>

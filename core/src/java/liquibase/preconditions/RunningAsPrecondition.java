@@ -32,7 +32,7 @@ public class RunningAsPrecondition implements Precondition {
             if (loggedusername.indexOf('@') >= 0) {
                 loggedusername = loggedusername.substring(0, loggedusername.indexOf('@'));
             }
-            if (!username.equals(loggedusername)) {
+            if (!username.equalsIgnoreCase(loggedusername)) {
                 throw new PreconditionFailedException("RunningAs Precondition failed: expected "+username+", was "+loggedusername, changeLog, this);
             }
         } catch (SQLException e) {

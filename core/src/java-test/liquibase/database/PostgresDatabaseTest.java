@@ -8,7 +8,7 @@ import org.junit.Test;
  */
 public class PostgresDatabaseTest extends AbstractDatabaseTest {
 
-    public PostgresDatabaseTest() {
+    public PostgresDatabaseTest() throws Exception {
         super(new PostgresDatabase());
     }
 

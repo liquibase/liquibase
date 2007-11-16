@@ -1,49 +1,47 @@
 package liquibase.database;
 
-import static org.junit.Assert.*;
+import junit.framework.TestCase;
 import org.junit.Test;
+import static org.junit.Assert.*;
 
-/**
- * Tests for {@link OracleDatabase}
- */
-public class OracleDatabaseTest extends AbstractDatabaseTest {
+public class H2DatabaseTest extends AbstractDatabaseTest {
 
-    public OracleDatabaseTest() throws Exception {
-        super(new OracleDatabase());
+    public H2DatabaseTest() throws Exception {
+        super(new H2Database());
     }
 
     protected String getProductNameString() {
-        return "Oracle";
+        return "H2";
     }
 
     @Test
     public void getBlobType() {
-        assertEquals("BLOB", getDatabase().getBlobType());
+        assertEquals("LONGVARBINARY", getDatabase().getBlobType());
     }
 
     @Test
     public void supportsInitiallyDeferrableColumns() {
-        assertTrue(getDatabase().supportsInitiallyDeferrableColumns());
+        assertFalse(getDatabase().supportsInitiallyDeferrableColumns());
     }
 
     @Test
     public void getBooleanType() {
-        assertEquals("NUMBER(1)", getDatabase().getBooleanType());
+        assertEquals("BOOLEAN", getDatabase().getBooleanType());
     }
 
     @Test
     public void getCurrencyType() {
-        assertEquals("NUMBER(15, 2)", getDatabase().getCurrencyType());
+        assertEquals("DECIMAL", getDatabase().getCurrencyType());
     }
 
     @Test
     public void getUUIDType() {
-        assertEquals("RAW(16)", getDatabase().getUUIDType());
+        assertEquals("VARCHAR(36)", getDatabase().getUUIDType());
     }
 
     @Test
     public void getClobType() {
-        assertEquals("CLOB", getDatabase().getClobType());
+        assertEquals("LONGVARCHAR", getDatabase().getClobType());
     }
 
     @Test
@@ -58,16 +56,15 @@ public class OracleDatabaseTest extends AbstractDatabaseTest {
 
     @Test
     public void getCurrentDateTimeFunction() {
-        assertEquals("SYSDATE", getDatabase().getCurrentDateTimeFunction());
+        assertEquals("NOW()", getDatabase().getCurrentDateTimeFunction());
     }
 
+    @Test
     public void testGetDefaultDriver() {
-        Database database = new OracleDatabase();
+        Database database = getDatabase();
 
-        assertEquals("oracle.jdbc.OracleDriver", database.getDefaultDriver("jdbc:oracle:thin:@localhost/XE"));
+        assertEquals("org.h2.Driver", database.getDefaultDriver("jdbc:h2:mem:liquibase"));
 
         assertNull(database.getDefaultDriver("jdbc:db2://localhost;databaseName=liquibase"));
     }
-
 }
-

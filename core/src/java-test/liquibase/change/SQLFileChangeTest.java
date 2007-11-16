@@ -77,9 +77,9 @@ public class SQLFileChangeTest extends AbstractChangeTest {
     @Test
     public void multiLineSQLFileSemiColon() throws Exception {
         SQLFileChange change2 = new SQLFileChange();
-        change2.setSql("SELECT * FROM customer;" 
-        				+ StreamUtil.getLineSeparator() +
-                "SELECT * from table;" + "SELECT * from table2;" + StreamUtil.getLineSeparator());
+        change2.setSql("SELECT * FROM customer;" + StreamUtil.getLineSeparator() +
+                "SELECT * from table;" + StreamUtil.getLineSeparator() +
+                "SELECT * from table2;" + StreamUtil.getLineSeparator());
         OracleDatabase database = new OracleDatabase();
         SqlStatement[] statements = change2.generateStatements(database);
         
