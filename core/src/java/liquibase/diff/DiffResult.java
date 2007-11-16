@@ -462,6 +462,7 @@ public class DiffResult {
                 continue;
             }
 
+            boolean foundDifference = false;
             Column baseColumn = baseSnapshot.getColumn(column);
             if (column.isDataTypeDifferent(baseColumn)) {
                 ColumnConfig columnConfig = new ColumnConfig();
@@ -473,6 +474,7 @@ public class DiffResult {
                 change.setColumn(columnConfig);
 
                 changes.add(change);
+                foundDifference = true;
             }
             if (column.isNullabilityDifferent(baseColumn)) {
                 if (baseColumn.isNullable() == null || baseColumn.isNullable()) {
@@ -482,6 +484,7 @@ public class DiffResult {
                     change.setColumnDataType(baseColumn.getDataTypeString(targetDatabase));
 
                     changes.add(change);
+                    foundDifference = true;
                 } else {
                     AddNotNullConstraintChange change = new AddNotNullConstraintChange();
                     change.setTableName(column.getTable().getName());
@@ -489,9 +492,11 @@ public class DiffResult {
                     change.setColumnDataType(baseColumn.getDataTypeString(targetDatabase));
                     
                     changes.add(change);
+                    foundDifference = true;
                 }
 
-            } else {
+            }
+            if (!foundDifference) {
                 throw new RuntimeException("Unknown difference");
             }
         }
