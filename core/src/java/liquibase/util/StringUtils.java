@@ -44,7 +44,7 @@ public class StringUtils {
      * Splits a (possible) multi-line SQL statement along ;'s and "go"'s.
      */
     public static String[] splitSQL(String multiLineSQL) {
-        return multiLineSQL.split(";\\s*\n|;|\n[gG][oO]\\s*\n|\n[Gg][oO]$");
+        return multiLineSQL.split(";\\s*\n|\n[gG][oO]\\s*\n|\n[Gg][oO]$");
     }
     
     /**
