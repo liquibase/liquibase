@@ -180,10 +180,12 @@ public class CreateTableStatement implements SqlStatement {
 
         if (getPrimaryKeyConstraint() != null && getPrimaryKeyConstraint().getColumns().size() > 0) {
             buffer.append(",");
-            if (getPrimaryKeyConstraint().getConstraintName() != null) {
-                buffer.append(" CONSTRAINT ");
-                buffer.append(StringUtils.trimToEmpty(getPrimaryKeyConstraint().getConstraintName()));
+            String pkName = StringUtils.trimToNull(getPrimaryKeyConstraint().getConstraintName());
+            if (pkName == null) {
+                pkName = database.generatePrimaryKeyName(getTableName());
             }
+            buffer.append(" CONSTRAINT ");
+            buffer.append(pkName);
             buffer.append(" PRIMARY KEY (");
             buffer.append(StringUtils.join(getPrimaryKeyConstraint().getColumns(), ", "));
             buffer.append(")");

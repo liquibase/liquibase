@@ -185,4 +185,12 @@ public class DB2Database extends AbstractDatabase {
     public String convertRequestedSchemaToCatalog(String requestedSchema) throws JDBCException {
         return null;
     }
+
+    public String generatePrimaryKeyName(String tableName) {
+        String pkName = super.generatePrimaryKeyName(tableName);
+        if (pkName.length() > 18) {
+            pkName = pkName.substring(0, 17);
+        }        
+        return pkName;
+    }
 }
