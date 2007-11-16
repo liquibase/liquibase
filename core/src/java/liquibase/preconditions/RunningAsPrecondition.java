@@ -29,7 +29,9 @@ public class RunningAsPrecondition implements Precondition {
     public void check(Migrator migrator, DatabaseChangeLog changeLog) throws PreconditionFailedException {
         try {
             String loggedusername = migrator.getDatabase().getConnection().getMetaData().getUserName();
-            loggedusername = loggedusername.substring(0, loggedusername.indexOf('@'));
+            if (loggedusername.indexOf('@') >= 0) {
+                loggedusername = loggedusername.substring(0, loggedusername.indexOf('@'));
+            }
             if (!username.equals(loggedusername)) {
                 throw new PreconditionFailedException("RunningAs Precondition failed: expected "+username+", was "+loggedusername, changeLog, this);
             }
