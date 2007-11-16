@@ -1028,11 +1028,7 @@ public abstract class AbstractDatabase implements Database {
     }
 
     public String generatePrimaryKeyName(String tableName) {
-        String pkName = "PK_" +tableName.toUpperCase();
-        if (pkName.length() > 18) {
-            pkName = pkName.substring(0, 17);
-        }
-        return pkName;
+        return "PK_" +tableName.toUpperCase();
     }
 
     public String escapeViewName(String schemaName, String viewName) {
