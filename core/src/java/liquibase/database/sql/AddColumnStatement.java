@@ -67,6 +67,10 @@ public class AddColumnStatement implements SqlStatement {
             }
         }
 
+        if (isAutoIncrement()) {
+            alterTable += " "+database.getAutoIncrementClause();
+        }
+
         if (!isNullable()) {
             alterTable += " NOT NULL";
         } else {
@@ -80,8 +84,7 @@ public class AddColumnStatement implements SqlStatement {
                 alterTable += " PRIMARY KEY";
             }
         }
-
-
+        
         if (!defaultClauseBeforeNotNull(database)) {
             alterTable += getDefaultClause(database);
         }
