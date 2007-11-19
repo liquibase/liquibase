@@ -204,4 +204,9 @@ public class OracleDatabase extends AbstractDatabase {
 //
 //        return returnSet;
 //    }
+
+    public String getColumnType(String columnType, Boolean autoIncrement) {
+        String s = super.getColumnType(columnType, autoIncrement);
+        return s.replaceAll("VARCHAR2", "VARCHAR");
+    }
 }

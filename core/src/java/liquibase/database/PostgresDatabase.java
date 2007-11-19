@@ -192,6 +192,10 @@ public class PostgresDatabase extends AbstractDatabase {
 
 
     public String getColumnType(String columnType, Boolean autoIncrement) {
+        if (columnType.startsWith("java.sql.Types.VARCHAR")) { //returns "name" for type
+            return columnType.replace("java.sql.Types.","");
+        }
+
         String type = super.getColumnType(columnType, autoIncrement);
 
         if (autoIncrement != null && autoIncrement) {

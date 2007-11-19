@@ -180,6 +180,13 @@ public abstract class AbstractDatabase implements Database {
      */
     public String getColumnType(String columnType, Boolean autoIncrement) {
         if (columnType.startsWith("java.sql.Types")) {
+            String dataTypeName = columnType.substring(columnType.lastIndexOf(".")+1);
+            String precision = null;
+            if (dataTypeName.indexOf("(") >= 0) {
+                precision = dataTypeName.substring(dataTypeName.indexOf("(")+1, dataTypeName.indexOf(")"));
+                dataTypeName = dataTypeName.substring(0, dataTypeName.indexOf("("));
+            }
+
             ResultSet resultSet = null;
             try {
                 DatabaseConnection connection = getConnection();
@@ -187,12 +194,6 @@ public abstract class AbstractDatabase implements Database {
                     throw new RuntimeException("Cannot evaluate java.sql.Types without a connection");
                 }
                 resultSet = connection.getMetaData().getTypeInfo();
-                String dataTypeName = columnType.substring(columnType.lastIndexOf(".")+1);
-                String precision = null;
-                if (dataTypeName.indexOf("(") >= 0) {
-                    precision = dataTypeName.substring(dataTypeName.indexOf("(")+1, dataTypeName.indexOf(")"));
-                    dataTypeName = dataTypeName.substring(0, dataTypeName.indexOf("("));
-                }
                 while (resultSet.next()) {
                     String typeName = resultSet.getString("TYPE_NAME");
                     int dataType = resultSet.getInt("DATA_TYPE");
@@ -205,6 +206,15 @@ public abstract class AbstractDatabase implements Database {
                         }
                     }
                 }
+                //did not find type, fall back on our defaults for ones we can figure out
+                if (dataTypeName.equalsIgnoreCase("BLOB")) {
+                    return getBlobType();
+                } else if (dataTypeName.equalsIgnoreCase("CLOB")) {
+                    return getClobType();
+                } else if (dataTypeName.equalsIgnoreCase("BOOLEAN")) {
+                    return getBooleanType();
+                }
+
                 throw new RuntimeException("Could not find java.sql.Types value for "+dataTypeName);
             } catch (Exception e) {
                 throw new RuntimeException(e);

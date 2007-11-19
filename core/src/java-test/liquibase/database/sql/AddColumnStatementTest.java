@@ -168,7 +168,8 @@ public class AddColumnStatementTest extends AbstractSqlStatementTest {
                           return (database instanceof DB2Database
                                   || database instanceof DerbyDatabase
                                   || database instanceof H2Database
-                                  || database instanceof CacheDatabase);
+                                  || database instanceof CacheDatabase
+                                    || !database.supportsAutoIncrement());
                       }
 
                       protected void preExecuteAssert(DatabaseSnapshot snapshot) {
