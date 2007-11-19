@@ -1,6 +1,17 @@
 LiquiBase Core Changelog
 ==========================================
 
+Changes in version 1.4.0 (2007.11.19)
+----------------------
+- IntelliJ Plug-in Support
+- Added support for specifying schemas in change log
+- MaxDB/SAPDB Support
+- Refactored Code
+- Can specify data types as java.sql.Types.*
+- Support for composite foreign keys
+- Improved Maven support
+- Bug Fixes
+
 Changes in version 1.3.2 (2007.10.8)
 ----------------------
 - Grails support
