@@ -106,6 +106,7 @@
     </xsd:attributeGroup>
 
     <xsd:attributeGroup name="renameViewAttributes">
+        <xsd:attribute name="schemaName" type="xsd:string"/>
         <xsd:attribute name="oldViewName" type="xsd:string"/>
         <xsd:attribute name="newViewName" type="xsd:string"/>
     </xsd:attributeGroup>
@@ -129,6 +130,7 @@
     </xsd:attributeGroup>
 
     <xsd:attributeGroup name="sequenceAttributes">
+        <xsd:attribute name="schemaName" type="xsd:string"/>
         <xsd:attribute name="sequenceName" type="xsd:string"/>
         <xsd:attribute name="startValue" type="xsd:string"/>
         <xsd:attribute name="incrementBy" type="xsd:string"/>
@@ -367,6 +369,7 @@
         <xsd:complexType>
             <xsd:simpleContent>
                 <xsd:extension base="xsd:string">
+                    <xsd:attribute name="schemaName" type="xsd:string"/>
                     <xsd:attribute name="viewName" type="xsd:string"/>
                 </xsd:extension>
             </xsd:simpleContent>
