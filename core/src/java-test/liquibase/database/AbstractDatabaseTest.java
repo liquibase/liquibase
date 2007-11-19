@@ -168,8 +168,9 @@ public abstract class AbstractDatabaseTest {
     @Test
     public void getColumnType_javaTypes() throws SQLException {
         Database database = getDatabase();
-        database.getConnection().rollback();
-        if (database.getConnection() != null) {
+        DatabaseConnection connection = database.getConnection();
+        if (connection != null) {
+            connection.rollback();
             assertEquals(database.getDateType().toUpperCase(), database.getColumnType("java.sql.Types.DATE", false).toUpperCase());
             assertEquals(database.getBooleanType().toUpperCase(), database.getColumnType("java.sql.Types.BOOLEAN", false).toUpperCase());
             assertEquals("VARCHAR(255)", database.getColumnType("java.sql.Types.VARCHAR(255)", false).toUpperCase());
