@@ -1,0 +1,17 @@
+update build.version in core/src/build.properties
+update changelog.txt
+tag repository
+
+CORE:
+run core/build.xml all
+create core release on sourceforge
+upload new version of site to shell.sourceforge.net
+
+POST MESSAGES TO:
+- mailing list
+- blog
+- sourceforge project
+- javalobby
+- freshmeat
+- wikipedia
+- Newly supported database lists 

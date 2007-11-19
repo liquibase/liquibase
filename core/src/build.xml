@@ -258,6 +258,7 @@ The available targets at the current stage:
         <loadfile property="nav.manual" srcFile="${src.dir}/site/nav/manual.html"/>
         <loadfile property="nav.ide" srcFile="${src.dir}/site/nav/ide.html"/>
         <loadfile property="analytics" srcFile="${src.dir}/site/analytics.html"/>
+        <loadfile property="site.name" srcFile="${src.dir}/site/include/sitename.html"/>
 
         <copy todir="${release.site.dir}" filtering="true">
             <fileset dir="${src.dir}/site">
@@ -270,6 +271,7 @@ The available targets at the current stage:
                 <filter token="NAV.IDE" value="${nav.ide}"/>
                 <filter token="ANALYTICS" value="${analytics}"/>
                 <filter token="BUILD.VERSION" value="${build.version}"/>
+                <filter token="SITE_NAME" value="${site.name}"/>
             </filterset>
         </copy>
 
