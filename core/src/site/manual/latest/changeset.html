@@ -7,10 +7,7 @@
         <style type='text/css' media='screen'>@import "../../include/css/main.css";</style>
     </head>
     <body>@ANALYTICS@
-        <img src="../../images/liquibase_logo.gif" alt="LiquiBase" class="topLogo"/>
-        <p id="sitename">
-            <strong>LiquiBase: Database Refactoring</strong>
-        </p>
+        @SITE_NAME@
 
         <div id="container">
                 @NAV.MANUAL@
@@ -26,10 +23,10 @@
 &lt;?xml version="1.0" encoding="UTF-8"?&gt;
 
 &lt;databaseChangeLog
-  xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.3"
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.4"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.3
-         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.3.xsd"&gt;
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.4
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.4.xsd"&gt;
     &lt;changeSet id="1" author="bob"&gt;
         &lt;comment&gt;A sample change log&lt;/comment&gt;
         &lt;createTable/&gt;
