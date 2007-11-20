@@ -471,7 +471,7 @@ public class DiffResult {
 
                 ModifyColumnChange change = new ModifyColumnChange();
                 change.setTableName(column.getTable().getName());
-                change.setColumn(columnConfig);
+                change.addColumn(columnConfig);
 
                 changes.add(change);
                 foundDifference = true;

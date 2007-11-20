@@ -1,18 +1,30 @@
 package liquibase.change;
 
-import liquibase.database.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import liquibase.database.CacheDatabase;
+import liquibase.database.DB2Database;
+import liquibase.database.Database;
+import liquibase.database.DerbyDatabase;
+import liquibase.database.HsqlDatabase;
+import liquibase.database.MSSQLDatabase;
+import liquibase.database.MaxDBDatabase;
+import liquibase.database.MySQLDatabase;
+import liquibase.database.OracleDatabase;
+import liquibase.database.SybaseDatabase;
 import liquibase.database.sql.RawSqlStatement;
 import liquibase.database.sql.SqlStatement;
 import liquibase.database.structure.Column;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Table;
 import liquibase.exception.UnsupportedChangeException;
+import liquibase.util.StringUtils;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * Modifies the data type of an existing column.
@@ -21,10 +33,11 @@ public class ModifyColumnChange extends AbstractChange {
 
     private String schemaName;
     private String tableName;
-    private ColumnConfig column;
+    private List<ColumnConfig> columns;
 
     public ModifyColumnChange() {
         super("modifyColumn", "Modify Column");
+        columns = new ArrayList<ColumnConfig>();
     }
 
     public String getSchemaName() {
@@ -43,64 +56,84 @@ public class ModifyColumnChange extends AbstractChange {
         this.tableName = tableName;
     }
 
-    public ColumnConfig getColumn() {
-        return column;
+    public List<ColumnConfig> getColumns() {
+    		return columns;
     }
 
-    public void setColumn(ColumnConfig column) {
-        this.column = column;
+    public void addColumn(ColumnConfig column) {
+      	columns.add(column);
+    }
+
+    public void removeColumn(ColumnConfig column) {
+      	columns.remove(column);
     }
 
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
-        if(database instanceof SybaseDatabase) {
-            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " MODIFY " + getColumn().getName() + " " + getColumn().getType())};
-        }
-        if (database instanceof MSSQLDatabase) {
-            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ALTER COLUMN " + getColumn().getName() + " " + getColumn().getType())};
-        } else if (database instanceof MySQLDatabase) {
-            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " MODIFY COLUMN " + getColumn().getName() + " " + getColumn().getType())};
-        } else if (database instanceof OracleDatabase || database instanceof MaxDBDatabase) {
-            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " MODIFY (" + getColumn().getName() + " " + getColumn().getType() + ")")};
-        } else if (database instanceof DerbyDatabase) {
-            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ALTER COLUMN "+getColumn().getName()+" SET DATA TYPE " + getColumn().getType())};
-        } else if (database instanceof HsqlDatabase) {
-            return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ALTER COLUMN "+getColumn().getName()+" "+getColumn().getType())};
-        } else if (database instanceof CacheDatabase) {
-        	return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ALTER COLUMN " + getColumn().getName() + " " + getColumn().getType())};
-        } else if (database instanceof DB2Database) {
-            return new SqlStatement[]{
-                    new RawSqlStatement("ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ALTER COLUMN " + getColumn().getName() + " SET DATA TYPE " + getColumn().getType()),
-                    new RawSqlStatement("CALL SYSPROC.ADMIN_CMD ('REORG TABLE "+ database.escapeTableName(getSchemaName(), getTableName())+"')")
-            };
-        }
+    	List<SqlStatement> sql = new ArrayList<SqlStatement>();
 
-        return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ALTER COLUMN " + getColumn().getName() + " TYPE " + getColumn().getType())};
+      for (ColumnConfig aColumn : columns) {
+
+        if(database instanceof SybaseDatabase) {
+        		sql.add(new RawSqlStatement("ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " MODIFY " + aColumn.getName() + " " + aColumn.getType()));
+        } else if (database instanceof MSSQLDatabase) {
+        		sql.add(new RawSqlStatement("ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ALTER COLUMN " + aColumn.getName() + " " + aColumn.getType()));
+        } else if (database instanceof MySQLDatabase) {
+        		sql.add(new RawSqlStatement("ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " MODIFY COLUMN " + aColumn.getName() + " " + aColumn.getType()));
+        } else if (database instanceof OracleDatabase || database instanceof MaxDBDatabase) {
+        		sql.add(new RawSqlStatement("ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " MODIFY (" + aColumn.getName() + " " + aColumn.getType() + ")"));
+        } else if (database instanceof DerbyDatabase) {
+        		sql.add(new RawSqlStatement("ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ALTER COLUMN "+aColumn.getName()+" SET DATA TYPE " + aColumn.getType()));
+        } else if (database instanceof HsqlDatabase) {
+        		sql.add(new RawSqlStatement("ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ALTER COLUMN "+aColumn.getName()+" "+aColumn.getType()));
+        } else if (database instanceof CacheDatabase) {
+        		sql.add(new RawSqlStatement("ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ALTER COLUMN " + aColumn.getName() + " " + aColumn.getType()));
+        } else if (database instanceof DB2Database) {
+        		sql.add(new RawSqlStatement("ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ALTER COLUMN " + aColumn.getName() + " SET DATA TYPE " + aColumn.getType()));
+        		sql.add(new RawSqlStatement("CALL SYSPROC.ADMIN_CMD ('REORG TABLE "+ database.escapeTableName(getSchemaName(), getTableName())+"')"));
+        } else {
+        		sql.add(new RawSqlStatement("ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ALTER COLUMN " + aColumn.getName() + " TYPE " + aColumn.getType()));
+        }
+      }
+        
+      return sql.toArray(new SqlStatement[sql.size()]);
     }
 
     public String getConfirmationMessage() {
-        return "Column " + getTableName()+"."+column.getName() + " modified";
+    		List<String> names = new ArrayList<String>(columns.size());
+    		for (ColumnConfig col : columns) {
+          	names.add(col.getName() + "(" + col.getType() + ")");
+    		}
+
+        return "Columns " + StringUtils.join(names, ",") + " of " + getTableName() + " modified";
     }
 
     public Element createNode(Document currentChangeLogFileDOM) {
         Element node = currentChangeLogFileDOM.createElement("modifyColumn");
         if (getSchemaName() != null) {
             node.setAttribute("schemaName", getSchemaName());
-        }
-        
+        }        
         node.setAttribute("tableName", getTableName());
-        node.appendChild(getColumn().createNode(currentChangeLogFileDOM));
+        
+        for (ColumnConfig col : getColumns()) {
+          Element subNode = col.createNode(currentChangeLogFileDOM);
+          node.appendChild(subNode);
+        }
 
         return node;
     }
 
     public Set<DatabaseObject> getAffectedDatabaseObjects() {
-        Table table = new Table(getTableName());
+      List<DatabaseObject> result = new ArrayList<DatabaseObject>(columns.size());
 
-        Column column = new Column();
-        column.setTable(table);
-        column.setName(this.column.getName());
+      Table table = new Table(getTableName());
+      for (ColumnConfig aColumn : columns) {
+          Column each = new Column();
+          each.setTable(table);
+          each.setName(aColumn.getName());
+          result.add(each);
+      }
 
-        return new HashSet<DatabaseObject>(Arrays.asList(column));
+      return new HashSet<DatabaseObject>(result);
     }
 
 }
