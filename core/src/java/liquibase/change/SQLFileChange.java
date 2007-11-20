@@ -30,6 +30,8 @@ import java.util.logging.Logger;
 public class SQLFileChange extends AbstractSQLChange {
     private static final Logger log = Logger.getLogger(Migrator.DEFAULT_LOG_NAME);
     private String file;
+    private String encoding = null;
+    
     
     public SQLFileChange() {
         super("sqlFile", "SQL From File");
@@ -48,8 +50,24 @@ public class SQLFileChange extends AbstractSQLChange {
         file = fileName;
     }
     
+    /**
+     * The encoding of the file containing SQL statements
+		 * @return the encoding
+		 */
+		public String getEncoding()
+		{
+			return encoding;
+		}
 
-    public void setUp() throws SetupException {
+		/**
+		 * @param encoding the encoding to set
+		 */
+		public void setEncoding(String encoding)
+		{
+			this.encoding = encoding;
+		}
+
+		public void setUp() throws SetupException {
         if (file == null) {
             throw new SetupException("<sqlfile> - No path specified");
         }
@@ -76,7 +94,7 @@ public class SQLFileChange extends AbstractSQLChange {
         FileInputStream fis = null;
         try {
             fis = new FileInputStream(file);
-            setSql( StreamUtil.getStreamContents(fis) );
+            setSql( StreamUtil.getStreamContents(fis, encoding) );
             return true;
         } catch (FileNotFoundException fnfe) {
             return false;
@@ -115,7 +133,7 @@ public class SQLFileChange extends AbstractSQLChange {
             if (in == null) {
                 return false;
             }
-            setSql( StreamUtil.getStreamContents(in));
+            setSql( StreamUtil.getStreamContents(in, encoding));
             return true;
         } catch (IOException ioe) {
             throw new SetupException("<sqlfile path="+file+"> -Unable to read file", ioe);
@@ -142,6 +160,9 @@ public class SQLFileChange extends AbstractSQLChange {
     public Element createNode(Document currentChangeLogDOM) {
         Element sqlElement = currentChangeLogDOM.createElement("sqlFile");
         sqlElement.setAttribute("path", file);
+        if (encoding != null) {
+        	sqlElement.setAttribute("encoding", encoding);
+        }
         return sqlElement;
     }
 
