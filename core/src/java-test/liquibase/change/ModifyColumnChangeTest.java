@@ -26,7 +26,7 @@ public class ModifyColumnChangeTest extends AbstractChangeTest {
         col1.setName("NAME");
         col1.setType("integer(3)");
 
-        change.setColumn(col1);
+        change.addColumn(col1);
     }
 
     @Test
@@ -42,7 +42,7 @@ public class ModifyColumnChangeTest extends AbstractChangeTest {
 
     @Test
     public void getConfirmationMessage() throws Exception {
-        assertEquals("Column TABLE_NAME.NAME modified", change.getConfirmationMessage());
+        assertEquals("Columns NAME(integer(3)) of TABLE_NAME modified", change.getConfirmationMessage());
     }
 
     @Test

@@ -105,7 +105,7 @@ public abstract class BaseChangeLogHandler extends DefaultHandler {
                 } else if (change instanceof CreateIndexChange) {
                     ((CreateIndexChange) change).addColumn(column);
                 } else if (change instanceof ModifyColumnChange) {
-                    ((ModifyColumnChange) change).setColumn(column);
+                    ((ModifyColumnChange) change).addColumn(column);
                 } else {
                     throw new RuntimeException("Unexpected column tag for " + change.getClass().getName());
                 }
