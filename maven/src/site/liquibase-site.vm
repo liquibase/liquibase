@@ -1,0 +1,28 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>$title</title>
+    <style type="text/css" media="all">
+      @import url("../../include/css/main.css");
+      @import url("../../include/css/maven.css");
+    </style>
+    <meta http-equiv="Content-Type" content="text/html; charset=${outputEncoding}" />
+  </head>
+  <body>@ANALYTICS@
+  <img src="../../images/liquibase_logo.gif" alt="LiquiBase" class="topLogo"/>
+        <p id="sitename">
+            <strong>LiquiBase: Database Refactoring</strong>
+        </p>
+
+        <div id="container">
+                @NAV.MANUAL@
+
+            <div id="content">
+                <div class="entry">
+                    $bodyContent
+                </div>
+            </div>
+        </div>
+  </body>
+</html>
