@@ -29,8 +29,10 @@
                     <table class="attributesTable">
                         <tr><th>constraintName</th><td>Name of the new foreign-key constraint <em>[required]</em></td></tr>
                         <tr><th>baseTableName</th><td>Name of the table containing the foreign key <em>[required]</em></td></tr>
+                        <tr><th>baseTableSchemaName</th><td>Name of the base table schema</td></tr>
                         <tr><th>baseColumnNames</th><td>Name of column(s) (comma-separate if multiple) to place the foreign key on <em>[required]</em></td></tr>
                         <tr><th>referencedTableName</th><td>Name of table the foreign key points to <em>[required]</em></td></tr>
+                        <tr><th>referencedTableSchemaName</th><td>Name of the referenced table schema</td></tr>
                         <tr><th>referencedColumnName</th><td>Column(s) (comma-separate if multiple) the foreign key points to <em>[required]</em></td></tr>
                         <tr><th>deferrable</th><td>Is the foreign key deferrable</td></tr>
                         <tr><th>initiallyDeferred</th><td>Is the foreign key initially deferred</td></tr>
@@ -50,6 +52,7 @@
                         <tr><th>H2</th><td>No Issues</td></tr>
                         <tr><th>Cach&eacute;</th><td>No Issues</td></tr>
                         <tr><th>Firebird</th><td>No Issues</td></tr>
+                        <tr><th>MaxDB</th><td>No Issues</td></tr>
                     </table>
 
                     <h3>Automatic Rollback Support: <strong>YES</strong></h3>

@@ -28,8 +28,10 @@
                     <h3>Available Attributes</h3>
                     <table class="attributesTable">
                         <tr><th>existingTableName</th><td>Name of the table containing the data to extract <em>[required]</em></td></tr>
+                        <tr><th>existingTableSchemaName</th><td>Name of the existing table schema</td></tr>
                         <tr><th>existingColumnName</th><td>Name of the column containing the data to extract <em>[required]</em></td></tr>
                         <tr><th>newTableName</th><td>Name of lookup table to create <em>[required]</em></td></tr>
+                        <tr><th>newTableSchemaName</th><td>Name of the table schema</td></tr>
                         <tr><th>newColumnName</th><td>Name of the column in the new table to create <em>[required]</em></td></tr>
                         <tr><th>constraintName</th><td>Name of the foreign-key constraint to create between the existing table and the lookup table <em>[required]</em></td></tr>
                     </table>
@@ -47,6 +49,7 @@
                         <tr><th>H2</th><td>No Issues</td></tr>
                         <tr><th>Cach&eacute;</th><td>Not Supported</td></tr>
                         <tr><th>Firebird</th><td>Not Supported</td></tr>
+                        <tr><th>MaxDB</th><td>No Issues</td></tr>
                     </table>
 
                     <h3>Automatic Rollback Support: <strong>YES</strong></h3>
