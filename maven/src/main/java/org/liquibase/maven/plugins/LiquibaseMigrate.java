@@ -5,8 +5,9 @@ import liquibase.migrator.Migrator;
 import org.apache.maven.plugin.MojoExecutionException;
 
 /**
- * A Maven wrapper around the Liquibase Migrator class for use in Maven projects.
- * @author Peter Murray, Trace Financial Limited
+ * Liquibase Migration Maven plugin. This plugin allows for DatabaseChangeLogs to be
+ * applied to a database as part of a Maven build process.
+ * @author Peter Murray
  * @description Liquibase Migrate Maven plugin
  * @goal migrate
  */

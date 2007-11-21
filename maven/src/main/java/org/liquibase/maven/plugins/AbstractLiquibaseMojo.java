@@ -165,6 +165,8 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
       migrator.setContexts(contexts);
       migrator.init(connection);
 
+      performMigratorConfiguration(migrator);
+
       getLog().info("Executing on Database: " + url);
 
       if (promptOnNonLocalDatabase && !migrator.isSafeToRunMigration()) {
@@ -189,6 +191,15 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
       throw new MojoFailureException(e.getMessage());
     }
     getLog().info(LOG_SEPARATOR);
+  }
+
+  /**
+   * Performs extra {@link Migrator} configuration as required by the extending class.
+   * By default this method does nothing, but sub classes can override this method to
+   * perform extra configuration steps on the {@link Migrator}.
+   * @param migrator The {@link Migrator} to perform the extra configuration on.
+   */
+  protected void performMigratorConfiguration(Migrator migrator) throws MojoExecutionException {
   }
 
   /**
