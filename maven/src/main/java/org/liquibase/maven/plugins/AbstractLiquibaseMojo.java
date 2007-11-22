@@ -82,9 +82,9 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
   protected String propertiesFile;
 
   /**
-   * Flag allowing for the Liquibase properties file to any settings provided in the
-   * Maven plugin configuration. By default if a property is explicity specified it is not
-   * overridden if it also appears in the properties file.
+   * Flag allowing for the Liquibase properties file to override any settings provided in
+   * the Maven plugin configuration. By default if a property is explicity specified it
+   * is not overridden if it also appears in the properties file.
    * @parameter expression="${liquibase.propertiesFileOverrides}" default-value="false"
    */
   protected boolean propertiesFileOverrides;
