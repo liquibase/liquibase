@@ -15,14 +15,104 @@
 
             <div id="content">
                 <div class="entry">
-                    <h2>Maven Support (Beta)</h2>
+                    <h2>Maven Liquibase Plugin</h2>
                     <p>
-                        LiquiBase can be controlled via a Maven plug-in.  Unfortunatly, although there is code
-                        in the LiquiBase jar that follows the Maven documentation for creating a plug-in, we
-                        do not have the nessisary Maven experience to actually test it well.
+                        LiquiBase can be controlled via a Maven plug-in which can be obtained from the central Maven repository.
+                        <!--The plugin version is the same as that of the Liquibase-Core with an extra .x appended to the end where .x-->
+                        <!--is the plugin patch number.<br/>-->
+                        <!--An example of this would be for Liquibase version 1.4.0 the plugin version would be 1.4.0.0 (for the very first-->
+                        <!--version of the 1.4.0 Maven plugin and 1.4.0.1 for the second and so on...)-->
                     </p>
                     <p>
-                        If you are interested in helping us test this functionality, please <a href="../../community.html">contact us</a>.
+                        You can find the all the versions of the Liquibase-core and Maven plugins in the central repository by going
+                        <a href="http://mvnrepository.com/search.html?query=liquibase">here</a>
+                    </p>
+
+                    <h2><a id="goals">Goals Available</a></h2>
+                    <ul>
+                      <li><a href="migrate-mojo.html">liquiabse:migrate</a> performs a migration on a specified database</li>
+                      <li><a href="migrateSQL-mojo.html">liquibase:migrateSQL</a> generates SQL to migrate a database to the current version</li>
+                    </ul>
+
+                    <h2>Configuration and Usage</h2>
+                    <p>
+                      Configuration of the plugin is done via the <code>&lt;plugins&gt;</code> section of the pom.xml, specifying
+                      the configuration and execution phase to bind the plugin to.
+                    </p>
+                    <p>
+                      Each goal has its own configuration parameters, but some of which are common to both are shown in the following example
+                      configurations. For more information on the configuration parameters check out the <a href="#goals">goals available</a>.
+                    </p>
+                    <p>
+                      Below is a sample configuration for the Liquibase Maven plugin version 1.4.0.0;
+                    </p>
+<pre>
+  &lt;project&gt;
+    [...]
+    &lt;build&gt;
+      &lt;plugins&gt;
+        &lt;plugin&gt;
+          &lt;groupId&gt;org.liquibase&lt;/groupId&gt;
+          &lt;artifactId&gt;liquibase-plugin&lt;/artifactId&gt;
+          &lt;version&gt;1.4.0.0&lt;/version&gt;
+          &lt;executions&gt;
+            &lt;execution&gt;
+              &lt;phase&gt;process-resources&lt;/phase&gt;
+              &lt;configuration&gt;
+                &lt;propertiesFile&gt;src/main/resources/liquibase.properties&lt;/propertiesFile&gt;
+              &lt;/configuration&gt;
+              &lt;goals&gt;
+                &lt;goal&gt;migrate&lt;/goal&gt;
+              &lt;/goals&gt;
+            &lt;/execution&gt;
+          &lt;/executions&gt;
+        &lt;/plugin&gt;
+      &lt;/plugins&gt;
+    &lt;/build&gt;
+    [...]
+  &lt;/project&gt;
+</pre>
+                    <p>
+                        The above example configuration will execute the <code><a href="migrate-mojo.html">liquibase:migrate</a></code>
+                        goal as part of the <code>proecess-resources</code> phase of the build. The parameters (database url, password, etc...)
+                        for running Liquibase are specified in the <code>src/main/resources/liquibase.properties</code>.
+                    </p>
+                    <p>
+                        All the parameters for executing Liquibase can also be specified in <code>&lt;configuration&gt;</code>
+                        section of the plugin. Below is an example of this;
+                    </p>
+<pre>
+  [...]
+    &lt;plugin&gt;
+      &lt;groupId&gt;org.liquibase&lt;/groupId&gt;
+      &lt;artifactId&gt;liquibase-plugin&lt;/artifactId&gt;
+      &lt;version&gt;1.4.0.0&lt;/version&gt;
+      &lt;executions&gt;
+        &lt;execution&gt;
+          &lt;phase&gt;process-resources&lt;/phase&gt;
+          &lt;configuration&gt;
+            &lt;changeLogFile&gt;src/main/resources/org/liquiabse/business_table.xml&lt;/changeLogFile&gt;
+            &lt;driver&gt;oracle.jdbc.OracleDriver&lt;/driver&gt;
+            &lt;url&gt;jdbc:oracle:thin:@tf-appserv-linux:1521:xe&lt;/url&gt;
+            &lt;username&gt;liquibaseTest&lt;/username&gt;
+            &lt;password&gt;pass&lt;/password&gt;
+          &lt;/configuration&gt;
+          &lt;goals&gt;
+            &lt;goal&gt;migrate&lt;/goal&gt;
+          &lt;/goals&gt;
+        &lt;/execution&gt;
+      &lt;/executions&gt;
+    &lt;/plugin&gt;
+  [...]
+</pre>
+                    <p>
+                        It is possible to specify a Liquibase properties file and individual properties in the
+                        <code>&lt;configuration&gt;</code>. If this is done the properties specified in the
+                        <code>&lt;configuration&gt;</code> section will be used in preference over those defined in
+                        the properties file. If this behaviour is not desirable, then the properties file can be setup
+                        to override the specified properties in the <code>&lt;configuration&gt;</code> section by adding
+                        <code>&lt;propertiesFileOverrides&gt;true&lt;/propertiesFileOverrides&gt;</code> to the
+                        <code>&lt;configuration&gt;</code> section.
                     </p>
                 </div>
             </div>
