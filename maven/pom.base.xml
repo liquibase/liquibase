@@ -42,6 +42,17 @@
           <target>1.5</target>
         </configuration>
       </plugin>
+
+      <!--
+        Use a customized Velocity template so we can reuse the Maven plugin
+        documentation in the Liquibase site documentation.
+      -->
+      <plugin>
+        <artifactId>maven-site-plugin</artifactId>
+        <configuration>
+          <templateFile>src/site/liquibase-site.vm</templateFile>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
 
