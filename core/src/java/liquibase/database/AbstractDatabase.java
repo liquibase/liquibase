@@ -967,6 +967,10 @@ public abstract class AbstractDatabase implements Database {
                     return Boolean.TRUE;
                 } else if (value.equals("0")) {
                     return Boolean.FALSE;
+                } else if (value.equals("(1)")) {
+                    return Boolean.TRUE;
+                } else if (value.equals("(0)")) {
+                    return Boolean.FALSE;
                 }
                 throw new ParseException("Unknown bit value: " + value, 0);
             } else if (dataType == Types.BOOLEAN) {
