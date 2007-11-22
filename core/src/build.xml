@@ -494,6 +494,7 @@ The available targets at the current stage:
     </target>
 
     <target name="maven" depends="prepare">
+      <property environment="env"/>
         <copy file="${basedir}/../pom.base.xml" tofile="${basedir}/../pom.xml" filtering="true">
             <filterset>
                 <filter token="BUILD.VERSION" value="${build.version}"/>
@@ -524,13 +525,14 @@ The available targets at the current stage:
             <pom refid="core.maven.project"/>
         </deploy>
 
-
         <exec dir="${maven.basedir}" executable="cmd">
-            <env key="JAVA_HOME" value="\Program Files\Java\jdk1.5.0_12"/>
+            <env key="JAVA_HOME" value="${env.JAVA_HOME}"/>
             <arg value="/c"/>
-            <arg value="c:\maven-2.0.7\bin\mvn.bat"/>
+            <arg value="${env.M2_HOME}\bin\mvn.bat"/>
+            <arg value="clean"/>
             <arg value="package"/>
-            <arg value="-Durl=file://${maven.repository}"/>
+            <arg value="plugin:xdoc"/>
+            <arg value="site"/>
         </exec>
 
         <deploy file="${maven.basedir}/target/liquibase-plugin-${build.version}.0.jar">
@@ -538,6 +540,12 @@ The available targets at the current stage:
             <pom refid="plugin.maven.project"/>
         </deploy>
 
+        <!--TODO automate the coping the html files into the site... -->
+        <!--<copy todir="${release.site.dir}/manual/latest">-->
+          <!--<fileset dir="${maven.build.dir}/site">-->
+            <!--<include name="*-mojo.html"/>-->
+          <!--</fileset>-->
+        <!--</copy>-->
     </target>
 
     <!-- target: ALL -->
