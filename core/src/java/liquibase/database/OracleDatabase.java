@@ -180,6 +180,7 @@ public class OracleDatabase extends AbstractDatabase {
                         defaultValue = ((String) defaultValue).replaceFirst("^to_date\\('","").replaceFirst("', 'HH24:MI:SS'\\)$","");
                     }
                 }
+                defaultValue = ((String) defaultValue).replaceFirst("'\\s*$", "'"); //sometimes oracle adds an extra space after the trailing ' (see http://sourceforge.net/tracker/index.php?func=detail&aid=1824663&group_id=187970&atid=923443).  
             }
         }
         return super.convertDatabaseValueToJavaObject(defaultValue, dataType, columnSize, decimalDigits);

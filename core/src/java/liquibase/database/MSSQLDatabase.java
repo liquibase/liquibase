@@ -255,4 +255,11 @@ public class MSSQLDatabase extends AbstractDatabase {
         return new RawSqlStatement(sql);
     }
 
+    public String getColumnType(String columnType, Boolean autoIncrement) {
+        String type = super.getColumnType(columnType, autoIncrement);
+        if (autoIncrement) {
+            type = type.replaceFirst(" identity$", "");
+        }
+        return type;
+    }
 }
