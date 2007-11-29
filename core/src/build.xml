@@ -50,6 +50,11 @@ The available targets at the current stage:
         <mkdir dir="${build.dir}"/>
         <mkdir dir="${build.test.dir}"/>
         <mkdir dir="${build.db.test.dir}"/>
+
+        <mkdir dir="${build14.dir}"/>
+        <mkdir dir="${build14.test.dir}"/>
+        <mkdir dir="${build14.db.test.dir}"/>
+
         <mkdir dir="${package.dir}/liquibase-${build.version}"/>
         <mkdir dir="${package.dir}/liquibase-${build.version}-src"/>
         <mkdir dir="${release.dir}"/>
@@ -98,6 +103,11 @@ The available targets at the current stage:
         <delete dir="${build.dir}"/>
         <delete dir="${build.test.dir}"/>
         <delete dir="${build.db.test.dir}"/>
+
+        <delete dir="${build14.dir}"/>
+        <delete dir="${build14.test.dir}"/>
+        <delete dir="${build14.db.test.dir}"/>
+
         <delete dir="${release.dir}"/>
         <delete dir="${lib.deps.dir}"/>
         <delete dir="${reports.dir}"/>
@@ -159,9 +169,18 @@ The available targets at the current stage:
 
     <!-- target: RETROWEAVE -->
     <target name="retroweave" depends="prepare">
-        <retroweaver srcdir="${build.dir}"/>
-        <retroweaver srcdir="${build.test.dir}"/>
-        <retroweaver srcdir="${build.db.test.dir}"/>
+        <copy todir="${build14.dir}">
+            <fileset dir="${build.dir}"/>
+        </copy>
+        <copy todir="${build14.test.dir}">
+            <fileset dir="${build.test.dir}"/>
+        </copy>
+        <copy todir="${build14.test.dir}">
+            <fileset dir="${build.test.dir}"/>
+        </copy>
+        <retroweaver srcdir="${build14.dir}"/>
+        <retroweaver srcdir="${build14.test.dir}"/>
+        <retroweaver srcdir="${build14.db.test.dir}"/>
     </target>
 
     <!-- target: PACKAGE -->
@@ -223,11 +242,11 @@ The available targets at the current stage:
                         includes="liquibase" mode="755"/>
         </tar>
 
-        <retroweaver srcdir="${build.dir}"/>
+        <retroweaver srcdir="${build14.dir}"/>
 
         <jar destfile="${release.dir}/${ant.project.name}-SNAPSHOT-14jvm.jar"
              manifest="${src.dir}/../META-INF/MANIFEST.MF" index="true">
-            <zipfileset dir="${build.dir}"/>
+            <zipfileset dir="${build14.dir}"/>
             <zipgroupfileset dir="${lib.14jvm.dir}" includes="retroweaver-rt-*.jar"/>
         </jar>
 

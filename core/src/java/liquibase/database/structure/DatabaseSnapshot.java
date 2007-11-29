@@ -248,14 +248,16 @@ public class DatabaseSnapshot {
 
             columnInfo.setPrimaryKey(isPrimaryKey(columnInfo));
 
-            ResultSet selectRS = null;
-            try {
-                selectRS = selectStatement.executeQuery("SELECT " + columnName + " FROM " + database.escapeTableName(schema, tableName) + " WHERE 1 = 0");
-                ResultSetMetaData meta = selectRS.getMetaData();
-                columnInfo.setAutoIncrement(meta.isAutoIncrement(1));
-            } finally {
-                if (selectRS != null) {
-                    selectRS.close();
+            if (database.supportsAutoIncrement()) {
+                ResultSet selectRS = null;
+                try {
+                    selectRS = selectStatement.executeQuery("SELECT " + columnName + " FROM " + database.escapeTableName(schema, tableName) + " WHERE 1 = 0");
+                    ResultSetMetaData meta = selectRS.getMetaData();
+                    columnInfo.setAutoIncrement(meta.isAutoIncrement(1));
+                } finally {
+                    if (selectRS != null) {
+                        selectRS.close();
+                    }
                 }
             }
 
@@ -481,6 +483,7 @@ public class DatabaseSnapshot {
         if (this.statusListeners == null) {
             return;
         }
+        log.finest(message);
         for (DiffStatusListener listener : this.statusListeners) {
             listener.statusUpdate(message);
         }
