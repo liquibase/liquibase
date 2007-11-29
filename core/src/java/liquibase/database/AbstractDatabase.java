@@ -894,6 +894,9 @@ public abstract class AbstractDatabase implements Database {
             schemaName = convertRequestedSchemaToSchema(schemaName);
         }
         String definition = (String) new JdbcTemplate(this).queryForObject(getViewDefinitionSql(schemaName, viewName), String.class);
+        if (definition == null) {
+            return null;
+        }
         return definition.replaceFirst("^CREATE VIEW [\\S]+ AS", "");
     }
 
