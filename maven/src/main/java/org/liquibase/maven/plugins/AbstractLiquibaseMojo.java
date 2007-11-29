@@ -106,11 +106,6 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
   protected boolean includeArtifact;
 
   /**
-   * @Component
-   */
-  protected MavenProjectHelper helper; //XXX may not be required
-
-  /**
    * Controls the verbosity of the output from invoking the plugin.
    * @parameter expression="${liquibase.verbose}" default-value="false"
    * @description Controls the verbosity of the plugin when executing
