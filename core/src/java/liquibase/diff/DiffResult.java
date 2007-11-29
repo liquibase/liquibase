@@ -558,14 +558,44 @@ public class DiffResult {
                 columnConfig.setName(column.getName());
                 columnConfig.setType(column.getDataTypeString(database));
 
+                ConstraintsConfig constraintsConfig = null;
+                if (column.isPrimaryKey()) {
+                    if (constraintsConfig == null) {
+                        constraintsConfig = new ConstraintsConfig();
+                    }
+                    constraintsConfig.setPrimaryKey(true);
+
+                    PrimaryKey pkToRemove = null;
+                    for (PrimaryKey pk : getMissingPrimaryKeys()) {
+                        if (pk.getTableName().equalsIgnoreCase(missingTable.getName())) {
+                            pkToRemove = pk;
+                        }
+                    }
+
+                    if (pkToRemove != null) {
+                        getMissingPrimaryKeys().remove(pkToRemove);
+                    }
+                }
+
+                if (column.isAutoIncrement()) {
+                    columnConfig.setAutoIncrement(true);
+                }
+
                 if (column.isNullable() != null && !column.isNullable()) {
-                    ConstraintsConfig constraintsConfig = new ConstraintsConfig();
+                    if (constraintsConfig == null) {
+                        constraintsConfig = new ConstraintsConfig();
+                    }
+
                     constraintsConfig.setNullable(false);
+                }
+                if (constraintsConfig != null) {
                     columnConfig.setConstraints(constraintsConfig);
                 }
 
                 Object defaultValue = column.getDefaultValue();
                 if (defaultValue == null) {
+                    //do nothing
+                } else if (column.isAutoIncrement()) {
                     //do nothing
                 } else if (defaultValue instanceof Date) {
                     columnConfig.setDefaultValueDate((Date) defaultValue);

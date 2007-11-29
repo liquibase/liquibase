@@ -231,7 +231,6 @@ public class DatabaseSnapshot {
             columnInfo.setDataType(rs.getInt("DATA_TYPE"));
             columnInfo.setColumnSize(rs.getInt("COLUMN_SIZE"));
             columnInfo.setDecimalDigits(rs.getInt("DECIMAL_DIGITS"));
-            columnInfo.setTypeName(rs.getString("TYPE_NAME"));
             Object defaultValue = rs.getObject("COLUMN_DEF");
             try {
                 columnInfo.setDefaultValue(database.convertDatabaseValueToJavaObject(defaultValue, columnInfo.getDataType(), columnInfo.getColumnSize(), columnInfo.getDecimalDigits()));
@@ -260,6 +259,8 @@ public class DatabaseSnapshot {
                     }
                 }
             }
+
+            columnInfo.setTypeName(database.getColumnType(rs.getString("TYPE_NAME"), columnInfo.isAutoIncrement()));            
 
 
             columnsMap.put(tableName + "." + columnName, columnInfo);
