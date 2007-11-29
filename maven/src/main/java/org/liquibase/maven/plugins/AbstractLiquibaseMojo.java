@@ -113,8 +113,6 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
   protected boolean verbose;
 
   public void execute() throws MojoExecutionException, MojoFailureException {
-    getLog().info("");
-    getLog().info("Liquibase Maven Plugin");
     getLog().info(LOG_SEPARATOR);
 
     String shouldRunProperty = System.getProperty(Migrator.SHOULD_RUN_SYSTEM_PROPERTY);
@@ -157,6 +155,8 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
       printSettings();
       getLog().info(LOG_SEPARATOR);
     }
+    // Check that all the parameters that must be specified have been by the user.
+    checkRequiredParametersAreSpecified();
 
     Connection connection = null;
     try {
@@ -206,6 +206,25 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
       throw new MojoFailureException(e.getMessage());
     }
     getLog().info(LOG_SEPARATOR);
+    getLog().info("");
+  }
+
+  /**
+   * Performs some validation after the properties file has been loaded checking that all
+   * properties required have been specified.
+   * @throws MojoFailureException If any property that is required has not been specified.
+   */
+  protected void checkRequiredParametersAreSpecified() throws MojoFailureException {
+    if (driver == null) {
+      throw new MojoFailureException("The driver has not been specified either as a "
+                                     + "parameter or in a properties file.");
+    } else if (url == null) {
+      throw new MojoFailureException("The database URL has not been specified either as "
+                                     + "a parameter or in a properties file.");
+    } else if (changeLogFile == null) {
+      throw new MojoFailureException("A DatabaseChangeLog has not been specified either "
+                                     + "as a parameter or in a properties file.");
+    }
   }
 
   /**
