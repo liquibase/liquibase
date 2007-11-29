@@ -22,7 +22,7 @@
                     <h2>Example</h2>
                     <pre>&lt;bean id="databaseMigrator" class="liquibase.spring.SpringMigrator">
       &lt;property name="dataSource" ref="myDataSource" /&gt;
-      &lt;property name="changeLogResource" value="classpath:db-changelog.xml" /&gt;
+      &lt;property name="changeLog" value="classpath:db-changelog.xml" /&gt;
 
       &lt;!-- The following configuration options are optional --&gt;
       &lt;property name="executeEnabled" value="true" /&gt;
