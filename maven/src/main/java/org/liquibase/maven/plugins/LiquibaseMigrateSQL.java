@@ -18,17 +18,24 @@ public class LiquibaseMigrateSQL extends AbstractLiquibaseMojo {
 
   /**
    * The file to output the Migration SQL script to, if it exists it will be overwritten.
-   * @parameter expression=${liquibase.migrationSqlOutputFile}
-   * @required
+   * @parameter expression="${liquibase.migrationSqlOutputFile}"
+   * default-value="${project.build}/liquibase/migrate.sql"
    */
-  private File migrationSqlOutputFile;
+  protected File migrationSqlOutputFile;
 
   /**
    * Output a change log SQL for the DatabaseChangeLog table only, not the actual database
    * changes that are required.
-   * @parameter expression=${liquibase.outputChangeLogSQLOnly} default-value="false"
+   * @parameter expression="${liquibase.outputChangeLogSQLOnly}" default-value="false"
    */
-  private boolean changeLogSqlOnly;
+  protected boolean changeLogSqlOnly;
+
+  @Override
+  protected void printSettings() {
+    super.printSettings();
+    getLog().info("   migrationSQLOutputFile: " + migrationSqlOutputFile);
+    getLog().info("   changeLogSqlOnly: " + changeLogSqlOnly);
+  }
 
   @Override
   protected void performMigratorConfiguration(Migrator migrator) throws MojoExecutionException {

@@ -106,7 +106,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
 
   public void execute() throws MojoExecutionException, MojoFailureException {
     getLog().info("");
-    getLog().info("Liquibase Database Migrate");
+    getLog().info("Liquibase Maven Plugin");
     getLog().info(LOG_SEPARATOR);
 
     String shouldRunProperty = System.getProperty(Migrator.SHOULD_RUN_SYSTEM_PROPERTY);
@@ -116,27 +116,37 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
       return;
     }
 
+    ClassLoader artifactClassLoader = null;
+    try {
+      artifactClassLoader = getArtifactClassloader();
+    }
+    catch (MalformedURLException e) {
+      throw new MojoExecutionException("Failed to create artifact classloader", e);
+    }
+
+    FileOpener mFO = new MavenFileOpener(artifactClassLoader);
+    FileOpener fsFO = new FileSystemFileOpener();
+    CompositeFileOpener cfo = new CompositeFileOpener(mFO, fsFO);
+
     // Load the properties file if there is one, but only for values that the user has not
     // already specified.
     if (propertiesFile != null) {
-      File f = new File(propertiesFile);
       if (verbose) {
         getLog().info("Loading Liquibase settings from properties file, "
-                      + f.getAbsolutePath());
+                      + propertiesFile);
       }
-      parsePropertiesFile(propertiesFile);
+      try {
+        InputStream is = cfo.getResourceAsStream(propertiesFile);
+        parsePropertiesFile(is);
+      }
+      catch (IOException e) {
+        throw new MojoExecutionException("Failed to resolve properties file", e);
+      }
     }
 
     if (verbose) {
       getLog().info("Settings----------------------------");
-      getLog().info("   properties file will override? " + propertiesFileOverrides);
-      getLog().info("   changeLogFile: " + changeLogFile);
-      getLog().info("   driver: " + driver);
-      getLog().info("   url: " + url);
-      getLog().info("   username: " + username);
-      getLog().info("   password: " + password);
-      getLog().info("   prompt on non-local database? " + promptOnNonLocalDatabase);
-      getLog().info("   drop first? " + dropFirst);
+      printSettings();
       getLog().info(LOG_SEPARATOR);
     }
 
@@ -144,7 +154,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     try {
       Driver dbDriver = (Driver)Class.forName(driver,
                                               true,
-                                              getArtifactClassloader()).newInstance();
+                                              artifactClassLoader).newInstance();
 
       Properties info = new Properties();
       info.put("user", username);
@@ -158,10 +168,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                                 + "database URL");
       }
 
-      FileOpener mFO = new MavenFileOpener();
-      FileOpener fsFO = new FileSystemFileOpener();
-      Migrator migrator = new Migrator(changeLogFile.trim(),
-                                       new CompositeFileOpener(mFO, fsFO));
+      Migrator migrator = new Migrator(changeLogFile.trim(), cfo);
       migrator.setContexts(contexts);
       migrator.init(connection);
 
@@ -194,6 +201,21 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
   }
 
   /**
+   * Prints the settings that have been set of defaulted for the plugin. These will only
+   * be shown in verbose mode.
+   */
+  protected void printSettings() {
+    getLog().info("   properties file will override? " + propertiesFileOverrides);
+    getLog().info("   changeLogFile: " + changeLogFile);
+    getLog().info("   driver: " + driver);
+    getLog().info("   url: " + url);
+    getLog().info("   username: " + username);
+    getLog().info("   password: " + password);
+    getLog().info("   prompt on non-local database? " + promptOnNonLocalDatabase);
+    getLog().info("   drop first? " + dropFirst);
+  }
+
+  /**
    * Performs extra {@link Migrator} configuration as required by the extending class.
    * By default this method does nothing, but sub classes can override this method to
    * perform extra configuration steps on the {@link Migrator}.
@@ -218,8 +240,8 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
    * delegating to the parent {@link ClassLoader} of this class.
    * @return The ClassLoader that can load the resolved dependencies for the Maven
    * project.
-   * @throws java.net.MalformedURLException If any of the dependencies cannot be resolved into a
-   * URL.
+   * @throws java.net.MalformedURLException If any of the dependencies cannot be resolved
+   * into a URL.
    */
   protected ClassLoader getArtifactClassloader() throws MalformedURLException {
     getLog().debug("Loading artfacts into URLClassLoader");
@@ -261,22 +283,23 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
 
   /**
    * Parses a properties file and sets the assocaited fields in the plugin.
-   * @param propertiesFile The file containing the Liquibase properties that need to be
-   * parsed.
+   * @param propertiesInputStream The input stream which is the Liquibase properties that
+   * needs to be parsed.
    * @throws org.apache.maven.plugin.MojoExecutionException If there is a problem parsing the file.
    */
-  protected void parsePropertiesFile(String propertiesFile) throws MojoExecutionException {
-
+  protected void parsePropertiesFile(InputStream propertiesInputStream) throws MojoExecutionException {
+    if (propertiesInputStream == null) {
+      throw new MojoExecutionException("Properties file input stream cannot be null.");
+    }
     Properties props = new Properties();
     try {
-      InputStream propertiesInputStream = new FileInputStream(propertiesFile);
       props.load(propertiesInputStream);
     }
     catch (IOException e) {
       throw new MojoExecutionException("Could not load the properties Liquibase file", e);
     }
 
-    for (Iterator it = props.keySet().iterator(); it.hasNext(); ) {
+    for (Iterator it = props.keySet().iterator(); it.hasNext();) {
       String key = null;
       try {
         key = (String)it.next();
