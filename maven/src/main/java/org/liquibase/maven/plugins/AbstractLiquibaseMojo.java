@@ -5,13 +5,14 @@ import java.lang.reflect.Field;
 import java.net.*;
 import java.sql.*;
 import java.util.*;
-import liquibase.migrator.Migrator;
+import liquibase.*;
 import liquibase.exception.JDBCException;
 import liquibase.exception.LiquibaseException;
-import liquibase.*;
+import liquibase.migrator.Migrator;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.*;
 import org.apache.maven.project.MavenProject;
+import org.apache.maven.project.MavenProjectHelper;
 
 /**
  * A base class for providing Liquibase {@link liquibase.migrator.Migrator} functionality.
@@ -98,6 +99,18 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
   protected MavenProject project;
 
   /**
+   * Allows for the maven project artifact to be included in the class loader for
+   * obtaining the Liquibase property and DatabaseChangeLog files.
+   * @parameter default-value="true"
+   */
+  protected boolean includeArtifact;
+
+  /**
+   * @Component
+   */
+  protected MavenProjectHelper helper; //XXX may not be required
+
+  /**
    * Controls the verbosity of the output from invoking the plugin.
    * @parameter expression="${liquibase.verbose}" default-value="false"
    * @description Controls the verbosity of the plugin when executing
@@ -131,12 +144,12 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     // Load the properties file if there is one, but only for values that the user has not
     // already specified.
     if (propertiesFile != null) {
-      if (verbose) {
-        getLog().info("Loading Liquibase settings from properties file, "
-                      + propertiesFile);
-      }
+      getLog().info("Loading Liquibase settings from properties file, " + propertiesFile);
       try {
         InputStream is = cfo.getResourceAsStream(propertiesFile);
+        if (is == null) {
+          throw new MojoFailureException("Failed to resolve the properties file.");
+        }
         parsePropertiesFile(is);
       }
       catch (IOException e) {
@@ -244,30 +257,50 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
    * into a URL.
    */
   protected ClassLoader getArtifactClassloader() throws MalformedURLException {
-    getLog().debug("Loading artfacts into URLClassLoader");
-    URL[] urls = new URL[0];
+    if (verbose) {
+      getLog().info("Loading artfacts into URLClassLoader");
+    }
+    Set urls = new HashSet();
 
     Set dependencies = project.getDependencyArtifacts();
     if (dependencies != null || !dependencies.isEmpty()) {
-      Set artifactURLs = new HashSet(dependencies.size());
-
       for (Iterator it = dependencies.iterator(); it.hasNext();) {
-        Artifact artifact = (Artifact)it.next();
-        File f = artifact.getFile();
-        if (f != null) {
-          URL fileURL = f.toURI().toURL();
-          getLog().debug("  artifact: " + fileURL);
-          artifactURLs.add(fileURL);
-        } else {
-          getLog().warn("Artifact with no actual file, '" + artifact.getGroupId()
-                        + ":" + artifact.getArtifactId() + "'");
-        }
+        addArtifact(urls, (Artifact)it.next());
       }
-      urls = (URL[])artifactURLs.toArray(new URL[artifactURLs.size()]);
     } else {
-      getLog().debug("there are no resolved artifacts for the Maven project.");
+      getLog().info("there are no resolved artifacts for the Maven project.");
     }
-    return new URLClassLoader(urls, getClass().getClassLoader());
+
+    // Include the artifact for the actual maven project if requested
+    if (includeArtifact) {
+      addArtifact(urls, project.getArtifact());
+    }
+    if (verbose) {
+      getLog().info(LOG_SEPARATOR);
+    }
+
+    URL[] urlArray = (URL[])urls.toArray(new URL[urls.size()]);
+    return new URLClassLoader(urlArray, getClass().getClassLoader());
+  }
+
+  /**
+   * Adds the artifact file into the set of URLs so it can be used in a URLClassLoader.
+   * @param urls The set to add the artifact file URL to.
+   * @param artifact The Artifiact to resolve the file for.
+   * @throws MalformedURLException If there is a problem creating the URL for the file.
+   */
+  private void addArtifact(Set urls, Artifact artifact) throws MalformedURLException {
+    File f = artifact.getFile();
+    if (f != null) {
+      URL fileURL = f.toURI().toURL();
+      if (verbose) {
+        getLog().info("  artifact: " + fileURL);
+      }
+      urls.add(fileURL);
+    } else {
+      getLog().warn("Artifact with no actual file, '" + artifact.getGroupId()
+                    + ":" + artifact.getArtifactId() + "'");
+    }
   }
 
   protected void releaseConnection(Connection c) {
@@ -289,7 +322,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
    */
   protected void parsePropertiesFile(InputStream propertiesInputStream) throws MojoExecutionException {
     if (propertiesInputStream == null) {
-      throw new MojoExecutionException("Properties file input stream cannot be null.");
+      throw new MojoExecutionException("Properties file InputStream is null.");
     }
     Properties props = new Properties();
     try {
