@@ -1,0 +1,4 @@
+Developing for the IntelliJ IDEA LiquiBase plug-in:
+----------------------------------------------------------
+1. Check out the full LiquiBase source from SVN.  See http://sourceforge.net/svn/?group_id=187970 for more information
+2. Create an IntelliJ project containing the liquibase.iml, ide.common.iml, and intellij.plugin.iml modules  

@@ -94,6 +94,21 @@ The available targets at the current stage:
             </classpath>
         </taskdef>
 
+        <copy file="${basedir}/../pom.base.xml" tofile="${basedir}/../pom.xml" filtering="true">
+            <filterset>
+                <filter token="BUILD.VERSION" value="${build.version}"/>
+            </filterset>
+        </copy>
+        <copy file="${maven.basedir}/pom.base.xml" tofile="${maven.basedir}/pom.xml" filtering="true">
+            <filterset>
+                <filter token="BUILD.VERSION" value="${build.version}"/>
+            </filterset>
+        </copy>
+        <copy file="${intellij.basedir}/META-INF/plugin.base.xml" tofile="${intellij.basedir}/META-INF/plugin.xml" filtering="true">
+            <filterset>
+                <filter token="BUILD.VERSION" value="${build.version}"/>
+            </filterset>
+        </copy>
     </target>
 
     <!-- target: CLEAN -->
@@ -242,7 +257,7 @@ The available targets at the current stage:
                         includes="liquibase" mode="755"/>
         </tar>
 
-        <retroweaver srcdir="${build14.dir}"/>
+        <antcall target="retroweave" inheritall="true" inheritrefs="true"/>
 
         <jar destfile="${release.dir}/${ant.project.name}-SNAPSHOT-14jvm.jar"
              manifest="${src.dir}/../META-INF/MANIFEST.MF" index="true">
@@ -269,6 +284,8 @@ The available targets at the current stage:
             <tarfileset dir="${package.dir}/liquibase-${build.version}-14jvm" prefix="liquibase-${build.version}"
                         includes="liquibase" mode="755"/>
         </tar>
+        <zip destfile="${release.dir}/liquibase-intellij-${build.version}-src.zip" basedir="${intellij.basedir}"
+                excludes="build/**,build-test/**"/>
     </target>
 
     <!-- target: SITE -->
@@ -519,17 +536,6 @@ The available targets at the current stage:
 
         <delete file="${basedir}/../pom.xml"/>
         <delete file="${maven.basedir}/pom.xml"/>
-
-        <copy file="${basedir}/../pom.base.xml" tofile="${basedir}/../pom.xml" filtering="true">
-            <filterset>
-                <filter token="BUILD.VERSION" value="${build.version}"/>
-            </filterset>
-        </copy>
-        <copy file="${maven.basedir}/pom.base.xml" tofile="${maven.basedir}/pom.xml" filtering="true">
-            <filterset>
-                <filter token="BUILD.VERSION" value="${build.version}"/>
-            </filterset>
-        </copy>
 
         <typedef resource="org/apache/maven/artifact/ant/antlib.xml">
             <classpath>
