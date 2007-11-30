@@ -26,7 +26,9 @@ POST MESSAGES TO:
 - wikipedia
 - Newly supported database lists
 
- Sample message:
+ Sample messages:
+--------------------------------------------------------
+CORE
 ---------------------------------------------------------
  LiquiBase 1.4.0 has been released. Major features include:
 
@@ -50,3 +52,14 @@ Download LiquiBase 1.4 from:
 
 http://www.liquibase.org/download.html
 ---------------------------------------------------------------
+INTELLIJ
+------------------------------------------------------------
+Version 1.4.1.0 of the LiquiBase IntelliJ plug-in is now available in the plug-in manager.
+
+This release is primarily a bug fix release.
+
+The core LiquiBase library is a database refactoring and change management tool.  The IntelliJ plug-in builds on the base library to make database refactoring as easy as code refactoring.
+
+Please let me know of any questions or comments you have
+
+Nathan
