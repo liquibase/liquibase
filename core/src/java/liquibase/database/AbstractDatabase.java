@@ -213,6 +213,10 @@ public abstract class AbstractDatabase implements Database {
                     return getClobType();
                 } else if (dataTypeName.equalsIgnoreCase("BOOLEAN")) {
                     return getBooleanType();
+                } else if (dataTypeName.equalsIgnoreCase("DATE")) {
+                    return getDateType();
+                } else if (dataTypeName.equalsIgnoreCase("TIME")) {
+                    return getTimeType();
                 }
 
                 throw new RuntimeException("Could not find java.sql.Types value for "+dataTypeName);

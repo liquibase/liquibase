@@ -257,7 +257,7 @@ public class MSSQLDatabase extends AbstractDatabase {
 
     public String getColumnType(String columnType, Boolean autoIncrement) {
         String type = super.getColumnType(columnType, autoIncrement);
-        if (autoIncrement) {
+        if (autoIncrement != null && autoIncrement) {
             type = type.replaceFirst(" identity$", "");
         }
         return type;
