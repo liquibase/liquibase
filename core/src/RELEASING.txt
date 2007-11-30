@@ -11,7 +11,16 @@ MAVEN:
 run core/build.xml maven
 this updates src/site.  run build.xml site to re-build the site with the new maven pages (if there was a change). 
 
+GRAILS:
+- copy new core jar to grails-liquibase/lib and remove old jar (including svn delete/add)
+- change version in LiquibaseGrailsPlugin.groovy
+- run: grails clean  
+- run: grails package-plugin
+- commit changes
+- run: grails release-plugin
+
 INTELLIJ:
+- run: build.xml intellij
 - right-click "prepare plugin module for deployment"
 - extract intellij.plugin.jar from .zip and rename LiquiBase.jar
 - update on plugins.intellij.net
