@@ -94,16 +94,6 @@ The available targets at the current stage:
             </classpath>
         </taskdef>
 
-        <copy file="${basedir}/../pom.base.xml" tofile="${basedir}/../pom.xml" filtering="true">
-            <filterset>
-                <filter token="BUILD.VERSION" value="${build.version}"/>
-            </filterset>
-        </copy>
-        <copy file="${maven.basedir}/pom.base.xml" tofile="${maven.basedir}/pom.xml" filtering="true">
-            <filterset>
-                <filter token="BUILD.VERSION" value="${build.version}"/>
-            </filterset>
-        </copy>
         <copy file="${intellij.basedir}/META-INF/plugin.base.xml" tofile="${intellij.basedir}/META-INF/plugin.xml" filtering="true">
             <filterset>
                 <filter token="BUILD.VERSION" value="${build.version}"/>
@@ -536,6 +526,17 @@ The available targets at the current stage:
 
         <delete file="${basedir}/../pom.xml"/>
         <delete file="${maven.basedir}/pom.xml"/>
+
+        <copy file="${basedir}/../pom.base.xml" tofile="${basedir}/../pom.xml" filtering="true">
+            <filterset>
+                <filter token="BUILD.VERSION" value="${build.version}"/>
+            </filterset>
+        </copy>
+        <copy file="${maven.basedir}/pom.base.xml" tofile="${maven.basedir}/pom.xml" filtering="true">
+            <filterset>
+                <filter token="BUILD.VERSION" value="${build.version}"/>
+            </filterset>
+        </copy>
 
         <typedef resource="org/apache/maven/artifact/ant/antlib.xml">
             <classpath>
