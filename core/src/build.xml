@@ -284,7 +284,7 @@ The available targets at the current stage:
                 <include name="**/*.html"/>
                 <include name="**/*.htm"/>
             </fileset>
-            <filterset>
+            <filterset id="site.filter.set">
                 <filter token="NAV.MAIN" value="${nav.main}"/>
                 <filter token="NAV.MANUAL" value="${nav.manual}"/>
                 <filter token="NAV.IDE" value="${nav.ide}"/>
@@ -298,6 +298,7 @@ The available targets at the current stage:
             <fileset dir="${src.dir}/site">
                 <exclude name="**/*.html"/>
                 <exclude name="**/*.wnk"/>
+                <exclude name="**/*.swf"/>
             </fileset>
         </copy>
         <copy todir="${release.site.dir}/xml/ns/dbchangelog">
@@ -328,7 +329,7 @@ The available targets at the current stage:
                 author="true"
                 version="true"
                 use="true"
-                windowtitle="LiquiBASE API (${build.version})"
+                windowtitle="LiquiBase ${build.version}) API"
                 linksource="false"
                 useexternalfile="yes"
                 breakiterator="yes">
@@ -514,6 +515,11 @@ The available targets at the current stage:
 
     <target name="maven" depends="prepare">
       <property environment="env"/>
+        <echo>build version: ${build.version}</echo>
+
+        <delete file="${basedir}/../pom.xml"/>
+        <delete file="${maven.basedir}/pom.xml"/>
+
         <copy file="${basedir}/../pom.base.xml" tofile="${basedir}/../pom.xml" filtering="true">
             <filterset>
                 <filter token="BUILD.VERSION" value="${build.version}"/>
@@ -560,11 +566,11 @@ The available targets at the current stage:
         </deploy>
 
         <!--TODO automate the coping the html files into the site... -->
-        <!--<copy todir="${release.site.dir}/manual/latest">-->
-          <!--<fileset dir="${maven.build.dir}/site">-->
-            <!--<include name="*-mojo.html"/>-->
-          <!--</fileset>-->
-        <!--</copy>-->
+        <copy todir="${src.dir}/site/manual/latest">
+          <fileset dir="${maven.build.dir}/site">
+            <include name="*-mojo.html"/>
+          </fileset>
+        </copy>
     </target>
 
     <!-- target: ALL -->
