@@ -11,6 +11,12 @@ MAVEN:
 run core/build.xml maven
 this updates src/site.  run build.xml site to re-build the site with the new maven pages (if there was a change). 
 
+INTELLIJ:
+- right-click "prepare plugin module for deployment"
+- extract intellij.plugin.jar from .zip and rename LiquiBase.jar
+- update on plugins.intellij.net
+- send message on http://www.intellij.net/forums/forum.jspa?forumID=18
+
 POST MESSAGES TO:
 - mailing list
 - blog
@@ -18,4 +24,29 @@ POST MESSAGES TO:
 - javalobby
 - freshmeat
 - wikipedia
-- Newly supported database lists 
+- Newly supported database lists
+
+ Sample message:
+---------------------------------------------------------
+ LiquiBase 1.4.0 has been released. Major features include:
+
+- IntelliJ Plug-in Support
+- Added support for specifying schemas in change log
+- MaxDB/SAPDB Support
+- Refactored Code
+- Can specify data types as java.sql.Types.*
+- Support for composite foreign keys
+- Improved Maven support
+- Bug Fixes
+
+Upgrading is simply a matter of replacing the liquibase.jar file. To take advantage of newer change log features, change your XSD declaration to:
+
+<databasechangelog xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.4";
+xsi="http://www.w3.org/2001/XMLSchema-instance";
+schemalocation="http://www.liquibase.org/xml/ns/dbchangelog/1.4
+http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.4.xsd";>
+
+Download LiquiBase 1.4 from:
+
+http://www.liquibase.org/download.html
+---------------------------------------------------------------
