@@ -49,12 +49,21 @@ public class SetNullableStatement implements SqlStatement {
         if (database instanceof OracleDatabase || database instanceof SybaseDatabase) {
             return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " MODIFY " + getColumnName() + nullableString;
         } else if (database instanceof MSSQLDatabase) {
+            if (getColumnDataType() == null) {
+                throw new StatementNotSupportedOnDatabaseException("Database requires columnDataType parameter", this, database);
+            }
             return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ALTER COLUMN " + getColumnName() + " " + getColumnDataType() + nullableString;
         } else if (database instanceof MySQLDatabase) {
+            if (getColumnDataType() == null) {
+                throw new StatementNotSupportedOnDatabaseException("Database requires columnDataType parameter", this, database);
+            }
             return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " MODIFY " + getColumnName() + " " + getColumnDataType() + nullableString;
         } else if (database instanceof DerbyDatabase || database instanceof CacheDatabase) {
             return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ALTER COLUMN  " + getColumnName() + nullableString;
         } else if (database instanceof HsqlDatabase) {
+            if (getColumnDataType() == null) {
+                throw new StatementNotSupportedOnDatabaseException("Database requires columnDataType parameter", this, database);
+            }
             return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ALTER COLUMN  " + getColumnName() + " " + getColumnDataType() + nullableString;
         } else if (database instanceof FirebirdDatabase) {
             throw new StatementNotSupportedOnDatabaseException(this, database);
