@@ -9,11 +9,7 @@ import com.intellij.openapi.util.WriteExternalException;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.VirtualFileManager;
-import dbhelp.db.Catalog;
-import dbhelp.db.Column;
-import dbhelp.db.Schema;
-import dbhelp.db.Table;
-import dbhelp.db.model.IDBNode;
+import dbhelp.db.*;
 import dbhelp.db.ui.DBTree;
 import dbhelp.plugin.action.portable.ActionGroup;
 import dbhelp.plugin.action.portable.PopupMenuManager;
@@ -27,12 +23,7 @@ import org.liquibase.ide.common.action.*;
 import org.liquibase.ide.common.change.action.*;
 
 import javax.swing.*;
-import javax.swing.event.TreeSelectionEvent;
-import javax.swing.event.TreeSelectionListener;
-import javax.swing.tree.TreePath;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class LiquibaseProjectComponent implements ProjectComponent, JDOMExternalizable {
@@ -77,6 +68,7 @@ public class LiquibaseProjectComponent implements ProjectComponent, JDOMExternal
         PopupMenuManager.getInstance().addAction(createRefactorMenu(liquibase.database.Database.class), Schema.class);
         PopupMenuManager.getInstance().addAction(createRefactorMenu(liquibase.database.structure.Table.class), Table.class);
         PopupMenuManager.getInstance().addAction(createRefactorMenu(liquibase.database.structure.Column.class), Column.class);
+        PopupMenuManager.getInstance().addAction(createRefactorMenu(liquibase.database.structure.ForeignKey.class), ForeignKey.class);
 //        PopupMenuManager.getInstance().getActions(DBTree.class)
 
         try {
@@ -127,6 +119,8 @@ public class LiquibaseProjectComponent implements ProjectComponent, JDOMExternal
         ActionGroup refactorActionGroup = new ActionGroup("Refactor");
         //database actions
         refactorActionGroup.addAction(new IntellijActionWrapper(new CreateTableAction(), dbObjectType));
+        refactorActionGroup.addAction(new IntellijActionWrapper(new CreateViewAction(), dbObjectType));
+        refactorActionGroup.addAction(new IntellijActionWrapper(new CreateProcedureAction(), dbObjectType));
 
         //table actions
         refactorActionGroup.addAction(new IntellijActionWrapper(new AddColumnAction(), dbObjectType));
@@ -147,8 +141,8 @@ public class LiquibaseProjectComponent implements ProjectComponent, JDOMExternal
         refactorActionGroup.addAction(new IntellijActionWrapper(new DropNotNullConstraintAction(), dbObjectType));
         refactorActionGroup.addAction(new IntellijActionWrapper(new RenameColumnAction(), dbObjectType));
 
-
-
+        //fk actions
+        refactorActionGroup.addAction(new IntellijActionWrapper(new DropForeignKeyConstraintAction(), dbObjectType));
 
         return refactorActionGroup;
     }
