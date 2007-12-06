@@ -310,10 +310,10 @@ The available targets at the current stage:
         <copy todir="${release.site.dir}/samples/">
             <fileset dir="${src.dir}/samples"/>
         </copy>
-        <copy todir="${release.site.dir}/manual/latest/api">
+        <copy todir="${release.site.dir}/api">
             <fileset dir="${reports.dir}/api"/>
         </copy>
-        <copy todir="${release.site.dir}/manual/latest/doxygen">
+        <copy todir="${release.site.dir}/doxygen">
             <fileset dir="${reports.dir}/doxygen"/>
         </copy>
 
@@ -577,7 +577,7 @@ The available targets at the current stage:
         </deploy>
 
         <!--TODO automate the coping the html files into the site... -->
-        <copy todir="${src.dir}/site/manual/latest">
+        <copy todir="${src.dir}/site/phpincludes">
           <fileset dir="${maven.build.dir}/site">
             <include name="*-mojo.html"/>
           </fileset>

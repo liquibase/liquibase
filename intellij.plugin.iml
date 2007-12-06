@@ -8,7 +8,7 @@
     <content url="file://$MODULE_DIR$/ide/intellij">
       <sourceFolder url="file://$MODULE_DIR$/ide/intellij/src/java" isTestSource="false" />
     </content>
-    <orderEntry type="jdk" jdkName="IDEA 6180" jdkType="IDEA JDK" />
+    <orderEntry type="jdk" jdkName="IDEA 6197" jdkType="IDEA JDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="Groovy from GroovyJ 0.1.9 (Demetra)" level="application" />
     <orderEntry type="module" module-name="liquibase" exported="" />
