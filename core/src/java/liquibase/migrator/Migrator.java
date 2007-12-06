@@ -240,6 +240,10 @@ public class Migrator {
         return buildVersion;
     }
 
+    public static String getSchemaVersion() {
+        return "1.4";
+    }
+
     public Database getDatabase() {
         return database;
     }

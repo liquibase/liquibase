@@ -17,7 +17,7 @@ public class CreateEmptyChangeLogAction extends MigratorAction {
     public void actionPerform(Database database, IdeFacade ideFacade) throws LiquibaseException {
         String changeLogFile = ideFacade.promptForChangeLogFile();
         try {
-            ideFacade.getChangeLogWriter().createEmptyChangeLog(new File(changeLogFile));
+            ideFacade.getChangeLogWriter().createEmptyChangeLog(changeLogFile);
         } catch (Exception e) {
             ideFacade.showError(e);
         }

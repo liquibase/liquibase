@@ -12,6 +12,7 @@ import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.structure.Column;
 import liquibase.database.structure.DatabaseObject;
+import liquibase.database.structure.ForeignKey;
 import liquibase.database.structure.Table;
 import liquibase.exception.LiquibaseException;
 import org.liquibase.ide.common.IdeFacade;
@@ -129,8 +130,10 @@ public class IntellijActionWrapper extends PortableAction {
                 return DatabaseFactory.getInstance().findCorrectDatabaseImplementation(((Schema) selectedObject).getDatabase().getConnection());
             } else if (selectedObject instanceof dbhelp.db.Table) {
                 dbhelp.db.Table selectedTable = (dbhelp.db.Table) selectedObject;
-
                 return createTableObject(selectedTable);
+            } else if (selectedObject instanceof dbhelp.db.ForeignKey) {
+                dbhelp.db.ForeignKey selectedFK = (dbhelp.db.ForeignKey) selectedObject;
+                return createForeignKeyObject(selectedFK);
             } else if (selectedObject instanceof AbstractDBObject.ProfileNode) {
                 return DatabaseFactory.getInstance().findCorrectDatabaseImplementation(((AbstractDBObject.ProfileNode) selectedObject).getDatabase().getConnection());
             } else {
@@ -165,41 +168,37 @@ public class IntellijActionWrapper extends PortableAction {
         return table;
     }
 
+    private ForeignKey createForeignKeyObject(dbhelp.db.ForeignKey selectedFK) {
+        ForeignKey fk = new ForeignKey();
+        fk.setName(selectedFK.getFkName());
 
-    public Database getSelectedDatabase() {
-        Object selectedObject = getUserData();
-        if (selectedObject instanceof DBTree) {
-            TreePath selectionPath = ((DBTree) getUserData()).getSelectionModel().getLeadSelectionPath();
+        Table pkTable = new Table(selectedFK.getPkTableName());
+        pkTable.setDatabase(getSelectedDatabase());
+        fk.setPrimaryKeyTable(pkTable);
+        fk.setPrimaryKeyColumns(selectedFK.getPkColumnName());
 
-            selectedObject = selectionPath.getPathComponent(1);
-        }
+        Table fkTable = new Table(selectedFK.getFkTableName());
+        fkTable.setDatabase(getSelectedDatabase());
+        fk.setForeignKeyTable(fkTable);
+        fk.setForeignKeyColumns(selectedFK.getFkColumnName());
 
-        try {
-            Connection connection;
-            if (selectedObject instanceof dbhelp.db.Database) {
-                connection = ((dbhelp.db.Database) selectedObject).getConnection();
-            } else if (selectedObject instanceof Catalog) {
-                connection = ((Catalog) selectedObject).getDatabase().getConnection();
-            } else if (selectedObject instanceof dbhelp.db.Column) {
-                connection = ((dbhelp.db.Column) selectedObject).getTable().getDatabase().getConnection();
-            } else if (selectedObject instanceof Schema) {
-                connection = ((Schema) selectedObject).getDatabase().getConnection();
-            } else if (selectedObject instanceof dbhelp.db.Table) {
-                connection = ((dbhelp.db.Table) selectedObject).getDatabase().getConnection();
-            } else if (selectedObject instanceof AbstractDBObject.ProfileNode) {
-                connection = ((AbstractDBObject.ProfileNode) selectedObject).getDatabase().getConnection();
-            } else {
-                throw new RuntimeException("Unknown object type: " + selectedObject.getClass().getName());
-            }
-            return DatabaseFactory.getInstance().findCorrectDatabaseImplementation(connection);
-        } catch (Exception
-                e) {
-            throw new RuntimeException(e);
-        }
+        fk.setDeferrable(selectedFK.getDeferrability() == 1);
+        return fk;
     }
 
-    public Column getSelectedColumn
-            () {
+    public Database getSelectedDatabase() {
+        DBTree tree = LiquibaseProjectComponent.getInstance().getDbTree();
+        Object pathComponent = tree.getSelectionPath().getPathComponent(1);
+        try {
+            Connection connection = ((AbstractDBObject) pathComponent).getDatabase().getConnection();
+            return DatabaseFactory.getInstance().findCorrectDatabaseImplementation(connection);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+    public Column getSelectedColumn() {
         Object selectedObject = getUserData();
         if (selectedObject instanceof DBTree) {
             TreePath selectionPath = ((DBTree) getUserData()).getSelectionModel().getLeadSelectionPath();
@@ -214,8 +213,7 @@ public class IntellijActionWrapper extends PortableAction {
         return null;
     }
 
-    public Table getSelectedTable
-            () {
+    public Table getSelectedTable() {
         Object selectedObject = getUserData();
         if (selectedObject instanceof DBTree) {
             TreePath selectionPath = ((DBTree) getUserData()).getSelectionModel().getLeadSelectionPath();
