@@ -999,6 +999,8 @@ public abstract class AbstractDatabase implements Database {
                 return new Float(value);
             } else if (dataType == Types.SMALLINT) {
                 return new Integer(value);
+            } else if (dataType == Types.TINYINT) {
+                return new Integer(value);
             } else {
                 throw new RuntimeException("Cannot convert type: " + dataType);
             }
