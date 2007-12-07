@@ -1,8 +1,10 @@
 package org.liquibase.ide.common.change.wizard.page;
 
+import org.liquibase.ide.common.AbstractWizardPageWithRequiredFields;
+
 import javax.swing.*;
 
-public class CreateViewWizardPageImpl implements CreateViewWizardPage {
+public class CreateViewWizardPageImpl extends AbstractWizardPageWithRequiredFields implements CreateViewWizardPage {
     private JTextArea definition;
     private JTextField viewName;
     private JPanel mainPanel;
@@ -21,5 +23,12 @@ public class CreateViewWizardPageImpl implements CreateViewWizardPage {
 
     public String getViewDefinition() {
         return definition.getText();
+    }
+
+    public JComponent[] getValidationComponents() {
+        return new JComponent[] {
+                viewName,
+                definition,
+        };
     }
 }

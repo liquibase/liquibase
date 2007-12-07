@@ -1,8 +1,11 @@
 package org.liquibase.ide.common.change.wizard.page;
 
+import liquibase.util.StringUtils;
+import org.liquibase.ide.common.AbstractWizardPageWithRequiredFields;
+
 import javax.swing.*;
 
-public class AddForeignKeyConstraintWizardPageImpl implements AddForeignKeyConstraintWizardPage {
+public class AddForeignKeyConstraintWizardPageImpl extends AbstractWizardPageWithRequiredFields implements AddForeignKeyConstraintWizardPage {
     private JTextField constraintName;
     private JTextField referencedTableName;
     private JTextField referencedColumnNames;
@@ -41,5 +44,13 @@ public class AddForeignKeyConstraintWizardPageImpl implements AddForeignKeyConst
 
     public JComponent getComponent() {
         return mainPanel;
+    }
+
+    public JComponent[] getValidationComponents() {
+        return new JComponent[] {
+                constraintName,
+                referencedTableName,
+                referencedColumnNames
+        };
     }
 }

@@ -1,6 +1,8 @@
 package org.liquibase.ide.common.change.wizard.page;
 
-public interface ChangeMetaDataWizardPage {
+import org.liquibase.ide.common.WizardPage;
+
+public interface ChangeMetaDataWizardPage extends WizardPage {
     String getId();
 
     String getAuthor();
