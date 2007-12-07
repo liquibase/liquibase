@@ -1,8 +1,10 @@
 package org.liquibase.ide.common.change.wizard.page;
 
+import org.liquibase.ide.common.AbstractWizardPageWithRequiredFields;
+
 import javax.swing.*;
 
-public class AddLookupTableWizardPageImpl implements AddLookupTableWizardPage{
+public class AddLookupTableWizardPageImpl extends AbstractWizardPageWithRequiredFields implements AddLookupTableWizardPage{
     private JTextField newTableName;
     private JTextField newColumnName;
     private JPanel mainPanel;
@@ -26,5 +28,14 @@ public class AddLookupTableWizardPageImpl implements AddLookupTableWizardPage{
 
     public JComponent getComponent() {
         return mainPanel;
+    }
+
+    public JComponent[] getValidationComponents() {
+        return new JComponent[] {
+                newTableName,
+                newColumnName,
+                constraintName
+
+        };
     }
 }

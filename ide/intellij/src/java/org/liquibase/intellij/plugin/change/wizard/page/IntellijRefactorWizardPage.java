@@ -20,11 +20,11 @@ public class IntellijRefactorWizardPage implements Step {
     }
 
     public void _commit(boolean b) throws CommitStepException {
-        //To change body of implemented methods use File | Settings | File Templates.
+        ;
     }
 
     public Icon getIcon() {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        return null;
     }
 
     public JComponent getComponent() {

@@ -4,15 +4,20 @@ import com.intellij.ide.wizard.AbstractWizard;
 import com.intellij.ide.wizard.Step;
 import liquibase.database.Database;
 import liquibase.database.structure.DatabaseObject;
+import org.liquibase.ide.common.IdeFacade;
+import org.liquibase.ide.common.WizardPage;
 import org.liquibase.ide.common.change.action.BaseRefactorAction;
 import org.liquibase.ide.common.change.wizard.RefactorChangeExecutor;
 import org.liquibase.ide.common.change.wizard.RefactorWizard;
 import org.liquibase.ide.common.change.wizard.page.RefactorWizardPage;
-import org.liquibase.ide.common.IdeFacade;
 import org.liquibase.intellij.plugin.LiquibaseProjectComponent;
 import org.liquibase.intellij.plugin.change.wizard.page.ChangeMetaDataWizardPage;
 import org.liquibase.intellij.plugin.change.wizard.page.IntellijRefactorWizardPage;
 
+import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.text.JTextComponent;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -22,46 +27,60 @@ public class IntellijRefactorWizard extends AbstractWizard<Step> {
     private Database database;
     private DatabaseObject selectedObject;
 
-    private RefactorWizard refactorWizard;
     private BaseRefactorAction action;
     private RefactorWizardPage[] pages;
 
     public IntellijRefactorWizard(RefactorWizard refactorWizard, DatabaseObject selectedObject, Database database, BaseRefactorAction action) {
         super(refactorWizard.getTitle(), LiquibaseProjectComponent.getInstance().getProject());
-        this.refactorWizard = refactorWizard;
         this.database = database;
         this.selectedObject = selectedObject;
         this.action = action;
 
         pages = refactorWizard.getPages();
-        for (RefactorWizardPage page : pages) {
+        for (final RefactorWizardPage page : pages) {
             addStep(new IntellijRefactorWizardPage(page));
+            addValidationListeners(page);
         }
 
         metaDataPage = new ChangeMetaDataWizardPage(LiquibaseProjectComponent.getInstance().getProject());
         addStep(metaDataPage);
+        addValidationListeners(metaDataPage);
 
         getFinishButton().addActionListener(new FinishListener());
         init();
+        validateWizardPages();
     }
 
-//    public IntellijRefactorWizard(String title, Project project, Database database, Connection connection, Object selectedObject, BaseRefactorWizardPage... additionalPages) {
-//        super(title, project);
-//        this.database = database;
-//        this.connection = connection;
-//        this.selectedObject = selectedObject;
-//        System.out.println("Database is: " + database);
-//
-//        for (BaseRefactorWizardPage page : createPages()) {
-//            addStep(page);
-//        }
-//
-//        metaDataPage = new ChangeMetaDataWizardPage(project);
-//        addStep(metaDataPage);
-//
-//        getFinishButton().addActionListener(new FinishListener());
-//        init();
-//    }
+    private void addValidationListeners(WizardPage page) {
+        JComponent[] validationComponents = page.getValidationComponents();
+        if (validationComponents != null) {
+            for (JComponent component : validationComponents) {
+                if (component instanceof JTextComponent) {
+                    ((JTextComponent) component).getDocument().addDocumentListener(new DocumentListener() {
+                        public void insertUpdate(DocumentEvent e) {
+                            validateWizardPages();
+                        }
+
+                        public void removeUpdate(DocumentEvent e) {
+                            validateWizardPages();
+                        }
+
+                        public void changedUpdate(DocumentEvent e) {
+                            validateWizardPages();
+                        }
+                    });
+                } else if (component instanceof JButton) {
+                    ((JButton) component).addActionListener(new ActionListener() {
+                        public void actionPerformed(ActionEvent e) {
+                            validateWizardPages();
+                        }
+                    });
+                } else {
+                    throw new RuntimeException("Unknown component type to watch for validation: "+component.getClass().getName());
+                }
+            }
+        }
+    }
 
     public Database getDatabase() {
         return database;
@@ -69,6 +88,20 @@ public class IntellijRefactorWizard extends AbstractWizard<Step> {
 
     protected String getHelpID() {
         return null;
+    }
+
+    private void validateWizardPages() {
+        boolean isValid = true;
+        for (RefactorWizardPage page : pages) {
+            if (!page.isValid()) {
+                isValid = false;
+            }
+        }
+        if (!metaDataPage.isValid()) {
+            isValid = false;
+        }
+
+        getFinishButton().setEnabled(isValid);
     }
 
     private class FinishListener implements ActionListener {

@@ -5,8 +5,13 @@ import liquibase.change.ConstraintsConfig;
 import liquibase.util.StringUtils;
 
 import javax.swing.*;
+import javax.swing.event.DocumentListener;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
+import javax.swing.event.DocumentEvent;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
@@ -31,14 +36,58 @@ public class AddTableWizardPageImpl implements AddTableWizardPage {
     private static final int IS_PRIMARY_KEY_COLUMN = 3;
     private static final int IS_AUTO_INCREMENT_COLUMN = 4;
     private static final int DEFAULT_VALUE_COLUMN = 5;
+    private Color defaultTableHeaderColor;
 
     public JPanel getMainPanel() {
         DefaultTableModel tableModel = new DefaultTableModel(new Object[]{"Column Name", "Data Type", "Nullable", "PK", "Auto-Increment", "Default Value"}, 0);
         columnTable.setModel(tableModel);
 
         addColumnButton.addActionListener(new AddColumnActionListener());
+        columnNameTextField.getDocument().addDocumentListener(new DocumentListener() {
+            public void insertUpdate(DocumentEvent e) {
+                validateForAddColumnButton();
+            }
+
+            public void removeUpdate(DocumentEvent e) {
+                validateForAddColumnButton();
+            }
+
+            public void changedUpdate(DocumentEvent e) {
+                validateForAddColumnButton();
+            }
+        });
+        
+        dataTypeTextField.getDocument().addDocumentListener(new DocumentListener() {
+            public void insertUpdate(DocumentEvent e) {
+                validateForAddColumnButton();
+            }
+
+            public void removeUpdate(DocumentEvent e) {
+                validateForAddColumnButton();
+            }
+
+            public void changedUpdate(DocumentEvent e) {
+                validateForAddColumnButton();
+            }
+        });
+
+        columnTable.getModel().addTableModelListener(new TableModelListener() {
+            public void tableChanged(TableModelEvent e) {
+                if (columnTable.getModel().getRowCount() == 0) {
+                    columnTable.setBackground(Color.PINK);
+                } else {
+                    columnTable.setBackground(Color.WHITE);
+                }
+            }
+        });
+        columnTable.setBackground(Color.PINK);
 
         return mainPanel;
+    }
+
+    private void validateForAddColumnButton() {
+        addColumnButton.setEnabled(columnNameTextField.getDocument().getLength() > 0
+                && dataTypeTextField.getDocument().getLength() > 0);
     }
 
 
@@ -108,5 +157,34 @@ public class AddTableWizardPageImpl implements AddTableWizardPage {
             }
 
         }
+    }
+
+    public boolean isValid() {
+        boolean isValid = true;
+        if (tableNameTextField.getDocument().getLength() == 0) {
+            tableNameTextField.setBackground(Color.PINK);
+            isValid = false;
+        } else {
+            tableNameTextField.setBackground(Color.WHITE);
+        }
+
+        if (columnTable.getRowCount() == 0) {
+            if (defaultTableHeaderColor == null) {
+                defaultTableHeaderColor = columnTable.getTableHeader().getBackground();
+            }
+            columnTable.getTableHeader().setBackground(Color.PINK);
+            isValid = false;
+        } else {
+            columnTable.getTableHeader().setBackground(defaultTableHeaderColor);
+        }
+
+        return isValid;
+    }
+
+    public JComponent[] getValidationComponents() {
+        return new JComponent[] {
+                tableNameTextField,
+                addColumnButton
+        };
     }
 }

@@ -4,9 +4,9 @@ import liquibase.change.AddDefaultValueChange;
 import liquibase.change.Change;
 import liquibase.database.structure.Column;
 import org.liquibase.ide.common.change.wizard.RefactorWizard;
-import org.liquibase.ide.common.change.wizard.page.AddDefaultValueWizardPage;
-import org.liquibase.ide.common.change.wizard.page.AddDefaultValueWizardPageImpl;
 import org.liquibase.ide.common.change.wizard.page.RefactorWizardPage;
+import org.liquibase.ide.common.change.wizard.page.SingleValueWizardPage;
+import org.liquibase.ide.common.change.wizard.page.SingleValueWizardPageImpl;
 
 public class AddDefaultValueAction extends BaseColumnRefactorAction {
     public AddDefaultValueAction() {
@@ -14,14 +14,14 @@ public class AddDefaultValueAction extends BaseColumnRefactorAction {
     }
 
     public RefactorWizard createRefactorWizard(Column selectedColumn) {
-        return new RefactorWizard("Add default value to "+selectedColumn, new AddDefaultValueWizardPageImpl());
+        return new RefactorWizard("Add default value to "+selectedColumn, new SingleValueWizardPageImpl("New DefaultValue"));
     }
 
     protected Change[] createChanges(Column column, RefactorWizardPage... pages) {
         AddDefaultValueChange change = new AddDefaultValueChange();
         change.setTableName(column.getTable().getName());
         change.setColumnName(column.getName());
-        change.setDefaultValue(((AddDefaultValueWizardPage) pages[0]).getDefaultValue());
+        change.setDefaultValue(((SingleValueWizardPage) pages[0]).getValue());
 
         return new Change[] { change };
     }
