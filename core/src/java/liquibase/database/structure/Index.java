@@ -7,7 +7,7 @@ import java.util.List;
 
 public class Index implements DatabaseObject, Comparable<Index> {
     private String name;
-    private String tableName;
+    private Table table;
     private List<String> columns = new ArrayList<String>();
     private String filterCondition;
 
@@ -20,12 +20,12 @@ public class Index implements DatabaseObject, Comparable<Index> {
         this.name = name;
     }
 
-    public String getTableName() {
-        return tableName;
+    public Table getTable() {
+        return table;
     }
 
-    public void setTableName(String tableName) {
-        this.tableName = tableName;
+    public void setTable(Table table) {
+        this.table = table;
     }
 
     public List<String> getColumns() {
@@ -56,19 +56,19 @@ public class Index implements DatabaseObject, Comparable<Index> {
             }
         }
 
-        return equals && tableName.equalsIgnoreCase(index.tableName);
+        return equals && table.getName().equalsIgnoreCase(index.table.getName());
 
     }
 
     public int hashCode() {
         int result;
-        result = tableName.toUpperCase().hashCode();
+        result = table.getName().toUpperCase().hashCode();
         result = 31 * result + columns.hashCode();
         return result;
     }
 
     public int compareTo(Index o) {
-        int returnValue = this.getTableName().compareTo(o.getTableName());
+        int returnValue = this.table.getName().compareTo(o.table.getName());
 
         if (returnValue == 0) {
             returnValue = this.getName().compareTo(o.getName());
@@ -85,9 +85,9 @@ public class Index implements DatabaseObject, Comparable<Index> {
 
     public String toString() {
         StringBuffer stringBuffer = new StringBuffer();
-        stringBuffer.append(getName() + " on " + getTableName() + "(");
+        stringBuffer.append(getName()).append(" on ").append(table.getName()).append("(");
         for (String column : columns) {
-            stringBuffer.append(column + ", ");
+            stringBuffer.append(column).append(", ");
         }
         stringBuffer.delete(stringBuffer.length() - 2, stringBuffer.length());
         stringBuffer.append(")");

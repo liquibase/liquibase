@@ -75,7 +75,7 @@ public class DropIndexChange extends AbstractChange {
 
     public Set<DatabaseObject> getAffectedDatabaseObjects() {
         Index index = new Index();
-        index.setTableName(tableName);
+        index.setTable(new Table(tableName));
         index.setName(indexName);
 
         Table table= new Table(getTableName());

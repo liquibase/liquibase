@@ -331,7 +331,7 @@ public class DiffResult {
         for (Index index : getUnexpectedIndexes()) {
 
             DropIndexChange change = new DropIndexChange();
-            change.setTableName(index.getTableName());
+            change.setTableName(index.getTable().getName());
             change.setIndexName(index.getName());
 
             changes.add(change);
@@ -342,7 +342,7 @@ public class DiffResult {
         for (Index index : getMissingIndexes()) {
 
             CreateIndexChange change = new CreateIndexChange();
-            change.setTableName(index.getTableName());
+            change.setTableName(index.getTable().getName());
             change.setIndexName(index.getName());
 
             for (String columnName : index.getColumns()) {
@@ -358,7 +358,7 @@ public class DiffResult {
         for (PrimaryKey pk : getUnexpectedPrimaryKeys()) {
 
             DropPrimaryKeyChange change = new DropPrimaryKeyChange();
-            change.setTableName(pk.getTableName());
+            change.setTableName(pk.getTable().getName());
             change.setConstraintName(pk.getName());
 
             changes.add(change);
@@ -369,7 +369,7 @@ public class DiffResult {
         for (PrimaryKey pk : getMissingPrimaryKeys()) {
 
             AddPrimaryKeyChange change = new AddPrimaryKeyChange();
-            change.setTableName(pk.getTableName());
+            change.setTableName(pk.getTable().getName());
             change.setConstraintName(pk.getName());
             change.setColumnNames(pk.getColumnNames());
 
@@ -567,7 +567,7 @@ public class DiffResult {
 
                     PrimaryKey pkToRemove = null;
                     for (PrimaryKey pk : getMissingPrimaryKeys()) {
-                        if (pk.getTableName().equalsIgnoreCase(missingTable.getName())) {
+                        if (pk.getTable().getName().equalsIgnoreCase(missingTable.getName())) {
                             pkToRemove = pk;
                         }
                     }

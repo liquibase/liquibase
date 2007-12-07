@@ -69,6 +69,9 @@ public class LiquibaseProjectComponent implements ProjectComponent, JDOMExternal
         PopupMenuManager.getInstance().addAction(createRefactorMenu(liquibase.database.structure.Table.class), Table.class);
         PopupMenuManager.getInstance().addAction(createRefactorMenu(liquibase.database.structure.Column.class), Column.class);
         PopupMenuManager.getInstance().addAction(createRefactorMenu(liquibase.database.structure.ForeignKey.class), ForeignKey.class);
+        PopupMenuManager.getInstance().addAction(createRefactorMenu(liquibase.database.structure.PrimaryKey.class), PrimaryKey.class);
+        PopupMenuManager.getInstance().addAction(createRefactorMenu(liquibase.database.structure.Index.class), Index.class);
+//        PopupMenuManager.getInstance().addAction(createRefactorMenu(liquibase.database.structure.View.class), Table.class); //dbhelper doesn't tell the difference between tables and views
 //        PopupMenuManager.getInstance().getActions(DBTree.class)
 
         try {
@@ -143,6 +146,16 @@ public class LiquibaseProjectComponent implements ProjectComponent, JDOMExternal
 
         //fk actions
         refactorActionGroup.addAction(new IntellijActionWrapper(new DropForeignKeyConstraintAction(), dbObjectType));
+
+        //pk actions
+        refactorActionGroup.addAction(new IntellijActionWrapper(new DropPrimaryKeyAction(), dbObjectType));
+
+        //index actions
+        refactorActionGroup.addAction(new IntellijActionWrapper(new DropIndexAction(), dbObjectType));
+
+        //view actions
+        refactorActionGroup.addAction(new IntellijActionWrapper(new DropViewAction(), dbObjectType));
+        refactorActionGroup.addAction(new IntellijActionWrapper(new RenameViewAction(), dbObjectType));
 
         return refactorActionGroup;
     }
