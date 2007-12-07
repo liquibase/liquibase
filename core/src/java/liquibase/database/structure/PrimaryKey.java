@@ -8,7 +8,7 @@ import java.util.List;
 public class PrimaryKey implements DatabaseObject, Comparable<PrimaryKey> {
     private String name;
     private List<String> columnNames = new ArrayList<String>();
-    private String tableName;
+    private Table table;
 
 
     public String getName() {
@@ -32,17 +32,17 @@ public class PrimaryKey implements DatabaseObject, Comparable<PrimaryKey> {
         this.columnNames.set(position, columnName);
     }
 
-    public String getTableName() {
-        return tableName;
+    public Table getTable() {
+        return table;
     }
 
-    public void setTableName(String tableName) {
-        this.tableName = tableName;
+    public void setTable(Table table) {
+        this.table = table;
     }
 
 
     public int compareTo(PrimaryKey o) {
-        int returnValue = this.getTableName().compareTo(o.getTableName());
+        int returnValue = this.getTable().getName().compareTo(o.getTable().getName());
         if (returnValue == 0) {
             returnValue = this.getColumnNames().compareTo(o.getColumnNames());
         }
@@ -60,19 +60,19 @@ public class PrimaryKey implements DatabaseObject, Comparable<PrimaryKey> {
 
         PrimaryKey that = (PrimaryKey) o;
 
-        return !(getColumnNames() != null ? !getColumnNames().equalsIgnoreCase(that.getColumnNames()) : that.getColumnNames() != null) && !(tableName != null ? !tableName.equalsIgnoreCase(that.tableName) : that.tableName != null);
+        return !(getColumnNames() != null ? !getColumnNames().equalsIgnoreCase(that.getColumnNames()) : that.getColumnNames() != null) && !(getTable().getName() != null ? !getTable().getName().equalsIgnoreCase(that.getTable().getName()) : that.getTable().getName() != null);
 
     }
 
     public int hashCode() {
         int result;
         result = (getColumnNames() != null ? getColumnNames().toUpperCase().hashCode() : 0);
-        result = 31 * result + (tableName != null ? tableName.toUpperCase().hashCode() : 0);
+        result = 31 * result + (table.getName() != null ? table.getName().toUpperCase().hashCode() : 0);
         return result;
     }
 
     public String toString() {
-        return getName() + " on " + getTableName() + "(" + getColumnNames() + ")";
+        return getName() + " on " + getTable().getName() + "(" + getColumnNames() + ")";
     }
 
     public List<String> getColumnNamesAsList() {

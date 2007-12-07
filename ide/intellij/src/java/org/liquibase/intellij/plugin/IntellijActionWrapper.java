@@ -10,10 +10,7 @@ import dbhelp.plugin.action.portable.PortableAction;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
-import liquibase.database.structure.Column;
-import liquibase.database.structure.DatabaseObject;
-import liquibase.database.structure.ForeignKey;
-import liquibase.database.structure.Table;
+import liquibase.database.structure.*;
 import liquibase.exception.LiquibaseException;
 import org.liquibase.ide.common.IdeFacade;
 import org.liquibase.ide.common.action.BaseDatabaseAction;
@@ -130,10 +127,19 @@ public class IntellijActionWrapper extends PortableAction {
                 return DatabaseFactory.getInstance().findCorrectDatabaseImplementation(((Schema) selectedObject).getDatabase().getConnection());
             } else if (selectedObject instanceof dbhelp.db.Table) {
                 dbhelp.db.Table selectedTable = (dbhelp.db.Table) selectedObject;
+                if (selectedTable.getTableType().equals("VIEW")) {
+                    return createViewObject(selectedTable);
+                }
                 return createTableObject(selectedTable);
             } else if (selectedObject instanceof dbhelp.db.ForeignKey) {
                 dbhelp.db.ForeignKey selectedFK = (dbhelp.db.ForeignKey) selectedObject;
                 return createForeignKeyObject(selectedFK);
+            } else if (selectedObject instanceof dbhelp.db.PrimaryKey) {
+                dbhelp.db.PrimaryKey selectedPK = (dbhelp.db.PrimaryKey) selectedObject;
+                return createPrimaryKeyObject(selectedPK);
+            } else if (selectedObject instanceof dbhelp.db.Index) {
+                dbhelp.db.Index selectedIndex = (dbhelp.db.Index) selectedObject;
+                return createIndexObject(selectedIndex);
             } else if (selectedObject instanceof AbstractDBObject.ProfileNode) {
                 return DatabaseFactory.getInstance().findCorrectDatabaseImplementation(((AbstractDBObject.ProfileNode) selectedObject).getDatabase().getConnection());
             } else {
@@ -168,6 +174,12 @@ public class IntellijActionWrapper extends PortableAction {
         return table;
     }
 
+    private View createViewObject(dbhelp.db.Table selectedTable) {
+        View view = new View(selectedTable.getName());
+        view.setDatabase(getSelectedDatabase());
+        return view;
+    }
+
     private ForeignKey createForeignKeyObject(dbhelp.db.ForeignKey selectedFK) {
         ForeignKey fk = new ForeignKey();
         fk.setName(selectedFK.getFkName());
@@ -184,6 +196,33 @@ public class IntellijActionWrapper extends PortableAction {
 
         fk.setDeferrable(selectedFK.getDeferrability() == 1);
         return fk;
+    }
+
+    private Index createIndexObject(dbhelp.db.Index selectedIndex) {
+        Index index = new Index();
+        index.setName(selectedIndex.getIndexName());
+
+        Table table = new Table(selectedIndex.getName());
+        table.setDatabase(getSelectedDatabase());
+        index.setTable(table);
+
+        index.getColumns().add(selectedIndex.getColumnName());
+        index.setFilterCondition(selectedIndex.getFilterCondition());
+
+        return index;
+    }
+
+    private PrimaryKey createPrimaryKeyObject(dbhelp.db.PrimaryKey selectedPK) {
+        PrimaryKey pk = new PrimaryKey();
+        pk.setName(selectedPK.getPkName());
+
+        Table table = new Table(selectedPK.getTableName());
+        table.setDatabase(getSelectedDatabase());
+        pk.setTable(table);
+
+        pk.addColumnName(1, selectedPK.getColumnName());
+
+        return pk;
     }
 
     public Database getSelectedDatabase() {

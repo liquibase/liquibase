@@ -1,12 +1,33 @@
 package liquibase.database.structure;
 
+import liquibase.database.Database;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class View implements DatabaseObject, Comparable<View> {
+    private Database database;
     private String name;
     private List<Column> columns = new ArrayList<Column>();
     private String definition;
+
+
+    public View(String name) {
+        this.name = name;
+    }
+
+
+    public View() {
+    }
+
+
+    public Database getDatabase() {
+        return database;
+    }
+
+    public void setDatabase(Database database) {
+        this.database = database;
+    }
 
     public String getName() {
         return name;

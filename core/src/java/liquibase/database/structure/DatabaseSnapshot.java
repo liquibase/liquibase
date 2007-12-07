@@ -274,7 +274,7 @@ public class DatabaseSnapshot {
             if (columnInfo.getTable() == null) {
                 continue;
             }
-            if (pk.getTableName().equalsIgnoreCase(columnInfo.getTable().getName())) {
+            if (pk.getTable().getName().equalsIgnoreCase(columnInfo.getTable().getName())) {
                 if (pk.getColumnNamesAsList().contains(columnInfo.getName())) {
                     return true;
                 }
@@ -381,7 +381,7 @@ public class DatabaseSnapshot {
                     indexInformation = indexMap.get(indexName);
                 } else {
                     indexInformation = new Index();
-                    indexInformation.setTableName(tableName);
+                    indexInformation.setTable(table);
                     indexInformation.setName(indexName);
                     indexInformation.setFilterCondition(filterCondition);
                     indexMap.put(indexName, indexInformation);
@@ -401,7 +401,7 @@ public class DatabaseSnapshot {
         //remove PK indexes
         for (Index index : indexes) {
             for (PrimaryKey pk : primaryKeys) {
-                if (index.getTableName().equalsIgnoreCase(pk.getTableName())
+                if (index.getTable().getName().equalsIgnoreCase(pk.getTable().getName())
                         && index.getColumnNames().equals(pk.getColumnNames())) {
                     indexesToRemove.add(index);
                 }
@@ -426,7 +426,7 @@ public class DatabaseSnapshot {
 
                 boolean foundExistingPK = false;
                 for (PrimaryKey pk : foundPKs) {
-                    if (pk.getTableName().equals(tableName)) {
+                    if (pk.getTable().getName().equals(tableName)) {
                         pk.addColumnName(position - 1, columnName);
 
                         foundExistingPK = true;
@@ -435,7 +435,7 @@ public class DatabaseSnapshot {
 
                 if (!foundExistingPK) {
                     PrimaryKey primaryKey = new PrimaryKey();
-                    primaryKey.setTableName(tableName);
+                    primaryKey.setTable(table);
                     primaryKey.addColumnName(position - 1, columnName);
                     primaryKey.setName(rs.getString("PK_NAME"));
 
