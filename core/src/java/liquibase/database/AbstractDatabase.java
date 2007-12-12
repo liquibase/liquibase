@@ -1095,4 +1095,25 @@ public abstract class AbstractDatabase implements Database {
     public String escapeViewName(String schemaName, String viewName) {
         return escapeTableName(schemaName, viewName);
     }
+
+    public boolean isColumnAutoIncrement(String schemaName, String tableName, String columnName) throws SQLException {
+        if (!supportsAutoIncrement()) {
+            return false;
+        }
+
+        boolean autoIncrement = false;
+
+        ResultSet selectRS = null;
+        try {
+            selectRS = getConnection().createStatement().executeQuery("SELECT " + columnName + " FROM " + escapeTableName(schemaName, tableName) + " WHERE 1 = 0");
+            ResultSetMetaData meta = selectRS.getMetaData();
+            autoIncrement = meta.isAutoIncrement(1);
+        } finally {
+            if (selectRS != null) {
+                selectRS.close();
+            }
+        }
+
+        return autoIncrement;
+    }
 }

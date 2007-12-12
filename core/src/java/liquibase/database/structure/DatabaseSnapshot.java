@@ -247,18 +247,7 @@ public class DatabaseSnapshot {
 
             columnInfo.setPrimaryKey(isPrimaryKey(columnInfo));
 
-            if (database.supportsAutoIncrement()) {
-                ResultSet selectRS = null;
-                try {
-                    selectRS = selectStatement.executeQuery("SELECT " + columnName + " FROM " + database.escapeTableName(schema, tableName) + " WHERE 1 = 0");
-                    ResultSetMetaData meta = selectRS.getMetaData();
-                    columnInfo.setAutoIncrement(meta.isAutoIncrement(1));
-                } finally {
-                    if (selectRS != null) {
-                        selectRS.close();
-                    }
-                }
-            }
+            columnInfo.setAutoIncrement(database.isColumnAutoIncrement(schema, tableName, columnName));
 
             columnInfo.setTypeName(database.getColumnType(rs.getString("TYPE_NAME"), columnInfo.isAutoIncrement()));            
 

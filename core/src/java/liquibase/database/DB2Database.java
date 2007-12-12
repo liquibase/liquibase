@@ -5,8 +5,7 @@ import liquibase.database.sql.SqlStatement;
 import liquibase.exception.DateParseException;
 import liquibase.exception.JDBCException;
 
-import java.sql.Connection;
-import java.sql.Types;
+import java.sql.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
@@ -190,7 +189,36 @@ public class DB2Database extends AbstractDatabase {
         String pkName = super.generatePrimaryKeyName(tableName);
         if (pkName.length() > 18) {
             pkName = pkName.substring(0, 17);
-        }        
+        }
         return pkName;
+    }
+
+    public boolean isColumnAutoIncrement(String schemaName, String tableName, String columnName) throws SQLException {
+        boolean autoIncrement = false;
+
+        PreparedStatement stmt = null;
+        try {
+            stmt = getConnection().prepareStatement("SELECT IDENTITY FROM SYSCAT.COLUMNS WHERE TABSCHEMA = ? AND TABNAME = ? AND COLNAME = ? AND HIDDEN != 'S'");
+            stmt.setString(1, schemaName);
+            stmt.setString(2, tableName);
+            stmt.setString(3, columnName);
+
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                String identity = rs.getString("IDENTITY");
+                if (identity.equalsIgnoreCase("Y")) {
+                    autoIncrement = true;
+                }
+            }
+            rs.close();
+        } finally {
+            if (stmt != null)
+            {
+                stmt.close();
+            }
+        }
+
+        return autoIncrement;
     }
 }

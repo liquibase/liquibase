@@ -9,6 +9,7 @@ import liquibase.migrator.Migrator;
 
 import java.io.IOException;
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.Date;
 
@@ -208,4 +209,6 @@ public interface Database extends DatabaseObject {
     String escapeSequenceName(String schemaName, String sequenceName);
 
     String escapeViewName(String schemaName, String viewName);
+
+    boolean isColumnAutoIncrement(String schemaName, String tableName, String columnName) throws SQLException;
 }
