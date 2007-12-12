@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.sql.SQLException;
 import java.util.Date;
 
 public class MockDatabase implements Database {
@@ -298,5 +299,9 @@ public class MockDatabase implements Database {
 
     public String escapeViewName(String schemaName, String viewName) {
         return escapeTableName(schemaName, viewName);
+    }
+
+    public boolean isColumnAutoIncrement(String schemaName, String tableName, String columnName) throws SQLException {
+        return false;
     }
 }
