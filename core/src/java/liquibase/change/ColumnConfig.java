@@ -1,6 +1,7 @@
 package liquibase.change;
 
 import liquibase.database.Database;
+import liquibase.database.sql.ComputedNumericValue;
 import liquibase.util.ISODateFormat;
 import liquibase.util.StringUtils;
 import org.w3c.dom.Document;
@@ -70,7 +71,11 @@ public class ColumnConfig {
         if (valueNumeric == null) {
             this.valueNumeric = null;
         } else {
-            this.valueNumeric = NumberFormat.getInstance().parse(valueNumeric);
+            if (valueNumeric.matches("\\d+\\.?\\d*")) {
+                this.valueNumeric = NumberFormat.getInstance().parse(valueNumeric);
+            } else {
+                this.valueNumeric = new ComputedNumericValue(valueNumeric);
+            }
         }
     }
 
