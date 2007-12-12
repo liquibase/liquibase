@@ -429,6 +429,7 @@ public class Migrator {
                     outputSQLWriter.write("-- Change Log: " + changeLogFile + StreamUtil.getLineSeparator());
                     outputSQLWriter.write("-- Ran at: " + DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(new Date()) + StreamUtil.getLineSeparator());
                     outputSQLWriter.write("-- Against: " + getDatabase().getConnectionUsername() + "@" + getDatabase().getConnectionURL() + StreamUtil.getLineSeparator());
+                    outputSQLWriter.write("-- LiquiBase version: "+getBuildVersion() + StreamUtil.getLineSeparator());
                     outputSQLWriter.write("--------------------------------------------------------------------------------------" + StreamUtil.getLineSeparator() + StreamUtil.getLineSeparator() + StreamUtil.getLineSeparator());
                     outputtedHeader = true;
                 }
