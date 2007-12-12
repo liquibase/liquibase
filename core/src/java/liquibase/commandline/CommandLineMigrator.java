@@ -207,7 +207,7 @@ public class CommandLineMigrator {
                 Object currentValue = field.get(this);
 
                 if (currentValue == null) {
-                    String value = entry.getValue().toString();
+                    String value = entry.getValue().toString().trim();
                     if (field.getType().equals(Boolean.class)) {
                         field.set(this, Boolean.valueOf(value));
                     } else {
@@ -544,7 +544,7 @@ public class CommandLineMigrator {
 
             driver = (Driver) Class.forName(this.driver, true, classLoader).newInstance();
         } catch (Exception e) {
-            throw new RuntimeException("Cannot get database driver: " + e.getMessage());
+            throw new RuntimeException("Cannot find database driver: " + e.getMessage());
         }
         Properties info = new Properties();
         info.put("user", username);
@@ -722,7 +722,7 @@ public class CommandLineMigrator {
         try {
             driverObject = (Driver) Class.forName(driver, true, classLoader).newInstance();
         } catch (Exception e) {
-            throw new RuntimeException("Cannot get database driver: " + e.getMessage());
+            throw new RuntimeException("Cannot find database driver: " + e.getMessage());
         }
 
         Properties info = new Properties();
