@@ -274,11 +274,6 @@ The available targets at the current stage:
 
     <!-- target: SITE -->
     <target name="site" depends="prepare">
-        <loadfile property="nav.main" srcFile="${src.dir}/site/nav/main.html"/>
-        <loadfile property="nav.manual" srcFile="${src.dir}/site/nav/manual.html"/>
-        <loadfile property="nav.ide" srcFile="${src.dir}/site/nav/ide.html"/>
-        <loadfile property="analytics" srcFile="${src.dir}/site/analytics.html"/>
-        <loadfile property="site.name" srcFile="${src.dir}/site/include/sitename.html"/>
 
         <copy todir="${release.site.dir}" filtering="true">
             <fileset dir="${src.dir}/site">
@@ -286,12 +281,7 @@ The available targets at the current stage:
                 <include name="**/*.htm"/>
             </fileset>
             <filterset id="site.filter.set">
-                <filter token="NAV.MAIN" value="${nav.main}"/>
-                <filter token="NAV.MANUAL" value="${nav.manual}"/>
-                <filter token="NAV.IDE" value="${nav.ide}"/>
-                <filter token="ANALYTICS" value="${analytics}"/>
                 <filter token="BUILD.VERSION" value="${build.version}"/>
-                <filter token="SITE_NAME" value="${site.name}"/>
             </filterset>
         </copy>
 
