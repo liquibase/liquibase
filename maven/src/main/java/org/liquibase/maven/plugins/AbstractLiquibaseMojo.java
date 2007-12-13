@@ -26,13 +26,13 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
 
   /**
    * Specifies the change log file to use for Liquibase.
-   * @parameter expression=${liquibase.changeLogFile}
+   * @parameter expression="${liquibase.changeLogFile}"
    */
   protected String changeLogFile;
 
   /**
    * The fully qualified name of the driver class to use to connect to the database.
-   * @parameter expression=${liquibase.driver}
+   * @parameter expression="${liquibase.driver}"
    */
   protected String driver;
 
@@ -63,7 +63,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
   /**
    * The Liquibase contexts to execute, which can be "," separated if multiple contexts
    * are required. If no context is specified then ALL contexts will be executed.
-   * @parameter expression=${liquibase.contexts} default-value=""
+   * @parameter expression="${liquibase.contexts}" default-value=""
    */
   protected String contexts;
 
@@ -78,7 +78,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
   /**
    * The Liquibase properties file used to configure the Liquibase
    * {@link liquibase.migrator.Migrator}.
-   * @parameter expression=${liquibase.propertiesFile}
+   * @parameter expression="${liquibase.propertiesFile}"
    */
   protected String propertiesFile;
 
@@ -240,6 +240,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     getLog().info("   password: " + password);
     getLog().info("   prompt on non-local database? " + promptOnNonLocalDatabase);
     getLog().info("   drop first? " + dropFirst);
+    getLog().info("   context(s): " + contexts);
   }
 
   /**
