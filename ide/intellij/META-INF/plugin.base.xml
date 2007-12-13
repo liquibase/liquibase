@@ -1,9 +1,9 @@
 <!DOCTYPE idea-plugin PUBLIC "Plugin/DTD" "http://plugins.intellij.net/plugin.dtd">
 <idea-plugin>
     <depends>DBHelper</depends>
-    <name>LiquiBase</name>
+    <name>LiquiBase Database Refactoring</name>
+    <id>LiquiBase</id>
     <description>LiquiBase Database Refactoring Plug-in for IntelliJ IDEA.
-        
         Adds a "Refactor" context menu to DBHelper's database explorer so you can refactor your database
         as easily as you refactor code.
 
@@ -12,11 +12,15 @@
 
         LiquiBase is a database-independent library that is designed to manage changes in a way that works well with multiple developers and code branching/merging.
 
-        For more information, see http://www.liquibase.org
+        For more information, see http://www.liquibase.org/ide/intellij
 
         Requires DBHelper plugin.</description>
-    <version>@BUILD.VERSION@.0</version>
-    <vendor url="http://www.liquibase.org" email="nathan@voxland.net">liquibase.org</vendor>
+    <version>@BUILD.VERSION@.2</version>
+    <change-notes>
+        1.4.1.2: Fixed bug in plugin deployment
+        1.4.1.1: Added additional refactorings and wizard validation
+    </change-notes>
+    <vendor url="http://www.liquibase.org/ide/intellij" email="nathan@voxland.net">liquibase.org</vendor>
     <idea-version since-build="3000"/>
     <project-components>
         <component>
