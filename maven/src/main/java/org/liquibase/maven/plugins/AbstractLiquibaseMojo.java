@@ -38,7 +38,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
 
   /**
    * The Database URL to connect to for executing Liquibase.
-   * @parameter expression=${liquibase.url}
+   * @parameter expression="${liquibase.url}"
    */
   protected String url;
 
