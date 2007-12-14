@@ -12,7 +12,6 @@ import liquibase.migrator.Migrator;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.*;
 import org.apache.maven.project.MavenProject;
-import org.apache.maven.project.MavenProjectHelper;
 
 /**
  * A base class for providing Liquibase {@link liquibase.migrator.Migrator} functionality.
@@ -23,6 +22,9 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
 
   public static final String LOG_SEPARATOR =
           "------------------------------------------------------------------------";
+
+  /** Suffix for fields that are representing a default value for a another field. */
+  private static final String DEFAULT_FIELD_SUFFIX = "Default";
 
   /**
    * Specifies the change log file to use for Liquibase.
@@ -59,6 +61,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
    * @parameter expression="${liquibase.dropFirst}" default-value="false"
    */
   protected boolean dropFirst;
+  private boolean dropFirstDefault = false;
 
   /**
    * The Liquibase contexts to execute, which can be "," separated if multiple contexts
@@ -66,6 +69,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
    * @parameter expression="${liquibase.contexts}" default-value=""
    */
   protected String contexts;
+  private String contextsDefault = "";
 
   /**
    * Controls the prompting of users as to whether or not they really want to run the
@@ -74,6 +78,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
    * @parameter expression="${liquibase.promptOnNonLocalDatabase}" default-value="true"
    */
   protected boolean promptOnNonLocalDatabase;
+  private boolean promptOnNonLocalDatabaseDefault = true;
 
   /**
    * The Liquibase properties file used to configure the Liquibase
@@ -86,9 +91,9 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
    * Flag allowing for the Liquibase properties file to override any settings provided in
    * the Maven plugin configuration. By default if a property is explicity specified it
    * is not overridden if it also appears in the properties file.
-   * @parameter expression="${liquibase.propertiesFileOverrides}" default-value="false"
+   * @parameter expression="${liquibase.propertyFileWillOverride}" default-value="false"
    */
-  protected boolean propertiesFileOverrides;
+  protected boolean propertyFileWillOverride;
 
   /**
    * The Maven project that plugin is running under.
@@ -101,9 +106,10 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
   /**
    * Allows for the maven project artifact to be included in the class loader for
    * obtaining the Liquibase property and DatabaseChangeLog files.
-   * @parameter default-value="true"
+   * @parameter expression="${liquibase.includeArtifact}" default-value="true"
    */
   protected boolean includeArtifact;
+  private boolean includeArtifactDefault = true;
 
   /**
    * Controls the verbosity of the output from invoking the plugin.
@@ -111,6 +117,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
    * @description Controls the verbosity of the plugin when executing
    */
   protected boolean verbose;
+  private boolean verboseDefault = false;
 
   public void execute() throws MojoExecutionException, MojoFailureException {
     getLog().info(LOG_SEPARATOR);
@@ -131,7 +138,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     }
 
     FileOpener mFO = new MavenFileOpener(artifactClassLoader);
-    FileOpener fsFO = new FileSystemFileOpener();
+    FileOpener fsFO = new FileSystemFileOpener(project.getBasedir().getAbsolutePath());
     CompositeFileOpener cfo = new CompositeFileOpener(mFO, fsFO);
 
     // Load the properties file if there is one, but only for values that the user has not
@@ -232,7 +239,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
    * be shown in verbose mode.
    */
   protected void printSettings() {
-    getLog().info("   properties file will override? " + propertiesFileOverrides);
+    getLog().info("   properties file will override? " + propertyFileWillOverride);
     getLog().info("   changeLogFile: " + changeLogFile);
     getLog().info("   driver: " + driver);
     getLog().info("   url: " + url);
@@ -275,7 +282,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     if (verbose) {
       getLog().info("Loading artfacts into URLClassLoader");
     }
-    Set urls = new HashSet();
+    Set<URL> urls = new HashSet<URL>();
 
     Set dependencies = project.getDependencyArtifacts();
     if (dependencies != null || !dependencies.isEmpty()) {
@@ -294,7 +301,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
       getLog().info(LOG_SEPARATOR);
     }
 
-    URL[] urlArray = (URL[])urls.toArray(new URL[urls.size()]);
+    URL[] urlArray = urls.toArray(new URL[urls.size()]);
     return new URLClassLoader(urlArray, getClass().getClassLoader());
   }
 
@@ -304,7 +311,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
    * @param artifact The Artifiact to resolve the file for.
    * @throws MalformedURLException If there is a problem creating the URL for the file.
    */
-  private void addArtifact(Set urls, Artifact artifact) throws MalformedURLException {
+  private void addArtifact(Set<URL> urls, Artifact artifact) throws MalformedURLException {
     File f = artifact.getFile();
     if (f != null) {
       URL fileURL = f.toURI().toURL();
@@ -352,18 +359,14 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
       try {
         key = (String)it.next();
         Field field = AbstractLiquibaseMojo.class.getDeclaredField(key);
-        Object currentValue = field.get(this);
 
-        if (currentValue == null) {
-          String value = props.get(key).toString();
-          if (field.getType().equals(Boolean.class)) {
-            field.set(this, Boolean.valueOf(value));
-          } else {
-            // Only set the value if the user has not already specified it or we are
-            // explicity overriding the setting.
-            if (propertiesFileOverrides || field.get(this) == null) {
-              field.set(this, value);
-            }
+        if (propertyFileWillOverride) {
+          getLog().debug("  properties file setting value: " + field.getName());
+          setFieldValue(field, props.get(key).toString());
+        } else {
+          if (!isCurrentFieldValueSpecified(field)) {
+            getLog().debug("  properties file setting value: " + field.getName());
+            setFieldValue(field, props.get(key).toString());
           }
         }
       }
@@ -372,6 +375,51 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         // May need to correct this to make it a more useful exception...
         throw new MojoExecutionException("Unknown parameter: '" + key + "'", e);
       }
+    }
+  }
+
+  /**
+   * This method will check to see if the user has specified a value different to that of
+   * the default value. This is not an ideal solution, but should cover most situations
+   * in the use of the plugin.
+   * @param f The Field to check if a user has specified a value for.
+   * @return <code>true</code> if the user has specified a value.
+   */
+  private boolean isCurrentFieldValueSpecified(Field f) throws IllegalAccessException {
+    Object currentValue = f.get(this);
+    if (currentValue == null) {
+      return false;
+    }
+
+    Object defaultValue = getDefaultValue(f);
+    if (defaultValue == null) {
+      return currentValue != null;
+    } else {
+      // There is a default value, check to see if the user has selected something other
+      // than the default
+      return !defaultValue.equals(f.get(this));
+    }
+  }
+
+  private Object getDefaultValue(Field field) throws IllegalAccessException {
+    List<Field> allFields = new ArrayList<Field>();
+    allFields.addAll(Arrays.asList(getClass().getDeclaredFields()));
+    allFields.addAll(Arrays.asList(AbstractLiquibaseMojo.class.getDeclaredFields()));
+
+    for (Field f : allFields) {
+      if (f.getName().equals(field.getName() + DEFAULT_FIELD_SUFFIX)) {
+        f.setAccessible(true);
+        return f.get(this);
+      }
+    }
+    return null;
+  }
+
+  private void setFieldValue(Field field, String value) throws IllegalAccessException {
+    if (field.getType().equals(Boolean.class)) {
+      field.set(this, Boolean.valueOf(value));
+    } else {
+      field.set(this, value);
     }
   }
 }
