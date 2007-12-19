@@ -47,6 +47,7 @@ public class IntellijActionWrapper extends PortableAction {
             Database selectedDatabase = getSelectedDatabase();
             if (action instanceof BaseRefactorAction) {
                 IntellijRefactorWizard wizard = new IntellijRefactorWizard(((BaseRefactorAction) action).createRefactorWizard(selectedDatabaseObject), selectedDatabaseObject, selectedDatabase, ((BaseRefactorAction) action));
+                wizard.setup();
                 wizard.pack();
                 wizard.show();
             } else if (action instanceof MigratorAction) {

@@ -9,8 +9,8 @@
 
   <!-- maps -->
   <maps>
-     <homeID>main</homeID>
-     <mapref location="Master.jhm"/>
+     <homeID>liquibase.index</homeID>
+     <mapref location="map.xml"/>
   </maps>
 
   <!-- views -->
@@ -18,7 +18,7 @@
     <name>TOC</name>
     <label>LiquiBase for IntelliJ IDEA Help</label>
     <type>javax.help.TOCView</type>
-    <data>MasterTOC.xml</data>
+    <data>toc.xml</data>
   </view>
 
 <!--  <view>-->

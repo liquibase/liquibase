@@ -1,0 +1,17 @@
+<?xml version='1.0' encoding='ISO-8859-1' ?>
+<!DOCTYPE map
+  PUBLIC "-//Sun Microsystems Inc.//DTD JavaHelp Map Version 1.0//EN" "http://java.sun.com/products/javahelp/map_1_0.dtd">
+
+<map version="1.0">
+
+    <mapID target="root" url="icons/icon_small.gif"/>
+    <mapID target="folder" url="clipart/bookClosedGreen.gif"/>
+    <mapID target="doc" url="clipart/list_shadow.gif"/>
+
+    <mapID target="liquibase.index" url="index.html" />
+    <mapID target="liquibase.core" url="liquibase/core.html" />
+	<mapID target="liquibase.refactoring" url="liquibase/refactoring.html" />
+	<mapID target="liquibase.commands" url="liquibase/commands.html" />
+    <mapID target="liquibase.overview" url="liquibase/overview.html" />
+
+</map>

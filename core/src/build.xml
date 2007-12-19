@@ -504,16 +504,6 @@ The available targets at the current stage:
         <fail if="unit.tests.failed"/>
     </target>
 
-    <target name="intellij" depends="prepare">
-        <delete file="${intellij.basedir}/META-INF/plugin.xml"/>
-
-        <copy file="${intellij.basedir}/META-INF/plugin.base.xml" tofile="${intellij.basedir}/META-INF/plugin.xml" filtering="true">
-            <filterset>
-                <filter token="BUILD.VERSION" value="${build.version}"/>
-            </filterset>
-        </copy>        
-    </target>
-
     <target name="maven" depends="prepare">
       <property environment="env"/>
         <echo>build version: ${build.version}</echo>

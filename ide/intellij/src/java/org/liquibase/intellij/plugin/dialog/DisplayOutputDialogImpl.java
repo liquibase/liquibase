@@ -26,8 +26,6 @@ public class DisplayOutputDialogImpl implements DisplayOutputDialog {
         dialog.outputArea.setText(output);
         builder.setCenterPanel(dialog.mainPanel);
 
-        builder.showModal(false);
-
-        builder.show();
+        builder.showNotModal();
     }
 }
