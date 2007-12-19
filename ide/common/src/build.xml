@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="liquibase-ide-common" default="compile">
+
+    <property file="build.local.properties"/>
+    <property file="build.properties"/>
+    <property file="../../intellij/src/build.properties"/>
+    <property file="../../../core/src/build.properties"/>
+
+    <target name="prepare">
+
+        <tstamp>
+            <format property="build.start" pattern="MM/DD/yyyy hh:mm aa"></format>
+        </tstamp>
+
+        <mkdir dir="${build.dir}"/>
+        <mkdir dir="${build.test.dir}"/>
+
+        <mkdir dir="${release.dir}"/>
+
+        <!-- Build classpath -->
+        <path id="classpath">
+            <fileset dir="${lib.dir}">
+                <include name="**/*.jar"/>
+            </fileset>
+            <pathelement location="${basedir}/../../../core/build"/>
+            <pathelement location="${build.dir}"/>
+            <pathelement path="${user.home}/.IntelliJIdea50/config/plugins/clover-idea5.jar"/>
+            <fileset dir="${release.dir}">
+                <include name="**/*.jar"/>
+            </fileset>
+            <fileset dir="${idea.home}/lib">
+                <include name="*.jar"/>
+            </fileset>
+        </path>
+    </target>
+
+    <!-- target: CLEAN -->
+    <target name="clean">
+        <property file="build.properties"/>
+
+        <delete dir="${build.dir}"/>
+        <delete dir="${build.test.dir}"/>
+
+        <delete dir="${release.dir}"/>
+    </target>
+
+    <!-- target: COMPILE -->
+    <target name="compile" depends="prepare">
+        <copy todir="${build.dir}" filtering="true">
+            <fileset dir="${src.dir}/java"
+                     includes="**/*.properties, **/*.xml, **/*.config, **/*.txt, **/*.jdo, **/*.tld, **/*.xsd, **/*.css, **/*.html, **/*.form"/>
+        </copy>
+        <copy todir="${build.dir}">
+            <fileset dir="${src.dir}/java" includes="**/*.jpg, **/*.png, **/*.gif"/>
+        </copy>
+        <copy todir="${build.dir}">
+            <fileset dir="${src.dir}/java" includes="**/help/**"/>
+        </copy>
+
+        <javac srcdir="${src.dir}/java" destdir="${build.dir}" deprecation="${deprecation}" debug="${debug}"
+               optimize="${optimize}" source="1.5">
+            <classpath refid="classpath"/>
+        </javac>
+
+        <mkdir dir="${build.test.dir}"/>
+        <javac srcdir="${src.dir}/java-test" destdir="${build.test.dir}" deprecation="${deprecation}"
+               debug="${debug}" optimize="${optimize}" source="1.5">
+            <classpath refid="classpath"/>
+        </javac>
+
+        <copy todir="${build.test.dir}">
+            <fileset dir="${src.dir}/java-test"
+                     includes="**/*.properties, **/*.xml, **/*.txt, **/*.config, **/*.tld, **/*.xsd,**/*.sql,**/*.css,**/*.html"/>
+        </copy>
+
+        <taskdef name="uidesigner" classname="com.intellij.uiDesigner.ant.Javac2">
+            <classpath refid="classpath"/>
+        </taskdef>
+
+        <uidesigner
+            destdir="${build.dir}"
+            debug="on"
+            source="1.5">
+            <src path="${src.dir}"/>
+            <include name="**/*.form"/>
+            <classpath refid="classpath"/>
+            <classpath>
+                <pathelement path="${build.dir}"/>
+                <pathelement path="${src.dir}"/>
+            </classpath>
+        </uidesigner>        
+    </target>
+</project>

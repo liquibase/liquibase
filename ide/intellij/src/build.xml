@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="liquibase-intellij" default="package">
+
+    <property file="build.local.properties"/>
+    <property file="build.properties"/>
+    <property file="../../../core/src/build.properties"/>
+
+    <target name="prepare">
+
+        <tstamp>
+            <format property="build.start" pattern="MM/DD/yyyy hh:mm aa"></format>
+        </tstamp>
+
+        <mkdir dir="${build.dir}"/>
+        <mkdir dir="${build.test.dir}"/>
+
+        <mkdir dir="${release.dir}"/>
+
+        <!-- Build classpath -->
+        <path id="classpath">
+            <fileset dir="${lib.dir}">
+                <include name="**/*.jar"/>
+            </fileset>
+            <pathelement location="${basedir}/../../common/build"/>
+            <pathelement location="${build.dir}"/>
+            <fileset dir="${user.home}/.IntelliJIdea70/config/plugins/">
+                <include name="**/*.jar"/>
+            </fileset>
+            <fileset dir="${release.dir}">
+                <include name="**/*.jar"/>
+            </fileset>
+            <fileset dir="${idea.home}/lib">
+                <include name="*.jar"/>
+            </fileset>
+        </path>
+
+        <delete file="${basedir}/../META-INF/plugin.xml"/>
+
+        <copy file="${basedir}/../META-INF/plugin.base.xml" tofile="${basedir}/../META-INF/plugin.xml" filtering="true">
+            <filterset>
+                <filter token="BUILD.VERSION" value="${build.version}"/>
+            </filterset>
+        </copy>                
+    </target>
+
+    <!-- target: CLEAN -->
+    <target name="clean">
+
+        <ant dir="${basedir}/../../common/src/" target="clean" inheritall="false" inheritrefs="false"/>
+
+        <property file="build.properties"/>
+
+        <delete dir="${build.dir}"/>
+        <delete dir="${build.test.dir}"/>
+
+        <delete dir="${release.dir}"/>
+    </target>
+
+    <!-- target: COMPILE -->
+    <target name="compile" depends="prepare">
+
+        <ant dir="${basedir}/../../common/src/" target="compile" inheritall="false" inheritrefs="false"/>
+
+        <copy todir="${build.dir}" filtering="true">
+            <filterset>
+                <filter token="BUILD.VERSION" value="${build.version}"/>
+            </filterset>
+            <fileset dir="${src.dir}/java"
+                     includes="**/*.properties, **/*.xml, **/*.config, **/*.txt, **/*.jdo, **/*.tld, **/*.xsd, **/*.css, **/*.html, **/*.form"/>
+        </copy>
+        <copy todir="${build.dir}">
+            <fileset dir="${src.dir}/java" includes="**/*.jpg, **/*.png, **/*.gif"/>
+        </copy>
+        <copy todir="${build.dir}">
+            <fileset dir="${src.dir}/java" includes="**/help/**"/>
+        </copy>
+
+        <javac srcdir="${src.dir}/java" destdir="${build.dir}" deprecation="${deprecation}" debug="${debug}"
+               optimize="${optimize}" source="1.5">
+            <classpath refid="classpath"/>
+        </javac>
+
+        <mkdir dir="${build.test.dir}"/>
+        <javac srcdir="${src.dir}/java-test" destdir="${build.test.dir}" deprecation="${deprecation}"
+               debug="${debug}" optimize="${optimize}" source="1.5">
+            <classpath refid="classpath"/>
+        </javac>
+
+        <copy todir="${build.test.dir}">
+            <fileset dir="${src.dir}/java-test"
+                     includes="**/*.properties, **/*.xml, **/*.txt, **/*.config, **/*.tld, **/*.xsd,**/*.sql,**/*.css,**/*.html"/>
+        </copy>
+
+        <taskdef name="uidesigner" classname="com.intellij.uiDesigner.ant.Javac2">
+            <classpath refid="classpath"/>
+        </taskdef>
+
+        <uidesigner
+            destdir="${build.dir}"
+            debug="on"
+            source="1.4">
+            <src path="${src.dir}"/>
+            <include name="**/*.form"/>
+            <classpath refid="classpath"/>
+            <classpath>
+                <pathelement path="${build.dir}"/>
+                <pathelement path="${src.dir}"/>
+            </classpath>
+        </uidesigner>        
+    </target>
+
+    <target name="package" depends="clean, compile">
+        <mkdir dir="${release.dir}/liquibase/"/>
+        <mkdir dir="${release.dir}/liquibase/lib/"/>
+        <mkdir dir="${release.dir}/liquibase/help/"/>
+
+        <jar destfile="${release.dir}/liquibase/lib/liquibase-intellij.jar">
+            <zipfileset dir="${basedir}/../../common/build"/>
+            <zipfileset dir="${build.dir}"/>
+            <zipfileset dir="${basedir}/../META-INF/" prefix="META-INF"/>
+        </jar>
+
+        <copy todir="${release.dir}/liquibase/lib/">
+          <fileset dir="${lib.dir}" includes="liquibase*.jar"/>
+        </copy>
+
+        <jar destfile="${release.dir}/liquibase/help/help.jar">
+            <zipfileset dir="help" excludes="**/*.jar"/>
+        </jar>
+
+        <zip destfile="${release.dir}/liquibase-intellij.zip" basedir="${release.dir}"
+             excludes="*.zip"/>
+
+        <jar destfile="${release.dir}/liquibase-intellij-src.zip">
+            <zipfileset dir="${basedir}/../../../"
+                        excludes="**/*.zip,
+                        **/*.swf,
+                        **/*.wnk,
+                        **/*.gz,
+                         maven/**,
+                         export/**,
+                         ide/eclipse/**,
+                         **/build/**,
+                         **/build-14/**,
+                         **/build-test/**,
+                         **/build-test-14/**,
+                         **/build-dbtest/**,
+                         **/build-dbtest-14/**,
+                         **/build-reports/**,
+                         **/release/**,
+                         **/maven-repository/**,
+                         **/package/**"/>
+        </jar>
+
+    </target>
+
+</project>

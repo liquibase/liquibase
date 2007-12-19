@@ -40,6 +40,8 @@ public class AddTableWizardPageImpl implements AddTableWizardPage {
 
     public JPanel getMainPanel() {
         DefaultTableModel tableModel = new DefaultTableModel(new Object[]{"Column Name", "Data Type", "Nullable", "PK", "Auto-Increment", "Default Value"}, 0);
+
+        
         columnTable.setModel(tableModel);
 
         addColumnButton.addActionListener(new AddColumnActionListener());

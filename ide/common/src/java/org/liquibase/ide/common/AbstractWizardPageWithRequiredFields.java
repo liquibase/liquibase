@@ -13,6 +13,9 @@ public abstract class AbstractWizardPageWithRequiredFields implements WizardPage
     public boolean isValid() {
         boolean isValid = true;
         for (final JComponent component : getValidationComponents()) {
+            if (component == null) {
+                continue;
+            }
             if (StringUtils.trimToNull(((JTextComponent) component).getText()) == null) {
                 isValid = false;
                 component.setBackground(Color.PINK);

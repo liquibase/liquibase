@@ -37,25 +37,33 @@ public class IntellijRefactorWizard extends AbstractWizard<Step> {
         this.action = action;
 
         pages = refactorWizard.getPages();
+
+        metaDataPage = new ChangeMetaDataWizardPage(LiquibaseProjectComponent.getInstance().getProject());
+        addValidationListeners(metaDataPage);
+
+        getFinishButton().addActionListener(new FinishListener());
+    }
+
+    public void setup() {
         for (final RefactorWizardPage page : pages) {
             addStep(new IntellijRefactorWizardPage(page));
             addValidationListeners(page);
         }
 
-        metaDataPage = new ChangeMetaDataWizardPage(LiquibaseProjectComponent.getInstance().getProject());
         addStep(metaDataPage);
-        addValidationListeners(metaDataPage);
 
-        getFinishButton().addActionListener(new FinishListener());
-        init();
         validateWizardPages();
+
+        init();
     }
 
     private void addValidationListeners(WizardPage page) {
         JComponent[] validationComponents = page.getValidationComponents();
         if (validationComponents != null) {
             for (JComponent component : validationComponents) {
-                if (component instanceof JTextComponent) {
+                if (component == null) {
+                    System.out.println("Cannot add validation to null component");
+                } else if (component instanceof JTextComponent) {
                     ((JTextComponent) component).getDocument().addDocumentListener(new DocumentListener() {
                         public void insertUpdate(DocumentEvent e) {
                             validateWizardPages();
@@ -87,7 +95,7 @@ public class IntellijRefactorWizard extends AbstractWizard<Step> {
     }
 
     protected String getHelpID() {
-        return null;
+        return "liquibase.refactoring";
     }
 
     private void validateWizardPages() {

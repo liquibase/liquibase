@@ -17,7 +17,6 @@ import dbhelp.plugin.idea.ProjectMain;
 import dbhelp.plugin.idea.utils.IDEAUtils;
 import liquibase.util.StringUtils;
 import org.jdom.Element;
-import org.jetbrains.annotations.NotNull;
 import org.liquibase.ide.common.IdeFacade;
 import org.liquibase.ide.common.action.*;
 import org.liquibase.ide.common.change.action.*;
@@ -62,17 +61,17 @@ public class LiquibaseProjectComponent implements ProjectComponent, JDOMExternal
 
 //        ProjectMain dbHelperProjectMain = ((ProjectMain) dbHelperComponent);
 
-        PopupMenuManager.getInstance().addAction(createLiquibaseMenu(liquibase.database.Database.class), DBTree.class);
+        ProjectMain.getInstance().getPopupMenuManager().addAction(createLiquibaseMenu(liquibase.database.Database.class), DBTree.class);
 
-        PopupMenuManager.getInstance().addAction(createRefactorMenu(liquibase.database.Database.class), Catalog.class);
-        PopupMenuManager.getInstance().addAction(createRefactorMenu(liquibase.database.Database.class), Schema.class);
-        PopupMenuManager.getInstance().addAction(createRefactorMenu(liquibase.database.structure.Table.class), Table.class);
-        PopupMenuManager.getInstance().addAction(createRefactorMenu(liquibase.database.structure.Column.class), Column.class);
-        PopupMenuManager.getInstance().addAction(createRefactorMenu(liquibase.database.structure.ForeignKey.class), ForeignKey.class);
-        PopupMenuManager.getInstance().addAction(createRefactorMenu(liquibase.database.structure.PrimaryKey.class), PrimaryKey.class);
-        PopupMenuManager.getInstance().addAction(createRefactorMenu(liquibase.database.structure.Index.class), Index.class);
-//        PopupMenuManager.getInstance().addAction(createRefactorMenu(liquibase.database.structure.View.class), Table.class); //dbhelper doesn't tell the difference between tables and views
-//        PopupMenuManager.getInstance().getActions(DBTree.class)
+        ProjectMain.getInstance().getPopupMenuManager().addAction(createRefactorMenu(liquibase.database.Database.class), Catalog.class);
+        ProjectMain.getInstance().getPopupMenuManager().addAction(createRefactorMenu(liquibase.database.Database.class), Schema.class);
+        ProjectMain.getInstance().getPopupMenuManager().addAction(createRefactorMenu(liquibase.database.structure.Table.class), Table.class);
+        ProjectMain.getInstance().getPopupMenuManager().addAction(createRefactorMenu(liquibase.database.structure.Column.class), Column.class);
+        ProjectMain.getInstance().getPopupMenuManager().addAction(createRefactorMenu(liquibase.database.structure.ForeignKey.class), ForeignKey.class);
+        ProjectMain.getInstance().getPopupMenuManager().addAction(createRefactorMenu(liquibase.database.structure.PrimaryKey.class), PrimaryKey.class);
+        ProjectMain.getInstance().getPopupMenuManager().addAction(createRefactorMenu(liquibase.database.structure.Index.class), Index.class);
+//        ProjectMain.getInstance().getPopupMenuManager().addAction(createRefactorMenu(liquibase.database.structure.View.class), Table.class); //dbhelper doesn't tell the difference between tables and views
+//        ProjectMain.getInstance().getPopupMenuManager().getActions(DBTree.class)
 
         try {
             //this is ugly, but I don't see any way to access the DBTree nicely
@@ -128,7 +127,7 @@ public class LiquibaseProjectComponent implements ProjectComponent, JDOMExternal
         //table actions
         refactorActionGroup.addAction(new IntellijActionWrapper(new AddColumnAction(), dbObjectType));
         refactorActionGroup.addAction(new IntellijActionWrapper(new DropTableAction(), dbObjectType));
-        refactorActionGroup.addAction(new IntellijActionWrapper(new RenameTableAction(), dbObjectType));        
+        refactorActionGroup.addAction(new IntellijActionWrapper(new RenameTableAction(), dbObjectType));
 
         //column actions
         refactorActionGroup.addAction(new IntellijActionWrapper(new AddAutoIncrementAction(), dbObjectType));
@@ -167,7 +166,6 @@ public class LiquibaseProjectComponent implements ProjectComponent, JDOMExternal
     public void disposeComponent() {
     }
 
-    @NotNull
     public String getComponentName() {
         return "LiquibaseProjectComponent";
     }
@@ -182,7 +180,7 @@ public class LiquibaseProjectComponent implements ProjectComponent, JDOMExternal
     public void projectClosed() {
         // called when project is being closed
     }
-    
+
     public String getRootChangeLogFile() {
         if (rootChangeLogFile != null) {
             return rootChangeLogFile;
