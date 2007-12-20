@@ -36,6 +36,10 @@ public class IntellijFacade implements IdeFacade {
     public Migrator getMigrator(String changeLogFile, Database database) {
         LiquibaseProjectComponent liquibaseProjectComponent = LiquibaseProjectComponent.getInstance();
 
+        if (changeLogFile == null) {
+            changeLogFile = liquibaseProjectComponent.getRootChangeLogFile();
+        }
+
         Migrator migrator = new Migrator(changeLogFile, new CompositeFileOpener(new IntellijFileOpener(), new FileSystemFileOpener()));
         if (database == null) {
             return migrator;
@@ -88,7 +92,7 @@ public class IntellijFacade implements IdeFacade {
         Project project = LiquibaseProjectComponent.getInstance().getProject();
         FileChooserDialog fileChooserDialog = FileChooserFactory.getInstance().createFileChooser(descriptor, project);
         VirtualFile[] files = fileChooserDialog.choose(null, project);
-        if (files == null) {
+        if (files == null || files.length == 0 || files[0] == null) {
             return null;
         }
         return new File(files[0].getUrl());

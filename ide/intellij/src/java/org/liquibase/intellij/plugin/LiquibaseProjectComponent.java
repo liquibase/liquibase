@@ -185,8 +185,8 @@ public class LiquibaseProjectComponent implements ProjectComponent, JDOMExternal
         if (rootChangeLogFile != null) {
             return rootChangeLogFile;
         }
-        if (outputChangeLogFile != null) {
-            return outputChangeLogFile;
+        if (getOutputChangeLogFile() != null) {
+            return getOutputChangeLogFile();
         }
         return null;
     }
@@ -196,7 +196,11 @@ public class LiquibaseProjectComponent implements ProjectComponent, JDOMExternal
     }
 
     public String getOutputChangeLogFile() {
-        return outputChangeLogFile;
+        if (outputChangeLogFile == null) {
+            return null;
+        } else {
+            return outputChangeLogFile;
+        }
     }
 
     public void setOutputChangeLogFile(String outputChangeLogFile) {
