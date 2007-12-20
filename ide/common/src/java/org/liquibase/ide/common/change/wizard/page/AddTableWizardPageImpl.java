@@ -124,10 +124,17 @@ public class AddTableWizardPageImpl implements AddTableWizardPage {
             columnConfig.setAutoIncrement(isAutoIncrement);
 
             ConstraintsConfig constraints = new ConstraintsConfig();
-            constraints.setNullable(isNullable);
-            constraints.setPrimaryKey(isPrimaryKey);
+            if (isNullable != null && isNullable) {
+                constraints.setNullable(isNullable);
+            }
 
-            columnConfig.setConstraints(constraints);
+            if (isPrimaryKey != null && isPrimaryKey) {
+                constraints.setPrimaryKey(isPrimaryKey);
+            }
+
+            if (constraints.isPrimaryKey() != null && constraints.isNullable() != null) {
+                columnConfig.setConstraints(constraints);
+            }
 
             columns.add(columnConfig);
         }

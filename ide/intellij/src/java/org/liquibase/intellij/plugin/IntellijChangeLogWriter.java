@@ -18,6 +18,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.File;
 import java.util.Date;
 
 public class IntellijChangeLogWriter implements ChangeLogWriter {
@@ -34,16 +35,21 @@ public class IntellijChangeLogWriter implements ChangeLogWriter {
                     }
                     Document doc;
                     if (!file.isValid() || file.getLength() == 0) {
-                        createEmptyChangeLog(file.getOutputStream(this, new Date().getTime(), new Date().getTime()));
+                        createEmptyChangeLog(file.getOutputStream(null));
                     }
 
                     doc = documentBuilder.parse(file.getInputStream());
 
                     doc.getDocumentElement().appendChild(changeSet.createNode(doc));
 
-                    OutputStream outputStream = file.getOutputStream(this, new Date().getTime(), new Date().getTime());
+                    OutputStream outputStream = file.getOutputStream(null);
 
                     serializeXML(doc, outputStream);
+
+                    outputStream.flush();
+                    outputStream.close();
+
+                    file.refresh(false, false);
 
                 } catch (Exception e) {
                     throw new RuntimeException(e);
@@ -71,13 +77,18 @@ public class IntellijChangeLogWriter implements ChangeLogWriter {
         ApplicationManager.getApplication().runWriteAction(new Runnable() {
             public void run() {
                 try {
+                    if (!new File(changeLogFile).createNewFile()) {
+                        throw new RuntimeException("Could not create file");
+                    }
                     VirtualFileManager virtualFileManager = VirtualFileManager.getInstance();
                     VirtualFile file = virtualFileManager.refreshAndFindFileByUrl(VirtualFileManager.constructUrl(LocalFileSystem.PROTOCOL, changeLogFile));
                     if (file == null) {
                         throw new RuntimeException("Could not find file");
                     }
 
-                    createEmptyChangeLog(file.getOutputStream(this, new Date().getTime(), new Date().getTime()));
+                    createEmptyChangeLog(file.getOutputStream(null));
+
+                    file.refresh(false, false);
 
                 } catch (Exception e) {
                     throw new RuntimeException(e);
