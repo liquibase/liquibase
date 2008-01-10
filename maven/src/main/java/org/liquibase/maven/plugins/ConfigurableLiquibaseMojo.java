@@ -26,7 +26,6 @@ public abstract class ConfigurableLiquibaseMojo extends AbstractLiquibaseMojo {
   /**
    * Specifies the change log file to use for Liquibase.
    * @parameter expression="${liquibase.changeLogFile}"
-   * @required
    */
   protected String changeLogFile;
 
@@ -72,6 +71,15 @@ public abstract class ConfigurableLiquibaseMojo extends AbstractLiquibaseMojo {
    */
   protected void performMigratorConfiguration(Migrator migrator)
           throws MojoExecutionException {
+  }
+
+  @Override
+  protected void checkRequiredParametersAreSpecified() throws MojoFailureException {
+    super.checkRequiredParametersAreSpecified();
+
+    if (changeLogFile == null) {
+      throw new MojoFailureException("The changeLogFile must be specified.");
+    }
   }
 
   /**
@@ -158,7 +166,7 @@ public abstract class ConfigurableLiquibaseMojo extends AbstractLiquibaseMojo {
       String key = null;
       try {
         key = (String)it.next();
-        Field field = AbstractLiquibaseMojo.class.getDeclaredField(key);
+        Field field = MavenUtils.getDeclaredField(this.getClass(), key);
 
         if (propertyFileWillOverride) {
           getLog().debug("  properties file setting value: " + field.getName());
