@@ -14,7 +14,7 @@ import org.apache.maven.plugin.MojoExecutionException;
  * @description Liquibase Migrate SQL Maven plugin
  * @goal migrateSQL
  */
-public class LiquibaseMigrateSQL extends AbstractLiquibaseMojo {
+public class LiquibaseMigrateSQL extends ConfigurableLiquibaseMojo {
 
   /**
    * The file to output the Migration SQL script to, if it exists it will be overwritten.
@@ -30,11 +30,21 @@ public class LiquibaseMigrateSQL extends AbstractLiquibaseMojo {
    */
   protected boolean changeLogSqlOnly;
 
+  /**
+   * Controls the prompting of users as to whether or not they really want to run the
+   * changes on a database that is not local to the machine that the user is current
+   * executing the plugin on.
+   * @parameter expression="${liquibase.promptOnNonLocalDatabase}" default-value="false"
+   */
+  protected boolean promptOnNonLocalDatabase;
+
+  private boolean promptOnNonLocalDatabaseDefault = false;
+
   @Override
-  protected void printSettings() {
-    super.printSettings();
-    getLog().info("   migrationSQLOutputFile: " + migrationSqlOutputFile);
-    getLog().info("   changeLogSqlOnly: " + changeLogSqlOnly);
+  protected void printSettings(String indent) {
+    super.printSettings(indent);
+    getLog().info(indent + "migrationSQLOutputFile: " + migrationSqlOutputFile);
+    getLog().info(indent + "changeLogSqlOnly: " + changeLogSqlOnly);
   }
 
   @Override
@@ -62,12 +72,7 @@ public class LiquibaseMigrateSQL extends AbstractLiquibaseMojo {
     migrator.setOutputSQLWriter(w);
   }
 
-  protected void performLiquibaseTask(Migrator migrator) throws MojoExecutionException {
-    try {
-      migrator.migrate();
-    }
-    catch (LiquibaseException e) {
-      throw new MojoExecutionException(e.getMessage(), e);
-    }
+  protected void performLiquibaseTask(Migrator migrator) throws LiquibaseException {
+    migrator.migrate();
   }
 }
