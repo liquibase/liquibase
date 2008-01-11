@@ -7,7 +7,7 @@
 
   <packaging>maven-plugin</packaging>
 
-  <version>@BUILD.VERSION@.0</version>
+  <version>@MAVEN.BUILD.VERSION@</version>
 
   <name>Liquibase Maven Plugin</name>
   <description>A plugin wraps up some of the Maven functionality of Liquibase</description>
