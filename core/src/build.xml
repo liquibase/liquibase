@@ -514,11 +514,13 @@ The available targets at the current stage:
         <copy file="${basedir}/../pom.base.xml" tofile="${basedir}/../pom.xml" filtering="true">
             <filterset>
                 <filter token="BUILD.VERSION" value="${build.version}"/>
+                <filter token="MAVEN.BUILD.VERSION" value="${build.version}.${maven.build.version}"/>
             </filterset>
         </copy>
         <copy file="${maven.basedir}/pom.base.xml" tofile="${maven.basedir}/pom.xml" filtering="true">
             <filterset>
                 <filter token="BUILD.VERSION" value="${build.version}"/>
+                <filter token="MAVEN.BUILD.VERSION" value="${build.version}.${maven.build.version}"/>
             </filterset>
         </copy>
 
@@ -551,7 +553,7 @@ The available targets at the current stage:
             <arg value="site"/>
         </exec>
 
-        <deploy file="${maven.basedir}/target/liquibase-plugin-${build.version}.0.jar">
+        <deploy file="${maven.basedir}/target/liquibase-plugin-${build.version}.${maven.build.version}.jar">
             <remoteRepository url="file://${maven.repository}"/>
             <pom refid="plugin.maven.project"/>
         </deploy>
@@ -563,6 +565,69 @@ The available targets at the current stage:
           </fileset>
         </copy>
     </target>
+
+    <target name="maven-snapshot" depends="prepare">
+      <property environment="env"/>
+        <echo>build version: ${build.version}</echo>
+
+        <delete file="${basedir}/../pom.xml"/>
+        <delete file="${maven.basedir}/pom.xml"/>
+
+        <copy file="${basedir}/../pom.base.xml" tofile="${basedir}/../pom.xml" filtering="true">
+            <filterset>
+                <filter token="BUILD.VERSION" value="${build.version}-SNAPSHOT"/>
+                <filter token="MAVEN.BUILD.VERSION" value="${build.version}.${maven.build.version}-SNAPSHOT"/>
+            </filterset>
+        </copy>
+        <copy file="${maven.basedir}/pom.base.xml" tofile="${maven.basedir}/pom.xml" filtering="true">
+            <filterset>
+                <filter token="BUILD.VERSION" value="${build.version}-SNAPSHOT"/>
+                <filter token="MAVEN.BUILD.VERSION" value="${build.version}.${maven.build.version}-SNAPSHOT"/>
+            </filterset>
+        </copy>
+
+        <typedef resource="org/apache/maven/artifact/ant/antlib.xml">
+            <classpath>
+                <fileset dir="${lib.compile.dir}">
+                    <include name="*.jar"/>
+                </fileset>
+                <fileset dir="${maven.basedir}/lib">
+                    <include name="*.jar"/>
+                </fileset>
+            </classpath>
+        </typedef>
+
+        <pom id="core.maven.project" file="${basedir}/../pom.xml"/>
+        <pom id="plugin.maven.project" file="${maven.basedir}/pom.xml"/>
+
+        <deploy file="${release.dir}/liquibase-SNAPSHOT.jar">
+            <remoteRepository url="file://${maven.repository.snapshot}"/>
+            <pom refid="core.maven.project"/>
+        </deploy>
+
+        <exec dir="${maven.basedir}" executable="cmd">
+            <env key="JAVA_HOME" value="${env.JAVA_HOME}"/>
+            <arg value="/c"/>
+            <arg value="${env.M2_HOME}\bin\mvn.bat"/>
+            <arg value="clean"/>
+            <arg value="package"/>
+            <arg value="plugin:xdoc"/>
+            <arg value="site"/>
+        </exec>
+
+        <deploy file="${maven.basedir}/target/liquibase-plugin-${build.version}.${maven.build.version}-SNAPSHOT.jar">
+            <remoteRepository url="file://${maven.repository.snapshot}"/>
+            <pom refid="plugin.maven.project"/>
+        </deploy>
+
+        <!--TODO automate the coping the html files into the site... -->
+        <copy todir="${src.dir}/site/phpincludes">
+          <fileset dir="${maven.build.dir}/site">
+            <include name="*-mojo.html"/>
+          </fileset>
+        </copy>
+    </target>
+
 
     <!-- target: ALL -->
     <target name="all" depends="prepare">
