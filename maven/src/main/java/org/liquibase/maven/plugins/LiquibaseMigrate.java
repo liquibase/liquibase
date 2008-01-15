@@ -13,6 +13,7 @@ import liquibase.migrator.Migrator;
 public class LiquibaseMigrate extends ConfigurableLiquibaseMojo {
 
   protected void performLiquibaseTask(Migrator migrator) throws LiquibaseException {
+    super.performLiquibaseTask(migrator);
     migrator.migrate();
   }
 }
