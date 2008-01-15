@@ -73,6 +73,7 @@ public class LiquibaseMigrateSQL extends ConfigurableLiquibaseMojo {
   }
 
   protected void performLiquibaseTask(Migrator migrator) throws LiquibaseException {
+    super.performLiquibaseTask(migrator);
     migrator.migrate();
   }
 }
