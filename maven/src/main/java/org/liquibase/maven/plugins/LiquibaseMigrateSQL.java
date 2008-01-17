@@ -26,9 +26,11 @@ public class LiquibaseMigrateSQL extends ConfigurableLiquibaseMojo {
   /**
    * Output a change log SQL for the DatabaseChangeLog table only, not the actual database
    * changes that are required.
-   * @parameter expression="${liquibase.outputChangeLogSQLOnly}" default-value="false"
+   * @parameter expression="${liquibase.outputChangeLogSQLOnly}" default-value="true"
    */
   protected boolean changeLogSqlOnly;
+
+  private boolean changeLogSqlOnlyDefault = true;
 
   /**
    * Controls the prompting of users as to whether or not they really want to run the
@@ -39,6 +41,11 @@ public class LiquibaseMigrateSQL extends ConfigurableLiquibaseMojo {
   protected boolean promptOnNonLocalDatabase;
 
   private boolean promptOnNonLocalDatabaseDefault = false;
+
+  @Override
+  protected boolean isPromptOnNonLocalDatabase() {
+    return promptOnNonLocalDatabase;
+  }
 
   @Override
   protected void printSettings(String indent) {
@@ -64,9 +71,10 @@ public class LiquibaseMigrateSQL extends ConfigurableLiquibaseMojo {
     
     getLog().info("Output SQL Migration File: " + migrationSqlOutputFile.getAbsolutePath());
     if (changeLogSqlOnly) {
-      getLog().info("Change Log only SQL");
+      getLog().info("Creating Change Log SQL Only");
       migrator.setMode(Migrator.Mode.OUTPUT_CHANGELOG_ONLY_SQL_MODE);
     } else {
+      getLog().info("Creating Change Log SQL and Migrating Database");
       migrator.setMode(Migrator.Mode.OUTPUT_SQL_MODE);
     }
     migrator.setOutputSQLWriter(w);

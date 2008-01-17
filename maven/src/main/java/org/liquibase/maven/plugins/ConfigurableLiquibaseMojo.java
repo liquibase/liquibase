@@ -131,8 +131,10 @@ public abstract class ConfigurableLiquibaseMojo extends AbstractLiquibaseMojo {
   }
 
   @Override
-  protected Migrator createMigrator(FileOpener fo) {
-    return new Migrator(changeLogFile.trim(), fo);
+  protected Migrator createMigrator(FileOpener fo) throws MojoExecutionException {
+    Migrator m = new Migrator(changeLogFile.trim(), fo);
+    performMigratorConfiguration(m);
+    return m;
   }
 
   @Override
@@ -224,7 +226,7 @@ public abstract class ConfigurableLiquibaseMojo extends AbstractLiquibaseMojo {
   }
 
   private void setFieldValue(Field field, String value) throws IllegalAccessException {
-    if (field.getType().equals(Boolean.class)) {
+    if (field.getType().equals(Boolean.class) || field.getType().equals(boolean.class)) {
       field.set(this, Boolean.valueOf(value));
     } else {
       field.set(this, value);
