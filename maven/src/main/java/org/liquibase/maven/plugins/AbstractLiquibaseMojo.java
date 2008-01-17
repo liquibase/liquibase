@@ -110,7 +110,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
 
       getLog().info("Executing on Database: " + url);
 
-      if (promptOnNonLocalDatabase && !migrator.isSafeToRunMigration()) {
+      if (isPromptOnNonLocalDatabase() && !migrator.isSafeToRunMigration()) {
         if (migrator.swingPromptForNonLocalDatabase()) {
           throw new LiquibaseException("User decided not to run against non-local database");
         }
@@ -136,6 +136,10 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     migrator.init(connection);
   }
 
+  protected boolean isPromptOnNonLocalDatabase() {
+    return promptOnNonLocalDatabase;
+  }
+
   private void displayMojoSettings() {
     if (verbose) {
       getLog().info("Settings----------------------------");
@@ -144,7 +148,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     }
   }
 
-  protected Migrator createMigrator(FileOpener fo) {
+  protected Migrator createMigrator(FileOpener fo) throws MojoExecutionException {
     return new Migrator("", fo);
   }
 
