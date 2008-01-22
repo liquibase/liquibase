@@ -4,8 +4,7 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.VirtualFileManager;
-import liquibase.migrator.Migrator;
-import liquibase.parser.MigratorSchemaResolver;
+import liquibase.parser.LiquibaseSchemaResolver;
 import liquibase.parser.xml.XMLChangeLogParser;
 import liquibase.ChangeSet;
 import org.apache.xml.serialize.OutputFormat;
@@ -69,7 +68,7 @@ public class IntellijChangeLogWriter implements ChangeLogWriter {
     private DocumentBuilder createDocumentBuilder() throws ParserConfigurationException {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder documentBuilder = factory.newDocumentBuilder();
-        documentBuilder.setEntityResolver(new MigratorSchemaResolver());
+        documentBuilder.setEntityResolver(new LiquibaseSchemaResolver());
         return documentBuilder;
     }
 

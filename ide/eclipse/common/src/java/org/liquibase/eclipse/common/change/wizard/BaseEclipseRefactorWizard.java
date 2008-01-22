@@ -6,7 +6,7 @@ import liquibase.change.Change;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.sql.SqlStatement;
 import liquibase.migrator.Migrator;
-import liquibase.parser.MigratorSchemaResolver;
+import liquibase.parser.LiquibaseSchemaResolver;
 import liquibase.util.StringUtils;
 import liquibase.xml.DefaultXmlWriter;
 import org.eclipse.core.commands.operations.OperationStatus;
@@ -124,7 +124,7 @@ public abstract class BaseEclipseRefactorWizard extends Wizard {
                         DocumentBuilder documentBuilder = factory
                                 .newDocumentBuilder();
                         documentBuilder
-                                .setEntityResolver(new MigratorSchemaResolver());
+                                .setEntityResolver(new LiquibaseSchemaResolver());
 
                         File file = new File(LiquibasePreferences
                                 .getCurrentChangeLogFileName());

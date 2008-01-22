@@ -4,7 +4,7 @@ import liquibase.DatabaseChangeLog;
 import liquibase.FileOpener;
 import liquibase.exception.ChangeLogParseException;
 import liquibase.log.LogFactory;
-import liquibase.parser.MigratorSchemaResolver;
+import liquibase.parser.LiquibaseSchemaResolver;
 import org.xml.sax.*;
 
 import javax.xml.parsers.SAXParser;
@@ -41,7 +41,7 @@ public class XMLChangeLogParser {
             }
 
             XMLReader xmlReader = parser.getXMLReader();
-            xmlReader.setEntityResolver(new MigratorSchemaResolver());
+            xmlReader.setEntityResolver(new LiquibaseSchemaResolver());
             xmlReader.setErrorHandler(new ErrorHandler() {
                 public void warning(SAXParseException exception) throws SAXException {
                     LogFactory.getLogger().warning(exception.getMessage());

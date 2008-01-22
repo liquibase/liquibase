@@ -4,7 +4,8 @@ import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.database.structure.*;
 import liquibase.exception.JDBCException;
-import liquibase.parser.MigratorSchemaResolver;
+import liquibase.parser.LiquibaseSchemaResolver;
+import liquibase.parser.xml.XMLChangeLogParser;
 import liquibase.xml.DefaultXmlWriter;
 import liquibase.xml.XmlWriter;
 import org.w3c.dom.Document;
@@ -280,14 +281,14 @@ public class DiffResult {
     public void printChangeLog(PrintStream out, Database targetDatabase, XmlWriter xmlWriter) throws ParserConfigurationException, IOException {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder documentBuilder = factory.newDocumentBuilder();
-        documentBuilder.setEntityResolver(new MigratorSchemaResolver());
+        documentBuilder.setEntityResolver(new LiquibaseSchemaResolver());
 
         Document doc = documentBuilder.newDocument();
 
         Element changeLogElement = doc.createElement("databaseChangeLog");
-        changeLogElement.setAttribute("xmlns", "http://www.liquibase.org/xml/ns/dbchangelog/1.4");
+        changeLogElement.setAttribute("xmlns", "http://www.liquibase.org/xml/ns/dbchangelog/"+ XMLChangeLogParser.getSchemaVersion());
         changeLogElement.setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
-        changeLogElement.setAttribute("xsi:schemaLocation", "http://www.liquibase.org/xml/ns/dbchangelog/1.4 http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.4.xsd");
+        changeLogElement.setAttribute("xsi:schemaLocation", "http://www.liquibase.org/xml/ns/dbchangelog/"+XMLChangeLogParser.getSchemaVersion()+" http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-"+XMLChangeLogParser.getSchemaVersion()+".xsd");
 
         doc.appendChild(changeLogElement);
 
