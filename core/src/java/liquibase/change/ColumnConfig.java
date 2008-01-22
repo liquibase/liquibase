@@ -2,6 +2,7 @@ package liquibase.change;
 
 import liquibase.database.Database;
 import liquibase.database.sql.ComputedNumericValue;
+import liquibase.database.sql.ComputedDateValue;
 import liquibase.util.ISODateFormat;
 import liquibase.util.StringUtils;
 import org.w3c.dom.Document;
@@ -100,7 +101,12 @@ public class ColumnConfig {
     }
 
     public void setValueDate(String valueDate) throws ParseException {
-        this.valueDate = new ISODateFormat().parse(valueDate);
+        try {
+            this.valueDate = new ISODateFormat().parse(valueDate);
+        } catch (ParseException e) {
+            //probably a function
+            this.valueDate = new ComputedDateValue(valueDate);
+        }
     }
 
     public Object getValueObject() {
