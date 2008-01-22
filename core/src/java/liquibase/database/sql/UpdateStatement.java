@@ -4,10 +4,7 @@ import liquibase.database.Database;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class UpdateStatement implements SqlStatement, PreparedSqlStatement {
     private String schemaName;
@@ -72,6 +69,14 @@ public class UpdateStatement implements SqlStatement, PreparedSqlStatement {
                 sql.append("NULL");
             } else if (newValue instanceof String && database.shouldQuoteValue(((String) newValue))) {
                 sql.append("'").append(newValue).append("'");
+            } else if (newValue instanceof Date) {
+                sql.append(database.getDateLiteral(((Date) newValue)));
+            } else if (newValue instanceof Boolean) {
+                if (((Boolean) newValue)) {
+                    sql.append(database.getTrueBooleanValue());
+                } else {
+                    sql.append(database.getFalseBooleanValue());
+                }
             } else {
                 sql.append(newValue);
             }

@@ -1,8 +1,8 @@
 package liquibase.preconditions;
 
 import liquibase.DatabaseChangeLog;
+import liquibase.database.Database;
 import liquibase.exception.PreconditionFailedException;
-import liquibase.migrator.Migrator;
 
 /**
  * Class for controling "not" logic in preconditions.
@@ -10,11 +10,11 @@ import liquibase.migrator.Migrator;
 public class NotPrecondition extends PreconditionLogic {
 
 
-    public void check(Migrator migrator, DatabaseChangeLog changeLog) throws PreconditionFailedException {
+    public void check(Database database, DatabaseChangeLog changeLog) throws PreconditionFailedException {
         for (Precondition precondition : getNestedPreconditions()) {
             boolean threwException = false;
             try {
-                precondition.check(migrator, changeLog);
+                precondition.check(database, changeLog);
             } catch (PreconditionFailedException e) {
                 ; //that's what we want with a Not precondition
                 threwException = true;

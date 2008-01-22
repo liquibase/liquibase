@@ -3,12 +3,14 @@ package liquibase.database.structure;
 import liquibase.database.AbstractDatabase;
 import liquibase.database.Database;
 import liquibase.database.OracleDatabase;
-import liquibase.database.template.JdbcTemplate;
 import liquibase.diff.DiffStatusListener;
 import liquibase.exception.JDBCException;
-import liquibase.migrator.Migrator;
+import liquibase.log.LogFactory;
 
-import java.sql.*;
+import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.text.ParseException;
 import java.util.*;
 import java.util.logging.Logger;
@@ -32,7 +34,7 @@ public class DatabaseSnapshot {
     private Map<String, Column> columnsMap = new HashMap<String, Column>();
     private Set<DiffStatusListener> statusListeners;
 
-    private static final Logger log = Logger.getLogger(Migrator.DEFAULT_LOG_NAME);
+    private static final Logger log = LogFactory.getLogger();
 
 
     /**
@@ -457,7 +459,7 @@ public class DatabaseSnapshot {
 
         if (database.supportsSequences()) {
             //noinspection unchecked
-            List<String> sequenceNamess = (List<String>) new JdbcTemplate(database).queryForList(database.createFindSequencesSQL(schema), String.class);
+            List<String> sequenceNamess = (List<String>) database.getJdbcTemplate().queryForList(database.createFindSequencesSQL(schema), String.class);
 
 
             for (String sequenceName : sequenceNamess) {

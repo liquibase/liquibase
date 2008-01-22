@@ -15,8 +15,8 @@ import java.util.List;
 
 public class PendingSQLWriter extends HTMLWriter {
 
-    public PendingSQLWriter(File rootOutputDir) {
-        super(new File(rootOutputDir, "pending"));
+    public PendingSQLWriter(File rootOutputDir, Database database) {
+        super(new File(rootOutputDir, "pending"), database);
     }
 
     protected String createTitle(Object object) {
@@ -40,11 +40,11 @@ public class PendingSQLWriter extends HTMLWriter {
             lastRunChangeSet = thisChangeSet;
             String anchor = thisChangeSet.toString(false).replaceAll("\\W","_");
             fileWriter.append("<a name='").append(anchor).append("'/>");
-            migrator.setOutputSQLWriter(fileWriter);
-            migrator.setMode(Migrator.Mode.OUTPUT_SQL_MODE);
+//            migrator.setOutputSQLWriter(fileWriter);
+//            migrator.setMode(Migrator.Mode.OUTPUT_SQL_MODE);
 
             try {
-                thisChangeSet.execute();
+                thisChangeSet.execute(null);
             } catch (MigrationFailedException e) {
                 fileWriter.append("EXECUTION ERROR: ").append(change.getChangeName()).append(": ").append(e.getMessage()).append("\n\n");
             }

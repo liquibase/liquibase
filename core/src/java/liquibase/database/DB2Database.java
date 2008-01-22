@@ -193,13 +193,13 @@ public class DB2Database extends AbstractDatabase {
         return pkName;
     }
 
-    public boolean isColumnAutoIncrement(String schemaName, String tableName, String columnName) throws SQLException {
+    public boolean isColumnAutoIncrement(String schemaName, String tableName, String columnName) throws SQLException, JDBCException {
         boolean autoIncrement = false;
 
         PreparedStatement stmt = null;
         try {
             stmt = getConnection().prepareStatement("SELECT IDENTITY FROM SYSCAT.COLUMNS WHERE TABSCHEMA = ? AND TABNAME = ? AND COLNAME = ? AND HIDDEN != 'S'");
-            stmt.setString(1, schemaName);
+            stmt.setString(1, convertRequestedSchemaToSchema(schemaName));
             stmt.setString(2, tableName);
             stmt.setString(3, columnName);
 

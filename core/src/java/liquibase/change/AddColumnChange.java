@@ -8,7 +8,6 @@ import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Table;
 import liquibase.exception.UnsupportedChangeException;
 import liquibase.util.StringUtils;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 

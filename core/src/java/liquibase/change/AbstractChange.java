@@ -4,9 +4,8 @@ import liquibase.ChangeSet;
 import liquibase.FileOpener;
 import liquibase.database.Database;
 import liquibase.database.sql.SqlStatement;
-import liquibase.database.template.JdbcTemplate;
 import liquibase.exception.*;
-import liquibase.migrator.Migrator;
+import liquibase.log.LogFactory;
 import liquibase.util.MD5Util;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
@@ -21,7 +20,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.*;
-import java.util.logging.Logger;
 
 /**
  * Standard superclass for Changes to implement. This is a <i>skeletal implementation</i>,
@@ -237,8 +235,8 @@ public abstract class AbstractChange implements Change {
      */
     private void execute(SqlStatement[] statements, Database database) throws JDBCException {
         for (SqlStatement statement : statements) {
-            Logger.getLogger(Migrator.DEFAULT_LOG_NAME).finest("Executing Statement: " + statement);
-            new JdbcTemplate(database).execute(statement);
+            LogFactory.getLogger().finest("Executing Statement: " + statement);
+            database.getJdbcTemplate().execute(statement);
         }
     }
     

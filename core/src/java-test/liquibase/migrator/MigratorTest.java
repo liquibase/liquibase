@@ -3,6 +3,7 @@ package liquibase.migrator;
 import liquibase.ClassLoaderFileOpener;
 import liquibase.FileOpener;
 import liquibase.database.*;
+import liquibase.database.template.JdbcOutputTemplate;
 import liquibase.exception.JDBCException;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.expectLastCall;
@@ -12,6 +13,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.InputStream;
+import java.io.PrintWriter;
 import java.net.URL;
 import java.sql.DatabaseMetaData;
 import java.util.Arrays;
@@ -55,7 +57,7 @@ public class MigratorTest {
         migrator.setUrl("jdbc:oracle:thin:@liquibase:1521:latest");
         assertFalse(migrator.isSafeToRunMigration());
 
-        migrator.setMode(Migrator.Mode.OUTPUT_SQL_MODE);
+        testMigrator.getDatabase().setJdbcTemplate(new JdbcOutputTemplate(new PrintWriter(System.out), testMigrator.getDatabase()));
         assertTrue("Safe to run if outputing sql, even if non-localhost URL", migrator.isSafeToRunMigration());
 
     }
@@ -84,14 +86,13 @@ public class MigratorTest {
         assertTrue("Postgres not in Implemented Databases", foundPostgres);
     }
 
-
     private class TestMigrator extends Migrator {
         private String url;
         private Database database;
         private InputStream inputStream;
 
         public TestMigrator() {
-            super("liquibase/test.xml", new ClassLoaderFileOpener());
+            super("liquibase/test.xml", new ClassLoaderFileOpener(), null);
             inputStream = createMock(InputStream.class);
             replay(inputStream);
         }

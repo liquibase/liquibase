@@ -1,5 +1,18 @@
 package liquibase.ant;
 
+import liquibase.CompositeFileOpener;
+import liquibase.FileOpener;
+import liquibase.FileSystemFileOpener;
+import liquibase.database.DatabaseFactory;
+import liquibase.exception.JDBCException;
+import liquibase.exception.MigrationFailedException;
+import liquibase.log.LogFactory;
+import liquibase.migrator.Migrator;
+import org.apache.tools.ant.Project;
+import org.apache.tools.ant.Task;
+import org.apache.tools.ant.types.Path;
+import org.apache.tools.ant.types.Reference;
+
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -17,19 +30,6 @@ import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
-import liquibase.CompositeFileOpener;
-import liquibase.FileOpener;
-import liquibase.FileSystemFileOpener;
-import liquibase.database.DatabaseFactory;
-import liquibase.exception.JDBCException;
-import liquibase.exception.MigrationFailedException;
-import liquibase.migrator.Migrator;
-
-import org.apache.tools.ant.Project;
-import org.apache.tools.ant.Task;
-import org.apache.tools.ant.types.Path;
-import org.apache.tools.ant.types.Reference;
-
 /**
  * Base class for all Ant LiquiBase tasks.  This class sets up the migrator and defines parameters
  * that are common to all tasks.
@@ -43,6 +43,7 @@ public class BaseLiquibaseTask extends Task {
     protected Path classpath;
     private boolean promptOnNonLocalDatabase = false;
     private String currentDateTimeFunction;
+    private String contexts;
 
     public BaseLiquibaseTask() {
         super();
@@ -119,7 +120,6 @@ public class BaseLiquibaseTask extends Task {
     protected Migrator createMigrator() throws MalformedURLException, ClassNotFoundException, JDBCException, SQLException, MigrationFailedException, IllegalAccessException, InstantiationException {
         FileOpener antFO = new AntFileOpener(getProject(), classpath);
         FileOpener fsFO = new FileSystemFileOpener();
-        Migrator migrator = new Migrator(getChangeLogFile().trim(), new CompositeFileOpener(antFO, fsFO));
 
         String[] strings = classpath.list();
         final List<URL> taskClassPath = new ArrayList<URL>();
@@ -154,10 +154,18 @@ public class BaseLiquibaseTask extends Task {
             throw new JDBCException("Connection could not be created to " + getUrl() + " with driver " + driver.getClass().getName() + ".  Possibly the wrong driver for the given database URL");
         }
 
-        migrator.init(connection);
+        Migrator migrator = new Migrator(getChangeLogFile().trim(), new CompositeFileOpener(antFO, fsFO), DatabaseFactory.getInstance().findCorrectDatabaseImplementation(connection));
         migrator.setCurrentDateTimeFunction(currentDateTimeFunction);
 
         return migrator;
+    }
+
+    public String getContexts() {
+        return contexts;
+    }
+
+    public void setContexts(String cntx) {
+        this.contexts = cntx;
     }
 
 
@@ -183,7 +191,7 @@ public class BaseLiquibaseTask extends Task {
         }
 
         protected void registerHandler(Handler theHandler) {
-            Logger logger = Logger.getLogger(Migrator.DEFAULT_LOG_NAME);
+            Logger logger = LogFactory.getLogger();
             for (Handler handler : logger.getHandlers()) {
                 logger.removeHandler(handler);
             }

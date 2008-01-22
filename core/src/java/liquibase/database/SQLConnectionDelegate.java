@@ -189,4 +189,18 @@ public class SQLConnectionDelegate implements DatabaseConnection {
     public Connection getUnderlyingConnection() {
         return con;
     }
+
+    public boolean equals(Object obj) {
+        if (!(obj instanceof SQLConnectionDelegate)) {
+            return false;
+        }
+        
+        SQLConnectionDelegate otherObj = (SQLConnectionDelegate) obj;
+        try {
+            return this.getUnderlyingConnection().getMetaData().getURL().equals(otherObj.getUnderlyingConnection().getMetaData().getURL())
+                    && this.getUnderlyingConnection().getMetaData().getUserName().equals(otherObj.getUnderlyingConnection().getMetaData().getUserName());
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

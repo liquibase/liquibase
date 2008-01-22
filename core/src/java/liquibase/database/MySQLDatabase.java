@@ -74,7 +74,7 @@ public class MySQLDatabase extends AbstractDatabase {
     }
 
     public String getLineComment() {
-        return "==";
+        return "--";
     }
 
     public String getFalseBooleanValue() {

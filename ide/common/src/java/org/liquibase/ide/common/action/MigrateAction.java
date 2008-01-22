@@ -15,7 +15,7 @@ public class MigrateAction extends MigratorAction {
         if (changeLogFile == null) {
             return;
         }
-        ideFacade.getMigrator(changeLogFile, database).migrate();
+        ideFacade.getMigrator(changeLogFile, database).update(null);
     }
 
     public boolean needsRefresh() {

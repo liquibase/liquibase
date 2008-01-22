@@ -53,7 +53,7 @@ public class InsertStatement implements SqlStatement {
             if (newValue == null) {
                 sql.append("NULL");
             } else if (newValue instanceof String && database.shouldQuoteValue(((String) newValue))) {
-                sql.append("'").append(newValue).append("'");
+                sql.append("'").append(database.escapeStringForDatabase((String) newValue)).append("'");
             } else if (newValue instanceof Date) {
                 sql.append(database.getDateLiteral(((Date) newValue)));
             } else if (newValue instanceof Boolean) {

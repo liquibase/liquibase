@@ -124,4 +124,13 @@ public class FirebirdDatabase extends AbstractDatabase {
             return requestedSchema.toUpperCase();
         }
     }
+
+    public String getColumnType(String columnType, Boolean autoIncrement) {
+        String type = super.getColumnType(columnType, autoIncrement);
+        if (type.startsWith("BLOB SUB_TYPE <0")) {
+            return getBlobType();
+        } else {
+            return type;
+        }
+    }
 }

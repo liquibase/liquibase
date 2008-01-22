@@ -2,6 +2,7 @@ package liquibase.commandline;
 
 import liquibase.CompositeFileOpener;
 import liquibase.FileSystemFileOpener;
+import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.diff.Diff;
 import liquibase.diff.DiffResult;
@@ -9,7 +10,10 @@ import liquibase.diff.DiffStatusListener;
 import liquibase.exception.CommandLineParsingException;
 import liquibase.exception.JDBCException;
 import liquibase.exception.ValidationFailedException;
+import liquibase.lock.LockHandler;
+import liquibase.log.LogFactory;
 import liquibase.migrator.Migrator;
+import liquibase.util.LiquibaseUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
 
@@ -69,7 +73,7 @@ public class CommandLineMigrator {
             commandLineMigrator.printHelp(System.out);
             return;
         } else if (args.length == 1 && "--version".equals(args[0])) {
-            System.out.println("LiquiBase Version: " + new Migrator(null, null).getBuildVersion() + StreamUtil.getLineSeparator());
+            System.out.println("LiquiBase Version: " + LiquibaseUtil.getBuildVersion() + StreamUtil.getLineSeparator());
             return;
         }
 
@@ -103,7 +107,7 @@ public class CommandLineMigrator {
                 ((ValidationFailedException) e.getCause()).printDescriptiveError(System.out);
             } else {
                 System.out.println("Migration Failed: " + message + generateLogLevelWarningMessage());
-                Logger.getLogger(Migrator.DEFAULT_LOG_NAME).log(Level.SEVERE, message, e);
+                LogFactory.getLogger().log(Level.SEVERE, message, e);
             }
             return;
         }
@@ -116,7 +120,7 @@ public class CommandLineMigrator {
     }
 
     private static String generateLogLevelWarningMessage() {
-        Logger logger = Logger.getLogger(Migrator.DEFAULT_LOG_NAME);
+        Logger logger = LogFactory.getLogger();
         if (logger == null || logger.getLevel() == null || (logger.getLevel().equals(Level.OFF))) {
             return "";
         } else {
@@ -133,8 +137,11 @@ public class CommandLineMigrator {
         for (int i = 0; i < args.length; i++) {
             String arg = args[i];
             if (arg.startsWith("--") && !arg.contains("=")) {
-                String nextArg = args[i + 1];
-                if (!nextArg.startsWith("--") && !isCommand(nextArg)) {
+                String nextArg = null;
+                if (i+1 < args.length) {
+                    nextArg = args[i + 1];
+                }
+                if (nextArg != null && !nextArg.startsWith("--") && !isCommand(nextArg)) {
                     arg = arg + "=" + nextArg;
                     i++;
                 }
@@ -194,6 +201,7 @@ public class CommandLineMigrator {
                 || "generateChangeLog".equalsIgnoreCase(arg)
                 || "clearCheckSums".equalsIgnoreCase(arg)
                 || "dbDoc".equalsIgnoreCase(arg)
+                || "changelogSync".equalsIgnoreCase(arg)
                 || "changelogSyncSQL".equalsIgnoreCase(arg);
     }
 
@@ -275,6 +283,7 @@ public class CommandLineMigrator {
         stream.println(" validate                  Checks changelog for errors");
         stream.println(" clearCheckSums            Removes all saved checksums from database log.");
         stream.println("                           Useful for 'MD5Sum Check Failed' errors");
+        stream.println(" changelogSync             Mark all changes as executed in the database");
         stream.println(" changelogSyncSQL          Writes SQL to mark all changes as executed ");
         stream.println("                           in the database to STDOUT");
         stream.println(" listLocks                 Lists who currently has locks on the");
@@ -512,26 +521,25 @@ public class CommandLineMigrator {
         }
 
         if ("finest".equalsIgnoreCase(logLevel)) {
-            Logger.getLogger(Migrator.DEFAULT_LOG_NAME).setLevel(Level.FINEST);
+            LogFactory.getLogger().setLevel(Level.FINEST);
         } else if ("finer".equalsIgnoreCase(logLevel)) {
-            Logger.getLogger(Migrator.DEFAULT_LOG_NAME).setLevel(Level.FINER);
+            LogFactory.getLogger().setLevel(Level.FINER);
         } else if ("fine".equalsIgnoreCase(logLevel)) {
-            Logger.getLogger(Migrator.DEFAULT_LOG_NAME).setLevel(Level.FINE);
+            LogFactory.getLogger().setLevel(Level.FINE);
         } else if ("info".equalsIgnoreCase(logLevel)) {
-            Logger.getLogger(Migrator.DEFAULT_LOG_NAME).setLevel(Level.INFO);
+            LogFactory.getLogger().setLevel(Level.INFO);
         } else if ("warning".equalsIgnoreCase(logLevel)) {
-            Logger.getLogger(Migrator.DEFAULT_LOG_NAME).setLevel(Level.WARNING);
+            LogFactory.getLogger().setLevel(Level.WARNING);
         } else if ("severe".equalsIgnoreCase(logLevel)) {
-            Logger.getLogger(Migrator.DEFAULT_LOG_NAME).setLevel(Level.SEVERE);
+            LogFactory.getLogger().setLevel(Level.SEVERE);
         } else if ("off".equalsIgnoreCase(logLevel)) {
-            Logger.getLogger(Migrator.DEFAULT_LOG_NAME).setLevel(Level.OFF);
+            LogFactory.getLogger().setLevel(Level.OFF);
         } else {
             throw new CommandLineParsingException("Unknown log level: " + logLevel);
         }
 
         FileSystemFileOpener fsOpener = new FileSystemFileOpener();
         CommandLineFileOpener clOpener = new CommandLineFileOpener(classLoader);
-        Migrator migrator = new Migrator(changeLogFile, new CompositeFileOpener(fsOpener, clOpener));
         Driver driver;
         try {
             if (this.driver == null) {
@@ -570,14 +578,14 @@ public class CommandLineMigrator {
         }
 
         try {
-            migrator.setContexts(contexts);
-            migrator.init(connection);
+            Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(connection);
+            Migrator migrator = new Migrator(changeLogFile, new CompositeFileOpener(fsOpener, clOpener), database);
 
             if ("listLocks".equalsIgnoreCase(command)) {
                 migrator.reportLocks(System.out);
                 return;
             } else if ("releaseLocks".equalsIgnoreCase(command)) {
-                migrator.forceReleaseLock();
+                LockHandler.getInstance(database).forceReleaseLock();
                 System.out.println("Successfully released all database change log locks for " + migrator.getDatabase().getConnectionUsername() + "@" + migrator.getDatabase().getConnectionURL());
                 return;
             } else if ("tag".equalsIgnoreCase(command)) {
@@ -594,7 +602,7 @@ public class CommandLineMigrator {
                 if (commandParams.contains("--verbose")) {
                     runVerbose = true;
                 }
-                migrator.reportStatus(runVerbose, System.out);
+                migrator.reportStatus(runVerbose, contexts, getOutputWriter());
                 return;
             } else if ("validate".equalsIgnoreCase(command)) {
                 try {
@@ -622,49 +630,44 @@ public class CommandLineMigrator {
             DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             try {
                 if ("migrate".equalsIgnoreCase(command)) {
-                    migrator.setMode(Migrator.Mode.EXECUTE_MODE);
+                    migrator.update(contexts);
+                } else if ("changelogSync".equalsIgnoreCase(command)) {
+                    migrator.changeLogSync(contexts);
                 } else if ("changelogSyncSQL".equalsIgnoreCase(command)) {
-                    migrator.setMode(Migrator.Mode.OUTPUT_CHANGELOG_ONLY_SQL_MODE);
-                    migrator.setOutputSQLWriter(getOutputWriter());
+                    migrator.changeLogSync(contexts, getOutputWriter());
                 } else if ("migrateSQL".equalsIgnoreCase(command)) {
-                    migrator.setMode(Migrator.Mode.OUTPUT_SQL_MODE);
-                    migrator.setOutputSQLWriter(getOutputWriter());
+                    migrator.update(contexts, getOutputWriter());
                 } else if ("rollback".equalsIgnoreCase(command)) {
-                    migrator.setMode(Migrator.Mode.EXECUTE_ROLLBACK_MODE);
                     if (commandParams == null) {
                         throw new CommandLineParsingException("rollback requires a rollback tag");
                     }
-                    migrator.setRollbackToTag(commandParams.iterator().next());
+                    migrator.rollback(commandParams.iterator().next(), contexts);
                 } else if ("rollbackToDate".equalsIgnoreCase(command)) {
-                    migrator.setMode(Migrator.Mode.EXECUTE_ROLLBACK_MODE);
                     if (commandParams == null) {
                         throw new CommandLineParsingException("rollback requires a rollback date");
                     }
-                    migrator.setRollbackToDate(dateFormat.parse(commandParams.iterator().next()));
+                    migrator.rollback(dateFormat.parse(commandParams.iterator().next()), contexts);
                 } else if ("rollbackCount".equalsIgnoreCase(command)) {
-                    migrator.setMode(Migrator.Mode.EXECUTE_ROLLBACK_MODE);
-                    migrator.setRollbackCount(Integer.parseInt(commandParams.iterator().next()));
+                    migrator.rollback(Integer.parseInt(commandParams.iterator().next()), contexts);
+
                 } else if ("rollbackSQL".equalsIgnoreCase(command)) {
-                    migrator.setMode(Migrator.Mode.OUTPUT_ROLLBACK_SQL_MODE);
-                    migrator.setOutputSQLWriter(getOutputWriter());
                     if (commandParams == null) {
                         throw new CommandLineParsingException("rollbackSQL requires a rollback tag");
                     }
-                    migrator.setRollbackToTag(commandParams.iterator().next());
+                    migrator.rollback(commandParams.iterator().next(), contexts, getOutputWriter());
                 } else if ("rollbackToDateSQL".equalsIgnoreCase(command)) {
-                    migrator.setMode(Migrator.Mode.OUTPUT_ROLLBACK_SQL_MODE);
-                    migrator.setOutputSQLWriter(getOutputWriter());
                     if (commandParams == null) {
                         throw new CommandLineParsingException("rollbackToDateSQL requires a rollback date");
                     }
-                    migrator.setRollbackToDate(dateFormat.parse(commandParams.iterator().next()));
+                    migrator.rollback(dateFormat.parse(commandParams.iterator().next()), contexts, getOutputWriter());
                 } else if ("rollbackCountSQL".equalsIgnoreCase(command)) {
-                    migrator.setMode(Migrator.Mode.OUTPUT_ROLLBACK_SQL_MODE);
-                    migrator.setOutputSQLWriter(getOutputWriter());
-                    migrator.setRollbackCount(Integer.valueOf(commandParams.iterator().next()));
+                    if (commandParams == null) {
+                        throw new CommandLineParsingException("rollbackCountSQL requires a rollback tag");
+                    }
+
+                    migrator.rollback(Integer.parseInt(commandParams.iterator().next()), contexts, getOutputWriter());
                 } else if ("futureRollbackSQL".equalsIgnoreCase(command)) {
-                    migrator.setMode(Migrator.Mode.OUTPUT_FUTURE_ROLLBACK_SQL_MODE);
-                    migrator.setOutputSQLWriter(getOutputWriter());
+                    migrator.futureRollbackSQL(contexts, getOutputWriter());
                 } else {
                     throw new CommandLineParsingException("Unknown command: " + command);
                 }
@@ -686,7 +689,6 @@ public class CommandLineMigrator {
 //                    }
 //                }
 //            }
-            migrator.migrate();
         } finally {
             connection.close();
         }

@@ -40,12 +40,8 @@ public class IntellijFacade implements IdeFacade {
             changeLogFile = liquibaseProjectComponent.getRootChangeLogFile();
         }
 
-        Migrator migrator = new Migrator(changeLogFile, new CompositeFileOpener(new IntellijFileOpener(), new FileSystemFileOpener()));
-        if (database == null) {
-            return migrator;
-        }
+        Migrator migrator = new Migrator(changeLogFile, new CompositeFileOpener(new IntellijFileOpener(), new FileSystemFileOpener()), database);
         try {
-            migrator.init(database);
             migrator.checkDatabaseChangeLogTable();
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -60,7 +56,7 @@ public class IntellijFacade implements IdeFacade {
     public DatabaseChangeLog getRootChangeLog() {
 //        XmlFile xmlFile = LiquibaseProjectComponent.getInstance().getChangeLogFile();
 //        return new DatabaseChangeLog(getMigrator())
-        return new DatabaseChangeLog(getMigrator(null, null), LiquibaseProjectComponent.getInstance().getRootChangeLogFile());
+        return new DatabaseChangeLog(LiquibaseProjectComponent.getInstance().getRootChangeLogFile());
     }
 
 

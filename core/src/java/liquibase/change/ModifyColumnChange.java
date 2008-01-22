@@ -1,20 +1,6 @@
 package liquibase.change;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import liquibase.database.CacheDatabase;
-import liquibase.database.DB2Database;
-import liquibase.database.Database;
-import liquibase.database.DerbyDatabase;
-import liquibase.database.HsqlDatabase;
-import liquibase.database.MSSQLDatabase;
-import liquibase.database.MaxDBDatabase;
-import liquibase.database.MySQLDatabase;
-import liquibase.database.OracleDatabase;
-import liquibase.database.SybaseDatabase;
+import liquibase.database.*;
 import liquibase.database.sql.RawSqlStatement;
 import liquibase.database.sql.SqlStatement;
 import liquibase.database.structure.Column;
@@ -22,9 +8,13 @@ import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Table;
 import liquibase.exception.UnsupportedChangeException;
 import liquibase.util.StringUtils;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Modifies the data type of an existing column.

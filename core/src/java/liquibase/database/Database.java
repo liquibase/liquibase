@@ -1,17 +1,18 @@
 package liquibase.database;
 
-import liquibase.DatabaseChangeLogLock;
+import liquibase.ChangeSet;
+import liquibase.RanChangeSet;
 import liquibase.database.sql.SqlStatement;
 import liquibase.database.structure.DatabaseObject;
+import liquibase.database.template.JdbcTemplate;
+import liquibase.exception.DatabaseHistoryException;
 import liquibase.exception.JDBCException;
-import liquibase.exception.LockException;
-import liquibase.migrator.Migrator;
 
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.Date;
+import java.util.List;
 
 public interface Database extends DatabaseObject {
     /**
@@ -105,19 +106,13 @@ public interface Database extends DatabaseObject {
      */
     String getConcatSql(String ... values);
 
-    boolean acquireLock(Migrator migrator) throws LockException;
-
-    void releaseLock() throws LockException;
-
-    DatabaseChangeLogLock[] listLocks() throws LockException;
-
     boolean doesChangeLogTableExist();
 
     boolean doesChangeLogLockTableExist();
 
-    void checkDatabaseChangeLogTable(Migrator migrator) throws JDBCException, IOException;
+    void checkDatabaseChangeLogTable() throws JDBCException;
 
-    void checkDatabaseChangeLogLockTable(Migrator migrator) throws JDBCException, IOException;
+    void checkDatabaseChangeLogLockTable() throws JDBCException;
 
     void dropDatabaseObjects(String schema) throws JDBCException;
 
@@ -210,5 +205,31 @@ public interface Database extends DatabaseObject {
 
     String escapeViewName(String schemaName, String viewName);
 
-    boolean isColumnAutoIncrement(String schemaName, String tableName, String columnName) throws SQLException;
+    boolean isColumnAutoIncrement(String schemaName, String tableName, String columnName) throws SQLException, JDBCException;
+
+    ChangeSet.RunStatus getRunStatus(ChangeSet changeSet) throws JDBCException, DatabaseHistoryException;
+
+    RanChangeSet getRanChangeSet(ChangeSet changeSet) throws JDBCException, DatabaseHistoryException;
+
+    void markChangeSetAsRan(ChangeSet changeSet) throws JDBCException;
+
+    void markChangeSetAsReRan(ChangeSet changeSet) throws JDBCException;
+
+    List<RanChangeSet> getRanChangeSetList() throws JDBCException;
+
+    Date getRanDate(ChangeSet changeSet) throws JDBCException, DatabaseHistoryException;
+
+    void removeRanStatus(ChangeSet changeSet) throws JDBCException;
+
+    void commit() throws JDBCException;
+
+    void rollback() throws JDBCException;
+
+    SqlStatement getSelectChangeLogLockSQL() throws JDBCException;
+
+    JdbcTemplate getJdbcTemplate();
+
+    void setJdbcTemplate(JdbcTemplate template);
+
+    String escapeStringForDatabase(String string);    
 }

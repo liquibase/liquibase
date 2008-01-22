@@ -1,8 +1,8 @@
 package liquibase.preconditions;
 
 import liquibase.DatabaseChangeLog;
+import liquibase.database.Database;
 import liquibase.exception.PreconditionFailedException;
-import liquibase.migrator.Migrator;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -30,11 +30,11 @@ public class SqlPrecondition implements Precondition {
         this.sql = sql;
     }
 
-    public void check(Migrator migrator, DatabaseChangeLog changeLog) throws PreconditionFailedException {
+    public void check(Database database, DatabaseChangeLog changeLog) throws PreconditionFailedException {
         Statement statement = null;
         ResultSet resultSet = null;
         try {
-            statement = migrator.getDatabase().getConnection().createStatement();
+            statement = database.getConnection().createStatement();
             resultSet = statement.executeQuery(getSql());
             if (!resultSet.next()) {
                 throw new PreconditionFailedException("No rows returned from SQL Precondition", changeLog, this);

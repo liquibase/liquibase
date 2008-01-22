@@ -6,6 +6,7 @@ import org.liquibase.ide.common.IdeFacade;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
+import java.io.PrintWriter;
 
 public class StatusAction extends MigratorAction {
 
@@ -21,7 +22,7 @@ public class StatusAction extends MigratorAction {
             return;
         }
 
-        ideFacade.getMigrator(changeLogFile, database).reportStatus(true, new PrintStream(byteArrayOutputStream));
+        ideFacade.getMigrator(changeLogFile, database).reportStatus(true, null, new PrintWriter(new PrintStream(byteArrayOutputStream)));
 
         ideFacade.showOutput("Check Change Log Status", byteArrayOutputStream.toString());
 

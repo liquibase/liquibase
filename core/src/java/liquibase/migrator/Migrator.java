@@ -1,32 +1,35 @@
 package liquibase.migrator;
 
 import liquibase.ChangeSet;
+import liquibase.DatabaseChangeLog;
 import liquibase.DatabaseChangeLogLock;
 import liquibase.FileOpener;
-import liquibase.RanChangeSet;
-import liquibase.change.ChangeFactory;
 import liquibase.database.Database;
-import liquibase.database.DatabaseConnection;
-import liquibase.database.DatabaseFactory;
-import liquibase.exception.*;
-import liquibase.parser.*;
-import liquibase.preconditions.PreconditionFactory;
+import liquibase.database.sql.UpdateStatement;
+import liquibase.database.template.JdbcOutputTemplate;
+import liquibase.database.template.JdbcTemplate;
+import liquibase.exception.JDBCException;
+import liquibase.exception.LiquibaseException;
+import liquibase.exception.LockException;
+import liquibase.exception.ValidationFailedException;
+import liquibase.lock.LockHandler;
+import liquibase.log.LogFactory;
+import liquibase.parser.ChangeLogIterator;
+import liquibase.parser.ChangeLogParser;
+import liquibase.parser.filter.*;
+import liquibase.parser.visitor.*;
+import liquibase.util.LiquibaseUtil;
 import liquibase.util.StreamUtil;
-import liquibase.util.StringUtils;
-import org.xml.sax.*;
 
 import javax.swing.*;
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
+import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.PrintStream;
 import java.io.Writer;
-import java.net.URL;
-import java.sql.*;
+import java.sql.Types;
 import java.text.DateFormat;
-import java.util.*;
 import java.util.Date;
+import java.util.List;
 import java.util.logging.Logger;
 
 /**
@@ -44,270 +47,29 @@ import java.util.logging.Logger;
  */
 public class Migrator {
 
-    // These modes tell the program whether to execute the statements against the database
-    // Or to output them in some file to be ran later manually
-
-    public enum Mode {
-        EXECUTE_MODE,
-        EXECUTE_ROLLBACK_MODE,
-        OUTPUT_SQL_MODE,
-        OUTPUT_ROLLBACK_SQL_MODE,
-        OUTPUT_FUTURE_ROLLBACK_SQL_MODE,
-        OUTPUT_CHANGELOG_ONLY_SQL_MODE,
-        FIND_UNRUN_CHANGESETS_MODE,
-    }
-
     public static final String SHOULD_RUN_SYSTEM_PROPERTY = "database.migrator.should.run";
-
-    public static final String DEFAULT_LOG_NAME = "database.migrator";
 
     private static boolean outputtedHeader = false;
 
-    private ChangeFactory changeFactory = new ChangeFactory();
-    private PreconditionFactory preconditionFactory = new PreconditionFactory();
-
-    private XMLReader xmlReader;
-
     private String changeLogFile;
     private FileOpener fileOpener;
-    private Mode mode;
-    private Writer outputSQLWriter;
-    private Date rollbackToDate;
-    private String rollbackToTag;
-    private Integer rollbackCount;
 
     private Database database;
     private Logger log;
-    private Set<String> contexts = new HashSet<String>();
 
-    private boolean hasChangeLogLock = false;
-    private long changeLogLockWaitTime = 1000 * 60 * 5;  //default to 5 mins
-
-    private List<RanChangeSet> ranChangeSetList;
-    private String buildVersion;
-
-    private boolean wasValidationRan = false;
-
-    public Migrator(String changeLogFile, FileOpener fileOpener) {
-        this(changeLogFile, fileOpener, false);
-    }
-
-    protected Migrator(String changeLogFile, FileOpener fileOpener, boolean alreadyHasChangeLogLock) {
-        log = Logger.getLogger(Migrator.DEFAULT_LOG_NAME);
+    public Migrator(String changeLogFile, FileOpener fileOpener, Database database) {
+        log = LogFactory.getLogger();
 
         if (changeLogFile != null) {
-            this.changeLogFile = changeLogFile.replace("\\","/");  //convert to standard / if usign absolute path on windows
+            this.changeLogFile = changeLogFile.replace("\\", "/");  //convert to standard / if usign absolute path on windows
         }
         this.fileOpener = fileOpener;
-        SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
-        if (System.getProperty("java.vm.version").startsWith("1.4")) {
-            saxParserFactory.setValidating(false);
-            saxParserFactory.setNamespaceAware(false);
-        } else {
-            saxParserFactory.setValidating(true);
-            saxParserFactory.setNamespaceAware(true);
-        }
-        try {
-            SAXParser parser = saxParserFactory.newSAXParser();
-            try {
-                parser.setProperty("http://java.sun.com/xml/jaxp/properties/schemaLanguage", "http://www.w3.org/2001/XMLSchema");
-            } catch (SAXNotRecognizedException e) {
-                ; //ok, parser must not support it
-            } catch (SAXNotSupportedException e) {
-                ; //ok, parser must not support it
-            }
-            xmlReader = parser.getXMLReader();
-            xmlReader.setEntityResolver(new MigratorSchemaResolver());
-            xmlReader.setErrorHandler(new ErrorHandler() {
-                public void warning(SAXParseException exception) throws SAXException {
-                    Logger.getLogger(Migrator.DEFAULT_LOG_NAME).warning(exception.getMessage());
-                    throw exception;
-                }
 
-                public void error(SAXParseException exception) throws SAXException {
-                    Logger.getLogger(Migrator.DEFAULT_LOG_NAME).severe(exception.getMessage());
-                    throw exception;
-                }
-
-                public void fatalError(SAXParseException exception) throws SAXException {
-                    Logger.getLogger(Migrator.DEFAULT_LOG_NAME).severe(exception.getMessage());
-                    throw exception;
-                }
-            });
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-        setMode(Mode.EXECUTE_MODE);
-        this.hasChangeLogLock = alreadyHasChangeLogLock;
-
-        this.buildVersion = findVersion();
-    }
-
-    private String findVersion() {
-        Properties buildInfo = new Properties();
-        URL buildInfoFile = Thread.currentThread().getContextClassLoader().getResource("buildinfo.properties");
-        try {
-            if (buildInfoFile == null) {
-                return "UNKNOWN";
-            } else {
-                InputStream in = buildInfoFile.openStream();
-
-                buildInfo.load(in);
-                String o = (String) buildInfo.get("build.version");
-                if (o == null) {
-                    return "UNKNOWN";
-                } else {
-                    return o;
-                }
-            }
-        } catch (IOException e) {
-            return "UNKNOWN";
-        }
-    }
-
-    /**
-     * Initializes the Migrator with the given connection.  Needs to be called before actually using the Migrator.
-     */
-    public void init(Connection connection) throws JDBCException {
-        // Array Of all the implemented databases
-        database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(connection);
-        database.setConnection(connection);
-    }
-
-    /**
-     * Initializes the Migrator with the given connection.  Needs to be called before actually using the Migrator.
-     */
-    public void init(DatabaseConnection connection) throws JDBCException {
-        // Array Of all the implemented databases
-        database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(connection);
-        database.setConnection(connection);
-    }
-
-    /**
-     * Initializes the Migrator with the given database.  Needs to be called before actually using the Migrator.
-     */
-    public void init(Database database) throws JDBCException {
         this.database = database;
-    }
-
-//    public void init(String driverClass, String url, String username, String password, ClassLoader driverClassLoader) throws JDBCException {
-//        Driver driver = null;
-//        try {
-//            if (driverClass == null) {
-//                driverClass = DatabaseFactory.getInstance().findDefaultDriver(url);
-//            }
-//
-//            if (driverClass == null) {
-//                throw new RuntimeException("Driver class was not specified and could not be determined from the url");
-//            }
-//
-//            driver = (Driver) Class.forName(driverClass, true, driverClassLoader).newInstance();
-//        } catch (Exception e) {
-//            throw new RuntimeException("Cannot get database driver: " + e.getMessage());
-//        }
-//        Properties info = new Properties();
-//        info.put("user", username);
-//        if (password != null) {
-//            info.put("password", password);
-//        }
-//
-//        Connection connection = null;
-//        try {
-//            connection = driver.connect(url, info);
-//
-//            init(connection);
-//        } catch (SQLException e) {
-//            throw new JDBCException(e);
-//        }
-//        if (connection == null) {
-//            throw new JDBCException("Connection could not be created to " + url + " with driver " + driver.getClass().getName() + ".  Possibly the wrong driver for the given database URL");
-//        }
-//
-//    }
-
-    /**
-     * Returns the ChangeFactory for converting tag strings to Change implementations.
-     */
-    public ChangeFactory getChangeFactory() {
-        return changeFactory;
-    }
-
-    public PreconditionFactory getPreconditionFactory() {
-        return preconditionFactory;
-    }
-
-    public String getBuildVersion() {
-        return buildVersion;
-    }
-
-    public static String getSchemaVersion() {
-        return "1.4";
     }
 
     public Database getDatabase() {
         return database;
-    }
-
-    /**
-     * Sets the mode of opereration for the Migrator.
-     */
-    public Mode getMode() {
-        return mode;
-    }
-
-    public void setMode(Mode mode) {
-        this.mode = mode;
-    }
-
-
-    /**
-     * The Writer to append SQL if not executing directly against the database.
-     */
-    public Writer getOutputSQLWriter() {
-        return outputSQLWriter;
-    }
-
-    public void setOutputSQLWriter(Writer outputSQLWriter) {
-        this.outputSQLWriter = outputSQLWriter;
-    }
-
-    /**
-     * Date to rollback to if executing in rollback mode.
-     */
-    public Date getRollbackToDate() {
-        if (rollbackToDate == null) {
-            return null;
-        }
-        return (Date) rollbackToDate.clone();
-
-    }
-
-    public void setRollbackToDate(Date rollbackToDate) {
-        if (rollbackToDate != null) {
-            this.rollbackToDate = new Date(rollbackToDate.getTime());
-        }
-    }
-
-    /**
-     * Tag to rollback to if executing in rollback mode.
-     */
-    public String getRollbackToTag() {
-        return rollbackToTag;
-    }
-
-    public void setRollbackToTag(String rollbackToTag) {
-        this.rollbackToTag = rollbackToTag;
-    }
-
-    /**
-     * Number of statements to rollback to if executing in rollback mode.
-     */
-    public Integer getRollbackCount() {
-        return rollbackCount;
-    }
-
-    public void setRollbackCount(Integer rollbackCount) {
-        this.rollbackCount = rollbackCount;
     }
 
     /**
@@ -328,289 +90,258 @@ public class Migrator {
     }
 
     /**
-     * Returns the ChangeSets that have been run against the current database.
-     */
-    public List<RanChangeSet> getRanChangeSetList() throws JDBCException {
-        try {
-            String databaseChangeLogTableName = getDatabase().getDatabaseChangeLogTableName();
-            if (ranChangeSetList == null) {
-                ranChangeSetList = new ArrayList<RanChangeSet>();
-                if (getDatabase().doesChangeLogTableExist()) {
-                    log.info("Reading from " + databaseChangeLogTableName);
-                    String sql = "SELECT * FROM " + databaseChangeLogTableName + " ORDER BY dateExecuted asc".toUpperCase();
-                    Statement statement = getDatabase().getConnection().createStatement();
-                    ResultSet rs = statement.executeQuery(sql);
-                    while (rs.next()) {
-                        String fileName = rs.getString("filename");
-                        String author = rs.getString("author");
-                        String id = rs.getString("id");
-                        String md5sum = rs.getString("md5sum");
-                        Date dateExecuted = rs.getTimestamp("dateExecuted");
-                        String tag = rs.getString("tag");
-                        RanChangeSet ranChangeSet = new RanChangeSet(fileName, id, author, md5sum, dateExecuted, tag);
-                        ranChangeSetList.add(ranChangeSet);
-                    }
-                    rs.close();
-                    statement.close();
-                }
-            }
-            return ranChangeSetList;
-        } catch (SQLException e) {
-            throw new JDBCException(e);
-        }
-    }
-
-
-
-
-    /**
      * Checks changelogs for bad MD5Sums and preconditions before attempting a migration
      */
-    public void validate() throws MigrationFailedException, IOException, JDBCException, LockException {
-        try {
-            if (!waitForLock()) {
-                return;
-            }
+    public void validate() throws LiquibaseException {
 
-            ValidateChangeLogHandler validateChangeLogHandler = new ValidateChangeLogHandler(this, changeLogFile,fileOpener);
-            runChangeLogs(validateChangeLogHandler);
-            if (!validateChangeLogHandler.validationPassed()) {
-                throw new ValidationFailedException(validateChangeLogHandler);
-            }
-        } finally {
-            releaseLock();
+        DatabaseChangeLog changeLog = new ChangeLogParser().parse(changeLogFile, fileOpener);
+        ChangeLogIterator logIterator = new ChangeLogIterator(changeLog, new DbmsChangeSetFilter(database));
+
+        ValidatingVisitor validatingVisitor = new ValidatingVisitor(database.getRanChangeSetList());
+        validatingVisitor.checkPreconditions(database, changeLog);
+        logIterator.run(validatingVisitor);
+
+        if (!validatingVisitor.validationPassed()) {
+            throw new ValidationFailedException(validatingVisitor);
         }
     }
 
-    /**
-     * The primary method to call on Migrator to actually do work.
-     * To use the Migrator, initialize it with the init(Connection) method, set the mode, outputSQLWriter, etc. as need be,
-     * then call the migrate() method.
-     */
-    public final void migrate() throws LiquibaseException {
+    public void update(String contexts) throws LiquibaseException {
+
+        LockHandler lockHandler = LockHandler.getInstance(database);
+        lockHandler.waitForLock();
+
         try {
-            if (!wasValidationRan()) {
-                validate();
-                wasValidationRan = true;
-            }
+            database.checkDatabaseChangeLogTable();
 
-            if (!waitForLock()) {
-                return;
-            }
+            validate();
 
-            Writer outputSQLWriter = getOutputSQLWriter();
+            DatabaseChangeLog changeLog = new ChangeLogParser().parse(changeLogFile, fileOpener);
+            ChangeLogIterator logIterator = new ChangeLogIterator(changeLog,
+                    new ShouldRunChangeSetFilter(database),
+                    new ContextChangeSetFilter(contexts),
+                    new DbmsChangeSetFilter(database));
 
-            if (outputSQLWriter == null) {
-                log.info("Reading changelog " + changeLogFile);
-            } else {
-                if (!outputtedHeader) {
-                    outputSQLWriter.write("--------------------------------------------------------------------------------------" + StreamUtil.getLineSeparator());
-                    if (mode.equals(Mode.OUTPUT_SQL_MODE)) {
-                        outputSQLWriter.write("-- SQL to update database to newest version" + StreamUtil.getLineSeparator());
-                    } else if (mode.equals(Mode.OUTPUT_CHANGELOG_ONLY_SQL_MODE)) {
-                        outputSQLWriter.write("-- SQL to add all changesets to database history table" + StreamUtil.getLineSeparator());
-                    } else if (mode.equals(Mode.OUTPUT_ROLLBACK_SQL_MODE)) {
-                        String stateDescription;
-                        if (getRollbackToTag() != null) {
-                            stateDescription = getRollbackToTag();
-                        } else if (getRollbackToDate() != null) {
-                            stateDescription = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(getRollbackToDate());
-                        } else if (getRollbackCount() != null) {
-                            stateDescription = getRollbackCount() + " change set ago";
-                        } else {
-                            throw new RuntimeException("Unknown rollback type");
-                        }
-                        outputSQLWriter.write("-- SQL to roll-back database to the state it was at " + stateDescription + StreamUtil.getLineSeparator());
-                    } else if (mode.equals(Mode.OUTPUT_FUTURE_ROLLBACK_SQL_MODE)) {
-                        outputSQLWriter.write("-- SQL to roll-back database from an updated buildVersion back to current version" + StreamUtil.getLineSeparator());
-                    } else {
-                        throw new LiquibaseException("Unexpected output mode: " + mode);
-                    }
-                    outputSQLWriter.write("-- Change Log: " + changeLogFile + StreamUtil.getLineSeparator());
-                    outputSQLWriter.write("-- Ran at: " + DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(new Date()) + StreamUtil.getLineSeparator());
-                    outputSQLWriter.write("-- Against: " + getDatabase().getConnectionUsername() + "@" + getDatabase().getConnectionURL() + StreamUtil.getLineSeparator());
-                    outputSQLWriter.write("-- LiquiBase version: "+getBuildVersion() + StreamUtil.getLineSeparator());
-                    outputSQLWriter.write("--------------------------------------------------------------------------------------" + StreamUtil.getLineSeparator() + StreamUtil.getLineSeparator() + StreamUtil.getLineSeparator());
-                    outputtedHeader = true;
-                }
-            }
+            logIterator.run(new UpdateVisitor(database));
+        } finally {
+            lockHandler.releaseLock();
+        }
+    }
 
-            if (mode.equals(Mode.EXECUTE_MODE) || mode.equals(Mode.OUTPUT_SQL_MODE) || mode.equals(Mode.OUTPUT_CHANGELOG_ONLY_SQL_MODE)) {
-                runChangeLogs(new UpdateDatabaseChangeLogHandler(this, changeLogFile,fileOpener));
-            } else if (mode.equals(Mode.EXECUTE_ROLLBACK_MODE) || mode.equals(Mode.OUTPUT_ROLLBACK_SQL_MODE)) {
-                RollbackDatabaseChangeLogHandler rollbackHandler;
-                if (getRollbackToDate() != null) {
-                    rollbackHandler = new RollbackDatabaseChangeLogHandler(this, changeLogFile, fileOpener, getRollbackToDate());
-                } else if (getRollbackToTag() != null) {
-                    if (!getDatabase().doesTagExist(getRollbackToTag())) {
-                        throw new LiquibaseException("'" + getRollbackToTag() + "' is not tag that exists in the database");
-                    }
+    public void update(String contexts, Writer output) throws LiquibaseException {
+        JdbcTemplate oldTemplate = database.getJdbcTemplate();
+        JdbcOutputTemplate outputTemplate = new JdbcOutputTemplate(output, database);
+        database.setJdbcTemplate(outputTemplate);
 
-                    rollbackHandler = new RollbackDatabaseChangeLogHandler(this, changeLogFile, fileOpener, getRollbackToTag());
-                } else if (getRollbackCount() != null) {
-                    rollbackHandler = new RollbackDatabaseChangeLogHandler(this, changeLogFile, fileOpener, getRollbackCount());
-                } else {
-                    throw new RuntimeException("Don't know what to rollback to");
-                }
-                runChangeLogs(rollbackHandler);
-                ChangeSet unrollbackableChangeSet = rollbackHandler.getUnRollBackableChangeSet();
-                if (unrollbackableChangeSet == null) {
-                    rollbackHandler.doRollback();
-                } else {
-                    throw new LiquibaseException("Cannot roll back changelog to selected date due to change set " + unrollbackableChangeSet);
-                }
-            } else if (mode.equals(Mode.OUTPUT_FUTURE_ROLLBACK_SQL_MODE)) {
-                RollbackFutureDatabaseChangeLogHandler rollbackHandler = 
-                    new RollbackFutureDatabaseChangeLogHandler(this, changeLogFile,fileOpener);
-                runChangeLogs(rollbackHandler);
-                ChangeSet unrollbackableChangeSet = rollbackHandler.getUnRollBackableChangeSet();
-                if (unrollbackableChangeSet == null) {
-                    rollbackHandler.doRollback();
-                } else {
-                    throw new LiquibaseException("Will not be able to rollback changes due to change set " + unrollbackableChangeSet);
-                }
-            } else if (mode.equals(Mode.FIND_UNRUN_CHANGESETS_MODE)) {
-                runChangeLogs(new FindChangeSetsHandler(this, changeLogFile,fileOpener));
+        outputHeader("Update Database Script");
 
-//                List<ChangeSet> unrunChangeSets = FindChangeSetsHandler.getUnrunChangeSets();
-//                System.out.println(unrunChangeSets.size()+" change sets have not been applied to "+getDatabase().getConnectionUsername() + "@" + getDatabase().getConnectionURL());
-            } else {
-                throw new LiquibaseException("Unknown mode: " + getMode());
-            }
-            if (outputSQLWriter != null) {
-                outputSQLWriter.flush();
-            }
-        } catch (LiquibaseException e) {
-            throw e;
-        } catch (Exception e) {
+        update(contexts);
+
+        try {
+            output.flush();
+        } catch (IOException e) {
             throw new LiquibaseException(e);
+        }
+
+        database.setJdbcTemplate(oldTemplate);
+    }
+
+    private void outputHeader(String message) throws JDBCException {
+        database.getJdbcTemplate().comment("**************************************************************************************");
+        database.getJdbcTemplate().comment(message);
+        database.getJdbcTemplate().comment("**************************************************************************************");
+        database.getJdbcTemplate().comment("Change Log: " + changeLogFile);
+        database.getJdbcTemplate().comment("Ran at: " + DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(new Date()));
+        database.getJdbcTemplate().comment("Against: " + getDatabase().getConnectionUsername() + "@" + getDatabase().getConnectionURL());
+        database.getJdbcTemplate().comment("LiquiBase version: " + LiquibaseUtil.getBuildVersion());
+        database.getJdbcTemplate().comment("**************************************************************************************" + StreamUtil.getLineSeparator());
+    }
+
+    public void rollback(int changesToRollback, String contexts, Writer output) throws LiquibaseException {
+        JdbcTemplate oldTemplate = database.getJdbcTemplate();
+        database.setJdbcTemplate(new JdbcOutputTemplate(output, database));
+
+        outputHeader("Rollback " + changesToRollback + " Change(s) Script");
+
+        rollback(changesToRollback, contexts);
+
+        try {
+            output.flush();
+        } catch (IOException e) {
+            throw new LiquibaseException(e);
+        }
+        database.setJdbcTemplate(oldTemplate);
+    }
+
+    public void rollback(int changesToRollback, String contexts) throws LiquibaseException {
+        LockHandler lockHandler = LockHandler.getInstance(database);
+        lockHandler.waitForLock();
+
+        try {
+            database.checkDatabaseChangeLogTable();
+
+            validate();
+
+            DatabaseChangeLog changeLog = new ChangeLogParser().parse(changeLogFile, fileOpener);
+            ChangeLogIterator logIterator = new ChangeLogIterator(changeLog,
+                    new AlreadyRanChangeSetFilter(database.getRanChangeSetList()),
+                    new ContextChangeSetFilter(contexts),
+                    new DbmsChangeSetFilter(database),
+                    new CountChangeSetFilter(changesToRollback));
+
+            logIterator.run(new RollbackVisitor(database));
         } finally {
-            releaseLock();
+            lockHandler.releaseLock();
         }
     }
 
-    public void changelogSyncSQL(Writer outputWriter) throws LiquibaseException {
-        this.setMode(Migrator.Mode.OUTPUT_CHANGELOG_ONLY_SQL_MODE);
-        this.setOutputSQLWriter(outputWriter);
+    public void rollback(String tagToRollBackTo, String contexts, Writer output) throws LiquibaseException {
+        JdbcTemplate oldTemplate = database.getJdbcTemplate();
+        database.setJdbcTemplate(new JdbcOutputTemplate(output, database));
 
-        this.migrate();
-    }
+        outputHeader("Rollback to '" + tagToRollBackTo + "' Script");
 
-    public void migrateSQL(Writer outputWriter) throws LiquibaseException {
-        this.setMode(Migrator.Mode.OUTPUT_SQL_MODE);
-        this.setOutputSQLWriter(outputWriter);
+        rollback(tagToRollBackTo, contexts);
 
-        this.migrate();
-    }
-
-    public void rollback(String tag) throws LiquibaseException {
-        this.setMode(Migrator.Mode.EXECUTE_ROLLBACK_MODE);
-        if (tag == null) {
-            throw new LiquibaseException("rollback requires a rollback tag");
+        try {
+            output.flush();
+        } catch (IOException e) {
+            throw new LiquibaseException(e);
         }
-        this.setRollbackToTag(tag);
-
-        migrate();
+        database.setJdbcTemplate(oldTemplate);
     }
 
-    public void rollbackToDate(Date date) throws LiquibaseException {
-        this.setMode(Migrator.Mode.EXECUTE_ROLLBACK_MODE);
-        if (date == null) {
-            throw new LiquibaseException("rollback requires a rollback date");
+    public void rollback(String tagToRollBackTo, String contexts) throws LiquibaseException {
+        LockHandler lockHandler = LockHandler.getInstance(database);
+        lockHandler.waitForLock();
+
+        try {
+            database.checkDatabaseChangeLogTable();
+
+            validate();
+
+            DatabaseChangeLog changeLog = new ChangeLogParser().parse(changeLogFile, fileOpener);
+            ChangeLogIterator logIterator = new ChangeLogIterator(changeLog,
+                    new AfterTagChangeSetFilter(tagToRollBackTo, database.getRanChangeSetList()),
+                    new ContextChangeSetFilter(contexts),
+                    new DbmsChangeSetFilter(database));
+
+            logIterator.run(new RollbackVisitor(database));
+        } finally {
+            lockHandler.releaseLock();
         }
-        this.setRollbackToDate(date);
-
-        migrate();
     }
 
-    public void rollbackCount(int changesToRollback) throws LiquibaseException {
-        this.setMode(Migrator.Mode.EXECUTE_ROLLBACK_MODE);
-        this.setRollbackCount(changesToRollback);
+    public void rollback(Date dateToRollBackTo, String contexts, Writer output) throws LiquibaseException {
+        JdbcTemplate oldTemplate = database.getJdbcTemplate();
+        database.setJdbcTemplate(new JdbcOutputTemplate(output, database));
 
-        migrate();
-    }
+        outputHeader("Rollback to " + dateToRollBackTo + " Script");
 
-    public void rollbackSQL(String tagToRollBackTo, Writer output) throws LiquibaseException {
-        this.setMode(Migrator.Mode.OUTPUT_ROLLBACK_SQL_MODE);
-        this.setOutputSQLWriter(output);
-        if (tagToRollBackTo == null) {
-            throw new LiquibaseException("rollbackSQL requires a rollback tag");
+        rollback(dateToRollBackTo, contexts);
+
+        try {
+            output.flush();
+        } catch (IOException e) {
+            throw new LiquibaseException(e);
         }
-        this.setRollbackToTag(tagToRollBackTo);
-
-        migrate();
+        database.setJdbcTemplate(oldTemplate);
     }
 
-    public void rollbackToDateSQL(Date date, Writer output) throws LiquibaseException {
-        setMode(Migrator.Mode.OUTPUT_ROLLBACK_SQL_MODE);
-        setOutputSQLWriter(output);
-        if (date == null) {
-            throw new LiquibaseException("rollbackToDateSQL requires a rollback date");
+    public void rollback(Date dateToRollBackTo, String contexts) throws LiquibaseException {
+        LockHandler lockHandler = LockHandler.getInstance(database);
+        lockHandler.waitForLock();
+
+        try {
+            database.checkDatabaseChangeLogTable();
+
+            validate();
+
+            DatabaseChangeLog changeLog = new ChangeLogParser().parse(changeLogFile, fileOpener);
+            ChangeLogIterator logIterator = new ChangeLogIterator(changeLog,
+                    new ExecutedAfterChangeSetFilter(dateToRollBackTo, database.getRanChangeSetList()),
+                    new ContextChangeSetFilter(contexts),
+                    new DbmsChangeSetFilter(database));
+
+            logIterator.run(new RollbackVisitor(database));
+        } finally {
+            lockHandler.releaseLock();
         }
-        setRollbackToDate(date);
-
-        migrate();
     }
 
-    public void rollbackCountSQL(int changesToRollback, Writer output) throws LiquibaseException {
-        setMode(Migrator.Mode.OUTPUT_ROLLBACK_SQL_MODE);
-        setOutputSQLWriter(output);
-        setRollbackCount(changesToRollback);
+    public void changeLogSync(String contexts, Writer output) throws LiquibaseException {
 
-        migrate();
-    }
-    
-    public void futureRollbackSQL(Writer output) throws LiquibaseException {
-        setMode(Migrator.Mode.OUTPUT_FUTURE_ROLLBACK_SQL_MODE);
-        setOutputSQLWriter(output);
+        JdbcOutputTemplate outputTemplate = new JdbcOutputTemplate(output, database);
+        JdbcTemplate oldTemplate = database.getJdbcTemplate();
+        database.setJdbcTemplate(outputTemplate);
 
-        migrate();
-    }
+        outputHeader("SQL to add all changesets to database history table");
 
+        changeLogSync(contexts);
 
-    protected ValidateChangeLogHandler getValidatChangeLogHandler() {
-        return new ValidateChangeLogHandler(this, changeLogFile,fileOpener);
-    }
-
-    private boolean waitForLock() throws JDBCException, IOException, LockException {
-        if (!hasChangeLogLock) {
-            checkDatabaseChangeLogTable();
-        }
-
-        boolean locked = false;
-        long timeToGiveUp = new Date().getTime() + changeLogLockWaitTime;
-        while (!locked && new Date().getTime() < timeToGiveUp) {
-            locked = acquireLock();
-            if (!locked) {
-                log.info("Waiting for changelog lock....");
-                try {
-                    Thread.sleep(1000 * 10);
-                } catch (InterruptedException e) {
-                    ;
-                }
-            }
+        try {
+            output.flush();
+        } catch (IOException e) {
+            throw new LiquibaseException(e);
         }
 
-        if (!locked) {
-            DatabaseChangeLogLock[] locks = listLocks();
-            String lockedBy;
-            if (locks.length > 0) {
-                DatabaseChangeLogLock lock = locks[0];
-                lockedBy = lock.getLockedBy() + " since " + DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(lock.getLockGranted());
-            } else {
-                lockedBy = "UNKNOWN";
-            }
-            log.severe("Could not acquire change log lock.  Currently locked by " + lockedBy);
-            return false;
-        }
-
-        return true;
-
+        database.setJdbcTemplate(oldTemplate);
     }
 
+    public void changeLogSync(String contexts) throws LiquibaseException {
+        LockHandler lockHandler = LockHandler.getInstance(database);
+        lockHandler.waitForLock();
 
-    protected boolean wasValidationRan() {
-        return wasValidationRan;
+        try {
+            database.checkDatabaseChangeLogTable();
+
+            validate();
+
+            DatabaseChangeLog changeLog = new ChangeLogParser().parse(changeLogFile, fileOpener);
+            ChangeLogIterator logIterator = new ChangeLogIterator(changeLog,
+                    new NotRanChangeSetFilter(database.getRanChangeSetList()),
+                    new ContextChangeSetFilter(contexts),
+                    new DbmsChangeSetFilter(database));
+
+            logIterator.run(new ChangeLogSyncVisitor(database));
+        } finally {
+            lockHandler.releaseLock();
+        }
+    }
+
+    public void futureRollbackSQL(String contexts, Writer output) throws LiquibaseException {
+        JdbcOutputTemplate outputTemplate = new JdbcOutputTemplate(output, database);
+        JdbcTemplate oldTemplate = database.getJdbcTemplate();
+        database.setJdbcTemplate(outputTemplate);
+
+        outputHeader("SQL to roll back currently unexecuted changes");
+
+        LockHandler lockHandler = LockHandler.getInstance(database);
+        lockHandler.waitForLock();
+
+        try {
+            database.checkDatabaseChangeLogTable();
+
+            validate();
+
+            DatabaseChangeLog changeLog = new ChangeLogParser().parse(changeLogFile, fileOpener);
+            ChangeLogIterator logIterator = new ChangeLogIterator(changeLog,
+                    new NotRanChangeSetFilter(database.getRanChangeSetList()),
+                    new ContextChangeSetFilter(contexts),
+                    new DbmsChangeSetFilter(database));
+
+            logIterator.run(new RollbackVisitor(database));
+        } finally {
+            database.setJdbcTemplate(oldTemplate);
+            lockHandler.releaseLock();
+        }
+
+        try {
+            output.flush();
+        } catch (IOException e) {
+            throw new LiquibaseException(e);
+        }
+
     }
 
     /**
@@ -625,12 +356,11 @@ public class Migrator {
      */
     public final void dropAll(String... schemas) throws JDBCException, LockException {
         try {
-            if (!waitForLock()) {
-                return;
-            }
+            LockHandler.getInstance(database).waitForLock();
 
             for (String schema : schemas) {
                 log.info("Dropping Database Objects in " + schema);
+                checkDatabaseChangeLogTable();
                 getDatabase().dropDatabaseObjects(schema);
                 checkDatabaseChangeLogTable();
                 log.finest("Objects dropped successfully");
@@ -641,28 +371,11 @@ public class Migrator {
             throw new JDBCException(e);
         } finally {
             try {
-                releaseLock();
+                LockHandler.getInstance(database).releaseLock();
             } catch (LockException e) {
-                log.severe("Unable to release lock: "+e.getMessage());
+                log.severe("Unable to release lock: " + e.getMessage());
             }
         }
-    }
-
-    public boolean acquireLock() throws LockException {
-        return hasChangeLogLock || getDatabase().acquireLock(this);
-    }
-
-    public void releaseLock() throws LockException {
-        getDatabase().releaseLock();
-    }
-
-    /**
-     * Releases whatever locks are on the database change log table
-     */
-    public void forceReleaseLock() throws LockException, JDBCException, IOException {
-        checkDatabaseChangeLogTable();
-
-        getDatabase().releaseLock();
     }
 
     /**
@@ -674,59 +387,8 @@ public class Migrator {
 
 
     public void checkDatabaseChangeLogTable() throws JDBCException, IOException {
-        getDatabase().checkDatabaseChangeLogTable(this);
-        getDatabase().checkDatabaseChangeLogLockTable(this);
-    }
-
-    private void runChangeLogs(ContentHandler contentHandler) throws MigrationFailedException {
-        InputStream inputStream = null;
-        try {
-            inputStream = getFileOpener().getResourceAsStream(changeLogFile);
-            if (inputStream == null) {
-                throw new MigrationFailedException(null, changeLogFile + " does not exist");
-            }
-
-            xmlReader.setContentHandler(contentHandler);
-            xmlReader.parse(new InputSource(inputStream));
-        } catch (IOException e) {
-            throw new MigrationFailedException(null, "Error Reading Migration File: " + e.getMessage(), e);
-        } catch (SAXParseException e) {
-            throw new MigrationFailedException(null, "Error parsing line " + e.getLineNumber() + " column " + e.getColumnNumber() + " of "+": " + e.getMessage());
-        } catch (SAXException e) {
-            Throwable parentCause = e.getException();
-            while (parentCause != null) {
-                if (parentCause instanceof MigrationFailedException) {
-                    throw ((MigrationFailedException) parentCause);
-                }
-                parentCause = parentCause.getCause();
-            }
-            String reason = e.getMessage();
-            String causeReason = null;
-            if(e.getCause()!=null) {
-                causeReason = e.getCause().getMessage();
-            }
-
-//            if (reason == null && causeReason==null) {
-//                reason = "Unknown Reason";
-//            }
-            if (reason == null) {
-                if (causeReason != null) {
-                    reason = causeReason;
-                } else {
-                    reason = "Unknown Reason";
-                }
-            }
-
-            throw new MigrationFailedException(null, "Invalid Migration File: " + reason, e);
-        } finally {
-            if (inputStream != null) {
-                try {
-                    inputStream.close();
-                } catch (IOException e) {
-                    ;
-                }
-            }
-        }
+        getDatabase().checkDatabaseChangeLogTable();
+        getDatabase().checkDatabaseChangeLogLockTable();
     }
 
     /**
@@ -736,7 +398,7 @@ public class Migrator {
      * should be prompted before continuing.
      */
     public boolean isSafeToRunMigration() throws JDBCException {
-        return Mode.OUTPUT_SQL_MODE.equals(getMode()) || Mode.OUTPUT_CHANGELOG_ONLY_SQL_MODE.equals(getMode()) || getDatabase().getConnectionURL().indexOf("localhost") >= 0;
+        return !getDatabase().getJdbcTemplate().executesStatements() || getDatabase().getConnectionURL().indexOf("localhost") >= 0;
     }
 
     /**
@@ -745,7 +407,7 @@ public class Migrator {
     public DatabaseChangeLogLock[] listLocks() throws JDBCException, IOException, LockException {
         checkDatabaseChangeLogTable();
 
-        return getDatabase().listLocks();
+        return LockHandler.getInstance(getDatabase()).listLocks();
     }
 
     public void reportLocks(PrintStream out) throws LockException, IOException, JDBCException {
@@ -758,95 +420,7 @@ public class Migrator {
             out.println(" - " + lock.getLockedBy() + " at " + DateFormat.getDateTimeInstance().format(lock.getLockGranted()));
         }
 
-    }    
-
-    /**
-     * Set the contexts to execute.  If more than once, comma separate them.
-     */
-    public void setContexts(String contexts) {
-        if (contexts != null) {
-            String[] strings = contexts.split(",");
-            for (String string : strings) {
-                this.contexts.add(string.trim().toLowerCase());
-            }
-        }
     }
-
-    public Set<String> getContexts() {
-        return contexts;
-    }
-
-    /**
-     * Returns the run status for the given ChangeSet
-     */
-    public ChangeSet.RunStatus getRunStatus(ChangeSet changeSet) throws JDBCException, DatabaseHistoryException {
-        if (!getDatabase().doesChangeLogTableExist()) {
-            return ChangeSet.RunStatus.NOT_RAN;
-        }
-
-        RanChangeSet foundRan = getRanChangeSet(changeSet);
-
-        if (foundRan == null) {
-            return ChangeSet.RunStatus.NOT_RAN;
-        } else {
-            if (foundRan.getMd5sum() == null) {
-                try {
-                    log.info("Updating NULL md5sum for " + changeSet.toString());
-                    Migrator migrator = changeSet.getDatabaseChangeLog().getMigrator();
-                    DatabaseConnection connection = migrator.getDatabase().getConnection();
-                    PreparedStatement updatePstmt = connection.prepareStatement("update DatabaseChangeLog set md5sum=? where id=? AND author=? AND filename=?".toUpperCase());
-                    updatePstmt.setString(1, changeSet.getMd5sum());
-                    updatePstmt.setString(2, changeSet.getId());
-                    updatePstmt.setString(3, changeSet.getAuthor());
-                    updatePstmt.setString(4, changeSet.getDatabaseChangeLog().getFilePath());
-
-                    updatePstmt.executeUpdate();
-                    updatePstmt.close();
-                    connection.commit();
-                } catch (SQLException e) {
-                    throw new JDBCException(e);
-                }
-
-                return ChangeSet.RunStatus.ALREADY_RAN;
-            } else {
-                if (foundRan.getMd5sum().equals(changeSet.getMd5sum())) {
-                    return ChangeSet.RunStatus.ALREADY_RAN;
-                } else {
-                    if (changeSet.shouldRunOnChange()) {
-                        return ChangeSet.RunStatus.RUN_AGAIN;
-                    } else {
-                        return ChangeSet.RunStatus.INVALID_MD5SUM;
-//                        throw new DatabaseHistoryException("MD5 Check for " + changeSet.toString() + " failed");
-                    }
-                }
-            }
-        }
-    }
-
-    private RanChangeSet getRanChangeSet(ChangeSet changeSet) throws JDBCException, DatabaseHistoryException {        
-        if (!getDatabase().doesChangeLogTableExist()) {
-            throw new DatabaseHistoryException("Database change table does not exist");
-        }
-
-        RanChangeSet foundRan = null;
-        for (RanChangeSet ranChange : getRanChangeSetList()) {
-            if (ranChange.isSameAs(changeSet)) {
-                foundRan = ranChange;
-                break;
-            }
-        }
-        return foundRan;
-    }
-
-    public Date getRanDate(ChangeSet changeSet) throws JDBCException, DatabaseHistoryException {
-        RanChangeSet ranChange = getRanChangeSet(changeSet);
-        if (ranChange == null) {
-            return null;
-        } else {
-            return ranChange.getDateExecuted();
-        }
-    }
-
 
     /**
      * Displays swing-based dialog about running against a non-localhost database.
@@ -860,172 +434,107 @@ public class Migrator {
                 "Confirm", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.NO_OPTION;
     }
 
+    public List<ChangeSet> listUnrunChangeSets(String contexts) throws LiquibaseException {
+        LockHandler lockHandler = LockHandler.getInstance(database);
+        lockHandler.waitForLock();
 
-    public boolean contextMatches(ChangeSet changeSet) {
-        Set<String> requiredContexts = getContexts();
-        Set<String> changeSetContexts = changeSet.getContexts();
-        if (changeSetContexts == null || changeSetContexts.size() == 0) {
-            return true;
-        }
-        if (requiredContexts == null || requiredContexts.size() == 0) {
-            return true;
-        }
-
-        for (String required : requiredContexts) {
-            if (changeSetContexts.contains(required)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public List<ChangeSet> listUnrunChangeSets() throws LiquibaseException {
-        setMode(Mode.FIND_UNRUN_CHANGESETS_MODE);
         try {
-            migrate();
-        } catch (MigrationFailedException e) {
-            throw new JDBCException(e);
-        }
+            database.checkDatabaseChangeLogTable();
 
-        return FindChangeSetsHandler.getUnrunChangeSets();
+            validate();
+
+            DatabaseChangeLog changeLog = new ChangeLogParser().parse(changeLogFile, fileOpener);
+            ChangeLogIterator logIterator = new ChangeLogIterator(changeLog,
+                    new ShouldRunChangeSetFilter(database),
+                    new ContextChangeSetFilter(contexts),
+                    new DbmsChangeSetFilter(database));
+
+            ListVisitor visitor = new ListVisitor();
+            logIterator.run(visitor);
+            return visitor.getSeenChangeSets();
+        } finally {
+            lockHandler.releaseLock();
+        }
     }
 
-    public void reportStatus(boolean verbose, PrintStream out) throws LiquibaseException {
-        List<ChangeSet> unrunChangeSets = listUnrunChangeSets();
-        out.println(unrunChangeSets.size() + " change sets have not been applied to " + getDatabase().getConnectionUsername() + "@" + getDatabase().getConnectionURL());
-        if (verbose) {
-            for (ChangeSet changeSet : unrunChangeSets) {
-                System.out.println("     " + changeSet.toString(false));
+    public void reportStatus(boolean verbose, String contexts, Writer out) throws LiquibaseException {
+        try {
+            List<ChangeSet> unrunChangeSets = listUnrunChangeSets(contexts);
+            out.append(String.valueOf(unrunChangeSets.size()));
+            out.append(" change sets have not been applied to ");
+            out.append(getDatabase().getConnectionUsername());
+            out.append("@");
+            out.append(getDatabase().getConnectionURL());
+            out.append(StreamUtil.getLineSeparator());
+            if (verbose) {
+                for (ChangeSet changeSet : unrunChangeSets) {
+                    out.append("     ").append(changeSet.toString(false)).append(StreamUtil.getLineSeparator());
+                }
             }
+
+            out.flush();
+        } catch (IOException e) {
+            throw new LiquibaseException(e);
         }
 
-    }    
-
-    /**
-     * After the change set has been ran against the database this method will update the change log table
-     * with the information.
-     */
-    public void markChangeSetAsRan(ChangeSet changeSet) throws JDBCException, IOException {
-        String dateValue = getDatabase().getCurrentDateTimeFunction();
-        String sql = "INSERT INTO DATABASECHANGELOG (ID, AUTHOR, FILENAME, DATEEXECUTED, MD5SUM, DESCRIPTION, COMMENTS, LIQUIBASE) VALUES ('?', '?', '?', " + dateValue + ", '?', '?', '?', '?')";
-        sql = sql.replaceFirst("\\?", escapeStringForDatabase(escapeStringForDatabase(changeSet.getId())));
-        sql = sql.replaceFirst("\\?", escapeStringForDatabase(changeSet.getAuthor()));
-        sql = sql.replaceFirst("\\?", escapeStringForDatabase(changeSet.getDatabaseChangeLog().getFilePath().replace("\\","\\\\")));
-        sql = sql.replaceFirst("\\?", escapeStringForDatabase(changeSet.getMd5sum()));
-        sql = sql.replaceFirst("\\?", escapeStringForDatabase(limitSize(changeSet.getDescription())));
-        sql = sql.replaceFirst("\\?", escapeStringForDatabase(limitSize(StringUtils.trimToEmpty(changeSet.getComments()))));
-        sql = sql.replaceFirst("\\?", escapeStringForDatabase(changeSet.getDatabaseChangeLog().getMigrator().getBuildVersion()));
-
-        Writer sqlOutputWriter = getOutputSQLWriter();
-        if (sqlOutputWriter == null) {
-            DatabaseConnection connection = getDatabase().getConnection();
-            try {
-                Statement statement = connection.createStatement();
-                statement.executeUpdate(sql);
-                statement.close();
-                connection.commit();
-            } catch (SQLException e) {
-                throw new JDBCException(e);
-            }
-        } else {
-            sqlOutputWriter.write(sql + ";" + StreamUtil.getLineSeparator() + StreamUtil.getLineSeparator());
-        }
-
-        getRanChangeSetList().add(new RanChangeSet(changeSet));
-    }
-    
-    public void markChangeSetAsReRan(ChangeSet changeSet) throws JDBCException, IOException {
-        String dateValue = changeSet.getDatabaseChangeLog().getMigrator().getDatabase().getCurrentDateTimeFunction();
-        String sql = "UPDATE DATABASECHANGELOG SET DATEEXECUTED=" + dateValue + ", MD5SUM='?' WHERE ID='?' AND AUTHOR='?' AND FILENAME='?'";
-        sql = sql.replaceFirst("\\?", escapeStringForDatabase(changeSet.getMd5sum()));
-        sql = sql.replaceFirst("\\?", escapeStringForDatabase(changeSet.getId()));
-        sql = sql.replaceFirst("\\?", escapeStringForDatabase(changeSet.getAuthor()));
-        sql = sql.replaceFirst("\\?", escapeStringForDatabase(changeSet.getDatabaseChangeLog().getFilePath()));
-
-        Writer sqlOutputWriter = getOutputSQLWriter();
-        if (sqlOutputWriter == null) {
-            DatabaseConnection connection = getDatabase().getConnection();
-            try {
-                Statement statement = connection.createStatement();
-                statement.executeUpdate(sql);
-                statement.close();
-                connection.commit();
-            } catch (SQLException e) {
-                throw new JDBCException(e);
-            }
-        } else {
-            sqlOutputWriter.write(sql + ";" + StreamUtil.getLineSeparator() + StreamUtil.getLineSeparator());
-        }
-    }
-    
-    public void removeRanStatus(ChangeSet changeSet) throws JDBCException, IOException {
-        String sql = "DELETE FROM DATABASECHANGELOG WHERE ID='?' AND AUTHOR='?' AND FILENAME='?'";
-        sql = sql.replaceFirst("\\?", escapeStringForDatabase(changeSet.getId()));
-        sql = sql.replaceFirst("\\?", escapeStringForDatabase(changeSet.getAuthor()));
-        sql = sql.replaceFirst("\\?", escapeStringForDatabase(changeSet.getDatabaseChangeLog().getFilePath()));
-
-        Writer sqlOutputWriter = getOutputSQLWriter();
-        if (sqlOutputWriter == null) {
-            DatabaseConnection connection = getDatabase().getConnection();
-            try {
-                Statement statement = connection.createStatement();
-                statement.executeUpdate(sql);
-                statement.close();
-                connection.commit();
-            } catch (SQLException e) {
-                throw new JDBCException(e);
-            }
-        } else {
-            sqlOutputWriter.write(sql + ";" + StreamUtil.getLineSeparator() + StreamUtil.getLineSeparator());
-        }
-    }
-
-    private String escapeStringForDatabase(String string) {
-        return string.replaceAll("'", "''");
-    }
-    
-    private String limitSize(String string) {
-        int maxLength = 255;
-        if (string.length() > maxLength) {
-            return string.substring(0, maxLength - 3) + "...";
-        }
-        return string;
     }
 
     /**
      * Sets checksums to null so they will be repopulated next run
      */
-    public void clearCheckSums() throws JDBCException {
-        DatabaseConnection connection = getDatabase().getConnection();
+    public void clearCheckSums() throws LiquibaseException {
+        log.info("Clearing database change log checksums");
+        LockHandler lockHandler = LockHandler.getInstance(database);
+        lockHandler.waitForLock();
+
         try {
-            Statement statement = null;
-            try {
-                statement = connection.createStatement();
-                statement.execute("update databasechangelog set md5sum=null".toUpperCase());
-                connection.commit();
-            } finally {
-                if (statement != null) {
-                    statement.close();
-                }
-            }
-        } catch (SQLException e) {
-            throw new JDBCException(e);
+            database.checkDatabaseChangeLogTable();
+
+            UpdateStatement updateStatement = new UpdateStatement(null, getDatabase().getDatabaseChangeLogTableName());
+            updateStatement.addNewColumnValue("MD5SUM", null, Types.VARCHAR);
+            getDatabase().getJdbcTemplate().execute(updateStatement);
+            getDatabase().commit();
+        } finally {
+            lockHandler.releaseLock();
         }
     }
 
-    public void generateDocumentation(String outputDirectory) throws LockException, IOException, JDBCException, MigrationFailedException, DatabaseHistoryException {
+    public void generateDocumentation(String outputDirectory) throws LiquibaseException {
+        log.info("Generating Database Documentation");
+        LockHandler lockHandler = LockHandler.getInstance(database);
+        lockHandler.waitForLock();
+
         try {
-            if (!waitForLock()) {
-                return;
-            }
+            database.checkDatabaseChangeLogTable();
 
-            DBDocChangeLogHandler changeLogHandler = new DBDocChangeLogHandler(outputDirectory, this, changeLogFile,fileOpener);
-            runChangeLogs(changeLogHandler);
+            validate();
 
-            changeLogHandler.writeHTML(this);
+            DatabaseChangeLog changeLog = new ChangeLogParser().parse(changeLogFile, fileOpener);
+            ChangeLogIterator logIterator = new ChangeLogIterator(changeLog,
+                    new DbmsChangeSetFilter(database));
+
+            DBDocVisitor visitor = new DBDocVisitor(database);
+            logIterator.run(visitor);
+
+            visitor.writeHTML(new File(outputDirectory), fileOpener);
+        } catch (IOException e) {
+            throw new LiquibaseException(e);
         } finally {
-            releaseLock();
+            lockHandler.releaseLock();
         }
+
+//        try {
+//            if (!LockHandler.getInstance(database).waitForLock()) {
+//                return;
+//            }
+//
+//            DBDocChangeLogHandler changeLogHandler = new DBDocChangeLogHandler(outputDirectory, this, changeLogFile,fileOpener);
+//            runChangeLogs(changeLogHandler);
+//
+//            changeLogHandler.writeHTML(this);
+//        } finally {
+//            releaseLock();
+//        }
     }
 
 }

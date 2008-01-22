@@ -20,7 +20,7 @@ public class MigrateSqlAction extends MigratorAction {
             return;
         }
 
-        ideFacade.getMigrator(changeLogFile, database).migrateSQL(stringWriter);
+        ideFacade.getMigrator(changeLogFile, database).update(null, stringWriter);
 
         ideFacade.showOutput("Migration SQL", stringWriter.toString());
     }

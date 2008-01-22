@@ -7,8 +7,10 @@ public class PreconditionFactory {
     @SuppressWarnings("unchecked")
     private final Map<String, Class> tagToClassMap;
 
+    private static final PreconditionFactory instance = new PreconditionFactory();
+
     @SuppressWarnings("unchecked")
-    public PreconditionFactory() {
+    private PreconditionFactory() {
         tagToClassMap = new HashMap<String, Class>();
         Class[] preconditions = new Class[]{
                 AndPrecondition.class,
@@ -27,6 +29,10 @@ public class PreconditionFactory {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static PreconditionFactory getInstance() {
+        return instance;
     }
 
     /**

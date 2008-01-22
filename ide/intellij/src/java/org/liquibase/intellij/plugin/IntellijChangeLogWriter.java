@@ -4,9 +4,10 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.VirtualFileManager;
-import liquibase.ChangeSet;
 import liquibase.migrator.Migrator;
 import liquibase.parser.MigratorSchemaResolver;
+import liquibase.parser.xml.XMLChangeLogParser;
+import liquibase.ChangeSet;
 import org.apache.xml.serialize.OutputFormat;
 import org.apache.xml.serialize.XMLSerializer;
 import org.liquibase.ide.common.ChangeLogWriter;
@@ -19,7 +20,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.File;
-import java.util.Date;
 
 public class IntellijChangeLogWriter implements ChangeLogWriter {
 
@@ -102,9 +102,9 @@ public class IntellijChangeLogWriter implements ChangeLogWriter {
         Document doc = createDocumentBuilder().newDocument();
 
         Element changeLogElement = doc.createElement("databaseChangeLog");
-        changeLogElement.setAttribute("xmlns", "http://www.liquibase.org/xml/ns/dbchangelog/"+ Migrator.getSchemaVersion());
+        changeLogElement.setAttribute("xmlns", "http://www.liquibase.org/xml/ns/dbchangelog/"+ XMLChangeLogParser.getSchemaVersion());
         changeLogElement.setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
-        changeLogElement.setAttribute("xsi:schemaLocation", "http://www.liquibase.org/xml/ns/dbchangelog/"+Migrator.getSchemaVersion()+" http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-"+Migrator.getSchemaVersion()+".xsd");
+        changeLogElement.setAttribute("xsi:schemaLocation", "http://www.liquibase.org/xml/ns/dbchangelog/"+XMLChangeLogParser.getSchemaVersion()+" http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-"+XMLChangeLogParser.getSchemaVersion()+".xsd");
 
         changeLogElement.appendChild(doc.createComment("Add change tags here"));
         doc.appendChild(changeLogElement);

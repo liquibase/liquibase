@@ -14,8 +14,8 @@ import java.util.List;
 
 public class TableWriter extends HTMLWriter {
 
-    public TableWriter(File rootOutputDir) {
-        super(new File(rootOutputDir, "tables"));
+    public TableWriter(File rootOutputDir, Database database) {
+        super(new File(rootOutputDir, "tables"), database);
     }
 
     protected String createTitle(Object object) {

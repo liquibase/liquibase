@@ -4,6 +4,7 @@ import java.net.MalformedURLException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import liquibase.FileOpener;
+import liquibase.database.DatabaseFactory;
 import liquibase.exception.JDBCException;
 import liquibase.exception.LiquibaseException;
 import liquibase.migrator.Migrator;
@@ -105,7 +106,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                                                     username,
                                                     password);
 
-      Migrator migrator = createMigrator(getFileOpener(artifactClassLoader));
+      Migrator migrator = createMigrator(getFileOpener(artifactClassLoader), connection);
       configureMigrator(migrator, connection);
 
       getLog().info("Executing on Database: " + url);
@@ -133,7 +134,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
 
   protected void configureMigrator(Migrator migrator, Connection connection)
           throws LiquibaseException {
-    migrator.init(connection);
+//    migrator.init(connection);
   }
 
   protected boolean isPromptOnNonLocalDatabase() {
@@ -148,8 +149,12 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     }
   }
 
-  protected Migrator createMigrator(FileOpener fo) throws MojoExecutionException {
-    return new Migrator("", fo);
+  protected Migrator createMigrator(FileOpener fo, Connection conn) throws MojoExecutionException {
+      try {
+          return new Migrator("", fo, DatabaseFactory.getInstance().findCorrectDatabaseImplementation(conn));
+      } catch (JDBCException e) {
+          throw new MojoExecutionException(e.getMessage());
+      }
   }
 
   protected void configureFieldsAndValues(FileOpener fo)

@@ -1,8 +1,7 @@
 package liquibase.database;
 
-import junit.framework.TestCase;
-import org.junit.Test;
 import static org.junit.Assert.*;
+import org.junit.Test;
 
 public class H2DatabaseTest extends AbstractDatabaseTest {
 

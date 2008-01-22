@@ -14,7 +14,7 @@ public class RollbackCountAction extends MigratorAction {
     public void actionPerform(Database database, IdeFacade ideFacade) throws LiquibaseException {
         Integer input = ideFacade.promptForInteger(getTitle(), "Enter number of changes to rollback", 1);
         if (input != null) {
-            ideFacade.getMigrator(null, database).rollbackCount(input);
+            ideFacade.getMigrator(null, database).rollback(input, null);
         }
     }
 

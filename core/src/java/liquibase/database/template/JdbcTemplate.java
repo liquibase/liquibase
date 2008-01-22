@@ -6,6 +6,7 @@ import liquibase.database.sql.CallableSqlStatement;
 import liquibase.database.sql.PreparedSqlStatement;
 import liquibase.database.sql.SqlStatement;
 import liquibase.exception.JDBCException;
+import liquibase.log.LogFactory;
 import liquibase.util.JdbcUtils;
 
 import java.sql.*;
@@ -22,12 +23,16 @@ import java.util.Map;
 @SuppressWarnings({"unchecked"})
 public class JdbcTemplate {
 
-    private Database database;
+    protected Database database;
 
     public JdbcTemplate(Database database) {
         this.database = database;
     }
 
+    public boolean executesStatements() {
+        return true;
+    }
+    
     //-------------------------------------------------------------------------
     // Methods dealing with static SQL (java.sql.Statement)
     //-------------------------------------------------------------------------
@@ -402,6 +407,15 @@ public class JdbcTemplate {
     }
 
     /**
+     * Adds a comment to the database.  Currently does nothing but is over-ridden in the output JDBC template
+     * @param message
+     * @throws JDBCException
+     */
+    public void comment(String message) throws JDBCException {
+        LogFactory.getLogger().info(message);
+    }
+
+    /**
      * Adapter to enable use of a RowCallbackHandler inside a ResultSetExtractor.
      * <p>Uses a regular ResultSet, so we have to be careful when using it:
      * We don't use it for navigating since this could lead to unpredictable consequences.
@@ -421,5 +435,4 @@ public class JdbcTemplate {
             return null;
         }
     }
-
 }
