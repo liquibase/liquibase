@@ -1,6 +1,6 @@
 package liquibase;
 
-import liquibase.parser.MigratorSchemaResolver;
+import liquibase.parser.LiquibaseSchemaResolver;
 import liquibase.preconditions.AndPrecondition;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -89,22 +89,5 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog> {
 
     public int hashCode() {
         return getFilePath().hashCode();
-    }
-
-    public Document toDocument() throws ParserConfigurationException {
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        DocumentBuilder documentBuilder = factory.newDocumentBuilder();
-        documentBuilder.setEntityResolver(new MigratorSchemaResolver());
-
-        Document doc = documentBuilder.newDocument();
-
-        Element changeLogElement = doc.createElement("databaseChangeLog");
-        changeLogElement.setAttribute("xmlns", "http://www.liquibase.org/xml/ns/dbchangelog/1.2");
-        changeLogElement.setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
-        changeLogElement.setAttribute("xsi:schemaLocation", "http://www.liquibase.org/xml/ns/dbchangelog/1.2 http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.2.xsd");
-
-        doc.appendChild(changeLogElement);
-
-        return doc;
     }
 }

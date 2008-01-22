@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="liquibase-sample">
+
+    <target name="migrate-mysql">
+
+        <path id="classpath">
+            <fileset dir="../../lib">
+                <include name="**/*.jar"/>
+            </fileset>
+            <fileset dir="../../lib-jdbc">
+                <include name="**/*.jar"/>
+            </fileset>
+            <fileset dir="../../lib-compile">
+                <include name="**/*.jar"/>
+            </fileset>
+            <pathelement location="../../build"/>
+            <pathelement path="${user.home}/.IntelliJIdea50/config/plugins/clover-idea5.jar"/>
+            <fileset dir="../../release">
+                <include name="**/*.jar"/>
+            </fileset>
+        </path>
+
+        <property name="db.changelog.file" value="changelogs/mysql/complete/root.changelog.xml"/>
+        <property name="database.url" value="jdbc:mysql://localhost/liquibase"/>
+        <property name="database.username" value="liquibase"/>
+        <property name="database.password" value="liquibase"/>
+        <property name="database.driver" value="com.mysql.jdbc.Driver"/>
+        <property name="prompt.user.if.not.local.database" value="true"/>
+
+        <fail unless="db.changelog.file">db.changelog.file not set</fail>
+        <fail unless="database.url">database.url not set</fail>
+
+        <fail unless="database.username">database.username not set</fail>
+        <fail unless="database.password">database.password not set</fail>
+
+        <taskdef resource="migratortasks.properties">
+            <classpath refid="classpath"/>
+        </taskdef>
+
+        <migrateDatabase
+                changeLogFile="${db.changelog.file}"
+                driver="${database.driver}"
+                url="${database.url}"
+                username="${database.username}"
+                password="${database.password}"
+                promptOnNonLocalDatabase="${prompt.user.if.not.local.database}"
+                dropFirst="false"
+                classpathref="classpath"
+                >
+        </migrateDatabase>
+    </target>
+
+
+</project>

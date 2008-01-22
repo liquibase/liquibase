@@ -9,7 +9,7 @@ import java.io.InputStream;
 /**
  * Finds the LiquiBase schema from the classpath rather than fetching it over the Internet.
  */
-public class MigratorSchemaResolver implements EntityResolver {
+public class LiquibaseSchemaResolver implements EntityResolver {
 
     private static final String SEARCH_PACKAGE = "liquibase/";
 
