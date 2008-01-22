@@ -8,6 +8,7 @@ import liquibase.database.DatabaseFactory;
 import liquibase.exception.JDBCException;
 import liquibase.exception.LiquibaseException;
 import liquibase.migrator.Migrator;
+import liquibase.migrator.UIFactory;
 import org.apache.maven.plugin.*;
 import org.apache.maven.project.MavenProject;
 
@@ -112,7 +113,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
       getLog().info("Executing on Database: " + url);
 
       if (isPromptOnNonLocalDatabase() && !migrator.isSafeToRunMigration()) {
-        if (migrator.swingPromptForNonLocalDatabase()) {
+        if (UIFactory.getInstance().getFacade().promptForNonLocalDatabase(migrator.getDatabase())) {
           throw new LiquibaseException("User decided not to run against non-local database");
         }
       }

@@ -21,7 +21,6 @@ import liquibase.parser.visitor.*;
 import liquibase.util.LiquibaseUtil;
 import liquibase.util.StreamUtil;
 
-import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -420,18 +419,6 @@ public class Migrator {
             out.println(" - " + lock.getLockedBy() + " at " + DateFormat.getDateTimeInstance().format(lock.getLockGranted()));
         }
 
-    }
-
-    /**
-     * Displays swing-based dialog about running against a non-localhost database.
-     * Returns true if the user selected that they are OK with that.
-     */
-    public boolean swingPromptForNonLocalDatabase() throws JDBCException {
-        return JOptionPane.showConfirmDialog(null, "You are running a database migration against a non-local database." + StreamUtil.getLineSeparator() +
-                "Database URL is: " + this.getDatabase().getConnectionURL() + StreamUtil.getLineSeparator() +
-                "Username is: " + this.getDatabase().getConnectionUsername() + StreamUtil.getLineSeparator() + StreamUtil.getLineSeparator() +
-                "Area you sure you want to do this?",
-                "Confirm", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE) == JOptionPane.NO_OPTION;
     }
 
     public List<ChangeSet> listUnrunChangeSets(String contexts) throws LiquibaseException {
