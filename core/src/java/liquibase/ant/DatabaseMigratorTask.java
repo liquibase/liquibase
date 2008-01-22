@@ -1,6 +1,7 @@
 package liquibase.ant;
 
 import liquibase.migrator.Migrator;
+import liquibase.migrator.UIFactory;
 import org.apache.tools.ant.BuildException;
 
 import java.sql.SQLException;
@@ -32,7 +33,7 @@ public class DatabaseMigratorTask extends BaseLiquibaseTask {
 
             if (isPromptOnNonLocalDatabase()
                     && !migrator.isSafeToRunMigration()
-                    && migrator.swingPromptForNonLocalDatabase()) {
+                    && UIFactory.getInstance().getFacade().promptForNonLocalDatabase(migrator.getDatabase())) {
                 throw new BuildException("Chose not to run against non-production database");
             }
 
