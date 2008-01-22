@@ -157,7 +157,12 @@ public class ColumnConfig {
     }
 
     public void setDefaultValueDate(String defaultValueDate) throws ParseException {
-        this.defaultValueDate = new ISODateFormat().parse(defaultValueDate);
+        try {
+            this.defaultValueDate = new ISODateFormat().parse(defaultValueDate);
+        } catch (ParseException e) {
+            //probably a computed date
+            this.defaultValueDate = new ComputedDateValue(defaultValueDate);
+        }
     }
 
     public void setDefaultValueDate(Date defaultValueDate) {
