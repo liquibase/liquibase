@@ -1,17 +1,22 @@
 package liquibase.database;
 
+import liquibase.ChangeSet;
 import liquibase.DatabaseChangeLogLock;
+import liquibase.RanChangeSet;
 import liquibase.database.sql.SqlStatement;
+import liquibase.database.template.JdbcTemplate;
+import liquibase.exception.DatabaseHistoryException;
 import liquibase.exception.JDBCException;
 import liquibase.exception.LockException;
 import liquibase.migrator.Migrator;
 
 import java.io.IOException;
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.sql.Time;
 import java.sql.Timestamp;
-import java.sql.SQLException;
 import java.util.Date;
+import java.util.List;
 
 public class MockDatabase implements Database {
 
@@ -303,5 +308,69 @@ public class MockDatabase implements Database {
 
     public boolean isColumnAutoIncrement(String schemaName, String tableName, String columnName) throws SQLException {
         return false;
+    }
+
+    public boolean acquireLock() throws LockException {
+        return false;
+    }
+
+    public void checkDatabaseChangeLogTable() throws JDBCException {
+        ;
+    }
+
+    public void checkDatabaseChangeLogLockTable() throws JDBCException {
+        ;
+    }
+
+    public ChangeSet.RunStatus getRunStatus(ChangeSet changeSet) throws JDBCException, DatabaseHistoryException {
+        return null;
+    }
+
+    public RanChangeSet getRanChangeSet(ChangeSet changeSet) throws JDBCException, DatabaseHistoryException {
+        return null;
+    }
+
+    public void markChangeSetAsRan(ChangeSet changeSet) throws JDBCException {
+        ;
+    }
+
+    public void markChangeSetAsReRan(ChangeSet changeSet) throws JDBCException {
+        ;
+    }
+
+    public List<RanChangeSet> getRanChangeSetList() throws JDBCException {
+        return null;
+    }
+
+    public Date getRanDate(ChangeSet changeSet) throws JDBCException, DatabaseHistoryException {
+        return null;
+    }
+
+    public void removeRanStatus(ChangeSet changeSet) throws JDBCException {
+        ;
+    }
+
+    public void commit() {
+        ;
+    }
+
+    public void rollback() {
+        ;
+    }
+
+    public SqlStatement getSelectChangeLogLockSQL() throws JDBCException {
+        return null;
+    }
+
+    public JdbcTemplate getJdbcTemplate() {
+        return null;
+    }
+
+    public void setJdbcTemplate(JdbcTemplate template) {
+        ;
+    }
+
+    public String escapeStringForDatabase(String string) {
+        return string;
     }
 }

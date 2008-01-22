@@ -129,7 +129,7 @@ public class OracleDatabase extends AbstractDatabase {
         }
     }
 
-    protected SqlStatement getSelectChangeLogLockSQL() throws JDBCException {
+    public SqlStatement getSelectChangeLogLockSQL() throws JDBCException {
         return new RawSqlStatement((super.getSelectChangeLogLockSQL().getSqlStatement(this) + " for update").toUpperCase());
     }
 

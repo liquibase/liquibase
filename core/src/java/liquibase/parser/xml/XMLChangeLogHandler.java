@@ -1,4 +1,4 @@
-package liquibase.parser;
+package liquibase.parser.xml;
 
 import liquibase.ChangeSet;
 import liquibase.DatabaseChangeLog;
@@ -6,12 +6,9 @@ import liquibase.FileOpener;
 import liquibase.change.*;
 import liquibase.change.custom.CustomChangeWrapper;
 import liquibase.exception.*;
-import liquibase.migrator.IncludeMigrator;
-import liquibase.migrator.Migrator;
-import liquibase.preconditions.AndPrecondition;
-import liquibase.preconditions.Precondition;
-import liquibase.preconditions.PreconditionLogic;
-import liquibase.preconditions.SqlPrecondition;
+import liquibase.log.LogFactory;
+import liquibase.parser.ChangeLogParser;
+import liquibase.preconditions.*;
 import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtils;
 import org.xml.sax.Attributes;
@@ -25,32 +22,30 @@ import java.util.Stack;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-/**
- * Base SAX Handler for all modes of reading change logs.  This class is subclassed depending on
- * how the change log should be read (for migration, for rollback, etc).
- */
-@SuppressWarnings({"AbstractClassExtendsConcreteClass"})
-public abstract class BaseChangeLogHandler extends DefaultHandler {
+class XMLChangeLogHandler extends DefaultHandler {
 
-    protected Migrator migrator;
     protected Logger log;
 
-    private DatabaseChangeLog changeLog;
+    private DatabaseChangeLog databaseChangeLog;
     private Change change;
     private StringBuffer text;
     private AndPrecondition rootPrecondition;
     private Stack<PreconditionLogic> preconditionLogicStack = new Stack<PreconditionLogic>();
     private ChangeSet changeSet;
-    protected String physicalChangeLogLocation;
     private FileOpener fileOpener;
     private Precondition currentPrecondition;
 
 
-    protected BaseChangeLogHandler(Migrator migrator, String physicalChangeLogLocation, FileOpener fileOpener) {
-        this.migrator = migrator;
-        this.physicalChangeLogLocation = physicalChangeLogLocation;
-        log = Logger.getLogger(Migrator.DEFAULT_LOG_NAME);
+    protected XMLChangeLogHandler(String physicalChangeLogLocation, FileOpener fileOpener) {
+        log = LogFactory.getLogger();
         this.fileOpener = fileOpener;
+
+        databaseChangeLog = new DatabaseChangeLog(physicalChangeLogLocation);
+        databaseChangeLog.setPhysicalFilePath(physicalChangeLogLocation);
+    }
+
+    public DatabaseChangeLog getDatabaseChangeLog() {
+        return databaseChangeLog;
     }
 
     public void startElement(String uri, String localName, String qName, Attributes atts) throws SAXException {
@@ -58,8 +53,7 @@ public abstract class BaseChangeLogHandler extends DefaultHandler {
             if ("comment".equals(qName)) {
                 text = new StringBuffer();
             } else if ("databaseChangeLog".equals(qName)) {
-                changeLog = new DatabaseChangeLog(migrator, physicalChangeLogLocation);
-                changeLog.setLogicalFilePath(atts.getValue("logicalFilePath"));
+                databaseChangeLog.setLogicalFilePath(atts.getValue("logicalFilePath"));
             } else if ("include".equals(qName)) {
                 String fileName = atts.getValue("file");
                 handleIncludedChangeLog(fileName);
@@ -72,11 +66,18 @@ public abstract class BaseChangeLogHandler extends DefaultHandler {
                 if ("true".equalsIgnoreCase(atts.getValue("runOnChange"))) {
                     runOnChange = true;
                 }
-                changeSet = new ChangeSet(atts.getValue("id"), atts.getValue("author"), alwaysRun, runOnChange, changeLog, atts.getValue("context"), atts.getValue("dbms"));
+                changeSet = new ChangeSet(atts.getValue("id"),
+                        atts.getValue("author"),
+                        alwaysRun,
+                        runOnChange,
+                        databaseChangeLog.getFilePath(),
+                        databaseChangeLog.getPhysicalFilePath(),
+                        atts.getValue("context"),
+                        atts.getValue("dbms"));
             } else if (changeSet != null && "rollback".equals(qName)) {
                 text = new StringBuffer();
             } else if (changeSet != null && change == null) {
-                change = migrator.getChangeFactory().create(qName);
+                change = ChangeFactory.getInstance().create(qName);
                 change.setChangeSet(changeSet);
                 text = new StringBuffer();
                 if (change == null) {
@@ -132,7 +133,7 @@ public abstract class BaseChangeLogHandler extends DefaultHandler {
                 //System.out.println("pre condition is true");
 
             } else if (rootPrecondition != null) {
-                currentPrecondition = migrator.getPreconditionFactory().create(qName);
+                currentPrecondition = PreconditionFactory.getInstance().create(qName);
 
                 for (int i = 0; i < atts.getLength(); i++) {
                     String attributeName = atts.getQName(i);
@@ -165,8 +166,10 @@ public abstract class BaseChangeLogHandler extends DefaultHandler {
         }
     }
 
-    protected void handleIncludedChangeLog(String fileName) throws LiquibaseException, IOException {
-        new IncludeMigrator(fileName, migrator).migrate();
+    protected void handleIncludedChangeLog(String fileName) throws LiquibaseException, IOException, ChangeLogParseException {
+        for (ChangeSet changeSet : new ChangeLogParser().parse(fileName, fileOpener).getChangeSets()) {
+            databaseChangeLog.addChangeSet(changeSet);
+        }
     }
 
     private void setProperty(Object object, String attributeName, String attributeValue) throws IllegalAccessException, InvocationTargetException, CustomChangeException {
@@ -190,7 +193,7 @@ public abstract class BaseChangeLogHandler extends DefaultHandler {
         try {
             if (rootPrecondition != null) {
                 if ("preConditions".equals(qName)) {
-                    changeLog.setPreconditions(rootPrecondition);
+                    databaseChangeLog.setPreconditions(rootPrecondition);
                     handlePreCondition(rootPrecondition);
                     rootPrecondition = null;
                 } else if ("and".equals(qName)) {
@@ -242,17 +245,17 @@ public abstract class BaseChangeLogHandler extends DefaultHandler {
             }
         } catch (Exception e) {
             log.log(Level.SEVERE, "Error thrown as a SAXException: " + e.getMessage(), e);
-            throw new SAXException(changeLog.getPhysicalFilePath() + ": " + e.getMessage(), e);
+            throw new SAXException(databaseChangeLog.getPhysicalFilePath() + ": " + e.getMessage(), e);
         }
     }
 
-    /**
-     * By defaultd does nothing.  Overridden in ValidatChangeLogHandler and anywhere else that is interested in them.
-     */
     protected void handlePreCondition(@SuppressWarnings("unused")Precondition precondition) {
+        databaseChangeLog.setPreconditions(rootPrecondition);
     }
 
-    protected abstract void handleChangeSet(ChangeSet changeSet) throws JDBCException, DatabaseHistoryException, MigrationFailedException, IOException;
+    protected void handleChangeSet(ChangeSet changeSet) throws JDBCException, DatabaseHistoryException, MigrationFailedException, IOException {
+        databaseChangeLog.addChangeSet(changeSet);
+    }
 
     public void characters(char ch[], int start, int length) throws SAXException {
         if (text != null) {

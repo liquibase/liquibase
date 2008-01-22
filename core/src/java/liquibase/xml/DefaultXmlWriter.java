@@ -1,15 +1,13 @@
 package liquibase.xml;
 
-import com.sun.org.apache.xml.internal.serialize.OutputFormat;
-import com.sun.org.apache.xml.internal.serialize.XMLSerializer;
 import org.w3c.dom.Document;
 
-import javax.xml.transform.stream.StreamResult;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.Transformer;
 import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -26,7 +24,11 @@ public class DefaultXmlWriter implements XmlWriter {
 
         try {
             TransformerFactory factory = TransformerFactory.newInstance();
-            factory.setAttribute("indent-number", 4);
+            try {
+                factory.setAttribute("indent-number", 4);
+            } catch (Exception e) {
+                ; //guess we can't set it, that's ok
+            }
 
             Transformer transformer = factory.newTransformer();
             transformer.setOutputProperty(OutputKeys.METHOD, "xml");

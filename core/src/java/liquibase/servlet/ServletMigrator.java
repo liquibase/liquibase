@@ -4,6 +4,8 @@ import liquibase.ClassLoaderFileOpener;
 import liquibase.CompositeFileOpener;
 import liquibase.FileOpener;
 import liquibase.FileSystemFileOpener;
+import liquibase.database.DatabaseFactory;
+import liquibase.log.LogFactory;
 import liquibase.migrator.Migrator;
 
 import javax.naming.Context;
@@ -16,7 +18,6 @@ import java.net.UnknownHostException;
 import java.sql.Connection;
 import java.util.logging.Handler;
 import java.util.logging.LogRecord;
-import java.util.logging.Logger;
 
 /**
  * Servlet listener than can be added to web.xml to allow LiquiBase to run on every application server startup.
@@ -57,7 +58,7 @@ public class ServletMigrator implements ServletContextListener {
     }
 
     public void contextInitialized(ServletContextEvent servletContextEvent) {
-        Logger.getLogger(Migrator.DEFAULT_LOG_NAME).addHandler(new Handler() {
+        LogFactory.getLogger().addHandler(new Handler() {
             public synchronized void publish(LogRecord record) {
                 MigratorStatusServlet.logMessage(record);
             }
@@ -78,7 +79,7 @@ public class ServletMigrator implements ServletContextListener {
 
         String shouldRunProperty = System.getProperty(Migrator.SHOULD_RUN_SYSTEM_PROPERTY);
         if (shouldRunProperty != null && !Boolean.valueOf(shouldRunProperty)) {
-            Logger.getLogger(Migrator.DEFAULT_LOG_NAME).info("Migrator did not run on " + hostName + " because '" + Migrator.SHOULD_RUN_SYSTEM_PROPERTY + "' system property was set to false");
+            LogFactory.getLogger().info("Migrator did not run on " + hostName + " because '" + Migrator.SHOULD_RUN_SYSTEM_PROPERTY + "' system property was set to false");
             return;
         }
 
@@ -135,10 +136,8 @@ public class ServletMigrator implements ServletContextListener {
                 FileOpener fsFO = new FileSystemFileOpener();
 
 
-                Migrator migrator = new Migrator(getChangeLogFile(), new CompositeFileOpener(clFO,fsFO));
-                migrator.init(connection);
-                migrator.setContexts(getContexts());
-                migrator.migrate();
+                Migrator migrator = new Migrator(getChangeLogFile(), new CompositeFileOpener(clFO,fsFO), DatabaseFactory.getInstance().findCorrectDatabaseImplementation(connection));
+                migrator.update(getContexts());
             } finally {
                 if (ic != null) {
                     ic.close();

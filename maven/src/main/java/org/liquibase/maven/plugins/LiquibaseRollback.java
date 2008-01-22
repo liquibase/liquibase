@@ -80,31 +80,31 @@ public class LiquibaseRollback extends ConfigurableLiquibaseMojo {
   protected void configureMigrator(Migrator migrator, Connection connection)
           throws LiquibaseException {
     super.configureMigrator(migrator, connection);
-    migrator.setMode(Migrator.Mode.EXECUTE_ROLLBACK_MODE);
+//    migrator.setMode(Migrator.Mode.EXECUTE_ROLLBACK_MODE);
   }
 
   protected void performLiquibaseTask(Migrator migrator) throws LiquibaseException {
     switch (type) {
       case COUNT: {
-        migrator.setRollbackCount(rollbackCount);
+        migrator.rollback(rollbackCount, contexts);
         break;
       }
       case DATE: {
         DateFormat format = DateFormat.getDateInstance();
-        try {
-          migrator.setRollbackToDate(format.parse(rollbackDate));
-        }
-        catch (ParseException e) {
-          String message = "Error parsing rollbackDate: " + e.getMessage();
-          if (format instanceof SimpleDateFormat) {
-            message += "\nDate must match pattern: " + ((SimpleDateFormat)format).toPattern();
-          }
-          throw new LiquibaseException(message, e);
-        }
+//        try {
+//          migrator.setRollbackToDate(format.parse(rollbackDate));
+//        }
+//        catch (ParseException e) {
+//          String message = "Error parsing rollbackDate: " + e.getMessage();
+//          if (format instanceof SimpleDateFormat) {
+//            message += "\nDate must match pattern: " + ((SimpleDateFormat)format).toPattern();
+//          }
+//          throw new LiquibaseException(message, e);
+//        }
         break;
       }
       case TAG: {
-        migrator.setRollbackToTag(rollbackTag);
+//        migrator.setRollbackToTag(rollbackTag);
         break;
       }
       default: {
@@ -112,6 +112,5 @@ public class LiquibaseRollback extends ConfigurableLiquibaseMojo {
       }
     }
 
-    migrator.migrate();
   }
 }

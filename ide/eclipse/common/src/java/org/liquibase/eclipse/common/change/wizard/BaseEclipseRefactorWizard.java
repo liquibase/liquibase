@@ -1,7 +1,7 @@
 package org.liquibase.eclipse.common.change.wizard;
 
-import liquibase.ChangeSet;
 import liquibase.DatabaseChangeLog;
+import liquibase.ChangeSet;
 import liquibase.change.Change;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.sql.SqlStatement;
@@ -76,30 +76,25 @@ public abstract class BaseEclipseRefactorWizard extends Wizard {
                     monitor.beginTask("Refactoring Database", 100);
 
                     try {
-                        Migrator migrator = new Migrator(LiquibasePreferences
-                                .getCurrentChangeLog(), new EclipseFileOpener());
-                        migrator.init(getConnection());
+                        Migrator migrator = new Migrator(LiquibasePreferences.getCurrentChangeLog(), new EclipseFileOpener(), DatabaseFactory.getInstance().findCorrectDatabaseImplementation(getConnection()));
 
                         monitor.subTask("Checking Control Tables");
-                        migrator.getDatabase().checkDatabaseChangeLogTable(
-                                migrator);
-                        migrator.getDatabase().checkDatabaseChangeLogLockTable(
-                                migrator);
+                        migrator.getDatabase().checkDatabaseChangeLogTable();
+                        migrator.getDatabase().checkDatabaseChangeLogLockTable();
                         monitor.worked(25);
 
 
                         monitor.subTask("Executing Change");
-                        DatabaseChangeLog changeLog = new DatabaseChangeLog(
-                                migrator, LiquibasePreferences
-                                .getCurrentChangeLog());
+                        DatabaseChangeLog changeLog = new DatabaseChangeLog(LiquibasePreferences.getCurrentChangeLog());
 
-                        ChangeSet changeSet = new ChangeSet(metaDataPage
-                                .getId(), metaDataPage.getAuthor(),
-                                metaDataPage.isAlwaysRun(), metaDataPage
-                                .isRunOnChange(), changeLog,
-                                StringUtils.trimToNull(metaDataPage
-                                        .getContext()), StringUtils
-                                .trimToNull(metaDataPage.getDbms()));
+                        ChangeSet changeSet = new ChangeSet(metaDataPage.getId(),
+                                metaDataPage.getAuthor(),
+                                metaDataPage.isAlwaysRun(),
+                                metaDataPage.isRunOnChange(),
+                                changeLog.getFilePath(),
+                                changeLog.getPhysicalFilePath(),
+                                StringUtils.trimToNull(metaDataPage.getContext()),
+                                StringUtils.trimToNull(metaDataPage.getDbms()));
                         changeSet.setComments(metaDataPage.getComments());
 
                         for (Change change : createChanges()) {
@@ -120,7 +115,7 @@ public abstract class BaseEclipseRefactorWizard extends Wizard {
                         monitor.worked(25);
 
                         monitor.subTask("Marking Change Set As Ran");
-                        migrator.markChangeSetAsRan(changeSet);
+                        migrator.getDatabase().markChangeSetAsRan(changeSet);
                         monitor.worked(25);
 
                         monitor.subTask("Writing to Change Log");

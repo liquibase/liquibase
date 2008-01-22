@@ -11,15 +11,16 @@ import java.util.Map;
  * later revisions.  The best way to get an instance of ChangeFactory is off the Migrator.getChangeFactory() method.
  *
  * @see liquibase.change.Change
- * @see liquibase.migrator.Migrator#getChangeFactory()
  */
 public class ChangeFactory {
 
     @SuppressWarnings("unchecked")
 	private final Map<String, Class> tagToClassMap;
 
+    private static final ChangeFactory instance = new ChangeFactory();
+
     @SuppressWarnings("unchecked")
-	public ChangeFactory() {
+	private ChangeFactory() {
         tagToClassMap = new HashMap<String, Class>();
         Class[] changes = new Class[]{
                 AddColumnChange.class,
@@ -66,6 +67,10 @@ public class ChangeFactory {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static ChangeFactory getInstance() {
+        return instance;
     }
 
     /**

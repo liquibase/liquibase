@@ -1,7 +1,7 @@
 package liquibase.database;
 
 import liquibase.exception.JDBCException;
-import liquibase.migrator.Migrator;
+import liquibase.log.LogFactory;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -11,7 +11,7 @@ public class DatabaseFactory {
 
     private static DatabaseFactory instance = new DatabaseFactory();
 
-    private static final Logger log = Logger.getLogger(Migrator.DEFAULT_LOG_NAME);
+    private static final Logger log = LogFactory.getLogger();
 
 
     private DatabaseFactory() {

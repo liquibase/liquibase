@@ -8,7 +8,9 @@ import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.util.*;
 import liquibase.*;
+import liquibase.database.DatabaseFactory;
 import liquibase.exception.LiquibaseException;
+import liquibase.exception.JDBCException;
 import liquibase.migrator.Migrator;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -130,18 +132,19 @@ public abstract class ConfigurableLiquibaseMojo extends AbstractLiquibaseMojo {
     }
   }
 
-  @Override
-  protected Migrator createMigrator(FileOpener fo) throws MojoExecutionException {
-    Migrator m = new Migrator(changeLogFile.trim(), fo);
-    performMigratorConfiguration(m);
-    return m;
+  protected Migrator createMigrator(FileOpener fo, Connection conn) throws MojoExecutionException {
+      try {
+          return new Migrator(changeLogFile.trim(), fo, DatabaseFactory.getInstance().findCorrectDatabaseImplementation(conn));
+      } catch (JDBCException e) {
+          throw new MojoExecutionException(e.getMessage());
+      }
   }
 
   @Override
   protected void configureMigrator(Migrator migrator, Connection connection)
           throws LiquibaseException {
     super.configureMigrator(migrator, connection);
-    migrator.setContexts(contexts);
+//    migrator.setContexts(contexts);
   }
 
   /**

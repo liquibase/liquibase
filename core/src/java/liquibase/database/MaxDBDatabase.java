@@ -6,13 +6,13 @@
 package liquibase.database;
 
 
-import java.sql.Connection;
-import java.util.HashSet;
-import java.util.Set;
-
 import liquibase.database.sql.RawSqlStatement;
 import liquibase.database.sql.SqlStatement;
 import liquibase.exception.JDBCException;
+
+import java.sql.Connection;
+import java.util.HashSet;
+import java.util.Set;
 
 
 public class MaxDBDatabase extends AbstractDatabase {

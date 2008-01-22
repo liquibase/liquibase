@@ -3,7 +3,10 @@ package liquibase;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Enumeration;
+import java.util.List;
+import java.util.Vector;
 
 /**
  * A FileOpener that will search in a List of other FileOpeners until it finds

@@ -1,8 +1,8 @@
 package liquibase.preconditions;
 
 import liquibase.DatabaseChangeLog;
+import liquibase.database.Database;
 import liquibase.exception.PreconditionFailedException;
-import liquibase.migrator.Migrator;
 
 import java.sql.SQLException;
 
@@ -26,9 +26,9 @@ public class RunningAsPrecondition implements Precondition {
     }
 
 
-    public void check(Migrator migrator, DatabaseChangeLog changeLog) throws PreconditionFailedException {
+    public void check(Database database, DatabaseChangeLog changeLog) throws PreconditionFailedException {
         try {
-            String loggedusername = migrator.getDatabase().getConnection().getMetaData().getUserName();
+            String loggedusername = database.getConnection().getMetaData().getUserName();
             if (loggedusername.indexOf('@') >= 0) {
                 loggedusername = loggedusername.substring(0, loggedusername.indexOf('@'));
             }

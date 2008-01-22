@@ -6,7 +6,6 @@ import liquibase.database.DatabaseFactory;
 import liquibase.exception.JDBCException;
 import liquibase.exception.LiquibaseException;
 import liquibase.migrator.Migrator;
-import liquibase.util.StringUtils;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ResourceLoaderAware;
@@ -255,16 +254,12 @@ public class SpringMigrator implements InitializingBean, BeanNameAware, Resource
             c = getDataSource().getConnection();
             Migrator migrator = createMigrator(c);
 
-            if (StringUtils.trimToNull(contexts) != null) {
-                migrator.setContexts(contexts);
-            }
-
             // First, run patchChangeLog() which allows md5sum values to be set to NULL
             setup(migrator);
 
             // Now, write out the SQL file for the changes if so configured
             if (isWriteSqlFileEnabled() && getSqlOutputDir() != null) {
-                if (migrator.listUnrunChangeSets().size() > 0) {
+                if (migrator.listUnrunChangeSets(getContexts()).size() > 0) {
                     log.log(Level.WARNING, getExecuteDisabledWarningMessage());
                 }
                 writeSqlFile(migrator);
@@ -326,9 +321,9 @@ public class SpringMigrator implements InitializingBean, BeanNameAware, Resource
             File upgradeFile = new File(ddlDir, fileString);
             fw = new FileWriter(upgradeFile);
 
-            migrator.setMode(Migrator.Mode.OUTPUT_SQL_MODE);
-            migrator.setOutputSQLWriter(fw);
-            migrator.migrate();
+//            migrator.setMode(Migrator.Mode.OUTPUT_SQL_MODE);
+//            migrator.setOutputSQLWriter(fw);
+            migrator.update(getContexts(), fw);
         } catch (IOException e) {
             throw new LiquibaseException(e);
         } finally {
@@ -343,9 +338,7 @@ public class SpringMigrator implements InitializingBean, BeanNameAware, Resource
     }
 
     private Migrator createMigrator(Connection c) throws IOException, JDBCException {
-        Migrator m = new Migrator(getChangeLog(), new SpringResourceOpener(getChangeLog()));
-        m.init(c);
-        return m;
+        return new Migrator(getChangeLog(), new SpringResourceOpener(getChangeLog()), DatabaseFactory.getInstance().findCorrectDatabaseImplementation(c));
     }
 
     /**
@@ -357,8 +350,8 @@ public class SpringMigrator implements InitializingBean, BeanNameAware, Resource
      * @throws IOException
      */
     protected void executeSql(Migrator migrator) throws LiquibaseException {
-        migrator.setMode(Migrator.Mode.EXECUTE_MODE);
-        migrator.migrate();
+//        migrator.setMode(Migrator.Mode.EXECUTE_MODE);
+        migrator.update(getContexts());
     }
 
     /**

@@ -4,6 +4,7 @@ import liquibase.database.Database;
 import liquibase.database.sql.SqlStatement;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.exception.UnsupportedChangeException;
+import liquibase.log.LogFactory;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
 import org.w3c.dom.Document;
@@ -46,34 +47,41 @@ public class ExecuteShellCommandChange extends AbstractChange {
     }
 
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
+        boolean shouldRun = true;
         if (os != null && os.size() > 0) {
-            if (os.contains(System.getProperty("os.name"))) {
-                List<String> commandArray = new ArrayList<String>();
-                commandArray.add(executable);
-                commandArray.addAll(args);
-
-                try {
-                    ProcessBuilder pb = new ProcessBuilder(commandArray);
-                    pb.redirectErrorStream(true);
-                    Process p = pb.start();
-                    int returnCode = 0;
-                    try {
-                        returnCode = p.waitFor();
-                    } catch (InterruptedException e) {
-                        ;
-                    }
-                    StreamUtil.copy(p.getErrorStream(), System.err);
-                    StreamUtil.copy(p.getInputStream(), System.err);
-
-                    if (returnCode != 0) {
-                        throw new RuntimeException(getCommandString()+" returned an code of "+returnCode);
-                    }
-                } catch (IOException e) {
-                    throw new UnsupportedChangeException("Error executing command: " + e);
-                }
+            String currentOS = System.getProperty("os.name");
+            if (!os.contains(currentOS)) {
+                shouldRun = false;
+                LogFactory.getLogger().info("Not executing on os "+currentOS+" when "+os+" was specified");
             }
         }
 
+        if (shouldRun) {
+            List<String> commandArray = new ArrayList<String>();
+            commandArray.add(executable);
+            commandArray.addAll(args);
+
+            try {
+                ProcessBuilder pb = new ProcessBuilder(commandArray);
+                pb.redirectErrorStream(true);
+                Process p = pb.start();
+                int returnCode = 0;
+                try {
+                    returnCode = p.waitFor();
+                } catch (InterruptedException e) {
+                    ;
+                }
+                StreamUtil.copy(p.getErrorStream(), System.err);
+                StreamUtil.copy(p.getInputStream(), System.err);
+
+                if (returnCode != 0) {
+                    throw new RuntimeException(getCommandString()+" returned an code of "+returnCode);
+                }
+            } catch (IOException e) {
+                throw new UnsupportedChangeException("Error executing command: " + e);
+            }
+
+        }
         return new SqlStatement[0];
     }
 

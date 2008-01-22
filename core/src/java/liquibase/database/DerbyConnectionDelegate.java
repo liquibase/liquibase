@@ -26,7 +26,7 @@ public class DerbyConnectionDelegate extends SQLConnectionDelegate {
     private void checkPoint() throws SQLException {
         Statement st = null;
         try {
-            st = createStatement();
+            st = createStatement();            
             st.execute("CALL SYSCS_UTIL.SYSCS_CHECKPOINT_DATABASE()");
         } finally {
             if (st != null) {

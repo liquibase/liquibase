@@ -3,7 +3,6 @@ package liquibase.database;
 import liquibase.database.sql.RawSqlStatement;
 import liquibase.database.sql.SqlStatement;
 import liquibase.exception.JDBCException;
-import liquibase.util.StringUtils;
 
 import java.sql.Connection;
 import java.sql.SQLException;

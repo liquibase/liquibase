@@ -20,7 +20,7 @@ public class RollbackToDateAction extends MigratorAction {
                 return;
             }
 
-            ideFacade.getMigrator(changeLogFile, database).rollbackToDate(input);
+            ideFacade.getMigrator(changeLogFile, database).rollback(input, null);
         }
     }
 

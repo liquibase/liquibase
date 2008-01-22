@@ -12,10 +12,9 @@ import org.liquibase.eclipse.common.action.BaseDatabaseAction;
 public class MigrateAction extends BaseDatabaseAction {
 	
 	public void run(IAction action) {
-		Migrator migrator = getMigrator(LiquibasePreferences.getRootChangeLog());
 		try {
-			migrator.init(getSelectedConnection(getSelection()));
-			migrator.migrate();
+            Migrator migrator = getMigrator(LiquibasePreferences.getRootChangeLog(), getSelectedConnection(getSelection()));
+			migrator.update(null);
 			
 			((JDBCDatabase)getSelectedDatabase(getSelection())).refresh();
 		} catch (Exception e) {

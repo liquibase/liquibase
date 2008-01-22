@@ -1,6 +1,8 @@
 package org.liquibase.eclipse.common.action;
 
 import liquibase.migrator.Migrator;
+import liquibase.database.DatabaseFactory;
+import liquibase.exception.JDBCException;
 import org.eclipse.datatools.connectivity.sqm.core.rte.ICatalogObject;
 import org.eclipse.datatools.modelbase.sql.constraints.ForeignKey;
 import org.eclipse.datatools.modelbase.sql.constraints.Index;
@@ -159,7 +161,7 @@ public abstract class BaseDatabaseAction implements IObjectActionDelegate, IWork
 		this.selection = selection;
 	}
 	
-	protected Migrator getMigrator(String changeLogFile) {
-		return new Migrator(changeLogFile, new EclipseFileOpener());
+	protected Migrator getMigrator(String changeLogFile, Connection conn) throws JDBCException {
+		return new Migrator(changeLogFile, new EclipseFileOpener(), DatabaseFactory.getInstance().findCorrectDatabaseImplementation(conn));
 	}
 }

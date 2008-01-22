@@ -1,6 +1,5 @@
 package liquibase;
 
-import liquibase.migrator.Migrator;
 import liquibase.parser.MigratorSchemaResolver;
 import liquibase.preconditions.AndPrecondition;
 import org.w3c.dom.Document;
@@ -9,23 +8,21 @@ import org.w3c.dom.Element;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Encapsulates the information stored in the change log XML file.
  */
 public class DatabaseChangeLog implements Comparable<DatabaseChangeLog> {
-    private Migrator migrator;
     private AndPrecondition preconditions;
     private String physicalFilePath;
     private String logicalFilePath;
 
-    public DatabaseChangeLog(Migrator migrator, String physicalFilePath) {
-        this.migrator = migrator;
-        this.physicalFilePath = physicalFilePath;
-    }
+    private List<ChangeSet> changeSets = new ArrayList<ChangeSet>();
 
-    public Migrator getMigrator() {
-        return migrator;
+    public DatabaseChangeLog(String physicalFilePath) {
+        this.physicalFilePath = physicalFilePath;
     }
 
     public AndPrecondition getPreconditions() {
@@ -45,6 +42,9 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog> {
     }
 
     public String getLogicalFilePath() {
+        if (logicalFilePath == null) {
+            return physicalFilePath;
+        }
         return logicalFilePath;
     }
 
@@ -68,6 +68,14 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog> {
         return getFilePath().compareTo(o.getFilePath());
     }
 
+
+    public List<ChangeSet> getChangeSets() {
+        return changeSets;
+    }
+
+    public void addChangeSet(ChangeSet changeSet) {
+        this.changeSets.add(changeSet);
+    }
 
     public boolean equals(Object o) {
         if (this == o) return true;

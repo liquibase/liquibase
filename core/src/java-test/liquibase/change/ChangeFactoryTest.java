@@ -15,7 +15,7 @@ public class ChangeFactoryTest
   @Before
   public void setUp()
   {
-    factory = new ChangeFactory();
+    factory = ChangeFactory.getInstance();
   }
 
   @Test

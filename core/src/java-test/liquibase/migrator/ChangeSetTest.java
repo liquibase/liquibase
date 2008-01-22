@@ -7,13 +7,13 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 
 /**
- * Tests for {@link ChangeSet}
+ * Tests for {@link liquibase.ChangeSet}
  */
 public class ChangeSetTest {
 
     @Test
     public void getDescriptions() {
-        ChangeSet changeSet = new ChangeSet("testId", "testAuthor", false, false, null, null, null);
+        ChangeSet changeSet = new ChangeSet("testId", "testAuthor", false, false,null,  null, null, null);
 
         assertEquals("Empty", changeSet.getDescription());
 

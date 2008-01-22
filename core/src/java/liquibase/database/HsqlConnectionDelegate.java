@@ -24,4 +24,18 @@ public class HsqlConnectionDelegate extends SQLConnectionDelegate {
             }
         }
     }
+
+    public void rollback() throws SQLException {
+        super.rollback();
+
+        Statement st = null;
+        try {
+            st = createStatement();
+            st.execute("CHECKPOINT");
+        } finally {
+            if (st != null) {
+                st.close();
+            }
+        }
+    }
 }

@@ -14,7 +14,7 @@ public class RanChangeSet {
     private String tag;
 
     public RanChangeSet(ChangeSet changeSet) {
-        this(changeSet.getDatabaseChangeLog().getFilePath(),
+        this(changeSet.getFilePath(),
              changeSet.getId(),
              changeSet.getAuthor(),
              changeSet.getMd5sum(),
@@ -27,7 +27,11 @@ public class RanChangeSet {
         this.id = id;
         this.author = author;
         this.md5sum = md5sum;
-        this.dateExecuted = new Date(dateExecuted.getTime());
+        if (dateExecuted == null) {
+            this.dateExecuted = null;
+        } else {
+            this.dateExecuted = new Date(dateExecuted.getTime());
+        }
         this.tag = tag;
     }
 
@@ -48,6 +52,9 @@ public class RanChangeSet {
     }
 
     public Date getDateExecuted() {
+        if (dateExecuted == null) {
+            return null;
+        }
         return (Date) dateExecuted.clone();
     }
 
@@ -82,7 +89,7 @@ public class RanChangeSet {
     }
 
     public boolean isSameAs(ChangeSet changeSet) {
-        return this.getChangeLog().replace("\\", "/").equals(changeSet.getDatabaseChangeLog().getFilePath().replace("\\", "/"))
+        return this.getChangeLog().replace("\\", "/").equals(changeSet.getFilePath().replace("\\", "/"))
                 && this.getId().equals(changeSet.getId())
                 && this.getAuthor().equals(changeSet.getAuthor());
     }

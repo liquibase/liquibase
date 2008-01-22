@@ -10,8 +10,8 @@ import java.util.List;
 
 public class AuthorWriter extends HTMLWriter {
 
-    public AuthorWriter(File rootOutputDir) {
-        super(new File(rootOutputDir, "authors"));
+    public AuthorWriter(File rootOutputDir, Database database) {
+        super(new File(rootOutputDir, "authors"), database);
     }
 
     protected String createTitle(Object object) {

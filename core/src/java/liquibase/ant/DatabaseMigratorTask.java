@@ -10,7 +10,6 @@ import java.sql.SQLException;
  */
 public class DatabaseMigratorTask extends BaseLiquibaseTask {
     private boolean dropFirst = false;
-    private String contexts;
 
     public boolean isDropFirst() {
         return dropFirst;
@@ -18,14 +17,6 @@ public class DatabaseMigratorTask extends BaseLiquibaseTask {
 
     public void setDropFirst(boolean dropFirst) {
         this.dropFirst = dropFirst;
-    }
-
-    public String getContexts() {
-        return contexts;
-    }
-
-    public void setContexts(String cntx) {
-        this.contexts = cntx;
     }
 
     public void execute() throws BuildException {
@@ -38,8 +29,6 @@ public class DatabaseMigratorTask extends BaseLiquibaseTask {
         Migrator migrator = null;
         try {
             migrator = createMigrator();
-            migrator.setContexts(getContexts());
-            migrator.setMode(Migrator.Mode.EXECUTE_MODE);
 
             if (isPromptOnNonLocalDatabase()
                     && !migrator.isSafeToRunMigration()
@@ -50,7 +39,7 @@ public class DatabaseMigratorTask extends BaseLiquibaseTask {
             if (isDropFirst()) {
                 migrator.dropAll();
             }
-            migrator.migrate();
+            migrator.update(getContexts());
         } catch (Exception e) {
             throw new BuildException(e);
         } finally {

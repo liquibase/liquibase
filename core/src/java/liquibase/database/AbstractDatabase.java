@@ -1,24 +1,22 @@
 package liquibase.database;
 
-import liquibase.DatabaseChangeLogLock;
+import liquibase.ChangeSet;
+import liquibase.RanChangeSet;
 import liquibase.change.*;
 import liquibase.database.sql.*;
 import liquibase.database.structure.*;
 import liquibase.database.template.JdbcTemplate;
 import liquibase.diff.DiffStatusListener;
+import liquibase.exception.DatabaseHistoryException;
 import liquibase.exception.DateParseException;
 import liquibase.exception.JDBCException;
-import liquibase.exception.LockException;
 import liquibase.exception.UnsupportedChangeException;
-import liquibase.migrator.Migrator;
+import liquibase.log.LogFactory;
 import liquibase.util.ISODateFormat;
-import liquibase.util.StreamUtil;
+import liquibase.util.LiquibaseUtil;
 import liquibase.util.StringUtils;
 
-import java.io.IOException;
-import java.io.Writer;
 import java.math.BigInteger;
-import java.net.InetAddress;
 import java.sql.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -34,7 +32,7 @@ import java.util.logging.Logger;
 public abstract class AbstractDatabase implements Database {
 
     private DatabaseConnection connection;
-    static final protected Logger log = Logger.getLogger(Migrator.DEFAULT_LOG_NAME);
+    static final protected Logger log = LogFactory.getLogger();
     protected boolean changeLogTableExists;
     protected boolean changeLogLockTableExists;
     protected boolean changeLogCreateAttempted;
@@ -43,6 +41,8 @@ public abstract class AbstractDatabase implements Database {
     private static boolean outputtedLockWarning = false;
 
     protected String currentDateTimeFunction;
+
+    private JdbcTemplate jdbcTemplate = new JdbcTemplate(this);
 
     protected AbstractDatabase() {
     }
@@ -180,10 +180,10 @@ public abstract class AbstractDatabase implements Database {
      */
     public String getColumnType(String columnType, Boolean autoIncrement) {
         if (columnType.startsWith("java.sql.Types")) {
-            String dataTypeName = columnType.substring(columnType.lastIndexOf(".")+1);
+            String dataTypeName = columnType.substring(columnType.lastIndexOf(".") + 1);
             String precision = null;
             if (dataTypeName.indexOf("(") >= 0) {
-                precision = dataTypeName.substring(dataTypeName.indexOf("(")+1, dataTypeName.indexOf(")"));
+                precision = dataTypeName.substring(dataTypeName.indexOf("(") + 1, dataTypeName.indexOf(")"));
                 dataTypeName = dataTypeName.substring(0, dataTypeName.indexOf("("));
             }
 
@@ -198,11 +198,11 @@ public abstract class AbstractDatabase implements Database {
                     String typeName = resultSet.getString("TYPE_NAME");
                     int dataType = resultSet.getInt("DATA_TYPE");
                     Integer requestedType = (Integer) Class.forName("java.sql.Types").getDeclaredField(dataTypeName).get(null);
-                    if  (requestedType == dataType) {
+                    if (requestedType == dataType) {
                         if (precision == null) {
                             return typeName;
                         } else {
-                            return typeName+"("+precision+")";
+                            return typeName + "(" + precision + ")";
                         }
                     }
                 }
@@ -219,7 +219,7 @@ public abstract class AbstractDatabase implements Database {
                     return getTimeType();
                 }
 
-                throw new RuntimeException("Could not find java.sql.Types value for "+dataTypeName);
+                throw new RuntimeException("Could not find java.sql.Types value for " + dataTypeName);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             } finally {
@@ -323,6 +323,8 @@ public abstract class AbstractDatabase implements Database {
             return getDateLiteral(((java.sql.Time) date));
         } else if (date instanceof Timestamp) {
             return getDateLiteral(((Timestamp) date));
+        } else if (date instanceof ComputedDateValue) {
+            return date.toString();
         } else {
             throw new RuntimeException("Unexpected type: " + date.getClass().getName());
         }
@@ -419,94 +421,18 @@ public abstract class AbstractDatabase implements Database {
 
     protected SqlStatement getCreateChangeLogSQL() {
         return new CreateTableStatement(null, getDatabaseChangeLogTableName())
-                .addPrimaryKeyColumn("id","varchar(150)", new NotNullConstraint())
-                .addPrimaryKeyColumn("author","varchar(150)", new NotNullConstraint())
-                .addPrimaryKeyColumn("filename","varchar(255)", new NotNullConstraint())
+                .addPrimaryKeyColumn("id", "varchar(150)", new NotNullConstraint())
+                .addPrimaryKeyColumn("author", "varchar(150)", new NotNullConstraint())
+                .addPrimaryKeyColumn("filename", "varchar(255)", new NotNullConstraint())
                 .addColumn("dateExecuted", getDateTimeType(), new NotNullConstraint())
-                .addColumn("md5sum","varchar(32)")
-                .addColumn("description","varchar(255)")
-                .addColumn("comments","varchar(255)")
-                .addColumn("tag","varchar(255)")
-                .addColumn("liquibase","varchar(10)");
+                .addColumn("md5sum", "varchar(32)")
+                .addColumn("description", "varchar(255)")
+                .addColumn("comments", "varchar(255)")
+                .addColumn("tag", "varchar(255)")
+                .addColumn("liquibase", "varchar(10)");
     }
 
-    public boolean acquireLock(Migrator migrator) throws LockException {
-        if (!migrator.getDatabase().doesChangeLogLockTableExist()) {
-            if (migrator.getMode().equals(Migrator.Mode.EXECUTE_MODE) || migrator.getMode().equals(Migrator.Mode.EXECUTE_ROLLBACK_MODE)) {
-                throw new LockException("Could not acquire lock, table does not exist");
-            } else {
-                return true;
-            }
-        }
-
-        try {
-            Boolean locked;
-            try {
-                locked = (Boolean) new JdbcTemplate(this).queryForObject(getSelectChangeLogLockSQL(), Boolean.class);
-            } catch (JDBCException e) {
-                throw new LockException("Error checking database lock status", e);
-            }
-            if (locked) {
-                return false;
-            } else {
-                UpdateStatement updateStatement = new UpdateStatement(null, getDatabaseChangeLogLockTableName());
-                updateStatement.addNewColumnValue("LOCKED", true, Types.BOOLEAN);
-                updateStatement.addNewColumnValue("LOCKGRANTED", new Timestamp(new java.util.Date().getTime()), Types.TIMESTAMP);
-                updateStatement.addNewColumnValue("LOCKEDBY", InetAddress.getLocalHost().getCanonicalHostName() + " (" + InetAddress.getLocalHost().getHostAddress() + ")", Types.VARCHAR);
-                updateStatement.setWhereClause("ID  = 1");
-
-                if (new JdbcTemplate(this).update(updateStatement) != 1) {
-                    throw new LockException("Did not update change log lock correctly");
-                }
-                getConnection().commit();
-                log.info("Successfully acquired change log lock");
-                return true;
-            }
-        } catch (Exception e) {
-            throw new LockException(e);
-        }
-
-    }
-
-    public void releaseLock() throws LockException {
-        if (doesChangeLogLockTableExist()) {
-            try {
-                UpdateStatement releaseStatement = new UpdateStatement(null, getDatabaseChangeLogLockTableName());
-                releaseStatement.addNewColumnValue("LOCKED", false, Types.BOOLEAN);
-                releaseStatement.addNewColumnValue("LOCKGRANTED", null, Types.TIMESTAMP);
-                releaseStatement.addNewColumnValue("LOCKEDBY", null, Types.VARCHAR);
-                releaseStatement.setWhereClause(" ID = 1");
-
-                int updatedRows = new JdbcTemplate(this).update(releaseStatement);
-                if (updatedRows != 1) {
-                    throw new LockException("Did not update change log lock correctly.\n\n" + releaseStatement + " updated " + updatedRows + " instead of the expected 1 row.");
-                }
-                getConnection().commit();
-                log.info("Successfully released change log lock");
-            } catch (Exception e) {
-                throw new LockException(e);
-            }
-        }
-    }
-
-    public DatabaseChangeLogLock[] listLocks() throws LockException {
-        try {
-            List<DatabaseChangeLogLock> allLocks = new ArrayList<DatabaseChangeLogLock>();
-            RawSqlStatement sqlStatement = new RawSqlStatement((("select id, locked, lockgranted, lockedby from " + getDatabaseChangeLogLockTableName()).toUpperCase()));
-            List<Map> rows = new JdbcTemplate(this).queryForList(sqlStatement);
-            for (Map columnMap : rows) {
-                Boolean locked = (Boolean) columnMap.get("locked");
-                if (locked != null && locked) {
-                    allLocks.add(new DatabaseChangeLogLock((Integer) columnMap.get("id"), (Date) columnMap.get("LOCKGRANTED"), (String) columnMap.get("LOCKEDBY")));
-                }
-            }
-            return allLocks.toArray(new DatabaseChangeLogLock[allLocks.size()]);
-        } catch (Exception e) {
-            throw new LockException(e);
-        }
-    }
-
-    protected SqlStatement getSelectChangeLogLockSQL() throws JDBCException {
+    public SqlStatement getSelectChangeLogLockSQL() throws JDBCException {
         return new RawSqlStatement(("select locked from " + getDatabaseChangeLogLockTableName() + " where id=1").toUpperCase());
     }
 
@@ -523,7 +449,7 @@ public abstract class AbstractDatabase implements Database {
      * the changes in the file. If the table does not exist it will create one
      * otherwise it will not do anything besides outputting a log message.
      */
-    public void checkDatabaseChangeLogTable(Migrator migrator) throws JDBCException, IOException {
+    public void checkDatabaseChangeLogTable() throws JDBCException {
         DatabaseConnection connection = getConnection();
         ResultSet checkTableRS = null;
         ResultSet checkColumnsRS = null;
@@ -567,6 +493,7 @@ public abstract class AbstractDatabase implements Database {
 
             } else if (!changeLogCreateAttempted) {
                 changeLogCreateAttempted = true;
+                getJdbcTemplate().comment("Create Database Change Log Table");
                 SqlStatement createTableStatement = getCreateChangeLogSQL();
                 if (!canCreateChangeLogTable()) {
                     throw new JDBCException("Cannot create " + getDatabaseChangeLogTableName() + " table for your database.\n\n" +
@@ -575,32 +502,40 @@ public abstract class AbstractDatabase implements Database {
                 }
                 // If there is no table in the database for recording change history create one.
                 statementsToExecute.add(createTableStatement);
-                if (migrator.getMode().equals(Migrator.Mode.EXECUTE_MODE)) {
-                    log.info("Creating database history table with name: " + getDatabaseChangeLogTableName());
-                    changeLogTableExists = true;
-                }
+//                if (migrator.getMode().equals(Migrator.Mode.EXECUTE_MODE)) {
+                log.info("Creating database history table with name: " + getDatabaseChangeLogTableName());
+                changeLogTableExists = true;
+//                }
             }
 
             for (SqlStatement sql : statementsToExecute) {
-                if (migrator.getMode().equals(Migrator.Mode.EXECUTE_MODE)) {
-                    new JdbcTemplate(this).update(sql);
-                    connection.commit();
-                } else {
-                    if (!migrator.getMode().equals(Migrator.Mode.OUTPUT_FUTURE_ROLLBACK_SQL_MODE)) {
-                        Writer writer = migrator.getOutputSQLWriter();
-                        if (writer == null) {
-                            wroteToOutput = false;
-                        } else {
-                            writer.append(sql.getSqlStatement(this)).append(sql.getEndDelimiter(this)).append(StreamUtil.getLineSeparator());
-                            wroteToOutput = true;
-                        }
-                    }
-                }
+//                if (migrator.getMode().equals(Migrator.Mode.EXECUTE_MODE)) {
+                this.getJdbcTemplate().execute(sql);
+                this.commit();
+//                } else {
+//                    if (!migrator.getMode().equals(Migrator.Mode.OUTPUT_FUTURE_ROLLBACK_SQL_MODE)) {
+//                        Writer writer = migrator.getOutputSQLWriter();
+//                        if (writer == null) {
+//                            wroteToOutput = false;
+//                        } else {
+//                            try {
+//                                writer.append(sql.getSqlStatement(this)).append(sql.getEndDelimiter(this)).append(StreamUtil.getLineSeparator());
+//                            } catch (IOException e) {
+//                                throw new RuntimeException(e);
+//                            }
+//                            wroteToOutput = true;
+//                        }
+//                    }
+//                }
             }
 
-            if (wroteToOutput) {
-                migrator.getOutputSQLWriter().append(StreamUtil.getLineSeparator());
-            }
+//            if (wroteToOutput) {
+//                try {
+//                    migrator.getOutputSQLWriter().append(StreamUtil.getLineSeparator());
+//                } catch (IOException e) {
+//                    throw new RuntimeException(e);
+//                }
+//            }
 
         } catch (SQLException e) {
             throw new JDBCException(e);
@@ -633,67 +568,43 @@ public abstract class AbstractDatabase implements Database {
      * if a machine is updating the database. If the table does not exist it will create one
      * otherwise it will not do anything besides outputting a log message.
      */
-    public void checkDatabaseChangeLogLockTable(Migrator migrator) throws JDBCException, IOException {
+    public void checkDatabaseChangeLogLockTable() throws JDBCException {
         DatabaseConnection connection = getConnection();
         ResultSet rs = null;
+        boolean knowMustInsertIntoLockTable = false;
         try {
             rs = connection.getMetaData().getTables(getCatalogName(), getSchemaName(), getDatabaseChangeLogLockTableName(), new String[]{"TABLE"});
             if (!rs.next()) {
                 if (!changeLogLockCreateAttempted) {
                     changeLogLockCreateAttempted = true;
                     SqlStatement createTableStatement = getCreateChangeLogLockSQL();
-                    // If there is no table in the database for recording change history create one.
-                    if (migrator.getMode().equals(Migrator.Mode.EXECUTE_MODE)) {
-                        new JdbcTemplate(this).update(createTableStatement);
-                        connection.commit();
-                        log.info("Created database lock table with name: " + getDatabaseChangeLogLockTableName());
-                        changeLogLockTableExists = true;
-                    } else {
-                        if (!migrator.getMode().equals(Migrator.Mode.OUTPUT_FUTURE_ROLLBACK_SQL_MODE)) {
-                            if (!outputtedLockWarning) {
-                                migrator.getOutputSQLWriter().write(migrator.getDatabase().getLineComment() + "-----------------------------------------------------------------------------------------------" + StreamUtil.getLineSeparator());
-                                migrator.getOutputSQLWriter().write(migrator.getDatabase().getLineComment() + " " + getDatabaseChangeLogLockTableName() + " table does not exist." + StreamUtil.getLineSeparator());
-                                migrator.getOutputSQLWriter().write(migrator.getDatabase().getLineComment() + " Race conditions may cause a corrupted sql script." + StreamUtil.getLineSeparator());
-                                migrator.getOutputSQLWriter().write(migrator.getDatabase().getLineComment() + " Consider running: " + StreamUtil.getLineSeparator());
-                                migrator.getOutputSQLWriter().write(migrator.getDatabase().getLineComment() + " " + getCreateChangeLogLockSQL().getSqlStatement(this) + ";" + StreamUtil.getLineSeparator());
-                                migrator.getOutputSQLWriter().write(migrator.getDatabase().getLineComment() + " " + getChangeLogLockInsertSQL().getSqlStatement(this) + ";" + StreamUtil.getLineSeparator());
-                                migrator.getOutputSQLWriter().write(migrator.getDatabase().getLineComment() + "-----------------------------------------------------------------------------------------------" + StreamUtil.getLineSeparator() + StreamUtil.getLineSeparator());
-                                outputtedLockWarning = true;
-                            }
 
-                            migrator.getOutputSQLWriter().append(createTableStatement.getSqlStatement(this));
-                            migrator.getOutputSQLWriter().append(";");
-                            migrator.getOutputSQLWriter().append(StreamUtil.getLineSeparator());
-                            migrator.getOutputSQLWriter().append(StreamUtil.getLineSeparator());
-                        }
-                    }
+                    getJdbcTemplate().comment("Create Database Lock Table");
+                    this.getJdbcTemplate().execute(createTableStatement);
+                    this.commit();
+                    log.info("Created database lock table with name: " + getDatabaseChangeLogLockTableName());
+                    changeLogLockTableExists = true;
+                    knowMustInsertIntoLockTable = true;
                 }
             } else {
                 changeLogLockTableExists = true;
             }
             rs.close();
 
-            SqlStatement insertRowStatment = getChangeLogLockInsertSQL();
             if (changeLogLockTableExists) {
-                RawSqlStatement selectStatement = new RawSqlStatement(("select count(*) from " + getDatabaseChangeLogLockTableName() + " where id=1".toUpperCase()));
-                int rows = new JdbcTemplate(this).queryForInt(selectStatement);
-                if (rows == 0) {
-                    if (migrator.getMode().equals(Migrator.Mode.EXECUTE_MODE)) {
-                        new JdbcTemplate(this).update(insertRowStatment);
-                        connection.commit();
-                        log.info("Inserted lock row into: " + getDatabaseChangeLogLockTableName());
-                    } else {
-                        migrator.getOutputSQLWriter().append(insertRowStatment.getSqlStatement(this));
-                        migrator.getOutputSQLWriter().append(";");
-                        migrator.getOutputSQLWriter().append(StreamUtil.getLineSeparator());
-                        migrator.getOutputSQLWriter().append(StreamUtil.getLineSeparator());
-                    }
+                int rows = -1;
+                if (!knowMustInsertIntoLockTable) {
+                    RawSqlStatement selectStatement = new RawSqlStatement("SELECT COUNT(*) FROM " + getDatabaseChangeLogLockTableName() + " WHERE ID=1");
+                    rows = this.getJdbcTemplate().queryForInt(selectStatement);
+                }
+                if (knowMustInsertIntoLockTable || rows == 0) {
+                    this.getJdbcTemplate().update(getChangeLogLockInsertSQL());
+                    this.commit();
+                    log.info("Inserted lock row into: " + getDatabaseChangeLogLockTableName());
                     rs.close();
                 }
             } else {
-                if (migrator.getMode().equals(Migrator.Mode.EXECUTE_MODE)) {
-                    throw new JDBCException("Change log lock table does not exist");
-                }
+                throw new JDBCException("Change log lock table does not exist");
             }
 
         } catch (SQLException e) {
@@ -769,13 +680,16 @@ public abstract class AbstractDatabase implements Database {
             }
 
 
-            RawSQLChange clearChangeLogChange = new RawSQLChange();
-            clearChangeLogChange.setSql("DELETE FROM " + getDatabaseChangeLogTableName());
-            dropChanges.add(clearChangeLogChange);
+            if (this.changeLogTableExists) {
+                RawSQLChange clearChangeLogChange = new RawSQLChange();
+                clearChangeLogChange.setSql("DELETE FROM " + getDatabaseChangeLogTableName());
+                dropChanges.add(clearChangeLogChange);
+            }
+
             try {
                 for (Change change : dropChanges) {
                     for (SqlStatement statement : change.generateStatements(this)) {
-                        new JdbcTemplate(this).execute(statement);
+                        this.getJdbcTemplate().execute(statement);
                     }
                 }
             } catch (UnsupportedChangeException e) {
@@ -783,12 +697,7 @@ public abstract class AbstractDatabase implements Database {
             }
 
         } finally {
-            try {
-                conn.commit();
-            } catch (SQLException e) {
-                //noinspection ThrowFromFinallyBlock
-                throw new JDBCException(e);
-            }
+            this.commit();
         }
     }
 
@@ -823,18 +732,18 @@ public abstract class AbstractDatabase implements Database {
      */
     public void tag(String tagString) throws JDBCException {
         try {
-            int totalRows = new JdbcTemplate(this).queryForInt(new RawSqlStatement("select count(*) from " + getDatabaseChangeLogTableName()));
+            int totalRows = this.getJdbcTemplate().queryForInt(new RawSqlStatement("select count(*) from " + getDatabaseChangeLogTableName()));
             if (totalRows == 0) {
                 throw new JDBCException("Cannot tag an empty database");
             }
 
-            Date lastExecutedDate = (Date) new JdbcTemplate(this).queryForObject(createChangeToTagSQL(), Date.class);
-            int rowsUpdated = new JdbcTemplate(this).update(createTagSQL(tagString, lastExecutedDate));
+            Date lastExecutedDate = (Date) this.getJdbcTemplate().queryForObject(createChangeToTagSQL(), Date.class);
+            int rowsUpdated = this.getJdbcTemplate().update(createTagSQL(tagString, lastExecutedDate));
             if (rowsUpdated == 0) {
 
                 throw new JDBCException("Did not tag database change log correctly");
             }
-            getConnection().commit();
+            this.commit();
         } catch (Exception e) {
             throw new JDBCException(e);
         }
@@ -868,7 +777,7 @@ public abstract class AbstractDatabase implements Database {
     }
 
     public boolean doesTagExist(String tag) throws JDBCException {
-        int count = new JdbcTemplate(this).queryForInt(new RawSqlStatement("SELECT COUNT(*) FROM " + getDatabaseChangeLogTableName() + " WHERE TAG='" + tag + "'"));
+        int count = this.getJdbcTemplate().queryForInt(new RawSqlStatement("SELECT COUNT(*) FROM " + getDatabaseChangeLogTableName() + " WHERE TAG='" + tag + "'"));
         return count > 0;
     }
 
@@ -897,7 +806,7 @@ public abstract class AbstractDatabase implements Database {
         if (schemaName == null) {
             schemaName = convertRequestedSchemaToSchema(schemaName);
         }
-        String definition = (String) new JdbcTemplate(this).queryForObject(getViewDefinitionSql(schemaName, viewName), String.class);
+        String definition = (String) this.getJdbcTemplate().queryForObject(getViewDefinitionSql(schemaName, viewName), String.class);
         if (definition == null) {
             return null;
         }
@@ -912,7 +821,7 @@ public abstract class AbstractDatabase implements Database {
             sql += " and table_catalog='" + convertRequestedSchemaToCatalog(schemaName) + "'";
         }
 
-        log.info("GetViewDefinitionSQL: "+sql);
+        log.info("GetViewDefinitionSQL: " + sql);
         return new RawSqlStatement(sql);
     }
 
@@ -987,7 +896,7 @@ public abstract class AbstractDatabase implements Database {
                     return new Integer(value);
                 }
                 return new Double(value);
-            } else if (dataType == Types.DOUBLE) {
+            } else if (dataType == Types.DOUBLE || dataType == Types.NUMERIC) {
                 return new Double(value);
             } else if (dataType == Types.FLOAT) {
                 return new Float(value);
@@ -1089,14 +998,14 @@ public abstract class AbstractDatabase implements Database {
     }
 
     public String generatePrimaryKeyName(String tableName) {
-        return "PK_" +tableName.toUpperCase();
+        return "PK_" + tableName.toUpperCase();
     }
 
     public String escapeViewName(String schemaName, String viewName) {
         return escapeTableName(schemaName, viewName);
     }
 
-    public boolean isColumnAutoIncrement(String schemaName, String tableName, String columnName) throws SQLException {
+    public boolean isColumnAutoIncrement(String schemaName, String tableName, String columnName) throws SQLException, JDBCException {
         if (!supportsAutoIncrement()) {
             return false;
         }
@@ -1115,5 +1024,206 @@ public abstract class AbstractDatabase implements Database {
         }
 
         return autoIncrement;
+    }
+
+    /**
+     * Returns the run status for the given ChangeSet
+     */
+    public ChangeSet.RunStatus getRunStatus(ChangeSet changeSet) throws JDBCException, DatabaseHistoryException {
+        if (!doesChangeLogTableExist()) {
+            return ChangeSet.RunStatus.NOT_RAN;
+        }
+
+        RanChangeSet foundRan = getRanChangeSet(changeSet);
+
+        if (foundRan == null) {
+            return ChangeSet.RunStatus.NOT_RAN;
+        } else {
+            if (foundRan.getMd5sum() == null) {
+                try {
+                    log.info("Updating NULL md5sum for " + changeSet.toString());
+                    DatabaseConnection connection = getConnection();
+                    PreparedStatement updatePstmt = connection.prepareStatement("update DatabaseChangeLog set md5sum=? where id=? AND author=? AND filename=?".toUpperCase());
+                    updatePstmt.setString(1, changeSet.getMd5sum());
+                    updatePstmt.setString(2, changeSet.getId());
+                    updatePstmt.setString(3, changeSet.getAuthor());
+                    updatePstmt.setString(4, changeSet.getFilePath());
+
+                    updatePstmt.executeUpdate();
+                    updatePstmt.close();
+                    this.commit();
+                } catch (SQLException e) {
+                    throw new JDBCException(e);
+                }
+
+                return ChangeSet.RunStatus.ALREADY_RAN;
+            } else {
+                if (foundRan.getMd5sum().equals(changeSet.getMd5sum())) {
+                    return ChangeSet.RunStatus.ALREADY_RAN;
+                } else {
+                    if (changeSet.shouldRunOnChange()) {
+                        return ChangeSet.RunStatus.RUN_AGAIN;
+                    } else {
+                        return ChangeSet.RunStatus.INVALID_MD5SUM;
+//                        throw new DatabaseHistoryException("MD5 Check for " + changeSet.toString() + " failed");
+                    }
+                }
+            }
+        }
+    }
+
+    public RanChangeSet getRanChangeSet(ChangeSet changeSet) throws JDBCException, DatabaseHistoryException {
+        if (!doesChangeLogTableExist()) {
+            throw new DatabaseHistoryException("Database change table does not exist");
+        }
+
+        RanChangeSet foundRan = null;
+        for (RanChangeSet ranChange : getRanChangeSetList()) {
+            if (ranChange.isSameAs(changeSet)) {
+                foundRan = ranChange;
+                break;
+            }
+        }
+        return foundRan;
+    }
+
+    /**
+     * Returns the ChangeSets that have been run against the current database.
+     */
+    public List<RanChangeSet> getRanChangeSetList() throws JDBCException {
+        try {
+            String databaseChangeLogTableName = getDatabaseChangeLogTableName();
+            List<RanChangeSet> ranChangeSetList = new ArrayList<RanChangeSet>();
+            if (doesChangeLogTableExist()) {
+                log.info("Reading from " + databaseChangeLogTableName);
+                String sql = "SELECT * FROM " + databaseChangeLogTableName + " ORDER BY dateExecuted asc".toUpperCase();
+                Statement statement = getConnection().createStatement();
+                ResultSet rs = statement.executeQuery(sql);
+                while (rs.next()) {
+                    String fileName = rs.getString("filename");
+                    String author = rs.getString("author");
+                    String id = rs.getString("id");
+                    String md5sum = rs.getString("md5sum");
+                    Date dateExecuted = rs.getTimestamp("dateExecuted");
+                    String tag = rs.getString("tag");
+                    RanChangeSet ranChangeSet = new RanChangeSet(fileName, id, author, md5sum, dateExecuted, tag);
+                    ranChangeSetList.add(ranChangeSet);
+                }
+                rs.close();
+                statement.close();
+            }
+            return ranChangeSetList;
+        } catch (SQLException e) {
+            if (!getJdbcTemplate().executesStatements()) {
+                //probably not created, no problem
+                return new ArrayList<RanChangeSet>();
+            } else {
+                throw new JDBCException(e);
+            }
+        }
+    }
+
+    public Date getRanDate(ChangeSet changeSet) throws JDBCException, DatabaseHistoryException {
+        RanChangeSet ranChange = getRanChangeSet(changeSet);
+        if (ranChange == null) {
+            return null;
+        } else {
+            return ranChange.getDateExecuted();
+        }
+    }
+
+    /**
+     * After the change set has been ran against the database this method will update the change log table
+     * with the information.
+     */
+    public void markChangeSetAsRan(ChangeSet changeSet) throws JDBCException {
+        String dateValue = getCurrentDateTimeFunction();
+
+        InsertStatement statement = new InsertStatement(null, getDatabaseChangeLogTableName());
+        statement.addColumnValue("ID", escapeStringForDatabase(changeSet.getId()));
+        statement.addColumnValue("AUTHOR", changeSet.getAuthor());
+        statement.addColumnValue("FILENAME", changeSet.getFilePath().replace("\\", "\\\\"));
+        statement.addColumnValue("DATEEXECUTED", new ComputedDateValue(dateValue));
+        statement.addColumnValue("MD5SUM", changeSet.getMd5sum());
+        statement.addColumnValue("DESCRIPTION", limitSize(changeSet.getDescription()));
+        statement.addColumnValue("COMMENTS", limitSize(StringUtils.trimToEmpty(changeSet.getComments())));
+        statement.addColumnValue("LIQUIBASE", LiquibaseUtil.getBuildVersion());
+
+
+        this.getJdbcTemplate().execute(statement);
+
+        getRanChangeSetList().add(new RanChangeSet(changeSet));
+    }
+
+    public void markChangeSetAsReRan(ChangeSet changeSet) throws JDBCException {
+        String dateValue = getCurrentDateTimeFunction();
+        String sql = "UPDATE DATABASECHANGELOG SET DATEEXECUTED=" + dateValue + ", MD5SUM='?' WHERE ID='?' AND AUTHOR='?' AND FILENAME='?'";
+        sql = sql.replaceFirst("\\?", escapeStringForDatabase(changeSet.getMd5sum()));
+        sql = sql.replaceFirst("\\?", escapeStringForDatabase(changeSet.getId()));
+        sql = sql.replaceFirst("\\?", escapeStringForDatabase(changeSet.getAuthor()));
+        sql = sql.replaceFirst("\\?", escapeStringForDatabase(changeSet.getFilePath()));
+
+        this.getJdbcTemplate().execute(new RawSqlStatement(sql));
+        this.commit();
+    }
+
+    public void removeRanStatus(ChangeSet changeSet) throws JDBCException {
+        String sql = "DELETE FROM DATABASECHANGELOG WHERE ID='?' AND AUTHOR='?' AND FILENAME='?'";
+        sql = sql.replaceFirst("\\?", escapeStringForDatabase(changeSet.getId()));
+        sql = sql.replaceFirst("\\?", escapeStringForDatabase(changeSet.getAuthor()));
+        sql = sql.replaceFirst("\\?", escapeStringForDatabase(changeSet.getFilePath()));
+
+        this.getJdbcTemplate().execute(new RawSqlStatement(sql));
+        commit();
+    }
+
+    public String escapeStringForDatabase(String string) {
+        return string.replaceAll("'", "''");
+    }
+
+    private String limitSize(String string) {
+        int maxLength = 255;
+        if (string.length() > maxLength) {
+            return string.substring(0, maxLength - 3) + "...";
+        }
+        return string;
+    }
+
+    public void commit() throws JDBCException {
+        try {
+            getConnection().commit();
+        } catch (SQLException e) {
+            throw new JDBCException(e);
+        }
+    }
+
+    public void rollback() throws JDBCException {
+        try {
+            getConnection().rollback();
+        } catch (SQLException e) {
+            throw new JDBCException(e);
+        }
+    }
+
+    public JdbcTemplate getJdbcTemplate() {
+        return jdbcTemplate;
+    }
+
+    public void setJdbcTemplate(JdbcTemplate template) {
+        this.jdbcTemplate = template;
+    }
+
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        AbstractDatabase that = (AbstractDatabase) o;
+
+        return !(connection != null ? !connection.equals(that.connection) : that.connection != null);
+
+    }
+
+    public int hashCode() {
+        return (connection != null ? connection.hashCode() : 0);
     }
 }

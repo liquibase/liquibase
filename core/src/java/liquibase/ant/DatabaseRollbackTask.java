@@ -52,11 +52,15 @@ public class DatabaseRollbackTask extends BaseLiquibaseTask {
         Migrator migrator = null;
         try {
             migrator = createMigrator();
-            migrator.setMode(Migrator.Mode.EXECUTE_ROLLBACK_MODE);
-            migrator.setRollbackToDate(getRollbackDate());
-            migrator.setRollbackToTag(getRollbackTag());
-            migrator.setRollbackCount(getRollbackCount());
-            migrator.migrate();
+            if (getRollbackCount() != null) {
+                migrator.rollback(getRollbackCount(), getContexts());
+            } else if (getRollbackDate() != null) {
+                migrator.rollback(getRollbackDate(), getContexts());
+            } else if (getRollbackTag() != null) {
+                migrator.rollback(getRollbackTag(), getContexts());
+            } else {
+                throw new BuildException("Must specify rollbackCount, rollbackDate, or rollbackTag");
+            }
         } catch (Exception e) {
             throw new BuildException(e);
         } finally {
@@ -64,7 +68,7 @@ public class DatabaseRollbackTask extends BaseLiquibaseTask {
                 try {
                     migrator.getDatabase().getConnection().close();
                 } catch (SQLException e) {
-                    throw new BuildException(e);
+                    ; //could not close
                 }
             }
         }

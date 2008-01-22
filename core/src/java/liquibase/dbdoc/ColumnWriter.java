@@ -11,8 +11,8 @@ import java.util.List;
 public class ColumnWriter extends HTMLWriter {
 
 
-    public ColumnWriter(File rootOutputDir) {
-        super(new File(rootOutputDir, "columns"));
+    public ColumnWriter(File rootOutputDir, Database database) {
+        super(new File(rootOutputDir, "columns"), database);
     }
 
     protected String createTitle(Object object) {

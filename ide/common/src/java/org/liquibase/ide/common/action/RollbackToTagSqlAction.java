@@ -16,7 +16,7 @@ public class RollbackToTagSqlAction extends MigratorAction {
         String input = ideFacade.promptForString(getTitle(), "Enter database tag to roll back to", null);
         if (input != null) {
             StringWriter writer = new StringWriter();
-            ideFacade.getMigrator(null, database).rollbackSQL(input, writer);
+            ideFacade.getMigrator(null, database).rollback(input, null, writer);
 
             ideFacade.showOutput("Rollback SQL", writer.toString());
         }

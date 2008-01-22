@@ -1,8 +1,8 @@
 package liquibase.preconditions;
 
 import liquibase.DatabaseChangeLog;
+import liquibase.database.Database;
 import liquibase.exception.PreconditionFailedException;
-import liquibase.migrator.Migrator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,12 +12,12 @@ import java.util.List;
  */
 public class AndPrecondition extends PreconditionLogic {
 
-    public void check(Migrator migrator, DatabaseChangeLog changeLog) throws PreconditionFailedException {
+    public void check(Database database, DatabaseChangeLog changeLog) throws PreconditionFailedException {
         boolean allPassed = true;
         List<FailedPrecondition> failures = new ArrayList<FailedPrecondition>();
         for (Precondition precondition : getNestedPreconditions()) {
             try {
-                precondition.check(migrator, changeLog);
+                precondition.check(database, changeLog);
             } catch (PreconditionFailedException e) {
                 failures.addAll(e.getFailedPreconditions());
                 allPassed = false;

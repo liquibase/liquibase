@@ -3,9 +3,7 @@ package liquibase.test;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
-import liquibase.database.AbstractDatabase;
 import liquibase.exception.JDBCException;
-import liquibase.migrator.Migrator;
 
 import java.sql.Connection;
 import java.sql.Driver;
