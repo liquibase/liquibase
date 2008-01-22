@@ -24,7 +24,7 @@ public class ShouldRunChangeSetFilter implements ChangeSetFilter {
         for (RanChangeSet ranChangeSet : ranChangeSets) {
             if (ranChangeSet.getId().equals(changeSet.getId())
                     && ranChangeSet.getAuthor().equals(changeSet.getAuthor())
-                    && ranChangeSet.getChangeLog().equals(changeSet.getFilePath())) {
+                    && isPathEquals(changeSet, ranChangeSet)) {
 
                 if (!changeSet.getMd5sum().equals(ranChangeSet.getMd5sum())) {
                     UpdateStatement md5sumUpdateStatement = new UpdateStatement(null, database.getDatabaseChangeLogTableName());
@@ -51,5 +51,14 @@ public class ShouldRunChangeSetFilter implements ChangeSetFilter {
             }
         }
         return true;
+    }
+
+    private boolean isPathEquals(ChangeSet changeSet, RanChangeSet ranChangeSet) {
+        if (System.getProperty("os.name").toLowerCase().startsWith("win")) {
+            return ranChangeSet.getChangeLog().equalsIgnoreCase(changeSet.getFilePath());
+        } else {
+            return ranChangeSet.getChangeLog().equals(changeSet.getFilePath());
+        }
+
     }
 }
