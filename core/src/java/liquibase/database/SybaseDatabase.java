@@ -43,20 +43,20 @@ public class SybaseDatabase extends MSSQLDatabase {
     }
     
     protected SqlStatement getCreateChangeLogSQL() {
-        return new RawSqlStatement(("CREATE TABLE DATABASECHANGELOG (id varchar(150) not null, " +
-                "author varchar(150) not null, " +
-                "filename varchar(255) not null, " +
-                "dateExecuted " + getDateTimeType() + " not null, " +
-                "md5sum varchar(32) null, " +
-                "description varchar(255) null, " +
-                "comments varchar(255) null, " +
-                "tag varchar(255) null, " +
-                "liquibase varchar(10) null, " +
-                "primary key(id, author, filename))").toUpperCase());
+        return new RawSqlStatement(("CREATE TABLE "+getDatabaseChangeLogTableName()+" (ID VARCHAR(150) NOT NULL, " +
+                "AUTHOR VARCHAR(150) NOT NULL, " +
+                "FILENAME VARCHAR(255) NOT NULL, " +
+                "DATEEXECUTED " + getDateTimeType() + " NOT NULL, " +
+                "MD5SUM VARCHAR(32) NULL, " +
+                "DESCRIPTION VARCHAR(255) NULL, " +
+                "COMMENTS VARCHAR(255) NULL, " +
+                "TAG VARCHAR(255) NULL, " +
+                "LIQUIBASE VARCHAR(10) NULL, " +
+                "PRIMARY KEY(ID, AUTHOR, FILENAME))"));
     }
 
     protected SqlStatement getCreateChangeLogLockSQL() {
-        return new RawSqlStatement(("create table DatabaseChangeLogLock (id int not null primary key, locked " + getBooleanType() + " not null, lockGranted " + getDateTimeType() + " null, lockedby varchar(255) null)").toUpperCase());
+        return new RawSqlStatement(("CREATE TABLE "+getDatabaseChangeLogLockTableName()+" (ID INT NOT NULL PRIMARY KEY, LOCKED " + getBooleanType() + " NOT NULL, LOCKGRANTED " + getDateTimeType() + " NULL, LOCKEDBY VARCHAR(255) NULL)"));
     }
     
     /**
