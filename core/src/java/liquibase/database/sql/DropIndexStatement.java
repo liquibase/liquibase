@@ -35,8 +35,14 @@ public class DropIndexStatement implements SqlStatement {
             throw new StatementNotSupportedOnDatabaseException("Database does not support schemas", this, database);
         }
         if (database instanceof MySQLDatabase) {
+            if (getTableName() == null) {
+                throw new StatementNotSupportedOnDatabaseException("tableName is required", this, database);
+            }
             return "DROP INDEX " +getIndexName() + " ON " + database.escapeTableName(getTableSchemaName(), getTableName());
         } else if (database instanceof MSSQLDatabase) {
+            if (getTableName() == null) {
+                throw new StatementNotSupportedOnDatabaseException("tableName is required", this, database);
+            }
             return "DROP INDEX " + database.escapeTableName(getTableSchemaName(), getTableName()) + "." + getIndexName();
         } else if (database instanceof OracleDatabase) {
             return "DROP INDEX " + getIndexName();
