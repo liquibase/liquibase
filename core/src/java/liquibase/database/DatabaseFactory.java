@@ -6,6 +6,9 @@ import liquibase.log.LogFactory;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.logging.Logger;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 public class DatabaseFactory {
 
@@ -13,6 +16,20 @@ public class DatabaseFactory {
 
     private static final Logger log = LogFactory.getLogger();
 
+    private List<Database> implementedDatabases = new ArrayList<Database>(Arrays.asList(
+            (Database) new OracleDatabase(),
+            new PostgresDatabase(),
+            new MSSQLDatabase(),
+            new MySQLDatabase(),
+            new DerbyDatabase(),
+            new HsqlDatabase(),
+            new DB2Database(),
+            new SybaseDatabase(),
+            new H2Database(),
+            new CacheDatabase(),
+            new FirebirdDatabase(),
+            new MaxDBDatabase()
+    ));
 
     private DatabaseFactory() {
     }
@@ -24,21 +41,12 @@ public class DatabaseFactory {
     /**
      * Returns instances of all implemented database types.
      */
-    public Database[] getImplementedDatabases() {
-        return new Database[]{
-                new OracleDatabase(),
-                new PostgresDatabase(),
-                new MSSQLDatabase(),
-                new MySQLDatabase(),
-                new DerbyDatabase(),
-                new HsqlDatabase(),
-                new DB2Database(),
-                new SybaseDatabase(),
-                new H2Database(),
-                new CacheDatabase(),
-                new FirebirdDatabase(),
-                new MaxDBDatabase()
-        };
+    public List<Database> getImplementedDatabases() {
+        return implementedDatabases;
+    }
+
+    public void addDatabaseImplementation(Database database) {
+        implementedDatabases.add(0, database);
     }
 
     public Database findCorrectDatabaseImplementation(Connection connection) throws JDBCException {
@@ -46,9 +54,7 @@ public class DatabaseFactory {
 
         boolean foundImplementation = false;
 
-        Database[] implementedDatabases = getImplementedDatabases();
-
-        for (Database implementedDatabase : implementedDatabases) {
+        for (Database implementedDatabase : getImplementedDatabases()) {
             database = implementedDatabase;
             if (database.isCorrectDatabaseImplementation(connection)) {
                 foundImplementation = true;

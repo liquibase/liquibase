@@ -46,6 +46,7 @@ public class CommandLineMigrator {
     protected String username;
     protected String password;
     protected String url;
+    protected String databaseClass;
     protected String changeLogFile;
     protected String classpath;
     protected String contexts;
@@ -301,6 +302,8 @@ public class CommandLineMigrator {
         stream.println(" --classpath=<value>                        Classpath containing");
         stream.println("                                            migration files and JDBC Driver");
         stream.println(" --driver=<jdbc.driver.ClassName>           Database driver class name");
+        stream.println(" --databaseClass=<database.ClassName>       custom liquibase.database.Database");
+        stream.println("                                            implementation to use");
         stream.println(" --contexts=<value>                         ChangeSet contexts to execute");
         stream.println(" --defaultsFile=</path/to/file.properties>  File with default option values");
         stream.println("                                            (default: ./liquibase.properties)");
@@ -541,9 +544,14 @@ public class CommandLineMigrator {
         FileSystemFileOpener fsOpener = new FileSystemFileOpener();
         CommandLineFileOpener clOpener = new CommandLineFileOpener(classLoader);
         Driver driver;
+        DatabaseFactory databaseFactory = DatabaseFactory.getInstance();
+        if (this.databaseClass != null) {
+            databaseFactory.addDatabaseImplementation((Database) Class.forName(this.databaseClass, true, classLoader).newInstance());
+        }
+
         try {
             if (this.driver == null) {
-                this.driver = DatabaseFactory.getInstance().findDefaultDriver(url);
+                this.driver = databaseFactory.findDefaultDriver(url);
             }
 
             if (this.driver == null) {
@@ -578,7 +586,7 @@ public class CommandLineMigrator {
         }
 
         try {
-            Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(connection);
+            Database database = databaseFactory.findCorrectDatabaseImplementation(connection);
             Migrator migrator = new Migrator(changeLogFile, new CompositeFileOpener(fsOpener, clOpener), database);
 
             if ("listLocks".equalsIgnoreCase(command)) {
