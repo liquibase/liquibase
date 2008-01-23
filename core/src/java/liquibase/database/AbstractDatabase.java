@@ -411,33 +411,33 @@ public abstract class AbstractDatabase implements Database {
 
     private SqlStatement getChangeLogLockInsertSQL() {
         return new InsertStatement(null, getDatabaseChangeLogLockTableName())
-                .addColumnValue("id", 1)
-                .addColumnValue("locked", Boolean.FALSE);
+                .addColumnValue("ID", 1)
+                .addColumnValue("LOCKED", Boolean.FALSE);
     }
 
     protected SqlStatement getCreateChangeLogLockSQL() {
         return new CreateTableStatement(null, getDatabaseChangeLogLockTableName())
-                .addPrimaryKeyColumn("id", "int", new NotNullConstraint())
-                .addColumn("locked", getBooleanType(), new NotNullConstraint())
-                .addColumn("lockGranted", getDateTimeType())
-                .addColumn("lockedby", "varchar(255)");
+                .addPrimaryKeyColumn("ID", "INT", new NotNullConstraint())
+                .addColumn("LOCKED", getBooleanType(), new NotNullConstraint())
+                .addColumn("LOCKGRANTED", getDateTimeType())
+                .addColumn("LOCKEDBY", "VARCHAR(255)");
     }
 
     protected SqlStatement getCreateChangeLogSQL() {
         return new CreateTableStatement(null, getDatabaseChangeLogTableName())
-                .addPrimaryKeyColumn("id", "varchar(150)", new NotNullConstraint())
-                .addPrimaryKeyColumn("author", "varchar(150)", new NotNullConstraint())
-                .addPrimaryKeyColumn("filename", "varchar(255)", new NotNullConstraint())
-                .addColumn("dateExecuted", getDateTimeType(), new NotNullConstraint())
-                .addColumn("md5sum", "varchar(32)")
-                .addColumn("description", "varchar(255)")
-                .addColumn("comments", "varchar(255)")
-                .addColumn("tag", "varchar(255)")
-                .addColumn("liquibase", "varchar(10)");
+                .addPrimaryKeyColumn("ID", "VARCHAR(150)", new NotNullConstraint())
+                .addPrimaryKeyColumn("AUTHOR", "VARCHAR(150)", new NotNullConstraint())
+                .addPrimaryKeyColumn("FILENAME", "VARCHAR(255)", new NotNullConstraint())
+                .addColumn("DATEEXECUTED", getDateTimeType(), new NotNullConstraint())
+                .addColumn("MD5SUM", "VARCHAR(32)")
+                .addColumn("DESCRIPTION", "VARCHAR(255)")
+                .addColumn("COMMENTS", "VARCHAR(255)")
+                .addColumn("TAG", "VARCHAR(255)")
+                .addColumn("LIQUIBASE", "VARCHAR(10)");
     }
 
     public SqlStatement getSelectChangeLogLockSQL() throws JDBCException {
-        return new RawSqlStatement(("select locked from " + getDatabaseChangeLogLockTableName() + " where id=1").toUpperCase());
+        return new RawSqlStatement(("SELECT LOCKED FROM " + getDatabaseChangeLogLockTableName() + " WHERE ID=1"));
     }
 
     public boolean doesChangeLogTableExist() {
@@ -736,7 +736,7 @@ public abstract class AbstractDatabase implements Database {
      */
     public void tag(String tagString) throws JDBCException {
         try {
-            int totalRows = this.getJdbcTemplate().queryForInt(new RawSqlStatement("select count(*) from " + getDatabaseChangeLogTableName()));
+            int totalRows = this.getJdbcTemplate().queryForInt(new RawSqlStatement("SELECT COUNT(*) FROM " + getDatabaseChangeLogTableName()));
             if (totalRows == 0) {
                 throw new JDBCException("Cannot tag an empty database");
             }
@@ -1047,7 +1047,7 @@ public abstract class AbstractDatabase implements Database {
                 try {
                     log.info("Updating NULL md5sum for " + changeSet.toString());
                     DatabaseConnection connection = getConnection();
-                    PreparedStatement updatePstmt = connection.prepareStatement("update DatabaseChangeLog set md5sum=? where id=? AND author=? AND filename=?".toUpperCase());
+                    PreparedStatement updatePstmt = connection.prepareStatement("UPDATE "+getDatabaseChangeLogTableName()+" SET MD5SUM=? WHERE ID=? AND AUTHOR=? AND FILENAME=?");
                     updatePstmt.setString(1, changeSet.getMd5sum());
                     updatePstmt.setString(2, changeSet.getId());
                     updatePstmt.setString(3, changeSet.getAuthor());
@@ -1100,16 +1100,16 @@ public abstract class AbstractDatabase implements Database {
             List<RanChangeSet> ranChangeSetList = new ArrayList<RanChangeSet>();
             if (doesChangeLogTableExist()) {
                 log.info("Reading from " + databaseChangeLogTableName);
-                String sql = "SELECT * FROM " + databaseChangeLogTableName + " ORDER BY dateExecuted asc".toUpperCase();
+                String sql = "SELECT * FROM " + databaseChangeLogTableName + " ORDER BY DATEEXECUTED ASC".toUpperCase();
                 Statement statement = getConnection().createStatement();
                 ResultSet rs = statement.executeQuery(sql);
                 while (rs.next()) {
-                    String fileName = rs.getString("filename");
-                    String author = rs.getString("author");
-                    String id = rs.getString("id");
-                    String md5sum = rs.getString("md5sum");
-                    Date dateExecuted = rs.getTimestamp("dateExecuted");
-                    String tag = rs.getString("tag");
+                    String fileName = rs.getString("FILENAME");
+                    String author = rs.getString("AUTHOR");
+                    String id = rs.getString("ID");
+                    String md5sum = rs.getString("MD5SUM");
+                    Date dateExecuted = rs.getTimestamp("DATEEXECUTED");
+                    String tag = rs.getString("TAG");
                     RanChangeSet ranChangeSet = new RanChangeSet(fileName, id, author, md5sum, dateExecuted, tag);
                     ranChangeSetList.add(ranChangeSet);
                 }
