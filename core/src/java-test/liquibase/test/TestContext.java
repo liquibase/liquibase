@@ -196,7 +196,7 @@ public class TestContext {
         if (allDatabases == null) {
             allDatabases = new HashSet<Database>();
 
-            allDatabases.addAll(Arrays.asList(DatabaseFactory.getInstance().getImplementedDatabases()));
+            allDatabases.addAll(DatabaseFactory.getInstance().getImplementedDatabases());
 
         }
         return allDatabases;
