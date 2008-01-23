@@ -189,4 +189,12 @@
         </createTable>
     </changeSet>
 
+    <changeSet id="commonTypes-test" author="nvoxland">
+        <createTable tableName="commonTypesTest">
+            <column name="intColumn" type="int"/>
+            <column name="floatColumn" type="float"/>
+        </createTable>
+    </changeSet>
+
+
 </databaseChangeLog>

@@ -311,4 +311,14 @@
         </executeCommand>
     </changeSet>
 
+    <changeSet id="customTypes-test" author="nvoxland">
+        <createTable tableName="customTypesTest">
+            <column name="bigIntColumn" type="bigint"/>
+            <column name="bigSerialColumn" type="bigserial"/>
+            <column name="bitVarColumn" type="bit varying(10)"/>
+            <column name="doubleColumn" type="double precision"/>
+            <column name="realColumn" type="real"/>            
+        </createTable>
+    </changeSet>
+
 </databaseChangeLog>
