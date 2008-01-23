@@ -166,7 +166,7 @@ public class PostgresDatabase extends AbstractDatabase {
 
 
     public SqlStatement createFindSequencesSQL(String schema) throws JDBCException {
-        return new RawSqlStatement("SELECT relname AS SEQUENCE_NAME FROM pg_class, pg_namespace WHERE relkind='S' AND pg_class.relnamespace = pg_namespace.oid AND nspname = '" + convertRequestedSchemaToSchema(schema) + "'");
+        return new RawSqlStatement("SELECT relname AS SEQUENCE_NAME FROM pg_class, pg_namespace WHERE relkind='S' AND pg_class.relnamespace = pg_namespace.oid AND nspname = '" + convertRequestedSchemaToSchema(schema) + "' AND 'nextval('''||relname||'''::regclass)' not in (select adsrc from pg_attrdef where adsrc is not null)");
     }
 
 
@@ -200,7 +200,12 @@ public class PostgresDatabase extends AbstractDatabase {
 
         if (type.startsWith("TEXT(")) {
             return getClobType();
+        } else if (type.toLowerCase().startsWith("float8")) {
+            return "FLOAT8";
+        } else if (type.toLowerCase().startsWith("float4")) {
+            return "FLOAT4";
         }
+
 
         if (autoIncrement != null && autoIncrement) {
             if ("integer".equals(type.toLowerCase())) {
