@@ -112,6 +112,16 @@ public class ChangeSet {
 
         try {
             database.getJdbcTemplate().comment("Changeset " + toString());
+            if (StringUtils.trimToNull(getComments()) != null) {
+                String comments = getComments();
+                String[] lines = comments.split("\n");
+                for (int i=0; i<lines.length; i++) {
+                    if (i > 0) {
+                        lines[i] = database.getLineComment()+" "+lines[i];
+                    }
+                }
+                database.getJdbcTemplate().comment(StringUtils.join(Arrays.asList(lines), "\n"));
+            }
 
             for (Change change : changes) {
                 try {
