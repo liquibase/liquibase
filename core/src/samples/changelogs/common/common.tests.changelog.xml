@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <databaseChangeLog
-        xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.4"
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.5"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.4 http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.4.xsd">
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.5 http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.5.xsd">
 
     <changeSet id="datatypetest-1" author="nvoxland">
         <createTable tableName="dataTypeTest">
@@ -170,6 +170,22 @@
             <column name="varcharColumn" type="java.sql.Types.VARCHAR(255)"/>
             <column name="blobColumn" type="java.sql.Types.BLOB"/>
             <column name="booleanColumn" type="java.sql.Types.BOOLEAN"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="createTableNamedUqConst" author="nvoxland">
+        <createTable tableName="createTableNamedUqConst">
+            <column name="id" type="int">
+                <constraints nullable="false" unique="true" uniqueConstraintName="uq_uqtest1"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="createTableUnNamedUqConst" author="nvoxland">
+        <createTable tableName="createTableUnNamedUqConst">
+            <column name="id" type="int">
+                <constraints nullable="false" unique="true"/>
+            </column>
         </createTable>
     </changeSet>
 

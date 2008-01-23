@@ -178,8 +178,9 @@ public class CreateTableStatement implements SqlStatement {
             }
         }
 
+        buffer.append(",");
+
         if (getPrimaryKeyConstraint() != null && getPrimaryKeyConstraint().getColumns().size() > 0) {
-            buffer.append(",");
             String pkName = StringUtils.trimToNull(getPrimaryKeyConstraint().getConstraintName());
             if (pkName == null) {
                 pkName = database.generatePrimaryKeyName(getTableName());
@@ -215,8 +216,10 @@ public class CreateTableStatement implements SqlStatement {
         }
 
         for (UniqueConstraint uniqueConstraint : getUniqueConstraints()) {
-            buffer.append(" CONSTRAINT ");
-            buffer.append(uniqueConstraint.getConstraintName());
+            if (uniqueConstraint.getConstraintName() != null) {
+                buffer.append(" CONSTRAINT ");
+                buffer.append(uniqueConstraint.getConstraintName());
+            }
             buffer.append(" UNIQUE (");
             buffer.append(StringUtils.join(uniqueConstraint.getColumns(), ", "));
             buffer.append("),");

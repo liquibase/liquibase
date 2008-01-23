@@ -273,6 +273,10 @@ public class ColumnConfig {
             if (constraints.isUnique() != null) {
                 constraintsElement.setAttribute("unique", constraints.isUnique().toString());
             }
+
+            if (constraints.getUniqueConstraintName() != null) {
+                constraintsElement.setAttribute("uniqueConstraintName", constraints.getUniqueConstraintName());
+            }
             element.appendChild(constraintsElement);
         }
 

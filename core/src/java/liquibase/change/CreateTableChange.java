@@ -67,7 +67,7 @@ public class CreateTableChange extends AbstractChange {
                 }
 
                 if (constraints.isUnique() != null && constraints.isUnique()) {
-                    statement.addColumnConstraint(new UniqueConstraint().addColumns(column.getName()));
+                    statement.addColumnConstraint(new UniqueConstraint(constraints.getUniqueConstraintName()).addColumns(column.getName()));
                 }
             }
 

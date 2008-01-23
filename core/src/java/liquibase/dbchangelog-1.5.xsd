@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-            targetNamespace="http://www.liquibase.org/xml/ns/dbchangelog/1.4"
-            xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.4"
+            targetNamespace="http://www.liquibase.org/xml/ns/dbchangelog/1.5"
+            xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.5"
             elementFormDefault="qualified">
 
     <!-- This is the main (root) part of the xsd -->
@@ -72,6 +72,7 @@
         <xsd:attribute name="nullable" type="xsd:boolean"/>
         <xsd:attribute name="primaryKey" type="xsd:boolean"/>
         <xsd:attribute name="unique" type="xsd:boolean"/>
+        <xsd:attribute name="uniqueConstraintName" type="xsd:string"/>
         <xsd:attribute name="references" type="xsd:string"/>
         <xsd:attribute name="foreignKeyName" type="xsd:string"/>
         <xsd:attribute name="deleteCascade" type="xsd:boolean"/>

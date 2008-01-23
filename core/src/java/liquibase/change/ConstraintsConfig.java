@@ -10,6 +10,7 @@ public class ConstraintsConfig {
     private Boolean primaryKey;
     private String references;
     private Boolean unique;
+    private String uniqueConstraintName;
     private String check;
     private Boolean deleteCascade;
     private String foreignKeyName;
@@ -46,6 +47,14 @@ public class ConstraintsConfig {
 
     public void setUnique(Boolean unique) {
         this.unique = unique;
+    }
+
+    public String getUniqueConstraintName() {
+        return uniqueConstraintName;
+    }
+
+    public void setUniqueConstraintName(String uniqueConstraintName) {
+        this.uniqueConstraintName = uniqueConstraintName;
     }
 
     public String getCheck() {
