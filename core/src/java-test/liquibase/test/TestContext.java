@@ -107,6 +107,8 @@ public class TestContext {
         } catch (SQLException e) {
 //            e.printStackTrace();
             ; //schema already exists
+        } finally {
+            databaseConnection.rollback();
         }
 
 //        Migrator migrator = new Migrator(null, null);

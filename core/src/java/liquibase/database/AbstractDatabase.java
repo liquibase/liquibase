@@ -250,6 +250,10 @@ public abstract class AbstractDatabase implements Database {
             return getTimeType();
         } else if ("dateTime".equalsIgnoreCase(columnType)) {
             return getDateTimeType();
+        } else if (columnType.toUpperCase().startsWith("FLOAT(")) {
+            return "FLOAT";
+        } else if (columnType.toUpperCase().startsWith("DOUBLE(")) {
+            return "DOUBLE";
         } else {
             return columnType;
         }
@@ -294,7 +298,7 @@ public abstract class AbstractDatabase implements Database {
             val.append("'");
             val.append(isoDate.substring(0, 10));
             val.append(" ");
-            //noinspection MagicNumber
+//noinspection MagicNumber
             val.append(isoDate.substring(11));
             val.append("'");
             return val.toString();
@@ -395,7 +399,7 @@ public abstract class AbstractDatabase implements Database {
         return returnString.toString().replaceFirst(" \\|\\| $", "");
     }
 
-    // ------- DATABASECHANGELOG / DATABASECHANGELOGLOCK METHODS ---- //
+// ------- DATABASECHANGELOG / DATABASECHANGELOGLOCK METHODS ---- //
 
     public String getDatabaseChangeLogTableName() {
         return "DatabaseChangeLog".toUpperCase();
@@ -621,7 +625,7 @@ public abstract class AbstractDatabase implements Database {
         }
     }
 
-    // ------- DATABASE OBJECT DROPPING METHODS ---- //
+// ------- DATABASE OBJECT DROPPING METHODS ---- //
 
     /**
      * Drops all objects owned by the connected user.
@@ -725,7 +729,7 @@ public abstract class AbstractDatabase implements Database {
         return tableName.equalsIgnoreCase(this.getDatabaseChangeLogTableName()) || tableName.equalsIgnoreCase(this.getDatabaseChangeLogLockTableName());
     }
 
-    // ------- DATABASE TAGGING METHODS ---- //
+// ------- DATABASE TAGGING METHODS ---- //
 
     /**
      * Tags the database changelog with the given string.
