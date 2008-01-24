@@ -427,7 +427,7 @@ public abstract class AbstractDatabase implements Database {
         return new CreateTableStatement(null, getDatabaseChangeLogTableName())
                 .addPrimaryKeyColumn("ID", "VARCHAR(63)", new NotNullConstraint())
                 .addPrimaryKeyColumn("AUTHOR", "VARCHAR(63)", new NotNullConstraint())
-                .addPrimaryKeyColumn("FILENAME", "VARCHAR(255)", new NotNullConstraint())
+                .addPrimaryKeyColumn("FILENAME", "VARCHAR(200)", new NotNullConstraint())
                 .addColumn("DATEEXECUTED", getDateTimeType(), new NotNullConstraint())
                 .addColumn("MD5SUM", "VARCHAR(32)")
                 .addColumn("DESCRIPTION", "VARCHAR(255)")
