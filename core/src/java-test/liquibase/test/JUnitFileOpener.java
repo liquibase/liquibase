@@ -32,4 +32,8 @@ public class JUnitFileOpener implements FileOpener {
     public Enumeration<URL> getResources(String packageName) throws IOException {
         return classLoader.getResources(packageName);
     }
+
+    public ClassLoader toClassLoader() {
+        return classLoader;
+    }
 }

@@ -28,7 +28,7 @@ public class CustomChangeWrapper extends AbstractChange {
     private String className;
     private SortedSet<String> params = new TreeSet<String>();
     private Map<String, String> paramValues = new HashMap<String, String>();
-
+    private ClassLoader classLoader;
 
     public CustomChangeWrapper() {
         super("customChange", "Custom Change");
@@ -38,10 +38,18 @@ public class CustomChangeWrapper extends AbstractChange {
         return customChange;
     }
 
+    public ClassLoader getClassLoader() {
+        return classLoader;
+    }
+
+    public void setClassLoader(ClassLoader classLoader) {
+        this.classLoader = classLoader;
+    }
+
     public void setClass(String className) throws CustomChangeException {
         this.className = className;
         try {
-            customChange = (CustomChange) Class.forName(className).newInstance();
+            customChange = (CustomChange) Class.forName(className, true, getClassLoader()).newInstance();
         } catch (Exception e) {
             throw new CustomChangeException(e);
         }

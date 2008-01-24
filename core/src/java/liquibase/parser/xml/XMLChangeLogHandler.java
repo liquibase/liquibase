@@ -84,6 +84,9 @@ class XMLChangeLogHandler extends DefaultHandler {
                     throw new MigrationFailedException(changeSet, "Unknown change: " + qName);
                 }
                 change.setFileOpener(fileOpener);
+                if (change instanceof CustomChangeWrapper) {
+                    ((CustomChangeWrapper) change).setClassLoader(fileOpener.toClassLoader());
+                }
                 for (int i = 0; i < atts.getLength(); i++) {
                     String attributeName = atts.getQName(i);
                     String attributeValue = atts.getValue(i);

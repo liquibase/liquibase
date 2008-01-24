@@ -37,4 +37,8 @@ public class AntFileOpener implements FileOpener {
     public Enumeration<URL> getResources(String packageName) throws IOException {
         return loader.getResources(packageName);
     }
+
+    public ClassLoader toClassLoader() {
+        return loader;
+    }
 }

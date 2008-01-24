@@ -60,6 +60,10 @@ public class IntellijFileOpener implements FileOpener {
         return action.returnValue;
     }
 
+    public ClassLoader toClassLoader() {
+        return null; //todo
+    }
+
     private static class WriteAction implements Runnable {
         private VirtualFile returnValue;
         private String file;
