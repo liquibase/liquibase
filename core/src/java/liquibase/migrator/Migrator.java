@@ -88,23 +88,6 @@ public class Migrator {
         }
     }
 
-    /**
-     * Checks changelogs for bad MD5Sums and preconditions before attempting a migration
-     */
-    public void validate() throws LiquibaseException {
-
-        DatabaseChangeLog changeLog = new ChangeLogParser().parse(changeLogFile, fileOpener);
-        ChangeLogIterator logIterator = new ChangeLogIterator(changeLog, new DbmsChangeSetFilter(database));
-
-        ValidatingVisitor validatingVisitor = new ValidatingVisitor(database.getRanChangeSetList());
-        validatingVisitor.checkPreconditions(database, changeLog);
-        logIterator.run(validatingVisitor);
-
-        if (!validatingVisitor.validationPassed()) {
-            throw new ValidationFailedException(validatingVisitor);
-        }
-    }
-
     public void update(String contexts) throws LiquibaseException {
 
         LockHandler lockHandler = LockHandler.getInstance(database);
@@ -113,9 +96,8 @@ public class Migrator {
         try {
             database.checkDatabaseChangeLogTable();
 
-            validate();
-
             DatabaseChangeLog changeLog = new ChangeLogParser().parse(changeLogFile, fileOpener);
+            changeLog.validate(database);
             ChangeLogIterator logIterator = new ChangeLogIterator(changeLog,
                     new ShouldRunChangeSetFilter(database),
                     new ContextChangeSetFilter(contexts),
@@ -153,9 +135,9 @@ public class Migrator {
         try {
             database.checkDatabaseChangeLogTable();
 
-            validate();
-
             DatabaseChangeLog changeLog = new ChangeLogParser().parse(changeLogFile, fileOpener);
+            changeLog.validate(database);
+
             ChangeLogIterator logIterator = new ChangeLogIterator(changeLog,
                     new ShouldRunChangeSetFilter(database),
                     new ContextChangeSetFilter(contexts),
@@ -220,9 +202,9 @@ public class Migrator {
         try {
             database.checkDatabaseChangeLogTable();
 
-            validate();
-
             DatabaseChangeLog changeLog = new ChangeLogParser().parse(changeLogFile, fileOpener);
+            changeLog.validate(database);
+
             ChangeLogIterator logIterator = new ChangeLogIterator(changeLog,
                     new AlreadyRanChangeSetFilter(database.getRanChangeSetList()),
                     new ContextChangeSetFilter(contexts),
@@ -258,9 +240,9 @@ public class Migrator {
         try {
             database.checkDatabaseChangeLogTable();
 
-            validate();
-
             DatabaseChangeLog changeLog = new ChangeLogParser().parse(changeLogFile, fileOpener);
+            changeLog.validate(database);
+            
             ChangeLogIterator logIterator = new ChangeLogIterator(changeLog,
                     new AfterTagChangeSetFilter(tagToRollBackTo, database.getRanChangeSetList()),
                     new ContextChangeSetFilter(contexts),
@@ -295,9 +277,9 @@ public class Migrator {
         try {
             database.checkDatabaseChangeLogTable();
 
-            validate();
-
             DatabaseChangeLog changeLog = new ChangeLogParser().parse(changeLogFile, fileOpener);
+            changeLog.validate(database);
+            
             ChangeLogIterator logIterator = new ChangeLogIterator(changeLog,
                     new ExecutedAfterChangeSetFilter(dateToRollBackTo, database.getRanChangeSetList()),
                     new ContextChangeSetFilter(contexts),
@@ -335,9 +317,9 @@ public class Migrator {
         try {
             database.checkDatabaseChangeLogTable();
 
-            validate();
-
             DatabaseChangeLog changeLog = new ChangeLogParser().parse(changeLogFile, fileOpener);
+            changeLog.validate(database);
+
             ChangeLogIterator logIterator = new ChangeLogIterator(changeLog,
                     new NotRanChangeSetFilter(database.getRanChangeSetList()),
                     new ContextChangeSetFilter(contexts),
@@ -362,9 +344,9 @@ public class Migrator {
         try {
             database.checkDatabaseChangeLogTable();
 
-            validate();
-
             DatabaseChangeLog changeLog = new ChangeLogParser().parse(changeLogFile, fileOpener);
+            changeLog.validate(database);
+
             ChangeLogIterator logIterator = new ChangeLogIterator(changeLog,
                     new NotRanChangeSetFilter(database.getRanChangeSetList()),
                     new ContextChangeSetFilter(contexts),
@@ -469,9 +451,9 @@ public class Migrator {
         try {
             database.checkDatabaseChangeLogTable();
 
-            validate();
-
             DatabaseChangeLog changeLog = new ChangeLogParser().parse(changeLogFile, fileOpener);
+            changeLog.validate(database);
+
             ChangeLogIterator logIterator = new ChangeLogIterator(changeLog,
                     new ShouldRunChangeSetFilter(database),
                     new ContextChangeSetFilter(contexts),
@@ -535,9 +517,9 @@ public class Migrator {
         try {
             database.checkDatabaseChangeLogTable();
 
-            validate();
-
             DatabaseChangeLog changeLog = new ChangeLogParser().parse(changeLogFile, fileOpener);
+            changeLog.validate(database);
+
             ChangeLogIterator logIterator = new ChangeLogIterator(changeLog,
                     new DbmsChangeSetFilter(database));
 
@@ -565,4 +547,12 @@ public class Migrator {
 //        }
     }
 
+    /**
+     * Checks changelogs for bad MD5Sums and preconditions before attempting a migration
+     */
+    public void validate() throws LiquibaseException {
+
+        DatabaseChangeLog changeLog = new ChangeLogParser().parse(changeLogFile, fileOpener);
+        changeLog.validate(database);
+    }
 }

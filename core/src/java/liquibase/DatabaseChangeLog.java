@@ -1,7 +1,14 @@
 package liquibase;
 
 import liquibase.parser.LiquibaseSchemaResolver;
+import liquibase.parser.ChangeLogParser;
+import liquibase.parser.ChangeLogIterator;
+import liquibase.parser.visitor.ValidatingVisitor;
+import liquibase.parser.filter.DbmsChangeSetFilter;
 import liquibase.preconditions.AndPrecondition;
+import liquibase.exception.LiquibaseException;
+import liquibase.exception.ValidationFailedException;
+import liquibase.database.Database;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -90,4 +97,21 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog> {
     public int hashCode() {
         return getFilePath().hashCode();
     }
+
+    /**
+     * Checks changelogs for bad MD5Sums and preconditions before attempting a migration
+     */
+    public void validate(Database database) throws LiquibaseException {
+
+        ChangeLogIterator logIterator = new ChangeLogIterator(this, new DbmsChangeSetFilter(database));
+
+        ValidatingVisitor validatingVisitor = new ValidatingVisitor(database.getRanChangeSetList());
+        validatingVisitor.checkPreconditions(database, this);
+        logIterator.run(validatingVisitor);
+
+        if (!validatingVisitor.validationPassed()) {
+            throw new ValidationFailedException(validatingVisitor);
+        }
+    }
+
 }
