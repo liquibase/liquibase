@@ -18,4 +18,8 @@ public class ClassLoaderFileOpener implements FileOpener {
     public Enumeration<URL> getResources(String packageName) throws IOException {
         return getClass().getClassLoader().getResources(packageName);
     }
+
+    public ClassLoader toClassLoader() {
+        return getClass().getClassLoader();
+    }
 }

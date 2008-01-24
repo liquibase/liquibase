@@ -12,4 +12,6 @@ public interface FileOpener {
     public InputStream getResourceAsStream(String file) throws IOException;
 
     public Enumeration<URL> getResources(String packageName) throws IOException;
+
+    public ClassLoader toClassLoader();
 }

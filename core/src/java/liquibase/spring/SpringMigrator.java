@@ -106,6 +106,10 @@ public class SpringMigrator implements InitializingBean, BeanNameAware, Resource
         public boolean isClasspathPrefixPresent(String file) {
             return file.startsWith(ResourceLoader.CLASSPATH_URL_PREFIX);
         }
+
+        public ClassLoader toClassLoader() {
+            return getResourceLoader().getClassLoader();
+        }
     }
 
     private String beanName;

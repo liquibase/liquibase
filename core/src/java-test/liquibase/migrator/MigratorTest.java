@@ -148,6 +148,10 @@ public class MigratorTest {
                 public Enumeration<URL> getResources(String packageName) {
                     return null;
                 }
+
+                public ClassLoader toClassLoader() {
+                    return null;
+                }
             };
         }
     }
