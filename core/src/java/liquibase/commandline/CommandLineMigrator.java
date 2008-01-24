@@ -113,7 +113,7 @@ public class CommandLineMigrator {
             return;
         }
 
-        if ("migrate".equals(commandLineMigrator.command)) {
+        if ("update".equals(commandLineMigrator.command)) {
             System.out.println("Migration successful");
         } else if (commandLineMigrator.command.startsWith("rollback") && !commandLineMigrator.command.endsWith("SQL")) {
             System.out.println("Rollback successful");
@@ -175,7 +175,7 @@ public class CommandLineMigrator {
     }
 
     private boolean isChangeLogRequired(String command) {
-        return command.toLowerCase().startsWith("migrate")
+        return command.toLowerCase().startsWith("update")
                 || command.toLowerCase().startsWith("rollback")
                 || "validate".equals(command);
     }
@@ -183,6 +183,10 @@ public class CommandLineMigrator {
     private boolean isCommand(String arg) {
         return "migrate".equals(arg)
                 || "migrateSQL".equalsIgnoreCase(arg)
+                || "update".equalsIgnoreCase(arg)
+                || "updateSQL".equalsIgnoreCase(arg)
+                || "updateCount".equalsIgnoreCase(arg)
+                || "updateCountSQL".equalsIgnoreCase(arg)
                 || "rollback".equalsIgnoreCase(arg)
                 || "rollbackToDate".equalsIgnoreCase(arg)
                 || "rollbackCount".equalsIgnoreCase(arg)
@@ -242,22 +246,24 @@ public class CommandLineMigrator {
         stream.println("Usage: java -jar liquibase.jar [options] [command]");
         stream.println("");
         stream.println("Standard Commands:");
-        stream.println(" migrate                        Updates database to current version");
+        stream.println(" update                         Updates database to current version");
+        stream.println(" updateSQL                      Writes SQL to update database to current");
+        stream.println("                                version to STDOUT");
+        stream.println(" updateCount <num>              Applies next NUM changes to the  database");
+        stream.println(" updateSQL <num>                Writes SQL to apply next NUM changes the database");
         stream.println(" rollback <tag>                 Rolls back the database to the the state is was");
         stream.println("                                when the tag was applied");
-        stream.println(" rollbackToDate <date/time>     Rolls back the database to the the state is was");
-        stream.println("                                at the given date/time.");
-        stream.println("                                Date Format: yyyy-MM-dd HH:mm:ss");
-        stream.println(" rollbackCount <value>          Rolls back the last <value> change sets");
-        stream.println("                                applied to the database");
-        stream.println(" migrateSQL                     Writes SQL to update database to current");
-        stream.println("                                version to STDOUT");
         stream.println(" rollbackSQL <tag>              Writes SQL to roll back the database to that");
         stream.println("                                state it was in when the tag was applied");
         stream.println("                                to STDOUT");
+        stream.println(" rollbackToDate <date/time>     Rolls back the database to the the state is was");
+        stream.println("                                at the given date/time.");
+        stream.println("                                Date Format: yyyy-MM-dd HH:mm:ss");
         stream.println(" rollbackToDateSQL <date/time>  Writes SQL to roll back the database to that");
         stream.println("                                state it was in at the given date/time version");
         stream.println("                                to STDOUT");
+        stream.println(" rollbackCount <value>          Rolls back the last <value> change sets");
+        stream.println("                                applied to the database");
         stream.println(" rollbackCountSQL <value>       Writes SQL to roll back the last");
         stream.println("                                <value> change sets to STDOUT");
         stream.println("                                applied to the database");
@@ -348,6 +354,11 @@ public class CommandLineMigrator {
         for (String arg : args) {
             if (isCommand(arg)) {
                 this.command = arg;
+                if (this.command.equalsIgnoreCase("migrate")) {
+                    this.command = "update";
+                } else if (this.command.equalsIgnoreCase("migrateSQL")) {
+                        this.command = "updateSQL";
+                }
                 seenCommand = true;
             } else if (seenCommand) {
                 commandParams.add(arg);
@@ -637,13 +648,17 @@ public class CommandLineMigrator {
 
             DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             try {
-                if ("migrate".equalsIgnoreCase(command)) {
+                if ("update".equalsIgnoreCase(command)) {
                     migrator.update(contexts);
                 } else if ("changelogSync".equalsIgnoreCase(command)) {
                     migrator.changeLogSync(contexts);
                 } else if ("changelogSyncSQL".equalsIgnoreCase(command)) {
                     migrator.changeLogSync(contexts, getOutputWriter());
-                } else if ("migrateSQL".equalsIgnoreCase(command)) {
+                } else if ("updateCount".equalsIgnoreCase(command)) {
+                    migrator.update(Integer.parseInt(commandParams.iterator().next()), contexts);
+                } else if ("updateCountSQL".equalsIgnoreCase(command)) {
+                    migrator.update(Integer.parseInt(commandParams.iterator().next()), contexts, getOutputWriter());
+                } else if ("updateSQL".equalsIgnoreCase(command)) {
                     migrator.update(contexts, getOutputWriter());
                 } else if ("rollback".equalsIgnoreCase(command)) {
                     if (commandParams == null) {
