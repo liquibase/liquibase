@@ -11,8 +11,10 @@ import liquibase.parser.ChangeLogParser;
 import liquibase.preconditions.*;
 import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtils;
+import liquibase.util.LiquibaseUtil;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
+import org.xml.sax.InputSource;
 import org.xml.sax.helpers.DefaultHandler;
 
 import java.io.IOException;
@@ -53,6 +55,10 @@ class XMLChangeLogHandler extends DefaultHandler {
             if ("comment".equals(qName)) {
                 text = new StringBuffer();
             } else if ("databaseChangeLog".equals(qName)) {
+                String version = uri.substring(uri.lastIndexOf("/")+1);
+                if (!version.equals(XMLChangeLogParser.getSchemaVersion())) {
+                    log.warning(databaseChangeLog.getPhysicalFilePath()+" is using schema version "+version+" rather than version "+XMLChangeLogParser.getSchemaVersion());
+                }
                 databaseChangeLog.setLogicalFilePath(atts.getValue("logicalFilePath"));
             } else if ("include".equals(qName)) {
                 String fileName = atts.getValue("file");
