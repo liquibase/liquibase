@@ -145,6 +145,47 @@ public class Migrator {
         database.setJdbcTemplate(oldTemplate);
     }
 
+    public void update(int changesToApply, String contexts) throws LiquibaseException {
+
+        LockHandler lockHandler = LockHandler.getInstance(database);
+        lockHandler.waitForLock();
+
+        try {
+            database.checkDatabaseChangeLogTable();
+
+            validate();
+
+            DatabaseChangeLog changeLog = new ChangeLogParser().parse(changeLogFile, fileOpener);
+            ChangeLogIterator logIterator = new ChangeLogIterator(changeLog,
+                    new ShouldRunChangeSetFilter(database),
+                    new ContextChangeSetFilter(contexts),
+                    new DbmsChangeSetFilter(database),
+                    new CountChangeSetFilter(changesToApply));
+
+            logIterator.run(new UpdateVisitor(database));
+        } finally {
+            lockHandler.releaseLock();
+        }
+    }
+
+    public void update(int changesToApply, String contexts, Writer output) throws LiquibaseException {
+        JdbcTemplate oldTemplate = database.getJdbcTemplate();
+        JdbcOutputTemplate outputTemplate = new JdbcOutputTemplate(output, database);
+        database.setJdbcTemplate(outputTemplate);
+
+        outputHeader("Update "+changesToApply+" Change Sets Database Script");
+
+        update(changesToApply, contexts);
+
+        try {
+            output.flush();
+        } catch (IOException e) {
+            throw new LiquibaseException(e);
+        }
+
+        database.setJdbcTemplate(oldTemplate);
+    }
+
     private void outputHeader(String message) throws JDBCException {
         database.getJdbcTemplate().comment("**************************************************************************************");
         database.getJdbcTemplate().comment(message);
