@@ -70,7 +70,7 @@ public class AddUniqueConstraintChange extends AbstractChange {
     }
 
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
-        AddUniqueConstraintStatement statement = new AddUniqueConstraintStatement(getSchemaName(), getTableName(), getColumnNames(), getConstraintName());
+        AddUniqueConstraintStatement statement = new AddUniqueConstraintStatement(getSchemaName() == null?database.getDefaultSchemaName():getSchemaName(), getTableName(), getColumnNames(), getConstraintName());
         statement.setTablespace(getTablespace());
 
         return new SqlStatement[] { statement };

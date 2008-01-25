@@ -82,8 +82,8 @@ public class FirebirdDatabase extends AbstractDatabase {
 //        if (schemaName != null) {
 //            sql += " and rdb$owner_name='" + schemaName.toUpperCase() + "'";
 //        }
-//        if (getCatalogName() != null) {
-//            sql += " and table_catalog='" + getCatalogName() + "'";
+//        if (getDefaultCatalogName() != null) {
+//            sql += " and table_catalog='" + getDefaultCatalogName() + "'";
 //
 //        }
         return new RawSqlStatement(sql);
@@ -119,7 +119,7 @@ public class FirebirdDatabase extends AbstractDatabase {
 
     public String convertRequestedSchemaToSchema(String requestedSchema) throws JDBCException {
         if (requestedSchema == null) {
-            return getSchemaName();
+            return getDefaultDatabaseSchemaName();
         } else {
             return requestedSchema.toUpperCase();
         }

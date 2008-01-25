@@ -64,9 +64,11 @@ public interface Database extends DatabaseObject {
 
     String getConnectionUsername() throws JDBCException;
 
-    String getCatalogName() throws JDBCException;
+    String getDefaultCatalogName() throws JDBCException;
 
-    String getSchemaName() throws JDBCException;
+    String getDefaultSchemaName();
+
+    void setDefaultSchemaName(String schemaName) throws JDBCException;
 
     /**
      * Returns whether this database support initially deferrable columns.

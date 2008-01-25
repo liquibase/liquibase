@@ -4,6 +4,7 @@ import liquibase.CompositeFileOpener;
 import liquibase.FileSystemFileOpener;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
+import liquibase.database.structure.Schema;
 import liquibase.diff.Diff;
 import liquibase.diff.DiffResult;
 import liquibase.diff.DiffStatusListener;
@@ -47,6 +48,7 @@ public class CommandLineMigrator {
     protected String password;
     protected String url;
     protected String databaseClass;
+    protected String defaultSchemaName;
     protected String changeLogFile;
     protected String classpath;
     protected String contexts;
@@ -249,8 +251,9 @@ public class CommandLineMigrator {
         stream.println(" update                         Updates database to current version");
         stream.println(" updateSQL                      Writes SQL to update database to current");
         stream.println("                                version to STDOUT");
-        stream.println(" updateCount <num>              Applies next NUM changes to the  database");
-        stream.println(" updateSQL <num>                Writes SQL to apply next NUM changes the database");
+        stream.println(" updateCount <num>              Applies next NUM changes to the database");
+        stream.println(" updateSQL <num>                Writes SQL to apply next NUM changes");
+        stream.println("                                to the database");
         stream.println(" rollback <tag>                 Rolls back the database to the the state is was");
         stream.println("                                when the tag was applied");
         stream.println(" rollbackSQL <tag>              Writes SQL to roll back the database to that");
@@ -310,6 +313,7 @@ public class CommandLineMigrator {
         stream.println(" --driver=<jdbc.driver.ClassName>           Database driver class name");
         stream.println(" --databaseClass=<database.ClassName>       custom liquibase.database.Database");
         stream.println("                                            implementation to use");
+        stream.println(" --defaultSchemaName=<name>                 Default database schema to use");
         stream.println(" --contexts=<value>                         ChangeSet contexts to execute");
         stream.println(" --defaultsFile=</path/to/file.properties>  File with default option values");
         stream.println("                                            (default: ./liquibase.properties)");
@@ -598,6 +602,8 @@ public class CommandLineMigrator {
 
         try {
             Database database = databaseFactory.findCorrectDatabaseImplementation(connection);
+            database.setDefaultSchemaName(StringUtils.trimToNull(defaultSchemaName));
+
             Migrator migrator = new Migrator(changeLogFile, new CompositeFileOpener(fsOpener, clOpener), database);
 
             if ("listLocks".equalsIgnoreCase(command)) {
@@ -793,7 +799,7 @@ public class CommandLineMigrator {
     }
 
     private void doGenerateChangeLog(Connection originalDatabase) throws JDBCException, IOException, ParserConfigurationException {
-        Diff diff = new Diff(originalDatabase);
+        Diff diff = new Diff(originalDatabase, defaultSchemaName);
         diff.addStatusListener(new OutDiffStatusListener());
         DiffResult diffResult = diff.compare();
 

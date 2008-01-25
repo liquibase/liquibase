@@ -112,6 +112,8 @@ class XMLChangeLogHandler extends DefaultHandler {
                     ((CreateTableChange) change).addColumn(column);
                 } else if (change instanceof InsertDataChange) {
                     ((InsertDataChange) change).addColumn(column);
+                } else if (change instanceof UpdateDataChange) {
+                    ((UpdateDataChange) change).addColumn(column);
                 } else if (change instanceof CreateIndexChange) {
                     ((CreateIndexChange) change).addColumn(column);
                 } else if (change instanceof ModifyColumnChange) {
@@ -164,6 +166,8 @@ class XMLChangeLogHandler extends DefaultHandler {
                 } else {
                     throw new MigrationFailedException(changeSet, "'param' unexpected in " + qName);
                 }
+            } else if ("where".equals(qName)) {
+                text = new StringBuffer();
             } else if (change instanceof ExecuteShellCommandChange && "arg".equals(qName)) {
                 ((ExecuteShellCommandChange) change).addArg(atts.getValue("value"));
             } else {
@@ -224,6 +228,15 @@ class XMLChangeLogHandler extends DefaultHandler {
             } else if (change != null && change instanceof RawSQLChange && "comment".equals(qName)) {
                 ((RawSQLChange) change).setComments(textString);
                 text = new StringBuffer();
+            } else if (change != null && "where".equals(qName)) {
+                if (change instanceof UpdateDataChange) {
+                    ((UpdateDataChange) change).setWhereClause(textString);
+                } else if (change instanceof DeleteDataChange) {
+                    ((DeleteDataChange) change).setWhereClause(textString);
+                } else {
+                    throw new RuntimeException("Unexpected change type: "+change.getClass().getName());
+                }
+                text = new StringBuffer();
             } else if (change != null && change instanceof CreateProcedureChange && "comment".equals(qName)) {
                 ((CreateProcedureChange) change).setComments(textString);
                 text = new StringBuffer();
@@ -243,6 +256,9 @@ class XMLChangeLogHandler extends DefaultHandler {
                         ((CreateViewChange) change).setSelectQuery(textString);
                     } else if (change instanceof InsertDataChange) {
                         List<ColumnConfig> columns = ((InsertDataChange) change).getColumns();
+                        columns.get(columns.size() - 1).setValue(textString);
+                    } else if (change instanceof UpdateDataChange) {
+                        List<ColumnConfig> columns = ((UpdateDataChange) change).getColumns();
                         columns.get(columns.size() - 1).setValue(textString);
                     } else {
                         throw new RuntimeException("Unexpected text in " + change.getTagName());

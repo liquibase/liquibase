@@ -50,7 +50,7 @@ public class RenameViewChange extends AbstractChange {
     }
 
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
-        return new SqlStatement[]{new RenameViewStatement(getSchemaName(), getOldViewName(), getNewViewName())};
+        return new SqlStatement[]{new RenameViewStatement(getSchemaName() == null?database.getDefaultSchemaName():getSchemaName(), getOldViewName(), getNewViewName())};
     }
 
     protected Change[] createInverses() {

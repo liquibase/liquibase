@@ -53,7 +53,7 @@ public class DropIndexChange extends AbstractChange {
 
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
         return new SqlStatement[] {
-            new DropIndexStatement(getIndexName(), getSchemaName(), getTableName())
+            new DropIndexStatement(getIndexName(), getSchemaName() == null?database.getDefaultSchemaName():getSchemaName(), getTableName())
         };
     }
 

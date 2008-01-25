@@ -3,7 +3,6 @@ package liquibase.database.template;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.sql.CallableSqlStatement;
-import liquibase.database.sql.PreparedSqlStatement;
 import liquibase.database.sql.SqlStatement;
 import liquibase.exception.JDBCException;
 import liquibase.log.LogFactory;
@@ -79,9 +78,7 @@ public class JdbcTemplate {
     }
 
     public Object query(final SqlStatement sql, final ResultSetExtractor rse) throws JDBCException {
-        if (sql instanceof PreparedSqlStatement) {
-            return query(((PreparedSqlStatement) sql), rse);
-        } else if (sql instanceof CallableSqlStatement) {
+        if (sql instanceof CallableSqlStatement) {
             throw new JDBCException("Direct query using CallableSqlStatement not currently implemented");
         }
 
@@ -139,9 +136,7 @@ public class JdbcTemplate {
     }
 
     public int update(final SqlStatement sql) throws JDBCException {
-        if (sql instanceof PreparedSqlStatement) {
-            return update(((PreparedSqlStatement) sql));
-        } else if (sql instanceof CallableSqlStatement) {
+        if (sql instanceof CallableSqlStatement) {
             throw new JDBCException("Direct update using CallableSqlStatement not currently implemented");
         }
 
@@ -157,197 +152,6 @@ public class JdbcTemplate {
         }
         return (Integer) execute(new UpdateStatementCallback());
     }
-
-    //-------------------------------------------------------------------------
-    // Methods dealing with prepared statements
-    //-------------------------------------------------------------------------
-
-    public Object execute(PreparedSqlStatement psc, PreparedStatementCallback action) throws JDBCException {
-
-        PreparedStatement ps = null;
-        try {
-            ps = psc.createPreparedStatement(database);
-            PreparedStatement psToUse = ps;
-            return action.doInPreparedStatement(psToUse);
-        }
-        catch (SQLException ex) {
-            // Release Connection early, to avoid potential connection pool deadlock
-            // in the case when the exception translator hasn't been initialized yet.
-            JdbcUtils.closeStatement(ps);
-            throw new JDBCException(ex);
-        }
-        finally {
-            JdbcUtils.closeStatement(ps);
-        }
-    }
-
-    /**
-     * Query using a prepared statement, allowing for a PreparedStatementCreator
-     * and a PreparedStatementSetter. Most other query methods use this method,
-     * but application code will always work with either a creator or a setter.
-     *
-     * @param psc Callback handler that can create a PreparedStatement given a
-     *            Connection
-     * @param pss object that knows how to set values on the prepared statement.
-     *            If this is null, the SQL will be assumed to contain no bind parameters.
-     * @param rse object that will extract results.
-     * @return an arbitrary result object, as returned by the ResultSetExtractor
-     * @throws JDBCException if there is any problem
-     */
-    public Object query(PreparedSqlStatement psc, final PreparedStatementSetter pss, final ResultSetExtractor rse)
-            throws JDBCException {
-
-        return execute(psc, new PreparedStatementCallback() {
-            public Object doInPreparedStatement(PreparedStatement ps) throws SQLException, JDBCException {
-                ResultSet rs = null;
-                try {
-                    if (pss != null) {
-                        pss.setValues(ps);
-                    }
-                    rs = ps.executeQuery();
-                    ResultSet rsToUse = rs;
-                    return rse.extractData(rsToUse);
-                }
-                finally {
-                    JdbcUtils.closeResultSet(rs);
-                }
-            }
-        });
-    }
-
-    public Object query(PreparedSqlStatement psc, ResultSetExtractor rse) throws JDBCException {
-        return query(psc, (PreparedStatementSetter) null, rse);
-    }
-
-    public Object query(PreparedSqlStatement sql, Object[] args, int[] argTypes, ResultSetExtractor rse) throws JDBCException {
-        return query(sql, new ArgTypePreparedStatementSetter(args, argTypes), rse);
-    }
-
-    public Object query(PreparedSqlStatement sql, Object[] args, ResultSetExtractor rse) throws JDBCException {
-        return query(sql, new ArgPreparedStatementSetter(args), rse);
-    }
-
-    public void query(PreparedSqlStatement psc, RowCallbackHandler rch) throws JDBCException {
-        query(psc, new RowCallbackHandlerResultSetExtractor(rch));
-    }
-
-    public void query(PreparedSqlStatement sql, PreparedStatementSetter pss, RowCallbackHandler rch) throws JDBCException {
-        query(sql, pss, new RowCallbackHandlerResultSetExtractor(rch));
-    }
-
-    public void query(PreparedSqlStatement sql, Object[] args, int[] argTypes, RowCallbackHandler rch) throws JDBCException {
-        query(sql, new ArgTypePreparedStatementSetter(args, argTypes), rch);
-    }
-
-    public void query(PreparedSqlStatement sql, Object[] args, RowCallbackHandler rch) throws JDBCException {
-        query(sql, new ArgPreparedStatementSetter(args), rch);
-    }
-
-    public List query(PreparedSqlStatement psc, RowMapper rowMapper) throws JDBCException {
-        return (List) query(psc, new RowMapperResultSetExtractor(rowMapper));
-    }
-
-    public List query(PreparedSqlStatement sql, PreparedStatementSetter pss, RowMapper rowMapper) throws JDBCException {
-        return (List) query(sql, pss, new RowMapperResultSetExtractor(rowMapper));
-    }
-
-    public List query(PreparedSqlStatement sql, Object[] args, int[] argTypes, RowMapper rowMapper) throws JDBCException {
-        return (List) query(sql, args, argTypes, new RowMapperResultSetExtractor(rowMapper));
-    }
-
-    public List query(PreparedSqlStatement sql, Object[] args, RowMapper rowMapper) throws JDBCException {
-        return (List) query(sql, args, new RowMapperResultSetExtractor(rowMapper));
-    }
-
-    public Object queryForObject(PreparedSqlStatement sql, Object[] args, int[] argTypes, RowMapper rowMapper)
-            throws JDBCException {
-
-        List results = (List) query(sql, args, argTypes, new RowMapperResultSetExtractor(rowMapper, 1));
-        return JdbcUtils.requiredSingleResult(results);
-    }
-
-    public Object queryForObject(PreparedSqlStatement sql, Object[] args, RowMapper rowMapper) throws JDBCException {
-        List results = (List) query(sql, args, new RowMapperResultSetExtractor(rowMapper, 1));
-        return JdbcUtils.requiredSingleResult(results);
-    }
-
-    public Object queryForObject(PreparedSqlStatement sql, Object[] args, int[] argTypes, Class requiredType)
-            throws JDBCException {
-
-        return queryForObject(sql, args, argTypes, getSingleColumnRowMapper(requiredType));
-    }
-
-    public Object queryForObject(PreparedSqlStatement sql, Object[] args, Class requiredType) throws JDBCException {
-        return queryForObject(sql, args, getSingleColumnRowMapper(requiredType));
-    }
-
-    public Map queryForMap(PreparedSqlStatement sql, Object[] args, int[] argTypes) throws JDBCException {
-        return (Map) queryForObject(sql, args, argTypes, getColumnMapRowMapper());
-    }
-
-    public Map queryForMap(PreparedSqlStatement sql, Object[] args) throws JDBCException {
-        return (Map) queryForObject(sql, args, getColumnMapRowMapper());
-    }
-
-    public long queryForLong(PreparedSqlStatement sql, Object[] args, int[] argTypes) throws JDBCException {
-        Number number = (Number) queryForObject(sql, args, argTypes, Long.class);
-        return (number != null ? number.longValue() : 0);
-    }
-
-    public long queryForLong(PreparedSqlStatement sql, Object[] args) throws JDBCException {
-        Number number = (Number) queryForObject(sql, args, Long.class);
-        return (number != null ? number.longValue() : 0);
-    }
-
-    public int queryForInt(PreparedSqlStatement sql, Object[] args, int[] argTypes) throws JDBCException {
-        Number number = (Number) queryForObject(sql, args, argTypes, Integer.class);
-        return (number != null ? number.intValue() : 0);
-    }
-
-    public int queryForInt(PreparedSqlStatement sql, Object[] args) throws JDBCException {
-        Number number = (Number) queryForObject(sql, args, Integer.class);
-        return (number != null ? number.intValue() : 0);
-    }
-
-    public List queryForList(PreparedSqlStatement sql, Object[] args, int[] argTypes, Class elementType) throws JDBCException {
-        return query(sql, args, argTypes, getSingleColumnRowMapper(elementType));
-    }
-
-    public List queryForList(PreparedSqlStatement sql, Object[] args, Class elementType) throws JDBCException {
-        return query(sql, args, getSingleColumnRowMapper(elementType));
-    }
-
-    public List queryForList(PreparedSqlStatement sql, Object[] args, int[] argTypes) throws JDBCException {
-        return query(sql, args, argTypes, getColumnMapRowMapper());
-    }
-
-    public List queryForList(PreparedSqlStatement sql, Object[] args) throws JDBCException {
-        return query(sql, args, getColumnMapRowMapper());
-    }
-
-    protected int update(final PreparedSqlStatement psc, final PreparedStatementSetter pss) throws JDBCException {
-        return (Integer) execute(psc, new PreparedStatementCallback() {
-            public Object doInPreparedStatement(PreparedStatement ps) throws SQLException {
-                if (pss != null) {
-                    pss.setValues(ps);
-                }
-                return ps.executeUpdate();
-            }
-        });
-    }
-
-    public int update(PreparedSqlStatement psc) throws JDBCException {
-        return update(psc, (PreparedStatementSetter) null);
-    }
-
-    public int update(PreparedSqlStatement sql, Object[] args, int[] argTypes) throws JDBCException {
-        return update(sql, new ArgTypePreparedStatementSetter(args, argTypes));
-    }
-
-    public int update(PreparedSqlStatement sql, Object[] args) throws JDBCException {
-        return update(sql, new ArgPreparedStatementSetter(args));
-    }
-
     //-------------------------------------------------------------------------
     // Methods dealing with callable statements
     //-------------------------------------------------------------------------

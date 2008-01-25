@@ -72,7 +72,7 @@ public class RenameColumnChange extends AbstractChange {
 
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
         return new SqlStatement[] {
-                new RenameColumnStatement(getSchemaName(), getTableName(), getOldColumnName(), getNewColumnName(), getColumnDataType())
+                new RenameColumnStatement(getSchemaName() == null?database.getDefaultSchemaName():getSchemaName(), getTableName(), getOldColumnName(), getNewColumnName(), getColumnDataType())
         };
     }
 

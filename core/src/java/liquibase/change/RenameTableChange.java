@@ -54,9 +54,10 @@ public class RenameTableChange extends AbstractChange {
 
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
         List<SqlStatement> statements = new ArrayList<SqlStatement>();
-        statements.add(new RenameTableStatement(getSchemaName(), getOldTableName(), getNewTableName()));
+        String schemaName = getSchemaName() == null?database.getDefaultSchemaName():getSchemaName();
+        statements.add(new RenameTableStatement(schemaName, getOldTableName(), getNewTableName()));
         if (database instanceof DB2Database) {
-            statements.add(new ReorganizeTableStatement(getSchemaName(), getNewTableName()));
+            statements.add(new ReorganizeTableStatement(schemaName, getNewTableName()));
         }
 
         return statements.toArray(new SqlStatement[statements.size()]);

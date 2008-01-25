@@ -11,7 +11,6 @@ import liquibase.database.template.JdbcTemplate;
 import liquibase.exception.JDBCException;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.LockException;
-import liquibase.exception.ValidationFailedException;
 import liquibase.lock.LockHandler;
 import liquibase.log.LogFactory;
 import liquibase.parser.ChangeLogIterator;
@@ -370,7 +369,7 @@ public class Migrator {
      * Drops all database objects owned by the current user.
      */
     public final void dropAll() throws JDBCException, LockException {
-        dropAll(getDatabase().getSchemaName());
+        dropAll(getDatabase().getDefaultSchemaName());
     }
 
     /**
@@ -500,8 +499,8 @@ public class Migrator {
         try {
             database.checkDatabaseChangeLogTable();
 
-            UpdateStatement updateStatement = new UpdateStatement(null, getDatabase().getDatabaseChangeLogTableName());
-            updateStatement.addNewColumnValue("MD5SUM", null, Types.VARCHAR);
+            UpdateStatement updateStatement = new UpdateStatement(getDatabase().getDefaultSchemaName(), getDatabase().getDatabaseChangeLogTableName());
+            updateStatement.addNewColumnValue("MD5SUM", null);
             getDatabase().getJdbcTemplate().execute(updateStatement);
             getDatabase().commit();
         } finally {

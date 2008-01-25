@@ -18,7 +18,7 @@ public class CreateViewStatementTest extends AbstractSqlStatementTest {
     private static final String TABLE_NAME = "CreateViewTestTable";
 
     protected SqlStatement generateTestStatement() {
-        return new CreateViewStatement(null, null, null);
+        return new CreateViewStatement(null, null, null, false);
     }
 
     protected void setupDatabase(Database database) throws Exception {
@@ -43,7 +43,7 @@ public class CreateViewStatementTest extends AbstractSqlStatementTest {
         final String definition = "SELECT * FROM " + TABLE_NAME;
 
         new DatabaseTestTemplate().testOnAvailableDatabases(
-                new SqlStatementDatabaseTest(null, new CreateViewStatement(null, VIEW_NAME, definition)) {
+                new SqlStatementDatabaseTest(null, new CreateViewStatement(null, VIEW_NAME, definition, false)) {
                     protected void preExecuteAssert(DatabaseSnapshot snapshot) {
                         assertNull(snapshot.getView(VIEW_NAME));
                     }
@@ -61,7 +61,7 @@ public class CreateViewStatementTest extends AbstractSqlStatementTest {
     public void execute_altSchema() throws Exception {
         final String definition = "SELECT * FROM " + TestContext.ALT_SCHEMA+"."+TABLE_NAME;
         new DatabaseTestTemplate().testOnAvailableDatabases(
-                new SqlStatementDatabaseTest(TestContext.ALT_SCHEMA, new CreateViewStatement(TestContext.ALT_SCHEMA, VIEW_NAME, definition)) {
+                new SqlStatementDatabaseTest(TestContext.ALT_SCHEMA, new CreateViewStatement(TestContext.ALT_SCHEMA, VIEW_NAME, definition, false)) {
                     protected boolean supportsTest(Database database) {
                         return !(database instanceof HsqlDatabase || database instanceof OracleDatabase); //don't know why oracle isn't working
                     }

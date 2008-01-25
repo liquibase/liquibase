@@ -50,7 +50,7 @@ public class DropUniqueConstraintChange extends AbstractChange {
 
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
         return new SqlStatement[]{
-                new DropUniqueConstraintStatement(getSchemaName(), getTableName(), getConstraintName()),
+                new DropUniqueConstraintStatement(getSchemaName() == null?database.getDefaultSchemaName():getSchemaName(), getTableName(), getConstraintName()),
         };
     }
 

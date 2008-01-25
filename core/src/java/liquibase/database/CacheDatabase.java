@@ -74,7 +74,7 @@ public class CacheDatabase extends AbstractDatabase {
     }
 
     @Override
-    public String getSchemaName() throws JDBCException {
+    protected String getDefaultDatabaseSchemaName() throws JDBCException {
         return "";
     }
 

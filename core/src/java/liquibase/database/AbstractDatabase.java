@@ -32,13 +32,13 @@ import java.util.logging.Logger;
 public abstract class AbstractDatabase implements Database {
 
     private DatabaseConnection connection;
+    private String defaultSchemaName;
+
     static final protected Logger log = LogFactory.getLogger();
     protected boolean changeLogTableExists;
     protected boolean changeLogLockTableExists;
     protected boolean changeLogCreateAttempted;
     protected boolean changeLogLockCreateAttempted;
-
-    private static boolean outputtedLockWarning = false;
 
     protected String currentDateTimeFunction;
 
@@ -137,12 +137,20 @@ public abstract class AbstractDatabase implements Database {
         }
     }
 
-    public String getCatalogName() throws JDBCException {
+    public String getDefaultCatalogName() throws JDBCException {
         return null;
     }
 
-    public String getSchemaName() throws JDBCException {
+    protected String getDefaultDatabaseSchemaName() throws JDBCException {
         return getConnectionUsername();
+    }
+
+    public String getDefaultSchemaName() {
+        return defaultSchemaName;
+    }
+
+    public void setDefaultSchemaName(String schemaName) throws JDBCException {
+        this.defaultSchemaName = schemaName;
     }
 
     /**
@@ -355,7 +363,7 @@ public abstract class AbstractDatabase implements Database {
     }
 
     protected boolean isDateTime(String isoDate) {
-        return isoDate.length() == "yyyy-MM-ddThh:mm:ss".length();
+        return isoDate.length() >= "yyyy-MM-ddThh:mm:ss".length();
     }
 
     protected boolean isTimeOnly(String isoDate) {
@@ -410,13 +418,13 @@ public abstract class AbstractDatabase implements Database {
     }
 
     private SqlStatement getChangeLogLockInsertSQL() {
-        return new InsertStatement(null, getDatabaseChangeLogLockTableName())
+        return new InsertStatement(getDefaultSchemaName(), getDatabaseChangeLogLockTableName())
                 .addColumnValue("ID", 1)
                 .addColumnValue("LOCKED", Boolean.FALSE);
     }
 
     protected SqlStatement getCreateChangeLogLockSQL() {
-        return new CreateTableStatement(null, getDatabaseChangeLogLockTableName())
+        return new CreateTableStatement(getDefaultSchemaName(), getDatabaseChangeLogLockTableName())
                 .addPrimaryKeyColumn("ID", "INT", new NotNullConstraint())
                 .addColumn("LOCKED", getBooleanType(), new NotNullConstraint())
                 .addColumn("LOCKGRANTED", getDateTimeType())
@@ -424,7 +432,7 @@ public abstract class AbstractDatabase implements Database {
     }
 
     protected SqlStatement getCreateChangeLogSQL() {
-        return new CreateTableStatement(null, getDatabaseChangeLogTableName())
+        return new CreateTableStatement(getDefaultSchemaName(), getDatabaseChangeLogTableName())
                 .addPrimaryKeyColumn("ID", "VARCHAR(63)", new NotNullConstraint())
                 .addPrimaryKeyColumn("AUTHOR", "VARCHAR(63)", new NotNullConstraint())
                 .addPrimaryKeyColumn("FILENAME", "VARCHAR(200)", new NotNullConstraint())
@@ -461,10 +469,10 @@ public abstract class AbstractDatabase implements Database {
         boolean wroteToOutput = false;
 
         try {
-            checkTableRS = connection.getMetaData().getTables(getCatalogName(), getSchemaName(), getDatabaseChangeLogTableName(), new String[]{"TABLE"});
+            checkTableRS = connection.getMetaData().getTables(convertRequestedSchemaToCatalog(getDefaultSchemaName()), convertRequestedSchemaToSchema(getDefaultSchemaName()), getDatabaseChangeLogTableName(), new String[]{"TABLE"});
             if (checkTableRS.next()) {
                 changeLogTableExists = true;
-                checkColumnsRS = connection.getMetaData().getColumns(getCatalogName(), getSchemaName(), getDatabaseChangeLogTableName(), null);
+                checkColumnsRS = connection.getMetaData().getColumns(convertRequestedSchemaToCatalog(getDefaultSchemaName()), convertRequestedSchemaToSchema(getDefaultSchemaName()), getDatabaseChangeLogTableName(), null);
                 boolean hasDescription = false;
                 boolean hasComments = false;
                 boolean hasTag = false;
@@ -483,16 +491,16 @@ public abstract class AbstractDatabase implements Database {
                 }
 
                 if (!hasDescription) {
-                    statementsToExecute.add(new AddColumnStatement(null, getDatabaseChangeLogTableName(), "DESCRIPTION", "VARCHAR(255)", null));
+                    statementsToExecute.add(new AddColumnStatement(getDefaultSchemaName(), getDatabaseChangeLogTableName(), "DESCRIPTION", "VARCHAR(255)", null));
                 }
                 if (!hasTag) {
-                    statementsToExecute.add(new AddColumnStatement(null, getDatabaseChangeLogTableName(), "TAG", "VARCHAR(255)", null));
+                    statementsToExecute.add(new AddColumnStatement(getDefaultSchemaName(), getDatabaseChangeLogTableName(), "TAG", "VARCHAR(255)", null));
                 }
                 if (!hasComments) {
-                    statementsToExecute.add(new AddColumnStatement(null, getDatabaseChangeLogTableName(), "COMMENTS", "VARCHAR(255)", null));
+                    statementsToExecute.add(new AddColumnStatement(getDefaultSchemaName(), getDatabaseChangeLogTableName(), "COMMENTS", "VARCHAR(255)", null));
                 }
                 if (!hasLiquibase) {
-                    statementsToExecute.add(new AddColumnStatement(null, getDatabaseChangeLogTableName(), "LIQUIBASE", "VARCHAR(255)", null));
+                    statementsToExecute.add(new AddColumnStatement(getDefaultSchemaName(), getDatabaseChangeLogTableName(), "LIQUIBASE", "VARCHAR(255)", null));
                 }
 
             } else if (!changeLogCreateAttempted) {
@@ -577,7 +585,7 @@ public abstract class AbstractDatabase implements Database {
         ResultSet rs = null;
         boolean knowMustInsertIntoLockTable = false;
         try {
-            rs = connection.getMetaData().getTables(getCatalogName(), getSchemaName(), getDatabaseChangeLogLockTableName(), new String[]{"TABLE"});
+            rs = connection.getMetaData().getTables(convertRequestedSchemaToCatalog(getDefaultSchemaName()), convertRequestedSchemaToSchema(getDefaultSchemaName()), getDatabaseChangeLogLockTableName(), new String[]{"TABLE"});
             if (!rs.next()) {
                 if (!changeLogLockCreateAttempted) {
                     changeLogLockCreateAttempted = true;
@@ -686,7 +694,7 @@ public abstract class AbstractDatabase implements Database {
 
             if (this.changeLogTableExists) {
                 RawSQLChange clearChangeLogChange = new RawSQLChange();
-                clearChangeLogChange.setSql("DELETE FROM " + getDatabaseChangeLogTableName());
+                clearChangeLogChange.setSql("DELETE FROM " + escapeTableName(convertRequestedSchemaToSchema(getDefaultSchemaName()), getDatabaseChangeLogTableName()));
                 dropChanges.add(clearChangeLogChange);
             }
 
@@ -741,10 +749,9 @@ public abstract class AbstractDatabase implements Database {
                 throw new JDBCException("Cannot tag an empty database");
             }
 
-            Date lastExecutedDate = (Date) this.getJdbcTemplate().queryForObject(createChangeToTagSQL(), Date.class);
+            Timestamp lastExecutedDate = (Timestamp) this.getJdbcTemplate().queryForObject(createChangeToTagSQL(), Timestamp.class);
             int rowsUpdated = this.getJdbcTemplate().update(createTagSQL(tagString, lastExecutedDate));
             if (rowsUpdated == 0) {
-
                 throw new JDBCException("Did not tag database change log correctly");
             }
             this.commit();
@@ -769,9 +776,9 @@ public abstract class AbstractDatabase implements Database {
      */
     protected SqlStatement createTagSQL(String tagName, Date dateExecuted) {
         UpdateStatement statement = new UpdateStatement(null, getDatabaseChangeLogTableName());
-        statement.addNewColumnValue("TAG", tagName, Types.VARCHAR);
+        statement.addNewColumnValue("TAG", tagName);
         statement.setWhereClause("DATEEXECUTED = ?");
-        statement.addWhereParameter(dateExecuted, Types.TIMESTAMP);
+        statement.addWhereParameter(dateExecuted);
 
         return statement;
     }
@@ -976,25 +983,26 @@ public abstract class AbstractDatabase implements Database {
     }
 
     public String convertRequestedSchemaToCatalog(String requestedSchema) throws JDBCException {
-        if (getCatalogName() == null) {
+        if (getDefaultCatalogName() == null) {
             return null;
         } else {
             if (requestedSchema == null) {
-                return getCatalogName();
+                return getDefaultCatalogName();
             }
             return StringUtils.trimToNull(requestedSchema);
         }
     }
 
     public String convertRequestedSchemaToSchema(String requestedSchema) throws JDBCException {
-        if (getSchemaName() == null) {
-            return null;
-        } else {
-            if (requestedSchema == null) {
-                return getSchemaName();
-            }
-            return StringUtils.trimToNull(requestedSchema);
+        String returnSchema = requestedSchema;
+        if (returnSchema == null) {
+            returnSchema = getDefaultDatabaseSchemaName();
         }
+
+        if (returnSchema != null) {
+            returnSchema = returnSchema.toUpperCase();
+        }
+        return returnSchema;
     }
 
     public boolean supportsSchemas() {
@@ -1143,7 +1151,7 @@ public abstract class AbstractDatabase implements Database {
     public void markChangeSetAsRan(ChangeSet changeSet) throws JDBCException {
         String dateValue = getCurrentDateTimeFunction();
 
-        InsertStatement statement = new InsertStatement(null, getDatabaseChangeLogTableName());
+        InsertStatement statement = new InsertStatement(getDefaultSchemaName(), getDatabaseChangeLogTableName());
         statement.addColumnValue("ID", escapeStringForDatabase(changeSet.getId()));
         statement.addColumnValue("AUTHOR", changeSet.getAuthor());
         statement.addColumnValue("FILENAME", changeSet.getFilePath().replace("\\", "\\\\"));

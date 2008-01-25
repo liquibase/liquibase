@@ -35,6 +35,7 @@ public class ShouldRunChangeSetFilterTest  {
         Database database = createMock(Database.class);
         expect(database.getRanChangeSetList()).andReturn(ranChanges);
         expect(database.getDatabaseChangeLogTableName()).andReturn("DATABASECHANGELOG").anyTimes();
+        expect(database.getDefaultSchemaName()).andReturn(null).anyTimes();
 
         JdbcTemplate template = createMock(JdbcTemplate.class);
         expect(database.getJdbcTemplate()).andReturn(template).anyTimes();

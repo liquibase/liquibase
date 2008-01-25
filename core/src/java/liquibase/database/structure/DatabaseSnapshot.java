@@ -6,6 +6,7 @@ import liquibase.database.OracleDatabase;
 import liquibase.diff.DiffStatusListener;
 import liquibase.exception.JDBCException;
 import liquibase.log.LogFactory;
+import liquibase.util.StringUtils;
 
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -61,7 +62,7 @@ public class DatabaseSnapshot {
      * Creates a snapshot of the given database.
      */
     public DatabaseSnapshot(Database database, Set<DiffStatusListener> statusListeners) throws JDBCException {
-        this(database, statusListeners, null);
+        this(database, statusListeners, database.getDefaultSchemaName());
     }
 
     /**
@@ -143,6 +144,7 @@ public class DatabaseSnapshot {
             String name = rs.getString("TABLE_NAME");
             String schemaName = rs.getString("TABLE_SCHEM");
             String catalogName = rs.getString("TABLE_CAT");
+            String remarks = rs.getString("REMARKS");
 
             if (database.isSystemTable(catalogName, schemaName, name) || database.isLiquibaseTable(name) || database.isSystemView(catalogName, schemaName, name)) {
                 continue;
@@ -150,6 +152,7 @@ public class DatabaseSnapshot {
 
             if ("TABLE".equals(type)) {
                 Table table = new Table(name);
+                table.setRemarks(StringUtils.trimToNull(remarks));
                 table.setDatabase(database);
                 tablesMap.put(name, table);
             } else if ("VIEW".equals(type)) {

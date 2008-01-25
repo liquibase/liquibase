@@ -123,7 +123,7 @@ public class TestContext {
 //        Migrator migrator = new Migrator(null, null);
 //        migrator.init(connection);
 //        if (database.supportsSchemas()) {
-//            migrator.dropAll(ALT_SCHEMA, database.getSchemaName());
+//            migrator.dropAll(ALT_SCHEMA, database.getDefaultSchemaName());
 //        } else {
 //            migrator.dropAll(new String[]{null});
 //        }

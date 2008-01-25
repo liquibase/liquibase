@@ -75,16 +75,17 @@ public class AddNotNullConstraintChange extends AbstractChange {
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
         List<SqlStatement> statements = new ArrayList<SqlStatement>();
 
+        String schemaName = getSchemaName() == null?database.getDefaultSchemaName():getSchemaName();
         if (defaultNullValue != null) {
-            statements.add(new UpdateStatement(getSchemaName(), getTableName())
-                    .addNewColumnValue(getColumnName(), getDefaultNullValue(), Types.VARCHAR)
+            statements.add(new UpdateStatement(schemaName, getTableName())
+                    .addNewColumnValue(getColumnName(), getDefaultNullValue())
                     .setWhereClause(getColumnName() + " IS NULL"));
         }
 
-        statements.add(new SetNullableStatement(getSchemaName(), getTableName(), getColumnName(), getColumnDataType(), false));
+        statements.add(new SetNullableStatement(schemaName, getTableName(), getColumnName(), getColumnDataType(), false));
 
         if (database instanceof DB2Database) {
-            statements.add(new ReorganizeTableStatement(getSchemaName(), getTableName()));
+            statements.add(new ReorganizeTableStatement(schemaName, getTableName()));
         }
 
         return statements.toArray(new SqlStatement[statements.size()]);

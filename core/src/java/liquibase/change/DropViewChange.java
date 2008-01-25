@@ -42,7 +42,7 @@ public class DropViewChange extends AbstractChange {
 
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
         return new SqlStatement[]{
-                new DropViewStatement(getSchemaName(), getViewName()),
+                new DropViewStatement(getSchemaName() == null?database.getDefaultSchemaName():getSchemaName(), getViewName()),
         };
     }
 

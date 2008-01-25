@@ -1,27 +1,28 @@
 package liquibase.change;
 
-import liquibase.database.Database;
-import liquibase.database.sql.InsertStatement;
 import liquibase.database.sql.SqlStatement;
+import liquibase.database.sql.InsertStatement;
+import liquibase.database.sql.UpdateStatement;
+import liquibase.database.Database;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Table;
 import liquibase.exception.UnsupportedChangeException;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
+import liquibase.util.StringUtils;
 
 import java.util.*;
 
-/**
- * Inserts data into an existing table.
- */
-public class InsertDataChange extends AbstractChange {
+import org.w3c.dom.Element;
+import org.w3c.dom.Document;
+
+public class UpdateDataChange extends AbstractChange {
 
     private String schemaName;
     private String tableName;
     private List<ColumnConfig> columns;
+    private String whereClause;
 
-    public InsertDataChange() {
-        super("insert", "Insert Row");
+    public UpdateDataChange() {
+        super("update", "Update Data");
         columns = new ArrayList<ColumnConfig>();
     }
 
@@ -57,13 +58,23 @@ public class InsertDataChange extends AbstractChange {
         columns.remove(column);
     }
 
+    public String getWhereClause() {
+        return whereClause;
+    }
+
+    public void setWhereClause(String whereClause) {
+        this.whereClause = whereClause;
+    }
+
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
 
-        InsertStatement statement = new InsertStatement(getSchemaName() == null?database.getDefaultSchemaName():getSchemaName(), getTableName());
+        UpdateStatement statement = new UpdateStatement(getSchemaName() == null?database.getDefaultSchemaName():getSchemaName(), getTableName());
 
         for (ColumnConfig column : columns) {
-            statement.addColumnValue(column.getName(), column.getValueObject());
+            statement.addNewColumnValue(column.getName(), column.getValueObject());
         }
+
+        statement.setWhereClause(whereClause);
 
         return new SqlStatement[]{
                 statement
@@ -71,11 +82,11 @@ public class InsertDataChange extends AbstractChange {
     }
 
     public String getConfirmationMessage() {
-        return "New row inserted into " + getTableName();
+        return "Data updated in " + getTableName();
     }
 
     public Element createNode(Document currentChangeLogFileDOM) {
-        Element node = currentChangeLogFileDOM.createElement("insert");
+        Element node = currentChangeLogFileDOM.createElement("update");
         if (getSchemaName() != null) {
             node.setAttribute("schemaName", getSchemaName());
         }
@@ -85,6 +96,12 @@ public class InsertDataChange extends AbstractChange {
         for (ColumnConfig col : getColumns()) {
             Element subNode = col.createNode(currentChangeLogFileDOM);
             node.appendChild(subNode);
+        }
+
+        if (StringUtils.trimToNull(getWhereClause()) != null) {
+            Element whereClause = currentChangeLogFileDOM.createElement("where");
+            whereClause.appendChild(currentChangeLogFileDOM.createTextNode(getWhereClause()));
+            node.appendChild(whereClause);
         }
         return node;
     }

@@ -50,7 +50,7 @@ public class DropPrimaryKeyChange extends AbstractChange {
 
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
         return new SqlStatement[]{
-                new DropPrimaryKeyStatement(getSchemaName(), getTableName(), getConstraintName()),
+                new DropPrimaryKeyStatement(getSchemaName() == null?database.getDefaultSchemaName():getSchemaName(), getTableName(), getConstraintName()),
         };
     }
 

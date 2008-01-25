@@ -162,8 +162,8 @@ public class MaxDBDatabase extends AbstractDatabase {
         return "FALSE";
     }
 
-    public String getSchemaName() throws JDBCException {//NOPMD
-        return super.getSchemaName().toUpperCase();
+    protected String getDefaultDatabaseSchemaName() throws JDBCException {//NOPMD
+        return super.getDefaultDatabaseSchemaName().toUpperCase();
     }
 
     public SqlStatement createFindSequencesSQL(String schema) throws JDBCException {

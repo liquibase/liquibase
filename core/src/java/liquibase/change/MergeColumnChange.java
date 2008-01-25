@@ -91,7 +91,8 @@ public class MergeColumnChange extends AbstractChange {
         List<SqlStatement> statements = new ArrayList<SqlStatement>();
 
         AddColumnChange addNewColumnChange = new AddColumnChange();
-        addNewColumnChange.setSchemaName(getSchemaName());
+        String schemaName = getSchemaName() == null?database.getDefaultSchemaName():getSchemaName();
+        addNewColumnChange.setSchemaName(schemaName);
         addNewColumnChange.setTableName(getTableName());
         ColumnConfig columnConfig = new ColumnConfig();
         columnConfig.setName(getFinalColumnName());
@@ -99,18 +100,18 @@ public class MergeColumnChange extends AbstractChange {
         addNewColumnChange.addColumn(columnConfig);
         statements.addAll(Arrays.asList(addNewColumnChange.generateStatements(database)));
 
-        String updateStatement = "UPDATE " + database.escapeTableName(getSchemaName(), getTableName()) + " SET " + getFinalColumnName() + " = " + database.getConcatSql(getColumn1Name(), "'"+getJoinString()+"'", getColumn2Name());
+        String updateStatement = "UPDATE " + database.escapeTableName(schemaName, getTableName()) + " SET " + getFinalColumnName() + " = " + database.getConcatSql(getColumn1Name(), "'"+getJoinString()+"'", getColumn2Name());
 
         statements.add(new RawSqlStatement(updateStatement));
 
         DropColumnChange dropColumn1Change = new DropColumnChange();
-        dropColumn1Change.setSchemaName(getSchemaName());
+        dropColumn1Change.setSchemaName(schemaName);
         dropColumn1Change.setTableName(getTableName());
         dropColumn1Change.setColumnName(getColumn1Name());
         statements.addAll(Arrays.asList(dropColumn1Change.generateStatements(database)));
 
         DropColumnChange dropColumn2Change = new DropColumnChange();
-        dropColumn2Change.setSchemaName(getSchemaName());
+        dropColumn2Change.setSchemaName(schemaName);
         dropColumn2Change.setTableName(getTableName());
         dropColumn2Change.setColumnName(getColumn2Name());
         statements.addAll(Arrays.asList(dropColumn2Change.generateStatements(database)));

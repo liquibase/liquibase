@@ -62,6 +62,7 @@ public class AddColumnChange extends AbstractChange {
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
         List<SqlStatement> sql = new ArrayList<SqlStatement>();
 
+        String schemaName = getSchemaName() == null?database.getDefaultSchemaName():getSchemaName();
         for (ColumnConfig aColumn : columns) {
             Set<ColumnConstraint> constraints = new HashSet<ColumnConstraint>();
             if (aColumn.getConstraints() != null) {
@@ -70,7 +71,7 @@ public class AddColumnChange extends AbstractChange {
                 }
             }
 
-            AddColumnStatement addColumnStatement = new AddColumnStatement(getSchemaName(),
+            AddColumnStatement addColumnStatement = new AddColumnStatement(schemaName,
                     getTableName(),
                     aColumn.getName(),
                     aColumn.getType(),
@@ -78,13 +79,19 @@ public class AddColumnChange extends AbstractChange {
                     constraints.toArray(new ColumnConstraint[constraints.size()]));
 
             sql.add(addColumnStatement);
+
+            if (aColumn.getValueObject() != null) {
+                UpdateStatement updateStatement = new UpdateStatement(schemaName, getTableName());
+                updateStatement.addNewColumnValue(aColumn.getName(), aColumn.getValueObject());
+                sql.add(updateStatement);
+            }
         }
 
         for (ColumnConfig aColumn : columns) {
             if (aColumn.getConstraints() != null) {
                 if (aColumn.getConstraints().isPrimaryKey() != null && aColumn.getConstraints().isPrimaryKey()) {
                     AddPrimaryKeyChange change = new AddPrimaryKeyChange();
-                    change.setSchemaName(getSchemaName());
+                    change.setSchemaName(schemaName);
                     change.setTableName(getTableName());
                     change.setColumnNames(aColumn.getName());
 
@@ -94,9 +101,9 @@ public class AddColumnChange extends AbstractChange {
         }
 
         if (database instanceof DB2Database) {
-            sql.add(new ReorganizeTableStatement(getSchemaName(), getTableName()));
+            sql.add(new ReorganizeTableStatement(schemaName, getTableName()));
         }
-        
+
         return sql.toArray(new SqlStatement[sql.size()]);
     }
 

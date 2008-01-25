@@ -30,31 +30,33 @@ public class Diff {
     }
 
     public Diff(DatabaseConnection baseConnection, DatabaseConnection targetConnection) throws JDBCException {
-            baseDatabase = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(baseConnection);
-            baseDatabase.setConnection(baseConnection);
+        baseDatabase = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(baseConnection);
+        baseDatabase.setConnection(baseConnection);
 
-            targetDatabase = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(targetConnection);
-            targetDatabase.setConnection(targetConnection);
+        targetDatabase = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(targetConnection);
+        targetDatabase.setConnection(targetConnection);
     }
 
-    public Diff(Connection originalDatabase) throws JDBCException {
-            targetDatabase = null;
+    public Diff(Connection originalDatabase, String schema) throws JDBCException {
+        targetDatabase = null;
 
-            baseDatabase = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(originalDatabase);
-            baseDatabase.setConnection(originalDatabase);
+        baseDatabase = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(originalDatabase);
+        baseDatabase.setConnection(originalDatabase);
+        baseDatabase.setDefaultSchemaName(schema);
     }
 
-    public Diff(DatabaseConnection originalDatabase) throws JDBCException {
-            targetDatabase = null;
+    public Diff(DatabaseConnection originalDatabase, String schema) throws JDBCException {
+        targetDatabase = null;
 
-            baseDatabase = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(originalDatabase);
-            baseDatabase.setConnection(originalDatabase);
+        baseDatabase = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(originalDatabase);
+        baseDatabase.setConnection(originalDatabase);
+        baseDatabase.setDefaultSchemaName(schema);
     }
 
     public Diff(DatabaseSnapshot baseDatabaseSnapshot, DatabaseSnapshot targetDatabaseSnapshot) throws JDBCException {
-            this.baseSnapshot = baseDatabaseSnapshot;
+        this.baseSnapshot = baseDatabaseSnapshot;
 
-            this.targetSnapshot= targetDatabaseSnapshot;
+        this.targetSnapshot = targetDatabaseSnapshot;
     }
 
     public void addStatusListener(DiffStatusListener listener) {
@@ -95,7 +97,7 @@ public class Diff {
         }
     }
 
-    private void checkVersionInfo(DiffResult diffResult) throws  JDBCException {
+    private void checkVersionInfo(DiffResult diffResult) throws JDBCException {
 
         if (targetDatabase != null) {
             diffResult.setProductName(new DiffComparison(baseDatabase.getDatabaseProductName(), targetDatabase.getDatabaseProductName()));
@@ -118,7 +120,7 @@ public class Diff {
         }
     }
 
-    private void checkViews(DiffResult diffResult)  {
+    private void checkViews(DiffResult diffResult) {
         for (View baseView : baseSnapshot.getViews()) {
             if (!targetSnapshot.getViews().contains(baseView)) {
                 diffResult.addMissingView(baseView);
@@ -148,7 +150,8 @@ public class Diff {
                     && (targetColumn.getView() == null || !diffResult.getUnexpectedViews().contains(targetColumn.getView()))
                     ) {
                 diffResult.addUnexpectedColumn(targetColumn);
-            } else if (targetColumn.getTable() != null && !diffResult.getUnexpectedTables().contains(targetColumn.getTable())) {
+            } else
+            if (targetColumn.getTable() != null && !diffResult.getUnexpectedTables().contains(targetColumn.getTable())) {
                 Column baseColumn = baseSnapshot.getColumn(targetColumn.getTable().getName(), targetColumn.getName());
 
                 if (targetColumn.isDifferent(baseColumn)) {
@@ -207,7 +210,7 @@ public class Diff {
             }
         }
 
-        for (Sequence targetSequence: targetSnapshot.getSequences()) {
+        for (Sequence targetSequence : targetSnapshot.getSequences()) {
             if (!baseSnapshot.getSequences().contains(targetSequence)) {
                 diffResult.addUnexpectedSequence(targetSequence);
             }

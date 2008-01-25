@@ -118,11 +118,11 @@ public class MSSQLDatabase extends AbstractDatabase {
         return "IDENTITY";
     }
 
-    public String getSchemaName() throws JDBCException {
+    protected String getDefaultDatabaseSchemaName() throws JDBCException {
         return null;
     }
 
-    public String getCatalogName() throws JDBCException {
+    public String getDefaultCatalogName() throws JDBCException {
         try {
             return getConnection().getCatalog();
         } catch (SQLException e) {
@@ -155,7 +155,7 @@ public class MSSQLDatabase extends AbstractDatabase {
 //            dropStatement = conn.createStatement();
 //
 //            fkStatement = conn.prepareStatement("select TABLE_NAME, CONSTRAINT_NAME from INFORMATION_SCHEMA.TABLE_CONSTRAINTS where CONSTRAINT_TYPE='FOREIGN KEY' AND TABLE_CATALOG=?");
-//            fkStatement.setString(1, getCatalogName());
+//            fkStatement.setString(1, getDefaultCatalogName());
 //            rs = fkStatement.executeQuery();
 //            while (rs.next()) {
 //                DropForeignKeyConstraintChange dropFK = new DropForeignKeyConstraintChange();
@@ -233,7 +233,7 @@ public class MSSQLDatabase extends AbstractDatabase {
     }
 
     public String convertRequestedSchemaToCatalog(String requestedSchema) throws JDBCException {
-        return getCatalogName();
+        return getDefaultCatalogName();
     }
 
     public String convertRequestedSchemaToSchema(String requestedSchema) throws JDBCException {
@@ -247,7 +247,7 @@ public class MSSQLDatabase extends AbstractDatabase {
         String sql = "select view_definition from information_schema.views where upper(table_name)='" + viewName.toUpperCase() + "'";
 //        if (StringUtils.trimToNull(schemaName) != null) {
             sql += " and table_schema='" + convertRequestedSchemaToSchema(schemaName) + "'";
-            sql += " and table_catalog='" + getCatalogName() + "'";
+            sql += " and table_catalog='" + getDefaultCatalogName() + "'";
 //        }
 
 //        log.info("GetViewDefinitionSQL: "+sql);

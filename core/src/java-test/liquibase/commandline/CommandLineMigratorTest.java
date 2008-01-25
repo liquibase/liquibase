@@ -28,7 +28,7 @@ public class CommandLineMigratorTest {
                 "--classpath=CLASSPATH;CLASSPATH2",
                 "--contexts=CONTEXT1,CONTEXT2",
                 "--promptForNonLocalDatabase=true",
-                "migrate",
+                "update",
         };
 
         CommandLineMigrator cli = new CommandLineMigrator();
@@ -42,11 +42,26 @@ public class CommandLineMigratorTest {
         assertEquals("CLASSPATH;CLASSPATH2", cli.classpath);
         assertEquals("CONTEXT1,CONTEXT2", cli.contexts);
         assertEquals(Boolean.TRUE, cli.promptForNonLocalDatabase);
-        assertEquals("migrate", cli.command);
+        assertEquals("update", cli.command);
     }
 
     @Test
     public void falseBooleanParameters() throws Exception {
+        String[] args = new String[]{
+                "--promptForNonLocalDatabase=false",
+                "update",
+        };
+
+        CommandLineMigrator cli = new CommandLineMigrator();
+        cli.parseOptions(args);
+
+        assertEquals(Boolean.FALSE, cli.promptForNonLocalDatabase);
+        assertEquals("update", cli.command);
+
+    }
+
+    @Test
+    public void convertMigrateToUpdate() throws Exception {
         String[] args = new String[]{
                 "--promptForNonLocalDatabase=false",
                 "migrate",
@@ -55,8 +70,7 @@ public class CommandLineMigratorTest {
         CommandLineMigrator cli = new CommandLineMigrator();
         cli.parseOptions(args);
 
-        assertEquals(Boolean.FALSE, cli.promptForNonLocalDatabase);
-        assertEquals("migrate", cli.command);
+        assertEquals("update", cli.command);
 
     }
 
@@ -64,14 +78,14 @@ public class CommandLineMigratorTest {
     public void trueBooleanParameters() throws Exception {
         String[] args = new String[]{
                 "--promptForNonLocalDatabase=true",
-                "migrate",
+                "update",
         };
 
         CommandLineMigrator cli = new CommandLineMigrator();
         cli.parseOptions(args);
 
         assertEquals(Boolean.TRUE, cli.promptForNonLocalDatabase);
-        assertEquals("migrate", cli.command);
+        assertEquals("update", cli.command);
 
     }
 
@@ -79,7 +93,7 @@ public class CommandLineMigratorTest {
     public void parameterWithoutDash() throws Exception {
         String[] args = new String[]{
                 "promptForNonLocalDatabase=true",
-                "migrate",
+                "update",
         };
 
         CommandLineMigrator cli = new CommandLineMigrator();

@@ -29,8 +29,8 @@ public class DerbyDatabase extends AbstractDatabase {
         return "derby";
     }
 
-    public String getSchemaName() throws JDBCException {//NOPMD
-        return super.getSchemaName().toUpperCase();
+    protected String getDefaultDatabaseSchemaName() throws JDBCException {//NOPMD
+        return super.getDefaultDatabaseSchemaName().toUpperCase();
     }
 
     public boolean supportsSequences() {
@@ -88,7 +88,13 @@ public class DerbyDatabase extends AbstractDatabase {
         } else if (isTimeOnly(isoDate)) {
             return "TIME(" + super.getDateLiteral(isoDate) + ")";
         } else {
-            return "TIMESTAMP(" + super.getDateLiteral(isoDate) + ")";
+            String dateString = super.getDateLiteral(isoDate);
+            int decimalDigits = dateString.length() - dateString.indexOf(".") - 2;
+            String padding = "";
+            for (int i=6; i> decimalDigits; i--) {
+                padding += "0";
+            }
+            return "TIMESTAMP(" + dateString.replaceFirst("'$", padding+"'") + ")";
         }
     }
 

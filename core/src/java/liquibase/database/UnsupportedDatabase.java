@@ -22,14 +22,14 @@ public class UnsupportedDatabase extends AbstractDatabase {
     /**
      * Always returns null or DATABASECHANGELOG table may not be found.
      */
-    public String getCatalogName() throws JDBCException {
+    public String getDefaultCatalogName() throws JDBCException {
         return null;
     }
 
     /**
      * Always returns null or DATABASECHANGELOG table may not be found.
      */
-    public String getSchemaName() throws JDBCException {
+    protected String getDefaultDatabaseSchemaName() throws JDBCException {
         return null;
     }
 

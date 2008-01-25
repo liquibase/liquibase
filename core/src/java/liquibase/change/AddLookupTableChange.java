@@ -136,13 +136,16 @@ public class AddLookupTableChange extends AbstractChange {
 
         List<SqlStatement> statements = new ArrayList<SqlStatement>();
 
-        SqlStatement[] createTablesSQL = {new RawSqlStatement("CREATE TABLE " + database.escapeTableName(getNewTableSchemaName(), getNewTableName()) + " AS SELECT DISTINCT " + getExistingColumnName() + " AS " + getNewColumnName() + " FROM " + database.escapeTableName(getExistingTableSchemaName(), getExistingTableName()) + " WHERE " + getExistingColumnName() + " IS NOT NULL")};
+        String newTableSchemaName = getNewTableSchemaName() == null?database.getDefaultSchemaName():getNewTableSchemaName();
+        String existingTableSchemaName = getExistingTableSchemaName() == null?database.getDefaultSchemaName():getExistingTableSchemaName();
+
+        SqlStatement[] createTablesSQL = {new RawSqlStatement("CREATE TABLE " + database.escapeTableName(newTableSchemaName, getNewTableName()) + " AS SELECT DISTINCT " + getExistingColumnName() + " AS " + getNewColumnName() + " FROM " + database.escapeTableName(existingTableSchemaName, getExistingTableName()) + " WHERE " + getExistingColumnName() + " IS NOT NULL")};
         if (database instanceof MSSQLDatabase) {
-            createTablesSQL = new SqlStatement[]{new RawSqlStatement("SELECT DISTINCT " + getExistingColumnName() + " AS " + getNewColumnName() + " INTO " + database.escapeTableName(getNewTableSchemaName(), getNewTableName()) + " FROM " + database.escapeTableName(getExistingTableSchemaName(), getExistingTableName()) + " WHERE " + getExistingColumnName() + " IS NOT NULL"),};
+            createTablesSQL = new SqlStatement[]{new RawSqlStatement("SELECT DISTINCT " + getExistingColumnName() + " AS " + getNewColumnName() + " INTO " + database.escapeTableName(newTableSchemaName, getNewTableName()) + " FROM " + database.escapeTableName(existingTableSchemaName, getExistingTableName()) + " WHERE " + getExistingColumnName() + " IS NOT NULL"),};
         } else if (database instanceof DB2Database) {
             createTablesSQL = new SqlStatement[]{
-                    new RawSqlStatement("CREATE TABLE " + database.escapeTableName(getNewTableSchemaName(), getNewTableName()) + " AS (SELECT " + getExistingColumnName() + " AS " + getNewColumnName() + " FROM " + database.escapeTableName(getExistingTableSchemaName(), getExistingTableName()) + ") WITH NO DATA"),
-                    new RawSqlStatement("INSERT INTO " + database.escapeTableName(getNewTableSchemaName(), getNewTableName()) + " SELECT DISTINCT " + getExistingColumnName() + " FROM " + database.escapeTableName(getExistingTableSchemaName(), getExistingTableName()) + " WHERE " + getExistingColumnName() + " IS NOT NULL"),
+                    new RawSqlStatement("CREATE TABLE " + database.escapeTableName(newTableSchemaName, getNewTableName()) + " AS (SELECT " + getExistingColumnName() + " AS " + getNewColumnName() + " FROM " + database.escapeTableName(existingTableSchemaName, getExistingTableName()) + ") WITH NO DATA"),
+                    new RawSqlStatement("INSERT INTO " + database.escapeTableName(newTableSchemaName, getNewTableName()) + " SELECT DISTINCT " + getExistingColumnName() + " FROM " + database.escapeTableName(existingTableSchemaName, getExistingTableName()) + " WHERE " + getExistingColumnName() + " IS NOT NULL"),
             };
         }
 
@@ -150,7 +153,7 @@ public class AddLookupTableChange extends AbstractChange {
 
         if (!(database instanceof OracleDatabase)) {
             AddNotNullConstraintChange addNotNullChange = new AddNotNullConstraintChange();
-            addNotNullChange.setSchemaName(getNewTableSchemaName());
+            addNotNullChange.setSchemaName(newTableSchemaName);
             addNotNullChange.setTableName(getNewTableName());
             addNotNullChange.setColumnName(getNewColumnName());
             addNotNullChange.setColumnDataType(getNewColumnDataType());
@@ -158,24 +161,24 @@ public class AddLookupTableChange extends AbstractChange {
         }
 
         if (database instanceof DB2Database) {
-            statements.add(new ReorganizeTableStatement(getNewTableSchemaName(), getNewTableName()));
+            statements.add(new ReorganizeTableStatement(newTableSchemaName, getNewTableName()));
         }
 
         AddPrimaryKeyChange addPKChange = new AddPrimaryKeyChange();
-        addPKChange.setSchemaName(getNewTableSchemaName());
+        addPKChange.setSchemaName(newTableSchemaName);
         addPKChange.setTableName(getNewTableName());
         addPKChange.setColumnNames(getNewColumnName());
         statements.addAll(Arrays.asList(addPKChange.generateStatements(database)));
 
         if (database instanceof DB2Database) {
-            statements.add(new ReorganizeTableStatement(getNewTableSchemaName(), getNewTableName()));
+            statements.add(new ReorganizeTableStatement(newTableSchemaName, getNewTableName()));
         }
 
         AddForeignKeyConstraintChange addFKChange = new AddForeignKeyConstraintChange();
-        addFKChange.setBaseTableSchemaName(getExistingTableSchemaName());
+        addFKChange.setBaseTableSchemaName(existingTableSchemaName);
         addFKChange.setBaseTableName(getExistingTableName());
         addFKChange.setBaseColumnNames(getExistingColumnName());
-        addFKChange.setReferencedTableSchemaName(getNewTableSchemaName());
+        addFKChange.setReferencedTableSchemaName(newTableSchemaName);
         addFKChange.setReferencedTableName(getNewTableName());
         addFKChange.setReferencedColumnNames(getNewColumnName());
 

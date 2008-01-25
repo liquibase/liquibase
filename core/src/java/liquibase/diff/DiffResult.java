@@ -8,6 +8,8 @@ import liquibase.parser.LiquibaseSchemaResolver;
 import liquibase.parser.xml.XMLChangeLogParser;
 import liquibase.xml.DefaultXmlWriter;
 import liquibase.xml.XmlWriter;
+import liquibase.util.StringUtils;
+import liquibase.util.StreamUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -553,6 +555,9 @@ public class DiffResult {
 
             CreateTableChange change = new CreateTableChange();
             change.setTableName(missingTable.getName());
+            if (missingTable.getRemarks() != null) {
+                change.setRemarks(missingTable.getRemarks());
+            }
 
             for (Column column : missingTable.getColumns()) {
                 ColumnConfig columnConfig = new ColumnConfig();

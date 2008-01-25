@@ -63,15 +63,16 @@ public class AddAutoIncrementChange extends AbstractChange {
     }
 
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
+        String schemaName = getSchemaName() == null?database.getDefaultSchemaName():getSchemaName();
         if (database instanceof PostgresDatabase) {
             String sequenceName = (getTableName()+"_"+getColumnName()+"_seq").toLowerCase();
             return new SqlStatement[]{
-                    new CreateSequenceStatement(getSchemaName(), sequenceName),
-                    new SetNullableStatement(getSchemaName(), getTableName(), getColumnName(), null, false),
-                    new AddDefaultValueStatement(getSchemaName(), getTableName(), getColumnName(), sequenceName),
+                    new CreateSequenceStatement(schemaName, sequenceName),
+                    new SetNullableStatement(schemaName, getTableName(), getColumnName(), null, false),
+                    new AddDefaultValueStatement(schemaName, getTableName(), getColumnName(), sequenceName),
             };
         } else {
-            return new SqlStatement[] { new AddAutoIncrementStatement(getSchemaName(), getTableName(), getColumnName(), getColumnDataType())};
+            return new SqlStatement[] { new AddAutoIncrementStatement(schemaName, getTableName(), getColumnName(), getColumnDataType())};
         }
     }
 
