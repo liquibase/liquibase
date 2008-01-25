@@ -48,7 +48,7 @@ public class HsqlDatabase extends AbstractDatabase {
         return false;
     }
 
-    public String getSchemaName() throws JDBCException {
+    protected String getDefaultDatabaseSchemaName() throws JDBCException {
         return "PUBLIC";
     }
 

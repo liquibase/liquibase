@@ -24,7 +24,10 @@ public class LockHandlerTest  {
         expect(database.getJdbcTemplate()).andReturn(template).anyTimes();
         expect(database.doesChangeLogLockTableExist()).andReturn(true);
         expect(database.getSelectChangeLogLockSQL()).andReturn(selectLockStatement);
-        expect(database.getDatabaseChangeLogLockTableName()).andReturn("LOCK_TABLE");
+        expect(database.getDatabaseChangeLogLockTableName()).andReturn("LOCK_TABLE").anyTimes();
+        expect(database.getDatabaseChangeLogTableName()).andReturn("DATABASECHANGELOG").anyTimes();
+        expect(database.getDefaultSchemaName()).andReturn(null).anyTimes();
+
         database.commit();
         expectLastCall();
 
@@ -98,7 +101,12 @@ public class LockHandlerTest  {
 
         expect(database.getJdbcTemplate()).andReturn(template).anyTimes();
         expect(database.doesChangeLogLockTableExist()).andReturn(true);
-        expect(database.getDatabaseChangeLogLockTableName()).andReturn("lock_table");
+        expect(database.getDatabaseChangeLogTableName()).andReturn("DATABASECHANGELOG").anyTimes();
+        database.commit();
+        expectLastCall().atLeastOnce();
+        expect(database.getDefaultSchemaName()).andReturn(null).anyTimes();        
+
+        expect(database.getDatabaseChangeLogLockTableName()).andReturn("lock_table").anyTimes();
         expectLastCall();
 
         expect(template.update(isA(UpdateStatement.class))).andReturn(1);
@@ -106,9 +114,6 @@ public class LockHandlerTest  {
         expectLastCall().anyTimes();
         template.comment("Release Database Lock");
         expectLastCall().anyTimes();
-
-        database.commit();
-        expectLastCall();
 
         replay(database);
         replay(template);

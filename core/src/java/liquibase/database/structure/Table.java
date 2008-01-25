@@ -9,6 +9,7 @@ public class Table implements DatabaseObject, Comparable<Table> {
 
     private Database database;
     private String name;
+    private String remarks;
     private List<Column> columns = new ArrayList<Column>();
 
     public Table(String name) {
@@ -25,6 +26,14 @@ public class Table implements DatabaseObject, Comparable<Table> {
 
     public void setDatabase(Database database) {
         this.database = database;
+    }
+
+    public String getRemarks() {
+        return remarks;
+    }
+
+    public void setRemarks(String remarks) {
+        this.remarks = remarks;
     }
 
     public List<Column> getColumns() {

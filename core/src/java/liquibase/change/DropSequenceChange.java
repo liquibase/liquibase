@@ -42,7 +42,7 @@ public class DropSequenceChange extends AbstractChange {
     }
 
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
-        return new SqlStatement[]{new DropSequenceStatement(getSchemaName(), getSequenceName())};
+        return new SqlStatement[]{new DropSequenceStatement(getSchemaName() == null?database.getDefaultSchemaName():getSchemaName(), getSequenceName())};
     }
 
     public String getConfirmationMessage() {

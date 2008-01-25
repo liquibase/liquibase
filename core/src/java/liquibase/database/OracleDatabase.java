@@ -7,12 +7,25 @@ import liquibase.exception.JDBCException;
 import java.sql.Connection;
 import java.sql.Types;
 import java.text.ParseException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 /**
  * Encapsulates Oracle database support.
  */
 public class OracleDatabase extends AbstractDatabase {
     public static final String PRODUCT_NAME = "oracle";
+
+    public void setConnection(Connection conn) {
+        try {
+            Method method = conn.getClass().getMethod("setRemarksReporting", Boolean.TYPE);
+            method.setAccessible(true);
+            method.invoke(conn, true);
+        } catch (Exception e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
+        super.setConnection(conn);
+    }
 
     public String getProductName() {
         return "Oracle";
@@ -87,8 +100,8 @@ public class OracleDatabase extends AbstractDatabase {
     }
 
 
-    public String getSchemaName() throws JDBCException {//NOPMD
-        return super.getSchemaName().toUpperCase();
+    protected String getDefaultDatabaseSchemaName() throws JDBCException {//NOPMD
+        return super.getDefaultDatabaseSchemaName().toUpperCase();
     }
 
     /**
@@ -119,6 +132,8 @@ public class OracleDatabase extends AbstractDatabase {
             val.append(", 'HH24:MI:SS')");
             return val.toString();
         } else if (isDateTime(isoDate)) {
+            normalLiteral = normalLiteral.substring(0, normalLiteral.lastIndexOf("."))+"'";
+
             StringBuffer val = new StringBuffer(26);
             val.append("to_date(");
             val.append(normalLiteral);

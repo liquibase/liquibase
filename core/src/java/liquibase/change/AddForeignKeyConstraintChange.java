@@ -136,10 +136,10 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
         
         return new SqlStatement[]{
                 new AddForeignKeyConstraintStatement(getConstraintName(),
-                        getBaseTableSchemaName(),
+                        getBaseTableSchemaName() == null?database.getDefaultSchemaName():getBaseTableSchemaName(),
                         getBaseTableName(),
                         getBaseColumnNames(),
-                        getReferencedTableSchemaName(),
+                        getReferencedTableSchemaName() == null?database.getDefaultSchemaName():getReferencedTableSchemaName(),
                         getReferencedTableName(),
                         getReferencedColumnNames())
                 .setDeferrable(deferrable)

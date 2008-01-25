@@ -7,6 +7,8 @@ import liquibase.FileSystemFileOpener;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
+import liquibase.database.AbstractDatabase;
+import liquibase.database.sql.DropTableStatement;
 import liquibase.database.structure.DatabaseSnapshot;
 import liquibase.diff.Diff;
 import liquibase.diff.DiffResult;
@@ -27,6 +29,7 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
+import java.lang.reflect.Field;
 
 public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
 
@@ -35,11 +38,14 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
     private String includedChangeLog;
     private String contexts = "test, context-b";
     private Database database;
+    private String url;
 
     protected AbstractSimpleChangeLogRunnerTest(String changelogDir, String url) throws Exception {
         this.completeChangeLog = "changelogs/" + changelogDir + "/complete/root.changelog.xml";
         this.rollbackChangeLog = "changelogs/" + changelogDir + "/rollback/rollbackable.changelog.xml";
         this.includedChangeLog = "changelogs/" + changelogDir + "/complete/included.changelog.xml";
+
+        this.url = url;
 
         DatabaseConnection connection = TestContext.getInstance().getConnection(url);
 
@@ -70,6 +76,7 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
             if (shouldRollBack()) {
                 database.rollback();
             }
+            database.setDefaultSchemaName(null);
         }
         super.tearDown();
     }
@@ -112,7 +119,7 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
     protected String[] getSchemasToDrop() throws JDBCException {
         return new String[] {
                 "liquibaseb".toUpperCase(),
-                database.getSchemaName(),
+                database.getDefaultSchemaName(),
         };
     }
 
@@ -245,7 +252,7 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
 
         DatabaseSnapshot originalSnapshot = new DatabaseSnapshot(database);
 
-        Diff diff = new Diff(database.getConnection());
+        Diff diff = new Diff(database.getConnection(), (String) null);
         DiffResult diffResult = diff.compare();
 
         File tempFile = File.createTempFile("liquibase-test", ".xml");
@@ -366,5 +373,58 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
         migrator.update(this.contexts); //try again, make sure there are no errors
 
         migrator.dropAll(getSchemasToDrop());
+    }
+
+
+    public void testRerunChangeLogOnDifferentSchema() throws Exception {
+        if (database == null) {
+            return;
+        }
+
+        if (!database.supportsSchemas()) {
+            return;
+        }
+
+        runCompleteChangeLog();
+
+        DatabaseConnection connection2 = TestContext.getInstance().getConnection(url);
+
+        Database database2 = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(connection2);
+
+        database2.setDefaultSchemaName("liquibaseb");
+
+        { //this is ugly, but is a special case specific to this test
+            Field changeLogTableExistsField = AbstractDatabase.class.getDeclaredField("changeLogTableExists");
+            changeLogTableExistsField.setAccessible(true);
+            changeLogTableExistsField.set(database2, false);
+
+            Field changeLogCreateAttemptedField = AbstractDatabase.class.getDeclaredField("changeLogCreateAttempted");
+            changeLogCreateAttemptedField.setAccessible(true);
+            changeLogCreateAttemptedField.set(database2, false);
+
+            Field changeLogLockTableExistsField = AbstractDatabase.class.getDeclaredField("changeLogLockTableExists");
+            changeLogLockTableExistsField.setAccessible(true);
+            changeLogLockTableExistsField.set(database2, false);
+
+            Field changeLogLockCreateAttemptedField = AbstractDatabase.class.getDeclaredField("changeLogLockCreateAttempted");
+            changeLogLockCreateAttemptedField.setAccessible(true);
+            changeLogLockCreateAttemptedField.set(database2, false);
+
+        }
+        database2.checkDatabaseChangeLogTable();
+        database2.dropDatabaseObjects(database2.getDefaultSchemaName());
+        dropDatabaseChangeLogTable(database2.getDefaultSchemaName(), database2);
+
+        JUnitFileOpener fileOpener = new JUnitFileOpener();
+        Migrator migrator = new Migrator(completeChangeLog, fileOpener, database2);
+        migrator.update(this.contexts);
+    }
+
+    private void dropDatabaseChangeLogTable(String schema, Database database) {
+        try {
+            database.getJdbcTemplate().execute(new DropTableStatement(schema, database.getDatabaseChangeLogTableName(), false));
+        } catch (JDBCException e) {
+            ; //ok
+        }
     }
 }

@@ -27,12 +27,12 @@ public class ShouldRunChangeSetFilter implements ChangeSetFilter {
                     && isPathEquals(changeSet, ranChangeSet)) {
 
                 if (!changeSet.getMd5sum().equals(ranChangeSet.getMd5sum())) {
-                    UpdateStatement md5sumUpdateStatement = new UpdateStatement(null, database.getDatabaseChangeLogTableName());
-                    md5sumUpdateStatement.addNewColumnValue("MD5SUM", changeSet.getMd5sum(), Types.VARCHAR);
+                    UpdateStatement md5sumUpdateStatement = new UpdateStatement(database.getDefaultSchemaName(), database.getDatabaseChangeLogTableName());
+                    md5sumUpdateStatement.addNewColumnValue("MD5SUM", changeSet.getMd5sum());
                     md5sumUpdateStatement.setWhereClause("ID = ? AND AUTHOR = ? AND FILENAME = ?");
-                    md5sumUpdateStatement.addWhereParameter(changeSet.getId(), Types.VARCHAR);
-                    md5sumUpdateStatement.addWhereParameter(changeSet.getAuthor(), Types.VARCHAR);
-                    md5sumUpdateStatement.addWhereParameter(changeSet.getFilePath(), Types.VARCHAR);
+                    md5sumUpdateStatement.addWhereParameter(changeSet.getId());
+                    md5sumUpdateStatement.addWhereParameter(changeSet.getAuthor());
+                    md5sumUpdateStatement.addWhereParameter(changeSet.getFilePath());
 
                     try {
                         database.getJdbcTemplate().update(md5sumUpdateStatement);

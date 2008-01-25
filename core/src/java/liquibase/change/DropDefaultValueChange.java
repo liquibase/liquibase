@@ -54,7 +54,7 @@ public class DropDefaultValueChange extends AbstractChange {
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
 
         return new SqlStatement[]{
-                new DropDefaultValueStatement(getSchemaName(), getTableName(), getColumnName()),
+                new DropDefaultValueStatement(getSchemaName() == null?database.getDefaultSchemaName():getSchemaName(), getTableName(), getColumnName()),
         };
     }
 

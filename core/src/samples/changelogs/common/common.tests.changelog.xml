@@ -116,7 +116,8 @@
         </createIndex>
         <addPrimaryKey tableName="TABLESPACE_TEST_TABLE" columnNames="id" constraintName="pk_tablespacetest"
                        tablespace="liquibase2"/>
-        <addUniqueConstraint tableName="TABLESPACE_TEST_TABLE" columnNames="username" constraintName="uq_tbsptest_usern" tablespace="liquibase2"/>        
+        <addUniqueConstraint tableName="TABLESPACE_TEST_TABLE" columnNames="username" constraintName="uq_tbsptest_usern"
+                             tablespace="liquibase2"/>
     </changeSet>
 
     <changeSet id="contextstest-1" author="nvoxland">
@@ -196,5 +197,109 @@
         </createTable>
     </changeSet>
 
+    <changeSet id="addColumnWithInitialValue-test" author="nvoxland">
+        <createTable tableName="tableWithInitialValue">
+            <column name="id" type="int"/>
+        </createTable>
+
+        <insert tableName="tableWithInitialValue">
+            <column name="id" valueNumeric="1"/>
+        </insert>
+        <insert tableName="tableWithInitialValue">
+            <column name="id" valueNumeric="2"/>
+        </insert>
+        <insert tableName="tableWithInitialValue">
+            <column name="id" valueNumeric="3"/>
+        </insert>
+
+        <addColumn tableName="tableWithInitialValue">
+            <column name="varcharColumn" type="varchar(25)" value="INITIAL_VALUE"/>
+            <column name="intColumn" type="int" valueNumeric="2"/>
+            <column name="dateCol" type="date" valueDate="2008-03-04"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet author="nvoxland" id="updateTest">
+        <createTable tableName="updateTest">
+            <column name="id" type="int"/>
+            <column name="varcharColumn" type="varchar(255)"/>
+            <column name="dateCol" type="date"/>
+            <column name="intCol" type="int"/>
+            <column name="commonCol" type="varchar(255)"/>
+        </createTable>
+
+        <insert tableName="updateTest">
+            <column name="id" valueNumeric="1"/>
+            <column name="varcharColumn" value="column 1 value"/>
+            <column name="dateCol" valueDate="2007-01-01"/>
+            <column name="intCol" valueNumeric="1"/>
+        </insert>
+        <insert tableName="updateTest">
+            <column name="id" valueNumeric="2"/>
+            <column name="varcharColumn" value="column 2 value"/>
+            <column name="dateCol" valueDate="2007-01-02"/>
+            <column name="intCol" valueNumeric="2"/>
+        </insert>
+        <insert tableName="updateTest">
+            <column name="id" valueNumeric="3"/>
+            <column name="varcharColumn" value="column 3 value"/>
+            <column name="dateCol" valueDate="2007-01-03"/>
+            <column name="intCol" valueNumeric="3"/>
+        </insert>
+
+        <update tableName="updateTest">
+            <column name="commonCol" value="Value for everyone"/>
+        </update>
+
+        <update tableName="updateTest">
+            <column name="varcharColumn" value="new column 1 value"/>
+            <column name="dateCol" valueDate="2008-01-01"/>
+            <column name="intCol" valueNumeric="11"/>
+            <where>id=1</where>
+        </update>
+        <update tableName="updateTest">
+            <column name="varcharColumn" value="new column 2 value"/>
+            <column name="dateCol" valueDate="2008-01-02"/>
+            <column name="intCol" valueNumeric="12"/>
+            <where>id=2</where>
+        </update>
+
+    </changeSet>
+
+    <changeSet author="nvoxland" id="deleteTest">
+        <createTable tableName="deleteTest">
+            <column name="id" type="int"/>
+            <column name="varcharColumn" type="varchar(255)"/>
+            <column name="dateCol" type="date"/>
+            <column name="intCol" type="int"/>
+            <column name="commonCol" type="varchar(255)"/>
+        </createTable>
+
+        <insert tableName="deleteTest">
+            <column name="id" valueNumeric="1"/>
+            <column name="varcharColumn" value="column 1 value"/>
+            <column name="dateCol" valueDate="2007-01-01"/>
+            <column name="intCol" valueNumeric="1"/>
+        </insert>
+        <insert tableName="deleteTest">
+            <column name="id" valueNumeric="2"/>
+            <column name="varcharColumn" value="column 2 value"/>
+            <column name="dateCol" valueDate="2007-01-02"/>
+            <column name="intCol" valueNumeric="2"/>
+        </insert>
+        <insert tableName="deleteTest">
+            <column name="id" valueNumeric="3"/>
+            <column name="varcharColumn" value="column 3 value"/>
+            <column name="dateCol" valueDate="2007-01-03"/>
+            <column name="intCol" valueNumeric="3"/>
+        </insert>
+
+        <delete tableName="deleteTest">
+            <where>id=1</where>
+        </delete>
+
+        <delete tableName="deleteTest">
+        </delete>
+    </changeSet>
 
 </databaseChangeLog>

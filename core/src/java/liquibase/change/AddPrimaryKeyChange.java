@@ -72,13 +72,15 @@ public class AddPrimaryKeyChange extends AbstractChange {
     }
 
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
-        AddPrimaryKeyStatement statement = new AddPrimaryKeyStatement(getSchemaName(), getTableName(), getColumnNames(), getConstraintName());
+        String schemaName = getSchemaName() == null?database.getDefaultSchemaName():getSchemaName();
+
+        AddPrimaryKeyStatement statement = new AddPrimaryKeyStatement(schemaName, getTableName(), getColumnNames(), getConstraintName());
         statement.setTablespace(getTablespace());
 
         if (database instanceof DB2Database) {
             return new SqlStatement[]{
                     statement,
-                    new ReorganizeTableStatement(getSchemaName(), getTableName())
+                    new ReorganizeTableStatement(schemaName, getTableName())
             };
         }
 

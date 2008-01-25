@@ -62,7 +62,7 @@ public class DropNotNullConstraintChange extends AbstractChange {
     }
 
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
-        return new SqlStatement[]{new SetNullableStatement(getSchemaName(), getTableName(), getColumnName(), getColumnDataType(), true)};
+        return new SqlStatement[]{new SetNullableStatement(getSchemaName() == null?database.getDefaultSchemaName():getSchemaName(), getTableName(), getColumnName(), getColumnDataType(), true)};
     }
 
     protected Change[] createInverses() {

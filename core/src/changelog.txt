@@ -1,6 +1,28 @@
 LiquiBase Core Changelog
 ==========================================
 
+Changes in version 1.5.0 ()
+----------------------
+- Major Refactoring of XML parser and Migrator class
+- Database table comments saved to generated change log
+- ReplaceIfExists attribute added to createView
+- Setting value/valueNumeric/valueBoolean/valueDate on addColumn will update all existing rows with the given value
+- Added defaultSchemaName parameter for setting default schema
+- Changelog file comparisons are case-insensitive on windows
+- Output warning of old schema version
+- Added updateCount and updateCountSQL commands
+- Changed "migrate" command to "update".  Note: "migrate" is now an alias for "update"
+- Added comments tag to generated SQL output
+- Custom Database implementations can be specified with the databaseClassName parameter
+- Created changeLogSync command
+- Rollback commands can specify contexts
+- createTable can specify unique constraint name
+- XSDs are not pulled from network
+- Handles Postgres datatypes better
+- added <update> change
+- added <delete> change
+- Other bug fixes
+
 Changes in version 1.4.1 (2007.11.30)
 ----------------------
 - Bug fixes

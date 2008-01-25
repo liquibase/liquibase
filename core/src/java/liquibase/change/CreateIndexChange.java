@@ -81,7 +81,7 @@ public class CreateIndexChange extends AbstractChange {
         }
 
         return new SqlStatement []{
-                new CreateIndexStatement(getIndexName(), getSchemaName(), getTableName(), columns.toArray(new String[getColumns().size()])).setTablespace(getTablespace())
+                new CreateIndexStatement(getIndexName(), getSchemaName() == null?database.getDefaultSchemaName():getSchemaName(), getTableName(), columns.toArray(new String[getColumns().size()])).setTablespace(getTablespace())
         };
     }
 

@@ -74,12 +74,16 @@ public class MockDatabase implements Database {
         return null;
     }
 
-    public String getCatalogName() throws JDBCException {
+    public String getDefaultCatalogName() throws JDBCException {
         return null;
     }
 
-    public String getSchemaName() throws JDBCException {
+    public String getDefaultSchemaName()  {
         return null;
+    }
+
+    public void setDefaultSchemaName(String schemaName) throws JDBCException {
+        
     }
 
     public boolean supportsInitiallyDeferrableColumns() {

@@ -29,8 +29,8 @@ public class RenameViewStatementTest extends AbstractSqlStatementTest {
                 .addPrimaryKeyColumn("id", "int")
                 , database);
 
-        dropAndCreateView(new CreateViewStatement(null, VIEW_NAME, "select * from " + TABLE_NAME), database);
-        dropAndCreateView(new CreateViewStatement(TestContext.ALT_SCHEMA, VIEW_NAME, "select * from " + TABLE_NAME), database);
+        dropAndCreateView(new CreateViewStatement(null, VIEW_NAME, "select * from " + TABLE_NAME, false), database);
+        dropAndCreateView(new CreateViewStatement(TestContext.ALT_SCHEMA, VIEW_NAME, "select * from " + TABLE_NAME, false), database);
     }
 
     protected SqlStatement generateTestStatement() {

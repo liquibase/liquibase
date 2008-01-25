@@ -21,6 +21,7 @@ public class CreateViewChange extends AbstractChange {
     private String schemaName;
     private String viewName;
     private String selectQuery;
+    private Boolean replaceIfExists;
 
     public CreateViewChange() {
         super("createView", "Create View");
@@ -50,9 +51,21 @@ public class CreateViewChange extends AbstractChange {
         this.selectQuery = selectQuery;
     }
 
+    public Boolean getReplaceIfExists() {
+        return replaceIfExists;
+    }
+
+    public void setReplaceIfExists(Boolean replaceIfExists) {
+        this.replaceIfExists = replaceIfExists;
+    }
+
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
+        boolean replaceIfExists = false;
+        if (getReplaceIfExists() != null && getReplaceIfExists()) {
+            replaceIfExists = true;
+        }
         return new SqlStatement[]{
-                new CreateViewStatement(getSchemaName(), getViewName(), getSelectQuery())
+                new CreateViewStatement(getSchemaName() == null?database.getDefaultSchemaName():getSchemaName(), getViewName(), getSelectQuery(), replaceIfExists),
         };
     }
 

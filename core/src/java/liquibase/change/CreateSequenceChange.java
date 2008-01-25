@@ -89,7 +89,7 @@ public class CreateSequenceChange extends AbstractChange {
 
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
         return new SqlStatement[] {
-                new CreateSequenceStatement(getSchemaName(), getSequenceName())
+                new CreateSequenceStatement(getSchemaName() == null?database.getDefaultSchemaName():getSchemaName(), getSequenceName())
                 .setIncrementBy(getIncrementBy())
                 .setMaxValue(getMaxValue())
                 .setMinValue(getMinValue())

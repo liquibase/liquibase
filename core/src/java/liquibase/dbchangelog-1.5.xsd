@@ -372,6 +372,7 @@
                 <xsd:extension base="xsd:string">
                     <xsd:attribute name="schemaName" type="xsd:string"/>
                     <xsd:attribute name="viewName" type="xsd:string"/>
+                    <xsd:attribute name="replaceIfExists" type="xsd:boolean"/>
                 </xsd:extension>
             </xsd:simpleContent>
         </xsd:complexType>
@@ -382,6 +383,25 @@
         <xsd:complexType>
             <xsd:sequence>
                 <xsd:element ref="column" maxOccurs="unbounded"/>
+            </xsd:sequence>
+            <xsd:attributeGroup ref="tableNameAttribute"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="update">
+        <xsd:complexType mixed="true">
+            <xsd:sequence>
+                <xsd:element ref="column" minOccurs="1" maxOccurs="unbounded"/>
+                <xsd:element name="where" minOccurs="0" maxOccurs="1" />
+            </xsd:sequence>
+            <xsd:attributeGroup ref="tableNameAttribute"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="delete">
+        <xsd:complexType mixed="true">
+            <xsd:sequence>
+                <xsd:element name="where" minOccurs="0" maxOccurs="1" />
             </xsd:sequence>
             <xsd:attributeGroup ref="tableNameAttribute"/>
         </xsd:complexType>
@@ -598,6 +618,8 @@
             <xsd:element ref="addUniqueConstraint" maxOccurs="unbounded"/>
             <xsd:element ref="dropUniqueConstraint" maxOccurs="unbounded"/>
             <xsd:element ref="customChange" maxOccurs="unbounded"/>
+            <xsd:element ref="update" maxOccurs="unbounded"/>
+            <xsd:element ref="delete" maxOccurs="unbounded"/>
             <xsd:element ref="executeCommand" maxOccurs="unbounded"/>
             <xsd:element ref="rollback" maxOccurs="1"/>
 

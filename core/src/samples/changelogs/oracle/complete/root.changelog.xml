@@ -108,7 +108,7 @@
                 <constraints nullable="false"/>
             </column>
             <column name="person_id" type="int">
-                <constraints nullable="false" foreignKeyName="fk_test_person" references="person(id)"/>
+                <constraints nullable="false" foreignKeyName="fk_test_person" references="liquibase.person(id)"/>
             </column>
         </createTable>
     </changeSet>
@@ -154,7 +154,10 @@
 
     <changeSet id="19" author="nvoxland">
         <createView viewName="personView">
-            select firstname, lastname from person
+            select * from liquibase.person
+        </createView>
+        <createView viewName="personView" replaceIfExists="true">
+            select * from liquibase.person
         </createView>
     </changeSet>
 

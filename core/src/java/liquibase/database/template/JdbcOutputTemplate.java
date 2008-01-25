@@ -1,7 +1,6 @@
 package liquibase.database.template;
 
 import liquibase.database.Database;
-import liquibase.database.sql.PreparedSqlStatement;
 import liquibase.database.sql.SqlStatement;
 import liquibase.exception.JDBCException;
 import liquibase.util.StreamUtil;
@@ -29,21 +28,6 @@ public class JdbcOutputTemplate extends JdbcTemplate {
     public int update(SqlStatement sql) throws JDBCException {
         outputStatement(sql);
 
-        return 0;
-    }
-
-    public int update(PreparedSqlStatement psc) throws JDBCException {
-        outputStatement(psc);
-        return 0;
-    }
-
-    public int update(PreparedSqlStatement sql, Object[] args, int[] argTypes) throws JDBCException {
-        outputStatement(sql);
-        return 0;
-    }
-
-    public int update(PreparedSqlStatement sql, Object[] args) throws JDBCException {
-        outputStatement(sql);
         return 0;
     }
 

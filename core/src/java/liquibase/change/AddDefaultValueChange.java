@@ -109,7 +109,7 @@ public class AddDefaultValueChange extends AbstractChange {
         }
 
         return new SqlStatement[] {
-                new AddDefaultValueStatement(getSchemaName(), getTableName(), getColumnName(), defaultValue)
+                new AddDefaultValueStatement(getSchemaName() == null?database.getDefaultSchemaName():getSchemaName(), getTableName(), getColumnName(), defaultValue)
         };
     }
 

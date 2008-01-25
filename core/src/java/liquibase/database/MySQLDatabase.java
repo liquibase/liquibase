@@ -100,17 +100,17 @@ public class MySQLDatabase extends AbstractDatabase {
     }
 
 
-    public String getSchemaName() throws JDBCException {
-        return super.getSchemaName().replaceFirst("\\@.*","");
+    protected String getDefaultDatabaseSchemaName() throws JDBCException {
+        return super.getDefaultDatabaseSchemaName().replaceFirst("\\@.*","");
     }
 
-    public String getCatalogName() throws JDBCException {
-        return super.getCatalogName();
+    public String getDefaultCatalogName() throws JDBCException {
+        return super.getDefaultCatalogName();
     }
 
     public String convertRequestedSchemaToSchema(String requestedSchema) throws JDBCException {
         if (requestedSchema == null) {
-            return getSchemaName();
+            return getDefaultDatabaseSchemaName();
         }
         return requestedSchema;
     }

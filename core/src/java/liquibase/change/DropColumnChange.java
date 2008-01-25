@@ -54,9 +54,11 @@ public class DropColumnChange extends AbstractChange {
 
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
         List<SqlStatement> statements = new ArrayList<SqlStatement>();
-        statements.add(new DropColumnStatement(getSchemaName(), getTableName(), getColumnName()));
+        String schemaName = getSchemaName() == null?database.getDefaultSchemaName():getSchemaName();
+
+        statements.add(new DropColumnStatement(schemaName, getTableName(), getColumnName()));
         if (database instanceof DB2Database) {
-            statements.add(new ReorganizeTableStatement(getSchemaName(), getTableName()));
+            statements.add(new ReorganizeTableStatement(schemaName, getTableName()));
         }
         return statements.toArray(new SqlStatement[statements.size()]);
     }

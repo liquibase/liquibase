@@ -29,8 +29,8 @@ public class DB2Database extends AbstractDatabase {
         return "db2";
     }
 
-    public String getSchemaName() throws JDBCException {//NOPMD
-        return super.getSchemaName().toUpperCase();
+    protected String getDefaultDatabaseSchemaName() throws JDBCException {//NOPMD
+        return super.getDefaultDatabaseSchemaName().toUpperCase();
     }
 
     public boolean supportsInitiallyDeferrableColumns() {
@@ -175,7 +175,7 @@ public class DB2Database extends AbstractDatabase {
 
     public String convertRequestedSchemaToSchema(String requestedSchema) throws JDBCException {
         if (requestedSchema == null) {
-            return getSchemaName();
+            return getDefaultDatabaseSchemaName();
         } else {
             return requestedSchema.toUpperCase();
         }

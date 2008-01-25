@@ -27,10 +27,10 @@ public class DropViewStatementTest extends AbstractSqlStatementTest {
                 .addPrimaryKeyColumn("id", "int")
                 , database);
 
-        new JdbcTemplate(database).execute(new CreateViewStatement(null, VIEW_NAME, "select * from "+TABLE_NAME));
+        new JdbcTemplate(database).execute(new CreateViewStatement(null, VIEW_NAME, "select * from "+TABLE_NAME, false));
 
         if (database.supportsSchemas()) {
-            new JdbcTemplate(database).execute(new CreateViewStatement(TestContext.ALT_SCHEMA, VIEW_NAME, "select * from "+ TestContext.ALT_SCHEMA+"."+TABLE_NAME));
+            new JdbcTemplate(database).execute(new CreateViewStatement(TestContext.ALT_SCHEMA, VIEW_NAME, "select * from "+ TestContext.ALT_SCHEMA+"."+TABLE_NAME, false));
         }
     }
 

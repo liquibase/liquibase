@@ -85,7 +85,7 @@ public class AlterSequenceChange extends AbstractChange {
         }
 
         return new SqlStatement[] {
-                new AlterSequenceStatement(getSchemaName(), getSequenceName())
+                new AlterSequenceStatement(getSchemaName() == null?database.getDefaultSchemaName():getSchemaName(), getSequenceName())
                 .setIncrementBy(getIncrementBy())
                 .setMaxValue(getMaxValue())
                 .setMinValue(getMinValue())

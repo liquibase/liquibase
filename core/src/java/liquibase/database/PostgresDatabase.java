@@ -129,11 +129,11 @@ public class PostgresDatabase extends AbstractDatabase {
         return "NOW()";
     }
 
-    public String getSchemaName() throws JDBCException {
+    protected String getDefaultDatabaseSchemaName() throws JDBCException {
         return null;
     }
 
-    public String getCatalogName() throws JDBCException {
+    public String getDefaultCatalogName() throws JDBCException {
         return "PUBLIC";
     }
 

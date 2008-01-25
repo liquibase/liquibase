@@ -136,7 +136,7 @@
 
     <changeSet id="16" author="nvoxland">
         <createView viewName="personView">
-            select firstname, lastname from person
+            select * from liquibase.person
         </createView>
     </changeSet>
 

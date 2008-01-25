@@ -55,14 +55,15 @@ public class LockHandler {
             if (locked) {
                 return false;
             } else {
-                UpdateStatement updateStatement = new UpdateStatement(null, database.getDatabaseChangeLogLockTableName());
-                updateStatement.addNewColumnValue("LOCKED", true, Types.BOOLEAN);
-                updateStatement.addNewColumnValue("LOCKGRANTED", new Timestamp(new java.util.Date().getTime()), Types.TIMESTAMP);
-                updateStatement.addNewColumnValue("LOCKEDBY", InetAddress.getLocalHost().getCanonicalHostName() + " (" + InetAddress.getLocalHost().getHostAddress() + ")", Types.VARCHAR);
+                UpdateStatement updateStatement = new UpdateStatement(database.getDefaultSchemaName(), database.getDatabaseChangeLogLockTableName());
+                updateStatement.addNewColumnValue("LOCKED", true);
+                updateStatement.addNewColumnValue("LOCKGRANTED", new Timestamp(new java.util.Date().getTime()));
+                updateStatement.addNewColumnValue("LOCKEDBY", InetAddress.getLocalHost().getCanonicalHostName() + " (" + InetAddress.getLocalHost().getHostAddress() + ")");
                 updateStatement.setWhereClause("ID  = 1");
 
                 database.getJdbcTemplate().comment("Lock Database");
-                if (database.getJdbcTemplate().update(updateStatement) != 1) {
+                int rowsUpdated = database.getJdbcTemplate().update(updateStatement);
+                if (rowsUpdated != 1) {
                     if (!database.getJdbcTemplate().executesStatements()) {
                         //expected
                     } else {
@@ -84,10 +85,10 @@ public class LockHandler {
     public void releaseLock() throws LockException {
         if (database.doesChangeLogLockTableExist()) {
             try {
-                UpdateStatement releaseStatement = new UpdateStatement(null, database.getDatabaseChangeLogLockTableName());
-                releaseStatement.addNewColumnValue("LOCKED", false, Types.BOOLEAN);
-                releaseStatement.addNewColumnValue("LOCKGRANTED", null, Types.TIMESTAMP);
-                releaseStatement.addNewColumnValue("LOCKEDBY", null, Types.VARCHAR);
+                UpdateStatement releaseStatement = new UpdateStatement(database.getDefaultSchemaName(), database.getDatabaseChangeLogLockTableName());
+                releaseStatement.addNewColumnValue("LOCKED", false);
+                releaseStatement.addNewColumnValue("LOCKGRANTED", null);
+                releaseStatement.addNewColumnValue("LOCKEDBY", null);
                 releaseStatement.setWhereClause(" ID = 1");
 
                 database.getJdbcTemplate().comment("Release Database Lock");                

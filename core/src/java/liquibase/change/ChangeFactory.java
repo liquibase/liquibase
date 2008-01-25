@@ -57,6 +57,8 @@ public class ChangeFactory {
                 CustomChangeWrapper.class,
                 CreateProcedureChange.class,
                 ExecuteShellCommandChange.class,
+                UpdateDataChange.class,
+                DeleteDataChange.class,
         };
 
         try {

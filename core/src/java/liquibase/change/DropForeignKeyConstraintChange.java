@@ -51,7 +51,10 @@ public class DropForeignKeyConstraintChange extends AbstractChange {
 
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
         return new SqlStatement[]{
-                new DropForeignKeyConstraintStatement(getBaseTableSchemaName(), getBaseTableName(), getConstraintName()),
+                new DropForeignKeyConstraintStatement(
+                        getBaseTableSchemaName() == null?database.getDefaultSchemaName():getBaseTableSchemaName(),
+                        getBaseTableName(),
+                        getConstraintName()),
         };
     }
 

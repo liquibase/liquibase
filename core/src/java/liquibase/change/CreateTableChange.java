@@ -24,6 +24,7 @@ public class CreateTableChange extends AbstractChange {
     private String schemaName;
     private String tableName;
     private String tablespace;
+    private String remarks;
 
     public CreateTableChange() {
         super("createTable", "Create Table");
@@ -32,7 +33,7 @@ public class CreateTableChange extends AbstractChange {
 
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
 
-        CreateTableStatement statement = new CreateTableStatement(getSchemaName(), getTableName());
+        CreateTableStatement statement = new CreateTableStatement(getSchemaName() == null?database.getDefaultSchemaName():getSchemaName(), getTableName());
         for (ColumnConfig column : getColumns()) {
             ConstraintsConfig constraints = column.getConstraints();
             boolean isAutoIncrement = column.isAutoIncrement() != null && column.isAutoIncrement();
@@ -127,6 +128,13 @@ public class CreateTableChange extends AbstractChange {
         columns.add(column);
     }
 
+    public String getRemarks() {
+        return remarks;
+    }
+
+    public void setRemarks(String remarks) {
+        this.remarks = remarks;
+    }
 
     public String getConfirmationMessage() {
         return "Table " + tableName + " created";
@@ -141,6 +149,9 @@ public class CreateTableChange extends AbstractChange {
         element.setAttribute("tableName", getTableName());
         if (StringUtils.trimToNull(tablespace) != null) {
             element.setAttribute("tablespace", tablespace);
+        }
+        if (StringUtils.trimToNull(remarks) != null) {
+            element.setAttribute("remarks", remarks);
         }
         for (ColumnConfig column : getColumns()) {
             element.appendChild(column.createNode(currentChangeLogFileDOM));
