@@ -1154,7 +1154,7 @@ public abstract class AbstractDatabase implements Database {
         InsertStatement statement = new InsertStatement(getDefaultSchemaName(), getDatabaseChangeLogTableName());
         statement.addColumnValue("ID", escapeStringForDatabase(changeSet.getId()));
         statement.addColumnValue("AUTHOR", changeSet.getAuthor());
-        statement.addColumnValue("FILENAME", changeSet.getFilePath().replace("\\", "\\\\"));
+        statement.addColumnValue("FILENAME", changeSet.getFilePath());
         statement.addColumnValue("DATEEXECUTED", new ComputedDateValue(dateValue));
         statement.addColumnValue("MD5SUM", changeSet.getMd5sum());
         statement.addColumnValue("DESCRIPTION", limitSize(changeSet.getDescription()));
