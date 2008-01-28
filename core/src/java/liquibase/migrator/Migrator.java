@@ -58,7 +58,7 @@ public class Migrator {
         log = LogFactory.getLogger();
 
         if (changeLogFile != null) {
-            this.changeLogFile = changeLogFile.replace("\\\\", "/");  //convert to standard / if usign absolute path on windows
+            this.changeLogFile = changeLogFile.replace('\\', '/');  //convert to standard / if usign absolute path on windows
         }
         this.fileOpener = fileOpener;
 
