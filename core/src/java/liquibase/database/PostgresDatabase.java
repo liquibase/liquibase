@@ -137,13 +137,13 @@ public class PostgresDatabase extends AbstractDatabase {
         return "PUBLIC";
     }
 
-    public String getDatabaseChangeLogTableName() {
-        return super.getDatabaseChangeLogTableName().toLowerCase();
-    }
+//    public String getDatabaseChangeLogTableName() {
+//        return super.getDatabaseChangeLogTableName().toLowerCase();
+//    }
 
-    public String getDatabaseChangeLogLockTableName() {
-        return super.getDatabaseChangeLogLockTableName().toLowerCase();
-    }
+//    public String getDatabaseChangeLogLockTableName() {
+//        return super.getDatabaseChangeLogLockTableName().toLowerCase();
+//    }
 
 //    public void dropDatabaseObjects(String schema) throws JDBCException {
 //        try {
