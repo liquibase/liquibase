@@ -445,7 +445,7 @@ public abstract class AbstractDatabase implements Database {
     }
 
     public SqlStatement getSelectChangeLogLockSQL() throws JDBCException {
-        return new RawSqlStatement(("SELECT LOCKED FROM " + getDatabaseChangeLogLockTableName() + " WHERE ID=1"));
+        return new RawSqlStatement(("SELECT LOCKED FROM " + escapeTableName(getDefaultSchemaName(), getDatabaseChangeLogLockTableName()) + " WHERE ID=1"));
     }
 
     public boolean doesChangeLogTableExist() {
