@@ -3,7 +3,7 @@ LiquiBase Core Changelog
 
 Changes in version 1.5.0 ()
 ----------------------
-- Major Refactoring of XML parser and Migrator class
+- Major Refactoring of XML parser and Migrator/Liquibase class
 - Database table comments saved to generated change log
 - ReplaceIfExists attribute added to createView
 - Setting value/valueNumeric/valueBoolean/valueDate on addColumn will update all existing rows with the given value
@@ -21,7 +21,8 @@ Changes in version 1.5.0 ()
 - Handles Postgres datatypes better
 - added <update> change
 - added <delete> change
-- Additional and enhanced Ant tasks 
+- Additional and enhanced Ant tasks
+- Changed database.migrator.should.run system property to liquibase.should.run 
 - Other bug fixes
 
 Changes in version 1.4.1 (2007.11.30)

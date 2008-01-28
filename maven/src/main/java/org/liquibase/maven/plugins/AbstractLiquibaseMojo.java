@@ -4,16 +4,16 @@ import java.net.MalformedURLException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import liquibase.FileOpener;
+import liquibase.Liquibase;
+import liquibase.UIFactory;
 import liquibase.database.DatabaseFactory;
 import liquibase.exception.JDBCException;
 import liquibase.exception.LiquibaseException;
-import liquibase.migrator.Migrator;
-import liquibase.migrator.UIFactory;
 import org.apache.maven.plugin.*;
 import org.apache.maven.project.MavenProject;
 
 /**
- * A base class for providing Liquibase {@link liquibase.migrator.Migrator}
+ * A base class for providing Liquibase {@link liquibase.Liquibase}
  * functionality.
  * @author Peter Murray
  * @requiresDependencyResolution test
@@ -83,9 +83,9 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
   public void execute() throws MojoExecutionException, MojoFailureException {
     getLog().info(MavenUtils.LOG_SEPARATOR);
 
-    String shouldRunProperty = System.getProperty(Migrator.SHOULD_RUN_SYSTEM_PROPERTY);
+    String shouldRunProperty = System.getProperty(Liquibase.SHOULD_RUN_SYSTEM_PROPERTY);
     if (shouldRunProperty != null && !Boolean.valueOf(shouldRunProperty).booleanValue()) {
-      getLog().warn("Migrator did not run because '" + Migrator.SHOULD_RUN_SYSTEM_PROPERTY
+      getLog().warn("LiquiBase did not run because '" + Liquibase.SHOULD_RUN_SYSTEM_PROPERTY
                     + "' system property was set to false");
       return;
     }
@@ -107,16 +107,16 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                                                     username,
                                                     password);
 
-      Migrator migrator = createMigrator(getFileOpener(artifactClassLoader), connection);
+      Liquibase liquibase = createLiquibase(getFileOpener(artifactClassLoader), connection);
       getLog().info("Executing on Database: " + url);
 
-      if (isPromptOnNonLocalDatabase() && !migrator.isSafeToRunMigration()) {
-        if (UIFactory.getInstance().getFacade().promptForNonLocalDatabase(migrator.getDatabase())) {
+      if (isPromptOnNonLocalDatabase() && !liquibase.isSafeToRunMigration()) {
+        if (UIFactory.getInstance().getFacade().promptForNonLocalDatabase(liquibase.getDatabase())) {
           throw new LiquibaseException("User decided not to run against non-local database");
         }
       }
 
-      performLiquibaseTask(migrator);
+      performLiquibaseTask(liquibase);
     }
     catch (LiquibaseException e) {
       releaseConnection(connection);
@@ -128,7 +128,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     getLog().info("");
   }
 
-  protected abstract void performLiquibaseTask(Migrator migrator)
+  protected abstract void performLiquibaseTask(Liquibase liquibase)
           throws LiquibaseException;
 
   protected boolean isPromptOnNonLocalDatabase() {
@@ -143,9 +143,9 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     }
   }
 
-  protected Migrator createMigrator(FileOpener fo, Connection conn) throws MojoExecutionException {
+  protected Liquibase createLiquibase(FileOpener fo, Connection conn) throws MojoExecutionException {
       try {
-          return new Migrator("", fo, DatabaseFactory.getInstance().findCorrectDatabaseImplementation(conn));
+          return new Liquibase("", fo, DatabaseFactory.getInstance().findCorrectDatabaseImplementation(conn));
       } catch (JDBCException e) {
           throw new MojoExecutionException(e.getMessage());
       }

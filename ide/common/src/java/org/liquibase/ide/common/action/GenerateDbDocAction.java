@@ -23,7 +23,7 @@ public class GenerateDbDocAction extends MigratorAction {
                     return;
                 }
 
-                ideFacade.getMigrator(null, database).generateDocumentation(input.getCanonicalPath());
+                ideFacade.getLiquibase(null, database).generateDocumentation(input.getCanonicalPath());
             } catch (IOException e) {
                 throw new LiquibaseException(e);
             }

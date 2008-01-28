@@ -4,6 +4,7 @@ import junit.framework.TestCase;
 import liquibase.ChangeSet;
 import liquibase.FileOpener;
 import liquibase.FileSystemFileOpener;
+import liquibase.Liquibase;
 import liquibase.database.AbstractDatabase;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
@@ -85,13 +86,13 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
         return true;
     }
 
-    protected Migrator createMigrator(String changeLogFile) throws Exception {
+    protected Liquibase createLiquibase(String changeLogFile) throws Exception {
         JUnitFileOpener fileOpener = new JUnitFileOpener();
-        return createMigrator(changeLogFile, fileOpener);
+        return createLiquibase(changeLogFile, fileOpener);
     }
 
-    private Migrator createMigrator(String changeLogFile, FileOpener fileOpener) throws JDBCException {
-        return new Migrator(changeLogFile, fileOpener, database);
+    private Liquibase createLiquibase(String changeLogFile, FileOpener fileOpener) throws JDBCException {
+        return new Liquibase(changeLogFile, fileOpener, database);
     }
 
     public void testRunChangeLog() throws Exception {
@@ -103,13 +104,13 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
     }
 
     private void runCompleteChangeLog() throws Exception {
-        Migrator migrator = createMigrator(completeChangeLog);
-        migrator.dropAll(getSchemasToDrop());
+        Liquibase liquibase = createLiquibase(completeChangeLog);
+        liquibase.dropAll(getSchemasToDrop());
 
         //run again to test changelog testing logic
-        migrator = createMigrator(completeChangeLog);
+        liquibase = createLiquibase(completeChangeLog);
         try {
-            migrator.update(this.contexts);
+            liquibase.update(this.contexts);
         } catch (ValidationFailedException e) {
             e.printDescriptiveError(System.out);
             throw e;
@@ -129,11 +130,11 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
         }
 
         StringWriter output = new StringWriter();
-        Migrator migrator = createMigrator(completeChangeLog);
-        migrator.dropAll(getSchemasToDrop());
+        Liquibase liquibase = createLiquibase(completeChangeLog);
+        liquibase.dropAll(getSchemasToDrop());
 
-        migrator = createMigrator(completeChangeLog);
-        migrator.update(this.contexts, output);
+        liquibase = createLiquibase(completeChangeLog);
+        liquibase.update(this.contexts, output);
 
 //        System.out.println(output.getBuffer().toString());
     }
@@ -143,20 +144,20 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
             return;
         }
 
-        Migrator migrator = createMigrator(rollbackChangeLog);
-        migrator.dropAll(getSchemasToDrop());
+        Liquibase liquibase = createLiquibase(rollbackChangeLog);
+        liquibase.dropAll(getSchemasToDrop());
 
-        migrator = createMigrator(rollbackChangeLog);
-        migrator.update(this.contexts);
+        liquibase = createLiquibase(rollbackChangeLog);
+        liquibase.update(this.contexts);
 
-        migrator = createMigrator(rollbackChangeLog);
-        migrator.rollback(new Date(0), this.contexts);
+        liquibase = createLiquibase(rollbackChangeLog);
+        liquibase.rollback(new Date(0), this.contexts);
 
-        migrator = createMigrator(rollbackChangeLog);
-        migrator.update(this.contexts);
+        liquibase = createLiquibase(rollbackChangeLog);
+        liquibase.update(this.contexts);
 
-        migrator = createMigrator(rollbackChangeLog);
-        migrator.rollback(new Date(0), this.contexts);
+        liquibase = createLiquibase(rollbackChangeLog);
+        liquibase.rollback(new Date(0), this.contexts);
     }
 
     public void testRollbackableChangeLogScriptOnExistingDatabase() throws Exception {
@@ -164,16 +165,16 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
             return;
         }
 
-        Migrator migrator = createMigrator(rollbackChangeLog);
-        migrator.dropAll(getSchemasToDrop());
+        Liquibase liquibase = createLiquibase(rollbackChangeLog);
+        liquibase.dropAll(getSchemasToDrop());
 
-        migrator = createMigrator(rollbackChangeLog);
-        migrator.update(this.contexts);
+        liquibase = createLiquibase(rollbackChangeLog);
+        liquibase.update(this.contexts);
 
         StringWriter writer = new StringWriter();
 
-        migrator = createMigrator(rollbackChangeLog);
-        migrator.rollback(new Date(0), this.contexts, writer);
+        liquibase = createLiquibase(rollbackChangeLog);
+        liquibase.rollback(new Date(0), this.contexts, writer);
 
 //        System.out.println("Rollback SQL for "+driverName+StreamUtil.getLineSeparator()+StreamUtil.getLineSeparator()+writer.toString());
     }
@@ -185,11 +186,11 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
 
         StringWriter writer = new StringWriter();
 
-        Migrator migrator = createMigrator(rollbackChangeLog);
-        migrator.dropAll(getSchemasToDrop());
+        Liquibase liquibase = createLiquibase(rollbackChangeLog);
+        liquibase.dropAll(getSchemasToDrop());
 
-        migrator = createMigrator(rollbackChangeLog);
-        migrator.futureRollbackSQL(this.contexts, writer);
+        liquibase = createLiquibase(rollbackChangeLog);
+        liquibase.futureRollbackSQL(this.contexts, writer);
 
 //        System.out.println("Rollback SQL for future "+driverName+"\n\n"+writer.toString());
     }
@@ -199,17 +200,17 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
             return;
         }
 
-        Migrator migrator = createMigrator(completeChangeLog);
-        migrator.dropAll(getSchemasToDrop());
+        Liquibase liquibase = createLiquibase(completeChangeLog);
+        liquibase.dropAll(getSchemasToDrop());
 
-        migrator = createMigrator(completeChangeLog);
-        migrator.update(this.contexts);
+        liquibase = createLiquibase(completeChangeLog);
+        liquibase.update(this.contexts);
 
-        migrator.tag("Test Tag");
+        liquibase.tag("Test Tag");
     }
 
 //    public void testGetDefaultDriver() throws Exception {
-//        Migrator migrator = createMigrator(completeChangeLog);
+//        Migrator migrator = createLiquibase(completeChangeLog);
 //
 //        assertEquals(driverName, migrator.getDatabase().getDefaultDriver(url));
 //    }
@@ -265,13 +266,13 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
             output.close();
         }
 
-        Migrator migrator = createMigrator(tempFile.getName());
-        migrator.dropAll(getSchemasToDrop());
+        Liquibase liquibase = createLiquibase(tempFile.getName());
+        liquibase.dropAll(getSchemasToDrop());
 
         //run again to test changelog testing logic
-        migrator = createMigrator(tempFile.getName());
+        liquibase = createLiquibase(tempFile.getName());
         try {
-            migrator.update(this.contexts);
+            liquibase.update(this.contexts);
         } catch (ValidationFailedException e) {
             e.printDescriptiveError(System.out);
             throw e;
@@ -304,16 +305,16 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
             return;
         }
 
-        Migrator migrator = createMigrator(completeChangeLog);
-        migrator.dropAll(getSchemasToDrop());
+        Liquibase liquibase = createLiquibase(completeChangeLog);
+        liquibase.dropAll(getSchemasToDrop());
 
-        migrator = createMigrator(completeChangeLog);
-        migrator.dropAll(getSchemasToDrop());
+        liquibase = createLiquibase(completeChangeLog);
+        liquibase.dropAll(getSchemasToDrop());
 
-        migrator = createMigrator(completeChangeLog);
-        migrator.update(this.contexts);
+        liquibase = createLiquibase(completeChangeLog);
+        liquibase.update(this.contexts);
 
-        migrator.clearCheckSums();
+        liquibase.clearCheckSums();
     }
 
     public void testTagEmptyDatabase() throws Exception {
@@ -321,13 +322,13 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
             return;
         }
 
-        Migrator migrator = createMigrator(completeChangeLog);
-        migrator.dropAll(getSchemasToDrop());
+        Liquibase liquibase = createLiquibase(completeChangeLog);
+        liquibase.dropAll(getSchemasToDrop());
 
-        migrator = createMigrator(completeChangeLog);
-        migrator.checkDatabaseChangeLogTable();
+        liquibase = createLiquibase(completeChangeLog);
+        liquibase.checkDatabaseChangeLogTable();
         try {
-            migrator.tag("empty");
+            liquibase.tag("empty");
         } catch (JDBCException e) {
             assertEquals("liquibase.exception.JDBCException: Cannot tag an empty database", e.getMessage());
         }
@@ -339,11 +340,11 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
             return;
         }
 
-        Migrator migrator = createMigrator(completeChangeLog);
-        migrator.dropAll(getSchemasToDrop());
+        Liquibase liquibase = createLiquibase(completeChangeLog);
+        liquibase.dropAll(getSchemasToDrop());
 
-        migrator = createMigrator(completeChangeLog);
-        List<ChangeSet> list = migrator.listUnrunChangeSets(this.contexts);
+        liquibase = createLiquibase(completeChangeLog);
+        List<ChangeSet> list = liquibase.listUnrunChangeSets(this.contexts);
 
         assertTrue(list.size() > 0);
 
@@ -365,14 +366,14 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
         } else {
             absolutePathOfChangeLog = "/" + absolutePathOfChangeLog;
         }
-        Migrator migrator = createMigrator(absolutePathOfChangeLog, new FileSystemFileOpener());
-        migrator.dropAll(getSchemasToDrop());
+        Liquibase liquibase = createLiquibase(absolutePathOfChangeLog, new FileSystemFileOpener());
+        liquibase.dropAll(getSchemasToDrop());
 
-        migrator.update(this.contexts);
+        liquibase.update(this.contexts);
 
-        migrator.update(this.contexts); //try again, make sure there are no errors
+        liquibase.update(this.contexts); //try again, make sure there are no errors
 
-        migrator.dropAll(getSchemasToDrop());
+        liquibase.dropAll(getSchemasToDrop());
     }
 
 
@@ -416,8 +417,8 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
         dropDatabaseChangeLogTable(database2.getDefaultSchemaName(), database2);
 
         JUnitFileOpener fileOpener = new JUnitFileOpener();
-        Migrator migrator = new Migrator(completeChangeLog, fileOpener, database2);
-        migrator.update(this.contexts);
+        Liquibase liquibase = new Liquibase(completeChangeLog, fileOpener, database2);
+        liquibase.update(this.contexts);
     }
 
     private void dropDatabaseChangeLogTable(String schema, Database database) {

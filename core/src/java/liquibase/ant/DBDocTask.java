@@ -1,6 +1,6 @@
 package liquibase.ant;
 
-import liquibase.migrator.Migrator;
+import liquibase.Liquibase;
 import liquibase.util.StringUtils;
 import org.apache.tools.ant.BuildException;
 
@@ -21,15 +21,15 @@ public class DBDocTask extends BaseLiquibaseTask {
             throw new BuildException("dbDoc requires outputDirectory to be set");
         }
 
-        Migrator migrator = null;
+        Liquibase liquibase = null;
         try {
-            migrator = createMigrator();
-            migrator.generateDocumentation(getOutputDirectory());
+            liquibase = createLiquibase();
+            liquibase.generateDocumentation(getOutputDirectory());
 
         } catch (Exception e) {
             throw new BuildException(e);
         } finally {
-            closeDatabase(migrator);
+            closeDatabase(liquibase);
         }
     }
 }

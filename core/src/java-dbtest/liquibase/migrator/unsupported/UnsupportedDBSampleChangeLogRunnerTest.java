@@ -27,21 +27,21 @@ public class UnsupportedDBSampleChangeLogRunnerTest { // extends AbstractSimpleC
 //        super.tearDown();
 //    }
 //
-//    protected Migrator createMigrator(String changeLogFile) throws Exception {
-//        Migrator migrator = super.createMigrator(changeLogFile);
+//    protected Migrator createLiquibase(String changeLogFile) throws Exception {
+//        Migrator migrator = super.createLiquibase(changeLogFile);
 //        migrator.setCurrentDateTimeFunction("CURRENT_TIMESTAMP");
 //        return migrator;
 //    }
 //
 //    public void testIsActuallyUnsupportedDatabase() throws Exception {
-//        Migrator migrator = createMigrator(null);
+//        Migrator migrator = createLiquibase(null);
 //
 //        assertTrue("Not using unsupported database", migrator.getDatabase() instanceof UnsupportedDatabase);
 //
 //    }
 //
 //    public void testGetDefaultDriver() throws Exception {
-//        assertNull(createMigrator(null).getDatabase().getDefaultDriver(url));
+//        assertNull(createLiquibase(null).getDatabase().getDefaultDriver(url));
 //    }
 //
 //    protected boolean shouldRollBack() {

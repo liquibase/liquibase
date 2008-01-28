@@ -2,10 +2,9 @@
 // Copyright: Copyright(c) 2007 Trace Financial Limited
 package org.liquibase.maven.plugins;
 
-import java.sql.Connection;
 import java.text.*;
 import liquibase.exception.LiquibaseException;
-import liquibase.migrator.Migrator;
+import liquibase.Liquibase;
 import org.apache.maven.plugin.MojoFailureException;
 
 /**
@@ -76,16 +75,16 @@ public class LiquibaseRollback extends ConfigurableLiquibaseMojo {
     getLog().info(indent + "rollback Tag: " + rollbackTag);
   }
 
-  protected void performLiquibaseTask(Migrator migrator) throws LiquibaseException {
+  protected void performLiquibaseTask(Liquibase liquibase) throws LiquibaseException {
     switch (type) {
       case COUNT: {
-        migrator.rollback(rollbackCount, contexts);
+        liquibase.rollback(rollbackCount, contexts);
         break;
       }
       case DATE: {
         DateFormat format = DateFormat.getDateInstance();
         try {
-          migrator.rollback(format.parse(rollbackDate), contexts);
+          liquibase.rollback(format.parse(rollbackDate), contexts);
         }
         catch (ParseException e) {
           String message = "Error parsing rollbackDate: " + e.getMessage();
@@ -97,7 +96,7 @@ public class LiquibaseRollback extends ConfigurableLiquibaseMojo {
         break;
       }
       case TAG: {
-        migrator.rollback(rollbackTag, contexts);
+        liquibase.rollback(rollbackTag, contexts);
         break;
       }
       default: {

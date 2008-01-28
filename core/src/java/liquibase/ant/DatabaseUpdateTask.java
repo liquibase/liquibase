@@ -1,7 +1,7 @@
 package liquibase.ant;
 
-import liquibase.migrator.Migrator;
-import liquibase.migrator.UIFactory;
+import liquibase.Liquibase;
+import liquibase.UIFactory;
 import org.apache.tools.ant.BuildException;
 
 import java.io.Writer;
@@ -25,25 +25,25 @@ public class DatabaseUpdateTask extends BaseLiquibaseTask {
             return;
         }
 
-        Migrator migrator = null;
+        Liquibase liquibase = null;
         try {
-            migrator = createMigrator();
+            liquibase = createLiquibase();
 
             if (isPromptOnNonLocalDatabase()
-                    && !migrator.isSafeToRunMigration()
-                    && UIFactory.getInstance().getFacade().promptForNonLocalDatabase(migrator.getDatabase())) {
+                    && !liquibase.isSafeToRunMigration()
+                    && UIFactory.getInstance().getFacade().promptForNonLocalDatabase(liquibase.getDatabase())) {
                 throw new BuildException("Chose not to run against non-production database");
             }
 
             if (isDropFirst()) {
-                migrator.dropAll();
+                liquibase.dropAll();
             }
 
             Writer writer = createOutputWriter();
             if (writer == null) {
-                migrator.update(getContexts());
+                liquibase.update(getContexts());
             } else {
-                migrator.update(getContexts(), writer);
+                liquibase.update(getContexts(), writer);
                 writer.flush();
                 writer.close();
             }
@@ -51,7 +51,7 @@ public class DatabaseUpdateTask extends BaseLiquibaseTask {
         } catch (Exception e) {
             throw new BuildException(e);
         } finally {
-            closeDatabase(migrator);
+            closeDatabase(liquibase);
         }
     }
 }

@@ -1,4 +1,4 @@
-package liquibase.migrator;
+package liquibase;
 
 import liquibase.ChangeSet;
 import liquibase.DatabaseChangeLog;
@@ -32,21 +32,10 @@ import java.util.logging.Logger;
 /**
  * Core class of the LiquiBase migrator.
  * Although there are several ways of executing LiquiBase (Ant, command line, etc.) they are all wrappers around this class.
- * <p/>
- * <b>Using Migrator directly</b>
- * <ol>
- * <li>Construct an instance of Migrator passing in the changelog file and file opener.</li>
- * <li>Call migrator.init(connection)</li>
- * <li>Set any contexts with the setContexts() method</li>
- * <li>Set the execution mode with setMode()</li>
- * <li>Call migrate()</li>
- * </ol>
  */
-public class Migrator {
+public class Liquibase {
 
-    public static final String SHOULD_RUN_SYSTEM_PROPERTY = "database.migrator.should.run";
-
-    private static boolean outputtedHeader = false;
+    public static final String SHOULD_RUN_SYSTEM_PROPERTY = "liquibase.should.run";
 
     private String changeLogFile;
     private FileOpener fileOpener;
@@ -54,7 +43,7 @@ public class Migrator {
     private Database database;
     private Logger log;
 
-    public Migrator(String changeLogFile, FileOpener fileOpener, Database database) {
+    public Liquibase(String changeLogFile, FileOpener fileOpener, Database database) {
         log = LogFactory.getLogger();
 
         if (changeLogFile != null) {

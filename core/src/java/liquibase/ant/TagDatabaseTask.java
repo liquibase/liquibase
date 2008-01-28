@@ -1,6 +1,6 @@
 package liquibase.ant;
 
-import liquibase.migrator.Migrator;
+import liquibase.Liquibase;
 import liquibase.util.StringUtils;
 import org.apache.tools.ant.BuildException;
 
@@ -21,15 +21,15 @@ public class TagDatabaseTask extends BaseLiquibaseTask {
             throw new BuildException("tagDatabase requires tag parameter to be set");
         }
 
-        Migrator migrator = null;
+        Liquibase liquibase = null;
         try {
-            migrator = createMigrator();
-            migrator.tag(getTag());
+            liquibase = createLiquibase();
+            liquibase.tag(getTag());
 
         } catch (Exception e) {
             throw new BuildException(e);
         } finally {
-            closeDatabase(migrator);
+            closeDatabase(liquibase);
         }
     }
 }

@@ -2,7 +2,7 @@ package org.liquibase.ide.common;
 
 import liquibase.DatabaseChangeLog;
 import liquibase.database.Database;
-import liquibase.migrator.Migrator;
+import liquibase.Liquibase;
 
 import java.util.Date;
 import java.io.File;
@@ -10,7 +10,7 @@ import java.io.File;
 public interface IdeFacade {
     ProgressMonitor getProgressMonitor();
 
-    Migrator getMigrator(String changeLogFile, Database database);
+    Liquibase getLiquibase(String changeLogFile, Database database);
 
     DatabaseChangeLog getRootChangeLog();
 

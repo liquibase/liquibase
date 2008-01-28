@@ -6,7 +6,7 @@ import java.io.*;
 import java.sql.Connection;
 
 import liquibase.exception.LiquibaseException;
-import liquibase.migrator.Migrator;
+import liquibase.Liquibase;
 import org.apache.maven.plugin.MojoExecutionException;
 
 /**
@@ -53,7 +53,7 @@ public class LiquibaseMigrateSQL extends ConfigurableLiquibaseMojo {
     }
 
     @Override
-    protected void performMigratorConfiguration(Migrator migrator) throws MojoExecutionException {
+    protected void performMigratorConfiguration(Liquibase liquibase) throws MojoExecutionException {
         try {
             if (!migrationSqlOutputFile.exists()) {
                 // Ensure the parent directories exist
@@ -68,10 +68,10 @@ public class LiquibaseMigrateSQL extends ConfigurableLiquibaseMojo {
         getLog().info("Output SQL Migration File: " + migrationSqlOutputFile.getAbsolutePath());
     }
 
-    protected void performLiquibaseTask(Migrator migrator) throws LiquibaseException {
+    protected void performLiquibaseTask(Liquibase liquibase) throws LiquibaseException {
         getLog().info("Creating Change Log SQL and Migrating Database");
-        super.performLiquibaseTask(migrator);
-        migrator.update(contexts, outputWriter);
+        super.performLiquibaseTask(liquibase);
+        liquibase.update(contexts, outputWriter);
     }
 
   @Override

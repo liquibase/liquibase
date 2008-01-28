@@ -20,7 +20,7 @@ public class RollbackFutureSqlAction extends MigratorAction {
             return;
         }
 
-        ideFacade.getMigrator(changeLogFile, database).futureRollbackSQL(null, writer);
+        ideFacade.getLiquibase(changeLogFile, database).futureRollbackSQL(null, writer);
         ideFacade.showOutput("Rollback SQL", writer.toString());
     }
 

@@ -2,11 +2,11 @@ package org.liquibase.ide.common.change.wizard;
 
 import liquibase.DatabaseChangeLog;
 import liquibase.ChangeSet;
+import liquibase.Liquibase;
 import liquibase.change.Change;
 import liquibase.database.Database;
 import liquibase.database.sql.SqlStatement;
 import liquibase.exception.MigrationFailedException;
-import liquibase.migrator.Migrator;
 import liquibase.util.StringUtils;
 import org.liquibase.ide.common.ChangeLogWriter;
 import org.liquibase.ide.common.IdeFacade;
@@ -17,7 +17,7 @@ public class RefactorChangeExecutor {
     public void executeChangeSet(IdeFacade ide, Database database, ChangeMetaDataWizardPage metaDataPage, Change... changes) throws MigrationFailedException {
 
         ProgressMonitor monitor = ide.getProgressMonitor();
-        Migrator migrator = ide.getMigrator(null, database);
+        Liquibase liquibase = ide.getLiquibase(null, database);
         ChangeLogWriter changeLogWriter = ide.getChangeLogWriter();
         DatabaseChangeLog changeLog = ide.getRootChangeLog();
 
@@ -26,8 +26,8 @@ public class RefactorChangeExecutor {
         ChangeSet changeSet = null;
         try {
             monitor.subTask("Checking Control Tables");
-            migrator.getDatabase().checkDatabaseChangeLogTable();
-            migrator.getDatabase().checkDatabaseChangeLogLockTable();
+            liquibase.getDatabase().checkDatabaseChangeLogTable();
+            liquibase.getDatabase().checkDatabaseChangeLogLockTable();
             monitor.worked(25);
 
 
@@ -46,7 +46,7 @@ public class RefactorChangeExecutor {
                 changeSet.addChange(change);
             }
 
-            liquibase.database.Database liquibaseDatabase = migrator.getDatabase();
+            liquibase.database.Database liquibaseDatabase = liquibase.getDatabase();
             for (Change change : changeSet.getChanges()) {
                 for (SqlStatement sql : change.generateStatements(liquibaseDatabase)) {
                     liquibaseDatabase.getJdbcTemplate().execute(sql);
@@ -55,7 +55,7 @@ public class RefactorChangeExecutor {
             monitor.worked(25);
 
             monitor.subTask("Marking Change Set As Ran");
-            migrator.getDatabase().markChangeSetAsRan(changeSet);
+            liquibase.getDatabase().markChangeSetAsRan(changeSet);
             monitor.worked(25);
 
             monitor.subTask("Writing to Change Log");

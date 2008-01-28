@@ -1,11 +1,11 @@
 package liquibase.spring;
 
 import liquibase.FileOpener;
+import liquibase.Liquibase;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.exception.JDBCException;
 import liquibase.exception.LiquibaseException;
-import liquibase.migrator.Migrator;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ResourceLoaderAware;
@@ -256,22 +256,22 @@ public class SpringMigrator implements InitializingBean, BeanNameAware, Resource
         Connection c = null;
         try {
             c = getDataSource().getConnection();
-            Migrator migrator = createMigrator(c);
+            Liquibase liquibase = createMigrator(c);
 
             // First, run patchChangeLog() which allows md5sum values to be set to NULL
 //            setup(migrator);
 
             // Now, write out the SQL file for the changes if so configured
             if (isWriteSqlFileEnabled() && getSqlOutputDir() != null) {
-                if (migrator.listUnrunChangeSets(getContexts()).size() > 0) {
+                if (liquibase.listUnrunChangeSets(getContexts()).size() > 0) {
                     log.log(Level.WARNING, getExecuteDisabledWarningMessage());
                 }
-                writeSqlFile(migrator);
+                writeSqlFile(liquibase);
             }
 
             // Now execute the DDL, if so configured
             if (isExecuteEnabled()) {
-                executeSql(migrator);
+                executeSql(liquibase);
             }
         } catch (SQLException e) {
             throw new JDBCException(e);
@@ -291,13 +291,13 @@ public class SpringMigrator implements InitializingBean, BeanNameAware, Resource
      * If there are any un-run changesets, this method will write them out to a file, if
      * so configured.
      *
-     * @param migrator
+     * @param liquibase
      *
      * @throws SQLException
      * @throws IOException
      * @throws LiquibaseException
      */
-    protected void writeSqlFile(Migrator migrator) throws LiquibaseException {
+    protected void writeSqlFile(Liquibase liquibase) throws LiquibaseException {
         FileWriter fw = null;
         try {
 
@@ -313,7 +313,7 @@ public class SpringMigrator implements InitializingBean, BeanNameAware, Resource
 
 //            migrator.setMode(Migrator.Mode.OUTPUT_SQL_MODE);
 //            migrator.setOutputSQLWriter(fw);
-            migrator.update(getContexts(), fw);
+            liquibase.update(getContexts(), fw);
         } catch (IOException e) {
             throw new LiquibaseException(e);
         } finally {
@@ -327,21 +327,21 @@ public class SpringMigrator implements InitializingBean, BeanNameAware, Resource
         }
     }
 
-    private Migrator createMigrator(Connection c) throws JDBCException {
-        return new Migrator(getChangeLog(), new SpringResourceOpener(getChangeLog()), DatabaseFactory.getInstance().findCorrectDatabaseImplementation(c));
+    private Liquibase createMigrator(Connection c) throws JDBCException {
+        return new Liquibase(getChangeLog(), new SpringResourceOpener(getChangeLog()), DatabaseFactory.getInstance().findCorrectDatabaseImplementation(c));
     }
 
     /**
      * This method will actually execute the changesets.
      *
-     * @param migrator
+     * @param liquibase
      *
      * @throws SQLException
      * @throws IOException
      */
-    protected void executeSql(Migrator migrator) throws LiquibaseException {
+    protected void executeSql(Liquibase liquibase) throws LiquibaseException {
 //        migrator.setMode(Migrator.Mode.EXECUTE_MODE);
-        migrator.update(getContexts());
+        liquibase.update(getContexts());
     }
 
     /**

@@ -1,6 +1,6 @@
 package liquibase.ant;
 
-import liquibase.migrator.Migrator;
+import liquibase.Liquibase;
 import org.apache.tools.ant.BuildException;
 
 import java.io.Writer;
@@ -9,15 +9,15 @@ public class ChangeLogSyncTask extends BaseLiquibaseTask {
 
     public void execute() throws BuildException {
 
-        Migrator migrator = null;
+        Liquibase liquibase = null;
         try {
-            migrator = createMigrator();
+            liquibase = createLiquibase();
 
             Writer writer = createOutputWriter();
             if (writer == null) {
-                migrator.changeLogSync(getContexts());
+                liquibase.changeLogSync(getContexts());
             } else {
-                migrator.changeLogSync(getContexts(), writer);
+                liquibase.changeLogSync(getContexts(), writer);
                 writer.flush();
                 writer.close();
             }
@@ -25,7 +25,7 @@ public class ChangeLogSyncTask extends BaseLiquibaseTask {
         } catch (Exception e) {
             throw new BuildException(e);
         } finally {
-            closeDatabase(migrator);
+            closeDatabase(liquibase);
         }
     }
 }

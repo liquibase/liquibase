@@ -513,41 +513,15 @@ public abstract class AbstractDatabase implements Database {
                 }
                 // If there is no table in the database for recording change history create one.
                 statementsToExecute.add(createTableStatement);
-//                if (migrator.getMode().equals(Migrator.Mode.EXECUTE_MODE)) {
                 log.info("Creating database history table with name: " + getDatabaseChangeLogTableName());
                 changeLogTableExists = true;
 //                }
             }
 
             for (SqlStatement sql : statementsToExecute) {
-//                if (migrator.getMode().equals(Migrator.Mode.EXECUTE_MODE)) {
                 this.getJdbcTemplate().execute(sql);
                 this.commit();
-//                } else {
-//                    if (!migrator.getMode().equals(Migrator.Mode.OUTPUT_FUTURE_ROLLBACK_SQL_MODE)) {
-//                        Writer writer = migrator.getOutputSQLWriter();
-//                        if (writer == null) {
-//                            wroteToOutput = false;
-//                        } else {
-//                            try {
-//                                writer.append(sql.getSqlStatement(this)).append(sql.getEndDelimiter(this)).append(StreamUtil.getLineSeparator());
-//                            } catch (IOException e) {
-//                                throw new RuntimeException(e);
-//                            }
-//                            wroteToOutput = true;
-//                        }
-//                    }
-//                }
             }
-
-//            if (wroteToOutput) {
-//                try {
-//                    migrator.getOutputSQLWriter().append(StreamUtil.getLineSeparator());
-//                } catch (IOException e) {
-//                    throw new RuntimeException(e);
-//                }
-//            }
-
         } catch (SQLException e) {
             throw new JDBCException(e);
         } finally {

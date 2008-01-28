@@ -16,7 +16,7 @@ public class RollbackCountSqlAction extends MigratorAction {
         Integer input = ideFacade.promptForInteger(getTitle(), "Enter number of changes to rollback", 1);
         if (input != null) {
             StringWriter writer = new StringWriter();
-            ideFacade.getMigrator(null, database).rollback(input, null, writer);
+            ideFacade.getLiquibase(null, database).rollback(input, null, writer);
 
             ideFacade.showOutput("Rollback SQL", writer.toString());
         }

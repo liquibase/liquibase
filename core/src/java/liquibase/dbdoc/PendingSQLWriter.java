@@ -4,7 +4,7 @@ import liquibase.ChangeSet;
 import liquibase.change.Change;
 import liquibase.database.Database;
 import liquibase.exception.MigrationFailedException;
-import liquibase.migrator.Migrator;
+import liquibase.Liquibase;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -21,7 +21,7 @@ public class PendingSQLWriter extends HTMLWriter {
         return "Pending SQL";
     }
 
-    protected void writeBody(FileWriter fileWriter, Object object, List<Change> ranChanges, List<Change> changesToRun, Migrator migrator) throws IOException{
+    protected void writeBody(FileWriter fileWriter, Object object, List<Change> ranChanges, List<Change> changesToRun, Liquibase liquibase) throws IOException{
         if (changesToRun.size() == 0) {
             fileWriter.append("<b>NONE</b>");
         }
@@ -38,11 +38,8 @@ public class PendingSQLWriter extends HTMLWriter {
             lastRunChangeSet = thisChangeSet;
             String anchor = thisChangeSet.toString(false).replaceAll("\\W","_");
             fileWriter.append("<a name='").append(anchor).append("'/>");
-//            migrator.setOutputSQLWriter(fileWriter);
-//            migrator.setMode(Migrator.Mode.OUTPUT_SQL_MODE);
-
             try {
-                thisChangeSet.execute(migrator.getDatabase());
+                thisChangeSet.execute(liquibase.getDatabase());
             } catch (MigrationFailedException e) {
                 fileWriter.append("EXECUTION ERROR: ").append(change.getChangeName()).append(": ").append(e.getMessage()).append("\n\n");
             }

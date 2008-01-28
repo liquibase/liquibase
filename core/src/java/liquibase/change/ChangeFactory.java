@@ -8,7 +8,7 @@ import java.util.Map;
 /**
  * Factory class for constructing the correct liquibase.change.Change implementation based on the tag name.
  * It is currently implemented by a static array of Change implementations, although that may change in
- * later revisions.  The best way to get an instance of ChangeFactory is off the Migrator.getChangeFactory() method.
+ * later revisions.  The best way to get an instance of ChangeFactory is off the Liquibase.getChangeFactory() method.
  *
  * @see liquibase.change.Change
  */

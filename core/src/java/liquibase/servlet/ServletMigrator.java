@@ -1,12 +1,9 @@
 package liquibase.servlet;
 
-import liquibase.ClassLoaderFileOpener;
-import liquibase.CompositeFileOpener;
-import liquibase.FileOpener;
-import liquibase.FileSystemFileOpener;
+import liquibase.*;
 import liquibase.database.DatabaseFactory;
 import liquibase.log.LogFactory;
-import liquibase.migrator.Migrator;
+import liquibase.Liquibase;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -77,9 +74,9 @@ public class ServletMigrator implements ServletContextListener {
             return;
         }
 
-        String shouldRunProperty = System.getProperty(Migrator.SHOULD_RUN_SYSTEM_PROPERTY);
+        String shouldRunProperty = System.getProperty(Liquibase.SHOULD_RUN_SYSTEM_PROPERTY);
         if (shouldRunProperty != null && !Boolean.valueOf(shouldRunProperty)) {
-            LogFactory.getLogger().info("Migrator did not run on " + hostName + " because '" + Migrator.SHOULD_RUN_SYSTEM_PROPERTY + "' system property was set to false");
+            LogFactory.getLogger().info("LiquiBase did not run on " + hostName + " because '" + Liquibase.SHOULD_RUN_SYSTEM_PROPERTY + "' system property was set to false");
             return;
         }
 
@@ -136,8 +133,8 @@ public class ServletMigrator implements ServletContextListener {
                 FileOpener fsFO = new FileSystemFileOpener();
 
 
-                Migrator migrator = new Migrator(getChangeLogFile(), new CompositeFileOpener(clFO,fsFO), DatabaseFactory.getInstance().findCorrectDatabaseImplementation(connection));
-                migrator.update(getContexts());
+                Liquibase liquibase = new Liquibase(getChangeLogFile(), new CompositeFileOpener(clFO,fsFO), DatabaseFactory.getInstance().findCorrectDatabaseImplementation(connection));
+                liquibase.update(getContexts());
             } finally {
                 if (ic != null) {
                     ic.close();

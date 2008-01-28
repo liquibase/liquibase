@@ -5,7 +5,7 @@ import liquibase.ChangeSet;
 import liquibase.change.Change;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.sql.SqlStatement;
-import liquibase.migrator.Migrator;
+import liquibase.Liquibase;
 import liquibase.parser.LiquibaseSchemaResolver;
 import liquibase.util.StringUtils;
 import liquibase.xml.DefaultXmlWriter;
@@ -76,11 +76,11 @@ public abstract class BaseEclipseRefactorWizard extends Wizard {
                     monitor.beginTask("Refactoring Database", 100);
 
                     try {
-                        Migrator migrator = new Migrator(LiquibasePreferences.getCurrentChangeLog(), new EclipseFileOpener(), DatabaseFactory.getInstance().findCorrectDatabaseImplementation(getConnection()));
+                        Liquibase liquibase = new Liquibase(LiquibasePreferences.getCurrentChangeLog(), new EclipseFileOpener(), DatabaseFactory.getInstance().findCorrectDatabaseImplementation(getConnection()));
 
                         monitor.subTask("Checking Control Tables");
-                        migrator.getDatabase().checkDatabaseChangeLogTable();
-                        migrator.getDatabase().checkDatabaseChangeLogLockTable();
+                        liquibase.getDatabase().checkDatabaseChangeLogTable();
+                        liquibase.getDatabase().checkDatabaseChangeLogLockTable();
                         monitor.worked(25);
 
 
@@ -115,7 +115,7 @@ public abstract class BaseEclipseRefactorWizard extends Wizard {
                         monitor.worked(25);
 
                         monitor.subTask("Marking Change Set As Ran");
-                        migrator.getDatabase().markChangeSetAsRan(changeSet);
+                        liquibase.getDatabase().markChangeSetAsRan(changeSet);
                         monitor.worked(25);
 
                         monitor.subTask("Writing to Change Log");

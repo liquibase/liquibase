@@ -17,7 +17,7 @@ public class RollbackToDateSqlAction extends MigratorAction {
         Date input = ideFacade.promptForDateTime(getTitle(), "Enter date/time database tag to roll back to\nFormat: yyyy-dd-mm hh:mm:ss", new Date());
         if (input != null) {
             StringWriter writer = new StringWriter();
-            ideFacade.getMigrator(null, database).rollback(input, null, writer);
+            ideFacade.getLiquibase(null, database).rollback(input, null, writer);
 
             ideFacade.showOutput("Rollback SQL", writer.toString());
         }

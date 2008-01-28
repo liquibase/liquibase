@@ -2,7 +2,6 @@ package org.liquibase.ide.common.action;
 
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
-import liquibase.migrator.Migrator;
 import org.liquibase.ide.common.IdeFacade;
 
 public abstract class MigratorAction extends BaseDatabaseAction {

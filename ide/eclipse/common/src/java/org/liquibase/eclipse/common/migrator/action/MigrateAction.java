@@ -1,6 +1,6 @@
 package org.liquibase.eclipse.common.migrator.action;
 
-import liquibase.migrator.Migrator;
+import liquibase.Liquibase;
 import org.eclipse.core.commands.operations.OperationStatus;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.datatools.connectivity.sqm.core.rte.jdbc.JDBCDatabase;
@@ -13,8 +13,8 @@ public class MigrateAction extends BaseDatabaseAction {
 	
 	public void run(IAction action) {
 		try {
-            Migrator migrator = getMigrator(LiquibasePreferences.getRootChangeLog(), getSelectedConnection(getSelection()));
-			migrator.update(null);
+            Liquibase liquibase = getLiquibase(LiquibasePreferences.getRootChangeLog(), getSelectedConnection(getSelection()));
+			liquibase.update(null);
 			
 			((JDBCDatabase)getSelectedDatabase(getSelection())).refresh();
 		} catch (Exception e) {
