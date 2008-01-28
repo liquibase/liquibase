@@ -42,7 +42,7 @@ public class PendingSQLWriter extends HTMLWriter {
 //            migrator.setMode(Migrator.Mode.OUTPUT_SQL_MODE);
 
             try {
-                thisChangeSet.execute(null);
+                thisChangeSet.execute(migrator.getDatabase());
             } catch (MigrationFailedException e) {
                 fileWriter.append("EXECUTION ERROR: ").append(change.getChangeName()).append(": ").append(e.getMessage()).append("\n\n");
             }

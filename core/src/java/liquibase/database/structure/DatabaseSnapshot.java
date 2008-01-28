@@ -382,8 +382,8 @@ public class DatabaseSnapshot {
                 }
                 indexInformation.getColumns().add(position - 1, columnName);
             }
-            for (String key : indexMap.keySet()) {
-                indexes.add(indexMap.get(key));
+            for (Map.Entry<String, Index> entry : indexMap.entrySet()) {
+                indexes.add(entry.getValue());
             }
             rs.close();
             if (statement != null) {

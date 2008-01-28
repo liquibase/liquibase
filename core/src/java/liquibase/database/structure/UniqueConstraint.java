@@ -10,6 +10,7 @@ public class UniqueConstraint {
     private Set<Column> columns = new HashSet<Column>();
 
     public UniqueConstraint(String name, Table table, Column... columns) {
+        this.name = name;
         this.table = table;
         this.columns.addAll(Arrays.asList(columns));
     }
