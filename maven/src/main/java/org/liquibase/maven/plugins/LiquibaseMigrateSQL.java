@@ -3,6 +3,7 @@
 package org.liquibase.maven.plugins;
 
 import java.io.*;
+import java.sql.Connection;
 
 import liquibase.exception.LiquibaseException;
 import liquibase.migrator.Migrator;
@@ -27,16 +28,6 @@ public class LiquibaseMigrateSQL extends ConfigurableLiquibaseMojo {
     protected File migrationSqlOutputFile;
 
     /**
-     * Output a change log SQL for the DatabaseChangeLog table only, not the actual database
-     * changes that are required.
-     *
-     * @parameter expression="${liquibase.outputChangeLogSQLOnly}" default-value="true"
-     */
-    protected boolean changeLogSqlOnly;
-
-    private boolean changeLogSqlOnlyDefault = true;
-
-    /**
      * Controls the prompting of users as to whether or not they really want to run the
      * changes on a database that is not local to the machine that the user is current
      * executing the plugin on.
@@ -46,6 +37,8 @@ public class LiquibaseMigrateSQL extends ConfigurableLiquibaseMojo {
     protected boolean promptOnNonLocalDatabase;
 
     private boolean promptOnNonLocalDatabaseDefault = false;
+
+    /** The writer fro writing the migration SQL. */  
     private Writer outputWriter;
 
     @Override
@@ -57,7 +50,6 @@ public class LiquibaseMigrateSQL extends ConfigurableLiquibaseMojo {
     protected void printSettings(String indent) {
         super.printSettings(indent);
         getLog().info(indent + "migrationSQLOutputFile: " + migrationSqlOutputFile);
-        getLog().info(indent + "changeLogSqlOnly: " + changeLogSqlOnly);
     }
 
     @Override
@@ -73,19 +65,23 @@ public class LiquibaseMigrateSQL extends ConfigurableLiquibaseMojo {
             getLog().error(e);
             throw new MojoExecutionException("Failed to create SQL output writer", e);
         }
-
         getLog().info("Output SQL Migration File: " + migrationSqlOutputFile.getAbsolutePath());
-        if (changeLogSqlOnly) {
-            getLog().info("Creating Change Log SQL Only");
-//      migrator.setMode(Migrator.Mode.OUTPUT_CHANGELOG_ONLY_SQL_MODE);
-        } else {
-            getLog().info("Creating Change Log SQL and Migrating Database");
-        }
-//    migrator.setOutputSQLWriter(w);
     }
 
     protected void performLiquibaseTask(Migrator migrator) throws LiquibaseException {
+        getLog().info("Creating Change Log SQL and Migrating Database");
         super.performLiquibaseTask(migrator);
-        migrator.update(null, outputWriter);
+        migrator.update(contexts, outputWriter);
     }
+
+  @Override
+  protected void releaseConnection(Connection c) {
+    super.releaseConnection(c);
+    try {
+      outputWriter.close();
+    }
+    catch (IOException e) {
+      getLog().error(e);
+    }
+  }
 }

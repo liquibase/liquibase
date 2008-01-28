@@ -136,17 +136,12 @@ public abstract class ConfigurableLiquibaseMojo extends AbstractLiquibaseMojo {
 
   protected Migrator createMigrator(FileOpener fo, Connection conn) throws MojoExecutionException {
       try {
-          return new Migrator(changeLogFile.trim(), fo, DatabaseFactory.getInstance().findCorrectDatabaseImplementation(conn));
+          return new Migrator(changeLogFile.trim(),
+                              fo,
+                              DatabaseFactory.getInstance().findCorrectDatabaseImplementation(conn));
       } catch (JDBCException e) {
           throw new MojoExecutionException(e.getMessage());
       }
-  }
-
-  @Override
-  protected void configureMigrator(Migrator migrator, Connection connection)
-          throws LiquibaseException {
-    super.configureMigrator(migrator, connection);
-//    migrator.setContexts(contexts);
   }
 
   /**

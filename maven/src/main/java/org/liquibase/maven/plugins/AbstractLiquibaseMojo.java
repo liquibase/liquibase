@@ -108,8 +108,6 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                                                     password);
 
       Migrator migrator = createMigrator(getFileOpener(artifactClassLoader), connection);
-      configureMigrator(migrator, connection);
-
       getLog().info("Executing on Database: " + url);
 
       if (isPromptOnNonLocalDatabase() && !migrator.isSafeToRunMigration()) {
@@ -132,11 +130,6 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
 
   protected abstract void performLiquibaseTask(Migrator migrator)
           throws LiquibaseException;
-
-  protected void configureMigrator(Migrator migrator, Connection connection)
-          throws LiquibaseException {
-//    migrator.init(connection);
-  }
 
   protected boolean isPromptOnNonLocalDatabase() {
     return promptOnNonLocalDatabase;
