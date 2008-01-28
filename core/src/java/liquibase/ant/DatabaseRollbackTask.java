@@ -5,6 +5,7 @@ import org.apache.tools.ant.BuildException;
 
 import java.sql.SQLException;
 import java.util.Date;
+import java.io.Writer;
 
 /**
  * Ant task for rolling back a database.
@@ -52,25 +53,36 @@ public class DatabaseRollbackTask extends BaseLiquibaseTask {
         Migrator migrator = null;
         try {
             migrator = createMigrator();
+            Writer writer = createOutputWriter();
             if (getRollbackCount() != null) {
-                migrator.rollback(getRollbackCount(), getContexts());
+                if (writer == null) {
+                    migrator.rollback(getRollbackCount(), getContexts());
+                } else {
+                    migrator.rollback(getRollbackCount(), getContexts(), writer);
+                }
             } else if (getRollbackDate() != null) {
-                migrator.rollback(getRollbackDate(), getContexts());
+                if (writer == null) {
+                    migrator.rollback(getRollbackDate(), getContexts());
+                } else {
+                    migrator.rollback(getRollbackDate(), getContexts(), writer);
+                }
             } else if (getRollbackTag() != null) {
-                migrator.rollback(getRollbackTag(), getContexts());
+                if (writer == null) {
+                    migrator.rollback(getRollbackTag(), getContexts());
+                } else {
+                    migrator.rollback(getRollbackTag(), getContexts(), writer);
+                }
             } else {
                 throw new BuildException("Must specify rollbackCount, rollbackDate, or rollbackTag");
+            }
+            if (writer != null) {
+                writer.flush();
+                writer.close();
             }
         } catch (Exception e) {
             throw new BuildException(e);
         } finally {
-            if (migrator != null && migrator.getDatabase() != null && migrator.getDatabase().getConnection() != null) {
-                try {
-                    migrator.getDatabase().getConnection().close();
-                } catch (SQLException e) {
-                    ; //could not close
-                }
-            }
+            closeDatabase(migrator);
         }
     }
 }

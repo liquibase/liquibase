@@ -221,7 +221,7 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
 
         runCompleteChangeLog();
 
-        Diff diff = new Diff(database.getConnection(), database.getConnection());
+        Diff diff = new Diff(database, database);
         DiffResult diffResult = diff.compare();
 
         assertEquals(0, diffResult.getMissingColumns().size());
@@ -252,7 +252,7 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
 
         DatabaseSnapshot originalSnapshot = new DatabaseSnapshot(database);
 
-        Diff diff = new Diff(database.getConnection(), (String) null);
+        Diff diff = new Diff(database, (String) null);
         DiffResult diffResult = diff.compare();
 
         File tempFile = File.createTempFile("liquibase-test", ".xml");

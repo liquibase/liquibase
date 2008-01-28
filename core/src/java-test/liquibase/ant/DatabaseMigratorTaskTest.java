@@ -5,16 +5,16 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 
 /**
- * Tests for {@link DatabaseMigratorTask}
+ * Tests for {@link DatabaseUpdateTask}
  */
 public class DatabaseMigratorTaskTest {
 
     @Test
     public void createClasspath() throws Exception {
-        DatabaseMigratorTask databaseMigratorTask = new DatabaseMigratorTask();
+        DatabaseUpdateTask databaseUpdateTask = new DatabaseUpdateTask();
         Project project = new Project();
-        databaseMigratorTask.setProject(project);
+        databaseUpdateTask.setProject(project);
 
-        assertEquals(project, databaseMigratorTask.createClasspath().getProject());
+        assertEquals(project, databaseUpdateTask.createClasspath().getProject());
     }
 }

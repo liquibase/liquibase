@@ -4,7 +4,6 @@ import liquibase.CompositeFileOpener;
 import liquibase.FileSystemFileOpener;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
-import liquibase.database.structure.Schema;
 import liquibase.diff.Diff;
 import liquibase.diff.DiffResult;
 import liquibase.diff.DiffStatusListener;
@@ -141,7 +140,7 @@ public class CommandLineMigrator {
             String arg = args[i];
             if (arg.startsWith("--") && !arg.contains("=")) {
                 String nextArg = null;
-                if (i+1 < args.length) {
+                if (i + 1 < args.length) {
                     nextArg = args[i + 1];
                 }
                 if (nextArg != null && !nextArg.startsWith("--") && !isCommand(nextArg)) {
@@ -361,7 +360,7 @@ public class CommandLineMigrator {
                 if (this.command.equalsIgnoreCase("migrate")) {
                     this.command = "update";
                 } else if (this.command.equalsIgnoreCase("migrateSQL")) {
-                        this.command = "updateSQL";
+                    this.command = "updateSQL";
                 }
                 seenCommand = true;
             } else if (seenCommand) {
@@ -588,21 +587,22 @@ public class CommandLineMigrator {
             throw new JDBCException("Connection could not be created to " + url + " with driver " + driver.getClass().getName() + ".  Possibly the wrong driver for the given database URL");
         }
 
-
-        if ("diff".equalsIgnoreCase(command)) {
-            doDiff(connection, createConnectionFromCommandParams(commandParams));
-            return;
-        } else if ("diffChangeLog".equalsIgnoreCase(command)) {
-            doDiffToChangeLog(connection, createConnectionFromCommandParams(commandParams));
-            return;
-        } else if ("generateChangeLog".equalsIgnoreCase(command)) {
-            doGenerateChangeLog(connection);
-            return;
-        }
-
         try {
             Database database = databaseFactory.findCorrectDatabaseImplementation(connection);
             database.setDefaultSchemaName(StringUtils.trimToNull(defaultSchemaName));
+
+
+            if ("diff".equalsIgnoreCase(command)) {
+                doDiff(database, createDatabaseFromCommandParams(commandParams));
+                return;
+            } else if ("diffChangeLog".equalsIgnoreCase(command)) {
+                doDiffToChangeLog(database, createDatabaseFromCommandParams(commandParams));
+                return;
+            } else if ("generateChangeLog".equalsIgnoreCase(command)) {
+                doGenerateChangeLog(database);
+                return;
+            }
+
 
             Migrator migrator = new Migrator(changeLogFile, new CompositeFileOpener(fsOpener, clOpener), database);
 
@@ -723,11 +723,12 @@ public class CommandLineMigrator {
         }
     }
 
-    private Connection createConnectionFromCommandParams(Set<String> commandParams) throws CommandLineParsingException, SQLException, JDBCException {
+    private Database createDatabaseFromCommandParams(Set<String> commandParams) throws CommandLineParsingException, SQLException, JDBCException {
         String driver = null;
         String url = null;
         String username = null;
         String password = null;
+        String defaultSchemaName = null;
 
         for (String param : commandParams) {
             String[] splitArg = splitArg(param);
@@ -738,10 +739,12 @@ public class CommandLineMigrator {
                 driver = value;
             } else if ("baseUrl".equalsIgnoreCase(attributeName)) {
                 url = value;
-            } else if ("baseUsername".equals(attributeName)) {
+            } else if ("baseUsername".equalsIgnoreCase(attributeName)) {
                 username = value;
-            } else if ("basePassword".equals(attributeName)) {
+            } else if ("basePassword".equalsIgnoreCase(attributeName)) {
                 password = value;
+            } else if ("baseDefaultSchemaName".equalsIgnoreCase(attributeName)) {
+                defaultSchemaName = value;
             }
         }
 
@@ -769,7 +772,11 @@ public class CommandLineMigrator {
         if (connection == null) {
             throw new JDBCException("Connection could not be created to " + url + " with driver " + driver.getClass().getName() + ".  Possibly the wrong driver for the given database URL");
         }
-        return connection;
+
+        Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(connection);
+        database.setDefaultSchemaName(defaultSchemaName);
+
+        return database;
     }
 
     private Writer getOutputWriter() {
@@ -780,7 +787,7 @@ public class CommandLineMigrator {
         return System.getProperty("os.name").startsWith("Windows ");
     }
 
-    private void doDiff(Connection baseDatabase, Connection targetDatabase) throws JDBCException {
+    private void doDiff(Database baseDatabase, Database targetDatabase) throws JDBCException {
         Diff diff = new Diff(baseDatabase, targetDatabase);
         diff.addStatusListener(new OutDiffStatusListener());
         DiffResult diffResult = diff.compare();
@@ -790,15 +797,15 @@ public class CommandLineMigrator {
         diffResult.printResult(System.out);
     }
 
-    private void doDiffToChangeLog(Connection baseDatabase, Connection targetDatabase) throws JDBCException, IOException, ParserConfigurationException {
+    private void doDiffToChangeLog(Database baseDatabase, Database targetDatabase) throws JDBCException, IOException, ParserConfigurationException {
         Diff diff = new Diff(baseDatabase, targetDatabase);
         diff.addStatusListener(new OutDiffStatusListener());
         DiffResult diffResult = diff.compare();
 
-        diffResult.printChangeLog(System.out, DatabaseFactory.getInstance().findCorrectDatabaseImplementation(targetDatabase));
+        diffResult.printChangeLog(System.out, targetDatabase);
     }
 
-    private void doGenerateChangeLog(Connection originalDatabase) throws JDBCException, IOException, ParserConfigurationException {
+    private void doGenerateChangeLog(Database originalDatabase) throws JDBCException, IOException, ParserConfigurationException {
         Diff diff = new Diff(originalDatabase, defaultSchemaName);
         diff.addStatusListener(new OutDiffStatusListener());
         DiffResult diffResult = diff.compare();
@@ -809,7 +816,7 @@ public class CommandLineMigrator {
             File changeFile = new File(changeLogFile);
             outputStream = new PrintStream(changeFile);
         }
-        diffResult.printChangeLog(outputStream, DatabaseFactory.getInstance().findCorrectDatabaseImplementation(originalDatabase));
+        diffResult.printChangeLog(outputStream, originalDatabase);
     }
 
 
