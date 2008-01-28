@@ -21,6 +21,7 @@ Changes in version 1.5.0 ()
 - Handles Postgres datatypes better
 - added <update> change
 - added <delete> change
+- Additional and enhanced Ant tasks 
 - Other bug fixes
 
 Changes in version 1.4.1 (2007.11.30)
