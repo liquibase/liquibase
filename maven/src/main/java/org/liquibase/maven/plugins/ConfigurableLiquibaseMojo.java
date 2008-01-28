@@ -118,13 +118,15 @@ public abstract class ConfigurableLiquibaseMojo extends AbstractLiquibaseMojo {
     // Load the properties file if there is one, but only for values that the user has not
     // already specified.
     if (propertiesFile != null) {
-      getLog().info("Loading Liquibase settings from properties file, " + propertiesFile);
+      getLog().info("Parsing Liquibase Properties File");
+      getLog().info("  File: " + propertiesFile);
       try {
         InputStream is = fo.getResourceAsStream(propertiesFile);
         if (is == null) {
           throw new MojoFailureException("Failed to resolve the properties file.");
         }
         parsePropertiesFile(is);
+        getLog().info(MavenUtils.LOG_SEPARATOR);
       }
       catch (IOException e) {
         throw new MojoExecutionException("Failed to resolve properties file", e);
@@ -184,9 +186,8 @@ public abstract class ConfigurableLiquibaseMojo extends AbstractLiquibaseMojo {
         }
       }
       catch (Exception e) {
-        getLog().warn(e);
-        // May need to correct this to make it a more useful exception...
-        throw new MojoExecutionException("Unknown parameter: '" + key + "'", e);
+        getLog().info("  '" + key + "' in properties file is not being used by this "
+                      + "task.");
       }
     }
   }
