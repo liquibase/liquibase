@@ -2,8 +2,7 @@
 
 <project name="liquibase-sample">
 
-    <target name="migrate-mysql">
-
+    <target name="prepare">
         <path id="classpath">
             <fileset dir="../../lib">
                 <include name="**/*.jar"/>
@@ -34,11 +33,13 @@
         <fail unless="database.username">database.username not set</fail>
         <fail unless="database.password">database.password not set</fail>
 
-        <taskdef resource="migratortasks.properties">
+        <taskdef resource="liquibasetasks.properties">
             <classpath refid="classpath"/>
         </taskdef>
+    </target>
 
-        <migrateDatabase
+    <target name="update" depends="prepare">
+        <updateDatabase
                 changeLogFile="${db.changelog.file}"
                 driver="${database.driver}"
                 url="${database.url}"
@@ -48,8 +49,154 @@
                 dropFirst="false"
                 classpathref="classpath"
                 >
-        </migrateDatabase>
+        </updateDatabase>
+    </target>
+
+    <target name="rolback" depends="prepare">
+        <rollbackDatabase
+                changeLogFile="${db.changelog.file}"
+                driver="${database.driver}"
+                url="${database.url}"
+                username="${database.username}"
+                password="${database.password}"
+                promptOnNonLocalDatabase="${prompt.user.if.not.local.database}"
+                rollbackCount="1"
+                classpathref="classpath"
+                >
+        </rollbackDatabase>
+    </target>
+
+    <target name="rolbackFuture" depends="prepare">
+        <rollbackFutureDatabase
+                changeLogFile="${db.changelog.file}"
+                driver="${database.driver}"
+                url="${database.url}"
+                username="${database.username}"
+                password="${database.password}"
+                promptOnNonLocalDatabase="${prompt.user.if.not.local.database}"
+                classpathref="classpath"
+                outputFile="/tmp/out.sql"
+                >
+        </rollbackFutureDatabase>
+    </target>
+
+    <target name="generateChangeLog" depends="prepare">
+
+        <generateChangeLog
+                changeLogFile="${db.changelog.file}"
+                driver="${database.driver}"
+                url="${database.url}"
+                username="${database.username}"
+                password="${database.password}"
+                promptOnNonLocalDatabase="${prompt.user.if.not.local.database}"
+                classpathref="classpath"
+                outputFile="/tmp/changelog.xml"
+                >
+        </generateChangeLog>
     </target>
 
 
+    <target name="diff" depends="prepare">
+
+        <diffDatabase
+                changeLogFile="${db.changelog.file}"
+                driver="${database.driver}"
+                url="${database.url}"
+                username="${database.username}"
+                password="${database.password}"
+                promptOnNonLocalDatabase="${prompt.user.if.not.local.database}"
+                classpathref="classpath"
+
+                baseUrl="${database.url}"
+                baseUsername="${database.username}"
+                basePassword="${database.password}"
+                baseDefaultSchemaName="liquibaseb"
+
+                outputFile="/tmp/diff.txt"
+                >
+        </diffDatabase>
+    </target>
+
+    <target name="diffChangeLog" depends="prepare">
+        <diffDatabaseToChangeLog
+                changeLogFile="${db.changelog.file}"
+                driver="${database.driver}"
+                url="${database.url}"
+                username="${database.username}"
+                password="${database.password}"
+                promptOnNonLocalDatabase="${prompt.user.if.not.local.database}"
+                classpathref="classpath"
+
+                baseUrl="${database.url}"
+                baseUsername="${database.username}"
+                basePassword="${database.password}"
+                baseDefaultSchemaName="liquibaseb"
+
+                outputFile="/tmp/diff.xml"
+                >
+        </diffDatabaseToChangeLog>
+    </target>
+
+    <target name="dbdoc" depends="prepare">
+
+        <dbDoc
+                changeLogFile="${db.changelog.file}"
+                driver="${database.driver}"
+                url="${database.url}"
+                username="${database.username}"
+                password="${database.password}"
+                promptOnNonLocalDatabase="${prompt.user.if.not.local.database}"
+                classpathref="classpath"
+
+                outputDirectory="/tmp/dbdoc-ant"
+                >
+        </dbDoc>
+    </target>
+
+    <target name="tag" depends="prepare">
+
+        <tagDatabase
+                changeLogFile="${db.changelog.file}"
+                driver="${database.driver}"
+                url="${database.url}"
+                username="${database.username}"
+                password="${database.password}"
+                promptOnNonLocalDatabase="${prompt.user.if.not.local.database}"
+                classpathref="classpath"
+
+                tag="ant-tag"
+                >
+        </tagDatabase>
+    </target>
+
+    <target name="changeLogSync" depends="prepare">
+
+        <changeLogSync
+                changeLogFile="${db.changelog.file}"
+                driver="${database.driver}"
+                url="${database.url}"
+                username="${database.username}"
+                password="${database.password}"
+                promptOnNonLocalDatabase="${prompt.user.if.not.local.database}"
+                classpathref="classpath"
+
+                outputFile="/tmp/out.sql"
+                >
+        </changeLogSync>
+    </target>
+
+    <target name="dropAll" depends="prepare">
+
+        <dropAllDatabaseObjects
+                changeLogFile="${db.changelog.file}"
+                driver="${database.driver}"
+                url="${database.url}"
+                username="${database.username}"
+                password="${database.password}"
+                promptOnNonLocalDatabase="${prompt.user.if.not.local.database}"
+                classpathref="classpath"
+                schemas="liquibase,liquibaseb"
+                >
+        </dropAllDatabaseObjects>
+    </target>
 </project>

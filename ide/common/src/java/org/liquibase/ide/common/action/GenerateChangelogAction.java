@@ -18,7 +18,7 @@ public class GenerateChangelogAction extends MigratorAction {
     }
 
     public void actionPerform(Database database, IdeFacade ideFacade) throws LiquibaseException {
-        Diff diff = new Diff(database.getConnection(), (String) null);
+        Diff diff = new Diff(database, (String) null);
 //        diff.addStatusListener(new OutDiffStatusListener());
         DiffResult diffResult = diff.compare();
 

@@ -5,11 +5,12 @@ import liquibase.migrator.UIFactory;
 import org.apache.tools.ant.BuildException;
 
 import java.sql.SQLException;
+import java.io.Writer;
 
 /**
  * Ant task for migrating a database forward.
  */
-public class DatabaseMigratorTask extends BaseLiquibaseTask {
+public class DatabaseUpdateTask extends BaseLiquibaseTask {
     private boolean dropFirst = false;
 
     public boolean isDropFirst() {
@@ -21,9 +22,7 @@ public class DatabaseMigratorTask extends BaseLiquibaseTask {
     }
 
     public void execute() throws BuildException {
-        String shouldRunProperty = System.getProperty(Migrator.SHOULD_RUN_SYSTEM_PROPERTY);
-        if (shouldRunProperty != null && !Boolean.valueOf(shouldRunProperty)) {
-            log("Migrator did not run because '" + Migrator.SHOULD_RUN_SYSTEM_PROPERTY + "' system property was set to false");
+        if (!shouldRun()) {
             return;
         }
 
@@ -40,17 +39,20 @@ public class DatabaseMigratorTask extends BaseLiquibaseTask {
             if (isDropFirst()) {
                 migrator.dropAll();
             }
-            migrator.update(getContexts());
+
+            Writer writer = createOutputWriter();
+            if (writer == null) {
+                migrator.update(getContexts());
+            } else {
+                migrator.update(getContexts(), writer);
+                writer.flush();
+                writer.close();
+            }
+
         } catch (Exception e) {
             throw new BuildException(e);
         } finally {
-            if (migrator != null && migrator.getDatabase() != null && migrator.getDatabase().getConnection() != null) {
-                try {
-                    migrator.getDatabase().getConnection().close();
-                } catch (SQLException e) {
-                    ;
-                }
-            }
+            closeDatabase(migrator);
         }
     }
 }

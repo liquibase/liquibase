@@ -3,9 +3,9 @@ package liquibase.ant;
 import liquibase.CompositeFileOpener;
 import liquibase.FileOpener;
 import liquibase.FileSystemFileOpener;
+import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.exception.JDBCException;
-import liquibase.exception.MigrationFailedException;
 import liquibase.log.LogFactory;
 import liquibase.migrator.Migrator;
 import org.apache.tools.ant.Project;
@@ -13,8 +13,7 @@ import org.apache.tools.ant.Task;
 import org.apache.tools.ant.types.Path;
 import org.apache.tools.ant.types.Reference;
 
-import java.io.File;
-import java.net.MalformedURLException;
+import java.io.*;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.security.AccessController;
@@ -44,6 +43,8 @@ public class BaseLiquibaseTask extends Task {
     private boolean promptOnNonLocalDatabase = false;
     private String currentDateTimeFunction;
     private String contexts;
+    private String outputFile;
+    private String defaultSchemaName;
 
     public BaseLiquibaseTask() {
         super();
@@ -117,14 +118,53 @@ public class BaseLiquibaseTask extends Task {
         this.currentDateTimeFunction = currentDateTimeFunction;
     }
 
-    protected Migrator createMigrator() throws MalformedURLException, ClassNotFoundException, JDBCException, SQLException, MigrationFailedException, IllegalAccessException, InstantiationException {
+    public String getOutputFile() {
+        return outputFile;
+    }
+
+    public void setOutputFile(String outputFile) {
+        this.outputFile = outputFile;
+    }
+
+    public Writer createOutputWriter() throws IOException {
+        if (outputFile == null) {
+            return null;
+        }
+        return new FileWriter(new File(getOutputFile()));
+    }
+
+    public PrintStream createPrintStream() throws IOException {
+        if (outputFile == null) {
+            return null;
+        }
+        return new PrintStream(new File(getOutputFile()));
+    }
+
+    public String getDefaultSchemaName() {
+        return defaultSchemaName;
+    }
+
+    public void setDefaultSchemaName(String defaultSchemaName) {
+        this.defaultSchemaName = defaultSchemaName;
+    }
+
+    protected Migrator createMigrator() throws Exception {
         FileOpener antFO = new AntFileOpener(getProject(), classpath);
         FileOpener fsFO = new FileSystemFileOpener();
 
+        Database database = createDatabaseObject(getDriver(), getUrl(), getUsername(), getPassword(), getDefaultSchemaName());
+        Migrator migrator = new Migrator(getChangeLogFile().trim(), new CompositeFileOpener(antFO, fsFO), database);
+        migrator.setCurrentDateTimeFunction(currentDateTimeFunction);
+
+        return migrator;
+    }
+
+    protected Database createDatabaseObject(String driverClassName, String databaseUrl, String username, String password, String defaultSchemaName) throws Exception {
         String[] strings = classpath.list();
+
         final List<URL> taskClassPath = new ArrayList<URL>();
-        for (int i = 0; i < strings.length; i++) {
-            URL url = new File(strings[i]).toURL();
+        for (String string : strings) {
+            URL url = new File(string).toURL();
             taskClassPath.add(url);
         }
 
@@ -134,30 +174,29 @@ public class BaseLiquibaseTask extends Task {
             }
         });
 
-        String driverClassName = getDriver();
         if (driverClassName == null) {
-            driverClassName = DatabaseFactory.getInstance().findDefaultDriver(getUrl());
+            driverClassName = DatabaseFactory.getInstance().findDefaultDriver(databaseUrl);
         }
 
         if (driverClassName == null) {
-            throw new JDBCException("driver not specified and no default could be found for the given url");
+            throw new JDBCException("driver not specified and no default could be found for "+databaseUrl);
         }
 
         Driver driver = (Driver) Class.forName(driverClassName, true, loader).newInstance();
 
         Properties info = new Properties();
-        info.put("user", getUsername());
-        info.put("password", getPassword());
-        Connection connection = driver.connect(getUrl(), info);
+        info.put("user", username);
+        info.put("password", password);
+        Connection connection = driver.connect(databaseUrl, info);
 
         if (connection == null) {
-            throw new JDBCException("Connection could not be created to " + getUrl() + " with driver " + driver.getClass().getName() + ".  Possibly the wrong driver for the given database URL");
+            throw new JDBCException("Connection could not be created to " + databaseUrl + " with driver " + driver.getClass().getName() + ".  Possibly the wrong driver for the given database URL");
         }
 
-        Migrator migrator = new Migrator(getChangeLogFile().trim(), new CompositeFileOpener(antFO, fsFO), DatabaseFactory.getInstance().findCorrectDatabaseImplementation(connection));
-        migrator.setCurrentDateTimeFunction(currentDateTimeFunction);
+        Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(connection);
+        database.setDefaultSchemaName(defaultSchemaName);
 
-        return migrator;
+        return database;
     }
 
     public String getContexts() {
@@ -231,4 +270,24 @@ public class BaseLiquibaseTask extends Task {
         }
 
     }
+
+    protected boolean shouldRun() {
+        String shouldRunProperty = System.getProperty(Migrator.SHOULD_RUN_SYSTEM_PROPERTY);
+        if (shouldRunProperty != null && !Boolean.valueOf(shouldRunProperty)) {
+            log("Migrator did not run because '" + Migrator.SHOULD_RUN_SYSTEM_PROPERTY + "' system property was set to false");
+            return false;
+        }
+        return true;
+    }
+
+    protected void closeDatabase(Migrator migrator) {
+        if (migrator != null && migrator.getDatabase() != null && migrator.getDatabase().getConnection() != null) {
+            try {
+                migrator.getDatabase().getConnection().close();
+            } catch (SQLException e) {
+                ;
+            }
+        }
+    }
+
 }

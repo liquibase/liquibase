@@ -71,8 +71,14 @@ public class DatabaseFactory {
             database = new UnsupportedDatabase();
         }
 
-        database.setConnection(connection);
-        return database;
+        Database returnDatabase;
+        try {
+            returnDatabase = database.getClass().newInstance();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        returnDatabase.setConnection(connection);
+        return returnDatabase;
     }
 
     public Database findCorrectDatabaseImplementation(DatabaseConnection connection) throws JDBCException {

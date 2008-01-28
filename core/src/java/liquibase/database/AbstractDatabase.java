@@ -802,7 +802,7 @@ public abstract class AbstractDatabase implements Database {
             return getProductName() + " Database";
         }
         try {
-            return getConnectionUsername() + " @ " + getConnectionURL();
+            return getConnectionUsername() + " @ " + getConnectionURL() + (getDefaultSchemaName() == null?"":" (Default Schema: "+getDefaultSchemaName()+")");
         } catch (JDBCException e) {
             return super.toString();
         }

@@ -1,12 +1,9 @@
 package liquibase.diff;
 
 import liquibase.database.Database;
-import liquibase.database.DatabaseConnection;
-import liquibase.database.DatabaseFactory;
 import liquibase.database.structure.*;
 import liquibase.exception.JDBCException;
 
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Set;
@@ -21,35 +18,16 @@ public class Diff {
 
     private Set<DiffStatusListener> statusListeners = new HashSet<DiffStatusListener>();
 
-    public Diff(Connection baseConnection, Connection targetConnection) throws JDBCException {
-        baseDatabase = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(baseConnection);
-        baseDatabase.setConnection(baseConnection);
+    public Diff(Database baseDatabase, Database targetDatabase) throws JDBCException {
+        this.baseDatabase = baseDatabase;
 
-        targetDatabase = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(targetConnection);
-        targetDatabase.setConnection(targetConnection);
+        this.targetDatabase = targetDatabase;
     }
 
-    public Diff(DatabaseConnection baseConnection, DatabaseConnection targetConnection) throws JDBCException {
-        baseDatabase = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(baseConnection);
-        baseDatabase.setConnection(baseConnection);
-
-        targetDatabase = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(targetConnection);
-        targetDatabase.setConnection(targetConnection);
-    }
-
-    public Diff(Connection originalDatabase, String schema) throws JDBCException {
+    public Diff(Database originalDatabase, String schema) throws JDBCException {
         targetDatabase = null;
 
-        baseDatabase = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(originalDatabase);
-        baseDatabase.setConnection(originalDatabase);
-        baseDatabase.setDefaultSchemaName(schema);
-    }
-
-    public Diff(DatabaseConnection originalDatabase, String schema) throws JDBCException {
-        targetDatabase = null;
-
-        baseDatabase = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(originalDatabase);
-        baseDatabase.setConnection(originalDatabase);
+        baseDatabase = originalDatabase;
         baseDatabase.setDefaultSchemaName(schema);
     }
 
