@@ -2,7 +2,7 @@
 if "%OS%" == "Windows_NT" setlocal
 
 rem %~dp0 is expanded pathname of the current script under NT
-set LIQUIBASE_HOME=%~dp0
+set LIQUIBASE_HOME="%~dp0"
 
 set CP=.
 for /R %LIQUIBASE_HOME% %%f in (liquibase*.jar) do set CP=%CP%;%%f
@@ -20,4 +20,4 @@ goto setup
 :done
 
 set JAVA_OPTS=
-java -cp %CP% %JAVA_OPTS% liquibase.commandline.CommandLineMigrator %CMD_LINE_ARGS%
+java -cp "%CP%" %JAVA_OPTS% liquibase.commandline.CommandLineMigrator %CMD_LINE_ARGS%
