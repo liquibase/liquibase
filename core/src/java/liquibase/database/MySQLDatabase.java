@@ -104,10 +104,6 @@ public class MySQLDatabase extends AbstractDatabase {
         return super.getDefaultDatabaseSchemaName().replaceFirst("\\@.*","");
     }
 
-    public String getDefaultCatalogName() throws JDBCException {
-        return super.getDefaultCatalogName();
-    }
-
     public String convertRequestedSchemaToSchema(String requestedSchema) throws JDBCException {
         if (requestedSchema == null) {
             return getDefaultDatabaseSchemaName();

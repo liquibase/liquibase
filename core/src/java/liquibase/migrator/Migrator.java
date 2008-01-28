@@ -24,7 +24,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.Writer;
-import java.sql.Types;
 import java.text.DateFormat;
 import java.util.Date;
 import java.util.List;
@@ -375,7 +374,7 @@ public class Migrator {
     /**
      * Drops all database objects owned by the current user.
      */
-    public final void dropAll(String... schemas) throws JDBCException, LockException {
+    public final void dropAll(String... schemas) throws JDBCException {
         try {
             LockHandler.getInstance(database).waitForLock();
 
@@ -407,7 +406,7 @@ public class Migrator {
     }
 
 
-    public void checkDatabaseChangeLogTable() throws JDBCException, IOException {
+    public void checkDatabaseChangeLogTable() throws JDBCException {
         getDatabase().checkDatabaseChangeLogTable();
         getDatabase().checkDatabaseChangeLogLockTable();
     }

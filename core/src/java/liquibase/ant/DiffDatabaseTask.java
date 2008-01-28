@@ -5,7 +5,6 @@ import liquibase.diff.Diff;
 import liquibase.diff.DiffResult;
 import liquibase.migrator.Migrator;
 import liquibase.util.StringUtils;
-import liquibase.exception.JDBCException;
 import org.apache.tools.ant.BuildException;
 
 import java.io.PrintStream;

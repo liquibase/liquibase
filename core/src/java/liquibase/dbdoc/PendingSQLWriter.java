@@ -3,8 +3,6 @@ package liquibase.dbdoc;
 import liquibase.ChangeSet;
 import liquibase.change.Change;
 import liquibase.database.Database;
-import liquibase.exception.DatabaseHistoryException;
-import liquibase.exception.JDBCException;
 import liquibase.exception.MigrationFailedException;
 import liquibase.migrator.Migrator;
 
@@ -23,7 +21,7 @@ public class PendingSQLWriter extends HTMLWriter {
         return "Pending SQL";
     }
 
-    protected void writeBody(FileWriter fileWriter, Object object, List<Change> ranChanges, List<Change> changesToRun, Migrator migrator) throws IOException, DatabaseHistoryException, JDBCException {
+    protected void writeBody(FileWriter fileWriter, Object object, List<Change> ranChanges, List<Change> changesToRun, Migrator migrator) throws IOException{
         if (changesToRun.size() == 0) {
             fileWriter.append("<b>NONE</b>");
         }

@@ -8,7 +8,10 @@ import liquibase.exception.JDBCException;
 import liquibase.log.LogFactory;
 import liquibase.util.JdbcUtils;
 
-import java.sql.*;
+import java.sql.CallableStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

@@ -71,11 +71,7 @@ public class StoredProcedureStatement implements SqlStatement, CallableSqlStatem
             if (param == null) {
                 pstmt.setNull(i + 1, type);
             } else {
-                try {
-                    pstmt.setObject(i + 1, param, type);
-                } catch (SQLException e) {
-                    throw e;
-                }
+                pstmt.setObject(i + 1, param, type);
             }
         }
 

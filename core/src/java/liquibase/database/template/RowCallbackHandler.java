@@ -1,7 +1,6 @@
 package liquibase.database.template;
 
 import java.sql.ResultSet;
-import java.sql.SQLException;
 
 /**
  * An interface used by {@link JdbcTemplate} for processing rows of a
@@ -37,6 +36,6 @@ interface RowCallbackHandler {
      * @throws java.sql.SQLException if a SQLException is encountered getting
      *                               column values (that is, there's no need to catch SQLException)
      */
-    void processRow(ResultSet rs) throws SQLException;
+    void processRow(ResultSet rs);
 
 }

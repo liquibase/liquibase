@@ -6,7 +6,6 @@ import liquibase.database.Database;
 import liquibase.database.sql.UpdateStatement;
 import liquibase.exception.JDBCException;
 
-import java.sql.Types;
 import java.util.List;
 
 public class ShouldRunChangeSetFilter implements ChangeSetFilter {

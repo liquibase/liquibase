@@ -26,6 +26,6 @@ interface CallableStatementCallback {
      *                             into a DataAccessException by a SQLExceptionTranslator
      * @throws JDBCException in case of custom exceptions
      */
-    Object doInCallableStatement(CallableStatement cs) throws SQLException, JDBCException;
+    Object doInCallableStatement(CallableStatement cs) throws SQLException;
 
 }

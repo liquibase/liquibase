@@ -357,7 +357,7 @@ public class DatabaseSnapshot {
             while (rs.next()) {
                 String indexName = rs.getString("INDEX_NAME");
                 short type = rs.getShort("TYPE");
-                String tableName = rs.getString("TABLE_NAME");
+//                String tableName = rs.getString("TABLE_NAME");
                 String columnName = rs.getString("COLUMN_NAME");
                 short position = rs.getShort("ORDINAL_POSITION");
                 String filterCondition = rs.getString("FILTER_CONDITION");
@@ -457,7 +457,7 @@ public class DatabaseSnapshot {
 //        }
 //    }
 
-    private void readSequences(String schema) throws JDBCException, SQLException {
+    private void readSequences(String schema) throws JDBCException {
         updateListeners("Reading sequences for " + database.toString() + " ...");
 
         if (database.supportsSequences()) {

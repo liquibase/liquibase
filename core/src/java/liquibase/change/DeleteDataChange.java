@@ -1,18 +1,18 @@
 package liquibase.change;
 
-import liquibase.database.sql.SqlStatement;
-import liquibase.database.sql.UpdateStatement;
-import liquibase.database.sql.DeleteStatement;
 import liquibase.database.Database;
+import liquibase.database.sql.DeleteStatement;
+import liquibase.database.sql.SqlStatement;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Table;
 import liquibase.exception.UnsupportedChangeException;
 import liquibase.util.StringUtils;
-
-import java.util.*;
-
-import org.w3c.dom.Element;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 public class DeleteDataChange extends AbstractChange {
 

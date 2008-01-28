@@ -52,7 +52,7 @@ public class StreamUtil {
             StringBuffer result = new StringBuffer();
 
             char[] buffer = new char[2048];
-            int read = 0;
+            int read;
             while ((read = reader.read(buffer)) > -1) {
                 result.append(buffer, 0, read);
             }

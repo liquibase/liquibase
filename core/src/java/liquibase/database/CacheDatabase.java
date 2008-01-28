@@ -97,7 +97,7 @@ public class CacheDatabase extends AbstractDatabase {
                 if (stringDefaultValue.charAt(0) == '"' && stringDefaultValue.charAt(stringDefaultValue.length() - 1) == '"') {
                     defaultValue = stringDefaultValue.substring(1, stringDefaultValue.length() - 1);
                 } else if (stringDefaultValue.startsWith("$")) {
-                    defaultValue = "OBJECTSCRIPT '" + ((String) defaultValue) + "'";
+                    defaultValue = "OBJECTSCRIPT '" + defaultValue + "'";
                 }
             }
         }

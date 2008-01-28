@@ -1,8 +1,7 @@
 package liquibase.ant;
 
-import liquibase.diff.DiffResult;
-import liquibase.exception.JDBCException;
 import liquibase.database.Database;
+import liquibase.diff.DiffResult;
 
 import java.io.PrintStream;
 

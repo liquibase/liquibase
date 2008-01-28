@@ -4,7 +4,6 @@ import liquibase.migrator.Migrator;
 import liquibase.migrator.UIFactory;
 import org.apache.tools.ant.BuildException;
 
-import java.sql.SQLException;
 import java.io.Writer;
 
 /**

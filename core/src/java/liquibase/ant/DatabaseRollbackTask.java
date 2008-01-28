@@ -3,9 +3,8 @@ package liquibase.ant;
 import liquibase.migrator.Migrator;
 import org.apache.tools.ant.BuildException;
 
-import java.sql.SQLException;
-import java.util.Date;
 import java.io.Writer;
+import java.util.Date;
 
 /**
  * Ant task for rolling back a database.

@@ -1,8 +1,8 @@
 package liquibase.ant;
 
-import org.apache.tools.ant.BuildException;
-import liquibase.util.StringUtils;
 import liquibase.migrator.Migrator;
+import liquibase.util.StringUtils;
+import org.apache.tools.ant.BuildException;
 
 public class TagDatabaseTask extends BaseLiquibaseTask {
 

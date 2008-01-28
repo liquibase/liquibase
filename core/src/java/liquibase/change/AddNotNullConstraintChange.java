@@ -13,7 +13,6 @@ import liquibase.exception.UnsupportedChangeException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import java.sql.Types;
 import java.util.*;
 
 /**

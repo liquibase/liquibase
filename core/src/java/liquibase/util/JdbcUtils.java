@@ -117,10 +117,6 @@ public abstract class JdbcUtils {
      * <p>Throws an exception if 0 or more than 1 element found.
      * @param results the result Collection (can be <code>null</code>)
      * @return the single result object
-     * @throws IncorrectResultSizeDataAccessException if more than one
-     * element has been found in the given Collection
-     * @throws EmptyResultDataAccessException if no element at all
-     * has been found in the given Collection
      */
     public static Object requiredSingleResult(Collection results) throws JDBCException {
         int size = (results != null ? results.size() : 0);

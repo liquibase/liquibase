@@ -723,7 +723,7 @@ public class CommandLineMigrator {
         }
     }
 
-    private Database createDatabaseFromCommandParams(Set<String> commandParams) throws CommandLineParsingException, SQLException, JDBCException {
+    private Database createDatabaseFromCommandParams(Set<String> commandParams) throws CommandLineParsingException, JDBCException {
         String driver = null;
         String url = null;
         String username = null;

@@ -2,7 +2,9 @@ package liquibase.database.sql;
 
 import liquibase.database.Database;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 public class DeleteStatement implements SqlStatement {
     private String schemaName;

@@ -22,7 +22,7 @@ public class RecentChangesWriter extends HTMLWriter {
 
     protected void writeBody(FileWriter fileWriter, Object object, List<Change> ranChanges, List<Change> changesToRun) throws IOException, DatabaseHistoryException, JDBCException {
         writeCustomHTML(fileWriter, object, ranChanges, database);
-        writeChanges("Most Recent Changes", fileWriter, object, ranChanges);
+        writeChanges("Most Recent Changes", fileWriter, ranChanges);
     }
 
     protected void writeCustomHTML(FileWriter fileWriter, Object object, List<Change> changes, Database database) throws IOException {

@@ -1,20 +1,13 @@
 package liquibase;
 
-import liquibase.parser.LiquibaseSchemaResolver;
-import liquibase.parser.ChangeLogParser;
-import liquibase.parser.ChangeLogIterator;
-import liquibase.parser.visitor.ValidatingVisitor;
-import liquibase.parser.filter.DbmsChangeSetFilter;
-import liquibase.preconditions.AndPrecondition;
+import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.ValidationFailedException;
-import liquibase.database.Database;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
+import liquibase.parser.ChangeLogIterator;
+import liquibase.parser.filter.DbmsChangeSetFilter;
+import liquibase.parser.visitor.ValidatingVisitor;
+import liquibase.preconditions.AndPrecondition;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import java.util.ArrayList;
 import java.util.List;
 

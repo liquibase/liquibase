@@ -5,19 +5,18 @@ import liquibase.DatabaseChangeLog;
 import liquibase.FileOpener;
 import liquibase.change.*;
 import liquibase.change.custom.CustomChangeWrapper;
-import liquibase.exception.*;
+import liquibase.exception.CustomChangeException;
+import liquibase.exception.LiquibaseException;
+import liquibase.exception.MigrationFailedException;
 import liquibase.log.LogFactory;
 import liquibase.parser.ChangeLogParser;
 import liquibase.preconditions.*;
 import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtils;
-import liquibase.util.LiquibaseUtil;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
-import org.xml.sax.InputSource;
 import org.xml.sax.helpers.DefaultHandler;
 
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Stack;
@@ -179,7 +178,7 @@ class XMLChangeLogHandler extends DefaultHandler {
         }
     }
 
-    protected void handleIncludedChangeLog(String fileName) throws LiquibaseException, IOException, ChangeLogParseException {
+    protected void handleIncludedChangeLog(String fileName) throws LiquibaseException {
         for (ChangeSet changeSet : new ChangeLogParser().parse(fileName, fileOpener).getChangeSets()) {
             databaseChangeLog.addChangeSet(changeSet);
         }
@@ -278,7 +277,7 @@ class XMLChangeLogHandler extends DefaultHandler {
         databaseChangeLog.setPreconditions(rootPrecondition);
     }
 
-    protected void handleChangeSet(ChangeSet changeSet) throws JDBCException, DatabaseHistoryException, MigrationFailedException, IOException {
+    protected void handleChangeSet(ChangeSet changeSet) {
         databaseChangeLog.addChangeSet(changeSet);
     }
 

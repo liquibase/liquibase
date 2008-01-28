@@ -2,8 +2,6 @@ package liquibase.database.sql;
 
 import liquibase.database.Database;
 
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.util.*;
 
 public class UpdateStatement implements SqlStatement {
