@@ -1,6 +1,6 @@
 package liquibase.ant;
 
-import liquibase.migrator.Migrator;
+import liquibase.Liquibase;
 import org.apache.tools.ant.BuildException;
 
 import java.io.Writer;
@@ -11,24 +11,24 @@ import java.io.Writer;
 public class DatabaseRollbackFutureTask extends BaseLiquibaseTask {
 
     public void execute() throws BuildException {
-        Migrator migrator = null;
+        Liquibase liquibase = null;
         try {
             Writer writer = createOutputWriter();
             if (writer == null) {
                 throw new BuildException("rollbackFutureDatabase requires outputFile to be set");
             }
 
-            migrator = createMigrator();
+            liquibase = createLiquibase();
 
 
-            migrator.futureRollbackSQL(getContexts(), writer);
+            liquibase.futureRollbackSQL(getContexts(), writer);
 
             writer.flush();
             writer.close();
         } catch (Exception e) {
             throw new BuildException(e);
         } finally {
-            closeDatabase(migrator);
+            closeDatabase(liquibase);
         }
     }
 }

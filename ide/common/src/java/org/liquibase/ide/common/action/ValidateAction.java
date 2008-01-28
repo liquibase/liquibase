@@ -23,7 +23,7 @@ public class ValidateAction extends MigratorAction {
                 return;
             }
 
-            ideFacade.getMigrator(changeLogFile, database).validate();
+            ideFacade.getLiquibase(changeLogFile, database).validate();
             message = "No validation errors found";
         } catch (ValidationFailedException e) {
             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();

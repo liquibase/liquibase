@@ -151,89 +151,6 @@ public class ChangeSet {
         }
     }
 
-//    public void execute() throws MigrationFailedException {
-
-//        for(Change change : changes) {
-//            try {
-//                change.setUp();
-//            } catch(SetupException se) {
-//                throw new MigrationFailedException(this, se);
-//            }
-//        }
-//
-//        Migrator migrator = getDatabaseChangeLog().getMigrator();
-//        DatabaseConnection connection = migrator.getDatabase().getConnection();
-//        try {
-//            Writer outputSQLWriter = getDatabaseChangeLog().getMigrator().getOutputSQLWriter();
-//            if (migrator.getMode().equals(Migrator.Mode.EXECUTE_MODE)) {
-//                log.finest("Reading ChangeSet: " + toString());
-//                for (Change change : getChanges()) {
-//                    change.executeStatements(migrator.getDatabase());
-//                    log.finest(change.getConfirmationMessage());
-//                }
-//
-//                connection.commit();
-//                log.finest("ChangeSet " + toString() + " has been successfully ran.");
-//            } else if (migrator.getMode().equals(Migrator.Mode.OUTPUT_SQL_MODE)) {
-//                outputSQLWriter.write("-- Changeset " + toString() + StreamUtil.getLineSeparator());
-//                writeComments(outputSQLWriter);
-//                for (Change change : getChanges()) {
-//                    change.saveStatements(getDatabaseChangeLog().getMigrator().getDatabase(), outputSQLWriter);
-//                }
-////                outputSQLWriter.write(getDatabaseChangeLog().getMigrator().getDatabase().getCommitSQL()+";"+StreamUtil.getLineSeparator()+StreamUtil.getLineSeparator());
-//            } else if (migrator.getMode().equals(Migrator.Mode.EXECUTE_ROLLBACK_MODE)) {
-//                log.finest("Rolling Back ChangeSet: " + toString());
-//                if (rollBackStatements != null && rollBackStatements.length > 0) {
-//                    for (SqlStatement rollback : rollBackStatements) {
-//                        try {
-//                            new JdbcTemplate(migrator.getDatabase()).execute(rollback);
-//                        } catch (JDBCException e) {
-//                            throw new RollbackFailedException("Error executing custom SQL [" + rollback.getSqlStatement(migrator.getDatabase()) + "]");
-//                        }
-//                    }
-//
-//                } else {
-//                    List<Change> changes = getChanges();
-//                    for (int i = changes.size() - 1; i >= 0; i--) {
-//                        Change change = changes.get(i);
-//                        change.executeRollbackStatements(migrator.getDatabase());
-//                        log.finest(change.getConfirmationMessage());
-//                    }
-//                }
-//
-//                connection.commit();
-//                log.finest("ChangeSet " + toString() + " has been successfully rolled back.");
-//            } else
-//            if (migrator.getMode().equals(Migrator.Mode.OUTPUT_ROLLBACK_SQL_MODE) || migrator.getMode().equals(Migrator.Mode.OUTPUT_FUTURE_ROLLBACK_SQL_MODE))
-//            {
-//                outputSQLWriter.write("-- Changeset " + toString() + StreamUtil.getLineSeparator());
-//                writeComments(outputSQLWriter);
-//                if (rollBackStatements != null && rollBackStatements.length > 0) {
-//                    for (SqlStatement statement : rollBackStatements) {
-//                        outputSQLWriter.append(statement.getSqlStatement(migrator.getDatabase())).append(statement.getEndDelimiter(migrator.getDatabase())).append(StreamUtil.getLineSeparator()).append(StreamUtil.getLineSeparator());
-//                    }
-//                } else {
-//                    for (int i = changes.size() - 1; i >= 0; i--) {
-//                        Change change = changes.get(i);
-//                        change.saveRollbackStatement(getDatabaseChangeLog().getMigrator().getDatabase(), outputSQLWriter);
-//                    }
-//                }
-//            } else if (migrator.getMode().equals(Migrator.Mode.OUTPUT_CHANGELOG_ONLY_SQL_MODE)) {
-//                //don't need to do anything
-//            } else {
-//                throw new MigrationFailedException(this, "Unexpected mode: " + migrator.getMode());
-//            }
-//            connection.commit();
-//        } catch (Exception e) {
-//            try {
-//                connection.rollback();
-//            } catch (SQLException e1) {
-//                throw new MigrationFailedException(this, e);
-//            }
-//            throw new MigrationFailedException(this, e);
-//        }
-//    }
-
     public void rolback(Database database) throws RollbackFailedException {
         try {
             database.getJdbcTemplate().comment("Rolling Back ChangeSet: " + toString());
@@ -261,16 +178,6 @@ public class ChangeSet {
             throw new RollbackFailedException(e);
         }
 
-    }
-
-
-    private void writeComments(Writer writer) throws IOException {
-        if (StringUtils.trimToNull(comments) != null) {
-            String[] commentLines = comments.split("\n");
-            for (String line : commentLines) {
-                writer.append("-- ").append(line.trim()).append(StreamUtil.getLineSeparator());
-            }
-        }
     }
 
     /**

@@ -11,8 +11,8 @@ import com.intellij.openapi.vfs.VirtualFile;
 import liquibase.CompositeFileOpener;
 import liquibase.DatabaseChangeLog;
 import liquibase.FileSystemFileOpener;
+import liquibase.Liquibase;
 import liquibase.database.Database;
-import liquibase.migrator.Migrator;
 import liquibase.util.ISODateFormat;
 import liquibase.xml.DefaultXmlWriter;
 import liquibase.xml.XmlWriter;
@@ -33,20 +33,20 @@ public class IntellijFacade implements IdeFacade {
     }
 
 
-    public Migrator getMigrator(String changeLogFile, Database database) {
+    public Liquibase getLiquibase(String changeLogFile, Database database) {
         LiquibaseProjectComponent liquibaseProjectComponent = LiquibaseProjectComponent.getInstance();
 
         if (changeLogFile == null) {
             changeLogFile = liquibaseProjectComponent.getRootChangeLogFile();
         }
 
-        Migrator migrator = new Migrator(changeLogFile, new CompositeFileOpener(new IntellijFileOpener(), new FileSystemFileOpener()), database);
+        Liquibase liquibase = new Liquibase(changeLogFile, new CompositeFileOpener(new IntellijFileOpener(), new FileSystemFileOpener()), database);
         try {
-            migrator.checkDatabaseChangeLogTable();
+            liquibase.checkDatabaseChangeLogTable();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        return migrator;
+        return liquibase;
     }
 
     public XmlWriter getXmlWriter() {

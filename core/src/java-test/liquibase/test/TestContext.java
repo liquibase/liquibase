@@ -111,22 +111,7 @@ public class TestContext {
             databaseConnection.rollback();
         }
 
-//        Migrator migrator = new Migrator(null, null);
-//        migrator.init(databaseConnection);
-//        migrator.dropAll();
-//        if (migrator.getDatabase().supportsSchemas()) {
-//            migrator.dropAll(TestContext.ALT_SCHEMA);
-//        }
-
         connectionsByUrl.put(url, databaseConnection);
-
-//        Migrator migrator = new Migrator(null, null);
-//        migrator.init(connection);
-//        if (database.supportsSchemas()) {
-//            migrator.dropAll(ALT_SCHEMA, database.getDefaultSchemaName());
-//        } else {
-//            migrator.dropAll(new String[]{null});
-//        }
 
         Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
 
@@ -140,25 +125,8 @@ public class TestContext {
                         ;
                     }
 
-//                    if (connection.getMetaData().getURL().startsWith("jdbc:derby")) {
-//                        try {
-//                            driver.connect("jdbc:derby:liquibase;shutdown=true", new Properties());
-//                        } catch (SQLException e) {
-//                            ;//clean shutdown throws exception.//NOPMD
-//                        }
-//                    } else if (connection.getMetaData().getURL().startsWith("jdbc:hsqldb")) {
-//                        try {
-//                            Statement statement = connection.createStatement();
-//                            statement.execute("SHUTDOWN");
-//                            statement.close();
-//                        } catch (SQLException e) {
-//                            ;
-//                        }
-//
-//                    }
 
                     databaseConnection.close();
-//                    System.out.println(url+" closed successfully");
                 } catch (SQLException e) {
                     System.out.println("Could not close " + url);
                     e.printStackTrace();

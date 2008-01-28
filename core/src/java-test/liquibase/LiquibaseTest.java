@@ -1,7 +1,8 @@
-package liquibase.migrator;
+package liquibase;
 
 import liquibase.ClassLoaderFileOpener;
 import liquibase.FileOpener;
+import liquibase.Liquibase;
 import liquibase.database.*;
 import liquibase.database.template.JdbcOutputTemplate;
 import liquibase.exception.JDBCException;
@@ -20,11 +21,11 @@ import java.util.Enumeration;
 import java.util.List;
 
 /**
- * Tests for {@link Migrator}
+ * Tests for {@link liquibase.Liquibase}
  */
-public class MigratorTest {
+public class LiquibaseTest {
 
-    private TestMigrator testMigrator;
+    private TestLiquibase testLiquibase;
     private DatabaseConnection connectionForConstructor;
 
     @Before
@@ -43,12 +44,12 @@ public class MigratorTest {
         expect(connectionForConstructor.getMetaData()).andReturn(metaData);
         replay(connectionForConstructor);
 
-        testMigrator = new TestMigrator();
+        testLiquibase = new TestLiquibase();
     }
 
     @Test
     public void isSaveToRunMigration() throws Exception {
-        TestMigrator migrator = testMigrator;
+        TestLiquibase migrator = testLiquibase;
 
         migrator.setUrl("jdbc:oracle:thin:@localhost:1521:latest");
         assertTrue(migrator.isSafeToRunMigration());
@@ -56,7 +57,7 @@ public class MigratorTest {
         migrator.setUrl("jdbc:oracle:thin:@liquibase:1521:latest");
         assertFalse(migrator.isSafeToRunMigration());
 
-        testMigrator.getDatabase().setJdbcTemplate(new JdbcOutputTemplate(new PrintWriter(System.out), testMigrator.getDatabase()));
+        testLiquibase.getDatabase().setJdbcTemplate(new JdbcOutputTemplate(new PrintWriter(System.out), testLiquibase.getDatabase()));
         assertTrue("Safe to run if outputing sql, even if non-localhost URL", migrator.isSafeToRunMigration());
 
     }
@@ -85,12 +86,12 @@ public class MigratorTest {
         assertTrue("Postgres not in Implemented Databases", foundPostgres);
     }
 
-    private class TestMigrator extends Migrator {
+    private class TestLiquibase extends Liquibase {
         private String url;
         private Database database;
         private InputStream inputStream;
 
-        public TestMigrator() {
+        public TestLiquibase() {
             super("liquibase/test.xml", new ClassLoaderFileOpener(), null);
             inputStream = createMock(InputStream.class);
             replay(inputStream);

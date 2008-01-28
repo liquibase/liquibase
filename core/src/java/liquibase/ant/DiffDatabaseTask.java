@@ -3,7 +3,7 @@ package liquibase.ant;
 import liquibase.database.Database;
 import liquibase.diff.Diff;
 import liquibase.diff.DiffResult;
-import liquibase.migrator.Migrator;
+import liquibase.Liquibase;
 import liquibase.util.StringUtils;
 import org.apache.tools.ant.BuildException;
 
@@ -71,30 +71,30 @@ public class DiffDatabaseTask extends BaseLiquibaseTask {
             throw new BuildException("diffDatabase requires basePassword to be set");
         }
         
-        Migrator migrator = null;
+        Liquibase liquibase = null;
         try {
             PrintStream writer = createPrintStream();
             if (writer == null) {
                 throw new BuildException("diffDatabase requires outputFile to be set");
             }
 
-            migrator = createMigrator();
+            liquibase = createLiquibase();
 
             Database baseDatabase = createDatabaseObject(getBaseDriver(), getBaseUrl(), getBaseUsername(), getBasePassword(), getBaseDefaultSchemaName());
 
 
-            Diff diff = new Diff(baseDatabase, migrator.getDatabase());
+            Diff diff = new Diff(baseDatabase, liquibase.getDatabase());
 //            diff.addStatusListener(new OutDiffStatusListener());
             DiffResult diffResult = diff.compare();
 
-            outputDiff(writer, diffResult, migrator.getDatabase());
+            outputDiff(writer, diffResult, liquibase.getDatabase());
 
             writer.flush();
             writer.close();
         } catch (Exception e) {
             throw new BuildException(e);
         } finally {
-            closeDatabase(migrator);
+            closeDatabase(liquibase);
         }
     }
 

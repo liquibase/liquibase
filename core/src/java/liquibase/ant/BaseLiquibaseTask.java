@@ -3,11 +3,11 @@ package liquibase.ant;
 import liquibase.CompositeFileOpener;
 import liquibase.FileOpener;
 import liquibase.FileSystemFileOpener;
+import liquibase.Liquibase;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.exception.JDBCException;
 import liquibase.log.LogFactory;
-import liquibase.migrator.Migrator;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.Task;
 import org.apache.tools.ant.types.Path;
@@ -148,15 +148,15 @@ public class BaseLiquibaseTask extends Task {
         this.defaultSchemaName = defaultSchemaName;
     }
 
-    protected Migrator createMigrator() throws Exception {
+    protected Liquibase createLiquibase() throws Exception {
         FileOpener antFO = new AntFileOpener(getProject(), classpath);
         FileOpener fsFO = new FileSystemFileOpener();
 
         Database database = createDatabaseObject(getDriver(), getUrl(), getUsername(), getPassword(), getDefaultSchemaName());
-        Migrator migrator = new Migrator(getChangeLogFile().trim(), new CompositeFileOpener(antFO, fsFO), database);
-        migrator.setCurrentDateTimeFunction(currentDateTimeFunction);
+        Liquibase liquibase = new Liquibase(getChangeLogFile().trim(), new CompositeFileOpener(antFO, fsFO), database);
+        liquibase.setCurrentDateTimeFunction(currentDateTimeFunction);
 
-        return migrator;
+        return liquibase;
     }
 
     protected Database createDatabaseObject(String driverClassName, String databaseUrl, String username, String password, String defaultSchemaName) throws Exception {
@@ -272,18 +272,18 @@ public class BaseLiquibaseTask extends Task {
     }
 
     protected boolean shouldRun() {
-        String shouldRunProperty = System.getProperty(Migrator.SHOULD_RUN_SYSTEM_PROPERTY);
+        String shouldRunProperty = System.getProperty(Liquibase.SHOULD_RUN_SYSTEM_PROPERTY);
         if (shouldRunProperty != null && !Boolean.valueOf(shouldRunProperty)) {
-            log("Migrator did not run because '" + Migrator.SHOULD_RUN_SYSTEM_PROPERTY + "' system property was set to false");
+            log("LiquiBase did not run because '" + Liquibase.SHOULD_RUN_SYSTEM_PROPERTY + "' system property was set to false");
             return false;
         }
         return true;
     }
 
-    protected void closeDatabase(Migrator migrator) {
-        if (migrator != null && migrator.getDatabase() != null && migrator.getDatabase().getConnection() != null) {
+    protected void closeDatabase(Liquibase liquibase) {
+        if (liquibase != null && liquibase.getDatabase() != null && liquibase.getDatabase().getConnection() != null) {
             try {
-                migrator.getDatabase().getConnection().close();
+                liquibase.getDatabase().getConnection().close();
             } catch (SQLException e) {
                 ;
             }

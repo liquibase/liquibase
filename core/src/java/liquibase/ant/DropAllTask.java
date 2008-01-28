@@ -1,6 +1,6 @@
 package liquibase.ant;
 
-import liquibase.migrator.Migrator;
+import liquibase.Liquibase;
 import liquibase.util.StringUtils;
 import org.apache.tools.ant.BuildException;
 
@@ -20,21 +20,21 @@ public class DropAllTask extends BaseLiquibaseTask {
 
     public void execute() throws BuildException {
 
-        Migrator migrator = null;
+        Liquibase liquibase = null;
         try {
-            migrator = createMigrator();
+            liquibase = createLiquibase();
 
             if (StringUtils.trimToNull(schemas) != null) {
                 List<String> schemas = StringUtils.splitAndTrim(this.schemas, ",");
-                migrator.dropAll(schemas.toArray(new String[schemas.size()]));
+                liquibase.dropAll(schemas.toArray(new String[schemas.size()]));
             } else {
-                migrator.dropAll();
+                liquibase.dropAll();
             }
 
         } catch (Exception e) {
             throw new BuildException(e);
         } finally {
-            closeDatabase(migrator);
+            closeDatabase(liquibase);
         }
     }
 }

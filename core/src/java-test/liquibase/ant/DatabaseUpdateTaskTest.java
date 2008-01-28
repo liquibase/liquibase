@@ -7,7 +7,7 @@ import org.junit.Test;
 /**
  * Tests for {@link DatabaseUpdateTask}
  */
-public class DatabaseMigratorTaskTest {
+public class DatabaseUpdateTaskTest {
 
     @Test
     public void createClasspath() throws Exception {

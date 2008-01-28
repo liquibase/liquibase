@@ -11,7 +11,7 @@ import liquibase.*;
 import liquibase.database.DatabaseFactory;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.JDBCException;
-import liquibase.migrator.Migrator;
+import liquibase.Liquibase;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 
@@ -50,7 +50,7 @@ public abstract class ConfigurableLiquibaseMojo extends AbstractLiquibaseMojo {
 
   /**
    * The Liquibase properties file used to configure the Liquibase {@link
-   * liquibase.migrator.Migrator}.
+   * liquibase.Liquibase}.
    * @parameter expression="${liquibase.propertiesFile}"
    */
   protected String propertiesFile;
@@ -64,14 +64,14 @@ public abstract class ConfigurableLiquibaseMojo extends AbstractLiquibaseMojo {
   protected boolean propertyFileWillOverride;
 
   /**
-   * Performs extra {@link liquibase.migrator.Migrator} configuration as required by the
+   * Performs extra {@link liquibase.Liquibase} configuration as required by the
    * extending class. By default this method does nothing, but sub classes can override
    * this method to perform extra configuration steps on the {@link
-   * liquibase.migrator.Migrator}.
-   * @param migrator The {@link liquibase.migrator.Migrator} to perform the extra
+   * liquibase.Liquibase}.
+   * @param liquibase The {@link liquibase.Liquibase} to perform the extra
    * configuration on.
    */
-  protected void performMigratorConfiguration(Migrator migrator)
+  protected void performMigratorConfiguration(Liquibase liquibase)
           throws MojoExecutionException {
   }
 
@@ -86,13 +86,13 @@ public abstract class ConfigurableLiquibaseMojo extends AbstractLiquibaseMojo {
 
   /**
    * Performs the actual Liquibase task on the database using the fully configured {@link
-   * liquibase.migrator.Migrator}.
-   * @param migrator The {@link liquibase.migrator.Migrator} that has been fully
+   * liquibase.Liquibase}.
+   * @param liquibase The {@link liquibase.Liquibase} that has been fully
    * configured to run the desired database task.
    */
-  protected void performLiquibaseTask(Migrator migrator) throws LiquibaseException {
+  protected void performLiquibaseTask(Liquibase liquibase) throws LiquibaseException {
     if (dropFirst) {
-      migrator.dropAll();
+      liquibase.dropAll();
     }
   }
 
@@ -134,9 +134,9 @@ public abstract class ConfigurableLiquibaseMojo extends AbstractLiquibaseMojo {
     }
   }
 
-  protected Migrator createMigrator(FileOpener fo, Connection conn) throws MojoExecutionException {
+  protected Liquibase createLiquibase(FileOpener fo, Connection conn) throws MojoExecutionException {
       try {
-          return new Migrator(changeLogFile.trim(),
+          return new Liquibase(changeLogFile.trim(),
                               fo,
                               DatabaseFactory.getInstance().findCorrectDatabaseImplementation(conn));
       } catch (JDBCException e) {

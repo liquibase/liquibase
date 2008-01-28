@@ -2,7 +2,7 @@
 // Copyright: Copyright(c) 2007 Trace Financial Limited
 package org.liquibase.maven.plugins;
 
-import liquibase.migrator.Migrator;
+import liquibase.Liquibase;
 import liquibase.exception.LiquibaseException;
 import org.apache.maven.plugin.MojoFailureException;
 
@@ -34,7 +34,7 @@ public class LiquibaseTag extends AbstractLiquibaseMojo {
     getLog().info(indent + "tag: " + tag);
   }
 
-  protected void performLiquibaseTask(Migrator migrator) throws LiquibaseException {
-    migrator.tag(tag);
+  protected void performLiquibaseTask(Liquibase liquibase) throws LiquibaseException {
+    liquibase.tag(tag);
   }
 }

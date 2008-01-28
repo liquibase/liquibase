@@ -3,7 +3,7 @@ package liquibase.ant;
 import liquibase.database.Database;
 import liquibase.diff.Diff;
 import liquibase.diff.DiffResult;
-import liquibase.migrator.Migrator;
+import liquibase.Liquibase;
 import org.apache.tools.ant.BuildException;
 
 import java.io.PrintStream;
@@ -11,16 +11,16 @@ import java.io.PrintStream;
 public class GenerateChangeLogTask extends BaseLiquibaseTask {
 
     public void execute() throws BuildException {
-        Migrator migrator = null;
+        Liquibase liquibase = null;
         try {
             PrintStream writer = createPrintStream();
             if (writer == null) {
                 throw new BuildException("generateChangeLog requires outputFile to be set");
             }
 
-            migrator = createMigrator();
+            liquibase = createLiquibase();
 
-            Database database = migrator.getDatabase();
+            Database database = liquibase.getDatabase();
             Diff diff = new Diff(database, getDefaultSchemaName());
 //            diff.addStatusListener(new OutDiffStatusListener());
             DiffResult diffResult = diff.compare();
@@ -32,7 +32,7 @@ public class GenerateChangeLogTask extends BaseLiquibaseTask {
         } catch (Exception e) {
             throw new BuildException(e);
         } finally {
-            closeDatabase(migrator);
+            closeDatabase(liquibase);
         }
     }
 }

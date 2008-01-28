@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Main-Class: liquibase.commandline.CommandLineMigrator
 Bundle-ManifestVersion: 2
-Bundle-Name: LiquiBase Migrator Plug-in
+Bundle-Name: LiquiBase Plug-in
 Bundle-SymbolicName: org.liquibase.migrator;singleton:=true
 Bundle-Version: 1.2.1
 Bundle-Vendor: LiquiBase.org

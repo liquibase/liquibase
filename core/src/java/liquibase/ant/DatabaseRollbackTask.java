@@ -1,6 +1,6 @@
 package liquibase.ant;
 
-import liquibase.migrator.Migrator;
+import liquibase.Liquibase;
 import org.apache.tools.ant.BuildException;
 
 import java.io.Writer;
@@ -49,27 +49,27 @@ public class DatabaseRollbackTask extends BaseLiquibaseTask {
         if (getRollbackDate() == null && getRollbackCount() == null && getRollbackTag() == null) {
             throw new BuildException("rollbackDatabase requires rollbackTag, rollbackDate, or rollbackCount to be set");
         }
-        Migrator migrator = null;
+        Liquibase liquibase = null;
         try {
-            migrator = createMigrator();
+            liquibase = createLiquibase();
             Writer writer = createOutputWriter();
             if (getRollbackCount() != null) {
                 if (writer == null) {
-                    migrator.rollback(getRollbackCount(), getContexts());
+                    liquibase.rollback(getRollbackCount(), getContexts());
                 } else {
-                    migrator.rollback(getRollbackCount(), getContexts(), writer);
+                    liquibase.rollback(getRollbackCount(), getContexts(), writer);
                 }
             } else if (getRollbackDate() != null) {
                 if (writer == null) {
-                    migrator.rollback(getRollbackDate(), getContexts());
+                    liquibase.rollback(getRollbackDate(), getContexts());
                 } else {
-                    migrator.rollback(getRollbackDate(), getContexts(), writer);
+                    liquibase.rollback(getRollbackDate(), getContexts(), writer);
                 }
             } else if (getRollbackTag() != null) {
                 if (writer == null) {
-                    migrator.rollback(getRollbackTag(), getContexts());
+                    liquibase.rollback(getRollbackTag(), getContexts());
                 } else {
-                    migrator.rollback(getRollbackTag(), getContexts(), writer);
+                    liquibase.rollback(getRollbackTag(), getContexts(), writer);
                 }
             } else {
                 throw new BuildException("Must specify rollbackCount, rollbackDate, or rollbackTag");
@@ -81,7 +81,7 @@ public class DatabaseRollbackTask extends BaseLiquibaseTask {
         } catch (Exception e) {
             throw new BuildException(e);
         } finally {
-            closeDatabase(migrator);
+            closeDatabase(liquibase);
         }
     }
 }

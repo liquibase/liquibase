@@ -22,7 +22,7 @@ public class StatusAction extends MigratorAction {
             return;
         }
 
-        ideFacade.getMigrator(changeLogFile, database).reportStatus(true, null, new PrintWriter(new PrintStream(byteArrayOutputStream)));
+        ideFacade.getLiquibase(changeLogFile, database).reportStatus(true, null, new PrintWriter(new PrintStream(byteArrayOutputStream)));
 
         ideFacade.showOutput("Check Change Log Status", byteArrayOutputStream.toString());
 

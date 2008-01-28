@@ -36,10 +36,10 @@ public class MigratorStatusServlet extends HttpServlet {
 
         PrintWriter writer = httpServletResponse.getWriter();
         writer.println("<html>");
-        writer.println("<head><title>Database Migrator Status</title></head>");
+        writer.println("<head><title>LiquiBase Status</title></head>");
         writer.println("<body>");
         if (migratorRunLog.size() == 0) {
-            writer.println("<b>Migrator did not run</b>");
+            writer.println("<b>LiquiBase did not run</b>");
         } else {
             writer.println("<b>View level: " + getLevelLink(Level.SEVERE, currentLevel, httpServletRequest)
                     + " " + getLevelLink(Level.WARNING, currentLevel, httpServletRequest)
@@ -51,7 +51,7 @@ public class MigratorStatusServlet extends HttpServlet {
                     + "</b>");
 
             writer.println("<hr>");
-            writer.println("<b>Migrator started at " + DateFormat.getDateTimeInstance().format(new Date(migratorRunLog.get(0).getMillis())));
+            writer.println("<b>LiquiBase started at " + DateFormat.getDateTimeInstance().format(new Date(migratorRunLog.get(0).getMillis())));
             writer.println("<hr>");
             writer.println("<pre>");
             for (LogRecord record : migratorRunLog) {
@@ -67,7 +67,7 @@ public class MigratorStatusServlet extends HttpServlet {
 
             writer.println("</pre>");
             writer.println("<hr>");
-            writer.println("<b>Migrator finished at " + DateFormat.getDateTimeInstance().format(new Date(migratorRunLog.get(migratorRunLog.size() - 1).getMillis())));
+            writer.println("<b>LiquiBase finished at " + DateFormat.getDateTimeInstance().format(new Date(migratorRunLog.get(migratorRunLog.size() - 1).getMillis())));
         }
         writer.println("</body>");
         writer.println("</html>");

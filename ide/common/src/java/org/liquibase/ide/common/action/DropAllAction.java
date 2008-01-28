@@ -13,7 +13,7 @@ public class DropAllAction extends MigratorAction {
     public void actionPerform(Database database, IdeFacade ideFacade) throws LiquibaseException {
 
         if (ideFacade.confirm(getTitle(), "Are you sure you want to drop all database objects?")) {
-            ideFacade.getMigrator(null, database).dropAll();
+            ideFacade.getLiquibase(null, database).dropAll();
             ideFacade.showMessage("Result", "All database objects dropped");
         }
 

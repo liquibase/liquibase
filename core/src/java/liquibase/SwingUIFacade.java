@@ -1,4 +1,4 @@
-package liquibase.migrator;
+package liquibase;
 
 import liquibase.database.Database;
 import liquibase.exception.JDBCException;

@@ -7,7 +7,7 @@ import org.junit.Test;
 /**
  * Tests for {@link liquibase.parser.LiquibaseSchemaResolver}
  */
-public class MigratorSchemaResolverTest {
+public class LiquibaseSchemaResolverTest {
 
     @Test
     public void resolveEntity() throws Exception {

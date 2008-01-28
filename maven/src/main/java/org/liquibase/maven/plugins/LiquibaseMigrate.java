@@ -1,7 +1,7 @@
 package org.liquibase.maven.plugins;
 
 import liquibase.exception.LiquibaseException;
-import liquibase.migrator.Migrator;
+import liquibase.Liquibase;
 
 /**
  * Liquibase Migration Maven plugin. This plugin allows for DatabaseChangeLogs to be
@@ -12,8 +12,8 @@ import liquibase.migrator.Migrator;
  */
 public class LiquibaseMigrate extends ConfigurableLiquibaseMojo {
 
-  protected void performLiquibaseTask(Migrator migrator) throws LiquibaseException {
-    super.performLiquibaseTask(migrator);
-      migrator.update(contexts);
+  protected void performLiquibaseTask(Liquibase liquibase) throws LiquibaseException {
+    super.performLiquibaseTask(liquibase);
+      liquibase.update(contexts);
   }
 }

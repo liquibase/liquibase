@@ -12,7 +12,7 @@ import liquibase.exception.JDBCException;
 import liquibase.exception.ValidationFailedException;
 import liquibase.lock.LockHandler;
 import liquibase.log.LogFactory;
-import liquibase.migrator.Migrator;
+import liquibase.Liquibase;
 import liquibase.util.LiquibaseUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
@@ -64,9 +64,9 @@ public class CommandLineMigrator {
 
 
     public static void main(String args[]) throws CommandLineParsingException, IOException {
-        String shouldRunProperty = System.getProperty(Migrator.SHOULD_RUN_SYSTEM_PROPERTY);
+        String shouldRunProperty = System.getProperty(Liquibase.SHOULD_RUN_SYSTEM_PROPERTY);
         if (shouldRunProperty != null && !Boolean.valueOf(shouldRunProperty)) {
-            System.out.println("Migrator did not run because '" + Migrator.SHOULD_RUN_SYSTEM_PROPERTY + "' system property was set to false");
+            System.out.println("LiquiBase did not run because '" + Liquibase.SHOULD_RUN_SYSTEM_PROPERTY + "' system property was set to false");
             return;
         }
 
@@ -604,22 +604,22 @@ public class CommandLineMigrator {
             }
 
 
-            Migrator migrator = new Migrator(changeLogFile, new CompositeFileOpener(fsOpener, clOpener), database);
+            Liquibase liquibase = new Liquibase(changeLogFile, new CompositeFileOpener(fsOpener, clOpener), database);
 
             if ("listLocks".equalsIgnoreCase(command)) {
-                migrator.reportLocks(System.out);
+                liquibase.reportLocks(System.out);
                 return;
             } else if ("releaseLocks".equalsIgnoreCase(command)) {
                 LockHandler.getInstance(database).forceReleaseLock();
-                System.out.println("Successfully released all database change log locks for " + migrator.getDatabase().getConnectionUsername() + "@" + migrator.getDatabase().getConnectionURL());
+                System.out.println("Successfully released all database change log locks for " + liquibase.getDatabase().getConnectionUsername() + "@" + liquibase.getDatabase().getConnectionURL());
                 return;
             } else if ("tag".equalsIgnoreCase(command)) {
-                migrator.tag(commandParams.iterator().next());
-                System.out.println("Successfully tagged " + migrator.getDatabase().getConnectionUsername() + "@" + migrator.getDatabase().getConnectionURL());
+                liquibase.tag(commandParams.iterator().next());
+                System.out.println("Successfully tagged " + liquibase.getDatabase().getConnectionUsername() + "@" + liquibase.getDatabase().getConnectionURL());
                 return;
             } else if ("dropAll".equals(command)) {
-                migrator.dropAll();
-                System.out.println("All objects dropped from " + migrator.getDatabase().getConnectionUsername() + "@" + migrator.getDatabase().getConnectionURL());
+                liquibase.dropAll();
+                System.out.println("All objects dropped from " + liquibase.getDatabase().getConnectionUsername() + "@" + liquibase.getDatabase().getConnectionURL());
                 return;
             } else if ("status".equalsIgnoreCase(command)) {
                 boolean runVerbose = false;
@@ -627,11 +627,11 @@ public class CommandLineMigrator {
                 if (commandParams.contains("--verbose")) {
                     runVerbose = true;
                 }
-                migrator.reportStatus(runVerbose, contexts, getOutputWriter());
+                liquibase.reportStatus(runVerbose, contexts, getOutputWriter());
                 return;
             } else if ("validate".equalsIgnoreCase(command)) {
                 try {
-                    migrator.validate();
+                    liquibase.validate();
                 } catch (ValidationFailedException e) {
                     e.printDescriptiveError(System.out);
                     return;
@@ -639,7 +639,7 @@ public class CommandLineMigrator {
                 System.out.println("No validation errors found");
                 return;
             } else if ("clearCheckSums".equalsIgnoreCase(command)) {
-                migrator.clearCheckSums();
+                liquibase.clearCheckSums();
                 return;
             } else if ("dbdoc".equalsIgnoreCase(command)) {
                 if (commandParams.size() == 0) {
@@ -648,55 +648,55 @@ public class CommandLineMigrator {
                 if (changeLogFile == null) {
                     throw new CommandLineParsingException("dbdoc requires a changeLog parameter");
                 }
-                migrator.generateDocumentation(commandParams.iterator().next());
+                liquibase.generateDocumentation(commandParams.iterator().next());
                 return;
             }
 
             DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             try {
                 if ("update".equalsIgnoreCase(command)) {
-                    migrator.update(contexts);
+                    liquibase.update(contexts);
                 } else if ("changelogSync".equalsIgnoreCase(command)) {
-                    migrator.changeLogSync(contexts);
+                    liquibase.changeLogSync(contexts);
                 } else if ("changelogSyncSQL".equalsIgnoreCase(command)) {
-                    migrator.changeLogSync(contexts, getOutputWriter());
+                    liquibase.changeLogSync(contexts, getOutputWriter());
                 } else if ("updateCount".equalsIgnoreCase(command)) {
-                    migrator.update(Integer.parseInt(commandParams.iterator().next()), contexts);
+                    liquibase.update(Integer.parseInt(commandParams.iterator().next()), contexts);
                 } else if ("updateCountSQL".equalsIgnoreCase(command)) {
-                    migrator.update(Integer.parseInt(commandParams.iterator().next()), contexts, getOutputWriter());
+                    liquibase.update(Integer.parseInt(commandParams.iterator().next()), contexts, getOutputWriter());
                 } else if ("updateSQL".equalsIgnoreCase(command)) {
-                    migrator.update(contexts, getOutputWriter());
+                    liquibase.update(contexts, getOutputWriter());
                 } else if ("rollback".equalsIgnoreCase(command)) {
                     if (commandParams == null) {
                         throw new CommandLineParsingException("rollback requires a rollback tag");
                     }
-                    migrator.rollback(commandParams.iterator().next(), contexts);
+                    liquibase.rollback(commandParams.iterator().next(), contexts);
                 } else if ("rollbackToDate".equalsIgnoreCase(command)) {
                     if (commandParams == null) {
                         throw new CommandLineParsingException("rollback requires a rollback date");
                     }
-                    migrator.rollback(dateFormat.parse(commandParams.iterator().next()), contexts);
+                    liquibase.rollback(dateFormat.parse(commandParams.iterator().next()), contexts);
                 } else if ("rollbackCount".equalsIgnoreCase(command)) {
-                    migrator.rollback(Integer.parseInt(commandParams.iterator().next()), contexts);
+                    liquibase.rollback(Integer.parseInt(commandParams.iterator().next()), contexts);
 
                 } else if ("rollbackSQL".equalsIgnoreCase(command)) {
                     if (commandParams == null) {
                         throw new CommandLineParsingException("rollbackSQL requires a rollback tag");
                     }
-                    migrator.rollback(commandParams.iterator().next(), contexts, getOutputWriter());
+                    liquibase.rollback(commandParams.iterator().next(), contexts, getOutputWriter());
                 } else if ("rollbackToDateSQL".equalsIgnoreCase(command)) {
                     if (commandParams == null) {
                         throw new CommandLineParsingException("rollbackToDateSQL requires a rollback date");
                     }
-                    migrator.rollback(dateFormat.parse(commandParams.iterator().next()), contexts, getOutputWriter());
+                    liquibase.rollback(dateFormat.parse(commandParams.iterator().next()), contexts, getOutputWriter());
                 } else if ("rollbackCountSQL".equalsIgnoreCase(command)) {
                     if (commandParams == null) {
                         throw new CommandLineParsingException("rollbackCountSQL requires a rollback tag");
                     }
 
-                    migrator.rollback(Integer.parseInt(commandParams.iterator().next()), contexts, getOutputWriter());
+                    liquibase.rollback(Integer.parseInt(commandParams.iterator().next()), contexts, getOutputWriter());
                 } else if ("futureRollbackSQL".equalsIgnoreCase(command)) {
-                    migrator.futureRollbackSQL(contexts, getOutputWriter());
+                    liquibase.futureRollbackSQL(contexts, getOutputWriter());
                 } else {
                     throw new CommandLineParsingException("Unknown command: " + command);
                 }

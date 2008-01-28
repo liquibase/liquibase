@@ -3,12 +3,12 @@ package liquibase.database;
 import liquibase.ChangeSet;
 import liquibase.DatabaseChangeLogLock;
 import liquibase.RanChangeSet;
+import liquibase.Liquibase;
 import liquibase.database.sql.SqlStatement;
 import liquibase.database.template.JdbcTemplate;
 import liquibase.exception.DatabaseHistoryException;
 import liquibase.exception.JDBCException;
 import liquibase.exception.LockException;
-import liquibase.migrator.Migrator;
 
 import java.io.IOException;
 import java.sql.Connection;
@@ -158,7 +158,7 @@ public class MockDatabase implements Database {
         return null;
     }
 
-    public boolean acquireLock(Migrator migrator) throws LockException {
+    public boolean acquireLock(Liquibase liquibase) throws LockException {
         return false;
     }
 
@@ -177,10 +177,10 @@ public class MockDatabase implements Database {
         return false;
     }
 
-    public void checkDatabaseChangeLogTable(Migrator migrator) throws JDBCException, IOException {
+    public void checkDatabaseChangeLogTable(Liquibase liquibase) throws JDBCException, IOException {
     }
 
-    public void checkDatabaseChangeLogLockTable(Migrator migrator) throws JDBCException, IOException {
+    public void checkDatabaseChangeLogLockTable(Liquibase liquibase) throws JDBCException, IOException {
     }
 
     public void dropDatabaseObjects(String schema) throws JDBCException {

@@ -18,7 +18,7 @@ public class ListLocksAction extends MigratorAction {
 
         try {
             String output = "";
-            DatabaseChangeLogLock[] locks = ideFacade.getMigrator(null, database).listLocks();
+            DatabaseChangeLogLock[] locks = ideFacade.getLiquibase(null, database).listLocks();
             for (DatabaseChangeLogLock lock : locks) {
                 output += "Locked by "+lock.getLockedBy()+" since "+ DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(lock.getLockGranted())+"\n";
             }
