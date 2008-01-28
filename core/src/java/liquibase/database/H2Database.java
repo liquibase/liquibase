@@ -89,10 +89,10 @@ public class H2Database extends HsqlDatabase {
 
     protected Date parseDate(String dateAsString) throws DateParseException {
         try {
-            if (dateAsString.indexOf(" ") > 0) {
+            if (dateAsString.indexOf(' ') > 0) {
                 return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSSSSSSS").parse(dateAsString);
             } else {
-                if (dateAsString.indexOf(":") > 0) {
+                if (dateAsString.indexOf(':') > 0) {
                     return new SimpleDateFormat("HH:mm:ss").parse(dateAsString);
                 } else {
                     return new SimpleDateFormat("yyyy-MM-dd").parse(dateAsString);

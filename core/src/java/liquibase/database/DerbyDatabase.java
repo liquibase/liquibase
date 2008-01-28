@@ -89,7 +89,7 @@ public class DerbyDatabase extends AbstractDatabase {
             return "TIME(" + super.getDateLiteral(isoDate) + ")";
         } else {
             String dateString = super.getDateLiteral(isoDate);
-            int decimalDigits = dateString.length() - dateString.indexOf(".") - 2;
+            int decimalDigits = dateString.length() - dateString.indexOf('.') - 2;
             String padding = "";
             for (int i=6; i> decimalDigits; i--) {
                 padding += "0";

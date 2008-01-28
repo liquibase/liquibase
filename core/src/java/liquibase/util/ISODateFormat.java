@@ -47,7 +47,7 @@ public class ISODateFormat {
         SimpleDateFormat dateTimeFormat = this.dateTimeFormat;
         String DATE_TIME_FORMAT_STRING = ISODateFormat.DATE_TIME_FORMAT_STRING;
 
-        if (dateAsString.indexOf(".") >= 0) {
+        if (dateAsString.indexOf('.') >= 0) {
             dateTimeFormat = this.dateTimeFormatWithDecimal;
             DATE_TIME_FORMAT_STRING = ISODateFormat.DATE_TIME_FORMAT_STRING_WITH_DECIMAL;
         }
@@ -56,7 +56,7 @@ public class ISODateFormat {
         if (dateAsString.length() >= DATE_TIME_FORMAT_STRING.length()-2) { //subtract 2 to not count the 's
             return new java.sql.Timestamp(dateTimeFormat.parse(dateAsString).getTime());
         } else {
-            if (dateAsString.indexOf(":") > 0) {
+            if (dateAsString.indexOf(':') > 0) {
                 return new java.sql.Time(timeFormat.parse(dateAsString).getTime());
             } else {
                 return new java.sql.Date(dateFormat.parse(dateAsString).getTime());
