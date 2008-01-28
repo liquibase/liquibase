@@ -2,15 +2,11 @@ package liquibase.parser.visitor;
 
 import liquibase.ChangeSet;
 import liquibase.exception.LiquibaseException;
-import liquibase.log.LogFactory;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Logger;
 
 public class ListVisitor implements ChangeSetVisitor {
-
-    private Logger log = LogFactory.getLogger();
 
     private List<ChangeSet> seenChangeSets = new ArrayList<ChangeSet>();
 

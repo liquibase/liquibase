@@ -203,4 +203,8 @@ public class SQLConnectionDelegate implements DatabaseConnection {
             throw new RuntimeException(e);
         }
     }
+
+    public int hashCode() {
+        return this.getUnderlyingConnection().hashCode();
+    }
 }

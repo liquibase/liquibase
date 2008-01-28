@@ -12,7 +12,6 @@ import liquibase.dbdoc.*;
 import liquibase.exception.DatabaseHistoryException;
 import liquibase.exception.JDBCException;
 import liquibase.exception.LiquibaseException;
-import liquibase.log.LogFactory;
 import liquibase.util.StreamUtil;
 
 import java.io.File;
@@ -20,16 +19,14 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
-import java.util.logging.Logger;
 
 public class DBDocVisitor implements ChangeSetVisitor {
 
-    private Logger log = LogFactory.getLogger();
     private Database database;
 
     private SortedSet<ChangeLogInfo> changeLogs;
     private Map<DatabaseObject, List<Change>> changesByObject;
-    static Map<String, List<Change>> changesByAuthor;
+    private Map<String, List<Change>> changesByAuthor;
 
     private Map<DatabaseObject, List<Change>> changesToRunByObject;
     private Map<String, List<Change>> changesToRunByAuthor;
