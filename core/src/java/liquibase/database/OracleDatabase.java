@@ -132,7 +132,7 @@ public class OracleDatabase extends AbstractDatabase {
             val.append(", 'HH24:MI:SS')");
             return val.toString();
         } else if (isDateTime(isoDate)) {
-            normalLiteral = normalLiteral.substring(0, normalLiteral.lastIndexOf("."))+"'";
+            normalLiteral = normalLiteral.substring(0, normalLiteral.lastIndexOf('.'))+"'";
 
             StringBuffer val = new StringBuffer(26);
             val.append("to_date(");
