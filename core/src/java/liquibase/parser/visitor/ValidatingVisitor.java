@@ -7,8 +7,8 @@ import liquibase.change.Change;
 import liquibase.database.Database;
 import liquibase.exception.PreconditionFailedException;
 import liquibase.exception.SetupException;
-import liquibase.preconditions.FailedPrecondition;
 import liquibase.preconditions.AndPrecondition;
+import liquibase.preconditions.FailedPrecondition;
 
 import java.util.ArrayList;
 import java.util.HashSet;

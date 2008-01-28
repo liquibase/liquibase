@@ -4,11 +4,10 @@ import liquibase.database.sql.RawSqlStatement;
 import liquibase.database.sql.SqlStatement;
 import liquibase.exception.JDBCException;
 
+import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.Types;
 import java.text.ParseException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 
 /**
  * Encapsulates Oracle database support.
@@ -22,7 +21,8 @@ public class OracleDatabase extends AbstractDatabase {
             method.setAccessible(true);
             method.invoke(conn, true);
         } catch (Exception e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            log.info("Could not set remarks reporting on OracleDatabase: "+e.getMessage());
+            ; //cannot set it. That is OK
         }
         super.setConnection(conn);
     }

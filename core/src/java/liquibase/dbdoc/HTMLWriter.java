@@ -42,8 +42,6 @@ public abstract class HTMLWriter {
             writeHeader(object, fileWriter);
             fileWriter.append("<body BGCOLOR=\"white\" onload=\"windowTitle();\">");
 
-            writeNav(fileWriter);
-
             fileWriter.append("<H2>").append(createTitle(object)).append("</H2>\n");
 
             writeBody(fileWriter, object, ranChanges, changesToRun);
@@ -71,8 +69,8 @@ public abstract class HTMLWriter {
 
     protected void writeBody(FileWriter fileWriter, Object object, List<Change> ranChanges, List<Change> changesToRun) throws IOException, DatabaseHistoryException, JDBCException {
         writeCustomHTML(fileWriter, object, ranChanges, database);
-        writeChanges("Pending Changes", fileWriter, object, changesToRun);
-        writeChanges("Past Changes", fileWriter, object, ranChanges);
+        writeChanges("Pending Changes", fileWriter, changesToRun);
+        writeChanges("Past Changes", fileWriter, ranChanges);
     }
 
     protected void writeTable(String title, List<List<String>> cells, FileWriter fileWriter) throws IOException {
@@ -97,69 +95,6 @@ public abstract class HTMLWriter {
         fileWriter.append("</TD>\n");
     }
 
-    private void writeNav(FileWriter fileWriter) throws IOException {
-//        fileWriter.append("<!-- ========= START OF TOP NAVBAR ======= -->\n")
-//                .append("<A NAME=\"navbar_top\"><!-- --></A>\n")
-//                .append("<A HREF=\"#skip-navbar_top\" title=\"Skip navigation links\"></A>\n")
-//                .append("\n")
-//                .append("<TABLE BORDER=\"0\" WIDTH=\"100%\" CELLPADDING=\"1\" CELLSPACING=\"0\" SUMMARY=\"\">\n")
-////                .append("<TR>\n")
-////                .append("<TD COLSPAN=3 BGCOLOR=\"#EEEEFF\" CLASS=\"NavBarCell1\">\n")
-////                .append("<A NAME=\"navbar_top_firstrow\"><!-- --></A>\n")
-////                .append("<TABLE BORDER=\"0\" CELLPADDING=\"0\" CELLSPACING=\"3\" SUMMARY=\"\">\n")
-////                .append("  <TR ALIGN=\"center\" VALIGN=\"top\">\n")
-////                .append("  <TD BGCOLOR=\"#EEEEFF\" CLASS=\"NavBarCell1\">    <A HREF=\"../../overview-summary.html\"><FONT CLASS=\"NavBarFont1\"><B>Overview</B></FONT></A>&nbsp;</TD>\n")
-////                .append("  <TD BGCOLOR=\"#EEEEFF\" CLASS=\"NavBarCell1\">    <A HREF=\"package-summary.html\"><FONT CLASS=\"NavBarFont1\"><B>Package</B></FONT></A>&nbsp;</TD>\n")
-////                .append("  <TD BGCOLOR=\"#FFFFFF\" CLASS=\"NavBarCell1Rev\"> &nbsp;<FONT CLASS=\"NavBarFont1Rev\"><B>Class</B></FONT>&nbsp;</TD>\n")
-////                .append("\n")
-////                .append("  <TD BGCOLOR=\"#EEEEFF\" CLASS=\"NavBarCell1\">    <A HREF=\"class-use/AWTEvent.html\"><FONT CLASS=\"NavBarFont1\"><B>Use</B></FONT></A>&nbsp;</TD>\n")
-////                .append("  <TD BGCOLOR=\"#EEEEFF\" CLASS=\"NavBarCell1\">    <A HREF=\"package-tree.html\"><FONT CLASS=\"NavBarFont1\"><B>Tree</B></FONT></A>&nbsp;</TD>\n")
-////                .append("  <TD BGCOLOR=\"#EEEEFF\" CLASS=\"NavBarCell1\">    <A HREF=\"../../deprecated-list.html\"><FONT CLASS=\"NavBarFont1\"><B>Deprecated</B></FONT></A>&nbsp;</TD>\n")
-////                .append("  <TD BGCOLOR=\"#EEEEFF\" CLASS=\"NavBarCell1\">    <A HREF=\"../../index-files/index-1.html\"><FONT CLASS=\"NavBarFont1\"><B>Index</B></FONT></A>&nbsp;</TD>\n")
-////                .append("  <TD BGCOLOR=\"#EEEEFF\" CLASS=\"NavBarCell1\">    <A HREF=\"../../help-doc.html\"><FONT CLASS=\"NavBarFont1\"><B>Help</B></FONT></A>&nbsp;</TD>\n")
-////                .append("\n")
-////                .append("  </TR>\n")
-////                .append("</TABLE>\n")
-////                .append("</TD>\n")
-////                .append("<TD ALIGN=\"right\" VALIGN=\"top\" ROWSPAN=3><EM>\n")
-////                .append("<b>Java<sup><font size=-2>TM</font></sup>&nbsp;2&nbsp;Platform<br>Std.&nbsp;Ed. v1.4.2</b></EM>\n")
-////                .append("</TD>\n")
-////                .append("</TR>\n")
-////                .append("\n")
-//                .append("<TR>\n")
-////                .append("<TD BGCOLOR=\"white\" CLASS=\"NavBarCell2\"><FONT SIZE=\"-2\">\n")
-////                .append("\n")
-////                .append("&nbsp;<A HREF=\"../../java/awt/AlphaComposite.html\" title=\"class in java.awt\"><B>PREV CLASS</B></A>&nbsp;\n")
-////                .append("&nbsp;<A HREF=\"../../java/awt/AWTEventMulticaster.html\" title=\"class in java.awt\"><B>NEXT CLASS</B></A></FONT></TD>\n")
-//                .append("<TD BGCOLOR=\"white\" CLASS=\"NavBarCell2\"><FONT SIZE=\"-2\">\n")
-//                .append("  <A HREF=\"../../index.html\" target=\"_top\"><B>FRAMES</B></A>  &nbsp;\n")
-//                .append("&nbsp;<A HREF=\"AWTEvent.html\" target=\"_top\"><B>NO FRAMES</B></A>  &nbsp;\n")
-//                .append("&nbsp;<SCRIPT type=\"text/javascript\">\n")
-//                .append("  <!--\n")
-//                .append("  if(window==top) {\n")
-//                .append("    document.writeln('<A HREF=\"../../allclasses-noframe.html\"><B>All Classes</B></A>');\n")
-//                .append("  }\n")
-//                .append("  //-->\n")
-//                .append("</SCRIPT>\n")
-//                .append("<NOSCRIPT>\n")
-//                .append("  <A HREF=\"../../allclasses-noframe.html\"><B>All Classes</B></A>\n")
-//                .append("</NOSCRIPT>\n")
-//                .append("\n")
-//                .append("</FONT></TD>\n")
-//                .append("</TR>\n")
-////                .append("<TR>\n")
-////                .append("<TD VALIGN=\"top\" CLASS=\"NavBarCell3\"><FONT SIZE=\"-2\">\n")
-////                .append("  SUMMARY:&nbsp;NESTED&nbsp;|&nbsp;<A HREF=\"#field_summary\">FIELD</A>&nbsp;|&nbsp;<A HREF=\"#constructor_summary\">CONSTR</A>&nbsp;|&nbsp;<A HREF=\"#method_summary\">METHOD</A></FONT></TD>\n")
-////                .append("<TD VALIGN=\"top\" CLASS=\"NavBarCell3\"><FONT SIZE=\"-2\">\n")
-////                .append("DETAIL:&nbsp;<A HREF=\"#field_detail\">FIELD</A>&nbsp;|&nbsp;<A HREF=\"#constructor_detail\">CONSTR</A>&nbsp;|&nbsp;<A HREF=\"#method_detail\">METHOD</A></FONT></TD>\n")
-////                .append("\n")
-////                .append("</TR>\n")
-//                .append("</TABLE>\n")
-//                .append("<A NAME=\"skip-navbar_top\"></A>\n")
-//                .append("<!-- ========= END OF TOP NAVBAR ========= -->");
-//        fileWriter.append("<HR>\n")
-    }
-
     private void writeHeader(Object object, FileWriter fileWriter) throws IOException {
         String title = createTitle(object);
         fileWriter.append("<head>")
@@ -175,7 +110,7 @@ public abstract class HTMLWriter {
 
     protected abstract String createTitle(Object object);
 
-    protected void writeChanges(String title, FileWriter fileWriter, Object object, List<Change> changes) throws IOException, DatabaseHistoryException, JDBCException {
+    protected void writeChanges(String title, FileWriter fileWriter, List<Change> changes) throws IOException, DatabaseHistoryException, JDBCException {
         fileWriter.append("<p><TABLE BORDER=\"1\" WIDTH=\"100%\" CELLPADDING=\"3\" CELLSPACING=\"0\" SUMMARY=\"\">\n");
         fileWriter.append("<TR BGCOLOR=\"#CCCCFF\" CLASS=\"TableHeadingColor\">\n");
         fileWriter.append("<TD COLSPAN='4'><FONT SIZE=\"+2\">\n");

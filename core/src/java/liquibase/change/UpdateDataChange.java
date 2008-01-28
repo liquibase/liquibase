@@ -1,18 +1,16 @@
 package liquibase.change;
 
-import liquibase.database.sql.SqlStatement;
-import liquibase.database.sql.InsertStatement;
-import liquibase.database.sql.UpdateStatement;
 import liquibase.database.Database;
+import liquibase.database.sql.SqlStatement;
+import liquibase.database.sql.UpdateStatement;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Table;
 import liquibase.exception.UnsupportedChangeException;
 import liquibase.util.StringUtils;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 import java.util.*;
-
-import org.w3c.dom.Element;
-import org.w3c.dom.Document;
 
 public class UpdateDataChange extends AbstractChange {
 

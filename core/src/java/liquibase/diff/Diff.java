@@ -4,7 +4,6 @@ import liquibase.database.Database;
 import liquibase.database.structure.*;
 import liquibase.exception.JDBCException;
 
-import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -18,7 +17,7 @@ public class Diff {
 
     private Set<DiffStatusListener> statusListeners = new HashSet<DiffStatusListener>();
 
-    public Diff(Database baseDatabase, Database targetDatabase) throws JDBCException {
+    public Diff(Database baseDatabase, Database targetDatabase) {
         this.baseDatabase = baseDatabase;
 
         this.targetDatabase = targetDatabase;
@@ -31,7 +30,7 @@ public class Diff {
         baseDatabase.setDefaultSchemaName(schema);
     }
 
-    public Diff(DatabaseSnapshot baseDatabaseSnapshot, DatabaseSnapshot targetDatabaseSnapshot) throws JDBCException {
+    public Diff(DatabaseSnapshot baseDatabaseSnapshot, DatabaseSnapshot targetDatabaseSnapshot) {
         this.baseSnapshot = baseDatabaseSnapshot;
 
         this.targetSnapshot = targetDatabaseSnapshot;
@@ -46,33 +45,29 @@ public class Diff {
     }
 
     public DiffResult compare() throws JDBCException {
-        try {
-            if (baseSnapshot == null) {
-                baseSnapshot = new DatabaseSnapshot(baseDatabase, statusListeners);
-            }
-
-            if (targetSnapshot == null) {
-                if (targetDatabase == null) {
-                    targetSnapshot = new DatabaseSnapshot();
-                } else {
-                    targetSnapshot = new DatabaseSnapshot(targetDatabase, statusListeners);
-                }
-            }
-
-            DiffResult diffResult = new DiffResult(baseSnapshot, targetSnapshot);
-            checkVersionInfo(diffResult);
-            checkTables(diffResult);
-            checkViews(diffResult);
-            checkColumns(diffResult);
-            checkForeignKeys(diffResult);
-            checkPrimaryKeys(diffResult);
-            checkIndexes(diffResult);
-            checkSequences(diffResult);
-
-            return diffResult;
-        } catch (SQLException e) {
-            throw new JDBCException();
+        if (baseSnapshot == null) {
+            baseSnapshot = new DatabaseSnapshot(baseDatabase, statusListeners);
         }
+
+        if (targetSnapshot == null) {
+            if (targetDatabase == null) {
+                targetSnapshot = new DatabaseSnapshot();
+            } else {
+                targetSnapshot = new DatabaseSnapshot(targetDatabase, statusListeners);
+            }
+        }
+
+        DiffResult diffResult = new DiffResult(baseSnapshot, targetSnapshot);
+        checkVersionInfo(diffResult);
+        checkTables(diffResult);
+        checkViews(diffResult);
+        checkColumns(diffResult);
+        checkForeignKeys(diffResult);
+        checkPrimaryKeys(diffResult);
+        checkIndexes(diffResult);
+        checkSequences(diffResult);
+
+        return diffResult;
     }
 
     private void checkVersionInfo(DiffResult diffResult) throws JDBCException {
@@ -84,7 +79,7 @@ public class Diff {
 
     }
 
-    private void checkTables(DiffResult diffResult) throws SQLException, JDBCException {
+    private void checkTables(DiffResult diffResult) {
         for (Table baseTable : baseSnapshot.getTables()) {
             if (!targetSnapshot.getTables().contains(baseTable)) {
                 diffResult.addMissingTable(baseTable);

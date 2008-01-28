@@ -1,13 +1,11 @@
 package liquibase.change.custom;
 
-import liquibase.FileOpener;
 import liquibase.change.AbstractChange;
 import liquibase.database.Database;
 import liquibase.database.sql.SqlStatement;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.exception.CustomChangeException;
 import liquibase.exception.RollbackImpossibleException;
-import liquibase.exception.SetupException;
 import liquibase.exception.UnsupportedChangeException;
 import liquibase.util.ObjectUtil;
 import org.w3c.dom.Document;
@@ -143,14 +141,5 @@ public class CustomChangeWrapper extends AbstractChange {
 
     public Set<DatabaseObject> getAffectedDatabaseObjects() {
         return null;
-    }
-
-
-    public void setUp() throws SetupException {
-    }
-
-
-    public void setFileOpener(FileOpener fileOpener) {
-        super.setFileOpener(fileOpener);
     }
 }

@@ -466,7 +466,6 @@ public abstract class AbstractDatabase implements Database {
         ResultSet checkTableRS = null;
         ResultSet checkColumnsRS = null;
         List<SqlStatement> statementsToExecute = new ArrayList<SqlStatement>();
-        boolean wroteToOutput = false;
 
         try {
             checkTableRS = connection.getMetaData().getTables(convertRequestedSchemaToCatalog(getDefaultSchemaName()), convertRequestedSchemaToSchema(getDefaultSchemaName()), getDatabaseChangeLogTableName(), new String[]{"TABLE"});
@@ -641,7 +640,6 @@ public abstract class AbstractDatabase implements Database {
      * @param schema
      */
     public void dropDatabaseObjects(String schema) throws JDBCException {
-        DatabaseConnection conn = getConnection();
         try {
             DatabaseSnapshot snapshot = new DatabaseSnapshot(this, new HashSet<DiffStatusListener>(), schema);
 

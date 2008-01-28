@@ -17,8 +17,8 @@ public class MD5Util {
         byte[] digestBytes = digest.digest();
 
         StringBuffer hexString = new StringBuffer();
-        for (int i = 0; i < digestBytes.length; i++) {
-            hexString.append(Integer.toHexString(0xFF & digestBytes[i]));
+        for (byte digestByte : digestBytes) {
+            hexString.append(Integer.toHexString(0xFF & digestByte));
         }
         return hexString.toString();
 

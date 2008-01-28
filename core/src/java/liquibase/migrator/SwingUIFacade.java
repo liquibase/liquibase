@@ -1,8 +1,8 @@
 package liquibase.migrator;
 
+import liquibase.database.Database;
 import liquibase.exception.JDBCException;
 import liquibase.util.StreamUtil;
-import liquibase.database.Database;
 
 import javax.swing.*;
 

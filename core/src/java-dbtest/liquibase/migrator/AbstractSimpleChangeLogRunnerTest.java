@@ -4,10 +4,10 @@ import junit.framework.TestCase;
 import liquibase.ChangeSet;
 import liquibase.FileOpener;
 import liquibase.FileSystemFileOpener;
+import liquibase.database.AbstractDatabase;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
-import liquibase.database.AbstractDatabase;
 import liquibase.database.sql.DropTableStatement;
 import liquibase.database.structure.DatabaseSnapshot;
 import liquibase.diff.Diff;
@@ -23,13 +23,13 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.io.StringWriter;
+import java.lang.reflect.Field;
 import java.net.URL;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
-import java.lang.reflect.Field;
 
 public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
 

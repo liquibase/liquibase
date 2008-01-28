@@ -31,6 +31,6 @@ interface ResultSetExtractor {
      *                               values or navigating (that is, there's no need to catch SQLException)
      * @throws JDBCException         in case of custom exceptions
      */
-    Object extractData(ResultSet rs) throws SQLException, JDBCException;
+    Object extractData(ResultSet rs) throws SQLException;
 
 }

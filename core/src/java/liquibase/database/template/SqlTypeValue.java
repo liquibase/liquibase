@@ -3,7 +3,6 @@ package liquibase.database.template;
 import liquibase.util.JdbcUtils;
 
 import java.sql.PreparedStatement;
-import java.sql.SQLException;
 
 /**
  * Interface to be implemented for setting values for more complex database specific
@@ -43,6 +42,6 @@ interface SqlTypeValue {
      * @see java.sql.Types
      * @see java.sql.PreparedStatement#setObject
      */
-    void setTypeValue(PreparedStatement ps, int paramIndex, int sqlType, String typeName) throws SQLException;
+    void setTypeValue(PreparedStatement ps, int paramIndex, int sqlType, String typeName);
 
 }

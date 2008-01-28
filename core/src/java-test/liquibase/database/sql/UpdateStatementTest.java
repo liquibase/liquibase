@@ -9,8 +9,6 @@ import liquibase.test.TestContext;
 import static org.junit.Assert.*;
 import org.junit.Test;
 
-import java.sql.Types;
-
 public class UpdateStatementTest extends AbstractSqlStatementTest {
 
     private static final String TABLE_NAME = "UpdateTest";

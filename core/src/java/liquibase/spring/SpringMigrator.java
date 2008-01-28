@@ -259,7 +259,7 @@ public class SpringMigrator implements InitializingBean, BeanNameAware, Resource
             Migrator migrator = createMigrator(c);
 
             // First, run patchChangeLog() which allows md5sum values to be set to NULL
-            setup(migrator);
+//            setup(migrator);
 
             // Now, write out the SQL file for the changes if so configured
             if (isWriteSqlFileEnabled() && getSqlOutputDir() != null) {
@@ -275,8 +275,6 @@ public class SpringMigrator implements InitializingBean, BeanNameAware, Resource
             }
         } catch (SQLException e) {
             throw new JDBCException(e);
-        } catch (IOException e) {
-            throw new LiquibaseException(e);
         } finally {
             if (c != null) {
                 try {
@@ -286,18 +284,6 @@ public class SpringMigrator implements InitializingBean, BeanNameAware, Resource
                 }
             }
         }
-
-    }
-
-    /**
-     * Subclasses can override this method and make calls to eraseChangeLogMD5Sum() as
-     * necessary.
-     *
-     * @throws IOException
-     * @throws SQLException
-     */
-    @SuppressWarnings({"UnusedDeclaration"})
-    private void setup(Migrator migrator) {
 
     }
 
@@ -341,7 +327,7 @@ public class SpringMigrator implements InitializingBean, BeanNameAware, Resource
         }
     }
 
-    private Migrator createMigrator(Connection c) throws IOException, JDBCException {
+    private Migrator createMigrator(Connection c) throws JDBCException {
         return new Migrator(getChangeLog(), new SpringResourceOpener(getChangeLog()), DatabaseFactory.getInstance().findCorrectDatabaseImplementation(c));
     }
 

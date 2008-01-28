@@ -16,7 +16,6 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.net.URL;
 import java.sql.DatabaseMetaData;
-import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.List;
 

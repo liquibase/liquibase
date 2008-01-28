@@ -148,9 +148,7 @@ public class ServletMigrator implements ServletContextListener {
             }
 
         } catch (Exception e) {
-            if ("false".equals(failOnError)) {
-                return;
-            } else {
+            if (!"false".equals(failOnError)) {
                 throw new RuntimeException(e);
             }
         }

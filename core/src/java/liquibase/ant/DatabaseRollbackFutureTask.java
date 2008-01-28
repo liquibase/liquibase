@@ -3,8 +3,6 @@ package liquibase.ant;
 import liquibase.migrator.Migrator;
 import org.apache.tools.ant.BuildException;
 
-import java.sql.SQLException;
-import java.util.Date;
 import java.io.Writer;
 
 /**

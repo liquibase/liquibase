@@ -3,7 +3,6 @@ package liquibase.database.template;
 import liquibase.exception.JDBCException;
 
 import java.sql.PreparedStatement;
-import java.sql.SQLException;
 
 /**
  * Generic callback interface for code that operates on a PreparedStatement.
@@ -27,6 +26,6 @@ interface PreparedStatementCallback {
      *                               to a DataAccessException by a SQLExceptionTranslator
      * @throws JDBCException         in case of custom exceptions
      */
-    Object doInPreparedStatement(PreparedStatement ps) throws SQLException, JDBCException;
+    Object doInPreparedStatement(PreparedStatement ps);
 
 }

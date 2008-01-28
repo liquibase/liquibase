@@ -8,8 +8,6 @@ import liquibase.parser.LiquibaseSchemaResolver;
 import liquibase.parser.xml.XMLChangeLogParser;
 import liquibase.xml.DefaultXmlWriter;
 import liquibase.xml.XmlWriter;
-import liquibase.util.StringUtils;
-import liquibase.util.StreamUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -566,9 +564,7 @@ public class DiffResult {
 
                 ConstraintsConfig constraintsConfig = null;
                 if (column.isPrimaryKey()) {
-                    if (constraintsConfig == null) {
-                        constraintsConfig = new ConstraintsConfig();
-                    }
+                    constraintsConfig = new ConstraintsConfig();
                     constraintsConfig.setPrimaryKey(true);
 
                     PrimaryKey pkToRemove = null;

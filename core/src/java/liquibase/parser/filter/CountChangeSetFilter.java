@@ -13,9 +13,6 @@ public class CountChangeSetFilter implements ChangeSetFilter {
 
     public boolean accepts(ChangeSet changeSet) {
         changeSetsSeen++;
-        if (changeSetsSeen > changeSetsToAllow) {
-            return false;
-        }
-        return true;
+        return changeSetsSeen <= changeSetsToAllow;
     }
 }

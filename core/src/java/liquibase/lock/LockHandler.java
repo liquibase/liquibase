@@ -8,10 +8,8 @@ import liquibase.exception.JDBCException;
 import liquibase.exception.LockException;
 import liquibase.log.LogFactory;
 
-import java.io.IOException;
 import java.net.InetAddress;
 import java.sql.Timestamp;
-import java.sql.Types;
 import java.text.DateFormat;
 import java.util.*;
 
@@ -174,7 +172,7 @@ public class LockHandler {
     /**
      * Releases whatever locks are on the database change log table
      */
-    public void forceReleaseLock() throws LockException, JDBCException, IOException {
+    public void forceReleaseLock() throws LockException, JDBCException {
         database.checkDatabaseChangeLogLockTable();
 
         releaseLock();

@@ -38,8 +38,6 @@ public class DBDocVisitor implements ChangeSetVisitor {
 
     private String rootChangeLog;
 
-    private ChangeLogWriter changeLogWriter;
-
     private static final int MAX_RECENT_CHANGE = 50;
 
     public DBDocVisitor(Database database) {
@@ -110,7 +108,7 @@ public class DBDocVisitor implements ChangeSetVisitor {
     }
 
     public void writeHTML(File rootOutputDir, FileOpener fileOpener) throws IOException, JDBCException, DatabaseHistoryException {
-        changeLogWriter = new ChangeLogWriter(fileOpener, rootOutputDir);
+        ChangeLogWriter changeLogWriter = new ChangeLogWriter(fileOpener, rootOutputDir);
         HTMLWriter authorWriter = new AuthorWriter(rootOutputDir, database);
         HTMLWriter tableWriter = new TableWriter(rootOutputDir, database);
         HTMLWriter columnWriter = new ColumnWriter(rootOutputDir, database);
