@@ -33,7 +33,8 @@ public class CreateTableChange extends AbstractChange {
 
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
 
-        CreateTableStatement statement = new CreateTableStatement(getSchemaName() == null?database.getDefaultSchemaName():getSchemaName(), getTableName());
+        String schemaName = getSchemaName() == null ? database.getDefaultSchemaName() : getSchemaName();
+        CreateTableStatement statement = new CreateTableStatement(schemaName, getTableName());
         for (ColumnConfig column : getColumns()) {
             ConstraintsConfig constraints = column.getConstraints();
             boolean isAutoIncrement = column.isAutoIncrement() != null && column.isAutoIncrement();
@@ -59,7 +60,10 @@ public class CreateTableChange extends AbstractChange {
                 }
 
                 if (constraints.getReferences() != null) {
-                    ForeignKeyConstraint fkConstraint = new ForeignKeyConstraint(constraints.getForeignKeyName(), constraints.getReferences());
+                    if (StringUtils.trimToNull(constraints.getForeignKeyName()) == null) {
+                        throw new UnsupportedChangeException("createTable with references requires foreignKeyName");
+                    }
+                    ForeignKeyConstraint fkConstraint = new ForeignKeyConstraint(constraints.getForeignKeyName(), database.escapeTableName(schemaName, constraints.getReferences()));
                     fkConstraint.setColumn(column.getName());
                     fkConstraint.setDeleteCascade(constraints.isDeleteCascade() != null && constraints.isDeleteCascade());
                     fkConstraint.setInitiallyDeferred(constraints.isInitiallyDeferred() != null && constraints.isInitiallyDeferred());
