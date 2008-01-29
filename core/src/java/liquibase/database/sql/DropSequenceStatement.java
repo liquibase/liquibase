@@ -1,6 +1,7 @@
 package liquibase.database.sql;
 
 import liquibase.database.Database;
+import liquibase.database.PostgresDatabase;
 import liquibase.exception.StatementNotSupportedOnDatabaseException;
 
 public class DropSequenceStatement implements SqlStatement {
@@ -26,7 +27,12 @@ public class DropSequenceStatement implements SqlStatement {
             throw new StatementNotSupportedOnDatabaseException(this, database);
         }
 
-        return "DROP SEQUENCE " + database.escapeSequenceName(getSchemaName(), getSequenceName());
+        String sql = "DROP SEQUENCE " + database.escapeSequenceName(getSchemaName(), getSequenceName());
+        if (database instanceof PostgresDatabase) {
+            sql += " CASCADE";
+        }
+
+        return sql;
     }
 
     public String getEndDelimiter(Database database) {

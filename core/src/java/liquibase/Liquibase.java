@@ -28,6 +28,7 @@ import java.text.DateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 /**
  * Core class of the LiquiBase migrator.
@@ -91,8 +92,14 @@ public class Liquibase {
                     new DbmsChangeSetFilter(database));
 
             logIterator.run(new UpdateVisitor(database));
+        } catch (LiquibaseException e) {
+            throw e;
         } finally {
-            lockHandler.releaseLock();
+            try {
+                lockHandler.releaseLock();
+            } catch (LockException e) {
+                log.log(Level.SEVERE, "Could not release lock", e);
+            }
         }
     }
 

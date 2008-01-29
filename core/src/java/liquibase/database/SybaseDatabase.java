@@ -43,7 +43,7 @@ public class SybaseDatabase extends MSSQLDatabase {
     }
     
     protected SqlStatement getCreateChangeLogSQL() {
-        return new RawSqlStatement(("CREATE TABLE "+getDatabaseChangeLogTableName()+" (ID VARCHAR(150) NOT NULL, " +
+        return new RawSqlStatement(("CREATE TABLE "+escapeTableName(getDefaultSchemaName(), getDatabaseChangeLogTableName())+" (ID VARCHAR(150) NOT NULL, " +
                 "AUTHOR VARCHAR(150) NOT NULL, " +
                 "FILENAME VARCHAR(255) NOT NULL, " +
                 "DATEEXECUTED " + getDateTimeType() + " NOT NULL, " +
@@ -56,7 +56,7 @@ public class SybaseDatabase extends MSSQLDatabase {
     }
 
     protected SqlStatement getCreateChangeLogLockSQL() {
-        return new RawSqlStatement(("CREATE TABLE "+getDatabaseChangeLogLockTableName()+" (ID INT NOT NULL PRIMARY KEY, LOCKED " + getBooleanType() + " NOT NULL, LOCKGRANTED " + getDateTimeType() + " NULL, LOCKEDBY VARCHAR(255) NULL)"));
+        return new RawSqlStatement(("CREATE TABLE "+escapeTableName(getDefaultSchemaName(), getDatabaseChangeLogLockTableName())+" (ID INT NOT NULL PRIMARY KEY, LOCKED " + getBooleanType() + " NOT NULL, LOCKGRANTED " + getDateTimeType() + " NULL, LOCKEDBY VARCHAR(255) NULL)"));
     }
     
     /**

@@ -68,7 +68,7 @@ public class AlterSequenceStatement implements SqlStatement {
 
         StringBuffer buffer = new StringBuffer();
         buffer.append("ALTER SEQUENCE ");
-        buffer.append(getSequenceName());
+        buffer.append(database.escapeSequenceName(getSchemaName(), getSequenceName()));
 
         if (getIncrementBy() != null) {
             if (database instanceof FirebirdDatabase || database instanceof HsqlDatabase) {

@@ -113,7 +113,7 @@ public class LockHandler {
 
         try {
             List<DatabaseChangeLogLock> allLocks = new ArrayList<DatabaseChangeLogLock>();
-            RawSqlStatement sqlStatement = new RawSqlStatement((("SELECT ID, LOCKED, LOCKGRANTED, LOCKEDBY FROM " + database.getDatabaseChangeLogLockTableName()).toUpperCase()));
+            RawSqlStatement sqlStatement = new RawSqlStatement((("SELECT ID, LOCKED, LOCKGRANTED, LOCKEDBY FROM " + database.escapeTableName(database.getDefaultSchemaName(), database.getDatabaseChangeLogLockTableName()))));
             List<Map> rows = database.getJdbcTemplate().queryForList(sqlStatement);
             for (Map columnMap : rows) {
                 Boolean locked = (Boolean) columnMap.get("LOCKED");
