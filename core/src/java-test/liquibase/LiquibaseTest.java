@@ -49,16 +49,16 @@ public class LiquibaseTest {
 
     @Test
     public void isSaveToRunMigration() throws Exception {
-        TestLiquibase migrator = testLiquibase;
+        TestLiquibase liquibase = testLiquibase;
 
-        migrator.setUrl("jdbc:oracle:thin:@localhost:1521:latest");
-        assertTrue(migrator.isSafeToRunMigration());
+        liquibase.setUrl("jdbc:oracle:thin:@localhost:1521:latest");
+        assertTrue(liquibase.isSafeToRunMigration());
 
-        migrator.setUrl("jdbc:oracle:thin:@liquibase:1521:latest");
-        assertFalse(migrator.isSafeToRunMigration());
+        liquibase.setUrl("jdbc:oracle:thin:@liquibase:1521:latest");
+        assertFalse(liquibase.isSafeToRunMigration());
 
         testLiquibase.getDatabase().setJdbcTemplate(new JdbcOutputTemplate(new PrintWriter(System.out), testLiquibase.getDatabase()));
-        assertTrue("Safe to run if outputing sql, even if non-localhost URL", migrator.isSafeToRunMigration());
+        assertTrue("Safe to run if outputing sql, even if non-localhost URL", liquibase.isSafeToRunMigration());
 
     }
 

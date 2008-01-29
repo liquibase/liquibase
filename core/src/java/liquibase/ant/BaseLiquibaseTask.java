@@ -30,7 +30,7 @@ import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
 /**
- * Base class for all Ant LiquiBase tasks.  This class sets up the migrator and defines parameters
+ * Base class for all Ant LiquiBase tasks.  This class sets up LiquiBase and defines parameters
  * that are common to all tasks.
  */
 public class BaseLiquibaseTask extends Task {

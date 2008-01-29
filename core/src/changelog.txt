@@ -22,7 +22,12 @@ Changes in version 1.5.0 ()
 - added <update> change
 - added <delete> change
 - Additional and enhanced Ant tasks
-- Changed database.migrator.should.run system property to liquibase.should.run 
+- Changed database.migrator.should.run system property to liquibase.should.run
+- Moved liquibase.servlet.MigratorStatusServlet to liquibase.servlet.LiquibaseStatusServlet
+- Moved liquibase.servlet.ServletMigrator to liquibase.servlet.LiquibaseServletListener
+- Moved liquibase.spring.SpringMigrator to liquibase.spring.SpringLiquibase
+- Moved liquibase.commandline.CommandLineMigrator to liquibase.commandline.Main
+- Renamed checked servlet listener parameters
 - Other bug fixes
 
 Changes in version 1.4.1 (2007.11.30)

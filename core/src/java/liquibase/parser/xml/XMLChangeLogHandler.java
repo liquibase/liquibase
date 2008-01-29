@@ -137,10 +137,8 @@ class XMLChangeLogHandler extends DefaultHandler {
                 }
                 lastColumn.setConstraints(constraints);
             } else if ("preConditions".equals(qName)) {
-//                System.out.println(migrator);
                 rootPrecondition = new AndPrecondition();
                 preconditionLogicStack.push(rootPrecondition);
-                //System.out.println("pre condition is true");
 
             } else if (rootPrecondition != null) {
                 currentPrecondition = PreconditionFactory.getInstance().create(qName);
