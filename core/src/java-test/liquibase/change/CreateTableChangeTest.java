@@ -320,6 +320,7 @@ public class CreateTableChangeTest extends AbstractChangeTest {
         ColumnConfig columnConfig = new ColumnConfig();
         columnConfig.setName("id");
         ConstraintsConfig constraints = new ConstraintsConfig();
+        constraints.setForeignKeyName("fk_test");
         constraints.setReferences("test(id)");
         constraints.setDeferrable(true);
         constraints.setInitiallyDeferred(true);
@@ -338,6 +339,7 @@ public class CreateTableChangeTest extends AbstractChangeTest {
         ColumnConfig columnConfig = new ColumnConfig();
         columnConfig.setName("id");
         ConstraintsConfig constraints = new ConstraintsConfig();
+        constraints.setForeignKeyName("fk_test");
         constraints.setReferences("test(id)");
         constraints.setDeferrable(false);
         constraints.setInitiallyDeferred(false);
@@ -357,6 +359,7 @@ public class CreateTableChangeTest extends AbstractChangeTest {
         columnConfig.setName("id");
         ConstraintsConfig constraints = new ConstraintsConfig();
         constraints.setReferences("test(id)");
+        constraints.setForeignKeyName("fk_test");
         columnConfig.setConstraints(constraints);
         change.addColumn(columnConfig);
 
