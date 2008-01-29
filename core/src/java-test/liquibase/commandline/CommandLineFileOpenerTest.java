@@ -1,7 +1,7 @@
 package liquibase.commandline;
 
 import liquibase.FileOpener;
-import liquibase.migrator.AbstractFileOpenerTest;
+import liquibase.AbstractFileOpenerTest;
 import static org.junit.Assert.*;
 import org.junit.Test;
 
@@ -16,7 +16,7 @@ import java.util.Enumeration;
 public class CommandLineFileOpenerTest extends AbstractFileOpenerTest {
 
     /**
-     * @see liquibase.migrator.AbstractFileOpenerTest#createFileOpener()
+     * @see liquibase.AbstractFileOpenerTest#createFileOpener()
      */
     @Override
     protected FileOpener createFileOpener() {

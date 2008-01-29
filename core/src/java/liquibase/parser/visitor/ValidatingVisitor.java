@@ -37,7 +37,6 @@ public class ValidatingVisitor implements ChangeSetVisitor {
                 return;
             }
             precondition.check(database, changeLog);
-//            preconditions.check(migrator, new DatabaseChangeLog(migrator, physicalChangeLogLocation));
         } catch (PreconditionFailedException e) {
             failedPreconditions.addAll(e.getFailedPreconditions());
         }

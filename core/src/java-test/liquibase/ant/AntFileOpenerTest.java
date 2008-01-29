@@ -1,7 +1,7 @@
 package liquibase.ant;
 
 import liquibase.FileOpener;
-import liquibase.migrator.AbstractFileOpenerTest;
+import liquibase.AbstractFileOpenerTest;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.types.Path;
 import static org.junit.Assert.*;
@@ -17,7 +17,7 @@ import java.util.Enumeration;
 public class AntFileOpenerTest extends AbstractFileOpenerTest {
 
     /**
-     * @see liquibase.migrator.AbstractFileOpenerTest#createFileOpener()
+     * @see liquibase.AbstractFileOpenerTest#createFileOpener()
      */
     @Override
     protected FileOpener createFileOpener() {

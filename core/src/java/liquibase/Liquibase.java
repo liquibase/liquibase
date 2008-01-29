@@ -31,7 +31,7 @@ import java.util.logging.Logger;
 import java.util.logging.Level;
 
 /**
- * Core class of the LiquiBase migrator.
+ * Core LiquiBase facade.
  * Although there are several ways of executing LiquiBase (Ant, command line, etc.) they are all wrappers around this class.
  */
 public class Liquibase {
@@ -410,7 +410,7 @@ public class Liquibase {
     /**
      * Returns true if it is "save" to migrate the database.
      * Currently, "safe" is defined as running in an output-sql mode or against a database on localhost.
-     * It is fine to run the migrator against a "non-safe" database, the method is mainly used to determine if the user
+     * It is fine to run LiquiBase against a "non-safe" database, the method is mainly used to determine if the user
      * should be prompted before continuing.
      */
     public boolean isSafeToRunMigration() throws JDBCException {
