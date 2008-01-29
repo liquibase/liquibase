@@ -31,24 +31,24 @@ public class DropIndexStatement implements SqlStatement {
     }
 
     public String getSqlStatement(Database database) throws StatementNotSupportedOnDatabaseException {
-        if (getTableSchemaName() != null && !database.supportsSchemas()) {
+        String schemaName = getTableSchemaName();
+        
+        if (schemaName != null && !database.supportsSchemas()) {
             throw new StatementNotSupportedOnDatabaseException("Database does not support schemas", this, database);
         }
         if (database instanceof MySQLDatabase) {
             if (getTableName() == null) {
                 throw new StatementNotSupportedOnDatabaseException("tableName is required", this, database);
             }
-            return "DROP INDEX " +getIndexName() + " ON " + database.escapeTableName(getTableSchemaName(), getTableName());
+            return "DROP INDEX " +getIndexName() + " ON " + database.escapeTableName(schemaName, getTableName());
         } else if (database instanceof MSSQLDatabase) {
             if (getTableName() == null) {
                 throw new StatementNotSupportedOnDatabaseException("tableName is required", this, database);
             }
-            return "DROP INDEX " + database.escapeTableName(getTableSchemaName(), getTableName()) + "." + getIndexName();
-        } else if (database instanceof OracleDatabase) {
-            return "DROP INDEX " + getIndexName();
+            return "DROP INDEX " + database.escapeTableName(schemaName, getTableName()) + "." + getIndexName();
         }
 
-        return "DROP INDEX " + getIndexName();
+        return "DROP INDEX " + database.escapeTableName(schemaName, getIndexName());
     }
 
     public String getEndDelimiter(Database database) {

@@ -139,7 +139,9 @@
     </changeSet>
 
     <changeSet id="15" author="nvoxland" runAlways="true">
-        <sql>update liquibaseRunInfo set timesRan=timesRan+1</sql>
+        <update tableName="liquibaseRunInfo">
+            <column name="timesRan" valueNumeric="timesRan+1"/>
+        </update>
     </changeSet>
 
     <changeSet id="16" author="nvoxland">

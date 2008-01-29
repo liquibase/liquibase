@@ -297,7 +297,76 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
         assertEquals(0, finalDiffResult.getUnexpectedSequences().size());
         assertEquals(0, finalDiffResult.getUnexpectedTables().size());
         assertEquals(0, finalDiffResult.getUnexpectedViews().size());
+    }
 
+    public void testRerunDiffChangeLogAltSchema() throws Exception {
+        if (database == null) {
+            return;
+        }
+        if (!database.supportsSchemas()) {
+            return;
+        }
+
+        Liquibase liquibase = createLiquibase(includedChangeLog);
+        liquibase.dropAll(getSchemasToDrop());
+
+        database.setDefaultSchemaName("liquibaseb");
+        
+        liquibase.update(includedChangeLog);
+
+        DatabaseSnapshot originalSnapshot = new DatabaseSnapshot(database);
+
+        Diff diff = new Diff(database, "liquibaseb");
+        DiffResult diffResult = diff.compare();
+
+        File tempFile = File.createTempFile("liquibase-test", ".xml");
+
+        FileOutputStream output = new FileOutputStream(tempFile);
+        try {
+            diffResult.printChangeLog(new PrintStream(output), database);
+            output.flush();
+        } finally {
+            output.close();
+        }
+
+        liquibase = createLiquibase(tempFile.getName());
+        liquibase.dropAll(getSchemasToDrop());
+
+        //run again to test changelog testing logic
+        database.getJdbcTemplate().execute(new DropTableStatement("liquibaseb", database.getDatabaseChangeLogTableName(), false));
+        database.getJdbcTemplate().execute(new DropTableStatement("liquibaseb", database.getDatabaseChangeLogLockTableName(), false));
+        database.commit();
+
+        DatabaseConnection connection = TestContext.getInstance().getConnection(url);
+        database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(connection);
+        database.setDefaultSchemaName("liquibaseb");
+        liquibase = createLiquibase(tempFile.getName());
+        try {
+            liquibase.update(this.contexts);
+        } catch (ValidationFailedException e) {
+            e.printDescriptiveError(System.out);
+            throw e;
+        }
+
+        tempFile.deleteOnExit();
+
+        DatabaseSnapshot finalSnapshot = new DatabaseSnapshot(database);
+
+        DiffResult finalDiffResult = new Diff(originalSnapshot, finalSnapshot).compare();
+        assertEquals(0, finalDiffResult.getMissingColumns().size());
+        assertEquals(0, finalDiffResult.getMissingForeignKeys().size());
+        assertEquals(0, finalDiffResult.getMissingIndexes().size());
+        assertEquals(0, finalDiffResult.getMissingPrimaryKeys().size());
+        assertEquals(0, finalDiffResult.getMissingSequences().size());
+        assertEquals(0, finalDiffResult.getMissingTables().size());
+        assertEquals(0, finalDiffResult.getMissingViews().size());
+        assertEquals(0, finalDiffResult.getUnexpectedColumns().size());
+        assertEquals(0, finalDiffResult.getUnexpectedForeignKeys().size());
+        assertEquals(0, finalDiffResult.getUnexpectedIndexes().size());
+        assertEquals(0, finalDiffResult.getUnexpectedPrimaryKeys().size());
+        assertEquals(0, finalDiffResult.getUnexpectedSequences().size());
+        assertEquals(0, finalDiffResult.getUnexpectedTables().size());
+        assertEquals(0, finalDiffResult.getUnexpectedViews().size());
     }
 
     public void testClearChecksums() throws Exception {
@@ -377,49 +446,49 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
     }
 
 
-    public void testRerunChangeLogOnDifferentSchema() throws Exception {
-        if (database == null) {
-            return;
-        }
-
-        if (!database.supportsSchemas()) {
-            return;
-        }
-
-        runCompleteChangeLog();
-
-        DatabaseConnection connection2 = TestContext.getInstance().getConnection(url);
-
-        Database database2 = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(connection2);
-
-        database2.setDefaultSchemaName("liquibaseb");
-
-        { //this is ugly, but is a special case specific to this test
-            Field changeLogTableExistsField = AbstractDatabase.class.getDeclaredField("changeLogTableExists");
-            changeLogTableExistsField.setAccessible(true);
-            changeLogTableExistsField.set(database2, false);
-
-            Field changeLogCreateAttemptedField = AbstractDatabase.class.getDeclaredField("changeLogCreateAttempted");
-            changeLogCreateAttemptedField.setAccessible(true);
-            changeLogCreateAttemptedField.set(database2, false);
-
-            Field changeLogLockTableExistsField = AbstractDatabase.class.getDeclaredField("changeLogLockTableExists");
-            changeLogLockTableExistsField.setAccessible(true);
-            changeLogLockTableExistsField.set(database2, false);
-
-            Field changeLogLockCreateAttemptedField = AbstractDatabase.class.getDeclaredField("changeLogLockCreateAttempted");
-            changeLogLockCreateAttemptedField.setAccessible(true);
-            changeLogLockCreateAttemptedField.set(database2, false);
-
-        }
-        database2.checkDatabaseChangeLogTable();
-        database2.dropDatabaseObjects(database2.getDefaultSchemaName());
-        dropDatabaseChangeLogTable(database2.getDefaultSchemaName(), database2);
-
-        JUnitFileOpener fileOpener = new JUnitFileOpener();
-        Liquibase liquibase = new Liquibase(completeChangeLog, fileOpener, database2);
-        liquibase.update(this.contexts);
-    }
+//    public void testRerunChangeLogOnDifferentSchema() throws Exception {
+//        if (database == null) {
+//            return;
+//        }
+//
+//        if (!database.supportsSchemas()) {
+//            return;
+//        }
+//
+//        runCompleteChangeLog();
+//
+//        DatabaseConnection connection2 = TestContext.getInstance().getConnection(url);
+//
+//        Database database2 = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(connection2);
+//
+//        database2.setDefaultSchemaName("liquibaseb");
+//
+//        { //this is ugly, but is a special case specific to this test
+//            Field changeLogTableExistsField = AbstractDatabase.class.getDeclaredField("changeLogTableExists");
+//            changeLogTableExistsField.setAccessible(true);
+//            changeLogTableExistsField.set(database2, false);
+//
+//            Field changeLogCreateAttemptedField = AbstractDatabase.class.getDeclaredField("changeLogCreateAttempted");
+//            changeLogCreateAttemptedField.setAccessible(true);
+//            changeLogCreateAttemptedField.set(database2, false);
+//
+//            Field changeLogLockTableExistsField = AbstractDatabase.class.getDeclaredField("changeLogLockTableExists");
+//            changeLogLockTableExistsField.setAccessible(true);
+//            changeLogLockTableExistsField.set(database2, false);
+//
+//            Field changeLogLockCreateAttemptedField = AbstractDatabase.class.getDeclaredField("changeLogLockCreateAttempted");
+//            changeLogLockCreateAttemptedField.setAccessible(true);
+//            changeLogLockCreateAttemptedField.set(database2, false);
+//
+//        }
+//        database2.checkDatabaseChangeLogTable();
+//        database2.dropDatabaseObjects(database2.getDefaultSchemaName());
+//        dropDatabaseChangeLogTable(database2.getDefaultSchemaName(), database2);
+//
+//        JUnitFileOpener fileOpener = new JUnitFileOpener();
+//        Liquibase liquibase = new Liquibase(completeChangeLog, fileOpener, database2);
+//        liquibase.update(this.contexts);
+//    }
 
     private void dropDatabaseChangeLogTable(String schema, Database database) {
         try {

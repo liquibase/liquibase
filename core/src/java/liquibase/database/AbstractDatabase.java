@@ -507,13 +507,13 @@ public abstract class AbstractDatabase implements Database {
                 getJdbcTemplate().comment("Create Database Change Log Table");
                 SqlStatement createTableStatement = getCreateChangeLogSQL();
                 if (!canCreateChangeLogTable()) {
-                    throw new JDBCException("Cannot create " + getDatabaseChangeLogTableName() + " table for your database.\n\n" +
+                    throw new JDBCException("Cannot create " + escapeTableName(getDefaultSchemaName(), getDatabaseChangeLogTableName()) + " table for your database.\n\n" +
                             "Please construct it manually using the following SQL as a base and re-run LiquiBase:\n\n" +
                             createTableStatement);
                 }
                 // If there is no table in the database for recording change history create one.
                 statementsToExecute.add(createTableStatement);
-                log.info("Creating database history table with name: " + getDatabaseChangeLogTableName());
+                log.info("Creating database history table with name: " + escapeTableName(getDefaultSchemaName(), getDatabaseChangeLogTableName()));
                 changeLogTableExists = true;
 //                }
             }
@@ -567,7 +567,7 @@ public abstract class AbstractDatabase implements Database {
                     getJdbcTemplate().comment("Create Database Lock Table");
                     this.getJdbcTemplate().execute(createTableStatement);
                     this.commit();
-                    log.info("Created database lock table with name: " + getDatabaseChangeLogLockTableName());
+                    log.info("Created database lock table with name: " + escapeTableName(getDefaultSchemaName(), getDatabaseChangeLogLockTableName()));
                     changeLogLockTableExists = true;
                     knowMustInsertIntoLockTable = true;
                 }
@@ -579,13 +579,13 @@ public abstract class AbstractDatabase implements Database {
             if (changeLogLockTableExists) {
                 int rows = -1;
                 if (!knowMustInsertIntoLockTable) {
-                    RawSqlStatement selectStatement = new RawSqlStatement("SELECT COUNT(*) FROM " + getDatabaseChangeLogLockTableName() + " WHERE ID=1");
+                    RawSqlStatement selectStatement = new RawSqlStatement("SELECT COUNT(*) FROM " + escapeTableName(getDefaultSchemaName(), getDatabaseChangeLogLockTableName()) + " WHERE ID=1");
                     rows = this.getJdbcTemplate().queryForInt(selectStatement);
                 }
                 if (knowMustInsertIntoLockTable || rows == 0) {
                     this.getJdbcTemplate().update(getChangeLogLockInsertSQL());
                     this.commit();
-                    log.info("Inserted lock row into: " + getDatabaseChangeLogLockTableName());
+                    log.info("Inserted lock row into: " + escapeTableName(getDefaultSchemaName(), getDatabaseChangeLogLockTableName()));
                     rs.close();
                 }
             } else {
@@ -716,7 +716,7 @@ public abstract class AbstractDatabase implements Database {
      */
     public void tag(String tagString) throws JDBCException {
         try {
-            int totalRows = this.getJdbcTemplate().queryForInt(new RawSqlStatement("SELECT COUNT(*) FROM " + getDatabaseChangeLogTableName()));
+            int totalRows = this.getJdbcTemplate().queryForInt(new RawSqlStatement("SELECT COUNT(*) FROM " + escapeTableName(getDefaultSchemaName(), getDatabaseChangeLogTableName())));
             if (totalRows == 0) {
                 throw new JDBCException("Cannot tag an empty database");
             }
@@ -724,7 +724,7 @@ public abstract class AbstractDatabase implements Database {
             Timestamp lastExecutedDate = (Timestamp) this.getJdbcTemplate().queryForObject(createChangeToTagSQL(), Timestamp.class);
             int rowsUpdated = this.getJdbcTemplate().update(createTagSQL(tagString, lastExecutedDate));
             if (rowsUpdated == 0) {
-                throw new JDBCException("Did not tag database change log correctly");
+                throw new JDBCException("Did not tag database change log correctly.  Should have tagged changeset from "+lastExecutedDate.toString());
             }
             this.commit();
         } catch (Exception e) {
@@ -736,7 +736,7 @@ public abstract class AbstractDatabase implements Database {
      * Returns SQL to return the date of the most recient changeset execution.
      */
     protected SqlStatement createChangeToTagSQL() {
-        return new RawSqlStatement("SELECT MAX(DATEEXECUTED) FROM " + getDatabaseChangeLogTableName());
+        return new RawSqlStatement("SELECT MAX(DATEEXECUTED) FROM " + escapeTableName(getDefaultSchemaName(), getDatabaseChangeLogTableName()));
     }
 
     /**
@@ -747,7 +747,7 @@ public abstract class AbstractDatabase implements Database {
      * </ol>
      */
     protected SqlStatement createTagSQL(String tagName, Date dateExecuted) {
-        UpdateStatement statement = new UpdateStatement(null, getDatabaseChangeLogTableName());
+        UpdateStatement statement = new UpdateStatement(getDefaultSchemaName(), getDatabaseChangeLogTableName());
         statement.addNewColumnValue("TAG", tagName);
         statement.setWhereClause("DATEEXECUTED = ?");
         statement.addWhereParameter(dateExecuted);
@@ -760,7 +760,7 @@ public abstract class AbstractDatabase implements Database {
     }
 
     public boolean doesTagExist(String tag) throws JDBCException {
-        int count = this.getJdbcTemplate().queryForInt(new RawSqlStatement("SELECT COUNT(*) FROM " + getDatabaseChangeLogTableName() + " WHERE TAG='" + tag + "'"));
+        int count = this.getJdbcTemplate().queryForInt(new RawSqlStatement("SELECT COUNT(*) FROM " + escapeTableName(getDefaultSchemaName(), getDatabaseChangeLogTableName()) + " WHERE TAG='" + tag + "'"));
         return count > 0;
     }
 
@@ -1027,7 +1027,7 @@ public abstract class AbstractDatabase implements Database {
                 try {
                     log.info("Updating NULL md5sum for " + changeSet.toString());
                     DatabaseConnection connection = getConnection();
-                    PreparedStatement updatePstmt = connection.prepareStatement("UPDATE "+getDatabaseChangeLogTableName()+" SET MD5SUM=? WHERE ID=? AND AUTHOR=? AND FILENAME=?");
+                    PreparedStatement updatePstmt = connection.prepareStatement("UPDATE "+escapeTableName(getDefaultSchemaName(), getDatabaseChangeLogTableName())+" SET MD5SUM=? WHERE ID=? AND AUTHOR=? AND FILENAME=?");
                     updatePstmt.setString(1, changeSet.getMd5sum());
                     updatePstmt.setString(2, changeSet.getId());
                     updatePstmt.setString(3, changeSet.getAuthor());
@@ -1076,7 +1076,7 @@ public abstract class AbstractDatabase implements Database {
      */
     public List<RanChangeSet> getRanChangeSetList() throws JDBCException {
         try {
-            String databaseChangeLogTableName = getDatabaseChangeLogTableName();
+            String databaseChangeLogTableName = escapeTableName(getDefaultSchemaName(), getDatabaseChangeLogTableName());
             List<RanChangeSet> ranChangeSetList = new ArrayList<RanChangeSet>();
             if (doesChangeLogTableExist()) {
                 log.info("Reading from " + databaseChangeLogTableName);
