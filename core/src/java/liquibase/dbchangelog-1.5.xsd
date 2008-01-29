@@ -65,6 +65,7 @@
         <xsd:attribute name="dbms" type="xsd:string"/>
         <xsd:attribute name="runOnChange" type="xsd:boolean"/>
         <xsd:attribute name="runAlways" type="xsd:boolean"/>
+        <xsd:attribute name="failOnError" type="xsd:boolean"/>
     </xsd:attributeGroup>
 
     <!-- Attributes for constraints -->
