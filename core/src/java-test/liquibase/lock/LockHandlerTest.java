@@ -134,6 +134,8 @@ public class LockHandlerTest  {
         expect(database.getJdbcTemplate()).andReturn(template).anyTimes();
         expect(database.doesChangeLogLockTableExist()).andReturn(true);
         expect(database.getDatabaseChangeLogLockTableName()).andReturn("lock_table");
+        expect(database.getDefaultSchemaName()).andReturn("default_schema");
+        expect(database.escapeTableName("default_schema", "lock_table")).andReturn("default_schema.lock_table");
         expectLastCall();
 
         List<Map> locksList = new ArrayList<Map>();
@@ -167,6 +169,8 @@ public class LockHandlerTest  {
         expect(database.doesChangeLogLockTableExist()).andReturn(true);
         expect(database.getDatabaseChangeLogLockTableName()).andReturn("lock_table");
         expectLastCall();
+        expect(database.getDefaultSchemaName()).andReturn("default_schema");
+        expect(database.escapeTableName("default_schema", "lock_table")).andReturn("default_schema.lock_table");
 
         List<Map> locksList = new ArrayList<Map>();
         Map lock = new HashMap();
@@ -197,8 +201,10 @@ public class LockHandlerTest  {
 
         expect(database.getJdbcTemplate()).andReturn(template).anyTimes();
         expect(database.doesChangeLogLockTableExist()).andReturn(true);
+        expect(database.getDefaultSchemaName()).andReturn("default_schema");
         expect(database.getDatabaseChangeLogLockTableName()).andReturn("lock_table");
         expectLastCall();
+        expect(database.escapeTableName("default_schema", "lock_table")).andReturn("default_schema.lock_table");
 
         List<Map> locksList = new ArrayList<Map>();
 

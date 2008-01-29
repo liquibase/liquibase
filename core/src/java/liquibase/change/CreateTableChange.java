@@ -63,7 +63,7 @@ public class CreateTableChange extends AbstractChange {
                     if (StringUtils.trimToNull(constraints.getForeignKeyName()) == null) {
                         throw new UnsupportedChangeException("createTable with references requires foreignKeyName");
                     }
-                    ForeignKeyConstraint fkConstraint = new ForeignKeyConstraint(constraints.getForeignKeyName(), database.escapeTableName(schemaName, constraints.getReferences()));
+                    ForeignKeyConstraint fkConstraint = new ForeignKeyConstraint(constraints.getForeignKeyName(), constraints.getReferences());
                     fkConstraint.setColumn(column.getName());
                     fkConstraint.setDeleteCascade(constraints.isDeleteCascade() != null && constraints.isDeleteCascade());
                     fkConstraint.setInitiallyDeferred(constraints.isInitiallyDeferred() != null && constraints.isInitiallyDeferred());
