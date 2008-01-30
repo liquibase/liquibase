@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.*;
 import java.util.logging.Logger;
+import java.util.logging.Level;
 
 /**
  * Encapsulates a changeSet and all its associated changes.
@@ -41,6 +42,7 @@ public class ChangeSet {
     private boolean runOnChange;
     private Set<String> contexts;
     private Set<String> dbmsSet;
+    private Boolean failOnError;
 
     private SqlStatement[] rollBackStatements;
 
@@ -147,7 +149,11 @@ public class ChangeSet {
             } catch (Exception e1) {
                 throw new MigrationFailedException(this, e);
             }
-            throw new MigrationFailedException(this, e);
+            if (getFailOnError() != null && !getFailOnError()) {
+                log.log(Level.INFO, "Change set "+toString(false)+" failed, but failOnError was false", e);
+            } else {
+                throw new MigrationFailedException(this, e);
+            }
         }
     }
 
@@ -234,6 +240,10 @@ public class ChangeSet {
 
         if (runOnChange) {
             node.setAttribute("runOnChange", "true");
+        }
+
+        if (failOnError != null) {
+            node.setAttribute("failOnError", failOnError.toString());
         }
 
         if (getContexts() != null && getContexts().size() > 0) {
@@ -324,5 +334,13 @@ public class ChangeSet {
         }
 
         return returnString.toString().replaceFirst("^, ", "");
+    }
+
+    public Boolean getFailOnError() {
+        return failOnError;
+    }
+
+    public void setFailOnError(Boolean failOnError) {
+        this.failOnError = failOnError;
     }
 }

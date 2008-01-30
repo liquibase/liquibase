@@ -79,6 +79,9 @@ class XMLChangeLogHandler extends DefaultHandler {
                         databaseChangeLog.getPhysicalFilePath(),
                         atts.getValue("context"),
                         atts.getValue("dbms"));
+                if (StringUtils.trimToNull(atts.getValue("failOnError")) != null) {
+                    changeSet.setFailOnError(Boolean.parseBoolean(atts.getValue("failOnError")));
+                }
             } else if (changeSet != null && "rollback".equals(qName)) {
                 text = new StringBuffer();
             } else if (changeSet != null && change == null) {
