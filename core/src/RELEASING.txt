@@ -6,6 +6,7 @@ CORE:
 run core/build.xml all
 create core release on sourceforge
 upload new version of site to shell.sourceforge.net
+update version info on /download
 
 MAVEN:
 run core/build.xml all
