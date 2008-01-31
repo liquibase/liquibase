@@ -3,6 +3,8 @@ package org.liquibase.maven.plugins;
 import java.net.MalformedURLException;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.logging.Level;
+
 import liquibase.FileOpener;
 import liquibase.Liquibase;
 import liquibase.UIFactory;
@@ -207,6 +209,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
   protected void releaseConnection(Connection c) {
     if (c != null) {
       try {
+        c.rollback();
         c.close();
       }
       catch (SQLException e) {

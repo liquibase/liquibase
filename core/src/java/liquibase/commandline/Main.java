@@ -704,7 +704,12 @@ public class Main {
                 throw new CommandLineParsingException("Unexpected date/time format.  Use 'yyyy-MM-dd HH:mm:ss'");
             }
         } finally {
-            connection.close();
+            try {
+                connection.rollback();
+                connection.close();
+            } catch (SQLException e) {
+                LogFactory.getLogger().log(Level.WARNING, "problem closing connection", e);
+            }
         }
     }
 
