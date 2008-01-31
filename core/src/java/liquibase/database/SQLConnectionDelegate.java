@@ -30,6 +30,7 @@ public class SQLConnectionDelegate implements DatabaseConnection {
     }
 
     public void close() throws SQLException {
+        con.rollback();
         con.close();
     }
 
