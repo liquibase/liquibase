@@ -163,14 +163,14 @@ public class Liquibase {
     }
 
     private void outputHeader(String message) throws JDBCException {
-        database.getJdbcTemplate().comment("**************************************************************************************");
+        database.getJdbcTemplate().comment("*********************************************************************");
         database.getJdbcTemplate().comment(message);
-        database.getJdbcTemplate().comment("**************************************************************************************");
+        database.getJdbcTemplate().comment("*********************************************************************");
         database.getJdbcTemplate().comment("Change Log: " + changeLogFile);
         database.getJdbcTemplate().comment("Ran at: " + DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(new Date()));
         database.getJdbcTemplate().comment("Against: " + getDatabase().getConnectionUsername() + "@" + getDatabase().getConnectionURL());
         database.getJdbcTemplate().comment("LiquiBase version: " + LiquibaseUtil.getBuildVersion());
-        database.getJdbcTemplate().comment("**************************************************************************************" + StreamUtil.getLineSeparator());
+        database.getJdbcTemplate().comment("*********************************************************************" + StreamUtil.getLineSeparator());
     }
 
     public void rollback(int changesToRollback, String contexts, Writer output) throws LiquibaseException {
