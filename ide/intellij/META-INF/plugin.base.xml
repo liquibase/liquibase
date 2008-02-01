@@ -18,9 +18,10 @@
         <br><br>
         Requires DBHelper plugin.
         ]]></description>
-    <version>@BUILD.VERSION@.5</version>
+    <version>@BUILD.VERSION@.0</version>
     <change-notes>
         <![CDATA[
+        1.5.1.0: Initial 1.5 IntelliJ release<br>
         1.4.1.5: Bug fixes<br>
         1.4.1.4: Bug fixes<br>
         1.4.1.3: Added help documentation, bug fixes<br>

@@ -23,6 +23,7 @@ GRAILS:
 - change version in LiquibaseGrailsPlugin.groovy
 - run: grails clean  
 - run: grails package-plugin
+- test by running grails install-plugin PATH_TO_NEW_ZIP.zip in an independent test grails environment 
 - commit changes
 - run: grails release-plugin
 
