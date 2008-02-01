@@ -438,6 +438,12 @@ public class Liquibase {
 
     }
 
+    public void forceReleaseLocks() throws LockException, IOException, JDBCException {
+        checkDatabaseChangeLogTable();
+
+        LockHandler.getInstance(getDatabase()).forceReleaseLock();
+    }
+
     public List<ChangeSet> listUnrunChangeSets(String contexts) throws LiquibaseException {
         LockHandler lockHandler = LockHandler.getInstance(database);
         lockHandler.waitForLock();

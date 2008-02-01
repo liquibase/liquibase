@@ -233,5 +233,7 @@ public interface Database extends DatabaseObject {
 
     void setJdbcTemplate(JdbcTemplate template);
 
-    String escapeStringForDatabase(String string);    
+    String escapeStringForDatabase(String string);
+
+    void close() throws JDBCException;
 }
