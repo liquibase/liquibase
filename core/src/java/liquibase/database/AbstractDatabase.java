@@ -1210,4 +1210,15 @@ public abstract class AbstractDatabase implements Database {
     public int hashCode() {
         return (connection != null ? connection.hashCode() : 0);
     }
+
+    public void close() throws JDBCException {
+        try {
+            DatabaseConnection connection = getConnection();
+            if (connection != null) {
+                connection.close();
+            }
+        } catch (SQLException e) {
+            throw new JDBCException(e);
+        }
+    }
 }

@@ -377,4 +377,8 @@ public class MockDatabase implements Database {
     public String escapeStringForDatabase(String string) {
         return string;
     }
+
+    public void close() throws JDBCException {
+        ;
+    }
 }

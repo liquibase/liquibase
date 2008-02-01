@@ -283,9 +283,9 @@ public class BaseLiquibaseTask extends Task {
     protected void closeDatabase(Liquibase liquibase) {
         if (liquibase != null && liquibase.getDatabase() != null && liquibase.getDatabase().getConnection() != null) {
             try {
-                liquibase.getDatabase().getConnection().close();
-            } catch (SQLException e) {
-                ;
+                liquibase.getDatabase().close();
+            } catch (JDBCException e) {
+                log("Error closing database: "+e.getMessage());
             }
         }
     }
