@@ -3,6 +3,7 @@ package liquibase.change;
 import liquibase.database.*;
 import liquibase.database.sql.RawSqlStatement;
 import liquibase.database.sql.SqlStatement;
+import liquibase.database.sql.ReorganizeTableStatement;
 import liquibase.database.structure.Column;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Table;
@@ -80,7 +81,7 @@ public class ModifyColumnChange extends AbstractChange {
         		sql.add(new RawSqlStatement("ALTER TABLE " + database.escapeTableName(schemaName, getTableName()) + " ALTER COLUMN " + aColumn.getName() + " " + aColumn.getType()));
         } else if (database instanceof DB2Database) {
         		sql.add(new RawSqlStatement("ALTER TABLE " + database.escapeTableName(schemaName, getTableName()) + " ALTER COLUMN " + aColumn.getName() + " SET DATA TYPE " + aColumn.getType()));
-        		sql.add(new RawSqlStatement("CALL SYSPROC.ADMIN_CMD ('REORG TABLE "+ database.escapeTableName(schemaName, getTableName())+"')"));
+        		sql.add(new ReorganizeTableStatement(schemaName, getTableName()));
         } else {
         		sql.add(new RawSqlStatement("ALTER TABLE " + database.escapeTableName(schemaName, getTableName()) + " ALTER COLUMN " + aColumn.getName() + " TYPE " + aColumn.getType()));
         }
