@@ -1,7 +1,7 @@
 LiquiBase Core Changelog
 ==========================================
 
-Changes in version 1.5.1 (2008.01.29)
+Changes in version 1.5.1 (2008.02.01)
 ----------------------
 - Fixed failOnError logic
 - Improved serial column detection in Postgres
