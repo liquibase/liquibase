@@ -199,8 +199,8 @@ public class DiffResult {
     }
 
     public void printResult(PrintStream out) throws JDBCException {
-        out.println("Base Database: " + baseDatabase.getConnectionUsername() + " " + baseDatabase.getConnectionURL());
-        out.println("Target Database: " + targetDatabase.getConnectionUsername() + " " + targetDatabase.getConnectionURL());
+        out.println("Base Database: " + targetDatabase.getConnectionUsername() + " " + targetDatabase.getConnectionURL());
+        out.println("Target Database: " + baseDatabase.getConnectionUsername() + " " + baseDatabase.getConnectionURL());
 
         printComparision("Product Name", productName, out);
         printComparision("Product Version", productVersion, out);
