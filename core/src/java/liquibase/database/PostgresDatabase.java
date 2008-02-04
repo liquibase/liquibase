@@ -166,7 +166,7 @@ public class PostgresDatabase extends AbstractDatabase {
 
 
     public SqlStatement createFindSequencesSQL(String schema) throws JDBCException {
-        return new RawSqlStatement("SELECT relname AS SEQUENCE_NAME FROM pg_class, pg_namespace WHERE relkind='S' AND pg_class.relnamespace = pg_namespace.oid AND nspname = '" + convertRequestedSchemaToSchema(schema) + "' AND 'nextval(''"+(schema==null?"":schema+".")+"'||relname||'''::regclass)' not in (select adsrc from pg_attrdef where adsrc is not null)");
+        return new RawSqlStatement("SELECT relname AS SEQUENCE_NAME FROM pg_class, pg_namespace WHERE relkind='S' AND pg_class.relnamespace = pg_namespace.oid AND nspname = '" + convertRequestedSchemaToSchema(schema) + "' AND 'nextval(''"+(schema==null?"":schema+".")+"'||relname||'''::regclass)' not in (select adsrc from pg_attrdef where adsrc is not null) AND 'nextval('''||relname||'''::regclass)' not in (select adsrc from pg_attrdef where adsrc is not null)");
     }
 
 
