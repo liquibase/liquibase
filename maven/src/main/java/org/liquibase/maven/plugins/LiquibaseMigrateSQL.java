@@ -7,6 +7,7 @@ import java.sql.Connection;
 
 import liquibase.exception.LiquibaseException;
 import liquibase.Liquibase;
+import liquibase.FileOpener;
 import org.apache.maven.plugin.MojoExecutionException;
 
 /**
@@ -16,8 +17,9 @@ import org.apache.maven.plugin.MojoExecutionException;
  * @author Peter Murray
  * @description Liquibase Migrate SQL Maven plugin
  * @goal migrateSQL
+ * @deprecated Use {@link LiquibaseUpdateSQL} or Maven goal "updateSQL" instead.
  */
-public class LiquibaseMigrateSQL extends ConfigurableLiquibaseMojo {
+public class LiquibaseMigrateSQL extends AbstractLiquibaseChangeLogMojo {
 
     /**
      * The file to output the Migration SQL script to, if it exists it will be overwritten.
@@ -38,7 +40,7 @@ public class LiquibaseMigrateSQL extends ConfigurableLiquibaseMojo {
 
     private boolean promptOnNonLocalDatabaseDefault = false;
 
-    /** The writer fro writing the migration SQL. */  
+    /** The writer for writing the migration SQL. */
     private Writer outputWriter;
 
     @Override
@@ -52,31 +54,41 @@ public class LiquibaseMigrateSQL extends ConfigurableLiquibaseMojo {
         getLog().info(indent + "migrationSQLOutputFile: " + migrationSqlOutputFile);
     }
 
-    @Override
-    protected void performMigratorConfiguration(Liquibase liquibase) throws MojoExecutionException {
-        try {
-            if (!migrationSqlOutputFile.exists()) {
-                // Ensure the parent directories exist
-                migrationSqlOutputFile.getParentFile().mkdirs();
-            }
-            outputWriter = new FileWriter(migrationSqlOutputFile);
-        }
-        catch (IOException e) {
-            getLog().error(e);
-            throw new MojoExecutionException("Failed to create SQL output writer", e);
-        }
-        getLog().info("Output SQL Migration File: " + migrationSqlOutputFile.getAbsolutePath());
-    }
+  @Override
+  protected Liquibase createLiquibase(FileOpener fo, Connection conn)
+          throws MojoExecutionException {
+    Liquibase liquibase = super.createLiquibase(fo, conn);
 
-    protected void performLiquibaseTask(Liquibase liquibase) throws LiquibaseException {
+    // Setup the output file writer
+    try {
+      if (!migrationSqlOutputFile.exists()) {
+        // Ensure the parent directories exist
+        migrationSqlOutputFile.getParentFile().mkdirs();
+        // Create the actual file
+        if (!migrationSqlOutputFile.createNewFile()) {
+          throw new MojoExecutionException("Cannot create the migration SQL file; "
+                                           + migrationSqlOutputFile.getAbsolutePath());
+        }
+      }
+      outputWriter = new FileWriter(migrationSqlOutputFile);
+    }
+    catch (IOException e) {
+      getLog().error(e);
+      throw new MojoExecutionException("Failed to create SQL output writer", e);
+    }
+    getLog().info("Output SQL Migration File: " + migrationSqlOutputFile.getAbsolutePath());
+    return liquibase;
+  }
+
+  protected void performLiquibaseTask(Liquibase liquibase) throws LiquibaseException {
         getLog().info("Creating Change Log SQL and Migrating Database");
         super.performLiquibaseTask(liquibase);
         liquibase.update(contexts, outputWriter);
     }
 
   @Override
-  protected void releaseConnection(Connection c) {
-    super.releaseConnection(c);
+  protected void cleanup(Connection c) {
+    super.cleanup(c);
     try {
       outputWriter.close();
     }
