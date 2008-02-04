@@ -12,7 +12,7 @@ import org.apache.maven.plugin.MojoFailureException;
  * @author Peter Murray
  * @goal rollback
  */
-public class LiquibaseRollback extends ConfigurableLiquibaseMojo {
+public class LiquibaseRollback extends AbstractLiquibaseChangeLogMojo {
 
   private enum RollbackType {
 
@@ -103,6 +103,5 @@ public class LiquibaseRollback extends ConfigurableLiquibaseMojo {
         throw new IllegalStateException("Unexpected rollback type, " + type);
       }
     }
-
   }
 }
