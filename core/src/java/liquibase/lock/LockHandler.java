@@ -1,6 +1,7 @@
 package liquibase.lock;
 
 import liquibase.DatabaseChangeLogLock;
+import liquibase.util.NetUtil;
 import liquibase.database.Database;
 import liquibase.database.sql.RawSqlStatement;
 import liquibase.database.sql.UpdateStatement;
@@ -9,6 +10,9 @@ import liquibase.exception.LockException;
 import liquibase.log.LogFactory;
 
 import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.util.*;
@@ -56,7 +60,8 @@ public class LockHandler {
                 UpdateStatement updateStatement = new UpdateStatement(database.getDefaultSchemaName(), database.getDatabaseChangeLogLockTableName());
                 updateStatement.addNewColumnValue("LOCKED", true);
                 updateStatement.addNewColumnValue("LOCKGRANTED", new Timestamp(new java.util.Date().getTime()));
-                updateStatement.addNewColumnValue("LOCKEDBY", InetAddress.getLocalHost().getCanonicalHostName() + " (" + InetAddress.getLocalHost().getHostAddress() + ")");
+                InetAddress localHost = NetUtil.getLocalHost();
+                updateStatement.addNewColumnValue("LOCKEDBY", localHost.getHostName() + " (" + localHost.getHostAddress() + ")");
                 updateStatement.setWhereClause("ID  = 1");
 
                 database.getJdbcTemplate().comment("Lock Database");
@@ -89,7 +94,7 @@ public class LockHandler {
                 releaseStatement.addNewColumnValue("LOCKEDBY", null);
                 releaseStatement.setWhereClause(" ID = 1");
 
-                database.getJdbcTemplate().comment("Release Database Lock");                
+                database.getJdbcTemplate().comment("Release Database Lock");
                 int updatedRows = database.getJdbcTemplate().update(releaseStatement);
                 if (updatedRows != 1) {
                     if (database.getJdbcTemplate().executesStatements()) {

@@ -2,6 +2,7 @@ package liquibase.servlet;
 
 import liquibase.log.LogFactory;
 import liquibase.*;
+import liquibase.util.NetUtil;
 import liquibase.database.DatabaseFactory;
 
 import javax.servlet.ServletContextListener;
@@ -67,8 +68,8 @@ public class LiquibaseServletListener implements ServletContextListener {
         });
         String hostName;
         try {
-            hostName = InetAddress.getLocalHost().getHostName();
-        } catch (UnknownHostException e) {
+            hostName = NetUtil.getLocalHost().getHostName();
+        } catch (Exception e) {
             servletContextEvent.getServletContext().log("Cannot find hostname: " + e.getMessage());
             return;
         }
