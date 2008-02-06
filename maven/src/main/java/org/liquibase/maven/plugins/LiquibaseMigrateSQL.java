@@ -9,6 +9,7 @@ import liquibase.exception.LiquibaseException;
 import liquibase.Liquibase;
 import liquibase.FileOpener;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.MojoFailureException;
 
 /**
  * Creates an SQL migration script using the provided DatabaseChangeLog(s) comparing what
@@ -19,40 +20,41 @@ import org.apache.maven.plugin.MojoExecutionException;
  * @goal migrateSQL
  * @deprecated Use {@link LiquibaseUpdateSQL} or Maven goal "updateSQL" instead.
  */
-public class LiquibaseMigrateSQL extends AbstractLiquibaseChangeLogMojo {
+public class LiquibaseMigrateSQL extends AbstractLiquibaseUpdateMojo {
 
-    /**
-     * The file to output the Migration SQL script to, if it exists it will be overwritten.
-     *
-     * @parameter expression="${liquibase.migrationSqlOutputFile}"
-     * default-value="${project.build.directory}/liquibase/migrate.sql"
-     */
-    protected File migrationSqlOutputFile;
+  /**
+   * The file to output the Migration SQL script to, if it exists it will be overwritten.
+   * @parameter expression="${liquibase.migrationSqlOutputFile}"
+   * default-value="${project.build.directory}/liquibase/migrate.sql"
+   */
+  protected File migrationSqlOutputFile;
 
-    /**
-     * Controls the prompting of users as to whether or not they really want to run the
-     * changes on a database that is not local to the machine that the user is current
-     * executing the plugin on.
-     *
-     * @parameter expression="${liquibase.promptOnNonLocalDatabase}" default-value="false"
-     */
-    protected boolean promptOnNonLocalDatabase;
+  /** The writer fro writing the migration SQL. */
+  private Writer outputWriter;
 
-    private boolean promptOnNonLocalDatabaseDefault = false;
+  @Override
+  protected void configureFieldsAndValues(FileOpener fo)
+          throws MojoExecutionException, MojoFailureException {
+    getLog().warn("This plugin goal is DEPRICATED and will bre removed in a future "
+                  + "release, please use \"updateSQL\" instead of \"migrateSQL\".");
+    super.configureFieldsAndValues(fo);
+  }
 
-    /** The writer for writing the migration SQL. */
-    private Writer outputWriter;
+  @Override
+  protected boolean isPromptOnNonLocalDatabase() {
+    // Always run on an non-local database as we are not actually modifying the database
+    // when run on it.
+    return false;
+  }
 
-    @Override
-    protected boolean isPromptOnNonLocalDatabase() {
-        return promptOnNonLocalDatabase;
+  @Override
+  protected void doUpdate(Liquibase liquibase) throws LiquibaseException {
+    if (changesToApply > 0) {
+      liquibase.update(changesToApply, contexts, outputWriter);
+    } else {
+      liquibase.update(contexts, outputWriter);
     }
-
-    @Override
-    protected void printSettings(String indent) {
-        super.printSettings(indent);
-        getLog().info(indent + "migrationSQLOutputFile: " + migrationSqlOutputFile);
-    }
+  }
 
   @Override
   protected Liquibase createLiquibase(FileOpener fo, Connection conn)
@@ -76,15 +78,16 @@ public class LiquibaseMigrateSQL extends AbstractLiquibaseChangeLogMojo {
       getLog().error(e);
       throw new MojoExecutionException("Failed to create SQL output writer", e);
     }
-    getLog().info("Output SQL Migration File: " + migrationSqlOutputFile.getAbsolutePath());
+    getLog().info(
+            "Output SQL Migration File: " + migrationSqlOutputFile.getAbsolutePath());
     return liquibase;
   }
 
-  protected void performLiquibaseTask(Liquibase liquibase) throws LiquibaseException {
-        getLog().info("Creating Change Log SQL and Migrating Database");
-        super.performLiquibaseTask(liquibase);
-        liquibase.update(contexts, outputWriter);
-    }
+  @Override
+  protected void printSettings(String indent) {
+    super.printSettings(indent);
+    getLog().info(indent + "migrationSQLOutputFile: " + migrationSqlOutputFile);
+  }
 
   @Override
   protected void cleanup(Connection c) {
