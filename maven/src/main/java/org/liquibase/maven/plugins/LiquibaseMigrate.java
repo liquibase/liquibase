@@ -2,6 +2,9 @@ package org.liquibase.maven.plugins;
 
 import liquibase.exception.LiquibaseException;
 import liquibase.Liquibase;
+import liquibase.FileOpener;
+import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.MojoFailureException;
 
 /**
  * Liquibase Migration Maven plugin. This plugin allows for DatabaseChangeLogs to be
@@ -11,11 +14,21 @@ import liquibase.Liquibase;
  * @goal migrate
  * @deprecated Use the LiquibaseUpdate class or Maven goal "update" instead.
  */
-public class LiquibaseMigrate extends AbstractLiquibaseChangeLogMojo {
+public class LiquibaseMigrate extends AbstractLiquibaseUpdateMojo {
 
   @Override
-  protected void performLiquibaseTask(Liquibase liquibase) throws LiquibaseException {
-    super.performLiquibaseTask(liquibase);
+  protected void configureFieldsAndValues(FileOpener fo)
+          throws MojoExecutionException, MojoFailureException {
+    getLog().warn("This plugin goal is DEPRICATED and will be removed in a future "
+                  + "release, please use \"update\" instead of \"migrate\".");
+    super.configureFieldsAndValues(fo);
+  }
+
+  protected void doUpdate(Liquibase liquibase) throws LiquibaseException {
+    if (changesToApply > 0) {
+      liquibase.update(changesToApply, contexts);
+    } else {
       liquibase.update(contexts);
+    }
   }
 }
