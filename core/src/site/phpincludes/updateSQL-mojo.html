@@ -1,7 +1,7 @@
-<div class="section"><h2><a name="liquibase:migrate"></a>
-liquibase:migrate</h2>
-<p>Liquibase Migration Maven plugin. This plugin allows for DatabaseChangeLogs to be
-applied to a database as part of a Maven build process.</p>
+<div class="section"><h2><a name="liquibase:updateSQL"></a>
+liquibase:updateSQL</h2>
+<p>Liquibase UpdateSQL Maven plugin. This plugin generates the SQL that is required to
+update the database to the current version as specified in the DatabaseChangeLogs.</p>
 <p><b>Mojo Attributes</b>
 :<ul><li>Requires a Maven 2.0 project to execute.</li>
 <li>Requires dependency resolution of artifacts in scope: <code>test</code></li>
@@ -19,31 +19,44 @@ Optional Parameters</h3>
 <td><code>String</code></td>
 <td>Specifies the change log file to use for Liquibase.</td>
 </tr>
-<tr class="a"><td><b><a href="#contexts">contexts</a>
+<tr class="a"><td><b><a href="#changesToApply">changesToApply</a>
+</b>
+</td>
+<td><code>int</code></td>
+<td>The number of changes to apply to the database. By default this value is 0, which
+will result in all changes (not already applied to the database) being applied. Default value is <code>0</code>.</td>
+</tr>
+<tr class="b"><td><b><a href="#contexts">contexts</a>
 </b>
 </td>
 <td><code>String</code></td>
 <td>The Liquibase contexts to execute, which can be &quot;,&quot; separated if multiple contexts
 are required. If no context is specified then ALL contexts will be executed.</td>
 </tr>
-<tr class="b"><td><b><a href="#driver">driver</a>
+<tr class="a"><td><b><a href="#driver">driver</a>
 </b>
 </td>
 <td><code>String</code></td>
 <td>The fully qualified name of the driver class to use to connect to the database.</td>
 </tr>
-<tr class="a"><td><b><a href="#dropFirst">dropFirst</a>
+<tr class="b"><td><b><a href="#dropFirst">dropFirst</a>
 </b>
 </td>
 <td><code>boolean</code></td>
 <td>Whether or not to perform a drop on the database before executing the change. Default value is <code>false</code>.</td>
 </tr>
-<tr class="b"><td><b><a href="#includeArtifact">includeArtifact</a>
+<tr class="a"><td><b><a href="#includeArtifact">includeArtifact</a>
 </b>
 </td>
 <td><code>boolean</code></td>
 <td>Allows for the maven project artifact to be included in the class loader for
 obtaining the Liquibase property and DatabaseChangeLog files. Default value is <code>true</code>.</td>
+</tr>
+<tr class="b"><td><b><a href="#migrationSqlOutputFile">migrationSqlOutputFile</a>
+</b>
+</td>
+<td><code>File</code></td>
+<td>The file to output the Migration SQL script to, if it exists it will be overwritten. Default value is <code>${project.build.directory}/liquibase/migrate.sql</code>.</td>
 </tr>
 <tr class="a"><td><b><a href="#password">password</a>
 </b>
@@ -108,6 +121,21 @@ Parameter Details</h3>
 : <code>${liquibase.changeLogFile}</code></li>
 </ul>
 <hr />
+<p><b><a name="changesToApply">changesToApply</a>
+</b>
+</p>
+<p>The number of changes to apply to the database. By default this value is 0, which
+will result in all changes (not already applied to the database) being applied.</p>
+<ul><li><b>Type</b>
+: <code>int</code></li>
+<li><b>Required</b>
+: <code>No</code></li>
+<li><b>Expression</b>
+: <code>${liquibase.changesToApply}</code></li>
+<li><b>Default</b>
+: <code>0</code></li>
+</ul>
+<hr />
 <p><b><a name="contexts">contexts</a>
 </b>
 </p>
@@ -160,6 +188,20 @@ obtaining the Liquibase property and DatabaseChangeLog files.</p>
 : <code>${liquibase.includeArtifact}</code></li>
 <li><b>Default</b>
 : <code>true</code></li>
+</ul>
+<hr />
+<p><b><a name="migrationSqlOutputFile">migrationSqlOutputFile</a>
+</b>
+</p>
+<p>The file to output the Migration SQL script to, if it exists it will be overwritten.</p>
+<ul><li><b>Type</b>
+: <code>java.io.File</code></li>
+<li><b>Required</b>
+: <code>No</code></li>
+<li><b>Expression</b>
+: <code>${liquibase.migrationSqlOutputFile}</code></li>
+<li><b>Default</b>
+: <code>${project.build.directory}/liquibase/migrate.sql</code></li>
 </ul>
 <hr />
 <p><b><a name="password">password</a>

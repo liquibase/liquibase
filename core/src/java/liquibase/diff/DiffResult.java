@@ -564,18 +564,20 @@ public class DiffResult {
 
                 ConstraintsConfig constraintsConfig = null;
                 if (column.isPrimaryKey()) {
-                    constraintsConfig = new ConstraintsConfig();
-                    constraintsConfig.setPrimaryKey(true);
-
-                    PrimaryKey pkToRemove = null;
+                    PrimaryKey primaryKey = null;
                     for (PrimaryKey pk : getMissingPrimaryKeys()) {
                         if (pk.getTable().getName().equalsIgnoreCase(missingTable.getName())) {
-                            pkToRemove = pk;
+                            primaryKey = pk;
                         }
                     }
 
-                    if (pkToRemove != null) {
-                        getMissingPrimaryKeys().remove(pkToRemove);
+                    if (primaryKey == null || primaryKey.getColumnNamesAsList().size() == 1) {
+                        constraintsConfig = new ConstraintsConfig();
+                        constraintsConfig.setPrimaryKey(true);
+
+                        if (primaryKey != null) {
+                            getMissingPrimaryKeys().remove(primaryKey);
+                        }
                     }
                 }
 

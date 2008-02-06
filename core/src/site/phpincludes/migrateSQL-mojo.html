@@ -19,88 +19,80 @@ Optional Parameters</h3>
 <td><code>String</code></td>
 <td>Specifies the change log file to use for Liquibase.</td>
 </tr>
-<tr class="a"><td><b><a href="#changeLogSqlOnly">changeLogSqlOnly</a>
-</b>
-</td>
-<td><code>boolean</code></td>
-<td>Output a change log SQL for the DatabaseChangeLog table only, not the actual database
-changes that are required. Default value is <code>false</code>.</td>
-</tr>
-<tr class="b"><td><b><a href="#contexts">contexts</a>
+<tr class="a"><td><b><a href="#contexts">contexts</a>
 </b>
 </td>
 <td><code>String</code></td>
 <td>The Liquibase contexts to execute, which can be &quot;,&quot; separated if multiple contexts
 are required. If no context is specified then ALL contexts will be executed.</td>
 </tr>
-<tr class="a"><td><b><a href="#driver">driver</a>
+<tr class="b"><td><b><a href="#driver">driver</a>
 </b>
 </td>
 <td><code>String</code></td>
 <td>The fully qualified name of the driver class to use to connect to the database.</td>
 </tr>
-<tr class="b"><td><b><a href="#dropFirst">dropFirst</a>
+<tr class="a"><td><b><a href="#dropFirst">dropFirst</a>
 </b>
 </td>
 <td><code>boolean</code></td>
 <td>Whether or not to perform a drop on the database before executing the change. Default value is <code>false</code>.</td>
 </tr>
-<tr class="a"><td><b><a href="#includeArtifact">includeArtifact</a>
+<tr class="b"><td><b><a href="#includeArtifact">includeArtifact</a>
 </b>
 </td>
 <td><code>boolean</code></td>
 <td>Allows for the maven project artifact to be included in the class loader for
 obtaining the Liquibase property and DatabaseChangeLog files. Default value is <code>true</code>.</td>
 </tr>
-<tr class="b"><td><b><a href="#migrationSqlOutputFile">migrationSqlOutputFile</a>
+<tr class="a"><td><b><a href="#migrationSqlOutputFile">migrationSqlOutputFile</a>
 </b>
 </td>
 <td><code>File</code></td>
 <td>The file to output the Migration SQL script to, if it exists it will be overwritten. Default value is <code>${project.build.directory}/liquibase/migrate.sql</code>.</td>
 </tr>
-<tr class="a"><td><b><a href="#password">password</a>
+<tr class="b"><td><b><a href="#password">password</a>
 </b>
 </td>
 <td><code>String</code></td>
 <td>The database password to use to connect to the specified database.</td>
 </tr>
-<tr class="b"><td><b><a href="#promptOnNonLocalDatabase">promptOnNonLocalDatabase</a>
+<tr class="a"><td><b><a href="#promptOnNonLocalDatabase">promptOnNonLocalDatabase</a>
 </b>
 </td>
 <td><code>boolean</code></td>
 <td>Controls the prompting of users as to whether or not they really want to run the
 changes on a database that is not local to the machine that the user is current
-executing the plugin on. Default value is <code>true</code>.</td>
+executing the plugin on. Default value is <code>false</code>.</td>
 </tr>
-<tr class="a"><td><b><a href="#propertiesFile">propertiesFile</a>
+<tr class="b"><td><b><a href="#propertiesFile">propertiesFile</a>
 </b>
 </td>
 <td><code>String</code></td>
-<td>The Liquibase properties file used to configure the Liquibase
-{@link liquibase.Liquibase}.
-</td>
+<td>The Liquibase properties file used to configure the Liquibase {@link
+liquibase.Liquibase}.</td>
 </tr>
-<tr class="b"><td><b><a href="#propertiesFileOverrides">propertiesFileOverrides</a>
+<tr class="a"><td><b><a href="#propertyFileWillOverride">propertyFileWillOverride</a>
 </b>
 </td>
 <td><code>boolean</code></td>
 <td>Flag allowing for the Liquibase properties file to override any settings provided in
-the Maven plugin configuration. By default if a property is explicity specified it
-is not overridden if it also appears in the properties file. Default value is <code>false</code>.</td>
+the Maven plugin configuration. By default if a property is explicity specified it is
+not overridden if it also appears in the properties file. Default value is <code>false</code>.</td>
 </tr>
-<tr class="a"><td><b><a href="#url">url</a>
+<tr class="b"><td><b><a href="#url">url</a>
 </b>
 </td>
 <td><code>String</code></td>
 <td>The Database URL to connect to for executing Liquibase.</td>
 </tr>
-<tr class="b"><td><b><a href="#username">username</a>
+<tr class="a"><td><b><a href="#username">username</a>
 </b>
 </td>
 <td><code>String</code></td>
 <td>The database username to use to connect to the specified database.</td>
 </tr>
-<tr class="a"><td><b><a href="#verbose">verbose</a>
+<tr class="b"><td><b><a href="#verbose">verbose</a>
 </b>
 </td>
 <td><code>boolean</code></td>
@@ -118,21 +110,8 @@ Parameter Details</h3>
 : <code>java.lang.String</code></li>
 <li><b>Required</b>
 : <code>No</code></li>
-</ul>
-<hr />
-<p><b><a name="changeLogSqlOnly">changeLogSqlOnly</a>
-</b>
-</p>
-<p>Output a change log SQL for the DatabaseChangeLog table only, not the actual database
-changes that are required.</p>
-<ul><li><b>Type</b>
-: <code>boolean</code></li>
-<li><b>Required</b>
-: <code>No</code></li>
 <li><b>Expression</b>
-: <code>${liquibase.outputChangeLogSQLOnly}</code></li>
-<li><b>Default</b>
-: <code>false</code></li>
+: <code>${liquibase.changeLogFile}</code></li>
 </ul>
 <hr />
 <p><b><a name="contexts">contexts</a>
@@ -144,6 +123,8 @@ are required. If no context is specified then ALL contexts will be executed.</p>
 : <code>java.lang.String</code></li>
 <li><b>Required</b>
 : <code>No</code></li>
+<li><b>Expression</b>
+: <code>${liquibase.contexts}</code></li>
 </ul>
 <hr />
 <p><b><a name="driver">driver</a>
@@ -154,6 +135,8 @@ are required. If no context is specified then ALL contexts will be executed.</p>
 : <code>java.lang.String</code></li>
 <li><b>Required</b>
 : <code>No</code></li>
+<li><b>Expression</b>
+: <code>${liquibase.driver}</code></li>
 </ul>
 <hr />
 <p><b><a name="dropFirst">dropFirst</a>
@@ -179,6 +162,8 @@ obtaining the Liquibase property and DatabaseChangeLog files.</p>
 : <code>boolean</code></li>
 <li><b>Required</b>
 : <code>No</code></li>
+<li><b>Expression</b>
+: <code>${liquibase.includeArtifact}</code></li>
 <li><b>Default</b>
 : <code>true</code></li>
 </ul>
@@ -222,33 +207,34 @@ executing the plugin on.</p>
 <li><b>Expression</b>
 : <code>${liquibase.promptOnNonLocalDatabase}</code></li>
 <li><b>Default</b>
-: <code>true</code></li>
+: <code>false</code></li>
 </ul>
 <hr />
 <p><b><a name="propertiesFile">propertiesFile</a>
 </b>
 </p>
-<p>The Liquibase properties file used to configure the Liquibase
-{@link liquibase.Liquibase}.
-</p>
+<p>The Liquibase properties file used to configure the Liquibase {@link
+liquibase.Liquibase}.</p>
 <ul><li><b>Type</b>
 : <code>java.lang.String</code></li>
 <li><b>Required</b>
 : <code>No</code></li>
+<li><b>Expression</b>
+: <code>${liquibase.propertiesFile}</code></li>
 </ul>
 <hr />
-<p><b><a name="propertiesFileOverrides">propertiesFileOverrides</a>
+<p><b><a name="propertyFileWillOverride">propertyFileWillOverride</a>
 </b>
 </p>
 <p>Flag allowing for the Liquibase properties file to override any settings provided in
-the Maven plugin configuration. By default if a property is explicity specified it
-is not overridden if it also appears in the properties file.</p>
+the Maven plugin configuration. By default if a property is explicity specified it is
+not overridden if it also appears in the properties file.</p>
 <ul><li><b>Type</b>
 : <code>boolean</code></li>
 <li><b>Required</b>
 : <code>No</code></li>
 <li><b>Expression</b>
-: <code>${liquibase.propertiesFileOverrides}</code></li>
+: <code>${liquibase.propertyFileWillOverride}</code></li>
 <li><b>Default</b>
 : <code>false</code></li>
 </ul>
@@ -261,6 +247,8 @@ is not overridden if it also appears in the properties file.</p>
 : <code>java.lang.String</code></li>
 <li><b>Required</b>
 : <code>No</code></li>
+<li><b>Expression</b>
+: <code>${liquibase.url}</code></li>
 </ul>
 <hr />
 <p><b><a name="username">username</a>
