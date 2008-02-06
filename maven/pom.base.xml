@@ -2,15 +2,23 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>org.liquibase</groupId>
-
   <artifactId>liquibase-plugin</artifactId>
+  <version>@MAVEN.BUILD.VERSION@</version>
 
   <packaging>maven-plugin</packaging>
 
-  <version>@MAVEN.BUILD.VERSION@</version>
-
   <name>Liquibase Maven Plugin</name>
-  <description>A plugin wraps up some of the Maven functionality of Liquibase</description>
+  <description>A Maven plugin wraps up some of the functionality of Liquibase</description>
+
+  <url>http://www.liquibase.org</url>
+
+  <issueManagement>
+    <url>http://sourceforge.net/tracker/?group_id=187970</url>
+  </issueManagement>
+
+  <scm>
+    <url>http://liquibase.svn.sourceforge.net/viewvc/liquibase/</url>
+  </scm>
 
   <dependencies>
     <dependency>
@@ -75,10 +83,4 @@
           <!--<url>scp://quark/maven/inhouse-snapshot</url>-->
         <!--</snapshotRepository>-->
     </distributionManagement>
-
-
-  <!--<scm>-->
-    <!--<connection>scm:cvs:ext:${env.USERNAME}@quark:/SourceControl/transformer:maven-plugins/${project.artifactId}</connection>-->
-    <!--<developerConnection>scm:cvs:ext:${env.USERNAME}@quark:/SourceControl/transformer:maven-plugins/${project.artifactId}</developerConnection>-->
-  <!--</scm>-->
 </project>
