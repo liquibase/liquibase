@@ -207,7 +207,11 @@ public class Liquibase {
 
             logIterator.run(new RollbackVisitor(database));
         } finally {
-            lockHandler.releaseLock();
+            try {
+                lockHandler.releaseLock();
+            } catch (LockException e) {
+                log.log(Level.SEVERE, "Error releasing lock", e);
+            }
         }
     }
 
