@@ -1152,7 +1152,7 @@ public abstract class AbstractDatabase implements Database {
     }
 
     public void removeRanStatus(ChangeSet changeSet) throws JDBCException {
-        String sql = "DELETE FROM DATABASECHANGELOG WHERE ID='?' AND AUTHOR='?' AND FILENAME='?'";
+        String sql = "DELETE FROM "+escapeTableName(getDefaultSchemaName(), getDatabaseChangeLogTableName())+" WHERE ID='?' AND AUTHOR='?' AND FILENAME='?'";
         sql = sql.replaceFirst("\\?", escapeStringForDatabase(changeSet.getId()));
         sql = sql.replaceFirst("\\?", escapeStringForDatabase(changeSet.getAuthor()));
         sql = sql.replaceFirst("\\?", escapeStringForDatabase(changeSet.getFilePath()));
