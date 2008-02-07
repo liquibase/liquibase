@@ -1,6 +1,12 @@
 LiquiBase Core Changelog
 ==========================================
 
+Changes in version 1.5.2 (2008.02.07)
+----------------------
+- Fixed bug with runOnChange and MD5sum check
+- Handles generating changelog for tables with composite primary keys
+- Other minor bug fixes
+
 Changes in version 1.5.1 (2008.02.01)
 ----------------------
 - Fixed failOnError logic
