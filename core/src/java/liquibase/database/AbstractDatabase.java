@@ -954,6 +954,10 @@ public abstract class AbstractDatabase implements Database {
         }
     }
 
+    public String escapeColumnName(String columnName) {
+        return columnName;
+    }
+
     public String convertRequestedSchemaToCatalog(String requestedSchema) throws JDBCException {
         if (getDefaultCatalogName() == null) {
             return null;
@@ -998,7 +1002,7 @@ public abstract class AbstractDatabase implements Database {
 
         ResultSet selectRS = null;
         try {
-            selectRS = getConnection().createStatement().executeQuery("SELECT " + columnName + " FROM " + escapeTableName(schemaName, tableName) + " WHERE 1 = 0");
+            selectRS = getConnection().createStatement().executeQuery("SELECT " + escapeColumnName(columnName) + " FROM " + escapeTableName(schemaName, tableName) + " WHERE 1 = 0");
             ResultSetMetaData meta = selectRS.getMetaData();
             autoIncrement = meta.isAutoIncrement(1);
         } finally {

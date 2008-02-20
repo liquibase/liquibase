@@ -718,7 +718,7 @@ public class Main {
         String url = null;
         String username = null;
         String password = null;
-        String defaultSchemaName = null;
+        String defaultSchemaName = this.defaultSchemaName;
 
         for (String param : commandParams) {
             String[] splitArg = splitArg(param);

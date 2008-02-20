@@ -282,6 +282,10 @@ public class MockDatabase implements Database {
         }
     }
 
+    public String escapeColumnName(String columnName) {
+        return columnName;
+    }
+
     public String escapeSequenceName(String schemaName, String sequenceName) {
         if (sequenceName == null) {
             return sequenceName;
