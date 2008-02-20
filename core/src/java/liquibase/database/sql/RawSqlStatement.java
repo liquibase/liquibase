@@ -5,7 +5,7 @@ import liquibase.database.Database;
 public class RawSqlStatement implements SqlStatement {
 
     private String sql;
-    private String endDelimiter  = ";";;
+    private String endDelimiter  = ";";
 
 
     public RawSqlStatement(String sql) {

@@ -22,20 +22,20 @@ public class AddDefaultValueStatement implements SqlStatement {
 
     public String getSqlStatement(Database database) {
         if (database instanceof SybaseDatabase) {
-            return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " REPLACE " + getColumnName() + " DEFAULT " + database.convertJavaObjectToString(getDefaultValue());
+            return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " REPLACE " + database.escapeColumnName(getColumnName()) + " DEFAULT " + database.convertJavaObjectToString(getDefaultValue());
         } else if (database instanceof MSSQLDatabase) {
             return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ADD CONSTRAINT " + ((MSSQLDatabase) database).generateDefaultConstraintName(getTableName(), getColumnName()) + " DEFAULT " + database.convertJavaObjectToString(getDefaultValue()) + " FOR " + getColumnName();
         } else if (database instanceof MySQLDatabase) {
-            return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ALTER " + getColumnName() + " SET DEFAULT " + database.convertJavaObjectToString(getDefaultValue());
+            return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ALTER " + database.escapeColumnName(getColumnName()) + " SET DEFAULT " + database.convertJavaObjectToString(getDefaultValue());
         } else if (database instanceof OracleDatabase) {
-            return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " MODIFY " + getColumnName() + " DEFAULT " + database.convertJavaObjectToString(getDefaultValue());
+            return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " MODIFY " + database.escapeColumnName(getColumnName()) + " DEFAULT " + database.convertJavaObjectToString(getDefaultValue());
         } else if (database instanceof DerbyDatabase) {
-            return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ALTER COLUMN  " + getColumnName() + " WITH DEFAULT " + database.convertJavaObjectToString(getDefaultValue());
+            return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ALTER COLUMN  " + database.escapeColumnName(getColumnName()) + " WITH DEFAULT " + database.convertJavaObjectToString(getDefaultValue());
         } else if (database instanceof MaxDBDatabase) {
-        		return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " COLUMN  " + getColumnName() + " ADD DEFAULT " + database.convertJavaObjectToString(getDefaultValue());
+        		return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " COLUMN  " + database.escapeColumnName(getColumnName()) + " ADD DEFAULT " + database.convertJavaObjectToString(getDefaultValue());
         }
 
-        return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ALTER COLUMN  " + getColumnName() + " SET DEFAULT " + database.convertJavaObjectToString(getDefaultValue());
+        return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ALTER COLUMN  " + database.escapeColumnName(getColumnName()) + " SET DEFAULT " + database.convertJavaObjectToString(getDefaultValue());
     }
 
     public String getColumnName() {

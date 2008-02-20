@@ -116,6 +116,14 @@ public class MySQLDatabase extends AbstractDatabase {
     }
 
     public SqlStatement getViewDefinitionSql(String schemaName, String viewName) throws JDBCException {
-        return new RawSqlStatement("select view_definition from information_schema.views where upper(table_name)='" + viewName.toUpperCase() + "'  and table_schema='" + convertRequestedSchemaToSchema(schemaName) + "'");
+        return new RawSqlStatement("select view_definition from information_schema.views where table_name='" + viewName + "' AND table_schema='" + schemaName + "'");
+    }
+
+    public String escapeTableName(String schemaName, String tableName) {
+        return "`" + tableName + "`";
+    }
+
+    public String escapeColumnName(String columnName) {
+        return "`" + columnName + "`";
     }
 }

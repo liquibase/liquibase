@@ -31,11 +31,11 @@ public class DropColumnStatement implements SqlStatement {
         if (!supportsDatabase(database)) {
             throw new StatementNotSupportedOnDatabaseException(this, database);
         } else if (database instanceof DB2Database) {
-            return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " DROP COLUMN " + getColumnName();
+            return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " DROP COLUMN " + database.escapeColumnName(getColumnName());
         } else if (database instanceof SybaseDatabase || database instanceof FirebirdDatabase) {
-            return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " DROP " + getColumnName();
+            return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " DROP " + database.escapeColumnName(getColumnName());
         }
-        return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " DROP COLUMN " + getColumnName();
+        return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " DROP COLUMN " + database.escapeColumnName(getColumnName());
     }
 
     public String getEndDelimiter(Database database) {

@@ -193,6 +193,8 @@ public interface Database extends DatabaseObject {
      */
     String escapeTableName(String schemaName, String tableName);
 
+    String escapeColumnName(String columnName);
+
 //    Set<UniqueConstraint> findUniqueConstraints(String schema) throws JDBCException;
 
     String convertRequestedSchemaToSchema(String requestedSchema) throws JDBCException;
