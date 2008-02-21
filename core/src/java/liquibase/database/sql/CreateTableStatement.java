@@ -150,7 +150,7 @@ public class CreateTableStatement implements SqlStatement {
             String column = columnIterator.next();
             boolean isAutoIncrement = autoIncrementColumns.contains(column);
 
-            buffer.append(column);
+            buffer.append(database.escapeColumnName(column));
             buffer.append(" ").append(database.getColumnType(columnTypes.get(column), isAutoIncrement));
 
             if (getDefaultValue(column) != null) {

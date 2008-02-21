@@ -58,7 +58,7 @@ public class CreateIndexStatement implements SqlStatement {
         Iterator<String> iterator = Arrays.asList(getColumns()).iterator();
         while (iterator.hasNext()) {
             String column = iterator.next();
-            buffer.append(column);
+            buffer.append(database.escapeColumnName(column));
             if (iterator.hasNext()) {
                 buffer.append(", ");
             }

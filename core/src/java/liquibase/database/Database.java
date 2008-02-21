@@ -193,7 +193,23 @@ public interface Database extends DatabaseObject {
      */
     String escapeTableName(String schemaName, String tableName);
 
+    /**
+     * Escapes a single column name in a database-dependent manner so reserved words can be used as a column
+     * name (i.e. "return"). 
+     *
+     * @param columnName column name
+     * @return escaped column name
+     */
     String escapeColumnName(String columnName);
+
+    /**
+     * Escapes a list of column names in a database-dependent manner so reserved words can be used as a column
+     * name (i.e. "return").
+     *
+     * @param columnNames list of column names
+     * @return escaped column name list
+     */
+    String escapeColumnNameList(String columnNames);
 
 //    Set<UniqueConstraint> findUniqueConstraints(String schema) throws JDBCException;
 
