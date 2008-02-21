@@ -57,7 +57,7 @@ public class UpdateStatement implements SqlStatement {
     public String getSqlStatement(Database database) {
         StringBuffer sql = new StringBuffer("UPDATE "+database.escapeTableName(getSchemaName(), getTableName())+" SET");
         for (String column : newColumnValues.keySet()) {
-            sql.append(" ").append(column).append(" = ");
+            sql.append(" ").append(database.escapeColumnName(column)).append(" = ");
             sql.append(convertToString(newColumnValues.get(column), database));
             sql.append(",");
         }

@@ -47,7 +47,7 @@ public class AddUniqueConstraintStatement implements SqlStatement {
     }
 
     public String getSqlStatement(Database database) throws StatementNotSupportedOnDatabaseException {
-        String sql = "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ADD CONSTRAINT " + getConstraintName() + " UNIQUE (" + getColumnNames() + ")";
+        String sql = "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ADD CONSTRAINT " + getConstraintName() + " UNIQUE (" + database.escapeColumnNameList(getColumnNames()) + ")";
 
         if (StringUtils.trimToNull(getTablespace()) != null && database.supportsTablespaces()) {
             if (database instanceof MSSQLDatabase) {

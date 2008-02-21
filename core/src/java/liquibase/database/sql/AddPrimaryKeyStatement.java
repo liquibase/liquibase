@@ -50,9 +50,9 @@ public class AddPrimaryKeyStatement implements SqlStatement {
     public String getSqlStatement(Database database) throws StatementNotSupportedOnDatabaseException {
         String sql;
         if (getConstraintName() == null  || database instanceof MySQLDatabase) {
-            sql = "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ADD PRIMARY KEY (" + getColumnNames() + ")";
+            sql = "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ADD PRIMARY KEY (" + database.escapeColumnNameList(getColumnNames()) + ")";
         } else {
-            sql = "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ADD CONSTRAINT " + getConstraintName() + " PRIMARY KEY (" + getColumnNames() + ")";
+            sql = "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ADD CONSTRAINT " + getConstraintName() + " PRIMARY KEY (" + database.escapeColumnNameList(getColumnNames()) + ")";
         }
 
         if (StringUtils.trimToNull(getTablespace()) != null && database.supportsTablespaces()) {

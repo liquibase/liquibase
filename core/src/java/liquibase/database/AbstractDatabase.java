@@ -958,6 +958,10 @@ public abstract class AbstractDatabase implements Database {
         return columnName;
     }
 
+    public String escapeColumnNameList(String columnNames) {
+        return columnNames;
+    }
+
     public String convertRequestedSchemaToCatalog(String requestedSchema) throws JDBCException {
         if (getDefaultCatalogName() == null) {
             return null;
