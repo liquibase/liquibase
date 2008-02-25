@@ -120,6 +120,9 @@ public class MySQLDatabase extends AbstractDatabase {
     }
 
     public String escapeTableName(String schemaName, String tableName) {
+        if(schemaName != null) {
+            return "`" + schemaName + "`.`" + tableName + "`";
+        }
         return "`" + tableName + "`";
     }
 
@@ -129,9 +132,9 @@ public class MySQLDatabase extends AbstractDatabase {
 
     public String escapeColumnNameList(String columnNames) {
         StringBuffer sb = new StringBuffer();
-        for(String columnName : columnNames.split(" ")) {
+        for(String columnName : columnNames.split(", ")) {
             if(sb.length() > 0) {
-                sb.append(" ");
+                sb.append(", ");
             }
             sb.append("`").append(columnName).append("`");
         }

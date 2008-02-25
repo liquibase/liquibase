@@ -188,7 +188,7 @@ public class CreateTableStatement implements SqlStatement {
             buffer.append(" CONSTRAINT ");
             buffer.append(pkName);
             buffer.append(" PRIMARY KEY (");
-            buffer.append(StringUtils.join(getPrimaryKeyConstraint().getColumns(), ", "));
+            buffer.append(database.escapeColumnNameList(StringUtils.join(getPrimaryKeyConstraint().getColumns(), ", ")));
             buffer.append(")");
             buffer.append(",");
         }
@@ -197,7 +197,7 @@ public class CreateTableStatement implements SqlStatement {
             buffer.append(" CONSTRAINT ")
                     .append(fkConstraint.getForeignKeyName())
                     .append(" FOREIGN KEY (")
-                    .append(fkConstraint.getColumn())
+                    .append(database.escapeColumnName(fkConstraint.getColumn()))
                     .append(") REFERENCES ")
                     .append(fkConstraint.getReferences());
 
@@ -221,7 +221,7 @@ public class CreateTableStatement implements SqlStatement {
                 buffer.append(uniqueConstraint.getConstraintName());
             }
             buffer.append(" UNIQUE (");
-            buffer.append(StringUtils.join(uniqueConstraint.getColumns(), ", "));
+            buffer.append(database.escapeColumnNameList(StringUtils.join(uniqueConstraint.getColumns(), ", ")));
             buffer.append("),");
         }
 
