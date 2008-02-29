@@ -118,7 +118,7 @@ public class DBDocVisitor implements ChangeSetVisitor {
         copyFile("liquibase/dbdoc/globalnav.html", rootOutputDir);
         copyFile("liquibase/dbdoc/overview-summary.html", rootOutputDir);
 
-        DatabaseSnapshot snapshot = new DatabaseSnapshot(database);
+        DatabaseSnapshot snapshot = database.createDatabaseSnapshot(null, null);
 
         new ChangeLogListWriter(rootOutputDir).writeHTML(changeLogs);
         new TableListWriter(rootOutputDir).writeHTML(new TreeSet<Object>(snapshot.getTables()));

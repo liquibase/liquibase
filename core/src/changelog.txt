@@ -1,6 +1,10 @@
 LiquiBase Core Changelog
 ==========================================
 
+Changes in version 1.5.3 (2008.02.28)
+----------------------
+- Recompiled to work with Java 1.5
+
 Changes in version 1.5.2 (2008.02.07)
 ----------------------
 - Fixed bug with runOnChange and MD5sum check

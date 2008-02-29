@@ -4,6 +4,7 @@ import liquibase.CompositeFileOpener;
 import liquibase.FileSystemFileOpener;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
+import liquibase.database.HibernateDatabase;
 import liquibase.diff.Diff;
 import liquibase.diff.DiffResult;
 import liquibase.diff.DiffStatusListener;
@@ -20,6 +21,7 @@ import liquibase.util.StringUtils;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.security.AccessController;
@@ -161,9 +163,6 @@ public class Main {
         } else if (!isCommand(command)) {
             messages.add("Unknown command: " + command);
         } else {
-            if (username == null) {
-                messages.add("--username is required");
-            }
             if (url == null) {
                 messages.add("--url is required");
             }
@@ -557,39 +556,8 @@ public class Main {
 
         FileSystemFileOpener fsOpener = new FileSystemFileOpener();
         CommandLineFileOpener clOpener = new CommandLineFileOpener(classLoader);
-        Driver driver;
-        DatabaseFactory databaseFactory = DatabaseFactory.getInstance();
-        if (this.databaseClass != null) {
-            databaseFactory.addDatabaseImplementation((Database) Class.forName(this.databaseClass, true, classLoader).newInstance());
-        }
-
+        Database database = createDatabaseObject(this.url, this.username, this.password, this.driver, this.defaultSchemaName, this.databaseClass);
         try {
-            if (this.driver == null) {
-                this.driver = databaseFactory.findDefaultDriver(url);
-            }
-
-            if (this.driver == null) {
-                throw new RuntimeException("Driver class was not specified and could not be determined from the url");
-            }
-
-            driver = (Driver) Class.forName(this.driver, true, classLoader).newInstance();
-        } catch (Exception e) {
-            throw new RuntimeException("Cannot find database driver: " + e.getMessage());
-        }
-        Properties info = new Properties();
-        info.put("user", username);
-        if (password != null) {
-            info.put("password", password);
-        }
-
-        Connection connection = driver.connect(url, info);
-        if (connection == null) {
-            throw new JDBCException("Connection could not be created to " + url + " with driver " + driver.getClass().getName() + ".  Possibly the wrong driver for the given database URL");
-        }
-
-        try {
-            Database database = databaseFactory.findCorrectDatabaseImplementation(connection);
-            database.setDefaultSchemaName(StringUtils.trimToNull(defaultSchemaName));
 
 
             if ("diff".equalsIgnoreCase(command)) {
@@ -705,11 +673,56 @@ public class Main {
             }
         } finally {
             try {
-                connection.rollback();
-                connection.close();
-            } catch (SQLException e) {
+                database.rollback();
+                database.close();
+            } catch (JDBCException e) {
                 LogFactory.getLogger().log(Level.WARNING, "problem closing connection", e);
             }
+        }
+    }
+
+    private Database createDatabaseObject(String url, String username, String password, String driver, String defaultSchemaName, String databaseClass) throws JDBCException {
+        try {
+            if (url.startsWith("hibernate:")) {
+                return (Database) Class.forName(HibernateDatabase.class.getName(), true, classLoader).getConstructor(String.class).newInstance(url.substring("hibernate:".length()));
+            }
+
+
+            Driver driverObject;
+            DatabaseFactory databaseFactory = DatabaseFactory.getInstance();
+            if (databaseClass != null) {
+                databaseFactory.addDatabaseImplementation((Database) Class.forName(databaseClass, true, classLoader).newInstance());
+            }
+
+            try {
+                if (driver == null) {
+                    driver = databaseFactory.findDefaultDriver(url);
+                }
+
+                if (driver == null) {
+                    throw new RuntimeException("Driver class was not specified and could not be determined from the url");
+                }
+
+                driverObject = (Driver) Class.forName(driver, true, classLoader).newInstance();
+            } catch (Exception e) {
+                throw new RuntimeException("Cannot find database driver: " + e.getMessage());
+            }
+            Properties info = new Properties();
+            info.put("user", username);
+            if (password != null) {
+                info.put("password", password);
+            }
+
+            Connection connection = driverObject.connect(url, info);
+            if (connection == null) {
+                throw new JDBCException("Connection could not be created to " + url + " with driver " + driver.getClass().getName() + ".  Possibly the wrong driver for the given database URL");
+            }
+
+            Database database = databaseFactory.findCorrectDatabaseImplementation(connection);
+            database.setDefaultSchemaName(StringUtils.trimToNull(defaultSchemaName));
+            return database;
+        } catch (Exception e) {
+            throw new JDBCException(e);
         }
     }
 
@@ -742,31 +755,32 @@ public class Main {
             driver = DatabaseFactory.getInstance().findDefaultDriver(url);
         }
 
-        Driver driverObject;
-        try {
-            driverObject = (Driver) Class.forName(driver, true, classLoader).newInstance();
-        } catch (Exception e) {
-            throw new RuntimeException("Cannot find database driver: " + e.getMessage());
-        }
-
-        Properties info = new Properties();
-        info.put("user", username);
-        info.put("password", password);
-
-        Connection connection;
-        try {
-            connection = driverObject.connect(url, info);
-        } catch (SQLException e) {
-            throw new JDBCException("Connection could not be created to " + url + ": " + e.getMessage(), e);
-        }
-        if (connection == null) {
-            throw new JDBCException("Connection could not be created to " + url + " with driver " + driver.getClass().getName() + ".  Possibly the wrong driver for the given database URL");
-        }
-
-        Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(connection);
-        database.setDefaultSchemaName(defaultSchemaName);
-
-        return database;
+        return createDatabaseObject(url, username, password, driver, defaultSchemaName, null);
+//        Driver driverObject;
+//        try {
+//            driverObject = (Driver) Class.forName(driver, true, classLoader).newInstance();
+//        } catch (Exception e) {
+//            throw new RuntimeException("Cannot find database driver: " + e.getMessage());
+//        }
+//
+//        Properties info = new Properties();
+//        info.put("user", username);
+//        info.put("password", password);
+//
+//        Connection connection;
+//        try {
+//            connection = driverObject.connect(url, info);
+//        } catch (SQLException e) {
+//            throw new JDBCException("Connection could not be created to " + url + ": " + e.getMessage(), e);
+//        }
+//        if (connection == null) {
+//            throw new JDBCException("Connection could not be created to " + url + " with driver " + driver.getClass().getName() + ".  Possibly the wrong driver for the given database URL");
+//        }
+//
+//        Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(connection);
+//        database.setDefaultSchemaName(defaultSchemaName);
+//
+//        return database;
     }
 
     private Writer getOutputWriter() {

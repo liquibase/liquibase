@@ -59,7 +59,7 @@ public abstract class SqlStatementDatabaseTest implements DatabaseTest {
         }
 
         setup(database);
-        DatabaseSnapshot snapshot = new DatabaseSnapshot(database, schema);
+        DatabaseSnapshot snapshot = database.createDatabaseSnapshot(schema, null);
         preExecuteAssert(snapshot);
 
         try {
@@ -74,7 +74,7 @@ public abstract class SqlStatementDatabaseTest implements DatabaseTest {
             }
         }
 
-        snapshot = new DatabaseSnapshot(database, schema);
+        snapshot = database.createDatabaseSnapshot(schema, null);
 
         postExecuteAssert(snapshot);
     }

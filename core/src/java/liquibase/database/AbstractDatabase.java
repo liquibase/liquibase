@@ -615,7 +615,7 @@ public abstract class AbstractDatabase implements Database {
      */
     public void dropDatabaseObjects(String schema) throws JDBCException {
         try {
-            DatabaseSnapshot snapshot = new DatabaseSnapshot(this, new HashSet<DiffStatusListener>(), schema);
+            DatabaseSnapshot snapshot = createDatabaseSnapshot(schema, new HashSet<DiffStatusListener>());
 
             List<Change> dropChanges = new ArrayList<Change>();
 
@@ -763,11 +763,6 @@ public abstract class AbstractDatabase implements Database {
         int count = this.getJdbcTemplate().queryForInt(new RawSqlStatement("SELECT COUNT(*) FROM " + escapeTableName(getDefaultSchemaName(), getDatabaseChangeLogTableName()) + " WHERE TAG='" + tag + "'"));
         return count > 0;
     }
-
-    public DatabaseSnapshot getSnapshot() throws JDBCException {
-        return new DatabaseSnapshot(this);
-    }
-
 
     public String toString() {
         if (getConnection() == null) {
@@ -1228,5 +1223,9 @@ public abstract class AbstractDatabase implements Database {
         } catch (SQLException e) {
             throw new JDBCException(e);
         }
+    }
+
+    public DatabaseSnapshot createDatabaseSnapshot(String schema, Set<DiffStatusListener> statusListeners) throws JDBCException {
+        return new SqlDatabaseSnapshot(this, statusListeners, schema);
     }
 }

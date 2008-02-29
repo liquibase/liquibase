@@ -2,8 +2,10 @@ package liquibase.database;
 
 import liquibase.ChangeSet;
 import liquibase.RanChangeSet;
+import liquibase.diff.DiffStatusListener;
 import liquibase.database.sql.SqlStatement;
 import liquibase.database.structure.DatabaseObject;
+import liquibase.database.structure.DatabaseSnapshot;
 import liquibase.database.template.JdbcTemplate;
 import liquibase.exception.DatabaseHistoryException;
 import liquibase.exception.JDBCException;
@@ -13,6 +15,7 @@ import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 public interface Database extends DatabaseObject {
     /**
@@ -254,4 +257,7 @@ public interface Database extends DatabaseObject {
     String escapeStringForDatabase(String string);
 
     void close() throws JDBCException;
+
+    DatabaseSnapshot createDatabaseSnapshot(String schema, Set<DiffStatusListener> statusListeners) throws JDBCException; 
+
 }
