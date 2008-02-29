@@ -256,9 +256,13 @@ public class Column implements DatabaseObject, Comparable<Column> {
     }
 
     public boolean isDataTypeDifferent(Column otherColumn) {
-        return this.getDataType() != otherColumn.getDataType()
-                || this.getColumnSize() != otherColumn.getColumnSize()
-                || this.getDecimalDigits() != otherColumn.getDecimalDigits();
+        try {
+            return this.getDataType() != otherColumn.getDataType()
+                    || this.getColumnSize() != otherColumn.getColumnSize()
+                    || this.getDecimalDigits() != otherColumn.getDecimalDigits();
+        } catch (NullPointerException e) {
+            throw new NullPointerException();
+        }
     }
 
     @SuppressWarnings({"SimplifiableIfStatement"})

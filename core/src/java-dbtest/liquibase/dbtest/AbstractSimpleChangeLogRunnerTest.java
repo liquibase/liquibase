@@ -245,7 +245,7 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
 
         runCompleteChangeLog();
 
-        DatabaseSnapshot originalSnapshot = new DatabaseSnapshot(database);
+        DatabaseSnapshot originalSnapshot = database.createDatabaseSnapshot(null, null);
 
         Diff diff = new Diff(database, (String) null);
         DiffResult diffResult = diff.compare();
@@ -274,7 +274,7 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
 
         tempFile.deleteOnExit();
 
-        DatabaseSnapshot finalSnapshot = new DatabaseSnapshot(database);
+        DatabaseSnapshot finalSnapshot = database.createDatabaseSnapshot(null, null);
 
         DiffResult finalDiffResult = new Diff(originalSnapshot, finalSnapshot).compare();
         assertEquals(0, finalDiffResult.getMissingColumns().size());
@@ -308,7 +308,7 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
         
         liquibase.update(includedChangeLog);
 
-        DatabaseSnapshot originalSnapshot = new DatabaseSnapshot(database);
+        DatabaseSnapshot originalSnapshot = database.createDatabaseSnapshot(null, null);
 
         Diff diff = new Diff(database, "liquibaseb");
         DiffResult diffResult = diff.compare();
@@ -344,7 +344,7 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
 
         tempFile.deleteOnExit();
 
-        DatabaseSnapshot finalSnapshot = new DatabaseSnapshot(database);
+        DatabaseSnapshot finalSnapshot = database.createDatabaseSnapshot(null, null);
 
         DiffResult finalDiffResult = new Diff(originalSnapshot, finalSnapshot).compare();
         assertEquals(0, finalDiffResult.getMissingColumns().size());

@@ -242,18 +242,20 @@ public class DiffResult {
             for (Column column : changedColumns) {
                 out.println("     " + column);
                 Column baseColumn = baseSnapshot.getColumn(column);
-                if (baseColumn.isDataTypeDifferent(column)) {
-                    out.println("           from " + baseColumn.getDataTypeString(baseDatabase) + " to " + targetSnapshot.getColumn(column).getDataTypeString(targetDatabase));
-                }
-                if (baseColumn.isNullabilityDifferent(column)) {
-                    Boolean nowNullable = targetSnapshot.getColumn(column).isNullable();
-                    if (nowNullable == null) {
-                        nowNullable = Boolean.TRUE;
+                if (baseColumn != null) {
+                    if (baseColumn.isDataTypeDifferent(column)) {
+                        out.println("           from " + baseColumn.getDataTypeString(baseDatabase) + " to " + targetSnapshot.getColumn(column).getDataTypeString(targetDatabase));
                     }
-                    if (nowNullable) {
-                        out.println("           now nullable");
-                    } else {
-                        out.println("           now not null");
+                    if (baseColumn.isNullabilityDifferent(column)) {
+                        Boolean nowNullable = targetSnapshot.getColumn(column).isNullable();
+                        if (nowNullable == null) {
+                            nowNullable = Boolean.TRUE;
+                        }
+                        if (nowNullable) {
+                            out.println("           now nullable");
+                        } else {
+                            out.println("           now not null");
+                        }
                     }
                 }
             }

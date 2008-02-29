@@ -46,14 +46,14 @@ public class Diff {
 
     public DiffResult compare() throws JDBCException {
         if (baseSnapshot == null) {
-            baseSnapshot = new DatabaseSnapshot(baseDatabase, statusListeners);
+            baseSnapshot = baseDatabase.createDatabaseSnapshot(null, statusListeners);
         }
 
         if (targetSnapshot == null) {
             if (targetDatabase == null) {
-                targetSnapshot = new DatabaseSnapshot();
+                targetSnapshot = new SqlDatabaseSnapshot();
             } else {
-                targetSnapshot = new DatabaseSnapshot(targetDatabase, statusListeners);
+                targetSnapshot = targetDatabase.createDatabaseSnapshot(null, statusListeners);
             }
         }
 
@@ -127,7 +127,7 @@ public class Diff {
             if (targetColumn.getTable() != null && !diffResult.getUnexpectedTables().contains(targetColumn.getTable())) {
                 Column baseColumn = baseSnapshot.getColumn(targetColumn.getTable().getName(), targetColumn.getName());
 
-                if (targetColumn.isDifferent(baseColumn)) {
+                if (baseColumn == null || targetColumn.isDifferent(baseColumn)) {
                     diffResult.addChangedColumn(targetColumn);
                 }
             }

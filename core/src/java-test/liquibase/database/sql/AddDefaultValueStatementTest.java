@@ -38,12 +38,12 @@ public class AddDefaultValueStatementTest extends AbstractSqlStatementTest {
                         .addColumn("id", "int")
                         .addColumn(COLUMN_NAME, "varchar(50)"));
 
-                DatabaseSnapshot snapshot = new DatabaseSnapshot(database);
+                DatabaseSnapshot snapshot = database.createDatabaseSnapshot(null, null);
                 assertNull(snapshot.getTable(TABLE_NAME).getColumn(COLUMN_NAME).getDefaultValue());
 
                 new JdbcTemplate(database).execute(new AddDefaultValueStatement(null, TABLE_NAME, COLUMN_NAME, "New Default Value"));
 
-                snapshot = new DatabaseSnapshot(database);
+                snapshot = database.createDatabaseSnapshot(null, null);
                 assertEquals("New Default Value", snapshot.getTable(TABLE_NAME).getColumn(COLUMN_NAME).getDefaultValue());
             }
         });
