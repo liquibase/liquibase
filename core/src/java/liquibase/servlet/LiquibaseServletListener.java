@@ -141,7 +141,6 @@ public class LiquibaseServletListener implements ServletContextListener {
                 }
                 if (connection != null) {
                     connection.close();
-                    connection.close();
                 }
             }
 
