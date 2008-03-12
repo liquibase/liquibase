@@ -260,7 +260,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
             Liquibase liquibase = createLiquibase(c);
 
             if (isWriteSqlFileEnabled() && getSqlOutputDir() != null) {
-                if (liquibase.listUnrunChangeSets(getContexts()).size() > 0) {
+                if ((!isExecuteEnabled()) && liquibase.listUnrunChangeSets(getContexts()).size() > 0) {
                     log.log(Level.WARNING, getExecuteDisabledWarningMessage());
                 }
                 writeSqlFile(liquibase);
