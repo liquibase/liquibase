@@ -244,7 +244,7 @@ public class MSSQLDatabase extends AbstractDatabase {
     }
 
     public SqlStatement getViewDefinitionSql(String schemaName, String viewName) throws JDBCException {
-        String sql = "select view_definition from information_schema.views where upper(table_name)='" + viewName.toUpperCase() + "'";
+        String sql = "select view_definition from INFORMATION_SCHEMA.VIEWS where upper(table_name)='" + viewName.toUpperCase() + "'";
 //        if (StringUtils.trimToNull(schemaName) != null) {
             sql += " and table_schema='" + convertRequestedSchemaToSchema(schemaName) + "'";
             sql += " and table_catalog='" + getDefaultCatalogName() + "'";
