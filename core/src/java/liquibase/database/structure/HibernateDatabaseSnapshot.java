@@ -10,12 +10,17 @@ import org.hibernate.cfg.Configuration;
 import org.hibernate.dialect.Dialect;
 import org.hibernate.dialect.MySQL5InnoDBDialect;
 import org.hibernate.engine.Mapping;
+import org.hibernate.mapping.*;
 
 import java.io.File;
 import java.util.*;
+import java.util.Collection;
+import java.util.Set;
+import java.util.Map;
+import java.util.List;
 import java.util.logging.Logger;
 
-public class HibernateDatabaseSnapshot  implements DatabaseSnapshot {
+public class HibernateDatabaseSnapshot implements DatabaseSnapshot {
     private HibernateDatabase database;
 
     public static void main(String[] args) throws Exception {
@@ -51,6 +56,7 @@ public class HibernateDatabaseSnapshot  implements DatabaseSnapshot {
             this.database = database;
 
             Dialect dialect = (Dialect) Class.forName(cfg.getProperty("dialect")).newInstance();
+            cfg.buildMappings();
             Mapping mapping = cfg.buildMapping();
 
 //            Dialect dialect = new MySQL5InnoDBDialect();
@@ -70,15 +76,20 @@ public class HibernateDatabaseSnapshot  implements DatabaseSnapshot {
                         Column column = new Column();
                         column.setName(hibernateColumn.getName());
 //todo:                        column.setAutoIncrement(hibernateColumn.);
-                        column.setColumnSize(hibernateColumn.getLength());
                         column.setDataType(hibernateColumn.getSqlTypeCode(mapping));
-                        column.setDecimalDigits(hibernateColumn.getPrecision());
+                        if (column.isNumeric()) {
+                            column.setColumnSize(hibernateColumn.getPrecision());
+                        } else {
+                            column.setColumnSize(hibernateColumn.getLength());
+                        }
+                        column.setDecimalDigits(hibernateColumn.getScale());
                         column.setDefaultValue(hibernateColumn.getDefaultValue());
                         column.setNullable(hibernateColumn.isNullable());
                         column.setPrimaryKey(isPrimaryKey(hibernateTable, hibernateColumn));
                         column.setTable(table);
-                        column.setTypeName(hibernateColumn.getSqlType(dialect, mapping));
+                        column.setTypeName(hibernateColumn.getSqlType(dialect, mapping).replaceFirst("\\(.*\\)", ""));
                         column.setUnique(hibernateColumn.isUnique());
+                        column.setCertainDataType(false);
 
                         columnsMap.put(table.getName() + "." + column.getName(), column);
                         table.getColumns().add(column);
@@ -100,8 +111,22 @@ public class HibernateDatabaseSnapshot  implements DatabaseSnapshot {
                         indexes.add(index);
                     }
 
+                    org.hibernate.mapping.PrimaryKey hibernatePrimaryKey = hibernateTable.getPrimaryKey();
+                    if (hibernatePrimaryKey != null) {
+                        PrimaryKey pk = new PrimaryKey();
+                        pk.setName(hibernatePrimaryKey.getName());
+                        pk.setTable(table);
+                        for (Object hibernateColumn : hibernatePrimaryKey.getColumns()) {
+                            pk.getColumnNamesAsList().add(((org.hibernate.mapping.Column) hibernateColumn).getName());
+                        }
+                        primaryKeys.add(pk);
+                    }
+
                 }
             }
+
+            this.tables = new HashSet<Table>(tablesMap.values());
+            this.columns = new HashSet<Column>(columnsMap.values());
 
             tableMappings = cfg.getTableMappings();
             while (tableMappings.hasNext()) {
@@ -116,10 +141,25 @@ public class HibernateDatabaseSnapshot  implements DatabaseSnapshot {
                                 && hibernateForeignKey.isPhysicalConstraint()) {
                             ForeignKey fk = new ForeignKey();
                             fk.setName(hibernateForeignKey.getName());
-                            fk.setForeignKeyTable(tablesMap.get(hibernateForeignKey.getTable().getName()));
-                            fk.setForeignKeyColumns(StringUtils.join((Collection<String>) hibernateForeignKey.getColumns(), ", "));
-                            fk.setForeignKeyTable(tablesMap.get(hibernateForeignKey.getReferencedTable().getName()));
-                            fk.setForeignKeyColumns(StringUtils.join((Collection<String>) hibernateForeignKey.getReferencedColumns(), ", "));
+                            fk.setForeignKeyTable(getTable(hibernateForeignKey.getTable().getName()));
+                            List<String> fkColumns = new ArrayList<String>();
+                            for (Object column : hibernateForeignKey.getColumns()) {
+                                fkColumns.add(((org.hibernate.mapping.Column) column).getName());
+                            }
+                            fk.setForeignKeyColumns(StringUtils.join(fkColumns, ", "));
+
+                            fk.setPrimaryKeyTable(getTable(hibernateForeignKey.getReferencedTable().getName()));
+
+                            fkColumns = new ArrayList<String>();
+                            for (Object column : hibernateForeignKey.getReferencedColumns()) {
+                                fkColumns.add(((org.hibernate.mapping.Column) column).getName());
+                            }
+                            if (fkColumns.size() == 0) {
+                                for (Object column : hibernateForeignKey.getReferencedTable().getPrimaryKey().getColumns()) {
+                                    fkColumns.add(((org.hibernate.mapping.Column) column).getName());
+                                }
+                            }
+                            fk.setPrimaryKeyColumns(StringUtils.join(fkColumns, ", "));
 //todo                            fk.setDeferrable(hibernateForeignKey.);
 //todo                            fk.setInitiallyDeferred();
                             foreignKeys.add(fk);
@@ -140,12 +180,7 @@ public class HibernateDatabaseSnapshot  implements DatabaseSnapshot {
 //                        script.add( comments.next() );
 //                    }
                 }
-
             }
-
-            this.tables = new HashSet<Table>(tablesMap.values());
-            this.columns = new HashSet<Column>(columnsMap.values());
-
         } catch (Exception e) {
             throw new JDBCException(e);
         }
@@ -179,14 +214,23 @@ public class HibernateDatabaseSnapshot  implements DatabaseSnapshot {
 
     public Column getColumn(Column column) {
         if (column.getTable() == null) {
-            return columnsMap.get(column.getView().getName() + "." + column.getName());
+            return getColumn(column.getView().getName(), column.getName());
         } else {
-            return columnsMap.get(column.getTable().getName() + "." + column.getName());
+            return getColumn(column.getTable().getName(), column.getName());
         }
     }
 
     public Column getColumn(String tableName, String columnName) {
-        return columnsMap.get(tableName + "." + columnName);
+        String tableAndColumn = tableName + "." + columnName;
+        Column returnColumn = columnsMap.get(tableAndColumn);
+        if (returnColumn == null) {
+            for (String key : columnsMap.keySet()) {
+                if (key.equalsIgnoreCase(tableAndColumn)) {
+                    return columnsMap.get(key);
+                }
+            }
+        }
+        return returnColumn;
     }
 
     public Set<Column> getColumns() {
@@ -210,7 +254,7 @@ public class HibernateDatabaseSnapshot  implements DatabaseSnapshot {
         return sequences;
     }
 
-      public Table getTable(String tableName) {
+    public Table getTable(String tableName) {
         for (Table table : getTables()) {
             if (table.getName().equalsIgnoreCase(tableName)) {
                 return table;

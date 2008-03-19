@@ -9,6 +9,7 @@ public class PrimaryKey implements DatabaseObject, Comparable<PrimaryKey> {
     private String name;
     private List<String> columnNames = new ArrayList<String>();
     private Table table;
+    private boolean certainName = true;
 
 
     public String getName() {
@@ -77,5 +78,13 @@ public class PrimaryKey implements DatabaseObject, Comparable<PrimaryKey> {
 
     public List<String> getColumnNamesAsList() {
         return columnNames;
+    }
+
+    public boolean isCertainName() {
+        return certainName;
+    }
+
+    public void setCertainName(boolean certainName) {
+        this.certainName = certainName;
     }
 }

@@ -23,6 +23,8 @@ public class Column implements DatabaseObject, Comparable<Column> {
     private boolean primaryKey = false;
     private boolean unique = false;
 
+    private boolean certainDataType = true;
+
 
     public Table getTable() {
         return table;
@@ -256,12 +258,12 @@ public class Column implements DatabaseObject, Comparable<Column> {
     }
 
     public boolean isDataTypeDifferent(Column otherColumn) {
-        try {
+        if (!this.isCertainDataType() || !otherColumn.isCertainDataType()) {
+            return false;
+        } else {
             return this.getDataType() != otherColumn.getDataType()
                     || this.getColumnSize() != otherColumn.getColumnSize()
-                    || this.getDecimalDigits() != otherColumn.getDecimalDigits();
-        } catch (NullPointerException e) {
-            throw new NullPointerException();
+                    || this.getDecimalDigits() != otherColumn.getDecimalDigits();            
         }
     }
 
@@ -290,5 +292,13 @@ public class Column implements DatabaseObject, Comparable<Column> {
 
     public void setPrimaryKey(boolean primaryKey) {
         this.primaryKey = primaryKey;
+    }
+
+    public boolean isCertainDataType() {
+        return certainDataType;
+    }
+
+    public void setCertainDataType(boolean certainDataType) {
+        this.certainDataType = certainDataType;
     }
 }

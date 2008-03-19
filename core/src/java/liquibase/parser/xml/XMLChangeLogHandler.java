@@ -175,6 +175,7 @@ class XMLChangeLogHandler extends DefaultHandler {
             }
         } catch (Exception e) {
             log.log(Level.SEVERE, "Error thrown as a SAXException: " + e.getMessage(), e);
+            e.printStackTrace();
             throw new SAXException(e);
         }
     }
