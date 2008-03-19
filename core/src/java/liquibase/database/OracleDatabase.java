@@ -165,10 +165,11 @@ public class OracleDatabase extends AbstractDatabase {
         }
         return false;
     }
-
-
+    
     public boolean shouldQuoteValue(String value) {
-        return super.shouldQuoteValue(value) && !value.startsWith("to_date(");
+        return super.shouldQuoteValue(value)
+            && !value.startsWith("to_date(")
+            && !value.equalsIgnoreCase(getCurrentDateTimeFunction());
     }
 
     public boolean supportsTablespaces() {
