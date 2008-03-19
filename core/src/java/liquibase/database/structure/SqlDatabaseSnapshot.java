@@ -105,14 +105,23 @@ public class SqlDatabaseSnapshot implements DatabaseSnapshot {
 
     public Column getColumn(Column column) {
         if (column.getTable() == null) {
-            return columnsMap.get(column.getView().getName() + "." + column.getName());
+            return getColumn(column.getView().getName(), column.getName());
         } else {
-            return columnsMap.get(column.getTable().getName() + "." + column.getName());
+            return getColumn(column.getTable().getName(), column.getName());
         }
     }
 
     public Column getColumn(String tableName, String columnName) {
-        return columnsMap.get(tableName + "." + columnName);
+        String tableAndColumn = tableName + "." + columnName;
+        Column returnColumn = columnsMap.get(tableAndColumn);
+        if (returnColumn == null) {
+            for (String key : columnsMap.keySet()) {
+                if (key.equalsIgnoreCase(tableAndColumn)) {
+                    return columnsMap.get(key);
+                }
+            }
+        }
+        return returnColumn;
     }
 
     public Set<Column> getColumns() {
@@ -365,6 +374,9 @@ public class SqlDatabaseSnapshot implements DatabaseSnapshot {
                 if (type == DatabaseMetaData.tableIndexStatistic) {
                     continue;
                 }
+                if (type == DatabaseMetaData.tableIndexOther) {
+                    continue;
+                }
 
                 if (columnName == null) {
                     //nothing to index, not sure why these come through sometimes
@@ -397,6 +409,12 @@ public class SqlDatabaseSnapshot implements DatabaseSnapshot {
             for (PrimaryKey pk : primaryKeys) {
                 if (index.getTable().getName().equalsIgnoreCase(pk.getTable().getName())
                         && index.getColumnNames().equals(pk.getColumnNames())) {
+                    indexesToRemove.add(index);
+                }
+            }
+            for (ForeignKey fk : foreignKeys) {
+                if (index.getTable().getName().equalsIgnoreCase(fk.getForeignKeyTable().getName())
+                        && index.getColumnNames().equals(fk.getForeignKeyColumns())) {
                     indexesToRemove.add(index);
                 }
             }
