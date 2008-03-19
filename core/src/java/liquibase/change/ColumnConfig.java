@@ -310,7 +310,7 @@ public class ColumnConfig {
             }
         } else if (this.getDefaultValueDate() != null) {
             Date defaultDateValue = this.getDefaultValueDate();
-            return database.getDateLiteral(defaultDateValue);
+            return "'" + database.getDateLiteral(defaultDateValue) + "'";
         } else {
             return "NULL";
         }
