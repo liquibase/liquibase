@@ -23,17 +23,6 @@ import java.util.logging.Logger;
 public class HibernateDatabaseSnapshot implements DatabaseSnapshot {
     private HibernateDatabase database;
 
-    public static void main(String[] args) throws Exception {
-//        URLClassLoader classLoader = new URLClassLoader(new URL[] {
-//                new URL("file:///othersvn/liquibase/core/src/samples/hibernate")
-//        }, Thread.currentThread().getContextClassLoader());
-//
-//        HibernateDatabaseSnapshot snapshot = (HibernateDatabaseSnapshot) Class.forName(HibernateDatabaseSnapshot.class.getName(), true, classLoader).getConstructor(String.class, Database.class).newInstance("C:/othersvn/liquibase/core/src/samples/hibernate/Hibernate.cfg.xml", null);
-
-        System.out.println(new File("Hibernate.cfg.xml").toURL());
-        HibernateDatabaseSnapshot snapshot = new HibernateDatabaseSnapshot(new HibernateDatabase("Hibernate.cfg.xml"));
-    }
-
     private Set<liquibase.database.structure.Table> tables = new HashSet<liquibase.database.structure.Table>();
     private Set<Column> columns = new HashSet<Column>();
     private Set<ForeignKey> foreignKeys = new HashSet<ForeignKey>();
@@ -51,7 +40,7 @@ public class HibernateDatabaseSnapshot implements DatabaseSnapshot {
 
     public HibernateDatabaseSnapshot(HibernateDatabase database) throws JDBCException {
         try {
-            Configuration cfg = new Configuration();
+            Configuration cfg = database.createConfiguration();
             cfg.configure(database.getConfigFile());
             this.database = database;
 

@@ -15,6 +15,9 @@ import java.sql.Date;
 import java.text.ParseException;
 import java.util.*;
 
+import org.hibernate.cfg.Configuration;
+import org.hibernate.cfg.AnnotationConfiguration;
+
 public class HibernateDatabase implements Database {
 
     private String configFile;
@@ -370,5 +373,9 @@ public class HibernateDatabase implements Database {
 
     public void close() throws JDBCException {
 
+    }
+
+    public Configuration createConfiguration() {
+        return new AnnotationConfiguration();
     }
 }
