@@ -1144,7 +1144,7 @@ public abstract class AbstractDatabase implements Database {
 
     public void markChangeSetAsReRan(ChangeSet changeSet) throws JDBCException {
         String dateValue = getCurrentDateTimeFunction();
-        String sql = "UPDATE DATABASECHANGELOG SET DATEEXECUTED=" + dateValue + ", MD5SUM='?' WHERE ID='?' AND AUTHOR='?' AND FILENAME='?'";
+        String sql = "UPDATE "+escapeTableName(getDefaultSchemaName(), "DATABASECHANGELOG")+" SET DATEEXECUTED=" + dateValue + ", MD5SUM='?' WHERE ID='?' AND AUTHOR='?' AND FILENAME='?'";
         sql = sql.replaceFirst("\\?", escapeStringForDatabase(changeSet.getMd5sum()));
         sql = sql.replaceFirst("\\?", escapeStringForDatabase(changeSet.getId()));
         sql = sql.replaceFirst("\\?", escapeStringForDatabase(changeSet.getAuthor()));
