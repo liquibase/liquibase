@@ -44,7 +44,9 @@ public class HibernateDatabaseSnapshot implements DatabaseSnapshot {
             cfg.configure(database.getConfigFile());
             this.database = database;
 
-            Dialect dialect = (Dialect) Class.forName(cfg.getProperty("dialect")).newInstance();
+//            Dialect dialect = (Dialect) Class.forName(cfg.getProperty("dialect")).newInstance();
+//            dialect.
+            Dialect dialect = new HibernateGenericDialect(cfg.getProperty("dialect"));
             cfg.buildMappings();
             Mapping mapping = cfg.buildMapping();
 

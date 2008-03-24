@@ -203,7 +203,7 @@ public class Main {
                 || "help".equalsIgnoreCase(arg)
                 || "diff".equalsIgnoreCase(arg)
                 || "diffChangeLog".equalsIgnoreCase(arg)
-                || "appendChangeLog".equalsIgnoreCase(arg)
+                || "generateChangeLog".equalsIgnoreCase(arg)
                 || "clearCheckSums".equalsIgnoreCase(arg)
                 || "dbDoc".equalsIgnoreCase(arg)
                 || "changelogSync".equalsIgnoreCase(arg)
@@ -381,7 +381,7 @@ public class Main {
                     throw new CommandLineParsingException("Unknown parameter: '" + attributeName + "'");
                 }
             } else {
-                throw new CommandLineParsingException("Parameters must start with a '--'");
+                throw new CommandLineParsingException("Unexpected value "+arg+": parameters must start with a '--'");
             }
         }
 
