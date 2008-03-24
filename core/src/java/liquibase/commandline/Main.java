@@ -203,7 +203,7 @@ public class Main {
                 || "help".equalsIgnoreCase(arg)
                 || "diff".equalsIgnoreCase(arg)
                 || "diffChangeLog".equalsIgnoreCase(arg)
-                || "generateChangeLog".equalsIgnoreCase(arg)
+                || "appendChangeLog".equalsIgnoreCase(arg)
                 || "clearCheckSums".equalsIgnoreCase(arg)
                 || "dbDoc".equalsIgnoreCase(arg)
                 || "changelogSync".equalsIgnoreCase(arg)
@@ -560,6 +560,8 @@ public class Main {
         try {
 
 
+            CompositeFileOpener fileOpener = new CompositeFileOpener(fsOpener, clOpener);
+
             if ("diff".equalsIgnoreCase(command)) {
                 doDiff(database, createDatabaseFromCommandParams(commandParams));
                 return;
@@ -572,7 +574,7 @@ public class Main {
             }
 
 
-            Liquibase liquibase = new Liquibase(changeLogFile, new CompositeFileOpener(fsOpener, clOpener), database);
+            Liquibase liquibase = new Liquibase(changeLogFile, fileOpener, database);
 
             if ("listLocks".equalsIgnoreCase(command)) {
                 liquibase.reportLocks(System.out);
@@ -806,7 +808,11 @@ public class Main {
         diff.addStatusListener(new OutDiffStatusListener());
         DiffResult diffResult = diff.compare();
 
-        diffResult.printChangeLog(System.out, targetDatabase);
+        if (changeLogFile == null) {
+            diffResult.printChangeLog(System.out, targetDatabase);
+        } else {
+            diffResult.printChangeLog(changeLogFile, targetDatabase);
+        }
     }
 
     private void doGenerateChangeLog(Database originalDatabase) throws JDBCException, IOException, ParserConfigurationException {

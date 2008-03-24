@@ -8,14 +8,16 @@ import liquibase.parser.LiquibaseSchemaResolver;
 import liquibase.parser.xml.XMLChangeLogParser;
 import liquibase.xml.DefaultXmlWriter;
 import liquibase.xml.XmlWriter;
+import liquibase.FileOpener;
+import liquibase.util.StringUtils;
+import liquibase.log.LogFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import java.io.IOException;
-import java.io.PrintStream;
+import java.io.*;
 import java.util.*;
 
 public class DiffResult {
@@ -274,9 +276,68 @@ public class DiffResult {
 
     }
 
+    public void printChangeLog(String changeLogFile, Database targetDatabase) throws ParserConfigurationException, IOException {
+        this.printChangeLog(changeLogFile, targetDatabase, new DefaultXmlWriter());
+    }
+
     public void printChangeLog(PrintStream out, Database targetDatabase) throws ParserConfigurationException, IOException {
         this.printChangeLog(out, targetDatabase, new DefaultXmlWriter());
     }
+
+    public void printChangeLog(String changeLogFile, Database targetDatabase, XmlWriter xmlWriter) throws ParserConfigurationException, IOException {
+        File file = new File(changeLogFile);
+        if (!file.exists()) {
+            LogFactory.getLogger().info(file + " does not exist, creating");
+            FileOutputStream stream = new FileOutputStream(file);
+            printChangeLog(new PrintStream(stream), targetDatabase, xmlWriter);
+            stream.close();
+        } else {
+            LogFactory.getLogger().info(file + " exists, appending");
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            printChangeLog(new PrintStream(out), targetDatabase, xmlWriter);
+
+            String xml = new String(out.toByteArray());
+            xml = xml.replaceFirst("(?ms).*<databaseChangeLog[^>]*>", "");
+            xml = xml.replaceFirst("</databaseChangeLog>", "");
+            xml = xml.trim();
+
+            String lineSeparator = System.getProperty("line.separator");
+            BufferedReader fileReader = new BufferedReader(new FileReader(file));
+            String line;
+            long offset = 0;
+            while ((line = fileReader.readLine()) != null) {
+                int index = line.indexOf("</databaseChangeLog>");
+                if (index >= 0) {
+                    offset += index;
+                } else {
+                    offset += line.getBytes().length;
+                    offset += lineSeparator.getBytes().length;
+                }
+            }
+            fileReader.close();
+
+            fileReader = new BufferedReader(new FileReader(file));
+            fileReader.skip(offset);
+            System.out.println("line:" +fileReader.readLine());
+
+            fileReader.close();
+
+
+
+//            System.out.println("resulting XML: " + xml.trim());
+
+            RandomAccessFile randomAccessFile = new RandomAccessFile(file, "rw");
+            randomAccessFile.seek(offset);
+            randomAccessFile.writeBytes("    "+xml+lineSeparator);
+            randomAccessFile.writeBytes("</databaseChangeLog>"+lineSeparator);
+            randomAccessFile.close();
+
+//            BufferedWriter fileWriter = new BufferedWriter(new FileWriter(file));
+//            fileWriter.append(xml);
+//            fileWriter.close();
+        }
+    }
+
     /**
      * Prints changeLog that would bring the base database to be the same as the target database
      */
@@ -288,9 +349,9 @@ public class DiffResult {
         Document doc = documentBuilder.newDocument();
 
         Element changeLogElement = doc.createElement("databaseChangeLog");
-        changeLogElement.setAttribute("xmlns", "http://www.liquibase.org/xml/ns/dbchangelog/"+ XMLChangeLogParser.getSchemaVersion());
+        changeLogElement.setAttribute("xmlns", "http://www.liquibase.org/xml/ns/dbchangelog/" + XMLChangeLogParser.getSchemaVersion());
         changeLogElement.setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
-        changeLogElement.setAttribute("xsi:schemaLocation", "http://www.liquibase.org/xml/ns/dbchangelog/"+XMLChangeLogParser.getSchemaVersion()+" http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-"+XMLChangeLogParser.getSchemaVersion()+".xsd");
+        changeLogElement.setAttribute("xsi:schemaLocation", "http://www.liquibase.org/xml/ns/dbchangelog/" + XMLChangeLogParser.getSchemaVersion() + " http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-" + XMLChangeLogParser.getSchemaVersion() + ".xsd");
 
         doc.appendChild(changeLogElement);
 
@@ -313,7 +374,7 @@ public class DiffResult {
 
         for (Change change : changes) {
             Element changeSet = doc.createElement("changeSet");
-            changeSet.setAttribute("author", "diff-generated");
+            changeSet.setAttribute("author", getAuthor());
             changeSet.setAttribute("id", generateId());
 
             changeSet.appendChild(change.createNode(doc));
@@ -324,6 +385,15 @@ public class DiffResult {
         xmlWriter.write(doc, out);
 
         out.flush();
+    }
+
+    private String getAuthor() {
+        String author = System.getProperty("user.name");
+        if (StringUtils.trimToNull(author) == null) {
+            return "diff-generated";
+        } else {
+            return author+" (generated)";
+        }
     }
 
     private String generateId() {
@@ -493,7 +563,7 @@ public class DiffResult {
                     change.setTableName(column.getTable().getName());
                     change.setColumnName(column.getName());
                     change.setColumnDataType(baseColumn.getDataTypeString(targetDatabase));
-                    
+
                     changes.add(change);
                     foundDifference = true;
                 }
@@ -609,7 +679,7 @@ public class DiffResult {
                     columnConfig.setDefaultValueBoolean(((Boolean) defaultValue));
                 } else if (defaultValue instanceof Number) {
                     columnConfig.setDefaultValueNumeric(((Number) defaultValue));
-                } else  {
+                } else {
                     columnConfig.setDefaultValue(defaultValue.toString());
                 }
 
