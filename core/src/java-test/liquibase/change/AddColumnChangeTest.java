@@ -140,11 +140,9 @@ public class AddColumnChangeTest extends AbstractChangeTest {
         refactoring.addColumn(column);
 
         SqlStatement[] sqlStatements = refactoring.generateStatements(new MockDatabase());
-        assertEquals(2, sqlStatements.length);
+        assertEquals(1, sqlStatements.length);
         assertTrue(sqlStatements[0] instanceof AddColumnStatement);
-        assertFalse(((AddColumnStatement) sqlStatements[0]).isPrimaryKey());
-
-        //todo: check add primary key statements after they have been refactored
+        assertTrue(((AddColumnStatement) sqlStatements[0]).isPrimaryKey());
     }
 
     @Test
@@ -166,11 +164,10 @@ public class AddColumnChangeTest extends AbstractChangeTest {
         refactoring.addColumn(column);
 
         SqlStatement[] sqlStatements = refactoring.generateStatements(new MockDatabase());
-        assertEquals(2, sqlStatements.length);
+        assertEquals(1, sqlStatements.length);
         assertTrue(sqlStatements[0] instanceof AddColumnStatement);
-        assertFalse(((AddColumnStatement) sqlStatements[0]).isPrimaryKey());
-
-        //todo: check add primary key and auto-increment statements after they have been refactored
+        assertTrue(((AddColumnStatement) sqlStatements[0]).isPrimaryKey());
+        assertTrue(((AddColumnStatement) sqlStatements[0]).isAutoIncrement());
     }
 
     @Test
