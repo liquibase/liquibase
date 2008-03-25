@@ -36,7 +36,7 @@ public class UpdateStatementTest extends AbstractSqlStatementTest {
                 UpdateStatement statement = new UpdateStatement(null, TABLE_NAME);
                 statement.addNewColumnValue(COLUMN_NAME, null);
 
-                assertEquals("UPDATE " + database.escapeTableName(null, TABLE_NAME) + " SET " + COLUMN_NAME + " = NULL", statement.getSqlStatement(database));
+                assertEquals("UPDATE " + database.escapeTableName(null, TABLE_NAME) + " SET " + database.escapeColumnName(COLUMN_NAME) + " = NULL", statement.getSqlStatement(database));
             }
         });
     }
