@@ -257,7 +257,7 @@ public class CreateTableChangeTest extends AbstractChangeTest {
         change.addColumn(columnConfig);
 
         CreateTableStatement statement = (CreateTableStatement) change.generateStatements(new MockDatabase())[0];
-        assertEquals("2007-01-02", statement.getDefaultValue("id"));
+        assertEquals("'2007-01-02'", statement.getDefaultValue("id"));
     }
 
     @Test
