@@ -374,9 +374,9 @@ public class SqlDatabaseSnapshot implements DatabaseSnapshot {
                 if (type == DatabaseMetaData.tableIndexStatistic) {
                     continue;
                 }
-                if (type == DatabaseMetaData.tableIndexOther) {
-                    continue;
-                }
+//                if (type == DatabaseMetaData.tableIndexOther) {
+//                    continue;
+//                }
 
                 if (columnName == null) {
                     //nothing to index, not sure why these come through sometimes
