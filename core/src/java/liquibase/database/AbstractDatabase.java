@@ -922,6 +922,8 @@ public abstract class AbstractDatabase implements Database {
                 return this.getDateLiteral(((java.sql.Time) value));
             } else if (value instanceof java.sql.Timestamp) {
                 return this.getDateLiteral(((java.sql.Timestamp) value));
+            } else if (value instanceof ComputedDateValue) {
+                return ((ComputedDateValue) value).getValue();
             } else {
                 throw new RuntimeException("Unknown default value type: " + value.getClass().getName());
             }

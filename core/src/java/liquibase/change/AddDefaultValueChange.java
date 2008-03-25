@@ -3,6 +3,8 @@ package liquibase.change;
 import liquibase.database.Database;
 import liquibase.database.sql.AddDefaultValueStatement;
 import liquibase.database.sql.SqlStatement;
+import liquibase.database.sql.ComputedDateValue;
+import liquibase.database.sql.ComputedNumericValue;
 import liquibase.database.structure.Column;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Table;
@@ -94,22 +96,27 @@ public class AddDefaultValueChange extends AbstractChange {
 
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
         Object defaultValue = null;
-        try {
-            if (getDefaultValue() != null) {
-                defaultValue = getDefaultValue();
-            } else if (getDefaultValueBoolean() != null) {
-                defaultValue = Boolean.valueOf(getDefaultValueBoolean());
-            } else if (getDefaultValueNumeric() != null) {
+
+        if (getDefaultValue() != null) {
+            defaultValue = getDefaultValue();
+        } else if (getDefaultValueBoolean() != null) {
+            defaultValue = Boolean.valueOf(getDefaultValueBoolean());
+        } else if (getDefaultValueNumeric() != null) {
+            try {
                 defaultValue = NumberFormat.getInstance().parse(getDefaultValueNumeric());
-            } else if (getDefaultValueDate() != null) {
-                defaultValue = new ISODateFormat().parse(getDefaultValueDate());
+            } catch (ParseException e) {
+                defaultValue = new ComputedNumericValue(getDefaultValueNumeric());
             }
-        } catch (ParseException e) {
-            throw new RuntimeException(e);
+        } else if (getDefaultValueDate() != null) {
+            try {
+                defaultValue = new ISODateFormat().parse(getDefaultValueDate());
+            } catch (ParseException e) {
+                defaultValue = new ComputedDateValue(getDefaultValueDate());
+            }
         }
 
-        return new SqlStatement[] {
-                new AddDefaultValueStatement(getSchemaName() == null?database.getDefaultSchemaName():getSchemaName(), getTableName(), getColumnName(), defaultValue)
+        return new SqlStatement[]{
+                new AddDefaultValueStatement(getSchemaName() == null ? database.getDefaultSchemaName() : getSchemaName(), getTableName(), getColumnName(), defaultValue)
         };
     }
 
