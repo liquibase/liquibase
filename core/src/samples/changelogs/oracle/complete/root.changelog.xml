@@ -337,4 +337,14 @@ END testSP;
         </sql>
     </changeSet>
 
+    <changeSet id="62" author="nvoxland">
+        <createTable tableName="sysdateTest">
+            <column name="id" type="int"/>
+            <column name="date1" type="date" defaultValueDate="SYSDATE"/>
+            <column name="date2" type="date"/>
+        </createTable>
+
+        <addDefaultValue tableName="sysdateTest" columnName="date2" defaultValueDate="SYSDATE"/>
+    </changeSet>
+
 </databaseChangeLog>
