@@ -96,7 +96,7 @@ public class AddColumnStatement implements SqlStatement {
         return !(database instanceof HsqlDatabase);
     }
 
-    private boolean isAutoIncrement() {
+    public boolean isAutoIncrement() {
         for (ColumnConstraint constraint : getConstraints()) {
             if (constraint instanceof AutoIncrementConstraint) {
                 return true;

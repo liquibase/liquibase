@@ -69,6 +69,12 @@ public class AddColumnChange extends AbstractChange {
                 if (aColumn.getConstraints().isNullable() != null && !aColumn.getConstraints().isNullable()) {
                     constraints.add(new NotNullConstraint());
                 }
+                if (aColumn.getConstraints().isPrimaryKey() != null && aColumn.getConstraints().isPrimaryKey()) {
+                    constraints.add(new PrimaryKeyConstraint());
+                }
+            }
+            if (aColumn.isAutoIncrement() != null && aColumn.isAutoIncrement()) {
+                constraints.add(new AutoIncrementConstraint(aColumn.getName()));
             }
 
             AddColumnStatement addColumnStatement = new AddColumnStatement(schemaName,
@@ -87,18 +93,18 @@ public class AddColumnChange extends AbstractChange {
             }
         }
 
-        for (ColumnConfig aColumn : columns) {
-            if (aColumn.getConstraints() != null) {
-                if (aColumn.getConstraints().isPrimaryKey() != null && aColumn.getConstraints().isPrimaryKey()) {
-                    AddPrimaryKeyChange change = new AddPrimaryKeyChange();
-                    change.setSchemaName(schemaName);
-                    change.setTableName(getTableName());
-                    change.setColumnNames(aColumn.getName());
-
-                    sql.addAll(Arrays.asList(change.generateStatements(database)));
-                }
-            }
-        }
+//        for (ColumnConfig aColumn : columns) {
+//            if (aColumn.getConstraints() != null) {
+//                if (aColumn.getConstraints().isPrimaryKey() != null && aColumn.getConstraints().isPrimaryKey()) {
+//                    AddPrimaryKeyChange change = new AddPrimaryKeyChange();
+//                    change.setSchemaName(schemaName);
+//                    change.setTableName(getTableName());
+//                    change.setColumnNames(aColumn.getName());
+//
+//                    sql.addAll(Arrays.asList(change.generateStatements(database)));
+//                }
+//            }
+//        }
 
         if (database instanceof DB2Database) {
             sql.add(new ReorganizeTableStatement(schemaName, getTableName()));
