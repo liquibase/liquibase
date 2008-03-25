@@ -225,7 +225,7 @@ class XMLChangeLogHandler extends DefaultHandler {
                 }
 
             } else if (changeSet != null && "rollback".equals(qName)) {
-                changeSet.setRollBackSQL(textString);
+                changeSet.addRollBackSQL(textString);
             } else if (change != null && change instanceof RawSQLChange && "comment".equals(qName)) {
                 ((RawSQLChange) change).setComments(textString);
                 text = new StringBuffer();

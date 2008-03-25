@@ -44,7 +44,7 @@ public class ChangeSet {
     private Set<String> dbmsSet;
     private Boolean failOnError;
 
-    private SqlStatement[] rollBackStatements;
+    private List<SqlStatement> rollBackStatements = new ArrayList<SqlStatement>();
 
     private String comments;
 
@@ -160,7 +160,7 @@ public class ChangeSet {
     public void rolback(Database database) throws RollbackFailedException {
         try {
             database.getJdbcTemplate().comment("Rolling Back ChangeSet: " + toString());
-            if (rollBackStatements != null && rollBackStatements.length > 0) {
+            if (rollBackStatements != null && rollBackStatements.size()> 0) {
                 for (SqlStatement rollback : rollBackStatements) {
                     try {
                         database.getJdbcTemplate().execute(rollback);
@@ -277,23 +277,21 @@ public class ChangeSet {
     }
 
     public SqlStatement[] getRollBackStatements() {
-        return rollBackStatements;
+        return rollBackStatements.toArray(new SqlStatement[rollBackStatements.size()]);
     }
 
-    public void setRollBackSQL(String sql) {
+    public void addRollBackSQL(String sql) {
         if (sql == null) {
             return;
         }
-        String[] sqlStatements = sql.split(";");
-        this.rollBackStatements = new SqlStatement[sqlStatements.length];
 
-        for (int i = 0; i < rollBackStatements.length; i++) {
-            rollBackStatements[i] = new RawSqlStatement(sqlStatements[i].trim());
+        for (String statment : StringUtils.splitSQL(sql)) {
+            rollBackStatements.add(new RawSqlStatement(statment.trim()));
         }
     }
 
     public boolean canRollBack() {
-        if (rollBackStatements != null && rollBackStatements.length > 0) {
+        if (rollBackStatements != null && rollBackStatements.size()> 0) {
             return true;
         }
 
