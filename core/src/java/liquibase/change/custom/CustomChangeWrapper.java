@@ -47,7 +47,7 @@ public class CustomChangeWrapper extends AbstractChange {
     public void setClass(String className) throws CustomChangeException {
         this.className = className;
         try {
-            System.out.println(classLoader.toString());
+//            System.out.println(classLoader.toString());
             customChange = (CustomChange) Class.forName(className, true, classLoader).newInstance();
         } catch (Exception e) {
             throw new CustomChangeException(e);
