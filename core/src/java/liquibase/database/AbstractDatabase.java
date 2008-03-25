@@ -721,10 +721,10 @@ public abstract class AbstractDatabase implements Database {
                 throw new JDBCException("Cannot tag an empty database");
             }
 
-            Timestamp lastExecutedDate = (Timestamp) this.getJdbcTemplate().queryForObject(createChangeToTagSQL(), Timestamp.class);
-            int rowsUpdated = this.getJdbcTemplate().update(createTagSQL(tagString, lastExecutedDate));
+//            Timestamp lastExecutedDate = (Timestamp) this.getJdbcTemplate().queryForObject(createChangeToTagSQL(), Timestamp.class);
+            int rowsUpdated = this.getJdbcTemplate().update(createTagSQL(tagString));
             if (rowsUpdated == 0) {
-                throw new JDBCException("Did not tag database change log correctly.  Should have tagged changeset from "+lastExecutedDate.toString());
+                throw new JDBCException("Did not tag database change log correctly");
             }
             this.commit();
         } catch (Exception e) {
@@ -740,17 +740,12 @@ public abstract class AbstractDatabase implements Database {
     }
 
     /**
-     * Returns SQL to tag the database.  SQL Contains two ?:
-     * <ol>
-     * <li>tag string</li>
-     * <li>date executed</li>
-     * </ol>
+     * Returns SQL to tag the database.
      */
-    protected SqlStatement createTagSQL(String tagName, Date dateExecuted) {
+    protected SqlStatement createTagSQL(String tagName) {
         UpdateStatement statement = new UpdateStatement(getDefaultSchemaName(), getDatabaseChangeLogTableName());
         statement.addNewColumnValue("TAG", tagName);
-        statement.setWhereClause("DATEEXECUTED = ?");
-        statement.addWhereParameter(dateExecuted);
+        statement.setWhereClause("DATEEXECUTED = ("+createChangeToTagSQL()+")");
 
         return statement;
     }
