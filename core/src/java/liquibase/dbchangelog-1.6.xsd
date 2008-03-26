@@ -72,6 +72,7 @@
     <xsd:attributeGroup name="constraintsAttributes">
         <xsd:attribute name="nullable" type="xsd:boolean"/>
         <xsd:attribute name="primaryKey" type="xsd:boolean"/>
+        <xsd:attribute name="primaryKeyName" type="xsd:string"/>
         <xsd:attribute name="unique" type="xsd:boolean"/>
         <xsd:attribute name="uniqueConstraintName" type="xsd:string"/>
         <xsd:attribute name="references" type="xsd:string"/>

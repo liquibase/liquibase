@@ -309,4 +309,25 @@
     <changeSet id="failOnErrorTest" author="rs" failOnError="false">
         <dropTable tableName="DoesNotExist" />
     </changeSet>
+
+    <changeSet id="createTableNamedPK" author="nvoxland">
+        <createTable tableName="createTableNamedPK">
+            <column name="id" type="int">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_pktest1"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet id="addColumnNamedPK" author="nvoxland">
+        <createTable tableName="addColumnNamedPK">
+            <column name="id" type="int">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addColumn tableName="addColumnNamedPK">
+            <column name="pk" type="int">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="pk_pktest2"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>

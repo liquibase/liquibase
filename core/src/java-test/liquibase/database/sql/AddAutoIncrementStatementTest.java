@@ -17,11 +17,11 @@ public class AddAutoIncrementStatementTest extends AbstractSqlStatementTest {
 
     protected void setupDatabase(Database database) throws Exception {
         dropAndCreateTable(new CreateTableStatement(null, TABLE_NAME)
-                .addPrimaryKeyColumn(COLUMN_NAME, COLUMN_TYPE)
+                .addPrimaryKeyColumn(COLUMN_NAME, COLUMN_TYPE, null)
                 .addColumn("otherColumn", "varchar(50)"), database);
 
         dropAndCreateTable(new CreateTableStatement(TestContext.ALT_SCHEMA, TABLE_NAME)
-                .addPrimaryKeyColumn(COLUMN_NAME, COLUMN_TYPE)
+                .addPrimaryKeyColumn(COLUMN_NAME, COLUMN_TYPE, null)
                 .addColumn("otherColumn", "varchar(50)"), database);
     }
 

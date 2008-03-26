@@ -14,11 +14,11 @@ public class DropTableStatementTest extends AbstractSqlStatementTest {
 
     protected void setupDatabase(Database database) throws Exception {
         dropAndCreateTable(new CreateTableStatement(null, TABLE_NAME)
-                .addPrimaryKeyColumn("id", "int")
+                .addPrimaryKeyColumn("id", "int", null)
                 , database);
 
         dropAndCreateTable(new CreateTableStatement(TestContext.ALT_SCHEMA, TABLE_NAME)
-                .addPrimaryKeyColumn("id", "int")
+                .addPrimaryKeyColumn("id", "int", null)
                 , database);
     }
 
