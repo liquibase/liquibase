@@ -25,7 +25,11 @@ public class GenerateChangeLogTask extends BaseLiquibaseTask {
 //            diff.addStatusListener(new OutDiffStatusListener());
             DiffResult diffResult = diff.compare();
 
-            diffResult.printChangeLog(writer, database);
+            if (getChangeLogFile() == null) {
+                diffResult.printChangeLog(writer, database);
+            } else {
+                diffResult.printChangeLog(getChangeLogFile(), database);
+            }
 
             writer.flush();
             writer.close();

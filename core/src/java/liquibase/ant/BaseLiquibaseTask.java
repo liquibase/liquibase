@@ -6,6 +6,7 @@ import liquibase.FileSystemFileOpener;
 import liquibase.Liquibase;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
+import liquibase.database.HibernateDatabase;
 import liquibase.exception.JDBCException;
 import liquibase.log.LogFactory;
 import org.apache.tools.ant.Project;
@@ -173,6 +174,10 @@ public class BaseLiquibaseTask extends Task {
                 return new URLClassLoader(taskClassPath.toArray(new URL[taskClassPath.size()]));
             }
         });
+
+        if (url.startsWith("hibernate:")) {
+            return (Database) Class.forName(HibernateDatabase.class.getName(), true, loader).getConstructor(String.class).newInstance(url.substring("hibernate:".length()));
+        }
 
         if (driverClassName == null) {
             driverClassName = DatabaseFactory.getInstance().findDefaultDriver(databaseUrl);
