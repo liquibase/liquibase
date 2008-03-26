@@ -167,4 +167,31 @@ public class AddDefaultValueChangeTest extends AbstractChangeTest {
         assertEquals("2007-01-02", node.getAttribute("defaultValueDate"));
 
     }
+
+    @Test
+    public void getMD5Sum() throws Exception {
+        AddDefaultValueChange change = new AddDefaultValueChange();
+        change.setSchemaName("SCHEMA_NAME");
+        change.setTableName("TABLE_NAME");
+        change.setColumnName("COLUMN_NAME");
+        change.setDefaultValue("DEF STRING");
+        change.setDefaultValueNumeric("42");
+        change.setDefaultValueBoolean(true);
+        change.setDefaultValueDate("2007-01-02");
+
+        String md5sum1 = change.getMD5Sum();
+
+        change.setSchemaName("SCHEMA_NAME2");
+        String md5Sum2 = change.getMD5Sum();
+
+        assertFalse(md5sum1.equals(md5Sum2));
+
+        change.setSchemaName("SCHEMA_NAME");
+        String md5Sum3 = change.getMD5Sum();
+
+        assertTrue(md5sum1.equals(md5Sum3));
+
+    }
+
+
 }
