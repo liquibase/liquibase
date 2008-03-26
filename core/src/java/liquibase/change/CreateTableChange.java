@@ -40,8 +40,7 @@ public class CreateTableChange extends AbstractChange {
             boolean isAutoIncrement = column.isAutoIncrement() != null && column.isAutoIncrement();
             if (constraints != null && constraints.isPrimaryKey() != null && constraints.isPrimaryKey()) {
 
-                statement.addPrimaryKeyColumn(column.getName(), constraints.getPrimaryKeyName(),
-                        database.getColumnType(column.getType(), isAutoIncrement));
+                statement.addPrimaryKeyColumn(column.getName(), database.getColumnType(column.getType(), isAutoIncrement), constraints.getPrimaryKeyName());
 
             } else {
                 String defaultValue = null;

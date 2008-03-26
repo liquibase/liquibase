@@ -67,7 +67,7 @@ public class CreateTableStatement implements SqlStatement {
         return notNullColumns;
     }
 
-    public CreateTableStatement addPrimaryKeyColumn(String columnName, String keyName, String columnType, ColumnConstraint... constraints) {
+    public CreateTableStatement addPrimaryKeyColumn(String columnName, String columnType, String keyName, ColumnConstraint... constraints) {
 //        String pkName = "PK_" + getTableName().toUpperCase();
 ////        if (pkName.length() > 18) {
 ////            pkName = pkName.substring(0, 17);
