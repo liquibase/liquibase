@@ -212,7 +212,7 @@ public abstract class AbstractChange implements Change {
         for (Map.Entry entry : attributeMap.entrySet()) {
             String value = (String) entry.getValue();
             if (value != null) {
-                buffer.append(" ").append(entry.getKey()).append("=\"").append(attributeMap.get(value)).append("\"");
+                buffer.append(" ").append(entry.getKey()).append("=\"").append(value).append("\"");
             }
         }
         buffer.append(">").append(StringUtils.trimToEmpty(XMLUtil.getTextContent(node)));
