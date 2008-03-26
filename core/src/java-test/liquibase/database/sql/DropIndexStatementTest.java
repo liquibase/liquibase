@@ -17,14 +17,14 @@ public class DropIndexStatementTest extends AbstractSqlStatementTest {
 
     protected void setupDatabase(Database database) throws Exception {
         dropAndCreateTable(new CreateTableStatement(null, TABLE_NAME)
-                .addPrimaryKeyColumn("id", "int")
+                .addPrimaryKeyColumn("id", "int", null)
                 .addColumn(COLUMN_NAME, "varchar(50)", new NotNullConstraint())
                 , database);
 
         new JdbcTemplate(database).execute(new CreateIndexStatement(IDX_NAME, null, TABLE_NAME, COLUMN_NAME));
 
         dropAndCreateTable(new CreateTableStatement(TestContext.ALT_SCHEMA, TABLE_NAME)
-                .addPrimaryKeyColumn("id", "int")
+                .addPrimaryKeyColumn("id", "int", null)
                 .addColumn(COLUMN_NAME, "varchar(50)", new NotNullConstraint())
                 , database);
 

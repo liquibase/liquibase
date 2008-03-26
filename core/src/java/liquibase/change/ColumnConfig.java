@@ -277,6 +277,10 @@ public class ColumnConfig {
             if (constraints.getUniqueConstraintName() != null) {
                 constraintsElement.setAttribute("uniqueConstraintName", constraints.getUniqueConstraintName());
             }
+
+            if (constraints.getPrimaryKeyName() != null) {
+                constraintsElement.setAttribute("primaryKeyName", constraints.getPrimaryKeyName());
+            }
             element.appendChild(constraintsElement);
         }
 

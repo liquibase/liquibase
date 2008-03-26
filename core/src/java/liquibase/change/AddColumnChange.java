@@ -70,7 +70,7 @@ public class AddColumnChange extends AbstractChange {
                     constraints.add(new NotNullConstraint());
                 }
                 if (aColumn.getConstraints().isPrimaryKey() != null && aColumn.getConstraints().isPrimaryKey()) {
-                    constraints.add(new PrimaryKeyConstraint());
+                    constraints.add(new PrimaryKeyConstraint(aColumn.getConstraints().getPrimaryKeyName()));
                 }
             }
             if (aColumn.isAutoIncrement() != null && aColumn.isAutoIncrement()) {

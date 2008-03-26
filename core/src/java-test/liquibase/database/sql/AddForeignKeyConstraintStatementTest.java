@@ -21,19 +21,19 @@ public class AddForeignKeyConstraintStatementTest extends AbstractSqlStatementTe
 
     protected void setupDatabase(Database database) throws Exception {
             dropAndCreateTable(new CreateTableStatement(null, BASE_TABLE_NAME)
-                    .addPrimaryKeyColumn("id", "int")
+                    .addPrimaryKeyColumn("id", "int", null)
                     .addColumn(BASE_COLUMN_NAME, "int"), database);
 
             dropAndCreateTable(new CreateTableStatement(null, REF_TABLE_NAME)
-                    .addPrimaryKeyColumn(REF_COL_NAME, "int")
+                    .addPrimaryKeyColumn(REF_COL_NAME, "int", null)
                     .addColumn("existingCol", "int"), database);
 
             dropAndCreateTable(new CreateTableStatement(TestContext.ALT_SCHEMA, BASE_TABLE_NAME)
-                    .addPrimaryKeyColumn("id", "int")
+                    .addPrimaryKeyColumn("id", "int", null)
                     .addColumn(BASE_COLUMN_NAME, "int"), database);
 
             dropAndCreateTable(new CreateTableStatement(TestContext.ALT_SCHEMA, REF_TABLE_NAME)
-                    .addPrimaryKeyColumn(REF_COL_NAME, "int")
+                    .addPrimaryKeyColumn(REF_COL_NAME, "int", null)
                     .addColumn("existingCol", "int"), database);
     }
 

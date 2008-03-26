@@ -8,6 +8,7 @@ public class ConstraintsConfig {
 
     private Boolean nullable;
     private Boolean primaryKey;
+    private String primaryKeyName;
     private String references;
     private Boolean unique;
     private String uniqueConstraintName;
@@ -31,6 +32,14 @@ public class ConstraintsConfig {
 
     public void setPrimaryKey(Boolean primaryKey) {
         this.primaryKey = primaryKey;
+    }
+
+    public String getPrimaryKeyName() {
+        return primaryKeyName;
+    }
+
+    public void setPrimaryKeyName(String primaryKeyName) {
+        this.primaryKeyName = primaryKeyName;
     }
 
     public String getReferences() {

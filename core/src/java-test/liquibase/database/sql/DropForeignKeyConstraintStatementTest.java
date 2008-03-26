@@ -20,12 +20,12 @@ public class DropForeignKeyConstraintStatementTest extends AbstractSqlStatementT
         dropTableIfExists(null, TABLE_NAME, database);
 
         dropAndCreateTable(new CreateTableStatement(null, FK_TABLE_NAME)
-                .addPrimaryKeyColumn("id", "int")
+                .addPrimaryKeyColumn("id", "int", null)
                 .addColumn("name", "varchar(50)")
                 , database);
 
         dropAndCreateTable(new CreateTableStatement(null, TABLE_NAME)
-                .addPrimaryKeyColumn("id", "int")
+                .addPrimaryKeyColumn("id", "int", null)
                 .addColumn("test_id", "int", new ForeignKeyConstraint(CONSTRAINT_NAME, FK_TABLE_NAME + "(id)"))
                 .addColumn("otherCol", "varchar(50)")
                 , database);
@@ -34,12 +34,12 @@ public class DropForeignKeyConstraintStatementTest extends AbstractSqlStatementT
         dropTableIfExists(TestContext.ALT_SCHEMA, TABLE_NAME, database);
 
         dropAndCreateTable(new CreateTableStatement(TestContext.ALT_SCHEMA, FK_TABLE_NAME)
-                .addPrimaryKeyColumn("id", "int")
+                .addPrimaryKeyColumn("id", "int", null)
                 .addColumn("name", "varchar(50)")
                 , database);
 
         dropAndCreateTable(new CreateTableStatement(TestContext.ALT_SCHEMA, TABLE_NAME)
-                .addPrimaryKeyColumn("id", "int")
+                .addPrimaryKeyColumn("id", "int", null)
                 .addColumn("test_id", "int", new ForeignKeyConstraint(ALT_SCHEMA_NAME, TestContext.ALT_SCHEMA + "." + FK_TABLE_NAME + "(id)"))
                 .addColumn("otherCol", "varchar(50)")
                 , database);
