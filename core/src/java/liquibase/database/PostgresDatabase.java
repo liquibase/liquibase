@@ -210,7 +210,7 @@ public class PostgresDatabase extends AbstractDatabase {
         if (autoIncrement != null && autoIncrement) {
             if ("integer".equals(type.toLowerCase())) {
                 return "serial";
-            } else if ("bigint".equals(type.toLowerCase())) {
+            } else if ("bigint".equals(type.toLowerCase()) || "bigserial".equals(type.toLowerCase())) {            
                 return "bigserial";
             } else {
                 // Unknown integer type, default to "serial"

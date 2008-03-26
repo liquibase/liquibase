@@ -79,4 +79,13 @@ public class PostgresDatabaseTest extends AbstractDatabaseTest {
         assertNull(database.getDefaultDriver("jdbc:db2://localhost;databaseName=liquibase"));
     }
 
+    @Test
+    public void getColumnType_BigSerial_AutoIncrement() {
+        assertEquals("bigserial", getDatabase().getColumnType("bigserial", Boolean.TRUE));
+    }
+
+    @Test
+    public void getColumnType_BigInt_AutoIncrement() {
+        assertEquals("bigserial", getDatabase().getColumnType("bigint", Boolean.TRUE));
+    }
 }
