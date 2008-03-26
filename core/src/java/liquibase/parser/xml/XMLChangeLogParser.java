@@ -15,7 +15,7 @@ import java.io.InputStream;
 public class XMLChangeLogParser {
 
     public static String getSchemaVersion() {
-        return "1.5";
+        return "1.6";
     }
     
     public DatabaseChangeLog parse(String physicalChangeLogLocation, FileOpener fileOpener) throws ChangeLogParseException {

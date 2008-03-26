@@ -164,7 +164,7 @@ public class CreateTableStatementTest extends AbstractSqlStatementTest {
                         .addColumn("name", "varchar(255)")
                         .addColumn("parent_id", "int", new ForeignKeyConstraint(foreignKeyName, FK_TABLE_NAME + "(id)").setDeleteCascade(true))) {
 
-                    protected void setup(Database database) throws JDBCException {
+                    protected void setup(Database database) throws Exception {
                         new JdbcTemplate(database).execute(new CreateTableStatement(null, FK_TABLE_NAME)
                         .addPrimaryKeyColumn("id", "int")
                         .addColumn("name", "varchar(255)"));

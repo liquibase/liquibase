@@ -59,6 +59,7 @@ public class ChangeFactory {
                 ExecuteShellCommandChange.class,
                 UpdateDataChange.class,
                 DeleteDataChange.class,
+                TagDatabaseChange.class,
         };
 
         try {
