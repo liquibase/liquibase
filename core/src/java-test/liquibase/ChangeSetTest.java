@@ -3,6 +3,7 @@ package liquibase;
 import liquibase.ChangeSet;
 import liquibase.change.CreateTableChange;
 import liquibase.change.InsertDataChange;
+import liquibase.change.AddDefaultValueChange;
 import static org.junit.Assert.*;
 import org.junit.Test;
 
@@ -25,5 +26,29 @@ public class ChangeSetTest {
 
         changeSet.addChange(new CreateTableChange());
         assertEquals("Insert Row (x2), Create Table", changeSet.getDescription());
+    }
+    
+    @Test
+    public void getMd5Sum() {
+        ChangeSet changeSet1 = new ChangeSet("testId", "testAuthor", false, false,null,  null, null, null);
+        ChangeSet changeSet2 = new ChangeSet("testId", "testAuthor", false, false,null,  null, null, null);
+
+        AddDefaultValueChange change = new AddDefaultValueChange();
+        change.setSchemaName("SCHEMA_NAME");
+        change.setTableName("TABLE_NAME");
+        change.setColumnName("COLUMN_NAME");
+        change.setDefaultValue("DEF STRING");
+        change.setDefaultValueNumeric("42");
+        change.setDefaultValueBoolean(true);
+        change.setDefaultValueDate("2007-01-02");
+
+        changeSet1.addChange(change);
+        changeSet2.addChange(change);
+
+        String md5Sum1 = changeSet1.getMd5sum();
+
+        change.setSchemaName("SCHEMA_NAME2");
+        String md5Sum2 = changeSet2.getMd5sum();
+        assertFalse(md5Sum1.equals(md5Sum2));
     }
 }
