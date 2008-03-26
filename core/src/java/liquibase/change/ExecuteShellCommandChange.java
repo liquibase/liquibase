@@ -11,6 +11,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import java.io.IOException;
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -71,8 +72,14 @@ public class ExecuteShellCommandChange extends AbstractChange {
                 } catch (InterruptedException e) {
                     ;
                 }
-                StreamUtil.copy(p.getErrorStream(), System.err);
-                StreamUtil.copy(p.getInputStream(), System.err);
+
+                ByteArrayOutputStream errorStream = new ByteArrayOutputStream();
+                ByteArrayOutputStream inputStream = new ByteArrayOutputStream();
+                StreamUtil.copy(p.getErrorStream(), errorStream);
+                StreamUtil.copy(p.getInputStream(), inputStream);
+
+                LogFactory.getLogger().info(errorStream.toString());
+                LogFactory.getLogger().info(inputStream.toString());
 
                 if (returnCode != 0) {
                     throw new RuntimeException(getCommandString()+" returned an code of "+returnCode);
