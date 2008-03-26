@@ -132,11 +132,11 @@ public class MySQLDatabase extends AbstractDatabase {
 
     public String escapeColumnNameList(String columnNames) {
         StringBuffer sb = new StringBuffer();
-        for(String columnName : columnNames.split(", ")) {
+        for(String columnName : columnNames.split(",")) {
             if(sb.length() > 0) {
                 sb.append(", ");
             }
-            sb.append("`").append(columnName).append("`");
+            sb.append("`").append(columnName.trim()).append("`");
         }
         return sb.toString();
     }

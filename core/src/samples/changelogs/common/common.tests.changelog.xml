@@ -317,7 +317,7 @@
             </column>
         </createTable>
     </changeSet>
-    <changeSet id="addColumnNamedPK" author="nvoxland">
+    <!--changeSet id="addColumnNamedPK" author="nvoxland">
         <createTable tableName="addColumnNamedPK">
             <column name="id" type="int">
                 <constraints nullable="false"/>
@@ -328,6 +328,6 @@
                 <constraints nullable="false" primaryKey="true" primaryKeyName="pk_pktest2"/>
             </column>
         </addColumn>
-    </changeSet>
+    </changeSet-->
 
 </databaseChangeLog>
