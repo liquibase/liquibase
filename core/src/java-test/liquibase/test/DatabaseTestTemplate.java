@@ -1,6 +1,7 @@
 package liquibase.test;
 
 import liquibase.database.Database;
+import liquibase.exception.MigrationFailedException;
 import org.junit.ComparisonFailure;
 
 import java.util.Set;
@@ -28,6 +29,16 @@ public class DatabaseTestTemplate {
                 newError.setStackTrace(e.getStackTrace());
                 throw newError;
             } catch (AssertionError e) {
+                e.printStackTrace();
+                String newMessage = "Database Test Failure on " + database;
+                if (e.getMessage() != null) {
+                    newMessage += ": " + e.getMessage();
+                }
+
+                AssertionError newError = new AssertionError(newMessage);
+                newError.setStackTrace(e.getStackTrace());
+                throw newError;
+            } catch (MigrationFailedException e) {
                 e.printStackTrace();
                 String newMessage = "Database Test Failure on " + database;
                 if (e.getMessage() != null) {

@@ -722,7 +722,7 @@ public abstract class AbstractDatabase implements Database {
             }
 
 //            Timestamp lastExecutedDate = (Timestamp) this.getJdbcTemplate().queryForObject(createChangeToTagSQL(), Timestamp.class);
-            int rowsUpdated = this.getJdbcTemplate().update(createTagSQL(tagString));
+            int rowsUpdated = this.getJdbcTemplate().update(new TagDatabaseStatement(tagString));
             if (rowsUpdated == 0) {
                 throw new JDBCException("Did not tag database change log correctly");
             }
@@ -730,24 +730,6 @@ public abstract class AbstractDatabase implements Database {
         } catch (Exception e) {
             throw new JDBCException(e);
         }
-    }
-
-    /**
-     * Returns SQL to return the date of the most recient changeset execution.
-     */
-    protected SqlStatement createChangeToTagSQL() {
-        return new RawSqlStatement("SELECT MAX(DATEEXECUTED) FROM " + escapeTableName(getDefaultSchemaName(), getDatabaseChangeLogTableName()));
-    }
-
-    /**
-     * Returns SQL to tag the database.
-     */
-    protected SqlStatement createTagSQL(String tagName) {
-        UpdateStatement statement = new UpdateStatement(getDefaultSchemaName(), getDatabaseChangeLogTableName());
-        statement.addNewColumnValue("TAG", tagName);
-        statement.setWhereClause("DATEEXECUTED = ("+createChangeToTagSQL()+")");
-
-        return statement;
     }
 
     public SqlStatement createFindSequencesSQL(String schema) throws JDBCException {

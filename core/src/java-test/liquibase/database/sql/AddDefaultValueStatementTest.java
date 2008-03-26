@@ -54,7 +54,7 @@ public class AddDefaultValueStatementTest extends AbstractSqlStatementTest {
         new DatabaseTestTemplate().testOnAvailableDatabases(
                 new SqlStatementDatabaseTest(null, new AddDefaultValueStatement(null, TABLE_NAME, COLUMN_NAME, Boolean.TRUE)) {
 
-                    protected void setup(Database database) throws JDBCException {
+                    protected void setup(Database database) throws Exception {
                         new JdbcTemplate(database).execute(new CreateTableStatement(null, TABLE_NAME)
                                 .addColumn("id", "int")
                                 .addColumn(COLUMN_NAME, database.getBooleanType()));
@@ -81,7 +81,7 @@ public class AddDefaultValueStatementTest extends AbstractSqlStatementTest {
         new DatabaseTestTemplate().testOnAvailableDatabases(
                 new SqlStatementDatabaseTest(null, new AddDefaultValueStatement(null, TABLE_NAME, COLUMN_NAME, 42)) {
 
-                    protected void setup(Database database) throws JDBCException {
+                    protected void setup(Database database) throws Exception {
                         new JdbcTemplate(database).execute(new CreateTableStatement(null, TABLE_NAME)
                                 .addColumn("id", "int")
                                 .addColumn(COLUMN_NAME, "int"));
@@ -104,7 +104,7 @@ public class AddDefaultValueStatementTest extends AbstractSqlStatementTest {
         new DatabaseTestTemplate().testOnAvailableDatabases(
                 new SqlStatementDatabaseTest(null, new AddDefaultValueStatement(null, TABLE_NAME, COLUMN_NAME, 42.56)) {
 
-                    protected void setup(Database database) throws JDBCException {
+                    protected void setup(Database database) throws Exception {
                         new JdbcTemplate(database).execute(new CreateTableStatement(null, TABLE_NAME)
                                 .addColumn("id", "int")
                                 .addColumn(COLUMN_NAME, "float"));
@@ -152,7 +152,7 @@ public class AddDefaultValueStatementTest extends AbstractSqlStatementTest {
         new DatabaseTestTemplate().testOnAvailableDatabases(
                 new SqlStatementDatabaseTest(null, new AddDefaultValueStatement(null, TABLE_NAME, COLUMN_NAME, date)) {
 
-                    protected void setup(Database database) throws JDBCException {
+                    protected void setup(Database database) throws Exception {
                         new JdbcTemplate(database).execute(new CreateTableStatement(null, TABLE_NAME)
                                 .addColumn("id", "int")
                                 .addColumn(COLUMN_NAME, database.getDateType()));
@@ -188,7 +188,7 @@ public class AddDefaultValueStatementTest extends AbstractSqlStatementTest {
         new DatabaseTestTemplate().testOnAvailableDatabases(
                 new SqlStatementDatabaseTest(null, new AddDefaultValueStatement(null, TABLE_NAME, COLUMN_NAME, time)) {
 
-                    protected void setup(Database database) throws JDBCException {
+                    protected void setup(Database database) throws Exception {
                         new JdbcTemplate(database).execute(new CreateTableStatement(null, TABLE_NAME)
                                 .addColumn("id", "int")
                                 .addColumn(COLUMN_NAME, database.getTimeType()));

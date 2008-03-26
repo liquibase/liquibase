@@ -17,7 +17,7 @@ public abstract class SqlStatementDatabaseTest implements DatabaseTest {
         this.statement = statement;
     }
 
-    protected void setup(Database database) throws JDBCException {
+    protected void setup(Database database) throws Exception {
 //        try {
 //            database.getConnection().commit();
 //        } catch (SQLException e) {
