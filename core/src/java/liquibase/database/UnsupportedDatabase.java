@@ -146,7 +146,7 @@ public class UnsupportedDatabase extends AbstractDatabase {
             } else if (dateFunction != null) {
                 return "{fn "+dateFunction+"()"+"}";
             } else {
-                return "NOW()";
+                return "CURRENT_TIMESTAMP";
             }
 
         } catch (SQLException e) {
