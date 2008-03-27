@@ -32,6 +32,7 @@ public class ColumnConfig {
 
     private ConstraintsConfig constraints;
     private Boolean autoIncrement;
+    private String remarks;
 
     public String getName() {
         return name;
@@ -238,6 +239,9 @@ public class ColumnConfig {
         if (getValueDate() != null) {
             element.setAttribute("valueDate", new ISODateFormat().format(getValueDate()));
         }
+        if (StringUtils.trimToNull(getRemarks()) != null) {
+            element.setAttribute("remarks", getRemarks());
+        }
 
         if (isAutoIncrement() != null && isAutoIncrement()) {
             element.setAttribute("autoIncrement", "true");
@@ -327,4 +331,11 @@ public class ColumnConfig {
                 || this.getDefaultValueNumeric() != null;
     }
 
+    public String getRemarks() {
+        return remarks;
+    }
+
+    public void setRemarks(String remarks) {
+        this.remarks = remarks;
+    }
 }

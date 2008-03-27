@@ -330,4 +330,10 @@
         </addColumn>
     </changeSet-->
 
+    <changeSet id="tableWithRemarks" author="nvoxland">
+        <createTable tableName="tableWithRemarks" remarks="some test remarks">
+            <column name="id" type="int"/>
+        </createTable>
+    </changeSet>
+
 </databaseChangeLog>

@@ -221,6 +221,7 @@ public class SqlDatabaseSnapshot implements DatabaseSnapshot {
             String columnName = rs.getString("COLUMN_NAME");
             String schemaName = rs.getString("TABLE_SCHEM");
             String catalogName = rs.getString("TABLE_CAT");
+            String remarks = rs.getString("REMARKS");
 
             if (database.isSystemTable(catalogName, schemaName, tableName) || database.isLiquibaseTable(tableName)) {
                 continue;
@@ -264,7 +265,7 @@ public class SqlDatabaseSnapshot implements DatabaseSnapshot {
             columnInfo.setAutoIncrement(database.isColumnAutoIncrement(schema, tableName, columnName));
 
             columnInfo.setTypeName(database.getColumnType(rs.getString("TYPE_NAME"), columnInfo.isAutoIncrement()));            
-
+            columnInfo.setRemarks(remarks);
 
             columnsMap.put(tableName + "." + columnName, columnInfo);
         }

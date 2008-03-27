@@ -611,6 +611,10 @@ public class DiffResult {
 
             columnConfig.setDefaultValue(database.convertJavaObjectToString(column.getDefaultValue()));
 
+            if (column.getRemarks() != null) {
+                columnConfig.setRemarks(column.getRemarks());
+            }
+
             change.addColumn(columnConfig);
 
             changes.add(change);
@@ -683,6 +687,10 @@ public class DiffResult {
                     columnConfig.setDefaultValue(defaultValue.toString());
                 }
 
+                if (column.getRemarks() != null) {
+                    columnConfig.setRemarks(column.getRemarks());
+                }
+                
                 change.addColumn(columnConfig);
             }
 
