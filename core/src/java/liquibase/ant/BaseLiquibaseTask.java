@@ -179,8 +179,8 @@ public class BaseLiquibaseTask extends Task {
             }
         });
 
-        if (url.startsWith("hibernate:")) {
-            return (Database) Class.forName(HibernateDatabase.class.getName(), true, loader).getConstructor(String.class).newInstance(url.substring("hibernate:".length()));
+        if (databaseUrl.startsWith("hibernate:")) {
+            return new HibernateDatabase(databaseUrl.substring("hibernate:".length()));
         }
 
         if (driverClassName == null) {

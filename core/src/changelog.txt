@@ -1,7 +1,7 @@
 LiquiBase Core Changelog
 ==========================================
 
-Changes in version 1.6.0
+Changes in version 1.6.0 (2008.03.27)
 ----------------------
 - Added Hibernate diff support
 - Fix to MD5Sum generation that requires updating all rows in databasechangelog table
