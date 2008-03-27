@@ -149,7 +149,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
 
     Connection connection = null;
     try {
-      String dbPassword = emptyPassword ? "" : password;
+      String dbPassword = emptyPassword || password == null ? "" : password ;
       connection = MavenUtils.getDatabaseConnection(artifactClassLoader,
                                                     driver,
                                                     url,
