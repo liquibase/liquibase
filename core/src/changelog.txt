@@ -1,6 +1,17 @@
 LiquiBase Core Changelog
 ==========================================
 
+Changes in version 1.6.0
+----------------------
+- Added Hibernate diff support
+- Fix to MD5Sum generation that requires updating all rows in databasechangelog table
+- Added tagDatabase tag
+- Added primaryKeyName attribute
+- Supports multiple rollback tags per changeSet
+- Column remarks stored in generated changelogs
+- executeCommand output logged to logging system
+- Many misc bug fixes
+
 Changes in version 1.5.3 (2008.02.28)
 ----------------------
 - Recompiled to work with Java 1.5
