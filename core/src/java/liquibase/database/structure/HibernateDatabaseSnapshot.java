@@ -92,13 +92,27 @@ public class HibernateDatabaseSnapshot implements DatabaseSnapshot {
                         Index index = new Index();
                         index.setTable(table);
                         index.setName(hibernateIndex.getName());
-//todo?                        index.setFilterCondition(hibernateIndex.getFilterCondition());
                         columnIterator = hibernateIndex.getColumnIterator();
                         while (columnIterator.hasNext()) {
                             org.hibernate.mapping.Column hibernateColumn = (org.hibernate.mapping.Column) columnIterator.next();
                             index.getColumns().add(hibernateColumn.getName());
                         }
 
+                        indexes.add(index);
+                    }
+
+                    Iterator uniqueIterator = hibernateTable.getUniqueKeyIterator();
+                    while (uniqueIterator.hasNext()) {
+                        org.hibernate.mapping.UniqueKey hiberateUnique = (org.hibernate.mapping.UniqueKey) uniqueIterator.next();
+
+                        Index index = new Index();
+                        index.setTable(table);
+                        index.setName(hiberateUnique.getName());
+                        columnIterator = hiberateUnique.getColumnIterator();
+                        while (columnIterator.hasNext()) {
+                            org.hibernate.mapping.Column hibernateColumn = (org.hibernate.mapping.Column) columnIterator.next();
+                            index.getColumns().add(hibernateColumn.getName());
+                        }
                         indexes.add(index);
                     }
 
@@ -278,6 +292,11 @@ public class HibernateDatabaseSnapshot implements DatabaseSnapshot {
                 return index;
             }
         }
+
+//        Index returnIndex = new Index();
+//        returnIndex.setName(indexName);
+//
+//        return returnIndex;
         return null;
     }
 
