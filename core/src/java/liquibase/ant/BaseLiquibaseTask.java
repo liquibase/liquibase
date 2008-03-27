@@ -154,7 +154,11 @@ public class BaseLiquibaseTask extends Task {
         FileOpener fsFO = new FileSystemFileOpener();
 
         Database database = createDatabaseObject(getDriver(), getUrl(), getUsername(), getPassword(), getDefaultSchemaName());
-        Liquibase liquibase = new Liquibase(getChangeLogFile().trim(), new CompositeFileOpener(antFO, fsFO), database);
+        String changeLogFile = null;
+        if (getChangeLogFile() != null) {
+            changeLogFile = getChangeLogFile().trim();
+        }
+        Liquibase liquibase = new Liquibase(changeLogFile, new CompositeFileOpener(antFO, fsFO), database);
         liquibase.setCurrentDateTimeFunction(currentDateTimeFunction);
 
         return liquibase;
