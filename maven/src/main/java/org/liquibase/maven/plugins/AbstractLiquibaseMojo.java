@@ -1,16 +1,16 @@
 package org.liquibase.maven.plugins;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.Field;
 import java.net.MalformedURLException;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.*;
-import java.lang.reflect.Field;
-
 import liquibase.*;
 import liquibase.database.DatabaseFactory;
 import liquibase.exception.*;
+import liquibase.log.LogFactory;
 import org.apache.maven.plugin.*;
 import org.apache.maven.project.MavenProject;
 
@@ -49,6 +49,13 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
   protected String password;
 
   /**
+   * Use an empty string as the password for the database connection. This should not be
+   * used along side the {@link #password} setting.
+   * @parameter expression="${liquibase.emptyPassword}" default-value="false"
+   */
+  protected boolean emptyPassword;
+
+  /**
    * Controls the prompting of users as to whether or not they really want to run the
    * changes on a database that is not local to the machine that the user is current
    * executing the plugin on.
@@ -75,6 +82,17 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
   protected boolean verbose;
 
   private boolean verboseDefault = false;
+
+  /**
+   * Controls the level of logging from Liquibase when executing. The value can be
+   * "all", "finest", "finer", "fine", "info", "warning", "severe" or "off". The value is
+   * case insensitive.
+   * @parameter expression="${liquibase.logging}" default-value="INFO"
+   * @description Controls the verbosity of the plugin when executing
+   */
+  protected String logging;
+
+  private String loggingDefault = "INFO";
 
   /**
    * The Liquibase properties file used to configure the Liquibase {@link
@@ -115,6 +133,14 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     ClassLoader artifactClassLoader = getMavenArtifactClassLoader();
     configureFieldsAndValues(getFileOpener(artifactClassLoader));
 
+    try {
+      LogFactory.setLoggingLevel(logging);
+    }
+    catch (IllegalArgumentException e) {
+      throw new MojoExecutionException("Failed to set logging level: " + e.getMessage(),
+                                       e);
+    }
+
     // Displays the settings for the Mojo depending of verbosity mode.
     displayMojoSettings();
 
@@ -123,11 +149,12 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
 
     Connection connection = null;
     try {
+      String dbPassword = emptyPassword ? "" : password;
       connection = MavenUtils.getDatabaseConnection(artifactClassLoader,
                                                     driver,
                                                     url,
                                                     username,
-                                                    password);
+                                                    dbPassword);
 
       liquibase = createLiquibase(getFileOpener(artifactClassLoader), connection);
       getLog().info("Executing on Database: " + url);
@@ -140,17 +167,11 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         }
       }
 
-//      if (isPromptOnNonLocalDatabase() && !liquibase.isSafeToRunMigration()) {
-//        if (UIFactory.getInstance().getFacade().promptForNonLocalDatabase(liquibase.getDatabase())) {
-//          throw new LiquibaseException("User decided not to run against non-local database");
-//        }
-//      }
-
       performLiquibaseTask(liquibase);
     }
     catch (LiquibaseException e) {
       cleanup(connection);
-      throw new MojoFailureException(e.getMessage());
+      throw new MojoExecutionException("Error setting up or running Liquibase: " + e.getMessage(), e);
     }
 
     cleanup(connection);
@@ -239,6 +260,11 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
       throw new MojoFailureException("The database URL has not been specified either as "
                                      + "a parameter or in a properties file.");
     }
+
+    if (password != null && emptyPassword) {
+      throw new MojoFailureException("A password cannot be present and the empty "
+                                     + "password property both be specified.");
+    }
   }
 
   /**
@@ -254,6 +280,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     getLog().info(indent + "url: " + url);
     getLog().info(indent + "username: " + username);
     getLog().info(indent + "password: " + password);
+    getLog().info(indent + "use empty password: " + emptyPassword);
     getLog().info(indent + "prompt on non-local database? " + promptOnNonLocalDatabase);
     getLog().info(indent + "properties file will override? " + propertyFileWillOverride);
   }

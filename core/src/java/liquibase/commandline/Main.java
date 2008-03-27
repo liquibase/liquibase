@@ -1,42 +1,27 @@
 package liquibase.commandline;
 
-import liquibase.CompositeFileOpener;
-import liquibase.FileSystemFileOpener;
-import liquibase.database.Database;
-import liquibase.database.DatabaseFactory;
-import liquibase.database.HibernateDatabase;
-import liquibase.diff.Diff;
-import liquibase.diff.DiffResult;
-import liquibase.diff.DiffStatusListener;
-import liquibase.exception.CommandLineParsingException;
-import liquibase.exception.JDBCException;
-import liquibase.exception.ValidationFailedException;
-import liquibase.lock.LockHandler;
-import liquibase.log.LogFactory;
-import liquibase.Liquibase;
-import liquibase.util.LiquibaseUtil;
-import liquibase.util.StreamUtil;
-import liquibase.util.StringUtils;
-
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.sql.Connection;
 import java.sql.Driver;
-import java.sql.SQLException;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.text.*;
 import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import liquibase.*;
+import liquibase.database.*;
+import liquibase.diff.*;
+import liquibase.exception.*;
+import liquibase.lock.LockHandler;
+import liquibase.log.LogFactory;
+import liquibase.util.*;
 
 /**
  * Class for executing LiquiBase via the command line.
@@ -536,22 +521,11 @@ public class Main {
             return;
         }
 
-        if ("finest".equalsIgnoreCase(logLevel)) {
-            LogFactory.getLogger().setLevel(Level.FINEST);
-        } else if ("finer".equalsIgnoreCase(logLevel)) {
-            LogFactory.getLogger().setLevel(Level.FINER);
-        } else if ("fine".equalsIgnoreCase(logLevel)) {
-            LogFactory.getLogger().setLevel(Level.FINE);
-        } else if ("info".equalsIgnoreCase(logLevel)) {
-            LogFactory.getLogger().setLevel(Level.INFO);
-        } else if ("warning".equalsIgnoreCase(logLevel)) {
-            LogFactory.getLogger().setLevel(Level.WARNING);
-        } else if ("severe".equalsIgnoreCase(logLevel)) {
-            LogFactory.getLogger().setLevel(Level.SEVERE);
-        } else if ("off".equalsIgnoreCase(logLevel)) {
-            LogFactory.getLogger().setLevel(Level.OFF);
-        } else {
-            throw new CommandLineParsingException("Unknown log level: " + logLevel);
+        try {
+            LogFactory.setLoggingLevel(logLevel);
+        }
+        catch (IllegalArgumentException e) {
+            throw new CommandLineParsingException(e.getMessage(), e);
         }
 
         FileSystemFileOpener fsOpener = new FileSystemFileOpener();
