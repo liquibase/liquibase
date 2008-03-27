@@ -94,6 +94,7 @@
         <xsd:attribute name="defaultValueDate" type="xsd:string"/>
         <xsd:attribute name="defaultValueBoolean" type="xsd:boolean"/>
         <xsd:attribute name="autoIncrement" type="xsd:boolean"/>
+        <xsd:attribute name="remarks" type="xsd:string"/>
     </xsd:attributeGroup>
 
     <xsd:attributeGroup name="dropTableAttributes">
@@ -364,6 +365,7 @@
                 <xsd:element ref="column" maxOccurs="unbounded"/>
             </xsd:sequence>
             <xsd:attributeGroup ref="tableNameAttribute"/>
+            <xsd:attribute name="remarks" type="xsd:string"/>
         </xsd:complexType>
     </xsd:element>
 

@@ -24,6 +24,7 @@ public class Column implements DatabaseObject, Comparable<Column> {
     private boolean unique = false;
 
     private boolean certainDataType = true;
+    private String remarks;
 
 
     public Table getTable() {
@@ -300,5 +301,13 @@ public class Column implements DatabaseObject, Comparable<Column> {
 
     public void setCertainDataType(boolean certainDataType) {
         this.certainDataType = certainDataType;
+    }
+
+    public String getRemarks() {
+        return remarks;
+    }
+
+    public void setRemarks(String remarks) {
+        this.remarks = remarks;
     }
 }
