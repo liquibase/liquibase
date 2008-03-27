@@ -758,8 +758,8 @@ public abstract class AbstractDatabase implements Database {
     }
 
     public String getViewDefinition(String schemaName, String viewName) throws JDBCException {
-        if (schemaName != null) {
-            schemaName = convertRequestedSchemaToSchema(schemaName);
+        if (schemaName == null) {
+            schemaName = convertRequestedSchemaToSchema(null);
         }
         String definition = (String) this.getJdbcTemplate().queryForObject(getViewDefinitionSql(schemaName, viewName), String.class);
         if (definition == null) {

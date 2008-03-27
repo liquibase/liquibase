@@ -11,7 +11,7 @@ import org.junit.Test;
 public class TagDatabaseStatementTest extends AbstractSqlStatementTest {
 
     protected void setupDatabase(Database database) throws Exception {
-
+        new Liquibase(null, null, database).dropAll();
     }
 
     protected SqlStatement generateTestStatement() {
