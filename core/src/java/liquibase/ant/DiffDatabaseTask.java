@@ -64,18 +64,18 @@ public class DiffDatabaseTask extends BaseLiquibaseTask {
         if (StringUtils.trimToNull(getBaseUrl()) == null) {
             throw new BuildException("diffDatabase requires baseUrl to be set");
         }
-        if (StringUtils.trimToNull(getBaseUsername()) == null) {
+        if (!(getBaseUrl().startsWith("hibernate")) && StringUtils.trimToNull(getBaseUsername()) == null) {
             throw new BuildException("diffDatabase requires baseUsername to be set");
         }
-        if (StringUtils.trimToNull(getBasePassword()) == null) {
+        if (!(getBaseUrl().startsWith("hibernate")) && StringUtils.trimToNull(getBasePassword()) == null) {
             throw new BuildException("diffDatabase requires basePassword to be set");
         }
         
         Liquibase liquibase = null;
         try {
             PrintStream writer = createPrintStream();
-            if (writer == null) {
-                throw new BuildException("diffDatabase requires outputFile to be set");
+            if (writer == null && getChangeLogFile() == null) {
+                throw new BuildException("diffDatabase requires outputFile or changeLogFile to be set");
             }
 
             liquibase = createLiquibase();
@@ -89,8 +89,10 @@ public class DiffDatabaseTask extends BaseLiquibaseTask {
 
             outputDiff(writer, diffResult, liquibase.getDatabase());
 
-            writer.flush();
-            writer.close();
+            if (writer != null) {
+                writer.flush();
+                writer.close();
+            }
         } catch (Exception e) {
             throw new BuildException(e);
         } finally {
