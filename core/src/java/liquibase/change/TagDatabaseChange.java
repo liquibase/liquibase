@@ -46,4 +46,8 @@ public class TagDatabaseChange extends AbstractChange{
     public Set<DatabaseObject> getAffectedDatabaseObjects() {
         return null;
     }
+
+    protected Change[] createInverses() {
+        return new Change[0];
+    }
 }

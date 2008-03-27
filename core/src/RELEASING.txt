@@ -68,7 +68,7 @@ http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.4.xsd";>
 
 Download LiquiBase 1.4 from:
 
-http://www.liquibase.org/download.html
+http://www.liquibase.org/download
 ---------------------------------------------------------------
 INTELLIJ
 ------------------------------------------------------------
