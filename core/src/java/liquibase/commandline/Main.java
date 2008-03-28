@@ -1,14 +1,11 @@
 package liquibase.commandline;
 
-import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
 import java.lang.reflect.Field;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
-import java.sql.Connection;
-import java.sql.Driver;
 import java.text.*;
 import java.util.*;
 import java.util.jar.JarEntry;
@@ -17,7 +14,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import liquibase.*;
 import liquibase.database.*;
-import liquibase.diff.*;
 import liquibase.exception.*;
 import liquibase.lock.LockHandler;
 import liquibase.log.LogFactory;
@@ -530,20 +526,20 @@ public class Main {
 
         FileSystemFileOpener fsOpener = new FileSystemFileOpener();
         CommandLineFileOpener clOpener = new CommandLineFileOpener(classLoader);
-        Database database = createDatabaseObject(this.url, this.username, this.password, this.driver, this.defaultSchemaName, this.databaseClass);
+        Database database = CommandLineUtils.createDatabaseObject(classLoader, this.url, this.username, this.password, this.driver, this.defaultSchemaName, this.databaseClass);
         try {
 
 
             CompositeFileOpener fileOpener = new CompositeFileOpener(fsOpener, clOpener);
 
             if ("diff".equalsIgnoreCase(command)) {
-                doDiff(database, createDatabaseFromCommandParams(commandParams));
+                CommandLineUtils.doDiff(database, createDatabaseFromCommandParams(commandParams));
                 return;
             } else if ("diffChangeLog".equalsIgnoreCase(command)) {
-                doDiffToChangeLog(database, createDatabaseFromCommandParams(commandParams));
+                CommandLineUtils.doDiffToChangeLog(changeLogFile, database, createDatabaseFromCommandParams(commandParams));
                 return;
             } else if ("generateChangeLog".equalsIgnoreCase(command)) {
-                doGenerateChangeLog(database);
+                CommandLineUtils.doGenerateChangeLog(changeLogFile, database, defaultSchemaName);
                 return;
             }
 
@@ -657,52 +653,7 @@ public class Main {
         }
     }
 
-    private Database createDatabaseObject(String url, String username, String password, String driver, String defaultSchemaName, String databaseClass) throws JDBCException {
-        try {
-            if (url.startsWith("hibernate:")) {
-                return (Database) Class.forName(HibernateDatabase.class.getName(), true, classLoader).getConstructor(String.class).newInstance(url.substring("hibernate:".length()));
-            }
-
-
-            Driver driverObject;
-            DatabaseFactory databaseFactory = DatabaseFactory.getInstance();
-            if (databaseClass != null) {
-                databaseFactory.addDatabaseImplementation((Database) Class.forName(databaseClass, true, classLoader).newInstance());
-            }
-
-            try {
-                if (driver == null) {
-                    driver = databaseFactory.findDefaultDriver(url);
-                }
-
-                if (driver == null) {
-                    throw new RuntimeException("Driver class was not specified and could not be determined from the url");
-                }
-
-                driverObject = (Driver) Class.forName(driver, true, classLoader).newInstance();
-            } catch (Exception e) {
-                throw new RuntimeException("Cannot find database driver: " + e.getMessage());
-            }
-            Properties info = new Properties();
-            info.put("user", username);
-            if (password != null) {
-                info.put("password", password);
-            }
-
-            Connection connection = driverObject.connect(url, info);
-            if (connection == null) {
-                throw new JDBCException("Connection could not be created to " + url + " with driver " + driver.getClass().getName() + ".  Possibly the wrong driver for the given database URL");
-            }
-
-            Database database = databaseFactory.findCorrectDatabaseImplementation(connection);
-            database.setDefaultSchemaName(StringUtils.trimToNull(defaultSchemaName));
-            return database;
-        } catch (Exception e) {
-            throw new JDBCException(e);
-        }
-    }
-
-    private Database createDatabaseFromCommandParams(Set<String> commandParams) throws CommandLineParsingException, JDBCException {
+  private Database createDatabaseFromCommandParams(Set<String> commandParams) throws CommandLineParsingException, JDBCException {
         String driver = null;
         String url = null;
         String username = null;
@@ -727,11 +678,11 @@ public class Main {
             }
         }
 
-        if (driver == null) {
-            driver = DatabaseFactory.getInstance().findDefaultDriver(url);
-        }
+//        if (driver == null) {
+//            driver = DatabaseFactory.getInstance().findDefaultDriver(url);
+//        }
 
-        return createDatabaseObject(url, username, password, driver, defaultSchemaName, null);
+        return CommandLineUtils.createDatabaseObject(classLoader, url, username, password, driver, defaultSchemaName, null);
 //        Driver driverObject;
 //        try {
 //            driverObject = (Driver) Class.forName(driver, true, classLoader).newInstance();
@@ -765,48 +716,5 @@ public class Main {
 
     public boolean isWindows() {
         return System.getProperty("os.name").startsWith("Windows ");
-    }
-
-    private void doDiff(Database baseDatabase, Database targetDatabase) throws JDBCException {
-        Diff diff = new Diff(baseDatabase, targetDatabase);
-        diff.addStatusListener(new OutDiffStatusListener());
-        DiffResult diffResult = diff.compare();
-
-        System.out.println("");
-        System.out.println("Diff Results:");
-        diffResult.printResult(System.out);
-    }
-
-    private void doDiffToChangeLog(Database baseDatabase, Database targetDatabase) throws JDBCException, IOException, ParserConfigurationException {
-        Diff diff = new Diff(baseDatabase, targetDatabase);
-        diff.addStatusListener(new OutDiffStatusListener());
-        DiffResult diffResult = diff.compare();
-
-        if (changeLogFile == null) {
-            diffResult.printChangeLog(System.out, targetDatabase);
-        } else {
-            diffResult.printChangeLog(changeLogFile, targetDatabase);
-        }
-    }
-
-    private void doGenerateChangeLog(Database originalDatabase) throws JDBCException, IOException, ParserConfigurationException {
-        Diff diff = new Diff(originalDatabase, defaultSchemaName);
-        diff.addStatusListener(new OutDiffStatusListener());
-        DiffResult diffResult = diff.compare();
-
-        PrintStream outputStream = System.out;
-
-        if (StringUtils.trimToNull(changeLogFile) != null) {
-            File changeFile = new File(changeLogFile);
-            outputStream = new PrintStream(changeFile);
-        }
-        diffResult.printChangeLog(outputStream, originalDatabase);
-    }
-
-
-    private static class OutDiffStatusListener implements DiffStatusListener {
-        public void statusUpdate(String message) {
-            System.err.println(message);
-        }
     }
 }
