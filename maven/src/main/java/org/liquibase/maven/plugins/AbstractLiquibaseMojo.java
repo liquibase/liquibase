@@ -116,6 +116,14 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
   protected boolean propertyFileWillOverride;
 
   /**
+   * Flag for forcing the checksums to be cleared from teh DatabaseChangeLog table.
+   * @parameter expression="${liquibase.clearCheckSums}" default-value="false"
+   */
+  protected boolean clearCheckSums;
+
+  private boolean clearCheckSumsDefault = false;
+
+  /**
    * The Maven project that plugin is running under.
    * @parameter expression="${project}"
    * @required
@@ -164,6 +172,11 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                                                        defaultSchemaName,
                                                        null);
       liquibase = createLiquibase(getFileOpener(artifactClassLoader), database);
+      if (clearCheckSums) {
+        getLog().info("Clearing the Liquibase Checksums on the database");
+        liquibase.clearCheckSums();
+      }
+
       getLog().info("Executing on Database: " + url);
 
       if (isPromptOnNonLocalDatabase()) {
@@ -286,6 +299,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     getLog().info(indent + "use empty password: " + emptyPassword);
     getLog().info(indent + "prompt on non-local database? " + promptOnNonLocalDatabase);
     getLog().info(indent + "properties file will override? " + propertyFileWillOverride);
+    getLog().info(indent + "clear checksums? " + clearCheckSums);
   }
 
   protected void cleanup(Database db) {
