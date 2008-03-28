@@ -3,11 +3,10 @@
 package org.liquibase.maven.plugins;
 
 import java.io.*;
-import java.sql.Connection;
-
-import liquibase.exception.LiquibaseException;
-import liquibase.Liquibase;
 import liquibase.FileOpener;
+import liquibase.Liquibase;
+import liquibase.database.Database;
+import liquibase.exception.LiquibaseException;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 
@@ -57,9 +56,9 @@ public class LiquibaseMigrateSQL extends AbstractLiquibaseUpdateMojo {
   }
 
   @Override
-  protected Liquibase createLiquibase(FileOpener fo, Connection conn)
+  protected Liquibase createLiquibase(FileOpener fo, Database db)
           throws MojoExecutionException {
-    Liquibase liquibase = super.createLiquibase(fo, conn);
+    Liquibase liquibase = super.createLiquibase(fo, db);
 
     // Setup the output file writer
     try {
@@ -90,8 +89,8 @@ public class LiquibaseMigrateSQL extends AbstractLiquibaseUpdateMojo {
   }
 
   @Override
-  protected void cleanup(Connection c) {
-    super.cleanup(c);
+  protected void cleanup(Database db) {
+    super.cleanup(db);
     try {
       outputWriter.close();
     }

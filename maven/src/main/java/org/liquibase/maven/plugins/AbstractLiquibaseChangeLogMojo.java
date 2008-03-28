@@ -2,16 +2,9 @@
 // Copyright: Copyright(c) 2007 Trace Financial Limited
 package org.liquibase.maven.plugins;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.Field;
-import java.sql.Connection;
-import java.util.*;
 import liquibase.*;
-import liquibase.database.DatabaseFactory;
+import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
-import liquibase.exception.JDBCException;
-import liquibase.Liquibase;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 
@@ -82,13 +75,8 @@ public abstract class AbstractLiquibaseChangeLogMojo extends AbstractLiquibaseMo
   }
 
   @Override
-  protected Liquibase createLiquibase(FileOpener fo, Connection conn) throws MojoExecutionException {
-      try {
-          return new Liquibase(changeLogFile.trim(),
-                              fo,
-                              DatabaseFactory.getInstance().findCorrectDatabaseImplementation(conn));
-      } catch (JDBCException e) {
-          throw new MojoExecutionException(e.getMessage());
-      }
+  protected Liquibase createLiquibase(FileOpener fo, Database db) throws MojoExecutionException {
+      String changeLog = changeLogFile == null ? "" : changeLogFile.trim();
+      return new Liquibase(changeLog, fo, db);
   }
 }

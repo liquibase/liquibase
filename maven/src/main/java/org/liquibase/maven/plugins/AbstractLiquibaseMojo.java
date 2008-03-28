@@ -4,11 +4,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.net.MalformedURLException;
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.*;
 import liquibase.*;
-import liquibase.database.DatabaseFactory;
+import liquibase.commandline.CommandLineUtils;
+import liquibase.database.Database;
 import liquibase.exception.*;
 import liquibase.log.LogFactory;
 import org.apache.maven.plugin.*;
@@ -52,8 +51,15 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
    * Use an empty string as the password for the database connection. This should not be
    * used along side the {@link #password} setting.
    * @parameter expression="${liquibase.emptyPassword}" default-value="false"
+   * @deprecated Use an empty or null value for the password instead.
    */
   protected boolean emptyPassword;
+
+  /**
+   * The default schema name to use the for database connection.
+   * @parameter expression="${liquibase.defaultSchemaName}"
+   */
+  protected String defaultSchemaName;
 
   /**
    * Controls the prompting of users as to whether or not they really want to run the
@@ -147,16 +153,17 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     // Check that all the parameters that must be specified have been by the user.
     checkRequiredParametersAreSpecified();
 
-    Connection connection = null;
+    Database database = null;
     try {
-      String dbPassword = emptyPassword || password == null ? "" : password ;
-      connection = MavenUtils.getDatabaseConnection(artifactClassLoader,
-                                                    driver,
-                                                    url,
-                                                    username,
-                                                    dbPassword);
-
-      liquibase = createLiquibase(getFileOpener(artifactClassLoader), connection);
+      String dbPassword = emptyPassword || password == null ? "" : password;
+      database = CommandLineUtils.createDatabaseObject(artifactClassLoader,
+                                                       url,
+                                                       username,
+                                                       dbPassword,
+                                                       driver,
+                                                       defaultSchemaName,
+                                                       null);
+      liquibase = createLiquibase(getFileOpener(artifactClassLoader), database);
       getLog().info("Executing on Database: " + url);
 
       if (isPromptOnNonLocalDatabase()) {
@@ -170,11 +177,11 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
       performLiquibaseTask(liquibase);
     }
     catch (LiquibaseException e) {
-      cleanup(connection);
+      cleanup(database);
       throw new MojoExecutionException("Error setting up or running Liquibase: " + e.getMessage(), e);
     }
 
-    cleanup(connection);
+    cleanup(database);
     getLog().info(MavenUtils.LOG_SEPARATOR);
     getLog().info("");
   }
@@ -198,12 +205,8 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     }
   }
 
-  protected Liquibase createLiquibase(FileOpener fo, Connection conn) throws MojoExecutionException {
-      try {
-          return new Liquibase("", fo, DatabaseFactory.getInstance().findCorrectDatabaseImplementation(conn));
-      } catch (JDBCException e) {
-          throw new MojoExecutionException(e.getMessage());
-      }
+  protected Liquibase createLiquibase(FileOpener fo, Database db) throws MojoExecutionException {
+    return new Liquibase("", fo, db);
   }
 
   protected void configureFieldsAndValues(FileOpener fo)
@@ -285,7 +288,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     getLog().info(indent + "properties file will override? " + propertyFileWillOverride);
   }
 
-  protected void cleanup(Connection c) {
+  protected void cleanup(Database db) {
     // Release any locks that we may have on the database.
     if (getLiquibase() != null) {
       try {
@@ -303,12 +306,12 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     }
 
     // Clean up the connection
-    if (c != null) {
+    if (db != null) {
       try {
-        c.rollback();
-        c.close();
+        db.rollback();
+        db.close();
       }
-      catch (SQLException e) {
+      catch (JDBCException e) {
         getLog().error("Failed to close open connection to database.", e);
       }
     }
