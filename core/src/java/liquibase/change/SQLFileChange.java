@@ -1,5 +1,8 @@
 package liquibase.change;
 
+import java.io.*;
+import java.util.Set;
+import java.util.logging.Logger;
 import liquibase.FileOpener;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.exception.SetupException;
@@ -9,18 +12,11 @@ import liquibase.util.StreamUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Set;
-import java.util.logging.Logger;
-
 /**
  * Represents a Change for custom SQL stored in a File.
  * 
  * To create an instance call the constructor as normal and then call
- * @{#setFileOpener(FileOpener)} before calling setPath otherwise the
+ * @link{#setFileOpener(FileOpener)} before calling setPath otherwise the
  * file will likely not be found.
  * 
  * 
