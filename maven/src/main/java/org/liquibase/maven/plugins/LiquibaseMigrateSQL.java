@@ -32,7 +32,7 @@ public class LiquibaseMigrateSQL extends AbstractLiquibaseUpdateMojo {
   private Writer outputWriter;
 
   @Override
-  protected void configureFieldsAndValues(FileOpener fo)
+  public void configureFieldsAndValues(FileOpener fo)
           throws MojoExecutionException, MojoFailureException {
     getLog().warn("This plugin goal is DEPRICATED and will bre removed in a future "
                   + "release, please use \"updateSQL\" instead of \"migrateSQL\".");

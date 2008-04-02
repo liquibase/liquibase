@@ -103,9 +103,9 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
   /**
    * The Liquibase properties file used to configure the Liquibase {@link
    * liquibase.Liquibase}.
-   * @parameter expression="${liquibase.propertiesFile}"
+   * @parameter expression="${liquibase.propertyFile}"
    */
-  protected String propertiesFile;
+  protected String propertyFile;
 
   /**
    * Flag allowing for the Liquibase properties file to override any settings provided in
@@ -222,15 +222,15 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     return new Liquibase("", fo, db);
   }
 
-  protected void configureFieldsAndValues(FileOpener fo)
+  public void configureFieldsAndValues(FileOpener fo)
           throws MojoExecutionException, MojoFailureException {
     // Load the properties file if there is one, but only for values that the user has not
     // already specified.
-    if (propertiesFile != null) {
+    if (propertyFile != null) {
       getLog().info("Parsing Liquibase Properties File");
-      getLog().info("  File: " + propertiesFile);
+      getLog().info("  File: " + propertyFile);
       try {
-        InputStream is = fo.getResourceAsStream(propertiesFile);
+        InputStream is = fo.getResourceAsStream(propertyFile);
         if (is == null) {
           throw new MojoFailureException("Failed to resolve the properties file.");
         }
@@ -297,8 +297,9 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     getLog().info(indent + "username: " + username);
     getLog().info(indent + "password: " + password);
     getLog().info(indent + "use empty password: " + emptyPassword);
-    getLog().info(indent + "prompt on non-local database? " + promptOnNonLocalDatabase);
+    getLog().info(indent + "properties file: " + propertyFile);
     getLog().info(indent + "properties file will override? " + propertyFileWillOverride);
+    getLog().info(indent + "prompt on non-local database? " + promptOnNonLocalDatabase);
     getLog().info(indent + "clear checksums? " + clearCheckSums);
   }
 

@@ -38,6 +38,13 @@
       <artifactId>liquibase-core</artifactId>
       <version>@BUILD.VERSION@</version>
     </dependency>
+
+    <dependency>
+      <groupId>org.apache.maven.shared</groupId>
+      <artifactId>maven-plugin-testing-harness</artifactId>
+      <version>1.1</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <build>
