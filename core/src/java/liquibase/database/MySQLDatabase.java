@@ -2,9 +2,13 @@ package liquibase.database;
 
 import liquibase.database.sql.RawSqlStatement;
 import liquibase.database.sql.SqlStatement;
+import liquibase.database.structure.DatabaseSnapshot;
+import liquibase.database.structure.MySqlDatabaseSnapshot;
+import liquibase.diff.DiffStatusListener;
 import liquibase.exception.JDBCException;
 
 import java.sql.Connection;
+import java.util.Set;
 
 /**
  * Encapsulates MySQL database support.
@@ -139,5 +143,9 @@ public class MySQLDatabase extends AbstractDatabase {
             sb.append("`").append(columnName.trim()).append("`");
         }
         return sb.toString();
+    }
+    
+    public DatabaseSnapshot createDatabaseSnapshot(String schema, Set<DiffStatusListener> statusListeners) throws JDBCException {
+        return new MySqlDatabaseSnapshot(this, statusListeners, schema);
     }
 }

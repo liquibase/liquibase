@@ -19,7 +19,7 @@ import java.util.logging.Logger;
 public class SqlDatabaseSnapshot implements DatabaseSnapshot {
 
     private DatabaseMetaData databaseMetaData;
-    private Database database;
+    protected Database database;
 
     private Set<Table> tables = new HashSet<Table>();
     private Set<View> views = new HashSet<View>();
@@ -208,7 +208,7 @@ public class SqlDatabaseSnapshot implements DatabaseSnapshot {
 //            rs.close();
 //        }
     }
-
+    
     private void readColumns(String schema) throws SQLException, JDBCException {
         updateListeners("Reading columns for " + database.toString() + " ...");
 
@@ -246,13 +246,7 @@ public class SqlDatabaseSnapshot implements DatabaseSnapshot {
             columnInfo.setDataType(rs.getInt("DATA_TYPE"));
             columnInfo.setColumnSize(rs.getInt("COLUMN_SIZE"));
             columnInfo.setDecimalDigits(rs.getInt("DECIMAL_DIGITS"));
-            Object defaultValue = rs.getObject("COLUMN_DEF");
-            try {
-                columnInfo.setDefaultValue(database.convertDatabaseValueToJavaObject(defaultValue, columnInfo.getDataType(), columnInfo.getColumnSize(), columnInfo.getDecimalDigits()));
-            } catch (ParseException e) {
-                throw new JDBCException(e);
-            }
-
+            
             int nullable = rs.getInt("NULLABLE");
             if (nullable == DatabaseMetaData.columnNoNulls) {
                 columnInfo.setNullable(false);
@@ -264,7 +258,7 @@ public class SqlDatabaseSnapshot implements DatabaseSnapshot {
 
             columnInfo.setAutoIncrement(database.isColumnAutoIncrement(schema, tableName, columnName));
 
-            columnInfo.setTypeName(database.getColumnType(rs.getString("TYPE_NAME"), columnInfo.isAutoIncrement()));            
+            getColumnTypeAndDefValue(columnInfo, rs);
             columnInfo.setRemarks(remarks);
 
             columnsMap.put(tableName + "." + columnName, columnInfo);
@@ -272,6 +266,32 @@ public class SqlDatabaseSnapshot implements DatabaseSnapshot {
         rs.close();
         selectStatement.close();
     }
+    
+    /**
+     * Method assigns correct column type and default value to Column object.
+     * 
+     * This method should be database engine specific. JDBC implementation requires 
+     * database engine vendors to convert native DB types to java objects.
+     * During conversion some metadata information are being lost or reported incorrectly via DatabaseMetaData objects. 
+     * This method, if necessary, must be overriden. It must go below DatabaseMetaData implementation and talk directly to database to get correct metadata information.    
+     * 
+     * @author Daniel Bargiel <danielbargiel@googlemail.com>
+     * 
+     * @param rs
+     * @param database
+     * @return void
+     * @throws SQLException
+     */
+    protected void getColumnTypeAndDefValue(Column columnInfo, ResultSet rs) throws SQLException, JDBCException {
+    	Object defaultValue = rs.getObject("COLUMN_DEF");
+        try {
+            columnInfo.setDefaultValue(database.convertDatabaseValueToJavaObject(defaultValue, columnInfo.getDataType(), columnInfo.getColumnSize(), columnInfo.getDecimalDigits()));
+        } catch (ParseException e) {
+            throw new JDBCException(e);
+        }
+        columnInfo.setTypeName(database.getColumnType(rs.getString("TYPE_NAME"), columnInfo.isAutoIncrement()));
+        
+    } // end of method getColumnTypeAndDefValue()
 
     private boolean isPrimaryKey(Column columnInfo) {
         for (PrimaryKey pk : getPrimaryKeys()) {

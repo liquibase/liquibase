@@ -2,6 +2,7 @@ package liquibase.database.structure;
 
 import liquibase.database.Database;
 import liquibase.database.MSSQLDatabase;
+import liquibase.database.MySQLDatabase;
 import liquibase.database.PostgresDatabase;
 import liquibase.util.SqlUtil;
 
@@ -222,6 +223,8 @@ public class Column implements DatabaseObject, Comparable<Column> {
                 return translatedTypeName;
             } else if (database instanceof MSSQLDatabase && translatedTypeName.equals("uniqueidentifier")) {
                 return translatedTypeName;
+            } else if (database instanceof MySQLDatabase && (translatedTypeName.startsWith("enum(") || translatedTypeName.startsWith("set("))            		) {
+            	return translatedTypeName;
             }
             dataType = translatedTypeName+"("+this.getColumnSize()+")";
         } else if (twoParams.contains(this.getDataType())) {
