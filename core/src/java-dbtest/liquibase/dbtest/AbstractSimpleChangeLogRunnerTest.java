@@ -263,6 +263,8 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
         Liquibase liquibase = createLiquibase(tempFile.getName());
         liquibase.dropAll(getSchemasToDrop());
 
+        DatabaseSnapshot emptySnapshot = database.createDatabaseSnapshot(null, null);
+
         //run again to test changelog testing logic
         liquibase = createLiquibase(tempFile.getName());
         try {
@@ -274,9 +276,9 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
 
         tempFile.deleteOnExit();
 
-        DatabaseSnapshot finalSnapshot = database.createDatabaseSnapshot(null, null);
+        DatabaseSnapshot migratedSnapshot = database.createDatabaseSnapshot(null, null);
 
-        DiffResult finalDiffResult = new Diff(originalSnapshot, finalSnapshot).compare();
+        DiffResult finalDiffResult = new Diff(originalSnapshot, migratedSnapshot).compare();
         assertEquals(0, finalDiffResult.getMissingColumns().size());
         assertEquals(0, finalDiffResult.getMissingForeignKeys().size());
         assertEquals(0, finalDiffResult.getMissingIndexes().size());
@@ -291,6 +293,24 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
         assertEquals(0, finalDiffResult.getUnexpectedSequences().size());
         assertEquals(0, finalDiffResult.getUnexpectedTables().size());
         assertEquals(0, finalDiffResult.getUnexpectedViews().size());
+
+        //diff to empty and drop all
+        Diff emptyDiff = new Diff(emptySnapshot, migratedSnapshot);
+        DiffResult emptyDiffResult = emptyDiff.compare();
+        output = new FileOutputStream(tempFile);
+        try {
+            emptyDiffResult.printChangeLog(new PrintStream(output), database);
+            output.flush();
+        } finally {
+            output.close();
+        }
+
+        liquibase = createLiquibase(tempFile.getName());
+        liquibase.update(this.contexts);
+
+        DatabaseSnapshot emptyAgainSnapshot = database.createDatabaseSnapshot(null, null);
+        assertEquals(0, emptyAgainSnapshot.getTables().size());
+        assertEquals(0, emptyAgainSnapshot.getViews().size());
     }
 
     public void testRerunDiffChangeLogAltSchema() throws Exception {
