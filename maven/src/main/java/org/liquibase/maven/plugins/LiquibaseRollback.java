@@ -19,13 +19,24 @@ public class LiquibaseRollback extends AbstractLiquibaseChangeLogMojo {
     TAG, DATE, COUNT
   }
 
-  /** @parameter expression="${liquibase.rollbackTag}" */
+  /**
+   * The tag to roll the database back to. 
+   * @parameter expression="${liquibase.rollbackTag}"
+   */
   private String rollbackTag;
 
-  /** @parameter expression="${liquibase.rollbackCount}" default-value="-1" */
+  /**
+   * The number of change sets to rollback.
+   * @parameter expression="${liquibase.rollbackCount}" default-value="-1"
+   */
   private int rollbackCount;
 
-  /** @parameter expression="${liquibase.rollbackDate}" */
+  /**
+   * The date to rollback the database to. The format of the date must match that of the
+   * <code>DateFormat.getDateInstance()</code> for the platform the plugin is executing
+   * on.
+   * @parameter expression="${liquibase.rollbackDate}"
+   */
   private String rollbackDate;
 
   /** The type of the rollback that is being performed. */
