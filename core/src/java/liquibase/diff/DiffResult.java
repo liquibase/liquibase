@@ -357,7 +357,6 @@ public class DiffResult {
 
         List<Change> changes = new ArrayList<Change>();
         addMissingTableChanges(changes, targetDatabase);
-        addUnexpectedTableChanges(changes);
         addMissingColumnChanges(changes, targetDatabase);
         addUnexpectedColumnChanges(changes);
         addChangedColumnChanges(changes);
@@ -371,6 +370,7 @@ public class DiffResult {
         addUnexpectedSequenceChanges(changes);
         addMissingViewChanges(changes);
         addUnexpectedViewChanges(changes);
+        addUnexpectedTableChanges(changes);
 
         for (Change change : changes) {
             Element changeSet = doc.createElement("changeSet");
@@ -430,11 +430,13 @@ public class DiffResult {
     private void addUnexpectedPrimaryKeyChanges(List<Change> changes) {
         for (PrimaryKey pk : getUnexpectedPrimaryKeys()) {
 
-            DropPrimaryKeyChange change = new DropPrimaryKeyChange();
-            change.setTableName(pk.getTable().getName());
-            change.setConstraintName(pk.getName());
+            if (!getUnexpectedTables().contains(pk.getTable())) {
+                DropPrimaryKeyChange change = new DropPrimaryKeyChange();
+                change.setTableName(pk.getTable().getName());
+                change.setConstraintName(pk.getName());
 
-            changes.add(change);
+                changes.add(change);
+            }
         }
     }
 
@@ -455,7 +457,7 @@ public class DiffResult {
 
             DropForeignKeyConstraintChange change = new DropForeignKeyConstraintChange();
             change.setConstraintName(fk.getName());
-            change.setBaseTableName(fk.getPrimaryKeyTable().getName());
+            change.setBaseTableName(fk.getForeignKeyTable().getName());
 
             changes.add(change);
         }
