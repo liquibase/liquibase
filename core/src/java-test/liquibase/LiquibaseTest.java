@@ -3,8 +3,16 @@ package liquibase;
 import liquibase.ClassLoaderFileOpener;
 import liquibase.FileOpener;
 import liquibase.Liquibase;
+import liquibase.lock.LockHandler;
+import liquibase.test.DatabaseTestTemplate;
+import liquibase.test.SqlStatementDatabaseTest;
+import liquibase.test.DatabaseTest;
+import liquibase.test.JdbcDatabaseTest;
 import liquibase.database.*;
+import liquibase.database.structure.DatabaseSnapshot;
+import liquibase.database.sql.DropTableStatement;
 import liquibase.database.template.JdbcOutputTemplate;
+import liquibase.database.template.JdbcTemplate;
 import liquibase.exception.JDBCException;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.expectLastCall;
@@ -122,7 +130,7 @@ public class LiquibaseTest {
             try {
 
                 expect(mockDatabase.isCorrectDatabaseImplementation(null)).andReturn(true).atLeastOnce();
-                mockDatabase.setConnection((DatabaseConnection)null);
+                mockDatabase.setConnection((DatabaseConnection) null);
                 expectLastCall();
                 expect(mockDatabase.getConnection()).andReturn(connectionForConstructor);
                 replay(mockDatabase);

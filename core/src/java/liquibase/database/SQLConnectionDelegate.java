@@ -1,5 +1,7 @@
 package liquibase.database;
 
+import liquibase.log.LogFactory;
+
 import java.sql.*;
 import java.util.Map;
 

@@ -1,17 +1,26 @@
 package liquibase.lock;
 
 import liquibase.DatabaseChangeLogLock;
+import liquibase.Liquibase;
+import liquibase.test.DatabaseTestTemplate;
+import liquibase.test.JdbcDatabaseTest;
+import liquibase.test.DatabaseTest;
 import liquibase.database.Database;
+import liquibase.database.structure.DatabaseSnapshot;
 import liquibase.database.sql.RawSqlStatement;
 import liquibase.database.sql.SqlStatement;
 import liquibase.database.sql.UpdateStatement;
+import liquibase.database.sql.DropTableStatement;
 import liquibase.database.template.JdbcTemplate;
+import liquibase.database.template.JdbcOutputTemplate;
 import liquibase.exception.LockException;
+import liquibase.exception.JDBCException;
 import static org.easymock.classextension.EasyMock.*;
 import static org.junit.Assert.*;
 import org.junit.Test;
 
 import java.util.*;
+import java.io.StringWriter;
 
 public class LockHandlerTest  {
 
@@ -235,5 +244,101 @@ public class LockHandlerTest  {
         assertEquals(0, locks.length);
 
         verify(database);
+    }
+
+    @Test
+    public void waitForLock_emptyDatabase() throws Exception {
+        new DatabaseTestTemplate().testOnAvailableDatabases(
+                new DatabaseTest() {
+
+                    public void performTest(Database database) throws Exception {
+                        try {
+                            new JdbcTemplate(database).execute(new DropTableStatement(null, database.getDatabaseChangeLogTableName(), false));
+                        } catch (JDBCException e) {
+                            ; //must not be there
+                        }
+                        try {
+                            new JdbcTemplate(database).execute(new DropTableStatement(null, database.getDatabaseChangeLogLockTableName(), false));
+                        } catch (JDBCException e) {
+                            ; //must not be there
+                        }
+
+                        database.commit();
+
+                        LockHandler lockHandler = LockHandler.getInstance(database);
+                        lockHandler.waitForLock();
+                        lockHandler.waitForLock();
+                    }
+
+                });
+    }
+
+    @Test
+    public void waitForLock_loggingDatabase() throws Exception {
+        new DatabaseTestTemplate().testOnAvailableDatabases(
+                new DatabaseTest() {
+
+                    public void performTest(Database database) throws Exception {
+                        try {
+                            new JdbcTemplate(database).execute(new DropTableStatement(null, database.getDatabaseChangeLogTableName(), false));
+                        } catch (JDBCException e) {
+                            ; //must not be there
+                        }
+                        try {
+                            new JdbcTemplate(database).execute(new DropTableStatement(null, database.getDatabaseChangeLogLockTableName(), false));
+                        } catch (JDBCException e) {
+                            ; //must not be there
+                        }
+
+                        database.commit();
+
+                        Database clearDatabase = database.getClass().newInstance();
+                        clearDatabase.setConnection(database.getConnection());
+
+                        clearDatabase.setJdbcTemplate(new JdbcOutputTemplate(new StringWriter(), clearDatabase));
+
+                        LockHandler lockHandler = LockHandler.getInstance(clearDatabase);
+                        lockHandler.waitForLock();
+                        lockHandler.waitForLock();
+                    }
+
+                });
+    }
+
+    @Test
+    public void waitForLock_loggingTheExecute() throws Exception {
+        new DatabaseTestTemplate().testOnAvailableDatabases(
+                new DatabaseTest() {
+
+                    public void performTest(Database database) throws Exception {
+                        try {
+                            new JdbcTemplate(database).execute(new DropTableStatement(null, database.getDatabaseChangeLogTableName(), false));
+                        } catch (JDBCException e) {
+                            ; //must not be there
+                        }
+                        try {
+                            new JdbcTemplate(database).execute(new DropTableStatement(null, database.getDatabaseChangeLogLockTableName(), false));
+                        } catch (JDBCException e) {
+                            ; //must not be there
+                        }
+
+                        database.commit();
+
+                        Database clearDatabase = database.getClass().newInstance();
+                        clearDatabase.setConnection(database.getConnection());
+
+                        JdbcTemplate originalTemplate = clearDatabase.getJdbcTemplate();
+                        clearDatabase.setJdbcTemplate(new JdbcOutputTemplate(new StringWriter(), clearDatabase));
+
+                        LockHandler lockHandler = LockHandler.getInstance(clearDatabase);
+                        lockHandler.waitForLock();
+
+                        clearDatabase.setJdbcTemplate(originalTemplate);
+                        lockHandler.waitForLock();
+
+                        clearDatabase.getJdbcTemplate().execute(clearDatabase.getSelectChangeLogLockSQL());
+                    }
+
+                });
     }
 }
