@@ -7,8 +7,11 @@ import java.sql.Driver;
 import java.sql.Connection;
 import java.util.Properties;
 import java.io.*;
+import java.lang.reflect.InvocationTargetException;
+
 import liquibase.database.*;
 import liquibase.exception.JDBCException;
+import liquibase.exception.MigrationFailedException;
 import liquibase.util.StringUtils;
 import liquibase.diff.*;
 
@@ -32,7 +35,11 @@ public class CommandLineUtils {
 
       try {
           if (url.startsWith("hibernate:")) {
-              return (Database) Class.forName(HibernateDatabase.class.getName(), true, classLoader).getConstructor(String.class).newInstance(url.substring("hibernate:".length()));
+              try {
+                  return (Database) Class.forName(HibernateDatabase.class.getName(), true, classLoader).getConstructor(String.class).newInstance(url.substring("hibernate:".length()));
+              } catch (NoClassDefFoundError e) {
+                  throw new MigrationFailedException(null, "Class "+e.getMessage()+" not found.  Make sure all required Hibernate and JDBC libraries are in your classpath");
+              }
           }
 
           Driver driverObject;
