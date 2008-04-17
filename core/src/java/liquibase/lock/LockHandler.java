@@ -183,4 +183,10 @@ public class LockHandler {
         releaseLock();
     }
 
+    /**
+     * Clears information the lock handler knows about the tables.  Should only be called by LiquiBase internal calls
+     */
+    public void reset() {
+        hasChangeLogLock = false;
+    }
 }

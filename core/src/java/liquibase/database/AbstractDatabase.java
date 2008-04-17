@@ -2,6 +2,7 @@ package liquibase.database;
 
 import liquibase.ChangeSet;
 import liquibase.RanChangeSet;
+import liquibase.lock.LockHandler;
 import liquibase.change.*;
 import liquibase.database.sql.*;
 import liquibase.database.structure.*;
@@ -1178,6 +1179,16 @@ public abstract class AbstractDatabase implements Database {
     }
 
     public void setJdbcTemplate(JdbcTemplate template) {
+        if (this.jdbcTemplate != null && !this.jdbcTemplate.executesStatements() && template.executesStatements()) {
+            //need to clear any history
+            LockHandler.getInstance(this).reset();
+            changeLogTableExists = false;
+            changeLogLockTableExists = false;
+            changeLogCreateAttempted = false;
+            changeLogLockCreateAttempted = false;
+
+
+        }
         this.jdbcTemplate = template;
     }
 

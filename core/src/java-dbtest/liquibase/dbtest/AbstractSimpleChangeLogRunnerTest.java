@@ -19,6 +19,8 @@ import liquibase.lock.LockHandler;
 import liquibase.log.LogFactory;
 import liquibase.test.JUnitFileOpener;
 import liquibase.test.TestContext;
+import liquibase.test.DatabaseTestTemplate;
+import liquibase.test.SqlStatementDatabaseTest;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -31,6 +33,10 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
+
+import org.junit.Test;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
 
