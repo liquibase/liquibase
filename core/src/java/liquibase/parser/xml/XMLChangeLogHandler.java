@@ -135,6 +135,8 @@ class XMLChangeLogHandler extends DefaultHandler {
                     lastColumn = ((AddColumnChange) change).getLastColumn();
                 } else if (change instanceof CreateTableChange) {
                     lastColumn = ((CreateTableChange) change).getColumns().get(((CreateTableChange) change).getColumns().size() - 1);
+                } else if (change instanceof ModifyColumnChange) {
+                    lastColumn = ((ModifyColumnChange) change).getColumns().get(((ModifyColumnChange) change).getColumns().size() - 1);
                 } else {
                     throw new RuntimeException("Unexpected change: " + change.getClass().getName());
                 }
