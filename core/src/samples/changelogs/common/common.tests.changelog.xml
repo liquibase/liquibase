@@ -38,6 +38,7 @@
             <column name="dateA" type="date"/>
             <column name="timeA" type="time"/>
             <column name="datetimeA" type="datetime"/>
+            <column name="datetimeB" type="datetime"/>
         </createTable>
 
         <addDefaultValue tableName="defaultValueTest" columnName="intA" defaultValueNumeric="1"/>
@@ -46,8 +47,26 @@
         <addDefaultValue tableName="defaultValueTest" columnName="dateA" defaultValueDate="2007-08-09"/>
         <addDefaultValue tableName="defaultValueTest" columnName="timeA" defaultValueDate="14:15:16"/>
         <addDefaultValue tableName="defaultValueTest" columnName="datetimeA" defaultValueDate="2007-08-09T10:11:12"/>
+        <addDefaultValue tableName="defaultValueTest" columnName="datetimeB" defaultValueDate="2007-08-09 10:11:12"/>
 
         <insert tableName="defaultValueTest">
+            <column name="id" valueNumeric="1"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="defaultValueTest-2" author="nvoxland">
+        <createTable tableName="defaultValueTest2">
+            <column name="id" type="int" />
+            <column name="intA" type="int" defaultValueNumeric="1"/>
+            <column name="textA" type="varchar(5)" defaultValue="a"/>
+            <column name="booleanA" type="boolean" defaultValueBoolean="true"/>
+            <column name="dateA" type="date" defaultValueDate="2007-08-09"/>
+            <column name="timeA" type="time" defaultValueDate="14:15:16"/>
+            <column name="datetimeA" type="datetime" defaultValueDate="2007-08-09T10:11:12"/>
+            <column name="datetimeB" type="datetime" defaultValueDate="2007-08-09 10:11:12"/>
+        </createTable>
+
+        <insert tableName="defaultValueTest2">
             <column name="id" valueNumeric="1"/>
         </insert>
     </changeSet>

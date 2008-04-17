@@ -11,9 +11,11 @@ public class ISODateFormat {
 
     private SimpleDateFormat dateTimeFormat = new SimpleDateFormat(DATE_TIME_FORMAT_STRING);
     private SimpleDateFormat dateTimeFormatWithDecimal = new SimpleDateFormat(DATE_TIME_FORMAT_STRING_WITH_DECIMAL);
+    private SimpleDateFormat dateTimeFormatWithSpace = new SimpleDateFormat(DATE_TIME_FORMAT_STRING_WITH_SPACE);
     private SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
     private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
     private static final String DATE_TIME_FORMAT_STRING = "yyyy-MM-dd'T'HH:mm:ss";
+    private static final String DATE_TIME_FORMAT_STRING_WITH_SPACE = "yyyy-MM-dd HH:mm:ss";
     private static final String DATE_TIME_FORMAT_STRING_WITH_DECIMAL = "yyyy-MM-dd'T'HH:mm:ss.S";
 
 
@@ -45,15 +47,14 @@ public class ISODateFormat {
 
     public Date parse(String dateAsString) throws ParseException {
         SimpleDateFormat dateTimeFormat = this.dateTimeFormat;
-        String DATE_TIME_FORMAT_STRING = ISODateFormat.DATE_TIME_FORMAT_STRING;
 
         if (dateAsString.indexOf('.') >= 0) {
             dateTimeFormat = this.dateTimeFormatWithDecimal;
-            DATE_TIME_FORMAT_STRING = ISODateFormat.DATE_TIME_FORMAT_STRING_WITH_DECIMAL;
+        } else if (dateAsString.indexOf(' ') >= 0) {
+            dateTimeFormat = this.dateTimeFormatWithSpace;
         }
 
-
-        if (dateAsString.length() >= DATE_TIME_FORMAT_STRING.length()-2) { //subtract 2 to not count the 's
+        if (dateAsString.length() != dateFormat.toPattern().length() && dateAsString.length() != timeFormat.toPattern().length()) { //subtract 2 to not count the 's
             return new java.sql.Timestamp(dateTimeFormat.parse(dateAsString).getTime());
         } else {
             if (dateAsString.indexOf(':') > 0) {

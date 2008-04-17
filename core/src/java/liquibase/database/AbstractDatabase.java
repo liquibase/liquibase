@@ -867,7 +867,7 @@ public abstract class AbstractDatabase implements Database {
             } else if (dataType == Types.TINYINT) {
                 return new Integer(value);
             } else if (dataType == Types.BLOB) {
-                throw new RuntimeException("Cannot output values of BLOBs");
+                return "!!!!!! LIQUIBASE CANNOT OUTPUT BLOB VALUES !!!!!!";
             } else {
                 throw new RuntimeException("Cannot convert type: " + dataType);
             }
