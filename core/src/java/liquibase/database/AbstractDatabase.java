@@ -303,14 +303,15 @@ public abstract class AbstractDatabase implements Database {
         if (isDateOnly(isoDate) || isTimeOnly(isoDate)) {
             return "'" + isoDate + "'";
         } else if (isDateTime(isoDate)) {
-            StringBuffer val = new StringBuffer();
-            val.append("'");
-            val.append(isoDate.substring(0, 10));
-            val.append(" ");
-//noinspection MagicNumber
-            val.append(isoDate.substring(11));
-            val.append("'");
-            return val.toString();
+//            StringBuffer val = new StringBuffer();
+//            val.append("'");
+//            val.append(isoDate.substring(0, 10));
+//            val.append(" ");
+////noinspection MagicNumber
+//            val.append(isoDate.substring(11));
+//            val.append("'");
+//            return val.toString();
+            return "'"+isoDate.replace('T', ' ')+"'";
         } else {
             return "BAD_DATE_FORMAT:" + isoDate;
         }

@@ -261,4 +261,8 @@ public class MSSQLDatabase extends AbstractDatabase {
         }
         return type;
     }
+
+    public String getDateLiteral(String isoDate) {
+        return super.getDateLiteral(isoDate).replace(' ', 'T');
+    }
 }
