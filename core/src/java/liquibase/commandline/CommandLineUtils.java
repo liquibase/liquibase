@@ -2,18 +2,30 @@
 // Copyright: Copyright(c) 2008 Trace Financial Limited
 package liquibase.commandline;
 
-import javax.xml.parsers.ParserConfigurationException;
-import java.sql.Driver;
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintStream;
 import java.sql.Connection;
+import java.sql.Driver;
+import java.util.ArrayList;
 import java.util.Properties;
-import java.io.*;
-import java.lang.reflect.InvocationTargetException;
+import java.util.logging.Formatter;
+import java.util.logging.Handler;
+import java.util.logging.LogRecord;
+import java.util.logging.SimpleFormatter;
 
-import liquibase.database.*;
+import javax.xml.parsers.ParserConfigurationException;
+
+import liquibase.database.Database;
+import liquibase.database.DatabaseFactory;
+import liquibase.database.HibernateDatabase;
+import liquibase.diff.Diff;
+import liquibase.diff.DiffResult;
+import liquibase.diff.DiffStatusListener;
 import liquibase.exception.JDBCException;
 import liquibase.exception.MigrationFailedException;
+import liquibase.log.LogFactory;
 import liquibase.util.StringUtils;
-import liquibase.diff.*;
 
 /**
  * Common Utilitiy methods used in the CommandLine application and the Maven plugin.
@@ -120,9 +132,98 @@ public class CommandLineUtils {
     }
 
   private static class OutDiffStatusListener implements DiffStatusListener {
-
+	  
+	/**
+	 * Custom formatter object
+	 */
+	private Formatter customFormatter = new Formatter() {
+		public String format(LogRecord rec) {
+			return new String(rec.getMessage()+"\n");
+		}
+	};  
+	
+	/**
+	 * Logger handlers
+	 */
+	private ArrayList<Handler> handList = new ArrayList<Handler>();
+	
+	
+	/**
+	 * Method prepares handler list and cache it in priv var
+	 * 
+	 * @author Daniel Bargiel <danielbargiel@googlemail.com>
+	 * 
+	 * @return void
+	 */
+	private void prepareHandlers() {
+		
+		if (handList.size() > 0) {
+			return;
+		}
+		
+		for(Handler h : LogFactory.getLogger().getParent().getHandlers()) {
+    		handList.add(h);
+    	}
+		
+    	for(Handler h : LogFactory.getLogger().getHandlers()) {
+    		handList.add(h);
+    	}
+    	
+	} // end of method prepareHandlers
+	
+	/**
+	 * Method sets custom formatter for cached Logger handlers
+	 * 
+	 * @author Daniel Bargiel <danielbargiel@googlemail.com>
+	 * 
+	 * @return void
+	 */
+	private void setCustomFormatter() {
+		Object[] arrHandlers = handList.toArray(); 
+    	for(int i = 0; i < arrHandlers.length; i++) {
+    		Handler h = (Handler)arrHandlers[i];
+    		h.setFormatter(customFormatter);
+    	}
+	} // end of method setCustomFormatter()
+	
+	/**
+	 * Method restores SimpleForramter so rest of logging can be formatted as usual
+	 * 
+	 * @author Daniel Bargiel <danielbargiel@googlemail.com>
+	 * 
+	 * @return void
+	 */
+	private void restoreSimpleFormatter() {
+		Object[] arrHandlers = handList.toArray();
+		for(int i = 0; i < arrHandlers.length; i++) {
+			Handler h = (Handler)arrHandlers[i];
+			h.setFormatter(new SimpleFormatter());
+    	}
+	} // end of method restoreSimpleFormatter() 
+	 
+	/**
+	 * Method report message to output facility using current Logger object
+	 * 
+	 * @author Daniel Bargiel <danielbargiel@googlemail.com>
+	 * 
+	 * @param String message Message to be logged
+	 * 
+	 * @return void
+	 */
     public void statusUpdate(String message) {
-      System.err.println(message);
-    }
-  }
+    	
+    	// Prepare
+    	prepareHandlers();
+    	setCustomFormatter();
+    	
+    	// Log message
+    	LogFactory.getLogger().info(message);
+    	
+    	// Cleanup
+    	restoreSimpleFormatter();
+    	
+    } // end of method statusUpdate
+    
+  } // end of class OutDiffStatusListener
+  
 }

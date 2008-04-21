@@ -44,6 +44,7 @@ public class Main {
     protected Set<String> commandParams = new HashSet<String>();
 
     protected String logLevel;
+    protected String logFile;
 
 
     public static void main(String args[]) throws CommandLineParsingException, IOException {
@@ -302,6 +303,7 @@ public class Main {
         stream.println(" --promptForNonLocalDatabase=<true|false>   Prompt if non-localhost");
         stream.println("                                            databases (default: false)");
         stream.println(" --logLevel=<level>                         Execution log level");
+        stream.println(" --logFile=<file>                           Log file");
         stream.println("                                            (finest, finer, fine, info,");
         stream.println("                                            warning, severe)");
         stream.println(" --currentDateTimeFunction=<value>          Overrides current date time function");
@@ -518,9 +520,12 @@ public class Main {
         }
 
         try {
-            LogFactory.setLoggingLevel(logLevel);
-        }
-        catch (IllegalArgumentException e) {
+        	if (null != logFile) {
+        		LogFactory.setLoggingLevel(logLevel, logFile);
+        	} else {
+        		LogFactory.setLoggingLevel(logLevel);
+        	}
+        } catch (IllegalArgumentException e) {
             throw new CommandLineParsingException(e.getMessage(), e);
         }
 
