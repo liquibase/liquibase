@@ -48,7 +48,11 @@ public class CustomChangeWrapper extends AbstractChange {
         this.className = className;
         try {
 //            System.out.println(classLoader.toString());
-            customChange = (CustomChange) Class.forName(className, true, classLoader).newInstance();
+            try {
+                customChange = (CustomChange) Class.forName(className, true, classLoader).newInstance();
+            } catch (ClassCastException e) { //fails in Ant in particular
+                customChange = (CustomChange) Class.forName(className).newInstance();
+            }
         } catch (Exception e) {
             throw new CustomChangeException(e);
         }
