@@ -58,7 +58,7 @@ public class MySqlDatabaseSnapshot extends SqlDatabaseSnapshot {
     /**
      * MySQL specific implementation
      */
-    protected void getColumnTypeAndDefValue(Column columnInfo, ResultSet rs) throws SQLException, JDBCException {
+    protected void getColumnTypeAndDefValue(Column columnInfo, ResultSet rs, Database database) throws SQLException, JDBCException {
 
     	String columnTypeName = rs.getString("TYPE_NAME");
         String columnName     = rs.getString("COLUMN_NAME");
@@ -112,7 +112,7 @@ public class MySqlDatabaseSnapshot extends SqlDatabaseSnapshot {
         	columnInfo.setTypeName(columnTypeName);
         	columnInfo.setDefaultValue(tableSchema.get(columnName).get(1));
         } else {
-        	super.getColumnTypeAndDefValue(columnInfo, rs);
+        	super.getColumnTypeAndDefValue(columnInfo, rs, database);
         }
     } // end of method getColumnTypeAndDefValue()
     

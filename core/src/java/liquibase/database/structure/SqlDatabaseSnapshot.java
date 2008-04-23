@@ -19,7 +19,7 @@ import java.util.logging.Logger;
 public class SqlDatabaseSnapshot implements DatabaseSnapshot {
 
     private DatabaseMetaData databaseMetaData;
-    protected Database database;
+    private Database database;
 
     private Set<Table> tables = new HashSet<Table>();
     private Set<View> views = new HashSet<View>();
@@ -258,7 +258,7 @@ public class SqlDatabaseSnapshot implements DatabaseSnapshot {
 
             columnInfo.setAutoIncrement(database.isColumnAutoIncrement(schema, tableName, columnName));
 
-            getColumnTypeAndDefValue(columnInfo, rs);
+            getColumnTypeAndDefValue(columnInfo, rs, database);
             columnInfo.setRemarks(remarks);
 
             columnsMap.put(tableName + "." + columnName, columnInfo);
@@ -278,11 +278,10 @@ public class SqlDatabaseSnapshot implements DatabaseSnapshot {
      * @author Daniel Bargiel <danielbargiel@googlemail.com>
      * 
      * @param rs
-     * @param database
      * @return void
      * @throws SQLException
      */
-    protected void getColumnTypeAndDefValue(Column columnInfo, ResultSet rs) throws SQLException, JDBCException {
+    protected void getColumnTypeAndDefValue(Column columnInfo, ResultSet rs, Database database) throws SQLException, JDBCException {
     	Object defaultValue = rs.getObject("COLUMN_DEF");
         try {
             columnInfo.setDefaultValue(database.convertDatabaseValueToJavaObject(defaultValue, columnInfo.getDataType(), columnInfo.getColumnSize(), columnInfo.getDecimalDigits()));

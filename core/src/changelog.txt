@@ -1,6 +1,11 @@
 LiquiBase Core Changelog
 ==========================================
 
+Changes in version 1.6.1 (2008.04.23)
+----------------------
+- Maven/Grails/IntlliJ Plugin relase of 1.6.x
+- Many misc bug fixes
+
 Changes in version 1.6.0 (2008.03.27)
 ----------------------
 - Added Hibernate diff support
