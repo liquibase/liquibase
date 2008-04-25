@@ -5,7 +5,7 @@ tag repository
 CORE:
 run core/build.xml all
 create core release on sourceforge
-upload new version of site to shell.sourceforge.net
+upload new version of site to server
 update version info on /download
 
 MAVEN:
