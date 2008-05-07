@@ -60,6 +60,7 @@ public class ChangeFactory {
                 UpdateDataChange.class,
                 DeleteDataChange.class,
                 TagDatabaseChange.class,
+                LoadDataChange.class,
         };
 
         try {

@@ -5,6 +5,7 @@ import liquibase.database.structure.DatabaseSnapshot;
 import liquibase.exception.JDBCException;
 import liquibase.test.*;
 import liquibase.Liquibase;
+import liquibase.lock.LockHandler;
 import static org.junit.Assert.*;
 import org.junit.Test;
 
@@ -12,6 +13,7 @@ public class TagDatabaseStatementTest extends AbstractSqlStatementTest {
 
     protected void setupDatabase(Database database) throws Exception {
         new Liquibase(null, null, database).dropAll();
+        LockHandler.getInstance(database).reset();
     }
 
     protected SqlStatement generateTestStatement() {

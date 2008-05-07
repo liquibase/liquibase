@@ -2,6 +2,7 @@ package liquibase.test;
 
 import liquibase.database.Database;
 import liquibase.exception.MigrationFailedException;
+import liquibase.lock.LockHandler;
 import org.junit.ComparisonFailure;
 
 import java.util.Set;
@@ -17,6 +18,11 @@ public class DatabaseTestTemplate {
 
     private void test(DatabaseTest test, Set<Database> databasesToTestOn) throws Exception {
         for (Database database : databasesToTestOn) {
+            LockHandler.getInstance(database).reset();
+            if (database.getConnection() != null) {
+                LockHandler.getInstance(database).forceReleaseLock();
+            }
+
             try {
                 test.performTest(database);
             } catch (ComparisonFailure e) {

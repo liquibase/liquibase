@@ -69,12 +69,16 @@ public class ColumnConfig {
     }
 
 
-    public void setValueNumeric(String valueNumeric) throws ParseException {
+    public void setValueNumeric(String valueNumeric) {
         if (valueNumeric == null) {
             this.valueNumeric = null;
         } else {
             if (valueNumeric.matches("\\d+\\.?\\d*")) {
-                this.valueNumeric = NumberFormat.getInstance().parse(valueNumeric);
+                try {
+                    this.valueNumeric = NumberFormat.getInstance().parse(valueNumeric);
+                } catch (ParseException e) {
+                    throw new RuntimeException(e);
+                }
             } else {
                 this.valueNumeric = new ComputedNumericValue(valueNumeric);
             }

@@ -12,7 +12,7 @@ import org.w3c.dom.Element;
 
 import java.util.*;
 
-public class UpdateDataChange extends AbstractChange {
+public class UpdateDataChange extends AbstractChange implements ChangeWithColumns {
 
     private String schemaName;
     private String tableName;

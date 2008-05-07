@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <databaseChangeLog
-        xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.6"
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.7"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.6 http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.6.xsd">
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.7 http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.7.xsd">
 
     <changeSet id="datatypetest-1" author="nvoxland">
         <createTable tableName="dataTypeTest">
@@ -353,6 +353,34 @@
         <createTable tableName="tableWithRemarks" remarks="some test remarks">
             <column name="id" type="int"/>
         </createTable>
+    </changeSet>
+
+    <changeSet id="sampleCSVData-table" author="nvoxland">
+        <createTable tableName="csvdata">
+            <column name="name" type="varchar(50)"/>
+            <column name="username" type="varchar(50)"/>
+            <column name="security_level" type="int"/>
+            <column name="last_login" type="datetime"/>
+            <column name="locked" type="boolean"/>
+        </createTable>
+    </changeSet>
+    <changeSet id="sampleCSVData" author="nvoxland">
+        <loadData tableName="csvdata" file="changelogs/sample.data1.csv"/>
+    </changeSet>
+    <changeSet id="sampleCSVData2" author="nvoxland">
+        <loadData tableName="csvdata" file="changelogs/sample.data2.csv">
+            <column header="locked" type="BOOLEAN"/>
+            <column header="last_login" type="DATE"/>
+            <column header="security_level" type="NUMERIC"/>
+        </loadData>
+    </changeSet>
+    <changeSet id="sampleCSVData3" author="nvoxland">
+        <loadData tableName="csvdata" file="changelogs/sample.data3.csv">
+            <column index="0" name="name" type="STRING"/>
+            <column header="last seen" name="last_login" type="DATE"/>
+            <column header="locked" type="BOOLEAN"/>
+            <column header="security_level" type="NUMERIC"/>
+        </loadData>
     </changeSet>
 
 </databaseChangeLog>
