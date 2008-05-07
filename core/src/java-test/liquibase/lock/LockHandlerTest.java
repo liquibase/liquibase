@@ -253,6 +253,8 @@ public class LockHandlerTest  {
 
                     public void performTest(Database database) throws Exception {
                         try {
+                            LockHandler.getInstance(database).reset();
+
                             new JdbcTemplate(database).execute(new DropTableStatement(null, database.getDatabaseChangeLogTableName(), false));
                         } catch (JDBCException e) {
                             ; //must not be there
@@ -279,6 +281,9 @@ public class LockHandlerTest  {
                 new DatabaseTest() {
 
                     public void performTest(Database database) throws Exception {
+
+                        LockHandler.getInstance(database).reset();;
+
                         try {
                             new JdbcTemplate(database).execute(new DropTableStatement(null, database.getDatabaseChangeLogTableName(), false));
                         } catch (JDBCException e) {
@@ -292,12 +297,9 @@ public class LockHandlerTest  {
 
                         database.commit();
 
-                        Database clearDatabase = database.getClass().newInstance();
-                        clearDatabase.setConnection(database.getConnection());
+                        database.setJdbcTemplate(new JdbcOutputTemplate(new StringWriter(), database));
 
-                        clearDatabase.setJdbcTemplate(new JdbcOutputTemplate(new StringWriter(), clearDatabase));
-
-                        LockHandler lockHandler = LockHandler.getInstance(clearDatabase);
+                        LockHandler lockHandler = LockHandler.getInstance(database);
                         lockHandler.waitForLock();
                         lockHandler.waitForLock();
                     }
@@ -306,11 +308,14 @@ public class LockHandlerTest  {
     }
 
     @Test
-    public void waitForLock_loggingTheExecute() throws Exception {
+    public void waitForLock_loggingThenExecute() throws Exception {
         new DatabaseTestTemplate().testOnAvailableDatabases(
                 new DatabaseTest() {
 
                     public void performTest(Database database) throws Exception {
+
+                        LockHandler.getInstance(database).reset();
+
                         try {
                             new JdbcTemplate(database).execute(new DropTableStatement(null, database.getDatabaseChangeLogTableName(), false));
                         } catch (JDBCException e) {
@@ -324,19 +329,19 @@ public class LockHandlerTest  {
 
                         database.commit();
 
-                        Database clearDatabase = database.getClass().newInstance();
-                        clearDatabase.setConnection(database.getConnection());
+//                        Database clearDatabase = database.getClass().newInstance();
+//                        clearDatabase.setConnection(database.getConnection());
 
-                        JdbcTemplate originalTemplate = clearDatabase.getJdbcTemplate();
-                        clearDatabase.setJdbcTemplate(new JdbcOutputTemplate(new StringWriter(), clearDatabase));
+                        JdbcTemplate originalTemplate = database.getJdbcTemplate();
+                        database.setJdbcTemplate(new JdbcOutputTemplate(new StringWriter(), database));
 
-                        LockHandler lockHandler = LockHandler.getInstance(clearDatabase);
+                        LockHandler lockHandler = LockHandler.getInstance(database);
                         lockHandler.waitForLock();
 
-                        clearDatabase.setJdbcTemplate(originalTemplate);
+                        database.setJdbcTemplate(originalTemplate);
                         lockHandler.waitForLock();
 
-                        clearDatabase.getJdbcTemplate().execute(clearDatabase.getSelectChangeLogLockSQL());
+                        database.getJdbcTemplate().execute(database.getSelectChangeLogLockSQL());
                     }
 
                 });

@@ -63,13 +63,14 @@ public class MySqlDatabaseSnapshot extends SqlDatabaseSnapshot {
     	String columnTypeName = rs.getString("TYPE_NAME");
         String columnName     = rs.getString("COLUMN_NAME");
         String tableName      = rs.getString("TABLE_NAME");
+        String schemaName     = rs.getString("TABLE_CAT");
         
         Map<String, List<String>> tableSchema = new HashMap<String, List<String>>();
         
         if (!schemaCache.containsKey(tableName)) {
         	
         	Statement selectStatement = database.getConnection().createStatement();
-            ResultSet rsColumnType = selectStatement.executeQuery("DESC "+tableName);
+            ResultSet rsColumnType = selectStatement.executeQuery("DESC "+database.escapeTableName(schemaName, tableName));
             
             while(rsColumnType.next()) {
             	List<String> colSchema = new ArrayList<String>();

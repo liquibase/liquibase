@@ -20,7 +20,7 @@ import java.util.Set;
 /**
  * Modifies the data type of an existing column.
  */
-public class ModifyColumnChange extends AbstractChange {
+public class ModifyColumnChange extends AbstractChange implements ChangeWithColumns {
 
     private String schemaName;
     private String tableName;

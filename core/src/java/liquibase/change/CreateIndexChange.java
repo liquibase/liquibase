@@ -15,7 +15,7 @@ import java.util.*;
 /**
  * Creates an index on an existing column.
  */
-public class CreateIndexChange extends AbstractChange {
+public class CreateIndexChange extends AbstractChange implements ChangeWithColumns {
 
     private String schemaName;
     private String tableName;

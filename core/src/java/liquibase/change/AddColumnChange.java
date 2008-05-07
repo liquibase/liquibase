@@ -16,7 +16,7 @@ import java.util.*;
 /**
  * Adds a column to an existing table.
  */
-public class AddColumnChange extends AbstractChange {
+public class AddColumnChange extends AbstractChange implements ChangeWithColumns {
 
     private String schemaName;
     private String tableName;

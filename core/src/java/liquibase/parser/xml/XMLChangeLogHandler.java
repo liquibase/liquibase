@@ -102,25 +102,20 @@ class XMLChangeLogHandler extends DefaultHandler {
                 }
                 change.setUp();
             } else if (change != null && "column".equals(qName)) {
-                ColumnConfig column = new ColumnConfig();
+                ColumnConfig column;
+                if (change instanceof LoadDataChange) {
+                    column = new LoadDataColumnConfig();
+                } else {
+                    column = new ColumnConfig();
+                }
                 for (int i = 0; i < atts.getLength(); i++) {
                     String attributeName = atts.getQName(i);
                     String attributeValue = atts.getValue(i);
                     setProperty(column, attributeName, attributeValue);
                 }
-                if (change instanceof AddColumnChange) {
-                    ((AddColumnChange) change).addColumn(column);
-                } else if (change instanceof CreateTableChange) {
-                    ((CreateTableChange) change).addColumn(column);
-                } else if (change instanceof InsertDataChange) {
-                    ((InsertDataChange) change).addColumn(column);
-                } else if (change instanceof UpdateDataChange) {
-                    ((UpdateDataChange) change).addColumn(column);
-                } else if (change instanceof CreateIndexChange) {
-                    ((CreateIndexChange) change).addColumn(column);
-                } else if (change instanceof ModifyColumnChange) {
-                    ((ModifyColumnChange) change).addColumn(column);
-                } else {
+                if (change instanceof ChangeWithColumns) {
+                    ((ChangeWithColumns) change).addColumn(column);
+                 } else {
                     throw new RuntimeException("Unexpected column tag for " + change.getClass().getName());
                 }
             } else if (change != null && "constraints".equals(qName)) {
