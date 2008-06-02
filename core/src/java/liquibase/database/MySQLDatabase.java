@@ -8,6 +8,7 @@ import liquibase.diff.DiffStatusListener;
 import liquibase.exception.JDBCException;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Set;
 
 /**
@@ -105,7 +106,12 @@ public class MySQLDatabase extends AbstractDatabase {
 
 
     protected String getDefaultDatabaseSchemaName() throws JDBCException {
-        return super.getDefaultDatabaseSchemaName().replaceFirst("\\@.*","");
+//        return super.getDefaultDatabaseSchemaName().replaceFirst("\\@.*","");
+        try {
+            return getConnection().getCatalog();
+        } catch (SQLException e) {
+            throw new JDBCException(e);
+        }
     }
 
     public String convertRequestedSchemaToSchema(String requestedSchema) throws JDBCException {

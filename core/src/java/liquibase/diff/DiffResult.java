@@ -1,16 +1,17 @@
 package liquibase.diff;
 
 import liquibase.change.*;
+import liquibase.csv.CSVWriter;
 import liquibase.database.Database;
 import liquibase.database.structure.*;
 import liquibase.exception.JDBCException;
+import liquibase.log.LogFactory;
 import liquibase.parser.LiquibaseSchemaResolver;
 import liquibase.parser.xml.XMLChangeLogParser;
+import liquibase.util.SqlUtil;
+import liquibase.util.StringUtils;
 import liquibase.xml.DefaultXmlWriter;
 import liquibase.xml.XmlWriter;
-import liquibase.FileOpener;
-import liquibase.util.StringUtils;
-import liquibase.log.LogFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -18,6 +19,9 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.Statement;
 import java.util.*;
 
 public class DiffResult {
@@ -55,6 +59,11 @@ public class DiffResult {
 
     private SortedSet<Sequence> missingSequences = new TreeSet<Sequence>();
     private SortedSet<Sequence> unexpectedSequences = new TreeSet<Sequence>();
+
+    private boolean diffData = false;
+    private String dataDir = null;
+    private String changeSetContext;
+    private String changeSetAuthor;
 
     public DiffResult(DatabaseSnapshot baseDatabase, DatabaseSnapshot targetDatabase) {
         this.baseDatabase = baseDatabase.getDatabase();
@@ -200,6 +209,30 @@ public class DiffResult {
         return unexpectedSequences;
     }
 
+    public boolean shouldDiffData() {
+        return diffData;
+    }
+
+    public void setDiffData(boolean diffData) {
+        this.diffData = diffData;
+    }
+
+    public String getDataDir() {
+        return dataDir;
+    }
+
+    public void setDataDir(String dataDir) {
+        this.dataDir = dataDir;
+    }
+
+    public String getChangeSetContext() {
+        return changeSetContext;
+    }
+
+    public void setChangeSetContext(String changeSetContext) {
+        this.changeSetContext = changeSetContext;
+    }
+
     public void printResult(PrintStream out) throws JDBCException {
         out.println("Base Database: " + targetDatabase.getConnectionUsername() + " " + targetDatabase.getConnectionURL());
         out.println("Target Database: " + baseDatabase.getConnectionUsername() + " " + baseDatabase.getConnectionURL());
@@ -318,18 +351,15 @@ public class DiffResult {
 
             fileReader = new BufferedReader(new FileReader(file));
             fileReader.skip(offset);
-            System.out.println("line:" +fileReader.readLine());
 
             fileReader.close();
-
-
 
 //            System.out.println("resulting XML: " + xml.trim());
 
             RandomAccessFile randomAccessFile = new RandomAccessFile(file, "rw");
             randomAccessFile.seek(offset);
-            randomAccessFile.writeBytes("    "+xml+lineSeparator);
-            randomAccessFile.writeBytes("</databaseChangeLog>"+lineSeparator);
+            randomAccessFile.writeBytes("    " + xml + lineSeparator);
+            randomAccessFile.writeBytes("</databaseChangeLog>" + lineSeparator);
             randomAccessFile.close();
 
 //            BufferedWriter fileWriter = new BufferedWriter(new FileWriter(file));
@@ -364,6 +394,11 @@ public class DiffResult {
         addUnexpectedPrimaryKeyChanges(changes);
         addMissingIndexChanges(changes);
         addUnexpectedIndexChanges(changes);
+
+        if (diffData) {
+            addInsertDataChanges(changes, dataDir);
+        }
+
         addMissingForeignKeyChanges(changes);
         addUnexpectedForeignKeyChanges(changes);
         addMissingSequenceChanges(changes);
@@ -374,8 +409,11 @@ public class DiffResult {
 
         for (Change change : changes) {
             Element changeSet = doc.createElement("changeSet");
-            changeSet.setAttribute("author", getAuthor());
+            changeSet.setAttribute("author", getChangeSetAuthor());
             changeSet.setAttribute("id", generateId());
+            if (getChangeSetContext() != null) {
+                changeSet.setAttribute("context", getChangeSetContext());
+            }
 
             changeSet.appendChild(change.createNode(doc));
             doc.getDocumentElement().appendChild(changeSet);
@@ -387,13 +425,20 @@ public class DiffResult {
         out.flush();
     }
 
-    private String getAuthor() {
+    private String getChangeSetAuthor() {
+        if (changeSetAuthor != null) {
+            return changeSetAuthor;
+        }
         String author = System.getProperty("user.name");
         if (StringUtils.trimToNull(author) == null) {
             return "diff-generated";
         } else {
-            return author+" (generated)";
+            return author + " (generated)";
         }
+    }
+
+    public void setChangeSetAuthor(String changeSetAuthor) {
+        this.changeSetAuthor = changeSetAuthor;
     }
 
     private String generateId() {
@@ -692,7 +737,7 @@ public class DiffResult {
                 if (column.getRemarks() != null) {
                     columnConfig.setRemarks(column.getRemarks());
                 }
-                
+
                 change.addColumn(columnConfig);
             }
 
@@ -709,4 +754,62 @@ public class DiffResult {
         }
     }
 
+    private void addInsertDataChanges(List<Change> changes, String dataDir) {
+        try {
+            String schema = baseSnapshot.getSchema();
+            Statement stmt = baseSnapshot.getDatabase().getConnection().createStatement();
+            for (Table table : baseSnapshot.getTables()) {
+                ResultSet rs = stmt.executeQuery("SELECT * FROM " + baseSnapshot.getDatabase().escapeTableName(schema, table.getName()));
+                String fileName = table.getName() + ".csv";
+                if (dataDir != null) {
+                    fileName = dataDir + "/" + fileName;
+                }
+
+
+                File parentDir = new File(dataDir);
+                if (!parentDir.exists()) {
+                    parentDir.mkdirs();
+                }
+                if (!parentDir.isDirectory()) {
+                    throw new RuntimeException(parentDir + " is not a directory");
+                }
+
+                CSVWriter outputFile = new CSVWriter(new FileWriter(fileName));
+                outputFile.writeAll(rs, true);
+                outputFile.flush();
+                outputFile.close();
+
+                LoadDataChange change = new LoadDataChange();
+                change.setFile(fileName);
+                change.setEncoding("UTF-8");
+                change.setSchemaName(schema);
+                change.setTableName(table.getName());
+
+                ResultSetMetaData columnData = rs.getMetaData();
+                for (int col = 1; col <= columnData.getColumnCount(); col++) {
+                    String colName = columnData.getColumnName(col);
+                    int dataType = columnData.getColumnType(col);
+                    String typeString = "STRING";
+                    if (SqlUtil.isNumeric(dataType)) {
+                        typeString = "NUMERIC";
+                    } else if (SqlUtil.isBoolean(dataType)) {
+                        typeString = "BOOLEAN";
+                    } else if (SqlUtil.isDate(dataType)) {
+                        typeString = "DATE";
+                    }
+
+                    LoadDataColumnConfig columnConfig = new LoadDataColumnConfig();
+                    columnConfig.setHeader(colName);
+                    columnConfig.setType(typeString);
+
+                    change.addColumn(columnConfig);
+                }
+
+                changes.add(change);
+            }
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

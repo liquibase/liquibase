@@ -32,4 +32,16 @@ public class LoadDataColumnConfig extends ColumnConfig {
     public void setHeader(String header) {
         this.header = header;
     }
+
+    public Element createNode(Document document) {
+        Element element = super.createNode(document);
+        if (getIndex() != null) {
+            element.setAttribute("index", getIndex().toString());
+        }
+
+        if (getHeader() != null) {
+            element.setAttribute("header", getHeader());
+        }
+        return element;
+    }
 }

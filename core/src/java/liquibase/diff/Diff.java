@@ -3,9 +3,11 @@ package liquibase.diff;
 import liquibase.database.Database;
 import liquibase.database.structure.*;
 import liquibase.exception.JDBCException;
+import liquibase.util.StringUtils;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.Arrays;
 
 public class Diff {
 
@@ -16,6 +18,16 @@ public class Diff {
     private DatabaseSnapshot targetSnapshot;
 
     private Set<DiffStatusListener> statusListeners = new HashSet<DiffStatusListener>();
+
+    private boolean diffTables = true;
+    private boolean diffColumns = true;
+    private boolean diffViews = true;
+    private boolean diffPrimaryKeys = true;
+    private boolean diffIndexes = true;
+    private boolean diffForeignKeys = true;
+    private boolean diffSequences = true;
+    private boolean diffData = false;
+
 
     public Diff(Database baseDatabase, Database targetDatabase) {
         this.baseDatabase = baseDatabase;
@@ -59,15 +71,110 @@ public class Diff {
 
         DiffResult diffResult = new DiffResult(baseSnapshot, targetSnapshot);
         checkVersionInfo(diffResult);
-        checkTables(diffResult);
-        checkViews(diffResult);
-        checkColumns(diffResult);
-        checkForeignKeys(diffResult);
-        checkPrimaryKeys(diffResult);
-        checkIndexes(diffResult);
-        checkSequences(diffResult);
+        if (shouldDiffTables()) {
+            checkTables(diffResult);
+        }
+        if (shouldDiffViews()) {
+            checkViews(diffResult);
+        }
+        if (shouldDiffColumns()) {
+            checkColumns(diffResult);
+        }
+        if (shouldDiffForeignKeys()) {
+            checkForeignKeys(diffResult);
+        }
+        if (shouldDiffPrimaryKeys()) {
+            checkPrimaryKeys(diffResult);
+        }
+        if (shouldDiffIndexes()) {
+            checkIndexes(diffResult);
+        }
+        if (shouldDiffSequences()) {
+            checkSequences(diffResult);
+        }
+        diffResult.setDiffData(shouldDiffData());
 
         return diffResult;
+    }
+
+
+    public void setDiffTypes(String diffTypes) {
+        if (StringUtils.trimToNull(diffTypes) != null) {
+            Set<String> types = new HashSet<String>(Arrays.asList(diffTypes.toLowerCase().split("\\s*,\\s*")));
+            diffTables = types.contains("tables");
+            diffColumns = types.contains("columns");
+            diffViews = types.contains("views");
+            diffPrimaryKeys = types.contains("primaryKeys");
+            diffIndexes = types.contains("indexes");
+            diffForeignKeys = types.contains("foreignKeys");
+            diffSequences = types.contains("sequences");
+            diffData = types.contains("data");            
+        }
+    }
+
+    public boolean shouldDiffTables() {
+        return diffTables;
+    }
+
+    public void setDiffTables(boolean diffTables) {
+        this.diffTables = diffTables;
+    }
+
+    public boolean shouldDiffColumns() {
+        return diffColumns;
+    }
+
+    public void setDiffColumns(boolean diffColumns) {
+        this.diffColumns = diffColumns;
+    }
+
+    public boolean shouldDiffViews() {
+        return diffViews;
+    }
+
+    public void setDiffViews(boolean diffViews) {
+        this.diffViews = diffViews;
+    }
+
+
+    public boolean shouldDiffPrimaryKeys() {
+        return diffPrimaryKeys;
+    }
+
+    public void setDiffPrimaryKeys(boolean diffPrimaryKeys) {
+        this.diffPrimaryKeys = diffPrimaryKeys;
+    }
+
+    public boolean shouldDiffIndexes() {
+        return diffIndexes;
+    }
+
+    public void setDiffIndexes(boolean diffIndexes) {
+        this.diffIndexes = diffIndexes;
+    }
+
+    public boolean shouldDiffForeignKeys() {
+        return diffForeignKeys;
+    }
+
+    public void setDiffForeignKeys(boolean diffForeignKeys) {
+        this.diffForeignKeys = diffForeignKeys;
+    }
+
+    public boolean shouldDiffSequences() {
+        return diffSequences;
+    }
+
+    public void setDiffSequences(boolean diffSequences) {
+        this.diffSequences = diffSequences;
+    }
+
+    public boolean shouldDiffData() {
+        return diffData;
+    }
+
+    public void setDiffData(boolean diffData) {
+        this.diffData = diffData;
     }
 
     private void checkVersionInfo(DiffResult diffResult) throws JDBCException {

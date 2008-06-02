@@ -1,6 +1,11 @@
 LiquiBase Core Changelog
 ==========================================
 
+Changes in version 1.7.0
+----------------------
+- loadData change
+- can export data with generateChangeLog
+
 Changes in version 1.6.1 (2008.04.23)
 ----------------------
 - Maven/Grails/IntlliJ Plugin relase of 1.6.x
