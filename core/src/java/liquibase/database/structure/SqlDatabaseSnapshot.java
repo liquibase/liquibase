@@ -36,6 +36,7 @@ public class SqlDatabaseSnapshot implements DatabaseSnapshot {
     private Set<DiffStatusListener> statusListeners;
 
     private static final Logger log = LogFactory.getLogger();
+    private String schema;
 
 
     /**
@@ -70,6 +71,7 @@ public class SqlDatabaseSnapshot implements DatabaseSnapshot {
      */
     public SqlDatabaseSnapshot(Database database, Set<DiffStatusListener> statusListeners, String requestedSchema) throws JDBCException {
         try {
+            this.schema = requestedSchema;
             this.database = database;
             this.databaseMetaData = database.getConnection().getMetaData();
             this.statusListeners = statusListeners;
@@ -574,5 +576,9 @@ public class SqlDatabaseSnapshot implements DatabaseSnapshot {
             }
         }
         return null;
+    }
+
+    public String getSchema() {
+        return schema;
     }
 }

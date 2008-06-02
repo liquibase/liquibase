@@ -59,7 +59,7 @@ public class ColumnConfig {
         // Since we have two rules for the value it can either be specifed as an attribute
         // or as the tag body in case of long values then the check is necessary so that it
         // should not override the value specifed as an attribute.
-        if (StringUtils.trimToNull(value) != null) {
+        if (value != null) {
             this.value = value;
         }
     }
@@ -213,7 +213,9 @@ public class ColumnConfig {
 
     public Element createNode(Document document) {
         Element element = document.createElement("column");
-        element.setAttribute("name", getName());
+        if (getName() != null) {
+            element.setAttribute("name", getName());
+        }
         if (getType() != null) {
             element.setAttribute("type", getType());
         }

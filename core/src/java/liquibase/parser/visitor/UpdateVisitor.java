@@ -22,7 +22,7 @@ public class UpdateVisitor implements ChangeSetVisitor {
     }
     
     public void visit(ChangeSet changeSet) throws LiquibaseException {
-        log.info("Running Changeset:" + changeSet);
+        log.finer("Running Changeset:" + changeSet);
         changeSet.execute(database);
         if (database.getRunStatus(changeSet).equals(ChangeSet.RunStatus.NOT_RAN)) {
             database.markChangeSetAsRan(changeSet);

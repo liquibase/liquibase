@@ -44,6 +44,7 @@ public abstract class AbstractDatabase implements Database {
     protected String currentDateTimeFunction;
 
     private JdbcTemplate jdbcTemplate = new JdbcTemplate(this);
+    private List<RanChangeSet> ranChangeSetList;
 
     protected AbstractDatabase() {
     }
@@ -569,7 +570,7 @@ public abstract class AbstractDatabase implements Database {
                     getJdbcTemplate().comment("Create Database Lock Table");
                     this.getJdbcTemplate().execute(createTableStatement);
                     this.commit();
-                    log.info("Created database lock table with name: " + escapeTableName(getDefaultSchemaName(), getDatabaseChangeLogLockTableName()));
+                    log.finest("Created database lock table with name: " + escapeTableName(getDefaultSchemaName(), getDatabaseChangeLogLockTableName()));
                     changeLogLockTableExists = true;
                     knowMustInsertIntoLockTable = true;
                 }
@@ -587,7 +588,7 @@ public abstract class AbstractDatabase implements Database {
                 if (knowMustInsertIntoLockTable || rows == 0) {
                     this.getJdbcTemplate().update(getChangeLogLockInsertSQL());
                     this.commit();
-                    log.info("Inserted lock row into: " + escapeTableName(getDefaultSchemaName(), getDatabaseChangeLogLockTableName()));
+                    log.fine("Inserted lock row into: " + escapeTableName(getDefaultSchemaName(), getDatabaseChangeLogLockTableName()));
                     rs.close();
                 }
             } else {
@@ -778,7 +779,7 @@ public abstract class AbstractDatabase implements Database {
             sql += " and table_catalog='" + convertRequestedSchemaToCatalog(schemaName) + "'";
         }
 
-        log.info("GetViewDefinitionSQL: " + sql);
+        log.finest("GetViewDefinitionSQL: " + sql);
         return new RawSqlStatement(sql);
     }
 
@@ -1061,9 +1062,13 @@ public abstract class AbstractDatabase implements Database {
      * Returns the ChangeSets that have been run against the current database.
      */
     public List<RanChangeSet> getRanChangeSetList() throws JDBCException {
+        if (this.ranChangeSetList != null) {
+            return this.ranChangeSetList;
+        }
+
         try {
             String databaseChangeLogTableName = escapeTableName(getDefaultSchemaName(), getDatabaseChangeLogTableName());
-            List<RanChangeSet> ranChangeSetList = new ArrayList<RanChangeSet>();
+            ranChangeSetList = new ArrayList<RanChangeSet>();
             if (doesChangeLogTableExist()) {
                 log.info("Reading from " + databaseChangeLogTableName);
                 String sql = "SELECT * FROM " + databaseChangeLogTableName + " ORDER BY DATEEXECUTED ASC".toUpperCase();
@@ -1145,6 +1150,8 @@ public abstract class AbstractDatabase implements Database {
 
         this.getJdbcTemplate().execute(new RawSqlStatement(sql));
         commit();
+
+        getRanChangeSetList().remove(new RanChangeSet(changeSet));
     }
 
     public String escapeStringForDatabase(String string) {

@@ -12,6 +12,7 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import liquibase.*;
 import liquibase.database.*;
 import liquibase.exception.*;
@@ -46,7 +47,6 @@ public class Main {
     protected String logLevel;
     protected String logFile;
 
-
     public static void main(String args[]) throws CommandLineParsingException, IOException {
         String shouldRunProperty = System.getProperty(Liquibase.SHOULD_RUN_SYSTEM_PROPERTY);
         if (shouldRunProperty != null && !Boolean.valueOf(shouldRunProperty)) {
@@ -63,7 +63,12 @@ public class Main {
             return;
         }
 
-        main.parseOptions(args);
+        try {
+            main.parseOptions(args);
+        } catch (CommandLineParsingException e) {
+            main.printHelp(System.out);
+            throw e;
+        }
 
         File propertiesFile = new File(main.defaultsFile);
 
@@ -364,7 +369,7 @@ public class Main {
                     throw new CommandLineParsingException("Unknown parameter: '" + attributeName + "'");
                 }
             } else {
-                throw new CommandLineParsingException("Unexpected value "+arg+": parameters must start with a '--'");
+                throw new CommandLineParsingException("Unexpected value " + arg + ": parameters must start with a '--'");
             }
         }
 
@@ -520,11 +525,11 @@ public class Main {
         }
 
         try {
-        	if (null != logFile) {
-        		LogFactory.setLoggingLevel(logLevel, logFile);
-        	} else {
-        		LogFactory.setLoggingLevel(logLevel);
-        	}
+            if (null != logFile) {
+                LogFactory.setLoggingLevel(logLevel, logFile);
+            } else {
+                LogFactory.setLoggingLevel(logLevel);
+            }
         } catch (IllegalArgumentException e) {
             throw new CommandLineParsingException(e.getMessage(), e);
         }
@@ -544,7 +549,7 @@ public class Main {
                 CommandLineUtils.doDiffToChangeLog(changeLogFile, database, createDatabaseFromCommandParams(commandParams));
                 return;
             } else if ("generateChangeLog".equalsIgnoreCase(command)) {
-                CommandLineUtils.doGenerateChangeLog(changeLogFile, database, defaultSchemaName);
+                CommandLineUtils.doGenerateChangeLog(changeLogFile, database, defaultSchemaName, StringUtils.trimToNull(getCommandParam("diffTypes")), StringUtils.trimToNull(getCommandParam("changeSetAuthor")), StringUtils.trimToNull(getCommandParam("changeSetContext")), StringUtils.trimToNull(getCommandParam("exportDataDir")));
                 return;
             }
 
@@ -658,7 +663,21 @@ public class Main {
         }
     }
 
-  private Database createDatabaseFromCommandParams(Set<String> commandParams) throws CommandLineParsingException, JDBCException {
+    private String getCommandParam(String paramName) throws CommandLineParsingException {
+        for (String param : commandParams) {
+            String[] splitArg = splitArg(param);
+
+            String attributeName = splitArg[0];
+            String value = splitArg[1];
+            if (attributeName.equalsIgnoreCase(paramName)) {
+                return value;
+            }
+        }
+
+        return null;
+    }
+
+    private Database createDatabaseFromCommandParams(Set<String> commandParams) throws CommandLineParsingException, JDBCException {
         String driver = null;
         String url = null;
         String username = null;

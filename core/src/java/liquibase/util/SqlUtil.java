@@ -22,4 +22,18 @@ public class SqlUtil {
 
         return numericTypes.contains(dataType);
     }
+
+    public static boolean isBoolean(int dataType) {
+        return dataType == Types.BOOLEAN;
+    }
+
+    public static boolean isDate(int dataType) {
+        List<Integer> validTypes = Arrays.asList(
+                Types.DATE,
+                Types.TIME,
+                Types.TIMESTAMP
+        );
+
+        return validTypes.contains(dataType);
+    }
 }

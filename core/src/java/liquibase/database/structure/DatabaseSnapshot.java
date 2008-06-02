@@ -39,4 +39,6 @@ public interface DatabaseSnapshot {
     View getView(String viewName);
 
     PrimaryKey getPrimaryKey(String pkName);
+
+    String getSchema();
 }

@@ -50,7 +50,7 @@ public class InsertStatement implements SqlStatement {
 
         for (String column : newColumnValues.keySet()) {
             Object newValue = newColumnValues.get(column);
-            if (newValue == null) {
+            if (newValue == null || newValue.toString().equals("NULL")) {
                 sql.append("NULL");
             } else if (newValue instanceof String && database.shouldQuoteValue(((String) newValue))) {
                 sql.append("'").append(database.escapeStringForDatabase((String) newValue)).append("'");

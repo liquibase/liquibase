@@ -317,4 +317,8 @@ public class HibernateDatabaseSnapshot implements DatabaseSnapshot {
         }
         return null;
     }
+
+    public String getSchema() {
+        return null;
+    }
 }

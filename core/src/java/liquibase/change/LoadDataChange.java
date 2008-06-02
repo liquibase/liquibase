@@ -1,23 +1,24 @@
 package liquibase.change;
 
-import liquibase.database.sql.SqlStatement;
-import liquibase.database.sql.InsertStatement;
 import liquibase.database.Database;
+import liquibase.database.sql.InsertStatement;
+import liquibase.database.sql.SqlStatement;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.exception.UnsupportedChangeException;
-import liquibase.exception.MigrationFailedException;
-import liquibase.util.StringUtils;
-import org.w3c.dom.Element;
+import liquibase.csv.CSVReader;
+import liquibase.util.MD5Util;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
-import java.util.Set;
-import java.util.List;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.io.*;
+import java.util.List;
+import java.util.Set;
 
-import au.com.bytecode.opencsv.CSVReader;
 
-public class LoadDataChange extends AbstractSQLChange implements ChangeWithColumns {
+public class LoadDataChange extends AbstractChange implements ChangeWithColumns {
 
     private String schemaName;
     private String tableName;
@@ -98,10 +99,12 @@ public class LoadDataChange extends AbstractSQLChange implements ChangeWithColum
                     if (columnConfig != null) {
                         columnName = columnConfig.getName();
 
-                        if (columnConfig.getType() != null) {
+                        if (value.toString().equalsIgnoreCase("NULL")) {
+                            value = "NULL";
+                        } else if (columnConfig.getType() != null) {
                             ColumnConfig valueConfig = new ColumnConfig();
                             if (columnConfig.getType().equalsIgnoreCase("BOOLEAN")) {
-                                valueConfig.setValueBoolean(Boolean.parseBoolean(value.toString()));
+                                valueConfig.setValueBoolean(Boolean.parseBoolean(value.toString().toLowerCase()));
                             } else if (columnConfig.getType().equalsIgnoreCase("NUMERIC")) {
                                 valueConfig.setValueNumeric(value.toString());
                             } else if (columnConfig.getType().equalsIgnoreCase("DATE")) {
@@ -160,11 +163,36 @@ public class LoadDataChange extends AbstractSQLChange implements ChangeWithColum
             node.setAttribute("encoding", getEncoding());
         }
 
+        for (LoadDataColumnConfig column : columns) {
+            node.appendChild(column.createNode(currentChangeLogDOM));
+        }
+
         return node;
 
     }
 
     public Set<DatabaseObject> getAffectedDatabaseObjects() {
         return null;
+    }
+
+    public String getMD5Sum() {
+        InputStream stream = null;
+        try {
+            stream = getFileOpener().getResourceAsStream(getFile());
+            if (stream == null) {
+                throw new RuntimeException(getFile() + " could not be found");
+            }
+            return MD5Util.computeMD5(stream);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } finally {
+            if (stream != null) {
+                try {
+                    stream.close();
+                } catch (IOException e) {
+                    ;
+                }
+            }
+        }
     }
 }
