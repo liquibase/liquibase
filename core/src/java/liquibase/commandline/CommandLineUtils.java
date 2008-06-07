@@ -75,7 +75,9 @@ public class CommandLineUtils {
                 throw new RuntimeException("Cannot find database driver: " + e.getMessage());
             }
             Properties info = new Properties();
-            info.put("user", username);
+            if (username != null) {
+                info.put("user", username);
+            }
             if (password != null) {
                 info.put("password", password);
             }
@@ -225,5 +227,5 @@ public class CommandLineUtils {
         } // end of method statusUpdate
 
     } // end of class OutDiffStatusListener
-  
+
 }
