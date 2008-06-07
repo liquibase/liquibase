@@ -55,7 +55,7 @@ public class AddColumnStatement implements SqlStatement {
             throw new StatementNotSupportedOnDatabaseException("Adding primary key columns is not supported", this, database);
         }
 
-        String alterTable = "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ADD "+ database.escapeColumnName(getColumnName()) + " " + database.getColumnType(getColumnType(), isAutoIncrement());
+        String alterTable = "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ADD "+ database.escapeColumnName(getSchemaName(), getTableName(), getColumnName()) + " " + database.getColumnType(getColumnType(), isAutoIncrement());
 
         if (defaultClauseBeforeNotNull(database)) {
             alterTable += getDefaultClause(database);

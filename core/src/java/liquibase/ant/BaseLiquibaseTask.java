@@ -21,7 +21,6 @@ import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.sql.Connection;
 import java.sql.Driver;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -46,6 +45,7 @@ public class BaseLiquibaseTask extends Task {
     private String contexts;
     private String outputFile;
     private String defaultSchemaName;
+    private String databaseClass;
 
     public BaseLiquibaseTask() {
         super();
@@ -153,7 +153,7 @@ public class BaseLiquibaseTask extends Task {
         FileOpener antFO = new AntFileOpener(getProject(), classpath);
         FileOpener fsFO = new FileSystemFileOpener();
 
-        Database database = createDatabaseObject(getDriver(), getUrl(), getUsername(), getPassword(), getDefaultSchemaName());
+        Database database = createDatabaseObject(getDriver(), getUrl(), getUsername(), getPassword(), getDefaultSchemaName(),getDatabaseClass());
         String changeLogFile = null;
         if (getChangeLogFile() != null) {
             changeLogFile = getChangeLogFile().trim();
@@ -164,7 +164,12 @@ public class BaseLiquibaseTask extends Task {
         return liquibase;
     }
 
-    protected Database createDatabaseObject(String driverClassName, String databaseUrl, String username, String password, String defaultSchemaName) throws Exception {
+    protected Database createDatabaseObject(String driverClassName, 
+    										String databaseUrl, 
+    										String username, 
+    										String password, 
+    										String defaultSchemaName,
+    										String databaseClass) throws Exception {
         String[] strings = classpath.list();
 
         final List<URL> taskClassPath = new ArrayList<URL>();
@@ -181,6 +186,18 @@ public class BaseLiquibaseTask extends Task {
 
         if (databaseUrl.startsWith("hibernate:")) {
             return new HibernateDatabase(databaseUrl.substring("hibernate:".length()));
+        }
+
+        if (databaseClass != null) {     
+        	
+        	  try
+        	  {
+        		  DatabaseFactory.getInstance().addDatabaseImplementation((Database) Class.forName(databaseClass, true, loader).newInstance());
+        	  }
+        	  catch (ClassCastException e) //fails in Ant in particular
+        	  {
+        		  DatabaseFactory.getInstance().addDatabaseImplementation((Database) Class.forName(databaseClass).newInstance());
+        	  }
         }
 
         if (driverClassName == null) {
@@ -298,5 +315,13 @@ public class BaseLiquibaseTask extends Task {
             }
         }
     }
+
+	public String getDatabaseClass() {
+		return databaseClass;
+	}
+
+	public void setDatabaseClass(String databaseClass) {
+		this.databaseClass = databaseClass;
+	}
 
 }

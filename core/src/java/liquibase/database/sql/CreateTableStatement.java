@@ -150,7 +150,7 @@ public class CreateTableStatement implements SqlStatement {
             String column = columnIterator.next();
             boolean isAutoIncrement = autoIncrementColumns.contains(column);
 
-            buffer.append(database.escapeColumnName(column));
+            buffer.append(database.escapeColumnName(getSchemaName(), getTableName(), column));
             buffer.append(" ").append(database.getColumnType(columnTypes.get(column), isAutoIncrement));
 
             if (getDefaultValue(column) != null) {
@@ -197,7 +197,7 @@ public class CreateTableStatement implements SqlStatement {
             buffer.append(" CONSTRAINT ")
                     .append(fkConstraint.getForeignKeyName())
                     .append(" FOREIGN KEY (")
-                    .append(database.escapeColumnName(fkConstraint.getColumn()))
+                    .append(database.escapeColumnName(getSchemaName(), getTableName(), fkConstraint.getColumn()))
                     .append(") REFERENCES ")
                     .append(fkConstraint.getReferences());
 

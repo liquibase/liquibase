@@ -199,11 +199,13 @@ public interface Database extends DatabaseObject {
     /**
      * Escapes a single column name in a database-dependent manner so reserved words can be used as a column
      * name (i.e. "return"). 
-     *
+     * @param schemaName
+     * @param tableName 
      * @param columnName column name
+     *
      * @return escaped column name
      */
-    String escapeColumnName(String columnName);
+    String escapeColumnName(String schemaName, String tableName, String columnName);
 
     /**
      * Escapes a list of column names in a database-dependent manner so reserved words can be used as a column

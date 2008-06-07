@@ -47,30 +47,30 @@ public class SetNullableStatement implements SqlStatement {
         }
 
         if (database instanceof OracleDatabase || database instanceof SybaseDatabase) {
-            return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " MODIFY " + database.escapeColumnName(getColumnName()) + nullableString;
+            return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " MODIFY " + database.escapeColumnName(getSchemaName(), getTableName(), getColumnName()) + nullableString;
         } else if (database instanceof MSSQLDatabase) {
             if (getColumnDataType() == null) {
                 throw new StatementNotSupportedOnDatabaseException("Database requires columnDataType parameter", this, database);
             }
-            return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ALTER COLUMN " + database.escapeColumnName(getColumnName()) + " " + getColumnDataType() + nullableString;
+            return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ALTER COLUMN " + database.escapeColumnName(getSchemaName(), getTableName(), getColumnName()) + " " + getColumnDataType() + nullableString;
         } else if (database instanceof MySQLDatabase) {
             if (getColumnDataType() == null) {
                 throw new StatementNotSupportedOnDatabaseException("Database requires columnDataType parameter", this, database);
             }
-            return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " MODIFY " + database.escapeColumnName(getColumnName()) + " " + getColumnDataType() + nullableString;
+            return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " MODIFY " + database.escapeColumnName(getSchemaName(), getTableName(), getColumnName()) + " " + getColumnDataType() + nullableString;
         } else if (database instanceof DerbyDatabase || database instanceof CacheDatabase) {
-            return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ALTER COLUMN  " + database.escapeColumnName(getColumnName()) + nullableString;
+            return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ALTER COLUMN  " + database.escapeColumnName(getSchemaName(), getTableName(), getColumnName()) + nullableString;
         } else if (database instanceof HsqlDatabase) {
 //            if (getColumnDataType() == null) {
 //                throw new StatementNotSupportedOnDatabaseException("Database requires columnDataType parameter", this, database);
 //            }
-            return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ALTER COLUMN  " + database.escapeColumnName(getColumnName()) + " " + getColumnDataType() + nullableString;
+            return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ALTER COLUMN  " + database.escapeColumnName(getSchemaName(), getTableName(), getColumnName()) + " " + getColumnDataType() + nullableString;
         } else if (database instanceof FirebirdDatabase) {
             throw new StatementNotSupportedOnDatabaseException(this, database);
         } else if (database instanceof MaxDBDatabase) {
-        		return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " COLUMN  " + database.escapeColumnName(getColumnName()) + (isNullable() ? " DEFAULT NULL" : " NOT NULL");
+        		return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " COLUMN  " + database.escapeColumnName(getSchemaName(), getTableName(), getColumnName()) + (isNullable() ? " DEFAULT NULL" : " NOT NULL");
         }
-        return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ALTER COLUMN  " + database.escapeColumnName(getColumnName()) + (isNullable()?" DROP NOT NULL":" SET NOT NULL");
+        return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ALTER COLUMN  " + database.escapeColumnName(getSchemaName(), getTableName(), getColumnName()) + (isNullable()?" DROP NOT NULL":" SET NOT NULL");
     }
 
     public String getEndDelimiter(Database database) {

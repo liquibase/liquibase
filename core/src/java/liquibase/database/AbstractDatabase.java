@@ -448,7 +448,7 @@ public abstract class AbstractDatabase implements Database {
     }
 
     public SqlStatement getSelectChangeLogLockSQL() throws JDBCException {
-        return new RawSqlStatement(("SELECT LOCKED FROM " + escapeTableName(getDefaultSchemaName(), getDatabaseChangeLogLockTableName()) + " WHERE ID=1"));
+        return new RawSqlStatement(("SELECT LOCKED FROM " + escapeTableName(getDefaultSchemaName(), getDatabaseChangeLogLockTableName()) + " WHERE " + escapeColumnName(getDefaultSchemaName(), getDatabaseChangeLogLockTableName(), "ID") + "=1"));
     }
 
     public boolean doesChangeLogTableExist() {
@@ -933,7 +933,7 @@ public abstract class AbstractDatabase implements Database {
         }
     }
 
-    public String escapeColumnName(String columnName) {
+    public String escapeColumnName(String schemaName, String tableName, String columnName) {
         return columnName;
     }
 
@@ -985,7 +985,7 @@ public abstract class AbstractDatabase implements Database {
 
         ResultSet selectRS = null;
         try {
-            selectRS = getConnection().createStatement().executeQuery("SELECT " + escapeColumnName(columnName) + " FROM " + escapeTableName(schemaName, tableName) + " WHERE 1 = 0");
+            selectRS = getConnection().createStatement().executeQuery("SELECT " + escapeColumnName(schemaName, tableName, columnName) + " FROM " + escapeTableName(schemaName, tableName) + " WHERE 1 = 0");
             ResultSetMetaData meta = selectRS.getMetaData();
             autoIncrement = meta.isAutoIncrement(1);
         } finally {

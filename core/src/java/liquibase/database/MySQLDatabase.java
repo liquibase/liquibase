@@ -136,7 +136,7 @@ public class MySQLDatabase extends AbstractDatabase {
         return "`" + tableName + "`";
     }
 
-    public String escapeColumnName(String columnName) {
+    public String escapeColumnName(String schemaName, String tableName, String columnName) {
         return "`" + columnName + "`";
     }
 
