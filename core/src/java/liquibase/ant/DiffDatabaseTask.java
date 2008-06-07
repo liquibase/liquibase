@@ -80,7 +80,7 @@ public class DiffDatabaseTask extends BaseLiquibaseTask {
 
             liquibase = createLiquibase();
 
-            Database baseDatabase = createDatabaseObject(getBaseDriver(), getBaseUrl(), getBaseUsername(), getBasePassword(), getBaseDefaultSchemaName());
+            Database baseDatabase = createDatabaseObject(getBaseDriver(), getBaseUrl(), getBaseUsername(), getBasePassword(), getBaseDefaultSchemaName(), getDatabaseClass());
 
 
             Diff diff = new Diff(baseDatabase, liquibase.getDatabase());

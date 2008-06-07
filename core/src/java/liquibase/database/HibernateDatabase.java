@@ -283,7 +283,7 @@ public class HibernateDatabase implements Database {
         return null;
     }
 
-    public String escapeColumnName(String columnName) {
+    public String escapeColumnName(String schemaName, String tableName, String columnName) {
         return null;
     }
 

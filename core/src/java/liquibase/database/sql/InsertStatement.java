@@ -41,7 +41,7 @@ public class InsertStatement implements SqlStatement {
         }
         StringBuffer sql = new StringBuffer("INSERT INTO " + database.escapeTableName(getSchemaName(), getTableName()) + " (");
         for (String column : newColumnValues.keySet()) {
-            sql.append(database.escapeColumnName(column)).append(", ");
+            sql.append(database.escapeColumnName(getSchemaName(), getTableName(), column)).append(", ");
         }
         sql.deleteCharAt(sql.lastIndexOf(" "));
         sql.deleteCharAt(sql.lastIndexOf(","));

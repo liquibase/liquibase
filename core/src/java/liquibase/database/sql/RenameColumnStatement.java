@@ -66,22 +66,22 @@ public class RenameColumnStatement implements SqlStatement {
         }
 
         if (database instanceof MSSQLDatabase) {
-            return "exec sp_rename '" + database.escapeTableName(getSchemaName(), getTableName()) + "." + database.escapeColumnName(getOldColumnName()) + "', '" + database.escapeColumnName(getNewColumnName()) + "'";
+            return "exec sp_rename '" + database.escapeTableName(getSchemaName(), getTableName()) + "." + database.escapeColumnName(getSchemaName(), getTableName(), getOldColumnName()) + "', '" + database.escapeColumnName(getSchemaName(), getTableName(), getNewColumnName()) + "'";
         } else if (database instanceof MySQLDatabase) {
             if (getColumnDataType() == null) {
                 throw new StatementNotSupportedOnDatabaseException("columnDataType is required to rename columns", this, database);
             }
 
-            return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " CHANGE " + database.escapeColumnName(getOldColumnName()) + " " + database.escapeColumnName(getNewColumnName()) + " " + getColumnDataType();
+            return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " CHANGE " + database.escapeColumnName(getSchemaName(), getTableName(), getOldColumnName()) + " " + database.escapeColumnName(getSchemaName(), getTableName(), getNewColumnName()) + " " + getColumnDataType();
         } else if (database instanceof HsqlDatabase) {
-            return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ALTER COLUMN " + database.escapeColumnName(getOldColumnName()) + " RENAME TO " + database.escapeColumnName(getNewColumnName());
+            return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ALTER COLUMN " + database.escapeColumnName(getSchemaName(), getTableName(), getOldColumnName()) + " RENAME TO " + database.escapeColumnName(getSchemaName(), getTableName(), getNewColumnName());
         } else if (database instanceof FirebirdDatabase) {
-            return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ALTER COLUMN " + database.escapeColumnName(getOldColumnName()) + " TO " + database.escapeColumnName(getNewColumnName());
+            return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ALTER COLUMN " + database.escapeColumnName(getSchemaName(), getTableName(), getOldColumnName()) + " TO " + database.escapeColumnName(getSchemaName(), getTableName(), getNewColumnName());
         } else if (database instanceof MaxDBDatabase) {
-          return "RENAME COLUMN " + database.escapeTableName(getSchemaName(), getTableName()) + "." + database.escapeColumnName(getOldColumnName()) + " TO " + database.escapeColumnName(getNewColumnName());
+          return "RENAME COLUMN " + database.escapeTableName(getSchemaName(), getTableName()) + "." + database.escapeColumnName(getSchemaName(), getTableName(), getOldColumnName()) + " TO " + database.escapeColumnName(getSchemaName(), getTableName(), getNewColumnName());
         }
 
-        return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " RENAME COLUMN " + database.escapeColumnName(getOldColumnName()) + " TO " + database.escapeColumnName(getNewColumnName());
+        return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " RENAME COLUMN " + database.escapeColumnName(getSchemaName(), getTableName(), getOldColumnName()) + " TO " + database.escapeColumnName(getSchemaName(), getTableName(), getNewColumnName());
     }
 
     public String getEndDelimiter(Database database) {

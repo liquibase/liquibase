@@ -285,7 +285,7 @@ public class MockDatabase implements Database {
         }
     }
 
-    public String escapeColumnName(String columnName) {
+    public String escapeColumnName(String schemaName, String tableName, String columnName) {
         return columnName;
     }
 
