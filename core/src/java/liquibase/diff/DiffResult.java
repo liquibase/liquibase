@@ -697,8 +697,9 @@ public class DiffResult {
                     if (primaryKey == null || primaryKey.getColumnNamesAsList().size() == 1) {
                         constraintsConfig = new ConstraintsConfig();
                         constraintsConfig.setPrimaryKey(true);
-
+                        
                         if (primaryKey != null) {
+                            constraintsConfig.setPrimaryKeyName(primaryKey.getName());
                             getMissingPrimaryKeys().remove(primaryKey);
                         }
                     }
