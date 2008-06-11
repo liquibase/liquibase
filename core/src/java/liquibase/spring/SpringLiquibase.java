@@ -147,7 +147,10 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
         } finally {
             if (connection != null) {
                 try {
-                    connection.rollback();
+                    if (!connection.getAutoCommit())
+                    {
+                      connection.rollback();
+                    }
                     connection.close();
                 } catch (Exception e) {
                     log.log(Level.WARNING, "problem closing connection", e);
