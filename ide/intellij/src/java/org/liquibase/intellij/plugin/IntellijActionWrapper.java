@@ -12,6 +12,7 @@ import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.structure.*;
 import liquibase.exception.LiquibaseException;
+import liquibase.exception.JDBCException;
 import org.liquibase.ide.common.IdeFacade;
 import org.liquibase.ide.common.action.BaseDatabaseAction;
 import org.liquibase.ide.common.action.MigratorAction;
@@ -42,10 +43,11 @@ public class IntellijActionWrapper extends PortableAction {
     }
 
     public void actionPerformed(ActionEvent actionEvent) {
-        try {
-            DatabaseObject selectedDatabaseObject = getSelectedDatabaseObject();
-            Database selectedDatabase = getSelectedDatabase();
-            if (action instanceof BaseRefactorAction) {
+       Database selectedDatabase = null;
+       try {
+          selectedDatabase = getSelectedDatabase();
+          DatabaseObject selectedDatabaseObject = getSelectedDatabaseObject();
+           if (action instanceof BaseRefactorAction) {
                 IntellijRefactorWizard wizard = new IntellijRefactorWizard(((BaseRefactorAction) action).createRefactorWizard(selectedDatabaseObject), selectedDatabaseObject, selectedDatabase, ((BaseRefactorAction) action));
                 wizard.setup();
                 wizard.pack();
@@ -53,13 +55,23 @@ public class IntellijActionWrapper extends PortableAction {
             } else if (action instanceof MigratorAction) {
                 ((MigratorAction) action).actionPerform(selectedDatabase, ideFacade);
             }
-
-            if (action.needsRefresh()) {
-                refresh();
-            }
+          if (! selectedDatabase.getAutoCommitMode()) {
+             selectedDatabase.commit();
+          }
         } catch (LiquibaseException e) {
             ideFacade.showError("Error Executing Change", e);
-        }
+        } finally {
+          if (selectedDatabase != null) {
+             try {
+                selectedDatabase.close();
+             } catch (JDBCException e) {
+                //ignore, we did our best.
+             }
+          }
+       }
+       if (action.needsRefresh()) {
+           refresh();
+       }
     }
 
     private void refresh() {
