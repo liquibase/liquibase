@@ -253,4 +253,60 @@ public class PostgresDatabase extends AbstractDatabase {
     public String convertRequestedSchemaToCatalog(String requestedSchema) throws JDBCException {
         return null;
     }
+
+  /**
+   * @see liquibase.database.AbstractDatabase#escapeTableName(java.lang.String, java.lang.String)
+   */
+  @Override
+  public String escapeTableName (String schemaName, String tableName)
+  {
+    //Check if tableName is in reserved words and has CaseSensitivity problems
+    if (StringUtils.trimToNull(tableName) != null && (hasCaseProblems(tableName) || isReservedWord(tableName)))
+    {
+      return super.escapeTableName(schemaName, "\"" + tableName + "\"");
+    }
+    return super.escapeTableName(schemaName, tableName);
+  }
+
+  /**
+   * @see liquibase.database.AbstractDatabase#escapeColumnName(java.lang.String)
+   */
+  @Override
+  public String escapeColumnName (String columnName)
+  {
+    if (hasCaseProblems(columnName) || isReservedWord(columnName))
+      return "\"" + columnName + "\"";
+    return columnName;
+  }
+  
+  /*
+   * Check if given string has case problems according to postgresql documentation. 
+   * If there are at least one characters with upper case while all other are in lower case (or vice versa) this string should be escaped. 
+   */
+  private boolean hasCaseProblems (String tableName)
+  {
+    if (tableName.matches(".*[A-Z].*") && tableName.matches(".*[a-z].*"))
+      return true;
+    return false;
+  }
+
+  /*
+   * Check if given string is reserved word.
+   */
+  private boolean isReservedWord (String tableName)
+  {
+    for (int i = 0; i != this.reservedWords.length; i++)
+      if (this.reservedWords[i].toLowerCase().equalsIgnoreCase(tableName))
+        return true;
+    return false;
+  }
+
+  /*
+   * Reserved words from postgresql documentation
+   */
+  private String[] reservedWords = new String[] {"ALL", "ANALYSE", "ANALYZE", "AND", "ANY", "ARRAY", "AS", "ASC", "ASYMMETRIC", "AUTHORIZATION", "BETWEEN", "BINARY", "BOTH", "CASE", "CAST", "CHECK", "COLLATE", "COLUMN", "CONSTRAINT", "CORRESPONDING", "CREATE", "CROSS", "CURRENT_DATE", "CURRENT_ROLE", "CURRENT_TIME", "CURRENT_TIMESTAMP", "CURRENT_USER", "DEFAULT", "DEFERRABLE", "DESC", "DISTINCT", "DO", "ELSE", "END", "EXCEPT", "FALSE", "FOR", "FOREIGN", "FREEZE", "FROM", "FULL", "GRANT", "GROUP", "HAVING",
+      "ILIKE", "IN", "INITIALLY", "INNER", "INTERSECT", "INTO", "IS", "ISNULL", "JOIN", "LEADING", "LEFT", "LIKE", "LIMIT", "LOCALTIME", "LOCALTIMESTAMP", "NATURAL", "NEW", "NOT", "NOTNULL", "NULL", "OFF", "OFFSET", "OLD", "ON", "ONLY", "OPEN", "OR", "ORDER", "OUTER", "OVERLAPS", "PLACING", "PRIMARY", "REFERENCES", "RETURNING", "RIGHT", "SELECT", "SESSION_USER", "SIMILAR", "SOME", "SYMMETRIC", "TABLE", "THEN", "TO", "TRAILING", "TRUE", "UNION", "UNIQUE", "USER", "USING", "VERBOSE", "WHEN", "WHERE"};
+
+    
+    
 }
