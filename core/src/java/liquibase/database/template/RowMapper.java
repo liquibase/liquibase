@@ -17,7 +17,7 @@ import java.sql.SQLException;
  * @see RowCallbackHandler
  * @see ResultSetExtractor
  */
-interface RowMapper {
+public interface RowMapper {
 
     /**
      * Implementations must implement this method to map each row of data
