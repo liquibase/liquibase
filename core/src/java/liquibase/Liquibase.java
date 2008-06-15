@@ -329,6 +329,47 @@ public class Liquibase {
         }
     }
 
+    public void markNextChangeSetRan(String contexts, Writer output) throws LiquibaseException {
+
+        JdbcOutputTemplate outputTemplate = new JdbcOutputTemplate(output, database);
+        JdbcTemplate oldTemplate = database.getJdbcTemplate();
+        database.setJdbcTemplate(outputTemplate);
+
+        outputHeader("SQL to add all changesets to database history table");
+
+        markNextChangeSetRan(contexts);
+
+        try {
+            output.flush();
+        } catch (IOException e) {
+            throw new LiquibaseException(e);
+        }
+
+        database.setJdbcTemplate(oldTemplate);
+    }
+
+    public void markNextChangeSetRan(String contexts) throws LiquibaseException {
+        LockHandler lockHandler = LockHandler.getInstance(database);
+        lockHandler.waitForLock();
+
+        try {
+            database.checkDatabaseChangeLogTable();
+
+            DatabaseChangeLog changeLog = new ChangeLogParser().parse(changeLogFile, fileOpener);
+            changeLog.validate(database);
+
+            ChangeLogIterator logIterator = new ChangeLogIterator(changeLog,
+                    new NotRanChangeSetFilter(database.getRanChangeSetList()),
+                    new ContextChangeSetFilter(contexts),
+                    new DbmsChangeSetFilter(database),
+                    new CountChangeSetFilter(1));
+
+            logIterator.run(new ChangeLogSyncVisitor(database));
+        } finally {
+            lockHandler.releaseLock();
+        }
+    }
+
     public void futureRollbackSQL(String contexts, Writer output) throws LiquibaseException {
         JdbcOutputTemplate outputTemplate = new JdbcOutputTemplate(output, database);
         JdbcTemplate oldTemplate = database.getJdbcTemplate();

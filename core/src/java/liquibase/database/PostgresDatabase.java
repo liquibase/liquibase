@@ -269,10 +269,10 @@ public class PostgresDatabase extends AbstractDatabase {
   }
 
   /**
-   * @see liquibase.database.AbstractDatabase#escapeColumnName(java.lang.String)
+   * @see liquibase.database.AbstractDatabase#escapeColumnName(java.lang.String, java.lang.String, java.lang.String)
    */
   @Override
-  public String escapeColumnName (String columnName)
+  public String escapeColumnName (String schemaName, String tableName, String columnName)
   {
     if (hasCaseProblems(columnName) || isReservedWord(columnName))
       return "\"" + columnName + "\"";
