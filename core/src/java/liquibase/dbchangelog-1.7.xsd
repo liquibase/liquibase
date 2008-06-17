@@ -18,6 +18,14 @@
                         </xsd:complexType>
                     </xsd:element>
 
+                    <xsd:element name="property" maxOccurs="unbounded">
+                        <xsd:complexType>
+                            <xsd:attribute name="file" type="xsd:string"/>
+                            <xsd:attribute name="name" type="xsd:string"/>
+                            <xsd:attribute name="value" type="xsd:string"/>
+                        </xsd:complexType>
+                    </xsd:element>
+
                     <!-- changeSet -->
                     <xsd:element name="changeSet" minOccurs="0" maxOccurs="1">
                         <xsd:complexType>
