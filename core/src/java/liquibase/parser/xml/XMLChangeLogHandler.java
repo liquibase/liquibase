@@ -18,10 +18,13 @@ import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.List;
-import java.util.Stack;
+import java.util.*;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
+import java.util.regex.MatchResult;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.io.InputStream;
 
 class XMLChangeLogHandler extends DefaultHandler {
 
@@ -36,6 +39,8 @@ class XMLChangeLogHandler extends DefaultHandler {
     private FileOpener fileOpener;
     private Precondition currentPrecondition;
 
+    private Map<String, Object> parameters = new HashMap<String, Object>();
+
 
     protected XMLChangeLogHandler(String physicalChangeLogLocation, FileOpener fileOpener) {
         log = LogFactory.getLogger();
@@ -49,7 +54,8 @@ class XMLChangeLogHandler extends DefaultHandler {
         return databaseChangeLog;
     }
 
-    public void startElement(String uri, String localName, String qName, Attributes atts) throws SAXException {
+    public void startElement(String uri, String localName, String qName, Attributes baseAttributes) throws SAXException {
+        Attributes atts = new ExpandingAttributes(baseAttributes);
         try {
             if ("comment".equals(qName)) {
                 text = new StringBuffer();
@@ -165,6 +171,22 @@ class XMLChangeLogHandler extends DefaultHandler {
                 }
             } else if ("where".equals(qName)) {
                 text = new StringBuffer();
+            } else if ("property".equals(qName)) {
+                if (StringUtils.trimToNull(atts.getValue("file")) == null) {
+                    this.setParameterValue(atts.getValue("name"), atts.getValue("value"));
+                } else {
+                    Properties props = new Properties();
+                    InputStream propertiesStream = fileOpener.getResourceAsStream(atts.getValue("file"));
+                    if (propertiesStream == null) {
+                        log.info("Could not open properties file "+atts.getValue("file"));
+                    } else {
+                        props.load(propertiesStream);
+
+                        for (Map.Entry entry : props.entrySet()) {
+                            this.setParameterValue(entry.getKey().toString(), entry.getValue().toString());
+                        }
+                    }
+                }
             } else if (change instanceof ExecuteShellCommandChange && "arg".equals(qName)) {
                 ((ExecuteShellCommandChange) change).addArg(atts.getValue("value"));
             } else {
@@ -186,19 +208,19 @@ class XMLChangeLogHandler extends DefaultHandler {
     private void setProperty(Object object, String attributeName, String attributeValue) throws IllegalAccessException, InvocationTargetException, CustomChangeException {
         if (object instanceof CustomChangeWrapper) {
             if (attributeName.equals("class")) {
-                ((CustomChangeWrapper) object).setClass(attributeValue);
+                ((CustomChangeWrapper) object).setClass(expandExpressions(attributeValue));
             } else {
-                ((CustomChangeWrapper) object).setParam(attributeName, attributeValue);
+                ((CustomChangeWrapper) object).setParam(attributeName, expandExpressions(attributeValue));
             }
         } else {
-            ObjectUtil.setProperty(object, attributeName, attributeValue);
+            ObjectUtil.setProperty(object, attributeName, expandExpressions(attributeValue));
         }
     }
 
     public void endElement(String uri, String localName, String qName) throws SAXException {
         String textString = null;
         if (text != null && text.length() > 0) {
-            textString = StringUtils.trimToNull(text.toString());
+            textString = expandExpressions(StringUtils.trimToNull(text.toString()));
         }
 
         try {
@@ -272,6 +294,27 @@ class XMLChangeLogHandler extends DefaultHandler {
         }
     }
 
+    protected String expandExpressions(String text) {
+        if (text == null) {
+            return null;
+        }
+        Pattern expressionPattern = Pattern.compile("(\\$\\{[^\\}]+\\})");
+        Matcher matcher = expressionPattern.matcher(text);
+        String originalText = text;
+        while (matcher.find()) {
+            String expressionString = originalText.substring(matcher.start(), matcher.end());
+            String valueTolookup = expressionString.replaceFirst("\\$\\{","").replaceFirst("\\}$", "");
+
+            int dotIndex = valueTolookup.indexOf('.');
+            Object value = getParameterValue(valueTolookup);
+
+            if (value != null) {
+                text = text.replace(expressionString, value.toString());
+            }
+        }
+        return text;
+    }
+
     protected void handlePreCondition(@SuppressWarnings("unused")Precondition precondition) {
         databaseChangeLog.setPreconditions(rootPrecondition);
     }
@@ -283,6 +326,75 @@ class XMLChangeLogHandler extends DefaultHandler {
     public void characters(char ch[], int start, int length) throws SAXException {
         if (text != null) {
             text.append(new String(ch, start, length));
+        }
+    }
+
+    public Object getParameterValue(String paramter) {
+        return parameters.get(paramter);
+    }
+
+    public void setParameterValue(String paramter, Object value) {
+        if (!parameters.containsKey(paramter)) {
+            parameters.put(paramter, value);
+        }
+    }
+
+    /**
+     * Wrapper for Attributes that expands the value as needed
+     */
+    private  class ExpandingAttributes implements Attributes {
+        private Attributes attributes;
+
+        private ExpandingAttributes(Attributes attributes) {
+            this.attributes = attributes;
+        }
+
+        public int getLength() {
+            return attributes.getLength();
+        }
+
+        public String getURI(int index) {
+            return attributes.getURI(index);
+        }
+
+        public String getLocalName(int index) {
+            return attributes.getLocalName(index);
+        }
+
+        public String getQName(int index) {
+            return attributes.getQName(index);
+        }
+
+        public String getType(int index) {
+            return attributes.getType(index);
+        }
+
+        public String getValue(int index) {
+            return attributes.getValue(index);
+        }
+
+        public int getIndex(String uri, String localName) {
+            return attributes.getIndex(uri, localName);
+        }
+
+        public int getIndex(String qName) {
+            return attributes.getIndex(qName);
+        }
+
+        public String getType(String uri, String localName) {
+            return attributes.getType(uri, localName);
+        }
+
+        public String getType(String qName) {
+            return attributes.getType(qName);
+        }
+
+        public String getValue(String uri, String localName) {
+            return expandExpressions(attributes.getValue(uri, localName));
+        }
+
+        public String getValue(String qName) {
+            return expandExpressions(attributes.getValue(qName));
         }
     }
 }

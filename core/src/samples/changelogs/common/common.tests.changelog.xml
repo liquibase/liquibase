@@ -5,6 +5,11 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.7 http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.7.xsd">
 
+    <property name="table.name" value="paramter_table"/>
+    <property file="changelogs/common/dynamic.parameters.properties"/>
+    <property name="column1.name" value="updated-columnA"/>
+    <property name="column2.name" value="columnB"/>
+
     <changeSet id="datatypetest-1" author="nvoxland">
         <createTable tableName="dataTypeTest">
             <column name="id" type="int">
@@ -381,6 +386,14 @@
             <column header="locked" type="BOOLEAN"/>
             <column header="security_level" type="NUMERIC"/>
         </loadData>
+    </changeSet>
+
+    <changeSet id="changeLogParameters" author="nvoxland">
+        <createTable tableName="${table.name}">
+            <column name="id" type="int"/>
+            <column name="${column1.name}" type="varchar(${column1.length})"/>
+            <column name="${column2.name}" type="int"/>
+        </createTable>
     </changeSet>
 
 </databaseChangeLog>
