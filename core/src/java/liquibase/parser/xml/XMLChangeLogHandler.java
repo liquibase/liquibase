@@ -21,7 +21,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
-import java.util.regex.MatchResult;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.io.InputStream;
@@ -39,15 +38,23 @@ class XMLChangeLogHandler extends DefaultHandler {
     private FileOpener fileOpener;
     private Precondition currentPrecondition;
 
-    private Map<String, Object> parameters = new HashMap<String, Object>();
+    private Map<String, Object> changeLogParameters = new HashMap<String, Object>();
 
 
-    protected XMLChangeLogHandler(String physicalChangeLogLocation, FileOpener fileOpener) {
+    protected XMLChangeLogHandler(String physicalChangeLogLocation, FileOpener fileOpener, Map<String, Object> properties) {
         log = LogFactory.getLogger();
         this.fileOpener = fileOpener;
 
         databaseChangeLog = new DatabaseChangeLog(physicalChangeLogLocation);
         databaseChangeLog.setPhysicalFilePath(physicalChangeLogLocation);
+
+        for (Map.Entry entry : System.getProperties().entrySet()) {
+            changeLogParameters.put(entry.getKey().toString(), entry.getValue());
+        }
+
+        for (Map.Entry entry : properties.entrySet()) {
+            changeLogParameters.put(entry.getKey().toString(), entry.getValue());
+        }
     }
 
     public DatabaseChangeLog getDatabaseChangeLog() {
@@ -200,7 +207,7 @@ class XMLChangeLogHandler extends DefaultHandler {
     }
 
     protected void handleIncludedChangeLog(String fileName) throws LiquibaseException {
-        for (ChangeSet changeSet : new ChangeLogParser().parse(fileName, fileOpener).getChangeSets()) {
+        for (ChangeSet changeSet : new ChangeLogParser(changeLogParameters).parse(fileName, fileOpener).getChangeSets()) {
             databaseChangeLog.addChangeSet(changeSet);
         }
     }
@@ -330,12 +337,12 @@ class XMLChangeLogHandler extends DefaultHandler {
     }
 
     public Object getParameterValue(String paramter) {
-        return parameters.get(paramter);
+        return changeLogParameters.get(paramter);
     }
 
     public void setParameterValue(String paramter, Object value) {
-        if (!parameters.containsKey(paramter)) {
-            parameters.put(paramter, value);
+        if (!changeLogParameters.containsKey(paramter)) {
+            changeLogParameters.put(paramter, value);
         }
     }
 
