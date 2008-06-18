@@ -47,6 +47,8 @@ public class Main {
     protected String logLevel;
     protected String logFile;
 
+    protected Map<String, Object> changeLogParameters = new HashMap<String, Object>();
+
     public static void main(String args[]) throws CommandLineParsingException, IOException {
         String shouldRunProperty = System.getProperty(Liquibase.SHOULD_RUN_SYSTEM_PROPERTY);
         if (shouldRunProperty != null && !Boolean.valueOf(shouldRunProperty)) {
@@ -331,6 +333,11 @@ public class Main {
         stream.println("Optional Diff Parameters:");
         stream.println(" --baseDriver=<jdbc.driver.ClassName>       Base Database driver class name");
         stream.println("");
+        stream.println("Change Log Properties:");
+        stream.println(" -D<property.name>=<property.value>         Pass a name/value pair to changelog");
+        stream.println("                                            To allow dynamic substitution of");
+        stream.println("                                            ${} blocks in the change log(s)");
+        stream.println("");
         stream.println("Default value for parameters can be stored in a file called");
         stream.println("'liquibase.properties' that is read from the current working directory.");
         stream.println("");
@@ -374,6 +381,13 @@ public class Main {
                 } catch (Exception e) {
                     throw new CommandLineParsingException("Unknown parameter: '" + attributeName + "'");
                 }
+            } else if (arg.startsWith("-D")) {
+                String[] splitArg = splitArg(arg);
+
+                String attributeName = splitArg[0].replaceFirst("^-D", "");
+                String value = splitArg[1];
+
+                changeLogParameters.put(attributeName, value);
             } else {
                 throw new CommandLineParsingException("Unexpected value " + arg + ": parameters must start with a '--'");
             }
@@ -561,6 +575,9 @@ public class Main {
 
 
             Liquibase liquibase = new Liquibase(changeLogFile, fileOpener, database);
+            for (Map.Entry<String, Object> entry : changeLogParameters.entrySet()) {
+                liquibase.setChangeLogParameterValue(entry.getKey(), entry.getValue());
+            }
 
             if ("listLocks".equalsIgnoreCase(command)) {
                 liquibase.reportLocks(System.out);

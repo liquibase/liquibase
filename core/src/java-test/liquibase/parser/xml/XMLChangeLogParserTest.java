@@ -12,11 +12,13 @@ import liquibase.test.JUnitFileOpener;
 import static org.junit.Assert.*;
 import org.junit.Test;
 
+import java.util.HashMap;
+
 public class XMLChangeLogParserTest {
 
     @Test
     public void simpleChangeLog() throws Exception {
-        DatabaseChangeLog changeLog = new XMLChangeLogParser().parse("liquibase/parser/xml/simpleChangeLog.xml", new JUnitFileOpener());
+        DatabaseChangeLog changeLog = new XMLChangeLogParser().parse("liquibase/parser/xml/simpleChangeLog.xml", new JUnitFileOpener(), new HashMap<String, Object>());
 
         assertEquals("liquibase/parser/xml/simpleChangeLog.xml", changeLog.getLogicalFilePath());
         assertEquals("liquibase/parser/xml/simpleChangeLog.xml", changeLog.getPhysicalFilePath());
@@ -38,7 +40,7 @@ public class XMLChangeLogParserTest {
 
     @Test
     public void multiChangeSetChangeLog() throws Exception {
-        DatabaseChangeLog changeLog = new XMLChangeLogParser().parse("liquibase/parser/xml/multiChangeSetChangeLog.xml", new JUnitFileOpener());
+        DatabaseChangeLog changeLog = new XMLChangeLogParser().parse("liquibase/parser/xml/multiChangeSetChangeLog.xml", new JUnitFileOpener(), new HashMap<String, Object>());
 
         assertEquals("liquibase/parser/xml/multiChangeSetChangeLog.xml", changeLog.getLogicalFilePath());
         assertEquals("liquibase/parser/xml/multiChangeSetChangeLog.xml", changeLog.getPhysicalFilePath());
@@ -98,7 +100,7 @@ public class XMLChangeLogParserTest {
 
     @Test
     public void logicalPathChangeLog() throws Exception {
-        DatabaseChangeLog changeLog = new XMLChangeLogParser().parse("liquibase/parser/xml/logicalPathChangeLog.xml", new JUnitFileOpener());
+        DatabaseChangeLog changeLog = new XMLChangeLogParser().parse("liquibase/parser/xml/logicalPathChangeLog.xml", new JUnitFileOpener(), new HashMap<String, Object>());
 
         assertEquals("liquibase/parser-logical/xml/logicalPathChangeLog.xml", changeLog.getLogicalFilePath());
         assertEquals("liquibase/parser/xml/logicalPathChangeLog.xml", changeLog.getPhysicalFilePath());
@@ -111,7 +113,7 @@ public class XMLChangeLogParserTest {
 
     @Test
     public void preconditionsChangeLog() throws Exception {
-        DatabaseChangeLog changeLog = new XMLChangeLogParser().parse("liquibase/parser/xml/preconditionsChangeLog.xml", new JUnitFileOpener());
+        DatabaseChangeLog changeLog = new XMLChangeLogParser().parse("liquibase/parser/xml/preconditionsChangeLog.xml", new JUnitFileOpener(), new HashMap<String, Object>());
 
         assertEquals("liquibase/parser/xml/preconditionsChangeLog.xml", changeLog.getLogicalFilePath());
         assertEquals("liquibase/parser/xml/preconditionsChangeLog.xml", changeLog.getPhysicalFilePath());
@@ -130,7 +132,7 @@ public class XMLChangeLogParserTest {
 
     @Test
     public void testNestedChangeLog() throws Exception {
-        DatabaseChangeLog changeLog = new XMLChangeLogParser().parse("liquibase/parser/xml/nestedChangeLog.xml", new JUnitFileOpener());
+        DatabaseChangeLog changeLog = new XMLChangeLogParser().parse("liquibase/parser/xml/nestedChangeLog.xml", new JUnitFileOpener(), new HashMap<String, Object>());
 
         assertEquals("liquibase/parser/xml/nestedChangeLog.xml", changeLog.getLogicalFilePath());
         assertEquals("liquibase/parser/xml/nestedChangeLog.xml", changeLog.getPhysicalFilePath());
@@ -178,7 +180,7 @@ public class XMLChangeLogParserTest {
 
     @Test
     public void doubleNestedChangeLog() throws Exception {
-        DatabaseChangeLog changeLog = new XMLChangeLogParser().parse("liquibase/parser/xml/doubleNestedChangeLog.xml", new JUnitFileOpener());
+        DatabaseChangeLog changeLog = new XMLChangeLogParser().parse("liquibase/parser/xml/doubleNestedChangeLog.xml", new JUnitFileOpener(), new HashMap<String, Object>());
 
         assertEquals("liquibase/parser/xml/doubleNestedChangeLog.xml", changeLog.getLogicalFilePath());
         assertEquals("liquibase/parser/xml/doubleNestedChangeLog.xml", changeLog.getPhysicalFilePath());
@@ -238,7 +240,7 @@ public class XMLChangeLogParserTest {
     @Test
     public void missingChangeLog() throws Exception {
         try {
-            DatabaseChangeLog changeLog = new XMLChangeLogParser().parse("liquibase/parser/xml/missingChangeLog.xml", new JUnitFileOpener());
+            DatabaseChangeLog changeLog = new XMLChangeLogParser().parse("liquibase/parser/xml/missingChangeLog.xml", new JUnitFileOpener(), new HashMap<String, Object>());
         } catch (Exception e) {
             assertTrue(e instanceof ChangeLogParseException);
             assertEquals("liquibase/parser/xml/missingChangeLog.xml does not exist", e.getMessage());
@@ -249,7 +251,7 @@ public class XMLChangeLogParserTest {
     @Test
     public void malformedChangeLog() throws Exception {
         try {
-            DatabaseChangeLog changeLog = new XMLChangeLogParser().parse("liquibase/parser/xml/malformedChangeLog.xml", new JUnitFileOpener());
+            DatabaseChangeLog changeLog = new XMLChangeLogParser().parse("liquibase/parser/xml/malformedChangeLog.xml", new JUnitFileOpener(), new HashMap<String, Object>());
         } catch (Exception e) {
             assertTrue(e instanceof ChangeLogParseException);
             assertTrue(e.getMessage().startsWith("Error parsing line"));
@@ -259,17 +261,17 @@ public class XMLChangeLogParserTest {
 
     @Test
     public void sampleChangeLogs() throws Exception {
-        new XMLChangeLogParser().parse("changelogs/cache/complete/root.changelog.xml", new JUnitFileOpener());
-        new XMLChangeLogParser().parse("changelogs/db2/complete/root.changelog.xml", new JUnitFileOpener());
-        new XMLChangeLogParser().parse("changelogs/derby/complete/root.changelog.xml", new JUnitFileOpener());
-        new XMLChangeLogParser().parse("changelogs/firebird/complete/root.changelog.xml", new JUnitFileOpener());
-        new XMLChangeLogParser().parse("changelogs/h2/complete/root.changelog.xml", new JUnitFileOpener());
-        new XMLChangeLogParser().parse("changelogs/hsqldb/complete/root.changelog.xml", new JUnitFileOpener());
-        new XMLChangeLogParser().parse("changelogs/maxdb/complete/root.changelog.xml", new JUnitFileOpener());
-        new XMLChangeLogParser().parse("changelogs/mysql/complete/root.changelog.xml", new JUnitFileOpener());
-        new XMLChangeLogParser().parse("changelogs/oracle/complete/root.changelog.xml", new JUnitFileOpener());
-        new XMLChangeLogParser().parse("changelogs/pgsql/complete/root.changelog.xml", new JUnitFileOpener());
-        new XMLChangeLogParser().parse("changelogs/sybase/complete/root.changelog.xml", new JUnitFileOpener());
-        new XMLChangeLogParser().parse("changelogs/unsupported/complete/root.changelog.xml", new JUnitFileOpener());
+        new XMLChangeLogParser().parse("changelogs/cache/complete/root.changelog.xml", new JUnitFileOpener(), new HashMap<String, Object>());
+        new XMLChangeLogParser().parse("changelogs/db2/complete/root.changelog.xml", new JUnitFileOpener(), new HashMap<String, Object>());
+        new XMLChangeLogParser().parse("changelogs/derby/complete/root.changelog.xml", new JUnitFileOpener(), new HashMap<String, Object>());
+        new XMLChangeLogParser().parse("changelogs/firebird/complete/root.changelog.xml", new JUnitFileOpener(), new HashMap<String, Object>());
+        new XMLChangeLogParser().parse("changelogs/h2/complete/root.changelog.xml", new JUnitFileOpener(), new HashMap<String, Object>());
+        new XMLChangeLogParser().parse("changelogs/hsqldb/complete/root.changelog.xml", new JUnitFileOpener(), new HashMap<String, Object>());
+        new XMLChangeLogParser().parse("changelogs/maxdb/complete/root.changelog.xml", new JUnitFileOpener(), new HashMap<String, Object>());
+        new XMLChangeLogParser().parse("changelogs/mysql/complete/root.changelog.xml", new JUnitFileOpener(), new HashMap<String, Object>());
+        new XMLChangeLogParser().parse("changelogs/oracle/complete/root.changelog.xml", new JUnitFileOpener(), new HashMap<String, Object>());
+        new XMLChangeLogParser().parse("changelogs/pgsql/complete/root.changelog.xml", new JUnitFileOpener(), new HashMap<String, Object>());
+        new XMLChangeLogParser().parse("changelogs/sybase/complete/root.changelog.xml", new JUnitFileOpener(), new HashMap<String, Object>());
+        new XMLChangeLogParser().parse("changelogs/unsupported/complete/root.changelog.xml", new JUnitFileOpener(), new HashMap<String, Object>());
     }
 }

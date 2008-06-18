@@ -11,14 +11,16 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 public class XMLChangeLogParser {
 
     public static String getSchemaVersion() {
         return "1.7";
     }
-    
-    public DatabaseChangeLog parse(String physicalChangeLogLocation, FileOpener fileOpener) throws ChangeLogParseException {
+
+    public DatabaseChangeLog parse(String physicalChangeLogLocation, FileOpener fileOpener, Map changeLogProperties) throws ChangeLogParseException {
 
         SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
         if (System.getProperty("java.vm.version").startsWith("1.4")) {
@@ -64,7 +66,7 @@ public class XMLChangeLogParser {
                 throw new ChangeLogParseException(physicalChangeLogLocation + " does not exist");
             }
 
-            XMLChangeLogHandler contentHandler = new XMLChangeLogHandler(physicalChangeLogLocation, fileOpener);
+            XMLChangeLogHandler contentHandler = new XMLChangeLogHandler(physicalChangeLogLocation, fileOpener, changeLogProperties);
             xmlReader.setContentHandler(contentHandler);
             xmlReader.parse(new InputSource(inputStream));
 

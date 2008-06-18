@@ -21,9 +21,7 @@ import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.sql.Connection;
 import java.sql.Driver;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
@@ -46,6 +44,8 @@ public class BaseLiquibaseTask extends Task {
     private String outputFile;
     private String defaultSchemaName;
     private String databaseClass;
+
+    private Map<String, Object> changeLogProperties = new HashMap<String, Object>();
 
     public BaseLiquibaseTask() {
         super();
@@ -147,6 +147,10 @@ public class BaseLiquibaseTask extends Task {
 
     public void setDefaultSchemaName(String defaultSchemaName) {
         this.defaultSchemaName = defaultSchemaName;
+    }
+
+    public void addChangeLogProperty(ChangeLogProperty changeLogProperty) {
+        System.out.println("called setChangeLOg");
     }
 
     protected Liquibase createLiquibase() throws Exception {
@@ -324,4 +328,24 @@ public class BaseLiquibaseTask extends Task {
 		this.databaseClass = databaseClass;
 	}
 
+    public static class ChangeLogProperty  {
+        private String name;
+        private String value;
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public String getValue() {
+            return value;
+        }
+
+        public void setValue(String value) {
+            this.value = value;
+        }
+    }
 }

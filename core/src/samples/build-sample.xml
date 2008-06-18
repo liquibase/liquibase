@@ -50,6 +50,7 @@
                 dropFirst="false"
                 classpathref="classpath"
                 >
+            <changeLogProperty name="table.name" value="ant_param_table"/>
         </updateDatabase>
     </target>
 
