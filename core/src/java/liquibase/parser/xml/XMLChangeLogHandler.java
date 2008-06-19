@@ -117,6 +117,26 @@ class XMLChangeLogHandler extends DefaultHandler {
                     }
                 }
                 inRollback = true;
+            } else if ("preConditions".equals(qName)) {
+                rootPrecondition = new AndPrecondition();
+                preconditionLogicStack.push(rootPrecondition);
+            } else if (rootPrecondition != null) {
+                currentPrecondition = PreconditionFactory.getInstance().create(qName);
+
+                for (int i = 0; i < atts.getLength(); i++) {
+                    String attributeName = atts.getQName(i);
+                    String attributeValue = atts.getValue(i);
+                    setProperty(currentPrecondition, attributeName, attributeValue);
+                }
+                preconditionLogicStack.peek().addNestedPrecondition(currentPrecondition);
+
+                if (currentPrecondition instanceof PreconditionLogic) {
+                    preconditionLogicStack.push(((PreconditionLogic) currentPrecondition));
+                }
+
+                if ("sqlCheck".equals(qName)) {
+                    text = new StringBuffer();
+                }
             } else if (changeSet != null && change == null) {
                 change = ChangeFactory.getInstance().create(qName);
                 change.setChangeSet(changeSet);
@@ -169,26 +189,6 @@ class XMLChangeLogHandler extends DefaultHandler {
                     throw new RuntimeException("Unexpected change: " + change.getClass().getName());
                 }
                 lastColumn.setConstraints(constraints);
-            } else if ("preConditions".equals(qName)) {
-                rootPrecondition = new AndPrecondition();
-                preconditionLogicStack.push(rootPrecondition);
-            } else if (rootPrecondition != null) {
-                currentPrecondition = PreconditionFactory.getInstance().create(qName);
-
-                for (int i = 0; i < atts.getLength(); i++) {
-                    String attributeName = atts.getQName(i);
-                    String attributeValue = atts.getValue(i);
-                    setProperty(currentPrecondition, attributeName, attributeValue);
-                }
-                preconditionLogicStack.peek().addNestedPrecondition(currentPrecondition);
-
-                if (currentPrecondition instanceof PreconditionLogic) {
-                    preconditionLogicStack.push(((PreconditionLogic) currentPrecondition));
-                }
-
-                if ("sqlCheck".equals(qName)) {
-                    text = new StringBuffer();
-                }
             } else if ("param".equals(qName)) {
                 if (change instanceof CustomChangeWrapper) {
                     ((CustomChangeWrapper) change).setParam(atts.getValue("name"), atts.getValue("value"));
@@ -252,8 +252,12 @@ class XMLChangeLogHandler extends DefaultHandler {
         try {
             if (rootPrecondition != null) {
                 if ("preConditions".equals(qName)) {
-                    databaseChangeLog.setPreconditions(rootPrecondition);
-                    handlePreCondition(rootPrecondition);
+                    if (changeSet == null) {
+                        databaseChangeLog.setPreconditions(rootPrecondition);
+                        handlePreCondition(rootPrecondition);
+                    } else {
+                        changeSet.setPreconditions(rootPrecondition);
+                    }
                     rootPrecondition = null;
                 } else if ("and".equals(qName)) {
                     preconditionLogicStack.pop();

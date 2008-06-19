@@ -76,7 +76,7 @@ public class XMLChangeLogParser {
         } catch (IOException e) {
             throw new ChangeLogParseException("Error Reading Migration File: " + e.getMessage(), e);
         } catch (SAXParseException e) {
-            throw new ChangeLogParseException("Error parsing line " + e.getLineNumber() + " column " + e.getColumnNumber() + " of " + ": " + e.getMessage());
+            throw new ChangeLogParseException("Error parsing line " + e.getLineNumber() + " column " + e.getColumnNumber() + " of " + physicalChangeLogLocation +": " + e.getMessage());
         } catch (SAXException e) {
             Throwable parentCause = e.getException();
             while (parentCause != null) {

@@ -25,6 +25,10 @@ public class FailedPrecondition {
 
 
     public String toString() {
-        return changeLog.toString()+" : "+message;
+        if (changeLog == null) {
+            return message;
+        } else {
+            return changeLog.toString()+" : "+message;
+        }
     }
 }
