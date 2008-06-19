@@ -17,6 +17,11 @@ public class RawSQLChange extends AbstractSQLChange {
         super("sql", "Custom SQL");
     }
 
+    public RawSQLChange(String sql) {
+        this();
+        setSql(sql);
+    }
+
     public String getComments() {
         return comments;
     }

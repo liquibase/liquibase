@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <databaseChangeLog
-        xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.6"
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.7"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.6 http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.6.xsd">
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.7 http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.7.xsd">
 
     <changeSet id="multiRollbackTest" author="rs" failOnError="false">
         <createTable tableName="multiRollback1">
@@ -20,6 +20,15 @@
             drop table multiRollback2;
         </rollback>
         <rollback>drop table multiRollback3</rollback>
+    </changeSet>
+
+    <changeSet id="changeRollback" author="nvoxland">
+        <createTable tableName="changeRollback1">
+            <column name="id" type="int"/>
+        </createTable>
+        <rollback>
+            <dropTable tableName="changeRollback1"/>
+        </rollback>
     </changeSet>
 
 </databaseChangeLog>

@@ -71,9 +71,9 @@ public class XMLChangeLogParserTest {
         assertEquals("Testing add column", changeSet.getComments());
         assertTrue(changeSet.shouldAlwaysRun());
         assertTrue(changeSet.shouldRunOnChange());
-        assertEquals(2, changeSet.getRollBackStatements().length);
-        assertTrue(changeSet.getRollBackStatements()[0] instanceof RawSqlStatement);
-        assertTrue(changeSet.getRollBackStatements()[1] instanceof RawSqlStatement);
+        assertEquals(2, changeSet.getRollBackChanges().length);
+        assertTrue(changeSet.getRollBackChanges()[0] instanceof RawSqlStatement);
+        assertTrue(changeSet.getRollBackChanges()[1] instanceof RawSqlStatement);
 
         change = changeSet.getChanges().get(0);
         assertEquals("addColumn", change.getTagName());
