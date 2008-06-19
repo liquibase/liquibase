@@ -100,6 +100,22 @@ class XMLChangeLogHandler extends DefaultHandler {
                 }
             } else if (changeSet != null && "rollback".equals(qName)) {
                 text = new StringBuffer();
+                String id = atts.getValue("changeSetId");
+                if (id != null) {
+                    String path = atts.getValue("changeSetPath");
+                    if (path == null) {
+                        path = databaseChangeLog.getFilePath();
+                    }
+                    String author = atts.getValue("changeSetAuthor");
+                    ChangeSet changeSet = databaseChangeLog.getChangeSet(path, author, id);
+                    if (changeSet == null) {
+                        throw new SAXException("Could not find changeSet to use for rollback: "+path+":"+author+":"+id);
+                    } else {
+                        for (Change change : changeSet.getChanges()) {
+                            this.changeSet.addRollbackChange(change);
+                        }
+                    }
+                }
                 inRollback = true;
             } else if (changeSet != null && change == null) {
                 change = ChangeFactory.getInstance().create(qName);
