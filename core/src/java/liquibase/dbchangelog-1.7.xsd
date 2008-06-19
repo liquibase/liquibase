@@ -29,9 +29,21 @@
                     <!-- changeSet -->
                     <xsd:element name="changeSet" minOccurs="0" maxOccurs="1">
                         <xsd:complexType>
-                            <xsd:choice>
-                                <xsd:group ref="changeSetChildren" maxOccurs="unbounded"/>
-                            </xsd:choice>
+                            <xsd:sequence>
+                                <xsd:element name="validCheckSum" minOccurs="0" maxOccurs="unbounded">
+                                    <xsd:complexType mixed="true">
+                                        <xsd:sequence>
+                                            <xsd:element ref="comment" minOccurs="0" maxOccurs="1"/>
+                                        </xsd:sequence>
+                                        <xsd:attributeGroup ref="tableNameAttribute"/>
+                                        <xsd:attribute name="stripComments" type="xsd:boolean"/>
+                                        <xsd:attribute name="splitStatements" type="xsd:boolean"/>
+                                    </xsd:complexType>
+                                </xsd:element>
+                                <xsd:choice>
+                                    <xsd:group ref="changeSetChildren" maxOccurs="unbounded"/>
+                                </xsd:choice>
+                            </xsd:sequence>
                             <xsd:attributeGroup ref="changeSetAttributes"/>
                         </xsd:complexType>
                     </xsd:element>

@@ -59,7 +59,7 @@ public class ValidatingVisitor implements ChangeSetVisitor {
             if (ranChangeSet.getId().equals(changeSet.getId())
                     && ranChangeSet.getAuthor().equals(changeSet.getAuthor())
                     && ranChangeSet.getChangeLog().equals(changeSet.getFilePath())) {
-                if (ranChangeSet.getMd5sum() != null && !ranChangeSet.getMd5sum().equals(changeSet.getMd5sum())) {
+                if (!changeSet.isCheckSumValid(ranChangeSet.getMd5sum())) {
                     if (!changeSet.shouldRunOnChange()) {
                         invalidMD5Sums.add(changeSet);
                     }

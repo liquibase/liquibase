@@ -66,6 +66,8 @@ class XMLChangeLogHandler extends DefaultHandler {
         try {
             if ("comment".equals(qName)) {
                 text = new StringBuffer();
+            } else if ("validCheckSum".equals(qName)) {
+                text = new StringBuffer();                
             } else if ("databaseChangeLog".equals(qName)) {
                 String version = uri.substring(uri.lastIndexOf("/")+1);
                 if (!version.equals(XMLChangeLogParser.getSchemaVersion())) {
@@ -152,7 +154,6 @@ class XMLChangeLogHandler extends DefaultHandler {
             } else if ("preConditions".equals(qName)) {
                 rootPrecondition = new AndPrecondition();
                 preconditionLogicStack.push(rootPrecondition);
-
             } else if (rootPrecondition != null) {
                 currentPrecondition = PreconditionFactory.getInstance().create(qName);
 
@@ -294,6 +295,9 @@ class XMLChangeLogHandler extends DefaultHandler {
                 text = null;
                 changeSet.addChange(change);
                 change = null;
+            } else if (changeSet != null && "validCheckSum".equals(qName)) {
+                changeSet.addValidCheckSum(text.toString());
+                text = null;
             }
         } catch (Exception e) {
             log.log(Level.SEVERE, "Error thrown as a SAXException: " + e.getMessage(), e);

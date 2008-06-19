@@ -43,6 +43,7 @@ public class ChangeSet {
     private Set<String> contexts;
     private Set<String> dbmsSet;
     private Boolean failOnError;
+    private Set<String> validCheckSums = new HashSet<String>();
 
     private List<SqlStatement> rollBackStatements = new ArrayList<SqlStatement>();
 
@@ -341,4 +342,26 @@ public class ChangeSet {
     public void setFailOnError(Boolean failOnError) {
         this.failOnError = failOnError;
     }
+
+    public void addValidCheckSum(String text) {
+        validCheckSums.add(text);
+    }
+
+    public boolean isCheckSumValid(String storedCheckSum) {
+        String currentMd5Sum = getMd5sum();
+        if (currentMd5Sum == null) {
+            return true;
+        }
+        if (currentMd5Sum.equals(storedCheckSum)) {
+            return true;
+        }
+
+        for (String validCheckSum : validCheckSums) {
+            if (currentMd5Sum.equals(validCheckSum)) {
+                return true;
+            }
+        }
+        return false;  //To change body of created methods use File | Settings | File Templates.
+    }
+
 }

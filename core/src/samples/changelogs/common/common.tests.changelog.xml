@@ -11,8 +11,9 @@
     <property name="column2.name" value="columnB"/>
 
     <changeSet id="datatypetest-1" author="nvoxland">
+        <validCheckSum>e5b7b29ce3a75640858cd022501852d2</validCheckSum>
         <createTable tableName="dataTypeTest">
-            <column name="id" type="int">
+            <column name="id" type="integer">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="dateCol" type="date"/>
