@@ -1,23 +1,17 @@
 package liquibase;
 
 import liquibase.change.Change;
+import liquibase.change.RawSQLChange;
 import liquibase.database.Database;
-import liquibase.database.sql.RawSqlStatement;
 import liquibase.database.sql.SqlStatement;
-import liquibase.exception.JDBCException;
-import liquibase.exception.MigrationFailedException;
-import liquibase.exception.RollbackFailedException;
-import liquibase.exception.SetupException;
+import liquibase.exception.*;
 import liquibase.log.LogFactory;
 import liquibase.util.MD5Util;
-import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Text;
 
-import java.io.IOException;
-import java.io.Writer;
 import java.util.*;
 import java.util.logging.Logger;
 import java.util.logging.Level;
@@ -45,7 +39,7 @@ public class ChangeSet {
     private Boolean failOnError;
     private Set<String> validCheckSums = new HashSet<String>();
 
-    private List<SqlStatement> rollBackStatements = new ArrayList<SqlStatement>();
+    private List<Change> rollBackChanges = new ArrayList<Change>();
 
     private String comments;
 
@@ -110,7 +104,6 @@ public class ChangeSet {
      * This method will actually execute each of the changes in the list against the
      * specified database.
      */
-
     public void execute(Database database) throws MigrationFailedException {
 
         try {
@@ -118,9 +111,9 @@ public class ChangeSet {
             if (StringUtils.trimToNull(getComments()) != null) {
                 String comments = getComments();
                 String[] lines = comments.split("\n");
-                for (int i=0; i<lines.length; i++) {
+                for (int i = 0; i < lines.length; i++) {
                     if (i > 0) {
-                        lines[i] = database.getLineComment()+" "+lines[i];
+                        lines[i] = database.getLineComment() + " " + lines[i];
                     }
                 }
                 database.getJdbcTemplate().comment(StringUtils.join(Arrays.asList(lines), "\n"));
@@ -151,7 +144,7 @@ public class ChangeSet {
                 throw new MigrationFailedException(this, e);
             }
             if (getFailOnError() != null && !getFailOnError()) {
-                log.log(Level.INFO, "Change set "+toString(false)+" failed, but failOnError was false", e);
+                log.log(Level.INFO, "Change set " + toString(false) + " failed, but failOnError was false", e);
             } else {
                 throw new MigrationFailedException(this, e);
             }
@@ -161,12 +154,14 @@ public class ChangeSet {
     public void rolback(Database database) throws RollbackFailedException {
         try {
             database.getJdbcTemplate().comment("Rolling Back ChangeSet: " + toString());
-            if (rollBackStatements != null && rollBackStatements.size()> 0) {
-                for (SqlStatement rollback : rollBackStatements) {
-                    try {
-                        database.getJdbcTemplate().execute(rollback);
-                    } catch (JDBCException e) {
-                        throw new RollbackFailedException("Error executing custom SQL [" + rollback.getSqlStatement(database) + "]", e);
+            if (rollBackChanges != null && rollBackChanges.size() > 0) {
+                for (Change rollback : rollBackChanges) {
+                    for (SqlStatement statement : rollback.generateStatements(database)) {
+                        try {
+                            database.getJdbcTemplate().execute(statement);
+                        } catch (JDBCException e) {
+                            throw new RollbackFailedException("Error executing custom SQL [" + statement + "]", e);
+                        }
                     }
                 }
 
@@ -277,22 +272,27 @@ public class ChangeSet {
         return node;
     }
 
-    public SqlStatement[] getRollBackStatements() {
-        return rollBackStatements.toArray(new SqlStatement[rollBackStatements.size()]);
+    public Change[] getRollBackChanges() {
+        return rollBackChanges.toArray(new Change[rollBackChanges.size()]);
     }
 
     public void addRollBackSQL(String sql) {
-        if (sql == null) {
+        if (StringUtils.trimToNull(sql) == null) {
             return;
         }
 
         for (String statment : StringUtils.splitSQL(sql)) {
-            rollBackStatements.add(new RawSqlStatement(statment.trim()));
+            rollBackChanges.add(new RawSQLChange(statment.trim()));
         }
     }
 
+    public void addRollbackChange(Change change) throws UnsupportedChangeException {
+        rollBackChanges.add(change);
+    }
+
+
     public boolean canRollBack() {
-        if (rollBackStatements != null && rollBackStatements.size()> 0) {
+        if (rollBackChanges != null && rollBackChanges.size() > 0) {
             return true;
         }
 

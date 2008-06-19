@@ -464,7 +464,13 @@
         </xsd:complexType>
     </xsd:element>
 
-    <xsd:element name="rollback" type="xsd:string"/>
+    <xsd:element name="rollback">
+        <xsd:complexType mixed="true">
+            <xsd:choice>
+                <xsd:group ref="changeSetChildren" minOccurs="0" maxOccurs="unbounded"/>
+            </xsd:choice>            
+        </xsd:complexType>
+    </xsd:element>
 
     <!-- comment  -->
     <xsd:element name="comment" type="xsd:string"/>

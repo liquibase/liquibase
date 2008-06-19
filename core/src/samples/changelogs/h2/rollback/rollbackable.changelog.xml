@@ -122,6 +122,8 @@
     </changeSet>
     <changeSet id="21" author="nvoxland">
         <customChange class="liquibase.change.custom.ExampleCustomTaskChange" helloTo="world"/>
-    </changeSet>    
+    </changeSet>
+
+    <include file="changelogs/common/rollback.tests.changelog.xml"/> <!-- cannot run on H2 because it is in-memory -->
 
 </databaseChangeLog>

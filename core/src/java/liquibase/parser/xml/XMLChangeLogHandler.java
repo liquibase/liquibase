@@ -39,6 +39,7 @@ class XMLChangeLogHandler extends DefaultHandler {
     private Precondition currentPrecondition;
 
     private Map<String, Object> changeLogParameters = new HashMap<String, Object>();
+    private boolean inRollback = false;
 
 
     protected XMLChangeLogHandler(String physicalChangeLogLocation, FileOpener fileOpener, Map<String, Object> properties) {
@@ -99,6 +100,7 @@ class XMLChangeLogHandler extends DefaultHandler {
                 }
             } else if (changeSet != null && "rollback".equals(qName)) {
                 text = new StringBuffer();
+                inRollback = true;
             } else if (changeSet != null && change == null) {
                 change = ChangeFactory.getInstance().create(qName);
                 change.setChangeSet(changeSet);
@@ -253,6 +255,7 @@ class XMLChangeLogHandler extends DefaultHandler {
 
             } else if (changeSet != null && "rollback".equals(qName)) {
                 changeSet.addRollBackSQL(textString);
+                inRollback = false;
             } else if (change != null && change instanceof RawSQLChange && "comment".equals(qName)) {
                 ((RawSQLChange) change).setComments(textString);
                 text = new StringBuffer();
@@ -293,7 +296,11 @@ class XMLChangeLogHandler extends DefaultHandler {
                     }
                 }
                 text = null;
-                changeSet.addChange(change);
+                if (inRollback) {
+                    changeSet.addRollbackChange(change);
+                } else {
+                    changeSet.addChange(change);
+                }
                 change = null;
             } else if (changeSet != null && "validCheckSum".equals(qName)) {
                 changeSet.addValidCheckSum(text.toString());
