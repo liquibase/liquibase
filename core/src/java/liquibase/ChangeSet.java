@@ -8,6 +8,9 @@ import liquibase.exception.*;
 import liquibase.log.LogFactory;
 import liquibase.util.MD5Util;
 import liquibase.util.StringUtils;
+import liquibase.util.StreamUtil;
+import liquibase.preconditions.AndPrecondition;
+import liquibase.preconditions.FailedPrecondition;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Text;
@@ -42,6 +45,8 @@ public class ChangeSet {
     private List<Change> rollBackChanges = new ArrayList<Change>();
 
     private String comments;
+
+    private AndPrecondition rootPrecondition;
 
     public boolean shouldAlwaysRun() {
         return alwaysRun;
@@ -119,6 +124,21 @@ public class ChangeSet {
                 database.getJdbcTemplate().comment(StringUtils.join(Arrays.asList(lines), "\n"));
             }
 
+            if (database.getJdbcTemplate().executesStatements() && rootPrecondition != null) {
+                try {
+                    rootPrecondition.check(database, null);
+                } catch (PreconditionFailedException e) {
+                    StringBuffer message = new StringBuffer();
+                    message.append(StreamUtil.getLineSeparator());
+                    for (FailedPrecondition invalid : e.getFailedPreconditions()) {
+                        message.append("          ").append(invalid.toString());
+                        message.append(StreamUtil.getLineSeparator());
+                    }
+
+                    throw new MigrationFailedException(this, message.toString());
+                }
+            }
+
             for (Change change : changes) {
                 try {
                     change.setUp();
@@ -146,7 +166,11 @@ public class ChangeSet {
             if (getFailOnError() != null && !getFailOnError()) {
                 log.log(Level.INFO, "Change set " + toString(false) + " failed, but failOnError was false", e);
             } else {
-                throw new MigrationFailedException(this, e);
+                if (e instanceof MigrationFailedException) {
+                    throw ((MigrationFailedException) e);
+                } else {
+                    throw new MigrationFailedException(this, e);
+                }
             }
         }
     }
@@ -364,4 +388,7 @@ public class ChangeSet {
         return false;  //To change body of created methods use File | Settings | File Templates.
     }
 
+    public void setPreconditions(AndPrecondition preconditions) {
+        this.rootPrecondition = preconditions;
+    }
 }

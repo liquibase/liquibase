@@ -381,6 +381,9 @@
         </loadData>
     </changeSet>
     <changeSet id="sampleCSVData3" author="nvoxland">
+        <preConditions>
+            <sqlCheck expectedResult="4">select count(*) from csvdata</sqlCheck>
+        </preConditions>
         <loadData tableName="csvdata" file="changelogs/sample.data3.csv">
             <column index="0" name="name" type="STRING"/>
             <column header="last seen" name="last_login" type="DATE"/>
@@ -396,5 +399,6 @@
             <column name="${column2.name}" type="int"/>
         </createTable>
     </changeSet>
+
 
 </databaseChangeLog>
