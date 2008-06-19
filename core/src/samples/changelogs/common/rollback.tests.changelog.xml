@@ -31,4 +31,15 @@
         </rollback>
     </changeSet>
 
+    <changeSet id="changeRollback2-create" author="nvoxland">
+        <createTable tableName="changeRollback2">
+            <column name="id" type="int"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="changeRollback2-drop" author="nvoxland">
+        <dropTable tableName="changeRollback2"/>
+        <rollback changeSetId="changeRollback2-create" changeSetAuthor="nvoxland"/>
+    </changeSet>
+
 </databaseChangeLog>

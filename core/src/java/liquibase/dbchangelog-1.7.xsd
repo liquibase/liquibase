@@ -468,7 +468,10 @@
         <xsd:complexType mixed="true">
             <xsd:choice>
                 <xsd:group ref="changeSetChildren" minOccurs="0" maxOccurs="unbounded"/>
-            </xsd:choice>            
+            </xsd:choice>
+            <xsd:attribute name="changeSetPath" type="xsd:string"/>
+            <xsd:attribute name="changeSetAuthor" type="xsd:string"/>
+            <xsd:attribute name="changeSetId" type="xsd:string"/>
         </xsd:complexType>
     </xsd:element>
 
