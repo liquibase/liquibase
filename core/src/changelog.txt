@@ -3,8 +3,17 @@ LiquiBase Core Changelog
 
 Changes in version 1.7.0
 ----------------------
-- loadData change
-- can export data with generateChangeLog
+- Added loadData change
+- Added support for changelog paramters
+- Allow preconditions in <changeSet>
+- Can export data with generChangeLog
+- Added markNextChangeSetRan command
+- Added validChangeLog tag to changeSet
+- Can use change tags in <rollback>
+- Can reference previous changeSets in <rollback>
+- Allow custom preconditions
+- RowMapper interface is now public
+- Misc bug fixes
 
 Changes in version 1.6.1 (2008.04.23)
 ----------------------
