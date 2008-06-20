@@ -47,7 +47,7 @@
                                         </xsd:complexType>
                                     </xsd:element>
                                     <xsd:choice>
-                                        <xsd:group ref="changeSetChildren" maxOccurs="unbounded"/>
+                                        <xsd:group ref="changeSetChildren" minOccurs="0" maxOccurs="unbounded"/>
                                     </xsd:choice>
                                 </xsd:sequence>
                                 <xsd:attributeGroup ref="changeSetAttributes"/>
@@ -327,6 +327,12 @@
     <xsd:element name="sqlCheck">
         <xsd:complexType mixed="true">
             <xsd:attribute name="expectedResult" type="xsd:string"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="customPrecondition">
+        <xsd:complexType>
+            <xsd:attribute name="className" type="xsd:string"/>
         </xsd:complexType>
     </xsd:element>
 
@@ -705,6 +711,7 @@
                 <xsd:element ref="dbms" maxOccurs="unbounded"/>
                 <xsd:element ref="runningAs" maxOccurs="unbounded"/>
                 <xsd:element ref="sqlCheck" maxOccurs="unbounded"/>
+                <xsd:element ref="customPrecondition" maxOccurs="unbounded"/>
             </xsd:choice>
         </xsd:sequence>
 

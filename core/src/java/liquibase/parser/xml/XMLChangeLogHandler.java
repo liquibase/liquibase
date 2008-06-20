@@ -271,6 +271,8 @@ class XMLChangeLogHandler extends DefaultHandler {
                 } else if (qName.equals("sqlCheck")) {
                     ((SqlPrecondition) currentPrecondition).setSql(textString);
                     currentPrecondition = null;
+                } else if (qName.equals("customPrecondition")) {
+                    ((CustomPreconditionWrapper) currentPrecondition).setClassLoader(fileOpener.toClassLoader());
                 }
 
             } else if (changeSet != null && "rollback".equals(qName)) {

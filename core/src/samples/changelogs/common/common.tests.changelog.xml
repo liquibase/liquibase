@@ -400,5 +400,10 @@
         </createTable>
     </changeSet>
 
+    <changeSet id="customPreCondition" author="nvoxland">
+        <preConditions>
+            <customPrecondition className="liquibase.preconditions.ExampleCustomPrecondition"/>
+        </preConditions>
+    </changeSet>
 
 </databaseChangeLog>
