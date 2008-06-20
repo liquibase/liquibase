@@ -19,6 +19,7 @@ public class PreconditionFactory {
                 DBMSPrecondition.class,
                 RunningAsPrecondition.class,
                 SqlPrecondition.class,
+                CustomPreconditionWrapper.class,
         };
 
         try {
