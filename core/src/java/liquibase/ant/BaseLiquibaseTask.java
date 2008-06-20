@@ -4,6 +4,7 @@ import liquibase.CompositeFileOpener;
 import liquibase.FileOpener;
 import liquibase.FileSystemFileOpener;
 import liquibase.Liquibase;
+import liquibase.util.LiquibaseUtil;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.HibernateDatabase;
@@ -150,7 +151,7 @@ public class BaseLiquibaseTask extends Task {
     }
 
     public void addChangeLogProperty(ChangeLogProperty changeLogProperty) {
-        System.out.println("called setChangeLOg");
+        changeLogProperties.put(changeLogProperty.getName(), changeLogProperty.getValue());
     }
 
     protected Liquibase createLiquibase() throws Exception {
