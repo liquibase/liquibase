@@ -334,8 +334,8 @@ public class Main {
         stream.println(" --baseDriver=<jdbc.driver.ClassName>       Base Database driver class name");
         stream.println("");
         stream.println("Change Log Properties:");
-        stream.println(" -D<property.name>=<property.value>         Pass a name/value pair for substitution");
-        stream.println("                                             of ${} blocks in the change log(s)");
+        stream.println(" -D<property.name>=<property.value>         Pass a name/value pair for");
+        stream.println("                                            substitution in the change log(s)");
         stream.println("");
         stream.println("Default value for parameters can be stored in a file called");
         stream.println("'liquibase.properties' that is read from the current working directory.");
