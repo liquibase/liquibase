@@ -5,6 +5,7 @@ import liquibase.DatabaseChangeLog;
 import liquibase.change.AddColumnChange;
 import liquibase.change.Change;
 import liquibase.change.CreateTableChange;
+import liquibase.change.RawSQLChange;
 import liquibase.database.sql.RawSqlStatement;
 import liquibase.exception.ChangeLogParseException;
 import liquibase.preconditions.OrPrecondition;
@@ -72,8 +73,8 @@ public class XMLChangeLogParserTest {
         assertTrue(changeSet.shouldAlwaysRun());
         assertTrue(changeSet.shouldRunOnChange());
         assertEquals(2, changeSet.getRollBackChanges().length);
-        assertTrue(changeSet.getRollBackChanges()[0] instanceof RawSqlStatement);
-        assertTrue(changeSet.getRollBackChanges()[1] instanceof RawSqlStatement);
+        assertTrue(changeSet.getRollBackChanges()[0] instanceof RawSQLChange);
+        assertTrue(changeSet.getRollBackChanges()[1] instanceof RawSQLChange);
 
         change = changeSet.getChanges().get(0);
         assertEquals("addColumn", change.getTagName());

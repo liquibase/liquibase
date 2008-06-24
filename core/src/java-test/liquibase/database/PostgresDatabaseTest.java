@@ -88,4 +88,17 @@ public class PostgresDatabaseTest extends AbstractDatabaseTest {
     public void getColumnType_BigInt_AutoIncrement() {
         assertEquals("bigserial", getDatabase().getColumnType("bigint", Boolean.TRUE));
     }
+
+    @Test
+    public void escapeTableName_noSchema() {
+        Database database = getDatabase();
+        assertEquals("\"tableName\"", database.escapeTableName(null, "tableName"));
+    }
+
+    @Test
+    public void escapeTableName_withSchema() {
+        Database database = getDatabase();
+        assertEquals("schemaName.\"tableName\"", database.escapeTableName("schemaName", "tableName"));
+    }
+
 }

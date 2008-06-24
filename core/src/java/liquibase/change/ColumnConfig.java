@@ -59,7 +59,7 @@ public class ColumnConfig {
         // Since we have two rules for the value it can either be specifed as an attribute
         // or as the tag body in case of long values then the check is necessary so that it
         // should not override the value specifed as an attribute.
-        if (value != null) {
+        if (StringUtils.trimToNull(value) != null) {
             this.value = value;
         }
     }

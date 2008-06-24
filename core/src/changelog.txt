@@ -1,7 +1,7 @@
 LiquiBase Core Changelog
 ==========================================
 
-Changes in version 1.7.0
+Changes in version 1.7.0 (2008.06.25)
 ----------------------
 - Added loadData change
 - Added support for changelog paramters
