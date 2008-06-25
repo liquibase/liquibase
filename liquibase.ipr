@@ -53,6 +53,7 @@
       <entry name="?*.dtd" />
       <entry name="?*.tld" />
       <entry name="?*.xsd" />
+      <entry name="?*.csv" />
     </wildcardResourcePatterns>
   </component>
   <component name="DependenciesAnalyzeManager">
