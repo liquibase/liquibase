@@ -21,6 +21,7 @@
     <version>@BUILD.VERSION@.0</version>
     <change-notes>
         <![CDATA[
+        1.7.0.0: New 1.7 functionality<br>
         1.6.0.0: Initial 1.5 IntelliJ release<br>
         1.5.2.0: Bug fixes in LiquiBase core library<br>
         1.5.1.0: Initial 1.5 IntelliJ release<br>
