@@ -1,10 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module relativePaths="true" type="JAVA_MODULE" version="4">
   <component name="FacetManager">
-    <facet type="hibernate" name="Hibernate" implicit="true">
+    <facet type="hibernate" name="Hibernate">
       <configuration>
-        <setting name="validation-enabled" value="true" />
-        <datasource-map />
+        <setting name="validation-enabled" value="false" />
+        <datasource-map>
+          <unit-entry name="&lt;anonymous&gt;Hibernate.cfg.xml@247" />
+          <unit-entry name="src/samples/hibernate/Hibernate.cfg.xml" />
+        </datasource-map>
         <deploymentDescriptor name="hibernate.cfg.xml" url="file://$MODULE_DIR$/core/src/samples/hibernate/Hibernate.cfg.xml" optional="false" version="3.0" />
       </configuration>
     </facet>
@@ -17,6 +20,7 @@
       <sourceFolder url="file://$MODULE_DIR$/core/src/java" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/core/src/java-dbtest" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/core/src/java-test" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/core/src/samples/hibernate" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/core/build-14" />
       <excludeFolder url="file://$MODULE_DIR$/core/build-dbtest" />
       <excludeFolder url="file://$MODULE_DIR$/core/build-dbtest-14" />
@@ -30,192 +34,35 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module-library">
-      <library>
+      <library name="lib">
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/core/lib/easymockclassextension-2.2.jar!/" />
+          <root url="file://$MODULE_DIR$/core/lib" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
+        <jarDirectory url="file://$MODULE_DIR$/core/lib" recursive="false" />
       </library>
     </orderEntry>
     <orderEntry type="module-library">
-      <library>
+      <library name="lib-compile">
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/core/lib/cglib-nodep-2.1_3.jar!/" />
+          <root url="file://$MODULE_DIR$/core/lib-compile" />
         </CLASSES>
         <JAVADOC />
-        <SOURCES />
+        <SOURCES>
+          <root url="file://$MODULE_DIR$/../hibernate/core/src/main/java" />
+        </SOURCES>
+        <jarDirectory url="file://$MODULE_DIR$/core/lib-compile" recursive="false" />
       </library>
     </orderEntry>
     <orderEntry type="module-library">
-      <library>
+      <library name="lib-jdbc">
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/core/lib/junit-4.1.jar!/" />
+          <root url="file://$MODULE_DIR$/core/lib-jdbc" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/core/lib/easymock-2.2.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/core/lib-compile/ant-1.6.5.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/core/lib-compile/ant_doxygen-1.4.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/core/lib-compile/jsdk-2.4.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/core/lib-compile/spring-2.0.6.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/core/lib-compile/spring-aspects-2.0.6.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/core/lib-compile/spring-mock-2.0.6.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/core/lib-compile/maven-ant-tasks-2.0.7.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/core/lib-jdbc/oracle-10.2/ojdbc14-10.2.0.1.0.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/core/lib-compile/hibernate-annotations-3.3.1.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/core/lib-compile/emma.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/core/lib-compile/commons-logging-1.0.4.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/core/lib-compile/emma_ant.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/core/lib-compile/dom4j-1.6.1.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/core/lib-compile/hibernate-commons-annotations-3.3.1.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/core/lib-compile/hibernate3-3.2.6.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/core/lib-compile/ejb3-persistence-3.3.1.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/core/lib-compile/commons-collections-2.1.1.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
+        <jarDirectory url="file://$MODULE_DIR$/core/lib-jdbc" recursive="false" />
       </library>
     </orderEntry>
     <orderEntryProperties />
