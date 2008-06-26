@@ -17,6 +17,7 @@ import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Set;
 
 /**
@@ -103,9 +104,10 @@ public class AddDefaultValueChange extends AbstractChange {
             defaultValue = Boolean.valueOf(getDefaultValueBoolean());
         } else if (getDefaultValueNumeric() != null) {
             try {
-                defaultValue = NumberFormat.getInstance().parse(getDefaultValueNumeric());
+                defaultValue = NumberFormat.getInstance(Locale.US).
+                	parse(getDefaultValueNumeric()); 
             } catch (ParseException e) {
-                defaultValue = new ComputedNumericValue(getDefaultValueNumeric());
+            	defaultValue = new ComputedNumericValue(getDefaultValueNumeric());
             }
         } else if (getDefaultValueDate() != null) {
             try {
