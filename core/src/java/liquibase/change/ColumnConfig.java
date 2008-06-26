@@ -11,6 +11,7 @@ import org.w3c.dom.Element;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.Date;
+import java.util.Locale;
 
 /**
  * This class is the representation of the column tag in the XMl file
@@ -75,7 +76,8 @@ public class ColumnConfig {
         } else {
             if (valueNumeric.matches("\\d+\\.?\\d*")) {
                 try {
-                    this.valueNumeric = NumberFormat.getInstance().parse(valueNumeric);
+                    this.valueNumeric = NumberFormat.getInstance(Locale.US).
+                    	parse(valueNumeric);
                 } catch (ParseException e) {
                     throw new RuntimeException(e);
                 }
@@ -152,7 +154,8 @@ public class ColumnConfig {
             if ("GENERATED_BY_DEFAULT".equals(defaultValueNumeric)) {
                 setAutoIncrement(true);
             } else {
-                this.defaultValueNumeric = NumberFormat.getInstance().parse(defaultValueNumeric);
+                this.defaultValueNumeric = NumberFormat.getInstance(Locale.US).
+                	parse(defaultValueNumeric);
             }
         }
     }
