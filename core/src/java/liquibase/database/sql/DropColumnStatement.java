@@ -43,6 +43,7 @@ public class DropColumnStatement implements SqlStatement {
     }
 
     public boolean supportsDatabase(Database database) {
-        return !(database instanceof DerbyDatabase);
+        return !(database instanceof DerbyDatabase ||
+        		database instanceof SQLiteDatabase);
     }
 }
