@@ -91,6 +91,7 @@ public class RenameColumnStatement implements SqlStatement {
     public boolean supportsDatabase(Database database) {
         return !(database instanceof DB2Database
                 || database instanceof CacheDatabase
-                || database instanceof DerbyDatabase);
+                || database instanceof DerbyDatabase
+                || database instanceof SQLiteDatabase);
     }
 }

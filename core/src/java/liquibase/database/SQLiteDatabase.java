@@ -13,8 +13,10 @@ import java.util.Vector;
 import liquibase.change.ColumnConfig;
 import liquibase.change.CreateTableChange;
 //import liquibase.database.sql.CopyRowsStatement;
+import liquibase.database.sql.CopyRowsStatement;
 import liquibase.database.sql.CreateIndexStatement;
 import liquibase.database.sql.DropTableStatement;
+import liquibase.database.sql.ReindexStatement;
 //import liquibase.database.sql.ReindexStatement;
 import liquibase.database.sql.RenameTableStatement;
 import liquibase.database.sql.SqlStatement;
@@ -162,12 +164,10 @@ public class SQLiteDatabase extends AbstractDatabase {
     		throws UnsupportedChangeException, JDBCException {
     	
     	Collection<SqlStatement> statements = new Vector<SqlStatement>();
-    	
-    	
+    	    	
     	DatabaseSnapshot snapshot = new SQLiteDatabaseSnapshot(database);
 		Table table = snapshot.getTable(tableName);
-		
-		/*
+				
 		List<ColumnConfig> createColumns = new Vector<ColumnConfig>();
 		List<ColumnConfig> copyColumns = new Vector<ColumnConfig>();
 		if (table!=null) {
@@ -201,9 +201,7 @@ public class SQLiteDatabase extends AbstractDatabase {
 				}
 			}
 		}
-    	
-    	
-    
+
     	// rename table
 		String temp_table_name = tableName+"_temporary";
 		statements.add(new RenameTableStatement(schemaName, tableName, temp_table_name));
@@ -232,7 +230,6 @@ public class SQLiteDatabase extends AbstractDatabase {
 						toArray(new String[index_config.getColumns().size()])));
 		}
     	
-    	*/
     	return statements;
     }    
     

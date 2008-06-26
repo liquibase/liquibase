@@ -45,6 +45,8 @@ public class RenameTableStatement implements SqlStatement {
             return "ALTER TABLE " + database.escapeTableName(getSchemaName(), oldTableName) + " RENAME TO " + database.escapeTableName(null, newTableName);
         } else if (database instanceof DB2Database) {
             return "RENAME " + database.escapeTableName(getSchemaName(), oldTableName) + " TO " + database.escapeTableName(null, newTableName);//db2 doesn't allow specifying new schema name
+        } else if (database instanceof SQLiteDatabase) {
+            return "ALTER TABLE " + database.escapeTableName(getSchemaName(), oldTableName) + " RENAME TO " + database.escapeTableName(null, newTableName);
         }
 
         return "RENAME " + database.escapeTableName(getSchemaName(), getOldTableName()) + " TO " + database.escapeTableName(getSchemaName(), getNewTableName());

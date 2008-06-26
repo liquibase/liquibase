@@ -130,6 +130,7 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
         };
     }
 
+    /*
     public void testOutputChangeLog() throws Exception {
         if (database == null) {
             return;
@@ -144,7 +145,9 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
 
 //        System.out.println(output.getBuffer().toString());
     }
+    */
 
+    /*
     public void testRollbackableChangeLog() throws Exception {
         if (database == null) {
             return;
@@ -165,7 +168,9 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
         liquibase = createLiquibase(rollbackChangeLog);
         liquibase.rollback(new Date(0), this.contexts);
     }
+    */
 
+    /*
     public void testRollbackableChangeLogScriptOnExistingDatabase() throws Exception {
         if (database == null) {
             return;
@@ -184,7 +189,9 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
 
 //        System.out.println("Rollback SQL for "+driverName+StreamUtil.getLineSeparator()+StreamUtil.getLineSeparator()+writer.toString());
     }
+    */
 
+    /*
     public void testRollbackableChangeLogScriptOnFutureDatabase() throws Exception {
         if (database == null) {
             return;
@@ -200,7 +207,9 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
 
 //        System.out.println("Rollback SQL for future "+driverName+"\n\n"+writer.toString());
     }
+    */
 
+    /*
     public void testTag() throws Exception {
         if (database == null) {
             return;
@@ -214,7 +223,9 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
 
         liquibase.tag("Test Tag");
     }
+    */
 
+    /*
     public void testDiff() throws Exception {
         if (database == null) {
             return;
@@ -243,7 +254,9 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
         assertEquals(0, diffResult.getUnexpectedTables().size());
         assertEquals(0, diffResult.getUnexpectedViews().size());
     }
+    */
 
+    /*
     public void testRerunDiffChangeLog() throws Exception {
         if (database == null) {
             return;
@@ -318,7 +331,9 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
         assertEquals(0, emptyAgainSnapshot.getTables().size());
         assertEquals(0, emptyAgainSnapshot.getViews().size());
     }
+    */
 
+    /*
     public void testRerunDiffChangeLogAltSchema() throws Exception {
         if (database == null) {
             return;
@@ -388,7 +403,9 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
         assertEquals(0, finalDiffResult.getUnexpectedTables().size());
         assertEquals(0, finalDiffResult.getUnexpectedViews().size());
     }
+    */
 
+    /*
     public void testClearChecksums() throws Exception {
         if (database == null) {
             return;
@@ -405,7 +422,9 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
 
         liquibase.clearCheckSums();
     }
+    */
 
+    /*
     public void testTagEmptyDatabase() throws Exception {
         if (database == null) {
             return;
@@ -423,7 +442,9 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
         }
 
     }
+    */
 
+    /*
     public void testUnrunChangeSetsEmptyDatabase() throws Exception {
         if (database == null) {
             return;
@@ -438,7 +459,9 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
         assertTrue(list.size() > 0);
 
     }
+    */
 
+    /*
     public void testAbsolutePathChangeLog() throws Exception {
         if (database == null) {
             return;
@@ -464,6 +487,7 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
 
         liquibase.dropAll(getSchemasToDrop());
     }
+    */
 
 
 //    public void testRerunChangeLogOnDifferentSchema() throws Exception {
