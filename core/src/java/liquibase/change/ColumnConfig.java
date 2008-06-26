@@ -3,6 +3,7 @@ package liquibase.change;
 import liquibase.database.Database;
 import liquibase.database.sql.ComputedDateValue;
 import liquibase.database.sql.ComputedNumericValue;
+import liquibase.database.structure.Column;
 import liquibase.util.ISODateFormat;
 import liquibase.util.StringUtils;
 import org.w3c.dom.Document;
@@ -34,6 +35,40 @@ public class ColumnConfig {
     private ConstraintsConfig constraints;
     private Boolean autoIncrement;
     private String remarks;
+    
+    
+    public ColumnConfig(Column columnStructure) {
+    	setName(columnStructure.getName());
+		setType(columnStructure.getTypeName());
+		if (columnStructure.getDefaultValue()!=null) {
+			setDefaultValue(columnStructure.getDefaultValue().toString());
+		}
+		setAutoIncrement(new Boolean(columnStructure.isAutoIncrement()));
+		ConstraintsConfig constraints = new ConstraintsConfig(); 
+		constraints.setNullable(columnStructure.isNullable());
+		constraints.setPrimaryKey(columnStructure.isPrimaryKey());
+		constraints.setUnique(columnStructure.isUnique());
+		setConstraints(constraints);
+    }
+    
+    public ColumnConfig(ColumnConfig column) {
+    	setName(column.getName());
+		setType(column.getType());
+		setDefaultValue(column.getDefaultValue());
+		setAutoIncrement(column.isAutoIncrement());
+		if (column.getConstraints()!=null) {
+			ConstraintsConfig constraints = new ConstraintsConfig(); 
+			constraints.setNullable(column.getConstraints().isNullable());
+			constraints.setPrimaryKey(column.getConstraints().isPrimaryKey());
+			constraints.setUnique(column.getConstraints().isUnique());
+		}
+		setConstraints(constraints);
+    }
+    
+    public ColumnConfig() {
+    	// do nothing
+    }
+    
 
     public String getName() {
         return name;

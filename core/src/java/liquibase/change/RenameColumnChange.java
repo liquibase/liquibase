@@ -1,17 +1,23 @@
 package liquibase.change;
 
 import liquibase.database.Database;
+import liquibase.database.SQLiteDatabase;
+import liquibase.database.SQLiteDatabase.AlterTableVisitor;
 import liquibase.database.sql.RenameColumnStatement;
 import liquibase.database.sql.SqlStatement;
 import liquibase.database.structure.Column;
 import liquibase.database.structure.DatabaseObject;
+import liquibase.database.structure.Index;
 import liquibase.database.structure.Table;
+import liquibase.exception.JDBCException;
 import liquibase.exception.UnsupportedChangeException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -71,9 +77,51 @@ public class RenameColumnChange extends AbstractChange {
     }
 
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
-        return new SqlStatement[] {
-                new RenameColumnStatement(getSchemaName() == null?database.getDefaultSchemaName():getSchemaName(), getTableName(), getOldColumnName(), getNewColumnName(), getColumnDataType())
-        };
+    	List<SqlStatement> statements = new ArrayList<SqlStatement>();
+    	
+    	if (database instanceof SQLiteDatabase) {
+    		// SQLite does not support this ALTER TABLE operation until now.
+			// For more information see: http://www.sqlite.org/omitted.html.
+			// This is a small work around...
+        	try {
+        		// define alter table logic
+        		AlterTableVisitor rename_alter_visitor = 
+        		new AlterTableVisitor() {
+        			public ColumnConfig[] getColumnsToAdd() {
+        				return new ColumnConfig[0];
+        			}
+        			public boolean copyThisColumn(ColumnConfig column) {
+        				return true;
+        			}
+        			public boolean createThisColumn(ColumnConfig column) {
+        				if (column.getName().equals(getOldColumnName())) {
+        					column.setName(getNewColumnName());
+        				}
+        				return true;
+        			}
+        			public boolean createThisIndex(Index index) {
+        				if (index.getColumns().contains(getOldColumnName())) {
+    						index.getColumns().remove(getOldColumnName());
+    						index.getColumns().add(getNewColumnName());
+    					}
+        				return true;
+        			}
+        		};
+        		// alter table
+				statements.addAll(SQLiteDatabase.getAlterTableStatements(
+						rename_alter_visitor,
+						database,getSchemaName(),getTableName()));
+			} catch (JDBCException e) {
+				System.err.println(e);
+				e.printStackTrace();
+			}
+        } else {
+	    	statements.add(new RenameColumnStatement(
+	    			getSchemaName()==null?database.getDefaultSchemaName():getSchemaName(), 
+	    			getTableName(), getOldColumnName(), getNewColumnName(), 
+	    			getColumnDataType()));
+        }
+    	return statements.toArray(new SqlStatement[statements.size()]);
     }
 
     protected Change[] createInverses() {
