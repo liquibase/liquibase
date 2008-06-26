@@ -18,24 +18,25 @@ import java.util.logging.Logger;
 
 public class SqlDatabaseSnapshot implements DatabaseSnapshot {
 
-    private DatabaseMetaData databaseMetaData;
-    private Database database;
+	protected DatabaseMetaData databaseMetaData;
+	protected Database database;
 
-    private Set<Table> tables = new HashSet<Table>();
-    private Set<View> views = new HashSet<View>();
-    private Set<Column> columns = new HashSet<Column>();
-    private Set<ForeignKey> foreignKeys = new HashSet<ForeignKey>();
-    private Set<Index> indexes = new HashSet<Index>();
-    private Set<PrimaryKey> primaryKeys = new HashSet<PrimaryKey>();
-    private Set<Sequence> sequences = new HashSet<Sequence>();
+	protected Set<Table> tables = new HashSet<Table>();
+    protected Set<View> views = new HashSet<View>();
+    protected Set<Column> columns = new HashSet<Column>();
+    protected Set<ForeignKey> foreignKeys = new HashSet<ForeignKey>();
+    protected Set<Index> indexes = new HashSet<Index>();
+    protected Set<PrimaryKey> primaryKeys = new HashSet<PrimaryKey>();
+    protected Set<Sequence> sequences = new HashSet<Sequence>();
 
 
-    private Map<String, Table> tablesMap = new HashMap<String, Table>();
-    private Map<String, View> viewsMap = new HashMap<String, View>();
-    private Map<String, Column> columnsMap = new HashMap<String, Column>();
+    protected Map<String, Table> tablesMap = new HashMap<String, Table>();
+    protected Map<String, View> viewsMap = new HashMap<String, View>();
+    protected Map<String, Column> columnsMap = new HashMap<String, Column>();
+    
     private Set<DiffStatusListener> statusListeners;
 
-    private static final Logger log = LogFactory.getLogger();
+    protected static final Logger log = LogFactory.getLogger();
     private String schema;
 
 
@@ -80,7 +81,7 @@ public class SqlDatabaseSnapshot implements DatabaseSnapshot {
             readForeignKeyInformation(requestedSchema);
             readPrimaryKeys(requestedSchema);
             readColumns(requestedSchema);
-//            readUniqueConstraints(catalog, schema);
+//            //readUniqueConstraints(catalog, schema);
             readIndexes(requestedSchema);
             readSequences(requestedSchema);
 
@@ -91,7 +92,6 @@ public class SqlDatabaseSnapshot implements DatabaseSnapshot {
             throw new JDBCException(e);
         }
     }
-
 
     public Database getDatabase() {
         return database;
@@ -147,7 +147,7 @@ public class SqlDatabaseSnapshot implements DatabaseSnapshot {
         return sequences;
     }
 
-    private void readTablesAndViews(String schema) throws SQLException, JDBCException {
+    protected void readTablesAndViews(String schema) throws SQLException, JDBCException {
         updateListeners("Reading tables for " + database.toString() + " ...");
         ResultSet rs = databaseMetaData.getTables(database.convertRequestedSchemaToCatalog(schema), database.convertRequestedSchemaToSchema(schema), null, new String[]{"TABLE", "VIEW"});
         while (rs.next()) {
@@ -211,7 +211,7 @@ public class SqlDatabaseSnapshot implements DatabaseSnapshot {
 //        }
     }
     
-    private void readColumns(String schema) throws SQLException, JDBCException {
+    protected void readColumns(String schema) throws SQLException, JDBCException {
         updateListeners("Reading columns for " + database.toString() + " ...");
 
         Statement selectStatement = database.getConnection().createStatement();
@@ -294,7 +294,7 @@ public class SqlDatabaseSnapshot implements DatabaseSnapshot {
         
     } // end of method getColumnTypeAndDefValue()
 
-    private boolean isPrimaryKey(Column columnInfo) {
+    protected boolean isPrimaryKey(Column columnInfo) {
         for (PrimaryKey pk : getPrimaryKeys()) {
             if (columnInfo.getTable() == null) {
                 continue;
@@ -309,7 +309,7 @@ public class SqlDatabaseSnapshot implements DatabaseSnapshot {
         return false;
     }
 
-    private void readForeignKeyInformation(String schema) throws JDBCException, SQLException {
+    protected void readForeignKeyInformation(String schema) throws JDBCException, SQLException {
         updateListeners("Reading foreign keys for " + database.toString() + " ...");
 
         for (Table table : tablesMap.values()) {
@@ -370,7 +370,7 @@ public class SqlDatabaseSnapshot implements DatabaseSnapshot {
         }
     }
 
-    private void readIndexes(String schema) throws JDBCException, SQLException {
+    protected void readIndexes(String schema) throws JDBCException, SQLException {
         updateListeners("Reading indexes for " + database.toString() + " ...");
 
         for (Table table : tablesMap.values()) {
@@ -444,7 +444,7 @@ public class SqlDatabaseSnapshot implements DatabaseSnapshot {
         indexes.removeAll(indexesToRemove);
     }
 
-    private void readPrimaryKeys(String schema) throws JDBCException, SQLException {
+    protected void readPrimaryKeys(String schema) throws JDBCException, SQLException {
         updateListeners("Reading primary keys for " + database.toString() + " ...");
 
         //we can't add directly to the this.primaryKeys hashSet because adding columns to an exising PK changes the hashCode and .contains() fails
@@ -497,7 +497,7 @@ public class SqlDatabaseSnapshot implements DatabaseSnapshot {
 //        }
 //    }
 
-    private void readSequences(String schema) throws JDBCException {
+    protected void readSequences(String schema) throws JDBCException {
         updateListeners("Reading sequences for " + database.toString() + " ...");
 
         if (database.supportsSequences()) {
@@ -514,7 +514,7 @@ public class SqlDatabaseSnapshot implements DatabaseSnapshot {
         }
     }
 
-    private void updateListeners(String message) {
+    protected void updateListeners(String message) {
         if (this.statusListeners == null) {
             return;
         }
