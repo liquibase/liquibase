@@ -9,6 +9,8 @@ import org.xml.sax.*;
 
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
+
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
@@ -60,7 +62,7 @@ public class XMLChangeLogParser {
                     throw exception;
                 }
             });
-
+        	
             inputStream = fileOpener.getResourceAsStream(physicalChangeLogLocation);
             if (inputStream == null) {
                 throw new ChangeLogParseException(physicalChangeLogLocation + " does not exist");
