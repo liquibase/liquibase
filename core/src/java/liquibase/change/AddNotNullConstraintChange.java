@@ -2,13 +2,19 @@ package liquibase.change;
 
 import liquibase.database.DB2Database;
 import liquibase.database.Database;
+import liquibase.database.SQLiteDatabase;
+import liquibase.database.SQLiteDatabase.AlterTableVisitor;
+import liquibase.database.sql.RawSqlStatement;
 import liquibase.database.sql.ReorganizeTableStatement;
 import liquibase.database.sql.SetNullableStatement;
 import liquibase.database.sql.SqlStatement;
 import liquibase.database.sql.UpdateStatement;
 import liquibase.database.structure.Column;
 import liquibase.database.structure.DatabaseObject;
+import liquibase.database.structure.Index;
 import liquibase.database.structure.Table;
+import liquibase.database.template.JdbcTemplate;
+import liquibase.exception.JDBCException;
 import liquibase.exception.UnsupportedChangeException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -70,9 +76,8 @@ public class AddNotNullConstraintChange extends AbstractChange {
         this.columnDataType = columnDataType;
     }
 
-
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
-        List<SqlStatement> statements = new ArrayList<SqlStatement>();
+    	List<SqlStatement> statements = new ArrayList<SqlStatement>();
 
         String schemaName = getSchemaName() == null?database.getDefaultSchemaName():getSchemaName();
         if (defaultNullValue != null) {
@@ -80,15 +85,70 @@ public class AddNotNullConstraintChange extends AbstractChange {
                     .addNewColumnValue(getColumnName(), getDefaultNullValue())
                     .setWhereClause(getColumnName() + " IS NULL"));
         }
+        
+        if (database instanceof SQLiteDatabase) {
+        	// SQLite does not support this ALTER TABLE operation until now.
+			// For more information see: http://www.sqlite.org/omitted.html.
+			// This is a small work around...
+        	
+    		// ... test if column contains NULL values
+    		if (defaultNullValue == null) {
+    			List<Map> null_rows = null;
+    			try {
+    				null_rows = new JdbcTemplate(database).
+						queryForList(new RawSqlStatement(
+							"SELECT * FROM `"+
+							database.escapeTableName(getSchemaName(), getTableName())+
+							"` WHERE `"+getColumnName()+"` IS NULL;"));
+    			} catch (JDBCException e) {
+    				e.printStackTrace();
+    			}
+        		if (null_rows.size()>0) {
+        			throw new UnsupportedChangeException(
+        					"Failed to add a Not-Null-Constraint because " +
+        					"some values are null. Use the " +
+        					"defaultNullValue attribute to define default " +
+        					"values for the existing null values.");
+        		}
+        	}
+    		
+    		// define alter table logic
+    		AlterTableVisitor rename_alter_visitor = new AlterTableVisitor() {
+    			public ColumnConfig[] getColumnsToAdd() {
+    				return new ColumnConfig[0];
+    			}
+    			public boolean copyThisColumn(ColumnConfig column) {
+    				return true;
+    			}
+    			public boolean createThisColumn(ColumnConfig column) {
+    				if (column.getName().equals(getColumnName())) {
+    					column.getConstraints().setNullable(false);
+    				}
+    				return true;
+    			}
+    			public boolean createThisIndex(Index index) {
+    				return true;
+    			}
+    		};
+        		
+    		try {
+        		// alter table
+				statements.addAll(SQLiteDatabase.getAlterTableStatements(
+						rename_alter_visitor,
+						database,getSchemaName(),getTableName()));
+        	} catch (JDBCException e) {
+				e.printStackTrace();
+			}
+        } else {
 
-        statements.add(new SetNullableStatement(schemaName, getTableName(), getColumnName(), getColumnDataType(), false));
-
-        if (database instanceof DB2Database) {
-            statements.add(new ReorganizeTableStatement(schemaName, getTableName()));
+        	// ...if it is not a SQLite database 
+        	statements.add(new SetNullableStatement(schemaName, getTableName(), getColumnName(), getColumnDataType(), false));
+            if (database instanceof DB2Database) {
+                statements.add(new ReorganizeTableStatement(schemaName, getTableName()));
+            }
+            
         }
-
         return statements.toArray(new SqlStatement[statements.size()]);
-
     }
 
     protected Change[] createInverses() {

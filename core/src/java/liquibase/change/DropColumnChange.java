@@ -2,12 +2,16 @@ package liquibase.change;
 
 import liquibase.database.DB2Database;
 import liquibase.database.Database;
+import liquibase.database.SQLiteDatabase;
+import liquibase.database.SQLiteDatabase.AlterTableVisitor;
 import liquibase.database.sql.DropColumnStatement;
 import liquibase.database.sql.ReorganizeTableStatement;
 import liquibase.database.sql.SqlStatement;
 import liquibase.database.structure.Column;
 import liquibase.database.structure.DatabaseObject;
+import liquibase.database.structure.Index;
 import liquibase.database.structure.Table;
+import liquibase.exception.JDBCException;
 import liquibase.exception.UnsupportedChangeException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -56,10 +60,45 @@ public class DropColumnChange extends AbstractChange {
         List<SqlStatement> statements = new ArrayList<SqlStatement>();
         String schemaName = getSchemaName() == null?database.getDefaultSchemaName():getSchemaName();
 
-        statements.add(new DropColumnStatement(schemaName, getTableName(), getColumnName()));
-        if (database instanceof DB2Database) {
-            statements.add(new ReorganizeTableStatement(schemaName, getTableName()));
-        }
+        if (database instanceof SQLiteDatabase) {		
+			// SQLite does not support this ALTER TABLE operation until now.
+			// For more information see: http://www.sqlite.org/omitted.html.
+			// This is a small work around...
+			
+			// define alter table logic
+    		AlterTableVisitor rename_alter_visitor = new AlterTableVisitor() {
+    			public ColumnConfig[] getColumnsToAdd() {
+    				return new ColumnConfig[0];
+    			}
+    			public boolean createThisColumn(ColumnConfig column) {
+    				return !column.getName().equals(getColumnName());
+    			}
+    			public boolean copyThisColumn(ColumnConfig column) {
+    				return !column.getName().equals(getColumnName());
+    			}
+    			public boolean createThisIndex(Index index) {
+    				return !index.getColumns().contains(getColumnName());
+    			}
+    		};  
+    		
+        	try {
+        		// alter table
+				statements.addAll(SQLiteDatabase.getAlterTableStatements(
+						rename_alter_visitor,
+						database,getSchemaName(),getTableName()));
+				
+			}  catch (JDBCException e) {
+				e.printStackTrace();
+			}
+		} else {
+			
+			// ...if it is not a SQLite database 
+	        statements.add(new DropColumnStatement(schemaName, getTableName(), getColumnName()));
+	        if (database instanceof DB2Database) {
+	            statements.add(new ReorganizeTableStatement(schemaName, getTableName()));
+	        }
+	        
+		}       
         return statements.toArray(new SqlStatement[statements.size()]);
     }
 

@@ -83,30 +83,32 @@ public class RenameColumnChange extends AbstractChange {
     		// SQLite does not support this ALTER TABLE operation until now.
 			// For more information see: http://www.sqlite.org/omitted.html.
 			// This is a small work around...
+        	
+    		// define alter table logic
+    		AlterTableVisitor rename_alter_visitor = 
+    		new AlterTableVisitor() {
+    			public ColumnConfig[] getColumnsToAdd() {
+    				return new ColumnConfig[0];
+    			}
+    			public boolean copyThisColumn(ColumnConfig column) {
+    				return true;
+    			}
+    			public boolean createThisColumn(ColumnConfig column) {
+    				if (column.getName().equals(getOldColumnName())) {
+    					column.setName(getNewColumnName());
+    				}
+    				return true;
+    			}
+    			public boolean createThisIndex(Index index) {
+    				if (index.getColumns().contains(getOldColumnName())) {
+						index.getColumns().remove(getOldColumnName());
+						index.getColumns().add(getNewColumnName());
+					}
+    				return true;
+    			}
+    		};
+        		
         	try {
-        		// define alter table logic
-        		AlterTableVisitor rename_alter_visitor = 
-        		new AlterTableVisitor() {
-        			public ColumnConfig[] getColumnsToAdd() {
-        				return new ColumnConfig[0];
-        			}
-        			public boolean copyThisColumn(ColumnConfig column) {
-        				return true;
-        			}
-        			public boolean createThisColumn(ColumnConfig column) {
-        				if (column.getName().equals(getOldColumnName())) {
-        					column.setName(getNewColumnName());
-        				}
-        				return true;
-        			}
-        			public boolean createThisIndex(Index index) {
-        				if (index.getColumns().contains(getOldColumnName())) {
-    						index.getColumns().remove(getOldColumnName());
-    						index.getColumns().add(getNewColumnName());
-    					}
-        				return true;
-        			}
-        		};
         		// alter table
 				statements.addAll(SQLiteDatabase.getAlterTableStatements(
 						rename_alter_visitor,
@@ -116,10 +118,13 @@ public class RenameColumnChange extends AbstractChange {
 				e.printStackTrace();
 			}
         } else {
+        	
+        	// ...if it is not a SQLite database 
 	    	statements.add(new RenameColumnStatement(
 	    			getSchemaName()==null?database.getDefaultSchemaName():getSchemaName(), 
 	    			getTableName(), getOldColumnName(), getNewColumnName(), 
 	    			getColumnDataType()));
+	    	
         }
     	return statements.toArray(new SqlStatement[statements.size()]);
     }

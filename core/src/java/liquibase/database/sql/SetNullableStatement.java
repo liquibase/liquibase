@@ -39,6 +39,10 @@ public class SetNullableStatement implements SqlStatement {
     }
 
     public String getSqlStatement(Database database) throws StatementNotSupportedOnDatabaseException {
+    	if (!supportsDatabase(database)) {
+            throw new StatementNotSupportedOnDatabaseException(this, database);
+        }
+    	
         String nullableString;
         if (isNullable()) {
             nullableString = " NULL";
@@ -78,6 +82,7 @@ public class SetNullableStatement implements SqlStatement {
     }
 
     public boolean supportsDatabase(Database database) {
-        return !(database instanceof FirebirdDatabase);
+        return !(database instanceof FirebirdDatabase || 
+        		database instanceof SQLiteDatabase);
     }
 }
