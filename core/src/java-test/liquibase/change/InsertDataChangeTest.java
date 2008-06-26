@@ -35,10 +35,15 @@ public class InsertDataChangeTest extends AbstractChangeTest {
         ColumnConfig col3 = new ColumnConfig();
         col3.setName("age");
         col3.setValueNumeric("21");
+        
+        ColumnConfig col4 = new ColumnConfig();
+        col4.setName("height");
+        col4.setValueNumeric("1.78");
 
         refactoring.addColumn(col1);
         refactoring.addColumn(col2);
         refactoring.addColumn(col3);
+        refactoring.addColumn(col4);
     }
 
     @Test
@@ -54,6 +59,7 @@ public class InsertDataChangeTest extends AbstractChangeTest {
         assertEquals("123", ((InsertStatement) sqlStatements[0]).getColumnValue("id").toString());
         assertEquals("Andrew", ((InsertStatement) sqlStatements[0]).getColumnValue("name").toString());
         assertEquals("21", ((InsertStatement) sqlStatements[0]).getColumnValue("age").toString());
+        assertEquals("1.78", ((InsertStatement) sqlStatements[0]).getColumnValue("height").toString());
     }
 
     @Test
@@ -70,7 +76,7 @@ public class InsertDataChangeTest extends AbstractChangeTest {
         assertEquals("TABLE_NAME", node.getAttribute("tableName"));
 
         NodeList columns = node.getChildNodes();
-        assertEquals(3, columns.getLength());
+        assertEquals(4, columns.getLength());
 
         assertEquals("column", ((Element) columns.item(0)).getTagName());
         assertEquals("id", ((Element) columns.item(0)).getAttribute("name"));
@@ -83,5 +89,9 @@ public class InsertDataChangeTest extends AbstractChangeTest {
         assertEquals("column", ((Element) columns.item(2)).getTagName());
         assertEquals("age", ((Element) columns.item(2)).getAttribute("name"));
         assertEquals("21", ((Element) columns.item(2)).getAttribute("valueNumeric"));
+        
+        assertEquals("column", ((Element) columns.item(3)).getTagName());
+        assertEquals("height", ((Element) columns.item(3)).getAttribute("name"));
+        assertEquals("1.78", ((Element) columns.item(3)).getAttribute("valueNumeric"));
     }
 }
