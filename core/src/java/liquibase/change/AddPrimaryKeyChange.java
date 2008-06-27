@@ -101,7 +101,7 @@ public class AddPrimaryKeyChange extends AbstractChange {
         };
     }
     
-    public SqlStatement[] generateStatementsForSQLiteDatabase(Database database) 
+    private SqlStatement[] generateStatementsForSQLiteDatabase(Database database) 
 			throws UnsupportedChangeException {
     	// SQLite does not support this ALTER TABLE operation until now.
 		// or more information: http://www.sqlite.org/omitted.html

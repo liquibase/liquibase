@@ -3,6 +3,7 @@ package liquibase.database.sql;
 import liquibase.database.DB2Database;
 import liquibase.database.Database;
 import liquibase.database.MSSQLDatabase;
+import liquibase.database.SQLiteDatabase;
 import liquibase.exception.StatementNotSupportedOnDatabaseException;
 import liquibase.util.StringUtils;
 
@@ -47,7 +48,11 @@ public class AddUniqueConstraintStatement implements SqlStatement {
     }
 
     public String getSqlStatement(Database database) throws StatementNotSupportedOnDatabaseException {
-        String sql = "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ADD CONSTRAINT " + getConstraintName() + " UNIQUE (" + database.escapeColumnNameList(getColumnNames()) + ")";
+    	if (!supportsDatabase(database)) {
+            throw new StatementNotSupportedOnDatabaseException(this, database);
+        }
+    	
+    	String sql = "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ADD CONSTRAINT " + getConstraintName() + " UNIQUE (" + database.escapeColumnNameList(getColumnNames()) + ")";
 
         if (StringUtils.trimToNull(getTablespace()) != null && database.supportsTablespaces()) {
             if (database instanceof MSSQLDatabase) {
@@ -67,6 +72,6 @@ public class AddUniqueConstraintStatement implements SqlStatement {
     }
 
     public boolean supportsDatabase(Database database) {
-        return true;
+        return !(database instanceof SQLiteDatabase);
     }
 }

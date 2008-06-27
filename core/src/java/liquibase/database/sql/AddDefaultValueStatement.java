@@ -1,6 +1,7 @@
 package liquibase.database.sql;
 
 import liquibase.database.*;
+import liquibase.exception.StatementNotSupportedOnDatabaseException;
 
 public class AddDefaultValueStatement implements SqlStatement {
     private String schemaName;
@@ -17,10 +18,14 @@ public class AddDefaultValueStatement implements SqlStatement {
     }
 
     public boolean supportsDatabase(Database database) {
-        return true;
+        return !(database instanceof SQLiteDatabase);
     }
 
-    public String getSqlStatement(Database database) {
+    public String getSqlStatement(Database database) throws StatementNotSupportedOnDatabaseException {
+    	if (!supportsDatabase(database)) {
+            throw new StatementNotSupportedOnDatabaseException(this, database);
+        }
+    	
         if (database instanceof SybaseDatabase) {
             return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " REPLACE " + database.escapeColumnName(getSchemaName(), getTableName(), getColumnName()) + " DEFAULT " + database.convertJavaObjectToString(getDefaultValue());
         } else if (database instanceof MSSQLDatabase) {

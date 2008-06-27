@@ -240,54 +240,60 @@
                 newTableName="state" newColumnName="id" newColumnDataType="char(2)"/>
     </changeSet>
 -->
-<!--
     <changeSet id="28" author="nvoxland">
         <addDefaultValue tableName="address" columnName="line2" defaultValue="N/A"/>
+		<insert tableName="address">
+            <column name="line1" value="23 Park Ave"/>
+            <column name="city" value="Houston"/>
+			<column name="state" value="TX"/>
+            <column name="postalcode" value="77345"/>
+        </insert>
     </changeSet>
+	
     <changeSet id="29" author="nvoxland">
         <dropDefaultValue tableName="address" columnName="line2"/>
     </changeSet>
-
+	
     <changeSet id="30" author="nvoxland">
         <createTable tableName="pkTest">
             <column name="id" type="int"/>
             <column name="value" type="varchar(50)"/>
         </createTable>
     </changeSet>
-
+	
     <changeSet id="31" author="nvoxland">
         <addPrimaryKey tableName="pkTest" columnNames="id" constraintName="pk_pktest"/>
     </changeSet>
 
+	<!-- Note: The attribute "constraintName" is used to pass the column name instead of the constraint name -->
     <changeSet id="32" author="nvoxland">
-        <dropPrimaryKey tableName="pkTest" constraintName="pk_pktest"/>
+        <dropPrimaryKey tableName="pkTest" constraintName="id"/>
     </changeSet>
 
+	<!-- Note: Multiple columns for the columnNames attribute are interpreted as multiple unique contraints for each column. -->
+	<!-- Note: The value of the attribute "constraintName" is ignored, nevertheless it must not be omited -->
     <changeSet id="33" author="nvoxland">
-        <addUniqueConstraint tableName="address" columnNames="line1, line2" constraintName="uq_address_line1line2"/>
+        <addUniqueConstraint tableName="address" columnNames="line1"/>
     </changeSet>
-
+	
+	<!-- Note: The attribute "constraintName" is used to pass the column name instead of the constraint name -->
     <changeSet id="34" author="nvoxland">
-        <dropUniqueConstraint tableName="address" constraintName="uq_address_line1line2"/>
+        <dropUniqueConstraint tableName="address" constraintName="line1"/>
     </changeSet>
-
 
     <changeSet id="35" author="nvoxland">
         <createTable tableName="tableToRollback">
             <column name="id" type="int"/>
         </createTable>
     </changeSet>
--->
 
-    <!--<changeSet id="50" author="nvoxland">-->
-        <!--<modifyColumn tableName="address">-->
-            <!--<column name="postalcode" type="varchar(20)"/>-->
-        <!--</modifyColumn>-->
-    <!--</changeSet>-->
-
+    <changeSet id="50" author="nvoxland">
+        <modifyColumn tableName="address">
+            <column name="postalcode" type="int"/>
+        </modifyColumn>
+    </changeSet>
 	
 	
-<!--	
     <changeSet id="51" author="nvoxland">
         <createTable tableName="nulldefaulttest">
             <column name="id" type="int" autoIncrement="true">
@@ -314,9 +320,9 @@
 
     <include file="changelogs/common/common.tests.changelog.xml" />
 
-    <include file="changelogs/common/autoincrement.tests.changelog.xml" />
-
+	<!--
     <include file="changelogs/common/schema.tests.changelog.xml" />
+	-->
 
     <changeSet id="54" author="nvoxland">
         <addColumn tableName="address">
@@ -328,7 +334,6 @@
             <column name="newcol2" type="varchar(255)"/>
         </addColumn>
     </changeSet>
-
     <changeSet id="56" author="nvoxland">
         <customChange class="liquibase.change.custom.ExampleCustomSqlChange">
             <param name="tableName" value="person"/>
@@ -342,7 +347,6 @@
     <changeSet id="58" author="nvoxland">
         <customChange class="liquibase.change.custom.ExampleCustomTaskChange" helloTo="world"/>
     </changeSet>
-	-->
 
     <!--<changeSet id="60" author="nvoxland">-->
         <!--<executeCommand executable="getmac" os="Windows XP">-->

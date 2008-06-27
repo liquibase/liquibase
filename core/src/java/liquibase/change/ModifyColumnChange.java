@@ -1,12 +1,15 @@
 package liquibase.change;
 
 import liquibase.database.*;
+import liquibase.database.SQLiteDatabase.AlterTableVisitor;
 import liquibase.database.sql.RawSqlStatement;
 import liquibase.database.sql.SqlStatement;
 import liquibase.database.sql.ReorganizeTableStatement;
 import liquibase.database.structure.Column;
 import liquibase.database.structure.DatabaseObject;
+import liquibase.database.structure.Index;
 import liquibase.database.structure.Table;
+import liquibase.exception.JDBCException;
 import liquibase.exception.UnsupportedChangeException;
 import liquibase.util.StringUtils;
 import org.w3c.dom.Document;
@@ -60,8 +63,14 @@ public class ModifyColumnChange extends AbstractChange implements ChangeWithColu
     }
 
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
+    	
+    	if (database instanceof SQLiteDatabase) {
+    		// return special statements for SQLite databases
+    		return generateStatementsForSQLiteDatabase(database);
+        }
+    	
     	List<SqlStatement> sql = new ArrayList<SqlStatement>();
-
+    	
       for (ColumnConfig aColumn : columns) {
 
           String schemaName = getSchemaName() == null?database.getDefaultSchemaName():getSchemaName();
@@ -88,6 +97,51 @@ public class ModifyColumnChange extends AbstractChange implements ChangeWithColu
       }
         
       return sql.toArray(new SqlStatement[sql.size()]);
+    }
+    
+    private SqlStatement[] generateStatementsForSQLiteDatabase(Database database) 
+			throws UnsupportedChangeException {
+
+		// SQLite does not support this ALTER TABLE operation until now.
+		// For more information see: http://www.sqlite.org/omitted.html.
+		// This is a small work around...
+    	
+    	List<SqlStatement> statements = new ArrayList<SqlStatement>();
+    	
+    	// define alter table logic
+		AlterTableVisitor rename_alter_visitor = 
+		new AlterTableVisitor() {
+			public ColumnConfig[] getColumnsToAdd() {
+				return new ColumnConfig[0];
+			}
+			public boolean copyThisColumn(ColumnConfig column) {
+				return true;
+			}
+			public boolean createThisColumn(ColumnConfig column) {
+				for (ColumnConfig cur_column: columns) {
+					if (cur_column.getName().equals(column.getName())) {
+						column.setType(cur_column.getType());
+						break;
+					}
+				}
+				return true;
+			}
+			public boolean createThisIndex(Index index) {
+				return true;
+			}
+		};
+    		
+    	try {
+    		// alter table
+			statements.addAll(SQLiteDatabase.getAlterTableStatements(
+					rename_alter_visitor,
+					database,getSchemaName(),getTableName()));
+		} catch (JDBCException e) {
+			System.err.println(e);
+			e.printStackTrace();
+		}
+    	
+    	return statements.toArray(new SqlStatement[statements.size()]);    	
     }
 
     public String getConfirmationMessage() {

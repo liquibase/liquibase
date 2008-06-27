@@ -100,7 +100,7 @@ public class AddNotNullConstraintChange extends AbstractChange {
         return statements.toArray(new SqlStatement[statements.size()]);
     }
     
-    public SqlStatement[] generateStatementsForSQLiteDatabase(Database database) 
+    private SqlStatement[] generateStatementsForSQLiteDatabase(Database database) 
 			throws UnsupportedChangeException {
     	
     	// SQLite does not support this ALTER TABLE operation until now.
@@ -116,26 +116,26 @@ public class AddNotNullConstraintChange extends AbstractChange {
                     .setWhereClause(getColumnName() + " IS NULL"));
         }
         
-		// ... test if column contains NULL values
-		if (defaultNullValue == null) {
-			List<Map> null_rows = null;
-			try {
-				null_rows = new JdbcTemplate(database).
-					queryForList(new RawSqlStatement(
-						"SELECT * FROM `"+
-						database.escapeTableName(getSchemaName(), getTableName())+
-						"` WHERE `"+getColumnName()+"` IS NULL;"));
-			} catch (JDBCException e) {
-				e.printStackTrace();
-			}
-    		if (null_rows.size()>0) {
-    			throw new UnsupportedChangeException(
-    					"Failed to add a Not-Null-Constraint because " +
-    					"some values are null. Use the " +
-    					"defaultNullValue attribute to define default " +
-    					"values for the existing null values.");
-    		}
-    	}
+//		// ... test if column contains NULL values
+//		if (defaultNullValue == null) {
+//			List<Map> null_rows = null;
+//			try {
+//				null_rows = database.getJdbcTemplate().
+//					queryForList(new RawSqlStatement(
+//						"SELECT * FROM `"+
+//						database.escapeTableName(getSchemaName(), getTableName())+
+//						"` WHERE `"+getColumnName()+"` IS NULL;"));
+//			} catch (JDBCException e) {
+//				e.printStackTrace();
+//			}
+//    		if (null_rows.size()>0) {
+//    			throw new UnsupportedChangeException(
+//    					"Failed to add a Not-Null-Constraint because " +
+//    					"some values are null. Use the " +
+//    					"defaultNullValue attribute to define default " +
+//    					"values for the existing null values.");
+//    		}
+//    	}
 		
 		// define alter table logic
 		AlterTableVisitor rename_alter_visitor = new AlterTableVisitor() {
