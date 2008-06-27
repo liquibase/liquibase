@@ -77,11 +77,13 @@ public class LiquibaseUpdateSQL extends AbstractLiquibaseUpdateMojo {
   @Override
   protected void cleanup(Database db) {
     super.cleanup(db);
-    try {
-      outputWriter.close();
-    }
-    catch (IOException e) {
-      getLog().error(e);
+    if (outputWriter != null) {
+      try {
+          outputWriter.close();
+        }
+      catch (IOException e) {
+        getLog().error(e);
+      }
     }
   }
 }
