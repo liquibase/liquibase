@@ -3,6 +3,7 @@ package liquibase.database.sql;
 import liquibase.database.Database;
 import liquibase.database.MaxDBDatabase;
 import liquibase.database.MySQLDatabase;
+import liquibase.database.SQLiteDatabase;
 import liquibase.exception.StatementNotSupportedOnDatabaseException;
 
 public class DropForeignKeyConstraintStatement implements SqlStatement {
@@ -30,7 +31,13 @@ public class DropForeignKeyConstraintStatement implements SqlStatement {
     }
 
     public String getSqlStatement(Database database) throws StatementNotSupportedOnDatabaseException {
-        if (getBaseTableSchemaName() != null && !database.supportsSchemas()) {
+    	if (!supportsDatabase(database)) {
+    		throw new StatementNotSupportedOnDatabaseException("SQLite " +
+    				"database does not support a drop foreign key statement", 
+    				this, database);
+    	}
+    	
+    	if (getBaseTableSchemaName() != null && !database.supportsSchemas()) {
             throw new StatementNotSupportedOnDatabaseException("Database does not support schemas", this, database);
         }
         
@@ -46,6 +53,6 @@ public class DropForeignKeyConstraintStatement implements SqlStatement {
     }
 
     public boolean supportsDatabase(Database database) {
-        return true;
+    	return (!(database instanceof SQLiteDatabase));
     }
 }
