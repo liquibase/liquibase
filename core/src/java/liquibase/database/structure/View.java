@@ -73,8 +73,17 @@ public class View implements DatabaseObject, Comparable<View> {
         return this.getName().compareTo(o.getName());
     }
 
-
     public String toString() {
-        return getName();
+    	String viewStr = getName()+" (";
+    	for (int i=0;i<columns.size();i++) {
+    		if (i>0) {
+    			viewStr += ","+columns.get(i);
+    		} else {
+    			viewStr += columns.get(i);
+    		}
+    	}
+    	viewStr += ")";
+        return viewStr;
     }
+    
 }

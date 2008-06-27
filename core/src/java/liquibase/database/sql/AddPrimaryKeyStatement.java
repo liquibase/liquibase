@@ -4,6 +4,7 @@ import liquibase.database.DB2Database;
 import liquibase.database.Database;
 import liquibase.database.MSSQLDatabase;
 import liquibase.database.MySQLDatabase;
+import liquibase.database.SQLiteDatabase;
 import liquibase.exception.StatementNotSupportedOnDatabaseException;
 import liquibase.util.StringUtils;
 
@@ -48,6 +49,10 @@ public class AddPrimaryKeyStatement implements SqlStatement {
     }
 
     public String getSqlStatement(Database database) throws StatementNotSupportedOnDatabaseException {
+    	if (!supportsDatabase(database)) {
+            throw new StatementNotSupportedOnDatabaseException(this, database);
+        }
+    	
         String sql;
         if (getConstraintName() == null  || database instanceof MySQLDatabase) {
             sql = "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ADD PRIMARY KEY (" + database.escapeColumnNameList(getColumnNames()) + ")";
@@ -73,6 +78,6 @@ public class AddPrimaryKeyStatement implements SqlStatement {
     }
 
     public boolean supportsDatabase(Database database) {
-        return true;
+    	return (!(database instanceof SQLiteDatabase));
     }
 }

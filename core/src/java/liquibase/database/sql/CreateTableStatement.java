@@ -3,6 +3,7 @@ package liquibase.database.sql;
 import liquibase.database.DB2Database;
 import liquibase.database.Database;
 import liquibase.database.MSSQLDatabase;
+import liquibase.database.SQLiteDatabase;
 import liquibase.database.SybaseDatabase;
 import liquibase.util.StringUtils;
 
@@ -153,6 +154,20 @@ public class CreateTableStatement implements SqlStatement {
             buffer.append(database.escapeColumnName(getSchemaName(), getTableName(), column));
             buffer.append(" ").append(database.getColumnType(columnTypes.get(column), isAutoIncrement));
 
+            if ((database instanceof SQLiteDatabase) && 
+					(getPrimaryKeyConstraint()!=null) &&
+					(getPrimaryKeyConstraint().getColumns().size()==1) &&
+					(getPrimaryKeyConstraint().getColumns().contains(column)) &&
+					isAutoIncrement) {
+            	String pkName = StringUtils.trimToNull(getPrimaryKeyConstraint().getConstraintName());
+	            if (pkName == null) {
+	                pkName = database.generatePrimaryKeyName(getTableName());
+	            }
+	            buffer.append(" CONSTRAINT ");
+	            buffer.append(pkName);
+				buffer.append(" PRIMARY KEY AUTOINCREMENT");
+			}
+            
             if (getDefaultValue(column) != null) {
                 if (database instanceof MSSQLDatabase) {
                     buffer.append(" CONSTRAINT ").append(((MSSQLDatabase) database).generateDefaultConstraintName(tableName, column));
@@ -161,7 +176,9 @@ public class CreateTableStatement implements SqlStatement {
                 buffer.append(getDefaultValue(column));
             }
 
-            if (isAutoIncrement) {
+            if (isAutoIncrement && 
+					(database.getAutoIncrementClause()!=null) &&
+					(!database.getAutoIncrementClause().equals(""))) {
                 buffer.append(" ").append(database.getAutoIncrementClause()).append(" ");
             }
 
@@ -179,18 +196,27 @@ public class CreateTableStatement implements SqlStatement {
         }
 
         buffer.append(",");
+        
+        if (!( (database instanceof SQLiteDatabase) && 
+				(getPrimaryKeyConstraint()!=null) &&
+				(getPrimaryKeyConstraint().getColumns().size()==1) &&
+				autoIncrementColumns.contains(getPrimaryKeyConstraint().getColumns().get(0)) )) {
+        	// ...skip this code block for sqlite if a single column primary key
+        	// with an autoincrement constraint exists.
+        	// This constraint is added after the column type.
 
-        if (getPrimaryKeyConstraint() != null && getPrimaryKeyConstraint().getColumns().size() > 0) {
-            String pkName = StringUtils.trimToNull(getPrimaryKeyConstraint().getConstraintName());
-            if (pkName == null) {
-                pkName = database.generatePrimaryKeyName(getTableName());
-            }
-            buffer.append(" CONSTRAINT ");
-            buffer.append(pkName);
-            buffer.append(" PRIMARY KEY (");
-            buffer.append(database.escapeColumnNameList(StringUtils.join(getPrimaryKeyConstraint().getColumns(), ", ")));
-            buffer.append(")");
-            buffer.append(",");
+	        if (getPrimaryKeyConstraint() != null && getPrimaryKeyConstraint().getColumns().size() > 0) {
+	            String pkName = StringUtils.trimToNull(getPrimaryKeyConstraint().getConstraintName());
+	            if (pkName == null) {
+	                pkName = database.generatePrimaryKeyName(getTableName());
+	            }
+	            buffer.append(" CONSTRAINT ");
+	            buffer.append(pkName);
+	            buffer.append(" PRIMARY KEY (");
+	            buffer.append(database.escapeColumnNameList(StringUtils.join(getPrimaryKeyConstraint().getColumns(), ", ")));
+	            buffer.append(")");
+	            buffer.append(",");
+	        }
         }
 
         for (ForeignKeyConstraint fkConstraint : getForeignKeyConstraints()) {

@@ -57,49 +57,59 @@ public class DropColumnChange extends AbstractChange {
     }
 
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
+     
+        if (database instanceof SQLiteDatabase) {		
+        	// return special statements for SQLite databases
+    		return generateStatementsForSQLiteDatabase(database);
+		}
+			
         List<SqlStatement> statements = new ArrayList<SqlStatement>();
         String schemaName = getSchemaName() == null?database.getDefaultSchemaName():getSchemaName();
-
-        if (database instanceof SQLiteDatabase) {		
-			// SQLite does not support this ALTER TABLE operation until now.
-			// For more information see: http://www.sqlite.org/omitted.html.
-			// This is a small work around...
-			
-			// define alter table logic
-    		AlterTableVisitor rename_alter_visitor = new AlterTableVisitor() {
-    			public ColumnConfig[] getColumnsToAdd() {
-    				return new ColumnConfig[0];
-    			}
-    			public boolean createThisColumn(ColumnConfig column) {
-    				return !column.getName().equals(getColumnName());
-    			}
-    			public boolean copyThisColumn(ColumnConfig column) {
-    				return !column.getName().equals(getColumnName());
-    			}
-    			public boolean createThisIndex(Index index) {
-    				return !index.getColumns().contains(getColumnName());
-    			}
-    		};  
-    		
-        	try {
-        		// alter table
-				statements.addAll(SQLiteDatabase.getAlterTableStatements(
-						rename_alter_visitor,
-						database,getSchemaName(),getTableName()));
-				
-			}  catch (JDBCException e) {
-				e.printStackTrace();
-			}
-		} else {
-			
-			// ...if it is not a SQLite database 
-	        statements.add(new DropColumnStatement(schemaName, getTableName(), getColumnName()));
-	        if (database instanceof DB2Database) {
-	            statements.add(new ReorganizeTableStatement(schemaName, getTableName()));
-	        }
-	        
-		}       
+        
+        statements.add(new DropColumnStatement(schemaName, getTableName(), getColumnName()));
+        if (database instanceof DB2Database) {
+            statements.add(new ReorganizeTableStatement(schemaName, getTableName()));
+        }
+        
         return statements.toArray(new SqlStatement[statements.size()]);
+    }
+    
+    public SqlStatement[] generateStatementsForSQLiteDatabase(Database database) 
+			throws UnsupportedChangeException {
+    	
+    	// SQLite does not support this ALTER TABLE operation until now.
+		// For more information see: http://www.sqlite.org/omitted.html.
+		// This is a small work around...
+		
+    	List<SqlStatement> statements = new ArrayList<SqlStatement>();
+        
+		// define alter table logic
+		AlterTableVisitor rename_alter_visitor = new AlterTableVisitor() {
+			public ColumnConfig[] getColumnsToAdd() {
+				return new ColumnConfig[0];
+			}
+			public boolean createThisColumn(ColumnConfig column) {
+				return !column.getName().equals(getColumnName());
+			}
+			public boolean copyThisColumn(ColumnConfig column) {
+				return !column.getName().equals(getColumnName());
+			}
+			public boolean createThisIndex(Index index) {
+				return !index.getColumns().contains(getColumnName());
+			}
+		};  
+		
+    	try {
+    		// alter table
+			statements.addAll(SQLiteDatabase.getAlterTableStatements(
+					rename_alter_visitor,
+					database,getSchemaName(),getTableName()));
+			
+		}  catch (JDBCException e) {
+			e.printStackTrace();
+		}
+		
+		return statements.toArray(new SqlStatement[statements.size()]);
     }
 
     public String getConfirmationMessage() {

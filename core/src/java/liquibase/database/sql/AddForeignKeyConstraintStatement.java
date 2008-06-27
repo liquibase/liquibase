@@ -1,6 +1,7 @@
 package liquibase.database.sql;
 
 import liquibase.database.Database;
+import liquibase.database.SQLiteDatabase;
 import liquibase.exception.StatementNotSupportedOnDatabaseException;
 
 public class AddForeignKeyConstraintStatement implements SqlStatement {
@@ -86,6 +87,10 @@ public class AddForeignKeyConstraintStatement implements SqlStatement {
     }
 
     public String getSqlStatement(Database database) throws StatementNotSupportedOnDatabaseException {
+    	if (!supportsDatabase(database)) {
+            throw new StatementNotSupportedOnDatabaseException(this, database);
+        }
+    	
         String sql = "ALTER TABLE " + database.escapeTableName(getBaseTableSchemaName(), getBaseTableName()) + " ADD CONSTRAINT " + getConstraintName() + " FOREIGN KEY (" + database.escapeColumnNameList(getBaseColumnNames()) + ") REFERENCES " + database.escapeTableName(getReferencedTableSchemaName(), getReferencedTableName()) + "(" + database.escapeColumnNameList(getReferencedColumnNames()) + ")";
 
         if (isDeleteCascade()) {
@@ -114,6 +119,6 @@ public class AddForeignKeyConstraintStatement implements SqlStatement {
     }
 
     public boolean supportsDatabase(Database database) {
-        return true;
+    	return (!(database instanceof SQLiteDatabase));
     }
 }

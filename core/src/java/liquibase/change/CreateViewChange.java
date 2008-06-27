@@ -1,7 +1,9 @@
 package liquibase.change;
 
 import liquibase.database.Database;
+import liquibase.database.SQLiteDatabase;
 import liquibase.database.sql.CreateViewStatement;
+import liquibase.database.sql.DropViewStatement;
 import liquibase.database.sql.SqlStatement;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.View;
@@ -9,8 +11,10 @@ import liquibase.exception.UnsupportedChangeException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -60,13 +64,27 @@ public class CreateViewChange extends AbstractChange {
     }
 
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
+    	List<SqlStatement> statements = new ArrayList<SqlStatement>();
+    
         boolean replaceIfExists = false;
         if (getReplaceIfExists() != null && getReplaceIfExists()) {
             replaceIfExists = true;
         }
-        return new SqlStatement[]{
-                new CreateViewStatement(getSchemaName() == null?database.getDefaultSchemaName():getSchemaName(), getViewName(), getSelectQuery(), replaceIfExists),
-        };
+        
+        if (!supportsReplaceIfExistsOption(database) && replaceIfExists) {
+        	statements.add(new DropViewStatement(
+        			getSchemaName() == null?database.getDefaultSchemaName():getSchemaName(), 
+        			getViewName()));
+        	statements.add(new CreateViewStatement(
+         			getSchemaName() == null?database.getDefaultSchemaName():getSchemaName(), 
+         			getViewName(), getSelectQuery(), false));
+        } else {
+         	statements.add(new CreateViewStatement(
+         			getSchemaName() == null?database.getDefaultSchemaName():getSchemaName(), 
+         			getViewName(), getSelectQuery(), replaceIfExists));
+        }
+        
+        return statements.toArray(new SqlStatement[statements.size()]);
     }
 
     public String getConfirmationMessage() {
@@ -100,6 +118,10 @@ public class CreateViewChange extends AbstractChange {
         dbObject.setName(viewName);
 
         return new HashSet<DatabaseObject>(Arrays.asList(dbObject));
+    }
+    
+    private boolean supportsReplaceIfExistsOption(Database database) {
+    	return !(database instanceof SQLiteDatabase);
     }
 
 }

@@ -68,47 +68,54 @@ public class DropNotNullConstraintChange extends AbstractChange {
     }
 
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
-    	List<SqlStatement> statements = new ArrayList<SqlStatement>();
     	
     	if (database instanceof SQLiteDatabase) {
-    		// SQLite does not support this ALTER TABLE operation until now.
-			// For more information see: http://www.sqlite.org/omitted.html.
-			// This is a small work around...
-    		
-			// define alter table logic
-    		AlterTableVisitor rename_alter_visitor = new AlterTableVisitor() {
-    			public ColumnConfig[] getColumnsToAdd() {
-    				return new ColumnConfig[0];
-    			}
-    			public boolean copyThisColumn(ColumnConfig column) {
-    				return true;
-    			}
-    			public boolean createThisColumn(ColumnConfig column) {
-    				if (column.getName().equals(getColumnName())) {
-    					column.getConstraints().setNullable(true);
-    				}
-    				return true;
-    			}
-    			public boolean createThisIndex(Index index) {
-    				return true;
-    			}
-    		};
-        		
-        	try {
-        		// alter table
-				statements.addAll(SQLiteDatabase.getAlterTableStatements(
-						rename_alter_visitor,
-						database,getSchemaName(),getTableName()));
-    		} catch (JDBCException e) {
-				e.printStackTrace();
+    		// return special statements for SQLite databases
+    		return generateStatementsForSQLiteDatabase(database);
+    	} 
+
+    	return new SqlStatement[] { new SetNullableStatement(
+    			getSchemaName() == null?database.getDefaultSchemaName():getSchemaName(), 
+    			getTableName(), getColumnName(), getColumnDataType(), true) 
+    	};
+    }
+    
+    public SqlStatement[] generateStatementsForSQLiteDatabase(Database database) 
+			throws UnsupportedChangeException {
+    	// SQLite does not support this ALTER TABLE operation until now.
+		// For more information see: http://www.sqlite.org/omitted.html.
+		// This is a small work around...
+		
+    	List<SqlStatement> statements = new ArrayList<SqlStatement>();
+    	
+		// define alter table logic
+		AlterTableVisitor rename_alter_visitor = new AlterTableVisitor() {
+			public ColumnConfig[] getColumnsToAdd() {
+				return new ColumnConfig[0];
 			}
-    	} else {
+			public boolean copyThisColumn(ColumnConfig column) {
+				return true;
+			}
+			public boolean createThisColumn(ColumnConfig column) {
+				if (column.getName().equals(getColumnName())) {
+					column.getConstraints().setNullable(true);
+				}
+				return true;
+			}
+			public boolean createThisIndex(Index index) {
+				return true;
+			}
+		};
     		
-    		// ...if it is not a SQLite database 
-    		statements.add(new SetNullableStatement(getSchemaName() == null?database.getDefaultSchemaName():getSchemaName(), getTableName(), getColumnName(), getColumnDataType(), true));
-    		
-    	}
-    	return statements.toArray(new SqlStatement[statements.size()]);
+    	try {
+    		// alter table
+			statements.addAll(SQLiteDatabase.getAlterTableStatements(
+					rename_alter_visitor,
+					database,getSchemaName(),getTableName()));
+		} catch (JDBCException e) {
+			e.printStackTrace();
+		}
+		return statements.toArray(new SqlStatement[statements.size()]);		
     }
 
     protected Change[] createInverses() {

@@ -1,6 +1,7 @@
 package liquibase.change;
 
 import liquibase.database.Database;
+import liquibase.database.SQLiteDatabase;
 import liquibase.database.sql.AddForeignKeyConstraintStatement;
 import liquibase.database.sql.SqlStatement;
 import liquibase.database.structure.Column;
@@ -119,6 +120,12 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
     }
 
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
+    	
+    	if (database instanceof SQLiteDatabase) {
+    		// return special statements for SQLite databases
+    		return generateStatementsForSQLiteDatabase(database);
+        }
+    	
         boolean deferrable = false;
         if (getDeferrable() != null) {
             deferrable = getDeferrable();
@@ -146,6 +153,14 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
                 .setInitiallyDeferred(initiallyDeferred)
                 .setDeleteCascade(deleteCascade)
         };
+    }
+    
+    public SqlStatement[] generateStatementsForSQLiteDatabase(Database database) 
+			throws UnsupportedChangeException {
+    	// SQLite does not support foreign keys until now.
+		// See for more information: http://www.sqlite.org/omitted.html
+		// Therefore this is an empty operation...
+		return new SqlStatement[]{};
     }
 
     protected Change[] createInverses() {

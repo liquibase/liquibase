@@ -40,7 +40,8 @@ public class AddAutoIncrementStatement implements SqlStatement {
                 || database instanceof CacheDatabase
                 || database instanceof FirebirdDatabase
                 || database instanceof H2Database
-                || database instanceof PostgresDatabase);
+                || database instanceof PostgresDatabase
+                || database instanceof SQLiteDatabase);
     }
 
     public String getSqlStatement(Database database) throws StatementNotSupportedOnDatabaseException {

@@ -2,11 +2,15 @@ package liquibase.change;
 
 import liquibase.database.Database;
 import liquibase.database.DerbyDatabase;
+import liquibase.database.SQLiteDatabase;
+import liquibase.database.SQLiteDatabase.AlterTableVisitor;
 import liquibase.database.sql.RawSqlStatement;
 import liquibase.database.sql.SqlStatement;
 import liquibase.database.structure.Column;
 import liquibase.database.structure.DatabaseObject;
+import liquibase.database.structure.Index;
 import liquibase.database.structure.Table;
+import liquibase.exception.JDBCException;
 import liquibase.exception.UnsupportedChangeException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -103,19 +107,61 @@ public class MergeColumnChange extends AbstractChange {
         String updateStatement = "UPDATE " + database.escapeTableName(schemaName, getTableName()) + " SET " + getFinalColumnName() + " = " + database.getConcatSql(getColumn1Name(), "'"+getJoinString()+"'", getColumn2Name());
 
         statements.add(new RawSqlStatement(updateStatement));
-
-        DropColumnChange dropColumn1Change = new DropColumnChange();
-        dropColumn1Change.setSchemaName(schemaName);
-        dropColumn1Change.setTableName(getTableName());
-        dropColumn1Change.setColumnName(getColumn1Name());
-        statements.addAll(Arrays.asList(dropColumn1Change.generateStatements(database)));
-
-        DropColumnChange dropColumn2Change = new DropColumnChange();
-        dropColumn2Change.setSchemaName(schemaName);
-        dropColumn2Change.setTableName(getTableName());
-        dropColumn2Change.setColumnName(getColumn2Name());
-        statements.addAll(Arrays.asList(dropColumn2Change.generateStatements(database)));
-
+        
+        if (database instanceof SQLiteDatabase) {
+        	// SQLite does not support this ALTER TABLE operation until now.
+			// For more information see: http://www.sqlite.org/omitted.html
+			// This is a small work around...
+    		
+			// define alter table logic
+    		AlterTableVisitor rename_alter_visitor = new AlterTableVisitor() {
+    			public ColumnConfig[] getColumnsToAdd() {
+    				ColumnConfig[] new_columns = new ColumnConfig[1];
+    				ColumnConfig new_column = new ColumnConfig();
+    		        new_column.setName(getFinalColumnName());
+    		        new_column.setType(getFinalColumnType());
+    				new_columns[0] = new ColumnConfig(new_column);
+    				return new_columns;
+    			}
+    			public boolean copyThisColumn(ColumnConfig column) {
+    				return !(column.getName().equals(getColumn1Name()) ||
+    						column.getName().equals(getColumn2Name()));
+    			}
+    			public boolean createThisColumn(ColumnConfig column) {
+    				return !(column.getName().equals(getColumn1Name()) ||
+    						column.getName().equals(getColumn2Name()));
+    			}
+    			public boolean createThisIndex(Index index) {
+    				return !(index.getColumns().contains(getColumn1Name()) ||
+    						index.getColumns().contains(getColumn2Name()));
+    			}
+    		};
+        	
+        	try {
+        		// alter table
+				statements.addAll(SQLiteDatabase.getAlterTableStatements(
+						rename_alter_visitor,
+						database,getSchemaName(),getTableName()));
+    		} catch (JDBCException e) {
+				e.printStackTrace();
+			}
+    		
+        } else {
+        	// ...if it is not a SQLite database 
+        	
+	        DropColumnChange dropColumn1Change = new DropColumnChange();
+	        dropColumn1Change.setSchemaName(schemaName);
+	        dropColumn1Change.setTableName(getTableName());
+	        dropColumn1Change.setColumnName(getColumn1Name());
+	        statements.addAll(Arrays.asList(dropColumn1Change.generateStatements(database)));
+	
+	        DropColumnChange dropColumn2Change = new DropColumnChange();
+	        dropColumn2Change.setSchemaName(schemaName);
+	        dropColumn2Change.setTableName(getTableName());
+	        dropColumn2Change.setColumnName(getColumn2Name());
+	        statements.addAll(Arrays.asList(dropColumn2Change.generateStatements(database)));
+        
+        }
         return statements.toArray(new SqlStatement[statements.size()]);
 
     }
