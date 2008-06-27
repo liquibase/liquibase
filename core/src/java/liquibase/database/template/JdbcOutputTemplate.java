@@ -1,12 +1,11 @@
 package liquibase.database.template;
 
-import liquibase.database.Database;
+import java.io.IOException;
+import java.io.Writer;
+import liquibase.database.*;
 import liquibase.database.sql.SqlStatement;
 import liquibase.exception.JDBCException;
 import liquibase.util.StreamUtil;
-
-import java.io.IOException;
-import java.io.Writer;
 
 public class JdbcOutputTemplate extends JdbcTemplate {
 
@@ -44,8 +43,20 @@ public class JdbcOutputTemplate extends JdbcTemplate {
 
     private void outputStatement(SqlStatement sql) throws JDBCException {
         try {
-            output.write(sql.getSqlStatement(database));
-            output.write(";");
+            String statement = sql.getSqlStatement(database);
+            output.write(statement);
+
+            if (!statement.endsWith(";")) {
+              output.write(";");
+            }
+
+            if (database instanceof MSSQLDatabase) {
+                output.write(StreamUtil.getLineSeparator());
+                output.write("GO");
+            } else if (database instanceof OracleDatabase) {
+                output.write(StreamUtil.getLineSeparator());
+                output.write("/");
+            }
             output.write(StreamUtil.getLineSeparator());
             output.write(StreamUtil.getLineSeparator());
         } catch (IOException e) {
