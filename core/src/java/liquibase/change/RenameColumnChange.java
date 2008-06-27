@@ -91,7 +91,7 @@ public class RenameColumnChange extends AbstractChange {
         };
     }
     
-    public SqlStatement[] generateStatementsForSQLiteDatabase(Database database) 
+    private SqlStatement[] generateStatementsForSQLiteDatabase(Database database) 
     		throws UnsupportedChangeException {
     	
     	// SQLite does not support this ALTER TABLE operation until now.

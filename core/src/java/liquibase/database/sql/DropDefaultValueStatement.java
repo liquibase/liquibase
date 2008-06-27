@@ -28,6 +28,10 @@ public class DropDefaultValueStatement implements SqlStatement {
     }
 
     public String getSqlStatement(Database database) throws StatementNotSupportedOnDatabaseException {
+    	if (!supportsDatabase(database)) {
+            throw new StatementNotSupportedOnDatabaseException(this, database);
+        }
+    	
         if (database instanceof MSSQLDatabase) {
 //smarter drop        return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + SqlUtil.escapeTableName(getTableName(), database) + " DROP CONSTRAINT select d.name from syscolumns c,sysobjects d, sysobjects t where c.id=t.id AND d.parent_obj=t.id AND d.type='D' AND t.type='U' AND c.name='"+getColumnName()+"' AND t.name='"+getTableName()+"'"),};
             return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " DROP CONSTRAINT " + ((MSSQLDatabase) database).generateDefaultConstraintName(getTableName(), getColumnName());
@@ -49,6 +53,6 @@ public class DropDefaultValueStatement implements SqlStatement {
     }
 
     public boolean supportsDatabase(Database database) {
-        return true;
+    	return !(database instanceof SQLiteDatabase);
     }
 }

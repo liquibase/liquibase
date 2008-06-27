@@ -155,7 +155,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
         };
     }
     
-    public SqlStatement[] generateStatementsForSQLiteDatabase(Database database) 
+    private SqlStatement[] generateStatementsForSQLiteDatabase(Database database) 
 			throws UnsupportedChangeException {
     	// SQLite does not support foreign keys until now.
 		// See for more information: http://www.sqlite.org/omitted.html

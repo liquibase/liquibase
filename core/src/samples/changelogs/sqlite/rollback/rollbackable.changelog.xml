@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <databaseChangeLog
-        xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.6"
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.7"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.6 http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.6.xsd">
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.7 http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.7.xsd">
     <preConditions>
             <dbms type="sqlite"/>
     </preConditions>
@@ -18,7 +18,7 @@
     </changeSet>
     <changeSet id="2" author="nvoxland">
         <addColumn tableName="magazine">
-            <column name="sku" type="varchar(50)">
+            <column name="sku" type="varchar(50)" defaultValue="N/A">
                 <constraints nullable="false"/>
             </column>
         </addColumn>
@@ -72,11 +72,14 @@
         </createView>
     </changeSet>
 
+	<!-- Not supported in SQlite -->
+	<!--
     <changeSet id="10" author="nvoxland">
         <renameView oldViewName="publicationView" newViewName="v_publication"/>
     </changeSet>
+	-->
 
-        <changeSet id="11" author="nvoxland">
+	<changeSet id="11" author="nvoxland">
         <createTable tableName="article">
             <column name="id" type="int" autoIncrement="true">
                 <constraints primaryKey="true" nullable="false"/>
@@ -94,12 +97,15 @@
                 deleteCascade="true"/>
     </changeSet>
 
+	<!-- Not supported in SQlite -->
+	<!--
     <changeSet id="13" author="nvoxland">
         <addLookupTable
             existingTableName="publication" existingColumnName="isbn"
             newTableName="isbn" newColumnName="code"
             newColumnDataType="varchar(50)"/>
     </changeSet>
+	-->
 
     <changeSet id="14" author="nvoxland">
         <addDefaultValue tableName="publication" columnName="isbn" defaultValue="0000-0000"/>

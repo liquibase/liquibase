@@ -4,6 +4,7 @@ import liquibase.database.Database;
 import liquibase.database.FirebirdDatabase;
 import liquibase.database.MSSQLDatabase;
 import liquibase.database.PostgresDatabase;
+import liquibase.database.SQLiteDatabase;
 import liquibase.exception.StatementNotSupportedOnDatabaseException;
 
 public class DropPrimaryKeyStatement implements SqlStatement {
@@ -31,7 +32,11 @@ public class DropPrimaryKeyStatement implements SqlStatement {
     }
 
     public String getSqlStatement(Database database) throws StatementNotSupportedOnDatabaseException {
-        if (getConstraintName() == null) {
+    	if (!supportsDatabase(database)) {
+            throw new StatementNotSupportedOnDatabaseException(this, database);
+        }
+    	
+    	if (getConstraintName() == null) {
             if (database instanceof MSSQLDatabase
                     || database instanceof PostgresDatabase
                     || database instanceof FirebirdDatabase) {
@@ -55,6 +60,6 @@ public class DropPrimaryKeyStatement implements SqlStatement {
     }
 
     public boolean supportsDatabase(Database database) {
-        return true;
+    	return (!(database instanceof SQLiteDatabase));
     }
 }

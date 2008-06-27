@@ -51,7 +51,8 @@ public class AddColumnStatement implements SqlStatement {
         if (isPrimaryKey() && (database instanceof CacheDatabase
                 || database instanceof H2Database
                 || database instanceof DB2Database
-                || database instanceof DerbyDatabase)) {
+                || database instanceof DerbyDatabase
+                || database instanceof SQLiteDatabase)) {
             throw new StatementNotSupportedOnDatabaseException("Adding primary key columns is not supported", this, database);
         }
 
@@ -88,7 +89,7 @@ public class AddColumnStatement implements SqlStatement {
         if (!defaultClauseBeforeNotNull(database)) {
             alterTable += getDefaultClause(database);
         }
-
+        
         return alterTable;
     }
 
