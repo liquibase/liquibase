@@ -293,7 +293,7 @@
         </modifyColumn>
     </changeSet>
 	
-	
+	<!--
     <changeSet id="51" author="nvoxland">
         <createTable tableName="nulldefaulttest">
             <column name="id" type="int" autoIncrement="true">
@@ -303,12 +303,12 @@
             <column name="test" type="bigint" defaultValue="null"/>
         </createTable>
     </changeSet>
-
     <changeSet id="51b" author="nvoxland">
         <addColumn tableName="nulldefaulttest">
             <column name="foreign_id" type="bigint" defaultValue="null"/>
         </addColumn>
     </changeSet>
+	-->
 
     <changeSet id="52" author="pkeeble">
         <sqlFile path="changelogs/sqlite/complete/sample.sql" stripComments="true"/>
