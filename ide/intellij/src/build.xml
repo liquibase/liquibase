@@ -7,7 +7,6 @@
     <property file="../../../core/src/build.properties"/>
 
     <target name="prepare">
-
         <tstamp>
             <format property="build.start" pattern="MM/DD/yyyy hh:mm aa"></format>
         </tstamp>
@@ -24,14 +23,19 @@
             </fileset>
             <pathelement location="${basedir}/../../common/build"/>
             <pathelement location="${build.dir}"/>
-            <fileset dir="${user.home}/.IntelliJIdea70/config/plugins/">
+
+            <fileset dir="${idea.plugins}">
                 <include name="**/*.jar"/>
             </fileset>
             <fileset dir="${release.dir}">
                 <include name="**/*.jar"/>
             </fileset>
             <fileset dir="${idea.home}/lib">
-                <include name="*.jar"/>
+                <include name="openapi.jar"/>
+                <include name="jdom.jar"/>
+                <include name="javac2.jar"/>
+                <include name="asm.jar"/>
+                <include name="asm-commons.jar"/>
             </fileset>
         </path>
 
@@ -41,7 +45,7 @@
             <filterset>
                 <filter token="BUILD.VERSION" value="${build.version}"/>
             </filterset>
-        </copy>                
+        </copy>
     </target>
 
     <!-- target: CLEAN -->
@@ -76,13 +80,13 @@
             <fileset dir="${src.dir}/java" includes="**/help/**"/>
         </copy>
 
-        <javac srcdir="${src.dir}/java" destdir="${build.dir}" deprecation="${deprecation}" debug="${debug}"
+        <javac srcdir="${src.dir}/java" destdir="${build.dir}" deprecation="${deprecation}" debug="${debug}" target="1.5"
                optimize="${optimize}" source="1.5">
             <classpath refid="classpath"/>
         </javac>
 
         <mkdir dir="${build.test.dir}"/>
-        <javac srcdir="${src.dir}/java-test" destdir="${build.test.dir}" deprecation="${deprecation}"
+        <javac srcdir="${src.dir}/java-test" destdir="${build.test.dir}" deprecation="${deprecation}" target="1.5"
                debug="${debug}" optimize="${optimize}" source="1.5">
             <classpath refid="classpath"/>
         </javac>
@@ -107,7 +111,7 @@
                 <pathelement path="${build.dir}"/>
                 <pathelement path="${src.dir}"/>
             </classpath>
-        </uidesigner>        
+        </uidesigner>
     </target>
 
     <target name="package" depends="clean, compile">
