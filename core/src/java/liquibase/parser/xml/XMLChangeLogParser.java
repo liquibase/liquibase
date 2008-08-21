@@ -9,11 +9,8 @@ import org.xml.sax.*;
 
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
-
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
 import java.util.Map;
 
 public class XMLChangeLogParser {
@@ -22,7 +19,7 @@ public class XMLChangeLogParser {
         return "1.7";
     }
 
-    public DatabaseChangeLog parse(String physicalChangeLogLocation, FileOpener fileOpener, Map changeLogProperties) throws ChangeLogParseException {
+    public DatabaseChangeLog parse(String physicalChangeLogLocation, FileOpener fileOpener, Map<String, Object> changeLogProperties) throws ChangeLogParseException {
 
         SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
         if (System.getProperty("java.vm.version").startsWith("1.4")) {
@@ -39,9 +36,9 @@ public class XMLChangeLogParser {
             try {
                 parser.setProperty("http://java.sun.com/xml/jaxp/properties/schemaLanguage", "http://www.w3.org/2001/XMLSchema");
             } catch (SAXNotRecognizedException e) {
-                ; //ok, parser must not support it
+                //ok, parser must not support it
             } catch (SAXNotSupportedException e) {
-                ; //ok, parser must not support it
+                //ok, parser must not support it
             }
 
             XMLReader xmlReader = parser.getXMLReader();
@@ -112,7 +109,7 @@ public class XMLChangeLogParser {
                 try {
                     inputStream.close();
                 } catch (IOException e) {
-                    ;
+                    // probably ok
                 }
             }
         }

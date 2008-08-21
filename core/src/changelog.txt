@@ -6,9 +6,9 @@ Changes in version 1.7.0 (2008.06.25)
 - Added loadData change
 - Added support for changelog paramters
 - Allow preconditions in <changeSet>
-- Can export data with generChangeLog
+- Can export data with generateChangeLog
 - Added markNextChangeSetRan command
-- Added validChangeLog tag to changeSet
+- Added validCheckSum tag to changeSet
 - Can use change tags in <rollback>
 - Can reference previous changeSets in <rollback>
 - Allow custom preconditions
