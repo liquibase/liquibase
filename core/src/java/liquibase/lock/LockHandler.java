@@ -123,7 +123,13 @@ public class LockHandler {
             RawSqlStatement sqlStatement = new RawSqlStatement((("SELECT ID, LOCKED, LOCKGRANTED, LOCKEDBY FROM " + database.escapeTableName(database.getDefaultSchemaName(), database.getDatabaseChangeLogLockTableName()))));
             List<Map> rows = database.getJdbcTemplate().queryForList(sqlStatement);
             for (Map columnMap : rows) {
-                Boolean locked = (Boolean) columnMap.get("LOCKED");
+                Object lockedValue = columnMap.get("LOCKED");
+                Boolean locked;
+                if (lockedValue instanceof Number) {
+                    locked = ((Number) lockedValue).intValue() == 1;
+                } else {
+                    locked = (Boolean) lockedValue;
+                }
                 if (locked != null && locked) {
                     allLocks.add(new DatabaseChangeLogLock((Integer) columnMap.get("ID"), (Date) columnMap.get("LOCKGRANTED"), (String) columnMap.get("LOCKEDBY")));
                 }
