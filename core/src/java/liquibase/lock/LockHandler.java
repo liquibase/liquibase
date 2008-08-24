@@ -104,6 +104,8 @@ public class LockHandler {
                 database.commit();
                 hasChangeLogLock = false;
 
+                instances.remove(this.database);
+
                 LogFactory.getLogger().info("Successfully released change log lock");
             } catch (Exception e) {
                 throw new LockException(e);
