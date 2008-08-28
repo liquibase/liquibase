@@ -111,6 +111,8 @@ public class ChangeSet {
      */
     public void execute(Database database) throws MigrationFailedException {
 
+        boolean skipChange = false;
+
         try {
             database.getJdbcTemplate().comment("Changeset " + toString());
             if (StringUtils.trimToNull(getComments()) != null) {
@@ -135,28 +137,42 @@ public class ChangeSet {
                         message.append(StreamUtil.getLineSeparator());
                     }
 
-                    throw new MigrationFailedException(this, message.toString());
+                    if (rootPrecondition.getOnFail() == null || rootPrecondition.getOnFail().equalsIgnoreCase("FAIL")) {
+                        throw new MigrationFailedException(this, message.toString());
+                    } else if (rootPrecondition.getOnFail().equalsIgnoreCase("SKIP")) {
+                        skipChange = true;
+
+                        log.log(Level.INFO, "Skipping ChangeSet: " + toString() +" due to precondition failure: " + message);
+                    } else if (rootPrecondition.getOnFail().equalsIgnoreCase("WARN")) {
+                        log.log(Level.WARNING, "Failed Precondition on ChangeSet: " + toString() + ": " + message);
+                    } else {
+                        throw new MigrationFailedException(this, "Unknown precondition onFail attribute: "+rootPrecondition.getOnFail());
+                    }
                 }
             }
 
-            for (Change change : changes) {
-                try {
-                    change.setUp();
-                } catch (SetupException se) {
-                    throw new MigrationFailedException(this, se);
+            if (!skipChange) {
+                for (Change change : changes) {
+                    try {
+                        change.setUp();
+                    } catch (SetupException se) {
+                        throw new MigrationFailedException(this, se);
+                    }
                 }
+
+                log.finest("Reading ChangeSet: " + toString());
+                for (Change change : getChanges()) {
+                    change.executeStatements(database);
+                    log.finest(change.getConfirmationMessage());
+                }
+
+                database.commit();
+                log.finest("ChangeSet " + toString() + " has been successfully run.");
+
+                database.commit();
+            } else {
+                log.finest("Skipping ChangeSet: " + toString());
             }
-
-            log.finest("Reading ChangeSet: " + toString());
-            for (Change change : getChanges()) {
-                change.executeStatements(database);
-                log.finest(change.getConfirmationMessage());
-            }
-
-            database.commit();
-            log.finest("ChangeSet " + toString() + " has been successfully ran.");
-
-            database.commit();
         } catch (Exception e) {
             try {
                 database.rollback();
@@ -374,9 +390,6 @@ public class ChangeSet {
     public boolean isCheckSumValid(String storedCheckSum) {
         String currentMd5Sum = getMd5sum();
         if (currentMd5Sum == null) {
-            return true;
-        }
-        if (storedCheckSum == null) {
             return true;
         }
         if (currentMd5Sum.equals(storedCheckSum)) {

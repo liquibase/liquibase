@@ -44,6 +44,7 @@
                                             <xsd:choice>
                                                 <xsd:group ref="PreConditionChildren"  maxOccurs="unbounded"/>
                                             </xsd:choice>
+                                            <xsd:attribute name="onFail" type="xsd:string"/>
                                         </xsd:complexType>
                                     </xsd:element>
                                     <xsd:choice>
@@ -382,6 +383,17 @@
         </xsd:complexType>
     </xsd:element>
 
+    <xsd:attributeGroup name="dropAllForeignKeyConstraintsAttrib">
+        <xsd:attribute name="baseTableSchemaName" type="xsd:string"/>
+        <xsd:attribute name="baseTableName" type="xsd:string"/>
+    </xsd:attributeGroup>
+
+    <xsd:element name="dropAllForeignKeyConstraints">
+        <xsd:complexType>
+            <xsd:attributeGroup ref="dropAllForeignKeyConstraintsAttrib"/>
+        </xsd:complexType>
+    </xsd:element>    
+
     <xsd:attributeGroup name="dropNotNullConstraintAttrib">
         <xsd:attribute name="schemaName" type="xsd:string"/>
         <xsd:attribute name="tableName" type="xsd:string"/>
@@ -684,6 +696,7 @@
             <xsd:element ref="dropNotNullConstraint" maxOccurs="unbounded"/>
             <xsd:element ref="addForeignKeyConstraint" maxOccurs="unbounded"/>
             <xsd:element ref="dropForeignKeyConstraint" maxOccurs="unbounded"/>
+            <xsd:element ref="dropAllForeignKeyConstraints" maxOccurs="unbounded"/>
             <xsd:element ref="addPrimaryKey" maxOccurs="unbounded"/>
             <xsd:element ref="dropPrimaryKey" maxOccurs="unbounded"/>
             <xsd:element ref="addLookupTable" maxOccurs="unbounded"/>
