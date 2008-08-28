@@ -119,6 +119,7 @@ class XMLChangeLogHandler extends DefaultHandler {
                 inRollback = true;
             } else if ("preConditions".equals(qName)) {
                 rootPrecondition = new AndPrecondition();
+                rootPrecondition.setSkipOnFail(Boolean.parseBoolean(atts.getValue("skipOnFail")));
                 preconditionLogicStack.push(rootPrecondition);
             } else if (rootPrecondition != null) {
                 currentPrecondition = PreconditionFactory.getInstance().create(qName);

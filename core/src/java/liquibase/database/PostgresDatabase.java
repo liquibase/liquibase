@@ -3,13 +3,16 @@ package liquibase.database;
 import liquibase.database.sql.RawSqlStatement;
 import liquibase.database.sql.SqlStatement;
 import liquibase.exception.JDBCException;
+import liquibase.exception.CustomChangeException;
 import liquibase.util.StringUtils;
 
-import java.sql.Connection;
-import java.sql.Types;
+import java.sql.*;
 import java.text.ParseException;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.logging.Level;
 
 /**
  * Encapsulates PostgreSQL database support.
@@ -18,6 +21,9 @@ public class PostgresDatabase extends AbstractDatabase {
     public static final String PRODUCT_NAME = "PostgreSQL";
 
     private Set<String> systemTablesAndViews = new HashSet<String>();
+
+    private String defaultDatabaseSchemaName;
+    private String defaultCatalogName;
 
     public PostgresDatabase() {
 //        systemTablesAndViews.add("pg_logdir_ls");
@@ -130,11 +136,73 @@ public class PostgresDatabase extends AbstractDatabase {
     }
 
     protected String getDefaultDatabaseSchemaName() throws JDBCException {
-        return null;
+
+        if (defaultDatabaseSchemaName == null) {
+            try {
+                List<String> searchPaths = getSearchPaths();
+                if (searchPaths != null && searchPaths.size() > 0) {
+                    for (String searchPath : searchPaths) {
+                        if (searchPath != null && searchPath.length() > 0) {
+                            defaultDatabaseSchemaName = searchPath;
+
+                            if (defaultDatabaseSchemaName.equals("$user") && getConnectionUsername() != null) {
+                                if (! schemaExists(getConnectionUsername())) {
+                                    defaultDatabaseSchemaName = null;
+                                }
+                            }
+
+                            if (defaultDatabaseSchemaName != null)
+                                break;
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                // TODO: throw?
+                e.printStackTrace();
+                log.log(Level.SEVERE, "Failed to get default catalog name from postgres", e);
+            }
+        }
+
+        return defaultDatabaseSchemaName;
     }
 
     public String getDefaultCatalogName() throws JDBCException {
-        return "PUBLIC";
+
+        if (defaultCatalogName == null) {
+            try {
+                List<String> searchPaths = getSearchPaths();
+                if (searchPaths != null && searchPaths.size() > 0) {
+                    for (String searchPath : searchPaths) {
+                        if (searchPath != null && searchPath.length() > 0) {
+                            defaultCatalogName = searchPath;
+
+                            if (defaultCatalogName.equals("$user") && getConnectionUsername() != null) {
+                                if (! catalogExists(getConnectionUsername())) {
+                                    defaultCatalogName = null;
+                                } else {
+                                    defaultCatalogName = getConnectionUsername();
+                                }
+                            }
+
+                            if (defaultCatalogName != null)
+                                break;
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                // TODO: throw?
+                e.printStackTrace();
+                log.log(Level.SEVERE, "Failed to get default catalog name from postgres", e);
+            }
+
+            // Default
+            if (defaultCatalogName == null) {
+                defaultCatalogName = "PUBLIC";
+            }
+
+        }
+
+        return defaultCatalogName;
     }
 
     public String getDatabaseChangeLogTableName() {
@@ -166,7 +234,7 @@ public class PostgresDatabase extends AbstractDatabase {
 
 
     public SqlStatement createFindSequencesSQL(String schema) throws JDBCException {
-        return new RawSqlStatement("SELECT relname AS SEQUENCE_NAME FROM pg_class, pg_namespace WHERE relkind='S' AND pg_class.relnamespace = pg_namespace.oid AND nspname = '" + convertRequestedSchemaToSchema(schema) + "' AND 'nextval(''"+(schema==null?"":schema+".")+"'||relname||'''::regclass)' not in (select adsrc from pg_attrdef where adsrc is not null) AND 'nextval('''||relname||'''::regclass)' not in (select adsrc from pg_attrdef where adsrc is not null)");
+        return new RawSqlStatement("SELECT relname AS SEQUENCE_NAME FROM pg_class, pg_namespace WHERE relkind='S' AND pg_class.relnamespace = pg_namespace.oid AND nspname = '" + convertRequestedSchemaToSchema(schema) + "' AND 'nextval(''" + (schema == null ? "" : schema + ".") + "'||relname||'''::regclass)' not in (select adsrc from pg_attrdef where adsrc is not null) AND 'nextval('''||relname||'''::regclass)' not in (select adsrc from pg_attrdef where adsrc is not null)");
     }
 
 
@@ -187,13 +255,13 @@ public class PostgresDatabase extends AbstractDatabase {
 
 
     public SqlStatement getViewDefinitionSql(String schemaName, String name) throws JDBCException {
-        return new RawSqlStatement("select definition from pg_views where viewname='" + name + "' AND schemaname='"+convertRequestedSchemaToSchema(schemaName)+"'");
+        return new RawSqlStatement("select definition from pg_views where viewname='" + name + "' AND schemaname='" + convertRequestedSchemaToSchema(schemaName) + "'");
     }
 
 
     public String getColumnType(String columnType, Boolean autoIncrement) {
         if (columnType.startsWith("java.sql.Types.VARCHAR")) { //returns "name" for type
-            return columnType.replace("java.sql.Types.","");
+            return columnType.replace("java.sql.Types.", "");
         }
 
         String type = super.getColumnType(columnType, autoIncrement);
@@ -210,7 +278,7 @@ public class PostgresDatabase extends AbstractDatabase {
         if (autoIncrement != null && autoIncrement) {
             if ("integer".equals(type.toLowerCase())) {
                 return "serial";
-            } else if ("bigint".equals(type.toLowerCase()) || "bigserial".equals(type.toLowerCase())) {            
+            } else if ("bigint".equals(type.toLowerCase()) || "bigserial".equals(type.toLowerCase())) {
                 return "bigserial";
             } else {
                 // Unknown integer type, default to "serial"
@@ -244,69 +312,144 @@ public class PostgresDatabase extends AbstractDatabase {
 
     public String convertRequestedSchemaToSchema(String requestedSchema) throws JDBCException {
         if (requestedSchema == null) {
-            return "public";
+            // Return the catalog name instead..
+            return getDefaultCatalogName();
         } else {
             return StringUtils.trimToNull(requestedSchema).toLowerCase();
         }
     }
 
     public String convertRequestedSchemaToCatalog(String requestedSchema) throws JDBCException {
-        return null;
+        return super.convertRequestedSchemaToCatalog(requestedSchema);
     }
 
-  /**
-   * @see liquibase.database.AbstractDatabase#escapeTableName(java.lang.String, java.lang.String)
-   */
-  @Override
-  public String escapeTableName (String schemaName, String tableName)
-  {
-    //Check if tableName is in reserved words and has CaseSensitivity problems
-    if (StringUtils.trimToNull(tableName) != null && (hasCaseProblems(tableName) || isReservedWord(tableName)))
-    {
-      return super.escapeTableName(schemaName, "\"" + tableName + "\"");
+    /**
+     * @see liquibase.database.AbstractDatabase#escapeTableName(java.lang.String, java.lang.String)
+     */
+    @Override
+    public String escapeTableName(String schemaName, String tableName) {
+        //Check if tableName is in reserved words and has CaseSensitivity problems
+        if (StringUtils.trimToNull(tableName) != null && (hasCaseProblems(tableName) || isReservedWord(tableName))) {
+            return super.escapeTableName(schemaName, "\"" + tableName + "\"");
+        }
+        return super.escapeTableName(schemaName, tableName);
     }
-    return super.escapeTableName(schemaName, tableName);
-  }
 
-  /**
-   * @see liquibase.database.AbstractDatabase#escapeColumnName(java.lang.String, java.lang.String, java.lang.String)
-   */
-  @Override
-  public String escapeColumnName (String schemaName, String tableName, String columnName)
-  {
-    if (hasCaseProblems(columnName) || isReservedWord(columnName))
-      return "\"" + columnName + "\"";
-    return columnName;
-  }
-  
-  /*
-   * Check if given string has case problems according to postgresql documentation. 
-   * If there are at least one characters with upper case while all other are in lower case (or vice versa) this string should be escaped. 
-   */
-  private boolean hasCaseProblems (String tableName)
-  {
-    if (tableName.matches(".*[A-Z].*") && tableName.matches(".*[a-z].*"))
-      return true;
-    return false;
-  }
+    /**
+     * @see liquibase.database.AbstractDatabase#escapeColumnName(java.lang.String, java.lang.String, java.lang.String)
+     */
+    @Override
+    public String escapeColumnName(String schemaName, String tableName, String columnName) {
+        if (hasCaseProblems(columnName) || isReservedWord(columnName))
+            return "\"" + columnName + "\"";
+        return columnName;
+    }
 
-  /*
-   * Check if given string is reserved word.
-   */
-  private boolean isReservedWord (String tableName)
-  {
-    for (int i = 0; i != this.reservedWords.length; i++)
-      if (this.reservedWords[i].toLowerCase().equalsIgnoreCase(tableName))
-        return true;
-    return false;
-  }
+    /*
+    * Check if given string has case problems according to postgresql documentation.
+    * If there are at least one characters with upper case while all other are in lower case (or vice versa) this string should be escaped.
+    */
+    private boolean hasCaseProblems(String tableName) {
+        if (tableName.matches(".*[A-Z].*") && tableName.matches(".*[a-z].*"))
+            return true;
+        return false;
+    }
 
-  /*
-   * Reserved words from postgresql documentation
-   */
-  private String[] reservedWords = new String[] {"ALL", "ANALYSE", "ANALYZE", "AND", "ANY", "ARRAY", "AS", "ASC", "ASYMMETRIC", "AUTHORIZATION", "BETWEEN", "BINARY", "BOTH", "CASE", "CAST", "CHECK", "COLLATE", "COLUMN", "CONSTRAINT", "CORRESPONDING", "CREATE", "CROSS", "CURRENT_DATE", "CURRENT_ROLE", "CURRENT_TIME", "CURRENT_TIMESTAMP", "CURRENT_USER", "DEFAULT", "DEFERRABLE", "DESC", "DISTINCT", "DO", "ELSE", "END", "EXCEPT", "FALSE", "FOR", "FOREIGN", "FREEZE", "FROM", "FULL", "GRANT", "GROUP", "HAVING",
-      "ILIKE", "IN", "INITIALLY", "INNER", "INTERSECT", "INTO", "IS", "ISNULL", "JOIN", "LEADING", "LEFT", "LIKE", "LIMIT", "LOCALTIME", "LOCALTIMESTAMP", "NATURAL", "NEW", "NOT", "NOTNULL", "NULL", "OFF", "OFFSET", "OLD", "ON", "ONLY", "OPEN", "OR", "ORDER", "OUTER", "OVERLAPS", "PLACING", "PRIMARY", "REFERENCES", "RETURNING", "RIGHT", "SELECT", "SESSION_USER", "SIMILAR", "SOME", "SYMMETRIC", "TABLE", "THEN", "TO", "TRAILING", "TRUE", "UNION", "UNIQUE", "USER", "USING", "VERBOSE", "WHEN", "WHERE"};
+    /*
+    * Check if given string is reserved word.
+    */
+    private boolean isReservedWord(String tableName) {
+        for (int i = 0; i != this.reservedWords.length; i++)
+            if (this.reservedWords[i].toLowerCase().equalsIgnoreCase(tableName))
+                return true;
+        return false;
+    }
 
-    
-    
+    /*
+    * Reserved words from postgresql documentation
+    */
+    private String[] reservedWords = new String[]{"ALL", "ANALYSE", "ANALYZE", "AND", "ANY", "ARRAY", "AS", "ASC", "ASYMMETRIC", "AUTHORIZATION", "BETWEEN", "BINARY", "BOTH", "CASE", "CAST", "CHECK", "COLLATE", "COLUMN", "CONSTRAINT", "CORRESPONDING", "CREATE", "CROSS", "CURRENT_DATE", "CURRENT_ROLE", "CURRENT_TIME", "CURRENT_TIMESTAMP", "CURRENT_USER", "DEFAULT", "DEFERRABLE", "DESC", "DISTINCT", "DO", "ELSE", "END", "EXCEPT", "FALSE", "FOR", "FOREIGN", "FREEZE", "FROM", "FULL", "GRANT", "GROUP", "HAVING",
+            "ILIKE", "IN", "INITIALLY", "INNER", "INTERSECT", "INTO", "IS", "ISNULL", "JOIN", "LEADING", "LEFT", "LIKE", "LIMIT", "LOCALTIME", "LOCALTIMESTAMP", "NATURAL", "NEW", "NOT", "NOTNULL", "NULL", "OFF", "OFFSET", "OLD", "ON", "ONLY", "OPEN", "OR", "ORDER", "OUTER", "OVERLAPS", "PLACING", "PRIMARY", "REFERENCES", "RETURNING", "RIGHT", "SELECT", "SESSION_USER", "SIMILAR", "SOME", "SYMMETRIC", "TABLE", "THEN", "TO", "TRAILING", "TRUE", "UNION", "UNIQUE", "USER", "USING", "VERBOSE", "WHEN", "WHERE"};
+
+    /*
+     * Get the current search paths
+     */
+    private List<String> getSearchPaths() {
+        List<String> searchPaths = null;
+
+        try {
+            DatabaseConnection con = getConnection();
+
+            if (con != null) {
+                Statement stmt = con.createStatement(
+                        ResultSet.TYPE_SCROLL_INSENSITIVE,
+                        ResultSet.CONCUR_READ_ONLY);
+
+                ResultSet searchPathQry = stmt.executeQuery("SHOW search_path");
+
+                if (searchPathQry.next()) {
+                    String searchPathResult = searchPathQry.getString(1);
+                    if (searchPathResult != null) {
+                        String dirtySearchPaths[] = searchPathResult.split("\\,");
+                        searchPaths = new ArrayList<String>();
+                        for (String searchPath : dirtySearchPaths) {
+                            searchPath = searchPath.trim();
+
+                            // Ensure there is consistency ..
+                            if (searchPath.equals("\"$user\"")) {
+                                searchPath = "$user";
+                            }
+
+                            searchPaths.add(searchPath);
+                        }
+                    }
+                }
+
+            }
+        } catch (Exception e) {
+            // TODO: Something?
+            e.printStackTrace();
+            log.log(Level.SEVERE, "Failed to get default catalog name from postgres", e);
+        }
+
+        return searchPaths;
+    }
+
+
+    private boolean catalogExists(String catalogName) throws SQLException {
+        if (catalogName != null) {
+            return runExistsQuery("select count(*) from information_schema.schemata where catalog_name='" + catalogName + "'");
+        } else {
+            return false;
+        }
+    }
+
+    private boolean schemaExists(String schemaName) throws SQLException {
+        if (schemaName != null) {
+            return runExistsQuery("select count(*) from information_schema.schemata where schema_name='" + schemaName + "'");
+        } else {
+            return false;
+        }
+    }
+
+    private boolean runExistsQuery(String query) throws SQLException {
+        DatabaseConnection con = getConnection();
+
+        Statement stmt = con.createStatement(
+                ResultSet.TYPE_SCROLL_INSENSITIVE,
+                ResultSet.CONCUR_READ_ONLY);
+
+        ResultSet existsQry = stmt.executeQuery(query);
+
+        if (existsQry.next()) {
+            Integer count = existsQry.getInt(1);
+
+            if (count != null && count > 0) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
 }
