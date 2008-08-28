@@ -5,6 +5,7 @@ import liquibase.database.MSSQLDatabase;
 import liquibase.database.MySQLDatabase;
 import liquibase.database.PostgresDatabase;
 import liquibase.util.SqlUtil;
+import liquibase.log.LogFactory;
 
 import java.sql.Types;
 import java.util.Arrays;
@@ -236,7 +237,8 @@ public class Column implements DatabaseObject, Comparable<Column> {
                 dataType = translatedTypeName+"("+this.getColumnSize()+","+this.getDecimalDigits()+")";
             }
         } else {
-            throw new RuntimeException("Unknown Data Type: "+this.getDataType()+" ("+this.getTypeName()+")");
+            LogFactory.getLogger().warning("Unknown Data Type: "+this.getDataType()+" ("+this.getTypeName()+").  Assuming it does not take parameters");
+            dataType = this.getTypeName();
         }
         return dataType;
     }
