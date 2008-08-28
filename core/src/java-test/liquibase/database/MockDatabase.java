@@ -265,6 +265,10 @@ public class MockDatabase implements Database {
         return "TIME";
     }
 
+    public String getBigIntType() {
+        return "BIGINT";
+    }
+
     public Object convertDatabaseValueToJavaObject(Object defaultValue, int dataType, int columnSize, int decimalDigits) {
         return defaultValue;
     }

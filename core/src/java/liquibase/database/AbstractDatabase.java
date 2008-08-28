@@ -264,6 +264,8 @@ public abstract class AbstractDatabase implements Database {
             return "FLOAT";
         } else if (columnType.toUpperCase().startsWith("DOUBLE(")) {
             return "DOUBLE";
+        } else if ("bigint".equalsIgnoreCase(columnType)) {
+            return getBigIntType();
         } else {
             return columnType;
         }
@@ -385,6 +387,10 @@ public abstract class AbstractDatabase implements Database {
      */
     public String getTimeType() {
         return "TIME";
+    }
+
+    public String getBigIntType() {
+        return "BIGINT";
     }
 
     /**

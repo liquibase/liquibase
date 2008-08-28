@@ -175,6 +175,8 @@ public interface Database extends DatabaseObject {
 
     String getTimeType();
 
+    String getBigIntType();
+
     Object convertDatabaseValueToJavaObject(Object defaultValue, int dataType, int columnSize, int decimalDigits) throws ParseException;
 
     String convertJavaObjectToString(Object value);
