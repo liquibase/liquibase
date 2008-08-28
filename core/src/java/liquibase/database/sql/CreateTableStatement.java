@@ -6,8 +6,10 @@ import liquibase.database.MSSQLDatabase;
 import liquibase.database.SQLiteDatabase;
 import liquibase.database.SybaseDatabase;
 import liquibase.util.StringUtils;
+import liquibase.log.LogFactory;
 
 import java.util.*;
+import java.util.logging.Level;
 
 public class CreateTableStatement implements SqlStatement {
     private String schemaName;
@@ -176,10 +178,14 @@ public class CreateTableStatement implements SqlStatement {
                 buffer.append(getDefaultValue(column));
             }
 
-            if (isAutoIncrement && 
+            if (isAutoIncrement &&
 					(database.getAutoIncrementClause()!=null) &&
 					(!database.getAutoIncrementClause().equals(""))) {
-                buffer.append(" ").append(database.getAutoIncrementClause()).append(" ");
+                if (database.supportsAutoIncrement()) {
+                    buffer.append(" ").append(database.getAutoIncrementClause()).append(" ");
+                } else {
+                    LogFactory.getLogger().log(Level.WARNING, database.getProductName()+" does not support autoincrement columns as request for "+(database.escapeTableName(getSchemaName(), getTableName())));
+                }
             }
 
             if (getNotNullColumns().contains(column)) {

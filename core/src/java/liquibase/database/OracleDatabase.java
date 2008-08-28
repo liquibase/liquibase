@@ -76,6 +76,10 @@ public class OracleDatabase extends AbstractDatabase {
         return "DATE";
     }
 
+    public String getBigIntType() {
+        return "NUMBER(19,0)";
+    }
+
     public boolean isCorrectDatabaseImplementation(Connection conn) throws JDBCException {
         return PRODUCT_NAME.equalsIgnoreCase(getDatabaseProductName(conn));
     }
