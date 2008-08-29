@@ -1,9 +1,13 @@
 package liquibase.database;
 
 import liquibase.exception.JDBCException;
+import liquibase.database.structure.DatabaseSnapshot;
+import liquibase.database.structure.CacheDatabaseSnapshot;
+import liquibase.diff.DiffStatusListener;
 
 import java.sql.Connection;
 import java.text.ParseException;
+import java.util.Set;
 
 public class CacheDatabase extends AbstractDatabase {
     public static final String PRODUCT_NAME = "cache";
@@ -107,5 +111,9 @@ public class CacheDatabase extends AbstractDatabase {
 
     public String getViewDefinition(String schemaName, String viewName) throws JDBCException {
         return null;
+    }
+
+    public DatabaseSnapshot createDatabaseSnapshot(String schema, Set<DiffStatusListener> statusListeners) throws JDBCException {
+        return new CacheDatabaseSnapshot(this, statusListeners, schema);
     }
 }

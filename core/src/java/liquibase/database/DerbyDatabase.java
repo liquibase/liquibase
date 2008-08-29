@@ -2,11 +2,15 @@ package liquibase.database;
 
 import liquibase.database.sql.RawSqlStatement;
 import liquibase.database.sql.SqlStatement;
+import liquibase.database.structure.DatabaseSnapshot;
+import liquibase.database.structure.DerbyDatabaseSnapshot;
 import liquibase.exception.JDBCException;
+import liquibase.diff.DiffStatusListener;
 
 import java.sql.Connection;
 import java.sql.Types;
 import java.text.ParseException;
+import java.util.Set;
 
 public class DerbyDatabase extends AbstractDatabase {
 
@@ -126,5 +130,9 @@ public class DerbyDatabase extends AbstractDatabase {
             }
         }
         return super.convertDatabaseValueToJavaObject(defaultValue, dataType, columnSize, decimalDigits);
+    }
+
+    public DatabaseSnapshot createDatabaseSnapshot(String schema, Set<DiffStatusListener> statusListeners) throws JDBCException {
+        return new DerbyDatabaseSnapshot(this, statusListeners, schema);
     }
 }

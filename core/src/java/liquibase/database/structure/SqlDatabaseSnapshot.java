@@ -16,7 +16,7 @@ import java.text.ParseException;
 import java.util.*;
 import java.util.logging.Logger;
 
-public class SqlDatabaseSnapshot implements DatabaseSnapshot {
+public abstract class SqlDatabaseSnapshot implements DatabaseSnapshot {
 
     protected DatabaseMetaData databaseMetaData;
     protected Database database;

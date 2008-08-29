@@ -8,7 +8,10 @@ package liquibase.database;
 
 import liquibase.database.sql.RawSqlStatement;
 import liquibase.database.sql.SqlStatement;
+import liquibase.database.structure.DatabaseSnapshot;
+import liquibase.database.structure.MaxDBDatabaseSnapshot;
 import liquibase.exception.JDBCException;
+import liquibase.diff.DiffStatusListener;
 
 import java.sql.Connection;
 import java.util.HashSet;
@@ -226,4 +229,7 @@ public class MaxDBDatabase extends AbstractDatabase {
         }
     }
 
+    public DatabaseSnapshot createDatabaseSnapshot(String schema, Set<DiffStatusListener> statusListeners) throws JDBCException {
+        return new MaxDBDatabaseSnapshot(this, statusListeners, schema);
+    }
 }

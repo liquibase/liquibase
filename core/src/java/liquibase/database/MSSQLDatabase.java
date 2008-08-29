@@ -2,7 +2,11 @@ package liquibase.database;
 
 import liquibase.database.sql.RawSqlStatement;
 import liquibase.database.sql.SqlStatement;
+import liquibase.database.structure.DatabaseSnapshot;
+import liquibase.database.structure.FirebirdDatabaseSnapshot;
+import liquibase.database.structure.MSSQLDatabaseSnapshot;
 import liquibase.exception.JDBCException;
+import liquibase.diff.DiffStatusListener;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -264,5 +268,9 @@ public class MSSQLDatabase extends AbstractDatabase {
 
     public String getDateLiteral(String isoDate) {
         return super.getDateLiteral(isoDate).replace(' ', 'T');
+    }
+
+    public DatabaseSnapshot createDatabaseSnapshot(String schema, Set<DiffStatusListener> statusListeners) throws JDBCException {
+        return new MSSQLDatabaseSnapshot(this, statusListeners, schema);
     }
 }

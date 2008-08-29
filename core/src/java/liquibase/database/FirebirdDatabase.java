@@ -2,9 +2,14 @@ package liquibase.database;
 
 import liquibase.database.sql.RawSqlStatement;
 import liquibase.database.sql.SqlStatement;
+import liquibase.database.structure.DatabaseSnapshot;
+import liquibase.database.structure.MaxDBDatabaseSnapshot;
+import liquibase.database.structure.FirebirdDatabaseSnapshot;
 import liquibase.exception.JDBCException;
+import liquibase.diff.DiffStatusListener;
 
 import java.sql.Connection;
+import java.util.Set;
 
 /**
  * Firebird database implementation.
@@ -132,5 +137,9 @@ public class FirebirdDatabase extends AbstractDatabase {
         } else {
             return type;
         }
+    }
+
+    public DatabaseSnapshot createDatabaseSnapshot(String schema, Set<DiffStatusListener> statusListeners) throws JDBCException {
+        return new FirebirdDatabaseSnapshot(this, statusListeners, schema);
     }
 }

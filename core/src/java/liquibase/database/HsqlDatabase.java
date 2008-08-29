@@ -2,9 +2,12 @@ package liquibase.database;
 
 import liquibase.database.sql.RawSqlStatement;
 import liquibase.database.sql.SqlStatement;
+import liquibase.database.structure.DatabaseSnapshot;
+import liquibase.database.structure.HsqlDatabaseSnapshot;
 import liquibase.exception.DateParseException;
 import liquibase.exception.JDBCException;
 import liquibase.util.ISODateFormat;
+import liquibase.diff.DiffStatusListener;
 
 import java.sql.Connection;
 import java.text.DateFormat;
@@ -13,6 +16,7 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 public class HsqlDatabase extends AbstractDatabase {
     private static String START_CONCAT = "CONCAT(";
@@ -156,5 +160,9 @@ public class HsqlDatabase extends AbstractDatabase {
 
     public String convertRequestedSchemaToSchema(String requestedSchema) throws JDBCException {
         return super.convertRequestedSchemaToSchema(requestedSchema).toUpperCase();
+    }
+
+    public DatabaseSnapshot createDatabaseSnapshot(String schema, Set<DiffStatusListener> statusListeners) throws JDBCException {
+        return new HsqlDatabaseSnapshot(this, statusListeners, schema);
     }
 }

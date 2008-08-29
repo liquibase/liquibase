@@ -63,7 +63,7 @@ public class Diff {
 
         if (targetSnapshot == null) {
             if (targetDatabase == null) {
-                targetSnapshot = new SqlDatabaseSnapshot();
+                targetSnapshot = new UnsupportedDatabaseSnapshot();
             } else {
                 targetSnapshot = targetDatabase.createDatabaseSnapshot(null, statusListeners);
             }

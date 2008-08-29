@@ -1,11 +1,15 @@
 package liquibase.database;
 
 import liquibase.exception.JDBCException;
+import liquibase.database.structure.DatabaseSnapshot;
+import liquibase.database.structure.UnsupportedDatabaseSnapshot;
+import liquibase.diff.DiffStatusListener;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.Set;
 
 public class UnsupportedDatabase extends AbstractDatabase {
     private String dateTimeType;
@@ -171,5 +175,9 @@ public class UnsupportedDatabase extends AbstractDatabase {
 
     public boolean supportsTablespaces() {
         return false;
+    }
+
+    public DatabaseSnapshot createDatabaseSnapshot(String schema, Set<DiffStatusListener> statusListeners) throws JDBCException {
+        return new UnsupportedDatabaseSnapshot(this, statusListeners, schema);
     }
 }
