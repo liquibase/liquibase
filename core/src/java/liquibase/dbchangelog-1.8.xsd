@@ -177,6 +177,7 @@
     <xsd:attributeGroup name="createIndex">
         <xsd:attributeGroup ref="tableNameAttribute"/>
         <xsd:attributeGroup ref="indexName"/>
+        <xsd:attribute name="unique" type="xsd:boolean"/>
     </xsd:attributeGroup>
 
 
@@ -292,6 +293,8 @@
         <xsd:attribute name="deferrable" type="xsd:boolean"/>
         <xsd:attribute name="initiallyDeferred" type="xsd:boolean"/>
         <xsd:attribute name="deleteCascade" type="xsd:boolean"/>
+        <xsd:attribute name="onDelete" type="xsd:string"/>
+        <xsd:attribute name="onUpdate" type="xsd:string"/>
     </xsd:attributeGroup>
 
     <xsd:attributeGroup name="addNotNullConstraintAttrib">

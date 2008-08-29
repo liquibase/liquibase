@@ -9,11 +9,13 @@ import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.ForeignKey;
 import liquibase.database.structure.Table;
 import liquibase.exception.UnsupportedChangeException;
+import liquibase.util.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.sql.DatabaseMetaData;
 
 /**
  * Adds a foreign key constraint to an existing column.
@@ -32,7 +34,8 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
     private Boolean deferrable;
     private Boolean initiallyDeferred;
 
-    private Boolean deleteCascade;
+    private Integer updateRule;
+    private Integer deleteRule;
 
     public AddForeignKeyConstraintChange() {
         super("addForeignKeyConstraint", "Add Foreign Key Constraint");
@@ -110,22 +113,71 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
         this.initiallyDeferred = initiallyDeferred;
     }
 
-
-    public Boolean getDeleteCascade() {
-        return deleteCascade;
-    }
+//    public Boolean getDeleteCascade() {
+//        return deleteCascade;
+//    }
 
     public void setDeleteCascade(Boolean deleteCascade) {
-        this.deleteCascade = deleteCascade;
+        if (deleteCascade != null && deleteCascade) {
+            setOnDelete("CASCADE");
+        }
+    }
+
+    public void setUpdateRule(Integer rule) {
+        this.updateRule = rule;
+    }
+
+    public Integer getUpdateRule() {
+        return this.updateRule;
+    }
+
+    public void setDeleteRule(Integer rule) {
+        this.deleteRule = rule;
+    }
+
+    public Integer getDeleteRule() {
+        return this.deleteRule;
+    }
+
+    public void setOnDelete(String onDelete) {
+        if (onDelete != null && onDelete.equalsIgnoreCase("CASCADE")) {
+            setDeleteRule(DatabaseMetaData.importedKeyCascade);
+        } else if (onDelete != null && onDelete.equalsIgnoreCase("SET NULL")) {
+            setDeleteRule(DatabaseMetaData.importedKeySetNull);
+        } else if (onDelete != null && onDelete.equalsIgnoreCase("SET DEFAULT")) {
+            setDeleteRule(DatabaseMetaData.importedKeySetDefault);
+        } else if (onDelete != null && onDelete.equalsIgnoreCase("RESTRICT")) {
+            setDeleteRule(DatabaseMetaData.importedKeyRestrict);
+        } else if (StringUtils.trimToNull(onDelete) == null){
+            setDeleteRule(DatabaseMetaData.importedKeyNoAction);
+        } else {
+            throw new RuntimeException("Unknown onDelete action: "+onDelete);
+        }
+    }
+
+    public void setOnUpdate(String onUpdate) {
+        if (onUpdate != null && onUpdate.equalsIgnoreCase("CASCADE")) {
+            setUpdateRule(DatabaseMetaData.importedKeyCascade);
+        } else  if (onUpdate != null && onUpdate.equalsIgnoreCase("SET NULL")) {
+            setUpdateRule(DatabaseMetaData.importedKeySetNull);
+        } else if (onUpdate != null && onUpdate.equalsIgnoreCase("SET DEFAULT")) {
+            setUpdateRule(DatabaseMetaData.importedKeySetDefault);
+        } else if (onUpdate != null && onUpdate.equalsIgnoreCase("RESTRICT")) {
+            setUpdateRule(DatabaseMetaData.importedKeyRestrict);
+        } else if (StringUtils.trimToNull(onUpdate) == null) {
+            setUpdateRule(DatabaseMetaData.importedKeyNoAction);
+        } else {
+            throw new RuntimeException("Unknown onUpdate action: "+onUpdate);
+        }
     }
 
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
-    	
-    	if (database instanceof SQLiteDatabase) {
-    		// return special statements for SQLite databases
-    		return generateStatementsForSQLiteDatabase(database);
+
+        if (database instanceof SQLiteDatabase) {
+            // return special statements for SQLite databases
+            return generateStatementsForSQLiteDatabase(database);
         }
-    	
+
         boolean deferrable = false;
         if (getDeferrable() != null) {
             deferrable = getDeferrable();
@@ -136,31 +188,27 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
             initiallyDeferred = getInitiallyDeferred();
         }
 
-        boolean deleteCascade = false;
-        if (getDeleteCascade() != null) {
-            deleteCascade = getDeleteCascade();
-        }
-        
         return new SqlStatement[]{
                 new AddForeignKeyConstraintStatement(getConstraintName(),
-                        getBaseTableSchemaName() == null?database.getDefaultSchemaName():getBaseTableSchemaName(),
+                        getBaseTableSchemaName() == null ? database.getDefaultSchemaName() : getBaseTableSchemaName(),
                         getBaseTableName(),
                         getBaseColumnNames(),
-                        getReferencedTableSchemaName() == null?database.getDefaultSchemaName():getReferencedTableSchemaName(),
+                        getReferencedTableSchemaName() == null ? database.getDefaultSchemaName() : getReferencedTableSchemaName(),
                         getReferencedTableName(),
                         getReferencedColumnNames())
-                .setDeferrable(deferrable)
-                .setInitiallyDeferred(initiallyDeferred)
-                .setDeleteCascade(deleteCascade)
+                        .setDeferrable(deferrable)
+                        .setInitiallyDeferred(initiallyDeferred)
+                        .setUpdateRule(updateRule)
+                        .setDeleteRule(deleteRule)
         };
     }
-    
-    private SqlStatement[] generateStatementsForSQLiteDatabase(Database database) 
-			throws UnsupportedChangeException {
-    	// SQLite does not support foreign keys until now.
-		// See for more information: http://www.sqlite.org/omitted.html
-		// Therefore this is an empty operation...
-		return new SqlStatement[]{};
+
+    private SqlStatement[] generateStatementsForSQLiteDatabase(Database database)
+            throws UnsupportedChangeException {
+        // SQLite does not support foreign keys until now.
+        // See for more information: http://www.sqlite.org/omitted.html
+        // Therefore this is an empty operation...
+        return new SqlStatement[]{};
     }
 
     protected Change[] createInverses() {
@@ -203,8 +251,47 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
             node.setAttribute("initiallyDeferred", getInitiallyDeferred().toString());
         }
 
-        if (getDeleteCascade() != null) {
-            node.setAttribute("deleteCascade", getDeleteCascade().toString());
+//        if (getDeleteCascade() != null) {
+//            node.setAttribute("deleteCascade", getDeleteCascade().toString());
+//        }
+
+        if (getUpdateRule() != null) {
+            switch (getUpdateRule()) {
+                case DatabaseMetaData.importedKeyCascade:
+                    node.setAttribute("onUpdate", "CASCADE");
+                    break;
+                case DatabaseMetaData.importedKeySetNull:
+                    node.setAttribute("onUpdate", "SET NULL");
+                    break;
+                case DatabaseMetaData.importedKeySetDefault:
+                    node.setAttribute("onUpdate", "SET DEFAULT");
+                    break;
+                case DatabaseMetaData.importedKeyRestrict:
+                    node.setAttribute("onUpdate", "RESTRICT");
+                    break;
+                default:
+                    node.setAttribute("onUpdate", "NO ACTION");
+                    break;
+            }
+        }
+        if (getDeleteRule() != null) {
+            switch (getDeleteRule()) {
+                case DatabaseMetaData.importedKeyCascade:
+                    node.setAttribute("onDelete", "CASCADE");
+                    break;
+                case DatabaseMetaData.importedKeySetNull:
+                    node.setAttribute("onDelete", "SET NULL");
+                    break;
+                case DatabaseMetaData.importedKeySetDefault:
+                    node.setAttribute("onDelete", "SET DEFAULT");
+                    break;
+                case DatabaseMetaData.importedKeyRestrict:
+                    node.setAttribute("onDelete", "RESTRICT");
+                    break;
+                default:
+                    node.setAttribute("onDelete", "NO ACTION");
+                    break;
+            }
         }
         return node;
     }
@@ -240,6 +327,8 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
         fk.setForeignKeyColumns(baseColumnNames);
         fk.setPrimaryKeyTable(referencedTable);
         fk.setPrimaryKeyColumns(referencedColumnNames);
+        fk.setDeleteRule(this.deleteRule);
+        fk.setUpdateRule(this.updateRule);
         returnSet.add(fk);
 
         return returnSet;

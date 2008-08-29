@@ -13,28 +13,29 @@ public class CreateIndexStatementTest extends AbstractSqlStatementTest {
     private static final String INDEX_NAME = "IDX_CreateIndexTest";
     private static final String COLUMN_NAME = "testCol";
     private static final String COLUMN_NAME2 = "testCol2";
+    private static final Boolean IS_UNIQUE = true;
 
     protected void setupDatabase(Database database) throws Exception {
-            dropAndCreateTable(new CreateTableStatement(null, TABLE_NAME)
-                    .addPrimaryKeyColumn("id", "int", null)
-                    .addColumn(COLUMN_NAME, "varchar(50)")
-                    .addColumn(COLUMN_NAME2, "varchar(50)")
-                    , database);
-            dropAndCreateTable(new CreateTableStatement(TestContext.ALT_SCHEMA, TABLE_NAME)
-                    .addPrimaryKeyColumn("id", "int", null)
-                    .addColumn(COLUMN_NAME, "varchar(50)")
-                    .addColumn(COLUMN_NAME2, "varchar(50)")
-                    , database);
+        dropAndCreateTable(new CreateTableStatement(null, TABLE_NAME)
+                .addPrimaryKeyColumn("id", "int", null)
+                .addColumn(COLUMN_NAME, "varchar(50)")
+                .addColumn(COLUMN_NAME2, "varchar(50)")
+                , database);
+        dropAndCreateTable(new CreateTableStatement(TestContext.ALT_SCHEMA, TABLE_NAME)
+                .addPrimaryKeyColumn("id", "int", null)
+                .addColumn(COLUMN_NAME, "varchar(50)")
+                .addColumn(COLUMN_NAME2, "varchar(50)")
+                , database);
     }
 
     protected CreateIndexStatement generateTestStatement() {
-        return new CreateIndexStatement(null, null, null);
+        return new CreateIndexStatement(null, null, null, null);
     }
 
     @Test
     public void execute_singleColumnDefaultSchema() throws Exception {
         new DatabaseTestTemplate().testOnAvailableDatabases(
-                new SqlStatementDatabaseTest(null, new CreateIndexStatement(INDEX_NAME, null, TABLE_NAME, COLUMN_NAME)) {
+                new SqlStatementDatabaseTest(null, new CreateIndexStatement(INDEX_NAME, null, TABLE_NAME, IS_UNIQUE, COLUMN_NAME)) {
 
                     protected void preExecuteAssert(DatabaseSnapshot snapshot) {
                         assertNull(snapshot.getIndex(INDEX_NAME));
@@ -50,7 +51,7 @@ public class CreateIndexStatementTest extends AbstractSqlStatementTest {
     @Test
     public void execute_alternateSchema() throws Exception {
         new DatabaseTestTemplate().testOnAvailableDatabases(
-                new SqlStatementDatabaseTest(TestContext.ALT_SCHEMA, new CreateIndexStatement(INDEX_NAME, TestContext.ALT_SCHEMA, TABLE_NAME, COLUMN_NAME)) {
+                new SqlStatementDatabaseTest(TestContext.ALT_SCHEMA, new CreateIndexStatement(INDEX_NAME, TestContext.ALT_SCHEMA, TABLE_NAME, IS_UNIQUE, COLUMN_NAME)) {
 
                     protected void preExecuteAssert(DatabaseSnapshot snapshot) {
                         assertNull(snapshot.getIndex(INDEX_NAME));
@@ -68,7 +69,7 @@ public class CreateIndexStatementTest extends AbstractSqlStatementTest {
     @Test
     public void execute_alternateTablespace() throws Exception {
         new DatabaseTestTemplate().testOnAvailableDatabases(
-                new SqlStatementDatabaseTest(null, new CreateIndexStatement(INDEX_NAME, null, TABLE_NAME, COLUMN_NAME).setTablespace(TestContext.ALT_TABLESPACE)) {
+                new SqlStatementDatabaseTest(null, new CreateIndexStatement(INDEX_NAME, null, TABLE_NAME, IS_UNIQUE, COLUMN_NAME).setTablespace(TestContext.ALT_TABLESPACE)) {
                     protected void preExecuteAssert(DatabaseSnapshot snapshot) {
                         assertNull(snapshot.getIndex(INDEX_NAME));
                     }
@@ -84,7 +85,7 @@ public class CreateIndexStatementTest extends AbstractSqlStatementTest {
     @Test
     public void execute_multiColumnDefaultSchema() throws Exception {
         new DatabaseTestTemplate().testOnAvailableDatabases(
-                new SqlStatementDatabaseTest(null, new CreateIndexStatement(INDEX_NAME, null, TABLE_NAME, COLUMN_NAME, COLUMN_NAME2)) {
+                new SqlStatementDatabaseTest(null, new CreateIndexStatement(INDEX_NAME, null, TABLE_NAME, IS_UNIQUE, COLUMN_NAME, COLUMN_NAME2)) {
 
                     protected void preExecuteAssert(DatabaseSnapshot snapshot) {
                         assertNull(snapshot.getIndex(INDEX_NAME));

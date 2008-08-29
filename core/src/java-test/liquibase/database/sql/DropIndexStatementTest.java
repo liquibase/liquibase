@@ -14,6 +14,7 @@ public class DropIndexStatementTest extends AbstractSqlStatementTest {
     private static final String COLUMN_NAME = "colName";
     private static final String IDX_NAME = "idx_dropindextest";
     private static final String ALT_IDX_NAME = "idx_altdindextest";
+    private static final Boolean IS_UNIQUE = true;
 
     protected void setupDatabase(Database database) throws Exception {
         dropAndCreateTable(new CreateTableStatement(null, TABLE_NAME)
@@ -21,7 +22,7 @@ public class DropIndexStatementTest extends AbstractSqlStatementTest {
                 .addColumn(COLUMN_NAME, "varchar(50)", new NotNullConstraint())
                 , database);
 
-        new JdbcTemplate(database).execute(new CreateIndexStatement(IDX_NAME, null, TABLE_NAME, COLUMN_NAME));
+        new JdbcTemplate(database).execute(new CreateIndexStatement(IDX_NAME, null, TABLE_NAME, IS_UNIQUE, COLUMN_NAME));
 
         dropAndCreateTable(new CreateTableStatement(TestContext.ALT_SCHEMA, TABLE_NAME)
                 .addPrimaryKeyColumn("id", "int", null)
@@ -29,7 +30,7 @@ public class DropIndexStatementTest extends AbstractSqlStatementTest {
                 , database);
 
         if (database.supportsSchemas()) {
-            new JdbcTemplate(database).execute(new CreateIndexStatement(ALT_IDX_NAME, TestContext.ALT_SCHEMA, TABLE_NAME, COLUMN_NAME));
+            new JdbcTemplate(database).execute(new CreateIndexStatement(ALT_IDX_NAME, TestContext.ALT_SCHEMA, TABLE_NAME, IS_UNIQUE, COLUMN_NAME));
         }
     }
 
