@@ -1,5 +1,7 @@
 package liquibase.database.sql;
 
+import java.sql.DatabaseMetaData;
+
 import liquibase.database.Database;
 import liquibase.database.SQLiteDatabase;
 import liquibase.exception.StatementNotSupportedOnDatabaseException;
@@ -20,6 +22,8 @@ public class AddForeignKeyConstraintStatement implements SqlStatement {
     private boolean initiallyDeferred;
 
     private boolean deleteCascade;
+    private Integer deleteRule;
+    private Integer updateRule;
 
     public AddForeignKeyConstraintStatement(String constraintName, String baseTableSchemaName, String baseTableName, String baseColumnNames, String referencedTableSchemaName, String referencedTableName, String referencedColumnNames) {
         this.baseTableSchemaName = baseTableSchemaName;
@@ -86,15 +90,64 @@ public class AddForeignKeyConstraintStatement implements SqlStatement {
         return this;
     }
 
+    public AddForeignKeyConstraintStatement setUpdateRule(Integer updateRule) {
+        this.updateRule = updateRule;
+        return this;
+    }
+
+    public AddForeignKeyConstraintStatement setDeleteRule(Integer deleteRule) {
+        this.deleteRule = deleteRule;
+        return this;
+    }
+
     public String getSqlStatement(Database database) throws StatementNotSupportedOnDatabaseException {
-    	if (!supportsDatabase(database)) {
+        if (!supportsDatabase(database)) {
             throw new StatementNotSupportedOnDatabaseException(this, database);
         }
-    	
+
         String sql = "ALTER TABLE " + database.escapeTableName(getBaseTableSchemaName(), getBaseTableName()) + " ADD CONSTRAINT " + getConstraintName() + " FOREIGN KEY (" + database.escapeColumnNameList(getBaseColumnNames()) + ") REFERENCES " + database.escapeTableName(getReferencedTableSchemaName(), getReferencedTableName()) + "(" + database.escapeColumnNameList(getReferencedColumnNames()) + ")";
 
-        if (isDeleteCascade()) {
-            sql += " ON DELETE CASCADE";
+        if (this.updateRule != null) {
+            switch (this.updateRule) {
+                case DatabaseMetaData.importedKeyCascade:
+                    sql += " ON UPDATE CASCADE";
+                    break;
+                case DatabaseMetaData.importedKeySetNull:
+                    sql += " ON UPDATE SET NULL";
+                    break;
+                case DatabaseMetaData.importedKeySetDefault:
+                    sql += " ON UPDATE SET DEFAULT";
+                    break;
+                case DatabaseMetaData.importedKeyRestrict:
+                    sql += " ON UPDATE RESTRICT";
+                    break;
+                case DatabaseMetaData.importedKeyNoAction:
+                    sql += " ON UPDATE NO ACTION";
+                    break;
+                default:
+                    break;
+            }
+        }
+        if (this.deleteRule != null) {
+            switch (this.deleteRule) {
+                case DatabaseMetaData.importedKeyCascade:
+                    sql += " ON DELETE CASCADE";
+                    break;
+                case DatabaseMetaData.importedKeySetNull:
+                    sql += " ON DELETE SET NULL";
+                    break;
+                case DatabaseMetaData.importedKeySetDefault:
+                    sql += " ON DELETE SET DEFAULT";
+                    break;
+                case DatabaseMetaData.importedKeyRestrict:
+                    sql += " ON DELETE RESTRICT";
+                    break;
+                case DatabaseMetaData.importedKeyNoAction:
+                    sql += " ON DELETE NO ACTION";
+                    break;
+                default:
+                    break;
+            }
         }
 
         if (isDeferrable() || isInitiallyDeferred()) {
@@ -119,6 +172,6 @@ public class AddForeignKeyConstraintStatement implements SqlStatement {
     }
 
     public boolean supportsDatabase(Database database) {
-    	return (!(database instanceof SQLiteDatabase));
+        return (!(database instanceof SQLiteDatabase));
     }
 }

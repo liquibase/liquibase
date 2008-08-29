@@ -462,6 +462,7 @@ public class DiffResult {
             CreateIndexChange change = new CreateIndexChange();
             change.setTableName(index.getTable().getName());
             change.setIndexName(index.getName());
+            change.setUnique(index.isUnique());
 
             for (String columnName : index.getColumns()) {
                 ColumnConfig column = new ColumnConfig();
@@ -522,6 +523,8 @@ public class DiffResult {
 
             change.setDeferrable(fk.isDeferrable());
             change.setInitiallyDeferred(fk.isInitiallyDeferred());
+            change.setUpdateRule(fk.getUpdateRule());
+            change.setDeleteRule(fk.getDeleteRule());
 
             changes.add(change);
         }

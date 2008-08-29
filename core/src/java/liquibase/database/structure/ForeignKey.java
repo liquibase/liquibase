@@ -14,6 +14,9 @@ public class ForeignKey implements DatabaseObject, Comparable<ForeignKey> {
     private boolean deferrable;
     private boolean initiallyDeferred;
 
+    private Integer updateRule;
+    private Integer deleteRule;
+
 
     public Table getPrimaryKeyTable() {
         return primaryKeyTable;
@@ -28,13 +31,13 @@ public class ForeignKey implements DatabaseObject, Comparable<ForeignKey> {
     }
 
     public void addPrimaryKeyColumn(String primaryKeyColumn) {
-    	if ((this.primaryKeyColumns == null)
-				|| (this.primaryKeyColumns.length() == 0)) {
-			this.primaryKeyColumns = primaryKeyColumn;
-		} else {
-			this.primaryKeyColumns = this.primaryKeyColumns + ", "
-					+ primaryKeyColumn;
-		}
+        if ((this.primaryKeyColumns == null)
+                || (this.primaryKeyColumns.length() == 0)) {
+            this.primaryKeyColumns = primaryKeyColumn;
+        } else {
+            this.primaryKeyColumns = this.primaryKeyColumns + ", "
+                    + primaryKeyColumn;
+        }
     }
 
     public void setPrimaryKeyColumns(String primaryKeyColumns) {
@@ -54,13 +57,13 @@ public class ForeignKey implements DatabaseObject, Comparable<ForeignKey> {
     }
 
     public void addForeignKeyColumn(String foreignKeyColumn) {
-    	if ((this.foreignKeyColumns == null)
-				|| (this.foreignKeyColumns.length() == 0)) {
-			this.foreignKeyColumns = foreignKeyColumn;
-		} else {
-			this.foreignKeyColumns = this.foreignKeyColumns + ", "
-					+ foreignKeyColumn;
-		}
+        if ((this.foreignKeyColumns == null)
+                || (this.foreignKeyColumns.length() == 0)) {
+            this.foreignKeyColumns = foreignKeyColumn;
+        } else {
+            this.foreignKeyColumns = this.foreignKeyColumns + ", "
+                    + foreignKeyColumn;
+        }
     }
 
     public void setForeignKeyColumns(String foreignKeyColumns) {
@@ -77,7 +80,7 @@ public class ForeignKey implements DatabaseObject, Comparable<ForeignKey> {
 
 
     public String toString() {
-        return getName()+"("+getForeignKeyTable()+"."+getForeignKeyColumns()+" ->"+getPrimaryKeyTable()+"."+getPrimaryKeyColumns()+")";
+        return getName() + "(" + getForeignKeyTable() + "." + getForeignKeyColumns() + " ->" + getPrimaryKeyTable() + "." + getPrimaryKeyColumns() + ")";
     }
 
 
@@ -98,6 +101,22 @@ public class ForeignKey implements DatabaseObject, Comparable<ForeignKey> {
         this.initiallyDeferred = initiallyDeferred;
     }
 
+    public void setUpdateRule(Integer rule) {
+        this.updateRule = rule;
+    }
+
+    public Integer getUpdateRule() {
+        return this.updateRule;
+    }
+
+    public void setDeleteRule(Integer rule) {
+        this.deleteRule = rule;
+    }
+
+    public Integer getDeleteRule() {
+        return this.deleteRule;
+    }
+
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
@@ -106,8 +125,11 @@ public class ForeignKey implements DatabaseObject, Comparable<ForeignKey> {
 
         return getForeignKeyColumns().equalsIgnoreCase(that.getForeignKeyColumns())
                 && foreignKeyTable.equals(that.foreignKeyTable)
+                && this.name.equalsIgnoreCase(that.getName())
                 && getPrimaryKeyColumns().equalsIgnoreCase(that.getPrimaryKeyColumns())
-                && primaryKeyTable.equals(that.primaryKeyTable);
+                && primaryKeyTable.equals(that.primaryKeyTable)
+                && this.updateRule.equals(that.getUpdateRule())
+                && this.deleteRule.equals(that.getDeleteRule());
 
     }
 
@@ -115,6 +137,9 @@ public class ForeignKey implements DatabaseObject, Comparable<ForeignKey> {
         int result = 0;
         if (primaryKeyTable != null) {
             result = primaryKeyTable.hashCode();
+        }
+        if (this.name != null) {
+            result = 31 * result + this.name.toUpperCase().hashCode();
         }
 
         if (primaryKeyColumns != null) {
@@ -128,6 +153,11 @@ public class ForeignKey implements DatabaseObject, Comparable<ForeignKey> {
         if (foreignKeyColumns != null) {
             result = 31 * result + foreignKeyColumns.toUpperCase().hashCode();
         }
+        if (this.updateRule != null)
+            result = 31 * result + this.updateRule.hashCode();
+        if (this.deleteRule != null)
+            result = 31 * result + this.deleteRule.hashCode();
+
 
         return result;
     }
@@ -138,11 +168,12 @@ public class ForeignKey implements DatabaseObject, Comparable<ForeignKey> {
         if (this.getForeignKeyTable() != null && o.getForeignKeyTable() != null) {
             returnValue = this.getForeignKeyTable().compareTo(o.getForeignKeyTable());
         }
-
         if (returnValue == 0 && this.getForeignKeyColumns() != null && o.getForeignKeyColumns() != null) {
             returnValue = this.getForeignKeyColumns().compareTo(o.getForeignKeyColumns());
         }
-
+        if (returnValue == 0 && this.getName() != null && o.getName() != null) {
+            returnValue = this.getName().compareTo(o.getName());
+        }
         if (returnValue == 0 && this.getPrimaryKeyTable() != null && o.getPrimaryKeyTable() != null) {
             returnValue = this.getPrimaryKeyTable().compareTo(o.getPrimaryKeyTable());
         }
@@ -150,22 +181,23 @@ public class ForeignKey implements DatabaseObject, Comparable<ForeignKey> {
         if (returnValue == 0 && this.getPrimaryKeyColumns() != null && o.getPrimaryKeyColumns() != null) {
             returnValue = this.getPrimaryKeyColumns().compareTo(o.getPrimaryKeyColumns());
         }
-
+        if (returnValue == 0 && this.updateRule != null && o.getUpdateRule() != null)
+            returnValue = this.updateRule.compareTo(o.getUpdateRule());
+        if (returnValue == 0 && this.deleteRule != null && o.getDeleteRule() != null)
+            returnValue = this.deleteRule.compareTo(o.getDeleteRule());
         return returnValue;
     }
-    
-    private String toDisplayString(List<String> columnsNames)
-    {
-    	StringBuilder sb = new StringBuilder();
-    	int i = 0;
-    	for (String columnName : columnsNames) {			
-    		i++;
-    		sb.append(columnName);
-    		if (i < columnsNames.size())
-    		{
-    			sb.append(", ");
-    		}
-		}
-    	return sb.toString();
+
+    private String toDisplayString(List<String> columnsNames) {
+        StringBuilder sb = new StringBuilder();
+        int i = 0;
+        for (String columnName : columnsNames) {
+            i++;
+            sb.append(columnName);
+            if (i < columnsNames.size()) {
+                sb.append(", ");
+            }
+        }
+        return sb.toString();
     }
 }

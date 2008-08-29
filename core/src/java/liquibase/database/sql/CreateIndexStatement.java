@@ -16,12 +16,14 @@ public class CreateIndexStatement implements SqlStatement {
     private String tableName;
     private String[] columns;
     private String tablespace;
+    private Boolean unique;
 
-    public CreateIndexStatement(String indexName, String tableSchemaName, String tableName, String... columns) {
+    public CreateIndexStatement(String indexName, String tableSchemaName, String tableName, Boolean isUnique, String... columns) {
         this.indexName = indexName;
         this.tableSchemaName = tableSchemaName;
         this.tableName = tableName;
         this.columns = columns;
+        this.unique = isUnique;
     }
 
     public String getTableSchemaName() {
@@ -51,8 +53,14 @@ public class CreateIndexStatement implements SqlStatement {
     }
 
     public String getSqlStatement(Database database) throws StatementNotSupportedOnDatabaseException {
-   StringBuffer buffer = new StringBuffer();
-        buffer.append("CREATE INDEX ");
+        StringBuffer buffer = new StringBuffer();
+
+        buffer.append("CREATE ");
+        if (unique != null && unique) {
+            buffer.append("UNIQUE ");
+        }            
+        buffer.append("INDEX ");
+
         buffer.append(getIndexName()).append(" ON ");
         buffer.append(database.escapeTableName(getTableSchemaName(), getTableName())).append("(");
         Iterator<String> iterator = Arrays.asList(getColumns()).iterator();

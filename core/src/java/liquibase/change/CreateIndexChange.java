@@ -20,6 +20,7 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
     private String schemaName;
     private String tableName;
     private String indexName;
+    private Boolean unique;
     private String tablespace;
     private List<ColumnConfig> columns;
 
@@ -80,8 +81,8 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
             columns.add(column.getName());
         }
 
-        return new SqlStatement []{
-                new CreateIndexStatement(getIndexName(), getSchemaName() == null?database.getDefaultSchemaName():getSchemaName(), getTableName(), columns.toArray(new String[getColumns().size()])).setTablespace(getTablespace())
+        return new SqlStatement[]{
+                new CreateIndexStatement(getIndexName(), getSchemaName() == null ? database.getDefaultSchemaName() : getSchemaName(), getTableName(), this.isUnique(), columns.toArray(new String[getColumns().size()])).setTablespace(getTablespace())
         };
     }
 
@@ -109,6 +110,12 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
 
         element.setAttribute("tableName", getTableName());
 
+        if (unique != null && unique) {
+            element.setAttribute("unique", "true");
+        } else {
+            element.setAttribute("unique", "false");
+        }
+        
         for (ColumnConfig column : getColumns()) {
             Element columnElement = currentChangeLogFileDOM.createElement("column");
             columnElement.setAttribute("name", column.getName());
@@ -122,10 +129,25 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
         Index index = new Index();
         index.setTable(new Table(tableName));
         index.setName(indexName);
+        index.setUnique(unique);
 
-        Table table= new Table(getTableName());
+        Table table = new Table(getTableName());
 
         return new HashSet<DatabaseObject>(Arrays.asList(index, table));
+    }
+
+    /**
+     * @param isUnique the isUnique to set
+     */
+    public void setUnique(Boolean isUnique) {
+        this.unique = isUnique;
+    }
+
+    /**
+     * @return the isUnique
+     */
+    public Boolean isUnique() {
+        return this.unique;
     }
 
 }

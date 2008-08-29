@@ -8,6 +8,7 @@ import java.util.List;
 public class Index implements DatabaseObject, Comparable<Index> {
     private String name;
     private Table table;
+    private Boolean unique;
     private List<String> columns = new ArrayList<String>();
     private String filterCondition;
 
@@ -44,6 +45,14 @@ public class Index implements DatabaseObject, Comparable<Index> {
         this.filterCondition = filterCondition;
     }
 
+    public void setUnique(Boolean value) {
+        this.unique = value;
+    }
+
+    public Boolean isUnique() {
+        return this.unique;
+    }
+
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
@@ -55,6 +64,9 @@ public class Index implements DatabaseObject, Comparable<Index> {
                 equals = false;
             }
         }
+        if (this.unique != index.isUnique()) {
+            equals = false;
+        }
 
         return equals && table.getName().equalsIgnoreCase(index.table.getName());
 
@@ -64,6 +76,7 @@ public class Index implements DatabaseObject, Comparable<Index> {
         int result;
         result = table.getName().toUpperCase().hashCode();
         result = 31 * result + columns.hashCode();
+        result = 31 * result + (this.unique.booleanValue() ? 1 : 0);
         return result;
     }
 
@@ -85,7 +98,11 @@ public class Index implements DatabaseObject, Comparable<Index> {
 
     public String toString() {
         StringBuffer stringBuffer = new StringBuffer();
-        stringBuffer.append(getName()).append(" on ").append(table.getName()).append("(");
+        stringBuffer.append(getName());
+        if (!this.unique.booleanValue()) {
+            stringBuffer.append(" unique ");
+        }
+        stringBuffer.append(" on ").append(table.getName()).append("(");
         for (String column : columns) {
             stringBuffer.append(column).append(", ");
         }

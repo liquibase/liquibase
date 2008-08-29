@@ -18,10 +18,10 @@ import java.util.logging.Logger;
 
 public class SqlDatabaseSnapshot implements DatabaseSnapshot {
 
-	protected DatabaseMetaData databaseMetaData;
-	protected Database database;
+    protected DatabaseMetaData databaseMetaData;
+    protected Database database;
 
-	protected Set<Table> tables = new HashSet<Table>();
+    protected Set<Table> tables = new HashSet<Table>();
     protected Set<View> views = new HashSet<View>();
     protected Set<Column> columns = new HashSet<Column>();
     protected Set<ForeignKey> foreignKeys = new HashSet<ForeignKey>();
@@ -33,7 +33,7 @@ public class SqlDatabaseSnapshot implements DatabaseSnapshot {
     protected Map<String, Table> tablesMap = new HashMap<String, Table>();
     protected Map<String, View> viewsMap = new HashMap<String, View>();
     protected Map<String, Column> columnsMap = new HashMap<String, Column>();
-    
+
     private Set<DiffStatusListener> statusListeners;
 
     protected static final Logger log = LogFactory.getLogger();
@@ -210,7 +210,7 @@ public class SqlDatabaseSnapshot implements DatabaseSnapshot {
 //            rs.close();
 //        }
     }
-    
+
     protected void readColumns(String schema) throws SQLException, JDBCException {
         updateListeners("Reading columns for " + database.toString() + " ...");
 
@@ -248,7 +248,7 @@ public class SqlDatabaseSnapshot implements DatabaseSnapshot {
             columnInfo.setDataType(rs.getInt("DATA_TYPE"));
             columnInfo.setColumnSize(rs.getInt("COLUMN_SIZE"));
             columnInfo.setDecimalDigits(rs.getInt("DECIMAL_DIGITS"));
-            
+
             int nullable = rs.getInt("NULLABLE");
             if (nullable == DatabaseMetaData.columnNoNulls) {
                 columnInfo.setNullable(false);
@@ -268,30 +268,29 @@ public class SqlDatabaseSnapshot implements DatabaseSnapshot {
         rs.close();
         selectStatement.close();
     }
-    
+
     /**
      * Method assigns correct column type and default value to Column object.
-     * 
-     * This method should be database engine specific. JDBC implementation requires 
+     * <p/>
+     * This method should be database engine specific. JDBC implementation requires
      * database engine vendors to convert native DB types to java objects.
-     * During conversion some metadata information are being lost or reported incorrectly via DatabaseMetaData objects. 
-     * This method, if necessary, must be overriden. It must go below DatabaseMetaData implementation and talk directly to database to get correct metadata information.    
-     * 
-     * @author Daniel Bargiel <danielbargiel@googlemail.com>
-     * 
+     * During conversion some metadata information are being lost or reported incorrectly via DatabaseMetaData objects.
+     * This method, if necessary, must be overriden. It must go below DatabaseMetaData implementation and talk directly to database to get correct metadata information.
+     *
      * @param rs
      * @return void
      * @throws SQLException
+     * @author Daniel Bargiel <danielbargiel@googlemail.com>
      */
     protected void getColumnTypeAndDefValue(Column columnInfo, ResultSet rs, Database database) throws SQLException, JDBCException {
-    	Object defaultValue = rs.getObject("COLUMN_DEF");
+        Object defaultValue = rs.getObject("COLUMN_DEF");
         try {
             columnInfo.setDefaultValue(database.convertDatabaseValueToJavaObject(defaultValue, columnInfo.getDataType(), columnInfo.getColumnSize(), columnInfo.getDecimalDigits()));
         } catch (ParseException e) {
             throw new JDBCException(e);
         }
         columnInfo.setTypeName(database.getColumnType(rs.getString("TYPE_NAME"), columnInfo.isAutoIncrement()));
-        
+
     } // end of method getColumnTypeAndDefValue()
 
     protected boolean isPrimaryKey(Column columnInfo) {
@@ -329,9 +328,9 @@ public class SqlDatabaseSnapshot implements DatabaseSnapshot {
                 //In case of subsequent parts of composite keys (KEY_SEQ>1) don't create new instance, just reuse the one from previous call.
                 //According to #getExportedKeys() contract, the result set rows are properly sorted, so the reuse of previous FK instance is safe.
                 if (keySeq == 1) {
-                	fkInfo = new ForeignKey();
+                    fkInfo = new ForeignKey();
                 }
-                
+
                 fkInfo.setPrimaryKeyTable(pkTable);
                 fkInfo.addPrimaryKeyColumn(pkColumn);
 
@@ -345,6 +344,17 @@ public class SqlDatabaseSnapshot implements DatabaseSnapshot {
                 fkInfo.addForeignKeyColumn(fkColumn);
 
                 fkInfo.setName(rs.getString("FK_NAME"));
+
+                Integer updateRule, deleteRule;
+                updateRule = new Integer(rs.getInt("UPDATE_RULE"));
+                if (rs.wasNull())
+                    updateRule = null;
+                deleteRule = new Integer(rs.getInt("DELETE_RULE"));
+                if (rs.wasNull()) {
+                    deleteRule = null;
+                }
+                fkInfo.setUpdateRule(updateRule);
+                fkInfo.setDeleteRule(deleteRule);
 
                 if (database.supportsInitiallyDeferrableColumns()) {
                     short deferrablility = rs.getShort("DEFERRABILITY");
@@ -362,7 +372,7 @@ public class SqlDatabaseSnapshot implements DatabaseSnapshot {
 
                 //Add only if the key was created in this iteration (updating the instance values changes hashCode so it cannot be re-inserted into set) 
                 if (keySeq == 1) {
-                	foreignKeys.add(fkInfo);
+                    foreignKeys.add(fkInfo);
                 }
             }
 
@@ -389,6 +399,7 @@ public class SqlDatabaseSnapshot implements DatabaseSnapshot {
                 String indexName = rs.getString("INDEX_NAME");
                 short type = rs.getShort("TYPE");
 //                String tableName = rs.getString("TABLE_NAME");
+                boolean nonUnique = rs.getBoolean("NON_UNIQUE");
                 String columnName = rs.getString("COLUMN_NAME");
                 short position = rs.getShort("ORDINAL_POSITION");
                 String filterCondition = rs.getString("FILTER_CONDITION");
@@ -411,6 +422,7 @@ public class SqlDatabaseSnapshot implements DatabaseSnapshot {
                     indexInformation = new Index();
                     indexInformation.setTable(table);
                     indexInformation.setName(indexName);
+                    indexInformation.setUnique(new Boolean(!nonUnique));
                     indexInformation.setFilterCondition(filterCondition);
                     indexMap.put(indexName, indexInformation);
                 }
