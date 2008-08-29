@@ -2,12 +2,17 @@ package liquibase.database;
 
 import liquibase.database.sql.RawSqlStatement;
 import liquibase.database.sql.SqlStatement;
+import liquibase.database.structure.DatabaseSnapshot;
+import liquibase.database.structure.HsqlDatabaseSnapshot;
+import liquibase.database.structure.DB2DatabaseSnapshot;
 import liquibase.exception.DateParseException;
 import liquibase.exception.JDBCException;
+import liquibase.diff.DiffStatusListener;
 
 import java.sql.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Set;
 
 public class DB2Database extends AbstractDatabase {
     public boolean isCorrectDatabaseImplementation(Connection conn) throws JDBCException {
@@ -220,5 +225,9 @@ public class DB2Database extends AbstractDatabase {
         }
 
         return autoIncrement;
+    }
+
+    public DatabaseSnapshot createDatabaseSnapshot(String schema, Set<DiffStatusListener> statusListeners) throws JDBCException {
+        return new DB2DatabaseSnapshot(this, statusListeners, schema);
     }
 }

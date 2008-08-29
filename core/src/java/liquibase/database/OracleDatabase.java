@@ -2,12 +2,17 @@ package liquibase.database;
 
 import liquibase.database.sql.RawSqlStatement;
 import liquibase.database.sql.SqlStatement;
+import liquibase.database.structure.DatabaseSnapshot;
+import liquibase.database.structure.SqlDatabaseSnapshot;
+import liquibase.database.structure.OracleDatabaseSnapshot;
 import liquibase.exception.JDBCException;
+import liquibase.diff.DiffStatusListener;
 
 import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.Types;
 import java.text.ParseException;
+import java.util.Set;
 
 /**
  * Encapsulates Oracle database support.
@@ -229,5 +234,9 @@ public class OracleDatabase extends AbstractDatabase {
     public String getColumnType(String columnType, Boolean autoIncrement) {
         String s = super.getColumnType(columnType, autoIncrement);
         return s.replaceAll("VARCHAR2", "VARCHAR");
+    }
+
+    public DatabaseSnapshot createDatabaseSnapshot(String schema, Set<DiffStatusListener> statusListeners) throws JDBCException {
+        return new OracleDatabaseSnapshot(this, statusListeners, schema);
     }
 }

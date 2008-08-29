@@ -1231,7 +1231,5 @@ public abstract class AbstractDatabase implements Database {
         }
     }
 
-    public DatabaseSnapshot createDatabaseSnapshot(String schema, Set<DiffStatusListener> statusListeners) throws JDBCException {
-        return new SqlDatabaseSnapshot(this, statusListeners, schema);
-    }
+    public abstract DatabaseSnapshot createDatabaseSnapshot(String schema, Set<DiffStatusListener> statusListeners) throws JDBCException;
 }

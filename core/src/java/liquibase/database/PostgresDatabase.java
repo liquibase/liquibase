@@ -2,9 +2,12 @@ package liquibase.database;
 
 import liquibase.database.sql.RawSqlStatement;
 import liquibase.database.sql.SqlStatement;
+import liquibase.database.structure.DatabaseSnapshot;
+import liquibase.database.structure.PostgresDatabaseSnapshot;
 import liquibase.exception.JDBCException;
 import liquibase.exception.CustomChangeException;
 import liquibase.util.StringUtils;
+import liquibase.diff.DiffStatusListener;
 
 import java.sql.*;
 import java.text.ParseException;
@@ -452,4 +455,7 @@ public class PostgresDatabase extends AbstractDatabase {
         return false;
     }
 
+    public DatabaseSnapshot createDatabaseSnapshot(String schema, Set<DiffStatusListener> statusListeners) throws JDBCException {
+        return new PostgresDatabaseSnapshot(this, statusListeners, schema);
+    }
 }
