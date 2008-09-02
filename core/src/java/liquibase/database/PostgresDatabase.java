@@ -151,6 +151,8 @@ public class PostgresDatabase extends AbstractDatabase {
                             if (defaultDatabaseSchemaName.equals("$user") && getConnectionUsername() != null) {
                                 if (! schemaExists(getConnectionUsername())) {
                                     defaultDatabaseSchemaName = null;
+                                } else {
+                                    defaultDatabaseSchemaName = getConnectionUsername();
                                 }
                             }
 
@@ -170,42 +172,7 @@ public class PostgresDatabase extends AbstractDatabase {
     }
 
     public String getDefaultCatalogName() throws JDBCException {
-
-        if (defaultCatalogName == null) {
-            try {
-                List<String> searchPaths = getSearchPaths();
-                if (searchPaths != null && searchPaths.size() > 0) {
-                    for (String searchPath : searchPaths) {
-                        if (searchPath != null && searchPath.length() > 0) {
-                            defaultCatalogName = searchPath;
-
-                            if (defaultCatalogName.equals("$user") && getConnectionUsername() != null) {
-                                if (! catalogExists(getConnectionUsername())) {
-                                    defaultCatalogName = null;
-                                } else {
-                                    defaultCatalogName = getConnectionUsername();
-                                }
-                            }
-
-                            if (defaultCatalogName != null)
-                                break;
-                        }
-                    }
-                }
-            } catch (Exception e) {
-                // TODO: throw?
-                e.printStackTrace();
-                log.log(Level.SEVERE, "Failed to get default catalog name from postgres", e);
-            }
-
-            // Default
-            if (defaultCatalogName == null) {
-                defaultCatalogName = "PUBLIC";
-            }
-
-        }
-
-        return defaultCatalogName;
+        return super.getDefaultCatalogName();
     }
 
     public String getDatabaseChangeLogTableName() {
