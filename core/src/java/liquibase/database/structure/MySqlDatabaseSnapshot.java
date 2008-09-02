@@ -115,6 +115,13 @@ public class MySqlDatabaseSnapshot extends SqlDatabaseSnapshot {
         } else {
         	super.getColumnTypeAndDefValue(columnInfo, rs, database);
         }
-    } // end of method getColumnTypeAndDefValue()
-    
-} // end of class MySqlDatabaseSnapshot
+    }
+
+    protected String convertPrimaryKeyName(String pkName) throws SQLException {
+        if (pkName.equals("PRIMARY")) {
+            return null;
+        } else {
+            return pkName;
+        }
+    }
+}

@@ -122,7 +122,8 @@ public class AddForeignKeyConstraintStatement implements SqlStatement {
                     sql += " ON UPDATE RESTRICT";
                     break;
                 case DatabaseMetaData.importedKeyNoAction:
-                    sql += " ON UPDATE NO ACTION";
+                    //don't do anything
+//                    sql += " ON UPDATE NO ACTION";
                     break;
                 default:
                     break;
@@ -143,7 +144,8 @@ public class AddForeignKeyConstraintStatement implements SqlStatement {
                     sql += " ON DELETE RESTRICT";
                     break;
                 case DatabaseMetaData.importedKeyNoAction:
-                    sql += " ON DELETE NO ACTION";
+                    //don't do anything
+//                    sql += " ON DELETE NO ACTION";
                     break;
                 default:
                     break;
