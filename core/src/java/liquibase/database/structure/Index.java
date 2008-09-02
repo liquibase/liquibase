@@ -68,7 +68,7 @@ public class Index implements DatabaseObject, Comparable<Index> {
             equals = false;
         }
 
-        return equals && table.getName().equalsIgnoreCase(index.table.getName());
+        return equals || table.getName().equalsIgnoreCase(index.table.getName());
 
     }
 
@@ -76,7 +76,7 @@ public class Index implements DatabaseObject, Comparable<Index> {
         int result;
         result = table.getName().toUpperCase().hashCode();
         result = 31 * result + columns.hashCode();
-        result = 31 * result + (this.unique.booleanValue() ? 1 : 0);
+        result = 31 * result + (unique == null || unique ? 1 : 0);
         return result;
     }
 

@@ -148,7 +148,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
             setDeleteRule(DatabaseMetaData.importedKeySetDefault);
         } else if (onDelete != null && onDelete.equalsIgnoreCase("RESTRICT")) {
             setDeleteRule(DatabaseMetaData.importedKeyRestrict);
-        } else if (StringUtils.trimToNull(onDelete) == null){
+        } else if (onDelete == null || onDelete.equalsIgnoreCase("NO ACTION")){
             setDeleteRule(DatabaseMetaData.importedKeyNoAction);
         } else {
             throw new RuntimeException("Unknown onDelete action: "+onDelete);
@@ -164,7 +164,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
             setUpdateRule(DatabaseMetaData.importedKeySetDefault);
         } else if (onUpdate != null && onUpdate.equalsIgnoreCase("RESTRICT")) {
             setUpdateRule(DatabaseMetaData.importedKeyRestrict);
-        } else if (StringUtils.trimToNull(onUpdate) == null) {
+        } else if (onUpdate == null || onUpdate.equalsIgnoreCase("NO ACTION")) {
             setUpdateRule(DatabaseMetaData.importedKeyNoAction);
         } else {
             throw new RuntimeException("Unknown onUpdate action: "+onUpdate);
@@ -270,7 +270,8 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
                     node.setAttribute("onUpdate", "RESTRICT");
                     break;
                 default:
-                    node.setAttribute("onUpdate", "NO ACTION");
+                    //don't set anything
+//                    node.setAttribute("onUpdate", "NO ACTION");
                     break;
             }
         }
@@ -289,7 +290,8 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
                     node.setAttribute("onDelete", "RESTRICT");
                     break;
                 default:
-                    node.setAttribute("onDelete", "NO ACTION");
+                    //don't set anything
+//                    node.setAttribute("onDelete", "NO ACTION");
                     break;
             }
         }

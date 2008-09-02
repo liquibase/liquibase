@@ -346,10 +346,10 @@ public abstract class SqlDatabaseSnapshot implements DatabaseSnapshot {
                 fkInfo.setName(rs.getString("FK_NAME"));
 
                 Integer updateRule, deleteRule;
-                updateRule = new Integer(rs.getInt("UPDATE_RULE"));
+                updateRule = rs.getInt("UPDATE_RULE");
                 if (rs.wasNull())
                     updateRule = null;
-                deleteRule = new Integer(rs.getInt("DELETE_RULE"));
+                deleteRule = rs.getInt("DELETE_RULE");
                 if (rs.wasNull()) {
                     deleteRule = null;
                 }
@@ -483,7 +483,7 @@ public abstract class SqlDatabaseSnapshot implements DatabaseSnapshot {
                     PrimaryKey primaryKey = new PrimaryKey();
                     primaryKey.setTable(table);
                     primaryKey.addColumnName(position - 1, columnName);
-                    primaryKey.setName(rs.getString("PK_NAME"));
+                    primaryKey.setName(convertPrimaryKeyName(rs.getString("PK_NAME")));
 
                     foundPKs.add(primaryKey);
                 }
@@ -493,6 +493,10 @@ public abstract class SqlDatabaseSnapshot implements DatabaseSnapshot {
         }
 
         this.primaryKeys.addAll(foundPKs);
+    }
+
+    protected String convertPrimaryKeyName(String pkName) throws SQLException {
+        return pkName;
     }
 
 //    private void readUniqueConstraints(String catalog, String schema) throws JDBCException, SQLException {
