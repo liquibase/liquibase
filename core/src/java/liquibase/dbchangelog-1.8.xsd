@@ -45,6 +45,7 @@
                                                 <xsd:group ref="PreConditionChildren"  maxOccurs="unbounded"/>
                                             </xsd:choice>
                                             <xsd:attribute name="onFail" type="xsd:string"/>
+                                            <xsd:attribute name="onError" type="xsd:string"/>
                                         </xsd:complexType>
                                     </xsd:element>
                                     <xsd:choice>

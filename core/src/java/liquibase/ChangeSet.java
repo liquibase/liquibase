@@ -11,6 +11,8 @@ import liquibase.util.StringUtils;
 import liquibase.util.StreamUtil;
 import liquibase.preconditions.AndPrecondition;
 import liquibase.preconditions.FailedPrecondition;
+import liquibase.preconditions.Preconditions;
+import liquibase.preconditions.ErrorPrecondition;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Text;
@@ -46,7 +48,7 @@ public class ChangeSet {
 
     private String comments;
 
-    private AndPrecondition rootPrecondition;
+    private Preconditions rootPrecondition;
 
     public boolean shouldAlwaysRun() {
         return alwaysRun;
@@ -137,16 +139,35 @@ public class ChangeSet {
                         message.append(StreamUtil.getLineSeparator());
                     }
 
-                    if (rootPrecondition.getOnFail() == null || rootPrecondition.getOnFail().equalsIgnoreCase("FAIL")) {
+                    if (rootPrecondition.getOnFail().equals(Preconditions.FailOption.HALT)) {
                         throw new MigrationFailedException(this, message.toString());
-                    } else if (rootPrecondition.getOnFail().equalsIgnoreCase("SKIP")) {
+                    } else if (rootPrecondition.getOnFail().equals(Preconditions.FailOption.CONTINUE)) {
                         skipChange = true;
 
                         log.log(Level.INFO, "Skipping ChangeSet: " + toString() +" due to precondition failure: " + message);
-                    } else if (rootPrecondition.getOnFail().equalsIgnoreCase("WARN")) {
-                        log.log(Level.WARNING, "Failed Precondition on ChangeSet: " + toString() + ": " + message);
+                    } else if (rootPrecondition.getOnFail().equals(Preconditions.FailOption.WARN)) {
+                        log.log(Level.WARNING, "Running change set despite failed precondition.  ChangeSet: " + toString() + ": " + message);
                     } else {
-                        throw new MigrationFailedException(this, "Unknown precondition onFail attribute: "+rootPrecondition.getOnFail());
+                        throw new MigrationFailedException(this, "Unexpected precondition onFail attribute: "+rootPrecondition.getOnFail());
+                    }
+                } catch (PreconditionErrorException e) {
+                    StringBuffer message = new StringBuffer();
+                    message.append(StreamUtil.getLineSeparator());
+                    for (ErrorPrecondition invalid : e.getErrorPreconditions()) {
+                        message.append("          ").append(invalid.toString());
+                        message.append(StreamUtil.getLineSeparator());
+                    }
+
+                    if (rootPrecondition.getOnError().equals(Preconditions.ErrorOption.HALT)) {
+                        throw new MigrationFailedException(this, message.toString());
+                    } else if (rootPrecondition.getOnError().equals(Preconditions.ErrorOption.CONTINUE)) {
+                        skipChange = true;
+
+                        log.log(Level.INFO, "Skipping ChangeSet: " + toString() +" due to precondition error: " + message);
+                    } else if (rootPrecondition.getOnError().equals(Preconditions.ErrorOption.WARN)) {
+                        log.log(Level.WARNING, "Running change set despite errored precondition.  ChangeSet: " + toString() + ": " + message);
+                    } else {
+                        throw new MigrationFailedException(this, "Unexpected precondition onError attribute: "+rootPrecondition.getOnError());
                     }
                 }
             }
@@ -404,7 +425,7 @@ public class ChangeSet {
         return false;  //To change body of created methods use File | Settings | File Templates.
     }
 
-    public void setPreconditions(AndPrecondition preconditions) {
+    public void setPreconditions(Preconditions preconditions) {
         this.rootPrecondition = preconditions;
     }
 }

@@ -3,6 +3,7 @@ package liquibase.preconditions;
 import liquibase.DatabaseChangeLog;
 import liquibase.database.Database;
 import liquibase.exception.PreconditionFailedException;
+import liquibase.exception.PreconditionErrorException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,9 +13,7 @@ import java.util.List;
  */
 public class AndPrecondition extends PreconditionLogic {
 
-    private String onFail;
-
-    public void check(Database database, DatabaseChangeLog changeLog) throws PreconditionFailedException {
+    public void check(Database database, DatabaseChangeLog changeLog) throws PreconditionFailedException, PreconditionErrorException {
         boolean allPassed = true;
         List<FailedPrecondition> failures = new ArrayList<FailedPrecondition>();
         for (Precondition precondition : getNestedPreconditions()) {
@@ -33,13 +32,5 @@ public class AndPrecondition extends PreconditionLogic {
 
     public String getTagName() {
         return "and";
-    }
-
-    public String getOnFail() {
-        return onFail;
-    }
-
-    public void setOnFail(String onFail) {
-        this.onFail = onFail;
     }
 }

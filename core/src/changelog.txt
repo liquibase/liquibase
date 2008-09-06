@@ -1,6 +1,16 @@
 LiquiBase Core Changelog
 ==========================================
 
+Changes in version 1.8.0
+----------------------
+- Added SQLite support
+- Bug fixes
+- Added dropAllForeignKeyConstraints change
+- Added onFail and onError precondition failure controls
+- Auto-increment specifying on a non-auto-increment table does not fail but simply ignores flag
+- Can control onDelete and onUpdate behavior for FK constraints
+- Added ability to specify that an index should be unique
+
 Changes in version 1.7.0 (2008.06.25)
 ----------------------
 - Added loadData change

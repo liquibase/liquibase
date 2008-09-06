@@ -3,6 +3,7 @@ package liquibase.preconditions;
 import liquibase.DatabaseChangeLog;
 import liquibase.database.Database;
 import liquibase.exception.PreconditionFailedException;
+import liquibase.exception.PreconditionErrorException;
 
 import java.sql.SQLException;
 
@@ -26,7 +27,7 @@ public class RunningAsPrecondition implements Precondition {
     }
 
 
-    public void check(Database database, DatabaseChangeLog changeLog) throws PreconditionFailedException {
+    public void check(Database database, DatabaseChangeLog changeLog) throws PreconditionFailedException, PreconditionErrorException {
         try {
             String loggedusername = database.getConnection().getMetaData().getUserName();
             if (loggedusername.indexOf('@') >= 0) {
@@ -36,7 +37,7 @@ public class RunningAsPrecondition implements Precondition {
                 throw new PreconditionFailedException("RunningAs Precondition failed: expected "+username+", was "+loggedusername, changeLog, this);
             }
         } catch (SQLException e) {
-            throw new RuntimeException("Cannot determine username", e);
+            throw new PreconditionErrorException(e, changeLog, this);
         }
     }
 

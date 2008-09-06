@@ -3,6 +3,7 @@ package liquibase.preconditions;
 import liquibase.DatabaseChangeLog;
 import liquibase.database.Database;
 import liquibase.exception.PreconditionFailedException;
+import liquibase.exception.PreconditionErrorException;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -30,7 +31,7 @@ public class SqlPrecondition implements Precondition {
         this.sql = sql;
     }
 
-    public void check(Database database, DatabaseChangeLog changeLog) throws PreconditionFailedException {
+    public void check(Database database, DatabaseChangeLog changeLog) throws PreconditionFailedException, PreconditionErrorException {
         Statement statement = null;
         ResultSet resultSet = null;
         try {
@@ -49,7 +50,7 @@ public class SqlPrecondition implements Precondition {
             }
 
         } catch (SQLException e) {
-            throw new PreconditionFailedException("Error executing SQL precondition: "+e.getMessage(), changeLog, this);
+            throw new PreconditionErrorException(e, changeLog, this);
         } finally {
             try {
                 if (resultSet != null) {
