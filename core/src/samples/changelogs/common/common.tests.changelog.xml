@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <databaseChangeLog
-        xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.7"
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.8"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.7 http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.7.xsd">
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.8 http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.8.xsd">
 
     <property name="table.name" value="paramter_table"/>
     <property file="changelogs/common/dynamic.parameters.properties"/>
@@ -406,4 +406,39 @@
         </preConditions>
     </changeSet>
 
+    <changeSet id="failContinuePrecondition" author="nvoxland">
+        <preConditions onFail="CONTINUE">
+            <runningAs username="invaliduser"/>
+        </preConditions>
+        <createTable tableName="fail_continue_ran">
+            <column name="id" type="int"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="failWarnPrecondition" author="nvoxland">
+        <preConditions onFail="WARN">
+            <runningAs username="invaliduser"/>
+        </preConditions>
+        <createTable tableName="fail_warn_ran">
+            <column name="id" type="int"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="errorContinuePrecondition" author="nvoxland">
+        <preConditions onError="CONTINUE">
+            <sqlCheck>select 1 from badtable</sqlCheck>
+        </preConditions>
+        <createTable tableName="error_continue_ran">
+            <column name="id" type="int"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="errorWarnPrecondition" author="nvoxland">
+        <preConditions onError="WARN">
+            <sqlCheck>select 1 from badtable</sqlCheck>
+        </preConditions>
+        <createTable tableName="error_warn_ran">
+            <column name="id" type="int"/>
+        </createTable>
+    </changeSet>
 </databaseChangeLog>

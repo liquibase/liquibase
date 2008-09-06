@@ -3,6 +3,7 @@ package liquibase.preconditions;
 import liquibase.DatabaseChangeLog;
 import liquibase.database.Database;
 import liquibase.exception.PreconditionFailedException;
+import liquibase.exception.PreconditionErrorException;
 
 /**
  * Class for controling "not" logic in preconditions.
@@ -10,7 +11,7 @@ import liquibase.exception.PreconditionFailedException;
 public class NotPrecondition extends PreconditionLogic {
 
 
-    public void check(Database database, DatabaseChangeLog changeLog) throws PreconditionFailedException {
+    public void check(Database database, DatabaseChangeLog changeLog) throws PreconditionFailedException, PreconditionErrorException {
         for (Precondition precondition : getNestedPreconditions()) {
             boolean threwException = false;
             try {

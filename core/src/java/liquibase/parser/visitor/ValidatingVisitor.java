@@ -7,8 +7,10 @@ import liquibase.change.Change;
 import liquibase.database.Database;
 import liquibase.exception.PreconditionFailedException;
 import liquibase.exception.SetupException;
+import liquibase.exception.PreconditionErrorException;
 import liquibase.preconditions.AndPrecondition;
 import liquibase.preconditions.FailedPrecondition;
+import liquibase.preconditions.ErrorPrecondition;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -19,6 +21,7 @@ public class ValidatingVisitor implements ChangeSetVisitor {
 
     private List<ChangeSet> invalidMD5Sums = new ArrayList<ChangeSet>();
     private List<FailedPrecondition> failedPreconditions = new ArrayList<FailedPrecondition>();
+    private List<ErrorPrecondition> errorPreconditions = new ArrayList<ErrorPrecondition>();
     private Set<ChangeSet> duplicateChangeSets = new HashSet<ChangeSet>();
     private List<SetupException> setupExceptions = new ArrayList<SetupException>();
 
@@ -39,6 +42,8 @@ public class ValidatingVisitor implements ChangeSetVisitor {
             precondition.check(database, changeLog);
         } catch (PreconditionFailedException e) {
             failedPreconditions.addAll(e.getFailedPreconditions());
+        } catch (PreconditionErrorException e) {
+            errorPreconditions.addAll(e.getErrorPreconditions());
         }
     }
 
@@ -84,6 +89,9 @@ public class ValidatingVisitor implements ChangeSetVisitor {
         return failedPreconditions;
     }
 
+    public List<ErrorPrecondition> getErrorPreconditions() {
+        return errorPreconditions;
+    }
 
     public Set<ChangeSet> getDuplicateChangeSets() {
         return duplicateChangeSets;
@@ -96,6 +104,7 @@ public class ValidatingVisitor implements ChangeSetVisitor {
     public boolean validationPassed() {
         return invalidMD5Sums.size() == 0
                 && failedPreconditions.size() == 0
+                && errorPreconditions.size() == 0
                 && duplicateChangeSets.size() == 0
                 && setupExceptions.size() == 0;
     }

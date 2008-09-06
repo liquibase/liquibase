@@ -32,7 +32,7 @@ class XMLChangeLogHandler extends DefaultHandler {
     private DatabaseChangeLog databaseChangeLog;
     private Change change;
     private StringBuffer text;
-    private AndPrecondition rootPrecondition;
+    private Preconditions rootPrecondition;
     private Stack<PreconditionLogic> preconditionLogicStack = new Stack<PreconditionLogic>();
     private ChangeSet changeSet;
     private FileOpener fileOpener;
@@ -118,8 +118,9 @@ class XMLChangeLogHandler extends DefaultHandler {
                 }
                 inRollback = true;
             } else if ("preConditions".equals(qName)) {
-                rootPrecondition = new AndPrecondition();
-                rootPrecondition.setOnFail(StringUtils.trimToNull(atts.getValue("skipOnFail")));
+                rootPrecondition = new Preconditions();
+                rootPrecondition.setOnFail(StringUtils.trimToNull(atts.getValue("onFail")));
+                rootPrecondition.setOnError(StringUtils.trimToNull(atts.getValue("onError")));
                 preconditionLogicStack.push(rootPrecondition);
             } else if (rootPrecondition != null) {
                 currentPrecondition = PreconditionFactory.getInstance().create(qName);

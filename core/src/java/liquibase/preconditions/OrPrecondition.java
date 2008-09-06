@@ -3,6 +3,7 @@ package liquibase.preconditions;
 import liquibase.DatabaseChangeLog;
 import liquibase.database.Database;
 import liquibase.exception.PreconditionFailedException;
+import liquibase.exception.PreconditionErrorException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,7 +14,7 @@ import java.util.List;
 public class OrPrecondition extends PreconditionLogic {
 
 
-    public void check(Database database, DatabaseChangeLog changeLog) throws PreconditionFailedException {
+    public void check(Database database, DatabaseChangeLog changeLog) throws PreconditionFailedException, PreconditionErrorException {
         boolean onePassed = false;
         List<FailedPrecondition> failures = new ArrayList<FailedPrecondition>();
         for (Precondition precondition : getNestedPreconditions()) {

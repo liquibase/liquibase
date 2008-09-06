@@ -1,8 +1,6 @@
 package liquibase.preconditions;
 
-import liquibase.exception.MigrationFailedException;
-import liquibase.exception.PreconditionFailedException;
-import liquibase.exception.CustomPreconditionFailedException;
+import liquibase.exception.*;
 import liquibase.database.Database;
 import liquibase.DatabaseChangeLog;
 
@@ -27,7 +25,7 @@ public class CustomPreconditionWrapper implements Precondition {
         this.classLoader = classLoader;
     }
 
-    public void check(Database database, DatabaseChangeLog changeLog) throws PreconditionFailedException {
+    public void check(Database database, DatabaseChangeLog changeLog) throws PreconditionFailedException, PreconditionErrorException {
         CustomPrecondition customPrecondition;
         try {
 //            System.out.println(classLoader.toString());
@@ -44,6 +42,8 @@ public class CustomPreconditionWrapper implements Precondition {
             customPrecondition.check(database);
         } catch (CustomPreconditionFailedException e) {
             throw new PreconditionFailedException(new FailedPrecondition("Custom Precondition Failed: "+e.getMessage(), changeLog, this));
+        } catch (CustomPreconditionErrorException e) {
+            throw new PreconditionErrorException(new ErrorPrecondition(e.getCause(), changeLog, this));
         }
     }
 
