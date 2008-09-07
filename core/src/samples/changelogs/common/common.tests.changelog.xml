@@ -402,7 +402,10 @@
 
     <changeSet id="customPreCondition" author="nvoxland">
         <preConditions>
-            <customPrecondition className="liquibase.preconditions.ExampleCustomPrecondition"/>
+            <customPrecondition className="liquibase.preconditions.ExampleCustomPrecondition">
+                <param name="name" value="Sample Name"/>
+                <param name="count" value="3"/>
+            </customPrecondition>
         </preConditions>
     </changeSet>
 

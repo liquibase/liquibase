@@ -337,6 +337,14 @@
 
     <xsd:element name="customPrecondition">
         <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element name="param" minOccurs="0" maxOccurs="unbounded">
+                    <xsd:complexType>
+                        <xsd:attribute name="name" type="xsd:string"/>
+                        <xsd:attribute name="value" type="xsd:string"/>
+                    </xsd:complexType>
+                </xsd:element>
+            </xsd:sequence>            
             <xsd:attribute name="className" type="xsd:string"/>
         </xsd:complexType>
     </xsd:element>
