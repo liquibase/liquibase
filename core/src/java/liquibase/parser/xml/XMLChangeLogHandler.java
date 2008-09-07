@@ -68,11 +68,11 @@ class XMLChangeLogHandler extends DefaultHandler {
             if ("comment".equals(qName)) {
                 text = new StringBuffer();
             } else if ("validCheckSum".equals(qName)) {
-                text = new StringBuffer();                
+                text = new StringBuffer();
             } else if ("databaseChangeLog".equals(qName)) {
-                String version = uri.substring(uri.lastIndexOf("/")+1);
+                String version = uri.substring(uri.lastIndexOf("/") + 1);
                 if (!version.equals(XMLChangeLogParser.getSchemaVersion())) {
-                    log.warning(databaseChangeLog.getPhysicalFilePath()+" is using schema version "+version+" rather than version "+XMLChangeLogParser.getSchemaVersion());
+                    log.warning(databaseChangeLog.getPhysicalFilePath() + " is using schema version " + version + " rather than version " + XMLChangeLogParser.getSchemaVersion());
                 }
                 databaseChangeLog.setLogicalFilePath(atts.getValue("logicalFilePath"));
             } else if ("include".equals(qName)) {
@@ -109,7 +109,7 @@ class XMLChangeLogHandler extends DefaultHandler {
                     String author = atts.getValue("changeSetAuthor");
                     ChangeSet changeSet = databaseChangeLog.getChangeSet(path, author, id);
                     if (changeSet == null) {
-                        throw new SAXException("Could not find changeSet to use for rollback: "+path+":"+author+":"+id);
+                        throw new SAXException("Could not find changeSet to use for rollback: " + path + ":" + author + ":" + id);
                     } else {
                         for (Change change : changeSet.getChanges()) {
                             this.changeSet.addRollbackChange(change);
@@ -122,6 +122,8 @@ class XMLChangeLogHandler extends DefaultHandler {
                 rootPrecondition.setOnFail(StringUtils.trimToNull(atts.getValue("onFail")));
                 rootPrecondition.setOnError(StringUtils.trimToNull(atts.getValue("onError")));
                 preconditionLogicStack.push(rootPrecondition);
+            } else if (currentPrecondition != null && currentPrecondition instanceof CustomPreconditionWrapper && qName.equals("param")) {
+                ((CustomPreconditionWrapper) currentPrecondition).setParam(atts.getValue("name"), atts.getValue("value"));
             } else if (rootPrecondition != null) {
                 currentPrecondition = PreconditionFactory.getInstance().create(qName);
 
@@ -170,7 +172,7 @@ class XMLChangeLogHandler extends DefaultHandler {
                 }
                 if (change instanceof ChangeWithColumns) {
                     ((ChangeWithColumns) change).addColumn(column);
-                 } else {
+                } else {
                     throw new RuntimeException("Unexpected column tag for " + change.getClass().getName());
                 }
             } else if (change != null && "constraints".equals(qName)) {
@@ -206,7 +208,7 @@ class XMLChangeLogHandler extends DefaultHandler {
                     Properties props = new Properties();
                     InputStream propertiesStream = fileOpener.getResourceAsStream(atts.getValue("file"));
                     if (propertiesStream == null) {
-                        log.info("Could not open properties file "+atts.getValue("file"));
+                        log.info("Could not open properties file " + atts.getValue("file"));
                     } else {
                         props.load(propertiesStream);
 
@@ -289,7 +291,7 @@ class XMLChangeLogHandler extends DefaultHandler {
                 } else if (change instanceof DeleteDataChange) {
                     ((DeleteDataChange) change).setWhereClause(textString);
                 } else {
-                    throw new RuntimeException("Unexpected change type: "+change.getClass().getName());
+                    throw new RuntimeException("Unexpected change type: " + change.getClass().getName());
                 }
                 text = new StringBuffer();
             } else if (change != null && change instanceof CreateProcedureChange && "comment".equals(qName)) {
@@ -345,7 +347,7 @@ class XMLChangeLogHandler extends DefaultHandler {
         String originalText = text;
         while (matcher.find()) {
             String expressionString = originalText.substring(matcher.start(), matcher.end());
-            String valueTolookup = expressionString.replaceFirst("\\$\\{","").replaceFirst("\\}$", "");
+            String valueTolookup = expressionString.replaceFirst("\\$\\{", "").replaceFirst("\\}$", "");
 
             int dotIndex = valueTolookup.indexOf('.');
             Object value = getParameterValue(valueTolookup);
@@ -384,7 +386,7 @@ class XMLChangeLogHandler extends DefaultHandler {
     /**
      * Wrapper for Attributes that expands the value as needed
      */
-    private  class ExpandingAttributes implements Attributes {
+    private class ExpandingAttributes implements Attributes {
         private Attributes attributes;
 
         private ExpandingAttributes(Attributes attributes) {

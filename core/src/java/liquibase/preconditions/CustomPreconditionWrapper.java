@@ -3,17 +3,27 @@ package liquibase.preconditions;
 import liquibase.exception.*;
 import liquibase.database.Database;
 import liquibase.DatabaseChangeLog;
+import liquibase.util.ObjectUtil;
+
+import java.util.SortedSet;
+import java.util.TreeSet;
+import java.util.Map;
+import java.util.HashMap;
+import java.lang.reflect.InvocationTargetException;
 
 public class CustomPreconditionWrapper implements Precondition {
 
     private String className;
     private ClassLoader classLoader;
 
+    private SortedSet<String> params = new TreeSet<String>();
+    private Map<String, String> paramValues = new HashMap<String, String>();
+
     public String getClassName() {
         return className;
     }
 
-    public void setClassName(String className) throws Exception{
+    public void setClassName(String className) {
         this.className = className;
     }
 
@@ -24,6 +34,12 @@ public class CustomPreconditionWrapper implements Precondition {
     public void setClassLoader(ClassLoader classLoader) {
         this.classLoader = classLoader;
     }
+
+    public void setParam(String name, String value) {
+        this.params.add(name);
+        this.paramValues.put(name, value);
+    }
+
 
     public void check(Database database, DatabaseChangeLog changeLog) throws PreconditionFailedException, PreconditionErrorException {
         CustomPrecondition customPrecondition;
@@ -36,6 +52,14 @@ public class CustomPreconditionWrapper implements Precondition {
             }
         } catch (Exception e) {
             throw new PreconditionFailedException("Could not open custom precondition class "+className, changeLog, this);
+        }
+
+        for (String param : params) {
+            try {
+                ObjectUtil.setProperty(customPrecondition, param, paramValues.get(param));
+            } catch (Exception e) {
+                throw new PreconditionFailedException("error setting parameter "+param+" on custom precondition "+className, changeLog, this);
+            }
         }
 
         try {

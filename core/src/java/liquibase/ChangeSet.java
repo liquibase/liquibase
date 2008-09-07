@@ -143,6 +143,7 @@ public class ChangeSet {
                     }
 
                     if (rootPrecondition.getOnFail().equals(Preconditions.FailOption.HALT)) {
+                        e.printStackTrace();
                         throw new MigrationFailedException(this, message.toString());
                     } else if (rootPrecondition.getOnFail().equals(Preconditions.FailOption.CONTINUE)) {
                         skipChange = true;
