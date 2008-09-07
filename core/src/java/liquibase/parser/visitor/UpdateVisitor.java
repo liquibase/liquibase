@@ -23,11 +23,12 @@ public class UpdateVisitor implements ChangeSetVisitor {
     
     public void visit(ChangeSet changeSet) throws LiquibaseException {
         log.finer("Running Changeset:" + changeSet);
-        changeSet.execute(database);
-        if (database.getRunStatus(changeSet).equals(ChangeSet.RunStatus.NOT_RAN)) {
-            database.markChangeSetAsRan(changeSet);
-        } else {
-            database.markChangeSetAsReRan(changeSet);
+        if (changeSet.execute(database)) {
+            if (database.getRunStatus(changeSet).equals(ChangeSet.RunStatus.NOT_RAN)) {
+                database.markChangeSetAsRan(changeSet);
+            } else {
+                database.markChangeSetAsReRan(changeSet);
+            }
         }
 
         database.commit();

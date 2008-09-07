@@ -424,6 +424,15 @@
         </createTable>
     </changeSet>
 
+    <changeSet id="failMarkRanPrecondition" author="nvoxland">
+        <preConditions onError="MARK_RAN">
+            <sqlCheck>select 1 from badtable</sqlCheck>
+        </preConditions>
+        <createTable tableName="fail_markran_ran">
+            <column name="id" type="int"/>
+        </createTable>
+    </changeSet>
+
     <changeSet id="errorContinuePrecondition" author="nvoxland">
         <preConditions onError="CONTINUE">
             <sqlCheck>select 1 from badtable</sqlCheck>
@@ -438,6 +447,15 @@
             <sqlCheck>select 1 from badtable</sqlCheck>
         </preConditions>
         <createTable tableName="error_warn_ran">
+            <column name="id" type="int"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="errorMarkRanPrecondition" author="nvoxland">
+        <preConditions onError="MARK_RAN">
+            <sqlCheck>select 1 from badtable</sqlCheck>
+        </preConditions>
+        <createTable tableName="error_markran_ran">
             <column name="id" type="int"/>
         </createTable>
     </changeSet>

@@ -11,6 +11,7 @@ public class Preconditions extends AndPrecondition {
     public enum FailOption {
         HALT("HALT"),
         CONTINUE("CONTINUE"),
+        MARK_RAN("MARK_RAN"),
         WARN("WARN");
 
         String key;
@@ -27,6 +28,7 @@ public class Preconditions extends AndPrecondition {
     public enum ErrorOption {
         HALT("HALT"),
         CONTINUE("CONTINUE"),
+        MARK_RAN("MARK_RAN"),
         WARN("WARN");
 
         String key;

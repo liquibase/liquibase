@@ -110,10 +110,13 @@ public class ChangeSet {
     /**
      * This method will actually execute each of the changes in the list against the
      * specified database.
+     *
+     * @return should change set be marked as ran
      */
-    public void execute(Database database) throws MigrationFailedException {
+    public boolean execute(Database database) throws MigrationFailedException {
 
         boolean skipChange = false;
+        boolean markRan = true;
 
         try {
             database.getJdbcTemplate().comment("Changeset " + toString());
@@ -143,8 +146,13 @@ public class ChangeSet {
                         throw new MigrationFailedException(this, message.toString());
                     } else if (rootPrecondition.getOnFail().equals(Preconditions.FailOption.CONTINUE)) {
                         skipChange = true;
+                        markRan = false;
 
-                        log.log(Level.INFO, "Skipping ChangeSet: " + toString() +" due to precondition failure: " + message);
+                        log.log(Level.INFO, "Continuing past ChangeSet: " + toString() +" due to precondition failure: " + message);
+                    } else if (rootPrecondition.getOnFail().equals(Preconditions.FailOption.MARK_RAN)) {
+                        skipChange = true;
+
+                        log.log(Level.INFO, "Marking ChangeSet: " + toString() +" ran due to precondition failure: " + message);
                     } else if (rootPrecondition.getOnFail().equals(Preconditions.FailOption.WARN)) {
                         log.log(Level.WARNING, "Running change set despite failed precondition.  ChangeSet: " + toString() + ": " + message);
                     } else {
@@ -162,8 +170,14 @@ public class ChangeSet {
                         throw new MigrationFailedException(this, message.toString());
                     } else if (rootPrecondition.getOnError().equals(Preconditions.ErrorOption.CONTINUE)) {
                         skipChange = true;
+                        markRan = false;
 
-                        log.log(Level.INFO, "Skipping ChangeSet: " + toString() +" due to precondition error: " + message);
+                        log.log(Level.INFO, "Continuing past ChangeSet: " + toString() +" due to precondition error: " + message);
+                    } else if (rootPrecondition.getOnError().equals(Preconditions.ErrorOption.MARK_RAN)) {
+                        skipChange = true;
+                        markRan = true;
+
+                        log.log(Level.INFO, "Marking ChangeSet: " + toString() +" due ran to precondition error: " + message);
                     } else if (rootPrecondition.getOnError().equals(Preconditions.ErrorOption.WARN)) {
                         log.log(Level.WARNING, "Running change set despite errored precondition.  ChangeSet: " + toString() + ": " + message);
                     } else {
@@ -194,6 +208,7 @@ public class ChangeSet {
             } else {
                 log.finest("Skipping ChangeSet: " + toString());
             }
+
         } catch (Exception e) {
             try {
                 database.rollback();
@@ -210,6 +225,7 @@ public class ChangeSet {
                 }
             }
         }
+        return markRan;
     }
 
     public void rolback(Database database) throws RollbackFailedException {
