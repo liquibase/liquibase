@@ -477,7 +477,7 @@
 
     <changeSet id="changeSetRanPrecondition" author="nvoxland">
         <preConditions>
-            <changeSetRan id="changeLogParameters" author="nvoxland" changeLogFile="changelogs/common/common.tests.changelog.xml"/>
+            <changeSetExecuted id="changeLogParameters" author="nvoxland" changeLogFile="changelogs/common/common.tests.changelog.xml"/>
         </preConditions>
         <createTable tableName="changesetprecondition_ran">
             <column name="id" type="int"/>

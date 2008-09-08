@@ -18,7 +18,7 @@ public class PreconditionFactory {
                 NotPrecondition.class,
                 DBMSPrecondition.class,
                 RunningAsPrecondition.class,
-                ChangeSetRanPrecondition.class,
+                ChangeSetExecutedPrecondition.class,
                 TableExistsPrecondition.class,
                 ColumnExistsPrecondition.class,
                 SequenceExistsPrecondition.class,

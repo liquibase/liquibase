@@ -9,7 +9,7 @@ import liquibase.exception.PreconditionErrorException;
 import liquibase.exception.JDBCException;
 import liquibase.exception.DatabaseHistoryException;
 
-public class ChangeSetRanPrecondition implements Precondition {
+public class ChangeSetExecutedPrecondition implements Precondition {
 
     private String changeLogFile;
     private String id;
@@ -53,6 +53,6 @@ public class ChangeSetRanPrecondition implements Precondition {
     }
 
     public String getTagName() {
-        return "changeSetRan";
+        return "changeSetExecuted";
     }
 }
