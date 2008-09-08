@@ -329,7 +329,7 @@
         </xsd:complexType>
     </xsd:element>
 
-    <xsd:element name="changeSetRan">
+    <xsd:element name="changeSetExecuted">
         <xsd:complexType>
             <xsd:attribute name="id" type="xsd:string"/>
             <xsd:attribute name="author" type="xsd:string"/>
@@ -793,7 +793,7 @@
                 <xsd:element ref="not" maxOccurs="unbounded"/>
                 <xsd:element ref="dbms" maxOccurs="unbounded"/>
                 <xsd:element ref="runningAs" maxOccurs="unbounded"/>
-                <xsd:element ref="changeSetRan" maxOccurs="unbounded"/>
+                <xsd:element ref="changeSetExecuted" maxOccurs="unbounded"/>
                 <xsd:element ref="tableExists" maxOccurs="unbounded"/>
                 <xsd:element ref="columnExists" maxOccurs="unbounded"/>
                 <xsd:element ref="sequenceExists" maxOccurs="unbounded"/>
