@@ -6,6 +6,7 @@ import liquibase.test.DatabaseTestTemplate;
 import liquibase.test.JdbcDatabaseTest;
 import liquibase.test.DatabaseTest;
 import liquibase.database.Database;
+import liquibase.database.AbstractDatabase;
 import liquibase.database.structure.DatabaseSnapshot;
 import liquibase.database.sql.RawSqlStatement;
 import liquibase.database.sql.SqlStatement;
@@ -21,8 +22,9 @@ import org.junit.Test;
 
 import java.util.*;
 import java.io.StringWriter;
+import java.lang.reflect.Field;
 
-public class LockHandlerTest  {
+public class LockHandlerTest {
 
     @Test
     public void acquireLock_tableExistsNotLocked() throws Exception {
@@ -31,11 +33,12 @@ public class LockHandlerTest  {
         RawSqlStatement selectLockStatement = new RawSqlStatement("SELECT LOCK");
 
         expect(database.getJdbcTemplate()).andReturn(template).anyTimes();
-        expect(database.doesChangeLogLockTableExist()).andReturn(true);
         expect(database.getSelectChangeLogLockSQL()).andReturn(selectLockStatement);
         expect(database.getDatabaseChangeLogLockTableName()).andReturn("LOCK_TABLE").anyTimes();
         expect(database.getDatabaseChangeLogTableName()).andReturn("DATABASECHANGELOG").anyTimes();
         expect(database.getDefaultSchemaName()).andReturn(null).anyTimes();
+        database.checkDatabaseChangeLogLockTable();
+        expectLastCall();
 
         database.commit();
         expectLastCall();
@@ -60,8 +63,20 @@ public class LockHandlerTest  {
         Database database = createMock(Database.class);
         JdbcTemplate template = createMock(JdbcTemplate.class);
 
+        RawSqlStatement selectLockStatement = new RawSqlStatement("SELECT LOCK");
         expect(database.getJdbcTemplate()).andReturn(template).anyTimes();
-        expect(database.doesChangeLogLockTableExist()).andReturn(false);
+        expect(database.getSelectChangeLogLockSQL()).andReturn(selectLockStatement);
+        expect(database.getDefaultSchemaName()).andReturn("DEF");
+        expect(database.getDatabaseChangeLogLockTableName()).andReturn("LOCK_TAB");
+        template.comment("Lock Database");
+        expectLastCall();
+        expect(template.queryForObject(selectLockStatement, Boolean.class)).andReturn(Boolean.FALSE);
+
+        database.checkDatabaseChangeLogLockTable();
+        expectLastCall();
+
+        expect(template.update(isA(UpdateStatement.class))).andReturn(1);
+        database.commit();
         expectLastCall();
 
 
@@ -69,25 +84,21 @@ public class LockHandlerTest  {
         replay(template);
 
         LockHandler handler = LockHandler.getInstance(database);
-        try {
-            handler.acquireLock();
-            fail("did not throw exception");
-        } catch (LockException e) {
-            assertEquals("Could not acquire lock, table does not exist", e.getMessage());
-        }
+        assertTrue(handler.acquireLock());
 
         verify(database);
         verify(template);
     }
 
-     @Test
+    @Test
     public void acquireLock_tableExistsIsLocked() throws Exception {
         Database database = createMock(Database.class);
         JdbcTemplate template = createMock(JdbcTemplate.class);
         RawSqlStatement selectLockStatement = new RawSqlStatement("SELECT LOCK");
 
         expect(database.getJdbcTemplate()).andReturn(template).anyTimes();
-        expect(database.doesChangeLogLockTableExist()).andReturn(true);
+        database.checkDatabaseChangeLogLockTable();
+        expectLastCall();
         expect(database.getSelectChangeLogLockSQL()).andReturn(selectLockStatement);
         expectLastCall();
 
@@ -113,7 +124,7 @@ public class LockHandlerTest  {
         expect(database.getDatabaseChangeLogTableName()).andReturn("DATABASECHANGELOG").anyTimes();
         database.commit();
         expectLastCall().atLeastOnce();
-        expect(database.getDefaultSchemaName()).andReturn(null).anyTimes();        
+        expect(database.getDefaultSchemaName()).andReturn(null).anyTimes();
 
         expect(database.getDatabaseChangeLogLockTableName()).andReturn("lock_table").anyTimes();
         expectLastCall();
@@ -282,7 +293,8 @@ public class LockHandlerTest  {
 
                     public void performTest(Database database) throws Exception {
 
-                        LockHandler.getInstance(database).reset();;
+                        LockHandler.getInstance(database).reset();
+                        ;
 
                         try {
                             new JdbcTemplate(database).execute(new DropTableStatement(null, database.getDatabaseChangeLogTableName(), false));

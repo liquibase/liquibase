@@ -10,6 +10,8 @@ import liquibase.test.TestContext;
 import static org.junit.Assert.*;
 import org.junit.Test;
 
+import java.sql.DatabaseMetaData;
+
 public class AddForeignKeyConstraintStatementTest extends AbstractSqlStatementTest {
 
     private static final String FK_NAME = "FK_ADDTEST";
@@ -98,7 +100,7 @@ public class AddForeignKeyConstraintStatementTest extends AbstractSqlStatementTe
     public void execute_deleteCascade() throws Exception {
         new DatabaseTestTemplate().testOnAvailableDatabases(new SqlStatementDatabaseTest(null, new AddForeignKeyConstraintStatement(FK_NAME,
                 null, BASE_TABLE_NAME, BASE_COLUMN_NAME,
-                null, REF_TABLE_NAME, REF_COL_NAME).setDeleteCascade(true)) {
+                null, REF_TABLE_NAME, REF_COL_NAME).setDeleteRule(DatabaseMetaData.importedKeyCascade)) {
             protected void preExecuteAssert(DatabaseSnapshot snapshot) {
                 assertNull(snapshot.getForeignKey(FK_NAME));
             }

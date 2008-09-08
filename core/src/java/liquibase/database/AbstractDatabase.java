@@ -36,10 +36,6 @@ public abstract class AbstractDatabase implements Database {
     private String defaultSchemaName;
 
     static final protected Logger log = LogFactory.getLogger();
-    protected boolean changeLogTableExists;
-    protected boolean changeLogLockTableExists;
-    protected boolean changeLogCreateAttempted;
-    protected boolean changeLogLockCreateAttempted;
 
     protected String currentDateTimeFunction;
 
@@ -314,7 +310,7 @@ public abstract class AbstractDatabase implements Database {
 //            val.append(isoDate.substring(11));
 //            val.append("'");
 //            return val.toString();
-            return "'"+isoDate.replace('T', ' ')+"'";
+            return "'" + isoDate.replace('T', ' ') + "'";
         } else {
             return "BAD_DATE_FORMAT:" + isoDate;
         }
@@ -457,12 +453,25 @@ public abstract class AbstractDatabase implements Database {
         return new RawSqlStatement(("SELECT LOCKED FROM " + escapeTableName(getDefaultSchemaName(), getDatabaseChangeLogLockTableName()) + " WHERE " + escapeColumnName(getDefaultSchemaName(), getDatabaseChangeLogLockTableName(), "ID") + "=1"));
     }
 
-    public boolean doesChangeLogTableExist() {
-        return changeLogTableExists;
-    }
 
-    public boolean doesChangeLogLockTableExist() {
-        return changeLogLockTableExists;
+    public boolean doesChangeLogTableExist() throws JDBCException {
+        DatabaseConnection connection = getConnection();
+        ResultSet rs = null;
+        try {
+            rs = connection.getMetaData().getTables(convertRequestedSchemaToCatalog(getDefaultSchemaName()), convertRequestedSchemaToSchema(getDefaultSchemaName()), getDatabaseChangeLogTableName(), new String[]{"TABLE"});
+            return rs.next();
+        } catch (Exception e) {
+            throw new JDBCException(e);
+        } finally {
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException e) {
+                    log.warning("Error closing result set: " + e.getMessage());
+                }
+            }
+        }
+
     }
 
     /**
@@ -472,14 +481,12 @@ public abstract class AbstractDatabase implements Database {
      */
     public void checkDatabaseChangeLogTable() throws JDBCException {
         DatabaseConnection connection = getConnection();
-        ResultSet checkTableRS = null;
         ResultSet checkColumnsRS = null;
         List<SqlStatement> statementsToExecute = new ArrayList<SqlStatement>();
 
+        boolean changeLogCreateAttempted = false;
         try {
-            checkTableRS = connection.getMetaData().getTables(convertRequestedSchemaToCatalog(getDefaultSchemaName()), convertRequestedSchemaToSchema(getDefaultSchemaName()), getDatabaseChangeLogTableName(), new String[]{"TABLE"});
-            if (checkTableRS.next()) {
-                changeLogTableExists = true;
+            if (doesChangeLogTableExist()) {
                 checkColumnsRS = connection.getMetaData().getColumns(convertRequestedSchemaToCatalog(getDefaultSchemaName()), convertRequestedSchemaToSchema(getDefaultSchemaName()), getDatabaseChangeLogTableName(), null);
                 boolean hasDescription = false;
                 boolean hasComments = false;
@@ -512,7 +519,6 @@ public abstract class AbstractDatabase implements Database {
                 }
 
             } else if (!changeLogCreateAttempted) {
-                changeLogCreateAttempted = true;
                 getJdbcTemplate().comment("Create Database Change Log Table");
                 SqlStatement createTableStatement = getCreateChangeLogSQL();
                 if (!canCreateChangeLogTable()) {
@@ -523,7 +529,6 @@ public abstract class AbstractDatabase implements Database {
                 // If there is no table in the database for recording change history create one.
                 statementsToExecute.add(createTableStatement);
                 log.info("Creating database history table with name: " + escapeTableName(getDefaultSchemaName(), getDatabaseChangeLogTableName()));
-                changeLogTableExists = true;
 //                }
             }
 
@@ -534,14 +539,6 @@ public abstract class AbstractDatabase implements Database {
         } catch (SQLException e) {
             throw new JDBCException(e);
         } finally {
-            if (checkTableRS != null) {
-                try {
-                    checkTableRS.close();
-                } catch (SQLException e) {
-                    //noinspection ThrowFromFinallyBlock
-                    throw new JDBCException(e);
-                }
-            }
             if (checkColumnsRS != null) {
                 try {
                     checkColumnsRS.close();
@@ -557,62 +554,55 @@ public abstract class AbstractDatabase implements Database {
         return true;
     }
 
-    /**
-     * This method will check the database ChangeLogLock table used to keep track of
-     * if a machine is updating the database. If the table does not exist it will create one
-     * otherwise it will not do anything besides outputting a log message.
-     */
-    public void checkDatabaseChangeLogLockTable() throws JDBCException {
+    public boolean doesChangeLogLockTableExist() throws JDBCException {
         DatabaseConnection connection = getConnection();
         ResultSet rs = null;
-        boolean knowMustInsertIntoLockTable = false;
         try {
             rs = connection.getMetaData().getTables(convertRequestedSchemaToCatalog(getDefaultSchemaName()), convertRequestedSchemaToSchema(getDefaultSchemaName()), getDatabaseChangeLogLockTableName(), new String[]{"TABLE"});
-            if (!rs.next()) {
-                if (!changeLogLockCreateAttempted) {
-                    changeLogLockCreateAttempted = true;
-                    SqlStatement createTableStatement = getCreateChangeLogLockSQL();
-
-                    getJdbcTemplate().comment("Create Database Lock Table");
-                    this.getJdbcTemplate().execute(createTableStatement);
-                    this.commit();
-                    log.finest("Created database lock table with name: " + escapeTableName(getDefaultSchemaName(), getDatabaseChangeLogLockTableName()));
-                    changeLogLockTableExists = true;
-                    knowMustInsertIntoLockTable = true;
-                }
-            } else {
-                changeLogLockTableExists = true;
-            }
-            rs.close();
-
-            if (changeLogLockTableExists) {
-                int rows = -1;
-                if (!knowMustInsertIntoLockTable) {
-                    RawSqlStatement selectStatement = new RawSqlStatement("SELECT COUNT(*) FROM " + escapeTableName(getDefaultSchemaName(), getDatabaseChangeLogLockTableName()) + " WHERE ID=1");
-                    rows = this.getJdbcTemplate().queryForInt(selectStatement);
-                }
-                if (knowMustInsertIntoLockTable || rows == 0) {
-                    this.getJdbcTemplate().update(getChangeLogLockInsertSQL());
-                    this.commit();
-                    log.fine("Inserted lock row into: " + escapeTableName(getDefaultSchemaName(), getDatabaseChangeLogLockTableName()));
-                    rs.close();
-                }
-            } else {
-                throw new JDBCException("Change log lock table does not exist");
-            }
-
-        } catch (SQLException e) {
+            return rs.next();
+        } catch (Exception e) {
             throw new JDBCException(e);
         } finally {
             if (rs != null) {
                 try {
                     rs.close();
                 } catch (SQLException e) {
-                    //noinspection ThrowFromFinallyBlock
-                    throw new JDBCException(e);
+                    log.warning("Error closing result set: " + e.getMessage());
                 }
             }
         }
+
+    }
+
+    /**
+     * This method will check the database ChangeLogLock table used to keep track of
+     * if a machine is updating the database. If the table does not exist it will create one
+     * otherwise it will not do anything besides outputting a log message.
+     */
+    public void checkDatabaseChangeLogLockTable() throws JDBCException {
+        boolean knowMustInsertIntoLockTable = false;
+
+        if (!doesChangeLogLockTableExist()) {
+            SqlStatement createTableStatement = getCreateChangeLogLockSQL();
+
+            getJdbcTemplate().comment("Create Database Lock Table");
+            this.getJdbcTemplate().execute(createTableStatement);
+            this.commit();
+            log.finest("Created database lock table with name: " + escapeTableName(getDefaultSchemaName(), getDatabaseChangeLogLockTableName()));
+            knowMustInsertIntoLockTable = true;
+        }
+
+        int rows = -1;
+        if (!knowMustInsertIntoLockTable) {
+            RawSqlStatement selectStatement = new RawSqlStatement("SELECT COUNT(*) FROM " + escapeTableName(getDefaultSchemaName(), getDatabaseChangeLogLockTableName()) + " WHERE ID=1");
+            rows = this.getJdbcTemplate().queryForInt(selectStatement);
+        }
+        if (knowMustInsertIntoLockTable || rows == 0) {
+            this.getJdbcTemplate().update(getChangeLogLockInsertSQL());
+            this.commit();
+            log.fine("Inserted lock row into: " + escapeTableName(getDefaultSchemaName(), getDatabaseChangeLogLockTableName()));
+        }
+
     }
 
 // ------- DATABASE OBJECT DROPPING METHODS ---- //
@@ -673,11 +663,9 @@ public abstract class AbstractDatabase implements Database {
             }
 
 
-            if (this.changeLogTableExists) {
-                RawSQLChange clearChangeLogChange = new RawSQLChange();
-                clearChangeLogChange.setSql("DELETE FROM " + escapeTableName(convertRequestedSchemaToSchema(getDefaultSchemaName()), getDatabaseChangeLogTableName()));
-                dropChanges.add(clearChangeLogChange);
-            }
+            RawSQLChange clearChangeLogChange = new RawSQLChange();
+            clearChangeLogChange.setSql("DELETE FROM " + escapeTableName(convertRequestedSchemaToSchema(getDefaultSchemaName()), getDatabaseChangeLogTableName()));
+            dropChanges.add(clearChangeLogChange);
 
             try {
                 for (Change change : dropChanges) {
@@ -755,7 +743,7 @@ public abstract class AbstractDatabase implements Database {
             return getProductName() + " Database";
         }
         try {
-            return getConnectionUsername() + " @ " + getConnectionURL() + (getDefaultSchemaName() == null?"":" (Default Schema: "+getDefaultSchemaName()+")");
+            return getConnectionUsername() + " @ " + getConnectionURL() + (getDefaultSchemaName() == null ? "" : " (Default Schema: " + getDefaultSchemaName() + ")");
         } catch (JDBCException e) {
             return super.toString();
         }
@@ -1020,7 +1008,7 @@ public abstract class AbstractDatabase implements Database {
                 try {
                     log.info("Updating NULL md5sum for " + changeSet.toString());
                     DatabaseConnection connection = getConnection();
-                    PreparedStatement updatePstmt = connection.prepareStatement("UPDATE "+escapeTableName(getDefaultSchemaName(), getDatabaseChangeLogTableName())+" SET MD5SUM=? WHERE ID=? AND AUTHOR=? AND FILENAME=?");
+                    PreparedStatement updatePstmt = connection.prepareStatement("UPDATE " + escapeTableName(getDefaultSchemaName(), getDatabaseChangeLogTableName()) + " SET MD5SUM=? WHERE ID=? AND AUTHOR=? AND FILENAME=?");
                     updatePstmt.setString(1, changeSet.getMd5sum());
                     updatePstmt.setString(2, changeSet.getId());
                     updatePstmt.setString(3, changeSet.getAuthor());
@@ -1138,7 +1126,7 @@ public abstract class AbstractDatabase implements Database {
 
     public void markChangeSetAsReRan(ChangeSet changeSet) throws JDBCException {
         String dateValue = getCurrentDateTimeFunction();
-        String sql = "UPDATE "+escapeTableName(getDefaultSchemaName(), "DATABASECHANGELOG")+" SET DATEEXECUTED=" + dateValue + ", MD5SUM='?' WHERE ID='?' AND AUTHOR='?' AND FILENAME='?'";
+        String sql = "UPDATE " + escapeTableName(getDefaultSchemaName(), "DATABASECHANGELOG") + " SET DATEEXECUTED=" + dateValue + ", MD5SUM='?' WHERE ID='?' AND AUTHOR='?' AND FILENAME='?'";
         sql = sql.replaceFirst("\\?", escapeStringForDatabase(changeSet.getMd5sum()));
         sql = sql.replaceFirst("\\?", escapeStringForDatabase(changeSet.getId()));
         sql = sql.replaceFirst("\\?", escapeStringForDatabase(changeSet.getAuthor()));
@@ -1149,7 +1137,7 @@ public abstract class AbstractDatabase implements Database {
     }
 
     public void removeRanStatus(ChangeSet changeSet) throws JDBCException {
-        String sql = "DELETE FROM "+escapeTableName(getDefaultSchemaName(), getDatabaseChangeLogTableName())+" WHERE ID='?' AND AUTHOR='?' AND FILENAME='?'";
+        String sql = "DELETE FROM " + escapeTableName(getDefaultSchemaName(), getDatabaseChangeLogTableName()) + " WHERE ID='?' AND AUTHOR='?' AND FILENAME='?'";
         sql = sql.replaceFirst("\\?", escapeStringForDatabase(changeSet.getId()));
         sql = sql.replaceFirst("\\?", escapeStringForDatabase(changeSet.getAuthor()));
         sql = sql.replaceFirst("\\?", escapeStringForDatabase(changeSet.getFilePath()));
@@ -1196,12 +1184,6 @@ public abstract class AbstractDatabase implements Database {
         if (this.jdbcTemplate != null && !this.jdbcTemplate.executesStatements() && template.executesStatements()) {
             //need to clear any history
             LockHandler.getInstance(this).reset();
-            changeLogTableExists = false;
-            changeLogLockTableExists = false;
-            changeLogCreateAttempted = false;
-            changeLogLockCreateAttempted = false;
-
-
         }
         this.jdbcTemplate = template;
     }
