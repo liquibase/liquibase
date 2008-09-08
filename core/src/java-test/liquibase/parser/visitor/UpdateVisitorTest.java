@@ -12,8 +12,7 @@ public class UpdateVisitorTest {
         Database database = createMock(Database.class);
 
         ChangeSet changeSet = createMock(ChangeSet.class);
-        changeSet.execute(database);
-        expectLastCall();
+        expect(changeSet.execute(database)).andReturn(true);
 
 
         expect(database.getRunStatus(changeSet)).andReturn(ChangeSet.RunStatus.NOT_RAN);
@@ -41,9 +40,7 @@ public class UpdateVisitorTest {
         ChangeSet changeSet = createMock(ChangeSet.class);
         Database database = createMock(Database.class);
 
-        changeSet.execute(database);
-        expectLastCall();
-
+        expect(changeSet.execute(database)).andReturn(true);
 
         expect(database.getRunStatus(changeSet)).andReturn(ChangeSet.RunStatus.ALREADY_RAN);
 
