@@ -329,6 +329,64 @@
         </xsd:complexType>
     </xsd:element>
 
+    <xsd:element name="changeSetRan">
+        <xsd:complexType>
+            <xsd:attribute name="id" type="xsd:string"/>
+            <xsd:attribute name="author" type="xsd:string"/>
+            <xsd:attribute name="changeLogFile" type="xsd:string"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="tableExists">
+        <xsd:complexType>
+            <xsd:attribute name="schemaName" type="xsd:string"/>
+            <xsd:attribute name="tableName" type="xsd:string"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="columnExists">
+        <xsd:complexType>
+            <xsd:attribute name="schemaName" type="xsd:string"/>
+            <xsd:attribute name="tableName" type="xsd:string"/>
+            <xsd:attribute name="columnName" type="xsd:string"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="sequenceExists">
+        <xsd:complexType>
+            <xsd:attribute name="schemaName" type="xsd:string"/>
+            <xsd:attribute name="sequenceName" type="xsd:string"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="foreignKeyConstraintExists">
+        <xsd:complexType>
+            <xsd:attribute name="schemaName" type="xsd:string"/>
+            <xsd:attribute name="foreignKeyName" type="xsd:string"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="indexExists">
+        <xsd:complexType>
+            <xsd:attribute name="schemaName" type="xsd:string"/>
+            <xsd:attribute name="indexName" type="xsd:string"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="primaryKeyExists">
+        <xsd:complexType>
+            <xsd:attribute name="schemaName" type="xsd:string"/>
+            <xsd:attribute name="primaryKeyName" type="xsd:string"/>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="viewExists">
+        <xsd:complexType>
+            <xsd:attribute name="schemaName" type="xsd:string"/>
+            <xsd:attribute name="viewName" type="xsd:string"/>
+        </xsd:complexType>
+    </xsd:element>
+
     <xsd:element name="sqlCheck">
         <xsd:complexType mixed="true">
             <xsd:attribute name="expectedResult" type="xsd:string"/>
@@ -735,6 +793,14 @@
                 <xsd:element ref="not" maxOccurs="unbounded"/>
                 <xsd:element ref="dbms" maxOccurs="unbounded"/>
                 <xsd:element ref="runningAs" maxOccurs="unbounded"/>
+                <xsd:element ref="changeSetRan" maxOccurs="unbounded"/>
+                <xsd:element ref="tableExists" maxOccurs="unbounded"/>
+                <xsd:element ref="columnExists" maxOccurs="unbounded"/>
+                <xsd:element ref="sequenceExists" maxOccurs="unbounded"/>
+                <xsd:element ref="foreignKeyConstraintExists" maxOccurs="unbounded"/>
+                <xsd:element ref="indexExists" maxOccurs="unbounded"/>
+                <xsd:element ref="primaryKeyExists" maxOccurs="unbounded"/>
+                <xsd:element ref="viewExists" maxOccurs="unbounded"/>
                 <xsd:element ref="sqlCheck" maxOccurs="unbounded"/>
                 <xsd:element ref="customPrecondition" maxOccurs="unbounded"/>
             </xsd:choice>

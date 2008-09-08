@@ -380,6 +380,7 @@
             <column header="security_level" type="NUMERIC"/>
         </loadData>
     </changeSet>
+
     <changeSet id="sampleCSVData3" author="nvoxland">
         <preConditions>
             <sqlCheck expectedResult="4">select count(*) from csvdata</sqlCheck>
@@ -392,6 +393,17 @@
         </loadData>
     </changeSet>
 
+    <changeSet id="createTableNamedPKRef" author="nvoxland">
+        <createTable tableName="createTableNamedPKRef">
+            <column name="id" type="int">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="ref" type="int">
+                <constraints foreignKeyName="fk_reftest" references="createTableNamedPK(id)"/>
+            </column>
+        </createTable>
+    </changeSet>
+    
     <changeSet id="changeLogParameters" author="nvoxland">
         <createTable tableName="${table.name}">
             <column name="id" type="int"/>
@@ -461,5 +473,55 @@
         <createTable tableName="error_markran_ran">
             <column name="id" type="int"/>
         </createTable>
+    </changeSet>
+
+    <changeSet id="changeSetRanPrecondition" author="nvoxland">
+        <preConditions>
+            <changeSetRan id="changeLogParameters" author="nvoxland" changeLogFile="changelogs/common/common.tests.changelog.xml"/>
+        </preConditions>
+        <createTable tableName="changesetprecondition_ran">
+            <column name="id" type="int"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="tableExistsPrecondition" author="nvoxland">
+        <preConditions>
+            <tableExists tableName="CSVDATA"/>
+        </preConditions>
+    </changeSet>
+
+    <changeSet id="columnExistsPrecondition" author="nvoxland">
+        <preConditions>
+            <columnExists tableName="CSVDATA" columnName="name"/>
+        </preConditions>
+    </changeSet>
+
+    <changeSet id="fkExistsPrecondition" author="nvoxland">
+        <preConditions>
+            <foreignKeyConstraintExists foreignKeyName="fk_reftest"/>
+        </preConditions>
+    </changeSet>
+
+    <changeSet id="indexPrecondition" author="nvoxland">
+        <preConditions>
+            <indexExists indexName="idx_compoundtest"/>
+        </preConditions>
+    </changeSet>
+
+    <!--<changeSet id="primaryKeyPrecondition" author="nvoxland">-->
+        <!--<preConditions>-->
+            <!--<primaryKeyExists primaryKeyName="pk_pktest1"/>-->
+        <!--</preConditions>-->
+    <!--</changeSet>-->
+
+
+    <changeSet id="viewsetup" author="nvoxland">
+        <sql>create view csvview as select * from csvdata</sql>
+    </changeSet>
+
+    <changeSet id="viewPrecondition" author="nvoxland">
+        <preConditions>
+            <viewExists viewName="csvview"/>
+        </preConditions>
     </changeSet>
 </databaseChangeLog>
