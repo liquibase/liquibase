@@ -38,11 +38,9 @@ public class LockHandler {
     }
 
     public boolean acquireLock() throws LockException {
-        if (!database.doesChangeLogLockTableExist()) {
-            throw new LockException("Could not acquire lock, table does not exist");
-        }
-
         try {
+            database.checkDatabaseChangeLogLockTable();
+
             Boolean locked;
             try {
                 locked = (Boolean) database.getJdbcTemplate().queryForObject(database.getSelectChangeLogLockSQL(), Boolean.class);
@@ -86,8 +84,8 @@ public class LockHandler {
     }
 
     public void releaseLock() throws LockException {
-        if (database.doesChangeLogLockTableExist()) {
-            try {
+        try {
+            if (database.doesChangeLogLockTableExist()) {
                 UpdateStatement releaseStatement = new UpdateStatement(database.getDefaultSchemaName(), database.getDatabaseChangeLogLockTableName());
                 releaseStatement.addNewColumnValue("LOCKED", false);
                 releaseStatement.addNewColumnValue("LOCKGRANTED", null);
@@ -107,18 +105,18 @@ public class LockHandler {
                 instances.remove(this.database);
 
                 LogFactory.getLogger().info("Successfully released change log lock");
-            } catch (Exception e) {
-                throw new LockException(e);
             }
+        } catch (Exception e) {
+            throw new LockException(e);
         }
     }
 
     public DatabaseChangeLogLock[] listLocks() throws LockException {
-        if (!database.doesChangeLogLockTableExist()) {
-            return new DatabaseChangeLogLock[0];
-        }
-
         try {
+            if (!database.doesChangeLogLockTableExist()) {
+                return new DatabaseChangeLogLock[0];
+            }
+
             List<DatabaseChangeLogLock> allLocks = new ArrayList<DatabaseChangeLogLock>();
             RawSqlStatement sqlStatement = new RawSqlStatement((("SELECT ID, LOCKED, LOCKGRANTED, LOCKEDBY FROM " + database.escapeTableName(database.getDefaultSchemaName(), database.getDatabaseChangeLogLockTableName()))));
             List<Map> rows = database.getJdbcTemplate().queryForList(sqlStatement);

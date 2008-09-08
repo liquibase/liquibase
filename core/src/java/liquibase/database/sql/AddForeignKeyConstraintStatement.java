@@ -21,7 +21,6 @@ public class AddForeignKeyConstraintStatement implements SqlStatement {
     private boolean deferrable;
     private boolean initiallyDeferred;
 
-    private boolean deleteCascade;
     private Integer deleteRule;
     private Integer updateRule;
 
@@ -67,6 +66,14 @@ public class AddForeignKeyConstraintStatement implements SqlStatement {
         return deferrable;
     }
 
+    public Integer getDeleteRule() {
+        return deleteRule;
+    }
+
+    public Integer getUpdateRule() {
+        return updateRule;
+    }
+
     public AddForeignKeyConstraintStatement setDeferrable(boolean deferrable) {
         this.deferrable = deferrable;
         return this;
@@ -78,15 +85,6 @@ public class AddForeignKeyConstraintStatement implements SqlStatement {
 
     public AddForeignKeyConstraintStatement setInitiallyDeferred(boolean initiallyDeferred) {
         this.initiallyDeferred = initiallyDeferred;
-        return this;
-    }
-
-    public boolean isDeleteCascade() {
-        return deleteCascade;
-    }
-
-    public AddForeignKeyConstraintStatement setDeleteCascade(boolean deleteCascade) {
-        this.deleteCascade = deleteCascade;
         return this;
     }
 
@@ -176,4 +174,6 @@ public class AddForeignKeyConstraintStatement implements SqlStatement {
     public boolean supportsDatabase(Database database) {
         return (!(database instanceof SQLiteDatabase));
     }
+
+
 }

@@ -8,6 +8,7 @@ import org.junit.Test;
 import org.w3c.dom.Element;
 
 import javax.xml.parsers.DocumentBuilderFactory;
+import java.sql.DatabaseMetaData;
 
 public class AddForeignKeyConstraintChangeTest  extends AbstractChangeTest {
 
@@ -45,7 +46,7 @@ public class AddForeignKeyConstraintChangeTest  extends AbstractChangeTest {
 
         assertEquals(true, statement.isDeferrable());
         assertEquals(true, statement.isInitiallyDeferred());
-        assertEquals(true, statement.isDeleteCascade());
+        assertEquals(DatabaseMetaData.importedKeyCascade, statement.getDeleteRule());
     }
 
       public void getRefactoringName() throws Exception {
@@ -77,7 +78,8 @@ public class AddForeignKeyConstraintChangeTest  extends AbstractChangeTest {
         change.setReferencedColumnNames("REF_COL_NAME");
 
         change.setDeferrable(true);
-        change.setDeleteCascade(true);
+        change.setDeleteRule(DatabaseMetaData.importedKeyCascade);
+        change.setUpdateRule(DatabaseMetaData.importedKeyCascade);
         change.setInitiallyDeferred(true);
 
         Element node = change.createNode(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument());
@@ -91,7 +93,8 @@ public class AddForeignKeyConstraintChangeTest  extends AbstractChangeTest {
         assertEquals("REF_COL_NAME", node.getAttribute("referencedColumnNames"));
         assertEquals("true", node.getAttribute("deferrable"));
         assertEquals("true", node.getAttribute("initiallyDeferred"));
-        assertEquals("true", node.getAttribute("deleteCascade"));
+        assertEquals("CASCADE", node.getAttribute("onDelete"));
+        assertEquals("CASCADE", node.getAttribute("onUpdate"));
 
     }
 }
