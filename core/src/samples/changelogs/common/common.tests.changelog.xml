@@ -519,9 +519,9 @@
         <!--<sql>create view csvview as select * from csvdata</sql>-->
     <!--</changeSet>-->
 
-    <changeSet id="viewPrecondition" author="nvoxland">
-        <preConditions>
-            <viewExists viewName="csvview"/>
-        </preConditions>
-    </changeSet>
+    <!--<changeSet id="viewPrecondition" author="nvoxland">-->
+        <!--<preConditions>-->
+            <!--<viewExists viewName="csvview"/>-->
+        <!--</preConditions>-->
+    <!--</changeSet>-->
 </databaseChangeLog>
