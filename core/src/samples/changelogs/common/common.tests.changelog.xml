@@ -515,9 +515,9 @@
     <!--</changeSet>-->
 
 
-    <changeSet id="viewsetup" author="nvoxland">
-        <sql>create view csvview as select * from csvdata</sql>
-    </changeSet>
+    <!--<changeSet id="viewsetup" author="nvoxland">-->
+        <!--<sql>create view csvview as select * from csvdata</sql>-->
+    <!--</changeSet>-->
 
     <changeSet id="viewPrecondition" author="nvoxland">
         <preConditions>
