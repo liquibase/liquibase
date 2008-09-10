@@ -11,6 +11,8 @@ import liquibase.database.structure.Index;
 import liquibase.database.structure.Table;
 import liquibase.exception.JDBCException;
 import liquibase.exception.UnsupportedChangeException;
+import liquibase.exception.InvalidChangeDefinitionException;
+import liquibase.util.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -66,6 +68,12 @@ public class AddAutoIncrementChange extends AbstractChange {
 
     public void setColumnDataType(String columnDataType) {
         this.columnDataType = columnDataType;
+    }
+
+    public void validate(Database database) throws InvalidChangeDefinitionException {
+        if (StringUtils.trimToNull(tableName) == null) {
+            throw new InvalidChangeDefinitionException("tableName is required", this);
+        }
     }
 
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {

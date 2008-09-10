@@ -54,8 +54,8 @@ public class DBDocVisitor implements ChangeSetVisitor {
         return ChangeSetVisitor.Direction.FORWARD;
     }
 
-    public void visit(ChangeSet changeSet) throws LiquibaseException {
-        ChangeSet.RunStatus runStatus = database.getRunStatus(changeSet);
+    public void visit(ChangeSet changeSet, Database database) throws LiquibaseException {
+        ChangeSet.RunStatus runStatus = this.database.getRunStatus(changeSet);
         if (rootChangeLog == null) {
             rootChangeLog = changeSet.getFilePath();
         }

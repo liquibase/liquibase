@@ -29,7 +29,7 @@ public class UpdateVisitorTest {
         replay(database);
 
         UpdateVisitor visitor = new UpdateVisitor(database);
-        visitor.visit(changeSet);
+        visitor.visit(changeSet, database);
 
         verify(database);
         verify(changeSet);
@@ -54,7 +54,7 @@ public class UpdateVisitorTest {
         replay(database);
 
         UpdateVisitor visitor = new UpdateVisitor(database);
-        visitor.visit(changeSet);
+        visitor.visit(changeSet, database);
 
         verify(database);
         verify(changeSet);

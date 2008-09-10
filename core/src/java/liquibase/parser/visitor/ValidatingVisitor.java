@@ -8,6 +8,7 @@ import liquibase.database.Database;
 import liquibase.exception.PreconditionFailedException;
 import liquibase.exception.SetupException;
 import liquibase.exception.PreconditionErrorException;
+import liquibase.exception.InvalidChangeDefinitionException;
 import liquibase.preconditions.AndPrecondition;
 import liquibase.preconditions.FailedPrecondition;
 import liquibase.preconditions.ErrorPrecondition;
@@ -24,6 +25,7 @@ public class ValidatingVisitor implements ChangeSetVisitor {
     private List<ErrorPrecondition> errorPreconditions = new ArrayList<ErrorPrecondition>();
     private Set<ChangeSet> duplicateChangeSets = new HashSet<ChangeSet>();
     private List<SetupException> setupExceptions = new ArrayList<SetupException>();
+    private List<InvalidChangeDefinitionException> changeValidationExceptions = new ArrayList<InvalidChangeDefinitionException>();
 
     private Set<String> seenChangeSets = new HashSet<String>();
 
@@ -33,7 +35,7 @@ public class ValidatingVisitor implements ChangeSetVisitor {
         this.ranChangeSets = ranChangeSets;
     }
 
-    public void checkPreconditions(Database database, DatabaseChangeLog changeLog) {
+    public void validate(Database database, DatabaseChangeLog changeLog) {
         try {
             AndPrecondition precondition = changeLog.getPreconditions();
             if (precondition == null) {
@@ -51,12 +53,18 @@ public class ValidatingVisitor implements ChangeSetVisitor {
         return ChangeSetVisitor.Direction.FORWARD;
     }
 
-    public void visit(ChangeSet changeSet) {
+    public void visit(ChangeSet changeSet, Database database) {
         for (Change change : changeSet.getChanges()) {
             try {
                 change.setUp();
             } catch (SetupException se) {
                 setupExceptions.add(se);
+            }
+
+            try {
+                change.validate(database);
+            } catch (InvalidChangeDefinitionException e) {
+                changeValidationExceptions.add(e);
             }
         }
 
@@ -71,6 +79,7 @@ public class ValidatingVisitor implements ChangeSetVisitor {
                 }
             }
         }
+
 
         String changeSetString = changeSet.toString(false);
         if (seenChangeSets.contains(changeSetString)) {
@@ -101,11 +110,16 @@ public class ValidatingVisitor implements ChangeSetVisitor {
         return setupExceptions;
     }
 
+    public List<InvalidChangeDefinitionException> getChangeValidationExceptions() {
+        return changeValidationExceptions;
+    }
+
     public boolean validationPassed() {
         return invalidMD5Sums.size() == 0
                 && failedPreconditions.size() == 0
                 && errorPreconditions.size() == 0
                 && duplicateChangeSets.size() == 0
+                && changeValidationExceptions.size() == 0
                 && setupExceptions.size() == 0;
     }
 

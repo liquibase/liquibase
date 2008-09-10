@@ -4,6 +4,7 @@ import liquibase.database.Database;
 import liquibase.database.sql.SqlStatement;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.exception.UnsupportedChangeException;
+import liquibase.exception.InvalidChangeDefinitionException;
 import liquibase.log.LogFactory;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
@@ -45,6 +46,13 @@ public class ExecuteShellCommandChange extends AbstractChange {
 
     public void setOs(String os) {
         this.os = StringUtils.splitAndTrim(os, ",");
+    }
+
+    public void validate(Database database) throws InvalidChangeDefinitionException {
+        if (StringUtils.trimToNull(executable) == null) {
+            throw new InvalidChangeDefinitionException("executable is required", this);
+        }
+
     }
 
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {

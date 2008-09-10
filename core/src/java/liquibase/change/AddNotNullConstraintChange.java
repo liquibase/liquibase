@@ -4,7 +4,6 @@ import liquibase.database.DB2Database;
 import liquibase.database.Database;
 import liquibase.database.SQLiteDatabase;
 import liquibase.database.SQLiteDatabase.AlterTableVisitor;
-import liquibase.database.sql.RawSqlStatement;
 import liquibase.database.sql.ReorganizeTableStatement;
 import liquibase.database.sql.SetNullableStatement;
 import liquibase.database.sql.SqlStatement;
@@ -13,9 +12,10 @@ import liquibase.database.structure.Column;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Index;
 import liquibase.database.structure.Table;
-import liquibase.database.template.JdbcTemplate;
 import liquibase.exception.JDBCException;
 import liquibase.exception.UnsupportedChangeException;
+import liquibase.exception.InvalidChangeDefinitionException;
+import liquibase.util.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -74,6 +74,16 @@ public class AddNotNullConstraintChange extends AbstractChange {
 
     public void setColumnDataType(String columnDataType) {
         this.columnDataType = columnDataType;
+    }
+
+    public void validate(Database database) throws InvalidChangeDefinitionException {
+        if (StringUtils.trimToNull(tableName) == null) {
+            throw new InvalidChangeDefinitionException("tableName is required", this);
+        }
+        if (StringUtils.trimToNull(columnName) == null) {
+            throw new InvalidChangeDefinitionException("columnName is required", this);
+        }
+
     }
 
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {

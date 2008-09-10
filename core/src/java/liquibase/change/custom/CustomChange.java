@@ -1,7 +1,9 @@
 package liquibase.change.custom;
 
 import liquibase.FileOpener;
+import liquibase.database.Database;
 import liquibase.exception.SetupException;
+import liquibase.exception.InvalidChangeDefinitionException;
 
 /**
  * Interface to implement when creating a custom change.  Actual custom changes implementations need to
@@ -33,5 +35,11 @@ interface CustomChange {
      * finding for files that are provided by the user.
      */
     public void setFileOpener(FileOpener fileOpener);
-    
+
+    /**
+     * Tests that the change is configured correctly before attempting to execute it.
+     * @param database The database the change will be ran against
+     */
+    public void validate(Database database) throws InvalidChangeDefinitionException;
+
 }

@@ -8,6 +8,8 @@ import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.ForeignKey;
 import liquibase.database.structure.Table;
 import liquibase.exception.UnsupportedChangeException;
+import liquibase.exception.InvalidChangeDefinitionException;
+import liquibase.util.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -48,6 +50,17 @@ public class DropForeignKeyConstraintChange extends AbstractChange {
 
     public void setConstraintName(String constraintName) {
         this.constraintName = constraintName;
+    }
+
+    public void validate(Database database) throws InvalidChangeDefinitionException {
+        if (StringUtils.trimToNull(baseTableName) == null) {
+            throw new InvalidChangeDefinitionException("baseTableName is required", this);
+        }
+        if (StringUtils.trimToNull(constraintName) == null) {
+            throw new InvalidChangeDefinitionException("constraintName is required", this);
+        }
+
+
     }
 
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {

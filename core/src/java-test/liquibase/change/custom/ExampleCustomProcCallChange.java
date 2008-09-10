@@ -7,6 +7,7 @@ import liquibase.database.sql.StoredProcedureStatement;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.exception.SetupException;
 import liquibase.exception.UnsupportedChangeException;
+import liquibase.exception.InvalidChangeDefinitionException;
 
 import java.util.Set;
 
@@ -48,4 +49,9 @@ public class ExampleCustomProcCallChange implements CustomSqlChange {
     public void setFileOpener(FileOpener fileOpener) {
         this.fileOpener = fileOpener;
     }
+
+    public void validate(Database database) throws InvalidChangeDefinitionException {
+
+    }
+    
 }

@@ -1,6 +1,7 @@
 package liquibase.parser.visitor;
 
 import liquibase.ChangeSet;
+import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
 
 import java.util.ArrayList;
@@ -18,7 +19,7 @@ public class ListVisitor implements ChangeSetVisitor {
         return ChangeSetVisitor.Direction.FORWARD;
     }
 
-    public void visit(ChangeSet changeSet) throws LiquibaseException {
+    public void visit(ChangeSet changeSet, Database database) throws LiquibaseException {
         seenChangeSets.add(changeSet);
     }
 }

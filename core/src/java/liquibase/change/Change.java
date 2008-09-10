@@ -175,4 +175,6 @@ public interface Change {
     public ChangeSet getChangeSet();
 
     public void setChangeSet(ChangeSet changeSet);
+
+    public void validate(Database database) throws InvalidChangeDefinitionException;
 }

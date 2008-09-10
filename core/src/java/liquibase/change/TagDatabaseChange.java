@@ -5,6 +5,8 @@ import liquibase.database.sql.TagDatabaseStatement;
 import liquibase.database.Database;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.exception.UnsupportedChangeException;
+import liquibase.exception.InvalidChangeDefinitionException;
+import liquibase.util.StringUtils;
 import org.w3c.dom.Element;
 import org.w3c.dom.Document;
 
@@ -24,6 +26,13 @@ public class TagDatabaseChange extends AbstractChange{
 
     public void setTag(String tag) {
         this.tag = tag;
+    }
+
+    public void validate(Database database) throws InvalidChangeDefinitionException {
+        if (StringUtils.trimToNull(tag) == null) {
+            throw new InvalidChangeDefinitionException("tag is required", this);
+        }
+
     }
 
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {

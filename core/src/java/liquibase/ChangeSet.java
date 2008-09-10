@@ -269,6 +269,7 @@ public class ChangeSet {
 
     public void addChange(Change change) {
         changes.add(change);
+        change.setChangeSet(this);
     }
 
     public String getId() {
@@ -288,7 +289,7 @@ public class ChangeSet {
     }
 
     public String toString(boolean includeMD5Sum) {
-        return filePath + " :: " + getId() + " :: " + getAuthor() + (includeMD5Sum ? (" :: (MD5Sum: " + getMd5sum() + ")") : "");
+        return filePath + "::" + getId() + "::" + getAuthor() + (includeMD5Sum ? ("::(MD5Sum: " + getMd5sum() + ")") : "");
     }
 
     public String toString() {

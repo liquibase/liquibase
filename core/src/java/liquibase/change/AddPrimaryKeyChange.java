@@ -13,6 +13,8 @@ import liquibase.database.structure.Index;
 import liquibase.database.structure.Table;
 import liquibase.exception.JDBCException;
 import liquibase.exception.UnsupportedChangeException;
+import liquibase.exception.InvalidChangeDefinitionException;
+import liquibase.util.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -77,11 +79,20 @@ public class AddPrimaryKeyChange extends AbstractChange {
         this.tablespace = tablespace;
     }
 
+    public void validate(Database database) throws InvalidChangeDefinitionException {
+        if (StringUtils.trimToNull(tableName) == null) {
+            throw new InvalidChangeDefinitionException("tableName is required", this);
+        }
+        if (StringUtils.trimToNull(columnNames) == null) {
+            throw new InvalidChangeDefinitionException("columnNames is required", this);
+        }
+
+    }
+
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
-    	
-    	
-    	
-        String schemaName = getSchemaName() == null?database.getDefaultSchemaName():getSchemaName();
+
+
+        String schemaName = getSchemaName() == null ? database.getDefaultSchemaName() : getSchemaName();
 
         AddPrimaryKeyStatement statement = new AddPrimaryKeyStatement(schemaName, getTableName(), getColumnNames(), getConstraintName());
         statement.setTablespace(getTablespace());
@@ -92,55 +103,58 @@ public class AddPrimaryKeyChange extends AbstractChange {
                     new ReorganizeTableStatement(schemaName, getTableName())
             };
         } else if (database instanceof SQLiteDatabase) {
-    		// return special statements for SQLite databases
-    		return generateStatementsForSQLiteDatabase(database);
+            // return special statements for SQLite databases
+            return generateStatementsForSQLiteDatabase(database);
         }
 
         return new SqlStatement[]{
                 statement
         };
     }
-    
-    private SqlStatement[] generateStatementsForSQLiteDatabase(Database database) 
-			throws UnsupportedChangeException {
-    	// SQLite does not support this ALTER TABLE operation until now.
-		// or more information: http://www.sqlite.org/omitted.html
-		// This is a small work around...
-    	
-    	List<SqlStatement> statements = new ArrayList<SqlStatement>();
-    	
-		// define alter table logic
-		AlterTableVisitor rename_alter_visitor = new AlterTableVisitor() {
-			public ColumnConfig[] getColumnsToAdd() {
-				return new ColumnConfig[0];
-			}
-			public boolean copyThisColumn(ColumnConfig column) {
-				return true;
-			}
-			public boolean createThisColumn(ColumnConfig column) {
-				String[] split_columns = getColumnNames().split("[ ]*,[ ]*");
-				for (String split_column:split_columns) {
-					if (column.getName().equals(split_column)) {
-    					column.getConstraints().setPrimaryKey(new Boolean(true));
-    				}
-				}
-				return true;
-			}
-			public boolean createThisIndex(Index index) {
-				return true;
-			}
-		};
-    		
-    	try {
-    		// alter table
-			statements.addAll(SQLiteDatabase.getAlterTableStatements(
-					rename_alter_visitor,
-					database,getSchemaName(),getTableName()));
-    	} catch (JDBCException e) {
-			e.printStackTrace();
-		}
-    	
-    	return statements.toArray(new SqlStatement[statements.size()]);
+
+    private SqlStatement[] generateStatementsForSQLiteDatabase(Database database)
+            throws UnsupportedChangeException {
+        // SQLite does not support this ALTER TABLE operation until now.
+        // or more information: http://www.sqlite.org/omitted.html
+        // This is a small work around...
+
+        List<SqlStatement> statements = new ArrayList<SqlStatement>();
+
+        // define alter table logic
+        AlterTableVisitor rename_alter_visitor = new AlterTableVisitor() {
+            public ColumnConfig[] getColumnsToAdd() {
+                return new ColumnConfig[0];
+            }
+
+            public boolean copyThisColumn(ColumnConfig column) {
+                return true;
+            }
+
+            public boolean createThisColumn(ColumnConfig column) {
+                String[] split_columns = getColumnNames().split("[ ]*,[ ]*");
+                for (String split_column : split_columns) {
+                    if (column.getName().equals(split_column)) {
+                        column.getConstraints().setPrimaryKey(new Boolean(true));
+                    }
+                }
+                return true;
+            }
+
+            public boolean createThisIndex(Index index) {
+                return true;
+            }
+        };
+
+        try {
+            // alter table
+            statements.addAll(SQLiteDatabase.getAlterTableStatements(
+                    rename_alter_visitor,
+                    database, getSchemaName(), getTableName()));
+        } catch (JDBCException e) {
+            e.printStackTrace();
+        }
+
+        return statements.toArray(new SqlStatement[statements.size()]);
     }
 
     protected Change[] createInverses() {
