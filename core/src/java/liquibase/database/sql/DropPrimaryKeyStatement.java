@@ -1,10 +1,6 @@
 package liquibase.database.sql;
 
-import liquibase.database.Database;
-import liquibase.database.FirebirdDatabase;
-import liquibase.database.MSSQLDatabase;
-import liquibase.database.PostgresDatabase;
-import liquibase.database.SQLiteDatabase;
+import liquibase.database.*;
 import liquibase.exception.StatementNotSupportedOnDatabaseException;
 
 public class DropPrimaryKeyStatement implements SqlStatement {
@@ -50,6 +46,8 @@ public class DropPrimaryKeyStatement implements SqlStatement {
             return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " DROP CONSTRAINT " + getConstraintName();
         } else if (database instanceof FirebirdDatabase) {
             return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " DROP CONSTRAINT "+getConstraintName();
+        } else if (database instanceof OracleDatabase) {
+            return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " DROP PRIMARY KEY DROP INDEX";
         }
 
         return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " DROP PRIMARY KEY";
