@@ -76,7 +76,7 @@ public class UpdateStatement implements SqlStatement {
 
     private String convertToString(Object newValue, Database database) {
         String sqlString;
-        if (newValue == null) {
+        if (newValue == null || newValue.toString().equalsIgnoreCase("NULL")) {
             sqlString = "NULL";
         } else if (newValue instanceof String && database.shouldQuoteValue(((String) newValue))) {
             sqlString = "'" + newValue + "'";
