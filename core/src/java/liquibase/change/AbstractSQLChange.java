@@ -4,6 +4,7 @@ import liquibase.database.Database;
 import liquibase.database.sql.RawSqlStatement;
 import liquibase.database.sql.SqlStatement;
 import liquibase.exception.UnsupportedChangeException;
+import liquibase.exception.InvalidChangeDefinitionException;
 import liquibase.util.StringUtils;
 
 import java.util.ArrayList;
@@ -80,6 +81,13 @@ public abstract class AbstractSQLChange extends AbstractChange {
 
     public void setEndDelimiter(String endDelimiter) {
         this.endDelimiter = endDelimiter;
+    }
+
+    public void validate(Database database) throws InvalidChangeDefinitionException {
+        if (StringUtils.trimToNull(getSql()) == null) {
+            throw new InvalidChangeDefinitionException("sql text is required", this);
+        }
+
     }
 
     /**

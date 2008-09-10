@@ -17,12 +17,12 @@ public class RollbackVisitor implements ChangeSetVisitor {
         return ChangeSetVisitor.Direction.REVERSE;
     }
 
-    public void visit(ChangeSet changeSet) throws LiquibaseException {
+    public void visit(ChangeSet changeSet, Database database) throws LiquibaseException {
         LogFactory.getLogger().info("Rolling Back Changeset:" + changeSet);
-        changeSet.rolback(database);
-        database.removeRanStatus(changeSet);
+        changeSet.rolback(this.database);
+        this.database.removeRanStatus(changeSet);
 
-        database.commit();
+        this.database.commit();
 
     }
 }

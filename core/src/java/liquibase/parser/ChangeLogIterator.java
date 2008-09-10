@@ -2,6 +2,7 @@ package liquibase.parser;
 
 import liquibase.ChangeSet;
 import liquibase.DatabaseChangeLog;
+import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
 import liquibase.parser.filter.ChangeSetFilter;
 import liquibase.parser.visitor.ChangeSetVisitor;
@@ -19,7 +20,7 @@ public class ChangeLogIterator {
         this.changeSetFilters = Arrays.asList(changeSetFilters);
     }
 
-    public void run(ChangeSetVisitor visitor) throws LiquibaseException {
+    public void run(ChangeSetVisitor visitor, Database database) throws LiquibaseException {
         List<ChangeSet> changeSetList = databaseChangeLog.getChangeSets();
         if (visitor.getDirection().equals(ChangeSetVisitor.Direction.REVERSE)) {
             Collections.reverse(changeSetList);
@@ -37,7 +38,7 @@ public class ChangeLogIterator {
             }
 
             if (shouldVisit) {
-                visitor.visit(changeSet);
+                visitor.visit(changeSet, database);
             }
         }
     }

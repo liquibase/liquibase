@@ -5,8 +5,10 @@ import liquibase.database.sql.InsertStatement;
 import liquibase.database.sql.SqlStatement;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.exception.UnsupportedChangeException;
+import liquibase.exception.InvalidChangeDefinitionException;
 import liquibase.csv.CSVReader;
 import liquibase.util.MD5Util;
+import liquibase.util.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -65,6 +67,13 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns 
 
     public void addColumn(ColumnConfig column) {
       	columns.add((LoadDataColumnConfig) column);
+    }
+
+    public void validate(Database database) throws InvalidChangeDefinitionException {
+        if (StringUtils.trimToNull(tableName) == null) {
+            throw new InvalidChangeDefinitionException("tableName is required", this);
+        }
+
     }
 
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {

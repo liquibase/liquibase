@@ -111,7 +111,7 @@ public class Liquibase {
                     new ContextChangeSetFilter(contexts),
                     new DbmsChangeSetFilter(database));
 
-            logIterator.run(new UpdateVisitor(database));
+            logIterator.run(new UpdateVisitor(database), database);
         } catch (LiquibaseException e) {
             throw e;
         } finally {
@@ -158,7 +158,7 @@ public class Liquibase {
                     new DbmsChangeSetFilter(database),
                     new CountChangeSetFilter(changesToApply));
 
-            logIterator.run(new UpdateVisitor(database));
+            logIterator.run(new UpdateVisitor(database), database);
         } finally {
             lockHandler.releaseLock();
         }
@@ -225,7 +225,7 @@ public class Liquibase {
                     new DbmsChangeSetFilter(database),
                     new CountChangeSetFilter(changesToRollback));
 
-            logIterator.run(new RollbackVisitor(database));
+            logIterator.run(new RollbackVisitor(database), database);
         } finally {
             try {
                 lockHandler.releaseLock();
@@ -266,7 +266,7 @@ public class Liquibase {
                     new ContextChangeSetFilter(contexts),
                     new DbmsChangeSetFilter(database));
 
-            logIterator.run(new RollbackVisitor(database));
+            logIterator.run(new RollbackVisitor(database), database);
         } finally {
             lockHandler.releaseLock();
         }
@@ -303,7 +303,7 @@ public class Liquibase {
                     new ContextChangeSetFilter(contexts),
                     new DbmsChangeSetFilter(database));
 
-            logIterator.run(new RollbackVisitor(database));
+            logIterator.run(new RollbackVisitor(database), database);
         } finally {
             lockHandler.releaseLock();
         }
@@ -343,7 +343,7 @@ public class Liquibase {
                     new ContextChangeSetFilter(contexts),
                     new DbmsChangeSetFilter(database));
 
-            logIterator.run(new ChangeLogSyncVisitor(database));
+            logIterator.run(new ChangeLogSyncVisitor(database), database);
         } finally {
             lockHandler.releaseLock();
         }
@@ -384,7 +384,7 @@ public class Liquibase {
                     new DbmsChangeSetFilter(database),
                     new CountChangeSetFilter(1));
 
-            logIterator.run(new ChangeLogSyncVisitor(database));
+            logIterator.run(new ChangeLogSyncVisitor(database), database);
         } finally {
             lockHandler.releaseLock();
         }
@@ -411,7 +411,7 @@ public class Liquibase {
                     new ContextChangeSetFilter(contexts),
                     new DbmsChangeSetFilter(database));
 
-            logIterator.run(new RollbackVisitor(database));
+            logIterator.run(new RollbackVisitor(database), database);
         } finally {
             database.setJdbcTemplate(oldTemplate);
             lockHandler.releaseLock();
@@ -525,7 +525,7 @@ public class Liquibase {
                     new DbmsChangeSetFilter(database));
 
             ListVisitor visitor = new ListVisitor();
-            logIterator.run(visitor);
+            logIterator.run(visitor, database);
             return visitor.getSeenChangeSets();
         } finally {
             lockHandler.releaseLock();
@@ -589,7 +589,7 @@ public class Liquibase {
                     new DbmsChangeSetFilter(database));
 
             DBDocVisitor visitor = new DBDocVisitor(database);
-            logIterator.run(visitor);
+            logIterator.run(visitor, database);
 
             visitor.writeHTML(new File(outputDirectory), fileOpener);
         } catch (IOException e) {

@@ -111,8 +111,8 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog> {
         ChangeLogIterator logIterator = new ChangeLogIterator(this, new DbmsChangeSetFilter(database));
 
         ValidatingVisitor validatingVisitor = new ValidatingVisitor(database.getRanChangeSetList());
-        validatingVisitor.checkPreconditions(database, this);
-        logIterator.run(validatingVisitor);
+        validatingVisitor.validate(database, this);
+        logIterator.run(validatingVisitor, database);
 
         if (!validatingVisitor.validationPassed()) {
             throw new ValidationFailedException(validatingVisitor);

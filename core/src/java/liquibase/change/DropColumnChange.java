@@ -13,6 +13,8 @@ import liquibase.database.structure.Index;
 import liquibase.database.structure.Table;
 import liquibase.exception.JDBCException;
 import liquibase.exception.UnsupportedChangeException;
+import liquibase.exception.InvalidChangeDefinitionException;
+import liquibase.util.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -54,6 +56,16 @@ public class DropColumnChange extends AbstractChange {
 
     public void setTableName(String tableName) {
         this.tableName = tableName;
+    }
+
+    public void validate(Database database) throws InvalidChangeDefinitionException {
+        if (StringUtils.trimToNull(tableName) == null) {
+            throw new InvalidChangeDefinitionException("tableName is required", this);
+        }
+        if (StringUtils.trimToNull(columnName) == null) {
+            throw new InvalidChangeDefinitionException("columnName is required", this);
+        }
+
     }
 
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {

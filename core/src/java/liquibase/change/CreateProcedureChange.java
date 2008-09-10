@@ -6,6 +6,8 @@ import liquibase.database.sql.RawSqlStatement;
 import liquibase.database.sql.SqlStatement;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.exception.UnsupportedChangeException;
+import liquibase.exception.InvalidChangeDefinitionException;
+import liquibase.util.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -33,6 +35,13 @@ public class CreateProcedureChange extends AbstractChange {
 
     public void setComments(String comments) {
         this.comments = comments;
+    }
+
+    public void validate(Database database) throws InvalidChangeDefinitionException {
+        if (StringUtils.trimToNull(procedureBody) == null) {
+            throw new InvalidChangeDefinitionException("procedure text is required", this);
+        }
+
     }
 
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {

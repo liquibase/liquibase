@@ -8,6 +8,7 @@ import liquibase.util.StreamUtil;
 import java.io.PrintStream;
 import java.util.List;
 import java.util.Set;
+import java.util.ArrayList;
 
 public class ValidationFailedException extends MigrationFailedException {
 
@@ -17,13 +18,14 @@ public class ValidationFailedException extends MigrationFailedException {
     private List<FailedPrecondition> failedPreconditions;
     private Set<ChangeSet> duplicateChangeSets;
     private List<SetupException> setupExceptions;
+    private List<InvalidChangeDefinitionException> changeValidationExceptions;
 
     public ValidationFailedException(ValidatingVisitor changeLogHandler) {
         this.invalidMD5Sums = changeLogHandler.getInvalidMD5Sums();
         this.failedPreconditions = changeLogHandler.getFailedPreconditions();
         this.duplicateChangeSets = changeLogHandler.getDuplicateChangeSets();
         this.setupExceptions = changeLogHandler.getSetupExceptions();
-        
+        this.changeValidationExceptions = changeLogHandler.getChangeValidationExceptions();
     }
 
 
@@ -62,7 +64,14 @@ public class ValidationFailedException extends MigrationFailedException {
                 message.append(StreamUtil.getLineSeparator());                
             }
         }
-        
+        if(changeValidationExceptions.size() >0){
+            message.append("     ").append(changeValidationExceptions.size()).append(" changes have validation failures").append(StreamUtil.getLineSeparator());
+            for (InvalidChangeDefinitionException invalid : changeValidationExceptions) {
+                message.append("          ").append(invalid.toString());
+                message.append(StreamUtil.getLineSeparator());
+            }
+        }
+
         return message.toString();
     }
 

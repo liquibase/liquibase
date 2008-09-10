@@ -3,10 +3,7 @@ package liquibase.change.custom;
 import liquibase.FileOpener;
 import liquibase.database.Database;
 import liquibase.database.structure.DatabaseObject;
-import liquibase.exception.CustomChangeException;
-import liquibase.exception.RollbackImpossibleException;
-import liquibase.exception.SetupException;
-import liquibase.exception.UnsupportedChangeException;
+import liquibase.exception.*;
 
 import java.util.Set;
 
@@ -48,5 +45,9 @@ public class ExampleCustomTaskChange implements CustomTaskChange, CustomTaskRoll
 
     public void setFileOpener(FileOpener fileOpener) {
         this.fileOpener = fileOpener;
+    }
+
+    public void validate(Database database) throws InvalidChangeDefinitionException {
+
     }
 }

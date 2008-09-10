@@ -16,7 +16,7 @@ public class ChangeLogSyncVisitor implements ChangeSetVisitor {
         return ChangeSetVisitor.Direction.FORWARD;
     }
 
-    public void visit(ChangeSet changeSet) throws LiquibaseException {
-        database.markChangeSetAsRan(changeSet);
+    public void visit(ChangeSet changeSet, Database database) throws LiquibaseException {
+        this.database.markChangeSetAsRan(changeSet);
     }
 }

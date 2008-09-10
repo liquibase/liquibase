@@ -6,6 +6,7 @@ import liquibase.database.sql.RawSqlStatement;
 import liquibase.database.sql.SqlStatement;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.util.StreamUtil;
+import liquibase.exception.InvalidChangeDefinitionException;
 import static org.easymock.EasyMock.*;
 import static org.easymock.classextension.EasyMock.createMock;
 import static org.easymock.classextension.EasyMock.replay;
@@ -55,6 +56,10 @@ public abstract class AbstractChangeTest {
             public Set<DatabaseObject> getAffectedDatabaseObjects() {
                 return null;
             }
+
+            public void validate(Database database) throws InvalidChangeDefinitionException {
+
+            }
         };
 
         StringWriter stringWriter = new StringWriter();
@@ -84,6 +89,11 @@ public abstract class AbstractChangeTest {
             public Set<DatabaseObject> getAffectedDatabaseObjects() {
                 return null;
             }
+
+            public void validate(Database database) throws InvalidChangeDefinitionException {
+
+            }
+            
         };
 
         Connection conn = createMock(Connection.class);

@@ -12,6 +12,8 @@ import liquibase.database.structure.Index;
 import liquibase.database.structure.Table;
 import liquibase.exception.JDBCException;
 import liquibase.exception.UnsupportedChangeException;
+import liquibase.exception.InvalidChangeDefinitionException;
+import liquibase.util.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -88,6 +90,25 @@ public class MergeColumnChange extends AbstractChange {
 
     public void setFinalColumnType(String finalColumnType) {
         this.finalColumnType = finalColumnType;
+    }
+
+    public void validate(Database database) throws InvalidChangeDefinitionException {
+        if (StringUtils.trimToNull(tableName) == null) {
+            throw new InvalidChangeDefinitionException("tableName is required", this);
+        }
+        if (StringUtils.trimToNull(column1Name) == null) {
+            throw new InvalidChangeDefinitionException("column1Name is required", this);
+        }
+        if (StringUtils.trimToNull(column2Name) == null) {
+            throw new InvalidChangeDefinitionException("column2Name is required", this);
+        }
+        if (StringUtils.trimToNull(finalColumnName) == null) {
+            throw new InvalidChangeDefinitionException("finalColumnName is required", this);
+        }
+        if (StringUtils.trimToNull(finalColumnType) == null) {
+            throw new InvalidChangeDefinitionException("finalColumnType is required", this);
+        }
+
     }
 
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {

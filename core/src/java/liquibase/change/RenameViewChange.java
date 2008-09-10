@@ -6,6 +6,8 @@ import liquibase.database.sql.SqlStatement;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.View;
 import liquibase.exception.UnsupportedChangeException;
+import liquibase.exception.InvalidChangeDefinitionException;
+import liquibase.util.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -47,6 +49,16 @@ public class RenameViewChange extends AbstractChange {
 
     public void setNewViewName(String newViewName) {
         this.newViewName = newViewName;
+    }
+
+    public void validate(Database database) throws InvalidChangeDefinitionException {
+        if (StringUtils.trimToNull(oldViewName) == null) {
+            throw new InvalidChangeDefinitionException("oldViewName is required", this);
+        }
+        if (StringUtils.trimToNull(newViewName) == null) {
+            throw new InvalidChangeDefinitionException("newViewName is required", this);
+        }
+
     }
 
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {

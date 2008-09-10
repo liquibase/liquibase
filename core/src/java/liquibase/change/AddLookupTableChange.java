@@ -9,6 +9,8 @@ import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.ForeignKey;
 import liquibase.database.structure.Table;
 import liquibase.exception.UnsupportedChangeException;
+import liquibase.exception.InvalidChangeDefinitionException;
+import liquibase.util.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -105,6 +107,24 @@ public class AddLookupTableChange extends AbstractChange {
 
     public void setConstraintName(String constraintName) {
         this.constraintName = constraintName;
+    }
+
+    public void validate(Database database) throws InvalidChangeDefinitionException {
+        if (StringUtils.trimToNull(existingTableName) == null) {
+            throw new InvalidChangeDefinitionException("existingTableName is required", this);
+        }
+        if (StringUtils.trimToNull(existingColumnName) == null) {
+            throw new InvalidChangeDefinitionException("existingColumnName is required", this);
+        }
+        if (StringUtils.trimToNull(newTableName) == null) {
+            throw new InvalidChangeDefinitionException("newTableName is required", this);
+        }
+        if (StringUtils.trimToNull(newColumnName) == null) {
+            throw new InvalidChangeDefinitionException("newColumnName is required", this);
+        }
+        if (StringUtils.trimToNull(newColumnDataType) == null) {
+            throw new InvalidChangeDefinitionException("newColumnDataType is required", this);
+        }
     }
 
     protected Change[] createInverses() {

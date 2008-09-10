@@ -8,6 +8,8 @@ import liquibase.database.sql.SqlStatement;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Table;
 import liquibase.exception.UnsupportedChangeException;
+import liquibase.exception.InvalidChangeDefinitionException;
+import liquibase.util.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -51,6 +53,14 @@ public class RenameTableChange extends AbstractChange {
         this.newTableName = newTableName;
     }
 
+    public void validate(Database database) throws InvalidChangeDefinitionException {
+        if (StringUtils.trimToNull(oldTableName) == null) {
+            throw new InvalidChangeDefinitionException("oldTableName is required", this);
+        }
+        if (StringUtils.trimToNull(newTableName) == null) {
+            throw new InvalidChangeDefinitionException("newTableName is required", this);
+        }
+    }
 
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
         List<SqlStatement> statements = new ArrayList<SqlStatement>();

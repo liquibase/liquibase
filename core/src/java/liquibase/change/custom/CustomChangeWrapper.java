@@ -7,6 +7,7 @@ import liquibase.database.structure.DatabaseObject;
 import liquibase.exception.CustomChangeException;
 import liquibase.exception.RollbackImpossibleException;
 import liquibase.exception.UnsupportedChangeException;
+import liquibase.exception.InvalidChangeDefinitionException;
 import liquibase.util.ObjectUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -64,6 +65,10 @@ public class CustomChangeWrapper extends AbstractChange {
     }
 
 
+    public void validate(Database database) throws InvalidChangeDefinitionException {
+        customChange.validate(database);
+    }
+
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
         SqlStatement[] statements = null;
         try {
@@ -84,7 +89,6 @@ public class CustomChangeWrapper extends AbstractChange {
         }
         return statements;
     }
-
 
     public SqlStatement[] generateRollbackStatements(Database database) throws UnsupportedChangeException, RollbackImpossibleException {
         SqlStatement[] statements = null;

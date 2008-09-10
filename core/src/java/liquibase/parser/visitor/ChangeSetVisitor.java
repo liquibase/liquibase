@@ -1,6 +1,7 @@
 package liquibase.parser.visitor;
 
 import liquibase.ChangeSet;
+import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
 
 public interface ChangeSetVisitor {
@@ -12,5 +13,5 @@ public interface ChangeSetVisitor {
 
     Direction getDirection(); 
 
-    void visit(ChangeSet changeSet) throws LiquibaseException;
+    void visit(ChangeSet changeSet, Database database) throws LiquibaseException;
 }

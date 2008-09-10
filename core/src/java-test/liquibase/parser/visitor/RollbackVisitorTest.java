@@ -27,7 +27,7 @@ public class RollbackVisitorTest {
         replay(database);
 
         RollbackVisitor visitor = new RollbackVisitor(database);
-        visitor.visit(changeSet);
+        visitor.visit(changeSet, database);
 
         verify(database);
         verify(changeSet);

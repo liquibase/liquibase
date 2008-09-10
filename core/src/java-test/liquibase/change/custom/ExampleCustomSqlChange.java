@@ -8,6 +8,7 @@ import liquibase.database.structure.DatabaseObject;
 import liquibase.exception.RollbackImpossibleException;
 import liquibase.exception.SetupException;
 import liquibase.exception.UnsupportedChangeException;
+import liquibase.exception.InvalidChangeDefinitionException;
 
 import java.util.Set;
 
@@ -72,4 +73,9 @@ public class ExampleCustomSqlChange implements CustomSqlChange, CustomSqlRollbac
     public void setFileOpener(FileOpener fileOpener) {
         this.fileOpener = fileOpener;
     }
+
+    public void validate(Database database) throws InvalidChangeDefinitionException {
+
+    }
+    
 }

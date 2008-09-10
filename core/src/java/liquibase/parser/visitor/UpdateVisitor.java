@@ -21,16 +21,16 @@ public class UpdateVisitor implements ChangeSetVisitor {
         return ChangeSetVisitor.Direction.FORWARD;
     }
     
-    public void visit(ChangeSet changeSet) throws LiquibaseException {
+    public void visit(ChangeSet changeSet, Database database) throws LiquibaseException {
         log.finer("Running Changeset:" + changeSet);
-        if (changeSet.execute(database)) {
-            if (database.getRunStatus(changeSet).equals(ChangeSet.RunStatus.NOT_RAN)) {
-                database.markChangeSetAsRan(changeSet);
+        if (changeSet.execute(this.database)) {
+            if (this.database.getRunStatus(changeSet).equals(ChangeSet.RunStatus.NOT_RAN)) {
+                this.database.markChangeSetAsRan(changeSet);
             } else {
-                database.markChangeSetAsReRan(changeSet);
+                this.database.markChangeSetAsReRan(changeSet);
             }
         }
 
-        database.commit();
+        this.database.commit();
     }
 }

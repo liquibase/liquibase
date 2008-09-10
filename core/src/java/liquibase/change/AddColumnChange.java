@@ -11,6 +11,7 @@ import liquibase.database.structure.Index;
 import liquibase.database.structure.Table;
 import liquibase.exception.JDBCException;
 import liquibase.exception.UnsupportedChangeException;
+import liquibase.exception.InvalidChangeDefinitionException;
 import liquibase.util.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -61,6 +62,25 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
 
     public void removeColumn(ColumnConfig column) {
         columns.remove(column);
+    }
+
+    public void validate(Database database) throws InvalidChangeDefinitionException {
+        if (StringUtils.trimToNull(tableName) == null) {
+            throw new InvalidChangeDefinitionException("tableName is required", this);
+        }
+
+        for (ColumnConfig column : getColumns()) {
+            if (StringUtils.trimToNull(column.getName()) == null) {
+                throw new InvalidChangeDefinitionException("column name is required", this);
+            }
+            if (StringUtils.trimToNull(column.getType()) == null) {
+                throw new InvalidChangeDefinitionException("column type is required", this);
+            }
+
+
+        }
+
+
     }
 
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {

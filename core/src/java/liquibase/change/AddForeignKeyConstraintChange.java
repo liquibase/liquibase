@@ -9,6 +9,7 @@ import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.ForeignKey;
 import liquibase.database.structure.Table;
 import liquibase.exception.UnsupportedChangeException;
+import liquibase.exception.InvalidChangeDefinitionException;
 import liquibase.util.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -169,6 +170,25 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
         } else {
             throw new RuntimeException("Unknown onUpdate action: "+onUpdate);
         }
+    }
+
+    public void validate(Database database) throws InvalidChangeDefinitionException {
+        if (StringUtils.trimToNull(baseTableName) == null) {
+            throw new InvalidChangeDefinitionException("baseTableName is required", this);
+        }
+        if (StringUtils.trimToNull(baseColumnNames) == null) {
+            throw new InvalidChangeDefinitionException("baseColumnNames is required", this);
+        }
+        if (StringUtils.trimToNull(referencedTableName) == null) {
+            throw new InvalidChangeDefinitionException("referencedTableName is required", this);
+        }
+        if (StringUtils.trimToNull(referencedColumnNames) == null) {
+            throw new InvalidChangeDefinitionException("referenceColumnNames is required", this);
+        }
+
+
+
+
     }
 
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
