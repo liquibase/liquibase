@@ -118,17 +118,11 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 
     private DataSource dataSource;
 
-    private boolean executeEnabled = true;
-
-    private boolean writeSqlFileEnabled = true;
-
     private Logger log = Logger.getLogger(SpringLiquibase.class.getName());
 
     private String changeLog;
 
     private String contexts;
-
-    private File sqlOutputDir;
 
     public SpringLiquibase() {
         super();
@@ -177,57 +171,6 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
     }
 
     /**
-     * Determines whether liquibase will actually execute DDL statements.
-     *
-     * @param executeSql
-     */
-    public void setExecuteEnabled(boolean executeSql) {
-        this.executeEnabled = executeSql;
-    }
-
-    /**
-     * Determines whether liquibase will actually execute DDL statements.
-     */
-    public boolean isExecuteEnabled() {
-        return executeEnabled;
-    }
-
-    /**
-     * Returns a warning message that will be written out to the log.  It is here so that it
-     * can be customized.
-     *
-     * @return
-     */
-    public String getExecuteDisabledWarningMessage() {
-        return "\n\nYou have set "
-                + getBeanName()
-                + ".executeEnabled=false, but there are \n"
-                + "database change sets that need to be run in order to bring the database up to date.\n"
-                + "The application may not behave properly until these changes are run.\n\n";
-
-    }
-
-    /**
-     * Returns the output directory into which a SQL file will be written *if*
-     * writeSqlFileEnabled is set to true.
-     *
-     * @return
-     */
-    public File getSqlOutputDir() {
-        return sqlOutputDir;
-    }
-
-    /**
-     * Sets the output directory into which a SQL file will be written if
-     * writeSqlFileEnabled is also set to true.
-     *
-     * @param sqlOutputDir
-     */
-    public void setSqlOutputDir(File sqlOutputDir) {
-        this.sqlOutputDir = sqlOutputDir;
-    }
-
-    /**
      * Returns a Resource that is able to resolve to a file or classpath resource.
      *
      * @return
@@ -262,17 +205,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
             c = getDataSource().getConnection();
             Liquibase liquibase = createLiquibase(c);
 
-            if (isWriteSqlFileEnabled() && getSqlOutputDir() != null) {
-                if ((!isExecuteEnabled()) && liquibase.listUnrunChangeSets(getContexts()).size() > 0) {
-                    log.log(Level.WARNING, getExecuteDisabledWarningMessage());
-                }
-                writeSqlFile(liquibase);
-            }
-
-            // Now execute the DDL, if so configured
-            if (isExecuteEnabled()) {
-                executeSql(liquibase);
-            }
+            liquibase.update(getContexts());
         } catch (SQLException e) {
             throw new JDBCException(e);
         } finally {
@@ -281,83 +214,16 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
                     c.rollback();
                     c.close();
                 } catch (SQLException e) {
-                    ;
+                    //nothing to do
                 }
             }
         }
 
-    }
-
-    /**
-     * If there are any un-run changesets, this method will write them out to a file, if
-     * so configured.
-     *
-     * @param liquibase
-     *
-     * @throws SQLException
-     * @throws IOException
-     * @throws LiquibaseException
-     */
-    protected void writeSqlFile(Liquibase liquibase) throws LiquibaseException {
-        FileWriter fw = null;
-        try {
-
-            File ddlDir = getSqlOutputDir();
-            ddlDir.mkdirs();
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
-            sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
-            String dateString = sdf.format(new java.util.Date());
-
-            String fileString = (getDatabaseProductName() + "-" + dateString + ".sql").replace(" ", "-").toLowerCase();
-            File upgradeFile = new File(ddlDir, fileString);
-            fw = new FileWriter(upgradeFile);
-
-            liquibase.update(getContexts(), fw);
-        } catch (IOException e) {
-            throw new LiquibaseException(e);
-        } finally {
-            if (fw != null) {
-                try {
-                    fw.close();
-                } catch (IOException e) {
-                    log.log(Level.SEVERE, "error closing fileWriter", e);
-                }
-            }
-        }
     }
 
     private Liquibase createLiquibase(Connection c) throws JDBCException {
         return new Liquibase(getChangeLog(), new SpringResourceOpener(getChangeLog()), DatabaseFactory.getInstance().findCorrectDatabaseImplementation(c));
     }
-
-    /**
-     * This method will actually execute the changesets.
-     *
-     * @param liquibase
-     *
-     * @throws SQLException
-     * @throws IOException
-     */
-    protected void executeSql(Liquibase liquibase) throws LiquibaseException {
-        liquibase.update(getContexts());
-    }
-
-    /**
-     * Boolean flag to determine whether generated SQL should be written to disk.
-     *
-     * @return
-     */
-    public boolean isWriteSqlFileEnabled() {
-        return writeSqlFileEnabled;
-    }
-
-    /**
-     * Boolean flag to determine whether generated SQL should be written to disk.
-     */
-    public void setWriteSqlFileEnabled(boolean writeSqlFile) {
-        this.writeSqlFileEnabled = writeSqlFile;
-    }
-
 
     /**
      * Spring sets this automatically to the instance's configured bean name.
