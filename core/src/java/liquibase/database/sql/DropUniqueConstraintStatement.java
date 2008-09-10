@@ -1,9 +1,6 @@
 package liquibase.database.sql;
 
-import liquibase.database.Database;
-import liquibase.database.MaxDBDatabase;
-import liquibase.database.MySQLDatabase;
-import liquibase.database.SQLiteDatabase;
+import liquibase.database.*;
 import liquibase.exception.StatementNotSupportedOnDatabaseException;
 
 public class DropUniqueConstraintStatement implements SqlStatement {
@@ -39,6 +36,8 @@ public class DropUniqueConstraintStatement implements SqlStatement {
             return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " DROP KEY " + getConstraintName();
         } else if (database instanceof MaxDBDatabase) {
             return "DROP INDEX " + getConstraintName() + " ON " + database.escapeTableName(getSchemaName(), getTableName());
+        } else if (database instanceof OracleDatabase) {
+            return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " DROP CONSTRAINT " + getConstraintName()+" DROP INDEX";
         }
 
         return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " DROP CONSTRAINT " + getConstraintName();
