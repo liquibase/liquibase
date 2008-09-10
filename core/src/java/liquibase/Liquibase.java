@@ -5,6 +5,7 @@ import liquibase.DatabaseChangeLog;
 import liquibase.DatabaseChangeLogLock;
 import liquibase.FileOpener;
 import liquibase.database.Database;
+import liquibase.database.DatabaseFactory;
 import liquibase.database.sql.UpdateStatement;
 import liquibase.database.template.JdbcOutputTemplate;
 import liquibase.database.template.JdbcTemplate;
@@ -31,6 +32,7 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.logging.Logger;
 import java.util.logging.Level;
+import java.sql.Connection;
 
 /**
  * Core LiquiBase facade.
@@ -47,6 +49,10 @@ public class Liquibase {
     private Logger log;
 
     private Map<String, Object> changeLogParameters = new HashMap<String, Object>();
+
+    public Liquibase(String changeLogFile, FileOpener fileOpener, Connection conn) throws JDBCException {
+        this(changeLogFile, fileOpener, DatabaseFactory.getInstance().findCorrectDatabaseImplementation(conn));
+    }
 
     public Liquibase(String changeLogFile, FileOpener fileOpener, Database database) {
         log = LogFactory.getLogger();
