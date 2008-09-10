@@ -386,9 +386,9 @@ public class DiffResult {
         doc.appendChild(changeLogElement);
 
         List<Change> changes = new ArrayList<Change>();
+        addUnexpectedViewChanges(changes);        
         addMissingTableChanges(changes, targetDatabase);
         addMissingColumnChanges(changes, targetDatabase);
-        addUnexpectedColumnChanges(changes);
         addChangedColumnChanges(changes);
         addMissingPrimaryKeyChanges(changes);
         addUnexpectedPrimaryKeyChanges(changes);
@@ -401,10 +401,10 @@ public class DiffResult {
 
         addMissingForeignKeyChanges(changes);
         addUnexpectedForeignKeyChanges(changes);
+        addUnexpectedColumnChanges(changes);
         addMissingSequenceChanges(changes);
         addUnexpectedSequenceChanges(changes);
         addMissingViewChanges(changes);
-        addUnexpectedViewChanges(changes);
         addUnexpectedTableChanges(changes);
 
         for (Change change : changes) {
