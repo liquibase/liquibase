@@ -189,8 +189,7 @@ public class ColumnConfig {
             if ("GENERATED_BY_DEFAULT".equals(defaultValueNumeric)) {
                 setAutoIncrement(true);
             } else {
-                this.defaultValueNumeric = NumberFormat.getInstance(Locale.US).
-                	parse(defaultValueNumeric);
+                this.defaultValueNumeric = NumberFormat.getInstance(Locale.US).parse(defaultValueNumeric);
             }
         }
     }

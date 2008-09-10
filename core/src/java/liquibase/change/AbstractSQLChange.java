@@ -21,6 +21,7 @@ public abstract class AbstractSQLChange extends AbstractChange {
 
     private boolean stripComments;
     private boolean splitStatements;
+    private String endDelimiter = ";";
     private String sql;
 
     protected AbstractSQLChange(String tagName, String changeName) {
@@ -72,7 +73,15 @@ public abstract class AbstractSQLChange extends AbstractChange {
     public void setSql(String sql) {
        this.sql = sql;
     }
-    
+
+    public String getEndDelimiter() {
+        return endDelimiter;
+    }
+
+    public void setEndDelimiter(String endDelimiter) {
+        this.endDelimiter = endDelimiter;
+    }
+
     /**
      * Generates one or more statements depending on how the SQL should be parsed.
      * If split statements is set to true then the SQL is split on the ; and go\n entries
@@ -83,8 +92,7 @@ public abstract class AbstractSQLChange extends AbstractChange {
      * 
      * The end result is one or more SQL statements split in the way the user requested
      */
-    public SqlStatement[] generateStatements(Database database)
-            throws UnsupportedChangeException {
+    public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
 
         List<SqlStatement> returnStatements = new ArrayList<SqlStatement>();
 
@@ -93,11 +101,10 @@ public abstract class AbstractSQLChange extends AbstractChange {
         if(isSplittingStatements()) {
             String[] statements = StringUtils.splitSQL(processedSQL);
             for (String statement : statements) {
-                returnStatements.add(new RawSqlStatement(statement));
+                returnStatements.add(new RawSqlStatement(statement, getEndDelimiter()));
             }
-        }
-        else {
-            returnStatements.add(new RawSqlStatement(processedSQL));
+        } else {
+            returnStatements.add(new RawSqlStatement(processedSQL, getEndDelimiter()));
         }
         
         return returnStatements.toArray(new SqlStatement[returnStatements.size()]);
