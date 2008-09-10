@@ -50,65 +50,72 @@ public class Main {
     protected Map<String, Object> changeLogParameters = new HashMap<String, Object>();
 
     public static void main(String args[]) throws CommandLineParsingException, IOException {
-        String shouldRunProperty = System.getProperty(Liquibase.SHOULD_RUN_SYSTEM_PROPERTY);
-        if (shouldRunProperty != null && !Boolean.valueOf(shouldRunProperty)) {
-            System.out.println("LiquiBase did not run because '" + Liquibase.SHOULD_RUN_SYSTEM_PROPERTY + "' system property was set to false");
-            return;
-        }
-
-        Main main = new Main();
-        if (args.length == 1 && "--help".equals(args[0])) {
-            main.printHelp(System.out);
-            return;
-        } else if (args.length == 1 && "--version".equals(args[0])) {
-            System.out.println("LiquiBase Version: " + LiquibaseUtil.getBuildVersion() + StreamUtil.getLineSeparator());
-            return;
-        }
-
         try {
-            main.parseOptions(args);
-        } catch (CommandLineParsingException e) {
-            main.printHelp(System.out);
-            throw e;
-        }
+            String shouldRunProperty = System.getProperty(Liquibase.SHOULD_RUN_SYSTEM_PROPERTY);
+            if (shouldRunProperty != null && !Boolean.valueOf(shouldRunProperty)) {
+                System.out.println("LiquiBase did not run because '" + Liquibase.SHOULD_RUN_SYSTEM_PROPERTY + "' system property was set to false");
+                return;
+            }
 
-        File propertiesFile = new File(main.defaultsFile);
+            Main main = new Main();
+            if (args.length == 1 && "--help".equals(args[0])) {
+                main.printHelp(System.out);
+                return;
+            } else if (args.length == 1 && "--version".equals(args[0])) {
+                System.out.println("LiquiBase Version: " + LiquibaseUtil.getBuildVersion() + StreamUtil.getLineSeparator());
+                return;
+            }
 
-        if (propertiesFile.exists()) {
-            main.parsePropertiesFile(new FileInputStream(propertiesFile));
-        }
-        List<String> setupMessages = main.checkSetup();
-        if (setupMessages.size() > 0) {
-            main.printHelp(setupMessages, System.out);
-            return;
-        }
+            try {
+                main.parseOptions(args);
+            } catch (CommandLineParsingException e) {
+                main.printHelp(System.out);
+                System.exit(-2);
+            }
 
-        try {
-            main.applyDefaults();
-            main.configureClassLoader();
-            main.doMigration();
+            File propertiesFile = new File(main.defaultsFile);
+
+            if (propertiesFile.exists()) {
+                main.parsePropertiesFile(new FileInputStream(propertiesFile));
+            }
+            List<String> setupMessages = main.checkSetup();
+            if (setupMessages.size() > 0) {
+                main.printHelp(setupMessages, System.out);
+                return;
+            }
+
+            try {
+                main.applyDefaults();
+                main.configureClassLoader();
+                main.doMigration();
+            } catch (Throwable e) {
+                String message = e.getMessage();
+                if (e.getCause() != null) {
+                    message = e.getCause().getMessage();
+                }
+                if (message == null) {
+                    message = "Unknown Reason";
+                }
+
+                if (e.getCause() instanceof ValidationFailedException) {
+                    ((ValidationFailedException) e.getCause()).printDescriptiveError(System.out);
+                } else {
+                    System.out.println("Migration Failed: " + message + generateLogLevelWarningMessage());
+                    LogFactory.getLogger().log(Level.SEVERE, message, e);
+                }
+                System.exit(-1);
+            }
+
+            if ("update".equals(main.command)) {
+                System.out.println("Migration successful");
+            } else if (main.command.startsWith("rollback") && !main.command.endsWith("SQL")) {
+                System.out.println("Rollback successful");
+            }
         } catch (Throwable e) {
-            String message = e.getMessage();
-            if (e.getCause() != null) {
-                message = e.getCause().getMessage();
-            }
-            if (message == null) {
-                message = "Unknown Reason";
-            }
-
-            if (e.getCause() instanceof ValidationFailedException) {
-                ((ValidationFailedException) e.getCause()).printDescriptiveError(System.out);
-            } else {
-                System.out.println("Migration Failed: " + message + generateLogLevelWarningMessage());
-                LogFactory.getLogger().log(Level.SEVERE, message, e);
-            }
-            return;
-        }
-
-        if ("update".equals(main.command)) {
-            System.out.println("Migration successful");
-        } else if (main.command.startsWith("rollback") && !main.command.endsWith("SQL")) {
-            System.out.println("Rollback successful");
+            String message = "Unexpected error running LiquiBase: " + e.getMessage();
+            System.out.println(message);
+            LogFactory.getLogger().log(Level.SEVERE, message, e);
+            System.exit(-3);
         }
     }
 
