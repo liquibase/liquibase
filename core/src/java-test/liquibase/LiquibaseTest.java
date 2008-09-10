@@ -100,7 +100,7 @@ public class LiquibaseTest {
         private InputStream inputStream;
 
         public TestLiquibase() {
-            super("liquibase/test.xml", new ClassLoaderFileOpener(), null);
+            super("liquibase/test.xml", new ClassLoaderFileOpener(), ((Database) null));
             inputStream = createMock(InputStream.class);
             replay(inputStream);
         }
