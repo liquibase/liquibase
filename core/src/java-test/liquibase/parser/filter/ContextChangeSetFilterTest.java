@@ -38,7 +38,7 @@ public class ContextChangeSetFilterTest {
 
     @Test
     public void singleContexts() {
-        ContextChangeSetFilter filter = new ContextChangeSetFilter("test1");
+        ContextChangeSetFilter filter = new ContextChangeSetFilter("TEST1");
 
         assertTrue(filter.accepts(new ChangeSet(null, null, false, false, null,null,  "test1", null)));
         assertTrue(filter.accepts(new ChangeSet(null, null, false, false, null,null,  "test1, test2", null)));
@@ -55,6 +55,7 @@ public class ContextChangeSetFilterTest {
         assertTrue(filter.accepts(new ChangeSet(null, null, false, false, null,null,  "test1, test2", null)));
         assertFalse(filter.accepts(new ChangeSet(null, null, false, false, null, null, "test3", null)));
         assertTrue(filter.accepts(new ChangeSet(null, null, false, false, null, null, "test3, test1", null)));
+        assertTrue(filter.accepts(new ChangeSet(null, null, false, false, null, null, "test3, TEST1", null)));
         assertTrue(filter.accepts(new ChangeSet(null, null, false, false, null,null,  null, null)));
     }
 
@@ -67,6 +68,7 @@ public class ContextChangeSetFilterTest {
         assertTrue(filter.accepts(new ChangeSet(null, null, false, false, null, null, "test1, test2", null)));
         assertFalse(filter.accepts(new ChangeSet(null, null, false, false, null, null, "test3", null)));
         assertTrue(filter.accepts(new ChangeSet(null, null, false, false, null, null, "test3, test1", null)));
+        assertTrue(filter.accepts(new ChangeSet(null, null, false, false, null, null, "test3, TEST1", null)));
         assertTrue(filter.accepts(new ChangeSet(null, null, false, false, null, null, null, null)));
     }
 }
