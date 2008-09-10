@@ -13,9 +13,15 @@ public class ContextChangeSetFilter implements ChangeSetFilter {
     public ContextChangeSetFilter(String... contexts) {
         this.contexts = new HashSet<String>();
         if (contexts != null) {
+            for (int i=0; i<contexts.length; i++) {
+                if (contexts[i] != null) {
+                    contexts[i] = contexts[i].toLowerCase();
+                }
+            }
+
             if (contexts.length == 1) {
                 if (contexts[0] == null) {
-                    ; //do nothing
+                    //do nothing
                 } else if (contexts[0].indexOf(",") >= 0) {
                     this.contexts.addAll(StringUtils.splitAndTrim(contexts[0], ","));
                 } else {
@@ -37,7 +43,7 @@ public class ContextChangeSetFilter implements ChangeSetFilter {
         }
         
         for (String context : changeSet.getContexts()) {
-            if (contexts.contains(context)) {
+            if (contexts.contains(context.toLowerCase())) {
                 return true;
             }
         }
