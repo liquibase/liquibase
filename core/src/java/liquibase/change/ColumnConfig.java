@@ -109,6 +109,9 @@ public class ColumnConfig {
         if (valueNumeric == null) {
             this.valueNumeric = null;
         } else {
+            valueNumeric = valueNumeric.replaceFirst("^\\(", "");
+            valueNumeric = valueNumeric.replaceFirst("\\)$", "");
+            
             if (valueNumeric.matches("\\d+\\.?\\d*")) {
                 try {
                     this.valueNumeric = NumberFormat.getInstance(Locale.US).
@@ -189,6 +192,8 @@ public class ColumnConfig {
             if ("GENERATED_BY_DEFAULT".equals(defaultValueNumeric)) {
                 setAutoIncrement(true);
             } else {
+                defaultValueNumeric = defaultValueNumeric.replaceFirst("^\\(", "");
+                defaultValueNumeric = defaultValueNumeric.replaceFirst("\\)$", "");
                 this.defaultValueNumeric = NumberFormat.getInstance(Locale.US).parse(defaultValueNumeric);
             }
         }
