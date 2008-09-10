@@ -77,7 +77,7 @@ public class CreateIndexStatement implements SqlStatement {
             if (database instanceof MSSQLDatabase) {
                 buffer.append(" ON ").append(getTablespace());
             } else if (database instanceof DB2Database) {
-                // cannot add indexes to tablespace in DB2
+                buffer.append(" IN ").append(getTablespace());
             } else {
                 buffer.append(" TABLESPACE ").append(getTablespace());
             }
