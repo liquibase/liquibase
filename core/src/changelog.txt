@@ -10,6 +10,13 @@ Changes in version 1.8.0
 - Auto-increment specifying on a non-auto-increment table does not fail but simply ignores flag
 - Can control onDelete and onUpdate behavior for FK constraints
 - Added ability to specify that an index should be unique
+- Additional validation step checks for required attributes at run time
+- Improved ordering of generated scripts with diff
+- Improved command line migrator return codes
+- Context checking is case insensitive
+- Can specify end delimiter in <sql> change
+- Added several new precondition checks
+- Custom preconditions can be passed parameters
 
 Changes in version 1.7.0 (2008.06.25)
 ----------------------
