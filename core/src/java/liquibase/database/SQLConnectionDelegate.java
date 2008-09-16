@@ -1,7 +1,5 @@
 package liquibase.database;
 
-import liquibase.log.LogFactory;
-
 import java.sql.*;
 import java.util.Map;
 
@@ -32,7 +30,7 @@ public class SQLConnectionDelegate implements DatabaseConnection {
     }
 
     public void close() throws SQLException {
-        con.rollback();
+        rollback();
         con.close();
     }
 
@@ -150,11 +148,15 @@ public class SQLConnectionDelegate implements DatabaseConnection {
     }
 
     public void rollback() throws SQLException {
-        con.rollback();
+    	if (!con.getAutoCommit()) {
+            con.rollback();
+        }
     }
 
     public void rollback(Savepoint savepoint) throws SQLException {
-        con.rollback(savepoint);
+    	if (!con.getAutoCommit()) {
+    		con.rollback(savepoint);
+    	}
     }
 
     public void setAutoCommit(boolean autoCommit) throws SQLException {
