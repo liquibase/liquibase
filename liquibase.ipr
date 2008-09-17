@@ -54,6 +54,7 @@
       <entry name="?*.tld" />
       <entry name="?*.xsd" />
       <entry name="?*.csv" />
+      <entry name="?*.sql" />
     </wildcardResourcePatterns>
   </component>
   <component name="DependenciesAnalyzeManager">

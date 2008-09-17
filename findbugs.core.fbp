@@ -1,0 +1,28 @@
+<Project filename="&lt;&lt;unnamed project&gt;&gt;" projectName="liquibase.core">
+  <Jar>C:\othersvn\liquibase\core\build</Jar>
+  <AuxClasspathEntry>C:\othersvn\liquibase\core\lib\cglib-nodep-2.1_3.jar</AuxClasspathEntry>
+  <AuxClasspathEntry>C:\othersvn\liquibase\core\lib\easymock-2.2.jar</AuxClasspathEntry>
+  <AuxClasspathEntry>C:\othersvn\liquibase\core\lib\easymockclassextension-2.2.jar</AuxClasspathEntry>
+  <AuxClasspathEntry>C:\othersvn\liquibase\core\lib\junit-4.1.jar</AuxClasspathEntry>
+  <AuxClasspathEntry>C:\othersvn\liquibase\core\lib\opencsv-1.8.jar</AuxClasspathEntry>
+  <AuxClasspathEntry>C:\othersvn\liquibase\core\lib-compile\ant-1.6.5.jar</AuxClasspathEntry>
+  <AuxClasspathEntry>C:\othersvn\liquibase\core\lib-compile\ant_doxygen-1.4.jar</AuxClasspathEntry>
+  <AuxClasspathEntry>C:\othersvn\liquibase\core\lib-compile\commons-collections-2.1.1.jar</AuxClasspathEntry>
+  <AuxClasspathEntry>C:\othersvn\liquibase\core\lib-compile\commons-logging-1.0.4.jar</AuxClasspathEntry>
+  <AuxClasspathEntry>C:\othersvn\liquibase\core\lib-compile\dom4j-1.6.1.jar</AuxClasspathEntry>
+  <AuxClasspathEntry>C:\othersvn\liquibase\core\lib-compile\ejb3-persistence-3.3.1.jar</AuxClasspathEntry>
+  <AuxClasspathEntry>C:\othersvn\liquibase\core\lib-compile\emma.jar</AuxClasspathEntry>
+  <AuxClasspathEntry>C:\othersvn\liquibase\core\lib-compile\emma_ant.jar</AuxClasspathEntry>
+  <AuxClasspathEntry>C:\othersvn\liquibase\core\lib-compile\hibernate-annotations-3.3.1.jar</AuxClasspathEntry>
+  <AuxClasspathEntry>C:\othersvn\liquibase\core\lib-compile\hibernate-commons-annotations-3.3.1.jar</AuxClasspathEntry>
+  <AuxClasspathEntry>C:\othersvn\liquibase\core\lib-compile\hibernate3-3.2.6.jar</AuxClasspathEntry>
+  <AuxClasspathEntry>C:\othersvn\liquibase\core\lib-compile\jsdk-2.4.jar</AuxClasspathEntry>
+  <AuxClasspathEntry>C:\othersvn\liquibase\core\lib-compile\maven-ant-tasks-2.0.7.jar</AuxClasspathEntry>
+  <AuxClasspathEntry>C:\othersvn\liquibase\core\lib-compile\spring-2.0.6.jar</AuxClasspathEntry>
+  <AuxClasspathEntry>C:\othersvn\liquibase\core\lib-compile\spring-aspects-2.0.6.jar</AuxClasspathEntry>
+  <AuxClasspathEntry>C:\othersvn\liquibase\core\lib-compile\spring-mock-2.0.6.jar</AuxClasspathEntry>
+  <SrcDir>C:\othersvn\liquibase\core\src\java</SrcDir>
+  <SuppressionFilter>
+    <LastVersion value="-1" relOp="NEQ"/>
+  </SuppressionFilter>
+</Project>
