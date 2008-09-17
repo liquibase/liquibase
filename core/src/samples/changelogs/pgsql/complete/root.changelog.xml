@@ -140,7 +140,7 @@
 
     <changeSet id="15" author="nvoxland" runAlways="true">
         <update tableName="liquibaseRunInfo">
-            <column name="timesRan" valueNumeric="timesRan+1"/>
+            <column name="timesRan" valueNumeric="&quot;timesRan&quot;+1"/>
         </update>
     </changeSet>
 

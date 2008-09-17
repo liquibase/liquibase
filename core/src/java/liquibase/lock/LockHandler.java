@@ -129,7 +129,7 @@ public class LockHandler {
                     locked = (Boolean) lockedValue;
                 }
                 if (locked != null && locked) {
-                    allLocks.add(new DatabaseChangeLogLock((Integer) columnMap.get("ID"), (Date) columnMap.get("LOCKGRANTED"), (String) columnMap.get("LOCKEDBY")));
+                    allLocks.add(new DatabaseChangeLogLock(((Number) columnMap.get("ID")).intValue(), (Date) columnMap.get("LOCKGRANTED"), (String) columnMap.get("LOCKEDBY")));
                 }
             }
             return allLocks.toArray(new DatabaseChangeLogLock[allLocks.size()]);

@@ -321,4 +321,8 @@ public class HibernateDatabaseSnapshot implements DatabaseSnapshot {
     public String getSchema() {
         return null;
     }
+
+    public boolean hasDatabaseChangeLogTable() {
+        return false;
+    }
 }

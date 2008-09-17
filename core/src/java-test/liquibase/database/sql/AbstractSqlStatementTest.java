@@ -19,6 +19,10 @@ public abstract class AbstractSqlStatementTest {
     public void setupAvailableDatabases() throws Exception {
         for (Database database : TestContext.getInstance().getAvailableDatabases()) {
             if (generateTestStatement().supportsDatabase(database)) {
+                if (database.supportsSchemas()) {
+                    database.dropDatabaseObjects(TestContext.ALT_SCHEMA);
+                }
+                database.dropDatabaseObjects(null);
                 setupDatabase(database);
             }
         }

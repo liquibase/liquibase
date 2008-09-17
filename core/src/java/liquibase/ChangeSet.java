@@ -184,6 +184,8 @@ public class ChangeSet {
                     } else {
                         throw new MigrationFailedException(this, "Unexpected precondition onError attribute: "+rootPrecondition.getOnError());
                     }
+
+                    database.rollback();
                 }
             }
 
@@ -255,6 +257,11 @@ public class ChangeSet {
             database.commit();
             log.finest("ChangeSet " + toString() + " has been successfully rolled back.");
         } catch (Exception e) {
+            try {
+                database.rollback();
+            } catch (JDBCException e1) {
+                ;
+            }
             throw new RollbackFailedException(e);
         }
 

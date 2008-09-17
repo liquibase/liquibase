@@ -2,6 +2,9 @@ package liquibase.database.sql;
 
 import liquibase.database.*;
 import liquibase.exception.StatementNotSupportedOnDatabaseException;
+import liquibase.log.LogFactory;
+
+import java.util.logging.Logger;
 
 public class DropTableStatement implements SqlStatement {
 
@@ -34,10 +37,10 @@ public class DropTableStatement implements SqlStatement {
             if (database instanceof DerbyDatabase
                     || database instanceof DB2Database
                     || database instanceof MSSQLDatabase
-                    || database instanceof FirebirdDatabase) {
-                throw new StatementNotSupportedOnDatabaseException("Database does not support drop with cascade", this, database);
-            }
-            if (database instanceof OracleDatabase) {
+                    || database instanceof FirebirdDatabase
+                    || database instanceof SQLiteDatabase) {
+                LogFactory.getLogger().info("Database does not support drop with cascade");
+            } else if (database instanceof OracleDatabase) {
                 buffer.append(" CASCADE CONSTRAINTS");
             } else {
                 buffer.append(" CASCADE");

@@ -11,10 +11,10 @@ import org.junit.Test;
 
 public class DropForeignKeyConstraintStatementTest extends AbstractSqlStatementTest {
 
-    private static final String TABLE_NAME = "DropFKTest";
-    private static final String FK_TABLE_NAME = "DropFKTestFK";
+    private static final String TABLE_NAME = "dropfktest";
+    private static final String FK_TABLE_NAME = "dropfktestfk";
     private static final String CONSTRAINT_NAME = "fk_droptest";
-    private static final String ALT_SCHEMA_NAME = "ALT" + CONSTRAINT_NAME;
+    private static final String ALT_SCHEMA_NAME = "alt" + CONSTRAINT_NAME;
 
     protected void setupDatabase(Database database) throws Exception {
         dropTableIfExists(null, TABLE_NAME, database);

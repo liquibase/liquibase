@@ -10,8 +10,8 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 
 public class DropViewStatementTest extends AbstractSqlStatementTest {
-    private static final String VIEW_NAME = "DropViewTest";
-    private static final String TABLE_NAME = "DropViewTestTable";
+    private static final String VIEW_NAME = "dropviewtest";
+    private static final String TABLE_NAME = "dropviewtesttable";
 
     protected void setupDatabase(Database database) throws Exception {
 

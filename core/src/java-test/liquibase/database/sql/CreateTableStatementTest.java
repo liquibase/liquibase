@@ -67,6 +67,10 @@ public class CreateTableStatementTest extends AbstractSqlStatementTest {
                         .addColumn("username", "varchar(255)", "'NEWUSER'")
                         .addColumnConstraint(new AutoIncrementConstraint("id"))) {
 
+                    protected boolean supportsTest(Database database) {
+                        return database.supportsAutoIncrement();
+                    }
+
                     protected boolean expectedException(Database database, JDBCException exception) {
                         return !database.supportsAutoIncrement();
                     }

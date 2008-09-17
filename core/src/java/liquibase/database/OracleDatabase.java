@@ -3,7 +3,6 @@ package liquibase.database;
 import liquibase.database.sql.RawSqlStatement;
 import liquibase.database.sql.SqlStatement;
 import liquibase.database.structure.DatabaseSnapshot;
-import liquibase.database.structure.SqlDatabaseSnapshot;
 import liquibase.database.structure.OracleDatabaseSnapshot;
 import liquibase.exception.JDBCException;
 import liquibase.diff.DiffStatusListener;
@@ -233,5 +232,9 @@ public class OracleDatabase extends AbstractDatabase {
 
     public DatabaseSnapshot createDatabaseSnapshot(String schema, Set<DiffStatusListener> statusListeners) throws JDBCException {
         return new OracleDatabaseSnapshot(this, statusListeners, schema);
+    }
+
+    public boolean supportsRestrictForeignKeys() {
+        return false;
     }
 }

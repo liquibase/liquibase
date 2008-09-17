@@ -122,9 +122,6 @@ public class AddLookupTableChange extends AbstractChange {
         if (StringUtils.trimToNull(newColumnName) == null) {
             throw new InvalidChangeDefinitionException("newColumnName is required", this);
         }
-        if (StringUtils.trimToNull(newColumnDataType) == null) {
-            throw new InvalidChangeDefinitionException("newColumnDataType is required", this);
-        }
     }
 
     protected Change[] createInverses() {

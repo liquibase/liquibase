@@ -172,7 +172,7 @@ public abstract class AbstractDatabaseTest {
             connection.rollback();
             assertEquals(database.getDateType().toUpperCase(), database.getColumnType("java.sql.Types.DATE", false).toUpperCase());
             assertEquals(database.getBooleanType().toUpperCase(), database.getColumnType("java.sql.Types.BOOLEAN", false).toUpperCase());
-            assertEquals("VARCHAR(255)", database.getColumnType("java.sql.Types.VARCHAR(255)", false).toUpperCase());
+            assertEquals("VARCHAR(255)", database.getColumnType("java.sql.Types.VARCHAR(255)", false).toUpperCase().replaceAll("VARCHAR2", "VARCHAR"));
         }
     }
 }

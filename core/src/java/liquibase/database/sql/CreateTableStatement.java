@@ -166,7 +166,7 @@ public class CreateTableStatement implements SqlStatement {
 	                pkName = database.generatePrimaryKeyName(getTableName());
 	            }
 	            buffer.append(" CONSTRAINT ");
-	            buffer.append(pkName);
+	            buffer.append(database.escapeConstraintName(pkName));
 				buffer.append(" PRIMARY KEY AUTOINCREMENT");
 			}
             
@@ -217,7 +217,7 @@ public class CreateTableStatement implements SqlStatement {
 	                pkName = database.generatePrimaryKeyName(getTableName());
 	            }
 	            buffer.append(" CONSTRAINT ");
-	            buffer.append(pkName);
+	            buffer.append(database.escapeConstraintName(pkName));
 	            buffer.append(" PRIMARY KEY (");
 	            buffer.append(database.escapeColumnNameList(StringUtils.join(getPrimaryKeyConstraint().getColumns(), ", ")));
 	            buffer.append(")");
@@ -227,7 +227,7 @@ public class CreateTableStatement implements SqlStatement {
 
         for (ForeignKeyConstraint fkConstraint : getForeignKeyConstraints()) {
             buffer.append(" CONSTRAINT ")
-                    .append(fkConstraint.getForeignKeyName())
+                    .append(database.escapeConstraintName(fkConstraint.getForeignKeyName()))
                     .append(" FOREIGN KEY (")
                     .append(database.escapeColumnName(getSchemaName(), getTableName(), fkConstraint.getColumn()))
                     .append(") REFERENCES ")
@@ -250,7 +250,7 @@ public class CreateTableStatement implements SqlStatement {
         for (UniqueConstraint uniqueConstraint : getUniqueConstraints()) {
             if (uniqueConstraint.getConstraintName() != null) {
                 buffer.append(" CONSTRAINT ");
-                buffer.append(uniqueConstraint.getConstraintName());
+                buffer.append(database.escapeConstraintName(uniqueConstraint.getConstraintName()));
             }
             buffer.append(" UNIQUE (");
             buffer.append(database.escapeColumnNameList(StringUtils.join(uniqueConstraint.getColumns(), ", ")));

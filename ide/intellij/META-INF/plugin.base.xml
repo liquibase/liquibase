@@ -18,7 +18,7 @@
         <br><br>
         Requires DBHelper plugin.
         ]]></description>
-    <version>@BUILD.VERSION@.2</version>
+    <version>@BUILD.VERSION@.@INTELLIJ.BUILD.VERSION@</version>
     <change-notes>
         <![CDATA[
         1.7.0.2: Re-tried recompiled with Java 1.5 for Mac users<br>

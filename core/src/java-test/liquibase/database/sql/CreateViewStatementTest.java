@@ -14,8 +14,8 @@ import org.junit.Test;
 
 public class CreateViewStatementTest extends AbstractSqlStatementTest {
 
-    private static final String VIEW_NAME = "CreateViewTest";
-    private static final String TABLE_NAME = "CreateViewTestTable";
+    private static final String VIEW_NAME = "createviewtest";
+    private static final String TABLE_NAME = "createviewtesttable";
 
     protected SqlStatement generateTestStatement() {
         return new CreateViewStatement(null, null, null, false);

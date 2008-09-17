@@ -11,9 +11,9 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 
 public class RenameViewStatementTest extends AbstractSqlStatementTest {
-    private static final String TABLE_NAME = "RenameViewTestTable";
-    private static final String VIEW_NAME = "RenameViewTest";
-    private static final String NEW_VIEW_NAME = "RenameViewTest_new";
+    private static final String TABLE_NAME = "renameviewtesttable";
+    private static final String VIEW_NAME = "renameviewtest";
+    private static final String NEW_VIEW_NAME = "renameviewtest_new";
 
     protected void setupDatabase(Database database) throws Exception {
 

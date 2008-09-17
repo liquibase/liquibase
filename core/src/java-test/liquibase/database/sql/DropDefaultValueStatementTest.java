@@ -43,7 +43,7 @@ public class DropDefaultValueStatementTest extends AbstractSqlStatementTest {
                     }
 
                     protected void postExecuteAssert(DatabaseSnapshot snapshot) {
-                        assertNull(snapshot.getTable(TABLE_NAME).getColumn(COLUMN_NAME).getDefaultValue());
+                        assertEquals(null, snapshot.getTable(TABLE_NAME).getColumn(COLUMN_NAME).getDefaultValue());
                     }
 
                 });

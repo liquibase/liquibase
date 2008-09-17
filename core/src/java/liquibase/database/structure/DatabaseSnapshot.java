@@ -41,4 +41,6 @@ public interface DatabaseSnapshot {
     PrimaryKey getPrimaryKey(String pkName);
 
     String getSchema();
+
+    boolean hasDatabaseChangeLogTable();
 }

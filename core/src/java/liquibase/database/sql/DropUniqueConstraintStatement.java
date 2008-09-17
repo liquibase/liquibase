@@ -33,14 +33,14 @@ public class DropUniqueConstraintStatement implements SqlStatement {
         }
     	
     	if (database instanceof MySQLDatabase) {
-            return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " DROP KEY " + getConstraintName();
+            return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " DROP KEY " + database.escapeConstraintName(getConstraintName());
         } else if (database instanceof MaxDBDatabase) {
-            return "DROP INDEX " + getConstraintName() + " ON " + database.escapeTableName(getSchemaName(), getTableName());
+            return "DROP INDEX " + database.escapeConstraintName(getConstraintName()) + " ON " + database.escapeTableName(getSchemaName(), getTableName());
         } else if (database instanceof OracleDatabase) {
-            return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " DROP CONSTRAINT " + getConstraintName()+" DROP INDEX";
+            return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " DROP CONSTRAINT " + database.escapeConstraintName(getConstraintName())+" DROP INDEX";
         }
 
-        return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " DROP CONSTRAINT " + getConstraintName();
+        return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " DROP CONSTRAINT " + database.escapeConstraintName(getConstraintName());
     }
 
     public String getEndDelimiter(Database database) {

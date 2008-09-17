@@ -42,9 +42,9 @@ public class DropForeignKeyConstraintStatement implements SqlStatement {
         }
         
         if (database instanceof MySQLDatabase || database instanceof MaxDBDatabase) {
-            return "ALTER TABLE " + database.escapeTableName(getBaseTableSchemaName(), getBaseTableName()) + " DROP FOREIGN KEY " + getConstraintName();
+            return "ALTER TABLE " + database.escapeTableName(getBaseTableSchemaName(), getBaseTableName()) + " DROP FOREIGN KEY " + database.escapeConstraintName(getConstraintName());
         } else {
-            return "ALTER TABLE " + database.escapeTableName(getBaseTableSchemaName(), getBaseTableName()) + " DROP CONSTRAINT " + getConstraintName();
+            return "ALTER TABLE " + database.escapeTableName(getBaseTableSchemaName(), getBaseTableName()) + " DROP CONSTRAINT " + database.escapeConstraintName(getConstraintName());
         }
     }
 

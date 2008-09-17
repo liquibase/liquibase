@@ -400,4 +400,12 @@ public class MockDatabase implements Database {
     public DatabaseSnapshot createDatabaseSnapshot(String schema, Set<DiffStatusListener> statusListeners) throws JDBCException {
         return null;
     }
+
+    public boolean supportsRestrictForeignKeys() {
+        return true;
+    }
+
+    public String escapeConstraintName(String constraintName) {
+        return constraintName;
+    }
 }

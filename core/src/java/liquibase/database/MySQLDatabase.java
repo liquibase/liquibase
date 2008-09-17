@@ -136,6 +136,14 @@ public class MySQLDatabase extends AbstractDatabase {
         return "`" + tableName + "`";
     }
 
+    public String escapeConstraintName(String constraintName) {
+        if (constraintName == null) {
+            return null;
+        }
+        return "`" + constraintName + "`";
+    }
+
+
     public String escapeColumnName(String schemaName, String tableName, String columnName) {
         return "`" + columnName + "`";
     }

@@ -382,4 +382,12 @@ public class HibernateDatabase implements Database {
     public Configuration createConfiguration() {
         return new AnnotationConfiguration();
     }
+
+    public boolean supportsRestrictForeignKeys() {
+        return false;
+    }
+
+    public String escapeConstraintName(String constraintName) {
+        return constraintName;
+    }
 }

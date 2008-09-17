@@ -224,17 +224,25 @@ public class MSSQLDatabase extends AbstractDatabase {
         }
 
         defaultValue = super.convertDatabaseValueToJavaObject(defaultValue, dataType, columnSize, decimalDigits);
-        
+
         return defaultValue;
     }
 
     public String escapeTableName(String schemaName, String tableName) {
         if (schemaName == null) {
-            return "["+tableName+"]";
+            return "[" + tableName + "]";
         } else {
-            return "["+schemaName+"].["+tableName+"]";
+            return "[" + schemaName + "].[" + tableName + "]";
         }
     }
+
+    public String escapeConstraintName(String constraintName) {
+        if (constraintName == null) {
+            return null;
+        }
+        return "[" + constraintName + "]";
+    }
+
 
     public String convertRequestedSchemaToCatalog(String requestedSchema) throws JDBCException {
         return getDefaultCatalogName();
@@ -250,8 +258,8 @@ public class MSSQLDatabase extends AbstractDatabase {
     public SqlStatement getViewDefinitionSql(String schemaName, String viewName) throws JDBCException {
         String sql = "select view_definition from INFORMATION_SCHEMA.VIEWS where upper(table_name)='" + viewName.toUpperCase() + "'";
 //        if (StringUtils.trimToNull(schemaName) != null) {
-            sql += " and table_schema='" + convertRequestedSchemaToSchema(schemaName) + "'";
-            sql += " and table_catalog='" + getDefaultCatalogName() + "'";
+        sql += " and table_schema='" + convertRequestedSchemaToSchema(schemaName) + "'";
+        sql += " and table_catalog='" + getDefaultCatalogName() + "'";
 //        }
 
 //        log.info("GetViewDefinitionSQL: "+sql);
@@ -272,5 +280,9 @@ public class MSSQLDatabase extends AbstractDatabase {
 
     public DatabaseSnapshot createDatabaseSnapshot(String schema, Set<DiffStatusListener> statusListeners) throws JDBCException {
         return new MSSQLDatabaseSnapshot(this, statusListeners, schema);
+    }
+
+    public boolean supportsRestrictForeignKeys() {
+        return false;
     }
 }
