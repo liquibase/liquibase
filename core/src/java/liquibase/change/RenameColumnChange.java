@@ -92,8 +92,6 @@ public class RenameColumnChange extends AbstractChange {
     }
 
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
-    	List<SqlStatement> statements = new ArrayList<SqlStatement>();
-    	
     	if (database instanceof SQLiteDatabase) {
     		// return special statements for SQLite databases
     		return generateStatementsForSQLiteDatabase(database);

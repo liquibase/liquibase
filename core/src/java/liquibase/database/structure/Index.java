@@ -64,7 +64,7 @@ public class Index implements DatabaseObject, Comparable<Index> {
                 equals = false;
             }
         }
-        if (this.unique != index.isUnique()) {
+        if (!this.unique.equals(index.isUnique())) {
             equals = false;
         }
 
@@ -99,7 +99,7 @@ public class Index implements DatabaseObject, Comparable<Index> {
     public String toString() {
         StringBuffer stringBuffer = new StringBuffer();
         stringBuffer.append(getName());
-        if (!this.unique.booleanValue()) {
+        if (!this.unique) {
             stringBuffer.append(" unique ");
         }
         stringBuffer.append(" on ").append(table.getName()).append("(");

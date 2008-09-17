@@ -34,8 +34,6 @@ public class HibernateDatabaseSnapshot implements DatabaseSnapshot {
     private Map<String, liquibase.database.structure.Table> tablesMap = new HashMap<String, liquibase.database.structure.Table>();
     private Map<String, Column> columnsMap = new HashMap<String, Column>();
 
-    private Set<DiffStatusListener> statusListeners;
-
     private static final Logger log = LogFactory.getLogger();
 
     public HibernateDatabaseSnapshot(HibernateDatabase database) throws JDBCException {

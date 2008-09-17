@@ -26,7 +26,6 @@ public class PostgresDatabase extends AbstractDatabase {
     private Set<String> systemTablesAndViews = new HashSet<String>();
 
     private String defaultDatabaseSchemaName;
-    private String defaultCatalogName;
 
     public PostgresDatabase() {
 //        systemTablesAndViews.add("pg_logdir_ls");

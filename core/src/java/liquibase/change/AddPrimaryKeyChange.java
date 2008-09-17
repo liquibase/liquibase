@@ -134,7 +134,7 @@ public class AddPrimaryKeyChange extends AbstractChange {
                 String[] split_columns = getColumnNames().split("[ ]*,[ ]*");
                 for (String split_column : split_columns) {
                     if (column.getName().equals(split_column)) {
-                        column.getConstraints().setPrimaryKey(new Boolean(true));
+                        column.getConstraints().setPrimaryKey(true);
                     }
                 }
                 return true;
