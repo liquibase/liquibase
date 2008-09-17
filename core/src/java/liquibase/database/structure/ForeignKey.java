@@ -125,7 +125,6 @@ public class ForeignKey implements DatabaseObject, Comparable<ForeignKey> {
 
         return getForeignKeyColumns().equalsIgnoreCase(that.getForeignKeyColumns())
                 && foreignKeyTable.equals(that.foreignKeyTable)
-                && this.name.equalsIgnoreCase(that.getName())
                 && getPrimaryKeyColumns().equalsIgnoreCase(that.getPrimaryKeyColumns())
                 && primaryKeyTable.equals(that.primaryKeyTable);
 
@@ -136,10 +135,6 @@ public class ForeignKey implements DatabaseObject, Comparable<ForeignKey> {
         if (primaryKeyTable != null) {
             result = primaryKeyTable.hashCode();
         }
-        if (this.name != null) {
-            result = 31 * result + this.name.toUpperCase().hashCode();
-        }
-
         if (primaryKeyColumns != null) {
             result = 31 * result + primaryKeyColumns.toUpperCase().hashCode();
         }
@@ -167,17 +162,17 @@ public class ForeignKey implements DatabaseObject, Comparable<ForeignKey> {
             returnValue = this.getForeignKeyTable().compareTo(o.getForeignKeyTable());
         }
         if (returnValue == 0 && this.getForeignKeyColumns() != null && o.getForeignKeyColumns() != null) {
-            returnValue = this.getForeignKeyColumns().compareTo(o.getForeignKeyColumns());
+            returnValue = this.getForeignKeyColumns().compareToIgnoreCase(o.getForeignKeyColumns());
         }
         if (returnValue == 0 && this.getName() != null && o.getName() != null) {
-            returnValue = this.getName().compareTo(o.getName());
+            returnValue = this.getName().compareToIgnoreCase(o.getName());
         }
         if (returnValue == 0 && this.getPrimaryKeyTable() != null && o.getPrimaryKeyTable() != null) {
             returnValue = this.getPrimaryKeyTable().compareTo(o.getPrimaryKeyTable());
         }
 
         if (returnValue == 0 && this.getPrimaryKeyColumns() != null && o.getPrimaryKeyColumns() != null) {
-            returnValue = this.getPrimaryKeyColumns().compareTo(o.getPrimaryKeyColumns());
+            returnValue = this.getPrimaryKeyColumns().compareToIgnoreCase(o.getPrimaryKeyColumns());
         }
         if (returnValue == 0 && this.updateRule != null && o.getUpdateRule() != null)
             returnValue = this.updateRule.compareTo(o.getUpdateRule());

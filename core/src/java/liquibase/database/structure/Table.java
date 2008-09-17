@@ -57,7 +57,7 @@ public class Table implements DatabaseObject, Comparable<Table> {
 
 
     public int compareTo(Table o) {
-        return this.getName().compareTo(o.getName());
+        return this.getName().compareToIgnoreCase(o.getName());
     }
 
 
