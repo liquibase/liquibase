@@ -4,6 +4,7 @@ import java.sql.DatabaseMetaData;
 
 import liquibase.database.Database;
 import liquibase.database.SQLiteDatabase;
+import liquibase.database.OracleDatabase;
 import liquibase.exception.StatementNotSupportedOnDatabaseException;
 
 public class AddForeignKeyConstraintStatement implements SqlStatement {
@@ -117,7 +118,9 @@ public class AddForeignKeyConstraintStatement implements SqlStatement {
                     sql += " ON UPDATE SET DEFAULT";
                     break;
                 case DatabaseMetaData.importedKeyRestrict:
-                    sql += " ON UPDATE RESTRICT";
+                    if (database.supportsRestrictForeignKeys()) {
+                        sql += " ON UPDATE RESTRICT";
+                    }
                     break;
                 case DatabaseMetaData.importedKeyNoAction:
                     //don't do anything
@@ -139,7 +142,9 @@ public class AddForeignKeyConstraintStatement implements SqlStatement {
                     sql += " ON DELETE SET DEFAULT";
                     break;
                 case DatabaseMetaData.importedKeyRestrict:
-                    sql += " ON DELETE RESTRICT";
+                    if (database.supportsRestrictForeignKeys()) {
+                        sql += " ON DELETE RESTRICT";
+                    }
                     break;
                 case DatabaseMetaData.importedKeyNoAction:
                     //don't do anything

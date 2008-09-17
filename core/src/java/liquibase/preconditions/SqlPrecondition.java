@@ -2,6 +2,7 @@ package liquibase.preconditions;
 
 import liquibase.DatabaseChangeLog;
 import liquibase.database.Database;
+import liquibase.database.DatabaseConnection;
 import liquibase.exception.PreconditionFailedException;
 import liquibase.exception.PreconditionErrorException;
 
@@ -34,8 +35,9 @@ public class SqlPrecondition implements Precondition {
     public void check(Database database, DatabaseChangeLog changeLog) throws PreconditionFailedException, PreconditionErrorException {
         Statement statement = null;
         ResultSet resultSet = null;
+        DatabaseConnection connection = database.getConnection();
         try {
-            statement = database.getConnection().createStatement();
+            statement = connection.createStatement();
             resultSet = statement.executeQuery(getSql());
             if (!resultSet.next()) {
                 throw new PreconditionFailedException("No rows returned from SQL Precondition", changeLog, this);

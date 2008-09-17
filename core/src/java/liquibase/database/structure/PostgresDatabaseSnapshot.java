@@ -25,4 +25,12 @@ public class PostgresDatabaseSnapshot extends SqlDatabaseSnapshot {
     public PostgresDatabaseSnapshot(Database database, Set<DiffStatusListener> statusListeners, String requestedSchema) throws JDBCException {
         super(database, statusListeners, requestedSchema);
     }
+
+    protected String convertFromDatabaseName(String objectName) {
+        if (objectName == null) {
+            return null;
+        }
+        return objectName.replaceAll("\"","");
+    }
+
 }

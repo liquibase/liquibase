@@ -44,6 +44,7 @@
         <copy file="${basedir}/../META-INF/plugin.base.xml" tofile="${basedir}/../META-INF/plugin.xml" filtering="true">
             <filterset>
                 <filter token="BUILD.VERSION" value="${build.version}"/>
+                <filter token="INTELLIJ.BUILD.VERSION" value="${intellij.build.version}"/>
             </filterset>
         </copy>
     </target>
@@ -69,6 +70,7 @@
         <copy todir="${build.dir}" filtering="true">
             <filterset>
                 <filter token="BUILD.VERSION" value="${build.version}"/>
+                <filter token="INTELLIJ.BUILD.VERSION" value="${intellij.build.version}"/>
             </filterset>
             <fileset dir="${src.dir}/java"
                      includes="**/*.properties, **/*.xml, **/*.config, **/*.txt, **/*.jdo, **/*.tld, **/*.xsd, **/*.css, **/*.html, **/*.form"/>

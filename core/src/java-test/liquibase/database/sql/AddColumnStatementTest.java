@@ -36,7 +36,7 @@ public class AddColumnStatementTest extends AbstractSqlStatementTest {
                         Column columnSnapshot = snapshot.getTable(TABLE_NAME).getColumn(NEW_COLUMN_NAME);
                         assertNotNull(columnSnapshot);
                         assertEquals(NEW_COLUMN_NAME.toUpperCase(), columnSnapshot.getName().toUpperCase());
-                        assertEquals("varchar".toUpperCase(), columnSnapshot.getTypeName().toUpperCase());
+                        assertEquals("varchar".toUpperCase(), columnSnapshot.getTypeName().toUpperCase().replaceAll("VARCHAR2", "VARCHAR"));
                         assertEquals(50, columnSnapshot.getColumnSize());
                         assertEquals("new default", columnSnapshot.getDefaultValue());
 

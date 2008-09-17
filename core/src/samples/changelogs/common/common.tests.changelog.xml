@@ -106,14 +106,14 @@
 
     <changeSet id="commentTest" author="nvoxland">
         <comment>Creates a table and updates a value with actual SQL. Mainly for testing the comment tags</comment>
-        <createTable tableName="commentTest">
+        <createTable tableName="commenttest">
             <column name="id" type="int"/>
         </createTable>
         <sql>
-            <comment>Insert value into commentTest</comment>
-            insert into commentTest (id) values (1);
-            insert into commentTest (id) values (2);
-            insert into commentTest (id) values (3);
+            <comment>Insert value into commenttest</comment>
+            insert into commenttest (id) values (1);
+            insert into commenttest (id) values (2);
+            insert into commenttest (id) values (3);
         </sql>
     </changeSet>
 
@@ -336,7 +336,7 @@
     </changeSet>
 
     <changeSet id="createTableNamedPK" author="nvoxland">
-        <createTable tableName="createTableNamedPK">
+        <createTable tableName="createtablenamedpk">
             <column name="id" type="int">
                 <constraints nullable="false" primaryKey="true" primaryKeyName="pk_pktest1"/>
             </column>
@@ -399,7 +399,7 @@
                 <constraints primaryKey="true"/>
             </column>
             <column name="ref" type="int">
-                <constraints foreignKeyName="fk_reftest" references="createTableNamedPK(id)"/>
+                <constraints foreignKeyName="fk_reftest" references="createtablenamedpk(id)"/>
             </column>
         </createTable>
     </changeSet>

@@ -172,7 +172,7 @@ public class PostgresDatabase extends AbstractDatabase {
     }
 
     public String getDefaultCatalogName() throws JDBCException {
-        return super.getDefaultCatalogName();
+        return "public";
     }
 
     public String getDatabaseChangeLogTableName() {
@@ -204,7 +204,14 @@ public class PostgresDatabase extends AbstractDatabase {
 
 
     public SqlStatement createFindSequencesSQL(String schema) throws JDBCException {
-        return new RawSqlStatement("SELECT relname AS SEQUENCE_NAME FROM pg_class, pg_namespace WHERE relkind='S' AND pg_class.relnamespace = pg_namespace.oid AND nspname = '" + convertRequestedSchemaToSchema(schema) + "' AND 'nextval(''" + (schema == null ? "" : schema + ".") + "'||relname||'''::regclass)' not in (select adsrc from pg_attrdef where adsrc is not null) AND 'nextval('''||relname||'''::regclass)' not in (select adsrc from pg_attrdef where adsrc is not null)");
+        return new RawSqlStatement("SELECT relname AS SEQUENCE_NAME FROM pg_class, pg_namespace " +
+                "WHERE relkind='S' " +
+                "AND pg_class.relnamespace = pg_namespace.oid " +
+                "AND nspname = '" + convertRequestedSchemaToSchema(schema) + "' " +
+                "AND 'nextval(''" + (schema == null ? "" : schema + ".") + "'||relname||'''::regclass)' not in (select adsrc from pg_attrdef where adsrc is not null) " +
+                "AND 'nextval(''" + (schema == null ? "" : schema + ".") + "\"'||relname||'\"''::regclass)' not in (select adsrc from pg_attrdef where adsrc is not null) " +
+                "AND 'nextval('''||relname||'''::regclass)' not in (select adsrc from pg_attrdef where adsrc is not null)"
+        );
     }
 
 
@@ -305,13 +312,25 @@ public class PostgresDatabase extends AbstractDatabase {
         return super.escapeTableName(schemaName, tableName);
     }
 
+    public String escapeConstraintName(String constraintName) {
+        if (constraintName == null) {
+            return null;
+        }
+        if (hasCaseProblems(constraintName) || isReservedWord(constraintName)) {
+            return "\"" + constraintName + "\"";
+        } else {
+            return super.escapeConstraintName(constraintName);
+        }
+    }
+
     /**
      * @see liquibase.database.AbstractDatabase#escapeColumnName(java.lang.String, java.lang.String, java.lang.String)
      */
     @Override
     public String escapeColumnName(String schemaName, String tableName, String columnName) {
-        if (hasCaseProblems(columnName) || isReservedWord(columnName))
+        if (hasCaseProblems(columnName) || isReservedWord(columnName)) {
             return "\"" + columnName + "\"";
+        }
         return columnName;
     }
 
@@ -320,9 +339,7 @@ public class PostgresDatabase extends AbstractDatabase {
     * If there are at least one characters with upper case while all other are in lower case (or vice versa) this string should be escaped.
     */
     private boolean hasCaseProblems(String tableName) {
-        if (tableName.matches(".*[A-Z].*") && tableName.matches(".*[a-z].*"))
-            return true;
-        return false;
+        return tableName.matches(".*[A-Z].*") && tableName.matches(".*[a-z].*");
     }
 
     /*
@@ -425,4 +442,39 @@ public class PostgresDatabase extends AbstractDatabase {
     public DatabaseSnapshot createDatabaseSnapshot(String schema, Set<DiffStatusListener> statusListeners) throws JDBCException {
         return new PostgresDatabaseSnapshot(this, statusListeners, schema);
     }
+
+
+    public String escapeSequenceName(String schemaName, String sequenceName) {
+        //Check if tableName is in reserved words and has CaseSensitivity problems
+        if (StringUtils.trimToNull(sequenceName) != null && (hasCaseProblems(sequenceName) || isReservedWord(sequenceName))) {
+            return super.escapeSequenceName(schemaName, "\"" + sequenceName + "\"");
+        }
+        return super.escapeSequenceName(schemaName, sequenceName);
+    }
+
+    protected Object convertToCorrectJavaType(String value, int dataType, int columnSize, int decimalDigits) throws ParseException {
+        Object returnValue = super.convertToCorrectJavaType(value, dataType, columnSize, decimalDigits);
+        if (returnValue != null && returnValue instanceof String) {
+            if (((String) returnValue).startsWith("NULL::")) {
+                return null;
+            }
+        }
+        return returnValue;
+    }
+
+    public String escapeColumnNameList(String columnNames) {
+        StringBuffer sb = new StringBuffer();
+        for(String columnName : columnNames.split(",")) {
+            if(sb.length() > 0) {
+                sb.append(", ");
+            }
+            String name = columnName.trim();
+            if (hasCaseProblems(name) || isReservedWord(name)) {
+                name = "\""+name+"\"";
+            }
+            sb.append(name);
+        }
+        return sb.toString();
+    }
+
 }

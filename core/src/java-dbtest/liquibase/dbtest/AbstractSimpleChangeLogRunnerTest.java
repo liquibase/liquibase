@@ -71,6 +71,11 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
             }
 
             LockHandler.getInstance(database).forceReleaseLock();
+            if (database.supportsSchemas()) {
+                database.dropDatabaseObjects(TestContext.ALT_SCHEMA);
+            }
+            database.dropDatabaseObjects(null);
+            database.commit();
         }
     }
 
@@ -331,7 +336,9 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
         liquibase.dropAll(getSchemasToDrop());
 
         database.setDefaultSchemaName("liquibaseb");
-        
+
+        LockHandler.getInstance(database).forceReleaseLock();
+
         liquibase.update(includedChangeLog);
 
         DatabaseSnapshot originalSnapshot = database.createDatabaseSnapshot(null, null);

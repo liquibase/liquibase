@@ -127,9 +127,7 @@ public class ForeignKey implements DatabaseObject, Comparable<ForeignKey> {
                 && foreignKeyTable.equals(that.foreignKeyTable)
                 && this.name.equalsIgnoreCase(that.getName())
                 && getPrimaryKeyColumns().equalsIgnoreCase(that.getPrimaryKeyColumns())
-                && primaryKeyTable.equals(that.primaryKeyTable)
-                && this.updateRule.equals(that.getUpdateRule())
-                && this.deleteRule.equals(that.getDeleteRule());
+                && primaryKeyTable.equals(that.primaryKeyTable);
 
     }
 

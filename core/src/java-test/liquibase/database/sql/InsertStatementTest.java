@@ -11,12 +11,12 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 
 public class InsertStatementTest extends AbstractSqlStatementTest {
-    private static final String TABLE_NAME = "InsertTest";
-    private static final String VARCHAR_COL_NAME = "colName_vc";
-    private static final String DATE_COL_NAME = "colName_dt";
-    private static final String BOOLEAN_COL_NAME = "colName_b";
-    private static final String INT_COL_NAME = "colName_i";
-    private static final String FLOAT_COL_NAME = "colName_f";
+    private static final String TABLE_NAME = "inserttest";
+    private static final String VARCHAR_COL_NAME = "colname_vc";
+    private static final String DATE_COL_NAME = "colname_dt";
+    private static final String BOOLEAN_COL_NAME = "colname_b";
+    private static final String INT_COL_NAME = "colname_i";
+    private static final String FLOAT_COL_NAME = "colname_f";
 
     protected void setupDatabase(Database database) throws Exception {
         dropAndCreateTable(new CreateTableStatement(null, TABLE_NAME)

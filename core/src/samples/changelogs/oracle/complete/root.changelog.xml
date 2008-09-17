@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <databaseChangeLog
-        xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.7"
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.8"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.7 http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.7.xsd">
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.8 http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.8.xsd">
     <preConditions>
             <dbms type="oracle"/>
             <runningAs username="liquibase"/>
@@ -353,4 +353,11 @@ END testSP;
             <column name="testcol" type="varchar2(50 char)"/>
         </createTable>
     </changeSet>
+
+    <changeSet id="64" author="nvoxland">
+        <sqlFile path="changelogs/oracle/complete/sampleproc.sql" splitStatements="false"/>
+    </changeSet>
+    <!--<changeSet id="64-test" author="nvoxland">-->
+        <!--<sql>call hello</sql>-->
+    <!--</changeSet>-->
 </databaseChangeLog>

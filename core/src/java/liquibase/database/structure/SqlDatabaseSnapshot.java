@@ -39,6 +39,8 @@ public abstract class SqlDatabaseSnapshot implements DatabaseSnapshot {
     protected static final Logger log = LogFactory.getLogger();
     private String schema;
 
+    private boolean hasDatabaseChangeLogTable = false;
+
 
     /**
      * Creates an empty database snapshot
@@ -152,12 +154,15 @@ public abstract class SqlDatabaseSnapshot implements DatabaseSnapshot {
         ResultSet rs = databaseMetaData.getTables(database.convertRequestedSchemaToCatalog(schema), database.convertRequestedSchemaToSchema(schema), null, new String[]{"TABLE", "VIEW"});
         while (rs.next()) {
             String type = rs.getString("TABLE_TYPE");
-            String name = rs.getString("TABLE_NAME");
-            String schemaName = rs.getString("TABLE_SCHEM");
-            String catalogName = rs.getString("TABLE_CAT");
+            String name = convertFromDatabaseName(rs.getString("TABLE_NAME"));
+            String schemaName = convertFromDatabaseName(rs.getString("TABLE_SCHEM"));
+            String catalogName = convertFromDatabaseName(rs.getString("TABLE_CAT"));
             String remarks = rs.getString("REMARKS");
 
             if (database.isSystemTable(catalogName, schemaName, name) || database.isLiquibaseTable(name) || database.isSystemView(catalogName, schemaName, name)) {
+                if (name.equalsIgnoreCase(database.getDatabaseChangeLogTableName())) {
+                    hasDatabaseChangeLogTable = true;
+                }
                 continue;
             }
 
@@ -211,6 +216,13 @@ public abstract class SqlDatabaseSnapshot implements DatabaseSnapshot {
 //        }
     }
 
+    protected String convertFromDatabaseName(String objectName) {
+        if (objectName == null) {
+            return null;
+        }
+        return objectName;
+    }
+
     protected void readColumns(String schema) throws SQLException, JDBCException {
         updateListeners("Reading columns for " + database.toString() + " ...");
 
@@ -219,10 +231,10 @@ public abstract class SqlDatabaseSnapshot implements DatabaseSnapshot {
         while (rs.next()) {
             Column columnInfo = new Column();
 
-            String tableName = rs.getString("TABLE_NAME");
-            String columnName = rs.getString("COLUMN_NAME");
-            String schemaName = rs.getString("TABLE_SCHEM");
-            String catalogName = rs.getString("TABLE_CAT");
+            String tableName = convertFromDatabaseName(rs.getString("TABLE_NAME"));
+            String columnName = convertFromDatabaseName(rs.getString("COLUMN_NAME"));
+            String schemaName = convertFromDatabaseName(rs.getString("TABLE_SCHEM"));
+            String catalogName = convertFromDatabaseName(rs.getString("TABLE_CAT"));
             String remarks = rs.getString("REMARKS");
 
             if (database.isSystemTable(catalogName, schemaName, tableName) || database.isLiquibaseTable(tableName)) {
@@ -317,8 +329,8 @@ public abstract class SqlDatabaseSnapshot implements DatabaseSnapshot {
             ResultSet rs = databaseMetaData.getExportedKeys(dbCatalog, dbSchema, table.getName());
             ForeignKey fkInfo = null;
             while (rs.next()) {
-                String pkTableName = rs.getString("PKTABLE_NAME");
-                String pkColumn = rs.getString("PKCOLUMN_NAME");
+                String pkTableName = convertFromDatabaseName(rs.getString("PKTABLE_NAME"));
+                String pkColumn = convertFromDatabaseName(rs.getString("PKCOLUMN_NAME"));
                 Table pkTable = tablesMap.get(pkTableName);
                 if (pkTable == null) {
                     throw new JDBCException("Could not find table " + pkTableName + " for column " + pkColumn);
@@ -334,8 +346,8 @@ public abstract class SqlDatabaseSnapshot implements DatabaseSnapshot {
                 fkInfo.setPrimaryKeyTable(pkTable);
                 fkInfo.addPrimaryKeyColumn(pkColumn);
 
-                String fkTableName = rs.getString("FKTABLE_NAME");
-                String fkColumn = rs.getString("FKCOLUMN_NAME");
+                String fkTableName = convertFromDatabaseName(rs.getString("FKTABLE_NAME"));
+                String fkColumn = convertFromDatabaseName(rs.getString("FKCOLUMN_NAME"));
                 Table fkTable = tablesMap.get(fkTableName);
                 if (fkTable == null) {
                     throw new JDBCException("Could not find table " + fkTableName + " for column " + fkColumn);
@@ -343,7 +355,7 @@ public abstract class SqlDatabaseSnapshot implements DatabaseSnapshot {
                 fkInfo.setForeignKeyTable(fkTable);
                 fkInfo.addForeignKeyColumn(fkColumn);
 
-                fkInfo.setName(rs.getString("FK_NAME"));
+                fkInfo.setName(convertFromDatabaseName(rs.getString("FK_NAME")));
 
                 Integer updateRule, deleteRule;
                 updateRule = rs.getInt("UPDATE_RULE");
@@ -396,11 +408,16 @@ public abstract class SqlDatabaseSnapshot implements DatabaseSnapshot {
             }
             Map<String, Index> indexMap = new HashMap<String, Index>();
             while (rs.next()) {
-                String indexName = rs.getString("INDEX_NAME");
+                String indexName = convertFromDatabaseName(rs.getString("INDEX_NAME"));
                 short type = rs.getShort("TYPE");
 //                String tableName = rs.getString("TABLE_NAME");
-                boolean nonUnique = rs.getBoolean("NON_UNIQUE");
-                String columnName = rs.getString("COLUMN_NAME");
+                boolean nonUnique = true;
+                try {
+                    nonUnique = rs.getBoolean("NON_UNIQUE");
+                } catch (SQLException e) {
+                    //doesn't exist in all databases
+                }
+                String columnName = convertFromDatabaseName(rs.getString("COLUMN_NAME"));
                 short position = rs.getShort("ORDINAL_POSITION");
                 String filterCondition = rs.getString("FILTER_CONDITION");
 
@@ -422,7 +439,7 @@ public abstract class SqlDatabaseSnapshot implements DatabaseSnapshot {
                     indexInformation = new Index();
                     indexInformation.setTable(table);
                     indexInformation.setName(indexName);
-                    indexInformation.setUnique(new Boolean(!nonUnique));
+                    indexInformation.setUnique(!nonUnique);
                     indexInformation.setFilterCondition(filterCondition);
                     indexMap.put(indexName, indexInformation);
                 }
@@ -466,8 +483,8 @@ public abstract class SqlDatabaseSnapshot implements DatabaseSnapshot {
             ResultSet rs = databaseMetaData.getPrimaryKeys(database.convertRequestedSchemaToCatalog(schema), database.convertRequestedSchemaToSchema(schema), table.getName());
 
             while (rs.next()) {
-                String tableName = rs.getString("TABLE_NAME");
-                String columnName = rs.getString("COLUMN_NAME");
+                String tableName = convertFromDatabaseName(rs.getString("TABLE_NAME"));
+                String columnName = convertFromDatabaseName(rs.getString("COLUMN_NAME"));
                 short position = rs.getShort("KEY_SEQ");
 
                 boolean foundExistingPK = false;
@@ -596,5 +613,9 @@ public abstract class SqlDatabaseSnapshot implements DatabaseSnapshot {
 
     public String getSchema() {
         return schema;
+    }
+
+    public boolean hasDatabaseChangeLogTable() {
+        return hasDatabaseChangeLogTable;
     }
 }

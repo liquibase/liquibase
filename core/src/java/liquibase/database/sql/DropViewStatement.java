@@ -29,7 +29,7 @@ public class DropViewStatement implements SqlStatement {
         return ";";
     }
 
-    public boolean supportsDatabase(Database database) {
+    public boolean supportsDatabase(Database datCabase) {
         return true;
     }
 }

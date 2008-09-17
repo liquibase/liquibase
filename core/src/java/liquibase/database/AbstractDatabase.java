@@ -347,6 +347,8 @@ public abstract class AbstractDatabase implements Database {
         try {
             if (dateAsString.indexOf(" ") > 0) {
                 return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(dateAsString);
+            } else if (dateAsString.indexOf("T") > 0) {
+                return new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(dateAsString);                
             } else {
                 if (dateAsString.indexOf(":") > 0) {
                     return new SimpleDateFormat("HH:mm:ss").parse(dateAsString);
@@ -618,6 +620,14 @@ public abstract class AbstractDatabase implements Database {
 
             List<Change> dropChanges = new ArrayList<Change>();
 
+            for (View view : snapshot.getViews()) {
+                DropViewChange dropChange = new DropViewChange();
+                dropChange.setViewName(view.getName());
+                dropChange.setSchemaName(schema);
+
+                dropChanges.add(dropChange);
+            }
+
             for (ForeignKey fk : snapshot.getForeignKeys()) {
                 DropForeignKeyConstraintChange dropFK = new DropForeignKeyConstraintChange();
                 dropFK.setBaseTableSchemaName(schema);
@@ -625,14 +635,6 @@ public abstract class AbstractDatabase implements Database {
                 dropFK.setConstraintName(fk.getName());
 
                 dropChanges.add(dropFK);
-            }
-
-            for (View view : snapshot.getViews()) {
-                DropViewChange dropChange = new DropViewChange();
-                dropChange.setViewName(view.getName());
-                dropChange.setSchemaName(schema);
-
-                dropChanges.add(dropChange);
             }
 
 //            for (Index index : snapshot.getIndexes()) {
@@ -648,6 +650,7 @@ public abstract class AbstractDatabase implements Database {
                 DropTableChange dropChange = new DropTableChange();
                 dropChange.setSchemaName(schema);
                 dropChange.setTableName(table.getName());
+                dropChange.setCascadeConstraints(true);
 
                 dropChanges.add(dropChange);
             }
@@ -663,9 +666,11 @@ public abstract class AbstractDatabase implements Database {
             }
 
 
-            RawSQLChange clearChangeLogChange = new RawSQLChange();
-            clearChangeLogChange.setSql("DELETE FROM " + escapeTableName(convertRequestedSchemaToSchema(getDefaultSchemaName()), getDatabaseChangeLogTableName()));
-            dropChanges.add(clearChangeLogChange);
+            if (snapshot.hasDatabaseChangeLogTable()) {
+                RawSQLChange clearChangeLogChange = new RawSQLChange();
+                clearChangeLogChange.setSql("DELETE FROM " + escapeTableName(convertRequestedSchemaToSchema(schema), getDatabaseChangeLogTableName()));
+                dropChanges.add(clearChangeLogChange);
+            }
 
             try {
                 for (Change change : dropChanges) {
@@ -925,6 +930,10 @@ public abstract class AbstractDatabase implements Database {
         } else {
             return schemaName + "." + sequenceName;
         }
+    }
+
+    public String escapeConstraintName(String constraintName) {
+        return constraintName;
     }
 
     public String escapeColumnName(String schemaName, String tableName, String columnName) {
@@ -1214,4 +1223,8 @@ public abstract class AbstractDatabase implements Database {
     }
 
     public abstract DatabaseSnapshot createDatabaseSnapshot(String schema, Set<DiffStatusListener> statusListeners) throws JDBCException;
+
+    public boolean supportsRestrictForeignKeys() {
+        return true;
+    }
 }

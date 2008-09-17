@@ -262,5 +262,9 @@ public interface Database extends DatabaseObject {
 
     void close() throws JDBCException;
 
-    DatabaseSnapshot createDatabaseSnapshot(String schema, Set<DiffStatusListener> statusListeners) throws JDBCException; 
+    DatabaseSnapshot createDatabaseSnapshot(String schema, Set<DiffStatusListener> statusListeners) throws JDBCException;
+
+    boolean supportsRestrictForeignKeys();
+
+    String escapeConstraintName(String constraintName);
 }

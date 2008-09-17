@@ -41,11 +41,11 @@ public class DropPrimaryKeyStatement implements SqlStatement {
         }
 
         if (database instanceof MSSQLDatabase) {
-            return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " DROP CONSTRAINT " + getConstraintName();
+            return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " DROP CONSTRAINT " + database.escapeConstraintName(getConstraintName());
         } else if (database instanceof PostgresDatabase) {
-            return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " DROP CONSTRAINT " + getConstraintName();
+            return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " DROP CONSTRAINT " + database.escapeConstraintName(getConstraintName());
         } else if (database instanceof FirebirdDatabase) {
-            return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " DROP CONSTRAINT "+getConstraintName();
+            return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " DROP CONSTRAINT "+database.escapeConstraintName(getConstraintName());
         } else if (database instanceof OracleDatabase) {
             return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " DROP PRIMARY KEY DROP INDEX";
         }
