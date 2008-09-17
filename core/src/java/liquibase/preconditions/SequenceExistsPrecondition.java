@@ -3,6 +3,7 @@ package liquibase.preconditions;
 import liquibase.database.Database;
 import liquibase.database.structure.DatabaseSnapshot;
 import liquibase.DatabaseChangeLog;
+import liquibase.util.StringUtils;
 import liquibase.exception.PreconditionFailedException;
 import liquibase.exception.PreconditionErrorException;
 import liquibase.exception.JDBCException;
@@ -16,7 +17,7 @@ public class SequenceExistsPrecondition implements Precondition {
     }
 
     public void setSchemaName(String schemaName) {
-        this.schemaName = schemaName;
+        this.schemaName = StringUtils.trimToNull(schemaName);
     }
 
     public String getSequenceName() {

@@ -40,7 +40,7 @@ public class ModifyColumnChange extends AbstractChange implements ChangeWithColu
     }
 
     public void setSchemaName(String schemaName) {
-        this.schemaName = schemaName;
+        this.schemaName = StringUtils.trimToNull(schemaName);
     }
 
     public String getTableName() {
