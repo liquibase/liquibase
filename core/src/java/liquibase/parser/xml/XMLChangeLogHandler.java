@@ -236,6 +236,7 @@ class XMLChangeLogHandler extends DefaultHandler {
     }
 
     private void setProperty(Object object, String attributeName, String attributeValue) throws IllegalAccessException, InvocationTargetException, CustomChangeException {
+        attributeValue = StringUtils.trimToNull(attributeValue);
         if (object instanceof CustomChangeWrapper) {
             if (attributeName.equals("class")) {
                 ((CustomChangeWrapper) object).setClass(expandExpressions(attributeValue));
