@@ -438,6 +438,9 @@ public class ChangeSet {
         if (currentMd5Sum == null) {
             return true;
         }
+        if (storedCheckSum == null) {
+            return true;
+        }
         if (currentMd5Sum.equals(storedCheckSum)) {
             return true;
         }

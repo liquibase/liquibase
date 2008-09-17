@@ -42,7 +42,7 @@ public class DropNotNullConstraintChange extends AbstractChange {
     }
 
     public void setSchemaName(String schemaName) {
-        this.schemaName = schemaName;
+        this.schemaName = StringUtils.trimToNull(schemaName);
     }
 
     public String getTableName() {

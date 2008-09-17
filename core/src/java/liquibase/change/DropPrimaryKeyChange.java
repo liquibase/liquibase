@@ -37,7 +37,7 @@ public class DropPrimaryKeyChange extends AbstractChange {
     }
 
     public void setSchemaName(String schemaName) {
-        this.schemaName = schemaName;
+        this.schemaName = StringUtils.trimToNull(schemaName);
     }
 
     public String getTableName() {
@@ -57,9 +57,6 @@ public class DropPrimaryKeyChange extends AbstractChange {
     }
 
     public void validate(Database database) throws InvalidChangeDefinitionException {
-        if (StringUtils.trimToNull(constraintName) == null) {
-            throw new InvalidChangeDefinitionException("constraintName is required", this);
-        }
     }
 
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {

@@ -45,7 +45,7 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
     }
 
     public void setSchemaName(String schemaName) {
-        this.schemaName = schemaName;
+        this.schemaName = StringUtils.trimToNull(schemaName);
     }
 
     public String getTableName() {
@@ -124,10 +124,12 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
 
         element.setAttribute("tableName", getTableName());
 
-        if (unique != null && unique) {
-            element.setAttribute("unique", "true");
-        } else {
-            element.setAttribute("unique", "false");
+        if (unique != null) { 
+            if (unique) {
+               element.setAttribute("unique", "true");
+            } else {
+                element.setAttribute("unique", "false");
+            }
         }
         
         for (ColumnConfig column : getColumns()) {
