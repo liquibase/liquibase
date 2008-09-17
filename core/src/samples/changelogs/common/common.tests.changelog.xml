@@ -12,7 +12,7 @@
 
     <changeSet id="datatypetest-1" author="nvoxland">
         <validCheckSum>e5b7b29ce3a75640858cd022501852d2</validCheckSum>
-        <createTable tableName="dataTypeTest">
+        <createTable tableName="dataTypeTest" schemaName="">
             <column name="id" type="integer">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
