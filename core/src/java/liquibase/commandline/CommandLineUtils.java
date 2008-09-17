@@ -146,7 +146,7 @@ public class CommandLineUtils {
          */
         private Formatter customFormatter = new Formatter() {
             public String format(LogRecord rec) {
-                return new String(rec.getMessage() + "\n");
+                return rec.getMessage() + "\n";
             }
         };
 

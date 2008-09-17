@@ -43,7 +43,7 @@ public class ColumnConfig {
 		if (columnStructure.getDefaultValue()!=null) {
 			setDefaultValue(columnStructure.getDefaultValue().toString());
 		}
-		setAutoIncrement(new Boolean(columnStructure.isAutoIncrement()));
+		setAutoIncrement(columnStructure.isAutoIncrement());
 		ConstraintsConfig constraints = new ConstraintsConfig(); 
 		constraints.setNullable(columnStructure.isNullable());
 		constraints.setPrimaryKey(columnStructure.isPrimaryKey());
