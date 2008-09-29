@@ -22,6 +22,7 @@ public class AndPrecondition extends PreconditionLogic {
             } catch (PreconditionFailedException e) {
                 failures.addAll(e.getFailedPreconditions());
                 allPassed = false;
+                break;
             }
         }
         if (!allPassed) {
