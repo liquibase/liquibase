@@ -7,6 +7,7 @@ import liquibase.parser.ChangeLogIterator;
 import liquibase.parser.filter.DbmsChangeSetFilter;
 import liquibase.parser.visitor.ValidatingVisitor;
 import liquibase.preconditions.AndPrecondition;
+import liquibase.preconditions.Preconditions;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,7 +16,7 @@ import java.util.List;
  * Encapsulates the information stored in the change log XML file.
  */
 public class DatabaseChangeLog implements Comparable<DatabaseChangeLog> {
-    private AndPrecondition preconditions;
+    private Preconditions preconditions;
     private String physicalFilePath;
     private String logicalFilePath;
 
@@ -25,11 +26,11 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog> {
         this.physicalFilePath = physicalFilePath;
     }
 
-    public AndPrecondition getPreconditions() {
+    public Preconditions getPreconditions() {
         return preconditions;
     }
 
-    public void setPreconditions(AndPrecondition precond) {
+    public void setPreconditions(Preconditions precond) {
         preconditions = precond;
     }
 
