@@ -360,4 +360,12 @@ END testSP;
     <!--<changeSet id="64-test" author="nvoxland">-->
         <!--<sql>call hello</sql>-->
     <!--</changeSet>-->
+
+    <changeSet id="65" author="nvoxland">
+        <sql>create table binarydoubletest (
+            id int not null primary key,
+            bdtestcol binary_double,
+            bftestcol binary_float)
+        </sql>
+    </changeSet>
 </databaseChangeLog>

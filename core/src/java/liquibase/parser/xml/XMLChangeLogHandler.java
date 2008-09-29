@@ -230,7 +230,12 @@ class XMLChangeLogHandler extends DefaultHandler {
     }
 
     protected void handleIncludedChangeLog(String fileName) throws LiquibaseException {
-        for (ChangeSet changeSet : new ChangeLogParser(changeLogParameters).parse(fileName, fileOpener).getChangeSets()) {
+        DatabaseChangeLog changeLog = new ChangeLogParser(changeLogParameters).parse(fileName, fileOpener);
+        AndPrecondition preconditions = changeLog.getPreconditions();
+        if (preconditions != null) {
+            databaseChangeLog.getPreconditions().addNestedPrecondition(preconditions);
+        }
+        for (ChangeSet changeSet : changeLog.getChangeSets()) {
             databaseChangeLog.addChangeSet(changeSet);
         }
     }
