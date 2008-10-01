@@ -1,6 +1,10 @@
 LiquiBase Core Changelog
 ==========================================
 
+Changes in version 1.8.1 (2008.10.1)
+----------------------
+- Bug fixes
+
 Changes in version 1.8.0 (2008.09.17)
 ----------------------
 - Added SQLite support

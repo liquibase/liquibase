@@ -47,6 +47,10 @@ The available targets at the current stage:
             <format property="build.start" pattern="MM/DD/yyyy hh:mm aa"></format>
         </tstamp>
 
+        <condition property="jvm.ok">
+              <equals arg1="${ant.java.version}" arg2="${target.java.version}"/>
+        </condition>
+
         <mkdir dir="${build.dir}"/>
         <mkdir dir="${build.test.dir}"/>
         <mkdir dir="${build.db.test.dir}"/>
@@ -95,6 +99,10 @@ The available targets at the current stage:
         </taskdef>
     </target>
 
+    <target name="check-jvm" depends="prepare" unless="jvm.ok">
+        <fail message="Wrong JVM - ${ant.java.version}"/>
+      </target>
+
     <!-- target: CLEAN -->
     <target name="clean">
         <property file="build.properties"/>
@@ -115,7 +123,7 @@ The available targets at the current stage:
     </target>
 
     <!-- target: COMPILE -->
-    <target name="compile" depends="prepare">
+    <target name="compile" depends="prepare, check-jvm">
         <copy todir="${build.dir}" filtering="true">
             <filterset>
                 <filter token="BUILD.VERSION" value="${build.version}"/>

@@ -359,14 +359,6 @@ END testSP;
 
     <changeSet id="64" author="nvoxland">
         <sqlFile path="changelogs/oracle/complete/sampleproc.sql" splitStatements="false" endDelimiter=""/>
-        <!--<sql  splitStatements="false">-->
-            <!--create or replace procedure testHello-->
-            <!--is-->
-            <!--begin-->
-            <!--DBMS_OUTPUT.PUT_LINE('Hello From The Database Again!');-->
-            <!--DBMS_OUTPUT.PUT_LINE('Hello Test!');-->
-            <!--end testHello;-->
-        <!--</sql>-->
     </changeSet>
     <!--<changeSet id="64-test" author="nvoxland">-->
         <!--<sql>call testHello</sql>-->
