@@ -336,6 +336,9 @@ BEGIN
 END testSP;
         </sql>
     </changeSet>
+    <!--<changeSet id="t1.1-call" author="nvoxland">-->
+        <!--<sql>execute testSP</sql>-->
+    <!--</changeSet>-->
 
     <changeSet id="62" author="nvoxland">
         <createTable tableName="sysdateTest">
@@ -355,10 +358,18 @@ END testSP;
     </changeSet>
 
     <changeSet id="64" author="nvoxland">
-        <sqlFile path="changelogs/oracle/complete/sampleproc.sql" splitStatements="false"/>
+        <sqlFile path="changelogs/oracle/complete/sampleproc.sql" splitStatements="false" endDelimiter=""/>
+        <!--<sql  splitStatements="false">-->
+            <!--create or replace procedure testHello-->
+            <!--is-->
+            <!--begin-->
+            <!--DBMS_OUTPUT.PUT_LINE('Hello From The Database Again!');-->
+            <!--DBMS_OUTPUT.PUT_LINE('Hello Test!');-->
+            <!--end testHello;-->
+        <!--</sql>-->
     </changeSet>
     <!--<changeSet id="64-test" author="nvoxland">-->
-        <!--<sql>call hello</sql>-->
+        <!--<sql>call testHello</sql>-->
     <!--</changeSet>-->
 
     <changeSet id="65" author="nvoxland">
