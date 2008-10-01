@@ -22,13 +22,14 @@ public abstract class AbstractSQLChange extends AbstractChange {
 
     private boolean stripComments;
     private boolean splitStatements;
-    private String endDelimiter = ";";
+    private String endDelimiter;
     private String sql;
 
     protected AbstractSQLChange(String tagName, String changeName) {
         super(tagName, changeName);
         stripComments= false;
         splitStatements =true;
+        endDelimiter =  ";";
     }
 
     /**
@@ -105,6 +106,7 @@ public abstract class AbstractSQLChange extends AbstractChange {
         List<SqlStatement> returnStatements = new ArrayList<SqlStatement>();
 
         String processedSQL = isStrippingComments() ? StringUtils.stripComments(getSql()) : getSql();
+        processedSQL = processedSQL.replaceAll("\r\n", "\n").replaceAll("\r", "\n");
         
         if(isSplittingStatements()) {
             String[] statements = StringUtils.splitSQL(processedSQL);
