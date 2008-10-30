@@ -165,6 +165,9 @@ public class BaseLiquibaseTask extends Task {
         }
         Liquibase liquibase = new Liquibase(changeLogFile, new CompositeFileOpener(antFO, fsFO), database);
         liquibase.setCurrentDateTimeFunction(currentDateTimeFunction);
+        for (Map.Entry<String, Object> entry : changeLogProperties.entrySet()) {
+            liquibase.setChangeLogParameterValue(entry.getKey(), entry.getValue());
+        }
 
         return liquibase;
     }
