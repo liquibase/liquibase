@@ -142,6 +142,16 @@ public interface Database extends DatabaseObject {
     String getDatabaseProductName(Connection conn) throws JDBCException;
 
     /**
+     * Returns the actual database-specific data type to use for a "char" column.
+     */
+    String getCharType();
+
+    /**
+     * Returns the actual database-specific data type to use for a "varchar" column.
+     */
+    String getVarcharType();
+
+    /**
      * Returns the actual database-specific data type to use a "boolean" column.
      */
     String getBooleanType();

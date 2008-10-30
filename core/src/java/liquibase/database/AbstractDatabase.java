@@ -223,6 +223,10 @@ public abstract class AbstractDatabase implements Database {
                     return getDateType();
                 } else if (dataTypeName.equalsIgnoreCase("TIME")) {
                     return getTimeType();
+                } else if (dataTypeName.equalsIgnoreCase("CHAR")) {
+                    return getCharType();
+                } else if (dataTypeName.equalsIgnoreCase("VARCHAR")) {
+                    return getVarcharType();
                 }
 
                 throw new RuntimeException("Could not find java.sql.Types value for " + dataTypeName);
@@ -262,6 +266,20 @@ public abstract class AbstractDatabase implements Database {
             return "DOUBLE";
         } else if ("bigint".equalsIgnoreCase(columnType)) {
             return getBigIntType();
+        } else if (columnType.toUpperCase().startsWith("CHAR(")) {
+            if (columnType.indexOf("(") >= 0) {
+                String precision = columnType.substring(columnType.indexOf("(") + 1, columnType.indexOf(")"));
+                return getCharType() + "(" + precision + ")";
+            } else {
+                return getCharType();
+            }
+        } else if (columnType.toUpperCase().startsWith("VARCHAR(")) {
+            if (columnType.indexOf("(") >= 0) {
+                String precision = columnType.substring(columnType.indexOf("(") + 1, columnType.indexOf(")"));
+                return getVarcharType() + "(" + precision + ")";
+            } else {
+                return getVarcharType();
+            }
         } else {
             return columnType;
         }
@@ -389,6 +407,18 @@ public abstract class AbstractDatabase implements Database {
 
     public String getBigIntType() {
         return "BIGINT";
+    }
+
+    /** Returns the actual database-specific data type to use for a "char" column. */
+    public String getCharType()
+    {
+        return "CHAR";
+    }
+
+    /** Returns the actual database-specific data type to use for a "varchar" column. */
+    public String getVarcharType()
+    {
+        return "VARCHAR";
     }
 
     /**

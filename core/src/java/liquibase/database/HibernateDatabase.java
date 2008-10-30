@@ -231,6 +231,15 @@ public class HibernateDatabase implements Database {
         return null;
     }
 
+    public String getCharType()
+    {
+        return null;
+    }
+
+    public String getVarcharType() {
+        return null;
+    }
+    
     public String getClobType() {
         return null;
     }
