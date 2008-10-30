@@ -249,6 +249,16 @@ public class MockDatabase implements Database {
         return "CLOB";
     }
 
+    public String getCharType()
+    {
+        return "CHAR";
+    }
+
+    public String getVarcharType()
+    {
+        return "VARCHAR";
+    }
+
     public String getBlobType() {
         return "BLOB";
     }
