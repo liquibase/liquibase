@@ -575,7 +575,7 @@ public class Main {
                 CommandLineUtils.doDiffToChangeLog(changeLogFile, database, createDatabaseFromCommandParams(commandParams));
                 return;
             } else if ("generateChangeLog".equalsIgnoreCase(command)) {
-                CommandLineUtils.doGenerateChangeLog(changeLogFile, database, defaultSchemaName, StringUtils.trimToNull(getCommandParam("diffTypes")), StringUtils.trimToNull(getCommandParam("changeSetAuthor")), StringUtils.trimToNull(getCommandParam("changeSetContext")), StringUtils.trimToNull(getCommandParam("exportDataDir")));
+                CommandLineUtils.doGenerateChangeLog(changeLogFile, database, defaultSchemaName, StringUtils.trimToNull(getCommandParam("diffTypes")), StringUtils.trimToNull(getCommandParam("changeSetAuthor")), StringUtils.trimToNull(getCommandParam("changeSetContext")), StringUtils.trimToNull(getCommandParam("dataDir")));
                 return;
             }
 
