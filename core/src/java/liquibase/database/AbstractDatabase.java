@@ -227,6 +227,8 @@ public abstract class AbstractDatabase implements Database {
                     return getCharType();
                 } else if (dataTypeName.equalsIgnoreCase("VARCHAR")) {
                     return getVarcharType();
+                } else if (dataTypeName.equalsIgnoreCase("FLOAT")) {
+                    return "FLOAT";
                 }
 
                 throw new RuntimeException("Could not find java.sql.Types value for " + dataTypeName);
