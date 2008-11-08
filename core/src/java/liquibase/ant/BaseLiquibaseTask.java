@@ -150,7 +150,7 @@ public class BaseLiquibaseTask extends Task {
         this.defaultSchemaName = defaultSchemaName;
     }
 
-    public void addChangeLogProperty(ChangeLogProperty changeLogProperty) {
+    public void addConfiguredChangeLogProperty(ChangeLogProperty changeLogProperty) {
         changeLogProperties.put(changeLogProperty.getName(), changeLogProperty.getValue());
     }
 
@@ -172,10 +172,10 @@ public class BaseLiquibaseTask extends Task {
         return liquibase;
     }
 
-    protected Database createDatabaseObject(String driverClassName, 
-    										String databaseUrl, 
-    										String username, 
-    										String password, 
+    protected Database createDatabaseObject(String driverClassName,
+    										String databaseUrl,
+    										String username,
+    										String password,
     										String defaultSchemaName,
     										String databaseClass) throws Exception {
         String[] strings = classpath.list();
@@ -196,8 +196,8 @@ public class BaseLiquibaseTask extends Task {
             return new HibernateDatabase(databaseUrl.substring("hibernate:".length()));
         }
 
-        if (databaseClass != null) {     
-        	
+        if (databaseClass != null) {
+
         	  try
         	  {
         		  DatabaseFactory.getInstance().addDatabaseImplementation((Database) Class.forName(databaseClass, true, loader).newInstance());
