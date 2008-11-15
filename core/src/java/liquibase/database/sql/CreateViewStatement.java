@@ -39,7 +39,8 @@ public class CreateViewStatement implements SqlStatement {
                 || database instanceof DB2Database
                 || database instanceof CacheDatabase
                 || database instanceof MSSQLDatabase
-                || database instanceof DerbyDatabase) {
+                || database instanceof DerbyDatabase
+                || database instanceof SybaseASADatabase) {
             if (replaceIfExists) {
                 throw new StatementNotSupportedOnDatabaseException("replaceIfExists not supported", this, database);
             }
@@ -52,6 +53,9 @@ public class CreateViewStatement implements SqlStatement {
             } else {
                 createClause = "RECREATE VIEW";
             }
+        } else if (database instanceof SybaseASADatabase && getSelectQuery().toLowerCase().startsWith("create view")){
+        	// Sybase ASA saves view definitions with header.
+        	return getSelectQuery();
         } else {
             createClause = "CREATE " + (replaceIfExists ? "OR REPLACE " : "") + "VIEW";
         }

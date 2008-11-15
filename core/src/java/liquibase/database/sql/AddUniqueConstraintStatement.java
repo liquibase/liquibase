@@ -4,6 +4,7 @@ import liquibase.database.DB2Database;
 import liquibase.database.Database;
 import liquibase.database.MSSQLDatabase;
 import liquibase.database.SQLiteDatabase;
+import liquibase.database.SybaseASADatabase;
 import liquibase.exception.StatementNotSupportedOnDatabaseException;
 import liquibase.util.StringUtils;
 
@@ -52,13 +53,13 @@ public class AddUniqueConstraintStatement implements SqlStatement {
             throw new StatementNotSupportedOnDatabaseException(this, database);
         }
     	
-    	String sql = "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ADD CONSTRAINT " + getConstraintName() + " UNIQUE (" + database.escapeColumnNameList(getColumnNames()) + ")";
+    	String sql = "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ADD CONSTRAINT " + database.escapeConstraintName(getConstraintName()) + " UNIQUE (" + database.escapeColumnNameList(getColumnNames()) + ")";
 
         if (StringUtils.trimToNull(getTablespace()) != null && database.supportsTablespaces()) {
             if (database instanceof MSSQLDatabase) {
                 sql += " ON " + getTablespace();
-            } else if (database instanceof DB2Database) {
-                ; //not supported in DB2
+            } else if (database instanceof DB2Database || database instanceof SybaseASADatabase) {
+                ; //not supported
             } else {
                 sql += " USING INDEX TABLESPACE " + getTablespace();
             }

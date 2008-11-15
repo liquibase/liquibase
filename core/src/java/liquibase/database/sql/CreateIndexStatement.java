@@ -3,6 +3,7 @@ package liquibase.database.sql;
 import liquibase.database.DB2Database;
 import liquibase.database.Database;
 import liquibase.database.MSSQLDatabase;
+import liquibase.database.SybaseASADatabase;
 import liquibase.exception.StatementNotSupportedOnDatabaseException;
 import liquibase.util.StringUtils;
 
@@ -61,7 +62,11 @@ public class CreateIndexStatement implements SqlStatement {
         }            
         buffer.append("INDEX ");
 
+<<<<<<< .mine
         buffer.append(database.escapeIndexName(null, getIndexName())).append(" ON ");
+=======
+        buffer.append(database.escapeConstraintName(getIndexName())).append(" ON ");
+>>>>>>> .theirs
         buffer.append(database.escapeTableName(getTableSchemaName(), getTableName())).append("(");
         Iterator<String> iterator = Arrays.asList(getColumns()).iterator();
         while (iterator.hasNext()) {
@@ -74,7 +79,7 @@ public class CreateIndexStatement implements SqlStatement {
         buffer.append(")");
 
         if (StringUtils.trimToNull(getTablespace()) != null && database.supportsTablespaces()) {
-            if (database instanceof MSSQLDatabase) {
+            if (database instanceof MSSQLDatabase || database instanceof SybaseASADatabase) {
                 buffer.append(" ON ").append(getTablespace());
             } else if (database instanceof DB2Database) {
                 buffer.append(" IN ").append(getTablespace());

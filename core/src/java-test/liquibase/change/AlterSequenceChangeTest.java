@@ -35,9 +35,9 @@ public class AlterSequenceChangeTest extends AbstractChangeTest {
         assertTrue(sqlStatements[0] instanceof AlterSequenceStatement);
         assertEquals("SCHEMA_NAME", ((AlterSequenceStatement) sqlStatements[0]).getSchemaName());
         assertEquals("SEQ_NAME", ((AlterSequenceStatement) sqlStatements[0]).getSequenceName());
-        assertEquals(100, ((AlterSequenceStatement) sqlStatements[0]).getMinValue());
-        assertEquals(1000, ((AlterSequenceStatement) sqlStatements[0]).getMaxValue());
-        assertEquals(50, ((AlterSequenceStatement) sqlStatements[0]).getIncrementBy());
+        assertEquals(new Integer(100), ((AlterSequenceStatement) sqlStatements[0]).getMinValue());
+        assertEquals(new Integer(1000), ((AlterSequenceStatement) sqlStatements[0]).getMaxValue());
+        assertEquals(new Integer(50), ((AlterSequenceStatement) sqlStatements[0]).getIncrementBy());
         assertEquals(true, ((AlterSequenceStatement) sqlStatements[0]).getOrdered());
 
     }

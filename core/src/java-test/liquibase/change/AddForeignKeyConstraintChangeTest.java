@@ -46,7 +46,7 @@ public class AddForeignKeyConstraintChangeTest  extends AbstractChangeTest {
 
         assertEquals(true, statement.isDeferrable());
         assertEquals(true, statement.isInitiallyDeferred());
-        assertEquals(DatabaseMetaData.importedKeyCascade, statement.getDeleteRule());
+        assertEquals(new Integer(DatabaseMetaData.importedKeyCascade), statement.getDeleteRule());
     }
 
       public void getRefactoringName() throws Exception {

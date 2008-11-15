@@ -29,7 +29,8 @@ public class DatabaseFactory {
             new CacheDatabase(),
             new FirebirdDatabase(),
             new MaxDBDatabase(),
-            new SQLiteDatabase()
+            new SQLiteDatabase(),
+            new SybaseASADatabase()
     ));
 
     private DatabaseFactory() {

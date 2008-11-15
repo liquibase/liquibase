@@ -4,6 +4,7 @@ import liquibase.database.Database;
 import liquibase.database.MaxDBDatabase;
 import liquibase.database.MySQLDatabase;
 import liquibase.database.SQLiteDatabase;
+import liquibase.database.SybaseASADatabase;
 import liquibase.exception.StatementNotSupportedOnDatabaseException;
 
 public class DropForeignKeyConstraintStatement implements SqlStatement {
@@ -41,7 +42,7 @@ public class DropForeignKeyConstraintStatement implements SqlStatement {
             throw new StatementNotSupportedOnDatabaseException("Database does not support schemas", this, database);
         }
         
-        if (database instanceof MySQLDatabase || database instanceof MaxDBDatabase) {
+        if (database instanceof MySQLDatabase || database instanceof MaxDBDatabase || database instanceof SybaseASADatabase) {
             return "ALTER TABLE " + database.escapeTableName(getBaseTableSchemaName(), getBaseTableName()) + " DROP FOREIGN KEY " + database.escapeConstraintName(getConstraintName());
         } else {
             return "ALTER TABLE " + database.escapeTableName(getBaseTableSchemaName(), getBaseTableName()) + " DROP CONSTRAINT " + database.escapeConstraintName(getConstraintName());

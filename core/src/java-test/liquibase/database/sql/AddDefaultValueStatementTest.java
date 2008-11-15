@@ -3,6 +3,7 @@ package liquibase.database.sql;
 import liquibase.database.Database;
 import liquibase.database.MSSQLDatabase;
 import liquibase.database.MySQLDatabase;
+import liquibase.database.SybaseASADatabase;
 import liquibase.database.structure.DatabaseSnapshot;
 import liquibase.database.template.JdbcTemplate;
 import liquibase.exception.JDBCException;
@@ -66,7 +67,10 @@ public class AddDefaultValueStatementTest extends AbstractSqlStatementTest {
                     }
 
                     protected void postExecuteAssert(DatabaseSnapshot snapshot) {
-                        if (snapshot.getDatabase() instanceof MySQLDatabase || snapshot.getDatabase() instanceof MSSQLDatabase) {
+                        if (snapshot.getDatabase() instanceof MySQLDatabase 
+                        		|| snapshot.getDatabase() instanceof MSSQLDatabase
+                        		|| snapshot.getDatabase() instanceof SybaseASADatabase
+                		) {
                             assertEquals("true", snapshot.getTable(TABLE_NAME).getColumn(COLUMN_NAME).getDefaultValue().toString().toLowerCase());
                         } else {
                             assertEquals(snapshot.getDatabase().getTrueBooleanValue().toLowerCase(), snapshot.getTable(TABLE_NAME).getColumn(COLUMN_NAME).getDefaultValue().toString().toLowerCase());
@@ -93,7 +97,7 @@ public class AddDefaultValueStatementTest extends AbstractSqlStatementTest {
                     }
 
                     protected void postExecuteAssert(DatabaseSnapshot snapshot) {
-                        assertEquals(42, new Integer(snapshot.getTable(TABLE_NAME).getColumn(COLUMN_NAME).getDefaultValue().toString()));
+                        assertEquals(new Integer(42), new Integer(snapshot.getTable(TABLE_NAME).getColumn(COLUMN_NAME).getDefaultValue().toString()));
                     }
 
                 });
@@ -116,7 +120,7 @@ public class AddDefaultValueStatementTest extends AbstractSqlStatementTest {
                     }
 
                     protected void postExecuteAssert(DatabaseSnapshot snapshot) {
-                        assertEquals(42.56f, new Float(snapshot.getTable(TABLE_NAME).getColumn(COLUMN_NAME).getDefaultValue().toString()));
+                        assertEquals(new Float(42.56f), new Float(snapshot.getTable(TABLE_NAME).getColumn(COLUMN_NAME).getDefaultValue().toString()));
                     }
 
                 });

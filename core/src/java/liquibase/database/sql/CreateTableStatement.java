@@ -4,6 +4,7 @@ import liquibase.database.DB2Database;
 import liquibase.database.Database;
 import liquibase.database.MSSQLDatabase;
 import liquibase.database.SQLiteDatabase;
+import liquibase.database.SybaseASADatabase;
 import liquibase.database.SybaseDatabase;
 import liquibase.util.StringUtils;
 import liquibase.log.LogFactory;
@@ -191,7 +192,7 @@ public class CreateTableStatement implements SqlStatement {
             if (getNotNullColumns().contains(column)) {
                 buffer.append(" NOT NULL");
             } else {
-                if (database instanceof SybaseDatabase) {
+                if (database instanceof SybaseDatabase || database instanceof SybaseASADatabase) {
                     buffer.append(" NULL");
                 }
             }
@@ -275,7 +276,7 @@ public class CreateTableStatement implements SqlStatement {
 //        }
 
         if (getTablespace() != null && database.supportsTablespaces()) {
-            if (database instanceof MSSQLDatabase) {
+            if (database instanceof MSSQLDatabase || database instanceof SybaseASADatabase) {
                 sql += " ON " + getTablespace();
             } else if (database instanceof DB2Database) {
                 sql += " IN " + getTablespace();
