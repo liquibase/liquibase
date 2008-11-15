@@ -24,6 +24,8 @@ public interface DatabaseSnapshot {
     Set<PrimaryKey> getPrimaryKeys();
 
     Set<Sequence> getSequences();
+    
+    Set<UniqueConstraint> getUniqueConstraints();
 
     /**
      * Returns the table object for the given tableName.  If table does not exist, returns null
@@ -39,6 +41,8 @@ public interface DatabaseSnapshot {
     View getView(String viewName);
 
     PrimaryKey getPrimaryKey(String pkName);
+    
+    UniqueConstraint getUniqueConstraint (String ucName);
 
     String getSchema();
 

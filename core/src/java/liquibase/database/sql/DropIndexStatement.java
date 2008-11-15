@@ -39,27 +39,15 @@ public class DropIndexStatement implements SqlStatement {
             if (getTableName() == null) {
                 throw new StatementNotSupportedOnDatabaseException("tableName is required", this, database);
             }
-<<<<<<< .mine
             return "DROP INDEX " + database.escapeIndexName(null, getIndexName()) + " ON " + database.escapeTableName(schemaName, getTableName());
-=======
-            return "DROP INDEX " + database.escapeConstraintName(getIndexName()) + " ON " + database.escapeTableName(schemaName, getTableName());
->>>>>>> .theirs
         } else if (database instanceof MSSQLDatabase) {
             if (getTableName() == null) {
                 throw new StatementNotSupportedOnDatabaseException("tableName is required", this, database);
             }
-<<<<<<< .mine
             return "DROP INDEX " + database.escapeTableName(schemaName, getTableName()) + "." + database.escapeIndexName(null, getIndexName());
-=======
-            return "DROP INDEX " + database.escapeTableName(schemaName, getTableName()) + "." + database.escapeConstraintName(getIndexName());
->>>>>>> .theirs
         }
 
-<<<<<<< .mine
         return "DROP INDEX " + database.escapeIndexName(null, getIndexName());
-=======
-        return "DROP INDEX " + database.escapeConstraintName(getIndexName());
->>>>>>> .theirs
     }
 
     public String getEndDelimiter(Database database) {

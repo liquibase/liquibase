@@ -104,7 +104,7 @@ public class AddForeignKeyConstraintStatement implements SqlStatement {
             throw new StatementNotSupportedOnDatabaseException(this, database);
         }
 
-        String sql = "ALTER TABLE " + database.escapeTableName(getBaseTableSchemaName(), getBaseTableName()) + " ADD CONSTRAINT " + getConstraintName() + " FOREIGN KEY (" + database.escapeColumnNameList(getBaseColumnNames()) + ") REFERENCES " + database.escapeTableName(getReferencedTableSchemaName(), getReferencedTableName()) + "(" + database.escapeColumnNameList(getReferencedColumnNames()) + ")";
+        String sql = "ALTER TABLE " + database.escapeTableName(getBaseTableSchemaName(), getBaseTableName()) + " ADD CONSTRAINT " + database.escapeConstraintName(getConstraintName()) + " FOREIGN KEY (" + database.escapeColumnNameList(getBaseColumnNames()) + ") REFERENCES " + database.escapeTableName(getReferencedTableSchemaName(), getReferencedTableName()) + "(" + database.escapeColumnNameList(getReferencedColumnNames()) + ")";
 
         if (this.updateRule != null) {
             switch (this.updateRule) {

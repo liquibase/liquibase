@@ -57,6 +57,9 @@ public class DiffResult {
     private SortedSet<PrimaryKey> missingPrimaryKeys = new TreeSet<PrimaryKey>();
     private SortedSet<PrimaryKey> unexpectedPrimaryKeys = new TreeSet<PrimaryKey>();
 
+    private SortedSet<UniqueConstraint> missingUniqueConstraints = new TreeSet<UniqueConstraint>();
+    private SortedSet<UniqueConstraint> unexpectedUniqueConstraints = new TreeSet<UniqueConstraint>();
+    
     private SortedSet<Sequence> missingSequences = new TreeSet<Sequence>();
     private SortedSet<Sequence> unexpectedSequences = new TreeSet<Sequence>();
 
@@ -208,6 +211,22 @@ public class DiffResult {
     public SortedSet<Sequence> getUnexpectedSequences() {
         return unexpectedSequences;
     }
+    
+    public void addMissingUniqueConstraint (UniqueConstraint uniqueConstraint) {
+      missingUniqueConstraints.add(uniqueConstraint);
+    }
+  
+    public SortedSet<UniqueConstraint> getMissingUniqueConstraints () {
+      return this.missingUniqueConstraints;
+    }
+  
+    public void addUnexpectedUniqueConstraint (UniqueConstraint uniqueConstraint) {
+      unexpectedUniqueConstraints.add(uniqueConstraint);
+    }
+  
+    public SortedSet<UniqueConstraint> getUnexpectedUniqueConstraints () {
+      return unexpectedUniqueConstraints;
+    }
 
     public boolean shouldDiffData() {
         return diffData;
@@ -250,6 +269,8 @@ public class DiffResult {
         printSetComparison("Unexpected Foreign Keys", getUnexpectedForeignKeys(), out);
         printSetComparison("Missing Primary Keys", getMissingPrimaryKeys(), out);
         printSetComparison("Unexpected Primary Keys", getUnexpectedPrimaryKeys(), out);
+        printSetComparison("Missing Unique Constraints", getMissingUniqueConstraints(), out);
+        printSetComparison("Unexpected Unique Constraints", getUnexpectedUniqueConstraints(), out);
         printSetComparison("Missing Indexes", getMissingIndexes(), out);
         printSetComparison("Unexpected Indexes", getUnexpectedIndexes(), out);
         printSetComparison("Missing Sequences", getMissingSequences(), out);
@@ -392,6 +413,8 @@ public class DiffResult {
         addChangedColumnChanges(changes);
         addMissingPrimaryKeyChanges(changes);
         addUnexpectedPrimaryKeyChanges(changes);
+        addMissingUniqueConstraintChanges(changes);
+        addUnexpectedUniqueConstraintChanges(changes);
         addMissingIndexChanges(changes);
         addUnexpectedIndexChanges(changes);
 
@@ -497,7 +520,32 @@ public class DiffResult {
             changes.add(change);
         }
     }
+    
+    private void addUnexpectedUniqueConstraintChanges(List<Change> changes) {
+      for (UniqueConstraint uc : getUnexpectedUniqueConstraints()) {
 
+          if (!getUnexpectedTables().contains(uc.getTable())) {
+              DropUniqueConstraintChange change = new DropUniqueConstraintChange();
+              change.setTableName(uc.getTable().getName());
+              change.setConstraintName(uc.getName());
+
+              changes.add(change);
+          }
+      }
+    }
+
+    private void addMissingUniqueConstraintChanges(List<Change> changes) {
+      for (UniqueConstraint uc : getMissingUniqueConstraints()) {
+
+          AddUniqueConstraintChange change = new AddUniqueConstraintChange();
+          change.setTableName(uc.getTable().getName());
+          change.setConstraintName(uc.getName());
+          change.setColumnNames(uc.getColumnNames());
+
+          changes.add(change);
+      }
+    }
+    
     private void addUnexpectedForeignKeyChanges(List<Change> changes) {
         for (ForeignKey fk : getUnexpectedForeignKeys()) {
 
