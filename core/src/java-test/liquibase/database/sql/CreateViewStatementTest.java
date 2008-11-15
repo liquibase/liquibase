@@ -28,12 +28,12 @@ public class CreateViewStatementTest extends AbstractSqlStatementTest {
         dropViewIfExists(TestContext.ALT_SCHEMA, VIEW_NAME, database);
 
         dropAndCreateTable(new CreateTableStatement(null, TABLE_NAME)
-                .addPrimaryKeyColumn("id", "int", null)
+                .addPrimaryKeyColumn("id", "int", null, null)
                 .addColumn("name", "varchar(50)")
                 , database);
 
         dropAndCreateTable(new CreateTableStatement(TestContext.ALT_SCHEMA, TABLE_NAME)
-                .addPrimaryKeyColumn("id", "int", null)
+                .addPrimaryKeyColumn("id", "int", null, null)
                 .addColumn("name", "varchar(50)")
                 , database);
     }

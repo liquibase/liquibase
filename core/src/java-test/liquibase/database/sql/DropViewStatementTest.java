@@ -20,11 +20,11 @@ public class DropViewStatementTest extends AbstractSqlStatementTest {
         dropViewIfExists(TestContext.ALT_SCHEMA, VIEW_NAME, database);
 
         dropAndCreateTable(new CreateTableStatement(null, TABLE_NAME)
-                .addPrimaryKeyColumn("id", "int", null)
+                .addPrimaryKeyColumn("id", "int", null, null)
                 , database);
 
         dropAndCreateTable(new CreateTableStatement(TestContext.ALT_SCHEMA, TABLE_NAME)
-                .addPrimaryKeyColumn("id", "int", null)
+                .addPrimaryKeyColumn("id", "int", null, null)
                 , database);
 
         new JdbcTemplate(database).execute(new CreateViewStatement(null, VIEW_NAME, "select * from "+TABLE_NAME, false));

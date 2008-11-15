@@ -70,7 +70,7 @@ public class CreateTableStatement implements SqlStatement {
         return notNullColumns;
     }
 
-    public CreateTableStatement addPrimaryKeyColumn(String columnName, String columnType, String keyName, ColumnConstraint... constraints) {
+    public CreateTableStatement addPrimaryKeyColumn(String columnName, String columnType, String defaultValue, String keyName, ColumnConstraint... constraints) {
 //        String pkName = "PK_" + getTableName().toUpperCase();
 ////        if (pkName.length() > 18) {
 ////            pkName = pkName.substring(0, 17);
@@ -84,7 +84,7 @@ public class CreateTableStatement implements SqlStatement {
         allConstraints.add(pkConstraint);
 
 
-        addColumn(columnName, columnType, allConstraints.toArray(new ColumnConstraint[allConstraints.size()]));
+        addColumn(columnName, columnType, defaultValue, allConstraints.toArray(new ColumnConstraint[allConstraints.size()]));
 
         return this;
     }

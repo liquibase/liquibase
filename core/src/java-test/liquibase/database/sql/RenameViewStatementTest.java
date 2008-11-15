@@ -22,11 +22,11 @@ public class RenameViewStatementTest extends AbstractSqlStatementTest {
         dropViewIfExists(TestContext.ALT_SCHEMA, NEW_VIEW_NAME, database);
 
         dropAndCreateTable(new CreateTableStatement(null, TABLE_NAME)
-                .addPrimaryKeyColumn("id", "int", null)
+                .addPrimaryKeyColumn("id", "int",null,  null)
                 , database);
 
         dropAndCreateTable(new CreateTableStatement(TestContext.ALT_SCHEMA, TABLE_NAME)
-                .addPrimaryKeyColumn("id", "int", null)
+                .addPrimaryKeyColumn("id", "int", null, null)
                 , database);
 
         dropAndCreateView(new CreateViewStatement(null, VIEW_NAME, "select * from " + TABLE_NAME, false), database);

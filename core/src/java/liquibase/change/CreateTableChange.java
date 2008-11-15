@@ -53,15 +53,17 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
         for (ColumnConfig column : getColumns()) {
             ConstraintsConfig constraints = column.getConstraints();
             boolean isAutoIncrement = column.isAutoIncrement() != null && column.isAutoIncrement();
+
+            String defaultValue = null;
+            if (column.hasDefaultValue()) {
+                defaultValue = StringUtils.trimToNull(column.getDefaultColumnValue(database));
+            }
+
             if (constraints != null && constraints.isPrimaryKey() != null && constraints.isPrimaryKey()) {
 
-                statement.addPrimaryKeyColumn(column.getName(), database.getColumnType(column.getType(), isAutoIncrement), constraints.getPrimaryKeyName());
+                statement.addPrimaryKeyColumn(column.getName(), database.getColumnType(column.getType(), isAutoIncrement), defaultValue, constraints.getPrimaryKeyName());
 
             } else {
-                String defaultValue = null;
-                if (column.hasDefaultValue()) {
-                    defaultValue = StringUtils.trimToNull(column.getDefaultColumnValue(database));
-                }
                 statement.addColumn(column.getName(),
                         database.getColumnType(column.getType(), column.isAutoIncrement()),
                         defaultValue);

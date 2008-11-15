@@ -508,7 +508,7 @@ public abstract class AbstractDatabase implements Database {
 
     protected SqlStatement getCreateChangeLogLockSQL() {
         return new CreateTableStatement(getDefaultSchemaName(), getDatabaseChangeLogLockTableName())
-                .addPrimaryKeyColumn("ID", "INT", null, new NotNullConstraint())
+                .addPrimaryKeyColumn("ID", "INT", null, null, new NotNullConstraint())
                 .addColumn("LOCKED", getBooleanType(), new NotNullConstraint())
                 .addColumn("LOCKGRANTED", getDateTimeType())
                 .addColumn("LOCKEDBY", "VARCHAR(255)");
@@ -516,9 +516,9 @@ public abstract class AbstractDatabase implements Database {
 
     protected SqlStatement getCreateChangeLogSQL() {
         return new CreateTableStatement(getDefaultSchemaName(), getDatabaseChangeLogTableName())
-                .addPrimaryKeyColumn("ID", "VARCHAR(63)", null, new NotNullConstraint())
-                .addPrimaryKeyColumn("AUTHOR", "VARCHAR(63)", null, new NotNullConstraint())
-                .addPrimaryKeyColumn("FILENAME", "VARCHAR(200)", null, new NotNullConstraint())
+                .addPrimaryKeyColumn("ID", "VARCHAR(63)", null, null, new NotNullConstraint())
+                .addPrimaryKeyColumn("AUTHOR", "VARCHAR(63)", null, null, new NotNullConstraint())
+                .addPrimaryKeyColumn("FILENAME", "VARCHAR(200)", null, null, new NotNullConstraint())
                 .addColumn("DATEEXECUTED", getDateTimeType(), new NotNullConstraint())
                 .addColumn("MD5SUM", "VARCHAR(32)")
                 .addColumn("DESCRIPTION", "VARCHAR(255)")

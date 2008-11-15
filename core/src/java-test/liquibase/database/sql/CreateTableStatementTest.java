@@ -32,7 +32,7 @@ public class CreateTableStatementTest extends AbstractSqlStatementTest {
     public void createTable_standard() throws Exception {
         new DatabaseTestTemplate().testOnAvailableDatabases(
                 new SqlStatementDatabaseTest(null, new CreateTableStatement(null, TABLE_NAME)
-                        .addPrimaryKeyColumn("id", "int", null)
+                        .addPrimaryKeyColumn("id", "int", null, null)
                         .addColumn("name", "varchar(255)")
                         .addColumn("username", "varchar(255)", "'NEWUSER'")) {
 
@@ -62,7 +62,7 @@ public class CreateTableStatementTest extends AbstractSqlStatementTest {
     public void createTable_autoincrementPK() throws Exception {
         new DatabaseTestTemplate().testOnAvailableDatabases(
                 new SqlStatementDatabaseTest(null, new CreateTableStatement(null, TABLE_NAME)
-                        .addPrimaryKeyColumn("id", "int", null)
+                        .addPrimaryKeyColumn("id", "int",null,  null)
                         .addColumn("name", "varchar(255)")
                         .addColumn("username", "varchar(255)", "'NEWUSER'")
                         .addColumnConstraint(new AutoIncrementConstraint("id"))) {
@@ -94,7 +94,7 @@ public class CreateTableStatementTest extends AbstractSqlStatementTest {
         final String foreignKeyName = "fk_test_parent";
         new DatabaseTestTemplate().testOnAvailableDatabases(
                 new SqlStatementDatabaseTest(null, new CreateTableStatement(null, TABLE_NAME)
-                        .addPrimaryKeyColumn("id", "int", null)
+                        .addPrimaryKeyColumn("id", "int", null, null)
                         .addColumn("name", "varchar(255)")
                         .addColumn("parent_id", "int", new ForeignKeyConstraint(foreignKeyName, TABLE_NAME + "(id)"))) {
 
@@ -125,7 +125,7 @@ public class CreateTableStatementTest extends AbstractSqlStatementTest {
 
         new DatabaseTestTemplate().testOnAvailableDatabases(
                 new SqlStatementDatabaseTest(null, new CreateTableStatement(null, TABLE_NAME)
-                        .addPrimaryKeyColumn("id", "int", null)
+                        .addPrimaryKeyColumn("id", "int", null, null)
                         .addColumn("name", "varchar(255)")
                         .addColumn("parent_id", "int",
                         new ForeignKeyConstraint(foreignKeyName, TABLE_NAME + "(id)")
@@ -164,13 +164,13 @@ public class CreateTableStatementTest extends AbstractSqlStatementTest {
 
         new DatabaseTestTemplate().testOnAvailableDatabases(
                 new SqlStatementDatabaseTest(null, new CreateTableStatement(null, TABLE_NAME)
-                        .addPrimaryKeyColumn("id", "int", null)
+                        .addPrimaryKeyColumn("id", "int", null, null)
                         .addColumn("name", "varchar(255)")
                         .addColumn("parent_id", "int", new ForeignKeyConstraint(foreignKeyName, FK_TABLE_NAME + "(id)").setDeleteCascade(true))) {
 
                     protected void setup(Database database) throws Exception {
                         new JdbcTemplate(database).execute(new CreateTableStatement(null, FK_TABLE_NAME)
-                        .addPrimaryKeyColumn("id", "int", null)
+                        .addPrimaryKeyColumn("id", "int",null,  null)
                         .addColumn("name", "varchar(255)"));
                         super.setup(database);
                     }
@@ -200,7 +200,7 @@ public class CreateTableStatementTest extends AbstractSqlStatementTest {
     public void createTable_uniqueColumn() throws Exception {
         new DatabaseTestTemplate().testOnAvailableDatabases(
                 new SqlStatementDatabaseTest(null, new CreateTableStatement(null, TABLE_NAME)
-                        .addPrimaryKeyColumn("id", "int", null)
+                        .addPrimaryKeyColumn("id", "int",null, null)
                         .addColumn("name", "varchar(255)")
                         .addColumn("username", "int", new UniqueConstraint("UQ_TESTCT_ID"), new NotNullConstraint())) {
 
@@ -226,7 +226,7 @@ public class CreateTableStatementTest extends AbstractSqlStatementTest {
     @Test
     public void addPrimaryKeyColumn_oneColumn() {
         CreateTableStatement statement = new CreateTableStatement(null, "tableName");
-        statement.addPrimaryKeyColumn("id", "int", null);
+        statement.addPrimaryKeyColumn("id", "int", null, null);
 
         assertEquals(1, statement.getPrimaryKeyConstraint().getColumns().size());
     }
@@ -234,8 +234,8 @@ public class CreateTableStatementTest extends AbstractSqlStatementTest {
     @Test
     public void addPrimaryKeyColumn_multiColumn() {
         CreateTableStatement statement = new CreateTableStatement(null, "tableName");
-        statement.addPrimaryKeyColumn("id1", "int", null);
-        statement.addPrimaryKeyColumn("id2", "int", null);
+        statement.addPrimaryKeyColumn("id1", "int", null, null);
+        statement.addPrimaryKeyColumn("id2", "int", null, null);
 
         assertEquals(2, statement.getPrimaryKeyConstraint().getColumns().size());
     }
@@ -282,7 +282,7 @@ public class CreateTableStatementTest extends AbstractSqlStatementTest {
     public void createTable_tablespace() throws Exception {
         new DatabaseTestTemplate().testOnAvailableDatabases(
                 new SqlStatementDatabaseTest(null, new CreateTableStatement(null, TABLE_NAME)
-                        .addPrimaryKeyColumn("id", "int", null)
+                        .addPrimaryKeyColumn("id", "int", null, null)
                         .addColumn("name", "varchar(255)")
                         .addColumn("username", "varchar(255)", "'NEWUSER'")
                         .setTablespace("liquibase2")) {
@@ -308,7 +308,7 @@ public class CreateTableStatementTest extends AbstractSqlStatementTest {
     public void createTable_altSchema() throws Exception {
         new DatabaseTestTemplate().testOnAvailableDatabases(
                 new SqlStatementDatabaseTest(TestContext.ALT_SCHEMA, new CreateTableStatement(TestContext.ALT_SCHEMA, TABLE_NAME)
-                        .addPrimaryKeyColumn("id", "int", null)
+                        .addPrimaryKeyColumn("id", "int", null, null)
                         .addColumn("name", "varchar(255)")
                         .addColumn("username", "varchar(255)", "'NEWUSER'")) {
 
