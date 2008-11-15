@@ -14,6 +14,15 @@ import liquibase.change.AddColumnChange;
 import liquibase.change.Change;
 import liquibase.change.CreateTableChange;
 import liquibase.change.RawSQLChange;
+<<<<<<< .mine
+
+
+
+=======
+import liquibase.change.custom.CustomChangeWrapper;
+import liquibase.change.custom.ExampleCustomSqlChange;
+import liquibase.database.sql.RawSqlStatement;
+>>>>>>> .theirs
 import liquibase.exception.ChangeLogParseException;
 import liquibase.preconditions.OrPrecondition;
 import liquibase.test.JUnitFileOpener;
@@ -52,7 +61,7 @@ public class XMLChangeLogParserTest {
         assertEquals("liquibase/parser/xml/multiChangeSetChangeLog.xml", changeLog.getPhysicalFilePath());
 
         assertNull(changeLog.getPreconditions());
-        assertEquals(3, changeLog.getChangeSets().size());
+        assertEquals(4, changeLog.getChangeSets().size());
 
         // change 0
         ChangeSet changeSet = changeLog.getChangeSets().get(0);
@@ -102,6 +111,21 @@ public class XMLChangeLogParserTest {
         change = changeSet.getChanges().get(0);
         assertEquals("createTable", change.getTagName());
         assertTrue(change instanceof CreateTableChange);
+
+    
+        // change 3
+        changeSet = changeLog.getChangeSets().get(3);
+        assertEquals(1, changeSet.getChanges().size());
+
+        change = changeSet.getChanges().get(0);
+        assertTrue(change instanceof CustomChangeWrapper);
+        CustomChangeWrapper wrapper = (CustomChangeWrapper) change;
+        wrapper.generateStatements(null);
+        assertTrue(wrapper.getCustomChange() instanceof ExampleCustomSqlChange);
+        ExampleCustomSqlChange exChg = (ExampleCustomSqlChange) wrapper.getCustomChange();
+        assertEquals("table", exChg.getTableName());
+        assertEquals("column", exChg.getColumnName());
+
     }
 
     @Test

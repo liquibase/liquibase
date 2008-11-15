@@ -38,6 +38,7 @@ class XMLChangeLogHandler extends DefaultHandler {
     private Preconditions rootPrecondition;
     private Stack<PreconditionLogic> preconditionLogicStack = new Stack<PreconditionLogic>();
     private ChangeSet changeSet;
+    private String paramName;
     private FileOpener fileOpener;
     private Precondition currentPrecondition;
 
@@ -197,12 +198,19 @@ class XMLChangeLogHandler extends DefaultHandler {
                     throw new RuntimeException("Unexpected change: " + change.getClass().getName());
                 }
                 lastColumn.setConstraints(constraints);
-            } else if ("param".equals(qName)) {
-                if (change instanceof CustomChangeWrapper) {
-                    ((CustomChangeWrapper) change).setParam(atts.getValue("name"), atts.getValue("value"));
-                } else {
-                    throw new MigrationFailedException(changeSet, "'param' unexpected in " + qName);
-                }
+			} else if ("param".equals(qName)) {
+				if (change instanceof CustomChangeWrapper) {
+					if (atts.getValue("value") == null) {
+						paramName = atts.getValue("name");
+						text = new StringBuffer();
+					} else {
+						((CustomChangeWrapper) change).setParam(atts
+								.getValue("name"), atts.getValue("value"));
+					}
+				} else {
+					throw new MigrationFailedException(changeSet,
+							"'param' unexpected in " + qName);
+				}
             } else if ("where".equals(qName)) {
                 text = new StringBuffer();
             } else if ("property".equals(qName)) {
@@ -321,6 +329,11 @@ class XMLChangeLogHandler extends DefaultHandler {
             } else if (change != null && change instanceof CreateProcedureChange && "comment".equals(qName)) {
                 ((CreateProcedureChange) change).setComments(textString);
                 text = new StringBuffer();
+			} else if (change != null && change instanceof CustomChangeWrapper
+					&& paramName != null && "param".equals(qName)) {
+				((CustomChangeWrapper) change).setParam(paramName, textString);
+				text = new StringBuffer();
+				paramName = null;
             } else if (changeSet != null && "comment".equals(qName)) {
                 changeSet.setComments(textString);
                 text = new StringBuffer();
