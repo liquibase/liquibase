@@ -729,7 +729,7 @@
         <xsd:complexType>
             <xsd:sequence>
                 <xsd:element name="param" minOccurs="0" maxOccurs="unbounded">
-                    <xsd:complexType>
+                    <xsd:complexType mixed="true">
                         <xsd:attribute name="name" type="xsd:string"/>
                         <xsd:attribute name="value" type="xsd:string"/>
                     </xsd:complexType>
