@@ -1000,6 +1000,10 @@ public abstract class AbstractDatabase implements Database {
         }
     }
 
+    public String escapeIndexName(String schemaName, String indexName) {
+        return escapeTableName(schemaName, indexName);
+    }
+
     public String escapeSequenceName(String schemaName, String sequenceName) {
         if (StringUtils.trimToNull(schemaName) == null || !supportsSchemas()) {
             return sequenceName;

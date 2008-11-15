@@ -236,6 +236,8 @@ public interface Database extends DatabaseObject {
      */
     String escapeTableName(String schemaName, String tableName);
 
+    String escapeIndexName(String schemaName, String indexName);
+
     /**
      * Escapes a single column name in a database-dependent manner so reserved words can be used as a column
      * name (i.e. "return"). 
@@ -305,4 +307,5 @@ public interface Database extends DatabaseObject {
     boolean supportsRestrictForeignKeys();
 
     String escapeConstraintName(String constraintName);
+
 }

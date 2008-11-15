@@ -61,7 +61,7 @@ public class CreateIndexStatement implements SqlStatement {
         }            
         buffer.append("INDEX ");
 
-        buffer.append(getIndexName()).append(" ON ");
+        buffer.append(database.escapeIndexName(null, getIndexName())).append(" ON ");
         buffer.append(database.escapeTableName(getTableSchemaName(), getTableName())).append("(");
         Iterator<String> iterator = Arrays.asList(getColumns()).iterator();
         while (iterator.hasNext()) {

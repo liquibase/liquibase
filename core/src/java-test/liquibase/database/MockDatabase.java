@@ -319,6 +319,10 @@ public class MockDatabase implements Database {
         }
     }
 
+    public String escapeIndexName(String schemaName, String indexName) {
+        return escapeTableName(schemaName, indexName);
+    }
+
     public String escapeColumnName(String schemaName, String tableName, String columnName) {
         return columnName;
     }
