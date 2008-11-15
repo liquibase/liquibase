@@ -65,7 +65,12 @@ public class RenameViewStatementTest extends AbstractSqlStatementTest {
                         assertNull(snapshot.getView(NEW_VIEW_NAME));
                     }
 
-                    protected void postExecuteAssert(DatabaseSnapshot snapshot) {
+                    @Override
+					protected boolean supportsTest(Database database) {
+                        return !(database instanceof SybaseASADatabase);
+					}
+
+					protected void postExecuteAssert(DatabaseSnapshot snapshot) {
                         assertNull(snapshot.getView(VIEW_NAME));
                         assertNotNull(snapshot.getView(NEW_VIEW_NAME));
                     }
@@ -78,7 +83,12 @@ public class RenameViewStatementTest extends AbstractSqlStatementTest {
         new DatabaseTestTemplate().testOnAvailableDatabases(
                 new SqlStatementDatabaseTest(TestContext.ALT_SCHEMA, new RenameViewStatement(TestContext.ALT_SCHEMA, VIEW_NAME, NEW_VIEW_NAME)) {
 
-                    protected boolean expectedException(Database database, JDBCException exception) {
+                	@Override
+					protected boolean supportsTest(Database database) {
+                        return !(database instanceof SybaseASADatabase);
+					}
+
+					protected boolean expectedException(Database database, JDBCException exception) {
                         return database instanceof OracleDatabase || !database.supportsSchemas();
                     }
 

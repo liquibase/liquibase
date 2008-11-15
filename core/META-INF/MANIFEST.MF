@@ -8,7 +8,7 @@ Bundle-Vendor: LiquiBase.org
 Export-Package: liquibase,
  liquibase.database,
  liquibase.database.structure,
- liquibase.migrator,
+ liquibase.migrator.servlet,
  liquibase.ant,
  liquibase.change,
  liquibase.commandline,

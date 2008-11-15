@@ -39,7 +39,9 @@ public class AddAutoIncrementStatementTest extends AbstractSqlStatementTest {
                         || database instanceof DerbyDatabase
                         || database instanceof CacheDatabase
                         || database instanceof H2Database
-                        || database instanceof FirebirdDatabase) {
+                        || database instanceof FirebirdDatabase
+                        || database instanceof SybaseASADatabase
+                ) {
                     assertFalse(generateTestStatement().supportsDatabase(database));
                 } else {
                     assertTrue(generateTestStatement().supportsDatabase(database));

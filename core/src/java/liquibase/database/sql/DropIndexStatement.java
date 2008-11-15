@@ -3,7 +3,6 @@ package liquibase.database.sql;
 import liquibase.database.Database;
 import liquibase.database.MSSQLDatabase;
 import liquibase.database.MySQLDatabase;
-import liquibase.database.OracleDatabase;
 import liquibase.exception.StatementNotSupportedOnDatabaseException;
 
 public class DropIndexStatement implements SqlStatement {
@@ -40,15 +39,27 @@ public class DropIndexStatement implements SqlStatement {
             if (getTableName() == null) {
                 throw new StatementNotSupportedOnDatabaseException("tableName is required", this, database);
             }
-            return "DROP INDEX " +getIndexName() + " ON " + database.escapeTableName(schemaName, getTableName());
+<<<<<<< .mine
+            return "DROP INDEX " + database.escapeIndexName(null, getIndexName()) + " ON " + database.escapeTableName(schemaName, getTableName());
+=======
+            return "DROP INDEX " + database.escapeConstraintName(getIndexName()) + " ON " + database.escapeTableName(schemaName, getTableName());
+>>>>>>> .theirs
         } else if (database instanceof MSSQLDatabase) {
             if (getTableName() == null) {
                 throw new StatementNotSupportedOnDatabaseException("tableName is required", this, database);
             }
-            return "DROP INDEX " + database.escapeTableName(schemaName, getTableName()) + "." + getIndexName();
+<<<<<<< .mine
+            return "DROP INDEX " + database.escapeTableName(schemaName, getTableName()) + "." + database.escapeIndexName(null, getIndexName());
+=======
+            return "DROP INDEX " + database.escapeTableName(schemaName, getTableName()) + "." + database.escapeConstraintName(getIndexName());
+>>>>>>> .theirs
         }
 
-        return "DROP INDEX " + getIndexName();
+<<<<<<< .mine
+        return "DROP INDEX " + database.escapeIndexName(null, getIndexName());
+=======
+        return "DROP INDEX " + database.escapeConstraintName(getIndexName());
+>>>>>>> .theirs
     }
 
     public String getEndDelimiter(Database database) {

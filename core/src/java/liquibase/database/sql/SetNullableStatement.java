@@ -50,7 +50,7 @@ public class SetNullableStatement implements SqlStatement {
             nullableString = " NOT NULL";
         }
 
-        if (database instanceof OracleDatabase || database instanceof SybaseDatabase) {
+        if (database instanceof OracleDatabase || database instanceof SybaseDatabase || database instanceof SybaseASADatabase) {
             return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " MODIFY " + database.escapeColumnName(getSchemaName(), getTableName(), getColumnName()) + nullableString;
         } else if (database instanceof MSSQLDatabase) {
             if (getColumnDataType() == null) {

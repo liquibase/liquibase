@@ -28,6 +28,8 @@ public class AddDefaultValueStatement implements SqlStatement {
     	
         if (database instanceof SybaseDatabase) {
             return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " REPLACE " + database.escapeColumnName(getSchemaName(), getTableName(), getColumnName()) + " DEFAULT " + database.convertJavaObjectToString(getDefaultValue());
+        } else if (database instanceof SybaseASADatabase) {
+            return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " MODIFY " + database.escapeColumnName(getSchemaName(), getTableName(), getColumnName()) + " DEFAULT " + database.convertJavaObjectToString(getDefaultValue());
         } else if (database instanceof MSSQLDatabase) {
             return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ADD CONSTRAINT " + ((MSSQLDatabase) database).generateDefaultConstraintName(getTableName(), getColumnName()) + " DEFAULT " + database.convertJavaObjectToString(getDefaultValue()) + " FOR " + getColumnName();
         } else if (database instanceof MySQLDatabase) {

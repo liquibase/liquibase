@@ -2,6 +2,7 @@ package liquibase.change;
 
 import liquibase.database.Database;
 import liquibase.database.SQLiteDatabase;
+import liquibase.database.SybaseASADatabase;
 import liquibase.database.SQLiteDatabase.AlterTableVisitor;
 import liquibase.database.sql.DropUniqueConstraintStatement;
 import liquibase.database.sql.SqlStatement;
@@ -27,8 +28,12 @@ public class DropUniqueConstraintChange extends AbstractChange {
     private String schemaName;
     private String tableName;
     private String constraintName;
+    /**
+     * Sybase ASA does drop unique constraint not by name, but using list of the columns in unique clause.
+     */
+    private String uniqueColumns;
 
-    public DropUniqueConstraintChange() {
+	public DropUniqueConstraintChange() {
         super("dropUniqueConstraint", "Drop Unique Constraint");
     }
 
@@ -56,8 +61,20 @@ public class DropUniqueConstraintChange extends AbstractChange {
         this.constraintName = constraintName;
     }
 
+    public String getUniqueColumns() {
+		return uniqueColumns;
+	}
+
+	public void setUniqueColumns(String uniqueColumns) {
+		this.uniqueColumns = uniqueColumns;
+	}
+
     public void validate(Database database) throws InvalidChangeDefinitionException {
-        if (StringUtils.trimToNull(constraintName) == null) {
+    	if (database instanceof SybaseASADatabase) {
+            if (StringUtils.trimToNull(constraintName) == null && StringUtils.trimToNull(constraintName) == null) {
+                throw new InvalidChangeDefinitionException("either constraintName or uniqueNames is required", this);
+            }
+    	} else if (StringUtils.trimToNull(constraintName) == null) {
             throw new InvalidChangeDefinitionException("constraintName is required", this);
         }
 
@@ -69,9 +86,12 @@ public class DropUniqueConstraintChange extends AbstractChange {
     		// return special statements for SQLite databases
     		return generateStatementsForSQLiteDatabase(database);
         }
-    	
+    	DropUniqueConstraintStatement statement = new DropUniqueConstraintStatement(getSchemaName() == null?database.getDefaultSchemaName():getSchemaName(), getTableName(), getConstraintName());
+    	if (database instanceof SybaseASADatabase) {
+    		statement.setUniqueColumns(uniqueColumns);
+    	}
     	return new SqlStatement[]{
-                new DropUniqueConstraintStatement(getSchemaName() == null?database.getDefaultSchemaName():getSchemaName(), getTableName(), getConstraintName()),
+			statement
         };
     }
     

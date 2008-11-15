@@ -87,7 +87,7 @@ public class ModifyColumnChange extends AbstractChange implements ChangeWithColu
       for (ColumnConfig aColumn : columns) {
 
           String schemaName = getSchemaName() == null?database.getDefaultSchemaName():getSchemaName();
-          if(database instanceof SybaseDatabase) {
+          if(database instanceof SybaseASADatabase || database instanceof SybaseDatabase) {
         		sql.add(new RawSqlStatement("ALTER TABLE " + database.escapeTableName(schemaName, getTableName()) + " MODIFY " + aColumn.getName() + " " + database.getColumnType(aColumn.getType(), false)));
         } else if (database instanceof MSSQLDatabase) {
         		sql.add(new RawSqlStatement("ALTER TABLE " + database.escapeTableName(schemaName, getTableName()) + " ALTER COLUMN " + aColumn.getName() + " " + database.getColumnType(aColumn.getType(), false)));

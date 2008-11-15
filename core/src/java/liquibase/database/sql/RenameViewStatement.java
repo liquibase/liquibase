@@ -45,6 +45,10 @@ public class RenameViewStatement implements SqlStatement {
         if (getSchemaName() != null && database instanceof OracleDatabase) {
             throw new StatementNotSupportedOnDatabaseException("Cannot specify schema when renaming in oracle", this, database);
         }
+        
+        if (database instanceof SybaseASADatabase) {
+            throw new StatementNotSupportedOnDatabaseException("Sybase ASA does not support renaming of view. Please drop old view and create a new one manually.", this, database);
+        }
 
         return "RENAME " + database.escapeViewName(getSchemaName(), getOldViewName()) + " TO " + database.escapeViewName(null, getNewViewName());
     }

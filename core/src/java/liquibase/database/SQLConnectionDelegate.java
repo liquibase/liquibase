@@ -160,7 +160,12 @@ public class SQLConnectionDelegate implements DatabaseConnection {
     }
 
     public void setAutoCommit(boolean autoCommit) throws SQLException {
-        con.setAutoCommit(autoCommit);
+        // Fix for Sybase jConnect JDBC driver bug.
+        // Which throws SQLException(JZ016: The AutoCommit option is already set to false)
+        // if con.setAutoCommit(false) called twise or more times with value 'false'.
+//        if (con.getAutoCommit() != autoCommit) {
+        	con.setAutoCommit(autoCommit);
+//        }
     }
 
     public void setCatalog(String catalog) throws SQLException {

@@ -38,6 +38,7 @@ public class TestContext {
 //            "jdbc:sybase:Tds:"+ InetAddress.getLocalHost().getHostName()+":5000/liquibase",
             "jdbc:sapdb://localhost/liquibas",
             "jdbc:sqlite:/liquibase.db",
+            "jdbc:sybase:Tds:localhost:9810/servicename=prior",
     };
 
     private Map<String, DatabaseConnection> connectionsByUrl = new HashMap<String, DatabaseConnection>();
@@ -92,7 +93,9 @@ public class TestContext {
         Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(connection);
         final DatabaseConnection databaseConnection = database.getConnection();
 
-        databaseConnection.setAutoCommit(false);
+        if (databaseConnection.getAutoCommit()) {
+        	databaseConnection.setAutoCommit(false);
+        }
 
         try {
             if (url.startsWith("jdbc:hsql")) {

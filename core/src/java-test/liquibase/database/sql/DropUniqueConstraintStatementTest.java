@@ -10,6 +10,7 @@ public class DropUniqueConstraintStatementTest  extends AbstractSqlStatementTest
     private static final String TABLE_NAME = "DropUQConstTest";
     private static final String COL_NAME = "colName";
     private static final String CONSTRAINT_NAME = "UQ_dropUQ";
+    private static final String UNIQUE_COLUMNS = COL_NAME;
 
     protected void setupDatabase(Database database) throws Exception {
         dropAndCreateTable(new CreateTableStatement(null, TABLE_NAME)
@@ -25,7 +26,7 @@ public class DropUniqueConstraintStatementTest  extends AbstractSqlStatementTest
     @Test
     public void execute_defaultSchema() throws Exception {
         new DatabaseTestTemplate().testOnAvailableDatabases(
-                new SqlStatementDatabaseTest(null, new DropUniqueConstraintStatement(null, TABLE_NAME, CONSTRAINT_NAME)) {
+                new SqlStatementDatabaseTest(null, new DropUniqueConstraintStatement(null, TABLE_NAME, CONSTRAINT_NAME, UNIQUE_COLUMNS)) {
 
                     protected void preExecuteAssert(DatabaseSnapshot snapshot) {
                         //todo: assert when isUnique works: assertTrue(snapshot.getTable(TABLE_NAME).getColumn(COL_NAME).isUnique());

@@ -84,7 +84,7 @@ public class AddColumnStatementTest extends AbstractSqlStatementTest {
                         Column columnSnapshot = snapshot.getTable(TABLE_NAME).getColumn(NEW_COLUMN_NAME);
                         assertNotNull(columnSnapshot);
                         assertEquals(NEW_COLUMN_NAME.toUpperCase(), columnSnapshot.getName().toUpperCase());
-                        assertEquals(42.5, ((Number) columnSnapshot.getDefaultValue()).doubleValue());
+                        assertEquals(new Double(42.5), new Double(((Number) columnSnapshot.getDefaultValue()).doubleValue()));
 
                         assertEquals(true, columnSnapshot.isNullable());
                     }

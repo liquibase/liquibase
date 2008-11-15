@@ -75,7 +75,7 @@ public class AddColumnStatement implements SqlStatement {
         if (!isNullable()) {
             alterTable += " NOT NULL";
         } else {
-            if (database instanceof SybaseDatabase) {
+            if (database instanceof SybaseDatabase || database instanceof SybaseASADatabase) {
                 alterTable += " NULL";
             }
         }

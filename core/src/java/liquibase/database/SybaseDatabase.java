@@ -92,7 +92,8 @@ public class SybaseDatabase extends MSSQLDatabase {
 
     public boolean isCorrectDatabaseImplementation(Connection conn) throws JDBCException {
         String dbProductName = getDatabaseProductName(conn);
-        return "Adaptive Server Enterprise".equals(dbProductName) ||
+        return 
+        	"Sybase SQL Server".equals(dbProductName) ||
             "sql server".equals(dbProductName);
     }
 
