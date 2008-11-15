@@ -1,19 +1,24 @@
 package liquibase.parser.xml;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
+import java.util.HashMap;
+
 import liquibase.ChangeSet;
 import liquibase.DatabaseChangeLog;
 import liquibase.change.AddColumnChange;
 import liquibase.change.Change;
 import liquibase.change.CreateTableChange;
 import liquibase.change.RawSQLChange;
-import liquibase.database.sql.RawSqlStatement;
 import liquibase.exception.ChangeLogParseException;
 import liquibase.preconditions.OrPrecondition;
 import liquibase.test.JUnitFileOpener;
-import static org.junit.Assert.*;
-import org.junit.Test;
 
-import java.util.HashMap;
+import org.junit.Test;
 
 public class XMLChangeLogParserTest {
 
@@ -133,10 +138,23 @@ public class XMLChangeLogParserTest {
 
     @Test
     public void testNestedChangeLog() throws Exception {
+    	final String nestedFileName = "liquibase/parser/xml/nestedChangeLog.xml";
         DatabaseChangeLog changeLog = new XMLChangeLogParser().parse("liquibase/parser/xml/nestedChangeLog.xml", new JUnitFileOpener(), new HashMap<String, Object>());
+        nestedFileAssertions(changeLog, nestedFileName);
 
-        assertEquals("liquibase/parser/xml/nestedChangeLog.xml", changeLog.getLogicalFilePath());
-        assertEquals("liquibase/parser/xml/nestedChangeLog.xml", changeLog.getPhysicalFilePath());
+    }
+
+    @Test
+    public void nestedRelativeChangeLog() throws Exception {
+    	final String nestedFileName = "liquibase/parser/xml/nestedRelativeChangeLog.xml";
+        DatabaseChangeLog changeLog = new XMLChangeLogParser().parse(nestedFileName, new JUnitFileOpener(), new HashMap<String, Object>());
+        nestedFileAssertions(changeLog, nestedFileName);
+
+    }
+
+    private void nestedFileAssertions(DatabaseChangeLog changeLog, String nestedFileName) {
+        assertEquals(nestedFileName, changeLog.getLogicalFilePath());
+        assertEquals(nestedFileName, changeLog.getPhysicalFilePath());
 
         assertNull(changeLog.getPreconditions());
         assertEquals(3, changeLog.getChangeSets().size());
@@ -146,7 +164,7 @@ public class XMLChangeLogParserTest {
         assertEquals("nvoxland", changeSet.getAuthor());
         assertEquals("1", changeSet.getId());
         assertEquals(1, changeSet.getChanges().size());
-        assertEquals("liquibase/parser/xml/nestedChangeLog.xml", changeSet.getFilePath());
+        assertEquals(nestedFileName, changeSet.getFilePath());
 
 
         Change change = changeSet.getChanges().get(0);
@@ -171,22 +189,41 @@ public class XMLChangeLogParserTest {
         assertEquals("nvoxland", changeSet.getAuthor());
         assertEquals("2", changeSet.getId());
         assertEquals(1, changeSet.getChanges().size());
-        assertEquals("liquibase/parser/xml/nestedChangeLog.xml", changeSet.getFilePath());
+        assertEquals(nestedFileName, changeSet.getFilePath());
 
         change = changeSet.getChanges().get(0);
         assertEquals("addColumn", change.getTagName());
         assertTrue(change instanceof AddColumnChange);
         assertEquals("employee", ((AddColumnChange) change).getTableName());
-    }
+	}
+
 
     @Test
     public void doubleNestedChangeLog() throws Exception {
-        DatabaseChangeLog changeLog = new XMLChangeLogParser().parse("liquibase/parser/xml/doubleNestedChangeLog.xml", new JUnitFileOpener(), new HashMap<String, Object>());
+    	final String doubleNestedFileName = "liquibase/parser/xml/doubleNestedChangeLog.xml";
+    	final String nestedFileName = "liquibase/parser/xml/nestedChangeLog.xml";
+        DatabaseChangeLog changeLog = new XMLChangeLogParser().parse(doubleNestedFileName, new JUnitFileOpener(), new HashMap<String, Object>());
 
-        assertEquals("liquibase/parser/xml/doubleNestedChangeLog.xml", changeLog.getLogicalFilePath());
-        assertEquals("liquibase/parser/xml/doubleNestedChangeLog.xml", changeLog.getPhysicalFilePath());
+        doubleNestedFileAssertions(doubleNestedFileName, nestedFileName,
+				changeLog);
+    }
 
-        assertNull(changeLog.getPreconditions());
+    @Test
+    public void doubleNestedRelativeChangeLog() throws Exception {
+    	final String doubleNestedFileName = "liquibase/parser/xml/doublenestedRelativeChangeLog.xml";
+    	final String nestedFileName = "liquibase/parser/xml/nestedRelativeChangeLog.xml";
+        DatabaseChangeLog changeLog = new XMLChangeLogParser().parse(doubleNestedFileName, new JUnitFileOpener(), new HashMap<String, Object>());
+
+        doubleNestedFileAssertions(doubleNestedFileName, nestedFileName,
+				changeLog);
+    }
+
+	private void doubleNestedFileAssertions(final String doubleNestedFileName,
+			final String nestedFileName, DatabaseChangeLog changeLog) {
+		assertEquals(doubleNestedFileName, changeLog.getLogicalFilePath());
+        assertEquals(doubleNestedFileName, changeLog.getPhysicalFilePath());
+
+		assertNull(changeLog.getPreconditions());
         assertEquals(4, changeLog.getChangeSets().size());
 
         // change 0
@@ -194,7 +231,7 @@ public class XMLChangeLogParserTest {
         assertEquals("nvoxland", changeSet.getAuthor());
         assertEquals("1", changeSet.getId());
         assertEquals(1, changeSet.getChanges().size());
-        assertEquals("liquibase/parser/xml/doubleNestedChangeLog.xml", changeSet.getFilePath());
+        assertEquals(doubleNestedFileName, changeSet.getFilePath());
 
         Change change = changeSet.getChanges().get(0);
         assertEquals("createTable", change.getTagName());
@@ -206,7 +243,7 @@ public class XMLChangeLogParserTest {
         assertEquals("nvoxland", changeSet.getAuthor());
         assertEquals("1", changeSet.getId());
         assertEquals(1, changeSet.getChanges().size());
-        assertEquals("liquibase/parser/xml/nestedChangeLog.xml", changeSet.getFilePath());
+        assertEquals(nestedFileName, changeSet.getFilePath());
 
         change = changeSet.getChanges().get(0);
         assertEquals("createTable", change.getTagName());
@@ -230,18 +267,19 @@ public class XMLChangeLogParserTest {
         assertEquals("nvoxland", changeSet.getAuthor());
         assertEquals("2", changeSet.getId());
         assertEquals(1, changeSet.getChanges().size());
-        assertEquals("liquibase/parser/xml/nestedChangeLog.xml", changeSet.getFilePath());
+        assertEquals(nestedFileName, changeSet.getFilePath());
 
         change = changeSet.getChanges().get(0);
         assertEquals("addColumn", change.getTagName());
         assertTrue(change instanceof AddColumnChange);
         assertEquals("employee", ((AddColumnChange) change).getTableName());
-    }
+	}
 
     @Test
     public void missingChangeLog() throws Exception {
         try {
-            DatabaseChangeLog changeLog = new XMLChangeLogParser().parse("liquibase/parser/xml/missingChangeLog.xml", new JUnitFileOpener(), new HashMap<String, Object>());
+            @SuppressWarnings("unused")
+			DatabaseChangeLog changeLog = new XMLChangeLogParser().parse("liquibase/parser/xml/missingChangeLog.xml", new JUnitFileOpener(), new HashMap<String, Object>());
         } catch (Exception e) {
             assertTrue(e instanceof ChangeLogParseException);
             assertEquals("liquibase/parser/xml/missingChangeLog.xml does not exist", e.getMessage());
@@ -273,6 +311,7 @@ public class XMLChangeLogParserTest {
         new XMLChangeLogParser().parse("changelogs/oracle/complete/root.changelog.xml", new JUnitFileOpener(), new HashMap<String, Object>());
         new XMLChangeLogParser().parse("changelogs/pgsql/complete/root.changelog.xml", new JUnitFileOpener(), new HashMap<String, Object>());
         new XMLChangeLogParser().parse("changelogs/sybase/complete/root.changelog.xml", new JUnitFileOpener(), new HashMap<String, Object>());
+        new XMLChangeLogParser().parse("changelogs/asany/complete/root.changelog.xml", new JUnitFileOpener(), new HashMap<String, Object>());
         new XMLChangeLogParser().parse("changelogs/unsupported/complete/root.changelog.xml", new JUnitFileOpener(), new HashMap<String, Object>());
     }
 }
