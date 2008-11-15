@@ -23,11 +23,14 @@ import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.io.File;
 import java.io.InputStream;
 
 class XMLChangeLogHandler extends DefaultHandler {
 
-    protected Logger log;
+    private static final char LIQUIBASE_FILE_SEPARATOR = '/';
+
+	protected Logger log;
 
     private DatabaseChangeLog databaseChangeLog;
     private Change change;
@@ -77,7 +80,8 @@ class XMLChangeLogHandler extends DefaultHandler {
                 databaseChangeLog.setLogicalFilePath(atts.getValue("logicalFilePath"));
             } else if ("include".equals(qName)) {
                 String fileName = atts.getValue("file");
-                handleIncludedChangeLog(fileName);
+                boolean isRelativePath = new Boolean(atts.getValue("isRelativePath")).booleanValue();
+                handleIncludedChangeLog(fileName, isRelativePath, databaseChangeLog.getPhysicalFilePath());
             } else if (changeSet == null && "changeSet".equals(qName)) {
                 boolean alwaysRun = false;
                 boolean runOnChange = false;
@@ -229,7 +233,11 @@ class XMLChangeLogHandler extends DefaultHandler {
         }
     }
 
-    protected void handleIncludedChangeLog(String fileName) throws LiquibaseException {
+    protected void handleIncludedChangeLog(String fileName, boolean isRelativePath, String relativeBaseFileName) throws LiquibaseException {
+        if (isRelativePath) {
+        	String path = searchPath (relativeBaseFileName);
+        	fileName = new StringBuilder(path).append(fileName).toString();
+        }
         DatabaseChangeLog changeLog = new ChangeLogParser(changeLogParameters).parse(fileName, fileOpener);
         AndPrecondition preconditions = changeLog.getPreconditions();
         if (preconditions != null) {
@@ -240,7 +248,18 @@ class XMLChangeLogHandler extends DefaultHandler {
         }
     }
 
-    private void setProperty(Object object, String attributeName, String attributeValue) throws IllegalAccessException, InvocationTargetException, CustomChangeException {
+    private String searchPath(String relativeBaseFileName) {
+    	if (relativeBaseFileName == null) {
+    		return null;
+    	}
+		int lastSeparatePosition = relativeBaseFileName.lastIndexOf(LIQUIBASE_FILE_SEPARATOR);
+		if (lastSeparatePosition >= 0) {
+			return relativeBaseFileName.substring(0, lastSeparatePosition + 1);
+		}
+		return relativeBaseFileName;
+	}
+
+	private void setProperty(Object object, String attributeName, String attributeValue) throws IllegalAccessException, InvocationTargetException, CustomChangeException {
         if (object instanceof CustomChangeWrapper) {
             if (attributeName.equals("class")) {
                 ((CustomChangeWrapper) object).setClass(expandExpressions(attributeValue));
