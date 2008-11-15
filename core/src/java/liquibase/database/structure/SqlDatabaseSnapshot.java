@@ -25,6 +25,7 @@ public abstract class SqlDatabaseSnapshot implements DatabaseSnapshot {
     protected Set<View> views = new HashSet<View>();
     protected Set<Column> columns = new HashSet<Column>();
     protected Set<ForeignKey> foreignKeys = new HashSet<ForeignKey>();
+    protected Set<UniqueConstraint> uniqueConstraints = new HashSet<UniqueConstraint>();
     protected Set<Index> indexes = new HashSet<Index>();
     protected Set<PrimaryKey> primaryKeys = new HashSet<PrimaryKey>();
     protected Set<Sequence> sequences = new HashSet<Sequence>();
@@ -83,7 +84,7 @@ public abstract class SqlDatabaseSnapshot implements DatabaseSnapshot {
             readForeignKeyInformation(requestedSchema);
             readPrimaryKeys(requestedSchema);
             readColumns(requestedSchema);
-//            //readUniqueConstraints(catalog, schema);
+            readUniqueConstraints(requestedSchema);
             readIndexes(requestedSchema);
             readSequences(requestedSchema);
 
@@ -147,6 +148,10 @@ public abstract class SqlDatabaseSnapshot implements DatabaseSnapshot {
 
     public Set<Sequence> getSequences() {
         return sequences;
+    }
+    
+    public Set<UniqueConstraint> getUniqueConstraints () {
+      return this.uniqueConstraints;
     }
 
     protected void readTablesAndViews(String schema) throws SQLException, JDBCException {
@@ -356,7 +361,7 @@ public abstract class SqlDatabaseSnapshot implements DatabaseSnapshot {
                 fkInfo.addForeignKeyColumn(fkColumn);
 
                 fkInfo.setName(convertFromDatabaseName(rs.getString("FK_NAME")));
-
+                
                 Integer updateRule, deleteRule;
                 updateRule = rs.getInt("UPDATE_RULE");
                 if (rs.wasNull())
@@ -459,16 +464,22 @@ public abstract class SqlDatabaseSnapshot implements DatabaseSnapshot {
         for (Index index : indexes) {
             for (PrimaryKey pk : primaryKeys) {
                 if (index.getTable().getName().equalsIgnoreCase(pk.getTable().getName())
-                        && index.getColumnNames().equals(pk.getColumnNames())) {
+                        && index.getColumnNames().equals(pk.getColumnNames()) && index.getName().equalsIgnoreCase(pk.getName())) {
                     indexesToRemove.add(index);
                 }
             }
             for (ForeignKey fk : foreignKeys) {
                 if (index.getTable().getName().equalsIgnoreCase(fk.getForeignKeyTable().getName())
-                        && index.getColumnNames().equals(fk.getForeignKeyColumns())) {
+                        && index.getColumnNames().equals(fk.getForeignKeyColumns()) && index.getName().equalsIgnoreCase(fk.getName())) {
                     indexesToRemove.add(index);
                 }
             }
+            for (UniqueConstraint uc : uniqueConstraints) {
+              if (index.getTable().getName().equalsIgnoreCase(uc.getTable().getName()) && index.getColumnNames().equals(uc.getColumnNames()) && index.getName().equalsIgnoreCase(uc.getName())) {
+                indexesToRemove.add(index);
+              }
+            }
+            
         }
         indexes.removeAll(indexesToRemove);
     }
@@ -516,6 +527,10 @@ public abstract class SqlDatabaseSnapshot implements DatabaseSnapshot {
         return pkName;
     }
 
+    protected void readUniqueConstraints (String schema) throws JDBCException, SQLException {
+      updateListeners("Reading unique constraints for " + database.toString() + " ...");
+    }
+    
 //    private void readUniqueConstraints(String catalog, String schema) throws JDBCException, SQLException {
 //        updateListeners("Reading unique constraints for " + database.toString() + " ...");
 //
@@ -611,6 +626,15 @@ public abstract class SqlDatabaseSnapshot implements DatabaseSnapshot {
         return null;
     }
 
+    public UniqueConstraint getUniqueConstraint (String ucName) {
+      for (UniqueConstraint uc : getUniqueConstraints()) {
+        if (uc.getName().equalsIgnoreCase(ucName)) {
+          return uc;
+        }
+      }
+      return null;
+    }
+    
     public String getSchema() {
         return schema;
     }

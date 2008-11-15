@@ -23,6 +23,7 @@ public class Diff {
     private boolean diffColumns = true;
     private boolean diffViews = true;
     private boolean diffPrimaryKeys = true;
+    private boolean diffUniqueConstraints = true;
     private boolean diffIndexes = true;
     private boolean diffForeignKeys = true;
     private boolean diffSequences = true;
@@ -86,6 +87,9 @@ public class Diff {
         if (shouldDiffPrimaryKeys()) {
             checkPrimaryKeys(diffResult);
         }
+        if (shouldDiffUniqueConstraints()) {
+          checkUniqueConstraints(diffResult);
+        }
         if (shouldDiffIndexes()) {
             checkIndexes(diffResult);
         }
@@ -105,10 +109,11 @@ public class Diff {
             diffColumns = types.contains("columns");
             diffViews = types.contains("views");
             diffPrimaryKeys = types.contains("primaryKeys");
+            diffUniqueConstraints = types.contains("uniqueConstraints");
             diffIndexes = types.contains("indexes");
             diffForeignKeys = types.contains("foreignKeys");
             diffSequences = types.contains("sequences");
-            diffData = types.contains("data");            
+            diffData = types.contains("data");
         }
     }
 
@@ -175,6 +180,14 @@ public class Diff {
 
     public void setDiffData(boolean diffData) {
         this.diffData = diffData;
+    }
+    
+    public boolean shouldDiffUniqueConstraints () {
+      return this.diffUniqueConstraints;
+    }
+    
+    public void setDiffUniqueConstraints (boolean diffUniqueConstraints) {
+      this.diffUniqueConstraints = diffUniqueConstraints;
     }
 
     private void checkVersionInfo(DiffResult diffResult) throws JDBCException {
@@ -255,6 +268,21 @@ public class Diff {
         }
     }
 
+    private void checkUniqueConstraints (DiffResult diffResult) {
+      for (UniqueConstraint baseIndex : baseSnapshot.getUniqueConstraints()) {
+        if (!targetSnapshot.getUniqueConstraints().contains(baseIndex)) {
+          diffResult.addMissingUniqueConstraint(baseIndex);
+        }
+      }
+
+      for (UniqueConstraint targetIndex : targetSnapshot.getUniqueConstraints()) {
+        if (!baseSnapshot.getUniqueConstraints().contains(targetIndex)) {
+          diffResult.addUnexpectedUniqueConstraint(targetIndex);
+        }
+      }
+    }
+    
+    
     private void checkIndexes(DiffResult diffResult) {
         for (Index baseIndex : baseSnapshot.getIndexes()) {
             if (!targetSnapshot.getIndexes().contains(baseIndex)) {

@@ -62,11 +62,7 @@ public class CreateIndexStatement implements SqlStatement {
         }            
         buffer.append("INDEX ");
 
-<<<<<<< .mine
         buffer.append(database.escapeIndexName(null, getIndexName())).append(" ON ");
-=======
-        buffer.append(database.escapeConstraintName(getIndexName())).append(" ON ");
->>>>>>> .theirs
         buffer.append(database.escapeTableName(getTableSchemaName(), getTableName())).append("(");
         Iterator<String> iterator = Arrays.asList(getColumns()).iterator();
         while (iterator.hasNext()) {

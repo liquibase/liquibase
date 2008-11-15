@@ -29,6 +29,7 @@ public class HibernateDatabaseSnapshot implements DatabaseSnapshot {
     private Set<Index> indexes = new HashSet<Index>();
     private Set<PrimaryKey> primaryKeys = new HashSet<PrimaryKey>();
     private Set<Sequence> sequences = new HashSet<Sequence>();
+    private Set<UniqueConstraint> uniqueConstraints = new HashSet<UniqueConstraint>();
 
 
     private Map<String, liquibase.database.structure.Table> tablesMap = new HashMap<String, liquibase.database.structure.Table>();
@@ -322,5 +323,24 @@ public class HibernateDatabaseSnapshot implements DatabaseSnapshot {
 
     public boolean hasDatabaseChangeLogTable() {
         return false;
+    }
+
+    /**
+     * @see liquibase.database.structure.DatabaseSnapshot#getUniqueConstraints()
+     */
+    public Set<UniqueConstraint> getUniqueConstraints () {
+      return this.uniqueConstraints;
+    }
+
+    /**
+     * @see liquibase.database.structure.DatabaseSnapshot#getUniqueConstraint(java.lang.String)
+     */
+    public UniqueConstraint getUniqueConstraint (String ucName) {
+      for (UniqueConstraint uc : getUniqueConstraints()) {
+        if (uc.getName().equalsIgnoreCase(ucName)) {
+            return uc;
+        }
+      }
+      return null;
     }
 }
