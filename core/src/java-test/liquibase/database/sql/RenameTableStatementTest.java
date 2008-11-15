@@ -21,11 +21,11 @@ public class RenameTableStatementTest  extends AbstractSqlStatementTest {
         dropTableIfExists(TestContext.ALT_SCHEMA, NEW_TABLE_NAME, database);
 
         dropAndCreateTable(new CreateTableStatement(null, TABLE_NAME)
-                .addPrimaryKeyColumn("id", "int", null)
+                .addPrimaryKeyColumn("id", "int",null,  null)
                 , database);
 
         dropAndCreateTable(new CreateTableStatement(TestContext.ALT_SCHEMA, TABLE_NAME)
-                .addPrimaryKeyColumn("id", "int", null)
+                .addPrimaryKeyColumn("id", "int", null, null)
                 , database);
     }
 

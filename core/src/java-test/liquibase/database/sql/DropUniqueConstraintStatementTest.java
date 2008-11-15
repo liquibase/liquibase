@@ -13,7 +13,7 @@ public class DropUniqueConstraintStatementTest  extends AbstractSqlStatementTest
 
     protected void setupDatabase(Database database) throws Exception {
         dropAndCreateTable(new CreateTableStatement(null, TABLE_NAME)
-                .addPrimaryKeyColumn("id", "int", null)
+                .addPrimaryKeyColumn("id", "int", null, null)
                 .addColumn(COL_NAME, "varchar(50)", new NotNullConstraint(), new UniqueConstraint(CONSTRAINT_NAME))
                 , database);
     }

@@ -21,12 +21,12 @@ public class RenameColumnStatementTest extends AbstractSqlStatementTest {
     protected void setupDatabase(Database database) throws Exception {
 
         dropAndCreateTable(new CreateTableStatement(null, TABLE_NAME)
-                .addPrimaryKeyColumn("id", "int", null)
+                .addPrimaryKeyColumn("id", "int", null, null)
                 .addColumn(COL_NAME, DATA_TYPE)
                 , database);
 
         dropAndCreateTable(new CreateTableStatement(TestContext.ALT_SCHEMA, TABLE_NAME)
-                .addPrimaryKeyColumn("id", "int", null)
+                .addPrimaryKeyColumn("id", "int", null, null)
                 .addColumn(COL_NAME, DATA_TYPE)
                 , database);
     }
