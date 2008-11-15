@@ -79,7 +79,7 @@ public class UpdateStatement implements SqlStatement {
         if (newValue == null || newValue.toString().equalsIgnoreCase("NULL")) {
             sqlString = "NULL";
         } else if (newValue instanceof String && database.shouldQuoteValue(((String) newValue))) {
-            sqlString = "'" + newValue + "'";
+            sqlString = "'" + database.escapeStringForDatabase(newValue.toString()) + "'";
         } else if (newValue instanceof Date) {
             sqlString = database.getDateLiteral(((Date) newValue));
         } else if (newValue instanceof Boolean) {
