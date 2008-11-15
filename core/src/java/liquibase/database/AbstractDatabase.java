@@ -185,105 +185,109 @@ public abstract class AbstractDatabase implements Database {
      * for the current database.
      */
     public String getColumnType(String columnType, Boolean autoIncrement) {
-        if (columnType.startsWith("java.sql.Types")) {
-            String dataTypeName = columnType.substring(columnType.lastIndexOf(".") + 1);
-            String precision = null;
-            if (dataTypeName.indexOf("(") >= 0) {
-                precision = dataTypeName.substring(dataTypeName.indexOf("(") + 1, dataTypeName.indexOf(")"));
-                dataTypeName = dataTypeName.substring(0, dataTypeName.indexOf("("));
-            }
-
-            ResultSet resultSet = null;
-            try {
-                DatabaseConnection connection = getConnection();
-                if (connection == null) {
-                    throw new RuntimeException("Cannot evaluate java.sql.Types without a connection");
-                }
-                resultSet = connection.getMetaData().getTypeInfo();
-                while (resultSet.next()) {
-                    String typeName = resultSet.getString("TYPE_NAME");
-                    int dataType = resultSet.getInt("DATA_TYPE");
-                    Integer requestedType = (Integer) Class.forName("java.sql.Types").getDeclaredField(dataTypeName).get(null);
-                    if (requestedType == dataType) {
-                        if (precision == null) {
-                            return typeName;
-                        } else {
-                            return typeName + "(" + precision + ")";
-                        }
-                    }
-                }
-                //did not find type, fall back on our defaults for ones we can figure out
-                if (dataTypeName.equalsIgnoreCase("BLOB")) {
-                    return getBlobType();
-                } else if (dataTypeName.equalsIgnoreCase("CLOB")) {
-                    return getClobType();
-                } else if (dataTypeName.equalsIgnoreCase("BOOLEAN")) {
-                    return getBooleanType();
-                } else if (dataTypeName.equalsIgnoreCase("DATE")) {
-                    return getDateType();
-                } else if (dataTypeName.equalsIgnoreCase("TIME")) {
-                    return getTimeType();
-                } else if (dataTypeName.equalsIgnoreCase("CHAR")) {
-                    return getCharType();
-                } else if (dataTypeName.equalsIgnoreCase("VARCHAR")) {
-                    return getVarcharType();
-                } else if (dataTypeName.equalsIgnoreCase("FLOAT")) {
-                    return "FLOAT";
-                }
-
-                throw new RuntimeException("Could not find java.sql.Types value for " + dataTypeName);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            } finally {
-                if (resultSet != null) {
-                    try {
-                        resultSet.close();
-                    } catch (SQLException e) {
-                        ;
-                    }
-                }
-            }
-        } else if ("boolean".equalsIgnoreCase(columnType)) {
-            return getBooleanType();
-        } else if ("currency".equalsIgnoreCase(columnType)) {
-            return getCurrencyType();
-        } else if ("UUID".equalsIgnoreCase(columnType)) {
-            return getUUIDType();
-        } else if ("BLOB".equalsIgnoreCase(columnType)
-                || "LONGVARBINARY".equalsIgnoreCase(columnType)) {
-            return getBlobType();
-        } else if ("CLOB".equalsIgnoreCase(columnType)
-                || "TEXT".equalsIgnoreCase(columnType)
-                || "LONGVARCHAR".equalsIgnoreCase(columnType)) {
-            return getClobType();
-        } else if ("date".equalsIgnoreCase(columnType)) {
-            return getDateType();
-        } else if ("time".equalsIgnoreCase(columnType)) {
-            return getTimeType();
-        } else if ("dateTime".equalsIgnoreCase(columnType)) {
-            return getDateTimeType();
-        } else if (columnType.toUpperCase().startsWith("FLOAT(")) {
-            return "FLOAT";
-        } else if (columnType.toUpperCase().startsWith("DOUBLE(")) {
-            return "DOUBLE";
-        } else if ("bigint".equalsIgnoreCase(columnType)) {
-            return getBigIntType();
-        } else if (columnType.toUpperCase().startsWith("CHAR(")) {
-            if (columnType.indexOf("(") >= 0) {
-                String precision = columnType.substring(columnType.indexOf("(") + 1, columnType.indexOf(")"));
-                return getCharType() + "(" + precision + ")";
-            } else {
-                return getCharType();
-            }
-        } else if (columnType.toUpperCase().startsWith("VARCHAR(")) {
-            if (columnType.indexOf("(") >= 0) {
-                String precision = columnType.substring(columnType.indexOf("(") + 1, columnType.indexOf(")"));
-                return getVarcharType() + "(" + precision + ")";
-            } else {
-                return getVarcharType();
-            }
+        // Parse out data type and precision
+        // Example cases: "CLOB", "java.sql.Types.CLOB", "CLOB(10000)", "java.sql.Types.CLOB(10000)
+        String dataTypeName = null;
+        String precision = null;
+        if (columnType.startsWith("java.sql.Types") && columnType.contains("(")) {
+            precision = columnType.substring(columnType.indexOf("(") + 1, columnType.indexOf(")"));
+            dataTypeName = columnType.substring(columnType.lastIndexOf(".") + 1, columnType.indexOf("("));
+        } else if (columnType.startsWith("java.sql.Types")) {
+            dataTypeName = columnType.substring(columnType.lastIndexOf(".") + 1);
+        } else if (columnType.contains("(")) {
+            precision = columnType.substring(columnType.indexOf("(") + 1, columnType.indexOf(")"));
+            dataTypeName = columnType.substring(0, columnType.indexOf("("));
         } else {
-            return columnType;
+            dataTypeName = columnType;
+        }
+
+        // Translate type to database-specific type, if possible
+        String returnTypeName = null;
+        if (columnType.startsWith("java.sql.Types")) {
+            returnTypeName = getTypeFromMetaData(dataTypeName);
+        }
+
+        if (returnTypeName == null) {
+            if (dataTypeName.equalsIgnoreCase("BIGINT")) {
+                returnTypeName = getBigIntType();
+            } else if (dataTypeName.equalsIgnoreCase("BLOB")) {
+                returnTypeName = getBlobType();
+            } else if (dataTypeName.equalsIgnoreCase("BOOLEAN")) {
+                returnTypeName = getBooleanType();
+            } else if (dataTypeName.equalsIgnoreCase("CHAR")) {
+                returnTypeName = getCharType();
+            } else if (dataTypeName.equalsIgnoreCase("CLOB")) {
+                returnTypeName = getClobType();
+            } else if (dataTypeName.equalsIgnoreCase("CURRENCY")) {
+                returnTypeName = getCurrencyType();
+            } else if (dataTypeName.equalsIgnoreCase("DATE")) {
+                returnTypeName = getDateType();
+            } else if (dataTypeName.equalsIgnoreCase("DATETIME")) {
+                returnTypeName = getDateTimeType();
+            } else if (dataTypeName.equalsIgnoreCase("DOUBLE")) {
+                returnTypeName = getDoubleType();
+            } else if (dataTypeName.equalsIgnoreCase("FLOAT")) {
+                returnTypeName = getFloatType();
+            } else if (dataTypeName.equalsIgnoreCase("INT")) {
+                returnTypeName = getIntType();
+            } else if (dataTypeName.equalsIgnoreCase("LONGVARBINARY")) {
+                returnTypeName = getBlobType();
+            } else if (dataTypeName.equalsIgnoreCase("LONGVARCHAR")) {
+                returnTypeName = getClobType();
+            } else if (dataTypeName.equalsIgnoreCase("TEXT")) {
+                returnTypeName = getClobType();
+            } else if (dataTypeName.equalsIgnoreCase("TIME")) {
+                returnTypeName = getTimeType();
+            } else if (dataTypeName.equalsIgnoreCase("TINYINT")) {
+                returnTypeName = getTinyIntType();
+            } else if (dataTypeName.equalsIgnoreCase("UUID")) {
+                returnTypeName = getUUIDType();
+            } else if (dataTypeName.equalsIgnoreCase("VARCHAR")) {
+                returnTypeName = getVarcharType();
+            } else {
+                // Don't know what it is, just return it
+                return columnType;
+            }
+        }
+
+        // Return type and precision, if any
+        if (precision == null) {
+            return returnTypeName;
+        } else {
+            return returnTypeName + "(" + precision + ")";
+        }
+    }
+
+    // Get the type from the Connection MetaData (use the MetaData to translate from java.sql.Types to DB-specific type)
+    private String getTypeFromMetaData(final String dataTypeName)
+    {
+        ResultSet resultSet = null;
+        try {
+            Integer requestedType = (Integer) Class.forName("java.sql.Types").getDeclaredField(dataTypeName).get(null);
+            DatabaseConnection connection = getConnection();
+            if (connection == null) {
+                throw new RuntimeException("Cannot evaluate java.sql.Types without a connection");
+            }
+            resultSet = connection.getMetaData().getTypeInfo();
+            while (resultSet.next()) {
+                String typeName = resultSet.getString("TYPE_NAME");
+                int dataType = resultSet.getInt("DATA_TYPE");
+                if (requestedType == dataType) {
+                        return typeName;
+                }
+            }
+            // Connection MetaData does not contain the type, return null
+            return null;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        } finally {
+            if (resultSet != null) {
+                try {
+                    resultSet.close();
+                } catch (SQLException e) {
+                    // Can't close result set, no handling required
+                }
+            }
         }
     }
 
@@ -421,6 +425,46 @@ public abstract class AbstractDatabase implements Database {
     public String getVarcharType()
     {
         return "VARCHAR";
+    }
+
+    /**
+     * Returns the actual database-specific data type to use for a "float" column.
+     *
+     * @return database-specific type for float
+     */
+    public String getFloatType()
+    {
+        return "FLOAT";
+    }
+
+    /**
+     * Returns the actual database-specific data type to use for a "double" column.
+     *
+     * @return database-specific type for double
+     */
+    public String getDoubleType()
+    {
+        return "DOUBLE";
+    }
+
+    /**
+     * Returns the actual database-specific data type to use for a "int" column.
+     *
+     * @return database-specific type for int
+     */
+    public String getIntType()
+    {
+        return "INT";
+    }
+
+    /**
+     * Returns the actual database-specific data type to use for a "tinyint" column.
+     *
+     * @return database-specific type for tinyint
+     */
+    public String getTinyIntType()
+    {
+        return "TINYINT";
     }
 
     /**

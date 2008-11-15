@@ -264,6 +264,26 @@ public class HibernateDatabase implements Database {
         return null;
     }
 
+    public String getFloatType()
+    {
+        return null;
+    }
+
+    public String getDoubleType()
+    {
+        return null;
+    }
+
+    public String getIntType()
+    {
+        return null;
+    }
+
+    public String getTinyIntType()
+    {
+        return null;
+    }
+
     public Object convertDatabaseValueToJavaObject(Object defaultValue, int dataType, int columnSize, int decimalDigits) throws ParseException {
         return null;
     }

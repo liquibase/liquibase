@@ -179,6 +179,34 @@ public interface Database extends DatabaseObject {
     String getDateType();
 
     /**
+     * Returns the actual database-specific data type to use for a "float" column.
+     *
+     * @return database-specific type for float
+     */
+    String getFloatType();
+
+    /**
+     * Returns the actual database-specific data type to use for a "double" column.
+     *
+     * @return database-specific type for double
+     */
+    String getDoubleType();
+
+    /**
+     * Returns the actual database-specific data type to use for a "int" column.
+     *
+     * @return database-specific type for int
+     */
+    String getIntType();
+
+    /**
+     * Returns the actual database-specific data type to use for a "tinyint" column.
+     *
+     * @return database-specific type for tinyint
+     */
+    String getTinyIntType();
+
+    /**
      * Returns the actual database-specific data type to use a "datetime" column.
      */
     String getDateTimeType();

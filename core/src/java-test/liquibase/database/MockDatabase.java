@@ -259,6 +259,26 @@ public class MockDatabase implements Database {
         return "VARCHAR";
     }
 
+    public String getFloatType()
+    {
+        return "FLOAT";
+    }
+
+    public String getDoubleType()
+    {
+        return "DOUBLE";
+    }
+
+    public String getIntType()
+    {
+        return "INT";
+    }
+
+    public String getTinyIntType()
+    {
+        return "TINYINT";
+    }
+
     public String getBlobType() {
         return "BLOB";
     }
