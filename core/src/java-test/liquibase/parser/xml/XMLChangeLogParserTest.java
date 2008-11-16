@@ -1,12 +1,6 @@
 package liquibase.parser.xml;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
-import java.util.HashMap;
+import static org.junit.Assert.*;
 
 import liquibase.ChangeSet;
 import liquibase.DatabaseChangeLog;
@@ -14,20 +8,15 @@ import liquibase.change.AddColumnChange;
 import liquibase.change.Change;
 import liquibase.change.CreateTableChange;
 import liquibase.change.RawSQLChange;
-<<<<<<< .mine
-
-
-
-=======
 import liquibase.change.custom.CustomChangeWrapper;
 import liquibase.change.custom.ExampleCustomSqlChange;
-import liquibase.database.sql.RawSqlStatement;
->>>>>>> .theirs
 import liquibase.exception.ChangeLogParseException;
 import liquibase.preconditions.OrPrecondition;
 import liquibase.test.JUnitFileOpener;
 
 import org.junit.Test;
+
+import java.util.HashMap;
 
 public class XMLChangeLogParserTest {
 
