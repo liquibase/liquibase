@@ -453,6 +453,10 @@ public class ChangeSet {
         return false;  //To change body of created methods use File | Settings | File Templates.
     }
 
+    public Preconditions getPrecondition() {
+        return rootPrecondition;
+    }
+
     public void setPreconditions(Preconditions preconditions) {
         this.rootPrecondition = preconditions;
     }
