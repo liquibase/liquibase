@@ -53,9 +53,9 @@ public class JdbcOutputTemplate extends JdbcTemplate {
             if (database instanceof MSSQLDatabase) {
                 output.write(StreamUtil.getLineSeparator());
                 output.write("GO");
-            } else if (database instanceof OracleDatabase) {
-                output.write(StreamUtil.getLineSeparator());
-                output.write("/");
+//            } else if (database instanceof OracleDatabase) {
+//                output.write(StreamUtil.getLineSeparator());
+//                output.write("/");
             }
             output.write(StreamUtil.getLineSeparator());
             output.write(StreamUtil.getLineSeparator());
