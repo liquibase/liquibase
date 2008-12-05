@@ -62,16 +62,7 @@ public class Table implements DatabaseObject, Comparable<Table> {
 
 
     public String toString() {
-    	String tableStr = getName()+" (";
-    	for (int i=0;i<columns.size();i++) {
-    		if (i>0) {
-    			tableStr += ","+columns.get(i).getName();
-    		} else {
-    			tableStr += columns.get(i).getName();
-    		}
-    	}
-    	tableStr += ")";
-        return tableStr;
+    	return getName();
     }
 
     /**
