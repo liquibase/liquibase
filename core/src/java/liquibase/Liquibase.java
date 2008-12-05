@@ -7,6 +7,7 @@ import liquibase.FileOpener;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.sql.UpdateStatement;
+import liquibase.database.sql.visitor.SqlStatementVisitor;
 import liquibase.database.template.JdbcOutputTemplate;
 import liquibase.database.template.JdbcTemplate;
 import liquibase.exception.JDBCException;
@@ -26,10 +27,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.io.Writer;
 import java.text.DateFormat;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.*;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 import java.sql.Connection;
@@ -567,7 +565,7 @@ public class Liquibase {
 
             UpdateStatement updateStatement = new UpdateStatement(getDatabase().getDefaultSchemaName(), getDatabase().getDatabaseChangeLogTableName());
             updateStatement.addNewColumnValue("MD5SUM", null);
-            getDatabase().getJdbcTemplate().execute(updateStatement);
+            getDatabase().getJdbcTemplate().execute(updateStatement, new ArrayList<SqlStatementVisitor>());
             getDatabase().commit();
         } finally {
             lockHandler.releaseLock();

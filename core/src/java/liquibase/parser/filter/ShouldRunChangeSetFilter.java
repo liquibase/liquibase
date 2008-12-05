@@ -4,9 +4,11 @@ import liquibase.ChangeSet;
 import liquibase.RanChangeSet;
 import liquibase.database.Database;
 import liquibase.database.sql.UpdateStatement;
+import liquibase.database.sql.visitor.SqlStatementVisitor;
 import liquibase.exception.JDBCException;
 
 import java.util.List;
+import java.util.ArrayList;
 
 public class ShouldRunChangeSetFilter implements ChangeSetFilter {
 
@@ -34,7 +36,7 @@ public class ShouldRunChangeSetFilter implements ChangeSetFilter {
                     md5sumUpdateStatement.addWhereParameter(changeSet.getFilePath());
 
                     try {
-                        database.getJdbcTemplate().update(md5sumUpdateStatement);
+                        database.getJdbcTemplate().update(md5sumUpdateStatement, new ArrayList<SqlStatementVisitor>());
                     } catch (JDBCException e) {
                         throw new RuntimeException(e);
                     }

@@ -4,12 +4,13 @@ import liquibase.change.Change;
 import liquibase.change.RawSQLChange;
 import liquibase.database.Database;
 import liquibase.database.sql.SqlStatement;
+import liquibase.database.sql.visitor.RegExpReplaceSqlStatementVisitor;
+import liquibase.database.sql.visitor.SqlStatementVisitor;
 import liquibase.exception.*;
 import liquibase.log.LogFactory;
 import liquibase.util.MD5Util;
 import liquibase.util.StringUtils;
 import liquibase.util.StreamUtil;
-import liquibase.preconditions.AndPrecondition;
 import liquibase.preconditions.FailedPrecondition;
 import liquibase.preconditions.Preconditions;
 import liquibase.preconditions.ErrorPrecondition;
@@ -49,6 +50,8 @@ public class ChangeSet {
     private String comments;
 
     private Preconditions rootPrecondition;
+
+    private List<SqlStatementVisitor> sqlVisitors = new ArrayList<SqlStatementVisitor>();
 
     public boolean shouldAlwaysRun() {
         return alwaysRun;
@@ -200,7 +203,7 @@ public class ChangeSet {
 
                 log.finest("Reading ChangeSet: " + toString());
                 for (Change change : getChanges()) {
-                    change.executeStatements(database);
+                    change.executeStatements(database, sqlVisitors);
                     log.finest(change.getConfirmationMessage());
                 }
 
@@ -238,7 +241,7 @@ public class ChangeSet {
                 for (Change rollback : rollBackChanges) {
                     for (SqlStatement statement : rollback.generateStatements(database)) {
                         try {
-                            database.getJdbcTemplate().execute(statement);
+                            database.getJdbcTemplate().execute(statement, sqlVisitors);
                         } catch (JDBCException e) {
                             throw new RollbackFailedException("Error executing custom SQL [" + statement + "]", e);
                         }
@@ -249,7 +252,7 @@ public class ChangeSet {
                 List<Change> changes = getChanges();
                 for (int i = changes.size() - 1; i >= 0; i--) {
                     Change change = changes.get(i);
-                    change.executeRollbackStatements(database);
+                    change.executeRollbackStatements(database, sqlVisitors);
                     log.finest(change.getConfirmationMessage());
                 }
             }
@@ -459,5 +462,9 @@ public class ChangeSet {
 
     public void setPreconditions(Preconditions preconditions) {
         this.rootPrecondition = preconditions;
+    }
+
+    public void addReplaceSql(String pattern, String with) {
+        sqlVisitors.add(new RegExpReplaceSqlStatementVisitor(pattern, with));
     }
 }
