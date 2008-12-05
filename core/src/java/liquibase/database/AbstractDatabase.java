@@ -24,6 +24,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Date;
 import java.util.logging.Logger;
+import java.util.regex.Pattern;
 
 /**
  * AbstractDatabase is extended by all supported databases as a facade to the underlying database.
@@ -41,6 +42,8 @@ public abstract class AbstractDatabase implements Database {
 
     private JdbcTemplate jdbcTemplate = new JdbcTemplate(this);
     private List<RanChangeSet> ranChangeSetList;
+    
+    private static Pattern CREATE_VIEW_AS_PATTERN = Pattern.compile("^CREATE\\s+.*?VIEW\\s+.*?AS\\s+", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
     protected AbstractDatabase() {
     }
@@ -843,7 +846,7 @@ public abstract class AbstractDatabase implements Database {
         if (definition == null) {
             return null;
         }
-        return definition.replaceFirst("^CREATE VIEW [\\S]+ AS", "");
+        return CREATE_VIEW_AS_PATTERN.matcher(definition).replaceFirst("");
     }
 
     public SqlStatement getViewDefinitionSql(String schemaName, String viewName) throws JDBCException {

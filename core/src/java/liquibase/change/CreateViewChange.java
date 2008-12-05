@@ -108,7 +108,7 @@ public class CreateViewChange extends AbstractChange {
         }
 
         element.setAttribute("viewName", getViewName());
-        element.appendChild(currentChangeLogFileDOM.createTextNode(getSelectQuery()));
+        element.appendChild(currentChangeLogFileDOM.createCDATASection(getSelectQuery()));
 
         return element;
     }
