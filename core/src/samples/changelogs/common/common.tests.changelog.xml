@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <databaseChangeLog
-        xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.8"
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.9"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.8 http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.8.xsd">
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9 http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
 
     <property name="table.name" value="paramter_table"/>
     <property file="changelogs/common/dynamic.parameters.properties"/>
@@ -524,4 +524,12 @@
             <!--<viewExists viewName="csvview"/>-->
         <!--</preConditions>-->
     <!--</changeSet>-->
+
+    <changeSet id="replaceSqlTest" author="nvoxland">
+        <createTable tableName="replaceTest">
+            <column name="id" type="int"/>
+        </createTable>
+        <replaceSql pattern="replaceTest" with="replacedTest"/>
+    </changeSet>
+
 </databaseChangeLog>

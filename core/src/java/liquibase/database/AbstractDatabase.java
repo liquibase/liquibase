@@ -5,6 +5,7 @@ import liquibase.RanChangeSet;
 import liquibase.lock.LockHandler;
 import liquibase.change.*;
 import liquibase.database.sql.*;
+import liquibase.database.sql.visitor.SqlStatementVisitor;
 import liquibase.database.structure.*;
 import liquibase.database.template.JdbcTemplate;
 import liquibase.diff.DiffStatusListener;
@@ -614,7 +615,7 @@ public abstract class AbstractDatabase implements Database {
             }
 
             for (SqlStatement sql : statementsToExecute) {
-                this.getJdbcTemplate().execute(sql);
+                this.getJdbcTemplate().execute(sql, new ArrayList<SqlStatementVisitor>());
                 this.commit();
             }
         } catch (SQLException e) {
@@ -667,7 +668,7 @@ public abstract class AbstractDatabase implements Database {
             SqlStatement createTableStatement = getCreateChangeLogLockSQL();
 
             getJdbcTemplate().comment("Create Database Lock Table");
-            this.getJdbcTemplate().execute(createTableStatement);
+            this.getJdbcTemplate().execute(createTableStatement, new ArrayList<SqlStatementVisitor>());
             this.commit();
             log.finest("Created database lock table with name: " + escapeTableName(getDefaultSchemaName(), getDatabaseChangeLogLockTableName()));
             knowMustInsertIntoLockTable = true;
@@ -676,10 +677,10 @@ public abstract class AbstractDatabase implements Database {
         int rows = -1;
         if (!knowMustInsertIntoLockTable) {
             RawSqlStatement selectStatement = new RawSqlStatement("SELECT COUNT(*) FROM " + escapeTableName(getDefaultSchemaName(), getDatabaseChangeLogLockTableName()) + " WHERE ID=1");
-            rows = this.getJdbcTemplate().queryForInt(selectStatement);
+            rows = this.getJdbcTemplate().queryForInt(selectStatement, new ArrayList<SqlStatementVisitor>());
         }
         if (knowMustInsertIntoLockTable || rows == 0) {
-            this.getJdbcTemplate().update(getChangeLogLockInsertSQL());
+            this.getJdbcTemplate().update(getChangeLogLockInsertSQL(), new ArrayList<SqlStatementVisitor>());
             this.commit();
             log.fine("Inserted lock row into: " + escapeTableName(getDefaultSchemaName(), getDatabaseChangeLogLockTableName()));
         }
@@ -754,7 +755,7 @@ public abstract class AbstractDatabase implements Database {
             try {
                 for (Change change : dropChanges) {
                     for (SqlStatement statement : change.generateStatements(this)) {
-                        this.getJdbcTemplate().execute(statement);
+                        this.getJdbcTemplate().execute(statement, new ArrayList<SqlStatementVisitor>());
                     }
                 }
             } catch (UnsupportedChangeException e) {
@@ -797,13 +798,13 @@ public abstract class AbstractDatabase implements Database {
      */
     public void tag(String tagString) throws JDBCException {
         try {
-            int totalRows = this.getJdbcTemplate().queryForInt(new RawSqlStatement("SELECT COUNT(*) FROM " + escapeTableName(getDefaultSchemaName(), getDatabaseChangeLogTableName())));
+            int totalRows = this.getJdbcTemplate().queryForInt(new RawSqlStatement("SELECT COUNT(*) FROM " + escapeTableName(getDefaultSchemaName(), getDatabaseChangeLogTableName())), new ArrayList<SqlStatementVisitor>());
             if (totalRows == 0) {
                 throw new JDBCException("Cannot tag an empty database");
             }
 
 //            Timestamp lastExecutedDate = (Timestamp) this.getJdbcTemplate().queryForObject(createChangeToTagSQL(), Timestamp.class);
-            int rowsUpdated = this.getJdbcTemplate().update(new TagDatabaseStatement(tagString));
+            int rowsUpdated = this.getJdbcTemplate().update(new TagDatabaseStatement(tagString), new ArrayList<SqlStatementVisitor>());
             if (rowsUpdated == 0) {
                 throw new JDBCException("Did not tag database change log correctly");
             }
@@ -818,7 +819,7 @@ public abstract class AbstractDatabase implements Database {
     }
 
     public boolean doesTagExist(String tag) throws JDBCException {
-        int count = this.getJdbcTemplate().queryForInt(new RawSqlStatement("SELECT COUNT(*) FROM " + escapeTableName(getDefaultSchemaName(), getDatabaseChangeLogTableName()) + " WHERE TAG='" + tag + "'"));
+        int count = this.getJdbcTemplate().queryForInt(new RawSqlStatement("SELECT COUNT(*) FROM " + escapeTableName(getDefaultSchemaName(), getDatabaseChangeLogTableName()) + " WHERE TAG='" + tag + "'"), new ArrayList<SqlStatementVisitor>());
         return count > 0;
     }
 
@@ -842,7 +843,7 @@ public abstract class AbstractDatabase implements Database {
         if (schemaName == null) {
             schemaName = convertRequestedSchemaToSchema(null);
         }
-        String definition = (String) this.getJdbcTemplate().queryForObject(getViewDefinitionSql(schemaName, viewName), String.class);
+        String definition = (String) this.getJdbcTemplate().queryForObject(getViewDefinitionSql(schemaName, viewName), String.class, new ArrayList<SqlStatementVisitor>());
         if (definition == null) {
             return null;
         }
@@ -1211,7 +1212,7 @@ public abstract class AbstractDatabase implements Database {
         statement.addColumnValue("LIQUIBASE", LiquibaseUtil.getBuildVersion());
 
 
-        this.getJdbcTemplate().execute(statement);
+        this.getJdbcTemplate().execute(statement, new ArrayList<SqlStatementVisitor>());
 
         getRanChangeSetList().add(new RanChangeSet(changeSet));
     }
@@ -1224,7 +1225,7 @@ public abstract class AbstractDatabase implements Database {
         sql = sql.replaceFirst("\\?", escapeStringForDatabase(changeSet.getAuthor()));
         sql = sql.replaceFirst("\\?", escapeStringForDatabase(changeSet.getFilePath()));
 
-        this.getJdbcTemplate().execute(new RawSqlStatement(sql));
+        this.getJdbcTemplate().execute(new RawSqlStatement(sql), new ArrayList<SqlStatementVisitor>());
         this.commit();
     }
 
@@ -1234,7 +1235,7 @@ public abstract class AbstractDatabase implements Database {
         sql = sql.replaceFirst("\\?", escapeStringForDatabase(changeSet.getAuthor()));
         sql = sql.replaceFirst("\\?", escapeStringForDatabase(changeSet.getFilePath()));
 
-        this.getJdbcTemplate().execute(new RawSqlStatement(sql));
+        this.getJdbcTemplate().execute(new RawSqlStatement(sql), new ArrayList<SqlStatementVisitor>());
         commit();
 
         getRanChangeSetList().remove(new RanChangeSet(changeSet));

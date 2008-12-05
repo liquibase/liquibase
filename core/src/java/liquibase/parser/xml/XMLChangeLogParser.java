@@ -16,7 +16,7 @@ import java.util.Map;
 public class XMLChangeLogParser {
 
     public static String getSchemaVersion() {
-        return "1.8";
+        return "1.9";
     }
 
     public DatabaseChangeLog parse(String physicalChangeLogLocation, FileOpener fileOpener, Map<String, Object> changeLogProperties) throws ChangeLogParseException {

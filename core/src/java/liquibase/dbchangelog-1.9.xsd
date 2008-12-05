@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-            targetNamespace="http://www.liquibase.org/xml/ns/dbchangelog/1.8"
-            xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.8"
+            targetNamespace="http://www.liquibase.org/xml/ns/dbchangelog/1.9"
+            xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.9"
             elementFormDefault="qualified">
 
     <!-- This is the main (root) part of the xsd -->
@@ -51,6 +51,13 @@
                                     <xsd:choice>
                                         <xsd:group ref="changeSetChildren" minOccurs="0" maxOccurs="unbounded"/>
                                     </xsd:choice>
+
+                                    <xsd:element name="replaceSql" minOccurs="0" maxOccurs="unbounded">
+                                        <xsd:complexType>
+                                            <xsd:attribute name="pattern" type="xsd:string"/>
+                                            <xsd:attribute name="with" type="xsd:string"/>
+                                        </xsd:complexType>
+                                    </xsd:element>
                                 </xsd:sequence>
                                 <xsd:attributeGroup ref="changeSetAttributes"/>
                             </xsd:complexType>

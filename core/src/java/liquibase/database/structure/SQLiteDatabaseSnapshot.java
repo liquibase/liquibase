@@ -19,6 +19,7 @@ import liquibase.database.AbstractDatabase;
 import liquibase.database.Database;
 import liquibase.database.HibernateDatabase;
 import liquibase.database.SQLiteDatabase;
+import liquibase.database.sql.visitor.SqlStatementVisitor;
 import liquibase.diff.DiffStatusListener;
 import liquibase.exception.JDBCException;
 import liquibase.log.LogFactory;
@@ -349,7 +350,7 @@ public class SQLiteDatabaseSnapshot extends SqlDatabaseSnapshot {
 
         if (database.supportsSequences()) {
             //noinspection unchecked
-            List<String> sequenceNamess = (List<String>) database.getJdbcTemplate().queryForList(database.createFindSequencesSQL(schema), String.class);
+            List<String> sequenceNamess = (List<String>) database.getJdbcTemplate().queryForList(database.createFindSequencesSQL(schema), String.class, new ArrayList<SqlStatementVisitor>());
 
 
             for (String sequenceName : sequenceNamess) {

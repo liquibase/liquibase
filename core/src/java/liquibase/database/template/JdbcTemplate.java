@@ -4,7 +4,9 @@ import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.sql.CallableSqlStatement;
 import liquibase.database.sql.SqlStatement;
+import liquibase.database.sql.visitor.SqlStatementVisitor;
 import liquibase.exception.JDBCException;
+import liquibase.exception.StatementNotSupportedOnDatabaseException;
 import liquibase.log.LogFactory;
 import liquibase.util.JdbcUtils;
 
@@ -12,10 +14,7 @@ import java.sql.CallableStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Class to simplify execution of SqlStatements.  Based heavily on <a href="http://static.springframework.org/spring/docs/2.0.x/reference/jdbc.html">Spring's JdbcTemplate</a>.
@@ -39,7 +38,7 @@ public class JdbcTemplate {
     // Methods dealing with static SQL (java.sql.Statement)
     //-------------------------------------------------------------------------
 
-    public Object execute(StatementCallback action) throws JDBCException {
+    public Object execute(StatementCallback action, List<SqlStatementVisitor> sqlVisitors) throws JDBCException {
         DatabaseConnection con = database.getConnection();
         Statement stmt = null;
         try {
@@ -61,15 +60,22 @@ public class JdbcTemplate {
     }
 
     public void execute(final SqlStatement sql) throws JDBCException {
+        execute(sql, new ArrayList<SqlStatementVisitor>());
+    }
+
+    public void execute(final SqlStatement sql, final List<SqlStatementVisitor> sqlVisitors) throws JDBCException {
         if (sql instanceof CallableSqlStatement) {
-            call(((CallableSqlStatement) sql), new ArrayList());
+            call(((CallableSqlStatement) sql), new ArrayList(), sqlVisitors);
             return;
         }
 
 
         class ExecuteStatementCallback implements StatementCallback {
             public Object doInStatement(Statement stmt) throws SQLException, JDBCException {
-                stmt.execute(sql.getSqlStatement(database));
+                String statement = applyVisitors(sql, sqlVisitors);
+
+
+                stmt.execute(statement);
                 return null;
             }
 
@@ -77,10 +83,22 @@ public class JdbcTemplate {
                 return sql;
             }
         }
-        execute(new ExecuteStatementCallback());
+        execute(new ExecuteStatementCallback(), sqlVisitors);
+    }
+
+    private String applyVisitors(SqlStatement sql, List<SqlStatementVisitor> sqlVisitors) throws StatementNotSupportedOnDatabaseException {
+        String returnSql = sql.getSqlStatement(database);
+        for (SqlStatementVisitor visitor : sqlVisitors) {
+            returnSql = visitor.modifySql(returnSql);
+        }
+        return returnSql;
     }
 
     public Object query(final SqlStatement sql, final ResultSetExtractor rse) throws JDBCException {
+        return query(sql, rse, new ArrayList<SqlStatementVisitor>());
+    }
+
+    public Object query(final SqlStatement sql, final ResultSetExtractor rse, final List<SqlStatementVisitor> sqlVisitors) throws JDBCException {
         if (sql instanceof CallableSqlStatement) {
             throw new JDBCException("Direct query using CallableSqlStatement not currently implemented");
         }
@@ -89,7 +107,7 @@ public class JdbcTemplate {
             public Object doInStatement(Statement stmt) throws SQLException, JDBCException {
                 ResultSet rs = null;
                 try {
-                    rs = stmt.executeQuery(sql.getSqlStatement(database));
+                    rs = stmt.executeQuery(applyVisitors(sql, sqlVisitors));
                     ResultSet rsToUse = rs;
                     return rse.extractData(rsToUse);
                 }
@@ -103,49 +121,81 @@ public class JdbcTemplate {
                 return sql;
             }
         }
-        return execute(new QueryStatementCallback());
+        return execute(new QueryStatementCallback(), sqlVisitors);
     }
 
     public List query(SqlStatement sql, RowMapper rowMapper) throws JDBCException {
-        return (List) query(sql, new RowMapperResultSetExtractor(rowMapper));
+        return query(sql, rowMapper, new ArrayList());
+    }
+
+    public List query(SqlStatement sql, RowMapper rowMapper, List<SqlStatementVisitor> sqlVisitors) throws JDBCException {
+        return (List) query(sql, new RowMapperResultSetExtractor(rowMapper), sqlVisitors);
     }
 
     public Object queryForObject(SqlStatement sql, RowMapper rowMapper) throws JDBCException {
-        List results = query(sql, rowMapper);
+        return queryForObject(sql, rowMapper, new ArrayList());
+    }
+
+    public Object queryForObject(SqlStatement sql, RowMapper rowMapper, List<SqlStatementVisitor> sqlVisitors) throws JDBCException {
+        List results = query(sql, rowMapper, sqlVisitors);
         return JdbcUtils.requiredSingleResult(results);
     }
 
     public Object queryForObject(SqlStatement sql, Class requiredType) throws JDBCException {
-        return queryForObject(sql, getSingleColumnRowMapper(requiredType));
+        return queryForObject(sql, requiredType, new ArrayList());
+    }
+
+    public Object queryForObject(SqlStatement sql, Class requiredType, List<SqlStatementVisitor> sqlVisitors) throws JDBCException {
+        return queryForObject(sql, getSingleColumnRowMapper(requiredType), sqlVisitors);
     }
 
     public long queryForLong(SqlStatement sql) throws JDBCException {
-        Number number = (Number) queryForObject(sql, Long.class);
+        return queryForLong(sql, new ArrayList());
+    }
+
+    public long queryForLong(SqlStatement sql, List<SqlStatementVisitor> sqlVisitors) throws JDBCException {
+        Number number = (Number) queryForObject(sql, Long.class, sqlVisitors);
         return (number != null ? number.longValue() : 0);
     }
 
     public int queryForInt(SqlStatement sql) throws JDBCException {
-        Number number = (Number) queryForObject(sql, Integer.class);
+        return queryForInt(sql, new ArrayList());
+    }
+
+    public int queryForInt(SqlStatement sql, List<SqlStatementVisitor> sqlVisitors) throws JDBCException {
+        Number number = (Number) queryForObject(sql, Integer.class, sqlVisitors);
         return (number != null ? number.intValue() : 0);
     }
 
     public List queryForList(SqlStatement sql, Class elementType) throws JDBCException {
-        return query(sql, getSingleColumnRowMapper(elementType));
+        return queryForList(sql, elementType, new ArrayList());
+    }
+
+    public List queryForList(SqlStatement sql, Class elementType, List<SqlStatementVisitor> sqlVisitors) throws JDBCException {
+        return query(sql, getSingleColumnRowMapper(elementType), sqlVisitors);
     }
 
     public List<Map> queryForList(SqlStatement sql) throws JDBCException {
+        return queryForList(sql, new ArrayList());
+    }
+
+    public List<Map> queryForList(SqlStatement sql, List<SqlStatementVisitor> sqlVisitors) throws JDBCException {
         //noinspection unchecked
-        return (List<Map>) query(sql, getColumnMapRowMapper());
+        return (List<Map>) query(sql, getColumnMapRowMapper(), sqlVisitors);
     }
 
     public int update(final SqlStatement sql) throws JDBCException {
+        return update(sql, new ArrayList());
+    }
+
+    public int update(final SqlStatement sql, final List<SqlStatementVisitor> sqlVisitors) throws JDBCException {
         if (sql instanceof CallableSqlStatement) {
             throw new JDBCException("Direct update using CallableSqlStatement not currently implemented");
         }
 
         class UpdateStatementCallback implements StatementCallback {
             public Object doInStatement(Statement stmt) throws SQLException, JDBCException {
-                return stmt.executeUpdate(sql.getSqlStatement(database));
+                return stmt.executeUpdate(applyVisitors(sql, sqlVisitors));
             }
 
 
@@ -153,13 +203,13 @@ public class JdbcTemplate {
                 return sql;
             }
         }
-        return (Integer) execute(new UpdateStatementCallback());
+        return (Integer) execute(new UpdateStatementCallback(), sqlVisitors);
     }
     //-------------------------------------------------------------------------
     // Methods dealing with callable statements
     //-------------------------------------------------------------------------
 
-    public Object execute(CallableSqlStatement csc, CallableStatementCallback action) throws JDBCException {
+    public Object execute(CallableSqlStatement csc, CallableStatementCallback action, List<SqlStatementVisitor> sqlVisitors) throws JDBCException {
         CallableStatement cs = null;
         try {
             cs = csc.createCallableStatement(database);
@@ -175,7 +225,7 @@ public class JdbcTemplate {
 
     }
 
-    public Map call(CallableSqlStatement csc, final List declaredParameters) throws JDBCException {
+    public Map call(CallableSqlStatement csc, final List declaredParameters, List<SqlStatementVisitor> sqlVisitors) throws JDBCException {
         return (Map) execute(csc, new CallableStatementCallback() {
             public Object doInCallableStatement(CallableStatement cs) throws SQLException {
                 //not currently doing anything with returned results
@@ -189,7 +239,7 @@ public class JdbcTemplate {
                 cs.execute();
                 return new HashMap();
             }
-        });
+        }, sqlVisitors);
     }
 
     /**

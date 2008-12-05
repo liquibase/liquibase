@@ -146,6 +146,8 @@ class XMLChangeLogHandler extends DefaultHandler {
                 if ("sqlCheck".equals(qName)) {
                     text = new StringBuffer();
                 }
+            } else if ("replaceSql".equals(qName)) {
+                changeSet.addReplaceSql(atts.getValue("pattern"), atts.getValue("with"));
             } else if (changeSet != null && change == null) {
                 change = ChangeFactory.getInstance().create(qName);
                 change.setChangeSet(changeSet);
