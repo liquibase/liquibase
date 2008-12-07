@@ -2,8 +2,8 @@
 <module relativePaths="true" type="JAVA_MODULE" version="4">
   <component name="NewModuleRootManager" inherit-compiler-output="false">
     <output url="file://$MODULE_DIR$/ide/eclipse/rcp/build" />
-    <exclude-output />
     <output-test url="file://$MODULE_DIR$/ide/eclipse/rcp/build-test" />
+    <exclude-output />
     <content url="file://$MODULE_DIR$/ide/eclipse/rcp">
       <sourceFolder url="file://$MODULE_DIR$/ide/eclipse/rcp/src/java" isTestSource="false" />
     </content>
@@ -11,7 +11,6 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="eclipse.common" />
     <orderEntry type="module" module-name="liquibase" />
-    <orderEntryProperties />
   </component>
 </module>
 

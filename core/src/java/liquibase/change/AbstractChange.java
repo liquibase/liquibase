@@ -4,7 +4,7 @@ import liquibase.ChangeSet;
 import liquibase.FileOpener;
 import liquibase.database.Database;
 import liquibase.database.sql.SqlStatement;
-import liquibase.database.sql.visitor.SqlStatementVisitor;
+import liquibase.database.sql.visitor.SqlVisitor;
 import liquibase.exception.*;
 import liquibase.log.LogFactory;
 import liquibase.util.MD5Util;
@@ -80,7 +80,7 @@ public abstract class AbstractChange implements Change {
     /**
      * @see liquibase.change.Change#executeStatements(liquibase.database.Database, Collection sqlVisitors)
      */
-    public void executeStatements(Database database, List<SqlStatementVisitor> sqlVisitors) throws JDBCException, UnsupportedChangeException {
+    public void executeStatements(Database database, List<SqlVisitor> sqlVisitors) throws JDBCException, UnsupportedChangeException {
         SqlStatement[] statements = generateStatements(database);
 
         execute(statements, sqlVisitors, database);
@@ -89,7 +89,7 @@ public abstract class AbstractChange implements Change {
     /**
      * @see liquibase.change.Change#saveStatements(liquibase.database.Database, Collection sqlVisitors, java.io.Writer)
      */
-    public void saveStatements(Database database, List<SqlStatementVisitor> sqlVisitors, Writer writer) throws IOException, UnsupportedChangeException, StatementNotSupportedOnDatabaseException {
+    public void saveStatements(Database database, List<SqlVisitor> sqlVisitors, Writer writer) throws IOException, UnsupportedChangeException, StatementNotSupportedOnDatabaseException {
         SqlStatement[] statements = generateStatements(database);
         for (SqlStatement statement : statements) {
             writer.append(statement.getSqlStatement(database)).append(statement.getEndDelimiter(database)).append(StreamUtil.getLineSeparator()).append(StreamUtil.getLineSeparator());
@@ -99,7 +99,7 @@ public abstract class AbstractChange implements Change {
     /**
      * @see liquibase.change.Change#executeRollbackStatements(liquibase.database.Database, Collection sqlVisitor)
      */
-    public void executeRollbackStatements(Database database, List<SqlStatementVisitor> sqlVisitors) throws JDBCException, UnsupportedChangeException, RollbackImpossibleException {
+    public void executeRollbackStatements(Database database, List<SqlVisitor> sqlVisitors) throws JDBCException, UnsupportedChangeException, RollbackImpossibleException {
         SqlStatement[] statements = generateRollbackStatements(database);
         execute(statements, sqlVisitors, database);
     }
@@ -107,7 +107,7 @@ public abstract class AbstractChange implements Change {
     /**
      * @see liquibase.change.Change#saveRollbackStatement(liquibase.database.Database, Collection sqlVisitor, java.io.Writer)
      */
-    public void saveRollbackStatement(Database database, List<SqlStatementVisitor> sqlVisitors, Writer writer) throws IOException, UnsupportedChangeException, RollbackImpossibleException, StatementNotSupportedOnDatabaseException {
+    public void saveRollbackStatement(Database database, List<SqlVisitor> sqlVisitors, Writer writer) throws IOException, UnsupportedChangeException, RollbackImpossibleException, StatementNotSupportedOnDatabaseException {
         SqlStatement[] statements = generateRollbackStatements(database);
         for (SqlStatement statement : statements) {
             writer.append(statement.getSqlStatement(database)).append(";\n\n");
@@ -234,7 +234,7 @@ public abstract class AbstractChange implements Change {
      * @param database the target {@link Database}
      * @throws JDBCException if there were problems issuing the statements
      */
-    private void execute(SqlStatement[] statements, List<SqlStatementVisitor> sqlVisitors, Database database) throws JDBCException {
+    private void execute(SqlStatement[] statements, List<SqlVisitor> sqlVisitors, Database database) throws JDBCException {
         for (SqlStatement statement : statements) {
             LogFactory.getLogger().finest("Executing Statement: " + statement);
             database.getJdbcTemplate().execute(statement, sqlVisitors);

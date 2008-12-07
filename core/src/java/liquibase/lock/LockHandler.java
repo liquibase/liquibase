@@ -5,15 +5,12 @@ import liquibase.util.NetUtil;
 import liquibase.database.Database;
 import liquibase.database.sql.RawSqlStatement;
 import liquibase.database.sql.UpdateStatement;
-import liquibase.database.sql.visitor.SqlStatementVisitor;
+import liquibase.database.sql.visitor.SqlVisitor;
 import liquibase.exception.JDBCException;
 import liquibase.exception.LockException;
 import liquibase.log.LogFactory;
 
 import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.net.NetworkInterface;
-import java.net.SocketException;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.util.*;
@@ -44,7 +41,7 @@ public class LockHandler {
 
             Boolean locked;
             try {
-                locked = (Boolean) database.getJdbcTemplate().queryForObject(database.getSelectChangeLogLockSQL(), Boolean.class, new ArrayList<SqlStatementVisitor>());
+                locked = (Boolean) database.getJdbcTemplate().queryForObject(database.getSelectChangeLogLockSQL(), Boolean.class, new ArrayList<SqlVisitor>());
             } catch (JDBCException e) {
                 if (!database.getJdbcTemplate().executesStatements()) {
                     //expected
@@ -64,7 +61,7 @@ public class LockHandler {
                 updateStatement.setWhereClause("ID  = 1");
 
                 database.getJdbcTemplate().comment("Lock Database");
-                int rowsUpdated = database.getJdbcTemplate().update(updateStatement, new ArrayList<SqlStatementVisitor>());
+                int rowsUpdated = database.getJdbcTemplate().update(updateStatement, new ArrayList<SqlVisitor>());
                 if (rowsUpdated != 1) {
                     if (!database.getJdbcTemplate().executesStatements()) {
                         //expected
@@ -94,7 +91,7 @@ public class LockHandler {
                 releaseStatement.setWhereClause(" ID = 1");
 
                 database.getJdbcTemplate().comment("Release Database Lock");
-                int updatedRows = database.getJdbcTemplate().update(releaseStatement, new ArrayList<SqlStatementVisitor>());
+                int updatedRows = database.getJdbcTemplate().update(releaseStatement, new ArrayList<SqlVisitor>());
                 if (updatedRows != 1) {
                     if (database.getJdbcTemplate().executesStatements()) {
                         throw new LockException("Did not update change log lock correctly.\n\n" + releaseStatement + " updated " + updatedRows + " instead of the expected 1 row.");
@@ -120,7 +117,7 @@ public class LockHandler {
 
             List<DatabaseChangeLogLock> allLocks = new ArrayList<DatabaseChangeLogLock>();
             RawSqlStatement sqlStatement = new RawSqlStatement((("SELECT ID, LOCKED, LOCKGRANTED, LOCKEDBY FROM " + database.escapeTableName(database.getDefaultSchemaName(), database.getDatabaseChangeLogLockTableName()))));
-            List<Map> rows = database.getJdbcTemplate().queryForList(sqlStatement, new ArrayList<SqlStatementVisitor>());
+            List<Map> rows = database.getJdbcTemplate().queryForList(sqlStatement, new ArrayList<SqlVisitor>());
             for (Map columnMap : rows) {
                 Object lockedValue = columnMap.get("LOCKED");
                 Boolean locked;

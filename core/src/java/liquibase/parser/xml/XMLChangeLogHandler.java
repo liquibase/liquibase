@@ -3,6 +3,8 @@ package liquibase.parser.xml;
 import liquibase.ChangeSet;
 import liquibase.DatabaseChangeLog;
 import liquibase.FileOpener;
+import liquibase.database.sql.visitor.SqlVisitorFactory;
+import liquibase.database.sql.visitor.SqlVisitor;
 import liquibase.change.*;
 import liquibase.change.custom.CustomChangeWrapper;
 import liquibase.exception.CustomChangeException;
@@ -44,6 +46,9 @@ class XMLChangeLogHandler extends DefaultHandler {
 
     private Map<String, Object> changeLogParameters = new HashMap<String, Object>();
     private boolean inRollback = false;
+
+    private boolean inModifySql = false;
+    private Collection modifySqlDbmsList;
 
 
     protected XMLChangeLogHandler(String physicalChangeLogLocation, FileOpener fileOpener, Map<String, Object> properties) {
@@ -146,8 +151,21 @@ class XMLChangeLogHandler extends DefaultHandler {
                 if ("sqlCheck".equals(qName)) {
                     text = new StringBuffer();
                 }
-            } else if ("replaceSql".equals(qName)) {
-                changeSet.addReplaceSql(atts.getValue("pattern"), atts.getValue("with"));
+            } else if ("modifySql".equals(qName)) {
+                inModifySql = true;
+                if (StringUtils.trimToNull(atts.getValue("dbms")) != null) {
+                    modifySqlDbmsList = StringUtils.splitAndTrim(atts.getValue("dbms"), ",");
+                }
+            } else if (inModifySql) {
+                SqlVisitor sqlVisitor = SqlVisitorFactory.getInstance().create(qName);
+                for (int i = 0; i < atts.getLength(); i++) {
+                    String attributeName = atts.getQName(i);
+                    String attributeValue = atts.getValue(i);
+                    setProperty(sqlVisitor, attributeName, attributeValue);
+                }
+                sqlVisitor.setApplicableDbms(modifySqlDbmsList);
+
+                changeSet.addSqlVisitor(sqlVisitor);
             } else if (changeSet != null && change == null) {
                 change = ChangeFactory.getInstance().create(qName);
                 change.setChangeSet(changeSet);
@@ -370,6 +388,9 @@ class XMLChangeLogHandler extends DefaultHandler {
             } else if (changeSet != null && "validCheckSum".equals(qName)) {
                 changeSet.addValidCheckSum(text.toString());
                 text = null;
+            } else if ("modifySql".equals(qName)) {
+                inModifySql = false;
+                modifySqlDbmsList = null;
             }
         } catch (Exception e) {
             log.log(Level.SEVERE, "Error thrown as a SAXException: " + e.getMessage(), e);

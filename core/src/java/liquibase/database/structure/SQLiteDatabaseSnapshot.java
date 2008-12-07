@@ -2,7 +2,6 @@ package liquibase.database.structure;
 
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.ParseException;
@@ -13,16 +12,13 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Logger;
 
 import liquibase.database.AbstractDatabase;
 import liquibase.database.Database;
-import liquibase.database.HibernateDatabase;
 import liquibase.database.SQLiteDatabase;
-import liquibase.database.sql.visitor.SqlStatementVisitor;
+import liquibase.database.sql.visitor.SqlVisitor;
 import liquibase.diff.DiffStatusListener;
 import liquibase.exception.JDBCException;
-import liquibase.log.LogFactory;
 import liquibase.util.StringUtils;
 
 public class SQLiteDatabaseSnapshot extends SqlDatabaseSnapshot {
@@ -350,7 +346,7 @@ public class SQLiteDatabaseSnapshot extends SqlDatabaseSnapshot {
 
         if (database.supportsSequences()) {
             //noinspection unchecked
-            List<String> sequenceNamess = (List<String>) database.getJdbcTemplate().queryForList(database.createFindSequencesSQL(schema), String.class, new ArrayList<SqlStatementVisitor>());
+            List<String> sequenceNamess = (List<String>) database.getJdbcTemplate().queryForList(database.createFindSequencesSQL(schema), String.class, new ArrayList<SqlVisitor>());
 
 
             for (String sequenceName : sequenceNamess) {

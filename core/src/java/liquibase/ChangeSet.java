@@ -4,8 +4,8 @@ import liquibase.change.Change;
 import liquibase.change.RawSQLChange;
 import liquibase.database.Database;
 import liquibase.database.sql.SqlStatement;
-import liquibase.database.sql.visitor.RegExpReplaceSqlStatementVisitor;
-import liquibase.database.sql.visitor.SqlStatementVisitor;
+import liquibase.database.sql.visitor.RegExpReplaceSqlVisitor;
+import liquibase.database.sql.visitor.SqlVisitor;
 import liquibase.exception.*;
 import liquibase.log.LogFactory;
 import liquibase.util.MD5Util;
@@ -51,7 +51,7 @@ public class ChangeSet {
 
     private Preconditions rootPrecondition;
 
-    private List<SqlStatementVisitor> sqlVisitors = new ArrayList<SqlStatementVisitor>();
+    private List<SqlVisitor> sqlVisitors = new ArrayList<SqlVisitor>();
 
     public boolean shouldAlwaysRun() {
         return alwaysRun;
@@ -464,7 +464,7 @@ public class ChangeSet {
         this.rootPrecondition = preconditions;
     }
 
-    public void addReplaceSql(String pattern, String with) {
-        sqlVisitors.add(new RegExpReplaceSqlStatementVisitor(pattern, with));
+    public void addSqlVisitor(SqlVisitor sqlVisitor) {
+        sqlVisitors.add(sqlVisitor);
     }
 }

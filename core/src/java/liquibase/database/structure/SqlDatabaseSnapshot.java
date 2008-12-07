@@ -3,7 +3,7 @@ package liquibase.database.structure;
 import liquibase.database.AbstractDatabase;
 import liquibase.database.Database;
 import liquibase.database.OracleDatabase;
-import liquibase.database.sql.visitor.SqlStatementVisitor;
+import liquibase.database.sql.visitor.SqlVisitor;
 import liquibase.diff.DiffStatusListener;
 import liquibase.exception.JDBCException;
 import liquibase.log.LogFactory;
@@ -551,7 +551,7 @@ public abstract class SqlDatabaseSnapshot implements DatabaseSnapshot {
 
         if (database.supportsSequences()) {
             //noinspection unchecked
-            List<String> sequenceNamess = (List<String>) database.getJdbcTemplate().queryForList(database.createFindSequencesSQL(schema), String.class, new ArrayList<SqlStatementVisitor>());
+            List<String> sequenceNamess = (List<String>) database.getJdbcTemplate().queryForList(database.createFindSequencesSQL(schema), String.class, new ArrayList<SqlVisitor>());
 
 
             for (String sequenceName : sequenceNamess) {

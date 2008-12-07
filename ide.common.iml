@@ -2,8 +2,8 @@
 <module relativePaths="true" type="JAVA_MODULE" version="4">
   <component name="NewModuleRootManager" inherit-compiler-output="false">
     <output url="file://$MODULE_DIR$/ide/common/build" />
-    <exclude-output />
     <output-test url="file://$MODULE_DIR$/ide/common/build-test" />
+    <exclude-output />
     <content url="file://$MODULE_DIR$/ide/common">
       <sourceFolder url="file://$MODULE_DIR$/ide/common/src/java" isTestSource="false" />
     </content>
@@ -11,7 +11,6 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="Groovy from GroovyJ 0.1.9 (Demetra)" level="application" />
     <orderEntry type="module" module-name="liquibase" />
-    <orderEntryProperties />
   </component>
 </module>
 
