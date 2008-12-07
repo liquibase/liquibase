@@ -9,72 +9,102 @@
     <xsd:element name="databaseChangeLog">
         <xsd:complexType>
             <xsd:sequence>
-                    <xsd:element name="preConditions" minOccurs="0" maxOccurs="1">
+                <xsd:element name="preConditions" minOccurs="0" maxOccurs="1">
+                    <xsd:complexType>
+                        <xsd:choice>
+                            <xsd:group ref="PreConditionChildren" maxOccurs="unbounded"/>
+                        </xsd:choice>
+                    </xsd:complexType>
+                </xsd:element>
+
+                <xsd:element name="property" minOccurs="0" maxOccurs="unbounded">
+                    <xsd:complexType>
+                        <xsd:attribute name="file" type="xsd:string"/>
+                        <xsd:attribute name="name" type="xsd:string"/>
+                        <xsd:attribute name="value" type="xsd:string"/>
+                    </xsd:complexType>
+                </xsd:element>
+
+                <xsd:choice minOccurs="0" maxOccurs="unbounded">
+                    <xsd:element name="changeSet" minOccurs="0" maxOccurs="unbounded">
                         <xsd:complexType>
-                            <xsd:choice>
-                                <xsd:group ref="PreConditionChildren"  maxOccurs="unbounded"/>
-                            </xsd:choice>
+                            <xsd:sequence>
+                                <xsd:element name="validCheckSum" minOccurs="0" maxOccurs="unbounded">
+                                    <xsd:complexType mixed="true">
+                                        <xsd:sequence>
+                                            <xsd:element ref="comment" minOccurs="0" maxOccurs="1"/>
+                                        </xsd:sequence>
+                                        <xsd:attributeGroup ref="tableNameAttribute"/>
+                                        <xsd:attribute name="stripComments" type="xsd:boolean"/>
+                                        <xsd:attribute name="splitStatements" type="xsd:boolean"/>
+                                    </xsd:complexType>
+                                </xsd:element>
+                                <xsd:element name="preConditions" minOccurs="0" maxOccurs="1">
+                                    <xsd:complexType>
+                                        <xsd:choice>
+                                            <xsd:group ref="PreConditionChildren" maxOccurs="unbounded"/>
+                                        </xsd:choice>
+                                        <xsd:attribute name="onFail" type="xsd:string"/>
+                                        <xsd:attribute name="onError" type="xsd:string"/>
+                                    </xsd:complexType>
+                                </xsd:element>
+                                <xsd:choice>
+                                    <xsd:group ref="changeSetChildren" minOccurs="0" maxOccurs="unbounded"/>
+                                </xsd:choice>
+
+                                <xsd:element name="modifySql" minOccurs="0" maxOccurs="unbounded">
+                                    <xsd:complexType>
+                                        <xsd:choice>
+                                            <xsd:group ref="modifySqlChildren" minOccurs="1" maxOccurs="unbounded"/>
+                                        </xsd:choice>
+                                        <xsd:attribute name="dbms" type="xsd:string"/>
+                                    </xsd:complexType>
+                                </xsd:element>
+
+                            </xsd:sequence>
+                            <xsd:attributeGroup ref="changeSetAttributes"/>
                         </xsd:complexType>
                     </xsd:element>
 
-                    <xsd:element name="property" minOccurs="0" maxOccurs="unbounded">
+                    <!-- include -->
+                    <xsd:element name="include" minOccurs="0" maxOccurs="unbounded">
                         <xsd:complexType>
                             <xsd:attribute name="file" type="xsd:string"/>
-                            <xsd:attribute name="name" type="xsd:string"/>
-                            <xsd:attribute name="value" type="xsd:string"/>
+                            <xsd:attribute name="isRelativePath" type="xsd:boolean"/>
                         </xsd:complexType>
                     </xsd:element>
-
-                    <xsd:choice minOccurs="0" maxOccurs="unbounded">
-                        <xsd:element name="changeSet" minOccurs="0" maxOccurs="unbounded">
-                            <xsd:complexType>
-                                <xsd:sequence>
-                                    <xsd:element name="validCheckSum" minOccurs="0" maxOccurs="unbounded">
-                                        <xsd:complexType mixed="true">
-                                            <xsd:sequence>
-                                                <xsd:element ref="comment" minOccurs="0" maxOccurs="1"/>
-                                            </xsd:sequence>
-                                            <xsd:attributeGroup ref="tableNameAttribute"/>
-                                            <xsd:attribute name="stripComments" type="xsd:boolean"/>
-                                            <xsd:attribute name="splitStatements" type="xsd:boolean"/>
-                                        </xsd:complexType>
-                                    </xsd:element>
-                                    <xsd:element name="preConditions" minOccurs="0" maxOccurs="1">
-                                        <xsd:complexType>
-                                            <xsd:choice>
-                                                <xsd:group ref="PreConditionChildren"  maxOccurs="unbounded"/>
-                                            </xsd:choice>
-                                            <xsd:attribute name="onFail" type="xsd:string"/>
-                                            <xsd:attribute name="onError" type="xsd:string"/>
-                                        </xsd:complexType>
-                                    </xsd:element>
-                                    <xsd:choice>
-                                        <xsd:group ref="changeSetChildren" minOccurs="0" maxOccurs="unbounded"/>
-                                    </xsd:choice>
-
-                                    <xsd:element name="replaceSql" minOccurs="0" maxOccurs="unbounded">
-                                        <xsd:complexType>
-                                            <xsd:attribute name="pattern" type="xsd:string"/>
-                                            <xsd:attribute name="with" type="xsd:string"/>
-                                        </xsd:complexType>
-                                    </xsd:element>
-                                </xsd:sequence>
-                                <xsd:attributeGroup ref="changeSetAttributes"/>
-                            </xsd:complexType>
-                        </xsd:element>
-
-                        <!-- include -->
-                        <xsd:element name="include" minOccurs="0" maxOccurs="unbounded">
-                            <xsd:complexType>
-                                <xsd:attribute name="file" type="xsd:string"/>
-                                <xsd:attribute name="isRelativePath" type="xsd:boolean"/>
-                            </xsd:complexType>
-                        </xsd:element>
                 </xsd:choice>
             </xsd:sequence>
             <xsd:attributeGroup ref="changeLogAttributes"/>
         </xsd:complexType>
     </xsd:element>
+
+    <xsd:group name="modifySqlChildren">
+        <xsd:choice>
+            <xsd:element name="replace" minOccurs="0" maxOccurs="unbounded">
+                <xsd:complexType>
+                    <xsd:attribute name="replace" type="xsd:string"/>
+                    <xsd:attribute name="with" type="xsd:string"/>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="regExpReplace" minOccurs="0" maxOccurs="unbounded">
+                <xsd:complexType>
+                    <xsd:attribute name="replace" type="xsd:string"/>
+                    <xsd:attribute name="with" type="xsd:string"/>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="prepend" minOccurs="0" maxOccurs="unbounded">
+                <xsd:complexType>
+                    <xsd:attribute name="value" type="xsd:string"/>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="append" minOccurs="0" maxOccurs="unbounded">
+                <xsd:complexType>
+                    <xsd:attribute name="value" type="xsd:string"/>
+                </xsd:complexType>
+            </xsd:element>
+        </xsd:choice>
+    </xsd:group>
 
     <!-- Attributes for DatabaseInfo -->
     <xsd:attributeGroup name="DatabaseInfoAttributes">
@@ -223,7 +253,7 @@
             <xsd:attribute name="schemaName" type="xsd:string"/>
             <xsd:attribute name="tableName" type="xsd:string"/>
             <xsd:attribute name="constraintName" type="xsd:string"/>
-            <xsd:attribute name="uniqueColumns" type="xsd:string"/>            
+            <xsd:attribute name="uniqueColumns" type="xsd:string"/>
         </xsd:complexType>
     </xsd:element>
 
@@ -411,7 +441,7 @@
                         <xsd:attribute name="value" type="xsd:string"/>
                     </xsd:complexType>
                 </xsd:element>
-            </xsd:sequence>            
+            </xsd:sequence>
             <xsd:attribute name="className" type="xsd:string"/>
         </xsd:complexType>
     </xsd:element>
@@ -471,7 +501,7 @@
         <xsd:complexType>
             <xsd:attributeGroup ref="dropAllForeignKeyConstraintsAttrib"/>
         </xsd:complexType>
-    </xsd:element>    
+    </xsd:element>
 
     <xsd:attributeGroup name="dropNotNullConstraintAttrib">
         <xsd:attribute name="schemaName" type="xsd:string"/>
@@ -542,7 +572,7 @@
         <xsd:complexType mixed="true">
             <xsd:sequence>
                 <xsd:element ref="column" minOccurs="1" maxOccurs="unbounded"/>
-                <xsd:element name="where" minOccurs="0" maxOccurs="1" />
+                <xsd:element name="where" minOccurs="0" maxOccurs="1"/>
             </xsd:sequence>
             <xsd:attributeGroup ref="tableNameAttribute"/>
         </xsd:complexType>
@@ -551,7 +581,7 @@
     <xsd:element name="delete">
         <xsd:complexType mixed="true">
             <xsd:sequence>
-                <xsd:element name="where" minOccurs="0" maxOccurs="1" />
+                <xsd:element name="where" minOccurs="0" maxOccurs="1"/>
             </xsd:sequence>
             <xsd:attributeGroup ref="tableNameAttribute"/>
         </xsd:complexType>

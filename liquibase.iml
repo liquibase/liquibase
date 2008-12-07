@@ -3,7 +3,6 @@
   <component name="FacetManager">
     <facet type="hibernate" name="Hibernate">
       <configuration>
-        <setting name="validation-enabled" value="false" />
         <datasource-map>
           <unit-entry name="&lt;anonymous&gt;Hibernate.cfg.xml@247" />
           <unit-entry name="src/samples/hibernate/Hibernate.cfg.xml" />
@@ -14,8 +13,8 @@
   </component>
   <component name="NewModuleRootManager" inherit-compiler-output="false">
     <output url="file://$MODULE_DIR$/core/build" />
-    <exclude-output />
     <output-test url="file://$MODULE_DIR$/core/build-test" />
+    <exclude-output />
     <content url="file://$MODULE_DIR$/core">
       <sourceFolder url="file://$MODULE_DIR$/core/src/java" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/core/src/java-dbtest" isTestSource="true" />
@@ -65,7 +64,6 @@
         <jarDirectory url="file://$MODULE_DIR$/core/lib-jdbc" recursive="false" />
       </library>
     </orderEntry>
-    <orderEntryProperties />
   </component>
 </module>
 

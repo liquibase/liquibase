@@ -529,7 +529,13 @@
         <createTable tableName="replaceTest">
             <column name="id" type="int"/>
         </createTable>
-        <replaceSql pattern="replaceTest" with="replacedTest"/>
+        <modifySql>
+            <replace replace="replaceTest" with="replacedTest"/>
+        </modifySql>
+        <modifySql dbms="mysql,derby">
+            <replace replace=")" with=""/>
+            <append value=", name varcar(255) )"/>
+        </modifySql>
     </changeSet>
 
 </databaseChangeLog>

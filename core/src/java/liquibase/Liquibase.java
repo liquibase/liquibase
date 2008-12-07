@@ -7,7 +7,7 @@ import liquibase.FileOpener;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.sql.UpdateStatement;
-import liquibase.database.sql.visitor.SqlStatementVisitor;
+import liquibase.database.sql.visitor.SqlVisitor;
 import liquibase.database.template.JdbcOutputTemplate;
 import liquibase.database.template.JdbcTemplate;
 import liquibase.exception.JDBCException;
@@ -565,7 +565,7 @@ public class Liquibase {
 
             UpdateStatement updateStatement = new UpdateStatement(getDatabase().getDefaultSchemaName(), getDatabase().getDatabaseChangeLogTableName());
             updateStatement.addNewColumnValue("MD5SUM", null);
-            getDatabase().getJdbcTemplate().execute(updateStatement, new ArrayList<SqlStatementVisitor>());
+            getDatabase().getJdbcTemplate().execute(updateStatement, new ArrayList<SqlVisitor>());
             getDatabase().commit();
         } finally {
             lockHandler.releaseLock();

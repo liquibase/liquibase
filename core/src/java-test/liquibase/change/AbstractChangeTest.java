@@ -4,7 +4,7 @@ import liquibase.database.Database;
 import liquibase.database.OracleDatabase;
 import liquibase.database.sql.RawSqlStatement;
 import liquibase.database.sql.SqlStatement;
-import liquibase.database.sql.visitor.SqlStatementVisitor;
+import liquibase.database.sql.visitor.SqlVisitor;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.util.StreamUtil;
 import liquibase.exception.InvalidChangeDefinitionException;
@@ -67,7 +67,7 @@ public abstract class AbstractChangeTest {
         StringWriter stringWriter = new StringWriter();
 
         OracleDatabase database = new OracleDatabase();
-        change.saveStatements(database, new ArrayList<SqlStatementVisitor>(), stringWriter);
+        change.saveStatements(database, new ArrayList<SqlVisitor>(), stringWriter);
 
         assertEquals("GENERATED STATEMENT;" + StreamUtil.getLineSeparator() + StreamUtil.getLineSeparator(), stringWriter.getBuffer().toString());
     }
@@ -112,7 +112,7 @@ public abstract class AbstractChangeTest {
         OracleDatabase database = new OracleDatabase();
         database.setConnection(conn);
 
-        change.executeStatements(database, new ArrayList<SqlStatementVisitor>());
+        change.executeStatements(database, new ArrayList<SqlVisitor>());
         
         verify(conn);
         verify(statement);

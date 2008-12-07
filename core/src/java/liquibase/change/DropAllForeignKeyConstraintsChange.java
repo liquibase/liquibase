@@ -3,7 +3,7 @@ package liquibase.change;
 import liquibase.database.Database;
 import liquibase.database.sql.SqlStatement;
 import liquibase.database.sql.FindForeignKeyConstraintsStatement;
-import liquibase.database.sql.visitor.SqlStatementVisitor;
+import liquibase.database.sql.visitor.SqlVisitor;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.template.JdbcTemplate;
 import liquibase.exception.JDBCException;
@@ -106,7 +106,7 @@ public class DropAllForeignKeyConstraintsChange extends AbstractChange {
         );
 
         try {
-            List<Map> results = jdbc.queryForList(sql, new ArrayList<SqlStatementVisitor>());
+            List<Map> results = jdbc.queryForList(sql, new ArrayList<SqlVisitor>());
 
             if (results != null && results.size() > 0) {
                 for (Map result : results) {
