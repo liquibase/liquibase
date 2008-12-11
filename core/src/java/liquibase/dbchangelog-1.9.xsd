@@ -70,7 +70,7 @@
                     <xsd:element name="include" minOccurs="0" maxOccurs="unbounded">
                         <xsd:complexType>
                             <xsd:attribute name="file" type="xsd:string"/>
-                            <xsd:attribute name="isRelativePath" type="xsd:boolean"/>
+                            <xsd:attribute name="relative" type="xsd:boolean"/>
                         </xsd:complexType>
                     </xsd:element>
                 </xsd:choice>

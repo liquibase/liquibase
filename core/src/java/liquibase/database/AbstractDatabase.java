@@ -950,7 +950,8 @@ public abstract class AbstractDatabase implements Database {
             } else if (dataType == Types.BLOB) {
                 return "!!!!!! LIQUIBASE CANNOT OUTPUT BLOB VALUES !!!!!!";
             } else {
-                throw new RuntimeException("Cannot convert type: " + dataType);
+                log.warning("Do not know how to convert type " + dataType);
+                return value;
             }
         } catch (DateParseException e) {
             return new ComputedDateValue(value);

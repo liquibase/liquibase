@@ -534,7 +534,10 @@
         </modifySql>
         <modifySql dbms="mysql,derby">
             <replace replace=")" with=""/>
-            <append value=", name varcar(255) )"/>
+            <append value=", name varchar(255) )"/>
+        </modifySql>
+        <modifySql dbms="mysql">
+            <append value=" engine innodb"/>
         </modifySql>
     </changeSet>
 
