@@ -154,8 +154,22 @@ public class HibernateDatabase implements Database {
     public String getDatabaseChangeLogLockTableName() {
         return null;
     }
+    
+    /**
+     * Does nothing because this is a hibernate database
+     * @see liquibase.database.Database#setDatabaseChangeLogLockTableName(java.lang.String)
+     */
+    public void setDatabaseChangeLogLockTableName(String tableName) {
+    }
 
-    public String getConcatSql(String... values) {
+	/**
+	 * Does nothing because this is a hibernate database
+     * @see liquibase.database.Database#setDatabaseChangeLogTableName(java.lang.String)
+     */
+    public void setDatabaseChangeLogTableName(String tableName) {
+    }
+
+	public String getConcatSql(String... values) {
         return null;
     }
 

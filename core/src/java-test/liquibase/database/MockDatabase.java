@@ -149,15 +149,37 @@ public class MockDatabase implements Database {
         return null;
     }
 
+    /**
+     * @see liquibase.database.Database#getDatabaseChangeLogTableName()
+     */
     public String getDatabaseChangeLogTableName() {
         return "DATABASECHANGELOG";
     }
 
+    /**
+     * @see liquibase.database.Database#getDatabaseChangeLogLockTableName()
+     */
     public String getDatabaseChangeLogLockTableName() {
         return "DATABASECHANGELOGLOCK";
     }
+    
+    /**
+     * Does nothing
+     * 
+     * @see liquibase.database.Database#setDatabaseChangeLogLockTableName(java.lang.String)
+     */
+    public void setDatabaseChangeLogLockTableName(String tableName) {
+    }
 
-    public String getConcatSql(String... values) {
+	/**
+	 * Does nothing
+	 * 
+     * @see liquibase.database.Database#setDatabaseChangeLogTableName(java.lang.String)
+     */
+    public void setDatabaseChangeLogTableName(String tableName) {
+    }
+
+	public String getConcatSql(String... values) {
         return null;
     }
 

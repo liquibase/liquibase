@@ -105,6 +105,20 @@ public interface Database extends DatabaseObject {
     String getDatabaseChangeLogTableName();
 
     String getDatabaseChangeLogLockTableName();
+    
+    /**
+     * Set the table name of the change log to the given table name
+     * 
+     * @param tableName
+     */
+    public void setDatabaseChangeLogTableName(String tableName);
+    
+    /**
+     * Set the table name of the change log lock to the given table name
+     * 
+     * @param tableName
+     */
+    public void setDatabaseChangeLogLockTableName(String tableName);
 
     /**
      * Returns SQL to concat the passed values.
