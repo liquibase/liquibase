@@ -95,9 +95,13 @@ public class ColumnConfig {
         // Since we have two rules for the value it can either be specifed as an attribute
         // or as the tag body in case of long values then the check is necessary so that it
         // should not override the value specifed as an attribute.
-        if (StringUtils.trimToNull(value) != null) {
-            this.value = value;
-        }
+//        if (StringUtils.trimToNull(value) != null) {
+//            this.value = value;
+//        }
+    	// TODO find where this is being called with the tag body 
+    	// and fix the code there.  this logic does not belong here
+    	// because it prevents a column from being the empty string
+    	this.value = value;
     }
 
     public Number getValueNumeric() {
