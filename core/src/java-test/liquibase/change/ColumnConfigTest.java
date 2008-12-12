@@ -22,10 +22,10 @@ public class ColumnConfigTest {
         assertEquals("abc", column.getValue());
 
         column.setValue(null);
-        assertEquals("passed null doesn't override the value", "abc", column.getValue());
+        assertEquals("passed null should override the value", null, column.getValue());
         
         column.setValue("");
-        assertEquals("passed empty strings don't override the value", "abc", column.getValue());
+        assertEquals("passed empty strings should override the value", "", column.getValue());
 
     }
 
