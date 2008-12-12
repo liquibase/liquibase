@@ -84,10 +84,16 @@ public class InsertDataChange extends AbstractChange implements ChangeWithColumn
         };
     }
 
+    /**
+     * @see liquibase.change.Change#getConfirmationMessage()
+     */
     public String getConfirmationMessage() {
         return "New row inserted into " + getTableName();
     }
 
+    /**
+     * @see liquibase.change.Change#createNode(org.w3c.dom.Document)
+     */
     public Element createNode(Document currentChangeLogFileDOM) {
         Element node = currentChangeLogFileDOM.createElement("insert");
         if (getSchemaName() != null) {
@@ -103,6 +109,9 @@ public class InsertDataChange extends AbstractChange implements ChangeWithColumn
         return node;
     }
 
+    /**
+     * @see liquibase.change.Change#getAffectedDatabaseObjects()
+     */
     public Set<DatabaseObject> getAffectedDatabaseObjects() {
         Table dbObject = new Table(getTableName());
 

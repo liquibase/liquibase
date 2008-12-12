@@ -1,5 +1,17 @@
 package liquibase.change;
 
+import java.io.IOException;
+import java.io.Writer;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
+
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
 import liquibase.ChangeSet;
 import liquibase.FileOpener;
 import liquibase.database.Database;
@@ -11,16 +23,11 @@ import liquibase.util.MD5Util;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
 import liquibase.util.XMLUtil;
+
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.IOException;
-import java.io.Writer;
-import java.util.*;
 
 /**
  * Standard superclass for Changes to implement. This is a <i>skeletal implementation</i>,
@@ -78,7 +85,7 @@ public abstract class AbstractChange implements Change {
     }
 
     /**
-     * @see liquibase.change.Change#executeStatements(liquibase.database.Database, Collection sqlVisitors)
+     * @see liquibase.change.Change#executeStatements(liquibase.database.Database, List sqlVisitors)
      */
     public void executeStatements(Database database, List<SqlVisitor> sqlVisitors) throws JDBCException, UnsupportedChangeException {
         SqlStatement[] statements = generateStatements(database);
@@ -87,7 +94,7 @@ public abstract class AbstractChange implements Change {
     }
 
     /**
-     * @see liquibase.change.Change#saveStatements(liquibase.database.Database, Collection sqlVisitors, java.io.Writer)
+     * @see liquibase.change.Change#saveStatements(liquibase.database.Database, List sqlVisitors, java.io.Writer)
      */
     public void saveStatements(Database database, List<SqlVisitor> sqlVisitors, Writer writer) throws IOException, UnsupportedChangeException, StatementNotSupportedOnDatabaseException {
         SqlStatement[] statements = generateStatements(database);
@@ -97,7 +104,7 @@ public abstract class AbstractChange implements Change {
     }
 
     /**
-     * @see liquibase.change.Change#executeRollbackStatements(liquibase.database.Database, Collection sqlVisitor)
+     * @see liquibase.change.Change#executeRollbackStatements(liquibase.database.Database, List sqlVisitor)
      */
     public void executeRollbackStatements(Database database, List<SqlVisitor> sqlVisitors) throws JDBCException, UnsupportedChangeException, RollbackImpossibleException {
         SqlStatement[] statements = generateRollbackStatements(database);
@@ -105,7 +112,7 @@ public abstract class AbstractChange implements Change {
     }
 
     /**
-     * @see liquibase.change.Change#saveRollbackStatement(liquibase.database.Database, Collection sqlVisitor, java.io.Writer)
+     * @see liquibase.change.Change#saveRollbackStatement(liquibase.database.Database, List sqlVisitor, java.io.Writer)
      */
     public void saveRollbackStatement(Database database, List<SqlVisitor> sqlVisitors, Writer writer) throws IOException, UnsupportedChangeException, RollbackImpossibleException, StatementNotSupportedOnDatabaseException {
         SqlStatement[] statements = generateRollbackStatements(database);
@@ -202,7 +209,7 @@ public abstract class AbstractChange implements Change {
      * @param buffer a {@link StringBuffer} object used to hold the {@link String}
      *               representation of the change
      */
-    private void nodeToStringBuffer(Element node, StringBuffer buffer) {
+    private void nodeToStringBuffer(Node node, StringBuffer buffer) {
         buffer.append("<").append(node.getNodeName());
         SortedMap<String, String> attributeMap = new TreeMap<String, String>();
         NamedNodeMap attributes = node.getAttributes();
