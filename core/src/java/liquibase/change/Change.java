@@ -1,19 +1,25 @@
 package liquibase.change;
 
+import java.io.IOException;
+import java.io.Writer;
+import java.util.Set;
+import java.util.List;
+
 import liquibase.ChangeSet;
 import liquibase.FileOpener;
 import liquibase.database.Database;
 import liquibase.database.sql.SqlStatement;
 import liquibase.database.sql.visitor.SqlVisitor;
 import liquibase.database.structure.DatabaseObject;
-import liquibase.exception.*;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
+import liquibase.exception.InvalidChangeDefinitionException;
+import liquibase.exception.JDBCException;
+import liquibase.exception.RollbackImpossibleException;
+import liquibase.exception.SetupException;
+import liquibase.exception.StatementNotSupportedOnDatabaseException;
+import liquibase.exception.UnsupportedChangeException;
 
-import java.io.IOException;
-import java.io.Writer;
-import java.util.Set;
-import java.util.List;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
 
 /**
  * Interface all changes (refactorings) implement.
@@ -141,13 +147,13 @@ public interface Change {
     public String getConfirmationMessage();
 
     /**
-     * Creates an XML element (of type {@link Element}) of the change object, and adds it
+     * Creates an XML element (of type {@link Node}) of the change object, and adds it
      * to the {@link Document} object passed as argument
      *
      * @param currentChangeLogDOM the current {@link Document} where this element is being added
-     * @return the {@link Element} object created
+     * @return the {@link Node} object created
      */
-    public Element createNode(Document currentChangeLogDOM);
+    public Node createNode(Document currentChangeLogDOM);
 
     /**
      * Calculates the MD5 hash for the string representation of the XML element

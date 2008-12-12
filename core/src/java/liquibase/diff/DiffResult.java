@@ -1,6 +1,27 @@
 package liquibase.diff;
 
+import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.io.RandomAccessFile;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
 import liquibase.change.*;
+
 import liquibase.csv.CSVWriter;
 import liquibase.database.Database;
 import liquibase.database.structure.*;
@@ -12,17 +33,9 @@ import liquibase.util.SqlUtil;
 import liquibase.util.StringUtils;
 import liquibase.xml.DefaultXmlWriter;
 import liquibase.xml.XmlWriter;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.*;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.Statement;
-import java.util.*;
 
 public class DiffResult {
 
@@ -59,7 +72,7 @@ public class DiffResult {
 
     private SortedSet<UniqueConstraint> missingUniqueConstraints = new TreeSet<UniqueConstraint>();
     private SortedSet<UniqueConstraint> unexpectedUniqueConstraints = new TreeSet<UniqueConstraint>();
-    
+
     private SortedSet<Sequence> missingSequences = new TreeSet<Sequence>();
     private SortedSet<Sequence> unexpectedSequences = new TreeSet<Sequence>();
 
@@ -211,21 +224,21 @@ public class DiffResult {
     public SortedSet<Sequence> getUnexpectedSequences() {
         return unexpectedSequences;
     }
-    
-    public void addMissingUniqueConstraint (UniqueConstraint uniqueConstraint) {
-      missingUniqueConstraints.add(uniqueConstraint);
+
+    public void addMissingUniqueConstraint(UniqueConstraint uniqueConstraint) {
+        missingUniqueConstraints.add(uniqueConstraint);
     }
-  
-    public SortedSet<UniqueConstraint> getMissingUniqueConstraints () {
-      return this.missingUniqueConstraints;
+
+    public SortedSet<UniqueConstraint> getMissingUniqueConstraints() {
+        return this.missingUniqueConstraints;
     }
-  
-    public void addUnexpectedUniqueConstraint (UniqueConstraint uniqueConstraint) {
-      unexpectedUniqueConstraints.add(uniqueConstraint);
+
+    public void addUnexpectedUniqueConstraint(UniqueConstraint uniqueConstraint) {
+        unexpectedUniqueConstraints.add(uniqueConstraint);
     }
-  
-    public SortedSet<UniqueConstraint> getUnexpectedUniqueConstraints () {
-      return unexpectedUniqueConstraints;
+
+    public SortedSet<UniqueConstraint> getUnexpectedUniqueConstraints() {
+        return unexpectedUniqueConstraints;
     }
 
     public boolean shouldDiffData() {
@@ -330,15 +343,15 @@ public class DiffResult {
 
     }
 
-    public void printChangeLog(String changeLogFile, Database targetDatabase) throws ParserConfigurationException, IOException {
+    public void printChangeLog(String changeLogFile, Database targetDatabase) throws ParserConfigurationException, IOException, SQLException {
         this.printChangeLog(changeLogFile, targetDatabase, new DefaultXmlWriter());
     }
 
-    public void printChangeLog(PrintStream out, Database targetDatabase) throws ParserConfigurationException, IOException {
+    public void printChangeLog(PrintStream out, Database targetDatabase) throws ParserConfigurationException, IOException, SQLException {
         this.printChangeLog(out, targetDatabase, new DefaultXmlWriter());
     }
 
-    public void printChangeLog(String changeLogFile, Database targetDatabase, XmlWriter xmlWriter) throws ParserConfigurationException, IOException {
+    public void printChangeLog(String changeLogFile, Database targetDatabase, XmlWriter xmlWriter) throws ParserConfigurationException, IOException, SQLException {
         File file = new File(changeLogFile);
         if (!file.exists()) {
             LogFactory.getLogger().info(file + " does not exist, creating");
@@ -392,7 +405,7 @@ public class DiffResult {
     /**
      * Prints changeLog that would bring the base database to be the same as the target database
      */
-    public void printChangeLog(PrintStream out, Database targetDatabase, XmlWriter xmlWriter) throws ParserConfigurationException, IOException {
+    public void printChangeLog(PrintStream out, Database targetDatabase, XmlWriter xmlWriter) throws ParserConfigurationException, IOException, SQLException {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder documentBuilder = factory.newDocumentBuilder();
         documentBuilder.setEntityResolver(new LiquibaseSchemaResolver());
@@ -407,7 +420,7 @@ public class DiffResult {
         doc.appendChild(changeLogElement);
 
         List<Change> changes = new ArrayList<Change>();
-        addUnexpectedViewChanges(changes);        
+        addUnexpectedViewChanges(changes);
         addMissingTableChanges(changes, targetDatabase);
         addMissingColumnChanges(changes, targetDatabase);
         addChangedColumnChanges(changes);
@@ -520,32 +533,32 @@ public class DiffResult {
             changes.add(change);
         }
     }
-    
+
     private void addUnexpectedUniqueConstraintChanges(List<Change> changes) {
-      for (UniqueConstraint uc : getUnexpectedUniqueConstraints()) {
+        for (UniqueConstraint uc : getUnexpectedUniqueConstraints()) {
 
-          if (!getUnexpectedTables().contains(uc.getTable())) {
-              DropUniqueConstraintChange change = new DropUniqueConstraintChange();
-              change.setTableName(uc.getTable().getName());
-              change.setConstraintName(uc.getName());
+            if (!getUnexpectedTables().contains(uc.getTable())) {
+                DropUniqueConstraintChange change = new DropUniqueConstraintChange();
+                change.setTableName(uc.getTable().getName());
+                change.setConstraintName(uc.getName());
 
-              changes.add(change);
-          }
-      }
+                changes.add(change);
+            }
+        }
     }
 
     private void addMissingUniqueConstraintChanges(List<Change> changes) {
-      for (UniqueConstraint uc : getMissingUniqueConstraints()) {
+        for (UniqueConstraint uc : getMissingUniqueConstraints()) {
 
-          AddUniqueConstraintChange change = new AddUniqueConstraintChange();
-          change.setTableName(uc.getTable().getName());
-          change.setConstraintName(uc.getName());
-          change.setColumnNames(uc.getColumnNames());
+            AddUniqueConstraintChange change = new AddUniqueConstraintChange();
+            change.setTableName(uc.getTable().getName());
+            change.setConstraintName(uc.getName());
+            change.setColumnNames(uc.getColumnNames());
 
-          changes.add(change);
-      }
+            changes.add(change);
+        }
     }
-    
+
     private void addUnexpectedForeignKeyChanges(List<Change> changes) {
         for (ForeignKey fk : getUnexpectedForeignKeys()) {
 
@@ -748,7 +761,7 @@ public class DiffResult {
                     if (primaryKey == null || primaryKey.getColumnNamesAsList().size() == 1) {
                         constraintsConfig = new ConstraintsConfig();
                         constraintsConfig.setPrimaryKey(true);
-                        
+
                         if (primaryKey != null) {
                             constraintsConfig.setPrimaryKeyName(primaryKey.getName());
                             getMissingPrimaryKeys().remove(primaryKey);
@@ -806,58 +819,116 @@ public class DiffResult {
         }
     }
 
-    private void addInsertDataChanges(List<Change> changes, String dataDir) {
+    private void addInsertDataChanges(List<Change> changes, String dataDir) throws SQLException, IOException {
         try {
             String schema = baseSnapshot.getSchema();
             Statement stmt = baseSnapshot.getDatabase().getConnection().createStatement();
             for (Table table : baseSnapshot.getTables()) {
                 ResultSet rs = stmt.executeQuery("SELECT * FROM " + baseSnapshot.getDatabase().escapeTableName(schema, table.getName()));
-                String fileName = table.getName() + ".csv";
-                if (dataDir != null) {
-                    fileName = dataDir + "/" + fileName;
-                }
-
-
-                File parentDir = new File(dataDir);
-                if (!parentDir.exists()) {
-                    parentDir.mkdirs();
-                }
-                if (!parentDir.isDirectory()) {
-                    throw new RuntimeException(parentDir + " is not a directory");
-                }
-
-                CSVWriter outputFile = new CSVWriter(new FileWriter(fileName));
-                outputFile.writeAll(rs, true);
-                outputFile.flush();
-                outputFile.close();
-
-                LoadDataChange change = new LoadDataChange();
-                change.setFile(fileName);
-                change.setEncoding("UTF-8");
-                change.setSchemaName(schema);
-                change.setTableName(table.getName());
 
                 ResultSetMetaData columnData = rs.getMetaData();
-                for (int col = 1; col <= columnData.getColumnCount(); col++) {
-                    String colName = columnData.getColumnName(col);
-                    int dataType = columnData.getColumnType(col);
-                    String typeString = "STRING";
-                    if (SqlUtil.isNumeric(dataType)) {
-                        typeString = "NUMERIC";
-                    } else if (SqlUtil.isBoolean(dataType)) {
-                        typeString = "BOOLEAN";
-                    } else if (SqlUtil.isDate(dataType)) {
-                        typeString = "DATE";
+                int columnCount = columnData.getColumnCount();
+
+                // if dataDir is not null, print out a csv file and use loadData tag
+                if (dataDir != null) {
+                    String fileName = table.getName() + ".csv";
+                    if (dataDir != null) {
+                        fileName = dataDir + "/" + fileName;
                     }
 
-                    LoadDataColumnConfig columnConfig = new LoadDataColumnConfig();
-                    columnConfig.setHeader(colName);
-                    columnConfig.setType(typeString);
+                    File parentDir = new File(dataDir);
+                    if (!parentDir.exists()) {
+                        parentDir.mkdirs();
+                    }
+                    if (!parentDir.isDirectory()) {
+                        throw new RuntimeException(parentDir + " is not a directory");
+                    }
 
-                    change.addColumn(columnConfig);
+                    CSVWriter outputFile = new CSVWriter(new FileWriter(fileName));
+                    outputFile.writeAll(rs, true);
+                    outputFile.flush();
+                    outputFile.close();
+
+                    LoadDataChange change = new LoadDataChange();
+                    change.setFile(fileName);
+                    change.setEncoding("UTF-8");
+                    change.setSchemaName(schema);
+                    change.setTableName(table.getName());
+
+                    for (int col = 1; col <= columnCount; col++) {
+                        String colName = columnData.getColumnName(col);
+                        int dataType = columnData.getColumnType(col);
+                        String typeString = "STRING";
+                        if (SqlUtil.isNumeric(dataType)) {
+                            typeString = "NUMERIC";
+                        } else if (SqlUtil.isBoolean(dataType)) {
+                            typeString = "BOOLEAN";
+                        } else if (SqlUtil.isDate(dataType)) {
+                            typeString = "DATE";
+                        }
+
+                        LoadDataColumnConfig columnConfig = new LoadDataColumnConfig();
+                        columnConfig.setHeader(colName);
+                        columnConfig.setType(typeString);
+
+                        change.addColumn(columnConfig);
+                    }
+
+                    changes.add(change);
+                } else { // if dataDir is null, build and use insert tags
+
+
+                    // loop over all rows
+                    while (rs.next()) {
+                        InsertDataChange change = new InsertDataChange();
+                        change.setSchemaName(schema);
+                        change.setTableName(table.getName());
+
+                        // loop over all columns for this row
+                        for (int col = 1; col <= columnCount; col++) {
+                            ColumnConfig column = new ColumnConfig();
+                            column.setName(columnData.getColumnName(col));
+
+                            // set the value for this column
+                            int dataType = columnData.getColumnType(col);
+                            if (SqlUtil.isNumeric(dataType)) {
+                                String columnValue = rs.getString(col);
+                                if (columnValue == null) {
+                                    column.setValueNumeric((Number) null);
+                                } else {
+                                    // its some sort of non-null number
+                                    if (dataType == Types.DOUBLE ||
+                                            dataType == Types.NUMERIC ||
+                                            dataType == Types.DECIMAL) {
+                                        column.setValueNumeric(new Double(columnValue));
+                                    } else if (dataType == Types.FLOAT ||
+                                            dataType == Types.REAL) {
+                                        column.setValueNumeric(new Float(columnValue));
+                                    } else {
+                                        // its an integer type of column
+                                        column.setValueNumeric(new Integer(columnValue));
+                                    }
+
+                                }
+
+                            } else if (SqlUtil.isBoolean(dataType)) {
+                                column.setValueBoolean(rs.getBoolean(col));
+                            } else if (SqlUtil.isDate(dataType)) {
+                                column.setValueDate(rs.getDate(col));
+                            } else { //string
+                                column.setValue(rs.getString(col));
+                            }
+
+                            change.addColumn(column);
+
+                        }
+
+                        // for each row, add a new change
+                        // (there will be one group per table)
+                        changes.add(change);
+                    }
+
                 }
-
-                changes.add(change);
             }
 
         } catch (Exception e) {
