@@ -86,7 +86,7 @@ class XMLChangeLogHandler extends DefaultHandler {
                 databaseChangeLog.setLogicalFilePath(atts.getValue("logicalFilePath"));
             } else if ("include".equals(qName)) {
                 String fileName = atts.getValue("file");
-                boolean isRelative = new Boolean(atts.getValue("relative")).booleanValue();
+                boolean isRelative = Boolean.parseBoolean(atts.getValue("relative"));
                 handleIncludedChangeLog(fileName, isRelative, databaseChangeLog.getPhysicalFilePath());
             } else if (changeSet == null && "changeSet".equals(qName)) {
                 boolean alwaysRun = false;
