@@ -1,32 +1,40 @@
 package liquibase.ant;
 
-import liquibase.CompositeFileOpener;
-import liquibase.FileOpener;
-import liquibase.FileSystemFileOpener;
-import liquibase.Liquibase;
-import liquibase.util.LiquibaseUtil;
-import liquibase.database.Database;
-import liquibase.database.DatabaseFactory;
-import liquibase.database.HibernateDatabase;
-import liquibase.exception.JDBCException;
-import liquibase.log.LogFactory;
-import org.apache.tools.ant.Project;
-import org.apache.tools.ant.Task;
-import org.apache.tools.ant.types.Path;
-import org.apache.tools.ant.types.Reference;
-
-import java.io.*;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.io.Writer;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.sql.Connection;
 import java.sql.Driver;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
+
+import liquibase.CompositeFileOpener;
+import liquibase.FileOpener;
+import liquibase.FileSystemFileOpener;
+import liquibase.Liquibase;
+import liquibase.database.Database;
+import liquibase.database.DatabaseFactory;
+import liquibase.database.HibernateDatabase;
+import liquibase.exception.JDBCException;
+import liquibase.log.LogFactory;
+
+import org.apache.tools.ant.Project;
+import org.apache.tools.ant.Task;
+import org.apache.tools.ant.types.Path;
+import org.apache.tools.ant.types.Reference;
 
 /**
  * Base class for all Ant LiquiBase tasks.  This class sets up LiquiBase and defines parameters
@@ -45,7 +53,10 @@ public class BaseLiquibaseTask extends Task {
     private String outputFile;
     private String defaultSchemaName;
     private String databaseClass;
-
+    private String databaseChangeLogTableName;
+    private String databaseChangeLogLockTableName;
+    
+    
     private Map<String, Object> changeLogProperties = new HashMap<String, Object>();
 
     public BaseLiquibaseTask() {
@@ -159,6 +170,7 @@ public class BaseLiquibaseTask extends Task {
         FileOpener fsFO = new FileSystemFileOpener();
 
         Database database = createDatabaseObject(getDriver(), getUrl(), getUsername(), getPassword(), getDefaultSchemaName(),getDatabaseClass());
+        
         String changeLogFile = null;
         if (getChangeLogFile() != null) {
             changeLogFile = getChangeLogFile().trim();
@@ -191,45 +203,53 @@ public class BaseLiquibaseTask extends Task {
                 return new URLClassLoader(taskClassPath.toArray(new URL[taskClassPath.size()]));
             }
         });
-
+        
+        Database database = null;
+        
         if (databaseUrl.startsWith("hibernate:")) {
-            return new HibernateDatabase(databaseUrl.substring("hibernate:".length()));
+            database = new HibernateDatabase(databaseUrl.substring("hibernate:".length()));
+        } else {
+	        if (databaseClass != null) {     
+	        	
+	        	  try
+	        	  {
+	        		  DatabaseFactory.getInstance().addDatabaseImplementation((Database) Class.forName(databaseClass, true, loader).newInstance());
+	        	  }
+	        	  catch (ClassCastException e) //fails in Ant in particular
+	        	  {
+	        		  DatabaseFactory.getInstance().addDatabaseImplementation((Database) Class.forName(databaseClass).newInstance());
+	        	  }
+	        }
+	
+	        if (driverClassName == null) {
+	            driverClassName = DatabaseFactory.getInstance().findDefaultDriver(databaseUrl);
+	        }
+	
+	        if (driverClassName == null) {
+	            throw new JDBCException("driver not specified and no default could be found for "+databaseUrl);
+	        }
+	
+	        Driver driver = (Driver) Class.forName(driverClassName, true, loader).newInstance();
+	
+	        Properties info = new Properties();
+	        info.put("user", username);
+	        info.put("password", password);
+	        Connection connection = driver.connect(databaseUrl, info);
+	
+	        if (connection == null) {
+	            throw new JDBCException("Connection could not be created to " + databaseUrl + " with driver " + driver.getClass().getName() + ".  Possibly the wrong driver for the given database URL");
+	        }
+	
+	        database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(connection);
+	        database.setDefaultSchemaName(defaultSchemaName);
         }
-
-        if (databaseClass != null) {
-
-        	  try
-        	  {
-        		  DatabaseFactory.getInstance().addDatabaseImplementation((Database) Class.forName(databaseClass, true, loader).newInstance());
-        	  }
-        	  catch (ClassCastException e) //fails in Ant in particular
-        	  {
-        		  DatabaseFactory.getInstance().addDatabaseImplementation((Database) Class.forName(databaseClass).newInstance());
-        	  }
-        }
-
-        if (driverClassName == null) {
-            driverClassName = DatabaseFactory.getInstance().findDefaultDriver(databaseUrl);
-        }
-
-        if (driverClassName == null) {
-            throw new JDBCException("driver not specified and no default could be found for "+databaseUrl);
-        }
-
-        Driver driver = (Driver) Class.forName(driverClassName, true, loader).newInstance();
-
-        Properties info = new Properties();
-        info.put("user", username);
-        info.put("password", password);
-        Connection connection = driver.connect(databaseUrl, info);
-
-        if (connection == null) {
-            throw new JDBCException("Connection could not be created to " + databaseUrl + " with driver " + driver.getClass().getName() + ".  Possibly the wrong driver for the given database URL");
-        }
-
-        Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(connection);
-        database.setDefaultSchemaName(defaultSchemaName);
-
+        
+        if (getDatabaseChangeLogTableName() != null)
+        	database.setDatabaseChangeLogTableName(getDatabaseChangeLogTableName());
+        
+        if (getDatabaseChangeLogLockTableName() != null)
+        	database.setDatabaseChangeLogLockTableName(getDatabaseChangeLogLockTableName());
+        
         return database;
     }
 
@@ -331,8 +351,28 @@ public class BaseLiquibaseTask extends Task {
 	public void setDatabaseClass(String databaseClass) {
 		this.databaseClass = databaseClass;
 	}
+	
+    public String getDatabaseChangeLogTableName() {
+    	return databaseChangeLogTableName;
+    }
 
-    public static class ChangeLogProperty  {
+	
+    public void setDatabaseChangeLogTableName(String tableName) {
+    	this.databaseChangeLogTableName = tableName;
+    }
+
+	
+    public String getDatabaseChangeLogLockTableName() {
+    	return databaseChangeLogLockTableName;
+    }
+
+	
+    public void setDatabaseChangeLogLockTableName(String tableName) {
+    	this.databaseChangeLogLockTableName = tableName;
+    }
+
+
+	public static class ChangeLogProperty  {
         private String name;
         private String value;
 

@@ -43,8 +43,11 @@ public abstract class AbstractDatabase implements Database {
 
     private JdbcTemplate jdbcTemplate = new JdbcTemplate(this);
     private List<RanChangeSet> ranChangeSetList;
-    
+
     private static Pattern CREATE_VIEW_AS_PATTERN = Pattern.compile("^CREATE\\s+.*?VIEW\\s+.*?AS\\s+", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+
+	private String databaseChangeLogTableName = "DatabaseChangeLog".toUpperCase();
+	private String databaseChangeLogLockTableName = "DatabaseChangeLogLock".toUpperCase();;
 
     protected AbstractDatabase() {
     }
@@ -496,12 +499,32 @@ public abstract class AbstractDatabase implements Database {
 
 // ------- DATABASECHANGELOG / DATABASECHANGELOGLOCK METHODS ---- //
 
+    /**
+     * @see liquibase.database.Database#getDatabaseChangeLogTableName()
+     */
     public String getDatabaseChangeLogTableName() {
-        return "DatabaseChangeLog".toUpperCase();
+        return databaseChangeLogTableName;
     }
 
+    /**
+     * @see liquibase.database.Database#getDatabaseChangeLogLockTableName()
+     */
     public String getDatabaseChangeLogLockTableName() {
-        return "DatabaseChangeLogLock".toUpperCase();
+        return databaseChangeLogLockTableName;
+    }
+    
+    /**
+     * @see liquibase.database.Database#setDatabaseChangeLogTableName(java.lang.String)
+     */
+    public void setDatabaseChangeLogTableName(String tableName) {
+        this.databaseChangeLogTableName = tableName;
+    }
+
+    /**
+     * @see liquibase.database.Database#setDatabaseChangeLogLockTableName(java.lang.String)
+     */
+    public void setDatabaseChangeLogLockTableName(String tableName) {
+        this.databaseChangeLogLockTableName = tableName;
     }
 
     private SqlStatement getChangeLogLockInsertSQL() {
@@ -1220,7 +1243,7 @@ public abstract class AbstractDatabase implements Database {
 
     public void markChangeSetAsReRan(ChangeSet changeSet) throws JDBCException {
         String dateValue = getCurrentDateTimeFunction();
-        String sql = "UPDATE " + escapeTableName(getDefaultSchemaName(), "DATABASECHANGELOG") + " SET DATEEXECUTED=" + dateValue + ", MD5SUM='?' WHERE ID='?' AND AUTHOR='?' AND FILENAME='?'";
+        String sql = "UPDATE " + escapeTableName(getDefaultSchemaName(), getDatabaseChangeLogTableName()) + " SET DATEEXECUTED=" + dateValue + ", MD5SUM='?' WHERE ID='?' AND AUTHOR='?' AND FILENAME='?'";
         sql = sql.replaceFirst("\\?", escapeStringForDatabase(changeSet.getMd5sum()));
         sql = sql.replaceFirst("\\?", escapeStringForDatabase(changeSet.getId()));
         sql = sql.replaceFirst("\\?", escapeStringForDatabase(changeSet.getAuthor()));
