@@ -343,15 +343,15 @@ public class DiffResult {
 
     }
 
-    public void printChangeLog(String changeLogFile, Database targetDatabase) throws ParserConfigurationException, IOException, SQLException {
+    public void printChangeLog(String changeLogFile, Database targetDatabase) throws ParserConfigurationException, IOException, JDBCException {
         this.printChangeLog(changeLogFile, targetDatabase, new DefaultXmlWriter());
     }
 
-    public void printChangeLog(PrintStream out, Database targetDatabase) throws ParserConfigurationException, IOException, SQLException {
+    public void printChangeLog(PrintStream out, Database targetDatabase) throws ParserConfigurationException, IOException, JDBCException {
         this.printChangeLog(out, targetDatabase, new DefaultXmlWriter());
     }
 
-    public void printChangeLog(String changeLogFile, Database targetDatabase, XmlWriter xmlWriter) throws ParserConfigurationException, IOException, SQLException {
+    public void printChangeLog(String changeLogFile, Database targetDatabase, XmlWriter xmlWriter) throws ParserConfigurationException, IOException, JDBCException {
         File file = new File(changeLogFile);
         if (!file.exists()) {
             LogFactory.getLogger().info(file + " does not exist, creating");
@@ -405,7 +405,7 @@ public class DiffResult {
     /**
      * Prints changeLog that would bring the base database to be the same as the target database
      */
-    public void printChangeLog(PrintStream out, Database targetDatabase, XmlWriter xmlWriter) throws ParserConfigurationException, IOException, SQLException {
+    public void printChangeLog(PrintStream out, Database targetDatabase, XmlWriter xmlWriter) throws ParserConfigurationException, IOException, JDBCException {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder documentBuilder = factory.newDocumentBuilder();
         documentBuilder.setEntityResolver(new LiquibaseSchemaResolver());
@@ -819,7 +819,7 @@ public class DiffResult {
         }
     }
 
-    private void addInsertDataChanges(List<Change> changes, String dataDir) throws SQLException, IOException {
+    private void addInsertDataChanges(List<Change> changes, String dataDir) throws JDBCException, IOException {
         try {
             String schema = baseSnapshot.getSchema();
             Statement stmt = baseSnapshot.getDatabase().getConnection().createStatement();

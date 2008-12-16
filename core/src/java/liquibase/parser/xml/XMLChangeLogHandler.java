@@ -374,6 +374,8 @@ class XMLChangeLogHandler extends DefaultHandler {
                     } else if (change instanceof UpdateDataChange) {
                         List<ColumnConfig> columns = ((UpdateDataChange) change).getColumns();
                         columns.get(columns.size() - 1).setValue(textString);
+                    } else if (change instanceof StopChange) {
+                        ((StopChange) change).setMessage(textString);
                     } else {
                         throw new RuntimeException("Unexpected text in " + change.getTagName());
                     }

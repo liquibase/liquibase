@@ -662,6 +662,10 @@
         </xsd:complexType>
     </xsd:element>
 
+    <xsd:element name="stop">
+        <xsd:complexType mixed="true"/>
+    </xsd:element>
+
     <!-- renameTable -->
     <xsd:element name="renameTable">
         <xsd:complexType>
@@ -821,6 +825,7 @@
             <xsd:element ref="delete" maxOccurs="unbounded"/>
             <xsd:element ref="loadData" maxOccurs="unbounded"/>
             <xsd:element ref="executeCommand" maxOccurs="unbounded"/>
+            <xsd:element ref="stop" maxOccurs="unbounded"/>
             <xsd:element ref="rollback" maxOccurs="1"/>
         </xsd:choice>
     </xsd:group>
