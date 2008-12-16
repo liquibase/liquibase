@@ -62,6 +62,7 @@ public class ChangeFactory {
                 TagDatabaseChange.class,
                 LoadDataChange.class,
                 DropAllForeignKeyConstraintsChange.class,
+                StopChange.class,
         };
 
         try {

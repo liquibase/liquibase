@@ -541,4 +541,8 @@
         </modifySql>
     </changeSet>
 
+    <!--<changeSet id="stopTest" author="nvoxland">-->
+        <!--<stop>Testing the stop command</stop>-->
+    <!--</changeSet>-->
+
 </databaseChangeLog>
