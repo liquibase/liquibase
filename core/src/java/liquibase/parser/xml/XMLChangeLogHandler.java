@@ -27,6 +27,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.io.File;
 import java.io.InputStream;
+import java.io.FilenameFilter;
+import java.net.URL;
+import java.net.URI;
 
 class XMLChangeLogHandler extends DefaultHandler {
 
@@ -88,6 +91,25 @@ class XMLChangeLogHandler extends DefaultHandler {
                 String fileName = atts.getValue("file");
                 boolean isRelative = Boolean.parseBoolean(atts.getValue("relative"));
                 handleIncludedChangeLog(fileName, isRelative, databaseChangeLog.getPhysicalFilePath());
+            } else if ("includeAll".equals(qName)) {
+                String pathName = atts.getValue("path");
+
+                Enumeration<URL> resources = fileOpener.getResources(pathName);
+                while (resources.hasMoreElements()) {
+                    URL dirUrl = resources.nextElement();
+                    File dir = new File(new URI(dirUrl.toExternalForm()));
+                    if (!dir.exists()) {
+                        throw new SAXException("includeAll path "+pathName+" could not be found.  Tried in "+dir.toString());
+                    }
+                    for (File file : dir.listFiles(new FilenameFilter() {
+                        public boolean accept(File dir, String name) {
+                            return name.endsWith(".xml");
+                        }
+                    })) {
+                        handleIncludedChangeLog(pathName+file.getName(), false, databaseChangeLog.getPhysicalFilePath());
+                    }
+
+                }
             } else if (changeSet == null && "changeSet".equals(qName)) {
                 boolean alwaysRun = false;
                 boolean runOnChange = false;
@@ -263,7 +285,7 @@ class XMLChangeLogHandler extends DefaultHandler {
 
     protected void handleIncludedChangeLog(String fileName, boolean isRelativePath, String relativeBaseFileName) throws LiquibaseException {
         if (isRelativePath) {
-        	String path = searchPath (relativeBaseFileName);
+        	String path = searchPath(relativeBaseFileName);
         	fileName = new StringBuilder(path).append(fileName).toString();
         }
         DatabaseChangeLog changeLog = new ChangeLogParser(changeLogParameters).parse(fileName, fileOpener);

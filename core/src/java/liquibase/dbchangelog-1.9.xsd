@@ -73,6 +73,11 @@
                             <xsd:attribute name="relative" type="xsd:boolean"/>
                         </xsd:complexType>
                     </xsd:element>
+                    <xsd:element name="includeAll" minOccurs="0" maxOccurs="unbounded">
+                        <xsd:complexType>
+                            <xsd:attribute name="path" type="xsd:string"/>
+                        </xsd:complexType>
+                    </xsd:element>
                 </xsd:choice>
             </xsd:sequence>
             <xsd:attributeGroup ref="changeLogAttributes"/>

@@ -545,4 +545,6 @@
         <!--<stop>Testing the stop command</stop>-->
     <!--</changeSet>-->
 
+    <includeAll path="changelogs/common/pathincluded/"/>
+    
 </databaseChangeLog>
