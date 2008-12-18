@@ -4,6 +4,7 @@ import liquibase.DatabaseChangeLog;
 import liquibase.FileOpener;
 import liquibase.exception.ChangeLogParseException;
 import liquibase.parser.xml.XMLChangeLogParser;
+import liquibase.parser.sql.SqlChangeLogGenerator;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -20,8 +21,11 @@ public class ChangeLogParser {
         this.changeLogParameters = changeLogParameters;
     }
 
-    public DatabaseChangeLog parse(String physicalChangeLogLocation, FileOpener fileOpener) throws ChangeLogParseException {
-        return new XMLChangeLogParser().parse(physicalChangeLogLocation, fileOpener, changeLogParameters);
+    public DatabaseChangeLog parse(String physicalSqlFileLocation, FileOpener fileOpener) throws ChangeLogParseException {
+        if (physicalSqlFileLocation.endsWith("sql")) {
+            return new SqlChangeLogGenerator().generate(physicalSqlFileLocation, fileOpener, changeLogParameters);
+        }
+        return new XMLChangeLogParser().parse(physicalSqlFileLocation, fileOpener, changeLogParameters);
     }
 
 }
