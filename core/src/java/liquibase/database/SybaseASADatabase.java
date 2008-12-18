@@ -4,6 +4,7 @@
 package liquibase.database;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -221,6 +222,48 @@ public class SybaseASADatabase extends AbstractDatabase {
 		return PRODUCT_NAME.equalsIgnoreCase(getDatabaseProductName(conn));
 	}
 
+	@Override
+	public String getDefaultCatalogName() throws JDBCException {
+        try {
+            return getConnection().getCatalog();
+        } catch (SQLException e) {
+            throw new JDBCException(e);
+        }
+	}
+
+	@Override
+	protected String getDefaultDatabaseSchemaName() throws JDBCException {
+		return null;
+	}
+
+	@Override
+	public String convertRequestedSchemaToSchema(String requestedSchema)
+			throws JDBCException {
+        if (requestedSchema == null) {
+            return "DBA";
+        }
+        return requestedSchema;
+	}
+
+	@Override
+	public String getDefaultSchemaName() {
+		// TODO Auto-generated method stub
+		return super.getDefaultSchemaName();
+	}
+
+	@Override
+	public String escapeColumnName(String schemaName, String tableName,
+			String columnName) {
+        return "[" + columnName + "]";
+	}
+
+	@Override
+	public String getViewDefinition(String schemaName, String viewName)
+			throws JDBCException {
+		// TODO Auto-generated method stub
+		return super.getViewDefinition(schemaName, viewName);
+	}
+
 	/* (non-Javadoc)
 	 * @see liquibase.database.Database#supportsInitiallyDeferrableColumns()
 	 */
@@ -233,6 +276,14 @@ public class SybaseASADatabase extends AbstractDatabase {
 	 */
 	public boolean supportsTablespaces() {
 		return true;
+	}
+
+	@Override
+	public String convertRequestedSchemaToCatalog(String requestedSchema)
+			throws JDBCException {
+		// like in MS SQL
+        return getDefaultCatalogName();
+        
 	}
 
 	@Override
