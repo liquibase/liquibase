@@ -45,6 +45,7 @@ public class ChangeSet {
     private Set<String> dbmsSet;
     private Boolean failOnError;
     private Set<String> validCheckSums = new HashSet<String>();
+    private boolean autocommit;
 
     private List<Change> rollBackChanges = new ArrayList<Change>();
 
@@ -63,6 +64,10 @@ public class ChangeSet {
     }
 
     public ChangeSet(String id, String author, boolean alwaysRun, boolean runOnChange, String filePath, String physicalFilePath, String contextList, String dbmsList) {
+        this(id, author,  alwaysRun, runOnChange, filePath, physicalFilePath, contextList,  dbmsList, false);
+    }
+
+    public ChangeSet(String id, String author, boolean alwaysRun, boolean runOnChange, String filePath, String physicalFilePath, String contextList, String dbmsList, boolean autocommit) {
         this.changes = new ArrayList<Change>();
         log = LogFactory.getLogger();
         this.id = id;
@@ -71,6 +76,7 @@ public class ChangeSet {
         this.physicalFilePath = physicalFilePath;
         this.alwaysRun = alwaysRun;
         this.runOnChange = runOnChange;
+        this.autocommit = autocommit;
         if (StringUtils.trimToNull(contextList) != null) {
             String[] strings = contextList.toLowerCase().split(",");
             contexts = new HashSet<String>();
@@ -123,6 +129,10 @@ public class ChangeSet {
         boolean markRan = true;
 
         try {
+            if (autocommit) {
+                database.setAutoCommit(true);
+            }
+
             database.getJdbcTemplate().comment("Changeset " + toString());
             if (StringUtils.trimToNull(getComments()) != null) {
                 String comments = getComments();
@@ -208,7 +218,9 @@ public class ChangeSet {
                     log.finest(change.getConfirmationMessage());
                 }
 
-                database.commit();
+                if (!autocommit) {
+                    database.commit();
+                }
                 log.finest("ChangeSet " + toString() + " has been successfully run.");
 
                 database.commit();
@@ -229,6 +241,14 @@ public class ChangeSet {
                     throw ((MigrationFailedException) e);
                 } else {
                     throw new MigrationFailedException(this, e);
+                }
+            }
+        } finally {
+            if (autocommit) {
+                try {
+                    database.setAutoCommit(false);
+                } catch (JDBCException e) {
+                    throw new MigrationFailedException(this, "Could not reset autocommit");
                 }
             }
         }

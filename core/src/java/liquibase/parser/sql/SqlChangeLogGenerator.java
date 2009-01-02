@@ -28,7 +28,7 @@ public class SqlChangeLogGenerator {
         change.setSplitStatements(false);
         change.setStripComments(false);
 
-        ChangeSet changeSet = new ChangeSet("raw", "includeAll", false, false, physicalChangeLogLocation, physicalChangeLogLocation, null, null);
+        ChangeSet changeSet = new ChangeSet("raw", "includeAll", false, false, physicalChangeLogLocation, physicalChangeLogLocation, null, null, false);
         changeSet.addChange(change);
 
         DatabaseChangeLog changeLog = new DatabaseChangeLog(physicalChangeLogLocation);

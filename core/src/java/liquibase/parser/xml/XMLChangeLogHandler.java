@@ -129,7 +129,8 @@ class XMLChangeLogHandler extends DefaultHandler {
                         databaseChangeLog.getFilePath(),
                         databaseChangeLog.getPhysicalFilePath(),
                         atts.getValue("context"),
-                        atts.getValue("dbms"));
+                        atts.getValue("dbms"),
+                        Boolean.valueOf(atts.getValue("autocommit")));
                 if (StringUtils.trimToNull(atts.getValue("failOnError")) != null) {
                     changeSet.setFailOnError(Boolean.parseBoolean(atts.getValue("failOnError")));
                 }

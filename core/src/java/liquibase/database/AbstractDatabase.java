@@ -1335,4 +1335,20 @@ public abstract class AbstractDatabase implements Database {
     public boolean supportsRestrictForeignKeys() {
         return true;
     }
+
+    public boolean isAutoCommit() throws JDBCException {
+        try {
+            return getConnection().getAutoCommit();
+        } catch (SQLException e) {
+            throw new JDBCException(e);
+        }
+    }
+
+    public void setAutoCommit(boolean b) throws JDBCException {
+        try {
+            getConnection().setAutoCommit(b);
+        } catch (SQLException e) {
+            throw new JDBCException(e);
+        }
+    }
 }

@@ -322,4 +322,7 @@ public interface Database extends DatabaseObject {
 
     String escapeConstraintName(String constraintName);
 
+    boolean isAutoCommit() throws JDBCException;
+
+    void setAutoCommit(boolean b) throws JDBCException;
 }

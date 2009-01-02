@@ -137,6 +137,7 @@
         <xsd:attribute name="runOnChange" type="xsd:boolean"/>
         <xsd:attribute name="runAlways" type="xsd:boolean"/>
         <xsd:attribute name="failOnError" type="xsd:boolean"/>
+        <xsd:attribute name="autocommit" type="xsd:boolean" default="false"/>
     </xsd:attributeGroup>
 
     <!-- Attributes for constraints -->
