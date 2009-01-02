@@ -546,5 +546,16 @@
     <!--</changeSet>-->
 
     <includeAll path="changelogs/common/pathincluded/"/>
-    
+
+    <changeSet id="autocommitTest" author="nvoxland" autocommit="true">
+        <createTable tableName="autocommittest">
+            <column name="id" type="int"/>
+        </createTable>
+        <insert tableName="autocommittest">
+            <column name="id" valueNumeric="1"/>
+        </insert>
+        <insert tableName="autocommittest">
+            <column name="id" valueNumeric="2"/>
+        </insert>
+    </changeSet>
 </databaseChangeLog>

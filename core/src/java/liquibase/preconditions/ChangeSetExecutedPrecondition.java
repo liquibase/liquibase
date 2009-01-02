@@ -40,7 +40,7 @@ public class ChangeSetExecutedPrecondition implements Precondition {
     }
 
     public void check(Database database, DatabaseChangeLog changeLog) throws PreconditionFailedException, PreconditionErrorException {
-        ChangeSet changeSet = new ChangeSet(getId(), getAuthor(), false, false, getChangeLogFile(), getChangeLogFile(), null, null);
+        ChangeSet changeSet = new ChangeSet(getId(), getAuthor(), false, false, getChangeLogFile(), getChangeLogFile(), null, null, false);
         RanChangeSet ranChangeSet;
         try {
             ranChangeSet = database.getRanChangeSet(changeSet);

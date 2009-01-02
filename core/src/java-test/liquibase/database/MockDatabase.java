@@ -45,6 +45,14 @@ public class MockDatabase implements Database {
         return false;
     }
 
+    public boolean isAutoCommit() throws JDBCException {
+        return false;
+    }
+
+    public void setAutoCommit(boolean b) throws JDBCException {
+
+    }
+
     public boolean supportsDDLInTransaction() {
         return false;
     }
