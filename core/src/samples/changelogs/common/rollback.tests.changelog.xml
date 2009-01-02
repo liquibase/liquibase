@@ -42,4 +42,9 @@
         <rollback changeSetId="changeRollback2-create" changeSetAuthor="nvoxland"/>
     </changeSet>
 
+    <changeSet id="noRollback" author="nvoxland">
+        <sql>insert into multiRollback3 (id) values (1)</sql>
+        <rollback/>
+    </changeSet>
+
 </databaseChangeLog>
