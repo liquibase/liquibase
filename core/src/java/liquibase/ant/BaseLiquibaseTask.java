@@ -204,19 +204,15 @@ public class BaseLiquibaseTask extends Task {
             }
         });
         
-        Database database = null;
+        Database database;
         
         if (databaseUrl.startsWith("hibernate:")) {
             database = new HibernateDatabase(databaseUrl.substring("hibernate:".length()));
         } else {
-	        if (databaseClass != null) {     
-	        	
-	        	  try
-	        	  {
+	        if (databaseClass != null) {
+	        	  try {
 	        		  DatabaseFactory.getInstance().addDatabaseImplementation((Database) Class.forName(databaseClass, true, loader).newInstance());
-	        	  }
-	        	  catch (ClassCastException e) //fails in Ant in particular
-	        	  {
+	        	  } catch (ClassCastException e) { //fails in Ant in particular
 	        		  DatabaseFactory.getInstance().addDatabaseImplementation((Database) Class.forName(databaseClass).newInstance());
 	        	  }
 	        }

@@ -16,7 +16,7 @@ import java.util.List;
  * Encapsulates the information stored in the change log XML file.
  */
 public class DatabaseChangeLog implements Comparable<DatabaseChangeLog> {
-    private Preconditions preconditions;
+    private Preconditions preconditions = new Preconditions();
     private String physicalFilePath;
     private String logicalFilePath;
 
