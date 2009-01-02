@@ -623,7 +623,6 @@
             <xsd:sequence>
                 <xsd:element ref="comment" minOccurs="0" maxOccurs="1"/>
             </xsd:sequence>
-            <xsd:attributeGroup ref="tableNameAttribute"/>
             <xsd:attribute name="stripComments" type="xsd:boolean"/>
             <xsd:attribute name="splitStatements" type="xsd:boolean"/>
             <xsd:attribute name="endDelimiter" type="xsd:string"/>
