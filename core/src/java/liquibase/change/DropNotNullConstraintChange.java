@@ -155,6 +155,9 @@ public class DropNotNullConstraintChange extends AbstractChange {
 
         element.setAttribute("tableName", getTableName());
         element.setAttribute("columnName", getColumnName());
+        if (getColumnDataType() != null) {
+            element.setAttribute("columnDataType", getColumnDataType());
+        }        
         return element;
     }
 
