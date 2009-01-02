@@ -2,6 +2,7 @@ package liquibase;
 
 import liquibase.change.Change;
 import liquibase.change.RawSQLChange;
+import liquibase.change.EmptyChange;
 import liquibase.database.Database;
 import liquibase.database.sql.SqlStatement;
 import liquibase.database.sql.visitor.RegExpReplaceSqlVisitor;
@@ -367,6 +368,7 @@ public class ChangeSet {
 
     public void addRollBackSQL(String sql) {
         if (StringUtils.trimToNull(sql) == null) {
+            rollBackChanges.add(new EmptyChange());
             return;
         }
 
