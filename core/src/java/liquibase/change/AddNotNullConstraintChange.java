@@ -203,6 +203,9 @@ public class AddNotNullConstraintChange extends AbstractChange {
 
         element.setAttribute("tableName", getTableName());
         element.setAttribute("columnName", getColumnName());
+        if (getColumnDataType() != null) {
+            element.setAttribute("columnDataType", getColumnDataType());
+        }
         element.setAttribute("defaultNullValue", getDefaultNullValue());
         return element;
     }
