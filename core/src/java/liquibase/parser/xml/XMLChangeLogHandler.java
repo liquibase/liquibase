@@ -90,8 +90,8 @@ class XMLChangeLogHandler extends DefaultHandler {
                 databaseChangeLog.setLogicalFilePath(atts.getValue("logicalFilePath"));
             } else if ("include".equals(qName)) {
                 String fileName = atts.getValue("file");
-                boolean isRelative = Boolean.parseBoolean(atts.getValue("relative"));
-                handleIncludedChangeLog(fileName, isRelative, databaseChangeLog.getPhysicalFilePath());
+                boolean isRelativeToChangelogFile = Boolean.parseBoolean(atts.getValue("relativeToChangelogFile"));
+                handleIncludedChangeLog(fileName, isRelativeToChangelogFile, databaseChangeLog.getPhysicalFilePath());
             } else if ("includeAll".equals(qName)) {
                 String pathName = atts.getValue("path");
 

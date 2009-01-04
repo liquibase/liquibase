@@ -17,7 +17,7 @@
         </createTable>
     </changeSet>
 
-    <include file="simpleChangeLog.xml" relative="true"/>
+    <include file="simpleChangeLog.xml" relativeToChangelogFile="true"/>
 
     <changeSet id="2" author="nvoxland">
         <addColumn tableName="employee">
