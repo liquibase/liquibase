@@ -5,7 +5,6 @@ import liquibase.change.RawSQLChange;
 import liquibase.change.EmptyChange;
 import liquibase.database.Database;
 import liquibase.database.sql.SqlStatement;
-import liquibase.database.sql.visitor.RegExpReplaceSqlVisitor;
 import liquibase.database.sql.visitor.SqlVisitor;
 import liquibase.exception.*;
 import liquibase.log.LogFactory;
@@ -45,7 +44,7 @@ public class ChangeSet {
     private Set<String> dbmsSet;
     private Boolean failOnError;
     private Set<String> validCheckSums = new HashSet<String>();
-    private boolean autocommit;
+    private boolean runInTransaction;
 
     private List<Change> rollBackChanges = new ArrayList<Change>();
 
@@ -67,7 +66,7 @@ public class ChangeSet {
         this(id, author,  alwaysRun, runOnChange, filePath, physicalFilePath, contextList,  dbmsList, false);
     }
 
-    public ChangeSet(String id, String author, boolean alwaysRun, boolean runOnChange, String filePath, String physicalFilePath, String contextList, String dbmsList, boolean autocommit) {
+    public ChangeSet(String id, String author, boolean alwaysRun, boolean runOnChange, String filePath, String physicalFilePath, String contextList, String dbmsList, boolean runInTransaction) {
         this.changes = new ArrayList<Change>();
         log = LogFactory.getLogger();
         this.id = id;
@@ -76,7 +75,7 @@ public class ChangeSet {
         this.physicalFilePath = physicalFilePath;
         this.alwaysRun = alwaysRun;
         this.runOnChange = runOnChange;
-        this.autocommit = autocommit;
+        this.runInTransaction = runInTransaction;
         if (StringUtils.trimToNull(contextList) != null) {
             String[] strings = contextList.toLowerCase().split(",");
             contexts = new HashSet<String>();
@@ -129,8 +128,8 @@ public class ChangeSet {
         boolean markRan = true;
 
         try {
-            if (autocommit) {
-                database.setAutoCommit(true);
+            if (runInTransaction) {
+                database.setAutoCommit(false);
             }
 
             database.getJdbcTemplate().comment("Changeset " + toString());
@@ -218,7 +217,7 @@ public class ChangeSet {
                     log.finest(change.getConfirmationMessage());
                 }
 
-                if (!autocommit) {
+                if (!runInTransaction) {
                     database.commit();
                 }
                 log.finest("ChangeSet " + toString() + " has been successfully run.");
@@ -244,9 +243,9 @@ public class ChangeSet {
                 }
             }
         } finally {
-            if (autocommit) {
+            if (runInTransaction) {
                 try {
-                    database.setAutoCommit(false);
+                    database.setAutoCommit(true);
                 } catch (JDBCException e) {
                     throw new MigrationFailedException(this, "Could not reset autocommit");
                 }
