@@ -547,7 +547,7 @@
 
     <includeAll path="changelogs/common/pathincluded/"/>
 
-    <changeSet id="autocommitTest" author="nvoxland" autocommit="true">
+    <changeSet id="autocommitTest" author="nvoxland" runInTransaction="false">
         <createTable tableName="autocommittest">
             <column name="id" type="int"/>
         </createTable>
