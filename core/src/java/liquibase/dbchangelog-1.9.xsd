@@ -5,6 +5,22 @@
             xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.9"
             elementFormDefault="qualified">
 
+    <xsd:simpleType name="onChangeSetPreconditionErrorOrFail">
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="HALT"/>
+            <xsd:enumeration value="WARN"/>
+            <xsd:enumeration value="CONTINUE"/>
+            <xsd:enumeration value="MARK_RAN"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
+    <xsd:simpleType name="onChangeLogPreconditionErrorOrFail">
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="HALT"/>
+            <xsd:enumeration value="WARN"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
     <!-- This is the main (root) part of the xsd -->
     <xsd:element name="databaseChangeLog">
         <xsd:complexType>
@@ -14,6 +30,8 @@
                         <xsd:choice>
                             <xsd:group ref="PreConditionChildren" maxOccurs="unbounded"/>
                         </xsd:choice>
+                        <xsd:attribute name="onFail" type="onChangeLogPreconditionErrorOrFail"/>
+                        <xsd:attribute name="onError" type="onChangeLogPreconditionErrorOrFail"/>
                     </xsd:complexType>
                 </xsd:element>
 
@@ -41,8 +59,8 @@
                                         <xsd:choice>
                                             <xsd:group ref="PreConditionChildren" maxOccurs="unbounded"/>
                                         </xsd:choice>
-                                        <xsd:attribute name="onFail" type="xsd:string"/>
-                                        <xsd:attribute name="onError" type="xsd:string"/>
+                                        <xsd:attribute name="onFail" type="onChangeSetPreconditionErrorOrFail"/>
+                                        <xsd:attribute name="onError" type="onChangeSetPreconditionErrorOrFail"/>
                                     </xsd:complexType>
                                 </xsd:element>
                                 <xsd:choice>
@@ -634,7 +652,7 @@
             <xsd:sequence>
                 <xsd:element name="arg" minOccurs="0" maxOccurs="unbounded">
                     <xsd:complexType>
-                        <xsd:attribute name="value" type="xsd:string"  use="required"/>
+                        <xsd:attribute name="value" type="xsd:string" use="required"/>
                     </xsd:complexType>
                 </xsd:element>
             </xsd:sequence>
