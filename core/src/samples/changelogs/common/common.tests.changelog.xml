@@ -441,7 +441,7 @@
 
     <changeSet id="failMarkRanPrecondition" author="nvoxland">
         <preConditions onError="MARK_RAN">
-            <sqlCheck>select 1 from badtable</sqlCheck>
+            <sqlCheck expectedResult="1">select 1 from badtable</sqlCheck>
         </preConditions>
         <createTable tableName="fail_markran_ran">
             <column name="id" type="int"/>
@@ -450,7 +450,7 @@
 
     <changeSet id="errorContinuePrecondition" author="nvoxland">
         <preConditions onError="CONTINUE">
-            <sqlCheck>select 1 from badtable</sqlCheck>
+            <sqlCheck expectedResult="1">select 1 from badtable</sqlCheck>
         </preConditions>
         <createTable tableName="error_continue_ran">
             <column name="id" type="int"/>
@@ -459,7 +459,7 @@
 
     <changeSet id="errorWarnPrecondition" author="nvoxland">
         <preConditions onError="WARN">
-            <sqlCheck>select 1 from badtable</sqlCheck>
+            <sqlCheck expectedResult="1">select 1 from badtable</sqlCheck>
         </preConditions>
         <createTable tableName="error_warn_ran">
             <column name="id" type="int"/>
@@ -468,7 +468,7 @@
 
     <changeSet id="errorMarkRanPrecondition" author="nvoxland">
         <preConditions onError="MARK_RAN">
-            <sqlCheck>select 1 from badtable</sqlCheck>
+            <sqlCheck expectedResult="1">select 1 from badtable</sqlCheck>
         </preConditions>
         <createTable tableName="error_markran_ran">
             <column name="id" type="int"/>
