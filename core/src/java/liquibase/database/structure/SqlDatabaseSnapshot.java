@@ -470,8 +470,7 @@ public abstract class SqlDatabaseSnapshot implements DatabaseSnapshot {
                 }
             }
             for (ForeignKey fk : foreignKeys) {
-                if (index.getTable().getName().equalsIgnoreCase(fk.getForeignKeyTable().getName())
-                        && index.getColumnNames().equals(fk.getForeignKeyColumns()) && index.getName().equalsIgnoreCase(fk.getName())) {
+                if (index.getTable().getName().equalsIgnoreCase(fk.getForeignKeyTable().getName())  && index.getColumnNames().equals(fk.getForeignKeyColumns())) {
                     indexesToRemove.add(index);
                 }
             }
