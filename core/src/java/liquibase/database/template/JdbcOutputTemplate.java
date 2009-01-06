@@ -2,8 +2,13 @@ package liquibase.database.template;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.List;
+import java.util.Map;
+
 import liquibase.database.*;
 import liquibase.database.sql.SqlStatement;
+import liquibase.database.sql.CallableSqlStatement;
+import liquibase.database.sql.visitor.SqlVisitor;
 import liquibase.exception.JDBCException;
 import liquibase.util.StreamUtil;
 
@@ -30,6 +35,33 @@ public class JdbcOutputTemplate extends JdbcTemplate {
         return 0;
     }
 
+    @Override
+    public Object execute(StatementCallback action, List<SqlVisitor> sqlVisitors) throws JDBCException {
+        outputStatement(action.getStatement(), sqlVisitors);
+        return null;
+    }
+
+    @Override
+    public void execute(SqlStatement sql, List<SqlVisitor> sqlVisitors) throws JDBCException {
+        outputStatement(sql, sqlVisitors);
+    }
+
+    @Override
+    public int update(SqlStatement sql, List<SqlVisitor> sqlVisitors) throws JDBCException {
+        outputStatement(sql, sqlVisitors);
+        return 0;
+    }
+
+    @Override
+    public Object execute(CallableSqlStatement csc, CallableStatementCallback action, List<SqlVisitor> sqlVisitors) throws JDBCException {
+        throw new JDBCException("Do not know how to output callable statement");
+    }
+
+    @Override
+    public Map call(CallableSqlStatement csc, List declaredParameters, List<SqlVisitor> sqlVisitors) throws JDBCException {
+        throw new JDBCException("Do not know how to output callable statement");
+    }
+
     public void comment(String message) throws JDBCException {
         try {
             output.write(database.getLineComment());
@@ -42,8 +74,12 @@ public class JdbcOutputTemplate extends JdbcTemplate {
     }
 
     private void outputStatement(SqlStatement sql) throws JDBCException {
+
+    }
+
+    private void outputStatement(SqlStatement sql, List<SqlVisitor> sqlVisitors) throws JDBCException {
         try {
-            String statement = sql.getSqlStatement(database);
+            String statement = applyVisitors(sql, sqlVisitors);
             output.write(statement);
 
             if (!statement.endsWith(";")) {
