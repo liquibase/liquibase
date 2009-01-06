@@ -147,7 +147,14 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
         liquibase = createLiquibase(completeChangeLog);
         liquibase.update(this.contexts, output);
 
-//        System.out.println(output.getBuffer().toString());
+        String outputResult = output.getBuffer().toString();
+        assertNotNull(outputResult);
+        assertTrue(outputResult.length() > 100); //should be pretty big
+
+        DatabaseSnapshot snapshot = database.createDatabaseSnapshot(null, null);
+        assertEquals(0, snapshot.getTables().size());
+
+//        System.out.println();
     }
 
     public void testRollbackableChangeLog() throws Exception {

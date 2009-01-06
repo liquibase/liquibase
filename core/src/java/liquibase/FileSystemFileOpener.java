@@ -65,7 +65,11 @@ public class FileSystemFileOpener implements FileOpener {
         String directoryPath = (new File(packageName).isAbsolute() || baseDirectory == null)
                 ? packageName : baseDirectory + File.separator + packageName;
 
-        File[] files = new File(directoryPath).listFiles();
+        File directoryFile = new File(directoryPath);
+        if (!directoryFile.exists()) {
+            throw new IOException("Could not find path "+directoryFile.getCanonicalPath());
+        }
+        File[] files = directoryFile.listFiles();
 
         List<URL> results = new ArrayList<URL>();
 
