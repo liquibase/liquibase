@@ -183,7 +183,7 @@ public abstract class SqlDatabaseSnapshot implements DatabaseSnapshot {
                 try {
                     view.setDefinition(database.getViewDefinition(schema, name));
                 } catch (JDBCException e) {
-                    System.out.println("Error getting view with " + ((AbstractDatabase) database).getViewDefinitionSql(schema, name));
+                    System.out.println("Error getting "+database.getConnectionURL()+" view with " + ((AbstractDatabase) database).getViewDefinitionSql(schema, name));
                     throw e;
                 }
 
@@ -549,14 +549,16 @@ public abstract class SqlDatabaseSnapshot implements DatabaseSnapshot {
 
         if (database.supportsSequences()) {
             //noinspection unchecked
-            List<String> sequenceNamess = (List<String>) database.getJdbcTemplate().queryForList(database.createFindSequencesSQL(schema), String.class, new ArrayList<SqlVisitor>());
+            List<String> sequenceNames = (List<String>) database.getJdbcTemplate().queryForList(database.createFindSequencesSQL(schema), String.class, new ArrayList<SqlVisitor>());
 
 
-            for (String sequenceName : sequenceNamess) {
-                Sequence seq = new Sequence();
-                seq.setName(sequenceName.trim());
+            if (sequenceNames != null) {
+                for (String sequenceName : sequenceNames) {
+                    Sequence seq = new Sequence();
+                    seq.setName(sequenceName.trim());
 
-                sequences.add(seq);
+                    sequences.add(seq);
+                }
             }
         }
     }

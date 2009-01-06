@@ -700,7 +700,11 @@ public abstract class AbstractDatabase implements Database {
         int rows = -1;
         if (!knowMustInsertIntoLockTable) {
             RawSqlStatement selectStatement = new RawSqlStatement("SELECT COUNT(*) FROM " + escapeTableName(getDefaultSchemaName(), getDatabaseChangeLogLockTableName()) + " WHERE ID=1");
-            rows = this.getJdbcTemplate().queryForInt(selectStatement, new ArrayList<SqlVisitor>());
+            try {
+                rows = this.getJdbcTemplate().queryForInt(selectStatement, new ArrayList<SqlVisitor>());
+            } catch (JDBCException e) {
+                throw e;
+            }
         }
         if (knowMustInsertIntoLockTable || rows == 0) {
             this.getJdbcTemplate().update(getChangeLogLockInsertSQL(), new ArrayList<SqlVisitor>());
