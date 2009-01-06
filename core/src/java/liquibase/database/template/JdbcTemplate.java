@@ -86,7 +86,7 @@ public class JdbcTemplate {
         execute(new ExecuteStatementCallback(), sqlVisitors);
     }
 
-    private String applyVisitors(SqlStatement sql, List<SqlVisitor> sqlVisitors) throws StatementNotSupportedOnDatabaseException {
+    protected String applyVisitors(SqlStatement sql, List<SqlVisitor> sqlVisitors) throws StatementNotSupportedOnDatabaseException {
         String returnSql = sql.getSqlStatement(database);
         for (SqlVisitor visitor : sqlVisitors) {
             if (visitor.isApplicable(database)) {
