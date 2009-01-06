@@ -262,7 +262,7 @@
     </changeSet>
 
     <changeSet id="33" author="nvoxland">
-        <dropUniqueConstraint tableName="address" constraintName="uq_address_line1line2" uniqueColumns="line1, line2"/>
+        <dropUniqueConstraint tableName="address" constraintName="uq_address_line1line2"/>
     </changeSet>
 
     <changeSet id="50" author="nvoxland">
