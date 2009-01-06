@@ -464,8 +464,7 @@ public abstract class SqlDatabaseSnapshot implements DatabaseSnapshot {
         //remove PK indexes
         for (Index index : indexes) {
             for (PrimaryKey pk : primaryKeys) {
-                if (index.getTable().getName().equalsIgnoreCase(pk.getTable().getName())
-                        && index.getColumnNames().equals(pk.getColumnNames()) && index.getName().equalsIgnoreCase(pk.getName())) {
+                if (index.getTable().getName().equalsIgnoreCase(pk.getTable().getName()) && index.getColumnNames().equals(pk.getColumnNames())) {
                     indexesToRemove.add(index);
                 }
             }
@@ -475,7 +474,7 @@ public abstract class SqlDatabaseSnapshot implements DatabaseSnapshot {
                 }
             }
             for (UniqueConstraint uc : uniqueConstraints) {
-              if (index.getTable().getName().equalsIgnoreCase(uc.getTable().getName()) && index.getColumnNames().equals(uc.getColumnNames()) && index.getName().equalsIgnoreCase(uc.getName())) {
+              if (index.getTable().getName().equalsIgnoreCase(uc.getTable().getName()) && index.getColumnNames().equals(uc.getColumnNames())) {
                 indexesToRemove.add(index);
               }
             }
