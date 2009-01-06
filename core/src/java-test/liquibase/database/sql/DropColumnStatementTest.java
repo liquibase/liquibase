@@ -3,6 +3,7 @@ package liquibase.database.sql;
 import liquibase.database.Database;
 import liquibase.database.DerbyDatabase;
 import liquibase.database.MSSQLDatabase;
+import liquibase.database.SQLiteDatabase;
 import liquibase.database.structure.DatabaseSnapshot;
 import liquibase.test.DatabaseTest;
 import liquibase.test.DatabaseTestTemplate;
@@ -32,7 +33,7 @@ public class DropColumnStatementTest extends AbstractSqlStatementTest {
     public void supportsDatabase() throws Exception {
         new DatabaseTestTemplate().testOnAllDatabases(new DatabaseTest() {
             public void performTest(Database database) throws Exception {
-                if (database instanceof DerbyDatabase) {
+                if (database instanceof SQLiteDatabase) {
                     assertFalse(generateTestStatement().supportsDatabase(database));
                 } else {
                     assertTrue(generateTestStatement().supportsDatabase(database));

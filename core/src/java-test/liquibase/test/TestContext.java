@@ -25,7 +25,7 @@ public class TestContext {
     private final String[] DEFAULT_TEST_URLS = new String[]{
             "jdbc:Cache://127.0.0.1:1972/liquibase",
             "jdbc:db2://localhost:50000/liquibas",
-//            "jdbc:derby:liquibase;create=true",
+            "jdbc:derby:liquibase;create=true",
             "jdbc:firebirdsql:localhost/3050:c:\\firebird\\liquibase.fdb",
             "jdbc:h2:mem:liquibase",
             "jdbc:hsqldb:mem:liquibase",

@@ -12,6 +12,7 @@ import liquibase.database.sql.RawSqlStatement;
 import liquibase.database.sql.SqlStatement;
 import liquibase.database.sql.UpdateStatement;
 import liquibase.database.sql.DropTableStatement;
+import liquibase.database.sql.visitor.SqlVisitor;
 import liquibase.database.template.JdbcTemplate;
 import liquibase.database.template.JdbcOutputTemplate;
 import liquibase.exception.LockException;
@@ -43,8 +44,8 @@ public class LockHandlerTest {
         database.commit();
         expectLastCall();
 
-        expect(template.queryForObject(selectLockStatement, Boolean.class)).andReturn(Boolean.FALSE);
-        expect(template.update(isA(UpdateStatement.class))).andReturn(1);
+        expect(template.queryForObject(eq(selectLockStatement), eq(Boolean.class), isA(List.class))).andReturn(Boolean.FALSE);
+        expect(template.update(isA(UpdateStatement.class), isA(List.class))).andReturn(1);
         template.comment("Lock Database");
         expectLastCall();
 
@@ -70,12 +71,12 @@ public class LockHandlerTest {
         expect(database.getDatabaseChangeLogLockTableName()).andReturn("LOCK_TAB");
         template.comment("Lock Database");
         expectLastCall();
-        expect(template.queryForObject(selectLockStatement, Boolean.class)).andReturn(Boolean.FALSE);
+        expect(template.queryForObject(eq(selectLockStatement), eq(Boolean.class), isA(List.class))).andReturn(Boolean.FALSE);
 
         database.checkDatabaseChangeLogLockTable();
         expectLastCall();
 
-        expect(template.update(isA(UpdateStatement.class))).andReturn(1);
+        expect(template.update(isA(UpdateStatement.class), isA(List.class))).andReturn(1);
         database.commit();
         expectLastCall();
 
@@ -102,7 +103,7 @@ public class LockHandlerTest {
         expect(database.getSelectChangeLogLockSQL()).andReturn(selectLockStatement);
         expectLastCall();
 
-        expect(template.queryForObject(selectLockStatement, Boolean.class)).andReturn(Boolean.TRUE);
+        expect(template.queryForObject(eq(selectLockStatement), eq(Boolean.class), isA(List.class))).andReturn(Boolean.TRUE);
 
         replay(database);
         replay(template);
@@ -129,7 +130,7 @@ public class LockHandlerTest {
         expect(database.getDatabaseChangeLogLockTableName()).andReturn("lock_table").anyTimes();
         expectLastCall();
 
-        expect(template.update(isA(UpdateStatement.class))).andReturn(1);
+        expect(template.update(isA(UpdateStatement.class), isA(List.class))).andReturn(1);
         template.comment("Lock Database");
         expectLastCall().anyTimes();
         template.comment("Release Database Lock");
@@ -166,7 +167,7 @@ public class LockHandlerTest {
         lock.put("LOCKEDBY", "127.0.0.1");
         locksList.add(lock);
 
-        expect(template.queryForList(isA(SqlStatement.class))).andReturn(locksList);
+        expect(template.queryForList(isA(SqlStatement.class), isA(List.class))).andReturn(locksList);
 
         replay(database);
         replay(template);
@@ -200,7 +201,7 @@ public class LockHandlerTest {
         lock.put("LOCKEDBY", "127.0.0.1");
         locksList.add(lock);
 
-        expect(template.queryForList(isA(SqlStatement.class))).andReturn(locksList);
+        expect(template.queryForList(isA(SqlStatement.class), isA(List.class))).andReturn(locksList);
 
         replay(database);
         replay(template);
@@ -228,7 +229,7 @@ public class LockHandlerTest {
 
         List<Map> locksList = new ArrayList<Map>();
 
-        expect(template.queryForList(isA(SqlStatement.class))).andReturn(locksList);
+        expect(template.queryForList(isA(SqlStatement.class), isA(List.class))).andReturn(locksList);
 
         replay(database);
         replay(template);
