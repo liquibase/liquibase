@@ -12,6 +12,8 @@ import liquibase.change.custom.CustomChangeWrapper;
 import liquibase.change.custom.ExampleCustomSqlChange;
 import liquibase.exception.ChangeLogParseException;
 import liquibase.preconditions.OrPrecondition;
+import liquibase.preconditions.Precondition;
+import liquibase.preconditions.Preconditions;
 import liquibase.test.JUnitFileOpener;
 
 import org.junit.Test;
@@ -27,7 +29,7 @@ public class XMLChangeLogParserTest {
         assertEquals("liquibase/parser/xml/simpleChangeLog.xml", changeLog.getLogicalFilePath());
         assertEquals("liquibase/parser/xml/simpleChangeLog.xml", changeLog.getPhysicalFilePath());
 
-        assertNull(changeLog.getPreconditions());
+        assertEquals(0, changeLog.getPreconditions().getNestedPreconditions().size());
         assertEquals(1, changeLog.getChangeSets().size());
 
         ChangeSet changeSet = changeLog.getChangeSets().get(0);
@@ -49,7 +51,7 @@ public class XMLChangeLogParserTest {
         assertEquals("liquibase/parser/xml/multiChangeSetChangeLog.xml", changeLog.getLogicalFilePath());
         assertEquals("liquibase/parser/xml/multiChangeSetChangeLog.xml", changeLog.getPhysicalFilePath());
 
-        assertNull(changeLog.getPreconditions());
+        assertEquals(0, changeLog.getPreconditions().getNestedPreconditions().size());
         assertEquals(4, changeLog.getChangeSets().size());
 
         // change 0
@@ -124,7 +126,7 @@ public class XMLChangeLogParserTest {
         assertEquals("liquibase/parser-logical/xml/logicalPathChangeLog.xml", changeLog.getLogicalFilePath());
         assertEquals("liquibase/parser/xml/logicalPathChangeLog.xml", changeLog.getPhysicalFilePath());
 
-        assertNull(changeLog.getPreconditions());
+        assertEquals(0, changeLog.getPreconditions().getNestedPreconditions().size());
         assertEquals(1, changeLog.getChangeSets().size());
         assertEquals("liquibase/parser-logical/xml/logicalPathChangeLog.xml", changeLog.getChangeSets().get(0).getFilePath());
 
@@ -169,7 +171,8 @@ public class XMLChangeLogParserTest {
         assertEquals(nestedFileName, changeLog.getLogicalFilePath());
         assertEquals(nestedFileName, changeLog.getPhysicalFilePath());
 
-        assertNull(changeLog.getPreconditions());
+        assertEquals(1, changeLog.getPreconditions().getNestedPreconditions().size());
+        assertEquals(0, ((Preconditions) changeLog.getPreconditions().getNestedPreconditions().get(0)).getNestedPreconditions().size());
         assertEquals(3, changeLog.getChangeSets().size());
 
         // change 0
@@ -236,7 +239,10 @@ public class XMLChangeLogParserTest {
 		assertEquals(doubleNestedFileName, changeLog.getLogicalFilePath());
         assertEquals(doubleNestedFileName, changeLog.getPhysicalFilePath());
 
-		assertNull(changeLog.getPreconditions());
+		assertEquals(1, changeLog.getPreconditions().getNestedPreconditions().size());
+        Preconditions nested = (Preconditions) changeLog.getPreconditions().getNestedPreconditions().get(0);
+        assertEquals(1, nested.getNestedPreconditions().size());
+        assertEquals(0, ((Preconditions) nested.getNestedPreconditions().get(0)).getNestedPreconditions().size());
         assertEquals(4, changeLog.getChangeSets().size());
 
         // change 0

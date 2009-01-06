@@ -213,7 +213,7 @@ public class Column implements DatabaseObject, Comparable<Column> {
             }
         }
 
-        if (database instanceof H2Database) {
+        if (database instanceof HsqlDatabase || database instanceof DerbyDatabase) {
             if (this.getDataType() == Types.FLOAT || this.getDataType() == Types.DOUBLE) {
                 return "float";
             }

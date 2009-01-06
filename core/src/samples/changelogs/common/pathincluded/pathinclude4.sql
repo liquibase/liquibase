@@ -1,1 +1,1 @@
-create table pathinclude4 (id int);
+create table pathinclude4 (id int)

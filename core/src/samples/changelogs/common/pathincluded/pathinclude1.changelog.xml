@@ -6,7 +6,10 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9 http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
 
     <preConditions>
-        <runningAs username="liquibase" />
+        <or>
+            <runningAs username="liquibase" />
+            <runningAs username="sa" />
+        </or>
     </preConditions>
 
     <changeSet id="1" author="nvoxland">

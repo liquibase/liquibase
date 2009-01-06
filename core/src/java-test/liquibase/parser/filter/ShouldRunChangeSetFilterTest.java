@@ -4,6 +4,7 @@ import liquibase.ChangeSet;
 import liquibase.RanChangeSet;
 import liquibase.database.Database;
 import liquibase.database.sql.UpdateStatement;
+import liquibase.database.sql.visitor.SqlVisitor;
 import liquibase.database.template.JdbcTemplate;
 import liquibase.exception.JDBCException;
 import static org.easymock.classextension.EasyMock.*;
@@ -12,6 +13,7 @@ import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 public class ShouldRunChangeSetFilterTest  {
 
@@ -39,7 +41,7 @@ public class ShouldRunChangeSetFilterTest  {
 
         JdbcTemplate template = createMock(JdbcTemplate.class);
         expect(database.getJdbcTemplate()).andReturn(template).anyTimes();
-        expect(template.update(isA(UpdateStatement.class))).andReturn(1).anyTimes();
+        expect(template.update(isA(UpdateStatement.class), isA(List.class))).andReturn(1).anyTimes();
 //        template.comment("Lock Database");
 //        expectLastCall();
 
