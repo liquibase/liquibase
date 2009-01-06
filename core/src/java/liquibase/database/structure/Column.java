@@ -1,9 +1,6 @@
 package liquibase.database.structure;
 
-import liquibase.database.Database;
-import liquibase.database.MSSQLDatabase;
-import liquibase.database.MySQLDatabase;
-import liquibase.database.PostgresDatabase;
+import liquibase.database.*;
 import liquibase.util.SqlUtil;
 import liquibase.log.LogFactory;
 
@@ -213,6 +210,12 @@ public class Column implements DatabaseObject, Comparable<Column> {
         if (database instanceof PostgresDatabase) {
             if ("bpchar".equals(translatedTypeName)) {
                 translatedTypeName = "char";
+            }
+        }
+
+        if (database instanceof H2Database) {
+            if (this.getDataType() == Types.FLOAT || this.getDataType() == Types.DOUBLE) {
+                return "float";
             }
         }
 
