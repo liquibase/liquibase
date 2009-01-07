@@ -15,6 +15,8 @@ import liquibase.util.StreamUtil;
 public class JdbcOutputTemplate extends JdbcTemplate {
 
     private Writer output;
+    private boolean alreadyCreatedChangeLockTable;
+    private boolean alreadyCreatedChangeTable;
 
     public JdbcOutputTemplate(Writer output, Database database) {
         super(database);
@@ -98,5 +100,21 @@ public class JdbcOutputTemplate extends JdbcTemplate {
         } catch (IOException e) {
             throw new JDBCException(e);
         }
+    }
+
+    public boolean alreadyCreatedChangeLockTable() {
+        return alreadyCreatedChangeLockTable;
+    }
+
+    public void setAlreadyCreatedChangeLockTable(boolean alreadyCreatedChangeLockTable) {
+        this.alreadyCreatedChangeLockTable = alreadyCreatedChangeLockTable;
+    }
+
+    public boolean alreadyCreatedChangeTable() {
+        return alreadyCreatedChangeTable;
+    }
+
+    public void setAlreadyCreatedChangeTable(boolean alreadyCreatedChangeTable) {
+        this.alreadyCreatedChangeTable = alreadyCreatedChangeTable;
     }
 }

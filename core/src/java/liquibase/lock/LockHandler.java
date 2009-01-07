@@ -83,7 +83,7 @@ public class LockHandler {
 
     public void releaseLock() throws LockException {
         try {
-            if (database.doesChangeLogLockTableExist()) {
+            if (database.doesChangeLogLockTableExist() || !database.getJdbcTemplate().executesStatements()) {
                 UpdateStatement releaseStatement = new UpdateStatement(database.getDefaultSchemaName(), database.getDatabaseChangeLogLockTableName());
                 releaseStatement.addNewColumnValue("LOCKED", false);
                 releaseStatement.addNewColumnValue("LOCKGRANTED", null);
