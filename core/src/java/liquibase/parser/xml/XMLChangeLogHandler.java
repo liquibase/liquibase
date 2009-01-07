@@ -36,7 +36,7 @@ class XMLChangeLogHandler extends DefaultHandler {
 
     private static final char LIQUIBASE_FILE_SEPARATOR = '/';
 
-	protected Logger log;
+    protected Logger log;
 
     private DatabaseChangeLog databaseChangeLog;
     private Change change;
@@ -100,7 +100,7 @@ class XMLChangeLogHandler extends DefaultHandler {
                     URL dirUrl = resources.nextElement();
                     File dir = new File(new URI(dirUrl.toExternalForm()));
                     if (!dir.exists()) {
-                        throw new SAXException("includeAll path "+pathName+" could not be found.  Tried in "+dir.toString());
+                        throw new SAXException("includeAll path " + pathName + " could not be found.  Tried in " + dir.toString());
                     }
 
                     File[] files = dir.listFiles(new FilenameFilter() {
@@ -109,7 +109,7 @@ class XMLChangeLogHandler extends DefaultHandler {
                         }
                     });
                     for (File file : files) {
-                        handleIncludedChangeLog(pathName+file.getName(), false, databaseChangeLog.getPhysicalFilePath());
+                        handleIncludedChangeLog(pathName + file.getName(), false, databaseChangeLog.getPhysicalFilePath());
                     }
 
                 }
@@ -244,19 +244,19 @@ class XMLChangeLogHandler extends DefaultHandler {
                     throw new RuntimeException("Unexpected change: " + change.getClass().getName());
                 }
                 lastColumn.setConstraints(constraints);
-			} else if ("param".equals(qName)) {
-				if (change instanceof CustomChangeWrapper) {
-					if (atts.getValue("value") == null) {
-						paramName = atts.getValue("name");
-						text = new StringBuffer();
-					} else {
-						((CustomChangeWrapper) change).setParam(atts
-								.getValue("name"), atts.getValue("value"));
-					}
-				} else {
-					throw new MigrationFailedException(changeSet,
-							"'param' unexpected in " + qName);
-				}
+            } else if ("param".equals(qName)) {
+                if (change instanceof CustomChangeWrapper) {
+                    if (atts.getValue("value") == null) {
+                        paramName = atts.getValue("name");
+                        text = new StringBuffer();
+                    } else {
+                        ((CustomChangeWrapper) change).setParam(atts
+                                .getValue("name"), atts.getValue("value"));
+                    }
+                } else {
+                    throw new MigrationFailedException(changeSet,
+                            "'param' unexpected in " + qName);
+                }
             } else if ("where".equals(qName)) {
                 text = new StringBuffer();
             } else if ("property".equals(qName)) {
@@ -289,8 +289,8 @@ class XMLChangeLogHandler extends DefaultHandler {
 
     protected void handleIncludedChangeLog(String fileName, boolean isRelativePath, String relativeBaseFileName) throws LiquibaseException {
         if (isRelativePath) {
-        	String path = searchPath(relativeBaseFileName);
-        	fileName = new StringBuilder(path).append(fileName).toString();
+            String path = searchPath(relativeBaseFileName);
+            fileName = new StringBuilder(path).append(fileName).toString();
         }
         DatabaseChangeLog changeLog = new ChangeLogParser(changeLogParameters).parse(fileName, fileOpener);
         AndPrecondition preconditions = changeLog.getPreconditions();
@@ -303,17 +303,17 @@ class XMLChangeLogHandler extends DefaultHandler {
     }
 
     private String searchPath(String relativeBaseFileName) {
-    	if (relativeBaseFileName == null) {
-    		return null;
-    	}
-		int lastSeparatePosition = relativeBaseFileName.lastIndexOf(LIQUIBASE_FILE_SEPARATOR);
-		if (lastSeparatePosition >= 0) {
-			return relativeBaseFileName.substring(0, lastSeparatePosition + 1);
-		}
-		return relativeBaseFileName;
-	}
+        if (relativeBaseFileName == null) {
+            return null;
+        }
+        int lastSeparatePosition = relativeBaseFileName.lastIndexOf(LIQUIBASE_FILE_SEPARATOR);
+        if (lastSeparatePosition >= 0) {
+            return relativeBaseFileName.substring(0, lastSeparatePosition + 1);
+        }
+        return relativeBaseFileName;
+    }
 
-	private void setProperty(Object object, String attributeName, String attributeValue) throws IllegalAccessException, InvocationTargetException, CustomChangeException {
+    private void setProperty(Object object, String attributeName, String attributeValue) throws IllegalAccessException, InvocationTargetException, CustomChangeException {
         ExpressionExpander expressionExpander = new ExpressionExpander(changeLogParameters);
         if (object instanceof CustomChangeWrapper) {
             if (attributeName.equals("class")) {
@@ -329,7 +329,7 @@ class XMLChangeLogHandler extends DefaultHandler {
     public void endElement(String uri, String localName, String qName) throws SAXException {
         String textString = null;
         if (text != null && text.length() > 0) {
-            textString = new ExpressionExpander(changeLogParameters). expandExpressions(StringUtils.trimToNull(text.toString()));
+            textString = new ExpressionExpander(changeLogParameters).expandExpressions(StringUtils.trimToNull(text.toString()));
         }
 
         try {
@@ -376,17 +376,28 @@ class XMLChangeLogHandler extends DefaultHandler {
             } else if (change != null && change instanceof CreateProcedureChange && "comment".equals(qName)) {
                 ((CreateProcedureChange) change).setComments(textString);
                 text = new StringBuffer();
-			} else if (change != null && change instanceof CustomChangeWrapper
-					&& paramName != null && "param".equals(qName)) {
-				((CustomChangeWrapper) change).setParam(paramName, textString);
-				text = new StringBuffer();
-				paramName = null;
+            } else if (change != null && change instanceof CustomChangeWrapper
+                    && paramName != null && "param".equals(qName)) {
+                ((CustomChangeWrapper) change).setParam(paramName, textString);
+                text = new StringBuffer();
+                paramName = null;
             } else if (changeSet != null && "comment".equals(qName)) {
                 changeSet.setComments(textString);
                 text = new StringBuffer();
             } else if (changeSet != null && "changeSet".equals(qName)) {
                 handleChangeSet(changeSet);
                 changeSet = null;
+            } else if (change != null && qName.equals("column") && textString != null) {
+                if (change instanceof InsertDataChange) {
+                    List<ColumnConfig> columns = ((InsertDataChange) change).getColumns();
+                    columns.get(columns.size() - 1).setValue(textString);
+                } else if (change instanceof UpdateDataChange) {
+                    List<ColumnConfig> columns = ((UpdateDataChange) change).getColumns();
+                    columns.get(columns.size() - 1).setValue(textString);
+                } else {
+                    throw new RuntimeException("Unexpected column with text: "+textString);
+                }
+                this.text = new StringBuffer();
             } else if (change != null && qName.equals(change.getTagName())) {
                 if (textString != null) {
                     if (change instanceof RawSQLChange) {
@@ -395,12 +406,6 @@ class XMLChangeLogHandler extends DefaultHandler {
                         ((CreateProcedureChange) change).setProcedureBody(textString);
                     } else if (change instanceof CreateViewChange) {
                         ((CreateViewChange) change).setSelectQuery(textString);
-                    } else if (change instanceof InsertDataChange) {
-                        List<ColumnConfig> columns = ((InsertDataChange) change).getColumns();
-                        columns.get(columns.size() - 1).setValue(textString);
-                    } else if (change instanceof UpdateDataChange) {
-                        List<ColumnConfig> columns = ((UpdateDataChange) change).getColumns();
-                        columns.get(columns.size() - 1).setValue(textString);
                     } else if (change instanceof StopChange) {
                         ((StopChange) change).setMessage(textString);
                     } else {
@@ -427,7 +432,7 @@ class XMLChangeLogHandler extends DefaultHandler {
         }
     }
 
-    protected void handlePreCondition(@SuppressWarnings("unused")Precondition precondition) {
+    protected void handlePreCondition(@SuppressWarnings("unused") Precondition precondition) {
         databaseChangeLog.setPreconditions(rootPrecondition);
     }
 

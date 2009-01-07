@@ -14,15 +14,20 @@
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="title" type="varchar(50)"/>            
+            <column name="summary" type="varchar(50)"/>            
+            <column name="abstract" type="varchar(50)"/>
         </createTable>
     </changeSet>
 
     <changeSet id="2" author="nvoxland" context="test">
         <insert tableName="news">
-            <column name="title" value="Liquibase 0.8 Released"/>
+            <column name="abstract" value="good news"/>
+            <column name="title">Liquibase 0.8 Released</column>
+            <column name="summary" value="YAY"/>
         </insert>
         <insert tableName="news">
             <column name="title" value="Liquibase 0.9 Released"/>
+            <column name="summary" value="Horay!"/>
         </insert>
     </changeSet>
 
