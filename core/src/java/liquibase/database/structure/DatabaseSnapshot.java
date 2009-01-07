@@ -41,6 +41,8 @@ public interface DatabaseSnapshot {
     View getView(String viewName);
 
     PrimaryKey getPrimaryKey(String pkName);
+
+    PrimaryKey getPrimaryKeyForTable(String tableName);
     
     UniqueConstraint getUniqueConstraint (String ucName);
 
