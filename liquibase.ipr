@@ -8,7 +8,9 @@
       <customJdkName value="" />
       <maximumHeapSize value="128" />
       <maximumStackSize value="32" />
-      <properties />
+      <properties>
+        <property name="env.JAVA_HOME" value="\Program Files\Java\jdk1.5.0_16" />
+      </properties>
     </buildFile>
     <buildFile url="file://$PROJECT_DIR$/core/src/samples/build-sample.xml">
       <additionalClassPath />
