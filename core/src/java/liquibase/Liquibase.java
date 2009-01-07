@@ -128,12 +128,18 @@ public class Liquibase {
 
         outputHeader("Update Database Script");
 
-        update(contexts);
+        LockHandler lockHandler = LockHandler.getInstance(database);
+        lockHandler.waitForLock();
 
         try {
+
+            update(contexts);
+
             output.flush();
         } catch (IOException e) {
             throw new LiquibaseException(e);
+        } finally {
+            lockHandler.releaseLock();
         }
 
         database.setJdbcTemplate(oldTemplate);

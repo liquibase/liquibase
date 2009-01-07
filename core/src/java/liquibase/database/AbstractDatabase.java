@@ -8,6 +8,7 @@ import liquibase.database.sql.*;
 import liquibase.database.sql.visitor.SqlVisitor;
 import liquibase.database.structure.*;
 import liquibase.database.template.JdbcTemplate;
+import liquibase.database.template.JdbcOutputTemplate;
 import liquibase.diff.DiffStatusListener;
 import liquibase.exception.DatabaseHistoryException;
 import liquibase.exception.DateParseException;
@@ -585,6 +586,14 @@ public abstract class AbstractDatabase implements Database {
      * otherwise it will not do anything besides outputting a log message.
      */
     public void checkDatabaseChangeLogTable() throws JDBCException {
+        if (!this.getJdbcTemplate().executesStatements()) {
+            if (((JdbcOutputTemplate) this.getJdbcTemplate()).alreadyCreatedChangeTable()) {
+                return;
+            } else {
+                ((JdbcOutputTemplate) this.getJdbcTemplate()).setAlreadyCreatedChangeTable(true);
+            }
+        }
+
         DatabaseConnection connection = getConnection();
         ResultSet checkColumnsRS = null;
         List<SqlStatement> statementsToExecute = new ArrayList<SqlStatement>();
@@ -688,6 +697,15 @@ public abstract class AbstractDatabase implements Database {
         boolean knowMustInsertIntoLockTable = false;
 
         if (!doesChangeLogLockTableExist()) {
+            if (!this.getJdbcTemplate().executesStatements()) {
+                if (((JdbcOutputTemplate) this.getJdbcTemplate()).alreadyCreatedChangeLockTable()) {
+                    return;
+                } else {
+                    ((JdbcOutputTemplate) this.getJdbcTemplate()).setAlreadyCreatedChangeLockTable(true);
+                }
+            }
+
+
             SqlStatement createTableStatement = getCreateChangeLogLockSQL();
 
             getJdbcTemplate().comment("Create Database Lock Table");
