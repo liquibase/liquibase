@@ -67,8 +67,6 @@ public class RenameColumnStatement implements SqlStatement {
 
         if (database instanceof MSSQLDatabase) {
             return "exec sp_rename '" + database.escapeTableName(getSchemaName(), getTableName()) + "." + database.escapeColumnName(getSchemaName(), getTableName(), getOldColumnName()) + "', '" + database.escapeColumnName(getSchemaName(), getTableName(), getNewColumnName()) + "'";
-        } else if (database instanceof SybaseASADatabase) {
-            return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " RENAME " + database.escapeColumnName(getSchemaName(), getTableName(), getOldColumnName()) + " TO " + database.escapeColumnName(getSchemaName(), getTableName(), getNewColumnName());
         } else if (database instanceof MySQLDatabase) {
             if (getColumnDataType() == null) {
                 throw new StatementNotSupportedOnDatabaseException("columnDataType is required to rename columns", this, database);
@@ -79,7 +77,8 @@ public class RenameColumnStatement implements SqlStatement {
             return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ALTER COLUMN " + database.escapeColumnName(getSchemaName(), getTableName(), getOldColumnName()) + " RENAME TO " + database.escapeColumnName(getSchemaName(), getTableName(), getNewColumnName());
         } else if (database instanceof FirebirdDatabase) {
             return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ALTER COLUMN " + database.escapeColumnName(getSchemaName(), getTableName(), getOldColumnName()) + " TO " + database.escapeColumnName(getSchemaName(), getTableName(), getNewColumnName());
-        } else if (database instanceof MaxDBDatabase) {
+        } else if ((database instanceof MaxDBDatabase) || (database instanceof DerbyDatabase)) {
+          // supported in Derby from version 10.3.1.4 (see "http://issues.apache.org/jira/browse/DERBY-1490")
           return "RENAME COLUMN " + database.escapeTableName(getSchemaName(), getTableName()) + "." + database.escapeColumnName(getSchemaName(), getTableName(), getOldColumnName()) + " TO " + database.escapeColumnName(getSchemaName(), getTableName(), getNewColumnName());
         }
 
@@ -93,7 +92,7 @@ public class RenameColumnStatement implements SqlStatement {
     public boolean supportsDatabase(Database database) {
         return !(database instanceof DB2Database
                 || database instanceof CacheDatabase
-                || database instanceof DerbyDatabase
                 || database instanceof SQLiteDatabase);
     }
 }
+
