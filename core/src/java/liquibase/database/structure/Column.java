@@ -195,13 +195,13 @@ public class Column implements DatabaseObject, Comparable<Column> {
         List<Integer> oneParam = Arrays.asList(
                 Types.CHAR,
                 Types.VARCHAR,
-                Types.VARBINARY
+                Types.VARBINARY,
+                Types.DOUBLE,
+                Types.FLOAT
         );
 
         List<Integer> twoParams = Arrays.asList(
                 Types.DECIMAL,
-                Types.DOUBLE,
-                Types.FLOAT,
                 Types.NUMERIC,
                 Types.REAL
         );
