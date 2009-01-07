@@ -7,10 +7,7 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 /**
  * A FileOpener implementation which finds Files in the
@@ -67,7 +64,7 @@ public class FileSystemFileOpener implements FileOpener {
 
         File directoryFile = new File(directoryPath);
         if (!directoryFile.exists()) {
-            throw new IOException("Could not find path "+directoryFile.getCanonicalPath());
+            return new Vector<URL>().elements();
         }
         File[] files = directoryFile.listFiles();
 
