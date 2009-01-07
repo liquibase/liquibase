@@ -41,8 +41,7 @@ public class RenameColumnStatementTest extends AbstractSqlStatementTest {
             public void performTest(Database database) throws Exception {
 
                 if (database instanceof DB2Database
-                        || database instanceof CacheDatabase
-                        || database instanceof DerbyDatabase) {
+                        || database instanceof CacheDatabase) {
                     assertFalse(generateTestStatement().supportsDatabase(database));
                 } else {
                     assertTrue(generateTestStatement().supportsDatabase(database));
