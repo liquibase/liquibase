@@ -720,7 +720,7 @@ public class DiffResult {
 
             columnConfig.setType(dataType);
 
-            columnConfig.setDefaultValue(database.convertJavaObjectToString(column.getDefaultValue()));
+            columnConfig.setDefaultValue(database.convertJavaObjectToString(column.getDefaultValue()).replaceFirst("'","").replaceAll("'$", ""));
 
             if (column.getRemarks() != null) {
                 columnConfig.setRemarks(column.getRemarks());

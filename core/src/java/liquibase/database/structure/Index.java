@@ -64,7 +64,12 @@ public class Index implements DatabaseObject, Comparable<Index> {
                 equals = false;
             }
         }
-        if (this.unique == null && index.isUnique() != null) {
+
+        if (this.unique == null && index.isUnique() == null) {
+            //continue check
+        } else if (this.unique == null && index.isUnique() != null) {
+            equals = false;
+        } else  if (this.unique != null && index.isUnique() == null) {
             equals = false;
         } else if (!this.unique.equals(index.isUnique())) {
             equals = false;
