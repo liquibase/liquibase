@@ -64,6 +64,7 @@
                                     </xsd:complexType>
                                 </xsd:element>
                                 <xsd:choice>
+                                    <xsd:element ref="tagDatabase" maxOccurs="1"/>
                                     <xsd:group ref="changeSetChildren" minOccurs="0" maxOccurs="unbounded"/>
                                 </xsd:choice>
 
@@ -802,7 +803,6 @@
     <xsd:group name="changeSetChildren">
         <xsd:choice>
             <xsd:element ref="comment" maxOccurs="1"/>
-            <xsd:element ref="tagDatabase" maxOccurs="unbounded"/>
             <xsd:element ref="createTable" maxOccurs="unbounded"/>
             <xsd:element ref="dropTable" maxOccurs="unbounded"/>
             <xsd:element ref="createView" maxOccurs="unbounded"/>
