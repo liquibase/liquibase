@@ -110,7 +110,7 @@ public class ColumnConfig {
 
 
     public void setValueNumeric(String valueNumeric) {
-        if (valueNumeric == null) {
+        if (valueNumeric == null || valueNumeric.equalsIgnoreCase("null")) {
             this.valueNumeric = null;
         } else {
             valueNumeric = valueNumeric.replaceFirst("^\\(", "");
@@ -150,6 +150,9 @@ public class ColumnConfig {
     }
 
     public void setValueDate(String valueDate) {
+        if (valueDate == null || valueDate.equalsIgnoreCase("null")) {
+            this.valueDate = null;
+        }
         try {
             this.valueDate = new ISODateFormat().parse(valueDate);
         } catch (ParseException e) {
@@ -190,7 +193,7 @@ public class ColumnConfig {
     }
 
     public void setDefaultValueNumeric(String defaultValueNumeric) throws ParseException {
-        if (defaultValueNumeric == null) {
+        if (defaultValueNumeric == null || defaultValueNumeric.equalsIgnoreCase("null")) {
             this.defaultValueNumeric = null;
         } else {
             if ("GENERATED_BY_DEFAULT".equals(defaultValueNumeric)) {
@@ -208,6 +211,9 @@ public class ColumnConfig {
     }
 
     public void setDefaultValueDate(String defaultValueDate) {
+        if (defaultValueDate == null || defaultValueDate.equalsIgnoreCase("null")) {
+            this.defaultValueDate = null;
+        }
         try {
             this.defaultValueDate = new ISODateFormat().parse(defaultValueDate);
         } catch (ParseException e) {
