@@ -317,6 +317,15 @@ public class HibernateDatabaseSnapshot implements DatabaseSnapshot {
         return null;
     }
 
+    public PrimaryKey getPrimaryKeyForTable(String tableName) {
+        for (PrimaryKey pk : getPrimaryKeys()) {
+            if (pk.getTable().getName().equalsIgnoreCase(tableName)) {
+                return pk;
+            }
+        }
+        return null;
+    }
+
     public String getSchema() {
         return null;
     }
