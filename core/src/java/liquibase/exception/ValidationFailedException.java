@@ -3,6 +3,7 @@ package liquibase.exception;
 import liquibase.ChangeSet;
 import liquibase.parser.visitor.ValidatingVisitor;
 import liquibase.preconditions.FailedPrecondition;
+import liquibase.preconditions.ErrorPrecondition;
 import liquibase.util.StreamUtil;
 
 import java.io.PrintStream;
@@ -12,10 +13,9 @@ import java.util.ArrayList;
 
 public class ValidationFailedException extends MigrationFailedException {
 
-    private static final long serialVersionUID = 1L;
-    
     private List<ChangeSet> invalidMD5Sums;
     private List<FailedPrecondition> failedPreconditions;
+    private List<ErrorPrecondition> errorPreconditions;
     private Set<ChangeSet> duplicateChangeSets;
     private List<SetupException> setupExceptions;
     private List<InvalidChangeDefinitionException> changeValidationExceptions;
@@ -23,6 +23,7 @@ public class ValidationFailedException extends MigrationFailedException {
     public ValidationFailedException(ValidatingVisitor changeLogHandler) {
         this.invalidMD5Sums = changeLogHandler.getInvalidMD5Sums();
         this.failedPreconditions = changeLogHandler.getFailedPreconditions();
+        this.errorPreconditions = changeLogHandler.getErrorPreconditions();
         this.duplicateChangeSets = changeLogHandler.getDuplicateChangeSets();
         this.setupExceptions = changeLogHandler.getSetupExceptions();
         this.changeValidationExceptions = changeLogHandler.getChangeValidationExceptions();
@@ -46,6 +47,13 @@ public class ValidationFailedException extends MigrationFailedException {
         if (failedPreconditions.size() > 0) {
             message.append("     ").append(failedPreconditions.size()).append(" preconditions failed").append(StreamUtil.getLineSeparator());
             for (FailedPrecondition invalid : failedPreconditions) {
+                message.append("     ").append(invalid.toString());
+                message.append(StreamUtil.getLineSeparator());
+            }
+        }
+        if (errorPreconditions.size() > 0) {
+            message.append("     ").append(errorPreconditions.size()).append(" preconditions generated an error").append(StreamUtil.getLineSeparator());
+            for (ErrorPrecondition invalid : errorPreconditions) {
                 message.append("     ").append(invalid.toString());
                 message.append(StreamUtil.getLineSeparator());
             }
@@ -92,6 +100,12 @@ public class ValidationFailedException extends MigrationFailedException {
             out.println("     "+failedPreconditions.size()+" preconditions failed");
             for (FailedPrecondition failedPrecondition : failedPreconditions) {
                 out.println("          "+failedPrecondition.toString());
+            }
+        }
+        if (errorPreconditions.size() > 0) {
+            out.println("     "+errorPreconditions.size()+" preconditions generated an error");
+            for (ErrorPrecondition errorPrecondition : errorPreconditions) {
+                out.println("          "+errorPrecondition.toString());
             }
         }
 
