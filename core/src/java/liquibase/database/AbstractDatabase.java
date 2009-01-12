@@ -1044,10 +1044,14 @@ public abstract class AbstractDatabase implements Database {
 
     public String escapeTableName(String schemaName, String tableName) {
         if (StringUtils.trimToNull(schemaName) == null || !supportsSchemas()) {
-            return tableName;
+            return getObjectEscapeCharacter() +tableName+ getObjectEscapeCharacter();
         } else {
-            return schemaName + "." + tableName;
+            return getObjectEscapeCharacter() +schemaName + getObjectEscapeCharacter()+"."+getObjectEscapeCharacter() + tableName + getObjectEscapeCharacter();
         }
+    }
+
+    public String getObjectEscapeCharacter() {
+        return "";
     }
 
     public String escapeIndexName(String schemaName, String indexName) {
@@ -1056,18 +1060,18 @@ public abstract class AbstractDatabase implements Database {
 
     public String escapeSequenceName(String schemaName, String sequenceName) {
         if (StringUtils.trimToNull(schemaName) == null || !supportsSchemas()) {
-            return sequenceName;
+            return getObjectEscapeCharacter() +sequenceName+ getObjectEscapeCharacter();
         } else {
-            return schemaName + "." + sequenceName;
+            return getObjectEscapeCharacter() +schemaName + getObjectEscapeCharacter()+"." +getObjectEscapeCharacter() + sequenceName+ getObjectEscapeCharacter();
         }
     }
 
     public String escapeConstraintName(String constraintName) {
-        return constraintName;
+        return getObjectEscapeCharacter() +constraintName+ getObjectEscapeCharacter();
     }
 
     public String escapeColumnName(String schemaName, String tableName, String columnName) {
-        return columnName;
+        return getObjectEscapeCharacter() +columnName+ getObjectEscapeCharacter();
     }
 
     public String escapeColumnNameList(String columnNames) {
