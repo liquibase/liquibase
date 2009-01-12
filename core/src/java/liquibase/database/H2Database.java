@@ -37,8 +37,12 @@ public class H2Database extends HsqlDatabase {
         return new RawSqlStatement("SELECT SEQUENCE_NAME FROM INFORMATION_SCHEMA.SEQUENCES WHERE SEQUENCE_SCHEMA = '" + convertRequestedSchemaToSchema(schema) + "' AND IS_GENERATED=FALSE");
     }
 
+    @Override
+    public String getObjectEscapeCharacter() {
+        return "`";
+    }
 
-//    public void dropDatabaseObjects(String schema) throws JDBCException {
+    //    public void dropDatabaseObjects(String schema) throws JDBCException {
 //        DatabaseConnection conn = getConnection();
 //        Statement dropStatement = null;
 //        try {
@@ -106,4 +110,10 @@ public class H2Database extends HsqlDatabase {
     public String getDateTimeType() {
         return "TIMESTAMP";
     }
+
+    @Override
+    public String convertRequestedSchemaToSchema(String requestedSchema) throws JDBCException {
+        return super.convertRequestedSchemaToSchema(requestedSchema).toLowerCase();
+    }
+
 }
