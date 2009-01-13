@@ -486,6 +486,7 @@ public class DiffResult {
 
             DropIndexChange change = new DropIndexChange();
             change.setTableName(index.getTable().getName());
+            change.setSchemaName(index.getTable().getSchema());
             change.setIndexName(index.getName());
 
             changes.add(change);
@@ -497,6 +498,7 @@ public class DiffResult {
 
             CreateIndexChange change = new CreateIndexChange();
             change.setTableName(index.getTable().getName());
+            change.setSchemaName(index.getTable().getSchema());
             change.setIndexName(index.getName());
             change.setUnique(index.isUnique());
 
@@ -515,6 +517,7 @@ public class DiffResult {
             if (!getUnexpectedTables().contains(pk.getTable())) {
                 DropPrimaryKeyChange change = new DropPrimaryKeyChange();
                 change.setTableName(pk.getTable().getName());
+                change.setSchemaName(pk.getTable().getSchema());
                 change.setConstraintName(pk.getName());
 
                 changes.add(change);
@@ -527,6 +530,7 @@ public class DiffResult {
 
             AddPrimaryKeyChange change = new AddPrimaryKeyChange();
             change.setTableName(pk.getTable().getName());
+            change.setSchemaName(pk.getTable().getSchema());
             change.setConstraintName(pk.getName());
             change.setColumnNames(pk.getColumnNames());
 
@@ -540,6 +544,7 @@ public class DiffResult {
             if (!getUnexpectedTables().contains(uc.getTable())) {
                 DropUniqueConstraintChange change = new DropUniqueConstraintChange();
                 change.setTableName(uc.getTable().getName());
+                change.setSchemaName(uc.getTable().getSchema());
                 change.setConstraintName(uc.getName());
 
                 changes.add(change);
@@ -552,6 +557,7 @@ public class DiffResult {
 
             AddUniqueConstraintChange change = new AddUniqueConstraintChange();
             change.setTableName(uc.getTable().getName());
+            change.setSchemaName(uc.getTable().getSchema());
             change.setConstraintName(uc.getName());
             change.setColumnNames(uc.getColumnNames());
 
@@ -565,6 +571,7 @@ public class DiffResult {
             DropForeignKeyConstraintChange change = new DropForeignKeyConstraintChange();
             change.setConstraintName(fk.getName());
             change.setBaseTableName(fk.getForeignKeyTable().getName());
+            change.setBaseTableSchemaName(fk.getForeignKeyTable().getSchema());
 
             changes.add(change);
         }
@@ -577,9 +584,11 @@ public class DiffResult {
             change.setConstraintName(fk.getName());
 
             change.setReferencedTableName(fk.getPrimaryKeyTable().getName());
+            change.setReferencedTableSchemaName(fk.getPrimaryKeyTable().getSchema());
             change.setReferencedColumnNames(fk.getPrimaryKeyColumns());
 
             change.setBaseTableName(fk.getForeignKeyTable().getName());
+            change.setBaseTableSchemaName(fk.getForeignKeyTable().getSchema());
             change.setBaseColumnNames(fk.getForeignKeyColumns());
 
             change.setDeferrable(fk.isDeferrable());
@@ -596,7 +605,8 @@ public class DiffResult {
 
             DropSequenceChange change = new DropSequenceChange();
             change.setSequenceName(sequence.getName());
-
+            change.setSchemaName(sequence.getSchema());
+            
             changes.add(change);
         }
     }
@@ -606,7 +616,8 @@ public class DiffResult {
 
             CreateSequenceChange change = new CreateSequenceChange();
             change.setSequenceName(sequence.getName());
-
+            change.setSchemaName(sequence.getSchema());
+            
             changes.add(change);
         }
     }
@@ -619,6 +630,7 @@ public class DiffResult {
 
             DropColumnChange change = new DropColumnChange();
             change.setTableName(column.getTable().getName());
+            change.setSchemaName(column.getTable().getName());
             change.setColumnName(column.getName());
 
             changes.add(change);
@@ -630,6 +642,7 @@ public class DiffResult {
 
             CreateViewChange change = new CreateViewChange();
             change.setViewName(view.getName());
+            change.setSchemaName(view.getSchema());
             String selectQuery = view.getDefinition();
             if (selectQuery == null) {
                 selectQuery = "COULD NOT DETERMINE VIEW QUERY";
@@ -655,6 +668,7 @@ public class DiffResult {
 
                 ModifyColumnChange change = new ModifyColumnChange();
                 change.setTableName(column.getTable().getName());
+                change.setSchemaName(column.getTable().getSchema());
                 change.addColumn(columnConfig);
 
                 changes.add(change);
@@ -664,6 +678,7 @@ public class DiffResult {
                 if (baseColumn.isNullable() == null || baseColumn.isNullable()) {
                     DropNotNullConstraintChange change = new DropNotNullConstraintChange();
                     change.setTableName(column.getTable().getName());
+                    change.setSchemaName(column.getTable().getSchema());
                     change.setColumnName(column.getName());
                     change.setColumnDataType(baseColumn.getDataTypeString(targetDatabase));
 
@@ -672,6 +687,7 @@ public class DiffResult {
                 } else {
                     AddNotNullConstraintChange change = new AddNotNullConstraintChange();
                     change.setTableName(column.getTable().getName());
+                    change.setSchemaName(column.getTable().getSchema());
                     change.setColumnName(column.getName());
                     change.setColumnDataType(baseColumn.getDataTypeString(targetDatabase));
 
@@ -697,6 +713,7 @@ public class DiffResult {
 
             DropViewChange change = new DropViewChange();
             change.setViewName(view.getName());
+            change.setSchemaName(view.getSchema());
 
             changes.add(change);
         }
@@ -711,6 +728,7 @@ public class DiffResult {
 
             AddColumnChange change = new AddColumnChange();
             change.setTableName(column.getTable().getName());
+            change.setSchemaName(column.getTable().getSchema());
 
             ColumnConfig columnConfig = new ColumnConfig();
             columnConfig.setName(column.getName());
@@ -740,6 +758,7 @@ public class DiffResult {
 
             CreateTableChange change = new CreateTableChange();
             change.setTableName(missingTable.getName());
+            change.setSchemaName(missingTable.getSchema());
             if (missingTable.getRemarks() != null) {
                 change.setRemarks(missingTable.getRemarks());
             }
@@ -814,6 +833,7 @@ public class DiffResult {
         for (Table unexpectedTable : getUnexpectedTables()) {
             DropTableChange change = new DropTableChange();
             change.setTableName(unexpectedTable.getName());
+            change.setSchemaName(unexpectedTable.getSchema());
 
             changes.add(change);
         }

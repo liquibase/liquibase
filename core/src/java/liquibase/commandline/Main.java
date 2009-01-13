@@ -38,6 +38,11 @@ public class Main {
     protected Boolean promptForNonLocalDatabase = null;
     protected Boolean includeSystemClasspath;
     protected String defaultsFile = "liquibase.properties";
+    
+    protected String diffTypes;
+    protected String changeSetAuthor;
+    protected String changeSetContext;
+    protected String dataDir;
 
     protected String currentDateTimeFunction;
 
@@ -575,7 +580,7 @@ public class Main {
                 CommandLineUtils.doDiffToChangeLog(changeLogFile, database, createDatabaseFromCommandParams(commandParams));
                 return;
             } else if ("generateChangeLog".equalsIgnoreCase(command)) {
-                CommandLineUtils.doGenerateChangeLog(changeLogFile, database, defaultSchemaName, StringUtils.trimToNull(getCommandParam("diffTypes")), StringUtils.trimToNull(getCommandParam("changeSetAuthor")), StringUtils.trimToNull(getCommandParam("changeSetContext")), StringUtils.trimToNull(getCommandParam("dataDir")));
+                CommandLineUtils.doGenerateChangeLog(changeLogFile, database, defaultSchemaName, StringUtils.trimToNull(diffTypes), StringUtils.trimToNull(changeSetAuthor), StringUtils.trimToNull(changeSetContext), StringUtils.trimToNull(dataDir));
                 return;
             }
 

@@ -92,10 +92,12 @@ public class SQLiteDatabaseSnapshot extends SqlDatabaseSnapshot {
                 Table table = new Table(name);
                 table.setRemarks(StringUtils.trimToNull(remarks));
                 table.setDatabase(database);
+                table.setSchema(schemaName);
                 tablesMap.put(name, table);
             } else if ("VIEW".equals(type)) {
                 View view = new View();
                 view.setName(name);
+                view.setSchema(schemaName);
                 try {
                     view.setDefinition(database.
                     		getViewDefinition(schema, name));
@@ -343,6 +345,8 @@ public class SQLiteDatabaseSnapshot extends SqlDatabaseSnapshot {
 	
 	protected void readSequences(String schema) throws JDBCException {
         updateListeners("Reading sequences for " + database.toString() + " ...");
+        
+        String convertedSchemaName = database.convertRequestedSchemaToSchema(schema);
 
         if (database.supportsSequences()) {
             //noinspection unchecked
@@ -352,6 +356,7 @@ public class SQLiteDatabaseSnapshot extends SqlDatabaseSnapshot {
             for (String sequenceName : sequenceNamess) {
                 Sequence seq = new Sequence();
                 seq.setName(sequenceName.trim());
+                seq.setName(convertedSchemaName);
 
                 sequences.add(seq);
             }

@@ -111,9 +111,9 @@ public class H2Database extends HsqlDatabase {
         return "TIMESTAMP";
     }
 
-    @Override
-    public String convertRequestedSchemaToSchema(String requestedSchema) throws JDBCException {
-        return super.convertRequestedSchemaToSchema(requestedSchema).toLowerCase();
-    }
+//    @Override
+//    public String convertRequestedSchemaToSchema(String requestedSchema) throws JDBCException {
+//        return super.convertRequestedSchemaToSchema(requestedSchema).toLowerCase();
+//    }
 
 }
