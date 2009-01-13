@@ -21,7 +21,6 @@ import liquibase.exception.JDBCException;
  */
 public class SybaseASADatabase extends AbstractDatabase {
 
-    public static final String PRODUCT_NAME = "Adaptive Server Anywhere";
     private static final Set<String> systemTablesAndViews;
     static {
     	systemTablesAndViews = new HashSet<String>();
@@ -217,9 +216,9 @@ public class SybaseASADatabase extends AbstractDatabase {
 	/* (non-Javadoc)
 	 * @see liquibase.database.Database#isCorrectDatabaseImplementation(java.sql.Connection)
 	 */
-	public boolean isCorrectDatabaseImplementation(Connection conn)
-			throws JDBCException {
-		return PRODUCT_NAME.equalsIgnoreCase(getDatabaseProductName(conn));
+	public boolean isCorrectDatabaseImplementation(Connection conn) throws JDBCException {
+		return "Adaptive Server Anywhere".equalsIgnoreCase(getDatabaseProductName(conn))
+                || "SQL Anywhere".equalsIgnoreCase(getDatabaseProductName(conn));
 	}
 
 	@Override
