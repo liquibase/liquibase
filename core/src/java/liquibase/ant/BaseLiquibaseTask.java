@@ -77,7 +77,7 @@ public class BaseLiquibaseTask extends Task {
     }
 
     public void setDriver(String driver) {
-        this.driver = driver;
+        this.driver = driver.trim();
     }
 
     public String getUrl() {
@@ -85,7 +85,7 @@ public class BaseLiquibaseTask extends Task {
     }
 
     public void setUrl(String url) {
-        this.url = url;
+        this.url = url.trim();
     }
 
     public String getUsername() {
@@ -93,7 +93,7 @@ public class BaseLiquibaseTask extends Task {
     }
 
     public void setUsername(String username) {
-        this.username = username;
+        this.username = username.trim();
     }
 
     public String getPassword() {
@@ -101,7 +101,7 @@ public class BaseLiquibaseTask extends Task {
     }
 
     public void setPassword(String password) {
-        this.password = password;
+        this.password = password.trim();
     }
 
     public String getChangeLogFile() {
@@ -109,7 +109,7 @@ public class BaseLiquibaseTask extends Task {
     }
 
     public void setChangeLogFile(String changeLogFile) {
-        this.changeLogFile = changeLogFile;
+        this.changeLogFile = changeLogFile.trim();
     }
 
     public Path createClasspath() {
@@ -128,7 +128,7 @@ public class BaseLiquibaseTask extends Task {
     }
 
     public void setCurrentDateTimeFunction(String currentDateTimeFunction) {
-        this.currentDateTimeFunction = currentDateTimeFunction;
+        this.currentDateTimeFunction = currentDateTimeFunction.trim();
     }
 
     public String getOutputFile() {
@@ -136,7 +136,7 @@ public class BaseLiquibaseTask extends Task {
     }
 
     public void setOutputFile(String outputFile) {
-        this.outputFile = outputFile;
+        this.outputFile = outputFile.trim();
     }
 
     public Writer createOutputWriter() throws IOException {
@@ -158,7 +158,7 @@ public class BaseLiquibaseTask extends Task {
     }
 
     public void setDefaultSchemaName(String defaultSchemaName) {
-        this.defaultSchemaName = defaultSchemaName;
+        this.defaultSchemaName = defaultSchemaName.trim();
     }
 
     public void addConfiguredChangeLogProperty(ChangeLogProperty changeLogProperty) {
@@ -254,7 +254,7 @@ public class BaseLiquibaseTask extends Task {
     }
 
     public void setContexts(String cntx) {
-        this.contexts = cntx;
+        this.contexts = cntx.trim();
     }
 
 
