@@ -176,10 +176,12 @@ public abstract class SqlDatabaseSnapshot implements DatabaseSnapshot {
                 Table table = new Table(name);
                 table.setRemarks(StringUtils.trimToNull(remarks));
                 table.setDatabase(database);
+                table.setSchema(schemaName);
                 tablesMap.put(name, table);
             } else if ("VIEW".equals(type)) {
                 View view = new View();
                 view.setName(name);
+                view.setSchema(schemaName);
                 try {
                     view.setDefinition(database.getViewDefinition(schema, name));
                 } catch (JDBCException e) {
@@ -335,11 +337,15 @@ public abstract class SqlDatabaseSnapshot implements DatabaseSnapshot {
             ResultSet rs = databaseMetaData.getExportedKeys(dbCatalog, dbSchema, table.getName());
             ForeignKey fkInfo = null;
             while (rs.next()) {
+                String fkName = convertFromDatabaseName(rs.getString("FK_NAME"));
+
                 String pkTableName = convertFromDatabaseName(rs.getString("PKTABLE_NAME"));
                 String pkColumn = convertFromDatabaseName(rs.getString("PKCOLUMN_NAME"));
                 Table pkTable = tablesMap.get(pkTableName);
                 if (pkTable == null) {
-                    throw new JDBCException("Could not find table " + pkTableName + " for column " + pkColumn);
+                	//Ok, no idea what to do with this one . . . should always be there
+                	log.warning("Foreign key " + fkName + " references table " + pkTableName + ", which we cannot find.  Ignoring.");
+                    continue;
                 }
                 int keySeq = rs.getInt("KEY_SEQ");
                 //Simple (non-composite) keys have KEY_SEQ=1, so create the ForeignKey.
@@ -353,15 +359,19 @@ public abstract class SqlDatabaseSnapshot implements DatabaseSnapshot {
                 fkInfo.addPrimaryKeyColumn(pkColumn);
 
                 String fkTableName = convertFromDatabaseName(rs.getString("FKTABLE_NAME"));
+                String fkSchema = convertFromDatabaseName(rs.getString("FKTABLE_SCHEM"));
                 String fkColumn = convertFromDatabaseName(rs.getString("FKCOLUMN_NAME"));
                 Table fkTable = tablesMap.get(fkTableName);
                 if (fkTable == null) {
-                    throw new JDBCException("Could not find table " + fkTableName + " for column " + fkColumn);
+                	fkTable = new Table(fkTableName);
+                	fkTable.setDatabase(database);
+                	fkTable.setSchema(fkSchema);
+                	log.warning("Foreign key " + fkName + " is in table " + fkTableName + ", which is in a different schema.  Retaining FK in diff, but table will not be diffed.");
                 }
                 fkInfo.setForeignKeyTable(fkTable);
                 fkInfo.addForeignKeyColumn(fkColumn);
 
-                fkInfo.setName(convertFromDatabaseName(rs.getString("FK_NAME")));
+				fkInfo.setName(fkName);
                 
                 Integer updateRule, deleteRule;
                 updateRule = rs.getInt("UPDATE_RULE");
@@ -546,7 +556,9 @@ public abstract class SqlDatabaseSnapshot implements DatabaseSnapshot {
 
     protected void readSequences(String schema) throws JDBCException {
         updateListeners("Reading sequences for " + database.toString() + " ...");
-
+        
+        String convertedSchemaName = database.convertRequestedSchemaToSchema(schema);
+        
         if (database.supportsSequences()) {
             //noinspection unchecked
             List<String> sequenceNames = (List<String>) database.getJdbcTemplate().queryForList(database.createFindSequencesSQL(schema), String.class, new ArrayList<SqlVisitor>());
@@ -556,7 +568,8 @@ public abstract class SqlDatabaseSnapshot implements DatabaseSnapshot {
                 for (String sequenceName : sequenceNames) {
                     Sequence seq = new Sequence();
                     seq.setName(sequenceName.trim());
-
+                    seq.setSchema(convertedSchemaName);
+                    
                     sequences.add(seq);
                 }
             }

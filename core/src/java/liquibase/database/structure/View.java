@@ -8,6 +8,7 @@ import java.util.List;
 public class View implements DatabaseObject, Comparable<View> {
     private Database database;
     private String name;
+    private String schema;
     private List<Column> columns = new ArrayList<Column>();
     private String definition;
 
@@ -85,5 +86,21 @@ public class View implements DatabaseObject, Comparable<View> {
     	viewStr += ")";
         return viewStr;
     }
+
+
+	/**
+	 * @return Returns the schema.
+	 */
+	public String getSchema () {
+		return schema;
+	}
+
+
+	/**
+	 * @param schema The schema to set.
+	 */
+	public void setSchema (String schema) {
+		this.schema = schema;
+	}
     
 }

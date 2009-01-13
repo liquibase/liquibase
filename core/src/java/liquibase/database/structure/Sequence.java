@@ -2,6 +2,7 @@ package liquibase.database.structure;
 
 public class Sequence implements DatabaseObject, Comparable<Sequence> {
     private String name;
+    private String schema;
 
 
     public String getName() {
@@ -36,4 +37,18 @@ public class Sequence implements DatabaseObject, Comparable<Sequence> {
     public String toString() {
         return getName();
     }
+
+	/**
+	 * @return Returns the schema.
+	 */
+	public String getSchema () {
+		return schema;
+	}
+
+	/**
+	 * @param schema The schema to set.
+	 */
+	public void setSchema (String schema) {
+		this.schema = schema;
+	}
 }

@@ -10,6 +10,7 @@ public class Table implements DatabaseObject, Comparable<Table> {
     private Database database;
     private String name;
     private String remarks;
+    private String schema;
     private List<Column> columns = new ArrayList<Column>();
 
     public Table(String name) {
@@ -77,4 +78,18 @@ public class Table implements DatabaseObject, Comparable<Table> {
         }
         return null;
     }
+
+	/**
+	 * @return Returns the schema.
+	 */
+	public String getSchema () {
+		return schema;
+	}
+
+	/**
+	 * @param schema The schema to set.
+	 */
+	public void setSchema (String schema) {
+		this.schema = schema;
+	}
 }

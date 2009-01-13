@@ -124,6 +124,9 @@ public class CreateSequenceChange extends AbstractChange {
     public Element createNode(Document currentChangeLogFileDOM) {
         Element node = currentChangeLogFileDOM.createElement("createSequence");
         node.setAttribute("sequenceName", getSequenceName());
+        if (getSchemaName() != null) {
+        	node.setAttribute("schemaName", getSchemaName());
+        }
         if (getMinValue() != null) {
             node.setAttribute("minValue", getMinValue().toString());
         }
