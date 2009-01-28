@@ -445,4 +445,11 @@ public class HibernateDatabase implements Database {
     public String escapeConstraintName(String constraintName) {
         return constraintName;
     }
+
+    /**
+     * As the connectionURL for Hibernate refers to a config file, just return false
+     */
+    public boolean isLocalDatabase() throws JDBCException {
+    	return false;
+    }
 }
