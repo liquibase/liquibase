@@ -15,6 +15,7 @@ public class Column implements DatabaseObject, Comparable<Column> {
     private int dataType;
     private int columnSize;
     private int decimalDigits;
+    private LengthSemantics lengthSemantics;
     private Boolean nullable;
     private String typeName;
     private Object defaultValue;
@@ -227,8 +228,10 @@ public class Column implements DatabaseObject, Comparable<Column> {
                 return translatedTypeName;
             } else if (database instanceof MSSQLDatabase && translatedTypeName.equals("uniqueidentifier")) {
                 return translatedTypeName;
-            } else if (database instanceof MySQLDatabase && (translatedTypeName.startsWith("enum(") || translatedTypeName.startsWith("set("))            		) {
-            	return translatedTypeName;
+            } else if (database instanceof MySQLDatabase && (translatedTypeName.startsWith("enum(") || translatedTypeName.startsWith("set("))                   ) {
+              return translatedTypeName;
+            } else if (database instanceof OracleDatabase && (translatedTypeName.equals("VARCHAR2"))                   ) {
+              return translatedTypeName+"("+this.getColumnSize()+" "+lengthSemantics+")";
             }
             dataType = translatedTypeName+"("+this.getColumnSize()+")";
         } else if (twoParams.contains(this.getDataType())) {
@@ -272,7 +275,8 @@ public class Column implements DatabaseObject, Comparable<Column> {
         } else {
             return this.getDataType() != otherColumn.getDataType()
                     || this.getColumnSize() != otherColumn.getColumnSize()
-                    || this.getDecimalDigits() != otherColumn.getDecimalDigits();            
+                    || this.getDecimalDigits() != otherColumn.getDecimalDigits()           
+                    || this.getLengthSemantics() != otherColumn.getLengthSemantics();            
         }
     }
 
@@ -317,5 +321,17 @@ public class Column implements DatabaseObject, Comparable<Column> {
 
     public void setRemarks(String remarks) {
         this.remarks = remarks;
+    }
+    
+    public LengthSemantics getLengthSemantics() {
+      return lengthSemantics;
+    }
+    
+    public void setLengthSemantics(LengthSemantics lengthSemantics) {
+      this.lengthSemantics = lengthSemantics;
+    }
+
+    public static enum LengthSemantics {
+      CHAR, BYTE
     }
 }
