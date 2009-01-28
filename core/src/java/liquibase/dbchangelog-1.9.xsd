@@ -344,19 +344,29 @@
         </xsd:complexType>
     </xsd:element>
 
+    <xsd:simpleType name="fkCascadeActionOptions">
+        <xsd:restriction base="xsd:token">
+            <xsd:enumeration value="CASCADE"></xsd:enumeration>
+            <xsd:enumeration value="SET NULL"></xsd:enumeration>
+            <xsd:enumeration value="SET DEFAULT"></xsd:enumeration>
+            <xsd:enumeration value="RESTRICT"></xsd:enumeration>
+            <xsd:enumeration value="NO ACTION"></xsd:enumeration>
+        </xsd:restriction>
+    </xsd:simpleType>
+
     <xsd:attributeGroup name="addForeignKeyConstraintAttrib">
         <xsd:attribute name="baseTableSchemaName" type="xsd:string"/>
         <xsd:attribute name="baseTableName" type="xsd:string" use="required"/>
         <xsd:attribute name="baseColumnNames" type="xsd:string" use="required"/>
-        <xsd:attribute name="constraintName" type="xsd:string"/>
+        <xsd:attribute name="constraintName" type="xsd:string" use="required"/>
         <xsd:attribute name="referencedTableSchemaName" type="xsd:string"/>
         <xsd:attribute name="referencedTableName" type="xsd:string" use="required"/>
         <xsd:attribute name="referencedColumnNames" type="xsd:string" use="required"/>
         <xsd:attribute name="deferrable" type="xsd:boolean"/>
         <xsd:attribute name="initiallyDeferred" type="xsd:boolean"/>
         <xsd:attribute name="deleteCascade" type="xsd:boolean"/>
-        <xsd:attribute name="onDelete" type="xsd:string"/>
-        <xsd:attribute name="onUpdate" type="xsd:string"/>
+        <xsd:attribute name="onDelete" type="fkCascadeActionOptions"/>
+        <xsd:attribute name="onUpdate" type="fkCascadeActionOptions"/>
     </xsd:attributeGroup>
 
     <xsd:attributeGroup name="addNotNullConstraintAttrib">
