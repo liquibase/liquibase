@@ -472,4 +472,8 @@ public class MockDatabase implements Database {
     public String escapeConstraintName(String constraintName) {
         return constraintName;
     }
+    
+    public boolean isLocalDatabase() throws JDBCException {
+    	return true;
+    }
 }

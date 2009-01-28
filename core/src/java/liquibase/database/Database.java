@@ -325,4 +325,6 @@ public interface Database extends DatabaseObject {
     boolean isAutoCommit() throws JDBCException;
 
     void setAutoCommit(boolean b) throws JDBCException;
+    
+    boolean isLocalDatabase() throws JDBCException;
 }

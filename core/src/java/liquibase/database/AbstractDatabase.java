@@ -1377,4 +1377,13 @@ public abstract class AbstractDatabase implements Database {
             throw new JDBCException(e);
         }
     }
+    
+    /**
+     * Default implementation, just look for "local" IPs
+     * @throws JDBCException 
+     */
+    public boolean isLocalDatabase() throws JDBCException {
+    	String url = getConnectionURL();
+    	return (url.indexOf("localhost") >= 0) || (url.indexOf("127.0.0.1") >= 0);
+    }
 }

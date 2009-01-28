@@ -110,6 +110,19 @@ public class H2Database extends HsqlDatabase {
     public String getDateTimeType() {
         return "TIMESTAMP";
     }
+    
+    @Override
+    public boolean isLocalDatabase() throws JDBCException {
+    	String url = getConnectionURL();
+    	boolean isLocalURL = (
+    		super.isLocalDatabase()
+    		|| url.startsWith("jdbc:h2:file:")
+    	    || url.startsWith("jdbc:h2:mem:")
+            || url.startsWith("jdbc:h2:zip:")
+            || url.startsWith("jdbc:h2:~")
+    	);
+    	return isLocalURL;
+    }
 
 //    @Override
 //    public String convertRequestedSchemaToSchema(String requestedSchema) throws JDBCException {

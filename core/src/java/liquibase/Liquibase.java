@@ -483,7 +483,7 @@ public class Liquibase {
      * should be prompted before continuing.
      */
     public boolean isSafeToRunMigration() throws JDBCException {
-        return !getDatabase().getJdbcTemplate().executesStatements() || getDatabase().getConnectionURL().indexOf("localhost") >= 0;
+        return !getDatabase().getJdbcTemplate().executesStatements() || getDatabase().isLocalDatabase();
     }
 
     /**
