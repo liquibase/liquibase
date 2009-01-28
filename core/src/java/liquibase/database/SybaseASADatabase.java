@@ -318,6 +318,16 @@ public class SybaseASADatabase extends AbstractDatabase {
         return new RawSqlStatement(sql);
     }
 
+	@Override
+	public void setAutoCommit(boolean b) throws JDBCException {
+		// workaround for strange Sybase bug.
+		// In some circumstances tds-driver thrown exception 
+		// JZ016: The AutoCommit option is already set to false.
+    	if (b || super.isAutoCommit()) {
+    		super.setAutoCommit(b);
+        }
+	}
+
 	private String escapeName(String indexName) {
 		return '[' + indexName + ']';
 	}
