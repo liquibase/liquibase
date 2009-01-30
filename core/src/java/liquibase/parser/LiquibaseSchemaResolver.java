@@ -19,7 +19,11 @@ public class LiquibaseSchemaResolver implements EntityResolver {
             if (iSlash >= 0) {
                 String xsdFile = systemId.substring(iSlash + 1);
                 try {
-                    InputStream resourceAsStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(SEARCH_PACKAGE + xsdFile);
+                    InputStream resourceAsStream = null;
+
+                    if (Thread.currentThread().getContextClassLoader() != null) {
+                      resourceAsStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(SEARCH_PACKAGE + xsdFile);
+                    }
 
                     if (resourceAsStream == null) {
                        resourceAsStream = this.getClass().getClassLoader().getResourceAsStream(SEARCH_PACKAGE + xsdFile);
