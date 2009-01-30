@@ -123,6 +123,10 @@ public class ForeignKey implements DatabaseObject, Comparable<ForeignKey> {
 
         ForeignKey that = (ForeignKey) o;
 
+        if (getForeignKeyColumns() == null) {
+            return this.getName().equalsIgnoreCase(that.getName());
+        }
+
         return getForeignKeyColumns().equalsIgnoreCase(that.getForeignKeyColumns())
                 && foreignKeyTable.equals(that.foreignKeyTable)
                 && getPrimaryKeyColumns().equalsIgnoreCase(that.getPrimaryKeyColumns())
