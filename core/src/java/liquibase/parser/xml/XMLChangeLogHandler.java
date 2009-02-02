@@ -98,6 +98,9 @@ class XMLChangeLogHandler extends DefaultHandler {
                 Enumeration<URL> resources = fileOpener.getResources(pathName);
                 while (resources.hasMoreElements()) {
                     URL dirUrl = resources.nextElement();
+                    if (dirUrl.getAuthority() != null) {
+                        continue;
+                    }
                     File dir = new File(new URI(dirUrl.toExternalForm()));
                     if (!dir.exists()) {
                         throw new SAXException("includeAll path " + pathName + " could not be found.  Tried in " + dir.toString());
