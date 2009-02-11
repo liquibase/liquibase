@@ -75,8 +75,14 @@ public abstract class HTMLWriter {
 
     protected void writeTable(String title, List<List<String>> cells, FileWriter fileWriter) throws IOException {
         fileWriter.append("<P>");
+        int colspan = 0;
+        if (cells.size() == 0) {
+            colspan = 0;
+        } else {
+            colspan = cells.get(0).size();
+        }
         fileWriter.append("<TABLE BORDER=\"1\" WIDTH=\"100%\" CELLPADDING=\"3\" CELLSPACING=\"0\" SUMMARY=\"\">\n")
-                .append("<TR BGCOLOR=\"#CCCCFF\" CLASS=\"TableHeadingColor\">\n").append("<TD COLSPAN=").append(String.valueOf(cells.get(0).size())).append("><FONT SIZE=\"+2\">\n").append("<B>").append(title).append("</B></FONT></TD>\n")
+                .append("<TR BGCOLOR=\"#CCCCFF\" CLASS=\"TableHeadingColor\">\n").append("<TD COLSPAN=").append(String.valueOf(colspan)).append("><FONT SIZE=\"+2\">\n").append("<B>").append(title).append("</B></FONT></TD>\n")
                 .append("</TR>\n");
 
         for (List<String> row : cells) {
