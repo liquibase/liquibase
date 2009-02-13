@@ -2,13 +2,19 @@ package liquibase.database.structure;
 
 import org.hibernate.dialect.Dialect;
 import org.hibernate.HibernateException;
+import org.hibernate.cfg.Configuration;
 
 import java.sql.Types;
 
 public class HibernateGenericDialect extends Dialect {
     private Dialect realDialect;
 
-    public HibernateGenericDialect(String dialectClass) throws Exception {
+    public HibernateGenericDialect(Configuration cfg) throws Exception {
+        String dialectClass = cfg.getProperty("hibernate.dialect");
+        if (dialectClass == null) {
+            dialectClass = cfg.getProperty("dialect");
+        }
+
         realDialect = (Dialect) Class.forName(dialectClass).newInstance();
     }
 
