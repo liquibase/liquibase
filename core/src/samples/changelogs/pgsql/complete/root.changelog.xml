@@ -326,4 +326,12 @@
         </createTable>
     </changeSet>
 
+    <changeSet id="reservedWordTest" author="nvoxland">
+        <createTable tableName="user">
+            <column name="id" type="int"/>
+            <column name="like" type="varchar(255)"/>
+            <column name="group" type="varchar(255)"/>
+        </createTable>
+    </changeSet>
+
 </databaseChangeLog>
