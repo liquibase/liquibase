@@ -165,4 +165,9 @@ public class HsqlDatabase extends AbstractDatabase {
     public DatabaseSnapshot createDatabaseSnapshot(String schema, Set<DiffStatusListener> statusListeners) throws JDBCException {
         return new HsqlDatabaseSnapshot(this, statusListeners, schema);
     }
+
+    @Override
+    public String getObjectEscapeCharacter() {
+        return "\"";
+    }
 }
