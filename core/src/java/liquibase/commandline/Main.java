@@ -219,6 +219,10 @@ public class Main {
 
         for (Map.Entry entry : props.entrySet()) {
             try {
+                if (entry.getKey().equals("promptOnNonLocalDatabase")) {
+                    continue;
+                }
+
                 Field field = getClass().getDeclaredField((String) entry.getKey());
                 Object currentValue = field.get(this);
 
