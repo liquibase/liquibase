@@ -128,9 +128,7 @@ public class ChangeSet {
         boolean markRan = true;
 
         try {
-            if (runInTransaction) {
-                database.setAutoCommit(false);
-            }
+            database.setAutoCommit(!runInTransaction);
 
             database.getJdbcTemplate().comment("Changeset " + toString());
             if (StringUtils.trimToNull(getComments()) != null) {
@@ -217,12 +215,10 @@ public class ChangeSet {
                     log.finest(change.getConfirmationMessage());
                 }
 
-                if (!runInTransaction) {
+                if (runInTransaction) {
                     database.commit();
                 }
                 log.finest("ChangeSet " + toString() + " has been successfully run.");
-
-                database.commit();
             } else {
                 log.finest("Skipping ChangeSet: " + toString());
             }
@@ -243,9 +239,9 @@ public class ChangeSet {
                 }
             }
         } finally {
-            if (runInTransaction) {
+            if (!runInTransaction && !database.getAutoCommitMode()) {
                 try {
-                    database.setAutoCommit(true);
+                    database.setAutoCommit(false);
                 } catch (JDBCException e) {
                     throw new MigrationFailedException(this, "Could not reset autocommit");
                 }
