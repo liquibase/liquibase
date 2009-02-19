@@ -9,7 +9,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 
-public class CSVWriter extends au.com.bytecode.opencsv.CSVWriter {
+public class CSVWriter extends liquibase.csv.opencsv.CSVWriter {
     private static final ISODateFormat ISO_DATE_FORMAT = new ISODateFormat();
 
     public CSVWriter(Writer writer) {
