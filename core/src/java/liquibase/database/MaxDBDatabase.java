@@ -1,8 +1,3 @@
-/*
- * Copyright (C) 2005 Whitestein Technologies AG, Poststrasse 22, CH-6300 Zug, Switzerland.
- * All rights reserved. The use of this file in source or binary form requires a written license from Whitestein Technologies AG.
- *
- */
 package liquibase.database;
 
 

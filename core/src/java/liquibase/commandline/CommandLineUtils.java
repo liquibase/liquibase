@@ -1,5 +1,3 @@
-// Version:   $Id: $
-// Copyright: Copyright(c) 2008 Trace Financial Limited
 package liquibase.commandline;
 
 import java.io.File;
