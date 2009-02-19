@@ -2,7 +2,7 @@ package liquibase.csv;
 
 import java.io.Reader;
 
-public class CSVReader extends au.com.bytecode.opencsv.CSVReader {
+public class CSVReader extends liquibase.csv.opencsv.CSVReader {
     public CSVReader(Reader reader) {
         super(reader);
     }
