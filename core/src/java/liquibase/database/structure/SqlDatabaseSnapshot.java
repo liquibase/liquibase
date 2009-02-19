@@ -157,7 +157,7 @@ public abstract class SqlDatabaseSnapshot implements DatabaseSnapshot {
 
     protected void readTablesAndViews(String schema) throws SQLException, JDBCException {
         updateListeners("Reading tables for " + database.toString() + " ...");
-        ResultSet rs = databaseMetaData.getTables(database.convertRequestedSchemaToCatalog(schema), database.convertRequestedSchemaToSchema(schema), null, new String[]{"TABLE", "VIEW"});
+        ResultSet rs = databaseMetaData.getTables(database.convertRequestedSchemaToCatalog(schema), database.convertRequestedSchemaToSchema(schema), null, new String[]{"TABLE", "VIEW", "ALIAS"});
         while (rs.next()) {
             String type = rs.getString("TABLE_TYPE");
             String name = convertFromDatabaseName(rs.getString("TABLE_NAME"));
@@ -172,7 +172,7 @@ public abstract class SqlDatabaseSnapshot implements DatabaseSnapshot {
                 continue;
             }
 
-            if ("TABLE".equals(type)) {
+            if ("TABLE".equals(type) || "ALIAS".equals(type)) {
                 Table table = new Table(name);
                 table.setRemarks(StringUtils.trimToNull(remarks));
                 table.setDatabase(database);
