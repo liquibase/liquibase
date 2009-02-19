@@ -16,6 +16,7 @@
             <pathelement location="../../build"/>
             <pathelement location="../../build-test"/>
             <pathelement path="${user.home}/.IntelliJIdea50/config/plugins/clover-idea5.jar"/>
+            <pathelement location="."/>
             <!--<fileset dir="../../release">-->
                 <!--<include name="**/*.jar"/>-->
             <!--</fileset>-->
@@ -136,6 +137,19 @@
                 outputFile="/tmp/diff.xml"
                 >
         </diffDatabaseToChangeLog>
+    </target>
+
+    <target name="diffChangeLog-hibernate" depends="prepare">
+        <diffDatabaseToChangeLog
+                driver="${database.driver}"
+                url="${database.url}"
+                username="${database.username}"
+                password="${database.password}"
+
+                baseUrl="hibernate:hibernate\Hibernate.cfg.xml"
+
+                outputFile="/tmp/hibernate.diff.xml"
+                classpathref="classpath"/>
     </target>
 
     <target name="dbdoc" depends="prepare">

@@ -18,8 +18,6 @@ public abstract class AbstractLiquibaseUpdateMojo extends AbstractLiquibaseChang
    */
   protected int changesToApply;
 
-  private int changesToApplyDefault = 0;
-
   protected void performLiquibaseTask(Liquibase liquibase) throws LiquibaseException {
     super.performLiquibaseTask(liquibase);
     doUpdate(liquibase);
