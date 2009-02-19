@@ -75,6 +75,10 @@ public abstract class SqlDatabaseSnapshot implements DatabaseSnapshot {
      * Creates a snapshot of the given database.
      */
     public SqlDatabaseSnapshot(Database database, Set<DiffStatusListener> statusListeners, String requestedSchema) throws JDBCException {
+        if (requestedSchema == null) {
+            requestedSchema = database.getDefaultSchemaName();
+        }
+
         try {
             this.schema = requestedSchema;
             this.database = database;

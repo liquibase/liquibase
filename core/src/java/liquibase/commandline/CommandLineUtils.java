@@ -11,6 +11,7 @@ import java.util.logging.Formatter;
 import java.util.logging.Handler;
 import java.util.logging.LogRecord;
 import java.util.logging.SimpleFormatter;
+import java.lang.reflect.InvocationTargetException;
 
 import javax.xml.parsers.ParserConfigurationException;
 
@@ -47,9 +48,13 @@ public class CommandLineUtils {
         try {
             if (url.startsWith("hibernate:")) {
                 try {
-                    return (Database) Class.forName(HibernateDatabase.class.getName(), true, classLoader).getConstructor(String.class).newInstance(url.substring("hibernate:".length()));
+                    return createHibernateDatabase(classLoader, url);
                 } catch (NoClassDefFoundError e) {
-                    throw new MigrationFailedException(null, "Class " + e.getMessage() + " not found.  Make sure all required Hibernate and JDBC libraries are in your classpath");
+                    try {
+                        return createHibernateDatabase(Thread.currentThread().getContextClassLoader(), url);
+                    } catch (NoClassDefFoundError e1) {
+                        throw new MigrationFailedException(null, "Class " + e1.getMessage() + " not found.  Make sure all required Hibernate and JDBC libraries are in your classpath");
+                    }
                 }
             }
 
@@ -91,6 +96,10 @@ public class CommandLineUtils {
         } catch (Exception e) {
             throw new JDBCException(e);
         }
+    }
+
+    private static Database createHibernateDatabase(ClassLoader classLoader, String url) throws InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException, ClassNotFoundException {
+        return (Database) Class.forName(HibernateDatabase.class.getName(), true, classLoader).getConstructor(String.class).newInstance(url.substring("hibernate:".length()));
     }
 
     public static void doDiff(Database baseDatabase, Database targetDatabase) throws JDBCException {
