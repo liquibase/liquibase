@@ -1,6 +1,6 @@
 update build.version in core/src/build.properties
 update changelog.txt
-tag repository
+tag repository (after everything is sucessfully released)
 
 CORE:
 run core/build.xml all
@@ -29,8 +29,8 @@ GRAILS:
 
 INTELLIJ:
 - update liquibase core jar in intellij.plugin/lib if nessisary
-- update version minor version in plugin-base.xml if nessisary
-- update change log in plugin-base.xml
+- update version minor version in build.properties if nessisary
+- update change log in plugin.base.xml
 - run: intellij.plugin/build.xml package
 - update on plugins.intellij.net with intellij.plugin/release/liquibase-intellij.zip
 - send message on http://www.intellij.net/forums/forum.jspa?forumID=18
