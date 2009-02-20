@@ -1,6 +1,14 @@
 LiquiBase Core Changelog
 ==========================================
 
+Changes in version 1.9.1 (2009.2.20)
+----------------------
+- Escape hsql tables/columns if they are a keyword
+- opensvn is included in our jar, not a dependency
+- Bug in runInTransaction
+- Additional bug fixes
+- Grails 1.1-SNAPSHOT support
+
 Changes in version 1.9.0 (2009.1.7)
 ----------------------
 - Paths in <include> can be relative to changelog
