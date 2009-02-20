@@ -194,7 +194,6 @@ The available targets at the current stage:
     <target name="package" depends="compile">
         <jar destfile="${release.dir}/liquibase-SNAPSHOT.jar" manifest="${src.dir}/../META-INF/MANIFEST.MF">
             <zipfileset dir="${build.dir}"/>
-            <zipfileset src="${lib.dir}/opencsv-1.8.jar"/>
         </jar>
 
         <copy tofile="${package.dir}/liquibase-${build.version}/liquibase-${build.version}.jar"
@@ -257,7 +256,6 @@ The available targets at the current stage:
              manifest="${src.dir}/../META-INF/MANIFEST.MF" index="true">
             <zipfileset dir="${build14.dir}"/>
             <zipgroupfileset dir="${lib.14jvm.dir}" includes="retroweaver-rt-*.jar"/>
-            <zipfileset src="${lib.dir}/opencsv-1.8.jar"/>
         </jar>
 
         <copy todir="${package.dir}/liquibase-${build.version}-14jvm">
