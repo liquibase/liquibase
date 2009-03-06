@@ -65,6 +65,15 @@ public class MockDatabase implements Database {
         return null;
     }
 
+
+    public int getDatabaseMajorVersion() throws JDBCException {
+        return 0;
+    }
+
+    public int getDatabaseMinorVersion() throws JDBCException {
+        return 0;
+    }
+
     public String getProductName() {
         return null;
     }

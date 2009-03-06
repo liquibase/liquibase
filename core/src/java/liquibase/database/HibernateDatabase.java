@@ -79,6 +79,14 @@ public class HibernateDatabase implements Database {
         return "N/A";
     }
 
+    public int getDatabaseMajorVersion() throws JDBCException {
+        return -1;
+    }
+
+    public int getDatabaseMinorVersion() throws JDBCException {
+        return -1;
+    }
+
     public String getProductName() {
         return "Hibernate Mapping";
     }

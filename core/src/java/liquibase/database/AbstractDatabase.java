@@ -119,6 +119,22 @@ public abstract class AbstractDatabase implements Database {
         }
     }
 
+    public int getDatabaseMajorVersion() throws JDBCException {
+        try {
+            return connection.getMetaData().getDatabaseMajorVersion();
+        } catch (SQLException e) {
+            throw new JDBCException(e);
+        }
+    }
+
+    public int getDatabaseMinorVersion() throws JDBCException {
+        try {
+            return connection.getMetaData().getDatabaseMinorVersion();
+        } catch (SQLException e) {
+            throw new JDBCException(e);
+        }
+    }
+
     public String getDriverName() throws JDBCException {
         try {
             return connection.getMetaData().getDriverName();

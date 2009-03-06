@@ -50,6 +50,9 @@ public interface Database extends DatabaseObject {
 
     String getDatabaseProductVersion() throws JDBCException;
 
+     int getDatabaseMajorVersion() throws JDBCException;
+
+    int getDatabaseMinorVersion() throws JDBCException;
     /**
      * Returns the full database product name.  May be different than what the JDBC connection reports (getDatabaseProductName())
      */
