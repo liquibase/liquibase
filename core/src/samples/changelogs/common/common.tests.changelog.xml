@@ -558,4 +558,11 @@
             <column name="id" valueNumeric="2"/>
         </insert>
     </changeSet>
+
+    <changeSet id="remarksTest" author="nvoxland">
+        <createTable tableName="remarkstest" remarks="Some remarks go here">
+            <column name="id" type="int"/>
+        </createTable>
+    </changeSet>
+
 </databaseChangeLog>
