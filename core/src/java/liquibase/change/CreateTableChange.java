@@ -102,6 +102,23 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
         List<SqlStatement> statements = new ArrayList<SqlStatement>();
         statements.add(statement);
 
+        if (StringUtils.trimToNull(remarks) != null) {
+            SetTableRemarksStatement remarksStatement = new SetTableRemarksStatement(schemaName, tableName, remarks);
+            if (remarksStatement.supportsDatabase(database)) {
+                statements.add(remarksStatement);
+            }
+        }
+
+        for (ColumnConfig column : getColumns()) {
+            String columnRemarks = StringUtils.trimToNull(column.getRemarks());
+            if (columnRemarks != null) {
+                SetColumnRemarksStatement remarksStatement = new SetColumnRemarksStatement(schemaName, tableName, column.getName(), columnRemarks);
+                if (remarksStatement.supportsDatabase(database)) {
+                    statements.add(remarksStatement);
+                }
+            }
+        }
+
         return statements.toArray(new SqlStatement[statements.size()]);
     }
 

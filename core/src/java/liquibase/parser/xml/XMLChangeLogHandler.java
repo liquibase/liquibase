@@ -94,27 +94,40 @@ class XMLChangeLogHandler extends DefaultHandler {
                 handleIncludedChangeLog(fileName, isRelativeToChangelogFile, databaseChangeLog.getPhysicalFilePath());
             } else if ("includeAll".equals(qName)) {
                 String pathName = atts.getValue("path");
-
+                if (!(pathName.endsWith("/") || pathName.endsWith("\\"))) {
+                    pathName = pathName+"/";
+                }
+                log.finest("includeAll for "+pathName);
+                log.finest("Using file opener for includeAll: "+fileOpener.getClass().getName());
                 Enumeration<URL> resources = fileOpener.getResources(pathName);
+                boolean foundResource = false;
                 while (resources.hasMoreElements()) {
-                    URL dirUrl = resources.nextElement();
-                    if (dirUrl.getAuthority() != null) {
+                    URL fileUrl = resources.nextElement();
+                    if (!fileUrl.toExternalForm().startsWith("file:")) {
+                        log.finest(fileUrl.toExternalForm()+" is not a file path");
                         continue;
                     }
-                    File dir = new File(new URI(dirUrl.toExternalForm()));
-                    if (!dir.exists()) {
-                        throw new SAXException("includeAll path " + pathName + " could not be found.  Tried in " + dir.toString());
+                    File file = new File(fileUrl.toExternalForm().replaceFirst("file://",""));
+                    log.finest("includeAll using path "+file.getCanonicalPath());
+                    if (!file.exists()) {
+                        throw new SAXException("includeAll path " + pathName + " could not be found.  Tried in " + file.toString());
+                    }
+                    if (file.isDirectory()) {
+                        log.finest(file.getCanonicalPath()+" is a directory");
+                        continue;
                     }
 
-                    File[] files = dir.listFiles(new FilenameFilter() {
-                        public boolean accept(File dir, String name) {
-                            return name.endsWith(".xml") || name.endsWith(".sql");
-                        }
-                    });
-                    for (File file : files) {
-                        handleIncludedChangeLog(pathName + file.getName(), false, databaseChangeLog.getPhysicalFilePath());
+                    foundResource = true;
+                    if (!(file.getName().endsWith(".xml") || file.getName().endsWith(".sql"))) {
+                        log.finest(file.getCanonicalPath()+" is not a recognized file type");
+                        continue;
                     }
 
+                    handleIncludedChangeLog(pathName + file.getName(), false, databaseChangeLog.getPhysicalFilePath());
+                }
+
+                if (!foundResource) {
+                    throw new SAXException("Could not find directory "+pathName);
                 }
             } else if (changeSet == null && "changeSet".equals(qName)) {
                 boolean alwaysRun = false;

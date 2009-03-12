@@ -22,7 +22,7 @@
             <!--</fileset>-->
         </path>
 
-        <property name="db.changelog.file" value="changelogs/mysql/complete/root.changelog.xml"/>
+        <property name="db.changelog.file" value="changelogs/includetest/f0.xml"/>
         <property name="database.url" value="jdbc:mysql://localhost/liquibase"/>
         <property name="database.username" value="liquibase"/>
         <property name="database.password" value="liquibase"/>
