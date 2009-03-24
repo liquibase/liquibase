@@ -973,6 +973,7 @@ public abstract class AbstractDatabase implements Database {
             } else if (dataType == Types.BIGINT) {
                 return new BigInteger(value);
             } else if (dataType == Types.BIT) {
+                value = value.replaceFirst("b'",""); //mysql puts wierd chars in bit field
                 if (value.equalsIgnoreCase("true")) {
                     return Boolean.TRUE;
                 } else if (value.equalsIgnoreCase("false")) {
