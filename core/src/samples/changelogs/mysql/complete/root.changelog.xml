@@ -350,4 +350,12 @@
         <!--</executeCommand>-->
     <!--</changeSet>-->
 
+    <changeSet id="bit-test" author="nvoxland">
+        <createTable tableName="bit_test">
+            <column type="int" name="id"/>
+            <column type="bit" name="bit_with_default" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
 </databaseChangeLog>

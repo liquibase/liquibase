@@ -100,30 +100,32 @@ class XMLChangeLogHandler extends DefaultHandler {
                 log.finest("includeAll for "+pathName);
                 log.finest("Using file opener for includeAll: "+fileOpener.getClass().getName());
                 Enumeration<URL> resources = fileOpener.getResources(pathName);
+
                 boolean foundResource = false;
+
                 while (resources.hasMoreElements()) {
                     URL fileUrl = resources.nextElement();
                     if (!fileUrl.toExternalForm().startsWith("file:")) {
                         log.finest(fileUrl.toExternalForm()+" is not a file path");
                         continue;
                     }
-                    File file = new File(fileUrl.toExternalForm().replaceFirst("file://",""));
+                    File file = new File(fileUrl.toURI());
                     log.finest("includeAll using path "+file.getCanonicalPath());
                     if (!file.exists()) {
                         throw new SAXException("includeAll path " + pathName + " could not be found.  Tried in " + file.toString());
                     }
                     if (file.isDirectory()) {
                         log.finest(file.getCanonicalPath()+" is a directory");
-                        continue;
+                        for (File childFile : file.listFiles()) {
+                            if (handleIncludedChangeLog(pathName + childFile.getName(), false, databaseChangeLog.getPhysicalFilePath())) {
+                                foundResource = true;
+                            }
+                        }
+                    } else {
+                        if (handleIncludedChangeLog(pathName + file.getName(), false, databaseChangeLog.getPhysicalFilePath())) {
+                            foundResource = true;
+                        }
                     }
-
-                    foundResource = true;
-                    if (!(file.getName().endsWith(".xml") || file.getName().endsWith(".sql"))) {
-                        log.finest(file.getCanonicalPath()+" is not a recognized file type");
-                        continue;
-                    }
-
-                    handleIncludedChangeLog(pathName + file.getName(), false, databaseChangeLog.getPhysicalFilePath());
                 }
 
                 if (!foundResource) {
@@ -303,7 +305,12 @@ class XMLChangeLogHandler extends DefaultHandler {
         }
     }
 
-    protected void handleIncludedChangeLog(String fileName, boolean isRelativePath, String relativeBaseFileName) throws LiquibaseException {
+    protected boolean handleIncludedChangeLog(String fileName, boolean isRelativePath, String relativeBaseFileName) throws LiquibaseException {
+        if (!(fileName.endsWith(".xml") || fileName.endsWith(".sql"))) {
+            log.finest(relativeBaseFileName+"/"+fileName+" is not a recognized file type");
+            return false;
+        }
+
         if (isRelativePath) {
             String path = searchPath(relativeBaseFileName);
             fileName = new StringBuilder(path).append(fileName).toString();
@@ -316,6 +323,8 @@ class XMLChangeLogHandler extends DefaultHandler {
         for (ChangeSet changeSet : changeLog.getChangeSets()) {
             databaseChangeLog.addChangeSet(changeSet);
         }
+
+        return true;
     }
 
     private String searchPath(String relativeBaseFileName) {
