@@ -1,6 +1,11 @@
 LiquiBase Core Changelog
 ==========================================
 
+Changes in version 1.9.2 (2009.3.22)
+----------------------
+- Fix for includeAll on windows
+- Other bug fixes
+
 Changes in version 1.9.1 (2009.2.20)
 ----------------------
 - Escape hsql tables/columns if they are a keyword
