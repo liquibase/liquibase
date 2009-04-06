@@ -21,6 +21,7 @@
     <version>@BUILD.VERSION@.@INTELLIJ.BUILD.VERSION@</version>
     <change-notes>
         <![CDATA[
+        1.9.2.0: Bug fixes<br>
         1.9.1.0: Bug fixes<br>
         1.9.0.0: New 1.9 LiquiBase functionality<br>
         1.8.0.0: New 1.8 functionality<br>
