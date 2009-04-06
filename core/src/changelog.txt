@@ -1,7 +1,7 @@
 LiquiBase Core Changelog
 ==========================================
 
-Changes in version 1.9.2 (2009.3.22)
+Changes in version 1.9.2 (2009.4.6)
 ----------------------
 - Fix for includeAll on windows
 - Other bug fixes
