@@ -464,11 +464,10 @@ public abstract class SqlDatabaseSnapshot implements DatabaseSnapshot {
                     indexMap.put(indexName, indexInformation);
                 }
 
-                //defect 2692046: create empty buckets in case the position is greater than the column size
-                final int columnsBefore = indexInformation.getColumns().size() + 1;
-                for (int i = position; i > columnsBefore; --i) {
+                for (int i = indexInformation.getColumns().size(); i < position; i++) {
                     indexInformation.getColumns().add(null);
                 }
+                indexInformation.getColumns().set(position-1, columnName);
             }
             for (Map.Entry<String, Index> entry : indexMap.entrySet()) {
                 indexes.add(entry.getValue());
