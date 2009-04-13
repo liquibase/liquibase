@@ -747,6 +747,14 @@ public class DiffResult {
             if (column.getRemarks() != null) {
                 columnConfig.setRemarks(column.getRemarks());
             }
+            if (column.isNullable() != null && !column.isNullable()) {
+                ConstraintsConfig constraintsConfig = columnConfig.getConstraints();
+                if (constraintsConfig == null) {
+                    constraintsConfig = new ConstraintsConfig();
+                    columnConfig.setConstraints(constraintsConfig);
+                }
+                constraintsConfig.setNullable(false);
+            }
 
             change.addColumn(columnConfig);
 

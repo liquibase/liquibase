@@ -1,6 +1,10 @@
 LiquiBase Core Changelog
 ==========================================
 
+Changes in version 1.9.3 (2009.4.3)
+----------------------
+- Fixed index column nested tags in generated XML
+
 Changes in version 1.9.2 (2009.4.6)
 ----------------------
 - Fix for includeAll on windows
