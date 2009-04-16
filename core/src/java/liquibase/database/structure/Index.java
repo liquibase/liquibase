@@ -83,7 +83,7 @@ public class Index implements DatabaseObject, Comparable<Index> {
         int result;
         result = table.getName().toUpperCase().hashCode();
         result = 31 * result + columns.hashCode();
-        result = 31 * result + (unique == null || unique ? 1 : 0);
+        result = 31 * result + (unique == null ? 2 : unique ? 1 : 0);
         return result;
     }
 

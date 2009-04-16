@@ -630,7 +630,7 @@ public class DiffResult {
 
             DropColumnChange change = new DropColumnChange();
             change.setTableName(column.getTable().getName());
-            change.setSchemaName(column.getTable().getName());
+            change.setSchemaName(column.getTable().getSchema());
             change.setColumnName(column.getName());
 
             changes.add(change);
