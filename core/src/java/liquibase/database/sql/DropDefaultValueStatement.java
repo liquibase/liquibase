@@ -1,6 +1,9 @@
 package liquibase.database.sql;
 
+import java.sql.ResultSet;
+import java.sql.Statement;
 import liquibase.database.*;
+import liquibase.exception.JDBCException;
 import liquibase.exception.StatementNotSupportedOnDatabaseException;
 
 public class DropDefaultValueStatement implements SqlStatement {
@@ -32,9 +35,21 @@ public class DropDefaultValueStatement implements SqlStatement {
             throw new StatementNotSupportedOnDatabaseException(this, database);
         }
     	
-        if (database instanceof MSSQLDatabase) {
-//smarter drop        return new SqlStatement[]{new RawSqlStatement("ALTER TABLE " + SqlUtil.escapeTableName(getTableName(), database) + " DROP CONSTRAINT select d.name from syscolumns c,sysobjects d, sysobjects t where c.id=t.id AND d.parent_obj=t.id AND d.type='D' AND t.type='U' AND c.name='"+getColumnName()+"' AND t.name='"+getTableName()+"'"),};
-            return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " DROP CONSTRAINT " + ((MSSQLDatabase) database).generateDefaultConstraintName(getTableName(), getColumnName());
+        if (database instanceof MSSQLDatabase) {   
+        	try {
+        		if(database.getDatabaseProductVersion().startsWith("9")) { // SQL Server 2005
+			      // SQL Server 2005 does not often work with the simpler query shown below
+        			String query = "DECLARE @default sysname\n";
+        			query += "SELECT @default = object_name(default_object_id) FROM sys.columns WHERE object_id=object_id('" + getSchemaName() + "." + getTableName() + "') AND name='" + columnName + "'\n";
+        			query += "EXEC ('ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " DROP CONSTRAINT ' + @default)";
+        			//System.out.println("DROP QUERY : " + query);
+        			return query;        		        		       
+        		} else {
+        			return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " DROP CONSTRAINT select d.name from syscolumns c,sysobjects d, sysobjects t where c.id=t.id AND d.parent_obj=t.id AND d.type='D' AND t.type='U' AND c.name='"+getColumnName()+"' AND t.name='"+getTableName()+"'";        	
+        		}
+        	} catch(JDBCException e) {
+        		return e.getMessage();
+        	}
         } else if (database instanceof MySQLDatabase) {
             return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ALTER " + database.escapeColumnName(getSchemaName(), getTableName(), getColumnName()) + " DROP DEFAULT";
         } else if (database instanceof OracleDatabase || database instanceof SybaseASADatabase) {

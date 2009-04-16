@@ -121,7 +121,6 @@ public class MSSQLDatabase extends AbstractDatabase {
     public String getAutoIncrementClause() {
         return "IDENTITY";
     }
-
     protected String getDefaultDatabaseSchemaName() throws JDBCException {
         return null;
     }
@@ -243,6 +242,9 @@ public class MSSQLDatabase extends AbstractDatabase {
         return "[" + constraintName + "]";
     }
 
+    public String escapeColumnName(String schemaName, String tableName, String columnName) {
+       return "[" +columnName+ "]";
+    }    
 
     public String convertRequestedSchemaToCatalog(String requestedSchema) throws JDBCException {
         return getDefaultCatalogName();
