@@ -2,6 +2,8 @@ package liquibase.database.statement.generator;
 
 import liquibase.database.*;
 import liquibase.database.statement.AddColumnStatement;
+import liquibase.database.statement.syntax.Sql;
+import liquibase.database.statement.syntax.UnparsedSql;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.StatementNotSupportedOnDatabaseException;
 
@@ -14,7 +16,7 @@ public class AddColumnGeneratorDefault implements SqlGenerator<AddColumnStatemen
         return true;
     }
 
-    public String[] generateSql(AddColumnStatement statement, Database database) throws LiquibaseException {
+    public Sql[] generateSql(AddColumnStatement statement, Database database) throws LiquibaseException {
 
         if (statement.isPrimaryKey() && (database instanceof CacheDatabase
                 || database instanceof H2Database
@@ -44,8 +46,8 @@ public class AddColumnGeneratorDefault implements SqlGenerator<AddColumnStatemen
 
         alterTable += getDefaultClause(statement, database);
 
-        return new String[]{
-                alterTable
+        return new Sql[]{
+                new UnparsedSql(alterTable)
         };
     }
 

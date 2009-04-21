@@ -2,6 +2,7 @@ package liquibase.database.statement.generator;
 
 import liquibase.database.Database;
 import liquibase.database.statement.SqlStatement;
+import liquibase.database.statement.syntax.Sql;
 import liquibase.exception.LiquibaseException;
 
 public interface SqlGenerator<StatementType extends SqlStatement> {
@@ -13,5 +14,5 @@ public interface SqlGenerator<StatementType extends SqlStatement> {
 
     public boolean isValid(StatementType statement, Database database);
 
-    public String[] generateSql(StatementType statement, Database database) throws LiquibaseException;
+    public Sql[] generateSql(StatementType statement, Database database) throws LiquibaseException;
 }
