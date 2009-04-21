@@ -30,6 +30,7 @@ public class DatabaseFactory {
             new FirebirdDatabase(),
             new MaxDBDatabase(),
             new SQLiteDatabase(),
+            new InformixDatabase(),
             new SybaseASADatabase()
     ));
 

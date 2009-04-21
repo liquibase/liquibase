@@ -93,7 +93,7 @@ public class ModifyColumnChange extends AbstractChange implements ChangeWithColu
         		sql.add(new RawSqlStatement("ALTER TABLE " + database.escapeTableName(schemaName, getTableName()) + " ALTER COLUMN " + aColumn.getName() + " " + database.getColumnType(aColumn.getType(), false)));
         } else if (database instanceof MySQLDatabase) {
         		sql.add(new RawSqlStatement("ALTER TABLE " + database.escapeTableName(schemaName, getTableName()) + " MODIFY COLUMN " + aColumn.getName() + " " + database.getColumnType(aColumn.getType(), false)));
-        } else if (database instanceof OracleDatabase || database instanceof MaxDBDatabase) {
+        } else if (database instanceof OracleDatabase || database instanceof MaxDBDatabase || database instanceof InformixDatabase) {
         		sql.add(new RawSqlStatement("ALTER TABLE " + database.escapeTableName(schemaName, getTableName()) + " MODIFY (" + aColumn.getName() + " " + database.getColumnType(aColumn.getType(), false) + ")"));
         } else if (database instanceof DerbyDatabase) {
         		sql.add(new RawSqlStatement("ALTER TABLE " + database.escapeTableName(schemaName, getTableName()) + " ALTER COLUMN "+aColumn.getName()+" SET DATA TYPE " + database.getColumnType(aColumn.getType(), false)));

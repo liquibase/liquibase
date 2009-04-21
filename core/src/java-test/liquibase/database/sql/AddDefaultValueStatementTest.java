@@ -27,7 +27,7 @@ public class AddDefaultValueStatementTest extends AbstractSqlStatementTest {
     }
 
     protected SqlStatement generateTestStatement() {
-        return new AddDefaultValueStatement(null, null, null, null);
+        return new AddDefaultValueStatement(null, null, null, null, null);
     }
 
     @Test
@@ -42,7 +42,7 @@ public class AddDefaultValueStatementTest extends AbstractSqlStatementTest {
                 DatabaseSnapshot snapshot = database.createDatabaseSnapshot(null, null);
                 assertNull(snapshot.getTable(TABLE_NAME).getColumn(COLUMN_NAME).getDefaultValue());
 
-                new JdbcTemplate(database).execute(new AddDefaultValueStatement(null, TABLE_NAME, COLUMN_NAME, "New Default Value"));
+                new JdbcTemplate(database).execute(new AddDefaultValueStatement(null, TABLE_NAME, COLUMN_NAME, null, "New Default Value"));
 
                 snapshot = database.createDatabaseSnapshot(null, null);
                 assertEquals("New Default Value", snapshot.getTable(TABLE_NAME).getColumn(COLUMN_NAME).getDefaultValue());
@@ -53,7 +53,7 @@ public class AddDefaultValueStatementTest extends AbstractSqlStatementTest {
     @Test
     public void execute_booleanDefaultValue() throws Exception {
         new DatabaseTestTemplate().testOnAvailableDatabases(
-                new SqlStatementDatabaseTest(null, new AddDefaultValueStatement(null, TABLE_NAME, COLUMN_NAME, Boolean.TRUE)) {
+                new SqlStatementDatabaseTest(null, new AddDefaultValueStatement(null, TABLE_NAME, COLUMN_NAME, null, Boolean.TRUE)) {
 
                     protected void setup(Database database) throws Exception {
                         new JdbcTemplate(database).execute(new CreateTableStatement(null, TABLE_NAME)
@@ -83,7 +83,7 @@ public class AddDefaultValueStatementTest extends AbstractSqlStatementTest {
     @Test
     public void execute_intDefaultValue() throws Exception {
         new DatabaseTestTemplate().testOnAvailableDatabases(
-                new SqlStatementDatabaseTest(null, new AddDefaultValueStatement(null, TABLE_NAME, COLUMN_NAME, 42)) {
+                new SqlStatementDatabaseTest(null, new AddDefaultValueStatement(null, TABLE_NAME, COLUMN_NAME, null, 42)) {
 
                     protected void setup(Database database) throws Exception {
                         new JdbcTemplate(database).execute(new CreateTableStatement(null, TABLE_NAME)
@@ -106,7 +106,7 @@ public class AddDefaultValueStatementTest extends AbstractSqlStatementTest {
     @Test
     public void execute_floatDefaultValue() throws Exception {
         new DatabaseTestTemplate().testOnAvailableDatabases(
-                new SqlStatementDatabaseTest(null, new AddDefaultValueStatement(null, TABLE_NAME, COLUMN_NAME, 42.56)) {
+                new SqlStatementDatabaseTest(null, new AddDefaultValueStatement(null, TABLE_NAME, COLUMN_NAME, null, 42.56)) {
 
                     protected void setup(Database database) throws Exception {
                         new JdbcTemplate(database).execute(new CreateTableStatement(null, TABLE_NAME)
@@ -131,7 +131,7 @@ public class AddDefaultValueStatementTest extends AbstractSqlStatementTest {
         final java.sql.Timestamp date = new java.sql.Timestamp(new Date().getTime());
 
         new DatabaseTestTemplate().testOnAvailableDatabases(
-                new SqlStatementDatabaseTest(null, new AddDefaultValueStatement(null, TABLE_NAME, COLUMN_NAME, date)) {
+                new SqlStatementDatabaseTest(null, new AddDefaultValueStatement(null, TABLE_NAME, COLUMN_NAME, null, date)) {
 
                     protected void setup(Database database) throws JDBCException {
                         new JdbcTemplate(database).execute(new CreateTableStatement(null, TABLE_NAME)
@@ -154,7 +154,7 @@ public class AddDefaultValueStatementTest extends AbstractSqlStatementTest {
     public void execute_dateDefaultValue() throws Exception {
         final java.sql.Date date = new java.sql.Date(new Date().getTime());
         new DatabaseTestTemplate().testOnAvailableDatabases(
-                new SqlStatementDatabaseTest(null, new AddDefaultValueStatement(null, TABLE_NAME, COLUMN_NAME, date)) {
+                new SqlStatementDatabaseTest(null, new AddDefaultValueStatement(null, TABLE_NAME, COLUMN_NAME, null, date)) {
 
                     protected void setup(Database database) throws Exception {
                         new JdbcTemplate(database).execute(new CreateTableStatement(null, TABLE_NAME)
@@ -190,7 +190,7 @@ public class AddDefaultValueStatementTest extends AbstractSqlStatementTest {
     public void execute_timeDefaultValue() throws Exception {
         final java.sql.Time time = new java.sql.Time(new Date().getTime());
         new DatabaseTestTemplate().testOnAvailableDatabases(
-                new SqlStatementDatabaseTest(null, new AddDefaultValueStatement(null, TABLE_NAME, COLUMN_NAME, time)) {
+                new SqlStatementDatabaseTest(null, new AddDefaultValueStatement(null, TABLE_NAME, COLUMN_NAME, null, time)) {
 
                     protected void setup(Database database) throws Exception {
                         new JdbcTemplate(database).execute(new CreateTableStatement(null, TABLE_NAME)

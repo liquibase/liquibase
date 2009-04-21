@@ -83,7 +83,7 @@ public class TestContext {
         try {
             connection = driver.connect(url, info);
         } catch (SQLException e) {
-            System.out.println("Could not connect to " + url + ": Will not test against");
+            System.out.println("Could not connect to " + url + ": Will not test against.  "+e.getMessage());
             return null; //could not connect
         }
         if (connection == null) {

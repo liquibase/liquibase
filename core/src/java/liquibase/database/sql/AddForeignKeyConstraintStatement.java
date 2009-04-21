@@ -3,6 +3,7 @@ package liquibase.database.sql;
 import java.sql.DatabaseMetaData;
 
 import liquibase.database.Database;
+import liquibase.database.InformixDatabase;
 import liquibase.database.SQLiteDatabase;
 import liquibase.database.OracleDatabase;
 import liquibase.exception.StatementNotSupportedOnDatabaseException;
@@ -103,23 +104,36 @@ public class AddForeignKeyConstraintStatement implements SqlStatement {
         if (!supportsDatabase(database)) {
             throw new StatementNotSupportedOnDatabaseException(this, database);
         }
-
-        String sql = "ALTER TABLE " + database.escapeTableName(getBaseTableSchemaName(), getBaseTableName()) + " ADD CONSTRAINT " + database.escapeConstraintName(getConstraintName()) + " FOREIGN KEY (" + database.escapeColumnNameList(getBaseColumnNames()) + ") REFERENCES " + database.escapeTableName(getReferencedTableSchemaName(), getReferencedTableName()) + "(" + database.escapeColumnNameList(getReferencedColumnNames()) + ")";
+        
+        StringBuilder sb = new StringBuilder();
+        sb.append("ALTER TABLE ")
+        	.append(database.escapeTableName(getBaseTableSchemaName(), getBaseTableName()))
+        	.append(" ADD CONSTRAINT ");
+        if (!(database instanceof InformixDatabase)) {
+        	sb.append(database.escapeConstraintName(getConstraintName()));
+        }
+        sb.append(" FOREIGN KEY (")
+        	.append(database.escapeColumnNameList(getBaseColumnNames()))
+        	.append(") REFERENCES ")
+        	.append(database.escapeTableName(getReferencedTableSchemaName(), getReferencedTableName()))
+        	.append("(")
+        	.append(database.escapeColumnNameList(getReferencedColumnNames()))
+        	.append(")");
 
         if (this.updateRule != null) {
             switch (this.updateRule) {
                 case DatabaseMetaData.importedKeyCascade:
-                    sql += " ON UPDATE CASCADE";
+                    sb.append(" ON UPDATE CASCADE");
                     break;
                 case DatabaseMetaData.importedKeySetNull:
-                    sql += " ON UPDATE SET NULL";
+                    sb.append(" ON UPDATE SET NULL");
                     break;
                 case DatabaseMetaData.importedKeySetDefault:
-                    sql += " ON UPDATE SET DEFAULT";
+                    sb.append(" ON UPDATE SET DEFAULT");
                     break;
                 case DatabaseMetaData.importedKeyRestrict:
                     if (database.supportsRestrictForeignKeys()) {
-                        sql += " ON UPDATE RESTRICT";
+                        sb.append(" ON UPDATE RESTRICT");
                     }
                     break;
                 case DatabaseMetaData.importedKeyNoAction:
@@ -133,17 +147,17 @@ public class AddForeignKeyConstraintStatement implements SqlStatement {
         if (this.deleteRule != null) {
             switch (this.deleteRule) {
                 case DatabaseMetaData.importedKeyCascade:
-                    sql += " ON DELETE CASCADE";
+                    sb.append(" ON DELETE CASCADE");
                     break;
                 case DatabaseMetaData.importedKeySetNull:
-                    sql += " ON DELETE SET NULL";
+                	sb.append(" ON DELETE SET NULL");
                     break;
                 case DatabaseMetaData.importedKeySetDefault:
-                    sql += " ON DELETE SET DEFAULT";
+                	sb.append(" ON DELETE SET DEFAULT");
                     break;
                 case DatabaseMetaData.importedKeyRestrict:
                     if (database.supportsRestrictForeignKeys()) {
-                        sql += " ON DELETE RESTRICT";
+                    	sb.append(" ON DELETE RESTRICT");
                     }
                     break;
                 case DatabaseMetaData.importedKeyNoAction:
@@ -161,15 +175,20 @@ public class AddForeignKeyConstraintStatement implements SqlStatement {
             }
 
             if (isDeferrable()) {
-                sql += " DEFERRABLE";
+            	sb.append(" DEFERRABLE");
             }
 
             if (isInitiallyDeferred()) {
-                sql += " INITIALLY DEFERRED";
+            	sb.append(" INITIALLY DEFERRED");
             }
         }
+        
+        if (database instanceof InformixDatabase) {
+        	sb.append(" CONSTRAINT ");
+        	sb.append(database.escapeConstraintName(getConstraintName()));
+        }
 
-        return sql;
+        return sb.toString();
     }
 
     public String getEndDelimiter(Database database) {

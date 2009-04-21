@@ -36,6 +36,7 @@ public class AddDefaultValueChange extends AbstractChange {
     private String schemaName;
     private String tableName;
     private String columnName;
+    private String columnDataType;
     private String defaultValue;
     private String defaultValueNumeric;
     private String defaultValueDate;
@@ -68,6 +69,14 @@ public class AddDefaultValueChange extends AbstractChange {
     public void setColumnName(String columnName) {
         this.columnName = columnName;
     }
+    
+    public String getColumnDataType() {
+		return columnDataType;
+	}
+    
+    public void setColumnDataType(String columnDataType) {
+		this.columnDataType = columnDataType;
+	}
 
     public String getDefaultValue() {
         return defaultValue;
@@ -142,7 +151,7 @@ public class AddDefaultValueChange extends AbstractChange {
         } 
 
         return new SqlStatement[]{
-                new AddDefaultValueStatement(getSchemaName() == null ? database.getDefaultSchemaName() : getSchemaName(), getTableName(), getColumnName(), defaultValue)
+                new AddDefaultValueStatement(getSchemaName() == null ? database.getDefaultSchemaName() : getSchemaName(), getTableName(), getColumnName(), getColumnDataType(), defaultValue)
         };
     }
     
@@ -206,6 +215,7 @@ public class AddDefaultValueChange extends AbstractChange {
         inverse.setSchemaName(getSchemaName());
         inverse.setTableName(getTableName());
         inverse.setColumnName(getColumnName());
+        inverse.setColumnDataType(getColumnDataType());
 
         return new Change[]{
                 inverse
@@ -223,6 +233,9 @@ public class AddDefaultValueChange extends AbstractChange {
         }
         node.setAttribute("tableName", getTableName());
         node.setAttribute("columnName", getColumnName());
+        if (getColumnDataType() != null) {
+        	node.setAttribute("columnDataType", getColumnDataType());
+        }
         if (getDefaultValue() != null) {
             node.setAttribute("defaultValue", getDefaultValue());
         }

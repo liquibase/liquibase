@@ -128,7 +128,8 @@ public class AddColumnStatement implements SqlStatement {
                 || database instanceof HsqlDatabase
                 || database instanceof DerbyDatabase
                 || database instanceof DB2Database
-                || database instanceof FirebirdDatabase;
+                || database instanceof FirebirdDatabase
+                || database instanceof InformixDatabase;
     }
 
     private String getDefaultClause(Database database) {

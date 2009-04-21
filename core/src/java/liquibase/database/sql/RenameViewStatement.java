@@ -62,6 +62,7 @@ public class RenameViewStatement implements SqlStatement {
         || database instanceof HsqlDatabase
         || database instanceof DB2Database
         || database instanceof CacheDatabase
-        || database instanceof FirebirdDatabase);
+        || database instanceof FirebirdDatabase
+        || database instanceof InformixDatabase);
     }
 }

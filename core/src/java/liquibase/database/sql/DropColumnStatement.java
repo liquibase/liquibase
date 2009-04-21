@@ -32,7 +32,7 @@ public class DropColumnStatement implements SqlStatement {
             throw new StatementNotSupportedOnDatabaseException(this, database);
         } else if (database instanceof DB2Database) {
             return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " DROP COLUMN " + database.escapeColumnName(getSchemaName(), getTableName(), getColumnName());
-        } else if (database instanceof SybaseDatabase || database instanceof SybaseASADatabase || database instanceof FirebirdDatabase) {
+        } else if (database instanceof SybaseDatabase || database instanceof SybaseASADatabase || database instanceof FirebirdDatabase || database instanceof InformixDatabase) {
             return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " DROP " + database.escapeColumnName(getSchemaName(), getTableName(), getColumnName());
         }
         return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " DROP COLUMN " + database.escapeColumnName(getSchemaName(), getTableName(), getColumnName());

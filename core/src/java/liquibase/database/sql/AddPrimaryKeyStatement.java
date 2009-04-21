@@ -2,6 +2,7 @@ package liquibase.database.sql;
 
 import liquibase.database.DB2Database;
 import liquibase.database.Database;
+import liquibase.database.InformixDatabase;
 import liquibase.database.MSSQLDatabase;
 import liquibase.database.MySQLDatabase;
 import liquibase.database.SQLiteDatabase;
@@ -57,6 +58,8 @@ public class AddPrimaryKeyStatement implements SqlStatement {
         String sql;
         if (getConstraintName() == null  || database instanceof MySQLDatabase || database instanceof SybaseASADatabase) {
             sql = "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ADD PRIMARY KEY (" + database.escapeColumnNameList(getColumnNames()) + ")";
+        } else if (database instanceof InformixDatabase) {
+        	sql = "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ADD CONSTRAINT PRIMARY KEY (" + database.escapeColumnNameList(getColumnNames()) + ") CONSTRAINT " + database.escapeConstraintName(getConstraintName());
         } else {
             sql = "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ADD CONSTRAINT " + database.escapeConstraintName(getConstraintName()) + " PRIMARY KEY (" + database.escapeColumnNameList(getColumnNames()) + ")";
         }

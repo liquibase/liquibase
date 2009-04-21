@@ -40,7 +40,8 @@ public class CreateViewStatement implements SqlStatement {
                 || database instanceof CacheDatabase
                 || database instanceof MSSQLDatabase
                 || database instanceof DerbyDatabase
-                || database instanceof SybaseASADatabase) {
+                || database instanceof SybaseASADatabase
+                || database instanceof InformixDatabase) {
             if (replaceIfExists) {
                 throw new StatementNotSupportedOnDatabaseException("replaceIfExists not supported", this, database);
             }

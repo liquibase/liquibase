@@ -26,13 +26,13 @@ public class DropDefaultValueStatementTest extends AbstractSqlStatementTest {
     }
 
     protected DropDefaultValueStatement generateTestStatement() {
-        return new DropDefaultValueStatement(null, null, null);
+        return new DropDefaultValueStatement(null, null, null, null);
     }
 
     @Test
     public void execute_defaultSchema() throws Exception {
         new DatabaseTestTemplate().testOnAvailableDatabases(
-                new SqlStatementDatabaseTest(null, new DropDefaultValueStatement(null, TABLE_NAME, COLUMN_NAME)) {
+                new SqlStatementDatabaseTest(null, new DropDefaultValueStatement(null, TABLE_NAME, COLUMN_NAME, null)) {
 
                     protected boolean supportsTest(Database database) {
                         return !(database instanceof DerbyDatabase);
@@ -52,7 +52,7 @@ public class DropDefaultValueStatementTest extends AbstractSqlStatementTest {
     @Test
     public void execute_altSchema() throws Exception {
         new DatabaseTestTemplate().testOnAvailableDatabases(
-                new SqlStatementDatabaseTest(TestContext.ALT_SCHEMA, new DropDefaultValueStatement(TestContext.ALT_SCHEMA, TABLE_NAME, COLUMN_NAME)) {
+                new SqlStatementDatabaseTest(TestContext.ALT_SCHEMA, new DropDefaultValueStatement(TestContext.ALT_SCHEMA, TABLE_NAME, COLUMN_NAME, null)) {
 
                     protected boolean supportsTest(Database database) {
                         return !(database instanceof DerbyDatabase);

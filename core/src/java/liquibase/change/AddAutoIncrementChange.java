@@ -83,7 +83,7 @@ public class AddAutoIncrementChange extends AbstractChange {
             return new SqlStatement[]{
                     new CreateSequenceStatement(schemaName, sequenceName),
                     new SetNullableStatement(schemaName, getTableName(), getColumnName(), null, false),
-                    new AddDefaultValueStatement(schemaName, getTableName(), getColumnName(), sequenceName),
+                    new AddDefaultValueStatement(schemaName, getTableName(), getColumnName(), getColumnDataType(), sequenceName),
             };
         } if (database instanceof SQLiteDatabase) { 
     		// return special statements for SQLite databases
