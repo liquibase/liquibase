@@ -1,9 +1,9 @@
 package liquibase.change;
 
 import liquibase.database.Database;
-import liquibase.database.sql.SqlStatement;
-import liquibase.database.sql.FindForeignKeyConstraintsStatement;
-import liquibase.database.sql.visitor.SqlVisitor;
+import liquibase.database.statement.SqlStatement;
+import liquibase.database.statement.FindForeignKeyConstraintsStatement;
+import liquibase.database.statement.visitor.SqlVisitor;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.template.JdbcTemplate;
 import liquibase.exception.JDBCException;

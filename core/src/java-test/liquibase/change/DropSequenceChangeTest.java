@@ -1,8 +1,8 @@
 package liquibase.change;
 
 import liquibase.database.Database;
-import liquibase.database.sql.DropSequenceStatement;
-import liquibase.database.sql.SqlStatement;
+import liquibase.database.statement.DropSequenceStatement;
+import liquibase.database.statement.SqlStatement;
 import liquibase.test.DatabaseTest;
 import liquibase.test.DatabaseTestTemplate;
 import static org.junit.Assert.*;

@@ -1,6 +1,6 @@
 package liquibase.database.template;
 
-import liquibase.database.sql.SqlStatement;
+import liquibase.database.statement.SqlStatement;
 import liquibase.exception.JDBCException;
 
 import java.sql.SQLException;

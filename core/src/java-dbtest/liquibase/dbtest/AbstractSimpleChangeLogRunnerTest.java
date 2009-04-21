@@ -5,11 +5,10 @@ import liquibase.ChangeSet;
 import liquibase.FileOpener;
 import liquibase.FileSystemFileOpener;
 import liquibase.Liquibase;
-import liquibase.database.AbstractDatabase;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
-import liquibase.database.sql.DropTableStatement;
+import liquibase.database.statement.DropTableStatement;
 import liquibase.database.structure.DatabaseSnapshot;
 import liquibase.diff.Diff;
 import liquibase.diff.DiffResult;
@@ -19,14 +18,11 @@ import liquibase.lock.LockHandler;
 import liquibase.log.LogFactory;
 import liquibase.test.JUnitFileOpener;
 import liquibase.test.TestContext;
-import liquibase.test.DatabaseTestTemplate;
-import liquibase.test.SqlStatementDatabaseTest;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.io.StringWriter;
-import java.lang.reflect.Field;
 import java.net.URL;
 import java.util.Date;
 import java.util.Enumeration;
@@ -34,7 +30,6 @@ import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
 
-import org.junit.Test;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 

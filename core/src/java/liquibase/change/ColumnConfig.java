@@ -2,8 +2,8 @@ package liquibase.change;
 
 import liquibase.database.Database;
 import liquibase.database.InformixDatabase;
-import liquibase.database.sql.ComputedDateValue;
-import liquibase.database.sql.ComputedNumericValue;
+import liquibase.database.statement.ComputedDateValue;
+import liquibase.database.statement.ComputedNumericValue;
 import liquibase.database.structure.Column;
 import liquibase.util.ISODateFormat;
 import liquibase.util.StringUtils;

@@ -2,7 +2,7 @@ package liquibase.change;
 
 import liquibase.database.Database;
 import liquibase.database.PostgresDatabase;
-import liquibase.database.sql.*;
+import liquibase.database.statement.*;
 import liquibase.test.DatabaseTest;
 import liquibase.test.DatabaseTestTemplate;
 import static org.junit.Assert.*;

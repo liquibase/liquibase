@@ -1,9 +1,8 @@
 package liquibase.change;
 
 import liquibase.database.MockDatabase;
-import liquibase.database.sql.SqlStatement;
-import liquibase.database.sql.RenameViewStatement;
-import liquibase.database.sql.TagDatabaseStatement;
+import liquibase.database.statement.SqlStatement;
+import liquibase.database.statement.TagDatabaseStatement;
 import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
 import org.junit.Before;

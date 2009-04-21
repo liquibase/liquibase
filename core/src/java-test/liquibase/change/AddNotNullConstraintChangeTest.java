@@ -2,9 +2,9 @@ package liquibase.change;
 
 import liquibase.database.Database;
 import liquibase.database.MockDatabase;
-import liquibase.database.sql.SetNullableStatement;
-import liquibase.database.sql.SqlStatement;
-import liquibase.database.sql.UpdateStatement;
+import liquibase.database.statement.SetNullableStatement;
+import liquibase.database.statement.SqlStatement;
+import liquibase.database.statement.UpdateStatement;
 import liquibase.test.DatabaseTest;
 import liquibase.test.DatabaseTestTemplate;
 import static org.junit.Assert.*;

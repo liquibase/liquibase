@@ -1,10 +1,10 @@
 package liquibase.change;
 
 import liquibase.database.MockDatabase;
-import liquibase.database.sql.CreateTableStatement;
-import liquibase.database.sql.ForeignKeyConstraint;
-import liquibase.database.sql.SqlStatement;
-import liquibase.database.sql.UniqueConstraint;
+import liquibase.database.statement.CreateTableStatement;
+import liquibase.database.statement.ForeignKeyConstraint;
+import liquibase.database.statement.SqlStatement;
+import liquibase.database.statement.UniqueConstraint;
 import liquibase.database.structure.Column;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Table;

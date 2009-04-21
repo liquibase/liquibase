@@ -1,7 +1,7 @@
 package liquibase.exception;
 
 import liquibase.database.Database;
-import liquibase.database.sql.SqlStatement;
+import liquibase.database.statement.SqlStatement;
 
 public class StatementNotSupportedOnDatabaseException extends JDBCException {
     private String reason;

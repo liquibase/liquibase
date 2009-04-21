@@ -6,9 +6,9 @@ import java.util.List;
 import java.util.Map;
 
 import liquibase.database.*;
-import liquibase.database.sql.SqlStatement;
-import liquibase.database.sql.CallableSqlStatement;
-import liquibase.database.sql.visitor.SqlVisitor;
+import liquibase.database.statement.SqlStatement;
+import liquibase.database.statement.CallableSqlStatement;
+import liquibase.database.statement.visitor.SqlVisitor;
 import liquibase.exception.JDBCException;
 import liquibase.util.StreamUtil;
 

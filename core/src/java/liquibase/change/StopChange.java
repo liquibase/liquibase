@@ -1,6 +1,6 @@
 package liquibase.change;
 
-import liquibase.database.sql.SqlStatement;
+import liquibase.database.statement.SqlStatement;
 import liquibase.database.Database;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.exception.UnsupportedChangeException;
@@ -11,7 +11,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import java.util.Set;
-import java.sql.SQLException;
 
 public class StopChange extends AbstractChange {
 

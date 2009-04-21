@@ -3,8 +3,8 @@ package liquibase.parser.filter;
 import liquibase.ChangeSet;
 import liquibase.RanChangeSet;
 import liquibase.database.Database;
-import liquibase.database.sql.UpdateStatement;
-import liquibase.database.sql.visitor.SqlVisitor;
+import liquibase.database.statement.UpdateStatement;
+import liquibase.database.statement.visitor.SqlVisitor;
 import liquibase.exception.JDBCException;
 
 import java.util.List;

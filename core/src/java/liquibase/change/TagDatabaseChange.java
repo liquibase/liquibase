@@ -1,7 +1,7 @@
 package liquibase.change;
 
-import liquibase.database.sql.SqlStatement;
-import liquibase.database.sql.TagDatabaseStatement;
+import liquibase.database.statement.SqlStatement;
+import liquibase.database.statement.TagDatabaseStatement;
 import liquibase.database.Database;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.exception.UnsupportedChangeException;

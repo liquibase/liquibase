@@ -1,22 +1,18 @@
 package liquibase.database;
 
 import java.sql.Connection;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import org.springframework.jdbc.core.ResultSetExtractor;
-
-import liquibase.database.sql.RawSqlStatement;
-import liquibase.database.sql.SqlStatement;
+import liquibase.database.statement.RawSqlStatement;
+import liquibase.database.statement.SqlStatement;
 import liquibase.database.structure.DatabaseSnapshot;
 import liquibase.database.structure.InformixDatabaseSnapshot;
 import liquibase.diff.DiffStatusListener;
 import liquibase.exception.JDBCException;
-import liquibase.util.ISODateFormat;
 
 public class InformixDatabase extends AbstractDatabase {
 

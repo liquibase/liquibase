@@ -2,8 +2,8 @@ package liquibase.change.custom;
 
 import liquibase.FileOpener;
 import liquibase.database.Database;
-import liquibase.database.sql.SqlStatement;
-import liquibase.database.sql.StoredProcedureStatement;
+import liquibase.database.statement.SqlStatement;
+import liquibase.database.statement.StoredProcedureStatement;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.exception.SetupException;
 import liquibase.exception.UnsupportedChangeException;

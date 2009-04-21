@@ -3,7 +3,7 @@ package liquibase.change;
 import liquibase.ClassLoaderFileOpener;
 import liquibase.database.MSSQLDatabase;
 import liquibase.database.OracleDatabase;
-import liquibase.database.sql.SqlStatement;
+import liquibase.database.statement.SqlStatement;
 import liquibase.exception.SetupException;
 import liquibase.util.MD5Util;
 import liquibase.util.StreamUtil;

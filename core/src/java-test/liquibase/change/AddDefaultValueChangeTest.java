@@ -2,8 +2,8 @@ package liquibase.change;
 
 import liquibase.database.Database;
 import liquibase.database.MockDatabase;
-import liquibase.database.sql.AddDefaultValueStatement;
-import liquibase.database.sql.SqlStatement;
+import liquibase.database.statement.AddDefaultValueStatement;
+import liquibase.database.statement.SqlStatement;
 import liquibase.test.DatabaseTest;
 import liquibase.test.DatabaseTestTemplate;
 import liquibase.util.ISODateFormat;

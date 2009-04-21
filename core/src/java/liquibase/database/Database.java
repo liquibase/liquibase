@@ -3,7 +3,7 @@ package liquibase.database;
 import liquibase.ChangeSet;
 import liquibase.RanChangeSet;
 import liquibase.diff.DiffStatusListener;
-import liquibase.database.sql.SqlStatement;
+import liquibase.database.statement.SqlStatement;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.DatabaseSnapshot;
 import liquibase.database.template.JdbcTemplate;

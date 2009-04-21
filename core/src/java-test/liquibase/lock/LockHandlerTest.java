@@ -1,21 +1,15 @@
 package liquibase.lock;
 
 import liquibase.DatabaseChangeLogLock;
-import liquibase.Liquibase;
 import liquibase.test.DatabaseTestTemplate;
-import liquibase.test.JdbcDatabaseTest;
 import liquibase.test.DatabaseTest;
 import liquibase.database.Database;
-import liquibase.database.AbstractDatabase;
-import liquibase.database.structure.DatabaseSnapshot;
-import liquibase.database.sql.RawSqlStatement;
-import liquibase.database.sql.SqlStatement;
-import liquibase.database.sql.UpdateStatement;
-import liquibase.database.sql.DropTableStatement;
-import liquibase.database.sql.visitor.SqlVisitor;
+import liquibase.database.statement.RawSqlStatement;
+import liquibase.database.statement.SqlStatement;
+import liquibase.database.statement.UpdateStatement;
+import liquibase.database.statement.DropTableStatement;
 import liquibase.database.template.JdbcTemplate;
 import liquibase.database.template.JdbcOutputTemplate;
-import liquibase.exception.LockException;
 import liquibase.exception.JDBCException;
 import static org.easymock.classextension.EasyMock.*;
 import static org.junit.Assert.*;
@@ -23,7 +17,6 @@ import org.junit.Test;
 
 import java.util.*;
 import java.io.StringWriter;
-import java.lang.reflect.Field;
 
 public class LockHandlerTest {
 

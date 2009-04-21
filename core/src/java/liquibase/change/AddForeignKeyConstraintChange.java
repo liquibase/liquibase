@@ -2,8 +2,8 @@ package liquibase.change;
 
 import liquibase.database.Database;
 import liquibase.database.SQLiteDatabase;
-import liquibase.database.sql.AddForeignKeyConstraintStatement;
-import liquibase.database.sql.SqlStatement;
+import liquibase.database.statement.AddForeignKeyConstraintStatement;
+import liquibase.database.statement.SqlStatement;
 import liquibase.database.structure.Column;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.ForeignKey;

@@ -1,7 +1,7 @@
 package liquibase.change;
 
 import liquibase.database.Database;
-import liquibase.database.sql.*;
+import liquibase.database.statement.*;
 import liquibase.database.structure.Column;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Table;

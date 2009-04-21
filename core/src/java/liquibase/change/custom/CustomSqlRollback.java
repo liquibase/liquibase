@@ -1,7 +1,7 @@
 package liquibase.change.custom;
 
 import liquibase.database.Database;
-import liquibase.database.sql.SqlStatement;
+import liquibase.database.statement.SqlStatement;
 import liquibase.exception.CustomChangeException;
 import liquibase.exception.RollbackImpossibleException;
 import liquibase.exception.UnsupportedChangeException;

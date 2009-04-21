@@ -4,7 +4,7 @@ import liquibase.DatabaseChangeLog;
 import liquibase.ChangeSet;
 import liquibase.change.Change;
 import liquibase.database.DatabaseFactory;
-import liquibase.database.sql.SqlStatement;
+import liquibase.database.statement.SqlStatement;
 import liquibase.Liquibase;
 import liquibase.parser.LiquibaseSchemaResolver;
 import liquibase.util.StringUtils;
