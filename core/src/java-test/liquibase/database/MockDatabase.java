@@ -272,70 +272,70 @@ public class MockDatabase implements Database {
         return "Mock Database";
     }
 
-    public String getBooleanType() {
-        return "BOOLEAN";
+    public DataType getBooleanType() {
+        return new DataType("BOOLEAN", false);
     }
 
-    public String getCurrencyType() {
-        return "CURRENCY";
+    public DataType getCurrencyType() {
+        return new DataType("CURRENCY", true);
     }
 
-    public String getUUIDType() {
-        return "UUID";
+    public DataType getUUIDType() {
+        return new DataType("UUID", false);
     }
 
-    public String getClobType() {
-        return "CLOB";
+    public DataType getClobType() {
+        return new DataType("CLOB", true);
     }
 
-    public String getCharType()
+    public DataType getCharType()
     {
-        return "CHAR";
+        return new DataType("CHAR", true);
     }
 
-    public String getVarcharType()
+    public DataType getVarcharType()
     {
-        return "VARCHAR";
+        return new DataType("VARCHAR", true);
     }
 
-    public String getFloatType()
+    public DataType getFloatType()
     {
-        return "FLOAT";
+        return new DataType("FLOAT", true);
     }
 
-    public String getDoubleType()
+    public DataType getDoubleType()
     {
-        return "DOUBLE";
+        return new DataType("DOUBLE", true);
     }
 
-    public String getIntType()
+    public DataType getIntType()
     {
-        return "INT";
+        return new DataType("INT", true);
     }
 
-    public String getTinyIntType()
+    public DataType getTinyIntType()
     {
-        return "TINYINT";
+        return new DataType("TINYINT", true);
     }
 
-    public String getBlobType() {
-        return "BLOB";
+    public DataType getBlobType() {
+        return new DataType("BLOB", true);
     }
 
-    public String getDateType() {
-        return "DATE";
+    public DataType getDateType() {
+        return new DataType("DATE", false);
     }
 
-    public String getDateTimeType() {
-        return "DATETIME";
+    public DataType getDateTimeType() {
+        return new DataType("DATETIME", false);
     }
 
-    public String getTimeType() {
-        return "TIME";
+    public DataType getTimeType() {
+        return new DataType("TIME", false);
     }
 
-    public String getBigIntType() {
-        return "BIGINT";
+    public DataType getBigIntType() {
+        return new DataType("BIGINT", true);
     }
 
     public Object convertDatabaseValueToJavaObject(Object defaultValue, int dataType, int columnSize, int decimalDigits) {

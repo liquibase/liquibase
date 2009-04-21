@@ -17,6 +17,14 @@ public class MaxDBDatabase extends AbstractDatabase {
 
     public static final String PRODUCT_NAME = "SAP DB";
     protected Set<String> systemTablesAndViews = new HashSet<String>();
+    private static final DataType BOOLEAN_TYPE = new DataType("BOOLEAN", false);
+    private static final DataType CURRENCY_TYPE = new DataType("NUMERIC(15, 2)", false);
+    private static final DataType UUID_TYPE = new DataType("CHAR(36)", false);
+    private static final DataType CLOB_TYPE = new DataType("LONG VARCHAR", false);
+    private static final DataType BLOB_TYPE = new DataType("LONG BYTE", false);
+    private static final DataType DATETIME_TYPE = new DataType("TIMESTAMP", false);
+    private static final DataType DATE_TYPE = new DataType("DATE", false);
+    private static final DataType TIME_TYPE = new DataType("TIME", false);
 
     public MaxDBDatabase() {
         super();
@@ -105,36 +113,36 @@ public class MaxDBDatabase extends AbstractDatabase {
         return true;
     }
 
-    public String getBooleanType() {
-        return "BOOLEAN";
+    public DataType getBooleanType() {
+        return BOOLEAN_TYPE;
     }
 
-    public String getCurrencyType() {
-        return "NUMERIC(15, 2)";
+    public DataType getCurrencyType() {
+        return CURRENCY_TYPE;
     }
 
-    public String getUUIDType() {
-        return "CHAR(36)";
+    public DataType getUUIDType() {
+        return UUID_TYPE;
     }
 
-    public String getClobType() {
-        return "LONG VARCHAR";
+    public DataType getClobType() {
+        return CLOB_TYPE;
     }
 
-    public String getBlobType() {
-        return "LONG BYTE";
+    public DataType getBlobType() {
+        return BLOB_TYPE;
     }
 
-    public String getDateTimeType() {
-        return "TIMESTAMP";
+    public DataType getDateTimeType() {
+        return DATETIME_TYPE;
     }
 
-    public String getDateType() {
-        return "DATE";
+    public DataType getDateType() {
+        return DATE_TYPE;
     }
 
-    public String getTimeType() {
-        return "TIME";
+    public DataType getTimeType() {
+        return TIME_TYPE;
     }
 
     public boolean isCorrectDatabaseImplementation(Connection conn) throws JDBCException {

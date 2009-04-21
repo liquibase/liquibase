@@ -18,7 +18,7 @@ public class MSSQLDatabaseTest extends AbstractDatabaseTest {
 
     @Test
     public void getBlobType() {
-        assertEquals("IMAGE", getDatabase().getBlobType());
+        assertEquals(new DataType("IMAGE", true), getDatabase().getBlobType());
     }
 
     @Test
@@ -28,32 +28,32 @@ public class MSSQLDatabaseTest extends AbstractDatabaseTest {
 
     @Test
     public void getBooleanType() {
-        assertEquals("BIT", getDatabase().getBooleanType());
+        assertEquals(new DataType("BIT", false), getDatabase().getBooleanType());
     }
 
     @Test
     public void getCurrencyType() {
-        assertEquals("MONEY", getDatabase().getCurrencyType());
+        assertEquals(new DataType("MONEY", false), getDatabase().getCurrencyType());
     }
 
     @Test
     public void getUUIDType() {
-        assertEquals("UNIQUEIDENTIFIER", getDatabase().getUUIDType());
+        assertEquals(new DataType("UNIQUEIDENTIFIER", false), getDatabase().getUUIDType());
     }
 
     @Test
     public void getClobType() {
-        assertEquals("TEXT", getDatabase().getClobType());
+        assertEquals(new DataType("TEXT", true), getDatabase().getClobType());
     }
 
     @Test
     public void getDateType() {
-        assertEquals("SMALLDATETIME", getDatabase().getDateType());
+        assertEquals(new DataType("SMALLDATETIME", false), getDatabase().getDateType());
     }
 
     @Test
     public void getDateTimeType() {
-        assertEquals("DATETIME", getDatabase().getDateTimeType());
+        assertEquals(new DataType("DATETIME", false), getDatabase().getDateTimeType());
     }
 
     @Test

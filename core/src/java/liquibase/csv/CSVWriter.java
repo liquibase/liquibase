@@ -7,7 +7,6 @@ import java.io.Writer;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.sql.Timestamp;
 
 public class CSVWriter extends liquibase.csv.opencsv.CSVWriter {
     private static final ISODateFormat ISO_DATE_FORMAT = new ISODateFormat();
@@ -65,12 +64,14 @@ public class CSVWriter extends liquibase.csv.opencsv.CSVWriter {
             return "NULL";
         }
 
-        if (value instanceof java.sql.Date) {
+        if (value instanceof java.sql.Date) {  // TODO: DHS Fix this for oracle.sql.TIMESTAMP
             return ISO_DATE_FORMAT.format((java.sql.Date) value);
         } else if (value instanceof java.sql.Time) {
             return ISO_DATE_FORMAT.format((java.sql.Time) value);
-        } else if (value instanceof Timestamp) {
-            return ISO_DATE_FORMAT.format((Timestamp) value);
+        } else if (value instanceof java.sql.Timestamp) {
+            return ISO_DATE_FORMAT.format((java.sql.Timestamp) value);
+//        } else if (value instanceof oracle.sql.TIMESTAMP) {
+//            return ISO_DATE_FORMAT.format((oracle.sql.TIMESTAMP) value);
         } else {
             return value.toString();
         }

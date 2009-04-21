@@ -3,7 +3,6 @@ package liquibase.database;
 import liquibase.database.sql.RawSqlStatement;
 import liquibase.database.sql.SqlStatement;
 import liquibase.database.structure.DatabaseSnapshot;
-import liquibase.database.structure.HsqlDatabaseSnapshot;
 import liquibase.database.structure.DB2DatabaseSnapshot;
 import liquibase.exception.DateParseException;
 import liquibase.exception.JDBCException;
@@ -15,6 +14,13 @@ import java.text.SimpleDateFormat;
 import java.util.Set;
 
 public class DB2Database extends AbstractDatabase {
+    private static final DataType BOOLEAN_TYPE = new DataType("SMALLINT", true);
+    private static final DataType CURRENCY_TYPE = new DataType("DECIMAL(19,4)", false);
+    private static final DataType UUID_TYPE = new DataType("VARCHAR(36)", false);
+    private static final DataType CLOB_TYPE = new DataType("CLOB", true);
+    private static final DataType BLOB_TYPE = new DataType("BLOB", true);
+    private static final DataType DATETIME_TYPE = new DataType("TIMESTAMP", false);
+
     public boolean isCorrectDatabaseImplementation(Connection conn) throws JDBCException {
         return getDatabaseProductName(conn).startsWith("DB2");
     }
@@ -50,8 +56,8 @@ public class DB2Database extends AbstractDatabase {
         return "CURRENT TIMESTAMP";
     }
 
-    public String getBooleanType() {
-        return "SMALLINT";
+    public DataType getBooleanType() {
+        return BOOLEAN_TYPE;
     }
 
     public String getTrueBooleanValue() {
@@ -101,24 +107,24 @@ public class DB2Database extends AbstractDatabase {
         }
     }
 
-    public String getCurrencyType() {
-        return "DECIMAL(19,4)";
+    public DataType getCurrencyType() {
+        return CURRENCY_TYPE;
     }
 
-    public String getUUIDType() {
-        return "VARCHAR(36)";
+    public DataType getUUIDType() {
+        return UUID_TYPE;
     }
 
-    public String getClobType() {
-        return "CLOB";
+    public DataType getClobType() {
+        return CLOB_TYPE;
     }
 
-    public String getBlobType() {
-        return "BLOB";
+    public DataType getBlobType() {
+        return BLOB_TYPE;
     }
 
-    public String getDateTimeType() {
-        return "TIMESTAMP";
+    public DataType getDateTimeType() {
+        return DATETIME_TYPE;
     }
 
     public SqlStatement createFindSequencesSQL(String schema) throws JDBCException {

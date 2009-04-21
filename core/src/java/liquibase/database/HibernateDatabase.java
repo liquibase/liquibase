@@ -249,67 +249,67 @@ public class HibernateDatabase implements Database {
         return null;
     }
 
-    public String getBooleanType() {
+    public DataType getBooleanType() {
         return null;
     }
 
-    public String getCurrencyType() {
+    public DataType getCurrencyType() {
         return null;
     }
 
-    public String getUUIDType() {
+    public DataType getUUIDType() {
         return null;
     }
 
-    public String getCharType()
+    public DataType getCharType()
     {
         return null;
     }
 
-    public String getVarcharType() {
+    public DataType getVarcharType() {
         return null;
     }
     
-    public String getClobType() {
+    public DataType getClobType() {
         return null;
     }
 
-    public String getBlobType() {
+    public DataType getBlobType() {
         return null;
     }
 
-    public String getDateType() {
+    public DataType getDateType() {
         return null;
     }
 
-    public String getDateTimeType() {
+    public DataType getDateTimeType() {
         return null;
     }
 
-    public String getTimeType() {
+    public DataType getTimeType() {
         return null;
     }
 
-    public String getBigIntType() {
+    public DataType getBigIntType() {
         return null;
     }
 
-    public String getFloatType()
+    public DataType getFloatType()
     {
         return null;
     }
 
-    public String getDoubleType()
+    public DataType getDoubleType()
     {
         return null;
     }
 
-    public String getIntType()
+    public DataType getIntType()
     {
         return null;
     }
 
-    public String getTinyIntType()
+    public DataType getTinyIntType()
     {
         return null;
     }

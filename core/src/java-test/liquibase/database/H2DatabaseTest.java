@@ -15,7 +15,7 @@ public class H2DatabaseTest extends AbstractDatabaseTest {
 
     @Test
     public void getBlobType() {
-        assertEquals("LONGVARBINARY", getDatabase().getBlobType());
+        assertEquals(new DataType("LONGVARBINARY", true), getDatabase().getBlobType());
     }
 
     @Test
@@ -25,32 +25,32 @@ public class H2DatabaseTest extends AbstractDatabaseTest {
 
     @Test
     public void getBooleanType() {
-        assertEquals("BOOLEAN", getDatabase().getBooleanType());
+        assertEquals(new DataType("BOOLEAN", false), getDatabase().getBooleanType());
     }
 
     @Test
     public void getCurrencyType() {
-        assertEquals("DECIMAL", getDatabase().getCurrencyType());
+        assertEquals(new DataType("DECIMAL", true), getDatabase().getCurrencyType());
     }
 
     @Test
     public void getUUIDType() {
-        assertEquals("VARCHAR(36)", getDatabase().getUUIDType());
+        assertEquals(new DataType("VARCHAR(36)", false), getDatabase().getUUIDType());
     }
 
     @Test
     public void getClobType() {
-        assertEquals("LONGVARCHAR", getDatabase().getClobType());
+        assertEquals(new DataType("LONGVARCHAR", true), getDatabase().getClobType());
     }
 
     @Test
     public void getDateType() {
-        assertEquals("DATE", getDatabase().getDateType());
+        assertEquals(new DataType("DATE", false), getDatabase().getDateType());
     }
 
     @Test
     public void getDateTimeType() {
-        assertEquals("TIMESTAMP", getDatabase().getDateTimeType());
+        assertEquals(new DataType("TIMESTAMP", false), getDatabase().getDateTimeType());
     }
 
     @Test
