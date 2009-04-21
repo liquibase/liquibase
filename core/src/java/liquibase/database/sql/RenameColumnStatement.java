@@ -77,8 +77,10 @@ public class RenameColumnStatement implements SqlStatement {
             return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ALTER COLUMN " + database.escapeColumnName(getSchemaName(), getTableName(), getOldColumnName()) + " RENAME TO " + database.escapeColumnName(getSchemaName(), getTableName(), getNewColumnName());
         } else if (database instanceof FirebirdDatabase) {
             return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ALTER COLUMN " + database.escapeColumnName(getSchemaName(), getTableName(), getOldColumnName()) + " TO " + database.escapeColumnName(getSchemaName(), getTableName(), getNewColumnName());
-        } else if ((database instanceof MaxDBDatabase) || (database instanceof DerbyDatabase)) {
-          // supported in Derby from version 10.3.1.4 (see "http://issues.apache.org/jira/browse/DERBY-1490")
+        } else if ((database instanceof MaxDBDatabase)
+                // supported in Derby from version 10.3.1.4 (see "http://issues.apache.org/jira/browse/DERBY-1490")
+                || (database instanceof DerbyDatabase)
+                || (database instanceof InformixDatabase)) {
           return "RENAME COLUMN " + database.escapeTableName(getSchemaName(), getTableName()) + "." + database.escapeColumnName(getSchemaName(), getTableName(), getOldColumnName()) + " TO " + database.escapeColumnName(getSchemaName(), getTableName(), getNewColumnName());
         }
 

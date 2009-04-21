@@ -2,6 +2,7 @@ package liquibase.database.sql;
 
 import liquibase.database.DB2Database;
 import liquibase.database.Database;
+import liquibase.database.InformixDatabase;
 import liquibase.database.MSSQLDatabase;
 import liquibase.database.SQLiteDatabase;
 import liquibase.database.SybaseASADatabase;
@@ -196,6 +197,13 @@ public class CreateTableStatement implements SqlStatement {
                     buffer.append(" NULL");
                 }
             }
+            
+            if ((database instanceof InformixDatabase) && 
+					(getPrimaryKeyConstraint()!=null) &&
+					(getPrimaryKeyConstraint().getColumns().size()==1) &&
+					(getPrimaryKeyConstraint().getColumns().contains(column))) {
+            	buffer.append(" PRIMARY KEY");
+            }
 
             if (columnIterator.hasNext()) {
                 buffer.append(", ");
@@ -204,21 +212,29 @@ public class CreateTableStatement implements SqlStatement {
 
         buffer.append(",");
         
+        // TODO informixdb
         if (!( (database instanceof SQLiteDatabase) && 
 				(getPrimaryKeyConstraint()!=null) &&
 				(getPrimaryKeyConstraint().getColumns().size()==1) &&
-				autoIncrementColumns.contains(getPrimaryKeyConstraint().getColumns().get(0)) )) {
+				autoIncrementColumns.contains(getPrimaryKeyConstraint().getColumns().get(0)) ) &&
+				
+				!((database instanceof InformixDatabase) &&
+				(getPrimaryKeyConstraint()!=null) &&
+				(getPrimaryKeyConstraint().getColumns().size()==1)
+				)) {
         	// ...skip this code block for sqlite if a single column primary key
         	// with an autoincrement constraint exists.
         	// This constraint is added after the column type.
 
 	        if (getPrimaryKeyConstraint() != null && getPrimaryKeyConstraint().getColumns().size() > 0) {
-	            String pkName = StringUtils.trimToNull(getPrimaryKeyConstraint().getConstraintName());
-	            if (pkName == null) {
-	                pkName = database.generatePrimaryKeyName(getTableName());
-	            }
-	            buffer.append(" CONSTRAINT ");
-	            buffer.append(database.escapeConstraintName(pkName));
+	        	if (!(database instanceof InformixDatabase)) {
+		            String pkName = StringUtils.trimToNull(getPrimaryKeyConstraint().getConstraintName());
+		            if (pkName == null) {
+		                pkName = database.generatePrimaryKeyName(getTableName());
+		            }
+		            buffer.append(" CONSTRAINT ");
+		            buffer.append(database.escapeConstraintName(pkName));
+	        	}
 	            buffer.append(" PRIMARY KEY (");
 	            buffer.append(database.escapeColumnNameList(StringUtils.join(getPrimaryKeyConstraint().getColumns(), ", ")));
 	            buffer.append(")");
@@ -227,9 +243,11 @@ public class CreateTableStatement implements SqlStatement {
         }
 
         for (ForeignKeyConstraint fkConstraint : getForeignKeyConstraints()) {
-            buffer.append(" CONSTRAINT ")
-                    .append(database.escapeConstraintName(fkConstraint.getForeignKeyName()))
-                    .append(" FOREIGN KEY (")
+        	if (!(database instanceof InformixDatabase)) {
+        		buffer.append(" CONSTRAINT ");
+                buffer.append(database.escapeConstraintName(fkConstraint.getForeignKeyName()));
+        	}
+            buffer.append(" FOREIGN KEY (")
                     .append(database.escapeColumnName(getSchemaName(), getTableName(), fkConstraint.getColumn()))
                     .append(") REFERENCES ")
                     .append(fkConstraint.getReferences());
@@ -237,7 +255,11 @@ public class CreateTableStatement implements SqlStatement {
             if (fkConstraint.isDeleteCascade()) {
                 buffer.append(" ON DELETE CASCADE");
             }
-
+            
+            if ((database instanceof InformixDatabase)) {
+            	buffer.append(" CONSTRAINT ");
+            	buffer.append(database.escapeConstraintName(fkConstraint.getForeignKeyName()));
+            }
 
             if (fkConstraint.isInitiallyDeferred()) {
                 buffer.append(" INITIALLY DEFERRED");
@@ -249,13 +271,18 @@ public class CreateTableStatement implements SqlStatement {
         }
 
         for (UniqueConstraint uniqueConstraint : getUniqueConstraints()) {
-            if (uniqueConstraint.getConstraintName() != null) {
+            if (uniqueConstraint.getConstraintName() != null && !constraintNameAfterUnique(database)) {
                 buffer.append(" CONSTRAINT ");
                 buffer.append(database.escapeConstraintName(uniqueConstraint.getConstraintName()));
             }
             buffer.append(" UNIQUE (");
             buffer.append(database.escapeColumnNameList(StringUtils.join(uniqueConstraint.getColumns(), ", ")));
-            buffer.append("),");
+            buffer.append(")");
+            if (uniqueConstraint.getConstraintName() != null && constraintNameAfterUnique(database)) {
+                buffer.append(" CONSTRAINT ");
+                buffer.append(database.escapeConstraintName(uniqueConstraint.getConstraintName()));
+            }
+            buffer.append(",");
         }
 
 //        if (constraints != null && constraints.getCheck() != null) {
@@ -286,6 +313,10 @@ public class CreateTableStatement implements SqlStatement {
         }
         return sql;
     }
+    
+    private boolean constraintNameAfterUnique(Database database) {
+		return database instanceof InformixDatabase;
+	}
 
     public String getDefaultValue(String column) {
         return defaultValues.get(column);

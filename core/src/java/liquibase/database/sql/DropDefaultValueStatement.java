@@ -11,11 +11,13 @@ public class DropDefaultValueStatement implements SqlStatement {
     private String schemaName;
     private String tableName;
     private String columnName;
+    private String columnDataType;
 
-    public DropDefaultValueStatement(String schemaName, String tableName, String columnName) {
+    public DropDefaultValueStatement(String schemaName, String tableName, String columnName, String columnDataType) {
         this.schemaName = schemaName;
         this.tableName = tableName;
         this.columnName = columnName;
+        this.columnDataType = columnDataType;
     }
 
     public String getSchemaName() {
@@ -29,6 +31,10 @@ public class DropDefaultValueStatement implements SqlStatement {
     public String getColumnName() {
         return columnName;
     }
+    
+    public String getColumnDataType() {
+		return columnDataType;
+	}
 
     public String getSqlStatement(Database database) throws StatementNotSupportedOnDatabaseException {
     	if (!supportsDatabase(database)) {
@@ -58,6 +64,11 @@ public class DropDefaultValueStatement implements SqlStatement {
             return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ALTER COLUMN  " + database.escapeColumnName(getSchemaName(), getTableName(), getColumnName()) + " WITH DEFAULT NULL";
         } else if (database instanceof MaxDBDatabase) {
           	return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " COLUMN  " + database.escapeColumnName(getSchemaName(), getTableName(), getColumnName()) + " DROP DEFAULT";
+        } else if (database instanceof InformixDatabase) {
+        	if (getColumnDataType() == null) {
+                throw new StatementNotSupportedOnDatabaseException("Database requires columnDataType parameter", this, database);
+        	}
+        	return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " MODIFY (" + database.escapeColumnName(getSchemaName(), getTableName(), getColumnName()) + " " + getColumnDataType() + ")";
         }
 
         return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ALTER COLUMN  " + database.escapeColumnName(getSchemaName(), getTableName(), getColumnName()) + " SET DEFAULT NULL";

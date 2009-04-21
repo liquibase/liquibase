@@ -73,6 +73,15 @@ public class SetNullableStatement implements SqlStatement {
             throw new StatementNotSupportedOnDatabaseException(this, database);
         } else if (database instanceof MaxDBDatabase) {
         		return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " COLUMN  " + database.escapeColumnName(getSchemaName(), getTableName(), getColumnName()) + (isNullable() ? " DEFAULT NULL" : " NOT NULL");
+        } else if (database instanceof InformixDatabase) {
+            if (getColumnDataType() == null) {
+                throw new StatementNotSupportedOnDatabaseException("Database requires columnDataType parameter", this, database);
+            }
+        	// Informix simply omits the null for nullables
+    		if (isNullable()) {
+    			nullableString = "";
+    		}
+        	return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " MODIFY (" + database.escapeColumnName(getSchemaName(), getTableName(), getColumnName()) + " " + getColumnDataType() + nullableString + ")";
         }
         return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ALTER COLUMN  " + database.escapeColumnName(getSchemaName(), getTableName(), getColumnName()) + (isNullable()?" DROP NOT NULL":" SET NOT NULL");
     }

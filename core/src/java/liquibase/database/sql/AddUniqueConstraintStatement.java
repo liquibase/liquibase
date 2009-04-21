@@ -2,6 +2,7 @@ package liquibase.database.sql;
 
 import liquibase.database.DB2Database;
 import liquibase.database.Database;
+import liquibase.database.InformixDatabase;
 import liquibase.database.MSSQLDatabase;
 import liquibase.database.SQLiteDatabase;
 import liquibase.database.SybaseASADatabase;
@@ -54,6 +55,9 @@ public class AddUniqueConstraintStatement implements SqlStatement {
         }
     	
     	String sql = "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ADD CONSTRAINT " + database.escapeConstraintName(getConstraintName()) + " UNIQUE (" + database.escapeColumnNameList(getColumnNames()) + ")";
+    	if (database instanceof InformixDatabase) {
+    		sql = "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ADD CONSTRAINT UNIQUE (" + database.escapeColumnNameList(getColumnNames()) + ") CONSTRAINT " + database.escapeConstraintName(getConstraintName());
+    	}
 
         if (StringUtils.trimToNull(getTablespace()) != null && database.supportsTablespaces()) {
             if (database instanceof MSSQLDatabase) {

@@ -31,6 +31,7 @@ public class DropDefaultValueChange extends AbstractChange {
     private String schemaName;
     private String tableName;
     private String columnName;
+    private String columnDataType;
 
     public DropDefaultValueChange() {
         super("dropDefaultValue", "Drop Default Value");
@@ -59,6 +60,14 @@ public class DropDefaultValueChange extends AbstractChange {
     public void setColumnName(String columnName) {
         this.columnName = columnName;
     }
+    
+    public String getColumnDataType() {
+		return columnDataType;
+	}
+    
+    public void setColumnDataType(String columnDataType) {
+		this.columnDataType = columnDataType;
+	}
 
     public void validate(Database database) throws InvalidChangeDefinitionException {
         if (StringUtils.trimToNull(columnName) == null) {
@@ -74,7 +83,7 @@ public class DropDefaultValueChange extends AbstractChange {
         }
     	
         return new SqlStatement[]{
-                new DropDefaultValueStatement(getSchemaName() == null?database.getDefaultSchemaName():getSchemaName(), getTableName(), getColumnName()),
+                new DropDefaultValueStatement(getSchemaName() == null?database.getDefaultSchemaName():getSchemaName(), getTableName(), getColumnName(), getColumnDataType()),
         };
     }
     
@@ -134,6 +143,9 @@ public class DropDefaultValueChange extends AbstractChange {
 
         node.setAttribute("tableName", getTableName());
         node.setAttribute("columnName", getColumnName());
+        if (getColumnDataType() != null) {
+        	node.setAttribute("columnDataType", getColumnDataType());
+        }
 
         return node;
     }

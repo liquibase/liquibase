@@ -48,6 +48,8 @@ public class DropPrimaryKeyStatement implements SqlStatement {
             return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " DROP CONSTRAINT "+database.escapeConstraintName(getConstraintName());
         } else if (database instanceof OracleDatabase) {
             return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " DROP PRIMARY KEY DROP INDEX";
+        } else if (database instanceof InformixDatabase) {
+            return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " DROP CONSTRAINT " + database.escapeConstraintName(getConstraintName());
         }
 
         return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " DROP PRIMARY KEY";

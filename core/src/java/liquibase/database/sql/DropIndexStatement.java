@@ -32,9 +32,6 @@ public class DropIndexStatement implements SqlStatement {
     public String getSqlStatement(Database database) throws StatementNotSupportedOnDatabaseException {
         String schemaName = getTableSchemaName();
         
-        if (schemaName != null && !database.supportsSchemas()) {
-            throw new StatementNotSupportedOnDatabaseException("Database does not support schemas", this, database);
-        }
         if (database instanceof MySQLDatabase) {
             if (getTableName() == null) {
                 throw new StatementNotSupportedOnDatabaseException("tableName is required", this, database);

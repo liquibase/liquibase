@@ -149,6 +149,8 @@ public class AddLookupTableChange extends AbstractChange {
             throw new UnsupportedChangeException("Add Lookup Table not currently supported for Cache");
         } else if (database instanceof FirebirdDatabase) {
             throw new UnsupportedChangeException("Add Lookup Table not currently supported for Firebird");
+        } else if (database instanceof InformixDatabase) {
+        	throw new UnsupportedChangeException("Add Lookup Table not currently supported for Informix");
         }
 
         List<SqlStatement> statements = new ArrayList<SqlStatement>();

@@ -43,6 +43,7 @@ public class AddAutoIncrementStatement implements SqlStatement {
                 || database instanceof PostgresDatabase
                 || database instanceof SQLiteDatabase
                 || database instanceof SybaseASADatabase
+                || database instanceof InformixDatabase
                 );
     }
 

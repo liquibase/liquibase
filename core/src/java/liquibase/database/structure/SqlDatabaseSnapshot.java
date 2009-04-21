@@ -2,6 +2,7 @@ package liquibase.database.structure;
 
 import liquibase.database.AbstractDatabase;
 import liquibase.database.Database;
+import liquibase.database.InformixDatabase;
 import liquibase.database.OracleDatabase;
 import liquibase.database.sql.visitor.SqlVisitor;
 import liquibase.diff.DiffStatusListener;
@@ -429,6 +430,14 @@ public abstract class SqlDatabaseSnapshot implements DatabaseSnapshot {
             Map<String, Index> indexMap = new HashMap<String, Index>();
             while (rs.next()) {
                 String indexName = convertFromDatabaseName(rs.getString("INDEX_NAME"));
+                /*
+                 * TODO Informix generates indexnames with a leading blank if no name given.
+                 * An identifier with a leading blank is not allowed.
+                 * So here is it replaced.
+                 */
+                if (database instanceof InformixDatabase && indexName.startsWith(" ")) {
+                	indexName = "_generated_index_" + indexName.substring(1);
+                }
                 short type = rs.getShort("TYPE");
 //                String tableName = rs.getString("TABLE_NAME");
                 boolean nonUnique = true;
@@ -439,6 +448,16 @@ public abstract class SqlDatabaseSnapshot implements DatabaseSnapshot {
                 }
                 String columnName = convertFromDatabaseName(rs.getString("COLUMN_NAME"));
                 short position = rs.getShort("ORDINAL_POSITION");
+                /*
+                 * TODO maybe bug in jdbc driver? Need to investigate.
+                 * If this "if" is commented out ArrayOutOfBoundsException is thrown
+                 * because it tries to access an element -1 of a List (position-1)
+                 */
+                if (database instanceof InformixDatabase
+                		&& type != DatabaseMetaData.tableIndexStatistic
+                		&& position == 0) {
+                	System.out.println(this.getClass().getName() + ": corrected position to " + ++position);
+                }
                 String filterCondition = rs.getString("FILTER_CONDITION");
 
                 if (type == DatabaseMetaData.tableIndexStatistic) {

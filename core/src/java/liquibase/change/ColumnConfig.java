@@ -1,6 +1,7 @@
 package liquibase.change;
 
 import liquibase.database.Database;
+import liquibase.database.InformixDatabase;
 import liquibase.database.sql.ComputedDateValue;
 import liquibase.database.sql.ComputedNumericValue;
 import liquibase.database.structure.Column;
@@ -372,6 +373,15 @@ public class ColumnConfig {
             if (returnValue.matches("\\d+")) {
                 return returnValue;
             } else {
+                // removing the ' from the getTrueBooleanValue
+                // of InformixDatabase makes troubles elsewhere
+                // e.g. when creating the databasechangeloglock
+                // table.
+            	// getTrueBooleanValue of Informix is "'t'",
+            	// no need to add another ''
+            	if (database instanceof InformixDatabase) {
+            		return returnValue;
+            	}
                 return "'" + returnValue + "'";
             }
         } else if (this.getDefaultValueDate() != null) {

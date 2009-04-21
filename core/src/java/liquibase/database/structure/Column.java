@@ -219,6 +219,18 @@ public class Column implements DatabaseObject, Comparable<Column> {
                 return "float";
             }
         }
+        
+        if (database instanceof InformixDatabase) {
+            /*
+             * rs.getInt("DATA_TYPE") returns 1 (Types.CHAR) for
+             * interval types (bug in JDBC driver?)
+             * So if you comment this out, the the columnsize will be appended
+             * and the type becomes: "INTERVAL HOUR TO FRACTION(3)(2413)"
+             */
+        	if (translatedTypeName.toUpperCase().startsWith("INTERVAL")) {
+        		return translatedTypeName;
+        	}
+        }
 
         String dataType;
         if (noParens.contains(this.getDataType())) {
