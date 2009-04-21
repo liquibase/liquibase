@@ -161,76 +161,76 @@ public interface Database extends DatabaseObject {
     /**
      * Returns the actual database-specific data type to use for a "char" column.
      */
-    String getCharType();
+    DataType getCharType();
 
     /**
      * Returns the actual database-specific data type to use for a "varchar" column.
      */
-    String getVarcharType();
+    DataType getVarcharType();
 
     /**
      * Returns the actual database-specific data type to use a "boolean" column.
      */
-    String getBooleanType();
+    DataType getBooleanType();
 
     /**
      * Returns the actual database-specific data type to use a "currency" column.
      */
-    String getCurrencyType();
+    DataType getCurrencyType();
 
     /**
      * Returns the actual database-specific data type to use a "UUID" column.
      */
-    String getUUIDType();
+    DataType getUUIDType();
 
     /**
      * Returns the actual database-specific data type to use a "CLOB" column.
      */
-    String getClobType();
+    DataType getClobType();
 
     /**
      * Returns the actual database-specific data type to use a "BLOB" column.
      */
-    String getBlobType();
+    DataType getBlobType();
 
-    String getDateType();
+    DataType getDateType();
 
     /**
      * Returns the actual database-specific data type to use for a "float" column.
      *
      * @return database-specific type for float
      */
-    String getFloatType();
+    DataType getFloatType();
 
     /**
      * Returns the actual database-specific data type to use for a "double" column.
      *
      * @return database-specific type for double
      */
-    String getDoubleType();
+    DataType getDoubleType();
 
     /**
      * Returns the actual database-specific data type to use for a "int" column.
      *
      * @return database-specific type for int
      */
-    String getIntType();
+    DataType getIntType();
 
     /**
      * Returns the actual database-specific data type to use for a "tinyint" column.
      *
      * @return database-specific type for tinyint
      */
-    String getTinyIntType();
+    DataType getTinyIntType();
 
     /**
      * Returns the actual database-specific data type to use a "datetime" column.
      */
-    String getDateTimeType();
+    DataType getDateTimeType();
 
-    String getTimeType();
+    DataType getTimeType();
 
-    String getBigIntType();
+    DataType getBigIntType();
 
     Object convertDatabaseValueToJavaObject(Object defaultValue, int dataType, int columnSize, int decimalDigits) throws ParseException;
 

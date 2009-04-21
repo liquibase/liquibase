@@ -4,7 +4,7 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 
 /**
- * Tests for {@link OracleDatabase}
+ * Tests for {@link OracleDatabase}.
  */
 public class OracleDatabaseTest extends AbstractDatabaseTest {
 
@@ -18,7 +18,7 @@ public class OracleDatabaseTest extends AbstractDatabaseTest {
 
     @Test
     public void getBlobType() {
-        assertEquals("BLOB", getDatabase().getBlobType());
+        assertEquals(new DataType("BLOB", false), getDatabase().getBlobType());
     }
 
     @Test
@@ -28,32 +28,32 @@ public class OracleDatabaseTest extends AbstractDatabaseTest {
 
     @Test
     public void getBooleanType() {
-        assertEquals("NUMBER(1)", getDatabase().getBooleanType());
+        assertEquals(new DataType("NUMBER(1)", false), getDatabase().getBooleanType());
     }
 
     @Test
     public void getCurrencyType() {
-        assertEquals("NUMBER(15, 2)", getDatabase().getCurrencyType());
+        assertEquals(new DataType("NUMBER(15, 2)", false), getDatabase().getCurrencyType());
     }
 
     @Test
     public void getUUIDType() {
-        assertEquals("RAW(16)", getDatabase().getUUIDType());
+        assertEquals(new DataType("RAW(16)", false), getDatabase().getUUIDType());
     }
 
     @Test
     public void getClobType() {
-        assertEquals("CLOB", getDatabase().getClobType());
+        assertEquals(new DataType("CLOB", false), getDatabase().getClobType());
     }
 
     @Test
     public void getDateType() {
-        assertEquals("DATE", getDatabase().getDateType());
+        assertEquals(new DataType("DATE", false), getDatabase().getDateType());
     }
 
     @Test
     public void getDateTimeType() {
-        assertEquals("TIMESTAMP", getDatabase().getDateTimeType());
+        assertEquals(new DataType("TIMESTAMP", true), getDatabase().getDateTimeType());
     }
 
     @Test

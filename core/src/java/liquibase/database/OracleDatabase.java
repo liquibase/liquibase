@@ -18,6 +18,14 @@ import java.util.Set;
  */
 public class OracleDatabase extends AbstractDatabase {
     public static final String PRODUCT_NAME = "oracle";
+    private static final DataType BOOLEAN_TYPE = new DataType("NUMBER(1)", false);
+    private static final DataType CURRENCY_TYPE = new DataType("NUMBER(15, 2)", false);
+    private static final DataType UUID_TYPE = new DataType("RAW(16)", false);
+    private static final DataType CLOB_TYPE = new DataType("CLOB", false);
+    private static final DataType BLOB_TYPE = new DataType("BLOB", false);
+    private static final DataType DATETIME_TYPE = new DataType("TIMESTAMP", true);
+    private static final DataType DATE_TYPE = new DataType("DATE", false);
+    private static final DataType BIGINT_TYPE = new DataType("NUMBER(19,0)", false);
 
     public void setConnection(Connection conn) {
         try {
@@ -47,41 +55,41 @@ public class OracleDatabase extends AbstractDatabase {
         return true;
     }
 
-    public String getBooleanType() {
-        return "NUMBER(1)";
+    public DataType getBooleanType() {
+        return BOOLEAN_TYPE;
     }
 
-    public String getCurrencyType() {
-        return "NUMBER(15, 2)";
+    public DataType getCurrencyType() {
+        return CURRENCY_TYPE;
     }
 
-    public String getUUIDType() {
-        return "RAW(16)";
+    public DataType getUUIDType() {
+        return UUID_TYPE;
     }
 
-    public String getClobType() {
-        return "CLOB";
+    public DataType getClobType() {
+        return CLOB_TYPE;
     }
 
-    public String getBlobType() {
-        return "BLOB";
+    public DataType getBlobType() {
+        return BLOB_TYPE;
     }
 
-    public String getDateTimeType() {
-        return "TIMESTAMP";
+    public DataType getDateTimeType() {
+        return DATETIME_TYPE;
     }
 
 
-    public String getDateType() {
-        return "DATE";
+    public DataType getDateType() {
+        return DATE_TYPE;
     }
 
-    public String getTimeType() {
-        return "DATE";
+    public DataType getTimeType() {
+        return DATE_TYPE;
     }
 
-    public String getBigIntType() {
-        return "NUMBER(19,0)";
+    public DataType getBigIntType() {
+        return BIGINT_TYPE;
     }
 
     public boolean isCorrectDatabaseImplementation(Connection conn) throws JDBCException {

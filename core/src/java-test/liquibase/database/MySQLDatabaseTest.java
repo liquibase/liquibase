@@ -18,7 +18,7 @@ public class MySQLDatabaseTest extends AbstractDatabaseTest {
 
     @Test
     public void getBlobType() {
-        assertEquals("BLOB", getDatabase().getBlobType());
+        assertEquals(new DataType("BLOB", true), getDatabase().getBlobType());
     }
 
     @Test
@@ -28,32 +28,32 @@ public class MySQLDatabaseTest extends AbstractDatabaseTest {
 
     @Test
     public void getBooleanType() {
-        assertEquals("TINYINT(1)", getDatabase().getBooleanType());
+        assertEquals(new DataType("TINYINT(1)", false), getDatabase().getBooleanType());
     }
 
     @Test
     public void getCurrencyType() {
-        assertEquals("DECIMAL", getDatabase().getCurrencyType());
+        assertEquals(new DataType("DECIMAL", true), getDatabase().getCurrencyType());
     }
 
     @Test
     public void getUUIDType() {
-        assertEquals("CHAR(36)", getDatabase().getUUIDType());
+        assertEquals(new DataType("CHAR(36)", false), getDatabase().getUUIDType());
     }
 
     @Test
     public void getClobType() {
-        assertEquals("TEXT", getDatabase().getClobType());
+        assertEquals(new DataType("TEXT", true), getDatabase().getClobType());
     }
 
     @Test
     public void getDateType() {
-        assertEquals("DATE", getDatabase().getDateType());
+        assertEquals(new DataType("DATE", false), getDatabase().getDateType());
     }
 
     @Test
     public void getDateTimeType() {
-        assertEquals("DATETIME", getDatabase().getDateTimeType());
+        assertEquals(new DataType("DATETIME", false), getDatabase().getDateTimeType());
     }
 
 

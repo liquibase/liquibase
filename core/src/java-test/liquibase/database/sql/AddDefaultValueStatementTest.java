@@ -58,7 +58,7 @@ public class AddDefaultValueStatementTest extends AbstractSqlStatementTest {
                     protected void setup(Database database) throws Exception {
                         new JdbcTemplate(database).execute(new CreateTableStatement(null, TABLE_NAME)
                                 .addColumn("id", "int")
-                                .addColumn(COLUMN_NAME, database.getBooleanType()));
+                                .addColumn(COLUMN_NAME, database.getBooleanType().getDataTypeName()));
                         super.setup(database);
                     }
 
@@ -136,7 +136,7 @@ public class AddDefaultValueStatementTest extends AbstractSqlStatementTest {
                     protected void setup(Database database) throws JDBCException {
                         new JdbcTemplate(database).execute(new CreateTableStatement(null, TABLE_NAME)
                                 .addColumn("id", "int")
-                                .addColumn(COLUMN_NAME, database.getDateTimeType()));
+                                .addColumn(COLUMN_NAME, database.getDateTimeType().getDataTypeName()));
                     }
 
                     protected void preExecuteAssert(DatabaseSnapshot snapshot) {
@@ -159,7 +159,7 @@ public class AddDefaultValueStatementTest extends AbstractSqlStatementTest {
                     protected void setup(Database database) throws Exception {
                         new JdbcTemplate(database).execute(new CreateTableStatement(null, TABLE_NAME)
                                 .addColumn("id", "int")
-                                .addColumn(COLUMN_NAME, database.getDateType()));
+                                .addColumn(COLUMN_NAME, database.getDateType().getDataTypeName()));
 
                         super.setup(database);
                     }
@@ -195,7 +195,7 @@ public class AddDefaultValueStatementTest extends AbstractSqlStatementTest {
                     protected void setup(Database database) throws Exception {
                         new JdbcTemplate(database).execute(new CreateTableStatement(null, TABLE_NAME)
                                 .addColumn("id", "int")
-                                .addColumn(COLUMN_NAME, database.getTimeType()));
+                                .addColumn(COLUMN_NAME, database.getTimeType().getDataTypeName()));
                         super.setup(database);
                     }
 

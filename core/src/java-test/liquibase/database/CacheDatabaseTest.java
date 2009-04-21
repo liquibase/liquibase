@@ -51,28 +51,27 @@ public class CacheDatabaseTest extends AbstractDatabaseTest{
 
 	@Test
 	public void getDateType() {
-		assertEquals("DATE", database.getDateType());
+		assertEquals(new DataType("DATE", false), database.getDateType());
 	}
 
 	@Test
 	public void getBlobType() {
-		assertEquals("LONGVARBINARY", database.getBlobType());
-		
+		assertEquals(new DataType("LONGVARBINARY", true), database.getBlobType());
 	}
 
 	@Test
 	public void getBooleanType() {
-		assertEquals("INTEGER", database.getBooleanType());
+		assertEquals(new DataType("INTEGER", true), database.getBooleanType());
 	}
 
 	@Test
 	public void getClobType() {
-		assertEquals("LONGVARCHAR", database.getClobType());
+		assertEquals(new DataType("LONGVARCHAR", true), database.getClobType());
 	}
 
 	@Test
 	public void getCurrencyType() {
-		assertEquals("MONEY", database.getCurrencyType());
+		assertEquals(new DataType("MONEY", true), database.getCurrencyType());
 	}
 
 	@Test
@@ -82,12 +81,12 @@ public class CacheDatabaseTest extends AbstractDatabaseTest{
 
 	@Test
 	public void getDateTimeType() {
-		assertEquals("DATETIME", database.getDateTimeType());
+		assertEquals(new DataType("DATETIME", false), database.getDateTimeType());
 	}
 
 	@Test
 	public void getUUIDType() {
-		assertEquals("CHAR(36)", database.getUUIDType());
+		assertEquals(new DataType("CHAR(36)", false), database.getUUIDType());
 	}
 
 	@Test

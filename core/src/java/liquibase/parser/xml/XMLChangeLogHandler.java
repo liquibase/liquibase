@@ -318,6 +318,9 @@ class XMLChangeLogHandler extends DefaultHandler {
         DatabaseChangeLog changeLog = new ChangeLogParser(changeLogParameters).parse(fileName, fileOpener);
         AndPrecondition preconditions = changeLog.getPreconditions();
         if (preconditions != null) {
+            if (null == databaseChangeLog.getPreconditions()) {
+                databaseChangeLog.setPreconditions(new Preconditions());
+            }
             databaseChangeLog.getPreconditions().addNestedPrecondition(preconditions);
         }
         for (ChangeSet changeSet : changeLog.getChangeSets()) {
