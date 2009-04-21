@@ -5,13 +5,14 @@ import liquibase.database.sql.SqlStatement;
 import liquibase.exception.JDBCException;
 import liquibase.exception.LiquibaseException;
 
-public interface SqlGenerator {
+public interface SqlGenerator<StatementType extends SqlStatement> {
 
-    public static final int APPLICABILITY_NOT = -1;
-    public static final int APPLICABILITY_DEFAULT = 1;
-    public static final int APPLICABILITY_DATABASE_SPECIFIC = 5;
+    public static final int SPECIALIZATION_LEVEL_DEFAULT = 1;
+    public static final int SPECIALIZATION_LEVEL_DATABASE_SPECIFIC = 5;
 
-    public int getApplicability(SqlStatement statement, Database database);
+    public int getSpecializationLevel();
 
-    public String[] generateSql(SqlStatement statement, Database database) throws LiquibaseException;
+    public boolean isValid(StatementType statement, Database database);
+
+    public String[] generateSql(StatementType statement, Database database) throws LiquibaseException;
 }
