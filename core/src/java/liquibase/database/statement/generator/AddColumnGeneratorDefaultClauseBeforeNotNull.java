@@ -1,6 +1,8 @@
 package liquibase.database.statement.generator;
 
 import liquibase.database.statement.AddColumnStatement;
+import liquibase.database.statement.syntax.Sql;
+import liquibase.database.statement.syntax.UnparsedSql;
 import liquibase.database.*;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.StatementNotSupportedOnDatabaseException;
@@ -19,7 +21,7 @@ public class AddColumnGeneratorDefaultClauseBeforeNotNull implements SqlGenerato
                 || database instanceof InformixDatabase;
     }
 
-    public String[] generateSql(AddColumnStatement statement, Database database) throws LiquibaseException {
+    public Sql[] generateSql(AddColumnStatement statement, Database database) throws LiquibaseException {
         if (statement.isPrimaryKey()
                 && (database instanceof H2Database || database instanceof DB2Database || database instanceof DerbyDatabase)) {
             throw new StatementNotSupportedOnDatabaseException("Adding primary key columns is not supported", statement, database);
@@ -49,8 +51,8 @@ public class AddColumnGeneratorDefaultClauseBeforeNotNull implements SqlGenerato
             }
         }
 
-        return new String[]{
-            alterTable
+        return new Sql[]{
+            new UnparsedSql(alterTable)
         };
     }
 

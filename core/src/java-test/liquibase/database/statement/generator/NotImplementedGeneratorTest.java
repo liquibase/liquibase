@@ -19,7 +19,7 @@ public class NotImplementedGeneratorTest {
         try {
             generator.generateSql(new AddDefaultValueStatement(null, "table", "name", "N/A"), new OracleDatabase());
         } catch (Exception e) {
-            assertEquals("liquibase.database.sql.AddDefaultValueStatement is not supported on Oracle", e.getMessage());
+            assertEquals("liquibase.database.statement.AddDefaultValueStatement is not supported on Oracle", e.getMessage());
         }
 
     }

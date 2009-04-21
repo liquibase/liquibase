@@ -1,6 +1,7 @@
 package liquibase.database.statement.generator;
 
 import liquibase.database.statement.SqlStatement;
+import liquibase.database.statement.syntax.Sql;
 import liquibase.database.Database;
 import liquibase.exception.StatementNotSupportedOnDatabaseException;
 import liquibase.exception.LiquibaseException;
@@ -15,7 +16,7 @@ public class NotImplementedGenerator implements SqlGenerator {
         return false;
     }
 
-    public String[] generateSql(SqlStatement statement, Database database) throws LiquibaseException {
+    public Sql[] generateSql(SqlStatement statement, Database database) throws LiquibaseException {
         throw new StatementNotSupportedOnDatabaseException(statement, database);
     }
 }

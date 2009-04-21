@@ -2,30 +2,11 @@ package liquibase.database.statement.generator;
 
 import liquibase.database.Database;
 import liquibase.database.statement.AddAutoIncrementStatement;
+import liquibase.database.statement.syntax.Sql;
+import liquibase.database.statement.syntax.UnparsedSql;
 import liquibase.exception.LiquibaseException;
 
 public class AddAutoIncrementGeneratorDefault implements SqlGenerator<AddAutoIncrementStatement> {
-
-//    public int getApplicability(SqlStatement statement, Database database) {
-//        if (database instanceof CacheDatabase
-//                || database instanceof DB2Database
-//                || database instanceof DerbyDatabase
-//                || database instanceof FirebirdDatabase
-//                || database instanceof H2Database
-//                || database instanceof HsqlDatabase
-//                || database instanceof MaxDBDatabase
-//                || database instanceof MSSQLDatabase
-//                || database instanceof MySQLDatabase
-//                || database instanceof OracleDatabase
-//                || database instanceof PostgresDatabase
-//                || database instanceof SQLiteDatabase
-//                || database instanceof SybaseASADatabase
-//                || database instanceof SybaseDatabase
-//              ) {
-//            return APPLICABILITY_DEFAULT;
-//        }
-//        return APPLICABILITY_NOT;
-//    }
 
     public int getSpecializationLevel() {
         return SPECIALIZATION_LEVEL_DEFAULT;
@@ -35,9 +16,9 @@ public class AddAutoIncrementGeneratorDefault implements SqlGenerator<AddAutoInc
         return database.supportsAutoIncrement();
     }
 
-    public String[] generateSql(AddAutoIncrementStatement statement, Database database) throws LiquibaseException {
-        return new String[] {
-                "ALTER TABLE " + database.escapeTableName(statement.getSchemaName(), statement.getTableName()) + " MODIFY " + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " " + statement.getColumnDataType() + " AUTO_INCREMENT"
+    public Sql[] generateSql(AddAutoIncrementStatement statement, Database database) throws LiquibaseException {
+        return new Sql[] {
+                new UnparsedSql("ALTER TABLE " + database.escapeTableName(statement.getSchemaName(), statement.getTableName()) + " MODIFY " + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " " + statement.getColumnDataType() + " AUTO_INCREMENT")
         };
     }
 }

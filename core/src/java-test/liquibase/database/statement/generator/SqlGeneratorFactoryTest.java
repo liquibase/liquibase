@@ -7,6 +7,7 @@ import liquibase.database.statement.AddAutoIncrementStatement;
 import liquibase.database.statement.SqlStatement;
 import liquibase.database.statement.CreateTableStatement;
 import liquibase.database.statement.AddDefaultValueStatement;
+import liquibase.database.statement.syntax.Sql;
 import liquibase.database.MySQLDatabase;
 import liquibase.database.Database;
 import liquibase.database.OracleDatabase;
@@ -45,8 +46,8 @@ public class SqlGeneratorFactoryTest {
                 return false;
             }
 
-            public String[] generateSql(SqlStatement statement, Database database) {
-                return new String[0];
+            public Sql[] generateSql(SqlStatement statement, Database database) {
+                return new Sql[0];
             }
         });
 
@@ -120,8 +121,8 @@ public class SqlGeneratorFactoryTest {
                 return createTableStatementClass.isAssignableFrom(statement.getClass()) && sqlDatabaseClass.isAssignableFrom(database.getClass());
             }
 
-            public String[] generateSql(SqlStatement statement, Database database) {
-                return new String[0];
+            public Sql[] generateSql(SqlStatement statement, Database database) {
+                return new Sql[0];
             }
         };
         SqlGeneratorFactory.getInstance().register(generator);
