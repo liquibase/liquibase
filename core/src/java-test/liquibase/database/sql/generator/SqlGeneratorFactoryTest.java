@@ -10,12 +10,17 @@ import liquibase.database.sql.AddDefaultValueStatement;
 import liquibase.database.MySQLDatabase;
 import liquibase.database.Database;
 import liquibase.database.OracleDatabase;
+import liquibase.database.HsqlDatabase;
+
+import java.util.List;
+import java.util.SortedSet;
 
 public class SqlGeneratorFactoryTest {
 
     @Before
     public void setup() {
-        SqlGeneratorFactory.getInstance().getGenerators().clear();
+        SqlGeneratorFactory.reset();
+
     }
 
     @Test
@@ -27,11 +32,17 @@ public class SqlGeneratorFactoryTest {
 
     @Test
     public void register() {
+        SqlGeneratorFactory.getInstance().getGenerators().clear();
+
         assertEquals(0, SqlGeneratorFactory.getInstance().getGenerators().size());
 
         SqlGeneratorFactory.getInstance().register(new SqlGenerator() {
-            public int getApplicability(SqlStatement statement, Database database) {
+            public int getSpecializationLevel() {
                 return 0;
+            }
+
+            public boolean isValid(SqlStatement statement, Database database) {
+                return false;
             }
 
             public String[] generateSql(SqlStatement statement, Database database) {
@@ -45,6 +56,8 @@ public class SqlGeneratorFactoryTest {
     @Test
     @SuppressWarnings({"UnusedDeclaration"})
     public void getBestGenerator_hasBest() {
+        SqlGeneratorFactory.getInstance().getGenerators().clear();
+
         SqlGenerator mysqlIncorrectGenerator = addGenerator(CreateTableStatement.class, MySQLDatabase.class, 1);
         SqlGenerator oracleIncorrectGenerator = addGenerator(CreateTableStatement.class, OracleDatabase.class, 1);
         SqlGenerator mysqlBetterGenerator = addGenerator(AddAutoIncrementStatement.class, MySQLDatabase.class, 2);
@@ -61,6 +74,7 @@ public class SqlGeneratorFactoryTest {
     @Test
     @SuppressWarnings({"UnusedDeclaration"})
     public void getBestGenerator_noneMatching() {
+        SqlGeneratorFactory.getInstance().getGenerators().clear();
 
         SqlGenerator mysqlIncorrectGenerator = addGenerator(CreateTableStatement.class, MySQLDatabase.class, 1);
         SqlGenerator oracleIncorrectGenerator = addGenerator(CreateTableStatement.class, OracleDatabase.class, 1);
@@ -74,14 +88,36 @@ public class SqlGeneratorFactoryTest {
         assertTrue(bestSqlGenerator instanceof NotImplementedGenerator);
     }
 
-    private SqlGenerator addGenerator(final Class<? extends SqlStatement> createTableStatementClass, final Class<? extends Database> sqlDatabaseClass, final int applicability) {
+    @Test
+    public void reset() {
+        SqlGeneratorFactory instance1 = SqlGeneratorFactory.getInstance();
+        SqlGeneratorFactory.reset();
+        assertFalse(instance1 == SqlGeneratorFactory.getInstance());
+    }
+
+    @Test
+    public void builtInGeneratorsAreFound() {
+        List<SqlGenerator> generators = SqlGeneratorFactory.getInstance().getGenerators();
+        assertTrue(generators.size() > 0);        
+    }
+
+    @SuppressWarnings({"UnusedDeclaration"})
+    @Test
+    public void getAllGenerators() {
+        SortedSet<SqlGenerator> allGenerators = SqlGeneratorFactory.getInstance().getAllGenerators(new AddAutoIncrementStatement(null, "person", "name", "varchar(255)"), new HsqlDatabase());
+
+        assertNotNull(allGenerators);
+        assertEquals(2, allGenerators.size());        
+    }
+
+    private SqlGenerator addGenerator(final Class<? extends SqlStatement> createTableStatementClass, final Class<? extends Database> sqlDatabaseClass, final int level) {
         SqlGenerator generator = new SqlGenerator() {
-            public int getApplicability(SqlStatement statement, Database database) {
-                if (createTableStatementClass.isAssignableFrom(statement.getClass()) && sqlDatabaseClass.isAssignableFrom(database.getClass())) {
-                    return applicability;
-                } else {
-                    return -1;
-                }
+            public int getSpecializationLevel() {
+                return level;
+            }
+
+            public boolean isValid(SqlStatement statement, Database database) {
+                return createTableStatementClass.isAssignableFrom(statement.getClass()) && sqlDatabaseClass.isAssignableFrom(database.getClass());
             }
 
             public String[] generateSql(SqlStatement statement, Database database) {

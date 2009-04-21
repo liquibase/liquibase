@@ -5,7 +5,7 @@ import liquibase.database.sql.AddAutoIncrementStatement;
 import liquibase.database.sql.SqlStatement;
 import liquibase.exception.LiquibaseException;
 
-public class AddAutoIncrementDefaultGenerator implements SqlGenerator {
+public class AddAutoIncrementGeneratorDefault implements SqlGenerator<AddAutoIncrementStatement> {
 
 //    public int getApplicability(SqlStatement statement, Database database) {
 //        if (database instanceof CacheDatabase
@@ -28,20 +28,15 @@ public class AddAutoIncrementDefaultGenerator implements SqlGenerator {
 //        return APPLICABILITY_NOT;
 //    }
 
-    public int getApplicability(SqlStatement statement, Database database) {
-        if (!(statement instanceof AddAutoIncrementStatement)) {
-            return APPLICABILITY_NOT;
-        }
-
-        if (database.supportsAutoIncrement()) {
-            return APPLICABILITY_DEFAULT;
-        } else {
-            return APPLICABILITY_NOT;
-        }
+    public int getSpecializationLevel() {
+        return SPECIALIZATION_LEVEL_DEFAULT;
     }
 
-    public String[] generateSql(SqlStatement sqlStatement, Database database) throws LiquibaseException {
-        AddAutoIncrementStatement statement = (AddAutoIncrementStatement) sqlStatement;
+    public boolean isValid(AddAutoIncrementStatement statement, Database database) {
+        return database.supportsAutoIncrement();
+    }
+
+    public String[] generateSql(AddAutoIncrementStatement statement, Database database) throws LiquibaseException {
         return new String[] {
                 "ALTER TABLE " + database.escapeTableName(statement.getSchemaName(), statement.getTableName()) + " MODIFY " + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " " + statement.getColumnDataType() + " AUTO_INCREMENT"
         };
