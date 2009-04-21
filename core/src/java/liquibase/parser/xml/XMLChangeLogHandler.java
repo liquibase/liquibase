@@ -3,8 +3,8 @@ package liquibase.parser.xml;
 import liquibase.ChangeSet;
 import liquibase.DatabaseChangeLog;
 import liquibase.FileOpener;
-import liquibase.database.sql.visitor.SqlVisitorFactory;
-import liquibase.database.sql.visitor.SqlVisitor;
+import liquibase.database.statement.visitor.SqlVisitorFactory;
+import liquibase.database.statement.visitor.SqlVisitor;
 import liquibase.change.*;
 import liquibase.change.custom.CustomChangeWrapper;
 import liquibase.exception.CustomChangeException;
@@ -22,15 +22,11 @@ import org.xml.sax.helpers.DefaultHandler;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
-import java.util.regex.Pattern;
-import java.util.regex.Matcher;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.io.File;
 import java.io.InputStream;
-import java.io.FilenameFilter;
 import java.net.URL;
-import java.net.URI;
 
 class XMLChangeLogHandler extends DefaultHandler {
 

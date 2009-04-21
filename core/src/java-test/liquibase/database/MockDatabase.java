@@ -5,7 +5,7 @@ import liquibase.DatabaseChangeLogLock;
 import liquibase.RanChangeSet;
 import liquibase.Liquibase;
 import liquibase.diff.DiffStatusListener;
-import liquibase.database.sql.SqlStatement;
+import liquibase.database.statement.SqlStatement;
 import liquibase.database.template.JdbcTemplate;
 import liquibase.database.structure.DatabaseSnapshot;
 import liquibase.exception.DatabaseHistoryException;

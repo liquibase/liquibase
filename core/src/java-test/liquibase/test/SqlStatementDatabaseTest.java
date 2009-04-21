@@ -1,7 +1,7 @@
 package liquibase.test;
 
 import liquibase.database.Database;
-import liquibase.database.sql.SqlStatement;
+import liquibase.database.statement.SqlStatement;
 import liquibase.database.structure.DatabaseSnapshot;
 import liquibase.database.template.JdbcTemplate;
 import liquibase.exception.JDBCException;

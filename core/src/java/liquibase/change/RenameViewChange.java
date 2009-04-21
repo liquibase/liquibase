@@ -1,8 +1,8 @@
 package liquibase.change;
 
 import liquibase.database.Database;
-import liquibase.database.sql.RenameViewStatement;
-import liquibase.database.sql.SqlStatement;
+import liquibase.database.statement.RenameViewStatement;
+import liquibase.database.statement.SqlStatement;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.View;
 import liquibase.exception.UnsupportedChangeException;

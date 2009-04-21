@@ -5,7 +5,7 @@ import liquibase.ChangeSet;
 import liquibase.Liquibase;
 import liquibase.change.Change;
 import liquibase.database.Database;
-import liquibase.database.sql.SqlStatement;
+import liquibase.database.statement.SqlStatement;
 import liquibase.exception.MigrationFailedException;
 import liquibase.util.StringUtils;
 import org.liquibase.ide.common.ChangeLogWriter;

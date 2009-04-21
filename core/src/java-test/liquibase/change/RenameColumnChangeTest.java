@@ -1,8 +1,8 @@
 package liquibase.change;
 
 import liquibase.database.MockDatabase;
-import liquibase.database.sql.RenameColumnStatement;
-import liquibase.database.sql.SqlStatement;
+import liquibase.database.statement.RenameColumnStatement;
+import liquibase.database.statement.SqlStatement;
 import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;

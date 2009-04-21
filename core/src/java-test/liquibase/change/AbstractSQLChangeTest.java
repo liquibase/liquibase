@@ -2,7 +2,7 @@ package liquibase.change;
 
 import liquibase.database.MSSQLDatabase;
 import liquibase.database.OracleDatabase;
-import liquibase.database.sql.SqlStatement;
+import liquibase.database.statement.SqlStatement;
 import liquibase.exception.StatementNotSupportedOnDatabaseException;
 import liquibase.exception.UnsupportedChangeException;
 import liquibase.util.XMLUtil;

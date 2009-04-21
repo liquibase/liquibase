@@ -1,11 +1,8 @@
 package liquibase.test;
 
-import liquibase.database.sql.SqlStatement;
 import liquibase.database.Database;
-import liquibase.database.template.JdbcTemplate;
 import liquibase.database.structure.DatabaseSnapshot;
 import liquibase.exception.JDBCException;
-import liquibase.exception.StatementNotSupportedOnDatabaseException;
 
 public abstract class JdbcDatabaseTest implements DatabaseTest {
 

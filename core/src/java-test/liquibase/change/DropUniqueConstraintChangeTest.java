@@ -1,8 +1,8 @@
 package liquibase.change;
 
 import liquibase.database.MockDatabase;
-import liquibase.database.sql.DropUniqueConstraintStatement;
-import liquibase.database.sql.SqlStatement;
+import liquibase.database.statement.DropUniqueConstraintStatement;
+import liquibase.database.statement.SqlStatement;
 import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;

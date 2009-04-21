@@ -2,7 +2,7 @@ package liquibase.database;
 
 import liquibase.exception.JDBCException;
 import liquibase.exception.DatabaseHistoryException;
-import liquibase.database.sql.SqlStatement;
+import liquibase.database.statement.SqlStatement;
 import liquibase.database.template.JdbcTemplate;
 import liquibase.database.structure.DatabaseSnapshot;
 import liquibase.database.structure.HibernateDatabaseSnapshot;

@@ -1,8 +1,8 @@
 package liquibase.database;
 
 
-import liquibase.database.sql.RawSqlStatement;
-import liquibase.database.sql.SqlStatement;
+import liquibase.database.statement.RawSqlStatement;
+import liquibase.database.statement.SqlStatement;
 import liquibase.database.structure.DatabaseSnapshot;
 import liquibase.database.structure.MaxDBDatabaseSnapshot;
 import liquibase.exception.JDBCException;

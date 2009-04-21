@@ -1,6 +1,6 @@
 package liquibase.util;
 
-import liquibase.database.sql.ComputedDateValue;
+import liquibase.database.statement.ComputedDateValue;
 
 import java.sql.Time;
 import java.text.ParseException;

@@ -2,9 +2,9 @@ package liquibase.change;
 
 import liquibase.database.*;
 import liquibase.database.SQLiteDatabase.AlterTableVisitor;
-import liquibase.database.sql.RawSqlStatement;
-import liquibase.database.sql.SqlStatement;
-import liquibase.database.sql.ReorganizeTableStatement;
+import liquibase.database.statement.RawSqlStatement;
+import liquibase.database.statement.SqlStatement;
+import liquibase.database.statement.ReorganizeTableStatement;
 import liquibase.database.structure.Column;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Index;

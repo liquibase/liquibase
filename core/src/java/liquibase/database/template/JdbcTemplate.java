@@ -2,9 +2,9 @@ package liquibase.database.template;
 
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
-import liquibase.database.sql.CallableSqlStatement;
-import liquibase.database.sql.SqlStatement;
-import liquibase.database.sql.visitor.SqlVisitor;
+import liquibase.database.statement.CallableSqlStatement;
+import liquibase.database.statement.SqlStatement;
+import liquibase.database.statement.visitor.SqlVisitor;
 import liquibase.exception.JDBCException;
 import liquibase.exception.StatementNotSupportedOnDatabaseException;
 import liquibase.log.LogFactory;

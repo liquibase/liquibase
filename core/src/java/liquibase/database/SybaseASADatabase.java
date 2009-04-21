@@ -8,8 +8,8 @@ import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Set;
 
-import liquibase.database.sql.RawSqlStatement;
-import liquibase.database.sql.SqlStatement;
+import liquibase.database.statement.RawSqlStatement;
+import liquibase.database.statement.SqlStatement;
 import liquibase.database.structure.DatabaseSnapshot;
 import liquibase.database.structure.SybaseASADatabaseSnapshot;
 import liquibase.diff.DiffStatusListener;
