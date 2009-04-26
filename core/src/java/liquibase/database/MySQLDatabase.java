@@ -135,36 +135,11 @@ public class MySQLDatabase extends AbstractDatabase {
         return new RawSqlStatement("select view_definition from information_schema.views where table_name='" + viewName + "' AND table_schema='" + schemaName + "'");
     }
 
-    public String escapeTableName(String schemaName, String tableName) {
-        if(schemaName != null) {
-            return "`" + schemaName + "`.`" + tableName + "`";
-        }
-        return "`" + tableName + "`";
+    @Override
+    public String escapeDatabaseObject(String objectName) {
+        return "`"+objectName+"`";
     }
 
-    public String escapeConstraintName(String constraintName) {
-        if (constraintName == null) {
-            return null;
-        }
-        return "`" + constraintName + "`";
-    }
-
-
-    public String escapeColumnName(String schemaName, String tableName, String columnName) {
-        return "`" + columnName + "`";
-    }
-
-    public String escapeColumnNameList(String columnNames) {
-        StringBuffer sb = new StringBuffer();
-        for(String columnName : columnNames.split(",")) {
-            if(sb.length() > 0) {
-                sb.append(", ");
-            }
-            sb.append("`").append(columnName.trim()).append("`");
-        }
-        return sb.toString();
-    }
-    
     public DatabaseSnapshot createDatabaseSnapshot(String schema, Set<DiffStatusListener> statusListeners) throws JDBCException {
         return new MySqlDatabaseSnapshot(this, statusListeners, schema);
     }

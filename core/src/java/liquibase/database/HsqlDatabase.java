@@ -174,24 +174,11 @@ public class HsqlDatabase extends AbstractDatabase {
     }
 
     @Override
-    public String escapeTableName(String schemaName, String tableName) {
-        if (StringUtils.trimToNull(schemaName) == null || !supportsSchemas()) {
-            return escapeObjectName(tableName);
-        } else {
-            return escapeObjectName(schemaName+"."+escapeObjectName(tableName));
+    public String escapeDatabaseObject(String objectName) {
+        if (keywords.contains(objectName.toUpperCase())) {
+            return "\""+objectName+"\"";
         }
-    }
-
-    @Override
-    public String escapeColumnName(String schemaName, String tableName, String columnName) {
-        return super.escapeColumnName(schemaName, tableName, columnName);    //To change body of overridden methods use File | Settings | File Templates.
-    }
-
-    private String escapeObjectName(String name) {
-        if (keywords.contains(name.toUpperCase())) {
-            return "\""+name+"\"";
-        }
-        return name;
+        return objectName;
     }
 
     private static List keywords = Arrays.asList(

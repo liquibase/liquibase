@@ -2,6 +2,7 @@ package liquibase.change;
 
 import liquibase.database.Database;
 import liquibase.database.statement.*;
+import liquibase.database.statement.generator.SqlGeneratorFactory;
 import liquibase.database.structure.Column;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Table;
@@ -104,7 +105,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
 
         if (StringUtils.trimToNull(remarks) != null) {
             SetTableRemarksStatement remarksStatement = new SetTableRemarksStatement(schemaName, tableName, remarks);
-            if (remarksStatement.supportsDatabase(database)) {
+            if (SqlGeneratorFactory.getInstance().statementSupported(remarksStatement, database)) {
                 statements.add(remarksStatement);
             }
         }
@@ -113,7 +114,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
             String columnRemarks = StringUtils.trimToNull(column.getRemarks());
             if (columnRemarks != null) {
                 SetColumnRemarksStatement remarksStatement = new SetColumnRemarksStatement(schemaName, tableName, column.getName(), columnRemarks);
-                if (remarksStatement.supportsDatabase(database)) {
+                if (SqlGeneratorFactory.getInstance().statementSupported(remarksStatement, database)) {
                     statements.add(remarksStatement);
                 }
             }

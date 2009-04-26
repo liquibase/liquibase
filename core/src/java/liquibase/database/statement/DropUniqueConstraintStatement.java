@@ -38,32 +38,6 @@ public class DropUniqueConstraintStatement implements SqlStatement {
         return constraintName;
     }
 
-    public String getSqlStatement(Database database) throws StatementNotSupportedOnDatabaseException {
-    	if (!supportsDatabase(database)) {
-            throw new StatementNotSupportedOnDatabaseException(this, database);
-        }
-    	
-    	if (database instanceof MySQLDatabase) {
-            return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " DROP KEY " + database.escapeConstraintName(getConstraintName());
-        } else if (database instanceof MaxDBDatabase) {
-            return "DROP INDEX " + database.escapeConstraintName(getConstraintName()) + " ON " + database.escapeTableName(getSchemaName(), getTableName());
-        } else if (database instanceof OracleDatabase) {
-            return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " DROP CONSTRAINT " + database.escapeConstraintName(getConstraintName())+" DROP INDEX";
-        } else if (database instanceof SybaseASADatabase) {
-            return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " DROP UNIQUE (" + getUniqueColumns() + ")";
-        }
-
-        return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " DROP CONSTRAINT " + database.escapeConstraintName(getConstraintName());
-    }
-
-    public String getEndDelimiter(Database database) {
-        return ";";
-    }
-
-    public boolean supportsDatabase(Database database) {
-    	return !(database instanceof SQLiteDatabase);
-    }
-
 	public String getUniqueColumns() {
 		return uniqueColumns;
 	}

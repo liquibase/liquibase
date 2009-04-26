@@ -141,11 +141,6 @@ public class SybaseASADatabase extends AbstractDatabase {
 		return new SybaseASADatabaseSnapshot(this, statusListeners, schema);
 	}
 
-	@Override
-	public String escapeIndexName(String schema, String indexName) {
-		return escapeName(indexName);
-	}
-
 	/* (non-Javadoc)
 	 * @see liquibase.database.Database#getBlobType()
 	 */
@@ -258,12 +253,6 @@ public class SybaseASADatabase extends AbstractDatabase {
 	}
 
 	@Override
-	public String escapeColumnName(String schemaName, String tableName,
-			String columnName) {
-        return "[" + columnName + "]";
-	}
-
-	@Override
 	public String getViewDefinition(String schemaName, String viewName)
 			throws JDBCException {
 		// TODO Auto-generated method stub
@@ -335,8 +324,8 @@ public class SybaseASADatabase extends AbstractDatabase {
         }
 	}
 
-	private String escapeName(String indexName) {
-		return '[' + indexName + ']';
-	}
-
+    @Override
+    public String escapeDatabaseObject(String objectName) {
+        return "["+objectName+"]";
+    }
 }

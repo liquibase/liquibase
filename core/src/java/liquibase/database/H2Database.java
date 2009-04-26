@@ -2,14 +2,22 @@ package liquibase.database;
 
 import liquibase.database.statement.RawSqlStatement;
 import liquibase.database.statement.SqlStatement;
+import liquibase.database.structure.DatabaseSnapshot;
+import liquibase.database.structure.HsqlDatabaseSnapshot;
 import liquibase.exception.DateParseException;
 import liquibase.exception.JDBCException;
 import liquibase.util.StringUtils;
+import liquibase.util.ISODateFormat;
+import liquibase.diff.DiffStatusListener;
 
 import java.sql.Connection;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.text.DateFormat;
 import java.util.Date;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
 
 public class H2Database extends HsqlDatabase {
     private static final DataType DATETIME_TYPE = new DataType("TIMESTAMP", false);
@@ -36,11 +44,6 @@ public class H2Database extends HsqlDatabase {
 
     public SqlStatement createFindSequencesSQL(String schema) throws JDBCException {
         return new RawSqlStatement("SELECT SEQUENCE_NAME FROM INFORMATION_SCHEMA.SEQUENCES WHERE SEQUENCE_SCHEMA = '" + convertRequestedSchemaToSchema(schema) + "' AND IS_GENERATED=FALSE");
-    }
-
-    @Override
-    public String getObjectEscapeCharacter() {
-        return "`";
     }
 
     //    public void dropDatabaseObjects(String schema) throws JDBCException {
@@ -77,7 +80,7 @@ public class H2Database extends HsqlDatabase {
     }
 
     public SqlStatement getViewDefinitionSql(String schemaName, String name) throws JDBCException {
-        return new RawSqlStatement("SELECT VIEW_DEFINITION FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_NAME = '" + name + "' AND TABLE_SCHEMA='"+convertRequestedSchemaToSchema(schemaName)+"'");
+        return new RawSqlStatement("SELECT VIEW_DEFINITION FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_NAME = '" + name + "' AND TABLE_SCHEMA='" + convertRequestedSchemaToSchema(schemaName) + "'");
     }
 
     public Object convertDatabaseValueToJavaObject(Object defaultValue, int dataType, int columnSize, int decimalDigits) throws ParseException {
@@ -111,18 +114,18 @@ public class H2Database extends HsqlDatabase {
     public DataType getDateTimeType() {
         return DATETIME_TYPE;
     }
-    
+
     @Override
     public boolean isLocalDatabase() throws JDBCException {
-    	String url = getConnectionURL();
-    	boolean isLocalURL = (
-    		super.isLocalDatabase()
-    		|| url.startsWith("jdbc:h2:file:")
-    	    || url.startsWith("jdbc:h2:mem:")
-            || url.startsWith("jdbc:h2:zip:")
-            || url.startsWith("jdbc:h2:~")
-    	);
-    	return isLocalURL;
+        String url = getConnectionURL();
+        boolean isLocalURL = (
+                super.isLocalDatabase()
+                        || url.startsWith("jdbc:h2:file:")
+                        || url.startsWith("jdbc:h2:mem:")
+                        || url.startsWith("jdbc:h2:zip:")
+                        || url.startsWith("jdbc:h2:~")
+        );
+        return isLocalURL;
     }
 
 //    @Override

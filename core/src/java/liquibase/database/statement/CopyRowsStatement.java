@@ -32,33 +32,4 @@ public class CopyRowsStatement implements SqlStatement {
 	public List<ColumnConfig> getCopyColumns() {
 		return this.copyColumns;
 	}
-
-	public String getEndDelimiter(Database database) {
-		return ";";
-	}
-
-	public String getSqlStatement(Database database)
-			throws StatementNotSupportedOnDatabaseException {
-		if (!supportsDatabase(database)) {
-			throw new StatementNotSupportedOnDatabaseException(this, database);
-		}
-		StringBuffer sql = new StringBuffer();
-		if (database instanceof SQLiteDatabase) {
-			sql.append("INSERT INTO `"+getTargetTable()+"` SELECT ");
-			for (int i=0;i<getCopyColumns().size();i++) {
-				ColumnConfig column = getCopyColumns().get(i);
-				if (i>0) {
-					sql.append(",");
-				}
-				sql.append("`"+column.getName()+"`");
-			}
-			sql.append(" FROM `"+getSourceTable()+"`");
-		}
-		return sql.toString();
-	}
-
-	public boolean supportsDatabase(Database database) {
-		return (database instanceof SQLiteDatabase);
-	}
-
 }

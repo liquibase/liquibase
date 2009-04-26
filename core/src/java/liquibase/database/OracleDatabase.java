@@ -161,7 +161,7 @@ public class OracleDatabase extends AbstractDatabase {
     }
 
     public SqlStatement getSelectChangeLogLockSQL() throws JDBCException {
-        return new RawSqlStatement((super.getSelectChangeLogLockSQL().getSqlStatement(this) + " for update").toUpperCase());
+        return new RawSqlStatement((((RawSqlStatement) super.getSelectChangeLogLockSQL()).getSql() + " for update").toUpperCase());
     }
 
     public SqlStatement createFindSequencesSQL(String schema) throws JDBCException {
@@ -221,7 +221,7 @@ public class OracleDatabase extends AbstractDatabase {
 //    public Set<UniqueConstraint> findUniqueConstraints(String schema) throws JDBCException {
 //        Set<UniqueConstraint> returnSet = new HashSet<UniqueConstraint>();
 //
-//        List<Map> maps = new JdbcTemplate(this).queryForList(new RawSqlStatement("SELECT UC.CONSTRAINT_NAME, UCC.TABLE_NAME, UCC.COLUMN_NAME FROM USER_CONSTRAINTS UC, USER_CONS_COLUMNS UCC WHERE UC.CONSTRAINT_NAME=UCC.CONSTRAINT_NAME AND CONSTRAINT_TYPE='U' ORDER BY UC.CONSTRAINT_NAME"));
+//        List<Map> maps = new Executor(this).queryForList(new RawSqlStatement("SELECT UC.CONSTRAINT_NAME, UCC.TABLE_NAME, UCC.COLUMN_NAME FROM USER_CONSTRAINTS UC, USER_CONS_COLUMNS UCC WHERE UC.CONSTRAINT_NAME=UCC.CONSTRAINT_NAME AND CONSTRAINT_TYPE='U' ORDER BY UC.CONSTRAINT_NAME"));
 //
 //        UniqueConstraint constraint = null;
 //        for (Map map : maps) {

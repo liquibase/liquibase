@@ -233,24 +233,10 @@ public class MSSQLDatabase extends AbstractDatabase {
         return defaultValue;
     }
 
-    public String escapeTableName(String schemaName, String tableName) {
-        if (schemaName == null) {
-            return "[" + tableName + "]";
-        } else {
-            return "[" + schemaName + "].[" + tableName + "]";
-        }
+    @Override
+    public String escapeDatabaseObject(String objectName) {
+        return "["+objectName+"]";
     }
-
-    public String escapeConstraintName(String constraintName) {
-        if (constraintName == null) {
-            return null;
-        }
-        return "[" + constraintName + "]";
-    }
-
-    public String escapeColumnName(String schemaName, String tableName, String columnName) {
-       return "[" +columnName+ "]";
-    }    
 
     public String convertRequestedSchemaToCatalog(String requestedSchema) throws JDBCException {
         return getDefaultCatalogName();

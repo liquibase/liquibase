@@ -6,7 +6,7 @@ import liquibase.diff.DiffStatusListener;
 import liquibase.database.statement.SqlStatement;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.DatabaseSnapshot;
-import liquibase.database.template.JdbcTemplate;
+import liquibase.database.template.Executor;
 import liquibase.exception.DatabaseHistoryException;
 import liquibase.exception.JDBCException;
 
@@ -255,6 +255,8 @@ public interface Database extends DatabaseObject {
 
     String escapeIndexName(String schemaName, String indexName);
 
+    String escapeDatabaseObject(String objectName);
+
     /**
      * Escapes a single column name in a database-dependent manner so reserved words can be used as a column
      * name (i.e. "return"). 
@@ -311,9 +313,9 @@ public interface Database extends DatabaseObject {
 
     SqlStatement getSelectChangeLogLockSQL() throws JDBCException;
 
-    JdbcTemplate getJdbcTemplate();
+    Executor getJdbcTemplate();
 
-    void setJdbcTemplate(JdbcTemplate template);
+    void setJdbcTemplate(Executor template);
 
     String escapeStringForDatabase(String string);
 

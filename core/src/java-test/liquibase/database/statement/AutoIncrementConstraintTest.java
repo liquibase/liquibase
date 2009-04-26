@@ -2,6 +2,7 @@ package liquibase.database.statement;
 
 import static org.junit.Assert.*;
 import org.junit.Test;
+import liquibase.database.statement.AutoIncrementConstraint;
 
 public class AutoIncrementConstraintTest {
     

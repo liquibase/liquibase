@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <databaseChangeLog
-        xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.9"
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.10"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9 http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.10 http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.10.xsd">
     <preConditions>
             <dbms type="informix"/>
     </preConditions>
@@ -72,11 +72,6 @@
         </createView>
     </changeSet>
 
-	<!--
-    <changeSet id="10" author="nvoxland">
-        <renameView oldViewName="publicationView" newViewName="v_publication"/>
-    </changeSet>
-	-->
     <changeSet id="11" author="nvoxland">
         <createTable tableName="article">
             <column name="id" type="int" autoIncrement="true">
@@ -95,18 +90,8 @@
                 deleteCascade="true"/>
     </changeSet>
 
-    <!--
-    <changeSet id="13" author="nvoxland">
-        <addLookupTable
-            existingTableName="publication" existingColumnName="isbn"
-            newTableName="isbn" newColumnName="code"
-            newColumnDataType="varchar(50)"/>
-    </changeSet>
-    -->
-
     <changeSet id="14" author="nvoxland">
-    	<!-- TODO It is really bad to have to set the columnDataType -->
-        <addDefaultValue tableName="publication" columnName="isbn" defaultValue="0000-0000" columnDataType="varchar(50)" />
+        <addDefaultValue tableName="publication" columnName="isbn" defaultValue="0000-0000" columnDataType="varchar(50)"/>
     </changeSet>
 
     <changeSet id="15" author="nvoxland">
@@ -134,6 +119,6 @@
         <customChange class="liquibase.change.custom.ExampleCustomTaskChange" helloTo="world"/>
     </changeSet>
 
-    <include file="changelogs/informix/common-copied/rollback.tests.changelog.xml"/>
+    <include file="changelogs/common/rollback.tests.changelog.xml"/>
     
 </databaseChangeLog>

@@ -30,30 +30,4 @@ public class DropForeignKeyConstraintStatement implements SqlStatement {
     public String getConstraintName() {
         return constraintName;
     }
-
-    public String getSqlStatement(Database database) throws StatementNotSupportedOnDatabaseException {
-    	if (!supportsDatabase(database)) {
-    		throw new StatementNotSupportedOnDatabaseException("SQLite " +
-    				"database does not support a drop foreign key statement", 
-    				this, database);
-    	}
-    	
-    	if (getBaseTableSchemaName() != null && !database.supportsSchemas()) {
-            throw new StatementNotSupportedOnDatabaseException("Database does not support schemas", this, database);
-        }
-        
-        if (database instanceof MySQLDatabase || database instanceof MaxDBDatabase || database instanceof SybaseASADatabase) {
-            return "ALTER TABLE " + database.escapeTableName(getBaseTableSchemaName(), getBaseTableName()) + " DROP FOREIGN KEY " + database.escapeConstraintName(getConstraintName());
-        } else {
-            return "ALTER TABLE " + database.escapeTableName(getBaseTableSchemaName(), getBaseTableName()) + " DROP CONSTRAINT " + database.escapeConstraintName(getConstraintName());
-        }
-    }
-
-    public String getEndDelimiter(Database database) {
-        return ";";
-    }
-
-    public boolean supportsDatabase(Database database) {
-    	return (!(database instanceof SQLiteDatabase));
-    }
 }

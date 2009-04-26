@@ -230,6 +230,9 @@ public class Column implements DatabaseObject, Comparable<Column> {
         	if (translatedTypeName.toUpperCase().startsWith("INTERVAL")) {
         		return translatedTypeName;
         	}
+        	if (this.getDataType() == Types.REAL) {
+        		return "SMALLFLOAT";
+        	}
         }
 
         String dataType;

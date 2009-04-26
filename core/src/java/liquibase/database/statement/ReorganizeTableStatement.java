@@ -22,26 +22,4 @@ public class ReorganizeTableStatement implements SqlStatement {
         return tableName;
     }
 
-    public String getSqlStatement(Database database) throws StatementNotSupportedOnDatabaseException {
-        if (!supportsDatabase(database)) {
-            throw new StatementNotSupportedOnDatabaseException("Cannot reorganize table", this, database);
-        }
-        try {
-            if (database.getDatabaseMajorVersion() >= 9) {
-                return "CALL SYSPROC.ADMIN_CMD ('REORG TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + "')";
-            } else {
-                return null;
-            }
-        } catch (JDBCException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public String getEndDelimiter(Database database) {
-        return ";";
-    }
-
-    public boolean supportsDatabase(Database database) {
-        return database instanceof DB2Database;
-    }
 }

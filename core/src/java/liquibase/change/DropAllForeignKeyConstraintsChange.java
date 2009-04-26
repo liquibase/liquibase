@@ -5,7 +5,7 @@ import liquibase.database.statement.SqlStatement;
 import liquibase.database.statement.FindForeignKeyConstraintsStatement;
 import liquibase.database.statement.visitor.SqlVisitor;
 import liquibase.database.structure.DatabaseObject;
-import liquibase.database.template.JdbcTemplate;
+import liquibase.database.template.Executor;
 import liquibase.exception.JDBCException;
 import liquibase.exception.UnsupportedChangeException;
 import liquibase.exception.InvalidChangeDefinitionException;
@@ -98,7 +98,7 @@ public class DropAllForeignKeyConstraintsChange extends AbstractChange {
         // Make a new list
         childDropChanges = new ArrayList<DropForeignKeyConstraintChange>();
 
-        JdbcTemplate jdbc = database.getJdbcTemplate();
+        Executor jdbc = database.getJdbcTemplate();
 
         FindForeignKeyConstraintsStatement sql = new FindForeignKeyConstraintsStatement(
                 getBaseTableSchemaName(),

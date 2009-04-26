@@ -192,7 +192,7 @@ public class PostgresDatabase extends AbstractDatabase {
 //            if (schema == null) {
 //                schema = getConnectionUsername();
 //            }
-//            new JdbcTemplate(this).execute(new RawSqlStatement("DROP OWNED BY " + schema));
+//            new Executor(this).execute(new RawSqlStatement("DROP OWNED BY " + schema));
 //
 //            getConnection().commit();
 //
@@ -304,38 +304,18 @@ public class PostgresDatabase extends AbstractDatabase {
         return super.convertRequestedSchemaToCatalog(requestedSchema);
     }
 
-    /**
-     * @see liquibase.database.AbstractDatabase#escapeTableName(java.lang.String, java.lang.String)
-     */
-    @Override
-    public String escapeTableName(String schemaName, String tableName) {
-        //Check if tableName is in reserved words and has CaseSensitivity problems
-        if (StringUtils.trimToNull(tableName) != null && (hasCaseProblems(tableName) || isReservedWord(tableName))) {
-            return super.escapeTableName(schemaName, "\"" + tableName + "\"");
-        }
-        return super.escapeTableName(schemaName, tableName);
-    }
 
-    public String escapeConstraintName(String constraintName) {
-        if (constraintName == null) {
+    @Override
+    public String escapeDatabaseObject(String objectName) {
+        if (objectName == null) {
             return null;
         }
-        if (hasCaseProblems(constraintName) || isReservedWord(constraintName)) {
-            return "\"" + constraintName + "\"";
+        if (hasCaseProblems(objectName) || isReservedWord(objectName)) {
+            return "\"" + objectName + "\"";
         } else {
-            return super.escapeConstraintName(constraintName);
+            return super.escapeDatabaseObject(objectName);
         }
-    }
 
-    /**
-     * @see liquibase.database.AbstractDatabase#escapeColumnName(java.lang.String, java.lang.String, java.lang.String)
-     */
-    @Override
-    public String escapeColumnName(String schemaName, String tableName, String columnName) {
-        if (hasCaseProblems(columnName) || isReservedWord(columnName)) {
-            return "\"" + columnName + "\"";
-        }
-        return columnName;
     }
 
     /*
@@ -448,14 +428,6 @@ public class PostgresDatabase extends AbstractDatabase {
     }
 
 
-    public String escapeSequenceName(String schemaName, String sequenceName) {
-        //Check if tableName is in reserved words and has CaseSensitivity problems
-        if (StringUtils.trimToNull(sequenceName) != null && (hasCaseProblems(sequenceName) || isReservedWord(sequenceName))) {
-            return super.escapeSequenceName(schemaName, "\"" + sequenceName + "\"");
-        }
-        return super.escapeSequenceName(schemaName, sequenceName);
-    }
-
     protected Object convertToCorrectJavaType(String value, int dataType, int columnSize, int decimalDigits) throws ParseException {
         Object returnValue = super.convertToCorrectJavaType(value, dataType, columnSize, decimalDigits);
         if (returnValue != null && returnValue instanceof String) {
@@ -465,20 +437,4 @@ public class PostgresDatabase extends AbstractDatabase {
         }
         return returnValue;
     }
-
-    public String escapeColumnNameList(String columnNames) {
-        StringBuffer sb = new StringBuffer();
-        for(String columnName : columnNames.split(",")) {
-            if(sb.length() > 0) {
-                sb.append(", ");
-            }
-            String name = columnName.trim();
-            if (hasCaseProblems(name) || isReservedWord(name)) {
-                name = "\""+name+"\"";
-            }
-            sb.append(name);
-        }
-        return sb.toString();
-    }
-
 }

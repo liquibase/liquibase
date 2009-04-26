@@ -47,56 +47,6 @@ public class AddColumnStatement implements SqlStatement {
         return constraints;
     }
 
-    public String getSqlStatement(Database database) throws StatementNotSupportedOnDatabaseException {
-        if (isPrimaryKey() && (database instanceof CacheDatabase
-                || database instanceof H2Database
-                || database instanceof DB2Database
-                || database instanceof DerbyDatabase
-                || database instanceof SQLiteDatabase)) {
-            throw new StatementNotSupportedOnDatabaseException("Adding primary key columns is not supported", this, database);
-        }
-
-        String alterTable = "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ADD "+ database.escapeColumnName(getSchemaName(), getTableName(), getColumnName()) + " " + database.getColumnType(getColumnType(), isAutoIncrement());
-
-        if (defaultClauseBeforeNotNull(database)) {
-            alterTable += getDefaultClause(database);
-        }
-
-        if (primaryKeyBeforeNotNull(database)) {
-            if (isPrimaryKey()) {
-                alterTable += " PRIMARY KEY";
-            }
-        }
-
-        if (isAutoIncrement()) {
-            alterTable += " "+database.getAutoIncrementClause();
-        }
-
-        if (!isNullable()) {
-            alterTable += " NOT NULL";
-        } else {
-            if (database instanceof SybaseDatabase || database instanceof SybaseASADatabase) {
-                alterTable += " NULL";
-            }
-        }
-
-        if (!primaryKeyBeforeNotNull(database)) {
-            if (isPrimaryKey()) {
-                alterTable += " PRIMARY KEY";
-            }
-        }
-        
-        if (!defaultClauseBeforeNotNull(database)) {
-            alterTable += getDefaultClause(database);
-        }
-        
-        return alterTable;
-    }
-
-    private boolean primaryKeyBeforeNotNull(Database database) {
-        return !(database instanceof HsqlDatabase);
-    }
-
     public boolean isAutoIncrement() {
         for (ColumnConstraint constraint : getConstraints()) {
             if (constraint instanceof AutoIncrementConstraint) {
@@ -113,34 +63,6 @@ public class AddColumnStatement implements SqlStatement {
             }
         }
         return false;
-    }
-
-    public String getEndDelimiter(Database database) {
-        return ";";
-    }
-
-    public boolean supportsDatabase(Database database) {
-        return true;
-    }
-
-    private boolean defaultClauseBeforeNotNull(Database database) {
-        return database instanceof OracleDatabase
-                || database instanceof HsqlDatabase
-                || database instanceof DerbyDatabase
-                || database instanceof DB2Database
-                || database instanceof FirebirdDatabase
-                || database instanceof InformixDatabase;
-    }
-
-    private String getDefaultClause(Database database) {
-        String clause = "";
-        if (getDefaultValue() != null) {
-            if (database instanceof MSSQLDatabase) {
-                clause += " CONSTRAINT " + ((MSSQLDatabase) database).generateDefaultConstraintName(tableName, getColumnName());
-            }
-            clause += " DEFAULT " + database.convertJavaObjectToString(getDefaultValue());
-        }
-        return clause;
     }
 
     public boolean isNullable() {

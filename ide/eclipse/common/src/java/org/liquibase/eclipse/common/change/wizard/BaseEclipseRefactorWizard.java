@@ -5,6 +5,8 @@ import liquibase.ChangeSet;
 import liquibase.change.Change;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.statement.SqlStatement;
+import liquibase.database.statement.generator.SqlGeneratorFactory;
+import liquibase.database.statement.syntax.Sql;
 import liquibase.Liquibase;
 import liquibase.parser.LiquibaseSchemaResolver;
 import liquibase.util.StringUtils;
@@ -106,9 +108,10 @@ public abstract class BaseEclipseRefactorWizard extends Wizard {
                                 .findCorrectDatabaseImplementation(connection);
                         Statement statement = connection.createStatement();
                         for (Change change : changeSet.getChanges()) {
-                            for (SqlStatement sql : change
-                                    .generateStatements(liquibaseDatabase)) {
-                                statement.execute(sql.getSqlStatement(liquibaseDatabase));
+                            for (SqlStatement sqlStatement : change.generateStatements(liquibaseDatabase)) {
+                                for (Sql sql : SqlGeneratorFactory.getInstance().generateSql(sqlStatement, liquibaseDatabase)) {
+                                    statement.execute(sql.toSql());
+                                }
                             }
                         }
                         statement.close();

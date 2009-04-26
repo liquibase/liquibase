@@ -3,7 +3,7 @@ package liquibase.database;
 import liquibase.exception.JDBCException;
 import liquibase.exception.DatabaseHistoryException;
 import liquibase.database.statement.SqlStatement;
-import liquibase.database.template.JdbcTemplate;
+import liquibase.database.template.Executor;
 import liquibase.database.structure.DatabaseSnapshot;
 import liquibase.database.structure.HibernateDatabaseSnapshot;
 import liquibase.ChangeSet;
@@ -350,6 +350,10 @@ public class HibernateDatabase implements Database {
         return null;
     }
 
+    public String escapeDatabaseObject(String objectName) {
+        return null;
+    }
+
     public String escapeColumnName(String schemaName, String tableName, String columnName) {
         return null;
     }
@@ -426,11 +430,11 @@ public class HibernateDatabase implements Database {
         return null;
     }
 
-    public JdbcTemplate getJdbcTemplate() {
+    public Executor getJdbcTemplate() {
         return null;
     }
 
-    public void setJdbcTemplate(JdbcTemplate template) {
+    public void setJdbcTemplate(Executor template) {
 
     }
 

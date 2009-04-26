@@ -18,15 +18,19 @@ public class SetColumnRemarksStatement implements SqlStatement {
         this.remarks = remarks;
     }
 
-    public String getSqlStatement(Database database) throws StatementNotSupportedOnDatabaseException {
-        return "COMMENT ON COLUMN "+database.escapeTableName(schemaName, tableName)+"."+database.escapeColumnName(schemaName, tableName, columnName)+" IS '"+remarks+"'";
+    public String getSchemaName() {
+        return schemaName;
     }
 
-    public String getEndDelimiter(Database database) {
-        return ";";
+    public String getTableName() {
+        return tableName;
     }
 
-    public boolean supportsDatabase(Database database) {
-        return database instanceof OracleDatabase;
+    public String getColumnName() {
+        return columnName;
+    }
+
+    public String getRemarks() {
+        return remarks;
     }
 }

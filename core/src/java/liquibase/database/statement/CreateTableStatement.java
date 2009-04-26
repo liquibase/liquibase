@@ -103,10 +103,6 @@ public class CreateTableStatement implements SqlStatement {
         return addColumn(columnName, columnType, null, constraints);
     }
 
-    public boolean supportsDatabase(Database database) {
-        return true;
-    }
-
     public CreateTableStatement addColumn(String columnName, String columnType, String defaultValue, ColumnConstraint... constraints) {
         this.getColumns().add(columnName);
         this.columnTypes.put(columnName, columnType);
@@ -143,187 +139,8 @@ public class CreateTableStatement implements SqlStatement {
         return this;
     }
 
-
-    public String getSqlStatement(Database database) {
-//        StringBuffer fkConstraints = new StringBuffer();
-
-        StringBuffer buffer = new StringBuffer();
-        buffer.append("CREATE TABLE ").append(database.escapeTableName(getSchemaName(), getTableName())).append(" ");
-        buffer.append("(");
-        Iterator<String> columnIterator = getColumns().iterator();
-        while (columnIterator.hasNext()) {
-            String column = columnIterator.next();
-            boolean isAutoIncrement = autoIncrementColumns.contains(column);
-
-            buffer.append(database.escapeColumnName(getSchemaName(), getTableName(), column));
-            buffer.append(" ").append(database.getColumnType(columnTypes.get(column), isAutoIncrement));
-
-            if ((database instanceof SQLiteDatabase) && 
-					(getPrimaryKeyConstraint()!=null) &&
-					(getPrimaryKeyConstraint().getColumns().size()==1) &&
-					(getPrimaryKeyConstraint().getColumns().contains(column)) &&
-					isAutoIncrement) {
-            	String pkName = StringUtils.trimToNull(getPrimaryKeyConstraint().getConstraintName());
-	            if (pkName == null) {
-	                pkName = database.generatePrimaryKeyName(getTableName());
-	            }
-	            buffer.append(" CONSTRAINT ");
-	            buffer.append(database.escapeConstraintName(pkName));
-				buffer.append(" PRIMARY KEY AUTOINCREMENT");
-			}
-            
-            if (getDefaultValue(column) != null) {
-                if (database instanceof MSSQLDatabase) {
-                    buffer.append(" CONSTRAINT ").append(((MSSQLDatabase) database).generateDefaultConstraintName(tableName, column));
-                }
-                buffer.append(" DEFAULT ");
-                buffer.append(getDefaultValue(column));
-            }
-
-            if (isAutoIncrement &&
-					(database.getAutoIncrementClause()!=null) &&
-					(!database.getAutoIncrementClause().equals(""))) {
-                if (database.supportsAutoIncrement()) {
-                    buffer.append(" ").append(database.getAutoIncrementClause()).append(" ");
-                } else {
-                    LogFactory.getLogger().log(Level.WARNING, database.getProductName()+" does not support autoincrement columns as request for "+(database.escapeTableName(getSchemaName(), getTableName())));
-                }
-            }
-
-            if (getNotNullColumns().contains(column)) {
-                buffer.append(" NOT NULL");
-            } else {
-                if (database instanceof SybaseDatabase || database instanceof SybaseASADatabase) {
-                    buffer.append(" NULL");
-                }
-            }
-            
-            if ((database instanceof InformixDatabase) && 
-					(getPrimaryKeyConstraint()!=null) &&
-					(getPrimaryKeyConstraint().getColumns().size()==1) &&
-					(getPrimaryKeyConstraint().getColumns().contains(column))) {
-            	buffer.append(" PRIMARY KEY");
-            }
-
-            if (columnIterator.hasNext()) {
-                buffer.append(", ");
-            }
-        }
-
-        buffer.append(",");
-        
-        // TODO informixdb
-        if (!( (database instanceof SQLiteDatabase) && 
-				(getPrimaryKeyConstraint()!=null) &&
-				(getPrimaryKeyConstraint().getColumns().size()==1) &&
-				autoIncrementColumns.contains(getPrimaryKeyConstraint().getColumns().get(0)) ) &&
-				
-				!((database instanceof InformixDatabase) &&
-				(getPrimaryKeyConstraint()!=null) &&
-				(getPrimaryKeyConstraint().getColumns().size()==1)
-				)) {
-        	// ...skip this code block for sqlite if a single column primary key
-        	// with an autoincrement constraint exists.
-        	// This constraint is added after the column type.
-
-	        if (getPrimaryKeyConstraint() != null && getPrimaryKeyConstraint().getColumns().size() > 0) {
-	        	if (!(database instanceof InformixDatabase)) {
-		            String pkName = StringUtils.trimToNull(getPrimaryKeyConstraint().getConstraintName());
-		            if (pkName == null) {
-		                pkName = database.generatePrimaryKeyName(getTableName());
-		            }
-		            buffer.append(" CONSTRAINT ");
-		            buffer.append(database.escapeConstraintName(pkName));
-	        	}
-	            buffer.append(" PRIMARY KEY (");
-	            buffer.append(database.escapeColumnNameList(StringUtils.join(getPrimaryKeyConstraint().getColumns(), ", ")));
-	            buffer.append(")");
-	            buffer.append(",");
-	        }
-        }
-
-        for (ForeignKeyConstraint fkConstraint : getForeignKeyConstraints()) {
-        	if (!(database instanceof InformixDatabase)) {
-        		buffer.append(" CONSTRAINT ");
-                buffer.append(database.escapeConstraintName(fkConstraint.getForeignKeyName()));
-        	}
-            buffer.append(" FOREIGN KEY (")
-                    .append(database.escapeColumnName(getSchemaName(), getTableName(), fkConstraint.getColumn()))
-                    .append(") REFERENCES ")
-                    .append(fkConstraint.getReferences());
-
-            if (fkConstraint.isDeleteCascade()) {
-                buffer.append(" ON DELETE CASCADE");
-            }
-            
-            if ((database instanceof InformixDatabase)) {
-            	buffer.append(" CONSTRAINT ");
-            	buffer.append(database.escapeConstraintName(fkConstraint.getForeignKeyName()));
-            }
-
-            if (fkConstraint.isInitiallyDeferred()) {
-                buffer.append(" INITIALLY DEFERRED");
-            }
-            if (fkConstraint.isDeferrable()) {
-                buffer.append(" DEFERRABLE");
-            }
-            buffer.append(",");
-        }
-
-        for (UniqueConstraint uniqueConstraint : getUniqueConstraints()) {
-            if (uniqueConstraint.getConstraintName() != null && !constraintNameAfterUnique(database)) {
-                buffer.append(" CONSTRAINT ");
-                buffer.append(database.escapeConstraintName(uniqueConstraint.getConstraintName()));
-            }
-            buffer.append(" UNIQUE (");
-            buffer.append(database.escapeColumnNameList(StringUtils.join(uniqueConstraint.getColumns(), ", ")));
-            buffer.append(")");
-            if (uniqueConstraint.getConstraintName() != null && constraintNameAfterUnique(database)) {
-                buffer.append(" CONSTRAINT ");
-                buffer.append(database.escapeConstraintName(uniqueConstraint.getConstraintName()));
-            }
-            buffer.append(",");
-        }
-
-//        if (constraints != null && constraints.getCheck() != null) {
-//            buffer.append(constraints.getCheck()).append(" ");
-//        }
-//    }
-
-        String sql = buffer.toString().replaceFirst(",\\s*$", "") + ")";
-
-//        if (StringUtils.trimToNull(tablespace) != null && database.supportsTablespaces()) {
-//            if (database instanceof MSSQLDatabase) {
-//                buffer.append(" ON ").append(tablespace);
-//            } else if (database instanceof DB2Database) {
-//                buffer.append(" IN ").append(tablespace);
-//            } else {
-//                buffer.append(" TABLESPACE ").append(tablespace);
-//            }
-//        }
-
-        if (getTablespace() != null && database.supportsTablespaces()) {
-            if (database instanceof MSSQLDatabase || database instanceof SybaseASADatabase) {
-                sql += " ON " + getTablespace();
-            } else if (database instanceof DB2Database) {
-                sql += " IN " + getTablespace();
-            } else {
-                sql += " TABLESPACE " + getTablespace();
-            }
-        }
-        return sql;
-    }
-    
-    private boolean constraintNameAfterUnique(Database database) {
-		return database instanceof InformixDatabase;
-	}
-
     public String getDefaultValue(String column) {
         return defaultValues.get(column);
-    }
-
-    public String getEndDelimiter(Database database) {
-        return ";";
     }
 
     public CreateTableStatement addColumnConstraint(NotNullConstraint notNullConstraint) {
@@ -344,5 +161,17 @@ public class CreateTableStatement implements SqlStatement {
     public CreateTableStatement addColumnConstraint(AutoIncrementConstraint autoIncrementConstraint) {
         autoIncrementColumns.add(autoIncrementConstraint.getColumnName());
         return this;
+    }
+
+    public Set<String> getAutoIncrementColumns() {
+        return autoIncrementColumns;
+    }
+
+    public Map<String, String> getColumnTypes() {
+        return columnTypes;
+    }
+
+    public Map<String, String> getDefaultValues() {
+        return defaultValues;
     }
 }

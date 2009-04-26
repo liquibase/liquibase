@@ -3,7 +3,7 @@ package liquibase.database.template;
 import java.sql.ResultSet;
 
 /**
- * An interface used by {@link JdbcTemplate} for processing rows of a
+ * An interface used by {@link Executor} for processing rows of a
  * {@link java.sql.ResultSet} on a per-row basis. Implementations of
  * this interface perform the actual work of processing each row
  * but don't need to worry about exception handling.
@@ -18,7 +18,7 @@ import java.sql.ResultSet;
  * exactly one result object per row, assembling them into a List.
  *
  * @author Spring Framework
- * @see JdbcTemplate
+ * @see Executor
  * @see RowMapper
  * @see ResultSetExtractor
  */

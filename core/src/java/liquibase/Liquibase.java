@@ -9,7 +9,7 @@ import liquibase.database.DatabaseFactory;
 import liquibase.database.statement.UpdateStatement;
 import liquibase.database.statement.visitor.SqlVisitor;
 import liquibase.database.template.JdbcOutputTemplate;
-import liquibase.database.template.JdbcTemplate;
+import liquibase.database.template.Executor;
 import liquibase.exception.JDBCException;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.LockException;
@@ -122,7 +122,7 @@ public class Liquibase {
     }
 
     public void update(String contexts, Writer output) throws LiquibaseException {
-        JdbcTemplate oldTemplate = database.getJdbcTemplate();
+        Executor oldTemplate = database.getJdbcTemplate();
         JdbcOutputTemplate outputTemplate = new JdbcOutputTemplate(output, database);
         database.setJdbcTemplate(outputTemplate);
 
@@ -169,7 +169,7 @@ public class Liquibase {
     }
 
     public void update(int changesToApply, String contexts, Writer output) throws LiquibaseException {
-        JdbcTemplate oldTemplate = database.getJdbcTemplate();
+        Executor oldTemplate = database.getJdbcTemplate();
         JdbcOutputTemplate outputTemplate = new JdbcOutputTemplate(output, database);
         database.setJdbcTemplate(outputTemplate);
 
@@ -198,7 +198,7 @@ public class Liquibase {
     }
 
     public void rollback(int changesToRollback, String contexts, Writer output) throws LiquibaseException {
-        JdbcTemplate oldTemplate = database.getJdbcTemplate();
+        Executor oldTemplate = database.getJdbcTemplate();
         database.setJdbcTemplate(new JdbcOutputTemplate(output, database));
 
         outputHeader("Rollback " + changesToRollback + " Change(s) Script");
@@ -240,7 +240,7 @@ public class Liquibase {
     }
 
     public void rollback(String tagToRollBackTo, String contexts, Writer output) throws LiquibaseException {
-        JdbcTemplate oldTemplate = database.getJdbcTemplate();
+        Executor oldTemplate = database.getJdbcTemplate();
         database.setJdbcTemplate(new JdbcOutputTemplate(output, database));
 
         outputHeader("Rollback to '" + tagToRollBackTo + "' Script");
@@ -277,7 +277,7 @@ public class Liquibase {
     }
 
     public void rollback(Date dateToRollBackTo, String contexts, Writer output) throws LiquibaseException {
-        JdbcTemplate oldTemplate = database.getJdbcTemplate();
+        Executor oldTemplate = database.getJdbcTemplate();
         database.setJdbcTemplate(new JdbcOutputTemplate(output, database));
 
         outputHeader("Rollback to " + dateToRollBackTo + " Script");
@@ -316,7 +316,7 @@ public class Liquibase {
     public void changeLogSync(String contexts, Writer output) throws LiquibaseException {
 
         JdbcOutputTemplate outputTemplate = new JdbcOutputTemplate(output, database);
-        JdbcTemplate oldTemplate = database.getJdbcTemplate();
+        Executor oldTemplate = database.getJdbcTemplate();
         database.setJdbcTemplate(outputTemplate);
 
         outputHeader("SQL to add all changesets to database history table");
@@ -356,7 +356,7 @@ public class Liquibase {
     public void markNextChangeSetRan(String contexts, Writer output) throws LiquibaseException {
 
         JdbcOutputTemplate outputTemplate = new JdbcOutputTemplate(output, database);
-        JdbcTemplate oldTemplate = database.getJdbcTemplate();
+        Executor oldTemplate = database.getJdbcTemplate();
         database.setJdbcTemplate(outputTemplate);
 
         outputHeader("SQL to add all changesets to database history table");
@@ -396,7 +396,7 @@ public class Liquibase {
 
     public void futureRollbackSQL(String contexts, Writer output) throws LiquibaseException {
         JdbcOutputTemplate outputTemplate = new JdbcOutputTemplate(output, database);
-        JdbcTemplate oldTemplate = database.getJdbcTemplate();
+        Executor oldTemplate = database.getJdbcTemplate();
         database.setJdbcTemplate(outputTemplate);
 
         outputHeader("SQL to roll back currently unexecuted changes");

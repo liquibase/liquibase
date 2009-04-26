@@ -6,13 +6,14 @@ import liquibase.database.statement.syntax.UnparsedSql;
 import liquibase.database.*;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.StatementNotSupportedOnDatabaseException;
+import liquibase.exception.JDBCException;
 
-public class AddColumnGeneratorDefaultClauseBeforeNotNull implements SqlGenerator<AddColumnStatement> {
+public class AddColumnGeneratorDefaultClauseBeforeNotNull extends AddColumnGenerator {
     public int getSpecializationLevel() {
         return SPECIALIZATION_LEVEL_DATABASE_SPECIFIC;
     }
 
-    public boolean isValid(AddColumnStatement statement, Database database) {
+    public boolean isValidGenerator(AddColumnStatement statement, Database database) {
         return database instanceof OracleDatabase
                 || database instanceof HsqlDatabase
                 || database instanceof DerbyDatabase
@@ -21,12 +22,16 @@ public class AddColumnGeneratorDefaultClauseBeforeNotNull implements SqlGenerato
                 || database instanceof InformixDatabase;
     }
 
-    public Sql[] generateSql(AddColumnStatement statement, Database database) throws LiquibaseException {
-        if (statement.isPrimaryKey()
-                && (database instanceof H2Database || database instanceof DB2Database || database instanceof DerbyDatabase)) {
-            throw new StatementNotSupportedOnDatabaseException("Adding primary key columns is not supported", statement, database);
+    @Override
+    public GeneratorValidationErrors validate(AddColumnStatement statement, Database database) {
+        GeneratorValidationErrors validationErrors = super.validate(statement, database);
+        if (database instanceof DerbyDatabase && statement.isAutoIncrement()) {
+            validationErrors.addError("Cannot add an identity column to a database");
         }
+        return validationErrors;
+    }
 
+    public Sql[] generateSql(AddColumnStatement statement, Database database) throws JDBCException {
         String alterTable = "ALTER TABLE " + database.escapeTableName(statement.getSchemaName(), statement.getTableName()) + " ADD " + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " " + database.getColumnType(statement.getColumnType(), statement.isAutoIncrement());
 
         alterTable += getDefaultClause(statement, database);
@@ -60,16 +65,13 @@ public class AddColumnGeneratorDefaultClauseBeforeNotNull implements SqlGenerato
     private String getDefaultClause(AddColumnStatement statement, Database database) {
         String clause = "";
         if (statement.getDefaultValue() != null) {
-            if (database instanceof MSSQLDatabase) {
-                clause += " CONSTRAINT " + ((MSSQLDatabase) database).generateDefaultConstraintName(statement.getTableName(), statement.getColumnName());
-            }
-            clause += " DEFAULT " + database.convertJavaObjectToString(statement.getDefaultValue());
+           clause += " DEFAULT " + database.convertJavaObjectToString(statement.getDefaultValue());
         }
         return clause;
     }
 
     private boolean primaryKeyBeforeNotNull(Database database) {
-        return !(database instanceof HsqlDatabase);
+        return !(database instanceof HsqlDatabase || database instanceof H2Database);
     }
 
 

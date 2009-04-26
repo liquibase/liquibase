@@ -6,7 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
- * Callback interface used by {@link JdbcTemplate}'s query methods.
+ * Callback interface used by {@link Executor}'s query methods.
  * Implementations of this interface perform the actual work of extracting
  * results from a {@link java.sql.ResultSet}, but don't need to worry
  * about exception handling. {@link java.sql.SQLException SQLExceptions}
@@ -14,7 +14,7 @@ import java.sql.SQLException;
  * <p/>
  *
  * @author Spring Framework
- * @see JdbcTemplate
+ * @see Executor
  * @see RowCallbackHandler
  * @see RowMapper
  */
