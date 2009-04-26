@@ -17,7 +17,7 @@ public class LoadDataChangeTest extends AbstractChangeTest {
 
     @Test
     public void getRefactoringName() throws Exception {
-        assertEquals("Load Data", new LoadDataChange().getChangeName());
+        assertEquals("Load Data", new LoadDataChange().getDescription());
     }
 
     @Test
@@ -117,13 +117,13 @@ public class LoadDataChangeTest extends AbstractChangeTest {
         refactoring.setFile("changelogs/sample.data1.csv");
         refactoring.setFileOpener(new JUnitFileOpener());
 
-        String md5sum1 = refactoring.getMD5Sum();
+        String md5sum1 = refactoring.generateCheckSum();
 
         refactoring.setFile("changelogs/sample.data2.csv");
-        String md5sum2 = refactoring.getMD5Sum();
+        String md5sum2 = refactoring.generateCheckSum();
 
         assertTrue(!md5sum1.equals(md5sum2));
-        assertTrue(md5sum2.equals(refactoring.getMD5Sum()));
+        assertTrue(md5sum2.equals(refactoring.generateCheckSum()));
     }
 
 }

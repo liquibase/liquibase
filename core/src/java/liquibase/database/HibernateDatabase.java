@@ -1,19 +1,22 @@
 package liquibase.database;
 
-import liquibase.exception.JDBCException;
-import liquibase.exception.DatabaseHistoryException;
+import liquibase.exception.*;
 import liquibase.database.statement.SqlStatement;
+import liquibase.database.statement.visitor.SqlVisitor;
 import liquibase.database.template.Executor;
 import liquibase.database.structure.DatabaseSnapshot;
 import liquibase.database.structure.HibernateDatabaseSnapshot;
 import liquibase.ChangeSet;
 import liquibase.RanChangeSet;
+import liquibase.change.Change;
 import liquibase.diff.DiffStatusListener;
 
 import java.sql.*;
 import java.sql.Date;
 import java.text.ParseException;
 import java.util.*;
+import java.io.Writer;
+import java.io.IOException;
 
 import org.hibernate.cfg.Configuration;
 import org.hibernate.cfg.AnnotationConfiguration;
@@ -463,5 +466,25 @@ public class HibernateDatabase implements Database {
      */
     public boolean isLocalDatabase() throws JDBCException {
     	return false;
+    }
+
+    public void executeStatements(Change change, List<SqlVisitor> sqlVisitors) throws LiquibaseException, UnsupportedChangeException {
+        ;
+    }
+
+    public void execute(SqlStatement[] statements, List<SqlVisitor> sqlVisitors) throws LiquibaseException {
+        ;
+    }
+
+    public void saveStatements(Change change, List<SqlVisitor> sqlVisitors, Writer writer) throws IOException, UnsupportedChangeException, StatementNotSupportedOnDatabaseException, LiquibaseException {
+        ;
+    }
+
+    public void executeRollbackStatements(Change change, List<SqlVisitor> sqlVisitors) throws LiquibaseException, UnsupportedChangeException, RollbackImpossibleException {
+        ;
+    }
+
+    public void saveRollbackStatement(Change change, List<SqlVisitor> sqlVisitors, Writer writer) throws IOException, UnsupportedChangeException, RollbackImpossibleException, StatementNotSupportedOnDatabaseException, LiquibaseException {
+        ;
     }
 }

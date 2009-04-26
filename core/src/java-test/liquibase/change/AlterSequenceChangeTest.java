@@ -16,7 +16,7 @@ public class AlterSequenceChangeTest extends AbstractChangeTest {
 
     @Test
     public void getRefactoringName() throws Exception {
-        assertEquals("Alter Sequence", new AlterSequenceChange().getChangeName());
+        assertEquals("Alter Sequence", new AlterSequenceChange().getDescription());
     }
 
     @Test

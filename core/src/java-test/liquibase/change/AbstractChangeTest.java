@@ -67,7 +67,7 @@ public abstract class AbstractChangeTest {
         StringWriter stringWriter = new StringWriter();
 
         OracleDatabase database = new OracleDatabase();
-        change.saveStatements(database, new ArrayList<SqlVisitor>(), stringWriter);
+        database.saveStatements(change, new ArrayList<SqlVisitor>(), stringWriter);
 
         assertEquals("GENERATED STATEMENT;" + StreamUtil.getLineSeparator() + StreamUtil.getLineSeparator(), stringWriter.getBuffer().toString());
     }
@@ -112,7 +112,7 @@ public abstract class AbstractChangeTest {
         OracleDatabase database = new OracleDatabase();
         database.setConnection(conn);
 
-        change.executeStatements(database, new ArrayList<SqlVisitor>());
+        database.executeStatements(change, new ArrayList<SqlVisitor>());
         
         verify(conn);
         verify(statement);

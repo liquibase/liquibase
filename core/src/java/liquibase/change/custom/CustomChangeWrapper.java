@@ -113,7 +113,7 @@ public class CustomChangeWrapper extends AbstractChange {
     }
 
 
-    public boolean canRollBack() {
+    public boolean supportsRollback() {
         return customChange instanceof CustomSqlRollback || customChange instanceof CustomTaskRollback;
     }
 

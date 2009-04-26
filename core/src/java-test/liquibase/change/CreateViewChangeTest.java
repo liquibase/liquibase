@@ -16,7 +16,7 @@ public class CreateViewChangeTest extends AbstractChangeTest {
 
     @Test
     public void getRefactoringName() throws Exception {
-        assertEquals("Create View", new CreateViewChange().getChangeName());
+        assertEquals("Create View", new CreateViewChange().getDescription());
     }
 
     @Test

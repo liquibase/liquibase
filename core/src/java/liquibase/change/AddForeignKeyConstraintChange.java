@@ -247,7 +247,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
     }
 
     public Element createNode(Document currentChangeLogFileDOM) {
-        Element node = currentChangeLogFileDOM.createElement(getTagName());
+        Element node = currentChangeLogFileDOM.createElement(getName());
 
         if (getBaseTableSchemaName() != null) {
             node.setAttribute("baseTableSchemaName", getBaseTableSchemaName());

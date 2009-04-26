@@ -422,7 +422,7 @@ class XMLChangeLogHandler extends DefaultHandler {
                     throw new RuntimeException("Unexpected column with text: "+textString);
                 }
                 this.text = new StringBuffer();
-            } else if (change != null && qName.equals(change.getTagName())) {
+            } else if (change != null && qName.equals(change.getName())) {
                 if (textString != null) {
                     if (change instanceof RawSQLChange) {
                         ((RawSQLChange) change).setSql(textString);
@@ -433,7 +433,7 @@ class XMLChangeLogHandler extends DefaultHandler {
                     } else if (change instanceof StopChange) {
                         ((StopChange) change).setMessage(textString);
                     } else {
-                        throw new RuntimeException("Unexpected text in " + change.getTagName());
+                        throw new RuntimeException("Unexpected text in " + change.getName());
                     }
                 }
                 text = null;

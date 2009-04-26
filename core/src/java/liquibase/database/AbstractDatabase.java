@@ -5,6 +5,8 @@ import liquibase.RanChangeSet;
 import liquibase.lock.LockHandler;
 import liquibase.change.*;
 import liquibase.database.statement.*;
+import liquibase.database.statement.generator.SqlGeneratorFactory;
+import liquibase.database.statement.syntax.Sql;
 import liquibase.database.statement.visitor.SqlVisitor;
 import liquibase.database.structure.*;
 import liquibase.database.template.Executor;
@@ -15,6 +17,7 @@ import liquibase.log.LogFactory;
 import liquibase.util.ISODateFormat;
 import liquibase.util.LiquibaseUtil;
 import liquibase.util.StringUtils;
+import liquibase.util.StreamUtil;
 
 import java.math.BigInteger;
 import java.sql.*;
@@ -24,6 +27,8 @@ import java.util.*;
 import java.util.Date;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
+import java.io.Writer;
+import java.io.IOException;
 
 /**
  * AbstractDatabase is extended by all supported databases as a facade to the underlying database.
@@ -1427,5 +1432,49 @@ public abstract class AbstractDatabase implements Database {
     public boolean isLocalDatabase() throws JDBCException {
     	String url = getConnectionURL();
     	return (url.indexOf("localhost") >= 0) || (url.indexOf("127.0.0.1") >= 0);
+    }
+
+    public void executeStatements(Change change, List<SqlVisitor> sqlVisitors) throws LiquibaseException, UnsupportedChangeException {
+        SqlStatement[] statements = change.generateStatements(this);
+
+        execute(statements, sqlVisitors);
+    }
+
+    /*
+     * Executes the statements passed as argument to a target {@link Database}
+     *
+     * @param statements an array containing the SQL statements to be issued
+     * @param database the target {@link Database}
+     * @throws JDBCException if there were problems issuing the statements
+     */
+    public void execute(SqlStatement[] statements, List<SqlVisitor> sqlVisitors) throws LiquibaseException {
+        for (SqlStatement statement : statements) {
+            LogFactory.getLogger().finest("Executing Statement: " + statement);
+            getJdbcTemplate().execute(statement, sqlVisitors);
+        }
+    }
+    
+
+    public void saveStatements(Change change, List<SqlVisitor> sqlVisitors, Writer writer) throws IOException, UnsupportedChangeException, StatementNotSupportedOnDatabaseException, LiquibaseException {
+        SqlStatement[] statements = change.generateStatements(this);
+        for (SqlStatement statement : statements) {
+            for (Sql sql : SqlGeneratorFactory.getInstance().generateSql(statement, this)) {
+                writer.append(sql.toSql()).append(sql.getEndDelimiter()).append(StreamUtil.getLineSeparator()).append(StreamUtil.getLineSeparator());
+            }
+        }
+    }
+
+    public void executeRollbackStatements(Change change, List<SqlVisitor> sqlVisitors) throws LiquibaseException, UnsupportedChangeException, RollbackImpossibleException {
+        SqlStatement[] statements = change.generateRollbackStatements(this);
+        execute(statements, sqlVisitors);
+    }
+
+    public void saveRollbackStatement(Change change, List<SqlVisitor> sqlVisitors, Writer writer) throws IOException, UnsupportedChangeException, RollbackImpossibleException, StatementNotSupportedOnDatabaseException, LiquibaseException {
+        SqlStatement[] statements = change.generateRollbackStatements(this);
+        for (SqlStatement statement : statements) {
+            for (Sql sql : SqlGeneratorFactory.getInstance().generateSql(statement, this)) {
+                writer.append(sql.toSql()).append(sql.getEndDelimiter()).append("\n\n");
+            }
+        }
     }
 }

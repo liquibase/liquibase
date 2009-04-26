@@ -1,6 +1,5 @@
 package liquibase.change;
 
-import liquibase.database.OracleDatabase;
 import liquibase.util.XMLUtil;
 import static org.junit.Assert.*;
 import org.junit.Before;
@@ -23,7 +22,7 @@ public abstract class RawSQLChangeTest extends AbstractChangeTest {
 
     @Test
     public void getRefactoringName() throws Exception {
-        assertEquals("Custom SQL", new RawSQLChange().getChangeName());
+        assertEquals("Custom SQL", new RawSQLChange().getDescription());
     }
 
 //    @Test

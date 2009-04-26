@@ -20,7 +20,7 @@ public class AddNotNullConstraintChangeTest extends AbstractChangeTest {
 
     @Test
     public void getRefactoringName() throws Exception {
-        assertEquals("Add Not-Null Constraint", new AddNotNullConstraintChange().getChangeName());
+        assertEquals("Add Not-Null Constraint", new AddNotNullConstraintChange().getDescription());
     }
 
     @Test

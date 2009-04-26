@@ -1,12 +1,8 @@
 package liquibase.change;
 
 import liquibase.ClassLoaderFileOpener;
-import liquibase.database.MSSQLDatabase;
 import liquibase.database.OracleDatabase;
-import liquibase.database.statement.SqlStatement;
 import liquibase.exception.SetupException;
-import liquibase.util.MD5Util;
-import liquibase.util.StreamUtil;
 import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
@@ -58,7 +54,7 @@ public abstract class SQLFileChangeTest extends AbstractChangeTest {
 //        OracleDatabase database = new OracleDatabase();
 //        assertEquals("TESTDATA",change.generateStatements(database)[0].getSqlStatement(database));
 //
-//    	assertEquals(MD5Util.computeMD5(change.getSql()), change.getMD5Sum());
+//    	assertEquals(MD5Util.computeMD5(change.getSql()), change.generateCheckSum());
 //	}
     
     @Test
@@ -152,7 +148,7 @@ public abstract class SQLFileChangeTest extends AbstractChangeTest {
 
     @Test
 	public void getRefactoringName() throws Exception {
-		assertEquals("SQL From File", change.getChangeName());
+		assertEquals("SQL From File", change.getDescription());
 
 	}
 

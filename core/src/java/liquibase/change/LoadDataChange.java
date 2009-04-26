@@ -184,7 +184,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns 
         return null;
     }
 
-    public String getMD5Sum() {
+    public String generateCheckSum() {
         InputStream stream = null;
         try {
             stream = getFileOpener().getResourceAsStream(getFile());

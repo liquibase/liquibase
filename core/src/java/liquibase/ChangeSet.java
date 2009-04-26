@@ -108,7 +108,7 @@ public class ChangeSet {
         if (md5sum == null) {
             StringBuffer stringToMD5 = new StringBuffer();
             for (Change change : getChanges()) {
-                stringToMD5.append(change.getMD5Sum()).append(":");
+                stringToMD5.append(change.generateCheckSum()).append(":");
             }
 
             md5sum = MD5Util.computeMD5(stringToMD5.toString());
@@ -211,7 +211,7 @@ public class ChangeSet {
 
                 log.finest("Reading ChangeSet: " + toString());
                 for (Change change : getChanges()) {
-                    change.executeStatements(database, sqlVisitors);
+                    database.executeStatements(change, sqlVisitors);
                     log.finest(change.getConfirmationMessage());
                 }
 
@@ -268,7 +268,7 @@ public class ChangeSet {
                 List<Change> changes = getChanges();
                 for (int i = changes.size() - 1; i >= 0; i--) {
                     Change change = changes.get(i);
-                    change.executeRollbackStatements(database, sqlVisitors);
+                    database.executeRollbackStatements(change, sqlVisitors);
                     log.finest(change.getConfirmationMessage());
                 }
             }
@@ -403,7 +403,7 @@ public class ChangeSet {
         }
 
         for (Change change : getChanges()) {
-            if (!change.canRollBack()) {
+            if (!change.supportsRollback()) {
                 return false;
             }
         }
@@ -425,10 +425,10 @@ public class ChangeSet {
             } else if (changeCount > 1) {
                 returnString.append(" (x").append(changeCount).append(")");
                 returnString.append(", ");
-                returnString.append(change.getChangeName());
+                returnString.append(change.getDescription());
                 changeCount = 1;
             } else {
-                returnString.append(", ").append(change.getChangeName());
+                returnString.append(", ").append(change.getDescription());
                 changeCount = 1;
             }
             lastChangeClass = change.getClass();

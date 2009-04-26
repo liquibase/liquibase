@@ -1,11 +1,5 @@
 package liquibase.change;
 
-import liquibase.database.Database;
-import liquibase.database.OracleDatabase;
-import liquibase.database.statement.RawSqlStatement;
-import liquibase.database.statement.SqlStatement;
-import liquibase.test.DatabaseTest;
-import liquibase.test.DatabaseTestTemplate;
 import static org.junit.Assert.*;
 import org.junit.Test;
 import org.w3c.dom.Element;
@@ -16,7 +10,7 @@ public abstract class CreateProcedureChangeTest extends AbstractChangeTest {
 
     @Test
     public void getRefactoringName() throws Exception {
-        assertEquals("Create Procedure", new CreateProcedureChange().getChangeName());
+        assertEquals("Create Procedure", new CreateProcedureChange().getDescription());
     }
 
 //    @Test

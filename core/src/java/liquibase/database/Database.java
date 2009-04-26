@@ -2,13 +2,14 @@ package liquibase.database;
 
 import liquibase.ChangeSet;
 import liquibase.RanChangeSet;
+import liquibase.change.Change;
 import liquibase.diff.DiffStatusListener;
 import liquibase.database.statement.SqlStatement;
+import liquibase.database.statement.visitor.SqlVisitor;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.DatabaseSnapshot;
 import liquibase.database.template.Executor;
-import liquibase.exception.DatabaseHistoryException;
-import liquibase.exception.JDBCException;
+import liquibase.exception.*;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -16,6 +17,8 @@ import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
+import java.io.Writer;
+import java.io.IOException;
 
 public interface Database extends DatabaseObject {
     /**
@@ -332,4 +335,20 @@ public interface Database extends DatabaseObject {
     void setAutoCommit(boolean b) throws JDBCException;
     
     boolean isLocalDatabase() throws JDBCException;
+
+    void executeStatements(Change change, List<SqlVisitor> sqlVisitors) throws LiquibaseException, UnsupportedChangeException;/*
+     * Executes the statements passed as argument to a target {@link Database}
+     *
+     * @param statements an array containing the SQL statements to be issued
+     * @param database the target {@link Database}
+     * @throws JDBCException if there were problems issuing the statements
+     */
+
+    void execute(SqlStatement[] statements, List<SqlVisitor> sqlVisitors) throws LiquibaseException;
+
+    void saveStatements(Change change, List<SqlVisitor> sqlVisitors, Writer writer) throws IOException, UnsupportedChangeException, StatementNotSupportedOnDatabaseException, LiquibaseException;
+
+    void executeRollbackStatements(Change change, List<SqlVisitor> sqlVisitors) throws LiquibaseException, UnsupportedChangeException, RollbackImpossibleException;
+
+    void saveRollbackStatement(Change change, List<SqlVisitor> sqlVisitors, Writer writer) throws IOException, UnsupportedChangeException, RollbackImpossibleException, StatementNotSupportedOnDatabaseException, LiquibaseException;
 }

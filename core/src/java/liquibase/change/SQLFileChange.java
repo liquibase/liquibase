@@ -147,9 +147,9 @@ public class SQLFileChange extends AbstractSQLChange {
     /**
      * Calculates an MD5 from the contents of the file.
      * 
-     * @see liquibase.change.AbstractChange#getMD5Sum()
+     * @see liquibase.change.AbstractChange#generateCheckSum()
      */
-    public String getMD5Sum() {
+    public String generateCheckSum() {
         return MD5Util.computeMD5(getSql());
     }
 

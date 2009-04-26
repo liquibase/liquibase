@@ -1,6 +1,5 @@
 package liquibase.change;
 
-import liquibase.database.OracleDatabase;
 import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
@@ -31,7 +30,7 @@ public abstract class ModifyColumnChangeTest extends AbstractChangeTest {
 
     @Test
     public void getRefactoringName() throws Exception {
-        assertEquals("Modify Column", change.getChangeName());
+        assertEquals("Modify Column", change.getDescription());
     }
 
 //    @Test
