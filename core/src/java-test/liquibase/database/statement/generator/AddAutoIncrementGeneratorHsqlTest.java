@@ -3,13 +3,12 @@ package liquibase.database.statement.generator;
 import org.junit.Test;
 import liquibase.database.statement.AddAutoIncrementStatement;
 import liquibase.database.Database;
-import liquibase.database.HsqlDatabase;
 import liquibase.database.H2Database;
 
-public class AddAutoIncrementGeneratorH2Test extends AddAutoIncrementGeneratorTest {
+public class AddAutoIncrementGeneratorHsqlTest extends AddAutoIncrementGeneratorTest {
 
-    public AddAutoIncrementGeneratorH2Test() {
-        super(new AddAutoIncrementGeneratorH2());
+    public AddAutoIncrementGeneratorHsqlTest() {
+        super(new AddAutoIncrementGeneratorHsql());
     }
 
     @Test

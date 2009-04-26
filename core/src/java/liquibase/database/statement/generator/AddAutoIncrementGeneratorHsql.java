@@ -9,7 +9,7 @@ import liquibase.database.statement.syntax.UnparsedSql;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.JDBCException;
 
-public class AddAutoIncrementGeneratorH2 extends AddAutoIncrementGenerator {
+public class AddAutoIncrementGeneratorHsql extends AddAutoIncrementGenerator {
 
     public int getSpecializationLevel() {
         return SPECIALIZATION_LEVEL_DATABASE_SPECIFIC;
