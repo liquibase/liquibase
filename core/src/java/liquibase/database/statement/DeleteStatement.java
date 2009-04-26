@@ -40,46 +40,7 @@ public class DeleteStatement implements SqlStatement {
         this.whereParameters.add(value);
     }
 
-
-    public boolean supportsDatabase(Database database) {
-        return true;
-    }
-
-    public String getSqlStatement(Database database) {
-        StringBuffer sql = new StringBuffer("DELETE FROM "+database.escapeTableName(getSchemaName(), getTableName()));
-
-        if (whereClause != null) {
-            String fixedWhereClause = " WHERE "+whereClause;
-            for (Object param : whereParameters) {
-                fixedWhereClause = fixedWhereClause.replaceFirst("\\?", convertToString(param, database));
-            }
-            sql.append(" ").append(fixedWhereClause);
-        }
-
-        return sql.toString();
-    }
-
-    private String convertToString(Object newValue, Database database) {
-        String sqlString;
-        if (newValue == null) {
-            sqlString = "NULL";
-        } else if (newValue instanceof String && database.shouldQuoteValue(((String) newValue))) {
-            sqlString = "'"+newValue+"'";
-        } else if (newValue instanceof Date) {
-            sqlString = database.getDateLiteral(((Date) newValue));
-        } else if (newValue instanceof Boolean) {
-            if (((Boolean) newValue)) {
-                sqlString = database.getTrueBooleanValue();
-            } else {
-                sqlString = database.getFalseBooleanValue();
-            }
-        } else {
-            sqlString = newValue.toString();
-        }
-        return sqlString;
-    }
-
-    public String getEndDelimiter(Database database) {
-        return ";";
+    public List<Object> getWhereParameters() {
+        return whereParameters;
     }
 }

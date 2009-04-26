@@ -3,7 +3,7 @@ package liquibase.test;
 import liquibase.database.Database;
 import liquibase.database.statement.SqlStatement;
 import liquibase.database.structure.DatabaseSnapshot;
-import liquibase.database.template.JdbcTemplate;
+import liquibase.database.template.Executor;
 import liquibase.exception.JDBCException;
 import liquibase.exception.StatementNotSupportedOnDatabaseException;
 
@@ -45,37 +45,37 @@ public abstract class SqlStatementDatabaseTest implements DatabaseTest {
     protected abstract void postExecuteAssert(DatabaseSnapshot snapshot) throws Exception;
 
     public final void performTest(Database database) throws Exception {
-        if (!supportsTest(database)) {
-            return;
-        }
-
-        if (!statement.supportsDatabase(database)) {
-            try {
-                statement.getSqlStatement(database);
-                org.junit.Assert.fail("did not throw exception");
-            } catch (StatementNotSupportedOnDatabaseException e) {
-                return; //what we expected
-            }
-        }
-
-        setup(database);
-        DatabaseSnapshot snapshot = database.createDatabaseSnapshot(schema, null);
-        preExecuteAssert(snapshot);
-
-        try {
-            new JdbcTemplate(database).execute(statement);
-            database.getConnection().commit();
-        } catch (JDBCException e) {
-            boolean expectsException = expectedException(database, e);
-            if (expectsException) {
-                return; //what we wanted
-            } else {
-                throw e;
-            }
-        }
-
-        snapshot = database.createDatabaseSnapshot(schema, null);
-
-        postExecuteAssert(snapshot);
+//        if (!supportsTest(database)) {
+//            return;
+//        }
+//
+//        if (!statement.supportsDatabase(database)) {
+//            try {
+//                statement.getSqlStatement(database);
+//                org.junit.Assert.fail("did not throw exception");
+//            } catch (StatementNotSupportedOnDatabaseException e) {
+//                return; //what we expected
+//            }
+//        }
+//
+//        setup(database);
+//        DatabaseSnapshot snapshot = database.createDatabaseSnapshot(schema, null);
+//        preExecuteAssert(snapshot);
+//
+//        try {
+//            new Executor(database).execute(statement);
+//            database.getConnection().commit();
+//        } catch (JDBCException e) {
+//            boolean expectsException = expectedException(database, e);
+//            if (expectsException) {
+//                return; //what we wanted
+//            } else {
+//                throw e;
+//            }
+//        }
+//
+//        snapshot = database.createDatabaseSnapshot(schema, null);
+//
+//        postExecuteAssert(snapshot);
     }
 }

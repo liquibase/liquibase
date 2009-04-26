@@ -205,56 +205,56 @@ public class AddColumnChangeTest extends AbstractChangeTest {
 
     }
 
-    @Test
-    public void sybaseNull() throws Exception {
-        AddColumnChange refactoring = new AddColumnChange();
-        refactoring.setTableName("TAB");
-        ColumnConfig column = new ColumnConfig();
-        column.setName("NEWCOL");
-        column.setType("TYP");
-        refactoring.addColumn(column);
+//    @Test
+//    public void sybaseNull() throws Exception {
+//        AddColumnChange refactoring = new AddColumnChange();
+//        refactoring.setTableName("TAB");
+//        ColumnConfig column = new ColumnConfig();
+//        column.setName("NEWCOL");
+//        column.setType("TYP");
+//        refactoring.addColumn(column);
+//
+//        SybaseDatabase db = new SybaseDatabase();
+//        assertEquals("ALTER TABLE [TAB] ADD NEWCOL TYP NULL", refactoring.generateStatements(db)[0].getSqlStatement(db));
+//    }
 
-        SybaseDatabase db = new SybaseDatabase();
-        assertEquals("ALTER TABLE [TAB] ADD NEWCOL TYP NULL", refactoring.generateStatements(db)[0].getSqlStatement(db));
-    }
+//    @Test
+//    public void sybaseNotNull() throws Exception {
+//        AddColumnChange refactoring = new AddColumnChange();
+//        refactoring.setTableName("TAB");
+//        ColumnConfig column = new ColumnConfig();
+//        column.setName("NEWCOL");
+//        column.setType("TYP");
+//        refactoring.addColumn(column);
+//
+//        ConstraintsConfig constraints = new ConstraintsConfig();
+//        constraints.setPrimaryKey(Boolean.FALSE);
+//        constraints.setNullable(Boolean.FALSE);
+//
+//        column.setConstraints(constraints);
+//
+//        SybaseDatabase database = new SybaseDatabase();
+//        assertEquals("ALTER TABLE [TAB] ADD NEWCOL TYP NOT NULL", refactoring.generateStatements(database)[0].getSqlStatement(database));
+//
+//    }
 
-    @Test
-    public void sybaseNotNull() throws Exception {
-        AddColumnChange refactoring = new AddColumnChange();
-        refactoring.setTableName("TAB");
-        ColumnConfig column = new ColumnConfig();
-        column.setName("NEWCOL");
-        column.setType("TYP");
-        refactoring.addColumn(column);
-
-        ConstraintsConfig constraints = new ConstraintsConfig();
-        constraints.setPrimaryKey(Boolean.FALSE);
-        constraints.setNullable(Boolean.FALSE);
-
-        column.setConstraints(constraints);
-
-        SybaseDatabase database = new SybaseDatabase();
-        assertEquals("ALTER TABLE [TAB] ADD NEWCOL TYP NOT NULL", refactoring.generateStatements(database)[0].getSqlStatement(database));
-
-    }
-
-    @Test
-    public void sybaseConstraintsNull() throws Exception {
-        AddColumnChange refactoring = new AddColumnChange();
-        refactoring.setTableName("TAB");
-        ColumnConfig column = new ColumnConfig();
-        column.setName("NEWCOL");
-        column.setType("TYP");
-        refactoring.addColumn(column);
-
-        ConstraintsConfig constraints = new ConstraintsConfig();
-        constraints.setPrimaryKey(Boolean.FALSE);
-        constraints.setNullable(Boolean.TRUE);
-
-        column.setConstraints(constraints);
-
-        SybaseDatabase database = new SybaseDatabase();
-        assertEquals("ALTER TABLE [TAB] ADD NEWCOL TYP NULL", refactoring.generateStatements(database)[0].getSqlStatement(database));
-
-    }
+//    @Test
+//    public void sybaseConstraintsNull() throws Exception {
+//        AddColumnChange refactoring = new AddColumnChange();
+//        refactoring.setTableName("TAB");
+//        ColumnConfig column = new ColumnConfig();
+//        column.setName("NEWCOL");
+//        column.setType("TYP");
+//        refactoring.addColumn(column);
+//
+//        ConstraintsConfig constraints = new ConstraintsConfig();
+//        constraints.setPrimaryKey(Boolean.FALSE);
+//        constraints.setNullable(Boolean.TRUE);
+//
+//        column.setConstraints(constraints);
+//
+//        SybaseDatabase database = new SybaseDatabase();
+//        assertEquals("ALTER TABLE [TAB] ADD NEWCOL TYP NULL", refactoring.generateStatements(database)[0].getSqlStatement(database));
+//
+//    }
 }

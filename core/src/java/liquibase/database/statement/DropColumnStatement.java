@@ -27,22 +27,4 @@ public class DropColumnStatement implements SqlStatement {
         return columnName;
     }
 
-    public String getSqlStatement(Database database) throws StatementNotSupportedOnDatabaseException {
-        if (!supportsDatabase(database)) {
-            throw new StatementNotSupportedOnDatabaseException(this, database);
-        } else if (database instanceof DB2Database) {
-            return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " DROP COLUMN " + database.escapeColumnName(getSchemaName(), getTableName(), getColumnName());
-        } else if (database instanceof SybaseDatabase || database instanceof SybaseASADatabase || database instanceof FirebirdDatabase || database instanceof InformixDatabase) {
-            return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " DROP " + database.escapeColumnName(getSchemaName(), getTableName(), getColumnName());
-        }
-        return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " DROP COLUMN " + database.escapeColumnName(getSchemaName(), getTableName(), getColumnName());
-    }
-
-    public String getEndDelimiter(Database database) {
-        return ";";
-    }
-
-    public boolean supportsDatabase(Database database) {
-        return !(database instanceof SQLiteDatabase);
-    }
 }

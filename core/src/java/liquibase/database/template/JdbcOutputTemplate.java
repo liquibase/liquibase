@@ -12,7 +12,7 @@ import liquibase.database.statement.visitor.SqlVisitor;
 import liquibase.exception.JDBCException;
 import liquibase.util.StreamUtil;
 
-public class JdbcOutputTemplate extends JdbcTemplate {
+public class JdbcOutputTemplate extends Executor {
 
     private Writer output;
     private boolean alreadyCreatedChangeLockTable;
@@ -81,22 +81,23 @@ public class JdbcOutputTemplate extends JdbcTemplate {
 
     private void outputStatement(SqlStatement sql, List<SqlVisitor> sqlVisitors) throws JDBCException {
         try {
-            String statement = applyVisitors(sql, sqlVisitors);
-            output.write(statement);
+            for (String statement : applyVisitors(sql, sqlVisitors)) {
+                output.write(statement);
 
-            if (!statement.endsWith(";")) {
-              output.write(";");
-            }
+                if (!statement.endsWith(";")) {
+                  output.write(";");
+                }
 
-            if (database instanceof MSSQLDatabase) {
+                if (database instanceof MSSQLDatabase) {
+                    output.write(StreamUtil.getLineSeparator());
+                    output.write("GO");
+    //            } else if (database instanceof OracleDatabase) {
+    //                output.write(StreamUtil.getLineSeparator());
+    //                output.write("/");
+                }
                 output.write(StreamUtil.getLineSeparator());
-                output.write("GO");
-//            } else if (database instanceof OracleDatabase) {
-//                output.write(StreamUtil.getLineSeparator());
-//                output.write("/");
+                output.write(StreamUtil.getLineSeparator());
             }
-            output.write(StreamUtil.getLineSeparator());
-            output.write(StreamUtil.getLineSeparator());
         } catch (IOException e) {
             throw new JDBCException(e);
         }

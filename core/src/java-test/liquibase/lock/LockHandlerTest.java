@@ -8,7 +8,7 @@ import liquibase.database.statement.RawSqlStatement;
 import liquibase.database.statement.SqlStatement;
 import liquibase.database.statement.UpdateStatement;
 import liquibase.database.statement.DropTableStatement;
-import liquibase.database.template.JdbcTemplate;
+import liquibase.database.template.Executor;
 import liquibase.database.template.JdbcOutputTemplate;
 import liquibase.exception.JDBCException;
 import static org.easymock.classextension.EasyMock.*;
@@ -23,7 +23,7 @@ public class LockHandlerTest {
     @Test
     public void acquireLock_tableExistsNotLocked() throws Exception {
         Database database = createMock(Database.class);
-        JdbcTemplate template = createMock(JdbcTemplate.class);
+        Executor template = createMock(Executor.class);
         RawSqlStatement selectLockStatement = new RawSqlStatement("SELECT LOCK");
 
         expect(database.getJdbcTemplate()).andReturn(template).anyTimes();
@@ -55,7 +55,7 @@ public class LockHandlerTest {
     @Test
     public void acquireLock_tableNotExists() throws Exception {
         Database database = createMock(Database.class);
-        JdbcTemplate template = createMock(JdbcTemplate.class);
+        Executor template = createMock(Executor.class);
 
         RawSqlStatement selectLockStatement = new RawSqlStatement("SELECT LOCK");
         expect(database.getJdbcTemplate()).andReturn(template).anyTimes();
@@ -87,7 +87,7 @@ public class LockHandlerTest {
     @Test
     public void acquireLock_tableExistsIsLocked() throws Exception {
         Database database = createMock(Database.class);
-        JdbcTemplate template = createMock(JdbcTemplate.class);
+        Executor template = createMock(Executor.class);
         RawSqlStatement selectLockStatement = new RawSqlStatement("SELECT LOCK");
 
         expect(database.getJdbcTemplate()).andReturn(template).anyTimes();
@@ -111,7 +111,7 @@ public class LockHandlerTest {
     @Test
     public void releaseLock_tableExistsAndLocked() throws Exception {
         Database database = createMock(Database.class);
-        JdbcTemplate template = createMock(JdbcTemplate.class);
+        Executor template = createMock(Executor.class);
 
         expect(database.getJdbcTemplate()).andReturn(template).anyTimes();
         expect(database.doesChangeLogLockTableExist()).andReturn(true);
@@ -143,7 +143,7 @@ public class LockHandlerTest {
     @Test
     public void listLocks_tableExistsWithLock() throws Exception {
         Database database = createMock(Database.class);
-        JdbcTemplate template = createMock(JdbcTemplate.class);
+        Executor template = createMock(Executor.class);
 
         expect(database.getJdbcTemplate()).andReturn(template).anyTimes();
         expect(database.doesChangeLogLockTableExist()).andReturn(true);
@@ -177,7 +177,7 @@ public class LockHandlerTest {
     @Test
     public void listLocks_tableExistsUnlocked() throws Exception {
         Database database = createMock(Database.class);
-        JdbcTemplate template = createMock(JdbcTemplate.class);
+        Executor template = createMock(Executor.class);
 
         expect(database.getJdbcTemplate()).andReturn(template).anyTimes();
         expect(database.doesChangeLogLockTableExist()).andReturn(true);
@@ -211,7 +211,7 @@ public class LockHandlerTest {
     @Test
     public void listLocks_tableExistsNoLocks() throws Exception {
         Database database = createMock(Database.class);
-        JdbcTemplate template = createMock(JdbcTemplate.class);
+        Executor template = createMock(Executor.class);
 
         expect(database.getJdbcTemplate()).andReturn(template).anyTimes();
         expect(database.doesChangeLogLockTableExist()).andReturn(true);
@@ -260,12 +260,12 @@ public class LockHandlerTest {
                         try {
                             LockHandler.getInstance(database).reset();
 
-                            new JdbcTemplate(database).execute(new DropTableStatement(null, database.getDatabaseChangeLogTableName(), false));
+                            new Executor(database).execute(new DropTableStatement(null, database.getDatabaseChangeLogTableName(), false));
                         } catch (JDBCException e) {
                             ; //must not be there
                         }
                         try {
-                            new JdbcTemplate(database).execute(new DropTableStatement(null, database.getDatabaseChangeLogLockTableName(), false));
+                            new Executor(database).execute(new DropTableStatement(null, database.getDatabaseChangeLogLockTableName(), false));
                         } catch (JDBCException e) {
                             ; //must not be there
                         }
@@ -291,12 +291,12 @@ public class LockHandlerTest {
                         ;
 
                         try {
-                            new JdbcTemplate(database).execute(new DropTableStatement(null, database.getDatabaseChangeLogTableName(), false));
+                            new Executor(database).execute(new DropTableStatement(null, database.getDatabaseChangeLogTableName(), false));
                         } catch (JDBCException e) {
                             ; //must not be there
                         }
                         try {
-                            new JdbcTemplate(database).execute(new DropTableStatement(null, database.getDatabaseChangeLogLockTableName(), false));
+                            new Executor(database).execute(new DropTableStatement(null, database.getDatabaseChangeLogLockTableName(), false));
                         } catch (JDBCException e) {
                             ; //must not be there
                         }
@@ -323,12 +323,12 @@ public class LockHandlerTest {
                         LockHandler.getInstance(database).reset();
 
                         try {
-                            new JdbcTemplate(database).execute(new DropTableStatement(null, database.getDatabaseChangeLogTableName(), false));
+                            new Executor(database).execute(new DropTableStatement(null, database.getDatabaseChangeLogTableName(), false));
                         } catch (JDBCException e) {
                             ; //must not be there
                         }
                         try {
-                            new JdbcTemplate(database).execute(new DropTableStatement(null, database.getDatabaseChangeLogLockTableName(), false));
+                            new Executor(database).execute(new DropTableStatement(null, database.getDatabaseChangeLogLockTableName(), false));
                         } catch (JDBCException e) {
                             ; //must not be there
                         }
@@ -338,7 +338,7 @@ public class LockHandlerTest {
 //                        Database clearDatabase = database.getClass().newInstance();
 //                        clearDatabase.setConnection(database.getConnection());
 
-                        JdbcTemplate originalTemplate = database.getJdbcTemplate();
+                        Executor originalTemplate = database.getJdbcTemplate();
                         database.setJdbcTemplate(new JdbcOutputTemplate(new StringWriter(), database));
 
                         LockHandler lockHandler = LockHandler.getInstance(database);

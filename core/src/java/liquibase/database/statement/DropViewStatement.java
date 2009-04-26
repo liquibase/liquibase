@@ -20,16 +20,4 @@ public class DropViewStatement implements SqlStatement {
     public String getViewName() {
         return viewName;
     }
-
-    public String getSqlStatement(Database database) throws StatementNotSupportedOnDatabaseException {
-        return "DROP VIEW " + database.escapeViewName(getSchemaName(), getViewName());
-    }
-
-    public String getEndDelimiter(Database database) {
-        return ";";
-    }
-
-    public boolean supportsDatabase(Database datCabase) {
-        return true;
-    }
 }

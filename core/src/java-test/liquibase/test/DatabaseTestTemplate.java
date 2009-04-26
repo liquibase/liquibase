@@ -2,7 +2,7 @@ package liquibase.test;
 
 import liquibase.database.Database;
 import liquibase.database.SQLiteDatabase;
-import liquibase.database.template.JdbcTemplate;
+import liquibase.database.template.Executor;
 import liquibase.exception.MigrationFailedException;
 import liquibase.lock.LockHandler;
 import org.junit.ComparisonFailure;
@@ -23,7 +23,7 @@ public class DatabaseTestTemplate {
             if (database instanceof SQLiteDatabase) {
                 continue; //todo: find how to get tests to run correctly on SQLite
             }
-            database.setJdbcTemplate(new JdbcTemplate(database));
+            database.setJdbcTemplate(new Executor(database));
             LockHandler.getInstance(database).reset();
             if (database.getConnection() != null) {
                 LockHandler.getInstance(database).forceReleaseLock();

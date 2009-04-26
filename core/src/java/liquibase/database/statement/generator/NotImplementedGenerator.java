@@ -4,7 +4,7 @@ import liquibase.database.statement.SqlStatement;
 import liquibase.database.statement.syntax.Sql;
 import liquibase.database.Database;
 import liquibase.exception.StatementNotSupportedOnDatabaseException;
-import liquibase.exception.LiquibaseException;
+import liquibase.exception.JDBCException;
 
 public class NotImplementedGenerator implements SqlGenerator {
 
@@ -12,11 +12,15 @@ public class NotImplementedGenerator implements SqlGenerator {
         return -5;
     }
 
-    public boolean isValid(SqlStatement statement, Database database) {
+    public boolean isValidGenerator(SqlStatement statement, Database database) {
         return false;
     }
 
-    public Sql[] generateSql(SqlStatement statement, Database database) throws LiquibaseException {
+    public GeneratorValidationErrors validate(SqlStatement sqlStatement, Database database) {
+        return new GeneratorValidationErrors();
+    }
+
+    public Sql[] generateSql(SqlStatement statement, Database database) throws JDBCException {
         throw new StatementNotSupportedOnDatabaseException(statement, database);
     }
 }

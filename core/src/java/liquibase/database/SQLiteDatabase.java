@@ -122,7 +122,7 @@ public class SQLiteDatabase extends AbstractDatabase {
     }
 
     public String getAutoIncrementClause() {
-        return "";
+        return "AUTOINCREMENT";
     }
 
     public String getColumnType(String columnType, Boolean autoIncrement) {

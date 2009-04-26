@@ -571,7 +571,7 @@ public abstract class SqlDatabaseSnapshot implements DatabaseSnapshot {
 //        updateListeners("Reading unique constraints for " + database.toString() + " ...");
 //
 //        //noinspection unchecked
-//        List<String> sequenceNamess = (List<String>) new JdbcTemplate(database).queryForList(database.findUniqueConstraints(schema), String.class);
+//        List<String> sequenceNamess = (List<String>) new Executor(database).queryForList(database.findUniqueConstraints(schema), String.class);
 //
 //        for (String sequenceName : sequenceNamess) {
 //            Sequence seq = new Sequence();

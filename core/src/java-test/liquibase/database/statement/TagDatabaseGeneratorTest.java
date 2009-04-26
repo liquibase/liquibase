@@ -1,0 +1,54 @@
+package liquibase.database.statement;
+
+import liquibase.database.*;
+import liquibase.database.statement.SqlStatement;
+import liquibase.database.statement.TagDatabaseStatement;
+import liquibase.database.statement.AbstractSqStatementTest;
+import liquibase.database.structure.DatabaseSnapshot;
+import liquibase.exception.JDBCException;
+import liquibase.test.*;
+import liquibase.Liquibase;
+import liquibase.lock.LockHandler;
+import static org.junit.Assert.*;
+import org.junit.Test;
+
+public class TagDatabaseGeneratorTest extends AbstractSqStatementTest {
+
+    protected void setupDatabase(Database database) throws Exception {
+        new Liquibase(null, null, database).dropAll();
+        LockHandler.getInstance(database).reset();
+    }
+
+    protected SqlStatement createGeneratorUnderTest() {
+        return new TagDatabaseStatement(null);
+    }
+
+//    @Test
+//    public void isValidGenerator() throws Exception {
+//        new DatabaseTestTemplate().testOnAllDatabases(new DatabaseTest() {
+//            public void performTest(Database database) throws Exception {
+//                assertTrue(createGeneratorUnderTest().supportsDatabase(database));
+//            }
+//        });
+//    }
+
+    @Test
+    public void execute() throws Exception {
+        new DatabaseTestTemplate().testOnAvailableDatabases(
+                new SqlStatementDatabaseTest(null, new TagDatabaseStatement("TAG_NAME")) {
+                    protected void setup(Database database) throws Exception {
+                        new Liquibase("changelogs/common/common.tests.changelog.xml", new JUnitFileOpener(), database).update(null);
+                    }
+
+                    protected void preExecuteAssert(DatabaseSnapshot snapshot) throws JDBCException {
+                        assertFalse(snapshot.getDatabase().doesTagExist("TAG_NAME"));
+                    }
+
+                    protected void postExecuteAssert(DatabaseSnapshot snapshot) throws JDBCException {
+                        assertTrue(snapshot.getDatabase().doesTagExist("TAG_NAME"));
+                    }
+
+                });
+    }
+
+}

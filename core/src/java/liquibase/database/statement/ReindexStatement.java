@@ -21,21 +21,4 @@ public class ReindexStatement implements SqlStatement {
     public String getTableName() {
         return tableName;
     }
-
-	public String getEndDelimiter(Database database) {
-		return ";";
-	}
-
-	public String getSqlStatement(Database database)
-			throws StatementNotSupportedOnDatabaseException {
-		if (!supportsDatabase(database)) {
-			throw new StatementNotSupportedOnDatabaseException(this, database);
-		}
-		return "REINDEX "+database.escapeTableName(getSchemaName(), getTableName());
-	}
-
-	public boolean supportsDatabase(Database database) {
-		return (database instanceof SQLiteDatabase);
-	}
-
 }

@@ -17,19 +17,16 @@ public class SetTableRemarksStatement implements SqlStatement {
         this.remarks = remarks;
     }
 
-    public String getSqlStatement(Database database) throws StatementNotSupportedOnDatabaseException {
-        if (database instanceof OracleDatabase) {
-            return "COMMENT ON TABLE "+database.escapeTableName(schemaName, tableName)+" IS '"+remarks+"'";
-        } else {
-            return "ALTER TABLE "+database.escapeTableName(schemaName, tableName)+" COMMENT = '"+remarks+"'";
-        }
+    public String getSchemaName() {
+        return schemaName;
     }
 
-    public String getEndDelimiter(Database database) {
-        return ";";
+    public String getTableName() {
+        return tableName;
     }
 
-    public boolean supportsDatabase(Database database) {
-        return database instanceof MySQLDatabase || database instanceof OracleDatabase;
+    public String getRemarks() {
+        return remarks;
     }
+
 }

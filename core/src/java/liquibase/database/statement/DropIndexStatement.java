@@ -28,30 +28,4 @@ public class DropIndexStatement implements SqlStatement {
     public String getTableName() {
         return tableName;
     }
-
-    public String getSqlStatement(Database database) throws StatementNotSupportedOnDatabaseException {
-        String schemaName = getTableSchemaName();
-        
-        if (database instanceof MySQLDatabase) {
-            if (getTableName() == null) {
-                throw new StatementNotSupportedOnDatabaseException("tableName is required", this, database);
-            }
-            return "DROP INDEX " + database.escapeIndexName(null, getIndexName()) + " ON " + database.escapeTableName(schemaName, getTableName());
-        } else if (database instanceof MSSQLDatabase) {
-            if (getTableName() == null) {
-                throw new StatementNotSupportedOnDatabaseException("tableName is required", this, database);
-            }
-            return "DROP INDEX " + database.escapeTableName(schemaName, getTableName()) + "." + database.escapeIndexName(null, getIndexName());
-        }
-
-        return "DROP INDEX " + database.escapeIndexName(null, getIndexName());
-    }
-
-    public String getEndDelimiter(Database database) {
-        return ";";
-    }
-
-    public boolean supportsDatabase(Database database) {
-        return true;
-    }
 }

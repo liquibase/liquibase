@@ -4,7 +4,7 @@ package liquibase.database.template;
  * Object to represent a SQL parameter value, including parameter metadata
  * such as the SQL type and the scale for numeric values.
  * <p/>
- * <p>Designed for use with {@link JdbcTemplate}'s operations that take an array of
+ * <p>Designed for use with {@link Executor}'s operations that take an array of
  * argument values: Each such argument value may be a <code>SqlParameterValue</code>,
  * indicating the SQL type (and optionally the scale) instead of letting the
  * template guess a default type. Note that this only applies to the operations with

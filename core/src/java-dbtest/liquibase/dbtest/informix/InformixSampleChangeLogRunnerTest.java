@@ -6,7 +6,19 @@ import liquibase.dbtest.AbstractSimpleChangeLogRunnerTest;
 public class InformixSampleChangeLogRunnerTest extends AbstractSimpleChangeLogRunnerTest {
 
     public InformixSampleChangeLogRunnerTest() throws Exception {
-        super("informix", "jdbc:informix-sqli://localhost:9088/liquibase:informixserver=ol_ids_1150_1;user=liquibase;password=liquibase");
+        super("informix", "jdbc:informix-sqli://localhost:9088/liquibase:informixserver=ol_ids_1150_1");
+    }
+    
+    @Override
+    public void testRerunDiffChangeLogAltSchema() throws Exception {
+    	/*
+    	 * Informix handles schemas differently
+    	 * It is allowed to have several schemas, but all the tables
+    	 * have to have unique names, even though they are in
+    	 * different schemas.
+    	 * So this test is disabled for Informix. 
+    	 */
+    	
     }
     
 }

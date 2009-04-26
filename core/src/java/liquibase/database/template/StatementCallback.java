@@ -15,7 +15,6 @@ import java.sql.Statement;
  * <p>Used internally by JdbcTemplate, but also useful for application code.
  *
  * @author Spring Framework
- * @see JdbcTemplate#execute(StatementCallback)
  */
 interface StatementCallback {
 

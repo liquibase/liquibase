@@ -7,13 +7,10 @@ import liquibase.change.*;
 import liquibase.database.statement.*;
 import liquibase.database.statement.visitor.SqlVisitor;
 import liquibase.database.structure.*;
-import liquibase.database.template.JdbcTemplate;
+import liquibase.database.template.Executor;
 import liquibase.database.template.JdbcOutputTemplate;
 import liquibase.diff.DiffStatusListener;
-import liquibase.exception.DatabaseHistoryException;
-import liquibase.exception.DateParseException;
-import liquibase.exception.JDBCException;
-import liquibase.exception.UnsupportedChangeException;
+import liquibase.exception.*;
 import liquibase.log.LogFactory;
 import liquibase.util.ISODateFormat;
 import liquibase.util.LiquibaseUtil;
@@ -42,7 +39,7 @@ public abstract class AbstractDatabase implements Database {
 
     protected String currentDateTimeFunction;
 
-    private JdbcTemplate jdbcTemplate = new JdbcTemplate(this);
+    private Executor executor = new Executor(this);
     private List<RanChangeSet> ranChangeSetList;
     private static final DataType DATE_TYPE = new DataType("DATE", false);
     private static final DataType TIME_TYPE = new DataType("TIME", false);
@@ -1077,38 +1074,50 @@ public abstract class AbstractDatabase implements Database {
 
     public String escapeTableName(String schemaName, String tableName) {
         if (StringUtils.trimToNull(schemaName) == null || !supportsSchemas()) {
-            return getObjectEscapeCharacter() +tableName+ getObjectEscapeCharacter();
+            return escapeDatabaseObject(tableName);
         } else {
-            return getObjectEscapeCharacter() +schemaName + getObjectEscapeCharacter()+"."+getObjectEscapeCharacter() + tableName + getObjectEscapeCharacter();
+            return escapeDatabaseObject(schemaName)+"."+escapeDatabaseObject(tableName);
         }
     }
 
-    public String getObjectEscapeCharacter() {
-        return "";
+    public String escapeDatabaseObject(String objectName) {
+        return objectName;
     }
 
     public String escapeIndexName(String schemaName, String indexName) {
-        return escapeTableName(schemaName, indexName);
+        if (StringUtils.trimToNull(schemaName) == null || !supportsSchemas()) {
+            return escapeDatabaseObject(indexName);
+        } else {
+            return escapeDatabaseObject(schemaName)+"."+escapeDatabaseObject(indexName);
+        }
     }
 
     public String escapeSequenceName(String schemaName, String sequenceName) {
         if (StringUtils.trimToNull(schemaName) == null || !supportsSchemas()) {
-            return getObjectEscapeCharacter() +sequenceName+ getObjectEscapeCharacter();
+            return escapeDatabaseObject(sequenceName);
         } else {
-            return getObjectEscapeCharacter() +schemaName + getObjectEscapeCharacter()+"." +getObjectEscapeCharacter() + sequenceName+ getObjectEscapeCharacter();
+            return escapeDatabaseObject(schemaName)+"."+escapeDatabaseObject(sequenceName);
         }
     }
 
     public String escapeConstraintName(String constraintName) {
-        return getObjectEscapeCharacter() +constraintName+ getObjectEscapeCharacter();
+        return escapeDatabaseObject(constraintName);
     }
 
     public String escapeColumnName(String schemaName, String tableName, String columnName) {
-        return getObjectEscapeCharacter() +columnName+ getObjectEscapeCharacter();
+        return escapeDatabaseObject(columnName);
     }
 
     public String escapeColumnNameList(String columnNames) {
-        return columnNames;
+        StringBuffer sb = new StringBuffer();
+        for(String columnName : columnNames.split(",")) {
+            if(sb.length() > 0) {
+                sb.append(", ");
+            }
+            sb.append(escapeDatabaseObject(columnName.trim()));
+        }
+        return sb.toString();
+
     }
 
     public String convertRequestedSchemaToCatalog(String requestedSchema) throws JDBCException {
@@ -1352,16 +1361,16 @@ public abstract class AbstractDatabase implements Database {
         }
     }
 
-    public JdbcTemplate getJdbcTemplate() {
-        return jdbcTemplate;
+    public Executor getJdbcTemplate() {
+        return executor;
     }
 
-    public void setJdbcTemplate(JdbcTemplate template) {
-        if (this.jdbcTemplate != null && !this.jdbcTemplate.executesStatements() && template.executesStatements()) {
+    public void setJdbcTemplate(Executor template) {
+        if (this.executor != null && !this.executor.executesStatements() && template.executesStatements()) {
             //need to clear any history
             LockHandler.getInstance(this).reset();
         }
-        this.jdbcTemplate = template;
+        this.executor = template;
     }
 
     public boolean equals(Object o) {

@@ -27,39 +27,4 @@ public class DropPrimaryKeyStatement implements SqlStatement {
         return constraintName;
     }
 
-    public String getSqlStatement(Database database) throws StatementNotSupportedOnDatabaseException {
-    	if (!supportsDatabase(database)) {
-            throw new StatementNotSupportedOnDatabaseException(this, database);
-        }
-    	
-    	if (getConstraintName() == null) {
-            if (database instanceof MSSQLDatabase
-                    || database instanceof PostgresDatabase
-                    || database instanceof FirebirdDatabase) {
-                throw new StatementNotSupportedOnDatabaseException("Database requires a constraint name to drop the primary key", this, database);
-            }
-        }
-
-        if (database instanceof MSSQLDatabase) {
-            return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " DROP CONSTRAINT " + database.escapeConstraintName(getConstraintName());
-        } else if (database instanceof PostgresDatabase) {
-            return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " DROP CONSTRAINT " + database.escapeConstraintName(getConstraintName());
-        } else if (database instanceof FirebirdDatabase) {
-            return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " DROP CONSTRAINT "+database.escapeConstraintName(getConstraintName());
-        } else if (database instanceof OracleDatabase) {
-            return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " DROP PRIMARY KEY DROP INDEX";
-        } else if (database instanceof InformixDatabase) {
-            return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " DROP CONSTRAINT " + database.escapeConstraintName(getConstraintName());
-        }
-
-        return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " DROP PRIMARY KEY";
-    }
-
-    public String getEndDelimiter(Database database) {
-        return ";";
-    }
-
-    public boolean supportsDatabase(Database database) {
-    	return (!(database instanceof SQLiteDatabase));
-    }
 }

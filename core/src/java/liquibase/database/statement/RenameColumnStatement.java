@@ -58,43 +58,5 @@ public class RenameColumnStatement implements SqlStatement {
     public void setColumnDataType(String columnDataType) {
         this.columnDataType = columnDataType;
     }
-
-
-    public String getSqlStatement(Database database) throws StatementNotSupportedOnDatabaseException {
-        if (!supportsDatabase(database)) {
-            throw new StatementNotSupportedOnDatabaseException(this, database);
-        }
-
-        if (database instanceof MSSQLDatabase) {
-            return "exec sp_rename '" + database.escapeTableName(getSchemaName(), getTableName()) + "." + database.escapeColumnName(getSchemaName(), getTableName(), getOldColumnName()) + "', '" + database.escapeColumnName(getSchemaName(), getTableName(), getNewColumnName()) + "'";
-        } else if (database instanceof MySQLDatabase) {
-            if (getColumnDataType() == null) {
-                throw new StatementNotSupportedOnDatabaseException("columnDataType is required to rename columns", this, database);
-            }
-
-            return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " CHANGE " + database.escapeColumnName(getSchemaName(), getTableName(), getOldColumnName()) + " " + database.escapeColumnName(getSchemaName(), getTableName(), getNewColumnName()) + " " + getColumnDataType();
-        } else if (database instanceof HsqlDatabase) {
-            return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ALTER COLUMN " + database.escapeColumnName(getSchemaName(), getTableName(), getOldColumnName()) + " RENAME TO " + database.escapeColumnName(getSchemaName(), getTableName(), getNewColumnName());
-        } else if (database instanceof FirebirdDatabase) {
-            return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " ALTER COLUMN " + database.escapeColumnName(getSchemaName(), getTableName(), getOldColumnName()) + " TO " + database.escapeColumnName(getSchemaName(), getTableName(), getNewColumnName());
-        } else if ((database instanceof MaxDBDatabase)
-                // supported in Derby from version 10.3.1.4 (see "http://issues.apache.org/jira/browse/DERBY-1490")
-                || (database instanceof DerbyDatabase)
-                || (database instanceof InformixDatabase)) {
-          return "RENAME COLUMN " + database.escapeTableName(getSchemaName(), getTableName()) + "." + database.escapeColumnName(getSchemaName(), getTableName(), getOldColumnName()) + " TO " + database.escapeColumnName(getSchemaName(), getTableName(), getNewColumnName());
-        }
-
-        return "ALTER TABLE " + database.escapeTableName(getSchemaName(), getTableName()) + " RENAME COLUMN " + database.escapeColumnName(getSchemaName(), getTableName(), getOldColumnName()) + " TO " + database.escapeColumnName(getSchemaName(), getTableName(), getNewColumnName());
-    }
-
-    public String getEndDelimiter(Database database) {
-        return ";";
-    }
-
-    public boolean supportsDatabase(Database database) {
-        return !(database instanceof DB2Database
-                || database instanceof CacheDatabase
-                || database instanceof SQLiteDatabase);
-    }
 }
 

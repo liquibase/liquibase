@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <databaseChangeLog
-        xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.7"
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.10"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.7 http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.7.xsd">
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.10 http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.10.xsd">
 
     <changeSet id="1" author="nvoxland">
         <createTable schemaName="liquibaseb" tableName="person2">
@@ -198,11 +198,11 @@
     <!--</changeSet>-->
 
     <changeSet id="28" author="nvoxland">
-        <addDefaultValue schemaName="liquibaseb" tableName="address2" columnName="line2" defaultValue="N/A"/>
+        <addDefaultValue schemaName="liquibaseb" tableName="address2" columnName="line2" columnDataType="varchar(255)" defaultValue="N/A"/>
     </changeSet>
 
     <changeSet id="29" author="nvoxland">
-        <dropDefaultValue schemaName="liquibaseb" tableName="address2" columnName="line2"/>
+        <dropDefaultValue schemaName="liquibaseb" tableName="address2" columnName="line2" columnDataType="varchar(255)"/>
     </changeSet>
 
     <changeSet id="30" author="nvoxland">

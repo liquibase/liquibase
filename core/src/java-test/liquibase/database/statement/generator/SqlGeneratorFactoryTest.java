@@ -8,10 +8,7 @@ import liquibase.database.statement.SqlStatement;
 import liquibase.database.statement.CreateTableStatement;
 import liquibase.database.statement.AddDefaultValueStatement;
 import liquibase.database.statement.syntax.Sql;
-import liquibase.database.MySQLDatabase;
-import liquibase.database.Database;
-import liquibase.database.OracleDatabase;
-import liquibase.database.HsqlDatabase;
+import liquibase.database.*;
 
 import java.util.List;
 import java.util.SortedSet;
@@ -42,8 +39,12 @@ public class SqlGeneratorFactoryTest {
                 return 0;
             }
 
-            public boolean isValid(SqlStatement statement, Database database) {
+            public boolean isValidGenerator(SqlStatement statement, Database database) {
                 return false;
+            }
+
+            public GeneratorValidationErrors validate(SqlStatement sqlStatement, Database database) {
+                return new GeneratorValidationErrors();
             }
 
             public Sql[] generateSql(SqlStatement statement, Database database) {
@@ -52,6 +53,64 @@ public class SqlGeneratorFactoryTest {
         });
 
         assertEquals(1, SqlGeneratorFactory.getInstance().getGenerators().size());
+    }
+
+    @Test
+    public void unregister_instance() {
+        SqlGeneratorFactory factory = SqlGeneratorFactory.getInstance();
+
+        factory.getGenerators().clear();
+
+        assertEquals(0, factory.getGenerators().size());
+
+        AddAutoIncrementGeneratorH2 sqlGenerator = new AddAutoIncrementGeneratorH2();
+
+        factory.register(new AddAutoIncrementGenerator());
+        factory.register(sqlGenerator);
+        factory.register(new AddAutoIncrementGeneratorDB2());
+
+        assertEquals(3, factory.getGenerators().size());
+
+        factory.unregister(sqlGenerator);
+        assertEquals(2, factory.getGenerators().size());
+    }
+
+    @Test
+    public void unregister_class() {
+        SqlGeneratorFactory factory = SqlGeneratorFactory.getInstance();
+
+        factory.getGenerators().clear();
+
+        assertEquals(0, factory.getGenerators().size());
+
+        AddAutoIncrementGeneratorH2 sqlGenerator = new AddAutoIncrementGeneratorH2();
+
+        factory.register(new AddAutoIncrementGenerator());
+        factory.register(sqlGenerator);
+        factory.register(new AddAutoIncrementGeneratorDB2());
+
+        assertEquals(3, factory.getGenerators().size());
+
+        factory.unregister(AddAutoIncrementGeneratorH2.class);
+        assertEquals(2, factory.getGenerators().size());
+    }
+
+     @Test
+    public void unregister_class_doesNotExist() {
+        SqlGeneratorFactory factory = SqlGeneratorFactory.getInstance();
+
+        factory.getGenerators().clear();
+
+        assertEquals(0, factory.getGenerators().size());
+
+        factory.register(new AddAutoIncrementGenerator());
+        factory.register(new AddAutoIncrementGeneratorH2());
+        factory.register(new AddAutoIncrementGeneratorDB2());
+
+        assertEquals(3, factory.getGenerators().size());
+
+        factory.unregister(AddColumnGenerator.class);
+        assertEquals(3, factory.getGenerators().size());
     }
 
     @Test
@@ -105,7 +164,7 @@ public class SqlGeneratorFactoryTest {
     @SuppressWarnings({"UnusedDeclaration"})
     @Test
     public void getAllGenerators() {
-        SortedSet<SqlGenerator> allGenerators = SqlGeneratorFactory.getInstance().getAllGenerators(new AddAutoIncrementStatement(null, "person", "name", "varchar(255)"), new HsqlDatabase());
+        SortedSet<SqlGenerator> allGenerators = SqlGeneratorFactory.getInstance().getAllGenerators(new AddAutoIncrementStatement(null, "person", "name", "varchar(255)"), new H2Database());
 
         assertNotNull(allGenerators);
         assertEquals(2, allGenerators.size());        
@@ -117,7 +176,11 @@ public class SqlGeneratorFactoryTest {
                 return level;
             }
 
-            public boolean isValid(SqlStatement statement, Database database) {
+            public GeneratorValidationErrors validate(SqlStatement sqlStatement, Database database) {
+                return new GeneratorValidationErrors();
+            }
+
+            public boolean isValidGenerator(SqlStatement statement, Database database) {
                 return createTableStatementClass.isAssignableFrom(statement.getClass()) && sqlDatabaseClass.isAssignableFrom(database.getClass());
             }
 

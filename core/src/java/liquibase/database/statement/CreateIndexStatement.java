@@ -53,45 +53,7 @@ public class CreateIndexStatement implements SqlStatement {
         return this;
     }
 
-    public String getSqlStatement(Database database) throws StatementNotSupportedOnDatabaseException {
-        StringBuffer buffer = new StringBuffer();
-
-        buffer.append("CREATE ");
-        if (unique != null && unique) {
-            buffer.append("UNIQUE ");
-        }            
-        buffer.append("INDEX ");
-
-        buffer.append(database.escapeIndexName(null, getIndexName())).append(" ON ");
-        buffer.append(database.escapeTableName(getTableSchemaName(), getTableName())).append("(");
-        Iterator<String> iterator = Arrays.asList(getColumns()).iterator();
-        while (iterator.hasNext()) {
-            String column = iterator.next();
-            buffer.append(database.escapeColumnName(getTableSchemaName(), getTableName(), column));
-            if (iterator.hasNext()) {
-                buffer.append(", ");
-            }
-        }
-        buffer.append(")");
-
-        if (StringUtils.trimToNull(getTablespace()) != null && database.supportsTablespaces()) {
-            if (database instanceof MSSQLDatabase || database instanceof SybaseASADatabase) {
-                buffer.append(" ON ").append(getTablespace());
-            } else if (database instanceof DB2Database) {
-                buffer.append(" IN ").append(getTablespace());
-            } else {
-                buffer.append(" TABLESPACE ").append(getTablespace());
-            }
-        }
-
-        return buffer.toString();
-    }
-
-    public String getEndDelimiter(Database database) {
-        return ";";
-    }
-
-    public boolean supportsDatabase(Database database) {
-        return true;
+    public Boolean isUnique() {
+        return unique;
     }
 }

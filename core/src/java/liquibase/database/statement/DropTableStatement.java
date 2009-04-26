@@ -27,34 +27,4 @@ public class DropTableStatement implements SqlStatement {
     public boolean isCascadeConstraints() {
         return cascadeConstraints;
     }
-
-    public String getSqlStatement(Database database) throws StatementNotSupportedOnDatabaseException {
-        StringBuffer buffer = new StringBuffer();
-        buffer.append("DROP TABLE ").append(database.escapeTableName(getSchemaName(), getTableName()));
-        if (isCascadeConstraints()) {
-            if (database instanceof DerbyDatabase
-                    || database instanceof DB2Database
-                    || database instanceof MSSQLDatabase
-                    || database instanceof FirebirdDatabase
-                    || database instanceof SQLiteDatabase
-                    || database instanceof SybaseASADatabase) {
-                LogFactory.getLogger().info("Database does not support drop with cascade");
-            } else if (database instanceof OracleDatabase) {
-                buffer.append(" CASCADE CONSTRAINTS");
-            } else {
-                buffer.append(" CASCADE");
-            }
-        }
-
-        return buffer.toString();
-
-    }
-
-    public String getEndDelimiter(Database database) {
-        return ";";
-    }
-
-    public boolean supportsDatabase(Database database) {
-        return true;
-    }
 }

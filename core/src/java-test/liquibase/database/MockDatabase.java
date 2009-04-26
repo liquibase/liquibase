@@ -6,7 +6,7 @@ import liquibase.RanChangeSet;
 import liquibase.Liquibase;
 import liquibase.diff.DiffStatusListener;
 import liquibase.database.statement.SqlStatement;
-import liquibase.database.template.JdbcTemplate;
+import liquibase.database.template.Executor;
 import liquibase.database.structure.DatabaseSnapshot;
 import liquibase.exception.DatabaseHistoryException;
 import liquibase.exception.JDBCException;
@@ -159,7 +159,7 @@ public class MockDatabase implements Database {
     }
 
     public String getAutoIncrementClause() {
-        return null;
+        return "AUTO_INCREMENT_CLAUSE";
     }
 
     public SqlStatement getCommitSQL() {
@@ -454,11 +454,11 @@ public class MockDatabase implements Database {
         return null;
     }
 
-    public JdbcTemplate getJdbcTemplate() {
+    public Executor getJdbcTemplate() {
         return null;
     }
 
-    public void setJdbcTemplate(JdbcTemplate template) {
+    public void setJdbcTemplate(Executor template) {
         ;
     }
 
@@ -484,5 +484,9 @@ public class MockDatabase implements Database {
     
     public boolean isLocalDatabase() throws JDBCException {
     	return true;
+    }
+
+    public String escapeDatabaseObject(String objectName) {
+        return objectName;
     }
 }

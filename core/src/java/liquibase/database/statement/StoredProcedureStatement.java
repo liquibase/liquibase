@@ -33,19 +33,6 @@ public class StoredProcedureStatement implements SqlStatement, CallableSqlStatem
         types.add(type);
     }
 
-    public boolean supportsDatabase(Database database) {
-        return true;
-    }
-
-    public String getSqlStatement(Database database) {
-        StringBuffer string = new StringBuffer();
-        string.append("exec (").append(procedureName);
-        for (String param : getParameters()) {
-            string.append(" ").append(param).append(",");
-        }
-        return string.toString().replaceFirst(",$", ")");
-    }
-
 
     public CallableStatement createCallableStatement(Database database) throws SQLException {
         StringBuffer sql = new StringBuffer("{call " + getProcedureName());
@@ -78,8 +65,4 @@ public class StoredProcedureStatement implements SqlStatement, CallableSqlStatem
         return pstmt;
     }
 
-
-    public String getEndDelimiter(Database database) {
-        return ";";
-    }
 }

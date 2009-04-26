@@ -4,6 +4,7 @@ import liquibase.database.Database;
 import liquibase.database.statement.SqlStatement;
 import liquibase.database.statement.syntax.Sql;
 import liquibase.exception.LiquibaseException;
+import liquibase.exception.JDBCException;
 
 public interface SqlGenerator<StatementType extends SqlStatement> {
 
@@ -12,7 +13,9 @@ public interface SqlGenerator<StatementType extends SqlStatement> {
 
     public int getSpecializationLevel();
 
-    public boolean isValid(StatementType statement, Database database);
+    public boolean isValidGenerator(StatementType statement, Database database);
 
-    public Sql[] generateSql(StatementType statement, Database database) throws LiquibaseException;
+    public GeneratorValidationErrors validate(StatementType statementType, Database database);
+
+    public Sql[] generateSql(StatementType statement, Database database) throws JDBCException;
 }
