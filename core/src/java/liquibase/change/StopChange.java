@@ -41,7 +41,7 @@ public class StopChange extends AbstractChange {
     }
 
     public Node createNode(Document currentChangeLogDOM) {
-        Element element = currentChangeLogDOM.createElement(getTagName());
+        Element element = currentChangeLogDOM.createElement(getName());
         if (getMessage() != null) {
             element.setTextContent(getMessage());
         }

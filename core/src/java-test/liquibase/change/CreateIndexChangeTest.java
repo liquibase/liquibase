@@ -18,7 +18,7 @@ public class CreateIndexChangeTest extends AbstractChangeTest {
 
     @Test
     public void getRefactoringName() throws Exception {
-        assertEquals("Create Index", new CreateIndexChange().getChangeName());
+        assertEquals("Create Index", new CreateIndexChange().getDescription());
     }
 
     @Test

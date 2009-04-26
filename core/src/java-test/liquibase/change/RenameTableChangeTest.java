@@ -24,7 +24,7 @@ public class RenameTableChangeTest extends AbstractChangeTest {
 
     @Test
     public void getRefactoringName() throws Exception {
-        assertEquals("Rename Table", refactoring.getChangeName());
+        assertEquals("Rename Table", refactoring.getDescription());
     }
 
     @Test

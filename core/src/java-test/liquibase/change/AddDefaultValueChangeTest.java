@@ -132,7 +132,7 @@ public class AddDefaultValueChangeTest extends AbstractChangeTest {
     }
 
     public void getRefactoringName() throws Exception {
-        assertEquals("Add Default Value", new AddDefaultValueChange().getChangeName());
+        assertEquals("Add Default Value", new AddDefaultValueChange().getDescription());
     }
 
     @Test
@@ -179,15 +179,15 @@ public class AddDefaultValueChangeTest extends AbstractChangeTest {
         change.setDefaultValueBoolean(true);
         change.setDefaultValueDate("2007-01-02");
 
-        String md5sum1 = change.getMD5Sum();
+        String md5sum1 = change.generateCheckSum();
 
         change.setSchemaName("SCHEMA_NAME2");
-        String md5Sum2 = change.getMD5Sum();
+        String md5Sum2 = change.generateCheckSum();
 
         assertFalse(md5sum1.equals(md5Sum2));
 
         change.setSchemaName("SCHEMA_NAME");
-        String md5Sum3 = change.getMD5Sum();
+        String md5Sum3 = change.generateCheckSum();
 
         assertTrue(md5sum1.equals(md5Sum3));
 

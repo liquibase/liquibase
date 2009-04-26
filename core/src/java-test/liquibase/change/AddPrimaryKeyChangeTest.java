@@ -17,7 +17,7 @@ public class AddPrimaryKeyChangeTest extends AbstractChangeTest {
 
     @Test
     public void getRefactoringName() throws Exception {
-        assertEquals("Add Primary Key", new AddPrimaryKeyChange().getChangeName());
+        assertEquals("Add Primary Key", new AddPrimaryKeyChange().getDescription());
     }
 
     @Test

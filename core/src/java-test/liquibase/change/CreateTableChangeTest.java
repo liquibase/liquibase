@@ -30,7 +30,7 @@ public class CreateTableChangeTest extends AbstractChangeTest {
 
     @Test
     public void getRefactoringName() throws Exception {
-        assertEquals("Create Table", change.getChangeName());
+        assertEquals("Create Table", change.getDescription());
     }
 
     @Test

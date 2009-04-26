@@ -1,10 +1,5 @@
 package liquibase.change;
 
-import liquibase.database.MSSQLDatabase;
-import liquibase.database.OracleDatabase;
-import liquibase.database.statement.SqlStatement;
-import liquibase.exception.StatementNotSupportedOnDatabaseException;
-import liquibase.exception.UnsupportedChangeException;
 import liquibase.util.XMLUtil;
 import static org.junit.Assert.*;
 import org.junit.Before;
@@ -24,7 +19,7 @@ public class AbstractSQLChangeTest extends AbstractChangeTest {
 
     @Test
     public void getRefactoringName() throws Exception {
-        assertEquals("Custom SQL", new RawSQLChange().getChangeName());
+        assertEquals("Custom SQL", new RawSQLChange().getDescription());
     }
 
     public void generateStatement() throws Exception {

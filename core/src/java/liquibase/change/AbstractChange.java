@@ -1,7 +1,5 @@
 package liquibase.change;
 
-import java.io.IOException;
-import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -16,14 +14,8 @@ import liquibase.ChangeSet;
 import liquibase.FileOpener;
 import liquibase.database.Database;
 import liquibase.database.statement.SqlStatement;
-import liquibase.database.statement.syntax.Sql;
-import liquibase.database.statement.generator.SqlGenerator;
-import liquibase.database.statement.generator.SqlGeneratorFactory;
-import liquibase.database.statement.visitor.SqlVisitor;
 import liquibase.exception.*;
-import liquibase.log.LogFactory;
 import liquibase.util.MD5Util;
-import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
 import liquibase.util.XMLUtil;
 
@@ -46,8 +38,8 @@ public abstract class AbstractChange implements Change {
      * only be accessed through accessor methods
      * by its subclasses
      */
-    private final String changeName;
-    private final String tagName;
+    private final String description;
+    private final String name;
     private FileOpener fileOpener;
 
     private ChangeSet changeSet;
@@ -55,12 +47,16 @@ public abstract class AbstractChange implements Change {
     /**
      * Constructor with tag name and name
      *
-     * @param tagName the tag name for this change
-     * @param changeName the name for this change
+     * @param name the tag name for this change
+     * @param description the name for this change
      */
-    protected AbstractChange(String tagName, String changeName) {
-        this.tagName = tagName;
-        this.changeName = changeName;
+    protected AbstractChange(String name, String description) {
+        this.name = name;
+        this.description = description;
+    }
+
+    public int getSpecializationLevel() {
+        return SPECIALIZATION_LEVEL_DEFAULT;
     }
 
     //~ ------------------------------------------------------------------------------- public interface
@@ -74,59 +70,19 @@ public abstract class AbstractChange implements Change {
     }
 
     /**
-     * @see liquibase.change.Change#getChangeName()
+     * @see liquibase.change.Change#getDescription()
      */
-    public String getChangeName() {
-        return changeName;
+    public String getDescription() {
+        return description;
     }
 
     /**
-     * @see liquibase.change.Change#getTagName()
+     * @see liquibase.change.Change#getName()
      */
-    public String getTagName() {
-        return tagName;
+    public String getName() {
+        return name;
     }
 
-    /**
-     * @see liquibase.change.Change#executeStatements(liquibase.database.Database, List sqlVisitors)
-     */
-    public void executeStatements(Database database, List<SqlVisitor> sqlVisitors) throws LiquibaseException, UnsupportedChangeException {
-        SqlStatement[] statements = generateStatements(database);
-
-        execute(statements, sqlVisitors, database);
-    }
-
-    /**
-     * @see liquibase.change.Change#saveStatements(liquibase.database.Database, List sqlVisitors, java.io.Writer)
-     */
-    public void saveStatements(Database database, List<SqlVisitor> sqlVisitors, Writer writer) throws IOException, UnsupportedChangeException, StatementNotSupportedOnDatabaseException, LiquibaseException {
-        SqlStatement[] statements = generateStatements(database);
-        for (SqlStatement statement : statements) {
-            for (Sql sql : SqlGeneratorFactory.getInstance().generateSql(statement, database)) {
-                writer.append(sql.toSql()).append(sql.getEndDelimiter()).append(StreamUtil.getLineSeparator()).append(StreamUtil.getLineSeparator());
-            }
-        }
-    }
-
-    /**
-     * @see liquibase.change.Change#executeRollbackStatements(liquibase.database.Database, List sqlVisitor)
-     */
-    public void executeRollbackStatements(Database database, List<SqlVisitor> sqlVisitors) throws LiquibaseException, UnsupportedChangeException, RollbackImpossibleException {
-        SqlStatement[] statements = generateRollbackStatements(database);
-        execute(statements, sqlVisitors, database);
-    }
-
-    /**
-     * @see liquibase.change.Change#saveRollbackStatement(liquibase.database.Database, List sqlVisitor, java.io.Writer)
-     */
-    public void saveRollbackStatement(Database database, List<SqlVisitor> sqlVisitors, Writer writer) throws IOException, UnsupportedChangeException, RollbackImpossibleException, StatementNotSupportedOnDatabaseException, LiquibaseException {
-        SqlStatement[] statements = generateRollbackStatements(database);
-        for (SqlStatement statement : statements) {
-            for (Sql sql : SqlGeneratorFactory.getInstance().generateSql(statement, database)) {
-                writer.append(sql.toSql()).append(sql.getEndDelimiter()).append("\n\n");
-            }
-        }
-    }
 
     /*
      * Skipped by this skeletal implementation
@@ -142,9 +98,9 @@ public abstract class AbstractChange implements Change {
     }
 
     /**
-     * @see liquibase.change.Change#canRollBack()
+     * @see liquibase.change.Change#supportsRollback()
      */
-    public boolean canRollBack() {
+    public boolean supportsRollback() {
         return createInverses() != null;
     }
 
@@ -161,9 +117,9 @@ public abstract class AbstractChange implements Change {
      */
 
     /**
-     * @see liquibase.change.Change#getMD5Sum()
+     * @see liquibase.change.Change#generateCheckSum()
      */
-    public String getMD5Sum() {
+    public String generateCheckSum() {
         try {
             StringBuffer buffer = new StringBuffer();
             nodeToStringBuffer(createNode(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()), buffer);
@@ -241,20 +197,6 @@ public abstract class AbstractChange implements Change {
         buffer.append("</").append(node.getNodeName()).append(">");
     }
 
-    /*
-     * Executes the statements passed as argument to a target {@link Database}
-     *
-     * @param statements an array containing the SQL statements to be issued
-     * @param database the target {@link Database}
-     * @throws JDBCException if there were problems issuing the statements
-     */
-    private void execute(SqlStatement[] statements, List<SqlVisitor> sqlVisitors, Database database) throws LiquibaseException {
-        for (SqlStatement statement : statements) {
-            LogFactory.getLogger().finest("Executing Statement: " + statement);
-            database.getJdbcTemplate().execute(statement, sqlVisitors);
-        }
-    }
-    
     /**
      * Default implementation that stores the file opener provided when the
      * Change was created.

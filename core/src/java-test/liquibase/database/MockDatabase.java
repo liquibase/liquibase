@@ -4,15 +4,16 @@ import liquibase.ChangeSet;
 import liquibase.DatabaseChangeLogLock;
 import liquibase.RanChangeSet;
 import liquibase.Liquibase;
+import liquibase.change.Change;
 import liquibase.diff.DiffStatusListener;
 import liquibase.database.statement.SqlStatement;
+import liquibase.database.statement.visitor.SqlVisitor;
 import liquibase.database.template.Executor;
 import liquibase.database.structure.DatabaseSnapshot;
-import liquibase.exception.DatabaseHistoryException;
-import liquibase.exception.JDBCException;
-import liquibase.exception.LockException;
+import liquibase.exception.*;
 
 import java.io.IOException;
+import java.io.Writer;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Time;
@@ -488,5 +489,25 @@ public class MockDatabase implements Database {
 
     public String escapeDatabaseObject(String objectName) {
         return objectName;
+    }
+
+    public void executeStatements(Change change, List<SqlVisitor> sqlVisitors) throws LiquibaseException, UnsupportedChangeException {
+        ;
+    }
+
+    public void execute(SqlStatement[] statements, List<SqlVisitor> sqlVisitors) throws LiquibaseException {
+        ;
+    }
+
+    public void saveStatements(Change change, List<SqlVisitor> sqlVisitors, Writer writer) throws IOException, UnsupportedChangeException, StatementNotSupportedOnDatabaseException, LiquibaseException {
+        ;
+    }
+
+    public void executeRollbackStatements(Change change, List<SqlVisitor> sqlVisitors) throws LiquibaseException, UnsupportedChangeException, RollbackImpossibleException {
+        ;
+    }
+
+    public void saveRollbackStatement(Change change, List<SqlVisitor> sqlVisitors, Writer writer) throws IOException, UnsupportedChangeException, RollbackImpossibleException, StatementNotSupportedOnDatabaseException, LiquibaseException {
+        ;
     }
 }

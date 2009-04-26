@@ -13,7 +13,7 @@ public class DropViewChangeTest  extends AbstractChangeTest {
 
     @Test
     public void getRefactoringName() throws Exception {
-        assertEquals("Drop View", new DropViewChange().getChangeName());
+        assertEquals("Drop View", new DropViewChange().getDescription());
     }
 
     @Test

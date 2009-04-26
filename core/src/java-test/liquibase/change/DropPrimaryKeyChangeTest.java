@@ -12,7 +12,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 public class DropPrimaryKeyChangeTest extends AbstractChangeTest {
         @Test
     public void getRefactoringName() throws Exception {
-        assertEquals("Drop Primary Key", new DropPrimaryKeyChange().getChangeName());
+        assertEquals("Drop Primary Key", new DropPrimaryKeyChange().getDescription());
     }
 
     @Test

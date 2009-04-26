@@ -14,7 +14,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 public class DropForeignKeyConstraintChangeTest extends AbstractChangeTest {
  @Test
     public void getRefactoringName() throws Exception {
-        assertEquals("Drop Foreign Key Constraint", new DropForeignKeyConstraintChange().getChangeName());
+        assertEquals("Drop Foreign Key Constraint", new DropForeignKeyConstraintChange().getDescription());
     }
 
     @Test

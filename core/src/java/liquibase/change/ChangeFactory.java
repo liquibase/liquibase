@@ -68,7 +68,7 @@ public class ChangeFactory {
         try {
             for (Class<Change> changeClass : changes) {
                 Change change = changeClass.newInstance();
-                tagToClassMap.put(change.getTagName(), changeClass);
+                tagToClassMap.put(change.getName(), changeClass);
             }
         } catch (Exception e) {
             throw new RuntimeException(e);

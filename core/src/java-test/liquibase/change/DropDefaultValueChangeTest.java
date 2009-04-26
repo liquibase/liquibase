@@ -13,7 +13,7 @@ public class DropDefaultValueChangeTest extends AbstractChangeTest {
 
     @Test
     public void getRefactoringName() throws Exception {
-        assertEquals("Drop Default Value", new DropDefaultValueChange().getChangeName());
+        assertEquals("Drop Default Value", new DropDefaultValueChange().getDescription());
     }
 
     @Test

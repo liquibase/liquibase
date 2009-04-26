@@ -135,7 +135,7 @@ public class DropDefaultValueChange extends AbstractChange {
     }
 
     public Element createNode(Document currentChangeLogFileDOM) {
-        Element node = currentChangeLogFileDOM.createElement(getTagName());
+        Element node = currentChangeLogFileDOM.createElement(getName());
 
         if (getSchemaName() != null) {
             node.setAttribute("schemaName", getSchemaName());

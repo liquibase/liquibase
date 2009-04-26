@@ -1,7 +1,6 @@
 package liquibase.change;
 
 import liquibase.database.MockDatabase;
-import liquibase.database.SybaseDatabase;
 import liquibase.database.statement.AddColumnStatement;
 import liquibase.database.statement.SqlStatement;
 import static org.junit.Assert.*;
@@ -20,7 +19,7 @@ public class AddColumnChangeTest extends AbstractChangeTest {
     @Test
     public void getRefactoringName() throws Exception {
         AddColumnChange refactoring = new AddColumnChange();
-        assertEquals("Add Column", refactoring.getChangeName());
+        assertEquals("Add Column", refactoring.getDescription());
     }
 
     @Test

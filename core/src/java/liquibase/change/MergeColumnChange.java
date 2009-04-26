@@ -196,7 +196,7 @@ public class MergeColumnChange extends AbstractChange {
     }
 
     public Element createNode(Document currentChangeLogFileDOM) {
-        Element element = currentChangeLogFileDOM.createElement(getTagName());
+        Element element = currentChangeLogFileDOM.createElement(getName());
         if (getSchemaName() != null) {
             element.setAttribute("schemaName", getSchemaName());
         }
