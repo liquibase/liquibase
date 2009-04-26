@@ -13,7 +13,7 @@ public class AddAutoIncrementGenerator implements SqlGenerator<AddAutoIncrementS
     }
 
     public boolean isValidGenerator(AddAutoIncrementStatement statement, Database database) {
-        return database instanceof H2Database || (database.supportsAutoIncrement()
+        return (database.supportsAutoIncrement()
                 && !(database instanceof DerbyDatabase)
                 && !(database instanceof HsqlDatabase));
     }
@@ -27,7 +27,6 @@ public class AddAutoIncrementGenerator implements SqlGenerator<AddAutoIncrementS
                 + database.escapeTableName(statement.getSchemaName(), statement.getTableName())
                 + " MODIFY " + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(), statement.getColumnName())
                 + " " + database.getColumnType(statement.getColumnDataType(), true)
-//                + (database instanceof MySQLDatabase ? " PRIMARY KEY": "")
                 + " AUTO_INCREMENT";
         return new Sql[] {
                 new UnparsedSql(sql)

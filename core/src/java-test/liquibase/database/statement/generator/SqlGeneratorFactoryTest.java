@@ -63,7 +63,7 @@ public class SqlGeneratorFactoryTest {
 
         assertEquals(0, factory.getGenerators().size());
 
-        AddAutoIncrementGeneratorH2 sqlGenerator = new AddAutoIncrementGeneratorH2();
+        AddAutoIncrementGeneratorHsql sqlGenerator = new AddAutoIncrementGeneratorHsql();
 
         factory.register(new AddAutoIncrementGenerator());
         factory.register(sqlGenerator);
@@ -83,7 +83,7 @@ public class SqlGeneratorFactoryTest {
 
         assertEquals(0, factory.getGenerators().size());
 
-        AddAutoIncrementGeneratorH2 sqlGenerator = new AddAutoIncrementGeneratorH2();
+        AddAutoIncrementGeneratorHsql sqlGenerator = new AddAutoIncrementGeneratorHsql();
 
         factory.register(new AddAutoIncrementGenerator());
         factory.register(sqlGenerator);
@@ -91,7 +91,7 @@ public class SqlGeneratorFactoryTest {
 
         assertEquals(3, factory.getGenerators().size());
 
-        factory.unregister(AddAutoIncrementGeneratorH2.class);
+        factory.unregister(AddAutoIncrementGeneratorHsql.class);
         assertEquals(2, factory.getGenerators().size());
     }
 
@@ -104,7 +104,7 @@ public class SqlGeneratorFactoryTest {
         assertEquals(0, factory.getGenerators().size());
 
         factory.register(new AddAutoIncrementGenerator());
-        factory.register(new AddAutoIncrementGeneratorH2());
+        factory.register(new AddAutoIncrementGeneratorHsql());
         factory.register(new AddAutoIncrementGeneratorDB2());
 
         assertEquals(3, factory.getGenerators().size());

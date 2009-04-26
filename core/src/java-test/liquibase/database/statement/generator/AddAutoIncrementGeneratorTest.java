@@ -32,14 +32,13 @@ public class AddAutoIncrementGeneratorTest extends AbstractSqlGeneratorTest {
     public void generateSql_noSchema() throws Exception {
         AddAutoIncrementStatement statement = new AddAutoIncrementStatement(null, "table_name", "id", "int");
         
-        testSqlOnAllExcept("ALTER TABLE [table_name] MODIFY [id] int AUTO_INCREMENT", statement, MySQLDatabase.class, PostgresDatabase.class);
-        testSqlOn("ALTER TABLE [table_name] MODIFY [id] int PRIMARY KEY AUTO_INCREMENT", statement, MySQLDatabase.class);
+        testSqlOnAllExcept("ALTER TABLE [table_name] MODIFY [id] int AUTO_INCREMENT", statement, PostgresDatabase.class);
         testSqlOn("alter table [table_name] modify id serial auto_increment", statement, PostgresDatabase.class);
     }
 
 
     @Override
     protected boolean shouldBeImplementation(Database database) {
-        return database.supportsAutoIncrement() && !(database instanceof DerbyDatabase) && !(database instanceof HsqlDatabase);
+        return database.supportsAutoIncrement() && !(database instanceof DerbyDatabase);
     }
 }
