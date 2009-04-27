@@ -50,7 +50,7 @@ public class AddForeignKeyConstraintChangeTest  extends AbstractChangeTest {
     }
 
       public void getRefactoringName() throws Exception {
-        assertEquals("Add Foreign Key Constraint", new AddForeignKeyConstraintChange().getDescription());
+        assertEquals("Add Foreign Key Constraint", new AddForeignKeyConstraintChange().getChangeDescription());
     }
 
     @Test

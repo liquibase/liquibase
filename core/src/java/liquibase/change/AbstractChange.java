@@ -38,8 +38,8 @@ public abstract class AbstractChange implements Change {
      * only be accessed through accessor methods
      * by its subclasses
      */
-    private final String description;
-    private final String name;
+    private final String changeDescription;
+    private final String changeName;
     private FileOpener fileOpener;
 
     private ChangeSet changeSet;
@@ -47,16 +47,20 @@ public abstract class AbstractChange implements Change {
     /**
      * Constructor with tag name and name
      *
-     * @param name the tag name for this change
-     * @param description the name for this change
+     * @param changeName the tag name for this change
+     * @param changeDescription the name for this change
      */
-    protected AbstractChange(String name, String description) {
-        this.name = name;
-        this.description = description;
+    protected AbstractChange(String changeName, String changeDescription) {
+        this.changeName = changeName;
+        this.changeDescription = changeDescription;
     }
 
     public int getSpecializationLevel() {
         return SPECIALIZATION_LEVEL_DEFAULT;
+    }
+
+    public boolean supports(Database database) {
+        return true;
     }
 
     //~ ------------------------------------------------------------------------------- public interface
@@ -70,17 +74,17 @@ public abstract class AbstractChange implements Change {
     }
 
     /**
-     * @see liquibase.change.Change#getDescription()
+     * @see liquibase.change.Change#getChangeDescription()
      */
-    public String getDescription() {
-        return description;
+    public String getChangeDescription() {
+        return changeDescription;
     }
 
     /**
-     * @see liquibase.change.Change#getName()
+     * @see liquibase.change.Change#getChangeName()
      */
-    public String getName() {
-        return name;
+    public String getChangeName() {
+        return changeName;
     }
 
 

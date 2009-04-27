@@ -425,10 +425,10 @@ public class ChangeSet {
             } else if (changeCount > 1) {
                 returnString.append(" (x").append(changeCount).append(")");
                 returnString.append(", ");
-                returnString.append(change.getDescription());
+                returnString.append(change.getChangeDescription());
                 changeCount = 1;
             } else {
-                returnString.append(", ").append(change.getDescription());
+                returnString.append(", ").append(change.getChangeDescription());
                 changeCount = 1;
             }
             lastChangeClass = change.getClass();

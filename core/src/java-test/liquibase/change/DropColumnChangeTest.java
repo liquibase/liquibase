@@ -16,7 +16,7 @@ public class DropColumnChangeTest extends AbstractChangeTest {
 
     @Test
     public void getRefactoringName() throws Exception {
-        assertEquals("Drop Column", new DropColumnChange().getDescription());
+        assertEquals("Drop Column", new DropColumnChange().getChangeDescription());
     }
 
     @Test

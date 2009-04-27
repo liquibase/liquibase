@@ -1,9 +1,10 @@
 package liquibase.change;
 
-import liquibase.change.custom.CustomChangeWrapper;
+import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.PluginUtil;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Factory class for constructing the correct liquibase.change.Change implementation based on the tag name.
@@ -14,83 +15,70 @@ import java.util.Map;
  */
 public class ChangeFactory {
 
-    @SuppressWarnings("unchecked")
-	private final Map<String, Class> tagToClassMap;
+    private static ChangeFactory instance = new ChangeFactory();
 
-    private static final ChangeFactory instance = new ChangeFactory();
+    private Map<String, Class<? extends Change>> registry = new ConcurrentHashMap<String, Class<? extends Change>>();
 
-    @SuppressWarnings("unchecked")
-	private ChangeFactory() {
-        tagToClassMap = new HashMap<String, Class>();
-        Class[] changes = new Class[]{
-                AddColumnChange.class,
-                AlterSequenceChange.class,
-                CreateIndexChange.class,
-                CreateSequenceChange.class,
-                CreateTableChange.class,
-                DropColumnChange.class,
-                DropIndexChange.class,
-                DropSequenceChange.class,
-                DropTableChange.class,
-                InsertDataChange.class,
-                ModifyColumnChange.class,
-                RawSQLChange.class,
-                RenameColumnChange.class,
-                RenameTableChange.class,
-                AddNotNullConstraintChange.class,
-                DropNotNullConstraintChange.class,
-                CreateViewChange.class,
-                DropViewChange.class,
-                MergeColumnChange.class,
-                RenameViewChange.class,
-                AddForeignKeyConstraintChange.class,
-                DropForeignKeyConstraintChange.class,
-                AddLookupTableChange.class,
-                AddPrimaryKeyChange.class,
-                DropPrimaryKeyChange.class,
-                AddAutoIncrementChange.class,
-                AddDefaultValueChange.class,
-                DropDefaultValueChange.class,
-                AddUniqueConstraintChange.class,
-                DropUniqueConstraintChange.class,
-                SQLFileChange.class,
-                CustomChangeWrapper.class,
-                CreateProcedureChange.class,
-                ExecuteShellCommandChange.class,
-                UpdateDataChange.class,
-                DeleteDataChange.class,
-                TagDatabaseChange.class,
-                LoadDataChange.class,
-                DropAllForeignKeyConstraintsChange.class,
-                StopChange.class,
-        };
-
+    private ChangeFactory() {
+        Class[] classes;
         try {
-            for (Class<Change> changeClass : changes) {
-                Change change = changeClass.newInstance();
-                tagToClassMap.put(change.getName(), changeClass);
+            classes = PluginUtil.getClasses("liquibase.change", Change.class);
+
+            for (Class clazz : classes) {
+                if (Change.class.isAssignableFrom(clazz) || Change.class.isAssignableFrom(clazz.getSuperclass())) {
+                    register(clazz);
+                }
             }
+
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+
     }
 
+    /**
+     * Return singleton SqlGeneratorFactory
+     */
     public static ChangeFactory getInstance() {
         return instance;
     }
 
-    /**
-     * Create a new Change subclass based on the given tag name.
-     */
-    public Change create(String tagName) {
-        Class<?> aClass = tagToClassMap.get(tagName);
-        if (aClass == null) {
-            throw new RuntimeException("Unknown tag: " + tagName);
-        }
+    public static void reset() {
+        instance = new ChangeFactory();
+    }
+
+
+    public void register(Class<? extends Change> changeClass) {
         try {
-            return (Change) aClass.newInstance();
+            registry.put(changeClass.newInstance().getChangeName(), changeClass);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new UnexpectedLiquibaseException(e);
         }
     }
+
+    public void unregister(String name) {
+        registry.remove(name);
+    }
+
+    /**
+     * Internal method for retrieving all generators.  Mainly exists for unit testing.
+     */
+    protected Map<String, Class<? extends Change>> getRegistry() {
+        return registry;
+    }
+
+    public Change create(String name) {
+        Class<? extends Change> aClass = registry.get(name);
+
+        if (aClass == null) {
+            return null;
+        }
+        
+        try {
+            return aClass.newInstance();
+        } catch (Exception e) {
+            throw new UnexpectedLiquibaseException(e);
+        }
+    }
+
 }

@@ -80,7 +80,7 @@ public class RenameViewChange extends AbstractChange {
     }
 
     public Element createNode(Document currentChangeLogFileDOM) {
-        Element element = currentChangeLogFileDOM.createElement(getName());
+        Element element = currentChangeLogFileDOM.createElement(getChangeName());
         if (getSchemaName() != null) {
             element.setAttribute("schemaName", getSchemaName());
         }

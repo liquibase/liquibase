@@ -143,7 +143,7 @@ public class DropUniqueConstraintChange extends AbstractChange {
     }
 
     public Element createNode(Document currentChangeLogFileDOM) {
-        Element node = currentChangeLogFileDOM.createElement(getName());
+        Element node = currentChangeLogFileDOM.createElement(getChangeName());
         if (getSchemaName() != null) {
             node.setAttribute("schemaName", getSchemaName());
         }

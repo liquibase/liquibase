@@ -22,7 +22,7 @@ public class TagDatabaseChangeTest extends AbstractChangeTest {
 
     @Test
     public void getRefactoringName() throws Exception {
-        assertEquals("Tag Database", refactoring.getDescription());
+        assertEquals("Tag Database", refactoring.getChangeDescription());
     }
 
     @Test

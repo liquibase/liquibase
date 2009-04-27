@@ -19,7 +19,7 @@ public class AbstractSQLChangeTest extends AbstractChangeTest {
 
     @Test
     public void getRefactoringName() throws Exception {
-        assertEquals("Custom SQL", new RawSQLChange().getDescription());
+        assertEquals("Custom SQL", new RawSQLChange().getChangeDescription());
     }
 
     public void generateStatement() throws Exception {

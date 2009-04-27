@@ -23,7 +23,7 @@ public class DropUniqueConstraintChangeTest  extends AbstractChangeTest {
 
     @Test
     public void getRefactoringName() throws Exception {
-        assertEquals("Drop Unique Constraint", change.getDescription());
+        assertEquals("Drop Unique Constraint", change.getChangeDescription());
     }
 
     @Test

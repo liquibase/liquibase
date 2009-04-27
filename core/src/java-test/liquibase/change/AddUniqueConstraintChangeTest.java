@@ -15,7 +15,7 @@ public class AddUniqueConstraintChangeTest extends AbstractChangeTest {
 
     @Test
     public void getRefactoringName() throws Exception {
-        assertEquals("Add Unique Constraint", new AddUniqueConstraintChange().getDescription());
+        assertEquals("Add Unique Constraint", new AddUniqueConstraintChange().getChangeDescription());
     }
 
     @Test

@@ -132,7 +132,7 @@ public class AddDefaultValueChangeTest extends AbstractChangeTest {
     }
 
     public void getRefactoringName() throws Exception {
-        assertEquals("Add Default Value", new AddDefaultValueChange().getDescription());
+        assertEquals("Add Default Value", new AddDefaultValueChange().getChangeDescription());
     }
 
     @Test

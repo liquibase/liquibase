@@ -148,7 +148,7 @@ public abstract class SQLFileChangeTest extends AbstractChangeTest {
 
     @Test
 	public void getRefactoringName() throws Exception {
-		assertEquals("SQL From File", change.getDescription());
+		assertEquals("SQL From File", change.getChangeDescription());
 
 	}
 

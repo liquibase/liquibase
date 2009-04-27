@@ -16,7 +16,7 @@ public class DropIndexChangeTest extends AbstractChangeTest {
 
     @Test
     public void getRefactoringName() throws Exception {
-        assertEquals("Drop Index", new DropIndexChange().getDescription());
+        assertEquals("Drop Index", new DropIndexChange().getChangeDescription());
     }
 
     @Test

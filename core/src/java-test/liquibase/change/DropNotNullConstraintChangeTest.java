@@ -16,7 +16,7 @@ public class DropNotNullConstraintChangeTest extends AbstractChangeTest {
 
     @Test
     public void getRefactoringName() throws Exception {
-        assertEquals("Drop Not-Null Constraint", new DropNotNullConstraintChange().getDescription());
+        assertEquals("Drop Not-Null Constraint", new DropNotNullConstraintChange().getChangeDescription());
     }
 
     @Test
