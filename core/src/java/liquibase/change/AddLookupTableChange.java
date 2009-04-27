@@ -214,7 +214,7 @@ public class AddLookupTableChange extends AbstractChange {
     }
 
     public Element createNode(Document currentChangeLogFileDOM) {
-        Element node = currentChangeLogFileDOM.createElement(getName());
+        Element node = currentChangeLogFileDOM.createElement(getChangeName());
         if (getExistingTableSchemaName() != null) {
             node.setAttribute("newTableSchemaName", getExistingTableSchemaName());
         }

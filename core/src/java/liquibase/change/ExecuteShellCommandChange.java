@@ -109,7 +109,7 @@ public class ExecuteShellCommandChange extends AbstractChange {
     }
 
     public Element createNode(Document currentChangeLogDOM) {
-        Element root = currentChangeLogDOM.createElement(getName());
+        Element root = currentChangeLogDOM.createElement(getChangeName());
         root.setAttribute("executable", getExecutable());
 
         for (String arg : args) {

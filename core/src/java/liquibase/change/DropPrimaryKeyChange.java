@@ -119,7 +119,7 @@ public class DropPrimaryKeyChange extends AbstractChange {
     }
 
     public Element createNode(Document currentChangeLogFileDOM) {
-        Element node = currentChangeLogFileDOM.createElement(getName());
+        Element node = currentChangeLogFileDOM.createElement(getChangeName());
         if (getSchemaName() != null) {
             node.setAttribute("schemaName", getSchemaName());
         }

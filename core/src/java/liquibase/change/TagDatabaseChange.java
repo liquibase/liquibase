@@ -46,7 +46,7 @@ public class TagDatabaseChange extends AbstractChange{
     }
 
     public Element createNode(Document currentChangeLogDOM) {
-        Element sqlElement = currentChangeLogDOM.createElement(getName());
+        Element sqlElement = currentChangeLogDOM.createElement(getChangeName());
         sqlElement.setAttribute("tag", getTag());
         return sqlElement;
 

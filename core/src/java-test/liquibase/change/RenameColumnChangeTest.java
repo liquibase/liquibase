@@ -30,7 +30,7 @@ public class RenameColumnChangeTest extends AbstractChangeTest {
 
     @Test
     public void getRefactoringName() throws Exception {
-        assertEquals("Rename Column", refactoring.getDescription());
+        assertEquals("Rename Column", refactoring.getChangeDescription());
     }
 
     @Test

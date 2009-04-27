@@ -41,7 +41,7 @@ public class PendingSQLWriter extends HTMLWriter {
             try {
                 thisChangeSet.execute(liquibase.getDatabase());
             } catch (MigrationFailedException e) {
-                fileWriter.append("EXECUTION ERROR: ").append(change.getDescription()).append(": ").append(e.getMessage()).append("\n\n");
+                fileWriter.append("EXECUTION ERROR: ").append(change.getChangeDescription()).append(": ").append(e.getMessage()).append("\n\n");
             }
         }
         fileWriter.append("</pre></code>");

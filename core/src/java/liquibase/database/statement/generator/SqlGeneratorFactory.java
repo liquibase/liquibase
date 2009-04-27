@@ -4,6 +4,7 @@ import liquibase.database.statement.SqlStatement;
 import liquibase.database.statement.syntax.Sql;
 import liquibase.database.Database;
 import liquibase.exception.JDBCException;
+import liquibase.PluginUtil;
 
 import java.util.*;
 import java.io.IOException;
@@ -26,12 +27,10 @@ public class SqlGeneratorFactory {
     private SqlGeneratorFactory() {
         Class[] classes;
         try {
-            classes = getClasses("liquibase.database.statement.generator");
+            classes = PluginUtil.getClasses("liquibase.database.statement.generator", SqlGenerator.class);
 
             for (Class clazz : classes) {
-                if (SqlGenerator.class.isAssignableFrom(clazz) || SqlGenerator.class.isAssignableFrom(clazz.getSuperclass())) {
                     register((SqlGenerator) clazz.getConstructor().newInstance());
-                }
             }
 
         } catch (Exception e) {
@@ -115,46 +114,6 @@ public class SqlGeneratorFactory {
         } else {
             return validGenerators.first();
         }
-    }
-
-    private Class[] getClasses(String packageName) throws ClassNotFoundException, IOException {
-        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-        assert classLoader != null;
-        String path = packageName.replace('.', '/');
-        Enumeration<URL> resources = classLoader.getResources(path);
-        List<File> dirs = new ArrayList<File>();
-        while (resources.hasMoreElements()) {
-            URL resource = resources.nextElement();
-            dirs.add(new File(resource.getFile().replace("%20", " ")));
-        }
-        ArrayList<Class> classes = new ArrayList<Class>();
-        for (File directory : dirs) {
-            classes.addAll(findClasses(directory, packageName));
-        }
-        return classes.toArray(new Class[classes.size()]);
-    }
-
-    private List<Class> findClasses(File directory, String packageName) throws ClassNotFoundException {
-        List<Class> classes = new ArrayList<Class>();
-        if (!directory.exists()) {
-            return classes;
-        }
-        File[] files = directory.listFiles();
-        for (File file : files) {
-            if (file.isDirectory()) {
-                assert !file.getName().contains(".");
-                classes.addAll(findClasses(file, packageName + "." + file.getName()));
-            } else if (file.getName().endsWith(".class")) {
-                Class<?> clazz = Class.forName(packageName + '.' + file.getName().substring(0, file.getName().length() - 6));
-                if (clazz.getName().indexOf("SqlGeneratorFactoryTest") < 0
-                        && !clazz.isInterface()) {
-                    classes.add(clazz);
-                }
-
-
-            }
-        }
-        return classes;
     }
 
     public Sql[] generateSql(SqlStatement statement, Database database) throws JDBCException {

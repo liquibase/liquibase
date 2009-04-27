@@ -91,7 +91,7 @@ public class DropForeignKeyConstraintChange extends AbstractChange {
     }
 
     public Element createNode(Document currentChangeLogFileDOM) {
-        Element node = currentChangeLogFileDOM.createElement(getName());
+        Element node = currentChangeLogFileDOM.createElement(getChangeName());
 
         if (getBaseTableSchemaName() != null) {
             node.setAttribute("baseTableSchemaName", getBaseTableSchemaName());

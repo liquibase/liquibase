@@ -59,19 +59,21 @@ public interface Change {
     /**
      * @return A descripton of the change
      */
-    public String getDescription();
+    public String getChangeDescription();
 
     /**
      * @return The "name" of the change.  The name is used for looking up a change based on an XML tag and other times
      *         where you want to dynamically generate a Change implementation.
      */
-    public String getName();
+    public String getChangeName();
 
     /**
      * @return The "speciliazation" that this change is designed for.  Higher specialiazations will take precidence.
      */
     public int getSpecializationLevel();
 
+    boolean supports(Database database);
+    
     /**
      * This method will be called after the no arg constructor and all of the
      * properties have been set to allow the task to do any heavy tasks or

@@ -34,23 +34,7 @@ public class SqlGeneratorFactoryTest {
 
         assertEquals(0, SqlGeneratorFactory.getInstance().getGenerators().size());
 
-        SqlGeneratorFactory.getInstance().register(new SqlGenerator() {
-            public int getSpecializationLevel() {
-                return 0;
-            }
-
-            public boolean isValidGenerator(SqlStatement statement, Database database) {
-                return false;
-            }
-
-            public GeneratorValidationErrors validate(SqlStatement sqlStatement, Database database) {
-                return new GeneratorValidationErrors();
-            }
-
-            public Sql[] generateSql(SqlStatement statement, Database database) {
-                return new Sql[0];
-            }
-        });
+        SqlGeneratorFactory.getInstance().register(new MockSqlGenerator());
 
         assertEquals(1, SqlGeneratorFactory.getInstance().getGenerators().size());
     }
@@ -191,5 +175,23 @@ public class SqlGeneratorFactoryTest {
         SqlGeneratorFactory.getInstance().register(generator);
 
         return generator;
+    }
+
+    private static class MockSqlGenerator implements SqlGenerator {
+        public int getSpecializationLevel() {
+            return 0;
+        }
+
+        public boolean isValidGenerator(SqlStatement statement, Database database) {
+            return false;
+        }
+
+        public GeneratorValidationErrors validate(SqlStatement sqlStatement, Database database) {
+            return new GeneratorValidationErrors();
+        }
+
+        public Sql[] generateSql(SqlStatement statement, Database database) {
+            return new Sql[0];
+        }
     }
 }

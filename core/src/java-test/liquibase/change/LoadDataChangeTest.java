@@ -17,7 +17,7 @@ public class LoadDataChangeTest extends AbstractChangeTest {
 
     @Test
     public void getRefactoringName() throws Exception {
-        assertEquals("Load Data", new LoadDataChange().getDescription());
+        assertEquals("Load Data", new LoadDataChange().getChangeDescription());
     }
 
     @Test

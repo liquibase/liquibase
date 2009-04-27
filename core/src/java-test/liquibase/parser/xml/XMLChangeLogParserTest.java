@@ -39,7 +39,7 @@ public class XMLChangeLogParserTest {
         assertEquals("Some comments go here", changeSet.getComments());
 
         Change change = changeSet.getChanges().get(0);
-        assertEquals("createTable", change.getName());
+        assertEquals("createTable", change.getChangeName());
         assertTrue(change instanceof CreateTableChange);
     }
 
@@ -64,7 +64,7 @@ public class XMLChangeLogParserTest {
         assertFalse(changeSet.shouldRunOnChange());
 
         Change change = changeSet.getChanges().get(0);
-        assertEquals("createTable", change.getName());
+        assertEquals("createTable", change.getChangeName());
         assertTrue(change instanceof CreateTableChange);
 
         // change 1
@@ -81,11 +81,11 @@ public class XMLChangeLogParserTest {
         assertTrue(changeSet.getRollBackChanges()[1] instanceof RawSQLChange);
 
         change = changeSet.getChanges().get(0);
-        assertEquals("addColumn", change.getName());
+        assertEquals("addColumn", change.getChangeName());
         assertTrue(change instanceof AddColumnChange);
 
         change = changeSet.getChanges().get(1);
-        assertEquals("addColumn", change.getName());
+        assertEquals("addColumn", change.getChangeName());
         assertTrue(change instanceof AddColumnChange);
 
         // change 2
@@ -99,7 +99,7 @@ public class XMLChangeLogParserTest {
         assertFalse(changeSet.shouldRunOnChange());
 
         change = changeSet.getChanges().get(0);
-        assertEquals("createTable", change.getName());
+        assertEquals("createTable", change.getChangeName());
         assertTrue(change instanceof CreateTableChange);
 
     
@@ -183,7 +183,7 @@ public class XMLChangeLogParserTest {
 
 
         Change change = changeSet.getChanges().get(0);
-        assertEquals("createTable", change.getName());
+        assertEquals("createTable", change.getChangeName());
         assertTrue(change instanceof CreateTableChange);
         assertEquals("employee", ((CreateTableChange) change).getTableName());
 
@@ -195,7 +195,7 @@ public class XMLChangeLogParserTest {
         assertEquals("liquibase/parser/xml/simpleChangeLog.xml", changeSet.getFilePath());
 
         change = changeSet.getChanges().get(0);
-        assertEquals("createTable", change.getName());
+        assertEquals("createTable", change.getChangeName());
         assertTrue(change instanceof CreateTableChange);
         assertEquals("person", ((CreateTableChange) change).getTableName());
 
@@ -207,7 +207,7 @@ public class XMLChangeLogParserTest {
         assertEquals(nestedFileName, changeSet.getFilePath());
 
         change = changeSet.getChanges().get(0);
-        assertEquals("addColumn", change.getName());
+        assertEquals("addColumn", change.getChangeName());
         assertTrue(change instanceof AddColumnChange);
         assertEquals("employee", ((AddColumnChange) change).getTableName());
 	}
@@ -252,7 +252,7 @@ public class XMLChangeLogParserTest {
         assertEquals(doubleNestedFileName, changeSet.getFilePath());
 
         Change change = changeSet.getChanges().get(0);
-        assertEquals("createTable", change.getName());
+        assertEquals("createTable", change.getChangeName());
         assertTrue(change instanceof CreateTableChange);
         assertEquals("partner", ((CreateTableChange) change).getTableName());
 
@@ -264,7 +264,7 @@ public class XMLChangeLogParserTest {
         assertEquals(nestedFileName, changeSet.getFilePath());
 
         change = changeSet.getChanges().get(0);
-        assertEquals("createTable", change.getName());
+        assertEquals("createTable", change.getChangeName());
         assertTrue(change instanceof CreateTableChange);
         assertEquals("employee", ((CreateTableChange) change).getTableName());
 
@@ -276,7 +276,7 @@ public class XMLChangeLogParserTest {
         assertEquals("liquibase/parser/xml/simpleChangeLog.xml", changeSet.getFilePath());
 
         change = changeSet.getChanges().get(0);
-        assertEquals("createTable", change.getName());
+        assertEquals("createTable", change.getChangeName());
         assertTrue(change instanceof CreateTableChange);
         assertEquals("person", ((CreateTableChange) change).getTableName());
 
@@ -288,7 +288,7 @@ public class XMLChangeLogParserTest {
         assertEquals(nestedFileName, changeSet.getFilePath());
 
         change = changeSet.getChanges().get(0);
-        assertEquals("addColumn", change.getName());
+        assertEquals("addColumn", change.getChangeName());
         assertTrue(change instanceof AddColumnChange);
         assertEquals("employee", ((AddColumnChange) change).getTableName());
 	}
