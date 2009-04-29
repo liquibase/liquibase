@@ -6,7 +6,6 @@ import liquibase.database.statement.syntax.UnparsedSql;
 import liquibase.database.statement.ForeignKeyConstraint;
 import liquibase.database.statement.UniqueConstraint;
 import liquibase.database.statement.CreateTableStatement;
-import liquibase.exception.JDBCException;
 import liquibase.util.StringUtils;
 import liquibase.log.LogFactory;
 
@@ -26,7 +25,7 @@ public class CreateTableGenerator implements SqlGenerator<CreateTableStatement> 
         return new GeneratorValidationErrors();
     }
 
-    public Sql[] generateSql(CreateTableStatement statement, Database database) throws JDBCException {
+    public Sql[] generateSql(CreateTableStatement statement, Database database) {
             StringBuffer buffer = new StringBuffer();
         buffer.append("CREATE TABLE ").append(database.escapeTableName(statement.getSchemaName(), statement.getTableName())).append(" ");
         buffer.append("(");

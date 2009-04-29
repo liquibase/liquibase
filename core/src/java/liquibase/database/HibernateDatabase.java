@@ -6,6 +6,7 @@ import liquibase.database.statement.visitor.SqlVisitor;
 import liquibase.database.template.Executor;
 import liquibase.database.structure.DatabaseSnapshot;
 import liquibase.database.structure.HibernateDatabaseSnapshot;
+import liquibase.database.structure.DatabaseObject;
 import liquibase.ChangeSet;
 import liquibase.RanChangeSet;
 import liquibase.change.Change;
@@ -28,6 +29,10 @@ public class HibernateDatabase implements Database {
 
     public HibernateDatabase(String configFile) {
         this.configFile = configFile;
+    }
+
+    public DatabaseObject[] getContainingObjects() {
+        return null;
     }
 
     public DatabaseSnapshot createDatabaseSnapshot(String schema, Set<DiffStatusListener> statusListeners) throws JDBCException {

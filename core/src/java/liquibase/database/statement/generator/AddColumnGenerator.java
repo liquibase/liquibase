@@ -1,11 +1,11 @@
 package liquibase.database.statement.generator;
 
 import liquibase.database.*;
+import liquibase.database.structure.Column;
+import liquibase.database.structure.Table;
 import liquibase.database.statement.AddColumnStatement;
 import liquibase.database.statement.syntax.Sql;
 import liquibase.database.statement.syntax.UnparsedSql;
-import liquibase.exception.StatementNotSupportedOnDatabaseException;
-import liquibase.exception.JDBCException;
 
 public class AddColumnGenerator implements SqlGenerator<AddColumnStatement> {
     
@@ -34,7 +34,7 @@ public class AddColumnGenerator implements SqlGenerator<AddColumnStatement> {
         return validationErrors;
     }
 
-    public Sql[] generateSql(AddColumnStatement statement, Database database) throws JDBCException {
+    public Sql[] generateSql(AddColumnStatement statement, Database database) {
 
         String alterTable = "ALTER TABLE " + database.escapeTableName(statement.getSchemaName(), statement.getTableName()) + " ADD " + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " " + database.getColumnType(statement.getColumnType(), statement.isAutoIncrement());
 
@@ -57,7 +57,9 @@ public class AddColumnGenerator implements SqlGenerator<AddColumnStatement> {
         alterTable += getDefaultClause(statement, database);
 
         return new Sql[]{
-                new UnparsedSql(alterTable)
+                new UnparsedSql(alterTable, new Column()
+                        .setTable(new Table(statement.getTableName()).setSchema(statement.getSchemaName()))
+                        .setName(statement.getColumnName()))
         };
     }
 

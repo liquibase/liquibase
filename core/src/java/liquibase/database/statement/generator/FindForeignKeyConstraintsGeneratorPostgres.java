@@ -5,7 +5,6 @@ import liquibase.database.statement.syntax.Sql;
 import liquibase.database.statement.syntax.UnparsedSql;
 import liquibase.database.Database;
 import liquibase.database.PostgresDatabase;
-import liquibase.exception.JDBCException;
 
 public class FindForeignKeyConstraintsGeneratorPostgres implements SqlGenerator<FindForeignKeyConstraintsStatement> {
     public int getSpecializationLevel() {
@@ -20,7 +19,7 @@ public class FindForeignKeyConstraintsGeneratorPostgres implements SqlGenerator<
         return new GeneratorValidationErrors();
     }
 
-    public Sql[] generateSql(FindForeignKeyConstraintsStatement statement, Database database) throws JDBCException {
+    public Sql[] generateSql(FindForeignKeyConstraintsStatement statement, Database database) {
          StringBuilder sb = new StringBuilder();
 
             sb.append("SELECT ");

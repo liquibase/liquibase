@@ -4,7 +4,6 @@ import liquibase.database.statement.DropTableStatement;
 import liquibase.database.statement.syntax.Sql;
 import liquibase.database.statement.syntax.UnparsedSql;
 import liquibase.database.*;
-import liquibase.exception.JDBCException;
 import liquibase.log.LogFactory;
 
 public class DropTableGenerator implements SqlGenerator<DropTableStatement> {
@@ -20,7 +19,7 @@ public class DropTableGenerator implements SqlGenerator<DropTableStatement> {
         return new GeneratorValidationErrors();
     }
 
-    public Sql[] generateSql(DropTableStatement statement, Database database) throws JDBCException {
+    public Sql[] generateSql(DropTableStatement statement, Database database) {
         StringBuffer buffer = new StringBuffer();
         buffer.append("DROP TABLE ").append(database.escapeTableName(statement.getSchemaName(), statement.getTableName()));
         if (statement.isCascadeConstraints()) {

@@ -31,8 +31,16 @@ public class Column implements DatabaseObject, Comparable<Column> {
         return table;
     }
 
-    public void setTable(Table table) {
+    public DatabaseObject[] getContainingObjects() {
+        return new DatabaseObject[] {
+                getTable()
+        };
+    }
+
+    public Column setTable(Table table) {
         this.table = table;
+
+        return this;
     }
 
 
@@ -40,16 +48,20 @@ public class Column implements DatabaseObject, Comparable<Column> {
         return view;
     }
 
-    public void setView(View view) {
+    public Column setView(View view) {
         this.view = view;
+
+        return this;
     }
 
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
+    public Column setName(String name) {
         this.name = name;
+
+        return this;
     }
 
 
@@ -57,32 +69,40 @@ public class Column implements DatabaseObject, Comparable<Column> {
         return dataType;
     }
 
-    public void setDataType(int dataType) {
+    public Column setDataType(int dataType) {
         this.dataType = dataType;
+
+        return this;
     }
 
     public int getColumnSize() {
         return columnSize;
     }
 
-    public void setColumnSize(int columnSize) {
+    public Column setColumnSize(int columnSize) {
         this.columnSize = columnSize;
+
+        return this;
     }
 
     public int getDecimalDigits() {
         return decimalDigits;
     }
 
-    public void setDecimalDigits(int decimalDigits) {
+    public Column setDecimalDigits(int decimalDigits) {
         this.decimalDigits = decimalDigits;
+
+        return this;
     }
 
     public Boolean isNullable() {
         return nullable;
     }
 
-    public void setNullable(Boolean nullable) {
+    public Column setNullable(Boolean nullable) {
         this.nullable = nullable;
+
+        return this;
     }
 
 
@@ -90,8 +110,10 @@ public class Column implements DatabaseObject, Comparable<Column> {
         return typeName;
     }
 
-    public void setTypeName(String typeName) {
+    public Column setTypeName(String typeName) {
         this.typeName = typeName;
+
+        return this;
     }
 
 
@@ -99,8 +121,10 @@ public class Column implements DatabaseObject, Comparable<Column> {
         return defaultValue;
     }
 
-    public void setDefaultValue(Object defaultValue) {
+    public Column setDefaultValue(Object defaultValue) {
         this.defaultValue = defaultValue;
+
+        return this;
     }
 
     public String toString() {
@@ -272,16 +296,20 @@ public class Column implements DatabaseObject, Comparable<Column> {
         return unique;
     }
 
-    public void setUnique(boolean unique) {
+    public Column setUnique(boolean unique) {
         this.unique = unique;
+
+        return this;
     }
 
     public boolean isAutoIncrement() {
         return autoIncrement;
     }
 
-    public void setAutoIncrement(boolean autoIncrement) {
+    public Column setAutoIncrement(boolean autoIncrement) {
         this.autoIncrement = autoIncrement;
+
+        return this;
     }
 
     public boolean isDataTypeDifferent(Column otherColumn) {
@@ -318,32 +346,40 @@ public class Column implements DatabaseObject, Comparable<Column> {
         return primaryKey;
     }
 
-    public void setPrimaryKey(boolean primaryKey) {
+    public Column setPrimaryKey(boolean primaryKey) {
         this.primaryKey = primaryKey;
+
+        return this;
     }
 
     public boolean isCertainDataType() {
         return certainDataType;
     }
 
-    public void setCertainDataType(boolean certainDataType) {
+    public Column setCertainDataType(boolean certainDataType) {
         this.certainDataType = certainDataType;
+
+        return this;
     }
 
     public String getRemarks() {
         return remarks;
     }
 
-    public void setRemarks(String remarks) {
+    public Column setRemarks(String remarks) {
         this.remarks = remarks;
+
+        return this;
     }
     
     public LengthSemantics getLengthSemantics() {
       return lengthSemantics;
     }
     
-    public void setLengthSemantics(LengthSemantics lengthSemantics) {
+    public Column setLengthSemantics(LengthSemantics lengthSemantics) {
       this.lengthSemantics = lengthSemantics;
+
+        return this;
     }
 
     public static enum LengthSemantics {

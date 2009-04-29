@@ -25,16 +25,33 @@ public class Table implements DatabaseObject, Comparable<Table> {
         return database;
     }
 
-    public void setDatabase(Database database) {
+    public DatabaseObject[] getContainingObjects() {
+        if (getSchema() == null) {
+            return new DatabaseObject[] {
+                    getDatabase()
+            };
+        } else {
+            return new DatabaseObject[] {
+                    new Schema(getSchema())
+            };
+        }
+
+    }
+
+    public Table setDatabase(Database database) {
         this.database = database;
+
+        return this;
     }
 
     public String getRemarks() {
         return remarks;
     }
 
-    public void setRemarks(String remarks) {
+    public Table setRemarks(String remarks) {
         this.remarks = remarks;
+
+        return this;
     }
 
     public List<Column> getColumns() {
@@ -89,7 +106,9 @@ public class Table implements DatabaseObject, Comparable<Table> {
 	/**
 	 * @param schema The schema to set.
 	 */
-	public void setSchema (String schema) {
+	public Table setSchema (String schema) {
 		this.schema = schema;
+
+        return this;
 	}
 }

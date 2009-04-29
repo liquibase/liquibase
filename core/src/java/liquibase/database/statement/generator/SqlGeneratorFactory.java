@@ -7,9 +7,6 @@ import liquibase.exception.JDBCException;
 import liquibase.PluginUtil;
 
 import java.util.*;
-import java.io.IOException;
-import java.io.File;
-import java.net.URL;
 import java.lang.reflect.Type;
 import java.lang.reflect.ParameterizedType;
 
@@ -110,7 +107,7 @@ public class SqlGeneratorFactory {
         SortedSet<SqlGenerator> validGenerators = getAllGenerators(statement, database);
 
         if (validGenerators.size() == 0) {
-            return new NotImplementedGenerator();
+            return null;
         } else {
             return validGenerators.first();
         }
@@ -121,6 +118,6 @@ public class SqlGeneratorFactory {
     }
 
     public boolean statementSupported(SqlStatement statement, Database database) {
-        return !(getBestGenerator(statement, database) instanceof NotImplementedGenerator);
+        return getBestGenerator(statement, database)  != null;
     }
 }

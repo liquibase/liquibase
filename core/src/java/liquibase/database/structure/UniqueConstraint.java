@@ -11,7 +11,17 @@ public class UniqueConstraint implements DatabaseObject, Comparable<UniqueConstr
   private Table        table;
   private List<String> columns = new ArrayList<String>();
 
-  public String getName () {
+
+    public DatabaseObject[] getContainingObjects() {
+        List<DatabaseObject> columns = new ArrayList<DatabaseObject>();
+        for (String column : this.columns) {
+            columns.add(new Column().setName(column).setTable(table));
+        }
+
+        return columns.toArray(new DatabaseObject[columns.size()]);
+    }
+
+    public String getName () {
     return name;
   }
 

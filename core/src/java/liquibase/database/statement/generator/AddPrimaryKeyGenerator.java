@@ -4,7 +4,6 @@ import liquibase.database.statement.AddPrimaryKeyStatement;
 import liquibase.database.statement.syntax.Sql;
 import liquibase.database.statement.syntax.UnparsedSql;
 import liquibase.database.*;
-import liquibase.exception.JDBCException;
 import liquibase.util.StringUtils;
 
 public class AddPrimaryKeyGenerator implements SqlGenerator<AddPrimaryKeyStatement> {
@@ -20,7 +19,7 @@ public class AddPrimaryKeyGenerator implements SqlGenerator<AddPrimaryKeyStateme
         return new GeneratorValidationErrors();
     }
 
-    public Sql[] generateSql(AddPrimaryKeyStatement statement, Database database) throws JDBCException {
+    public Sql[] generateSql(AddPrimaryKeyStatement statement, Database database) {
         String sql;
         if (statement.getConstraintName() == null  || database instanceof MySQLDatabase || database instanceof SybaseASADatabase) {
             sql = "ALTER TABLE " + database.escapeTableName(statement.getSchemaName(), statement.getTableName()) + " ADD PRIMARY KEY (" + database.escapeColumnNameList(statement.getColumnNames()) + ")";

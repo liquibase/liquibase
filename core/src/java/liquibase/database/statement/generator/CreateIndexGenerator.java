@@ -4,7 +4,6 @@ import liquibase.database.*;
 import liquibase.database.statement.syntax.Sql;
 import liquibase.database.statement.syntax.UnparsedSql;
 import liquibase.database.statement.CreateIndexStatement;
-import liquibase.exception.JDBCException;
 import liquibase.util.StringUtils;
 
 import java.util.Iterator;
@@ -23,7 +22,7 @@ public class CreateIndexGenerator implements SqlGenerator<CreateIndexStatement> 
         return new GeneratorValidationErrors();
     }
 
-    public Sql[] generateSql(CreateIndexStatement statement, Database database) throws JDBCException {
+    public Sql[] generateSql(CreateIndexStatement statement, Database database) {
         StringBuffer buffer = new StringBuffer();
 
         buffer.append("CREATE ");

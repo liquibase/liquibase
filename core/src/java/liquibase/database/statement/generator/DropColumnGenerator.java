@@ -4,7 +4,6 @@ import liquibase.database.statement.DropColumnStatement;
 import liquibase.database.statement.syntax.Sql;
 import liquibase.database.statement.syntax.UnparsedSql;
 import liquibase.database.*;
-import liquibase.exception.JDBCException;
 
 public class DropColumnGenerator implements SqlGenerator<DropColumnStatement> {
 
@@ -20,7 +19,7 @@ public class DropColumnGenerator implements SqlGenerator<DropColumnStatement> {
         return new GeneratorValidationErrors();
     }
 
-    public Sql[] generateSql(DropColumnStatement statement, Database database) throws JDBCException {
+    public Sql[] generateSql(DropColumnStatement statement, Database database) {
         if (database instanceof DB2Database) {
             return new Sql[] { new UnparsedSql("ALTER TABLE " + database.escapeTableName(statement.getSchemaName(), statement.getTableName()) + " DROP COLUMN " + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(), statement.getColumnName())) };
         } else if (database instanceof SybaseDatabase || database instanceof SybaseASADatabase || database instanceof FirebirdDatabase || database instanceof InformixDatabase) {

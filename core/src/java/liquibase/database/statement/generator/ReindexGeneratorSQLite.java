@@ -5,7 +5,6 @@ import liquibase.database.statement.syntax.Sql;
 import liquibase.database.statement.syntax.UnparsedSql;
 import liquibase.database.Database;
 import liquibase.database.SQLiteDatabase;
-import liquibase.exception.JDBCException;
 
 public class ReindexGeneratorSQLite implements SqlGenerator<ReindexStatement> {
     public int getSpecializationLevel() {
@@ -20,7 +19,7 @@ public class ReindexGeneratorSQLite implements SqlGenerator<ReindexStatement> {
         return new GeneratorValidationErrors();
     }
 
-    public Sql[] generateSql(ReindexStatement statement, Database database) throws JDBCException {
+    public Sql[] generateSql(ReindexStatement statement, Database database) {
         return new Sql[] {
                 new UnparsedSql("REINDEX "+database.escapeTableName(statement.getSchemaName(), statement.getTableName()))
         };

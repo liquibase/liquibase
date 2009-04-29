@@ -5,7 +5,6 @@ import liquibase.database.statement.syntax.Sql;
 import liquibase.database.statement.syntax.UnparsedSql;
 import liquibase.database.*;
 import liquibase.exception.StatementNotSupportedOnDatabaseException;
-import liquibase.exception.JDBCException;
 
 public class CreateSequenceGenerator implements SqlGenerator<CreateSequenceStatement> {
     public int getSpecializationLevel() {
@@ -16,53 +15,54 @@ public class CreateSequenceGenerator implements SqlGenerator<CreateSequenceState
         return database.supportsSequences();
     }
 
-    public GeneratorValidationErrors validate(CreateSequenceStatement createSequenceStatement, Database database) {
-        return new GeneratorValidationErrors();
+    public GeneratorValidationErrors validate(CreateSequenceStatement statement, Database database) {
+        GeneratorValidationErrors validationErrors = new GeneratorValidationErrors();
+
+        if (database instanceof FirebirdDatabase) {
+            validationErrors.checkDisallowedField("startValue", statement.getStartValue());
+            validationErrors.checkDisallowedField("incrementBy", statement.getIncrementBy());
+        }
+
+        if (database instanceof FirebirdDatabase || database instanceof HsqlDatabase) {
+            validationErrors.checkDisallowedField("minValue", statement.getMinValue());
+            validationErrors.checkDisallowedField("maxValue", statement.getMaxValue());
+        }
+
+        if (database instanceof FirebirdDatabase || database instanceof HsqlDatabase) {
+            validationErrors.addError("Database does not support creating sequences with maxValue");
+        }
+
+        if (statement.getOrdered() != null && !(database instanceof OracleDatabase || database instanceof DB2Database || database instanceof MaxDBDatabase)) {
+            validationErrors.checkDisallowedField("ordered", statement.getOrdered());
+        }
+
+
+        return validationErrors;
     }
 
-    public Sql[] generateSql(CreateSequenceStatement statement, Database database) throws JDBCException {
+    public Sql[] generateSql(CreateSequenceStatement statement, Database database) {
         StringBuffer buffer = new StringBuffer();
         buffer.append("CREATE SEQUENCE ");
         buffer.append(database.escapeSequenceName(statement.getSchemaName(), statement.getSequenceName()));
         if (statement.getStartValue() != null) {
-            if (database instanceof FirebirdDatabase) {
-                throw new StatementNotSupportedOnDatabaseException("Firebird does not support creating sequences with startValue", statement, database);
-            } else {
-                buffer.append(" START WITH ").append(statement.getStartValue());
-            }
+            buffer.append(" START WITH ").append(statement.getStartValue());
         }
         if (statement.getIncrementBy() != null) {
-            if (database instanceof FirebirdDatabase) {
-                throw new StatementNotSupportedOnDatabaseException("Firebird does not support creating sequences with increments", statement, database);
-            } else {
-                buffer.append(" INCREMENT BY ").append(statement.getIncrementBy());
-            }
+            buffer.append(" INCREMENT BY ").append(statement.getIncrementBy());
         }
         if (statement.getMinValue() != null) {
-            if (database instanceof FirebirdDatabase || database instanceof HsqlDatabase) {
-                throw new StatementNotSupportedOnDatabaseException("Database does not support creating sequences with minValue", statement, database);
-            } else {
-                buffer.append(" MINVALUE ").append(statement.getMinValue());
-            }
+            buffer.append(" MINVALUE ").append(statement.getMinValue());
         }
         if (statement.getMaxValue() != null) {
-            if (database instanceof FirebirdDatabase || database instanceof HsqlDatabase) {
-                throw new StatementNotSupportedOnDatabaseException("Database does not support creating sequences with maxValue", statement, database);
-            } else {
-                buffer.append(" MAXVALUE ").append(statement.getMaxValue());
-            }
+            buffer.append(" MAXVALUE ").append(statement.getMaxValue());
         }
 
         if (statement.getOrdered() != null) {
-            if (database instanceof OracleDatabase || database instanceof DB2Database || database instanceof MaxDBDatabase) {
-                if (statement.getOrdered()) {
-                    buffer.append(" ORDER");
-                }
-            } else {
-                throw new StatementNotSupportedOnDatabaseException("Database does not support creating sequences with 'order'", statement, database);
+            if (statement.getOrdered()) {
+                buffer.append(" ORDER");
             }
         }
 
-        return new Sql[] {new UnparsedSql(buffer.toString())};
+        return new Sql[]{new UnparsedSql(buffer.toString())};
     }
 }

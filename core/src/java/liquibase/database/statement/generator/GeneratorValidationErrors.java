@@ -20,6 +20,12 @@ public class GeneratorValidationErrors {
         }
     }
 
+    public void checkDisallowedField(String disallowedFieldName, Object value) {
+        if (value != null) {
+            addError(disallowedFieldName+" is not allowed");
+        }
+    }
+
     public void addError(String message) {
         errorMessages.add(message);
     }
@@ -27,4 +33,5 @@ public class GeneratorValidationErrors {
     public List<String> getErrorMessages() {
         return errorMessages;
     }
+
 }

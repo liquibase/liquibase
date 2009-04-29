@@ -10,6 +10,7 @@ import liquibase.database.statement.SqlStatement;
 import liquibase.database.statement.visitor.SqlVisitor;
 import liquibase.database.template.Executor;
 import liquibase.database.structure.DatabaseSnapshot;
+import liquibase.database.structure.DatabaseObject;
 import liquibase.exception.*;
 
 import java.io.IOException;
@@ -23,6 +24,11 @@ import java.util.List;
 import java.util.Set;
 
 public class MockDatabase implements Database {
+
+
+    public DatabaseObject[] getContainingObjects() {
+        return null;
+    }
 
     public boolean isCorrectDatabaseImplementation(Connection conn) throws JDBCException {
         return false;

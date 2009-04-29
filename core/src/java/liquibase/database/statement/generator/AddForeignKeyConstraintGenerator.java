@@ -3,11 +3,13 @@ package liquibase.database.statement.generator;
 import liquibase.database.Database;
 import liquibase.database.InformixDatabase;
 import liquibase.database.SQLiteDatabase;
+import liquibase.database.structure.Column;
+import liquibase.database.structure.Table;
 import liquibase.database.statement.syntax.Sql;
 import liquibase.database.statement.syntax.UnparsedSql;
 import liquibase.database.statement.AddForeignKeyConstraintStatement;
+import liquibase.database.statement.ForeignKeyConstraint;
 import liquibase.exception.StatementNotSupportedOnDatabaseException;
-import liquibase.exception.JDBCException;
 
 import java.sql.DatabaseMetaData;
 
@@ -21,10 +23,17 @@ public class AddForeignKeyConstraintGenerator implements SqlGenerator<AddForeign
     }
 
     public GeneratorValidationErrors validate(AddForeignKeyConstraintStatement addForeignKeyConstraintStatement, Database database) {
-        return new GeneratorValidationErrors();
+        GeneratorValidationErrors validationErrors = new GeneratorValidationErrors();
+
+        if (!database.supportsInitiallyDeferrableColumns()) {
+            validationErrors.checkDisallowedField("initiallyDeferred", addForeignKeyConstraintStatement.isInitiallyDeferred());
+            validationErrors.checkDisallowedField("deferrable", addForeignKeyConstraintStatement.isDeferrable());
+        }
+
+        return validationErrors;
     }
 
-    public Sql[] generateSql(AddForeignKeyConstraintStatement statement, Database database) throws JDBCException {
+    public Sql[] generateSql(AddForeignKeyConstraintStatement statement, Database database) {
         StringBuilder sb = new StringBuilder();
         sb.append("ALTER TABLE ")
         	.append(database.escapeTableName(statement.getBaseTableSchemaName(), statement.getBaseTableName()))
@@ -90,10 +99,6 @@ public class AddForeignKeyConstraintGenerator implements SqlGenerator<AddForeign
         }
 
         if (statement.isDeferrable() || statement.isInitiallyDeferred()) {
-            if (!database.supportsInitiallyDeferrableColumns()) {
-                throw new StatementNotSupportedOnDatabaseException("Database does not support deferrable foreign keys", statement, database);
-            }
-
             if (statement.isDeferrable()) {
             	sb.append(" DEFERRABLE");
             }
@@ -108,6 +113,8 @@ public class AddForeignKeyConstraintGenerator implements SqlGenerator<AddForeign
         	sb.append(database.escapeConstraintName(statement.getConstraintName()));
         }
 
-        return new Sql[] { new UnparsedSql(sb.toString()) };
+        return new Sql[] {
+                new UnparsedSql(sb.toString())
+        };
     }
 }

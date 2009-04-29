@@ -6,7 +6,6 @@ import liquibase.database.statement.syntax.UnparsedSql;
 import liquibase.database.Database;
 import liquibase.database.OracleDatabase;
 import liquibase.database.MySQLDatabase;
-import liquibase.exception.JDBCException;
 
 public class SetTableRemarksGenerator implements SqlGenerator<SetTableRemarksStatement>{
     public int getSpecializationLevel() {
@@ -21,7 +20,7 @@ public class SetTableRemarksGenerator implements SqlGenerator<SetTableRemarksSta
         return new GeneratorValidationErrors();
     }
 
-    public Sql[] generateSql(SetTableRemarksStatement statement, Database database) throws JDBCException {
+    public Sql[] generateSql(SetTableRemarksStatement statement, Database database) {
         String sql;
         if (database instanceof OracleDatabase) {
             sql = "COMMENT ON TABLE "+database.escapeTableName(statement.getSchemaName(), statement.getTableName())+" IS '"+statement.getRemarks()+"'";

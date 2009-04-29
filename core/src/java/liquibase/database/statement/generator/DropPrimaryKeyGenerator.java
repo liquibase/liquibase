@@ -5,7 +5,6 @@ import liquibase.database.statement.syntax.Sql;
 import liquibase.database.statement.syntax.UnparsedSql;
 import liquibase.database.statement.DropPrimaryKeyStatement;
 import liquibase.exception.StatementNotSupportedOnDatabaseException;
-import liquibase.exception.JDBCException;
 
 public class DropPrimaryKeyGenerator implements SqlGenerator<DropPrimaryKeyStatement> {
     public int getSpecializationLevel() {
@@ -17,18 +16,20 @@ public class DropPrimaryKeyGenerator implements SqlGenerator<DropPrimaryKeyState
     }
 
     public GeneratorValidationErrors validate(DropPrimaryKeyStatement dropPrimaryKeyStatement, Database database) {
-        return new GeneratorValidationErrors();
-    }
+        GeneratorValidationErrors validationErrors = new GeneratorValidationErrors();
 
-    public Sql[] generateSql(DropPrimaryKeyStatement statement, Database database) throws JDBCException {
-        if (statement.getConstraintName() == null) {
+        if (dropPrimaryKeyStatement.getConstraintName() == null) {
             if (database instanceof MSSQLDatabase
                     || database instanceof PostgresDatabase
                     || database instanceof FirebirdDatabase) {
-                throw new StatementNotSupportedOnDatabaseException("Database requires a constraint name to drop the primary key", statement, database);
+                validationErrors.checkDisallowedField("constraintName", dropPrimaryKeyStatement.getConstraintName());
             }
         }
 
+        return validationErrors;
+    }
+
+    public Sql[] generateSql(DropPrimaryKeyStatement statement, Database database) {
         String sql;
 
         if (database instanceof MSSQLDatabase) {

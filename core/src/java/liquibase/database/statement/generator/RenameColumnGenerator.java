@@ -5,7 +5,6 @@ import liquibase.database.statement.syntax.Sql;
 import liquibase.database.statement.syntax.UnparsedSql;
 import liquibase.database.*;
 import liquibase.exception.StatementNotSupportedOnDatabaseException;
-import liquibase.exception.JDBCException;
 
 public class RenameColumnGenerator implements SqlGenerator<RenameColumnStatement> {
     public int getSpecializationLevel() {
@@ -19,18 +18,19 @@ public class RenameColumnGenerator implements SqlGenerator<RenameColumnStatement
     }
 
     public GeneratorValidationErrors validate(RenameColumnStatement renameColumnStatement, Database database) {
-        return new GeneratorValidationErrors();
+        GeneratorValidationErrors validationErrors = new GeneratorValidationErrors();
+        if (database instanceof MySQLDatabase) {
+            validationErrors.checkRequiredField("columnDataType", renameColumnStatement.getColumnDataType());
+        }
+
+        return validationErrors;
     }
 
-    public Sql[] generateSql(RenameColumnStatement statement, Database database) throws JDBCException {
+    public Sql[] generateSql(RenameColumnStatement statement, Database database) {
         String sql;
         if (database instanceof MSSQLDatabase) {
             sql = "exec sp_rename '" + database.escapeTableName(statement.getSchemaName(), statement.getTableName()) + "." + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(), statement.getOldColumnName()) + "', '" + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(), statement.getNewColumnName()) + "'";
         } else if (database instanceof MySQLDatabase) {
-            if (statement.getColumnDataType() == null) {
-                throw new StatementNotSupportedOnDatabaseException("columnDataType is required to rename columns", statement, database);
-            }
-
             sql ="ALTER TABLE " + database.escapeTableName(statement.getSchemaName(), statement.getTableName()) + " CHANGE " + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(), statement.getOldColumnName()) + " " + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(), statement.getNewColumnName()) + " " + statement.getColumnDataType();
         } else if (database instanceof HsqlDatabase) {
             sql ="ALTER TABLE " + database.escapeTableName(statement.getSchemaName(), statement.getTableName()) + " ALTER COLUMN " + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(), statement.getOldColumnName()) + " RENAME TO " + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(), statement.getNewColumnName());

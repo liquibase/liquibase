@@ -5,9 +5,9 @@ import liquibase.database.statement.syntax.Sql;
 import liquibase.database.statement.syntax.UnparsedSql;
 import liquibase.database.Database;
 import liquibase.database.SybaseDatabase;
-import liquibase.exception.LiquibaseException;
+import liquibase.database.structure.Column;
+import liquibase.database.structure.Table;
 import liquibase.exception.StatementNotSupportedOnDatabaseException;
-import liquibase.exception.JDBCException;
 
 public class AddDefaultValueGeneratorInformix extends AddDefaultValueGenerator {
     public int getSpecializationLevel() {
@@ -18,12 +18,22 @@ public class AddDefaultValueGeneratorInformix extends AddDefaultValueGenerator {
         return database instanceof SybaseDatabase;
     }
 
-    public Sql[] generateSql(AddDefaultValueStatement statement, Database database) throws JDBCException {
-        if (statement.getColumnDataType() == null) {
-            throw new StatementNotSupportedOnDatabaseException("Database requires columnDataType parameter", statement, database);
+    @Override
+    public GeneratorValidationErrors validate(AddDefaultValueStatement addDefaultValueStatement, Database database) {
+        GeneratorValidationErrors validationErrors = super.validate(addDefaultValueStatement, database);
+        if (addDefaultValueStatement.getColumnDataType() == null) {
+            validationErrors.checkRequiredField("columnDataType", addDefaultValueStatement.getColumnDataType());
         }
-        return new Sql[] {
-                new UnparsedSql("ALTER TABLE " + database.escapeTableName(statement.getSchemaName(), statement.getTableName()) + " MODIFY (" + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " " + database.getColumnType(statement.getColumnDataType(), false) + " DEFAULT " + database.convertJavaObjectToString(statement.getDefaultValue()) + ")")
+        return validationErrors;
+    }
+
+    public Sql[] generateSql(AddDefaultValueStatement statement, Database database) {
+
+        return new Sql[]{
+                new UnparsedSql("ALTER TABLE " + database.escapeTableName(statement.getSchemaName(), statement.getTableName()) + " MODIFY (" + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " " + database.getColumnType(statement.getColumnDataType(), false) + " DEFAULT " + database.convertJavaObjectToString(statement.getDefaultValue()) + ")",
+                        new Column()
+                                .setTable(new Table(statement.getTableName()).setSchema(statement.getSchemaName()))
+                                .setName(statement.getColumnName()))
         };
     }
 }

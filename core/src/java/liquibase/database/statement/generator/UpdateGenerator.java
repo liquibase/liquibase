@@ -4,7 +4,6 @@ import liquibase.database.Database;
 import liquibase.database.statement.syntax.Sql;
 import liquibase.database.statement.syntax.UnparsedSql;
 import liquibase.database.statement.UpdateStatement;
-import liquibase.exception.JDBCException;
 
 import java.util.Date;
 
@@ -21,7 +20,7 @@ public class UpdateGenerator implements SqlGenerator<UpdateStatement> {
         return new GeneratorValidationErrors();
     }
 
-    public Sql[] generateSql(UpdateStatement statement, Database database) throws JDBCException {
+    public Sql[] generateSql(UpdateStatement statement, Database database) {
         StringBuffer sql = new StringBuffer("UPDATE " + database.escapeTableName(statement.getSchemaName(), statement.getTableName()) + " SET");
         for (String column : statement.getNewColumnValues().keySet()) {
             sql.append(" ").append(database.escapeColumnName(statement.getSchemaName(), statement.getTableName(), column)).append(" = ");

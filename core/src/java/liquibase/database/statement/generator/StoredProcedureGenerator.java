@@ -4,7 +4,6 @@ import liquibase.database.statement.StoredProcedureStatement;
 import liquibase.database.statement.syntax.Sql;
 import liquibase.database.statement.syntax.UnparsedSql;
 import liquibase.database.Database;
-import liquibase.exception.JDBCException;
 
 public class StoredProcedureGenerator implements SqlGenerator<StoredProcedureStatement> {
     public int getSpecializationLevel() {
@@ -19,7 +18,7 @@ public class StoredProcedureGenerator implements SqlGenerator<StoredProcedureSta
         return new GeneratorValidationErrors();
     }
 
-    public Sql[] generateSql(StoredProcedureStatement statement, Database database) throws JDBCException {
+    public Sql[] generateSql(StoredProcedureStatement statement, Database database) {
         StringBuffer string = new StringBuffer();
         string.append("exec (").append(statement.getProcedureName());
         for (String param : statement.getParameters()) {

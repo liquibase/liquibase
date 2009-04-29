@@ -5,7 +5,6 @@ import liquibase.database.statement.syntax.Sql;
 import liquibase.database.statement.syntax.UnparsedSql;
 import liquibase.database.Database;
 import liquibase.database.PostgresDatabase;
-import liquibase.exception.JDBCException;
 
 public class DropSequenceGenerator implements SqlGenerator<DropSequenceStatement> {
     public int getSpecializationLevel() {
@@ -20,7 +19,7 @@ public class DropSequenceGenerator implements SqlGenerator<DropSequenceStatement
         return new GeneratorValidationErrors();
     }
 
-    public Sql[] generateSql(DropSequenceStatement statement, Database database) throws JDBCException {
+    public Sql[] generateSql(DropSequenceStatement statement, Database database) {
         String sql = "DROP SEQUENCE " + database.escapeSequenceName(statement.getSchemaName(), statement.getSequenceName());
         if (database instanceof PostgresDatabase) {
             sql += " CASCADE";

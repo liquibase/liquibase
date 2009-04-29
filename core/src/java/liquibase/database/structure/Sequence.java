@@ -5,6 +5,10 @@ public class Sequence implements DatabaseObject, Comparable<Sequence> {
     private String schema;
 
 
+    public DatabaseObject[] getContainingObjects() {
+        return null;
+    }
+
     public String getName() {
         return name;
     }
