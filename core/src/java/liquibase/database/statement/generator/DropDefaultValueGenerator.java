@@ -6,6 +6,7 @@ import liquibase.database.statement.syntax.Sql;
 import liquibase.database.statement.syntax.UnparsedSql;
 import liquibase.exception.StatementNotSupportedOnDatabaseException;
 import liquibase.exception.JDBCException;
+import liquibase.exception.UnexpectedLiquibaseException;
 
 public class DropDefaultValueGenerator implements SqlGenerator<DropDefaultValueStatement> {
     public int getSpecializationLevel() {
@@ -17,13 +18,25 @@ public class DropDefaultValueGenerator implements SqlGenerator<DropDefaultValueS
     }
 
     public GeneratorValidationErrors validate(DropDefaultValueStatement dropDefaultValueStatement, Database database) {
-        return new GeneratorValidationErrors();
+        GeneratorValidationErrors validationErrors = new GeneratorValidationErrors();
+        if (database instanceof InformixDatabase) {
+            validationErrors.checkRequiredField("columnDataType", dropDefaultValueStatement.getColumnDataType());
+        }
+
+
+        return validationErrors;
     }
 
-    public Sql[] generateSql(DropDefaultValueStatement statement, Database database) throws JDBCException {
+    public Sql[] generateSql(DropDefaultValueStatement statement, Database database) {
         String sql;
          if (database instanceof MSSQLDatabase) {
-        		if(database.getDatabaseProductVersion().startsWith("9")) { // SQL Server 2005
+             String productVersion = null;
+             try {
+                 productVersion = database.getDatabaseProductVersion();
+             } catch (JDBCException e) {
+                 throw new UnexpectedLiquibaseException(e);
+             }
+             if(productVersion.startsWith("9")) { // SQL Server 2005
 			      // SQL Server 2005 does not often work with the simpler query shown below
         			String query = "DECLARE @default sysname\n";
         			query += "SELECT @default = object_name(default_object_id) FROM sys.columns WHERE object_id=object_id('" + statement.getSchemaName() + "." + statement.getTableName() + "') AND name='" + statement.getColumnName() + "'\n";
@@ -46,9 +59,6 @@ public class DropDefaultValueGenerator implements SqlGenerator<DropDefaultValueS
         	 * TODO If dropped from a not null column the not null constraint will be dropped, too.
         	 * If the column is "NOT NULL" it has to be added behind the datatype.
         	 */
-        	if (statement.getColumnDataType() == null) {
-                throw new StatementNotSupportedOnDatabaseException("Database requires columnDataType parameter", statement, database);
-        	}
         	sql = "ALTER TABLE " + database.escapeTableName(statement.getSchemaName(), statement.getTableName()) + " MODIFY (" + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " " + statement.getColumnDataType() + ")";
         } else {
             sql = "ALTER TABLE " + database.escapeTableName(statement.getSchemaName(), statement.getTableName()) + " ALTER COLUMN  " + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " SET DEFAULT NULL";

@@ -129,7 +129,7 @@ public class SqlGeneratorFactoryTest {
         SqlGenerator bestSqlGenerator = SqlGeneratorFactory.getInstance().getBestGenerator(new AddDefaultValueStatement(null, "person", "name", "N/A"), new MySQLDatabase());
 
         assertNotNull(bestSqlGenerator);
-        assertTrue(bestSqlGenerator instanceof NotImplementedGenerator);
+        assertNull(bestSqlGenerator);
     }
 
     @Test

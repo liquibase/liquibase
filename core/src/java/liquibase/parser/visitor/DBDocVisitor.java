@@ -85,7 +85,7 @@ public class DBDocVisitor implements ChangeSetVisitor {
         }
 
         for (Change change : changeSet.getChanges()) {
-            Set<DatabaseObject> affectedDatabaseObjects = change.getAffectedDatabaseObjects();
+            Set<DatabaseObject> affectedDatabaseObjects = change.getAffectedDatabaseObjects(database);
             if (affectedDatabaseObjects != null) {
                 for (DatabaseObject dbObject : affectedDatabaseObjects) {
                     if (toRun) {

@@ -12,6 +12,11 @@ public class Index implements DatabaseObject, Comparable<Index> {
     private List<String> columns = new ArrayList<String>();
     private String filterCondition;
 
+    public DatabaseObject[] getContainingObjects() {
+        return new DatabaseObject[] {
+                table
+        };        
+    }
 
     public String getName() {
         return name;

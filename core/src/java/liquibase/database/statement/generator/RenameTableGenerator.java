@@ -4,7 +4,6 @@ import liquibase.database.statement.RenameTableStatement;
 import liquibase.database.statement.syntax.Sql;
 import liquibase.database.statement.syntax.UnparsedSql;
 import liquibase.database.*;
-import liquibase.exception.JDBCException;
 
 public class RenameTableGenerator implements SqlGenerator<RenameTableStatement> {
     public int getSpecializationLevel() {
@@ -19,7 +18,7 @@ public class RenameTableGenerator implements SqlGenerator<RenameTableStatement> 
         return new GeneratorValidationErrors();
     }
 
-    public Sql[] generateSql(RenameTableStatement statement, Database database) throws JDBCException {
+    public Sql[] generateSql(RenameTableStatement statement, Database database) {
         String sql;
         if (database instanceof MSSQLDatabase) {
             sql = "exec sp_rename '" + database.escapeTableName(statement.getSchemaName(), statement.getOldTableName()) + "', " + database.escapeTableName(null, statement.getNewTableName());

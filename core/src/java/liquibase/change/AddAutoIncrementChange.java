@@ -70,71 +70,21 @@ public class AddAutoIncrementChange extends AbstractChange {
         this.columnDataType = columnDataType;
     }
 
-    public void validate(Database database) throws InvalidChangeDefinitionException {
-        if (StringUtils.trimToNull(tableName) == null) {
-            throw new InvalidChangeDefinitionException("tableName is required", this);
-        }
-    }
-
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
-        String schemaName = getSchemaName() == null?database.getDefaultSchemaName():getSchemaName();
         if (database instanceof PostgresDatabase) {
-            String sequenceName = (getTableName()+"_"+getColumnName()+"_seq").toLowerCase();
+            String sequenceName = (getTableName() + "_" + getColumnName() + "_seq").toLowerCase();
             return new SqlStatement[]{
                     new CreateSequenceStatement(schemaName, sequenceName),
                     new SetNullableStatement(schemaName, getTableName(), getColumnName(), null, false),
                     new AddDefaultValueStatement(schemaName, getTableName(), getColumnName(), getColumnDataType(), sequenceName),
             };
-        } if (database instanceof SQLiteDatabase) { 
-    		// return special statements for SQLite databases
-    		return generateStatementsForSQLiteDatabase(database);
-        } else {
-            return new SqlStatement[] { new AddAutoIncrementStatement(schemaName, getTableName(), getColumnName(), getColumnDataType())};
         }
-    }
-    
-    private SqlStatement[] generateStatementsForSQLiteDatabase(Database database) 
-			throws UnsupportedChangeException {
-    	// SQLite does not support this ALTER TABLE operation until now.
-		// For more information see: http://www.sqlite.org/omitted.html.
-		// This is a small work around...
-		
-    	List<SqlStatement> statements = new ArrayList<SqlStatement>();
-    	
-		// define alter table logic
-		AlterTableVisitor rename_alter_visitor = new AlterTableVisitor() {
-			public ColumnConfig[] getColumnsToAdd() {
-				return new ColumnConfig[0];
-			}
-			public boolean copyThisColumn(ColumnConfig column) {
-				return true;
-			}
-			public boolean createThisColumn(ColumnConfig column) {
-				if (column.getName().equals(getColumnName())) {
-					column.setAutoIncrement(true);
-					column.setType("INTEGER");
-				}
-				return true;
-			}
-			public boolean createThisIndex(Index index) {
-				return true;
-			}
-		};
-    		
-    	try {
-    		// alter table
-			statements.addAll(SQLiteDatabase.getAlterTableStatements(
-					rename_alter_visitor,
-					database,getSchemaName(),getTableName()));
-    	} catch (JDBCException e) {
-			e.printStackTrace();
-		}
-    	
-    	return statements.toArray(new SqlStatement[statements.size()]);
+
+        return new SqlStatement[]{new AddAutoIncrementStatement(getSchemaName(), getTableName(), getColumnName(), getColumnDataType())};
     }
 
     public String getConfirmationMessage() {
-        return "Auto-increment added to "+getTableName()+"."+getColumnName();
+        return "Auto-increment added to " + getTableName() + "." + getColumnName();
     }
 
     public Element createNode(Document currentChangeLogFileDOM) {
@@ -150,17 +100,4 @@ public class AddAutoIncrementChange extends AbstractChange {
 
         return node;
     }
-
-    public Set<DatabaseObject> getAffectedDatabaseObjects() {
-        Column column = new Column();
-
-        Table table = new Table(getTableName());
-        column.setTable(table);
-
-        column.setName(columnName);
-
-        return new HashSet<DatabaseObject>(Arrays.asList(table, column));
-
-    }
-    
 }

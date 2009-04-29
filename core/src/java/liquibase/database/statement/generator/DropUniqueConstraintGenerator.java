@@ -4,7 +4,6 @@ import liquibase.database.statement.DropUniqueConstraintStatement;
 import liquibase.database.statement.syntax.Sql;
 import liquibase.database.statement.syntax.UnparsedSql;
 import liquibase.database.*;
-import liquibase.exception.JDBCException;
 
 public class DropUniqueConstraintGenerator implements SqlGenerator<DropUniqueConstraintStatement> {
     public int getSpecializationLevel() {
@@ -19,7 +18,7 @@ public class DropUniqueConstraintGenerator implements SqlGenerator<DropUniqueCon
         return new GeneratorValidationErrors();
     }
 
-    public Sql[] generateSql(DropUniqueConstraintStatement statement, Database database) throws JDBCException {
+    public Sql[] generateSql(DropUniqueConstraintStatement statement, Database database) {
         String sql;
         if (database instanceof MySQLDatabase) {
             sql = "ALTER TABLE " + database.escapeTableName(statement.getSchemaName(), statement.getTableName()) + " DROP KEY " + database.escapeConstraintName(statement.getConstraintName());

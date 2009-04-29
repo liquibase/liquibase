@@ -4,10 +4,9 @@ import liquibase.database.statement.AddDefaultValueStatement;
 import liquibase.database.statement.syntax.Sql;
 import liquibase.database.statement.syntax.UnparsedSql;
 import liquibase.database.Database;
-import liquibase.database.SybaseDatabase;
 import liquibase.database.MaxDBDatabase;
-import liquibase.exception.LiquibaseException;
-import liquibase.exception.JDBCException;
+import liquibase.database.structure.Column;
+import liquibase.database.structure.Table;
 
 public class AddDefaultValueGeneratorMaxDB extends AddDefaultValueGenerator {
     public int getSpecializationLevel() {
@@ -18,9 +17,12 @@ public class AddDefaultValueGeneratorMaxDB extends AddDefaultValueGenerator {
         return database instanceof MaxDBDatabase;
     }
 
-    public Sql[] generateSql(AddDefaultValueStatement statement, Database database) throws JDBCException {
-        return new Sql[] {
-                new UnparsedSql("ALTER TABLE " + database.escapeTableName(statement.getSchemaName(), statement.getTableName()) + " COLUMN  " + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " ADD DEFAULT " + database.convertJavaObjectToString(statement.getDefaultValue()))
+    public Sql[] generateSql(AddDefaultValueStatement statement, Database database) {
+        return new Sql[]{
+                new UnparsedSql("ALTER TABLE " + database.escapeTableName(statement.getSchemaName(), statement.getTableName()) + " COLUMN  " + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " ADD DEFAULT " + database.convertJavaObjectToString(statement.getDefaultValue()),
+                        new Column()
+                                .setTable(new Table(statement.getTableName()).setSchema(statement.getSchemaName()))
+                                .setName(statement.getColumnName()))
         };
     }
 }

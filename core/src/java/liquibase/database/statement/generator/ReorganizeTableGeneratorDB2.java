@@ -20,7 +20,7 @@ public class ReorganizeTableGeneratorDB2 implements SqlGenerator<ReorganizeTable
         return new GeneratorValidationErrors();
     }
 
-    public Sql[] generateSql(ReorganizeTableStatement statement, Database database) throws JDBCException {
+    public Sql[] generateSql(ReorganizeTableStatement statement, Database database) {
         try {
             if (database.getDatabaseMajorVersion() >= 9) {
                 return new Sql[]{

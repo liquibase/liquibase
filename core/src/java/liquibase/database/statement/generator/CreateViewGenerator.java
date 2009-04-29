@@ -5,7 +5,6 @@ import liquibase.database.statement.syntax.Sql;
 import liquibase.database.statement.syntax.UnparsedSql;
 import liquibase.database.statement.CreateViewStatement;
 import liquibase.exception.StatementNotSupportedOnDatabaseException;
-import liquibase.exception.JDBCException;
 
 public class CreateViewGenerator implements SqlGenerator<CreateViewStatement> {
     public int getSpecializationLevel() {
@@ -17,11 +16,7 @@ public class CreateViewGenerator implements SqlGenerator<CreateViewStatement> {
     }
 
     public GeneratorValidationErrors validate(CreateViewStatement createViewStatement, Database database) {
-        return new GeneratorValidationErrors();
-    }
-
-    public Sql[] generateSql(CreateViewStatement statement, Database database) throws JDBCException {
-        String createClause;
+        GeneratorValidationErrors validationErrors = new GeneratorValidationErrors();
         if (database instanceof HsqlDatabase
                 || database instanceof DB2Database
                 || database instanceof CacheDatabase
@@ -29,11 +24,16 @@ public class CreateViewGenerator implements SqlGenerator<CreateViewStatement> {
                 || database instanceof DerbyDatabase
                 || database instanceof SybaseASADatabase
                 || database instanceof InformixDatabase) {
-            if (statement.isReplaceIfExists()) {
-                throw new StatementNotSupportedOnDatabaseException("replaceIfExists not supported", statement, database);
+            if (createViewStatement.isReplaceIfExists()) {
+                validationErrors.checkDisallowedField("replaceIfExists", createViewStatement.isReplaceIfExists());
             }
         }
 
+        return validationErrors;
+    }
+
+    public Sql[] generateSql(CreateViewStatement statement, Database database) {
+        String createClause;
 
         if (database instanceof FirebirdDatabase) {
             if (statement.isReplaceIfExists()) {

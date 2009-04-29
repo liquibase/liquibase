@@ -6,7 +6,6 @@ import liquibase.database.statement.syntax.Sql;
 import liquibase.database.statement.syntax.UnparsedSql;
 import liquibase.database.statement.TagDatabaseStatement;
 import liquibase.database.statement.UpdateStatement;
-import liquibase.exception.JDBCException;
 
 public class TagDatabaseGenerator implements SqlGenerator<TagDatabaseStatement> {
     public int getSpecializationLevel() {
@@ -21,7 +20,7 @@ public class TagDatabaseGenerator implements SqlGenerator<TagDatabaseStatement> 
         return new GeneratorValidationErrors();
     }
 
-    public Sql[] generateSql(TagDatabaseStatement statement, Database database) throws JDBCException {
+    public Sql[] generateSql(TagDatabaseStatement statement, Database database) {
         UpdateStatement updateStatement = new UpdateStatement(database.getDefaultSchemaName(), database.getDatabaseChangeLogTableName());
         updateStatement.addNewColumnValue("TAG", statement.getTag());
         if (database instanceof MySQLDatabase) {

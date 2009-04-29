@@ -25,13 +25,11 @@ public class ChangeFactory {
             classes = PluginUtil.getClasses("liquibase.change", Change.class);
 
             for (Class clazz : classes) {
-                if (Change.class.isAssignableFrom(clazz) || Change.class.isAssignableFrom(clazz.getSuperclass())) {
-                    register(clazz);
-                }
+                register(clazz);
             }
 
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new UnexpectedLiquibaseException(e);
         }
 
     }
@@ -73,7 +71,7 @@ public class ChangeFactory {
         if (aClass == null) {
             return null;
         }
-        
+
         try {
             return aClass.newInstance();
         } catch (Exception e) {

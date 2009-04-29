@@ -38,7 +38,7 @@ public class Main {
     protected Boolean promptForNonLocalDatabase = null;
     protected Boolean includeSystemClasspath;
     protected String defaultsFile = "liquibase.properties";
-    
+
     protected String diffTypes;
     protected String changeSetAuthor;
     protected String changeSetContext;
@@ -379,7 +379,16 @@ public class Main {
                 }
                 seenCommand = true;
             } else if (seenCommand) {
-                commandParams.add(arg);
+                if (arg.startsWith("-D")) {
+                    String[] splitArg = splitArg(arg);
+
+                    String attributeName = splitArg[0].replaceFirst("^-D", "");
+                    String value = splitArg[1];
+
+                    changeLogParameters.put(attributeName, value);
+                } else {
+                    commandParams.add(arg);
+                }
             } else if (arg.startsWith("--")) {
                 String[] splitArg = splitArg(arg);
 
@@ -396,13 +405,6 @@ public class Main {
                 } catch (Exception e) {
                     throw new CommandLineParsingException("Unknown parameter: '" + attributeName + "'");
                 }
-            } else if (arg.startsWith("-D")) {
-                String[] splitArg = splitArg(arg);
-
-                String attributeName = splitArg[0].replaceFirst("^-D", "");
-                String value = splitArg[1];
-
-                changeLogParameters.put(attributeName, value);
             } else {
                 throw new CommandLineParsingException("Unexpected value " + arg + ": parameters must start with a '--'");
             }

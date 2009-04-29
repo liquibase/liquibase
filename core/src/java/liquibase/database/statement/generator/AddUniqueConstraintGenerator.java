@@ -4,7 +4,6 @@ import liquibase.database.statement.AddUniqueConstraintStatement;
 import liquibase.database.statement.syntax.Sql;
 import liquibase.database.statement.syntax.UnparsedSql;
 import liquibase.database.*;
-import liquibase.exception.JDBCException;
 import liquibase.util.StringUtils;
 
 public class AddUniqueConstraintGenerator implements SqlGenerator<AddUniqueConstraintStatement> {
@@ -13,14 +12,18 @@ public class AddUniqueConstraintGenerator implements SqlGenerator<AddUniqueConst
     }
 
     public boolean isValidGenerator(AddUniqueConstraintStatement statement, Database database) {
-        return !(database instanceof SQLiteDatabase);
+        return !(database instanceof SQLiteDatabase) 
+        		&& !(database instanceof MSSQLDatabase)
+        		&& !(database instanceof SybaseDatabase)
+        		&& !(database instanceof SybaseASADatabase)
+        ;
     }
 
     public GeneratorValidationErrors validate(AddUniqueConstraintStatement addUniqueConstraintStatement, Database database) {
         return new GeneratorValidationErrors();
     }
 
-    public Sql[] generateSql(AddUniqueConstraintStatement statement, Database database) throws JDBCException {
+    public Sql[] generateSql(AddUniqueConstraintStatement statement, Database database) {
       String sql = "ALTER TABLE " + database.escapeTableName(statement.getSchemaName(), statement.getTableName()) + " ADD CONSTRAINT " + database.escapeConstraintName(statement.getConstraintName()) + " UNIQUE (" + database.escapeColumnNameList(statement.getColumnNames()) + ")";
     	if (database instanceof InformixDatabase) {
     		sql = "ALTER TABLE " + database.escapeTableName(statement.getSchemaName(), statement.getTableName()) + " ADD CONSTRAINT UNIQUE (" + database.escapeColumnNameList(statement.getColumnNames()) + ") CONSTRAINT " + database.escapeConstraintName(statement.getConstraintName());

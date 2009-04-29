@@ -175,9 +175,11 @@ public class HsqlDatabase extends AbstractDatabase {
 
     @Override
     public String escapeDatabaseObject(String objectName) {
-        if (keywords.contains(objectName.toUpperCase())) {
-            return "\""+objectName+"\"";
-        }
+    	if (objectName != null) {
+            if (keywords.contains(objectName.toUpperCase())) {
+                return "\""+objectName+"\"";
+            }
+    	}
         return objectName;
     }
 

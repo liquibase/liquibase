@@ -7,7 +7,6 @@ import liquibase.database.Database;
 import liquibase.database.MySQLDatabase;
 import liquibase.database.MSSQLDatabase;
 import liquibase.exception.StatementNotSupportedOnDatabaseException;
-import liquibase.exception.JDBCException;
 
 public class DropIndexGenerator implements SqlGenerator<DropIndexStatement> {
     public int getSpecializationLevel() {
@@ -18,22 +17,22 @@ public class DropIndexGenerator implements SqlGenerator<DropIndexStatement> {
         return true;
     }
 
-    public GeneratorValidationErrors validate(DropIndexStatement dropIndexStatement, Database database) {
-        return new GeneratorValidationErrors();
+    public GeneratorValidationErrors validate(DropIndexStatement statement, Database database) {
+        GeneratorValidationErrors validationErrors = new GeneratorValidationErrors();
+
+        if (database instanceof MySQLDatabase || database instanceof MSSQLDatabase) {
+                validationErrors.checkRequiredField("tableName", statement.getTableName());
+        }
+
+        return validationErrors;
     }
 
-    public Sql[] generateSql(DropIndexStatement statement, Database database) throws JDBCException {
+    public Sql[] generateSql(DropIndexStatement statement, Database database) {
         String schemaName = statement.getTableSchemaName();
         
         if (database instanceof MySQLDatabase) {
-            if (statement.getTableName() == null) {
-                throw new StatementNotSupportedOnDatabaseException("tableName is required", statement, database);
-            }
             return new Sql[] {new UnparsedSql("DROP INDEX " + database.escapeIndexName(null, statement.getIndexName()) + " ON " + database.escapeTableName(schemaName, statement.getTableName())) };
         } else if (database instanceof MSSQLDatabase) {
-            if (statement.getTableName() == null) {
-                throw new StatementNotSupportedOnDatabaseException("tableName is required", statement, database);
-            }
             return new Sql[] {new UnparsedSql("DROP INDEX " + database.escapeTableName(schemaName, statement.getTableName()) + "." + database.escapeIndexName(null, statement.getIndexName())) };
         }
 

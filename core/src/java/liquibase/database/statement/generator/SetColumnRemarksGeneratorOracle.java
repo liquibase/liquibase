@@ -5,7 +5,6 @@ import liquibase.database.OracleDatabase;
 import liquibase.database.statement.syntax.Sql;
 import liquibase.database.statement.syntax.UnparsedSql;
 import liquibase.database.statement.SetColumnRemarksStatement;
-import liquibase.exception.JDBCException;
 
 public class SetColumnRemarksGeneratorOracle implements SqlGenerator<SetColumnRemarksStatement> {
     public int getSpecializationLevel() {
@@ -20,7 +19,7 @@ public class SetColumnRemarksGeneratorOracle implements SqlGenerator<SetColumnRe
         return new GeneratorValidationErrors();
     }
 
-    public Sql[] generateSql(SetColumnRemarksStatement statement, Database database) throws JDBCException {
+    public Sql[] generateSql(SetColumnRemarksStatement statement, Database database) {
         return new Sql[] {
                 new UnparsedSql("COMMENT ON COLUMN "+database.escapeTableName(statement.getSchemaName(), statement.getTableName())+"."+database.escapeColumnName(statement.getSchemaName(), statement.getTableName(), statement.getColumnName())+" IS '"+statement.getRemarks()+"'")
         };

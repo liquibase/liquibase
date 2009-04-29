@@ -17,6 +17,17 @@ public class ForeignKey implements DatabaseObject, Comparable<ForeignKey> {
     private Integer updateRule;
     private Integer deleteRule;
 
+    public DatabaseObject[] getContainingObjects() {
+        return new DatabaseObject[] {
+                new liquibase.database.structure.Column()
+                        .setName(getPrimaryKeyColumns())
+                        .setTable(getPrimaryKeyTable()),
+                new liquibase.database.structure.Column()
+                        .setName(getForeignKeyColumns())
+                        .setTable(getForeignKeyTable())
+
+        };
+    }
 
     public Table getPrimaryKeyTable() {
         return primaryKeyTable;

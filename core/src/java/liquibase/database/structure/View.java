@@ -22,6 +22,12 @@ public class View implements DatabaseObject, Comparable<View> {
     }
 
 
+    public DatabaseObject[] getContainingObjects() {
+        return new DatabaseObject[] {
+                getDatabase()
+        };
+    }
+
     public Database getDatabase() {
         return database;
     }

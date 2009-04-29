@@ -64,6 +64,10 @@ public abstract class AbstractDatabase implements Database {
     protected AbstractDatabase() {
     }
 
+    public DatabaseObject[] getContainingObjects() {
+        return null;
+    }
+
     // ------- DATABASE INFORMATION METHODS ---- //
 
     public DatabaseConnection getConnection() {
@@ -1078,6 +1082,10 @@ public abstract class AbstractDatabase implements Database {
     }
 
     public String escapeTableName(String schemaName, String tableName) {
+        if (schemaName == null) {
+            schemaName = getDefaultSchemaName();
+        }
+
         if (StringUtils.trimToNull(schemaName) == null || !supportsSchemas()) {
             return escapeDatabaseObject(tableName);
         } else {
@@ -1090,6 +1098,10 @@ public abstract class AbstractDatabase implements Database {
     }
 
     public String escapeIndexName(String schemaName, String indexName) {
+        if (schemaName == null) {
+            schemaName = getDefaultSchemaName();
+        }
+
         if (StringUtils.trimToNull(schemaName) == null || !supportsSchemas()) {
             return escapeDatabaseObject(indexName);
         } else {
@@ -1098,6 +1110,10 @@ public abstract class AbstractDatabase implements Database {
     }
 
     public String escapeSequenceName(String schemaName, String sequenceName) {
+        if (schemaName == null) {
+            schemaName = getDefaultSchemaName();
+        }
+
         if (StringUtils.trimToNull(schemaName) == null || !supportsSchemas()) {
             return escapeDatabaseObject(sequenceName);
         } else {
@@ -1110,6 +1126,10 @@ public abstract class AbstractDatabase implements Database {
     }
 
     public String escapeColumnName(String schemaName, String tableName, String columnName) {
+        if (schemaName == null) {
+            schemaName = getDefaultSchemaName();
+        }
+
         return escapeDatabaseObject(columnName);
     }
 

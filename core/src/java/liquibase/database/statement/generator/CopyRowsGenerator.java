@@ -5,7 +5,6 @@ import liquibase.database.statement.syntax.Sql;
 import liquibase.database.statement.syntax.UnparsedSql;
 import liquibase.database.Database;
 import liquibase.database.SQLiteDatabase;
-import liquibase.exception.JDBCException;
 import liquibase.change.ColumnConfig;
 
 public class CopyRowsGenerator implements SqlGenerator<CopyRowsStatement> {
@@ -21,7 +20,7 @@ public class CopyRowsGenerator implements SqlGenerator<CopyRowsStatement> {
         return new GeneratorValidationErrors();
     }
 
-    public Sql[] generateSql(CopyRowsStatement statement, Database database) throws JDBCException {
+    public Sql[] generateSql(CopyRowsStatement statement, Database database) {
         StringBuffer sql = new StringBuffer();
         if (database instanceof SQLiteDatabase) {
             sql.append("INSERT INTO `").append(statement.getTargetTable()).append("` SELECT ");

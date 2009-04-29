@@ -5,7 +5,6 @@ import liquibase.database.statement.syntax.Sql;
 import liquibase.database.statement.syntax.UnparsedSql;
 import liquibase.database.Database;
 import liquibase.database.SQLiteDatabase;
-import liquibase.exception.JDBCException;
 
 import java.util.Date;
 
@@ -22,7 +21,7 @@ public class DeleteGenerator implements SqlGenerator<DeleteStatement> {
         return new GeneratorValidationErrors();
     }
 
-    public Sql[] generateSql(DeleteStatement statement, Database database) throws JDBCException {
+    public Sql[] generateSql(DeleteStatement statement, Database database) {
         StringBuffer sql = new StringBuffer("DELETE FROM " + database.escapeTableName(statement.getSchemaName(), statement.getTableName()));
 
         if (statement.getWhereClause() != null) {

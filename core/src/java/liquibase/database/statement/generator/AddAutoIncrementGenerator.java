@@ -1,10 +1,11 @@
 package liquibase.database.statement.generator;
 
 import liquibase.database.*;
+import liquibase.database.structure.Column;
+import liquibase.database.structure.Table;
 import liquibase.database.statement.AddAutoIncrementStatement;
 import liquibase.database.statement.syntax.Sql;
 import liquibase.database.statement.syntax.UnparsedSql;
-import liquibase.exception.JDBCException;
 
 public class AddAutoIncrementGenerator implements SqlGenerator<AddAutoIncrementStatement> {
 
@@ -22,14 +23,17 @@ public class AddAutoIncrementGenerator implements SqlGenerator<AddAutoIncrementS
         return new GeneratorValidationErrors();
     }
 
-    public Sql[] generateSql(AddAutoIncrementStatement statement, Database database) throws JDBCException {
+    public Sql[] generateSql(AddAutoIncrementStatement statement, Database database) {
         String sql = "ALTER TABLE "
                 + database.escapeTableName(statement.getSchemaName(), statement.getTableName())
                 + " MODIFY " + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(), statement.getColumnName())
                 + " " + database.getColumnType(statement.getColumnDataType(), true)
                 + " AUTO_INCREMENT";
-        return new Sql[] {
-                new UnparsedSql(sql)
+
+        return new Sql[]{
+                new UnparsedSql(sql, new Column()
+                        .setTable(new Table(statement.getTableName()).setSchema(statement.getSchemaName()))
+                        .setName(statement.getColumnName()))
         };
     }
 }

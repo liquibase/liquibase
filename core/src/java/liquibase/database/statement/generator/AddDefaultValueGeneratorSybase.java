@@ -5,8 +5,8 @@ import liquibase.database.statement.syntax.Sql;
 import liquibase.database.statement.syntax.UnparsedSql;
 import liquibase.database.Database;
 import liquibase.database.SybaseDatabase;
-import liquibase.exception.LiquibaseException;
-import liquibase.exception.JDBCException;
+import liquibase.database.structure.Column;
+import liquibase.database.structure.Table;
 
 public class AddDefaultValueGeneratorSybase extends AddDefaultValueGenerator {
     public int getSpecializationLevel() {
@@ -17,9 +17,12 @@ public class AddDefaultValueGeneratorSybase extends AddDefaultValueGenerator {
         return database instanceof SybaseDatabase;
     }
 
-    public Sql[] generateSql(AddDefaultValueStatement statement, Database database) throws JDBCException {
-        return new Sql[] {
-                new UnparsedSql("ALTER TABLE " + database.escapeTableName(statement.getSchemaName(), statement.getTableName()) + " REPLACE " + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " DEFAULT " + database.convertJavaObjectToString(statement.getDefaultValue()))
+    public Sql[] generateSql(AddDefaultValueStatement statement, Database database) {
+        return new Sql[]{
+                new UnparsedSql("ALTER TABLE " + database.escapeTableName(statement.getSchemaName(), statement.getTableName()) + " REPLACE " + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " DEFAULT " + database.convertJavaObjectToString(statement.getDefaultValue()),
+                        new Column()
+                                .setTable(new Table(statement.getTableName()).setSchema(statement.getSchemaName()))
+                                .setName(statement.getColumnName()))
         };
     }
 }

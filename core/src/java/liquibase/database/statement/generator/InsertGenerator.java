@@ -5,7 +5,6 @@ import liquibase.database.statement.syntax.Sql;
 import liquibase.database.statement.syntax.UnparsedSql;
 import liquibase.database.Database;
 import liquibase.exception.StatementNotSupportedOnDatabaseException;
-import liquibase.exception.JDBCException;
 
 import java.util.Date;
 
@@ -19,13 +18,16 @@ public class InsertGenerator implements SqlGenerator<InsertStatement> {
     }
 
     public GeneratorValidationErrors validate(InsertStatement insertStatement, Database database) {
-        return new GeneratorValidationErrors();
+        GeneratorValidationErrors validationErrors = new GeneratorValidationErrors();
+
+        if (insertStatement.getSchemaName() != null && !database.supportsSchemas()) {
+           validationErrors.addError("Database does not support schemas");
+       }
+
+        return validationErrors;
     }
 
-    public Sql[] generateSql(InsertStatement statement, Database database) throws JDBCException {
-         if (statement.getSchemaName() != null && !database.supportsSchemas()) {
-            throw new StatementNotSupportedOnDatabaseException("Database does not support schemas", statement, database);
-        }
+    public Sql[] generateSql(InsertStatement statement, Database database) {
         StringBuffer sql = new StringBuffer("INSERT INTO " + database.escapeTableName(statement.getSchemaName(), statement.getTableName()) + " (");
         for (String column : statement.getColumnValues().keySet()) {
             sql.append(database.escapeColumnName(statement.getSchemaName(), statement.getTableName(), column)).append(", ");

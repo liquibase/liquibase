@@ -4,7 +4,6 @@ import liquibase.database.Database;
 import liquibase.database.statement.RawSqlStatement;
 import liquibase.database.statement.syntax.Sql;
 import liquibase.database.statement.syntax.UnparsedSql;
-import liquibase.exception.JDBCException;
 
 public class RawSqlGenerator implements SqlGenerator<RawSqlStatement> {
     public int getSpecializationLevel() {
@@ -19,7 +18,7 @@ public class RawSqlGenerator implements SqlGenerator<RawSqlStatement> {
         return new GeneratorValidationErrors();
     }
 
-    public Sql[] generateSql(RawSqlStatement statement, Database database) throws JDBCException {
+    public Sql[] generateSql(RawSqlStatement statement, Database database) {
         return new Sql[] {
            new UnparsedSql(statement.getSql(), statement.getEndDelimiter())     
         };

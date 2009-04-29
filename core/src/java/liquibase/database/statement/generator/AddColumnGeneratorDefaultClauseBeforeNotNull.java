@@ -4,9 +4,8 @@ import liquibase.database.statement.AddColumnStatement;
 import liquibase.database.statement.syntax.Sql;
 import liquibase.database.statement.syntax.UnparsedSql;
 import liquibase.database.*;
-import liquibase.exception.LiquibaseException;
-import liquibase.exception.StatementNotSupportedOnDatabaseException;
-import liquibase.exception.JDBCException;
+import liquibase.database.structure.Column;
+import liquibase.database.structure.Table;
 
 public class AddColumnGeneratorDefaultClauseBeforeNotNull extends AddColumnGenerator {
     public int getSpecializationLevel() {
@@ -31,7 +30,7 @@ public class AddColumnGeneratorDefaultClauseBeforeNotNull extends AddColumnGener
         return validationErrors;
     }
 
-    public Sql[] generateSql(AddColumnStatement statement, Database database) throws JDBCException {
+    public Sql[] generateSql(AddColumnStatement statement, Database database) {
         String alterTable = "ALTER TABLE " + database.escapeTableName(statement.getSchemaName(), statement.getTableName()) + " ADD " + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " " + database.getColumnType(statement.getColumnType(), statement.isAutoIncrement());
 
         alterTable += getDefaultClause(statement, database);
@@ -57,7 +56,9 @@ public class AddColumnGeneratorDefaultClauseBeforeNotNull extends AddColumnGener
         }
 
         return new Sql[]{
-            new UnparsedSql(alterTable)
+                new UnparsedSql(alterTable, new Column()
+                        .setTable(new Table(statement.getTableName()).setSchema(statement.getSchemaName()))
+                        .setName(statement.getColumnName()))
         };
     }
 
@@ -65,7 +66,7 @@ public class AddColumnGeneratorDefaultClauseBeforeNotNull extends AddColumnGener
     private String getDefaultClause(AddColumnStatement statement, Database database) {
         String clause = "";
         if (statement.getDefaultValue() != null) {
-           clause += " DEFAULT " + database.convertJavaObjectToString(statement.getDefaultValue());
+            clause += " DEFAULT " + database.convertJavaObjectToString(statement.getDefaultValue());
         }
         return clause;
     }

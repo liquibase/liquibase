@@ -5,7 +5,6 @@ import liquibase.database.statement.syntax.Sql;
 import liquibase.database.statement.syntax.UnparsedSql;
 import liquibase.database.*;
 import liquibase.exception.StatementNotSupportedOnDatabaseException;
-import liquibase.exception.JDBCException;
 
 public class RenameViewGenerator implements SqlGenerator<RenameViewStatement> {
     public int getSpecializationLevel() {
@@ -18,14 +17,20 @@ public class RenameViewGenerator implements SqlGenerator<RenameViewStatement> {
                 || database instanceof DB2Database
                 || database instanceof CacheDatabase
                 || database instanceof FirebirdDatabase
-                || database instanceof InformixDatabase);
+                || database instanceof InformixDatabase
+                || database instanceof SybaseASADatabase);
     }
 
     public GeneratorValidationErrors validate(RenameViewStatement renameViewStatement, Database database) {
-        return new GeneratorValidationErrors();
+        GeneratorValidationErrors validationErrors = new GeneratorValidationErrors();
+        if (database instanceof OracleDatabase) {
+            validationErrors.checkDisallowedField("schemaName", renameViewStatement.getSchemaName());
+        }
+
+        return validationErrors;
     }
 
-    public Sql[] generateSql(RenameViewStatement statement, Database database) throws JDBCException {
+    public Sql[] generateSql(RenameViewStatement statement, Database database) {
         String sql;
 
         if (database instanceof MSSQLDatabase) {
@@ -37,16 +42,7 @@ public class RenameViewGenerator implements SqlGenerator<RenameViewStatement> {
         } else if (database instanceof MaxDBDatabase) {
             sql = "RENAME VIEW " + database.escapeViewName(statement.getSchemaName(), statement.getOldViewName()) + " TO " + database.escapeViewName(null, statement.getNewViewName());
         } else {
-            if (statement.getSchemaName() != null && database instanceof OracleDatabase) {
-                throw new StatementNotSupportedOnDatabaseException("Cannot specify schema when renaming in oracle", statement, database);
-            }
-
-            if (database instanceof SybaseASADatabase) {
-                throw new StatementNotSupportedOnDatabaseException("Sybase ASA does not support renaming of view. Please drop old view and create a new one manually.", statement, database);
-
-            }
             sql = "RENAME " + database.escapeViewName(statement.getSchemaName(), statement.getOldViewName()) + " TO " + database.escapeViewName(null, statement.getNewViewName());
-
         }
 
         return new Sql[]{

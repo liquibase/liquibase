@@ -4,7 +4,6 @@ import liquibase.database.statement.DropViewStatement;
 import liquibase.database.statement.syntax.Sql;
 import liquibase.database.statement.syntax.UnparsedSql;
 import liquibase.database.Database;
-import liquibase.exception.JDBCException;
 
 public class DropViewGenerator implements SqlGenerator<DropViewStatement> {
     public int getSpecializationLevel() {
@@ -19,7 +18,7 @@ public class DropViewGenerator implements SqlGenerator<DropViewStatement> {
         return new GeneratorValidationErrors();
     }
 
-    public Sql[] generateSql(DropViewStatement statement, Database database) throws JDBCException {
+    public Sql[] generateSql(DropViewStatement statement, Database database) {
         return new Sql[] {
                 new UnparsedSql("DROP VIEW " + database.escapeViewName(statement.getSchemaName(), statement.getViewName()))
         };

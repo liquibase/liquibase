@@ -11,6 +11,11 @@ public class PrimaryKey implements DatabaseObject, Comparable<PrimaryKey> {
     private Table table;
     private boolean certainName = true;
 
+    public DatabaseObject[] getContainingObjects() {
+        return new DatabaseObject[] {
+                table
+        };
+    }
 
     public String getName() {
         return name;

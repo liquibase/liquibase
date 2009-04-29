@@ -94,7 +94,7 @@ public interface Change {
      */
     public void setFileOpener(FileOpener fileOpener);
 
-    public Set<DatabaseObject> getAffectedDatabaseObjects();
+    public Set<DatabaseObject> getAffectedDatabaseObjects(Database database);
     
     /**
      * Calculates the checksum (currently MD5 hash) for the current configuration of this change.
