@@ -5,11 +5,9 @@ import liquibase.database.statement.AlterSequenceStatement;
 import liquibase.database.statement.SqlStatement;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Sequence;
-import liquibase.exception.UnsupportedChangeException;
 import liquibase.exception.InvalidChangeDefinitionException;
+import liquibase.exception.UnsupportedChangeException;
 import liquibase.util.StringUtils;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -104,28 +102,6 @@ public class AlterSequenceChange extends AbstractChange {
 
     public String getConfirmationMessage() {
         return "Sequence " + getSequenceName() + " altered";
-    }
-
-    public Element createNode(Document currentChangeLogFileDOM) {
-        Element node = currentChangeLogFileDOM.createElement("alterSequence");
-        node.setAttribute("sequenceName", getSequenceName());
-        if (getSchemaName() != null) {
-            node.setAttribute("schemaName", getSchemaName());
-        }
-        if (getMinValue() != null) {
-            node.setAttribute("minValue", getMinValue().toString());
-        }
-        if (getMaxValue() != null) {
-            node.setAttribute("maxValue", getMaxValue().toString());
-        }
-        if (getIncrementBy() != null) {
-            node.setAttribute("incrementBy", getIncrementBy().toString());
-        }
-        if (isOrdered() != null) {
-            node.setAttribute("ordered", isOrdered().toString());
-        }
-
-        return node;
     }
 
     public Set<DatabaseObject> getAffectedDatabaseObjects() {

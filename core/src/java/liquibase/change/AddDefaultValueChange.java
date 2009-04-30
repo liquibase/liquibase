@@ -4,29 +4,22 @@ import liquibase.database.Database;
 import liquibase.database.SQLiteDatabase;
 import liquibase.database.SQLiteDatabase.AlterTableVisitor;
 import liquibase.database.statement.AddDefaultValueStatement;
-import liquibase.database.statement.SqlStatement;
 import liquibase.database.statement.ComputedDateValue;
 import liquibase.database.statement.ComputedNumericValue;
+import liquibase.database.statement.SqlStatement;
 import liquibase.database.structure.Column;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Index;
 import liquibase.database.structure.Table;
+import liquibase.exception.InvalidChangeDefinitionException;
 import liquibase.exception.JDBCException;
 import liquibase.exception.UnsupportedChangeException;
-import liquibase.exception.InvalidChangeDefinitionException;
 import liquibase.util.ISODateFormat;
 import liquibase.util.StringUtils;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
 import java.text.NumberFormat;
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Sets a new default value to an existing column.
@@ -226,31 +219,6 @@ public class AddDefaultValueChange extends AbstractChange {
         return "Default value added to " + getTableName() + "." + getColumnName();
     }
 
-    public Element createNode(Document currentChangeLogFileDOM) {
-        Element node = currentChangeLogFileDOM.createElement(getChangeName());
-        if (getSchemaName() != null) {
-            node.setAttribute("schemaName", getSchemaName());
-        }
-        node.setAttribute("tableName", getTableName());
-        node.setAttribute("columnName", getColumnName());
-        if (getColumnDataType() != null) {
-        	node.setAttribute("columnDataType", getColumnDataType());
-        }
-        if (getDefaultValue() != null) {
-            node.setAttribute("defaultValue", getDefaultValue());
-        }
-        if (getDefaultValueNumeric() != null) {
-            node.setAttribute("defaultValueNumeric", getDefaultValueNumeric());
-        }
-        if (getDefaultValueDate() != null) {
-            node.setAttribute("defaultValueDate", getDefaultValueDate());
-        }
-        if (getDefaultValueBoolean() != null) {
-            node.setAttribute("defaultValueBoolean", getDefaultValueBoolean().toString());
-        }
-
-        return node;
-    }
 
     public Set<DatabaseObject> getAffectedDatabaseObjects() {
         Column column = new Column();

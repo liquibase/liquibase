@@ -12,7 +12,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 public class DropPrimaryKeyChangeTest extends AbstractChangeTest {
         @Test
     public void getRefactoringName() throws Exception {
-        assertEquals("Drop Primary Key", new DropPrimaryKeyChange().getChangeDescription());
+        assertEquals("Drop Primary Key", new DropPrimaryKeyChange().getChangeMetaData().getDescription());
     }
 
     @Test
@@ -40,16 +40,4 @@ public class DropPrimaryKeyChangeTest extends AbstractChangeTest {
 
     }
 
-    @Test
-    public void createNode() throws Exception {
-        DropPrimaryKeyChange change = new DropPrimaryKeyChange();
-        change.setSchemaName("SCHEMA_NAME");
-        change.setTableName("TABLE_NAME");
-        change.setConstraintName("PK_NAME");
-        Element node = change.createNode(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument());
-        assertEquals("dropPrimaryKey", node.getTagName());
-        assertEquals("SCHEMA_NAME", node.getAttribute("schemaName"));
-        assertEquals("TABLE_NAME", node.getAttribute("tableName"));
-        assertEquals("PK_NAME", node.getAttribute("constraintName"));
-    }
 }

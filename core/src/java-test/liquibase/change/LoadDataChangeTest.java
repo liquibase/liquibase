@@ -17,7 +17,7 @@ public class LoadDataChangeTest extends AbstractChangeTest {
 
     @Test
     public void getRefactoringName() throws Exception {
-        assertEquals("Load Data", new LoadDataChange().getChangeDescription());
+        assertEquals("Load Data", new LoadDataChange().getChangeMetaData().getDescription());
     }
 
     @Test
@@ -91,22 +91,6 @@ public class LoadDataChangeTest extends AbstractChangeTest {
         refactoring.setFile("FILE_NAME");
 
         assertEquals("Data loaded from FILE_NAME into TABLE_NAME", refactoring.getConfirmationMessage());
-    }
-
-    @Test
-    public void createNode() throws Exception {
-        LoadDataChange refactoring = new LoadDataChange();
-        refactoring.setSchemaName("SCHEMA_NAME");
-        refactoring.setTableName("TABLE_NAME");
-        refactoring.setFile("FILE_NAME");
-        refactoring.setEncoding("UTF-8");
-
-        Element node = refactoring.createNode(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument());
-        assertEquals("loadData", node.getNodeName());
-        assertEquals("SCHEMA_NAME", node.getAttribute("schemaName"));
-        assertEquals("TABLE_NAME", node.getAttribute("tableName"));
-        assertEquals("FILE_NAME", node.getAttribute("file"));
-        assertEquals("UTF-8", node.getAttribute("encoding"));
     }
     
     @Test

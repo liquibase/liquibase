@@ -14,7 +14,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 public class DropForeignKeyConstraintChangeTest extends AbstractChangeTest {
  @Test
     public void getRefactoringName() throws Exception {
-        assertEquals("Drop Foreign Key Constraint", new DropForeignKeyConstraintChange().getChangeDescription());
+        assertEquals("Drop Foreign Key Constraint", new DropForeignKeyConstraintChange().getChangeMetaData().getDescription());
     }
 
     @Test
@@ -46,19 +46,5 @@ public class DropForeignKeyConstraintChangeTest extends AbstractChangeTest {
         change.setConstraintName("FK_NAME");
 
         assertEquals("Foreign key FK_NAME dropped", change.getConfirmationMessage());
-    }
-
-    @Test
-    public void createNode() throws Exception {
-        DropForeignKeyConstraintChange change = new DropForeignKeyConstraintChange();
-        change.setBaseTableSchemaName("SCHEMA_NAME");
-        change.setBaseTableName("TABLE_NAME");
-        change.setConstraintName("FK_NAME");
-
-        Element node = change.createNode(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument());
-        assertEquals("dropForeignKeyConstraint", node.getTagName());
-        assertEquals("SCHEMA_NAME", node.getAttribute("baseTableSchemaName"));
-        assertEquals("TABLE_NAME", node.getAttribute("baseTableName"));
-        assertEquals("FK_NAME", node.getAttribute("constraintName"));
     }
 }

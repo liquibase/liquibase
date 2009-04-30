@@ -5,11 +5,9 @@ import liquibase.database.statement.InsertStatement;
 import liquibase.database.statement.SqlStatement;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Table;
-import liquibase.exception.UnsupportedChangeException;
 import liquibase.exception.InvalidChangeDefinitionException;
+import liquibase.exception.UnsupportedChangeException;
 import liquibase.util.StringUtils;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
 import java.util.*;
 
@@ -89,24 +87,6 @@ public class InsertDataChange extends AbstractChange implements ChangeWithColumn
      */
     public String getConfirmationMessage() {
         return "New row inserted into " + getTableName();
-    }
-
-    /**
-     * @see liquibase.change.Change#createNode(org.w3c.dom.Document)
-     */
-    public Element createNode(Document currentChangeLogFileDOM) {
-        Element node = currentChangeLogFileDOM.createElement("insert");
-        if (getSchemaName() != null) {
-            node.setAttribute("schemaName", getSchemaName());
-        }
-
-        node.setAttribute("tableName", getTableName());
-
-        for (ColumnConfig col : getColumns()) {
-            Element subNode = col.createNode(currentChangeLogFileDOM);
-            node.appendChild(subNode);
-        }
-        return node;
     }
 
     /**

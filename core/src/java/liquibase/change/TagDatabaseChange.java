@@ -1,14 +1,12 @@
 package liquibase.change;
 
+import liquibase.database.Database;
 import liquibase.database.statement.SqlStatement;
 import liquibase.database.statement.TagDatabaseStatement;
-import liquibase.database.Database;
 import liquibase.database.structure.DatabaseObject;
-import liquibase.exception.UnsupportedChangeException;
 import liquibase.exception.InvalidChangeDefinitionException;
+import liquibase.exception.UnsupportedChangeException;
 import liquibase.util.StringUtils;
-import org.w3c.dom.Element;
-import org.w3c.dom.Document;
 
 import java.util.Set;
 
@@ -43,13 +41,6 @@ public class TagDatabaseChange extends AbstractChange{
 
     public String getConfirmationMessage() {
         return "Tag '"+tag+"' applied to database";
-    }
-
-    public Element createNode(Document currentChangeLogDOM) {
-        Element sqlElement = currentChangeLogDOM.createElement(getChangeName());
-        sqlElement.setAttribute("tag", getTag());
-        return sqlElement;
-
     }
 
     public Set<DatabaseObject> getAffectedDatabaseObjects() {

@@ -7,11 +7,9 @@ import liquibase.database.statement.SqlStatement;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.ForeignKey;
 import liquibase.database.structure.Table;
-import liquibase.exception.UnsupportedChangeException;
 import liquibase.exception.InvalidChangeDefinitionException;
+import liquibase.exception.UnsupportedChangeException;
 import liquibase.util.StringUtils;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -88,19 +86,6 @@ public class DropForeignKeyConstraintChange extends AbstractChange {
 
     public String getConfirmationMessage() {
         return "Foreign key " + getConstraintName() + " dropped";
-    }
-
-    public Element createNode(Document currentChangeLogFileDOM) {
-        Element node = currentChangeLogFileDOM.createElement(getChangeName());
-
-        if (getBaseTableSchemaName() != null) {
-            node.setAttribute("baseTableSchemaName", getBaseTableSchemaName());
-        }
-
-        node.setAttribute("baseTableName", getBaseTableName());
-        node.setAttribute("constraintName", getConstraintName());
-
-        return node;
     }
 
     public Set<DatabaseObject> getAffectedDatabaseObjects() {

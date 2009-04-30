@@ -1,9 +1,9 @@
 package liquibase.change;
 
-import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.PluginUtil;
+import liquibase.exception.UnexpectedLiquibaseException;
 
-import java.util.*;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -48,7 +48,7 @@ public class ChangeFactory {
 
     public void register(Class<? extends Change> changeClass) {
         try {
-            registry.put(changeClass.newInstance().getChangeName(), changeClass);
+            registry.put(changeClass.newInstance().getChangeMetaData().getName(), changeClass);
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);
         }

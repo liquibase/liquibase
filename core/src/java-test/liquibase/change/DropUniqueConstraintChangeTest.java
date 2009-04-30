@@ -23,7 +23,7 @@ public class DropUniqueConstraintChangeTest  extends AbstractChangeTest {
 
     @Test
     public void getRefactoringName() throws Exception {
-        assertEquals("Drop Unique Constraint", change.getChangeDescription());
+        assertEquals("Drop Unique Constraint", change.getChangeMetaData().getDescription());
     }
 
     @Test
@@ -41,23 +41,4 @@ public class DropUniqueConstraintChangeTest  extends AbstractChangeTest {
         assertEquals("Unique constraint UQ_CONSTRAINT dropped from TAB_NAME", change.getConfirmationMessage());
     }
 
-    @Test
-    public void createNode() throws Exception {
-        Element element = change.createNode(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument());
-        assertEquals("dropUniqueConstraint", element.getTagName());
-        assertEquals("SCHEMA_NAME", element.getAttribute("schemaName"));
-        assertEquals("TAB_NAME", element.getAttribute("tableName"));
-        assertEquals("UQ_CONSTRAINT", element.getAttribute("constraintName"));
-    }
-
-    @Test
-    public void createNode_noSchema() throws Exception {
-        change.setSchemaName(null);
-
-        Element element = change.createNode(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument());
-        assertEquals("dropUniqueConstraint", element.getTagName());
-        assertEquals("TAB_NAME", element.getAttribute("tableName"));
-        assertEquals("UQ_CONSTRAINT", element.getAttribute("constraintName"));
-        assertFalse(element.hasAttribute("schemaName"));
-    }
 }

@@ -6,11 +6,9 @@ import liquibase.database.statement.SqlStatement;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Index;
 import liquibase.database.structure.Table;
-import liquibase.exception.UnsupportedChangeException;
 import liquibase.exception.InvalidChangeDefinitionException;
+import liquibase.exception.UnsupportedChangeException;
 import liquibase.util.StringUtils;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -68,18 +66,6 @@ public class DropIndexChange extends AbstractChange {
 
     public String getConfirmationMessage() {
         return "Index " + getIndexName() + " dropped from table " + getTableName();
-    }
-
-    public Element createNode(Document currentChangeLogFileDOM) {
-        Element element = currentChangeLogFileDOM.createElement("dropIndex");
-        if (getSchemaName() != null) {
-            element.setAttribute("schemaName", getSchemaName());
-        }
-
-        element.setAttribute("indexName", getIndexName());
-        element.setAttribute("tableName", getTableName());
-
-        return element;
     }
 
     public Set<DatabaseObject> getAffectedDatabaseObjects() {

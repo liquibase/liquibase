@@ -330,51 +330,16 @@ public class ChangeSet {
         this.comments = comments;
     }
 
-    public Element createNode(Document currentChangeLogDOM) {
-        Element node = currentChangeLogDOM.createElement("changeSet");
-        node.setAttribute("id", getId());
-        node.setAttribute("author", getAuthor());
+    public boolean isAlwaysRun() {
+        return alwaysRun;
+    }
 
-        if (alwaysRun) {
-            node.setAttribute("alwaysRun", "true");
-        }
+    public boolean isRunOnChange() {
+        return runOnChange;
+    }
 
-        if (runOnChange) {
-            node.setAttribute("runOnChange", "true");
-        }
-
-        if (failOnError != null) {
-            node.setAttribute("failOnError", failOnError.toString());
-        }
-
-        if (getContexts() != null && getContexts().size() > 0) {
-            StringBuffer contextString = new StringBuffer();
-            for (String context : getContexts()) {
-                contextString.append(context).append(",");
-            }
-            node.setAttribute("context", contextString.toString().replaceFirst(",$", ""));
-        }
-
-        if (getDbmsSet() != null && getDbmsSet().size() > 0) {
-            StringBuffer dbmsString = new StringBuffer();
-            for (String dbms : getDbmsSet()) {
-                dbmsString.append(dbms).append(",");
-            }
-            node.setAttribute("dbms", dbmsString.toString().replaceFirst(",$", ""));
-        }
-
-        if (StringUtils.trimToNull(getComments()) != null) {
-            Element commentsElement = currentChangeLogDOM.createElement("comment");
-            Text commentsText = currentChangeLogDOM.createTextNode(getComments());
-            commentsElement.appendChild(commentsText);
-            node.appendChild(commentsElement);
-        }
-
-
-        for (Change change : getChanges()) {
-            node.appendChild(change.createNode(currentChangeLogDOM));
-        }
-        return node;
+    public boolean isRunInTransaction() {
+        return runInTransaction;
     }
 
     public Change[] getRollBackChanges() {
@@ -425,10 +390,10 @@ public class ChangeSet {
             } else if (changeCount > 1) {
                 returnString.append(" (x").append(changeCount).append(")");
                 returnString.append(", ");
-                returnString.append(change.getChangeDescription());
+                returnString.append(change.getChangeMetaData().getDescription());
                 changeCount = 1;
             } else {
-                returnString.append(", ").append(change.getChangeDescription());
+                returnString.append(", ").append(change.getChangeMetaData().getDescription());
                 changeCount = 1;
             }
             lastChangeClass = change.getClass();

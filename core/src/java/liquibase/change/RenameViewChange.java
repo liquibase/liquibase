@@ -5,11 +5,9 @@ import liquibase.database.statement.RenameViewStatement;
 import liquibase.database.statement.SqlStatement;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.View;
-import liquibase.exception.UnsupportedChangeException;
 import liquibase.exception.InvalidChangeDefinitionException;
+import liquibase.exception.UnsupportedChangeException;
 import liquibase.util.StringUtils;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -77,17 +75,6 @@ public class RenameViewChange extends AbstractChange {
 
     public String getConfirmationMessage() {
         return "View " + oldViewName + " renamed to " + newViewName;
-    }
-
-    public Element createNode(Document currentChangeLogFileDOM) {
-        Element element = currentChangeLogFileDOM.createElement(getChangeName());
-        if (getSchemaName() != null) {
-            element.setAttribute("schemaName", getSchemaName());
-        }
-        element.setAttribute("oldViewName", getOldViewName());
-        element.setAttribute("newViewName", getNewViewName());
-
-        return element;
     }
 
     public Set<DatabaseObject> getAffectedDatabaseObjects() {

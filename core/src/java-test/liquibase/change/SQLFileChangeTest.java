@@ -38,15 +38,6 @@ public abstract class SQLFileChangeTest extends AbstractChangeTest {
 	    assertNotNull(change.getFileOpener());
 	}
     
-    @Test
-	public void createNode() throws Exception {
- 
-        Element element = change.createNode(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument());
-        assertEquals("sqlFile", element.getTagName());
-        
-        assertEquals(fileName, element.getAttribute("path"));
-	}
-
 //    @Test
 //	public void generateStatement() throws Exception {
 //		assertEquals(fileName,change.getPath());
@@ -148,7 +139,7 @@ public abstract class SQLFileChangeTest extends AbstractChangeTest {
 
     @Test
 	public void getRefactoringName() throws Exception {
-		assertEquals("SQL From File", change.getChangeDescription());
+		assertEquals("SQL From File", change.getChangeMetaData().getDescription());
 
 	}
 

@@ -18,7 +18,7 @@ public class CreateSequenceChangeTest extends AbstractChangeTest {
 
     @Test
     public void getRefactoringName() throws Exception {
-        assertEquals("Create Sequence", new CreateSequenceChange().getChangeDescription());
+        assertEquals("Create Sequence", new CreateSequenceChange().getChangeMetaData().getDescription());
     }
 
     @Test
@@ -61,33 +61,4 @@ public class CreateSequenceChangeTest extends AbstractChangeTest {
         assertEquals("Sequence SEQ_NAME created", change.getConfirmationMessage());
     }
 
-    @Test
-    public void createNode() throws Exception {
-        CreateSequenceChange change = new CreateSequenceChange();
-        change.setSequenceName("SEQ_NAME");
-
-        Element node = change.createNode(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument());
-        assertEquals("createSequence", node.getNodeName());
-        assertEquals("SEQ_NAME", node.getAttribute("sequenceName"));
-        assertFalse(node.hasAttribute("incrementBy"));
-        assertFalse(node.hasAttribute("maxValue"));
-        assertFalse(node.hasAttribute("minValue"));
-        assertFalse(node.hasAttribute("ordered"));
-        assertFalse(node.hasAttribute("startValue"));
-
-        change.setIncrementBy(1);
-        change.setMaxValue(2);
-        change.setMinValue(3);
-        change.setOrdered(true);
-        change.setStartValue(4);
-
-        node = change.createNode(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument());
-        assertEquals("createSequence", node.getNodeName());
-        assertEquals("SEQ_NAME", node.getAttribute("sequenceName"));
-        assertEquals("1", node.getAttribute("incrementBy"));
-        assertEquals("2", node.getAttribute("maxValue"));
-        assertEquals("3", node.getAttribute("minValue"));
-        assertEquals("true", node.getAttribute("ordered"));
-        assertEquals("4", node.getAttribute("startValue"));
-    }
 }

@@ -6,11 +6,9 @@ import liquibase.database.statement.generator.SqlGeneratorFactory;
 import liquibase.database.structure.Column;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Table;
-import liquibase.exception.UnsupportedChangeException;
 import liquibase.exception.InvalidChangeDefinitionException;
+import liquibase.exception.UnsupportedChangeException;
 import liquibase.util.StringUtils;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -176,25 +174,6 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
 
     public String getConfirmationMessage() {
         return "Table " + tableName + " created";
-    }
-
-    public Element createNode(Document currentChangeLogFileDOM) {
-        Element element = currentChangeLogFileDOM.createElement("createTable");
-        if (getSchemaName() != null) {
-            element.setAttribute("schemaName", getSchemaName());
-        }
-
-        element.setAttribute("tableName", getTableName());
-        if (StringUtils.trimToNull(tablespace) != null) {
-            element.setAttribute("tablespace", tablespace);
-        }
-        if (StringUtils.trimToNull(remarks) != null) {
-            element.setAttribute("remarks", remarks);
-        }
-        for (ColumnConfig column : getColumns()) {
-            element.appendChild(column.createNode(currentChangeLogFileDOM));
-        }
-        return element;
     }
 
     public Set<DatabaseObject> getAffectedDatabaseObjects() {

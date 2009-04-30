@@ -1,14 +1,11 @@
 package liquibase.change;
 
-import liquibase.database.statement.SqlStatement;
 import liquibase.database.Database;
+import liquibase.database.statement.SqlStatement;
 import liquibase.database.structure.DatabaseObject;
-import liquibase.exception.UnsupportedChangeException;
 import liquibase.exception.InvalidChangeDefinitionException;
+import liquibase.exception.UnsupportedChangeException;
 import liquibase.util.StringUtils;
-import org.w3c.dom.Node;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
 import java.util.Set;
 
@@ -38,14 +35,6 @@ public class StopChange extends AbstractChange {
 
     public String getConfirmationMessage() {
         return "Changelog Execution Stopped";
-    }
-
-    public Node createNode(Document currentChangeLogDOM) {
-        Element element = currentChangeLogDOM.createElement(getChangeName());
-        if (getMessage() != null) {
-            element.setTextContent(getMessage());
-        }
-        return element;
     }
 
     public Set<DatabaseObject> getAffectedDatabaseObjects() {

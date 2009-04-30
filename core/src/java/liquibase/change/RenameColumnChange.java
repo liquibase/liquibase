@@ -9,18 +9,12 @@ import liquibase.database.structure.Column;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Index;
 import liquibase.database.structure.Table;
+import liquibase.exception.InvalidChangeDefinitionException;
 import liquibase.exception.JDBCException;
 import liquibase.exception.UnsupportedChangeException;
-import liquibase.exception.InvalidChangeDefinitionException;
 import liquibase.util.StringUtils;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Renames an existing column.
@@ -165,19 +159,6 @@ public class RenameColumnChange extends AbstractChange {
 
     public String getConfirmationMessage() {
         return "Column "+tableName+"."+ oldColumnName + " renamed to " + newColumnName;
-    }
-
-    public Element createNode(Document currentChangeLogFileDOM) {
-        Element node = currentChangeLogFileDOM.createElement("renameColumn");
-        if (getSchemaName() != null) {
-            node.setAttribute("schemaName", getSchemaName());
-        }
-        
-        node.setAttribute("tableName", getTableName());
-        node.setAttribute("oldColumnName", getOldColumnName());
-        node.setAttribute("newColumnName", getNewColumnName());
-
-        return node;
     }
 
     public Set<DatabaseObject> getAffectedDatabaseObjects() {

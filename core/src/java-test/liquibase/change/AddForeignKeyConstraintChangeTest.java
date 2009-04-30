@@ -50,7 +50,7 @@ public class AddForeignKeyConstraintChangeTest  extends AbstractChangeTest {
     }
 
       public void getRefactoringName() throws Exception {
-        assertEquals("Add Foreign Key Constraint", new AddForeignKeyConstraintChange().getChangeDescription());
+        assertEquals("Add Foreign Key Constraint", new AddForeignKeyConstraintChange().getChangeMetaData().getDescription());
     }
 
     @Test
@@ -62,39 +62,5 @@ public class AddForeignKeyConstraintChangeTest  extends AbstractChangeTest {
         change.setBaseColumnNames("COL_NAME");
 
         assertEquals("Foreign key contraint added to TABLE_NAME (COL_NAME)", change.getConfirmationMessage());
-    }
-
-    @Test
-    public void createNode() throws Exception {
-        AddForeignKeyConstraintChange change = new AddForeignKeyConstraintChange();
-        change.setConstraintName("FK_NAME");
-
-        change.setBaseTableSchemaName("BASE_SCHEMA_NAME");
-        change.setBaseTableName("BASE_TABLE_NAME");
-        change.setBaseColumnNames("BASE_COL_NAME");
-
-        change.setReferencedTableSchemaName("REF_SCHEMA_NAME");
-        change.setReferencedTableName("REF_TABLE_NAME");
-        change.setReferencedColumnNames("REF_COL_NAME");
-
-        change.setDeferrable(true);
-        change.setDeleteRule(DatabaseMetaData.importedKeyCascade);
-        change.setUpdateRule(DatabaseMetaData.importedKeyCascade);
-        change.setInitiallyDeferred(true);
-
-        Element node = change.createNode(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument());
-        assertEquals("addForeignKeyConstraint", node.getTagName());
-        assertEquals("FK_NAME", node.getAttribute("constraintName"));
-        assertEquals("BASE_SCHEMA_NAME", node.getAttribute("baseTableSchemaName"));
-        assertEquals("BASE_TABLE_NAME", node.getAttribute("baseTableName"));
-        assertEquals("BASE_COL_NAME", node.getAttribute("baseColumnNames"));
-        assertEquals("REF_SCHEMA_NAME", node.getAttribute("referencedTableSchemaName"));
-        assertEquals("REF_TABLE_NAME", node.getAttribute("referencedTableName"));
-        assertEquals("REF_COL_NAME", node.getAttribute("referencedColumnNames"));
-        assertEquals("true", node.getAttribute("deferrable"));
-        assertEquals("true", node.getAttribute("initiallyDeferred"));
-        assertEquals("CASCADE", node.getAttribute("onDelete"));
-        assertEquals("CASCADE", node.getAttribute("onUpdate"));
-
     }
 }

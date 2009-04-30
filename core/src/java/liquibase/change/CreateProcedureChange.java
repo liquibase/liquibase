@@ -5,11 +5,9 @@ import liquibase.database.OracleDatabase;
 import liquibase.database.statement.RawSqlStatement;
 import liquibase.database.statement.SqlStatement;
 import liquibase.database.structure.DatabaseObject;
-import liquibase.exception.UnsupportedChangeException;
 import liquibase.exception.InvalidChangeDefinitionException;
+import liquibase.exception.UnsupportedChangeException;
 import liquibase.util.StringUtils;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
 import java.util.Set;
 
@@ -57,14 +55,6 @@ public class CreateProcedureChange extends AbstractChange {
     public String getConfirmationMessage() {
         return "Stored procedure created";
     }
-
-    public Element createNode(Document currentChangeLogFileDOM) {
-        Element sqlElement = currentChangeLogFileDOM.createElement(getChangeName());
-        sqlElement.appendChild(currentChangeLogFileDOM.createTextNode(getProcedureBody()));
-
-        return sqlElement;
-    }
-
 
     public Set<DatabaseObject> getAffectedDatabaseObjects() {
         return null;

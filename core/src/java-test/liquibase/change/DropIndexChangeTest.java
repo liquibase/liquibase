@@ -16,7 +16,7 @@ public class DropIndexChangeTest extends AbstractChangeTest {
 
     @Test
     public void getRefactoringName() throws Exception {
-        assertEquals("Drop Index", new DropIndexChange().getChangeDescription());
+        assertEquals("Drop Index", new DropIndexChange().getChangeMetaData().getDescription());
     }
 
     @Test
@@ -41,15 +41,5 @@ public class DropIndexChangeTest extends AbstractChangeTest {
         refactoring.setTableName("TABLE_NAME");
 
         assertEquals("Index IDX_NAME dropped from table TABLE_NAME", refactoring.getConfirmationMessage());
-    }
-
-    @Test
-    public void createNode() throws Exception {
-        DropIndexChange refactoring = new DropIndexChange();
-        refactoring.setIndexName("IDX_NAME");
-        Element element = refactoring.createNode(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument());
-
-        assertEquals("dropIndex", element.getTagName());
-        assertEquals("IDX_NAME", element.getAttribute("indexName"));
     }
 }

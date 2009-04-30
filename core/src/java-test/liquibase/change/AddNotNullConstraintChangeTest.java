@@ -20,7 +20,7 @@ public class AddNotNullConstraintChangeTest extends AbstractChangeTest {
 
     @Test
     public void getRefactoringName() throws Exception {
-        assertEquals("Add Not-Null Constraint", new AddNotNullConstraintChange().getChangeDescription());
+        assertEquals("Add Not-Null Constraint", new AddNotNullConstraintChange().getChangeMetaData().getDescription());
     }
 
     @Test
@@ -63,17 +63,4 @@ public class AddNotNullConstraintChangeTest extends AbstractChangeTest {
         assertEquals("Null constraint has been added to TABLE_NAME.COL_HERE", change.getConfirmationMessage());
     }
 
-    @Test
-    public void createNode() throws Exception {
-        AddNotNullConstraintChange change = new AddNotNullConstraintChange();
-        change.setTableName("TABLE_NAME");
-        change.setColumnName("COL_HERE");
-        change.setDefaultNullValue("DEFAULT_VALUE");
-
-        Element node = change.createNode(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument());
-        assertEquals("addNotNullConstraint", node.getTagName());
-        assertEquals("TABLE_NAME", node.getAttribute("tableName"));
-        assertEquals("COL_HERE", node.getAttribute("columnName"));
-        assertEquals("DEFAULT_VALUE", node.getAttribute("defaultNullValue"));
-    }
 }

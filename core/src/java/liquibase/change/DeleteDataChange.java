@@ -5,11 +5,9 @@ import liquibase.database.statement.DeleteStatement;
 import liquibase.database.statement.SqlStatement;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Table;
-import liquibase.exception.UnsupportedChangeException;
 import liquibase.exception.InvalidChangeDefinitionException;
+import liquibase.exception.UnsupportedChangeException;
 import liquibase.util.StringUtils;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -68,22 +66,6 @@ public class DeleteDataChange extends AbstractChange {
 
     public String getConfirmationMessage() {
         return "Data deleted from " + getTableName();
-    }
-
-    public Element createNode(Document currentChangeLogFileDOM) {
-        Element node = currentChangeLogFileDOM.createElement("delete");
-        if (getSchemaName() != null) {
-            node.setAttribute("schemaName", getSchemaName());
-        }
-
-        node.setAttribute("tableName", getTableName());
-
-        if (StringUtils.trimToNull(getWhereClause()) != null) {
-            Element whereClause = currentChangeLogFileDOM.createElement("where");
-            whereClause.appendChild(currentChangeLogFileDOM.createTextNode(getWhereClause()));
-            node.appendChild(whereClause);
-        }
-        return node;
     }
 
     public Set<DatabaseObject> getAffectedDatabaseObjects() {

@@ -13,7 +13,7 @@ public class DropViewChangeTest  extends AbstractChangeTest {
 
     @Test
     public void getRefactoringName() throws Exception {
-        assertEquals("Drop View", new DropViewChange().getChangeDescription());
+        assertEquals("Drop View", new DropViewChange().getChangeMetaData().getDescription());
     }
 
     @Test
@@ -36,28 +36,4 @@ public class DropViewChangeTest  extends AbstractChangeTest {
 
         assertEquals("View VIEW_NAME dropped", change.getConfirmationMessage());
     }
-
-    @Test
-    public void createNode() throws Exception {
-        DropViewChange change = new DropViewChange();
-        change.setViewName("VIEW_NAME");
-
-        Element node = change.createNode(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument());
-        assertEquals("dropView", node.getTagName());
-        assertFalse(node.hasAttribute("schemaName"));
-        assertEquals("VIEW_NAME", node.getAttribute("viewName"));
-    }
-
-    @Test
-    public void createNode_withSchema() throws Exception {
-        DropViewChange change = new DropViewChange();
-        change.setSchemaName("SCHEMA_NAME");
-        change.setViewName("VIEW_NAME");
-
-        Element node = change.createNode(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument());
-        assertEquals("dropView", node.getTagName());
-        assertEquals("SCHEMA_NAME", node.getAttribute("schemaName"));
-        assertEquals("VIEW_NAME", node.getAttribute("viewName"));
-    }
-
 }

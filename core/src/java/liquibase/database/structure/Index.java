@@ -111,7 +111,7 @@ public class Index implements DatabaseObject, Comparable<Index> {
     public String toString() {
         StringBuffer stringBuffer = new StringBuffer();
         stringBuffer.append(getName());
-        if (!this.unique) {
+        if (this.unique != null && !this.unique) {
             stringBuffer.append(" unique ");
         }
         stringBuffer.append(" on ").append(table.getName()).append("(");

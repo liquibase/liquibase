@@ -30,7 +30,7 @@ public class RenameColumnChangeTest extends AbstractChangeTest {
 
     @Test
     public void getRefactoringName() throws Exception {
-        assertEquals("Rename Column", refactoring.getChangeDescription());
+        assertEquals("Rename Column", refactoring.getChangeMetaData().getDescription());
     }
 
     @Test
@@ -49,15 +49,4 @@ public class RenameColumnChangeTest extends AbstractChangeTest {
         assertEquals("Column TABLE_NAME.oldColName renamed to newColName", refactoring.getConfirmationMessage());
     }
 
-    @Test
-    public void createNode() throws Exception {
-        Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
-
-        Element node = refactoring.createNode(document);
-        assertEquals("renameColumn", node.getTagName());
-        assertEquals("SCHEMA_NAME", node.getAttribute("schemaName"));
-        assertEquals("TABLE_NAME", node.getAttribute("tableName"));
-        assertEquals("oldColName", node.getAttribute("oldColumnName"));
-        assertEquals("newColName", node.getAttribute("newColumnName"));
-    }
 }

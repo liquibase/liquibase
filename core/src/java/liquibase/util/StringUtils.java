@@ -3,6 +3,7 @@ package liquibase.util;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Arrays;
 
 /**
  * Various utility methods for working with strings.
@@ -58,6 +59,10 @@ public class StringUtils {
     public static String stripComments(String multiLineSQL) {
         String strippedSingleLines = multiLineSQL.replaceAll("\\s--\\s.*", "");
         return strippedSingleLines.replaceAll("/\\*[\n\\S\\s]*\\*/", "\n");
+    }
+
+    public static String join(String[] array, String delimiter) {
+        return join(Arrays.asList(array), delimiter);
     }
 
     public static String join(Collection<String> collection, String delimiter) {

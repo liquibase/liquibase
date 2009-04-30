@@ -10,12 +10,10 @@ import liquibase.database.structure.Column;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Index;
 import liquibase.database.structure.Table;
+import liquibase.exception.InvalidChangeDefinitionException;
 import liquibase.exception.JDBCException;
 import liquibase.exception.UnsupportedChangeException;
-import liquibase.exception.InvalidChangeDefinitionException;
 import liquibase.util.StringUtils;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
 import java.util.*;
 
@@ -193,22 +191,6 @@ public class MergeColumnChange extends AbstractChange {
 
     public String getConfirmationMessage() {
         return "Columns "+getTableName()+"."+getColumn1Name()+" and "+getTableName()+"."+getColumn2Name()+" merged";
-    }
-
-    public Element createNode(Document currentChangeLogFileDOM) {
-        Element element = currentChangeLogFileDOM.createElement(getChangeName());
-        if (getSchemaName() != null) {
-            element.setAttribute("schemaName", getSchemaName());
-        }
-
-        element.setAttribute("tableName", getTableName());
-        element.setAttribute("column1Name", getColumn1Name());
-        element.setAttribute("joinString", getJoinString());
-        element.setAttribute("column2Name", getColumn2Name());
-        element.setAttribute("finalColumnName", getFinalColumnName());
-        element.setAttribute("finalColumnType", getFinalColumnType());
-
-        return element;
     }
 
     public Set<DatabaseObject> getAffectedDatabaseObjects() {

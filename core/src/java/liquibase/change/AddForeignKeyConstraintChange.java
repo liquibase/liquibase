@@ -8,15 +8,13 @@ import liquibase.database.structure.Column;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.ForeignKey;
 import liquibase.database.structure.Table;
-import liquibase.exception.UnsupportedChangeException;
 import liquibase.exception.InvalidChangeDefinitionException;
+import liquibase.exception.UnsupportedChangeException;
 import liquibase.util.StringUtils;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
+import java.sql.DatabaseMetaData;
 import java.util.HashSet;
 import java.util.Set;
-import java.sql.DatabaseMetaData;
 
 /**
  * Adds a foreign key constraint to an existing column.
@@ -246,78 +244,6 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
         return "Foreign key contraint added to " + getBaseTableName() + " (" + getBaseColumnNames() + ")";
     }
 
-    public Element createNode(Document currentChangeLogFileDOM) {
-        Element node = currentChangeLogFileDOM.createElement(getChangeName());
-
-        if (getBaseTableSchemaName() != null) {
-            node.setAttribute("baseTableSchemaName", getBaseTableSchemaName());
-        }
-
-        node.setAttribute("baseTableName", getBaseTableName());
-        node.setAttribute("baseColumnNames", getBaseColumnNames());
-        node.setAttribute("constraintName", getConstraintName());
-
-        if (getReferencedTableSchemaName() != null) {
-            node.setAttribute("referencedTableSchemaName", getReferencedTableSchemaName());
-        }
-        node.setAttribute("referencedTableName", getReferencedTableName());
-        node.setAttribute("referencedColumnNames", getReferencedColumnNames());
-
-        if (getDeferrable() != null) {
-            node.setAttribute("deferrable", getDeferrable().toString());
-        }
-
-        if (getInitiallyDeferred() != null) {
-            node.setAttribute("initiallyDeferred", getInitiallyDeferred().toString());
-        }
-
-//        if (getDeleteCascade() != null) {
-//            node.setAttribute("deleteCascade", getDeleteCascade().toString());
-//        }
-
-        if (getUpdateRule() != null) {
-            switch (getUpdateRule()) {
-                case DatabaseMetaData.importedKeyCascade:
-                    node.setAttribute("onUpdate", "CASCADE");
-                    break;
-                case DatabaseMetaData.importedKeySetNull:
-                    node.setAttribute("onUpdate", "SET NULL");
-                    break;
-                case DatabaseMetaData.importedKeySetDefault:
-                    node.setAttribute("onUpdate", "SET DEFAULT");
-                    break;
-                case DatabaseMetaData.importedKeyRestrict:
-                    node.setAttribute("onUpdate", "RESTRICT");
-                    break;
-                default:
-                    //don't set anything
-//                    node.setAttribute("onUpdate", "NO ACTION");
-                    break;
-            }
-        }
-        if (getDeleteRule() != null) {
-            switch (getDeleteRule()) {
-                case DatabaseMetaData.importedKeyCascade:
-                    node.setAttribute("onDelete", "CASCADE");
-                    break;
-                case DatabaseMetaData.importedKeySetNull:
-                    node.setAttribute("onDelete", "SET NULL");
-                    break;
-                case DatabaseMetaData.importedKeySetDefault:
-                    node.setAttribute("onDelete", "SET DEFAULT");
-                    break;
-                case DatabaseMetaData.importedKeyRestrict:
-                    node.setAttribute("onDelete", "RESTRICT");
-                    break;
-                default:
-                    //don't set anything
-//                    node.setAttribute("onDelete", "NO ACTION");
-                    break;
-            }
-        }
-        return node;
-    }
-
     public Set<DatabaseObject> getAffectedDatabaseObjects() {
         Set<DatabaseObject> returnSet = new HashSet<DatabaseObject>();
 
@@ -356,5 +282,4 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
         return returnSet;
 
     }
-
 }

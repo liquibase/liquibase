@@ -17,7 +17,7 @@ public class AddPrimaryKeyChangeTest extends AbstractChangeTest {
 
     @Test
     public void getRefactoringName() throws Exception {
-        assertEquals("Add Primary Key", new AddPrimaryKeyChange().getChangeDescription());
+        assertEquals("Add Primary Key", new AddPrimaryKeyChange().getChangeMetaData().getDescription());
     }
 
     @Test
@@ -63,21 +63,4 @@ public class AddPrimaryKeyChangeTest extends AbstractChangeTest {
         assertEquals("Primary key added to TABLE_NAME (COL_HERE)", change.getConfirmationMessage());
     }
 
-    @Test
-    public void createNode() throws Exception {
-        AddPrimaryKeyChange change = new AddPrimaryKeyChange();
-        change.setSchemaName("SCHEMA_NAME");
-        change.setTableName("TABLE_NAME");
-        change.setColumnNames("COL_HERE");
-        change.setConstraintName("PK_NAME");
-        change.setTablespace("TABLESPACE_NAME");
-
-        Element node = change.createNode(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument());
-        assertEquals("addPrimaryKey", node.getTagName());
-        assertEquals("SCHEMA_NAME", node.getAttribute("schemaName"));
-        assertEquals("TABLE_NAME", node.getAttribute("tableName"));
-        assertEquals("COL_HERE", node.getAttribute("columnNames"));
-        assertEquals("PK_NAME", node.getAttribute("constraintName"));
-        assertEquals("TABLESPACE_NAME", node.getAttribute("tablespace"));
-    }
 }

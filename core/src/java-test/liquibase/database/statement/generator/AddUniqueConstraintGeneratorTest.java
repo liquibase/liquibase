@@ -19,18 +19,18 @@ import liquibase.test.TestContext;
 
 import org.junit.Test;
 
-public class AddUniqueConstraintGeneratorTest extends AbstractSqlGeneratorTest{
-	protected static final String TABLE_NAME = "AddUQTest";
-	protected static final String COLUMN_NAME = "colToMakeUQ";
-	protected static final String CONSTRAINT_NAME = "UQ_TEST";
+public class AddUniqueConstraintGeneratorTest extends AbstractSqlGeneratorTest {
+    protected static final String TABLE_NAME = "AddUQTest";
+    protected static final String COLUMN_NAME = "colToMakeUQ";
+    protected static final String CONSTRAINT_NAME = "UQ_TEST";
 
     public AddUniqueConstraintGeneratorTest() {
-		this(new AddUniqueConstraintGenerator());
-	}
+        this(new AddUniqueConstraintGenerator());
+    }
 
     public AddUniqueConstraintGeneratorTest(SqlGenerator generatorUnderTest) {
-		super(generatorUnderTest);
-	}
+        super(generatorUnderTest);
+    }
 
 //    protected void setupDatabase(Database database) throws Exception {
 //            dropAndCreateTable(new CreateTableStatement(null, TABLE_NAME)
@@ -96,43 +96,43 @@ public class AddUniqueConstraintGeneratorTest extends AbstractSqlGeneratorTest{
 //                });
 //    }
 
-	@Override
-	protected SqlStatement createSampleSqlStatement() {
-		return new AddUniqueConstraintStatement(null, null, null, null);
-	}
+    @Override
+    protected SqlStatement createSampleSqlStatement() {
+        return new AddUniqueConstraintStatement(null, null, null, null);
+    }
 
-	@Override
-	protected SqlStatement[] setupStatements() {
-		return new SqlStatement[] {new CreateTableStatement(null, TABLE_NAME)
-        .addColumn("id", "int", new NotNullConstraint())
-        .addColumn(COLUMN_NAME, "int", new NotNullConstraint())
+    @Override
+    protected SqlStatement[] setupStatements() {
+        return new SqlStatement[]{new CreateTableStatement(null, TABLE_NAME)
+                .addColumn("id", "int", new NotNullConstraint())
+                .addColumn(COLUMN_NAME, "int", new NotNullConstraint())
         };
-	}
+    }
 
-	@Override
-	protected boolean shouldBeImplementation(Database database) {
-        return !(database instanceof SQLiteDatabase) 
-			&& !(database instanceof MSSQLDatabase)
-			&& !(database instanceof SybaseDatabase)
-			&& !(database instanceof SybaseASADatabase)
-		;
-	}
+    @Override
+    protected boolean shouldBeImplementation(Database database) {
+        return !(database instanceof SQLiteDatabase)
+                && !(database instanceof MSSQLDatabase)
+                && !(database instanceof SybaseDatabase)
+                && !(database instanceof SybaseASADatabase)
+                ;
+    }
 
-	@Test
-	public void execute_noSchema() throws Exception {
-		SqlStatement statement = new AddUniqueConstraintStatement(null, TABLE_NAME, COLUMN_NAME, CONSTRAINT_NAME);
-		testSqlOnAllExcept("alter table [adduqtest] add constraint [uq_test] unique ([coltomakeuq])", statement
-				, MySQLDatabase.class, InformixDatabase.class, OracleDatabase.class, PostgresDatabase.class, DerbyDatabase.class);
-		testSqlOn("alter table `adduqtest` add constraint `uq_test` unique (`coltomakeuq`)", statement, MySQLDatabase.class);
-		testSqlOn("alter table adduqtest add constraint unique (coltomakeuq) constraint uq_test", statement, InformixDatabase.class);
-		testSqlOn("alter table adduqtest add constraint uq_test unique (coltomakeuq)", statement, OracleDatabase.class);
-		testSqlOn("alter table \"adduqtest\" add constraint uq_test unique (\"coltomakeuq\")", statement, PostgresDatabase.class);
-		testSqlOn("alter table adduqtest add constraint uq_test unique (coltomakeuq)", statement, DerbyDatabase.class);
-	}
+    @Test
+    public void execute_noSchema() throws Exception {
+        SqlStatement statement = new AddUniqueConstraintStatement(null, TABLE_NAME, COLUMN_NAME, CONSTRAINT_NAME);
+        testSqlOnAllExcept("alter table [adduqtest] add constraint [uq_test] unique ([coltomakeuq])", statement
+                , MySQLDatabase.class, InformixDatabase.class, OracleDatabase.class, PostgresDatabase.class, DerbyDatabase.class);
+        testSqlOn("alter table `adduqtest` add constraint `uq_test` unique (`coltomakeuq`)", statement, MySQLDatabase.class);
+        testSqlOn("alter table adduqtest add constraint unique (coltomakeuq) constraint uq_test", statement, InformixDatabase.class);
+        testSqlOn("alter table adduqtest add constraint uq_test unique (coltomakeuq)", statement, OracleDatabase.class);
+        testSqlOn("alter table \"adduqtest\" add constraint uq_test unique (\"coltomakeuq\")", statement, PostgresDatabase.class);
+        testSqlOn("alter table adduqtest add constraint uq_test unique (coltomakeuq)", statement, DerbyDatabase.class);
+    }
 
-	@Test
-	public void execute_noConstraintName() throws Exception {
-		SqlStatement statement = new AddUniqueConstraintStatement(null, TABLE_NAME, COLUMN_NAME, null);
+    @Test
+    public void execute_noConstraintName() throws Exception {
+        SqlStatement statement = new AddUniqueConstraintStatement(null, TABLE_NAME, COLUMN_NAME, null);
 //		testSqlOnAllExcept("alter table [adduqtest] add constraint [uq_test]", statement
 //				, MySQLDatabase.class, InformixDatabase.class, OracleDatabase.class, PostgresDatabase.class, DerbyDatabase.class);
 //		testSqlOn("alter table `adduqtest` add constraint `null` unique (`coltomakeuq`)", statement, MySQLDatabase.class);
@@ -140,24 +140,24 @@ public class AddUniqueConstraintGeneratorTest extends AbstractSqlGeneratorTest{
 //		testSqlOn("alter table adduqtest add constraint uq_test unique (coltomakeuq)", statement, OracleDatabase.class);
 //		testSqlOn("alter table \"adduqtest\" add constraint uq_test unique (\"coltomakeuq\")", statement, PostgresDatabase.class);
 //		testSqlOn("alter table adduqtest add constraint uq_test unique (coltomakeuq)", statement, DerbyDatabase.class);
-	}
+    }
 
-	@Test
-	public void execute_withSchema() throws Exception {
-		SqlStatement statement = new AddUniqueConstraintStatement(TestContext.ALT_SCHEMA, TABLE_NAME, COLUMN_NAME, CONSTRAINT_NAME);
+    @Test
+    public void execute_withSchema() throws Exception {
+        SqlStatement statement = new AddUniqueConstraintStatement(TestContext.ALT_SCHEMA, TABLE_NAME, COLUMN_NAME, CONSTRAINT_NAME);
 
-		testSqlOnAllExcept("alter table liquibaseb.[adduqtest] add constraint [uq_test] unique ([coltomakeuq])", statement
-				, MySQLDatabase.class, InformixDatabase.class, OracleDatabase.class, PostgresDatabase.class, DerbyDatabase.class
-				// FIXME seems like FirebirdDatabase does not support schema attribute. Check it!
-				, FirebirdDatabase.class  
-				);
-		
-		// FIXME Syntax for mysql is correct, but exception "Table 'liquibaseb.adduqtest' doesn't exist" is thrown
+        testSqlOnAllExcept("alter table liquibaseb.[adduqtest] add constraint [uq_test] unique ([coltomakeuq])", statement
+                , MySQLDatabase.class, InformixDatabase.class, OracleDatabase.class, PostgresDatabase.class, DerbyDatabase.class
+                // FIXME seems like FirebirdDatabase does not support schema attribute. Check it!
+                , FirebirdDatabase.class
+        );
+
+        // FIXME Syntax for mysql is correct, but exception "Table 'liquibaseb.adduqtest' doesn't exist" is thrown
 // 		testSqlOn("alter table `liquibaseb`.`adduqtest` add constraint `uq_test` unique (`coltomakeuq`)", statement, MySQLDatabase.class);
-		testSqlOn("alter table liquibaseb.adduqtest add constraint unique (coltomakeuq) constraint uq_test", statement, InformixDatabase.class);
-		testSqlOn("alter table liquibaseb.adduqtest add constraint uq_test unique (coltomakeuq)", statement, OracleDatabase.class);
-		testSqlOn("alter table liquibaseb.\"adduqtest\" add constraint uq_test unique (\"coltomakeuq\")", statement, PostgresDatabase.class);
-		testSqlOn("alter table liquibaseb.adduqtest add constraint uq_test unique (coltomakeuq)", statement, DerbyDatabase.class);
-	}
+        testSqlOn("alter table liquibaseb.adduqtest add constraint unique (coltomakeuq) constraint uq_test", statement, InformixDatabase.class);
+        testSqlOn("alter table liquibaseb.adduqtest add constraint uq_test unique (coltomakeuq)", statement, OracleDatabase.class);
+        testSqlOn("alter table liquibaseb.\"adduqtest\" add constraint uq_test unique (\"coltomakeuq\")", statement, PostgresDatabase.class);
+        testSqlOn("alter table liquibaseb.adduqtest add constraint uq_test unique (coltomakeuq)", statement, DerbyDatabase.class);
+    }
 
 }

@@ -26,7 +26,7 @@ public class DropTableChangeTest extends AbstractChangeTest {
 
     @Test
     public void getRefactoringName() throws Exception {
-        assertEquals("Drop Table", change.getChangeDescription());
+        assertEquals("Drop Table", change.getChangeMetaData().getDescription());
     }
 
     @Test
@@ -49,30 +49,5 @@ public class DropTableChangeTest extends AbstractChangeTest {
     @Test
     public void getConfirmationMessage() throws Exception {
         assertEquals("Table TAB_NAME dropped", change.getConfirmationMessage());
-    }
-
-    @Test
-    public void createNode() throws Exception {
-        Element element = change.createNode(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument());
-        assertEquals("dropTable", element.getTagName());
-        assertEquals("TAB_NAME", element.getAttribute("tableName"));
-        assertEquals("true", element.getAttribute("cascadeConstraints"));
-    }
-
-    @Test
-    public void createNode_withSchema() throws Exception {
-        Element element = change.createNode(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument());
-        assertEquals("dropTable", element.getTagName());
-        assertEquals("TAB_NAME", element.getAttribute("tableName"));
-        assertEquals("true", element.getAttribute("cascadeConstraints"));
-        assertTrue(element.hasAttribute("schemaName"));
-    }
-
-    @Test
-    public void createNode_nullConstraint() throws Exception {
-        change.setCascadeConstraints(null);
-        Element element = change.createNode(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument());
-        assertEquals("dropTable", element.getTagName());
-        assertFalse(element.hasAttribute("cascadeConstraints"));
     }
 }

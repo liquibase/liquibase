@@ -1,16 +1,14 @@
 package liquibase.change;
 
+import liquibase.csv.CSVReader;
 import liquibase.database.Database;
 import liquibase.database.statement.InsertStatement;
 import liquibase.database.statement.SqlStatement;
 import liquibase.database.structure.DatabaseObject;
-import liquibase.exception.UnsupportedChangeException;
 import liquibase.exception.InvalidChangeDefinitionException;
-import liquibase.csv.CSVReader;
+import liquibase.exception.UnsupportedChangeException;
 import liquibase.util.MD5Util;
 import liquibase.util.StringUtils;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -157,27 +155,6 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns 
 
     public String getConfirmationMessage() {
         return "Data loaded from "+getFile()+" into "+getTableName();
-    }
-
-    public Element createNode(Document currentChangeLogDOM) {
-        Element node = currentChangeLogDOM.createElement("loadData");
-        if (getSchemaName() != null) {
-            node.setAttribute("schemaName", getSchemaName());
-        }
-
-        node.setAttribute("file", getFile());
-        node.setAttribute("tableName", getTableName());
-
-        if (getEncoding() != null) {
-            node.setAttribute("encoding", getEncoding());
-        }
-
-        for (LoadDataColumnConfig column : columns) {
-            node.appendChild(column.createNode(currentChangeLogDOM));
-        }
-
-        return node;
-
     }
 
     public Set<DatabaseObject> getAffectedDatabaseObjects() {

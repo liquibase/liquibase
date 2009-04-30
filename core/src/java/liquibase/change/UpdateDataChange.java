@@ -5,11 +5,9 @@ import liquibase.database.statement.SqlStatement;
 import liquibase.database.statement.UpdateStatement;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Table;
-import liquibase.exception.UnsupportedChangeException;
 import liquibase.exception.InvalidChangeDefinitionException;
+import liquibase.exception.UnsupportedChangeException;
 import liquibase.util.StringUtils;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
 import java.util.*;
 
@@ -94,27 +92,6 @@ public class UpdateDataChange extends AbstractChange implements ChangeWithColumn
 
     public String getConfirmationMessage() {
         return "Data updated in " + getTableName();
-    }
-
-    public Element createNode(Document currentChangeLogFileDOM) {
-        Element node = currentChangeLogFileDOM.createElement("update");
-        if (getSchemaName() != null) {
-            node.setAttribute("schemaName", getSchemaName());
-        }
-
-        node.setAttribute("tableName", getTableName());
-
-        for (ColumnConfig col : getColumns()) {
-            Element subNode = col.createNode(currentChangeLogFileDOM);
-            node.appendChild(subNode);
-        }
-
-        if (StringUtils.trimToNull(getWhereClause()) != null) {
-            Element whereClause = currentChangeLogFileDOM.createElement("where");
-            whereClause.appendChild(currentChangeLogFileDOM.createTextNode(getWhereClause()));
-            node.appendChild(whereClause);
-        }
-        return node;
     }
 
     public Set<DatabaseObject> getAffectedDatabaseObjects() {

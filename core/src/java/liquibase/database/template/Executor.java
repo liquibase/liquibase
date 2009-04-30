@@ -11,6 +11,7 @@ import liquibase.exception.JDBCException;
 import liquibase.exception.StatementNotSupportedOnDatabaseException;
 import liquibase.log.LogFactory;
 import liquibase.util.JdbcUtils;
+import liquibase.util.StringUtils;
 
 import java.sql.CallableStatement;
 import java.sql.ResultSet;
@@ -54,7 +55,7 @@ public class Executor {
             // in the case when the exception translator hasn't been initialized yet.
             JdbcUtils.closeStatement(stmt);
             stmt = null;
-            throw new JDBCException("Error executing SQL " + applyVisitors(action.getStatement(), sqlVisitors), ex);
+            throw new JDBCException("Error executing SQL " + StringUtils.join(applyVisitors(action.getStatement(), sqlVisitors), ", "), ex);
         }
         finally {
             JdbcUtils.closeStatement(stmt);

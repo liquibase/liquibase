@@ -1,20 +1,16 @@
 package liquibase.change;
 
-import java.io.IOException;
-import java.io.Writer;
-import java.util.Set;
-import java.util.List;
-
 import liquibase.ChangeSet;
 import liquibase.FileOpener;
 import liquibase.database.Database;
 import liquibase.database.statement.SqlStatement;
-import liquibase.database.statement.visitor.SqlVisitor;
 import liquibase.database.structure.DatabaseObject;
-import liquibase.exception.*;
+import liquibase.exception.InvalidChangeDefinitionException;
+import liquibase.exception.RollbackImpossibleException;
+import liquibase.exception.SetupException;
+import liquibase.exception.UnsupportedChangeException;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
+import java.util.Set;
 
 /**
  * Interface all changes (refactorings) implement.
@@ -56,16 +52,7 @@ public interface Change {
     public static final int SPECIALIZATION_LEVEL_DEFAULT = 1;
     public static final int SPECIALIZATION_LEVEL_DATABASE_SPECIFIC = 5;
 
-    /**
-     * @return A descripton of the change
-     */
-    public String getChangeDescription();
-
-    /**
-     * @return The "name" of the change.  The name is used for looking up a change based on an XML tag and other times
-     *         where you want to dynamically generate a Change implementation.
-     */
-    public String getChangeName();
+    public ChangeMetaData getChangeMetaData();
 
     /**
      * @return The "speciliazation" that this change is designed for.  Higher specialiazations will take precidence.
@@ -131,14 +118,5 @@ public interface Change {
      * @throws RollbackImpossibleException if rollback is not supported for this change
      */
     public SqlStatement[] generateRollbackStatements(Database database) throws UnsupportedChangeException, RollbackImpossibleException;
-
-    /**
-     * Creates an XML element (of type {@link Node}) of the change object, and adds it
-     * to the {@link Document} object passed as argument
-     *
-     * @param currentChangeLogDOM the current {@link Document} where this element is being added
-     * @return the {@link Node} object created
-     */
-    public Node createNode(Document currentChangeLogDOM);
 
 }
