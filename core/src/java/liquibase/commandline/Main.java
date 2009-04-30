@@ -74,6 +74,8 @@ public class Main {
             try {
                 main.parseOptions(args);
             } catch (CommandLineParsingException e) {
+                System.out.println(e.getMessage());
+                System.out.println();
                 main.printHelp(System.out);
                 System.exit(-2);
             }
@@ -379,7 +381,16 @@ public class Main {
                 }
                 seenCommand = true;
             } else if (seenCommand) {
-                commandParams.add(arg);
+                if (arg.startsWith("-D")) {
+                    String[] splitArg = splitArg(arg);
+
+                    String attributeName = splitArg[0].replaceFirst("^-D", "");
+                    String value = splitArg[1];
+
+                    changeLogParameters.put(attributeName, value);
+                } else {
+                    commandParams.add(arg);
+                }
             } else if (arg.startsWith("--")) {
                 String[] splitArg = splitArg(arg);
 
@@ -396,13 +407,6 @@ public class Main {
                 } catch (Exception e) {
                     throw new CommandLineParsingException("Unknown parameter: '" + attributeName + "'");
                 }
-            } else if (arg.startsWith("-D")) {
-                String[] splitArg = splitArg(arg);
-
-                String attributeName = splitArg[0].replaceFirst("^-D", "");
-                String value = splitArg[1];
-
-                changeLogParameters.put(attributeName, value);
             } else {
                 throw new CommandLineParsingException("Unexpected value " + arg + ": parameters must start with a '--'");
             }
