@@ -22,7 +22,7 @@ public class TagDatabaseChangeTest extends AbstractChangeTest {
 
     @Test
     public void getRefactoringName() throws Exception {
-        assertEquals("Tag Database", refactoring.getChangeDescription());
+        assertEquals("Tag Database", refactoring.getChangeMetaData().getDescription());
     }
 
     @Test
@@ -41,15 +41,6 @@ public class TagDatabaseChangeTest extends AbstractChangeTest {
         refactoring.setTag("TAG_NAME");
 
         assertEquals("Tag 'TAG_NAME' applied to database", refactoring.getConfirmationMessage());
-    }
-
-    @Test
-    public void createNode() throws Exception {
-        refactoring.setTag("TAG_NAME");
-
-        Element node = refactoring.createNode(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument());
-        assertEquals("tagDatabase", node.getTagName());
-        assertEquals("TAG_NAME", node.getAttribute("tag"));
     }
 
 }

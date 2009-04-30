@@ -27,7 +27,7 @@ public class DropSequenceChangeTest extends AbstractChangeTest {
 
     @Test
     public void getRefactoringName() throws Exception {
-        assertEquals("Drop Sequence", new DropSequenceChange().getChangeDescription());
+        assertEquals("Drop Sequence", new DropSequenceChange().getChangeMetaData().getDescription());
     }
 
     @Test
@@ -57,13 +57,5 @@ public class DropSequenceChangeTest extends AbstractChangeTest {
     @Test
     public void getConfirmationMessage() throws Exception {
         assertEquals("Sequence SEQ_NAME dropped", change.getConfirmationMessage());
-    }
-
-    @Test
-    public void createNode() throws Exception {
-        Element element = change.createNode(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument());
-
-        assertEquals("dropSequence", element.getTagName());
-        assertEquals("SEQ_NAME", element.getAttribute("sequenceName"));
     }
 }

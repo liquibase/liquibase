@@ -3,16 +3,14 @@ package liquibase.change;
 import liquibase.database.Database;
 import liquibase.database.statement.SqlStatement;
 import liquibase.database.structure.DatabaseObject;
-import liquibase.exception.UnsupportedChangeException;
 import liquibase.exception.InvalidChangeDefinitionException;
+import liquibase.exception.UnsupportedChangeException;
 import liquibase.log.LogFactory;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
-import java.io.IOException;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -106,20 +104,6 @@ public class ExecuteShellCommandChange extends AbstractChange {
 
     private String getCommandString() {
         return executable + " " + StringUtils.join(args, " ");
-    }
-
-    public Element createNode(Document currentChangeLogDOM) {
-        Element root = currentChangeLogDOM.createElement(getChangeName());
-        root.setAttribute("executable", getExecutable());
-
-        for (String arg : args) {
-            Element argElement = currentChangeLogDOM.createElement("arg");
-            argElement.setAttribute("value", arg);
-            root.appendChild(argElement);
-        }
-
-        return root;
-
     }
 
     public Set<DatabaseObject> getAffectedDatabaseObjects() {

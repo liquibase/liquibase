@@ -21,7 +21,7 @@ public class RenameViewChangeTest extends AbstractChangeTest {
 
     @Test
     public void getRefactoringName() throws Exception {
-        assertEquals("Rename View", refactoring.getChangeDescription());
+        assertEquals("Rename View", refactoring.getChangeMetaData().getDescription());
     }
 
     @Test
@@ -48,16 +48,4 @@ public class RenameViewChangeTest extends AbstractChangeTest {
         assertEquals("View OLD_NAME renamed to NEW_NAME", refactoring.getConfirmationMessage());
     }
 
-    @Test
-    public void createNode() throws Exception {
-        refactoring.setSchemaName("SCHEMA_NAME");
-        refactoring.setOldViewName("OLD_NAME");
-        refactoring.setNewViewName("NEW_NAME");
-
-        Element node = refactoring.createNode(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument());
-        assertEquals("renameView", node.getTagName());
-        assertEquals("SCHEMA_NAME", node.getAttribute("schemaName"));
-        assertEquals("OLD_NAME", node.getAttribute("oldViewName"));
-        assertEquals("NEW_NAME", node.getAttribute("newViewName"));
-    }
 }

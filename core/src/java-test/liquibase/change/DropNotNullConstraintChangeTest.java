@@ -16,7 +16,7 @@ public class DropNotNullConstraintChangeTest extends AbstractChangeTest {
 
     @Test
     public void getRefactoringName() throws Exception {
-        assertEquals("Drop Not-Null Constraint", new DropNotNullConstraintChange().getChangeDescription());
+        assertEquals("Drop Not-Null Constraint", new DropNotNullConstraintChange().getChangeMetaData().getDescription());
     }
 
     @Test
@@ -46,14 +46,4 @@ public class DropNotNullConstraintChangeTest extends AbstractChangeTest {
 
     }
 
-    @Test
-    public void createNode() throws Exception {
-        DropNotNullConstraintChange change = new DropNotNullConstraintChange();
-        change.setTableName("TABLE_NAME");
-        change.setColumnName("COL_HERE");
-        Element node = change.createNode(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument());
-        assertEquals("dropNotNullConstraint", node.getTagName());
-        assertEquals("TABLE_NAME", node.getAttribute("tableName"));
-        assertEquals("COL_HERE", node.getAttribute("columnName"));
-    }
 }

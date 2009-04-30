@@ -1,8 +1,6 @@
 package liquibase.change;
 
 import liquibase.database.structure.DatabaseObject;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
 import java.util.Set;
 
@@ -33,14 +31,6 @@ public class RawSQLChange extends AbstractSQLChange {
     public String getConfirmationMessage() {
         return "Custom SQL executed";
     }
-
-    public Element createNode(Document currentChangeLogFileDOM) {
-        Element sqlElement = currentChangeLogFileDOM.createElement("sql");
-        sqlElement.appendChild(currentChangeLogFileDOM.createTextNode(getSql()));
-
-        return sqlElement;
-    }
-
 
     public Set<DatabaseObject> getAffectedDatabaseObjects() {
         return null;

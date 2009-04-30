@@ -7,17 +7,11 @@ import liquibase.database.statement.DropViewStatement;
 import liquibase.database.statement.SqlStatement;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.View;
-import liquibase.exception.UnsupportedChangeException;
 import liquibase.exception.InvalidChangeDefinitionException;
+import liquibase.exception.UnsupportedChangeException;
 import liquibase.util.StringUtils;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Creats a new view.
@@ -98,19 +92,6 @@ public class CreateViewChange extends AbstractChange {
 
     public String getConfirmationMessage() {
         return "View "+getViewName()+" created";
-    }
-
-    public Element createNode(Document currentChangeLogFileDOM) {
-        Element element = currentChangeLogFileDOM.createElement("createView");
-
-        if (getSchemaName() != null) {
-            element.setAttribute("schemaName", getSchemaName());
-        }
-
-        element.setAttribute("viewName", getViewName());
-        element.appendChild(currentChangeLogFileDOM.createCDATASection(getSelectQuery()));
-
-        return element;
     }
 
     protected Change[] createInverses() {

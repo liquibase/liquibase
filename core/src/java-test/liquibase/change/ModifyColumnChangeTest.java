@@ -30,7 +30,7 @@ public abstract class ModifyColumnChangeTest extends AbstractChangeTest {
 
     @Test
     public void getRefactoringName() throws Exception {
-        assertEquals("Modify Column", change.getChangeDescription());
+        assertEquals("Modify Column", change.getChangeMetaData().getDescription());
     }
 
 //    @Test
@@ -44,18 +44,4 @@ public abstract class ModifyColumnChangeTest extends AbstractChangeTest {
         assertEquals("Columns NAME(integer(3)) of TABLE_NAME modified", change.getConfirmationMessage());
     }
 
-    @Test
-    public void createNode() throws Exception {
-        Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
-
-        Element node = change.createNode(document);
-        assertEquals("modifyColumn", node.getTagName());
-        assertEquals("TABLE_NAME", node.getAttribute("tableName"));
-
-        NodeList columns = node.getElementsByTagName("column");
-        assertEquals(1, columns.getLength());
-        assertEquals("column", ((Element) columns.item(0)).getTagName());
-        assertEquals("NAME", ((Element) columns.item(0)).getAttribute("name"));
-        assertEquals("integer(3)", ((Element) columns.item(0)).getAttribute("type"));
-    }
 }

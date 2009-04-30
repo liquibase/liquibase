@@ -8,12 +8,10 @@ import liquibase.database.statement.SqlStatement;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Index;
 import liquibase.database.structure.Table;
+import liquibase.exception.InvalidChangeDefinitionException;
 import liquibase.exception.JDBCException;
 import liquibase.exception.UnsupportedChangeException;
-import liquibase.exception.InvalidChangeDefinitionException;
 import liquibase.util.StringUtils;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -116,19 +114,6 @@ public class DropPrimaryKeyChange extends AbstractChange {
 
     public String getConfirmationMessage() {
         return "Primary key dropped from "+getTableName();
-    }
-
-    public Element createNode(Document currentChangeLogFileDOM) {
-        Element node = currentChangeLogFileDOM.createElement(getChangeName());
-        if (getSchemaName() != null) {
-            node.setAttribute("schemaName", getSchemaName());
-        }
-        
-        node.setAttribute("tableName", getTableName());
-        if (getConstraintName() != null) {
-            node.setAttribute("constraintName", getConstraintName());
-        }
-        return node;
     }
 
     public Set<DatabaseObject> getAffectedDatabaseObjects() {

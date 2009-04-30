@@ -1,17 +1,15 @@
 package liquibase.change;
 
 import liquibase.database.Database;
-import liquibase.database.statement.SqlStatement;
 import liquibase.database.statement.FindForeignKeyConstraintsStatement;
+import liquibase.database.statement.SqlStatement;
 import liquibase.database.statement.visitor.SqlVisitor;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.template.Executor;
+import liquibase.exception.InvalidChangeDefinitionException;
 import liquibase.exception.JDBCException;
 import liquibase.exception.UnsupportedChangeException;
-import liquibase.exception.InvalidChangeDefinitionException;
 import liquibase.util.StringUtils;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
 import java.util.*;
 
@@ -67,18 +65,6 @@ public class DropAllForeignKeyConstraintsChange extends AbstractChange {
 
     public String getConfirmationMessage() {
         return "Foreign keys on base table " + getBaseTableName() + " dropped";
-    }
-
-    public Element createNode(Document currentChangeLogFileDOM) {
-        Element node = currentChangeLogFileDOM.createElement(getChangeName());
-
-        if (getBaseTableSchemaName() != null) {
-            node.setAttribute("baseTableSchemaName", getBaseTableSchemaName());
-        }
-
-        node.setAttribute("baseTableName", getBaseTableName());
-
-        return node;
     }
 
     public Set<DatabaseObject> getAffectedDatabaseObjects() {

@@ -1,16 +1,18 @@
 package liquibase.change;
 
-import java.io.*;
-import java.util.Set;
-import java.util.logging.Logger;
 import liquibase.FileOpener;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.exception.SetupException;
 import liquibase.log.LogFactory;
 import liquibase.util.MD5Util;
 import liquibase.util.StreamUtil;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
+
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Set;
+import java.util.logging.Logger;
 
 /**
  * Represents a Change for custom SQL stored in a File.
@@ -151,15 +153,6 @@ public class SQLFileChange extends AbstractSQLChange {
      */
     public String generateCheckSum() {
         return MD5Util.computeMD5(getSql());
-    }
-
-    public Element createNode(Document currentChangeLogDOM) {
-        Element sqlElement = currentChangeLogDOM.createElement("sqlFile");
-        sqlElement.setAttribute("path", file);
-        if (encoding != null) {
-        	sqlElement.setAttribute("encoding", encoding);
-        }
-        return sqlElement;
     }
 
     public String getConfirmationMessage() {

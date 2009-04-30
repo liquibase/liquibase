@@ -9,12 +9,10 @@ import liquibase.database.structure.Column;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Index;
 import liquibase.database.structure.Table;
+import liquibase.exception.InvalidChangeDefinitionException;
 import liquibase.exception.JDBCException;
 import liquibase.exception.UnsupportedChangeException;
-import liquibase.exception.InvalidChangeDefinitionException;
 import liquibase.util.StringUtils;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -156,22 +154,6 @@ public class AddUniqueConstraintChange extends AbstractChange {
         return new Change[]{
                 inverse,
         };
-    }
-
-    public Element createNode(Document currentChangeLogFileDOM) {
-        Element element = currentChangeLogFileDOM.createElement(getChangeName());
-        if (getSchemaName() != null) {
-            element.setAttribute("schemaName", getSchemaName());
-        }
-        if (getTablespace() != null) {
-            element.setAttribute("tablespace", getTablespace());            
-        }
-
-        element.setAttribute("tableName", getTableName());
-        element.setAttribute("columnNames", getColumnNames());
-        element.setAttribute("constraintName", getConstraintName());
-
-        return element;
     }
 
     public Set<DatabaseObject> getAffectedDatabaseObjects() {

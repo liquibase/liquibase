@@ -12,12 +12,10 @@ import liquibase.database.structure.Column;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Index;
 import liquibase.database.structure.Table;
+import liquibase.exception.InvalidChangeDefinitionException;
 import liquibase.exception.JDBCException;
 import liquibase.exception.UnsupportedChangeException;
-import liquibase.exception.InvalidChangeDefinitionException;
 import liquibase.util.StringUtils;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
 import java.util.*;
 
@@ -194,21 +192,6 @@ public class AddNotNullConstraintChange extends AbstractChange {
         return "Null constraint has been added to " + getTableName() + "." + getColumnName();
     }
 
-
-    public Element createNode(Document currentChangeLogFileDOM) {
-        Element element = currentChangeLogFileDOM.createElement("addNotNullConstraint");
-        if (getSchemaName() != null) {
-            element.setAttribute("schemaName", getSchemaName());
-        }
-
-        element.setAttribute("tableName", getTableName());
-        element.setAttribute("columnName", getColumnName());
-        if (getColumnDataType() != null) {
-            element.setAttribute("columnDataType", getColumnDataType());
-        }
-        element.setAttribute("defaultNullValue", getDefaultNullValue());
-        return element;
-    }
 
     public Set<DatabaseObject> getAffectedDatabaseObjects() {
 

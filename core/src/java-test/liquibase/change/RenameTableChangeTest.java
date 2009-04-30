@@ -24,7 +24,7 @@ public class RenameTableChangeTest extends AbstractChangeTest {
 
     @Test
     public void getRefactoringName() throws Exception {
-        assertEquals("Rename Table", refactoring.getChangeDescription());
+        assertEquals("Rename Table", refactoring.getChangeMetaData().getDescription());
     }
 
     @Test
@@ -51,16 +51,4 @@ public class RenameTableChangeTest extends AbstractChangeTest {
         assertEquals("Table OLD_NAME renamed to NEW_NAME", refactoring.getConfirmationMessage());
     }
 
-    @Test
-    public void createNode() throws Exception {
-        refactoring.setSchemaName("SCHEMA_NAME");
-        refactoring.setOldTableName("OLD_NAME");
-        refactoring.setNewTableName("NEW_NAME");
-
-        Element node = refactoring.createNode(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument());
-        assertEquals("renameTable", node.getTagName());
-        assertEquals("SCHEMA_NAME", node.getAttribute("schemaName"));
-        assertEquals("OLD_NAME", node.getAttribute("oldTableName"));
-        assertEquals("NEW_NAME", node.getAttribute("newTableName"));
-    }
 }

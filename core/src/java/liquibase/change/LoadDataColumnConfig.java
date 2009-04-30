@@ -1,8 +1,5 @@
 package liquibase.change;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-
 public class LoadDataColumnConfig extends ColumnConfig {
 
     private Integer index;
@@ -24,15 +21,4 @@ public class LoadDataColumnConfig extends ColumnConfig {
         this.header = header;
     }
 
-    public Element createNode(Document document) {
-        Element element = super.createNode(document);
-        if (getIndex() != null) {
-            element.setAttribute("index", getIndex().toString());
-        }
-
-        if (getHeader() != null) {
-            element.setAttribute("header", getHeader());
-        }
-        return element;
-    }
 }

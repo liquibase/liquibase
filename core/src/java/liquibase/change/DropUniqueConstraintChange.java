@@ -2,19 +2,17 @@ package liquibase.change;
 
 import liquibase.database.Database;
 import liquibase.database.SQLiteDatabase;
-import liquibase.database.SybaseASADatabase;
 import liquibase.database.SQLiteDatabase.AlterTableVisitor;
+import liquibase.database.SybaseASADatabase;
 import liquibase.database.statement.DropUniqueConstraintStatement;
 import liquibase.database.statement.SqlStatement;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Index;
 import liquibase.database.structure.Table;
+import liquibase.exception.InvalidChangeDefinitionException;
 import liquibase.exception.JDBCException;
 import liquibase.exception.UnsupportedChangeException;
-import liquibase.exception.InvalidChangeDefinitionException;
 import liquibase.util.StringUtils;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -140,17 +138,6 @@ public class DropUniqueConstraintChange extends AbstractChange {
 
     public String getConfirmationMessage() {
         return "Unique constraint "+getConstraintName()+" dropped from "+getTableName();
-    }
-
-    public Element createNode(Document currentChangeLogFileDOM) {
-        Element node = currentChangeLogFileDOM.createElement(getChangeName());
-        if (getSchemaName() != null) {
-            node.setAttribute("schemaName", getSchemaName());
-        }
-        
-        node.setAttribute("tableName", getTableName());
-        node.setAttribute("constraintName", constraintName);
-        return node;
     }
 
     public Set<DatabaseObject> getAffectedDatabaseObjects() {

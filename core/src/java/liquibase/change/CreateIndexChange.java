@@ -6,11 +6,9 @@ import liquibase.database.statement.SqlStatement;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Index;
 import liquibase.database.structure.Table;
-import liquibase.exception.UnsupportedChangeException;
 import liquibase.exception.InvalidChangeDefinitionException;
+import liquibase.exception.UnsupportedChangeException;
 import liquibase.util.StringUtils;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
 import java.util.*;
 
@@ -113,32 +111,6 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
 
     public String getConfirmationMessage() {
         return "Index " + getIndexName() + " created";
-    }
-
-    public Element createNode(Document currentChangeLogFileDOM) {
-        Element element = currentChangeLogFileDOM.createElement("createIndex");
-        element.setAttribute("indexName", getIndexName());
-        if (getSchemaName() != null) {
-            element.setAttribute("schemaName", getSchemaName());
-        }
-
-        element.setAttribute("tableName", getTableName());
-
-        if (unique != null) { 
-            if (unique) {
-               element.setAttribute("unique", "true");
-            } else {
-                element.setAttribute("unique", "false");
-            }
-        }
-        
-        for (ColumnConfig column : getColumns()) {
-            Element columnElement = currentChangeLogFileDOM.createElement("column");
-            columnElement.setAttribute("name", column.getName());
-            element.appendChild(columnElement);
-        }
-
-        return element;
     }
 
     public Set<DatabaseObject> getAffectedDatabaseObjects() {

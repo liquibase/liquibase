@@ -19,7 +19,7 @@ public class AddColumnChangeTest extends AbstractChangeTest {
     @Test
     public void getRefactoringName() throws Exception {
         AddColumnChange refactoring = new AddColumnChange();
-        assertEquals("Add Column", refactoring.getChangeDescription());
+        assertEquals("Add Column", refactoring.getChangeMetaData().getDescription());
     }
 
     @Test
@@ -179,29 +179,6 @@ public class AddColumnChangeTest extends AbstractChangeTest {
         refactoring.addColumn(column);
 
         assertEquals("Columns NEWCOL(TYP) added to TAB", refactoring.getConfirmationMessage());
-    }
-
-    @Test
-    public void createNode() throws Exception {
-        Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
-
-        AddColumnChange refactoring = new AddColumnChange();
-        refactoring.setTableName("TAB");
-        ColumnConfig column = new ColumnConfig();
-        column.setName("NEWCOL");
-        column.setType("TYP");
-        refactoring.addColumn(column);
-
-        Element node = refactoring.createNode(document);
-        assertEquals("addColumn", node.getTagName());
-        assertEquals("TAB", node.getAttribute("tableName"));
-
-        NodeList columns = node.getElementsByTagName("column");
-        assertEquals(1, columns.getLength());
-        assertEquals("column", ((Element) columns.item(0)).getTagName());
-        assertEquals("NEWCOL", ((Element) columns.item(0)).getAttribute("name"));
-        assertEquals("TYP", ((Element) columns.item(0)).getAttribute("type"));
-
     }
 
 //    @Test

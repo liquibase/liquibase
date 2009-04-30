@@ -25,8 +25,8 @@ public class AddAutoIncrementChangeTest extends AbstractChangeTest {
     @Test
     public void constructor() {
         AddAutoIncrementChange change = new AddAutoIncrementChange();
-        assertEquals("addAutoIncrement", change.getChangeName());
-        assertEquals("Set Column as Auto-Increment", change.getChangeDescription());
+        assertEquals("addAutoIncrement", change.getChangeMetaData().getName());
+        assertEquals("Set Column as Auto-Increment", change.getChangeMetaData().getDescription());
     }
 
     @Test
@@ -111,7 +111,7 @@ public class AddAutoIncrementChangeTest extends AbstractChangeTest {
 
     @Test
     public void getRefactoringName() throws Exception {
-        assertEquals("Set Column as Auto-Increment", new AddAutoIncrementChange().getChangeDescription());
+        assertEquals("Set Column as Auto-Increment", new AddAutoIncrementChange().getChangeMetaData().getDescription());
     }
 
     @Test
@@ -123,21 +123,5 @@ public class AddAutoIncrementChangeTest extends AbstractChangeTest {
         change.setColumnDataType("DATATYPE(255)");
 
         assertEquals("Auto-increment added to TABLE_NAME.COLUMN_NAME", change.getConfirmationMessage());
-    }
-
-    @Test
-    public void createNode() throws Exception {
-        AddAutoIncrementChange change = new AddAutoIncrementChange();
-        change.setSchemaName("SCHEMA_NAME");
-        change.setTableName("TABLE_NAME");
-        change.setColumnName("COLUMN_NAME");
-        change.setColumnDataType("DATATYPE(255)");
-
-        Element node = change.createNode(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument());
-        assertEquals("addAutoIncrement", node.getTagName());
-        assertEquals("SCHEMA_NAME", node.getAttribute("schemaName"));
-        assertEquals("TABLE_NAME", node.getAttribute("tableName"));
-        assertEquals("COLUMN_NAME", node.getAttribute("columnName"));
-        assertEquals("DATATYPE(255)", node.getAttribute("columnDataType"));
     }
 }

@@ -9,19 +9,12 @@ import liquibase.database.structure.Column;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Index;
 import liquibase.database.structure.Table;
+import liquibase.exception.InvalidChangeDefinitionException;
 import liquibase.exception.JDBCException;
 import liquibase.exception.UnsupportedChangeException;
-import liquibase.exception.InvalidChangeDefinitionException;
 import liquibase.util.StringUtils;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Removes the default value from an existing column.
@@ -132,22 +125,6 @@ public class DropDefaultValueChange extends AbstractChange {
 
     public String getConfirmationMessage() {
         return "Default value dropped from "+getTableName()+"."+getColumnName();
-    }
-
-    public Element createNode(Document currentChangeLogFileDOM) {
-        Element node = currentChangeLogFileDOM.createElement(getChangeName());
-
-        if (getSchemaName() != null) {
-            node.setAttribute("schemaName", getSchemaName());
-        }
-
-        node.setAttribute("tableName", getTableName());
-        node.setAttribute("columnName", getColumnName());
-        if (getColumnDataType() != null) {
-        	node.setAttribute("columnDataType", getColumnDataType());
-        }
-
-        return node;
     }
 
     public Set<DatabaseObject> getAffectedDatabaseObjects() {

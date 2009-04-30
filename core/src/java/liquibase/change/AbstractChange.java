@@ -1,28 +1,30 @@
 package liquibase.change;
 
-import java.util.*;
-
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-
 import liquibase.ChangeSet;
 import liquibase.FileOpener;
 import liquibase.database.Database;
-import liquibase.database.structure.DatabaseObject;
 import liquibase.database.statement.SqlStatement;
-import liquibase.database.statement.syntax.Sql;
-import liquibase.database.statement.generator.SqlGeneratorFactory;
 import liquibase.database.statement.generator.GeneratorValidationErrors;
 import liquibase.database.statement.generator.SqlGenerator;
-import liquibase.exception.*;
+import liquibase.database.statement.generator.SqlGeneratorFactory;
+import liquibase.database.statement.syntax.Sql;
+import liquibase.database.structure.DatabaseObject;
+import liquibase.exception.InvalidChangeDefinitionException;
+import liquibase.exception.RollbackImpossibleException;
+import liquibase.exception.SetupException;
+import liquibase.exception.UnsupportedChangeException;
+import liquibase.parser.ChangeLogSerializer;
 import liquibase.util.MD5Util;
 import liquibase.util.StringUtils;
 import liquibase.util.XMLUtil;
-
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import java.util.*;
 
 /**
  * Standard superclass for Changes to implement. This is a <i>skeletal implementation</i>,
@@ -32,14 +34,8 @@ import org.w3c.dom.NodeList;
  */
 public abstract class AbstractChange implements Change {
 
-    /*
-     * The name and the tag name of the change.
-     * Defined as private members, so they can
-     * only be accessed through accessor methods
-     * by its subclasses
-     */
-    private final String changeDescription;
-    private final String changeName;
+    private ChangeMetaData changeMetaData;
+
     private FileOpener fileOpener;
 
     private ChangeSet changeSet;
@@ -51,8 +47,7 @@ public abstract class AbstractChange implements Change {
      * @param changeDescription the name for this change
      */
     protected AbstractChange(String changeName, String changeDescription) {
-        this.changeName = changeName;
-        this.changeDescription = changeDescription;
+        this.changeMetaData = new ChangeMetaData(changeName,changeDescription);
     }
 
     public int getSpecializationLevel() {
@@ -63,7 +58,9 @@ public abstract class AbstractChange implements Change {
         return true;
     }
 
-    //~ ------------------------------------------------------------------------------- public interface
+    public ChangeMetaData getChangeMetaData() {
+        return changeMetaData;
+    }
 
     public ChangeSet getChangeSet() {
         return changeSet;
@@ -71,20 +68,6 @@ public abstract class AbstractChange implements Change {
 
     public void setChangeSet(ChangeSet changeSet) {
         this.changeSet = changeSet;
-    }
-
-    /**
-     * @see liquibase.change.Change#getChangeDescription()
-     */
-    public String getChangeDescription() {
-        return changeDescription;
-    }
-
-    /**
-     * @see liquibase.change.Change#getChangeName()
-     */
-    public String getChangeName() {
-        return changeName;
     }
 
     public void validate(Database database) throws InvalidChangeDefinitionException {
@@ -121,25 +104,13 @@ public abstract class AbstractChange implements Change {
         return createInverses() != null;
     }
 
-    /*
-     * Skipped by this skeletal implementation
-     *
-     * @see liquibase.change.Change#getConfirmationMessage()
-     */
-
-    /*
-     * Skipped by this skeletal implementation
-     *
-     * @see liquibase.change.Change#createNode(org.w3c.dom.Document)
-     */
-
     /**
      * @see liquibase.change.Change#generateCheckSum()
      */
     public String generateCheckSum() {
         try {
             StringBuffer buffer = new StringBuffer();
-            nodeToStringBuffer(createNode(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()), buffer);
+            nodeToStringBuffer(new ChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(this), buffer);
             return MD5Util.computeMD5(buffer.toString());
         } catch (ParserConfigurationException e) {
             throw new RuntimeException(e);

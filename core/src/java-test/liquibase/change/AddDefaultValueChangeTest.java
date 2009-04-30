@@ -132,7 +132,7 @@ public class AddDefaultValueChangeTest extends AbstractChangeTest {
     }
 
     public void getRefactoringName() throws Exception {
-        assertEquals("Add Default Value", new AddDefaultValueChange().getChangeDescription());
+        assertEquals("Add Default Value", new AddDefaultValueChange().getChangeMetaData().getDescription());
     }
 
     @Test
@@ -143,29 +143,6 @@ public class AddDefaultValueChangeTest extends AbstractChangeTest {
         change.setColumnName("COLUMN_NAME");
 
         assertEquals("Default value added to TABLE_NAME.COLUMN_NAME", change.getConfirmationMessage());
-    }
-
-    @Test
-    public void createNode() throws Exception {
-        AddDefaultValueChange change = new AddDefaultValueChange();
-        change.setSchemaName("SCHEMA_NAME");
-        change.setTableName("TABLE_NAME");
-        change.setColumnName("COLUMN_NAME");
-        change.setDefaultValue("DEF STRING");
-        change.setDefaultValueNumeric("42");
-        change.setDefaultValueBoolean(true);
-        change.setDefaultValueDate("2007-01-02");
-
-        Element node = change.createNode(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument());
-        assertEquals("addDefaultValue", node.getTagName());
-        assertEquals("SCHEMA_NAME", node.getAttribute("schemaName"));
-        assertEquals("TABLE_NAME", node.getAttribute("tableName"));
-        assertEquals("COLUMN_NAME", node.getAttribute("columnName"));
-        assertEquals("DEF STRING", node.getAttribute("defaultValue"));
-        assertEquals("42", node.getAttribute("defaultValueNumeric"));
-        assertEquals("true", node.getAttribute("defaultValueBoolean"));
-        assertEquals("2007-01-02", node.getAttribute("defaultValueDate"));
-
     }
 
     @Test

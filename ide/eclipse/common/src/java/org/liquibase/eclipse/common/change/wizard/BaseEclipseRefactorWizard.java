@@ -9,6 +9,7 @@ import liquibase.database.statement.generator.SqlGeneratorFactory;
 import liquibase.database.statement.syntax.Sql;
 import liquibase.Liquibase;
 import liquibase.parser.LiquibaseSchemaResolver;
+import liquibase.parser.ChangeLogSerializer;
 import liquibase.util.StringUtils;
 import liquibase.xml.DefaultXmlWriter;
 import org.eclipse.core.commands.operations.OperationStatus;
@@ -153,8 +154,7 @@ public abstract class BaseEclipseRefactorWizard extends Wizard {
                             doc = documentBuilder.parse(file);
                         }
 
-                        doc.getDocumentElement().appendChild(
-                                changeSet.createNode(doc));
+                        doc.getDocumentElement().appendChild(new ChangeLogSerializer(doc).createNode(changeSet));
 
                         FileOutputStream out = new FileOutputStream(file);
                         new DefaultXmlWriter().write(doc, out);

@@ -13,7 +13,7 @@ public class DropDefaultValueChangeTest extends AbstractChangeTest {
 
     @Test
     public void getRefactoringName() throws Exception {
-        assertEquals("Drop Default Value", new DropDefaultValueChange().getChangeDescription());
+        assertEquals("Drop Default Value", new DropDefaultValueChange().getChangeMetaData().getDescription());
     }
 
     @Test
@@ -39,32 +39,4 @@ public class DropDefaultValueChangeTest extends AbstractChangeTest {
 
         assertEquals("Default value dropped from TABLE_NAME.COL_HERE", change.getConfirmationMessage());
     }
-
-    @Test
-    public void createNode() throws Exception {
-        DropDefaultValueChange change = new DropDefaultValueChange();
-        change.setTableName("TABLE_NAME");
-        change.setColumnName("COL_NAME");
-
-        Element node = change.createNode(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument());
-        assertEquals("dropDefaultValue", node.getTagName());
-        assertFalse(node.hasAttribute("schemaName"));
-        assertEquals("TABLE_NAME", node.getAttribute("tableName"));
-        assertEquals("COL_NAME", node.getAttribute("columnName"));
-    }
-
-    @Test
-    public void createNode_withSchema() throws Exception {
-        DropDefaultValueChange change = new DropDefaultValueChange();
-        change.setSchemaName("SCHEMA_NAME");
-        change.setTableName("TABLE_NAME");
-        change.setColumnName("COL_NAME");
-
-        Element node = change.createNode(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument());
-        assertEquals("dropDefaultValue", node.getTagName());
-        assertEquals("SCHEMA_NAME", node.getAttribute("schemaName"));
-        assertEquals("TABLE_NAME", node.getAttribute("tableName"));
-        assertEquals("COL_NAME", node.getAttribute("columnName"));
-    }
-
 }

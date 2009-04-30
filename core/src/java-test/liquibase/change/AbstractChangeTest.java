@@ -37,9 +37,6 @@ public abstract class AbstractChangeTest {
     public abstract void getConfirmationMessage() throws Exception;
 
     @Test
-    public abstract void createNode() throws Exception;
-
-    @Test
     public void saveStatement() throws Exception {
         Change change = new AbstractChange("test", "Test Refactoring") {
             public SqlStatement[] generateStatements(Database database) {

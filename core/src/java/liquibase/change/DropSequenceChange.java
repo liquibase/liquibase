@@ -5,11 +5,9 @@ import liquibase.database.statement.DropSequenceStatement;
 import liquibase.database.statement.SqlStatement;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Sequence;
-import liquibase.exception.UnsupportedChangeException;
 import liquibase.exception.InvalidChangeDefinitionException;
+import liquibase.exception.UnsupportedChangeException;
 import liquibase.util.StringUtils;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -56,16 +54,6 @@ public class DropSequenceChange extends AbstractChange {
 
     public String getConfirmationMessage() {
         return "Sequence " + getSequenceName() + " dropped";
-    }
-
-    public Element createNode(Document currentChangeLogFileDOM) {
-        Element element = currentChangeLogFileDOM.createElement("dropSequence");
-        if (getSchemaName() != null) {
-            element.setAttribute("schemaName", getSchemaName());
-        }
-        element.setAttribute("sequenceName", getSequenceName());
-
-        return element;
     }
 
     public Set<DatabaseObject> getAffectedDatabaseObjects() {

@@ -63,7 +63,7 @@ public class ChangeFactoryTest {
 
         assertEquals(3, factory.getRegistry().size());
 
-        factory.unregister(change.getChangeName());
+        factory.unregister(change.getChangeMetaData().getName());
         assertEquals(2, factory.getRegistry().size());
     }
 

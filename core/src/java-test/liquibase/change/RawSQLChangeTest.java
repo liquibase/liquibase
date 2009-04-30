@@ -22,7 +22,7 @@ public abstract class RawSQLChangeTest extends AbstractChangeTest {
 
     @Test
     public void getRefactoringName() throws Exception {
-        assertEquals("Custom SQL", new RawSQLChange().getChangeDescription());
+        assertEquals("Custom SQL", new RawSQLChange().getChangeMetaData().getDescription());
     }
 
 //    @Test
@@ -35,15 +35,5 @@ public abstract class RawSQLChangeTest extends AbstractChangeTest {
     @Test
     public void getConfirmationMessage() throws Exception {
         assertEquals("Custom SQL executed", refactoring.getConfirmationMessage());
-    }
-
-    @Test
-    public void createNode() throws Exception {
-        refactoring.setSql("SOME SQL HERE");
-
-        Element element = refactoring.createNode(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument());
-        assertEquals("sql", element.getTagName());
-
-        assertEquals("SOME SQL HERE", XMLUtil.getTextContent(element));
     }
 }

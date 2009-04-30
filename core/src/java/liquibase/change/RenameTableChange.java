@@ -7,11 +7,9 @@ import liquibase.database.statement.ReorganizeTableStatement;
 import liquibase.database.statement.SqlStatement;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Table;
-import liquibase.exception.UnsupportedChangeException;
 import liquibase.exception.InvalidChangeDefinitionException;
+import liquibase.exception.UnsupportedChangeException;
 import liquibase.util.StringUtils;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
 import java.util.*;
 
@@ -87,20 +85,6 @@ public class RenameTableChange extends AbstractChange {
     public String getConfirmationMessage() {
         return "Table " + oldTableName + " renamed to " + newTableName;
     }
-
-    public Element createNode(Document currentChangeLogFileDOM) {
-        Element element = currentChangeLogFileDOM.createElement("renameTable");
-        if (getSchemaName() != null) {
-            element.setAttribute("schemaName", getSchemaName());
-        }
-
-        element.setAttribute("oldTableName", getOldTableName());
-
-        element.setAttribute("newTableName", getNewTableName());
-
-        return element;
-    }
-
 
     public Set<DatabaseObject> getAffectedDatabaseObjects() {
         Table oldTable = new Table(getOldTableName());

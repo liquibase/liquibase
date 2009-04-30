@@ -6,9 +6,6 @@ import liquibase.database.statement.ComputedDateValue;
 import liquibase.database.statement.ComputedNumericValue;
 import liquibase.database.structure.Column;
 import liquibase.util.ISODateFormat;
-import liquibase.util.StringUtils;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
 import java.text.NumberFormat;
 import java.text.ParseException;
@@ -262,92 +259,6 @@ public class ColumnConfig {
 
     public void setAutoIncrement(Boolean autoIncrement) {
         this.autoIncrement = autoIncrement;
-    }
-
-    public Element createNode(Document document) {
-        Element element = document.createElement("column");
-        if (getName() != null) {
-            element.setAttribute("name", getName());
-        }
-        if (getType() != null) {
-            element.setAttribute("type", getType());
-        }
-
-        if (getDefaultValue() != null) {
-            element.setAttribute("defaultValue", getDefaultValue());
-        }
-        if (getDefaultValueNumeric() != null) {
-            element.setAttribute("defaultValueNumeric", getDefaultValueNumeric().toString());
-        }
-        if (getDefaultValueDate() != null) {
-            element.setAttribute("defaultValueDate", new ISODateFormat().format(getDefaultValueDate()));
-        }
-        if (getDefaultValueBoolean() != null) {
-            element.setAttribute("defaultValueBoolean", getDefaultValueBoolean().toString());
-        }
-
-        if (getValue() != null) {
-            element.setAttribute("value", getValue());
-        }
-        if (getValueNumeric() != null) {
-            element.setAttribute("valueNumeric", getValueNumeric().toString());
-        }
-        if (getValueBoolean() != null) {
-            element.setAttribute("valueBoolean", getValueBoolean().toString());
-        }
-        if (getValueDate() != null) {
-            element.setAttribute("valueDate", new ISODateFormat().format(getValueDate()));
-        }
-        if (StringUtils.trimToNull(getRemarks()) != null) {
-            element.setAttribute("remarks", getRemarks());
-        }
-
-        if (isAutoIncrement() != null && isAutoIncrement()) {
-            element.setAttribute("autoIncrement", "true");
-        }
-
-        ConstraintsConfig constraints = getConstraints();
-        if (constraints != null) {
-            Element constraintsElement = document.createElement("constraints");
-            if (constraints.getCheck() != null) {
-                constraintsElement.setAttribute("check", constraints.getCheck());
-            }
-            if (constraints.getForeignKeyName() != null) {
-                constraintsElement.setAttribute("foreignKeyName", constraints.getForeignKeyName());
-            }
-            if (constraints.getReferences() != null) {
-                constraintsElement.setAttribute("references", constraints.getReferences());
-            }
-            if (constraints.isDeferrable() != null) {
-                constraintsElement.setAttribute("deferrable", constraints.isDeferrable().toString());
-            }
-            if (constraints.isDeleteCascade() != null) {
-                constraintsElement.setAttribute("deleteCascade", constraints.isDeleteCascade().toString());
-            }
-            if (constraints.isInitiallyDeferred() != null) {
-                constraintsElement.setAttribute("initiallyDeferred", constraints.isInitiallyDeferred().toString());
-            }
-            if (constraints.isNullable() != null) {
-                constraintsElement.setAttribute("nullable", constraints.isNullable().toString());
-            }
-            if (constraints.isPrimaryKey() != null) {
-                constraintsElement.setAttribute("primaryKey", constraints.isPrimaryKey().toString());
-            }
-            if (constraints.isUnique() != null) {
-                constraintsElement.setAttribute("unique", constraints.isUnique().toString());
-            }
-
-            if (constraints.getUniqueConstraintName() != null) {
-                constraintsElement.setAttribute("uniqueConstraintName", constraints.getUniqueConstraintName());
-            }
-
-            if (constraints.getPrimaryKeyName() != null) {
-                constraintsElement.setAttribute("primaryKeyName", constraints.getPrimaryKeyName());
-            }
-            element.appendChild(constraintsElement);
-        }
-
-        return element;
     }
 
     public String getDefaultColumnValue(Database database) {

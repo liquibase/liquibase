@@ -19,7 +19,7 @@ public class AbstractSQLChangeTest extends AbstractChangeTest {
 
     @Test
     public void getRefactoringName() throws Exception {
-        assertEquals("Custom SQL", new RawSQLChange().getChangeDescription());
+        assertEquals("Custom SQL", new RawSQLChange().getChangeMetaData().getDescription());
     }
 
     public void generateStatement() throws Exception {
@@ -38,16 +38,6 @@ public class AbstractSQLChangeTest extends AbstractChangeTest {
         assertEquals("Custom SQL executed", refactoring.getConfirmationMessage());
     }
 
-    @Test
-    public void createNode() throws Exception {
-        refactoring.setSql("SOME SQL HERE");
-
-        Element element = refactoring.createNode(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument());
-        assertEquals("sql", element.getTagName());
-
-        assertEquals("SOME SQL HERE", XMLUtil.getTextContent(element));
-    }
-    
 //    @Test
 //    public void multiLineSQLFileSemiColon() throws Exception {
 //        SQLFileChange change2 = new SQLFileChange();

@@ -3,8 +3,8 @@ package liquibase.change;
 import liquibase.database.Database;
 import liquibase.database.statement.RawSqlStatement;
 import liquibase.database.statement.SqlStatement;
-import liquibase.exception.UnsupportedChangeException;
 import liquibase.exception.InvalidChangeDefinitionException;
+import liquibase.exception.UnsupportedChangeException;
 import liquibase.util.StringUtils;
 
 import java.util.ArrayList;

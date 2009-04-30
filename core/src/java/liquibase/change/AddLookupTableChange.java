@@ -8,11 +8,9 @@ import liquibase.database.structure.Column;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.ForeignKey;
 import liquibase.database.structure.Table;
-import liquibase.exception.UnsupportedChangeException;
 import liquibase.exception.InvalidChangeDefinitionException;
+import liquibase.exception.UnsupportedChangeException;
 import liquibase.util.StringUtils;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
 import java.util.*;
 
@@ -211,25 +209,6 @@ public class AddLookupTableChange extends AbstractChange {
 
     public String getConfirmationMessage() {
         return "Lookup table added for "+getExistingTableName()+"."+getExistingColumnName();
-    }
-
-    public Element createNode(Document currentChangeLogFileDOM) {
-        Element node = currentChangeLogFileDOM.createElement(getChangeName());
-        if (getExistingTableSchemaName() != null) {
-            node.setAttribute("newTableSchemaName", getExistingTableSchemaName());
-        }
-        node.setAttribute("existingTableName", getExistingTableName());
-        node.setAttribute("existingColumnName", getExistingColumnName());
-
-        if (getNewTableSchemaName() != null) {
-            node.setAttribute("newTableSchemaName", getNewTableSchemaName());
-        }
-
-        node.setAttribute("newTableName", getNewTableName());
-        node.setAttribute("newColumnName", getNewColumnName());
-        node.setAttribute("constraintName", getConstraintName());
-
-        return node;
     }
 
     public Set<DatabaseObject> getAffectedDatabaseObjects() {

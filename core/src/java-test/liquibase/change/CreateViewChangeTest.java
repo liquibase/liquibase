@@ -16,7 +16,7 @@ public class CreateViewChangeTest extends AbstractChangeTest {
 
     @Test
     public void getRefactoringName() throws Exception {
-        assertEquals("Create View", new CreateViewChange().getChangeDescription());
+        assertEquals("Create View", new CreateViewChange().getChangeMetaData().getDescription());
     }
 
     @Test
@@ -46,19 +46,5 @@ public class CreateViewChangeTest extends AbstractChangeTest {
         change.setViewName("VIEW_NAME");
 
         assertEquals("View VIEW_NAME created", change.getConfirmationMessage());
-    }
-
-    @Test
-    public void createNode() throws Exception {
-        CreateViewChange change = new CreateViewChange();
-        change.setSchemaName("SCHEMA_NAME");
-        change.setViewName("VIEW_NAME");
-        change.setSelectQuery("SELECT * FROM EXISTING_TABLE");
-
-        Element node = change.createNode(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument());
-        assertEquals("createView", node.getTagName());
-        assertEquals("SCHEMA_NAME", node.getAttribute("schemaName"));
-        assertEquals("VIEW_NAME", node.getAttribute("viewName"));
-        assertEquals("SELECT * FROM EXISTING_TABLE", node.getTextContent());
     }
 }

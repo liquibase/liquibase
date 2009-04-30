@@ -10,7 +10,7 @@ public abstract class CreateProcedureChangeTest extends AbstractChangeTest {
 
     @Test
     public void getRefactoringName() throws Exception {
-        assertEquals("Create Procedure", new CreateProcedureChange().getChangeDescription());
+        assertEquals("Create Procedure", new CreateProcedureChange().getChangeMetaData().getDescription());
     }
 
 //    @Test
@@ -40,16 +40,5 @@ public abstract class CreateProcedureChangeTest extends AbstractChangeTest {
     public void getConfirmationMessage() throws Exception {
         CreateProcedureChange refactoring = new CreateProcedureChange();
         assertEquals("Stored procedure created", refactoring.getConfirmationMessage());
-    }
-
-    @Test
-    public void createNode() throws Exception {
-        CreateProcedureChange refactoring = new CreateProcedureChange();
-        refactoring.setProcedureBody("CREATE PROC PROCBODY HERE");
-        refactoring.setComments("Comments go here");
-
-        Element element = refactoring.createNode(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument());
-        assertEquals("createProcedure", element.getTagName());
-        assertEquals("CREATE PROC PROCBODY HERE", element.getTextContent());
     }
 }

@@ -5,11 +5,9 @@ import liquibase.database.statement.DropTableStatement;
 import liquibase.database.statement.SqlStatement;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Table;
-import liquibase.exception.UnsupportedChangeException;
 import liquibase.exception.InvalidChangeDefinitionException;
+import liquibase.exception.UnsupportedChangeException;
 import liquibase.util.StringUtils;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -73,21 +71,6 @@ public class DropTableChange extends AbstractChange {
 
     public String getConfirmationMessage() {
         return "Table " + getTableName() + " dropped";
-    }
-
-    public Element createNode(Document currentChangeLogFileDOM) {
-        Element element = currentChangeLogFileDOM.createElement("dropTable");
-        if (getSchemaName() != null) {
-            element.setAttribute("schemaName", getSchemaName());
-        }
-
-        element.setAttribute("tableName", getTableName());
-
-        if (isCascadeConstraints() != null) {
-            element.setAttribute("cascadeConstraints", isCascadeConstraints().toString());
-        }
-
-        return element;
     }
 
     public Set<DatabaseObject> getAffectedDatabaseObjects() {

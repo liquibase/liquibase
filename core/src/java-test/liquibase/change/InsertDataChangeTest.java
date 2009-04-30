@@ -48,7 +48,7 @@ public class InsertDataChangeTest extends AbstractChangeTest {
 
     @Test
     public void getRefactoringName() throws Exception {
-        assertEquals("Insert Row", refactoring.getChangeDescription());
+        assertEquals("Insert Row", refactoring.getChangeMetaData().getDescription());
     }
 
     @Test
@@ -65,33 +65,5 @@ public class InsertDataChangeTest extends AbstractChangeTest {
     @Test
     public void getConfirmationMessage() throws Exception {
         assertEquals("New row inserted into TABLE_NAME", refactoring.getConfirmationMessage());
-    }
-
-    @Test
-    public void createNode() throws Exception {
-        Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
-        Element node = refactoring.createNode(document);
-
-        assertEquals("insert", node.getTagName());
-        assertEquals("TABLE_NAME", node.getAttribute("tableName"));
-
-        NodeList columns = node.getChildNodes();
-        assertEquals(4, columns.getLength());
-
-        assertEquals("column", ((Element) columns.item(0)).getTagName());
-        assertEquals("id", ((Element) columns.item(0)).getAttribute("name"));
-        assertEquals("123", ((Element) columns.item(0)).getAttribute("valueNumeric"));
-
-        assertEquals("column", ((Element) columns.item(1)).getTagName());
-        assertEquals("name", ((Element) columns.item(1)).getAttribute("name"));
-        assertEquals("Andrew", ((Element) columns.item(1)).getAttribute("value"));
-
-        assertEquals("column", ((Element) columns.item(2)).getTagName());
-        assertEquals("age", ((Element) columns.item(2)).getAttribute("name"));
-        assertEquals("21", ((Element) columns.item(2)).getAttribute("valueNumeric"));
-        
-        assertEquals("column", ((Element) columns.item(3)).getTagName());
-        assertEquals("height", ((Element) columns.item(3)).getAttribute("name"));
-        assertEquals("1.78", ((Element) columns.item(3)).getAttribute("valueNumeric"));
     }
 }

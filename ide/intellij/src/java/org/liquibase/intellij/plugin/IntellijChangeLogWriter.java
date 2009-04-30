@@ -5,6 +5,7 @@ import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.VirtualFileManager;
 import liquibase.parser.LiquibaseSchemaResolver;
+import liquibase.parser.ChangeLogSerializer;
 import liquibase.parser.xml.XMLChangeLogParser;
 import liquibase.ChangeSet;
 import org.apache.xml.serialize.OutputFormat;
@@ -39,7 +40,7 @@ public class IntellijChangeLogWriter implements ChangeLogWriter {
 
                     doc = documentBuilder.parse(file.getInputStream());
 
-                    doc.getDocumentElement().appendChild(changeSet.createNode(doc));
+                    doc.getDocumentElement().appendChild(new ChangeLogSerializer(doc).createNode(changeSet));
 
                     OutputStream outputStream = file.getOutputStream(null);
 

@@ -11,12 +11,10 @@ import liquibase.database.structure.Column;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Index;
 import liquibase.database.structure.Table;
+import liquibase.exception.InvalidChangeDefinitionException;
 import liquibase.exception.JDBCException;
 import liquibase.exception.UnsupportedChangeException;
-import liquibase.exception.InvalidChangeDefinitionException;
 import liquibase.util.StringUtils;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
 import java.util.*;
 
@@ -126,17 +124,6 @@ public class DropColumnChange extends AbstractChange {
 
     public String getConfirmationMessage() {
         return "Column " + getTableName() + "." + getColumnName() + " dropped";
-    }
-
-    public Element createNode (Document currentChangeLogFileDOM) {
-        Element element = currentChangeLogFileDOM.createElement("dropColumn");
-        if (getSchemaName() != null) {
-            element.setAttribute("schemaName", getSchemaName());
-        }
-
-        element.setAttribute("tableName", getTableName());
-        element.setAttribute("columnName", getColumnName());
-        return element;
     }
 
     public Set<DatabaseObject> getAffectedDatabaseObjects() {

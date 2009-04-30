@@ -5,12 +5,10 @@ import liquibase.database.Database;
 import liquibase.database.statement.SqlStatement;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.exception.CustomChangeException;
+import liquibase.exception.InvalidChangeDefinitionException;
 import liquibase.exception.RollbackImpossibleException;
 import liquibase.exception.UnsupportedChangeException;
-import liquibase.exception.InvalidChangeDefinitionException;
 import liquibase.util.ObjectUtil;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
 import java.util.*;
 
@@ -59,11 +57,22 @@ public class CustomChangeWrapper extends AbstractChange {
         }
     }
 
+    public String getClassName() {
+        return className;
+    }
+
     public void setParam(String name, String value) {
         this.params.add(name);
         this.paramValues.put(name, value);
     }
 
+    public SortedSet<String> getParams() {
+        return params;
+    }
+
+    public Map<String, String> getParamValues() {
+        return paramValues;
+    }
 
     public void validate(Database database) throws InvalidChangeDefinitionException {
         customChange.validate(database);
@@ -131,21 +140,6 @@ public class CustomChangeWrapper extends AbstractChange {
 
     public String getConfirmationMessage() {
         return customChange.getConfirmationMessage();
-    }
-
-    public Element createNode(Document currentChangeLogDOM) {
-        Element customElement = currentChangeLogDOM.createElement("custom");
-        customElement.setAttribute("class", className);
-
-        for (String param : params) {
-            Element paramElement = currentChangeLogDOM.createElement("param");
-            paramElement.setAttribute("name", param);
-            paramElement.setAttribute("value", paramValues.get(param));
-
-            customElement.appendChild(paramElement);
-        }
-
-        return customElement;
     }
 
     public Set<DatabaseObject> getAffectedDatabaseObjects() {
