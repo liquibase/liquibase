@@ -4,6 +4,8 @@ import liquibase.database.Database;
 import liquibase.database.MockDatabase;
 import liquibase.database.statement.AddDefaultValueStatement;
 import liquibase.database.statement.SqlStatement;
+import liquibase.database.statement.ComputedNumericValue;
+import liquibase.database.statement.ComputedDateValue;
 import liquibase.test.DatabaseTest;
 import liquibase.test.DatabaseTestTemplate;
 import liquibase.util.ISODateFormat;
@@ -22,6 +24,7 @@ public class AddDefaultValueChangeTest extends AbstractChangeTest {
         change.setTableName("TABLE_NAME");
         change.setColumnName("COLUMN_NAME");
         change.setDefaultValue("New default value");
+        change.setColumnDataType("VARCHAR(255)");
 
         SqlStatement[] statements = change.generateStatements(new MockDatabase());
         assertEquals(1, statements.length);
@@ -31,6 +34,7 @@ public class AddDefaultValueChangeTest extends AbstractChangeTest {
         assertEquals("TABLE_NAME", statement.getTableName());
         assertEquals("COLUMN_NAME", statement.getColumnName());
         assertEquals("New default value", statement.getDefaultValue());
+        assertEquals("VARCHAR(255)", statement.getColumnDataType());
     }
 
     @Test
@@ -67,6 +71,42 @@ public class AddDefaultValueChangeTest extends AbstractChangeTest {
         assertEquals("COLUMN_NAME", statement.getColumnName());
         assertTrue(statement.getDefaultValue() instanceof Number);
         assertEquals("42.56", statement.getDefaultValue().toString());
+    }
+
+    @Test
+    public void generateStatements_computedNumeric() throws Exception {
+        AddDefaultValueChange change = new AddDefaultValueChange();
+        change.setTableName("TABLE_NAME");
+        change.setColumnName("COLUMN_NAME");
+        change.setDefaultValueNumeric("Math.random()");
+
+        SqlStatement[] statements = change.generateStatements(new MockDatabase());
+        assertEquals(1, statements.length);
+        AddDefaultValueStatement statement = (AddDefaultValueStatement) statements[0];
+
+
+        assertEquals("TABLE_NAME", statement.getTableName());
+        assertEquals("COLUMN_NAME", statement.getColumnName());
+        assertTrue(statement.getDefaultValue() instanceof ComputedNumericValue);
+        assertEquals("Math.random()", statement.getDefaultValue().toString());
+    }
+
+    @Test
+    public void generateStatements_computedDate() throws Exception {
+        AddDefaultValueChange change = new AddDefaultValueChange();
+        change.setTableName("TABLE_NAME");
+        change.setColumnName("COLUMN_NAME");
+        change.setDefaultValueDate("NOW()");
+
+        SqlStatement[] statements = change.generateStatements(new MockDatabase());
+        assertEquals(1, statements.length);
+        AddDefaultValueStatement statement = (AddDefaultValueStatement) statements[0];
+
+
+        assertEquals("TABLE_NAME", statement.getTableName());
+        assertEquals("COLUMN_NAME", statement.getColumnName());
+        assertTrue(statement.getDefaultValue() instanceof ComputedDateValue);
+        assertEquals("NOW()", statement.getDefaultValue().toString());
     }
 
     @Test
