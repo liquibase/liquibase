@@ -175,21 +175,4 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
     public String getConfirmationMessage() {
         return "Table " + tableName + " created";
     }
-
-    public Set<DatabaseObject> getAffectedDatabaseObjects() {
-        Set<DatabaseObject> returnSet = new HashSet<DatabaseObject>();
-
-        Table table = new Table(getTableName());
-        returnSet.add(table);
-
-        for (ColumnConfig columnConfig : getColumns()) {
-            Column column = new Column();
-            column.setTable(table);
-            column.setName(columnConfig.getName());
-
-            returnSet.add(column);
-        }
-
-        return returnSet;
-    }
 }

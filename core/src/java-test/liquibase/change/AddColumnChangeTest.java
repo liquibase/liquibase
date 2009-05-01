@@ -1,9 +1,11 @@
 package liquibase.change;
 
 import liquibase.database.MockDatabase;
-import liquibase.database.statement.AddColumnStatement;
-import liquibase.database.statement.SqlStatement;
+import liquibase.database.Database;
+import liquibase.database.DB2Database;
+import liquibase.database.statement.*;
 import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -23,11 +25,63 @@ public class AddColumnChangeTest extends AbstractChangeTest {
     }
 
     @Test
+    public void addColumn() throws Exception {
+        AddColumnChange change = new AddColumnChange();
+        assertEquals(0, change.getColumns().size());
+
+        change.addColumn(new ColumnConfig().setName("a"));
+        assertEquals(1, change.getColumns().size());
+
+        change.addColumn(new ColumnConfig().setName("b"));
+        assertEquals(2, change.getColumns().size());
+    }
+
+    @Test
+    public void removeColumn() throws Exception {
+        ColumnConfig columnA = new ColumnConfig().setName("a");
+        ColumnConfig columnB = new ColumnConfig().setName("b");
+
+        AddColumnChange change = new AddColumnChange();
+        assertEquals(0, change.getColumns().size());
+
+        change.removeColumn(columnA);
+        assertEquals(0, change.getColumns().size());
+
+        change.addColumn(columnA);
+        assertEquals(1, change.getColumns().size());
+
+        change.removeColumn(columnB);
+        assertEquals(1, change.getColumns().size());
+
+        change.removeColumn(columnA);
+        assertEquals(0, change.getColumns().size());
+    }
+
+    @Test
+    public void getLastColumn() {
+        ColumnConfig columnA = new ColumnConfig().setName("a");
+        ColumnConfig columnB = new ColumnConfig().setName("b");
+
+        AddColumnChange change = new AddColumnChange();
+        assertEquals(0, change.getColumns().size());
+        assertNull(change.getLastColumn());
+
+        change.addColumn(columnA);
+        assertEquals(1, change.getColumns().size());
+        assertEquals(columnA, change.getLastColumn());
+
+        change.addColumn(columnB);
+        assertEquals(2, change.getColumns().size());
+        assertEquals(columnB, change.getLastColumn());
+
+    }
+
+    @Test
     public void generateStatement() throws Exception {
         AddColumnChange refactoring = new AddColumnChange();
         refactoring.setSchemaName("SCHEMA");
         refactoring.setTableName("TAB");
-        
+
         ColumnConfig column = new ColumnConfig();
         column.setName("NEWCOL");
         column.setType("TYP");
@@ -46,23 +100,43 @@ public class AddColumnChangeTest extends AbstractChangeTest {
         column.setConstraints(new ConstraintsConfig());
         refactoring.addColumn(column);
 
-        SqlStatement[] sqlStatements = refactoring.generateStatements(new MockDatabase());
-        assertEquals(2, sqlStatements.length);
-        assertTrue(sqlStatements[0] instanceof AddColumnStatement);
-        assertTrue(sqlStatements[1] instanceof AddColumnStatement);
+        testChangeOnAll(refactoring, new GenerateAllValidator() {
+            public void validate(SqlStatement[] sqlStatements, Database database) {
 
-        assertEquals("SCHEMA", ((AddColumnStatement) sqlStatements[0]).getSchemaName());
-        assertEquals("TAB", ((AddColumnStatement) sqlStatements[0]).getTableName());
-        assertEquals("NEWCOL", ((AddColumnStatement) sqlStatements[0]).getColumnName());
-        assertEquals("TYP", ((AddColumnStatement) sqlStatements[0]).getColumnType());
-        assertFalse(((AddColumnStatement) sqlStatements[0]).isPrimaryKey());
-        assertFalse(((AddColumnStatement) sqlStatements[0]).isNullable());
+                if (database instanceof DB2Database) {
+                    assertEquals(4, sqlStatements.length);
+                    assertTrue(sqlStatements[0] instanceof AddColumnStatement);
+                    assertTrue(sqlStatements[1] instanceof ReorganizeTableStatement);
+                    assertTrue(sqlStatements[2] instanceof AddColumnStatement);
+                    assertTrue(sqlStatements[3] instanceof ReorganizeTableStatement);
+                } else {
+                    assertEquals(2, sqlStatements.length);
+                    assertTrue(sqlStatements[0] instanceof AddColumnStatement);
+                    assertTrue(sqlStatements[1] instanceof AddColumnStatement);
+                }
 
-        assertEquals("SCHEMA", ((AddColumnStatement) sqlStatements[1]).getSchemaName());
-        assertEquals("TAB", ((AddColumnStatement) sqlStatements[1]).getTableName());
-        assertEquals("NEWCOL2", ((AddColumnStatement) sqlStatements[1]).getColumnName());
-        assertEquals("TYP2", ((AddColumnStatement) sqlStatements[1]).getColumnType());
-        assertTrue(((AddColumnStatement) sqlStatements[1]).isNullable());
+                AddColumnStatement firstAddColumnStatement = (AddColumnStatement) sqlStatements[0];
+                AddColumnStatement secondAddColumnStatement = null;
+                if (database instanceof DB2Database) {
+                    secondAddColumnStatement = (AddColumnStatement) sqlStatements[2];
+                } else {
+                    secondAddColumnStatement = (AddColumnStatement) sqlStatements[1];
+                }
+
+                assertEquals("SCHEMA", firstAddColumnStatement.getSchemaName());
+                assertEquals("TAB", firstAddColumnStatement.getTableName());
+                assertEquals("NEWCOL", firstAddColumnStatement.getColumnName());
+                assertEquals("TYP", firstAddColumnStatement.getColumnType());
+                assertFalse(firstAddColumnStatement.isPrimaryKey());
+                assertFalse(firstAddColumnStatement.isNullable());
+
+                assertEquals("SCHEMA", secondAddColumnStatement.getSchemaName());
+                assertEquals("TAB", secondAddColumnStatement.getTableName());
+                assertEquals("NEWCOL2", secondAddColumnStatement.getColumnName());
+                assertEquals("TYP2", secondAddColumnStatement.getColumnType());
+                assertTrue(secondAddColumnStatement.isNullable());
+            }
+        });
     }
 
     @Test
@@ -81,16 +155,26 @@ public class AddColumnChangeTest extends AbstractChangeTest {
 
         refactoring.addColumn(column);
 
-        SqlStatement[] sqlStatements = refactoring.generateStatements(new MockDatabase());
-        assertEquals(1, sqlStatements.length);
-        assertTrue(sqlStatements[0] instanceof AddColumnStatement);
+        testChangeOnAll(refactoring, new GenerateAllValidator() {
+            public void validate(SqlStatement[] sqlStatements, Database database) {
 
-        assertEquals("SCHEMA", ((AddColumnStatement) sqlStatements[0]).getSchemaName());
-        assertEquals("TAB", ((AddColumnStatement) sqlStatements[0]).getTableName());
-        assertEquals("NEWCOL", ((AddColumnStatement) sqlStatements[0]).getColumnName());
-        assertEquals("TYP", ((AddColumnStatement) sqlStatements[0]).getColumnType());
-        assertFalse(((AddColumnStatement) sqlStatements[0]).isPrimaryKey());
-        assertTrue(((AddColumnStatement) sqlStatements[0]).isNullable());
+                if (database instanceof DB2Database) {
+                    assertEquals(2, sqlStatements.length);
+                    assertTrue(sqlStatements[0] instanceof AddColumnStatement);
+                    assertTrue(sqlStatements[1] instanceof ReorganizeTableStatement);
+                } else {
+                    assertEquals(1, sqlStatements.length);
+                    assertTrue(sqlStatements[0] instanceof AddColumnStatement);
+                }
+
+                assertEquals("SCHEMA", ((AddColumnStatement) sqlStatements[0]).getSchemaName());
+                assertEquals("TAB", ((AddColumnStatement) sqlStatements[0]).getTableName());
+                assertEquals("NEWCOL", ((AddColumnStatement) sqlStatements[0]).getColumnName());
+                assertEquals("TYP", ((AddColumnStatement) sqlStatements[0]).getColumnType());
+                assertFalse(((AddColumnStatement) sqlStatements[0]).isPrimaryKey());
+                assertTrue(((AddColumnStatement) sqlStatements[0]).isNullable());
+            }
+        });
     }
 
     @Test
@@ -109,16 +193,25 @@ public class AddColumnChangeTest extends AbstractChangeTest {
 
         refactoring.addColumn(column);
 
-        SqlStatement[] sqlStatements = refactoring.generateStatements(new MockDatabase());
-        assertEquals(1, sqlStatements.length);
-        assertTrue(sqlStatements[0] instanceof AddColumnStatement);
+        testChangeOnAll(refactoring, new GenerateAllValidator() {
+            public void validate(SqlStatement[] sqlStatements, Database database) {
+                if (database instanceof DB2Database) {
+                    assertEquals(2, sqlStatements.length);
+                    assertTrue(sqlStatements[0] instanceof AddColumnStatement);
+                    assertTrue(sqlStatements[1] instanceof ReorganizeTableStatement);
+                } else {
+                    assertEquals(1, sqlStatements.length);
+                    assertTrue(sqlStatements[0] instanceof AddColumnStatement);
+                }
 
-        assertEquals("SCHEMA", ((AddColumnStatement) sqlStatements[0]).getSchemaName());
-        assertEquals("TAB", ((AddColumnStatement) sqlStatements[0]).getTableName());
-        assertEquals("NEWCOL", ((AddColumnStatement) sqlStatements[0]).getColumnName());
-        assertEquals("TYP", ((AddColumnStatement) sqlStatements[0]).getColumnType());
-        assertFalse(((AddColumnStatement) sqlStatements[0]).isPrimaryKey());
-        assertFalse(((AddColumnStatement) sqlStatements[0]).isNullable());
+                assertEquals("SCHEMA", ((AddColumnStatement) sqlStatements[0]).getSchemaName());
+                assertEquals("TAB", ((AddColumnStatement) sqlStatements[0]).getTableName());
+                assertEquals("NEWCOL", ((AddColumnStatement) sqlStatements[0]).getColumnName());
+                assertEquals("TYP", ((AddColumnStatement) sqlStatements[0]).getColumnType());
+                assertFalse(((AddColumnStatement) sqlStatements[0]).isPrimaryKey());
+                assertFalse(((AddColumnStatement) sqlStatements[0]).isNullable());
+            }
+        });
     }
 
     @Test
@@ -138,10 +231,61 @@ public class AddColumnChangeTest extends AbstractChangeTest {
 
         refactoring.addColumn(column);
 
-        SqlStatement[] sqlStatements = refactoring.generateStatements(new MockDatabase());
-        assertEquals(1, sqlStatements.length);
-        assertTrue(sqlStatements[0] instanceof AddColumnStatement);
-        assertTrue(((AddColumnStatement) sqlStatements[0]).isPrimaryKey());
+        testChangeOnAll(refactoring, new GenerateAllValidator() {
+            public void validate(SqlStatement[] sqlStatements, Database database) {
+                if (database instanceof DB2Database) {
+                    assertEquals(2, sqlStatements.length);
+                    assertTrue(sqlStatements[0] instanceof AddColumnStatement);
+                    assertTrue(sqlStatements[1] instanceof ReorganizeTableStatement);
+                } else {
+                    assertEquals(1, sqlStatements.length);
+                    assertTrue(sqlStatements[0] instanceof AddColumnStatement);
+                }
+
+                assertTrue(((AddColumnStatement) sqlStatements[0]).isPrimaryKey());
+            }
+        });
+    }
+
+    @Test
+    public void generateStatement_withDefaultValue() throws Exception {
+        AddColumnChange refactoring = new AddColumnChange();
+        refactoring.setSchemaName("SCHEMA");
+        refactoring.setTableName("TAB");
+        ColumnConfig column = new ColumnConfig();
+        column.setName("NEWCOL");
+        column.setType("TYP");
+        column.setValue("SOME VALUE");
+
+        ConstraintsConfig constraints = new ConstraintsConfig();
+        constraints.setNullable(Boolean.FALSE);
+        constraints.setPrimaryKey(Boolean.TRUE);
+        column.setAutoIncrement(Boolean.TRUE);
+
+        column.setConstraints(constraints);
+
+        refactoring.addColumn(column);
+
+        testChangeOnAll(refactoring, new GenerateAllValidator() {
+            public void validate(SqlStatement[] sqlStatements, Database database) {
+                if (database instanceof DB2Database) {
+                    assertEquals(3, sqlStatements.length);
+                    assertTrue(sqlStatements[0] instanceof AddColumnStatement);
+                    assertTrue(sqlStatements[1] instanceof ReorganizeTableStatement);
+                    assertTrue(sqlStatements[2] instanceof UpdateStatement);
+                } else {
+                    assertEquals(2, sqlStatements.length);
+                    assertTrue(sqlStatements[0] instanceof AddColumnStatement);
+                    assertTrue(sqlStatements[1] instanceof UpdateStatement);
+                }
+
+                assertTrue(((AddColumnStatement) sqlStatements[0]).isPrimaryKey());
+                assertTrue(((AddColumnStatement) sqlStatements[0]).isAutoIncrement());
+
+                assertEquals("TAB", ((UpdateStatement) sqlStatements[sqlStatements.length - 1]).getTableName());
+                assertEquals("SOME VALUE", ((UpdateStatement) sqlStatements[sqlStatements.length - 1]).getNewColumnValues().get("NEWCOL"));
+            }
+        });
     }
 
     @Test
@@ -162,11 +306,84 @@ public class AddColumnChangeTest extends AbstractChangeTest {
 
         refactoring.addColumn(column);
 
-        SqlStatement[] sqlStatements = refactoring.generateStatements(new MockDatabase());
-        assertEquals(1, sqlStatements.length);
-        assertTrue(sqlStatements[0] instanceof AddColumnStatement);
-        assertTrue(((AddColumnStatement) sqlStatements[0]).isPrimaryKey());
-        assertTrue(((AddColumnStatement) sqlStatements[0]).isAutoIncrement());
+        testChangeOnAll(refactoring, new GenerateAllValidator() {
+            public void validate(SqlStatement[] sqlStatements, Database database) {
+                if (database instanceof DB2Database) {
+                    assertEquals(2, sqlStatements.length);
+                    assertTrue(sqlStatements[0] instanceof AddColumnStatement);
+                    assertTrue(sqlStatements[1] instanceof ReorganizeTableStatement);
+                } else {
+                    assertEquals(1, sqlStatements.length);
+                    assertTrue(sqlStatements[0] instanceof AddColumnStatement);
+                }
+
+                assertTrue(((AddColumnStatement) sqlStatements[0]).isPrimaryKey());
+                assertTrue(((AddColumnStatement) sqlStatements[0]).isAutoIncrement());
+            }
+        });
+    }
+
+    @Test
+    public void createInverses_singleColumn() throws Exception {
+        AddColumnChange refactoring = new AddColumnChange();
+        refactoring.setSchemaName("SCHEMA");
+        refactoring.setTableName("TAB");
+        ColumnConfig column = new ColumnConfig();
+        column.setName("NEWCOL");
+        column.setType("TYP");
+
+        ConstraintsConfig constraints = new ConstraintsConfig();
+        constraints.setNullable(Boolean.FALSE);
+        constraints.setPrimaryKey(Boolean.TRUE);
+        column.setAutoIncrement(Boolean.TRUE);
+
+        column.setConstraints(constraints);
+
+        refactoring.addColumn(column);
+
+        testInverseOnAll(refactoring, new InverseValidator() {
+            public void validate(Change[] changes) {
+                assertEquals(1, changes.length);
+                assertTrue(changes[0] instanceof DropColumnChange);
+                assertEquals("TAB", ((DropColumnChange) changes[0]).getTableName());
+                assertEquals("NEWCOL", ((DropColumnChange) changes[0]).getColumnName());
+
+            }
+        });
+    }
+
+    @Test
+    public void createInverses_multiColumn() throws Exception {
+        AddColumnChange refactoring = new AddColumnChange();
+        refactoring.setSchemaName("SCHEMA");
+        refactoring.setTableName("TAB");
+        ColumnConfig column = new ColumnConfig();
+        column.setName("NEWCOL");
+        column.setType("TYP");
+
+        ConstraintsConfig constraints = new ConstraintsConfig();
+        constraints.setNullable(Boolean.FALSE);
+        constraints.setPrimaryKey(Boolean.TRUE);
+        column.setAutoIncrement(Boolean.TRUE);
+
+        column.setConstraints(constraints);
+
+        refactoring.addColumn(column);
+
+        column = new ColumnConfig();
+        column.setName("NEWCOL2");
+        column.setType("TYP");
+        refactoring.addColumn(column);
+
+        testInverseOnAll(refactoring, new InverseValidator() {
+            public void validate(Change[] changes) {
+                assertEquals(2, changes.length);
+                assertTrue(changes[0] instanceof DropColumnChange);
+                assertEquals("NEWCOL", ((DropColumnChange) changes[0]).getColumnName());
+                assertTrue(changes[1] instanceof DropColumnChange);
+                assertEquals("NEWCOL2", ((DropColumnChange) changes[1]).getColumnName());
+            }
+        });
     }
 
     @Test
@@ -181,56 +398,4 @@ public class AddColumnChangeTest extends AbstractChangeTest {
         assertEquals("Columns NEWCOL(TYP) added to TAB", refactoring.getConfirmationMessage());
     }
 
-//    @Test
-//    public void sybaseNull() throws Exception {
-//        AddColumnChange refactoring = new AddColumnChange();
-//        refactoring.setTableName("TAB");
-//        ColumnConfig column = new ColumnConfig();
-//        column.setName("NEWCOL");
-//        column.setType("TYP");
-//        refactoring.addColumn(column);
-//
-//        SybaseDatabase db = new SybaseDatabase();
-//        assertEquals("ALTER TABLE [TAB] ADD NEWCOL TYP NULL", refactoring.generateStatements(db)[0].getSqlStatement(db));
-//    }
-
-//    @Test
-//    public void sybaseNotNull() throws Exception {
-//        AddColumnChange refactoring = new AddColumnChange();
-//        refactoring.setTableName("TAB");
-//        ColumnConfig column = new ColumnConfig();
-//        column.setName("NEWCOL");
-//        column.setType("TYP");
-//        refactoring.addColumn(column);
-//
-//        ConstraintsConfig constraints = new ConstraintsConfig();
-//        constraints.setPrimaryKey(Boolean.FALSE);
-//        constraints.setNullable(Boolean.FALSE);
-//
-//        column.setConstraints(constraints);
-//
-//        SybaseDatabase database = new SybaseDatabase();
-//        assertEquals("ALTER TABLE [TAB] ADD NEWCOL TYP NOT NULL", refactoring.generateStatements(database)[0].getSqlStatement(database));
-//
-//    }
-
-//    @Test
-//    public void sybaseConstraintsNull() throws Exception {
-//        AddColumnChange refactoring = new AddColumnChange();
-//        refactoring.setTableName("TAB");
-//        ColumnConfig column = new ColumnConfig();
-//        column.setName("NEWCOL");
-//        column.setType("TYP");
-//        refactoring.addColumn(column);
-//
-//        ConstraintsConfig constraints = new ConstraintsConfig();
-//        constraints.setPrimaryKey(Boolean.FALSE);
-//        constraints.setNullable(Boolean.TRUE);
-//
-//        column.setConstraints(constraints);
-//
-//        SybaseDatabase database = new SybaseDatabase();
-//        assertEquals("ALTER TABLE [TAB] ADD NEWCOL TYP NULL", refactoring.generateStatements(database)[0].getSqlStatement(database));
-//
-//    }
 }

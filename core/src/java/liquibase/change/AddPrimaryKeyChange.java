@@ -169,24 +169,4 @@ public class AddPrimaryKeyChange extends AbstractChange {
     public String getConfirmationMessage() {
         return "Primary key added to " + getTableName() + " (" + getColumnNames() + ")";
     }
-
-    public Set<DatabaseObject> getAffectedDatabaseObjects() {
-
-        Set<DatabaseObject> dbObjects = new HashSet<DatabaseObject>();
-
-        Table table = new Table(getTableName());
-        dbObjects.add(table);
-
-        for (String columnName : columnNames.split(",")) {
-            Column column = new Column();
-            column.setTable(table);
-            column.setName(columnName.trim());
-
-            dbObjects.add(column);
-        }
-
-        return dbObjects;
-
-    }
-
 }

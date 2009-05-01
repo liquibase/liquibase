@@ -113,17 +113,6 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
         return "Index " + getIndexName() + " created";
     }
 
-    public Set<DatabaseObject> getAffectedDatabaseObjects() {
-        Index index = new Index();
-        index.setTable(new Table(tableName));
-        index.setName(indexName);
-        index.setUnique(unique);
-
-        Table table = new Table(getTableName());
-
-        return new HashSet<DatabaseObject>(Arrays.asList(index, table));
-    }
-
     /**
      * @param isUnique the isUnique to set
      */

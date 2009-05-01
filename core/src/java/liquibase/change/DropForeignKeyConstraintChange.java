@@ -87,20 +87,4 @@ public class DropForeignKeyConstraintChange extends AbstractChange {
     public String getConfirmationMessage() {
         return "Foreign key " + getConstraintName() + " dropped";
     }
-
-    public Set<DatabaseObject> getAffectedDatabaseObjects() {
-        Set<DatabaseObject> returnSet = new HashSet<DatabaseObject>();
-
-        Table baseTable = new Table(getBaseTableName());
-        returnSet.add(baseTable);
-
-        ForeignKey fk = new ForeignKey();
-        fk.setName(constraintName);
-        fk.setForeignKeyTable(baseTable);
-        returnSet.add(fk);
-
-        return returnSet;
-
-    }
-
 }

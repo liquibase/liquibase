@@ -21,10 +21,6 @@ public class EmptyChange extends AbstractChange {
         return "Empty change did nothing";
     }
 
-    public Set<DatabaseObject> getAffectedDatabaseObjects() {
-        return null;
-    }
-
     public void validate(Database database) throws InvalidChangeDefinitionException {
         
     }

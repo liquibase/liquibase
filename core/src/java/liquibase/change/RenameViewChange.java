@@ -77,14 +77,4 @@ public class RenameViewChange extends AbstractChange {
         return "View " + oldViewName + " renamed to " + newViewName;
     }
 
-    public Set<DatabaseObject> getAffectedDatabaseObjects() {
-        View oldView = new View();
-        oldView.setName(oldViewName);
-
-        View newView = new View();
-        newView.setName(newViewName);
-
-        return new HashSet<DatabaseObject>(Arrays.asList(oldView, newView));
-    }
-
 }

@@ -161,20 +161,4 @@ public class RenameColumnChange extends AbstractChange {
         return "Column "+tableName+"."+ oldColumnName + " renamed to " + newColumnName;
     }
 
-    public Set<DatabaseObject> getAffectedDatabaseObjects() {
-
-        Table table = new Table(getTableName());
-
-        Column oldColumn = new Column();
-        oldColumn.setTable(table);
-        oldColumn.setName(getOldColumnName());
-
-        Column newColumn = new Column();
-        newColumn.setTable(table);
-        newColumn.setName(getNewColumnName());
-
-        return new HashSet<DatabaseObject>(Arrays.asList(table, oldColumn, newColumn));
-
-    }
-
 }

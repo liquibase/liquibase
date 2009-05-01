@@ -243,43 +243,4 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
     public String getConfirmationMessage() {
         return "Foreign key contraint added to " + getBaseTableName() + " (" + getBaseColumnNames() + ")";
     }
-
-    public Set<DatabaseObject> getAffectedDatabaseObjects() {
-        Set<DatabaseObject> returnSet = new HashSet<DatabaseObject>();
-
-        Table baseTable = new Table(getBaseTableName());
-        returnSet.add(baseTable);
-
-        for (String columnName : getBaseColumnNames().split(",")) {
-            Column baseColumn = new Column();
-            baseColumn.setTable(baseTable);
-            baseColumn.setName(columnName.trim());
-
-            returnSet.add(baseColumn);
-        }
-
-        Table referencedTable = new Table(getReferencedTableName());
-        returnSet.add(referencedTable);
-
-        for (String columnName : getReferencedColumnNames().split(",")) {
-            Column referencedColumn = new Column();
-            referencedColumn.setTable(baseTable);
-            referencedColumn.setName(columnName.trim());
-
-            returnSet.add(referencedColumn);
-        }
-
-        ForeignKey fk = new ForeignKey();
-        fk.setName(constraintName);
-        fk.setForeignKeyTable(baseTable);
-        fk.setForeignKeyColumns(baseColumnNames);
-        fk.setPrimaryKeyTable(referencedTable);
-        fk.setPrimaryKeyColumns(referencedColumnNames);
-        fk.setDeleteRule(this.deleteRule);
-        fk.setUpdateRule(this.updateRule);
-        returnSet.add(fk);
-
-        return returnSet;
-
-    }
 }

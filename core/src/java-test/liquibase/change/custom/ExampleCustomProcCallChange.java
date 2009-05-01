@@ -41,11 +41,6 @@ public class ExampleCustomProcCallChange implements CustomSqlChange {
     public void setUp() throws SetupException {
     }
 
-    public Set<DatabaseObject> getAffectedDatabaseObjects() {
-        return null;
-    }
-
-
     public void setFileOpener(FileOpener fileOpener) {
         this.fileOpener = fileOpener;
     }

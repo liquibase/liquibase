@@ -125,18 +125,4 @@ public class DropColumnChange extends AbstractChange {
     public String getConfirmationMessage() {
         return "Column " + getTableName() + "." + getColumnName() + " dropped";
     }
-
-    public Set<DatabaseObject> getAffectedDatabaseObjects() {
-
-
-        Table table = new Table(getTableName());
-
-        Column column = new Column();
-        column.setTable(table);
-        column.setName(columnName);
-
-        return new HashSet<DatabaseObject>(Arrays.asList(table, column));
-
-    }
-
 }

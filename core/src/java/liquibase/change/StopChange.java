@@ -37,10 +37,6 @@ public class StopChange extends AbstractChange {
         return "Changelog Execution Stopped";
     }
 
-    public Set<DatabaseObject> getAffectedDatabaseObjects() {
-        return null;
-    }
-
     public static class StopChangeException extends RuntimeException {
         public StopChangeException(String message) {
             super(message);

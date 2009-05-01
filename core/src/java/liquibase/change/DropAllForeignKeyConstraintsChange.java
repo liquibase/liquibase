@@ -67,19 +67,6 @@ public class DropAllForeignKeyConstraintsChange extends AbstractChange {
         return "Foreign keys on base table " + getBaseTableName() + " dropped";
     }
 
-    public Set<DatabaseObject> getAffectedDatabaseObjects() {
-        Set<DatabaseObject> databaseObjects = null;
-
-        if (childDropChanges != null) {
-            databaseObjects = new HashSet<DatabaseObject>();
-            for (DropForeignKeyConstraintChange change : childDropChanges) {
-                databaseObjects.addAll(change.getAffectedDatabaseObjects());
-            }
-        }
-
-        return databaseObjects;
-    }
-
     private void generateChildren(Database database) throws UnsupportedChangeException {
         // Make a new list
         childDropChanges = new ArrayList<DropForeignKeyConstraintChange>();

@@ -88,14 +88,4 @@ public class InsertDataChange extends AbstractChange implements ChangeWithColumn
     public String getConfirmationMessage() {
         return "New row inserted into " + getTableName();
     }
-
-    /**
-     * @see liquibase.change.Change#getAffectedDatabaseObjects()
-     */
-    public Set<DatabaseObject> getAffectedDatabaseObjects() {
-        Table dbObject = new Table(getTableName());
-
-        return new HashSet<DatabaseObject>(Arrays.asList(dbObject));
-    }
-
 }

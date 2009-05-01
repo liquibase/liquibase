@@ -105,17 +105,6 @@ public class AddDefaultValueChange extends AbstractChange {
         this.defaultValueBoolean = defaultValueBoolean;
     }
 
-    public void validate(Database database) throws InvalidChangeDefinitionException {
-        if (StringUtils.trimToNull(tableName) == null) {
-            throw new InvalidChangeDefinitionException("tableName is required", this);
-        }
-        if (StringUtils.trimToNull(columnName) == null) {
-            throw new InvalidChangeDefinitionException("columnName is required", this);
-        }
-
-
-    }
-
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
         Object defaultValue = null;
 
@@ -138,69 +127,9 @@ public class AddDefaultValueChange extends AbstractChange {
             }
         }
         
-        if (database instanceof SQLiteDatabase) {
-    		// return special statements for SQLite databases
-    		return generateStatementsForSQLiteDatabase(database,defaultValue);
-        } 
-
         return new SqlStatement[]{
                 new AddDefaultValueStatement(getSchemaName() == null ? database.getDefaultSchemaName() : getSchemaName(), getTableName(), getColumnName(), getColumnDataType(), defaultValue)
         };
-    }
-    
-    private SqlStatement[] generateStatementsForSQLiteDatabase(
-    		Database database, Object defaultValue) 
-			throws UnsupportedChangeException {
-    	// SQLite does not support this ALTER TABLE operation until now.
-		// For more information see: http://www.sqlite.org/omitted.html.
-		// This is a small work around...
-    	
-    	List<SqlStatement> statements = new ArrayList<SqlStatement>();
-    	
-		// define alter table logic
-		AlterTableVisitor rename_alter_visitor = new AlterTableVisitor() {
-			public ColumnConfig[] getColumnsToAdd() {
-				return new ColumnConfig[0];
-			}
-			public boolean copyThisColumn(ColumnConfig column) {
-				return true;
-			}
-			public boolean createThisColumn(ColumnConfig column) {
-				if (column.getName().equals(getColumnName())) {
-					try {
-						if (getDefaultValue()!=null) {
-							column.setDefaultValue(getDefaultValue());
-						}
-						if (getDefaultValueBoolean()!=null) {
-							column.setDefaultValueBoolean(getDefaultValueBoolean());
-						}
-    					if (getDefaultValueDate()!=null) {
-    						column.setDefaultValueDate(getDefaultValueDate());
-    					}
-    					if (getDefaultValueNumeric()!=null) {
-    						column.setDefaultValueNumeric(getDefaultValueNumeric());
-    					}
-					} catch (ParseException e) {
-						e.printStackTrace();
-					}
-				}
-				return true;
-			}
-			public boolean createThisIndex(Index index) {
-				return true;
-			}
-		};
-    		
-    	try {
-    		// alter table
-			statements.addAll(SQLiteDatabase.getAlterTableStatements(
-					rename_alter_visitor,
-					database,getSchemaName(),getTableName()));
-    	} catch (JDBCException e) {
-			e.printStackTrace();
-		}
-    	
-    	return statements.toArray(new SqlStatement[statements.size()]);
     }
 
     protected Change[] createInverses() {
@@ -218,18 +147,4 @@ public class AddDefaultValueChange extends AbstractChange {
     public String getConfirmationMessage() {
         return "Default value added to " + getTableName() + "." + getColumnName();
     }
-
-
-    public Set<DatabaseObject> getAffectedDatabaseObjects() {
-        Column column = new Column();
-
-        Table table = new Table(getTableName());
-        column.setTable(table);
-
-        column.setName(columnName);
-
-        return new HashSet<DatabaseObject>(Arrays.asList(table, column));
-
-    }
-
 }

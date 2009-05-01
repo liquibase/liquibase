@@ -155,24 +155,4 @@ public class AddUniqueConstraintChange extends AbstractChange {
                 inverse,
         };
     }
-
-    public Set<DatabaseObject> getAffectedDatabaseObjects() {
-
-        Set<DatabaseObject> returnSet = new HashSet<DatabaseObject>();
-
-        Table table = new Table(getTableName());
-        returnSet.add(table);
-
-        for (String columnName : getColumnNames().split(",")) {
-            Column column = new Column();
-            column.setTable(table);
-            column.setName(columnName.trim());
-
-            returnSet.add(column);
-        }
-
-        return returnSet;
-
-    }
-
 }

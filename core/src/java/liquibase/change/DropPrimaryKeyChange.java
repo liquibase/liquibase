@@ -115,16 +115,4 @@ public class DropPrimaryKeyChange extends AbstractChange {
     public String getConfirmationMessage() {
         return "Primary key dropped from "+getTableName();
     }
-
-    public Set<DatabaseObject> getAffectedDatabaseObjects() {
-
-        Set<DatabaseObject> dbObjects = new HashSet<DatabaseObject>();
-
-        Table table = new Table(getTableName());
-        dbObjects.add(table);
-
-        return dbObjects;
-
-    }
-
 }

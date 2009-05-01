@@ -94,10 +94,4 @@ public class UpdateDataChange extends AbstractChange implements ChangeWithColumn
         return "Data updated in " + getTableName();
     }
 
-    public Set<DatabaseObject> getAffectedDatabaseObjects() {
-        Table dbObject = new Table(getTableName());
-
-        return new HashSet<DatabaseObject>(Arrays.asList(dbObject));
-    }
-
 }

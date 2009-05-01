@@ -139,15 +139,4 @@ public class DropUniqueConstraintChange extends AbstractChange {
     public String getConfirmationMessage() {
         return "Unique constraint "+getConstraintName()+" dropped from "+getTableName();
     }
-
-    public Set<DatabaseObject> getAffectedDatabaseObjects() {
-
-        Set<DatabaseObject> returnSet = new HashSet<DatabaseObject>();
-
-        Table table = new Table(getTableName());
-        returnSet.add(table);
-
-        return returnSet;
-
-    }
 }

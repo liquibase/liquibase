@@ -65,36 +65,11 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
         columns.remove(column);
     }
 
-    public void validate(Database database) throws InvalidChangeDefinitionException {
-        if (StringUtils.trimToNull(tableName) == null) {
-            throw new InvalidChangeDefinitionException("tableName is required", this);
-        }
-
-        for (ColumnConfig column : getColumns()) {
-            if (StringUtils.trimToNull(column.getName()) == null) {
-                throw new InvalidChangeDefinitionException("column name is required", this);
-            }
-            if (StringUtils.trimToNull(column.getType()) == null) {
-                throw new InvalidChangeDefinitionException("column type is required", this);
-            }
-
-
-        }
-
-
-    }
-
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
-    	
-//    	if (database instanceof SQLiteDatabase) {
-//    		// return special statements for SQLite databases
-//    		return generateStatementsForSQLiteDatabase(database);
-//        }
-    	
+
         List<SqlStatement> sql = new ArrayList<SqlStatement>();
 
-        String schemaName = getSchemaName() == null?database.getDefaultSchemaName():getSchemaName();
-        for (ColumnConfig aColumn : columns) {
+        for (ColumnConfig aColumn : getColumns()) {
             Set<ColumnConstraint> constraints = new HashSet<ColumnConstraint>();
             if (aColumn.getConstraints() != null) {
                 if (aColumn.getConstraints().isNullable() != null && !aColumn.getConstraints().isNullable()) {
@@ -108,7 +83,7 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
                 constraints.add(new AutoIncrementConstraint(aColumn.getName()));
             }
 
-            AddColumnStatement addColumnStatement = new AddColumnStatement(schemaName,
+            AddColumnStatement addColumnStatement = new AddColumnStatement(getSchemaName(),
                     getTableName(),
                     aColumn.getName(),
                     aColumn.getType(),
@@ -117,8 +92,12 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
 
             sql.add(addColumnStatement);
 
+            if (database instanceof DB2Database) {
+                sql.add(new ReorganizeTableStatement(getSchemaName(), getTableName()));
+            }            
+
             if (aColumn.getValueObject() != null) {
-                UpdateStatement updateStatement = new UpdateStatement(schemaName, getTableName());
+                UpdateStatement updateStatement = new UpdateStatement(getSchemaName(), getTableName());
                 updateStatement.addNewColumnValue(aColumn.getName(), aColumn.getValueObject());
                 sql.add(updateStatement);
             }
@@ -137,70 +116,13 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
 //            }
 //        }
 
-        if (database instanceof DB2Database) {
-            sql.add(new ReorganizeTableStatement(schemaName, getTableName()));
-        }
-
         return sql.toArray(new SqlStatement[sql.size()]);
-    }
-    
-    private SqlStatement[] generateStatementsForSQLiteDatabase(Database database) 
-			throws UnsupportedChangeException {
-
-		// SQLite does not support this ALTER TABLE operation until now.
-		// For more information see: http://www.sqlite.org/omitted.html.
-		// This is a small work around...
-    	
-    	List<SqlStatement> statements = new ArrayList<SqlStatement>();
-    	
-    	// define alter table logic
-		AlterTableVisitor rename_alter_visitor = 
-		new AlterTableVisitor() {
-			public ColumnConfig[] getColumnsToAdd() {
-				ColumnConfig[] columnsToAdd = new ColumnConfig[columns.size()];
-				for (int i=0;i<columns.size();i++) {
-					columnsToAdd[i] = new ColumnConfig(columns.get(i));
-				}
-				return columnsToAdd;
-			}
-			public boolean copyThisColumn(ColumnConfig column) {
-				return true;
-			}
-			public boolean createThisColumn(ColumnConfig column) {
-				return true;
-			}
-			public boolean createThisIndex(Index index) {
-				return true;
-			}
-		};
-    		
-    	try {
-    		// alter table
-			statements.addAll(SQLiteDatabase.getAlterTableStatements(
-					rename_alter_visitor,
-					database,getSchemaName(),getTableName()));
-		} catch (JDBCException e) {
-			System.err.println(e);
-			e.printStackTrace();
-		}
-    	
-    	return statements.toArray(new SqlStatement[statements.size()]);
-    	
     }
 
     protected Change[] createInverses() {
         List<Change> inverses = new ArrayList<Change>();
 
         for (ColumnConfig aColumn : columns) {
-            if (aColumn.hasDefaultValue()) {
-                DropDefaultValueChange dropChange = new DropDefaultValueChange();
-                dropChange.setTableName(getTableName());
-                dropChange.setColumnName(aColumn.getName());
-
-                inverses.add(dropChange);
-            }
-
-
             DropColumnChange inverse = new DropColumnChange();
             inverse.setSchemaName(getSchemaName());
             inverse.setColumnName(aColumn.getName());
@@ -219,20 +141,4 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
 
         return "Columns " + StringUtils.join(names, ",") + " added to " + tableName;
     }
-
-    public Set<DatabaseObject> getAffectedDatabaseObjects() {
-        List<DatabaseObject> result = new ArrayList<DatabaseObject>(columns.size());
-
-        Table table = new Table(getTableName());
-        result.add(table);
-        for (ColumnConfig aColumn : columns) {
-            Column each = new Column();
-            each.setTable(table);
-            each.setName(aColumn.getName());
-            result.add(each);
-        }
-
-        return new HashSet<DatabaseObject>(result);
-    }
-
 }

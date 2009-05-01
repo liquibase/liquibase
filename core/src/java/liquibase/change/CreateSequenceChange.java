@@ -118,11 +118,4 @@ public class CreateSequenceChange extends AbstractChange {
     public String getConfirmationMessage() {
         return "Sequence " + getSequenceName() + " created";
     }
-
-    public Set<DatabaseObject> getAffectedDatabaseObjects() {
-        Sequence dbObject = new Sequence();
-        dbObject.setName(sequenceName);
-
-        return new HashSet<DatabaseObject>(Arrays.asList(dbObject));
-    }
 }

@@ -73,10 +73,4 @@ public class DropTableChange extends AbstractChange {
         return "Table " + getTableName() + " dropped";
     }
 
-    public Set<DatabaseObject> getAffectedDatabaseObjects() {
-        Table dbObject = new Table(getTableName());
-
-        return new HashSet<DatabaseObject>(Arrays.asList(dbObject));
-    }
-
 }

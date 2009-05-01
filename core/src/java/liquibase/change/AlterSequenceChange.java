@@ -103,11 +103,4 @@ public class AlterSequenceChange extends AbstractChange {
     public String getConfirmationMessage() {
         return "Sequence " + getSequenceName() + " altered";
     }
-
-    public Set<DatabaseObject> getAffectedDatabaseObjects() {
-        Sequence dbObject = new Sequence();
-        dbObject.setName(sequenceName);
-
-        return new HashSet<DatabaseObject>(Arrays.asList(dbObject));
-    }
 }
