@@ -43,10 +43,6 @@ public class TagDatabaseChange extends AbstractChange{
         return "Tag '"+tag+"' applied to database";
     }
 
-    public Set<DatabaseObject> getAffectedDatabaseObjects() {
-        return null;
-    }
-
     protected Change[] createInverses() {
         return new Change[0];
     }

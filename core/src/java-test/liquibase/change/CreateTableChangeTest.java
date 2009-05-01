@@ -200,32 +200,6 @@ public class CreateTableChangeTest extends AbstractChangeTest {
     }
 
     @Test
-    public void getAffectedDatabaseObjects() {
-        CreateTableChange change = new CreateTableChange();
-        change.setTableName("testTable");
-
-        ColumnConfig column = new ColumnConfig();
-        column.setName("id");
-        change.addColumn(column);
-
-        column = new ColumnConfig();
-        column.setName("id2");
-        change.addColumn(column);
-
-        Set<DatabaseObject> affectedDatabaseObjects = change.getAffectedDatabaseObjects();
-        assertEquals(3, affectedDatabaseObjects.size());
-        for (DatabaseObject object : affectedDatabaseObjects) {
-            if (object instanceof Table) {
-                assertEquals("testTable", ((Table) object).getName());
-            } else {
-                assertEquals("testTable", ((Column) object).getTable().getName());
-                String columnName = ((Column) object).getName();
-                assertTrue(columnName.equals("id") || columnName.equals("id2"));
-            }
-        }
-    }
-
-    @Test
     public void foreignKey_deferrable() throws Exception {
         CreateTableChange change = new CreateTableChange();
         ColumnConfig columnConfig = new ColumnConfig();

@@ -163,19 +163,4 @@ public class ModifyColumnChange extends AbstractChange implements ChangeWithColu
 
         return "Columns " + StringUtils.join(names, ",") + " of " + getTableName() + " modified";
     }
-
-    public Set<DatabaseObject> getAffectedDatabaseObjects() {
-      List<DatabaseObject> result = new ArrayList<DatabaseObject>(columns.size());
-
-      Table table = new Table(getTableName());
-      for (ColumnConfig aColumn : columns) {
-          Column each = new Column();
-          each.setTable(table);
-          each.setName(aColumn.getName());
-          result.add(each);
-      }
-
-      return new HashSet<DatabaseObject>(result);
-    }
-
 }

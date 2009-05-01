@@ -68,10 +68,4 @@ public class DeleteDataChange extends AbstractChange {
         return "Data deleted from " + getTableName();
     }
 
-    public Set<DatabaseObject> getAffectedDatabaseObjects() {
-        Table dbObject = new Table(getTableName());
-
-        return new HashSet<DatabaseObject>(Arrays.asList(dbObject));
-    }
-
 }

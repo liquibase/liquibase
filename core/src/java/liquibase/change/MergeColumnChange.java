@@ -192,23 +192,4 @@ public class MergeColumnChange extends AbstractChange {
     public String getConfirmationMessage() {
         return "Columns "+getTableName()+"."+getColumn1Name()+" and "+getTableName()+"."+getColumn2Name()+" merged";
     }
-
-    public Set<DatabaseObject> getAffectedDatabaseObjects() {
-        Set<DatabaseObject> returnSet = new HashSet<DatabaseObject>();
-        Table table = new Table(getTableName());
-        returnSet.add(table);
-
-        Column column1 = new Column();
-        column1.setTable(table);
-        column1.setName(column1Name);
-        returnSet.add(column1);
-
-        Column column2 = new Column();
-        column2.setTable(table);
-        column2.setName(column2Name);
-        returnSet.add(column2);
-
-        return returnSet;
-    }
-
 }

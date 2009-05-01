@@ -31,8 +31,4 @@ public class RawSQLChange extends AbstractSQLChange {
     public String getConfirmationMessage() {
         return "Custom SQL executed";
     }
-
-    public Set<DatabaseObject> getAffectedDatabaseObjects() {
-        return null;
-    }
 }

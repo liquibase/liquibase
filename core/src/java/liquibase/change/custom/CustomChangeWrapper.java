@@ -141,8 +141,4 @@ public class CustomChangeWrapper extends AbstractChange {
     public String getConfirmationMessage() {
         return customChange.getConfirmationMessage();
     }
-
-    public Set<DatabaseObject> getAffectedDatabaseObjects() {
-        return null;
-    }
 }

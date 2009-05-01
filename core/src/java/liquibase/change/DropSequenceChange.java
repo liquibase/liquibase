@@ -55,11 +55,4 @@ public class DropSequenceChange extends AbstractChange {
     public String getConfirmationMessage() {
         return "Sequence " + getSequenceName() + " dropped";
     }
-
-    public Set<DatabaseObject> getAffectedDatabaseObjects() {
-        Sequence dbObject = new Sequence();
-        dbObject.setName(sequenceName);
-
-        return new HashSet<DatabaseObject>(Arrays.asList(dbObject));
-    }
 }

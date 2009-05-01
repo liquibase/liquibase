@@ -72,16 +72,18 @@ public class ColumnConfig {
         return name;
     }
 
-    public void setName(String name) {
+    public ColumnConfig setName(String name) {
         this.name = name;
+        return this;
     }
 
     public String getType() {
         return type;
     }
 
-    public void setType(String type) {
+    public ColumnConfig setType(String type) {
         this.type = type;
+        return this;
     }
 
     public String getValue() {
@@ -107,7 +109,7 @@ public class ColumnConfig {
     }
 
 
-    public void setValueNumeric(String valueNumeric) {
+    public ColumnConfig setValueNumeric(String valueNumeric) {
         if (valueNumeric == null || valueNumeric.equalsIgnoreCase("null")) {
             this.valueNumeric = null;
         } else {
@@ -125,29 +127,37 @@ public class ColumnConfig {
                 this.valueNumeric = new ComputedNumericValue(valueNumeric);
             }
         }
+
+        return this;
     }
 
-    public void setValueNumeric(Number valueNumeric) {
+    public ColumnConfig setValueNumeric(Number valueNumeric) {
         this.valueNumeric = valueNumeric;
+
+        return this;
     }
 
     public Boolean getValueBoolean() {
         return valueBoolean;
     }
 
-    public void setValueBoolean(Boolean valueBoolean) {
+    public ColumnConfig setValueBoolean(Boolean valueBoolean) {
         this.valueBoolean = valueBoolean;
+
+        return this;
     }
 
     public Date getValueDate() {
         return valueDate;
     }
 
-    public void setValueDate(Date valueDate) {
+    public ColumnConfig setValueDate(Date valueDate) {
         this.valueDate = valueDate;
+
+        return this;
     }
 
-    public void setValueDate(String valueDate) {
+    public ColumnConfig setValueDate(String valueDate) {
         if (valueDate == null || valueDate.equalsIgnoreCase("null")) {
             this.valueDate = null;
         }
@@ -157,6 +167,8 @@ public class ColumnConfig {
             //probably a function
             this.valueDate = new ComputedDateValue(valueDate);
         }
+
+        return this;
     }
 
     public Object getValueObject() {
@@ -177,8 +189,10 @@ public class ColumnConfig {
         return defaultValue;
     }
 
-    public void setDefaultValue(String defaultValue) {
+    public ColumnConfig setDefaultValue(String defaultValue) {
         this.defaultValue = defaultValue;
+
+        return this;
     }
 
 
@@ -186,11 +200,13 @@ public class ColumnConfig {
         return defaultValueNumeric;
     }
 
-    public void setDefaultValueNumeric(Number defaultValueNumeric) {
+    public ColumnConfig setDefaultValueNumeric(Number defaultValueNumeric) {
         this.defaultValueNumeric = defaultValueNumeric;
+
+        return this;
     }
 
-    public void setDefaultValueNumeric(String defaultValueNumeric) throws ParseException {
+    public ColumnConfig setDefaultValueNumeric(String defaultValueNumeric) throws ParseException {
         if (defaultValueNumeric == null || defaultValueNumeric.equalsIgnoreCase("null")) {
             this.defaultValueNumeric = null;
         } else {
@@ -202,13 +218,15 @@ public class ColumnConfig {
                 this.defaultValueNumeric = NumberFormat.getInstance(Locale.US).parse(defaultValueNumeric);
             }
         }
+
+        return this;
     }
 
     public Date getDefaultValueDate() {
         return defaultValueDate;
     }
 
-    public void setDefaultValueDate(String defaultValueDate) {
+    public ColumnConfig setDefaultValueDate(String defaultValueDate) {
         if (defaultValueDate == null || defaultValueDate.equalsIgnoreCase("null")) {
             this.defaultValueDate = null;
         }
@@ -218,18 +236,24 @@ public class ColumnConfig {
             //probably a computed date
             this.defaultValueDate = new ComputedDateValue(defaultValueDate);
         }
+
+        return this;
     }
 
-    public void setDefaultValueDate(Date defaultValueDate) {
+    public ColumnConfig setDefaultValueDate(Date defaultValueDate) {
         this.defaultValueDate = defaultValueDate;
+
+        return this;
     }
 
     public Boolean getDefaultValueBoolean() {
         return defaultValueBoolean;
     }
 
-    public void setDefaultValueBoolean(Boolean defaultValueBoolean) {
+    public ColumnConfig setDefaultValueBoolean(Boolean defaultValueBoolean) {
         this.defaultValueBoolean = defaultValueBoolean;
+
+        return this;
     }
 
     public Object getDefaultValueObject() {
@@ -249,16 +273,20 @@ public class ColumnConfig {
         return constraints;
     }
 
-    public void setConstraints(ConstraintsConfig constraints) {
+    public ColumnConfig setConstraints(ConstraintsConfig constraints) {
         this.constraints = constraints;
+
+        return this;
     }
 
     public Boolean isAutoIncrement() {
         return autoIncrement;
     }
 
-    public void setAutoIncrement(Boolean autoIncrement) {
+    public ColumnConfig setAutoIncrement(Boolean autoIncrement) {
         this.autoIncrement = autoIncrement;
+
+        return this;
     }
 
     public String getDefaultColumnValue(Database database) {
@@ -314,7 +342,8 @@ public class ColumnConfig {
         return remarks;
     }
 
-    public void setRemarks(String remarks) {
+    public ColumnConfig setRemarks(String remarks) {
         this.remarks = remarks;
+        return this;
     }
 }

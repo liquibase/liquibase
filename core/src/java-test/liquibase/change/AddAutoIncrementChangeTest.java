@@ -38,7 +38,7 @@ public class AddAutoIncrementChangeTest extends AbstractChangeTest {
         change.setColumnDataType("DATATYPE(255)");
 
         testChangeOnAllExcept(change, new GenerateAllValidator() {
-            public void validate(SqlStatement[] sqlStatements) {
+            public void validate(SqlStatement[] sqlStatements, Database database) {
 
                 assertEquals(1, sqlStatements.length);
                 assertTrue(sqlStatements[0] instanceof AddAutoIncrementStatement);
@@ -49,7 +49,7 @@ public class AddAutoIncrementChangeTest extends AbstractChangeTest {
             }
         }, PostgresDatabase.class);
         testChange(change, new GenerateAllValidator() {
-            public void validate(SqlStatement[] sqlStatements) {
+            public void validate(SqlStatement[] sqlStatements, Database database) {
 
                 assertEquals(3, sqlStatements.length);
                 //todo: improve test as statements are no longer raw statements
@@ -58,55 +58,6 @@ public class AddAutoIncrementChangeTest extends AbstractChangeTest {
                 assertTrue(sqlStatements[2] instanceof AddDefaultValueStatement);
             }
         }, PostgresDatabase.class);
-    }
-
-    protected void testChangeOnAllExcept(Change change, GenerateAllValidator validator, Class<? extends Database>... databases) throws Exception {
-        List<Class<? extends Database>> databsesToRun = new ArrayList<Class<? extends Database>>();
-        for (Database database : TestContext.getInstance().getAllDatabases()) {
-            List<Class<? extends Database>> databaseClasses = Arrays.asList(databases);
-            if (!databaseClasses.contains(database.getClass())) {
-                databsesToRun.add(database.getClass());
-            }
-        }
-
-        testChange(change, validator, databsesToRun.toArray(new Class[databsesToRun.size()]));
-    }
-
-    protected void testChangeOnAll(Change change, GenerateAllValidator validator) throws Exception {
-        for (Database database : TestContext.getInstance().getAllDatabases()) {
-            SqlStatement[] sqlStatements = change.generateStatements(database);
-            try {
-                validator.validate(sqlStatements);
-            } catch (AssertionError e) {
-                AssertionError error = new AssertionError("GenerateAllValidator failed for " + database.getProductName() + ": " + e.getMessage());
-                error.setStackTrace(e.getStackTrace());
-
-                throw error;
-            }
-        }
-    }
-
-    protected void testChange(Change change, GenerateAllValidator validator, Class<? extends Database>... databases) throws Exception {
-        for (Database database : TestContext.getInstance().getAllDatabases()) {
-            List<Class<? extends Database>> databaseClasses = Arrays.asList(databases);
-            if (!databaseClasses.contains(database.getClass())) {
-                continue;
-            }
-
-            SqlStatement[] sqlStatements = change.generateStatements(database);
-            try {
-                validator.validate(sqlStatements);
-            } catch (AssertionError e) {
-                AssertionError error = new AssertionError("GenerateAllValidator failed for " + database.getProductName() + ": " + e.getMessage());
-                error.setStackTrace(e.getStackTrace());
-
-                throw error;
-            }
-        }
-    }
-
-    protected static interface GenerateAllValidator {
-        public void validate(SqlStatement[] statements);
     }
 
     @Test

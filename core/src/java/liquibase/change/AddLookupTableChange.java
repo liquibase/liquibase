@@ -210,34 +210,4 @@ public class AddLookupTableChange extends AbstractChange {
     public String getConfirmationMessage() {
         return "Lookup table added for "+getExistingTableName()+"."+getExistingColumnName();
     }
-
-    public Set<DatabaseObject> getAffectedDatabaseObjects() {
-        Set<DatabaseObject> returnSet = new HashSet<DatabaseObject>();
-
-        Table existingTable = new Table(getExistingTableName());
-        returnSet.add(existingTable);
-
-        Column existingColumn = new Column();
-        existingColumn.setTable(existingTable);
-        existingColumn.setName(getExistingColumnName());
-        returnSet.add(existingColumn);
-
-        Table newTable = new Table(getNewTableName());
-        returnSet.add(newTable);
-
-        Column newColumn = new Column();
-        newColumn.setTable(existingTable);
-        newColumn.setName(getNewColumnName());
-        returnSet.add(newColumn);
-
-        ForeignKey fk = new ForeignKey();
-        fk.setForeignKeyTable(existingTable);
-        fk.setForeignKeyColumns(existingColumn.getName());
-        fk.setPrimaryKeyTable(newTable);
-        fk.setPrimaryKeyColumns(newColumn.getName());
-        returnSet.add(fk);
-
-        return returnSet;
-
-    }
 }

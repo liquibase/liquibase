@@ -85,12 +85,4 @@ public class RenameTableChange extends AbstractChange {
     public String getConfirmationMessage() {
         return "Table " + oldTableName + " renamed to " + newTableName;
     }
-
-    public Set<DatabaseObject> getAffectedDatabaseObjects() {
-        Table oldTable = new Table(getOldTableName());
-
-        Table newTable = new Table(getNewTableName());
-
-        return new HashSet<DatabaseObject>(Arrays.asList(oldTable, newTable));
-    }
 }

@@ -65,11 +65,6 @@ public class ExampleCustomSqlChange implements CustomSqlChange, CustomSqlRollbac
     public void setUp() throws SetupException {
     }
 
-    public Set<DatabaseObject> getAffectedDatabaseObjects() {
-        return null;
-    }
-
-
     public void setFileOpener(FileOpener fileOpener) {
         this.fileOpener = fileOpener;
     }

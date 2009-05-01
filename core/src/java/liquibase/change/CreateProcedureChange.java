@@ -55,8 +55,4 @@ public class CreateProcedureChange extends AbstractChange {
     public String getConfirmationMessage() {
         return "Stored procedure created";
     }
-
-    public Set<DatabaseObject> getAffectedDatabaseObjects() {
-        return null;
-    }
 }

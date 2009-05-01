@@ -67,15 +67,4 @@ public class DropIndexChange extends AbstractChange {
     public String getConfirmationMessage() {
         return "Index " + getIndexName() + " dropped from table " + getTableName();
     }
-
-    public Set<DatabaseObject> getAffectedDatabaseObjects() {
-        Index index = new Index();
-        index.setTable(new Table(tableName));
-        index.setName(indexName);
-
-        Table table= new Table(getTableName());
-
-        return new HashSet<DatabaseObject>(Arrays.asList(index, table));
-    }
-    
 }

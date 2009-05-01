@@ -57,11 +57,4 @@ public class DropViewChange extends AbstractChange {
         return "View "+getViewName()+" dropped";
     }
 
-    public Set<DatabaseObject> getAffectedDatabaseObjects() {
-        View dbObject = new View();
-        dbObject.setName(viewName);
-
-        return new HashSet<DatabaseObject>(Arrays.asList(dbObject));
-    }
-
 }

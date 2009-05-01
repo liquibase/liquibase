@@ -140,16 +140,4 @@ public class DropNotNullConstraintChange extends AbstractChange {
     public String getConfirmationMessage() {
         return "Null constraint dropped from " + getTableName() + "." + getColumnName();
     }
-
-    public Set<DatabaseObject> getAffectedDatabaseObjects() {
-
-        Table table = new Table(getTableName());
-
-        Column column = new Column();
-        column.setTable(table);
-        column.setName(columnName);
-
-
-        return new HashSet<DatabaseObject>(Arrays.asList(table, column));
-    }
 }

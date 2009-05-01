@@ -158,9 +158,4 @@ public class SQLFileChange extends AbstractSQLChange {
     public String getConfirmationMessage() {
         return "SQL in file " + file + " executed";
     }
-
-
-    public Set<DatabaseObject> getAffectedDatabaseObjects() {
-        return null;
-    }
 }

@@ -157,10 +157,6 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns 
         return "Data loaded from "+getFile()+" into "+getTableName();
     }
 
-    public Set<DatabaseObject> getAffectedDatabaseObjects() {
-        return null;
-    }
-
     public String generateCheckSum() {
         InputStream stream = null;
         try {

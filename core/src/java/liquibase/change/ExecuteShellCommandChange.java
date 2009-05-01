@@ -105,8 +105,4 @@ public class ExecuteShellCommandChange extends AbstractChange {
     private String getCommandString() {
         return executable + " " + StringUtils.join(args, " ");
     }
-
-    public Set<DatabaseObject> getAffectedDatabaseObjects() {
-        return null;
-    }
 }

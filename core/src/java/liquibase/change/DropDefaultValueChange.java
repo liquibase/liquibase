@@ -126,17 +126,4 @@ public class DropDefaultValueChange extends AbstractChange {
     public String getConfirmationMessage() {
         return "Default value dropped from "+getTableName()+"."+getColumnName();
     }
-
-    public Set<DatabaseObject> getAffectedDatabaseObjects() {
-        Column column = new Column();
-
-        Table table = new Table(getTableName());
-        column.setTable(table);
-
-        column.setName(columnName);
-
-        return new HashSet<DatabaseObject>(Arrays.asList(table, column));
-
-    }
-    
 }

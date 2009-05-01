@@ -103,13 +103,6 @@ public class CreateViewChange extends AbstractChange {
         };
     }
 
-    public Set<DatabaseObject> getAffectedDatabaseObjects() {
-        View dbObject = new View();
-        dbObject.setName(viewName);
-
-        return new HashSet<DatabaseObject>(Arrays.asList(dbObject));
-    }
-    
     private boolean supportsReplaceIfExistsOption(Database database) {
     	return !(database instanceof SQLiteDatabase);
     }

@@ -39,10 +39,6 @@ public class ExampleCustomTaskChange implements CustomTaskChange, CustomTaskRoll
         ;
     }
 
-    public Set<DatabaseObject> getAffectedDatabaseObjects() {
-        return null;
-    }
-
     public void setFileOpener(FileOpener fileOpener) {
         this.fileOpener = fileOpener;
     }

@@ -191,18 +191,4 @@ public class AddNotNullConstraintChange extends AbstractChange {
     public String getConfirmationMessage() {
         return "Null constraint has been added to " + getTableName() + "." + getColumnName();
     }
-
-
-    public Set<DatabaseObject> getAffectedDatabaseObjects() {
-
-        Table table = new Table(getTableName());
-
-        Column column = new Column();
-        column.setTable(table);
-        column.setName(getColumnName());
-
-
-        return new HashSet<DatabaseObject>(Arrays.asList(table, column));
-
-    }
 }
