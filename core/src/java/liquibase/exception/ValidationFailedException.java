@@ -1,7 +1,7 @@
 package liquibase.exception;
 
 import liquibase.ChangeSet;
-import liquibase.parser.visitor.ValidatingVisitor;
+import liquibase.changelog.visitor.ValidatingVisitor;
 import liquibase.preconditions.FailedPrecondition;
 import liquibase.preconditions.ErrorPrecondition;
 import liquibase.util.StreamUtil;
@@ -9,7 +9,6 @@ import liquibase.util.StreamUtil;
 import java.io.PrintStream;
 import java.util.List;
 import java.util.Set;
-import java.util.ArrayList;
 
 public class ValidationFailedException extends MigrationFailedException {
 

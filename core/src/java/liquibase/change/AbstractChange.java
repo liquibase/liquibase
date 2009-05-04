@@ -13,7 +13,7 @@ import liquibase.exception.InvalidChangeDefinitionException;
 import liquibase.exception.RollbackImpossibleException;
 import liquibase.exception.SetupException;
 import liquibase.exception.UnsupportedChangeException;
-import liquibase.parser.xml.XMLChangeLogSerializer;
+import liquibase.changelog.parser.xml.XMLChangeLogSerializer;
 import liquibase.util.MD5Util;
 import liquibase.util.StringUtils;
 

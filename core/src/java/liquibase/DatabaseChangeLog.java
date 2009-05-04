@@ -3,10 +3,9 @@ package liquibase;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.ValidationFailedException;
-import liquibase.parser.ChangeLogIterator;
-import liquibase.parser.filter.DbmsChangeSetFilter;
-import liquibase.parser.visitor.ValidatingVisitor;
-import liquibase.preconditions.AndPrecondition;
+import liquibase.changelog.ChangeLogIterator;
+import liquibase.changelog.filter.DbmsChangeSetFilter;
+import liquibase.changelog.visitor.ValidatingVisitor;
 import liquibase.preconditions.Preconditions;
 
 import java.util.ArrayList;
