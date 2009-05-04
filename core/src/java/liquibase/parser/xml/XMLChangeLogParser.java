@@ -5,6 +5,7 @@ import liquibase.FileOpener;
 import liquibase.exception.ChangeLogParseException;
 import liquibase.log.LogFactory;
 import liquibase.parser.LiquibaseSchemaResolver;
+import liquibase.parser.ChangeLogParser;
 import org.xml.sax.*;
 
 import javax.xml.parsers.SAXParser;
@@ -13,13 +14,19 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
 
-public class XMLChangeLogParser {
+public class XMLChangeLogParser implements ChangeLogParser {
 
     public static String getSchemaVersion() {
         return "1.9";
     }
 
-    public DatabaseChangeLog parse(String physicalChangeLogLocation, FileOpener fileOpener, Map<String, Object> changeLogProperties) throws ChangeLogParseException {
+    public String[] getValidFileExtensions() {
+        return new String[] {
+            "xml"
+        };
+    }
+
+    public DatabaseChangeLog parse(String physicalChangeLogLocation, Map<String, Object> changeLogParameters, FileOpener fileOpener) throws ChangeLogParseException {
 
         SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
         if (System.getProperty("java.vm.version").startsWith("1.4")) {
@@ -65,7 +72,7 @@ public class XMLChangeLogParser {
                 throw new ChangeLogParseException(physicalChangeLogLocation + " does not exist");
             }
 
-            XMLChangeLogHandler contentHandler = new XMLChangeLogHandler(physicalChangeLogLocation, fileOpener, changeLogProperties);
+            XMLChangeLogHandler contentHandler = new XMLChangeLogHandler(physicalChangeLogLocation, fileOpener, changeLogParameters);
             xmlReader.setContentHandler(contentHandler);
             xmlReader.parse(new InputSource(inputStream));
 

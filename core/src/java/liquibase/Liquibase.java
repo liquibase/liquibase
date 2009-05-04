@@ -17,6 +17,7 @@ import liquibase.lock.LockHandler;
 import liquibase.log.LogFactory;
 import liquibase.parser.ChangeLogIterator;
 import liquibase.parser.ChangeLogParser;
+import liquibase.parser.ChangeLogParserFactory;
 import liquibase.parser.filter.*;
 import liquibase.parser.visitor.*;
 import liquibase.util.LiquibaseUtil;
@@ -102,7 +103,7 @@ public class Liquibase {
         try {
             database.checkDatabaseChangeLogTable();
 
-            DatabaseChangeLog changeLog = new ChangeLogParser(changeLogParameters).parse(changeLogFile, fileOpener);
+            DatabaseChangeLog changeLog = ChangeLogParserFactory.getInstance().getParser(changeLogFile).parse(changeLogFile, changeLogParameters, fileOpener);
             changeLog.validate(database);
             ChangeLogIterator logIterator = new ChangeLogIterator(changeLog,
                     new ShouldRunChangeSetFilter(database),
@@ -153,7 +154,7 @@ public class Liquibase {
         try {
             database.checkDatabaseChangeLogTable();
 
-            DatabaseChangeLog changeLog = new ChangeLogParser(changeLogParameters).parse(changeLogFile, fileOpener);
+            DatabaseChangeLog changeLog = ChangeLogParserFactory.getInstance().getParser(changeLogFile).parse(changeLogFile, changeLogParameters, fileOpener);
             changeLog.validate(database);
 
             ChangeLogIterator logIterator = new ChangeLogIterator(changeLog,
@@ -220,7 +221,7 @@ public class Liquibase {
         try {
             database.checkDatabaseChangeLogTable();
 
-            DatabaseChangeLog changeLog = new ChangeLogParser(changeLogParameters).parse(changeLogFile, fileOpener);
+            DatabaseChangeLog changeLog = ChangeLogParserFactory.getInstance().getParser(changeLogFile).parse(changeLogFile, changeLogParameters, fileOpener);
             changeLog.validate(database);
 
             ChangeLogIterator logIterator = new ChangeLogIterator(changeLog,
@@ -262,7 +263,7 @@ public class Liquibase {
         try {
             database.checkDatabaseChangeLogTable();
 
-            DatabaseChangeLog changeLog = new ChangeLogParser(changeLogParameters).parse(changeLogFile, fileOpener);
+            DatabaseChangeLog changeLog = ChangeLogParserFactory.getInstance().getParser(changeLogFile).parse(changeLogFile, changeLogParameters, fileOpener);
             changeLog.validate(database);
             
             ChangeLogIterator logIterator = new ChangeLogIterator(changeLog,
@@ -299,7 +300,7 @@ public class Liquibase {
         try {
             database.checkDatabaseChangeLogTable();
 
-            DatabaseChangeLog changeLog = new ChangeLogParser(changeLogParameters).parse(changeLogFile, fileOpener);
+            DatabaseChangeLog changeLog = ChangeLogParserFactory.getInstance().getParser(changeLogFile).parse(changeLogFile, changeLogParameters, fileOpener);
             changeLog.validate(database);
             
             ChangeLogIterator logIterator = new ChangeLogIterator(changeLog,
@@ -339,7 +340,7 @@ public class Liquibase {
         try {
             database.checkDatabaseChangeLogTable();
 
-            DatabaseChangeLog changeLog = new ChangeLogParser(changeLogParameters).parse(changeLogFile, fileOpener);
+            DatabaseChangeLog changeLog = ChangeLogParserFactory.getInstance().getParser(changeLogFile).parse(changeLogFile, changeLogParameters, fileOpener);
             changeLog.validate(database);
 
             ChangeLogIterator logIterator = new ChangeLogIterator(changeLog,
@@ -379,7 +380,7 @@ public class Liquibase {
         try {
             database.checkDatabaseChangeLogTable();
 
-            DatabaseChangeLog changeLog = new ChangeLogParser(changeLogParameters).parse(changeLogFile, fileOpener);
+            DatabaseChangeLog changeLog = ChangeLogParserFactory.getInstance().getParser(changeLogFile).parse(changeLogFile, changeLogParameters, fileOpener);
             changeLog.validate(database);
 
             ChangeLogIterator logIterator = new ChangeLogIterator(changeLog,
@@ -407,7 +408,7 @@ public class Liquibase {
         try {
             database.checkDatabaseChangeLogTable();
 
-            DatabaseChangeLog changeLog = new ChangeLogParser(changeLogParameters).parse(changeLogFile, fileOpener);
+            DatabaseChangeLog changeLog = ChangeLogParserFactory.getInstance().getParser(changeLogFile).parse(changeLogFile, changeLogParameters, fileOpener);
             changeLog.validate(database);
 
             ChangeLogIterator logIterator = new ChangeLogIterator(changeLog,
@@ -520,7 +521,7 @@ public class Liquibase {
         try {
             database.checkDatabaseChangeLogTable();
 
-            DatabaseChangeLog changeLog = new ChangeLogParser(changeLogParameters).parse(changeLogFile, fileOpener);
+            DatabaseChangeLog changeLog = ChangeLogParserFactory.getInstance().getParser(changeLogFile).parse(changeLogFile, changeLogParameters, fileOpener);
             changeLog.validate(database);
 
             ChangeLogIterator logIterator = new ChangeLogIterator(changeLog,
@@ -586,7 +587,7 @@ public class Liquibase {
         try {
             database.checkDatabaseChangeLogTable();
 
-            DatabaseChangeLog changeLog = new ChangeLogParser(changeLogParameters).parse(changeLogFile, fileOpener);
+            DatabaseChangeLog changeLog = ChangeLogParserFactory.getInstance().getParser(changeLogFile).parse(changeLogFile, changeLogParameters, fileOpener);
             changeLog.validate(database);
 
             ChangeLogIterator logIterator = new ChangeLogIterator(changeLog,
@@ -621,7 +622,7 @@ public class Liquibase {
      */
     public void validate() throws LiquibaseException {
 
-        DatabaseChangeLog changeLog = new ChangeLogParser(changeLogParameters).parse(changeLogFile, fileOpener);
+        DatabaseChangeLog changeLog = ChangeLogParserFactory.getInstance().getParser(changeLogFile).parse(changeLogFile, changeLogParameters, fileOpener);
         changeLog.validate(database);
     }
 }

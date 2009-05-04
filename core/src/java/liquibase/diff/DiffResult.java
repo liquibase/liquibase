@@ -29,6 +29,7 @@ import liquibase.exception.JDBCException;
 import liquibase.log.LogFactory;
 import liquibase.parser.LiquibaseSchemaResolver;
 import liquibase.parser.ChangeLogSerializer;
+import liquibase.parser.xml.XMLChangeLogSerializer;
 import liquibase.parser.xml.XMLChangeLogParser;
 import liquibase.util.SqlUtil;
 import liquibase.util.StringUtils;
@@ -444,7 +445,7 @@ public class DiffResult {
         addMissingViewChanges(changes);
         addUnexpectedTableChanges(changes);
 
-        ChangeLogSerializer changeLogSerializer = new ChangeLogSerializer(doc);
+        XMLChangeLogSerializer changeLogSerializer = new XMLChangeLogSerializer(doc);
         for (Change change : changes) {
             Element changeSet = doc.createElement("changeSet");
             changeSet.setAttribute("author", getChangeSetAuthor());
