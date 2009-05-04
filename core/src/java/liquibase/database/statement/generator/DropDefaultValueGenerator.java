@@ -44,6 +44,7 @@ public class DropDefaultValueGenerator implements SqlGenerator<DropDefaultValueS
         			//System.out.println("DROP QUERY : " + query);
         			sql = query;
         		} else {
+        			// FIXME this syntax does not supported by MSSQL 2000
         			sql = "ALTER TABLE " + database.escapeTableName(statement.getSchemaName(), statement.getTableName()) + " DROP CONSTRAINT select d.name from syscolumns c,sysobjects d, sysobjects t where c.id=t.id AND d.parent_obj=t.id AND d.type='D' AND t.type='U' AND c.name='"+statement.getColumnName()+"' AND t.name='"+statement.getTableName()+"'";
         		}
         } else if (database instanceof MySQLDatabase) {

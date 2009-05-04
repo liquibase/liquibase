@@ -5,7 +5,8 @@ import static org.junit.Assert.*;
 
 public class GeneratorLevelTest {
 
-    @Test
+    @SuppressWarnings("unchecked")
+	@Test
     public void checkLevelsAndNaming() {
         for (SqlGenerator generator : SqlGeneratorFactory.getInstance().getGenerators()) {
             int specializationlevel = generator.getSpecializationLevel();

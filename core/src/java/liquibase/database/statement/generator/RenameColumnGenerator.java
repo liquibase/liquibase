@@ -29,7 +29,8 @@ public class RenameColumnGenerator implements SqlGenerator<RenameColumnStatement
     public Sql[] generateSql(RenameColumnStatement statement, Database database) {
         String sql;
         if (database instanceof MSSQLDatabase) {
-            sql = "exec sp_rename '" + database.escapeTableName(statement.getSchemaName(), statement.getTableName()) + "." + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(), statement.getOldColumnName()) + "', '" + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(), statement.getNewColumnName()) + "'";
+        	// do no escape the new column name. Otherwise it produce "exec sp_rename '[dbo].[person].[usernae]', '[username]'"
+            sql = "exec sp_rename '" + database.escapeTableName(statement.getSchemaName(), statement.getTableName()) + "." + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(), statement.getOldColumnName()) + "', '" + statement.getNewColumnName() + "'";
         } else if (database instanceof MySQLDatabase) {
             sql ="ALTER TABLE " + database.escapeTableName(statement.getSchemaName(), statement.getTableName()) + " CHANGE " + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(), statement.getOldColumnName()) + " " + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(), statement.getNewColumnName()) + " " + statement.getColumnDataType();
         } else if (database instanceof HsqlDatabase) {

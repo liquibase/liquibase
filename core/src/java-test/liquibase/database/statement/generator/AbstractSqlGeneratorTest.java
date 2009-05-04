@@ -1,32 +1,39 @@
 package liquibase.database.statement.generator;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.Arrays;
+import java.util.List;
+
 import liquibase.database.Database;
-import liquibase.database.template.Executor;
-import liquibase.database.statement.SqlStatement;
 import liquibase.database.statement.CreateTableStatement;
+import liquibase.database.statement.SqlStatement;
 import liquibase.database.statement.syntax.Sql;
-import liquibase.test.TestContext;
+import liquibase.database.template.Executor;
 import liquibase.exception.JDBCException;
-import static org.junit.Assert.*;
+import liquibase.test.TestContext;
+
 import org.junit.Test;
 
-import java.sql.Statement;
-import java.sql.SQLException;
-import java.util.Arrays;
+public abstract class AbstractSqlGeneratorTest<T extends SqlStatement> {
 
-public abstract class AbstractSqlGeneratorTest {
+    protected SqlGenerator<T> generatorUnderTest;
+    private List<? extends SqlStatement> setupStatements;
 
-    protected SqlGenerator generatorUnderTest;
-    private SqlStatement[] setupStatements;
-
-    public AbstractSqlGeneratorTest(SqlGenerator generatorUnderTest) {
+    public AbstractSqlGeneratorTest(SqlGenerator generatorUnderTest) throws Exception {
         this.generatorUnderTest = generatorUnderTest;
-        this.setupStatements = setupStatements();
+        for (Database database : TestContext.getInstance().getAvailableDatabases()) {
+        	this.setupStatements = setupStatements(database);
+        }
     }
 
-    protected abstract SqlStatement createSampleSqlStatement();
+    protected abstract T createSampleSqlStatement();
 
-    protected abstract SqlStatement[] setupStatements();
+    protected abstract List<? extends SqlStatement>  setupStatements(Database database);
 
     protected void dropAndCreateTable(CreateTableStatement statement, Database database) throws SQLException, JDBCException {
         new Executor(database).execute(statement);
@@ -37,15 +44,17 @@ public abstract class AbstractSqlGeneratorTest {
 
     }
 
-    public void setupAvailableDatabases() throws Exception {
+    public void resetAvailableDatabases() throws Exception {
         for (Database database : TestContext.getInstance().getAvailableDatabases()) {
             if (database.supportsSchemas()) {
                 database.dropDatabaseObjects(TestContext.ALT_SCHEMA);
             }
             database.dropDatabaseObjects(null);
 
-            for (SqlStatement statement : setupStatements) {
-                new Executor(database).execute(statement);
+            if (setupStatements != null) {
+	            for (SqlStatement statement : setupStatements) {
+	                new Executor(database).execute(statement);
+	            }
             }
         }
     }
@@ -56,9 +65,9 @@ public abstract class AbstractSqlGeneratorTest {
         for (Database database : TestContext.getInstance().getAllDatabases()) {
             boolean isImpl = generatorUnderTest.isValidGenerator(createSampleSqlStatement(), database);
             if (shouldBeImplementation(database)) {
-                assertTrue("Unexpected true isValidGenerator for " + database.getProductName(), isImpl);
+                assertTrue("Unexpected false isValidGenerator for " + database.getProductName(), isImpl);
             } else {
-                assertFalse("Unexpected false isValidGenerator for " + database.getProductName(), isImpl);
+                assertFalse("Unexpected true isValidGenerator for " + database.getProductName(), isImpl);
             }
         }
     }
@@ -79,19 +88,19 @@ public abstract class AbstractSqlGeneratorTest {
         return true;
     }
 
-    protected void testSqlOnAll(String expectedSql, SqlStatement sqlStatement) throws Exception {
-        testSql(expectedSql, sqlStatement, new Class[0], new Class[0]);        
+    protected void testSqlOnAll(String expectedSql, T sqlStatement) throws Exception {
+        testSql(expectedSql, sqlStatement, null, null);        
     }
 
-    protected void testSqlOn(String expectedSql, SqlStatement sqlStatement, Class... includeDatabases) throws Exception {
-        testSql(expectedSql, sqlStatement, includeDatabases, new Class[0]);
+    protected void testSqlOn(String expectedSql, T sqlStatement, Class<? extends Database>... includeDatabases) throws Exception {
+        testSql(expectedSql, sqlStatement, includeDatabases, null);
     }
 
-    public void testSqlOnAllExcept(String expectedSql, SqlStatement sqlStatement, Class... excludedDatabases) throws Exception {
-        testSql(expectedSql,  sqlStatement, new Class[0], excludedDatabases);
+    public void testSqlOnAllExcept(String expectedSql, T sqlStatement, Class<? extends Database>... excludedDatabases) throws Exception {
+        testSql(expectedSql,  sqlStatement, null, excludedDatabases);
     }
 
-    private void testSql(String expectedSql, SqlStatement sqlStatement, Class[] includeDatabases, Class[] excludeDatabases) throws Exception {
+    private void testSql(String expectedSql, T sqlStatement, Class<? extends Database>[] includeDatabases, Class<? extends Database>[] excludeDatabases) throws Exception {
 
         if (expectedSql != null) {
             for (Database database : TestContext.getInstance().getAllDatabases()) {
@@ -108,7 +117,7 @@ public abstract class AbstractSqlGeneratorTest {
             }
         }
 
-        setupAvailableDatabases();
+        resetAvailableDatabases();
         for (Database availableDatabase : TestContext.getInstance().getAvailableDatabases()) {
             Statement statement = availableDatabase.getConnection().createStatement();
             if (shouldTestDatabase(sqlStatement, availableDatabase, includeDatabases, excludeDatabases)) {
@@ -132,10 +141,12 @@ public abstract class AbstractSqlGeneratorTest {
         return convertedSql.replaceFirst("auto_increment_clause", database.getAutoIncrementClause());
     }
 
-    private boolean shouldTestDatabase(SqlStatement sqlStatement, Database database, Class[] includeDatabases, Class[] excludeDatabases) {
+    private boolean shouldTestDatabase(T sqlStatement, Database database, Class[] includeDatabases, Class[] excludeDatabases) {
+    	SqlGenerator<T> generator = SqlGeneratorFactory.getInstance().getBestGenerator(sqlStatement, database);
         if (!generatorUnderTest.isValidGenerator(sqlStatement, database)
                 || generatorUnderTest.validate(sqlStatement, database).hasErrors()
-                || !SqlGeneratorFactory.getInstance().getBestGenerator(sqlStatement, database).getClass().equals(generatorUnderTest.getClass())) {
+                || generator == null 
+                || !generator.getClass().equals(generatorUnderTest.getClass())) {
             return false;
         }
 

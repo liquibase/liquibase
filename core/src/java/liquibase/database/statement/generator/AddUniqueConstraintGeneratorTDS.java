@@ -27,7 +27,6 @@ public class AddUniqueConstraintGeneratorTDS extends AddUniqueConstraintGenerato
         return  (database instanceof MSSQLDatabase)
 			|| (database instanceof SybaseDatabase)
 			|| (database instanceof SybaseASADatabase)
-			|| (database instanceof MySQLDatabase)
 		;
 	}
 

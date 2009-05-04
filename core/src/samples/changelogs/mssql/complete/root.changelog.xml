@@ -237,10 +237,16 @@
     <changeSet id="28" author="nvoxland">
         <addDefaultValue tableName="address" columnName="line2" defaultValue="N/A"/>
     </changeSet>
-
+<!--
+ |  Note for mssql 2000.
+ | DropDefaultValueGenerator produces syntax like 
+ | ALTER TABLE [dbo].[address] DROP CONSTRAINT select d.name from syscolumns c,sysobjects d, sysobjects t where c.id=t.id AND d.parent_obj=t.id AND d.type='D' AND t.type='U' AND c.name='line2' AND t.name='address':
+ | that is obviously does dot supported. 
+ 	
     <changeSet id="29" author="nvoxland">
         <dropDefaultValue tableName="address" columnName="line2"/>
     </changeSet>
+ -->
 
     <changeSet id="30" author="nvoxland">
         <dropPrimaryKey tableName="address" constraintName="pk_address"/>

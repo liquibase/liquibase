@@ -5,10 +5,10 @@ import liquibase.database.statement.AddAutoIncrementStatement;
 import liquibase.database.Database;
 import liquibase.database.H2Database;
 
-public class AddAutoIncrementGeneratorHsqlTest extends AddAutoIncrementGeneratorTest {
+public class AddAutoIncrementGeneratorHsqlTest extends AddAutoIncrementGeneratorTest<AddAutoIncrementStatement> {
 
-    public AddAutoIncrementGeneratorHsqlTest() {
-        super(new AddAutoIncrementGeneratorHsql());
+    public AddAutoIncrementGeneratorHsqlTest() throws Exception {
+    	super(new AddAutoIncrementGeneratorHsql());
     }
 
     @Test
