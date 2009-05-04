@@ -13,6 +13,7 @@ import liquibase.exception.MigrationFailedException;
 import liquibase.log.LogFactory;
 import liquibase.parser.ChangeLogParser;
 import liquibase.parser.ExpressionExpander;
+import liquibase.parser.ChangeLogParserFactory;
 import liquibase.preconditions.*;
 import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtils;
@@ -311,7 +312,7 @@ class XMLChangeLogHandler extends DefaultHandler {
             String path = searchPath(relativeBaseFileName);
             fileName = new StringBuilder(path).append(fileName).toString();
         }
-        DatabaseChangeLog changeLog = new ChangeLogParser(changeLogParameters).parse(fileName, fileOpener);
+        DatabaseChangeLog changeLog = ChangeLogParserFactory.getInstance().getParser(fileName).parse(fileName, changeLogParameters, fileOpener);
         AndPrecondition preconditions = changeLog.getPreconditions();
         if (preconditions != null) {
             if (null == databaseChangeLog.getPreconditions()) {

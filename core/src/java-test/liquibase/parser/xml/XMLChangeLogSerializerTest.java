@@ -1,17 +1,17 @@
-package liquibase.parser;
+package liquibase.parser.xml;
 
 import org.junit.Test;
 import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
 import org.w3c.dom.*;
 import liquibase.change.*;
-import liquibase.util.XMLUtil;
 import liquibase.ClassLoaderFileOpener;
+import liquibase.parser.xml.XMLChangeLogSerializer;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.sql.DatabaseMetaData;
 
-public class ChangeLogSerializerTest {
+public class XMLChangeLogSerializerTest {
     @Test
     public void createNode_addAutoIncrementChange() throws Exception {
         AddAutoIncrementChange change = new AddAutoIncrementChange();
@@ -20,7 +20,7 @@ public class ChangeLogSerializerTest {
         change.setColumnName("COLUMN_NAME");
         change.setColumnDataType("DATATYPE(255)");
 
-        Element node = new ChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(change);
+        Element node = new XMLChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(change);
 
         assertEquals("addAutoIncrement", node.getTagName());
 
@@ -50,7 +50,7 @@ public class ChangeLogSerializerTest {
         column.setType("TYP");
         refactoring.addColumn(column);
 
-        Element node = new ChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(refactoring);
+        Element node = new XMLChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(refactoring);
         assertEquals("addColumn", node.getTagName());
         assertEquals("TAB", node.getAttribute("tableName"));
 
@@ -73,7 +73,7 @@ public class ChangeLogSerializerTest {
         change.setDefaultValueBoolean(true);
         change.setDefaultValueDate("2007-01-02");
 
-        Element node = new ChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(change);
+        Element node = new XMLChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(change);
         assertEquals("addDefaultValue", node.getTagName());
         assertEquals("SCHEMA_NAME", node.getAttribute("schemaName"));
         assertEquals("TABLE_NAME", node.getAttribute("tableName"));
@@ -103,7 +103,7 @@ public class ChangeLogSerializerTest {
         change.setUpdateRule(DatabaseMetaData.importedKeyCascade);
         change.setInitiallyDeferred(true);
 
-        Element node = new ChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(change);
+        Element node = new XMLChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(change);
         assertEquals("addForeignKeyConstraint", node.getTagName());
         assertEquals("FK_NAME", node.getAttribute("constraintName"));
         assertEquals("BASE_SCHEMA_NAME", node.getAttribute("baseTableSchemaName"));
@@ -126,7 +126,7 @@ public class ChangeLogSerializerTest {
         change.setColumnName("COL_HERE");
         change.setDefaultNullValue("DEFAULT_VALUE");
 
-        Element node = new ChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(change);
+        Element node = new XMLChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(change);
         assertEquals("addNotNullConstraint", node.getTagName());
         assertEquals("TABLE_NAME", node.getAttribute("tableName"));
         assertEquals("COL_HERE", node.getAttribute("columnName"));
@@ -142,7 +142,7 @@ public class ChangeLogSerializerTest {
         change.setConstraintName("PK_NAME");
         change.setTablespace("TABLESPACE_NAME");
 
-        Element node = new ChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(change);
+        Element node = new XMLChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(change);
         assertEquals("addPrimaryKey", node.getTagName());
         assertEquals("SCHEMA_NAME", node.getAttribute("schemaName"));
         assertEquals("TABLE_NAME", node.getAttribute("tableName"));
@@ -160,7 +160,7 @@ public class ChangeLogSerializerTest {
         change.setConstraintName("PK_NAME");
         change.setTablespace("TABLESPACE_NAME");
 
-        Element node = new ChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(change);
+        Element node = new XMLChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(change);
         assertEquals("addUniqueConstraint", node.getTagName());
         assertEquals("SCHEMA_NAME", node.getAttribute("schemaName"));
         assertEquals("TABLE_NAME", node.getAttribute("tableName"));
@@ -174,7 +174,7 @@ public class ChangeLogSerializerTest {
         AlterSequenceChange refactoring = new AlterSequenceChange();
         refactoring.setSequenceName("SEQ_NAME");
 
-        Element node = new ChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(refactoring);
+        Element node = new XMLChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(refactoring);
         assertEquals("alterSequence", node.getNodeName());
         assertEquals("SEQ_NAME", node.getAttribute("sequenceName"));
         assertFalse(node.hasAttribute("incrementBy"));
@@ -193,7 +193,7 @@ public class ChangeLogSerializerTest {
         refactoring.setMinValue(3);
         refactoring.setOrdered(true);
 
-        Element node = new ChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(refactoring);
+        Element node = new XMLChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(refactoring);
         assertEquals("alterSequence", node.getNodeName());
         assertEquals("SCHEMA_NAME", node.getAttribute("schemaName"));
         assertEquals("SEQ_NAME", node.getAttribute("sequenceName"));
@@ -222,7 +222,7 @@ public class ChangeLogSerializerTest {
         constraints.setUnique(true);
         column.setConstraints(constraints);
 
-        Element element = new ChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(column);
+        Element element = new XMLChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(column);
         assertEquals("column", element.getTagName());
         assertEquals("id", element.getAttribute("name"));
         assertEquals("varchar(255)", element.getAttribute("type"));
@@ -256,7 +256,7 @@ public class ChangeLogSerializerTest {
         column2.setName("COL2");
         refactoring.addColumn(column2);
 
-        Element element = new ChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(refactoring);
+        Element element = new XMLChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(refactoring);
         assertEquals("createIndex", element.getTagName());
         assertEquals("IDX_TEST", element.getAttribute("indexName"));
         assertEquals("TAB_NAME", element.getAttribute("tableName"));
@@ -274,7 +274,7 @@ public class ChangeLogSerializerTest {
         refactoring.setProcedureBody("CREATE PROC PROCBODY HERE");
         refactoring.setComments("Comments go here");
 
-        Element element = new ChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(refactoring);
+        Element element = new XMLChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(refactoring);
         assertEquals("createProcedure", element.getTagName());
         assertEquals("CREATE PROC PROCBODY HERE", element.getTextContent());
     }
@@ -284,7 +284,7 @@ public class ChangeLogSerializerTest {
         CreateSequenceChange change = new CreateSequenceChange();
         change.setSequenceName("SEQ_NAME");
 
-        Element node = new ChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(change);
+        Element node = new XMLChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(change);
         assertEquals("createSequence", node.getNodeName());
         assertEquals("SEQ_NAME", node.getAttribute("sequenceName"));
         assertFalse(node.hasAttribute("incrementBy"));
@@ -299,7 +299,7 @@ public class ChangeLogSerializerTest {
         change.setOrdered(true);
         change.setStartValue(4);
 
-        node = new ChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(change);
+        node = new XMLChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(change);
         assertEquals("createSequence", node.getNodeName());
         assertEquals("SEQ_NAME", node.getAttribute("sequenceName"));
         assertEquals("1", node.getAttribute("incrementBy"));
@@ -353,7 +353,7 @@ public class ChangeLogSerializerTest {
         column5.setConstraints(column5constraints);
         change.addColumn(column5);
 
-        Element element = new ChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(change);
+        Element element = new XMLChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(change);
         assertEquals("createTable", element.getTagName());
         assertEquals(5, element.getChildNodes().getLength());
 
@@ -405,7 +405,7 @@ public class ChangeLogSerializerTest {
         change.setTableName("TABLE_NAME");
         change.setColumnName("COL_NAME");
 
-        Element node = new ChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(change);
+        Element node = new XMLChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(change);
         assertEquals("dropColumn", node.getTagName());
         assertFalse(node.hasAttribute("schemaName"));
         assertEquals("TABLE_NAME", node.getAttribute("tableName"));
@@ -419,7 +419,7 @@ public class ChangeLogSerializerTest {
         change.setTableName("TABLE_NAME");
         change.setColumnName("COL_NAME");
 
-        Element node = new ChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(change);
+        Element node = new XMLChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(change);
         assertEquals("dropColumn", node.getTagName());
         assertEquals("SCHEMA_NAME", node.getAttribute("schemaName"));
         assertEquals("TABLE_NAME", node.getAttribute("tableName"));
@@ -432,7 +432,7 @@ public class ChangeLogSerializerTest {
         change.setTableName("TABLE_NAME");
         change.setColumnName("COL_NAME");
 
-        Element node = new ChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(change);
+        Element node = new XMLChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(change);
         assertEquals("dropDefaultValue", node.getTagName());
         assertFalse(node.hasAttribute("schemaName"));
         assertEquals("TABLE_NAME", node.getAttribute("tableName"));
@@ -446,7 +446,7 @@ public class ChangeLogSerializerTest {
         change.setTableName("TABLE_NAME");
         change.setColumnName("COL_NAME");
 
-        Element node = new ChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(change);
+        Element node = new XMLChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(change);
         assertEquals("dropDefaultValue", node.getTagName());
         assertEquals("SCHEMA_NAME", node.getAttribute("schemaName"));
         assertEquals("TABLE_NAME", node.getAttribute("tableName"));
@@ -460,7 +460,7 @@ public class ChangeLogSerializerTest {
         change.setBaseTableName("TABLE_NAME");
         change.setConstraintName("FK_NAME");
 
-        Element node = new ChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(change);
+        Element node = new XMLChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(change);
         assertEquals("dropForeignKeyConstraint", node.getTagName());
         assertEquals("SCHEMA_NAME", node.getAttribute("baseTableSchemaName"));
         assertEquals("TABLE_NAME", node.getAttribute("baseTableName"));
@@ -471,7 +471,7 @@ public class ChangeLogSerializerTest {
     public void createNode_DropIndexChange() throws Exception {
         DropIndexChange refactoring = new DropIndexChange();
         refactoring.setIndexName("IDX_NAME");
-        Element element = new ChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(refactoring);
+        Element element = new XMLChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(refactoring);
 
         assertEquals("dropIndex", element.getTagName());
         assertEquals("IDX_NAME", element.getAttribute("indexName"));
@@ -483,7 +483,7 @@ public class ChangeLogSerializerTest {
         change.setTableName("TABLE_NAME");
         change.setColumnName("COL_HERE");
 
-        Element node = new ChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(change);
+        Element node = new XMLChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(change);
         assertEquals("dropNotNullConstraint", node.getTagName());
         assertEquals("TABLE_NAME", node.getAttribute("tableName"));
         assertEquals("COL_HERE", node.getAttribute("columnName"));
@@ -495,7 +495,7 @@ public class ChangeLogSerializerTest {
         change.setSchemaName("SCHEMA_NAME");
         change.setTableName("TABLE_NAME");
         change.setConstraintName("PK_NAME");
-        Element node = new ChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(change);
+        Element node = new XMLChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(change);
         assertEquals("dropPrimaryKey", node.getTagName());
         assertEquals("SCHEMA_NAME", node.getAttribute("schemaName"));
         assertEquals("TABLE_NAME", node.getAttribute("tableName"));
@@ -507,7 +507,7 @@ public class ChangeLogSerializerTest {
         DropSequenceChange change = new DropSequenceChange();
         change.setSequenceName("SEQ_NAME");
 
-        Element element = new ChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(change);
+        Element element = new XMLChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(change);
 
         assertEquals("dropSequence", element.getTagName());
         assertEquals("SEQ_NAME", element.getAttribute("sequenceName"));
@@ -520,7 +520,7 @@ public class ChangeLogSerializerTest {
         change.setTableName("TAB_NAME");
         change.setCascadeConstraints(true);
 
-        Element element = new ChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(change);
+        Element element = new XMLChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(change);
         assertEquals("dropTable", element.getTagName());
         assertEquals("TAB_NAME", element.getAttribute("tableName"));
         assertEquals("true", element.getAttribute("cascadeConstraints"));
@@ -533,7 +533,7 @@ public class ChangeLogSerializerTest {
         change.setTableName("TAB_NAME");
         change.setCascadeConstraints(true);
 
-        Element element = new ChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(change);
+        Element element = new XMLChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(change);
         assertEquals("dropTable", element.getTagName());
         assertEquals("TAB_NAME", element.getAttribute("tableName"));
         assertEquals("true", element.getAttribute("cascadeConstraints"));
@@ -547,7 +547,7 @@ public class ChangeLogSerializerTest {
         change.setTableName("TAB_NAME");
         change.setCascadeConstraints(null);
 
-        Element element = new ChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(change);
+        Element element = new XMLChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(change);
         assertEquals("dropTable", element.getTagName());
         assertFalse(element.hasAttribute("cascadeConstraints"));
     }
@@ -559,7 +559,7 @@ public class ChangeLogSerializerTest {
         change.setTableName("TAB_NAME");
         change.setConstraintName("UQ_CONSTRAINT");
 
-        Element element = new ChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(change);
+        Element element = new XMLChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(change);
         assertEquals("dropUniqueConstraint", element.getTagName());
         assertEquals("SCHEMA_NAME", element.getAttribute("schemaName"));
         assertEquals("TAB_NAME", element.getAttribute("tableName"));
@@ -572,7 +572,7 @@ public class ChangeLogSerializerTest {
         change.setTableName("TAB_NAME");
         change.setConstraintName("UQ_CONSTRAINT");
 
-        Element element = new ChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(change);
+        Element element = new XMLChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(change);
         assertEquals("dropUniqueConstraint", element.getTagName());
         assertEquals("TAB_NAME", element.getAttribute("tableName"));
         assertEquals("UQ_CONSTRAINT", element.getAttribute("constraintName"));
@@ -584,7 +584,7 @@ public class ChangeLogSerializerTest {
         DropViewChange change = new DropViewChange();
         change.setViewName("VIEW_NAME");
 
-        Element node = new ChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(change);
+        Element node = new XMLChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(change);
         assertEquals("dropView", node.getTagName());
         assertFalse(node.hasAttribute("schemaName"));
         assertEquals("VIEW_NAME", node.getAttribute("viewName"));
@@ -596,7 +596,7 @@ public class ChangeLogSerializerTest {
         change.setSchemaName("SCHEMA_NAME");
         change.setViewName("VIEW_NAME");
 
-        Element node = new ChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(change);
+        Element node = new XMLChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(change);
         assertEquals("dropView", node.getTagName());
         assertEquals("SCHEMA_NAME", node.getAttribute("schemaName"));
         assertEquals("VIEW_NAME", node.getAttribute("viewName"));
@@ -628,7 +628,7 @@ public class ChangeLogSerializerTest {
         refactoring.addColumn(col3);
         refactoring.addColumn(col4);
 
-        Element node = new ChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(refactoring);
+        Element node = new XMLChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(refactoring);
 
         assertEquals("insert", node.getTagName());
         assertEquals("TABLE_NAME", node.getAttribute("tableName"));
@@ -661,7 +661,7 @@ public class ChangeLogSerializerTest {
         refactoring.setFile("FILE_NAME");
         refactoring.setEncoding("UTF-8");
 
-        Element node = new ChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(refactoring);
+        Element node = new XMLChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(refactoring);
         assertEquals("loadData", node.getNodeName());
         assertEquals("SCHEMA_NAME", node.getAttribute("schemaName"));
         assertEquals("TABLE_NAME", node.getAttribute("tableName"));
@@ -680,7 +680,7 @@ public class ChangeLogSerializerTest {
 
         change.addColumn(col1);
 
-        Element node = new ChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(change);
+        Element node = new XMLChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(change);
         assertEquals("modifyColumn", node.getTagName());
         assertEquals("TABLE_NAME", node.getAttribute("tableName"));
 
@@ -696,7 +696,7 @@ public class ChangeLogSerializerTest {
         RawSQLChange refactoring = new RawSQLChange();
         refactoring.setSql("SOME SQL HERE");
 
-        Element element = new ChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(refactoring);
+        Element element = new XMLChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(refactoring);
         assertEquals("sql", element.getTagName());
 
         assertEquals("SOME SQL HERE", element.getTextContent());
@@ -712,7 +712,7 @@ public class ChangeLogSerializerTest {
         refactoring.setNewColumnName("newColName");
 
 
-        Element node = new ChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(refactoring);
+        Element node = new XMLChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(refactoring);
         assertEquals("renameColumn", node.getTagName());
         assertEquals("SCHEMA_NAME", node.getAttribute("schemaName"));
         assertEquals("TABLE_NAME", node.getAttribute("tableName"));
@@ -728,7 +728,7 @@ public class ChangeLogSerializerTest {
         refactoring.setOldTableName("OLD_NAME");
         refactoring.setNewTableName("NEW_NAME");
 
-        Element node = new ChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(refactoring);
+        Element node = new XMLChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(refactoring);
         assertEquals("renameTable", node.getTagName());
         assertEquals("SCHEMA_NAME", node.getAttribute("schemaName"));
         assertEquals("OLD_NAME", node.getAttribute("oldTableName"));
@@ -742,7 +742,7 @@ public class ChangeLogSerializerTest {
         refactoring.setOldViewName("OLD_NAME");
         refactoring.setNewViewName("NEW_NAME");
 
-        Element node = new ChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(refactoring);
+        Element node = new XMLChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(refactoring);
         assertEquals("renameView", node.getTagName());
         assertEquals("SCHEMA_NAME", node.getAttribute("schemaName"));
         assertEquals("OLD_NAME", node.getAttribute("oldViewName"));
@@ -758,7 +758,7 @@ public class ChangeLogSerializerTest {
         change.setFileOpener(opener);
         change.setPath(fileName);
 
-        Element element = new ChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(change);
+        Element element = new XMLChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(change);
         assertEquals("sqlFile", element.getTagName());
 
         assertEquals(fileName, element.getAttribute("path"));
@@ -769,7 +769,7 @@ public class ChangeLogSerializerTest {
         TagDatabaseChange refactoring = new TagDatabaseChange();
         refactoring.setTag("TAG_NAME");
 
-        Element node = new ChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(refactoring);
+        Element node = new XMLChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(refactoring);
         assertEquals("tagDatabase", node.getTagName());
         assertEquals("TAG_NAME", node.getAttribute("tag"));
     }
@@ -782,7 +782,7 @@ public class ChangeLogSerializerTest {
         change.setViewName("VIEW_NAME");
         change.setSelectQuery("SELECT * FROM EXISTING_TABLE");
 
-        Element node = new ChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(change);
+        Element node = new XMLChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(change);
         assertEquals("createView", node.getTagName());
         assertEquals("SCHEMA_NAME", node.getAttribute("schemaName"));
         assertEquals("VIEW_NAME", node.getAttribute("viewName"));

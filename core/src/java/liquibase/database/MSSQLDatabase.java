@@ -285,13 +285,4 @@ public class MSSQLDatabase extends AbstractDatabase {
 	public String getDefaultSchemaName() {
 		return "dbo";
 	}
-
-	@Override
-	public String escapeIndexName(String schemaName, String indexName) {
-        if (StringUtils.trimToNull(schemaName) == null || !supportsSchemas()) {
-            return escapeDatabaseObject(indexName);
-        } else {
-            return escapeDatabaseObject(schemaName)+"."+escapeDatabaseObject(indexName);
-        }
-	}
 }

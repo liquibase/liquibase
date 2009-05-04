@@ -1098,10 +1098,6 @@ public abstract class AbstractDatabase implements Database {
     }
 
     public String escapeIndexName(String schemaName, String indexName) {
-        if (schemaName == null) {
-            schemaName = getDefaultSchemaName();
-        }
-
         if (StringUtils.trimToNull(schemaName) == null || !supportsSchemas()) {
             return escapeDatabaseObject(indexName);
         } else {

@@ -13,14 +13,9 @@ import liquibase.exception.InvalidChangeDefinitionException;
 import liquibase.exception.RollbackImpossibleException;
 import liquibase.exception.SetupException;
 import liquibase.exception.UnsupportedChangeException;
-import liquibase.parser.ChangeLogSerializer;
+import liquibase.parser.xml.XMLChangeLogSerializer;
 import liquibase.util.MD5Util;
 import liquibase.util.StringUtils;
-import liquibase.util.XMLUtil;
-import org.w3c.dom.Element;
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -109,9 +104,8 @@ public abstract class AbstractChange implements Change {
      */
     public String generateCheckSum() {
         try {
-            StringBuffer buffer = new StringBuffer();
-            nodeToStringBuffer(new ChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(this), buffer);
-            return MD5Util.computeMD5(buffer.toString());
+            String string = new XMLChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).serialize(this);
+            return MD5Util.computeMD5(string);
         } catch (ParserConfigurationException e) {
             throw new RuntimeException(e);
         }
@@ -150,39 +144,6 @@ public abstract class AbstractChange implements Change {
      */
     protected Change[] createInverses() {
         return null;
-    }
-
-    /*
-     * Creates a {@link String} using the XML element representation of this
-     * change
-     *
-     * @param node the {@link Element} associated to this change
-     * @param buffer a {@link StringBuffer} object used to hold the {@link String}
-     *               representation of the change
-     */
-    private void nodeToStringBuffer(Node node, StringBuffer buffer) {
-        buffer.append("<").append(node.getNodeName());
-        SortedMap<String, String> attributeMap = new TreeMap<String, String>();
-        NamedNodeMap attributes = node.getAttributes();
-        for (int i = 0; i < attributes.getLength(); i++) {
-            Node attribute = attributes.item(i);
-            attributeMap.put(attribute.getNodeName(), attribute.getNodeValue());
-        }
-        for (Map.Entry entry : attributeMap.entrySet()) {
-            String value = (String) entry.getValue();
-            if (value != null) {
-                buffer.append(" ").append(entry.getKey()).append("=\"").append(value).append("\"");
-            }
-        }
-        buffer.append(">").append(StringUtils.trimToEmpty(XMLUtil.getTextContent(node)));
-        NodeList childNodes = node.getChildNodes();
-        for (int i = 0; i < childNodes.getLength(); i++) {
-            Node childNode = childNodes.item(i);
-            if (childNode instanceof Element) {
-                nodeToStringBuffer(((Element) childNode), buffer);
-            }
-        }
-        buffer.append("</").append(node.getNodeName()).append(">");
     }
 
     /**
