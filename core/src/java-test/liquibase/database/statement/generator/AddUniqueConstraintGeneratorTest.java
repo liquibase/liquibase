@@ -1,5 +1,8 @@
 package liquibase.database.statement.generator;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import liquibase.database.Database;
 import liquibase.database.DerbyDatabase;
 import liquibase.database.FirebirdDatabase;
@@ -19,16 +22,16 @@ import liquibase.test.TestContext;
 
 import org.junit.Test;
 
-public class AddUniqueConstraintGeneratorTest extends AbstractSqlGeneratorTest {
+public class AddUniqueConstraintGeneratorTest extends AbstractSqlGeneratorTest<AddUniqueConstraintStatement> {
     protected static final String TABLE_NAME = "AddUQTest";
     protected static final String COLUMN_NAME = "colToMakeUQ";
     protected static final String CONSTRAINT_NAME = "UQ_TEST";
 
-    public AddUniqueConstraintGeneratorTest() {
+    public AddUniqueConstraintGeneratorTest() throws Exception {
         this(new AddUniqueConstraintGenerator());
     }
 
-    public AddUniqueConstraintGeneratorTest(SqlGenerator generatorUnderTest) {
+    public AddUniqueConstraintGeneratorTest(SqlGenerator<AddUniqueConstraintStatement> generatorUnderTest) throws Exception {
         super(generatorUnderTest);
     }
 
@@ -97,17 +100,29 @@ public class AddUniqueConstraintGeneratorTest extends AbstractSqlGeneratorTest {
 //    }
 
     @Override
-    protected SqlStatement createSampleSqlStatement() {
+    protected AddUniqueConstraintStatement createSampleSqlStatement() {
         return new AddUniqueConstraintStatement(null, null, null, null);
     }
 
-    @Override
-    protected SqlStatement[] setupStatements() {
-        return new SqlStatement[]{new CreateTableStatement(null, TABLE_NAME)
-                .addColumn("id", "int", new NotNullConstraint())
-                .addColumn(COLUMN_NAME, "int", new NotNullConstraint())
-        };
-    }
+	@Override
+    protected List<? extends SqlStatement> setupStatements(Database database) {
+		List<CreateTableStatement> statements = new ArrayList<CreateTableStatement>();
+		CreateTableStatement table = new CreateTableStatement(null, TABLE_NAME);
+		table
+			.addColumn("id", "int", new NotNullConstraint())
+	        .addColumn(COLUMN_NAME, "int", new NotNullConstraint());
+		statements.add(table);
+        
+		if (database.supportsSchemas()) {
+			table = new CreateTableStatement(TestContext.ALT_SCHEMA, TABLE_NAME);
+			table
+				.addColumn("id", "int", new NotNullConstraint())
+		        .addColumn(COLUMN_NAME, "int", new NotNullConstraint());
+			statements.add(table);
+		}
+		return statements;
+	}
+
 
     @Override
     protected boolean shouldBeImplementation(Database database) {
@@ -118,9 +133,10 @@ public class AddUniqueConstraintGeneratorTest extends AbstractSqlGeneratorTest {
                 ;
     }
 
-    @Test
+    @SuppressWarnings("unchecked")
+	@Test
     public void execute_noSchema() throws Exception {
-        SqlStatement statement = new AddUniqueConstraintStatement(null, TABLE_NAME, COLUMN_NAME, CONSTRAINT_NAME);
+    	AddUniqueConstraintStatement statement = new AddUniqueConstraintStatement(null, TABLE_NAME, COLUMN_NAME, CONSTRAINT_NAME);
         testSqlOnAllExcept("alter table [adduqtest] add constraint [uq_test] unique ([coltomakeuq])", statement
                 , MySQLDatabase.class, InformixDatabase.class, OracleDatabase.class, PostgresDatabase.class, DerbyDatabase.class);
         testSqlOn("alter table `adduqtest` add constraint `uq_test` unique (`coltomakeuq`)", statement, MySQLDatabase.class);
@@ -132,7 +148,7 @@ public class AddUniqueConstraintGeneratorTest extends AbstractSqlGeneratorTest {
 
     @Test
     public void execute_noConstraintName() throws Exception {
-        SqlStatement statement = new AddUniqueConstraintStatement(null, TABLE_NAME, COLUMN_NAME, null);
+    	AddUniqueConstraintStatement statement = new AddUniqueConstraintStatement(null, TABLE_NAME, COLUMN_NAME, null);
 //		testSqlOnAllExcept("alter table [adduqtest] add constraint [uq_test]", statement
 //				, MySQLDatabase.class, InformixDatabase.class, OracleDatabase.class, PostgresDatabase.class, DerbyDatabase.class);
 //		testSqlOn("alter table `adduqtest` add constraint `null` unique (`coltomakeuq`)", statement, MySQLDatabase.class);
@@ -144,7 +160,7 @@ public class AddUniqueConstraintGeneratorTest extends AbstractSqlGeneratorTest {
 
     @Test
     public void execute_withSchema() throws Exception {
-        SqlStatement statement = new AddUniqueConstraintStatement(TestContext.ALT_SCHEMA, TABLE_NAME, COLUMN_NAME, CONSTRAINT_NAME);
+    	AddUniqueConstraintStatement statement = new AddUniqueConstraintStatement(TestContext.ALT_SCHEMA, TABLE_NAME, COLUMN_NAME, CONSTRAINT_NAME);
 
         testSqlOnAllExcept("alter table liquibaseb.[adduqtest] add constraint [uq_test] unique ([coltomakeuq])", statement
                 , MySQLDatabase.class, InformixDatabase.class, OracleDatabase.class, PostgresDatabase.class, DerbyDatabase.class

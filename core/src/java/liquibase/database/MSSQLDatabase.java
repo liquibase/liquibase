@@ -5,6 +5,7 @@ import liquibase.database.statement.SqlStatement;
 import liquibase.database.structure.DatabaseSnapshot;
 import liquibase.database.structure.MSSQLDatabaseSnapshot;
 import liquibase.exception.JDBCException;
+import liquibase.util.StringUtils;
 import liquibase.diff.DiffStatusListener;
 
 import java.sql.Connection;
@@ -282,7 +283,15 @@ public class MSSQLDatabase extends AbstractDatabase {
 
 	@Override
 	public String getDefaultSchemaName() {
-		// TODO Auto-generated method stub
 		return "dbo";
+	}
+
+	@Override
+	public String escapeIndexName(String schemaName, String indexName) {
+        if (StringUtils.trimToNull(schemaName) == null || !supportsSchemas()) {
+            return escapeDatabaseObject(indexName);
+        } else {
+            return escapeDatabaseObject(schemaName)+"."+escapeDatabaseObject(indexName);
+        }
 	}
 }

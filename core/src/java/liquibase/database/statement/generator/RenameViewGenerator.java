@@ -34,7 +34,7 @@ public class RenameViewGenerator implements SqlGenerator<RenameViewStatement> {
         String sql;
 
         if (database instanceof MSSQLDatabase) {
-            sql = "exec sp_rename '" + database.escapeViewName(statement.getSchemaName(), statement.getOldViewName()) + "', " + database.escapeViewName(null, statement.getNewViewName());
+            sql = "exec sp_rename '" + database.escapeViewName(statement.getSchemaName(), statement.getOldViewName()) + "', '" + statement.getNewViewName() + '\'';
         } else if (database instanceof MySQLDatabase) {
             sql = "RENAME TABLE " + database.escapeViewName(statement.getSchemaName(), statement.getOldViewName()) + " TO " + database.escapeViewName(statement.getSchemaName(), statement.getNewViewName());
         } else if (database instanceof PostgresDatabase) {

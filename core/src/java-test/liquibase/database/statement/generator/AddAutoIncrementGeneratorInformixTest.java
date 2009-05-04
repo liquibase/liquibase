@@ -5,9 +5,9 @@ import static org.junit.Assert.*;
 import liquibase.database.statement.AddAutoIncrementStatement;
 import liquibase.database.*;
 
-public class AddAutoIncrementGeneratorInformixTest extends AddAutoIncrementGeneratorTest {
+public class AddAutoIncrementGeneratorInformixTest extends AddAutoIncrementGeneratorTest<AddAutoIncrementStatement> {
 
-    public AddAutoIncrementGeneratorInformixTest() {
+    public AddAutoIncrementGeneratorInformixTest() throws Exception {
         super(new AddAutoIncrementGeneratorInformix());
     }
 

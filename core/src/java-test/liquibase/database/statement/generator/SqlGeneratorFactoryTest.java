@@ -34,7 +34,7 @@ public class SqlGeneratorFactoryTest {
 
         assertEquals(0, SqlGeneratorFactory.getInstance().getGenerators().size());
 
-        SqlGeneratorFactory.getInstance().register(new MockSqlGenerator());
+        SqlGeneratorFactory.getInstance().register(new MockSqlGenerator<SqlStatement>());
 
         assertEquals(1, SqlGeneratorFactory.getInstance().getGenerators().size());
     }
@@ -47,7 +47,8 @@ public class SqlGeneratorFactoryTest {
 
         assertEquals(0, factory.getGenerators().size());
 
-        AddAutoIncrementGeneratorHsql sqlGenerator = new AddAutoIncrementGeneratorHsql();
+        AddAutoIncrementGeneratorHsql sqlGenerator 
+        	= new AddAutoIncrementGeneratorHsql();
 
         factory.register(new AddAutoIncrementGenerator());
         factory.register(sqlGenerator);
@@ -67,7 +68,8 @@ public class SqlGeneratorFactoryTest {
 
         assertEquals(0, factory.getGenerators().size());
 
-        AddAutoIncrementGeneratorHsql sqlGenerator = new AddAutoIncrementGeneratorHsql();
+        AddAutoIncrementGeneratorHsql sqlGenerator 
+        			= new AddAutoIncrementGeneratorHsql();
 
         factory.register(new AddAutoIncrementGenerator());
         factory.register(sqlGenerator);
@@ -98,17 +100,17 @@ public class SqlGeneratorFactoryTest {
     }
 
     @Test
-    @SuppressWarnings({"UnusedDeclaration"})
+    @SuppressWarnings({"unused"})
     public void getBestGenerator_hasBest() {
         SqlGeneratorFactory.getInstance().getGenerators().clear();
 
-        SqlGenerator mysqlIncorrectGenerator = addGenerator(CreateTableStatement.class, MySQLDatabase.class, 1);
-        SqlGenerator oracleIncorrectGenerator = addGenerator(CreateTableStatement.class, OracleDatabase.class, 1);
-        SqlGenerator mysqlBetterGenerator = addGenerator(AddAutoIncrementStatement.class, MySQLDatabase.class, 2);
-        SqlGenerator mysqlCorrectGenerator = addGenerator(AddAutoIncrementStatement.class, MySQLDatabase.class, 1);
-        SqlGenerator oracleCorrectGenerator = addGenerator(AddAutoIncrementStatement.class, OracleDatabase.class, 1);
+        SqlGenerator<CreateTableStatement> mysqlIncorrectGenerator = addGenerator(CreateTableStatement.class, MySQLDatabase.class, 1);
+        SqlGenerator<CreateTableStatement> oracleIncorrectGenerator = addGenerator(CreateTableStatement.class, OracleDatabase.class, 1);
+        SqlGenerator<AddAutoIncrementStatement> mysqlBetterGenerator = addGenerator(AddAutoIncrementStatement.class, MySQLDatabase.class, 2);
+        SqlGenerator<AddAutoIncrementStatement> mysqlCorrectGenerator = addGenerator(AddAutoIncrementStatement.class, MySQLDatabase.class, 1);
+        SqlGenerator<AddAutoIncrementStatement> oracleCorrectGenerator = addGenerator(AddAutoIncrementStatement.class, OracleDatabase.class, 1);
 
-        SqlGenerator bestSqlGenerator = SqlGeneratorFactory.getInstance().getBestGenerator(new AddAutoIncrementStatement(null, "person", "name", "varchar(255)"), new MySQLDatabase());
+        SqlGenerator<AddAutoIncrementStatement> bestSqlGenerator = SqlGeneratorFactory.getInstance().getBestGenerator(new AddAutoIncrementStatement(null, "person", "name", "varchar(255)"), new MySQLDatabase());
 
         assertNotNull(bestSqlGenerator);
         assertTrue(mysqlBetterGenerator == bestSqlGenerator);
@@ -116,19 +118,18 @@ public class SqlGeneratorFactoryTest {
     }
 
     @Test
-    @SuppressWarnings({"UnusedDeclaration"})
+    @SuppressWarnings({"unused"})
     public void getBestGenerator_noneMatching() {
         SqlGeneratorFactory.getInstance().getGenerators().clear();
 
-        SqlGenerator mysqlIncorrectGenerator = addGenerator(CreateTableStatement.class, MySQLDatabase.class, 1);
-        SqlGenerator oracleIncorrectGenerator = addGenerator(CreateTableStatement.class, OracleDatabase.class, 1);
-        SqlGenerator mysqlBetterGenerator = addGenerator(AddAutoIncrementStatement.class, MySQLDatabase.class, 2);
-        SqlGenerator mysqlCorrectGenerator = addGenerator(AddAutoIncrementStatement.class, MySQLDatabase.class, 1);
-        SqlGenerator oracleCorrectGenerator = addGenerator(AddAutoIncrementStatement.class, OracleDatabase.class, 1);
+        SqlGenerator<CreateTableStatement> mysqlIncorrectGenerator = addGenerator(CreateTableStatement.class, MySQLDatabase.class, 1);
+        SqlGenerator<CreateTableStatement> oracleIncorrectGenerator = addGenerator(CreateTableStatement.class, OracleDatabase.class, 1);
+        SqlGenerator<AddAutoIncrementStatement> mysqlBetterGenerator = addGenerator(AddAutoIncrementStatement.class, MySQLDatabase.class, 2);
+        SqlGenerator<AddAutoIncrementStatement> mysqlCorrectGenerator = addGenerator(AddAutoIncrementStatement.class, MySQLDatabase.class, 1);
+        SqlGenerator<AddAutoIncrementStatement> oracleCorrectGenerator = addGenerator(AddAutoIncrementStatement.class, OracleDatabase.class, 1);
 
-        SqlGenerator bestSqlGenerator = SqlGeneratorFactory.getInstance().getBestGenerator(new AddDefaultValueStatement(null, "person", "name", "N/A"), new MySQLDatabase());
+        SqlGenerator<AddDefaultValueStatement> bestSqlGenerator = SqlGeneratorFactory.getInstance().getBestGenerator(new AddDefaultValueStatement(null, "person", "name", "N/A"), new MySQLDatabase());
 
-        assertNotNull(bestSqlGenerator);
         assertNull(bestSqlGenerator);
     }
 
@@ -139,22 +140,23 @@ public class SqlGeneratorFactoryTest {
         assertFalse(instance1 == SqlGeneratorFactory.getInstance());
     }
 
-    @Test
+    @SuppressWarnings("unchecked")
+	@Test
     public void builtInGeneratorsAreFound() {
         List<SqlGenerator> generators = SqlGeneratorFactory.getInstance().getGenerators();
         assertTrue(generators.size() > 0);        
     }
 
-    @SuppressWarnings({"UnusedDeclaration"})
     @Test
     public void getAllGenerators() {
         SortedSet<SqlGenerator> allGenerators = SqlGeneratorFactory.getInstance().getAllGenerators(new AddAutoIncrementStatement(null, "person", "name", "varchar(255)"), new H2Database());
 
         assertNotNull(allGenerators);
-        assertEquals(2, allGenerators.size());        
+        assertEquals(1, allGenerators.size());        
     }
 
-    private SqlGenerator addGenerator(final Class<? extends SqlStatement> createTableStatementClass, final Class<? extends Database> sqlDatabaseClass, final int level) {
+    private SqlGenerator addGenerator(final Class<? extends SqlStatement> sqlStatementClass, final Class<? extends Database> sqlDatabaseClass, final int level) {
+    	
         SqlGenerator generator = new SqlGenerator() {
             public int getSpecializationLevel() {
                 return level;
@@ -165,7 +167,8 @@ public class SqlGeneratorFactoryTest {
             }
 
             public boolean isValidGenerator(SqlStatement statement, Database database) {
-                return createTableStatementClass.isAssignableFrom(statement.getClass()) && sqlDatabaseClass.isAssignableFrom(database.getClass());
+            	boolean ret = sqlStatementClass.isAssignableFrom(statement.getClass()) && sqlDatabaseClass.isAssignableFrom(database.getClass()); 
+                return ret;
             }
 
             public Sql[] generateSql(SqlStatement statement, Database database) {
@@ -177,7 +180,7 @@ public class SqlGeneratorFactoryTest {
         return generator;
     }
 
-    private static class MockSqlGenerator implements SqlGenerator {
+    private static class MockSqlGenerator<T extends SqlStatement> implements SqlGenerator<T> {
         public int getSpecializationLevel() {
             return 0;
         }

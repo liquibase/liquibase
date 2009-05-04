@@ -1,15 +1,22 @@
 package liquibase.database.statement.generator;
 
-import org.junit.Test;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
+import liquibase.database.DB2Database;
+import liquibase.database.Database;
+import liquibase.database.DerbyDatabase;
+import liquibase.database.FirebirdDatabase;
+import liquibase.database.HsqlDatabase;
+import liquibase.database.InformixDatabase;
+import liquibase.database.OracleDatabase;
 import liquibase.database.statement.AddColumnStatement;
 import liquibase.database.statement.AutoIncrementConstraint;
 import liquibase.database.statement.NotNullConstraint;
 import liquibase.database.statement.PrimaryKeyConstraint;
-import liquibase.database.*;
+
+import org.junit.Test;
 
 public class AddColumnGeneratorDefaultClauseBeforeNotNullTest extends AddColumnGeneratorTest {
-    public AddColumnGeneratorDefaultClauseBeforeNotNullTest() {
+    public AddColumnGeneratorDefaultClauseBeforeNotNullTest() throws Exception {
         super(new AddColumnGeneratorDefaultClauseBeforeNotNull());
     }
 
@@ -26,7 +33,8 @@ public class AddColumnGeneratorDefaultClauseBeforeNotNullTest extends AddColumnG
         testSqlOnAll("ALTER TABLE [table_name] ADD [column_name] int DEFAULT 42 NOT NULL", new AddColumnStatement(null, "table_name", "column_name", "int", 42, new NotNullConstraint()));
     }
 
-    @Test
+    @SuppressWarnings("unchecked")
+	@Test
     public void generateSql_primaryKey() throws Exception {
         AddColumnStatement statement = new AddColumnStatement(null, "table_name", "column_name", "int", null, new PrimaryKeyConstraint());
         

@@ -1,54 +1,88 @@
 package liquibase.database.statement.generator;
 
-import liquibase.database.statement.AddAutoIncrementStatement;
-import liquibase.database.statement.CreateTableStatement;
-import liquibase.database.statement.PrimaryKeyConstraint;
-import liquibase.database.statement.SqlStatement;
-import liquibase.database.*;
-import liquibase.database.structure.DatabaseObject;
-import liquibase.database.structure.Table;
-import liquibase.database.structure.Column;
-import liquibase.database.structure.Schema;
-import liquibase.change.AddAutoIncrementChange;
-import liquibase.test.TestContext;
-import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
-public class AddAutoIncrementGeneratorTest extends AbstractSqlGeneratorTest {
+import liquibase.change.AddAutoIncrementChange;
+import liquibase.database.Database;
+import liquibase.database.DerbyDatabase;
+import liquibase.database.HsqlDatabase;
+import liquibase.database.MSSQLDatabase;
+import liquibase.database.MySQLDatabase;
+import liquibase.database.PostgresDatabase;
+import liquibase.database.statement.AddAutoIncrementStatement;
+import liquibase.database.statement.CreateTableStatement;
+import liquibase.database.statement.NotNullConstraint;
+import liquibase.database.statement.SqlStatement;
+import liquibase.database.structure.Column;
+import liquibase.database.structure.DatabaseObject;
+import liquibase.database.structure.Schema;
+import liquibase.database.structure.Table;
+import liquibase.test.TestContext;
 
-    public AddAutoIncrementGeneratorTest() {
-        this(new AddAutoIncrementGenerator());
+import org.junit.Test;
+
+public class AddAutoIncrementGeneratorTest <T extends AddAutoIncrementStatement>
+	extends AbstractSqlGeneratorTest<T> {
+
+	protected static final String TABLE_NAME = "table_name";
+
+    public AddAutoIncrementGeneratorTest() throws Exception {
+    	this(new AddAutoIncrementGenerator());
     }
 
-    public AddAutoIncrementGeneratorTest(SqlGenerator generatorUnderTest) {
+    public AddAutoIncrementGeneratorTest(AddAutoIncrementGenerator generatorUnderTest) throws Exception {
         super(generatorUnderTest);
     }
 
-    protected SqlStatement[] setupStatements() {
-        return new SqlStatement[]{
-                new CreateTableStatement(null, "table_name")
-                        .addColumn("id", "int", new PrimaryKeyConstraint())
-        };
+    
+	@Override
+	protected List<? extends SqlStatement> setupStatements(
+			Database database) {
+		ArrayList<CreateTableStatement> statements = new ArrayList<CreateTableStatement>();
+		CreateTableStatement table = new CreateTableStatement(null, TABLE_NAME);
+		if (database instanceof MySQLDatabase) {
+			table.addPrimaryKeyColumn("id", "int", null, "pk_");
+		} else {
+			table.addColumn("id", "int", new NotNullConstraint());
+		}
+		statements.add(table);
+        
+		if (database.supportsSchemas()) {
+			table = new CreateTableStatement(TestContext.ALT_SCHEMA, TABLE_NAME);
+			table
+				.addColumn("id", "int", new NotNullConstraint());
+			statements.add(table);
+		}
+		return statements;
+	}
+
+
+
+    protected T createSampleSqlStatement() {
+        return (T) new AddAutoIncrementStatement(null, null, null, null);
     }
 
-    protected AddAutoIncrementStatement createSampleSqlStatement() {
-        return new AddAutoIncrementStatement(null, null, null, null);
-    }
-
-    @Test
+    @SuppressWarnings("unchecked")
+	@Test
     public void generateSql_noSchema() throws Exception {
         AddAutoIncrementStatement statement = new AddAutoIncrementStatement(null, "table_name", "id", "int");
-        
-        testSqlOnAllExcept("ALTER TABLE [table_name] MODIFY [id] int AUTO_INCREMENT", statement, PostgresDatabase.class);
-        testSqlOn("alter table [table_name] modify id serial auto_increment", statement, PostgresDatabase.class);
+        testSqlOnAllExcept("ALTER TABLE [table_name] MODIFY [id] int AUTO_INCREMENT", (T) statement, PostgresDatabase.class
+                // TODO sqlserver does not allow change autoincrement property for field :( 
+        		, MSSQLDatabase.class
+        		, MySQLDatabase.class
+        		);
+        testSqlOn("alter table [table_name] modify id serial auto_increment", (T) statement, PostgresDatabase.class);
+        testSqlOn("alter table `table_name` modify `id` int auto_increment", (T) statement, MySQLDatabase.class);
     }
 
 
     @Override
     protected boolean shouldBeImplementation(Database database) {
-        return database.supportsAutoIncrement() && !(database instanceof DerbyDatabase);
+        return database.supportsAutoIncrement() && !(database instanceof DerbyDatabase) && !(database instanceof HsqlDatabase);
     }
 
     @Test

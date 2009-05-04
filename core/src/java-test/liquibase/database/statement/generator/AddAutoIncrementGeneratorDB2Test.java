@@ -1,14 +1,15 @@
 package liquibase.database.statement.generator;
 
-import org.junit.Test;
-import liquibase.database.statement.AddAutoIncrementStatement;
-import liquibase.database.Database;
 import liquibase.database.DB2Database;
+import liquibase.database.Database;
+import liquibase.database.statement.AddAutoIncrementStatement;
 
-public class AddAutoIncrementGeneratorDB2Test extends AddAutoIncrementGeneratorTest {
+import org.junit.Test;
 
-    public AddAutoIncrementGeneratorDB2Test() {
-        super(new AddAutoIncrementGeneratorDB2());
+public class AddAutoIncrementGeneratorDB2Test extends AddAutoIncrementGeneratorTest<AddAutoIncrementStatement> {
+
+    public AddAutoIncrementGeneratorDB2Test() throws Exception {
+    	super(new AddAutoIncrementGeneratorDB2());
     }
 
     @Test
