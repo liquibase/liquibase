@@ -62,19 +62,24 @@ public class AddAutoIncrementGeneratorTest <T extends AddAutoIncrementStatement>
 
 
 
-    protected T createSampleSqlStatement() {
+    @SuppressWarnings("unchecked")
+	protected T createSampleSqlStatement() {
         return (T) new AddAutoIncrementStatement(null, null, null, null);
     }
 
-    @SuppressWarnings("unchecked")
+    @Override
+	protected boolean waitForException(Database database) {
+		return database instanceof MSSQLDatabase;
+	}
+
+	@SuppressWarnings("unchecked")
 	@Test
     public void generateSql_noSchema() throws Exception {
         AddAutoIncrementStatement statement = new AddAutoIncrementStatement(null, "table_name", "id", "int");
-        testSqlOnAllExcept("ALTER TABLE [table_name] MODIFY [id] int AUTO_INCREMENT", (T) statement, PostgresDatabase.class
-                // TODO sqlserver does not allow change autoincrement property for field :( 
-        		, MSSQLDatabase.class
+        testSqlOnAllExcept("ALTER TABLE [table_name] MODIFY [id] int AUTO_INCREMENT", (T) statement
+        		, PostgresDatabase.class
         		, MySQLDatabase.class
-        		);
+        );
         testSqlOn("alter table [table_name] modify id serial auto_increment", (T) statement, PostgresDatabase.class);
         testSqlOn("alter table `table_name` modify `id` int auto_increment", (T) statement, MySQLDatabase.class);
     }
@@ -82,7 +87,10 @@ public class AddAutoIncrementGeneratorTest <T extends AddAutoIncrementStatement>
 
     @Override
     protected boolean shouldBeImplementation(Database database) {
-        return database.supportsAutoIncrement() && !(database instanceof DerbyDatabase) && !(database instanceof HsqlDatabase);
+        return database.supportsAutoIncrement() 
+        && !(database instanceof DerbyDatabase) 
+        && !(database instanceof MSSQLDatabase) 
+        && !(database instanceof HsqlDatabase);
     }
 
     @Test
