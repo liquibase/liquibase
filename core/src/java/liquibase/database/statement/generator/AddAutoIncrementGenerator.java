@@ -16,11 +16,16 @@ public class AddAutoIncrementGenerator implements SqlGenerator<AddAutoIncrementS
     public boolean isValidGenerator(AddAutoIncrementStatement statement, Database database) {
         return (database.supportsAutoIncrement()
                 && !(database instanceof DerbyDatabase)
+                && !(database instanceof MSSQLDatabase)
                 && !(database instanceof HsqlDatabase));
     }
 
-    public GeneratorValidationErrors validate(AddAutoIncrementStatement addAutoIncrementStatement, Database database) {
-        return new GeneratorValidationErrors();
+    public GeneratorValidationErrors validate(AddAutoIncrementStatement statement, Database database) {
+        GeneratorValidationErrors validationErrors = new GeneratorValidationErrors();
+        if (database instanceof MSSQLDatabase) {
+            validationErrors.addError("Cannot make the column as auto-increment.");
+        }
+        return validationErrors;
     }
 
     public Sql[] generateSql(AddAutoIncrementStatement statement, Database database) {
