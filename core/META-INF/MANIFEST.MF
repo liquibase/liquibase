@@ -14,7 +14,7 @@ Export-Package: liquibase,
  liquibase.commandline,
  liquibase.diff,
  liquibase.exception,
- liquibase.parser,
+ liquibase.changelog,
  liquibase.preconditions,
  liquibase.migrator.servlet,
  liquibase.util
