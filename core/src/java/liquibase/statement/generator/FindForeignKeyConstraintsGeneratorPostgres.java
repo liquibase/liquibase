@@ -5,6 +5,8 @@ import liquibase.database.PostgresDatabase;
 import liquibase.statement.FindForeignKeyConstraintsStatement;
 import liquibase.statement.syntax.Sql;
 import liquibase.statement.syntax.UnparsedSql;
+import liquibase.exception.ValidationErrors;
+import liquibase.exception.ValidationErrors;
 
 public class FindForeignKeyConstraintsGeneratorPostgres implements SqlGenerator<FindForeignKeyConstraintsStatement> {
     public int getSpecializationLevel() {
@@ -15,8 +17,8 @@ public class FindForeignKeyConstraintsGeneratorPostgres implements SqlGenerator<
         return database instanceof PostgresDatabase;
     }
 
-    public GeneratorValidationErrors validate(FindForeignKeyConstraintsStatement findForeignKeyConstraintsStatement, Database database) {
-        return new GeneratorValidationErrors();
+    public ValidationErrors validate(FindForeignKeyConstraintsStatement findForeignKeyConstraintsStatement, Database database) {
+        return new ValidationErrors();
     }
 
     public Sql[] generateSql(FindForeignKeyConstraintsStatement statement, Database database) {

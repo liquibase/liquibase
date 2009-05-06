@@ -9,6 +9,8 @@ import liquibase.database.structure.Table;
 import liquibase.statement.AddAutoIncrementStatement;
 import liquibase.statement.syntax.Sql;
 import liquibase.statement.syntax.UnparsedSql;
+import liquibase.exception.ValidationErrors;
+import liquibase.exception.ValidationErrors;
 
 public class AddAutoIncrementGenerator implements SqlGenerator<AddAutoIncrementStatement> {
 
@@ -23,8 +25,8 @@ public class AddAutoIncrementGenerator implements SqlGenerator<AddAutoIncrementS
                 && !(database instanceof HsqlDatabase));
     }
 
-    public GeneratorValidationErrors validate(AddAutoIncrementStatement statement, Database database) {
-        GeneratorValidationErrors validationErrors = new GeneratorValidationErrors();
+    public ValidationErrors validate(AddAutoIncrementStatement statement, Database database) {
+        ValidationErrors validationErrors = new ValidationErrors();
         if (database instanceof MSSQLDatabase) {
             validationErrors.addError("Cannot make the column as auto-increment.");
         }

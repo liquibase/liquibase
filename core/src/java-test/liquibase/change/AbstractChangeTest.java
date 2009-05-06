@@ -109,10 +109,6 @@ public abstract class AbstractChangeTest {
             public String getConfirmationMessage() {
                 return null;
             }
-
-            public void validate(Database database) throws InvalidChangeDefinitionException {
-
-            }
         };
 
         StringWriter stringWriter = new StringWriter();
@@ -133,11 +129,6 @@ public abstract class AbstractChangeTest {
             public String getConfirmationMessage() {
                 return null;
             }
-
-            public void validate(Database database) throws InvalidChangeDefinitionException {
-
-            }
-
         };
 
         Connection conn = createMock(Connection.class);

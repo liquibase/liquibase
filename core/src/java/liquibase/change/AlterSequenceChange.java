@@ -73,18 +73,7 @@ public class AlterSequenceChange extends AbstractChange {
         this.ordered = ordered;
     }
 
-    public void validate(Database database) throws InvalidChangeDefinitionException {
-        if (StringUtils.trimToNull(sequenceName) == null) {
-            throw new InvalidChangeDefinitionException("sequenceName is required", this);
-        }
-
-    }
-
-    public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
-        if (!database.supportsSequences()) {
-            throw new UnsupportedChangeException("Sequences do not exist in "+database.getProductName());
-        }
-
+    public SqlStatement[] generateStatements(Database database) {
         return new SqlStatement[] {
                 new AlterSequenceStatement(getSchemaName() == null?database.getDefaultSchemaName():getSchemaName(), getSequenceName())
                 .setIncrementBy(getIncrementBy())

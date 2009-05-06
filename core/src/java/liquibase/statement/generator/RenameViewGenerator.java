@@ -4,6 +4,8 @@ import liquibase.database.*;
 import liquibase.statement.RenameViewStatement;
 import liquibase.statement.syntax.Sql;
 import liquibase.statement.syntax.UnparsedSql;
+import liquibase.exception.ValidationErrors;
+import liquibase.exception.ValidationErrors;
 
 public class RenameViewGenerator implements SqlGenerator<RenameViewStatement> {
     public int getSpecializationLevel() {
@@ -20,8 +22,8 @@ public class RenameViewGenerator implements SqlGenerator<RenameViewStatement> {
                 || database instanceof SybaseASADatabase);
     }
 
-    public GeneratorValidationErrors validate(RenameViewStatement renameViewStatement, Database database) {
-        GeneratorValidationErrors validationErrors = new GeneratorValidationErrors();
+    public ValidationErrors validate(RenameViewStatement renameViewStatement, Database database) {
+        ValidationErrors validationErrors = new ValidationErrors();
         if (database instanceof OracleDatabase) {
             validationErrors.checkDisallowedField("schemaName", renameViewStatement.getSchemaName());
         }

@@ -5,6 +5,8 @@ import liquibase.statement.CreateIndexStatement;
 import liquibase.statement.syntax.Sql;
 import liquibase.statement.syntax.UnparsedSql;
 import liquibase.util.StringUtils;
+import liquibase.exception.ValidationErrors;
+import liquibase.exception.ValidationErrors;
 
 import java.util.Arrays;
 import java.util.Iterator;
@@ -18,8 +20,8 @@ public class CreateIndexGenerator implements SqlGenerator<CreateIndexStatement> 
         return true;
     }
 
-    public GeneratorValidationErrors validate(CreateIndexStatement createIndexStatement, Database database) {
-        return new GeneratorValidationErrors();
+    public ValidationErrors validate(CreateIndexStatement createIndexStatement, Database database) {
+        return new ValidationErrors();
     }
 
     public Sql[] generateSql(CreateIndexStatement statement, Database database) {

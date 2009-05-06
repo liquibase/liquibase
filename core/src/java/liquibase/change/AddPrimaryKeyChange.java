@@ -72,17 +72,7 @@ public class AddPrimaryKeyChange extends AbstractChange {
         this.tablespace = tablespace;
     }
 
-    public void validate(Database database) throws InvalidChangeDefinitionException {
-        if (StringUtils.trimToNull(tableName) == null) {
-            throw new InvalidChangeDefinitionException("tableName is required", this);
-        }
-        if (StringUtils.trimToNull(columnNames) == null) {
-            throw new InvalidChangeDefinitionException("columnNames is required", this);
-        }
-
-    }
-
-    public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
+    public SqlStatement[] generateStatements(Database database) {
 
 
         String schemaName = getSchemaName() == null ? database.getDefaultSchemaName() : getSchemaName();
@@ -105,8 +95,7 @@ public class AddPrimaryKeyChange extends AbstractChange {
         };
     }
 
-    private SqlStatement[] generateStatementsForSQLiteDatabase(Database database)
-            throws UnsupportedChangeException {
+    private SqlStatement[] generateStatementsForSQLiteDatabase(Database database) {
         // SQLite does not support this ALTER TABLE operation until now.
         // or more information: http://www.sqlite.org/omitted.html
         // This is a small work around...
@@ -143,7 +132,7 @@ public class AddPrimaryKeyChange extends AbstractChange {
             statements.addAll(SQLiteDatabase.getAlterTableStatements(
                     rename_alter_visitor,
                     database, getSchemaName(), getTableName()));
-        } catch (JDBCException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 

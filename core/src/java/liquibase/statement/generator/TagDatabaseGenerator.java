@@ -6,6 +6,8 @@ import liquibase.statement.TagDatabaseStatement;
 import liquibase.statement.UpdateStatement;
 import liquibase.statement.syntax.Sql;
 import liquibase.statement.syntax.UnparsedSql;
+import liquibase.exception.ValidationErrors;
+import liquibase.exception.ValidationErrors;
 
 public class TagDatabaseGenerator implements SqlGenerator<TagDatabaseStatement> {
     public int getSpecializationLevel() {
@@ -16,8 +18,8 @@ public class TagDatabaseGenerator implements SqlGenerator<TagDatabaseStatement> 
         return true;
     }
 
-    public GeneratorValidationErrors validate(TagDatabaseStatement tagDatabaseStatement, Database database) {
-        return new GeneratorValidationErrors();
+    public ValidationErrors validate(TagDatabaseStatement tagDatabaseStatement, Database database) {
+        return new ValidationErrors();
     }
 
     public Sql[] generateSql(TagDatabaseStatement statement, Database database) {

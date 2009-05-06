@@ -56,19 +56,7 @@ public class ModifyColumnChange extends AbstractChange implements ChangeWithColu
       	columns.remove(column);
     }
 
-    public void validate(Database database) throws InvalidChangeDefinitionException {
-        if (StringUtils.trimToNull(tableName) == null) {
-            throw new InvalidChangeDefinitionException("tableName is required", this);
-        }
-
-        for (ColumnConfig column : columns) {
-            if (StringUtils.trimToNull(column.getName()) == null) {
-                throw new InvalidChangeDefinitionException("column name is required", this);
-            }
-        }
-    }
-
-    public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
+    public SqlStatement[] generateStatements(Database database) {
     	
     	if (database instanceof SQLiteDatabase) {
     		// return special statements for SQLite databases
@@ -105,8 +93,7 @@ public class ModifyColumnChange extends AbstractChange implements ChangeWithColu
       return sql.toArray(new SqlStatement[sql.size()]);
     }
     
-    private SqlStatement[] generateStatementsForSQLiteDatabase(Database database) 
-			throws UnsupportedChangeException {
+    private SqlStatement[] generateStatementsForSQLiteDatabase(Database database) {
 
 		// SQLite does not support this ALTER TABLE operation until now.
 		// For more information see: http://www.sqlite.org/omitted.html.
@@ -142,7 +129,7 @@ public class ModifyColumnChange extends AbstractChange implements ChangeWithColu
 			statements.addAll(SQLiteDatabase.getAlterTableStatements(
 					rename_alter_visitor,
 					database,getSchemaName(),getTableName()));
-		} catch (JDBCException e) {
+		} catch (Exception e) {
 			System.err.println(e);
 			e.printStackTrace();
 		}

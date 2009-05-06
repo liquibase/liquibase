@@ -3,6 +3,7 @@ package liquibase.change;
 import liquibase.database.Database;
 import liquibase.exception.InvalidChangeDefinitionException;
 import liquibase.exception.UnsupportedChangeException;
+import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.log.LogFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.util.StreamUtil;
@@ -44,14 +45,7 @@ public class ExecuteShellCommandChange extends AbstractChange {
         this.os = StringUtils.splitAndTrim(os, ",");
     }
 
-    public void validate(Database database) throws InvalidChangeDefinitionException {
-        if (StringUtils.trimToNull(executable) == null) {
-            throw new InvalidChangeDefinitionException("executable is required", this);
-        }
-
-    }
-
-    public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
+    public SqlStatement[] generateStatements(Database database) {
         boolean shouldRun = true;
         if (os != null && os.size() > 0) {
             String currentOS = System.getProperty("os.name");
@@ -89,7 +83,7 @@ public class ExecuteShellCommandChange extends AbstractChange {
                     throw new RuntimeException(getCommandString()+" returned an code of "+returnCode);
                 }
             } catch (IOException e) {
-                throw new UnsupportedChangeException("Error executing command: " + e);
+                throw new UnexpectedLiquibaseException("Error executing command: " + e);
             }
 
         }

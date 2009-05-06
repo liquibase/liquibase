@@ -6,6 +6,8 @@ import liquibase.database.structure.Table;
 import liquibase.statement.AddDefaultValueStatement;
 import liquibase.statement.syntax.Sql;
 import liquibase.statement.syntax.UnparsedSql;
+import liquibase.exception.ValidationErrors;
+import liquibase.exception.ValidationErrors;
 
 public class AddDefaultValueGenerator implements SqlGenerator<AddDefaultValueStatement> {
     public int getSpecializationLevel() {
@@ -16,8 +18,8 @@ public class AddDefaultValueGenerator implements SqlGenerator<AddDefaultValueSta
         return true;
     }
 
-    public GeneratorValidationErrors validate(AddDefaultValueStatement addDefaultValueStatement, Database database) {
-        return new GeneratorValidationErrors();
+    public ValidationErrors validate(AddDefaultValueStatement addDefaultValueStatement, Database database) {
+        return new ValidationErrors();
     }
 
     public Sql[] generateSql(AddDefaultValueStatement statement, Database database) {

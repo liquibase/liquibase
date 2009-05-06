@@ -4,10 +4,7 @@ import liquibase.ChangeSet;
 import liquibase.FileOpener;
 import liquibase.database.Database;
 import liquibase.database.structure.DatabaseObject;
-import liquibase.exception.InvalidChangeDefinitionException;
-import liquibase.exception.RollbackImpossibleException;
-import liquibase.exception.SetupException;
-import liquibase.exception.UnsupportedChangeException;
+import liquibase.exception.*;
 import liquibase.statement.SqlStatement;
 
 import java.util.Set;
@@ -69,7 +66,7 @@ public interface Change {
      */
     public void setUp() throws SetupException;
 
-    public void validate(Database database) throws InvalidChangeDefinitionException;
+    public ValidationErrors validate(Database database);
 
     public ChangeSet getChangeSet();
 
@@ -96,11 +93,10 @@ public interface Change {
     /**
      * Generates the SQL statements required to run the change
      *
-     * @param database databasethe target {@link Database} associated to this change's statements
+     * @param database databasethe target {@link liquibase.database.Database} associated to this change's statements
      * @return an array of {@link String}s with the statements
-     * @throws UnsupportedChangeException if this change is not supported by the {@link Database} passed as argument
      */
-    public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException;
+    public SqlStatement[] generateStatements(Database database);
 
      /**
      * Can this change be rolled back

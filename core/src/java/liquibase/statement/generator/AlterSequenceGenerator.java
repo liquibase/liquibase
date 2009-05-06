@@ -4,6 +4,8 @@ import liquibase.database.*;
 import liquibase.statement.AlterSequenceStatement;
 import liquibase.statement.syntax.Sql;
 import liquibase.statement.syntax.UnparsedSql;
+import liquibase.exception.ValidationErrors;
+import liquibase.exception.ValidationErrors;
 
 public class AlterSequenceGenerator implements SqlGenerator<AlterSequenceStatement> {
     public int getSpecializationLevel() {
@@ -14,8 +16,8 @@ public class AlterSequenceGenerator implements SqlGenerator<AlterSequenceStateme
         return database.supportsSequences();
     }
 
-    public GeneratorValidationErrors validate(AlterSequenceStatement alterSequenceStatement, Database database) {
-        GeneratorValidationErrors validationErrors = new GeneratorValidationErrors();
+    public ValidationErrors validate(AlterSequenceStatement alterSequenceStatement, Database database) {
+        ValidationErrors validationErrors = new ValidationErrors();
 
         if (database instanceof FirebirdDatabase || database instanceof HsqlDatabase) {
             validationErrors.checkDisallowedField("incrementBy", alterSequenceStatement.getIncrementBy());

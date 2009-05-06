@@ -4,6 +4,8 @@ import liquibase.database.*;
 import liquibase.statement.DropPrimaryKeyStatement;
 import liquibase.statement.syntax.Sql;
 import liquibase.statement.syntax.UnparsedSql;
+import liquibase.exception.ValidationErrors;
+import liquibase.exception.ValidationErrors;
 
 public class DropPrimaryKeyGenerator implements SqlGenerator<DropPrimaryKeyStatement> {
     public int getSpecializationLevel() {
@@ -14,8 +16,8 @@ public class DropPrimaryKeyGenerator implements SqlGenerator<DropPrimaryKeyState
         return (!(database instanceof SQLiteDatabase));
     }
 
-    public GeneratorValidationErrors validate(DropPrimaryKeyStatement dropPrimaryKeyStatement, Database database) {
-        GeneratorValidationErrors validationErrors = new GeneratorValidationErrors();
+    public ValidationErrors validate(DropPrimaryKeyStatement dropPrimaryKeyStatement, Database database) {
+        ValidationErrors validationErrors = new ValidationErrors();
 
         if (dropPrimaryKeyStatement.getConstraintName() == null) {
             if (database instanceof MSSQLDatabase

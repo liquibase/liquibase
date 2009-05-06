@@ -4,6 +4,8 @@ import liquibase.database.*;
 import liquibase.statement.SetNullableStatement;
 import liquibase.statement.syntax.Sql;
 import liquibase.statement.syntax.UnparsedSql;
+import liquibase.exception.ValidationErrors;
+import liquibase.exception.ValidationErrors;
 
 public class SetNullableGenerator implements SqlGenerator<SetNullableStatement> {
     public int getSpecializationLevel() {
@@ -15,8 +17,8 @@ public class SetNullableGenerator implements SqlGenerator<SetNullableStatement> 
                 database instanceof SQLiteDatabase);
     }
 
-    public GeneratorValidationErrors validate(SetNullableStatement setNullableStatement, Database database) {
-        GeneratorValidationErrors validationErrors = new GeneratorValidationErrors();
+    public ValidationErrors validate(SetNullableStatement setNullableStatement, Database database) {
+        ValidationErrors validationErrors = new ValidationErrors();
         if (database instanceof MSSQLDatabase || database instanceof MySQLDatabase || database instanceof InformixDatabase) {
             validationErrors.checkRequiredField("columnDataType", setNullableStatement.getColumnDataType());
         }

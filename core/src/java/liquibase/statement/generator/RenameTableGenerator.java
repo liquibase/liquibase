@@ -4,6 +4,8 @@ import liquibase.database.*;
 import liquibase.statement.RenameTableStatement;
 import liquibase.statement.syntax.Sql;
 import liquibase.statement.syntax.UnparsedSql;
+import liquibase.exception.ValidationErrors;
+import liquibase.exception.ValidationErrors;
 
 public class RenameTableGenerator implements SqlGenerator<RenameTableStatement> {
     public int getSpecializationLevel() {
@@ -14,8 +16,8 @@ public class RenameTableGenerator implements SqlGenerator<RenameTableStatement> 
         return !(database instanceof CacheDatabase || database instanceof FirebirdDatabase);
     }
 
-    public GeneratorValidationErrors validate(RenameTableStatement renameTableStatement, Database database) {
-        return new GeneratorValidationErrors();
+    public ValidationErrors validate(RenameTableStatement renameTableStatement, Database database) {
+        return new ValidationErrors();
     }
 
     public Sql[] generateSql(RenameTableStatement statement, Database database) {

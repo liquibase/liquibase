@@ -3,6 +3,7 @@ package liquibase.change;
 import liquibase.database.Database;
 import liquibase.exception.InvalidChangeDefinitionException;
 import liquibase.exception.UnsupportedChangeException;
+import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.statement.*;
 import liquibase.statement.generator.SqlGeneratorFactory;
 import liquibase.util.StringUtils;
@@ -26,21 +27,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
         columns = new ArrayList<ColumnConfig>();
     }
 
-    public void validate(Database database) throws InvalidChangeDefinitionException {
-        if (getColumns().size() == 0) {
-            throw new InvalidChangeDefinitionException("No columns defined", this);
-        }
-        for (ColumnConfig column : getColumns()) {
-            if (StringUtils.trimToNull(column.getName()) == null) {
-                throw new InvalidChangeDefinitionException("Column name is required", this);
-            }
-            if (StringUtils.trimToNull(column.getType()) == null) {
-                throw new InvalidChangeDefinitionException("Column type is required", this);
-            }
-        }
-    }
-
-    public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
+    public SqlStatement[] generateStatements(Database database) {
 
         String schemaName = getSchemaName() == null ? database.getDefaultSchemaName() : getSchemaName();
         CreateTableStatement statement = new CreateTableStatement(schemaName, getTableName());
@@ -71,7 +58,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
 
                 if (constraints.getReferences() != null) {
                     if (StringUtils.trimToNull(constraints.getForeignKeyName()) == null) {
-                        throw new UnsupportedChangeException("createTable with references requires foreignKeyName");
+                        throw new UnexpectedLiquibaseException("createTable with references requires foreignKeyName");
                     }
                     ForeignKeyConstraint fkConstraint = new ForeignKeyConstraint(constraints.getForeignKeyName(), constraints.getReferences());
                     fkConstraint.setColumn(column.getName());

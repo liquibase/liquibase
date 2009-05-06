@@ -6,6 +6,8 @@ import liquibase.database.SQLiteDatabase;
 import liquibase.statement.AddForeignKeyConstraintStatement;
 import liquibase.statement.syntax.Sql;
 import liquibase.statement.syntax.UnparsedSql;
+import liquibase.exception.ValidationErrors;
+import liquibase.exception.ValidationErrors;
 
 import java.sql.DatabaseMetaData;
 
@@ -18,8 +20,8 @@ public class AddForeignKeyConstraintGenerator implements SqlGenerator<AddForeign
         return (!(database instanceof SQLiteDatabase));
     }
 
-    public GeneratorValidationErrors validate(AddForeignKeyConstraintStatement addForeignKeyConstraintStatement, Database database) {
-        GeneratorValidationErrors validationErrors = new GeneratorValidationErrors();
+    public ValidationErrors validate(AddForeignKeyConstraintStatement addForeignKeyConstraintStatement, Database database) {
+        ValidationErrors validationErrors = new ValidationErrors();
 
         if (!database.supportsInitiallyDeferrableColumns()) {
             validationErrors.checkDisallowedField("initiallyDeferred", addForeignKeyConstraintStatement.isInitiallyDeferred());

@@ -5,6 +5,7 @@ import liquibase.database.template.Executor;
 import liquibase.exception.InvalidChangeDefinitionException;
 import liquibase.exception.JDBCException;
 import liquibase.exception.UnsupportedChangeException;
+import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.statement.FindForeignKeyConstraintsStatement;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.visitor.SqlVisitor;
@@ -43,13 +44,7 @@ public class DropAllForeignKeyConstraintsChange extends AbstractChange {
         this.baseTableName = baseTableName;
     }
 
-    public void validate(Database database) throws InvalidChangeDefinitionException {
-        if (StringUtils.trimToNull(baseTableName) == null) {
-            throw new InvalidChangeDefinitionException("baseTableName is required", this);
-        }
-    }
-
-    public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
+    public SqlStatement[] generateStatements(Database database) {
         List<SqlStatement> sqlStatements = new ArrayList<SqlStatement>();
 
         if (childDropChanges == null) {
@@ -69,7 +64,7 @@ public class DropAllForeignKeyConstraintsChange extends AbstractChange {
         return "Foreign keys on base table " + getBaseTableName() + " dropped";
     }
 
-    private void generateChildren(Database database) throws UnsupportedChangeException {
+    private void generateChildren(Database database) {
         // Make a new list
         childDropChanges = new ArrayList<DropForeignKeyConstraintChange>();
 
@@ -105,7 +100,7 @@ public class DropAllForeignKeyConstraintsChange extends AbstractChange {
                 }
             }
         } catch (JDBCException e) {
-            throw new UnsupportedChangeException("Failed to find foreign keys for table: " + getBaseTableName(), e);
+            throw new UnexpectedLiquibaseException("Failed to find foreign keys for table: " + getBaseTableName(), e);
         }
     }
 }

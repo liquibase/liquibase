@@ -2,10 +2,7 @@ package liquibase.change.custom;
 
 import liquibase.FileOpener;
 import liquibase.database.Database;
-import liquibase.exception.InvalidChangeDefinitionException;
-import liquibase.exception.RollbackImpossibleException;
-import liquibase.exception.SetupException;
-import liquibase.exception.UnsupportedChangeException;
+import liquibase.exception.*;
 import liquibase.statement.RawSqlStatement;
 import liquibase.statement.SqlStatement;
 
@@ -43,7 +40,7 @@ public class ExampleCustomSqlChange implements CustomSqlChange, CustomSqlRollbac
         this.newValue = newValue;
     }
 
-    public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
+    public SqlStatement[] generateStatements(Database database) {
         return new SqlStatement[]{
                 new RawSqlStatement("update "+tableName+" set "+columnName+" = "+newValue)
         };
@@ -66,8 +63,8 @@ public class ExampleCustomSqlChange implements CustomSqlChange, CustomSqlRollbac
         this.fileOpener = fileOpener;
     }
 
-    public void validate(Database database) throws InvalidChangeDefinitionException {
-
+    public ValidationErrors validate(Database database) {
+        return new ValidationErrors();
     }
     
 }

@@ -4,6 +4,8 @@ import liquibase.database.*;
 import liquibase.statement.DropForeignKeyConstraintStatement;
 import liquibase.statement.syntax.Sql;
 import liquibase.statement.syntax.UnparsedSql;
+import liquibase.exception.ValidationErrors;
+import liquibase.exception.ValidationErrors;
 
 public class DropForeignKeyConstraintGenerator implements SqlGenerator<DropForeignKeyConstraintStatement> {
     public int getSpecializationLevel() {
@@ -14,8 +16,8 @@ public class DropForeignKeyConstraintGenerator implements SqlGenerator<DropForei
         return (!(database instanceof SQLiteDatabase));
     }
 
-    public GeneratorValidationErrors validate(DropForeignKeyConstraintStatement dropForeignKeyConstraintStatement, Database database) {
-        return new GeneratorValidationErrors();
+    public ValidationErrors validate(DropForeignKeyConstraintStatement dropForeignKeyConstraintStatement, Database database) {
+        return new ValidationErrors();
     }
 
     public Sql[] generateSql(DropForeignKeyConstraintStatement statement, Database database) {

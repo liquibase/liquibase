@@ -51,21 +51,6 @@ public class MD5Util {
     }
 
     /**
-     * Converts a hexadecimal character to an integer.
-     *
-     * @param ch A character to convert to an integer digit
-     * @param index The index of the character in the source
-     * @return An integer
-     */
-    private static int toDigit(char ch, int index) {
-        int digit = Character.digit(ch, 16);
-        if (digit == -1) {
-            throw new UnexpectedLiquibaseException("Illegal hexadecimal charcter " + ch + " at index " + index);
-        }
-        return digit;
-    }
-
-    /**
      * Converts an array of bytes into an array of characters representing the hexadecimal values of each byte in order.
      * The returned array will be double the length of the passed array, as it takes two characters to represent any
      * given byte.

@@ -63,18 +63,7 @@ public class DropUniqueConstraintChange extends AbstractChange {
 		this.uniqueColumns = uniqueColumns;
 	}
 
-    public void validate(Database database) throws InvalidChangeDefinitionException {
-    	if (database instanceof SybaseASADatabase) {
-            if (StringUtils.trimToNull(constraintName) == null && StringUtils.trimToNull(constraintName) == null) {
-                throw new InvalidChangeDefinitionException("either constraintName or uniqueNames is required", this);
-            }
-    	} else if (StringUtils.trimToNull(constraintName) == null) {
-            throw new InvalidChangeDefinitionException("constraintName is required", this);
-        }
-
-    }
-
-    public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
+    public SqlStatement[] generateStatements(Database database) {
         
     	if (database instanceof SQLiteDatabase) {
     		// return special statements for SQLite databases
@@ -89,8 +78,7 @@ public class DropUniqueConstraintChange extends AbstractChange {
         };
     }
     
-    private SqlStatement[] generateStatementsForSQLiteDatabase(Database database) 
-			throws UnsupportedChangeException {
+    private SqlStatement[] generateStatementsForSQLiteDatabase(Database database) {
     	
     	// SQLite does not support this ALTER TABLE operation until now.
 		// For more information see: http://www.sqlite.org/omitted.html.
@@ -125,7 +113,7 @@ public class DropUniqueConstraintChange extends AbstractChange {
 			statements.addAll(SQLiteDatabase.getAlterTableStatements(
 					rename_alter_visitor,
 					database,getSchemaName(),getTableName()));
-    	} catch (JDBCException e) {
+    	} catch (Exception e) {
 			e.printStackTrace();
 		}
     	

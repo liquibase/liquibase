@@ -2,10 +2,7 @@ package liquibase.change.custom;
 
 import liquibase.change.AbstractChange;
 import liquibase.database.Database;
-import liquibase.exception.CustomChangeException;
-import liquibase.exception.InvalidChangeDefinitionException;
-import liquibase.exception.RollbackImpossibleException;
-import liquibase.exception.UnsupportedChangeException;
+import liquibase.exception.*;
 import liquibase.statement.SqlStatement;
 import liquibase.util.ObjectUtil;
 
@@ -76,11 +73,11 @@ public class CustomChangeWrapper extends AbstractChange {
         return paramValues;
     }
 
-    public void validate(Database database) throws InvalidChangeDefinitionException {
-        customChange.validate(database);
+    public ValidationErrors validate(Database database) {
+        return customChange.validate(database);
     }
 
-    public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
+    public SqlStatement[] generateStatements(Database database) {
         SqlStatement[] statements = null;
         try {
             configureCustomChange();
@@ -89,10 +86,10 @@ public class CustomChangeWrapper extends AbstractChange {
             } else if (customChange instanceof CustomTaskChange) {
                 ((CustomTaskChange) customChange).execute(database);
             } else {
-                throw new UnsupportedChangeException(customChange.getClass().getName() + " does not implement " + CustomSqlChange.class.getName() + " or " + CustomTaskChange.class.getName());
+                throw new UnexpectedLiquibaseException(customChange.getClass().getName() + " does not implement " + CustomSqlChange.class.getName() + " or " + CustomTaskChange.class.getName());
             }
         } catch (CustomChangeException e) {
-            throw new UnsupportedChangeException(e);
+            throw new UnexpectedLiquibaseException(e);
         }
 
         if (statements == null) {

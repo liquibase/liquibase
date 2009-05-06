@@ -1,13 +1,14 @@
-package liquibase.statement.generator;
+package liquibase.exception;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
+import liquibase.exception.ValidationErrors;
 
-public class GeneratorValidatorErrorsTest {
+public class ValidatorErrorsTest {
     @Test
     public void hasErrors() {
-        GeneratorValidationErrors errors = new GeneratorValidationErrors();
+        ValidationErrors errors = new ValidationErrors();
         assertFalse(errors.hasErrors());
 
         errors.addError("test message");
@@ -18,7 +19,7 @@ public class GeneratorValidatorErrorsTest {
 
     @Test
     public void checkRequiredField_nullValue() {
-        GeneratorValidationErrors errors = new GeneratorValidationErrors();
+        ValidationErrors errors = new ValidationErrors();
         assertFalse(errors.hasErrors());
 
         errors.checkRequiredField("testField", null);

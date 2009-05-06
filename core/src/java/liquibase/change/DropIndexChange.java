@@ -2,7 +2,6 @@ package liquibase.change;
 
 import liquibase.database.Database;
 import liquibase.exception.InvalidChangeDefinitionException;
-import liquibase.exception.UnsupportedChangeException;
 import liquibase.statement.DropIndexStatement;
 import liquibase.statement.SqlStatement;
 import liquibase.util.StringUtils;
@@ -44,14 +43,7 @@ public class DropIndexChange extends AbstractChange {
         this.tableName = tableName;
     }
 
-    public void validate(Database database) throws InvalidChangeDefinitionException {
-        if (StringUtils.trimToNull(indexName) == null) {
-            throw new InvalidChangeDefinitionException("indexName is required", this);
-        }
-
-    }
-
-    public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
+    public SqlStatement[] generateStatements(Database database) {
         return new SqlStatement[] {
             new DropIndexStatement(getIndexName(), getSchemaName() == null?database.getDefaultSchemaName():getSchemaName(), getTableName())
         };

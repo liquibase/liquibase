@@ -7,6 +7,7 @@ import liquibase.database.structure.Table;
 import liquibase.statement.AddAutoIncrementStatement;
 import liquibase.statement.syntax.Sql;
 import liquibase.statement.syntax.UnparsedSql;
+import liquibase.exception.ValidationErrors;
 
 public class AddAutoIncrementGeneratorInformix extends AddAutoIncrementGenerator {
     public int getSpecializationLevel() {
@@ -18,8 +19,8 @@ public class AddAutoIncrementGeneratorInformix extends AddAutoIncrementGenerator
     }
 
     @Override
-    public GeneratorValidationErrors validate(AddAutoIncrementStatement addAutoIncrementStatement, Database database) {
-        GeneratorValidationErrors validationErrors = super.validate(addAutoIncrementStatement, database);
+    public ValidationErrors validate(AddAutoIncrementStatement addAutoIncrementStatement, Database database) {
+        ValidationErrors validationErrors = super.validate(addAutoIncrementStatement, database);
 
         validationErrors.checkRequiredField("columnDataType", addAutoIncrementStatement.getColumnDataType());
 

@@ -835,14 +835,10 @@ public abstract class AbstractDatabase implements Database {
                 dropChanges.add(clearChangeLogChange);
             }
 
-            try {
-                for (Change change : dropChanges) {
-                    for (SqlStatement statement : change.generateStatements(this)) {
-                        this.getJdbcTemplate().execute(statement, new ArrayList<SqlVisitor>());
-                    }
+            for (Change change : dropChanges) {
+                for (SqlStatement statement : change.generateStatements(this)) {
+                    this.getJdbcTemplate().execute(statement, new ArrayList<SqlVisitor>());
                 }
-            } catch (UnsupportedChangeException e) {
-                throw new JDBCException(e);
             }
 
         } finally {

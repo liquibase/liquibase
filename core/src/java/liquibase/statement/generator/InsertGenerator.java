@@ -4,6 +4,8 @@ import liquibase.database.Database;
 import liquibase.statement.InsertStatement;
 import liquibase.statement.syntax.Sql;
 import liquibase.statement.syntax.UnparsedSql;
+import liquibase.exception.ValidationErrors;
+import liquibase.exception.ValidationErrors;
 
 import java.util.Date;
 
@@ -16,8 +18,8 @@ public class InsertGenerator implements SqlGenerator<InsertStatement> {
         return true;
     }
 
-    public GeneratorValidationErrors validate(InsertStatement insertStatement, Database database) {
-        GeneratorValidationErrors validationErrors = new GeneratorValidationErrors();
+    public ValidationErrors validate(InsertStatement insertStatement, Database database) {
+        ValidationErrors validationErrors = new ValidationErrors();
 
         if (insertStatement.getSchemaName() != null && !database.supportsSchemas()) {
            validationErrors.addError("Database does not support schemas");

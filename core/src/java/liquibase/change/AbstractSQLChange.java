@@ -2,7 +2,6 @@ package liquibase.change;
 
 import liquibase.database.Database;
 import liquibase.exception.InvalidChangeDefinitionException;
-import liquibase.exception.UnsupportedChangeException;
 import liquibase.statement.RawSqlStatement;
 import liquibase.statement.SqlStatement;
 import liquibase.util.StringUtils;
@@ -84,13 +83,6 @@ public abstract class AbstractSQLChange extends AbstractChange {
         this.endDelimiter = endDelimiter;
     }
 
-    public void validate(Database database) throws InvalidChangeDefinitionException {
-        if (StringUtils.trimToNull(getSql()) == null) {
-            throw new InvalidChangeDefinitionException("sql text is required", this);
-        }
-
-    }
-
     /**
      * Generates one or more statements depending on how the SQL should be parsed.
      * If split statements is set to true then the SQL is split on the ; and go\n entries
@@ -101,7 +93,7 @@ public abstract class AbstractSQLChange extends AbstractChange {
      * 
      * The end result is one or more SQL statements split in the way the user requested
      */
-    public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
+    public SqlStatement[] generateStatements(Database database) {
 
         List<SqlStatement> returnStatements = new ArrayList<SqlStatement>();
 

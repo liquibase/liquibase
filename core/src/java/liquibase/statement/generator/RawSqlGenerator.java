@@ -4,6 +4,8 @@ import liquibase.database.Database;
 import liquibase.statement.RawSqlStatement;
 import liquibase.statement.syntax.Sql;
 import liquibase.statement.syntax.UnparsedSql;
+import liquibase.exception.ValidationErrors;
+import liquibase.exception.ValidationErrors;
 
 public class RawSqlGenerator implements SqlGenerator<RawSqlStatement> {
     public int getSpecializationLevel() {
@@ -14,8 +16,8 @@ public class RawSqlGenerator implements SqlGenerator<RawSqlStatement> {
         return true;
     }
 
-    public GeneratorValidationErrors validate(RawSqlStatement rawSqlStatement, Database database) {
-        return new GeneratorValidationErrors();
+    public ValidationErrors validate(RawSqlStatement rawSqlStatement, Database database) {
+        return new ValidationErrors();
     }
 
     public Sql[] generateSql(RawSqlStatement statement, Database database) {

@@ -24,6 +24,6 @@ public interface CustomSqlChange extends CustomChange {
      * @throws liquibase.exception.CustomChangeException if an exception occurs while processing this change
      * @throws liquibase.exception.UnsupportedChangeException if this change is not supported by the {@link liquibase.database.Database} passed as argument
      */
-    public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException, CustomChangeException;
+    public SqlStatement[] generateStatements(Database database) throws CustomChangeException;
 
 }

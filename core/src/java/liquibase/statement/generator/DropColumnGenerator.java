@@ -4,6 +4,8 @@ import liquibase.database.*;
 import liquibase.statement.DropColumnStatement;
 import liquibase.statement.syntax.Sql;
 import liquibase.statement.syntax.UnparsedSql;
+import liquibase.exception.ValidationErrors;
+import liquibase.exception.ValidationErrors;
 
 public class DropColumnGenerator implements SqlGenerator<DropColumnStatement> {
 
@@ -15,8 +17,8 @@ public class DropColumnGenerator implements SqlGenerator<DropColumnStatement> {
         return true;
     }
 
-    public GeneratorValidationErrors validate(DropColumnStatement dropColumnStatement, Database database) {
-        return new GeneratorValidationErrors();
+    public ValidationErrors validate(DropColumnStatement dropColumnStatement, Database database) {
+        return new ValidationErrors();
     }
 
     public Sql[] generateSql(DropColumnStatement statement, Database database) {

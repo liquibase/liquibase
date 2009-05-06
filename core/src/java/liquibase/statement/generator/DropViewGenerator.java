@@ -4,6 +4,8 @@ import liquibase.database.Database;
 import liquibase.statement.DropViewStatement;
 import liquibase.statement.syntax.Sql;
 import liquibase.statement.syntax.UnparsedSql;
+import liquibase.exception.ValidationErrors;
+import liquibase.exception.ValidationErrors;
 
 public class DropViewGenerator implements SqlGenerator<DropViewStatement> {
     public int getSpecializationLevel() {
@@ -14,8 +16,8 @@ public class DropViewGenerator implements SqlGenerator<DropViewStatement> {
         return true;
     }
 
-    public GeneratorValidationErrors validate(DropViewStatement dropViewStatement, Database database) {
-        return new GeneratorValidationErrors();
+    public ValidationErrors validate(DropViewStatement dropViewStatement, Database database) {
+        return new ValidationErrors();
     }
 
     public Sql[] generateSql(DropViewStatement statement, Database database) {

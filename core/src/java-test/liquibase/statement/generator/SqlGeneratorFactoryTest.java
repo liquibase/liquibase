@@ -9,6 +9,8 @@ import liquibase.statement.AddDefaultValueStatement;
 import liquibase.statement.CreateTableStatement;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.syntax.Sql;
+import liquibase.exception.ValidationErrors;
+import liquibase.exception.ValidationErrors;
 import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
@@ -165,8 +167,8 @@ public class SqlGeneratorFactoryTest {
                 return level;
             }
 
-            public GeneratorValidationErrors validate(SqlStatement sqlStatement, Database database) {
-                return new GeneratorValidationErrors();
+            public ValidationErrors validate(SqlStatement sqlStatement, Database database) {
+                return new ValidationErrors();
             }
 
             public boolean isValidGenerator(SqlStatement statement, Database database) {
@@ -192,8 +194,8 @@ public class SqlGeneratorFactoryTest {
             return false;
         }
 
-        public GeneratorValidationErrors validate(SqlStatement sqlStatement, Database database) {
-            return new GeneratorValidationErrors();
+        public ValidationErrors validate(SqlStatement sqlStatement, Database database) {
+            return new ValidationErrors();
         }
 
         public Sql[] generateSql(SqlStatement statement, Database database) {

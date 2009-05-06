@@ -61,13 +61,7 @@ public class DropDefaultValueChange extends AbstractChange {
 		this.columnDataType = columnDataType;
 	}
 
-    public void validate(Database database) throws InvalidChangeDefinitionException {
-        if (StringUtils.trimToNull(columnName) == null) {
-            throw new InvalidChangeDefinitionException("columnName is required", this);
-        }
-    }
-
-    public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
+    public SqlStatement[] generateStatements(Database database) {
 
     	if (database instanceof SQLiteDatabase) {
     		// return special statements for SQLite databases
@@ -79,8 +73,7 @@ public class DropDefaultValueChange extends AbstractChange {
         };
     }
     
-    private SqlStatement[] generateStatementsForSQLiteDatabase(Database database) 
-			throws UnsupportedChangeException {
+    private SqlStatement[] generateStatementsForSQLiteDatabase(Database database) {
     	
     	// SQLite does not support this ALTER TABLE operation until now.
 		// For more information see: http://www.sqlite.org/omitted.html.
@@ -115,7 +108,7 @@ public class DropDefaultValueChange extends AbstractChange {
 			statements.addAll(SQLiteDatabase.getAlterTableStatements(
 					rename_alter_visitor,
 					database,getSchemaName(),getTableName()));
-    	} catch (JDBCException e) {
+    	} catch (Exception e) {
 			e.printStackTrace();
 		}
     	

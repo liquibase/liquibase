@@ -7,6 +7,7 @@ import liquibase.database.structure.Table;
 import liquibase.statement.AddDefaultValueStatement;
 import liquibase.statement.syntax.Sql;
 import liquibase.statement.syntax.UnparsedSql;
+import liquibase.exception.ValidationErrors;
 
 public class AddDefaultValueGeneratorInformix extends AddDefaultValueGenerator {
     public int getSpecializationLevel() {
@@ -18,8 +19,8 @@ public class AddDefaultValueGeneratorInformix extends AddDefaultValueGenerator {
     }
 
     @Override
-    public GeneratorValidationErrors validate(AddDefaultValueStatement addDefaultValueStatement, Database database) {
-        GeneratorValidationErrors validationErrors = super.validate(addDefaultValueStatement, database);
+    public ValidationErrors validate(AddDefaultValueStatement addDefaultValueStatement, Database database) {
+        ValidationErrors validationErrors = super.validate(addDefaultValueStatement, database);
         if (addDefaultValueStatement.getColumnDataType() == null) {
             validationErrors.checkRequiredField("columnDataType", addDefaultValueStatement.getColumnDataType());
         }

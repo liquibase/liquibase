@@ -5,16 +5,11 @@ import liquibase.FileOpener;
 import liquibase.changelog.parser.string.StringChangeLogSerializer;
 import liquibase.database.Database;
 import liquibase.database.structure.DatabaseObject;
-import liquibase.exception.InvalidChangeDefinitionException;
-import liquibase.exception.RollbackImpossibleException;
-import liquibase.exception.SetupException;
-import liquibase.exception.UnsupportedChangeException;
+import liquibase.exception.*;
 import liquibase.statement.SqlStatement;
-import liquibase.statement.generator.GeneratorValidationErrors;
 import liquibase.statement.generator.SqlGenerator;
 import liquibase.statement.generator.SqlGeneratorFactory;
 import liquibase.statement.syntax.Sql;
-import liquibase.util.StringUtils;
 
 import java.util.*;
 
@@ -38,11 +33,11 @@ public abstract class AbstractChange implements Change {
     /**
      * Constructor with tag name and name
      *
-     * @param changeName the tag name for this change
+     * @param changeName        the tag name for this change
      * @param changeDescription the name for this change
      */
     protected AbstractChange(String changeName, String changeDescription) {
-        this.changeMetaData = new ChangeMetaData(changeName,changeDescription);
+        this.changeMetaData = new ChangeMetaData(changeName, changeDescription);
     }
 
     public int getSpecializationLevel() {
@@ -65,17 +60,13 @@ public abstract class AbstractChange implements Change {
         this.changeSet = changeSet;
     }
 
-    public void validate(Database database) throws InvalidChangeDefinitionException {
-        try {
-            for (SqlStatement statement : generateStatements(database)) {
-                GeneratorValidationErrors validationErrors = SqlGeneratorFactory.getInstance().getBestGenerator(statement, database).validate(statement, database);
-                if (validationErrors.hasErrors()) {
-                    throw new InvalidChangeDefinitionException("Change is invalid for "+database+": "+StringUtils.join(validationErrors.getErrorMessages(), ", "), this);
-                }
-            }
-        } catch (UnsupportedChangeException e) {
-            throw new InvalidChangeDefinitionException("Change is invalid for "+database+": "+e.getMessage(), this);
+    public ValidationErrors validate(Database database) {
+        ValidationErrors changeValidationErrors = new ValidationErrors();
+        for (SqlStatement statement : generateStatements(database)) {
+            changeValidationErrors.addAll(SqlGeneratorFactory.getInstance().getBestGenerator(statement, database).validate(statement, database));
         }
+
+        return changeValidationErrors;
     }
 
 
@@ -103,7 +94,7 @@ public abstract class AbstractChange implements Change {
      * @see liquibase.change.Change#generateCheckSum()
      */
     public CheckSum generateCheckSum() {
-            return new CheckSum(new StringChangeLogSerializer().serialize(this));
+        return new CheckSum(new StringChangeLogSerializer().serialize(this));
     }
 
     //~ ------------------------------------------------------------------------------- private methods
@@ -148,41 +139,37 @@ public abstract class AbstractChange implements Change {
     public void setFileOpener(FileOpener fileOpener) {
         this.fileOpener = fileOpener;
     }
-    
+
     /**
      * Returns the FileOpen as provided by the creating ChangeLog.
-     * 
+     *
      * @return The file opener
      */
     public FileOpener getFileOpener() {
         return fileOpener;
     }
-    
+
     /**
      * Most Changes don't need to do any setup.
      * This implements a no-op
      */
     public void setUp() throws SetupException {
-        
+
     }
 
     public Set<DatabaseObject> getAffectedDatabaseObjects(Database database) {
         Set<DatabaseObject> affectedObjects = new HashSet<DatabaseObject>();
-        try {
-            for (SqlStatement statement : generateStatements(database)) {
-                SqlGenerator sqlGenerator = SqlGeneratorFactory.getInstance().getBestGenerator(statement, database);
-                if (sqlGenerator != null) {
-                    for (Sql sql : sqlGenerator.generateSql(statement, database)) {
-                        affectedObjects.addAll(sql.getAffectedDatabaseObjects());
-                    }
+        for (SqlStatement statement : generateStatements(database)) {
+            SqlGenerator sqlGenerator = SqlGeneratorFactory.getInstance().getBestGenerator(statement, database);
+            if (sqlGenerator != null) {
+                for (Sql sql : sqlGenerator.generateSql(statement, database)) {
+                    affectedObjects.addAll(sql.getAffectedDatabaseObjects());
                 }
-
             }
 
-            return affectedObjects;
-        } catch (UnsupportedChangeException e) {
-            return new HashSet<DatabaseObject>();
         }
+
+        return affectedObjects;
     }
 
 }

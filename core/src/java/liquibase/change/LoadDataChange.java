@@ -4,6 +4,7 @@ import liquibase.csv.CSVReader;
 import liquibase.database.Database;
 import liquibase.exception.InvalidChangeDefinitionException;
 import liquibase.exception.UnsupportedChangeException;
+import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.statement.InsertStatement;
 import liquibase.statement.SqlStatement;
 import liquibase.util.StringUtils;
@@ -64,18 +65,11 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns 
       	columns.add((LoadDataColumnConfig) column);
     }
 
-    public void validate(Database database) throws InvalidChangeDefinitionException {
-        if (StringUtils.trimToNull(tableName) == null) {
-            throw new InvalidChangeDefinitionException("tableName is required", this);
-        }
-
-    }
-
-    public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
+    public SqlStatement[] generateStatements(Database database) {
         try {
             InputStream stream = getFileOpener().getResourceAsStream(getFile());
             if (stream == null) {
-                throw new UnsupportedChangeException("Data file "+getFile()+" was not found");
+                throw new UnexpectedLiquibaseException("Data file "+getFile()+" was not found");
             }
 
             InputStreamReader streamReader;
@@ -88,7 +82,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns 
             CSVReader reader = new CSVReader(streamReader);
             String[] headers = reader.readNext();
             if (headers == null) {
-                throw new UnsupportedChangeException("Data file "+getFile()+" was empty");
+                throw new UnexpectedLiquibaseException("Data file "+getFile()+" was empty");
             }
 
             List<SqlStatement> statements = new ArrayList<SqlStatement>();
@@ -116,7 +110,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns 
                             } else if (columnConfig.getType().equalsIgnoreCase("STRING")) {
                                 valueConfig.setValue(value.toString());
                             } else {
-                                throw new UnsupportedChangeException("loadData type of "+columnConfig.getType()+" is not supported.  Please use BOOLEAN, NUMERIC, DATE, or STRING");
+                                throw new UnexpectedLiquibaseException("loadData type of "+columnConfig.getType()+" is not supported.  Please use BOOLEAN, NUMERIC, DATE, or STRING");
                             }
                             value = valueConfig.getValueObject();
                         }

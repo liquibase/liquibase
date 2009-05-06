@@ -5,6 +5,8 @@ import liquibase.database.PostgresDatabase;
 import liquibase.statement.DropSequenceStatement;
 import liquibase.statement.syntax.Sql;
 import liquibase.statement.syntax.UnparsedSql;
+import liquibase.exception.ValidationErrors;
+import liquibase.exception.ValidationErrors;
 
 public class DropSequenceGenerator implements SqlGenerator<DropSequenceStatement> {
     public int getSpecializationLevel() {
@@ -15,8 +17,8 @@ public class DropSequenceGenerator implements SqlGenerator<DropSequenceStatement
         return database.supportsSequences();
     }
 
-    public GeneratorValidationErrors validate(DropSequenceStatement dropSequenceStatement, Database database) {
-        return new GeneratorValidationErrors();
+    public ValidationErrors validate(DropSequenceStatement dropSequenceStatement, Database database) {
+        return new ValidationErrors();
     }
 
     public Sql[] generateSql(DropSequenceStatement statement, Database database) {

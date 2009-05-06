@@ -6,6 +6,8 @@ import liquibase.database.structure.Table;
 import liquibase.statement.AddColumnStatement;
 import liquibase.statement.syntax.Sql;
 import liquibase.statement.syntax.UnparsedSql;
+import liquibase.exception.ValidationErrors;
+import liquibase.exception.ValidationErrors;
 
 public class AddColumnGenerator implements SqlGenerator<AddColumnStatement> {
     
@@ -17,8 +19,8 @@ public class AddColumnGenerator implements SqlGenerator<AddColumnStatement> {
         return true;
     }
 
-    public GeneratorValidationErrors validate(AddColumnStatement statement, Database database) {
-        GeneratorValidationErrors validationErrors = new GeneratorValidationErrors();
+    public ValidationErrors validate(AddColumnStatement statement, Database database) {
+        ValidationErrors validationErrors = new ValidationErrors();
 
         if (statement.isPrimaryKey() && (database instanceof CacheDatabase
                 || database instanceof H2Database

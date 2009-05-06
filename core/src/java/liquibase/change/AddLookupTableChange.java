@@ -105,21 +105,6 @@ public class AddLookupTableChange extends AbstractChange {
         this.constraintName = constraintName;
     }
 
-    public void validate(Database database) throws InvalidChangeDefinitionException {
-        if (StringUtils.trimToNull(existingTableName) == null) {
-            throw new InvalidChangeDefinitionException("existingTableName is required", this);
-        }
-        if (StringUtils.trimToNull(existingColumnName) == null) {
-            throw new InvalidChangeDefinitionException("existingColumnName is required", this);
-        }
-        if (StringUtils.trimToNull(newTableName) == null) {
-            throw new InvalidChangeDefinitionException("newTableName is required", this);
-        }
-        if (StringUtils.trimToNull(newColumnName) == null) {
-            throw new InvalidChangeDefinitionException("newColumnName is required", this);
-        }
-    }
-
     protected Change[] createInverses() {
         DropForeignKeyConstraintChange dropFK = new DropForeignKeyConstraintChange();
         dropFK.setBaseTableSchemaName(getExistingTableSchemaName());
@@ -136,19 +121,7 @@ public class AddLookupTableChange extends AbstractChange {
         };
     }
 
-    public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
-        if (database instanceof DerbyDatabase) {
-            throw new UnsupportedChangeException("Add Lookup Table currently not supported in Derby");
-        } else if (database instanceof HsqlDatabase) {
-            throw new UnsupportedChangeException("Add Lookup Table currently not supported in HSQLDB");
-        } else if (database instanceof CacheDatabase) {
-            throw new UnsupportedChangeException("Add Lookup Table not currently supported for Cache");
-        } else if (database instanceof FirebirdDatabase) {
-            throw new UnsupportedChangeException("Add Lookup Table not currently supported for Firebird");
-        } else if (database instanceof InformixDatabase) {
-        	throw new UnsupportedChangeException("Add Lookup Table not currently supported for Informix");
-        }
-
+    public SqlStatement[] generateStatements(Database database) {
         List<SqlStatement> statements = new ArrayList<SqlStatement>();
 
         String newTableSchemaName = getNewTableSchemaName() == null?database.getDefaultSchemaName():getNewTableSchemaName();

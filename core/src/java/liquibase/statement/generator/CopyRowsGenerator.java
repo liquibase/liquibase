@@ -6,6 +6,8 @@ import liquibase.database.SQLiteDatabase;
 import liquibase.statement.CopyRowsStatement;
 import liquibase.statement.syntax.Sql;
 import liquibase.statement.syntax.UnparsedSql;
+import liquibase.exception.ValidationErrors;
+import liquibase.exception.ValidationErrors;
 
 public class CopyRowsGenerator implements SqlGenerator<CopyRowsStatement> {
     public int getSpecializationLevel() {
@@ -16,8 +18,8 @@ public class CopyRowsGenerator implements SqlGenerator<CopyRowsStatement> {
         return (database instanceof SQLiteDatabase);
     }
 
-    public GeneratorValidationErrors validate(CopyRowsStatement copyRowsStatement, Database database) {
-        return new GeneratorValidationErrors();
+    public ValidationErrors validate(CopyRowsStatement copyRowsStatement, Database database) {
+        return new ValidationErrors();
     }
 
     public Sql[] generateSql(CopyRowsStatement statement, Database database) {

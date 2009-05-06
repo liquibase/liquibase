@@ -72,17 +72,7 @@ public class AddNotNullConstraintChange extends AbstractChange {
         this.columnDataType = columnDataType;
     }
 
-    public void validate(Database database) throws InvalidChangeDefinitionException {
-        if (StringUtils.trimToNull(tableName) == null) {
-            throw new InvalidChangeDefinitionException("tableName is required", this);
-        }
-        if (StringUtils.trimToNull(columnName) == null) {
-            throw new InvalidChangeDefinitionException("columnName is required", this);
-        }
-
-    }
-
-    public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
+    public SqlStatement[] generateStatements(Database database) {
 
         if (database instanceof SQLiteDatabase) {
     		// return special statements for SQLite databases
@@ -106,8 +96,7 @@ public class AddNotNullConstraintChange extends AbstractChange {
         return statements.toArray(new SqlStatement[statements.size()]);
     }
     
-    private SqlStatement[] generateStatementsForSQLiteDatabase(Database database) 
-			throws UnsupportedChangeException {
+    private SqlStatement[] generateStatementsForSQLiteDatabase(Database database) {
     	
     	// SQLite does not support this ALTER TABLE operation until now.
 		// For more information see: http://www.sqlite.org/omitted.html.
@@ -164,10 +153,8 @@ public class AddNotNullConstraintChange extends AbstractChange {
     		
 		try {
     		// alter table
-			statements.addAll(SQLiteDatabase.getAlterTableStatements(
-					rename_alter_visitor,
-					database,getSchemaName(),getTableName()));
-    	} catch (JDBCException e) {
+			statements.addAll(SQLiteDatabase.getAlterTableStatements(rename_alter_visitor, database,getSchemaName(),getTableName()));
+    	} catch (Exception e) {
 			e.printStackTrace();
 		}
     	

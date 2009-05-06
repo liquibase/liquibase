@@ -5,10 +5,7 @@ import liquibase.DatabaseChangeLog;
 import liquibase.RanChangeSet;
 import liquibase.change.Change;
 import liquibase.database.Database;
-import liquibase.exception.InvalidChangeDefinitionException;
-import liquibase.exception.PreconditionErrorException;
-import liquibase.exception.PreconditionFailedException;
-import liquibase.exception.SetupException;
+import liquibase.exception.*;
 import liquibase.preconditions.AndPrecondition;
 import liquibase.preconditions.ErrorPrecondition;
 import liquibase.preconditions.FailedPrecondition;
@@ -25,7 +22,7 @@ public class ValidatingVisitor implements ChangeSetVisitor {
     private List<ErrorPrecondition> errorPreconditions = new ArrayList<ErrorPrecondition>();
     private Set<ChangeSet> duplicateChangeSets = new HashSet<ChangeSet>();
     private List<SetupException> setupExceptions = new ArrayList<SetupException>();
-    private List<InvalidChangeDefinitionException> changeValidationExceptions = new ArrayList<InvalidChangeDefinitionException>();
+    private List<Throwable> changeValidationExceptions = new ArrayList<Throwable>();
 
     private Set<String> seenChangeSets = new HashSet<String>();
 
@@ -63,7 +60,7 @@ public class ValidatingVisitor implements ChangeSetVisitor {
 
             try {
                 change.validate(database);
-            } catch (InvalidChangeDefinitionException e) {
+            } catch (Throwable e) {
                 changeValidationExceptions.add(e);
             }
         }
@@ -110,7 +107,7 @@ public class ValidatingVisitor implements ChangeSetVisitor {
         return setupExceptions;
     }
 
-    public List<InvalidChangeDefinitionException> getChangeValidationExceptions() {
+    public List<Throwable> getChangeValidationExceptions() {
         return changeValidationExceptions;
     }
 

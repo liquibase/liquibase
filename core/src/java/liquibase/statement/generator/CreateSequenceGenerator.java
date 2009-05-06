@@ -4,6 +4,8 @@ import liquibase.database.*;
 import liquibase.statement.CreateSequenceStatement;
 import liquibase.statement.syntax.Sql;
 import liquibase.statement.syntax.UnparsedSql;
+import liquibase.exception.ValidationErrors;
+import liquibase.exception.ValidationErrors;
 
 public class CreateSequenceGenerator implements SqlGenerator<CreateSequenceStatement> {
     public int getSpecializationLevel() {
@@ -14,8 +16,8 @@ public class CreateSequenceGenerator implements SqlGenerator<CreateSequenceState
         return database.supportsSequences();
     }
 
-    public GeneratorValidationErrors validate(CreateSequenceStatement statement, Database database) {
-        GeneratorValidationErrors validationErrors = new GeneratorValidationErrors();
+    public ValidationErrors validate(CreateSequenceStatement statement, Database database) {
+        ValidationErrors validationErrors = new ValidationErrors();
 
         if (database instanceof FirebirdDatabase) {
             validationErrors.checkDisallowedField("startValue", statement.getStartValue());

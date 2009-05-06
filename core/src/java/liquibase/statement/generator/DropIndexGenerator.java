@@ -6,6 +6,8 @@ import liquibase.database.MySQLDatabase;
 import liquibase.statement.DropIndexStatement;
 import liquibase.statement.syntax.Sql;
 import liquibase.statement.syntax.UnparsedSql;
+import liquibase.exception.ValidationErrors;
+import liquibase.exception.ValidationErrors;
 
 public class DropIndexGenerator implements SqlGenerator<DropIndexStatement> {
     public int getSpecializationLevel() {
@@ -16,8 +18,8 @@ public class DropIndexGenerator implements SqlGenerator<DropIndexStatement> {
         return true;
     }
 
-    public GeneratorValidationErrors validate(DropIndexStatement statement, Database database) {
-        GeneratorValidationErrors validationErrors = new GeneratorValidationErrors();
+    public ValidationErrors validate(DropIndexStatement statement, Database database) {
+        ValidationErrors validationErrors = new ValidationErrors();
 
         if (database instanceof MySQLDatabase || database instanceof MSSQLDatabase) {
                 validationErrors.checkRequiredField("tableName", statement.getTableName());
