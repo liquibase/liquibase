@@ -86,7 +86,7 @@ public interface Change {
     /**
      * Calculates the checksum (currently MD5 hash) for the current configuration of this change.
      */
-    public String generateCheckSum();
+    public CheckSum generateCheckSum();
 
      /**
      * @return Confirmation message to be displayed after the change is executed

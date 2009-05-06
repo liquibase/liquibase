@@ -14,6 +14,7 @@ import liquibase.exception.RollbackImpossibleException;
 import liquibase.exception.SetupException;
 import liquibase.exception.UnsupportedChangeException;
 import liquibase.changelog.parser.xml.XMLChangeLogSerializer;
+import liquibase.changelog.parser.string.StringChangeLogSerializer;
 import liquibase.util.MD5Util;
 import liquibase.util.StringUtils;
 
@@ -29,10 +30,13 @@ import java.util.*;
  */
 public abstract class AbstractChange implements Change {
 
+    @ChangeMetaDataField
     private ChangeMetaData changeMetaData;
 
+    @ChangeMetaDataField
     private FileOpener fileOpener;
 
+    @ChangeMetaDataField
     private ChangeSet changeSet;
 
     /**
@@ -102,13 +106,8 @@ public abstract class AbstractChange implements Change {
     /**
      * @see liquibase.change.Change#generateCheckSum()
      */
-    public String generateCheckSum() {
-        try {
-            String string = new XMLChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).serialize(this);
-            return MD5Util.computeMD5(string);
-        } catch (ParserConfigurationException e) {
-            throw new RuntimeException(e);
-        }
+    public CheckSum generateCheckSum() {
+            return new CheckSum(new StringChangeLogSerializer().serialize(this));
     }
 
     //~ ------------------------------------------------------------------------------- private methods

@@ -4,6 +4,7 @@ import liquibase.DatabaseChangeLog;
 import liquibase.FileOpener;
 import liquibase.ChangeSet;
 import liquibase.changelog.ChangeLogParser;
+import liquibase.changelog.ChangeLogSerializer;
 import liquibase.util.StreamUtil;
 import liquibase.change.RawSQLChange;
 import liquibase.exception.ChangeLogParseException;
@@ -17,6 +18,10 @@ public class SqlChangeLogParser implements ChangeLogParser {
         return new String [] {
                 "sql"
         };
+    }
+
+    public ChangeLogSerializer getSerializer() {
+        return null;
     }
 
     public DatabaseChangeLog parse(String physicalChangeLogLocation, Map<String, Object> changeLogParameters, FileOpener fileOpener) throws ChangeLogParseException {

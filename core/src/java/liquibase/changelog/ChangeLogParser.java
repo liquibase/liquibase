@@ -11,4 +11,6 @@ public interface ChangeLogParser {
     public DatabaseChangeLog parse(String physicalChangeLogLocation, Map<String, Object> changeLogParameters, FileOpener fileOpener) throws ChangeLogParseException;
 
     public String[] getValidFileExtensions();
+
+    public ChangeLogSerializer getSerializer();
 }
