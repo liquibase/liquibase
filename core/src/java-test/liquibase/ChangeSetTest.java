@@ -1,10 +1,10 @@
 package liquibase;
 
-import liquibase.ChangeSet;
+import liquibase.change.AddDefaultValueChange;
 import liquibase.change.CreateTableChange;
 import liquibase.change.InsertDataChange;
-import liquibase.change.AddDefaultValueChange;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import org.junit.Test;
 
 /**

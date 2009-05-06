@@ -2,13 +2,13 @@ package liquibase;
 
 import liquibase.log.LogFactory;
 
-import java.io.IOException;
 import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.Modifier;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
-import java.util.ArrayList;
-import java.lang.reflect.Modifier;
 
 public class PluginUtil {
 

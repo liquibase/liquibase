@@ -1,17 +1,13 @@
 package liquibase.change;
 
-import liquibase.database.MockDatabase;
-import liquibase.database.Database;
 import liquibase.database.DB2Database;
-import liquibase.database.statement.*;
+import liquibase.database.Database;
+import liquibase.statement.AddColumnStatement;
+import liquibase.statement.ReorganizeTableStatement;
+import liquibase.statement.SqlStatement;
+import liquibase.statement.UpdateStatement;
 import static org.junit.Assert.*;
-import static org.junit.Assert.assertTrue;
 import org.junit.Test;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
-
-import javax.xml.parsers.DocumentBuilderFactory;
 
 /**
  * Tests for {@link AddColumnChange}

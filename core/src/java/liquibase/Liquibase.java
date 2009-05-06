@@ -1,24 +1,20 @@
 package liquibase;
 
-import liquibase.ChangeSet;
-import liquibase.DatabaseChangeLog;
-import liquibase.DatabaseChangeLogLock;
-import liquibase.FileOpener;
+import liquibase.changelog.ChangeLogIterator;
+import liquibase.changelog.ChangeLogParserFactory;
 import liquibase.changelog.filter.*;
 import liquibase.changelog.visitor.*;
-import liquibase.changelog.ChangeLogIterator;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
-import liquibase.database.statement.UpdateStatement;
-import liquibase.database.statement.visitor.SqlVisitor;
-import liquibase.database.template.JdbcOutputTemplate;
 import liquibase.database.template.Executor;
+import liquibase.database.template.JdbcOutputTemplate;
 import liquibase.exception.JDBCException;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.LockException;
 import liquibase.lock.LockHandler;
 import liquibase.log.LogFactory;
-import liquibase.changelog.ChangeLogParserFactory;
+import liquibase.statement.UpdateStatement;
+import liquibase.statement.visitor.SqlVisitor;
 import liquibase.util.LiquibaseUtil;
 import liquibase.util.StreamUtil;
 
@@ -26,11 +22,11 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.Writer;
+import java.sql.Connection;
 import java.text.DateFormat;
 import java.util.*;
-import java.util.logging.Logger;
 import java.util.logging.Level;
-import java.sql.Connection;
+import java.util.logging.Logger;
 
 /**
  * Core LiquiBase facade.

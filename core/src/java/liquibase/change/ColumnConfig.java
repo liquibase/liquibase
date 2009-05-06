@@ -2,9 +2,9 @@ package liquibase.change;
 
 import liquibase.database.Database;
 import liquibase.database.InformixDatabase;
-import liquibase.database.statement.ComputedDateValue;
-import liquibase.database.statement.ComputedNumericValue;
 import liquibase.database.structure.Column;
+import liquibase.statement.ComputedDateValue;
+import liquibase.statement.ComputedNumericValue;
 import liquibase.util.ISODateFormat;
 
 import java.text.NumberFormat;

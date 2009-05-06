@@ -1,10 +1,9 @@
 package liquibase.preconditions;
 
-import liquibase.exception.MigrationFailedException;
 import liquibase.util.StringUtils;
 
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 public class Preconditions extends AndPrecondition {
 

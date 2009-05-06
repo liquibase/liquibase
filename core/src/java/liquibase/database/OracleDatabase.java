@@ -1,11 +1,11 @@
 package liquibase.database;
 
-import liquibase.database.statement.RawSqlStatement;
-import liquibase.database.statement.SqlStatement;
 import liquibase.database.structure.DatabaseSnapshot;
 import liquibase.database.structure.OracleDatabaseSnapshot;
-import liquibase.exception.JDBCException;
 import liquibase.diff.DiffStatusListener;
+import liquibase.exception.JDBCException;
+import liquibase.statement.RawSqlStatement;
+import liquibase.statement.SqlStatement;
 
 import java.lang.reflect.Method;
 import java.sql.Connection;

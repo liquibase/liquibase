@@ -1,18 +1,15 @@
 package liquibase.changelog;
 
+import liquibase.DatabaseChangeLog;
+import liquibase.FileOpener;
+import liquibase.changelog.parser.sql.SqlChangeLogParser;
+import liquibase.changelog.parser.xml.XMLChangeLogParser;
+import liquibase.exception.ChangeLogParseException;
 import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Map;
-
-import liquibase.changelog.parser.xml.XMLChangeLogParser;
-import liquibase.changelog.parser.sql.SqlChangeLogParser;
-import liquibase.changelog.ChangeLogParserFactory;
-import liquibase.changelog.ChangeLogParser;
-import liquibase.DatabaseChangeLog;
-import liquibase.FileOpener;
-import liquibase.exception.ChangeLogParseException;
 
 public class ChangeLogParserFactoryTest {
     @Before

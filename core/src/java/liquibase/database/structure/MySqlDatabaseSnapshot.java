@@ -1,18 +1,14 @@
 package liquibase.database.structure;
 
+import liquibase.database.Database;
+import liquibase.diff.DiffStatusListener;
+import liquibase.exception.JDBCException;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import liquibase.database.Database;
-import liquibase.diff.DiffStatusListener;
-import liquibase.exception.JDBCException;
+import java.util.*;
 
 public class MySqlDatabaseSnapshot extends SqlDatabaseSnapshot {
 	

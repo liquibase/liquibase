@@ -9,7 +9,6 @@ import java.net.URI;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Enumeration;
-import java.util.Collection;
 
 public class JUnitFileOpener implements FileOpener {
     private URLClassLoader classLoader;

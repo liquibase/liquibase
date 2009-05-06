@@ -2,17 +2,11 @@ package liquibase.change;
 
 import liquibase.database.Database;
 import liquibase.database.SQLiteDatabase;
-import liquibase.database.statement.DropForeignKeyConstraintStatement;
-import liquibase.database.statement.SqlStatement;
-import liquibase.database.structure.DatabaseObject;
-import liquibase.database.structure.ForeignKey;
-import liquibase.database.structure.Table;
 import liquibase.exception.InvalidChangeDefinitionException;
 import liquibase.exception.UnsupportedChangeException;
+import liquibase.statement.DropForeignKeyConstraintStatement;
+import liquibase.statement.SqlStatement;
 import liquibase.util.StringUtils;
-
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * Drops an existing foreign key constraint.

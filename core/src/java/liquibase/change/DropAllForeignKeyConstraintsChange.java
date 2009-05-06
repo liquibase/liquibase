@@ -1,17 +1,19 @@
 package liquibase.change;
 
 import liquibase.database.Database;
-import liquibase.database.statement.FindForeignKeyConstraintsStatement;
-import liquibase.database.statement.SqlStatement;
-import liquibase.database.statement.visitor.SqlVisitor;
-import liquibase.database.structure.DatabaseObject;
 import liquibase.database.template.Executor;
 import liquibase.exception.InvalidChangeDefinitionException;
 import liquibase.exception.JDBCException;
 import liquibase.exception.UnsupportedChangeException;
+import liquibase.statement.FindForeignKeyConstraintsStatement;
+import liquibase.statement.SqlStatement;
+import liquibase.statement.visitor.SqlVisitor;
 import liquibase.util.StringUtils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 public class DropAllForeignKeyConstraintsChange extends AbstractChange {
 

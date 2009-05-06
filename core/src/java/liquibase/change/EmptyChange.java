@@ -1,12 +1,9 @@
 package liquibase.change;
 
 import liquibase.database.Database;
-import liquibase.database.statement.SqlStatement;
-import liquibase.database.structure.DatabaseObject;
 import liquibase.exception.InvalidChangeDefinitionException;
 import liquibase.exception.UnsupportedChangeException;
-
-import java.util.Set;
+import liquibase.statement.SqlStatement;
 
 public class EmptyChange extends AbstractChange {
     public EmptyChange() {

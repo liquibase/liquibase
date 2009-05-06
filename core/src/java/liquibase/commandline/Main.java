@@ -1,24 +1,32 @@
 package liquibase.commandline;
 
+import liquibase.CompositeFileOpener;
+import liquibase.FileSystemFileOpener;
+import liquibase.Liquibase;
+import liquibase.database.Database;
+import liquibase.exception.CommandLineParsingException;
+import liquibase.exception.JDBCException;
+import liquibase.exception.ValidationFailedException;
+import liquibase.lock.LockHandler;
+import liquibase.log.LogFactory;
+import liquibase.util.LiquibaseUtil;
+import liquibase.util.StreamUtil;
+import liquibase.util.StringUtils;
+
 import java.io.*;
 import java.lang.reflect.Field;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
-import java.text.*;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import liquibase.*;
-import liquibase.database.*;
-import liquibase.exception.*;
-import liquibase.lock.LockHandler;
-import liquibase.log.LogFactory;
-import liquibase.util.*;
 
 /**
  * Class for executing LiquiBase via the command line.

@@ -2,24 +2,20 @@ package liquibase.change;
 
 import liquibase.ChangeSet;
 import liquibase.FileOpener;
+import liquibase.changelog.parser.string.StringChangeLogSerializer;
 import liquibase.database.Database;
-import liquibase.database.statement.SqlStatement;
-import liquibase.database.statement.generator.GeneratorValidationErrors;
-import liquibase.database.statement.generator.SqlGenerator;
-import liquibase.database.statement.generator.SqlGeneratorFactory;
-import liquibase.database.statement.syntax.Sql;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.exception.InvalidChangeDefinitionException;
 import liquibase.exception.RollbackImpossibleException;
 import liquibase.exception.SetupException;
 import liquibase.exception.UnsupportedChangeException;
-import liquibase.changelog.parser.xml.XMLChangeLogSerializer;
-import liquibase.changelog.parser.string.StringChangeLogSerializer;
-import liquibase.util.MD5Util;
+import liquibase.statement.SqlStatement;
+import liquibase.statement.generator.GeneratorValidationErrors;
+import liquibase.statement.generator.SqlGenerator;
+import liquibase.statement.generator.SqlGeneratorFactory;
+import liquibase.statement.syntax.Sql;
 import liquibase.util.StringUtils;
 
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import java.util.*;
 
 /**

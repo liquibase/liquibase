@@ -1,17 +1,17 @@
 package liquibase.servlet;
 
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.ServletException;
-import java.util.logging.LogRecord;
-import java.util.logging.Level;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Date;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.DateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
 
 /**
  * Servlet that can be registered via web.xml to view the log of the LiquiBase run from the LiquibaseServletListener.

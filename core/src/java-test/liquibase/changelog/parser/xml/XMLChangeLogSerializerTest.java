@@ -1,12 +1,13 @@
 package liquibase.changelog.parser.xml;
 
-import org.junit.Test;
-import static org.junit.Assert.*;
-import static org.junit.Assert.assertEquals;
-import org.w3c.dom.*;
-import liquibase.change.*;
 import liquibase.ClassLoaderFileOpener;
-import liquibase.changelog.parser.xml.XMLChangeLogSerializer;
+import liquibase.change.*;
+import static org.junit.Assert.*;
+import org.junit.Test;
+import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.sql.DatabaseMetaData;

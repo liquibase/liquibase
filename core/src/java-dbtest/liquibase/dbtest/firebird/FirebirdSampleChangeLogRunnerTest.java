@@ -1,7 +1,7 @@
 package liquibase.dbtest.firebird;
 
-import liquibase.exception.JDBCException;
 import liquibase.dbtest.AbstractSimpleChangeLogRunnerTest;
+import liquibase.exception.JDBCException;
 
 /**
  * To configure database:

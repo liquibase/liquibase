@@ -6,9 +6,6 @@ import liquibase.exception.SetupException;
 import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
-import org.w3c.dom.Element;
-
-import javax.xml.parsers.DocumentBuilderFactory;
 
 /**
  * Tests the SQL File with a simple text file. No real SQL is used with the

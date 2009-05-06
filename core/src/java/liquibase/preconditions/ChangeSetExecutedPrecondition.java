@@ -1,13 +1,11 @@
 package liquibase.preconditions;
 
-import liquibase.database.Database;
-import liquibase.DatabaseChangeLog;
 import liquibase.ChangeSet;
+import liquibase.DatabaseChangeLog;
 import liquibase.RanChangeSet;
-import liquibase.exception.PreconditionFailedException;
+import liquibase.database.Database;
 import liquibase.exception.PreconditionErrorException;
-import liquibase.exception.JDBCException;
-import liquibase.exception.DatabaseHistoryException;
+import liquibase.exception.PreconditionFailedException;
 
 public class ChangeSetExecutedPrecondition implements Precondition {
 

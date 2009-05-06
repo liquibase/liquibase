@@ -1,10 +1,10 @@
 package liquibase.dbdoc;
 
 import liquibase.ChangeSet;
+import liquibase.Liquibase;
 import liquibase.change.Change;
 import liquibase.database.Database;
 import liquibase.exception.MigrationFailedException;
-import liquibase.Liquibase;
 
 import java.io.File;
 import java.io.FileWriter;

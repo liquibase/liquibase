@@ -1,28 +1,17 @@
 package liquibase.database;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.*;
-
 import liquibase.change.ColumnConfig;
 import liquibase.change.CreateTableChange;
-//import liquibase.database.sql.CopyRowsStatement;
-import liquibase.database.statement.CopyRowsStatement;
-import liquibase.database.statement.CreateIndexStatement;
-import liquibase.database.statement.DropTableStatement;
-import liquibase.database.statement.ReindexStatement;
-//import liquibase.database.sql.ReindexStatement;
-import liquibase.database.statement.RenameTableStatement;
-import liquibase.database.statement.SqlStatement;
-import liquibase.database.structure.Column;
-import liquibase.database.structure.DatabaseSnapshot;
-import liquibase.database.structure.Index;
-import liquibase.database.structure.SQLiteDatabaseSnapshot;
-import liquibase.database.structure.Table;
+import liquibase.database.structure.*;
 import liquibase.diff.DiffStatusListener;
 import liquibase.exception.JDBCException;
 import liquibase.exception.UnsupportedChangeException;
+import liquibase.statement.*;
 import liquibase.util.ISODateFormat;
+
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.*;
 
 public class SQLiteDatabase extends AbstractDatabase {
 

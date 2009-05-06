@@ -2,8 +2,8 @@ package liquibase.changelog.filter;
 
 import liquibase.ChangeSet;
 import liquibase.RanChangeSet;
-import liquibase.changelog.filter.AlreadyRanChangeSetFilter;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 import java.util.ArrayList;

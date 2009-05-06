@@ -1,9 +1,5 @@
 package liquibase.change;
 
-import liquibase.database.structure.DatabaseObject;
-
-import java.util.Set;
-
 /**
  * Allows execution of arbitrary SQL.  This change can be used when existing changes are either don't exist,
  * are not flexible enough, or buggy. 

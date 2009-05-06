@@ -1,9 +1,9 @@
 package liquibase.ant;
 
+import liquibase.Liquibase;
 import liquibase.database.Database;
 import liquibase.diff.Diff;
 import liquibase.diff.DiffResult;
-import liquibase.Liquibase;
 import org.apache.tools.ant.BuildException;
 
 import java.io.PrintStream;

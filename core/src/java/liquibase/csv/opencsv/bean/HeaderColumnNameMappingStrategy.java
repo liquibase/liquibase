@@ -1,12 +1,12 @@
 package liquibase.csv.opencsv.bean;
 
+import liquibase.csv.opencsv.CSVReader;
+
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.io.IOException;
-
-import liquibase.csv.opencsv.CSVReader;
 
 /**
  Copyright 2007 Kyle Miller.

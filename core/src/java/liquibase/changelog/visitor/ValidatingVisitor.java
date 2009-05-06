@@ -5,13 +5,13 @@ import liquibase.DatabaseChangeLog;
 import liquibase.RanChangeSet;
 import liquibase.change.Change;
 import liquibase.database.Database;
+import liquibase.exception.InvalidChangeDefinitionException;
+import liquibase.exception.PreconditionErrorException;
 import liquibase.exception.PreconditionFailedException;
 import liquibase.exception.SetupException;
-import liquibase.exception.PreconditionErrorException;
-import liquibase.exception.InvalidChangeDefinitionException;
 import liquibase.preconditions.AndPrecondition;
-import liquibase.preconditions.FailedPrecondition;
 import liquibase.preconditions.ErrorPrecondition;
+import liquibase.preconditions.FailedPrecondition;
 
 import java.util.ArrayList;
 import java.util.HashSet;

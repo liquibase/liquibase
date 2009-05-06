@@ -1,6 +1,5 @@
 package liquibase;
 
-import liquibase.FileOpener;
 import org.junit.Before;
 
 /**

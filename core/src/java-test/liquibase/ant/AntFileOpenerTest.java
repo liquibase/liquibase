@@ -1,10 +1,11 @@
 package liquibase.ant;
 
-import liquibase.FileOpener;
 import liquibase.AbstractFileOpenerTest;
+import liquibase.FileOpener;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.types.Path;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import org.junit.Test;
 
 import java.io.InputStream;

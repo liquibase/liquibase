@@ -1,12 +1,12 @@
 package liquibase.preconditions;
 
+import liquibase.DatabaseChangeLog;
 import liquibase.database.Database;
 import liquibase.database.structure.DatabaseSnapshot;
-import liquibase.DatabaseChangeLog;
-import liquibase.util.StringUtils;
-import liquibase.exception.PreconditionFailedException;
-import liquibase.exception.PreconditionErrorException;
 import liquibase.exception.JDBCException;
+import liquibase.exception.PreconditionErrorException;
+import liquibase.exception.PreconditionFailedException;
+import liquibase.util.StringUtils;
 
 public class ViewExistsPrecondition implements Precondition {
     private String schemaName;

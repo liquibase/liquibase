@@ -3,11 +3,11 @@
  */
 package liquibase.database.structure;
 
-import java.util.Set;
-
 import liquibase.database.Database;
 import liquibase.diff.DiffStatusListener;
 import liquibase.exception.JDBCException;
+
+import java.util.Set;
 
 /**
  * @author otaranenko

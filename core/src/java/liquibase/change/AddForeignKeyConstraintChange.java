@@ -2,19 +2,13 @@ package liquibase.change;
 
 import liquibase.database.Database;
 import liquibase.database.SQLiteDatabase;
-import liquibase.database.statement.AddForeignKeyConstraintStatement;
-import liquibase.database.statement.SqlStatement;
-import liquibase.database.structure.Column;
-import liquibase.database.structure.DatabaseObject;
-import liquibase.database.structure.ForeignKey;
-import liquibase.database.structure.Table;
 import liquibase.exception.InvalidChangeDefinitionException;
 import liquibase.exception.UnsupportedChangeException;
+import liquibase.statement.AddForeignKeyConstraintStatement;
+import liquibase.statement.SqlStatement;
 import liquibase.util.StringUtils;
 
 import java.sql.DatabaseMetaData;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * Adds a foreign key constraint to an existing column.

@@ -3,12 +3,11 @@ package liquibase.changelog;
 import liquibase.ChangeSet;
 import liquibase.DatabaseChangeLog;
 import liquibase.changelog.filter.ContextChangeSetFilter;
-import liquibase.database.MySQLDatabase;
-import liquibase.database.Database;
 import liquibase.changelog.filter.DbmsChangeSetFilter;
 import liquibase.changelog.visitor.ChangeSetVisitor;
-import liquibase.changelog.ChangeLogIterator;
-import static org.junit.Assert.*;
+import liquibase.database.Database;
+import liquibase.database.MySQLDatabase;
+import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
 

@@ -1,8 +1,8 @@
 package liquibase.csv.opencsv.bean;
 
-import java.io.IOException;
-
 import liquibase.csv.CSVReader;
+
+import java.io.IOException;
 
 /**
  Copyright 2007 Kyle Miller.

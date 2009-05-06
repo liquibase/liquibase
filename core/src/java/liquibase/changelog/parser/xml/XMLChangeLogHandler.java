@@ -3,30 +3,30 @@ package liquibase.changelog.parser.xml;
 import liquibase.ChangeSet;
 import liquibase.DatabaseChangeLog;
 import liquibase.FileOpener;
-import liquibase.database.statement.visitor.SqlVisitorFactory;
-import liquibase.database.statement.visitor.SqlVisitor;
 import liquibase.change.*;
 import liquibase.change.custom.CustomChangeWrapper;
+import liquibase.changelog.ChangeLogParserFactory;
+import liquibase.changelog.ExpressionExpander;
 import liquibase.exception.CustomChangeException;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.MigrationFailedException;
 import liquibase.log.LogFactory;
-import liquibase.changelog.ExpressionExpander;
-import liquibase.changelog.ChangeLogParserFactory;
 import liquibase.preconditions.*;
+import liquibase.statement.visitor.SqlVisitor;
+import liquibase.statement.visitor.SqlVisitorFactory;
 import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtils;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
+import java.io.File;
+import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
+import java.net.URL;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.io.File;
-import java.io.InputStream;
-import java.net.URL;
 
 class XMLChangeLogHandler extends DefaultHandler {
 

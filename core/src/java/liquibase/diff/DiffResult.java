@@ -1,42 +1,30 @@
 package liquibase.diff;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.io.RandomAccessFile;
-import java.sql.*;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.SortedSet;
-import java.util.TreeSet;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-
 import liquibase.change.*;
-
+import liquibase.changelog.parser.xml.LiquibaseSchemaResolver;
+import liquibase.changelog.parser.xml.XMLChangeLogParser;
+import liquibase.changelog.parser.xml.XMLChangeLogSerializer;
 import liquibase.csv.CSVWriter;
 import liquibase.database.Database;
 import liquibase.database.structure.*;
 import liquibase.exception.JDBCException;
 import liquibase.log.LogFactory;
-import liquibase.changelog.parser.xml.LiquibaseSchemaResolver;
-import liquibase.changelog.parser.xml.XMLChangeLogSerializer;
-import liquibase.changelog.parser.xml.XMLChangeLogParser;
 import liquibase.util.SqlUtil;
 import liquibase.util.StringUtils;
 import liquibase.xml.DefaultXmlWriter;
 import liquibase.xml.XmlWriter;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.*;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.Statement;
+import java.sql.Types;
+import java.util.*;
 
 public class DiffResult {
 

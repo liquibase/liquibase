@@ -1,26 +1,23 @@
 package liquibase;
 
 import liquibase.change.Change;
-import liquibase.change.RawSQLChange;
 import liquibase.change.EmptyChange;
+import liquibase.change.RawSQLChange;
 import liquibase.database.Database;
-import liquibase.database.statement.SqlStatement;
-import liquibase.database.statement.visitor.SqlVisitor;
 import liquibase.exception.*;
 import liquibase.log.LogFactory;
-import liquibase.util.MD5Util;
-import liquibase.util.StringUtils;
-import liquibase.util.StreamUtil;
+import liquibase.preconditions.ErrorPrecondition;
 import liquibase.preconditions.FailedPrecondition;
 import liquibase.preconditions.Preconditions;
-import liquibase.preconditions.ErrorPrecondition;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Text;
+import liquibase.statement.SqlStatement;
+import liquibase.statement.visitor.SqlVisitor;
+import liquibase.util.MD5Util;
+import liquibase.util.StreamUtil;
+import liquibase.util.StringUtils;
 
 import java.util.*;
-import java.util.logging.Logger;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Encapsulates a changeSet and all its associated changes.

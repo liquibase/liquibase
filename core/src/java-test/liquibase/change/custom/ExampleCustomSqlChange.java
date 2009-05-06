@@ -2,15 +2,12 @@ package liquibase.change.custom;
 
 import liquibase.FileOpener;
 import liquibase.database.Database;
-import liquibase.database.statement.RawSqlStatement;
-import liquibase.database.statement.SqlStatement;
-import liquibase.database.structure.DatabaseObject;
+import liquibase.exception.InvalidChangeDefinitionException;
 import liquibase.exception.RollbackImpossibleException;
 import liquibase.exception.SetupException;
 import liquibase.exception.UnsupportedChangeException;
-import liquibase.exception.InvalidChangeDefinitionException;
-
-import java.util.Set;
+import liquibase.statement.RawSqlStatement;
+import liquibase.statement.SqlStatement;
 
 public class ExampleCustomSqlChange implements CustomSqlChange, CustomSqlRollback {
 

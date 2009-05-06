@@ -4,10 +4,10 @@ import liquibase.database.AbstractDatabase;
 import liquibase.database.Database;
 import liquibase.database.InformixDatabase;
 import liquibase.database.OracleDatabase;
-import liquibase.database.statement.visitor.SqlVisitor;
 import liquibase.diff.DiffStatusListener;
 import liquibase.exception.JDBCException;
 import liquibase.log.LogFactory;
+import liquibase.statement.visitor.SqlVisitor;
 import liquibase.util.StringUtils;
 
 import java.sql.DatabaseMetaData;

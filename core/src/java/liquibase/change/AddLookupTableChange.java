@@ -1,18 +1,16 @@
 package liquibase.change;
 
 import liquibase.database.*;
-import liquibase.database.statement.RawSqlStatement;
-import liquibase.database.statement.ReorganizeTableStatement;
-import liquibase.database.statement.SqlStatement;
-import liquibase.database.structure.Column;
-import liquibase.database.structure.DatabaseObject;
-import liquibase.database.structure.ForeignKey;
-import liquibase.database.structure.Table;
 import liquibase.exception.InvalidChangeDefinitionException;
 import liquibase.exception.UnsupportedChangeException;
+import liquibase.statement.RawSqlStatement;
+import liquibase.statement.ReorganizeTableStatement;
+import liquibase.statement.SqlStatement;
 import liquibase.util.StringUtils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Extracts data from an existing column to create a lookup table.

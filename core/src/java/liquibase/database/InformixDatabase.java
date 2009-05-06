@@ -1,5 +1,12 @@
 package liquibase.database;
 
+import liquibase.database.structure.DatabaseSnapshot;
+import liquibase.database.structure.InformixDatabaseSnapshot;
+import liquibase.diff.DiffStatusListener;
+import liquibase.exception.JDBCException;
+import liquibase.statement.RawSqlStatement;
+import liquibase.statement.SqlStatement;
+
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashSet;
@@ -7,13 +14,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
-
-import liquibase.database.statement.RawSqlStatement;
-import liquibase.database.statement.SqlStatement;
-import liquibase.database.structure.DatabaseSnapshot;
-import liquibase.database.structure.InformixDatabaseSnapshot;
-import liquibase.diff.DiffStatusListener;
-import liquibase.exception.JDBCException;
 
 public class InformixDatabase extends AbstractDatabase {
 

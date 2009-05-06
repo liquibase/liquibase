@@ -2,14 +2,14 @@ package liquibase.database.template;
 
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
-import liquibase.database.statement.CallableSqlStatement;
-import liquibase.database.statement.SqlStatement;
-import liquibase.database.statement.generator.SqlGeneratorFactory;
-import liquibase.database.statement.syntax.Sql;
-import liquibase.database.statement.visitor.SqlVisitor;
 import liquibase.exception.JDBCException;
 import liquibase.exception.StatementNotSupportedOnDatabaseException;
 import liquibase.log.LogFactory;
+import liquibase.statement.CallableSqlStatement;
+import liquibase.statement.SqlStatement;
+import liquibase.statement.generator.SqlGeneratorFactory;
+import liquibase.statement.syntax.Sql;
+import liquibase.statement.visitor.SqlVisitor;
 import liquibase.util.JdbcUtils;
 import liquibase.util.StringUtils;
 
@@ -17,7 +17,10 @@ import java.sql.CallableStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Class to simplify execution of SqlStatements.  Based heavily on <a href="http://static.springframework.org/spring/docs/2.0.x/reference/jdbc.html">Spring's JdbcTemplate</a>.

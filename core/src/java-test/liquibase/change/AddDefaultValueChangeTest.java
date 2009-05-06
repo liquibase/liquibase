@@ -2,18 +2,16 @@ package liquibase.change;
 
 import liquibase.database.Database;
 import liquibase.database.MockDatabase;
-import liquibase.database.statement.AddDefaultValueStatement;
-import liquibase.database.statement.SqlStatement;
-import liquibase.database.statement.ComputedNumericValue;
-import liquibase.database.statement.ComputedDateValue;
+import liquibase.statement.AddDefaultValueStatement;
+import liquibase.statement.ComputedDateValue;
+import liquibase.statement.ComputedNumericValue;
+import liquibase.statement.SqlStatement;
 import liquibase.test.DatabaseTest;
 import liquibase.test.DatabaseTestTemplate;
 import liquibase.util.ISODateFormat;
 import static org.junit.Assert.*;
 import org.junit.Test;
-import org.w3c.dom.Element;
 
-import javax.xml.parsers.DocumentBuilderFactory;
 import java.util.Date;
 
 public class AddDefaultValueChangeTest extends AbstractChangeTest {

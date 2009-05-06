@@ -1,23 +1,15 @@
 package liquibase.database;
 
-import liquibase.database.statement.RawSqlStatement;
-import liquibase.database.statement.SqlStatement;
-import liquibase.database.structure.DatabaseSnapshot;
-import liquibase.database.structure.HsqlDatabaseSnapshot;
 import liquibase.exception.DateParseException;
 import liquibase.exception.JDBCException;
+import liquibase.statement.RawSqlStatement;
+import liquibase.statement.SqlStatement;
 import liquibase.util.StringUtils;
-import liquibase.util.ISODateFormat;
-import liquibase.diff.DiffStatusListener;
 
 import java.sql.Connection;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.text.DateFormat;
 import java.util.Date;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
 
 public class H2Database extends HsqlDatabase {
     private static final DataType DATETIME_TYPE = new DataType("TIMESTAMP", false);

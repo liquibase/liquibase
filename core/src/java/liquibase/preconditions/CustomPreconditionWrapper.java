@@ -1,15 +1,17 @@
 package liquibase.preconditions;
 
-import liquibase.exception.*;
-import liquibase.database.Database;
 import liquibase.DatabaseChangeLog;
+import liquibase.database.Database;
+import liquibase.exception.CustomPreconditionErrorException;
+import liquibase.exception.CustomPreconditionFailedException;
+import liquibase.exception.PreconditionErrorException;
+import liquibase.exception.PreconditionFailedException;
 import liquibase.util.ObjectUtil;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import java.util.Map;
-import java.util.HashMap;
-import java.lang.reflect.InvocationTargetException;
 
 public class CustomPreconditionWrapper implements Precondition {
 

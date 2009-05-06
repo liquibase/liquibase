@@ -3,9 +3,9 @@ package liquibase.changelog;
 import liquibase.ChangeSet;
 import liquibase.DatabaseChangeLog;
 import liquibase.changelog.filter.ChangeSetFilter;
+import liquibase.changelog.visitor.ChangeSetVisitor;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
-import liquibase.changelog.visitor.ChangeSetVisitor;
 
 import java.util.Arrays;
 import java.util.Collections;

@@ -1,22 +1,8 @@
 package liquibase.change;
 
 import static org.junit.Assert.*;
-import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
-import liquibase.database.statement.generator.*;
-import liquibase.database.statement.SqlStatement;
-import liquibase.database.statement.CreateTableStatement;
-import liquibase.database.statement.AddAutoIncrementStatement;
-import liquibase.database.statement.AddDefaultValueStatement;
-import liquibase.database.statement.syntax.Sql;
-import liquibase.database.Database;
-import liquibase.database.MySQLDatabase;
-import liquibase.database.OracleDatabase;
-import liquibase.database.H2Database;
-
-import java.util.List;
-import java.util.SortedSet;
 
 /**
  * Tests for {@link ChangeFactory}

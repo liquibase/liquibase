@@ -2,12 +2,10 @@ package liquibase.change;
 
 import liquibase.csv.CSVReader;
 import liquibase.database.Database;
-import liquibase.database.statement.InsertStatement;
-import liquibase.database.statement.SqlStatement;
-import liquibase.database.structure.DatabaseObject;
 import liquibase.exception.InvalidChangeDefinitionException;
 import liquibase.exception.UnsupportedChangeException;
-import liquibase.util.MD5Util;
+import liquibase.statement.InsertStatement;
+import liquibase.statement.SqlStatement;
 import liquibase.util.StringUtils;
 
 import java.io.IOException;
@@ -15,7 +13,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 
 public class LoadDataChange extends AbstractChange implements ChangeWithColumns {

@@ -1,9 +1,9 @@
 package liquibase.database;
 
-import liquibase.exception.JDBCException;
 import liquibase.database.structure.DatabaseSnapshot;
 import liquibase.database.structure.UnsupportedDatabaseSnapshot;
 import liquibase.diff.DiffStatusListener;
+import liquibase.exception.JDBCException;
 
 import java.sql.Connection;
 import java.sql.ResultSet;

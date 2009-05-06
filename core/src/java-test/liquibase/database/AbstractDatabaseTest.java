@@ -3,7 +3,8 @@ package liquibase.database;
 import liquibase.change.ColumnConfig;
 import liquibase.test.TestContext;
 import static org.easymock.EasyMock.*;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 import java.sql.Connection;
