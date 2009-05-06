@@ -1,17 +1,14 @@
 package liquibase.change;
 
 import liquibase.FileOpener;
-import liquibase.database.structure.DatabaseObject;
 import liquibase.exception.SetupException;
 import liquibase.log.LogFactory;
-import liquibase.util.MD5Util;
 import liquibase.util.StreamUtil;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Set;
 import java.util.logging.Logger;
 
 /**
@@ -26,17 +23,20 @@ import java.util.logging.Logger;
  * 
  */
 public class SQLFileChange extends AbstractSQLChange {
+
+    @ChangeMetaDataField
     private static final Logger log = LogFactory.getLogger();
-    private String file;
+
+    private String path;
     private String encoding = null;
-    
-    
+
+
     public SQLFileChange() {
         super("sqlFile", "SQL From File");
     }
 
     public String getPath() {
-        return file;
+        return path;
     }
 
     /**
@@ -45,7 +45,7 @@ public class SQLFileChange extends AbstractSQLChange {
      * @param fileName The file to use
      */
     public void setPath(String fileName) {
-        file = fileName;
+        path = fileName;
     }
     
     /**
@@ -66,17 +66,17 @@ public class SQLFileChange extends AbstractSQLChange {
 		}
 
 		public void setUp() throws SetupException {
-        if (file == null) {
+        if (path == null) {
             throw new SetupException("<sqlfile> - No path specified");
         }
-        log.fine("SQLFile file:" + file);
-        boolean loaded = loadFromClasspath(file);
+        log.fine("SQLFile file:" + path);
+        boolean loaded = loadFromClasspath(path);
         if(!loaded) {
-            loaded = loadFromFileSystem(file);
+            loaded = loadFromFileSystem(path);
         }
         
         if (!loaded) {
-            throw new SetupException("<sqlfile path="+file+"> - Could not find file");
+            throw new SetupException("<sqlfile path="+ path +"> - Could not find file");
         }
         log.finer("SQLFile file contents is:" + getSql());
     }
@@ -151,11 +151,11 @@ public class SQLFileChange extends AbstractSQLChange {
      * 
      * @see liquibase.change.AbstractChange#generateCheckSum()
      */
-    public String generateCheckSum() {
-        return MD5Util.computeMD5(getSql());
+    public CheckSum generateCheckSum() {
+        return new CheckSum(getSql());
     }
 
     public String getConfirmationMessage() {
-        return "SQL in file " + file + " executed";
+        return "SQL in file " + path + " executed";
     }
 }

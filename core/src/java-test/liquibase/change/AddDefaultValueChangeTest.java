@@ -196,15 +196,15 @@ public class AddDefaultValueChangeTest extends AbstractChangeTest {
         change.setDefaultValueBoolean(true);
         change.setDefaultValueDate("2007-01-02");
 
-        String md5sum1 = change.generateCheckSum();
+        String md5sum1 = change.generateCheckSum().toString();
 
         change.setSchemaName("SCHEMA_NAME2");
-        String md5Sum2 = change.generateCheckSum();
+        String md5Sum2 = change.generateCheckSum().toString();
 
         assertFalse(md5sum1.equals(md5Sum2));
 
         change.setSchemaName("SCHEMA_NAME");
-        String md5Sum3 = change.generateCheckSum();
+        String md5Sum3 = change.generateCheckSum().toString();
 
         assertTrue(md5sum1.equals(md5Sum3));
 

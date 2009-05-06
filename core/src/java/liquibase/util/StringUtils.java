@@ -96,4 +96,13 @@ public class StringUtils {
 
 
     }
+
+    public static String repeat(String string, int times) {
+        String returnString = "";
+        for (int i=0; i<times; i++) {
+            returnString += string;
+        }
+
+        return returnString;
+    }
 }

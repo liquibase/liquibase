@@ -157,14 +157,14 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns 
         return "Data loaded from "+getFile()+" into "+getTableName();
     }
 
-    public String generateCheckSum() {
+    public CheckSum generateCheckSum() {
         InputStream stream = null;
         try {
             stream = getFileOpener().getResourceAsStream(getFile());
             if (stream == null) {
                 throw new RuntimeException(getFile() + " could not be found");
             }
-            return MD5Util.computeMD5(stream);
+            return new CheckSum(stream);
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {

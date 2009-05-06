@@ -94,20 +94,20 @@ public class LoadDataChangeTest extends AbstractChangeTest {
     }
     
     @Test
-    public void getMd5Sum() throws Exception {
+    public void generateCheckSum() throws Exception {
         LoadDataChange refactoring = new LoadDataChange();
         refactoring.setSchemaName("SCHEMA_NAME");
         refactoring.setTableName("TABLE_NAME");
         refactoring.setFile("changelogs/sample.data1.csv");
         refactoring.setFileOpener(new JUnitFileOpener());
 
-        String md5sum1 = refactoring.generateCheckSum();
+        String md5sum1 = refactoring.generateCheckSum().toString();
 
         refactoring.setFile("changelogs/sample.data2.csv");
-        String md5sum2 = refactoring.generateCheckSum();
+        String md5sum2 = refactoring.generateCheckSum().toString();
 
         assertTrue(!md5sum1.equals(md5sum2));
-        assertTrue(md5sum2.equals(refactoring.generateCheckSum()));
+        assertEquals(md5sum2, refactoring.generateCheckSum().toString());
     }
 
 }

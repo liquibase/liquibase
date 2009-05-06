@@ -3,13 +3,17 @@ package liquibase.changelog.parser.xml;
 import liquibase.DatabaseChangeLog;
 import liquibase.FileOpener;
 import liquibase.changelog.ChangeLogParser;
+import liquibase.changelog.ChangeLogSerializer;
 import liquibase.exception.ChangeLogParseException;
+import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.log.LogFactory;
 import liquibase.changelog.parser.xml.LiquibaseSchemaResolver;
 import org.xml.sax.*;
 
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
@@ -24,6 +28,14 @@ public class XMLChangeLogParser implements ChangeLogParser {
         return new String[] {
             "xml"
         };
+    }
+
+    public ChangeLogSerializer getSerializer() {
+        try {
+            return new XMLChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument());
+        } catch (ParserConfigurationException e) {
+            throw new UnexpectedLiquibaseException(e);
+        }
     }
 
     public DatabaseChangeLog parse(String physicalChangeLogLocation, Map<String, Object> changeLogParameters, FileOpener fileOpener) throws ChangeLogParseException {

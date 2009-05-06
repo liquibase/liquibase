@@ -11,11 +11,9 @@ import liquibase.changelog.ChangeLogSerializer;
 import org.w3c.dom.*;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Field;
 import java.sql.DatabaseMetaData;
-import java.util.Collection;
-import java.util.SortedMap;
-import java.util.TreeMap;
-import java.util.Map;
+import java.util.*;
 
 public class XMLChangeLogSerializer implements ChangeLogSerializer {
 
@@ -47,38 +45,37 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
     public Element createNode(Change change) {
         Element node = currentChangeLogFileDOM.createElement(change.getChangeMetaData().getName());
         try {
-            for (Method method : change.getClass().getMethods()) {
-                String methodName = method.getName();
-                if (!methodName.equals("getConfirmationMessage")
-                        && !methodName.equals("getChangeMetaData")
-                        && !methodName.equals("getSpecializationLevel")
-                        && !methodName.equals("getClass")
-                        && !methodName.equals("getAffectedDatabaseObjects")
-                        && !methodName.equals("getLastColumn")
-                        && !methodName.equals("getChangeSet")
-                        && !methodName.equals("getMd5sum")
-                        && (methodName.startsWith("get") || methodName.startsWith("is"))
-                        && method.getParameterTypes().length == 0) {
-                    String propertyName = methodName.replaceFirst("^is", "").replaceFirst("^get", "");
-                    propertyName = propertyName.substring(0, 1).toLowerCase() + propertyName.substring(1);
-                    if (method.getReturnType().equals(ColumnConfig.class)) {
-                        node.appendChild(createNode((ColumnConfig) method.invoke(change)));
-                    } else if (Collection.class.isAssignableFrom(method.getReturnType())) {
-                        for (Object object : (Collection) method.invoke(change)) {
-                            if (object instanceof ColumnConfig) {
-                                node.appendChild(createNode((ColumnConfig) object));
-                            }
+            List<Field> allFields = new ArrayList<Field>();
+            Class classToExtractFieldsFrom = change.getClass();
+            while (!classToExtractFieldsFrom.equals(Object.class)) {
+                allFields.addAll(Arrays.asList(classToExtractFieldsFrom.getDeclaredFields()));
+                classToExtractFieldsFrom = classToExtractFieldsFrom.getSuperclass();
+            }
+
+            for (Field field : allFields) {
+                field.setAccessible(true);
+                if (field.getAnnotation(ChangeMetaDataField.class) != null) {
+                    continue;
+                }
+                
+                String propertyName = field.getName();
+                if (field.getType().equals(ColumnConfig.class)) {
+                    node.appendChild(createNode((ColumnConfig) field.get(change)));
+                } else if (Collection.class.isAssignableFrom(field.getType())) {
+                    for (Object object : (Collection) field.get(change)) {
+                        if (object instanceof ColumnConfig) {
+                            node.appendChild(createNode((ColumnConfig) object));
                         }
-                    } else {
-                        Object value = method.invoke(change);
-                        if (value != null) {
-                            if (propertyName.equals("procedureBody")
-                                    || propertyName.equals("sql")
-                                    || propertyName.equals("selectQuery")) {
-                                node.setTextContent(value.toString());
-                            } else {
-                                node.setAttribute(propertyName, value.toString());
-                            }
+                    }
+                } else {
+                    Object value = field.get(change);
+                    if (value != null) {
+                        if (propertyName.equals("procedureBody")
+                                || propertyName.equals("sql")
+                                || propertyName.equals("selectQuery")) {
+                            node.setTextContent(value.toString());
+                        } else {
+                            node.setAttribute(propertyName, value.toString());
                         }
                     }
                 }

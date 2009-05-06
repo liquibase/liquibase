@@ -9,6 +9,7 @@ import liquibase.database.structure.DatabaseObject;
 import liquibase.util.StreamUtil;
 import liquibase.exception.InvalidChangeDefinitionException;
 import liquibase.test.TestContext;
+import liquibase.changelog.parser.string.StringChangeLogSerializer;
 import static org.easymock.EasyMock.*;
 import static org.easymock.classextension.EasyMock.createMock;
 import static org.easymock.classextension.EasyMock.replay;
@@ -20,10 +21,8 @@ import org.w3c.dom.Element;
 import java.io.StringWriter;
 import java.sql.Connection;
 import java.sql.Statement;
-import java.util.Set;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Arrays;
+import java.util.*;
+import java.lang.reflect.Field;
 
 /**
  * Base test class for changes
@@ -38,6 +37,70 @@ public abstract class AbstractChangeTest {
 
     @Test
     public abstract void getConfirmationMessage() throws Exception;
+
+    @Test
+    public void generateCheckSum() throws Exception {
+        String className = getClass().getName().replaceAll("Test$", "");
+        if (className.indexOf("Abstract") > 0) {
+            return;
+        }
+        Change change = (Change) Class.forName(className).getConstructor().newInstance();
+        CheckSum checkSum = change.generateCheckSum();
+        assertNotNull(checkSum);
+        assertEquals(2, checkSum.getVersion());
+        assertTrue(checkSum.toString().startsWith("2:"));
+
+        Map<String, String> seenCheckSums = new HashMap<String, String>();
+        for (Field field : change.getClass().getDeclaredFields()) {
+            field.setAccessible(true);
+            if (field.getName().startsWith("$VR") || field.getName().equals("serialVersionUID")) {
+                //code coverage related
+            } else  if (String.class.isAssignableFrom(field.getType())) {
+                field.set(change, "asdghasdgasdg");
+                checkThatChecksumIsNew(change, seenCheckSums, field);
+                field.set(change, "gsgasdgasdggasdg sdg a");
+                checkThatChecksumIsNew(change, seenCheckSums, field);
+            } else if (Boolean.class.isAssignableFrom(field.getType())) {
+                field.set(change, Boolean.TRUE);
+                checkThatChecksumIsNew(change, seenCheckSums, field);
+                field.set(change, Boolean.FALSE);
+                checkThatChecksumIsNew(change, seenCheckSums, field);
+            } else if (Integer.class.isAssignableFrom(field.getType())) {
+                field.set(change, 6532);
+                checkThatChecksumIsNew(change, seenCheckSums, field);
+                field.set(change, -52352);
+                checkThatChecksumIsNew(change, seenCheckSums, field);
+            } else if (List.class.isAssignableFrom(field.getType())) {
+                ColumnConfig column1 = new ColumnConfig();
+                ((List) field.get(change)).add(column1);
+
+                column1.setName("ghsdgasdg");
+                checkThatChecksumIsNew(change, seenCheckSums, field);
+
+                column1.setType("gasdgasdg");
+                checkThatChecksumIsNew(change, seenCheckSums, field);
+
+                ColumnConfig column2 = new ColumnConfig();
+                ((List) field.get(change)).add(column2);
+
+                column2.setName("87682346asgasdg");
+                checkThatChecksumIsNew(change, seenCheckSums, field);
+
+            } else {
+                throw new RuntimeException("Unknown field type: "+field.getType()+" for "+field.getName());
+            }
+        }
+    }
+
+    private void checkThatChecksumIsNew(Change change, Map<String, String> seenCheckSums, Field field) {
+        String serialized = new StringChangeLogSerializer().serialize(change);
+
+        CheckSum newCheckSum = change.generateCheckSum();
+        if (seenCheckSums.containsKey(newCheckSum.toString())) {
+            fail("generated duplicate checksum channging "+field.getName()+"\n"+serialized+"\nmatches\n"+seenCheckSums.get(newCheckSum.toString()));
+        }
+        seenCheckSums.put(newCheckSum.toString(), serialized);
+    }
 
     @Test
     public void saveStatement() throws Exception {
