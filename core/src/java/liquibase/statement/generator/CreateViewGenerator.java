@@ -18,6 +18,10 @@ public class CreateViewGenerator implements SqlGenerator<CreateViewStatement> {
 
     public ValidationErrors validate(CreateViewStatement createViewStatement, Database database) {
         ValidationErrors validationErrors = new ValidationErrors();
+
+        validationErrors.checkRequiredField("viewName", createViewStatement.getViewName());
+        validationErrors.checkRequiredField("selectQuery", createViewStatement.getSelectQuery());
+
         if (database instanceof HsqlDatabase
                 || database instanceof DB2Database
                 || database instanceof CacheDatabase

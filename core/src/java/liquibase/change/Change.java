@@ -68,6 +68,8 @@ public interface Change {
 
     public ValidationErrors validate(Database database);
 
+    boolean isAvailable(Database database);
+
     public ChangeSet getChangeSet();
 
     public void setChangeSet(ChangeSet changeSet);

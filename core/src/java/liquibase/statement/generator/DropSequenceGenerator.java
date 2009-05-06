@@ -18,7 +18,9 @@ public class DropSequenceGenerator implements SqlGenerator<DropSequenceStatement
     }
 
     public ValidationErrors validate(DropSequenceStatement dropSequenceStatement, Database database) {
-        return new ValidationErrors();
+        ValidationErrors validationErrors = new ValidationErrors();
+        validationErrors.checkRequiredField("sequenceName", dropSequenceStatement.getSequenceName());
+        return validationErrors;
     }
 
     public Sql[] generateSql(DropSequenceStatement statement, Database database) {

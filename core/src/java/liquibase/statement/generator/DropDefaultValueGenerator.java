@@ -20,6 +20,9 @@ public class DropDefaultValueGenerator implements SqlGenerator<DropDefaultValueS
 
     public ValidationErrors validate(DropDefaultValueStatement dropDefaultValueStatement, Database database) {
         ValidationErrors validationErrors = new ValidationErrors();
+        validationErrors.checkRequiredField("tableName", dropDefaultValueStatement.getTableName());
+        validationErrors.checkRequiredField("columnName", dropDefaultValueStatement.getColumnName());
+
         if (database instanceof InformixDatabase) {
             validationErrors.checkRequiredField("columnDataType", dropDefaultValueStatement.getColumnDataType());
         }

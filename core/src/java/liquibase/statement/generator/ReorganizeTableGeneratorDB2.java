@@ -19,7 +19,9 @@ public class ReorganizeTableGeneratorDB2 implements SqlGenerator<ReorganizeTable
     }
 
     public ValidationErrors validate(ReorganizeTableStatement reorganizeTableStatement, Database database) {
-        return new ValidationErrors();
+        ValidationErrors validationErrors = new ValidationErrors();
+        validationErrors.checkRequiredField("tableName", reorganizeTableStatement.getTableName());
+        return validationErrors;
     }
 
     public Sql[] generateSql(ReorganizeTableStatement statement, Database database) {

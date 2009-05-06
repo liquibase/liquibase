@@ -20,6 +20,10 @@ public class RenameColumnGenerator implements SqlGenerator<RenameColumnStatement
 
     public ValidationErrors validate(RenameColumnStatement renameColumnStatement, Database database) {
         ValidationErrors validationErrors = new ValidationErrors();
+        validationErrors.checkRequiredField("tableName", renameColumnStatement.getTableName());
+        validationErrors.checkRequiredField("oldColumnName", renameColumnStatement.getOldColumnName());
+        validationErrors.checkRequiredField("newColumnName", renameColumnStatement.getNewColumnName());
+
         if (database instanceof MySQLDatabase) {
             validationErrors.checkRequiredField("columnDataType", renameColumnStatement.getColumnDataType());
         }

@@ -17,7 +17,9 @@ public class RawSqlGenerator implements SqlGenerator<RawSqlStatement> {
     }
 
     public ValidationErrors validate(RawSqlStatement rawSqlStatement, Database database) {
-        return new ValidationErrors();
+        ValidationErrors validationErrors = new ValidationErrors();
+        validationErrors.checkRequiredField("sql", rawSqlStatement.getSql());
+        return validationErrors;
     }
 
     public Sql[] generateSql(RawSqlStatement statement, Database database) {

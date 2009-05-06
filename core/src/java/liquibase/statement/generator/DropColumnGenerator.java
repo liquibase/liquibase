@@ -18,7 +18,10 @@ public class DropColumnGenerator implements SqlGenerator<DropColumnStatement> {
     }
 
     public ValidationErrors validate(DropColumnStatement dropColumnStatement, Database database) {
-        return new ValidationErrors();
+        ValidationErrors validationErrors = new ValidationErrors();
+        validationErrors.checkRequiredField("tableName", dropColumnStatement.getTableName());
+        validationErrors.checkRequiredField("columnName", dropColumnStatement.getColumnName());
+        return validationErrors;
     }
 
     public Sql[] generateSql(DropColumnStatement statement, Database database) {

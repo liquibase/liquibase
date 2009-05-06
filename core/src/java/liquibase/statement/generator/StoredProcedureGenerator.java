@@ -17,7 +17,9 @@ public class StoredProcedureGenerator implements SqlGenerator<StoredProcedureSta
     }
 
     public ValidationErrors validate(StoredProcedureStatement storedProcedureStatement, Database database) {
-        return new ValidationErrors();
+        ValidationErrors validationErrors = new ValidationErrors();
+        validationErrors.checkRequiredField("procedureName", storedProcedureStatement.getProcedureName());
+        return validationErrors;
     }
 
     public Sql[] generateSql(StoredProcedureStatement statement, Database database) {

@@ -18,7 +18,10 @@ public class AddPrimaryKeyGenerator implements SqlGenerator<AddPrimaryKeyStateme
     }
 
     public ValidationErrors validate(AddPrimaryKeyStatement addPrimaryKeyStatement, Database database) {
-        return new ValidationErrors();
+        ValidationErrors validationErrors = new ValidationErrors();
+        validationErrors.checkRequiredField("columnNames", addPrimaryKeyStatement.getColumnNames());
+        validationErrors.checkRequiredField("tableName", addPrimaryKeyStatement.getTableName());
+        return validationErrors;
     }
 
     public Sql[] generateSql(AddPrimaryKeyStatement statement, Database database) {

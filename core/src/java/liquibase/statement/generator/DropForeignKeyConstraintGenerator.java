@@ -17,7 +17,10 @@ public class DropForeignKeyConstraintGenerator implements SqlGenerator<DropForei
     }
 
     public ValidationErrors validate(DropForeignKeyConstraintStatement dropForeignKeyConstraintStatement, Database database) {
-        return new ValidationErrors();
+        ValidationErrors validationErrors = new ValidationErrors();
+        validationErrors.checkRequiredField("baseTableName", dropForeignKeyConstraintStatement.getBaseTableName());
+        validationErrors.checkRequiredField("constraintName", dropForeignKeyConstraintStatement.getConstraintName());
+        return validationErrors;
     }
 
     public Sql[] generateSql(DropForeignKeyConstraintStatement statement, Database database) {

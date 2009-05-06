@@ -18,7 +18,9 @@ public class ReindexGeneratorSQLite implements SqlGenerator<ReindexStatement> {
     }
 
     public ValidationErrors validate(ReindexStatement reindexStatement, Database database) {
-        return new ValidationErrors();
+        ValidationErrors validationErrors = new ValidationErrors();
+        validationErrors.checkRequiredField("tableName", reindexStatement.getTableName());
+        return validationErrors;
     }
 
     public Sql[] generateSql(ReindexStatement statement, Database database) {

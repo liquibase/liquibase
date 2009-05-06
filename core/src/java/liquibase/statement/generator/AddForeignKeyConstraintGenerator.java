@@ -28,6 +28,11 @@ public class AddForeignKeyConstraintGenerator implements SqlGenerator<AddForeign
             validationErrors.checkDisallowedField("deferrable", addForeignKeyConstraintStatement.isDeferrable());
         }
 
+        validationErrors.checkRequiredField("baseColumnNames", addForeignKeyConstraintStatement.getBaseColumnNames());
+        validationErrors.checkRequiredField("baseTableNames", addForeignKeyConstraintStatement.getBaseTableName());
+        validationErrors.checkRequiredField("referencedColumnNames", addForeignKeyConstraintStatement.getReferencedColumnNames());
+        validationErrors.checkRequiredField("referencedTableName", addForeignKeyConstraintStatement.getReferencedTableName());
+
         return validationErrors;
     }
 

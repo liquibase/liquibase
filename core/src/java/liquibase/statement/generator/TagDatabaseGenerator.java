@@ -19,7 +19,9 @@ public class TagDatabaseGenerator implements SqlGenerator<TagDatabaseStatement> 
     }
 
     public ValidationErrors validate(TagDatabaseStatement tagDatabaseStatement, Database database) {
-        return new ValidationErrors();
+        ValidationErrors validationErrors = new ValidationErrors();
+        validationErrors.checkRequiredField("tag", tagDatabaseStatement.getTag());
+        return validationErrors;
     }
 
     public Sql[] generateSql(TagDatabaseStatement statement, Database database) {

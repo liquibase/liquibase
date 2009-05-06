@@ -20,6 +20,7 @@ public class DropIndexGenerator implements SqlGenerator<DropIndexStatement> {
 
     public ValidationErrors validate(DropIndexStatement statement, Database database) {
         ValidationErrors validationErrors = new ValidationErrors();
+        validationErrors.checkRequiredField("indexName", statement.getIndexName());
 
         if (database instanceof MySQLDatabase || database instanceof MSSQLDatabase) {
                 validationErrors.checkRequiredField("tableName", statement.getTableName());

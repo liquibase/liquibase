@@ -18,6 +18,7 @@ public class DropPrimaryKeyGenerator implements SqlGenerator<DropPrimaryKeyState
 
     public ValidationErrors validate(DropPrimaryKeyStatement dropPrimaryKeyStatement, Database database) {
         ValidationErrors validationErrors = new ValidationErrors();
+        validationErrors.checkRequiredField("tableName", dropPrimaryKeyStatement.getTableName());
 
         if (dropPrimaryKeyStatement.getConstraintName() == null) {
             if (database instanceof MSSQLDatabase

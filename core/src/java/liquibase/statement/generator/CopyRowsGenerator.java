@@ -19,7 +19,11 @@ public class CopyRowsGenerator implements SqlGenerator<CopyRowsStatement> {
     }
 
     public ValidationErrors validate(CopyRowsStatement copyRowsStatement, Database database) {
-        return new ValidationErrors();
+        ValidationErrors validationErrors = new ValidationErrors();
+        validationErrors.checkRequiredField("targetTable", copyRowsStatement.getTargetTable());
+        validationErrors.checkRequiredField("sourceTable", copyRowsStatement.getSourceTable());
+        validationErrors.checkRequiredField("copyColumns", copyRowsStatement.getCopyColumns());
+        return validationErrors;
     }
 
     public Sql[] generateSql(CopyRowsStatement statement, Database database) {

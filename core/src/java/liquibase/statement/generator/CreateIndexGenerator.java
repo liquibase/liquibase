@@ -21,7 +21,10 @@ public class CreateIndexGenerator implements SqlGenerator<CreateIndexStatement> 
     }
 
     public ValidationErrors validate(CreateIndexStatement createIndexStatement, Database database) {
-        return new ValidationErrors();
+        ValidationErrors validationErrors = new ValidationErrors();
+        validationErrors.checkRequiredField("tableName", createIndexStatement.getTableName());
+        validationErrors.checkRequiredField("columns", createIndexStatement.getColumns());
+        return validationErrors;
     }
 
     public Sql[] generateSql(CreateIndexStatement statement, Database database) {

@@ -24,6 +24,9 @@ public class RenameViewGenerator implements SqlGenerator<RenameViewStatement> {
 
     public ValidationErrors validate(RenameViewStatement renameViewStatement, Database database) {
         ValidationErrors validationErrors = new ValidationErrors();
+        validationErrors.checkRequiredField("oldViewName", renameViewStatement.getOldViewName());
+        validationErrors.checkRequiredField("newViewName", renameViewStatement.getNewViewName());
+
         if (database instanceof OracleDatabase) {
             validationErrors.checkDisallowedField("schemaName", renameViewStatement.getSchemaName());
         }

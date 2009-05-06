@@ -22,6 +22,10 @@ public class AddColumnGenerator implements SqlGenerator<AddColumnStatement> {
     public ValidationErrors validate(AddColumnStatement statement, Database database) {
         ValidationErrors validationErrors = new ValidationErrors();
 
+        validationErrors.checkRequiredField("columnName", statement.getColumnName());
+        validationErrors.checkRequiredField("columnType", statement.getColumnType());
+        validationErrors.checkRequiredField("tableName", statement.getTableName());
+        
         if (statement.isPrimaryKey() && (database instanceof CacheDatabase
                 || database instanceof H2Database
                 || database instanceof DB2Database

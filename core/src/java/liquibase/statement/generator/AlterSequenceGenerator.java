@@ -29,6 +29,8 @@ public class AlterSequenceGenerator implements SqlGenerator<AlterSequenceStateme
             validationErrors.checkDisallowedField("ordered", alterSequenceStatement.getOrdered());
         }
 
+        validationErrors.checkRequiredField("sequenceName", alterSequenceStatement.getSequenceName());
+
         return validationErrors;
     }
 

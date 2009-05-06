@@ -26,7 +26,10 @@ public class CreateTableGenerator implements SqlGenerator<CreateTableStatement> 
     }
 
     public ValidationErrors validate(CreateTableStatement createTableStatement, Database database) {
-        return new ValidationErrors();
+        ValidationErrors validationErrors = new ValidationErrors();
+        validationErrors.checkRequiredField("tableName", createTableStatement.getTableName());
+        validationErrors.checkRequiredField("columns", createTableStatement.getColumns());
+        return validationErrors;
     }
 
     public Sql[] generateSql(CreateTableStatement statement, Database database) {

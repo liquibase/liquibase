@@ -60,10 +60,25 @@ public abstract class AbstractChange implements Change {
         this.changeSet = changeSet;
     }
 
+    public boolean isAvailable(Database database) {
+        for (SqlStatement statement : generateStatements(database)) {
+            SqlGenerator sqlGenerator = SqlGeneratorFactory.getInstance().getBestGenerator(statement, database);
+            if (sqlGenerator == null) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     public ValidationErrors validate(Database database) {
         ValidationErrors changeValidationErrors = new ValidationErrors();
         for (SqlStatement statement : generateStatements(database)) {
-            changeValidationErrors.addAll(SqlGeneratorFactory.getInstance().getBestGenerator(statement, database).validate(statement, database));
+            SqlGenerator sqlGenerator = SqlGeneratorFactory.getInstance().getBestGenerator(statement, database);
+            if (sqlGenerator == null) {
+                changeValidationErrors.addError(getChangeMetaData().getName()+" is not supported on "+database.getProductName());
+            } else {
+                changeValidationErrors.addAll(sqlGenerator.validate(statement, database));
+            }
         }
 
         return changeValidationErrors;
