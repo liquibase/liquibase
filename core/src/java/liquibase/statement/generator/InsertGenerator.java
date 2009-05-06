@@ -20,6 +20,8 @@ public class InsertGenerator implements SqlGenerator<InsertStatement> {
 
     public ValidationErrors validate(InsertStatement insertStatement, Database database) {
         ValidationErrors validationErrors = new ValidationErrors();
+        validationErrors.checkRequiredField("tableName", insertStatement.getTableName());
+        validationErrors.checkRequiredField("columns", insertStatement.getColumnValues());
 
         if (insertStatement.getSchemaName() != null && !database.supportsSchemas()) {
            validationErrors.addError("Database does not support schemas");

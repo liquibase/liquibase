@@ -166,11 +166,6 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
 
     public SqlStatement[] generateStatements(Database database) {
 
-        if (database instanceof SQLiteDatabase) {
-            // return special statements for SQLite databases
-            return generateStatementsForSQLiteDatabase(database);
-        }
-
         boolean deferrable = false;
         if (getDeferrable() != null) {
             deferrable = getDeferrable();
@@ -194,13 +189,6 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
                         .setUpdateRule(updateRule)
                         .setDeleteRule(deleteRule)
         };
-    }
-
-    private SqlStatement[] generateStatementsForSQLiteDatabase(Database database) {
-        // SQLite does not support foreign keys until now.
-        // See for more information: http://www.sqlite.org/omitted.html
-        // Therefore this is an empty operation...
-        return new SqlStatement[]{};
     }
 
     protected Change[] createInverses() {

@@ -1,6 +1,8 @@
 package liquibase.change;
 
 import liquibase.database.MockDatabase;
+import liquibase.database.Database;
+import liquibase.database.SQLiteDatabase;
 import liquibase.statement.AddForeignKeyConstraintStatement;
 import liquibase.statement.SqlStatement;
 import static org.junit.Assert.assertEquals;
@@ -9,6 +11,11 @@ import org.junit.Test;
 import java.sql.DatabaseMetaData;
 
 public class AddForeignKeyConstraintChangeTest  extends AbstractChangeTest {
+
+    @Override
+    protected boolean shouldBeAvailable(Database database) {
+        return !(database instanceof SQLiteDatabase);
+    }
 
     @Test
     public void generateStatement() throws Exception {

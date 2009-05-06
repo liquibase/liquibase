@@ -2,6 +2,7 @@ package liquibase.exception;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Collection;
 
 public class ValidationErrors {
 
@@ -14,7 +15,12 @@ public class ValidationErrors {
     public void checkRequiredField(String requiredFieldName, Object value) {
         if (value == null) {
             addError(requiredFieldName+" is required");
+        } else {
+            if (value instanceof Collection && ((Collection) value).size() == 0) {
+                addError(requiredFieldName+" is empty");
+            }
         }
+
     }
 
     public void checkDisallowedField(String disallowedFieldName, Object value) {

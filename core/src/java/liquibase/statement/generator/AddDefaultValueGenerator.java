@@ -19,7 +19,11 @@ public class AddDefaultValueGenerator implements SqlGenerator<AddDefaultValueSta
     }
 
     public ValidationErrors validate(AddDefaultValueStatement addDefaultValueStatement, Database database) {
-        return new ValidationErrors();
+        ValidationErrors validationErrors = new ValidationErrors();
+        validationErrors.checkRequiredField("defaultValue", addDefaultValueStatement.getDefaultValue());
+        validationErrors.checkRequiredField("columnName", addDefaultValueStatement.getColumnName());
+        validationErrors.checkRequiredField("tableName", addDefaultValueStatement.getTableName());
+        return validationErrors;
     }
 
     public Sql[] generateSql(AddDefaultValueStatement statement, Database database) {

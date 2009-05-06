@@ -22,7 +22,10 @@ public class AddUniqueConstraintGenerator implements SqlGenerator<AddUniqueConst
     }
 
     public ValidationErrors validate(AddUniqueConstraintStatement addUniqueConstraintStatement, Database database) {
-        return new ValidationErrors();
+        ValidationErrors validationErrors = new ValidationErrors();
+        validationErrors.checkRequiredField("columnNames", addUniqueConstraintStatement.getColumnNames());
+        validationErrors.checkRequiredField("tableName", addUniqueConstraintStatement.getTableName());
+        return validationErrors;
     }
 
     public Sql[] generateSql(AddUniqueConstraintStatement statement, Database database) {

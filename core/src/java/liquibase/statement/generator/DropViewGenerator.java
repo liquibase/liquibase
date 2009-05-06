@@ -17,7 +17,9 @@ public class DropViewGenerator implements SqlGenerator<DropViewStatement> {
     }
 
     public ValidationErrors validate(DropViewStatement dropViewStatement, Database database) {
-        return new ValidationErrors();
+        ValidationErrors validationErrors = new ValidationErrors();
+        validationErrors.checkRequiredField("viewName", dropViewStatement.getViewName());
+        return validationErrors;
     }
 
     public Sql[] generateSql(DropViewStatement statement, Database database) {

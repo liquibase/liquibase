@@ -19,7 +19,10 @@ public class SetTableRemarksGenerator implements SqlGenerator<SetTableRemarksSta
     }
 
     public ValidationErrors validate(SetTableRemarksStatement setTableRemarksStatement, Database database) {
-        return new ValidationErrors();
+        ValidationErrors validationErrors = new ValidationErrors();
+        validationErrors.checkRequiredField("tableName", setTableRemarksStatement.getTableName());
+        validationErrors.checkRequiredField("remarks", setTableRemarksStatement.getRemarks());
+        return validationErrors;
     }
 
     public Sql[] generateSql(SetTableRemarksStatement statement, Database database) {

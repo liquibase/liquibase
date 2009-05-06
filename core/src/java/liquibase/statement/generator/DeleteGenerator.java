@@ -20,7 +20,9 @@ public class DeleteGenerator implements SqlGenerator<DeleteStatement> {
     }
 
     public ValidationErrors validate(DeleteStatement deleteStatement, Database database) {
-        return new ValidationErrors();
+        ValidationErrors validationErrors = new ValidationErrors();
+        validationErrors.checkRequiredField("tableName", deleteStatement.getTableName());
+        return validationErrors;
     }
 
     public Sql[] generateSql(DeleteStatement statement, Database database) {

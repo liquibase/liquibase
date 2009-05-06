@@ -18,7 +18,9 @@ public class DropTableGenerator implements SqlGenerator<DropTableStatement> {
     }
 
     public ValidationErrors validate(DropTableStatement dropTableStatement, Database database) {
-        return new ValidationErrors();
+        ValidationErrors validationErrors = new ValidationErrors();
+        validationErrors.checkRequiredField("tableName", dropTableStatement.getTableName());
+        return validationErrors;
     }
 
     public Sql[] generateSql(DropTableStatement statement, Database database) {

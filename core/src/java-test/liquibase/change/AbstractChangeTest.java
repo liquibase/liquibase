@@ -4,6 +4,7 @@ import liquibase.changelog.parser.string.StringChangeLogSerializer;
 import liquibase.database.Database;
 import liquibase.database.OracleDatabase;
 import liquibase.exception.InvalidChangeDefinitionException;
+import liquibase.exception.ValidationErrors;
 import liquibase.statement.RawSqlStatement;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.visitor.SqlVisitor;
@@ -17,6 +18,7 @@ import org.junit.Test;
 
 import java.io.StringWriter;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
 import java.sql.Statement;
 import java.util.*;
@@ -37,11 +39,11 @@ public abstract class AbstractChangeTest {
 
     @Test
     public void generateCheckSum() throws Exception {
-        String className = getClass().getName().replaceAll("Test$", "");
-        if (className.indexOf("Abstract") > 0) {
+        Change change = createClassUnderTest();
+        if (change == null) {
             return;
         }
-        Change change = (Change) Class.forName(className).getConstructor().newInstance();
+
         CheckSum checkSum = change.generateCheckSum();
         assertNotNull(checkSum);
         assertEquals(2, checkSum.getVersion());
@@ -87,6 +89,15 @@ public abstract class AbstractChangeTest {
                 throw new RuntimeException("Unknown field type: "+field.getType()+" for "+field.getName());
             }
         }
+    }
+
+    private Change createClassUnderTest() throws InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException, ClassNotFoundException {
+        String className = getClass().getName().replaceAll("Test$", "");
+        if (className.indexOf("Abstract") > 0) {
+            return null;
+        }
+
+        return (Change) Class.forName(className).getConstructor().newInstance();
     }
 
     private void checkThatChecksumIsNew(Change change, Map<String, String> seenCheckSums, Field field) {
@@ -237,6 +248,35 @@ public abstract class AbstractChangeTest {
                 error.setStackTrace(e.getStackTrace());
 
                 throw error;
+            }
+        }
+    }
+
+    @Test
+    public void isAvailable() throws Exception {
+        Change change = createClassUnderTest();
+        if (change == null) {
+            return;
+        }
+        for (Database database : TestContext.getInstance().getAllDatabases()) {
+            assertEquals("Unexpected availablity on "+database.getProductName(), shouldBeAvailable(database), change.isAvailable(database));
+        }
+    }
+
+    protected boolean shouldBeAvailable(Database database) {
+        return true;
+    }
+
+    @Test
+    public void validate() throws Exception {
+        Change change = createClassUnderTest();
+        if (change == null) {
+            return;
+        }
+        for (Database database : TestContext.getInstance().getAllDatabases()) {
+            if (change.isAvailable(database)) {
+                ValidationErrors validationErrors = change.validate(database);
+                assertTrue("no errors found for "+database.getProductName(), validationErrors.hasErrors());
             }
         }
     }

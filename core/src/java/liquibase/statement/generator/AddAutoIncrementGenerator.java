@@ -27,9 +27,10 @@ public class AddAutoIncrementGenerator implements SqlGenerator<AddAutoIncrementS
 
     public ValidationErrors validate(AddAutoIncrementStatement statement, Database database) {
         ValidationErrors validationErrors = new ValidationErrors();
-        if (database instanceof MSSQLDatabase) {
-            validationErrors.addError("Cannot make the column as auto-increment.");
-        }
+
+        validationErrors.checkRequiredField("columnName", statement.getColumnName());
+        validationErrors.checkRequiredField("tableName", statement.getTableName());
+
         return validationErrors;
     }
 

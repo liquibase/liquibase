@@ -17,7 +17,9 @@ public class DropUniqueConstraintGenerator implements SqlGenerator<DropUniqueCon
     }
 
     public ValidationErrors validate(DropUniqueConstraintStatement dropUniqueConstraintStatement, Database database) {
-        return new ValidationErrors();
+        ValidationErrors validationErrors = new ValidationErrors();
+        validationErrors.checkRequiredField("tableName", dropUniqueConstraintStatement.getTableName());
+        return validationErrors;
     }
 
     public Sql[] generateSql(DropUniqueConstraintStatement statement, Database database) {

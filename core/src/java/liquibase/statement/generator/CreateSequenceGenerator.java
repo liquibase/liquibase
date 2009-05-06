@@ -19,6 +19,8 @@ public class CreateSequenceGenerator implements SqlGenerator<CreateSequenceState
     public ValidationErrors validate(CreateSequenceStatement statement, Database database) {
         ValidationErrors validationErrors = new ValidationErrors();
 
+        validationErrors.checkRequiredField("sequenceName", statement.getSequenceName());
+
         if (database instanceof FirebirdDatabase) {
             validationErrors.checkDisallowedField("startValue", statement.getStartValue());
             validationErrors.checkDisallowedField("incrementBy", statement.getIncrementBy());

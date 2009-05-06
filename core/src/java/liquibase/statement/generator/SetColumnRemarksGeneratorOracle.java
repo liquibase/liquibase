@@ -18,7 +18,11 @@ public class SetColumnRemarksGeneratorOracle implements SqlGenerator<SetColumnRe
     }
 
     public ValidationErrors validate(SetColumnRemarksStatement setColumnRemarksStatement, Database database) {
-        return new ValidationErrors();
+        ValidationErrors validationErrors = new ValidationErrors();
+        validationErrors.checkRequiredField("tableName", setColumnRemarksStatement.getTableName());
+        validationErrors.checkRequiredField("columnName", setColumnRemarksStatement.getColumnName());
+        validationErrors.checkRequiredField("remarks", setColumnRemarksStatement.getRemarks());
+        return validationErrors;
     }
 
     public Sql[] generateSql(SetColumnRemarksStatement statement, Database database) {

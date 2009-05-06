@@ -18,7 +18,9 @@ public class FindForeignKeyConstraintsGeneratorPostgres implements SqlGenerator<
     }
 
     public ValidationErrors validate(FindForeignKeyConstraintsStatement findForeignKeyConstraintsStatement, Database database) {
-        return new ValidationErrors();
+        ValidationErrors validationErrors = new ValidationErrors();
+        validationErrors.checkRequiredField("baseTableName", findForeignKeyConstraintsStatement.getBaseTableName());
+        return validationErrors;
     }
 
     public Sql[] generateSql(FindForeignKeyConstraintsStatement statement, Database database) {

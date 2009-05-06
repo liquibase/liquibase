@@ -19,7 +19,10 @@ public class UpdateGenerator implements SqlGenerator<UpdateStatement> {
     }
 
     public ValidationErrors validate(UpdateStatement updateStatement, Database database) {
-        return new ValidationErrors();
+        ValidationErrors validationErrors = new ValidationErrors();
+        validationErrors.checkRequiredField("tableName", updateStatement.getTableName());
+        validationErrors.checkRequiredField("columns", updateStatement.getNewColumnValues());
+        return validationErrors;
     }
 
     public Sql[] generateSql(UpdateStatement statement, Database database) {
