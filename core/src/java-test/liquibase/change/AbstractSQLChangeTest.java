@@ -1,12 +1,8 @@
 package liquibase.change;
 
-import liquibase.util.XMLUtil;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
-import org.w3c.dom.Element;
-
-import javax.xml.parsers.DocumentBuilderFactory;
 
 public class AbstractSQLChangeTest extends AbstractChangeTest {
 

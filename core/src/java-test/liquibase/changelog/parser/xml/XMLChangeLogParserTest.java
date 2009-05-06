@@ -1,10 +1,7 @@
 package liquibase.changelog.parser.xml;
 
-import static org.junit.Assert.*;
-
 import liquibase.ChangeSet;
 import liquibase.DatabaseChangeLog;
-import liquibase.changelog.parser.xml.XMLChangeLogParser;
 import liquibase.change.AddColumnChange;
 import liquibase.change.Change;
 import liquibase.change.CreateTableChange;
@@ -15,7 +12,7 @@ import liquibase.exception.ChangeLogParseException;
 import liquibase.preconditions.OrPrecondition;
 import liquibase.preconditions.Preconditions;
 import liquibase.test.JUnitFileOpener;
-
+import static org.junit.Assert.*;
 import org.junit.Test;
 
 import java.util.HashMap;

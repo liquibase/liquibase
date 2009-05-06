@@ -1,12 +1,11 @@
 package liquibase.exception;
 
-import liquibase.preconditions.FailedPrecondition;
-import liquibase.preconditions.Precondition;
-import liquibase.preconditions.ErrorPrecondition;
 import liquibase.DatabaseChangeLog;
+import liquibase.preconditions.ErrorPrecondition;
+import liquibase.preconditions.Precondition;
 
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 public class PreconditionErrorException extends Exception {
 

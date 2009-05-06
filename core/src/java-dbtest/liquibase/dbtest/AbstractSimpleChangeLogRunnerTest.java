@@ -8,7 +8,6 @@ import liquibase.Liquibase;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
-import liquibase.database.statement.DropTableStatement;
 import liquibase.database.structure.DatabaseSnapshot;
 import liquibase.diff.Diff;
 import liquibase.diff.DiffResult;
@@ -16,6 +15,7 @@ import liquibase.exception.JDBCException;
 import liquibase.exception.ValidationFailedException;
 import liquibase.lock.LockHandler;
 import liquibase.log.LogFactory;
+import liquibase.statement.DropTableStatement;
 import liquibase.test.JUnitFileOpener;
 import liquibase.test.TestContext;
 
@@ -29,9 +29,6 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
-
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 
 public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
 

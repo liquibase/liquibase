@@ -7,13 +7,12 @@ import liquibase.changelog.ChangeLogSerializer;
 import liquibase.exception.ChangeLogParseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.log.LogFactory;
-import liquibase.changelog.parser.xml.LiquibaseSchemaResolver;
 import org.xml.sax.*;
 
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;

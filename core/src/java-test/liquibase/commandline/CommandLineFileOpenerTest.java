@@ -1,8 +1,8 @@
 package liquibase.commandline;
 
-import liquibase.FileOpener;
 import liquibase.AbstractFileOpenerTest;
-import static org.junit.Assert.*;
+import liquibase.FileOpener;
+import static org.junit.Assert.assertNotNull;
 import org.junit.Test;
 
 import java.io.IOException;

@@ -17,11 +17,11 @@ package liquibase.csv.opencsv.bean;
  limitations under the License.
  */
 
+import liquibase.csv.opencsv.CSVReader;
+
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
 import java.io.IOException;
-
-import liquibase.csv.opencsv.CSVReader;
 
 public interface MappingStrategy {
 

@@ -1,11 +1,10 @@
 package liquibase.test;
 
 import liquibase.database.Database;
-import liquibase.database.statement.SqlStatement;
 import liquibase.database.structure.DatabaseSnapshot;
-import liquibase.database.template.Executor;
 import liquibase.exception.JDBCException;
 import liquibase.exception.StatementNotSupportedOnDatabaseException;
+import liquibase.statement.SqlStatement;
 
 public abstract class SqlStatementDatabaseTest implements DatabaseTest {
 

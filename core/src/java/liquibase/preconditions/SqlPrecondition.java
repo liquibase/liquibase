@@ -3,8 +3,8 @@ package liquibase.preconditions;
 import liquibase.DatabaseChangeLog;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
-import liquibase.exception.PreconditionFailedException;
 import liquibase.exception.PreconditionErrorException;
+import liquibase.exception.PreconditionFailedException;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

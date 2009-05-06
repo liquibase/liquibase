@@ -1,28 +1,25 @@
 package liquibase.change;
 
+import liquibase.changelog.parser.string.StringChangeLogSerializer;
 import liquibase.database.Database;
 import liquibase.database.OracleDatabase;
-import liquibase.database.statement.RawSqlStatement;
-import liquibase.database.statement.SqlStatement;
-import liquibase.database.statement.visitor.SqlVisitor;
-import liquibase.database.structure.DatabaseObject;
-import liquibase.util.StreamUtil;
 import liquibase.exception.InvalidChangeDefinitionException;
+import liquibase.statement.RawSqlStatement;
+import liquibase.statement.SqlStatement;
+import liquibase.statement.visitor.SqlVisitor;
 import liquibase.test.TestContext;
-import liquibase.changelog.parser.string.StringChangeLogSerializer;
+import liquibase.util.StreamUtil;
 import static org.easymock.EasyMock.*;
 import static org.easymock.classextension.EasyMock.createMock;
 import static org.easymock.classextension.EasyMock.replay;
 import static org.junit.Assert.*;
 import org.junit.Test;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
 import java.io.StringWriter;
+import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.sql.Statement;
 import java.util.*;
-import java.lang.reflect.Field;
 
 /**
  * Base test class for changes

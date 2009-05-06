@@ -1,8 +1,8 @@
 package liquibase.database.structure;
 
-import org.hibernate.dialect.Dialect;
 import org.hibernate.HibernateException;
 import org.hibernate.cfg.Configuration;
+import org.hibernate.dialect.Dialect;
 
 import java.sql.Types;
 

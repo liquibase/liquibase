@@ -16,6 +16,8 @@ package liquibase.csv.opencsv.bean;
  limitations under the License.
  */
 
+import liquibase.csv.opencsv.CSVReader;
+
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
 import java.beans.PropertyEditor;
@@ -24,8 +26,6 @@ import java.io.Reader;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
-
-import liquibase.csv.opencsv.CSVReader;
 
 public class CsvToBean {
 

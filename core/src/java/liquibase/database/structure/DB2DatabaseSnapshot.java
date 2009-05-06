@@ -1,8 +1,8 @@
 package liquibase.database.structure;
 
 import liquibase.database.Database;
-import liquibase.exception.JDBCException;
 import liquibase.diff.DiffStatusListener;
+import liquibase.exception.JDBCException;
 
 import java.util.Set;
 

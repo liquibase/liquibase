@@ -2,13 +2,13 @@ package liquibase.changelog.filter;
 
 import liquibase.ChangeSet;
 import liquibase.RanChangeSet;
-import liquibase.changelog.filter.ShouldRunChangeSetFilter;
 import liquibase.database.Database;
-import liquibase.database.statement.UpdateStatement;
 import liquibase.database.template.Executor;
 import liquibase.exception.JDBCException;
+import liquibase.statement.UpdateStatement;
 import static org.easymock.classextension.EasyMock.*;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 import java.util.ArrayList;

@@ -1,8 +1,5 @@
 package liquibase;
 
-import liquibase.ClassLoaderFileOpener;
-import liquibase.FileOpener;
-import liquibase.Liquibase;
 import liquibase.database.*;
 import liquibase.database.template.JdbcOutputTemplate;
 import liquibase.exception.JDBCException;

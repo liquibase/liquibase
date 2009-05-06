@@ -3,20 +3,16 @@ package liquibase.change;
 import liquibase.database.Database;
 import liquibase.database.SQLiteDatabase;
 import liquibase.database.SQLiteDatabase.AlterTableVisitor;
-import liquibase.database.statement.DropPrimaryKeyStatement;
-import liquibase.database.statement.SqlStatement;
-import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Index;
-import liquibase.database.structure.Table;
 import liquibase.exception.InvalidChangeDefinitionException;
 import liquibase.exception.JDBCException;
 import liquibase.exception.UnsupportedChangeException;
+import liquibase.statement.DropPrimaryKeyStatement;
+import liquibase.statement.SqlStatement;
 import liquibase.util.StringUtils;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Removes an existing primary key.

@@ -2,23 +2,10 @@ package liquibase.change;
 
 import liquibase.database.Database;
 import liquibase.database.PostgresDatabase;
-import liquibase.database.structure.DatabaseObject;
-import liquibase.database.structure.Table;
-import liquibase.database.structure.Column;
-import liquibase.database.statement.*;
-import liquibase.test.DatabaseTest;
-import liquibase.test.DatabaseTestTemplate;
-import liquibase.test.TestContext;
-import static org.junit.Assert.*;
+import liquibase.statement.*;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import org.junit.Test;
-import org.w3c.dom.Element;
-
-import javax.xml.parsers.DocumentBuilderFactory;
-import java.util.Arrays;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Set;
 
 public class AddAutoIncrementChangeTest extends AbstractChangeTest {
 

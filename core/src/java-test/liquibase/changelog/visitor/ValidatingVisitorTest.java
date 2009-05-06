@@ -2,9 +2,8 @@ package liquibase.changelog.visitor;
 
 import liquibase.ChangeSet;
 import liquibase.RanChangeSet;
-import liquibase.changelog.visitor.ValidatingVisitor;
-import liquibase.change.CreateTableChange;
 import liquibase.change.ColumnConfig;
+import liquibase.change.CreateTableChange;
 import liquibase.exception.SetupException;
 import static org.junit.Assert.*;
 import org.junit.Before;

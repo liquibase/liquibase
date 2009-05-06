@@ -2,16 +2,15 @@ package liquibase.change;
 
 import liquibase.database.Database;
 import liquibase.database.SQLiteDatabase;
-import liquibase.database.statement.CreateViewStatement;
-import liquibase.database.statement.DropViewStatement;
-import liquibase.database.statement.SqlStatement;
-import liquibase.database.structure.DatabaseObject;
-import liquibase.database.structure.View;
 import liquibase.exception.InvalidChangeDefinitionException;
 import liquibase.exception.UnsupportedChangeException;
+import liquibase.statement.CreateViewStatement;
+import liquibase.statement.DropViewStatement;
+import liquibase.statement.SqlStatement;
 import liquibase.util.StringUtils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Creats a new view.

@@ -1,12 +1,12 @@
 package liquibase.database;
 
-import liquibase.database.statement.RawSqlStatement;
-import liquibase.database.statement.SqlStatement;
-import liquibase.database.structure.DatabaseSnapshot;
 import liquibase.database.structure.DB2DatabaseSnapshot;
+import liquibase.database.structure.DatabaseSnapshot;
+import liquibase.diff.DiffStatusListener;
 import liquibase.exception.DateParseException;
 import liquibase.exception.JDBCException;
-import liquibase.diff.DiffStatusListener;
+import liquibase.statement.RawSqlStatement;
+import liquibase.statement.SqlStatement;
 
 import java.sql.*;
 import java.text.ParseException;

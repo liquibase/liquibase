@@ -1,17 +1,17 @@
 package liquibase.changelog.parser.sql;
 
+import liquibase.ChangeSet;
 import liquibase.DatabaseChangeLog;
 import liquibase.FileOpener;
-import liquibase.ChangeSet;
+import liquibase.change.RawSQLChange;
 import liquibase.changelog.ChangeLogParser;
 import liquibase.changelog.ChangeLogSerializer;
-import liquibase.util.StreamUtil;
-import liquibase.change.RawSQLChange;
 import liquibase.exception.ChangeLogParseException;
+import liquibase.util.StreamUtil;
 
-import java.util.Map;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Map;
 
 public class SqlChangeLogParser implements ChangeLogParser {
     public String[] getValidFileExtensions() {

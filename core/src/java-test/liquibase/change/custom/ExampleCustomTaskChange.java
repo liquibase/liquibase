@@ -2,10 +2,7 @@ package liquibase.change.custom;
 
 import liquibase.FileOpener;
 import liquibase.database.Database;
-import liquibase.database.structure.DatabaseObject;
 import liquibase.exception.*;
-
-import java.util.Set;
 
 public class ExampleCustomTaskChange implements CustomTaskChange, CustomTaskRollback {
 

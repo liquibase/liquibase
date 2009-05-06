@@ -1,16 +1,17 @@
 package liquibase.database.template;
 
+import liquibase.database.Database;
+import liquibase.database.MSSQLDatabase;
+import liquibase.exception.JDBCException;
+import liquibase.statement.CallableSqlStatement;
+import liquibase.statement.SqlStatement;
+import liquibase.statement.visitor.SqlVisitor;
+import liquibase.util.StreamUtil;
+
 import java.io.IOException;
 import java.io.Writer;
 import java.util.List;
 import java.util.Map;
-
-import liquibase.database.*;
-import liquibase.database.statement.SqlStatement;
-import liquibase.database.statement.CallableSqlStatement;
-import liquibase.database.statement.visitor.SqlVisitor;
-import liquibase.exception.JDBCException;
-import liquibase.util.StreamUtil;
 
 public class JdbcOutputTemplate extends Executor {
 

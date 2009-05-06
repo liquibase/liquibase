@@ -1,19 +1,19 @@
 package liquibase.database;
 
-import liquibase.database.statement.RawSqlStatement;
-import liquibase.database.statement.SqlStatement;
 import liquibase.database.structure.DatabaseSnapshot;
 import liquibase.database.structure.PostgresDatabaseSnapshot;
-import liquibase.exception.JDBCException;
-import liquibase.util.StringUtils;
 import liquibase.diff.DiffStatusListener;
+import liquibase.exception.JDBCException;
+import liquibase.statement.RawSqlStatement;
+import liquibase.statement.SqlStatement;
+import liquibase.util.StringUtils;
 
 import java.sql.*;
 import java.text.ParseException;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 
 /**

@@ -2,16 +2,13 @@ package liquibase.change;
 
 import liquibase.database.Database;
 import liquibase.database.MockDatabase;
-import liquibase.database.statement.SetNullableStatement;
-import liquibase.database.statement.SqlStatement;
-import liquibase.database.statement.UpdateStatement;
+import liquibase.statement.SetNullableStatement;
+import liquibase.statement.SqlStatement;
+import liquibase.statement.UpdateStatement;
 import liquibase.test.DatabaseTest;
 import liquibase.test.DatabaseTestTemplate;
 import static org.junit.Assert.*;
 import org.junit.Test;
-import org.w3c.dom.Element;
-
-import javax.xml.parsers.DocumentBuilderFactory;
 
 /**
  * Tests for {@link AddNotNullConstraintChange}

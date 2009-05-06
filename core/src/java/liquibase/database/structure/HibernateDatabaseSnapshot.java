@@ -2,22 +2,14 @@ package liquibase.database.structure;
 
 import liquibase.database.Database;
 import liquibase.database.HibernateDatabase;
-import liquibase.diff.DiffStatusListener;
 import liquibase.exception.JDBCException;
 import liquibase.log.LogFactory;
 import liquibase.util.StringUtils;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.dialect.Dialect;
-import org.hibernate.dialect.MySQL5InnoDBDialect;
 import org.hibernate.engine.Mapping;
-import org.hibernate.mapping.*;
 
-import java.io.File;
 import java.util.*;
-import java.util.Collection;
-import java.util.Set;
-import java.util.Map;
-import java.util.List;
 import java.util.logging.Logger;
 
 public class HibernateDatabaseSnapshot implements DatabaseSnapshot {

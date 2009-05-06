@@ -2,8 +2,8 @@ package liquibase.changelog.parser.string;
 
 import liquibase.ChangeSet;
 import liquibase.change.Change;
-import liquibase.change.ColumnConfig;
 import liquibase.change.ChangeMetaDataField;
+import liquibase.change.ColumnConfig;
 import liquibase.changelog.ChangeLogSerializer;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.util.StringUtils;

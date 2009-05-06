@@ -1,16 +1,14 @@
 package liquibase.change;
 
 import liquibase.database.Database;
-import liquibase.database.statement.DropSequenceStatement;
-import liquibase.database.statement.SqlStatement;
+import liquibase.statement.DropSequenceStatement;
+import liquibase.statement.SqlStatement;
 import liquibase.test.DatabaseTest;
 import liquibase.test.DatabaseTestTemplate;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Test;
-import org.w3c.dom.Element;
-
-import javax.xml.parsers.DocumentBuilderFactory;
 
 /**
  * Tests for {@link DropSequenceChange}

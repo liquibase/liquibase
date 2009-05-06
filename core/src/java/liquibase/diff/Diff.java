@@ -5,9 +5,9 @@ import liquibase.database.structure.*;
 import liquibase.exception.JDBCException;
 import liquibase.util.StringUtils;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.Arrays;
 
 public class Diff {
 

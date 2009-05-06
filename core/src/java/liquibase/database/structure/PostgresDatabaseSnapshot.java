@@ -1,18 +1,14 @@
 package liquibase.database.structure;
 
 import liquibase.database.Database;
-import liquibase.exception.JDBCException;
 import liquibase.diff.DiffStatusListener;
+import liquibase.exception.JDBCException;
 
 import java.sql.Array;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
-import java.util.StringTokenizer;
+import java.util.*;
 
 public class PostgresDatabaseSnapshot extends SqlDatabaseSnapshot {
 

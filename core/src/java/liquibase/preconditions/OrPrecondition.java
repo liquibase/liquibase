@@ -2,8 +2,8 @@ package liquibase.preconditions;
 
 import liquibase.DatabaseChangeLog;
 import liquibase.database.Database;
-import liquibase.exception.PreconditionFailedException;
 import liquibase.exception.PreconditionErrorException;
+import liquibase.exception.PreconditionFailedException;
 
 import java.util.ArrayList;
 import java.util.List;

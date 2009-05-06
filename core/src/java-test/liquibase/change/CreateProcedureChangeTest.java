@@ -1,10 +1,7 @@
 package liquibase.change;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 import org.junit.Test;
-import org.w3c.dom.Element;
-
-import javax.xml.parsers.DocumentBuilderFactory;
 
 public abstract class CreateProcedureChangeTest extends AbstractChangeTest {
 

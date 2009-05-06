@@ -1,27 +1,5 @@
 package liquibase.dbtest.hibernate;
 
-import liquibase.database.Database;
-import liquibase.database.HibernateDatabase;
-import liquibase.database.MySQLDatabase;
-import liquibase.test.DatabaseTest;
-import liquibase.test.DatabaseTestTemplate;
-import liquibase.test.JUnitFileOpener;
-import liquibase.Liquibase;
-import liquibase.diff.Diff;
-import liquibase.diff.DiffResult;
-import org.junit.Test;
-import static org.junit.Assert.*;
-import org.hibernate.cfg.Configuration;
-import org.hibernate.cfg.Environment;
-import org.hibernate.tool.hbm2ddl.SchemaExport;
-import org.springframework.mock.jndi.SimpleNamingContextBuilder;
-import org.springframework.jdbc.datasource.DriverManagerDataSource;
-import org.springframework.jdbc.datasource.SingleConnectionDataSource;
-
-import javax.sql.DataSource;
-import java.io.*;
-import java.sql.Connection;
-
 public class HibernateTest {
     private static final String HIBERNATE_CONFIG_FILE = "Hibernate.cfg.xml";
 

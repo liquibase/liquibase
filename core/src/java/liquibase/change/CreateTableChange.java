@@ -1,19 +1,14 @@
 package liquibase.change;
 
 import liquibase.database.Database;
-import liquibase.database.statement.*;
-import liquibase.database.statement.generator.SqlGeneratorFactory;
-import liquibase.database.structure.Column;
-import liquibase.database.structure.DatabaseObject;
-import liquibase.database.structure.Table;
 import liquibase.exception.InvalidChangeDefinitionException;
 import liquibase.exception.UnsupportedChangeException;
+import liquibase.statement.*;
+import liquibase.statement.generator.SqlGeneratorFactory;
 import liquibase.util.StringUtils;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Creates a new table.

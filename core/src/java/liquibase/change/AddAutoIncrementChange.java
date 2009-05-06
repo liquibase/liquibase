@@ -2,8 +2,8 @@ package liquibase.change;
 
 import liquibase.database.Database;
 import liquibase.database.PostgresDatabase;
-import liquibase.database.statement.*;
 import liquibase.exception.UnsupportedChangeException;
+import liquibase.statement.*;
 import liquibase.util.StringUtils;
 
 /**

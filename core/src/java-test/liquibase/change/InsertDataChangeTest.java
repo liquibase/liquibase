@@ -1,16 +1,12 @@
 package liquibase.change;
 
 import liquibase.database.MockDatabase;
-import liquibase.database.statement.InsertStatement;
-import liquibase.database.statement.SqlStatement;
-import static org.junit.Assert.*;
+import liquibase.statement.InsertStatement;
+import liquibase.statement.SqlStatement;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Test;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
-
-import javax.xml.parsers.DocumentBuilderFactory;
 
 /**
  * Tests for {@link InsertDataChange}

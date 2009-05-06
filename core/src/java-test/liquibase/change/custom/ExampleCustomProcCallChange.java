@@ -2,14 +2,11 @@ package liquibase.change.custom;
 
 import liquibase.FileOpener;
 import liquibase.database.Database;
-import liquibase.database.statement.SqlStatement;
-import liquibase.database.statement.StoredProcedureStatement;
-import liquibase.database.structure.DatabaseObject;
+import liquibase.exception.InvalidChangeDefinitionException;
 import liquibase.exception.SetupException;
 import liquibase.exception.UnsupportedChangeException;
-import liquibase.exception.InvalidChangeDefinitionException;
-
-import java.util.Set;
+import liquibase.statement.SqlStatement;
+import liquibase.statement.StoredProcedureStatement;
 
 public class ExampleCustomProcCallChange implements CustomSqlChange {
 

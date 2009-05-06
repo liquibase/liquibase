@@ -1,17 +1,17 @@
 package liquibase.database;
 
-import liquibase.database.statement.RawSqlStatement;
-import liquibase.database.statement.SqlStatement;
 import liquibase.database.structure.DatabaseSnapshot;
 import liquibase.database.structure.MSSQLDatabaseSnapshot;
-import liquibase.exception.JDBCException;
 import liquibase.diff.DiffStatusListener;
+import liquibase.exception.JDBCException;
+import liquibase.statement.RawSqlStatement;
+import liquibase.statement.SqlStatement;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Set;
-import java.util.HashSet;
 import java.text.ParseException;
+import java.util.HashSet;
+import java.util.Set;
 
 public class SybaseDatabase extends AbstractDatabase {
 

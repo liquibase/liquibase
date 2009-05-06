@@ -3,12 +3,12 @@ package liquibase.change;
 import liquibase.ChangeSet;
 import liquibase.FileOpener;
 import liquibase.database.Database;
-import liquibase.database.statement.SqlStatement;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.exception.InvalidChangeDefinitionException;
 import liquibase.exception.RollbackImpossibleException;
 import liquibase.exception.SetupException;
 import liquibase.exception.UnsupportedChangeException;
+import liquibase.statement.SqlStatement;
 
 import java.util.Set;
 

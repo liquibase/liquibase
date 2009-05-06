@@ -1,13 +1,11 @@
 package liquibase.change;
 
 import liquibase.database.MockDatabase;
-import liquibase.database.statement.SetNullableStatement;
-import liquibase.database.statement.SqlStatement;
-import static org.junit.Assert.*;
+import liquibase.statement.SetNullableStatement;
+import liquibase.statement.SqlStatement;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import org.junit.Test;
-import org.w3c.dom.Element;
-
-import javax.xml.parsers.DocumentBuilderFactory;
 
 /**
  * Tests for {@link DropNotNullConstraintChange}

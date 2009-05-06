@@ -1,25 +1,17 @@
 package liquibase.change;
 
 import liquibase.database.Database;
-import liquibase.database.SQLiteDatabase;
-import liquibase.database.SQLiteDatabase.AlterTableVisitor;
-import liquibase.database.statement.AddDefaultValueStatement;
-import liquibase.database.statement.ComputedDateValue;
-import liquibase.database.statement.ComputedNumericValue;
-import liquibase.database.statement.SqlStatement;
-import liquibase.database.structure.Column;
-import liquibase.database.structure.DatabaseObject;
-import liquibase.database.structure.Index;
-import liquibase.database.structure.Table;
-import liquibase.exception.InvalidChangeDefinitionException;
-import liquibase.exception.JDBCException;
 import liquibase.exception.UnsupportedChangeException;
+import liquibase.statement.AddDefaultValueStatement;
+import liquibase.statement.ComputedDateValue;
+import liquibase.statement.ComputedNumericValue;
+import liquibase.statement.SqlStatement;
 import liquibase.util.ISODateFormat;
 import liquibase.util.StringUtils;
 
 import java.text.NumberFormat;
 import java.text.ParseException;
-import java.util.*;
+import java.util.Locale;
 
 /**
  * Sets a new default value to an existing column.

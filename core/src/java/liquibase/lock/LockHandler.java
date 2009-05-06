@@ -1,14 +1,14 @@
 package liquibase.lock;
 
 import liquibase.DatabaseChangeLogLock;
-import liquibase.util.NetUtil;
 import liquibase.database.Database;
-import liquibase.database.statement.RawSqlStatement;
-import liquibase.database.statement.UpdateStatement;
-import liquibase.database.statement.visitor.SqlVisitor;
 import liquibase.exception.JDBCException;
 import liquibase.exception.LockException;
 import liquibase.log.LogFactory;
+import liquibase.statement.RawSqlStatement;
+import liquibase.statement.UpdateStatement;
+import liquibase.statement.visitor.SqlVisitor;
+import liquibase.util.NetUtil;
 
 import java.net.InetAddress;
 import java.sql.Timestamp;

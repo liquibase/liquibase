@@ -1,17 +1,11 @@
 package liquibase.change;
 
 import liquibase.database.Database;
-import liquibase.database.statement.RenameViewStatement;
-import liquibase.database.statement.SqlStatement;
-import liquibase.database.structure.DatabaseObject;
-import liquibase.database.structure.View;
 import liquibase.exception.InvalidChangeDefinitionException;
 import liquibase.exception.UnsupportedChangeException;
+import liquibase.statement.RenameViewStatement;
+import liquibase.statement.SqlStatement;
 import liquibase.util.StringUtils;
-
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * Renames an existing view.

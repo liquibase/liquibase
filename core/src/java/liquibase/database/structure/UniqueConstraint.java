@@ -1,9 +1,9 @@
 package liquibase.database.structure;
 
+import liquibase.util.StringUtils;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import liquibase.util.StringUtils;
 
 public class UniqueConstraint implements DatabaseObject, Comparable<UniqueConstraint>
 {

@@ -1,7 +1,7 @@
 package liquibase.changelog.parser.xml;
 
-import liquibase.changelog.parser.xml.LiquibaseSchemaResolver;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import org.junit.Test;
 
 /**

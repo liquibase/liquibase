@@ -1,7 +1,6 @@
 package liquibase.changelog.visitor;
 
 import liquibase.ChangeSet;
-import liquibase.changelog.visitor.RollbackVisitor;
 import liquibase.database.Database;
 import static org.easymock.EasyMock.expectLastCall;
 import static org.easymock.classextension.EasyMock.*;

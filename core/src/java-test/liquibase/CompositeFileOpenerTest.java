@@ -1,7 +1,5 @@
 package liquibase;
 
-import liquibase.CompositeFileOpener;
-import liquibase.FileOpener;
 import static org.easymock.EasyMock.*;
 import org.junit.After;
 import static org.junit.Assert.*;

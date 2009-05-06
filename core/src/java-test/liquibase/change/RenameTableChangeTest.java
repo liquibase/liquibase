@@ -1,14 +1,12 @@
 package liquibase.change;
 
 import liquibase.database.MockDatabase;
-import liquibase.database.statement.RenameTableStatement;
-import liquibase.database.statement.SqlStatement;
-import static org.junit.Assert.*;
+import liquibase.statement.RenameTableStatement;
+import liquibase.statement.SqlStatement;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Test;
-import org.w3c.dom.Element;
-
-import javax.xml.parsers.DocumentBuilderFactory;
 
 /**
  * Tests for {@link RenameTableChange}

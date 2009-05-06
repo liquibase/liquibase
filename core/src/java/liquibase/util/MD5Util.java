@@ -1,9 +1,8 @@
 package liquibase.util;
 
-import java.security.MessageDigest;
-import java.security.DigestInputStream;
 import java.io.InputStream;
-import java.io.BufferedInputStream;
+import java.security.DigestInputStream;
+import java.security.MessageDigest;
 
 /**
  * Generates md5-sums based on a string.

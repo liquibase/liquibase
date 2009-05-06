@@ -2,23 +2,25 @@ package liquibase.database;
 
 import liquibase.ChangeSet;
 import liquibase.RanChangeSet;
-import liquibase.lock.LockHandler;
 import liquibase.change.*;
-import liquibase.database.statement.*;
-import liquibase.database.statement.generator.SqlGeneratorFactory;
-import liquibase.database.statement.syntax.Sql;
-import liquibase.database.statement.visitor.SqlVisitor;
 import liquibase.database.structure.*;
 import liquibase.database.template.Executor;
 import liquibase.database.template.JdbcOutputTemplate;
 import liquibase.diff.DiffStatusListener;
 import liquibase.exception.*;
+import liquibase.lock.LockHandler;
 import liquibase.log.LogFactory;
+import liquibase.statement.*;
+import liquibase.statement.generator.SqlGeneratorFactory;
+import liquibase.statement.syntax.Sql;
+import liquibase.statement.visitor.SqlVisitor;
 import liquibase.util.ISODateFormat;
 import liquibase.util.LiquibaseUtil;
-import liquibase.util.StringUtils;
 import liquibase.util.StreamUtil;
+import liquibase.util.StringUtils;
 
+import java.io.IOException;
+import java.io.Writer;
 import java.math.BigInteger;
 import java.sql.*;
 import java.text.ParseException;
@@ -27,8 +29,6 @@ import java.util.*;
 import java.util.Date;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
-import java.io.Writer;
-import java.io.IOException;
 
 /**
  * AbstractDatabase is extended by all supported databases as a facade to the underlying database.

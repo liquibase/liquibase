@@ -1,20 +1,13 @@
 package liquibase.change;
 
 import liquibase.database.MockDatabase;
-import liquibase.database.statement.CreateTableStatement;
-import liquibase.database.statement.ForeignKeyConstraint;
-import liquibase.database.statement.SqlStatement;
-import liquibase.database.statement.UniqueConstraint;
-import liquibase.database.structure.Column;
-import liquibase.database.structure.DatabaseObject;
-import liquibase.database.structure.Table;
+import liquibase.statement.CreateTableStatement;
+import liquibase.statement.ForeignKeyConstraint;
+import liquibase.statement.SqlStatement;
+import liquibase.statement.UniqueConstraint;
 import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
-import org.w3c.dom.Element;
-
-import javax.xml.parsers.DocumentBuilderFactory;
-import java.util.Set;
 
 /**
  * Tests for {@link CreateTableChange}

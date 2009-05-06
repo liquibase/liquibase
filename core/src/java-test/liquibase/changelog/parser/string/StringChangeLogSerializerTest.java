@@ -1,10 +1,10 @@
 package liquibase.changelog.parser.string;
 
-import org.junit.Test;
-import static org.junit.Assert.*;
 import liquibase.change.AddColumnChange;
-import liquibase.change.SQLFileChange;
 import liquibase.change.ColumnConfig;
+import liquibase.change.SQLFileChange;
+import static org.junit.Assert.assertEquals;
+import org.junit.Test;
 
 public class StringChangeLogSerializerTest {
     

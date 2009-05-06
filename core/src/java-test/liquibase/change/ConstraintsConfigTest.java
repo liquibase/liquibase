@@ -1,6 +1,6 @@
 package liquibase.change;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNull;
 import org.junit.Test;
 
 /**

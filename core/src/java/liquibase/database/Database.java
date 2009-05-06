@@ -3,22 +3,22 @@ package liquibase.database;
 import liquibase.ChangeSet;
 import liquibase.RanChangeSet;
 import liquibase.change.Change;
-import liquibase.diff.DiffStatusListener;
-import liquibase.database.statement.SqlStatement;
-import liquibase.database.statement.visitor.SqlVisitor;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.DatabaseSnapshot;
 import liquibase.database.template.Executor;
+import liquibase.diff.DiffStatusListener;
 import liquibase.exception.*;
+import liquibase.statement.SqlStatement;
+import liquibase.statement.visitor.SqlVisitor;
 
+import java.io.IOException;
+import java.io.Writer;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
-import java.io.Writer;
-import java.io.IOException;
 
 public interface Database extends DatabaseObject {
     /**

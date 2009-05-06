@@ -1,16 +1,15 @@
 package liquibase.changelog.parser.xml;
 
+import liquibase.ChangeSet;
 import liquibase.change.*;
 import liquibase.change.custom.CustomChangeWrapper;
+import liquibase.changelog.ChangeLogSerializer;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.util.ISODateFormat;
 import liquibase.util.StringUtils;
 import liquibase.util.XMLUtil;
-import liquibase.ChangeSet;
-import liquibase.changelog.ChangeLogSerializer;
 import org.w3c.dom.*;
 
-import java.lang.reflect.Method;
 import java.lang.reflect.Field;
 import java.sql.DatabaseMetaData;
 import java.util.*;
