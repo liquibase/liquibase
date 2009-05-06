@@ -164,26 +164,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
         }
     }
 
-    public void validate(Database database) throws InvalidChangeDefinitionException {
-        if (StringUtils.trimToNull(baseTableName) == null) {
-            throw new InvalidChangeDefinitionException("baseTableName is required", this);
-        }
-        if (StringUtils.trimToNull(baseColumnNames) == null) {
-            throw new InvalidChangeDefinitionException("baseColumnNames is required", this);
-        }
-        if (StringUtils.trimToNull(referencedTableName) == null) {
-            throw new InvalidChangeDefinitionException("referencedTableName is required", this);
-        }
-        if (StringUtils.trimToNull(referencedColumnNames) == null) {
-            throw new InvalidChangeDefinitionException("referenceColumnNames is required", this);
-        }
-
-
-
-
-    }
-
-    public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
+    public SqlStatement[] generateStatements(Database database) {
 
         if (database instanceof SQLiteDatabase) {
             // return special statements for SQLite databases
@@ -215,8 +196,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
         };
     }
 
-    private SqlStatement[] generateStatementsForSQLiteDatabase(Database database)
-            throws UnsupportedChangeException {
+    private SqlStatement[] generateStatementsForSQLiteDatabase(Database database) {
         // SQLite does not support foreign keys until now.
         // See for more information: http://www.sqlite.org/omitted.html
         // Therefore this is an empty operation...

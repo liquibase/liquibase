@@ -5,6 +5,8 @@ import liquibase.statement.AddPrimaryKeyStatement;
 import liquibase.statement.syntax.Sql;
 import liquibase.statement.syntax.UnparsedSql;
 import liquibase.util.StringUtils;
+import liquibase.exception.ValidationErrors;
+import liquibase.exception.ValidationErrors;
 
 public class AddPrimaryKeyGenerator implements SqlGenerator<AddPrimaryKeyStatement> {
     public int getSpecializationLevel() {
@@ -15,8 +17,8 @@ public class AddPrimaryKeyGenerator implements SqlGenerator<AddPrimaryKeyStateme
         return (!(database instanceof SQLiteDatabase));
     }
 
-    public GeneratorValidationErrors validate(AddPrimaryKeyStatement addPrimaryKeyStatement, Database database) {
-        return new GeneratorValidationErrors();
+    public ValidationErrors validate(AddPrimaryKeyStatement addPrimaryKeyStatement, Database database) {
+        return new ValidationErrors();
     }
 
     public Sql[] generateSql(AddPrimaryKeyStatement statement, Database database) {

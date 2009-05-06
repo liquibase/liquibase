@@ -4,6 +4,8 @@ import liquibase.database.*;
 import liquibase.statement.DropUniqueConstraintStatement;
 import liquibase.statement.syntax.Sql;
 import liquibase.statement.syntax.UnparsedSql;
+import liquibase.exception.ValidationErrors;
+import liquibase.exception.ValidationErrors;
 
 public class DropUniqueConstraintGenerator implements SqlGenerator<DropUniqueConstraintStatement> {
     public int getSpecializationLevel() {
@@ -14,8 +16,8 @@ public class DropUniqueConstraintGenerator implements SqlGenerator<DropUniqueCon
         return !(database instanceof SQLiteDatabase);
     }
 
-    public GeneratorValidationErrors validate(DropUniqueConstraintStatement dropUniqueConstraintStatement, Database database) {
-        return new GeneratorValidationErrors();
+    public ValidationErrors validate(DropUniqueConstraintStatement dropUniqueConstraintStatement, Database database) {
+        return new ValidationErrors();
     }
 
     public Sql[] generateSql(DropUniqueConstraintStatement statement, Database database) {

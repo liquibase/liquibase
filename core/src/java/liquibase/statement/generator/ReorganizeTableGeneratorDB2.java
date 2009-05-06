@@ -3,6 +3,8 @@ package liquibase.statement.generator;
 import liquibase.database.DB2Database;
 import liquibase.database.Database;
 import liquibase.exception.JDBCException;
+import liquibase.exception.ValidationErrors;
+import liquibase.exception.ValidationErrors;
 import liquibase.statement.ReorganizeTableStatement;
 import liquibase.statement.syntax.Sql;
 import liquibase.statement.syntax.UnparsedSql;
@@ -16,8 +18,8 @@ public class ReorganizeTableGeneratorDB2 implements SqlGenerator<ReorganizeTable
         return database instanceof DB2Database;
     }
 
-    public GeneratorValidationErrors validate(ReorganizeTableStatement reorganizeTableStatement, Database database) {
-        return new GeneratorValidationErrors();
+    public ValidationErrors validate(ReorganizeTableStatement reorganizeTableStatement, Database database) {
+        return new ValidationErrors();
     }
 
     public Sql[] generateSql(ReorganizeTableStatement statement, Database database) {

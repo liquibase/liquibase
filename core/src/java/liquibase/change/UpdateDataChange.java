@@ -2,7 +2,6 @@ package liquibase.change;
 
 import liquibase.database.Database;
 import liquibase.exception.InvalidChangeDefinitionException;
-import liquibase.exception.UnsupportedChangeException;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.UpdateStatement;
 import liquibase.util.StringUtils;
@@ -62,19 +61,7 @@ public class UpdateDataChange extends AbstractChange implements ChangeWithColumn
         this.whereClause = whereClause;
     }
 
-    public void validate(Database database) throws InvalidChangeDefinitionException {
-        if (StringUtils.trimToNull(tableName) == null) {
-            throw new InvalidChangeDefinitionException("tableName is required", this);
-        }
-
-        for (ColumnConfig column : getColumns()) {
-            if (StringUtils.trimToNull(column.getName()) == null) {
-                throw new InvalidChangeDefinitionException("column name is required", this);
-            }
-        }
-    }
-    
-    public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
+    public SqlStatement[] generateStatements(Database database) {
 
         UpdateStatement statement = new UpdateStatement(getSchemaName() == null?database.getDefaultSchemaName():getSchemaName(), getTableName());
 

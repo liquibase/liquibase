@@ -3,6 +3,8 @@ package liquibase.statement.generator;
 import liquibase.database.*;
 import liquibase.exception.JDBCException;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.exception.ValidationErrors;
+import liquibase.exception.ValidationErrors;
 import liquibase.statement.DropDefaultValueStatement;
 import liquibase.statement.syntax.Sql;
 import liquibase.statement.syntax.UnparsedSql;
@@ -16,8 +18,8 @@ public class DropDefaultValueGenerator implements SqlGenerator<DropDefaultValueS
         return !(database instanceof SQLiteDatabase);
     }
 
-    public GeneratorValidationErrors validate(DropDefaultValueStatement dropDefaultValueStatement, Database database) {
-        GeneratorValidationErrors validationErrors = new GeneratorValidationErrors();
+    public ValidationErrors validate(DropDefaultValueStatement dropDefaultValueStatement, Database database) {
+        ValidationErrors validationErrors = new ValidationErrors();
         if (database instanceof InformixDatabase) {
             validationErrors.checkRequiredField("columnDataType", dropDefaultValueStatement.getColumnDataType());
         }

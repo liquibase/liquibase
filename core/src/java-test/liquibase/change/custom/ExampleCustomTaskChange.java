@@ -20,7 +20,7 @@ public class ExampleCustomTaskChange implements CustomTaskChange, CustomTaskRoll
         this.helloTo = helloTo;
     }
 
-    public void execute(Database database) throws CustomChangeException, UnsupportedChangeException {
+    public void execute(Database database) throws CustomChangeException {
         System.out.println("Hello "+getHelloTo());
     }
 
@@ -40,7 +40,7 @@ public class ExampleCustomTaskChange implements CustomTaskChange, CustomTaskRoll
         this.fileOpener = fileOpener;
     }
 
-    public void validate(Database database) throws InvalidChangeDefinitionException {
-
+    public ValidationErrors validate(Database database) {
+        return new ValidationErrors();
     }
 }

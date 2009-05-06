@@ -4,6 +4,8 @@ import liquibase.database.*;
 import liquibase.statement.CreateViewStatement;
 import liquibase.statement.syntax.Sql;
 import liquibase.statement.syntax.UnparsedSql;
+import liquibase.exception.ValidationErrors;
+import liquibase.exception.ValidationErrors;
 
 public class CreateViewGenerator implements SqlGenerator<CreateViewStatement> {
     public int getSpecializationLevel() {
@@ -14,8 +16,8 @@ public class CreateViewGenerator implements SqlGenerator<CreateViewStatement> {
         return true;
     }
 
-    public GeneratorValidationErrors validate(CreateViewStatement createViewStatement, Database database) {
-        GeneratorValidationErrors validationErrors = new GeneratorValidationErrors();
+    public ValidationErrors validate(CreateViewStatement createViewStatement, Database database) {
+        ValidationErrors validationErrors = new ValidationErrors();
         if (database instanceof HsqlDatabase
                 || database instanceof DB2Database
                 || database instanceof CacheDatabase

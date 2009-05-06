@@ -3,7 +3,6 @@ package liquibase.change;
 import liquibase.database.Database;
 import liquibase.database.SQLiteDatabase;
 import liquibase.exception.InvalidChangeDefinitionException;
-import liquibase.exception.UnsupportedChangeException;
 import liquibase.statement.CreateViewStatement;
 import liquibase.statement.DropViewStatement;
 import liquibase.statement.SqlStatement;
@@ -58,14 +57,7 @@ public class CreateViewChange extends AbstractChange {
         this.replaceIfExists = replaceIfExists;
     }
 
-    public void validate(Database database) throws InvalidChangeDefinitionException {
-        if (StringUtils.trimToNull(viewName) == null) {
-            throw new InvalidChangeDefinitionException("viewName is required", this);
-        }
-
-    }
-
-    public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
+    public SqlStatement[] generateStatements(Database database) {
     	List<SqlStatement> statements = new ArrayList<SqlStatement>();
     
         boolean replaceIfExists = false;

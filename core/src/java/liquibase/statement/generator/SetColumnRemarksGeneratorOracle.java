@@ -5,6 +5,8 @@ import liquibase.database.OracleDatabase;
 import liquibase.statement.SetColumnRemarksStatement;
 import liquibase.statement.syntax.Sql;
 import liquibase.statement.syntax.UnparsedSql;
+import liquibase.exception.ValidationErrors;
+import liquibase.exception.ValidationErrors;
 
 public class SetColumnRemarksGeneratorOracle implements SqlGenerator<SetColumnRemarksStatement> {
     public int getSpecializationLevel() {
@@ -15,8 +17,8 @@ public class SetColumnRemarksGeneratorOracle implements SqlGenerator<SetColumnRe
         return database instanceof OracleDatabase;
     }
 
-    public GeneratorValidationErrors validate(SetColumnRemarksStatement setColumnRemarksStatement, Database database) {
-        return new GeneratorValidationErrors();
+    public ValidationErrors validate(SetColumnRemarksStatement setColumnRemarksStatement, Database database) {
+        return new ValidationErrors();
     }
 
     public Sql[] generateSql(SetColumnRemarksStatement statement, Database database) {

@@ -5,6 +5,8 @@ import liquibase.statement.AddUniqueConstraintStatement;
 import liquibase.statement.syntax.Sql;
 import liquibase.statement.syntax.UnparsedSql;
 import liquibase.util.StringUtils;
+import liquibase.exception.ValidationErrors;
+import liquibase.exception.ValidationErrors;
 
 public class AddUniqueConstraintGenerator implements SqlGenerator<AddUniqueConstraintStatement> {
     public int getSpecializationLevel() {
@@ -19,8 +21,8 @@ public class AddUniqueConstraintGenerator implements SqlGenerator<AddUniqueConst
         ;
     }
 
-    public GeneratorValidationErrors validate(AddUniqueConstraintStatement addUniqueConstraintStatement, Database database) {
-        return new GeneratorValidationErrors();
+    public ValidationErrors validate(AddUniqueConstraintStatement addUniqueConstraintStatement, Database database) {
+        return new ValidationErrors();
     }
 
     public Sql[] generateSql(AddUniqueConstraintStatement statement, Database database) {

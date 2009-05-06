@@ -5,6 +5,8 @@ import liquibase.log.LogFactory;
 import liquibase.statement.DropTableStatement;
 import liquibase.statement.syntax.Sql;
 import liquibase.statement.syntax.UnparsedSql;
+import liquibase.exception.ValidationErrors;
+import liquibase.exception.ValidationErrors;
 
 public class DropTableGenerator implements SqlGenerator<DropTableStatement> {
     public int getSpecializationLevel() {
@@ -15,8 +17,8 @@ public class DropTableGenerator implements SqlGenerator<DropTableStatement> {
         return true;
     }
 
-    public GeneratorValidationErrors validate(DropTableStatement dropTableStatement, Database database) {
-        return new GeneratorValidationErrors();
+    public ValidationErrors validate(DropTableStatement dropTableStatement, Database database) {
+        return new ValidationErrors();
     }
 
     public Sql[] generateSql(DropTableStatement statement, Database database) {

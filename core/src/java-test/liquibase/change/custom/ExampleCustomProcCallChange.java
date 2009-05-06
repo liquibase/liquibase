@@ -2,9 +2,7 @@ package liquibase.change.custom;
 
 import liquibase.FileOpener;
 import liquibase.database.Database;
-import liquibase.exception.InvalidChangeDefinitionException;
-import liquibase.exception.SetupException;
-import liquibase.exception.UnsupportedChangeException;
+import liquibase.exception.*;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.StoredProcedureStatement;
 
@@ -24,7 +22,7 @@ public class ExampleCustomProcCallChange implements CustomSqlChange {
         this.procedureName = procedureName;
     }
 
-    public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
+    public SqlStatement[] generateStatements(Database database) throws CustomChangeException {
         StoredProcedureStatement procedureStatement = new StoredProcedureStatement("testHello");
         return new SqlStatement[]{
                 procedureStatement,
@@ -42,8 +40,7 @@ public class ExampleCustomProcCallChange implements CustomSqlChange {
         this.fileOpener = fileOpener;
     }
 
-    public void validate(Database database) throws InvalidChangeDefinitionException {
-
+    public ValidationErrors validate(Database database) {
+        return new ValidationErrors();
     }
-    
 }

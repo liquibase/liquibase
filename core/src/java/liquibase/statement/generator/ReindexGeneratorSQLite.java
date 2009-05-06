@@ -5,6 +5,8 @@ import liquibase.database.SQLiteDatabase;
 import liquibase.statement.ReindexStatement;
 import liquibase.statement.syntax.Sql;
 import liquibase.statement.syntax.UnparsedSql;
+import liquibase.exception.ValidationErrors;
+import liquibase.exception.ValidationErrors;
 
 public class ReindexGeneratorSQLite implements SqlGenerator<ReindexStatement> {
     public int getSpecializationLevel() {
@@ -15,8 +17,8 @@ public class ReindexGeneratorSQLite implements SqlGenerator<ReindexStatement> {
         return (database instanceof SQLiteDatabase);
     }
 
-    public GeneratorValidationErrors validate(ReindexStatement reindexStatement, Database database) {
-        return new GeneratorValidationErrors();
+    public ValidationErrors validate(ReindexStatement reindexStatement, Database database) {
+        return new ValidationErrors();
     }
 
     public Sql[] generateSql(ReindexStatement statement, Database database) {

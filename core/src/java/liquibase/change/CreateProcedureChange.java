@@ -3,7 +3,6 @@ package liquibase.change;
 import liquibase.database.Database;
 import liquibase.database.OracleDatabase;
 import liquibase.exception.InvalidChangeDefinitionException;
-import liquibase.exception.UnsupportedChangeException;
 import liquibase.statement.RawSqlStatement;
 import liquibase.statement.SqlStatement;
 import liquibase.util.StringUtils;
@@ -32,14 +31,7 @@ public class CreateProcedureChange extends AbstractChange {
         this.comments = comments;
     }
 
-    public void validate(Database database) throws InvalidChangeDefinitionException {
-        if (StringUtils.trimToNull(procedureBody) == null) {
-            throw new InvalidChangeDefinitionException("procedure text is required", this);
-        }
-
-    }
-
-    public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
+    public SqlStatement[] generateStatements(Database database) {
         String endDelimiter = ";";
         if (database instanceof OracleDatabase) {
             endDelimiter = "\n/";

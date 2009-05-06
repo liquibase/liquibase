@@ -4,6 +4,8 @@ import liquibase.database.*;
 import liquibase.statement.RenameColumnStatement;
 import liquibase.statement.syntax.Sql;
 import liquibase.statement.syntax.UnparsedSql;
+import liquibase.exception.ValidationErrors;
+import liquibase.exception.ValidationErrors;
 
 public class RenameColumnGenerator implements SqlGenerator<RenameColumnStatement> {
     public int getSpecializationLevel() {
@@ -16,8 +18,8 @@ public class RenameColumnGenerator implements SqlGenerator<RenameColumnStatement
                 || database instanceof SQLiteDatabase);
     }
 
-    public GeneratorValidationErrors validate(RenameColumnStatement renameColumnStatement, Database database) {
-        GeneratorValidationErrors validationErrors = new GeneratorValidationErrors();
+    public ValidationErrors validate(RenameColumnStatement renameColumnStatement, Database database) {
+        ValidationErrors validationErrors = new ValidationErrors();
         if (database instanceof MySQLDatabase) {
             validationErrors.checkRequiredField("columnDataType", renameColumnStatement.getColumnDataType());
         }

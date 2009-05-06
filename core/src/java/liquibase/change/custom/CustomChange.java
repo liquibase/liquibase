@@ -4,6 +4,7 @@ import liquibase.FileOpener;
 import liquibase.database.Database;
 import liquibase.exception.InvalidChangeDefinitionException;
 import liquibase.exception.SetupException;
+import liquibase.exception.ValidationErrors;
 
 /**
  * Interface to implement when creating a custom change.  Actual custom changes implementations need to
@@ -40,6 +41,6 @@ interface CustomChange {
      * Tests that the change is configured correctly before attempting to execute it.
      * @param database The database the change will be ran against
      */
-    public void validate(Database database) throws InvalidChangeDefinitionException;
+    public ValidationErrors validate(Database database);
 
 }

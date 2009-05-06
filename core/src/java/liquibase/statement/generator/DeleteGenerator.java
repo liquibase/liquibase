@@ -5,6 +5,8 @@ import liquibase.database.SQLiteDatabase;
 import liquibase.statement.DeleteStatement;
 import liquibase.statement.syntax.Sql;
 import liquibase.statement.syntax.UnparsedSql;
+import liquibase.exception.ValidationErrors;
+import liquibase.exception.ValidationErrors;
 
 import java.util.Date;
 
@@ -17,8 +19,8 @@ public class DeleteGenerator implements SqlGenerator<DeleteStatement> {
         return !(database instanceof SQLiteDatabase);
     }
 
-    public GeneratorValidationErrors validate(DeleteStatement deleteStatement, Database database) {
-        return new GeneratorValidationErrors();
+    public ValidationErrors validate(DeleteStatement deleteStatement, Database database) {
+        return new ValidationErrors();
     }
 
     public Sql[] generateSql(DeleteStatement statement, Database database) {

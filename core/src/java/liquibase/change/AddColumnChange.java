@@ -2,7 +2,6 @@ package liquibase.change;
 
 import liquibase.database.DB2Database;
 import liquibase.database.Database;
-import liquibase.exception.UnsupportedChangeException;
 import liquibase.statement.*;
 import liquibase.util.StringUtils;
 
@@ -57,7 +56,7 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
         columns.remove(column);
     }
 
-    public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
+    public SqlStatement[] generateStatements(Database database) {
 
         List<SqlStatement> sql = new ArrayList<SqlStatement>();
 

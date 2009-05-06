@@ -4,6 +4,8 @@ import liquibase.database.Database;
 import liquibase.statement.UpdateStatement;
 import liquibase.statement.syntax.Sql;
 import liquibase.statement.syntax.UnparsedSql;
+import liquibase.exception.ValidationErrors;
+import liquibase.exception.ValidationErrors;
 
 import java.util.Date;
 
@@ -16,8 +18,8 @@ public class UpdateGenerator implements SqlGenerator<UpdateStatement> {
         return true;
     }
 
-    public GeneratorValidationErrors validate(UpdateStatement updateStatement, Database database) {
-        return new GeneratorValidationErrors();
+    public ValidationErrors validate(UpdateStatement updateStatement, Database database) {
+        return new ValidationErrors();
     }
 
     public Sql[] generateSql(UpdateStatement statement, Database database) {

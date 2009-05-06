@@ -50,10 +50,7 @@ public class DropPrimaryKeyChange extends AbstractChange {
         this.constraintName = constraintName;
     }
 
-    public void validate(Database database) throws InvalidChangeDefinitionException {
-    }
-
-    public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
+    public SqlStatement[] generateStatements(Database database) {
     	
     	if (database instanceof SQLiteDatabase) {
     		// return special statements for SQLite databases
@@ -65,8 +62,7 @@ public class DropPrimaryKeyChange extends AbstractChange {
         };
     }
     
-    private SqlStatement[] generateStatementsForSQLiteDatabase(Database database) 
-			throws UnsupportedChangeException {
+    private SqlStatement[] generateStatementsForSQLiteDatabase(Database database) {
     	
     	// SQLite does not support this ALTER TABLE operation until now.
 		// For more information see: http://www.sqlite.org/omitted.html.
@@ -101,7 +97,7 @@ public class DropPrimaryKeyChange extends AbstractChange {
 			statements.addAll(SQLiteDatabase.getAlterTableStatements(
 					rename_alter_visitor,
 					database,getSchemaName(),getTableName()));
-		} catch (JDBCException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		

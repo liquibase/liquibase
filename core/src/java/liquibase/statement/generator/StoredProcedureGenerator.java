@@ -4,6 +4,8 @@ import liquibase.database.Database;
 import liquibase.statement.StoredProcedureStatement;
 import liquibase.statement.syntax.Sql;
 import liquibase.statement.syntax.UnparsedSql;
+import liquibase.exception.ValidationErrors;
+import liquibase.exception.ValidationErrors;
 
 public class StoredProcedureGenerator implements SqlGenerator<StoredProcedureStatement> {
     public int getSpecializationLevel() {
@@ -14,8 +16,8 @@ public class StoredProcedureGenerator implements SqlGenerator<StoredProcedureSta
         return true;
     }
 
-    public GeneratorValidationErrors validate(StoredProcedureStatement storedProcedureStatement, Database database) {
-        return new GeneratorValidationErrors();
+    public ValidationErrors validate(StoredProcedureStatement storedProcedureStatement, Database database) {
+        return new ValidationErrors();
     }
 
     public Sql[] generateSql(StoredProcedureStatement statement, Database database) {

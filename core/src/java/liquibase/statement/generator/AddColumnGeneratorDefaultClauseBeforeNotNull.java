@@ -6,6 +6,7 @@ import liquibase.database.structure.Table;
 import liquibase.statement.AddColumnStatement;
 import liquibase.statement.syntax.Sql;
 import liquibase.statement.syntax.UnparsedSql;
+import liquibase.exception.ValidationErrors;
 
 public class AddColumnGeneratorDefaultClauseBeforeNotNull extends AddColumnGenerator {
     public int getSpecializationLevel() {
@@ -22,8 +23,8 @@ public class AddColumnGeneratorDefaultClauseBeforeNotNull extends AddColumnGener
     }
 
     @Override
-    public GeneratorValidationErrors validate(AddColumnStatement statement, Database database) {
-        GeneratorValidationErrors validationErrors = super.validate(statement, database);
+    public ValidationErrors validate(AddColumnStatement statement, Database database) {
+        ValidationErrors validationErrors = super.validate(statement, database);
         if (database instanceof DerbyDatabase && statement.isAutoIncrement()) {
             validationErrors.addError("Cannot add an identity column to a database");
         }

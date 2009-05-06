@@ -70,17 +70,7 @@ public class AddUniqueConstraintChange extends AbstractChange {
         this.tablespace = tablespace;
     }
 
-    public void validate(Database database) throws InvalidChangeDefinitionException {
-        if (StringUtils.trimToNull(tableName) == null) {
-            throw new InvalidChangeDefinitionException("tableName is required", this);
-        }
-        if (StringUtils.trimToNull(columnNames) == null) {
-            throw new InvalidChangeDefinitionException("columnNames is required", this);
-        }
-
-    }
-
-    public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
+    public SqlStatement[] generateStatements(Database database) {
         
     	if (database instanceof SQLiteDatabase) {
     		// return special statements for SQLite databases
@@ -93,8 +83,7 @@ public class AddUniqueConstraintChange extends AbstractChange {
         return new SqlStatement[] { statement };
     }
     
-    private SqlStatement[] generateStatementsForSQLiteDatabase(Database database) 
-			throws UnsupportedChangeException {
+    private SqlStatement[] generateStatementsForSQLiteDatabase(Database database) {
     	
     	// SQLite does not support this ALTER TABLE operation until now.
 		// For more information see: http://www.sqlite.org/omitted.html.
@@ -129,7 +118,7 @@ public class AddUniqueConstraintChange extends AbstractChange {
 			statements.addAll(SQLiteDatabase.getAlterTableStatements(
 					rename_alter_visitor,
 					database,getSchemaName(),getTableName()));
-    	} catch (JDBCException e) {
+    	} catch (Exception e) {
 			e.printStackTrace();
 		}
     	

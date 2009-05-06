@@ -1,7 +1,6 @@
 package liquibase.change;
 
 import liquibase.database.Database;
-import liquibase.exception.UnsupportedChangeException;
 import liquibase.statement.AddDefaultValueStatement;
 import liquibase.statement.ComputedDateValue;
 import liquibase.statement.ComputedNumericValue;
@@ -97,7 +96,7 @@ public class AddDefaultValueChange extends AbstractChange {
         this.defaultValueBoolean = defaultValueBoolean;
     }
 
-    public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
+    public SqlStatement[] generateStatements(Database database) {
         Object defaultValue = null;
 
         if (getDefaultValue() != null) {

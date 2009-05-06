@@ -2,7 +2,6 @@ package liquibase.change;
 
 import liquibase.database.Database;
 import liquibase.exception.InvalidChangeDefinitionException;
-import liquibase.exception.UnsupportedChangeException;
 import liquibase.statement.CreateSequenceStatement;
 import liquibase.statement.SqlStatement;
 import liquibase.util.StringUtils;
@@ -81,14 +80,7 @@ public class CreateSequenceChange extends AbstractChange {
         this.ordered = ordered;
     }
 
-    public void validate(Database database) throws InvalidChangeDefinitionException {
-        if (StringUtils.trimToNull(sequenceName) == null) {
-            throw new InvalidChangeDefinitionException("sequenceName is required", this);
-        }
-
-    }
-
-    public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
+    public SqlStatement[] generateStatements(Database database) {
         return new SqlStatement[] {
                 new CreateSequenceStatement(getSchemaName() == null?database.getDefaultSchemaName():getSchemaName(), getSequenceName())
                 .setIncrementBy(getIncrementBy())

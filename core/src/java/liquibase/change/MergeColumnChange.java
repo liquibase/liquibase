@@ -89,26 +89,7 @@ public class MergeColumnChange extends AbstractChange {
         this.finalColumnType = finalColumnType;
     }
 
-    public void validate(Database database) throws InvalidChangeDefinitionException {
-        if (StringUtils.trimToNull(tableName) == null) {
-            throw new InvalidChangeDefinitionException("tableName is required", this);
-        }
-        if (StringUtils.trimToNull(column1Name) == null) {
-            throw new InvalidChangeDefinitionException("column1Name is required", this);
-        }
-        if (StringUtils.trimToNull(column2Name) == null) {
-            throw new InvalidChangeDefinitionException("column2Name is required", this);
-        }
-        if (StringUtils.trimToNull(finalColumnName) == null) {
-            throw new InvalidChangeDefinitionException("finalColumnName is required", this);
-        }
-        if (StringUtils.trimToNull(finalColumnType) == null) {
-            throw new InvalidChangeDefinitionException("finalColumnType is required", this);
-        }
-
-    }
-
-    public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
+    public SqlStatement[] generateStatements(Database database) {
 
         List<SqlStatement> statements = new ArrayList<SqlStatement>();
 
@@ -160,7 +141,7 @@ public class MergeColumnChange extends AbstractChange {
 				statements.addAll(SQLiteDatabase.getAlterTableStatements(
 						rename_alter_visitor,
 						database,getSchemaName(),getTableName()));
-    		} catch (JDBCException e) {
+    		} catch (Exception e) {
 				e.printStackTrace();
 			}
     		

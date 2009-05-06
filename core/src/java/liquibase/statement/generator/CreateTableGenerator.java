@@ -8,6 +8,10 @@ import liquibase.statement.UniqueConstraint;
 import liquibase.statement.syntax.Sql;
 import liquibase.statement.syntax.UnparsedSql;
 import liquibase.util.StringUtils;
+import liquibase.exception.ValidationErrors;
+import liquibase.exception.ValidationErrors;
+import liquibase.exception.UnsupportedChangeException;
+import liquibase.change.ColumnConfig;
 
 import java.util.Iterator;
 import java.util.logging.Level;
@@ -21,8 +25,8 @@ public class CreateTableGenerator implements SqlGenerator<CreateTableStatement> 
         return true;
     }
 
-    public GeneratorValidationErrors validate(CreateTableStatement createTableStatement, Database database) {
-        return new GeneratorValidationErrors();
+    public ValidationErrors validate(CreateTableStatement createTableStatement, Database database) {
+        return new ValidationErrors();
     }
 
     public Sql[] generateSql(CreateTableStatement statement, Database database) {

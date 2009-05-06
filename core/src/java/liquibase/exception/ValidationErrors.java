@@ -1,14 +1,11 @@
-package liquibase.statement.generator;
+package liquibase.exception;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.ArrayList;
 
-public class GeneratorValidationErrors {
-    private List<String> errorMessages;
+public class ValidationErrors {
 
-    public GeneratorValidationErrors() {
-        this.errorMessages = new ArrayList<String>();
-    }
+    protected List<String> errorMessages = new ArrayList<String>();
 
     public boolean hasErrors() {
         return errorMessages.size() > 0;
@@ -34,4 +31,7 @@ public class GeneratorValidationErrors {
         return errorMessages;
     }
 
+    public void addAll(ValidationErrors validationErrors) {
+        this.errorMessages.addAll(validationErrors.getErrorMessages());
+    }
 }

@@ -3,7 +3,6 @@ package liquibase.change;
 import liquibase.database.DB2Database;
 import liquibase.database.Database;
 import liquibase.exception.InvalidChangeDefinitionException;
-import liquibase.exception.UnsupportedChangeException;
 import liquibase.statement.RenameTableStatement;
 import liquibase.statement.ReorganizeTableStatement;
 import liquibase.statement.SqlStatement;
@@ -50,16 +49,7 @@ public class RenameTableChange extends AbstractChange {
         this.newTableName = newTableName;
     }
 
-    public void validate(Database database) throws InvalidChangeDefinitionException {
-        if (StringUtils.trimToNull(oldTableName) == null) {
-            throw new InvalidChangeDefinitionException("oldTableName is required", this);
-        }
-        if (StringUtils.trimToNull(newTableName) == null) {
-            throw new InvalidChangeDefinitionException("newTableName is required", this);
-        }
-    }
-
-    public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
+    public SqlStatement[] generateStatements(Database database) {
         List<SqlStatement> statements = new ArrayList<SqlStatement>();
         String schemaName = getSchemaName() == null?database.getDefaultSchemaName():getSchemaName();
         statements.add(new RenameTableStatement(schemaName, getOldTableName(), getNewTableName()));

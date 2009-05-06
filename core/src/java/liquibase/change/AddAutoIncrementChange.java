@@ -2,7 +2,6 @@ package liquibase.change;
 
 import liquibase.database.Database;
 import liquibase.database.PostgresDatabase;
-import liquibase.exception.UnsupportedChangeException;
 import liquibase.statement.*;
 import liquibase.util.StringUtils;
 
@@ -54,7 +53,7 @@ public class AddAutoIncrementChange extends AbstractChange {
         this.columnDataType = columnDataType;
     }
 
-    public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
+    public SqlStatement[] generateStatements(Database database) {
         if (database instanceof PostgresDatabase) {
             String sequenceName = (getTableName() + "_" + getColumnName() + "_seq").toLowerCase();
             return new SqlStatement[]{

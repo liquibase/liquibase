@@ -6,6 +6,8 @@ import liquibase.database.OracleDatabase;
 import liquibase.statement.SetTableRemarksStatement;
 import liquibase.statement.syntax.Sql;
 import liquibase.statement.syntax.UnparsedSql;
+import liquibase.exception.ValidationErrors;
+import liquibase.exception.ValidationErrors;
 
 public class SetTableRemarksGenerator implements SqlGenerator<SetTableRemarksStatement>{
     public int getSpecializationLevel() {
@@ -16,8 +18,8 @@ public class SetTableRemarksGenerator implements SqlGenerator<SetTableRemarksSta
         return database instanceof MySQLDatabase || database instanceof OracleDatabase;
     }
 
-    public GeneratorValidationErrors validate(SetTableRemarksStatement setTableRemarksStatement, Database database) {
-        return new GeneratorValidationErrors();
+    public ValidationErrors validate(SetTableRemarksStatement setTableRemarksStatement, Database database) {
+        return new ValidationErrors();
     }
 
     public Sql[] generateSql(SetTableRemarksStatement statement, Database database) {

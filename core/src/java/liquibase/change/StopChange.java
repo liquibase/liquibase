@@ -2,7 +2,6 @@ package liquibase.change;
 
 import liquibase.database.Database;
 import liquibase.exception.InvalidChangeDefinitionException;
-import liquibase.exception.UnsupportedChangeException;
 import liquibase.statement.SqlStatement;
 import liquibase.util.StringUtils;
 
@@ -22,11 +21,7 @@ public class StopChange extends AbstractChange {
         this.message = StringUtils.trimToNull(message);
     }
 
-    public void validate(Database database) throws InvalidChangeDefinitionException {
-        ;
-    }
-
-    public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
+    public SqlStatement[] generateStatements(Database database) {
         throw new StopChangeException(getMessage());
     }
 
