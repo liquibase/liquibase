@@ -1,6 +1,7 @@
 package liquibase.change;
 
 import liquibase.database.Database;
+import liquibase.database.SybaseASADatabase;
 import liquibase.statement.CreateSequenceStatement;
 import liquibase.statement.SqlStatement;
 import liquibase.test.DatabaseTest;
@@ -59,4 +60,8 @@ public class CreateSequenceChangeTest extends AbstractChangeTest {
         assertEquals("Sequence SEQ_NAME created", change.getConfirmationMessage());
     }
 
+    @Override
+    protected boolean changeIsUnsupported(Database database) {
+        return !database.supportsSequences();
+    }
 }

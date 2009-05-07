@@ -2,6 +2,7 @@ package liquibase.change;
 
 import liquibase.database.Database;
 import liquibase.database.MockDatabase;
+import liquibase.database.SybaseASADatabase;
 import liquibase.statement.AddDefaultValueStatement;
 import liquibase.statement.ComputedDateValue;
 import liquibase.statement.ComputedNumericValue;

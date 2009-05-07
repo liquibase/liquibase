@@ -1,6 +1,6 @@
 package liquibase.change;
 
-import liquibase.database.MockDatabase;
+import liquibase.database.*;
 import liquibase.statement.RenameColumnStatement;
 import liquibase.statement.SqlStatement;
 import static org.junit.Assert.assertEquals;
@@ -46,4 +46,10 @@ public class RenameColumnChangeTest extends AbstractChangeTest {
         assertEquals("Column TABLE_NAME.oldColName renamed to newColName", refactoring.getConfirmationMessage());
     }
 
+    @Override
+    protected boolean changeIsUnsupported(Database database) {
+        return database instanceof DB2Database
+                || database instanceof CacheDatabase
+                || database instanceof SQLiteDatabase;
+    }
 }

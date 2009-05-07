@@ -56,10 +56,10 @@ public class DropColumnChange extends AbstractChange {
 
     public SqlStatement[] generateStatements(Database database) {
      
-        if (database instanceof SQLiteDatabase) {		
-        	// return special statements for SQLite databases
-    		return generateStatementsForSQLiteDatabase(database);
-		}
+//todo        if (database instanceof SQLiteDatabase) {		
+//        	// return special statements for SQLite databases
+//    		return generateStatementsForSQLiteDatabase(database);
+//		}
 			
         List<SqlStatement> statements = new ArrayList<SqlStatement>();
         String schemaName = getSchemaName() == null?database.getDefaultSchemaName():getSchemaName();

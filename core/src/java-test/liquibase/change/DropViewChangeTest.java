@@ -1,6 +1,8 @@
 package liquibase.change;
 
 import liquibase.database.MockDatabase;
+import liquibase.database.Database;
+import liquibase.database.SybaseASADatabase;
 import liquibase.statement.DropViewStatement;
 import liquibase.statement.SqlStatement;
 import static org.junit.Assert.assertEquals;

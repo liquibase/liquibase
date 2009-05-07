@@ -1,6 +1,9 @@
 package liquibase.change;
 
 import liquibase.database.MockDatabase;
+import liquibase.database.Database;
+import liquibase.database.SybaseASADatabase;
+import liquibase.database.SQLiteDatabase;
 import liquibase.statement.DropUniqueConstraintStatement;
 import liquibase.statement.SqlStatement;
 import static org.junit.Assert.assertEquals;
@@ -37,6 +40,11 @@ public class DropUniqueConstraintChangeTest  extends AbstractChangeTest {
     @Test
     public void getConfirmationMessage() throws Exception {
         assertEquals("Unique constraint UQ_CONSTRAINT dropped from TAB_NAME", change.getConfirmationMessage());
+    }
+
+    @Override
+    protected boolean changeIsUnsupported(Database database) {
+        return database instanceof SQLiteDatabase;
     }
 
 }

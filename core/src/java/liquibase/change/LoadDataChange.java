@@ -8,6 +8,7 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.statement.InsertStatement;
 import liquibase.statement.SqlStatement;
 import liquibase.util.StringUtils;
+import liquibase.FileOpener;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -67,7 +68,11 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns 
 
     public SqlStatement[] generateStatements(Database database) {
         try {
-            InputStream stream = getFileOpener().getResourceAsStream(getFile());
+            FileOpener opener = getFileOpener();
+            if (opener == null) {
+                throw new UnexpectedLiquibaseException("No file opener specified for "+getFile());
+            }
+            InputStream stream = opener.getResourceAsStream(getFile());
             if (stream == null) {
                 throw new UnexpectedLiquibaseException("Data file "+getFile()+" was not found");
             }

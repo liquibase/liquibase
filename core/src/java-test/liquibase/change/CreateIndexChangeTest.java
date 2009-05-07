@@ -1,6 +1,7 @@
 package liquibase.change;
 
 import liquibase.database.Database;
+import liquibase.database.SybaseASADatabase;
 import liquibase.statement.CreateIndexStatement;
 import liquibase.statement.SqlStatement;
 import liquibase.test.DatabaseTest;

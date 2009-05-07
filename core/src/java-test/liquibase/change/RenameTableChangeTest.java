@@ -1,6 +1,6 @@
 package liquibase.change;
 
-import liquibase.database.MockDatabase;
+import liquibase.database.*;
 import liquibase.statement.RenameTableStatement;
 import liquibase.statement.SqlStatement;
 import static org.junit.Assert.assertEquals;
@@ -47,6 +47,12 @@ public class RenameTableChangeTest extends AbstractChangeTest {
         refactoring.setNewTableName("NEW_NAME");
 
         assertEquals("Table OLD_NAME renamed to NEW_NAME", refactoring.getConfirmationMessage());
+    }
+
+    @Override
+    protected boolean changeIsUnsupported(Database database) {
+        return database instanceof CacheDatabase
+                || database instanceof FirebirdDatabase;
     }
 
 }

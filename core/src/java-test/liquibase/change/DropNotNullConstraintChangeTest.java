@@ -1,6 +1,6 @@
 package liquibase.change;
 
-import liquibase.database.MockDatabase;
+import liquibase.database.*;
 import liquibase.statement.SetNullableStatement;
 import liquibase.statement.SqlStatement;
 import static org.junit.Assert.assertEquals;
@@ -42,6 +42,12 @@ public class DropNotNullConstraintChangeTest extends AbstractChangeTest {
         change.setColumnName("COL_HERE");
         assertEquals("Null constraint dropped from TABLE_NAME.COL_HERE", change.getConfirmationMessage());
 
+    }
+
+    @Override
+    protected boolean changeIsUnsupported(Database database) {
+        return database instanceof FirebirdDatabase
+                || database instanceof SQLiteDatabase;
     }
 
 }

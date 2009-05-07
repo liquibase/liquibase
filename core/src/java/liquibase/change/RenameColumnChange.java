@@ -71,10 +71,10 @@ public class RenameColumnChange extends AbstractChange {
     }
 
     public SqlStatement[] generateStatements(Database database) {
-    	if (database instanceof SQLiteDatabase) {
-    		// return special statements for SQLite databases
-    		return generateStatementsForSQLiteDatabase(database);
-        } 
+//todo    	if (database instanceof SQLiteDatabase) {
+//    		// return special statements for SQLite databases
+//    		return generateStatementsForSQLiteDatabase(database);
+//        }
 
     	return new SqlStatement[] { new RenameColumnStatement(
     			getSchemaName() == null?database.getDefaultSchemaName():getSchemaName(), 

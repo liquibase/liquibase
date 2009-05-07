@@ -1,7 +1,6 @@
 package liquibase.change;
 
-import liquibase.database.Database;
-import liquibase.database.MockDatabase;
+import liquibase.database.*;
 import liquibase.statement.SetNullableStatement;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.UpdateStatement;
@@ -60,4 +59,10 @@ public class AddNotNullConstraintChangeTest extends AbstractChangeTest {
         assertEquals("Null constraint has been added to TABLE_NAME.COL_HERE", change.getConfirmationMessage());
     }
 
+    @Override
+    protected boolean changeIsUnsupported(Database database) {
+        return database instanceof FirebirdDatabase
+                || database instanceof SQLiteDatabase;
+    }
+    
 }

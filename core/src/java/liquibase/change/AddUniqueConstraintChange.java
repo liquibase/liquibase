@@ -72,10 +72,10 @@ public class AddUniqueConstraintChange extends AbstractChange {
 
     public SqlStatement[] generateStatements(Database database) {
         
-    	if (database instanceof SQLiteDatabase) {
-    		// return special statements for SQLite databases
-    		return generateStatementsForSQLiteDatabase(database);
-        }
+//todo    	if (database instanceof SQLiteDatabase) {
+//    		// return special statements for SQLite databases
+//    		return generateStatementsForSQLiteDatabase(database);
+//        }
     	
     	AddUniqueConstraintStatement statement = new AddUniqueConstraintStatement(getSchemaName() == null?database.getDefaultSchemaName():getSchemaName(), getTableName(), getColumnNames(), getConstraintName());
         statement.setTablespace(getTablespace());

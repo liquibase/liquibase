@@ -1,6 +1,7 @@
 package liquibase.change;
 
 import liquibase.database.Database;
+import liquibase.database.SybaseASADatabase;
 import liquibase.statement.DropSequenceStatement;
 import liquibase.statement.SqlStatement;
 import liquibase.test.DatabaseTest;
@@ -56,4 +57,10 @@ public class DropSequenceChangeTest extends AbstractChangeTest {
     public void getConfirmationMessage() throws Exception {
         assertEquals("Sequence SEQ_NAME dropped", change.getConfirmationMessage());
     }
+
+    @Override
+    protected boolean changeIsUnsupported(Database database) {
+        return !database.supportsSequences();
+    }
+
 }
