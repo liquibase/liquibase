@@ -1,6 +1,8 @@
 package liquibase.change;
 
 import liquibase.database.MockDatabase;
+import liquibase.database.Database;
+import liquibase.database.SybaseASADatabase;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.TagDatabaseStatement;
 import static org.junit.Assert.assertEquals;
@@ -38,6 +40,5 @@ public class TagDatabaseChangeTest extends AbstractChangeTest {
         refactoring.setTag("TAG_NAME");
 
         assertEquals("Tag 'TAG_NAME' applied to database", refactoring.getConfirmationMessage());
-    }
-
+    }   
 }

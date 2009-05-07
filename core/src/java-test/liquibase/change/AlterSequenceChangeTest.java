@@ -1,6 +1,6 @@
 package liquibase.change;
 
-import liquibase.database.MockDatabase;
+import liquibase.database.*;
 import liquibase.statement.AlterSequenceStatement;
 import liquibase.statement.SqlStatement;
 import static org.junit.Assert.assertEquals;
@@ -46,5 +46,16 @@ public class AlterSequenceChangeTest extends AbstractChangeTest {
         refactoring.setSequenceName("SEQ_NAME");
 
         assertEquals("Sequence SEQ_NAME altered", refactoring.getConfirmationMessage());
+    }
+
+    @Override
+    protected boolean changeIsUnsupported(Database database) {
+        return database instanceof SQLiteDatabase
+                || database instanceof SybaseASADatabase
+                || database instanceof MSSQLDatabase
+                || database instanceof MySQLDatabase
+                || database instanceof DerbyDatabase
+                || database instanceof SybaseDatabase
+                || database instanceof CacheDatabase;
     }
 }

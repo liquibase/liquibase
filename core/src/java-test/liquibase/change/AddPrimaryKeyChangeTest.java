@@ -2,6 +2,8 @@ package liquibase.change;
 
 import liquibase.database.DB2Database;
 import liquibase.database.Database;
+import liquibase.database.SybaseASADatabase;
+import liquibase.database.SQLiteDatabase;
 import liquibase.statement.AddPrimaryKeyStatement;
 import liquibase.statement.ReorganizeTableStatement;
 import liquibase.statement.SqlStatement;
@@ -61,4 +63,9 @@ public class AddPrimaryKeyChangeTest extends AbstractChangeTest {
         assertEquals("Primary key added to TABLE_NAME (COL_HERE)", change.getConfirmationMessage());
     }
 
+    @Override
+    protected boolean changeIsUnsupported(Database database) {
+        return database instanceof SQLiteDatabase;
+    }
+    
 }

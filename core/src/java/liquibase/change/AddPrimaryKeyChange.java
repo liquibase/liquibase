@@ -85,9 +85,9 @@ public class AddPrimaryKeyChange extends AbstractChange {
                     statement,
                     new ReorganizeTableStatement(schemaName, getTableName())
             };
-        } else if (database instanceof SQLiteDatabase) {
-            // return special statements for SQLite databases
-            return generateStatementsForSQLiteDatabase(database);
+//todo        } else if (database instanceof SQLiteDatabase) {
+//            // return special statements for SQLite databases
+//            return generateStatementsForSQLiteDatabase(database);
         }
 
         return new SqlStatement[]{

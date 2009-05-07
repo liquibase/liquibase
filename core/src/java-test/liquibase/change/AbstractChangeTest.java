@@ -3,7 +3,6 @@ package liquibase.change;
 import liquibase.changelog.parser.string.StringChangeLogSerializer;
 import liquibase.database.Database;
 import liquibase.database.OracleDatabase;
-import liquibase.exception.InvalidChangeDefinitionException;
 import liquibase.exception.ValidationErrors;
 import liquibase.statement.RawSqlStatement;
 import liquibase.statement.SqlStatement;
@@ -253,18 +252,18 @@ public abstract class AbstractChangeTest {
     }
 
     @Test
-    public void isAvailable() throws Exception {
+    public void isSupported() throws Exception {
         Change change = createClassUnderTest();
         if (change == null) {
             return;
         }
         for (Database database : TestContext.getInstance().getAllDatabases()) {
-            assertEquals("Unexpected availablity on "+database.getProductName(), shouldBeAvailable(database), change.isAvailable(database));
+            assertEquals("Unexpected availablity on "+database.getProductName(), !changeIsUnsupported(database), change.isSupported(database));
         }
     }
 
-    protected boolean shouldBeAvailable(Database database) {
-        return true;
+    protected boolean changeIsUnsupported(Database database) {
+        return false;
     }
 
     @Test
@@ -274,7 +273,7 @@ public abstract class AbstractChangeTest {
             return;
         }
         for (Database database : TestContext.getInstance().getAllDatabases()) {
-            if (change.isAvailable(database)) {
+            if (change.isSupported(database)) {
                 ValidationErrors validationErrors = change.validate(database);
                 assertTrue("no errors found for "+database.getProductName(), validationErrors.hasErrors());
             }

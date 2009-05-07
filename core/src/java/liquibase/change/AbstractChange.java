@@ -60,7 +60,7 @@ public abstract class AbstractChange implements Change {
         this.changeSet = changeSet;
     }
 
-    public boolean isAvailable(Database database) {
+    public boolean isSupported(Database database) {
         for (SqlStatement statement : generateStatements(database)) {
             SqlGenerator sqlGenerator = SqlGeneratorFactory.getInstance().getBestGenerator(statement, database);
             if (sqlGenerator == null) {

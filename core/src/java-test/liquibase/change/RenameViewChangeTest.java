@@ -1,6 +1,6 @@
 package liquibase.change;
 
-import liquibase.database.MockDatabase;
+import liquibase.database.*;
 import liquibase.statement.RenameViewStatement;
 import liquibase.statement.SqlStatement;
 import static org.junit.Assert.assertEquals;
@@ -46,4 +46,14 @@ public class RenameViewChangeTest extends AbstractChangeTest {
         assertEquals("View OLD_NAME renamed to NEW_NAME", refactoring.getConfirmationMessage());
     }
 
+    @Override
+    protected boolean changeIsUnsupported(Database database) {
+        return database instanceof SybaseASADatabase
+                || database instanceof InformixDatabase
+                || database instanceof DerbyDatabase
+                || database instanceof HsqlDatabase
+                || database instanceof DB2Database
+                || database instanceof CacheDatabase
+                || database instanceof FirebirdDatabase;
+    }
 }

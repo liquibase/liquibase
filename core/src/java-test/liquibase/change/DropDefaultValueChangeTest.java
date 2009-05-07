@@ -1,6 +1,9 @@
 package liquibase.change;
 
 import liquibase.database.MockDatabase;
+import liquibase.database.Database;
+import liquibase.database.SybaseASADatabase;
+import liquibase.database.SQLiteDatabase;
 import liquibase.statement.DropDefaultValueStatement;
 import liquibase.statement.SqlStatement;
 import static org.junit.Assert.assertEquals;
@@ -37,4 +40,10 @@ public class DropDefaultValueChangeTest extends AbstractChangeTest {
 
         assertEquals("Default value dropped from TABLE_NAME.COL_HERE", change.getConfirmationMessage());
     }
+
+    @Override
+    protected boolean changeIsUnsupported(Database database) {
+        return database instanceof SQLiteDatabase;
+    }
+
 }

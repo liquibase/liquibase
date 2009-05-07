@@ -65,10 +65,10 @@ public class DropUniqueConstraintChange extends AbstractChange {
 
     public SqlStatement[] generateStatements(Database database) {
         
-    	if (database instanceof SQLiteDatabase) {
-    		// return special statements for SQLite databases
-    		return generateStatementsForSQLiteDatabase(database);
-        }
+//todo    	if (database instanceof SQLiteDatabase) {
+//    		// return special statements for SQLite databases
+//    		return generateStatementsForSQLiteDatabase(database);
+//        }
     	DropUniqueConstraintStatement statement = new DropUniqueConstraintStatement(getSchemaName() == null?database.getDefaultSchemaName():getSchemaName(), getTableName(), getConstraintName());
     	if (database instanceof SybaseASADatabase) {
     		statement.setUniqueColumns(uniqueColumns);

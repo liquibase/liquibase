@@ -1,6 +1,8 @@
 package liquibase.change;
 
 import liquibase.database.Database;
+import liquibase.database.SybaseASADatabase;
+import liquibase.database.SQLiteDatabase;
 import liquibase.statement.AddUniqueConstraintStatement;
 import liquibase.statement.SqlStatement;
 import liquibase.test.DatabaseTest;
@@ -51,4 +53,8 @@ public class AddUniqueConstraintChangeTest extends AbstractChangeTest {
         assertEquals("Unique constraint added to TABLE_NAME(COL_HERE)", change.getConfirmationMessage());
     }
 
+    @Override
+    protected boolean changeIsUnsupported(Database database) {
+        return database instanceof SQLiteDatabase;
+    }
 }

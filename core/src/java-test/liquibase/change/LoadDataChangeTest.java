@@ -108,4 +108,13 @@ public class LoadDataChangeTest extends AbstractChangeTest {
         assertEquals(md5sum2, refactoring.generateCheckSum().toString());
     }
 
+    @Override
+    public void isSupported() throws Exception {
+        // todo: test with file opener
+    }
+
+    @Override
+    public void validate() throws Exception {
+        // todo: test with file opener
+    }
 }

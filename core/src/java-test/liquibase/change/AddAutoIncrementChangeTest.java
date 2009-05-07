@@ -1,7 +1,6 @@
 package liquibase.change;
 
-import liquibase.database.Database;
-import liquibase.database.PostgresDatabase;
+import liquibase.database.*;
 import liquibase.statement.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -62,4 +61,13 @@ public class AddAutoIncrementChangeTest extends AbstractChangeTest {
 
         assertEquals("Auto-increment added to TABLE_NAME.COLUMN_NAME", change.getConfirmationMessage());
     }
+
+    @Override
+    protected boolean changeIsUnsupported(Database database) {
+        return !database.supportsAutoIncrement()
+                || database instanceof MSSQLDatabase
+                || database instanceof DerbyDatabase
+                || (database instanceof HsqlDatabase && !(database instanceof H2Database));
+    }
+
 }

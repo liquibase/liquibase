@@ -1,6 +1,9 @@
 package liquibase.change;
 
 import liquibase.database.MockDatabase;
+import liquibase.database.Database;
+import liquibase.database.SybaseASADatabase;
+import liquibase.database.SQLiteDatabase;
 import liquibase.statement.DropPrimaryKeyStatement;
 import liquibase.statement.SqlStatement;
 import static org.junit.Assert.assertEquals;
@@ -38,4 +41,8 @@ public class DropPrimaryKeyChangeTest extends AbstractChangeTest {
 
     }
 
+    @Override
+    protected boolean changeIsUnsupported(Database database) {
+        return database instanceof SQLiteDatabase;
+    }
 }

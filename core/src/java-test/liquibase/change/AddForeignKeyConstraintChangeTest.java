@@ -3,6 +3,7 @@ package liquibase.change;
 import liquibase.database.MockDatabase;
 import liquibase.database.Database;
 import liquibase.database.SQLiteDatabase;
+import liquibase.database.SybaseASADatabase;
 import liquibase.statement.AddForeignKeyConstraintStatement;
 import liquibase.statement.SqlStatement;
 import static org.junit.Assert.assertEquals;
@@ -12,10 +13,6 @@ import java.sql.DatabaseMetaData;
 
 public class AddForeignKeyConstraintChangeTest  extends AbstractChangeTest {
 
-    @Override
-    protected boolean shouldBeAvailable(Database database) {
-        return !(database instanceof SQLiteDatabase);
-    }
 
     @Test
     public void generateStatement() throws Exception {
@@ -67,5 +64,10 @@ public class AddForeignKeyConstraintChangeTest  extends AbstractChangeTest {
         change.setBaseColumnNames("COL_NAME");
 
         assertEquals("Foreign key contraint added to TABLE_NAME (COL_NAME)", change.getConfirmationMessage());
+    }
+
+    @Override
+    protected boolean changeIsUnsupported(Database database) {
+        return database instanceof SQLiteDatabase;
     }
 }
