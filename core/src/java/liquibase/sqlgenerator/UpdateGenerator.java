@@ -8,7 +8,7 @@ import liquibase.statement.UpdateStatement;
 
 import java.util.Date;
 
-class UpdateGenerator implements SqlGenerator<UpdateStatement> {
+public class UpdateGenerator implements SqlGenerator<UpdateStatement> {
     public int getPriority() {
         return PRIORITY_DEFAULT;
     }

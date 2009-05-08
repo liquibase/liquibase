@@ -13,7 +13,7 @@ import liquibase.util.log.LogFactory;
 import java.util.Iterator;
 import java.util.logging.Level;
 
-class CreateTableGenerator implements SqlGenerator<CreateTableStatement> {
+public class CreateTableGenerator implements SqlGenerator<CreateTableStatement> {
     public int getPriority() {
         return PRIORITY_DEFAULT;
     }

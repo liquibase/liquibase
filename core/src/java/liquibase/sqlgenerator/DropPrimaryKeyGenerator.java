@@ -6,7 +6,7 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.statement.DropPrimaryKeyStatement;
 
-class DropPrimaryKeyGenerator implements SqlGenerator<DropPrimaryKeyStatement> {
+public class DropPrimaryKeyGenerator implements SqlGenerator<DropPrimaryKeyStatement> {
     public int getPriority() {
         return PRIORITY_DEFAULT;
     }

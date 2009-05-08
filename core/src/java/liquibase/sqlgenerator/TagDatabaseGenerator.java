@@ -8,7 +8,7 @@ import liquibase.sql.UnparsedSql;
 import liquibase.statement.TagDatabaseStatement;
 import liquibase.statement.UpdateStatement;
 
-class TagDatabaseGenerator implements SqlGenerator<TagDatabaseStatement> {
+public class TagDatabaseGenerator implements SqlGenerator<TagDatabaseStatement> {
     public int getPriority() {
         return PRIORITY_DEFAULT;
     }

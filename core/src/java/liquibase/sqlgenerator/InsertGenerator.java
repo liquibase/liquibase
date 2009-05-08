@@ -8,7 +8,7 @@ import liquibase.statement.InsertStatement;
 
 import java.util.Date;
 
-class InsertGenerator implements SqlGenerator<InsertStatement> {
+public class InsertGenerator implements SqlGenerator<InsertStatement> {
     public int getPriority() {
         return PRIORITY_DEFAULT;
     }

@@ -9,7 +9,7 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.statement.AddAutoIncrementStatement;
 
-class AddAutoIncrementGeneratorInformix extends AddAutoIncrementGenerator {
+public class AddAutoIncrementGeneratorInformix extends AddAutoIncrementGenerator {
     public int getPriority() {
         return PRIORITY_DATABASE;
     }

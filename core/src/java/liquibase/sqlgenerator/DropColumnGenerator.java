@@ -6,7 +6,7 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.statement.DropColumnStatement;
 
-class DropColumnGenerator implements SqlGenerator<DropColumnStatement> {
+public class DropColumnGenerator implements SqlGenerator<DropColumnStatement> {
 
     public int getPriority() {
         return PRIORITY_DEFAULT;

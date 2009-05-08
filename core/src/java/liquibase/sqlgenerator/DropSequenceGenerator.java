@@ -7,7 +7,7 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.statement.DropSequenceStatement;
 
-class DropSequenceGenerator implements SqlGenerator<DropSequenceStatement> {
+public class DropSequenceGenerator implements SqlGenerator<DropSequenceStatement> {
     public int getPriority() {
         return PRIORITY_DEFAULT;
     }

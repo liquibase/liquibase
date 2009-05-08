@@ -33,8 +33,7 @@ public class AddAutoIncrementGeneratorTest <T extends AddAutoIncrementStatement>
 
     
 	@Override
-	protected List<? extends SqlStatement> setupStatements(
-			Database database) {
+	protected List<? extends SqlStatement> setupStatements(Database database) {
 		ArrayList<CreateTableStatement> statements = new ArrayList<CreateTableStatement>();
 		CreateTableStatement table = new CreateTableStatement(null, TABLE_NAME);
 		if (database instanceof MySQLDatabase) {

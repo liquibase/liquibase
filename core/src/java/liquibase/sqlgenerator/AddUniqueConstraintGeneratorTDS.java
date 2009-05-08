@@ -8,7 +8,7 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.statement.AddUniqueConstraintStatement;
 
-class AddUniqueConstraintGeneratorTDS extends AddUniqueConstraintGenerator {
+public class AddUniqueConstraintGeneratorTDS extends AddUniqueConstraintGenerator {
 
 	public AddUniqueConstraintGeneratorTDS() {
 

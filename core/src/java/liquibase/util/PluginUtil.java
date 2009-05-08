@@ -48,7 +48,7 @@ public class PluginUtil {
                         clazz.getConstructor();
                         classes.add(clazz);
                     } catch (NoSuchMethodException e) {
-                        LogFactory.getLogger().warning("Class "+clazz.getName()+" does not have a public no-arg constructor, so it can't be used as a "+requiredInterface.getName()+" plug-in");
+                            LogFactory.getLogger().warning("Class "+clazz.getName()+" does not have a public no-arg constructor, so it can't be used as a "+requiredInterface.getName()+" plug-in");
                     }
                 }
 

@@ -5,7 +5,7 @@ import liquibase.database.SQLiteDatabase;
 import liquibase.sql.Sql;
 import liquibase.statement.AddColumnStatement;
 
-class AddColumnGeneratorSQLite extends AddColumnGenerator {
+public class AddColumnGeneratorSQLite extends AddColumnGenerator {
      public int getPriority() {
         return PRIORITY_DATABASE;
     }

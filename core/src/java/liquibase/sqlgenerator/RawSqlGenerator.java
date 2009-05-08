@@ -6,7 +6,7 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.statement.RawSqlStatement;
 
-class RawSqlGenerator implements SqlGenerator<RawSqlStatement> {
+public class RawSqlGenerator implements SqlGenerator<RawSqlStatement> {
     public int getPriority() {
         return PRIORITY_DEFAULT;
     }

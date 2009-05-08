@@ -114,7 +114,7 @@ public class SqlGeneratorFactory {
         }
     }
 
-    public Sql[] generateSql(SqlStatement statement, Database database) throws JDBCException {
+    public Sql[] generateSql(SqlStatement statement, Database database) {
         SqlGenerator sqlGenerator = getGenerator(statement, database);
         if (sqlGenerator == null) {
             return null;

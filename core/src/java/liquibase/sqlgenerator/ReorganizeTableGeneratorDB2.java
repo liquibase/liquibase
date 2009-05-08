@@ -8,7 +8,7 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.statement.ReorganizeTableStatement;
 
-class ReorganizeTableGeneratorDB2 implements SqlGenerator<ReorganizeTableStatement> {
+public class ReorganizeTableGeneratorDB2 implements SqlGenerator<ReorganizeTableStatement> {
     public int getPriority() {
         return PRIORITY_DATABASE;
     }

@@ -298,10 +298,6 @@ public class SybaseDatabase extends AbstractDatabase {
                 "PRIMARY KEY(ID, AUTHOR, FILENAME))"));
     }
 
-    protected SqlStatement getCreateChangeLogLockSQL() {
-        return new RawSqlStatement(("CREATE TABLE " + escapeTableName(getDefaultSchemaName(), getDatabaseChangeLogLockTableName()) + " (ID INT NOT NULL PRIMARY KEY, LOCKED " + getBooleanType() + " NOT NULL, LOCKGRANTED " + getDateTimeType() + " NULL, LOCKEDBY VARCHAR(255) NULL)"));
-    }
-
     /**
      * Drops all objects owned by the connected user.
      * <p/>

@@ -10,7 +10,7 @@ import liquibase.util.StringUtils;
 import java.util.Arrays;
 import java.util.Iterator;
 
-class CreateIndexGenerator implements SqlGenerator<CreateIndexStatement> {
+public class CreateIndexGenerator implements SqlGenerator<CreateIndexStatement> {
     public int getPriority() {
         return PRIORITY_DEFAULT;
     }

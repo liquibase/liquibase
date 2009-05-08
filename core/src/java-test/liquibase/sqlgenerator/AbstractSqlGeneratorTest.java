@@ -114,8 +114,8 @@ public abstract class AbstractSqlGeneratorTest<T extends SqlStatement> {
                     convertedSql = replaceStandardTypes(convertedSql, database);
 
                     Sql[] sql = generatorUnderTest.generateSql(sqlStatement, database);
-
-                    assertEquals(1, sql.length);
+                    assertNotNull("Null SQL for " + database, sql);
+                    assertEquals("Unexpected number of  SQL statements for " + database, 1, sql.length);
                     assertEquals("Incorrect SQL for " + database, convertedSql.toLowerCase(), sql[0].toSql().toLowerCase());
                 }
             }

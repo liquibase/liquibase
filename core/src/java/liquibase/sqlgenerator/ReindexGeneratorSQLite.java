@@ -7,7 +7,7 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.statement.ReindexStatement;
 
-class ReindexGeneratorSQLite implements SqlGenerator<ReindexStatement> {
+public class ReindexGeneratorSQLite implements SqlGenerator<ReindexStatement> {
     public int getPriority() {
         return PRIORITY_DATABASE;
     }

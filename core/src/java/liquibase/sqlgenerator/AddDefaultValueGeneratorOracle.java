@@ -8,7 +8,7 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.statement.AddDefaultValueStatement;
 
-class AddDefaultValueGeneratorOracle extends AddDefaultValueGenerator {
+public class AddDefaultValueGeneratorOracle extends AddDefaultValueGenerator {
     public int getPriority() {
         return PRIORITY_DATABASE;
     }

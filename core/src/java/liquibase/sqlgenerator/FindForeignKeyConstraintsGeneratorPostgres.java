@@ -7,7 +7,7 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.statement.FindForeignKeyConstraintsStatement;
 
-class FindForeignKeyConstraintsGeneratorPostgres implements SqlGenerator<FindForeignKeyConstraintsStatement> {
+public class FindForeignKeyConstraintsGeneratorPostgres implements SqlGenerator<FindForeignKeyConstraintsStatement> {
     public int getPriority() {
         return PRIORITY_DATABASE;
     }

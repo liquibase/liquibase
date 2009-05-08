@@ -6,7 +6,7 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.statement.DropViewStatement;
 
-class DropViewGenerator implements SqlGenerator<DropViewStatement> {
+public class DropViewGenerator implements SqlGenerator<DropViewStatement> {
     public int getPriority() {
         return PRIORITY_DEFAULT;
     }

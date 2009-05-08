@@ -6,7 +6,7 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.statement.CreateSequenceStatement;
 
-class CreateSequenceGenerator implements SqlGenerator<CreateSequenceStatement> {
+public class CreateSequenceGenerator implements SqlGenerator<CreateSequenceStatement> {
     public int getPriority() {
         return PRIORITY_DEFAULT;
     }

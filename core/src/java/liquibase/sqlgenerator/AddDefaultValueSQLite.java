@@ -5,7 +5,7 @@ import liquibase.database.SQLiteDatabase;
 import liquibase.sql.Sql;
 import liquibase.statement.AddDefaultValueStatement;
 
-class AddDefaultValueSQLite extends AddDefaultValueGenerator {
+public class AddDefaultValueSQLite extends AddDefaultValueGenerator {
     @Override
     public int getPriority() {
         return PRIORITY_DATABASE;

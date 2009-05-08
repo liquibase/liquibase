@@ -7,7 +7,7 @@ import liquibase.sql.UnparsedSql;
 import liquibase.statement.DropTableStatement;
 import liquibase.util.log.LogFactory;
 
-class DropTableGenerator implements SqlGenerator<DropTableStatement> {
+public class DropTableGenerator implements SqlGenerator<DropTableStatement> {
     public int getPriority() {
         return PRIORITY_DEFAULT;
     }

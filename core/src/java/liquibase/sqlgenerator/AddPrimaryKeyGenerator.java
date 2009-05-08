@@ -7,7 +7,7 @@ import liquibase.sql.UnparsedSql;
 import liquibase.statement.AddPrimaryKeyStatement;
 import liquibase.util.StringUtils;
 
-class AddPrimaryKeyGenerator implements SqlGenerator<AddPrimaryKeyStatement> {
+public class AddPrimaryKeyGenerator implements SqlGenerator<AddPrimaryKeyStatement> {
     public int getPriority() {
         return PRIORITY_DEFAULT;
     }

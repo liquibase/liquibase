@@ -8,7 +8,7 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.statement.DropIndexStatement;
 
-class DropIndexGenerator implements SqlGenerator<DropIndexStatement> {
+public class DropIndexGenerator implements SqlGenerator<DropIndexStatement> {
     public int getPriority() {
         return PRIORITY_DEFAULT;
     }

@@ -6,7 +6,7 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.statement.DropForeignKeyConstraintStatement;
 
-class DropForeignKeyConstraintGenerator implements SqlGenerator<DropForeignKeyConstraintStatement> {
+public class DropForeignKeyConstraintGenerator implements SqlGenerator<DropForeignKeyConstraintStatement> {
     public int getPriority() {
         return PRIORITY_DEFAULT;
     }
