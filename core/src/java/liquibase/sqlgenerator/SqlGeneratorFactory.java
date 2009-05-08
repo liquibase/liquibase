@@ -1,7 +1,9 @@
 package liquibase.sqlgenerator;
 
 import liquibase.database.Database;
+import liquibase.database.structure.DatabaseObject;
 import liquibase.exception.JDBCException;
+import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.statement.SqlStatement;
 import liquibase.util.PluginUtil;
@@ -24,10 +26,10 @@ public class SqlGeneratorFactory {
     private SqlGeneratorFactory() {
         Class[] classes;
         try {
-            classes = PluginUtil.getClasses("liquibase.statement.generator", SqlGenerator.class);
+            classes = PluginUtil.getClasses("liquibase.sqlgenerator", SqlGenerator.class);
 
             for (Class clazz : classes) {
-                    register((SqlGenerator) clazz.getConstructor().newInstance());
+                register((SqlGenerator) clazz.getConstructor().newInstance());
             }
 
         } catch (Exception e) {
@@ -68,17 +70,14 @@ public class SqlGeneratorFactory {
     }
 
 
-    /**
-     * Internal method for retrieving all generators.  Mainly exists for unit testing.
-     */
-    protected List<SqlGenerator> getGenerators() {
+    protected Collection<SqlGenerator> getGenerators() {
         return generators;
     }
 
-    public SortedSet<SqlGenerator> getAllGenerators(SqlStatement statement, Database database) {
+    protected SortedSet<SqlGenerator> getGenerators(SqlStatement statement, Database database) {
         SortedSet<SqlGenerator> validGenerators = new TreeSet<SqlGenerator>(new Comparator<SqlGenerator>() {
             public int compare(SqlGenerator o1, SqlGenerator o2) {
-                return -1 * new Integer(o1.getSpecializationLevel()).compareTo(o2.getSpecializationLevel());
+                return -1 * new Integer(o1.getPriority()).compareTo(o2.getPriority());
             }
         });
 
@@ -88,11 +87,13 @@ public class SqlGeneratorFactory {
                 for (Type type : clazz.getGenericInterfaces()) {
                     if (type instanceof ParameterizedType
                             && Arrays.asList(((ParameterizedType) type).getActualTypeArguments()).contains(statement.getClass())) {
-                        if (generator.isValidGenerator(statement, database)) {
+                        //noinspection unchecked
+                        if (generator.supports(statement, database)) {
                             validGenerators.add(generator);
                         }
                     } else if (type.equals(SqlGenerator.class)) {
-                        if (generator.isValidGenerator(statement, database)) {
+                        //noinspection unchecked
+                        if (generator.supports(statement, database)) {
                             validGenerators.add(generator);
                         }
                     }
@@ -103,8 +104,8 @@ public class SqlGeneratorFactory {
         return validGenerators;
     }
 
-    public SqlGenerator getBestGenerator(SqlStatement statement, Database database) {
-        SortedSet<SqlGenerator> validGenerators = getAllGenerators(statement, database);
+    protected SqlGenerator getGenerator(SqlStatement statement, Database database) {
+        SortedSet<SqlGenerator> validGenerators = getGenerators(statement, database);
 
         if (validGenerators.size() == 0) {
             return null;
@@ -114,10 +115,35 @@ public class SqlGeneratorFactory {
     }
 
     public Sql[] generateSql(SqlStatement statement, Database database) throws JDBCException {
-        return getBestGenerator(statement, database).generateSql(statement, database);
+        SqlGenerator sqlGenerator = getGenerator(statement, database);
+        if (sqlGenerator == null) {
+            return null;
+        }
+        //noinspection unchecked
+        return sqlGenerator.generateSql(statement, database);
     }
 
-    public boolean statementSupported(SqlStatement statement, Database database) {
-        return getBestGenerator(statement, database)  != null;
+    public boolean supports(SqlStatement statement, Database database) {
+        return getGenerator(statement, database) != null;
+    }
+
+    public ValidationErrors validate(SqlStatement statement, Database database) {
+        //noinspection unchecked
+        return getGenerator(statement, database).validate(statement, database);
+    }
+
+    public Set<DatabaseObject> getAffectedDatabaseObjects(SqlStatement statement, Database database) {
+        Set<DatabaseObject> affectedObjects = new HashSet<DatabaseObject>();
+
+        SqlGenerator sqlGenerator = SqlGeneratorFactory.getInstance().getGenerator(statement, database);
+        if (sqlGenerator != null) {
+            //noinspection unchecked
+            for (Sql sql : sqlGenerator.generateSql(statement, database)) {
+                affectedObjects.addAll(sql.getAffectedDatabaseObjects());
+            }
+        }
+
+        return affectedObjects;
+
     }
 }

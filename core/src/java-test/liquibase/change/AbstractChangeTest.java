@@ -111,7 +111,7 @@ public abstract class AbstractChangeTest {
 
     @Test
     public void saveStatement() throws Exception {
-        Change change = new AbstractChange("test", "Test Refactoring") {
+        Change change = new AbstractChange("test", "Test Refactoring", ChangeMetaData.PRIORITY_DEFAULT) {
             public SqlStatement[] generateStatements(Database database) {
                 return new SqlStatement[]{new RawSqlStatement("GENERATED STATEMENT")};
             }
@@ -131,7 +131,7 @@ public abstract class AbstractChangeTest {
 
     @Test
     public void executeStatement() throws Exception {
-        Change change = new AbstractChange("test", "Test Refactorign") {
+        Change change = new AbstractChange("test", "Test Refactorign", ChangeMetaData.PRIORITY_DEFAULT) {
             public SqlStatement[] generateStatements(Database database) {
                 return new SqlStatement[]{new RawSqlStatement("GENERATED STATEMENT;")};
             }
@@ -258,7 +258,7 @@ public abstract class AbstractChangeTest {
             return;
         }
         for (Database database : TestContext.getInstance().getAllDatabases()) {
-            assertEquals("Unexpected availablity on "+database.getProductName(), !changeIsUnsupported(database), change.isSupported(database));
+            assertEquals("Unexpected availablity on "+database.getProductName(), !changeIsUnsupported(database), change.supports(database));
         }
     }
 
@@ -273,7 +273,7 @@ public abstract class AbstractChangeTest {
             return;
         }
         for (Database database : TestContext.getInstance().getAllDatabases()) {
-            if (change.isSupported(database)) {
+            if (change.supports(database)) {
                 ValidationErrors validationErrors = change.validate(database);
                 assertTrue("no errors found for "+database.getProductName(), validationErrors.hasErrors());
             }

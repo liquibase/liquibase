@@ -25,7 +25,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns 
 
 
     public LoadDataChange() {
-        super("loadData", "Load Data");
+        super("loadData", "Load Data", ChangeMetaData.PRIORITY_DEFAULT);
     }
 
     public String getSchemaName() {

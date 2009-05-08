@@ -6,12 +6,12 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.statement.RawSqlStatement;
 
-public class RawSqlGenerator implements SqlGenerator<RawSqlStatement> {
-    public int getSpecializationLevel() {
-        return SPECIALIZATION_LEVEL_DEFAULT;
+class RawSqlGenerator implements SqlGenerator<RawSqlStatement> {
+    public int getPriority() {
+        return PRIORITY_DEFAULT;
     }
 
-    public boolean isValidGenerator(RawSqlStatement statement, Database database) {
+    public boolean supports(RawSqlStatement statement, Database database) {
         return true;
     }
 

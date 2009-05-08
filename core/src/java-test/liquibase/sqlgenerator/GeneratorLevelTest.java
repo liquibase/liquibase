@@ -9,12 +9,12 @@ public class GeneratorLevelTest {
 	@Test
     public void checkLevelsAndNaming() {
         for (SqlGenerator generator : SqlGeneratorFactory.getInstance().getGenerators()) {
-            int specializationlevel = generator.getSpecializationLevel();
+            int specializationlevel = generator.getPriority();
             String className = generator.getClass().getName();
             if (className.endsWith("Generator")) {
-                assertEquals("Incorrect level/naming convention for "+ className, SqlGenerator.SPECIALIZATION_LEVEL_DEFAULT, specializationlevel);
+                assertEquals("Incorrect level/naming convention for "+ className, SqlGenerator.PRIORITY_DEFAULT, specializationlevel);
             } else {
-                assertEquals("Incorrect level/naming convention for "+ className, SqlGenerator.SPECIALIZATION_LEVEL_DATABASE_SPECIFIC, specializationlevel);
+                assertEquals("Incorrect level/naming convention for "+ className, SqlGenerator.PRIORITY_DATABASE, specializationlevel);
             }
         }
     }

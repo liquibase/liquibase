@@ -7,12 +7,12 @@ import liquibase.sql.UnparsedSql;
 import liquibase.statement.DropTableStatement;
 import liquibase.util.log.LogFactory;
 
-public class DropTableGenerator implements SqlGenerator<DropTableStatement> {
-    public int getSpecializationLevel() {
-        return SPECIALIZATION_LEVEL_DEFAULT;
+class DropTableGenerator implements SqlGenerator<DropTableStatement> {
+    public int getPriority() {
+        return PRIORITY_DEFAULT;
     }
 
-    public boolean isValidGenerator(DropTableStatement statement, Database database) {
+    public boolean supports(DropTableStatement statement, Database database) {
         return true;
     }
 

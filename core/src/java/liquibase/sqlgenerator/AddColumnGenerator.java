@@ -8,13 +8,13 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.statement.AddColumnStatement;
 
-public class AddColumnGenerator implements SqlGenerator<AddColumnStatement> {
+class AddColumnGenerator implements SqlGenerator<AddColumnStatement> {
     
-    public int getSpecializationLevel() {
-        return SPECIALIZATION_LEVEL_DEFAULT;
+    public int getPriority() {
+        return PRIORITY_DEFAULT;
     }
 
-    public boolean isValidGenerator(AddColumnStatement statement, Database database) {
+    public boolean supports(AddColumnStatement statement, Database database) {
         return true;
     }
 

@@ -18,7 +18,7 @@ public class InsertDataChange extends AbstractChange implements ChangeWithColumn
     private List<ColumnConfig> columns;
 
     public InsertDataChange() {
-        super("insert", "Insert Row");
+        super("insert", "Insert Row", ChangeMetaData.PRIORITY_DEFAULT);
         columns = new ArrayList<ColumnConfig>();
     }
 

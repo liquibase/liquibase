@@ -19,7 +19,7 @@ public class AlterSequenceChange extends AbstractChange {
     // StartValue is not allowed since we cannot alter the starting sequence number
 
     public AlterSequenceChange() {
-        super("alterSequence", "Alter Sequence");
+        super("alterSequence", "Alter Sequence", ChangeMetaData.PRIORITY_DEFAULT);
     }
 
     public String getSchemaName() {

@@ -20,7 +20,7 @@ public class CreateSequenceChange extends AbstractChange {
 
 
     public CreateSequenceChange() {
-        super("createSequence", "Create Sequence");
+        super("createSequence", "Create Sequence", ChangeMetaData.PRIORITY_DEFAULT);
     }
 
     public String getSchemaName() {

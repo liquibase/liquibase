@@ -55,7 +55,7 @@ public class ValidatingVisitor implements ChangeSetVisitor {
     public void visit(ChangeSet changeSet, Database database) {
         for (Change change : changeSet.getChanges()) {
             try {
-                change.setUp();
+                change.init();
             } catch (SetupException se) {
                 setupExceptions.add(se);
             }

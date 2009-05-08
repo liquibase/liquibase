@@ -200,7 +200,7 @@ public class ChangeSet {
             if (!skipChange) {
                 for (Change change : changes) {
                     try {
-                        change.setUp();
+                        change.init();
                     } catch (SetupException se) {
                         throw new MigrationFailedException(this, se);
                     }
@@ -359,13 +359,13 @@ public class ChangeSet {
     }
 
 
-    public boolean canRollBack() {
+    public boolean supportsRollback(Database database) {
         if (rollBackChanges != null && rollBackChanges.size() > 0) {
             return true;
         }
 
         for (Change change : getChanges()) {
-            if (!change.supportsRollback()) {
+            if (!change.supportsRollback(database)) {
                 return false;
             }
         }

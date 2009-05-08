@@ -13,7 +13,7 @@ public abstract class AbstractSqStatementTest<SqlStatementUnderTest extends SqlS
     @Test
     public void hasAtLeastOneGenerator() {
         for (Database database : TestContext.getInstance().getAllDatabases()) {
-            if (SqlGeneratorFactory.getInstance().getBestGenerator(createStatementUnderTest(), database) != null) {
+            if (SqlGeneratorFactory.getInstance().supports(createStatementUnderTest(), database)) {
                 return;
             };
         }

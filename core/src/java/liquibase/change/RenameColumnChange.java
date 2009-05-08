@@ -23,7 +23,7 @@ public class RenameColumnChange extends AbstractChange {
     private String columnDataType;
 
     public RenameColumnChange() {
-        super("renameColumn", "Rename Column");
+        super("renameColumn", "Rename Column", ChangeMetaData.PRIORITY_DEFAULT);
     }
 
 

@@ -13,7 +13,7 @@ public class DropViewChange extends AbstractChange {
     private String viewName;
 
     public DropViewChange() {
-        super("dropView", "Drop View");
+        super("dropView", "Drop View", ChangeMetaData.PRIORITY_DEFAULT);
     }
 
     public String getSchemaName() {

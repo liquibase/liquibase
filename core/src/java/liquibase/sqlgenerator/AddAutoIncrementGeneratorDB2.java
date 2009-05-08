@@ -8,13 +8,13 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.statement.AddAutoIncrementStatement;
 
-public class AddAutoIncrementGeneratorDB2 extends AddAutoIncrementGenerator {
+class AddAutoIncrementGeneratorDB2 extends AddAutoIncrementGenerator {
 
-    public int getSpecializationLevel() {
-        return SPECIALIZATION_LEVEL_DATABASE_SPECIFIC;
+    public int getPriority() {
+        return PRIORITY_DATABASE;
     }
 
-    public boolean isValidGenerator(AddAutoIncrementStatement statement, Database database) {
+    public boolean supports(AddAutoIncrementStatement statement, Database database) {
         return database instanceof DB2Database;
     }
 

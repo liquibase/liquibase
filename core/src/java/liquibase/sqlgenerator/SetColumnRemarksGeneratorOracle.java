@@ -7,12 +7,12 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.statement.SetColumnRemarksStatement;
 
-public class SetColumnRemarksGeneratorOracle implements SqlGenerator<SetColumnRemarksStatement> {
-    public int getSpecializationLevel() {
-        return SPECIALIZATION_LEVEL_DATABASE_SPECIFIC;
+class SetColumnRemarksGeneratorOracle implements SqlGenerator<SetColumnRemarksStatement> {
+    public int getPriority() {
+        return PRIORITY_DATABASE;
     }
 
-    public boolean isValidGenerator(SetColumnRemarksStatement statement, Database database) {
+    public boolean supports(SetColumnRemarksStatement statement, Database database) {
         return database instanceof OracleDatabase;
     }
 

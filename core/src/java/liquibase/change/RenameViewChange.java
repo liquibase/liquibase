@@ -14,7 +14,7 @@ public class RenameViewChange extends AbstractChange {
     private String newViewName;
 
     public RenameViewChange() {
-        super("renameView", "Rename View");
+        super("renameView", "Rename View", ChangeMetaData.PRIORITY_DEFAULT);
     }
 
     public String getSchemaName() {

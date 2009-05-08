@@ -16,7 +16,7 @@ public class UpdateDataChange extends AbstractChange implements ChangeWithColumn
     private String whereClause;
 
     public UpdateDataChange() {
-        super("update", "Update Data");
+        super("update", "Update Data", ChangeMetaData.PRIORITY_DEFAULT);
         columns = new ArrayList<ColumnConfig>();
     }
 

@@ -6,12 +6,12 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.statement.RenameViewStatement;
 
-public class RenameViewGenerator implements SqlGenerator<RenameViewStatement> {
-    public int getSpecializationLevel() {
-        return SPECIALIZATION_LEVEL_DEFAULT;
+class RenameViewGenerator implements SqlGenerator<RenameViewStatement> {
+    public int getPriority() {
+        return PRIORITY_DEFAULT;
     }
 
-    public boolean isValidGenerator(RenameViewStatement statement, Database database) {
+    public boolean supports(RenameViewStatement statement, Database database) {
         return !(database instanceof DerbyDatabase
                 || database instanceof HsqlDatabase
                 || database instanceof DB2Database

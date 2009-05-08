@@ -8,12 +8,12 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.statement.DropDefaultValueStatement;
 
-public class DropDefaultValueGenerator implements SqlGenerator<DropDefaultValueStatement> {
-    public int getSpecializationLevel() {
-        return SPECIALIZATION_LEVEL_DEFAULT;
+class DropDefaultValueGenerator implements SqlGenerator<DropDefaultValueStatement> {
+    public int getPriority() {
+        return PRIORITY_DEFAULT;
     }
 
-    public boolean isValidGenerator(DropDefaultValueStatement statement, Database database) {
+    public boolean supports(DropDefaultValueStatement statement, Database database) {
         return !(database instanceof SQLiteDatabase);
     }
 

@@ -14,7 +14,7 @@ public class DropSequenceChange extends AbstractChange {
     private String sequenceName;
 
     public DropSequenceChange() {
-        super("dropSequence", "Drop Sequence");
+        super("dropSequence", "Drop Sequence", ChangeMetaData.PRIORITY_DEFAULT);
     }
 
     public String getSchemaName() {

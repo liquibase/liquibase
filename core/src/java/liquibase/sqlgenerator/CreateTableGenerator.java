@@ -13,12 +13,12 @@ import liquibase.util.log.LogFactory;
 import java.util.Iterator;
 import java.util.logging.Level;
 
-public class CreateTableGenerator implements SqlGenerator<CreateTableStatement> {
-    public int getSpecializationLevel() {
-        return SPECIALIZATION_LEVEL_DEFAULT;
+class CreateTableGenerator implements SqlGenerator<CreateTableStatement> {
+    public int getPriority() {
+        return PRIORITY_DEFAULT;
     }
 
-    public boolean isValidGenerator(CreateTableStatement statement, Database database) {
+    public boolean supports(CreateTableStatement statement, Database database) {
         return true;
     }
 

@@ -23,8 +23,8 @@ public abstract class AbstractSQLChange extends AbstractChange {
     private String endDelimiter;
     private String sql;
 
-    protected AbstractSQLChange(String tagName, String changeName) {
-        super(tagName, changeName);
+    protected AbstractSQLChange(String tagName, String changeName, int priority) {
+        super(tagName, changeName, priority);
         stripComments= false;
         splitStatements =true;
         endDelimiter =  ";";

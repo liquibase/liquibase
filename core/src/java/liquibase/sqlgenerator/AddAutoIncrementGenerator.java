@@ -11,13 +11,13 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.statement.AddAutoIncrementStatement;
 
-public class AddAutoIncrementGenerator implements SqlGenerator<AddAutoIncrementStatement> {
+class AddAutoIncrementGenerator implements SqlGenerator<AddAutoIncrementStatement> {
 
-    public int getSpecializationLevel() {
-        return SPECIALIZATION_LEVEL_DEFAULT;
+    public int getPriority() {
+        return PRIORITY_DEFAULT;
     }
 
-    public boolean isValidGenerator(AddAutoIncrementStatement statement, Database database) {
+    public boolean supports(AddAutoIncrementStatement statement, Database database) {
         return (database.supportsAutoIncrement()
                 && !(database instanceof DerbyDatabase)
                 && !(database instanceof MSSQLDatabase)

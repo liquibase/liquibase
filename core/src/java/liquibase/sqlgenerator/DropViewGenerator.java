@@ -6,12 +6,12 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.statement.DropViewStatement;
 
-public class DropViewGenerator implements SqlGenerator<DropViewStatement> {
-    public int getSpecializationLevel() {
-        return SPECIALIZATION_LEVEL_DEFAULT;
+class DropViewGenerator implements SqlGenerator<DropViewStatement> {
+    public int getPriority() {
+        return PRIORITY_DEFAULT;
     }
 
-    public boolean isValidGenerator(DropViewStatement statement, Database database) {
+    public boolean supports(DropViewStatement statement, Database database) {
         return true;
     }
 

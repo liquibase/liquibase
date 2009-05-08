@@ -27,7 +27,7 @@ public class AddDefaultValueChange extends AbstractChange {
     private Boolean defaultValueBoolean;
 
     public AddDefaultValueChange() {
-        super("addDefaultValue", "Add Default Value");
+        super("addDefaultValue", "Add Default Value", ChangeMetaData.PRIORITY_DEFAULT);
     }
 
     public String getSchemaName() {

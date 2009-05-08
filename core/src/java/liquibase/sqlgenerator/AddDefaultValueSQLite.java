@@ -5,14 +5,14 @@ import liquibase.database.SQLiteDatabase;
 import liquibase.sql.Sql;
 import liquibase.statement.AddDefaultValueStatement;
 
-public class AddDefaultValueSQLite extends AddDefaultValueGenerator {
+class AddDefaultValueSQLite extends AddDefaultValueGenerator {
     @Override
-    public int getSpecializationLevel() {
-        return SPECIALIZATION_LEVEL_DATABASE_SPECIFIC;
+    public int getPriority() {
+        return PRIORITY_DATABASE;
     }
 
     @Override
-    public boolean isValidGenerator(AddDefaultValueStatement statement, Database database) {
+    public boolean supports(AddDefaultValueStatement statement, Database database) {
         return database instanceof SQLiteDatabase;
     }
 

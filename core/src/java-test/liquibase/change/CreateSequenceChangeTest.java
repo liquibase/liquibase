@@ -1,6 +1,9 @@
 package liquibase.change;
 
 import liquibase.database.Database;
+import liquibase.database.InformixDatabase;
+import liquibase.database.OracleDatabase;
+import liquibase.database.PostgresDatabase;
 import liquibase.statement.CreateSequenceStatement;
 import liquibase.statement.SqlStatement;
 import liquibase.test.DatabaseTest;
@@ -42,10 +45,10 @@ public class CreateSequenceChangeTest extends AbstractChangeTest {
 
                 assertEquals("SCHEMA_NAME", ((CreateSequenceStatement) sqlStatements[0]).getSchemaName());
                 assertEquals("SEQ_NAME", ((CreateSequenceStatement) sqlStatements[0]).getSequenceName());
-                assertEquals(new Integer(1), ((CreateSequenceStatement) sqlStatements[0]).getIncrementBy());
-                assertEquals(new Integer(2), ((CreateSequenceStatement) sqlStatements[0]).getMinValue());
-                assertEquals(new Integer(3), ((CreateSequenceStatement) sqlStatements[0]).getMaxValue());
-                assertEquals(new Integer(4), ((CreateSequenceStatement) sqlStatements[0]).getStartValue());
+                assertEquals(1, ((CreateSequenceStatement) sqlStatements[0]).getIncrementBy());
+                assertEquals(2, ((CreateSequenceStatement) sqlStatements[0]).getMinValue());
+                assertEquals(3, ((CreateSequenceStatement) sqlStatements[0]).getMaxValue());
+                assertEquals(4, ((CreateSequenceStatement) sqlStatements[0]).getStartValue());
                 assertEquals(true, ((CreateSequenceStatement) sqlStatements[0]).getOrdered());
             }
         });

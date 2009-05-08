@@ -6,13 +6,13 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.statement.DropColumnStatement;
 
-public class DropColumnGenerator implements SqlGenerator<DropColumnStatement> {
+class DropColumnGenerator implements SqlGenerator<DropColumnStatement> {
 
-    public int getSpecializationLevel() {
-        return SPECIALIZATION_LEVEL_DEFAULT;
+    public int getPriority() {
+        return PRIORITY_DEFAULT;
     }
 
-    public boolean isValidGenerator(DropColumnStatement statement, Database database) {
+    public boolean supports(DropColumnStatement statement, Database database) {
         return true;
     }
 

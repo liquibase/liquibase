@@ -6,12 +6,12 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.statement.RenameColumnStatement;
 
-public class RenameColumnGenerator implements SqlGenerator<RenameColumnStatement> {
-    public int getSpecializationLevel() {
-        return SPECIALIZATION_LEVEL_DEFAULT;
+class RenameColumnGenerator implements SqlGenerator<RenameColumnStatement> {
+    public int getPriority() {
+        return PRIORITY_DEFAULT;
     }
 
-    public boolean isValidGenerator(RenameColumnStatement statement, Database database) {
+    public boolean supports(RenameColumnStatement statement, Database database) {
         return !(database instanceof DB2Database
                 || database instanceof CacheDatabase
                 || database instanceof SQLiteDatabase);

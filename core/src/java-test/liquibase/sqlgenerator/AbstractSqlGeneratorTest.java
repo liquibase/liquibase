@@ -59,11 +59,11 @@ public abstract class AbstractSqlGeneratorTest<T extends SqlStatement> {
     @Test
     public void isImplementation() throws Exception {
         for (Database database : TestContext.getInstance().getAllDatabases()) {
-            boolean isImpl = generatorUnderTest.isValidGenerator(createSampleSqlStatement(), database);
+            boolean isImpl = generatorUnderTest.supports(createSampleSqlStatement(), database);
             if (shouldBeImplementation(database)) {
-                assertTrue("Unexpected false isValidGenerator for " + database.getProductName(), isImpl);
+                assertTrue("Unexpected false supports for " + database.getProductName(), isImpl);
             } else {
-                assertFalse("Unexpected true isValidGenerator for " + database.getProductName(), isImpl);
+                assertFalse("Unexpected true supports for " + database.getProductName(), isImpl);
             }
         }
     }
@@ -146,8 +146,8 @@ public abstract class AbstractSqlGeneratorTest<T extends SqlStatement> {
     }
 
     private boolean shouldTestDatabase(T sqlStatement, Database database, Class[] includeDatabases, Class[] excludeDatabases) {
-    	SqlGenerator<T> generator = SqlGeneratorFactory.getInstance().getBestGenerator(sqlStatement, database);
-        if (!generatorUnderTest.isValidGenerator(sqlStatement, database)
+    	SqlGenerator<T> generator = SqlGeneratorFactory.getInstance().getGenerator(sqlStatement, database);
+        if (!generatorUnderTest.supports(sqlStatement, database)
                 || generatorUnderTest.validate(sqlStatement, database).hasErrors()
                 || generator == null 
                 || !generator.getClass().equals(generatorUnderTest.getClass())) {

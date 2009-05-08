@@ -6,12 +6,12 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.statement.AlterSequenceStatement;
 
-public class AlterSequenceGenerator implements SqlGenerator<AlterSequenceStatement> {
-    public int getSpecializationLevel() {
-        return SPECIALIZATION_LEVEL_DEFAULT;
+class AlterSequenceGenerator implements SqlGenerator<AlterSequenceStatement> {
+    public int getPriority() {
+        return PRIORITY_DEFAULT;
     }
 
-    public boolean isValidGenerator(AlterSequenceStatement statement, Database database) {
+    public boolean supports(AlterSequenceStatement statement, Database database) {
         return database.supportsSequences();
     }
 

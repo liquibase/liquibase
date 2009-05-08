@@ -8,7 +8,7 @@ public class RawSQLChange extends AbstractSQLChange {
 
     private String comments;
     public RawSQLChange() {
-        super("sql", "Custom SQL");
+        super("sql", "Custom SQL", ChangeMetaData.PRIORITY_DEFAULT);
     }
 
     public RawSQLChange(String sql) {

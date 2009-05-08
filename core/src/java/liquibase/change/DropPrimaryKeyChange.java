@@ -20,7 +20,7 @@ public class DropPrimaryKeyChange extends AbstractChange {
     private String constraintName;
 
     public DropPrimaryKeyChange() {
-        super("dropPrimaryKey", "Drop Primary Key");
+        super("dropPrimaryKey", "Drop Primary Key", ChangeMetaData.PRIORITY_DEFAULT);
     }
 
     public String getSchemaName() {

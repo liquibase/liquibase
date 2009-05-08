@@ -53,7 +53,7 @@ public class ValidatingVisitorTest {
     @Test
     public void visit_setupException() {
         changeSet1.addChange(new CreateTableChange() {
-            public void setUp() throws SetupException {
+            public void init() throws SetupException {
                 throw new SetupException("Test message");
             }
         });

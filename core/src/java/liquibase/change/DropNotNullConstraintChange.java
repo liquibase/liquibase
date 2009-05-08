@@ -23,7 +23,7 @@ public class DropNotNullConstraintChange extends AbstractChange {
 
 
     public DropNotNullConstraintChange() {
-        super("dropNotNullConstraint", "Drop Not-Null Constraint");
+        super("dropNotNullConstraint", "Drop Not-Null Constraint", ChangeMetaData.PRIORITY_DEFAULT);
     }
 
     public String getSchemaName() {
