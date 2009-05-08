@@ -1,83 +1,106 @@
-package liquibase.sqlgenerator;
+package liquibase.statementexecute;
 
-import liquibase.change.AddAutoIncrementChange;
 import liquibase.database.*;
-import liquibase.database.structure.Column;
-import liquibase.database.structure.DatabaseObject;
-import liquibase.database.structure.Schema;
-import liquibase.database.structure.Table;
-import liquibase.statement.AddAutoIncrementStatement;
-import liquibase.statement.CreateTableStatement;
-import liquibase.statement.NotNullConstraint;
-import liquibase.statement.SqlStatement;
 import liquibase.test.TestContext;
-import static org.junit.Assert.assertEquals;
+import liquibase.statement.*;
 import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
-public class AddAutoIncrementGeneratorTest <T extends AddAutoIncrementStatement> extends AbstractSqlGeneratorTest<T> {
+public class AddAutoIncrementExecuteTest extends AbstractExecuteTest {
 
-	protected static final String TABLE_NAME = "table_name";
+    protected static final String TABLE_NAME = "table_name";
 
-    public AddAutoIncrementGeneratorTest() throws Exception {
-    	this(new AddAutoIncrementGenerator());
-    }
 
-    public AddAutoIncrementGeneratorTest(AddAutoIncrementGenerator generatorUnderTest) throws Exception {
-        super(generatorUnderTest);
+    @Override
+    protected List<? extends SqlStatement> setupStatements(Database database) {
+        ArrayList<CreateTableStatement> statements = new ArrayList<CreateTableStatement>();
+        CreateTableStatement table = new CreateTableStatement(null, TABLE_NAME);
+        if (database instanceof MySQLDatabase) {
+            table.addPrimaryKeyColumn("id", "int", null, "pk_");
+        } else {
+            table.addColumn("id", "int", new NotNullConstraint());
+        }
+        statements.add(table);
+
+        if (database.supportsSchemas()) {
+            table = new CreateTableStatement(TestContext.ALT_SCHEMA, TABLE_NAME);
+            table
+                    .addColumn("id", "int", new NotNullConstraint());
+            statements.add(table);
+        }
+        return statements;
     }
 
     @SuppressWarnings("unchecked")
-	protected T createSampleSqlStatement() {
-        return (T) new AddAutoIncrementStatement(null, null, null, null);
-    }
-
-    @Override
-	protected boolean waitForException(Database database) {
-		return database instanceof MSSQLDatabase;
-	}
-
-
-    @Override
-    protected boolean shouldBeImplementation(Database database) {
-        return database.supportsAutoIncrement() 
-        && !(database instanceof DerbyDatabase) 
-        && !(database instanceof MSSQLDatabase) 
-        && !(database instanceof HsqlDatabase);
-    }
-
     @Test
-    public void getAffectedDatabaseObjects() throws Exception {
-        for (Database database : TestContext.getInstance().getAvailableDatabases()) {
-            AddAutoIncrementChange change = new AddAutoIncrementChange();
-            change.setSchemaName("SCHEMA_NAME");
-            change.setTableName("TABLE_NAME");
-            change.setColumnName("COLUMN_NAME");
-            change.setColumnDataType("INT");
+    public void noSchema() throws Exception {
+        this.statementUnderTest = new AddAutoIncrementStatement(null, "table_name", "id", "int");
 
-            Set<DatabaseObject> affectedDatabaseObjects = change.getAffectedDatabaseObjects(database);
-            if (affectedDatabaseObjects.size() > 0) {
-                assertEquals(3, affectedDatabaseObjects.size());
-            }
+        assertCorrect("alter table [table_name] modify id serial auto_increment", PostgresDatabase.class);
+        assertCorrect("alter table `table_name` modify `id` int auto_increment", MySQLDatabase.class);
+        assertCorrect("ALTER TABLE [table_name] ALTER COLUMN [column_name] SET GENERATED ALWAYS AS IDENTITY", DB2Database.class);
+        assertCorrect("ALTER TABLE [table_name] MODIFY [column_name] serial", InformixDatabase.class);
 
-            for (DatabaseObject databaseObject : affectedDatabaseObjects) {
-                if (databaseObject instanceof Schema) {
-                    assertEquals("SCHEMA_NAME", ((Schema) databaseObject).getName());
-                } else if (databaseObject instanceof Table) {
-                        assertEquals("SCHEMA_NAME", ((Table) databaseObject).getSchema());
-                        assertEquals("TABLE_NAME", ((Table) databaseObject).getName());
-                } else {
-                    assertEquals("COLUMN_NAME", ((Column) databaseObject).getName());
-                    assertEquals("TABLE_NAME", ((Column) databaseObject).getTable().getName());
-                }
-            }
-        }
+        assertCorrect("ALTER TABLE [table_name] MODIFY [id] int AUTO_INCREMENT");
     }
 
-//      @Test
+    @SuppressWarnings("unchecked")
+    @Test
+    public void fullNoConstraints() throws Exception {
+        this.statementUnderTest = new AddColumnStatement(null, "table_name", "column_name", "int", 42);
+
+        assertCorrect("ALTER TABLE [table_name] ADD [column_name] INT NULL DEFAULT 42", SybaseDatabase.class);
+        assertCorrect("alter table [dbo].[table_name] add [column_name] int constraint df_table_name_column_name default 42", MSSQLDatabase.class);
+        assertCorrect("alter table [table_name] add [column_name] integer default 42", SQLiteDatabase.class);
+        assertCorrect("alter table table_name add column_name int default 42", PostgresDatabase.class);
+        assertCorrect("ALTER TABLE [table_name] ADD [column_name] int DEFAULT 42");
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void autoIncrement() throws Exception {
+        this.statementUnderTest = new AddColumnStatement(null, "table_name", "column_name", "int", null, new AutoIncrementConstraint());
+
+        assertCorrect("ALTER TABLE [dbo].[table_name] ADD [column_name] int auto_increment_clause", MSSQLDatabase.class);
+        assertCorrect("alter table [table_name] add [column_name] int default autoincrement null", SybaseASADatabase.class);
+        assertCorrect("alter table [table_name] add [column_name] int identity null", SybaseDatabase.class);
+        assertCorrect("alter table [table_name] add [column_name] serial", PostgresDatabase.class);
+        assertCorrect("ALTER TABLE [table_name] ADD [column_name] int auto_increment_clause");
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void notNull() throws Exception {
+        this.statementUnderTest = new AddColumnStatement(null, "table_name", "column_name", "int", 42, new NotNullConstraint());
+
+        assertCorrect("ALTER TABLE [table_name] ADD [column_name] int NOT NULL DEFAULT 42", SybaseASADatabase.class);
+        assertCorrect("alter table [dbo].[table_name] add [column_name] int not null constraint df_table_name_column_name default 42", MSSQLDatabase.class);
+        assertCorrect("ALTER TABLE [table_name] ADD [column_name] int NOT NULL DEFAULT 42");
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void generateSql_primaryKey() throws Exception {
+        this.statementUnderTest = new AddColumnStatement(null, "table_name", "column_name", "int", null, new PrimaryKeyConstraint());
+        //        		sqlserver (at least 2000) does not allows add not null column.
+//        , MSSQLDatabase.class
+        assertCorrect(null, MSSQLDatabase.class);
+        assertCorrect("ALTER TABLE [table_name] ADD [column_name] int NOT NULL PRIMARY KEY");
+
+    }
+
+//     protected void setupDatabase(Database database) throws Exception {
+//        dropAndCreateTable(new CreateTableStatement(null, TABLE_NAME).addColumn("existingCol", "int"), database);
+//        dropAndCreateTable(new CreateTableStatement(TestContext.ALT_SCHEMA, TABLE_NAME).addColumn("existingCol", "int"), database);
+//    }
+//
+//    protected AddColumnStatement createGeneratorUnderTest() {
+//        return new AddColumnStatement(null, null, null, null, null);
+//    }
+//
+//    @Test
 //    public void execute_stringDefault() throws Exception {
 //        new DatabaseTestTemplate().testOnAvailableDatabases(
 //                new SqlStatementDatabaseTest(null, new AddColumnStatement(null, TABLE_NAME, NEW_COLUMN_NAME, "varchar(50)", "new default")) {

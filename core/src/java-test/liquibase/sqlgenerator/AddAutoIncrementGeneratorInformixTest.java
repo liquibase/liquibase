@@ -13,11 +13,6 @@ public class AddAutoIncrementGeneratorInformixTest extends AddAutoIncrementGener
         super(new AddAutoIncrementGeneratorInformix());
     }
 
-    @Test
-    public void generateSql_noSchema() throws Exception {
-        testSqlOnAll("ALTER TABLE [table_name] MODIFY [column_name] serial", new AddAutoIncrementStatement(null, "table_name", "column_name", "int"));
-    }
-
     @Override
     public void isValid() throws Exception {
         assertTrue(generatorUnderTest.validate(new AddAutoIncrementStatement(null, null, null, null), new InformixDatabase()).getErrorMessages().contains("columnDataType is required"));
