@@ -8,7 +8,7 @@ import liquibase.database.template.Executor;
 import liquibase.database.template.JdbcOutputTemplate;
 import liquibase.diff.DiffStatusListener;
 import liquibase.exception.*;
-import liquibase.lock.LockHandler;
+import liquibase.lock.LockManager;
 import liquibase.sql.Sql;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
@@ -573,11 +573,7 @@ public abstract class AbstractDatabase implements Database {
     }
 
     protected SqlStatement getCreateChangeLogLockSQL() {
-        return new CreateTableStatement(getDefaultSchemaName(), getDatabaseChangeLogLockTableName())
-                .addPrimaryKeyColumn("ID", "INT", null, null, new NotNullConstraint())
-                .addColumn("LOCKED", getBooleanType().getDataTypeName(), new NotNullConstraint())
-                .addColumn("LOCKGRANTED", getDateTimeType().getDataTypeName())
-                .addColumn("LOCKEDBY", "VARCHAR(255)");
+        return new CreateDatabaseChangeLogLockTableStatement();
     }
 
     protected SqlStatement getCreateChangeLogSQL() {
@@ -1385,7 +1381,7 @@ public abstract class AbstractDatabase implements Database {
     public void setJdbcTemplate(Executor template) {
         if (this.executor != null && !this.executor.executesStatements() && template.executesStatements()) {
             //need to clear any history
-            LockHandler.getInstance(this).reset();
+            LockManager.getInstance(this).reset();
         }
         this.executor = template;
     }

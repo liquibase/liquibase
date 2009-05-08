@@ -149,7 +149,7 @@ public class SqlGeneratorFactoryTest {
 	@Test
     public void builtInGeneratorsAreFound() {
         Collection<SqlGenerator> generators = SqlGeneratorFactory.getInstance().getGenerators();
-        assertTrue(generators.size() > 0);        
+        assertTrue(generators.size() > 10);
     }
 
     @Test

@@ -20,7 +20,7 @@ import java.util.List;
  * For more information see: http://www.sqlite.org/omitted.html.
  * This is a small work around...
  */
-class AddAutoIncrementGeneratorSQLite extends AddAutoIncrementGenerator {
+public class AddAutoIncrementGeneratorSQLite extends AddAutoIncrementGenerator {
 
     public int getPriority() {
         return PRIORITY_DATABASE;

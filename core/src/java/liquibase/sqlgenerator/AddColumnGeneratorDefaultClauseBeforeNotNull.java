@@ -8,7 +8,7 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.statement.AddColumnStatement;
 
-class AddColumnGeneratorDefaultClauseBeforeNotNull extends AddColumnGenerator {
+public class AddColumnGeneratorDefaultClauseBeforeNotNull extends AddColumnGenerator {
     public int getPriority() {
         return PRIORITY_DATABASE;
     }

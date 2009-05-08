@@ -8,7 +8,7 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.statement.CopyRowsStatement;
 
-class CopyRowsGenerator implements SqlGenerator<CopyRowsStatement> {
+public class CopyRowsGenerator implements SqlGenerator<CopyRowsStatement> {
     public int getPriority() {
         return PRIORITY_DEFAULT;
     }

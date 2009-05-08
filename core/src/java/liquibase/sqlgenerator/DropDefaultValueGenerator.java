@@ -8,7 +8,7 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.statement.DropDefaultValueStatement;
 
-class DropDefaultValueGenerator implements SqlGenerator<DropDefaultValueStatement> {
+public class DropDefaultValueGenerator implements SqlGenerator<DropDefaultValueStatement> {
     public int getPriority() {
         return PRIORITY_DEFAULT;
     }

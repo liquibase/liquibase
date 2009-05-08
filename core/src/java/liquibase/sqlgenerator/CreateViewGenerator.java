@@ -6,7 +6,7 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.statement.CreateViewStatement;
 
-class CreateViewGenerator implements SqlGenerator<CreateViewStatement> {
+public class CreateViewGenerator implements SqlGenerator<CreateViewStatement> {
     public int getPriority() {
         return PRIORITY_DEFAULT;
     }

@@ -11,7 +11,7 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.statement.AddAutoIncrementStatement;
 
-class AddAutoIncrementGenerator implements SqlGenerator<AddAutoIncrementStatement> {
+public class AddAutoIncrementGenerator implements SqlGenerator<AddAutoIncrementStatement> {
 
     public int getPriority() {
         return PRIORITY_DEFAULT;

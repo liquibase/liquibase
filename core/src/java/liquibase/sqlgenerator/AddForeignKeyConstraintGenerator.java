@@ -10,7 +10,7 @@ import liquibase.statement.AddForeignKeyConstraintStatement;
 
 import java.sql.DatabaseMetaData;
 
-class AddForeignKeyConstraintGenerator implements SqlGenerator<AddForeignKeyConstraintStatement> {
+public class AddForeignKeyConstraintGenerator implements SqlGenerator<AddForeignKeyConstraintStatement> {
     public int getPriority() {
         return PRIORITY_DEFAULT;
     }

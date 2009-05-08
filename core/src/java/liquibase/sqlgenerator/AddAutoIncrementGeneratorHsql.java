@@ -8,7 +8,7 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.statement.AddAutoIncrementStatement;
 
-class AddAutoIncrementGeneratorHsql extends AddAutoIncrementGenerator {
+public class AddAutoIncrementGeneratorHsql extends AddAutoIncrementGenerator {
 
     public int getPriority() {
         return PRIORITY_DATABASE;

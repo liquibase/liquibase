@@ -6,7 +6,7 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.statement.SetNullableStatement;
 
-class SetNullableGenerator implements SqlGenerator<SetNullableStatement> {
+public class SetNullableGenerator implements SqlGenerator<SetNullableStatement> {
     public int getPriority() {
         return PRIORITY_DEFAULT;
     }

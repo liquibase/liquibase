@@ -9,7 +9,7 @@ import liquibase.statement.DeleteStatement;
 
 import java.util.Date;
 
-class DeleteGenerator implements SqlGenerator<DeleteStatement> {
+public class DeleteGenerator implements SqlGenerator<DeleteStatement> {
     public int getPriority() {
         return PRIORITY_DEFAULT;
     }

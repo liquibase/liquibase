@@ -13,23 +13,24 @@ import java.net.InetAddress;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
-public class LockHandler {
+public class LockManager {
 
     private Database database;
     private boolean hasChangeLogLock = false;
 
     private long changeLogLockWaitTime = 1000 * 60 * 5;  //default to 5 mins
 
-    private static Map<Database, LockHandler> instances = new HashMap<Database, LockHandler>();
+    private static Map<Database, LockManager> instances = new ConcurrentHashMap<Database, LockManager>();
 
-    private LockHandler(Database database) {
+    private LockManager(Database database) {
         this.database = database;
     }
 
-    public static LockHandler getInstance(Database database) {
+    public static LockManager getInstance(Database database) {
         if (!instances.containsKey(database)) {
-            instances.put(database, new LockHandler(database));
+            instances.put(database, new LockManager(database));
         }
         return instances.get(database);
     }

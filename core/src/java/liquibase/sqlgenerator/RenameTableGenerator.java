@@ -6,7 +6,7 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.statement.RenameTableStatement;
 
-class RenameTableGenerator implements SqlGenerator<RenameTableStatement> {
+public class RenameTableGenerator implements SqlGenerator<RenameTableStatement> {
     public int getPriority() {
         return PRIORITY_DEFAULT;
     }

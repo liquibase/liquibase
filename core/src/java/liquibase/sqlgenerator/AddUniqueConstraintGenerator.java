@@ -7,7 +7,7 @@ import liquibase.sql.UnparsedSql;
 import liquibase.statement.AddUniqueConstraintStatement;
 import liquibase.util.StringUtils;
 
-class AddUniqueConstraintGenerator implements SqlGenerator<AddUniqueConstraintStatement> {
+public class AddUniqueConstraintGenerator implements SqlGenerator<AddUniqueConstraintStatement> {
     public int getPriority() {
         return PRIORITY_DEFAULT;
     }

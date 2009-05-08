@@ -93,6 +93,9 @@ public class Executor {
 
     protected String[] applyVisitors(SqlStatement statement, List<SqlVisitor> sqlVisitors) throws StatementNotSupportedOnDatabaseException, JDBCException {
         Sql[] sql = SqlGeneratorFactory.getInstance().generateSql(statement, database);
+        if (sql == null) {
+            return new String[0];
+        }
         String[] returnSql = new String[sql.length];
 
         for (int i=0; i<sql.length; i++) {

@@ -6,7 +6,7 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.statement.StoredProcedureStatement;
 
-class StoredProcedureGenerator implements SqlGenerator<StoredProcedureStatement> {
+public class StoredProcedureGenerator implements SqlGenerator<StoredProcedureStatement> {
     public int getPriority() {
         return PRIORITY_DEFAULT;
     }

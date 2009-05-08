@@ -8,7 +8,7 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.statement.AddColumnStatement;
 
-class AddColumnGenerator implements SqlGenerator<AddColumnStatement> {
+public class AddColumnGenerator implements SqlGenerator<AddColumnStatement> {
     
     public int getPriority() {
         return PRIORITY_DEFAULT;

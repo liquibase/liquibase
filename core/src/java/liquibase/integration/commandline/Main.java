@@ -5,7 +5,7 @@ import liquibase.database.Database;
 import liquibase.exception.CommandLineParsingException;
 import liquibase.exception.JDBCException;
 import liquibase.exception.ValidationFailedException;
-import liquibase.lock.LockHandler;
+import liquibase.lock.LockManager;
 import liquibase.resource.CompositeFileOpener;
 import liquibase.resource.FileSystemFileOpener;
 import liquibase.util.LiquibaseUtil;
@@ -608,7 +608,7 @@ public class Main {
                 liquibase.reportLocks(System.out);
                 return;
             } else if ("releaseLocks".equalsIgnoreCase(command)) {
-                LockHandler.getInstance(database).forceReleaseLock();
+                LockManager.getInstance(database).forceReleaseLock();
                 System.out.println("Successfully released all database change log locks for " + liquibase.getDatabase().getConnectionUsername() + "@" + liquibase.getDatabase().getConnectionURL());
                 return;
             } else if ("tag".equalsIgnoreCase(command)) {

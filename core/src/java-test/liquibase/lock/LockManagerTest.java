@@ -1,6 +1,8 @@
 package liquibase.lock;
 
 import liquibase.database.Database;
+import liquibase.database.OracleDatabase;
+import liquibase.database.MySQLDatabase;
 import liquibase.database.template.Executor;
 import liquibase.database.template.JdbcOutputTemplate;
 import liquibase.exception.JDBCException;
@@ -10,15 +12,53 @@ import liquibase.statement.SqlStatement;
 import liquibase.statement.UpdateStatement;
 import liquibase.test.DatabaseTest;
 import liquibase.test.DatabaseTestTemplate;
+import liquibase.change.ChangeFactory;
 import static org.easymock.classextension.EasyMock.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertNotNull;
 import org.junit.Test;
 
 import java.io.StringWriter;
 import java.util.*;
+import java.sql.Connection;
 
-public class LockHandlerTest {
+@SuppressWarnings({"EqualsWhichDoesntCheckParameterClass"})
+public class LockManagerTest {
+
+    @Test
+    public void getInstance() {
+        final Database oracle1 = new OracleDatabase() {
+            @Override
+            public boolean equals(Object o) {
+                return o == this;
+            }
+        };
+        final Database oracle2 = new OracleDatabase() {
+            @Override
+            public boolean equals(Object o) {
+                return o == this;
+            }
+
+        };
+        final Database mysql = new MySQLDatabase() {
+            @Override
+            public boolean equals(Object o) {
+                return o == this;
+            }
+        };
+
+        assertNotNull(LockManager.getInstance(oracle1));
+        assertNotNull(LockManager.getInstance(oracle2));
+        assertNotNull(LockManager.getInstance(mysql));
+
+        assertTrue(LockManager.getInstance(oracle1) == LockManager.getInstance(oracle1));
+        assertTrue(LockManager.getInstance(oracle2) == LockManager.getInstance(oracle2));
+        assertTrue(LockManager.getInstance(mysql) == LockManager.getInstance(mysql));
+
+        assertTrue(LockManager.getInstance(oracle1) != LockManager.getInstance(oracle2));
+        assertTrue(LockManager.getInstance(oracle1) != LockManager.getInstance(mysql));
+    }
 
     @Test
     public void acquireLock_tableExistsNotLocked() throws Exception {
@@ -45,8 +85,8 @@ public class LockHandlerTest {
         replay(database);
         replay(template);
 
-        LockHandler handler = LockHandler.getInstance(database);
-        handler.acquireLock();
+        LockManager manager = LockManager.getInstance(database);
+        manager.acquireLock();
 
         verify(database);
         verify(template);
@@ -77,8 +117,8 @@ public class LockHandlerTest {
         replay(database);
         replay(template);
 
-        LockHandler handler = LockHandler.getInstance(database);
-        assertTrue(handler.acquireLock());
+        LockManager manager = LockManager.getInstance(database);
+        assertTrue(manager.acquireLock());
 
         verify(database);
         verify(template);
@@ -101,8 +141,8 @@ public class LockHandlerTest {
         replay(database);
         replay(template);
 
-        LockHandler handler = LockHandler.getInstance(database);
-        handler.acquireLock();
+        LockManager manager = LockManager.getInstance(database);
+        manager.acquireLock();
 
         verify(database);
         verify(template);
@@ -132,8 +172,8 @@ public class LockHandlerTest {
         replay(database);
         replay(template);
 
-        LockHandler handler = LockHandler.getInstance(database);
-        handler.releaseLock();
+        LockManager manager = LockManager.getInstance(database);
+        manager.releaseLock();
 
         verify(database);
         verify(template);
@@ -165,8 +205,8 @@ public class LockHandlerTest {
         replay(database);
         replay(template);
 
-        LockHandler handler = LockHandler.getInstance(database);
-        DatabaseChangeLogLock[] locks = handler.listLocks();
+        LockManager manager = LockManager.getInstance(database);
+        DatabaseChangeLogLock[] locks = manager.listLocks();
         assertEquals(1, locks.length);
 
         verify(database);
@@ -199,8 +239,8 @@ public class LockHandlerTest {
         replay(database);
         replay(template);
 
-        LockHandler handler = LockHandler.getInstance(database);
-        DatabaseChangeLogLock[] locks = handler.listLocks();
+        LockManager manager = LockManager.getInstance(database);
+        DatabaseChangeLogLock[] locks = manager.listLocks();
         assertEquals(0, locks.length);
 
         verify(database);
@@ -227,8 +267,8 @@ public class LockHandlerTest {
         replay(database);
         replay(template);
 
-        LockHandler handler = LockHandler.getInstance(database);
-        DatabaseChangeLogLock[] locks = handler.listLocks();
+        LockManager manager = LockManager.getInstance(database);
+        DatabaseChangeLogLock[] locks = manager.listLocks();
         assertEquals(0, locks.length);
 
         verify(database);
@@ -244,8 +284,8 @@ public class LockHandlerTest {
 
         replay(database);
 
-        LockHandler handler = LockHandler.getInstance(database);
-        DatabaseChangeLogLock[] locks = handler.listLocks();
+        LockManager manager = LockManager.getInstance(database);
+        DatabaseChangeLogLock[] locks = manager.listLocks();
         assertEquals(0, locks.length);
 
         verify(database);
@@ -258,7 +298,7 @@ public class LockHandlerTest {
 
                     public void performTest(Database database) throws Exception {
                         try {
-                            LockHandler.getInstance(database).reset();
+                            LockManager.getInstance(database).reset();
 
                             new Executor(database).execute(new DropTableStatement(null, database.getDatabaseChangeLogTableName(), false));
                         } catch (JDBCException e) {
@@ -272,9 +312,9 @@ public class LockHandlerTest {
 
                         database.commit();
 
-                        LockHandler lockHandler = LockHandler.getInstance(database);
-                        lockHandler.waitForLock();
-                        lockHandler.waitForLock();
+                        LockManager lockManager = LockManager.getInstance(database);
+                        lockManager.waitForLock();
+                        lockManager.waitForLock();
                     }
 
                 });
@@ -287,7 +327,7 @@ public class LockHandlerTest {
 
                     public void performTest(Database database) throws Exception {
 
-                        LockHandler.getInstance(database).reset();
+                        LockManager.getInstance(database).reset();
                         ;
 
                         try {
@@ -305,9 +345,9 @@ public class LockHandlerTest {
 
                         database.setJdbcTemplate(new JdbcOutputTemplate(new StringWriter(), database));
 
-                        LockHandler lockHandler = LockHandler.getInstance(database);
-                        lockHandler.waitForLock();
-                        lockHandler.waitForLock();
+                        LockManager lockManager = LockManager.getInstance(database);
+                        lockManager.waitForLock();
+                        lockManager.waitForLock();
                     }
 
                 });
@@ -320,7 +360,7 @@ public class LockHandlerTest {
 
                     public void performTest(Database database) throws Exception {
 
-                        LockHandler.getInstance(database).reset();
+                        LockManager.getInstance(database).reset();
 
                         try {
                             new Executor(database).execute(new DropTableStatement(null, database.getDatabaseChangeLogTableName(), false));
@@ -341,11 +381,11 @@ public class LockHandlerTest {
                         Executor originalTemplate = database.getJdbcTemplate();
                         database.setJdbcTemplate(new JdbcOutputTemplate(new StringWriter(), database));
 
-                        LockHandler lockHandler = LockHandler.getInstance(database);
-                        lockHandler.waitForLock();
+                        LockManager lockManager = LockManager.getInstance(database);
+                        lockManager.waitForLock();
 
                         database.setJdbcTemplate(originalTemplate);
-                        lockHandler.waitForLock();
+                        lockManager.waitForLock();
 
                         database.getJdbcTemplate().execute(database.getSelectChangeLogLockSQL());
                     }

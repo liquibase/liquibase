@@ -8,7 +8,7 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.statement.AddDefaultValueStatement;
 
-class AddDefaultValueGenerator implements SqlGenerator<AddDefaultValueStatement> {
+public class AddDefaultValueGenerator implements SqlGenerator<AddDefaultValueStatement> {
     public int getPriority() {
         return PRIORITY_DEFAULT;
     }

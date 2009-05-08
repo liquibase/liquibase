@@ -6,7 +6,7 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.statement.DropUniqueConstraintStatement;
 
-class DropUniqueConstraintGenerator implements SqlGenerator<DropUniqueConstraintStatement> {
+public class DropUniqueConstraintGenerator implements SqlGenerator<DropUniqueConstraintStatement> {
     public int getPriority() {
         return PRIORITY_DEFAULT;
     }

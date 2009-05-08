@@ -7,7 +7,7 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.statement.SetColumnRemarksStatement;
 
-class SetColumnRemarksGeneratorOracle implements SqlGenerator<SetColumnRemarksStatement> {
+public class SetColumnRemarksGeneratorOracle implements SqlGenerator<SetColumnRemarksStatement> {
     public int getPriority() {
         return PRIORITY_DATABASE;
     }
