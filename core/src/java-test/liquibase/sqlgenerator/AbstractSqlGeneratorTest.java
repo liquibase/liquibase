@@ -19,18 +19,12 @@ import java.util.List;
 public abstract class AbstractSqlGeneratorTest<T extends SqlStatement> {
 
     protected SqlGenerator<T> generatorUnderTest;
-    private List<? extends SqlStatement> setupStatements;
 
     public AbstractSqlGeneratorTest(SqlGenerator generatorUnderTest) throws Exception {
         this.generatorUnderTest = generatorUnderTest;
-        for (Database database : TestContext.getInstance().getAvailableDatabases()) {
-        	this.setupStatements = setupStatements(database);
-        }
     }
 
     protected abstract T createSampleSqlStatement();
-
-    protected abstract List<? extends SqlStatement>  setupStatements(Database database);
 
     protected void dropAndCreateTable(CreateTableStatement statement, Database database) throws SQLException, JDBCException {
         new Executor(database).execute(statement);
@@ -40,51 +34,6 @@ public abstract class AbstractSqlGeneratorTest<T extends SqlStatement> {
         }
 
     }
-
-    public void resetAvailableDatabases() throws Exception {
-        for (Database database : TestContext.getInstance().getAvailableDatabases()) {
-            DatabaseConnection connection = database.getConnection();
-            Statement connectionStatement = connection.createStatement();
-
-            if (database.supportsSchemas()) {
-                database.dropDatabaseObjects(TestContext.ALT_SCHEMA);
-                connection.commit();
-                try {
-                    connectionStatement.executeUpdate("drop table "+database.escapeTableName(TestContext.ALT_SCHEMA, database.getDatabaseChangeLogLockTableName()));
-                } catch (SQLException e) {
-                    ;
-                }
-                connection.commit();
-                try {
-                    connectionStatement.executeUpdate("drop table "+database.escapeTableName(TestContext.ALT_SCHEMA, database.getDatabaseChangeLogTableName()));
-                } catch (SQLException e) {
-                    ;
-                }
-                connection.commit();
-            }
-            database.dropDatabaseObjects(null);
-            try {
-                connectionStatement.executeUpdate("drop table "+database.escapeTableName(null, database.getDatabaseChangeLogLockTableName()));
-            } catch (SQLException e) {
-                ;
-            }
-            connection.commit();
-            try {
-                connectionStatement.executeUpdate("drop table "+database.escapeTableName(null, database.getDatabaseChangeLogTableName()));
-            } catch (SQLException e) {
-                ;
-            }
-            connection.commit();
-
-            if (setupStatements != null) {
-	            for (SqlStatement statement : setupStatements) {
-	                new Executor(database).execute(statement);
-	            }
-            }
-            connectionStatement.close();
-        }
-    }
-
 
     @Test
     public void isImplementation() throws Exception {
@@ -122,103 +71,6 @@ public abstract class AbstractSqlGeneratorTest<T extends SqlStatement> {
         return true;
     }
 
-    protected void testSqlOnAll(String expectedSql, T sqlStatement) throws Exception {
-        testSql(expectedSql, sqlStatement, null, null);        
-    }
-
-    protected void testSqlOn(String expectedSql, T sqlStatement, Class<? extends Database>... includeDatabases) throws Exception {
-        testSql(expectedSql, sqlStatement, includeDatabases, null);
-    }
-
-    public void testSqlOnAllExcept(String expectedSql, T sqlStatement, Class<? extends Database>... excludedDatabases) throws Exception {
-        testSql(expectedSql,  sqlStatement, null, excludedDatabases);
-    }
-
-    private void testSql(String expectedSql, T sqlStatement, Class<? extends Database>[] includeDatabases, Class<? extends Database>[] excludeDatabases) throws Exception {
-
-        if (expectedSql != null) {
-            for (Database database : TestContext.getInstance().getAllDatabases()) {
-                if (shouldTestDatabase(sqlStatement, database, includeDatabases, excludeDatabases)) {
-                    String convertedSql =  replaceEscaping(expectedSql, database);
-                    convertedSql = replaceDatabaseClauses(convertedSql, database);
-                    convertedSql = replaceStandardTypes(convertedSql, database);
-
-                    Sql[] sql = generatorUnderTest.generateSql(sqlStatement, database);
-                    assertNotNull("Null SQL for " + database, sql);
-                    assertEquals("Unexpected number of  SQL statements for " + database, 1, sql.length);
-                    assertEquals("Incorrect SQL for " + database, convertedSql.toLowerCase(), sql[0].toSql().toLowerCase());
-                }
-            }
-        }
-
-        resetAvailableDatabases();
-        for (Database availableDatabase : TestContext.getInstance().getAvailableDatabases()) {
-            Statement statement = availableDatabase.getConnection().createStatement();
-            if (shouldTestDatabase(sqlStatement, availableDatabase, includeDatabases, excludeDatabases)) {
-                String sqlToRun = generatorUnderTest.generateSql(sqlStatement, availableDatabase)[0].toSql();
-                try {
-                    statement.execute(sqlToRun);
-                } catch (Exception e) {
-                    System.out.println("Failed to execute against "+availableDatabase.getProductName()+": "+sqlToRun);
-                    throw e;
-
-                }
-            }
-        }
-    }
-
-    private String replaceStandardTypes(String convertedSql, Database database) {
-        convertedSql = replaceType("int", convertedSql, database);
-        convertedSql = replaceType("datetime", convertedSql, database);
-        convertedSql = replaceType("boolean", convertedSql, database);
-
-        return convertedSql;
-    }
-
-    private String replaceType(String type, String baseString, Database database) {
-        return baseString.replaceAll(" "+type+" ", " " + database.getColumnType(type, false) + " ")
-                .replaceAll(" "+type+",", " " + database.getColumnType(type, false) + ",");
-    }
-
-    private String replaceDatabaseClauses(String convertedSql, Database database) {
-        return convertedSql.replaceFirst("auto_increment_clause", database.getAutoIncrementClause());
-    }
-
-    private boolean shouldTestDatabase(T sqlStatement, Database database, Class[] includeDatabases, Class[] excludeDatabases) {
-    	SqlGenerator<T> generator = SqlGeneratorFactory.getInstance().getGenerator(sqlStatement, database);
-        if (!generatorUnderTest.supports(sqlStatement, database)
-                || generatorUnderTest.validate(sqlStatement, database).hasErrors()
-                || generator == null 
-                || !generator.getClass().equals(generatorUnderTest.getClass())) {
-            return false;
-        }
-
-        boolean shouldInclude = true;
-        if (includeDatabases != null && includeDatabases.length > 0) {
-            shouldInclude = Arrays.asList(includeDatabases).contains(database.getClass());
-        }
-
-        boolean shouldExclude = false;
-        if (excludeDatabases != null && excludeDatabases.length > 0) {
-            shouldExclude = Arrays.asList(excludeDatabases).contains(database.getClass());            
-        }
-
-        return !shouldExclude && shouldInclude;
-
-
-    }
-
-    private String replaceEscaping(String expectedSql, Database database) {
-        String convertedSql = expectedSql;
-        int lastIndex = 0;
-        while ((lastIndex = convertedSql.indexOf("[", lastIndex)) >= 0) {
-            String objectName = convertedSql.substring(lastIndex+1, convertedSql.indexOf("]", lastIndex));
-            convertedSql = convertedSql.replace("["+objectName+"]", database.escapeDatabaseObject(objectName));
-            lastIndex++;
-        }
-
-        return convertedSql;
-    }
 
 
 }

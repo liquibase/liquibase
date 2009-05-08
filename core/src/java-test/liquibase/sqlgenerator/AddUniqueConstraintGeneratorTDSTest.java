@@ -26,25 +26,4 @@ public class AddUniqueConstraintGeneratorTDSTest extends
 			|| (database instanceof SybaseASADatabase)
 		;
 	}
-	
-	@Test @Override
-	public void execute_noSchema() throws Exception {
-		AddUniqueConstraintStatement statement = new AddUniqueConstraintStatement(null, TABLE_NAME, COLUMN_NAME, CONSTRAINT_NAME);
-		testSqlOn("alter table [adduqtest] add constraint [uq_test] unique ([coltomakeuq])", statement, SybaseDatabase.class);
-		testSqlOn("alter table [dbo].[adduqtest] add constraint [uq_test] unique ([coltomakeuq])", statement, MSSQLDatabase.class);
-		testSqlOn("alter table [adduqtest] add constraint [uq_test] unique ([coltomakeuq])", statement, SybaseASADatabase.class);
-	}
-
-	@Test @Override
-	public void execute_noConstraintName() throws Exception {
-		AddUniqueConstraintStatement statement = new AddUniqueConstraintStatement(null, TABLE_NAME, COLUMN_NAME, null);
-		testSqlOnAllExcept("alter table [adduqtest] add unique ([coltomakeuq])", statement, MSSQLDatabase.class);
-		testSqlOn("alter table [dbo].[adduqtest] add unique ([coltomakeuq])", statement, MSSQLDatabase.class);
-	}
-	
-	@Test @Override
-	public void execute_withSchema() throws Exception {
-		AddUniqueConstraintStatement statement = new AddUniqueConstraintStatement(TestContext.ALT_SCHEMA, TABLE_NAME, COLUMN_NAME, CONSTRAINT_NAME);
-		testSqlOnAll("alter table [liquibaseb].[adduqtest] add constraint [uq_test] unique ([coltomakeuq])", statement);
-	}
 }
