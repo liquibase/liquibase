@@ -1,8 +1,8 @@
 package liquibase.dbdoc;
 
-import liquibase.ChangeSet;
 import liquibase.Liquibase;
 import liquibase.change.Change;
+import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.exception.MigrationFailedException;
 

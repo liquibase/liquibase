@@ -6,10 +6,14 @@ import java.lang.reflect.Field;
 import java.net.MalformedURLException;
 import java.util.*;
 import liquibase.*;
-import liquibase.commandline.CommandLineUtils;
+import liquibase.resource.CompositeFileOpener;
+import liquibase.resource.FileOpener;
+import liquibase.resource.FileSystemFileOpener;
+import liquibase.integration.commandline.CommandLineUtils;
 import liquibase.database.Database;
 import liquibase.exception.*;
-import liquibase.log.LogFactory;
+import liquibase.util.log.LogFactory;
+import liquibase.util.ui.UIFactory;
 import org.apache.maven.plugin.*;
 import org.apache.maven.project.MavenProject;
 

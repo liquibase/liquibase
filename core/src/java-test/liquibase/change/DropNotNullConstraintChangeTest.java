@@ -1,6 +1,9 @@
 package liquibase.change;
 
-import liquibase.database.*;
+import liquibase.database.Database;
+import liquibase.database.FirebirdDatabase;
+import liquibase.database.MockDatabase;
+import liquibase.database.SQLiteDatabase;
 import liquibase.statement.SetNullableStatement;
 import liquibase.statement.SqlStatement;
 import static org.junit.Assert.assertEquals;

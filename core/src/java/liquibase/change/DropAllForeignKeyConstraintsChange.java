@@ -2,14 +2,11 @@ package liquibase.change;
 
 import liquibase.database.Database;
 import liquibase.database.template.Executor;
-import liquibase.exception.InvalidChangeDefinitionException;
 import liquibase.exception.JDBCException;
-import liquibase.exception.UnsupportedChangeException;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.sql.visitor.SqlVisitor;
 import liquibase.statement.FindForeignKeyConstraintsStatement;
 import liquibase.statement.SqlStatement;
-import liquibase.statement.visitor.SqlVisitor;
-import liquibase.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;

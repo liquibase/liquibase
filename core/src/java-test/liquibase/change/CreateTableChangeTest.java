@@ -1,8 +1,6 @@
 package liquibase.change;
 
 import liquibase.database.MockDatabase;
-import liquibase.database.Database;
-import liquibase.database.SybaseASADatabase;
 import liquibase.statement.CreateTableStatement;
 import liquibase.statement.ForeignKeyConstraint;
 import liquibase.statement.SqlStatement;

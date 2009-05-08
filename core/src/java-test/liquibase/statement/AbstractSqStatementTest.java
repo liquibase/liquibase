@@ -1,18 +1,10 @@
 package liquibase.statement;
 
 import liquibase.database.Database;
-import liquibase.database.PostgresDatabase;
-import liquibase.database.template.Executor;
-import liquibase.exception.JDBCException;
-import liquibase.statement.generator.SqlGenerator;
-import liquibase.statement.generator.SqlGeneratorFactory;
-import liquibase.statement.*;
+import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.test.TestContext;
-import org.junit.Before;
+import static org.junit.Assert.fail;
 import org.junit.Test;
-
-import java.sql.SQLException;
-import static org.junit.Assert.*;
 
 public abstract class AbstractSqStatementTest<SqlStatementUnderTest extends SqlStatement> {
 

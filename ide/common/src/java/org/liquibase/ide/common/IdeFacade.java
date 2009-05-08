@@ -1,6 +1,6 @@
 package org.liquibase.ide.common;
 
-import liquibase.DatabaseChangeLog;
+import liquibase.changelog.DatabaseChangeLog;
 import liquibase.database.Database;
 import liquibase.Liquibase;
 

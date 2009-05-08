@@ -1,8 +1,8 @@
 package liquibase.change.custom;
 
-import liquibase.FileOpener;
 import liquibase.database.Database;
 import liquibase.exception.*;
+import liquibase.resource.FileOpener;
 
 public class ExampleCustomTaskChange implements CustomTaskChange, CustomTaskRollback {
 

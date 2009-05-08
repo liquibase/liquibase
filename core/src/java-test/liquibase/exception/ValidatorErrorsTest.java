@@ -3,7 +3,6 @@ package liquibase.exception;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
-import liquibase.exception.ValidationErrors;
 
 public class ValidatorErrorsTest {
     @Test

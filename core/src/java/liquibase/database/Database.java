@@ -1,15 +1,15 @@
 package liquibase.database;
 
-import liquibase.ChangeSet;
-import liquibase.RanChangeSet;
 import liquibase.change.Change;
+import liquibase.changelog.ChangeSet;
+import liquibase.changelog.RanChangeSet;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.DatabaseSnapshot;
 import liquibase.database.template.Executor;
 import liquibase.diff.DiffStatusListener;
 import liquibase.exception.*;
+import liquibase.sql.visitor.SqlVisitor;
 import liquibase.statement.SqlStatement;
-import liquibase.statement.visitor.SqlVisitor;
 
 import java.io.IOException;
 import java.io.Writer;

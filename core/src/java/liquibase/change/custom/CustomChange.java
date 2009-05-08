@@ -1,10 +1,9 @@
 package liquibase.change.custom;
 
-import liquibase.FileOpener;
 import liquibase.database.Database;
-import liquibase.exception.InvalidChangeDefinitionException;
 import liquibase.exception.SetupException;
 import liquibase.exception.ValidationErrors;
+import liquibase.resource.FileOpener;
 
 /**
  * Interface to implement when creating a custom change.  Actual custom changes implementations need to

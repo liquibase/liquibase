@@ -4,7 +4,7 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.VirtualFileManager;
-import liquibase.FileOpener;
+import liquibase.resource.FileOpener;
 
 import java.io.IOException;
 import java.io.InputStream;

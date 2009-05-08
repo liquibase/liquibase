@@ -1,7 +1,7 @@
 package org.liquibase.maven.plugins;
 
 import java.io.*;
-import liquibase.FileOpener;
+import liquibase.resource.FileOpener;
 import liquibase.Liquibase;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;

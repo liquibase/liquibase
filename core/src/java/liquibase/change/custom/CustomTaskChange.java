@@ -2,7 +2,6 @@ package liquibase.change.custom;
 
 import liquibase.database.Database;
 import liquibase.exception.CustomChangeException;
-import liquibase.exception.UnsupportedChangeException;
 
 /**
  * Interface to implement when creating a custom change that does not actually generate SQL.

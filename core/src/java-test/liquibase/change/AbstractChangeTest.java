@@ -1,12 +1,12 @@
 package liquibase.change;
 
-import liquibase.changelog.parser.string.StringChangeLogSerializer;
 import liquibase.database.Database;
 import liquibase.database.OracleDatabase;
 import liquibase.exception.ValidationErrors;
+import liquibase.parser.string.StringChangeLogSerializer;
+import liquibase.sql.visitor.SqlVisitor;
 import liquibase.statement.RawSqlStatement;
 import liquibase.statement.SqlStatement;
-import liquibase.statement.visitor.SqlVisitor;
 import liquibase.test.TestContext;
 import liquibase.util.StreamUtil;
 import static org.easymock.EasyMock.*;

@@ -1,17 +1,17 @@
 package org.liquibase.eclipse.common.change.wizard;
 
-import liquibase.DatabaseChangeLog;
-import liquibase.ChangeSet;
+import liquibase.changelog.DatabaseChangeLog;
+import liquibase.changelog.ChangeSet;
 import liquibase.change.Change;
 import liquibase.database.DatabaseFactory;
 import liquibase.statement.SqlStatement;
-import liquibase.statement.generator.SqlGeneratorFactory;
-import liquibase.statement.syntax.Sql;
+import liquibase.sqlgenerator.SqlGeneratorFactory;
+import liquibase.sql.Sql;
 import liquibase.Liquibase;
-import liquibase.changelog.parser.xml.LiquibaseSchemaResolver;
-import liquibase.changelog.parser.xml.XMLChangeLogSerializer;
+import liquibase.parser.xml.LiquibaseSchemaResolver;
+import liquibase.parser.xml.XMLChangeLogSerializer;
 import liquibase.util.StringUtils;
-import liquibase.xml.DefaultXmlWriter;
+import liquibase.util.xml.DefaultXmlWriter;
 import org.eclipse.core.commands.operations.OperationStatus;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;

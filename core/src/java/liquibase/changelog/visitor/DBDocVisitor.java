@@ -1,8 +1,7 @@
 package liquibase.changelog.visitor;
 
-import liquibase.ChangeSet;
-import liquibase.FileOpener;
 import liquibase.change.Change;
+import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.database.structure.Column;
 import liquibase.database.structure.DatabaseObject;
@@ -12,6 +11,7 @@ import liquibase.dbdoc.*;
 import liquibase.exception.DatabaseHistoryException;
 import liquibase.exception.JDBCException;
 import liquibase.exception.LiquibaseException;
+import liquibase.resource.FileOpener;
 import liquibase.util.StreamUtil;
 
 import java.io.File;

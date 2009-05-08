@@ -1,7 +1,7 @@
 package liquibase.changelog.filter;
 
-import liquibase.ChangeSet;
-import liquibase.RanChangeSet;
+import liquibase.changelog.ChangeSet;
+import liquibase.changelog.RanChangeSet;
 import liquibase.exception.RollbackFailedException;
 import static org.junit.Assert.*;
 import org.junit.Test;

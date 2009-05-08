@@ -4,14 +4,14 @@ import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.exception.JDBCException;
 import liquibase.exception.StatementNotSupportedOnDatabaseException;
-import liquibase.log.LogFactory;
+import liquibase.sql.Sql;
+import liquibase.sql.visitor.SqlVisitor;
+import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.CallableSqlStatement;
 import liquibase.statement.SqlStatement;
-import liquibase.statement.generator.SqlGeneratorFactory;
-import liquibase.statement.syntax.Sql;
-import liquibase.statement.visitor.SqlVisitor;
 import liquibase.util.JdbcUtils;
 import liquibase.util.StringUtils;
+import liquibase.util.log.LogFactory;
 
 import java.sql.CallableStatement;
 import java.sql.ResultSet;

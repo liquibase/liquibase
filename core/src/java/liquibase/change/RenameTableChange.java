@@ -2,9 +2,6 @@ package liquibase.change;
 
 import liquibase.database.DB2Database;
 import liquibase.database.Database;
-import liquibase.database.SQLiteDatabase;
-import liquibase.database.FirebirdDatabase;
-import liquibase.exception.InvalidChangeDefinitionException;
 import liquibase.statement.RenameTableStatement;
 import liquibase.statement.ReorganizeTableStatement;
 import liquibase.statement.SqlStatement;

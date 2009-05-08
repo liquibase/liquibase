@@ -1,14 +1,12 @@
 package liquibase.change;
 
-import liquibase.csv.CSVReader;
 import liquibase.database.Database;
-import liquibase.exception.InvalidChangeDefinitionException;
-import liquibase.exception.UnsupportedChangeException;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.resource.FileOpener;
 import liquibase.statement.InsertStatement;
 import liquibase.statement.SqlStatement;
 import liquibase.util.StringUtils;
-import liquibase.FileOpener;
+import liquibase.util.csv.CSVReader;
 
 import java.io.IOException;
 import java.io.InputStream;

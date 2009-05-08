@@ -1,9 +1,8 @@
 package liquibase.change;
 
-import liquibase.database.MockDatabase;
 import liquibase.database.Database;
+import liquibase.database.MockDatabase;
 import liquibase.database.SQLiteDatabase;
-import liquibase.database.SybaseASADatabase;
 import liquibase.statement.AddForeignKeyConstraintStatement;
 import liquibase.statement.SqlStatement;
 import static org.junit.Assert.assertEquals;

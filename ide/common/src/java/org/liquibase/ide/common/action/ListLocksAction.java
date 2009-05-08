@@ -1,6 +1,6 @@
 package org.liquibase.ide.common.action;
 
-import liquibase.DatabaseChangeLogLock;
+import liquibase.lock.DatabaseChangeLogLock;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
 import org.liquibase.ide.common.IdeFacade;

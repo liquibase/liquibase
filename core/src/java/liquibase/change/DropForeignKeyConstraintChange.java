@@ -2,11 +2,8 @@ package liquibase.change;
 
 import liquibase.database.Database;
 import liquibase.database.SQLiteDatabase;
-import liquibase.exception.InvalidChangeDefinitionException;
-import liquibase.exception.UnsupportedChangeException;
 import liquibase.statement.DropForeignKeyConstraintStatement;
 import liquibase.statement.SqlStatement;
-import liquibase.util.StringUtils;
 
 /**
  * Drops an existing foreign key constraint.

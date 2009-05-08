@@ -6,9 +6,9 @@ import liquibase.database.InformixDatabase;
 import liquibase.database.OracleDatabase;
 import liquibase.diff.DiffStatusListener;
 import liquibase.exception.JDBCException;
-import liquibase.log.LogFactory;
-import liquibase.statement.visitor.SqlVisitor;
+import liquibase.sql.visitor.SqlVisitor;
 import liquibase.util.StringUtils;
+import liquibase.util.log.LogFactory;
 
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;

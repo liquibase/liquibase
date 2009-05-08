@@ -1,6 +1,6 @@
 package liquibase.test;
 
-import liquibase.FileOpener;
+import liquibase.resource.FileOpener;
 
 import java.io.File;
 import java.io.IOException;

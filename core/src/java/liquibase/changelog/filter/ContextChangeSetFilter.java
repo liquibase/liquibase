@@ -1,6 +1,6 @@
 package liquibase.changelog.filter;
 
-import liquibase.ChangeSet;
+import liquibase.changelog.ChangeSet;
 import liquibase.util.StringUtils;
 
 import java.util.Arrays;

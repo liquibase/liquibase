@@ -1,14 +1,16 @@
 package liquibase.changelog.visitor;
 
-import liquibase.ChangeSet;
-import liquibase.DatabaseChangeLog;
-import liquibase.RanChangeSet;
 import liquibase.change.Change;
+import liquibase.changelog.ChangeSet;
+import liquibase.changelog.DatabaseChangeLog;
+import liquibase.changelog.RanChangeSet;
 import liquibase.database.Database;
-import liquibase.exception.*;
-import liquibase.preconditions.AndPrecondition;
-import liquibase.preconditions.ErrorPrecondition;
-import liquibase.preconditions.FailedPrecondition;
+import liquibase.exception.PreconditionErrorException;
+import liquibase.exception.PreconditionFailedException;
+import liquibase.exception.SetupException;
+import liquibase.precondition.AndPrecondition;
+import liquibase.precondition.ErrorPrecondition;
+import liquibase.precondition.FailedPrecondition;
 
 import java.util.ArrayList;
 import java.util.HashSet;

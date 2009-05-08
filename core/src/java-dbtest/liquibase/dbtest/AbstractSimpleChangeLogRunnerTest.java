@@ -1,10 +1,8 @@
 package liquibase.dbtest;
 
 import junit.framework.TestCase;
-import liquibase.ChangeSet;
-import liquibase.FileOpener;
-import liquibase.FileSystemFileOpener;
 import liquibase.Liquibase;
+import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
@@ -14,10 +12,12 @@ import liquibase.diff.DiffResult;
 import liquibase.exception.JDBCException;
 import liquibase.exception.ValidationFailedException;
 import liquibase.lock.LockHandler;
-import liquibase.log.LogFactory;
+import liquibase.resource.FileOpener;
+import liquibase.resource.FileSystemFileOpener;
 import liquibase.statement.DropTableStatement;
 import liquibase.test.JUnitFileOpener;
 import liquibase.test.TestContext;
+import liquibase.util.log.LogFactory;
 
 import java.io.File;
 import java.io.FileOutputStream;

@@ -1,8 +1,7 @@
 package liquibase.change;
 
-import liquibase.database.MockDatabase;
 import liquibase.database.Database;
-import liquibase.database.SybaseASADatabase;
+import liquibase.database.MockDatabase;
 import liquibase.database.SQLiteDatabase;
 import liquibase.statement.DropDefaultValueStatement;
 import liquibase.statement.SqlStatement;

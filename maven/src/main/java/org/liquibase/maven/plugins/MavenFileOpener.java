@@ -5,13 +5,13 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.Enumeration;
 
-import liquibase.FileOpener;
+import liquibase.resource.FileOpener;
 
 /**
  * Implementation of liquibase.FileOpener for Maven which will use a default or user
  * specified {@link ClassLoader} to load files/resources.
  *
- * @see liquibase.FileOpener
+ * @see liquibase.resource.FileOpener
  */
 public class MavenFileOpener implements FileOpener {
 
@@ -21,14 +21,14 @@ public class MavenFileOpener implements FileOpener {
     private ClassLoader _loader;
 
     /**
-     * Creates a {@link liquibase.FileOpener} that uses the classloader for the class.
+     * Creates a {@link liquibase.resource.FileOpener} that uses the classloader for the class.
      */
     public MavenFileOpener() {
         this(MavenFileOpener.class.getClassLoader());
     }
 
     /**
-     * Creates a {@link liquibase.FileOpener} that will use the specified
+     * Creates a {@link liquibase.resource.FileOpener} that will use the specified
      * {@link ClassLoader} to load files.
      *
      * @param cl The {@link ClassLoader} to use to load files/resources.

@@ -1,6 +1,5 @@
 package liquibase.lock;
 
-import liquibase.DatabaseChangeLogLock;
 import liquibase.database.Database;
 import liquibase.database.template.Executor;
 import liquibase.database.template.JdbcOutputTemplate;

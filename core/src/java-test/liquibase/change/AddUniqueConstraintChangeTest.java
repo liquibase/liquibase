@@ -1,7 +1,6 @@
 package liquibase.change;
 
 import liquibase.database.Database;
-import liquibase.database.SybaseASADatabase;
 import liquibase.database.SQLiteDatabase;
 import liquibase.statement.AddUniqueConstraintStatement;
 import liquibase.statement.SqlStatement;

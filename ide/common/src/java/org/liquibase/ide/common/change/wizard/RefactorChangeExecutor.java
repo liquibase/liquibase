@@ -1,7 +1,7 @@
 package org.liquibase.ide.common.change.wizard;
 
-import liquibase.DatabaseChangeLog;
-import liquibase.ChangeSet;
+import liquibase.changelog.DatabaseChangeLog;
+import liquibase.changelog.ChangeSet;
 import liquibase.Liquibase;
 import liquibase.change.Change;
 import liquibase.database.Database;

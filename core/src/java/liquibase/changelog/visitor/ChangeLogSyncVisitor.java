@@ -1,6 +1,6 @@
 package liquibase.changelog.visitor;
 
-import liquibase.ChangeSet;
+import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
 

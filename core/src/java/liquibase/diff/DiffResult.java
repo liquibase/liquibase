@@ -1,18 +1,18 @@
 package liquibase.diff;
 
 import liquibase.change.*;
-import liquibase.changelog.parser.xml.LiquibaseSchemaResolver;
-import liquibase.changelog.parser.xml.XMLChangeLogParser;
-import liquibase.changelog.parser.xml.XMLChangeLogSerializer;
-import liquibase.csv.CSVWriter;
 import liquibase.database.Database;
 import liquibase.database.structure.*;
 import liquibase.exception.JDBCException;
-import liquibase.log.LogFactory;
+import liquibase.parser.xml.LiquibaseSchemaResolver;
+import liquibase.parser.xml.XMLChangeLogParser;
+import liquibase.parser.xml.XMLChangeLogSerializer;
 import liquibase.util.SqlUtil;
 import liquibase.util.StringUtils;
-import liquibase.xml.DefaultXmlWriter;
-import liquibase.xml.XmlWriter;
+import liquibase.util.csv.CSVWriter;
+import liquibase.util.log.LogFactory;
+import liquibase.util.xml.DefaultXmlWriter;
+import liquibase.util.xml.XmlWriter;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 

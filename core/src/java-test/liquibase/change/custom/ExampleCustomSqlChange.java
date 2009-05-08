@@ -1,8 +1,11 @@
 package liquibase.change.custom;
 
-import liquibase.FileOpener;
 import liquibase.database.Database;
-import liquibase.exception.*;
+import liquibase.exception.RollbackImpossibleException;
+import liquibase.exception.SetupException;
+import liquibase.exception.UnsupportedChangeException;
+import liquibase.exception.ValidationErrors;
+import liquibase.resource.FileOpener;
 import liquibase.statement.RawSqlStatement;
 import liquibase.statement.SqlStatement;
 

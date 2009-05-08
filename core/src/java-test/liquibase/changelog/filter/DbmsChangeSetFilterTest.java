@@ -1,6 +1,6 @@
 package liquibase.changelog.filter;
 
-import liquibase.ChangeSet;
+import liquibase.changelog.ChangeSet;
 import liquibase.database.MySQLDatabase;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
