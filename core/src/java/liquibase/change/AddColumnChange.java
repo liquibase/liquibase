@@ -20,7 +20,7 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
     private List<ColumnConfig> columns;
 
     public AddColumnChange() {
-        super("addColumn", "Add Column");
+        super("addColumn", "Add Column", ChangeMetaData.PRIORITY_DEFAULT);
         columns = new ArrayList<ColumnConfig>();
     }
 

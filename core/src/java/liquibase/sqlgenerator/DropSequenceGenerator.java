@@ -7,12 +7,12 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.statement.DropSequenceStatement;
 
-public class DropSequenceGenerator implements SqlGenerator<DropSequenceStatement> {
-    public int getSpecializationLevel() {
-        return SPECIALIZATION_LEVEL_DEFAULT;
+class DropSequenceGenerator implements SqlGenerator<DropSequenceStatement> {
+    public int getPriority() {
+        return PRIORITY_DEFAULT;
     }
 
-    public boolean isValidGenerator(DropSequenceStatement statement, Database database) {
+    public boolean supports(DropSequenceStatement statement, Database database) {
         return database.supportsSequences();
     }
 

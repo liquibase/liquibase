@@ -6,12 +6,12 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.statement.CreateSequenceStatement;
 
-public class CreateSequenceGenerator implements SqlGenerator<CreateSequenceStatement> {
-    public int getSpecializationLevel() {
-        return SPECIALIZATION_LEVEL_DEFAULT;
+class CreateSequenceGenerator implements SqlGenerator<CreateSequenceStatement> {
+    public int getPriority() {
+        return PRIORITY_DEFAULT;
     }
 
-    public boolean isValidGenerator(CreateSequenceStatement statement, Database database) {
+    public boolean supports(CreateSequenceStatement statement, Database database) {
         return database.supportsSequences();
     }
 

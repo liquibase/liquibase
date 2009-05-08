@@ -6,12 +6,12 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.statement.SetNullableStatement;
 
-public class SetNullableGenerator implements SqlGenerator<SetNullableStatement> {
-    public int getSpecializationLevel() {
-        return SPECIALIZATION_LEVEL_DEFAULT;
+class SetNullableGenerator implements SqlGenerator<SetNullableStatement> {
+    public int getPriority() {
+        return PRIORITY_DEFAULT;
     }
 
-    public boolean isValidGenerator(SetNullableStatement statement, Database database) {
+    public boolean supports(SetNullableStatement statement, Database database) {
         return !(database instanceof FirebirdDatabase ||
                 database instanceof SQLiteDatabase);
     }

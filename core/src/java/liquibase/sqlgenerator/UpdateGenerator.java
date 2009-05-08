@@ -8,12 +8,12 @@ import liquibase.statement.UpdateStatement;
 
 import java.util.Date;
 
-public class UpdateGenerator implements SqlGenerator<UpdateStatement> {
-    public int getSpecializationLevel() {
-        return SPECIALIZATION_LEVEL_DEFAULT;
+class UpdateGenerator implements SqlGenerator<UpdateStatement> {
+    public int getPriority() {
+        return PRIORITY_DEFAULT;
     }
 
-    public boolean isValidGenerator(UpdateStatement statement, Database database) {
+    public boolean supports(UpdateStatement statement, Database database) {
         return true;
     }
 

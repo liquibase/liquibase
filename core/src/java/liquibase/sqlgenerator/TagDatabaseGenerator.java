@@ -8,12 +8,12 @@ import liquibase.sql.UnparsedSql;
 import liquibase.statement.TagDatabaseStatement;
 import liquibase.statement.UpdateStatement;
 
-public class TagDatabaseGenerator implements SqlGenerator<TagDatabaseStatement> {
-    public int getSpecializationLevel() {
-        return SPECIALIZATION_LEVEL_DEFAULT;
+class TagDatabaseGenerator implements SqlGenerator<TagDatabaseStatement> {
+    public int getPriority() {
+        return PRIORITY_DEFAULT;
     }
 
-    public boolean isValidGenerator(TagDatabaseStatement statement, Database database) {
+    public boolean supports(TagDatabaseStatement statement, Database database) {
         return true;
     }
 
@@ -44,7 +44,7 @@ public class TagDatabaseGenerator implements SqlGenerator<TagDatabaseStatement> 
             updateStatement.setWhereClause("DATEEXECUTED = (SELECT MAX(DATEEXECUTED) FROM " + database.escapeTableName(database.getDefaultSchemaName(), database.getDatabaseChangeLogTableName()) + ")");
         }
 
-        return SqlGeneratorFactory.getInstance().getBestGenerator(updateStatement, database).generateSql(updateStatement, database);
+        return SqlGeneratorFactory.getInstance().getGenerator(updateStatement, database).generateSql(updateStatement, database);
 
     }
 }

@@ -10,12 +10,12 @@ import liquibase.statement.AddForeignKeyConstraintStatement;
 
 import java.sql.DatabaseMetaData;
 
-public class AddForeignKeyConstraintGenerator implements SqlGenerator<AddForeignKeyConstraintStatement> {
-    public int getSpecializationLevel() {
-        return SPECIALIZATION_LEVEL_DEFAULT;
+class AddForeignKeyConstraintGenerator implements SqlGenerator<AddForeignKeyConstraintStatement> {
+    public int getPriority() {
+        return PRIORITY_DEFAULT;
     }
 
-    public boolean isValidGenerator(AddForeignKeyConstraintStatement statement, Database database) {
+    public boolean supports(AddForeignKeyConstraintStatement statement, Database database) {
         return (!(database instanceof SQLiteDatabase));
     }
 

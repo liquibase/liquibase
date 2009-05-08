@@ -39,16 +39,8 @@ public abstract class AbstractChange implements Change {
      * @param changeName        the tag name for this change
      * @param changeDescription the name for this change
      */
-    protected AbstractChange(String changeName, String changeDescription) {
-        this.changeMetaData = new ChangeMetaData(changeName, changeDescription);
-    }
-
-    public int getSpecializationLevel() {
-        return SPECIALIZATION_LEVEL_DEFAULT;
-    }
-
-    public boolean supports(Database database) {
-        return true;
+    protected AbstractChange(String changeName, String changeDescription, int priority) {
+        this.changeMetaData = new ChangeMetaData(changeName, changeDescription, priority);
     }
 
     public ChangeMetaData getChangeMetaData() {
@@ -63,10 +55,9 @@ public abstract class AbstractChange implements Change {
         this.changeSet = changeSet;
     }
 
-    public boolean isSupported(Database database) {
+    public boolean supports(Database database) {
         for (SqlStatement statement : generateStatements(database)) {
-            SqlGenerator sqlGenerator = SqlGeneratorFactory.getInstance().getBestGenerator(statement, database);
-            if (sqlGenerator == null) {
+            if (!SqlGeneratorFactory.getInstance().supports(statement, database)) {
                 return false;
             }
         }
@@ -76,11 +67,10 @@ public abstract class AbstractChange implements Change {
     public ValidationErrors validate(Database database) {
         ValidationErrors changeValidationErrors = new ValidationErrors();
         for (SqlStatement statement : generateStatements(database)) {
-            SqlGenerator sqlGenerator = SqlGeneratorFactory.getInstance().getBestGenerator(statement, database);
-            if (sqlGenerator == null) {
+            if (!SqlGeneratorFactory.getInstance().supports(statement, database)) {
                 changeValidationErrors.addError(getChangeMetaData().getName()+" is not supported on "+database.getProductName());
             } else {
-                changeValidationErrors.addAll(sqlGenerator.validate(statement, database));
+                changeValidationErrors.addAll(SqlGeneratorFactory.getInstance().validate(statement, database));
             }
         }
 
@@ -102,9 +92,10 @@ public abstract class AbstractChange implements Change {
     }
 
     /**
-     * @see liquibase.change.Change#supportsRollback()
+     * @see Change#supportsRollback(liquibase.database.Database)
+     * @param database
      */
-    public boolean supportsRollback() {
+    public boolean supportsRollback(Database database) {
         return createInverses() != null;
     }
 
@@ -171,20 +162,14 @@ public abstract class AbstractChange implements Change {
      * Most Changes don't need to do any setup.
      * This implements a no-op
      */
-    public void setUp() throws SetupException {
+    public void init() throws SetupException {
 
     }
 
     public Set<DatabaseObject> getAffectedDatabaseObjects(Database database) {
         Set<DatabaseObject> affectedObjects = new HashSet<DatabaseObject>();
         for (SqlStatement statement : generateStatements(database)) {
-            SqlGenerator sqlGenerator = SqlGeneratorFactory.getInstance().getBestGenerator(statement, database);
-            if (sqlGenerator != null) {
-                for (Sql sql : sqlGenerator.generateSql(statement, database)) {
-                    affectedObjects.addAll(sql.getAffectedDatabaseObjects());
-                }
-            }
-
+            affectedObjects.addAll(SqlGeneratorFactory.getInstance().getAffectedDatabaseObjects(statement, database));
         }
 
         return affectedObjects;

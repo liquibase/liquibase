@@ -23,7 +23,7 @@ public class DropDefaultValueChange extends AbstractChange {
     private String columnDataType;
 
     public DropDefaultValueChange() {
-        super("dropDefaultValue", "Drop Default Value");
+        super("dropDefaultValue", "Drop Default Value", ChangeMetaData.PRIORITY_DEFAULT);
     }
 
     public String getSchemaName() {

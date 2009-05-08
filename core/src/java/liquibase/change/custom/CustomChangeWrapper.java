@@ -1,6 +1,7 @@
 package liquibase.change.custom;
 
 import liquibase.change.AbstractChange;
+import liquibase.change.ChangeMetaData;
 import liquibase.database.Database;
 import liquibase.exception.*;
 import liquibase.statement.SqlStatement;
@@ -27,7 +28,7 @@ public class CustomChangeWrapper extends AbstractChange {
     private ClassLoader classLoader;
 
     public CustomChangeWrapper() {
-        super("customChange", "Custom Change");
+        super("customChange", "Custom Change", ChangeMetaData.PRIORITY_DEFAULT);
     }
 
     public CustomChange getCustomChange() {
@@ -121,7 +122,7 @@ public class CustomChangeWrapper extends AbstractChange {
     }
 
 
-    public boolean supportsRollback() {
+    public boolean supportsRollback(Database database) {
         return customChange instanceof CustomSqlRollback || customChange instanceof CustomTaskRollback;
     }
 

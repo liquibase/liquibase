@@ -8,12 +8,12 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.statement.AddDefaultValueStatement;
 
-public class AddDefaultValueGeneratorDerby extends AddDefaultValueGenerator {
-    public int getSpecializationLevel() {
-        return SPECIALIZATION_LEVEL_DATABASE_SPECIFIC;
+class AddDefaultValueGeneratorDerby extends AddDefaultValueGenerator {
+    public int getPriority() {
+        return PRIORITY_DATABASE;
     }
 
-    public boolean isValidGenerator(AddDefaultValueStatement statement, Database database) {
+    public boolean supports(AddDefaultValueStatement statement, Database database) {
         return database instanceof DerbyDatabase;
     }
 

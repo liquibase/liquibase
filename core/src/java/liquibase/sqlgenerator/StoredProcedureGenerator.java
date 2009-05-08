@@ -6,12 +6,12 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.statement.StoredProcedureStatement;
 
-public class StoredProcedureGenerator implements SqlGenerator<StoredProcedureStatement> {
-    public int getSpecializationLevel() {
-        return SPECIALIZATION_LEVEL_DEFAULT;
+class StoredProcedureGenerator implements SqlGenerator<StoredProcedureStatement> {
+    public int getPriority() {
+        return PRIORITY_DEFAULT;
     }
 
-    public boolean isValidGenerator(StoredProcedureStatement statement, Database database) {
+    public boolean supports(StoredProcedureStatement statement, Database database) {
         return true;
     }
 

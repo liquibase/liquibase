@@ -21,7 +21,7 @@ public class ModifyColumnChange extends AbstractChange implements ChangeWithColu
     private List<ColumnConfig> columns;
 
     public ModifyColumnChange() {
-        super("modifyColumn", "Modify Column");
+        super("modifyColumn", "Modify Column", ChangeMetaData.PRIORITY_DEFAULT);
         columns = new ArrayList<ColumnConfig>();
     }
 

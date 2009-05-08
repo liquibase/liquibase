@@ -21,7 +21,7 @@ public class CreateViewChange extends AbstractChange {
     private Boolean replaceIfExists;
 
     public CreateViewChange() {
-        super("createView", "Create View");
+        super("createView", "Create View", ChangeMetaData.PRIORITY_DEFAULT);
     }
 
     public String getSchemaName() {

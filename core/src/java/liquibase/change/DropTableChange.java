@@ -15,7 +15,7 @@ public class DropTableChange extends AbstractChange {
     private Boolean cascadeConstraints;
 
     public DropTableChange() {
-        super("dropTable", "Drop Table");
+        super("dropTable", "Drop Table", ChangeMetaData.PRIORITY_DEFAULT);
     }
 
 

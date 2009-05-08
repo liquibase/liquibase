@@ -8,12 +8,12 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.statement.ReorganizeTableStatement;
 
-public class ReorganizeTableGeneratorDB2 implements SqlGenerator<ReorganizeTableStatement> {
-    public int getSpecializationLevel() {
-        return SPECIALIZATION_LEVEL_DATABASE_SPECIFIC;
+class ReorganizeTableGeneratorDB2 implements SqlGenerator<ReorganizeTableStatement> {
+    public int getPriority() {
+        return PRIORITY_DATABASE;
     }
 
-    public boolean isValidGenerator(ReorganizeTableStatement statement, Database database) {
+    public boolean supports(ReorganizeTableStatement statement, Database database) {
         return database instanceof DB2Database;
     }
 

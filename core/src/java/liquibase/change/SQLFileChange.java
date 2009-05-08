@@ -32,7 +32,7 @@ public class SQLFileChange extends AbstractSQLChange {
 
 
     public SQLFileChange() {
-        super("sqlFile", "SQL From File");
+        super("sqlFile", "SQL From File", ChangeMetaData.PRIORITY_DEFAULT);
     }
 
     public String getPath() {
@@ -65,7 +65,7 @@ public class SQLFileChange extends AbstractSQLChange {
 			this.encoding = encoding;
 		}
 
-		public void setUp() throws SetupException {
+		public void init() throws SetupException {
         if (path == null) {
             throw new SetupException("<sqlfile> - No path specified");
         }

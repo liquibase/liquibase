@@ -9,7 +9,7 @@ public class TagDatabaseChange extends AbstractChange{
     private String tag;
 
     public TagDatabaseChange() {
-        super("tagDatabase", "Tag Database");
+        super("tagDatabase", "Tag Database", ChangeMetaData.PRIORITY_DEFAULT);
     }
 
     public String getTag() {

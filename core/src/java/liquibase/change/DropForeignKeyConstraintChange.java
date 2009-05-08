@@ -14,7 +14,7 @@ public class DropForeignKeyConstraintChange extends AbstractChange {
     private String constraintName;
 
     public DropForeignKeyConstraintChange() {
-        super("dropForeignKeyConstraint", "Drop Foreign Key Constraint");
+        super("dropForeignKeyConstraint", "Drop Foreign Key Constraint", ChangeMetaData.PRIORITY_DEFAULT);
     }
 
     public String getBaseTableSchemaName() {

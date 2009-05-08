@@ -2,7 +2,7 @@ package liquibase.sqlgenerator;
 
 public class AlterSequenceGeneratorTest {
 ////    @Test
-////    public void isValidGenerator() throws Exception {
+////    public void supports() throws Exception {
 ////        for (Database database : TestContext.getInstance().getAllDatabases()) {
 ////            if (database.supportsSequences()) {
 ////                assertTrue(createGeneratorUnderTest().supportsDatabase(database));

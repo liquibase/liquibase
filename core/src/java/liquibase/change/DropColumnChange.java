@@ -23,7 +23,7 @@ public class DropColumnChange extends AbstractChange {
     private String columnName;
 
     public DropColumnChange() {
-        super("dropColumn", "Drop Column");
+        super("dropColumn", "Drop Column", ChangeMetaData.PRIORITY_DEFAULT);
     }
 
     public String getColumnName() {

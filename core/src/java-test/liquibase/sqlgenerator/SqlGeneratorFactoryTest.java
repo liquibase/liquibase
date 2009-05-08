@@ -16,6 +16,7 @@ import org.junit.Test;
 
 import java.util.List;
 import java.util.SortedSet;
+import java.util.Collection;
 
 public class SqlGeneratorFactoryTest {
 
@@ -114,7 +115,7 @@ public class SqlGeneratorFactoryTest {
         SqlGenerator<AddAutoIncrementStatement> mysqlCorrectGenerator = addGenerator(AddAutoIncrementStatement.class, MySQLDatabase.class, 1);
         SqlGenerator<AddAutoIncrementStatement> oracleCorrectGenerator = addGenerator(AddAutoIncrementStatement.class, OracleDatabase.class, 1);
 
-        SqlGenerator<AddAutoIncrementStatement> bestSqlGenerator = SqlGeneratorFactory.getInstance().getBestGenerator(new AddAutoIncrementStatement(null, "person", "name", "varchar(255)"), new MySQLDatabase());
+        SqlGenerator<AddAutoIncrementStatement> bestSqlGenerator = SqlGeneratorFactory.getInstance().getGenerator(new AddAutoIncrementStatement(null, "person", "name", "varchar(255)"), new MySQLDatabase());
 
         assertNotNull(bestSqlGenerator);
         assertTrue(mysqlBetterGenerator == bestSqlGenerator);
@@ -132,7 +133,7 @@ public class SqlGeneratorFactoryTest {
         SqlGenerator<AddAutoIncrementStatement> mysqlCorrectGenerator = addGenerator(AddAutoIncrementStatement.class, MySQLDatabase.class, 1);
         SqlGenerator<AddAutoIncrementStatement> oracleCorrectGenerator = addGenerator(AddAutoIncrementStatement.class, OracleDatabase.class, 1);
 
-        SqlGenerator<AddDefaultValueStatement> bestSqlGenerator = SqlGeneratorFactory.getInstance().getBestGenerator(new AddDefaultValueStatement(null, "person", "name", "N/A"), new MySQLDatabase());
+        SqlGenerator<AddDefaultValueStatement> bestSqlGenerator = SqlGeneratorFactory.getInstance().getGenerator(new AddDefaultValueStatement(null, "person", "name", "N/A"), new MySQLDatabase());
 
         assertNull(bestSqlGenerator);
     }
@@ -147,13 +148,13 @@ public class SqlGeneratorFactoryTest {
     @SuppressWarnings("unchecked")
 	@Test
     public void builtInGeneratorsAreFound() {
-        List<SqlGenerator> generators = SqlGeneratorFactory.getInstance().getGenerators();
+        Collection<SqlGenerator> generators = SqlGeneratorFactory.getInstance().getGenerators();
         assertTrue(generators.size() > 0);        
     }
 
     @Test
     public void getAllGenerators() {
-        SortedSet<SqlGenerator> allGenerators = SqlGeneratorFactory.getInstance().getAllGenerators(new AddAutoIncrementStatement(null, "person", "name", "varchar(255)"), new H2Database());
+        SortedSet<SqlGenerator> allGenerators = SqlGeneratorFactory.getInstance().getGenerators(new AddAutoIncrementStatement(null, "person", "name", "varchar(255)"), new H2Database());
 
         assertNotNull(allGenerators);
         assertEquals(1, allGenerators.size());        
@@ -162,7 +163,7 @@ public class SqlGeneratorFactoryTest {
     private SqlGenerator addGenerator(final Class<? extends SqlStatement> sqlStatementClass, final Class<? extends Database> sqlDatabaseClass, final int level) {
     	
         SqlGenerator generator = new SqlGenerator() {
-            public int getSpecializationLevel() {
+            public int getPriority() {
                 return level;
             }
 
@@ -170,7 +171,7 @@ public class SqlGeneratorFactoryTest {
                 return new ValidationErrors();
             }
 
-            public boolean isValidGenerator(SqlStatement statement, Database database) {
+            public boolean supports(SqlStatement statement, Database database) {
             	boolean ret = sqlStatementClass.isAssignableFrom(statement.getClass()) && sqlDatabaseClass.isAssignableFrom(database.getClass()); 
                 return ret;
             }
@@ -185,11 +186,11 @@ public class SqlGeneratorFactoryTest {
     }
 
     private static class MockSqlGenerator<T extends SqlStatement> implements SqlGenerator<T> {
-        public int getSpecializationLevel() {
+        public int getPriority() {
             return 0;
         }
 
-        public boolean isValidGenerator(SqlStatement statement, Database database) {
+        public boolean supports(SqlStatement statement, Database database) {
             return false;
         }
 

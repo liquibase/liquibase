@@ -5,14 +5,14 @@ import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.statement.SqlStatement;
 
-public interface SqlGenerator<StatementType extends SqlStatement> {
+interface SqlGenerator<StatementType extends SqlStatement> {
 
-    public static final int SPECIALIZATION_LEVEL_DEFAULT = 1;
-    public static final int SPECIALIZATION_LEVEL_DATABASE_SPECIFIC = 5;
+    public static final int PRIORITY_DEFAULT = 1;
+    public static final int PRIORITY_DATABASE = 5;
 
-    public int getSpecializationLevel();
+    public int getPriority();
 
-    public boolean isValidGenerator(StatementType statement, Database database);
+    public boolean supports(StatementType statement, Database database);
 
     public ValidationErrors validate(StatementType statementType, Database database);
 

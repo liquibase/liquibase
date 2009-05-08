@@ -21,7 +21,7 @@ public class RenameTableChange extends AbstractChange {
     private String newTableName;
 
     public RenameTableChange() {
-        super("renameTable", "Rename Table");
+        super("renameTable", "Rename Table", ChangeMetaData.PRIORITY_DEFAULT);
     }
 
     public String getSchemaName() {

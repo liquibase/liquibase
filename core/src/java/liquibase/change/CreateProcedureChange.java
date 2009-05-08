@@ -10,7 +10,7 @@ public class CreateProcedureChange extends AbstractChange {
     private String procedureBody;
 
     public CreateProcedureChange() {
-        super("createProcedure", "Create Procedure");
+        super("createProcedure", "Create Procedure", ChangeMetaData.PRIORITY_DEFAULT);
     }
 
     public String getProcedureBody() {

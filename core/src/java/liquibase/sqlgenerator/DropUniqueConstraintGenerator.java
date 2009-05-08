@@ -6,12 +6,12 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.statement.DropUniqueConstraintStatement;
 
-public class DropUniqueConstraintGenerator implements SqlGenerator<DropUniqueConstraintStatement> {
-    public int getSpecializationLevel() {
-        return SPECIALIZATION_LEVEL_DEFAULT;
+class DropUniqueConstraintGenerator implements SqlGenerator<DropUniqueConstraintStatement> {
+    public int getPriority() {
+        return PRIORITY_DEFAULT;
     }
 
-    public boolean isValidGenerator(DropUniqueConstraintStatement statement, Database database) {
+    public boolean supports(DropUniqueConstraintStatement statement, Database database) {
         return !(database instanceof SQLiteDatabase);
     }
 

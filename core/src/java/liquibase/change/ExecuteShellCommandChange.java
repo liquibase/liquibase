@@ -22,7 +22,7 @@ public class ExecuteShellCommandChange extends AbstractChange {
     private List<String> args = new ArrayList<String>();
 
     public ExecuteShellCommandChange() {
-        super("executeCommand", "Execute Shell Command");
+        super("executeCommand", "Execute Shell Command", ChangeMetaData.PRIORITY_DEFAULT);
     }
 
 

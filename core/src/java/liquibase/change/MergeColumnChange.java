@@ -28,7 +28,7 @@ public class MergeColumnChange extends AbstractChange {
     private String finalColumnType;
 
     public MergeColumnChange() {
-        super("mergeColumns", "Merge Column");
+        super("mergeColumns", "Merge Column", ChangeMetaData.PRIORITY_DEFAULT);
     }
 
     public String getSchemaName() {

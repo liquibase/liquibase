@@ -27,7 +27,7 @@ public abstract class SQLFileChangeTest extends AbstractChangeTest {
         ClassLoaderFileOpener opener = new ClassLoaderFileOpener();
         change.setFileOpener(opener);
         change.setPath(fileName);
-        change.setUp();
+        change.init();
     }
 	
 	@Test
@@ -49,7 +49,7 @@ public abstract class SQLFileChangeTest extends AbstractChangeTest {
     public void generateStatementFileNotFound() throws Exception {
         try {
             change.setPath("doesnotexist.sql");
-            change.setUp();
+            change.init();
             change.generateStatements(new OracleDatabase());
             
             fail("The file does not exist so should not be found");

@@ -12,7 +12,7 @@ public class DeleteDataChange extends AbstractChange {
     private String whereClause;
 
     public DeleteDataChange() {
-        super("delete", "Delete Data");
+        super("delete", "Delete Data", ChangeMetaData.PRIORITY_DEFAULT);
     }
 
     public String getSchemaName() {

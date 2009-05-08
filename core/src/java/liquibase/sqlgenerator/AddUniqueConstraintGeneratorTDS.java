@@ -8,19 +8,19 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.statement.AddUniqueConstraintStatement;
 
-public class AddUniqueConstraintGeneratorTDS extends AddUniqueConstraintGenerator {
+class AddUniqueConstraintGeneratorTDS extends AddUniqueConstraintGenerator {
 
 	public AddUniqueConstraintGeneratorTDS() {
 
     }
 
     @Override
-    public int getSpecializationLevel() {
-        return SPECIALIZATION_LEVEL_DATABASE_SPECIFIC;
+    public int getPriority() {
+        return PRIORITY_DATABASE;
     }
 
     @Override
-	public boolean isValidGenerator(AddUniqueConstraintStatement statement, Database database) {
+	public boolean supports(AddUniqueConstraintStatement statement, Database database) {
         return  (database instanceof MSSQLDatabase)
 			|| (database instanceof SybaseDatabase)
 			|| (database instanceof SybaseASADatabase)

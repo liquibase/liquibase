@@ -9,7 +9,7 @@ public class StopChange extends AbstractChange {
     private String message;
 
     public StopChange() {
-        super("stop", "Stop Execution");
+        super("stop", "Stop Execution", ChangeMetaData.PRIORITY_DEFAULT);
     }
 
     public String getMessage() {

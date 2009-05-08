@@ -25,7 +25,7 @@ public class DropUniqueConstraintChange extends AbstractChange {
     private String uniqueColumns;
 
 	public DropUniqueConstraintChange() {
-        super("dropUniqueConstraint", "Drop Unique Constraint");
+        super("dropUniqueConstraint", "Drop Unique Constraint", ChangeMetaData.PRIORITY_DEFAULT);
     }
 
     public String getSchemaName() {

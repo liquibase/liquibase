@@ -22,7 +22,7 @@ public class DropAllForeignKeyConstraintsChange extends AbstractChange {
 
 
     public DropAllForeignKeyConstraintsChange() {
-        super("dropAllForeignKeyConstraints", "Drop All Foreign Key Constraints");
+        super("dropAllForeignKeyConstraints", "Drop All Foreign Key Constraints", ChangeMetaData.PRIORITY_DEFAULT);
     }
 
     public String getBaseTableSchemaName() {

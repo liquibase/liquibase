@@ -20,13 +20,13 @@ import java.util.List;
  * For more information see: http://www.sqlite.org/omitted.html.
  * This is a small work around...
  */
-public class AddAutoIncrementGeneratorSQLite extends AddAutoIncrementGenerator {
+class AddAutoIncrementGeneratorSQLite extends AddAutoIncrementGenerator {
 
-    public int getSpecializationLevel() {
-        return SPECIALIZATION_LEVEL_DATABASE_SPECIFIC;
+    public int getPriority() {
+        return PRIORITY_DATABASE;
     }
 
-    public boolean isValidGenerator(AddAutoIncrementStatement statement, Database database) {
+    public boolean supports(AddAutoIncrementStatement statement, Database database) {
         return database instanceof SQLiteDatabase;
     }
 
@@ -61,7 +61,7 @@ public class AddAutoIncrementGeneratorSQLite extends AddAutoIncrementGenerator {
             for (SqlStatement generatedStatement : SQLiteDatabase.getAlterTableStatements(
                     rename_alter_visitor,
                     database, statement.getSchemaName(), statement.getTableName())) {
-                for (SqlGenerator generator : Arrays.asList(SqlGeneratorFactory.getInstance().getBestGenerator(generatedStatement, database))) {
+                for (SqlGenerator generator : Arrays.asList(SqlGeneratorFactory.getInstance().getGenerator(generatedStatement, database))) {
                     statements.addAll(Arrays.asList(generator.generateSql(generatedStatement, database)));
                 }
             }

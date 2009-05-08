@@ -9,12 +9,12 @@ import liquibase.statement.DeleteStatement;
 
 import java.util.Date;
 
-public class DeleteGenerator implements SqlGenerator<DeleteStatement> {
-    public int getSpecializationLevel() {
-        return SPECIALIZATION_LEVEL_DEFAULT;
+class DeleteGenerator implements SqlGenerator<DeleteStatement> {
+    public int getPriority() {
+        return PRIORITY_DEFAULT;
     }
 
-    public boolean isValidGenerator(DeleteStatement statement, Database database) {
+    public boolean supports(DeleteStatement statement, Database database) {
         return !(database instanceof SQLiteDatabase);
     }
 

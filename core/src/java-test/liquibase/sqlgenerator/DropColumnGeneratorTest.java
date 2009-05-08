@@ -2,7 +2,7 @@ package liquibase.sqlgenerator;
 
 public class DropColumnGeneratorTest {
 ////    @Test
-////    public void isValidGenerator() throws Exception {
+////    public void supports() throws Exception {
 ////        new DatabaseTestTemplate().testOnAllDatabases(new DatabaseTest() {
 ////            public void performTest(Database database) throws Exception {
 ////                if (database instanceof SQLiteDatabase) {

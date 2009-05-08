@@ -15,7 +15,7 @@ public class DropIndexChange extends AbstractChange {
     private String tableName;
 
     public DropIndexChange() {
-        super("dropIndex", "Drop Index");
+        super("dropIndex", "Drop Index", ChangeMetaData.PRIORITY_DEFAULT);
     }
 
     public String getSchemaName() {

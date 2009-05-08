@@ -10,12 +10,12 @@ import liquibase.util.StringUtils;
 import java.util.Arrays;
 import java.util.Iterator;
 
-public class CreateIndexGenerator implements SqlGenerator<CreateIndexStatement> {
-    public int getSpecializationLevel() {
-        return SPECIALIZATION_LEVEL_DEFAULT;
+class CreateIndexGenerator implements SqlGenerator<CreateIndexStatement> {
+    public int getPriority() {
+        return PRIORITY_DEFAULT;
     }
 
-    public boolean isValidGenerator(CreateIndexStatement statement, Database database) {
+    public boolean supports(CreateIndexStatement statement, Database database) {
         return true;
     }
 

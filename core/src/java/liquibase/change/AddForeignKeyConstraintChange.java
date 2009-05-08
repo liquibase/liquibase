@@ -27,7 +27,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
     private Integer deleteRule;
 
     public AddForeignKeyConstraintChange() {
-        super("addForeignKeyConstraint", "Add Foreign Key Constraint");
+        super("addForeignKeyConstraint", "Add Foreign Key Constraint", ChangeMetaData.PRIORITY_DEFAULT);
     }
 
     public String getBaseTableSchemaName() {

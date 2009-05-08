@@ -7,12 +7,12 @@ import liquibase.sql.UnparsedSql;
 import liquibase.statement.AddPrimaryKeyStatement;
 import liquibase.util.StringUtils;
 
-public class AddPrimaryKeyGenerator implements SqlGenerator<AddPrimaryKeyStatement> {
-    public int getSpecializationLevel() {
-        return SPECIALIZATION_LEVEL_DEFAULT;
+class AddPrimaryKeyGenerator implements SqlGenerator<AddPrimaryKeyStatement> {
+    public int getPriority() {
+        return PRIORITY_DEFAULT;
     }
 
-    public boolean isValidGenerator(AddPrimaryKeyStatement statement, Database database) {
+    public boolean supports(AddPrimaryKeyStatement statement, Database database) {
         return (!(database instanceof SQLiteDatabase));
     }
 

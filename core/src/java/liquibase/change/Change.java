@@ -49,29 +49,7 @@ import java.util.Set;
  */
 public interface Change {
 
-    public static final int SPECIALIZATION_LEVEL_DEFAULT = 1;
-    public static final int SPECIALIZATION_LEVEL_DATABASE_SPECIFIC = 5;
-
     public ChangeMetaData getChangeMetaData();
-
-    /**
-     * @return The "speciliazation" that this change is designed for.  Higher specialiazations will take precidence.
-     */
-    public int getSpecializationLevel();
-
-    boolean supports(Database database);
-    
-    /**
-     * This method will be called after the no arg constructor and all of the
-     * properties have been set to allow the task to do any heavy tasks or
-     * more importantly generate any exceptions to report to the user about
-     * the settings provided.
-     */
-    public void setUp() throws SetupException;
-
-    public ValidationErrors validate(Database database);
-
-    boolean isSupported(Database database);
 
     public ChangeSet getChangeSet();
 
@@ -82,6 +60,19 @@ public interface Change {
      * finding for files that are provided by the user.
      */
     public void setFileOpener(FileOpener fileOpener);
+
+
+    /**
+     * This method will be called after the no arg constructor and all of the
+     * properties have been set to allow the task to do any heavy tasks or
+     * more importantly generate any exceptions to report to the user about
+     * the settings provided.
+     */
+    public void init() throws SetupException;
+
+    boolean supports(Database database);
+
+    public ValidationErrors validate(Database database);
 
     public Set<DatabaseObject> getAffectedDatabaseObjects(Database database);
     
@@ -107,8 +98,9 @@ public interface Change {
      * Can this change be rolled back
      *
      * @return <i>true</i> if rollback is supported, <i>false</i> otherwise
+      * @param database
      */
-    public boolean supportsRollback();
+    public boolean supportsRollback(Database database);
 
     /**
      * Generates the SQL statements required to roll back the change

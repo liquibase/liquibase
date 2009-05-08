@@ -8,12 +8,12 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.statement.CopyRowsStatement;
 
-public class CopyRowsGenerator implements SqlGenerator<CopyRowsStatement> {
-    public int getSpecializationLevel() {
-        return SPECIALIZATION_LEVEL_DEFAULT;
+class CopyRowsGenerator implements SqlGenerator<CopyRowsStatement> {
+    public int getPriority() {
+        return PRIORITY_DEFAULT;
     }
 
-    public boolean isValidGenerator(CopyRowsStatement statement, Database database) {
+    public boolean supports(CopyRowsStatement statement, Database database) {
         return (database instanceof SQLiteDatabase);
     }
 

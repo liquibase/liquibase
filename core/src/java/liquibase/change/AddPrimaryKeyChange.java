@@ -25,7 +25,7 @@ public class AddPrimaryKeyChange extends AbstractChange {
     private String constraintName;
 
     public AddPrimaryKeyChange() {
-        super("addPrimaryKey", "Add Primary Key");
+        super("addPrimaryKey", "Add Primary Key", ChangeMetaData.PRIORITY_DEFAULT);
     }
 
     public String getTableName() {

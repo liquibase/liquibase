@@ -18,7 +18,7 @@ public class AddAutoIncrementChange extends AbstractChange {
     private String columnDataType;
 
     public AddAutoIncrementChange() {
-        super("addAutoIncrement", "Set Column as Auto-Increment");
+        super("addAutoIncrement", "Set Column as Auto-Increment", ChangeMetaData.PRIORITY_DEFAULT);
     }
 
     public String getSchemaName() {

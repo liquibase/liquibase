@@ -5,7 +5,7 @@ import liquibase.statement.SqlStatement;
 
 public class EmptyChange extends AbstractChange {
     public EmptyChange() {
-        super("empty", "empty");
+        super("empty", "empty", ChangeMetaData.PRIORITY_DEFAULT);
     }
 
     public SqlStatement[] generateStatements(Database database) {

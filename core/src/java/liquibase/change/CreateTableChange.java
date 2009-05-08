@@ -21,7 +21,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
     private String remarks;
 
     public CreateTableChange() {
-        super("createTable", "Create Table");
+        super("createTable", "Create Table", ChangeMetaData.PRIORITY_DEFAULT);
         columns = new ArrayList<ColumnConfig>();
     }
 
@@ -83,7 +83,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
 
         if (StringUtils.trimToNull(remarks) != null) {
             SetTableRemarksStatement remarksStatement = new SetTableRemarksStatement(schemaName, tableName, remarks);
-            if (SqlGeneratorFactory.getInstance().statementSupported(remarksStatement, database)) {
+            if (SqlGeneratorFactory.getInstance().supports(remarksStatement, database)) {
                 statements.add(remarksStatement);
             }
         }
@@ -92,7 +92,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
             String columnRemarks = StringUtils.trimToNull(column.getRemarks());
             if (columnRemarks != null) {
                 SetColumnRemarksStatement remarksStatement = new SetColumnRemarksStatement(schemaName, tableName, column.getName(), columnRemarks);
-                if (SqlGeneratorFactory.getInstance().statementSupported(remarksStatement, database)) {
+                if (SqlGeneratorFactory.getInstance().supports(remarksStatement, database)) {
                     statements.add(remarksStatement);
                 }
             }

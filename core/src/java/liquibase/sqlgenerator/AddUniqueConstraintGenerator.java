@@ -7,12 +7,12 @@ import liquibase.sql.UnparsedSql;
 import liquibase.statement.AddUniqueConstraintStatement;
 import liquibase.util.StringUtils;
 
-public class AddUniqueConstraintGenerator implements SqlGenerator<AddUniqueConstraintStatement> {
-    public int getSpecializationLevel() {
-        return SPECIALIZATION_LEVEL_DEFAULT;
+class AddUniqueConstraintGenerator implements SqlGenerator<AddUniqueConstraintStatement> {
+    public int getPriority() {
+        return PRIORITY_DEFAULT;
     }
 
-    public boolean isValidGenerator(AddUniqueConstraintStatement statement, Database database) {
+    public boolean supports(AddUniqueConstraintStatement statement, Database database) {
         return !(database instanceof SQLiteDatabase) 
         		&& !(database instanceof MSSQLDatabase)
         		&& !(database instanceof SybaseDatabase)

@@ -23,7 +23,7 @@ public class AddUniqueConstraintChange extends AbstractChange {
     private String tablespace;
 
     public AddUniqueConstraintChange() {
-        super("addUniqueConstraint", "Add Unique Constraint");
+        super("addUniqueConstraint", "Add Unique Constraint", ChangeMetaData.PRIORITY_DEFAULT);
     }
 
     public String getSchemaName() {

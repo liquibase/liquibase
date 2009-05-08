@@ -6,12 +6,12 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.statement.DropForeignKeyConstraintStatement;
 
-public class DropForeignKeyConstraintGenerator implements SqlGenerator<DropForeignKeyConstraintStatement> {
-    public int getSpecializationLevel() {
-        return SPECIALIZATION_LEVEL_DEFAULT;
+class DropForeignKeyConstraintGenerator implements SqlGenerator<DropForeignKeyConstraintStatement> {
+    public int getPriority() {
+        return PRIORITY_DEFAULT;
     }
 
-    public boolean isValidGenerator(DropForeignKeyConstraintStatement statement, Database database) {
+    public boolean supports(DropForeignKeyConstraintStatement statement, Database database) {
         return (!(database instanceof SQLiteDatabase));
     }
 

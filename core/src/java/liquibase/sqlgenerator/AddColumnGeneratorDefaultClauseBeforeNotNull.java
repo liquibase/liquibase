@@ -8,12 +8,12 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.statement.AddColumnStatement;
 
-public class AddColumnGeneratorDefaultClauseBeforeNotNull extends AddColumnGenerator {
-    public int getSpecializationLevel() {
-        return SPECIALIZATION_LEVEL_DATABASE_SPECIFIC;
+class AddColumnGeneratorDefaultClauseBeforeNotNull extends AddColumnGenerator {
+    public int getPriority() {
+        return PRIORITY_DATABASE;
     }
 
-    public boolean isValidGenerator(AddColumnStatement statement, Database database) {
+    public boolean supports(AddColumnStatement statement, Database database) {
         return database instanceof OracleDatabase
                 || database instanceof HsqlDatabase
                 || database instanceof DerbyDatabase

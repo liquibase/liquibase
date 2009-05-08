@@ -8,12 +8,12 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.statement.DropIndexStatement;
 
-public class DropIndexGenerator implements SqlGenerator<DropIndexStatement> {
-    public int getSpecializationLevel() {
-        return SPECIALIZATION_LEVEL_DEFAULT;
+class DropIndexGenerator implements SqlGenerator<DropIndexStatement> {
+    public int getPriority() {
+        return PRIORITY_DEFAULT;
     }
 
-    public boolean isValidGenerator(DropIndexStatement statement, Database database) {
+    public boolean supports(DropIndexStatement statement, Database database) {
         return true;
     }
 

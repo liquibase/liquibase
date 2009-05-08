@@ -6,12 +6,12 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.statement.RenameTableStatement;
 
-public class RenameTableGenerator implements SqlGenerator<RenameTableStatement> {
-    public int getSpecializationLevel() {
-        return SPECIALIZATION_LEVEL_DEFAULT;
+class RenameTableGenerator implements SqlGenerator<RenameTableStatement> {
+    public int getPriority() {
+        return PRIORITY_DEFAULT;
     }
 
-    public boolean isValidGenerator(RenameTableStatement statement, Database database) {
+    public boolean supports(RenameTableStatement statement, Database database) {
         return !(database instanceof CacheDatabase || database instanceof FirebirdDatabase);
     }
 

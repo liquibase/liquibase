@@ -9,7 +9,7 @@ public class DropSequenceGeneratorTest {
 //    }
 //
 ////    @Test
-////    public void isValidGenerator() throws Exception {
+////    public void supports() throws Exception {
 ////        new DatabaseTestTemplate().testOnAvailableDatabases(new DatabaseTest() {
 ////            public void performTest(Database database) throws Exception {
 ////                if (database.supportsSequences()) {

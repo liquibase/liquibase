@@ -26,7 +26,7 @@ public class AddNotNullConstraintChange extends AbstractChange {
 
 
     public AddNotNullConstraintChange() {
-        super("addNotNullConstraint", "Add Not-Null Constraint");
+        super("addNotNullConstraint", "Add Not-Null Constraint", ChangeMetaData.PRIORITY_DEFAULT);
     }
 
     public String getSchemaName() {

@@ -6,12 +6,12 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.statement.CreateViewStatement;
 
-public class CreateViewGenerator implements SqlGenerator<CreateViewStatement> {
-    public int getSpecializationLevel() {
-        return SPECIALIZATION_LEVEL_DEFAULT;
+class CreateViewGenerator implements SqlGenerator<CreateViewStatement> {
+    public int getPriority() {
+        return PRIORITY_DEFAULT;
     }
 
-    public boolean isValidGenerator(CreateViewStatement statement, Database database) {
+    public boolean supports(CreateViewStatement statement, Database database) {
         return true;
     }
 

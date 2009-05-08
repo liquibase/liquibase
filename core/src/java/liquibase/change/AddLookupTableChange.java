@@ -26,7 +26,7 @@ public class AddLookupTableChange extends AbstractChange {
     private String constraintName;
 
     public AddLookupTableChange() {
-        super("addLookupTable", "Add Lookup Table");
+        super("addLookupTable", "Add Lookup Table", ChangeMetaData.PRIORITY_DEFAULT);
     }
 
     public String getExistingTableSchemaName() {

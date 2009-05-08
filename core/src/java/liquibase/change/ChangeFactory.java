@@ -25,6 +25,7 @@ public class ChangeFactory {
             classes = PluginUtil.getClasses("liquibase.change", Change.class);
 
             for (Class clazz : classes) {
+                //noinspection unchecked
                 register(clazz);
             }
 
@@ -58,10 +59,7 @@ public class ChangeFactory {
         registry.remove(name);
     }
 
-    /**
-     * Internal method for retrieving all generators.  Mainly exists for unit testing.
-     */
-    protected Map<String, Class<? extends Change>> getRegistry() {
+    public Map<String, Class<? extends Change>> getRegistry() {
         return registry;
     }
 

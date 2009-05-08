@@ -222,7 +222,7 @@ class XMLChangeLogHandler extends DefaultHandler {
                     String attributeValue = atts.getValue(i);
                     setProperty(change, attributeName, attributeValue);
                 }
-                change.setUp();
+                change.init();
             } else if (change != null && "column".equals(qName)) {
                 ColumnConfig column;
                 if (change instanceof LoadDataChange) {
