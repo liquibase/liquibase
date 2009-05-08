@@ -2,7 +2,6 @@ package liquibase.change;
 
 import liquibase.database.Database;
 import liquibase.database.SQLiteDatabase;
-import liquibase.exception.InvalidChangeDefinitionException;
 import liquibase.statement.CreateViewStatement;
 import liquibase.statement.DropViewStatement;
 import liquibase.statement.SqlStatement;

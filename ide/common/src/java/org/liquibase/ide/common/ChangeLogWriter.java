@@ -1,6 +1,6 @@
 package org.liquibase.ide.common;
 
-import liquibase.ChangeSet;
+import liquibase.changelog.ChangeSet;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;

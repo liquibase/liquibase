@@ -1,10 +1,8 @@
 package liquibase.change;
 
 import liquibase.database.Database;
-import liquibase.exception.InvalidChangeDefinitionException;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.TagDatabaseStatement;
-import liquibase.util.StringUtils;
 
 public class TagDatabaseChange extends AbstractChange{
 

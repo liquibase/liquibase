@@ -1,8 +1,8 @@
 package liquibase.change;
 
-import liquibase.ClassLoaderFileOpener;
 import liquibase.database.OracleDatabase;
 import liquibase.exception.SetupException;
+import liquibase.resource.ClassLoaderFileOpener;
 import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;

@@ -3,6 +3,8 @@ package liquibase;
 import liquibase.database.*;
 import liquibase.database.template.JdbcOutputTemplate;
 import liquibase.exception.JDBCException;
+import liquibase.resource.ClassLoaderFileOpener;
+import liquibase.resource.FileOpener;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.expectLastCall;
 import static org.easymock.classextension.EasyMock.*;

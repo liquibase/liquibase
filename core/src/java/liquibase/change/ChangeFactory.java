@@ -1,7 +1,7 @@
 package liquibase.change;
 
-import liquibase.PluginUtil;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.util.PluginUtil;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

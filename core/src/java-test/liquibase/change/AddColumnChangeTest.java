@@ -2,8 +2,6 @@ package liquibase.change;
 
 import liquibase.database.DB2Database;
 import liquibase.database.Database;
-import liquibase.database.SybaseASADatabase;
-import liquibase.database.SQLiteDatabase;
 import liquibase.statement.AddColumnStatement;
 import liquibase.statement.ReorganizeTableStatement;
 import liquibase.statement.SqlStatement;

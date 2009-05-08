@@ -1,9 +1,9 @@
 package liquibase.change;
 
-import liquibase.FileOpener;
 import liquibase.exception.SetupException;
-import liquibase.log.LogFactory;
+import liquibase.resource.FileOpener;
 import liquibase.util.StreamUtil;
+import liquibase.util.log.LogFactory;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;

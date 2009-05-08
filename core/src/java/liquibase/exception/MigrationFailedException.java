@@ -1,6 +1,6 @@
 package liquibase.exception;
 
-import liquibase.ChangeSet;
+import liquibase.changelog.ChangeSet;
 
 public class MigrationFailedException extends LiquibaseException {
 

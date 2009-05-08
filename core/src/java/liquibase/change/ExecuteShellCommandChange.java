@@ -1,13 +1,11 @@
 package liquibase.change;
 
 import liquibase.database.Database;
-import liquibase.exception.InvalidChangeDefinitionException;
-import liquibase.exception.UnsupportedChangeException;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.log.LogFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
+import liquibase.util.log.LogFactory;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

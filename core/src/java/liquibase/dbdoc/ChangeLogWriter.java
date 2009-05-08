@@ -1,6 +1,6 @@
 package liquibase.dbdoc;
 
-import liquibase.FileOpener;
+import liquibase.resource.FileOpener;
 import liquibase.util.StreamUtil;
 
 import java.io.File;

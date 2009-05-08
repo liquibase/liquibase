@@ -5,8 +5,6 @@ import liquibase.database.DerbyDatabase;
 import liquibase.database.SQLiteDatabase;
 import liquibase.database.SQLiteDatabase.AlterTableVisitor;
 import liquibase.database.structure.Index;
-import liquibase.exception.InvalidChangeDefinitionException;
-import liquibase.exception.JDBCException;
 import liquibase.exception.UnsupportedChangeException;
 import liquibase.statement.RawSqlStatement;
 import liquibase.statement.SqlStatement;

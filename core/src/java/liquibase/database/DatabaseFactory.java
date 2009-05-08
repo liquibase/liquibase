@@ -1,7 +1,7 @@
 package liquibase.database;
 
 import liquibase.exception.JDBCException;
-import liquibase.log.LogFactory;
+import liquibase.util.log.LogFactory;
 
 import java.sql.Connection;
 import java.sql.SQLException;

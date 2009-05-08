@@ -3,9 +3,9 @@ package liquibase.database.template;
 import liquibase.database.Database;
 import liquibase.database.MSSQLDatabase;
 import liquibase.exception.JDBCException;
+import liquibase.sql.visitor.SqlVisitor;
 import liquibase.statement.CallableSqlStatement;
 import liquibase.statement.SqlStatement;
-import liquibase.statement.visitor.SqlVisitor;
 import liquibase.util.StreamUtil;
 
 import java.io.IOException;

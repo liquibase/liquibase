@@ -1,8 +1,6 @@
 package liquibase.change;
 
 import liquibase.database.Database;
-import liquibase.exception.InvalidChangeDefinitionException;
-import liquibase.exception.UnsupportedChangeException;
 import liquibase.statement.AlterSequenceStatement;
 import liquibase.statement.SqlStatement;
 import liquibase.util.StringUtils;

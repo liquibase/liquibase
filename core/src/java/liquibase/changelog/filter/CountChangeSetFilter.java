@@ -1,6 +1,6 @@
 package liquibase.changelog.filter;
 
-import liquibase.ChangeSet;
+import liquibase.changelog.ChangeSet;
 
 public class CountChangeSetFilter implements ChangeSetFilter {
 

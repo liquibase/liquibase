@@ -1,5 +1,5 @@
 Manifest-Version: 1.0
-Main-Class: liquibase.commandline.Main
+Main-Class: liquibase.integration.commandline.Main
 Bundle-ManifestVersion: 2
 Bundle-Name: LiquiBase Plug-in
 Bundle-SymbolicName: org.liquibase.migrator;singleton:=true

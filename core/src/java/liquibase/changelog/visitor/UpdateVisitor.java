@@ -1,9 +1,9 @@
 package liquibase.changelog.visitor;
 
-import liquibase.ChangeSet;
+import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
-import liquibase.log.LogFactory;
+import liquibase.util.log.LogFactory;
 
 import java.util.logging.Logger;
 

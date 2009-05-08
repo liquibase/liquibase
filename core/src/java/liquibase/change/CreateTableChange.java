@@ -1,11 +1,9 @@
 package liquibase.change;
 
 import liquibase.database.Database;
-import liquibase.exception.InvalidChangeDefinitionException;
-import liquibase.exception.UnsupportedChangeException;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.*;
-import liquibase.statement.generator.SqlGeneratorFactory;
 import liquibase.util.StringUtils;
 
 import java.util.ArrayList;

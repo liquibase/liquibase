@@ -1,9 +1,9 @@
 package liquibase.exception;
 
-import liquibase.ChangeSet;
+import liquibase.changelog.ChangeSet;
 import liquibase.changelog.visitor.ValidatingVisitor;
-import liquibase.preconditions.ErrorPrecondition;
-import liquibase.preconditions.FailedPrecondition;
+import liquibase.precondition.ErrorPrecondition;
+import liquibase.precondition.FailedPrecondition;
 import liquibase.util.StreamUtil;
 
 import java.io.PrintStream;

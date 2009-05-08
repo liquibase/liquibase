@@ -2,7 +2,6 @@ package liquibase.change.custom;
 
 import liquibase.database.Database;
 import liquibase.exception.CustomChangeException;
-import liquibase.exception.UnsupportedChangeException;
 import liquibase.statement.SqlStatement;
 
 /**

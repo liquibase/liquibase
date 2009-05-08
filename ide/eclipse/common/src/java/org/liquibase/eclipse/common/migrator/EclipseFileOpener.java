@@ -1,6 +1,6 @@
 package org.liquibase.eclipse.common.migrator;
 
-import liquibase.FileOpener;
+import liquibase.resource.FileOpener;
 import org.liquibase.eclipse.common.LiquibasePreferences;
 
 import java.io.File;

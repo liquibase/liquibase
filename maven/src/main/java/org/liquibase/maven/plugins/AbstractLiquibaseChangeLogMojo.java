@@ -3,6 +3,9 @@
 package org.liquibase.maven.plugins;
 
 import liquibase.*;
+import liquibase.resource.CompositeFileOpener;
+import liquibase.resource.FileOpener;
+import liquibase.resource.FileSystemFileOpener;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
 import org.apache.maven.plugin.MojoExecutionException;

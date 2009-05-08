@@ -1,7 +1,8 @@
 package liquibase;
 
 import liquibase.changelog.ChangeLogIterator;
-import liquibase.changelog.ChangeLogParserFactory;
+import liquibase.changelog.ChangeSet;
+import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.filter.*;
 import liquibase.changelog.visitor.*;
 import liquibase.database.Database;
@@ -11,12 +12,15 @@ import liquibase.database.template.JdbcOutputTemplate;
 import liquibase.exception.JDBCException;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.LockException;
+import liquibase.lock.DatabaseChangeLogLock;
 import liquibase.lock.LockHandler;
-import liquibase.log.LogFactory;
+import liquibase.parser.ChangeLogParserFactory;
+import liquibase.resource.FileOpener;
+import liquibase.sql.visitor.SqlVisitor;
 import liquibase.statement.UpdateStatement;
-import liquibase.statement.visitor.SqlVisitor;
 import liquibase.util.LiquibaseUtil;
 import liquibase.util.StreamUtil;
+import liquibase.util.log.LogFactory;
 
 import java.io.File;
 import java.io.IOException;

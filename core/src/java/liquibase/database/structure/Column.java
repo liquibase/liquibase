@@ -1,8 +1,8 @@
 package liquibase.database.structure;
 
 import liquibase.database.*;
-import liquibase.log.LogFactory;
 import liquibase.util.SqlUtil;
+import liquibase.util.log.LogFactory;
 
 import java.sql.Types;
 import java.util.Arrays;

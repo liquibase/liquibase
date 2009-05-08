@@ -1,8 +1,10 @@
 package liquibase.change.custom;
 
-import liquibase.FileOpener;
 import liquibase.database.Database;
-import liquibase.exception.*;
+import liquibase.exception.CustomChangeException;
+import liquibase.exception.SetupException;
+import liquibase.exception.ValidationErrors;
+import liquibase.resource.FileOpener;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.StoredProcedureStatement;
 

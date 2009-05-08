@@ -1,6 +1,6 @@
 package liquibase.changelog.filter;
 
-import liquibase.ChangeSet;
+import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 
 public class DbmsChangeSetFilter implements ChangeSetFilter {

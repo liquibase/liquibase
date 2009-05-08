@@ -1,12 +1,9 @@
 package liquibase.change;
 
 import liquibase.database.*;
-import liquibase.exception.InvalidChangeDefinitionException;
-import liquibase.exception.UnsupportedChangeException;
 import liquibase.statement.RawSqlStatement;
 import liquibase.statement.ReorganizeTableStatement;
 import liquibase.statement.SqlStatement;
-import liquibase.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;

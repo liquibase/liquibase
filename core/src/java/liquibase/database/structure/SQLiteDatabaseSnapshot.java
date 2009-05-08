@@ -5,7 +5,7 @@ import liquibase.database.Database;
 import liquibase.database.SQLiteDatabase;
 import liquibase.diff.DiffStatusListener;
 import liquibase.exception.JDBCException;
-import liquibase.statement.visitor.SqlVisitor;
+import liquibase.sql.visitor.SqlVisitor;
 import liquibase.util.StringUtils;
 
 import java.sql.DatabaseMetaData;

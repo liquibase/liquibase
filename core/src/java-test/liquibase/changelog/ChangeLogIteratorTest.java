@@ -1,7 +1,5 @@
 package liquibase.changelog;
 
-import liquibase.ChangeSet;
-import liquibase.DatabaseChangeLog;
 import liquibase.changelog.filter.ContextChangeSetFilter;
 import liquibase.changelog.filter.DbmsChangeSetFilter;
 import liquibase.changelog.visitor.ChangeSetVisitor;
