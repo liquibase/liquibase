@@ -1,6 +1,7 @@
 package liquibase.sqlgenerator;
 
 import liquibase.database.Database;
+import liquibase.database.DatabaseConnection;
 import liquibase.database.template.Executor;
 import liquibase.exception.JDBCException;
 import liquibase.sql.Sql;
@@ -42,16 +43,45 @@ public abstract class AbstractSqlGeneratorTest<T extends SqlStatement> {
 
     public void resetAvailableDatabases() throws Exception {
         for (Database database : TestContext.getInstance().getAvailableDatabases()) {
+            DatabaseConnection connection = database.getConnection();
+            Statement connectionStatement = connection.createStatement();
+
             if (database.supportsSchemas()) {
                 database.dropDatabaseObjects(TestContext.ALT_SCHEMA);
+                connection.commit();
+                try {
+                    connectionStatement.executeUpdate("drop table "+database.escapeTableName(TestContext.ALT_SCHEMA, database.getDatabaseChangeLogLockTableName()));
+                } catch (SQLException e) {
+                    ;
+                }
+                connection.commit();
+                try {
+                    connectionStatement.executeUpdate("drop table "+database.escapeTableName(TestContext.ALT_SCHEMA, database.getDatabaseChangeLogTableName()));
+                } catch (SQLException e) {
+                    ;
+                }
+                connection.commit();
             }
             database.dropDatabaseObjects(null);
+            try {
+                connectionStatement.executeUpdate("drop table "+database.escapeTableName(null, database.getDatabaseChangeLogLockTableName()));
+            } catch (SQLException e) {
+                ;
+            }
+            connection.commit();
+            try {
+                connectionStatement.executeUpdate("drop table "+database.escapeTableName(null, database.getDatabaseChangeLogTableName()));
+            } catch (SQLException e) {
+                ;
+            }
+            connection.commit();
 
             if (setupStatements != null) {
 	            for (SqlStatement statement : setupStatements) {
 	                new Executor(database).execute(statement);
 	            }
             }
+            connectionStatement.close();
         }
     }
 
@@ -138,7 +168,16 @@ public abstract class AbstractSqlGeneratorTest<T extends SqlStatement> {
     }
 
     private String replaceStandardTypes(String convertedSql, Database database) {
-        return convertedSql.replaceAll(" int ", " "+database.getColumnType("int", false)+" ");
+        convertedSql = replaceType("int", convertedSql, database);
+        convertedSql = replaceType("datetime", convertedSql, database);
+        convertedSql = replaceType("boolean", convertedSql, database);
+
+        return convertedSql;
+    }
+
+    private String replaceType(String type, String baseString, Database database) {
+        return baseString.replaceAll(" "+type+" ", " " + database.getColumnType(type, false) + " ")
+                .replaceAll(" "+type+",", " " + database.getColumnType(type, false) + ",");
     }
 
     private String replaceDatabaseClauses(String convertedSql, Database database) {

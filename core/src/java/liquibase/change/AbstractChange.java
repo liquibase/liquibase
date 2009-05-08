@@ -9,8 +9,6 @@ import liquibase.exception.UnsupportedChangeException;
 import liquibase.exception.ValidationErrors;
 import liquibase.parser.string.StringChangeLogSerializer;
 import liquibase.resource.FileOpener;
-import liquibase.sql.Sql;
-import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
 

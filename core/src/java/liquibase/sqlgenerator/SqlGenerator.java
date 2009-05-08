@@ -5,7 +5,7 @@ import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.statement.SqlStatement;
 
-interface SqlGenerator<StatementType extends SqlStatement> {
+public interface SqlGenerator<StatementType extends SqlStatement> {
 
     public static final int PRIORITY_DEFAULT = 1;
     public static final int PRIORITY_DATABASE = 5;
