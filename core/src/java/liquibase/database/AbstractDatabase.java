@@ -589,11 +589,6 @@ public abstract class AbstractDatabase implements Database {
                 .addColumn("LIQUIBASE", "VARCHAR(10)");
     }
 
-    public SqlStatement getSelectChangeLogLockSQL() throws JDBCException {
-        return new RawSqlStatement(("SELECT LOCKED FROM " + escapeTableName(getDefaultSchemaName(), getDatabaseChangeLogLockTableName()) + " WHERE " + escapeColumnName(getDefaultSchemaName(), getDatabaseChangeLogLockTableName(), "ID") + "=1"));
-    }
-
-
     public boolean doesChangeLogTableExist() throws JDBCException {
         DatabaseConnection connection = getConnection();
         ResultSet rs = null;
@@ -620,11 +615,11 @@ public abstract class AbstractDatabase implements Database {
      * otherwise it will not do anything besides outputting a log message.
      */
     public void checkDatabaseChangeLogTable() throws JDBCException {
-        if (!this.getJdbcTemplate().executesStatements()) {
-            if (((JdbcOutputTemplate) this.getJdbcTemplate()).alreadyCreatedChangeTable()) {
+        if (!this.getExecutor().executesStatements()) {
+            if (((JdbcOutputTemplate) this.getExecutor()).alreadyCreatedChangeTable()) {
                 return;
             } else {
-                ((JdbcOutputTemplate) this.getJdbcTemplate()).setAlreadyCreatedChangeTable(true);
+                ((JdbcOutputTemplate) this.getExecutor()).setAlreadyCreatedChangeTable(true);
             }
         }
 
@@ -667,7 +662,7 @@ public abstract class AbstractDatabase implements Database {
                 }
 
             } else if (!changeLogCreateAttempted) {
-                getJdbcTemplate().comment("Create Database Change Log Table");
+                getExecutor().comment("Create Database Change Log Table");
                 SqlStatement createTableStatement = getCreateChangeLogSQL();
                 if (!canCreateChangeLogTable()) {
                     throw new JDBCException("Cannot create " + escapeTableName(getDefaultSchemaName(), getDatabaseChangeLogTableName()) + " table for your database.\n\n" +
@@ -681,7 +676,7 @@ public abstract class AbstractDatabase implements Database {
             }
 
             for (SqlStatement sql : statementsToExecute) {
-                this.getJdbcTemplate().execute(sql, new ArrayList<SqlVisitor>());
+                this.getExecutor().execute(sql, new ArrayList<SqlVisitor>());
                 this.commit();
             }
         } catch (SQLException e) {
@@ -731,19 +726,19 @@ public abstract class AbstractDatabase implements Database {
         boolean knowMustInsertIntoLockTable = false;
 
         if (!doesChangeLogLockTableExist()) {
-            if (!this.getJdbcTemplate().executesStatements()) {
-                if (((JdbcOutputTemplate) this.getJdbcTemplate()).alreadyCreatedChangeLockTable()) {
+            if (!this.getExecutor().executesStatements()) {
+                if (((JdbcOutputTemplate) this.getExecutor()).alreadyCreatedChangeLockTable()) {
                     return;
                 } else {
-                    ((JdbcOutputTemplate) this.getJdbcTemplate()).setAlreadyCreatedChangeLockTable(true);
+                    ((JdbcOutputTemplate) this.getExecutor()).setAlreadyCreatedChangeLockTable(true);
                 }
             }
 
 
             SqlStatement createTableStatement = getCreateChangeLogLockSQL();
 
-            getJdbcTemplate().comment("Create Database Lock Table");
-            this.getJdbcTemplate().execute(createTableStatement, new ArrayList<SqlVisitor>());
+            getExecutor().comment("Create Database Lock Table");
+            this.getExecutor().execute(createTableStatement, new ArrayList<SqlVisitor>());
             this.commit();
             log.finest("Created database lock table with name: " + escapeTableName(getDefaultSchemaName(), getDatabaseChangeLogLockTableName()));
             knowMustInsertIntoLockTable = true;
@@ -753,13 +748,13 @@ public abstract class AbstractDatabase implements Database {
         if (!knowMustInsertIntoLockTable) {
             RawSqlStatement selectStatement = new RawSqlStatement("SELECT COUNT(*) FROM " + escapeTableName(getDefaultSchemaName(), getDatabaseChangeLogLockTableName()) + " WHERE ID=1");
             try {
-                rows = this.getJdbcTemplate().queryForInt(selectStatement, new ArrayList<SqlVisitor>());
+                rows = this.getExecutor().queryForInt(selectStatement, new ArrayList<SqlVisitor>());
             } catch (JDBCException e) {
                 throw e;
             }
         }
         if (knowMustInsertIntoLockTable || rows == 0) {
-            this.getJdbcTemplate().update(getChangeLogLockInsertSQL(), new ArrayList<SqlVisitor>());
+            this.getExecutor().update(getChangeLogLockInsertSQL(), new ArrayList<SqlVisitor>());
             this.commit();
             log.fine("Inserted lock row into: " + escapeTableName(getDefaultSchemaName(), getDatabaseChangeLogLockTableName()));
         }
@@ -833,7 +828,7 @@ public abstract class AbstractDatabase implements Database {
 
             for (Change change : dropChanges) {
                 for (SqlStatement statement : change.generateStatements(this)) {
-                    this.getJdbcTemplate().execute(statement, new ArrayList<SqlVisitor>());
+                    this.getExecutor().execute(statement, new ArrayList<SqlVisitor>());
                 }
             }
 
@@ -873,13 +868,13 @@ public abstract class AbstractDatabase implements Database {
      */
     public void tag(String tagString) throws JDBCException {
         try {
-            int totalRows = this.getJdbcTemplate().queryForInt(new RawSqlStatement("SELECT COUNT(*) FROM " + escapeTableName(getDefaultSchemaName(), getDatabaseChangeLogTableName())), new ArrayList<SqlVisitor>());
+            int totalRows = this.getExecutor().queryForInt(new RawSqlStatement("SELECT COUNT(*) FROM " + escapeTableName(getDefaultSchemaName(), getDatabaseChangeLogTableName())), new ArrayList<SqlVisitor>());
             if (totalRows == 0) {
                 throw new JDBCException("Cannot tag an empty database");
             }
 
-//            Timestamp lastExecutedDate = (Timestamp) this.getJdbcTemplate().queryForObject(createChangeToTagSQL(), Timestamp.class);
-            int rowsUpdated = this.getJdbcTemplate().update(new TagDatabaseStatement(tagString), new ArrayList<SqlVisitor>());
+//            Timestamp lastExecutedDate = (Timestamp) this.getExecutor().queryForObject(createChangeToTagSQL(), Timestamp.class);
+            int rowsUpdated = this.getExecutor().update(new TagDatabaseStatement(tagString), new ArrayList<SqlVisitor>());
             if (rowsUpdated == 0) {
                 throw new JDBCException("Did not tag database change log correctly");
             }
@@ -894,7 +889,7 @@ public abstract class AbstractDatabase implements Database {
     }
 
     public boolean doesTagExist(String tag) throws JDBCException {
-        int count = this.getJdbcTemplate().queryForInt(new RawSqlStatement("SELECT COUNT(*) FROM " + escapeTableName(getDefaultSchemaName(), getDatabaseChangeLogTableName()) + " WHERE TAG='" + tag + "'"), new ArrayList<SqlVisitor>());
+        int count = this.getExecutor().queryForInt(new RawSqlStatement("SELECT COUNT(*) FROM " + escapeTableName(getDefaultSchemaName(), getDatabaseChangeLogTableName()) + " WHERE TAG='" + tag + "'"), new ArrayList<SqlVisitor>());
         return count > 0;
     }
 
@@ -918,7 +913,7 @@ public abstract class AbstractDatabase implements Database {
         if (schemaName == null) {
             schemaName = convertRequestedSchemaToSchema(null);
         }
-        String definition = (String) this.getJdbcTemplate().queryForObject(getViewDefinitionSql(schemaName, viewName), String.class, new ArrayList<SqlVisitor>());
+        String definition = (String) this.getExecutor().queryForObject(getViewDefinitionSql(schemaName, viewName), String.class, new ArrayList<SqlVisitor>());
         if (definition == null) {
             return null;
         }
@@ -1281,7 +1276,7 @@ public abstract class AbstractDatabase implements Database {
             }
             return ranChangeSetList;
         } catch (SQLException e) {
-            if (!getJdbcTemplate().executesStatements()) {
+            if (!getExecutor().executesStatements()) {
                 //probably not created, no problem
                 return new ArrayList<RanChangeSet>();
             } else {
@@ -1317,7 +1312,7 @@ public abstract class AbstractDatabase implements Database {
         statement.addColumnValue("LIQUIBASE", LiquibaseUtil.getBuildVersion());
 
 
-        this.getJdbcTemplate().execute(statement, new ArrayList<SqlVisitor>());
+        this.getExecutor().execute(statement, new ArrayList<SqlVisitor>());
 
         getRanChangeSetList().add(new RanChangeSet(changeSet));
     }
@@ -1330,7 +1325,7 @@ public abstract class AbstractDatabase implements Database {
         sql = sql.replaceFirst("\\?", escapeStringForDatabase(changeSet.getAuthor()));
         sql = sql.replaceFirst("\\?", escapeStringForDatabase(changeSet.getFilePath()));
 
-        this.getJdbcTemplate().execute(new RawSqlStatement(sql), new ArrayList<SqlVisitor>());
+        this.getExecutor().execute(new RawSqlStatement(sql), new ArrayList<SqlVisitor>());
         this.commit();
     }
 
@@ -1340,7 +1335,7 @@ public abstract class AbstractDatabase implements Database {
         sql = sql.replaceFirst("\\?", escapeStringForDatabase(changeSet.getAuthor()));
         sql = sql.replaceFirst("\\?", escapeStringForDatabase(changeSet.getFilePath()));
 
-        this.getJdbcTemplate().execute(new RawSqlStatement(sql), new ArrayList<SqlVisitor>());
+        this.getExecutor().execute(new RawSqlStatement(sql), new ArrayList<SqlVisitor>());
         commit();
 
         getRanChangeSetList().remove(new RanChangeSet(changeSet));
@@ -1374,7 +1369,7 @@ public abstract class AbstractDatabase implements Database {
         }
     }
 
-    public Executor getJdbcTemplate() {
+    public Executor getExecutor() {
         return executor;
     }
 
@@ -1458,7 +1453,7 @@ public abstract class AbstractDatabase implements Database {
     public void execute(SqlStatement[] statements, List<SqlVisitor> sqlVisitors) throws LiquibaseException {
         for (SqlStatement statement : statements) {
             LogFactory.getLogger().finest("Executing Statement: " + statement);
-            getJdbcTemplate().execute(statement, sqlVisitors);
+            getExecutor().execute(statement, sqlVisitors);
         }
     }
     
@@ -1484,5 +1479,23 @@ public abstract class AbstractDatabase implements Database {
                 writer.append(sql.toSql()).append(sql.getEndDelimiter()).append("\n\n");
             }
         }
+    }
+
+    public Object queryForObject(SqlStatement sqlStatement, Class returnClass, ArrayList<SqlVisitor> sqlVisitors) throws JDBCException {
+        return getExecutor().queryForObject(sqlStatement, returnClass, sqlVisitors);
+    }
+
+    public void comment(String comment) throws JDBCException {
+        getExecutor().comment(comment);
+    }
+
+    public int update(SqlStatement sqlStatement, ArrayList<SqlVisitor> sqlVisitors) throws JDBCException {
+        return getExecutor().update(sqlStatement, sqlVisitors);
+
+
+    }
+
+    public List<Map> queryForList(SqlStatement sqlStatement, ArrayList<SqlVisitor> sqlVisitors) throws JDBCException {
+        return getExecutor().queryForList(sqlStatement, sqlVisitors);
     }
 }

@@ -160,10 +160,6 @@ public class OracleDatabase extends AbstractDatabase {
         }
     }
 
-    public SqlStatement getSelectChangeLogLockSQL() throws JDBCException {
-        return new RawSqlStatement((((RawSqlStatement) super.getSelectChangeLogLockSQL()).getSql() + " for update").toUpperCase());
-    }
-
     public SqlStatement createFindSequencesSQL(String schema) throws JDBCException {
         return new RawSqlStatement("SELECT SEQUENCE_NAME FROM ALL_SEQUENCES WHERE SEQUENCE_OWNER = '" + convertRequestedSchemaToSchema(schema) + "'");
     }

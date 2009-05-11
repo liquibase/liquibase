@@ -127,7 +127,7 @@ public class ChangeSet {
         try {
             database.setAutoCommit(!runInTransaction);
 
-            database.getJdbcTemplate().comment("Changeset " + toString());
+            database.getExecutor().comment("Changeset " + toString());
             if (StringUtils.trimToNull(getComments()) != null) {
                 String comments = getComments();
                 String[] lines = comments.split("\n");
@@ -136,10 +136,10 @@ public class ChangeSet {
                         lines[i] = database.getLineComment() + " " + lines[i];
                     }
                 }
-                database.getJdbcTemplate().comment(StringUtils.join(Arrays.asList(lines), "\n"));
+                database.getExecutor().comment(StringUtils.join(Arrays.asList(lines), "\n"));
             }
 
-            if (database.getJdbcTemplate().executesStatements() && rootPrecondition != null) {
+            if (database.getExecutor().executesStatements() && rootPrecondition != null) {
                 try {
                     rootPrecondition.check(database, null);
                 } catch (PreconditionFailedException e) {
@@ -249,12 +249,12 @@ public class ChangeSet {
 
     public void rolback(Database database) throws RollbackFailedException {
         try {
-            database.getJdbcTemplate().comment("Rolling Back ChangeSet: " + toString());
+            database.getExecutor().comment("Rolling Back ChangeSet: " + toString());
             if (rollBackChanges != null && rollBackChanges.size() > 0) {
                 for (Change rollback : rollBackChanges) {
                     for (SqlStatement statement : rollback.generateStatements(database)) {
                         try {
-                            database.getJdbcTemplate().execute(statement, sqlVisitors);
+                            database.getExecutor().execute(statement, sqlVisitors);
                         } catch (JDBCException e) {
                             throw new RollbackFailedException("Error executing custom SQL [" + statement + "]", e);
                         }

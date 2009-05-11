@@ -49,7 +49,7 @@ public class RefactorChangeExecutor {
             liquibase.database.Database liquibaseDatabase = liquibase.getDatabase();
             for (Change change : changeSet.getChanges()) {
                 for (SqlStatement sql : change.generateStatements(liquibaseDatabase)) {
-                    liquibaseDatabase.getJdbcTemplate().execute(sql);
+                    liquibaseDatabase.getExecutor().execute(sql);
                 }
             }
             monitor.worked(25);
