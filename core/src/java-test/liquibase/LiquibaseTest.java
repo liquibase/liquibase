@@ -1,7 +1,8 @@
 package liquibase;
 
 import liquibase.database.*;
-import liquibase.database.template.JdbcOutputTemplate;
+import liquibase.executor.LoggingExecutor;
+import liquibase.executor.ExecutorService;
 import liquibase.exception.JDBCException;
 import liquibase.resource.ClassLoaderFileOpener;
 import liquibase.resource.FileOpener;
@@ -56,7 +57,7 @@ public class LiquibaseTest {
         liquibase.setUrl("jdbc:oracle:thin:@liquibase:1521:latest");
         assertFalse(liquibase.isSafeToRunMigration());
 
-        testLiquibase.getDatabase().setJdbcTemplate(new JdbcOutputTemplate(new PrintWriter(System.out), testLiquibase.getDatabase()));
+        ExecutorService.setExecutor(testLiquibase.getDatabase(), new LoggingExecutor(new PrintWriter(System.out), testLiquibase.getDatabase()));
         assertTrue("Safe to run if outputing sql, even if non-localhost URL", liquibase.isSafeToRunMigration());
 
     }

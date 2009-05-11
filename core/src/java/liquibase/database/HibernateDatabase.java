@@ -6,7 +6,7 @@ import liquibase.changelog.RanChangeSet;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.DatabaseSnapshot;
 import liquibase.database.structure.HibernateDatabaseSnapshot;
-import liquibase.database.template.Executor;
+import liquibase.executor.Executor;
 import liquibase.diff.DiffStatusListener;
 import liquibase.exception.*;
 import liquibase.sql.visitor.SqlVisitor;
@@ -435,14 +435,6 @@ public class HibernateDatabase implements Database {
 
     }
 
-    public Executor getExecutor() {
-        return null;
-    }
-
-    public void setJdbcTemplate(Executor template) {
-
-    }
-
     public String escapeStringForDatabase(String string) {
         return null;
     }
@@ -488,25 +480,5 @@ public class HibernateDatabase implements Database {
 
     public void saveRollbackStatement(Change change, List<SqlVisitor> sqlVisitors, Writer writer) throws IOException, UnsupportedChangeException, RollbackImpossibleException, StatementNotSupportedOnDatabaseException, LiquibaseException {
         ;
-    }
-
-    public Object queryForObject(SqlStatement sqlStatement, Class returnClass, ArrayList<SqlVisitor> sqlVisitors) throws JDBCException {
-        return null;
-    }
-
-    public int update(SqlStatement sqlStatement, ArrayList<SqlVisitor> sqlVisitors) throws JDBCException {
-        return 0;
-    }
-
-    public List<Map> queryForList(SqlStatement sqlStatement, ArrayList<SqlVisitor> sqlVisitors) throws JDBCException {
-        return null;
-    }
-
-    public void comment(String comment) throws JDBCException {
-        
-    }
-
-    public void execute(SqlStatement statement, ArrayList<SqlVisitor> sqlVisitors) throws JDBCException {
-        
     }
 }

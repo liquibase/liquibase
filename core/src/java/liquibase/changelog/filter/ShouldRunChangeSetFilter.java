@@ -6,6 +6,7 @@ import liquibase.database.Database;
 import liquibase.exception.JDBCException;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.statement.UpdateStatement;
+import liquibase.executor.ExecutorService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,7 +37,7 @@ public class ShouldRunChangeSetFilter implements ChangeSetFilter {
                     md5sumUpdateStatement.addWhereParameter(changeSet.getFilePath());
 
                     try {
-                        database.getExecutor().update(md5sumUpdateStatement, new ArrayList<SqlVisitor>());
+                        ExecutorService.getExecutor(database).update(md5sumUpdateStatement, new ArrayList<SqlVisitor>());
                     } catch (JDBCException e) {
                         throw new RuntimeException(e);
                     }

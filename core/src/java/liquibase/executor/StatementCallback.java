@@ -1,4 +1,4 @@
-package liquibase.database.template;
+package liquibase.executor;
 
 import liquibase.exception.JDBCException;
 import liquibase.statement.SqlStatement;

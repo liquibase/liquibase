@@ -755,7 +755,7 @@ public class Main {
         }
 
 //        if (driver == null) {
-//            driver = DatabaseFactory.getInstance().findDefaultDriver(url);
+//            driver = DatabaseFactory.getExecutor().findDefaultDriver(url);
 //        }
 
         return CommandLineUtils.createDatabaseObject(classLoader, url, username, password, driver, defaultSchemaName, null);
@@ -780,7 +780,7 @@ public class Main {
 //            throw new JDBCException("Connection could not be created to " + url + " with driver " + driver.getClass().getName() + ".  Possibly the wrong driver for the given database URL");
 //        }
 //
-//        Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(connection);
+//        Database database = DatabaseFactory.getExecutor().findCorrectDatabaseImplementation(connection);
 //        database.setDefaultSchemaName(defaultSchemaName);
 //
 //        return database;

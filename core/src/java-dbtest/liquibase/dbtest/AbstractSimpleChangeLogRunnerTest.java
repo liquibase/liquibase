@@ -2,6 +2,8 @@ package liquibase.dbtest;
 
 import junit.framework.TestCase;
 import liquibase.Liquibase;
+import liquibase.executor.ExecutorService;
+import liquibase.executor.Executor;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
@@ -359,8 +361,9 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
         liquibase.dropAll(getSchemasToDrop());
 
         //run again to test changelog testing logic
-        database.getExecutor().execute(new DropTableStatement("liquibaseb", database.getDatabaseChangeLogTableName(), false));
-        database.getExecutor().execute(new DropTableStatement("liquibaseb", database.getDatabaseChangeLogLockTableName(), false));
+        Executor executor = ExecutorService.getExecutor(database);
+        executor.execute(new DropTableStatement("liquibaseb", database.getDatabaseChangeLogTableName(), false));
+        executor.execute(new DropTableStatement("liquibaseb", database.getDatabaseChangeLogLockTableName(), false));
         database.commit();
 
         DatabaseConnection connection = TestContext.getInstance().getConnection(url);
@@ -483,9 +486,9 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
 //
 //        runCompleteChangeLog();
 //
-//        DatabaseConnection connection2 = TestContext.getInstance().getConnection(url);
+//        DatabaseConnection connection2 = TestContext.getExecutor().getConnection(url);
 //
-//        Database database2 = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(connection2);
+//        Database database2 = DatabaseFactory.getExecutor().findCorrectDatabaseImplementation(connection2);
 //
 //        database2.setDefaultSchemaName("liquibaseb");
 //
@@ -518,7 +521,7 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
 
     private void dropDatabaseChangeLogTable(String schema, Database database) {
         try {
-            database.getExecutor().execute(new DropTableStatement(schema, database.getDatabaseChangeLogTableName(), false));
+            ExecutorService.getExecutor(database).execute(new DropTableStatement(schema, database.getDatabaseChangeLogTableName(), false));
         } catch (JDBCException e) {
             ; //ok
         }
