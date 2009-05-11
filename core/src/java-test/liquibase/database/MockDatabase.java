@@ -530,4 +530,8 @@ public class MockDatabase implements Database {
     public void comment(String comment) throws JDBCException {
         
     }
+
+    public void execute(SqlStatement statement, ArrayList<SqlVisitor> sqlVisitors) throws JDBCException {
+        
+    }
 }

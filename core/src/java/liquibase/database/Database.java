@@ -354,6 +354,8 @@ public interface Database extends DatabaseObject {
 
     int update(SqlStatement sqlStatement, ArrayList<SqlVisitor> sqlVisitors) throws JDBCException;
 
+    void execute(SqlStatement statement, ArrayList<SqlVisitor> sqlVisitors) throws JDBCException;
+
     void comment(String comment) throws JDBCException ;
 
     List<Map> queryForList(SqlStatement sqlStatement, ArrayList<SqlVisitor> sqlVisitors) throws JDBCException;

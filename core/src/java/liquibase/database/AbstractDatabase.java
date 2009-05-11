@@ -8,7 +8,7 @@ import liquibase.database.template.Executor;
 import liquibase.database.template.JdbcOutputTemplate;
 import liquibase.diff.DiffStatusListener;
 import liquibase.exception.*;
-import liquibase.lock.LockManager;
+import liquibase.lock.LockService;
 import liquibase.sql.Sql;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
@@ -746,9 +746,15 @@ public abstract class AbstractDatabase implements Database {
 
         int rows = -1;
         if (!knowMustInsertIntoLockTable) {
-            RawSqlStatement selectStatement = new RawSqlStatement("SELECT COUNT(*) FROM " + escapeTableName(getDefaultSchemaName(), getDatabaseChangeLogLockTableName()) + " WHERE ID=1");
+            SqlStatement selectStatement = new SelectFromDatabaseChangeLogLockStatement("COUNT(*)");
             try {
-                rows = this.getExecutor().queryForInt(selectStatement, new ArrayList<SqlVisitor>());
+                List<Map> returnList = this.getExecutor().queryForList(selectStatement, new ArrayList<SqlVisitor>());
+                if (returnList == null || returnList.size() == 0) {
+                    rows = 0;
+                } else {
+                    Map map = returnList.get(0);
+                    rows = Integer.parseInt(map.values().iterator().next().toString());
+                }
             } catch (JDBCException e) {
                 throw e;
             }
@@ -759,6 +765,10 @@ public abstract class AbstractDatabase implements Database {
             log.fine("Inserted lock row into: " + escapeTableName(getDefaultSchemaName(), getDatabaseChangeLogLockTableName()));
         }
 
+    }
+
+    public int queryForInt(SqlStatement selectStatement, ArrayList<SqlVisitor> sqlVisitors) throws JDBCException {
+        return getExecutor().queryForInt(selectStatement, sqlVisitors);
     }
 
 // ------- DATABASE OBJECT DROPPING METHODS ---- //
@@ -1376,7 +1386,7 @@ public abstract class AbstractDatabase implements Database {
     public void setJdbcTemplate(Executor template) {
         if (this.executor != null && !this.executor.executesStatements() && template.executesStatements()) {
             //need to clear any history
-            LockManager.getInstance(this).reset();
+            LockService.getInstance(this).reset();
         }
         this.executor = template;
     }
@@ -1491,11 +1501,13 @@ public abstract class AbstractDatabase implements Database {
 
     public int update(SqlStatement sqlStatement, ArrayList<SqlVisitor> sqlVisitors) throws JDBCException {
         return getExecutor().update(sqlStatement, sqlVisitors);
-
-
     }
 
     public List<Map> queryForList(SqlStatement sqlStatement, ArrayList<SqlVisitor> sqlVisitors) throws JDBCException {
         return getExecutor().queryForList(sqlStatement, sqlVisitors);
+    }
+
+    public void execute(SqlStatement statement, ArrayList<SqlVisitor> sqlVisitors) throws JDBCException {
+        getExecutor().execute(statement, sqlVisitors);
     }
 }

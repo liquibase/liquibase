@@ -6,25 +6,26 @@ import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.UpdateStatement;
+import liquibase.statement.LockDatabaseChangeLogStatement;
 import liquibase.util.NetUtil;
 
 import java.net.InetAddress;
 import java.sql.Timestamp;
 
-public class LockDatabaseChangeLogGenerator implements SqlGenerator {
+public class LockDatabaseChangeLogGenerator implements SqlGenerator<LockDatabaseChangeLogStatement> {
     public int getPriority() {
         return PRIORITY_DEFAULT;
     }
 
-    public boolean supports(SqlStatement statement, Database database) {
+    public boolean supports(LockDatabaseChangeLogStatement statement, Database database) {
         return true;
     }
 
-    public ValidationErrors validate(SqlStatement statement, Database database) {
+    public ValidationErrors validate(LockDatabaseChangeLogStatement statement, Database database) {
         return new ValidationErrors();
     }
 
-    public Sql[] generateSql(SqlStatement statement, Database database) {
+    public Sql[] generateSql(LockDatabaseChangeLogStatement statement, Database database) {
         InetAddress localHost;
         try {
             localHost = NetUtil.getLocalHost();

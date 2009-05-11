@@ -26,6 +26,6 @@ public class UnlockDatabaseChangeLogGenerator implements SqlGenerator<UnlockData
         releaseStatement.addNewColumnValue("LOCKEDBY", null);
         releaseStatement.setWhereClause(" ID = 1");
 
-        return SqlGeneratorFactory.getInstance().generateSql(statement, database);
+        return SqlGeneratorFactory.getInstance().generateSql(releaseStatement, database);
     }
 }

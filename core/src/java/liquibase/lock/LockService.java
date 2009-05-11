@@ -5,16 +5,13 @@ import liquibase.exception.JDBCException;
 import liquibase.exception.LockException;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.statement.*;
-import liquibase.util.NetUtil;
 import liquibase.util.log.LogFactory;
 
-import java.net.InetAddress;
-import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class LockManager {
+public class LockService {
 
     private Database database;
 
@@ -23,15 +20,15 @@ public class LockManager {
     private long changeLogLockWaitTime = 1000 * 60 * 5;  //default to 5 mins
     private long changeLogLocRecheckTime = 1000 * 10;  //default to every 10 seconds
 
-    private static Map<Database, LockManager> instances = new ConcurrentHashMap<Database, LockManager>();
+    private static Map<Database, LockService> instances = new ConcurrentHashMap<Database, LockService>();
 
-    private LockManager(Database database) {
+    private LockService(Database database) {
         this.database = database;
     }
 
-    public static LockManager getInstance(Database database) {
+    public static LockService getInstance(Database database) {
         if (!instances.containsKey(database)) {
-            instances.put(database, new LockManager(database));
+            instances.put(database, new LockService(database));
         }
         return instances.get(database);
     }
@@ -83,6 +80,7 @@ public class LockManager {
         }
 
         try {
+            database.rollback();
             database.checkDatabaseChangeLogLockTable();
 
             Boolean locked;
@@ -117,6 +115,12 @@ public class LockManager {
             }
         } catch (Exception e) {
             throw new LockException(e);
+        } finally {
+            try {
+                database.rollback();
+            } catch (JDBCException e) {
+                ;
+            }
         }
 
     }
@@ -124,8 +128,8 @@ public class LockManager {
     public void releaseLock() throws LockException {
         try {
             if (database.doesChangeLogLockTableExist()) {
-
                 database.comment("Release Database Lock");
+                database.rollback();
                 int updatedRows = database.update(new UnlockDatabaseChangeLogStatement(), new ArrayList<SqlVisitor>());
                 if (updatedRows != 1) {
                     if (database.getExecutor().executesStatements()) {
@@ -141,6 +145,12 @@ public class LockManager {
             }
         } catch (Exception e) {
             throw new LockException(e);
+        } finally {
+            try {
+                database.rollback();
+            } catch (JDBCException e) {
+                ;
+            }
         }
     }
 
@@ -185,5 +195,11 @@ public class LockManager {
      */
     public void reset() {
         hasChangeLogLock = false;
+    }
+
+    public static void resetAll() {
+        for (Map.Entry<Database, LockService> entity : instances.entrySet()) {
+            entity.getValue().reset();
+        }
     }
 }

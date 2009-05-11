@@ -13,7 +13,7 @@ import java.util.*;
 /**
  * Controls the database connections for running tests.
  * For times we aren't wanting to run the database-hitting tests, set the "test.databases" system property
- * to be a comma-separated list of the databses we want to test against.  The string is checked against the database url.  
+ * to be a comma-separated list of the databses we want to test against.  The string is checked against the database url.
  */
 public class TestContext {
     private static TestContext instance = new TestContext();
@@ -67,34 +67,16 @@ public class TestContext {
             }
         }
 
-        String username = getUsername(url);
-        String password = getPassword(url);
-
-        JUnitJDBCDriverClassLoader jdbcDriverLoader = JUnitJDBCDriverClassLoader.getInstance();
-        final Driver driver = (Driver) Class.forName(DatabaseFactory.getInstance().findDefaultDriver(url), true, jdbcDriverLoader).newInstance();
-
-        Properties info = new Properties();
-        info.put("user", username);
-        if (password != null) {
-            info.put("password", password);
-        }
-
-        Connection connection;
-        try {
-            connection = driver.connect(url, info);
-        } catch (SQLException e) {
-            System.out.println("Could not connect to " + url + ": Will not test against.  "+e.getMessage());
-            return null; //could not connect
-        }
+        Connection connection = openDatabaseConnection(url);
         if (connection == null) {
-            throw new JDBCException("Connection could not be created to " + url + " with driver " + driver.getClass().getName() + ".  Possibly the wrong driver for the given database URL");
+            return null;
         }
 
         Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(connection);
         final DatabaseConnection databaseConnection = database.getConnection();
 
         if (databaseConnection.getAutoCommit()) {
-        	databaseConnection.setAutoCommit(false);
+            databaseConnection.setAutoCommit(false);
         }
 
         try {
@@ -139,6 +121,34 @@ public class TestContext {
         }));
 
         return databaseConnection;
+    }
+
+    public Connection openDatabaseConnection(String url) throws Exception {
+        String username = getUsername(url);
+        String password = getPassword(url);
+
+
+        JUnitJDBCDriverClassLoader jdbcDriverLoader = JUnitJDBCDriverClassLoader.getInstance();
+        final Driver driver = (Driver) Class.forName(DatabaseFactory.getInstance().findDefaultDriver(url), true, jdbcDriverLoader).newInstance();
+
+        Properties info = new Properties();
+        info.put("user", username);
+        if (password != null) {
+            info.put("password", password);
+        }
+
+        Connection connection;
+        try {
+            connection = driver.connect(url, info);
+        } catch (SQLException e) {
+            System.out.println("Could not connect to " + url + ": Will not test against.  " + e.getMessage());
+            return null; //could not connect
+        }
+        if (connection == null) {
+            throw new JDBCException("Connection could not be created to " + url + " with driver " + driver.getClass().getName() + ".  Possibly the wrong driver for the given database URL");
+        }
+
+        return connection;
     }
 
     private String getUsername(String url) {
@@ -211,6 +221,6 @@ public class TestContext {
                 return url;
             }
         }
-        throw new RuntimeException("Could not find url for "+database);
+        throw new RuntimeException("Could not find url for " + database);
     }
 }

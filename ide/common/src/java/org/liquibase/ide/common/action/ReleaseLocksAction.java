@@ -2,7 +2,7 @@ package org.liquibase.ide.common.action;
 
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
-import liquibase.lock.LockManager;
+import liquibase.lock.LockService;
 import org.liquibase.ide.common.IdeFacade;
 
 public class ReleaseLocksAction extends MigratorAction {
@@ -12,7 +12,7 @@ public class ReleaseLocksAction extends MigratorAction {
     }
 
     public void actionPerform(Database database, IdeFacade ideFacade) throws LiquibaseException {
-        LockManager.getInstance(database).releaseLock();
+        LockService.getInstance(database).releaseLock();
 
         ideFacade.showMessage("Result", "All locks released successfully");
 
