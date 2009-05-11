@@ -11,7 +11,7 @@ import liquibase.diff.Diff;
 import liquibase.diff.DiffResult;
 import liquibase.exception.JDBCException;
 import liquibase.exception.ValidationFailedException;
-import liquibase.lock.LockManager;
+import liquibase.lock.LockService;
 import liquibase.resource.FileOpener;
 import liquibase.resource.FileSystemFileOpener;
 import liquibase.statement.DropTableStatement;
@@ -62,7 +62,7 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
                 database.rollback();
             }
 
-            LockManager.getInstance(database).forceReleaseLock();
+            LockService.getInstance(database).forceReleaseLock();
             if (database.supportsSchemas()) {
                 database.dropDatabaseObjects(TestContext.ALT_SCHEMA);
             }
@@ -336,7 +336,7 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
 
         database.setDefaultSchemaName("liquibaseb");
 
-        LockManager.getInstance(database).forceReleaseLock();
+        LockService.getInstance(database).forceReleaseLock();
 
         liquibase.update(includedChangeLog);
 

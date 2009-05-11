@@ -36,6 +36,10 @@ public abstract class AbstractExecuteTest {
         test(expectedSql, null, null);
     }
 
+    protected void assertCorrectOnRest(String expectedSql) throws Exception {
+        assertCorrect(expectedSql);
+    }
+
     protected void assertCorrect(String expectedSql, Class<? extends Database>... includeDatabases) throws Exception {
         assertNotNull(statementUnderTest);
         
@@ -85,6 +89,9 @@ public abstract class AbstractExecuteTest {
         convertedSql = replaceType("int", convertedSql, database);
         convertedSql = replaceType("datetime", convertedSql, database);
         convertedSql = replaceType("boolean", convertedSql, database);
+
+        convertedSql = convertedSql.replaceAll("FALSE", database.getFalseBooleanValue());
+        convertedSql = convertedSql.replaceAll("TRUE", database.getFalseBooleanValue());
 
         return convertedSql;
     }

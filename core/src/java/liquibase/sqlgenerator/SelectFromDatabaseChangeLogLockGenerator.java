@@ -6,6 +6,7 @@ import liquibase.database.OracleDatabase;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
+import liquibase.util.StringUtils;
 
 public class SelectFromDatabaseChangeLogLockGenerator implements SqlGenerator<SelectFromDatabaseChangeLogLockStatement> {
     public int getPriority() {
@@ -24,7 +25,7 @@ public class SelectFromDatabaseChangeLogLockGenerator implements SqlGenerator<Se
     }
 
     public Sql[] generateSql(SelectFromDatabaseChangeLogLockStatement statement, Database database) {
-        String sql = "SELECT LOCKED FROM " +
+        String sql = "SELECT "+ StringUtils.join(statement.getColumnsToSelect(), ",")+" FROM " +
                 database.escapeTableName(database.getDefaultSchemaName(), database.getDatabaseChangeLogLockTableName()) +
                 " WHERE " + database.escapeColumnName(database.getDefaultSchemaName(), database.getDatabaseChangeLogLockTableName(), "ID") + "=1";
 

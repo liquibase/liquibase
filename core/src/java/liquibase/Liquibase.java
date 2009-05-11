@@ -13,7 +13,7 @@ import liquibase.exception.JDBCException;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.LockException;
 import liquibase.lock.DatabaseChangeLogLock;
-import liquibase.lock.LockManager;
+import liquibase.lock.LockService;
 import liquibase.parser.ChangeLogParserFactory;
 import liquibase.resource.FileOpener;
 import liquibase.sql.visitor.SqlVisitor;
@@ -96,8 +96,8 @@ public class Liquibase {
 
     public void update(String contexts) throws LiquibaseException {
 
-        LockManager lockManager = LockManager.getInstance(database);
-        lockManager.waitForLock();
+        LockService lockService = LockService.getInstance(database);
+        lockService.waitForLock();
 
         try {
             database.checkDatabaseChangeLogTable();
@@ -114,7 +114,7 @@ public class Liquibase {
             throw e;
         } finally {
             try {
-                lockManager.releaseLock();
+                lockService.releaseLock();
             } catch (LockException e) {
                 log.log(Level.SEVERE, "Could not release lock", e);
             }
@@ -128,8 +128,8 @@ public class Liquibase {
 
         outputHeader("Update Database Script");
 
-        LockManager lockManager = LockManager.getInstance(database);
-        lockManager.waitForLock();
+        LockService lockService = LockService.getInstance(database);
+        lockService.waitForLock();
 
         try {
 
@@ -139,7 +139,7 @@ public class Liquibase {
         } catch (IOException e) {
             throw new LiquibaseException(e);
         } finally {
-            lockManager.releaseLock();
+            lockService.releaseLock();
         }
 
         database.setJdbcTemplate(oldTemplate);
@@ -147,8 +147,8 @@ public class Liquibase {
 
     public void update(int changesToApply, String contexts) throws LiquibaseException {
 
-        LockManager lockManager = LockManager.getInstance(database);
-        lockManager.waitForLock();
+        LockService lockService = LockService.getInstance(database);
+        lockService.waitForLock();
 
         try {
             database.checkDatabaseChangeLogTable();
@@ -164,7 +164,7 @@ public class Liquibase {
 
             logIterator.run(new UpdateVisitor(database), database);
         } finally {
-            lockManager.releaseLock();
+            lockService.releaseLock();
         }
     }
 
@@ -214,8 +214,8 @@ public class Liquibase {
     }
 
     public void rollback(int changesToRollback, String contexts) throws LiquibaseException {
-        LockManager lockManager = LockManager.getInstance(database);
-        lockManager.waitForLock();
+        LockService lockService = LockService.getInstance(database);
+        lockService.waitForLock();
 
         try {
             database.checkDatabaseChangeLogTable();
@@ -232,7 +232,7 @@ public class Liquibase {
             logIterator.run(new RollbackVisitor(database), database);
         } finally {
             try {
-                lockManager.releaseLock();
+                lockService.releaseLock();
             } catch (LockException e) {
                 log.log(Level.SEVERE, "Error releasing lock", e);
             }
@@ -256,8 +256,8 @@ public class Liquibase {
     }
 
     public void rollback(String tagToRollBackTo, String contexts) throws LiquibaseException {
-        LockManager lockManager = LockManager.getInstance(database);
-        lockManager.waitForLock();
+        LockService lockService = LockService.getInstance(database);
+        lockService.waitForLock();
 
         try {
             database.checkDatabaseChangeLogTable();
@@ -272,7 +272,7 @@ public class Liquibase {
 
             logIterator.run(new RollbackVisitor(database), database);
         } finally {
-            lockManager.releaseLock();
+            lockService.releaseLock();
         }
     }
 
@@ -293,8 +293,8 @@ public class Liquibase {
     }
 
     public void rollback(Date dateToRollBackTo, String contexts) throws LiquibaseException {
-        LockManager lockManager = LockManager.getInstance(database);
-        lockManager.waitForLock();
+        LockService lockService = LockService.getInstance(database);
+        lockService.waitForLock();
 
         try {
             database.checkDatabaseChangeLogTable();
@@ -309,7 +309,7 @@ public class Liquibase {
 
             logIterator.run(new RollbackVisitor(database), database);
         } finally {
-            lockManager.releaseLock();
+            lockService.releaseLock();
         }
     }
 
@@ -333,8 +333,8 @@ public class Liquibase {
     }
 
     public void changeLogSync(String contexts) throws LiquibaseException {
-        LockManager lockManager = LockManager.getInstance(database);
-        lockManager.waitForLock();
+        LockService lockService = LockService.getInstance(database);
+        lockService.waitForLock();
 
         try {
             database.checkDatabaseChangeLogTable();
@@ -349,7 +349,7 @@ public class Liquibase {
 
             logIterator.run(new ChangeLogSyncVisitor(database), database);
         } finally {
-            lockManager.releaseLock();
+            lockService.releaseLock();
         }
     }
 
@@ -373,8 +373,8 @@ public class Liquibase {
     }
 
     public void markNextChangeSetRan(String contexts) throws LiquibaseException {
-        LockManager lockManager = LockManager.getInstance(database);
-        lockManager.waitForLock();
+        LockService lockService = LockService.getInstance(database);
+        lockService.waitForLock();
 
         try {
             database.checkDatabaseChangeLogTable();
@@ -390,7 +390,7 @@ public class Liquibase {
 
             logIterator.run(new ChangeLogSyncVisitor(database), database);
         } finally {
-            lockManager.releaseLock();
+            lockService.releaseLock();
         }
     }
 
@@ -401,8 +401,8 @@ public class Liquibase {
 
         outputHeader("SQL to roll back currently unexecuted changes");
 
-        LockManager lockManager = LockManager.getInstance(database);
-        lockManager.waitForLock();
+        LockService lockService = LockService.getInstance(database);
+        lockService.waitForLock();
 
         try {
             database.checkDatabaseChangeLogTable();
@@ -418,7 +418,7 @@ public class Liquibase {
             logIterator.run(new RollbackVisitor(database), database);
         } finally {
             database.setJdbcTemplate(oldTemplate);
-            lockManager.releaseLock();
+            lockService.releaseLock();
         }
 
         try {
@@ -441,7 +441,7 @@ public class Liquibase {
      */
     public final void dropAll(String... schemas) throws JDBCException {
         try {
-            LockManager.getInstance(database).waitForLock();
+            LockService.getInstance(database).waitForLock();
 
             for (String schema : schemas) {
                 log.info("Dropping Database Objects in schema: " + database.convertRequestedSchemaToSchema(schema));
@@ -456,7 +456,7 @@ public class Liquibase {
             throw new JDBCException(e);
         } finally {
             try {
-                LockManager.getInstance(database).releaseLock();
+                LockService.getInstance(database).releaseLock();
             } catch (LockException e) {
                 log.severe("Unable to release lock: " + e.getMessage());
             }
@@ -492,7 +492,7 @@ public class Liquibase {
     public DatabaseChangeLogLock[] listLocks() throws JDBCException, IOException, LockException {
         checkDatabaseChangeLogTable();
 
-        return LockManager.getInstance(getDatabase()).listLocks();
+        return LockService.getInstance(getDatabase()).listLocks();
     }
 
     public void reportLocks(PrintStream out) throws LockException, IOException, JDBCException {
@@ -510,12 +510,12 @@ public class Liquibase {
     public void forceReleaseLocks() throws LockException, IOException, JDBCException {
         checkDatabaseChangeLogTable();
 
-        LockManager.getInstance(getDatabase()).forceReleaseLock();
+        LockService.getInstance(getDatabase()).forceReleaseLock();
     }
 
     public List<ChangeSet> listUnrunChangeSets(String contexts) throws LiquibaseException {
-        LockManager lockManager = LockManager.getInstance(database);
-        lockManager.waitForLock();
+        LockService lockService = LockService.getInstance(database);
+        lockService.waitForLock();
 
         try {
             database.checkDatabaseChangeLogTable();
@@ -532,7 +532,7 @@ public class Liquibase {
             logIterator.run(visitor, database);
             return visitor.getSeenChangeSets();
         } finally {
-            lockManager.releaseLock();
+            lockService.releaseLock();
         }
     }
 
@@ -563,8 +563,8 @@ public class Liquibase {
      */
     public void clearCheckSums() throws LiquibaseException {
         log.info("Clearing database change log checksums");
-        LockManager lockManager = LockManager.getInstance(database);
-        lockManager.waitForLock();
+        LockService lockService = LockService.getInstance(database);
+        lockService.waitForLock();
 
         try {
             database.checkDatabaseChangeLogTable();
@@ -574,14 +574,14 @@ public class Liquibase {
             getDatabase().getExecutor().execute(updateStatement, new ArrayList<SqlVisitor>());
             getDatabase().commit();
         } finally {
-            lockManager.releaseLock();
+            lockService.releaseLock();
         }
     }
 
     public void generateDocumentation(String outputDirectory) throws LiquibaseException {
         log.info("Generating Database Documentation");
-        LockManager lockManager = LockManager.getInstance(database);
-        lockManager.waitForLock();
+        LockService lockService = LockService.getInstance(database);
+        lockService.waitForLock();
 
         try {
             database.checkDatabaseChangeLogTable();
@@ -599,11 +599,11 @@ public class Liquibase {
         } catch (IOException e) {
             throw new LiquibaseException(e);
         } finally {
-            lockManager.releaseLock();
+            lockService.releaseLock();
         }
 
 //        try {
-//            if (!LockManager.getInstance(database).waitForLock()) {
+//            if (!LockService.getInstance(database).waitForLock()) {
 //                return;
 //            }
 //

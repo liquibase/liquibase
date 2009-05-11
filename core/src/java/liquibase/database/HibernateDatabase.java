@@ -506,4 +506,7 @@ public class HibernateDatabase implements Database {
         
     }
 
+    public void execute(SqlStatement statement, ArrayList<SqlVisitor> sqlVisitors) throws JDBCException {
+        
+    }
 }
