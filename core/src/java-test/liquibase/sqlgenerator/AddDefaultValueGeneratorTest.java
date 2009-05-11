@@ -144,7 +144,7 @@ public class AddDefaultValueGeneratorTest {
 //                        if (defaultValue instanceof java.sql.Date) {
 //                            assertEquals(new ISODateFormat().format(date), new ISODateFormat().format(((java.sql.Date) defaultValue)));
 //                        } else { //mssql uses smalldatetime for date which is actually a timestamp
-//                            Calendar cal = Calendar.getInstance();
+//                            Calendar cal = Calendar.getExecutor();
 //                            cal.setTime(date);
 //                            cal.set(Calendar.HOUR, 0);
 //                            cal.set(Calendar.MINUTE, 0);
@@ -179,7 +179,7 @@ public class AddDefaultValueGeneratorTest {
 //                        if (defaultValue instanceof java.sql.Time) {
 //                            assertEquals(new ISODateFormat().format(time), new ISODateFormat().format(((java.sql.Time) defaultValue)));
 //                        } else { //mssql uses smalldatetime which is a timestamp, oracle uses date which is a date
-//                            Calendar cal = Calendar.getInstance();
+//                            Calendar cal = Calendar.getExecutor();
 //                            cal.setTime(time);
 //                            cal.set(Calendar.DAY_OF_YEAR, 0);
 //                            cal.set(Calendar.YEAR, 0);

@@ -1,10 +1,8 @@
 package liquibase.sqlgenerator;
 
 import liquibase.database.Database;
-import liquibase.database.DatabaseConnection;
-import liquibase.database.template.Executor;
+import liquibase.executor.Executor;
 import liquibase.exception.JDBCException;
-import liquibase.sql.Sql;
 import liquibase.statement.CreateTableStatement;
 import liquibase.statement.SqlStatement;
 import liquibase.test.TestContext;
@@ -12,9 +10,6 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 
 import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.Arrays;
-import java.util.List;
 
 public abstract class AbstractSqlGeneratorTest<T extends SqlStatement> {
 

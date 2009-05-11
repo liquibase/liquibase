@@ -2,7 +2,7 @@ package liquibase.statementexecute;
 
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
-import liquibase.database.template.Executor;
+import liquibase.executor.Executor;
 import liquibase.test.TestContext;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.SqlGeneratorFactory;

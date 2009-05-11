@@ -1,7 +1,8 @@
 package liquibase.change;
 
 import liquibase.database.Database;
-import liquibase.database.template.Executor;
+import liquibase.executor.Executor;
+import liquibase.executor.ExecutorService;
 import liquibase.exception.JDBCException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.sql.visitor.SqlVisitor;
@@ -65,7 +66,7 @@ public class DropAllForeignKeyConstraintsChange extends AbstractChange {
         // Make a new list
         childDropChanges = new ArrayList<DropForeignKeyConstraintChange>();
 
-        Executor jdbc = database.getExecutor();
+        Executor jdbc = ExecutorService.getExecutor(database);
 
         FindForeignKeyConstraintsStatement sql = new FindForeignKeyConstraintsStatement(
                 getBaseTableSchemaName(),

@@ -1,4 +1,4 @@
-package liquibase.database.template;
+package liquibase.executor;
 
 import java.io.StringWriter;
 import java.math.BigDecimal;

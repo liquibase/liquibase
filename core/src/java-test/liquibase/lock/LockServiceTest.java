@@ -3,17 +3,12 @@ package liquibase.lock;
 import liquibase.database.Database;
 import liquibase.database.MySQLDatabase;
 import liquibase.database.OracleDatabase;
-import liquibase.database.template.JdbcOutputTemplate;
-import liquibase.database.template.Executor;
 import liquibase.exception.LockException;
-import liquibase.exception.JDBCException;
 import liquibase.statement.LockDatabaseChangeLogStatement;
 import liquibase.statement.SelectFromDatabaseChangeLogLockStatement;
 import liquibase.statement.UnlockDatabaseChangeLogStatement;
-import liquibase.statement.DropTableStatement;
-import liquibase.test.DatabaseTest;
-import liquibase.test.DatabaseTestTemplate;
-import liquibase.sql.visitor.SqlVisitor;
+import liquibase.executor.Executor;
+import liquibase.executor.ExecutorService;
 import static org.easymock.classextension.EasyMock.*;
 import static org.junit.Assert.*;
 import org.junit.Test;
@@ -22,7 +17,6 @@ import org.junit.After;
 import java.text.DateFormat;
 import java.util.*;
 import java.lang.reflect.Field;
-import java.io.StringWriter;
 
 @SuppressWarnings({"EqualsWhichDoesntCheckParameterClass"})
 public class LockServiceTest {
@@ -88,6 +82,7 @@ public class LockServiceTest {
     @Test
     public void acquireLock_tableExistsNotLocked() throws Exception {
         Database database = createMock(Database.class);
+        Executor executor = createMock(Executor.class);
 
         database.checkDatabaseChangeLogLockTable();
         expectLastCall();
@@ -95,17 +90,19 @@ public class LockServiceTest {
         database.rollback();
         expectLastCall().anyTimes();
 
-        expect(database.queryForObject(isA(SelectFromDatabaseChangeLogLockStatement.class), eq(Boolean.class), isA(ArrayList.class))).andReturn(false);
+        expect(executor.queryForObject(isA(SelectFromDatabaseChangeLogLockStatement.class), eq(Boolean.class), isA(ArrayList.class))).andReturn(false);
 
-        database.comment("Lock Database");
+        executor.comment("Lock Database");
         expectLastCall();
 
-        expect(database.update(isA(LockDatabaseChangeLogStatement.class), isA(ArrayList.class))).andReturn(1);
+        expect(executor.update(isA(LockDatabaseChangeLogStatement.class), isA(ArrayList.class))).andReturn(1);
 
         database.commit();
         expectLastCall();
 
+        replay(executor);
         replay(database);
+        ExecutorService.setExecutor(database, executor);
 
         LockService service = LockService.getInstance(database);
         assertTrue(service.acquireLock());
@@ -116,6 +113,7 @@ public class LockServiceTest {
     @Test
     public void acquireLock_tableExistsIsLocked() throws Exception {
         Database database = createMock(Database.class);
+        Executor executor = createMock(Executor.class);
 
         database.checkDatabaseChangeLogLockTable();
         expectLastCall();
@@ -123,9 +121,11 @@ public class LockServiceTest {
         database.rollback();
         expectLastCall().anyTimes();
 
-        expect(database.queryForObject(isA(SelectFromDatabaseChangeLogLockStatement.class), eq(Boolean.class), isA(ArrayList.class))).andReturn(true);
+        expect(executor.queryForObject(isA(SelectFromDatabaseChangeLogLockStatement.class), eq(Boolean.class), isA(ArrayList.class))).andReturn(true);
 
         replay(database);
+        replay(executor);
+        ExecutorService.setExecutor(database, executor);
 
         LockService service = LockService.getInstance(database);
         assertFalse(service.acquireLock());
@@ -136,6 +136,7 @@ public class LockServiceTest {
     @Test
     public void waitForLock_notLocked() throws Exception {
         Database database = createMock(Database.class);
+        Executor executor = createMock(Executor.class);
 
         database.checkDatabaseChangeLogLockTable();
         expectLastCall();
@@ -143,17 +144,19 @@ public class LockServiceTest {
         database.rollback();
         expectLastCall().anyTimes();
 
-        expect(database.queryForObject(isA(SelectFromDatabaseChangeLogLockStatement.class), eq(Boolean.class), isA(ArrayList.class))).andReturn(false);
+        expect(executor.queryForObject(isA(SelectFromDatabaseChangeLogLockStatement.class), eq(Boolean.class), isA(ArrayList.class))).andReturn(false);
 
-        database.comment("Lock Database");
+        executor.comment("Lock Database");
         expectLastCall();
 
-        expect(database.update(isA(LockDatabaseChangeLogStatement.class), isA(ArrayList.class))).andReturn(1);
+        expect(executor.update(isA(LockDatabaseChangeLogStatement.class), isA(ArrayList.class))).andReturn(1);
 
         database.commit();
         expectLastCall();
 
         replay(database);
+        replay(executor);
+        ExecutorService.setExecutor(database, executor);
 
         LockService service = LockService.getInstance(database);
         service.waitForLock();
@@ -164,27 +167,30 @@ public class LockServiceTest {
     @Test
     public void waitForLock_lockedThenReleased() throws Exception {
         Database database = createMock(Database.class);
+        Executor executor = createMock(Executor.class);
 
         database.checkDatabaseChangeLogLockTable();
         expectLastCall().anyTimes();
 
-        expect(database.queryForObject(isA(SelectFromDatabaseChangeLogLockStatement.class), eq(Boolean.class), isA(ArrayList.class))).andReturn(true);
-        expect(database.queryForObject(isA(SelectFromDatabaseChangeLogLockStatement.class), eq(Boolean.class), isA(ArrayList.class))).andReturn(true);
-        expect(database.queryForObject(isA(SelectFromDatabaseChangeLogLockStatement.class), eq(Boolean.class), isA(ArrayList.class))).andReturn(true);
-        expect(database.queryForObject(isA(SelectFromDatabaseChangeLogLockStatement.class), eq(Boolean.class), isA(ArrayList.class))).andReturn(false);
+        expect(executor.queryForObject(isA(SelectFromDatabaseChangeLogLockStatement.class), eq(Boolean.class), isA(ArrayList.class))).andReturn(true);
+        expect(executor.queryForObject(isA(SelectFromDatabaseChangeLogLockStatement.class), eq(Boolean.class), isA(ArrayList.class))).andReturn(true);
+        expect(executor.queryForObject(isA(SelectFromDatabaseChangeLogLockStatement.class), eq(Boolean.class), isA(ArrayList.class))).andReturn(true);
+        expect(executor.queryForObject(isA(SelectFromDatabaseChangeLogLockStatement.class), eq(Boolean.class), isA(ArrayList.class))).andReturn(false);
 
-        database.comment("Lock Database");
+        executor.comment("Lock Database");
         expectLastCall();
 
         database.rollback();
         expectLastCall().anyTimes();
 
-        expect(database.update(isA(LockDatabaseChangeLogStatement.class), isA(ArrayList.class))).andReturn(1);
+        expect(executor.update(isA(LockDatabaseChangeLogStatement.class), isA(ArrayList.class))).andReturn(1);
 
         database.commit();
         expectLastCall();
 
         replay(database);
+        replay(executor);
+        ExecutorService.setExecutor(database, executor);
 
         LockService service = LockService.getInstance(database);
         service.setChangeLogLockRecheckTime(1);
@@ -196,11 +202,12 @@ public class LockServiceTest {
     @Test
     public void waitForLock_lockedThenTimeout() throws Exception {
         Database database = createMock(Database.class);
+        Executor executor = createMock(Executor.class);
 
         database.checkDatabaseChangeLogLockTable();
         expectLastCall().anyTimes();
 
-        expect(database.queryForObject(isA(SelectFromDatabaseChangeLogLockStatement.class), eq(Boolean.class), isA(ArrayList.class))).andReturn(true).anyTimes();
+        expect(executor.queryForObject(isA(SelectFromDatabaseChangeLogLockStatement.class), eq(Boolean.class), isA(ArrayList.class))).andReturn(true).anyTimes();
         expect(database.doesChangeLogLockTableExist()).andReturn(true);
 
         List<Map> resultList = new ArrayList<Map>();
@@ -212,12 +219,14 @@ public class LockServiceTest {
         result.put("LOCKEDBY", "Locker");
         resultList.add(result);
 
-        expect(database.queryForList(isA(SelectFromDatabaseChangeLogLockStatement.class), isA(ArrayList.class))).andReturn(resultList);
+        expect(executor.queryForList(isA(SelectFromDatabaseChangeLogLockStatement.class), isA(ArrayList.class))).andReturn(resultList);
 
         database.rollback();
         expectLastCall().anyTimes();
 
         replay(database);
+        replay(executor);
+        ExecutorService.setExecutor(database, executor);
 
         LockService service = LockService.getInstance(database);
         service.setChangeLogLockWaitTime(10);
@@ -236,19 +245,22 @@ public class LockServiceTest {
     @Test
     public void releaseLock_tableExistsAndLocked() throws Exception {
         Database database = createMock(Database.class);
+        Executor executor = createMock(Executor.class);
 
-        expect(database.update(isA(UnlockDatabaseChangeLogStatement.class), isA(ArrayList.class))).andReturn(1);
+        expect(executor.update(isA(UnlockDatabaseChangeLogStatement.class), isA(ArrayList.class))).andReturn(1);
         expect(database.doesChangeLogLockTableExist()).andReturn(true);
         database.commit();
         expectLastCall().atLeastOnce();
 
-        database.comment("Release Database Lock");
+        executor.comment("Release Database Lock");
         expectLastCall().anyTimes();
 
         database.rollback();
         expectLastCall().anyTimes();
-        
+
         replay(database);
+        replay(executor);
+        ExecutorService.setExecutor(database, executor);
 
         LockService service = LockService.getInstance(database);
         service.releaseLock();
@@ -259,11 +271,12 @@ public class LockServiceTest {
     @Test
     public void listLocks_hasLocks() throws Exception {
         Database database = createMock(Database.class);
+        Executor executor = createMock(Executor.class);
 
         database.checkDatabaseChangeLogLockTable();
         expectLastCall().anyTimes();
 
-        expect(database.queryForObject(isA(SelectFromDatabaseChangeLogLockStatement.class), eq(Boolean.class), isA(ArrayList.class))).andReturn(true).anyTimes();
+        expect(executor.queryForObject(isA(SelectFromDatabaseChangeLogLockStatement.class), eq(Boolean.class), isA(ArrayList.class))).andReturn(true).anyTimes();
         expect(database.doesChangeLogLockTableExist()).andReturn(true);
 
         List<Map> resultList = new ArrayList<Map>();
@@ -275,9 +288,11 @@ public class LockServiceTest {
         result.put("LOCKEDBY", "Locker");
         resultList.add(result);
 
-        expect(database.queryForList(isA(SelectFromDatabaseChangeLogLockStatement.class), isA(ArrayList.class))).andReturn(resultList);
+        expect(executor.queryForList(isA(SelectFromDatabaseChangeLogLockStatement.class), isA(ArrayList.class))).andReturn(resultList);
 
         replay(database);
+        replay(executor);
+        ExecutorService.setExecutor(database, executor);
 
         LockService service = LockService.getInstance(database);
         DatabaseChangeLogLock[] locks = service.listLocks();
@@ -292,18 +307,21 @@ public class LockServiceTest {
     @Test
     public void listLocks_tableExistsUnlocked() throws Exception {
         Database database = createMock(Database.class);
+        Executor executor = createMock(Executor.class);
 
         database.checkDatabaseChangeLogLockTable();
         expectLastCall().anyTimes();
 
-        expect(database.queryForObject(isA(SelectFromDatabaseChangeLogLockStatement.class), eq(Boolean.class), isA(ArrayList.class))).andReturn(true).anyTimes();
+        expect(executor.queryForObject(isA(SelectFromDatabaseChangeLogLockStatement.class), eq(Boolean.class), isA(ArrayList.class))).andReturn(true).anyTimes();
         expect(database.doesChangeLogLockTableExist()).andReturn(true);
 
         List<Map> resultList = new ArrayList<Map>();
 
-        expect(database.queryForList(isA(SelectFromDatabaseChangeLogLockStatement.class), isA(ArrayList.class))).andReturn(resultList);
+        expect(executor.queryForList(isA(SelectFromDatabaseChangeLogLockStatement.class), isA(ArrayList.class))).andReturn(resultList);
 
         replay(database);
+        replay(executor);
+        ExecutorService.setExecutor(database, executor);
 
         LockService service = LockService.getInstance(database);
         DatabaseChangeLogLock[] locks = service.listLocks();

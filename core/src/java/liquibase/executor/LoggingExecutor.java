@@ -1,4 +1,4 @@
-package liquibase.database.template;
+package liquibase.executor;
 
 import liquibase.database.Database;
 import liquibase.database.MSSQLDatabase;
@@ -13,13 +13,13 @@ import java.io.Writer;
 import java.util.List;
 import java.util.Map;
 
-public class JdbcOutputTemplate extends Executor {
+public class LoggingExecutor extends Executor {
 
     private Writer output;
     private boolean alreadyCreatedChangeLockTable;
     private boolean alreadyCreatedChangeTable;
 
-    public JdbcOutputTemplate(Writer output, Database database) {
+    public LoggingExecutor(Writer output, Database database) {
         super(database);
         this.output = output;
     }

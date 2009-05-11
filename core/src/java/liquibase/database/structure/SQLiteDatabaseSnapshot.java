@@ -7,6 +7,7 @@ import liquibase.diff.DiffStatusListener;
 import liquibase.exception.JDBCException;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.util.StringUtils;
+import liquibase.executor.ExecutorService;
 
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -344,7 +345,7 @@ public class SQLiteDatabaseSnapshot extends SqlDatabaseSnapshot {
 
         if (database.supportsSequences()) {
             //noinspection unchecked
-            List<String> sequenceNamess = (List<String>) database.getExecutor().queryForList(database.createFindSequencesSQL(schema), String.class, new ArrayList<SqlVisitor>());
+            List<String> sequenceNamess = (List<String>) ExecutorService.getExecutor(database).queryForList(database.createFindSequencesSQL(schema), String.class, new ArrayList<SqlVisitor>());
 
 
             for (String sequenceName : sequenceNamess) {

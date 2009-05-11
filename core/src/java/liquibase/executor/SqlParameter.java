@@ -1,4 +1,4 @@
-package liquibase.database.template;
+package liquibase.executor;
 
 /**
  * Object to represent a SQL parameter definition.
