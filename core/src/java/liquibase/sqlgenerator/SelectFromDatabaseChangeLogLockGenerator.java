@@ -1,8 +1,8 @@
 package liquibase.sqlgenerator;
 
-import liquibase.statement.SetNullableStatement;
 import liquibase.statement.SelectFromDatabaseChangeLogLockStatement;
 import liquibase.database.Database;
+import liquibase.database.OracleDatabase;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
@@ -18,16 +18,21 @@ public class SelectFromDatabaseChangeLogLockGenerator implements SqlGenerator<Se
 
     public ValidationErrors validate(SelectFromDatabaseChangeLogLockStatement statement, Database database) {
         ValidationErrors errors = new ValidationErrors();
-        errors.checkRequiredField("columnToSelect", statement.getColumnToSelect());
+        errors.checkRequiredField("columnToSelect", statement.getColumnsToSelect());
 
         return errors;
     }
 
     public Sql[] generateSql(SelectFromDatabaseChangeLogLockStatement statement, Database database) {
+        String sql = "SELECT LOCKED FROM " +
+                database.escapeTableName(database.getDefaultSchemaName(), database.getDatabaseChangeLogLockTableName()) +
+                " WHERE " + database.escapeColumnName(database.getDefaultSchemaName(), database.getDatabaseChangeLogLockTableName(), "ID") + "=1";
+
+        if (database instanceof OracleDatabase) {
+            sql += " for update";
+        }
         return new Sql[] {
-                new UnparsedSql("SELECT LOCKED FROM " +
-                        database.escapeTableName(database.getDefaultSchemaName(), database.getDatabaseChangeLogLockTableName()) +
-                        " WHERE " + database.escapeColumnName(database.getDefaultSchemaName(), database.getDatabaseChangeLogLockTableName(), "ID") + "=1")
+                new UnparsedSql(sql)
         };
     }
 }

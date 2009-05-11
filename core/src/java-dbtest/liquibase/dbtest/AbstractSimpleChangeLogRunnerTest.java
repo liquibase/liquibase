@@ -359,8 +359,8 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
         liquibase.dropAll(getSchemasToDrop());
 
         //run again to test changelog testing logic
-        database.getJdbcTemplate().execute(new DropTableStatement("liquibaseb", database.getDatabaseChangeLogTableName(), false));
-        database.getJdbcTemplate().execute(new DropTableStatement("liquibaseb", database.getDatabaseChangeLogLockTableName(), false));
+        database.getExecutor().execute(new DropTableStatement("liquibaseb", database.getDatabaseChangeLogTableName(), false));
+        database.getExecutor().execute(new DropTableStatement("liquibaseb", database.getDatabaseChangeLogLockTableName(), false));
         database.commit();
 
         DatabaseConnection connection = TestContext.getInstance().getConnection(url);
@@ -518,7 +518,7 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
 
     private void dropDatabaseChangeLogTable(String schema, Database database) {
         try {
-            database.getJdbcTemplate().execute(new DropTableStatement(schema, database.getDatabaseChangeLogTableName(), false));
+            database.getExecutor().execute(new DropTableStatement(schema, database.getDatabaseChangeLogTableName(), false));
         } catch (JDBCException e) {
             ; //ok
         }

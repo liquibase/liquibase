@@ -20,6 +20,8 @@ import java.sql.*;
 import java.text.ParseException;
 import java.util.List;
 import java.util.Set;
+import java.util.ArrayList;
+import java.util.Map;
 
 public class HibernateDatabase implements Database {
 
@@ -433,11 +435,7 @@ public class HibernateDatabase implements Database {
 
     }
 
-    public SqlStatement getSelectChangeLogLockSQL() throws JDBCException {
-        return null;
-    }
-
-    public Executor getJdbcTemplate() {
+    public Executor getExecutor() {
         return null;
     }
 
@@ -491,4 +489,21 @@ public class HibernateDatabase implements Database {
     public void saveRollbackStatement(Change change, List<SqlVisitor> sqlVisitors, Writer writer) throws IOException, UnsupportedChangeException, RollbackImpossibleException, StatementNotSupportedOnDatabaseException, LiquibaseException {
         ;
     }
+
+    public Object queryForObject(SqlStatement sqlStatement, Class returnClass, ArrayList<SqlVisitor> sqlVisitors) throws JDBCException {
+        return null;
+    }
+
+    public int update(SqlStatement sqlStatement, ArrayList<SqlVisitor> sqlVisitors) throws JDBCException {
+        return 0;
+    }
+
+    public List<Map> queryForList(SqlStatement sqlStatement, ArrayList<SqlVisitor> sqlVisitors) throws JDBCException {
+        return null;
+    }
+
+    public void comment(String comment) throws JDBCException {
+        
+    }
+
 }

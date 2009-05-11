@@ -40,7 +40,7 @@ public class ShouldRunChangeSetFilterTest  {
         expect(database.getDefaultSchemaName()).andReturn(null).anyTimes();
 
         Executor template = createMock(Executor.class);
-        expect(database.getJdbcTemplate()).andReturn(template).anyTimes();
+        expect(database.getExecutor()).andReturn(template).anyTimes();
         expect(template.update(isA(UpdateStatement.class), isA(List.class))).andReturn(1).anyTimes();
 //        template.comment("Lock Database");
 //        expectLastCall();

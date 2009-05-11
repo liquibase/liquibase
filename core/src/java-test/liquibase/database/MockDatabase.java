@@ -19,9 +19,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Time;
 import java.sql.Timestamp;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class MockDatabase implements Database {
 
@@ -461,7 +459,7 @@ public class MockDatabase implements Database {
         return null;
     }
 
-    public Executor getJdbcTemplate() {
+    public Executor getExecutor() {
         return null;
     }
 
@@ -515,5 +513,21 @@ public class MockDatabase implements Database {
 
     public void saveRollbackStatement(Change change, List<SqlVisitor> sqlVisitors, Writer writer) throws IOException, UnsupportedChangeException, RollbackImpossibleException, StatementNotSupportedOnDatabaseException, LiquibaseException {
         ;
+    }
+
+    public Object queryForObject(SqlStatement sqlStatement, Class returnClass, ArrayList<SqlVisitor> sqlVisitors) throws JDBCException {
+        return null;
+    }
+
+    public int update(SqlStatement sqlStatement, ArrayList<SqlVisitor> sqlVisitors) throws JDBCException {
+        return 0;
+    }
+
+    public List<Map> queryForList(SqlStatement sqlStatement, ArrayList<SqlVisitor> sqlVisitors) throws JDBCException {
+        return null;
+    }
+
+    public void comment(String comment) throws JDBCException {
+        
     }
 }

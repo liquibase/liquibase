@@ -2,13 +2,13 @@ package liquibase.statement;
 
 public class SelectFromDatabaseChangeLogLockStatement implements SqlStatement {
 
-    private String columnToSelect;
+    private String[] columnsToSelect;
 
-    public SelectFromDatabaseChangeLogLockStatement(String columnToSelect) {
-        this.columnToSelect = columnToSelect;
+    public SelectFromDatabaseChangeLogLockStatement(String... columnsToSelect) {
+        this.columnsToSelect = columnsToSelect;
     }
 
-    public String getColumnToSelect() {
-        return columnToSelect;
+    public String[] getColumnsToSelect() {
+        return columnsToSelect;
     }
 }
