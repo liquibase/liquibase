@@ -13,7 +13,7 @@ import java.io.Writer;
 import java.util.List;
 import java.util.Map;
 
-public class LoggingExecutor extends Executor {
+public class LoggingExecutor extends AbstractExecutor implements WriteExecutor {
 
     private Writer output;
     private boolean alreadyCreatedChangeLockTable;
@@ -38,29 +38,24 @@ public class LoggingExecutor extends Executor {
         return 0;
     }
 
-    @Override
     public Object execute(StatementCallback action, List<SqlVisitor> sqlVisitors) throws JDBCException {
         outputStatement(action.getStatement(), sqlVisitors);
         return null;
     }
 
-    @Override
     public void execute(SqlStatement sql, List<SqlVisitor> sqlVisitors) throws JDBCException {
         outputStatement(sql, sqlVisitors);
     }
 
-    @Override
     public int update(SqlStatement sql, List<SqlVisitor> sqlVisitors) throws JDBCException {
         outputStatement(sql, sqlVisitors);
         return 0;
     }
 
-    @Override
     public Object execute(CallableSqlStatement csc, CallableStatementCallback action, List<SqlVisitor> sqlVisitors) throws JDBCException {
         throw new JDBCException("Do not know how to output callable statement");
     }
 
-    @Override
     public Map call(CallableSqlStatement csc, List declaredParameters, List<SqlVisitor> sqlVisitors) throws JDBCException {
         throw new JDBCException("Do not know how to output callable statement");
     }

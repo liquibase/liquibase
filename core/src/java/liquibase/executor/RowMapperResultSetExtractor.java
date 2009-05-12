@@ -32,7 +32,7 @@ import java.util.List;
  *
  * @author Spring Framework
  * @see RowMapper
- * @see Executor
+ * @see WriteExecutor
  */
 @SuppressWarnings({"unchecked"})
 class RowMapperResultSetExtractor implements ResultSetExtractor {

@@ -4,7 +4,7 @@ import liquibase.change.*;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.RanChangeSet;
 import liquibase.database.structure.*;
-import liquibase.executor.Executor;
+import liquibase.executor.WriteExecutor;
 import liquibase.executor.LoggingExecutor;
 import liquibase.executor.ExecutorService;
 import liquibase.diff.DiffStatusListener;
@@ -614,12 +614,12 @@ public abstract class AbstractDatabase implements Database {
      * otherwise it will not do anything besides outputting a log message.
      */
     public void checkDatabaseChangeLogTable() throws JDBCException {
-        Executor executor = ExecutorService.getExecutor(this);
-        if (!executor.executesStatements()) {
-            if (((LoggingExecutor) executor).alreadyCreatedChangeTable()) {
+        WriteExecutor writeExecutor = ExecutorService.getInstance().getWriteExecutor(this);
+        if (!writeExecutor.executesStatements()) {
+            if (((LoggingExecutor) writeExecutor).alreadyCreatedChangeTable()) {
                 return;
             } else {
-                ((LoggingExecutor) executor).setAlreadyCreatedChangeTable(true);
+                ((LoggingExecutor) writeExecutor).setAlreadyCreatedChangeTable(true);
             }
         }
 
@@ -662,7 +662,7 @@ public abstract class AbstractDatabase implements Database {
                 }
 
             } else if (!changeLogCreateAttempted) {
-                executor.comment("Create Database Change Log Table");
+                writeExecutor.comment("Create Database Change Log Table");
                 SqlStatement createTableStatement = getCreateChangeLogSQL();
                 if (!canCreateChangeLogTable()) {
                     throw new JDBCException("Cannot create " + escapeTableName(getDefaultSchemaName(), getDatabaseChangeLogTableName()) + " table for your database.\n\n" +
@@ -676,7 +676,7 @@ public abstract class AbstractDatabase implements Database {
             }
 
             for (SqlStatement sql : statementsToExecute) {
-                executor.execute(sql, new ArrayList<SqlVisitor>());
+                writeExecutor.execute(sql, new ArrayList<SqlVisitor>());
                 this.commit();
             }
         } catch (SQLException e) {
@@ -725,22 +725,22 @@ public abstract class AbstractDatabase implements Database {
     public void checkDatabaseChangeLogLockTable() throws JDBCException {
         boolean knowMustInsertIntoLockTable = false;
 
-        Executor executor = ExecutorService.getExecutor(this);
+        WriteExecutor writeExecutor = ExecutorService.getInstance().getWriteExecutor(this);
         if (!doesChangeLogLockTableExist()) {
 
-            if (!executor.executesStatements()) {
-                if (((LoggingExecutor) executor).alreadyCreatedChangeLockTable()) {
+            if (!writeExecutor.executesStatements()) {
+                if (((LoggingExecutor) writeExecutor).alreadyCreatedChangeLockTable()) {
                     return;
                 } else {
-                    ((LoggingExecutor) executor).setAlreadyCreatedChangeLockTable(true);
+                    ((LoggingExecutor) writeExecutor).setAlreadyCreatedChangeLockTable(true);
                 }
             }
 
 
             SqlStatement createTableStatement = getCreateChangeLogLockSQL();
 
-            executor.comment("Create Database Lock Table");
-            executor.execute(createTableStatement, new ArrayList<SqlVisitor>());
+            writeExecutor.comment("Create Database Lock Table");
+            writeExecutor.execute(createTableStatement, new ArrayList<SqlVisitor>());
             this.commit();
             log.finest("Created database lock table with name: " + escapeTableName(getDefaultSchemaName(), getDatabaseChangeLogLockTableName()));
             knowMustInsertIntoLockTable = true;
@@ -750,7 +750,7 @@ public abstract class AbstractDatabase implements Database {
         if (!knowMustInsertIntoLockTable) {
             SqlStatement selectStatement = new SelectFromDatabaseChangeLogLockStatement("COUNT(*)");
             try {
-                List<Map> returnList = executor.queryForList(selectStatement, new ArrayList<SqlVisitor>());
+                List<Map> returnList = ExecutorService.getInstance().getReadExecutor(this).queryForList(selectStatement, new ArrayList<SqlVisitor>());
                 if (returnList == null || returnList.size() == 0) {
                     rows = 0;
                 } else {
@@ -762,7 +762,7 @@ public abstract class AbstractDatabase implements Database {
             }
         }
         if (knowMustInsertIntoLockTable || rows == 0) {
-            executor.update(getChangeLogLockInsertSQL(), new ArrayList<SqlVisitor>());
+            writeExecutor.update(getChangeLogLockInsertSQL(), new ArrayList<SqlVisitor>());
             this.commit();
             log.fine("Inserted lock row into: " + escapeTableName(getDefaultSchemaName(), getDatabaseChangeLogLockTableName()));
         }
@@ -836,7 +836,7 @@ public abstract class AbstractDatabase implements Database {
 
             for (Change change : dropChanges) {
                 for (SqlStatement statement : change.generateStatements(this)) {
-                    ExecutorService.getExecutor(this).execute(statement, new ArrayList<SqlVisitor>());
+                    ExecutorService.getInstance().getWriteExecutor(this).execute(statement, new ArrayList<SqlVisitor>());
                 }
             }
 
@@ -875,15 +875,15 @@ public abstract class AbstractDatabase implements Database {
      * Tags the database changelog with the given string.
      */
     public void tag(String tagString) throws JDBCException {
-        Executor executor = ExecutorService.getExecutor(this);
+        WriteExecutor writeExecutor = ExecutorService.getInstance().getWriteExecutor(this);
         try {
-            int totalRows = executor.queryForInt(new RawSqlStatement("SELECT COUNT(*) FROM " + escapeTableName(getDefaultSchemaName(), getDatabaseChangeLogTableName())), new ArrayList<SqlVisitor>());
+            int totalRows = ExecutorService.getInstance().getReadExecutor(this).queryForInt(new RawSqlStatement("SELECT COUNT(*) FROM " + escapeTableName(getDefaultSchemaName(), getDatabaseChangeLogTableName())), new ArrayList<SqlVisitor>());
             if (totalRows == 0) {
                 throw new JDBCException("Cannot tag an empty database");
             }
 
-//            Timestamp lastExecutedDate = (Timestamp) this.getExecutor().queryForObject(createChangeToTagSQL(), Timestamp.class);
-            int rowsUpdated = executor.update(new TagDatabaseStatement(tagString), new ArrayList<SqlVisitor>());
+//            Timestamp lastExecutedDate = (Timestamp) this.getWriteExecutor().queryForObject(createChangeToTagSQL(), Timestamp.class);
+            int rowsUpdated = writeExecutor.update(new TagDatabaseStatement(tagString), new ArrayList<SqlVisitor>());
             if (rowsUpdated == 0) {
                 throw new JDBCException("Did not tag database change log correctly");
             }
@@ -898,7 +898,7 @@ public abstract class AbstractDatabase implements Database {
     }
 
     public boolean doesTagExist(String tag) throws JDBCException {
-        int count = ExecutorService.getExecutor(this).queryForInt(new RawSqlStatement("SELECT COUNT(*) FROM " + escapeTableName(getDefaultSchemaName(), getDatabaseChangeLogTableName()) + " WHERE TAG='" + tag + "'"), new ArrayList<SqlVisitor>());
+        int count = ExecutorService.getInstance().getReadExecutor(this).queryForInt(new RawSqlStatement("SELECT COUNT(*) FROM " + escapeTableName(getDefaultSchemaName(), getDatabaseChangeLogTableName()) + " WHERE TAG='" + tag + "'"), new ArrayList<SqlVisitor>());
         return count > 0;
     }
 
@@ -922,7 +922,7 @@ public abstract class AbstractDatabase implements Database {
         if (schemaName == null) {
             schemaName = convertRequestedSchemaToSchema(null);
         }
-        String definition = (String) ExecutorService.getExecutor(this).queryForObject(getViewDefinitionSql(schemaName, viewName), String.class, new ArrayList<SqlVisitor>());
+        String definition = (String) ExecutorService.getInstance().getReadExecutor(this).queryForObject(getViewDefinitionSql(schemaName, viewName), String.class, new ArrayList<SqlVisitor>());
         if (definition == null) {
             return null;
         }
@@ -1285,7 +1285,7 @@ public abstract class AbstractDatabase implements Database {
             }
             return ranChangeSetList;
         } catch (SQLException e) {
-            if (!ExecutorService.getExecutor(this).executesStatements()) {
+            if (!ExecutorService.getInstance().getWriteExecutor(this).executesStatements()) {
                 //probably not created, no problem
                 return new ArrayList<RanChangeSet>();
             } else {
@@ -1321,7 +1321,7 @@ public abstract class AbstractDatabase implements Database {
         statement.addColumnValue("LIQUIBASE", LiquibaseUtil.getBuildVersion());
 
 
-        ExecutorService.getExecutor(this).execute(statement, new ArrayList<SqlVisitor>());
+        ExecutorService.getInstance().getWriteExecutor(this).execute(statement, new ArrayList<SqlVisitor>());
 
         getRanChangeSetList().add(new RanChangeSet(changeSet));
     }
@@ -1334,7 +1334,7 @@ public abstract class AbstractDatabase implements Database {
         sql = sql.replaceFirst("\\?", escapeStringForDatabase(changeSet.getAuthor()));
         sql = sql.replaceFirst("\\?", escapeStringForDatabase(changeSet.getFilePath()));
 
-        ExecutorService.getExecutor(this).execute(new RawSqlStatement(sql), new ArrayList<SqlVisitor>());
+        ExecutorService.getInstance().getWriteExecutor(this).execute(new RawSqlStatement(sql), new ArrayList<SqlVisitor>());
         this.commit();
     }
 
@@ -1344,7 +1344,7 @@ public abstract class AbstractDatabase implements Database {
         sql = sql.replaceFirst("\\?", escapeStringForDatabase(changeSet.getAuthor()));
         sql = sql.replaceFirst("\\?", escapeStringForDatabase(changeSet.getFilePath()));
 
-        ExecutorService.getExecutor(this).execute(new RawSqlStatement(sql), new ArrayList<SqlVisitor>());
+        ExecutorService.getInstance().getWriteExecutor(this).execute(new RawSqlStatement(sql), new ArrayList<SqlVisitor>());
         commit();
 
         getRanChangeSetList().remove(new RanChangeSet(changeSet));
@@ -1450,7 +1450,7 @@ public abstract class AbstractDatabase implements Database {
     public void execute(SqlStatement[] statements, List<SqlVisitor> sqlVisitors) throws LiquibaseException {
         for (SqlStatement statement : statements) {
             LogFactory.getLogger().finest("Executing Statement: " + statement);
-            ExecutorService.getExecutor(this).execute(statement, sqlVisitors);
+            ExecutorService.getInstance().getWriteExecutor(this).execute(statement, sqlVisitors);
         }
     }
     

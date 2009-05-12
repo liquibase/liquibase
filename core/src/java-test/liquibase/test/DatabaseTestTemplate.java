@@ -2,8 +2,8 @@ package liquibase.test;
 
 import liquibase.database.Database;
 import liquibase.database.SQLiteDatabase;
-import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
+import liquibase.executor.DefaultExecutor;
 import liquibase.exception.MigrationFailedException;
 import liquibase.lock.LockService;
 import org.junit.ComparisonFailure;
@@ -24,7 +24,7 @@ public class DatabaseTestTemplate {
             if (database instanceof SQLiteDatabase) {
                 continue; //todo: find how to get tests to run correctly on SQLite
             }
-            ExecutorService.setExecutor(database, new Executor(database));
+            ExecutorService.getInstance().setWriteExecutor(database, new DefaultExecutor(database));
             LockService.getInstance(database).reset();
             if (database.getConnection() != null) {
                 LockService.getInstance(database).forceReleaseLock();

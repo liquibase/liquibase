@@ -6,14 +6,14 @@ public class AddDefaultValueGeneratorTest {
 //        new DatabaseTestTemplate().testOnAvailableDatabases(new DatabaseTest() {
 //
 //            public void performTest(Database database) throws Exception {
-//                new Executor(database).execute(new CreateTableStatement(null, TABLE_NAME)
+//                new WriteExecutor(database).execute(new CreateTableStatement(null, TABLE_NAME)
 //                        .addColumn("id", "int")
 //                        .addColumn(COLUMN_NAME, "varchar(50)"));
 //
 //                DatabaseSnapshot snapshot = database.createDatabaseSnapshot(null, null);
 //                assertNull(snapshot.getTable(TABLE_NAME).getColumn(COLUMN_NAME).getDefaultValue());
 //
-//                new Executor(database).execute(new AddDefaultValueStatement(null, TABLE_NAME, COLUMN_NAME, null, "New Default Value"));
+//                new WriteExecutor(database).execute(new AddDefaultValueStatement(null, TABLE_NAME, COLUMN_NAME, null, "New Default Value"));
 //
 //                snapshot = database.createDatabaseSnapshot(null, null);
 //                assertEquals("New Default Value", snapshot.getTable(TABLE_NAME).getColumn(COLUMN_NAME).getDefaultValue());
@@ -27,7 +27,7 @@ public class AddDefaultValueGeneratorTest {
 //                new SqlStatementDatabaseTest(null, new AddDefaultValueStatement(null, TABLE_NAME, COLUMN_NAME, null, Boolean.TRUE)) {
 //
 //                    protected void setup(Database database) throws Exception {
-//                        new Executor(database).execute(new CreateTableStatement(null, TABLE_NAME)
+//                        new WriteExecutor(database).execute(new CreateTableStatement(null, TABLE_NAME)
 //                                .addColumn("id", "int")
 //                                .addColumn(COLUMN_NAME, database.getBooleanType().getDataTypeName()));
 //                        super.setup(database);
@@ -57,7 +57,7 @@ public class AddDefaultValueGeneratorTest {
 //                new SqlStatementDatabaseTest(null, new AddDefaultValueStatement(null, TABLE_NAME, COLUMN_NAME, null, 42)) {
 //
 //                    protected void setup(Database database) throws Exception {
-//                        new Executor(database).execute(new CreateTableStatement(null, TABLE_NAME)
+//                        new WriteExecutor(database).execute(new CreateTableStatement(null, TABLE_NAME)
 //                                .addColumn("id", "int")
 //                                .addColumn(COLUMN_NAME, "int"));
 //                        super.setup(database);
@@ -80,7 +80,7 @@ public class AddDefaultValueGeneratorTest {
 //                new SqlStatementDatabaseTest(null, new AddDefaultValueStatement(null, TABLE_NAME, COLUMN_NAME, null, 42.56)) {
 //
 //                    protected void setup(Database database) throws Exception {
-//                        new Executor(database).execute(new CreateTableStatement(null, TABLE_NAME)
+//                        new WriteExecutor(database).execute(new CreateTableStatement(null, TABLE_NAME)
 //                                .addColumn("id", "int")
 //                                .addColumn(COLUMN_NAME, "float"));
 //                        super.setup(database);    //To change body of overridden methods use File | Settings | File Templates.
@@ -105,7 +105,7 @@ public class AddDefaultValueGeneratorTest {
 //                new SqlStatementDatabaseTest(null, new AddDefaultValueStatement(null, TABLE_NAME, COLUMN_NAME, null, date)) {
 //
 //                    protected void setup(Database database) throws JDBCException {
-//                        new Executor(database).execute(new CreateTableStatement(null, TABLE_NAME)
+//                        new WriteExecutor(database).execute(new CreateTableStatement(null, TABLE_NAME)
 //                                .addColumn("id", "int")
 //                                .addColumn(COLUMN_NAME, database.getDateTimeType().getDataTypeName()));
 //                    }
@@ -128,7 +128,7 @@ public class AddDefaultValueGeneratorTest {
 //                new SqlStatementDatabaseTest(null, new AddDefaultValueStatement(null, TABLE_NAME, COLUMN_NAME, null, date)) {
 //
 //                    protected void setup(Database database) throws Exception {
-//                        new Executor(database).execute(new CreateTableStatement(null, TABLE_NAME)
+//                        new WriteExecutor(database).execute(new CreateTableStatement(null, TABLE_NAME)
 //                                .addColumn("id", "int")
 //                                .addColumn(COLUMN_NAME, database.getDateType().getDataTypeName()));
 //
@@ -144,7 +144,7 @@ public class AddDefaultValueGeneratorTest {
 //                        if (defaultValue instanceof java.sql.Date) {
 //                            assertEquals(new ISODateFormat().format(date), new ISODateFormat().format(((java.sql.Date) defaultValue)));
 //                        } else { //mssql uses smalldatetime for date which is actually a timestamp
-//                            Calendar cal = Calendar.getExecutor();
+//                            Calendar cal = Calendar.getWriteExecutor();
 //                            cal.setTime(date);
 //                            cal.set(Calendar.HOUR, 0);
 //                            cal.set(Calendar.MINUTE, 0);
@@ -164,7 +164,7 @@ public class AddDefaultValueGeneratorTest {
 //                new SqlStatementDatabaseTest(null, new AddDefaultValueStatement(null, TABLE_NAME, COLUMN_NAME, null, time)) {
 //
 //                    protected void setup(Database database) throws Exception {
-//                        new Executor(database).execute(new CreateTableStatement(null, TABLE_NAME)
+//                        new WriteExecutor(database).execute(new CreateTableStatement(null, TABLE_NAME)
 //                                .addColumn("id", "int")
 //                                .addColumn(COLUMN_NAME, database.getTimeType().getDataTypeName()));
 //                        super.setup(database);
@@ -179,7 +179,7 @@ public class AddDefaultValueGeneratorTest {
 //                        if (defaultValue instanceof java.sql.Time) {
 //                            assertEquals(new ISODateFormat().format(time), new ISODateFormat().format(((java.sql.Time) defaultValue)));
 //                        } else { //mssql uses smalldatetime which is a timestamp, oracle uses date which is a date
-//                            Calendar cal = Calendar.getExecutor();
+//                            Calendar cal = Calendar.getWriteExecutor();
 //                            cal.setTime(time);
 //                            cal.set(Calendar.DAY_OF_YEAR, 0);
 //                            cal.set(Calendar.YEAR, 0);

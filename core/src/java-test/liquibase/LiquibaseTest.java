@@ -57,7 +57,7 @@ public class LiquibaseTest {
         liquibase.setUrl("jdbc:oracle:thin:@liquibase:1521:latest");
         assertFalse(liquibase.isSafeToRunMigration());
 
-        ExecutorService.setExecutor(testLiquibase.getDatabase(), new LoggingExecutor(new PrintWriter(System.out), testLiquibase.getDatabase()));
+        ExecutorService.getInstance().setWriteExecutor(testLiquibase.getDatabase(), new LoggingExecutor(new PrintWriter(System.out), testLiquibase.getDatabase()));
         assertTrue("Safe to run if outputing sql, even if non-localhost URL", liquibase.isSafeToRunMigration());
 
     }

@@ -345,7 +345,7 @@ public class SQLiteDatabaseSnapshot extends SqlDatabaseSnapshot {
 
         if (database.supportsSequences()) {
             //noinspection unchecked
-            List<String> sequenceNamess = (List<String>) ExecutorService.getExecutor(database).queryForList(database.createFindSequencesSQL(schema), String.class, new ArrayList<SqlVisitor>());
+            List<String> sequenceNamess = (List<String>) ExecutorService.getInstance().getReadExecutor(database).queryForList(database.createFindSequencesSQL(schema), String.class, new ArrayList<SqlVisitor>());
 
 
             for (String sequenceName : sequenceNamess) {

@@ -1,7 +1,6 @@
 package liquibase.database;
 
 import liquibase.Liquibase;
-import liquibase.executor.Executor;
 import liquibase.change.Change;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.RanChangeSet;

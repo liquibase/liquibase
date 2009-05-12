@@ -5,7 +5,6 @@ import liquibase.changelog.ChangeSet;
 import liquibase.changelog.RanChangeSet;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.DatabaseSnapshot;
-import liquibase.executor.Executor;
 import liquibase.diff.DiffStatusListener;
 import liquibase.exception.*;
 import liquibase.sql.visitor.SqlVisitor;

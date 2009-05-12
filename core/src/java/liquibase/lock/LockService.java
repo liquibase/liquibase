@@ -7,7 +7,7 @@ import liquibase.sql.visitor.SqlVisitor;
 import liquibase.statement.*;
 import liquibase.util.log.LogFactory;
 import liquibase.executor.ExecutorService;
-import liquibase.executor.Executor;
+import liquibase.executor.WriteExecutor;
 
 import java.text.DateFormat;
 import java.util.*;
@@ -81,7 +81,7 @@ public class LockService {
             return true;
         }
 
-        Executor executor = ExecutorService.getExecutor(database);
+        WriteExecutor writeExecutor = ExecutorService.getInstance().getWriteExecutor(database);
 
         try {
             database.rollback();
@@ -89,9 +89,9 @@ public class LockService {
 
             Boolean locked;
             try {
-                locked = (Boolean) executor.queryForObject(new SelectFromDatabaseChangeLogLockStatement("locked"), Boolean.class, new ArrayList<SqlVisitor>());
+                locked = (Boolean) ExecutorService.getInstance().getReadExecutor(database).queryForObject(new SelectFromDatabaseChangeLogLockStatement("locked"), Boolean.class, new ArrayList<SqlVisitor>());
             } catch (JDBCException e) {
-                if (!executor.executesStatements()) {
+                if (!writeExecutor.executesStatements()) {
                     //expected
                     locked = false;
                 } else {
@@ -102,10 +102,10 @@ public class LockService {
                 return false;
             } else {
 
-                executor.comment("Lock Database");
-                int rowsUpdated = executor.update(new LockDatabaseChangeLogStatement(), new ArrayList<SqlVisitor>());
+                writeExecutor.comment("Lock Database");
+                int rowsUpdated = writeExecutor.update(new LockDatabaseChangeLogStatement(), new ArrayList<SqlVisitor>());
                 if (rowsUpdated != 1) {
-                    if (!executor.executesStatements()) {
+                    if (!writeExecutor.executesStatements()) {
                         //expected
                     } else {
                         throw new LockException("Did not update change log lock correctly");
@@ -130,14 +130,14 @@ public class LockService {
     }
 
     public void releaseLock() throws LockException {
-        Executor executor = ExecutorService.getExecutor(database);
+        WriteExecutor writeExecutor = ExecutorService.getInstance().getWriteExecutor(database);
         try {
             if (database.doesChangeLogLockTableExist()) {
-                executor.comment("Release Database Lock");
+                writeExecutor.comment("Release Database Lock");
                 database.rollback();
-                int updatedRows = executor.update(new UnlockDatabaseChangeLogStatement(), new ArrayList<SqlVisitor>());
+                int updatedRows = writeExecutor.update(new UnlockDatabaseChangeLogStatement(), new ArrayList<SqlVisitor>());
                 if (updatedRows != 1) {
-                    if (executor.executesStatements()) {
+                    if (writeExecutor.executesStatements()) {
                         throw new LockException("Did not update change log lock correctly.\n\n" + updatedRows + "rows were updated instead of the expected 1 row.");
                     }
                 }
@@ -167,7 +167,7 @@ public class LockService {
 
             List<DatabaseChangeLogLock> allLocks = new ArrayList<DatabaseChangeLogLock>();
             SqlStatement sqlStatement = new SelectFromDatabaseChangeLogLockStatement("ID", "LOCKED", "LOCKGRANTED", "LOCKEDBY");
-            List<Map> rows = ExecutorService.getExecutor(database).queryForList(sqlStatement, new ArrayList<SqlVisitor>());
+            List<Map> rows = ExecutorService.getInstance().getReadExecutor(database).queryForList(sqlStatement, new ArrayList<SqlVisitor>());
             for (Map columnMap : rows) {
                 Object lockedValue = columnMap.get("LOCKED");
                 Boolean locked;

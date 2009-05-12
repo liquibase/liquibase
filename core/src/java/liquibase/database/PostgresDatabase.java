@@ -192,7 +192,7 @@ public class PostgresDatabase extends AbstractDatabase {
 //            if (schema == null) {
 //                schema = getConnectionUsername();
 //            }
-//            new Executor(this).execute(new RawSqlStatement("DROP OWNED BY " + schema));
+//            new WriteExecutor(this).execute(new RawSqlStatement("DROP OWNED BY " + schema));
 //
 //            getConnection().commit();
 //
