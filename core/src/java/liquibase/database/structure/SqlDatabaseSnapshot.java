@@ -572,7 +572,7 @@ public abstract class SqlDatabaseSnapshot implements DatabaseSnapshot {
 //        updateListeners("Reading unique constraints for " + database.toString() + " ...");
 //
 //        //noinspection unchecked
-//        List<String> sequenceNamess = (List<String>) new Executor(database).queryForList(database.findUniqueConstraints(schema), String.class);
+//        List<String> sequenceNamess = (List<String>) new WriteExecutor(database).queryForList(database.findUniqueConstraints(schema), String.class);
 //
 //        for (String sequenceName : sequenceNamess) {
 //            Sequence seq = new Sequence();
@@ -589,7 +589,7 @@ public abstract class SqlDatabaseSnapshot implements DatabaseSnapshot {
 
         if (database.supportsSequences()) {
             //noinspection unchecked
-            List<String> sequenceNames = (List<String>) ExecutorService.getExecutor(database).queryForList(database.createFindSequencesSQL(schema), String.class, new ArrayList<SqlVisitor>());
+            List<String> sequenceNames = (List<String>) ExecutorService.getInstance().getReadExecutor(database).queryForList(database.createFindSequencesSQL(schema), String.class, new ArrayList<SqlVisitor>());
 
 
             if (sequenceNames != null) {

@@ -28,12 +28,10 @@ import java.util.Map;
  * <b>Note: This class is currently intended for LiquiBase-internal use only and may change without notice in the future</b>
  */
 @SuppressWarnings({"unchecked"})
-public class Executor {
+public class DefaultExecutor extends AbstractExecutor implements WriteExecutor, ReadExecutor {
 
-    protected Database database;
-
-    public Executor(Database database) {
-        this.database = database;
+    public DefaultExecutor(Database database) {
+        super(database);
     }
 
     public boolean executesStatements() {
@@ -91,24 +89,6 @@ public class Executor {
         execute(new ExecuteStatementCallback(), sqlVisitors);
     }
 
-    protected String[] applyVisitors(SqlStatement statement, List<SqlVisitor> sqlVisitors) throws StatementNotSupportedOnDatabaseException, JDBCException {
-        Sql[] sql = SqlGeneratorFactory.getInstance().generateSql(statement, database);
-        if (sql == null) {
-            return new String[0];
-        }
-        String[] returnSql = new String[sql.length];
-
-        for (int i=0; i<sql.length; i++) {
-            returnSql[i] = sql[i].toSql();
-            for (SqlVisitor visitor : sqlVisitors) {
-                if (visitor.isApplicable(database)) {
-                    returnSql[i] = visitor.modifySql(returnSql[i], database);
-                }
-            }
-
-        }
-        return returnSql;
-    }
 
     public Object query(final SqlStatement sql, final ResultSetExtractor rse) throws JDBCException {
         return query(sql, rse, new ArrayList<SqlVisitor>());
@@ -288,11 +268,6 @@ public class Executor {
         return new SingleColumnRowMapper(requiredType);
     }
 
-    /**
-     * Adds a comment to the database.  Currently does nothing but is over-ridden in the output JDBC template
-     * @param message
-     * @throws JDBCException
-     */
     public void comment(String message) throws JDBCException {
         LogFactory.getLogger().info(message);
     }

@@ -1,7 +1,7 @@
 package liquibase.sqlgenerator;
 
 import liquibase.database.Database;
-import liquibase.executor.Executor;
+import liquibase.executor.ExecutorService;
 import liquibase.exception.JDBCException;
 import liquibase.statement.CreateTableStatement;
 import liquibase.statement.SqlStatement;
@@ -22,7 +22,7 @@ public abstract class AbstractSqlGeneratorTest<T extends SqlStatement> {
     protected abstract T createSampleSqlStatement();
 
     protected void dropAndCreateTable(CreateTableStatement statement, Database database) throws SQLException, JDBCException {
-        new Executor(database).execute(statement);
+        ExecutorService.getInstance().getWriteExecutor(database).execute(statement);
 
         if (!database.getAutoCommitMode()) {
             database.getConnection().commit();

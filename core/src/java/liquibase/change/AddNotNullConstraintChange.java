@@ -112,7 +112,7 @@ public class AddNotNullConstraintChange extends AbstractChange {
 //		if (defaultNullValue == null) {
 //			List<Map> null_rows = null;
 //			try {
-//				null_rows = database.getExecutor().
+//				null_rows = database.getWriteExecutor().
 //					queryForList(new RawSqlStatement(
 //						"SELECT * FROM `"+
 //						database.escapeTableName(getSchemaName(), getTableName())+

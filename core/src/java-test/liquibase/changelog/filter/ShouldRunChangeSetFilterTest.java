@@ -3,8 +3,8 @@ package liquibase.changelog.filter;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.RanChangeSet;
 import liquibase.database.Database;
-import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
+import liquibase.executor.WriteExecutor;
 import liquibase.exception.JDBCException;
 import liquibase.statement.UpdateStatement;
 import static org.easymock.classextension.EasyMock.*;
@@ -40,14 +40,14 @@ public class ShouldRunChangeSetFilterTest  {
         expect(database.getDatabaseChangeLogTableName()).andReturn("DATABASECHANGELOG").anyTimes();
         expect(database.getDefaultSchemaName()).andReturn(null).anyTimes();
 
-        Executor template = createMock(Executor.class);
+        WriteExecutor template = createMock(WriteExecutor.class);
         expect(template.update(isA(UpdateStatement.class), isA(List.class))).andReturn(1).anyTimes();
 //        template.comment("Lock Database");
 //        expectLastCall();
 
         replay(database);
         replay(template);
-        ExecutorService.setExecutor(database, template);
+        ExecutorService.getInstance().setWriteExecutor(database, template);
 
         ShouldRunChangeSetFilter filter = new ShouldRunChangeSetFilter(database);
 

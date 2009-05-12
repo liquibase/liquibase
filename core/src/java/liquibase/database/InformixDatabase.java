@@ -215,7 +215,7 @@ public class InformixDatabase extends AbstractDatabase {
 	@Override
 	public String getViewDefinition(String schemaName, String viewName)
 			throws JDBCException {
-		List<Map> retList = ExecutorService.getExecutor(this).queryForList(getViewDefinitionSql(schemaName, viewName));
+		List<Map> retList = ExecutorService.getInstance().getReadExecutor(this).queryForList(getViewDefinitionSql(schemaName, viewName));
 		// building the view definition from the multiple rows
 		StringBuilder sb = new StringBuilder();
 		for (Map rowMap : retList) {

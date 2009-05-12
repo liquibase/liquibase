@@ -2,7 +2,7 @@ package liquibase.statementexecute;
 
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
-import liquibase.executor.Executor;
+import liquibase.executor.ExecutorService;
 import liquibase.test.TestContext;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
@@ -176,7 +176,7 @@ public abstract class AbstractExecuteTest {
             List<? extends SqlStatement> setupStatements = setupStatements(database);
             if (setupStatements != null) {
                 for (SqlStatement statement : setupStatements) {
-                    new Executor(database).execute(statement);
+                    ExecutorService.getInstance().getWriteExecutor(database).execute(statement);
                 }
             }
             connectionStatement.close();

@@ -6,7 +6,6 @@ import liquibase.changelog.RanChangeSet;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.DatabaseSnapshot;
 import liquibase.database.structure.HibernateDatabaseSnapshot;
-import liquibase.executor.Executor;
 import liquibase.diff.DiffStatusListener;
 import liquibase.exception.*;
 import liquibase.sql.visitor.SqlVisitor;
@@ -20,8 +19,6 @@ import java.sql.*;
 import java.text.ParseException;
 import java.util.List;
 import java.util.Set;
-import java.util.ArrayList;
-import java.util.Map;
 
 public class HibernateDatabase implements Database {
 

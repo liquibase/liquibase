@@ -3,6 +3,7 @@ package org.liquibase.ide.common.change.wizard;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.ChangeSet;
 import liquibase.Liquibase;
+import liquibase.executor.ExecutorService;
 import liquibase.change.Change;
 import liquibase.database.Database;
 import liquibase.statement.SqlStatement;
@@ -49,7 +50,7 @@ public class RefactorChangeExecutor {
             liquibase.database.Database liquibaseDatabase = liquibase.getDatabase();
             for (Change change : changeSet.getChanges()) {
                 for (SqlStatement sql : change.generateStatements(liquibaseDatabase)) {
-                    liquibaseDatabase.getExecutor().execute(sql);
+                    ExecutorService.getInstance().getWriteExecutor(database).execute(sql);
                 }
             }
             monitor.worked(25);

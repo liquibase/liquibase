@@ -15,7 +15,7 @@ import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
 import liquibase.util.log.LogFactory;
 import liquibase.executor.ExecutorService;
-import liquibase.executor.Executor;
+import liquibase.executor.WriteExecutor;
 
 import java.util.*;
 import java.util.logging.Level;
@@ -126,12 +126,12 @@ public class ChangeSet {
         boolean skipChange = false;
         boolean markRan = true;
 
-        Executor executor = ExecutorService.getExecutor(database);
+        WriteExecutor writeExecutor = ExecutorService.getInstance().getWriteExecutor(database);
         try {
             database.setAutoCommit(!runInTransaction);
 
 
-            executor.comment("Changeset " + toString());
+            writeExecutor.comment("Changeset " + toString());
             if (StringUtils.trimToNull(getComments()) != null) {
                 String comments = getComments();
                 String[] lines = comments.split("\n");
@@ -140,10 +140,10 @@ public class ChangeSet {
                         lines[i] = database.getLineComment() + " " + lines[i];
                     }
                 }
-                executor.comment(StringUtils.join(Arrays.asList(lines), "\n"));
+                writeExecutor.comment(StringUtils.join(Arrays.asList(lines), "\n"));
             }
 
-            if (executor.executesStatements() && rootPrecondition != null) {
+            if (writeExecutor.executesStatements() && rootPrecondition != null) {
                 try {
                     rootPrecondition.check(database, null);
                 } catch (PreconditionFailedException e) {
@@ -253,13 +253,13 @@ public class ChangeSet {
 
     public void rolback(Database database) throws RollbackFailedException {
         try {
-            Executor executor = ExecutorService.getExecutor(database);
-            executor.comment("Rolling Back ChangeSet: " + toString());
+            WriteExecutor writeExecutor = ExecutorService.getInstance().getWriteExecutor(database);
+            writeExecutor.comment("Rolling Back ChangeSet: " + toString());
             if (rollBackChanges != null && rollBackChanges.size() > 0) {
                 for (Change rollback : rollBackChanges) {
                     for (SqlStatement statement : rollback.generateStatements(database)) {
                         try {
-                            executor.execute(statement, sqlVisitors);
+                            writeExecutor.execute(statement, sqlVisitors);
                         } catch (JDBCException e) {
                             throw new RollbackFailedException("Error executing custom SQL [" + statement + "]", e);
                         }

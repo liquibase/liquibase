@@ -4,7 +4,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
- * An interface used by {@link Executor} for mapping rows of a
+ * An interface used by {@link WriteExecutor} for mapping rows of a
  * {@link java.sql.ResultSet} on a per-row basis. Implementations of this
  * interface perform the actual work of mapping each row to a result object,
  * but don't need to worry about exception handling.
@@ -13,7 +13,7 @@ import java.sql.SQLException;
  * <p/>
  *
  * @author Spring Framework
- * @see Executor
+ * @see WriteExecutor
  * @see RowCallbackHandler
  * @see ResultSetExtractor
  */
