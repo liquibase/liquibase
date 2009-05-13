@@ -9,6 +9,11 @@ public class H2SampleChangeLogRunnerTest extends AbstractSimpleChangeLogRunnerTe
         super("h2", "jdbc:h2:mem:liquibase");
     }
 
+    @Override
+    public void testRunChangeLog() throws Exception {
+        super.testRunChangeLog(); 
+    }
+
     protected void setUp() throws Exception {
         super.setUp();
     }

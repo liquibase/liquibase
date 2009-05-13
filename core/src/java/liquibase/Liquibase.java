@@ -105,14 +105,12 @@ public class Liquibase {
 
             DatabaseChangeLog changeLog = ChangeLogParserFactory.getInstance().getParser(changeLogFile).parse(changeLogFile, changeLogParameters, fileOpener);
             changeLog.validate(database);
-            ChangeLogIterator logIterator = new ChangeLogIterator(changeLog,
+            ChangeLogIterator changeLogIterator = new ChangeLogIterator(changeLog,
                     new ShouldRunChangeSetFilter(database),
                     new ContextChangeSetFilter(contexts),
                     new DbmsChangeSetFilter(database));
 
-            logIterator.run(new UpdateVisitor(database), database);
-        } catch (LiquibaseException e) {
-            throw e;
+            changeLogIterator.run(new UpdateVisitor(database), database);
         } finally {
             try {
                 lockService.releaseLock();

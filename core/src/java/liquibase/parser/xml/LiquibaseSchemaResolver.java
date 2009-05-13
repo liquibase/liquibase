@@ -11,7 +11,7 @@ import java.io.InputStream;
  */
 public class LiquibaseSchemaResolver implements EntityResolver {
 
-    private static final String SEARCH_PACKAGE = "liquibase/";
+    private static final String SEARCH_PACKAGE = "liquibase/parser/xml/";
 
     public InputSource resolveEntity(String publicId, String systemId) throws IOException {
         if (systemId != null) {
