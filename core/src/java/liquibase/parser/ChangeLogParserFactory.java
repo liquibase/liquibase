@@ -26,7 +26,7 @@ public class ChangeLogParserFactory {
     private ChangeLogParserFactory() {
         Class[] classes;
         try {
-            classes = PluginUtil.getClasses("liquibase.changelog.parser", ChangeLogParser.class);
+            classes = PluginUtil.getClasses("liquibase.parser", ChangeLogParser.class);
 
             for (Class clazz : classes) {
                     register((ChangeLogParser) clazz.getConstructor().newInstance());
