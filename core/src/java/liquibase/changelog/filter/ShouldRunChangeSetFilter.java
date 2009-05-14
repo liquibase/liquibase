@@ -28,9 +28,9 @@ public class ShouldRunChangeSetFilter implements ChangeSetFilter {
                     && ranChangeSet.getAuthor().equals(changeSet.getAuthor())
                     && isPathEquals(changeSet, ranChangeSet)) {
 
-                if (!changeSet.getMd5sum().equals(ranChangeSet.getMd5sum())) {
+                if (!changeSet.generateCheckSum().equals(ranChangeSet.getLastCheckSum())) {
                     UpdateStatement md5sumUpdateStatement = new UpdateStatement(database.getDefaultSchemaName(), database.getDatabaseChangeLogTableName());
-                    md5sumUpdateStatement.addNewColumnValue("MD5SUM", changeSet.getMd5sum());
+                    md5sumUpdateStatement.addNewColumnValue("MD5SUM", changeSet.generateCheckSum());
                     md5sumUpdateStatement.setWhereClause("ID = ? AND AUTHOR = ? AND FILENAME = ?");
                     md5sumUpdateStatement.addWhereParameter(changeSet.getId());
                     md5sumUpdateStatement.addWhereParameter(changeSet.getAuthor());
@@ -45,7 +45,7 @@ public class ShouldRunChangeSetFilter implements ChangeSetFilter {
 
                 if (changeSet.shouldAlwaysRun()) {
                     return true;
-                } else if (changeSet.shouldRunOnChange() && !changeSet.getMd5sum().equals(ranChangeSet.getMd5sum())) {
+                } else if (changeSet.shouldRunOnChange() && !changeSet.generateCheckSum().equals(ranChangeSet.getLastCheckSum())) {
                     return true;
                 } else {
                     return false;

@@ -3,6 +3,7 @@ package liquibase.changelog.filter;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.RanChangeSet;
 import liquibase.exception.RollbackFailedException;
+import liquibase.change.CheckSum;
 import static org.junit.Assert.*;
 import org.junit.Test;
 
@@ -24,9 +25,9 @@ public class AfterTagChangeSetFilterTest {
     @Test
     public void accepts() throws Exception {
         ArrayList<RanChangeSet> ranChanges = new ArrayList<RanChangeSet>();
-        ranChanges.add(new RanChangeSet("path/changelog", "1", "testAuthor", "12345", new Date(), null));
-        ranChanges.add(new RanChangeSet("path/changelog", "2", "testAuthor", "12345", new Date(), "tag1"));
-        ranChanges.add(new RanChangeSet("path/changelog", "3", "testAuthor", "12345", new Date(), null));
+        ranChanges.add(new RanChangeSet("path/changelog", "1", "testAuthor", CheckSum.parse("12345"), new Date(), null));
+        ranChanges.add(new RanChangeSet("path/changelog", "2", "testAuthor", CheckSum.parse("12345"), new Date(), "tag1"));
+        ranChanges.add(new RanChangeSet("path/changelog", "3", "testAuthor", CheckSum.parse("12345"), new Date(), null));
         AfterTagChangeSetFilter filter = new AfterTagChangeSetFilter("tag1", ranChanges);
 
         assertFalse(filter.accepts(new ChangeSet("1", "testAuthor", false, false, "path/changelog", null, null, null)));
