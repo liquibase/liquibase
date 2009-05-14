@@ -581,7 +581,7 @@ public abstract class AbstractDatabase implements Database {
                 .addPrimaryKeyColumn("AUTHOR", "VARCHAR(63)", null, null, new NotNullConstraint())
                 .addPrimaryKeyColumn("FILENAME", "VARCHAR(200)", null, null, new NotNullConstraint())
                 .addColumn("DATEEXECUTED", getDateTimeType().getDataTypeName(), new NotNullConstraint())
-                .addColumn("MD5SUM", "VARCHAR(32)")
+                .addColumn("MD5SUM", "VARCHAR(35)")
                 .addColumn("DESCRIPTION", "VARCHAR(255)")
                 .addColumn("COMMENTS", "VARCHAR(255)")
                 .addColumn("TAG", "VARCHAR(255)")
@@ -1206,12 +1206,12 @@ public abstract class AbstractDatabase implements Database {
         if (foundRan == null) {
             return ChangeSet.RunStatus.NOT_RAN;
         } else {
-            if (foundRan.getMd5sum() == null) {
+            if (foundRan.getLastCheckSum() == null) {
                 try {
                     log.info("Updating NULL md5sum for " + changeSet.toString());
                     DatabaseConnection connection = getConnection();
                     PreparedStatement updatePstmt = connection.prepareStatement("UPDATE " + escapeTableName(getDefaultSchemaName(), getDatabaseChangeLogTableName()) + " SET MD5SUM=? WHERE ID=? AND AUTHOR=? AND FILENAME=?");
-                    updatePstmt.setString(1, changeSet.getMd5sum());
+                    updatePstmt.setString(1, changeSet.generateCheckSum().toString());
                     updatePstmt.setString(2, changeSet.getId());
                     updatePstmt.setString(3, changeSet.getAuthor());
                     updatePstmt.setString(4, changeSet.getFilePath());
@@ -1225,7 +1225,7 @@ public abstract class AbstractDatabase implements Database {
 
                 return ChangeSet.RunStatus.ALREADY_RAN;
             } else {
-                if (foundRan.getMd5sum().equals(changeSet.getMd5sum())) {
+                if (foundRan.getLastCheckSum().equals(changeSet.generateCheckSum())) {
                     return ChangeSet.RunStatus.ALREADY_RAN;
                 } else {
                     if (changeSet.shouldRunOnChange()) {
@@ -1277,7 +1277,7 @@ public abstract class AbstractDatabase implements Database {
                     String md5sum = rs.getString("MD5SUM");
                     Date dateExecuted = rs.getTimestamp("DATEEXECUTED");
                     String tag = rs.getString("TAG");
-                    RanChangeSet ranChangeSet = new RanChangeSet(fileName, id, author, md5sum, dateExecuted, tag);
+                    RanChangeSet ranChangeSet = new RanChangeSet(fileName, id, author, CheckSum.parse(md5sum), dateExecuted, tag);
                     ranChangeSetList.add(ranChangeSet);
                 }
                 rs.close();
@@ -1315,7 +1315,7 @@ public abstract class AbstractDatabase implements Database {
         statement.addColumnValue("AUTHOR", changeSet.getAuthor());
         statement.addColumnValue("FILENAME", changeSet.getFilePath());
         statement.addColumnValue("DATEEXECUTED", new ComputedDateValue(dateValue));
-        statement.addColumnValue("MD5SUM", changeSet.getMd5sum());
+        statement.addColumnValue("MD5SUM", changeSet.generateCheckSum().toString());
         statement.addColumnValue("DESCRIPTION", limitSize(changeSet.getDescription()));
         statement.addColumnValue("COMMENTS", limitSize(StringUtils.trimToEmpty(changeSet.getComments())));
         statement.addColumnValue("LIQUIBASE", LiquibaseUtil.getBuildVersion());
@@ -1329,7 +1329,7 @@ public abstract class AbstractDatabase implements Database {
     public void markChangeSetAsReRan(ChangeSet changeSet) throws JDBCException {
         String dateValue = getCurrentDateTimeFunction();
         String sql = "UPDATE " + escapeTableName(getDefaultSchemaName(), getDatabaseChangeLogTableName()) + " SET DATEEXECUTED=" + dateValue + ", MD5SUM='?' WHERE ID='?' AND AUTHOR='?' AND FILENAME='?'";
-        sql = sql.replaceFirst("\\?", escapeStringForDatabase(changeSet.getMd5sum()));
+        sql = sql.replaceFirst("\\?", escapeStringForDatabase(changeSet.generateCheckSum().toString()));
         sql = sql.replaceFirst("\\?", escapeStringForDatabase(changeSet.getId()));
         sql = sql.replaceFirst("\\?", escapeStringForDatabase(changeSet.getAuthor()));
         sql = sql.replaceFirst("\\?", escapeStringForDatabase(changeSet.getFilePath()));

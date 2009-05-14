@@ -1,5 +1,7 @@
 package liquibase.changelog;
 
+import liquibase.change.CheckSum;
+
 import java.util.Date;
 
 /**
@@ -9,7 +11,7 @@ public class RanChangeSet {
     private final String changeLog;
     private final String id;
     private final String author;
-    private final String md5sum;
+    private final CheckSum lastCheckSum;
     private final Date dateExecuted;
     private String tag;
 
@@ -17,16 +19,16 @@ public class RanChangeSet {
         this(changeSet.getFilePath(),
              changeSet.getId(),
              changeSet.getAuthor(),
-             changeSet.getMd5sum(),
+             changeSet.generateCheckSum(),
              new Date(),
              null);
     }
 
-    public RanChangeSet(String changeLog, String id, String author, String md5sum, Date dateExecuted, String tag) {
+    public RanChangeSet(String changeLog, String id, String author, CheckSum lastCheckSum, Date dateExecuted, String tag) {
         this.changeLog = changeLog;
         this.id = id;
         this.author = author;
-        this.md5sum = md5sum;
+        this.lastCheckSum = lastCheckSum;
         if (dateExecuted == null) {
             this.dateExecuted = null;
         } else {
@@ -47,8 +49,8 @@ public class RanChangeSet {
         return author;
     }
 
-    public String getMd5sum() {
-        return md5sum;
+    public CheckSum getLastCheckSum() {
+        return lastCheckSum;
     }
 
     public Date getDateExecuted() {

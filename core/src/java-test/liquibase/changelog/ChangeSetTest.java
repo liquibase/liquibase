@@ -3,6 +3,7 @@ package liquibase.changelog;
 import liquibase.change.AddDefaultValueChange;
 import liquibase.change.CreateTableChange;
 import liquibase.change.InsertDataChange;
+import liquibase.change.CheckSum;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import org.junit.Test;
@@ -29,7 +30,7 @@ public class ChangeSetTest {
     }
     
     @Test
-    public void getMd5Sum() {
+    public void generateCheckSum() {
         ChangeSet changeSet1 = new ChangeSet("testId", "testAuthor", false, false,null,  null, null, null);
         ChangeSet changeSet2 = new ChangeSet("testId", "testAuthor", false, false,null,  null, null, null);
 
@@ -45,10 +46,10 @@ public class ChangeSetTest {
         changeSet1.addChange(change);
         changeSet2.addChange(change);
 
-        String md5Sum1 = changeSet1.getMd5sum();
+        CheckSum md5Sum1 = changeSet1.generateCheckSum();
 
         change.setSchemaName("SCHEMA_NAME2");
-        String md5Sum2 = changeSet2.getMd5sum();
+        CheckSum md5Sum2 = changeSet2.generateCheckSum();
         assertFalse(md5Sum1.equals(md5Sum2));
     }
 }

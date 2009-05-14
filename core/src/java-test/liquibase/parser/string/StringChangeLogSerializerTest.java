@@ -3,11 +3,12 @@ package liquibase.parser.string;
 import liquibase.change.AddColumnChange;
 import liquibase.change.ColumnConfig;
 import liquibase.change.SQLFileChange;
+import liquibase.changelog.ChangeSet;
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 public class StringChangeLogSerializerTest {
-    
+
     @Test
     public void serialized_AddColumnChange() {
         AddColumnChange change = new AddColumnChange();
@@ -64,6 +65,29 @@ public class StringChangeLogSerializerTest {
                 "    schemaName=\"SCHEMA_NAME\"\n" +
                 "    tableName=\"TABLE_NAME\"\n" +
                 "]", new StringChangeLogSerializer().serialize(change));
+    }
+
+    @Test
+    public void serialized_changeSet() {
+        ChangeSet changeSet = new ChangeSet("1", "ted", true, false, "com/example/test.xml", "c:/com/exmple/test", "context1, context2", "mysql, oracle");
+        AddColumnChange change = new AddColumnChange();
+        changeSet.addChange(change);
+
+        assertEquals("changeSet:[\n" +
+                "    alwaysRun=\"true\"\n"+
+                "    author=\"test\"\n"+
+                "    contextList=\"context1,context2\"\n"+
+                "    dbmsList=\"mysql,oracle\"\n"+
+                "    filePath=\"com/example/test.xml\"\n"+
+                "    id=\"1\"\n"+
+                "    physicalFilePath=\"c:/com/example/test.xml\"\n"+
+                "    runOnChange=\"false\"\n"+
+                "    changes: [\n"+
+                "        addColumn:[\n" +
+                "            columns=[]\n" +
+                "        ]\n" +
+                "    ]\n" +
+                "]", new StringChangeLogSerializer().serialize(changeSet));
     }
 
     @Test

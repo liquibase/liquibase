@@ -2,6 +2,7 @@ package liquibase.changelog.filter;
 
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.RanChangeSet;
+import liquibase.change.CheckSum;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
@@ -21,8 +22,8 @@ public class AlreadyRanChangeSetFilterTest {
     @Test
     public void accepts() {
         ArrayList<RanChangeSet> ranChanges = new ArrayList<RanChangeSet>();
-        ranChanges.add(new RanChangeSet("path/changelog", "1", "testAuthor", "12345", new Date(), null));
-        ranChanges.add(new RanChangeSet("path/changelog", "2", "testAuthor", "12345", new Date(), null));
+        ranChanges.add(new RanChangeSet("path/changelog", "1", "testAuthor", CheckSum.parse("12345"), new Date(), null));
+        ranChanges.add(new RanChangeSet("path/changelog", "2", "testAuthor", CheckSum.parse("12345"), new Date(), null));
         AlreadyRanChangeSetFilter filter = new AlreadyRanChangeSetFilter(ranChanges);
 
         //everything same

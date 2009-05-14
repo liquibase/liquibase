@@ -152,7 +152,7 @@ public class SQLFileChange extends AbstractSQLChange {
      * @see liquibase.change.AbstractChange#generateCheckSum()
      */
     public CheckSum generateCheckSum() {
-        return new CheckSum(getSql());
+        return CheckSum.compute(getSql());
     }
 
     public String getConfirmationMessage() {

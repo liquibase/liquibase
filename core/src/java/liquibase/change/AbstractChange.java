@@ -101,7 +101,7 @@ public abstract class AbstractChange implements Change {
      * @see liquibase.change.Change#generateCheckSum()
      */
     public CheckSum generateCheckSum() {
-        return new CheckSum(new StringChangeLogSerializer().serialize(this));
+        return CheckSum.compute(new StringChangeLogSerializer().serialize(this));
     }
 
     //~ ------------------------------------------------------------------------------- private methods

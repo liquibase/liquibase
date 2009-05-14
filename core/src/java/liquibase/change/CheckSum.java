@@ -5,15 +5,28 @@ import liquibase.util.MD5Util;
 import java.io.InputStream;
 
 public class CheckSum {
-    private int version = 2;
+    private int version;
     private String checksum;
 
-    public CheckSum(String valueToChecksum) {
-        this.checksum = MD5Util.computeMD5(valueToChecksum);
+    private CheckSum(String checksum, int version) {
+        this.checksum = checksum;
+        this.version = version;
     }
 
-    public CheckSum(InputStream stream) {
-        this.checksum = MD5Util.computeMD5(stream);
+    public static CheckSum parse(String checksumValue) {
+        if (checksumValue.startsWith("2:")) {
+            return new CheckSum(checksumValue.substring(2), 2);
+        } else {
+            return new CheckSum(checksumValue, 1);
+        }
+    }
+
+    public static CheckSum compute(String valueToChecksum) {
+        return new CheckSum(MD5Util.computeMD5(valueToChecksum), 2);
+    }
+
+    public static CheckSum compute(InputStream stream) {
+        return new CheckSum(MD5Util.computeMD5(stream), 2);
     }
 
     @Override
@@ -23,5 +36,15 @@ public class CheckSum {
 
     public int getVersion() {
         return version;
+    }
+
+    @Override
+    public int hashCode() {
+        return toString().hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return this.toString().equals(obj.toString());
     }
 }

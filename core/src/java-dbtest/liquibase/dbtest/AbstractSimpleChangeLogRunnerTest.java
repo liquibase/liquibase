@@ -151,6 +151,19 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
 //        System.out.println();
     }
 
+       public void testUpdateTwice() throws Exception {
+        if (database == null) {
+            return;
+        }
+
+        Liquibase liquibase = createLiquibase(completeChangeLog);
+        liquibase.dropAll(getSchemasToDrop());
+
+        liquibase = createLiquibase(completeChangeLog);
+        liquibase.update(this.contexts);
+        liquibase.update(this.contexts);
+    }
+
     public void testRollbackableChangeLog() throws Exception {
         if (database == null) {
             return;

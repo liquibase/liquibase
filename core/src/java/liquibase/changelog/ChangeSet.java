@@ -3,6 +3,7 @@ package liquibase.changelog;
 import liquibase.change.Change;
 import liquibase.change.EmptyChange;
 import liquibase.change.RawSQLChange;
+import liquibase.change.CheckSum;
 import liquibase.database.Database;
 import liquibase.exception.*;
 import liquibase.precondition.ErrorPrecondition;
@@ -10,12 +11,12 @@ import liquibase.precondition.FailedPrecondition;
 import liquibase.precondition.Preconditions;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.statement.SqlStatement;
-import liquibase.util.MD5Util;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
 import liquibase.util.log.LogFactory;
 import liquibase.executor.ExecutorService;
 import liquibase.executor.WriteExecutor;
+import liquibase.parser.string.StringChangeLogSerializer;
 
 import java.util.*;
 import java.util.logging.Level;
@@ -36,13 +37,12 @@ public class ChangeSet {
     private String filePath = "UNKNOWN CHANGE LOG";
     private String physicalFilePath;
     private Logger log;
-    private String md5sum;
     private boolean alwaysRun;
     private boolean runOnChange;
     private Set<String> contexts;
     private Set<String> dbmsSet;
     private Boolean failOnError;
-    private Set<String> validCheckSums = new HashSet<String>();
+    private Set<CheckSum> validCheckSums = new HashSet<CheckSum>();
     private boolean runInTransaction;
 
     private List<Change> rollBackChanges = new ArrayList<Change>();
@@ -62,7 +62,7 @@ public class ChangeSet {
     }
 
     public ChangeSet(String id, String author, boolean alwaysRun, boolean runOnChange, String filePath, String physicalFilePath, String contextList, String dbmsList) {
-        this(id, author,  alwaysRun, runOnChange, filePath, physicalFilePath, contextList,  dbmsList, false);
+        this(id, author, alwaysRun, runOnChange, filePath, physicalFilePath, contextList, dbmsList, false);
     }
 
     public ChangeSet(String id, String author, boolean alwaysRun, boolean runOnChange, String filePath, String physicalFilePath, String contextList, String dbmsList, boolean runInTransaction) {
@@ -103,16 +103,13 @@ public class ChangeSet {
         }
     }
 
-    public String getMd5sum() {
-        if (md5sum == null) {
+    public CheckSum generateCheckSum() {
             StringBuffer stringToMD5 = new StringBuffer();
             for (Change change : getChanges()) {
                 stringToMD5.append(change.generateCheckSum()).append(":");
             }
 
-            md5sum = MD5Util.computeMD5(stringToMD5.toString());
-        }
-        return md5sum;
+            return CheckSum.compute(stringToMD5.toString());
     }
 
     /**
@@ -161,15 +158,15 @@ public class ChangeSet {
                         skipChange = true;
                         markRan = false;
 
-                        log.log(Level.INFO, "Continuing past ChangeSet: " + toString() +" due to precondition failure: " + message);
+                        log.log(Level.INFO, "Continuing past ChangeSet: " + toString() + " due to precondition failure: " + message);
                     } else if (rootPrecondition.getOnFail().equals(Preconditions.FailOption.MARK_RAN)) {
                         skipChange = true;
 
-                        log.log(Level.INFO, "Marking ChangeSet: " + toString() +" ran due to precondition failure: " + message);
+                        log.log(Level.INFO, "Marking ChangeSet: " + toString() + " ran due to precondition failure: " + message);
                     } else if (rootPrecondition.getOnFail().equals(Preconditions.FailOption.WARN)) {
                         log.log(Level.WARNING, "Running change set despite failed precondition.  ChangeSet: " + toString() + ": " + message);
                     } else {
-                        throw new MigrationFailedException(this, "Unexpected precondition onFail attribute: "+rootPrecondition.getOnFail());
+                        throw new MigrationFailedException(this, "Unexpected precondition onFail attribute: " + rootPrecondition.getOnFail());
                     }
                 } catch (PreconditionErrorException e) {
                     StringBuffer message = new StringBuffer();
@@ -185,16 +182,16 @@ public class ChangeSet {
                         skipChange = true;
                         markRan = false;
 
-                        log.log(Level.INFO, "Continuing past ChangeSet: " + toString() +" due to precondition error: " + message);
+                        log.log(Level.INFO, "Continuing past ChangeSet: " + toString() + " due to precondition error: " + message);
                     } else if (rootPrecondition.getOnError().equals(Preconditions.ErrorOption.MARK_RAN)) {
                         skipChange = true;
                         markRan = true;
 
-                        log.log(Level.INFO, "Marking ChangeSet: " + toString() +" due ran to precondition error: " + message);
+                        log.log(Level.INFO, "Marking ChangeSet: " + toString() + " due ran to precondition error: " + message);
                     } else if (rootPrecondition.getOnError().equals(Preconditions.ErrorOption.WARN)) {
                         log.log(Level.WARNING, "Running change set despite errored precondition.  ChangeSet: " + toString() + ": " + message);
                     } else {
-                        throw new MigrationFailedException(this, "Unexpected precondition onError attribute: "+rootPrecondition.getOnError());
+                        throw new MigrationFailedException(this, "Unexpected precondition onError attribute: " + rootPrecondition.getOnError());
                     }
 
                     database.rollback();
@@ -317,7 +314,7 @@ public class ChangeSet {
     }
 
     public String toString(boolean includeMD5Sum) {
-        return filePath + "::" + getId() + "::" + getAuthor() + (includeMD5Sum ? ("::(MD5Sum: " + getMd5sum() + ")") : "");
+        return filePath + "::" + getId() + "::" + getAuthor() + (includeMD5Sum ? ("::(MD5Sum: " + generateCheckSum() + ")") : "");
     }
 
     public String toString() {
@@ -417,11 +414,11 @@ public class ChangeSet {
     }
 
     public void addValidCheckSum(String text) {
-        validCheckSums.add(text);
+        validCheckSums.add(CheckSum.parse(text));
     }
 
-    public boolean isCheckSumValid(String storedCheckSum) {
-        String currentMd5Sum = getMd5sum();
+    public boolean isCheckSumValid(CheckSum storedCheckSum) {
+        CheckSum currentMd5Sum = generateCheckSum();
         if (currentMd5Sum == null) {
             return true;
         }
@@ -432,7 +429,7 @@ public class ChangeSet {
             return true;
         }
 
-        for (String validCheckSum : validCheckSums) {
+        for (CheckSum validCheckSum : validCheckSums) {
             if (currentMd5Sum.equals(validCheckSum)) {
                 return true;
             }

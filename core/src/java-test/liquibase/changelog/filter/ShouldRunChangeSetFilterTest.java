@@ -7,6 +7,7 @@ import liquibase.executor.ExecutorService;
 import liquibase.executor.WriteExecutor;
 import liquibase.exception.JDBCException;
 import liquibase.statement.UpdateStatement;
+import liquibase.change.CheckSum;
 import static org.easymock.classextension.EasyMock.*;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -32,8 +33,8 @@ public class ShouldRunChangeSetFilterTest  {
     @Test
     public void accepts() throws JDBCException {
         ArrayList<RanChangeSet> ranChanges = new ArrayList<RanChangeSet>();
-        ranChanges.add(new RanChangeSet("path/changelog", "1", "testAuthor", "12345", new Date(), null));
-        ranChanges.add(new RanChangeSet("path/changelog", "2", "testAuthor", "12345", new Date(), null));
+        ranChanges.add(new RanChangeSet("path/changelog", "1", "testAuthor", CheckSum.parse("12345"), new Date(), null));
+        ranChanges.add(new RanChangeSet("path/changelog", "2", "testAuthor", CheckSum.parse("12345"), new Date(), null));
 
         Database database = createMock(Database.class);
         expect(database.getRanChangeSetList()).andReturn(ranChanges);
