@@ -11,7 +11,7 @@ import liquibase.resource.FileOpener;
  * <br><br>
  * See http://www.liquibase.org/manual/custom_refactoring_class for more information.
  */
-interface CustomChange {
+public interface CustomChange {
 
 
     /**
