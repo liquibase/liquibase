@@ -285,4 +285,9 @@ public class MSSQLDatabase extends AbstractDatabase {
     public boolean supportsRestrictForeignKeys() {
         return false;
     }
+
+    @Override
+    public String escapeColumnName(String schemaName, String tableName, String columnName) {
+        return "["+columnName+"]";
+    }
 }

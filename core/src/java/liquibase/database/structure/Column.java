@@ -196,6 +196,7 @@ public class Column implements DatabaseObject, Comparable<Column> {
         List<Integer> oneParam = Arrays.asList(
                 Types.CHAR,
                 Types.VARCHAR,
+                -9, //nvarchar
                 Types.VARBINARY,
                 Types.DOUBLE,
                 Types.FLOAT
