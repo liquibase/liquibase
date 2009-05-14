@@ -1,9 +1,6 @@
 package liquibase.changelog;
 
-import liquibase.change.Change;
-import liquibase.change.EmptyChange;
-import liquibase.change.RawSQLChange;
-import liquibase.change.CheckSum;
+import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.exception.*;
 import liquibase.precondition.ErrorPrecondition;

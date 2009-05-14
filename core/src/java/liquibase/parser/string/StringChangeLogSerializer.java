@@ -3,6 +3,9 @@ package liquibase.parser.string;
 import liquibase.change.Change;
 import liquibase.change.ChangeMetaDataField;
 import liquibase.change.ColumnConfig;
+import liquibase.change.ConstraintsConfig;
+import liquibase.change.custom.CustomSqlChange;
+import liquibase.change.custom.CustomChange;
 import liquibase.changelog.ChangeSet;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.parser.ChangeLogSerializer;
@@ -12,6 +15,7 @@ import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.Map;
 
 public class StringChangeLogSerializer implements ChangeLogSerializer {
 
@@ -38,9 +42,15 @@ public class StringChangeLogSerializer implements ChangeLogSerializer {
                 Object value = field.get(objectToSerialize);
                 if (value instanceof ColumnConfig) {
                     values.add(indent(indent) + serializeColumnConfig((ColumnConfig) field.get(objectToSerialize), indent + 1));
+                } else if (value instanceof ConstraintsConfig) {
+                    values.add(indent(indent) + serializeConstraintsConfig((ConstraintsConfig) field.get(objectToSerialize), indent + 1));
+                } else if (value instanceof CustomChange) {
+                    values.add(indent(indent) + serializeCustomChange((CustomChange) field.get(objectToSerialize), indent + 1));
                 } else {
                     if (value != null) {
-                        if (value instanceof Collection) {
+                        if (value instanceof Map) {
+                            values.add(indent(indent) + propertyName + "=" + serializeObject((Map) value, indent + 1));
+                        } else if (value instanceof Collection) {
                             values.add(indent(indent) + propertyName + "=" + serializeObject((Collection) value, indent + 1));
                         } else {
                             values.add(indent(indent) + propertyName + "=\"" + value.toString() + "\"");
@@ -75,13 +85,29 @@ public class StringChangeLogSerializer implements ChangeLogSerializer {
         String returnString = "[\n";
         for (Object object : collection) {
             if (object instanceof ColumnConfig) {
-                returnString += indent(indent) + serializeColumnConfig((ColumnConfig) object, indent + 1)+",\n";
+                returnString += indent(indent) + serializeColumnConfig((ColumnConfig) object, indent + 1) + ",\n";
             } else {
-                returnString += indent(indent) + "[" + object.toString() + "],\n";
+                returnString += indent(indent) + object.toString()+ ",\n";
             }
         }
-        returnString = returnString.replaceFirst(",$","");
+        returnString = returnString.replaceFirst(",$", "");
         returnString += indent(indent - 1) + "]";
+
+        return returnString;
+
+    }
+
+    private String serializeObject(Map collection, int indent) {
+        if (collection.size() == 0) {
+            return "[]";
+        }
+
+        String returnString = "{\n";
+        for (Object key : new TreeSet(collection.keySet())) {
+            returnString += indent(indent) +  key.toString() +"=\""+collection.get(key)+ "\",\n";
+        }
+        returnString = returnString.replaceFirst(",$", "");
+        returnString += indent(indent - 1) + "}";
 
         return returnString;
 
@@ -95,7 +121,15 @@ public class StringChangeLogSerializer implements ChangeLogSerializer {
         return "column:" + serializeObject(columnConfig, indent);
     }
 
+    private String serializeConstraintsConfig(ConstraintsConfig constraintsConfig, int indent) {
+        return "constraints:" + serializeObject(constraintsConfig, indent);
+    }
+
+    private String serializeCustomChange(CustomChange customChange, int indent) {
+        return "customChange:" + serializeObject(customChange, indent);
+    }
+
     public String serialize(ChangeSet changeSet) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        return null;
     }
 }
