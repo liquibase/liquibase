@@ -9,6 +9,7 @@ public abstract class MigratorAction extends BaseDatabaseAction {
         super(title);
     }
 
+    @Override
     public boolean isApplicableTo(Class objectType) {
         return objectType.equals(Database.class);
     }

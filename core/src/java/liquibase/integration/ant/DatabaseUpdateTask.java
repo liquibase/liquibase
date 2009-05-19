@@ -20,6 +20,7 @@ public class DatabaseUpdateTask extends BaseLiquibaseTask {
         this.dropFirst = dropFirst;
     }
 
+    @Override
     public void execute() throws BuildException {
         if (!shouldRun()) {
             return;

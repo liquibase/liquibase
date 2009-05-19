@@ -71,6 +71,7 @@ class XMLChangeLogHandler extends DefaultHandler {
         return databaseChangeLog;
     }
 
+    @Override
     public void startElement(String uri, String localName, String qName, Attributes baseAttributes) throws SAXException {
         Attributes atts = new ExpandingAttributes(baseAttributes);
         try {
@@ -350,6 +351,7 @@ class XMLChangeLogHandler extends DefaultHandler {
         }
     }
 
+    @Override
     public void endElement(String uri, String localName, String qName) throws SAXException {
         String textString = null;
         if (text != null && text.length() > 0) {
@@ -464,6 +466,7 @@ class XMLChangeLogHandler extends DefaultHandler {
         databaseChangeLog.addChangeSet(changeSet);
     }
 
+    @Override
     public void characters(char ch[], int start, int length) throws SAXException {
         if (text != null) {
             text.append(new String(ch, start, length));

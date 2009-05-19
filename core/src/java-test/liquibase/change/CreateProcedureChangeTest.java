@@ -5,6 +5,7 @@ import org.junit.Test;
 
 public abstract class CreateProcedureChangeTest extends AbstractChangeTest {
 
+    @Override
     @Test
     public void getRefactoringName() throws Exception {
         assertEquals("Create Procedure", new CreateProcedureChange().getChangeMetaData().getDescription());
@@ -33,6 +34,7 @@ public abstract class CreateProcedureChangeTest extends AbstractChangeTest {
 //        });
 //    }
 
+    @Override
     @Test
     public void getConfirmationMessage() throws Exception {
         CreateProcedureChange refactoring = new CreateProcedureChange();

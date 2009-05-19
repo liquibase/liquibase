@@ -34,6 +34,7 @@ public class LiquibaseTag extends AbstractLiquibaseMojo {
     getLog().info(indent + "tag: " + tag);
   }
 
+  @Override
   protected void performLiquibaseTask(Liquibase liquibase) throws LiquibaseException {
     liquibase.tag(tag);
   }

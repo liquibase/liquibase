@@ -32,6 +32,7 @@ public class MySQLDatabase extends AbstractDatabase {
     }
 
 
+    @Override
     public String getConnectionUsername() throws JDBCException {
         return super.getConnectionUsername().replaceAll("\\@.*", "");
     }
@@ -72,6 +73,7 @@ public class MySQLDatabase extends AbstractDatabase {
         return DATETIME_TYPE;
     }
 
+    @Override
     public boolean supportsSequences() {
         return false;
     }
@@ -84,18 +86,22 @@ public class MySQLDatabase extends AbstractDatabase {
         return "NOW()";
     }
 
+    @Override
     public String getLineComment() {
         return "--";
     }
 
+    @Override
     public String getFalseBooleanValue() {
         return "0";
     }
 
+    @Override
     public String getTrueBooleanValue() {
         return "1";
     }
 
+    @Override
     public String getConcatSql(String ... values) {
         StringBuffer returnString = new StringBuffer();
         returnString.append("CONCAT_WS(");
@@ -111,6 +117,7 @@ public class MySQLDatabase extends AbstractDatabase {
     }
 
 
+    @Override
     protected String getDefaultDatabaseSchemaName() throws JDBCException {
 //        return super.getDefaultDatabaseSchemaName().replaceFirst("\\@.*","");
         try {
@@ -120,6 +127,7 @@ public class MySQLDatabase extends AbstractDatabase {
         }
     }
 
+    @Override
     public String convertRequestedSchemaToSchema(String requestedSchema) throws JDBCException {
         if (requestedSchema == null) {
             return getDefaultDatabaseSchemaName();
@@ -127,10 +135,12 @@ public class MySQLDatabase extends AbstractDatabase {
         return requestedSchema;
     }
 
+    @Override
     public String convertRequestedSchemaToCatalog(String requestedSchema) throws JDBCException {
         return requestedSchema;
     }
 
+    @Override
     public SqlStatement getViewDefinitionSql(String schemaName, String viewName) throws JDBCException {
         return new RawSqlStatement("select view_definition from information_schema.views where table_name='" + viewName + "' AND table_schema='" + schemaName + "'");
     }
@@ -140,6 +150,7 @@ public class MySQLDatabase extends AbstractDatabase {
         return "`"+objectName+"`";
     }
 
+    @Override
     public DatabaseSnapshot createDatabaseSnapshot(String schema, Set<DiffStatusListener> statusListeners) throws JDBCException {
         return new MySqlDatabaseSnapshot(this, statusListeners, schema);
     }

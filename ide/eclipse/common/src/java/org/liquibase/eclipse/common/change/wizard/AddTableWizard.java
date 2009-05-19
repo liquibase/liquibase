@@ -40,7 +40,8 @@ public class AddTableWizard extends BaseEclipseRefactorWizard {
 		this.table.setSchema(schema);
 	}
 	
-	public IWizardPage[] createPages() {
+	@Override
+    public IWizardPage[] createPages() {
 		TableFormModel model = new DefaultTableFormModel(this.table);
 		
 		page1 = new GenericColumnsPage("org.eclipse.datatools.sqltools.tablewizard.ui.GenericColumnPage", model.getPersistentTable());		

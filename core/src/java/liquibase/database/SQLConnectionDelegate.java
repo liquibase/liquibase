@@ -200,6 +200,7 @@ public class SQLConnectionDelegate implements DatabaseConnection {
         return con;
     }
 
+    @Override
     public boolean equals(Object obj) {
         if (!(obj instanceof SQLConnectionDelegate)) {
             return false;
@@ -214,6 +215,7 @@ public class SQLConnectionDelegate implements DatabaseConnection {
         }
     }
 
+    @Override
     public int hashCode() {
         return this.getUnderlyingConnection().hashCode();
     }

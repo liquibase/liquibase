@@ -12,10 +12,12 @@ public class DropDefaultValueAction extends BaseColumnRefactorAction {
         super("Drop Default Value");
     }
 
+    @Override
     public RefactorWizard createRefactorWizard(Column selectedColumn) {
         return new RefactorWizard("Drop default value on "+selectedColumn);
     }
 
+    @Override
     protected Change[] createChanges(Column column, RefactorWizardPage... pages) {
         DropDefaultValueChange change = new DropDefaultValueChange();
         change.setTableName(column.getTable().getName());

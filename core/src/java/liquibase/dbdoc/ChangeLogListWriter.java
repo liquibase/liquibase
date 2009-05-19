@@ -8,6 +8,7 @@ public class ChangeLogListWriter extends HTMLListWriter {
         super("All Change Logs", "changelogs.html", "changelogs", outputDir);
     }
 
+    @Override
     public String getTargetExtension() {
         return ".xml";
     }

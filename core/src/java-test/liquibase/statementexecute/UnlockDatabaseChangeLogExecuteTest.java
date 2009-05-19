@@ -12,6 +12,7 @@ import java.util.Arrays;
 import org.junit.Test;
 
 public class UnlockDatabaseChangeLogExecuteTest extends AbstractExecuteTest {
+    @Override
     protected List<? extends SqlStatement> setupStatements(Database database) {
         return Arrays.asList(new CreateDatabaseChangeLogLockTableStatement());
     }

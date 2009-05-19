@@ -15,11 +15,13 @@ import org.junit.Test;
  */
 public class DropNotNullConstraintChangeTest extends AbstractChangeTest {
 
+    @Override
     @Test
     public void getRefactoringName() throws Exception {
         assertEquals("Drop Not-Null Constraint", new DropNotNullConstraintChange().getChangeMetaData().getDescription());
     }
 
+    @Override
     @Test
     public void generateStatement() throws Exception {
         DropNotNullConstraintChange change = new DropNotNullConstraintChange();
@@ -38,6 +40,7 @@ public class DropNotNullConstraintChangeTest extends AbstractChangeTest {
         assertTrue(((SetNullableStatement) sqlStatements[0]).isNullable());
     }
 
+    @Override
     @Test
     public void getConfirmationMessage() throws Exception {
         DropNotNullConstraintChange change = new DropNotNullConstraintChange();

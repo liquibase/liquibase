@@ -14,6 +14,7 @@ public class StatusAction extends MigratorAction {
         super("Change Log Status");
     }
 
+    @Override
     public void actionPerform(Database database, IdeFacade ideFacade) throws LiquibaseException {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 
@@ -28,6 +29,7 @@ public class StatusAction extends MigratorAction {
 
     }
 
+    @Override
     public boolean needsRefresh() {
         return false;
     }

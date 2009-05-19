@@ -75,10 +75,12 @@ public class CacheDatabase extends AbstractDatabase {
         return "--";
     }
 
+    @Override
     public String getFalseBooleanValue() {
         return "0";
     }
 
+    @Override
     public String getTrueBooleanValue() {
         return "1";
     }
@@ -88,6 +90,7 @@ public class CacheDatabase extends AbstractDatabase {
         return "";
     }
 
+    @Override
     public boolean supportsSequences() {
         return false;
     }
@@ -96,10 +99,12 @@ public class CacheDatabase extends AbstractDatabase {
         return false;
     }
 
+    @Override
     public boolean supportsAutoIncrement() {
         return false;
     }
 
+    @Override
     public Object convertDatabaseValueToJavaObject(Object defaultValue, int dataType, int columnSize, int decimalDigits) throws ParseException {
         if (defaultValue != null) {
             if (defaultValue instanceof String) {
@@ -115,10 +120,12 @@ public class CacheDatabase extends AbstractDatabase {
 
     }
 
+    @Override
     public String getViewDefinition(String schemaName, String viewName) throws JDBCException {
         return null;
     }
 
+    @Override
     public DatabaseSnapshot createDatabaseSnapshot(String schema, Set<DiffStatusListener> statusListeners) throws JDBCException {
         return new CacheDatabaseSnapshot(this, statusListeners, schema);
     }

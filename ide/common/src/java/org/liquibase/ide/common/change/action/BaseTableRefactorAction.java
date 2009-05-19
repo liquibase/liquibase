@@ -14,16 +14,19 @@ public abstract class BaseTableRefactorAction extends BaseRefactorAction {
 
     public abstract RefactorWizard createRefactorWizard(Table dbObject);
 
+    @Override
     public final RefactorWizard createRefactorWizard(DatabaseObject dbObject) {
         return createRefactorWizard((Table) dbObject);
     }
 
+    @Override
     public Change[] createChanges(DatabaseObject selectedTable, RefactorWizardPage... pages) {
         return createChanges(((Table) selectedTable), pages);
     }
 
     protected abstract Change[] createChanges(Table selectedTable, RefactorWizardPage... pages);
 
+    @Override
     public boolean isApplicableTo(Class objectType) {
         return objectType.equals(Table.class);
     }

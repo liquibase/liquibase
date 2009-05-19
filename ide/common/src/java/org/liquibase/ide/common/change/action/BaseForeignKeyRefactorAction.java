@@ -15,16 +15,19 @@ public abstract class BaseForeignKeyRefactorAction extends BaseRefactorAction {
 
     public abstract RefactorWizard createRefactorWizard(ForeignKey selectedFK);
 
+    @Override
     public final RefactorWizard createRefactorWizard(DatabaseObject dbObject) {
         return createRefactorWizard((ForeignKey) dbObject);
     }
 
+    @Override
     public Change[] createChanges(DatabaseObject selectedFK, RefactorWizardPage... pages) {
         return createChanges(((ForeignKey) selectedFK), pages);
     }
 
     protected abstract Change[] createChanges(ForeignKey selectedFK, RefactorWizardPage... pages);
 
+    @Override
     public boolean isApplicableTo(Class objectType) {
         return objectType.equals(ForeignKey.class);
     }

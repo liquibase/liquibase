@@ -21,11 +21,13 @@ public class DropUniqueConstraintChangeTest  extends AbstractChangeTest {
         change.setConstraintName("UQ_CONSTRAINT");
     }
 
+    @Override
     @Test
     public void getRefactoringName() throws Exception {
         assertEquals("Drop Unique Constraint", change.getChangeMetaData().getDescription());
     }
 
+    @Override
     @Test
     public void generateStatement() throws Exception {
         SqlStatement[] sqlStatements = change.generateStatements(new MockDatabase());
@@ -36,6 +38,7 @@ public class DropUniqueConstraintChangeTest  extends AbstractChangeTest {
         assertEquals("UQ_CONSTRAINT", ((DropUniqueConstraintStatement) sqlStatements[0]).getConstraintName());
     }
 
+    @Override
     @Test
     public void getConfirmationMessage() throws Exception {
         assertEquals("Unique constraint UQ_CONSTRAINT dropped from TAB_NAME", change.getConfirmationMessage());

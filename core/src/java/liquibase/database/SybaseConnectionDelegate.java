@@ -16,14 +16,17 @@ public class SybaseConnectionDelegate extends SQLConnectionDelegate {
         super(delegate);
     }
 
+    @Override
     public void commit() throws SQLException {
         
     }
 
+    @Override
     public void rollback() throws SQLException {
         
     }
 
+    @Override
     public void rollback(Savepoint savepoint) throws SQLException {
         
     }

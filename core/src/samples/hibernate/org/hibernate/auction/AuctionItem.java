@@ -63,7 +63,8 @@ public class AuctionItem extends Persistent {
 		condition = i;
 	}
 
-	public String toString() {
+	@Override
+    public String toString() {
 		return shortDescription + " (" + description + ": " + condition + "/10)";
 	}
 

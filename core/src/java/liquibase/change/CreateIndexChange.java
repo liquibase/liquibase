@@ -82,6 +82,7 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
         };
     }
 
+    @Override
     protected Change[] createInverses() {
         DropIndexChange inverse = new DropIndexChange();
         inverse.setSchemaName(getSchemaName());

@@ -13,10 +13,12 @@ public class AddUniqueConstraintAction extends BaseColumnRefactorAction {
         super("Add Unique Constraint");
     }
 
+    @Override
     public RefactorWizard createRefactorWizard(Column selectedColumn) {
         return new RefactorWizard("Make "+selectedColumn+" unique", new SingleValueWizardPageImpl("Unique Constraint Name"));
     }
 
+    @Override
     protected Change[] createChanges(Column column, RefactorWizardPage... pages) {
         AddUniqueConstraintChange change = new AddUniqueConstraintChange();
         change.setTableName(column.getTable().getName());

@@ -18,6 +18,7 @@ public class HibernateGenericDialect extends Dialect {
         realDialect = (Dialect) Class.forName(dialectClass).newInstance();
     }
 
+    @Override
     public String getTypeName(int code, int length, int precision, int scale) throws HibernateException {
         if (code == Types.BIGINT) {
             return "bigint";

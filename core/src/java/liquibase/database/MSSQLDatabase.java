@@ -61,6 +61,7 @@ public class MSSQLDatabase extends AbstractDatabase {
     }
 
 
+    @Override
     public Set<String> getSystemTablesAndViews() {
         return systemTablesAndViews;
     }
@@ -69,6 +70,7 @@ public class MSSQLDatabase extends AbstractDatabase {
         return false;
     }
 
+    @Override
     public boolean supportsSequences() {
         return false;
     }
@@ -91,11 +93,13 @@ public class MSSQLDatabase extends AbstractDatabase {
     }
 
 
+    @Override
     public DataType getTimeType() {
         return DATETIME_TYPE;
     }
 
 
+    @Override
     public DataType getDateType() {
         return DATE_TYPE;
     }
@@ -124,13 +128,16 @@ public class MSSQLDatabase extends AbstractDatabase {
         return "GETDATE()";
     }
 
+    @Override
     public String getAutoIncrementClause() {
         return "IDENTITY";
     }
+    @Override
     protected String getDefaultDatabaseSchemaName() throws JDBCException {
         return null;
     }
 
+    @Override
     public String getDefaultCatalogName() throws JDBCException {
         try {
             return getConnection().getCatalog();
@@ -139,14 +146,17 @@ public class MSSQLDatabase extends AbstractDatabase {
         }
     }
 
+    @Override
     public String getTrueBooleanValue() {
         return "1";
     }
 
+    @Override
     public String getFalseBooleanValue() {
         return "0";
     }
 
+    @Override
     public String getConcatSql(String... values) {
         StringBuffer returnString = new StringBuffer();
         for (String value : values) {
@@ -202,10 +212,12 @@ public class MSSQLDatabase extends AbstractDatabase {
     }
 
 
+    @Override
     public boolean isSystemTable(String catalogName, String schemaName, String tableName) {
         return super.isSystemTable(catalogName, schemaName, tableName) || schemaName.equals("sys");
     }
 
+    @Override
     public boolean isSystemView(String catalogName, String schemaName, String viewName) {
         return super.isSystemView(catalogName, schemaName, viewName) || schemaName.equals("sys");
     }
@@ -215,6 +227,7 @@ public class MSSQLDatabase extends AbstractDatabase {
     }
 
 
+    @Override
     public Object convertDatabaseValueToJavaObject(Object defaultValue, int dataType, int columnSize, int decimalDigits) throws ParseException {
         if (defaultValue == null) {
             return null;
@@ -238,10 +251,12 @@ public class MSSQLDatabase extends AbstractDatabase {
         return "["+objectName+"]";
     }
 
+    @Override
     public String convertRequestedSchemaToCatalog(String requestedSchema) throws JDBCException {
         return getDefaultCatalogName();
     }
 
+    @Override
     public String convertRequestedSchemaToSchema(String requestedSchema) throws JDBCException {
         if (requestedSchema == null) {
             return "dbo";
@@ -249,6 +264,7 @@ public class MSSQLDatabase extends AbstractDatabase {
         return requestedSchema;
     }
 
+    @Override
     public SqlStatement getViewDefinitionSql(String schemaName, String viewName) throws JDBCException {
         String sql = "select view_definition from INFORMATION_SCHEMA.VIEWS where upper(table_name)='" + viewName.toUpperCase() + "'";
 //        if (StringUtils.trimToNull(schemaName) != null) {
@@ -260,6 +276,7 @@ public class MSSQLDatabase extends AbstractDatabase {
         return new RawSqlStatement(sql);
     }
 
+    @Override
     public String getColumnType(String columnType, Boolean autoIncrement) {
         String type = super.getColumnType(columnType, autoIncrement);
         if (autoIncrement != null && autoIncrement) {
@@ -268,14 +285,17 @@ public class MSSQLDatabase extends AbstractDatabase {
         return type;
     }
 
+    @Override
     public String getDateLiteral(String isoDate) {
         return super.getDateLiteral(isoDate).replace(' ', 'T');
     }
 
+    @Override
     public DatabaseSnapshot createDatabaseSnapshot(String schema, Set<DiffStatusListener> statusListeners) throws JDBCException {
         return new MSSQLDatabaseSnapshot(this, statusListeners, schema);
     }
 
+    @Override
     public boolean supportsRestrictForeignKeys() {
         return false;
     }

@@ -13,11 +13,13 @@ import org.junit.Test;
  */
 public class LoadDataChangeTest extends AbstractChangeTest {
 
+    @Override
     @Test
     public void getRefactoringName() throws Exception {
         assertEquals("Load Data", new LoadDataChange().getChangeMetaData().getDescription());
     }
 
+    @Override
     @Test
     public void generateStatement() throws Exception {
         LoadDataChange refactoring = new LoadDataChange();
@@ -82,6 +84,7 @@ public class LoadDataChangeTest extends AbstractChangeTest {
         assertEquals(Boolean.FALSE, ((InsertStatement) sqlStatements[1]).getColumnValue("active"));
     }
 
+    @Override
     @Test
     public void getConfirmationMessage() throws Exception {
         LoadDataChange refactoring = new LoadDataChange();
@@ -91,6 +94,7 @@ public class LoadDataChangeTest extends AbstractChangeTest {
         assertEquals("Data loaded from FILE_NAME into TABLE_NAME", refactoring.getConfirmationMessage());
     }
     
+    @Override
     @Test
     public void generateCheckSum() throws Exception {
         LoadDataChange refactoring = new LoadDataChange();

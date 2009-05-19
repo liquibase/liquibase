@@ -11,11 +11,13 @@ import org.junit.Test;
 
 public class DropDefaultValueChangeTest extends AbstractChangeTest {
 
+    @Override
     @Test
     public void getRefactoringName() throws Exception {
         assertEquals("Drop Default Value", new DropDefaultValueChange().getChangeMetaData().getDescription());
     }
 
+    @Override
     @Test
     public void generateStatement() throws Exception {
         DropDefaultValueChange change = new DropDefaultValueChange();
@@ -31,6 +33,7 @@ public class DropDefaultValueChangeTest extends AbstractChangeTest {
         assertEquals("COL_HERE", ((DropDefaultValueStatement) sqlStatements[0]).getColumnName());
     }
 
+    @Override
     @Test
     public void getConfirmationMessage() throws Exception {
         DropDefaultValueChange change = new DropDefaultValueChange();

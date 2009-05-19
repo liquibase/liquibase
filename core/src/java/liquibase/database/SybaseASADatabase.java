@@ -296,6 +296,7 @@ public class SybaseASADatabase extends AbstractDatabase {
         return "0";
     }
 
+    @Override
     public boolean supportsSequences() {
         return false;
     }

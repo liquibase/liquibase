@@ -12,11 +12,13 @@ import org.junit.Test;
  */
 public class AlterSequenceChangeTest extends AbstractChangeTest {
 
+    @Override
     @Test
     public void getRefactoringName() throws Exception {
         assertEquals("Alter Sequence", new AlterSequenceChange().getChangeMetaData().getDescription());
     }
 
+    @Override
     @Test
     public void generateStatement() throws Exception {
         AlterSequenceChange refactoring = new AlterSequenceChange();
@@ -40,6 +42,7 @@ public class AlterSequenceChangeTest extends AbstractChangeTest {
 
     }
 
+    @Override
     @Test
     public void getConfirmationMessage() throws Exception {
         AlterSequenceChange refactoring = new AlterSequenceChange();

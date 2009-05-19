@@ -30,6 +30,7 @@ public class TagDatabaseChange extends AbstractChange{
         return "Tag '"+tag+"' applied to database";
     }
 
+    @Override
     protected Change[] createInverses() {
         return new Change[0];
     }

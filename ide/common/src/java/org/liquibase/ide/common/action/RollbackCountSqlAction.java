@@ -12,6 +12,7 @@ public class RollbackCountSqlAction extends MigratorAction {
         super("Rollback Changes (Generate SQL)");
     }
 
+    @Override
     public void actionPerform(Database database, IdeFacade ideFacade) throws LiquibaseException {
         Integer input = ideFacade.promptForInteger(getTitle(), "Enter number of changes to rollback", 1);
         if (input != null) {
@@ -22,6 +23,7 @@ public class RollbackCountSqlAction extends MigratorAction {
         }
     }
 
+    @Override
     public boolean needsRefresh() {
         return true;
     }

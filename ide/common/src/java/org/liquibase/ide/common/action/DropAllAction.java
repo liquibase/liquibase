@@ -10,6 +10,7 @@ public class DropAllAction extends MigratorAction {
         super("Drop All Objects");
     }
 
+    @Override
     public void actionPerform(Database database, IdeFacade ideFacade) throws LiquibaseException {
 
         if (ideFacade.confirm(getTitle(), "Are you sure you want to drop all database objects?")) {
@@ -19,6 +20,7 @@ public class DropAllAction extends MigratorAction {
 
     }
 
+    @Override
     public boolean needsRefresh() {
         return true;
     }

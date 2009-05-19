@@ -108,6 +108,7 @@ public class DropNotNullConstraintChange extends AbstractChange {
 		return statements.toArray(new SqlStatement[statements.size()]);		
     }
 
+    @Override
     protected Change[] createInverses() {
         AddNotNullConstraintChange inverse = new AddNotNullConstraintChange();
         inverse.setColumnName(getColumnName());

@@ -187,6 +187,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
         };
     }
 
+    @Override
     protected Change[] createInverses() {
         DropForeignKeyConstraintChange inverse = new DropForeignKeyConstraintChange();
         inverse.setBaseTableSchemaName(getBaseTableSchemaName());

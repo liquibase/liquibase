@@ -9,10 +9,12 @@ import liquibase.sql.UnparsedSql;
 import liquibase.statement.AddColumnStatement;
 
 public class AddColumnGeneratorDefaultClauseBeforeNotNull extends AddColumnGenerator {
+    @Override
     public int getPriority() {
         return PRIORITY_DATABASE;
     }
 
+    @Override
     public boolean supports(AddColumnStatement statement, Database database) {
         return database instanceof OracleDatabase
                 || database instanceof HsqlDatabase
@@ -31,6 +33,7 @@ public class AddColumnGeneratorDefaultClauseBeforeNotNull extends AddColumnGener
         return validationErrors;
     }
 
+    @Override
     public Sql[] generateSql(AddColumnStatement statement, Database database) {
         String alterTable = "ALTER TABLE " + database.escapeTableName(statement.getSchemaName(), statement.getTableName()) + " ADD " + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " " + database.getColumnType(statement.getColumnType(), statement.isAutoIncrement());
 

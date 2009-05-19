@@ -14,6 +14,7 @@ public class ListLocksAction extends MigratorAction {
         super("List LiquiBase Locks");
     }
 
+    @Override
     public void actionPerform(Database database, IdeFacade ideFacade) throws LiquibaseException {
 
         try {
@@ -29,6 +30,7 @@ public class ListLocksAction extends MigratorAction {
         }
     }
 
+    @Override
     public boolean needsRefresh() {
         return false;
     }

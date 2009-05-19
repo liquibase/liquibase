@@ -56,6 +56,7 @@ public abstract class AbstractLiquibaseChangeLogMojo extends AbstractLiquibaseMo
    * @param liquibase The {@link liquibase.Liquibase} that has been fully
    * configured to run the desired database task.
    */
+  @Override
   protected void performLiquibaseTask(Liquibase liquibase) throws LiquibaseException {
     if (dropFirst) {
       liquibase.dropAll();

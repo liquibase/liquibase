@@ -14,16 +14,19 @@ public abstract class BasePrimaryKeyRefactorAction extends BaseRefactorAction {
 
     public abstract RefactorWizard createRefactorWizard(PrimaryKey selectedIndex);
 
+    @Override
     public final RefactorWizard createRefactorWizard(DatabaseObject dbObject) {
         return createRefactorWizard((PrimaryKey) dbObject);
     }
 
+    @Override
     public Change[] createChanges(DatabaseObject selectedPK, RefactorWizardPage... pages) {
         return createChanges(((PrimaryKey) selectedPK), pages);
     }
 
     protected abstract Change[] createChanges(PrimaryKey selectedPK, RefactorWizardPage... pages);
 
+    @Override
     public boolean isApplicableTo(Class objectType) {
         return objectType.equals(PrimaryKey.class);
     }

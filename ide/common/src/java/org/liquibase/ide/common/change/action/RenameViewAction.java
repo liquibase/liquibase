@@ -13,10 +13,12 @@ public class RenameViewAction extends BaseViewRefactorAction {
         super("Rename View");
     }
 
+    @Override
     public RefactorWizard createRefactorWizard(View selectedView) {
         return new RefactorWizard("Rename "+selectedView, new SingleValueWizardPageImpl("New View Name", selectedView.getName()));
     }
 
+    @Override
     protected Change[] createChanges(View view, RefactorWizardPage... pages) {
         RenameViewChange change = new RenameViewChange();
         change.setOldViewName(view.getName());

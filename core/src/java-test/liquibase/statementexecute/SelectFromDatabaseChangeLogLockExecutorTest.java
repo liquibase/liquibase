@@ -14,6 +14,7 @@ import org.junit.Test;
 
 public class SelectFromDatabaseChangeLogLockExecutorTest extends AbstractExecuteTest {
 
+    @Override
     protected List<? extends SqlStatement> setupStatements(Database database) {
         return Arrays.asList(new CreateDatabaseChangeLogLockTableStatement());
     }

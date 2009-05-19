@@ -94,6 +94,7 @@ public class IntellijRefactorWizard extends AbstractWizard<Step> {
         return database;
     }
 
+    @Override
     protected String getHelpID() {
         return "liquibase.refactoring";
     }

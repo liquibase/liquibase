@@ -13,11 +13,13 @@ public class AbstractSQLChangeTest extends AbstractChangeTest {
         refactoring = new RawSQLChange();
     }
 
+    @Override
     @Test
     public void getRefactoringName() throws Exception {
         assertEquals("Custom SQL", new RawSQLChange().getChangeMetaData().getDescription());
     }
 
+    @Override
     public void generateStatement() throws Exception {
         //To change body of implemented methods use File | Settings | File Templates.
     }
@@ -29,6 +31,7 @@ public class AbstractSQLChangeTest extends AbstractChangeTest {
 //        assertEquals("SQL STATEMENT HERE", refactoring.generateStatements(database)[0].getSqlStatement(database));
 //    }
 
+    @Override
     @Test
     public void getConfirmationMessage() throws Exception {
         assertEquals("Custom SQL executed", refactoring.getConfirmationMessage());

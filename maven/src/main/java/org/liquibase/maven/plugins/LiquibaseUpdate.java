@@ -12,6 +12,7 @@ import liquibase.Liquibase;
  */
 public class LiquibaseUpdate extends AbstractLiquibaseUpdateMojo {
 
+  @Override
   protected void doUpdate(Liquibase liquibase) throws LiquibaseException {
     if (changesToApply > 0) {
       liquibase.update(changesToApply, contexts);

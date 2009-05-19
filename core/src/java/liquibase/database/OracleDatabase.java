@@ -27,6 +27,7 @@ public class OracleDatabase extends AbstractDatabase {
     private static final DataType DATE_TYPE = new DataType("DATE", false);
     private static final DataType BIGINT_TYPE = new DataType("NUMBER(19,0)", false);
 
+    @Override
     public void setConnection(Connection conn) {
         try {
             Method method = conn.getClass().getMethod("setRemarksReporting", Boolean.TYPE);
@@ -51,6 +52,7 @@ public class OracleDatabase extends AbstractDatabase {
         return true;
     }
 
+    @Override
     public boolean supportsSequences() {
         return true;
     }
@@ -80,14 +82,17 @@ public class OracleDatabase extends AbstractDatabase {
     }
 
 
+    @Override
     public DataType getDateType() {
         return DATE_TYPE;
     }
 
+    @Override
     public DataType getTimeType() {
         return DATE_TYPE;
     }
 
+    @Override
     public DataType getBigIntType() {
         return BIGINT_TYPE;
     }
@@ -107,15 +112,18 @@ public class OracleDatabase extends AbstractDatabase {
         return "SYSDATE";
     }
 
+    @Override
     public String getTrueBooleanValue() {
         return "1";
     }
 
+    @Override
     public String getFalseBooleanValue() {
         return "0";
     }
 
 
+    @Override
     protected String getDefaultDatabaseSchemaName() throws JDBCException {//NOPMD
         return super.getDefaultDatabaseSchemaName().toUpperCase();
     }
@@ -132,6 +140,7 @@ public class OracleDatabase extends AbstractDatabase {
      * YYYY-MM-DD
      * YYYY-MM-DDThh:mm:ss
      */
+    @Override
     public String getDateLiteral(String isoDate) {
         String normalLiteral = super.getDateLiteral(isoDate);
 
@@ -160,11 +169,13 @@ public class OracleDatabase extends AbstractDatabase {
         }
     }
 
+    @Override
     public SqlStatement createFindSequencesSQL(String schema) throws JDBCException {
         return new RawSqlStatement("SELECT SEQUENCE_NAME FROM ALL_SEQUENCES WHERE SEQUENCE_OWNER = '" + convertRequestedSchemaToSchema(schema) + "'");
     }
 
 
+    @Override
     public boolean isSystemTable(String catalogName, String schemaName, String tableName) {
         if (super.isSystemTable(catalogName, schemaName, tableName)) {
             return true;
@@ -178,6 +189,7 @@ public class OracleDatabase extends AbstractDatabase {
         return false;
     }
     
+    @Override
     public boolean shouldQuoteValue(String value) {
         return super.shouldQuoteValue(value)
             && !value.startsWith("to_date(")
@@ -188,14 +200,17 @@ public class OracleDatabase extends AbstractDatabase {
         return true;
     }
 
+    @Override
     public SqlStatement getViewDefinitionSql(String schemaName, String name) throws JDBCException {
         return new RawSqlStatement("SELECT TEXT FROM ALL_VIEWS WHERE upper(VIEW_NAME)='"+name.toUpperCase()+"' AND OWNER='"+convertRequestedSchemaToSchema(schemaName)+"'" );
     }
 
+    @Override
     public boolean supportsAutoIncrement() {
         return false;
     }
 
+    @Override
     public Object convertDatabaseValueToJavaObject(Object defaultValue, int dataType, int columnSize, int decimalDigits) throws ParseException {
         if (defaultValue != null) {
             if (defaultValue instanceof String) {
@@ -234,10 +249,12 @@ public class OracleDatabase extends AbstractDatabase {
 //        return returnSet;
 //    }
 
+    @Override
     public DatabaseSnapshot createDatabaseSnapshot(String schema, Set<DiffStatusListener> statusListeners) throws JDBCException {
         return new OracleDatabaseSnapshot(this, statusListeners, schema);
     }
 
+    @Override
     public boolean supportsRestrictForeignKeys() {
         return false;
     }

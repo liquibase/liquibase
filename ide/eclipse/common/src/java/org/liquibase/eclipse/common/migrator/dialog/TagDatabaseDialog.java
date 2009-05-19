@@ -45,7 +45,8 @@ public class TagDatabaseDialog extends Dialog {
 		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, false);
 	}
 
-	protected void configureShell(Shell newShell) {
+	@Override
+    protected void configureShell(Shell newShell) {
 		super.configureShell(newShell);
 		newShell.setText("Tag Database");
 	}

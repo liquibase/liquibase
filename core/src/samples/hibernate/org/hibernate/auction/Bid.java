@@ -44,7 +44,8 @@ public class Bid extends Persistent {
 		bidder = user;
 	}
 
-	public String toString() {
+	@Override
+    public String toString() {
 		return bidder.getUserName() + " $" + amount;
 	}
 	

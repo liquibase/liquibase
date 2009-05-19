@@ -136,6 +136,7 @@ public class AddPrimaryKeyChange extends AbstractChange {
         return statements.toArray(new SqlStatement[statements.size()]);
     }
 
+    @Override
     protected Change[] createInverses() {
         DropPrimaryKeyChange inverse = new DropPrimaryKeyChange();
         inverse.setSchemaName(getSchemaName());

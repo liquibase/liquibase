@@ -13,10 +13,12 @@ public class AddNotNullConstraintAction extends BaseColumnRefactorAction {
         super("Add Not Null Constraint");
     }
 
+    @Override
     public RefactorWizard createRefactorWizard(Column selectedColumn) {
         return new RefactorWizard("Add not null constraint to "+selectedColumn, new SingleValueWizardPageImpl("Set Existing Null Values To"));
     }
 
+    @Override
     protected Change[] createChanges(Column column, RefactorWizardPage... pages) {
         AddNotNullConstraintChange change = new AddNotNullConstraintChange();
         change.setTableName(column.getTable().getName());

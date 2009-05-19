@@ -282,6 +282,7 @@ public class BaseLiquibaseTask extends Task {
 
         protected Handler createHandler() {
             return new Handler() {
+                @Override
                 public void publish(LogRecord logRecord) {
                     task.log(logRecord.getMessage(), mapLevelToAntLevel(logRecord.getLevel()));
                 }

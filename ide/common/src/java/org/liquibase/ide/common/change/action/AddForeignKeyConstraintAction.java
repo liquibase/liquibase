@@ -13,10 +13,12 @@ public class AddForeignKeyConstraintAction extends BaseColumnRefactorAction {
         super("Add Foreign Key");
     }
 
+    @Override
     public RefactorWizard createRefactorWizard(Column selectedColumn) {
         return new RefactorWizard("Add foreign key constraint to "+selectedColumn, new AddForeignKeyConstraintWizardPageImpl());
     }
 
+    @Override
     protected Change[] createChanges(Column column, RefactorWizardPage... pages) {
         AddForeignKeyConstraintChange change = new AddForeignKeyConstraintChange();
         change.setBaseTableName(column.getTable().getName());

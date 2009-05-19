@@ -85,6 +85,7 @@ public class ChangeLogIteratorTest {
 
     private static class ReverseChangeSetVisitor extends TestChangeSetVisitor {
 
+        @Override
         public Direction getDirection() {
             return ChangeSetVisitor.Direction.REVERSE;
         }

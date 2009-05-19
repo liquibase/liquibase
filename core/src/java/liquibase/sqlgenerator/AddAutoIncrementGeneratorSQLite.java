@@ -22,14 +22,17 @@ import java.util.List;
  */
 public class AddAutoIncrementGeneratorSQLite extends AddAutoIncrementGenerator {
 
+    @Override
     public int getPriority() {
         return PRIORITY_DATABASE;
     }
 
+    @Override
     public boolean supports(AddAutoIncrementStatement statement, Database database) {
         return database instanceof SQLiteDatabase;
     }
 
+    @Override
     public Sql[] generateSql(final AddAutoIncrementStatement statement, Database database) {
         List<Sql> statements = new ArrayList<Sql>();
 

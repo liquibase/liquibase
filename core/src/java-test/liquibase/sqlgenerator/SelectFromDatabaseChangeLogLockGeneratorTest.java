@@ -16,6 +16,7 @@ public class SelectFromDatabaseChangeLogLockGeneratorTest<T extends SelectFromDa
         super(new SelectFromDatabaseChangeLogLockGenerator());
     }
 
+    @Override
     protected T createSampleSqlStatement() {
         return (T) new SelectFromDatabaseChangeLogLockStatement("LOCKED");
     }

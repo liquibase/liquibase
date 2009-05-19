@@ -13,10 +13,12 @@ public class CreateIndexAction extends BaseColumnRefactorAction {
         super("Create Index");
     }
 
+    @Override
     public RefactorWizard createRefactorWizard(Column selectedColumn) {
         return new RefactorWizard("Create index on "+selectedColumn, new SingleValueWizardPageImpl("Index Name"));
     }
 
+    @Override
     protected Change[] createChanges(Column column, RefactorWizardPage... pages) {
         CreateIndexChange change = new CreateIndexChange();
         change.setTableName(column.getTable().getName());

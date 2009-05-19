@@ -17,11 +17,13 @@ import org.junit.Test;
  */
 public class AddNotNullConstraintChangeTest extends AbstractChangeTest {
 
+    @Override
     @Test
     public void getRefactoringName() throws Exception {
         assertEquals("Add Not-Null Constraint", new AddNotNullConstraintChange().getChangeMetaData().getDescription());
     }
 
+    @Override
     @Test
     public void generateStatement() throws Exception {
 
@@ -53,6 +55,7 @@ public class AddNotNullConstraintChangeTest extends AbstractChangeTest {
         });
     }
 
+    @Override
     @Test
     public void getConfirmationMessage() throws Exception {
         AddNotNullConstraintChange change = new AddNotNullConstraintChange();

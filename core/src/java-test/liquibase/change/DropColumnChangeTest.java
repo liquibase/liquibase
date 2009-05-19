@@ -12,11 +12,13 @@ import org.junit.Test;
  */
 public class DropColumnChangeTest extends AbstractChangeTest {
 
+    @Override
     @Test
     public void getRefactoringName() throws Exception {
         assertEquals("Drop Column", new DropColumnChange().getChangeMetaData().getDescription());
     }
 
+    @Override
     @Test
     public void generateStatement() throws Exception {
         DropColumnChange change = new DropColumnChange();
@@ -32,6 +34,7 @@ public class DropColumnChangeTest extends AbstractChangeTest {
         assertEquals("COL_HERE", ((DropColumnStatement) sqlStatements[0]).getColumnName());
     }
 
+    @Override
     @Test
     public void getConfirmationMessage() throws Exception {
         DropColumnChange change = new DropColumnChange();

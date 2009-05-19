@@ -17,6 +17,7 @@ public class GenerateChangelogAction extends MigratorAction {
         super("Generate Complete Change Log");
     }
 
+    @Override
     public void actionPerform(Database database, IdeFacade ideFacade) throws LiquibaseException {
         Diff diff = new Diff(database, (String) null);
 //        diff.addStatusListener(new OutDiffStatusListener());
@@ -35,6 +36,7 @@ public class GenerateChangelogAction extends MigratorAction {
     }
 
 
+    @Override
     public boolean needsRefresh() {
         return false;
     }

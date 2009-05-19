@@ -14,6 +14,7 @@ public class CreateEmptyChangeLogAction extends MigratorAction {
         super("Create Empty Change Log");
     }
 
+    @Override
     public void actionPerform(Database database, IdeFacade ideFacade) throws LiquibaseException {
         String changeLogFile = ideFacade.promptForChangeLogFile();
         try {
@@ -23,6 +24,7 @@ public class CreateEmptyChangeLogAction extends MigratorAction {
         }
     }
 
+    @Override
     public boolean needsRefresh() {
         return false;
     }

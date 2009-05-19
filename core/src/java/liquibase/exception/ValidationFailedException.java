@@ -29,6 +29,7 @@ public class ValidationFailedException extends MigrationFailedException {
     }
 
 
+    @Override
     public String getMessage() {
         StringBuffer message = new StringBuffer();
         message.append("Validation Failed:").append(StreamUtil.getLineSeparator());

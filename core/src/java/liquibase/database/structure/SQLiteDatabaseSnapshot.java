@@ -165,7 +165,8 @@ public class SQLiteDatabaseSnapshot extends SqlDatabaseSnapshot {
         this.primaryKeys.addAll(foundPKs);
     }
 	
-	protected void readColumns(String schema) throws SQLException, JDBCException {
+	@Override
+    protected void readColumns(String schema) throws SQLException, JDBCException {
         updateListeners("Reading columns for " + database.toString() + " ...");
 
         if (database instanceof SQLiteDatabase) {
@@ -257,7 +258,8 @@ public class SQLiteDatabaseSnapshot extends SqlDatabaseSnapshot {
         return columnInfo;
     }
 	
-	protected void readIndexes(String schema) throws JDBCException, SQLException {
+	@Override
+    protected void readIndexes(String schema) throws JDBCException, SQLException {
         updateListeners("Reading indexes for " + database.toString() + " ...");
 
         for (Table table : tablesMap.values()) {
@@ -338,7 +340,8 @@ public class SQLiteDatabaseSnapshot extends SqlDatabaseSnapshot {
         indexes.removeAll(indexesToRemove);
     }
 	
-	protected void readSequences(String schema) throws JDBCException {
+	@Override
+    protected void readSequences(String schema) throws JDBCException {
         updateListeners("Reading sequences for " + database.toString() + " ...");
         
         String convertedSchemaName = database.convertRequestedSchemaToSchema(schema);

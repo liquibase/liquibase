@@ -65,7 +65,8 @@ public class SQLFileChange extends AbstractSQLChange {
 			this.encoding = encoding;
 		}
 
-		public void init() throws SetupException {
+		@Override
+        public void init() throws SetupException {
         if (path == null) {
             throw new SetupException("<sqlfile> - No path specified");
         }
@@ -151,6 +152,7 @@ public class SQLFileChange extends AbstractSQLChange {
      * 
      * @see liquibase.change.AbstractChange#generateCheckSum()
      */
+    @Override
     public CheckSum generateCheckSum() {
         return CheckSum.compute(getSql());
     }

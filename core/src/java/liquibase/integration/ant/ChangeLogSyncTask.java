@@ -7,6 +7,7 @@ import java.io.Writer;
 
 public class ChangeLogSyncTask extends BaseLiquibaseTask {
 
+    @Override
     public void execute() throws BuildException {
 
         Liquibase liquibase = null;

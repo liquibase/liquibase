@@ -13,6 +13,7 @@ public class GenerateDbDocAction extends MigratorAction {
         super("Generate DbDoc");
     }
 
+    @Override
     public void actionPerform(Database database, IdeFacade ideFacade) throws LiquibaseException {
         File input = ideFacade.promptForDirectory(getTitle(), "Select Output Directory", null);
         if (input != null) {
@@ -31,6 +32,7 @@ public class GenerateDbDocAction extends MigratorAction {
 
     }
 
+    @Override
     public boolean needsRefresh() {
         return false;
     }

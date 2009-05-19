@@ -15,10 +15,12 @@ public class ColumnWriter extends HTMLWriter {
         super(new File(rootOutputDir, "columns"), database);
     }
 
+    @Override
     protected String createTitle(Object object) {
         return "Changes affecting column \""+object.toString() + "\"";
     }
 
+    @Override
     protected void writeCustomHTML(FileWriter fileWriter, Object object, List<Change> changes, Database database) throws IOException {
     }
 }

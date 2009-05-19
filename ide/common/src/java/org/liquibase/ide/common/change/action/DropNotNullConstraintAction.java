@@ -11,10 +11,12 @@ public class DropNotNullConstraintAction extends BaseColumnRefactorAction {
         super("Drop Not Null Constraint");
     }
 
+    @Override
     public RefactorWizard createRefactorWizard(Column selectedColumn) {
         return new RefactorWizard("Drop not null constraint on "+selectedColumn);
     }
 
+    @Override
     protected Change[] createChanges(Column column, RefactorWizardPage... pages) {
         DropNotNullConstraintChange change = new DropNotNullConstraintChange();
         change.setTableName(column.getTable().getName());

@@ -126,6 +126,7 @@ public class AddUniqueConstraintChange extends AbstractChange {
         return "Unique constraint added to "+getTableName()+"("+getColumnNames()+")";
     }
 
+    @Override
     protected Change[] createInverses() {
         DropUniqueConstraintChange inverse = new DropUniqueConstraintChange();
         inverse.setSchemaName(getSchemaName());

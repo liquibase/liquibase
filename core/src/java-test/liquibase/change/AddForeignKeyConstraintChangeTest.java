@@ -13,6 +13,7 @@ import java.sql.DatabaseMetaData;
 public class AddForeignKeyConstraintChangeTest  extends AbstractChangeTest {
 
 
+    @Override
     @Test
     public void generateStatement() throws Exception {
         AddForeignKeyConstraintChange change = new AddForeignKeyConstraintChange();
@@ -50,10 +51,12 @@ public class AddForeignKeyConstraintChangeTest  extends AbstractChangeTest {
         assertEquals(new Integer(DatabaseMetaData.importedKeyCascade), statement.getDeleteRule());
     }
 
+      @Override
       public void getRefactoringName() throws Exception {
         assertEquals("Add Foreign Key Constraint", new AddForeignKeyConstraintChange().getChangeMetaData().getDescription());
     }
 
+    @Override
     @Test
     public void getConfirmationMessage() throws Exception {
         AddForeignKeyConstraintChange change = new AddForeignKeyConstraintChange();

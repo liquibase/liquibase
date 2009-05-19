@@ -102,6 +102,7 @@ public class AddLookupTableChange extends AbstractChange {
         this.constraintName = constraintName;
     }
 
+    @Override
     protected Change[] createInverses() {
         DropForeignKeyConstraintChange dropFK = new DropForeignKeyConstraintChange();
         dropFK.setBaseTableSchemaName(getExistingTableSchemaName());

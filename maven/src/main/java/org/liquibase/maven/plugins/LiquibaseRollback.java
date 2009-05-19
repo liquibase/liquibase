@@ -86,6 +86,7 @@ public class LiquibaseRollback extends AbstractLiquibaseChangeLogMojo {
     getLog().info(indent + "rollback Tag: " + rollbackTag);
   }
 
+  @Override
   protected void performLiquibaseTask(Liquibase liquibase) throws LiquibaseException {
     switch (type) {
       case COUNT: {

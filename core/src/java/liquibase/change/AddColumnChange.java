@@ -110,6 +110,7 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
         return sql.toArray(new SqlStatement[sql.size()]);
     }
 
+    @Override
     protected Change[] createInverses() {
         List<Change> inverses = new ArrayList<Change>();
 

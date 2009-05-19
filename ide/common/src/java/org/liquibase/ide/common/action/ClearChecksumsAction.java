@@ -10,6 +10,7 @@ public class ClearChecksumsAction extends MigratorAction {
         super("Clear Checksums");
     }
 
+    @Override
     public void actionPerform(Database database, IdeFacade ideFacade) throws LiquibaseException {
         ideFacade.getLiquibase(null, database).clearCheckSums();
 
@@ -17,6 +18,7 @@ public class ClearChecksumsAction extends MigratorAction {
 
     }
 
+    @Override
     public boolean needsRefresh() {
         return false;
     }

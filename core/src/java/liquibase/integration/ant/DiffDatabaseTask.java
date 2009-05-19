@@ -60,6 +60,7 @@ public class DiffDatabaseTask extends BaseLiquibaseTask {
         this.baseDefaultSchemaName = baseDefaultSchemaName;
     }
 
+    @Override
     public void execute() throws BuildException {
         if (StringUtils.trimToNull(getBaseUrl()) == null) {
             throw new BuildException("diffDatabase requires baseUrl to be set");

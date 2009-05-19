@@ -27,6 +27,7 @@ public abstract class BaseRefactorAction extends BaseDatabaseAction {
 
     public abstract Change[] createChanges(DatabaseObject selectedObject, RefactorWizardPage... pages);
 
+    @Override
     public boolean needsRefresh() {
         return true;
     }

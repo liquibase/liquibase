@@ -23,11 +23,13 @@ public class DropSequenceChangeTest extends AbstractChangeTest {
         change.setSequenceName("SEQ_NAME");
     }
 
+    @Override
     @Test
     public void getRefactoringName() throws Exception {
         assertEquals("Drop Sequence", new DropSequenceChange().getChangeMetaData().getDescription());
     }
 
+    @Override
     @Test
     public void generateStatement() throws Exception {
 
@@ -52,6 +54,7 @@ public class DropSequenceChangeTest extends AbstractChangeTest {
         });
     }
 
+    @Override
     @Test
     public void getConfirmationMessage() throws Exception {
         assertEquals("Sequence SEQ_NAME dropped", change.getConfirmationMessage());

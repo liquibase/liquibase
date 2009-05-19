@@ -13,10 +13,12 @@ public class RenameColumnAction extends BaseColumnRefactorAction {
         super("Rename Column");
     }
 
+    @Override
     public RefactorWizard createRefactorWizard(Column selectedColumn) {
         return new RefactorWizard("Rename "+selectedColumn, new SingleValueWizardPageImpl("New Column Name", selectedColumn.getName()));
     }
 
+    @Override
     protected Change[] createChanges(Column column, RefactorWizardPage... pages) {
         RenameColumnChange change = new RenameColumnChange();
         change.setTableName(column.getTable().getName());

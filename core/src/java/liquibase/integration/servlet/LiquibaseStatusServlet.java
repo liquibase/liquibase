@@ -25,6 +25,7 @@ public class LiquibaseStatusServlet extends HttpServlet {
 
     }
 
+    @Override
     protected void doGet(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws ServletException, IOException {
         httpServletResponse.setContentType("text/html");
 

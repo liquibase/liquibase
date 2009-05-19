@@ -15,6 +15,7 @@ public class AddAutoIncrementChangeTest extends AbstractChangeTest {
         assertEquals("Set Column as Auto-Increment", change.getChangeMetaData().getDescription());
     }
 
+    @Override
     @Test
     public void generateStatement() throws Exception {
         AddAutoIncrementChange change = new AddAutoIncrementChange();
@@ -46,11 +47,13 @@ public class AddAutoIncrementChangeTest extends AbstractChangeTest {
         }, PostgresDatabase.class);
     }
 
+    @Override
     @Test
     public void getRefactoringName() throws Exception {
         assertEquals("Set Column as Auto-Increment", new AddAutoIncrementChange().getChangeMetaData().getDescription());
     }
 
+    @Override
     @Test
     public void getConfirmationMessage() throws Exception {
         AddAutoIncrementChange change = new AddAutoIncrementChange();

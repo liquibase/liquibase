@@ -54,7 +54,8 @@ public class User extends Persistent {
 		bids = list;
 	}
 	
-	public String toString() {
+	@Override
+    public String toString() {
 		return userName;
 	}
 

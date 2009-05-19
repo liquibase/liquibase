@@ -30,6 +30,7 @@ public class AddAutoIncrementGeneratorTest <T extends AddAutoIncrementStatement>
         super(generatorUnderTest);
     }
 
+    @Override
     @SuppressWarnings("unchecked")
 	protected T createSampleSqlStatement() {
         return (T) new AddAutoIncrementStatement(null, null, null, null);

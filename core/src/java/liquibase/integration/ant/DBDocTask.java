@@ -16,6 +16,7 @@ public class DBDocTask extends BaseLiquibaseTask {
         this.outputDirectory = outputDirectory;
     }
 
+    @Override
     public void execute() throws BuildException {
         if (StringUtils.trimToNull(getOutputDirectory()) == null) {
             throw new BuildException("dbDoc requires outputDirectory to be set");

@@ -7,6 +7,7 @@ import java.io.Writer;
 
 public class MarkNextChangeSetRanTask extends BaseLiquibaseTask {
 
+    @Override
     public void execute() throws BuildException {
 
         Liquibase liquibase = null;

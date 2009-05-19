@@ -20,6 +20,7 @@ public class UnsupportedDatabase extends AbstractDatabase {
     private static final DataType BLOB_TYPE = new DataType("BLOB", false);
 
 
+    @Override
     public void setConnection(Connection conn) {
         super.setConnection(conn);
         dateTimeType = findDateTypeType();
@@ -31,6 +32,7 @@ public class UnsupportedDatabase extends AbstractDatabase {
     /**
      * Always returns null or DATABASECHANGELOG table may not be found.
      */
+    @Override
     public String getDefaultCatalogName() throws JDBCException {
         return null;
     }
@@ -38,6 +40,7 @@ public class UnsupportedDatabase extends AbstractDatabase {
     /**
      * Always returns null or DATABASECHANGELOG table may not be found.
      */
+    @Override
     protected String getDefaultDatabaseSchemaName() throws JDBCException {
         return null;
     }
@@ -47,10 +50,12 @@ public class UnsupportedDatabase extends AbstractDatabase {
     }
 
 
+    @Override
     public String getFalseBooleanValue() {
         return "0";
     }
 
+    @Override
     public String getTrueBooleanValue() {
         return "1";
     }
@@ -164,6 +169,7 @@ public class UnsupportedDatabase extends AbstractDatabase {
     }
 
 
+    @Override
     protected boolean canCreateChangeLogTable() throws JDBCException {
         //check index size.  Many drivers just return 0, so it's not a great test
         int maxIndexLength;
@@ -182,6 +188,7 @@ public class UnsupportedDatabase extends AbstractDatabase {
         return false;
     }
 
+    @Override
     public DatabaseSnapshot createDatabaseSnapshot(String schema, Set<DiffStatusListener> statusListeners) throws JDBCException {
         return new UnsupportedDatabaseSnapshot(this, statusListeners, schema);
     }

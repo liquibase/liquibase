@@ -36,6 +36,7 @@ public class CSVWriter extends liquibase.util.csv.opencsv.CSVWriter {
     }
 
 
+    @Override
     public void writeAll(ResultSet rs, boolean includeColumnNames) throws SQLException, IOException {
         ResultSetMetaData metadata = rs.getMetaData();
 

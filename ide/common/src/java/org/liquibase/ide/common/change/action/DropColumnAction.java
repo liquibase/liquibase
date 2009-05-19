@@ -11,10 +11,12 @@ public class DropColumnAction extends BaseColumnRefactorAction {
         super("Drop Column");
     }
 
+    @Override
     public RefactorWizard createRefactorWizard(Column selectedColumn) {
         return new RefactorWizard("Drop "+selectedColumn);
     }
 
+    @Override
     protected Change[] createChanges(Column column, RefactorWizardPage... pages) {
         DropColumnChange change = new DropColumnChange();
         change.setTableName(column.getTable().getName());

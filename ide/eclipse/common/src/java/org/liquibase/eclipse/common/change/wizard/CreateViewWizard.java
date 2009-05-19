@@ -20,7 +20,8 @@ public class CreateViewWizard extends BaseEclipseRefactorWizard {
 		this.schema = schema;
 	}
 	
-	public IWizardPage[] createPages() {
+	@Override
+    public IWizardPage[] createPages() {
 		page1 = new CreateViewWizardPage(schema);		
 
 		return new IWizardPage[] {page1};

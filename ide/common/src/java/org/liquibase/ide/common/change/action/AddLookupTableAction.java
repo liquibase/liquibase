@@ -13,10 +13,12 @@ public class AddLookupTableAction  extends BaseColumnRefactorAction {
         super("Add Lookup Table");
     }
 
+    @Override
     public RefactorWizard createRefactorWizard(Column selectedColumn) {
         return new RefactorWizard("Add lookup table for "+selectedColumn, new AddLookupTableWizardPageImpl());
     }
 
+    @Override
     protected Change[] createChanges(Column column, RefactorWizardPage... pages) {
         AddLookupTableChange change = new AddLookupTableChange();
         change.setExistingTableName(column.getTable().getName());

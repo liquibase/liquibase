@@ -101,6 +101,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
         return statements.toArray(new SqlStatement[statements.size()]);
     }
 
+    @Override
     protected Change[] createInverses() {
         DropTableChange inverse = new DropTableChange();
         inverse.setSchemaName(getSchemaName());

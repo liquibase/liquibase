@@ -151,6 +151,7 @@ public class CommandLineUtils {
          * Custom formatter object
          */
         private Formatter customFormatter = new Formatter() {
+            @Override
             public String format(LogRecord rec) {
                 return rec.getMessage() + "\n";
             }

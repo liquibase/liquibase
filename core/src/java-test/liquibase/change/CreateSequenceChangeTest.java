@@ -17,11 +17,13 @@ import org.junit.Test;
  */
 public class CreateSequenceChangeTest extends AbstractChangeTest {
 
+    @Override
     @Test
     public void getRefactoringName() throws Exception {
         assertEquals("Create Sequence", new CreateSequenceChange().getChangeMetaData().getDescription());
     }
 
+    @Override
     @Test
     public void generateStatement() throws Exception {
         new DatabaseTestTemplate().testOnAllDatabases(new DatabaseTest() {
@@ -54,6 +56,7 @@ public class CreateSequenceChangeTest extends AbstractChangeTest {
         });
     }
 
+    @Override
     @Test
     public void getConfirmationMessage() throws Exception {
         CreateSequenceChange change = new CreateSequenceChange();

@@ -45,6 +45,7 @@ public class RenameViewChange extends AbstractChange {
         return new SqlStatement[]{new RenameViewStatement(getSchemaName() == null?database.getDefaultSchemaName():getSchemaName(), getOldViewName(), getNewViewName())};
     }
 
+    @Override
     protected Change[] createInverses() {
         RenameViewChange inverse = new RenameViewChange();
         inverse.setOldViewName(getNewViewName());

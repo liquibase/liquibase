@@ -9,14 +9,17 @@ import liquibase.sql.UnparsedSql;
 import liquibase.statement.AddDefaultValueStatement;
 
 public class AddDefaultValueGeneratorSybase extends AddDefaultValueGenerator {
+    @Override
     public int getPriority() {
         return PRIORITY_DATABASE;
     }
 
+    @Override
     public boolean supports(AddDefaultValueStatement statement, Database database) {
         return database instanceof SybaseDatabase;
     }
 
+    @Override
     public Sql[] generateSql(AddDefaultValueStatement statement, Database database) {
         return new Sql[]{
                 new UnparsedSql("ALTER TABLE " + database.escapeTableName(statement.getSchemaName(), statement.getTableName()) + " REPLACE " + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " DEFAULT " + database.convertJavaObjectToString(statement.getDefaultValue()),
