@@ -12,6 +12,7 @@ public class MigrateSqlAction extends MigratorAction {
         super("Generate Migration SQL");
     }
 
+    @Override
     public void actionPerform(Database database, IdeFacade ideFacade) throws LiquibaseException {
         StringWriter stringWriter = new StringWriter();
 
@@ -25,6 +26,7 @@ public class MigrateSqlAction extends MigratorAction {
         ideFacade.showOutput("Migration SQL", stringWriter.toString());
     }
 
+    @Override
     public boolean needsRefresh() {
         return true;
     }

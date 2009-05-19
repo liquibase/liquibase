@@ -10,10 +10,12 @@ import static org.junit.Assert.assertTrue;
 
 public class AddLookupTableChangeTest extends AbstractChangeTest {
 
+    @Override
     public void getRefactoringName() throws Exception {
         assertEquals("Add Lookup Table", new AddLookupTableChange().getChangeMetaData().getDescription());
     }
 
+    @Override
     public void generateStatement() throws Exception {
         AddLookupTableChange change = new AddLookupTableChange();
         change.setExistingTableName("OLD_TABLE_NAME");
@@ -39,6 +41,7 @@ public class AddLookupTableChangeTest extends AbstractChangeTest {
         });
     }
 
+    @Override
     public void getConfirmationMessage() throws Exception {
         AddLookupTableChange change = new AddLookupTableChange();
         change.setExistingTableName("OLD_TABLE_NAME");

@@ -23,6 +23,7 @@ public class RawSqlStatement implements SqlStatement {
         return endDelimiter;
     }
 
+    @Override
     public String toString() {
         return sql;
     }

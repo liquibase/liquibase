@@ -82,6 +82,7 @@ public class CustomChangeWrapper extends AbstractChange {
         return paramValues;
     }
 
+    @Override
     public ValidationErrors validate(Database database) {
         return customChange.validate(database);
     }
@@ -107,6 +108,7 @@ public class CustomChangeWrapper extends AbstractChange {
         return statements;
     }
 
+    @Override
     public SqlStatement[] generateRollbackStatements(Database database) throws UnsupportedChangeException, RollbackImpossibleException {
         SqlStatement[] statements = null;
         try {
@@ -130,6 +132,7 @@ public class CustomChangeWrapper extends AbstractChange {
     }
 
 
+    @Override
     public boolean supportsRollback(Database database) {
         return customChange instanceof CustomSqlRollback || customChange instanceof CustomTaskRollback;
     }

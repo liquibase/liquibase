@@ -80,6 +80,7 @@ public class CompositeFileOpener implements FileOpener {
             this.classLoaders.addAll(Arrays.asList(classLoaders));
         }
 
+        @Override
         public Class loadClass(String name) throws ClassNotFoundException {
             for (Object classLoader1 : classLoaders) {
                 ClassLoader classLoader = (ClassLoader) classLoader1;

@@ -21,11 +21,13 @@ public class CreateTableChangeTest extends AbstractChangeTest {
         change = new CreateTableChange();
     }
 
+    @Override
     @Test
     public void getRefactoringName() throws Exception {
         assertEquals("Create Table", change.getChangeMetaData().getDescription());
     }
 
+    @Override
     @Test
     public void generateStatement() throws Exception {
         change.setTableName("TABLE_NAME");
@@ -99,6 +101,7 @@ public class CreateTableChangeTest extends AbstractChangeTest {
         assertTrue(keyConstraint.isInitiallyDeferred());
     }
 
+    @Override
     @Test
     public void getConfirmationMessage() throws Exception {
         change.setTableName("TAB_NAME");

@@ -15,10 +15,12 @@ public class AddColumnAction extends BaseTableRefactorAction {
         super("Add Column");
     }
 
+    @Override
     public RefactorWizard createRefactorWizard(Table dbObject) {
         return new RefactorWizard("Add column to "+ ((Table) dbObject).getName(), new AddColumnWizardPageImpl());
     }
 
+    @Override
     protected Change[] createChanges(Table selectedTable, RefactorWizardPage... pages) {
         AddColumnChange change = new AddColumnChange();
         change.setTableName(selectedTable.getName());

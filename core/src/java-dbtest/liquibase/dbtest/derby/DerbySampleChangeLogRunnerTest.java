@@ -9,6 +9,7 @@ public class DerbySampleChangeLogRunnerTest extends AbstractSimpleChangeLogRunne
         super("derby", "jdbc:derby:liquibase;create=true");
     }
 
+    @Override
     protected boolean shouldRollBack() {
         return false;
     }

@@ -6,14 +6,17 @@ import liquibase.sql.Sql;
 import liquibase.statement.AddColumnStatement;
 
 public class AddColumnGeneratorSQLite extends AddColumnGenerator {
+     @Override
      public int getPriority() {
         return PRIORITY_DATABASE;
     }
 
+    @Override
     public boolean supports(AddColumnStatement statement, Database database) {
         return database instanceof SQLiteDatabase;
     }
 
+    @Override
     public Sql[] generateSql(final AddColumnStatement statement, Database database) {
 //        // SQLite does not support this ALTER TABLE operation until now.
 //        // For more information see: http://www.sqlite.org/omitted.html.

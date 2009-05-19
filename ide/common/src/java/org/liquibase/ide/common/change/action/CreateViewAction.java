@@ -12,10 +12,12 @@ public class CreateViewAction extends BaseDatabaseRefactorAction {
         super("Create View");
     }
 
+    @Override
     public RefactorWizard createRefactorWizard(DatabaseObject dbObject) {
         return new RefactorWizard("Create View", new CreateViewWizardPageImpl());
     }
 
+    @Override
     public Change[] createChanges(DatabaseObject selectedTable, RefactorWizardPage... pages) {
         CreateViewChange change = new CreateViewChange();
         change.setViewName(((CreateViewWizardPageImpl) pages[0]).getViewName());

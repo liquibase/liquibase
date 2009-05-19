@@ -84,6 +84,7 @@ public class CreateViewChange extends AbstractChange {
         return "View "+getViewName()+" created";
     }
 
+    @Override
     protected Change[] createInverses() {
         DropViewChange inverse = new DropViewChange();
         inverse.setViewName(getViewName());

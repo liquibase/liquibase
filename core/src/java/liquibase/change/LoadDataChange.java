@@ -151,6 +151,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns 
         return "Data loaded from "+getFile()+" into "+getTableName();
     }
 
+    @Override
     public CheckSum generateCheckSum() {
         InputStream stream = null;
         try {

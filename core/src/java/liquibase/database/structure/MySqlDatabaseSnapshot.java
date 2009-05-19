@@ -54,6 +54,7 @@ public class MySqlDatabaseSnapshot extends SqlDatabaseSnapshot {
     /**
      * MySQL specific implementation
      */
+    @Override
     protected void getColumnTypeAndDefValue(Column columnInfo, ResultSet rs, Database database) throws SQLException, JDBCException {
 
     	String columnTypeName = rs.getString("TYPE_NAME");
@@ -113,6 +114,7 @@ public class MySqlDatabaseSnapshot extends SqlDatabaseSnapshot {
         }
     }
 
+    @Override
     protected String convertPrimaryKeyName(String pkName) throws SQLException {
         if (pkName.equals("PRIMARY")) {
             return null;

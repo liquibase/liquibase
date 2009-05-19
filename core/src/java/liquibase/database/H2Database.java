@@ -14,14 +14,17 @@ import java.util.Date;
 public class H2Database extends HsqlDatabase {
     private static final DataType DATETIME_TYPE = new DataType("TIMESTAMP", false);
 
+    @Override
     public String getProductName() {
         return "H2 Database";
     }
 
+    @Override
     public String getTypeName() {
         return "h2";
     }
 
+    @Override
     public String getDefaultDriver(String url) {
         if (url.startsWith("jdbc:h2")) {
             return "org.h2.Driver";
@@ -30,10 +33,12 @@ public class H2Database extends HsqlDatabase {
     }
 
 
+    @Override
     public boolean isCorrectDatabaseImplementation(Connection conn) throws JDBCException {
         return "H2".equals(getDatabaseProductName(conn));
     }
 
+    @Override
     public SqlStatement createFindSequencesSQL(String schema) throws JDBCException {
         return new RawSqlStatement("SELECT SEQUENCE_NAME FROM INFORMATION_SCHEMA.SEQUENCES WHERE SEQUENCE_SCHEMA = '" + convertRequestedSchemaToSchema(schema) + "' AND IS_GENERATED=FALSE");
     }
@@ -63,18 +68,22 @@ public class H2Database extends HsqlDatabase {
 //
 //    }
 
+    @Override
     public boolean supportsTablespaces() {
         return false;
     }
 
+    @Override
     public String getViewDefinition(String schemaName, String name) throws JDBCException {
         return super.getViewDefinition(schemaName, name).replaceFirst(".*?\n", ""); //h2 returns "create view....as\nselect
     }
 
+    @Override
     public SqlStatement getViewDefinitionSql(String schemaName, String name) throws JDBCException {
         return new RawSqlStatement("SELECT VIEW_DEFINITION FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_NAME = '" + name + "' AND TABLE_SCHEMA='" + convertRequestedSchemaToSchema(schemaName) + "'");
     }
 
+    @Override
     public Object convertDatabaseValueToJavaObject(Object defaultValue, int dataType, int columnSize, int decimalDigits) throws ParseException {
         if (defaultValue != null && defaultValue instanceof String) {
             if (StringUtils.trimToEmpty(((String) defaultValue)).startsWith("(NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_")) {
@@ -87,6 +96,7 @@ public class H2Database extends HsqlDatabase {
         return super.convertDatabaseValueToJavaObject(defaultValue, dataType, columnSize, decimalDigits);
     }
 
+    @Override
     protected Date parseDate(String dateAsString) throws DateParseException {
         try {
             if (dateAsString.indexOf(' ') > 0) {
@@ -103,6 +113,7 @@ public class H2Database extends HsqlDatabase {
         }
     }
 
+    @Override
     public DataType getDateTimeType() {
         return DATETIME_TYPE;
     }

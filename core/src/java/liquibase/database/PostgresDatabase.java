@@ -91,6 +91,7 @@ public class PostgresDatabase extends AbstractDatabase {
         return "postgresql";
     }
 
+    @Override
     public Set<String> getSystemTablesAndViews() {
         return systemTablesAndViews;
     }
@@ -134,6 +135,7 @@ public class PostgresDatabase extends AbstractDatabase {
         return DATETIME_TYPE;
     }
 
+    @Override
     public boolean supportsSequences() {
         return true;
     }
@@ -142,6 +144,7 @@ public class PostgresDatabase extends AbstractDatabase {
         return "NOW()";
     }
 
+    @Override
     protected String getDefaultDatabaseSchemaName() throws JDBCException {
 
         if (defaultDatabaseSchemaName == null) {
@@ -175,14 +178,17 @@ public class PostgresDatabase extends AbstractDatabase {
         return defaultDatabaseSchemaName;
     }
 
+    @Override
     public String getDefaultCatalogName() throws JDBCException {
         return "public";
     }
 
+    @Override
     public String getDatabaseChangeLogTableName() {
         return super.getDatabaseChangeLogTableName().toLowerCase();
     }
 
+    @Override
     public String getDatabaseChangeLogLockTableName() {
         return super.getDatabaseChangeLogLockTableName().toLowerCase();
     }
@@ -207,6 +213,7 @@ public class PostgresDatabase extends AbstractDatabase {
 //    }
 
 
+    @Override
     public SqlStatement createFindSequencesSQL(String schema) throws JDBCException {
         return new RawSqlStatement("SELECT relname AS SEQUENCE_NAME FROM pg_class, pg_namespace " +
                 "WHERE relkind='S' " +
@@ -219,6 +226,7 @@ public class PostgresDatabase extends AbstractDatabase {
     }
 
 
+    @Override
     public boolean isSystemTable(String catalogName, String schemaName, String tableName) {
         return super.isSystemTable(catalogName, schemaName, tableName)
                 || "pg_catalog".equals(schemaName)
@@ -235,11 +243,13 @@ public class PostgresDatabase extends AbstractDatabase {
     }
 
 
+    @Override
     public SqlStatement getViewDefinitionSql(String schemaName, String name) throws JDBCException {
         return new RawSqlStatement("select definition from pg_views where viewname='" + name + "' AND schemaname='" + convertRequestedSchemaToSchema(schemaName) + "'");
     }
 
 
+    @Override
     public String getColumnType(String columnType, Boolean autoIncrement) {
         if (columnType.startsWith("java.sql.Types.VARCHAR")) { //returns "name" for type
             return columnType.replace("java.sql.Types.", "");
@@ -271,11 +281,13 @@ public class PostgresDatabase extends AbstractDatabase {
     }
 
 
+    @Override
     public String getAutoIncrementClause() {
         return "";
     }
 
 
+    @Override
     public Object convertDatabaseValueToJavaObject(Object defaultValue, int dataType, int columnSize, int decimalDigits) throws ParseException {
         if (defaultValue != null) {
             if (defaultValue instanceof String) {
@@ -291,6 +303,7 @@ public class PostgresDatabase extends AbstractDatabase {
 
     }
 
+    @Override
     public String convertRequestedSchemaToSchema(String requestedSchema) throws JDBCException {
         if (requestedSchema == null) {
             // Return the catalog name instead..
@@ -300,6 +313,7 @@ public class PostgresDatabase extends AbstractDatabase {
         }
     }
 
+    @Override
     public String convertRequestedSchemaToCatalog(String requestedSchema) throws JDBCException {
         return super.convertRequestedSchemaToCatalog(requestedSchema);
     }
@@ -423,11 +437,13 @@ public class PostgresDatabase extends AbstractDatabase {
         return false;
     }
 
+    @Override
     public DatabaseSnapshot createDatabaseSnapshot(String schema, Set<DiffStatusListener> statusListeners) throws JDBCException {
         return new PostgresDatabaseSnapshot(this, statusListeners, schema);
     }
 
 
+    @Override
     protected Object convertToCorrectJavaType(String value, int dataType, int columnSize, int decimalDigits) throws ParseException {
         Object returnValue = super.convertToCorrectJavaType(value, dataType, columnSize, decimalDigits);
         if (returnValue != null && returnValue instanceof String) {

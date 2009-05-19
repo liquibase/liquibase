@@ -125,6 +125,7 @@ public class RenameColumnChange extends AbstractChange {
     	return statements.toArray(new SqlStatement[statements.size()]);
     }
 
+    @Override
     protected Change[] createInverses() {
         RenameColumnChange inverse = new RenameColumnChange();
         inverse.setSchemaName(getSchemaName());

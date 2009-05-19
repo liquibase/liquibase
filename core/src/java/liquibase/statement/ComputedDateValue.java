@@ -15,14 +15,17 @@ public class ComputedDateValue extends Date {
     }
 
 
+    @Override
     public long getTime() {
         throw new RuntimeException("Date computed by database");
     }
 
+    @Override
     public String toString() {
         return getValue();
     }
 
+    @Override
     public boolean equals(Object obj) {
         if (obj instanceof ComputedDateValue) {
             return this.toString().equals(obj.toString());
@@ -31,6 +34,7 @@ public class ComputedDateValue extends Date {
         }
     }
 
+    @Override
     public int hashCode() {
         return this.toString().hashCode();
     }

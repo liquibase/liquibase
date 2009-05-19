@@ -14,11 +14,13 @@ import org.junit.Test;
  */
 public class CreateIndexChangeTest extends AbstractChangeTest {
 
+    @Override
     @Test
     public void getRefactoringName() throws Exception {
         assertEquals("Create Index", new CreateIndexChange().getChangeMetaData().getDescription());
     }
 
+    @Override
     @Test
     public void generateStatement() throws Exception {
         new DatabaseTestTemplate().testOnAllDatabases(new DatabaseTest() {
@@ -52,6 +54,7 @@ public class CreateIndexChangeTest extends AbstractChangeTest {
         });
     }
 
+    @Override
     @Test
     public void getConfirmationMessage() throws Exception {
         CreateIndexChange refactoring = new CreateIndexChange();

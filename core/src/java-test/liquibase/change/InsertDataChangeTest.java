@@ -42,11 +42,13 @@ public class InsertDataChangeTest extends AbstractChangeTest {
         refactoring.addColumn(col4);
     }
 
+    @Override
     @Test
     public void getRefactoringName() throws Exception {
         assertEquals("Insert Row", refactoring.getChangeMetaData().getDescription());
     }
 
+    @Override
     @Test
     public void generateStatement() throws Exception {
         SqlStatement[] sqlStatements = refactoring.generateStatements(new MockDatabase());
@@ -58,6 +60,7 @@ public class InsertDataChangeTest extends AbstractChangeTest {
         assertEquals("1.78", ((InsertStatement) sqlStatements[0]).getColumnValue("height").toString());
     }
 
+    @Override
     @Test
     public void getConfirmationMessage() throws Exception {
         assertEquals("New row inserted into TABLE_NAME", refactoring.getConfirmationMessage());

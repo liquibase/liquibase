@@ -10,11 +10,13 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 public class DropPrimaryKeyChangeTest extends AbstractChangeTest {
+        @Override
         @Test
     public void getRefactoringName() throws Exception {
         assertEquals("Drop Primary Key", new DropPrimaryKeyChange().getChangeMetaData().getDescription());
     }
 
+    @Override
     @Test
     public void generateStatement() throws Exception {
         DropPrimaryKeyChange change = new DropPrimaryKeyChange();
@@ -30,6 +32,7 @@ public class DropPrimaryKeyChangeTest extends AbstractChangeTest {
         assertEquals("PK_NAME", ((DropPrimaryKeyStatement) sqlStatements[0]).getConstraintName());
     }
 
+    @Override
     @Test
     public void getConfirmationMessage() throws Exception {
         DropPrimaryKeyChange change = new DropPrimaryKeyChange();

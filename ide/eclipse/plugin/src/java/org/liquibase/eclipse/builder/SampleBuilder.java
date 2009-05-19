@@ -61,15 +61,18 @@ public class SampleBuilder extends IncrementalProjectBuilder {
 					.getLineNumber(), severity);
 		}
 
-		public void error(SAXParseException exception) throws SAXException {
+		@Override
+        public void error(SAXParseException exception) throws SAXException {
 			addMarker(exception, IMarker.SEVERITY_ERROR);
 		}
 
-		public void fatalError(SAXParseException exception) throws SAXException {
+		@Override
+        public void fatalError(SAXParseException exception) throws SAXException {
 			addMarker(exception, IMarker.SEVERITY_ERROR);
 		}
 
-		public void warning(SAXParseException exception) throws SAXException {
+		@Override
+        public void warning(SAXParseException exception) throws SAXException {
 			addMarker(exception, IMarker.SEVERITY_WARNING);
 		}
 	}
@@ -100,7 +103,8 @@ public class SampleBuilder extends IncrementalProjectBuilder {
 	 * @see org.eclipse.core.internal.events.InternalBuilder#build(int,
 	 *      java.util.Map, org.eclipse.core.runtime.IProgressMonitor)
 	 */
-	protected IProject[] build(int kind, Map args, IProgressMonitor monitor)
+	@Override
+    protected IProject[] build(int kind, Map args, IProgressMonitor monitor)
 			throws CoreException {
 		if (kind == FULL_BUILD) {
 			fullBuild(monitor);

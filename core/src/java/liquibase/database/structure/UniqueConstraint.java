@@ -59,6 +59,7 @@ public class UniqueConstraint implements DatabaseObject, Comparable<UniqueConstr
     return returnValue;
   }
 
+  @Override
   public int hashCode () {
     int result = 0;
     if (this.table != null) {

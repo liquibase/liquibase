@@ -27,6 +27,7 @@ public class MigrationFailedException extends LiquibaseException {
     }
 
 
+    @Override
     public String getMessage() {
         String message = "Migration failed";
         if (failedChangeSet != null) {

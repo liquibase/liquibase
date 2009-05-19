@@ -62,6 +62,7 @@ public class View implements DatabaseObject, Comparable<View> {
         this.definition = definition;
     }
 
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
@@ -72,6 +73,7 @@ public class View implements DatabaseObject, Comparable<View> {
 
     }
 
+    @Override
     public int hashCode() {
         return name.toUpperCase().hashCode();
     }
@@ -80,6 +82,7 @@ public class View implements DatabaseObject, Comparable<View> {
         return this.getName().compareTo(o.getName());
     }
 
+    @Override
     public String toString() {
     	String viewStr = getName()+" (";
     	for (int i=0;i<columns.size();i++) {

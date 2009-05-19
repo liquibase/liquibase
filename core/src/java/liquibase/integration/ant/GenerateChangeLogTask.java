@@ -10,6 +10,7 @@ import java.io.PrintStream;
 
 public class GenerateChangeLogTask extends BaseLiquibaseTask {
 
+    @Override
     public void execute() throws BuildException {
         Liquibase liquibase = null;
         try {

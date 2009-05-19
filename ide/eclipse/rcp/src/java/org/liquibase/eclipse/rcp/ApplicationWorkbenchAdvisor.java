@@ -14,11 +14,13 @@ public class ApplicationWorkbenchAdvisor extends WorkbenchAdvisor {
 		configurer.setSaveAndRestore(true);
 	}
 	
+    @Override
     public WorkbenchWindowAdvisor createWorkbenchWindowAdvisor(IWorkbenchWindowConfigurer configurer) {
         return new ApplicationWorkbenchWindowAdvisor(configurer);
     }
 
-	public String getInitialWindowPerspectiveId() {
+	@Override
+    public String getInitialWindowPerspectiveId() {
 		return PERSPECTIVE_ID;
 	}
 }

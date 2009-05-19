@@ -21,6 +21,7 @@ import java.util.Map;
 
 public class HeaderColumnNameTranslateMappingStrategy extends HeaderColumnNameMappingStrategy {
     private Map columnMapping = new HashMap();
+    @Override
     protected String getColumnName(int col) {
         return (String) getColumnMapping().get(header[col]);
     }

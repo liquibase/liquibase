@@ -10,14 +10,17 @@ import liquibase.statement.AddAutoIncrementStatement;
 
 public class AddAutoIncrementGeneratorDB2 extends AddAutoIncrementGenerator {
 
+    @Override
     public int getPriority() {
         return PRIORITY_DATABASE;
     }
 
+    @Override
     public boolean supports(AddAutoIncrementStatement statement, Database database) {
         return database instanceof DB2Database;
     }
 
+    @Override
     public Sql[] generateSql(AddAutoIncrementStatement statement, Database database) {
         return new Sql[]{
                 new UnparsedSql("ALTER TABLE " + database.escapeTableName(statement.getSchemaName(), statement.getTableName()) + " ALTER COLUMN " + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " SET GENERATED ALWAYS AS IDENTITY",

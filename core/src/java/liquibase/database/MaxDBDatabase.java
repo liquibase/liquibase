@@ -93,6 +93,7 @@ public class MaxDBDatabase extends AbstractDatabase {
         systemTablesAndViews.add("VERSION");
     }
 
+    @Override
     public Set<String> getSystemTablesAndViews() {
         return systemTablesAndViews;
     }
@@ -109,6 +110,7 @@ public class MaxDBDatabase extends AbstractDatabase {
         return false;
     }
 
+    @Override
     public boolean supportsSequences() {
         return true;
     }
@@ -137,10 +139,12 @@ public class MaxDBDatabase extends AbstractDatabase {
         return DATETIME_TYPE;
     }
 
+    @Override
     public DataType getDateType() {
         return DATE_TYPE;
     }
 
+    @Override
     public DataType getTimeType() {
         return TIME_TYPE;
     }
@@ -160,23 +164,28 @@ public class MaxDBDatabase extends AbstractDatabase {
         return "TIMESTAMP";
     }
 
+    @Override
     public String getTrueBooleanValue() {
         return "TRUE";
     }
 
+    @Override
     public String getFalseBooleanValue() {
         return "FALSE";
     }
 
+    @Override
     protected String getDefaultDatabaseSchemaName() throws JDBCException {//NOPMD
         return super.getDefaultDatabaseSchemaName().toUpperCase();
     }
 
+    @Override
     public SqlStatement createFindSequencesSQL(String schema) throws JDBCException {
         return new RawSqlStatement("SELECT SEQUENCE_NAME FROM DOMAIN.SEQUENCES WHERE OWNER = '"
                 + convertRequestedSchemaToSchema(schema) + "'");
     }
 
+    @Override
     public boolean isSystemTable(String catalogName, String schemaName, String tableName) {
         if (super.isSystemTable(catalogName, schemaName, tableName)) {
             return true;
@@ -192,6 +201,7 @@ public class MaxDBDatabase extends AbstractDatabase {
         return false;
     }
 
+    @Override
     public boolean isSystemView(String catalogName, String schemaName, String tableName) {
         if (super.isSystemView(catalogName, schemaName, tableName)) {
             return true;
@@ -211,15 +221,18 @@ public class MaxDBDatabase extends AbstractDatabase {
         return false;
     }
 
+    @Override
     public SqlStatement getViewDefinitionSql(String schemaName, String name) throws JDBCException {
         return new RawSqlStatement("SELECT DEFINITION FROM DOMAIN.VIEWDEFS WHERE upper(VIEWNAME)='" + name.toUpperCase()
                 + "' AND OWNER='" + convertRequestedSchemaToSchema(schemaName) + "'");
     }
 
+    @Override
     public boolean supportsAutoIncrement() {
         return false;
     }
 
+    @Override
     public String convertJavaObjectToString(Object value) {
         if (value instanceof Boolean) {
             if (((Boolean) value)) {
@@ -232,6 +245,7 @@ public class MaxDBDatabase extends AbstractDatabase {
         }
     }
 
+    @Override
     public DatabaseSnapshot createDatabaseSnapshot(String schema, Set<DiffStatusListener> statusListeners) throws JDBCException {
         return new MaxDBDatabaseSnapshot(this, statusListeners, schema);
     }

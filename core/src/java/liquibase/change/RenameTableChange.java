@@ -59,6 +59,7 @@ public class RenameTableChange extends AbstractChange {
         return statements.toArray(new SqlStatement[statements.size()]);
     }
 
+    @Override
     protected Change[] createInverses() {
         RenameTableChange inverse = new RenameTableChange();
         inverse.setSchemaName(getSchemaName());

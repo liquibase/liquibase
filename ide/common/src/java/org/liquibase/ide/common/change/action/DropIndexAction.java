@@ -12,10 +12,12 @@ public class DropIndexAction extends BaseIndexRefactorAction {
         super("Drop Index");
     }
 
+    @Override
     public RefactorWizard createRefactorWizard(Index selectedIndex) {
         return new RefactorWizard("Drop index "+selectedIndex);
     }
 
+    @Override
     protected Change[] createChanges(Index selectedIndex, RefactorWizardPage... pages) {
         DropIndexChange change = new DropIndexChange();
         change.setIndexName(selectedIndex.getName());

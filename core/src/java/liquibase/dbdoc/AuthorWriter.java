@@ -14,10 +14,12 @@ public class AuthorWriter extends HTMLWriter {
         super(new File(rootOutputDir, "authors"), database);
     }
 
+    @Override
     protected String createTitle(Object object) {
         return "Changes created by author "+object.toString();
     }
 
+    @Override
     protected void writeCustomHTML(FileWriter fileWriter, Object object, List<Change> changes, Database database) throws IOException {
     }
 }

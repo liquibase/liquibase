@@ -10,11 +10,13 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 public class DropForeignKeyConstraintChangeTest extends AbstractChangeTest {
+ @Override
  @Test
     public void getRefactoringName() throws Exception {
         assertEquals("Drop Foreign Key Constraint", new DropForeignKeyConstraintChange().getChangeMetaData().getDescription());
     }
 
+    @Override
     @Test
     public void generateStatement() throws Exception {
 
@@ -36,6 +38,7 @@ public class DropForeignKeyConstraintChangeTest extends AbstractChangeTest {
         });
     }
 
+    @Override
     @Test
     public void getConfirmationMessage() throws Exception {
         DropForeignKeyConstraintChange change = new DropForeignKeyConstraintChange();

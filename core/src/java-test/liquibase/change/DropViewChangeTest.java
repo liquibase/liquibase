@@ -9,11 +9,13 @@ import org.junit.Test;
 
 public class DropViewChangeTest  extends AbstractChangeTest {
 
+    @Override
     @Test
     public void getRefactoringName() throws Exception {
         assertEquals("Drop View", new DropViewChange().getChangeMetaData().getDescription());
     }
 
+    @Override
     @Test
     public void generateStatement() throws Exception {
         DropViewChange change = new DropViewChange();
@@ -27,6 +29,7 @@ public class DropViewChangeTest  extends AbstractChangeTest {
         assertEquals("VIEW_NAME", ((DropViewStatement) sqlStatements[0]).getViewName());
     }
 
+    @Override
     @Test
     public void getConfirmationMessage() throws Exception {
         DropViewChange change = new DropViewChange();

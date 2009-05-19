@@ -10,7 +10,8 @@ public class CacheDatabaseTest extends AbstractDatabaseTest{
         super(new CacheDatabase());
     }
 	
-	protected String getProductNameString() {
+	@Override
+    protected String getProductNameString() {
 	      return "Cache";
 	    }
 	
@@ -50,47 +51,56 @@ public class CacheDatabaseTest extends AbstractDatabaseTest{
 		assertEquals("cache", database.getTypeName());
 	}
 
-	@Test
+	@Override
+    @Test
 	public void getDateType() {
 		assertEquals(new DataType("DATE", false), database.getDateType());
 	}
 
-	@Test
+	@Override
+    @Test
 	public void getBlobType() {
 		assertEquals(new DataType("LONGVARBINARY", true), database.getBlobType());
 	}
 
-	@Test
+	@Override
+    @Test
 	public void getBooleanType() {
 		assertEquals(new DataType("INTEGER", true), database.getBooleanType());
 	}
 
-	@Test
+	@Override
+    @Test
 	public void getClobType() {
 		assertEquals(new DataType("LONGVARCHAR", true), database.getClobType());
 	}
 
-	@Test
+	@Override
+    @Test
 	public void getCurrencyType() {
 		assertEquals(new DataType("MONEY", true), database.getCurrencyType());
 	}
 
-	@Test
+	@Override
+    @Test
 	public void getCurrentDateTimeFunction() {
 		assertEquals("SYSDATE", database.getCurrentDateTimeFunction());
 	}
 
-	@Test
+	@Override
+    @Test
 	public void getDateTimeType() {
 		assertEquals(new DataType("DATETIME", false), database.getDateTimeType());
 	}
 
-	@Test
+	@Override
+    @Test
 	public void getUUIDType() {
 		assertEquals(new DataType("CHAR(36)", false), database.getUUIDType());
 	}
 
-	@Test
+	@Override
+    @Test
 	public void supportsInitiallyDeferrableColumns() {
 		assertFalse(database.supportsInitiallyDeferrableColumns());
 	}

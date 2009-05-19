@@ -12,10 +12,12 @@ public class DropViewAction extends BaseViewRefactorAction {
         super("Drop View");
     }
 
+    @Override
     public RefactorWizard createRefactorWizard(View dbObject) {
         return new RefactorWizard("Drop view "+ dbObject);
     }
 
+    @Override
     protected Change[] createChanges(View view, RefactorWizardPage... pages) {
         DropViewChange change = new DropViewChange();
         change.setViewName(view.getName());

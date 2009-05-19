@@ -12,11 +12,13 @@ import org.junit.Test;
  */
 public class DropIndexChangeTest extends AbstractChangeTest {
 
+    @Override
     @Test
     public void getRefactoringName() throws Exception {
         assertEquals("Drop Index", new DropIndexChange().getChangeMetaData().getDescription());
     }
 
+    @Override
     @Test
     public void generateStatement() throws Exception {
         DropIndexChange refactoring = new DropIndexChange();
@@ -32,6 +34,7 @@ public class DropIndexChangeTest extends AbstractChangeTest {
         assertEquals("IDX_NAME", ((DropIndexStatement) sqlStatements[0]).getIndexName());
     }
 
+    @Override
     @Test
     public void getConfirmationMessage() throws Exception {
         DropIndexChange refactoring = new DropIndexChange();

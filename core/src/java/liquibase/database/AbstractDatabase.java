@@ -902,6 +902,7 @@ public abstract class AbstractDatabase implements Database {
         return count > 0;
     }
 
+    @Override
     public String toString() {
         if (getConnection() == null) {
             return getProductName() + " Database";
@@ -1378,6 +1379,7 @@ public abstract class AbstractDatabase implements Database {
         }
     }
 
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
@@ -1388,6 +1390,7 @@ public abstract class AbstractDatabase implements Database {
 
     }
 
+    @Override
     public int hashCode() {
         return (connection != null ? connection.hashCode() : 0);
     }

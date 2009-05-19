@@ -9,14 +9,17 @@ import liquibase.sql.UnparsedSql;
 import liquibase.statement.AddDefaultValueStatement;
 
 public class AddDefaultValueGeneratorDerby extends AddDefaultValueGenerator {
+    @Override
     public int getPriority() {
         return PRIORITY_DATABASE;
     }
 
+    @Override
     public boolean supports(AddDefaultValueStatement statement, Database database) {
         return database instanceof DerbyDatabase;
     }
 
+    @Override
     public Sql[] generateSql(AddDefaultValueStatement statement, Database database) {
         return new Sql[]{
                 new UnparsedSql("ALTER TABLE " + database.escapeTableName(statement.getSchemaName(), statement.getTableName()) + " ALTER COLUMN  " + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " WITH DEFAULT " + database.convertJavaObjectToString(statement.getDefaultValue()),

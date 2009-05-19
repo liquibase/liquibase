@@ -31,6 +31,7 @@ public class OracleDatabaseSnapshot extends SqlDatabaseSnapshot {
     /**
      * Oracle specific implementation
      */
+    @Override
     protected void getColumnTypeAndDefValue(Column columnInfo, ResultSet rs, Database database) throws SQLException, JDBCException {
       super.getColumnTypeAndDefValue(columnInfo, rs, database);
 

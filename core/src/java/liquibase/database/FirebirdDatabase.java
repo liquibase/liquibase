@@ -42,6 +42,7 @@ public class FirebirdDatabase extends AbstractDatabase {
     }
 
 
+    @Override
     public boolean supportsSequences() {
         return true;
     }
@@ -83,10 +84,12 @@ public class FirebirdDatabase extends AbstractDatabase {
     }
 
 
+    @Override
     public SqlStatement createFindSequencesSQL(String schema) throws JDBCException {
         return new RawSqlStatement("SELECT RDB$GENERATOR_NAME FROM RDB$GENERATORS WHERE RDB$SYSTEM_FLAG IS NULL OR RDB$SYSTEM_FLAG = 0");
     }
 
+    @Override
     public SqlStatement getViewDefinitionSql(String schemaName, String viewName) throws JDBCException {
         String sql = "select rdb$view_source from rdb$relations where upper(rdb$relation_name)='" + viewName + "'";
 //        if (schemaName != null) {
@@ -100,33 +103,40 @@ public class FirebirdDatabase extends AbstractDatabase {
     }
 
 
+    @Override
     public boolean supportsDDLInTransaction() {
         return false;
     }
 
 
+    @Override
     public String getTrueBooleanValue() {
         return "1";
     }
 
+    @Override
     public String getFalseBooleanValue() {
         return "0";
     }
 
 
+    @Override
     public boolean isSystemTable(String catalogName, String schemaName, String tableName) {
         return tableName.startsWith("RDB$") || super.isSystemTable(catalogName, schemaName, tableName);
     }
 
 
+    @Override
     public boolean supportsAutoIncrement() {
         return false;
     }
 
+    @Override
     public boolean supportsSchemas() {
         return false;
     }
 
+    @Override
     public String convertRequestedSchemaToSchema(String requestedSchema) throws JDBCException {
         if (requestedSchema == null) {
             return getDefaultDatabaseSchemaName();
@@ -135,6 +145,7 @@ public class FirebirdDatabase extends AbstractDatabase {
         }
     }
 
+    @Override
     public String getColumnType(String columnType, Boolean autoIncrement) {
         String type = super.getColumnType(columnType, autoIncrement);
         if (type.startsWith("BLOB SUB_TYPE <0")) {
@@ -144,6 +155,7 @@ public class FirebirdDatabase extends AbstractDatabase {
         }
     }
 
+    @Override
     public DatabaseSnapshot createDatabaseSnapshot(String schema, Set<DiffStatusListener> statusListeners) throws JDBCException {
         return new FirebirdDatabaseSnapshot(this, statusListeners, schema);
     }

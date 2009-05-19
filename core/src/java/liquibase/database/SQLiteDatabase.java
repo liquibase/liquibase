@@ -84,22 +84,27 @@ public class SQLiteDatabase extends AbstractDatabase {
         return false;
     }
 
+    @Override
     public String getViewDefinition(String schemaName, String viewName) throws JDBCException {
         return null;
     }
 
+    @Override
     public boolean supportsSequences() {
         return false;
     }
 
+    @Override
     public boolean supportsSchemas() {
         return false;
     }
 
+    @Override
     public String getFalseBooleanValue() {
         return "0";
     }
 
+    @Override
     public String getTrueBooleanValue() {
         return "1";
     }
@@ -110,10 +115,12 @@ public class SQLiteDatabase extends AbstractDatabase {
                 " WHERE rowid = new.rowid END ";
     }
 
+    @Override
     public String getAutoIncrementClause() {
         return "AUTOINCREMENT";
     }
 
+    @Override
     public String getColumnType(String columnType, Boolean autoIncrement) {
         String type;
         if (columnType.equals("INTEGER") ||
@@ -220,6 +227,7 @@ public class SQLiteDatabase extends AbstractDatabase {
         return statements;
     }
 
+    @Override
     public String getConnectionUsername() throws JDBCException {
         try {
             String username = getConnection().getMetaData().getUserName();
@@ -232,10 +240,12 @@ public class SQLiteDatabase extends AbstractDatabase {
         }
     }
 
+    @Override
     protected Set<String> getSystemTablesAndViews() {
         return systemTables;
     }
 
+    @Override
     public String getDateLiteral(java.sql.Timestamp date) {
         return getDateLiteral(new ISODateFormat().format(date).replaceFirst("^'", "").replaceFirst("'$", ""));
     }
@@ -251,6 +261,7 @@ public class SQLiteDatabase extends AbstractDatabase {
         public boolean createThisIndex(Index index);
     }
 
+    @Override
     public DatabaseSnapshot createDatabaseSnapshot(String schema, Set<DiffStatusListener> statusListeners) throws JDBCException {
         return new SQLiteDatabaseSnapshot(this);
     }

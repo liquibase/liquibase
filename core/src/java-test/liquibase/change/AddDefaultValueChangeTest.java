@@ -16,6 +16,7 @@ import java.util.Date;
 
 public class AddDefaultValueChangeTest extends AbstractChangeTest {
 
+    @Override
     @Test
     public void generateStatement() throws Exception {
         AddDefaultValueChange change = new AddDefaultValueChange();
@@ -169,10 +170,12 @@ public class AddDefaultValueChangeTest extends AbstractChangeTest {
         });
     }
 
+    @Override
     public void getRefactoringName() throws Exception {
         assertEquals("Add Default Value", new AddDefaultValueChange().getChangeMetaData().getDescription());
     }
 
+    @Override
     @Test
     public void getConfirmationMessage() throws Exception {
         AddDefaultValueChange change = new AddDefaultValueChange();

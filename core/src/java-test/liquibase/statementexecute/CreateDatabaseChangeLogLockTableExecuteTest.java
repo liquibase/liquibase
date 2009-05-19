@@ -9,6 +9,7 @@ import java.util.List;
 import org.junit.Test;
 
 public class CreateDatabaseChangeLogLockTableExecuteTest extends AbstractExecuteTest {
+    @Override
     protected List<? extends SqlStatement> setupStatements(Database database) {
         return null;
     }

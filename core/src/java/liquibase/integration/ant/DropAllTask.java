@@ -18,6 +18,7 @@ public class DropAllTask extends BaseLiquibaseTask {
         this.schemas = schemas;
     }
 
+    @Override
     public void execute() throws BuildException {
 
         Liquibase liquibase = null;

@@ -12,10 +12,12 @@ public class DropPrimaryKeyAction extends BasePrimaryKeyRefactorAction {
         super("Drop Primary Key");
     }
 
+    @Override
     public RefactorWizard createRefactorWizard(PrimaryKey selectedPK) {
         return new RefactorWizard("Drop primary key "+selectedPK);
     }
 
+    @Override
     protected Change[] createChanges(PrimaryKey selectedPK, RefactorWizardPage... pages) {
         DropPrimaryKeyChange change = new DropPrimaryKeyChange();
         change.setConstraintName(selectedPK.getName());

@@ -60,6 +60,7 @@ public class PrimaryKey implements DatabaseObject, Comparable<PrimaryKey> {
     }
 
 
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
@@ -70,6 +71,7 @@ public class PrimaryKey implements DatabaseObject, Comparable<PrimaryKey> {
 
     }
 
+    @Override
     public int hashCode() {
         int result;
         result = (getColumnNames() != null ? getColumnNames().toUpperCase().hashCode() : 0);
@@ -77,6 +79,7 @@ public class PrimaryKey implements DatabaseObject, Comparable<PrimaryKey> {
         return result;
     }
 
+    @Override
     public String toString() {
         return getName() + " on " + getTable().getName() + "(" + getColumnNames() + ")";
     }

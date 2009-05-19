@@ -17,11 +17,13 @@ public class TagDatabaseChangeTest extends AbstractChangeTest {
         refactoring = new TagDatabaseChange();
     }
 
+    @Override
     @Test
     public void getRefactoringName() throws Exception {
         assertEquals("Tag Database", refactoring.getChangeMetaData().getDescription());
     }
 
+    @Override
     @Test
     public void generateStatement() throws Exception {
         TagDatabaseChange refactoring = new TagDatabaseChange();
@@ -33,6 +35,7 @@ public class TagDatabaseChangeTest extends AbstractChangeTest {
         assertEquals("TAG_NAME", ((TagDatabaseStatement) sqlStatements[0]).getTag());
     }
 
+    @Override
     @Test
     public void getConfirmationMessage() throws Exception {
         refactoring.setTag("TAG_NAME");

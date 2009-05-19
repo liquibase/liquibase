@@ -10,6 +10,7 @@ import java.io.Writer;
  */
 public class DatabaseRollbackFutureTask extends BaseLiquibaseTask {
 
+    @Override
     public void execute() throws BuildException {
         Liquibase liquibase = null;
         try {

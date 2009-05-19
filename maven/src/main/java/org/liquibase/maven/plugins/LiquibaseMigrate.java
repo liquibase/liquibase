@@ -24,6 +24,7 @@ public class LiquibaseMigrate extends AbstractLiquibaseUpdateMojo {
     super.configureFieldsAndValues(fo);
   }
 
+  @Override
   protected void doUpdate(Liquibase liquibase) throws LiquibaseException {
     if (changesToApply > 0) {
       liquibase.update(changesToApply, contexts);

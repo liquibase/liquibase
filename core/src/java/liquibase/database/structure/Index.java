@@ -58,6 +58,7 @@ public class Index implements DatabaseObject, Comparable<Index> {
         return this.unique;
     }
 
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
@@ -84,6 +85,7 @@ public class Index implements DatabaseObject, Comparable<Index> {
 
     }
 
+    @Override
     public int hashCode() {
         int result;
         result = table.getName().toUpperCase().hashCode();
@@ -108,6 +110,7 @@ public class Index implements DatabaseObject, Comparable<Index> {
         return returnValue;
     }
 
+    @Override
     public String toString() {
         StringBuffer stringBuffer = new StringBuffer();
         stringBuffer.append(getName());

@@ -25,11 +25,13 @@ public class RenameColumnChangeTest extends AbstractChangeTest {
         refactoring.setNewColumnName("newColName");
     }
 
+    @Override
     @Test
     public void getRefactoringName() throws Exception {
         assertEquals("Rename Column", refactoring.getChangeMetaData().getDescription());
     }
 
+    @Override
     @Test
     public void generateStatement() throws Exception {
         SqlStatement[] sqlStatements = refactoring.generateStatements(new MockDatabase());
@@ -41,6 +43,7 @@ public class RenameColumnChangeTest extends AbstractChangeTest {
         assertEquals("newColName", ((RenameColumnStatement) sqlStatements[0]).getNewColumnName());
     }
 
+    @Override
     @Test
     public void getConfirmationMessage() throws Exception {
         assertEquals("Column TABLE_NAME.oldColName renamed to newColName", refactoring.getConfirmationMessage());

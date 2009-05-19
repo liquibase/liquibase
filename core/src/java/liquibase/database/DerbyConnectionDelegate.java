@@ -11,12 +11,14 @@ public class DerbyConnectionDelegate extends SQLConnectionDelegate {
     }
 
 
+    @Override
     public void commit() throws SQLException {
         super.commit();
 
         checkPoint();
     }
 
+    @Override
     public void rollback() throws SQLException {
         super.rollback();
 

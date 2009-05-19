@@ -13,10 +13,12 @@ public class CreateProcedureAction extends BaseDatabaseRefactorAction {
         super("Create Procedure");
     }
 
+    @Override
     public RefactorWizard createRefactorWizard(DatabaseObject dbObject) {
         return new RefactorWizard("Create Procedure", new SingleValueWizardPageTextAreaImpl("Procedure Definition"));
     }
 
+    @Override
     public Change[] createChanges(DatabaseObject selectedTable, RefactorWizardPage... pages) {
         CreateProcedureChange change = new CreateProcedureChange();
         change.setProcedureBody(((SingleValueWizardPageImpl) pages[0]).getValue());

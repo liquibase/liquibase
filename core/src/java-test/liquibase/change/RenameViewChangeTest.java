@@ -17,11 +17,13 @@ public class RenameViewChangeTest extends AbstractChangeTest {
         refactoring = new RenameViewChange();
     }
 
+    @Override
     @Test
     public void getRefactoringName() throws Exception {
         assertEquals("Rename View", refactoring.getChangeMetaData().getDescription());
     }
 
+    @Override
     @Test
     public void generateStatement() throws Exception {
         RenameViewChange refactoring = new RenameViewChange();
@@ -38,6 +40,7 @@ public class RenameViewChangeTest extends AbstractChangeTest {
         assertEquals("NEW_NAME", ((RenameViewStatement) sqlStatements[0]).getNewViewName());
     }
 
+    @Override
     @Test
     public void getConfirmationMessage() throws Exception {
         refactoring.setOldViewName("OLD_NAME");

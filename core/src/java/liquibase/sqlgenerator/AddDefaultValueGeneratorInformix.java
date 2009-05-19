@@ -10,10 +10,12 @@ import liquibase.sql.UnparsedSql;
 import liquibase.statement.AddDefaultValueStatement;
 
 public class AddDefaultValueGeneratorInformix extends AddDefaultValueGenerator {
+    @Override
     public int getPriority() {
         return PRIORITY_DATABASE;
     }
 
+    @Override
     public boolean supports(AddDefaultValueStatement statement, Database database) {
         return database instanceof SybaseDatabase;
     }
@@ -27,6 +29,7 @@ public class AddDefaultValueGeneratorInformix extends AddDefaultValueGenerator {
         return validationErrors;
     }
 
+    @Override
     public Sql[] generateSql(AddDefaultValueStatement statement, Database database) {
 
         return new Sql[]{

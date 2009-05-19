@@ -90,6 +90,7 @@ public class ForeignKey implements DatabaseObject, Comparable<ForeignKey> {
     }
 
 
+    @Override
     public String toString() {
         return getName() + "(" + getForeignKeyTable() + "." + getForeignKeyColumns() + " ->" + getPrimaryKeyTable() + "." + getPrimaryKeyColumns() + ")";
     }
@@ -128,6 +129,7 @@ public class ForeignKey implements DatabaseObject, Comparable<ForeignKey> {
         return this.deleteRule;
     }
 
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
@@ -145,6 +147,7 @@ public class ForeignKey implements DatabaseObject, Comparable<ForeignKey> {
 
     }
 
+    @Override
     public int hashCode() {
         int result = 0;
         if (primaryKeyTable != null) {

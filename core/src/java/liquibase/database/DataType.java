@@ -41,6 +41,7 @@ public class DataType
         return supportsPrecision;
     }
 
+    @Override
     public boolean equals(final Object o)
     {
         if (this == o) {
@@ -62,6 +63,7 @@ public class DataType
         return true;
     }
 
+    @Override
     public int hashCode()
     {
         int result;
@@ -70,6 +72,7 @@ public class DataType
         return result;
     }
 
+    @Override
     public String toString() {
         return this.getClass().getName() + "[" + dataTypeName + ", " + supportsPrecision + "]";
     }

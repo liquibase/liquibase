@@ -11,6 +11,7 @@ public class DB2SampleChangeLogRunnerTest extends AbstractSimpleChangeLogRunnerT
         super("db2", "jdbc:db2://localhost:50000/liquibas");
     }
 
+    @Override
     protected Properties createProperties() {
         Properties properties = super.createProperties();
         properties.put("retrieveMessagesFromServerOnGetMessage", "true");

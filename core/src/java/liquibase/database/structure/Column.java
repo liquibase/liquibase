@@ -127,6 +127,7 @@ public class Column implements DatabaseObject, Comparable<Column> {
         return this;
     }
 
+    @Override
     public String toString() {
         String tableOrViewName;
         if (table == null) {
@@ -163,6 +164,7 @@ public class Column implements DatabaseObject, Comparable<Column> {
     }
 
 
+    @Override
     public boolean equals(Object o) {
         try {
             if (this == o) return true;
@@ -177,6 +179,7 @@ public class Column implements DatabaseObject, Comparable<Column> {
 
     }
 
+    @Override
     public int hashCode() {
         try {
             int result;

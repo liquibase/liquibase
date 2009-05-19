@@ -12,22 +12,27 @@ public class ComputedNumericValue extends Number {
         return value;
     }
 
+    @Override
     public String toString() {
         return getValue();
     }
 
+    @Override
     public int intValue() {
         throw new RuntimeException("Value computed by database");
     }
 
+    @Override
     public long longValue() {
         throw new RuntimeException("Value computed by database");
     }
 
+    @Override
     public float floatValue() {
         throw new RuntimeException("Value computed by database");
     }
 
+    @Override
     public double doubleValue() {
         throw new RuntimeException("Value computed by database");
     }

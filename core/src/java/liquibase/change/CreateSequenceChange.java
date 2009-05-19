@@ -90,6 +90,7 @@ public class CreateSequenceChange extends AbstractChange {
         };
     }
 
+    @Override
     protected Change[] createInverses() {
         DropSequenceChange inverse = new DropSequenceChange();
         inverse.setSequenceName(getSequenceName());

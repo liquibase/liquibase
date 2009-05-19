@@ -128,12 +128,14 @@ public abstract class SQLFileChangeTest extends AbstractChangeTest {
 //        assertEquals("SELECT * from gogo",statements[1].getSqlStatement(database));
 //    }
 
+    @Override
     @Test
 	public void getConfirmationMessage() throws Exception {
     	change.setPath(fileName);
 		assertEquals("SQL in file " + fileName + " executed", change.getConfirmationMessage());
 	}
 
+    @Override
     @Test
 	public void getRefactoringName() throws Exception {
 		assertEquals("SQL From File", change.getChangeMetaData().getDescription());

@@ -25,6 +25,7 @@ public class ColumnPositionMappingStrategy extends HeaderColumnNameMappingStrate
     public void captureHeader(CSVReader reader) throws IOException {
         //do nothing, first line is not header
     }
+    @Override
     protected String getColumnName(int col) {
         return (null != columnMapping && col < columnMapping.length) ? columnMapping[col] : null ;
     }

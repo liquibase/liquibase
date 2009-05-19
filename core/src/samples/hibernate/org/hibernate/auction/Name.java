@@ -8,8 +8,10 @@ public class Name {
 	private String firstName;
 	private String lastName;
 	private Character initial;
-	private Name() {}
-	public Name(String first, Character middle, String last) {
+
+    public Name() {}
+
+    public Name(String first, Character middle, String last) {
 		firstName = first;
 		initial = middle;
 		lastName = last;
@@ -38,7 +40,8 @@ public class Name {
 		this.lastName = lastName;
 	}
 	
-	public String toString() {
+	@Override
+    public String toString() {
 		StringBuffer buf = new StringBuffer()
 			.append(firstName)
 			.append(' ');

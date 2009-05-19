@@ -31,6 +31,7 @@ public class PostgresDatabaseSnapshot extends SqlDatabaseSnapshot {
     super(database, statusListeners, requestedSchema);
   }
 
+  @Override
   protected String convertFromDatabaseName (String objectName) {
     if (objectName == null) {
       return null;
@@ -41,6 +42,7 @@ public class PostgresDatabaseSnapshot extends SqlDatabaseSnapshot {
   /**
    * 
    */
+  @Override
   protected void readUniqueConstraints (String schema) throws JDBCException, SQLException {
     updateListeners("Reading unique constraints for " + database.toString() + " ...");
     List<UniqueConstraint> foundUC = new ArrayList<UniqueConstraint>();

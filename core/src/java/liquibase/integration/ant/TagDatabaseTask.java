@@ -16,6 +16,7 @@ public class TagDatabaseTask extends BaseLiquibaseTask {
         this.tag = tag;
     }
 
+    @Override
     public void execute() throws BuildException {
         if (StringUtils.trimToNull(getTag()) == null) {
             throw new BuildException("tagDatabase requires tag parameter to be set");

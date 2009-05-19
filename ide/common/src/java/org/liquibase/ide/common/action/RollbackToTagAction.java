@@ -10,6 +10,7 @@ public class RollbackToTagAction extends MigratorAction {
         super("Rollback to Tag");
     }
 
+    @Override
     public void actionPerform(Database database, IdeFacade ideFacade) throws LiquibaseException {
         String input = ideFacade.promptForString(getTitle(), "Enter database tag to roll back to", null);
         if (input != null) {
@@ -17,6 +18,7 @@ public class RollbackToTagAction extends MigratorAction {
         }
     }
 
+    @Override
     public boolean needsRefresh() {
         return true;
     }

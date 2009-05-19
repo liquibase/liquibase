@@ -12,50 +12,60 @@ public class PostgresDatabaseTest extends AbstractDatabaseTest {
         super(new PostgresDatabase());
     }
 
+    @Override
     protected String getProductNameString() {
         return "PostgreSQL";
     }
 
+    @Override
     @Test
     public void getBlobType() {
         assertEquals(new DataType("BYTEA", false), getDatabase().getBlobType());
     }
 
+    @Override
     @Test
     public void supportsInitiallyDeferrableColumns() {
         assertTrue(getDatabase().supportsInitiallyDeferrableColumns());
     }
 
+    @Override
     @Test
     public void getBooleanType() {
         assertEquals(new DataType("BOOLEAN", false), getDatabase().getBooleanType());
     }
 
+    @Override
     @Test
     public void getCurrencyType() {
         assertEquals(new DataType("DECIMAL", true), getDatabase().getCurrencyType());
     }
 
+    @Override
     @Test
     public void getUUIDType() {
         assertEquals(new DataType("CHAR(36)", false), getDatabase().getUUIDType());
     }
 
+    @Override
     @Test
     public void getClobType() {
         assertEquals(new DataType("TEXT", true), getDatabase().getClobType());
     }
 
+    @Override
     @Test
     public void getDateType() {
         assertEquals(new DataType("DATE", false), getDatabase().getDateType());
     }
 
+    @Override
     @Test
     public void getDateTimeType() {
         assertEquals(new DataType("TIMESTAMP WITH TIME ZONE", false), getDatabase().getDateTimeType());
     }
 
+    @Override
     @Test
     public void getCurrentDateTimeFunction() {
         assertEquals("NOW()", getDatabase().getCurrentDateTimeFunction());
@@ -89,6 +99,7 @@ public class PostgresDatabaseTest extends AbstractDatabaseTest {
         assertEquals("bigserial", getDatabase().getColumnType("bigint", Boolean.TRUE));
     }
 
+    @Override
     @Test
     public void escapeTableName_noSchema() {
         Database database = getDatabase();
@@ -101,6 +112,7 @@ public class PostgresDatabaseTest extends AbstractDatabaseTest {
          assertEquals("\"user\"", database.escapeTableName(null, "user"));
      }
 
+    @Override
     @Test
     public void escapeTableName_withSchema() {
         Database database = getDatabase();

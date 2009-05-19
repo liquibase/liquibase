@@ -14,16 +14,19 @@ public abstract class BaseIndexRefactorAction extends BaseRefactorAction {
 
     public abstract RefactorWizard createRefactorWizard(Index selectedIndex);
 
+    @Override
     public final RefactorWizard createRefactorWizard(DatabaseObject dbObject) {
         return createRefactorWizard((Index) dbObject);
     }
 
+    @Override
     public Change[] createChanges(DatabaseObject selectedFK, RefactorWizardPage... pages) {
         return createChanges(((Index) selectedFK), pages);
     }
 
     protected abstract Change[] createChanges(Index selectedFK, RefactorWizardPage... pages);
 
+    @Override
     public boolean isApplicableTo(Class objectType) {
         return objectType.equals(Index.class);
     }

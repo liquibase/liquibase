@@ -14,6 +14,7 @@ import org.junit.Test;
  */
 public class AddColumnChangeTest extends AbstractChangeTest {
 
+    @Override
     @Test
     public void getRefactoringName() throws Exception {
         AddColumnChange refactoring = new AddColumnChange();
@@ -72,6 +73,7 @@ public class AddColumnChangeTest extends AbstractChangeTest {
 
     }
 
+    @Override
     @Test
     public void generateStatement() throws Exception {
         AddColumnChange refactoring = new AddColumnChange();
@@ -382,6 +384,7 @@ public class AddColumnChangeTest extends AbstractChangeTest {
         });
     }
 
+    @Override
     @Test
     public void getConfirmationMessage() throws Exception {
         AddColumnChange refactoring = new AddColumnChange();

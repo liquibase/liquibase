@@ -12,11 +12,13 @@ import org.junit.Test;
 
 public class AddUniqueConstraintChangeTest extends AbstractChangeTest {
 
+    @Override
     @Test
     public void getRefactoringName() throws Exception {
         assertEquals("Add Unique Constraint", new AddUniqueConstraintChange().getChangeMetaData().getDescription());
     }
 
+    @Override
     @Test
     public void generateStatement() throws Exception {
 
@@ -43,6 +45,7 @@ public class AddUniqueConstraintChangeTest extends AbstractChangeTest {
         });
     }
 
+    @Override
     @Test
     public void getConfirmationMessage() throws Exception {
         AddUniqueConstraintChange change = new AddUniqueConstraintChange();

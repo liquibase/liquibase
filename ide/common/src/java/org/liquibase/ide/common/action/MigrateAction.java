@@ -10,6 +10,7 @@ public class MigrateAction extends MigratorAction {
         super("Update Database");
     }
 
+    @Override
     public void actionPerform(Database database, IdeFacade ideFacade) throws LiquibaseException {
         String changeLogFile = ideFacade.promptForChangeLogFile();
         if (changeLogFile == null) {
@@ -18,6 +19,7 @@ public class MigrateAction extends MigratorAction {
         ideFacade.getLiquibase(changeLogFile, database).update(null);
     }
 
+    @Override
     public boolean needsRefresh() {
         return true;
     }

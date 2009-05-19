@@ -176,6 +176,7 @@ public class DBDocVisitor implements ChangeSetVisitor {
             this.physicalPath = physicalPath;
         }
 
+        @Override
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
@@ -186,6 +187,7 @@ public class DBDocVisitor implements ChangeSetVisitor {
 
         }
 
+        @Override
         public int hashCode() {
             return logicalPath.hashCode();
         }
@@ -194,6 +196,7 @@ public class DBDocVisitor implements ChangeSetVisitor {
             return this.logicalPath.compareTo(o.logicalPath);
         }
 
+        @Override
         public String toString() {
             return logicalPath;
         }

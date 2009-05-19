@@ -17,6 +17,7 @@ public class PendingSQLWriter extends HTMLWriter {
         super(new File(rootOutputDir, "pending"), database);
     }
 
+    @Override
     protected String createTitle(Object object) {
         return "Pending SQL";
     }
@@ -47,6 +48,7 @@ public class PendingSQLWriter extends HTMLWriter {
         fileWriter.append("</pre></code>");
     }
 
+    @Override
     protected void writeCustomHTML(FileWriter fileWriter, Object object, List<Change> changes, Database database) throws IOException {
     }
 }

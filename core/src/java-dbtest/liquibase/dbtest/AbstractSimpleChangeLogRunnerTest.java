@@ -56,6 +56,7 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
         }
     }
 
+    @Override
     protected void setUp() throws Exception {
         super.setUp();
 
@@ -77,6 +78,7 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
         return new Properties();
     }
 
+    @Override
     protected void tearDown() throws Exception {
         if (database != null) {
             if (shouldRollBack()) {

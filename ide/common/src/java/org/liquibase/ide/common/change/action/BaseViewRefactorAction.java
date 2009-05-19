@@ -14,16 +14,19 @@ public abstract class BaseViewRefactorAction extends BaseRefactorAction {
 
     public abstract RefactorWizard createRefactorWizard(View dbObject);
 
+    @Override
     public final RefactorWizard createRefactorWizard(DatabaseObject dbObject) {
         return createRefactorWizard((View) dbObject);
     }
 
+    @Override
     public Change[] createChanges(DatabaseObject selectedView, RefactorWizardPage... pages) {
         return createChanges(((View) selectedView), pages);
     }
 
     protected abstract Change[] createChanges(View selectedView, RefactorWizardPage... pages);
 
+    @Override
     public boolean isApplicableTo(Class objectType) {
         return objectType.equals(View.class);
     }

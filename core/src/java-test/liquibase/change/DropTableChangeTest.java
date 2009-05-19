@@ -21,11 +21,13 @@ public class DropTableChangeTest extends AbstractChangeTest {
         change.setCascadeConstraints(true);
     }
 
+    @Override
     @Test
     public void getRefactoringName() throws Exception {
         assertEquals("Drop Table", change.getChangeMetaData().getDescription());
     }
 
+    @Override
     @Test
     public void generateStatement() throws Exception {
         SqlStatement[] sqlStatements = change.generateStatements(new MockDatabase());
@@ -43,6 +45,7 @@ public class DropTableChangeTest extends AbstractChangeTest {
         assertFalse(((DropTableStatement) sqlStatements[0]).isCascadeConstraints());
     }
 
+    @Override
     @Test
     public void getConfirmationMessage() throws Exception {
         assertEquals("Table TAB_NAME dropped", change.getConfirmationMessage());

@@ -14,6 +14,7 @@ public class ValidateAction extends MigratorAction {
         super("Validate Change Log");
     }
 
+    @Override
     public void actionPerform(Database database, IdeFacade ideFacade) throws LiquibaseException {
         String message;
 
@@ -37,6 +38,7 @@ public class ValidateAction extends MigratorAction {
 
     }
 
+    @Override
     public boolean needsRefresh() {
         return false;
     }

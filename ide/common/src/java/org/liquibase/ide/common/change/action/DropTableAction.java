@@ -15,10 +15,12 @@ public class DropTableAction  extends BaseTableRefactorAction {
         super("Drop Table");
     }
 
+    @Override
     public RefactorWizard createRefactorWizard(Table dbObject) {
         return new RefactorWizard("Drop table "+ dbObject);
     }
 
+    @Override
     protected Change[] createChanges(Table selectedTable, RefactorWizardPage... pages) {
         DropTableChange change = new DropTableChange();
         change.setTableName(selectedTable.getName());

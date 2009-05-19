@@ -8,6 +8,7 @@ public abstract class BaseDatabaseRefactorAction extends BaseRefactorAction {
         super(title);
     }
 
+    @Override
     public boolean isApplicableTo(Class objectType) {
         return objectType.equals(Database.class);
     }

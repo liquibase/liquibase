@@ -68,6 +68,7 @@ public class RanChangeSet {
         this.tag = tag;
     }
 
+    @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;
@@ -82,6 +83,7 @@ public class RanChangeSet {
 
     }
 
+    @Override
     public int hashCode() {
         int result;
         result = changeLog.hashCode();

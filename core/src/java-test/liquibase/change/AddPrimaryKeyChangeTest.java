@@ -14,11 +14,13 @@ import org.junit.Test;
 
 public class AddPrimaryKeyChangeTest extends AbstractChangeTest {
 
+    @Override
     @Test
     public void getRefactoringName() throws Exception {
         assertEquals("Add Primary Key", new AddPrimaryKeyChange().getChangeMetaData().getDescription());
     }
 
+    @Override
     @Test
     public void generateStatement() throws Exception {
 
@@ -53,6 +55,7 @@ public class AddPrimaryKeyChangeTest extends AbstractChangeTest {
         });
     }
 
+    @Override
     @Test
     public void getConfirmationMessage() throws Exception {
         AddPrimaryKeyChange change = new AddPrimaryKeyChange();

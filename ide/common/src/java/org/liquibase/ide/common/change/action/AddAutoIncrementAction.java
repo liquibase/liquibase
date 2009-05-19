@@ -12,10 +12,12 @@ public class AddAutoIncrementAction extends BaseColumnRefactorAction {
         super("Add Auto Increment");
     }
 
+    @Override
     public RefactorWizard createRefactorWizard(Column selectedColumn) {
         return new RefactorWizard("Make "+selectedColumn+" auto-increment");
     }
 
+    @Override
     protected Change[] createChanges(Column column, RefactorWizardPage... pages) {
         AddAutoIncrementChange change = new AddAutoIncrementChange();
         change.setTableName(column.getTable().getName());

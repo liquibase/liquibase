@@ -10,10 +10,12 @@ import liquibase.sql.UnparsedSql;
 import liquibase.statement.AddAutoIncrementStatement;
 
 public class AddAutoIncrementGeneratorInformix extends AddAutoIncrementGenerator {
+    @Override
     public int getPriority() {
         return PRIORITY_DATABASE;
     }
 
+    @Override
     public boolean supports(AddAutoIncrementStatement statement, Database database) {
         return database instanceof InformixDatabase;
     }
@@ -27,6 +29,7 @@ public class AddAutoIncrementGeneratorInformix extends AddAutoIncrementGenerator
         return validationErrors;
     }
 
+    @Override
     public Sql[] generateSql(AddAutoIncrementStatement statement, Database database) {
         return new Sql[]{
                 new UnparsedSql("ALTER TABLE " + database.escapeTableName(statement.getSchemaName(), statement.getTableName()) + " MODIFY " + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " " + database.getColumnType(statement.getColumnDataType(), true),

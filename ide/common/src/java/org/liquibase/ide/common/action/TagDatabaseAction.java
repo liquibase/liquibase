@@ -10,6 +10,7 @@ public class TagDatabaseAction extends MigratorAction {
         super("Tag Database");
     }
 
+    @Override
     public void actionPerform(Database database, IdeFacade ideFacade) throws LiquibaseException {
         String input = ideFacade.promptForString(getTitle(), "Enter database tag", null);
         if (input != null) {
@@ -17,6 +18,7 @@ public class TagDatabaseAction extends MigratorAction {
         }
     }
 
+    @Override
     public boolean needsRefresh() {
         return false;
     }

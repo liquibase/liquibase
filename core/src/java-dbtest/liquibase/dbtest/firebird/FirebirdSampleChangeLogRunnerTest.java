@@ -18,10 +18,12 @@ public class FirebirdSampleChangeLogRunnerTest extends AbstractSimpleChangeLogRu
         super("firebird", "jdbc:firebirdsql:localhost/3050:c:\\firebird\\liquibase.fdb");
     }
 
+    @Override
     protected boolean shouldRollBack() {
         return false;
     }
 
+    @Override
     protected String[] getSchemasToDrop() throws JDBCException {
         return new String[] {
                 null,

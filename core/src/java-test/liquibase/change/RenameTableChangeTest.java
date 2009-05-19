@@ -23,11 +23,13 @@ public class RenameTableChangeTest extends AbstractChangeTest {
         refactoring = new RenameTableChange();
     }
 
+    @Override
     @Test
     public void getRefactoringName() throws Exception {
         assertEquals("Rename Table", refactoring.getChangeMetaData().getDescription());
     }
 
+    @Override
     @Test
     public void generateStatement() throws Exception {
         RenameTableChange refactoring = new RenameTableChange();
@@ -44,6 +46,7 @@ public class RenameTableChangeTest extends AbstractChangeTest {
         assertEquals("NEW_NAME", ((RenameTableStatement) sqlStatements[0]).getNewTableName());
     }
 
+    @Override
     @Test
     public void getConfirmationMessage() throws Exception {
         refactoring.setOldTableName("OLD_NAME");

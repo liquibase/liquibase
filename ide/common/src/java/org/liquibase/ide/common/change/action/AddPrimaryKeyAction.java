@@ -13,10 +13,12 @@ public class AddPrimaryKeyAction extends BaseColumnRefactorAction {
         super("Add Primary Key");
     }
 
+    @Override
     public RefactorWizard createRefactorWizard(Column selectedColumn) {
         return new RefactorWizard("Make "+selectedColumn+" primary key", new SingleValueWizardPageImpl("Constraint Name"));
     }
 
+    @Override
     protected Change[] createChanges(Column column, RefactorWizardPage... pages) {
         AddPrimaryKeyChange change = new AddPrimaryKeyChange();
         change.setTableName(column.getTable().getName());

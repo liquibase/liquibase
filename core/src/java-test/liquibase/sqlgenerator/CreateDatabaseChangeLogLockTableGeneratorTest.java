@@ -8,6 +8,7 @@ public class CreateDatabaseChangeLogLockTableGeneratorTest extends AbstractSqlGe
         super(new CreateDatabaseChangeLogLockTableGenerator());
     }
 
+    @Override
     protected CreateDatabaseChangeLogLockTableStatement createSampleSqlStatement() {
         return new CreateDatabaseChangeLogLockTableStatement();
     }

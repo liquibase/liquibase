@@ -58,13 +58,16 @@ public class LiquibaseServletListener implements ServletContextListener {
 
     public void contextInitialized(ServletContextEvent servletContextEvent) {
         LogFactory.getLogger().addHandler(new Handler() {
+            @Override
             public synchronized void publish(LogRecord record) {
                 LiquibaseStatusServlet.logMessage(record);
             }
 
+            @Override
             public void flush() {
             }
 
+            @Override
             public void close() throws SecurityException {
             }
         });

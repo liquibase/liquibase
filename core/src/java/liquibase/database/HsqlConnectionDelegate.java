@@ -11,6 +11,7 @@ public class HsqlConnectionDelegate extends SQLConnectionDelegate {
     }
 
 
+    @Override
     public void commit() throws SQLException {
         super.commit();
 
@@ -25,6 +26,7 @@ public class HsqlConnectionDelegate extends SQLConnectionDelegate {
         }
     }
 
+    @Override
     public void rollback() throws SQLException {
         super.rollback();
 

@@ -18,10 +18,12 @@ public class TableWriter extends HTMLWriter {
         super(new File(rootOutputDir, "tables"), database);
     }
 
+    @Override
     protected String createTitle(Object object) {
         return "Changes affecting table \""+object.toString() + "\"";
     }
 
+    @Override
     protected void writeCustomHTML(FileWriter fileWriter, Object object, List<Change> changes, Database database) throws IOException {
         writeColumns(fileWriter, ((Table) object), database);
     }

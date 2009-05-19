@@ -13,10 +13,12 @@ public class AddDefaultValueAction extends BaseColumnRefactorAction {
         super("Add Default Value");
     }
 
+    @Override
     public RefactorWizard createRefactorWizard(Column selectedColumn) {
         return new RefactorWizard("Add default value to "+selectedColumn, new SingleValueWizardPageImpl("New DefaultValue"));
     }
 
+    @Override
     protected Change[] createChanges(Column column, RefactorWizardPage... pages) {
         AddDefaultValueChange change = new AddDefaultValueChange();
         change.setTableName(column.getTable().getName());

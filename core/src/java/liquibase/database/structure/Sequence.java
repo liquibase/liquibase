@@ -23,6 +23,7 @@ public class Sequence implements DatabaseObject, Comparable<Sequence> {
     }
 
 
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
@@ -33,11 +34,13 @@ public class Sequence implements DatabaseObject, Comparable<Sequence> {
 
     }
 
+    @Override
     public int hashCode() {
         return (name != null ? name.toUpperCase().hashCode() : 0);
     }
 
 
+    @Override
     public String toString() {
         return getName();
     }

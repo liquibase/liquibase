@@ -17,10 +17,12 @@ public class CreateTableAction extends BaseDatabaseRefactorAction {
     }
 
 
+    @Override
     public RefactorWizard createRefactorWizard(DatabaseObject dbObject) {
         return new RefactorWizard("Create New Table", new AddTableWizardPageImpl());
     }
 
+    @Override
     public Change[] createChanges(DatabaseObject selectedTable, RefactorWizardPage... pages) {
         AddTableWizardPage wizardPage = (AddTableWizardPage) pages[0];
         CreateTableChange change = new CreateTableChange();

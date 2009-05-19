@@ -13,6 +13,7 @@ public class RollbackToDateSqlAction extends MigratorAction {
         super("Rollback to Date (Generate SQL)");
     }
 
+    @Override
     public void actionPerform(Database database, IdeFacade ideFacade) throws LiquibaseException {
         Date input = ideFacade.promptForDateTime(getTitle(), "Enter date/time database tag to roll back to\nFormat: yyyy-dd-mm hh:mm:ss", new Date());
         if (input != null) {
@@ -23,6 +24,7 @@ public class RollbackToDateSqlAction extends MigratorAction {
         }
     }
 
+    @Override
     public boolean needsRefresh() {
         return true;
     }

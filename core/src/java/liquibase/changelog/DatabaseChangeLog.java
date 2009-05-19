@@ -59,6 +59,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog> {
         }
     }
 
+    @Override
     public String toString() {
         return getFilePath();
     }
@@ -88,6 +89,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog> {
         this.changeSets.add(changeSet);
     }
 
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
@@ -98,6 +100,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog> {
 
     }
 
+    @Override
     public int hashCode() {
         return getFilePath().hashCode();
     }

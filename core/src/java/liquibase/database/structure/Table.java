@@ -59,6 +59,7 @@ public class Table implements DatabaseObject, Comparable<Table> {
     }
 
 
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
@@ -69,6 +70,7 @@ public class Table implements DatabaseObject, Comparable<Table> {
 
     }
 
+    @Override
     public int hashCode() {
         return name.toUpperCase().hashCode();
     }
@@ -79,6 +81,7 @@ public class Table implements DatabaseObject, Comparable<Table> {
     }
 
 
+    @Override
     public String toString() {
     	return getName();
     }

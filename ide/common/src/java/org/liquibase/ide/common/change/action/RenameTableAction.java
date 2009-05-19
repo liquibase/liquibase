@@ -13,10 +13,12 @@ public class RenameTableAction extends BaseTableRefactorAction {
         super("Rename Table");
     }
 
+    @Override
     public RefactorWizard createRefactorWizard(Table selectedTable) {
         return new RefactorWizard("Rename "+selectedTable, new SingleValueWizardPageImpl("New Table Name", selectedTable.getName()));
     }
 
+    @Override
     protected Change[] createChanges(Table table, RefactorWizardPage... pages) {
         RenameTableChange change = new RenameTableChange();
         change.setOldTableName(table.getName());

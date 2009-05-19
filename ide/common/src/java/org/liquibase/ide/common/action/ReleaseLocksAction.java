@@ -11,6 +11,7 @@ public class ReleaseLocksAction extends MigratorAction {
         super("Release LiquiBase Locks");
     }
 
+    @Override
     public void actionPerform(Database database, IdeFacade ideFacade) throws LiquibaseException {
         LockService.getInstance(database).releaseLock();
 
@@ -18,6 +19,7 @@ public class ReleaseLocksAction extends MigratorAction {
 
     }
 
+    @Override
     public boolean needsRefresh() {
         return false;
     }

@@ -123,6 +123,7 @@ public class AddDefaultValueChange extends AbstractChange {
         };
     }
 
+    @Override
     protected Change[] createInverses() {
         DropDefaultValueChange inverse = new DropDefaultValueChange();
         inverse.setSchemaName(getSchemaName());

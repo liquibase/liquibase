@@ -97,13 +97,16 @@ public class LiquibaseTest {
             replay(inputStream);
         }
 
+        @Override
         public Database getDatabase() {
             if (database == null) {
                 database = new OracleDatabase() {
+                    @Override
                     public String getConnectionURL() {
                         return url;
                     }
 
+                    @Override
                     public String getConnectionUsername() {
                         return "testUser";
                     }
@@ -139,6 +142,7 @@ public class LiquibaseTest {
             this.url = url;
         }
 
+        @Override
         public FileOpener getFileOpener() {
             return new FileOpener() {
                 public InputStream getResourceAsStream(String file) {

@@ -12,6 +12,7 @@ public class RollbackFutureSqlAction extends MigratorAction {
         super("Generate SQL to Roll Back Unrun Changes");
     }
 
+    @Override
     public void actionPerform(Database database, IdeFacade ideFacade) throws LiquibaseException {
         StringWriter writer = new StringWriter();
 
@@ -24,6 +25,7 @@ public class RollbackFutureSqlAction extends MigratorAction {
         ideFacade.showOutput("Rollback SQL", writer.toString());
     }
 
+    @Override
     public boolean needsRefresh() {
         return true;
     }

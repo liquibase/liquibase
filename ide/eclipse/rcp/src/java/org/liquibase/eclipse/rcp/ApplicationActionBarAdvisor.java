@@ -40,7 +40,8 @@ public class ApplicationActionBarAdvisor extends ActionBarAdvisor {
 		super(configurer);
 	}
 
-	protected void makeActions(IWorkbenchWindow window) {
+	@Override
+    protected void makeActions(IWorkbenchWindow window) {
 		newAction = ActionFactory.NEW.create(window);
 		register(newAction);
 
@@ -77,7 +78,8 @@ public class ApplicationActionBarAdvisor extends ActionBarAdvisor {
 		register(updateAction);
 	}
 
-	protected void fillMenuBar(IMenuManager menuBar) {
+	@Override
+    protected void fillMenuBar(IMenuManager menuBar) {
 		MenuManager fileMenu = new MenuManager("&File",
 				IWorkbenchActionConstants.M_FILE);
 		fileMenu.add(newAction);

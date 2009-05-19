@@ -14,16 +14,19 @@ public abstract class BaseColumnRefactorAction extends BaseRefactorAction {
 
     public abstract RefactorWizard createRefactorWizard(Column selectedColumn);
 
+    @Override
     public final RefactorWizard createRefactorWizard(DatabaseObject dbObject) {
         return createRefactorWizard((Column) dbObject);
     }
 
+    @Override
     public Change[] createChanges(DatabaseObject selectedColumn, RefactorWizardPage... pages) {
         return createChanges(((Column) selectedColumn), pages);
     }
 
     protected abstract Change[] createChanges(Column selectedColumn, RefactorWizardPage... pages);
 
+    @Override
     public boolean isApplicableTo(Class objectType) {
         return objectType.equals(Column.class);
     }
