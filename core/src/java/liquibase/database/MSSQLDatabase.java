@@ -4,6 +4,7 @@ import liquibase.database.structure.DatabaseSnapshot;
 import liquibase.database.structure.MSSQLDatabaseSnapshot;
 import liquibase.diff.DiffStatusListener;
 import liquibase.exception.JDBCException;
+import liquibase.statement.CreateTableStatement;
 import liquibase.statement.RawSqlStatement;
 import liquibase.statement.SqlStatement;
 
@@ -258,9 +259,9 @@ public class MSSQLDatabase extends AbstractDatabase {
 
     @Override
     public String convertRequestedSchemaToSchema(String requestedSchema) throws JDBCException {
-        if (requestedSchema == null) {
-            return "dbo";
-        }
+//        if (requestedSchema == null) {
+//            return "dbo";
+//        }
         return requestedSchema;
     }
 
@@ -295,13 +296,46 @@ public class MSSQLDatabase extends AbstractDatabase {
         return new MSSQLDatabaseSnapshot(this, statusListeners, schema);
     }
 
-    @Override
+	@Override
     public boolean supportsRestrictForeignKeys() {
         return false;
     }
 
 	@Override
 	public String getDefaultSchemaName() {
+        try {
+        	DatabaseConnection connection = getConnection(); 
+            return connection == null ? null: connection.getCatalog();
+        } catch (SQLException e) {
+            log.severe(e.getMessage());
+            e.printStackTrace();
+            return null;
+        }
+	}
+
+	@Override
+	protected SqlStatement getCreateChangeLogSQL() throws JDBCException {
+		CreateTableStatement ret = (CreateTableStatement) super.getCreateChangeLogSQL();
+		ret.setSchemaName("dbo");
+		return ret;
+	}
+
+	@Override
+	public void checkDatabaseChangeLogLockTable() throws JDBCException {
+		// TODO Auto-generated method stub
+		super.checkDatabaseChangeLogLockTable();
+	}
+
+	@Override
+	public void checkDatabaseChangeLogTable() throws JDBCException {
+		// TODO Auto-generated method stub
+		super.checkDatabaseChangeLogTable();
+	}
+
+	@Override
+	public String getLiquibaseSchemaName() throws JDBCException {
+		// TODO Auto-generated method stub
 		return "dbo";
 	}
+
 }

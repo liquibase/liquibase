@@ -18,7 +18,7 @@ public class FileSystemFileOpenerTest {
     
     @Before
     public void createFileOpener() throws URISyntaxException {
-        File thisClassFile = new File(new URI(this.getClass().getClassLoader().getResource("liquibase/FileSystemFileOpener.class").toExternalForm()));
+        File thisClassFile = new File(new URI(this.getClass().getClassLoader().getResource("liquibase/resource/FileSystemFileOpener.class").toExternalForm()));
         String packageDirectory = thisClassFile.getParent();
 
         
@@ -27,7 +27,7 @@ public class FileSystemFileOpenerTest {
     
     @Test(expected = IllegalArgumentException.class)
     public void onlyAcceptsDirectories() throws URISyntaxException {
-        File thisClassFile = new File(new URI(this.getClass().getClassLoader().getResource("liquibase/FileSystemFileOpener.class").toExternalForm()));
+        File thisClassFile = new File(new URI(this.getClass().getClassLoader().getResource("liquibase/resource/FileSystemFileOpener.class").toExternalForm()));
 
         FileOpener o = new FileSystemFileOpener(thisClassFile.getAbsolutePath());
     }

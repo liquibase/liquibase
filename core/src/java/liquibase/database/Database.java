@@ -74,6 +74,8 @@ public interface Database extends DatabaseObject {
 
     String getDefaultSchemaName();
 
+    String getLiquibaseSchemaName() throws JDBCException;
+    	
     void setDefaultSchemaName(String schemaName) throws JDBCException;
 
     /**

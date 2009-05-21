@@ -50,7 +50,7 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
 
         DatabaseConnection connection = TestContext.getInstance().getConnection(url);
 
-        LogFactory.getLogger().setLevel(Level.SEVERE);
+        LogFactory.getLogger().setLevel(Level.FINER);
         if (connection != null) {
             database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(connection);
         }
@@ -377,9 +377,10 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
 
         //run again to test changelog testing logic
         WriteExecutor writeExecutor = ExecutorService.getInstance().getWriteExecutor(database);
-        writeExecutor.execute(new DropTableStatement("liquibaseb", database.getDatabaseChangeLogTableName(), false));
-        writeExecutor.execute(new DropTableStatement("liquibaseb", database.getDatabaseChangeLogLockTableName(), false));
-        database.commit();
+        // FIXME do drop table more intelligent and avoid direct pointing to the schema for liquibase tables.
+//        writeExecutor.execute(new DropTableStatement("liquibaseb", database.getDatabaseChangeLogTableName(), false));
+//        writeExecutor.execute(new DropTableStatement("liquibaseb", database.getDatabaseChangeLogLockTableName(), false));
+//        database.commit();
 
         DatabaseConnection connection = TestContext.getInstance().getConnection(url);
         database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(connection);

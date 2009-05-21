@@ -152,14 +152,14 @@ public class TestContext {
     }
 
     private String getUsername(String url) {
-        if (url.startsWith("jdbc:hsqldb") || url.indexOf(":jtds:") != -1) {
+        if (url.startsWith("jdbc:hsqldb")) {
             return "sa";
         }
         return "liquibase";
     }
 
     private String getPassword(String url) {
-        if (url.startsWith("jdbc:hsqldb") || url.indexOf(":jtds:") != -1) {
+        if (url.startsWith("jdbc:hsqldb")) {
             return "";
         }
         return "liquibase";

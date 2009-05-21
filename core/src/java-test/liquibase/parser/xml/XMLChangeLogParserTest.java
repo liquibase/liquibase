@@ -223,7 +223,7 @@ public class XMLChangeLogParserTest {
 
     @Test
     public void doubleNestedRelativeChangeLog() throws Exception {
-    	final String doubleNestedFileName = "liquibase/changelog/parser/xml/doublenestedRelativeChangeLog.xml";
+    	final String doubleNestedFileName = "liquibase/parser/xml/doublenestedRelativeChangeLog.xml";
     	final String nestedFileName = "liquibase/parser/xml/nestedRelativeChangeLog.xml";
         DatabaseChangeLog changeLog = new XMLChangeLogParser().parse(doubleNestedFileName, new HashMap<String, Object>(), new JUnitFileOpener());
 

@@ -17,7 +17,7 @@
         </createTable>
     </changeSet>
 
-    <include file="liquibase/changelog/parser/xml/simpleChangeLog.xml"/>
+    <include file="liquibase/parser/xml/simpleChangeLog.xml"/>
 
     <changeSet id="2" author="nvoxland">
         <addColumn tableName="employee">

@@ -569,7 +569,7 @@ public class Liquibase {
         try {
             database.checkDatabaseChangeLogTable();
 
-            UpdateStatement updateStatement = new UpdateStatement(getDatabase().getDefaultSchemaName(), getDatabase().getDatabaseChangeLogTableName());
+            UpdateStatement updateStatement = new UpdateStatement(getDatabase().getLiquibaseSchemaName(), getDatabase().getDatabaseChangeLogTableName());
             updateStatement.addNewColumnValue("MD5SUM", null);
             ExecutorService.getInstance().getWriteExecutor(database).execute(updateStatement, new ArrayList<SqlVisitor>());
             getDatabase().commit();

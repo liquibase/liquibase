@@ -136,7 +136,7 @@
 
     <changeSet id="16" author="nvoxland">
         <createView viewName="personView">
-            select * from [dbo].person
+            select * from person
         </createView>
     </changeSet>
 

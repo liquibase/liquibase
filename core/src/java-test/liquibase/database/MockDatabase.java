@@ -505,4 +505,8 @@ public class MockDatabase implements Database {
     public void saveRollbackStatement(Change change, List<SqlVisitor> sqlVisitors, Writer writer) throws IOException, UnsupportedChangeException, RollbackImpossibleException, StatementNotSupportedOnDatabaseException, LiquibaseException {
         ;
     }
+
+	public String getLiquibaseSchemaName() throws JDBCException {
+		return null;
+	}
 }
