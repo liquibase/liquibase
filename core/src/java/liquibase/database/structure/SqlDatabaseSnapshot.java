@@ -164,6 +164,8 @@ public abstract class SqlDatabaseSnapshot implements DatabaseSnapshot {
     protected void readTablesAndViews(String schema) throws SQLException, JDBCException {
         updateListeners("Reading tables for " + database.toString() + " ...");
         ResultSet rs = databaseMetaData.getTables(database.convertRequestedSchemaToCatalog(schema), database.convertRequestedSchemaToSchema(schema), null, new String[]{"TABLE", "VIEW", "ALIAS"});
+        // try to switch off auto detection of the liquibase's system table.
+        hasDatabaseChangeLogTable = true;
         while (rs.next()) {
             String type = rs.getString("TABLE_TYPE");
             String name = convertFromDatabaseName(rs.getString("TABLE_NAME"));

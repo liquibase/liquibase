@@ -3,6 +3,8 @@ package liquibase.sqlgenerator;
 import liquibase.statement.SelectFromDatabaseChangeLogLockStatement;
 import liquibase.database.Database;
 import liquibase.database.OracleDatabase;
+import liquibase.exception.JDBCException;
+import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
@@ -25,9 +27,15 @@ public class SelectFromDatabaseChangeLogLockGenerator implements SqlGenerator<Se
     }
 
     public Sql[] generateSql(SelectFromDatabaseChangeLogLockStatement statement, Database database) {
+    	String liquibaseSchema = null;
+    	try {
+    		liquibaseSchema = database.getLiquibaseSchemaName();
+    	} catch (JDBCException e) {
+            throw new UnexpectedLiquibaseException(e);
+    	}
         String sql = "SELECT "+ StringUtils.join(statement.getColumnsToSelect(), ",")+" FROM " +
-                database.escapeTableName(database.getDefaultSchemaName(), database.getDatabaseChangeLogLockTableName()) +
-                " WHERE " + database.escapeColumnName(database.getDefaultSchemaName(), database.getDatabaseChangeLogLockTableName(), "ID") + "=1";
+                database.escapeTableName(liquibaseSchema, database.getDatabaseChangeLogLockTableName()) +
+                " WHERE " + database.escapeColumnName(liquibaseSchema, database.getDatabaseChangeLogLockTableName(), "ID") + "=1";
 
         if (database instanceof OracleDatabase) {
             sql += " for update";

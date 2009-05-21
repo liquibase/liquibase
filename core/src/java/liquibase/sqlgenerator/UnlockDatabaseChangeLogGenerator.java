@@ -3,6 +3,8 @@ package liquibase.sqlgenerator;
 import liquibase.statement.UnlockDatabaseChangeLogStatement;
 import liquibase.statement.UpdateStatement;
 import liquibase.database.Database;
+import liquibase.exception.JDBCException;
+import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 
@@ -20,7 +22,14 @@ public class UnlockDatabaseChangeLogGenerator implements SqlGenerator<UnlockData
     }
 
     public Sql[] generateSql(UnlockDatabaseChangeLogStatement statement, Database database) {
-        UpdateStatement releaseStatement = new UpdateStatement(database.getDefaultSchemaName(), database.getDatabaseChangeLogLockTableName());
+    	String liquibaseSchema = null;
+    	try {
+    		liquibaseSchema = database.getLiquibaseSchemaName();
+    	} catch (JDBCException e) {
+            throw new UnexpectedLiquibaseException(e);
+    	}
+
+        UpdateStatement releaseStatement = new UpdateStatement(liquibaseSchema, database.getDatabaseChangeLogLockTableName());
         releaseStatement.addNewColumnValue("LOCKED", false);
         releaseStatement.addNewColumnValue("LOCKGRANTED", null);
         releaseStatement.addNewColumnValue("LOCKEDBY", null);

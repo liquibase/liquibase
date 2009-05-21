@@ -27,7 +27,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
 
     public SqlStatement[] generateStatements(Database database) {
 
-        String schemaName = getSchemaName() == null ? database.getDefaultSchemaName() : getSchemaName();
+        String schemaName = getSchemaName() == null ? (database == null ? null: database.getDefaultSchemaName()) : getSchemaName();
         CreateTableStatement statement = new CreateTableStatement(schemaName, getTableName());
         for (ColumnConfig column : getColumns()) {
             ConstraintsConfig constraints = column.getConstraints();
@@ -44,7 +44,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
 
             } else {
                 statement.addColumn(column.getName(),
-                        database.getColumnType(column.getType(), column.isAutoIncrement()),
+                        database == null ? column.getType() : database.getColumnType(column.getType(), column.isAutoIncrement()),
                         defaultValue);
             }
 

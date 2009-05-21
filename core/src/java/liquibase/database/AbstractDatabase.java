@@ -565,8 +565,8 @@ public abstract class AbstractDatabase implements Database {
         this.databaseChangeLogLockTableName = tableName;
     }
 
-    private SqlStatement getChangeLogLockInsertSQL() {
-        return new InsertStatement(getDefaultSchemaName(), getDatabaseChangeLogLockTableName())
+    private SqlStatement getChangeLogLockInsertSQL() throws JDBCException {
+        return new InsertStatement(getLiquibaseSchemaName(), getDatabaseChangeLogLockTableName())
                 .addColumnValue("ID", 1)
                 .addColumnValue("LOCKED", Boolean.FALSE);
     }
@@ -575,8 +575,8 @@ public abstract class AbstractDatabase implements Database {
         return new CreateDatabaseChangeLogLockTableStatement();
     }
 
-    protected SqlStatement getCreateChangeLogSQL() {
-        return new CreateTableStatement(getDefaultSchemaName(), getDatabaseChangeLogTableName())
+    protected SqlStatement getCreateChangeLogSQL() throws JDBCException {
+        return new CreateTableStatement(getLiquibaseSchemaName(), getDatabaseChangeLogTableName())
                 .addPrimaryKeyColumn("ID", "VARCHAR(63)", null, null, new NotNullConstraint())
                 .addPrimaryKeyColumn("AUTHOR", "VARCHAR(63)", null, null, new NotNullConstraint())
                 .addPrimaryKeyColumn("FILENAME", "VARCHAR(200)", null, null, new NotNullConstraint())
@@ -592,7 +592,7 @@ public abstract class AbstractDatabase implements Database {
         DatabaseConnection connection = getConnection();
         ResultSet rs = null;
         try {
-            rs = connection.getMetaData().getTables(convertRequestedSchemaToCatalog(getDefaultSchemaName()), convertRequestedSchemaToSchema(getDefaultSchemaName()), getDatabaseChangeLogTableName(), new String[]{"TABLE"});
+            rs = connection.getMetaData().getTables(convertRequestedSchemaToCatalog(getDefaultSchemaName()), convertRequestedSchemaToSchema(getLiquibaseSchemaName()), getDatabaseChangeLogTableName(), new String[]{"TABLE"});
             return rs.next();
         } catch (Exception e) {
             throw new JDBCException(e);
@@ -630,7 +630,7 @@ public abstract class AbstractDatabase implements Database {
         boolean changeLogCreateAttempted = false;
         try {
             if (doesChangeLogTableExist()) {
-                checkColumnsRS = connection.getMetaData().getColumns(convertRequestedSchemaToCatalog(getDefaultSchemaName()), convertRequestedSchemaToSchema(getDefaultSchemaName()), getDatabaseChangeLogTableName(), null);
+                checkColumnsRS = connection.getMetaData().getColumns(convertRequestedSchemaToCatalog(getLiquibaseSchemaName()), convertRequestedSchemaToSchema(getLiquibaseSchemaName()), getDatabaseChangeLogTableName(), null);
                 boolean hasDescription = false;
                 boolean hasComments = false;
                 boolean hasTag = false;
@@ -649,16 +649,16 @@ public abstract class AbstractDatabase implements Database {
                 }
 
                 if (!hasDescription) {
-                    statementsToExecute.add(new AddColumnStatement(getDefaultSchemaName(), getDatabaseChangeLogTableName(), "DESCRIPTION", "VARCHAR(255)", null));
+                    statementsToExecute.add(new AddColumnStatement(getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "DESCRIPTION", "VARCHAR(255)", null));
                 }
                 if (!hasTag) {
-                    statementsToExecute.add(new AddColumnStatement(getDefaultSchemaName(), getDatabaseChangeLogTableName(), "TAG", "VARCHAR(255)", null));
+                    statementsToExecute.add(new AddColumnStatement(getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "TAG", "VARCHAR(255)", null));
                 }
                 if (!hasComments) {
-                    statementsToExecute.add(new AddColumnStatement(getDefaultSchemaName(), getDatabaseChangeLogTableName(), "COMMENTS", "VARCHAR(255)", null));
+                    statementsToExecute.add(new AddColumnStatement(getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "COMMENTS", "VARCHAR(255)", null));
                 }
                 if (!hasLiquibase) {
-                    statementsToExecute.add(new AddColumnStatement(getDefaultSchemaName(), getDatabaseChangeLogTableName(), "LIQUIBASE", "VARCHAR(255)", null));
+                    statementsToExecute.add(new AddColumnStatement(getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "LIQUIBASE", "VARCHAR(255)", null));
                 }
 
             } else if (!changeLogCreateAttempted) {
@@ -701,7 +701,7 @@ public abstract class AbstractDatabase implements Database {
         DatabaseConnection connection = getConnection();
         ResultSet rs = null;
         try {
-            rs = connection.getMetaData().getTables(convertRequestedSchemaToCatalog(getDefaultSchemaName()), convertRequestedSchemaToSchema(getDefaultSchemaName()), getDatabaseChangeLogLockTableName(), new String[]{"TABLE"});
+            rs = connection.getMetaData().getTables(convertRequestedSchemaToCatalog(getLiquibaseSchemaName()), convertRequestedSchemaToSchema(getLiquibaseSchemaName()), getDatabaseChangeLogLockTableName(), new String[]{"TABLE"});
             return rs.next();
         } catch (Exception e) {
             throw new JDBCException(e);
@@ -717,7 +717,11 @@ public abstract class AbstractDatabase implements Database {
 
     }
 
-    /**
+    public String getLiquibaseSchemaName() throws JDBCException {
+		return getDefaultDatabaseSchemaName();
+	}
+
+	/**
      * This method will check the database ChangeLogLock table used to keep track of
      * if a machine is updating the database. If the table does not exist it will create one
      * otherwise it will not do anything besides outputting a log message.
@@ -742,7 +746,7 @@ public abstract class AbstractDatabase implements Database {
             writeExecutor.comment("Create Database Lock Table");
             writeExecutor.execute(createTableStatement, new ArrayList<SqlVisitor>());
             this.commit();
-            log.finest("Created database lock table with name: " + escapeTableName(getDefaultSchemaName(), getDatabaseChangeLogLockTableName()));
+            log.finest("Created database lock table with name: " + escapeTableName(getLiquibaseSchemaName(), getDatabaseChangeLogLockTableName()));
             knowMustInsertIntoLockTable = true;
         }
 
@@ -764,7 +768,7 @@ public abstract class AbstractDatabase implements Database {
         if (knowMustInsertIntoLockTable || rows == 0) {
             writeExecutor.update(getChangeLogLockInsertSQL(), new ArrayList<SqlVisitor>());
             this.commit();
-            log.fine("Inserted lock row into: " + escapeTableName(getDefaultSchemaName(), getDatabaseChangeLogLockTableName()));
+            log.fine("Inserted lock row into: " + escapeTableName(getLiquibaseSchemaName(), getDatabaseChangeLogLockTableName()));
         }
 
     }
@@ -830,7 +834,7 @@ public abstract class AbstractDatabase implements Database {
 
             if (snapshot.hasDatabaseChangeLogTable()) {
                 RawSQLChange clearChangeLogChange = new RawSQLChange();
-                clearChangeLogChange.setSql("DELETE FROM " + escapeTableName(convertRequestedSchemaToSchema(schema), getDatabaseChangeLogTableName()));
+                clearChangeLogChange.setSql("DELETE FROM " + escapeTableName(getLiquibaseSchemaName(), getDatabaseChangeLogTableName()));
                 dropChanges.add(clearChangeLogChange);
             }
 
@@ -877,7 +881,7 @@ public abstract class AbstractDatabase implements Database {
     public void tag(String tagString) throws JDBCException {
         WriteExecutor writeExecutor = ExecutorService.getInstance().getWriteExecutor(this);
         try {
-            int totalRows = ExecutorService.getInstance().getReadExecutor(this).queryForInt(new RawSqlStatement("SELECT COUNT(*) FROM " + escapeTableName(getDefaultSchemaName(), getDatabaseChangeLogTableName())), new ArrayList<SqlVisitor>());
+            int totalRows = ExecutorService.getInstance().getReadExecutor(this).queryForInt(new RawSqlStatement("SELECT COUNT(*) FROM " + escapeTableName(getLiquibaseSchemaName(), getDatabaseChangeLogTableName())), new ArrayList<SqlVisitor>());
             if (totalRows == 0) {
                 throw new JDBCException("Cannot tag an empty database");
             }
@@ -898,7 +902,7 @@ public abstract class AbstractDatabase implements Database {
     }
 
     public boolean doesTagExist(String tag) throws JDBCException {
-        int count = ExecutorService.getInstance().getReadExecutor(this).queryForInt(new RawSqlStatement("SELECT COUNT(*) FROM " + escapeTableName(getDefaultSchemaName(), getDatabaseChangeLogTableName()) + " WHERE TAG='" + tag + "'"), new ArrayList<SqlVisitor>());
+        int count = ExecutorService.getInstance().getReadExecutor(this).queryForInt(new RawSqlStatement("SELECT COUNT(*) FROM " + escapeTableName(getLiquibaseSchemaName(), getDatabaseChangeLogTableName()) + " WHERE TAG='" + tag + "'"), new ArrayList<SqlVisitor>());
         return count > 0;
     }
 
@@ -1211,7 +1215,7 @@ public abstract class AbstractDatabase implements Database {
                 try {
                     log.info("Updating NULL md5sum for " + changeSet.toString());
                     DatabaseConnection connection = getConnection();
-                    PreparedStatement updatePstmt = connection.prepareStatement("UPDATE " + escapeTableName(getDefaultSchemaName(), getDatabaseChangeLogTableName()) + " SET MD5SUM=? WHERE ID=? AND AUTHOR=? AND FILENAME=?");
+                    PreparedStatement updatePstmt = connection.prepareStatement("UPDATE " + escapeTableName(getLiquibaseSchemaName(), getDatabaseChangeLogTableName()) + " SET MD5SUM=? WHERE ID=? AND AUTHOR=? AND FILENAME=?");
                     updatePstmt.setString(1, changeSet.generateCheckSum().toString());
                     updatePstmt.setString(2, changeSet.getId());
                     updatePstmt.setString(3, changeSet.getAuthor());
@@ -1264,7 +1268,7 @@ public abstract class AbstractDatabase implements Database {
         }
 
         try {
-            String databaseChangeLogTableName = escapeTableName(getDefaultSchemaName(), getDatabaseChangeLogTableName());
+            String databaseChangeLogTableName = escapeTableName(getLiquibaseSchemaName(), getDatabaseChangeLogTableName());
             ranChangeSetList = new ArrayList<RanChangeSet>();
             if (doesChangeLogTableExist()) {
                 log.info("Reading from " + databaseChangeLogTableName);
@@ -1311,7 +1315,7 @@ public abstract class AbstractDatabase implements Database {
     public void markChangeSetAsRan(ChangeSet changeSet) throws JDBCException {
         String dateValue = getCurrentDateTimeFunction();
 
-        InsertStatement statement = new InsertStatement(getDefaultSchemaName(), getDatabaseChangeLogTableName());
+        InsertStatement statement = new InsertStatement(getLiquibaseSchemaName(), getDatabaseChangeLogTableName());
         statement.addColumnValue("ID", escapeStringForDatabase(changeSet.getId()));
         statement.addColumnValue("AUTHOR", changeSet.getAuthor());
         statement.addColumnValue("FILENAME", changeSet.getFilePath());
@@ -1329,7 +1333,7 @@ public abstract class AbstractDatabase implements Database {
 
     public void markChangeSetAsReRan(ChangeSet changeSet) throws JDBCException {
         String dateValue = getCurrentDateTimeFunction();
-        String sql = "UPDATE " + escapeTableName(getDefaultSchemaName(), getDatabaseChangeLogTableName()) + " SET DATEEXECUTED=" + dateValue + ", MD5SUM='?' WHERE ID='?' AND AUTHOR='?' AND FILENAME='?'";
+        String sql = "UPDATE " + escapeTableName(getLiquibaseSchemaName(), getDatabaseChangeLogTableName()) + " SET DATEEXECUTED=" + dateValue + ", MD5SUM='?' WHERE ID='?' AND AUTHOR='?' AND FILENAME='?'";
         sql = sql.replaceFirst("\\?", escapeStringForDatabase(changeSet.generateCheckSum().toString()));
         sql = sql.replaceFirst("\\?", escapeStringForDatabase(changeSet.getId()));
         sql = sql.replaceFirst("\\?", escapeStringForDatabase(changeSet.getAuthor()));
@@ -1340,7 +1344,7 @@ public abstract class AbstractDatabase implements Database {
     }
 
     public void removeRanStatus(ChangeSet changeSet) throws JDBCException {
-        String sql = "DELETE FROM " + escapeTableName(getDefaultSchemaName(), getDatabaseChangeLogTableName()) + " WHERE ID='?' AND AUTHOR='?' AND FILENAME='?'";
+        String sql = "DELETE FROM " + escapeTableName(getLiquibaseSchemaName(), getDatabaseChangeLogTableName()) + " WHERE ID='?' AND AUTHOR='?' AND FILENAME='?'";
         sql = sql.replaceFirst("\\?", escapeStringForDatabase(changeSet.getId()));
         sql = sql.replaceFirst("\\?", escapeStringForDatabase(changeSet.getAuthor()));
         sql = sql.replaceFirst("\\?", escapeStringForDatabase(changeSet.getFilePath()));

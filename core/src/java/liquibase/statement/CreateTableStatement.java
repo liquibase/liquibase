@@ -163,4 +163,8 @@ public class CreateTableStatement implements SqlStatement {
     public Map<String, String> getDefaultValues() {
         return defaultValues;
     }
+
+	public void setSchemaName(String schemaName) {
+		this.schemaName = schemaName;
+	}
 }

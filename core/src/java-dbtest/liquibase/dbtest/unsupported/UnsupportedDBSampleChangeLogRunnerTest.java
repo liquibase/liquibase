@@ -4,7 +4,7 @@ package liquibase.dbtest.unsupported;
  * TODO: find a good way to implement that doesn't require wrapping the connection object.
  * Use to test using Derby, but changing the reported type so LiquiBase doesn't recognize it.
  */
-@SuppressWarnings({"ALL"})
+@SuppressWarnings({"all"})
 public class UnsupportedDBSampleChangeLogRunnerTest { // extends AbstractSimpleChangeLogRunnerTest {
 
 //    public UnsupportedDBSampleChangeLogRunnerTest() throws Exception {

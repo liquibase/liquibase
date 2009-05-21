@@ -1,6 +1,7 @@
 package liquibase.sqlgenerator;
 
 import liquibase.database.Database;
+import liquibase.exception.JDBCException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
@@ -26,14 +27,21 @@ public class LockDatabaseChangeLogGenerator implements SqlGenerator<LockDatabase
     }
 
     public Sql[] generateSql(LockDatabaseChangeLogStatement statement, Database database) {
+    	String liquibaseSchema = null;
+    	try {
+    		liquibaseSchema = database.getLiquibaseSchemaName();
+    	} catch (JDBCException e) {
+            throw new UnexpectedLiquibaseException(e);
+    	}
+
         InetAddress localHost;
-        try {
+    	try {
             localHost = NetUtil.getLocalHost();
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);
         }
 
-        UpdateStatement updateStatement = new UpdateStatement(database.getDefaultSchemaName(), database.getDatabaseChangeLogLockTableName());
+        UpdateStatement updateStatement = new UpdateStatement(liquibaseSchema, database.getDatabaseChangeLogLockTableName());
         updateStatement.addNewColumnValue("LOCKED", true);
         updateStatement.addNewColumnValue("LOCKGRANTED", new Timestamp(new java.util.Date().getTime()));
         updateStatement.addNewColumnValue("LOCKEDBY", localHost.getHostName() + " (" + localHost.getHostAddress() + ")");
