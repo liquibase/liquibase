@@ -150,11 +150,6 @@ public class DB2Database extends AbstractDatabase {
     }
 
     @Override
-    public SqlStatement getViewDefinitionSql(String schemaName, String name) throws JDBCException {
-        return new RawSqlStatement("select view_definition from SYSIBM.VIEWS where TABLE_NAME='" + name + "' and TABLE_SCHEMA='" + convertRequestedSchemaToSchema(schemaName) + "'");
-    }
-
-    @Override
     public String getViewDefinition(String schemaName, String name) throws JDBCException {
         return super.getViewDefinition(schemaName, name).replaceFirst("CREATE VIEW \\w+ AS ", ""); //db2 returns "create view....as select
     }

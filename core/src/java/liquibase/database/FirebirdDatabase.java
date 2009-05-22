@@ -90,20 +90,6 @@ public class FirebirdDatabase extends AbstractDatabase {
     }
 
     @Override
-    public SqlStatement getViewDefinitionSql(String schemaName, String viewName) throws JDBCException {
-        String sql = "select rdb$view_source from rdb$relations where upper(rdb$relation_name)='" + viewName + "'";
-//        if (schemaName != null) {
-//            sql += " and rdb$owner_name='" + schemaName.toUpperCase() + "'";
-//        }
-//        if (getDefaultCatalogName() != null) {
-//            sql += " and table_catalog='" + getDefaultCatalogName() + "'";
-//
-//        }
-        return new RawSqlStatement(sql);
-    }
-
-
-    @Override
     public boolean supportsDDLInTransaction() {
         return false;
     }

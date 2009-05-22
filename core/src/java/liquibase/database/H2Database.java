@@ -79,11 +79,6 @@ public class H2Database extends HsqlDatabase {
     }
 
     @Override
-    public SqlStatement getViewDefinitionSql(String schemaName, String name) throws JDBCException {
-        return new RawSqlStatement("SELECT VIEW_DEFINITION FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_NAME = '" + name + "' AND TABLE_SCHEMA='" + convertRequestedSchemaToSchema(schemaName) + "'");
-    }
-
-    @Override
     public Object convertDatabaseValueToJavaObject(Object defaultValue, int dataType, int columnSize, int decimalDigits) throws ParseException {
         if (defaultValue != null && defaultValue instanceof String) {
             if (StringUtils.trimToEmpty(((String) defaultValue)).startsWith("(NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_")) {
