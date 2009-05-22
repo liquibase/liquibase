@@ -506,7 +506,11 @@ public class MockDatabase implements Database {
         ;
     }
 
-	public String getLiquibaseSchemaName() throws JDBCException {
+	public String getLiquibaseSchemaName(){
 		return null;
+	}
+
+	public boolean isPeculiarLiquibaseSchema() {
+		return false;
 	}
 }

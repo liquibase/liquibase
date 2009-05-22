@@ -1,5 +1,6 @@
 package liquibase.database.structure;
 
+import liquibase.changelog.DatabaseChangeLog;
 import liquibase.database.AbstractDatabase;
 import liquibase.database.Database;
 import liquibase.database.InformixDatabase;
@@ -163,9 +164,19 @@ public abstract class SqlDatabaseSnapshot implements DatabaseSnapshot {
 
     protected void readTablesAndViews(String schema) throws SQLException, JDBCException {
         updateListeners("Reading tables for " + database.toString() + " ...");
-        ResultSet rs = databaseMetaData.getTables(database.convertRequestedSchemaToCatalog(schema), database.convertRequestedSchemaToSchema(schema), null, new String[]{"TABLE", "VIEW", "ALIAS"});
         // try to switch off auto detection of the liquibase's system table.
-        hasDatabaseChangeLogTable = true;
+        if (database.isPeculiarLiquibaseSchema()) {
+            ResultSet rs = databaseMetaData.getTables(database.convertRequestedSchemaToCatalog(database.getLiquibaseSchemaName()), database.convertRequestedSchemaToSchema(database.getLiquibaseSchemaName()), Database.databaseChangeLogTableName, new String[]{"TABLE"});
+            while (rs.next()) {
+                String name = convertFromDatabaseName(rs.getString("TABLE_NAME"));
+                if (name.equalsIgnoreCase(database.getDatabaseChangeLogTableName())) {
+                    hasDatabaseChangeLogTable = true;
+                }
+            }
+            rs.close();
+        }
+
+        ResultSet rs = databaseMetaData.getTables(database.convertRequestedSchemaToCatalog(schema), database.convertRequestedSchemaToSchema(schema), null, new String[]{"TABLE", "VIEW", "ALIAS"});
         while (rs.next()) {
             String type = rs.getString("TABLE_TYPE");
             String name = convertFromDatabaseName(rs.getString("TABLE_NAME"));
@@ -174,7 +185,7 @@ public abstract class SqlDatabaseSnapshot implements DatabaseSnapshot {
             String remarks = rs.getString("REMARKS");
 
             if (database.isSystemTable(catalogName, schemaName, name) || database.isLiquibaseTable(name) || database.isSystemView(catalogName, schemaName, name)) {
-                if (name.equalsIgnoreCase(database.getDatabaseChangeLogTableName())) {
+                if (name.equalsIgnoreCase(database.getDatabaseChangeLogTableName()) && !database.isPeculiarLiquibaseSchema()) {
                     hasDatabaseChangeLogTable = true;
                 }
                 continue;

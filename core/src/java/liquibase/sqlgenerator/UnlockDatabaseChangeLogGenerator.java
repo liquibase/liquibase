@@ -23,11 +23,7 @@ public class UnlockDatabaseChangeLogGenerator implements SqlGenerator<UnlockData
 
     public Sql[] generateSql(UnlockDatabaseChangeLogStatement statement, Database database) {
     	String liquibaseSchema = null;
-    	try {
-    		liquibaseSchema = database.getLiquibaseSchemaName();
-    	} catch (JDBCException e) {
-            throw new UnexpectedLiquibaseException(e);
-    	}
+		liquibaseSchema = database.getLiquibaseSchemaName();
 
         UpdateStatement releaseStatement = new UpdateStatement(liquibaseSchema, database.getDatabaseChangeLogLockTableName());
         releaseStatement.addNewColumnValue("LOCKED", false);

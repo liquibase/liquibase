@@ -717,8 +717,8 @@ public abstract class AbstractDatabase implements Database {
 
     }
 
-    public String getLiquibaseSchemaName() throws JDBCException {
-		return getDefaultDatabaseSchemaName();
+    public String getLiquibaseSchemaName() {
+		return getDefaultSchemaName();
 	}
 
 	/**
@@ -1484,4 +1484,8 @@ public abstract class AbstractDatabase implements Database {
             }
         }
     }
+
+	public boolean isPeculiarLiquibaseSchema() {
+		return false;
+	}
 }

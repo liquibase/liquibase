@@ -28,11 +28,7 @@ public class TagDatabaseGenerator implements SqlGenerator<TagDatabaseStatement> 
 
     public Sql[] generateSql(TagDatabaseStatement statement, Database database) {
     	String liquibaseSchema = null;
-    	try {
-    		liquibaseSchema = database.getLiquibaseSchemaName();
-    	} catch (JDBCException e){
-    		throw new UnexpectedLiquibaseException(e);
-    	}
+   		liquibaseSchema = database.getLiquibaseSchemaName();
         UpdateStatement updateStatement = new UpdateStatement(liquibaseSchema, database.getDatabaseChangeLogTableName());
         updateStatement.addNewColumnValue("TAG", statement.getTag());
         if (database instanceof MySQLDatabase) {
