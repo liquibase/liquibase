@@ -28,11 +28,7 @@ public class SelectFromDatabaseChangeLogLockGenerator implements SqlGenerator<Se
 
     public Sql[] generateSql(SelectFromDatabaseChangeLogLockStatement statement, Database database) {
     	String liquibaseSchema = null;
-    	try {
-    		liquibaseSchema = database.getLiquibaseSchemaName();
-    	} catch (JDBCException e) {
-            throw new UnexpectedLiquibaseException(e);
-    	}
+   		liquibaseSchema = database.getLiquibaseSchemaName();
         String sql = "SELECT "+ StringUtils.join(statement.getColumnsToSelect(), ",")+" FROM " +
                 database.escapeTableName(liquibaseSchema, database.getDatabaseChangeLogLockTableName()) +
                 " WHERE " + database.escapeColumnName(liquibaseSchema, database.getDatabaseChangeLogLockTableName(), "ID") + "=1";

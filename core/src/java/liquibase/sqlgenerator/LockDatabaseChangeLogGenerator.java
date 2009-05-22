@@ -28,11 +28,7 @@ public class LockDatabaseChangeLogGenerator implements SqlGenerator<LockDatabase
 
     public Sql[] generateSql(LockDatabaseChangeLogStatement statement, Database database) {
     	String liquibaseSchema = null;
-    	try {
     		liquibaseSchema = database.getLiquibaseSchemaName();
-    	} catch (JDBCException e) {
-            throw new UnexpectedLiquibaseException(e);
-    	}
 
         InetAddress localHost;
     	try {

@@ -20,7 +20,9 @@ import java.util.Set;
 
 public class AddAutoIncrementGeneratorTest <T extends AddAutoIncrementStatement> extends AbstractSqlGeneratorTest<T> {
 
-	protected static final String TABLE_NAME = "table_name";
+	protected static final String TABLE_NAME = "TABLE_NAME";
+	protected static final String COLUMN_NAME = "COLUMN_NAME";
+	protected static final String SCHEMA_NAME = "SCHEMA_NAME";
 
     public AddAutoIncrementGeneratorTest() throws Exception {
     	this(new AddAutoIncrementGenerator());
@@ -33,7 +35,7 @@ public class AddAutoIncrementGeneratorTest <T extends AddAutoIncrementStatement>
     @Override
     @SuppressWarnings("unchecked")
 	protected T createSampleSqlStatement() {
-        return (T) new AddAutoIncrementStatement(null, null, null, null);
+        return (T) new AddAutoIncrementStatement(null, TABLE_NAME, COLUMN_NAME, null);
     }
 
     @Override

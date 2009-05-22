@@ -146,28 +146,32 @@ public abstract class AbstractExecuteTest {
             if (database.supportsSchemas()) {
                 database.dropDatabaseObjects(TestContext.ALT_SCHEMA);
                 connection.commit();
-                try {
-                    connectionStatement.executeUpdate("drop table " + database.escapeTableName(TestContext.ALT_SCHEMA, database.getDatabaseChangeLogLockTableName()));
-                } catch (SQLException e) {
-                    ;
+                if (!database.isPeculiarLiquibaseSchema()) {
+                    try {
+                        connectionStatement.executeUpdate("drop table " + database.escapeTableName(TestContext.ALT_SCHEMA, database.getDatabaseChangeLogLockTableName()));
+                    } catch (SQLException e) {
+                        ;
+                    }
+                    connection.commit();
                 }
-                connection.commit();
-                try {
-                    connectionStatement.executeUpdate("drop table " + database.escapeTableName(TestContext.ALT_SCHEMA, database.getDatabaseChangeLogTableName()));
-                } catch (SQLException e) {
-                    ;
+                if (!database.isPeculiarLiquibaseSchema()) {
+                    try {
+                        connectionStatement.executeUpdate("drop table " + database.escapeTableName(TestContext.ALT_SCHEMA, database.getDatabaseChangeLogTableName()));
+                    } catch (SQLException e) {
+                        ;
+                    }
+                    connection.commit();
                 }
-                connection.commit();
             }
-            database.dropDatabaseObjects(null);
+            database.dropDatabaseObjects(database.convertRequestedSchemaToSchema(null));
             try {
-                connectionStatement.executeUpdate("drop table " + database.escapeTableName(null, database.getDatabaseChangeLogLockTableName()));
+                connectionStatement.executeUpdate("drop table " + database.escapeTableName(database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName()));
             } catch (SQLException e) {
                 ;
             }
             connection.commit();
             try {
-                connectionStatement.executeUpdate("drop table " + database.escapeTableName(null, database.getDatabaseChangeLogTableName()));
+                connectionStatement.executeUpdate("drop table " + database.escapeTableName(database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName()));
             } catch (SQLException e) {
                 ;
             }

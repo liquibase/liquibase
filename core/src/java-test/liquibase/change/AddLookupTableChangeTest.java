@@ -29,7 +29,7 @@ public class AddLookupTableChangeTest extends AbstractChangeTest {
 
         testChangeOnAll(change, new GenerateAllValidator() {
             public void validate(SqlStatement[] statements, Database database) {
-                assertEquals(1, statements.length);
+                assertEquals(4, statements.length);
                 AddDefaultValueStatement statement = (AddDefaultValueStatement) statements[0];
 
 

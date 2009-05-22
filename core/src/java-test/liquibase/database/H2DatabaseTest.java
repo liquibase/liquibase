@@ -81,13 +81,13 @@ public class H2DatabaseTest extends AbstractDatabaseTest {
     @Test
     public void escapeTableName_noSchema() {
         Database database = getDatabase();
-        assertEquals("`tableName`", database.escapeTableName(null, "tableName"));
+        assertEquals("tableName", database.escapeTableName(null, "tableName"));
     }
 
     @Override
     @Test
     public void escapeTableName_withSchema() {
         Database database = getDatabase();
-        assertEquals("`schemaName`.`tableName`", database.escapeTableName("schemaName", "tableName"));
+        assertEquals("schemaName.tableName", database.escapeTableName("schemaName", "tableName"));
     }    
 }

@@ -18,7 +18,11 @@ import java.text.ParseException;
 import java.util.*;
 
 public interface Database extends DatabaseObject {
-    /**
+
+	String databaseChangeLogTableName = "DatabaseChangeLog".toUpperCase();
+	String databaseChangeLogLockTableName = "DatabaseChangeLogLock".toUpperCase();;
+
+	/**
      * Is this AbstractDatabase subclass the correct one to use for the given connection.
      */
     boolean isCorrectDatabaseImplementation(Connection conn) throws JDBCException;
@@ -74,7 +78,9 @@ public interface Database extends DatabaseObject {
 
     String getDefaultSchemaName();
 
-    String getLiquibaseSchemaName() throws JDBCException;
+    String getLiquibaseSchemaName();
+    
+    boolean isPeculiarLiquibaseSchema(); 
     	
     void setDefaultSchemaName(String schemaName) throws JDBCException;
 

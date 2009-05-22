@@ -11,6 +11,7 @@ import java.util.List;
 public class AddAutoIncrementExecuteTest extends AbstractExecuteTest {
 
     protected static final String TABLE_NAME = "table_name";
+    protected static final String COLUMN_NAME = "column_name";
 
 
     @Override
@@ -36,58 +37,58 @@ public class AddAutoIncrementExecuteTest extends AbstractExecuteTest {
     @SuppressWarnings("unchecked")
     @Test
     public void noSchema() throws Exception {
-        this.statementUnderTest = new AddAutoIncrementStatement(null, "table_name", "id", "int");
+        this.statementUnderTest = new AddAutoIncrementStatement(null, TABLE_NAME, COLUMN_NAME, "int");
 
-        assertCorrect("alter table [table_name] modify id serial auto_increment", PostgresDatabase.class);
-        assertCorrect("alter table `table_name` modify `id` int auto_increment", MySQLDatabase.class);
+        assertCorrect("alter table [table_name] modify column_name serial auto_increment", PostgresDatabase.class);
+        assertCorrect("alter table `table_name` modify `column_name` int auto_increment", MySQLDatabase.class);
         assertCorrect("ALTER TABLE [table_name] ALTER COLUMN [column_name] SET GENERATED ALWAYS AS IDENTITY", DB2Database.class);
         assertCorrect("ALTER TABLE [table_name] MODIFY [column_name] serial", InformixDatabase.class);
 
-        assertCorrect("ALTER TABLE [table_name] MODIFY [id] int AUTO_INCREMENT");
+        assertCorrectOnRest("ALTER TABLE [table_name] MODIFY [column_name] int AUTO_INCREMENT");
     }
 
     @SuppressWarnings("unchecked")
     @Test
     public void fullNoConstraints() throws Exception {
-        this.statementUnderTest = new AddColumnStatement(null, "table_name", "column_name", "int", 42);
+        this.statementUnderTest = new AddColumnStatement(null, "table_name", TABLE_NAME, COLUMN_NAME, 42);
 
         assertCorrect("ALTER TABLE [table_name] ADD [column_name] INT NULL DEFAULT 42", SybaseDatabase.class);
-        assertCorrect("alter table [dbo].[table_name] add [column_name] int constraint df_table_name_column_name default 42", MSSQLDatabase.class);
+        assertCorrect("alter table [table_name] add [column_name] int constraint df_table_name_column_name default 42", MSSQLDatabase.class);
         assertCorrect("alter table [table_name] add [column_name] integer default 42", SQLiteDatabase.class);
         assertCorrect("alter table table_name add column_name int default 42", PostgresDatabase.class);
-        assertCorrect("ALTER TABLE [table_name] ADD [column_name] int DEFAULT 42");
+        assertCorrectOnRest("ALTER TABLE [table_name] ADD [column_name] int DEFAULT 42");
     }
 
     @SuppressWarnings("unchecked")
     @Test
     public void autoIncrement() throws Exception {
-        this.statementUnderTest = new AddColumnStatement(null, "table_name", "column_name", "int", null, new AutoIncrementConstraint());
+        this.statementUnderTest = new AddColumnStatement(null, TABLE_NAME, COLUMN_NAME, "int", null, new AutoIncrementConstraint());
 
         assertCorrect("ALTER TABLE [dbo].[table_name] ADD [column_name] int auto_increment_clause", MSSQLDatabase.class);
         assertCorrect("alter table [table_name] add [column_name] int default autoincrement null", SybaseASADatabase.class);
         assertCorrect("alter table [table_name] add [column_name] int identity null", SybaseDatabase.class);
         assertCorrect("alter table [table_name] add [column_name] serial", PostgresDatabase.class);
-        assertCorrect("ALTER TABLE [table_name] ADD [column_name] int auto_increment_clause");
+        assertCorrectOnRest("ALTER TABLE [table_name] ADD [column_name] int auto_increment_clause");
     }
 
     @SuppressWarnings("unchecked")
     @Test
     public void notNull() throws Exception {
-        this.statementUnderTest = new AddColumnStatement(null, "table_name", "column_name", "int", 42, new NotNullConstraint());
+        this.statementUnderTest = new AddColumnStatement(null, TABLE_NAME, COLUMN_NAME, "int", 42, new NotNullConstraint());
 
         assertCorrect("ALTER TABLE [table_name] ADD [column_name] int NOT NULL DEFAULT 42", SybaseASADatabase.class);
         assertCorrect("alter table [dbo].[table_name] add [column_name] int not null constraint df_table_name_column_name default 42", MSSQLDatabase.class);
-        assertCorrect("ALTER TABLE [table_name] ADD [column_name] int NOT NULL DEFAULT 42");
+        assertCorrectOnRest("ALTER TABLE [table_name] ADD [column_name] int NOT NULL DEFAULT 42");
     }
 
     @SuppressWarnings("unchecked")
     @Test
     public void generateSql_primaryKey() throws Exception {
         this.statementUnderTest = new AddColumnStatement(null, "table_name", "column_name", "int", null, new PrimaryKeyConstraint());
-        //        		sqlserver (at least 2000) does not allows add not null column.
+//        		sqlserver (at least 2000) does not allows add not null column.
 //        , MSSQLDatabase.class
         assertCorrect(null, MSSQLDatabase.class);
-        assertCorrect("ALTER TABLE [table_name] ADD [column_name] int NOT NULL PRIMARY KEY");
+        assertCorrectOnRest("ALTER TABLE [table_name] ADD [column_name] int NOT NULL PRIMARY KEY");
 
     }
 

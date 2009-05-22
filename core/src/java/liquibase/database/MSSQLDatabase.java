@@ -259,9 +259,9 @@ public class MSSQLDatabase extends AbstractDatabase {
 
     @Override
     public String convertRequestedSchemaToSchema(String requestedSchema) throws JDBCException {
-//        if (requestedSchema == null) {
-//            return "dbo";
-//        }
+        if (requestedSchema == null && getConnection() != null) {
+            return getDefaultCatalogName();
+        }
         return requestedSchema;
     }
 
@@ -333,9 +333,13 @@ public class MSSQLDatabase extends AbstractDatabase {
 	}
 
 	@Override
-	public String getLiquibaseSchemaName() throws JDBCException {
-		// TODO Auto-generated method stub
+	public String getLiquibaseSchemaName() {
 		return "dbo";
+	}
+
+	@Override
+	public boolean isPeculiarLiquibaseSchema() {
+		return true;
 	}
 
 }
