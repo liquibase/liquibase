@@ -27,7 +27,7 @@ public class CompositeFileOpenerTest {
         first = createMock(FileOpener.class);
         second = createMock(FileOpener.class);
         composite = new CompositeFileOpener(first,second);
-        validStream = this.getClass().getClassLoader().getResourceAsStream("liquibase/CompositeFileOpenerTest.class");
+        validStream = this.getClass().getClassLoader().getResourceAsStream("liquibase/resource/CompositeFileOpenerTest.class");
         
         empty = new Vector<URL>().elements();
         hasElements = this.getClass().getClassLoader().getResources("liquibase");

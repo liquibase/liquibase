@@ -72,7 +72,6 @@ public class ChangeFactoryTest {
     }
 
     @Test
-    @SuppressWarnings({"UnusedDeclaration"})
     public void create_exists() {
         Change change = ChangeFactory.getInstance().create("createTable");
 
@@ -87,7 +86,6 @@ public class ChangeFactoryTest {
     }
 
     @Test
-    @SuppressWarnings({"UnusedDeclaration"})
     public void create_notExists() {
         Change change = ChangeFactory.getInstance().create("badChangeName");
 

@@ -22,14 +22,14 @@ public class AddColumnGeneratorTest extends AbstractSqlGeneratorTest<AddColumnSt
 
 	@Override
 	protected AddColumnStatement createSampleSqlStatement() {
-		return new AddColumnStatement(null, null, null, null, null);
+		return new AddColumnStatement(null, "table_name", "column_name", "column_type", null);
 	}
 
 
 	@Override
     public void isValid() throws Exception {
         super.isValid();
-        AddColumnStatement addPKColumn = new AddColumnStatement(null, null, null, null, null, new PrimaryKeyConstraint("pk_name"));
+        AddColumnStatement addPKColumn = new AddColumnStatement(null, "table_name", "column_name", "column_type", null, new PrimaryKeyConstraint("pk_name"));
 
         assertFalse(generatorUnderTest.validate(addPKColumn, new OracleDatabase()).hasErrors());
         assertTrue(generatorUnderTest.validate(addPKColumn, new CacheDatabase()).getErrorMessages().contains("Cannot add a primary key column"));

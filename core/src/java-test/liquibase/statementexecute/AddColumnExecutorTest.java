@@ -3,6 +3,7 @@ package liquibase.statementexecute;
 import liquibase.database.Database;
 import liquibase.database.InformixDatabase;
 import liquibase.database.HsqlDatabase;
+import liquibase.database.SybaseASADatabase;
 import liquibase.test.TestContext;
 import liquibase.statement.*;
 
@@ -35,6 +36,7 @@ public class AddColumnExecutorTest extends AbstractExecuteTest {
         this.statementUnderTest = new AddColumnStatement(null, "table_name", "column_name", "int", null, new AutoIncrementConstraint("column_name"));
 
         assertCorrect("alter table table_name add column_name serial", InformixDatabase.class);
+        assertCorrect("alter table [table_name] add [column_name] autoincrement", SybaseASADatabase.class);
         assertCorrect("alter table table_name add column_name int auto_increment_clause");
     }
 
