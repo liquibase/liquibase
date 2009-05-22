@@ -46,10 +46,13 @@ public abstract class AbstractSqlGeneratorTest<T extends SqlStatement> {
     public void isValid() throws Exception {
         for (Database database : TestContext.getInstance().getAllDatabases()) {
         	if (shouldBeImplementation(database)) {
-        		assertFalse("isValid failed against " + database, generatorUnderTest.validate(createSampleSqlStatement(), database).hasErrors());
-        	} else if (waitForException(database)) {
-//        		assertTrue("The validation should be failed for " + database, generatorUnderTest.validate(createSampleSqlStatement(), database).hasErrors());
-        	}
+            	if (waitForException(database)) {
+            		assertTrue("The validation should be failed for " + database, generatorUnderTest.validate(createSampleSqlStatement(), database).hasErrors());
+            	} else {
+            		assertFalse("isValid failed against " + database, generatorUnderTest.validate(createSampleSqlStatement(), database).hasErrors());
+            	}
+            	
+        	} 
         }
     }
 

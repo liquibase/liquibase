@@ -17,6 +17,7 @@ public class AddUniqueConstraintGenerator implements SqlGenerator<AddUniqueConst
         		&& !(database instanceof MSSQLDatabase)
         		&& !(database instanceof SybaseDatabase)
         		&& !(database instanceof SybaseASADatabase)
+        		&& !(database instanceof InformixDatabase)
         ;
     }
 
@@ -28,10 +29,20 @@ public class AddUniqueConstraintGenerator implements SqlGenerator<AddUniqueConst
     }
 
     public Sql[] generateSql(AddUniqueConstraintStatement statement, Database database) {
-      String sql = "ALTER TABLE " + database.escapeTableName(statement.getSchemaName(), statement.getTableName()) + " ADD CONSTRAINT " + database.escapeConstraintName(statement.getConstraintName()) + " UNIQUE (" + database.escapeColumnNameList(statement.getColumnNames()) + ")";
-    	if (database instanceof InformixDatabase) {
-    		sql = "ALTER TABLE " + database.escapeTableName(statement.getSchemaName(), statement.getTableName()) + " ADD CONSTRAINT UNIQUE (" + database.escapeColumnNameList(statement.getColumnNames()) + ") CONSTRAINT " + database.escapeConstraintName(statement.getConstraintName());
-    	}
+		
+		String sql = null;
+		if (statement.getConstraintName() == null) {
+			sql = String.format("ALTER TABLE %s ADD UNIQUE (%s)"
+					, database.escapeTableName(statement.getSchemaName(), statement.getTableName())
+					, database.escapeColumnNameList(statement.getColumnNames())
+			);
+		} else {
+			sql = String.format("ALTER TABLE %s ADD CONSTRAINT %s UNIQUE (%s)"
+					, database.escapeTableName(statement.getSchemaName(), statement.getTableName())
+					, database.escapeConstraintName(statement.getConstraintName())
+					, database.escapeColumnNameList(statement.getColumnNames())
+			);
+		}
 
         if (StringUtils.trimToNull(statement.getTablespace()) != null && database.supportsTablespaces()) {
             if (database instanceof MSSQLDatabase) {

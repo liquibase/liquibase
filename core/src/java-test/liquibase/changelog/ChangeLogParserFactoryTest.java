@@ -59,7 +59,6 @@ public class ChangeLogParserFactoryTest {
     }
 
     @Test
-    @SuppressWarnings({"unused"})
     public void getParser_byExtension() {
         ChangeLogParserFactory.getInstance().getParsers().clear();
 
@@ -74,7 +73,6 @@ public class ChangeLogParserFactoryTest {
     }
 
     @Test
-    @SuppressWarnings({"unused"})
     public void getParser_byFile() {
         ChangeLogParserFactory.getInstance().getParsers().clear();
 
@@ -89,7 +87,6 @@ public class ChangeLogParserFactoryTest {
     }
 
     @Test
-    @SuppressWarnings({"unused"})
     public void getParser_noneMatching() {
         ChangeLogParserFactory.getInstance().getParsers().clear();
 
