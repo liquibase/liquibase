@@ -833,9 +833,7 @@ public abstract class AbstractDatabase implements Database {
 
 
             if (snapshot.hasDatabaseChangeLogTable()) {
-                RawSQLChange clearChangeLogChange = new RawSQLChange();
-                clearChangeLogChange.setSql("DELETE FROM " + escapeTableName(getLiquibaseSchemaName(), getDatabaseChangeLogTableName()));
-                dropChanges.add(clearChangeLogChange);
+                dropChanges.add(new AnonymousChange(new ClearDatabaseChangeLogTableStatement()));
             }
 
             for (Change change : dropChanges) {
@@ -881,7 +879,7 @@ public abstract class AbstractDatabase implements Database {
     public void tag(String tagString) throws JDBCException {
         WriteExecutor writeExecutor = ExecutorService.getInstance().getWriteExecutor(this);
         try {
-            int totalRows = ExecutorService.getInstance().getReadExecutor(this).queryForInt(new RawSqlStatement("SELECT COUNT(*) FROM " + escapeTableName(getLiquibaseSchemaName(), getDatabaseChangeLogTableName())), new ArrayList<SqlVisitor>());
+            int totalRows = ExecutorService.getInstance().getReadExecutor(this).queryForInt(new SelectFromDatabaseChangeLogStatement("COUNT(*)"), new ArrayList<SqlVisitor>());
             if (totalRows == 0) {
                 throw new JDBCException("Cannot tag an empty database");
             }
@@ -902,7 +900,7 @@ public abstract class AbstractDatabase implements Database {
     }
 
     public boolean doesTagExist(String tag) throws JDBCException {
-        int count = ExecutorService.getInstance().getReadExecutor(this).queryForInt(new RawSqlStatement("SELECT COUNT(*) FROM " + escapeTableName(getLiquibaseSchemaName(), getDatabaseChangeLogTableName()) + " WHERE TAG='" + tag + "'"), new ArrayList<SqlVisitor>());
+        int count = ExecutorService.getInstance().getReadExecutor(this).queryForInt(new SelectFromDatabaseChangeLogStatement(new SelectFromDatabaseChangeLogStatement.ByTag("tag"), "COUNT(*)"), new ArrayList<SqlVisitor>());
         return count > 0;
     }
 
@@ -935,15 +933,7 @@ public abstract class AbstractDatabase implements Database {
     }
 
     public SqlStatement getViewDefinitionSql(String schemaName, String viewName) throws JDBCException {
-        String sql = "select view_definition from information_schema.views where upper(table_name)='" + viewName.toUpperCase() + "'";
-        if (convertRequestedSchemaToCatalog(schemaName) != null) {
-            sql += " and table_schema='" + convertRequestedSchemaToSchema(schemaName) + "'";
-        } else if (convertRequestedSchemaToCatalog(schemaName) != null) {
-            sql += " and table_catalog='" + convertRequestedSchemaToCatalog(schemaName) + "'";
-        }
-
-        log.finest("GetViewDefinitionSQL: " + sql);
-        return new RawSqlStatement(sql);
+        return new GetViewDefinitionStatement(schemaName, viewName); //todo: remove
     }
 
 
@@ -1431,10 +1421,10 @@ public abstract class AbstractDatabase implements Database {
             throw new JDBCException(e);
         }
     }
-    
+
     /**
      * Default implementation, just look for "local" IPs
-     * @throws JDBCException 
+     * @throws JDBCException
      */
     public boolean isLocalDatabase() throws JDBCException {
     	String url = getConnectionURL();
@@ -1460,7 +1450,7 @@ public abstract class AbstractDatabase implements Database {
             ExecutorService.getInstance().getWriteExecutor(this).execute(statement, sqlVisitors);
         }
     }
-    
+
 
     public void saveStatements(Change change, List<SqlVisitor> sqlVisitors, Writer writer) throws IOException, UnsupportedChangeException, StatementNotSupportedOnDatabaseException, LiquibaseException {
         SqlStatement[] statements = change.generateStatements(this);

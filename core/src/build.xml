@@ -648,4 +648,35 @@ The available targets at the current stage:
         <antcall target="site" inheritAll="true" inheritRefs="true"/>
         <antcall target="package" inheritAll="true" inheritRefs="true"/>
     </target>
+
+    <target name="crap4j" depends="prepare">
+
+        <echo>${CRAP4J_HOME}</echo>
+        <taskdef name="crap4j" classname="org.crap4j.anttask.Crap4jAntTask">
+            <classpath>
+                <fileset dir="/crap4j/lib">
+                    <include name="**/*.jar"/>
+                </fileset>
+            </classpath>
+        </taskdef>
+
+        <crap4j projectdir="${basedir}/.."
+                outputDir="reports/crap4j"
+                dontTest="false" debug="false">
+            <classes>
+                <pathElement location="../build"/>
+            </classes>
+            <srces>
+                <pathElement location="../src/java"/>
+            </srces>
+            <testClasses>
+                <pathElement location="../build-test"/>
+            </testClasses>
+            <libClasspath>
+                <fileset dir="../lib">
+                    <include name="**/*.jar"/>
+                </fileset>
+            </libClasspath>
+        </crap4j>
+    </target>
 </project>

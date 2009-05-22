@@ -226,15 +226,6 @@ public class InformixDatabase extends AbstractDatabase {
 	}
 
 	@Override
-	public SqlStatement getViewDefinitionSql(String schemaName, String name)
-			throws JDBCException {
-		// TODO owner is schemaName ?
-		// view definition is distributed over multiple rows, each 64 chars
-		return new RawSqlStatement("select v.viewtext from sysviews v, systables t where t.tabname = '"
-				+ name + "' and v.tabid = t.tabid and t.tabtype = 'V' order by v.seqno");
-	}
-
-	@Override
 	public String getAutoIncrementClause() {
 		return "";
 	}
