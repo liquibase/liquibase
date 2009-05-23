@@ -26,7 +26,7 @@ public class SelectFromDatabaseChangeLogGenerator implements SqlGenerator<Select
 
     public Sql[] generateSql(SelectFromDatabaseChangeLogStatement statement, Database database) {
         String sql = "SELECT " + StringUtils.join(statement.getColumnsToSelect(), ",") + " FROM " +
-                database.escapeTableName(database.getDefaultSchemaName(), database.getDatabaseChangeLogTableName());
+                database.escapeTableName(database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName());
 
         SelectFromDatabaseChangeLogStatement.WhereClause whereClause = statement.getWhereClause();
         if (whereClause != null) {

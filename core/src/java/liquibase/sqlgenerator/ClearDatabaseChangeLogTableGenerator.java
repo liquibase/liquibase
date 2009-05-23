@@ -23,8 +23,14 @@ public class ClearDatabaseChangeLogTableGenerator implements SqlGenerator<ClearD
 
     public Sql[] generateSql(ClearDatabaseChangeLogTableStatement statement, Database database) {
         try {
+        	String schemaName = null;
+        	if (database.isPeculiarLiquibaseSchema()) {
+        		schemaName = database.getLiquibaseSchemaName();
+        	} else {
+        		schemaName = database.convertRequestedSchemaToSchema(null);
+        	}
             return new Sql[] {
-                    new UnparsedSql("DELETE FROM " + database.escapeTableName(database.convertRequestedSchemaToSchema(null), database.getDatabaseChangeLogTableName()))
+                    new UnparsedSql("DELETE FROM " + database.escapeTableName(schemaName, database.getDatabaseChangeLogTableName()))
             };
         } catch (JDBCException e) {
             throw new UnexpectedLiquibaseException(e);
