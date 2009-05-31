@@ -257,13 +257,6 @@ public class InformixDatabase extends AbstractDatabase {
 	}
 	
 	@Override
-	public SqlStatement createFindSequencesSQL(String schema)
-			throws JDBCException {
-		return new RawSqlStatement(
-				"SELECT tabname FROM systables t, syssequences s WHERE s.tabid = t.tabid");
-	}
-	
-	@Override
 	public String convertJavaObjectToString(Object value) {
 		if (value != null && value instanceof Boolean) {
             if (((Boolean) value)) {

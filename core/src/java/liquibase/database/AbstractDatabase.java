@@ -895,10 +895,6 @@ public abstract class AbstractDatabase implements Database {
         }
     }
 
-    public SqlStatement createFindSequencesSQL(String schema) throws JDBCException {
-        return null;
-    }
-
     public boolean doesTagExist(String tag) throws JDBCException {
         int count = ExecutorService.getInstance().getReadExecutor(this).queryForInt(new SelectFromDatabaseChangeLogStatement(new SelectFromDatabaseChangeLogStatement.ByTag("tag"), "COUNT(*)"), new ArrayList<SqlVisitor>());
         return count > 0;

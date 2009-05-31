@@ -11,6 +11,7 @@ import liquibase.sql.visitor.SqlVisitor;
 import liquibase.util.StringUtils;
 import liquibase.util.log.LogFactory;
 import liquibase.executor.ExecutorService;
+import liquibase.statement.SelectSequencesStatement;
 
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -602,7 +603,7 @@ public abstract class SqlDatabaseSnapshot implements DatabaseSnapshot {
 
         if (database.supportsSequences()) {
             //noinspection unchecked
-            List<String> sequenceNames = (List<String>) ExecutorService.getInstance().getReadExecutor(database).queryForList(database.createFindSequencesSQL(schema), String.class, new ArrayList<SqlVisitor>());
+            List<String> sequenceNames = (List<String>) ExecutorService.getInstance().getReadExecutor(database).queryForList(new SelectSequencesStatement(schema), String.class, new ArrayList<SqlVisitor>());
 
 
             if (sequenceNames != null) {

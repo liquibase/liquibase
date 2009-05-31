@@ -231,10 +231,6 @@ public class HibernateDatabase implements Database {
         return false;
     }
 
-    public SqlStatement createFindSequencesSQL(String schema) throws JDBCException {
-        return null;
-    }
-
     public boolean shouldQuoteValue(String value) {
         return false;
     }

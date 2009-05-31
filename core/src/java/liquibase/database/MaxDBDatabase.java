@@ -180,12 +180,6 @@ public class MaxDBDatabase extends AbstractDatabase {
     }
 
     @Override
-    public SqlStatement createFindSequencesSQL(String schema) throws JDBCException {
-        return new RawSqlStatement("SELECT SEQUENCE_NAME FROM DOMAIN.SEQUENCES WHERE OWNER = '"
-                + convertRequestedSchemaToSchema(schema) + "'");
-    }
-
-    @Override
     public boolean isSystemTable(String catalogName, String schemaName, String tableName) {
         if (super.isSystemTable(catalogName, schemaName, tableName)) {
             return true;
