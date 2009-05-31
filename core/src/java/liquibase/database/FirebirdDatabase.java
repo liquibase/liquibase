@@ -85,11 +85,6 @@ public class FirebirdDatabase extends AbstractDatabase {
 
 
     @Override
-    public SqlStatement createFindSequencesSQL(String schema) throws JDBCException {
-        return new RawSqlStatement("SELECT RDB$GENERATOR_NAME FROM RDB$GENERATORS WHERE RDB$SYSTEM_FLAG IS NULL OR RDB$SYSTEM_FLAG = 0");
-    }
-
-    @Override
     public boolean supportsDDLInTransaction() {
         return false;
     }

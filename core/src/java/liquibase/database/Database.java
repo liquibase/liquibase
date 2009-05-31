@@ -154,8 +154,6 @@ public interface Database extends DatabaseObject {
 
     boolean isLiquibaseTable(String tableName);
 
-    SqlStatement createFindSequencesSQL(String schema) throws JDBCException;
-
     boolean shouldQuoteValue(String value);
 
     boolean supportsTablespaces();

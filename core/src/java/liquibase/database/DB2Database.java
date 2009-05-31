@@ -133,12 +133,6 @@ public class DB2Database extends AbstractDatabase {
     }
 
     @Override
-    public SqlStatement createFindSequencesSQL(String schema) throws JDBCException {
-        return new RawSqlStatement("SELECT SEQNAME AS SEQUENCE_NAME FROM SYSCAT.SEQUENCES WHERE SEQTYPE='S' AND SEQSCHEMA = '" + convertRequestedSchemaToSchema(schema) + "'");
-    }
-
-
-    @Override
     public boolean shouldQuoteValue(String value) {
         return super.shouldQuoteValue(value)
                 && !value.startsWith("\"SYSIBM\"");

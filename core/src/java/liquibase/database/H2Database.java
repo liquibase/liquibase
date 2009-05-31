@@ -38,11 +38,6 @@ public class H2Database extends HsqlDatabase {
         return "H2".equals(getDatabaseProductName(conn));
     }
 
-    @Override
-    public SqlStatement createFindSequencesSQL(String schema) throws JDBCException {
-        return new RawSqlStatement("SELECT SEQUENCE_NAME FROM INFORMATION_SCHEMA.SEQUENCES WHERE SEQUENCE_SCHEMA = '" + convertRequestedSchemaToSchema(schema) + "' AND IS_GENERATED=FALSE");
-    }
-
     //    public void dropDatabaseObjects(String schema) throws JDBCException {
 //        DatabaseConnection conn = getConnection();
 //        Statement dropStatement = null;
