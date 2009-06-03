@@ -21,6 +21,14 @@
         </xsd:restriction>
     </xsd:simpleType>
 
+    <xsd:simpleType name="onChangeLogPreconditionOnUpdateSQL">
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="RUN"/>
+            <xsd:enumeration value="FAIL"/>
+            <xsd:enumeration value="IGNORE"/>
+        </xsd:restriction>
+    </xsd:simpleType>
+
     <!-- This is the main (root) part of the xsd -->
     <xsd:element name="databaseChangeLog">
         <xsd:complexType>
@@ -61,6 +69,7 @@
                                         </xsd:choice>
                                         <xsd:attribute name="onFail" type="onChangeSetPreconditionErrorOrFail"/>
                                         <xsd:attribute name="onError" type="onChangeSetPreconditionErrorOrFail"/>
+                                        <xsd:attribute name="onUpdateSQL" type="onChangeLogPreconditionOnUpdateSQL"/>
                                     </xsd:complexType>
                                 </xsd:element>
                                 <xsd:choice>

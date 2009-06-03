@@ -120,7 +120,9 @@ public class ChangeSet {
      * This method will actually execute each of the changes in the list against the
      * specified database.
      *
+     * @param database The Database object for this migration
      * @return should change set be marked as ran
+     * @throws MigrationFailedException when the migration fails
      */
     public boolean execute(Database database) throws MigrationFailedException {
 
@@ -142,7 +144,27 @@ public class ChangeSet {
                 database.getJdbcTemplate().comment(StringUtils.join(Arrays.asList(lines), "\n"));
             }
 
-            if (database.getJdbcTemplate().executesStatements() && rootPrecondition != null) {
+            // Three cases for preConditions onUpdateSQL:
+            // 1. RUN: preConditions should be run, as in regular update mode
+            // 2. FAIL: the preConditions should fail if there are any
+            // 3. IGNORE: act as if preConditions don't exist
+            boolean testPrecondition = false;
+            if (rootPrecondition != null) {
+                if (database.getJdbcTemplate().executesStatements()) {
+                    testPrecondition = true;
+                } else {
+                    if (rootPrecondition.getOnUpdateSQL().equals(Preconditions.OnUpdateSQLOption.RUN)) {
+                        testPrecondition = true;
+                    } else if (rootPrecondition.getOnUpdateSQL().equals(Preconditions.OnUpdateSQLOption.FAIL)) {
+                        throw new MigrationFailedException(this, "Unexpected precondition in updateSQL mode with onUpdateSQL value: "
+                                + rootPrecondition.getOnUpdateSQL());
+                    } else if (rootPrecondition.getOnUpdateSQL().equals(Preconditions.OnUpdateSQLOption.IGNORE)) {
+                        testPrecondition = false;
+                    }
+                }
+            }
+
+            if (testPrecondition) {
                 try {
                     rootPrecondition.check(database, null);
                 } catch (PreconditionFailedException e) {
@@ -155,7 +177,7 @@ public class ChangeSet {
 
                     if (rootPrecondition.getOnFail().equals(Preconditions.FailOption.HALT)) {
                         e.printStackTrace();
-                        throw new MigrationFailedException(this, message.toString());
+                        throw new MigrationFailedException(this, message.toString(), e);
                     } else if (rootPrecondition.getOnFail().equals(Preconditions.FailOption.CONTINUE)) {
                         skipChange = true;
                         markRan = false;
@@ -168,7 +190,7 @@ public class ChangeSet {
                     } else if (rootPrecondition.getOnFail().equals(Preconditions.FailOption.WARN)) {
                         log.log(Level.WARNING, "Running change set despite failed precondition.  ChangeSet: " + toString() + ": " + message);
                     } else {
-                        throw new MigrationFailedException(this, "Unexpected precondition onFail attribute: "+rootPrecondition.getOnFail());
+                        throw new MigrationFailedException(this, "Unexpected precondition onFail attribute: "+rootPrecondition.getOnFail(), e);
                     }
                 } catch (PreconditionErrorException e) {
                     StringBuffer message = new StringBuffer();
@@ -179,7 +201,7 @@ public class ChangeSet {
                     }
 
                     if (rootPrecondition.getOnError().equals(Preconditions.ErrorOption.HALT)) {
-                        throw new MigrationFailedException(this, message.toString());
+                        throw new MigrationFailedException(this, message.toString(), e);
                     } else if (rootPrecondition.getOnError().equals(Preconditions.ErrorOption.CONTINUE)) {
                         skipChange = true;
                         markRan = false;
@@ -193,7 +215,7 @@ public class ChangeSet {
                     } else if (rootPrecondition.getOnError().equals(Preconditions.ErrorOption.WARN)) {
                         log.log(Level.WARNING, "Running change set despite errored precondition.  ChangeSet: " + toString() + ": " + message);
                     } else {
-                        throw new MigrationFailedException(this, "Unexpected precondition onError attribute: "+rootPrecondition.getOnError());
+                        throw new MigrationFailedException(this, "Unexpected precondition onError attribute: "+rootPrecondition.getOnError(), e);
                     }
 
                     database.rollback();
@@ -243,7 +265,7 @@ public class ChangeSet {
                 try {
                     database.setAutoCommit(false);
                 } catch (JDBCException e) {
-                    throw new MigrationFailedException(this, "Could not reset autocommit");
+                    throw new MigrationFailedException(this, "Could not reset autocommit", e);
                 }
             }
         }
@@ -279,7 +301,7 @@ public class ChangeSet {
             try {
                 database.rollback();
             } catch (JDBCException e1) {
-                ;
+                e.printStackTrace();
             }
             throw new RollbackFailedException(e);
         }
@@ -288,6 +310,7 @@ public class ChangeSet {
 
     /**
      * Returns an unmodifiable list of changes.  To add one, use the addRefactoing method.
+     * @return List of Change objects
      */
     public List<Change> getChanges() {
         return Collections.unmodifiableList(changes);
