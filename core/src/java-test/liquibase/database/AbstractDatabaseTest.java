@@ -55,30 +55,30 @@ public abstract class AbstractDatabaseTest {
         ColumnConfig column = new ColumnConfig();
 
         column.setType("boolean");
-        assertEquals(database.getBooleanType(), database.getColumnType(column));
+        assertEquals(database.getBooleanType().getDataTypeName(), database.getColumnType(column));
         column.setType("BooLean");
-        assertEquals(database.getBooleanType(), database.getColumnType(column));
+        assertEquals(database.getBooleanType().getDataTypeName(), database.getColumnType(column));
 
 
         column.setType("currency");
-        assertEquals(database.getCurrencyType(), database.getColumnType(column));
+        assertEquals(database.getCurrencyType().getDataTypeName(), database.getColumnType(column));
         column.setType("currEncy");
-        assertEquals(database.getCurrencyType(), database.getColumnType(column));
+        assertEquals(database.getCurrencyType().getDataTypeName(), database.getColumnType(column));
 
         column.setType("uuid");
-        assertEquals(database.getUUIDType(), database.getColumnType(column));
+        assertEquals(database.getUUIDType().getDataTypeName(), database.getColumnType(column));
         column.setType("UUID");
-        assertEquals(database.getUUIDType(), database.getColumnType(column));
+        assertEquals(database.getUUIDType().getDataTypeName(), database.getColumnType(column));
 
         column.setType("blob");
-        assertEquals(database.getBlobType(), database.getColumnType(column));
+        assertEquals(database.getBlobType().getDataTypeName(), database.getColumnType(column));
         column.setType("BLOB");
-        assertEquals(database.getBlobType(), database.getColumnType(column));
+        assertEquals(database.getBlobType().getDataTypeName(), database.getColumnType(column));
 
         column.setType("clob");
-        assertEquals(database.getClobType(), database.getColumnType(column));
+        assertEquals(database.getClobType().getDataTypeName(), database.getColumnType(column));
         column.setType("CLOB");
-        assertEquals(database.getClobType(), database.getColumnType(column));
+        assertEquals(database.getClobType().getDataTypeName(), database.getColumnType(column));
 
         column.setType("SomethingElse");
         assertEquals("SomethingElse", database.getColumnType(column));
@@ -170,8 +170,8 @@ public abstract class AbstractDatabaseTest {
         DatabaseConnection connection = database.getConnection();
         if (connection != null) {
             connection.rollback();
-            assertEquals(database.getDateType().toUpperCase(), database.getColumnType("java.sql.Types.DATE", false).toUpperCase());
-            assertEquals(database.getBooleanType().toUpperCase(), database.getColumnType("java.sql.Types.BOOLEAN", false).toUpperCase());
+            assertEquals(database.getDateType().getDataTypeName().toUpperCase(), database.getColumnType("java.sql.Types.DATE", false).toUpperCase());
+            assertEquals(database.getBooleanType().getDataTypeName().toUpperCase(), database.getColumnType("java.sql.Types.BOOLEAN", false).toUpperCase());
             assertEquals("VARCHAR(255)", database.getColumnType("java.sql.Types.VARCHAR(255)", false).toUpperCase().replaceAll("VARCHAR2", "VARCHAR"));
         }
     }

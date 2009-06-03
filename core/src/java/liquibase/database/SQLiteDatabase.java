@@ -33,29 +33,34 @@ public class SQLiteDatabase extends AbstractDatabase {
     }
 
     public static final String PRODUCT_NAME = "SQLite";
+    private static final DataType BLOB_TYPE = new DataType("BLOB", false);
+    private static final DataType BOOLEAN_TYPE = new DataType("BOOLEAN", false);
+    private static final DataType CLOB_TYPE = new DataType("TEXT", true);
+    private static final DataType CURRENCY_TYPE = new DataType("REAL", false);
+    private static final DataType DATETIME_TYPE = new DataType("TEXT", false);
 
-    public String getBlobType() {
-        return "BLOB";
+    public DataType getBlobType() {
+        return BLOB_TYPE;
     }
 
-    public String getBooleanType() {
-        return "BOOLEAN";
+    public DataType getBooleanType() {
+        return BOOLEAN_TYPE;
     }
 
-    public String getClobType() {
-        return "TEXT";
+    public DataType getClobType() {
+        return CLOB_TYPE;
     }
 
-    public String getCurrencyType() {
-        return "REAL";
+    public DataType getCurrencyType() {
+        return CURRENCY_TYPE;
     }
 
     public String getCurrentDateTimeFunction() {
         return "CURRENT_TIMESTAMP";
     }
 
-    public String getDateTimeType() {
-        return "TEXT";
+    public DataType getDateTimeType() {
+        return DATETIME_TYPE;
     }
 
     public String getDefaultDriver(String url) {
@@ -73,8 +78,8 @@ public class SQLiteDatabase extends AbstractDatabase {
         return "sqlite";
     }
 
-    public String getUUIDType() {
-        return "TEXT";
+    public DataType getUUIDType() {
+        return DATETIME_TYPE;
     }
 
     public boolean isCorrectDatabaseImplementation(Connection conn)

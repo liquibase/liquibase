@@ -5,7 +5,6 @@ import liquibase.database.sql.SqlStatement;
 import liquibase.database.structure.DatabaseSnapshot;
 import liquibase.database.structure.PostgresDatabaseSnapshot;
 import liquibase.exception.JDBCException;
-import liquibase.exception.CustomChangeException;
 import liquibase.util.StringUtils;
 import liquibase.diff.DiffStatusListener;
 
@@ -26,6 +25,12 @@ public class PostgresDatabase extends AbstractDatabase {
     private Set<String> systemTablesAndViews = new HashSet<String>();
 
     private String defaultDatabaseSchemaName;
+    private static final DataType BOOLEAN_TYPE = new DataType("BOOLEAN", false);
+    private static final DataType CURRENCY_TYPE = new DataType("DECIMAL", true);
+    private static final DataType UUID_TYPE = new DataType("CHAR(36)", false);
+    private static final DataType CLOB_TYPE = new DataType("TEXT", true);
+    private static final DataType BLOB_TYPE = new DataType("BYTEA", false);
+    private static final DataType DATETIME_TYPE = new DataType("TIMESTAMP WITH TIME ZONE", false);
 
     public PostgresDatabase() {
 //        systemTablesAndViews.add("pg_logdir_ls");
@@ -105,28 +110,28 @@ public class PostgresDatabase extends AbstractDatabase {
         return null;
     }
 
-    public String getBooleanType() {
-        return "BOOLEAN";
+    public DataType getBooleanType() {
+        return BOOLEAN_TYPE;
     }
 
-    public String getCurrencyType() {
-        return "DECIMAL";
+    public DataType getCurrencyType() {
+        return CURRENCY_TYPE;
     }
 
-    public String getUUIDType() {
-        return "CHAR(36)";
+    public DataType getUUIDType() {
+        return UUID_TYPE;
     }
 
-    public String getClobType() {
-        return "TEXT";
+    public DataType getClobType() {
+        return CLOB_TYPE;
     }
 
-    public String getBlobType() {
-        return "BYTEA";
+    public DataType getBlobType() {
+        return BLOB_TYPE;
     }
 
-    public String getDateTimeType() {
-        return "TIMESTAMP WITH TIME ZONE";
+    public DataType getDateTimeType() {
+        return DATETIME_TYPE;
     }
 
     public boolean supportsSequences() {
@@ -243,7 +248,7 @@ public class PostgresDatabase extends AbstractDatabase {
         String type = super.getColumnType(columnType, autoIncrement);
 
         if (type.startsWith("TEXT(")) {
-            return getClobType();
+            return getClobType().getDataTypeName();
         } else if (type.toLowerCase().startsWith("float8")) {
             return "FLOAT8";
         } else if (type.toLowerCase().startsWith("float4")) {

@@ -11,29 +11,35 @@ import java.util.Set;
 
 public class CacheDatabase extends AbstractDatabase {
     public static final String PRODUCT_NAME = "cache";
+    private static final DataType BLOB_TYPE = new DataType("LONGVARBINARY", true);
+    private static final DataType BOOLEAN_TYPE = new DataType("INTEGER", true);
+    private static final DataType CLOB_TYPE = new DataType("LONGVARCHAR", true);
+    private static final DataType CURRENCY_TYPE = new DataType("MONEY", true);
+    private static final DataType DATETIME_TYPE = new DataType("DATETIME", false);
+    private static final DataType UUID_TYPE = new DataType("CHAR(36)", false);
 
-    public String getBlobType() {
-        return "LONGVARBINARY";
+    public DataType getBlobType() {
+        return BLOB_TYPE;
     }
 
-    public String getBooleanType() {
-        return "INTEGER";
+    public DataType getBooleanType() {
+        return BOOLEAN_TYPE;
     }
 
-    public String getClobType() {
-        return "LONGVARCHAR";
+    public DataType getClobType() {
+        return CLOB_TYPE;
     }
 
-    public String getCurrencyType() {
-        return "MONEY";
+    public DataType getCurrencyType() {
+        return CURRENCY_TYPE;
     }
 
-    public String getDateTimeType() {
-        return "DATETIME";
+    public DataType getDateTimeType() {
+        return DATETIME_TYPE;
     }
 
-    public String getUUIDType() {
-        return "CHAR(36)";
+    public DataType getUUIDType() {
+        return UUID_TYPE;
     }
 
     public String getCurrentDateTimeFunction() {

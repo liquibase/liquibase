@@ -13,6 +13,11 @@ import java.util.Set;
 
 public class UnsupportedDatabase extends AbstractDatabase {
     private String dateTimeType;
+    private static final DataType BOOLEAN_TYPE = new DataType("INT", false);
+    private static final DataType CURRENCY_TYPE = new DataType("DECIMAL", true);
+    private static final DataType UUID_TYPE = new DataType("CHAR(36)", false);
+    private static final DataType CLOB_TYPE = new DataType("CLOB", false);
+    private static final DataType BLOB_TYPE = new DataType("BLOB", false);
 
 
     public void setConnection(Connection conn) {
@@ -37,8 +42,8 @@ public class UnsupportedDatabase extends AbstractDatabase {
         return null;
     }
 
-    public String getBooleanType() {
-        return "INT";
+    public DataType getBooleanType() {
+        return BOOLEAN_TYPE;
     }
 
 
@@ -50,24 +55,24 @@ public class UnsupportedDatabase extends AbstractDatabase {
         return "1";
     }
 
-    public String getCurrencyType() {
-        return "DECIMAL";
+    public DataType getCurrencyType() {
+        return CURRENCY_TYPE;
     }
 
-    public String getUUIDType() {
-        return "CHAR(36)";
+    public DataType getUUIDType() {
+        return UUID_TYPE;
     }
 
-    public String getClobType() {
-        return "CLOB";
+    public DataType getClobType() {
+        return CLOB_TYPE;
     }
 
-    public String getBlobType() {
-        return "BLOB";
+    public DataType getBlobType() {
+        return BLOB_TYPE;
     }
 
-    public String getDateTimeType() {
-        return dateTimeType;
+    public DataType getDateTimeType() {
+        return new DataType(dateTimeType, false);
     }
 
     private String findDateTypeType() {

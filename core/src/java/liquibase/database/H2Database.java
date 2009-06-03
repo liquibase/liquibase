@@ -12,6 +12,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class H2Database extends HsqlDatabase {
+    private static final DataType DATETIME_TYPE = new DataType("TIMESTAMP", false);
 
     public String getProductName() {
         return "H2 Database";
@@ -107,8 +108,8 @@ public class H2Database extends HsqlDatabase {
         }
     }
 
-    public String getDateTimeType() {
-        return "TIMESTAMP";
+    public DataType getDateTimeType() {
+        return DATETIME_TYPE;
     }
     
     @Override

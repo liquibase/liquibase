@@ -22,7 +22,7 @@ public class InsertStatementTest extends AbstractSqlStatementTest {
         dropAndCreateTable(new CreateTableStatement(null, TABLE_NAME)
                 .addColumn(VARCHAR_COL_NAME, "varchar(50)")
                 .addColumn(DATE_COL_NAME, "varchar(50)")
-                .addColumn(BOOLEAN_COL_NAME, database.getBooleanType())
+                .addColumn(BOOLEAN_COL_NAME, database.getBooleanType().getDataTypeName())
                 .addColumn(INT_COL_NAME, "int")
                 .addColumn(FLOAT_COL_NAME, "float")
                 , database);
@@ -30,7 +30,7 @@ public class InsertStatementTest extends AbstractSqlStatementTest {
         dropAndCreateTable(new CreateTableStatement(TestContext.ALT_SCHEMA, TABLE_NAME)
                 .addColumn(VARCHAR_COL_NAME, "varchar(50)")
                 .addColumn(DATE_COL_NAME, "varchar(50)")
-                .addColumn(BOOLEAN_COL_NAME, database.getBooleanType())
+                .addColumn(BOOLEAN_COL_NAME, database.getBooleanType().getDataTypeName())
                 .addColumn(INT_COL_NAME, "int")
                 .addColumn(FLOAT_COL_NAME, "float")
                 , database);
