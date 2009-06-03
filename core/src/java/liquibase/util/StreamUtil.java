@@ -6,9 +6,11 @@ import java.io.*;
  * Utilities for working with streams.
  */
 public class StreamUtil {
-
+	
+	final public static String lineSeparator = System.getProperty("line.separator");
+	
     public static String getLineSeparator() {
-        return System.getProperty("line.separator");
+        return lineSeparator;
     }
 
     /**

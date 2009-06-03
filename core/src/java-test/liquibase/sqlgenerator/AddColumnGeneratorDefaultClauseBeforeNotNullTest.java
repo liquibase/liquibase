@@ -1,12 +1,17 @@
 package liquibase.sqlgenerator;
 
-import liquibase.database.*;
+import static org.junit.Assert.assertTrue;
+import liquibase.database.DB2Database;
+import liquibase.database.Database;
+import liquibase.database.DerbyDatabase;
+import liquibase.database.FirebirdDatabase;
+import liquibase.database.HsqlDatabase;
+import liquibase.database.InformixDatabase;
+import liquibase.database.OracleDatabase;
 import liquibase.exception.ValidationErrors;
 import liquibase.statement.AddColumnStatement;
 import liquibase.statement.AutoIncrementConstraint;
-import liquibase.statement.NotNullConstraint;
-import liquibase.statement.PrimaryKeyConstraint;
-import static org.junit.Assert.assertTrue;
+
 import org.junit.Test;
 
 public class AddColumnGeneratorDefaultClauseBeforeNotNullTest extends AddColumnGeneratorTest {

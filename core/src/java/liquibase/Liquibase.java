@@ -44,7 +44,7 @@ public class Liquibase {
     private String changeLogFile;
     private FileOpener fileOpener;
 
-    private Database database;
+    protected Database database;
     private Logger log;
 
     private Map<String, Object> changeLogParameters = new HashMap<String, Object>();

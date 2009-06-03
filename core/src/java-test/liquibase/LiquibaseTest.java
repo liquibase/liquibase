@@ -51,13 +51,16 @@ public class LiquibaseTest {
     public void isSaveToRunMigration() throws Exception {
         TestLiquibase liquibase = testLiquibase;
 
+        // curiously setting the database of mock liquibase
+        Database database = testLiquibase.getDatabase();
+        
         liquibase.setUrl("jdbc:oracle:thin:@localhost:1521:latest");
         assertTrue(liquibase.isSafeToRunMigration());
 
         liquibase.setUrl("jdbc:oracle:thin:@liquibase:1521:latest");
         assertFalse(liquibase.isSafeToRunMigration());
 
-        ExecutorService.getInstance().setWriteExecutor(testLiquibase.getDatabase(), new LoggingExecutor(new PrintWriter(System.out), testLiquibase.getDatabase()));
+        ExecutorService.getInstance().setWriteExecutor(database, new LoggingExecutor(new PrintWriter(System.out), database));
         assertTrue("Safe to run if outputing sql, even if non-localhost URL", liquibase.isSafeToRunMigration());
 
     }
@@ -88,7 +91,8 @@ public class LiquibaseTest {
 
     private class TestLiquibase extends Liquibase {
         private String url;
-        private Database database;
+        // instead use super.database 
+        //private Database database;
         private InputStream inputStream;
 
         public TestLiquibase() {
