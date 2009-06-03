@@ -1,41 +1,40 @@
 package liquibase.sqlgenerator;
 
+import static org.junit.Assert.assertEquals;
+
+import java.util.Set;
+
 import liquibase.change.AddAutoIncrementChange;
-import liquibase.database.*;
+import liquibase.database.Database;
+import liquibase.database.DerbyDatabase;
+import liquibase.database.HsqlDatabase;
+import liquibase.database.MSSQLDatabase;
 import liquibase.database.structure.Column;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Schema;
 import liquibase.database.structure.Table;
 import liquibase.statement.AddAutoIncrementStatement;
-import liquibase.statement.CreateTableStatement;
-import liquibase.statement.NotNullConstraint;
-import liquibase.statement.SqlStatement;
 import liquibase.test.TestContext;
-import static org.junit.Assert.assertEquals;
+
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-
-public class AddAutoIncrementGeneratorTest <T extends AddAutoIncrementStatement> extends AbstractSqlGeneratorTest<T> {
+public class AddAutoIncrementGeneratorTest extends AbstractSqlGeneratorTest<AddAutoIncrementStatement> {
 
 	protected static final String TABLE_NAME = "TABLE_NAME";
 	protected static final String COLUMN_NAME = "COLUMN_NAME";
 	protected static final String SCHEMA_NAME = "SCHEMA_NAME";
 
     public AddAutoIncrementGeneratorTest() throws Exception {
-    	this(new AddAutoIncrementGenerator());
+    	super(new AddAutoIncrementGenerator());
     }
 
-    public AddAutoIncrementGeneratorTest(AddAutoIncrementGenerator generatorUnderTest) throws Exception {
-        super(generatorUnderTest);
+    public AddAutoIncrementGeneratorTest(SqlGenerator<AddAutoIncrementStatement> addAutoIncrementGenerator) throws Exception {
+        super(addAutoIncrementGenerator);
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-	protected T createSampleSqlStatement() {
-        return (T) new AddAutoIncrementStatement(null, TABLE_NAME, COLUMN_NAME, null);
+	protected AddAutoIncrementStatement createSampleSqlStatement() {
+        return new AddAutoIncrementStatement(null, TABLE_NAME, COLUMN_NAME, null);
     }
 
     @Override

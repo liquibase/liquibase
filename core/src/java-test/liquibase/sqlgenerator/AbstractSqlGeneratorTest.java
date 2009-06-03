@@ -15,7 +15,7 @@ public abstract class AbstractSqlGeneratorTest<T extends SqlStatement> {
 
     protected SqlGenerator<T> generatorUnderTest;
 
-    public AbstractSqlGeneratorTest(SqlGenerator generatorUnderTest) throws Exception {
+    public AbstractSqlGeneratorTest(SqlGenerator<T> generatorUnderTest) throws Exception {
         this.generatorUnderTest = generatorUnderTest;
     }
 

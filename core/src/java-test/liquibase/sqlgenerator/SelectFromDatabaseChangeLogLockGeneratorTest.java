@@ -1,23 +1,14 @@
 package liquibase.sqlgenerator;
 
-import liquibase.database.Database;
-import liquibase.database.PostgresDatabase;
-import liquibase.database.MySQLDatabase;
-import liquibase.database.MSSQLDatabase;
-import liquibase.statement.*;
+import liquibase.statement.SelectFromDatabaseChangeLogLockStatement;
 
-import java.util.List;
-import java.util.Arrays;
-
-import org.junit.Test;
-
-public class SelectFromDatabaseChangeLogLockGeneratorTest<T extends SelectFromDatabaseChangeLogLockStatement> extends AbstractSqlGeneratorTest<T> {
+public class SelectFromDatabaseChangeLogLockGeneratorTest extends AbstractSqlGeneratorTest<SelectFromDatabaseChangeLogLockStatement> {
     public SelectFromDatabaseChangeLogLockGeneratorTest() throws Exception {
-        super(new SelectFromDatabaseChangeLogLockGenerator());
+        super( new SelectFromDatabaseChangeLogLockGenerator());
     }
 
     @Override
-    protected T createSampleSqlStatement() {
-        return (T) new SelectFromDatabaseChangeLogLockStatement("LOCKED");
+    protected SelectFromDatabaseChangeLogLockStatement createSampleSqlStatement() {
+        return new SelectFromDatabaseChangeLogLockStatement("LOCKED");
     }
 }

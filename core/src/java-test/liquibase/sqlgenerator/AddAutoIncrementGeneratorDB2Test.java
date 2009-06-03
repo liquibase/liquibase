@@ -5,7 +5,7 @@ import liquibase.database.Database;
 import liquibase.statement.AddAutoIncrementStatement;
 import org.junit.Test;
 
-public class AddAutoIncrementGeneratorDB2Test extends AddAutoIncrementGeneratorTest<AddAutoIncrementStatement> {
+public class AddAutoIncrementGeneratorDB2Test extends AddAutoIncrementGeneratorTest {
 
     public AddAutoIncrementGeneratorDB2Test() throws Exception {
     	super(new AddAutoIncrementGeneratorDB2());

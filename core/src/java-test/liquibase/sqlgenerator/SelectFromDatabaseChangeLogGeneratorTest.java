@@ -2,13 +2,13 @@ package liquibase.sqlgenerator;
 
 import liquibase.statement.SelectFromDatabaseChangeLogStatement;
 
-public class SelectFromDatabaseChangeLogGeneratorTest<T extends SelectFromDatabaseChangeLogStatement> extends AbstractSqlGeneratorTest<T> {
+public class SelectFromDatabaseChangeLogGeneratorTest extends AbstractSqlGeneratorTest<SelectFromDatabaseChangeLogStatement> {
     public SelectFromDatabaseChangeLogGeneratorTest() throws Exception {
-        super(new SelectFromDatabaseChangeLogGenerator());
+        super( new SelectFromDatabaseChangeLogGenerator());
     }
 
     @Override
-    protected T createSampleSqlStatement() {
-        return (T) new SelectFromDatabaseChangeLogStatement("ID");
+    protected SelectFromDatabaseChangeLogStatement createSampleSqlStatement() {
+        return new SelectFromDatabaseChangeLogStatement("ID");
     }
 }

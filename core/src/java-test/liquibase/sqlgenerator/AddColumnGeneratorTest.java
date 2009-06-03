@@ -1,20 +1,23 @@
 package liquibase.sqlgenerator;
 
-import liquibase.database.*;
-import liquibase.statement.*;
-import liquibase.test.TestContext;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import org.junit.Test;
-
-import java.util.ArrayList;
-import java.util.List;
+import liquibase.database.CacheDatabase;
+import liquibase.database.DB2Database;
+import liquibase.database.DerbyDatabase;
+import liquibase.database.H2Database;
+import liquibase.database.MySQLDatabase;
+import liquibase.database.OracleDatabase;
+import liquibase.database.SQLiteDatabase;
+import liquibase.statement.AddColumnStatement;
+import liquibase.statement.AutoIncrementConstraint;
+import liquibase.statement.PrimaryKeyConstraint;
 
 public class AddColumnGeneratorTest extends AbstractSqlGeneratorTest<AddColumnStatement> {
 
     public AddColumnGeneratorTest() throws Exception {
         this(new AddColumnGenerator());
-    }
+    } 
 
     public AddColumnGeneratorTest(SqlGenerator<AddColumnStatement> generatorUnderTest) throws Exception {
         super(generatorUnderTest);

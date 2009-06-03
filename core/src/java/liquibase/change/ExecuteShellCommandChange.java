@@ -2,6 +2,10 @@ package liquibase.change;
 
 import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.executor.ExecutorService;
+import liquibase.executor.LoggingExecutor;
+import liquibase.executor.WriteExecutor;
+import liquibase.statement.CommentStatement;
 import liquibase.statement.SqlStatement;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
@@ -53,7 +57,16 @@ public class ExecuteShellCommandChange extends AbstractChange {
             }
         }
 
-        if (shouldRun) {
+    	// check if running under not-executed mode (logging output)
+        boolean nonExecutedMode = false;
+        WriteExecutor writeExecutor = ExecutorService.getInstance().getWriteExecutor(database);
+        if (writeExecutor instanceof LoggingExecutor) {
+        	nonExecutedMode = true;
+        }
+        
+        if (shouldRun && !nonExecutedMode) {
+        	
+        	
             List<String> commandArray = new ArrayList<String>();
             commandArray.add(executable);
             commandArray.addAll(args);
@@ -85,6 +98,13 @@ public class ExecuteShellCommandChange extends AbstractChange {
             }
 
         }
+        
+        if (nonExecutedMode) {
+        	return new SqlStatement[] {
+        			new CommentStatement(getCommandString())
+        	};
+        }
+        
         return new SqlStatement[0];
     }
 
