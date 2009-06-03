@@ -10,11 +10,14 @@ import liquibase.statement.AddAutoIncrementStatement;
 import liquibase.statement.AddDefaultValueStatement;
 import liquibase.statement.CreateTableStatement;
 import liquibase.statement.SqlStatement;
+import liquibase.sqlgenerator.core.AddColumnGenerator;
+import liquibase.sqlgenerator.core.AddAutoIncrementGenerator;
+import liquibase.sqlgenerator.core.AddAutoIncrementGeneratorHsql;
+import liquibase.sqlgenerator.core.AddAutoIncrementGeneratorDB2;
 import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.List;
 import java.util.SortedSet;
 import java.util.Collection;
 

@@ -1,0 +1,48 @@
+package liquibase.sqlgenerator.core;
+
+import liquibase.database.*;
+import liquibase.exception.ValidationErrors;
+import liquibase.sql.Sql;
+import liquibase.sql.UnparsedSql;
+import liquibase.statement.DropTableStatement;
+import liquibase.util.log.LogFactory;
+import liquibase.sqlgenerator.SqlGenerator;
+
+public class DropTableGenerator implements SqlGenerator<DropTableStatement> {
+    public int getPriority() {
+        return PRIORITY_DEFAULT;
+    }
+
+    public boolean supports(DropTableStatement statement, Database database) {
+        return true;
+    }
+
+    public ValidationErrors validate(DropTableStatement dropTableStatement, Database database) {
+        ValidationErrors validationErrors = new ValidationErrors();
+        validationErrors.checkRequiredField("tableName", dropTableStatement.getTableName());
+        return validationErrors;
+    }
+
+    public Sql[] generateSql(DropTableStatement statement, Database database) {
+        StringBuffer buffer = new StringBuffer();
+        buffer.append("DROP TABLE ").append(database.escapeTableName(statement.getSchemaName(), statement.getTableName()));
+        if (statement.isCascadeConstraints()) {
+            if (database instanceof DerbyDatabase
+                    || database instanceof DB2Database
+                    || database instanceof MSSQLDatabase
+                    || database instanceof FirebirdDatabase
+                    || database instanceof SQLiteDatabase
+                    || database instanceof SybaseASADatabase) {
+                LogFactory.getLogger().info("Database does not support drop with cascade");
+            } else if (database instanceof OracleDatabase) {
+                buffer.append(" CASCADE CONSTRAINTS");
+            } else {
+                buffer.append(" CASCADE");
+            }
+        }
+
+        return new Sql[]{
+                new UnparsedSql(buffer.toString())
+        };
+    }
+}
