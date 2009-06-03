@@ -16,7 +16,7 @@ import java.util.Set;
 
 public class DB2Database extends AbstractDatabase {
     public boolean isCorrectDatabaseImplementation(Connection conn) throws JDBCException {
-        return getDatabaseProductName(conn).startsWith("DB2");
+        return getDatabaseProductName(conn).startsWith("DB2/");
     }
 
     public String getDefaultDriver(String url) {
@@ -191,6 +191,11 @@ public class DB2Database extends AbstractDatabase {
     }
 
     public String generatePrimaryKeyName(String tableName) {
+        if(tableName.equals(databaseChangeLogTableName))
+            tableName = shortDatabaseChangeLogTableName;
+        else if(tableName.equals(databaseChangeLogLockTableName))
+            tableName = shortDatabaseChangeLogLockTableName;
+
         String pkName = super.generatePrimaryKeyName(tableName);
         if (pkName.length() > 18) {
             pkName = pkName.substring(0, 17);

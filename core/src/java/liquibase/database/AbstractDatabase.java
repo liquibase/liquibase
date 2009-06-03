@@ -47,8 +47,19 @@ public abstract class AbstractDatabase implements Database {
 
     private static Pattern CREATE_VIEW_AS_PATTERN = Pattern.compile("^CREATE\\s+.*?VIEW\\s+.*?AS\\s+", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
-	private String databaseChangeLogTableName = "DatabaseChangeLog".toUpperCase();
-	private String databaseChangeLogLockTableName = "DatabaseChangeLogLock".toUpperCase();;
+	protected String databaseChangeLogTableName = "DatabaseChangeLog".toUpperCase();
+   /**
+     * we need the short name for alternative and shorter PK constraint name building
+     */
+    protected String shortDatabaseChangeLogTableName = "DbChgLog".toUpperCase();
+
+
+    protected String databaseChangeLogLockTableName = "DatabaseChangeLogLock".toUpperCase();
+    /**
+     * we need the short name for alternative and shorter PK constraint name building
+     */
+    protected String shortDatabaseChangeLogLockTableName = "DbChgLogLock".toUpperCase();
+
 
     protected AbstractDatabase() {
     }

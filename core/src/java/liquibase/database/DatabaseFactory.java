@@ -24,6 +24,7 @@ public class DatabaseFactory {
             new DerbyDatabase(),
             new HsqlDatabase(),
             new DB2Database(),
+            new DB2iDatabase(),
             new SybaseDatabase(),
             new H2Database(),
             new CacheDatabase(),
