@@ -30,6 +30,6 @@ public class DB2iDatabase extends DB2Database {
 
     @Override
     public DataType getFloatType() {
-        return new DataType("DECIMAL", false);
+        return new DataType("DECIMAL", true);
     }
 }
