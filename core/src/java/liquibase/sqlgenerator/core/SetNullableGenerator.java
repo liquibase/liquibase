@@ -6,6 +6,7 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.statement.SetNullableStatement;
 import liquibase.sqlgenerator.SqlGenerator;
+import liquibase.sqlgenerator.SqlGeneratorChain;
 
 public class SetNullableGenerator implements SqlGenerator<SetNullableStatement> {
     public int getPriority() {
@@ -17,7 +18,7 @@ public class SetNullableGenerator implements SqlGenerator<SetNullableStatement> 
                 database instanceof SQLiteDatabase);
     }
 
-    public ValidationErrors validate(SetNullableStatement setNullableStatement, Database database) {
+    public ValidationErrors validate(SetNullableStatement setNullableStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
 
         validationErrors.checkRequiredField("tableName", setNullableStatement.getTableName());
@@ -29,7 +30,7 @@ public class SetNullableGenerator implements SqlGenerator<SetNullableStatement> 
         return validationErrors;
     }
 
-    public Sql[] generateSql(SetNullableStatement statement, Database database) {
+    public Sql[] generateSql(SetNullableStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         String sql;
 
         String nullableString;

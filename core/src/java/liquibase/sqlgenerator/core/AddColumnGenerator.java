@@ -8,6 +8,7 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.statement.AddColumnStatement;
 import liquibase.sqlgenerator.SqlGenerator;
+import liquibase.sqlgenerator.SqlGeneratorChain;
 
 public class AddColumnGenerator implements SqlGenerator<AddColumnStatement> {
     
@@ -19,7 +20,7 @@ public class AddColumnGenerator implements SqlGenerator<AddColumnStatement> {
         return true;
     }
 
-    public ValidationErrors validate(AddColumnStatement statement, Database database) {
+    public ValidationErrors validate(AddColumnStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
 
         validationErrors.checkRequiredField("columnName", statement.getColumnName());
@@ -40,7 +41,7 @@ public class AddColumnGenerator implements SqlGenerator<AddColumnStatement> {
         return validationErrors;
     }
 
-    public Sql[] generateSql(AddColumnStatement statement, Database database) {
+    public Sql[] generateSql(AddColumnStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
 
         String alterTable = "ALTER TABLE " + database.escapeTableName(statement.getSchemaName(), statement.getTableName()) + " ADD " + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " " + database.getColumnType(statement.getColumnType(), statement.isAutoIncrement());
 

@@ -8,6 +8,7 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.statement.DropIndexStatement;
 import liquibase.sqlgenerator.SqlGenerator;
+import liquibase.sqlgenerator.SqlGeneratorChain;
 
 public class DropIndexGenerator implements SqlGenerator<DropIndexStatement> {
     public int getPriority() {
@@ -18,7 +19,7 @@ public class DropIndexGenerator implements SqlGenerator<DropIndexStatement> {
         return true;
     }
 
-    public ValidationErrors validate(DropIndexStatement statement, Database database) {
+    public ValidationErrors validate(DropIndexStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("indexName", statement.getIndexName());
 
@@ -29,7 +30,7 @@ public class DropIndexGenerator implements SqlGenerator<DropIndexStatement> {
         return validationErrors;
     }
 
-    public Sql[] generateSql(DropIndexStatement statement, Database database) {
+    public Sql[] generateSql(DropIndexStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         String schemaName = statement.getTableSchemaName();
         
         if (database instanceof MySQLDatabase) {

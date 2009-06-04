@@ -6,6 +6,7 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.statement.RenameTableStatement;
 import liquibase.sqlgenerator.SqlGenerator;
+import liquibase.sqlgenerator.SqlGeneratorChain;
 
 public class RenameTableGenerator implements SqlGenerator<RenameTableStatement> {
     public int getPriority() {
@@ -16,7 +17,7 @@ public class RenameTableGenerator implements SqlGenerator<RenameTableStatement> 
         return !(database instanceof CacheDatabase || database instanceof FirebirdDatabase);
     }
 
-    public ValidationErrors validate(RenameTableStatement renameTableStatement, Database database) {
+    public ValidationErrors validate(RenameTableStatement renameTableStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("schemaName", renameTableStatement.getSchemaName());
         validationErrors.checkRequiredField("newTableName", renameTableStatement.getNewTableName());
@@ -24,7 +25,7 @@ public class RenameTableGenerator implements SqlGenerator<RenameTableStatement> 
         return validationErrors;
     }
 
-    public Sql[] generateSql(RenameTableStatement statement, Database database) {
+    public Sql[] generateSql(RenameTableStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         String sql;
         if (database instanceof MSSQLDatabase) {
             sql = "exec sp_rename '" + database.escapeTableName(statement.getSchemaName(), statement.getOldTableName()) + "', '" + statement.getNewTableName() + '\'';

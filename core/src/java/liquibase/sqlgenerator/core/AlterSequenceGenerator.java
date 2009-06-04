@@ -6,6 +6,7 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.statement.AlterSequenceStatement;
 import liquibase.sqlgenerator.SqlGenerator;
+import liquibase.sqlgenerator.SqlGeneratorChain;
 
 public class AlterSequenceGenerator implements SqlGenerator<AlterSequenceStatement> {
     public int getPriority() {
@@ -16,7 +17,7 @@ public class AlterSequenceGenerator implements SqlGenerator<AlterSequenceStateme
         return database.supportsSequences();
     }
 
-    public ValidationErrors validate(AlterSequenceStatement alterSequenceStatement, Database database) {
+    public ValidationErrors validate(AlterSequenceStatement alterSequenceStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
 
         if (database instanceof FirebirdDatabase || database instanceof HsqlDatabase) {
@@ -34,7 +35,7 @@ public class AlterSequenceGenerator implements SqlGenerator<AlterSequenceStateme
         return validationErrors;
     }
 
-    public Sql[] generateSql(AlterSequenceStatement statement, Database database) {
+    public Sql[] generateSql(AlterSequenceStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         StringBuffer buffer = new StringBuffer();
         buffer.append("ALTER SEQUENCE ");
         buffer.append(database.escapeSequenceName(statement.getSchemaName(), statement.getSequenceName()));

@@ -7,6 +7,7 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.statement.DeleteStatement;
 import liquibase.sqlgenerator.SqlGenerator;
+import liquibase.sqlgenerator.SqlGeneratorChain;
 
 import java.util.Date;
 
@@ -19,13 +20,13 @@ public class DeleteGenerator implements SqlGenerator<DeleteStatement> {
         return !(database instanceof SQLiteDatabase);
     }
 
-    public ValidationErrors validate(DeleteStatement deleteStatement, Database database) {
+    public ValidationErrors validate(DeleteStatement deleteStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", deleteStatement.getTableName());
         return validationErrors;
     }
 
-    public Sql[] generateSql(DeleteStatement statement, Database database) {
+    public Sql[] generateSql(DeleteStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         StringBuffer sql = new StringBuffer("DELETE FROM " + database.escapeTableName(statement.getSchemaName(), statement.getTableName()));
 
         if (statement.getWhereClause() != null) {

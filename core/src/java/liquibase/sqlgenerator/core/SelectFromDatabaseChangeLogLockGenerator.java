@@ -3,13 +3,12 @@ package liquibase.sqlgenerator.core;
 import liquibase.statement.SelectFromDatabaseChangeLogLockStatement;
 import liquibase.database.Database;
 import liquibase.database.OracleDatabase;
-import liquibase.exception.JDBCException;
-import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.util.StringUtils;
 import liquibase.sqlgenerator.SqlGenerator;
+import liquibase.sqlgenerator.SqlGeneratorChain;
 
 public class SelectFromDatabaseChangeLogLockGenerator implements SqlGenerator<SelectFromDatabaseChangeLogLockStatement> {
     public int getPriority() {
@@ -20,14 +19,14 @@ public class SelectFromDatabaseChangeLogLockGenerator implements SqlGenerator<Se
         return true;
     }
 
-    public ValidationErrors validate(SelectFromDatabaseChangeLogLockStatement statement, Database database) {
+    public ValidationErrors validate(SelectFromDatabaseChangeLogLockStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors errors = new ValidationErrors();
         errors.checkRequiredField("columnToSelect", statement.getColumnsToSelect());
 
         return errors;
     }
 
-    public Sql[] generateSql(SelectFromDatabaseChangeLogLockStatement statement, Database database) {
+    public Sql[] generateSql(SelectFromDatabaseChangeLogLockStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
     	String liquibaseSchema = null;
    		liquibaseSchema = database.getLiquibaseSchemaName();
         String sql = "SELECT "+ StringUtils.join(statement.getColumnsToSelect(), ",")+" FROM " +

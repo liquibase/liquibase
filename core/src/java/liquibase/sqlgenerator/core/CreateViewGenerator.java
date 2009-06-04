@@ -6,6 +6,7 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.statement.CreateViewStatement;
 import liquibase.sqlgenerator.SqlGenerator;
+import liquibase.sqlgenerator.SqlGeneratorChain;
 
 public class CreateViewGenerator implements SqlGenerator<CreateViewStatement> {
     public int getPriority() {
@@ -16,7 +17,7 @@ public class CreateViewGenerator implements SqlGenerator<CreateViewStatement> {
         return true;
     }
 
-    public ValidationErrors validate(CreateViewStatement createViewStatement, Database database) {
+    public ValidationErrors validate(CreateViewStatement createViewStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
 
         validationErrors.checkRequiredField("viewName", createViewStatement.getViewName());
@@ -37,7 +38,7 @@ public class CreateViewGenerator implements SqlGenerator<CreateViewStatement> {
         return validationErrors;
     }
 
-    public Sql[] generateSql(CreateViewStatement statement, Database database) {
+    public Sql[] generateSql(CreateViewStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         String createClause;
 
         if (database instanceof FirebirdDatabase) {

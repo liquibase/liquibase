@@ -6,6 +6,7 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.statement.RenameViewStatement;
 import liquibase.sqlgenerator.SqlGenerator;
+import liquibase.sqlgenerator.SqlGeneratorChain;
 
 public class RenameViewGenerator implements SqlGenerator<RenameViewStatement> {
     public int getPriority() {
@@ -22,7 +23,7 @@ public class RenameViewGenerator implements SqlGenerator<RenameViewStatement> {
                 || database instanceof SybaseASADatabase);
     }
 
-    public ValidationErrors validate(RenameViewStatement renameViewStatement, Database database) {
+    public ValidationErrors validate(RenameViewStatement renameViewStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("oldViewName", renameViewStatement.getOldViewName());
         validationErrors.checkRequiredField("newViewName", renameViewStatement.getNewViewName());
@@ -34,7 +35,7 @@ public class RenameViewGenerator implements SqlGenerator<RenameViewStatement> {
         return validationErrors;
     }
 
-    public Sql[] generateSql(RenameViewStatement statement, Database database) {
+    public Sql[] generateSql(RenameViewStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         String sql;
 
         if (database instanceof MSSQLDatabase) {

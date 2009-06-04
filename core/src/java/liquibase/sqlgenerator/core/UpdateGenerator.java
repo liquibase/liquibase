@@ -6,6 +6,7 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.statement.UpdateStatement;
 import liquibase.sqlgenerator.SqlGenerator;
+import liquibase.sqlgenerator.SqlGeneratorChain;
 
 import java.util.Date;
 
@@ -18,14 +19,14 @@ public class UpdateGenerator implements SqlGenerator<UpdateStatement> {
         return true;
     }
 
-    public ValidationErrors validate(UpdateStatement updateStatement, Database database) {
+    public ValidationErrors validate(UpdateStatement updateStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", updateStatement.getTableName());
         validationErrors.checkRequiredField("columns", updateStatement.getNewColumnValues());
         return validationErrors;
     }
 
-    public Sql[] generateSql(UpdateStatement statement, Database database) {
+    public Sql[] generateSql(UpdateStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         StringBuffer sql = new StringBuffer("UPDATE " + database.escapeTableName(statement.getSchemaName(), statement.getTableName()) + " SET");
         for (String column : statement.getNewColumnValues().keySet()) {
             sql.append(" ").append(database.escapeColumnName(statement.getSchemaName(), statement.getTableName(), column)).append(" = ");

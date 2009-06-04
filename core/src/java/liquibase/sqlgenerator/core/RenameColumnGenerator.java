@@ -6,6 +6,7 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.statement.RenameColumnStatement;
 import liquibase.sqlgenerator.SqlGenerator;
+import liquibase.sqlgenerator.SqlGeneratorChain;
 
 public class RenameColumnGenerator implements SqlGenerator<RenameColumnStatement> {
     public int getPriority() {
@@ -18,7 +19,7 @@ public class RenameColumnGenerator implements SqlGenerator<RenameColumnStatement
                 || database instanceof SQLiteDatabase);
     }
 
-    public ValidationErrors validate(RenameColumnStatement renameColumnStatement, Database database) {
+    public ValidationErrors validate(RenameColumnStatement renameColumnStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", renameColumnStatement.getTableName());
         validationErrors.checkRequiredField("oldColumnName", renameColumnStatement.getOldColumnName());
@@ -31,7 +32,7 @@ public class RenameColumnGenerator implements SqlGenerator<RenameColumnStatement
         return validationErrors;
     }
 
-    public Sql[] generateSql(RenameColumnStatement statement, Database database) {
+    public Sql[] generateSql(RenameColumnStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         String sql;
         if (database instanceof MSSQLDatabase) {
         	// do no escape the new column name. Otherwise it produce "exec sp_rename '[dbo].[person].[usernae]', '[username]'"

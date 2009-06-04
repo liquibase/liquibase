@@ -6,6 +6,7 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.statement.DropPrimaryKeyStatement;
 import liquibase.sqlgenerator.SqlGenerator;
+import liquibase.sqlgenerator.SqlGeneratorChain;
 
 public class DropPrimaryKeyGenerator implements SqlGenerator<DropPrimaryKeyStatement> {
     public int getPriority() {
@@ -16,7 +17,7 @@ public class DropPrimaryKeyGenerator implements SqlGenerator<DropPrimaryKeyState
         return (!(database instanceof SQLiteDatabase));
     }
 
-    public ValidationErrors validate(DropPrimaryKeyStatement dropPrimaryKeyStatement, Database database) {
+    public ValidationErrors validate(DropPrimaryKeyStatement dropPrimaryKeyStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", dropPrimaryKeyStatement.getTableName());
 
@@ -31,7 +32,7 @@ public class DropPrimaryKeyGenerator implements SqlGenerator<DropPrimaryKeyState
         return validationErrors;
     }
 
-    public Sql[] generateSql(DropPrimaryKeyStatement statement, Database database) {
+    public Sql[] generateSql(DropPrimaryKeyStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         String sql;
 
         if (database instanceof MSSQLDatabase) {

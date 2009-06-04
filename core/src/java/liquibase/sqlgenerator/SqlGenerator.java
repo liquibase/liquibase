@@ -52,10 +52,10 @@ public interface SqlGenerator<StatementType extends SqlStatement> {
      * Validate the data contained in the SqlStatement.  If there are no errors, return an empty ValidationErrors object, not a null value.
      * LiquiBase will inspect the ValidationErrors result before attempting to call generateSql.
      */
-    public ValidationErrors validate(StatementType statement, Database database);
+    public ValidationErrors validate(StatementType statement, Database database, SqlGeneratorChain sqlGeneratorChain);
 
     /**
      * Generate the actual Sql for the given statement and database.
      */
-    public Sql[] generateSql(StatementType statement, Database database);
+    public Sql[] generateSql(StatementType statement, Database database, SqlGeneratorChain sqlGeneratorChain);
 }

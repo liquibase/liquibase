@@ -1,7 +1,5 @@
 package liquibase.sqlgenerator.core;
 
-import javax.swing.text.html.HTMLDocument.HTMLReader.IsindexAction;
-
 import liquibase.statement.CreateDatabaseChangeLogLockTableStatement;
 import liquibase.statement.CreateTableStatement;
 import liquibase.statement.NotNullConstraint;
@@ -11,6 +9,7 @@ import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
+import liquibase.sqlgenerator.SqlGeneratorChain;
 
 public class CreateDatabaseChangeLogLockTableGenerator implements SqlGenerator<CreateDatabaseChangeLogLockTableStatement> {
     public int getPriority() {
@@ -21,11 +20,11 @@ public class CreateDatabaseChangeLogLockTableGenerator implements SqlGenerator<C
         return true;
     }
 
-    public ValidationErrors validate(CreateDatabaseChangeLogLockTableStatement createDatabaseChangeLogLockTableStatement, Database database) {
+    public ValidationErrors validate(CreateDatabaseChangeLogLockTableStatement createDatabaseChangeLogLockTableStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         return new ValidationErrors();
     }
 
-    public Sql[] generateSql(CreateDatabaseChangeLogLockTableStatement statement, Database database) {
+    public Sql[] generateSql(CreateDatabaseChangeLogLockTableStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         CreateTableStatement createTableStatement = new CreateTableStatement(database.getDefaultSchemaName(), database.getDatabaseChangeLogLockTableName())
                 .addPrimaryKeyColumn("ID", "INT", null, null, new NotNullConstraint())
                 .addColumn("LOCKED", "BOOLEAN", new NotNullConstraint())

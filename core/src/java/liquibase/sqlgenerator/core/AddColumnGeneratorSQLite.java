@@ -5,6 +5,7 @@ import liquibase.database.SQLiteDatabase;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.statement.AddColumnStatement;
+import liquibase.sqlgenerator.SqlGeneratorChain;
 
 public class AddColumnGeneratorSQLite extends AddColumnGenerator {
      @Override
@@ -18,7 +19,7 @@ public class AddColumnGeneratorSQLite extends AddColumnGenerator {
     }
 
     @Override
-    public Sql[] generateSql(final AddColumnStatement statement, Database database) {
+    public Sql[] generateSql(final AddColumnStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
 //        // SQLite does not support this ALTER TABLE operation until now.
 //        // For more information see: http://www.sqlite.org/omitted.html.
 //        // This is a small work around...

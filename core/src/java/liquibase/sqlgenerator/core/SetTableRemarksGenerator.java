@@ -8,6 +8,7 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.statement.SetTableRemarksStatement;
 import liquibase.sqlgenerator.SqlGenerator;
+import liquibase.sqlgenerator.SqlGeneratorChain;
 
 public class SetTableRemarksGenerator implements SqlGenerator<SetTableRemarksStatement> {
     public int getPriority() {
@@ -18,14 +19,14 @@ public class SetTableRemarksGenerator implements SqlGenerator<SetTableRemarksSta
         return database instanceof MySQLDatabase || database instanceof OracleDatabase;
     }
 
-    public ValidationErrors validate(SetTableRemarksStatement setTableRemarksStatement, Database database) {
+    public ValidationErrors validate(SetTableRemarksStatement setTableRemarksStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", setTableRemarksStatement.getTableName());
         validationErrors.checkRequiredField("remarks", setTableRemarksStatement.getRemarks());
         return validationErrors;
     }
 
-    public Sql[] generateSql(SetTableRemarksStatement statement, Database database) {
+    public Sql[] generateSql(SetTableRemarksStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         String sql;
         if (database instanceof OracleDatabase) {
             sql = "COMMENT ON TABLE "+database.escapeTableName(statement.getSchemaName(), statement.getTableName())+" IS '"+statement.getRemarks()+"'";

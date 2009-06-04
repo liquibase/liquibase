@@ -7,6 +7,7 @@ import liquibase.database.SybaseDatabase;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.statement.AddUniqueConstraintStatement;
+import liquibase.sqlgenerator.SqlGeneratorChain;
 
 public class AddUniqueConstraintGeneratorTDS extends AddUniqueConstraintGenerator {
 
@@ -28,7 +29,7 @@ public class AddUniqueConstraintGeneratorTDS extends AddUniqueConstraintGenerato
 	}
 
 	@Override
-	public Sql[] generateSql(AddUniqueConstraintStatement statement, Database database) {
+	public Sql[] generateSql(AddUniqueConstraintStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
 
 		final String sqlTemplate = "ALTER TABLE %s ADD CONSTRAINT %s UNIQUE (%s)";
 		final String sqlNoContraintNameTemplate = "ALTER TABLE %s ADD UNIQUE (%s)";

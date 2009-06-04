@@ -7,6 +7,7 @@ import liquibase.sql.UnparsedSql;
 import liquibase.statement.AddUniqueConstraintStatement;
 import liquibase.util.StringUtils;
 import liquibase.sqlgenerator.SqlGenerator;
+import liquibase.sqlgenerator.SqlGeneratorChain;
 
 public class AddUniqueConstraintGenerator implements SqlGenerator<AddUniqueConstraintStatement> {
     public int getPriority() {
@@ -22,14 +23,14 @@ public class AddUniqueConstraintGenerator implements SqlGenerator<AddUniqueConst
         ;
     }
 
-    public ValidationErrors validate(AddUniqueConstraintStatement addUniqueConstraintStatement, Database database) {
+    public ValidationErrors validate(AddUniqueConstraintStatement addUniqueConstraintStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("columnNames", addUniqueConstraintStatement.getColumnNames());
         validationErrors.checkRequiredField("tableName", addUniqueConstraintStatement.getTableName());
         return validationErrors;
     }
 
-    public Sql[] generateSql(AddUniqueConstraintStatement statement, Database database) {
+    public Sql[] generateSql(AddUniqueConstraintStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
 		
 		String sql = null;
 		if (statement.getConstraintName() == null) {

@@ -6,6 +6,7 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.statement.CreateSequenceStatement;
 import liquibase.sqlgenerator.SqlGenerator;
+import liquibase.sqlgenerator.SqlGeneratorChain;
 
 public class CreateSequenceGenerator implements SqlGenerator<CreateSequenceStatement> {
     public int getPriority() {
@@ -16,7 +17,7 @@ public class CreateSequenceGenerator implements SqlGenerator<CreateSequenceState
         return database.supportsSequences();
     }
 
-    public ValidationErrors validate(CreateSequenceStatement statement, Database database) {
+    public ValidationErrors validate(CreateSequenceStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
 
         validationErrors.checkRequiredField("sequenceName", statement.getSequenceName());
@@ -43,7 +44,7 @@ public class CreateSequenceGenerator implements SqlGenerator<CreateSequenceState
         return validationErrors;
     }
 
-    public Sql[] generateSql(CreateSequenceStatement statement, Database database) {
+    public Sql[] generateSql(CreateSequenceStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         StringBuffer buffer = new StringBuffer();
         buffer.append("CREATE SEQUENCE ");
         buffer.append(database.escapeSequenceName(statement.getSchemaName(), statement.getSequenceName()));

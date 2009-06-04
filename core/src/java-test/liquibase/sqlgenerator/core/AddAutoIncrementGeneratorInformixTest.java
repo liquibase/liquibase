@@ -6,6 +6,7 @@ import liquibase.database.Database;
 import liquibase.database.InformixDatabase;
 import liquibase.statement.AddAutoIncrementStatement;
 import liquibase.sqlgenerator.core.AddAutoIncrementGeneratorInformix;
+import liquibase.sqlgenerator.MockSqlGeneratorChain;
 
 public class AddAutoIncrementGeneratorInformixTest extends AddAutoIncrementGeneratorTest {
 
@@ -15,8 +16,8 @@ public class AddAutoIncrementGeneratorInformixTest extends AddAutoIncrementGener
 
     @Override
     public void isValid() throws Exception {
-        assertTrue(generatorUnderTest.validate(new AddAutoIncrementStatement(null, null, null, null), new InformixDatabase()).getErrorMessages().contains("columnDataType is required"));
-        assertFalse(generatorUnderTest.validate(new AddAutoIncrementStatement(null, "table_name", "column_name", "int"), new InformixDatabase()).hasErrors());
+        assertTrue(generatorUnderTest.validate(new AddAutoIncrementStatement(null, null, null, null), new InformixDatabase(), new MockSqlGeneratorChain()).getErrorMessages().contains("columnDataType is required"));
+        assertFalse(generatorUnderTest.validate(new AddAutoIncrementStatement(null, "table_name", "column_name", "int"), new InformixDatabase(), new MockSqlGeneratorChain()).hasErrors());
     }
 
     @Override

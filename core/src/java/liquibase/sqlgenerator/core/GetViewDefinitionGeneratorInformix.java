@@ -5,6 +5,7 @@ import liquibase.database.Database;
 import liquibase.database.InformixDatabase;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
+import liquibase.sqlgenerator.SqlGeneratorChain;
 
 public class GetViewDefinitionGeneratorInformix extends GetViewDefinitionGenerator {
     @Override
@@ -18,7 +19,7 @@ public class GetViewDefinitionGeneratorInformix extends GetViewDefinitionGenerat
     }
 
     @Override
-    public Sql[] generateSql(GetViewDefinitionStatement statement, Database database) {
+    public Sql[] generateSql(GetViewDefinitionStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         // TODO owner is schemaName ?
         // view definition is distributed over multiple rows, each 64 chars
 

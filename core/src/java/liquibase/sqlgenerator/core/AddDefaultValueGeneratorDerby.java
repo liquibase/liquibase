@@ -7,6 +7,7 @@ import liquibase.database.structure.Table;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.statement.AddDefaultValueStatement;
+import liquibase.sqlgenerator.SqlGeneratorChain;
 
 public class AddDefaultValueGeneratorDerby extends AddDefaultValueGenerator {
     @Override
@@ -20,7 +21,7 @@ public class AddDefaultValueGeneratorDerby extends AddDefaultValueGenerator {
     }
 
     @Override
-    public Sql[] generateSql(AddDefaultValueStatement statement, Database database) {
+    public Sql[] generateSql(AddDefaultValueStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         return new Sql[]{
                 new UnparsedSql("ALTER TABLE " + database.escapeTableName(statement.getSchemaName(), statement.getTableName()) + " ALTER COLUMN  " + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " WITH DEFAULT " + database.convertJavaObjectToString(statement.getDefaultValue()),
                         new Column()

@@ -8,6 +8,7 @@ import liquibase.sql.UnparsedSql;
 import liquibase.statement.SelectFromDatabaseChangeLogStatement;
 import liquibase.util.StringUtils;
 import liquibase.sqlgenerator.SqlGenerator;
+import liquibase.sqlgenerator.SqlGeneratorChain;
 
 public class SelectFromDatabaseChangeLogGenerator implements SqlGenerator<SelectFromDatabaseChangeLogStatement> {
     public int getPriority() {
@@ -18,14 +19,14 @@ public class SelectFromDatabaseChangeLogGenerator implements SqlGenerator<Select
         return true;
     }
 
-    public ValidationErrors validate(SelectFromDatabaseChangeLogStatement statement, Database database) {
+    public ValidationErrors validate(SelectFromDatabaseChangeLogStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors errors = new ValidationErrors();
         errors.checkRequiredField("columnToSelect", statement.getColumnsToSelect());
 
         return errors;
     }
 
-    public Sql[] generateSql(SelectFromDatabaseChangeLogStatement statement, Database database) {
+    public Sql[] generateSql(SelectFromDatabaseChangeLogStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         String sql = "SELECT " + StringUtils.join(statement.getColumnsToSelect(), ",") + " FROM " +
                 database.escapeTableName(database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName());
 

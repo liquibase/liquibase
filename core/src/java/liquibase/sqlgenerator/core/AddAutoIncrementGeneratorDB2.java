@@ -7,6 +7,7 @@ import liquibase.database.structure.Table;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.statement.AddAutoIncrementStatement;
+import liquibase.sqlgenerator.SqlGeneratorChain;
 
 public class AddAutoIncrementGeneratorDB2 extends AddAutoIncrementGenerator {
 
@@ -21,7 +22,7 @@ public class AddAutoIncrementGeneratorDB2 extends AddAutoIncrementGenerator {
     }
 
     @Override
-    public Sql[] generateSql(AddAutoIncrementStatement statement, Database database) {
+    public Sql[] generateSql(AddAutoIncrementStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         return new Sql[]{
                 new UnparsedSql("ALTER TABLE " + database.escapeTableName(statement.getSchemaName(), statement.getTableName()) + " ALTER COLUMN " + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " SET GENERATED ALWAYS AS IDENTITY",
                         new Column()
