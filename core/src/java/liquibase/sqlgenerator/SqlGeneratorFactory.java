@@ -104,7 +104,7 @@ public class SqlGeneratorFactory {
         return validGenerators;
     }
 
-    protected SqlGenerator getGenerator(SqlStatement statement, Database database) {
+    public SqlGenerator getGenerator(SqlStatement statement, Database database) {
         SortedSet<SqlGenerator> validGenerators = getGenerators(statement, database);
 
         if (validGenerators.size() == 0) {
