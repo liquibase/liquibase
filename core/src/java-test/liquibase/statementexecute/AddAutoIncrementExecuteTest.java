@@ -64,7 +64,7 @@ public class AddAutoIncrementExecuteTest extends AbstractExecuteTest {
     public void autoIncrement() throws Exception {
         this.statementUnderTest = new AddColumnStatement(null, TABLE_NAME, COLUMN_NAME, "int", null, new AutoIncrementConstraint());
 
-        assertCorrect("ALTER TABLE [dbo].[table_name] ADD [column_name] int auto_increment_clause", MSSQLDatabase.class);
+        assertCorrect("ALTER TABLE [table_name] ADD [column_name] int auto_increment_clause", MSSQLDatabase.class);
         assertCorrect("alter table [table_name] add [column_name] int default autoincrement null", SybaseASADatabase.class);
         assertCorrect("alter table [table_name] add [column_name] int identity null", SybaseDatabase.class);
         assertCorrect("alter table [table_name] add [column_name] serial", PostgresDatabase.class);
@@ -77,7 +77,7 @@ public class AddAutoIncrementExecuteTest extends AbstractExecuteTest {
         this.statementUnderTest = new AddColumnStatement(null, TABLE_NAME, COLUMN_NAME, "int", 42, new NotNullConstraint());
 
         assertCorrect("ALTER TABLE [table_name] ADD [column_name] int NOT NULL DEFAULT 42", SybaseASADatabase.class);
-        assertCorrect("alter table [dbo].[table_name] add [column_name] int not null constraint df_table_name_column_name default 42", MSSQLDatabase.class);
+        assertCorrect("alter table [table_name] add [column_name] int not null constraint df_table_name_column_name default 42", MSSQLDatabase.class);
         assertCorrectOnRest("ALTER TABLE [table_name] ADD [column_name] int NOT NULL DEFAULT 42");
     }
 

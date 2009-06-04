@@ -11,7 +11,7 @@ import liquibase.sqlgenerator.SqlGenerator;
 
 public class ClearDatabaseChangeLogTableGenerator implements SqlGenerator<ClearDatabaseChangeLogTableStatement> {
     public int getPriority() {
-        return PRIORITY_DATABASE;
+        return PRIORITY_DEFAULT;
     }
 
     public boolean supports(ClearDatabaseChangeLogTableStatement statement, Database database) {

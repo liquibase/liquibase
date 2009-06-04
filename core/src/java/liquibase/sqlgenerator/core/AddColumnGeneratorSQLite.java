@@ -3,6 +3,7 @@ package liquibase.sqlgenerator.core;
 import liquibase.database.Database;
 import liquibase.database.SQLiteDatabase;
 import liquibase.sql.Sql;
+import liquibase.sql.UnparsedSql;
 import liquibase.statement.AddColumnStatement;
 
 public class AddColumnGeneratorSQLite extends AddColumnGenerator {
@@ -56,6 +57,8 @@ public class AddColumnGeneratorSQLite extends AddColumnGenerator {
 //
 //        return statements.toArray(new SqlStatement[statements.size()]);
 
-        return new Sql[0]; //todo
-        }
+        return new Sql[] {
+        		new UnparsedSql("not supported. FIXME!!")
+        };
+    }
 }
