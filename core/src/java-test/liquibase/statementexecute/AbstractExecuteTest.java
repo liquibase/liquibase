@@ -1,22 +1,23 @@
 package liquibase.statementexecute;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.executor.ExecutorService;
-import liquibase.test.TestContext;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
+import liquibase.test.TestContext;
 
-import java.util.Set;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Arrays;
-import java.sql.Statement;
-import java.sql.SQLException;
-
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertEquals;
 import org.junit.After;
 
 public abstract class AbstractExecuteTest {
@@ -105,7 +106,7 @@ public abstract class AbstractExecuteTest {
         return convertedSql.replaceFirst("auto_increment_clause", database.getAutoIncrementClause());
     }
 
-    private boolean shouldTestDatabase(Database database, Class[] includeDatabases, Class[] excludeDatabases) {
+    private boolean shouldTestDatabase(Database database, Class<? extends Database>[] includeDatabases, Class<? extends Database>[] excludeDatabases) {
         if (!SqlGeneratorFactory.getInstance().supports(statementUnderTest, database)
                 || SqlGeneratorFactory.getInstance().validate(statementUnderTest, database).hasErrors()) {
             return false;
