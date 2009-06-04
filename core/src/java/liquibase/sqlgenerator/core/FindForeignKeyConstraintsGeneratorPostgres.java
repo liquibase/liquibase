@@ -7,6 +7,7 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.statement.FindForeignKeyConstraintsStatement;
 import liquibase.sqlgenerator.SqlGenerator;
+import liquibase.sqlgenerator.SqlGeneratorChain;
 
 public class FindForeignKeyConstraintsGeneratorPostgres implements SqlGenerator<FindForeignKeyConstraintsStatement> {
     public int getPriority() {
@@ -17,13 +18,13 @@ public class FindForeignKeyConstraintsGeneratorPostgres implements SqlGenerator<
         return database instanceof PostgresDatabase;
     }
 
-    public ValidationErrors validate(FindForeignKeyConstraintsStatement findForeignKeyConstraintsStatement, Database database) {
+    public ValidationErrors validate(FindForeignKeyConstraintsStatement findForeignKeyConstraintsStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("baseTableName", findForeignKeyConstraintsStatement.getBaseTableName());
         return validationErrors;
     }
 
-    public Sql[] generateSql(FindForeignKeyConstraintsStatement statement, Database database) {
+    public Sql[] generateSql(FindForeignKeyConstraintsStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
          StringBuilder sb = new StringBuilder();
 
             sb.append("SELECT ");

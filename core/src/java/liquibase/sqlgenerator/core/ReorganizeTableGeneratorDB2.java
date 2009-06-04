@@ -8,6 +8,7 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.statement.ReorganizeTableStatement;
 import liquibase.sqlgenerator.SqlGenerator;
+import liquibase.sqlgenerator.SqlGeneratorChain;
 
 public class ReorganizeTableGeneratorDB2 implements SqlGenerator<ReorganizeTableStatement> {
     public int getPriority() {
@@ -18,13 +19,13 @@ public class ReorganizeTableGeneratorDB2 implements SqlGenerator<ReorganizeTable
         return database instanceof DB2Database;
     }
 
-    public ValidationErrors validate(ReorganizeTableStatement reorganizeTableStatement, Database database) {
+    public ValidationErrors validate(ReorganizeTableStatement reorganizeTableStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", reorganizeTableStatement.getTableName());
         return validationErrors;
     }
 
-    public Sql[] generateSql(ReorganizeTableStatement statement, Database database) {
+    public Sql[] generateSql(ReorganizeTableStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         try {
             if (database.getDatabaseMajorVersion() >= 9) {
                 return new Sql[]{

@@ -2,14 +2,12 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.statement.SelectSequencesStatement;
 import liquibase.database.Database;
-import liquibase.database.OracleDatabase;
 import liquibase.database.FirebirdDatabase;
 import liquibase.exception.ValidationErrors;
-import liquibase.exception.JDBCException;
-import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGenerator;
+import liquibase.sqlgenerator.SqlGeneratorChain;
 
 public class SelectSequencesGeneratorFirebird implements SqlGenerator<SelectSequencesStatement> {
     public int getPriority() {
@@ -20,11 +18,11 @@ public class SelectSequencesGeneratorFirebird implements SqlGenerator<SelectSequ
         return database instanceof FirebirdDatabase;
     }
 
-    public ValidationErrors validate(SelectSequencesStatement statement, Database database) {
+    public ValidationErrors validate(SelectSequencesStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         return new ValidationErrors();
     }
 
-    public Sql[] generateSql(SelectSequencesStatement statement, Database database) {
+    public Sql[] generateSql(SelectSequencesStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         return new Sql[]{
                 new UnparsedSql("SELECT RDB$GENERATOR_NAME FROM RDB$GENERATORS WHERE RDB$SYSTEM_FLAG IS NULL OR RDB$SYSTEM_FLAG = 0")
         };

@@ -2,7 +2,6 @@ package liquibase.sqlgenerator;
 
 import liquibase.database.Database;
 import liquibase.database.structure.DatabaseObject;
-import liquibase.exception.JDBCException;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.statement.SqlStatement;
@@ -75,11 +74,7 @@ public class SqlGeneratorFactory {
     }
 
     protected SortedSet<SqlGenerator> getGenerators(SqlStatement statement, Database database) {
-        SortedSet<SqlGenerator> validGenerators = new TreeSet<SqlGenerator>(new Comparator<SqlGenerator>() {
-            public int compare(SqlGenerator o1, SqlGenerator o2) {
-                return -1 * new Integer(o1.getPriority()).compareTo(o2.getPriority());
-            }
-        });
+        SortedSet<SqlGenerator> validGenerators = new TreeSet<SqlGenerator>(new SqlGeneratorComparator());
 
         for (SqlGenerator generator : getGenerators()) {
             Class clazz = generator.getClass();
@@ -104,41 +99,35 @@ public class SqlGeneratorFactory {
         return validGenerators;
     }
 
-    public SqlGenerator getGenerator(SqlStatement statement, Database database) {
-        SortedSet<SqlGenerator> validGenerators = getGenerators(statement, database);
-
-        if (validGenerators.size() == 0) {
-            return null;
-        } else {
-            return validGenerators.first();
-        }
-    }
-
-    public Sql[] generateSql(SqlStatement statement, Database database) {
-        SqlGenerator sqlGenerator = getGenerator(statement, database);
-        if (sqlGenerator == null) {
+    private SqlGeneratorChain createGeneratorChain(SqlStatement statement, Database database) {
+        SortedSet<SqlGenerator> sqlGenerators = getGenerators(statement, database);
+        if (sqlGenerators == null || sqlGenerators.size() == 0) {
             return null;
         }
         //noinspection unchecked
-        return sqlGenerator.generateSql(statement, database);
+        return new SqlGeneratorChain(sqlGenerators);
+    }
+
+    public Sql[] generateSql(SqlStatement statement, Database database) {
+        return createGeneratorChain(statement, database).generateSql(statement, database);
     }
 
     public boolean supports(SqlStatement statement, Database database) {
-        return getGenerator(statement, database) != null;
+        return getGenerators(statement, database).size() > 0;
     }
 
     public ValidationErrors validate(SqlStatement statement, Database database) {
         //noinspection unchecked
-        return getGenerator(statement, database).validate(statement, database);
+        return createGeneratorChain(statement, database).validate(statement, database);
     }
 
     public Set<DatabaseObject> getAffectedDatabaseObjects(SqlStatement statement, Database database) {
         Set<DatabaseObject> affectedObjects = new HashSet<DatabaseObject>();
 
-        SqlGenerator sqlGenerator = SqlGeneratorFactory.getInstance().getGenerator(statement, database);
-        if (sqlGenerator != null) {
+        SqlGeneratorChain sqlGeneratorChain = createGeneratorChain(statement, database);
+        if (sqlGeneratorChain != null) {
             //noinspection unchecked
-            for (Sql sql : sqlGenerator.generateSql(statement, database)) {
+            for (Sql sql : sqlGeneratorChain.generateSql(statement, database)) {
                 affectedObjects.addAll(sql.getAffectedDatabaseObjects());
             }
         }
@@ -146,4 +135,5 @@ public class SqlGeneratorFactory {
         return affectedObjects;
 
     }
+
 }

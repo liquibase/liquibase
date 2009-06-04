@@ -8,6 +8,7 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.statement.AddDefaultValueStatement;
 import liquibase.sqlgenerator.SqlGenerator;
+import liquibase.sqlgenerator.SqlGeneratorChain;
 
 public class AddDefaultValueGenerator implements SqlGenerator<AddDefaultValueStatement> {
     public int getPriority() {
@@ -18,7 +19,7 @@ public class AddDefaultValueGenerator implements SqlGenerator<AddDefaultValueSta
         return true;
     }
 
-    public ValidationErrors validate(AddDefaultValueStatement addDefaultValueStatement, Database database) {
+    public ValidationErrors validate(AddDefaultValueStatement addDefaultValueStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("defaultValue", addDefaultValueStatement.getDefaultValue());
         validationErrors.checkRequiredField("columnName", addDefaultValueStatement.getColumnName());
@@ -26,7 +27,7 @@ public class AddDefaultValueGenerator implements SqlGenerator<AddDefaultValueSta
         return validationErrors;
     }
 
-    public Sql[] generateSql(AddDefaultValueStatement statement, Database database) {
+    public Sql[] generateSql(AddDefaultValueStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         return new Sql[]{
                 new UnparsedSql("ALTER TABLE " + database.escapeTableName(statement.getSchemaName(), statement.getTableName()) + " ALTER COLUMN  " + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " SET DEFAULT " + database.convertJavaObjectToString(statement.getDefaultValue()),
                         new Column()

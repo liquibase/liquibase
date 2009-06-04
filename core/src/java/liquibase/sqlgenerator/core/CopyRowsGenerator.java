@@ -8,6 +8,7 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.statement.CopyRowsStatement;
 import liquibase.sqlgenerator.SqlGenerator;
+import liquibase.sqlgenerator.SqlGeneratorChain;
 
 public class CopyRowsGenerator implements SqlGenerator<CopyRowsStatement> {
     public int getPriority() {
@@ -18,7 +19,7 @@ public class CopyRowsGenerator implements SqlGenerator<CopyRowsStatement> {
         return (database instanceof SQLiteDatabase);
     }
 
-    public ValidationErrors validate(CopyRowsStatement copyRowsStatement, Database database) {
+    public ValidationErrors validate(CopyRowsStatement copyRowsStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("targetTable", copyRowsStatement.getTargetTable());
         validationErrors.checkRequiredField("sourceTable", copyRowsStatement.getSourceTable());
@@ -26,7 +27,7 @@ public class CopyRowsGenerator implements SqlGenerator<CopyRowsStatement> {
         return validationErrors;
     }
 
-    public Sql[] generateSql(CopyRowsStatement statement, Database database) {
+    public Sql[] generateSql(CopyRowsStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         StringBuffer sql = new StringBuffer();
         if (database instanceof SQLiteDatabase) {
             sql.append("INSERT INTO `").append(statement.getTargetTable()).append("` SELECT ");

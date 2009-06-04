@@ -1,16 +1,15 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
-import liquibase.exception.JDBCException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
-import liquibase.statement.SqlStatement;
 import liquibase.statement.UpdateStatement;
 import liquibase.statement.LockDatabaseChangeLogStatement;
 import liquibase.util.NetUtil;
 import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
+import liquibase.sqlgenerator.SqlGeneratorChain;
 
 import java.net.InetAddress;
 import java.sql.Timestamp;
@@ -24,11 +23,11 @@ public class LockDatabaseChangeLogGenerator implements SqlGenerator<LockDatabase
         return true;
     }
 
-    public ValidationErrors validate(LockDatabaseChangeLogStatement statement, Database database) {
+    public ValidationErrors validate(LockDatabaseChangeLogStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         return new ValidationErrors();
     }
 
-    public Sql[] generateSql(LockDatabaseChangeLogStatement statement, Database database) {
+    public Sql[] generateSql(LockDatabaseChangeLogStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
     	String liquibaseSchema = null;
     		liquibaseSchema = database.getLiquibaseSchemaName();
 

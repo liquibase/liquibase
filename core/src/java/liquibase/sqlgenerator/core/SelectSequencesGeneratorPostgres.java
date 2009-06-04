@@ -2,8 +2,6 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.statement.SelectSequencesStatement;
 import liquibase.database.Database;
-import liquibase.database.OracleDatabase;
-import liquibase.database.DB2Database;
 import liquibase.database.PostgresDatabase;
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.JDBCException;
@@ -11,6 +9,7 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGenerator;
+import liquibase.sqlgenerator.SqlGeneratorChain;
 
 public class SelectSequencesGeneratorPostgres implements SqlGenerator<SelectSequencesStatement> {
     public int getPriority() {
@@ -21,11 +20,11 @@ public class SelectSequencesGeneratorPostgres implements SqlGenerator<SelectSequ
         return database instanceof PostgresDatabase;
     }
 
-    public ValidationErrors validate(SelectSequencesStatement statement, Database database) {
+    public ValidationErrors validate(SelectSequencesStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         return new ValidationErrors();
     }
 
-    public Sql[] generateSql(SelectSequencesStatement statement, Database database) {
+    public Sql[] generateSql(SelectSequencesStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         try {
             String schema = statement.getSchemaName();
             

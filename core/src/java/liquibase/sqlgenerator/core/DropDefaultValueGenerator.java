@@ -8,6 +8,7 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.statement.DropDefaultValueStatement;
 import liquibase.sqlgenerator.SqlGenerator;
+import liquibase.sqlgenerator.SqlGeneratorChain;
 
 public class DropDefaultValueGenerator implements SqlGenerator<DropDefaultValueStatement> {
     public int getPriority() {
@@ -18,7 +19,7 @@ public class DropDefaultValueGenerator implements SqlGenerator<DropDefaultValueS
         return !(database instanceof SQLiteDatabase);
     }
 
-    public ValidationErrors validate(DropDefaultValueStatement dropDefaultValueStatement, Database database) {
+    public ValidationErrors validate(DropDefaultValueStatement dropDefaultValueStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", dropDefaultValueStatement.getTableName());
         validationErrors.checkRequiredField("columnName", dropDefaultValueStatement.getColumnName());
@@ -31,7 +32,7 @@ public class DropDefaultValueGenerator implements SqlGenerator<DropDefaultValueS
         return validationErrors;
     }
 
-    public Sql[] generateSql(DropDefaultValueStatement statement, Database database) {
+    public Sql[] generateSql(DropDefaultValueStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         String sql;
          if (database instanceof MSSQLDatabase) {
              String productVersion = null;

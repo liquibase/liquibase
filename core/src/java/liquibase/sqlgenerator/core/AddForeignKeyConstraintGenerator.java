@@ -8,6 +8,7 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.statement.AddForeignKeyConstraintStatement;
 import liquibase.sqlgenerator.SqlGenerator;
+import liquibase.sqlgenerator.SqlGeneratorChain;
 
 import java.sql.DatabaseMetaData;
 
@@ -20,7 +21,7 @@ public class AddForeignKeyConstraintGenerator implements SqlGenerator<AddForeign
         return (!(database instanceof SQLiteDatabase));
     }
 
-    public ValidationErrors validate(AddForeignKeyConstraintStatement addForeignKeyConstraintStatement, Database database) {
+    public ValidationErrors validate(AddForeignKeyConstraintStatement addForeignKeyConstraintStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
 
         if (!database.supportsInitiallyDeferrableColumns()) {
@@ -36,7 +37,7 @@ public class AddForeignKeyConstraintGenerator implements SqlGenerator<AddForeign
         return validationErrors;
     }
 
-    public Sql[] generateSql(AddForeignKeyConstraintStatement statement, Database database) {
+    public Sql[] generateSql(AddForeignKeyConstraintStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         StringBuilder sb = new StringBuilder();
         sb.append("ALTER TABLE ")
         	.append(database.escapeTableName(statement.getBaseTableSchemaName(), statement.getBaseTableName()))

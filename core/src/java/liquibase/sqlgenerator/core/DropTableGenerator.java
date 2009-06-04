@@ -7,6 +7,7 @@ import liquibase.sql.UnparsedSql;
 import liquibase.statement.DropTableStatement;
 import liquibase.util.log.LogFactory;
 import liquibase.sqlgenerator.SqlGenerator;
+import liquibase.sqlgenerator.SqlGeneratorChain;
 
 public class DropTableGenerator implements SqlGenerator<DropTableStatement> {
     public int getPriority() {
@@ -17,13 +18,13 @@ public class DropTableGenerator implements SqlGenerator<DropTableStatement> {
         return true;
     }
 
-    public ValidationErrors validate(DropTableStatement dropTableStatement, Database database) {
+    public ValidationErrors validate(DropTableStatement dropTableStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", dropTableStatement.getTableName());
         return validationErrors;
     }
 
-    public Sql[] generateSql(DropTableStatement statement, Database database) {
+    public Sql[] generateSql(DropTableStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         StringBuffer buffer = new StringBuffer();
         buffer.append("DROP TABLE ").append(database.escapeTableName(statement.getSchemaName(), statement.getTableName()));
         if (statement.isCascadeConstraints()) {

@@ -10,6 +10,7 @@ import liquibase.statement.UniqueConstraint;
 import liquibase.util.StringUtils;
 import liquibase.util.log.LogFactory;
 import liquibase.sqlgenerator.SqlGenerator;
+import liquibase.sqlgenerator.SqlGeneratorChain;
 
 import java.util.Iterator;
 import java.util.logging.Level;
@@ -23,14 +24,14 @@ public class CreateTableGenerator implements SqlGenerator<CreateTableStatement> 
         return true;
     }
 
-    public ValidationErrors validate(CreateTableStatement createTableStatement, Database database) {
+    public ValidationErrors validate(CreateTableStatement createTableStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", createTableStatement.getTableName());
         validationErrors.checkRequiredField("columns", createTableStatement.getColumns());
         return validationErrors;
     }
 
-    public Sql[] generateSql(CreateTableStatement statement, Database database) {
+    public Sql[] generateSql(CreateTableStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
             StringBuffer buffer = new StringBuffer();
         buffer.append("CREATE TABLE ").append(database.escapeTableName(statement.getSchemaName(), statement.getTableName())).append(" ");
         buffer.append("(");

@@ -6,6 +6,7 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.statement.StoredProcedureStatement;
 import liquibase.sqlgenerator.SqlGenerator;
+import liquibase.sqlgenerator.SqlGeneratorChain;
 
 public class StoredProcedureGenerator implements SqlGenerator<StoredProcedureStatement> {
     public int getPriority() {
@@ -16,13 +17,13 @@ public class StoredProcedureGenerator implements SqlGenerator<StoredProcedureSta
         return true;
     }
 
-    public ValidationErrors validate(StoredProcedureStatement storedProcedureStatement, Database database) {
+    public ValidationErrors validate(StoredProcedureStatement storedProcedureStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("procedureName", storedProcedureStatement.getProcedureName());
         return validationErrors;
     }
 
-    public Sql[] generateSql(StoredProcedureStatement statement, Database database) {
+    public Sql[] generateSql(StoredProcedureStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         StringBuffer string = new StringBuffer();
         string.append("exec (").append(statement.getProcedureName());
         for (String param : statement.getParameters()) {

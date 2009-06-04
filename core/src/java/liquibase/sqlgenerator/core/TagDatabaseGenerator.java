@@ -2,9 +2,6 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
 import liquibase.database.MySQLDatabase;
-import liquibase.exception.JDBCException;
-import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.exception.UnsupportedChangeException;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
@@ -12,6 +9,7 @@ import liquibase.statement.TagDatabaseStatement;
 import liquibase.statement.UpdateStatement;
 import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
+import liquibase.sqlgenerator.SqlGeneratorChain;
 
 public class TagDatabaseGenerator implements SqlGenerator<TagDatabaseStatement> {
     public int getPriority() {
@@ -22,13 +20,13 @@ public class TagDatabaseGenerator implements SqlGenerator<TagDatabaseStatement> 
         return true;
     }
 
-    public ValidationErrors validate(TagDatabaseStatement tagDatabaseStatement, Database database) {
+    public ValidationErrors validate(TagDatabaseStatement tagDatabaseStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tag", tagDatabaseStatement.getTag());
         return validationErrors;
     }
 
-    public Sql[] generateSql(TagDatabaseStatement statement, Database database) {
+    public Sql[] generateSql(TagDatabaseStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
     	String liquibaseSchema = null;
    		liquibaseSchema = database.getLiquibaseSchemaName();
         UpdateStatement updateStatement = new UpdateStatement(liquibaseSchema, database.getDatabaseChangeLogTableName());
@@ -51,7 +49,7 @@ public class TagDatabaseGenerator implements SqlGenerator<TagDatabaseStatement> 
             updateStatement.setWhereClause("DATEEXECUTED = (SELECT MAX(DATEEXECUTED) FROM " + database.escapeTableName(liquibaseSchema, database.getDatabaseChangeLogTableName()) + ")");
         }
 
-        return SqlGeneratorFactory.getInstance().getGenerator(updateStatement, database).generateSql(updateStatement, database);
+        return SqlGeneratorFactory.getInstance().generateSql(updateStatement, database);
 
     }
 }

@@ -8,6 +8,7 @@ import liquibase.sql.UnparsedSql;
 import liquibase.exception.JDBCException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.sqlgenerator.SqlGenerator;
+import liquibase.sqlgenerator.SqlGeneratorChain;
 
 public class GetViewDefinitionGeneratorDB2 extends GetViewDefinitionGenerator {
     @Override
@@ -21,7 +22,7 @@ public class GetViewDefinitionGeneratorDB2 extends GetViewDefinitionGenerator {
     }
 
     @Override
-    public Sql[] generateSql(GetViewDefinitionStatement statement, Database database) {
+    public Sql[] generateSql(GetViewDefinitionStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         try {
             return new Sql[] {
                     new UnparsedSql("select view_definition from SYSIBM.VIEWS where TABLE_NAME='" + statement.getViewName() + "' and TABLE_SCHEMA='" + database.convertRequestedSchemaToSchema(statement.getSchemaName()) + "'")

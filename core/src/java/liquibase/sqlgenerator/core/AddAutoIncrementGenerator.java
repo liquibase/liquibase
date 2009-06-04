@@ -11,6 +11,7 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.statement.AddAutoIncrementStatement;
 import liquibase.sqlgenerator.SqlGenerator;
+import liquibase.sqlgenerator.SqlGeneratorChain;
 
 public class AddAutoIncrementGenerator implements SqlGenerator<AddAutoIncrementStatement> {
 
@@ -25,7 +26,7 @@ public class AddAutoIncrementGenerator implements SqlGenerator<AddAutoIncrementS
                 && !(database instanceof HsqlDatabase));
     }
 
-    public ValidationErrors validate(AddAutoIncrementStatement statement, Database database) {
+    public ValidationErrors validate(AddAutoIncrementStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
 
         validationErrors.checkRequiredField("columnName", statement.getColumnName());
@@ -34,7 +35,7 @@ public class AddAutoIncrementGenerator implements SqlGenerator<AddAutoIncrementS
         return validationErrors;
     }
 
-    public Sql[] generateSql(AddAutoIncrementStatement statement, Database database) {
+    public Sql[] generateSql(AddAutoIncrementStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         String sql = "ALTER TABLE "
                 + database.escapeTableName(statement.getSchemaName(), statement.getTableName())
                 + " MODIFY " + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(), statement.getColumnName())

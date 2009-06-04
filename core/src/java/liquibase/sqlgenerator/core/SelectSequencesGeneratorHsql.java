@@ -8,6 +8,7 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGenerator;
+import liquibase.sqlgenerator.SqlGeneratorChain;
 
 public class SelectSequencesGeneratorHsql implements SqlGenerator<SelectSequencesStatement> {
     public int getPriority() {
@@ -18,11 +19,11 @@ public class SelectSequencesGeneratorHsql implements SqlGenerator<SelectSequence
         return database instanceof HsqlDatabase && !(database instanceof H2Database);
     }
 
-    public ValidationErrors validate(SelectSequencesStatement statement, Database database) {
+    public ValidationErrors validate(SelectSequencesStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         return new ValidationErrors();
     }
 
-    public Sql[] generateSql(SelectSequencesStatement statement, Database database) {
+    public Sql[] generateSql(SelectSequencesStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         try {
             return new Sql[] {
                     new UnparsedSql("SELECT SEQUENCE_NAME FROM INFORMATION_SCHEMA.SYSTEM_SEQUENCES WHERE SEQUENCE_SCHEMA = '" + database.convertRequestedSchemaToSchema(statement.getSchemaName()) + "'")

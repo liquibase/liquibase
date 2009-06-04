@@ -3,12 +3,11 @@ package liquibase.sqlgenerator.core;
 import liquibase.statement.UnlockDatabaseChangeLogStatement;
 import liquibase.statement.UpdateStatement;
 import liquibase.database.Database;
-import liquibase.exception.JDBCException;
-import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
+import liquibase.sqlgenerator.SqlGeneratorChain;
 
 public class UnlockDatabaseChangeLogGenerator implements SqlGenerator<UnlockDatabaseChangeLogStatement> {
     public int getPriority() {
@@ -19,11 +18,11 @@ public class UnlockDatabaseChangeLogGenerator implements SqlGenerator<UnlockData
         return true;
     }
 
-    public ValidationErrors validate(UnlockDatabaseChangeLogStatement statement, Database database) {
+    public ValidationErrors validate(UnlockDatabaseChangeLogStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         return new ValidationErrors();
     }
 
-    public Sql[] generateSql(UnlockDatabaseChangeLogStatement statement, Database database) {
+    public Sql[] generateSql(UnlockDatabaseChangeLogStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
     	String liquibaseSchema = null;
 		liquibaseSchema = database.getLiquibaseSchemaName();
 

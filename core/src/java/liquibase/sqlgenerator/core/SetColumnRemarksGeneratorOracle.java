@@ -7,6 +7,7 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.statement.SetColumnRemarksStatement;
 import liquibase.sqlgenerator.SqlGenerator;
+import liquibase.sqlgenerator.SqlGeneratorChain;
 
 public class SetColumnRemarksGeneratorOracle implements SqlGenerator<SetColumnRemarksStatement> {
     public int getPriority() {
@@ -17,7 +18,7 @@ public class SetColumnRemarksGeneratorOracle implements SqlGenerator<SetColumnRe
         return database instanceof OracleDatabase;
     }
 
-    public ValidationErrors validate(SetColumnRemarksStatement setColumnRemarksStatement, Database database) {
+    public ValidationErrors validate(SetColumnRemarksStatement setColumnRemarksStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", setColumnRemarksStatement.getTableName());
         validationErrors.checkRequiredField("columnName", setColumnRemarksStatement.getColumnName());
@@ -25,7 +26,7 @@ public class SetColumnRemarksGeneratorOracle implements SqlGenerator<SetColumnRe
         return validationErrors;
     }
 
-    public Sql[] generateSql(SetColumnRemarksStatement statement, Database database) {
+    public Sql[] generateSql(SetColumnRemarksStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         return new Sql[] {
                 new UnparsedSql("COMMENT ON COLUMN "+database.escapeTableName(statement.getSchemaName(), statement.getTableName())+"."+database.escapeColumnName(statement.getSchemaName(), statement.getTableName(), statement.getColumnName())+" IS '"+statement.getRemarks()+"'")
         };

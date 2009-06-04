@@ -8,6 +8,7 @@ import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.statement.AddDefaultValueStatement;
+import liquibase.sqlgenerator.SqlGeneratorChain;
 
 public class AddDefaultValueGeneratorInformix extends AddDefaultValueGenerator {
     @Override
@@ -21,8 +22,8 @@ public class AddDefaultValueGeneratorInformix extends AddDefaultValueGenerator {
     }
 
     @Override
-    public ValidationErrors validate(AddDefaultValueStatement addDefaultValueStatement, Database database) {
-        ValidationErrors validationErrors = super.validate(addDefaultValueStatement, database);
+    public ValidationErrors validate(AddDefaultValueStatement addDefaultValueStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+        ValidationErrors validationErrors = super.validate(addDefaultValueStatement, database, sqlGeneratorChain);
         if (addDefaultValueStatement.getColumnDataType() == null) {
             validationErrors.checkRequiredField("columnDataType", addDefaultValueStatement.getColumnDataType());
         }
@@ -30,7 +31,7 @@ public class AddDefaultValueGeneratorInformix extends AddDefaultValueGenerator {
     }
 
     @Override
-    public Sql[] generateSql(AddDefaultValueStatement statement, Database database) {
+    public Sql[] generateSql(AddDefaultValueStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
 
         return new Sql[]{
                 new UnparsedSql("ALTER TABLE " + database.escapeTableName(statement.getSchemaName(), statement.getTableName()) + " MODIFY (" + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " " + database.getColumnType(statement.getColumnDataType(), false) + " DEFAULT " + database.convertJavaObjectToString(statement.getDefaultValue()) + ")",

@@ -6,6 +6,7 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.statement.DropUniqueConstraintStatement;
 import liquibase.sqlgenerator.SqlGenerator;
+import liquibase.sqlgenerator.SqlGeneratorChain;
 
 public class DropUniqueConstraintGenerator implements SqlGenerator<DropUniqueConstraintStatement> {
     public int getPriority() {
@@ -16,13 +17,13 @@ public class DropUniqueConstraintGenerator implements SqlGenerator<DropUniqueCon
         return !(database instanceof SQLiteDatabase);
     }
 
-    public ValidationErrors validate(DropUniqueConstraintStatement dropUniqueConstraintStatement, Database database) {
+    public ValidationErrors validate(DropUniqueConstraintStatement dropUniqueConstraintStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", dropUniqueConstraintStatement.getTableName());
         return validationErrors;
     }
 
-    public Sql[] generateSql(DropUniqueConstraintStatement statement, Database database) {
+    public Sql[] generateSql(DropUniqueConstraintStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         String sql;
         if (database instanceof MySQLDatabase) {
             sql = "ALTER TABLE " + database.escapeTableName(statement.getSchemaName(), statement.getTableName()) + " DROP KEY " + database.escapeConstraintName(statement.getConstraintName());
