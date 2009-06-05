@@ -24,7 +24,7 @@ public class SingleLineComment implements Sql {
 	}
 
 	public String toSql() {
-		return sql;
+		return lineCommentToken + ' ' + sql;
 	}
 
 }
