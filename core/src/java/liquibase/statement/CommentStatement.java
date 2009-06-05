@@ -15,7 +15,7 @@ public class CommentStatement implements SqlStatement {
 
 	@Override
 	public String toString() {
-		if (text != null && text.length() < MAX_LENGTH) {
+		if (text != null && text.length() >= MAX_LENGTH) {
 			return text.substring(0, MAX_LENGTH - 3) + "..."; 
 		}
 		return getText();
