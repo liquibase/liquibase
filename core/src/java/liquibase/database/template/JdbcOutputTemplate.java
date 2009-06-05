@@ -84,9 +84,6 @@ public class JdbcOutputTemplate extends JdbcTemplate {
             String statement = applyVisitors(sql, sqlVisitors);
             output.write(statement);
 
-            if (!statement.endsWith(";")) {
-              output.write(";");
-            }
 
             if (database instanceof MSSQLDatabase) {
                 output.write(StreamUtil.getLineSeparator());
@@ -94,6 +91,10 @@ public class JdbcOutputTemplate extends JdbcTemplate {
 //            } else if (database instanceof OracleDatabase) {
 //                output.write(StreamUtil.getLineSeparator());
 //                output.write("/");
+            } else {
+                if (!statement.endsWith(";")) {
+                    output.write(";");
+                }
             }
             output.write(StreamUtil.getLineSeparator());
             output.write(StreamUtil.getLineSeparator());
