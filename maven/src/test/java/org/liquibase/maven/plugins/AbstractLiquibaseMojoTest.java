@@ -2,15 +2,19 @@
 // Copyright: Copyright(c) 2008 Trace Financial Limited
 package org.liquibase.maven.plugins;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.Map;
 import java.util.Properties;
-import org.apache.maven.plugin.testing.AbstractMojoTestCase;
+
+import liquibase.resource.FileOpener;
+import liquibase.resource.FileSystemFileOpener;
+
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugin.testing.AbstractMojoTestCase;
 import org.codehaus.plexus.configuration.PlexusConfiguration;
-import liquibase.FileOpener;
-import liquibase.FileSystemFileOpener;
 
 /**
  * A base class for writing tests that validate the properties passed in to the plugins.

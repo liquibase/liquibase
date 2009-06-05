@@ -1,20 +1,28 @@
 package org.liquibase.maven.plugins;
 
-import java.io.*;
-import liquibase.resource.FileOpener;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Writer;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+
 import liquibase.Liquibase;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
+import liquibase.resource.FileOpener;
+
 import org.apache.maven.plugin.MojoExecutionException;
 
 /**
- * Liquibase UpdateSQL Maven plugin. This plugin generates the SQL that is required to
- * update the database to the current version as specified in the DatabaseChangeLogs.
- * @author Peter Murray
- * @description Liquibase UpdateSQL Maven plugin
- * @goal updateSQL
+ * Liquibase RollbackSQL Maven plugin. This plugin generates the SQL that is required to
+ * rollback the database to the specified pointing attributes 'rollbackCount', 'rollbackTag'
+ * @author Oleg Taranenko
+ * @description Liquibase RollbackSQL Maven plugin
+ * @goal rollbackSQL
  */
-public class LiquibaseUpdateSQL extends AbstractLiquibaseUpdateMojo {
+public class LiquibaseRollbackSQL extends LiquibaseRollback {
 
   /**
    * The file to output the Migration SQL script to, if it exists it will be overwritten.
@@ -33,14 +41,6 @@ public class LiquibaseUpdateSQL extends AbstractLiquibaseUpdateMojo {
     return false;
   }
 
-  @Override
-  protected void doUpdate(Liquibase liquibase) throws LiquibaseException {
-    if (changesToApply > 0) {
-      liquibase.update(changesToApply, contexts, outputWriter);
-    } else {
-      liquibase.update(contexts, outputWriter);
-    }
-  }
 
   @Override
   protected Liquibase createLiquibase(FileOpener fo, Database db)
@@ -85,5 +85,37 @@ public class LiquibaseUpdateSQL extends AbstractLiquibaseUpdateMojo {
         getLog().error(e);
       }
     }
+  }
+
+
+  @Override
+  protected void performLiquibaseTask(Liquibase liquibase) throws LiquibaseException {
+	    switch (type) {
+	      case COUNT: {
+	        liquibase.rollback(rollbackCount, contexts, outputWriter);
+	        break;
+	      }
+	      case DATE: {
+	        DateFormat format = DateFormat.getDateInstance();
+	        try {
+	          liquibase.rollback(format.parse(rollbackDate), contexts, outputWriter);
+	        }
+	        catch (ParseException e) {
+	          String message = "Error parsing rollbackDate: " + e.getMessage();
+	          if (format instanceof SimpleDateFormat) {
+	            message += "\nDate must match pattern: " + ((SimpleDateFormat)format).toPattern();
+	          }
+	          throw new LiquibaseException(message, e);
+	        }
+	        break;
+	      }
+	      case TAG: {
+	        liquibase.rollback(rollbackTag, contexts, outputWriter);
+	        break;
+	      }
+	      default: {
+	        throw new IllegalStateException("Unexpected rollback type, " + type);
+	      }
+	    }
   }
 }
