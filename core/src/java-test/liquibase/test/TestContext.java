@@ -64,6 +64,8 @@ public class TestContext {
             if (!shouldTest) {
                 System.out.println("test.databases system property forbids testing against " + url);
                 return null;
+            } else {
+                System.out.println("Will be tested against " + url);
             }
         }
 
