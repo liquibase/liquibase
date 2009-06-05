@@ -14,7 +14,7 @@ import org.apache.maven.plugin.MojoFailureException;
  */
 public class LiquibaseRollback extends AbstractLiquibaseChangeLogMojo {
 
-  private enum RollbackType {
+  protected enum RollbackType {
 
     TAG, DATE, COUNT
   }
@@ -23,13 +23,13 @@ public class LiquibaseRollback extends AbstractLiquibaseChangeLogMojo {
    * The tag to roll the database back to. 
    * @parameter expression="${liquibase.rollbackTag}"
    */
-  private String rollbackTag;
+  protected String rollbackTag;
 
   /**
    * The number of change sets to rollback.
    * @parameter expression="${liquibase.rollbackCount}" default-value="-1"
    */
-  private int rollbackCount;
+  protected int rollbackCount;
 
   /**
    * The date to rollback the database to. The format of the date must match that of the
@@ -37,10 +37,10 @@ public class LiquibaseRollback extends AbstractLiquibaseChangeLogMojo {
    * on.
    * @parameter expression="${liquibase.rollbackDate}"
    */
-  private String rollbackDate;
+  protected String rollbackDate;
 
   /** The type of the rollback that is being performed. */
-  private RollbackType type;
+  protected RollbackType type;
 
   @Override
   protected void checkRequiredParametersAreSpecified() throws MojoFailureException {
@@ -52,8 +52,8 @@ public class LiquibaseRollback extends AbstractLiquibaseChangeLogMojo {
                                      + "or rollbackDate");
     }
 
-    if (rollbackCount == 0) {
-      throw new MojoFailureException("A rollback count of 0 is meaningless, please "
+    if (rollbackCount <= 0) {
+      throw new MojoFailureException("A rollback count of " + rollbackCount + " is meaningless, please "
                                      + "select a value greater than 0");
     }
 
