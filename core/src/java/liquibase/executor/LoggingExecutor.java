@@ -80,9 +80,6 @@ public class LoggingExecutor extends AbstractExecutor implements WriteExecutor {
             for (String statement : applyVisitors(sql, sqlVisitors)) {
                 output.write(statement);
 
-                if (!statement.endsWith(";")) {
-                  output.write(";");
-                }
 
                 if (database instanceof MSSQLDatabase) {
                     output.write(StreamUtil.getLineSeparator());
@@ -90,6 +87,10 @@ public class LoggingExecutor extends AbstractExecutor implements WriteExecutor {
     //            } else if (database instanceof OracleDatabase) {
     //                output.write(StreamUtil.getLineSeparator());
     //                output.write("/");
+                } else {
+                    if (!statement.endsWith(";")) {
+                        output.write(";");
+                    }
                 }
                 output.write(StreamUtil.getLineSeparator());
                 output.write(StreamUtil.getLineSeparator());
