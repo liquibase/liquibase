@@ -1,18 +1,27 @@
 package liquibase.util;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+
+import java.io.ByteArrayInputStream;
 
 import org.junit.Test;
 
-import hidden.org.codehaus.plexus.util.StringInputStream;
-
-
 public class MD5UtilTest {
+
+	private static final String TEST_STRING = "foo";
+	private static final String TEST_STRING_MD5_HASH = "acbd18db4cc2f85cedef654fccc4a4d8";
+
+	@Test
+	public void testComputeMD5() throws Exception {
+		String hash = MD5Util.computeMD5(TEST_STRING);
+		assertEquals(TEST_STRING_MD5_HASH, hash);
+	}
+
 	@Test
 	public void testComputeMD5InputStream() {
-		String s = "abc";
-		StringInputStream is = new StringInputStream(s);
-		String hexString = MD5Util.computeMD5(is);
-		assertEquals("90150983cd24fb0d6963f7d28e17f72",hexString);
+		ByteArrayInputStream bais = new ByteArrayInputStream(TEST_STRING.getBytes());
+		String hexString = MD5Util.computeMD5(bais);
+		assertEquals(TEST_STRING_MD5_HASH, hexString);
 	}
+
 }
