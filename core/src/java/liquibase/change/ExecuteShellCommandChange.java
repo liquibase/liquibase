@@ -1,21 +1,25 @@
 package liquibase.change;
 
-import liquibase.database.Database;
-import liquibase.database.sql.SqlStatement;
-import liquibase.database.structure.DatabaseObject;
-import liquibase.exception.UnsupportedChangeException;
-import liquibase.exception.InvalidChangeDefinitionException;
-import liquibase.log.LogFactory;
-import liquibase.util.StreamUtil;
-import liquibase.util.StringUtils;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-
-import java.io.IOException;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+
+import liquibase.database.Database;
+import liquibase.database.sql.CommentStatement;
+import liquibase.database.sql.SqlStatement;
+import liquibase.database.structure.DatabaseObject;
+import liquibase.database.template.JdbcOutputTemplate;
+import liquibase.database.template.JdbcTemplate;
+import liquibase.exception.InvalidChangeDefinitionException;
+import liquibase.exception.UnsupportedChangeException;
+import liquibase.log.LogFactory;
+import liquibase.util.StreamUtil;
+import liquibase.util.StringUtils;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 /**
  * Executes a given shell executable.
@@ -65,7 +69,16 @@ public class ExecuteShellCommandChange extends AbstractChange {
             }
         }
 
-        if (shouldRun) {
+    	// check if running under not-executed mode (logging output)
+        boolean nonExecutedMode = false;
+        JdbcTemplate jdbcTemplate = database.getJdbcTemplate();
+        if (jdbcTemplate instanceof JdbcOutputTemplate) {
+        	nonExecutedMode = true;
+        }
+        
+        if (shouldRun && !nonExecutedMode) {
+        	
+        	
             List<String> commandArray = new ArrayList<String>();
             commandArray.add(executable);
             commandArray.addAll(args);
@@ -96,6 +109,11 @@ public class ExecuteShellCommandChange extends AbstractChange {
                 throw new UnsupportedChangeException("Error executing command: " + e);
             }
 
+        }
+        if (nonExecutedMode) {
+        	return new SqlStatement[] {
+        			new CommentStatement(getCommandString())
+        	};
         }
         return new SqlStatement[0];
     }
