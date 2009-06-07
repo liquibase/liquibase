@@ -4,13 +4,28 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.net.MalformedURLException;
-import java.util.*;
-import liquibase.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Properties;
+import java.util.Map.Entry;
+
+import liquibase.CompositeFileOpener;
+import liquibase.FileOpener;
+import liquibase.FileSystemFileOpener;
+import liquibase.Liquibase;
+import liquibase.UIFactory;
 import liquibase.commandline.CommandLineUtils;
 import liquibase.database.Database;
-import liquibase.exception.*;
+import liquibase.exception.JDBCException;
+import liquibase.exception.LiquibaseException;
+import liquibase.exception.LockException;
 import liquibase.log.LogFactory;
-import org.apache.maven.plugin.*;
+
+import org.apache.maven.plugin.AbstractMojo;
+import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
 
 /**
@@ -134,6 +149,12 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
   /** The {@link Liquibase} object used modify the database. */ 
   private Liquibase liquibase;
 
+  /**
+   * Array to put a expression variable to maven plugin.
+   * @parameter 
+   */
+  private Properties expressionVars;
+  
   public void execute() throws MojoExecutionException, MojoFailureException {
     getLog().info(MavenUtils.LOG_SEPARATOR);
 
@@ -171,7 +192,17 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                                                        driver,
                                                        defaultSchemaName,
                                                        null);
+
+
       liquibase = createLiquibase(getFileOpener(artifactClassLoader), database);
+
+      getLog().debug("expressionVars = " + expressionVars.toString());
+      if (expressionVars != null) {
+      	for (Entry<Object, Object> var: expressionVars.entrySet()) {
+      		this.liquibase.setChangeLogParameterValue(var.getKey().toString(), var.getValue());
+      	}
+      }
+      
       if (clearCheckSums) {
         getLog().info("Clearing the Liquibase Checksums on the database");
         liquibase.clearCheckSums();
