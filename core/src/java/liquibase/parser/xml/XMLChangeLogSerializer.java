@@ -54,7 +54,8 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
 
             for (Field field : allFields) {
                 field.setAccessible(true);
-                if (field.getAnnotation(ChangeMetaDataField.class) != null) {
+                ChangeProperty changePropertyAnnotation = field.getAnnotation(ChangeProperty.class);
+                if (changePropertyAnnotation != null && !changePropertyAnnotation.includeInSerialization()) {
                     continue;
                 }
                 

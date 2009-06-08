@@ -2,7 +2,7 @@ package liquibase.change.custom;
 
 import liquibase.change.AbstractChange;
 import liquibase.change.ChangeMetaData;
-import liquibase.change.ChangeMetaDataField;
+import liquibase.change.ChangeProperty;
 import liquibase.database.Database;
 import liquibase.exception.*;
 import liquibase.statement.SqlStatement;
@@ -22,17 +22,17 @@ import java.util.TreeSet;
  */
 public class CustomChangeWrapper extends AbstractChange {
 
-    @ChangeMetaDataField
+    @ChangeProperty(includeInSerialization = false)
     private CustomChange customChange;
     
     private String className;
 
-    @ChangeMetaDataField
+    @ChangeProperty(includeInSerialization = false)
     private SortedSet<String> params = new TreeSet<String>();
 
     private Map<String, String> paramValues = new HashMap<String, String>();
 
-    @ChangeMetaDataField
+    @ChangeProperty(includeInSerialization = false)
     private ClassLoader classLoader;
 
     public CustomChangeWrapper() {
