@@ -1,7 +1,7 @@
 package liquibase.changelog.visitor;
 
 import liquibase.change.ColumnConfig;
-import liquibase.change.CreateTableChange;
+import liquibase.change.core.CreateTableChange;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.RanChangeSet;
 import liquibase.exception.SetupException;

@@ -2,7 +2,7 @@ package org.liquibase.eclipse.common.change.wizard;
 
 import java.sql.Connection;
 
-import liquibase.change.AddAutoIncrementChange;
+import liquibase.change.core.AddAutoIncrementChange;
 import liquibase.change.Change;
 
 import org.eclipse.datatools.connectivity.sqm.core.rte.ICatalogObject;

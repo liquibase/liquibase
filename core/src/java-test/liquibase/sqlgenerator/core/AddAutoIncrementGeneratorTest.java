@@ -4,7 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.Set;
 
-import liquibase.change.AddAutoIncrementChange;
+import liquibase.change.core.AddAutoIncrementChange;
 import liquibase.database.Database;
 import liquibase.database.DerbyDatabase;
 import liquibase.database.HsqlDatabase;

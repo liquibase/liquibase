@@ -1,6 +1,6 @@
 package org.liquibase.ide.common.change.action;
 
-import liquibase.change.AddDefaultValueChange;
+import liquibase.change.core.AddDefaultValueChange;
 import liquibase.change.Change;
 import liquibase.database.structure.Column;
 import org.liquibase.ide.common.change.wizard.RefactorWizard;

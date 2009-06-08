@@ -1,6 +1,7 @@
 package liquibase.diff;
 
 import liquibase.change.*;
+import liquibase.change.core.*;
 import liquibase.database.Database;
 import liquibase.database.structure.*;
 import liquibase.exception.JDBCException;

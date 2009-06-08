@@ -1,7 +1,7 @@
 package org.liquibase.ide.common.change.action;
 
 import liquibase.change.Change;
-import liquibase.change.DropForeignKeyConstraintChange;
+import liquibase.change.core.DropForeignKeyConstraintChange;
 import liquibase.database.structure.ForeignKey;
 import org.liquibase.ide.common.change.wizard.RefactorWizard;
 import org.liquibase.ide.common.change.wizard.page.RefactorWizardPage;

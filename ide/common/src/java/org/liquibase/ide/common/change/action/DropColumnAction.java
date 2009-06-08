@@ -1,7 +1,7 @@
 package org.liquibase.ide.common.change.action;
 
 import liquibase.change.Change;
-import liquibase.change.DropColumnChange;
+import liquibase.change.core.DropColumnChange;
 import liquibase.database.structure.Column;
 import org.liquibase.ide.common.change.wizard.RefactorWizard;
 import org.liquibase.ide.common.change.wizard.page.RefactorWizardPage;

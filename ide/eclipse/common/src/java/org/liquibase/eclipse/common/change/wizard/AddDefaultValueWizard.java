@@ -2,7 +2,7 @@ package org.liquibase.eclipse.common.change.wizard;
 
 import java.sql.Connection;
 
-import liquibase.change.AddDefaultValueChange;
+import liquibase.change.core.AddDefaultValueChange;
 import liquibase.change.Change;
 
 import org.eclipse.datatools.connectivity.sqm.core.rte.ICatalogObject;

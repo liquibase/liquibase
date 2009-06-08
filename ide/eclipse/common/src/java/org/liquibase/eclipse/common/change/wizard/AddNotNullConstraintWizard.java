@@ -2,7 +2,7 @@ package org.liquibase.eclipse.common.change.wizard;
 
 import java.sql.Connection;
 
-import liquibase.change.AddNotNullConstraintChange;
+import liquibase.change.core.AddNotNullConstraintChange;
 import liquibase.change.Change;
 
 import org.eclipse.datatools.connectivity.sqm.core.rte.ICatalogObject;

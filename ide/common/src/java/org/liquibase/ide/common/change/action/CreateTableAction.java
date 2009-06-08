@@ -2,7 +2,7 @@ package org.liquibase.ide.common.change.action;
 
 import liquibase.change.Change;
 import liquibase.change.ColumnConfig;
-import liquibase.change.CreateTableChange;
+import liquibase.change.core.CreateTableChange;
 import liquibase.database.structure.DatabaseObject;
 import org.liquibase.ide.common.change.wizard.RefactorWizard;
 import org.liquibase.ide.common.change.wizard.page.AddTableWizardPage;

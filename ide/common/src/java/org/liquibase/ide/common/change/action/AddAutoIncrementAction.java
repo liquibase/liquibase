@@ -1,9 +1,8 @@
 package org.liquibase.ide.common.change.action;
 
-import liquibase.change.AddAutoIncrementChange;
+import liquibase.change.core.AddAutoIncrementChange;
 import liquibase.change.Change;
 import liquibase.database.structure.Column;
-import liquibase.database.Database;
 import org.liquibase.ide.common.change.wizard.RefactorWizard;
 import org.liquibase.ide.common.change.wizard.page.RefactorWizardPage;
 

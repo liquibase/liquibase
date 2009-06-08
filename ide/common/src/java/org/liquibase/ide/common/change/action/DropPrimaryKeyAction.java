@@ -1,7 +1,7 @@
 package org.liquibase.ide.common.change.action;
 
 import liquibase.change.Change;
-import liquibase.change.DropPrimaryKeyChange;
+import liquibase.change.core.DropPrimaryKeyChange;
 import liquibase.database.structure.PrimaryKey;
 import org.liquibase.ide.common.change.wizard.RefactorWizard;
 import org.liquibase.ide.common.change.wizard.page.RefactorWizardPage;

@@ -5,7 +5,7 @@ import java.sql.Connection;
 import liquibase.change.Change;
 import liquibase.change.ColumnConfig;
 import liquibase.change.ConstraintsConfig;
-import liquibase.change.CreateTableChange;
+import liquibase.change.core.CreateTableChange;
 
 import org.eclipse.datatools.connectivity.sqm.core.rte.ICatalogObject;
 import org.eclipse.datatools.modelbase.sql.datatypes.BinaryStringDataType;

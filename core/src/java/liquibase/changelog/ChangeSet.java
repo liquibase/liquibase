@@ -1,6 +1,8 @@
 package liquibase.changelog;
 
 import liquibase.change.*;
+import liquibase.change.core.RawSQLChange;
+import liquibase.change.core.EmptyChange;
 import liquibase.database.Database;
 import liquibase.exception.*;
 import liquibase.precondition.ErrorPrecondition;
@@ -13,7 +15,6 @@ import liquibase.util.StringUtils;
 import liquibase.util.log.LogFactory;
 import liquibase.executor.ExecutorService;
 import liquibase.executor.WriteExecutor;
-import liquibase.parser.string.StringChangeLogSerializer;
 
 import java.util.*;
 import java.util.logging.Level;
