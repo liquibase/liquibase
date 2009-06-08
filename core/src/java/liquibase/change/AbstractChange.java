@@ -22,13 +22,13 @@ import java.util.*;
  */
 public abstract class AbstractChange implements Change {
 
-    @ChangeMetaDataField
+    @ChangeProperty(includeInSerialization = false)
     private ChangeMetaData changeMetaData;
 
-    @ChangeMetaDataField
+    @ChangeProperty(includeInSerialization = false)
     private FileOpener fileOpener;
 
-    @ChangeMetaDataField
+    @ChangeProperty(includeInSerialization = false)
     private ChangeSet changeSet;
 
     /**

@@ -1,10 +1,9 @@
 package liquibase.parser.string;
 
 import liquibase.change.Change;
-import liquibase.change.ChangeMetaDataField;
+import liquibase.change.ChangeProperty;
 import liquibase.change.ColumnConfig;
 import liquibase.change.ConstraintsConfig;
-import liquibase.change.custom.CustomSqlChange;
 import liquibase.change.custom.CustomChange;
 import liquibase.changelog.ChangeSet;
 import liquibase.exception.UnexpectedLiquibaseException;
@@ -33,7 +32,8 @@ public class StringChangeLogSerializer implements ChangeLogSerializer {
             SortedSet<String> values = new TreeSet<String>();
             for (Field field : objectToSerialize.getClass().getDeclaredFields()) {
                 field.setAccessible(true);
-                if (field.getAnnotation(ChangeMetaDataField.class) != null) {
+                ChangeProperty changePropertyAnnotation = field.getAnnotation(ChangeProperty.class);
+                if (changePropertyAnnotation != null && !changePropertyAnnotation.includeInSerialization()) {
                     continue;
                 }
 

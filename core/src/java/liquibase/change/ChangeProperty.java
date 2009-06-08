@@ -7,6 +7,6 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
-public @interface ChangeMetaDataField {
-    
+public @interface ChangeProperty {
+    public boolean includeInSerialization() default true;
 }

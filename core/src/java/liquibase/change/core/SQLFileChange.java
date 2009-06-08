@@ -5,7 +5,7 @@ import liquibase.resource.FileOpener;
 import liquibase.util.StreamUtil;
 import liquibase.util.log.LogFactory;
 import liquibase.change.AbstractSQLChange;
-import liquibase.change.ChangeMetaDataField;
+import liquibase.change.ChangeProperty;
 import liquibase.change.ChangeMetaData;
 import liquibase.change.CheckSum;
 
@@ -28,7 +28,7 @@ import java.util.logging.Logger;
  */
 public class SQLFileChange extends AbstractSQLChange {
 
-    @ChangeMetaDataField
+    @ChangeProperty(includeInSerialization = false)
     private static final Logger log = LogFactory.getLogger();
 
     private String path;
