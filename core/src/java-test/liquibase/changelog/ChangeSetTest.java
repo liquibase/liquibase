@@ -1,8 +1,8 @@
 package liquibase.changelog;
 
-import liquibase.change.AddDefaultValueChange;
-import liquibase.change.CreateTableChange;
-import liquibase.change.InsertDataChange;
+import liquibase.change.core.AddDefaultValueChange;
+import liquibase.change.core.CreateTableChange;
+import liquibase.change.core.InsertDataChange;
 import liquibase.change.CheckSum;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;

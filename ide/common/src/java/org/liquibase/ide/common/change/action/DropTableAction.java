@@ -1,12 +1,9 @@
 package org.liquibase.ide.common.change.action;
 
-import liquibase.change.AddColumnChange;
+import liquibase.change.core.DropTableChange;
 import liquibase.change.Change;
-import liquibase.change.ColumnConfig;
-import liquibase.change.DropTableChange;
 import liquibase.database.structure.Table;
 import org.liquibase.ide.common.change.wizard.RefactorWizard;
-import org.liquibase.ide.common.change.wizard.page.AddColumnWizardPage;
 import org.liquibase.ide.common.change.wizard.page.RefactorWizardPage;
 
 public class DropTableAction  extends BaseTableRefactorAction {

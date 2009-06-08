@@ -1,6 +1,7 @@
 package liquibase.parser.xml;
 
 import liquibase.change.*;
+import liquibase.change.core.*;
 import liquibase.change.custom.CustomChangeWrapper;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;

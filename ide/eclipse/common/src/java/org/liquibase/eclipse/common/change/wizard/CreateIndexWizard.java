@@ -5,7 +5,7 @@ import java.util.Arrays;
 
 import liquibase.change.Change;
 import liquibase.change.ColumnConfig;
-import liquibase.change.CreateIndexChange;
+import liquibase.change.core.CreateIndexChange;
 
 import org.eclipse.datatools.connectivity.sqm.core.rte.ICatalogObject;
 import org.eclipse.datatools.modelbase.sql.schema.Database;

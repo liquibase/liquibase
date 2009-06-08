@@ -1,6 +1,6 @@
 package org.liquibase.ide.common.change.action;
 
-import liquibase.change.AddColumnChange;
+import liquibase.change.core.AddColumnChange;
 import liquibase.change.Change;
 import liquibase.change.ColumnConfig;
 import liquibase.database.structure.Table;

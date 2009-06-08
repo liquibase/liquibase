@@ -1,10 +1,13 @@
 package liquibase.parser.string;
 
 import liquibase.change.*;
+import liquibase.change.core.AddColumnChange;
+import liquibase.change.core.DropAllForeignKeyConstraintsChange;
+import liquibase.change.core.SQLFileChange;
+import liquibase.change.core.LoadDataColumnConfig;
 import liquibase.change.custom.CustomSqlChange;
 import liquibase.change.custom.ExampleCustomSqlChange;
 import liquibase.change.custom.CustomChangeWrapper;
-import liquibase.changelog.ChangeSet;
 import liquibase.resource.FileOpener;
 import liquibase.test.JUnitFileOpener;
 import static org.junit.Assert.*;

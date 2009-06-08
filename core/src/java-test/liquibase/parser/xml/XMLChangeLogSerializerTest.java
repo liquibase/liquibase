@@ -1,6 +1,7 @@
 package liquibase.parser.xml;
 
 import liquibase.change.*;
+import liquibase.change.core.*;
 import liquibase.resource.ClassLoaderFileOpener;
 import static org.junit.Assert.*;
 import org.junit.Test;
@@ -753,7 +754,7 @@ public class XMLChangeLogSerializerTest {
     @Test
     public void createNode_SQLFileChange() throws Exception {
 
-        String fileName = "liquibase/change/SQLFileTestData.sql";
+        String fileName = "liquibase/change/core/SQLFileTestData.sql";
         SQLFileChange change = new SQLFileChange();
         ClassLoaderFileOpener opener = new ClassLoaderFileOpener();
         change.setFileOpener(opener);

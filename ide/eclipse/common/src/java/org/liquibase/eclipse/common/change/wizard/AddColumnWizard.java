@@ -2,7 +2,7 @@ package org.liquibase.eclipse.common.change.wizard;
 
 import java.sql.Connection;
 
-import liquibase.change.AddColumnChange;
+import liquibase.change.core.AddColumnChange;
 import liquibase.change.Change;
 import liquibase.change.ColumnConfig;
 

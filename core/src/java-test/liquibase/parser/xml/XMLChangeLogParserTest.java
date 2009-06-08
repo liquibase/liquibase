@@ -1,9 +1,9 @@
 package liquibase.parser.xml;
 
-import liquibase.change.AddColumnChange;
 import liquibase.change.Change;
-import liquibase.change.CreateTableChange;
-import liquibase.change.RawSQLChange;
+import liquibase.change.core.RawSQLChange;
+import liquibase.change.core.AddColumnChange;
+import liquibase.change.core.CreateTableChange;
 import liquibase.change.custom.CustomChangeWrapper;
 import liquibase.change.custom.ExampleCustomSqlChange;
 import liquibase.changelog.ChangeSet;

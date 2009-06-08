@@ -1,7 +1,7 @@
 package liquibase.database;
 
 import liquibase.change.ColumnConfig;
-import liquibase.change.CreateTableChange;
+import liquibase.change.core.CreateTableChange;
 import liquibase.database.structure.*;
 import liquibase.diff.DiffStatusListener;
 import liquibase.exception.JDBCException;

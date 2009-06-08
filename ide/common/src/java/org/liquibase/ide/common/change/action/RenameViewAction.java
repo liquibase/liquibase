@@ -1,7 +1,7 @@
 package org.liquibase.ide.common.change.action;
 
 import liquibase.change.Change;
-import liquibase.change.RenameViewChange;
+import liquibase.change.core.RenameViewChange;
 import liquibase.database.structure.View;
 import org.liquibase.ide.common.change.wizard.RefactorWizard;
 import org.liquibase.ide.common.change.wizard.page.RefactorWizardPage;

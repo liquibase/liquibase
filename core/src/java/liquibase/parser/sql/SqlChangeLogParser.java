@@ -1,6 +1,6 @@
 package liquibase.parser.sql;
 
-import liquibase.change.RawSQLChange;
+import liquibase.change.core.RawSQLChange;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.exception.ChangeLogParseException;

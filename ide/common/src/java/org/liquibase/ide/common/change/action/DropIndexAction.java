@@ -1,7 +1,7 @@
 package org.liquibase.ide.common.change.action;
 
 import liquibase.change.Change;
-import liquibase.change.DropIndexChange;
+import liquibase.change.core.DropIndexChange;
 import liquibase.database.structure.Index;
 import org.liquibase.ide.common.change.wizard.RefactorWizard;
 import org.liquibase.ide.common.change.wizard.page.RefactorWizardPage;
