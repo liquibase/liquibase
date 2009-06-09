@@ -1,6 +1,10 @@
 package liquibase.change.core;
 
 import liquibase.database.*;
+import liquibase.database.core.DB2Database;
+import liquibase.database.core.MSSQLDatabase;
+import liquibase.database.core.OracleDatabase;
+import liquibase.database.core.SybaseASADatabase;
 import liquibase.statement.RawSqlStatement;
 import liquibase.statement.ReorganizeTableStatement;
 import liquibase.statement.SqlStatement;
@@ -129,7 +133,7 @@ public class AddLookupTableChange extends AbstractChange {
         String existingTableSchemaName = getExistingTableSchemaName() == null?database.getDefaultSchemaName():getExistingTableSchemaName();
 
         SqlStatement[] createTablesSQL = {new RawSqlStatement("CREATE TABLE " + database.escapeTableName(newTableSchemaName, getNewTableName()) + " AS SELECT DISTINCT " + getExistingColumnName() + " AS " + getNewColumnName() + " FROM " + database.escapeTableName(existingTableSchemaName, getExistingTableName()) + " WHERE " + getExistingColumnName() + " IS NOT NULL")};
-        if (database instanceof MSSQLDatabase ) {
+        if (database instanceof MSSQLDatabase) {
             createTablesSQL = new SqlStatement[]{new RawSqlStatement("SELECT DISTINCT " + getExistingColumnName() + " AS " + getNewColumnName() + " INTO " + database.escapeTableName(newTableSchemaName, getNewTableName()) + " FROM " + database.escapeTableName(existingTableSchemaName, getExistingTableName()) + " WHERE " + getExistingColumnName() + " IS NOT NULL"),};
         } else if (database instanceof SybaseASADatabase) {
             createTablesSQL = new SqlStatement[]{new RawSqlStatement("SELECT DISTINCT " + getExistingColumnName() + " AS " + getNewColumnName() + " INTO " + database.escapeTableName(newTableSchemaName, getNewTableName()) + " FROM " + database.escapeTableName(existingTableSchemaName, getExistingTableName()) + " WHERE " + getExistingColumnName() + " IS NOT NULL"),};

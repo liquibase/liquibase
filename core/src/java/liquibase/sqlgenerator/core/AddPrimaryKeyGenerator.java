@@ -1,6 +1,7 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.*;
+import liquibase.database.core.*;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
@@ -36,7 +37,7 @@ public class AddPrimaryKeyGenerator implements SqlGenerator<AddPrimaryKeyStateme
         }
 
         if (StringUtils.trimToNull(statement.getTablespace()) != null && database.supportsTablespaces()) {
-            if (database instanceof MSSQLDatabase ) {
+            if (database instanceof MSSQLDatabase) {
                 sql += " ON "+statement.getTablespace();
             } else if (database instanceof DB2Database || database instanceof SybaseASADatabase) {
                 ; //not supported

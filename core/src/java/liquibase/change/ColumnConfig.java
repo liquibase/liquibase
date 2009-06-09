@@ -1,7 +1,7 @@
 package liquibase.change;
 
 import liquibase.database.Database;
-import liquibase.database.InformixDatabase;
+import liquibase.database.core.InformixDatabase;
 import liquibase.database.structure.Column;
 import liquibase.statement.ComputedDateValue;
 import liquibase.statement.ComputedNumericValue;

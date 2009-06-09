@@ -2,7 +2,7 @@ package liquibase.integration.commandline;
 
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
-import liquibase.database.HibernateDatabase;
+import liquibase.database.core.HibernateDatabase;
 import liquibase.diff.Diff;
 import liquibase.diff.DiffResult;
 import liquibase.diff.DiffStatusListener;
@@ -60,7 +60,7 @@ public class CommandLineUtils {
             Driver driverObject;
             DatabaseFactory databaseFactory = DatabaseFactory.getInstance();
             if (databaseClass != null) {
-                databaseFactory.addDatabaseImplementation((Database) Class.forName(databaseClass, true, classLoader).newInstance());
+                databaseFactory.register((Database) Class.forName(databaseClass, true, classLoader).newInstance());
             }
 
             try {

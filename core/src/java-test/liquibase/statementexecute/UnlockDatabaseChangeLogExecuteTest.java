@@ -4,12 +4,12 @@ import liquibase.statement.SqlStatement;
 import liquibase.statement.CreateDatabaseChangeLogLockTableStatement;
 import liquibase.statement.UnlockDatabaseChangeLogStatement;
 import liquibase.database.Database;
-import liquibase.database.H2Database;
-import liquibase.database.HsqlDatabase;
-import liquibase.database.InformixDatabase;
-import liquibase.database.MSSQLDatabase;
-import liquibase.database.MaxDBDatabase;
-import liquibase.database.PostgresDatabase;
+import liquibase.database.core.H2Database;
+import liquibase.database.core.HsqlDatabase;
+import liquibase.database.core.InformixDatabase;
+import liquibase.database.core.MSSQLDatabase;
+import liquibase.database.core.MaxDBDatabase;
+import liquibase.database.core.PostgresDatabase;
 
 import java.util.List;
 import java.util.Arrays;

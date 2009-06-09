@@ -66,7 +66,7 @@ public abstract class AbstractChange implements Change {
         ValidationErrors changeValidationErrors = new ValidationErrors();
         for (SqlStatement statement : generateStatements(database)) {
             if (!SqlGeneratorFactory.getInstance().supports(statement, database)) {
-                changeValidationErrors.addError(getChangeMetaData().getName()+" is not supported on "+database.getProductName());
+                changeValidationErrors.addError(getChangeMetaData().getName()+" is not supported on "+database.getTypeName());
             } else {
                 changeValidationErrors.addAll(SqlGeneratorFactory.getInstance().validate(statement, database));
             }

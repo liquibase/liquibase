@@ -1,16 +1,15 @@
 package liquibase.statementexecute;
 
-import liquibase.database.CacheDatabase;
 import liquibase.database.Database;
-import liquibase.database.InformixDatabase;
-import liquibase.database.HsqlDatabase;
-import liquibase.database.MSSQLDatabase;
-import liquibase.database.MaxDBDatabase;
-import liquibase.database.MySQLDatabase;
-import liquibase.database.PostgresDatabase;
-import liquibase.database.SQLiteDatabase;
-import liquibase.database.SybaseASADatabase;
-import liquibase.database.SybaseDatabase;
+import liquibase.database.core.MSSQLDatabase;
+import liquibase.database.core.MaxDBDatabase;
+import liquibase.database.core.MySQLDatabase;
+import liquibase.database.core.PostgresDatabase;
+import liquibase.database.core.SQLiteDatabase;
+import liquibase.database.core.SybaseASADatabase;
+import liquibase.database.core.SybaseDatabase;
+import liquibase.database.core.CacheDatabase;
+import liquibase.database.core.*;
 import liquibase.test.TestContext;
 import liquibase.statement.*;
 

@@ -3,7 +3,7 @@ package liquibase.sqlgenerator.core;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import liquibase.database.Database;
-import liquibase.database.InformixDatabase;
+import liquibase.database.core.InformixDatabase;
 import liquibase.statement.AddAutoIncrementStatement;
 import liquibase.sqlgenerator.core.AddAutoIncrementGeneratorInformix;
 import liquibase.sqlgenerator.MockSqlGeneratorChain;

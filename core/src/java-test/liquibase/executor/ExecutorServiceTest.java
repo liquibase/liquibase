@@ -4,8 +4,8 @@ import org.junit.Test;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import liquibase.database.Database;
-import liquibase.database.OracleDatabase;
-import liquibase.database.MySQLDatabase;
+import liquibase.database.core.OracleDatabase;
+import liquibase.database.core.MySQLDatabase;
 
 public class ExecutorServiceTest {
 

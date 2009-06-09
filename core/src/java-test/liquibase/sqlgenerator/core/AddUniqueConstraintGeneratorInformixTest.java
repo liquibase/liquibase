@@ -1,7 +1,7 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
-import liquibase.database.InformixDatabase;
+import liquibase.database.core.InformixDatabase;
 import liquibase.sqlgenerator.core.AddUniqueConstraintGeneratorInformix;
 
 public class AddUniqueConstraintGeneratorInformixTest extends

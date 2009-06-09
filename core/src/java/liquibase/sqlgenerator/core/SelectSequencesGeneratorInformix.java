@@ -2,7 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.statement.SelectSequencesStatement;
 import liquibase.database.Database;
-import liquibase.database.InformixDatabase;
+import liquibase.database.core.InformixDatabase;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;

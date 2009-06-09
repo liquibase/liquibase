@@ -1,10 +1,9 @@
 package liquibase.database.structure;
 
-import liquibase.changelog.DatabaseChangeLog;
 import liquibase.database.AbstractDatabase;
 import liquibase.database.Database;
-import liquibase.database.InformixDatabase;
-import liquibase.database.OracleDatabase;
+import liquibase.database.core.InformixDatabase;
+import liquibase.database.core.OracleDatabase;
 import liquibase.diff.DiffStatusListener;
 import liquibase.exception.JDBCException;
 import liquibase.sql.visitor.SqlVisitor;

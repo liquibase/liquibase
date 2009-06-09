@@ -1,7 +1,7 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
-import liquibase.database.MSSQLDatabase;
+import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.structure.Column;
 import liquibase.database.structure.Table;
 import liquibase.sql.Sql;

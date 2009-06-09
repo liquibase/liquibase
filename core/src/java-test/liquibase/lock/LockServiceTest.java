@@ -1,8 +1,8 @@
 package liquibase.lock;
 
 import liquibase.database.Database;
-import liquibase.database.MySQLDatabase;
-import liquibase.database.OracleDatabase;
+import liquibase.database.core.MySQLDatabase;
+import liquibase.database.core.OracleDatabase;
 import liquibase.exception.LockException;
 import liquibase.statement.LockDatabaseChangeLogStatement;
 import liquibase.statement.SelectFromDatabaseChangeLogLockStatement;

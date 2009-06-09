@@ -7,11 +7,11 @@ public class StatementNotSupportedOnDatabaseException extends JDBCException {
     private String reason;
 
     public StatementNotSupportedOnDatabaseException(SqlStatement statement, Database database) {
-        super(statement.getClass().getName()+" is not supported on "+database.getProductName());
+        super(statement.getClass().getName()+" is not supported on "+database.getTypeName());
     }
 
     public StatementNotSupportedOnDatabaseException(String reason, SqlStatement statement, Database database) {
-        super(statement.getClass().getName()+" is not supported on "+database.getProductName()+": "+reason);
+        super(statement.getClass().getName()+" is not supported on "+database.getTypeName()+": "+reason);
         this.reason = reason;
     }
 

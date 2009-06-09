@@ -20,7 +20,7 @@ import java.util.*;
 public interface Database extends DatabaseObject {
 
 	String databaseChangeLogTableName = "DatabaseChangeLog".toUpperCase();
-	String databaseChangeLogLockTableName = "DatabaseChangeLogLock".toUpperCase();;
+	String databaseChangeLogLockTableName = "DatabaseChangeLogLock".toUpperCase();
 
 	/**
      * Is this AbstractDatabase subclass the correct one to use for the given connection.
@@ -57,10 +57,6 @@ public interface Database extends DatabaseObject {
      int getDatabaseMajorVersion() throws JDBCException;
 
     int getDatabaseMinorVersion() throws JDBCException;
-    /**
-     * Returns the full database product name.  May be different than what the JDBC connection reports (getDatabaseProductName())
-     */
-    String getProductName();
 
     /**
      * Returns an all-lower-case short name of the product.  Used for end-user selecting of database type

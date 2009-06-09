@@ -1,8 +1,8 @@
 package liquibase.change.core;
 
-import liquibase.database.DB2Database;
+import liquibase.database.core.DB2Database;
 import liquibase.database.Database;
-import liquibase.database.SQLiteDatabase;
+import liquibase.database.core.SQLiteDatabase;
 import liquibase.statement.AddPrimaryKeyStatement;
 import liquibase.statement.ReorganizeTableStatement;
 import liquibase.statement.SqlStatement;

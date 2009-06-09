@@ -1,7 +1,8 @@
 package liquibase.change.core;
 
 import liquibase.database.*;
-import liquibase.database.SQLiteDatabase.AlterTableVisitor;
+import liquibase.database.core.*;
+import liquibase.database.core.SQLiteDatabase.AlterTableVisitor;
 import liquibase.database.structure.Index;
 import liquibase.statement.RawSqlStatement;
 import liquibase.statement.ReorganizeTableStatement;

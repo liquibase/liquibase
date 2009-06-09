@@ -2,7 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.change.ColumnConfig;
 import liquibase.database.Database;
-import liquibase.database.SQLiteDatabase;
+import liquibase.database.core.SQLiteDatabase;
 import liquibase.database.structure.Index;
 import liquibase.exception.JDBCException;
 import liquibase.exception.UnexpectedLiquibaseException;
@@ -10,7 +10,6 @@ import liquibase.exception.UnsupportedChangeException;
 import liquibase.sql.Sql;
 import liquibase.statement.AddAutoIncrementStatement;
 import liquibase.statement.SqlStatement;
-import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 

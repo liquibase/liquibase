@@ -1,9 +1,9 @@
 package liquibase.change.core;
 
-import liquibase.database.CacheDatabase;
+import liquibase.database.core.CacheDatabase;
 import liquibase.database.Database;
-import liquibase.database.FirebirdDatabase;
-import liquibase.database.MockDatabase;
+import liquibase.database.core.FirebirdDatabase;
+import liquibase.database.core.MockDatabase;
 import liquibase.statement.RenameTableStatement;
 import liquibase.statement.SqlStatement;
 import liquibase.change.core.RenameTableChange;

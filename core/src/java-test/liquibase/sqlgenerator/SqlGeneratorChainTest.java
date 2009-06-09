@@ -6,7 +6,7 @@ import static org.junit.Assert.*;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import liquibase.database.MockDatabase;
+import liquibase.database.core.MockDatabase;
 import liquibase.statement.MockSqlStatement;
 import liquibase.sql.Sql;
 import liquibase.exception.ValidationErrors;

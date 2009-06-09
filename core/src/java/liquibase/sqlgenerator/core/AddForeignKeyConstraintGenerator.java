@@ -1,8 +1,8 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
-import liquibase.database.InformixDatabase;
-import liquibase.database.SQLiteDatabase;
+import liquibase.database.core.InformixDatabase;
+import liquibase.database.core.SQLiteDatabase;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;

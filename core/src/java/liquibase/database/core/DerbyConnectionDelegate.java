@@ -1,0 +1,41 @@
+package liquibase.database.core;
+
+import liquibase.database.SQLConnectionDelegate;
+
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
+
+public class DerbyConnectionDelegate extends SQLConnectionDelegate {
+
+    public DerbyConnectionDelegate(Connection connection) {
+        super(connection);
+    }
+
+
+    @Override
+    public void commit() throws SQLException {
+        super.commit();
+
+        checkPoint();
+    }
+
+    @Override
+    public void rollback() throws SQLException {
+        super.rollback();
+
+        checkPoint();
+    }
+
+    private void checkPoint() throws SQLException {
+        Statement st = null;
+        try {
+            st = createStatement();            
+            st.execute("CALL SYSCS_UTIL.SYSCS_CHECKPOINT_DATABASE()");
+        } finally {
+            if (st != null) {
+                st.close();
+            }
+        }
+    }
+}

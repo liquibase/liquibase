@@ -1,7 +1,7 @@
 package liquibase.sqlgenerator;
 
 import liquibase.database.Database;
-import liquibase.database.H2Database;
+import liquibase.database.core.H2Database;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.statement.AddAutoIncrementStatement;
@@ -118,7 +118,7 @@ public class SqlGeneratorFactoryTest {
     }
 
     @Test
-    public void getAllGenerators() {
+    public void getGenerators() {
         SortedSet<SqlGenerator> allGenerators = SqlGeneratorFactory.getInstance().getGenerators(new AddAutoIncrementStatement(null, "person", "name", "varchar(255)"), new H2Database());
 
         assertNotNull(allGenerators);

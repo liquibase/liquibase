@@ -1,6 +1,6 @@
 package liquibase.sqlgenerator.core;
 
-import liquibase.database.DB2Database;
+import liquibase.database.core.DB2Database;
 import liquibase.database.Database;
 import liquibase.database.structure.Column;
 import liquibase.database.structure.Table;

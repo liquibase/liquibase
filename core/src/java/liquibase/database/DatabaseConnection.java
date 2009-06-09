@@ -7,7 +7,7 @@ import java.sql.*;
  * java.sql. This interface allows wrappers and aspects over the basic 
  * connection.
  * 
- * @see SybaseConnectionDelegate
+ * @see liquibase.database.core.SybaseConnectionDelegate
  * @see SQLConnectionDelegate
  * @author <a href="mailto:csuml@yahoo.co.uk">Paul Keeble</a>
  *

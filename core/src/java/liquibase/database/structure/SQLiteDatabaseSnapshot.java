@@ -2,7 +2,7 @@ package liquibase.database.structure;
 
 import liquibase.database.AbstractDatabase;
 import liquibase.database.Database;
-import liquibase.database.SQLiteDatabase;
+import liquibase.database.core.SQLiteDatabase;
 import liquibase.diff.DiffStatusListener;
 import liquibase.exception.JDBCException;
 import liquibase.sql.visitor.SqlVisitor;

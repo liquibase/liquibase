@@ -1,8 +1,8 @@
 package liquibase.change.core;
 
 import liquibase.database.Database;
-import liquibase.database.FirebirdDatabase;
-import liquibase.database.SQLiteDatabase;
+import liquibase.database.core.FirebirdDatabase;
+import liquibase.database.core.SQLiteDatabase;
 import liquibase.statement.SqlStatement;
 import liquibase.change.core.AddLookupTableChange;
 import liquibase.change.AbstractChangeTest;

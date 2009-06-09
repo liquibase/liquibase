@@ -1,7 +1,7 @@
 package liquibase.change.core;
 
 import liquibase.database.Database;
-import liquibase.database.SQLiteDatabase;
+import liquibase.database.core.SQLiteDatabase;
 import liquibase.statement.CreateViewStatement;
 import liquibase.statement.DropViewStatement;
 import liquibase.statement.SqlStatement;

@@ -1,11 +1,11 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
-import liquibase.database.InformixDatabase;
-import liquibase.database.MSSQLDatabase;
-import liquibase.database.SQLiteDatabase;
-import liquibase.database.SybaseASADatabase;
-import liquibase.database.SybaseDatabase;
+import liquibase.database.core.InformixDatabase;
+import liquibase.database.core.MSSQLDatabase;
+import liquibase.database.core.SQLiteDatabase;
+import liquibase.database.core.SybaseASADatabase;
+import liquibase.database.core.SybaseDatabase;
 import liquibase.statement.AddUniqueConstraintStatement;
 import liquibase.sqlgenerator.core.AddUniqueConstraintGenerator;
 import liquibase.sqlgenerator.AbstractSqlGeneratorTest;
