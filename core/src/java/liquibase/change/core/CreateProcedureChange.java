@@ -1,7 +1,7 @@
 package liquibase.change.core;
 
 import liquibase.database.Database;
-import liquibase.database.OracleDatabase;
+import liquibase.database.core.OracleDatabase;
 import liquibase.statement.RawSqlStatement;
 import liquibase.statement.SqlStatement;
 import liquibase.change.AbstractChange;

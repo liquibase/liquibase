@@ -1,8 +1,8 @@
 package liquibase.statementexecute;
 
 import liquibase.database.Database;
-import liquibase.database.MSSQLDatabase;
-import liquibase.database.OracleDatabase;
+import liquibase.database.core.MSSQLDatabase;
+import liquibase.database.core.OracleDatabase;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.CreateDatabaseChangeLogLockTableStatement;
 import liquibase.statement.SelectFromDatabaseChangeLogLockStatement;

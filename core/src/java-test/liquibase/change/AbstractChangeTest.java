@@ -1,7 +1,7 @@
 package liquibase.change;
 
 import liquibase.database.Database;
-import liquibase.database.OracleDatabase;
+import liquibase.database.core.OracleDatabase;
 import liquibase.exception.ValidationErrors;
 import liquibase.parser.string.StringChangeLogSerializer;
 import liquibase.sql.visitor.SqlVisitor;
@@ -179,7 +179,7 @@ public abstract class AbstractChangeTest {
             try {
                 validator.validate(sqlStatements, database);
             } catch (AssertionError e) {
-                AssertionError error = new AssertionError("GenerateAllValidator failed for " + database.getProductName() + ": " + e.getMessage());
+                AssertionError error = new AssertionError("GenerateAllValidator failed for " + database.getTypeName() + ": " + e.getMessage());
                 error.setStackTrace(e.getStackTrace());
 
                 throw error;
@@ -198,7 +198,7 @@ public abstract class AbstractChangeTest {
             try {
                 validator.validate(sqlStatements, database);
             } catch (AssertionError e) {
-                AssertionError error = new AssertionError("GenerateAllValidator failed for " + database.getProductName() + ": " + e.getMessage());
+                AssertionError error = new AssertionError("GenerateAllValidator failed for " + database.getTypeName() + ": " + e.getMessage());
                 error.setStackTrace(e.getStackTrace());
 
                 throw error;
@@ -224,7 +224,7 @@ public abstract class AbstractChangeTest {
             try {
                 validator.validate(inverses);
             } catch (AssertionError e) {
-                AssertionError error = new AssertionError("InverseValidator failed for " + database.getProductName() + ": " + e.getMessage());
+                AssertionError error = new AssertionError("InverseValidator failed for " + database.getTypeName() + ": " + e.getMessage());
                 error.setStackTrace(e.getStackTrace());
 
                 throw error;
@@ -243,7 +243,7 @@ public abstract class AbstractChangeTest {
             try {
                 validator.validate(inverses);
             } catch (AssertionError e) {
-                AssertionError error = new AssertionError("InverseValidator failed for " + database.getProductName() + ": " + e.getMessage());
+                AssertionError error = new AssertionError("InverseValidator failed for " + database.getTypeName() + ": " + e.getMessage());
                 error.setStackTrace(e.getStackTrace());
 
                 throw error;
@@ -258,7 +258,7 @@ public abstract class AbstractChangeTest {
             return;
         }
         for (Database database : TestContext.getInstance().getAllDatabases()) {
-            assertEquals("Unexpected availablity on "+database.getProductName(), !changeIsUnsupported(database), change.supports(database));
+            assertEquals("Unexpected availablity on "+database.getTypeName(), !changeIsUnsupported(database), change.supports(database));
         }
     }
 
@@ -275,7 +275,7 @@ public abstract class AbstractChangeTest {
         for (Database database : TestContext.getInstance().getAllDatabases()) {
             if (change.supports(database)) {
                 ValidationErrors validationErrors = change.validate(database);
-                assertTrue("no errors found for "+database.getProductName(), validationErrors.hasErrors());
+                assertTrue("no errors found for "+database.getTypeName(), validationErrors.hasErrors());
             }
         }
     }

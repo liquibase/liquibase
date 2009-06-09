@@ -904,7 +904,7 @@ public abstract class AbstractDatabase implements Database {
     @Override
     public String toString() {
         if (getConnection() == null) {
-            return getProductName() + " Database";
+            return getTypeName() + " Database";
         }
         try {
             return getConnectionUsername() + " @ " + getConnectionURL() + (getDefaultSchemaName() == null ? "" : " (Default Schema: " + getDefaultSchemaName() + ")");

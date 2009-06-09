@@ -1,6 +1,10 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.*;
+import liquibase.database.core.MaxDBDatabase;
+import liquibase.database.core.MySQLDatabase;
+import liquibase.database.core.SQLiteDatabase;
+import liquibase.database.core.SybaseASADatabase;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;

@@ -1,6 +1,7 @@
 package liquibase.database.structure;
 
 import liquibase.database.*;
+import liquibase.database.core.*;
 import liquibase.util.SqlUtil;
 import liquibase.util.log.LogFactory;
 

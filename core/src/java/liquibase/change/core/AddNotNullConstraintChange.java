@@ -1,9 +1,9 @@
 package liquibase.change.core;
 
-import liquibase.database.DB2Database;
+import liquibase.database.core.DB2Database;
+import liquibase.database.core.SQLiteDatabase;
 import liquibase.database.Database;
-import liquibase.database.SQLiteDatabase;
-import liquibase.database.SQLiteDatabase.AlterTableVisitor;
+import liquibase.database.core.SQLiteDatabase.AlterTableVisitor;
 import liquibase.database.structure.Index;
 import liquibase.statement.ReorganizeTableStatement;
 import liquibase.statement.SetNullableStatement;

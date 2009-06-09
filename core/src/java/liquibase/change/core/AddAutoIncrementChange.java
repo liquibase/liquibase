@@ -1,7 +1,7 @@
 package liquibase.change.core;
 
 import liquibase.database.Database;
-import liquibase.database.PostgresDatabase;
+import liquibase.database.core.PostgresDatabase;
 import liquibase.statement.*;
 import liquibase.util.StringUtils;
 import liquibase.change.AbstractChange;

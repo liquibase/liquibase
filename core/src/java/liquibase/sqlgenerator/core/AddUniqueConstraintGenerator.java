@@ -1,6 +1,7 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.*;
+import liquibase.database.core.*;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
@@ -15,7 +16,7 @@ public class AddUniqueConstraintGenerator implements SqlGenerator<AddUniqueConst
     }
 
     public boolean supports(AddUniqueConstraintStatement statement, Database database) {
-        return !(database instanceof SQLiteDatabase) 
+        return !(database instanceof SQLiteDatabase)
         		&& !(database instanceof MSSQLDatabase)
         		&& !(database instanceof SybaseDatabase)
         		&& !(database instanceof SybaseASADatabase)

@@ -4,7 +4,7 @@ import liquibase.statement.CreateDatabaseChangeLogLockTableStatement;
 import liquibase.statement.CreateTableStatement;
 import liquibase.statement.NotNullConstraint;
 import liquibase.database.Database;
-import liquibase.database.MSSQLDatabase;
+import liquibase.database.core.MSSQLDatabase;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.SqlGenerator;

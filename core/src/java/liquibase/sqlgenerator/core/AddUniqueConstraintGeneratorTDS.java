@@ -1,9 +1,9 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
-import liquibase.database.MSSQLDatabase;
-import liquibase.database.SybaseASADatabase;
-import liquibase.database.SybaseDatabase;
+import liquibase.database.core.MSSQLDatabase;
+import liquibase.database.core.SybaseASADatabase;
+import liquibase.database.core.SybaseDatabase;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.statement.AddUniqueConstraintStatement;

@@ -2,6 +2,8 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.statement.GetViewDefinitionStatement;
 import liquibase.database.*;
+import liquibase.database.core.H2Database;
+import liquibase.database.core.HsqlDatabase;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.exception.JDBCException;

@@ -1,6 +1,7 @@
 package liquibase.change.core;
 
 import liquibase.database.*;
+import liquibase.database.core.*;
 import liquibase.statement.*;
 import liquibase.change.core.AddAutoIncrementChange;
 import liquibase.change.AbstractChangeTest;

@@ -2,6 +2,8 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.statement.SelectSequencesStatement;
 import liquibase.database.*;
+import liquibase.database.core.H2Database;
+import liquibase.database.core.HsqlDatabase;
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.JDBCException;
 import liquibase.exception.UnexpectedLiquibaseException;

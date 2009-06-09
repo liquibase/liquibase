@@ -2,6 +2,9 @@ package liquibase.database;
 
 import liquibase.exception.JDBCException;
 import liquibase.util.log.LogFactory;
+import liquibase.util.PluginUtil;
+import liquibase.database.core.*;
+import liquibase.sqlgenerator.SqlGenerator;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -16,25 +19,20 @@ public class DatabaseFactory {
 
     private static final Logger log = LogFactory.getLogger();
 
-    private List<Database> implementedDatabases = new ArrayList<Database>(Arrays.asList(
-            (Database) new OracleDatabase(),
-            new PostgresDatabase(),
-            new MSSQLDatabase(),
-            new MySQLDatabase(),
-            new DerbyDatabase(),
-            new HsqlDatabase(),
-            new DB2Database(),
-            new SybaseDatabase(),
-            new H2Database(),
-            new CacheDatabase(),
-            new FirebirdDatabase(),
-            new MaxDBDatabase(),
-            new SQLiteDatabase(),
-            new InformixDatabase(),
-            new SybaseASADatabase()
-    ));
+    private List<Database> implementedDatabases = new ArrayList<Database>();
 
     private DatabaseFactory() {
+        try {
+            Class[] classes = PluginUtil.getClasses("liquibase.database", Database.class);
+
+            for (Class clazz : classes) {
+                register((Database) clazz.getConstructor().newInstance());
+            }
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
     }
 
     public static DatabaseFactory getInstance() {
@@ -48,7 +46,7 @@ public class DatabaseFactory {
         return implementedDatabases;
     }
 
-    public void addDatabaseImplementation(Database database) {
+    public void register(Database database) {
         implementedDatabases.add(0, database);
     }
 

@@ -1,7 +1,7 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
-import liquibase.database.SybaseDatabase;
+import liquibase.database.core.SybaseDatabase;
 import liquibase.database.structure.Column;
 import liquibase.database.structure.Table;
 import liquibase.exception.ValidationErrors;

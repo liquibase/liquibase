@@ -1,7 +1,7 @@
 package liquibase.database.structure;
 
 import liquibase.database.Database;
-import liquibase.database.HibernateDatabase;
+import liquibase.database.core.HibernateDatabase;
 import liquibase.exception.JDBCException;
 import liquibase.util.StringUtils;
 import liquibase.util.log.LogFactory;

@@ -1,6 +1,7 @@
 package liquibase.statementexecute;
 
 import liquibase.database.*;
+import liquibase.database.core.*;
 import liquibase.test.TestContext;
 import liquibase.statement.*;
 import org.junit.Test;

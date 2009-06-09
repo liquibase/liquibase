@@ -1,6 +1,6 @@
 package liquibase.change.core;
 
-import liquibase.database.MockDatabase;
+import liquibase.database.core.MockDatabase;
 import liquibase.statement.CreateTableStatement;
 import liquibase.statement.ForeignKeyConstraint;
 import liquibase.statement.SqlStatement;

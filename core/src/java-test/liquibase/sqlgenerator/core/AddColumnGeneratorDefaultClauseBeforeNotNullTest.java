@@ -1,13 +1,11 @@
 package liquibase.sqlgenerator.core;
 
 import static org.junit.Assert.assertTrue;
-import liquibase.database.DB2Database;
 import liquibase.database.Database;
-import liquibase.database.DerbyDatabase;
-import liquibase.database.FirebirdDatabase;
-import liquibase.database.HsqlDatabase;
-import liquibase.database.InformixDatabase;
-import liquibase.database.OracleDatabase;
+import liquibase.database.core.OracleDatabase;
+import liquibase.database.core.DB2Database;
+import liquibase.database.core.DerbyDatabase;
+import liquibase.database.core.*;
 import liquibase.exception.ValidationErrors;
 import liquibase.statement.AddColumnStatement;
 import liquibase.statement.AutoIncrementConstraint;

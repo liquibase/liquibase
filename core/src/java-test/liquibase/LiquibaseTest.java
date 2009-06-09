@@ -1,6 +1,9 @@
 package liquibase;
 
 import liquibase.database.*;
+import liquibase.database.core.PostgresDatabase;
+import liquibase.database.core.MSSQLDatabase;
+import liquibase.database.core.OracleDatabase;
 import liquibase.executor.LoggingExecutor;
 import liquibase.executor.ExecutorService;
 import liquibase.exception.JDBCException;

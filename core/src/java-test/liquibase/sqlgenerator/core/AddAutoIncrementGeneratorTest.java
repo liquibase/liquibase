@@ -6,9 +6,9 @@ import java.util.Set;
 
 import liquibase.change.core.AddAutoIncrementChange;
 import liquibase.database.Database;
-import liquibase.database.DerbyDatabase;
-import liquibase.database.HsqlDatabase;
-import liquibase.database.MSSQLDatabase;
+import liquibase.database.core.DerbyDatabase;
+import liquibase.database.core.HsqlDatabase;
+import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.structure.Column;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Schema;
@@ -49,7 +49,7 @@ public class AddAutoIncrementGeneratorTest extends AbstractSqlGeneratorTest<AddA
     @Override
     protected boolean shouldBeImplementation(Database database) {
         return database.supportsAutoIncrement() 
-        && !(database instanceof DerbyDatabase) 
+        && !(database instanceof DerbyDatabase)
         && !(database instanceof MSSQLDatabase) 
         && !(database instanceof HsqlDatabase);
     }

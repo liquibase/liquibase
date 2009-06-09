@@ -1,8 +1,8 @@
 package liquibase.change.core;
 
 import liquibase.database.Database;
-import liquibase.database.MockDatabase;
-import liquibase.database.SQLiteDatabase;
+import liquibase.database.core.MockDatabase;
+import liquibase.database.core.SQLiteDatabase;
 import liquibase.statement.AddForeignKeyConstraintStatement;
 import liquibase.statement.SqlStatement;
 import liquibase.change.core.AddForeignKeyConstraintChange;

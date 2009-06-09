@@ -1,7 +1,7 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
-import liquibase.database.DerbyDatabase;
+import liquibase.database.core.DerbyDatabase;
 import liquibase.database.structure.Column;
 import liquibase.database.structure.Table;
 import liquibase.sql.Sql;

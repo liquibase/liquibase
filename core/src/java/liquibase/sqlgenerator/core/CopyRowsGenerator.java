@@ -2,7 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.change.ColumnConfig;
 import liquibase.database.Database;
-import liquibase.database.SQLiteDatabase;
+import liquibase.database.core.SQLiteDatabase;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;

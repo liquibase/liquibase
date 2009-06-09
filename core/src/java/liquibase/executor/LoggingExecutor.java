@@ -1,7 +1,7 @@
 package liquibase.executor;
 
 import liquibase.database.Database;
-import liquibase.database.MSSQLDatabase;
+import liquibase.database.core.MSSQLDatabase;
 import liquibase.exception.JDBCException;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.statement.CallableSqlStatement;

@@ -1,6 +1,6 @@
 package liquibase.change.core;
 
-import liquibase.database.OracleDatabase;
+import liquibase.database.core.OracleDatabase;
 import liquibase.exception.SetupException;
 import liquibase.resource.ClassLoaderFileOpener;
 import liquibase.change.core.SQLFileChange;

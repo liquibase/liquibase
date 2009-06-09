@@ -2,7 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.statement.SelectSequencesStatement;
 import liquibase.database.Database;
-import liquibase.database.PostgresDatabase;
+import liquibase.database.core.PostgresDatabase;
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.JDBCException;
 import liquibase.exception.UnexpectedLiquibaseException;

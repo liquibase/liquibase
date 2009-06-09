@@ -1,7 +1,7 @@
 package liquibase.test;
 
 import liquibase.database.Database;
-import liquibase.database.SQLiteDatabase;
+import liquibase.database.core.SQLiteDatabase;
 import liquibase.executor.ExecutorService;
 import liquibase.executor.DefaultExecutor;
 import liquibase.exception.MigrationFailedException;

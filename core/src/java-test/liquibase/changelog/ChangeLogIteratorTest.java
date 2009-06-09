@@ -4,7 +4,7 @@ import liquibase.changelog.filter.ContextChangeSetFilter;
 import liquibase.changelog.filter.DbmsChangeSetFilter;
 import liquibase.changelog.visitor.ChangeSetVisitor;
 import liquibase.database.Database;
-import liquibase.database.MySQLDatabase;
+import liquibase.database.core.MySQLDatabase;
 import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;

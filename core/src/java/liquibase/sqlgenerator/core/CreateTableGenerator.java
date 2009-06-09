@@ -1,6 +1,7 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.*;
+import liquibase.database.core.*;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
@@ -71,7 +72,7 @@ public class CreateTableGenerator implements SqlGenerator<CreateTableStatement> 
                 if (database.supportsAutoIncrement()) {
                     buffer.append(" ").append(database.getAutoIncrementClause()).append(" ");
                 } else {
-                    LogFactory.getLogger().log(Level.WARNING, database.getProductName()+" does not support autoincrement columns as request for "+(database.escapeTableName(statement.getSchemaName(), statement.getTableName())));
+                    LogFactory.getLogger().log(Level.WARNING, database.getTypeName()+" does not support autoincrement columns as request for "+(database.escapeTableName(statement.getSchemaName(), statement.getTableName())));
                 }
             }
 

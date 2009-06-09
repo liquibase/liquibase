@@ -3,7 +3,7 @@ package liquibase.integration.ant;
 import liquibase.Liquibase;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
-import liquibase.database.HibernateDatabase;
+import liquibase.database.core.HibernateDatabase;
 import liquibase.exception.JDBCException;
 import liquibase.resource.CompositeFileOpener;
 import liquibase.resource.FileOpener;
@@ -202,9 +202,9 @@ public class BaseLiquibaseTask extends Task {
         } else {
 	        if (databaseClass != null) {
 	        	  try {
-	        		  DatabaseFactory.getInstance().addDatabaseImplementation((Database) Class.forName(databaseClass, true, loader).newInstance());
+	        		  DatabaseFactory.getInstance().register((Database) Class.forName(databaseClass, true, loader).newInstance());
 	        	  } catch (ClassCastException e) { //fails in Ant in particular
-	        		  DatabaseFactory.getInstance().addDatabaseImplementation((Database) Class.forName(databaseClass).newInstance());
+	        		  DatabaseFactory.getInstance().register((Database) Class.forName(databaseClass).newInstance());
 	        	  }
 	        }
 	
