@@ -53,53 +53,12 @@ public class AddForeignKeyConstraintGenerator implements SqlGenerator<AddForeign
         	.append(database.escapeColumnNameList(statement.getReferencedColumnNames()))
         	.append(")");
 
-        if (statement.getUpdateRule() != null) {
-            switch (statement.getUpdateRule()) {
-                case DatabaseMetaData.importedKeyCascade:
-                    sb.append(" ON UPDATE CASCADE");
-                    break;
-                case DatabaseMetaData.importedKeySetNull:
-                    sb.append(" ON UPDATE SET NULL");
-                    break;
-                case DatabaseMetaData.importedKeySetDefault:
-                    sb.append(" ON UPDATE SET DEFAULT");
-                    break;
-                case DatabaseMetaData.importedKeyRestrict:
-                    if (database.supportsRestrictForeignKeys()) {
-                        sb.append(" ON UPDATE RESTRICT");
-                    }
-                    break;
-                case DatabaseMetaData.importedKeyNoAction:
-                    //don't do anything
-//                    sql += " ON UPDATE NO ACTION";
-                    break;
-                default:
-                    break;
-            }
+        if (statement.getOnUpdate() != null) {
+            sb.append(" ON UPDATE ").append(statement.getOnUpdate());
         }
-        if (statement.getDeleteRule() != null) {
-            switch (statement.getDeleteRule()) {
-                case DatabaseMetaData.importedKeyCascade:
-                    sb.append(" ON DELETE CASCADE");
-                    break;
-                case DatabaseMetaData.importedKeySetNull:
-                	sb.append(" ON DELETE SET NULL");
-                    break;
-                case DatabaseMetaData.importedKeySetDefault:
-                	sb.append(" ON DELETE SET DEFAULT");
-                    break;
-                case DatabaseMetaData.importedKeyRestrict:
-                    if (database.supportsRestrictForeignKeys()) {
-                    	sb.append(" ON DELETE RESTRICT");
-                    }
-                    break;
-                case DatabaseMetaData.importedKeyNoAction:
-                    //don't do anything
-//                    sql += " ON DELETE NO ACTION";
-                    break;
-                default:
-                    break;
-            }
+
+        if (statement.getOnDelete() != null) {
+            sb.append(" ON DELETE ").append(statement.getOnDelete());
         }
 
         if (statement.isDeferrable() || statement.isInitiallyDeferred()) {

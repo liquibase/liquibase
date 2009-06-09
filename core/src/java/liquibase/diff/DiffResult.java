@@ -584,8 +584,8 @@ public class DiffResult {
 
             change.setDeferrable(fk.isDeferrable());
             change.setInitiallyDeferred(fk.isInitiallyDeferred());
-            change.setUpdateRule(fk.getUpdateRule());
-            change.setDeleteRule(fk.getDeleteRule());
+            change.setOnUpdate(fk.getUpdateRule());
+            change.setOnDelete(fk.getDeleteRule());
 
             changes.add(change);
         }

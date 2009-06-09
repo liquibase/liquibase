@@ -50,7 +50,7 @@ public class AddForeignKeyConstraintChangeTest  extends AbstractChangeTest {
 
         assertEquals(true, statement.isDeferrable());
         assertEquals(true, statement.isInitiallyDeferred());
-        assertEquals(new Integer(DatabaseMetaData.importedKeyCascade), statement.getDeleteRule());
+        assertEquals("CASCADE", statement.getOnDelete());
     }
 
       @Override
