@@ -10,11 +10,6 @@ public class H2SampleChangeLogRunnerTest extends AbstractSimpleChangeLogRunnerTe
     }
 
     @Override
-    public void testUpdateTwice() throws Exception {
-        super.testUpdateTwice();    //To change body of overridden methods use File | Settings | File Templates.
-    }
-
-    @Override
     protected void setUp() throws Exception {
         super.setUp();
     }

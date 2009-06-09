@@ -6,6 +6,7 @@ import liquibase.statement.SqlStatement;
 import liquibase.change.AbstractChange;
 import liquibase.change.ChangeMetaData;
 import liquibase.change.Change;
+import liquibase.exception.UnexpectedLiquibaseException;
 
 import java.sql.DatabaseMetaData;
 
@@ -26,8 +27,8 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
     private Boolean deferrable;
     private Boolean initiallyDeferred;
 
-    private Integer updateRule;
-    private Integer deleteRule;
+    private String onUpdate;
+    private String onDelete;
 
     public AddForeignKeyConstraintChange() {
         super("addForeignKeyConstraint", "Add Foreign Key Constraint", ChangeMetaData.PRIORITY_DEFAULT);
@@ -115,51 +116,51 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
         }
     }
 
-    public void setUpdateRule(Integer rule) {
-        this.updateRule = rule;
+    public void setOnUpdate(String rule) {
+        this.onUpdate = rule;
     }
 
-    public Integer getUpdateRule() {
-        return this.updateRule;
-    }
-
-    public void setDeleteRule(Integer rule) {
-        this.deleteRule = rule;
-    }
-
-    public Integer getDeleteRule() {
-        return this.deleteRule;
+    public String getOnUpdate() {
+        return onUpdate;
     }
 
     public void setOnDelete(String onDelete) {
-        if (onDelete != null && onDelete.equalsIgnoreCase("CASCADE")) {
-            setDeleteRule(DatabaseMetaData.importedKeyCascade);
-        } else if (onDelete != null && onDelete.equalsIgnoreCase("SET NULL")) {
-            setDeleteRule(DatabaseMetaData.importedKeySetNull);
-        } else if (onDelete != null && onDelete.equalsIgnoreCase("SET DEFAULT")) {
-            setDeleteRule(DatabaseMetaData.importedKeySetDefault);
-        } else if (onDelete != null && onDelete.equalsIgnoreCase("RESTRICT")) {
-            setDeleteRule(DatabaseMetaData.importedKeyRestrict);
-        } else if (onDelete == null || onDelete.equalsIgnoreCase("NO ACTION")){
-            setDeleteRule(DatabaseMetaData.importedKeyNoAction);
+        this.onDelete = onDelete;
+    }
+
+    public String getOnDelete() {
+        return this.onDelete;
+    }
+
+    public void setOnDelete(int rule) {
+        if (rule == DatabaseMetaData.importedKeyCascade) {
+            setOnDelete("CASCADE");
+        } else if (rule == DatabaseMetaData.importedKeySetNull) {
+            setOnDelete("SET NULL");
+        } else if (rule == DatabaseMetaData.importedKeySetDefault) {
+            setOnDelete("SET DEFAULT");
+        } else if (rule == DatabaseMetaData.importedKeyRestrict) {
+            setOnDelete("RESTRICT");
+        } else if (rule == DatabaseMetaData.importedKeyNoAction){
+            setOnDelete("NO ACTION");
         } else {
-            throw new RuntimeException("Unknown onDelete action: "+onDelete);
+            throw new UnexpectedLiquibaseException("Unknown onDelete action: "+rule);
         }
     }
 
-    public void setOnUpdate(String onUpdate) {
-        if (onUpdate != null && onUpdate.equalsIgnoreCase("CASCADE")) {
-            setUpdateRule(DatabaseMetaData.importedKeyCascade);
-        } else  if (onUpdate != null && onUpdate.equalsIgnoreCase("SET NULL")) {
-            setUpdateRule(DatabaseMetaData.importedKeySetNull);
-        } else if (onUpdate != null && onUpdate.equalsIgnoreCase("SET DEFAULT")) {
-            setUpdateRule(DatabaseMetaData.importedKeySetDefault);
-        } else if (onUpdate != null && onUpdate.equalsIgnoreCase("RESTRICT")) {
-            setUpdateRule(DatabaseMetaData.importedKeyRestrict);
-        } else if (onUpdate == null || onUpdate.equalsIgnoreCase("NO ACTION")) {
-            setUpdateRule(DatabaseMetaData.importedKeyNoAction);
+    public void setOnUpdate(int rule) {
+        if (rule == DatabaseMetaData.importedKeyCascade) {
+            setOnUpdate("CASCADE");
+        } else  if (rule == DatabaseMetaData.importedKeySetNull) {
+            setOnUpdate("SET NULL");
+        } else if (rule == DatabaseMetaData.importedKeySetDefault) {
+            setOnUpdate("SET DEFAULT");
+        } else if (rule == DatabaseMetaData.importedKeyRestrict) {
+            setOnUpdate("RESTRICT");
+        } else if (rule == DatabaseMetaData.importedKeyNoAction) {
+            setOnUpdate("NO ACTION");
         } else {
-            throw new RuntimeException("Unknown onUpdate action: "+onUpdate);
+            throw new UnexpectedLiquibaseException("Unknown onUpdate action: "+onUpdate);
         }
     }
 
@@ -185,8 +186,8 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
                         getReferencedColumnNames())
                         .setDeferrable(deferrable)
                         .setInitiallyDeferred(initiallyDeferred)
-                        .setUpdateRule(updateRule)
-                        .setDeleteRule(deleteRule)
+                        .setOnUpdate(getOnUpdate())
+                        .setOnDelete(getOnDelete())
         };
     }
 

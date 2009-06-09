@@ -101,8 +101,8 @@ public class XMLChangeLogSerializerTest {
         change.setReferencedColumnNames("REF_COL_NAME");
 
         change.setDeferrable(true);
-        change.setDeleteRule(DatabaseMetaData.importedKeyCascade);
-        change.setUpdateRule(DatabaseMetaData.importedKeyCascade);
+        change.setOnDelete("CASCADE");
+        change.setOnUpdate("CASCADE");
         change.setInitiallyDeferred(true);
 
         Element node = new XMLChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(change);

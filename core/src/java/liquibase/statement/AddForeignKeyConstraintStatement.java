@@ -15,8 +15,8 @@ public class AddForeignKeyConstraintStatement implements SqlStatement {
     private boolean deferrable;
     private boolean initiallyDeferred;
 
-    private Integer deleteRule;
-    private Integer updateRule;
+    private String onDelete;
+    private String onUpdate;
 
     public AddForeignKeyConstraintStatement(String constraintName, String baseTableSchemaName, String baseTableName, String baseColumnNames, String referencedTableSchemaName, String referencedTableName, String referencedColumnNames) {
         this.baseTableSchemaName = baseTableSchemaName;
@@ -60,12 +60,12 @@ public class AddForeignKeyConstraintStatement implements SqlStatement {
         return deferrable;
     }
 
-    public Integer getDeleteRule() {
-        return deleteRule;
+    public String getOnDelete() {
+        return onDelete;
     }
 
-    public Integer getUpdateRule() {
-        return updateRule;
+    public String getOnUpdate() {
+        return onUpdate;
     }
 
     public AddForeignKeyConstraintStatement setDeferrable(boolean deferrable) {
@@ -82,13 +82,13 @@ public class AddForeignKeyConstraintStatement implements SqlStatement {
         return this;
     }
 
-    public AddForeignKeyConstraintStatement setUpdateRule(Integer updateRule) {
-        this.updateRule = updateRule;
+    public AddForeignKeyConstraintStatement setOnUpdate(String updateRule) {
+        this.onUpdate = updateRule;
         return this;
     }
 
-    public AddForeignKeyConstraintStatement setDeleteRule(Integer deleteRule) {
-        this.deleteRule = deleteRule;
+    public AddForeignKeyConstraintStatement setOnDelete(String deleteRule) {
+        this.onDelete = deleteRule;
         return this;
     }
 }

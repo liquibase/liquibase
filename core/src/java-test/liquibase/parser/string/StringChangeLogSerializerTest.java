@@ -1,10 +1,7 @@
 package liquibase.parser.string;
 
 import liquibase.change.*;
-import liquibase.change.core.AddColumnChange;
-import liquibase.change.core.DropAllForeignKeyConstraintsChange;
-import liquibase.change.core.SQLFileChange;
-import liquibase.change.core.LoadDataColumnConfig;
+import liquibase.change.core.*;
 import liquibase.change.custom.CustomSqlChange;
 import liquibase.change.custom.ExampleCustomSqlChange;
 import liquibase.change.custom.CustomChangeWrapper;
@@ -22,16 +19,16 @@ import java.util.logging.Logger;
 public class StringChangeLogSerializerTest {
 
     @Test
-    public void serialized_CustomChange() throws Exception{
+    public void serialized_CustomChange() throws Exception {
 
-        String expectedString = "customChange:[\n"+
-        "    className=\"liquibase.change.custom.ExampleCustomSqlChange\"\n"+
-        "    paramValues={\n"+
-        "        columnName=\"column_name\",\n"+
-        "        newValue=\"new_value\",\n"+
-        "        tableName=\"table_name\"\n"+
-        "    }\n"+
-        "]";
+        String expectedString = "customChange:[\n" +
+                "    className=\"liquibase.change.custom.ExampleCustomSqlChange\"\n" +
+                "    paramValues={\n" +
+                "        columnName=\"column_name\",\n" +
+                "        newValue=\"new_value\",\n" +
+                "        tableName=\"table_name\"\n" +
+                "    }\n" +
+                "]";
 
         CustomChangeWrapper wrapper = new CustomChangeWrapper();
         wrapper.setFileOpener(new JUnitFileOpener());
@@ -102,6 +99,41 @@ public class StringChangeLogSerializerTest {
                 "]", new StringChangeLogSerializer().serialize(change));
     }
 
+    @Test
+    public void serialized_AddForeignKeyConstraint() {
+        AddForeignKeyConstraintChange change = new AddForeignKeyConstraintChange();
+
+        assertEquals("addForeignKeyConstraint:[]", new StringChangeLogSerializer().serialize(change));
+
+        change.setBaseTableName("TABLE_NAME");
+        change.setBaseColumnNames("COL1, COL2");
+        change.setBaseTableSchemaName("BASE_SCHEM");
+        change.setConstraintName("FK_TEST");
+        change.setDeferrable(true);
+        change.setInitiallyDeferred(true);
+        change.setDeleteCascade(true);
+        change.setOnDelete("SET NULL");
+        change.setOnUpdate("NO ACTION");
+        change.setReferencedTableName("REF_TABLE");
+        change.setReferencedColumnNames("COLA, COLB");
+        change.setReferencedTableSchemaName("REF_SCHEM");
+
+        assertEquals("addForeignKeyConstraint:[\n" +
+                "    baseColumnNames=\"COL1, COL2\"\n" +
+                "    baseTableName=\"TABLE_NAME\"\n" +
+                "    baseTableSchemaName=\"BASE_SCHEM\"\n" +
+                "    constraintName=\"FK_TEST\"\n" +
+                "    deferrable=\"true\"\n" +
+                "    initiallyDeferred=\"true\"\n" +
+                "    onDelete=\"SET NULL\"\n" +
+                "    onUpdate=\"NO ACTION\"\n" +
+                "    referencedColumnNames=\"COLA, COLB\"\n" +
+                "    referencedTableName=\"REF_TABLE\"\n" +
+                "    referencedTableSchemaName=\"REF_SCHEM\"\n" +
+                "]", new StringChangeLogSerializer().serialize(change));
+
+    }
+
 //    @Test
 //    public void serialized_changeSet() {
 //        ChangeSet changeSet = new ChangeSet("1", "ted", true, false, "com/example/test.xml", "c:/com/exmple/test", "context1, context2", "mysql, oracle");
@@ -152,7 +184,7 @@ public class StringChangeLogSerializerTest {
             String string = new StringChangeLogSerializer().serialize(change);
             System.out.println(string);
             System.out.println("-------------");
-            assertTrue("@ in string.  Probably poorly serialzed object reference."+string, string.indexOf("@") < 0);
+            assertTrue("@ in string.  Probably poorly serialzed object reference." + string, string.indexOf("@") < 0);
         }
     }
 
@@ -196,7 +228,7 @@ public class StringChangeLogSerializerTest {
                         } else if (field.getType().equals(SortedSet.class)) {
                             collection = new TreeSet();
                         } else {
-                            throw new RuntimeException("Unknow collection type: "+field.getType().getName());
+                            throw new RuntimeException("Unknow collection type: " + field.getType().getName());
                         }
                         if (typeToCreate.equals(ColumnConfig.class)) {
                             collection.add(createColumnConfig());
@@ -235,7 +267,7 @@ public class StringChangeLogSerializerTest {
     }
 
     private Number createNumber() {
-        return new Random().nextDouble()*10000;
+        return new Random().nextDouble() * 10000;
     }
 
     private Integer createInteger() {
