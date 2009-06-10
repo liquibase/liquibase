@@ -5,8 +5,8 @@ import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.VirtualFileManager;
 import liquibase.parser.xml.LiquibaseSchemaResolver;
-import liquibase.parser.xml.XMLChangeLogSerializer;
-import liquibase.parser.xml.XMLChangeLogParser;
+import liquibase.serializer.xml.XMLChangeLogSerializer;
+import liquibase.parser.xml.XMLChangeLogSAXParser;
 import liquibase.changelog.ChangeSet;
 import org.apache.xml.serialize.OutputFormat;
 import org.apache.xml.serialize.XMLSerializer;
@@ -40,7 +40,9 @@ public class IntellijChangeLogWriter implements ChangeLogWriter {
 
                     doc = documentBuilder.parse(file.getInputStream());
 
-                    doc.getDocumentElement().appendChild(new XMLChangeLogSerializer(doc).createNode(changeSet));
+                    XMLChangeLogSerializer xmlChangeLogSerializer = new XMLChangeLogSerializer();
+                    xmlChangeLogSerializer.setCurrentChangeLogFileDOM(doc);
+                    doc.getDocumentElement().appendChild(xmlChangeLogSerializer.createNode(changeSet));
 
                     OutputStream outputStream = file.getOutputStream(null);
 
@@ -102,9 +104,9 @@ public class IntellijChangeLogWriter implements ChangeLogWriter {
         Document doc = createDocumentBuilder().newDocument();
 
         Element changeLogElement = doc.createElement("databaseChangeLog");
-        changeLogElement.setAttribute("xmlns", "http://www.liquibase.org/xml/ns/dbchangelog/"+ XMLChangeLogParser.getSchemaVersion());
+        changeLogElement.setAttribute("xmlns", "http://www.liquibase.org/xml/ns/dbchangelog/"+ XMLChangeLogSAXParser.getSchemaVersion());
         changeLogElement.setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
-        changeLogElement.setAttribute("xsi:schemaLocation", "http://www.liquibase.org/xml/ns/dbchangelog/"+ XMLChangeLogParser.getSchemaVersion()+" http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-"+XMLChangeLogParser.getSchemaVersion()+".xsd");
+        changeLogElement.setAttribute("xsi:schemaLocation", "http://www.liquibase.org/xml/ns/dbchangelog/"+ XMLChangeLogSAXParser.getSchemaVersion()+" http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-"+ XMLChangeLogSAXParser.getSchemaVersion()+".xsd");
 
         changeLogElement.appendChild(doc.createComment("Add change tags here"));
         doc.appendChild(changeLogElement);

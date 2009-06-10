@@ -6,8 +6,8 @@ import liquibase.database.Database;
 import liquibase.database.structure.*;
 import liquibase.exception.JDBCException;
 import liquibase.parser.xml.LiquibaseSchemaResolver;
-import liquibase.parser.xml.XMLChangeLogParser;
-import liquibase.parser.xml.XMLChangeLogSerializer;
+import liquibase.parser.xml.XMLChangeLogSAXParser;
+import liquibase.serializer.xml.XMLChangeLogSerializer;
 import liquibase.util.SqlUtil;
 import liquibase.util.StringUtils;
 import liquibase.util.csv.CSVWriter;
@@ -403,9 +403,9 @@ public class DiffResult {
         Document doc = documentBuilder.newDocument();
 
         Element changeLogElement = doc.createElement("databaseChangeLog");
-        changeLogElement.setAttribute("xmlns", "http://www.liquibase.org/xml/ns/dbchangelog/" + XMLChangeLogParser.getSchemaVersion());
+        changeLogElement.setAttribute("xmlns", "http://www.liquibase.org/xml/ns/dbchangelog/" + XMLChangeLogSAXParser.getSchemaVersion());
         changeLogElement.setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
-        changeLogElement.setAttribute("xsi:schemaLocation", "http://www.liquibase.org/xml/ns/dbchangelog/" + XMLChangeLogParser.getSchemaVersion() + " http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-" + XMLChangeLogParser.getSchemaVersion() + ".xsd");
+        changeLogElement.setAttribute("xsi:schemaLocation", "http://www.liquibase.org/xml/ns/dbchangelog/" + XMLChangeLogSAXParser.getSchemaVersion() + " http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-" + XMLChangeLogSAXParser.getSchemaVersion() + ".xsd");
 
         doc.appendChild(changeLogElement);
 
@@ -433,7 +433,8 @@ public class DiffResult {
         addMissingViewChanges(changes);
         addUnexpectedTableChanges(changes);
 
-        XMLChangeLogSerializer changeLogSerializer = new XMLChangeLogSerializer(doc);
+        XMLChangeLogSerializer changeLogSerializer = new XMLChangeLogSerializer();
+        changeLogSerializer.setCurrentChangeLogFileDOM(doc);
         for (Change change : changes) {
             Element changeSet = doc.createElement("changeSet");
             changeSet.setAttribute("author", getChangeSetAuthor());

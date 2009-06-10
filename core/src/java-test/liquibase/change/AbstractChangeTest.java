@@ -3,7 +3,7 @@ package liquibase.change;
 import liquibase.database.Database;
 import liquibase.database.core.OracleDatabase;
 import liquibase.exception.ValidationErrors;
-import liquibase.parser.string.StringChangeLogSerializer;
+import liquibase.serializer.string.StringChangeLogSerializer;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.statement.RawSqlStatement;
 import liquibase.statement.SqlStatement;

@@ -1,4 +1,4 @@
-package liquibase.parser.string;
+package liquibase.serializer.string;
 
 import liquibase.change.Change;
 import liquibase.change.ChangeProperty;
@@ -6,8 +6,9 @@ import liquibase.change.ColumnConfig;
 import liquibase.change.ConstraintsConfig;
 import liquibase.change.custom.CustomChange;
 import liquibase.changelog.ChangeSet;
+import liquibase.changelog.DatabaseChangeLog;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.parser.ChangeLogSerializer;
+import liquibase.serializer.ChangeLogSerializer;
 import liquibase.util.StringUtils;
 
 import java.lang.reflect.Field;
@@ -20,6 +21,14 @@ public class StringChangeLogSerializer implements ChangeLogSerializer {
 
     private static final int INDENT_LENGTH = 4;
 
+    public String[] getValidFileExtensions() {
+        return new String[] {"txt"};
+    }
+
+    public String serialize(DatabaseChangeLog databaseChangeLog) {
+        return null; //todo
+    }
+    
     public String serialize(Change change) {
         return change.getChangeMetaData().getName() + ":" + serializeObject(change, 1);
     }
