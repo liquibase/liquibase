@@ -20,10 +20,6 @@ public class SqlChangeLogParser implements ChangeLogParser {
         };
     }
 
-    public ChangeLogSerializer getSerializer() {
-        return null;
-    }
-
     public DatabaseChangeLog parse(String physicalChangeLogLocation, Map<String, Object> changeLogParameters, FileOpener fileOpener) throws ChangeLogParseException {
 
         RawSQLChange change = new RawSQLChange();

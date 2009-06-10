@@ -29,14 +29,6 @@ public class XMLChangeLogParser implements ChangeLogParser {
         };
     }
 
-    public ChangeLogSerializer getSerializer() {
-        try {
-            return new XMLChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument());
-        } catch (ParserConfigurationException e) {
-            throw new UnexpectedLiquibaseException(e);
-        }
-    }
-
     public DatabaseChangeLog parse(String physicalChangeLogLocation, Map<String, Object> changeLogParameters, FileOpener fileOpener) throws ChangeLogParseException {
 
         SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
