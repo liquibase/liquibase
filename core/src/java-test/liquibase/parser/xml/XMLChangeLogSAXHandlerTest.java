@@ -7,12 +7,12 @@ import org.junit.Test;
 import java.util.HashMap;
 
 
-public class XMLChangeLogHandlerTest {
-    private XMLChangeLogHandler handler;
+public class XMLChangeLogSAXHandlerTest {
+    private XMLChangeLogSAXHandler handler;
 
     @Before
     public void setup() {
-        handler = new XMLChangeLogHandler(null, null, new HashMap<String, Object>());
+        handler = new XMLChangeLogSAXHandler(null, null, new HashMap<String, Object>());
     }
 
 

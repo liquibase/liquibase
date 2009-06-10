@@ -3,9 +3,8 @@ package liquibase.changelog;
 import liquibase.exception.ChangeLogParseException;
 import liquibase.parser.ChangeLogParser;
 import liquibase.parser.ChangeLogParserFactory;
-import liquibase.parser.ChangeLogSerializer;
 import liquibase.parser.sql.SqlChangeLogParser;
-import liquibase.parser.xml.XMLChangeLogParser;
+import liquibase.parser.xml.XMLChangeLogSAXParser;
 import liquibase.resource.FileOpener;
 import static org.junit.Assert.*;
 import org.junit.Before;
@@ -48,7 +47,7 @@ public class ChangeLogParserFactoryTest {
 
         ChangeLogParser mockChangeLogParser = new MockChangeLogParser();
 
-        factory.register(new XMLChangeLogParser());
+        factory.register(new XMLChangeLogSAXParser());
         factory.register(mockChangeLogParser);
         factory.register(new SqlChangeLogParser());
 
@@ -62,7 +61,7 @@ public class ChangeLogParserFactoryTest {
     public void getParser_byExtension() {
         ChangeLogParserFactory.getInstance().getParsers().clear();
 
-        XMLChangeLogParser xmlChangeLogParser = new XMLChangeLogParser();
+        XMLChangeLogSAXParser xmlChangeLogParser = new XMLChangeLogSAXParser();
         ChangeLogParserFactory.getInstance().register(xmlChangeLogParser);
         ChangeLogParserFactory.getInstance().register(new SqlChangeLogParser());
 
@@ -76,7 +75,7 @@ public class ChangeLogParserFactoryTest {
     public void getParser_byFile() {
         ChangeLogParserFactory.getInstance().getParsers().clear();
 
-        XMLChangeLogParser xmlChangeLogParser = new XMLChangeLogParser();
+        XMLChangeLogSAXParser xmlChangeLogParser = new XMLChangeLogSAXParser();
         ChangeLogParserFactory.getInstance().register(xmlChangeLogParser);
         ChangeLogParserFactory.getInstance().register(new SqlChangeLogParser());
 
@@ -92,7 +91,7 @@ public class ChangeLogParserFactoryTest {
 
         ChangeLogParserFactory.getInstance().getParsers().clear();
 
-        XMLChangeLogParser xmlChangeLogParser = new XMLChangeLogParser();
+        XMLChangeLogSAXParser xmlChangeLogParser = new XMLChangeLogSAXParser();
         ChangeLogParserFactory.getInstance().register(xmlChangeLogParser);
         ChangeLogParserFactory.getInstance().register(new SqlChangeLogParser());
 

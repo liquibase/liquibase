@@ -29,7 +29,7 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-class XMLChangeLogHandler extends DefaultHandler {
+class XMLChangeLogSAXHandler extends DefaultHandler {
 
     private static final char LIQUIBASE_FILE_SEPARATOR = '/';
 
@@ -52,7 +52,7 @@ class XMLChangeLogHandler extends DefaultHandler {
     private Collection modifySqlDbmsList;
 
 
-    protected XMLChangeLogHandler(String physicalChangeLogLocation, FileOpener fileOpener, Map<String, Object> properties) {
+    protected XMLChangeLogSAXHandler(String physicalChangeLogLocation, FileOpener fileOpener, Map<String, Object> properties) {
         log = LogFactory.getLogger();
         this.fileOpener = fileOpener;
 
@@ -82,8 +82,8 @@ class XMLChangeLogHandler extends DefaultHandler {
                 text = new StringBuffer();
             } else if ("databaseChangeLog".equals(qName)) {
                 String version = uri.substring(uri.lastIndexOf("/") + 1);
-                if (!version.equals(XMLChangeLogParser.getSchemaVersion())) {
-                    log.warning(databaseChangeLog.getPhysicalFilePath() + " is using schema version " + version + " rather than version " + XMLChangeLogParser.getSchemaVersion());
+                if (!version.equals(XMLChangeLogSAXParser.getSchemaVersion())) {
+                    log.warning(databaseChangeLog.getPhysicalFilePath() + " is using schema version " + version + " rather than version " + XMLChangeLogSAXParser.getSchemaVersion());
                 }
                 databaseChangeLog.setLogicalFilePath(atts.getValue("logicalFilePath"));
             } else if ("include".equals(qName)) {

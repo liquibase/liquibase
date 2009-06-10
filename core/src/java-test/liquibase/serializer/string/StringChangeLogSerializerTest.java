@@ -1,4 +1,4 @@
-package liquibase.parser.string;
+package liquibase.serializer.string;
 
 import liquibase.change.*;
 import liquibase.change.core.*;
@@ -7,6 +7,7 @@ import liquibase.change.custom.ExampleCustomSqlChange;
 import liquibase.change.custom.CustomChangeWrapper;
 import liquibase.resource.FileOpener;
 import liquibase.test.JUnitFileOpener;
+import liquibase.serializer.string.StringChangeLogSerializer;
 import static org.junit.Assert.*;
 import org.junit.Test;
 

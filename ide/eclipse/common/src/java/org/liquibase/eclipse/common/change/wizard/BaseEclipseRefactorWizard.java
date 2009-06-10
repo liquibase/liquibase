@@ -8,8 +8,8 @@ import liquibase.statement.SqlStatement;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.sql.Sql;
 import liquibase.Liquibase;
+import liquibase.serializer.xml.XMLChangeLogSerializer;
 import liquibase.parser.xml.LiquibaseSchemaResolver;
-import liquibase.parser.xml.XMLChangeLogSerializer;
 import liquibase.util.StringUtils;
 import liquibase.util.xml.DefaultXmlWriter;
 import org.eclipse.core.commands.operations.OperationStatus;
@@ -154,7 +154,9 @@ public abstract class BaseEclipseRefactorWizard extends Wizard {
                             doc = documentBuilder.parse(file);
                         }
 
-                        doc.getDocumentElement().appendChild(new XMLChangeLogSerializer(doc).createNode(changeSet));
+                        XMLChangeLogSerializer xmlChangeLogSerializer = new XMLChangeLogSerializer();
+                        xmlChangeLogSerializer.setCurrentChangeLogFileDOM(doc);
+                        doc.getDocumentElement().appendChild(xmlChangeLogSerializer.createNode(changeSet));
 
                         FileOutputStream out = new FileOutputStream(file);
                         new DefaultXmlWriter().write(doc, out);

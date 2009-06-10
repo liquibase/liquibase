@@ -2,25 +2,21 @@ package liquibase.parser.xml;
 
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.exception.ChangeLogParseException;
-import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.parser.ChangeLogParser;
-import liquibase.parser.ChangeLogSerializer;
 import liquibase.resource.FileOpener;
 import liquibase.util.log.LogFactory;
 import org.xml.sax.*;
 
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
 
-public class XMLChangeLogParser implements ChangeLogParser {
+public class XMLChangeLogSAXParser implements ChangeLogParser {
 
     public static String getSchemaVersion() {
-        return "1.9";
+        return "2.0";
     }
 
     public String[] getValidFileExtensions() {
@@ -75,7 +71,7 @@ public class XMLChangeLogParser implements ChangeLogParser {
                 throw new ChangeLogParseException(physicalChangeLogLocation + " does not exist");
             }
 
-            XMLChangeLogHandler contentHandler = new XMLChangeLogHandler(physicalChangeLogLocation, fileOpener, changeLogParameters);
+            XMLChangeLogSAXHandler contentHandler = new XMLChangeLogSAXHandler(physicalChangeLogLocation, fileOpener, changeLogParameters);
             xmlReader.setContentHandler(contentHandler);
             xmlReader.parse(new InputSource(inputStream));
 

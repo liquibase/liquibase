@@ -5,7 +5,6 @@ import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.exception.ChangeLogParseException;
 import liquibase.parser.ChangeLogParser;
-import liquibase.parser.ChangeLogSerializer;
 import liquibase.resource.FileOpener;
 import liquibase.util.StreamUtil;
 

@@ -1,26 +1,41 @@
-package liquibase.parser.xml;
+package liquibase.serializer.xml;
 
 import liquibase.change.*;
-import liquibase.change.core.AddForeignKeyConstraintChange;
 import liquibase.change.custom.CustomChangeWrapper;
 import liquibase.changelog.ChangeSet;
+import liquibase.changelog.DatabaseChangeLog;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.parser.ChangeLogSerializer;
+import liquibase.serializer.ChangeLogSerializer;
 import liquibase.util.ISODateFormat;
 import liquibase.util.StringUtils;
 import liquibase.util.XMLUtil;
 import org.w3c.dom.*;
 
 import java.lang.reflect.Field;
-import java.sql.DatabaseMetaData;
 import java.util.*;
 
 public class XMLChangeLogSerializer implements ChangeLogSerializer {
 
     private Document currentChangeLogFileDOM;
 
-    public XMLChangeLogSerializer(Document currentChangeLogFileDOM) {
+    public XMLChangeLogSerializer() {
+    }
+
+    protected XMLChangeLogSerializer(Document currentChangeLogFileDOM) {
         this.currentChangeLogFileDOM = currentChangeLogFileDOM;
+    }
+
+    public void setCurrentChangeLogFileDOM(Document currentChangeLogFileDOM) {
+        this.currentChangeLogFileDOM = currentChangeLogFileDOM;
+    }
+
+    public String[] getValidFileExtensions() {
+        return new String[] {"xml"};
+    }
+
+
+    public String serialize(DatabaseChangeLog databaseChangeLog) {
+        return null; //todo
     }
 
     public String serialize(Change change) {

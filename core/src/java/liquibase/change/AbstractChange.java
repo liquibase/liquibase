@@ -7,7 +7,7 @@ import liquibase.exception.RollbackImpossibleException;
 import liquibase.exception.SetupException;
 import liquibase.exception.UnsupportedChangeException;
 import liquibase.exception.ValidationErrors;
-import liquibase.parser.string.StringChangeLogSerializer;
+import liquibase.serializer.string.StringChangeLogSerializer;
 import liquibase.resource.FileOpener;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
