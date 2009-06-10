@@ -12,5 +12,4 @@ public interface ChangeLogParser {
 
     public String[] getValidFileExtensions();
 
-    public ChangeLogSerializer getSerializer();
 }

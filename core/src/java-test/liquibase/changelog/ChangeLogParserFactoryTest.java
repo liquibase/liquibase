@@ -121,10 +121,6 @@ public class ChangeLogParserFactoryTest {
             return null;
         }
 
-        public ChangeLogSerializer getSerializer() {
-            return null;
-        }
-
         public String[] getValidFileExtensions() {
             return new String[] {
                     "test"
