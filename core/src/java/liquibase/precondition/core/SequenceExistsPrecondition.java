@@ -1,4 +1,4 @@
-package liquibase.precondition;
+package liquibase.precondition.core;
 
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.database.Database;
@@ -7,10 +7,11 @@ import liquibase.exception.JDBCException;
 import liquibase.exception.PreconditionErrorException;
 import liquibase.exception.PreconditionFailedException;
 import liquibase.util.StringUtils;
+import liquibase.precondition.Precondition;
 
-public class ViewExistsPrecondition implements Precondition {
+public class SequenceExistsPrecondition implements Precondition {
     private String schemaName;
-    private String viewName;
+    private String sequenceName;
 
     public String getSchemaName() {
         return schemaName;
@@ -20,12 +21,12 @@ public class ViewExistsPrecondition implements Precondition {
         this.schemaName = StringUtils.trimToNull(schemaName);
     }
 
-    public String getViewName() {
-        return viewName;
+    public String getSequenceName() {
+        return sequenceName;
     }
 
-    public void setViewName(String viewName) {
-        this.viewName = viewName;
+    public void setSequenceName(String sequenceName) {
+        this.sequenceName = sequenceName;
     }
 
     public void check(Database database, DatabaseChangeLog changeLog) throws PreconditionFailedException, PreconditionErrorException {
@@ -35,12 +36,12 @@ public class ViewExistsPrecondition implements Precondition {
         } catch (JDBCException e) {
             throw new PreconditionErrorException(e, changeLog, this);
         }
-        if (databaseSnapshot.getView(getViewName()) == null) {
-            throw new PreconditionFailedException("View "+database.escapeStringForDatabase(getViewName())+" does not exist", changeLog, this);
+        if (databaseSnapshot.getSequence(getSequenceName()) == null) {
+            throw new PreconditionFailedException("Sequence "+database.escapeSequenceName(getSchemaName(), getSequenceName())+" does not exist", changeLog, this);
         }
     }
 
-    public String getTagName() {
-        return "viewExists";
+    public String getName() {
+        return "sequenceExists";
     }
 }

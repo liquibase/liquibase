@@ -1,4 +1,4 @@
-package liquibase.precondition;
+package liquibase.precondition.core;
 
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.database.Database;
@@ -7,10 +7,11 @@ import liquibase.exception.JDBCException;
 import liquibase.exception.PreconditionErrorException;
 import liquibase.exception.PreconditionFailedException;
 import liquibase.util.StringUtils;
+import liquibase.precondition.Precondition;
 
-public class IndexExistsPrecondition implements Precondition {
+public class ViewExistsPrecondition implements Precondition {
     private String schemaName;
-    private String indexName;
+    private String viewName;
 
     public String getSchemaName() {
         return schemaName;
@@ -20,12 +21,12 @@ public class IndexExistsPrecondition implements Precondition {
         this.schemaName = StringUtils.trimToNull(schemaName);
     }
 
-    public String getIndexName() {
-        return indexName;
+    public String getViewName() {
+        return viewName;
     }
 
-    public void setIndexName(String indexName) {
-        this.indexName = indexName;
+    public void setViewName(String viewName) {
+        this.viewName = viewName;
     }
 
     public void check(Database database, DatabaseChangeLog changeLog) throws PreconditionFailedException, PreconditionErrorException {
@@ -35,12 +36,12 @@ public class IndexExistsPrecondition implements Precondition {
         } catch (JDBCException e) {
             throw new PreconditionErrorException(e, changeLog, this);
         }
-        if (databaseSnapshot.getIndex(getIndexName()) == null) {
-            throw new PreconditionFailedException("Index "+database.escapeStringForDatabase(getIndexName())+" does not exist", changeLog, this);
+        if (databaseSnapshot.getView(getViewName()) == null) {
+            throw new PreconditionFailedException("View "+database.escapeStringForDatabase(getViewName())+" does not exist", changeLog, this);
         }
     }
 
-    public String getTagName() {
-        return "indexExists";
+    public String getName() {
+        return "viewExists";
     }
 }

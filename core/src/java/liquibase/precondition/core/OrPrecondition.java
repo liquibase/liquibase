@@ -1,37 +1,38 @@
-package liquibase.precondition;
+package liquibase.precondition.core;
 
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.database.Database;
 import liquibase.exception.PreconditionErrorException;
 import liquibase.exception.PreconditionFailedException;
+import liquibase.precondition.PreconditionLogic;
+import liquibase.precondition.Precondition;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Container class for all preconditions on a change log.
+ * Class for controling "or" logic in preconditions.
  */
-public class AndPrecondition extends PreconditionLogic {
+public class OrPrecondition extends PreconditionLogic {
+
 
     public void check(Database database, DatabaseChangeLog changeLog) throws PreconditionFailedException, PreconditionErrorException {
-        boolean allPassed = true;
+        boolean onePassed = false;
         List<FailedPrecondition> failures = new ArrayList<FailedPrecondition>();
         for (Precondition precondition : getNestedPreconditions()) {
             try {
                 precondition.check(database, changeLog);
+                onePassed = true;
             } catch (PreconditionFailedException e) {
                 failures.addAll(e.getFailedPreconditions());
-                allPassed = false;
-                break;
             }
         }
-        if (!allPassed) {
+        if (!onePassed) {
             throw new PreconditionFailedException(failures);
         }
     }
 
-
-    public String getTagName() {
-        return "and";
+    public String getName() {
+        return "or";
     }
 }

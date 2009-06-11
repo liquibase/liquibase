@@ -11,6 +11,9 @@ import liquibase.exception.LiquibaseException;
 import liquibase.exception.MigrationFailedException;
 import liquibase.parser.ChangeLogParserFactory;
 import liquibase.precondition.*;
+import liquibase.precondition.core.AndPrecondition;
+import liquibase.precondition.core.SqlPrecondition;
+import liquibase.precondition.core.PreconditionContainer;
 import liquibase.resource.FileOpener;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.sql.visitor.SqlVisitorFactory;
@@ -38,7 +41,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
     private DatabaseChangeLog databaseChangeLog;
     private Change change;
     private StringBuffer text;
-    private Preconditions rootPrecondition;
+    private PreconditionContainer rootPrecondition;
     private Stack<PreconditionLogic> preconditionLogicStack = new Stack<PreconditionLogic>();
     private ChangeSet changeSet;
     private String paramName;
@@ -170,7 +173,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
                 }
                 inRollback = true;
             } else if ("preConditions".equals(qName)) {
-                rootPrecondition = new Preconditions();
+                rootPrecondition = new PreconditionContainer();
                 rootPrecondition.setOnFail(StringUtils.trimToNull(atts.getValue("onFail")));
                 rootPrecondition.setOnError(StringUtils.trimToNull(atts.getValue("onError")));
                 preconditionLogicStack.push(rootPrecondition);
@@ -317,7 +320,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
         AndPrecondition preconditions = changeLog.getPreconditions();
         if (preconditions != null) {
             if (null == databaseChangeLog.getPreconditions()) {
-                databaseChangeLog.setPreconditions(new Preconditions());
+                databaseChangeLog.setPreconditions(new PreconditionContainer());
             }
             databaseChangeLog.getPreconditions().addNestedPrecondition(preconditions);
         }

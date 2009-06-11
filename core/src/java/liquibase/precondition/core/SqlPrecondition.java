@@ -1,10 +1,11 @@
-package liquibase.precondition;
+package liquibase.precondition.core;
 
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.exception.PreconditionErrorException;
 import liquibase.exception.PreconditionFailedException;
+import liquibase.precondition.Precondition;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -71,7 +72,7 @@ public class SqlPrecondition implements Precondition {
         }
     }
 
-    public String getTagName() {
+    public String getName() {
         return "sqlCheck";
     }
 }

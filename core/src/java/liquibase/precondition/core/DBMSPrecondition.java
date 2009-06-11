@@ -1,9 +1,10 @@
-package liquibase.precondition;
+package liquibase.precondition.core;
 
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.database.Database;
 import liquibase.exception.PreconditionErrorException;
 import liquibase.exception.PreconditionFailedException;
+import liquibase.precondition.Precondition;
 
 /**
  * Precondition for specifying the type of database (oracle, mysql, etc.).
@@ -38,7 +39,7 @@ public class DBMSPrecondition implements Precondition {
         }
     }
 
-    public String getTagName() {
+    public String getName() {
         return "dbms";
     }
 

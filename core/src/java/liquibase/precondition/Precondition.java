@@ -9,7 +9,8 @@ import liquibase.exception.PreconditionFailedException;
  * Marker interface for preconditions.  May become an annotation in the future.
  */
 public interface Precondition {
+    public String getName();
+
     public void check(Database database, DatabaseChangeLog changeLog) throws PreconditionFailedException, PreconditionErrorException;
 
-    public String getTagName();
 }

@@ -8,9 +8,9 @@ import liquibase.database.Database;
 import liquibase.exception.PreconditionErrorException;
 import liquibase.exception.PreconditionFailedException;
 import liquibase.exception.SetupException;
-import liquibase.precondition.AndPrecondition;
-import liquibase.precondition.ErrorPrecondition;
-import liquibase.precondition.FailedPrecondition;
+import liquibase.precondition.core.FailedPrecondition;
+import liquibase.precondition.core.AndPrecondition;
+import liquibase.precondition.core.ErrorPrecondition;
 
 import java.util.ArrayList;
 import java.util.HashSet;

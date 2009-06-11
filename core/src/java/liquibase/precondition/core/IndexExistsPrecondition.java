@@ -1,4 +1,4 @@
-package liquibase.precondition;
+package liquibase.precondition.core;
 
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.database.Database;
@@ -7,10 +7,11 @@ import liquibase.exception.JDBCException;
 import liquibase.exception.PreconditionErrorException;
 import liquibase.exception.PreconditionFailedException;
 import liquibase.util.StringUtils;
+import liquibase.precondition.Precondition;
 
-public class ForeignKeyExistsPrecondition implements Precondition {
+public class IndexExistsPrecondition implements Precondition {
     private String schemaName;
-    private String foreignKeyName;
+    private String indexName;
 
     public String getSchemaName() {
         return schemaName;
@@ -20,12 +21,12 @@ public class ForeignKeyExistsPrecondition implements Precondition {
         this.schemaName = StringUtils.trimToNull(schemaName);
     }
 
-    public String getForeignKeyName() {
-        return foreignKeyName;
+    public String getIndexName() {
+        return indexName;
     }
 
-    public void setForeignKeyName(String foreignKeyName) {
-        this.foreignKeyName = foreignKeyName;
+    public void setIndexName(String indexName) {
+        this.indexName = indexName;
     }
 
     public void check(Database database, DatabaseChangeLog changeLog) throws PreconditionFailedException, PreconditionErrorException {
@@ -35,12 +36,12 @@ public class ForeignKeyExistsPrecondition implements Precondition {
         } catch (JDBCException e) {
             throw new PreconditionErrorException(e, changeLog, this);
         }
-        if (databaseSnapshot.getForeignKey(getForeignKeyName()) == null) {
-            throw new PreconditionFailedException("Foreign Key "+database.escapeStringForDatabase(getForeignKeyName())+" does not exist", changeLog, this);
+        if (databaseSnapshot.getIndex(getIndexName()) == null) {
+            throw new PreconditionFailedException("Index "+database.escapeStringForDatabase(getIndexName())+" does not exist", changeLog, this);
         }
     }
 
-    public String getTagName() {
-        return "foreignKeyConstraintExists";
+    public String getName() {
+        return "indexExists";
     }
 }

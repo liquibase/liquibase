@@ -1,9 +1,11 @@
-package liquibase.precondition;
+package liquibase.precondition.core;
 
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.database.Database;
 import liquibase.exception.PreconditionErrorException;
 import liquibase.exception.PreconditionFailedException;
+import liquibase.precondition.PreconditionLogic;
+import liquibase.precondition.Precondition;
 
 /**
  * Class for controling "not" logic in preconditions.
@@ -27,7 +29,7 @@ public class NotPrecondition extends PreconditionLogic {
         }
     }
 
-    public String getTagName() {
+    public String getName() {
         return "not";
     }
 }

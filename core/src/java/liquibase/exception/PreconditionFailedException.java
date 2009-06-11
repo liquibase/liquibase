@@ -1,7 +1,7 @@
 package liquibase.exception;
 
 import liquibase.changelog.DatabaseChangeLog;
-import liquibase.precondition.FailedPrecondition;
+import liquibase.precondition.core.FailedPrecondition;
 import liquibase.precondition.Precondition;
 
 import java.util.ArrayList;

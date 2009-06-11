@@ -1,4 +1,4 @@
-package liquibase.precondition;
+package liquibase.precondition.core;
 
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.database.Database;
@@ -7,6 +7,7 @@ import liquibase.exception.JDBCException;
 import liquibase.exception.PreconditionErrorException;
 import liquibase.exception.PreconditionFailedException;
 import liquibase.util.StringUtils;
+import liquibase.precondition.Precondition;
 
 public class PrimaryKeyExistsPrecondition implements Precondition {
     private String schemaName;
@@ -57,7 +58,7 @@ public class PrimaryKeyExistsPrecondition implements Precondition {
         }
     }
 
-    public String getTagName() {
+    public String getName() {
         return "primaryKeyExists";
     }
 }

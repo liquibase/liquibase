@@ -9,8 +9,8 @@ import liquibase.change.custom.ExampleCustomSqlChange;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.exception.ChangeLogParseException;
-import liquibase.precondition.OrPrecondition;
-import liquibase.precondition.Preconditions;
+import liquibase.precondition.core.OrPrecondition;
+import liquibase.precondition.core.PreconditionContainer;
 import liquibase.test.JUnitFileOpener;
 import static org.junit.Assert.*;
 import org.junit.Test;
@@ -139,11 +139,11 @@ public class XMLChangeLogSAXParserTest {
         assertNotNull(changeLog.getPreconditions());
         assertEquals(2, changeLog.getPreconditions().getNestedPreconditions().size());
 
-        assertEquals("runningAs", changeLog.getPreconditions().getNestedPreconditions().get(0).getTagName());
+        assertEquals("runningAs", changeLog.getPreconditions().getNestedPreconditions().get(0).getName());
 
-        assertEquals("or", changeLog.getPreconditions().getNestedPreconditions().get(1).getTagName());
-        assertEquals("dbms", ((OrPrecondition) changeLog.getPreconditions().getNestedPreconditions().get(1)).getNestedPreconditions().get(0).getTagName());
-        assertEquals("dbms", ((OrPrecondition) changeLog.getPreconditions().getNestedPreconditions().get(1)).getNestedPreconditions().get(1).getTagName());
+        assertEquals("or", changeLog.getPreconditions().getNestedPreconditions().get(1).getName());
+        assertEquals("dbms", ((OrPrecondition) changeLog.getPreconditions().getNestedPreconditions().get(1)).getNestedPreconditions().get(0).getName());
+        assertEquals("dbms", ((OrPrecondition) changeLog.getPreconditions().getNestedPreconditions().get(1)).getNestedPreconditions().get(1).getName());
 
         assertEquals(1, changeLog.getChangeSets().size());
     }
@@ -169,7 +169,7 @@ public class XMLChangeLogSAXParserTest {
         assertEquals(nestedFileName, changeLog.getPhysicalFilePath());
 
         assertEquals(1, changeLog.getPreconditions().getNestedPreconditions().size());
-        assertEquals(0, ((Preconditions) changeLog.getPreconditions().getNestedPreconditions().get(0)).getNestedPreconditions().size());
+        assertEquals(0, ((PreconditionContainer) changeLog.getPreconditions().getNestedPreconditions().get(0)).getNestedPreconditions().size());
         assertEquals(3, changeLog.getChangeSets().size());
 
         // change 0
@@ -237,9 +237,9 @@ public class XMLChangeLogSAXParserTest {
         assertEquals(doubleNestedFileName, changeLog.getPhysicalFilePath());
 
 		assertEquals(1, changeLog.getPreconditions().getNestedPreconditions().size());
-        Preconditions nested = (Preconditions) changeLog.getPreconditions().getNestedPreconditions().get(0);
+        PreconditionContainer nested = (PreconditionContainer) changeLog.getPreconditions().getNestedPreconditions().get(0);
         assertEquals(1, nested.getNestedPreconditions().size());
-        assertEquals(0, ((Preconditions) nested.getNestedPreconditions().get(0)).getNestedPreconditions().size());
+        assertEquals(0, ((PreconditionContainer) nested.getNestedPreconditions().get(0)).getNestedPreconditions().size());
         assertEquals(4, changeLog.getChangeSets().size());
 
         // change 0

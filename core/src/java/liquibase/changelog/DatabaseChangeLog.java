@@ -5,7 +5,7 @@ import liquibase.changelog.visitor.ValidatingVisitor;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.ValidationFailedException;
-import liquibase.precondition.Preconditions;
+import liquibase.precondition.core.PreconditionContainer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +14,7 @@ import java.util.List;
  * Encapsulates the information stored in the change log XML file.
  */
 public class DatabaseChangeLog implements Comparable<DatabaseChangeLog> {
-    private Preconditions preconditions = new Preconditions();
+    private PreconditionContainer preconditionContainer = new PreconditionContainer();
     private String physicalFilePath;
     private String logicalFilePath;
 
@@ -24,12 +24,12 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog> {
         this.physicalFilePath = physicalFilePath;
     }
 
-    public Preconditions getPreconditions() {
-        return preconditions;
+    public PreconditionContainer getPreconditions() {
+        return preconditionContainer;
     }
 
-    public void setPreconditions(Preconditions precond) {
-        preconditions = precond;
+    public void setPreconditions(PreconditionContainer precond) {
+        preconditionContainer = precond;
     }
 
     public String getPhysicalFilePath() {

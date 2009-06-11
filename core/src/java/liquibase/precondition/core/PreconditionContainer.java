@@ -1,11 +1,12 @@
-package liquibase.precondition;
+package liquibase.precondition.core;
 
 import liquibase.util.StringUtils;
+import liquibase.precondition.core.AndPrecondition;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class Preconditions extends AndPrecondition {
+public class PreconditionContainer extends AndPrecondition {
 
     public enum FailOption {
         HALT("HALT"),
