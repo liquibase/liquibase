@@ -572,10 +572,6 @@ public abstract class AbstractDatabase implements Database {
                 .addColumnValue("LOCKED", Boolean.FALSE);
     }
 
-    protected SqlStatement getCreateChangeLogLockSQL() {
-        return new CreateDatabaseChangeLogLockTableStatement();
-    }
-
     protected SqlStatement getCreateChangeLogSQL() throws JDBCException {
         return new CreateTableStatement(getLiquibaseSchemaName(), getDatabaseChangeLogTableName())
                 .addPrimaryKeyColumn("ID", "VARCHAR(63)", null, null, new NotNullConstraint())
@@ -742,7 +738,7 @@ public abstract class AbstractDatabase implements Database {
             }
 
 
-            SqlStatement createTableStatement = getCreateChangeLogLockSQL();
+            SqlStatement createTableStatement = new CreateDatabaseChangeLogLockTableStatement();
 
             writeExecutor.comment("Create Database Lock Table");
             writeExecutor.execute(createTableStatement, new ArrayList<SqlVisitor>());
