@@ -1,4 +1,4 @@
-package liquibase.precondition;
+package liquibase.precondition.core;
 
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.database.Database;
@@ -7,10 +7,11 @@ import liquibase.exception.JDBCException;
 import liquibase.exception.PreconditionErrorException;
 import liquibase.exception.PreconditionFailedException;
 import liquibase.util.StringUtils;
+import liquibase.precondition.Precondition;
 
-public class SequenceExistsPrecondition implements Precondition {
+public class ForeignKeyExistsPrecondition implements Precondition {
     private String schemaName;
-    private String sequenceName;
+    private String foreignKeyName;
 
     public String getSchemaName() {
         return schemaName;
@@ -20,12 +21,12 @@ public class SequenceExistsPrecondition implements Precondition {
         this.schemaName = StringUtils.trimToNull(schemaName);
     }
 
-    public String getSequenceName() {
-        return sequenceName;
+    public String getForeignKeyName() {
+        return foreignKeyName;
     }
 
-    public void setSequenceName(String sequenceName) {
-        this.sequenceName = sequenceName;
+    public void setForeignKeyName(String foreignKeyName) {
+        this.foreignKeyName = foreignKeyName;
     }
 
     public void check(Database database, DatabaseChangeLog changeLog) throws PreconditionFailedException, PreconditionErrorException {
@@ -35,12 +36,12 @@ public class SequenceExistsPrecondition implements Precondition {
         } catch (JDBCException e) {
             throw new PreconditionErrorException(e, changeLog, this);
         }
-        if (databaseSnapshot.getSequence(getSequenceName()) == null) {
-            throw new PreconditionFailedException("Sequence "+database.escapeSequenceName(getSchemaName(), getSequenceName())+" does not exist", changeLog, this);
+        if (databaseSnapshot.getForeignKey(getForeignKeyName()) == null) {
+            throw new PreconditionFailedException("Foreign Key "+database.escapeStringForDatabase(getForeignKeyName())+" does not exist", changeLog, this);
         }
     }
 
-    public String getTagName() {
-        return "sequenceExists";
+    public String getName() {
+        return "foreignKeyConstraintExists";
     }
 }

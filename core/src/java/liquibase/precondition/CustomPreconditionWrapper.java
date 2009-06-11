@@ -7,6 +7,8 @@ import liquibase.exception.CustomPreconditionFailedException;
 import liquibase.exception.PreconditionErrorException;
 import liquibase.exception.PreconditionFailedException;
 import liquibase.util.ObjectUtil;
+import liquibase.precondition.core.ErrorPrecondition;
+import liquibase.precondition.core.FailedPrecondition;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -73,7 +75,7 @@ public class CustomPreconditionWrapper implements Precondition {
         }
     }
 
-    public String getTagName() {
+    public String getName() {
         return "customPrecondition";
     }
 }
