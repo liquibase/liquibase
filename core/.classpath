@@ -18,5 +18,7 @@
 	<classpathentry kind="lib" path="lib-compile/hibernate-commons-annotations-3.3.1.jar"/>
 	<classpathentry kind="lib" path="lib-compile/hibernate3-3.2.6.jar"/>
 	<classpathentry kind="lib" path="lib/junit-4.1.jar" sourcepath="lib-sources/junit-4.1-src.jar"/>
+	<classpathentry kind="lib" path="lib/commons-logging-1.0.4.jar"/>
+	<classpathentry kind="lib" path="lib/commons-logging-api-1.0.4.jar"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>
