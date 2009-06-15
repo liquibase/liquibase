@@ -18,14 +18,14 @@ import java.util.*;
  *
  * @author <a href="mailto:csuml@yahoo.co.uk>Paul Keeble</a>
  */
-public class FileSystemFileOpener implements FileOpener {
+public class FileSystemResourceAccessor implements ResourceAccessor {
     String baseDirectory;
 
     /**
      * Creates using a Base directory of null, all files will be
      * resolved exactly as they are given.
      */
-    public FileSystemFileOpener() {
+    public FileSystemResourceAccessor() {
         baseDirectory = null;
     }
 
@@ -34,7 +34,7 @@ public class FileSystemFileOpener implements FileOpener {
      *
      * @param base The path to use to resolve relative paths
      */
-    public FileSystemFileOpener(String base) {
+    public FileSystemResourceAccessor(String base) {
         if (new File(base).isFile())
             throw new IllegalArgumentException("base must be a directory");
         baseDirectory = base;

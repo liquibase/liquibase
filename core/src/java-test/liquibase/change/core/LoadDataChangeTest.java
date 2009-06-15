@@ -3,7 +3,7 @@ package liquibase.change.core;
 import liquibase.database.core.MockDatabase;
 import liquibase.statement.InsertStatement;
 import liquibase.statement.SqlStatement;
-import liquibase.test.JUnitFileOpener;
+import liquibase.test.JUnitResourceAccessor;
 import liquibase.change.core.LoadDataChange;
 import liquibase.change.core.LoadDataColumnConfig;
 import liquibase.change.AbstractChangeTest;
@@ -29,7 +29,7 @@ public class LoadDataChangeTest extends AbstractChangeTest {
         refactoring.setSchemaName("SCHEMA_NAME");
         refactoring.setTableName("TABLE_NAME");
         refactoring.setFile("changelogs/sample.data1.csv");
-        refactoring.setFileOpener(new JUnitFileOpener());
+        refactoring.setFileOpener(new JUnitResourceAccessor());
 
         SqlStatement[] sqlStatements = refactoring.generateStatements(new MockDatabase());
 
@@ -54,7 +54,7 @@ public class LoadDataChangeTest extends AbstractChangeTest {
         refactoring.setSchemaName("SCHEMA_NAME");
         refactoring.setTableName("TABLE_NAME");
         refactoring.setFile("changelogs/sample.data1-excel.csv");
-        refactoring.setFileOpener(new JUnitFileOpener());
+        refactoring.setFileOpener(new JUnitResourceAccessor());
 
         LoadDataColumnConfig ageConfig = new LoadDataColumnConfig();
         ageConfig.setHeader("age");
@@ -104,7 +104,7 @@ public class LoadDataChangeTest extends AbstractChangeTest {
         refactoring.setSchemaName("SCHEMA_NAME");
         refactoring.setTableName("TABLE_NAME");
         refactoring.setFile("changelogs/sample.data1.csv");
-        refactoring.setFileOpener(new JUnitFileOpener());
+        refactoring.setFileOpener(new JUnitResourceAccessor());
 
         String md5sum1 = refactoring.generateCheckSum().toString();
 

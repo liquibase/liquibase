@@ -1,7 +1,7 @@
 package liquibase.change.core;
 
 import liquibase.exception.SetupException;
-import liquibase.resource.FileOpener;
+import liquibase.resource.ResourceAccessor;
 import liquibase.util.StreamUtil;
 import liquibase.util.log.LogFactory;
 import liquibase.change.AbstractSQLChange;
@@ -127,7 +127,7 @@ public class SQLFileChange extends AbstractSQLChange {
     private boolean loadFromClasspath(String file) throws SetupException {
         InputStream in = null;
         try {
-            FileOpener fo = getFileOpener();
+            ResourceAccessor fo = getFileOpener();
             if(fo== null) {
                 return false;
             }

@@ -3,9 +3,9 @@
 package org.liquibase.maven.plugins;
 
 import liquibase.*;
-import liquibase.resource.CompositeFileOpener;
-import liquibase.resource.FileOpener;
-import liquibase.resource.FileSystemFileOpener;
+import liquibase.resource.CompositeResourceAccessor;
+import liquibase.resource.ResourceAccessor;
+import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -72,14 +72,14 @@ public abstract class AbstractLiquibaseChangeLogMojo extends AbstractLiquibaseMo
   }
 
   @Override
-  protected FileOpener getFileOpener(ClassLoader cl) {
-    FileOpener mFO = new MavenFileOpener(cl);
-    FileOpener fsFO = new FileSystemFileOpener(project.getBasedir().getAbsolutePath());
-    return new CompositeFileOpener(mFO, fsFO);
+  protected ResourceAccessor getFileOpener(ClassLoader cl) {
+    ResourceAccessor mFO = new MavenResourceAccessor(cl);
+    ResourceAccessor fsFO = new FileSystemResourceAccessor(project.getBasedir().getAbsolutePath());
+    return new CompositeResourceAccessor(mFO, fsFO);
   }
 
   @Override
-  protected Liquibase createLiquibase(FileOpener fo, Database db) throws MojoExecutionException {
+  protected Liquibase createLiquibase(ResourceAccessor fo, Database db) throws MojoExecutionException {
       String changeLog = changeLogFile == null ? "" : changeLogFile.trim();
       return new Liquibase(changeLog, fo, db);
   }

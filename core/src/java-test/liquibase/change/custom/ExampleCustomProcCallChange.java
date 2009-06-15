@@ -4,7 +4,7 @@ import liquibase.database.Database;
 import liquibase.exception.CustomChangeException;
 import liquibase.exception.SetupException;
 import liquibase.exception.ValidationErrors;
-import liquibase.resource.FileOpener;
+import liquibase.resource.ResourceAccessor;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.StoredProcedureStatement;
 
@@ -13,7 +13,7 @@ public class ExampleCustomProcCallChange implements CustomSqlChange {
     private String procedureName;
 
     @SuppressWarnings({"UnusedDeclaration", "FieldCanBeLocal"})
-    private FileOpener fileOpener;
+    private ResourceAccessor resourceAccessor;
 
 
     public String getProcedureName() {
@@ -38,8 +38,8 @@ public class ExampleCustomProcCallChange implements CustomSqlChange {
     public void setUp() throws SetupException {
     }
 
-    public void setFileOpener(FileOpener fileOpener) {
-        this.fileOpener = fileOpener;
+    public void setFileOpener(ResourceAccessor resourceAccessor) {
+        this.resourceAccessor = resourceAccessor;
     }
 
     public ValidationErrors validate(Database database) {

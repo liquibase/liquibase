@@ -14,7 +14,7 @@ import liquibase.precondition.*;
 import liquibase.precondition.core.AndPrecondition;
 import liquibase.precondition.core.SqlPrecondition;
 import liquibase.precondition.core.PreconditionContainer;
-import liquibase.resource.FileOpener;
+import liquibase.resource.ResourceAccessor;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.sql.visitor.SqlVisitorFactory;
 import liquibase.util.ObjectUtil;
@@ -45,7 +45,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
     private Stack<PreconditionLogic> preconditionLogicStack = new Stack<PreconditionLogic>();
     private ChangeSet changeSet;
     private String paramName;
-    private FileOpener fileOpener;
+    private ResourceAccessor resourceAccessor;
     private Precondition currentPrecondition;
 
     private Map<String, Object> changeLogParameters = new HashMap<String, Object>();
@@ -55,9 +55,9 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
     private Collection modifySqlDbmsList;
 
 
-    protected XMLChangeLogSAXHandler(String physicalChangeLogLocation, FileOpener fileOpener, Map<String, Object> properties) {
+    protected XMLChangeLogSAXHandler(String physicalChangeLogLocation, ResourceAccessor resourceAccessor, Map<String, Object> properties) {
         log = LogFactory.getLogger();
-        this.fileOpener = fileOpener;
+        this.resourceAccessor = resourceAccessor;
 
         databaseChangeLog = new DatabaseChangeLog(physicalChangeLogLocation);
         databaseChangeLog.setPhysicalFilePath(physicalChangeLogLocation);
@@ -99,8 +99,8 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
                     pathName = pathName+"/";
                 }
                 log.finest("includeAll for "+pathName);
-                log.finest("Using file opener for includeAll: "+fileOpener.getClass().getName());
-                Enumeration<URL> resources = fileOpener.getResources(pathName);
+                log.finest("Using file opener for includeAll: "+ resourceAccessor.getClass().getName());
+                Enumeration<URL> resources = resourceAccessor.getResources(pathName);
 
                 boolean foundResource = false;
 
@@ -218,9 +218,9 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
                 if (change == null) {
                     throw new MigrationFailedException(changeSet, "Unknown change: " + qName);
                 }
-                change.setFileOpener(fileOpener);
+                change.setFileOpener(resourceAccessor);
                 if (change instanceof CustomChangeWrapper) {
-                    ((CustomChangeWrapper) change).setClassLoader(fileOpener.toClassLoader());
+                    ((CustomChangeWrapper) change).setClassLoader(resourceAccessor.toClassLoader());
                 }
                 for (int i = 0; i < atts.getLength(); i++) {
                     String attributeName = atts.getQName(i);
@@ -283,7 +283,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
                     this.setParameterValue(atts.getValue("name"), atts.getValue("value"));
                 } else {
                     Properties props = new Properties();
-                    InputStream propertiesStream = fileOpener.getResourceAsStream(atts.getValue("file"));
+                    InputStream propertiesStream = resourceAccessor.getResourceAsStream(atts.getValue("file"));
                     if (propertiesStream == null) {
                         log.info("Could not open properties file " + atts.getValue("file"));
                     } else {
@@ -316,7 +316,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
             String path = searchPath(relativeBaseFileName);
             fileName = new StringBuilder(path).append(fileName).toString();
         }
-        DatabaseChangeLog changeLog = ChangeLogParserFactory.getInstance().getParser(fileName).parse(fileName, changeLogParameters, fileOpener);
+        DatabaseChangeLog changeLog = ChangeLogParserFactory.getInstance().getParser(fileName).parse(fileName, changeLogParameters, resourceAccessor);
         AndPrecondition preconditions = changeLog.getPreconditions();
         if (preconditions != null) {
             if (null == databaseChangeLog.getPreconditions()) {
@@ -385,7 +385,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
                     ((SqlPrecondition) currentPrecondition).setSql(textString);
                     currentPrecondition = null;
                 } else if (qName.equals("customPrecondition")) {
-                    ((CustomPreconditionWrapper) currentPrecondition).setClassLoader(fileOpener.toClassLoader());
+                    ((CustomPreconditionWrapper) currentPrecondition).setClassLoader(resourceAccessor.toClassLoader());
                 }
 
             } else if (changeSet != null && "rollback".equals(qName)) {

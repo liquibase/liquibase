@@ -1,7 +1,7 @@
 package org.liquibase.maven.plugins;
 
 import java.io.*;
-import liquibase.resource.FileOpener;
+import liquibase.resource.ResourceAccessor;
 import liquibase.Liquibase;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
@@ -43,7 +43,7 @@ public class LiquibaseUpdateSQL extends AbstractLiquibaseUpdateMojo {
   }
 
   @Override
-  protected Liquibase createLiquibase(FileOpener fo, Database db)
+  protected Liquibase createLiquibase(ResourceAccessor fo, Database db)
           throws MojoExecutionException {
     Liquibase liquibase = super.createLiquibase(fo, db);
 

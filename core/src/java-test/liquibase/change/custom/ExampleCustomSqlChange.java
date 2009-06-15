@@ -5,7 +5,7 @@ import liquibase.exception.RollbackImpossibleException;
 import liquibase.exception.SetupException;
 import liquibase.exception.UnsupportedChangeException;
 import liquibase.exception.ValidationErrors;
-import liquibase.resource.FileOpener;
+import liquibase.resource.ResourceAccessor;
 import liquibase.statement.RawSqlStatement;
 import liquibase.statement.SqlStatement;
 
@@ -16,7 +16,7 @@ public class ExampleCustomSqlChange implements CustomSqlChange, CustomSqlRollbac
     private String newValue;
 
     @SuppressWarnings({"UnusedDeclaration", "FieldCanBeLocal"})
-    private FileOpener fileOpener;
+    private ResourceAccessor resourceAccessor;
 
 
     public String getTableName() {
@@ -62,8 +62,8 @@ public class ExampleCustomSqlChange implements CustomSqlChange, CustomSqlRollbac
     public void setUp() throws SetupException {
     }
 
-    public void setFileOpener(FileOpener fileOpener) {
-        this.fileOpener = fileOpener;
+    public void setFileOpener(ResourceAccessor resourceAccessor) {
+        this.resourceAccessor = resourceAccessor;
     }
 
     public ValidationErrors validate(Database database) {

@@ -8,7 +8,7 @@ import liquibase.exception.SetupException;
 import liquibase.exception.UnsupportedChangeException;
 import liquibase.exception.ValidationErrors;
 import liquibase.serializer.string.StringChangeLogSerializer;
-import liquibase.resource.FileOpener;
+import liquibase.resource.ResourceAccessor;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
 
@@ -26,7 +26,7 @@ public abstract class AbstractChange implements Change {
     private ChangeMetaData changeMetaData;
 
     @ChangeProperty(includeInSerialization = false)
-    private FileOpener fileOpener;
+    private ResourceAccessor resourceAccessor;
 
     @ChangeProperty(includeInSerialization = false)
     private ChangeSet changeSet;
@@ -143,8 +143,8 @@ public abstract class AbstractChange implements Change {
      * Default implementation that stores the file opener provided when the
      * Change was created.
      */
-    public void setFileOpener(FileOpener fileOpener) {
-        this.fileOpener = fileOpener;
+    public void setFileOpener(ResourceAccessor resourceAccessor) {
+        this.resourceAccessor = resourceAccessor;
     }
 
     /**
@@ -152,8 +152,8 @@ public abstract class AbstractChange implements Change {
      *
      * @return The file opener
      */
-    public FileOpener getFileOpener() {
-        return fileOpener;
+    public ResourceAccessor getFileOpener() {
+        return resourceAccessor;
     }
 
     /**

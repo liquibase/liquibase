@@ -5,7 +5,7 @@ import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.exception.JDBCException;
 import liquibase.exception.LiquibaseException;
-import liquibase.resource.FileOpener;
+import liquibase.resource.ResourceAccessor;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ResourceLoaderAware;
@@ -67,7 +67,7 @@ import java.util.logging.Logger;
  * @author Rob Schoening
  */
 public class SpringLiquibase implements InitializingBean, BeanNameAware, ResourceLoaderAware {
-    public class SpringResourceOpener implements FileOpener {
+    public class SpringResourceOpener implements ResourceAccessor {
         private String parentFile;
 
         public SpringResourceOpener(String parentFile) {

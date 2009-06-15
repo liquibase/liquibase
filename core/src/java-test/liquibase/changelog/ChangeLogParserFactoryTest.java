@@ -5,7 +5,7 @@ import liquibase.parser.ChangeLogParser;
 import liquibase.parser.ChangeLogParserFactory;
 import liquibase.parser.sql.SqlChangeLogParser;
 import liquibase.parser.xml.XMLChangeLogSAXParser;
-import liquibase.resource.FileOpener;
+import liquibase.resource.ResourceAccessor;
 import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
@@ -116,7 +116,7 @@ public class ChangeLogParserFactoryTest {
 
     private static class MockChangeLogParser implements ChangeLogParser {
 
-        public DatabaseChangeLog parse(String physicalChangeLogLocation, Map<String, Object> changeLogParameters, FileOpener fileOpener) throws ChangeLogParseException {
+        public DatabaseChangeLog parse(String physicalChangeLogLocation, Map<String, Object> changeLogParameters, ResourceAccessor resourceAccessor) throws ChangeLogParseException {
             return null;
         }
 

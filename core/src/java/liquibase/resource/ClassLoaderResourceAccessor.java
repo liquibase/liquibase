@@ -8,9 +8,9 @@ import java.util.Enumeration;
 /**
  * An implementation of liquibase.FileOpener that opens file from the class loader.
  *
- * @see FileOpener
+ * @see ResourceAccessor
  */
-public class ClassLoaderFileOpener implements FileOpener {
+public class ClassLoaderResourceAccessor implements ResourceAccessor {
     public InputStream getResourceAsStream(String file) throws IOException {
         return getClass().getClassLoader().getResourceAsStream(file);
     }

@@ -1,6 +1,6 @@
 package org.liquibase.eclipse.common.migrator;
 
-import liquibase.resource.FileOpener;
+import liquibase.resource.ResourceAccessor;
 import org.liquibase.eclipse.common.LiquibasePreferences;
 
 import java.io.File;
@@ -14,10 +14,10 @@ import java.util.Enumeration;
 import java.util.List;
 
 
-public class EclipseFileOpener implements FileOpener {
+public class EclipseResourceAccessor implements ResourceAccessor {
     private ClassLoader loader;
 
-    public EclipseFileOpener()  {
+    public EclipseResourceAccessor()  {
         try {
     	List<URL> urls = new ArrayList<URL>();
 	    	for (File root : LiquibasePreferences.getRoots()) {

@@ -8,8 +8,8 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.InputValidator;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.vfs.VirtualFile;
-import liquibase.resource.CompositeFileOpener;
-import liquibase.resource.FileSystemFileOpener;
+import liquibase.resource.CompositeResourceAccessor;
+import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.Liquibase;
 import liquibase.database.Database;
@@ -40,7 +40,7 @@ public class IntellijFacade implements IdeFacade {
             changeLogFile = liquibaseProjectComponent.getRootChangeLogFile();
         }
 
-        Liquibase liquibase = new Liquibase(changeLogFile, new CompositeFileOpener(new IntellijFileOpener(), new FileSystemFileOpener()), database);
+        Liquibase liquibase = new Liquibase(changeLogFile, new CompositeResourceAccessor(new IntellijResourceAccessor(), new FileSystemResourceAccessor()), database);
         try {
             liquibase.checkDatabaseChangeLogTable();
         } catch (Exception e) {

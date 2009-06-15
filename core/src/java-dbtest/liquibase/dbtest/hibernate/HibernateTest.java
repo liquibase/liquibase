@@ -11,7 +11,7 @@ public class HibernateTest {
 //                        if (!(database instanceof MySQLDatabase)) {
 //                            return;
 //                        }
-//                        Liquibase liquibase = new Liquibase(null, new JUnitFileOpener(), database);
+//                        Liquibase liquibase = new Liquibase(null, new JUnitResourceAccessor(), database);
 //                        liquibase.dropAll();
 //
 //                        Database hibernateDatabase = new HibernateDatabase(HIBERNATE_CONFIG_FILE);
@@ -26,7 +26,7 @@ public class HibernateTest {
 //                        diffResult.printChangeLog(new PrintStream(outChangeLog), hibernateDatabase);
 //                        outChangeLog.close();
 //
-//                        liquibase = new Liquibase(outFile.getName(), new JUnitFileOpener(), database);
+//                        liquibase = new Liquibase(outFile.getName(), new JUnitResourceAccessor(), database);
 //                        liquibase.update(null);
 //
 //                        diff = new Diff(hibernateDatabase, database);

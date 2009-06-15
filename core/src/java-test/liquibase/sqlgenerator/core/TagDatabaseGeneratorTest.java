@@ -15,7 +15,7 @@ public class TagDatabaseGeneratorTest {
 //        new DatabaseTestTemplate().testOnAvailableDatabases(
 //                new SqlStatementDatabaseTest(null, new TagDatabaseStatement("TAG_NAME")) {
 //                    protected void setup(Database database) throws Exception {
-//                        new Liquibase("changelogs/common/common.tests.changelog.xml", new JUnitFileOpener(), database).update(null);
+//                        new Liquibase("changelogs/common/common.tests.changelog.xml", new JUnitResourceAccessor(), database).update(null);
 //                    }
 //
 //                    protected void preExecuteAssert(DatabaseSnapshot snapshot) throws JDBCException {

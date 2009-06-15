@@ -23,7 +23,7 @@ import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
 import org.liquibase.eclipse.common.LiquibasePreferences;
 import org.liquibase.eclipse.common.change.wizard.page.ChangeMetaDataWizardPage;
-import org.liquibase.eclipse.common.migrator.EclipseFileOpener;
+import org.liquibase.eclipse.common.migrator.EclipseResourceAccessor;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -79,7 +79,7 @@ public abstract class BaseEclipseRefactorWizard extends Wizard {
                     monitor.beginTask("Refactoring Database", 100);
 
                     try {
-                        Liquibase liquibase = new Liquibase(LiquibasePreferences.getCurrentChangeLog(), new EclipseFileOpener(), DatabaseFactory.getInstance().findCorrectDatabaseImplementation(getConnection()));
+                        Liquibase liquibase = new Liquibase(LiquibasePreferences.getCurrentChangeLog(), new EclipseResourceAccessor(), DatabaseFactory.getInstance().findCorrectDatabaseImplementation(getConnection()));
 
                         monitor.subTask("Checking Control Tables");
                         liquibase.getDatabase().checkDatabaseChangeLogTable();

@@ -6,9 +6,9 @@ import java.lang.reflect.Field;
 import java.net.MalformedURLException;
 import java.util.*;
 import liquibase.*;
-import liquibase.resource.CompositeFileOpener;
-import liquibase.resource.FileOpener;
-import liquibase.resource.FileSystemFileOpener;
+import liquibase.resource.CompositeResourceAccessor;
+import liquibase.resource.ResourceAccessor;
+import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.integration.commandline.CommandLineUtils;
 import liquibase.database.Database;
 import liquibase.exception.*;
@@ -222,11 +222,11 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     }
   }
 
-  protected Liquibase createLiquibase(FileOpener fo, Database db) throws MojoExecutionException {
+  protected Liquibase createLiquibase(ResourceAccessor fo, Database db) throws MojoExecutionException {
     return new Liquibase("", fo, db);
   }
 
-  public void configureFieldsAndValues(FileOpener fo)
+  public void configureFieldsAndValues(ResourceAccessor fo)
           throws MojoExecutionException, MojoFailureException {
     // Load the properties file if there is one, but only for values that the user has not
     // already specified.
@@ -260,10 +260,10 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     }
   }
 
-  protected FileOpener getFileOpener(ClassLoader cl) {
-    FileOpener mFO = new MavenFileOpener(cl);
-    FileOpener fsFO = new FileSystemFileOpener(project.getBasedir().getAbsolutePath());
-    return new CompositeFileOpener(mFO, fsFO);
+  protected ResourceAccessor getFileOpener(ClassLoader cl) {
+    ResourceAccessor mFO = new MavenResourceAccessor(cl);
+    ResourceAccessor fsFO = new FileSystemResourceAccessor(project.getBasedir().getAbsolutePath());
+    return new CompositeResourceAccessor(mFO, fsFO);
   }
 
   /**

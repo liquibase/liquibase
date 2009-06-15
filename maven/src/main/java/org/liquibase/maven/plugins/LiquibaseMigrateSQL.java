@@ -3,7 +3,7 @@
 package org.liquibase.maven.plugins;
 
 import java.io.*;
-import liquibase.resource.FileOpener;
+import liquibase.resource.ResourceAccessor;
 import liquibase.Liquibase;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
@@ -32,7 +32,7 @@ public class LiquibaseMigrateSQL extends AbstractLiquibaseUpdateMojo {
   private Writer outputWriter;
 
   @Override
-  public void configureFieldsAndValues(FileOpener fo)
+  public void configureFieldsAndValues(ResourceAccessor fo)
           throws MojoExecutionException, MojoFailureException {
     getLog().warn("This plugin goal is DEPRICATED and will bre removed in a future "
                   + "release, please use \"updateSQL\" instead of \"migrateSQL\".");
@@ -56,7 +56,7 @@ public class LiquibaseMigrateSQL extends AbstractLiquibaseUpdateMojo {
   }
 
   @Override
-  protected Liquibase createLiquibase(FileOpener fo, Database db)
+  protected Liquibase createLiquibase(ResourceAccessor fo, Database db)
           throws MojoExecutionException {
     Liquibase liquibase = super.createLiquibase(fo, db);
 
