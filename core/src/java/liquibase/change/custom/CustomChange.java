@@ -3,7 +3,7 @@ package liquibase.change.custom;
 import liquibase.database.Database;
 import liquibase.exception.SetupException;
 import liquibase.exception.ValidationErrors;
-import liquibase.resource.FileOpener;
+import liquibase.resource.ResourceAccessor;
 
 /**
  * Interface to implement when creating a custom change.  Actual custom changes implementations need to
@@ -34,7 +34,7 @@ public interface CustomChange {
      * Sets the fileOpener that should be used for any file loading and resource
      * finding for files that are provided by the user.
      */
-    public void setFileOpener(FileOpener fileOpener);
+    public void setFileOpener(ResourceAccessor resourceAccessor);
 
     /**
      * Tests that the change is configured correctly before attempting to execute it.

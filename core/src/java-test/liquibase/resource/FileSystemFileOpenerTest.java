@@ -14,27 +14,27 @@ import java.util.Enumeration;
 
 
 public class FileSystemFileOpenerTest {
-    FileSystemFileOpener opener;
+    FileSystemResourceAccessor opener;
     
     @Before
     public void createFileOpener() throws URISyntaxException {
-        File thisClassFile = new File(new URI(this.getClass().getClassLoader().getResource("liquibase/resource/FileSystemFileOpener.class").toExternalForm()));
+        File thisClassFile = new File(new URI(this.getClass().getClassLoader().getResource("liquibase/resource/FileSystemResourceAccessor.class").toExternalForm()));
         String packageDirectory = thisClassFile.getParent();
 
         
-        opener = new FileSystemFileOpener(packageDirectory);
+        opener = new FileSystemResourceAccessor(packageDirectory);
     }
     
     @Test(expected = IllegalArgumentException.class)
     public void onlyAcceptsDirectories() throws URISyntaxException {
-        File thisClassFile = new File(new URI(this.getClass().getClassLoader().getResource("liquibase/resource/FileSystemFileOpener.class").toExternalForm()));
+        File thisClassFile = new File(new URI(this.getClass().getClassLoader().getResource("liquibase/resource/FileSystemResourceAccessor.class").toExternalForm()));
 
-        FileOpener o = new FileSystemFileOpener(thisClassFile.getAbsolutePath());
+        ResourceAccessor o = new FileSystemResourceAccessor(thisClassFile.getAbsolutePath());
     }
 
     @Test
     public void singleFileTest() throws IOException {
-        assertNotNull(opener.getResourceAsStream("FileSystemFileOpener.class"));
+        assertNotNull(opener.getResourceAsStream("FileSystemResourceAccessor.class"));
     }
     
     @Test
@@ -43,7 +43,7 @@ public class FileSystemFileOpenerTest {
         boolean found = false;
         while(files.hasMoreElements()) {
             URL u = files.nextElement();
-            found |=u.getFile().lastIndexOf("FileSystemFileOpener")>-1;
+            found |=u.getFile().lastIndexOf("FileSystemResourceAccessor")>-1;
         }
         assertTrue(found);
     }

@@ -6,8 +6,8 @@ import liquibase.exception.CommandLineParsingException;
 import liquibase.exception.JDBCException;
 import liquibase.exception.ValidationFailedException;
 import liquibase.lock.LockService;
-import liquibase.resource.CompositeFileOpener;
-import liquibase.resource.FileSystemFileOpener;
+import liquibase.resource.CompositeResourceAccessor;
+import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.util.LiquibaseUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
@@ -579,13 +579,13 @@ public class Main {
             throw new CommandLineParsingException(e.getMessage(), e);
         }
 
-        FileSystemFileOpener fsOpener = new FileSystemFileOpener();
-        CommandLineFileOpener clOpener = new CommandLineFileOpener(classLoader);
+        FileSystemResourceAccessor fsOpener = new FileSystemResourceAccessor();
+        CommandLineResourceAccessor clOpener = new CommandLineResourceAccessor(classLoader);
         Database database = CommandLineUtils.createDatabaseObject(classLoader, this.url, this.username, this.password, this.driver, this.defaultSchemaName, this.databaseClass);
         try {
 
 
-            CompositeFileOpener fileOpener = new CompositeFileOpener(fsOpener, clOpener);
+            CompositeResourceAccessor fileOpener = new CompositeResourceAccessor(fsOpener, clOpener);
 
             if ("diff".equalsIgnoreCase(command)) {
                 CommandLineUtils.doDiff(database, createDatabaseFromCommandParams(commandParams));

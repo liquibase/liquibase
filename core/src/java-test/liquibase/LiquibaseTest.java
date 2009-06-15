@@ -7,8 +7,8 @@ import liquibase.database.core.OracleDatabase;
 import liquibase.executor.LoggingExecutor;
 import liquibase.executor.ExecutorService;
 import liquibase.exception.JDBCException;
-import liquibase.resource.ClassLoaderFileOpener;
-import liquibase.resource.FileOpener;
+import liquibase.resource.ClassLoaderResourceAccessor;
+import liquibase.resource.ResourceAccessor;
 import static org.easymock.EasyMock.expect;
 import static org.easymock.EasyMock.expectLastCall;
 import static org.easymock.classextension.EasyMock.*;
@@ -99,7 +99,7 @@ public class LiquibaseTest {
         private InputStream inputStream;
 
         public TestLiquibase() {
-            super("liquibase/test.xml", new ClassLoaderFileOpener(), ((Database) null));
+            super("liquibase/test.xml", new ClassLoaderResourceAccessor(), ((Database) null));
             inputStream = createMock(InputStream.class);
             replay(inputStream);
         }
@@ -150,8 +150,8 @@ public class LiquibaseTest {
         }
 
         @Override
-        public FileOpener getFileOpener() {
-            return new FileOpener() {
+        public ResourceAccessor getFileOpener() {
+            return new ResourceAccessor() {
                 public InputStream getResourceAsStream(String file) {
                     return inputStream;
                 }

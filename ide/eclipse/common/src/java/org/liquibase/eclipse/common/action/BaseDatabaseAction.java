@@ -18,7 +18,7 @@ import org.eclipse.ui.IObjectActionDelegate;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
-import org.liquibase.eclipse.common.migrator.EclipseFileOpener;
+import org.liquibase.eclipse.common.migrator.EclipseResourceAccessor;
 
 import java.sql.Connection;
 import java.util.List;
@@ -162,6 +162,6 @@ public abstract class BaseDatabaseAction implements IObjectActionDelegate, IWork
 	}
 	
 	protected Liquibase getLiquibase(String changeLogFile, Connection conn) throws JDBCException {
-		return new Liquibase(changeLogFile, new EclipseFileOpener(), DatabaseFactory.getInstance().findCorrectDatabaseImplementation(conn));
+		return new Liquibase(changeLogFile, new EclipseResourceAccessor(), DatabaseFactory.getInstance().findCorrectDatabaseImplementation(conn));
 	}
 }

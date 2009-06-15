@@ -1,7 +1,7 @@
 package liquibase.integration.ant;
 
 import liquibase.resource.AbstractFileOpenerTest;
-import liquibase.resource.FileOpener;
+import liquibase.resource.ResourceAccessor;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.types.Path;
 import static org.junit.Assert.assertNotNull;
@@ -13,7 +13,7 @@ import java.net.URL;
 import java.util.Enumeration;
 
 /**
- * Tests for {@link AntFileOpener}
+ * Tests for {@link AntResourceAccessor}
  */
 public class AntFileOpenerTest extends AbstractFileOpenerTest {
 
@@ -21,25 +21,25 @@ public class AntFileOpenerTest extends AbstractFileOpenerTest {
      * @see liquibase.resource.AbstractFileOpenerTest#createFileOpener()
      */
     @Override
-    protected FileOpener createFileOpener() {
+    protected ResourceAccessor createFileOpener() {
         Project project = new Project();
-        return new AntFileOpener(project, new Path(project));
+        return new AntResourceAccessor(project, new Path(project));
     }
 
     @Test
     public void getResourceAsStream() throws Exception {
-      InputStream inputStream = fileOpener.getResourceAsStream("liquibase/integration/ant/AntFileOpenerTest.class");
+      InputStream inputStream = resourceAccessor.getResourceAsStream("liquibase/integration/ant/AntFileOpenerTest.class");
       assertNotNull(inputStream);
     }
 
     @Test
     public void getResourceAsStreamNonExistantFile() throws Exception {
-      assertNull(fileOpener.getResourceAsStream("non/existant/file.txt"));
+      assertNull(resourceAccessor.getResourceAsStream("non/existant/file.txt"));
     }
 
     @Test
     public void getResources() throws Exception {
-      Enumeration<URL> resources = fileOpener.getResources("liquibase/ant");
+      Enumeration<URL> resources = resourceAccessor.getResources("liquibase/ant");
       assertNotNull(resources);
     }
 }

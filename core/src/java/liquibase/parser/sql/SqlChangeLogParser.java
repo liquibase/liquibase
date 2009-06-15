@@ -5,7 +5,7 @@ import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.exception.ChangeLogParseException;
 import liquibase.parser.ChangeLogParser;
-import liquibase.resource.FileOpener;
+import liquibase.resource.ResourceAccessor;
 import liquibase.util.StreamUtil;
 
 import java.io.IOException;
@@ -19,18 +19,18 @@ public class SqlChangeLogParser implements ChangeLogParser {
         };
     }
 
-    public DatabaseChangeLog parse(String physicalChangeLogLocation, Map<String, Object> changeLogParameters, FileOpener fileOpener) throws ChangeLogParseException {
+    public DatabaseChangeLog parse(String physicalChangeLogLocation, Map<String, Object> changeLogParameters, ResourceAccessor resourceAccessor) throws ChangeLogParseException {
 
         RawSQLChange change = new RawSQLChange();
 
         try {
-            InputStream sqlStream = fileOpener.getResourceAsStream(physicalChangeLogLocation);
+            InputStream sqlStream = resourceAccessor.getResourceAsStream(physicalChangeLogLocation);
             String sql = StreamUtil.getStreamContents(sqlStream, null);
             change.setSql(sql);
         } catch (IOException e) {
             throw new ChangeLogParseException(e);
         }
-        change.setFileOpener(fileOpener);
+        change.setFileOpener(resourceAccessor);
         change.setSplitStatements(false);
         change.setStripComments(false);
 

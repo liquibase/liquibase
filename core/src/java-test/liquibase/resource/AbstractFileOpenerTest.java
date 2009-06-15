@@ -7,13 +7,13 @@ import org.junit.Before;
  */
 public abstract class AbstractFileOpenerTest
 {
-  protected FileOpener fileOpener;
+  protected ResourceAccessor resourceAccessor;
 
-  protected abstract FileOpener createFileOpener();
+    protected abstract ResourceAccessor createFileOpener();
 
   @Before
   public void setUp() throws Exception
   {
-    fileOpener = createFileOpener();
+    resourceAccessor = createFileOpener();
   }
 }

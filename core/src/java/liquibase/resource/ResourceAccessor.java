@@ -8,7 +8,7 @@ import java.util.Enumeration;
 /**
  * Abstracts file access so they can be read in a variety of manners.
  */
-public interface FileOpener {
+public interface ResourceAccessor {
     public InputStream getResourceAsStream(String file) throws IOException;
 
     public Enumeration<URL> getResources(String packageName) throws IOException;

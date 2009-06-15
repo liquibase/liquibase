@@ -2,7 +2,7 @@ package org.liquibase.maven.plugins;
 
 import liquibase.exception.LiquibaseException;
 import liquibase.Liquibase;
-import liquibase.resource.FileOpener;
+import liquibase.resource.ResourceAccessor;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 
@@ -17,7 +17,7 @@ import org.apache.maven.plugin.MojoFailureException;
 public class LiquibaseMigrate extends AbstractLiquibaseUpdateMojo {
 
   @Override
-  public void configureFieldsAndValues(FileOpener fo)
+  public void configureFieldsAndValues(ResourceAccessor fo)
           throws MojoExecutionException, MojoFailureException {
     getLog().warn("This plugin goal is DEPRICATED and will be removed in a future "
                   + "release, please use \"update\" instead of \"migrate\".");

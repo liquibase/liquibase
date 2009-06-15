@@ -13,20 +13,20 @@ import java.util.Enumeration;
 import java.util.Vector;
 
 public class CompositeFileOpenerTest {
-    FileOpener first;
-    FileOpener second;
-    FileOpener hasDir;
-    FileOpener noDir;
-    CompositeFileOpener composite;
+    ResourceAccessor first;
+    ResourceAccessor second;
+    ResourceAccessor hasDir;
+    ResourceAccessor noDir;
+    CompositeResourceAccessor composite;
     InputStream validStream;
     Enumeration<URL> empty;
     Enumeration<URL> hasElements;
     
     @Before
     public void setUp() throws IOException {
-        first = createMock(FileOpener.class);
-        second = createMock(FileOpener.class);
-        composite = new CompositeFileOpener(first,second);
+        first = createMock(ResourceAccessor.class);
+        second = createMock(ResourceAccessor.class);
+        composite = new CompositeResourceAccessor(first,second);
         validStream = this.getClass().getClassLoader().getResourceAsStream("liquibase/resource/CompositeFileOpenerTest.class");
         
         empty = new Vector<URL>().elements();

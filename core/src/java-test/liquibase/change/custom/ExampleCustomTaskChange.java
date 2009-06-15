@@ -2,14 +2,14 @@ package liquibase.change.custom;
 
 import liquibase.database.Database;
 import liquibase.exception.*;
-import liquibase.resource.FileOpener;
+import liquibase.resource.ResourceAccessor;
 
 public class ExampleCustomTaskChange implements CustomTaskChange, CustomTaskRollback {
 
     private String helloTo;
 
     @SuppressWarnings({"UnusedDeclaration", "FieldCanBeLocal"})
-    private FileOpener fileOpener;
+    private ResourceAccessor resourceAccessor;
 
 
     public String getHelloTo() {
@@ -36,8 +36,8 @@ public class ExampleCustomTaskChange implements CustomTaskChange, CustomTaskRoll
         ;
     }
 
-    public void setFileOpener(FileOpener fileOpener) {
-        this.fileOpener = fileOpener;
+    public void setFileOpener(ResourceAccessor resourceAccessor) {
+        this.resourceAccessor = resourceAccessor;
     }
 
     public ValidationErrors validate(Database database) {

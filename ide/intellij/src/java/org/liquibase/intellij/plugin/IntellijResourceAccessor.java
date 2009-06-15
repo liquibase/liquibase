@@ -4,7 +4,7 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.VirtualFileManager;
-import liquibase.resource.FileOpener;
+import liquibase.resource.ResourceAccessor;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,7 +14,7 @@ import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.Iterator;
 
-public class IntellijFileOpener implements FileOpener {
+public class IntellijResourceAccessor implements ResourceAccessor {
     public InputStream getResourceAsStream(String file) throws IOException {
         if (file == null) {
             return null;

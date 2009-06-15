@@ -11,7 +11,7 @@ import liquibase.dbdoc.*;
 import liquibase.exception.DatabaseHistoryException;
 import liquibase.exception.JDBCException;
 import liquibase.exception.LiquibaseException;
-import liquibase.resource.FileOpener;
+import liquibase.resource.ResourceAccessor;
 import liquibase.util.StreamUtil;
 
 import java.io.File;
@@ -104,8 +104,8 @@ public class DBDocVisitor implements ChangeSetVisitor {
         }
     }
 
-    public void writeHTML(File rootOutputDir, FileOpener fileOpener) throws IOException, JDBCException, DatabaseHistoryException {
-        ChangeLogWriter changeLogWriter = new ChangeLogWriter(fileOpener, rootOutputDir);
+    public void writeHTML(File rootOutputDir, ResourceAccessor resourceAccessor) throws IOException, JDBCException, DatabaseHistoryException {
+        ChangeLogWriter changeLogWriter = new ChangeLogWriter(resourceAccessor, rootOutputDir);
         HTMLWriter authorWriter = new AuthorWriter(rootOutputDir, database);
         HTMLWriter tableWriter = new TableWriter(rootOutputDir, database);
         HTMLWriter columnWriter = new ColumnWriter(rootOutputDir, database);

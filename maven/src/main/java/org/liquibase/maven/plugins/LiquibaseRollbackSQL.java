@@ -11,7 +11,7 @@ import java.text.SimpleDateFormat;
 import liquibase.Liquibase;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
-import liquibase.resource.FileOpener;
+import liquibase.resource.ResourceAccessor;
 
 import org.apache.maven.plugin.MojoExecutionException;
 
@@ -43,7 +43,7 @@ public class LiquibaseRollbackSQL extends LiquibaseRollback {
 
 
   @Override
-  protected Liquibase createLiquibase(FileOpener fo, Database db)
+  protected Liquibase createLiquibase(ResourceAccessor fo, Database db)
           throws MojoExecutionException {
     Liquibase liquibase = super.createLiquibase(fo, db);
 

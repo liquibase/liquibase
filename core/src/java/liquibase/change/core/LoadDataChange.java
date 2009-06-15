@@ -2,7 +2,7 @@ package liquibase.change.core;
 
 import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.resource.FileOpener;
+import liquibase.resource.ResourceAccessor;
 import liquibase.statement.InsertStatement;
 import liquibase.statement.SqlStatement;
 import liquibase.util.StringUtils;
@@ -67,7 +67,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns 
 
     public SqlStatement[] generateStatements(Database database) {
         try {
-            FileOpener opener = getFileOpener();
+            ResourceAccessor opener = getFileOpener();
             if (opener == null) {
                 throw new UnexpectedLiquibaseException("No file opener specified for "+getFile());
             }

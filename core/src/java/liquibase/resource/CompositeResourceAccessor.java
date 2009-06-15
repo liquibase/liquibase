@@ -11,8 +11,8 @@ import java.util.*;
  *
  * @author <a href="mailto:csuml@yahoo.co.uk>Paul Keeble</a>
  */
-public class CompositeFileOpener implements FileOpener {
-    List<FileOpener> openers;
+public class CompositeResourceAccessor implements ResourceAccessor {
+    List<ResourceAccessor> openers;
 
     /**
      * Creates a Composite Opener with the list specified. The List will
@@ -20,7 +20,7 @@ public class CompositeFileOpener implements FileOpener {
      *
      * @param openers The list of Openers to use
      */
-    public CompositeFileOpener(List<FileOpener> openers) {
+    public CompositeResourceAccessor(List<ResourceAccessor> openers) {
         this.openers = openers;
     }
 
@@ -29,7 +29,7 @@ public class CompositeFileOpener implements FileOpener {
      *
      * @param openers The list of Openers to use
      */
-    public CompositeFileOpener(FileOpener... openers) {
+    public CompositeResourceAccessor(ResourceAccessor... openers) {
         this.openers = Arrays.asList(openers);
     }
 
@@ -40,7 +40,7 @@ public class CompositeFileOpener implements FileOpener {
      * then null is returned.
      */
     public InputStream getResourceAsStream(String file) throws IOException {
-        for (FileOpener o : openers) {
+        for (ResourceAccessor o : openers) {
             InputStream is = o.getResourceAsStream(file);
             if (is != null)
                 return is;
@@ -54,7 +54,7 @@ public class CompositeFileOpener implements FileOpener {
      * Enumeration is returned.
      */
     public Enumeration<URL> getResources(String packageName) throws IOException {
-        for (FileOpener o : openers) {
+        for (ResourceAccessor o : openers) {
             Enumeration<URL> e = o.getResources(packageName);
             if (e.hasMoreElements())
                 return e;
@@ -64,7 +64,7 @@ public class CompositeFileOpener implements FileOpener {
 
     public ClassLoader toClassLoader() {
         List<ClassLoader> classLoaders = new ArrayList<ClassLoader>();
-        for (FileOpener fo: openers) {
+        for (ResourceAccessor fo: openers) {
             classLoaders.add(fo.toClassLoader());
         }
 

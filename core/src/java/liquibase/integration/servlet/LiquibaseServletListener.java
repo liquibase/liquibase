@@ -2,10 +2,9 @@ package liquibase.integration.servlet;
 
 import liquibase.Liquibase;
 import liquibase.database.DatabaseFactory;
-import liquibase.resource.ClassLoaderFileOpener;
-import liquibase.resource.CompositeFileOpener;
-import liquibase.resource.FileOpener;
-import liquibase.resource.FileSystemFileOpener;
+import liquibase.resource.CompositeResourceAccessor;
+import liquibase.resource.ResourceAccessor;
+import liquibase.resource.*;
 import liquibase.util.NetUtil;
 import liquibase.util.log.LogFactory;
 
@@ -134,11 +133,11 @@ public class LiquibaseServletListener implements ServletContextListener {
 
                 connection = dataSource.getConnection();
 
-                FileOpener clFO = new ClassLoaderFileOpener();
-                FileOpener fsFO = new FileSystemFileOpener();
+                ResourceAccessor clFO = new ClassLoaderResourceAccessor();
+                ResourceAccessor fsFO = new FileSystemResourceAccessor();
 
 
-                Liquibase liquibase = new Liquibase(getChangeLogFile(), new CompositeFileOpener(clFO,fsFO), DatabaseFactory.getInstance().findCorrectDatabaseImplementation(connection));
+                Liquibase liquibase = new Liquibase(getChangeLogFile(), new CompositeResourceAccessor(clFO,fsFO), DatabaseFactory.getInstance().findCorrectDatabaseImplementation(connection));
                 liquibase.update(getContexts());
             } finally {
                 if (ic != null) {

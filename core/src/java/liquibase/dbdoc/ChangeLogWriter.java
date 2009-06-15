@@ -1,6 +1,6 @@
 package liquibase.dbdoc;
 
-import liquibase.resource.FileOpener;
+import liquibase.resource.ResourceAccessor;
 import liquibase.util.StreamUtil;
 
 import java.io.File;
@@ -10,15 +10,15 @@ import java.io.InputStream;
 
 public class ChangeLogWriter {
     protected File outputDir;
-    private FileOpener fileOpener;
+    private ResourceAccessor resourceAccessor;
 
-    public ChangeLogWriter(FileOpener fileOpener, File rootOutputDir) {
+    public ChangeLogWriter(ResourceAccessor resourceAccessor, File rootOutputDir) {
         this.outputDir = new File(rootOutputDir, "changelogs");
-        this.fileOpener = fileOpener;
+        this.resourceAccessor = resourceAccessor;
     }
 
     public void writeChangeLog(String changeLog, String physicalFilePath) throws IOException {
-        InputStream stylesheet = fileOpener.getResourceAsStream(physicalFilePath);
+        InputStream stylesheet = resourceAccessor.getResourceAsStream(physicalFilePath);
         if (stylesheet == null) {
             throw new IOException("Can not find "+changeLog);
         }

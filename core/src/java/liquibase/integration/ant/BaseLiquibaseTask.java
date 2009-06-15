@@ -5,9 +5,9 @@ import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.core.HibernateDatabase;
 import liquibase.exception.JDBCException;
-import liquibase.resource.CompositeFileOpener;
-import liquibase.resource.FileOpener;
-import liquibase.resource.FileSystemFileOpener;
+import liquibase.resource.CompositeResourceAccessor;
+import liquibase.resource.ResourceAccessor;
+import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.util.log.LogFactory;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.Task;
@@ -157,8 +157,8 @@ public class BaseLiquibaseTask extends Task {
     }
 
     protected Liquibase createLiquibase() throws Exception {
-        FileOpener antFO = new AntFileOpener(getProject(), classpath);
-        FileOpener fsFO = new FileSystemFileOpener();
+        ResourceAccessor antFO = new AntResourceAccessor(getProject(), classpath);
+        ResourceAccessor fsFO = new FileSystemResourceAccessor();
 
         Database database = createDatabaseObject(getDriver(), getUrl(), getUsername(), getPassword(), getDefaultSchemaName(),getDatabaseClass());
         
@@ -166,7 +166,7 @@ public class BaseLiquibaseTask extends Task {
         if (getChangeLogFile() != null) {
             changeLogFile = getChangeLogFile().trim();
         }
-        Liquibase liquibase = new Liquibase(changeLogFile, new CompositeFileOpener(antFO, fsFO), database);
+        Liquibase liquibase = new Liquibase(changeLogFile, new CompositeResourceAccessor(antFO, fsFO), database);
         liquibase.setCurrentDateTimeFunction(currentDateTimeFunction);
         for (Map.Entry<String, Object> entry : changeLogProperties.entrySet()) {
             liquibase.setChangeLogParameterValue(entry.getKey(), entry.getValue());

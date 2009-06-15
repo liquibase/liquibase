@@ -1,6 +1,6 @@
 package liquibase.integration.ant;
 
-import liquibase.resource.FileOpener;
+import liquibase.resource.ResourceAccessor;
 import org.apache.tools.ant.AntClassLoader;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.types.Path;
@@ -15,10 +15,10 @@ import java.util.Enumeration;
 /**
  * An implementation of FileOpener that is specific to how Ant works.
  */
-public class AntFileOpener implements FileOpener {
+public class AntResourceAccessor implements ResourceAccessor {
     private AntClassLoader loader;
 
-    public AntFileOpener(final Project project, final Path classpath) {
+    public AntResourceAccessor(final Project project, final Path classpath) {
         loader = AccessController.doPrivileged(new PrivilegedAction<AntClassLoader>() {
             public AntClassLoader run() {
                 return new AntClassLoader(project, classpath);

@@ -1,6 +1,6 @@
 package liquibase.integration.commandline;
 
-import liquibase.resource.FileOpener;
+import liquibase.resource.ResourceAccessor;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -10,12 +10,12 @@ import java.util.Enumeration;
 /**
  * Implementation of liquibase.FileOpener for the command line app.
  *
- * @see liquibase.resource.FileOpener
+ * @see liquibase.resource.ResourceAccessor
  */
-public class CommandLineFileOpener implements FileOpener {
+public class CommandLineResourceAccessor implements ResourceAccessor {
     private ClassLoader loader;
 
-    public CommandLineFileOpener(ClassLoader loader) {
+    public CommandLineResourceAccessor(ClassLoader loader) {
         this.loader = loader;
     }
 

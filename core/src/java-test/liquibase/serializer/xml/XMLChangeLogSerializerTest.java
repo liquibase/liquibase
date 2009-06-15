@@ -2,7 +2,7 @@ package liquibase.serializer.xml;
 
 import liquibase.change.*;
 import liquibase.change.core.*;
-import liquibase.resource.ClassLoaderFileOpener;
+import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.serializer.xml.XMLChangeLogSerializer;
 import static org.junit.Assert.*;
 import org.junit.Test;
@@ -756,7 +756,7 @@ public class XMLChangeLogSerializerTest {
 
         String fileName = "liquibase/change/core/SQLFileTestData.sql";
         SQLFileChange change = new SQLFileChange();
-        ClassLoaderFileOpener opener = new ClassLoaderFileOpener();
+        ClassLoaderResourceAccessor opener = new ClassLoaderResourceAccessor();
         change.setFileOpener(opener);
         change.setPath(fileName);
 

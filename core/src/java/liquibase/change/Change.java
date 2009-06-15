@@ -7,7 +7,7 @@ import liquibase.exception.RollbackImpossibleException;
 import liquibase.exception.SetupException;
 import liquibase.exception.UnsupportedChangeException;
 import liquibase.exception.ValidationErrors;
-import liquibase.resource.FileOpener;
+import liquibase.resource.ResourceAccessor;
 import liquibase.statement.SqlStatement;
 
 import java.util.Set;
@@ -59,7 +59,7 @@ public interface Change {
      * Sets the fileOpener that should be used for any file loading and resource
      * finding for files that are provided by the user.
      */
-    public void setFileOpener(FileOpener fileOpener);
+    public void setFileOpener(ResourceAccessor resourceAccessor);
 
 
     /**

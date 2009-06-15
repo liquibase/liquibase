@@ -2,7 +2,7 @@ package liquibase.change.core;
 
 import liquibase.database.core.OracleDatabase;
 import liquibase.exception.SetupException;
-import liquibase.resource.ClassLoaderFileOpener;
+import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.change.core.SQLFileChange;
 import liquibase.change.AbstractChangeTest;
 import static org.junit.Assert.*;
@@ -26,7 +26,7 @@ public abstract class SQLFileChangeTest extends AbstractChangeTest {
 	    //file contains contents "TESTDATA"
     	fileName= "liquibase/change/core/SQLFileTestData.sql";
         change = new SQLFileChange();
-        ClassLoaderFileOpener opener = new ClassLoaderFileOpener();
+        ClassLoaderResourceAccessor opener = new ClassLoaderResourceAccessor();
         change.setFileOpener(opener);
         change.setPath(fileName);
         change.init();

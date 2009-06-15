@@ -14,10 +14,10 @@ import liquibase.diff.DiffResult;
 import liquibase.exception.JDBCException;
 import liquibase.exception.ValidationFailedException;
 import liquibase.lock.LockService;
-import liquibase.resource.FileOpener;
-import liquibase.resource.FileSystemFileOpener;
+import liquibase.resource.ResourceAccessor;
+import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.statement.DropTableStatement;
-import liquibase.test.JUnitFileOpener;
+import liquibase.test.JUnitResourceAccessor;
 import liquibase.test.TestContext;
 import liquibase.util.log.LogFactory;
 
@@ -94,12 +94,12 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
     }
 
     protected Liquibase createLiquibase(String changeLogFile) throws Exception {
-        JUnitFileOpener fileOpener = new JUnitFileOpener();
+        JUnitResourceAccessor fileOpener = new JUnitResourceAccessor();
         return createLiquibase(changeLogFile, fileOpener);
     }
 
-    private Liquibase createLiquibase(String changeLogFile, FileOpener fileOpener) throws JDBCException {
-        return new Liquibase(changeLogFile, fileOpener, database);
+    private Liquibase createLiquibase(String changeLogFile, ResourceAccessor resourceAccessor) throws JDBCException {
+        return new Liquibase(changeLogFile, resourceAccessor, database);
     }
 
     public void testRunChangeLog() throws Exception {
@@ -471,7 +471,7 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
         }
         
 
-        Enumeration<URL> urls = new JUnitFileOpener().getResources(includedChangeLog);
+        Enumeration<URL> urls = new JUnitResourceAccessor().getResources(includedChangeLog);
         URL completeChangeLogURL = urls.nextElement();
 
         String absolutePathOfChangeLog = completeChangeLogURL.toExternalForm();
@@ -481,7 +481,7 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
         } else {
             absolutePathOfChangeLog = "/" + absolutePathOfChangeLog;
         }
-        Liquibase liquibase = createLiquibase(absolutePathOfChangeLog, new FileSystemFileOpener());
+        Liquibase liquibase = createLiquibase(absolutePathOfChangeLog, new FileSystemResourceAccessor());
         liquibase.dropAll(getSchemasToDrop());
 
         liquibase.update(this.contexts);
@@ -531,8 +531,8 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
 //        database2.dropDatabaseObjects(database2.getDefaultSchemaName());
 //        dropDatabaseChangeLogTable(database2.getDefaultSchemaName(), database2);
 //
-//        JUnitFileOpener fileOpener = new JUnitFileOpener();
-//        Liquibase liquibase = new Liquibase(completeChangeLog, fileOpener, database2);
+//        JUnitResourceAccessor resourceAccessor = new JUnitResourceAccessor();
+//        Liquibase liquibase = new Liquibase(completeChangeLog, resourceAccessor, database2);
 //        liquibase.update(this.contexts);
 //    }
 
