@@ -15,6 +15,9 @@ public class PluginUtil {
     public static Class[] getClasses(String packageName, Class requiredInterface) throws ClassNotFoundException, IOException {
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         assert classLoader != null;
+
+        Class.forName(requiredInterface.getName());
+
         String path = packageName.replace('.', '/');
         Enumeration<URL> resources = classLoader.getResources(path);
         List<File> dirs = new ArrayList<File>();
