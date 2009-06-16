@@ -8,7 +8,6 @@
 	<classpathentry kind="lib" path="lib/cglib-nodep-2.1_3.jar"/>
 	<classpathentry kind="lib" path="lib/easymock-2.2.jar"/>
 	<classpathentry kind="lib" path="lib/easymockclassextension-2.2.jar"/>
-	<classpathentry kind="lib" path="lib-compile/ant_doxygen-1.4.jar"/>
 	<classpathentry kind="lib" path="lib-compile/ant-1.6.5.jar"/>
 	<classpathentry kind="lib" path="lib-compile/jsdk-2.4.jar"/>
 	<classpathentry kind="lib" path="lib-compile/spring-2.0.6.jar"/>
