@@ -8,8 +8,8 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.Properties;
 
-import liquibase.resource.FileOpener;
-import liquibase.resource.FileSystemFileOpener;
+import liquibase.resource.ResourceAccessor;
+import liquibase.resource.FileSystemResourceAccessor;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -26,7 +26,7 @@ public abstract class AbstractLiquibaseMojoTest extends AbstractMojoTestCase {
           throws MojoExecutionException, MojoFailureException {
 
     File rootDir = new File(getBasedir(), "target/test-classes");
-    FileOpener fo = new FileSystemFileOpener(rootDir.getAbsolutePath());
+    ResourceAccessor fo = new FileSystemResourceAccessor(rootDir.getAbsolutePath());
     mojo.configureFieldsAndValues(fo);
   }
 
