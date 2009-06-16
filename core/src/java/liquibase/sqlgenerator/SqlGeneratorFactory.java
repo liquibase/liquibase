@@ -5,7 +5,7 @@ import liquibase.database.structure.DatabaseObject;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.statement.SqlStatement;
-import liquibase.util.PluginUtil;
+import liquibase.util.plugin.ClassPathScanner;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -25,7 +25,7 @@ public class SqlGeneratorFactory {
     private SqlGeneratorFactory() {
         Class[] classes;
         try {
-            classes = PluginUtil.getClasses("liquibase.sqlgenerator", SqlGenerator.class);
+            classes = ClassPathScanner.getInstance().getClasses("liquibase.sqlgenerator", SqlGenerator.class);
 
             for (Class clazz : classes) {
                 register((SqlGenerator) clazz.getConstructor().newInstance());

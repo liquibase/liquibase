@@ -1,6 +1,6 @@
 package liquibase.precondition;
 
-import liquibase.util.PluginUtil;
+import liquibase.util.plugin.ClassPathScanner;
 import liquibase.exception.UnexpectedLiquibaseException;
 
 import java.util.HashMap;
@@ -17,7 +17,7 @@ public class PreconditionFactory {
         preconditions = new HashMap<String, Class<? extends Precondition>>();
         Class[] classes;
         try {
-            classes = PluginUtil.getClasses("liquibase.precondition", Precondition.class);
+            classes = ClassPathScanner.getInstance().getClasses("liquibase.precondition", Precondition.class);
 
             for (Class<? extends Precondition> clazz : classes) {
                     register(clazz);

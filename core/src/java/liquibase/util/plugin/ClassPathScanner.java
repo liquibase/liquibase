@@ -1,4 +1,4 @@
-package liquibase.util;
+package liquibase.util.plugin;
 
 import liquibase.util.log.LogFactory;
 
@@ -10,9 +10,18 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 
-public class PluginUtil {
+public class ClassPathScanner {
 
-    public static Class[] getClasses(String packageName, Class requiredInterface) throws ClassNotFoundException, IOException {
+    private static ClassPathScanner instance = new ClassPathScanner();
+
+    private ClassPathScanner() {
+    }
+
+    public static ClassPathScanner getInstance() {
+        return instance;
+    }
+
+    public Class[] getClasses(String packageName, Class requiredInterface) throws ClassNotFoundException, IOException {
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         assert classLoader != null;
 
@@ -32,7 +41,7 @@ public class PluginUtil {
         return classes.toArray(new Class[classes.size()]);
     }
 
-    private static List<Class> findClasses(File directory, String packageName, Class requiredInterface) throws ClassNotFoundException {
+    private List<Class> findClasses(File directory, String packageName, Class requiredInterface) throws ClassNotFoundException {
         List<Class> classes = new ArrayList<Class>();
         if (!directory.exists()) {
             return classes;
@@ -61,7 +70,7 @@ public class PluginUtil {
         return classes;
     }
 
-    private static boolean isCorrectType(Class<?> clazz, Class requiredInterface) {
+    private boolean isCorrectType(Class<?> clazz, Class requiredInterface) {
         return !clazz.equals(Object.class) && (requiredInterface.isAssignableFrom(clazz) || isCorrectType(clazz.getSuperclass(), requiredInterface));
     }
 
