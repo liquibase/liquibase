@@ -34,10 +34,10 @@ import java.util.logging.Level;
 
 public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
 
-    private String completeChangeLog;
+    protected String completeChangeLog;
     private String rollbackChangeLog;
     private String includedChangeLog;
-    private String contexts = "test, context-b";
+    protected String contexts = "test, context-b";
     private Database database;
     private String url;
 

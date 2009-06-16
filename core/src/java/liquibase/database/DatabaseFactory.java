@@ -2,14 +2,12 @@ package liquibase.database;
 
 import liquibase.exception.JDBCException;
 import liquibase.util.log.LogFactory;
-import liquibase.util.PluginUtil;
+import liquibase.util.plugin.ClassPathScanner;
 import liquibase.database.core.*;
-import liquibase.sqlgenerator.SqlGenerator;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -23,7 +21,7 @@ public class DatabaseFactory {
 
     private DatabaseFactory() {
         try {
-            Class[] classes = PluginUtil.getClasses("liquibase.database", Database.class);
+            Class[] classes = ClassPathScanner.getInstance().getClasses("liquibase.database", Database.class);
 
             for (Class clazz : classes) {
                 register((Database) clazz.getConstructor().newInstance());

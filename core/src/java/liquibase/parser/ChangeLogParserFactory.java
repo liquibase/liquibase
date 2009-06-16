@@ -1,7 +1,7 @@
 package liquibase.parser;
 
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.util.PluginUtil;
+import liquibase.util.plugin.ClassPathScanner;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,7 +26,7 @@ public class ChangeLogParserFactory {
     private ChangeLogParserFactory() {
         Class[] classes;
         try {
-            classes = PluginUtil.getClasses("liquibase.parser", ChangeLogParser.class);
+            classes = ClassPathScanner.getInstance().getClasses("liquibase.parser", ChangeLogParser.class);
 
             for (Class clazz : classes) {
                     register((ChangeLogParser) clazz.getConstructor().newInstance());

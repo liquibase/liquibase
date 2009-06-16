@@ -4,8 +4,7 @@ import liquibase.change.core.AddDefaultValueChange;
 import liquibase.change.core.CreateTableChange;
 import liquibase.change.core.InsertDataChange;
 import liquibase.change.CheckSum;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.*;
 import org.junit.Test;
 
 /**
@@ -51,5 +50,31 @@ public class ChangeSetTest {
         change.setSchemaName("SCHEMA_NAME2");
         CheckSum md5Sum2 = changeSet2.generateCheckSum();
         assertFalse(md5Sum1.equals(md5Sum2));
+    }
+
+    @Test
+    public void isCheckSumValid_validCheckSum() {
+        ChangeSet changeSet = new ChangeSet("1", "2",false, false, "/test.xml", "/test.xml",null, null);
+        CheckSum checkSum = changeSet.generateCheckSum();
+
+        assertTrue(changeSet.isCheckSumValid(checkSum));
+    }
+
+    @Test
+    public void isCheckSumValid_invalidCheckSum() {
+        CheckSum checkSum = CheckSum.parse("2:asdf");
+
+        ChangeSet changeSet = new ChangeSet("1", "2",false, false, "/test.xml", "/test.xml",null, null);
+        assertFalse(changeSet.isCheckSumValid(checkSum));
+    }
+
+    @Test
+    public void isCheckSumValid_differentButValidCheckSum() {
+        CheckSum checkSum = CheckSum.parse("2:asdf");
+
+        ChangeSet changeSet = new ChangeSet("1", "2",false, false, "/test.xml", "/test.xml",null, null);
+        changeSet.addValidCheckSum(changeSet.generateCheckSum().toString());
+
+        assertTrue(changeSet.isCheckSumValid(checkSum));
     }
 }

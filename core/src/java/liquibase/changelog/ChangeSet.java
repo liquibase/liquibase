@@ -433,7 +433,7 @@ public class ChangeSet {
                 return true;
             }
         }
-        return false;  //To change body of created methods use File | Settings | File Templates.
+        return false;
     }
 
     public PreconditionContainer getPrecondition() {
