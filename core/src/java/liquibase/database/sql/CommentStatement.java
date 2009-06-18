@@ -28,18 +28,15 @@ public class CommentStatement implements SqlStatement {
 		return text;
 	}
 
-	@Override
 	public String getEndDelimiter(Database database) {
 		return "\n";
 	}
 
-	@Override
 	public String getSqlStatement(Database database)
 			throws StatementNotSupportedOnDatabaseException {
 		return database.getLineComment() + ' ' + getText();
 	}
 
-	@Override
 	public boolean supportsDatabase(Database database) {
 		return true;
 	}
