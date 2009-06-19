@@ -291,6 +291,10 @@ public abstract class AbstractDatabase implements Database {
             }
         }
 
+        if (returnTypeName == null) {
+            throw new UnexpectedLiquibaseException("Could not determine "+dataTypeName+" for "+this.getClass().getName());
+        }
+
         // Return type and precision, if any
         if (precision != null && returnTypeName.getSupportsPrecision()) {
             return returnTypeName.getDataTypeName() + "(" + precision + ")";

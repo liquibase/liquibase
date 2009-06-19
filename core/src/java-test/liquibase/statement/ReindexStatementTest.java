@@ -5,4 +5,9 @@ public class ReindexStatementTest extends AbstractSqStatementTest<ReindexStateme
     protected ReindexStatement createStatementUnderTest() {
         return new ReindexStatement(null, null);
     }
+
+    @Override
+    public void hasAtLeastOneGenerator() {
+        //todo: remove override once SQLite is back in TestContext.AllDatabases
+    }
 }

@@ -1,14 +1,11 @@
 package liquibase.statement;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class UpdateStatement implements SqlStatement {
     private String schemaName;
     private String tableName;
-    private Map<String, Object> newColumnValues = new HashMap<String, Object>();
+    private SortedMap<String, Object> newColumnValues = new TreeMap<String, Object>();
     private String whereClause;
     private List<Object> whereParameters = new ArrayList<Object>();
 

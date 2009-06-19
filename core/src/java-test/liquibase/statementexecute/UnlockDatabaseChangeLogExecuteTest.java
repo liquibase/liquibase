@@ -25,9 +25,9 @@ public class UnlockDatabaseChangeLogExecuteTest extends AbstractExecuteTest {
     @Test
     public void generateSql() throws Exception {
         this.statementUnderTest = new UnlockDatabaseChangeLogStatement();
-        assertCorrect("update [dbo].[databasechangeloglock] set [lockedby] = null, [lockgranted] = null, [locked] = 0 where  id = 1", MSSQLDatabase.class);
-        assertCorrect("update [databasechangeloglock] set [lockedby] = null, [lockgranted] = null, [locked] = 'f' where  id = 1", InformixDatabase.class);
-        assertCorrect("update [databasechangeloglock] set [lockedby] = null, [lockgranted] = null, [locked] = false where  id = 1", PostgresDatabase.class, HsqlDatabase.class, H2Database.class, MaxDBDatabase.class);
-        assertCorrectOnRest("update [databasechangeloglock] set [lockedby] = null, [lockgranted] = null, [locked] = 0 where  id = 1");
+        assertCorrect("update [dbo].[databasechangeloglock] set [locked] = 0, [lockedby] = null, [lockgranted] = null where [id] = 1", MSSQLDatabase.class);
+        assertCorrect("update [databasechangeloglock] set [locked] = 'f', [lockedby] = null, [lockgranted] = null where [id] = 1", InformixDatabase.class);
+        assertCorrect("update [databasechangeloglock] set [locked] = false, [lockedby] = null, [lockgranted] = null where [id] = 1", PostgresDatabase.class, HsqlDatabase.class, H2Database.class, MaxDBDatabase.class);
+        assertCorrectOnRest("update [databasechangeloglock] set [locked] = 0, [lockedby] = null, [lockgranted] = null where [id] = 1");
     }
 }

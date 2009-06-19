@@ -71,7 +71,7 @@ public class LiquibaseTest {
     @Test
     public void getImplementedDatabases() throws Exception {
         List<Database> databases = DatabaseFactory.getInstance().getImplementedDatabases();
-        assertEquals(15, databases.size());
+        assertTrue(databases.size() > 15);
 
         boolean foundOracle = false;
         boolean foundPostgres = false;

@@ -10,15 +10,4 @@ public class MySQLSampleChangeLogRunnerTest extends AbstractSimpleChangeLogRunne
     public MySQLSampleChangeLogRunnerTest() throws Exception {
         super("mysql", "jdbc:mysql://localhost/liquibase");
     }
-
-    public void testRun() throws Exception {
-        Liquibase liquibase = createLiquibase(completeChangeLog);
-        try {
-            liquibase.update(this.contexts);
-        } catch (ValidationFailedException e) {
-            e.printDescriptiveError(System.out);
-            throw e;
-        }
-
-    }
 }

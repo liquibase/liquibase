@@ -36,7 +36,7 @@ public class UpdateGenerator implements SqlGenerator<UpdateStatement> {
 
         sql.deleteCharAt(sql.lastIndexOf(","));
         if (statement.getWhereClause() != null) {
-            String fixedWhereClause = "WHERE " + statement.getWhereClause();
+            String fixedWhereClause = "WHERE " + statement.getWhereClause().trim();
             for (Object param : statement.getWhereParameters()) {
                 fixedWhereClause = fixedWhereClause.replaceFirst("\\?", convertToString(param, database));
             }

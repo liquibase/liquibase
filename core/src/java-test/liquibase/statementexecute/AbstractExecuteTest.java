@@ -12,6 +12,9 @@ import java.util.Set;
 
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
+import liquibase.database.example.ExampleCustomDatabase;
+import liquibase.database.core.MockDatabase;
+import liquibase.database.core.UnsupportedDatabase;
 import liquibase.executor.ExecutorService;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
@@ -65,7 +68,7 @@ public abstract class AbstractExecuteTest {
                     Sql[] sql = SqlGeneratorFactory.getInstance().generateSql(statementUnderTest, database);
                     assertNotNull("Null SQL for " + database, sql);
                     assertEquals("Unexpected number of  SQL statements for " + database, 1, sql.length);
-                    assertEquals("Incorrect SQL for " + database, convertedSql.toLowerCase(), sql[0].toSql().toLowerCase());
+                    assertEquals("Incorrect SQL for " + database.getClass().getName(), convertedSql.toLowerCase(), sql[0].toSql().toLowerCase());
                 }
             }
         }
@@ -107,6 +110,9 @@ public abstract class AbstractExecuteTest {
     }
 
     private boolean shouldTestDatabase(Database database, Class<? extends Database>[] includeDatabases, Class<? extends Database>[] excludeDatabases) {
+        if (database instanceof MockDatabase || database instanceof ExampleCustomDatabase || database instanceof UnsupportedDatabase) {
+            return false;
+        }
         if (!SqlGeneratorFactory.getInstance().supports(statementUnderTest, database)
                 || SqlGeneratorFactory.getInstance().validate(statementUnderTest, database).hasErrors()) {
             return false;

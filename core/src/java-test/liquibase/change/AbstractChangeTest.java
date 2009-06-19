@@ -275,7 +275,7 @@ public abstract class AbstractChangeTest {
         for (Database database : TestContext.getInstance().getAllDatabases()) {
             if (change.supports(database)) {
                 ValidationErrors validationErrors = change.validate(database);
-                assertTrue("no errors found for "+database.getTypeName(), validationErrors.hasErrors());
+                assertTrue("no errors found for "+database.getClass().getName(), validationErrors.hasErrors());
             }
         }
     }
