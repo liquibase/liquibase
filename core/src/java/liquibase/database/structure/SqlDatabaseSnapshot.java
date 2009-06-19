@@ -85,7 +85,9 @@ public abstract class SqlDatabaseSnapshot implements DatabaseSnapshot {
         try {
             this.schema = requestedSchema;
             this.database = database;
-            this.databaseMetaData = database.getConnection().getMetaData();
+            if (database.getConnection() != null) {
+                this.databaseMetaData = database.getConnection().getMetaData();
+            }
             this.statusListeners = statusListeners;
 
             readTablesAndViews(requestedSchema);

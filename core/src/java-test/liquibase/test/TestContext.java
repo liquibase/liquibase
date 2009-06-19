@@ -3,6 +3,9 @@ package liquibase.test;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
+import liquibase.database.example.ExampleCustomDatabase;
+import liquibase.database.core.SQLiteDatabase;
+import liquibase.database.core.MockDatabase;
 import liquibase.exception.JDBCException;
 
 import java.sql.Connection;
@@ -182,6 +185,15 @@ public class TestContext {
 
             allDatabases.addAll(DatabaseFactory.getInstance().getImplementedDatabases());
 
+            List<Database> toRemove = new ArrayList<Database>();
+            for (Database database : allDatabases) {
+                if (database instanceof SQLiteDatabase //todo: re-enable sqlite testing
+                        || database instanceof MockDatabase
+                        || database instanceof ExampleCustomDatabase) {
+                    toRemove.add(database);
+                }
+            }
+            allDatabases.removeAll(toRemove);
         }
         return allDatabases;
     }

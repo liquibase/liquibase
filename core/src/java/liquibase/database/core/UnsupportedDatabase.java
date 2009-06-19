@@ -114,7 +114,7 @@ public class UnsupportedDatabase extends AbstractDatabase {
     }    
 
     public String getTypeName() {
-        return getDatabaseProductName().toLowerCase().replaceAll("\\W","");
+        return "unsupported";
     }
 
     public boolean supportsInitiallyDeferrableColumns() {

@@ -30,7 +30,7 @@ public class UnlockDatabaseChangeLogGenerator implements SqlGenerator<UnlockData
         releaseStatement.addNewColumnValue("LOCKED", false);
         releaseStatement.addNewColumnValue("LOCKGRANTED", null);
         releaseStatement.addNewColumnValue("LOCKEDBY", null);
-        releaseStatement.setWhereClause(" ID = 1");
+        releaseStatement.setWhereClause(database.escapeColumnName(liquibaseSchema, database.getDatabaseChangeLogTableName(), "ID")+" = 1");
 
         return SqlGeneratorFactory.getInstance().generateSql(releaseStatement, database);
     }

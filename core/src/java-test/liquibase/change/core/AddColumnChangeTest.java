@@ -20,6 +20,12 @@ import org.junit.Test;
  */
 public class AddColumnChangeTest extends AbstractChangeTest {
 
+
+    @Override
+    public void validate() throws Exception {
+        super.validate();    //To change body of overridden methods use File | Settings | File Templates.
+    }
+
     @Override
     @Test
     public void getRefactoringName() throws Exception {

@@ -1,6 +1,7 @@
 package liquibase.lock;
 
 import liquibase.database.Database;
+import liquibase.database.DatabaseConnection;
 import liquibase.database.core.MySQLDatabase;
 import liquibase.database.core.OracleDatabase;
 import liquibase.exception.LockException;
@@ -106,6 +107,7 @@ public class LockServiceTest {
         replay(readExecutor);
         replay(database);
         ExecutorService.getInstance().setWriteExecutor(database, writeExecutor);
+        ExecutorService.getInstance().setReadExecutor(database, readExecutor);
 
         LockService service = LockService.getInstance(database);
         assertTrue(service.acquireLock());
@@ -165,6 +167,7 @@ public class LockServiceTest {
         replay(writeExecutor);
         replay(readExecutor);
         ExecutorService.getInstance().setWriteExecutor(database, writeExecutor);
+        ExecutorService.getInstance().setReadExecutor(database, readExecutor);
 
         LockService service = LockService.getInstance(database);
         service.waitForLock();
@@ -202,6 +205,7 @@ public class LockServiceTest {
         replay(database);
         replay(writeExecutor);
         replay(readExecutor);
+        ExecutorService.getInstance().setReadExecutor(database, readExecutor);
         ExecutorService.getInstance().setWriteExecutor(database, writeExecutor);
 
         LockService service = LockService.getInstance(database);

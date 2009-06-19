@@ -5,6 +5,7 @@ import liquibase.database.Database;
 import liquibase.statement.*;
 import liquibase.util.StringUtils;
 import liquibase.change.*;
+import liquibase.exception.ValidationErrors;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -55,6 +56,15 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
 
     public void removeColumn(ColumnConfig column) {
         columns.remove(column);
+    }
+
+    @Override
+    public ValidationErrors validate(Database database) {
+        ValidationErrors validationErrors = super.validate(database);
+        if (columns.size() == 0) {
+            validationErrors.addError("'columns' is required");
+        }
+        return validationErrors;
     }
 
     public SqlStatement[] generateStatements(Database database) {
