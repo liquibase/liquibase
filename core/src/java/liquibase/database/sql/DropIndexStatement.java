@@ -47,7 +47,7 @@ public class DropIndexStatement implements SqlStatement {
             return "DROP INDEX " + database.escapeTableName(schemaName, getTableName()) + "." + database.escapeIndexName(null, getIndexName());
         }
 
-        return "DROP INDEX " + database.escapeIndexName(null, getIndexName());
+        return "DROP INDEX " + database.escapeIndexName(schemaName, getIndexName());
     }
 
     public String getEndDelimiter(Database database) {
