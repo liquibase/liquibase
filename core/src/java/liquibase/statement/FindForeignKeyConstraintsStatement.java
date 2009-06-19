@@ -2,11 +2,11 @@ package liquibase.statement;
 
 public class FindForeignKeyConstraintsStatement implements SqlStatement {
 
-    public static final String RESULT_COLUMN_BASE_TABLE_NAME        = "k_table";
-    public static final String RESULT_COLUMN_BASE_TABLE_COLUMN_NAME = "fk_column";
-    public static final String RESULT_COLUMN_FOREIGN_TABLE_NAME     = "pk_table";
-    public static final String RESULT_COLUMN_FOREIGN_COLUMN_NAME    = "pk_column";
-    public static final String RESULT_COLUMN_CONSTRAINT_NAME        = "constraint_name";
+    public static final String RESULT_COLUMN_BASE_TABLE_NAME        = "TABLE_NAME";
+    public static final String RESULT_COLUMN_BASE_TABLE_COLUMN_NAME = "COLUMN_NAME";
+    public static final String RESULT_COLUMN_FOREIGN_TABLE_NAME     = "REFERENCED_TABLE_NAME";
+    public static final String RESULT_COLUMN_FOREIGN_COLUMN_NAME    = "REFERENCED_COLUMN_NAME";
+    public static final String RESULT_COLUMN_CONSTRAINT_NAME        = "CONSTRAINT_NAME";
 
     private String baseTableSchemaName;
     private String baseTableName;
