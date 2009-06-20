@@ -13,16 +13,16 @@ import liquibase.sqlgenerator.core.AddAutoIncrementGeneratorDB2;
 import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.After;
 
 import java.util.SortedSet;
 import java.util.Collection;
 
 public class SqlGeneratorFactoryTest {
 
-    @Before
-    public void setup() {
+    @After
+    public void teardown() {
         SqlGeneratorFactory.reset();
-
     }
 
     @Test

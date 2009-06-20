@@ -73,6 +73,13 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
                 if (changePropertyAnnotation != null && !changePropertyAnnotation.includeInSerialization()) {
                     continue;
                 }
+                if (field.getName().equals("serialVersionUID")) {
+                    continue;
+                }
+                if (field.getName().equals("$VRc")) { //from emma
+                    continue;
+                }
+                
                 
                 String propertyName = field.getName();
                 if (field.getType().equals(ColumnConfig.class)) {
