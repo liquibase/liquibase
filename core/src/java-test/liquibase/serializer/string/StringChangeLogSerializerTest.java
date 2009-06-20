@@ -193,12 +193,18 @@ public class StringChangeLogSerializerTest {
         Class clazz = object.getClass();
         for (Field field : clazz.getDeclaredFields()) {
             field.setAccessible(true);
-            if (field.getType().equals(Logger.class)) {
+            if (field.getType().getName().equals("[[Z")) {
+                //nothing, from emma
+            } else if (field.getName().equals("serialVersionUID")) {
+                //nothing
+            } else if (field.getType().equals(Logger.class)) {
                 //nothing
             } else if (field.getType().equals(ResourceAccessor.class)) {
                 //nothing
             } else if (field.getType().equals(ClassLoader.class)) {
                 //nothing
+            } else if (field.getType().equals(long.class)) {
+                field.set(object, createInteger().longValue());
             } else if (field.getType().equals(String.class)) {
                 field.set(object, createString());
             } else if (field.getType().equals(Number.class)) {
