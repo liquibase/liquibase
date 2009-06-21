@@ -12,6 +12,9 @@ import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.SQLException;
 import java.util.*;
+import java.io.File;
+import java.net.URISyntaxException;
+import java.net.URI;
 
 /**
  * Controls the database connections for running tests.
@@ -237,4 +240,10 @@ public class TestContext {
         }
         throw new RuntimeException("Could not find url for " + database);
     }
+
+    public File findProjectRoot() throws URISyntaxException {
+        File thisClassFile = new File(new URI(this.getClass().getClassLoader().getResource("liquibase/test/TestContext.class").toExternalForm()));
+        return new File(thisClassFile.getParentFile().getParentFile().getParentFile().getParent());
+    }
+
 }

@@ -8,14 +8,14 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.net.URISyntaxException;
 import java.util.Enumeration;
 
 public class JUnitResourceAccessor implements ResourceAccessor {
     private URLClassLoader classLoader;
 
     public JUnitResourceAccessor() throws Exception {
-        File thisClassFile = new File(new URI(this.getClass().getClassLoader().getResource("liquibase/test/JUnitResourceAccessor.class").toExternalForm()));
-        File srcDir = new File(thisClassFile.getParentFile().getParentFile().getParentFile().getParent(), "src");
+        File srcDir = new File(TestContext.getInstance().findProjectRoot(), "src");
         classLoader = new URLClassLoader(new URL[]{
                 new File(srcDir, "samples").toURL(),
                 new File(srcDir, "java-test").toURL(),
