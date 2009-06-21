@@ -54,12 +54,14 @@ public class CompositeResourceAccessor implements ResourceAccessor {
      * Enumeration is returned.
      */
     public Enumeration<URL> getResources(String packageName) throws IOException {
+        Vector<URL> urls = new Vector<URL>();
         for (ResourceAccessor o : openers) {
             Enumeration<URL> e = o.getResources(packageName);
-            if (e.hasMoreElements())
-                return e;
+            while (e.hasMoreElements()) {
+                urls.add(e.nextElement());
+            }
         }
-        return new Vector<URL>().elements();
+        return urls.elements();
     }
 
     public ClassLoader toClassLoader() {

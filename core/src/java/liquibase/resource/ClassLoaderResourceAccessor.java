@@ -11,15 +11,25 @@ import java.util.Enumeration;
  * @see ResourceAccessor
  */
 public class ClassLoaderResourceAccessor implements ResourceAccessor {
+    private ClassLoader classLoader;
+
+    public ClassLoaderResourceAccessor() {
+        this.classLoader = getClass().getClassLoader();
+    }
+
+    public ClassLoaderResourceAccessor(ClassLoader classLoader) {
+        this.classLoader = classLoader;
+    }
+
     public InputStream getResourceAsStream(String file) throws IOException {
-        return getClass().getClassLoader().getResourceAsStream(file);
+        return classLoader.getResourceAsStream(file);
     }
 
     public Enumeration<URL> getResources(String packageName) throws IOException {
-        return getClass().getClassLoader().getResources(packageName);
+        return classLoader.getResources(packageName);
     }
 
     public ClassLoader toClassLoader() {
-        return getClass().getClassLoader();
+        return classLoader;
     }
 }
