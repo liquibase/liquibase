@@ -14,6 +14,19 @@ import java.io.InputStream;
 import java.util.Map;
 
 public class XMLChangeLogSAXParser implements ChangeLogParser {
+    private SAXParserFactory saxParserFactory;
+
+    public XMLChangeLogSAXParser() {
+        saxParserFactory = SAXParserFactory.newInstance();
+
+        if (System.getProperty("java.vm.version").startsWith("1.4")) {
+            saxParserFactory.setValidating(false);
+            saxParserFactory.setNamespaceAware(false);
+        } else {
+            saxParserFactory.setValidating(true);
+            saxParserFactory.setNamespaceAware(true);
+        }
+    }
 
     public static String getSchemaVersion() {
         return "2.0";
@@ -26,15 +39,6 @@ public class XMLChangeLogSAXParser implements ChangeLogParser {
     }
 
     public DatabaseChangeLog parse(String physicalChangeLogLocation, Map<String, Object> changeLogParameters, ResourceAccessor resourceAccessor) throws ChangeLogParseException {
-
-        SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
-        if (System.getProperty("java.vm.version").startsWith("1.4")) {
-            saxParserFactory.setValidating(false);
-            saxParserFactory.setNamespaceAware(false);
-        } else {
-            saxParserFactory.setValidating(true);
-            saxParserFactory.setNamespaceAware(true);
-        }
 
         InputStream inputStream = null;
         try {
