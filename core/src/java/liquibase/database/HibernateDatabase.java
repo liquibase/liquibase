@@ -20,19 +20,20 @@ import org.hibernate.cfg.AnnotationConfiguration;
 
 public class HibernateDatabase implements Database {
 
-    private String configFile;
+    private Configuration configuration;
     private String defaultSchema;
 
+    public HibernateDatabase(Configuration configuration) {
+        this.configuration = configuration;
+    }
+
     public HibernateDatabase(String configFile) {
-        this.configFile = configFile;
+        configuration = new AnnotationConfiguration();
+        configuration.configure(configFile);
     }
 
     public DatabaseSnapshot createDatabaseSnapshot(String schema, Set<DiffStatusListener> statusListeners) throws JDBCException {
         return new HibernateDatabaseSnapshot(this);
-    }
-
-    public String getConfigFile() {
-        return configFile;
     }
 
     public boolean isCorrectDatabaseImplementation(Connection conn) throws JDBCException {
@@ -100,7 +101,7 @@ public class HibernateDatabase implements Database {
     }
 
     public String getConnectionURL() throws JDBCException {
-        return "hibernate:"+configFile;
+        return "hibernate:"+configuration.toString();
     }
 
     public String getConnectionUsername() throws JDBCException {
@@ -442,8 +443,8 @@ public class HibernateDatabase implements Database {
 
     }
 
-    public Configuration createConfiguration() {
-        return new AnnotationConfiguration();
+    public Configuration getConfiguration() {
+        return configuration;
     }
 
     public boolean supportsRestrictForeignKeys() {

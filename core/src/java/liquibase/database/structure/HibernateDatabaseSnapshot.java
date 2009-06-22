@@ -39,8 +39,7 @@ public class HibernateDatabaseSnapshot implements DatabaseSnapshot {
 
     public HibernateDatabaseSnapshot(HibernateDatabase database) throws JDBCException {
         try {
-            Configuration cfg = database.createConfiguration();
-            cfg.configure(database.getConfigFile());
+            Configuration cfg = database.getConfiguration();
             this.database = database;
 
 //            Dialect dialect = (Dialect) Class.forName(cfg.getProperty("dialect")).newInstance();
