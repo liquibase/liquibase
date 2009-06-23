@@ -1,6 +1,13 @@
 LiquiBase Core Changelog
 ==========================================
 
+Changes in version 1.9.4 (2009.6.23)
+----------------------
+- DB2 for iSeries support
+- Improved Maven support
+- executeCommand does not run under updateSQL etc.
+- Bug fixes
+
 Changes in version 1.9.3 (2009.4.3)
 ----------------------
 - Fixed index column nested tags in generated XML

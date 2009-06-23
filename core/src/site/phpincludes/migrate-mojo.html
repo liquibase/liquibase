@@ -1,7 +1,7 @@
 <div class="section"><h2><a name="liquibase:migrate"></a>
 liquibase:migrate</h2>
 <p><strong>Full name</strong>:</p>
-<p>org.liquibase:liquibase-plugin:1.9.3.0:migrate</p>
+<p>org.liquibase:liquibase-plugin:1.9.4.0-SNAPSHOT:migrate</p>
 <p><strong>Description</strong>:</p>
 <p>Liquibase Migration Maven plugin. This plugin allows for
 DatabaseChangeLogs to be applied to a database as part of a Maven
@@ -75,7 +75,13 @@ the change. Default value is: <code>false</code>.</td>
 This should not be used along side the <code>password</code>
 setting. Default value is: <code>false</code>.</td>
 </tr>
-<tr class="b"><td><strong><a href="#includeArtifact">includeArtifact</a>
+<tr class="b"><td><strong><a href="#expressionVars">expressionVars</a>
+</strong></td>
+<td><code>Properties</code></td>
+<td><code>-</code></td>
+<td>Array to put a expression variable to maven plugin. </td>
+</tr>
+<tr class="a"><td><strong><a href="#includeArtifact">includeArtifact</a>
 </strong></td>
 <td><code>boolean</code></td>
 <td><code>-</code></td>
@@ -83,7 +89,7 @@ setting. Default value is: <code>false</code>.</td>
 loader for obtaining the Liquibase property and DatabaseChangeLog
 files. Default value is: <code>true</code>.</td>
 </tr>
-<tr class="a"><td><strong><a href="#logging">logging</a>
+<tr class="b"><td><strong><a href="#logging">logging</a>
 </strong></td>
 <td><code>String</code></td>
 <td><code>-</code></td>
@@ -91,13 +97,13 @@ files. Default value is: <code>true</code>.</td>
 value can be &quot;all&quot;, &quot;finest&quot;, &quot;finer&quot;, &quot;fine&quot;, &quot;info&quot;, &quot;warning&quot;,
 &quot;severe&quot; or &quot;off&quot;. The value is case insensitive. Default value is: <code>INFO</code>.</td>
 </tr>
-<tr class="b"><td><strong><a href="#password">password</a>
+<tr class="a"><td><strong><a href="#password">password</a>
 </strong></td>
 <td><code>String</code></td>
 <td><code>-</code></td>
 <td>The database password to use to connect to the specified database. </td>
 </tr>
-<tr class="a"><td><strong><a href="#promptOnNonLocalDatabase">promptOnNonLocalDatabase</a>
+<tr class="b"><td><strong><a href="#promptOnNonLocalDatabase">promptOnNonLocalDatabase</a>
 </strong></td>
 <td><code>boolean</code></td>
 <td><code>-</code></td>
@@ -105,14 +111,14 @@ value can be &quot;all&quot;, &quot;finest&quot;, &quot;finer&quot;, &quot;fine&
 want to run the changes on a database that is not local to the
 machine that the user is current executing the plugin on. Default value is: <code>true</code>.</td>
 </tr>
-<tr class="b"><td><strong><a href="#propertyFile">propertyFile</a>
+<tr class="a"><td><strong><a href="#propertyFile">propertyFile</a>
 </strong></td>
 <td><code>String</code></td>
 <td><code>-</code></td>
 <td>The Liquibase properties file used to configure the Liquibase
 <code>Liquibase</code>. </td>
 </tr>
-<tr class="a"><td><strong><a href="#propertyFileWillOverride">propertyFileWillOverride</a>
+<tr class="b"><td><strong><a href="#propertyFileWillOverride">propertyFileWillOverride</a>
 </strong></td>
 <td><code>boolean</code></td>
 <td><code>-</code></td>
@@ -121,19 +127,19 @@ settings provided in the Maven plugin configuration. By default if
 a property is explicity specified it is not overridden if it also
 appears in the properties file. Default value is: <code>false</code>.</td>
 </tr>
-<tr class="b"><td><strong><a href="#url">url</a>
+<tr class="a"><td><strong><a href="#url">url</a>
 </strong></td>
 <td><code>String</code></td>
 <td><code>-</code></td>
 <td>The Database URL to connect to for executing Liquibase. </td>
 </tr>
-<tr class="a"><td><strong><a href="#username">username</a>
+<tr class="b"><td><strong><a href="#username">username</a>
 </strong></td>
 <td><code>String</code></td>
 <td><code>-</code></td>
 <td>The database username to use to connect to the specified database. </td>
 </tr>
-<tr class="b"><td><strong><a href="#verbose">verbose</a>
+<tr class="a"><td><strong><a href="#verbose">verbose</a>
 </strong></td>
 <td><code>boolean</code></td>
 <td><code>-</code></td>
@@ -219,6 +225,13 @@ setting.</p>
 <li><strong>Required</strong>: <code>No</code></li>
 <li><strong>Expression</strong>: <code>${liquibase.emptyPassword}</code></li>
 <li><strong>Default</strong>: <code>false</code></li>
+</ul>
+<hr />
+<p><strong><a name="expressionVars">expressionVars</a>
+:</strong></p>
+<p>Array to put a expression variable to maven plugin.</p>
+<ul><li><strong>Type</strong>: <code>java.util.Properties</code></li>
+<li><strong>Required</strong>: <code>No</code></li>
 </ul>
 <hr />
 <p><strong><a name="includeArtifact">includeArtifact</a>
