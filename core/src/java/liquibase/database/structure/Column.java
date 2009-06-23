@@ -247,7 +247,7 @@ public class Column implements DatabaseObject, Comparable<Column> {
                 return "float";
             }
         }
-        
+
         if (database instanceof InformixDatabase) {
             /*
              * rs.getInt("DATA_TYPE") returns 1 (Types.CHAR) for
@@ -275,6 +275,8 @@ public class Column implements DatabaseObject, Comparable<Column> {
               return translatedTypeName;
             } else if (database instanceof OracleDatabase && (translatedTypeName.equals("VARCHAR2"))                   ) {
               return translatedTypeName+"("+this.getColumnSize()+" "+lengthSemantics+")";
+            } else if (database instanceof MySQLDatabase && translatedTypeName.equals("double")) {
+              return translatedTypeName;
             }
             dataType = translatedTypeName+"("+this.getColumnSize()+")";
         } else if (twoParams.contains(this.getDataType())) {
@@ -322,8 +324,8 @@ public class Column implements DatabaseObject, Comparable<Column> {
         } else {
             return this.getDataType() != otherColumn.getDataType()
                     || this.getColumnSize() != otherColumn.getColumnSize()
-                    || this.getDecimalDigits() != otherColumn.getDecimalDigits()           
-                    || this.getLengthSemantics() != otherColumn.getLengthSemantics();            
+                    || this.getDecimalDigits() != otherColumn.getDecimalDigits()
+                    || this.getLengthSemantics() != otherColumn.getLengthSemantics();
         }
     }
 
@@ -375,11 +377,11 @@ public class Column implements DatabaseObject, Comparable<Column> {
 
         return this;
     }
-    
+
     public LengthSemantics getLengthSemantics() {
       return lengthSemantics;
     }
-    
+
     public Column setLengthSemantics(LengthSemantics lengthSemantics) {
       this.lengthSemantics = lengthSemantics;
 
@@ -390,3 +392,4 @@ public class Column implements DatabaseObject, Comparable<Column> {
       CHAR, BYTE
     }
 }
+
