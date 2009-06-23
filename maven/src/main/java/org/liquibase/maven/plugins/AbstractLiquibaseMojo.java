@@ -196,7 +196,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
 
       liquibase = createLiquibase(getFileOpener(artifactClassLoader), database);
 
-      getLog().debug("expressionVars = " + expressionVars.toString());
+//      getLog().debug("expressionVars = " + expressionVars.toString());
       if (expressionVars != null) {
       	for (Entry<Object, Object> var: expressionVars.entrySet()) {
       		this.liquibase.setChangeLogParameterValue(var.getKey().toString(), var.getValue());
