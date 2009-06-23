@@ -1,19 +1,21 @@
 package liquibase.util.plugin;
 
 import liquibase.util.log.LogFactory;
+import liquibase.util.StringUtils;
 import liquibase.resource.ResourceAccessor;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.exception.UnexpectedLiquibaseException;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Modifier;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.List;
+import java.util.*;
 import java.util.jar.JarFile;
 import java.util.jar.JarEntry;
+import java.util.jar.Manifest;
+import java.util.jar.Attributes;
 
 public class ClassPathScanner {
 
@@ -21,8 +23,11 @@ public class ClassPathScanner {
 
     private ResourceAccessor resourceAccessor;
 
+    private Map<Class, List<Class>> classesBySuperclass;
+    private List<String> packagesToScan;
+
     private ClassPathScanner() {
-        this.resourceAccessor = new ClassLoaderResourceAccessor();
+        setResourceAccessor(new ClassLoaderResourceAccessor());
     }
 
     public static ClassPathScanner getInstance() {
@@ -31,17 +36,45 @@ public class ClassPathScanner {
 
     public void setResourceAccessor(ResourceAccessor resourceAccessor) {
         this.resourceAccessor = resourceAccessor;
+        this.classesBySuperclass = new HashMap<Class, List<Class>>();
+
+        packagesToScan = new ArrayList<String>();
+        Enumeration<URL> manifests = null;
+        try {
+            manifests = resourceAccessor.getResources("META-INF/MANIFEST.MF");
+            while (manifests.hasMoreElements()) {
+                URL url = manifests.nextElement();
+                InputStream is = url.openStream();
+                Manifest manifest = new Manifest(is);
+                String attributes = StringUtils.trimToNull(manifest.getMainAttributes().getValue("LiquiBase-Package"));
+                if (attributes != null) {
+                    for (Object value : attributes.split(",")) {
+                        packagesToScan.add(value.toString());
+                    }
+                }
+                is.close();
+            }
+        } catch (IOException e) {
+            throw new UnexpectedLiquibaseException(e);
+        }
     }
 
-    public Class[] getClasses(String packageName, Class requiredInterface) throws Exception {
+    public Class[] getClasses(Class requiredInterface) throws Exception {
         Class.forName(requiredInterface.getName());
 
-        String path = packageName.replace('.', '/');
-        Enumeration<URL> resources = resourceAccessor.getResources(path);
-        ArrayList<Class> classes = new ArrayList<Class>();
-        while (resources.hasMoreElements()) {
-            classes.addAll(findClasses(resources.nextElement(), packageName, requiredInterface));
+        if (!classesBySuperclass.containsKey(requiredInterface)) {
+            classesBySuperclass.put(requiredInterface, new ArrayList<Class>());
+
+            for (String packageName : packagesToScan) {
+                String path = packageName.replace('.', '/');
+                Enumeration<URL> resources = resourceAccessor.getResources(path);
+                while (resources.hasMoreElements()) {
+                    classesBySuperclass.get(requiredInterface).addAll(findClasses(resources.nextElement(), packageName, requiredInterface));
+                }
+            }
         }
+
+        List<Class> classes = classesBySuperclass.get(requiredInterface);
         return classes.toArray(new Class[classes.size()]);
     }
 
@@ -52,22 +85,21 @@ public class ClassPathScanner {
 //        }
 
         List<String> potentialClassNames = new ArrayList<String>();
-        if (resource.getProtocol().equals("jar")){
-            File zipfile = new File(resource.getFile().split("!")[0].replaceFirst("file:\\/","")) ;
+        if (resource.getProtocol().equals("jar")) {
+            File zipfile = new File(resource.getFile().split("!")[0].replaceFirst("file:\\/", ""));
             JarFile jarFile = new JarFile(zipfile);
-            System.out.println("load from jar");
             Enumeration<JarEntry> entries = jarFile.entries();
             while (entries.hasMoreElements()) {
                 JarEntry entry = entries.nextElement();
                 if (entry.getName().startsWith(packageName.replaceAll("\\.", "/")) && entry.getName().endsWith(".class")) {
-                    potentialClassNames.add(entry.getName().replaceAll("\\/",".").substring(0, entry.getName().length() - ".class".length()));
+                    potentialClassNames.add(entry.getName().replaceAll("\\/", ".").substring(0, entry.getName().length() - ".class".length()));
                 }
             }
         } else if (resource.getProtocol().equals("file")) {
             File directory = new File(resource.getFile().replace("%20", " "));
 
             if (!directory.exists()) {
-                System.out.println(directory+" does not exist");
+                System.out.println(directory + " does not exist");
                 return classes;
             }
 
@@ -81,7 +113,7 @@ public class ClassPathScanner {
             }
 
         } else {
-            throw new UnexpectedLiquibaseException("Cannot read plugin classes from protocol "+resource.getProtocol());
+            throw new UnexpectedLiquibaseException("Cannot read plugin classes from protocol " + resource.getProtocol());
         }
 
         for (String potentialClassName : potentialClassNames) {
@@ -93,7 +125,10 @@ public class ClassPathScanner {
                     clazz.getConstructor();
                     classes.add(clazz);
                 } catch (NoSuchMethodException e) {
-                        LogFactory.getLogger().warning("Class "+clazz.getName()+" does not have a public no-arg constructor, so it can't be used as a "+requiredInterface.getName()+" plug-in");
+                    URL classAsUrl = resourceAccessor.toClassLoader().getResource(clazz.getName().replaceAll("\\.", "/") + ".class");
+                    if (!clazz.getName().equals("liquibase.database.core.HibernateDatabase") && (classAsUrl != null && !classAsUrl.toExternalForm().contains("build-test/liquibase/"))) { //keeps the logs down
+                        LogFactory.getLogger().warning("Class " + clazz.getName() + " does not have a public no-arg constructor, so it can't be used as a " + requiredInterface.getName() + " plug-in");
+                    }
                 }
             }
 

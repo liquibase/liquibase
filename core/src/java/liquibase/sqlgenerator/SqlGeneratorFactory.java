@@ -25,7 +25,7 @@ public class SqlGeneratorFactory {
     private SqlGeneratorFactory() {
         Class[] classes;
         try {
-            classes = ClassPathScanner.getInstance().getClasses("liquibase.sqlgenerator", SqlGenerator.class);
+            classes = ClassPathScanner.getInstance().getClasses(SqlGenerator.class);
 
             for (Class clazz : classes) {
                 register((SqlGenerator) clazz.getConstructor().newInstance());

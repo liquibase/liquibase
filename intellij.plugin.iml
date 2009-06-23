@@ -15,5 +15,7 @@
     <orderEntry type="module" module-name="liquibase" />
     <orderEntry type="module" module-name="ide.common" />
   </component>
+  <component name="ProjectKey" />
+  <component name="ProjectRunConfigurationManager" />
 </module>
 

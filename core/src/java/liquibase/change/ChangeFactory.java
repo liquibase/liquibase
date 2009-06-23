@@ -22,7 +22,7 @@ public class ChangeFactory {
     private ChangeFactory() {
         Class[] classes;
         try {
-            classes = ClassPathScanner.getInstance().getClasses("liquibase.change", Change.class);
+            classes = ClassPathScanner.getInstance().getClasses(Change.class);
 
             for (Class clazz : classes) {
                 //noinspection unchecked

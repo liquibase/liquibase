@@ -26,7 +26,7 @@ public class ChangeLogParserFactory {
     private ChangeLogParserFactory() {
         Class[] classes;
         try {
-            classes = ClassPathScanner.getInstance().getClasses("liquibase.parser", ChangeLogParser.class);
+            classes = ClassPathScanner.getInstance().getClasses(ChangeLogParser.class);
 
             for (Class clazz : classes) {
                     register((ChangeLogParser) clazz.getConstructor().newInstance());

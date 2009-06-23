@@ -13,6 +13,10 @@ public class AnonymousChange extends AbstractChange {
 
     private List<SqlStatement> statements = new ArrayList<SqlStatement>();
 
+    public AnonymousChange() {
+        this(new SqlStatement[0]);
+    }
+
     public AnonymousChange(SqlStatement... statement) {
         super("anonymous", "Anonymous change", ChangeMetaData.PRIORITY_DEFAULT);
         this.statements.addAll(Arrays.asList(statement));

@@ -60,6 +60,7 @@
       <entry name="?*.xsd" />
       <entry name="?*.csv" />
       <entry name="?*.sql" />
+      <entry name="?*.MF" />
     </wildcardResourcePatterns>
   </component>
   <component name="CopyrightManager" default="">
@@ -138,6 +139,7 @@
     <option name="outputChangeLogFile" />
     <option name="rootChangeLogFile" />
   </component>
+  <component name="NewModuleRootManager" />
   <component name="Palette2">
     <group name="Swing">
       <item class="com.intellij.uiDesigner.HSpacer" tooltip-text="Horizontal Spacer" icon="/com/intellij/uiDesigner/icons/hspacer.png" removable="false" auto-create-binding="false" can-attach-label="false">
@@ -264,7 +266,7 @@
   </component>
   <component name="ProjectFileVersion" converted="true" />
   <component name="ProjectKey">
-    <option name="state" value="project://E:\src\liquibase\liquibase.ipr" />
+    <option name="state" value="project://C:\othersvn\liquibase\liquibase.ipr" />
   </component>
   <component name="ProjectModuleManager">
     <modules>
@@ -274,7 +276,6 @@
       <module fileurl="file://$PROJECT_DIR$/ide.common.iml" filepath="$PROJECT_DIR$/ide.common.iml" />
       <module fileurl="file://$PROJECT_DIR$/intellij.plugin.iml" filepath="$PROJECT_DIR$/intellij.plugin.iml" />
       <module fileurl="file://$PROJECT_DIR$/liquibase.iml" filepath="$PROJECT_DIR$/liquibase.iml" />
-      <module fileurl="file://C:/othersvn/grails-liquibase/liquibase.grails.iml" filepath="C:/othersvn/grails-liquibase/liquibase.grails.iml" />
       <module fileurl="file://$PROJECT_DIR$/liquibase.maven.iml" filepath="$PROJECT_DIR$/liquibase.maven.iml" />
     </modules>
   </component>
@@ -467,7 +468,6 @@
   </component>
   <component name="VcsDirectoryMappings">
     <mapping directory="" vcs="" />
-    <mapping directory="C:/othersvn/grails-liquibase" vcs="svn" />
     <mapping directory="$PROJECT_DIR$/core" vcs="svn" />
     <mapping directory="$PROJECT_DIR$/ide/common" vcs="svn" />
     <mapping directory="$PROJECT_DIR$/ide/eclipse/common" vcs="svn" />

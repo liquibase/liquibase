@@ -148,7 +148,7 @@ The available targets at the current stage:
 
     <!-- target: PACKAGE -->
     <target name="package" depends="compile">
-        <jar destfile="${release.dir}/liquibase-SNAPSHOT.jar" manifest="${src.dir}/../META-INF/MANIFEST.MF">
+        <jar destfile="${release.dir}/liquibase-SNAPSHOT.jar" manifest="${src.dir}/META-INF/MANIFEST.MF">
             <zipfileset dir="${build.dir}"/>
         </jar>
 
