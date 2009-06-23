@@ -25,7 +25,7 @@ public class ChangeLogSerializerFactory {
     private ChangeLogSerializerFactory() {
         Class[] classes;
         try {
-            classes = ClassPathScanner.getInstance().getClasses("liquibase.serializer", ChangeLogSerializer.class);
+            classes = ClassPathScanner.getInstance().getClasses(ChangeLogSerializer.class);
 
             for (Class clazz : classes) {
                     register((ChangeLogSerializer) clazz.getConstructor().newInstance());

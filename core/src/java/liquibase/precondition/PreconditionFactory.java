@@ -17,7 +17,7 @@ public class PreconditionFactory {
         preconditions = new HashMap<String, Class<? extends Precondition>>();
         Class[] classes;
         try {
-            classes = ClassPathScanner.getInstance().getClasses("liquibase.precondition", Precondition.class);
+            classes = ClassPathScanner.getInstance().getClasses(Precondition.class);
 
             for (Class<? extends Precondition> clazz : classes) {
                     register(clazz);

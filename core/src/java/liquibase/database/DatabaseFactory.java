@@ -21,7 +21,7 @@ public class DatabaseFactory {
 
     private DatabaseFactory() {
         try {
-            Class[] classes = ClassPathScanner.getInstance().getClasses("liquibase.database", Database.class);
+            Class[] classes = ClassPathScanner.getInstance().getClasses(Database.class);
 
             for (Class clazz : classes) {
                 register((Database) clazz.getConstructor().newInstance());

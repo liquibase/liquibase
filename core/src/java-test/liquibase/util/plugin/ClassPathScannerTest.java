@@ -15,14 +15,14 @@ import java.net.URL;
 import java.io.File;
 
 public class ClassPathScannerTest {
-    private CompositeResourceAccessor resourceAccessor;
     private ClassPathScanner classPathScanner;
 
     @Before
     public void setup() throws Exception{
-        resourceAccessor = new CompositeResourceAccessor(new ClassLoaderResourceAccessor(), new ClassLoaderResourceAccessor(new URLClassLoader(new URL[] {
+        CompositeResourceAccessor resourceAccessor = new CompositeResourceAccessor(new ClassLoaderResourceAccessor(), new ClassLoaderResourceAccessor(new URLClassLoader(new URL[]{
                 new File(TestContext.getInstance().findProjectRoot(), "/lib-test/liquibase-samples.jar").toURL()
-        })));;
+        })));
+        ;
         
         classPathScanner = ClassPathScanner.getInstance();
         classPathScanner.setResourceAccessor(resourceAccessor);
@@ -43,19 +43,18 @@ public class ClassPathScannerTest {
 
     @Test
     public void getClasses() throws Exception {
-        Class[] classes = classPathScanner.getClasses("liquibase.parser", ChangeLogParser.class);
+        Class[] classes = classPathScanner.getClasses(ChangeLogParser.class);
         assertTrue(classes.length > 0);
     }
 
 
     @Test
     public void getClasses_sampleJar() throws Exception {
-        Class[] classes = ClassPathScanner.getInstance().getClasses("liquibase.sqlgenerator", SqlGenerator.class);
+        Class[] classes = ClassPathScanner.getInstance().getClasses(SqlGenerator.class);
         for (Class clazz : classes) {
             if (clazz.getName().equals("liquibase.sqlgenerator.ext.sample1.Sample1UpdateGenerator")) {
                 return;
             }
-            System.out.println(clazz.getName());
         }
         fail("Did not find Sample1UpdateGenerator");
     }
