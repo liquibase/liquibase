@@ -10,6 +10,7 @@ import liquibase.statement.FindForeignKeyConstraintsStatement;
 import liquibase.statement.SqlStatement;
 import liquibase.change.AbstractChange;
 import liquibase.change.ChangeMetaData;
+import liquibase.change.ChangeProperty;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,6 +22,7 @@ public class DropAllForeignKeyConstraintsChange extends AbstractChange {
     private String baseTableSchemaName;
     private String baseTableName;
 
+    @ChangeProperty(includeInSerialization = false)
     private List<DropForeignKeyConstraintChange> childDropChanges;
 
 
