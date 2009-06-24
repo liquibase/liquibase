@@ -146,9 +146,33 @@ The available targets at the current stage:
         </propertyfile>
     </target>
 
+    <macrodef name="build-sample-jars">
+        <attribute name="sample"/>
+        <sequential>
+            <delete dir="${src.dir}/samples/ext/@{sample}/build"/>
+            <mkdir dir="${src.dir}/samples/ext/@{sample}/build"/>
+            <javac srcdir="${src.dir}/samples/ext/@{sample}/java" destdir="${src.dir}/samples/ext/@{sample}/build" deprecation="${deprecation}" debug="${debug}"
+                   optimize="${optimize}" source="1.5">
+                <classpath>
+                    <pathelement path="${build.dir}"/>
+                    <pathelement path="${build.test.dir}"/>
+                    <path refid="classpath"/>
+                </classpath>
+            </javac>
+
+            <jar basedir="${src.dir}/samples/ext/@{sample}/build" destfile="${src.dir}/../lib-test/liquibase-@{sample}.jar"/>
+            </sequential>
+
+        </macrodef>
+
+    <target name="build-sample-jars" depends="prepare">
+        <build-sample-jars sample="sample1"/>
+        <build-sample-jars sample="sample2"/>
+    </target>
+
     <!-- target: PACKAGE -->
     <target name="package" depends="compile">
-        <jar destfile="${release.dir}/liquibase-SNAPSHOT.jar" manifest="${src.dir}/META-INF/MANIFEST.MF">
+        <jar destfile="${release.dir}/liquibase-SNAPSHOT.jar" manifest="${src.dir}/java/META-INF/MANIFEST.MF">
             <zipfileset dir="${build.dir}"/>
         </jar>
 

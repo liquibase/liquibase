@@ -432,7 +432,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
                     throw new RuntimeException("Unexpected column with text: "+textString);
                 }
                 this.text = new StringBuffer();
-            } else if (change != null && qName.equals(change.getChangeMetaData().getName())) {
+            } else if (change != null && localName.equals(change.getChangeMetaData().getName())) {
                 if (textString != null) {
                     if (change instanceof RawSQLChange) {
                         ((RawSQLChange) change).setSql(textString);
