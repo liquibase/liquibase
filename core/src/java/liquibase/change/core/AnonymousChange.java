@@ -4,6 +4,7 @@ import liquibase.statement.SqlStatement;
 import liquibase.database.Database;
 import liquibase.change.AbstractChange;
 import liquibase.change.ChangeMetaData;
+import liquibase.change.ChangeProperty;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -11,6 +12,7 @@ import java.util.Arrays;
 
 public class AnonymousChange extends AbstractChange {
 
+    @ChangeProperty(includeInSerialization = false)
     private List<SqlStatement> statements = new ArrayList<SqlStatement>();
 
     public AnonymousChange() {

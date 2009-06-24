@@ -176,9 +176,6 @@ public class StringChangeLogSerializerTest {
     public void tryAllChanges() throws Exception {
         for (Class<? extends Change> changeClass : ChangeFactory.getInstance().getRegistry().values()) {
             Change change = changeClass.getConstructor().newInstance();
-            if (change instanceof DropAllForeignKeyConstraintsChange) {
-                continue;
-            }
 
             setFields(change);
 
@@ -192,6 +189,9 @@ public class StringChangeLogSerializerTest {
     private void setFields(Object object) throws Exception {
         Class clazz = object.getClass();
         for (Field field : clazz.getDeclaredFields()) {
+            if (field.getAnnotation(ChangeProperty.class) != null && !field.getAnnotation(ChangeProperty.class).includeInSerialization()) {
+                continue;                
+            }
             field.setAccessible(true);
             if (field.getType().getName().equals("[[Z")) {
                 //nothing, from emma

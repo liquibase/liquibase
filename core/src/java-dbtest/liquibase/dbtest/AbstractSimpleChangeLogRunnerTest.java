@@ -16,16 +16,20 @@ import liquibase.exception.ValidationFailedException;
 import liquibase.lock.LockService;
 import liquibase.resource.ResourceAccessor;
 import liquibase.resource.FileSystemResourceAccessor;
+import liquibase.resource.CompositeResourceAccessor;
+import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.statement.DropTableStatement;
 import liquibase.test.JUnitResourceAccessor;
 import liquibase.test.TestContext;
 import liquibase.util.log.LogFactory;
+import liquibase.util.plugin.ClassPathScanner;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.io.StringWriter;
 import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.List;
@@ -106,7 +110,7 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
         if (database == null) {
             return;
         }
-        
+
         runCompleteChangeLog();
     }
 
@@ -125,7 +129,7 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
     }
 
     protected String[] getSchemasToDrop() throws JDBCException {
-        return new String[] {
+        return new String[]{
                 "liquibaseb".toUpperCase(),
                 database.getDefaultSchemaName(),
         };
@@ -153,7 +157,7 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
 //        System.out.println();
     }
 
-       public void testUpdateTwice() throws Exception {
+    public void testUpdateTwice() throws Exception {
         if (database == null) {
             return;
         }
@@ -469,13 +473,13 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
         if (database == null) {
             return;
         }
-        
+
 
         Enumeration<URL> urls = new JUnitResourceAccessor().getResources(includedChangeLog);
         URL completeChangeLogURL = urls.nextElement();
 
         String absolutePathOfChangeLog = completeChangeLogURL.toExternalForm();
-        absolutePathOfChangeLog = absolutePathOfChangeLog.replaceFirst("file:\\/","");
+        absolutePathOfChangeLog = absolutePathOfChangeLog.replaceFirst("file:\\/", "");
         if (System.getProperty("os.name").startsWith("Windows ")) {
             absolutePathOfChangeLog = absolutePathOfChangeLog.replace('/', '\\');
         } else {
@@ -541,6 +545,36 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
             ExecutorService.getInstance().getWriteExecutor(database).execute(new DropTableStatement(schema, database.getDatabaseChangeLogTableName(), false));
         } catch (JDBCException e) {
             ; //ok
+        }
+    }
+
+    public void testExecuteExtChangelog() throws Exception {
+        if (database == null) {
+            return;
+        }
+
+        CompositeResourceAccessor resourceAccessor = new CompositeResourceAccessor(new ClassLoaderResourceAccessor(), new ClassLoaderResourceAccessor(new URLClassLoader(new URL[]{
+                new File(TestContext.getInstance().findProjectRoot(), "/lib-test/liquibase-samples.jar").toURL()
+        })));
+        ;
+
+        ClassPathScanner.getInstance().setResourceAccessor(resourceAccessor);
+
+        try {
+            String extChangelog = "changelogs/common/ext.changelog.xml";
+            Liquibase liquibase = createLiquibase(extChangelog);
+            liquibase.dropAll(getSchemasToDrop());
+
+            //run again to test changelog testing logic
+            liquibase = createLiquibase(extChangelog);
+            try {
+                liquibase.update(this.contexts);
+            } catch (ValidationFailedException e) {
+                e.printDescriptiveError(System.out);
+                throw e;
+            }
+        } finally {
+            ClassPathScanner.reset();
         }
     }
 }

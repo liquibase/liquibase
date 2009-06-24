@@ -9,6 +9,7 @@ import liquibase.changelog.ExpressionExpander;
 import liquibase.exception.CustomChangeException;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.MigrationFailedException;
+import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.parser.ChangeLogParserFactory;
 import liquibase.precondition.*;
 import liquibase.precondition.core.AndPrecondition;
@@ -212,18 +213,21 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 
                 changeSet.addSqlVisitor(sqlVisitor);
             } else if (changeSet != null && change == null) {
-                change = ChangeFactory.getInstance().create(qName);
+                change = ChangeFactory.getInstance().create(localName);
+                if (change == null) {
+                    throw new SAXException("Unknown LiquiBase extension: "+localName+".  Are you missing a jar from your classpath?");
+                }
                 change.setChangeSet(changeSet);
                 text = new StringBuffer();
                 if (change == null) {
-                    throw new MigrationFailedException(changeSet, "Unknown change: " + qName);
+                    throw new MigrationFailedException(changeSet, "Unknown change: " + localName);
                 }
                 change.setFileOpener(resourceAccessor);
                 if (change instanceof CustomChangeWrapper) {
                     ((CustomChangeWrapper) change).setClassLoader(resourceAccessor.toClassLoader());
                 }
                 for (int i = 0; i < atts.getLength(); i++) {
-                    String attributeName = atts.getQName(i);
+                    String attributeName = atts.getLocalName(i);
                     String attributeValue = atts.getValue(i);
                     setProperty(change, attributeName, attributeValue);
                 }

@@ -20,7 +20,7 @@ public class ClassPathScannerTest {
     @Before
     public void setup() throws Exception{
         CompositeResourceAccessor resourceAccessor = new CompositeResourceAccessor(new ClassLoaderResourceAccessor(), new ClassLoaderResourceAccessor(new URLClassLoader(new URL[]{
-                new File(TestContext.getInstance().findProjectRoot(), "/lib-test/liquibase-samples.jar").toURL()
+                new File(TestContext.getInstance().findProjectRoot(), "/lib-test/liquibase-sample1.jar").toURL()
         })));
         ;
         
