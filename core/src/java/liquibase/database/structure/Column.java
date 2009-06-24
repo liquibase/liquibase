@@ -275,7 +275,7 @@ public class Column implements DatabaseObject, Comparable<Column> {
               return translatedTypeName;
             } else if (database instanceof OracleDatabase && (translatedTypeName.equals("VARCHAR2"))                   ) {
               return translatedTypeName+"("+this.getColumnSize()+" "+lengthSemantics+")";
-            } else if (database instanceof MySQLDatabase && translatedTypeName.equals("double")) {
+            } else if (database instanceof MySQLDatabase && translatedTypeName.equalsIgnoreCase("DOUBLE")) {
               return translatedTypeName;
             }
             dataType = translatedTypeName+"("+this.getColumnSize()+")";

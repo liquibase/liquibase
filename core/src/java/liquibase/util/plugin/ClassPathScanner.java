@@ -117,7 +117,13 @@ public class ClassPathScanner {
         }
 
         for (String potentialClassName : potentialClassNames) {
-            Class<?> clazz = Class.forName(potentialClassName, true, resourceAccessor.toClassLoader());
+            Class<?> clazz = null;
+            try {
+                clazz = Class.forName(potentialClassName, true, resourceAccessor.toClassLoader());
+            } catch (NoClassDefFoundError e) {
+                LogFactory.getLogger().warning("Could not configure extension class "+potentialClassName+": Missing dependency "+e.getMessage());
+                continue;
+            }
             if (!clazz.isInterface()
                     && !Modifier.isAbstract(clazz.getModifiers())
                     && isCorrectType(clazz, requiredInterface)) {
