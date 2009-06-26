@@ -282,7 +282,7 @@ public class Column implements DatabaseObject, Comparable<Column> {
         } else if (twoParams.contains(this.getDataType())) {
             if (database instanceof PostgresDatabase && this.getColumnSize() == 131089 ) {
                 dataType = "DECIMAL";
-            } else if (database instanceof MSSQLDatabase && translatedTypeName.equalsIgnoreCase("money")) {
+            } else if (database instanceof MSSQLDatabase && translatedTypeName.toLowerCase().contains("money")) {
                 dataType = translatedTypeName.toUpperCase();
             } else {
                 dataType = translatedTypeName+"("+this.getColumnSize()+","+this.getDecimalDigits()+")";
