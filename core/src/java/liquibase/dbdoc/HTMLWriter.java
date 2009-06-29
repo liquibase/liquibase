@@ -108,7 +108,7 @@ public abstract class HTMLWriter {
                 .append("<LINK REL =\"stylesheet\" TYPE=\"text/css\" HREF=\"../../stylesheet.css\" TITLE=\"Style\">")
                 .append("<SCRIPT type=\"text/javascript\">")
                 .append("function windowTitle()")
-                .append("{").append("    parent.document.title=\"").append(title).append("\";")
+                .append("{").append("    parent.document.title=\"").append(title.replaceAll("\"", "'")).append("\";")
                 .append("}")
                 .append("</SCRIPT>")
                 .append("</head>");
