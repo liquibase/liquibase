@@ -6,6 +6,7 @@ public class SelectFromDatabaseChangeLogStatement implements SqlStatement {
 
     private String[] columnsToSelect;
     private WhereClause whereClause;
+    private String[] orderByColumns = new String[0];
 
     public SelectFromDatabaseChangeLogStatement(String... columnsToSelect) {
         this(null, columnsToSelect);
@@ -22,6 +23,16 @@ public class SelectFromDatabaseChangeLogStatement implements SqlStatement {
 
     public WhereClause getWhereClause() {
         return whereClause;
+    }
+
+    public String[] getOrderByColumns() {
+        return orderByColumns;
+    }
+
+    public SelectFromDatabaseChangeLogStatement setOrderBy(String... columns) {
+        this.orderByColumns = columns;
+
+        return this;
     }
 
     public static interface WhereClause {
