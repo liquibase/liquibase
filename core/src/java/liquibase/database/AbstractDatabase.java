@@ -61,6 +61,8 @@ public abstract class AbstractDatabase implements Database {
 	private String databaseChangeLogTableName = "DatabaseChangeLog".toUpperCase();
 	private String databaseChangeLogLockTableName = "DatabaseChangeLogLock".toUpperCase();;
 
+    private Integer lastChangeSetSequenceValue;
+
     protected AbstractDatabase() {
     }
 
@@ -576,19 +578,6 @@ public abstract class AbstractDatabase implements Database {
                 .addColumnValue("LOCKED", Boolean.FALSE);
     }
 
-    protected SqlStatement getCreateChangeLogSQL() throws JDBCException {
-        return new CreateTableStatement(getLiquibaseSchemaName(), getDatabaseChangeLogTableName())
-                .addPrimaryKeyColumn("ID", "VARCHAR(63)", null, null, new NotNullConstraint())
-                .addPrimaryKeyColumn("AUTHOR", "VARCHAR(63)", null, null, new NotNullConstraint())
-                .addPrimaryKeyColumn("FILENAME", "VARCHAR(200)", null, null, new NotNullConstraint())
-                .addColumn("DATEEXECUTED", getDateTimeType().getDataTypeName(), new NotNullConstraint())
-                .addColumn("MD5SUM", "VARCHAR(35)")
-                .addColumn("DESCRIPTION", "VARCHAR(255)")
-                .addColumn("COMMENTS", "VARCHAR(255)")
-                .addColumn("TAG", "VARCHAR(255)")
-                .addColumn("LIQUIBASE", "VARCHAR(10)");
-    }
-
     public boolean doesChangeLogTableExist() throws JDBCException {
         DatabaseConnection connection = getConnection();
         ResultSet rs = null;
@@ -664,7 +653,7 @@ public abstract class AbstractDatabase implements Database {
 
             } else if (!changeLogCreateAttempted) {
                 writeExecutor.comment("Create Database Change Log Table");
-                SqlStatement createTableStatement = getCreateChangeLogSQL();
+                SqlStatement createTableStatement = new CreateDatabaseChangeLogTableStatement();
                 if (!canCreateChangeLogTable()) {
                     throw new JDBCException("Cannot create " + escapeTableName(getDefaultSchemaName(), getDatabaseChangeLogTableName()) + " table for your database.\n\n" +
                             "Please construct it manually using the following SQL as a base and re-run LiquiBase:\n\n" +
@@ -1300,20 +1289,9 @@ public abstract class AbstractDatabase implements Database {
      * with the information.
      */
     public void markChangeSetAsRan(ChangeSet changeSet) throws JDBCException {
-        String dateValue = getCurrentDateTimeFunction();
-
-        InsertStatement statement = new InsertStatement(getLiquibaseSchemaName(), getDatabaseChangeLogTableName());
-        statement.addColumnValue("ID", escapeStringForDatabase(changeSet.getId()));
-        statement.addColumnValue("AUTHOR", changeSet.getAuthor());
-        statement.addColumnValue("FILENAME", changeSet.getFilePath());
-        statement.addColumnValue("DATEEXECUTED", new ComputedDateValue(dateValue));
-        statement.addColumnValue("MD5SUM", changeSet.generateCheckSum().toString());
-        statement.addColumnValue("DESCRIPTION", limitSize(changeSet.getDescription()));
-        statement.addColumnValue("COMMENTS", limitSize(StringUtils.trimToEmpty(changeSet.getComments())));
-        statement.addColumnValue("LIQUIBASE", LiquibaseUtil.getBuildVersion());
 
 
-        ExecutorService.getInstance().getWriteExecutor(this).execute(statement, new ArrayList<SqlVisitor>());
+        ExecutorService.getInstance().getWriteExecutor(this).execute(new MarkChangeSetRanStatement(changeSet), new ArrayList<SqlVisitor>());
 
         getRanChangeSetList().add(new RanChangeSet(changeSet));
     }
@@ -1344,14 +1322,6 @@ public abstract class AbstractDatabase implements Database {
 
     public String escapeStringForDatabase(String string) {
         return string.replaceAll("'", "''");
-    }
-
-    private String limitSize(String string) {
-        int maxLength = 255;
-        if (string.length() > maxLength) {
-            return string.substring(0, maxLength - 3) + "...";
-        }
-        return string;
     }
 
     public void commit() throws JDBCException {
@@ -1475,4 +1445,12 @@ public abstract class AbstractDatabase implements Database {
 	public boolean isPeculiarLiquibaseSchema() {
 		return false;
 	}
+
+    public int getNextChangeSetSequenceValue() throws LiquibaseException {
+        if (lastChangeSetSequenceValue == null) {
+            lastChangeSetSequenceValue = ExecutorService.getInstance().getReadExecutor(this).queryForInt(new GetNextChangeSetSequenceValueStatement());
+        }
+
+        return ++lastChangeSetSequenceValue;
+    }
 }

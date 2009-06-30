@@ -305,20 +305,6 @@ public class SybaseDatabase extends AbstractDatabase {
         return false;
     }
 
-    @Override
-    protected SqlStatement getCreateChangeLogSQL() {
-        return new RawSqlStatement(("CREATE TABLE " + escapeTableName(getDefaultSchemaName(), getDatabaseChangeLogTableName()) + " (ID VARCHAR(150) NOT NULL, " +
-                "AUTHOR VARCHAR(150) NOT NULL, " +
-                "FILENAME VARCHAR(255) NOT NULL, " +
-                "DATEEXECUTED " + getDateTimeType() + " NOT NULL, " +
-                "MD5SUM VARCHAR(32) NULL, " +
-                "DESCRIPTION VARCHAR(255) NULL, " +
-                "COMMENTS VARCHAR(255) NULL, " +
-                "TAG VARCHAR(255) NULL, " +
-                "LIQUIBASE VARCHAR(10) NULL, " +
-                "PRIMARY KEY(ID, AUTHOR, FILENAME))"));
-    }
-
     /**
      * Drops all objects owned by the connected user.
      * <p/>

@@ -481,4 +481,8 @@ public class HibernateDatabase implements Database {
 	public boolean isPeculiarLiquibaseSchema() {
 		return false;
 	}
+
+    public int getNextChangeSetSequenceValue() throws LiquibaseException {
+        return 1;
+    }
 }
