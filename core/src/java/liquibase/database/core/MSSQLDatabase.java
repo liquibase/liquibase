@@ -301,13 +301,6 @@ public class MSSQLDatabase extends AbstractDatabase {
 	}
 
 	@Override
-	protected SqlStatement getCreateChangeLogSQL() throws JDBCException {
-		CreateTableStatement ret = (CreateTableStatement) super.getCreateChangeLogSQL();
-		ret.setSchemaName("dbo");
-		return ret;
-	}
-
-	@Override
 	public void checkDatabaseChangeLogLockTable() throws JDBCException {
 		// TODO Auto-generated method stub
 		super.checkDatabaseChangeLogLockTable();

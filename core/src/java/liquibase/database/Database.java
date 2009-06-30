@@ -344,4 +344,6 @@ public interface Database extends DatabaseObject {
     void executeRollbackStatements(Change change, List<SqlVisitor> sqlVisitors) throws LiquibaseException, UnsupportedChangeException, RollbackImpossibleException;
 
     void saveRollbackStatement(Change change, List<SqlVisitor> sqlVisitors, Writer writer) throws IOException, UnsupportedChangeException, RollbackImpossibleException, StatementNotSupportedOnDatabaseException, LiquibaseException;
+
+    int getNextChangeSetSequenceValue() throws LiquibaseException;
 }
