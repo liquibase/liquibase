@@ -18,7 +18,7 @@ import liquibase.resource.ResourceAccessor;
 import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.ClassLoaderResourceAccessor;
-import liquibase.statement.DropTableStatement;
+import liquibase.statement.core.DropTableStatement;
 import liquibase.test.JUnitResourceAccessor;
 import liquibase.test.TestContext;
 import liquibase.util.log.LogFactory;

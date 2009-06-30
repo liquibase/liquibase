@@ -2,8 +2,8 @@ package liquibase.change.core;
 
 import liquibase.database.core.DB2Database;
 import liquibase.database.Database;
-import liquibase.statement.RenameTableStatement;
-import liquibase.statement.ReorganizeTableStatement;
+import liquibase.statement.core.RenameTableStatement;
+import liquibase.statement.core.ReorganizeTableStatement;
 import liquibase.statement.SqlStatement;
 import liquibase.util.StringUtils;
 import liquibase.change.AbstractChange;

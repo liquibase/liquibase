@@ -2,7 +2,7 @@ package liquibase.change.core;
 
 import liquibase.database.*;
 import liquibase.database.core.*;
-import liquibase.statement.RenameViewStatement;
+import liquibase.statement.core.RenameViewStatement;
 import liquibase.statement.SqlStatement;
 import liquibase.change.core.RenameViewChange;
 import liquibase.change.AbstractChangeTest;

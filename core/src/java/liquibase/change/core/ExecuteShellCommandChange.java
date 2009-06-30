@@ -5,7 +5,7 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.executor.LoggingExecutor;
 import liquibase.executor.WriteExecutor;
-import liquibase.statement.CommentStatement;
+import liquibase.statement.core.CommentStatement;
 import liquibase.statement.SqlStatement;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;

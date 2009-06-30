@@ -18,7 +18,7 @@ import liquibase.lock.LockService;
 import liquibase.parser.ChangeLogParserFactory;
 import liquibase.resource.ResourceAccessor;
 import liquibase.sql.visitor.SqlVisitor;
-import liquibase.statement.UpdateStatement;
+import liquibase.statement.core.UpdateStatement;
 import liquibase.util.LiquibaseUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.log.LogFactory;

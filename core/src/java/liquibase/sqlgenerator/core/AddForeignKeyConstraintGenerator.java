@@ -6,11 +6,9 @@ import liquibase.database.core.SQLiteDatabase;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
-import liquibase.statement.AddForeignKeyConstraintStatement;
+import liquibase.statement.core.AddForeignKeyConstraintStatement;
 import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
-
-import java.sql.DatabaseMetaData;
 
 public class AddForeignKeyConstraintGenerator implements SqlGenerator<AddForeignKeyConstraintStatement> {
     public int getPriority() {

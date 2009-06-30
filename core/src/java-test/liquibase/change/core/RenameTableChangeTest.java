@@ -4,7 +4,7 @@ import liquibase.database.core.CacheDatabase;
 import liquibase.database.Database;
 import liquibase.database.core.FirebirdDatabase;
 import liquibase.database.core.MockDatabase;
-import liquibase.statement.RenameTableStatement;
+import liquibase.statement.core.RenameTableStatement;
 import liquibase.statement.SqlStatement;
 import liquibase.change.core.RenameTableChange;
 import liquibase.change.AbstractChangeTest;

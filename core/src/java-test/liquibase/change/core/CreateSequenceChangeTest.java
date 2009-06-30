@@ -1,7 +1,7 @@
 package liquibase.change.core;
 
 import liquibase.database.Database;
-import liquibase.statement.CreateSequenceStatement;
+import liquibase.statement.core.CreateSequenceStatement;
 import liquibase.statement.SqlStatement;
 import liquibase.test.DatabaseTest;
 import liquibase.test.DatabaseTestTemplate;

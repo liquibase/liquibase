@@ -2,7 +2,7 @@ package liquibase.change.core;
 
 import liquibase.database.Database;
 import liquibase.database.core.SQLiteDatabase;
-import liquibase.statement.AddUniqueConstraintStatement;
+import liquibase.statement.core.AddUniqueConstraintStatement;
 import liquibase.statement.SqlStatement;
 import liquibase.test.DatabaseTest;
 import liquibase.test.DatabaseTestTemplate;

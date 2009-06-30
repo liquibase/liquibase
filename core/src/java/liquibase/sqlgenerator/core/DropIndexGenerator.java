@@ -6,7 +6,7 @@ import liquibase.database.core.MySQLDatabase;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
-import liquibase.statement.DropIndexStatement;
+import liquibase.statement.core.DropIndexStatement;
 import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 

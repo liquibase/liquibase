@@ -4,7 +4,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import liquibase.database.Database;
 import liquibase.database.core.InformixDatabase;
-import liquibase.statement.AddAutoIncrementStatement;
+import liquibase.statement.core.AddAutoIncrementStatement;
 import liquibase.sqlgenerator.core.AddAutoIncrementGeneratorInformix;
 import liquibase.sqlgenerator.MockSqlGeneratorChain;
 

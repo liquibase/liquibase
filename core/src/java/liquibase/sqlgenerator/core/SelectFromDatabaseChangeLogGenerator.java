@@ -5,7 +5,7 @@ import liquibase.exception.ValidationErrors;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
-import liquibase.statement.SelectFromDatabaseChangeLogStatement;
+import liquibase.statement.core.SelectFromDatabaseChangeLogStatement;
 import liquibase.util.StringUtils;
 import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;

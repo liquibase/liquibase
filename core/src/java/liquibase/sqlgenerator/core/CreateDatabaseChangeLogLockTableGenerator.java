@@ -1,7 +1,7 @@
 package liquibase.sqlgenerator.core;
 
-import liquibase.statement.CreateDatabaseChangeLogLockTableStatement;
-import liquibase.statement.CreateTableStatement;
+import liquibase.statement.core.CreateDatabaseChangeLogLockTableStatement;
+import liquibase.statement.core.CreateTableStatement;
 import liquibase.statement.NotNullConstraint;
 import liquibase.database.Database;
 import liquibase.database.core.MSSQLDatabase;

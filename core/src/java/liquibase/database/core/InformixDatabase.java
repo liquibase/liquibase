@@ -6,8 +6,6 @@ import liquibase.database.AbstractDatabase;
 import liquibase.database.DataType;
 import liquibase.diff.DiffStatusListener;
 import liquibase.exception.JDBCException;
-import liquibase.statement.RawSqlStatement;
-import liquibase.statement.SqlStatement;
 import liquibase.executor.ExecutorService;
 
 import java.sql.Connection;

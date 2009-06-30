@@ -3,7 +3,7 @@ package liquibase.change.core;
 import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.resource.ResourceAccessor;
-import liquibase.statement.InsertStatement;
+import liquibase.statement.core.InsertStatement;
 import liquibase.statement.SqlStatement;
 import liquibase.util.StringUtils;
 import liquibase.util.csv.CSVReader;

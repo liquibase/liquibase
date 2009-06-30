@@ -4,9 +4,9 @@ import liquibase.database.*;
 import liquibase.database.core.*;
 import liquibase.test.TestContext;
 import liquibase.statement.SqlStatement;
-import liquibase.statement.CreateTableStatement;
+import liquibase.statement.core.CreateTableStatement;
 import liquibase.statement.NotNullConstraint;
-import liquibase.statement.AddUniqueConstraintStatement;
+import liquibase.statement.core.AddUniqueConstraintStatement;
 
 import java.util.List;
 import java.util.ArrayList;

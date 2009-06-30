@@ -8,7 +8,7 @@ import liquibase.database.core.SybaseASADatabase;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
-import liquibase.statement.CreateIndexStatement;
+import liquibase.statement.core.CreateIndexStatement;
 import liquibase.util.StringUtils;
 import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;

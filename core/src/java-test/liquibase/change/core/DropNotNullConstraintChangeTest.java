@@ -4,7 +4,7 @@ import liquibase.database.Database;
 import liquibase.database.core.FirebirdDatabase;
 import liquibase.database.core.MockDatabase;
 import liquibase.database.core.SQLiteDatabase;
-import liquibase.statement.SetNullableStatement;
+import liquibase.statement.core.SetNullableStatement;
 import liquibase.statement.SqlStatement;
 import liquibase.change.core.DropNotNullConstraintChange;
 import liquibase.change.AbstractChangeTest;

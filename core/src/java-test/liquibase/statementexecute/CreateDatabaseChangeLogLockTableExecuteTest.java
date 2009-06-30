@@ -3,7 +3,7 @@ package liquibase.statementexecute;
 import liquibase.database.*;
 import liquibase.database.core.*;
 import liquibase.statement.SqlStatement;
-import liquibase.statement.CreateDatabaseChangeLogLockTableStatement;
+import liquibase.statement.core.CreateDatabaseChangeLogLockTableStatement;
 
 import java.util.List;
 

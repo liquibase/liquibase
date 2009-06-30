@@ -1,13 +1,12 @@
 package liquibase.lock;
 
 import liquibase.database.Database;
-import liquibase.database.DatabaseConnection;
 import liquibase.database.core.MySQLDatabase;
 import liquibase.database.core.OracleDatabase;
 import liquibase.exception.LockException;
-import liquibase.statement.LockDatabaseChangeLogStatement;
-import liquibase.statement.SelectFromDatabaseChangeLogLockStatement;
-import liquibase.statement.UnlockDatabaseChangeLogStatement;
+import liquibase.statement.core.LockDatabaseChangeLogStatement;
+import liquibase.statement.core.SelectFromDatabaseChangeLogLockStatement;
+import liquibase.statement.core.UnlockDatabaseChangeLogStatement;
 import liquibase.executor.ExecutorService;
 import liquibase.executor.WriteExecutor;
 import liquibase.executor.ReadExecutor;

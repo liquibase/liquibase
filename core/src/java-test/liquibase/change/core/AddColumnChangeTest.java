@@ -2,10 +2,10 @@ package liquibase.change.core;
 
 import liquibase.database.core.DB2Database;
 import liquibase.database.Database;
-import liquibase.statement.AddColumnStatement;
-import liquibase.statement.ReorganizeTableStatement;
+import liquibase.statement.core.ReorganizeTableStatement;
 import liquibase.statement.SqlStatement;
-import liquibase.statement.UpdateStatement;
+import liquibase.statement.core.AddColumnStatement;
+import liquibase.statement.core.UpdateStatement;
 import liquibase.change.core.AddColumnChange;
 import liquibase.change.core.DropColumnChange;
 import liquibase.change.AbstractChangeTest;

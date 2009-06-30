@@ -5,7 +5,7 @@ import liquibase.changelog.RanChangeSet;
 import liquibase.database.Database;
 import liquibase.exception.JDBCException;
 import liquibase.sql.visitor.SqlVisitor;
-import liquibase.statement.UpdateStatement;
+import liquibase.statement.core.UpdateStatement;
 import liquibase.executor.ExecutorService;
 
 import java.util.ArrayList;

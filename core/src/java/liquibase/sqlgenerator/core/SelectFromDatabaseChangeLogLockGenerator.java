@@ -1,6 +1,6 @@
 package liquibase.sqlgenerator.core;
 
-import liquibase.statement.SelectFromDatabaseChangeLogLockStatement;
+import liquibase.statement.core.SelectFromDatabaseChangeLogLockStatement;
 import liquibase.database.Database;
 import liquibase.database.core.OracleDatabase;
 import liquibase.exception.ValidationErrors;

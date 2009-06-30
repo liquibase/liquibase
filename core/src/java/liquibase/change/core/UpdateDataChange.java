@@ -2,7 +2,7 @@ package liquibase.change.core;
 
 import liquibase.database.Database;
 import liquibase.statement.SqlStatement;
-import liquibase.statement.UpdateStatement;
+import liquibase.statement.core.UpdateStatement;
 import liquibase.util.StringUtils;
 import liquibase.change.AbstractChange;
 import liquibase.change.ChangeWithColumns;

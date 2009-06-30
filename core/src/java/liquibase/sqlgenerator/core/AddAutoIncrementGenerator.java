@@ -9,7 +9,7 @@ import liquibase.database.structure.Table;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
-import liquibase.statement.AddAutoIncrementStatement;
+import liquibase.statement.core.AddAutoIncrementStatement;
 import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 

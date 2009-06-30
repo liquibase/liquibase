@@ -7,7 +7,7 @@ import liquibase.database.structure.Table;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
-import liquibase.statement.AddDefaultValueStatement;
+import liquibase.statement.core.AddDefaultValueStatement;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 
 public class AddDefaultValueGeneratorInformix extends AddDefaultValueGenerator {

@@ -5,7 +5,7 @@ import liquibase.database.core.*;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
-import liquibase.statement.AddPrimaryKeyStatement;
+import liquibase.statement.core.AddPrimaryKeyStatement;
 import liquibase.util.StringUtils;
 import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;

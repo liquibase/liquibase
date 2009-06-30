@@ -5,7 +5,7 @@ import liquibase.database.core.*;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
-import liquibase.statement.CreateTableStatement;
+import liquibase.statement.core.CreateTableStatement;
 import liquibase.statement.ForeignKeyConstraint;
 import liquibase.statement.UniqueConstraint;
 import liquibase.util.StringUtils;

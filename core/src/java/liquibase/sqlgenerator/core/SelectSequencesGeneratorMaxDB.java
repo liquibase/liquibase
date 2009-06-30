@@ -1,6 +1,6 @@
 package liquibase.sqlgenerator.core;
 
-import liquibase.statement.SelectSequencesStatement;
+import liquibase.statement.core.SelectSequencesStatement;
 import liquibase.database.Database;
 import liquibase.database.core.MaxDBDatabase;
 import liquibase.exception.ValidationErrors;

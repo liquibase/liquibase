@@ -7,7 +7,7 @@ import liquibase.executor.WriteExecutor;
 import liquibase.executor.*;
 import liquibase.exception.JDBCException;
 import liquibase.sql.visitor.SqlVisitor;
-import liquibase.statement.DropTableStatement;
+import liquibase.statement.core.DropTableStatement;
 import liquibase.test.DatabaseTest;
 import liquibase.test.DatabaseTestTemplate;
 import liquibase.test.TestContext;

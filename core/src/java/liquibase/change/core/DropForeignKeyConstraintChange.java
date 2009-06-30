@@ -2,7 +2,7 @@ package liquibase.change.core;
 
 import liquibase.database.Database;
 import liquibase.database.core.SQLiteDatabase;
-import liquibase.statement.DropForeignKeyConstraintStatement;
+import liquibase.statement.core.DropForeignKeyConstraintStatement;
 import liquibase.statement.SqlStatement;
 import liquibase.change.AbstractChange;
 import liquibase.change.ChangeMetaData;

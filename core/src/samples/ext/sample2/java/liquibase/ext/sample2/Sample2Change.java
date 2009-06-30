@@ -2,7 +2,7 @@ package liquibase.ext.sample2;
 
 import liquibase.change.AbstractChange;
 import liquibase.database.Database;
-import liquibase.statement.CreateTableStatement;
+import liquibase.statement.core.CreateTableStatement;
 import liquibase.statement.SqlStatement;
 
 public class Sample2Change extends AbstractChange {

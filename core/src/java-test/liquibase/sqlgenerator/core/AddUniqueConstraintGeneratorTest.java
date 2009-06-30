@@ -6,7 +6,7 @@ import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.database.core.SybaseASADatabase;
 import liquibase.database.core.SybaseDatabase;
-import liquibase.statement.AddUniqueConstraintStatement;
+import liquibase.statement.core.AddUniqueConstraintStatement;
 import liquibase.sqlgenerator.core.AddUniqueConstraintGenerator;
 import liquibase.sqlgenerator.AbstractSqlGeneratorTest;
 import liquibase.sqlgenerator.SqlGenerator;

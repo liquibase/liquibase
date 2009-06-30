@@ -1,6 +1,6 @@
 package liquibase.sqlgenerator.core;
 
-import liquibase.statement.ClearDatabaseChangeLogTableStatement;
+import liquibase.statement.core.ClearDatabaseChangeLogTableStatement;
 import liquibase.database.Database;
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.JDBCException;

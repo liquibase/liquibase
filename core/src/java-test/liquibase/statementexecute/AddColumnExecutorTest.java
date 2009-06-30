@@ -12,6 +12,8 @@ import liquibase.database.core.CacheDatabase;
 import liquibase.database.core.*;
 import liquibase.test.TestContext;
 import liquibase.statement.*;
+import liquibase.statement.core.AddColumnStatement;
+import liquibase.statement.core.CreateTableStatement;
 
 import java.util.List;
 import java.util.ArrayList;
