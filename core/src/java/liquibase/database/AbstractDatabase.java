@@ -1206,36 +1206,24 @@ public abstract class AbstractDatabase implements Database {
             return this.ranChangeSetList;
         }
 
-        try {
-            String databaseChangeLogTableName = escapeTableName(getLiquibaseSchemaName(), getDatabaseChangeLogTableName());
-            ranChangeSetList = new ArrayList<RanChangeSet>();
-            if (doesChangeLogTableExist()) {
-                log.info("Reading from " + databaseChangeLogTableName);
-                String sql = "SELECT * FROM " + databaseChangeLogTableName + " ORDER BY DATEEXECUTED ASC".toUpperCase();
-                Statement statement = getConnection().createStatement();
-                ResultSet rs = statement.executeQuery(sql);
-                while (rs.next()) {
-                    String fileName = rs.getString("FILENAME");
-                    String author = rs.getString("AUTHOR");
-                    String id = rs.getString("ID");
-                    String md5sum = rs.getString("MD5SUM");
-                    Date dateExecuted = rs.getTimestamp("DATEEXECUTED");
-                    String tag = rs.getString("TAG");
-                    RanChangeSet ranChangeSet = new RanChangeSet(fileName, id, author, CheckSum.parse(md5sum), dateExecuted, tag);
-                    ranChangeSetList.add(ranChangeSet);
-                }
-                rs.close();
-                statement.close();
-            }
-            return ranChangeSetList;
-        } catch (SQLException e) {
-            if (!ExecutorService.getInstance().getWriteExecutor(this).executesStatements()) {
-                //probably not created, no problem
-                return new ArrayList<RanChangeSet>();
-            } else {
-                throw new JDBCException(e);
+        String databaseChangeLogTableName = escapeTableName(getLiquibaseSchemaName(), getDatabaseChangeLogTableName());
+        ranChangeSetList = new ArrayList<RanChangeSet>();
+        if (doesChangeLogTableExist()) {
+            log.info("Reading from " + databaseChangeLogTableName);
+            SqlStatement select = new SelectFromDatabaseChangeLogStatement("FILENAME", "AUTHOR", "ID", "MD5SUM", "DATEEXECUTED", "ORDEREXECUTED", "TAG").setOrderBy("ORDEREXECUTED ASC", "DATEEXECUTED ASC");
+            List<Map> results = ExecutorService.getInstance().getReadExecutor(this).queryForList(select);
+            for (Map rs : results) {
+                String fileName = rs.get("FILENAME").toString();
+                String author = rs.get("AUTHOR").toString();
+                String id = rs.get("ID").toString();
+                String md5sum = rs.get("MD5SUM").toString();
+                Date dateExecuted = (Date) rs.get("DATEEXECUTED");
+                String tag = rs.get("TAG").toString();
+                RanChangeSet ranChangeSet = new RanChangeSet(fileName, id, author, CheckSum.parse(md5sum), dateExecuted, tag);
+                ranChangeSetList.add(ranChangeSet);
             }
         }
+        return ranChangeSetList;
     }
 
     public Date getRanDate(ChangeSet changeSet) throws JDBCException, DatabaseHistoryException {
