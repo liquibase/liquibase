@@ -7,7 +7,7 @@ import liquibase.database.core.OracleDatabase;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.database.core.CacheDatabase;
 import liquibase.database.core.*;
-import liquibase.statement.AddColumnStatement;
+import liquibase.statement.core.AddColumnStatement;
 import liquibase.statement.AutoIncrementConstraint;
 import liquibase.statement.PrimaryKeyConstraint;
 import liquibase.sqlgenerator.core.AddColumnGenerator;

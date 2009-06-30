@@ -1,6 +1,6 @@
 package liquibase.sqlgenerator.core;
 
-import liquibase.statement.SelectFromDatabaseChangeLogLockStatement;
+import liquibase.statement.core.SelectFromDatabaseChangeLogLockStatement;
 import liquibase.sqlgenerator.core.SelectFromDatabaseChangeLogLockGenerator;
 import liquibase.sqlgenerator.AbstractSqlGeneratorTest;
 

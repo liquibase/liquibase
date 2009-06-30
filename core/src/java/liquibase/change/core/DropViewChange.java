@@ -1,7 +1,7 @@
 package liquibase.change.core;
 
 import liquibase.database.Database;
-import liquibase.statement.DropViewStatement;
+import liquibase.statement.core.DropViewStatement;
 import liquibase.statement.SqlStatement;
 import liquibase.util.StringUtils;
 import liquibase.change.AbstractChange;

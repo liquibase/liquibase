@@ -1,7 +1,7 @@
 package liquibase.change.core;
 
 import liquibase.database.core.MockDatabase;
-import liquibase.statement.DropIndexStatement;
+import liquibase.statement.core.DropIndexStatement;
 import liquibase.statement.SqlStatement;
 import liquibase.change.core.DropIndexChange;
 import liquibase.change.AbstractChangeTest;

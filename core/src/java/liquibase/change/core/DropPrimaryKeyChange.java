@@ -4,7 +4,7 @@ import liquibase.database.Database;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.database.core.SQLiteDatabase.AlterTableVisitor;
 import liquibase.database.structure.Index;
-import liquibase.statement.DropPrimaryKeyStatement;
+import liquibase.statement.core.DropPrimaryKeyStatement;
 import liquibase.statement.SqlStatement;
 import liquibase.util.StringUtils;
 import liquibase.change.AbstractChange;

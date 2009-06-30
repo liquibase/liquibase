@@ -36,6 +36,7 @@ INTELLIJ:
 - send message on http://www.intellij.net/forums/forum.jspa?forumID=18
 
 POST MESSAGES TO:
+- update releaed versions on jira
 - mailing list
 - blog
 - sourceforge project

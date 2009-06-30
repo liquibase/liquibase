@@ -6,7 +6,7 @@ import liquibase.database.core.OracleDatabase;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
-import liquibase.statement.SetTableRemarksStatement;
+import liquibase.statement.core.SetTableRemarksStatement;
 import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 

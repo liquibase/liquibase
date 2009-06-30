@@ -5,7 +5,7 @@ import liquibase.database.core.CacheDatabase;
 import liquibase.database.core.DB2Database;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.database.core.MockDatabase;
-import liquibase.statement.RenameColumnStatement;
+import liquibase.statement.core.RenameColumnStatement;
 import liquibase.statement.SqlStatement;
 import liquibase.change.core.RenameColumnChange;
 import liquibase.change.AbstractChangeTest;

@@ -10,6 +10,7 @@ import liquibase.diff.DiffStatusListener;
 import liquibase.exception.JDBCException;
 import liquibase.exception.UnsupportedChangeException;
 import liquibase.statement.*;
+import liquibase.statement.core.*;
 import liquibase.util.ISODateFormat;
 
 import java.sql.Connection;

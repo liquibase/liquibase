@@ -5,7 +5,7 @@ import liquibase.database.core.SQLiteDatabase;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
-import liquibase.statement.DeleteStatement;
+import liquibase.statement.core.DeleteStatement;
 import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 

@@ -1,28 +1,11 @@
 package liquibase.parser;
 
-import liquibase.database.Database;
-import liquibase.database.core.H2Database;
-import liquibase.exception.ValidationErrors;
-import liquibase.sql.Sql;
-import liquibase.statement.AddAutoIncrementStatement;
-import liquibase.statement.SqlStatement;
-import liquibase.sqlgenerator.core.AddColumnGenerator;
-import liquibase.sqlgenerator.core.AddAutoIncrementGenerator;
-import liquibase.sqlgenerator.core.AddAutoIncrementGeneratorHsql;
-import liquibase.sqlgenerator.core.AddAutoIncrementGeneratorDB2;
-import liquibase.serializer.xml.XMLChangeLogSerializer;
-import liquibase.serializer.string.StringChangeLogSerializer;
-import liquibase.serializer.ChangeLogSerializerFactory;
-import liquibase.serializer.MockChangeLogSerializer;
-import liquibase.serializer.ChangeLogSerializer;
 import liquibase.parser.sql.SqlChangeLogParser;
 import liquibase.parser.xml.XMLChangeLogSAXParser;
 import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.SortedSet;
-import java.util.Collection;
 import java.util.Map;
 
 public class ChangeLogParserFactoryTest {

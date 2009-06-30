@@ -1,6 +1,6 @@
 package liquibase.sqlgenerator.core;
 
-import liquibase.statement.CommentStatement;
+import liquibase.statement.core.CommentStatement;
 import liquibase.sqlgenerator.core.CommentGenerator;
 import liquibase.sqlgenerator.AbstractSqlGeneratorTest;
 

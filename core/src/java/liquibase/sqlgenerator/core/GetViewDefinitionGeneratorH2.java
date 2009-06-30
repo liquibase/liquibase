@@ -1,6 +1,6 @@
 package liquibase.sqlgenerator.core;
 
-import liquibase.statement.GetViewDefinitionStatement;
+import liquibase.statement.core.GetViewDefinitionStatement;
 import liquibase.database.Database;
 import liquibase.database.core.H2Database;
 import liquibase.sql.Sql;

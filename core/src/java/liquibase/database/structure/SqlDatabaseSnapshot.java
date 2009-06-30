@@ -10,7 +10,7 @@ import liquibase.sql.visitor.SqlVisitor;
 import liquibase.util.StringUtils;
 import liquibase.util.log.LogFactory;
 import liquibase.executor.ExecutorService;
-import liquibase.statement.SelectSequencesStatement;
+import liquibase.statement.core.SelectSequencesStatement;
 
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;

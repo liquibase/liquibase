@@ -5,7 +5,7 @@ import liquibase.database.core.OracleDatabase;
 import liquibase.exception.ValidationErrors;
 import liquibase.serializer.string.StringChangeLogSerializer;
 import liquibase.sql.visitor.SqlVisitor;
-import liquibase.statement.RawSqlStatement;
+import liquibase.statement.core.RawSqlStatement;
 import liquibase.statement.SqlStatement;
 import liquibase.test.TestContext;
 import liquibase.util.StreamUtil;

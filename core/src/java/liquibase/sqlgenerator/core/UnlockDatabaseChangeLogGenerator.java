@@ -1,7 +1,7 @@
 package liquibase.sqlgenerator.core;
 
-import liquibase.statement.UnlockDatabaseChangeLogStatement;
-import liquibase.statement.UpdateStatement;
+import liquibase.statement.core.UnlockDatabaseChangeLogStatement;
+import liquibase.statement.core.UpdateStatement;
 import liquibase.database.Database;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;

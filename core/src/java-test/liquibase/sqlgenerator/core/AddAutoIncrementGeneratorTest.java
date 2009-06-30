@@ -13,7 +13,7 @@ import liquibase.database.structure.Column;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Schema;
 import liquibase.database.structure.Table;
-import liquibase.statement.AddAutoIncrementStatement;
+import liquibase.statement.core.AddAutoIncrementStatement;
 import liquibase.test.TestContext;
 import liquibase.sqlgenerator.core.AddAutoIncrementGenerator;
 import liquibase.sqlgenerator.AbstractSqlGeneratorTest;

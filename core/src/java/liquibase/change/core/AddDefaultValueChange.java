@@ -1,7 +1,7 @@
 package liquibase.change.core;
 
 import liquibase.database.Database;
-import liquibase.statement.AddDefaultValueStatement;
+import liquibase.statement.core.AddDefaultValueStatement;
 import liquibase.statement.ComputedDateValue;
 import liquibase.statement.ComputedNumericValue;
 import liquibase.statement.SqlStatement;

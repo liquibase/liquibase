@@ -1,12 +1,11 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
-import liquibase.database.core.PostgresDatabase;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
-import liquibase.statement.FindForeignKeyConstraintsStatement;
+import liquibase.statement.core.FindForeignKeyConstraintsStatement;
 import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 

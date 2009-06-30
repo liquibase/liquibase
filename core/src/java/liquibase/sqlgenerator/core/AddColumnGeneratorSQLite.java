@@ -4,7 +4,7 @@ import liquibase.database.Database;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
-import liquibase.statement.AddColumnStatement;
+import liquibase.statement.core.AddColumnStatement;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 
 public class AddColumnGeneratorSQLite extends AddColumnGenerator {

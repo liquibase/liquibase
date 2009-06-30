@@ -6,7 +6,7 @@ import liquibase.executor.ReadExecutor;
 import liquibase.exception.JDBCException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.sql.visitor.SqlVisitor;
-import liquibase.statement.FindForeignKeyConstraintsStatement;
+import liquibase.statement.core.FindForeignKeyConstraintsStatement;
 import liquibase.statement.SqlStatement;
 import liquibase.change.AbstractChange;
 import liquibase.change.ChangeMetaData;

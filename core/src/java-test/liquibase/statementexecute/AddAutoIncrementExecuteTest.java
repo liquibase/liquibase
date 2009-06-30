@@ -4,6 +4,9 @@ import liquibase.database.*;
 import liquibase.database.core.*;
 import liquibase.test.TestContext;
 import liquibase.statement.*;
+import liquibase.statement.core.AddColumnStatement;
+import liquibase.statement.core.CreateTableStatement;
+import liquibase.statement.core.AddAutoIncrementStatement;
 import org.junit.Test;
 
 import java.util.ArrayList;

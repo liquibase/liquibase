@@ -6,7 +6,7 @@ import liquibase.exception.SetupException;
 import liquibase.exception.UnsupportedChangeException;
 import liquibase.exception.ValidationErrors;
 import liquibase.resource.ResourceAccessor;
-import liquibase.statement.RawSqlStatement;
+import liquibase.statement.core.RawSqlStatement;
 import liquibase.statement.SqlStatement;
 
 public class ExampleCustomSqlChange implements CustomSqlChange, CustomSqlRollback {

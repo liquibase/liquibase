@@ -6,7 +6,7 @@ import liquibase.database.core.SQLiteDatabase;
 import liquibase.database.core.SQLiteDatabase.AlterTableVisitor;
 import liquibase.database.structure.Index;
 import liquibase.exception.UnsupportedChangeException;
-import liquibase.statement.RawSqlStatement;
+import liquibase.statement.core.RawSqlStatement;
 import liquibase.statement.SqlStatement;
 import liquibase.util.StringUtils;
 import liquibase.change.AbstractChange;

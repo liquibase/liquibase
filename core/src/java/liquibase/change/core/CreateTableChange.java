@@ -4,6 +4,9 @@ import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.*;
+import liquibase.statement.core.SetTableRemarksStatement;
+import liquibase.statement.core.CreateTableStatement;
+import liquibase.statement.core.SetColumnRemarksStatement;
 import liquibase.util.StringUtils;
 import liquibase.change.*;
 

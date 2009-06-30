@@ -1,6 +1,8 @@
 package liquibase.statement;
 
 import liquibase.database.Database;
+import liquibase.statement.SqlStatement;
+import liquibase.statement.CallableSqlStatement;
 
 import java.sql.CallableStatement;
 import java.sql.SQLException;

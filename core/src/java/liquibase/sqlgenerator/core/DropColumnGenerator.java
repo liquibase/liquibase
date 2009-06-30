@@ -5,7 +5,7 @@ import liquibase.database.core.*;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
-import liquibase.statement.DropColumnStatement;
+import liquibase.statement.core.DropColumnStatement;
 import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 

@@ -1,7 +1,7 @@
 package liquibase.change.core;
 
 import liquibase.database.Database;
-import liquibase.statement.AddForeignKeyConstraintStatement;
+import liquibase.statement.core.AddForeignKeyConstraintStatement;
 import liquibase.statement.SqlStatement;
 import liquibase.change.AbstractChange;
 import liquibase.change.ChangeMetaData;

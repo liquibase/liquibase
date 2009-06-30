@@ -8,7 +8,7 @@ import liquibase.exception.JDBCException;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.util.StringUtils;
 import liquibase.executor.ExecutorService;
-import liquibase.statement.SelectSequencesStatement;
+import liquibase.statement.core.SelectSequencesStatement;
 
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;

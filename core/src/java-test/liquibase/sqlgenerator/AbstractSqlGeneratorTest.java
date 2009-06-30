@@ -3,7 +3,7 @@ package liquibase.sqlgenerator;
 import liquibase.database.Database;
 import liquibase.executor.ExecutorService;
 import liquibase.exception.JDBCException;
-import liquibase.statement.CreateTableStatement;
+import liquibase.statement.core.CreateTableStatement;
 import liquibase.statement.SqlStatement;
 import liquibase.test.TestContext;
 import static org.junit.Assert.*;

@@ -3,7 +3,7 @@ package liquibase.change.core;
 import liquibase.database.Database;
 import liquibase.database.core.MockDatabase;
 import liquibase.database.core.SQLiteDatabase;
-import liquibase.statement.DropUniqueConstraintStatement;
+import liquibase.statement.core.DropUniqueConstraintStatement;
 import liquibase.statement.SqlStatement;
 import liquibase.change.core.DropUniqueConstraintChange;
 import liquibase.change.AbstractChangeTest;

@@ -6,7 +6,7 @@ import liquibase.database.Database;
 import liquibase.executor.ExecutorService;
 import liquibase.executor.WriteExecutor;
 import liquibase.exception.JDBCException;
-import liquibase.statement.UpdateStatement;
+import liquibase.statement.core.UpdateStatement;
 import liquibase.change.CheckSum;
 import static org.easymock.classextension.EasyMock.*;
 import static org.junit.Assert.assertFalse;

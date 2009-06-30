@@ -7,7 +7,7 @@ import liquibase.database.core.DB2Database;
 import liquibase.database.core.DerbyDatabase;
 import liquibase.database.core.*;
 import liquibase.exception.ValidationErrors;
-import liquibase.statement.AddColumnStatement;
+import liquibase.statement.core.AddColumnStatement;
 import liquibase.statement.AutoIncrementConstraint;
 import liquibase.sqlgenerator.core.AddColumnGeneratorDefaultClauseBeforeNotNull;
 import liquibase.sqlgenerator.MockSqlGeneratorChain;

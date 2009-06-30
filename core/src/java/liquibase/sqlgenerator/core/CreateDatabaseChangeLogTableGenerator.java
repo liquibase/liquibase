@@ -4,6 +4,8 @@ import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.*;
+import liquibase.statement.core.CreateTableStatement;
+import liquibase.statement.core.CreateDatabaseChangeLogTableStatement;
 import liquibase.database.Database;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.SybaseDatabase;

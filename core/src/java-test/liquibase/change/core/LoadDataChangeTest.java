@@ -1,7 +1,7 @@
 package liquibase.change.core;
 
 import liquibase.database.core.MockDatabase;
-import liquibase.statement.InsertStatement;
+import liquibase.statement.core.InsertStatement;
 import liquibase.statement.SqlStatement;
 import liquibase.test.JUnitResourceAccessor;
 import liquibase.change.core.LoadDataChange;

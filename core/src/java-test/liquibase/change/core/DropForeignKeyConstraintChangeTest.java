@@ -1,7 +1,7 @@
 package liquibase.change.core;
 
 import liquibase.database.Database;
-import liquibase.statement.DropForeignKeyConstraintStatement;
+import liquibase.statement.core.DropForeignKeyConstraintStatement;
 import liquibase.statement.SqlStatement;
 import liquibase.test.DatabaseTest;
 import liquibase.test.DatabaseTestTemplate;

@@ -4,8 +4,8 @@ import liquibase.database.Database;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.OracleDatabase;
 import liquibase.statement.SqlStatement;
-import liquibase.statement.CreateDatabaseChangeLogLockTableStatement;
-import liquibase.statement.SelectFromDatabaseChangeLogLockStatement;
+import liquibase.statement.core.CreateDatabaseChangeLogLockTableStatement;
+import liquibase.statement.core.SelectFromDatabaseChangeLogLockStatement;
 
 import java.util.List;
 import java.util.Arrays;

@@ -2,7 +2,7 @@ package liquibase.change.core;
 
 import liquibase.database.*;
 import liquibase.database.core.*;
-import liquibase.statement.AlterSequenceStatement;
+import liquibase.statement.core.AlterSequenceStatement;
 import liquibase.statement.SqlStatement;
 import liquibase.change.core.AlterSequenceChange;
 import liquibase.change.AbstractChangeTest;

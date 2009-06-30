@@ -6,7 +6,7 @@ import liquibase.database.structure.Column;
 import liquibase.database.structure.Table;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
-import liquibase.statement.AddDefaultValueStatement;
+import liquibase.statement.core.AddDefaultValueStatement;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 
 public class AddDefaultValueGeneratorDerby extends AddDefaultValueGenerator {

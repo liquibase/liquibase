@@ -8,7 +8,7 @@ import liquibase.exception.JDBCException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.UnsupportedChangeException;
 import liquibase.sql.Sql;
-import liquibase.statement.AddAutoIncrementStatement;
+import liquibase.statement.core.AddAutoIncrementStatement;
 import liquibase.statement.SqlStatement;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.sqlgenerator.SqlGeneratorChain;
