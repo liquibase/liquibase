@@ -308,12 +308,6 @@ public class SybaseASADatabase extends AbstractDatabase {
 	}
 	
 	@Override
-    public SqlStatement getViewDefinitionSql(String schemaName, String viewName) throws JDBCException {
-        String sql = "select viewtext from sysviews where upper(viewname)='" + viewName.toUpperCase() + "' and upper(vcreator) = '" + schemaName.toUpperCase() + '\'';
-        return new RawSqlStatement(sql);
-    }
-
-	@Override
 	public void setAutoCommit(boolean b) throws JDBCException {
 		// workaround for strange Sybase bug.
 		// In some circumstances tds-driver thrown exception 

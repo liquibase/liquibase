@@ -7,6 +7,7 @@ import liquibase.database.DataType;
 import liquibase.diff.DiffStatusListener;
 import liquibase.exception.JDBCException;
 import liquibase.executor.ExecutorService;
+import liquibase.statement.core.GetViewDefinitionStatement;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -211,7 +212,7 @@ public class InformixDatabase extends AbstractDatabase {
 	@Override
 	public String getViewDefinition(String schemaName, String viewName)
 			throws JDBCException {
-		List<Map> retList = ExecutorService.getInstance().getReadExecutor(this).queryForList(getViewDefinitionSql(schemaName, viewName));
+		List<Map> retList = ExecutorService.getInstance().getReadExecutor(this).queryForList(new GetViewDefinitionStatement(schemaName, viewName));
 		// building the view definition from the multiple rows
 		StringBuilder sb = new StringBuilder();
 		for (Map rowMap : retList) {

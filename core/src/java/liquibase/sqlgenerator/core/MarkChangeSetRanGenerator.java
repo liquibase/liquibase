@@ -5,7 +5,9 @@ import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.core.MarkChangeSetRanStatement;
 import liquibase.statement.core.InsertStatement;
+import liquibase.statement.core.UpdateStatement;
 import liquibase.statement.ComputedDateValue;
+import liquibase.statement.SqlStatement;
 import liquibase.database.Database;
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.LiquibaseException;
@@ -36,25 +38,33 @@ public class MarkChangeSetRanGenerator implements SqlGenerator<MarkChangeSetRanS
 
         ChangeSet changeSet = statement.getChangeSet();
 
-        InsertStatement insertStatement;
+        SqlStatement runStatement;
         try {
-            insertStatement = new InsertStatement(database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName());
-            insertStatement.addColumnValue("ID", database.escapeStringForDatabase(changeSet.getId()));
-            insertStatement.addColumnValue("AUTHOR", changeSet.getAuthor());
-            insertStatement.addColumnValue("FILENAME", changeSet.getFilePath());
-            insertStatement.addColumnValue("DATEEXECUTED", new ComputedDateValue(dateValue));
-            insertStatement.addColumnValue("ORDEREXECUTED", database.getNextChangeSetSequenceValue());
-            insertStatement.addColumnValue("MD5SUM", changeSet.generateCheckSum().toString());
-            insertStatement.addColumnValue("DESCRIPTION", limitSize(changeSet.getDescription()));
-            insertStatement.addColumnValue("COMMENTS", limitSize(StringUtils.trimToEmpty(changeSet.getComments())));
-            insertStatement.addColumnValue("LIQUIBASE", LiquibaseUtil.getBuildVersion());
+            if (statement.isRanBefore()) {
+                runStatement = new UpdateStatement(database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())
+                        .addNewColumnValue("DATEEXECUTED", dateValue)
+                        .addNewColumnValue("MD5SUM", changeSet.generateCheckSum().toString())
+                        .setWhereClause("ID=? AND AUTHOR=? AND FILENAME=?")
+                        .addWhereParameters(changeSet.getId(), changeSet.getAuthor(), changeSet.getFilePath());
+            } else {
+                runStatement = new InsertStatement(database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())
+                        .addColumnValue("ID", database.escapeStringForDatabase(changeSet.getId()))
+                        .addColumnValue("AUTHOR", changeSet.getAuthor())
+                        .addColumnValue("FILENAME", changeSet.getFilePath())
+                        .addColumnValue("DATEEXECUTED", new ComputedDateValue(dateValue))
+                        .addColumnValue("ORDEREXECUTED", database.getNextChangeSetSequenceValue())
+                        .addColumnValue("MD5SUM", changeSet.generateCheckSum().toString())
+                        .addColumnValue("DESCRIPTION", limitSize(changeSet.getDescription()))
+                        .addColumnValue("COMMENTS", limitSize(StringUtils.trimToEmpty(changeSet.getComments())))
+                        .addColumnValue("LIQUIBASE", LiquibaseUtil.getBuildVersion());
+            }
         } catch (LiquibaseException e) {
             throw new UnexpectedLiquibaseException(e);
         }
 
-        return SqlGeneratorFactory.getInstance().generateSql(insertStatement, database);
+        return SqlGeneratorFactory.getInstance().generateSql(runStatement, database);
     }
-    
+
     private String limitSize(String string) {
         int maxLength = 255;
         if (string.length() > maxLength) {
