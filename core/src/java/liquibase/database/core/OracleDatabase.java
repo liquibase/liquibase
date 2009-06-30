@@ -193,11 +193,6 @@ public class OracleDatabase extends AbstractDatabase {
     }
 
     @Override
-    public SqlStatement getViewDefinitionSql(String schemaName, String name) throws JDBCException {
-        return new RawSqlStatement("SELECT TEXT FROM ALL_VIEWS WHERE upper(VIEW_NAME)='"+name.toUpperCase()+"' AND OWNER='"+convertRequestedSchemaToSchema(schemaName)+"'" );
-    }
-
-    @Override
     public boolean supportsAutoIncrement() {
         return false;
     }

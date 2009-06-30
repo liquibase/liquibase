@@ -230,12 +230,6 @@ public class PostgresDatabase extends AbstractDatabase {
 
 
     @Override
-    public SqlStatement getViewDefinitionSql(String schemaName, String name) throws JDBCException {
-        return new RawSqlStatement("select definition from pg_views where viewname='" + name + "' AND schemaname='" + convertRequestedSchemaToSchema(schemaName) + "'");
-    }
-
-
-    @Override
     public String getColumnType(String columnType, Boolean autoIncrement) {
         if (columnType.startsWith("java.sql.Types.VARCHAR")) { //returns "name" for type
             return columnType.replace("java.sql.Types.", "");

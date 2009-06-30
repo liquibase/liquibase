@@ -217,18 +217,6 @@ public class SybaseDatabase extends AbstractDatabase {
     }
 
     @Override
-    public SqlStatement getViewDefinitionSql(String schemaName, String viewName) throws JDBCException {
-        String sql = "select view_definition from INFORMATION_SCHEMA.VIEWS where upper(table_name)='" + viewName.toUpperCase() + "'";
-//        if (StringUtils.trimToNull(schemaName) != null) {
-        sql += " and table_schema='" + convertRequestedSchemaToSchema(schemaName) + "'";
-        sql += " and table_catalog='" + getDefaultCatalogName() + "'";
-//        }
-
-//        log.info("GetViewDefinitionSQL: "+sql);
-        return new RawSqlStatement(sql);
-    }
-
-    @Override
     public String getColumnType(String columnType, Boolean autoIncrement) {
         String type = super.getColumnType(columnType, autoIncrement);
         if (autoIncrement != null && autoIncrement) {

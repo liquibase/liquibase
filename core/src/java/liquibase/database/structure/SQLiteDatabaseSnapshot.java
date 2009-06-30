@@ -9,6 +9,7 @@ import liquibase.sql.visitor.SqlVisitor;
 import liquibase.util.StringUtils;
 import liquibase.executor.ExecutorService;
 import liquibase.statement.core.SelectSequencesStatement;
+import liquibase.statement.core.GetViewDefinitionStatement;
 
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -98,9 +99,7 @@ public class SQLiteDatabaseSnapshot extends SqlDatabaseSnapshot {
                     view.setDefinition(database.
                     		getViewDefinition(schema, name));
                 } catch (JDBCException e) {
-                    System.out.println("Error getting view with " + 
-                    	((AbstractDatabase)database).
-                    		getViewDefinitionSql(schema, name));
+                    System.out.println("Error getting view with " + new GetViewDefinitionStatement(schema, name));
                     throw e;
                 }
                 viewsMap.put(name, view);

@@ -4,6 +4,7 @@ import liquibase.statement.SqlStatement;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Arrays;
 
 public class DeleteStatement implements SqlStatement {
     private String schemaName;
@@ -35,8 +36,16 @@ public class DeleteStatement implements SqlStatement {
         return this;
     }
 
-    public void addWhereParameter(Object value) {
+    public DeleteStatement addWhereParameter(Object value) {
         this.whereParameters.add(value);
+
+        return this;
+    }
+
+    public DeleteStatement addWhereParameters(Object... value) {
+        this.whereParameters.addAll(Arrays.asList(value));
+
+        return this;
     }
 
     public List<Object> getWhereParameters() {

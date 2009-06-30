@@ -572,12 +572,6 @@ public abstract class AbstractDatabase implements Database {
         this.databaseChangeLogLockTableName = tableName;
     }
 
-    private SqlStatement getChangeLogLockInsertSQL() throws JDBCException {
-        return new InsertStatement(getLiquibaseSchemaName(), getDatabaseChangeLogLockTableName())
-                .addColumnValue("ID", 1)
-                .addColumnValue("LOCKED", Boolean.FALSE);
-    }
-
     public boolean doesChangeLogTableExist() throws JDBCException {
         DatabaseConnection connection = getConnection();
         ResultSet rs = null;
@@ -717,7 +711,6 @@ public abstract class AbstractDatabase implements Database {
      * otherwise it will not do anything besides outputting a log message.
      */
     public void checkDatabaseChangeLogLockTable() throws JDBCException {
-        boolean knowMustInsertIntoLockTable = false;
 
         WriteExecutor writeExecutor = ExecutorService.getInstance().getWriteExecutor(this);
         if (!doesChangeLogLockTableExist()) {
@@ -731,36 +724,11 @@ public abstract class AbstractDatabase implements Database {
             }
 
 
-            SqlStatement createTableStatement = new CreateDatabaseChangeLogLockTableStatement();
-
             writeExecutor.comment("Create Database Lock Table");
-            writeExecutor.execute(createTableStatement, new ArrayList<SqlVisitor>());
+            writeExecutor.execute(new CreateDatabaseChangeLogLockTableStatement(), new ArrayList<SqlVisitor>());
             this.commit();
             log.finest("Created database lock table with name: " + escapeTableName(getLiquibaseSchemaName(), getDatabaseChangeLogLockTableName()));
-            knowMustInsertIntoLockTable = true;
         }
-
-        int rows = -1;
-        if (!knowMustInsertIntoLockTable) {
-            SqlStatement selectStatement = new SelectFromDatabaseChangeLogLockStatement("COUNT(*)");
-            try {
-                List<Map> returnList = ExecutorService.getInstance().getReadExecutor(this).queryForList(selectStatement, new ArrayList<SqlVisitor>());
-                if (returnList == null || returnList.size() == 0) {
-                    rows = 0;
-                } else {
-                    Map map = returnList.get(0);
-                    rows = Integer.parseInt(map.values().iterator().next().toString());
-                }
-            } catch (JDBCException e) {
-                throw e;
-            }
-        }
-        if (knowMustInsertIntoLockTable || rows == 0) {
-            writeExecutor.update(getChangeLogLockInsertSQL(), new ArrayList<SqlVisitor>());
-            this.commit();
-            log.fine("Inserted lock row into: " + escapeTableName(getLiquibaseSchemaName(), getDatabaseChangeLogLockTableName()));
-        }
-
     }
 
 // ------- DATABASE OBJECT DROPPING METHODS ---- //
@@ -911,17 +879,12 @@ public abstract class AbstractDatabase implements Database {
         if (schemaName == null) {
             schemaName = convertRequestedSchemaToSchema(null);
         }
-        String definition = (String) ExecutorService.getInstance().getReadExecutor(this).queryForObject(getViewDefinitionSql(schemaName, viewName), String.class, new ArrayList<SqlVisitor>());
+        String definition = (String) ExecutorService.getInstance().getReadExecutor(this).queryForObject(new GetViewDefinitionStatement(schemaName, viewName), String.class, new ArrayList<SqlVisitor>());
         if (definition == null) {
             return null;
         }
         return CREATE_VIEW_AS_PATTERN.matcher(definition).replaceFirst("");
     }
-
-    public SqlStatement getViewDefinitionSql(String schemaName, String viewName) throws JDBCException {
-        return new GetViewDefinitionStatement(schemaName, viewName); //todo: remove
-    }
-
 
     public int getDatabaseType(int type) {
         int returnType = type;
@@ -1291,30 +1254,20 @@ public abstract class AbstractDatabase implements Database {
     public void markChangeSetAsRan(ChangeSet changeSet) throws JDBCException {
 
 
-        ExecutorService.getInstance().getWriteExecutor(this).execute(new MarkChangeSetRanStatement(changeSet), new ArrayList<SqlVisitor>());
+        ExecutorService.getInstance().getWriteExecutor(this).execute(new MarkChangeSetRanStatement(changeSet, false), new ArrayList<SqlVisitor>());
 
         getRanChangeSetList().add(new RanChangeSet(changeSet));
     }
 
     public void markChangeSetAsReRan(ChangeSet changeSet) throws JDBCException {
-        String dateValue = getCurrentDateTimeFunction();
-        String sql = "UPDATE " + escapeTableName(getLiquibaseSchemaName(), getDatabaseChangeLogTableName()) + " SET DATEEXECUTED=" + dateValue + ", MD5SUM='?' WHERE ID='?' AND AUTHOR='?' AND FILENAME='?'";
-        sql = sql.replaceFirst("\\?", escapeStringForDatabase(changeSet.generateCheckSum().toString()));
-        sql = sql.replaceFirst("\\?", escapeStringForDatabase(changeSet.getId()));
-        sql = sql.replaceFirst("\\?", escapeStringForDatabase(changeSet.getAuthor()));
-        sql = sql.replaceFirst("\\?", escapeStringForDatabase(changeSet.getFilePath()));
 
-        ExecutorService.getInstance().getWriteExecutor(this).execute(new RawSqlStatement(sql), new ArrayList<SqlVisitor>());
+        ExecutorService.getInstance().getWriteExecutor(this).execute(new MarkChangeSetRanStatement(changeSet, true), new ArrayList<SqlVisitor>());
         this.commit();
     }
 
     public void removeRanStatus(ChangeSet changeSet) throws JDBCException {
-        String sql = "DELETE FROM " + escapeTableName(getLiquibaseSchemaName(), getDatabaseChangeLogTableName()) + " WHERE ID='?' AND AUTHOR='?' AND FILENAME='?'";
-        sql = sql.replaceFirst("\\?", escapeStringForDatabase(changeSet.getId()));
-        sql = sql.replaceFirst("\\?", escapeStringForDatabase(changeSet.getAuthor()));
-        sql = sql.replaceFirst("\\?", escapeStringForDatabase(changeSet.getFilePath()));
 
-        ExecutorService.getInstance().getWriteExecutor(this).execute(new RawSqlStatement(sql), new ArrayList<SqlVisitor>());
+        ExecutorService.getInstance().getWriteExecutor(this).execute(new RemoveChangeSetRanStatusStatement(changeSet), new ArrayList<SqlVisitor>());
         commit();
 
         getRanChangeSetList().remove(new RanChangeSet(changeSet));

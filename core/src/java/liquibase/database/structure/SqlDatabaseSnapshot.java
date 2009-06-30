@@ -11,6 +11,7 @@ import liquibase.util.StringUtils;
 import liquibase.util.log.LogFactory;
 import liquibase.executor.ExecutorService;
 import liquibase.statement.core.SelectSequencesStatement;
+import liquibase.statement.core.GetViewDefinitionStatement;
 
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -206,7 +207,7 @@ public abstract class SqlDatabaseSnapshot implements DatabaseSnapshot {
                 try {
                     view.setDefinition(database.getViewDefinition(schema, name));
                 } catch (JDBCException e) {
-                    System.out.println("Error getting " + database.getConnectionURL() + " view with " + ((AbstractDatabase) database).getViewDefinitionSql(schema, name));
+                    System.out.println("Error getting " + database.getConnectionURL() + " view with " + new GetViewDefinitionStatement(schema, name));
                     throw e;
                 }
 

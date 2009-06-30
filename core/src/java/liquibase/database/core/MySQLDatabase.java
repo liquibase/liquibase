@@ -139,11 +139,6 @@ public class MySQLDatabase extends AbstractDatabase {
     }
 
     @Override
-    public SqlStatement getViewDefinitionSql(String schemaName, String viewName) throws JDBCException {
-        return new RawSqlStatement("select view_definition from information_schema.views where table_name='" + viewName + "' AND table_schema='" + schemaName + "'");
-    }
-
-    @Override
     public String escapeDatabaseObject(String objectName) {
         return "`"+objectName+"`";
     }

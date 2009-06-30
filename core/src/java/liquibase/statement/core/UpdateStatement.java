@@ -41,8 +41,16 @@ public class UpdateStatement implements SqlStatement {
         return this;
     }
 
-    public void addWhereParameter(Object value) {
+    public UpdateStatement addWhereParameter(Object value) {
         this.whereParameters.add(value);
+
+        return this;
+    }
+
+    public UpdateStatement addWhereParameters(Object... value) {
+        this.whereParameters.addAll(Arrays.asList(value));
+
+        return this;
     }
 
     public Map<String, Object> getNewColumnValues() {

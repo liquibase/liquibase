@@ -214,12 +214,6 @@ public class MaxDBDatabase extends AbstractDatabase {
     }
 
     @Override
-    public SqlStatement getViewDefinitionSql(String schemaName, String name) throws JDBCException {
-        return new RawSqlStatement("SELECT DEFINITION FROM DOMAIN.VIEWDEFS WHERE upper(VIEWNAME)='" + name.toUpperCase()
-                + "' AND OWNER='" + convertRequestedSchemaToSchema(schemaName) + "'");
-    }
-
-    @Override
     public boolean supportsAutoIncrement() {
         return false;
     }
