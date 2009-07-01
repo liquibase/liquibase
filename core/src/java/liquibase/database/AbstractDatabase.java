@@ -59,8 +59,8 @@ public abstract class AbstractDatabase implements Database {
 
     private static Pattern CREATE_VIEW_AS_PATTERN = Pattern.compile("^CREATE\\s+.*?VIEW\\s+.*?AS\\s+", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
-	private String databaseChangeLogTableName = System.getProperty("liquibase.databaseChangeLog")==null?"DatabaseChangeLog".toUpperCase():System.getProperty("liquibase.databaseChangeLog");
-	private String databaseChangeLogLockTableName = System.getProperty("liquibase.databaseChangeLogLock")==null?"DatabaseChangeLogLock".toUpperCase():System.getProperty("liquibase.databaseChangeLogLock");
+	private String databaseChangeLogTableName = System.getProperty("liquibase.databaseChangeLogTableName")==null?"DatabaseChangeLog".toUpperCase():System.getProperty("liquibase.databaseChangeLogTableName");
+	private String databaseChangeLogLockTableName = System.getProperty("liquibase.databaseChangeLogLockTableName")==null?"DatabaseChangeLogLock".toUpperCase():System.getProperty("liquibase.databaseChangeLogLockTableName");
 
     private Integer lastChangeSetSequenceValue;
 
