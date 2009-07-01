@@ -297,17 +297,6 @@ public class MSSQLDatabase extends AbstractDatabase {
         }
 	}
 
-	@Override
-	public void checkDatabaseChangeLogLockTable() throws JDBCException {
-		// TODO Auto-generated method stub
-		super.checkDatabaseChangeLogLockTable();
-	}
-
-	@Override
-	public void checkDatabaseChangeLogTable() throws JDBCException {
-		// TODO Auto-generated method stub
-		super.checkDatabaseChangeLogTable();
-	}
 
 	@Override
 	public String getLiquibaseSchemaName() {

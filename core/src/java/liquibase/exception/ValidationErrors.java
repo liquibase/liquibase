@@ -15,18 +15,17 @@ public class ValidationErrors {
 
     public void checkRequiredField(String requiredFieldName, Object value) {
         if (value == null) {
-            addError(requiredFieldName+" is required");
-        } else {
-            if (value instanceof Collection && ((Collection) value).size() == 0) {
-                addError(requiredFieldName+" is empty");
-            }
+            addError(requiredFieldName + " is required");
+        } else if (value instanceof Collection && ((Collection) value).size() == 0) {
+            addError(requiredFieldName + " is empty");
+        } else if (value instanceof Object[] && ((Object[]) value).length == 0) {
+            addError(requiredFieldName + " is empty");
         }
-
     }
 
     public void checkDisallowedField(String disallowedFieldName, Object value) {
         if (value != null) {
-            addError(disallowedFieldName+" is not allowed");
+            addError(disallowedFieldName + " is not allowed");
         }
     }
 

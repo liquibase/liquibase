@@ -14,6 +14,7 @@ import liquibase.sql.Sql;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.*;
+import liquibase.statement.UniqueConstraint;
 import liquibase.statement.core.*;
 import liquibase.util.ISODateFormat;
 import liquibase.util.StreamUtil;
@@ -619,6 +620,8 @@ public abstract class AbstractDatabase implements Database {
                 boolean hasComments = false;
                 boolean hasTag = false;
                 boolean hasLiquibase = false;
+                boolean hasOrderExecuted = false;
+                boolean checksumNotRightSize = false;
                 while (checkColumnsRS.next()) {
                     String columnName = checkColumnsRS.getString("COLUMN_NAME");
                     if ("DESCRIPTION".equalsIgnoreCase(columnName)) {
@@ -629,20 +632,49 @@ public abstract class AbstractDatabase implements Database {
                         hasTag = true;
                     } else if ("LIQUIBASE".equalsIgnoreCase(columnName)) {
                         hasLiquibase = true;
+                    } else if ("ORDEREXECUTED".equalsIgnoreCase(columnName)) {
+                        hasOrderExecuted = true;
+                    } else if ("MD5SUM".equalsIgnoreCase(columnName) && checkColumnsRS.getInt("COLUMN_SIZE") != 35) {
+                        checksumNotRightSize = true;
                     }
                 }
 
                 if (!hasDescription) {
+                    writeExecutor.comment("Adding missing databasechangelog.description column");
                     statementsToExecute.add(new AddColumnStatement(getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "DESCRIPTION", "VARCHAR(255)", null));
                 }
                 if (!hasTag) {
+                    writeExecutor.comment("Adding missing databasechangelog.tag column");
                     statementsToExecute.add(new AddColumnStatement(getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "TAG", "VARCHAR(255)", null));
                 }
                 if (!hasComments) {
+                    writeExecutor.comment("Adding missing databasechangelog.comments column");
                     statementsToExecute.add(new AddColumnStatement(getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "COMMENTS", "VARCHAR(255)", null));
                 }
                 if (!hasLiquibase) {
+                    writeExecutor.comment("Adding missing databasechangelog.liquibase column");
                     statementsToExecute.add(new AddColumnStatement(getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "LIQUIBASE", "VARCHAR(255)", null));
+                }
+                if (!hasOrderExecuted) {
+                    writeExecutor.comment("Adding missing databasechangelog.orderexecuted column");
+                    statementsToExecute.add(new AddColumnStatement(getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "ORDEREXECUTED", "BIGINT", null, new NotNullConstraint(), new UniqueConstraint()));
+                }
+                if (!checksumNotRightSize) {
+                    writeExecutor.comment("Modifying size of databasechangelog.md5sum column");
+
+                    ColumnConfig checksumColumn = new ColumnConfig();
+                    checksumColumn.setName("MD5SUM");
+                    checksumColumn.setType("VARCHAR(35)");
+                    statementsToExecute.add(new ModifyColumnsStatement(getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), checksumColumn));
+                }
+
+                ResultSet md5sumRS = connection.createStatement().executeQuery("SELECT MD5SUM FROM "+escapeTableName(getLiquibaseSchemaName(),  getDatabaseChangeLogTableName())+" WHERE MD5SUM IS NOT NULL");
+                if (md5sumRS.next()) {
+                    String md5sum = md5sumRS.getString(1);
+                    if (!md5sum.startsWith(CheckSum.getCurrentVersion()+":")) {
+                        writeExecutor.comment("DatabaseChangeLog checksums are an incompatible version.  Setting them to null so they will be updated on next database update");
+                        statementsToExecute.add(new RawSqlStatement("UPDATE "+escapeTableName(getLiquibaseSchemaName(), getDatabaseChangeLogTableName())+" SET MD5SUM=null"));
+                    }
                 }
 
             } else if (!changeLogCreateAttempted) {

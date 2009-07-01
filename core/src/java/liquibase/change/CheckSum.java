@@ -14,19 +14,23 @@ public class CheckSum {
     }
 
     public static CheckSum parse(String checksumValue) {
-        if (checksumValue.startsWith("2:")) {
-            return new CheckSum(checksumValue.substring(2), 2);
+        if (checksumValue.startsWith(CheckSum.getCurrentVersion()+":")) {
+            return new CheckSum(checksumValue.substring(2), getCurrentVersion());
         } else {
             return new CheckSum(checksumValue, 1);
         }
     }
 
+    public static int getCurrentVersion() {
+        return 2;
+    }
+
     public static CheckSum compute(String valueToChecksum) {
-        return new CheckSum(MD5Util.computeMD5(valueToChecksum), 2);
+        return new CheckSum(MD5Util.computeMD5(valueToChecksum), getCurrentVersion());
     }
 
     public static CheckSum compute(InputStream stream) {
-        return new CheckSum(MD5Util.computeMD5(stream), 2);
+        return new CheckSum(MD5Util.computeMD5(stream), getCurrentVersion());
     }
 
     @Override

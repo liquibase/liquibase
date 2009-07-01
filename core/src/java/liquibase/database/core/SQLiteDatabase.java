@@ -153,12 +153,12 @@ public class SQLiteDatabase extends AbstractDatabase {
         return type;
     }
 
-    public static Collection<SqlStatement> getAlterTableStatements(
+    public static List<SqlStatement> getAlterTableStatements(
             AlterTableVisitor alterTableVisitor,
             Database database, String schemaName, String tableName)
             throws UnsupportedChangeException, JDBCException {
 
-        Collection<SqlStatement> statements = new Vector<SqlStatement>();
+        List<SqlStatement> statements = new ArrayList<SqlStatement>();
 
         DatabaseSnapshot snapshot = new SQLiteDatabaseSnapshot(database);
         Table table = snapshot.getTable(tableName);
