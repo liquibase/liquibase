@@ -2,14 +2,16 @@ package liquibase.statement.core;
 
 import liquibase.statement.SqlStatement;
 
+import java.math.BigInteger;
+
 public class CreateSequenceStatement implements SqlStatement {
 
     private String schemaName;
     private String sequenceName;
-    private Integer startValue;
-    private Integer incrementBy;
-    private Integer maxValue;
-    private Integer minValue;
+    private BigInteger startValue;
+    private BigInteger incrementBy;
+    private BigInteger maxValue;
+    private BigInteger minValue;
     private Boolean ordered;
 
     public CreateSequenceStatement(String schemaName, String sequenceName) {
@@ -25,38 +27,38 @@ public class CreateSequenceStatement implements SqlStatement {
         return sequenceName;
     }
 
-    public Integer getStartValue() {
+    public BigInteger getStartValue() {
         return startValue;
     }
 
-    public CreateSequenceStatement setStartValue(Integer startValue) {
+    public CreateSequenceStatement setStartValue(BigInteger startValue) {
         this.startValue = startValue;
         return this;
     }
 
-    public Integer getIncrementBy() {
+    public BigInteger getIncrementBy() {
         return incrementBy;
     }
 
-    public CreateSequenceStatement setIncrementBy(Integer incrementBy) {
+    public CreateSequenceStatement setIncrementBy(BigInteger incrementBy) {
         this.incrementBy = incrementBy;
         return this;
     }
 
-    public Integer getMaxValue() {
+    public BigInteger getMaxValue() {
         return maxValue;
     }
 
-    public CreateSequenceStatement setMaxValue(Integer maxValue) {
+    public CreateSequenceStatement setMaxValue(BigInteger maxValue) {
         this.maxValue = maxValue;
         return this;
     }
 
-    public Integer getMinValue() {
+    public BigInteger getMinValue() {
         return minValue;
     }
 
-    public CreateSequenceStatement setMinValue(Integer minValue) {
+    public CreateSequenceStatement setMinValue(BigInteger minValue) {
         this.minValue = minValue;
         return this;
     }

@@ -12,6 +12,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import javax.xml.parsers.DocumentBuilderFactory;
+import java.math.BigInteger;
 
 public class XMLChangeLogSerializerTest {
     @Test
@@ -190,9 +191,9 @@ public class XMLChangeLogSerializerTest {
         AlterSequenceChange refactoring = new AlterSequenceChange();
         refactoring.setSchemaName("SCHEMA_NAME");
         refactoring.setSequenceName("SEQ_NAME");
-        refactoring.setIncrementBy(1);
-        refactoring.setMaxValue(2);
-        refactoring.setMinValue(3);
+        refactoring.setIncrementBy(new BigInteger("1"));
+        refactoring.setMaxValue(new BigInteger("2"));
+        refactoring.setMinValue(new BigInteger("3"));
         refactoring.setOrdered(true);
 
         Element node = new XMLChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(refactoring);
@@ -295,11 +296,11 @@ public class XMLChangeLogSerializerTest {
         assertFalse(node.hasAttribute("ordered"));
         assertFalse(node.hasAttribute("startValue"));
 
-        change.setIncrementBy(1);
-        change.setMaxValue(2);
-        change.setMinValue(3);
+        change.setIncrementBy(new BigInteger("1"));
+        change.setMaxValue(new BigInteger("2"));
+        change.setMinValue(new BigInteger("3"));
         change.setOrdered(true);
-        change.setStartValue(4);
+        change.setStartValue(new BigInteger("4"));
 
         node = new XMLChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(change);
         assertEquals("createSequence", node.getNodeName());

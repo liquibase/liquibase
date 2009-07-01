@@ -11,6 +11,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
+import java.math.BigInteger;
+
 /**
  * Tests for {@link CreateSequenceChange}
  */
@@ -34,11 +36,11 @@ public class CreateSequenceChangeTest extends AbstractChangeTest {
                 CreateSequenceChange change = new CreateSequenceChange();
                 change.setSchemaName("SCHEMA_NAME");
                 change.setSequenceName("SEQ_NAME");
-                change.setIncrementBy(1);
-                change.setMinValue(2);
-                change.setMaxValue(3);
+                change.setIncrementBy(new BigInteger("1"));
+                change.setMinValue(new BigInteger("2"));
+                change.setMaxValue(new BigInteger("3"));
                 change.setOrdered(true);
-                change.setStartValue(4);
+                change.setStartValue(new BigInteger("4"));
 
                 SqlStatement[] sqlStatements = change.generateStatements(database);
                 assertEquals(1, sqlStatements.length);

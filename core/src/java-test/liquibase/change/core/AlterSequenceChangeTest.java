@@ -10,6 +10,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
+import java.math.BigInteger;
+
 /**
  * Tests for {@link AlterSequenceChange}
  */
@@ -27,9 +29,9 @@ public class AlterSequenceChangeTest extends AbstractChangeTest {
         AlterSequenceChange refactoring = new AlterSequenceChange();
         refactoring.setSchemaName("SCHEMA_NAME");
         refactoring.setSequenceName("SEQ_NAME");
-        refactoring.setMinValue(100);
-        refactoring.setMaxValue(1000);
-        refactoring.setIncrementBy(50);
+        refactoring.setMinValue(new BigInteger("100"));
+        refactoring.setMaxValue(new BigInteger("1000"));
+        refactoring.setIncrementBy(new BigInteger("50"));
         refactoring.setOrdered(true);
 
         SqlStatement[] sqlStatements = refactoring.generateStatements(new MockDatabase());

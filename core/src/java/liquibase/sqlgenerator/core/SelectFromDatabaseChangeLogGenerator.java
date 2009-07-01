@@ -39,7 +39,7 @@ public class SelectFromDatabaseChangeLogGenerator implements SqlGenerator<Select
             }
         }
 
-        if (statement.getOrderByColumns().length > 0) {
+        if (statement.getOrderByColumns() != null && statement.getOrderByColumns().length > 0) {
             sql += " ORDER BY "+StringUtils.join(statement.getOrderByColumns(), ", ");
         }
 

@@ -2,13 +2,15 @@ package liquibase.statement.core;
 
 import liquibase.statement.SqlStatement;
 
+import java.math.BigInteger;
+
 public class AlterSequenceStatement implements SqlStatement {
 
     private String schemaName;
     private String sequenceName;
-    private Integer incrementBy;
-    private Integer maxValue;
-    private Integer minValue;
+    private BigInteger incrementBy;
+    private BigInteger maxValue;
+    private BigInteger minValue;
     private Boolean ordered;
 
     public AlterSequenceStatement(String schemaName, String sequenceName) {
@@ -24,29 +26,29 @@ public class AlterSequenceStatement implements SqlStatement {
         return sequenceName;
     }
 
-    public Integer getIncrementBy() {
+    public BigInteger getIncrementBy() {
         return incrementBy;
     }
 
-    public AlterSequenceStatement setIncrementBy(Integer incrementBy) {
+    public AlterSequenceStatement setIncrementBy(BigInteger incrementBy) {
         this.incrementBy = incrementBy;
         return this;
     }
 
-    public Integer getMaxValue() {
+    public BigInteger getMaxValue() {
         return maxValue;
     }
 
-    public AlterSequenceStatement setMaxValue(Integer maxValue) {
+    public AlterSequenceStatement setMaxValue(BigInteger maxValue) {
         this.maxValue = maxValue;
         return this;
     }
 
-    public Integer getMinValue() {
+    public BigInteger getMinValue() {
         return minValue;
     }
 
-    public AlterSequenceStatement setMinValue(Integer minValue) {
+    public AlterSequenceStatement setMinValue(BigInteger minValue) {
         this.minValue = minValue;
         return this;
     }
