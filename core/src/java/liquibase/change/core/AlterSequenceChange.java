@@ -7,6 +7,8 @@ import liquibase.util.StringUtils;
 import liquibase.change.AbstractChange;
 import liquibase.change.ChangeMetaData;
 
+import java.math.BigInteger;
+
 /**
  * Modifies properties of an existing sequence.
  */
@@ -14,9 +16,9 @@ public class AlterSequenceChange extends AbstractChange {
 
     private String schemaName;
     private String sequenceName;
-    private Integer incrementBy;
-    private Integer maxValue;
-    private Integer minValue;
+    private BigInteger incrementBy;
+    private BigInteger maxValue;
+    private BigInteger minValue;
     private Boolean ordered;
     // StartValue is not allowed since we cannot alter the starting sequence number
 
@@ -41,27 +43,27 @@ public class AlterSequenceChange extends AbstractChange {
     }
 
 
-    public Integer getIncrementBy() {
+    public BigInteger getIncrementBy() {
         return incrementBy;
     }
 
-    public void setIncrementBy(Integer incrementBy) {
+    public void setIncrementBy(BigInteger incrementBy) {
         this.incrementBy = incrementBy;
     }
 
-    public Integer getMaxValue() {
+    public BigInteger getMaxValue() {
         return maxValue;
     }
 
-    public void setMaxValue(Integer maxValue) {
+    public void setMaxValue(BigInteger maxValue) {
         this.maxValue = maxValue;
     }
 
-    public Integer getMinValue() {
+    public BigInteger getMinValue() {
         return minValue;
     }
 
-    public void setMinValue(Integer minValue) {
+    public void setMinValue(BigInteger minValue) {
         this.minValue = minValue;
     }
 

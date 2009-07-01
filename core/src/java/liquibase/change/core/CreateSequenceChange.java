@@ -8,6 +8,8 @@ import liquibase.change.AbstractChange;
 import liquibase.change.ChangeMetaData;
 import liquibase.change.Change;
 
+import java.math.BigInteger;
+
 /**
  * Creates a new sequence.
  */
@@ -15,10 +17,10 @@ public class CreateSequenceChange extends AbstractChange {
 
     private String schemaName;
     private String sequenceName;
-    private Integer startValue;
-    private Integer incrementBy;
-    private Integer maxValue;
-    private Integer minValue;
+    private BigInteger startValue;
+    private BigInteger incrementBy;
+    private BigInteger maxValue;
+    private BigInteger minValue;
     private Boolean ordered;
 
 
@@ -42,35 +44,35 @@ public class CreateSequenceChange extends AbstractChange {
         this.sequenceName = sequenceName;
     }
 
-    public Integer getStartValue() {
+    public BigInteger getStartValue() {
         return startValue;
     }
 
-    public void setStartValue(Integer startValue) {
+    public void setStartValue(BigInteger startValue) {
         this.startValue = startValue;
     }
 
-    public Integer getIncrementBy() {
+    public BigInteger getIncrementBy() {
         return incrementBy;
     }
 
-    public void setIncrementBy(Integer incrementBy) {
+    public void setIncrementBy(BigInteger incrementBy) {
         this.incrementBy = incrementBy;
     }
 
-    public Integer getMaxValue() {
+    public BigInteger getMaxValue() {
         return maxValue;
     }
 
-    public void setMaxValue(Integer maxValue) {
+    public void setMaxValue(BigInteger maxValue) {
         this.maxValue = maxValue;
     }
 
-    public Integer getMinValue() {
+    public BigInteger getMinValue() {
         return minValue;
     }
 
-    public void setMinValue(Integer minValue) {
+    public void setMinValue(BigInteger minValue) {
         this.minValue = minValue;
     }
 

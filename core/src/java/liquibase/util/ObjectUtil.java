@@ -1,7 +1,10 @@
 package liquibase.util;
 
+import liquibase.exception.UnexpectedLiquibaseException;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.math.BigInteger;
 
 public class ObjectUtil {
 
@@ -21,17 +24,27 @@ public class ObjectUtil {
         Method[] methods = object.getClass().getMethods();
         for (Method method : methods) {
             if (method.getName().equals(methodName)) {
-                if (method.getParameterTypes().length == 1 && method.getParameterTypes()[0].equals(Boolean.class)) {
-                    method.invoke(object, Boolean.valueOf(propertyValue));
-                    return;
-                } else
-                if (method.getParameterTypes().length == 1 && method.getParameterTypes()[0].equals(String.class)) {
-                    method.invoke(object, propertyValue);
-                    return;
-                } else
-                if (method.getParameterTypes().length == 1 && method.getParameterTypes()[0].equals(Integer.class)) {
-                    method.invoke(object, Integer.valueOf(propertyValue));
-                    return;
+                Class<?> parameterType = method.getParameterTypes()[0];
+                if (method.getParameterTypes().length == 1) {
+                    if (parameterType.equals(Boolean.class)) {
+                        method.invoke(object, Boolean.valueOf(propertyValue));
+                        return;
+                    } else if (parameterType.equals(String.class)) {
+                        method.invoke(object, propertyValue);
+                        return;
+                    } else if (parameterType.equals(String.class)) {
+                        method.invoke(object, propertyValue);
+                        return;
+                    } else if (parameterType.equals(Integer.class)) {
+                        method.invoke(object, Integer.valueOf(propertyValue));
+                        return;
+                    } else if (parameterType.equals(Long.class)) {
+                        method.invoke(object, Long.valueOf(propertyValue));
+                        return;
+                    } else if (parameterType.equals(BigInteger.class)) {
+                        method.invoke(object, new BigInteger(propertyValue));
+                        return;
+                    }
                 }
             }
         }
