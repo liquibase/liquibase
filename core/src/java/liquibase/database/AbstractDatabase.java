@@ -59,8 +59,8 @@ public abstract class AbstractDatabase implements Database {
 
     private static Pattern CREATE_VIEW_AS_PATTERN = Pattern.compile("^CREATE\\s+.*?VIEW\\s+.*?AS\\s+", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
-	private String databaseChangeLogTableName = "DatabaseChangeLog".toUpperCase();
-	private String databaseChangeLogLockTableName = "DatabaseChangeLogLock".toUpperCase();;
+	private String databaseChangeLogTableName = System.getProperty("liquibase.databaseChangeLog")==null?"DatabaseChangeLog".toUpperCase():System.getProperty("liquibase.databaseChangeLog");
+	private String databaseChangeLogLockTableName = System.getProperty("liquibase.databaseChangeLogLock")==null?"DatabaseChangeLogLock".toUpperCase():System.getProperty("liquibase.databaseChangeLogLock");
 
     private Integer lastChangeSetSequenceValue;
 
@@ -1242,7 +1242,7 @@ public abstract class AbstractDatabase implements Database {
         ranChangeSetList = new ArrayList<RanChangeSet>();
         if (doesChangeLogTableExist()) {
             log.info("Reading from " + databaseChangeLogTableName);
-            SqlStatement select = new SelectFromDatabaseChangeLogStatement("FILENAME", "AUTHOR", "ID", "MD5SUM", "DATEEXECUTED", "ORDEREXECUTED", "TAG").setOrderBy("ORDEREXECUTED ASC", "DATEEXECUTED ASC");
+            SqlStatement select = new SelectFromDatabaseChangeLogStatement("FILENAME", "AUTHOR", "ID", "MD5SUM", "DATEEXECUTED", "ORDEREXECUTED", "TAG").setOrderBy("DATEEXECUTED ASC", "ORDEREXECUTED ASC");
             List<Map> results = ExecutorService.getInstance().getReadExecutor(this).queryForList(select);
             for (Map rs : results) {
                 String fileName = rs.get("FILENAME").toString();

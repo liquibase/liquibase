@@ -6,7 +6,7 @@ public class SelectFromDatabaseChangeLogStatement implements SqlStatement {
 
     private String[] columnsToSelect;
     private WhereClause whereClause;
-    private String[] orderByColumns = new String[0];
+    private String[] orderByColumns;
 
     public SelectFromDatabaseChangeLogStatement(String... columnsToSelect) {
         this(null, columnsToSelect);
