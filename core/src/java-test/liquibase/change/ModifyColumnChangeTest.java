@@ -1,14 +1,18 @@
 package liquibase.change;
 
+import static org.junit.Assert.assertEquals;
+
+import javax.xml.parsers.DocumentBuilderFactory;
+
+import liquibase.database.Database;
+import liquibase.database.MySQLDatabase;
 import liquibase.database.OracleDatabase;
-import static org.junit.Assert.*;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
-
-import javax.xml.parsers.DocumentBuilderFactory;
 
 /**
  * Tests for {@link ModifyColumnChange}
@@ -37,7 +41,7 @@ public class ModifyColumnChangeTest extends AbstractChangeTest {
     @Test
     public void generateStatement() throws Exception {
         OracleDatabase database = new OracleDatabase();
-        assertEquals("ALTER TABLE TABLE_NAME MODIFY (NAME integer(3))", change.generateStatements(database)[0].getSqlStatement(database));
+        assertEquals("ALTER TABLE TABLE_NAME MODIFY ( NAME integer(3) )", change.generateStatements(database)[0].getSqlStatement(database));
     }
 
     @Test
@@ -59,4 +63,27 @@ public class ModifyColumnChangeTest extends AbstractChangeTest {
         assertEquals("NAME", ((Element) columns.item(0)).getAttribute("name"));
         assertEquals("integer(3)", ((Element) columns.item(0)).getAttribute("type"));
     }
+    
+    @Test
+    public void generateFullStatementForMysql() throws Exception {
+        Database database = new MySQLDatabase();
+        ModifyColumnChange mysqlchange = new ModifyColumnChange();
+        mysqlchange.setTableName("TABLE_NAME");
+
+        ColumnConfig col1 = new ColumnConfig();
+        col1.setName("NAME");
+        col1.setType("integer(3)");
+        col1.setAutoIncrement(true);
+        col1.setDefaultValueNumeric(0);
+        
+        ConstraintsConfig constraints = new ConstraintsConfig();
+        constraints.setPrimaryKey(true);
+        constraints.setNullable(false);
+        col1.setConstraints(constraints);
+
+        mysqlchange.addColumn(col1);
+        assertEquals("ALTER TABLE `TABLE_NAME` MODIFY `NAME` integer(3) NOT NULL DEFAULT 0 AUTO_INCREMENT PRIMARY KEY", mysqlchange.generateStatements(database)[0].getSqlStatement(database));
+    }
+
+    
 }

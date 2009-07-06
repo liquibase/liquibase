@@ -1,25 +1,30 @@
 package liquibase.change;
 
-import liquibase.database.*;
-import liquibase.database.SQLiteDatabase.AlterTableVisitor;
-import liquibase.database.sql.RawSqlStatement;
-import liquibase.database.sql.SqlStatement;
-import liquibase.database.sql.ReorganizeTableStatement;
-import liquibase.database.structure.Column;
-import liquibase.database.structure.DatabaseObject;
-import liquibase.database.structure.Index;
-import liquibase.database.structure.Table;
-import liquibase.exception.JDBCException;
-import liquibase.exception.UnsupportedChangeException;
-import liquibase.exception.InvalidChangeDefinitionException;
-import liquibase.util.StringUtils;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import liquibase.database.Database;
+import liquibase.database.SQLiteDatabase;
+import liquibase.database.SQLiteDatabase.AlterTableVisitor;
+import liquibase.database.sql.AutoIncrementConstraint;
+import liquibase.database.sql.ColumnConstraint;
+import liquibase.database.sql.ModifyColumnStatement;
+import liquibase.database.sql.NotNullConstraint;
+import liquibase.database.sql.PrimaryKeyConstraint;
+import liquibase.database.sql.SqlStatement;
+import liquibase.database.structure.Column;
+import liquibase.database.structure.DatabaseObject;
+import liquibase.database.structure.Index;
+import liquibase.database.structure.Table;
+import liquibase.exception.InvalidChangeDefinitionException;
+import liquibase.exception.JDBCException;
+import liquibase.exception.UnsupportedChangeException;
+import liquibase.util.StringUtils;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 /**
  * Modifies the data type of an existing column.
@@ -84,29 +89,31 @@ public class ModifyColumnChange extends AbstractChange implements ChangeWithColu
     	
     	List<SqlStatement> sql = new ArrayList<SqlStatement>();
     	
-      for (ColumnConfig aColumn : columns) {
+    	
+    	for (ColumnConfig aColumn : columns) {
+    		
+    		Set<ColumnConstraint> constraints = new HashSet<ColumnConstraint>();
+            if (aColumn.getConstraints() != null) {
+                if (aColumn.getConstraints().isNullable() != null && !aColumn.getConstraints().isNullable()) {
+                    constraints.add(new NotNullConstraint());
+                }
+                if (aColumn.getConstraints().isPrimaryKey() != null && aColumn.getConstraints().isPrimaryKey()) {
+                    constraints.add(new PrimaryKeyConstraint(aColumn.getConstraints().getPrimaryKeyName()));
+                }
+            }
+            if (aColumn.isAutoIncrement() != null && aColumn.isAutoIncrement()) {
+                constraints.add(new AutoIncrementConstraint(aColumn.getName()));
+            }
+            
+    		ModifyColumnStatement modColumnStatement = new ModifyColumnStatement(schemaName,
+    				getTableName(),
+    				aColumn.getName(),
+    				aColumn.getType(),
+    				aColumn.getDefaultValueObject(),
+    				constraints.toArray(new ColumnConstraint[constraints.size()]));
 
-          String schemaName = getSchemaName() == null?database.getDefaultSchemaName():getSchemaName();
-          if(database instanceof SybaseASADatabase || database instanceof SybaseDatabase) {
-        		sql.add(new RawSqlStatement("ALTER TABLE " + database.escapeTableName(schemaName, getTableName()) + " MODIFY " + aColumn.getName() + " " + database.getColumnType(aColumn.getType(), false)));
-        } else if (database instanceof MSSQLDatabase) {
-        		sql.add(new RawSqlStatement("ALTER TABLE " + database.escapeTableName(schemaName, getTableName()) + " ALTER COLUMN " + aColumn.getName() + " " + database.getColumnType(aColumn.getType(), false)));
-        } else if (database instanceof MySQLDatabase) {
-        		sql.add(new RawSqlStatement("ALTER TABLE " + database.escapeTableName(schemaName, getTableName()) + " MODIFY COLUMN " + aColumn.getName() + " " + database.getColumnType(aColumn.getType(), false)));
-        } else if (database instanceof OracleDatabase || database instanceof MaxDBDatabase) {
-        		sql.add(new RawSqlStatement("ALTER TABLE " + database.escapeTableName(schemaName, getTableName()) + " MODIFY (" + aColumn.getName() + " " + database.getColumnType(aColumn.getType(), false) + ")"));
-        } else if (database instanceof DerbyDatabase) {
-        		sql.add(new RawSqlStatement("ALTER TABLE " + database.escapeTableName(schemaName, getTableName()) + " ALTER COLUMN "+aColumn.getName()+" SET DATA TYPE " + database.getColumnType(aColumn.getType(), false)));
-        } else if (database instanceof HsqlDatabase) {
-        		sql.add(new RawSqlStatement("ALTER TABLE " + database.escapeTableName(schemaName, getTableName()) + " ALTER COLUMN "+aColumn.getName()+" "+database.getColumnType(aColumn.getType(), false)));
-        } else if (database instanceof CacheDatabase) {
-        		sql.add(new RawSqlStatement("ALTER TABLE " + database.escapeTableName(schemaName, getTableName()) + " ALTER COLUMN " + aColumn.getName() + " " + database.getColumnType(aColumn.getType(), false)));
-        } else if (database instanceof DB2Database) {
-        		sql.add(new RawSqlStatement("ALTER TABLE " + database.escapeTableName(schemaName, getTableName()) + " ALTER COLUMN " + aColumn.getName() + " SET DATA TYPE " + database.getColumnType(aColumn.getType(), false)));
-        		sql.add(new ReorganizeTableStatement(schemaName, getTableName()));
-        } else {
-        		sql.add(new RawSqlStatement("ALTER TABLE " + database.escapeTableName(schemaName, getTableName()) + " ALTER COLUMN " + aColumn.getName() + " TYPE " + database.getColumnType(aColumn.getType(), false)));
-        }
+    		sql.add(modColumnStatement);
+      
       }
         
       return sql.toArray(new SqlStatement[sql.size()]);
