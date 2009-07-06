@@ -20,11 +20,11 @@ public class ChangeFactory {
     private Map<String, Class<? extends Change>> registry = new ConcurrentHashMap<String, Class<? extends Change>>();
 
     private ChangeFactory() {
-        Class[] classes;
+        Class<? extends Change>[] classes;
         try {
             classes = ClassPathScanner.getInstance().getClasses(Change.class);
 
-            for (Class clazz : classes) {
+            for (Class<? extends Change> clazz : classes) {
                 //noinspection unchecked
                 register(clazz);
             }

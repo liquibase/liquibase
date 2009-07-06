@@ -23,7 +23,7 @@ public class DatabaseFactory {
         try {
             Class[] classes = ClassPathScanner.getInstance().getClasses(Database.class);
 
-            for (Class clazz : classes) {
+            for (Class<? extends Database> clazz : classes) {
                 register((Database) clazz.getConstructor().newInstance());
             }
 

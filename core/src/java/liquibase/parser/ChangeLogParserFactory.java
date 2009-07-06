@@ -24,11 +24,11 @@ public class ChangeLogParserFactory {
     }
 
     private ChangeLogParserFactory() {
-        Class[] classes;
+        Class<? extends ChangeLogParser>[] classes;
         try {
             classes = ClassPathScanner.getInstance().getClasses(ChangeLogParser.class);
 
-            for (Class clazz : classes) {
+            for (Class<? extends ChangeLogParser> clazz : classes) {
                     register((ChangeLogParser) clazz.getConstructor().newInstance());
             }
         } catch (Exception e) {
