@@ -1,16 +1,24 @@
 package liquibase.change.core;
 
-import liquibase.database.*;
-import liquibase.database.core.*;
-import liquibase.statement.core.AlterSequenceStatement;
-import liquibase.statement.SqlStatement;
-import liquibase.change.core.AlterSequenceChange;
-import liquibase.change.AbstractChangeTest;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import org.junit.Test;
 
 import java.math.BigInteger;
+
+import liquibase.change.AbstractChangeTest;
+import liquibase.database.Database;
+import liquibase.database.core.CacheDatabase;
+import liquibase.database.core.DerbyDatabase;
+import liquibase.database.core.MSSQLDatabase;
+import liquibase.database.core.MockDatabase;
+import liquibase.database.core.MySQLDatabase;
+import liquibase.database.core.SQLiteDatabase;
+import liquibase.database.core.SybaseASADatabase;
+import liquibase.database.core.SybaseDatabase;
+import liquibase.statement.SqlStatement;
+import liquibase.statement.core.AlterSequenceStatement;
+
+import org.junit.Test;
 
 /**
  * Tests for {@link AlterSequenceChange}
@@ -40,9 +48,9 @@ public class AlterSequenceChangeTest extends AbstractChangeTest {
         assertTrue(sqlStatements[0] instanceof AlterSequenceStatement);
         assertEquals("SCHEMA_NAME", ((AlterSequenceStatement) sqlStatements[0]).getSchemaName());
         assertEquals("SEQ_NAME", ((AlterSequenceStatement) sqlStatements[0]).getSequenceName());
-        assertEquals(new Integer(100), ((AlterSequenceStatement) sqlStatements[0]).getMinValue());
-        assertEquals(new Integer(1000), ((AlterSequenceStatement) sqlStatements[0]).getMaxValue());
-        assertEquals(new Integer(50), ((AlterSequenceStatement) sqlStatements[0]).getIncrementBy());
+        assertEquals(new BigInteger("100"), ((AlterSequenceStatement) sqlStatements[0]).getMinValue());
+        assertEquals(new BigInteger("1000"), ((AlterSequenceStatement) sqlStatements[0]).getMaxValue());
+        assertEquals(new BigInteger("50"), ((AlterSequenceStatement) sqlStatements[0]).getIncrementBy());
         assertEquals(true, ((AlterSequenceStatement) sqlStatements[0]).getOrdered());
 
     }
