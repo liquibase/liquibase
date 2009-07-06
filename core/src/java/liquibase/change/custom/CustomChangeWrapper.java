@@ -84,7 +84,11 @@ public class CustomChangeWrapper extends AbstractChange {
 
     @Override
     public ValidationErrors validate(Database database) {
-        return customChange.validate(database);
+        try {
+            return customChange.validate(database);
+        } catch (AbstractMethodError e) {
+            return new ValidationErrors(); //old interface, //todo: be smarter about handling upgrade            
+        }
     }
 
     public SqlStatement[] generateStatements(Database database) {

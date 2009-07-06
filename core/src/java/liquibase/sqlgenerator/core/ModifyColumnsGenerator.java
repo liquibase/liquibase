@@ -79,7 +79,7 @@ public class ModifyColumnsGenerator implements SqlGenerator<ModifyColumnsStateme
 
                 alterTable += getDefaultClause(column, database);
 
-                if (column.isAutoIncrement()) {
+                if (column.isAutoIncrement() != null && column.isAutoIncrement()) {
                     alterTable += " " + database.getAutoIncrementClause();
                 }
 

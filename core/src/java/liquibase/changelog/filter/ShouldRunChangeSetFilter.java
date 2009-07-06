@@ -30,7 +30,7 @@ public class ShouldRunChangeSetFilter implements ChangeSetFilter {
 
                 if (!changeSet.generateCheckSum().equals(ranChangeSet.getLastCheckSum())) {
                     UpdateStatement md5sumUpdateStatement = new UpdateStatement(database.getDefaultSchemaName(), database.getDatabaseChangeLogTableName());
-                    md5sumUpdateStatement.addNewColumnValue("MD5SUM", changeSet.generateCheckSum());
+                    md5sumUpdateStatement.addNewColumnValue("MD5SUM", changeSet.generateCheckSum().toString());
                     md5sumUpdateStatement.setWhereClause("ID = ? AND AUTHOR = ? AND FILENAME = ?");
                     md5sumUpdateStatement.addWhereParameter(changeSet.getId());
                     md5sumUpdateStatement.addWhereParameter(changeSet.getAuthor());

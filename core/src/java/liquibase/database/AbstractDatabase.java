@@ -666,7 +666,7 @@ public abstract class AbstractDatabase implements Database {
                     writeExecutor.comment("Adding missing databasechangelog.orderexecuted column");
                     statementsToExecute.add(new AddColumnStatement(getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "ORDEREXECUTED", "BIGINT", null, new NotNullConstraint(), new UniqueConstraint()));
                 }
-                if (!checksumNotRightSize) {
+                if (checksumNotRightSize) {
                     writeExecutor.comment("Modifying size of databasechangelog.md5sum column");
 
                     ColumnConfig checksumColumn = new ColumnConfig();
@@ -1255,9 +1255,9 @@ public abstract class AbstractDatabase implements Database {
                 String fileName = rs.get("FILENAME").toString();
                 String author = rs.get("AUTHOR").toString();
                 String id = rs.get("ID").toString();
-                String md5sum = rs.get("MD5SUM").toString();
+                String md5sum = rs.get("MD5SUM")==null?null:rs.get("MD5SUM").toString();
                 Date dateExecuted = (Date) rs.get("DATEEXECUTED");
-                String tag = rs.get("TAG").toString();
+                String tag = rs.get("TAG")==null?null:rs.get("TAG").toString();
                 RanChangeSet ranChangeSet = new RanChangeSet(fileName, id, author, CheckSum.parse(md5sum), dateExecuted, tag);
                 ranChangeSetList.add(ranChangeSet);
             }

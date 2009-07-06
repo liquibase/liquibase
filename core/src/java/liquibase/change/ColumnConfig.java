@@ -296,7 +296,7 @@ public class ColumnConfig {
     }
 
     public boolean isNullable() {
-        return getConstraints() != null && getConstraints().isNullable();
+        return getConstraints() == null || getConstraints().isNullable();
     }
 
     public String getDefaultColumnValue(Database database) {
