@@ -1,21 +1,40 @@
 package liquibase.serializer.string;
 
-import liquibase.change.*;
-import liquibase.change.core.*;
-import liquibase.change.custom.CustomSqlChange;
-import liquibase.change.custom.ExampleCustomSqlChange;
-import liquibase.change.custom.CustomChangeWrapper;
-import liquibase.resource.ResourceAccessor;
-import liquibase.test.JUnitResourceAccessor;
-import liquibase.serializer.string.StringChangeLogSerializer;
-import static org.junit.Assert.*;
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.*;
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.logging.Logger;
+
+import liquibase.change.Change;
+import liquibase.change.ChangeFactory;
+import liquibase.change.ChangeProperty;
+import liquibase.change.ColumnConfig;
+import liquibase.change.ConstraintsConfig;
+import liquibase.change.core.AddColumnChange;
+import liquibase.change.core.AddForeignKeyConstraintChange;
+import liquibase.change.core.LoadDataColumnConfig;
+import liquibase.change.core.SQLFileChange;
+import liquibase.change.custom.CustomChangeWrapper;
+import liquibase.change.custom.CustomSqlChange;
+import liquibase.change.custom.ExampleCustomSqlChange;
+import liquibase.resource.ResourceAccessor;
+import liquibase.test.JUnitResourceAccessor;
+
+import org.junit.Test;
 
 public class StringChangeLogSerializerTest {
 
@@ -211,6 +230,8 @@ public class StringChangeLogSerializerTest {
                 field.set(object, createNumber());
             } else if (field.getType().equals(Integer.class)) {
                 field.set(object, createInteger());
+            } else if (field.getType().equals(BigInteger.class)) {
+                field.set(object, createBigInteger());
             } else if (field.getType().equals(Date.class)) {
                 field.set(object, createDate());
             } else if (field.getType().equals(Boolean.class)) {
@@ -279,6 +300,11 @@ public class StringChangeLogSerializerTest {
 
     private Integer createInteger() {
         return new Random().nextInt();
+    }
+
+    private BigInteger createBigInteger() {
+    	
+        return new BigInteger(20, new Random());
     }
 
     private Date createDate() {

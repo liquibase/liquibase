@@ -18,6 +18,7 @@ import org.junit.Test;
 import java.io.StringWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.math.BigInteger;
 import java.sql.Connection;
 import java.sql.Statement;
 import java.util.*;
@@ -67,6 +68,11 @@ public abstract class AbstractChangeTest {
                 field.set(change, 6532);
                 checkThatChecksumIsNew(change, seenCheckSums, field);
                 field.set(change, -52352);
+                checkThatChecksumIsNew(change, seenCheckSums, field);
+            } else if (BigInteger.class.isAssignableFrom(field.getType())) {
+                field.set(change, new BigInteger("6532"));
+                checkThatChecksumIsNew(change, seenCheckSums, field);
+                field.set(change, new BigInteger("-52352"));
                 checkThatChecksumIsNew(change, seenCheckSums, field);
             } else if (List.class.isAssignableFrom(field.getType())) {
                 ColumnConfig column1 = new ColumnConfig();
