@@ -3,6 +3,8 @@
 	<classpathentry excluding="**/.svn" kind="src" output="build" path="src/java"/>
 	<classpathentry excluding="**/.svn" kind="src" output="build-test" path="src/java-test"/>
 	<classpathentry excluding="**/.svn" kind="src" output="build-dbtest" path="src/java-dbtest"/>
+	<classpathentry kind="src" path="src/samples/ext/sample1/java"/>
+	<classpathentry kind="src" path="src/samples/ext/sample2/java"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="lib" path="lib/cglib-nodep-2.1_3.jar"/>
