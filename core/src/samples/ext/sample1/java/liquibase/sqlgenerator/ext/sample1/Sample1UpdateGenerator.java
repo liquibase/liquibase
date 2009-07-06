@@ -1,12 +1,12 @@
 package liquibase.sqlgenerator.ext.sample1;
 
-import liquibase.statement.UpdateStatement;
-import liquibase.sqlgenerator.SqlGenerator;
-import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.database.Database;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
+import liquibase.sqlgenerator.SqlGenerator;
+import liquibase.sqlgenerator.SqlGeneratorChain;
+import liquibase.statement.core.UpdateStatement;
 
 public class Sample1UpdateGenerator implements SqlGenerator<UpdateStatement> {
     public int getPriority() {
