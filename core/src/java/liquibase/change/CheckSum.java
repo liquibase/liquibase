@@ -14,6 +14,9 @@ public class CheckSum {
     }
 
     public static CheckSum parse(String checksumValue) {
+        if (checksumValue == null) {
+            return null;
+        }
         if (checksumValue.startsWith(CheckSum.getCurrentVersion()+":")) {
             return new CheckSum(checksumValue.substring(2), getCurrentVersion());
         } else {
