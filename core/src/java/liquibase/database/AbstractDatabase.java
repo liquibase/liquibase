@@ -50,6 +50,7 @@ public abstract class AbstractDatabase implements Database {
     private static final DataType DATE_TYPE = new DataType("DATE", false);
     private static final DataType TIME_TYPE = new DataType("TIME", false);
     private static final DataType BIGINT_TYPE = new DataType("BIGINT", true);
+    private static final DataType NUMBER_TYPE = new DataType("NUMBER", true);
     private static final DataType CHAR_TYPE = new DataType("CHAR", true);
     private static final DataType VARCHAR_TYPE = new DataType("VARCHAR", true);
     private static final DataType FLOAT_TYPE = new DataType("FLOAT", true);
@@ -247,6 +248,8 @@ public abstract class AbstractDatabase implements Database {
         DataType returnTypeName = null;
         if (dataTypeName.equalsIgnoreCase("BIGINT")) {
             returnTypeName = getBigIntType();
+        } else if (dataTypeName.equalsIgnoreCase("NUMBER")) {
+            returnTypeName = getNumberType();
         } else if (dataTypeName.equalsIgnoreCase("BLOB")) {
             returnTypeName = getBlobType();
         } else if (dataTypeName.equalsIgnoreCase("BOOLEAN")) {
@@ -425,7 +428,7 @@ public abstract class AbstractDatabase implements Database {
             if (dateAsString.indexOf(" ") > 0) {
                 return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(dateAsString);
             } else if (dateAsString.indexOf("T") > 0) {
-                return new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(dateAsString);                
+                return new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(dateAsString);
             } else {
                 if (dateAsString.indexOf(":") > 0) {
                     return new SimpleDateFormat("HH:mm:ss").parse(dateAsString);
@@ -466,6 +469,10 @@ public abstract class AbstractDatabase implements Database {
 
     public DataType getBigIntType() {
         return BIGINT_TYPE;
+    }
+
+    public DataType getNumberType() {
+        return NUMBER_TYPE;
     }
 
     /** Returns the actual database-specific data type to use for a "char" column. */
@@ -558,7 +565,7 @@ public abstract class AbstractDatabase implements Database {
     public String getDatabaseChangeLogLockTableName() {
         return databaseChangeLogLockTableName;
     }
-    
+
     /**
      * @see liquibase.database.Database#setDatabaseChangeLogTableName(java.lang.String)
      */
