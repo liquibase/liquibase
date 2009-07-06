@@ -22,6 +22,7 @@ public class MSSQLDatabase extends AbstractDatabase {
     protected Set<String> systemTablesAndViews = new HashSet<String>();
     private static final DataType DATETIME_TYPE = new DataType("DATETIME", false);
     private static final DataType DATE_TYPE = new DataType("SMALLDATETIME", false);
+    private static final DataType NUMBER_TYPE = new DataType("NUMERIC", false);
     private static final DataType BOOLEAN_TYPE = new DataType("BIT", false);
     private static final DataType CURRENCY_TYPE = new DataType("MONEY", false);
     private static final DataType UUID_TYPE = new DataType("UNIQUEIDENTIFIER", false);
@@ -115,6 +116,11 @@ public class MSSQLDatabase extends AbstractDatabase {
 
     public DataType getClobType() {
         return CLOB_TYPE;
+    }
+
+    @Override
+    public DataType getNumberType() {
+        return NUMBER_TYPE;
     }
 
     public DataType getBlobType() {
