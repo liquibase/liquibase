@@ -66,7 +66,7 @@ public class RenameColumnStatement implements SqlStatement {
         }
 
         if (database instanceof MSSQLDatabase) {
-            return "exec sp_rename '" + database.escapeTableName(getSchemaName(), getTableName()) + "." + database.escapeColumnName(getSchemaName(), getTableName(), getOldColumnName()) + "', '" + database.escapeColumnName(getSchemaName(), getTableName(), getNewColumnName()) + "'";
+            return "exec sp_rename '" + database.escapeTableName(getSchemaName(), getTableName()) + "." + database.escapeColumnName(getSchemaName(), getTableName(), getOldColumnName()) + "', '" + getNewColumnName() + "'";
         } else if (database instanceof MySQLDatabase) {
             if (getColumnDataType() == null) {
                 throw new StatementNotSupportedOnDatabaseException("columnDataType is required to rename columns", this, database);
