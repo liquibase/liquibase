@@ -25,7 +25,7 @@ public class TagDatabaseStatement implements SqlStatement {
                 long version = Long.parseLong(database.getDatabaseProductVersion().substring(0,1));
 
                 if (version < 5) {
-                    return new RawSqlStatement("UPDATE DATABASECHANGELOG C LEFT JOIN (SELECT MAX(DATEEXECUTED) as MAXDATE FROM (SELECT DATEEXECUTED FROM `DATABASECHANGELOG`) AS X) D ON C.DATEEXECUTED = D.MAXDATE SET C.TAG = '"+tag+"' WHERE D.MAXDATE IS NOT NULL").getSqlStatement(database);
+                    return new RawSqlStatement("UPDATE "+database.escapeTableName(database.getDefaultSchemaName(), database.getDatabaseChangeLogTableName())+" C LEFT JOIN (SELECT MAX(DATEEXECUTED) as MAXDATE FROM (SELECT DATEEXECUTED FROM `DATABASECHANGELOG`) AS X) D ON C.DATEEXECUTED = D.MAXDATE SET C.TAG = '"+tag+"' WHERE D.MAXDATE IS NOT NULL").getSqlStatement(database);
                 }
 
             } catch (Throwable e) {
