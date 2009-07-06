@@ -37,7 +37,7 @@ public class TagDatabaseGenerator implements SqlGenerator<TagDatabaseStatement> 
 
                 if (version < 5) {
                     return new Sql[]{
-                            new UnparsedSql("UPDATE DATABASECHANGELOG C LEFT JOIN (SELECT MAX(DATEEXECUTED) as MAXDATE FROM (SELECT DATEEXECUTED FROM `DATABASECHANGELOG`) AS X) D ON C.DATEEXECUTED = D.MAXDATE SET C.TAG = '" + statement.getTag() + "' WHERE D.MAXDATE IS NOT NULL")
+                            new UnparsedSql("UPDATE "+database.escapeTableName(database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())+" C LEFT JOIN (SELECT MAX(DATEEXECUTED) as MAXDATE FROM (SELECT DATEEXECUTED FROM `DATABASECHANGELOG`) AS X) D ON C.DATEEXECUTED = D.MAXDATE SET C.TAG = '" + statement.getTag() + "' WHERE D.MAXDATE IS NOT NULL")
                     };
                 }
 
