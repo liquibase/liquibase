@@ -11,6 +11,7 @@ import liquibase.database.Database;
 import liquibase.database.structure.Index;
 import liquibase.database.core.*;
 import liquibase.exception.ValidationErrors;
+import liquibase.exception.StatementNotSupportedOnDatabaseException;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.change.ColumnConfig;
@@ -32,6 +33,17 @@ public class ModifyColumnsGenerator implements SqlGenerator<ModifyColumnsStateme
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", statement.getTableName());
         validationErrors.checkRequiredField("columns", statement.getColumns());
+
+        for (ColumnConfig column : statement.getColumns()) {
+            if (column.isPrimaryKey() && (database instanceof CacheDatabase
+                    || database instanceof H2Database
+                    || database instanceof DB2Database
+                    || database instanceof DerbyDatabase
+                    || database instanceof SQLiteDatabase)) {
+                validationErrors.addError("Adding primary key columns is not supported on "+database.getTypeName());
+            }
+        }
+
         return validationErrors;
     }
 
@@ -42,33 +54,46 @@ public class ModifyColumnsGenerator implements SqlGenerator<ModifyColumnsStateme
         }
 
         List<Sql> sql = new ArrayList<Sql>();
+        for (ColumnConfig column : statement.getColumns()) {
+            String alterTable = "ALTER TABLE " + database.escapeTableName(statement.getSchemaName(), statement.getTableName());
 
-      for (ColumnConfig aColumn : statement.getColumns()) {
+            // add "MODIFY"
+            alterTable += " " + getModifyString(database) + " ";
 
-          String schemaName = statement.getSchemaName() == null?database.getDefaultSchemaName():statement.getSchemaName();
-          if(database instanceof SybaseASADatabase || database instanceof SybaseDatabase) {
-                sql.add(new UnparsedSql("ALTER TABLE " + database.escapeTableName(schemaName, statement.getTableName()) + " MODIFY " + aColumn.getName() + " " + database.getColumnType(aColumn.getType(), false)));
-        } else if (database instanceof MSSQLDatabase) {
-                sql.add(new UnparsedSql("ALTER TABLE " + database.escapeTableName(schemaName, statement.getTableName()) + " ALTER COLUMN " + aColumn.getName() + " " + database.getColumnType(aColumn.getType(), false)));
-        } else if (database instanceof MySQLDatabase) {
-                sql.add(new UnparsedSql("ALTER TABLE " + database.escapeTableName(schemaName, statement.getTableName()) + " MODIFY COLUMN " + aColumn.getName() + " " + database.getColumnType(aColumn.getType(), false)));
-        } else if (database instanceof OracleDatabase || database instanceof MaxDBDatabase || database instanceof InformixDatabase) {
-                sql.add(new UnparsedSql("ALTER TABLE " + database.escapeTableName(schemaName, statement.getTableName()) + " MODIFY (" + aColumn.getName() + " " + database.getColumnType(aColumn.getType(), false) + ")"));
-        } else if (database instanceof DerbyDatabase) {
-                sql.add(new UnparsedSql("ALTER TABLE " + database.escapeTableName(schemaName, statement.getTableName()) + " ALTER COLUMN "+aColumn.getName()+" SET DATA TYPE " + database.getColumnType(aColumn.getType(), false)));
-        } else if (database instanceof HsqlDatabase) {
-                sql.add(new UnparsedSql("ALTER TABLE " + database.escapeTableName(schemaName, statement.getTableName()) + " ALTER COLUMN "+aColumn.getName()+" "+database.getColumnType(aColumn.getType(), false)));
-        } else if (database instanceof CacheDatabase) {
-                sql.add(new UnparsedSql("ALTER TABLE " + database.escapeTableName(schemaName, statement.getTableName()) + " ALTER COLUMN " + aColumn.getName() + " " + database.getColumnType(aColumn.getType(), false)));
-        } else if (database instanceof DB2Database) {
-                sql.add(new UnparsedSql("ALTER TABLE " + database.escapeTableName(schemaName, statement.getTableName()) + " ALTER COLUMN " + aColumn.getName() + " SET DATA TYPE " + database.getColumnType(aColumn.getType(), false)));
-                sql.addAll(Arrays.asList(SqlGeneratorFactory.getInstance().generateSql(new ReorganizeTableStatement(schemaName, statement.getTableName()), database)));
-        } else {
-                sql.add(new UnparsedSql("ALTER TABLE " + database.escapeTableName(schemaName, statement.getTableName()) + " ALTER COLUMN " + aColumn.getName() + " TYPE " + database.getColumnType(aColumn.getType(), false)));
+            // add column name
+            alterTable += database.escapeColumnName(statement.getSchemaName(), statement.getTableName(), column.getName());
+
+            alterTable += getPreDataTypeString(database); // adds a space if nothing else
+
+            // add column type
+            alterTable += database.getColumnType(column.getType(), false);
+
+            if (supportsExtraMetaData(database)) {
+                if (!column.isNullable()) {
+                    alterTable += " NOT NULL";
+                } else {
+                    if (database instanceof SybaseDatabase || database instanceof SybaseASADatabase) {
+                        alterTable += " NULL";
+                    }
+                }
+
+                alterTable += getDefaultClause(column, database);
+
+                if (column.isAutoIncrement()) {
+                    alterTable += " " + database.getAutoIncrementClause();
+                }
+
+                if (column.isPrimaryKey()) {
+                    alterTable += " PRIMARY KEY";
+                }
+            }
+
+            alterTable += getPostDataTypeString(database);
+
+            sql.add(new UnparsedSql(alterTable));
         }
-      }
 
-      return sql.toArray(new Sql[sql.size()]);
+        return sql.toArray(new Sql[sql.size()]);
 
     }
 
@@ -80,42 +105,123 @@ public class ModifyColumnsGenerator implements SqlGenerator<ModifyColumnsStateme
 
     	List<Sql> statements = new ArrayList<Sql>();
 
-    	// define alter table logic
-		SQLiteDatabase.AlterTableVisitor rename_alter_visitor =
-		new SQLiteDatabase.AlterTableVisitor() {
-			public ColumnConfig[] getColumnsToAdd() {
-				return new ColumnConfig[0];
-			}
-			public boolean copyThisColumn(ColumnConfig column) {
-				return true;
-			}
-			public boolean createThisColumn(ColumnConfig column) {
-				for (ColumnConfig cur_column: statement.getColumns()) {
-					if (cur_column.getName().equals(column.getName())) {
-						column.setType(cur_column.getType());
-						break;
-					}
-				}
-				return true;
-			}
-			public boolean createThisIndex(Index index) {
-				return true;
-			}
-		};
+//todo: fixup    	// define alter table logic
+//		SQLiteDatabase.AlterTableVisitor rename_alter_visitor =
+//		new SQLiteDatabase.AlterTableVisitor() {
+//			public ColumnConfig[] getColumnsToAdd() {
+//				return new ColumnConfig[0];
+//			}
+//			public boolean copyThisColumn(ColumnConfig column) {
+//				return true;
+//			}
+//			public boolean createThisColumn(ColumnConfig column) {
+//				for (ColumnConfig cur_column: statement.getColumns()) {
+//					if (cur_column.getName().equals(column.getName())) {
+//						column.setType(cur_column.getType());
+//						break;
+//					}
+//				}
+//				return true;
+//			}
+//			public boolean createThisIndex(Index index) {
+//				return true;
+//			}
+//		};
+//
+//    	try {
+//    		// alter table
+//            for (SqlStatement alterStatement : SQLiteDatabase.getAlterTableStatements(
+//                    rename_alter_visitor, database, statement.getSchemaName(), statement.getTableName())) {
+//                statements.addAll(Arrays.asList(SqlGeneratorFactory.getInstance().generateSql(alterStatement, database)));
+//            }
+//
+//		} catch (Exception e) {
+//			System.err.println(e);
+//			e.printStackTrace();
+//		}
 
-    	try {
-    		// alter table
-            for (SqlStatement alterStatement : SQLiteDatabase.getAlterTableStatements(
-                    rename_alter_visitor, database, statement.getSchemaName(), statement.getTableName())) {
-                statements.addAll(Arrays.asList(SqlGeneratorFactory.getInstance().generateSql(alterStatement, database)));
+    	return statements.toArray(new Sql[statements.size()]);
+    }
+
+    /**
+     * Whether the ALTER command can take things like "DEFAULT VALUE" or "PRIMARY KEY" as well as type changes
+     *
+     * @param database
+     * @return true/false whether extra information can be included
+     */
+    private boolean supportsExtraMetaData(Database database) {
+        if (database instanceof MSSQLDatabase
+                || database instanceof MySQLDatabase) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * @return either "MODIFY" or "ALTER COLUMN" depending on the current db
+     */
+    private String getModifyString(Database database) {
+        if (database instanceof HsqlDatabase
+                || database instanceof DerbyDatabase
+                || database instanceof DB2Database
+                || database instanceof MSSQLDatabase
+                || database instanceof CacheDatabase) {
+            return "ALTER COLUMN";
+        } else if (database instanceof SybaseASADatabase
+                || database instanceof SybaseDatabase
+                || database instanceof MySQLDatabase) {
+            return "MODIFY";
+        } else if (database instanceof OracleDatabase
+                || database instanceof MaxDBDatabase) {
+            return "MODIFY (";
+        } else {
+            return "ALTER COLUMN";
+        }
+    }
+
+    /**
+     * @return the string that comes before the column type
+     *         definition (like 'set data type' for derby or an open parentheses for Oracle)
+     */
+    private String getPreDataTypeString(Database database) {
+        if (database instanceof DerbyDatabase
+                || database instanceof DB2Database) {
+            return " SET DATA TYPE ";
+        } else if (database instanceof SybaseASADatabase
+                || database instanceof SybaseDatabase
+                || database instanceof MSSQLDatabase
+                || database instanceof MySQLDatabase
+                || database instanceof HsqlDatabase
+                || database instanceof CacheDatabase
+                || database instanceof OracleDatabase
+                || database instanceof MaxDBDatabase) {
+            return " ";
+        } else {
+            return " TYPE ";
+        }
+    }
+
+    /**
+     * @return the string that comes after the column type definition (like a close parentheses for Oracle)
+     */
+    private String getPostDataTypeString(Database database) {
+        if (database instanceof OracleDatabase
+                || database instanceof MaxDBDatabase) {
+            return " )";
+        } else {
+            return "";
+        }
+    }
+
+    private String getDefaultClause(ColumnConfig column, Database database) {
+        String clause = "";
+        if (column.getDefaultValue() != null) {
+            if (database instanceof MySQLDatabase) {
+                clause += " DEFAULT " + database.convertJavaObjectToString(column.getDefaultValue());
             }
-
-		} catch (Exception e) {
-			System.err.println(e);
-			e.printStackTrace();
-		}
-
-    	return statements.toArray(new Sql[statements.size()]);    	
+        }
+        return clause;
     }
 
 }

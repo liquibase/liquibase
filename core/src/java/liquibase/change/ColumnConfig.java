@@ -5,6 +5,8 @@ import liquibase.database.core.InformixDatabase;
 import liquibase.database.structure.Column;
 import liquibase.statement.ComputedDateValue;
 import liquibase.statement.ComputedNumericValue;
+import liquibase.statement.ColumnConstraint;
+import liquibase.statement.PrimaryKeyConstraint;
 import liquibase.util.ISODateFormat;
 
 import java.text.NumberFormat;
@@ -287,6 +289,14 @@ public class ColumnConfig {
         this.autoIncrement = autoIncrement;
 
         return this;
+    }
+
+    public boolean isPrimaryKey() {
+        return getConstraints() != null && getConstraints().isPrimaryKey();
+    }
+
+    public boolean isNullable() {
+        return getConstraints() != null && getConstraints().isNullable();
     }
 
     public String getDefaultColumnValue(Database database) {
