@@ -1,13 +1,13 @@
 package liquibase.change.core;
 
+import liquibase.change.AbstractChange;
+import liquibase.change.ChangeMetaData;
+import liquibase.change.ChangeWithColumns;
+import liquibase.change.ColumnConfig;
 import liquibase.database.Database;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.UpdateStatement;
 import liquibase.util.StringUtils;
-import liquibase.change.AbstractChange;
-import liquibase.change.ChangeWithColumns;
-import liquibase.change.ColumnConfig;
-import liquibase.change.ChangeMetaData;
 
 import java.util.ArrayList;
 import java.util.List;

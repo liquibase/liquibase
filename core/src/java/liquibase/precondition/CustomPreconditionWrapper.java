@@ -6,9 +6,9 @@ import liquibase.exception.CustomPreconditionErrorException;
 import liquibase.exception.CustomPreconditionFailedException;
 import liquibase.exception.PreconditionErrorException;
 import liquibase.exception.PreconditionFailedException;
-import liquibase.util.ObjectUtil;
 import liquibase.precondition.core.ErrorPrecondition;
 import liquibase.precondition.core.FailedPrecondition;
+import liquibase.util.ObjectUtil;
 
 import java.util.HashMap;
 import java.util.Map;

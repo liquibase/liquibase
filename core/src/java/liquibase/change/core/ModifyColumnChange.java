@@ -1,22 +1,16 @@
 package liquibase.change.core;
 
-import liquibase.database.*;
-import liquibase.database.core.*;
-import liquibase.database.core.SQLiteDatabase.AlterTableVisitor;
-import liquibase.database.structure.Index;
-import liquibase.statement.core.RawSqlStatement;
-import liquibase.statement.core.ReorganizeTableStatement;
-import liquibase.statement.core.ModifyColumnsStatement;
-import liquibase.statement.SqlStatement;
-import liquibase.util.StringUtils;
 import liquibase.change.AbstractChange;
+import liquibase.change.ChangeMetaData;
 import liquibase.change.ChangeWithColumns;
 import liquibase.change.ColumnConfig;
-import liquibase.change.ChangeMetaData;
+import liquibase.database.Database;
+import liquibase.statement.SqlStatement;
+import liquibase.statement.core.ModifyColumnsStatement;
+import liquibase.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Arrays;
 
 /**
  * Modifies the data type of an existing column.

@@ -1,15 +1,11 @@
 package liquibase.database.core;
 
-import liquibase.database.structure.CacheDatabaseSnapshot;
-import liquibase.database.structure.DatabaseSnapshot;
 import liquibase.database.AbstractDatabase;
 import liquibase.database.DataType;
-import liquibase.diff.DiffStatusListener;
-import liquibase.exception.JDBCException;
+import liquibase.database.DatabaseConnection;
+import liquibase.exception.DatabaseException;
 
-import java.sql.Connection;
 import java.text.ParseException;
-import java.util.Set;
 
 public class CacheDatabase extends AbstractDatabase {
     public static final String PRODUCT_NAME = "cache";
@@ -59,8 +55,8 @@ public class CacheDatabase extends AbstractDatabase {
         return "cache";
     }
 
-    public boolean isCorrectDatabaseImplementation(Connection conn)
-            throws JDBCException {
+    public boolean isCorrectDatabaseImplementation(DatabaseConnection conn)
+            throws DatabaseException {
         return PRODUCT_NAME.equalsIgnoreCase(getDatabaseProductName(conn));
     }
 
@@ -84,7 +80,7 @@ public class CacheDatabase extends AbstractDatabase {
     }
 
     @Override
-    protected String getDefaultDatabaseSchemaName() throws JDBCException {
+    protected String getDefaultDatabaseSchemaName() throws DatabaseException {
         return "";
     }
 
@@ -119,12 +115,7 @@ public class CacheDatabase extends AbstractDatabase {
     }
 
     @Override
-    public String getViewDefinition(String schemaName, String viewName) throws JDBCException {
+    public String getViewDefinition(String schemaName, String viewName) throws DatabaseException {
         return null;
-    }
-
-    @Override
-    public DatabaseSnapshot createDatabaseSnapshot(String schema, Set<DiffStatusListener> statusListeners) throws JDBCException {
-        return new CacheDatabaseSnapshot(this, statusListeners, schema);
     }
 }

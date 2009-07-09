@@ -1,15 +1,15 @@
 package liquibase.change.core;
 
+import liquibase.change.AbstractChange;
+import liquibase.change.Change;
+import liquibase.change.ChangeMetaData;
 import liquibase.database.Database;
-import liquibase.statement.core.AddDefaultValueStatement;
 import liquibase.statement.ComputedDateValue;
 import liquibase.statement.ComputedNumericValue;
 import liquibase.statement.SqlStatement;
+import liquibase.statement.core.AddDefaultValueStatement;
 import liquibase.util.ISODateFormat;
 import liquibase.util.StringUtils;
-import liquibase.change.AbstractChange;
-import liquibase.change.ChangeMetaData;
-import liquibase.change.Change;
 
 import java.text.NumberFormat;
 import java.text.ParseException;

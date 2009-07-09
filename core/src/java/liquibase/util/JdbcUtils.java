@@ -1,6 +1,6 @@
 package liquibase.util;
 
-import liquibase.exception.JDBCException;
+import liquibase.exception.DatabaseException;
 
 import java.sql.*;
 import java.util.Collection;
@@ -118,13 +118,13 @@ public abstract class JdbcUtils {
      * @param results the result Collection (can be <code>null</code>)
      * @return the single result object
      */
-    public static Object requiredSingleResult(Collection results) throws JDBCException {
+    public static Object requiredSingleResult(Collection results) throws DatabaseException {
         int size = (results != null ? results.size() : 0);
         if (size == 0) {
-            throw new JDBCException("Empty result set, expected one row");
+            throw new DatabaseException("Empty result set, expected one row");
         }
         if (results.size() > 1) {
-            throw new JDBCException("Result set larger than one row");
+            throw new DatabaseException("Result set larger than one row");
         }
         return results.iterator().next();
     }

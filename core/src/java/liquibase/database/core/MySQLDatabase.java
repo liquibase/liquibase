@@ -1,17 +1,9 @@
 package liquibase.database.core;
 
-import liquibase.database.structure.DatabaseSnapshot;
-import liquibase.database.structure.MySqlDatabaseSnapshot;
 import liquibase.database.AbstractDatabase;
 import liquibase.database.DataType;
-import liquibase.diff.DiffStatusListener;
-import liquibase.exception.JDBCException;
-import liquibase.statement.core.RawSqlStatement;
-import liquibase.statement.SqlStatement;
-
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.Set;
+import liquibase.database.DatabaseConnection;
+import liquibase.exception.DatabaseException;
 
 /**
  * Encapsulates MySQL database support.
@@ -30,12 +22,12 @@ public class MySQLDatabase extends AbstractDatabase {
     }
 
 
-    @Override
-    public String getConnectionUsername() throws JDBCException {
-        return super.getConnectionUsername().replaceAll("\\@.*", "");
-    }
+//todo: handle    @Override
+//    public String getConnectionUsername() throws DatabaseException {
+//        return super.getConnection().getConnectionUserName().replaceAll("\\@.*", "");
+//    }
 
-    public boolean isCorrectDatabaseImplementation(Connection conn) throws JDBCException {
+    public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
         return PRODUCT_NAME.equalsIgnoreCase(getDatabaseProductName(conn));
     }
 
@@ -116,17 +108,13 @@ public class MySQLDatabase extends AbstractDatabase {
 
 
     @Override
-    protected String getDefaultDatabaseSchemaName() throws JDBCException {
+    protected String getDefaultDatabaseSchemaName() throws DatabaseException {
 //        return super.getDefaultDatabaseSchemaName().replaceFirst("\\@.*","");
-        try {
             return getConnection().getCatalog();
-        } catch (SQLException e) {
-            throw new JDBCException(e);
-        }
     }
 
     @Override
-    public String convertRequestedSchemaToSchema(String requestedSchema) throws JDBCException {
+    public String convertRequestedSchemaToSchema(String requestedSchema) throws DatabaseException {
         if (requestedSchema == null) {
             return getDefaultDatabaseSchemaName();
         }
@@ -134,17 +122,12 @@ public class MySQLDatabase extends AbstractDatabase {
     }
 
     @Override
-    public String convertRequestedSchemaToCatalog(String requestedSchema) throws JDBCException {
+    public String convertRequestedSchemaToCatalog(String requestedSchema) throws DatabaseException {
         return requestedSchema;
     }
 
     @Override
     public String escapeDatabaseObject(String objectName) {
         return "`"+objectName+"`";
-    }
-
-    @Override
-    public DatabaseSnapshot createDatabaseSnapshot(String schema, Set<DiffStatusListener> statusListeners) throws JDBCException {
-        return new MySqlDatabaseSnapshot(this, statusListeners, schema);
     }
 }

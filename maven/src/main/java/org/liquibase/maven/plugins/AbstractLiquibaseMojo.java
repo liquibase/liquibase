@@ -319,7 +319,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
       catch (IOException e) {
         getLog().error(e.getMessage(), e);
       }
-      catch (JDBCException e) {
+      catch (DatabaseException e) {
         getLog().error(e.getMessage(), e);
       }
     }
@@ -330,7 +330,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         db.rollback();
         db.close();
       }
-      catch (JDBCException e) {
+      catch (DatabaseException e) {
         getLog().error("Failed to close open connection to database.", e);
       }
     }

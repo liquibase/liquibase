@@ -4,9 +4,9 @@ import liquibase.database.Database;
 import liquibase.database.core.InformixDatabase;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
-import liquibase.statement.core.AddUniqueConstraintStatement;
 import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
+import liquibase.statement.core.AddUniqueConstraintStatement;
 
 public class AddUniqueConstraintGeneratorInformix extends AddUniqueConstraintGenerator {
 

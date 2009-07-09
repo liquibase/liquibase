@@ -2,12 +2,13 @@ package liquibase.precondition.core;
 
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.database.Database;
-import liquibase.database.structure.DatabaseSnapshot;
-import liquibase.exception.JDBCException;
+import liquibase.exception.DatabaseException;
 import liquibase.exception.PreconditionErrorException;
 import liquibase.exception.PreconditionFailedException;
-import liquibase.util.StringUtils;
 import liquibase.precondition.Precondition;
+import liquibase.snapshot.DatabaseSnapshot;
+import liquibase.snapshot.DatabaseSnapshotGeneratorFactory;
+import liquibase.util.StringUtils;
 
 public class ViewExistsPrecondition implements Precondition {
     private String schemaName;
@@ -30,13 +31,13 @@ public class ViewExistsPrecondition implements Precondition {
     }
 
     public void check(Database database, DatabaseChangeLog changeLog) throws PreconditionFailedException, PreconditionErrorException {
-        DatabaseSnapshot databaseSnapshot;
+        DatabaseSnapshot snapshot;
         try {
-            databaseSnapshot = database.createDatabaseSnapshot(getSchemaName(), null);
-        } catch (JDBCException e) {
+            snapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database, getSchemaName(), null);
+        } catch (DatabaseException e) {
             throw new PreconditionErrorException(e, changeLog, this);
         }
-        if (databaseSnapshot.getView(getViewName()) == null) {
+        if (snapshot.getView(getViewName()) == null) {
             throw new PreconditionFailedException("View "+database.escapeStringForDatabase(getViewName())+" does not exist", changeLog, this);
         }
     }

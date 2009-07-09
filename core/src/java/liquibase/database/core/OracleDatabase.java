@@ -1,19 +1,13 @@
 package liquibase.database.core;
 
-import liquibase.database.structure.DatabaseSnapshot;
-import liquibase.database.structure.OracleDatabaseSnapshot;
 import liquibase.database.AbstractDatabase;
 import liquibase.database.DataType;
-import liquibase.diff.DiffStatusListener;
-import liquibase.exception.JDBCException;
-import liquibase.statement.core.RawSqlStatement;
-import liquibase.statement.SqlStatement;
+import liquibase.database.DatabaseConnection;
+import liquibase.exception.DatabaseException;
 
 import java.lang.reflect.Method;
-import java.sql.Connection;
 import java.sql.Types;
 import java.text.ParseException;
-import java.util.Set;
 
 /**
  * Encapsulates Oracle database support.
@@ -30,7 +24,7 @@ public class OracleDatabase extends AbstractDatabase {
     private static final DataType BIGINT_TYPE = new DataType("NUMBER(19,0)", false);
 
     @Override
-    public void setConnection(Connection conn) {
+    public void setConnection(DatabaseConnection conn) {
         try {
             Method method = conn.getClass().getMethod("setRemarksReporting", Boolean.TYPE);
             method.setAccessible(true);
@@ -95,7 +89,7 @@ public class OracleDatabase extends AbstractDatabase {
         return BIGINT_TYPE;
     }
 
-    public boolean isCorrectDatabaseImplementation(Connection conn) throws JDBCException {
+    public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
         return PRODUCT_NAME.equalsIgnoreCase(getDatabaseProductName(conn));
     }
 
@@ -122,7 +116,7 @@ public class OracleDatabase extends AbstractDatabase {
 
 
     @Override
-    protected String getDefaultDatabaseSchemaName() throws JDBCException {//NOPMD
+    protected String getDefaultDatabaseSchemaName() throws DatabaseException {//NOPMD
         return super.getDefaultDatabaseSchemaName().toUpperCase();
     }
 
@@ -216,7 +210,7 @@ public class OracleDatabase extends AbstractDatabase {
         return super.convertDatabaseValueToJavaObject(defaultValue, dataType, columnSize, decimalDigits);
     }
 
-//    public Set<UniqueConstraint> findUniqueConstraints(String schema) throws JDBCException {
+//    public Set<UniqueConstraint> findUniqueConstraints(String schema) throws DatabaseException {
 //        Set<UniqueConstraint> returnSet = new HashSet<UniqueConstraint>();
 //
 //        List<Map> maps = new WriteExecutor(this).queryForList(new RawSqlStatement("SELECT UC.CONSTRAINT_NAME, UCC.TABLE_NAME, UCC.COLUMN_NAME FROM USER_CONSTRAINTS UC, USER_CONS_COLUMNS UCC WHERE UC.CONSTRAINT_NAME=UCC.CONSTRAINT_NAME AND CONSTRAINT_TYPE='U' ORDER BY UC.CONSTRAINT_NAME"));
@@ -235,11 +229,6 @@ public class OracleDatabase extends AbstractDatabase {
 //
 //        return returnSet;
 //    }
-
-    @Override
-    public DatabaseSnapshot createDatabaseSnapshot(String schema, Set<DiffStatusListener> statusListeners) throws JDBCException {
-        return new OracleDatabaseSnapshot(this, statusListeners, schema);
-    }
 
     @Override
     public boolean supportsRestrictForeignKeys() {

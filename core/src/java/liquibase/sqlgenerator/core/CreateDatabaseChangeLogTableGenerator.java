@@ -1,16 +1,17 @@
 package liquibase.sqlgenerator.core;
 
-import liquibase.sqlgenerator.SqlGenerator;
-import liquibase.sqlgenerator.SqlGeneratorChain;
-import liquibase.sqlgenerator.SqlGeneratorFactory;
-import liquibase.statement.*;
-import liquibase.statement.core.CreateTableStatement;
-import liquibase.statement.core.CreateDatabaseChangeLogTableStatement;
 import liquibase.database.Database;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.SybaseDatabase;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
+import liquibase.sqlgenerator.SqlGenerator;
+import liquibase.sqlgenerator.SqlGeneratorChain;
+import liquibase.sqlgenerator.SqlGeneratorFactory;
+import liquibase.statement.NotNullConstraint;
+import liquibase.statement.UniqueConstraint;
+import liquibase.statement.core.CreateDatabaseChangeLogTableStatement;
+import liquibase.statement.core.CreateTableStatement;
 
 public class CreateDatabaseChangeLogTableGenerator implements SqlGenerator<CreateDatabaseChangeLogTableStatement> {
     public int getPriority() {

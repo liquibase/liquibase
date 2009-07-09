@@ -1,15 +1,15 @@
 package liquibase.sqlgenerator.core;
 
-import liquibase.statement.core.SelectSequencesStatement;
 import liquibase.database.Database;
 import liquibase.database.core.OracleDatabase;
-import liquibase.exception.ValidationErrors;
-import liquibase.exception.JDBCException;
+import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
+import liquibase.statement.core.SelectSequencesStatement;
 
 public class SelectSequencesGeneratorOracle implements SqlGenerator<SelectSequencesStatement> {
     public int getPriority() {
@@ -29,7 +29,7 @@ public class SelectSequencesGeneratorOracle implements SqlGenerator<SelectSequen
             return new Sql[] {
                     new UnparsedSql("SELECT SEQUENCE_NAME FROM ALL_SEQUENCES WHERE SEQUENCE_OWNER = '" + database.convertRequestedSchemaToSchema(statement.getSchemaName()) + "'")
             };
-        } catch (JDBCException e) {
+        } catch (DatabaseException e) {
             throw new UnexpectedLiquibaseException(e);
         }
     }

@@ -1,9 +1,9 @@
 package liquibase.change.core;
 
-import liquibase.database.Database;
-import liquibase.statement.SqlStatement;
 import liquibase.change.AbstractChange;
 import liquibase.change.ChangeMetaData;
+import liquibase.database.Database;
+import liquibase.statement.SqlStatement;
 
 public class EmptyChange extends AbstractChange {
     public EmptyChange() {

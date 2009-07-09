@@ -1,8 +1,8 @@
 package liquibase.change;
 
 import liquibase.database.Database;
-import liquibase.statement.core.RawSqlStatement;
 import liquibase.statement.SqlStatement;
+import liquibase.statement.core.RawSqlStatement;
 import liquibase.util.StringUtils;
 
 import java.util.ArrayList;

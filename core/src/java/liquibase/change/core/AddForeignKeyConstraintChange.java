@@ -1,14 +1,13 @@
 package liquibase.change.core;
 
-import liquibase.database.Database;
-import liquibase.statement.core.AddForeignKeyConstraintStatement;
-import liquibase.statement.SqlStatement;
 import liquibase.change.AbstractChange;
-import liquibase.change.ChangeMetaData;
 import liquibase.change.Change;
+import liquibase.change.ChangeMetaData;
+import liquibase.database.Database;
+import liquibase.database.structure.ForeignKeyConstraintType;
 import liquibase.exception.UnexpectedLiquibaseException;
-
-import java.sql.DatabaseMetaData;
+import liquibase.statement.SqlStatement;
+import liquibase.statement.core.AddForeignKeyConstraintStatement;
 
 /**
  * Adds a foreign key constraint to an existing column.
@@ -132,32 +131,32 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
         return this.onDelete;
     }
 
-    public void setOnDelete(int rule) {
-        if (rule == DatabaseMetaData.importedKeyCascade) {
+    public void setOnDelete(ForeignKeyConstraintType rule) {
+        if (rule == ForeignKeyConstraintType.importedKeyCascade) {
             setOnDelete("CASCADE");
-        } else if (rule == DatabaseMetaData.importedKeySetNull) {
+        } else if (rule == ForeignKeyConstraintType.importedKeySetNull) {
             setOnDelete("SET NULL");
-        } else if (rule == DatabaseMetaData.importedKeySetDefault) {
+        } else if (rule == ForeignKeyConstraintType.importedKeySetDefault) {
             setOnDelete("SET DEFAULT");
-        } else if (rule == DatabaseMetaData.importedKeyRestrict) {
+        } else if (rule == ForeignKeyConstraintType.importedKeyRestrict) {
             setOnDelete("RESTRICT");
-        } else if (rule == DatabaseMetaData.importedKeyNoAction){
+        } else if (rule == ForeignKeyConstraintType.importedKeyNoAction){
             setOnDelete("NO ACTION");
         } else {
             throw new UnexpectedLiquibaseException("Unknown onDelete action: "+rule);
         }
     }
 
-    public void setOnUpdate(int rule) {
-        if (rule == DatabaseMetaData.importedKeyCascade) {
+    public void setOnUpdate(ForeignKeyConstraintType rule) {
+        if (rule == ForeignKeyConstraintType.importedKeyCascade) {
             setOnUpdate("CASCADE");
-        } else  if (rule == DatabaseMetaData.importedKeySetNull) {
+        } else  if (rule == ForeignKeyConstraintType.importedKeySetNull) {
             setOnUpdate("SET NULL");
-        } else if (rule == DatabaseMetaData.importedKeySetDefault) {
+        } else if (rule == ForeignKeyConstraintType.importedKeySetDefault) {
             setOnUpdate("SET DEFAULT");
-        } else if (rule == DatabaseMetaData.importedKeyRestrict) {
+        } else if (rule == ForeignKeyConstraintType.importedKeyRestrict) {
             setOnUpdate("RESTRICT");
-        } else if (rule == DatabaseMetaData.importedKeyNoAction) {
+        } else if (rule == ForeignKeyConstraintType.importedKeyNoAction) {
             setOnUpdate("NO ACTION");
         } else {
             throw new UnexpectedLiquibaseException("Unknown onUpdate action: "+onUpdate);

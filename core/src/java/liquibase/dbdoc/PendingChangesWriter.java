@@ -2,8 +2,8 @@ package liquibase.dbdoc;
 
 import liquibase.change.Change;
 import liquibase.database.Database;
+import liquibase.exception.DatabaseException;
 import liquibase.exception.DatabaseHistoryException;
-import liquibase.exception.JDBCException;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -22,7 +22,7 @@ public class PendingChangesWriter extends HTMLWriter {
     }
 
     @Override
-    protected void writeBody(FileWriter fileWriter, Object object, List<Change> ranChanges, List<Change> changesToRun) throws IOException, DatabaseHistoryException, JDBCException {
+    protected void writeBody(FileWriter fileWriter, Object object, List<Change> ranChanges, List<Change> changesToRun) throws IOException, DatabaseHistoryException, DatabaseException {
         writeCustomHTML(fileWriter, object, ranChanges, database);
         writeChanges("Pending Changes", fileWriter, changesToRun);
     }

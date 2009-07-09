@@ -1,12 +1,12 @@
 package liquibase.sqlgenerator.core;
 
-import liquibase.sqlgenerator.SqlGenerator;
-import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.database.Database;
 import liquibase.database.core.SybaseDatabase;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
+import liquibase.sqlgenerator.SqlGenerator;
+import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.CreateDatabaseChangeLogTableStatement;
 
 public class CreateDatabaseChangeLogTableGeneratorSybase implements SqlGenerator<CreateDatabaseChangeLogTableStatement> {

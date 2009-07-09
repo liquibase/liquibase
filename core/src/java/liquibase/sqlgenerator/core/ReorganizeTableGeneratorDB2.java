@@ -1,14 +1,14 @@
 package liquibase.sqlgenerator.core;
 
-import liquibase.database.core.DB2Database;
 import liquibase.database.Database;
-import liquibase.exception.JDBCException;
+import liquibase.database.core.DB2Database;
+import liquibase.exception.DatabaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
-import liquibase.statement.core.ReorganizeTableStatement;
 import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
+import liquibase.statement.core.ReorganizeTableStatement;
 
 public class ReorganizeTableGeneratorDB2 implements SqlGenerator<ReorganizeTableStatement> {
     public int getPriority() {
@@ -34,7 +34,7 @@ public class ReorganizeTableGeneratorDB2 implements SqlGenerator<ReorganizeTable
             } else {
                 return null;
             }
-        } catch (JDBCException e) {
+        } catch (DatabaseException e) {
             throw new RuntimeException(e);
         }
     }

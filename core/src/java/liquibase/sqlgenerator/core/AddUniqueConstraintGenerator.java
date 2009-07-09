@@ -1,14 +1,14 @@
 package liquibase.sqlgenerator.core;
 
-import liquibase.database.*;
+import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
-import liquibase.statement.core.AddUniqueConstraintStatement;
-import liquibase.util.StringUtils;
 import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
+import liquibase.statement.core.AddUniqueConstraintStatement;
+import liquibase.util.StringUtils;
 
 public class AddUniqueConstraintGenerator implements SqlGenerator<AddUniqueConstraintStatement> {
     public int getPriority() {

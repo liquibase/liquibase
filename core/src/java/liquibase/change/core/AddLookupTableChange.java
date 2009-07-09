@@ -1,16 +1,16 @@
 package liquibase.change.core;
 
-import liquibase.database.*;
+import liquibase.change.AbstractChange;
+import liquibase.change.Change;
+import liquibase.change.ChangeMetaData;
+import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.OracleDatabase;
 import liquibase.database.core.SybaseASADatabase;
+import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.statement.core.ReorganizeTableStatement;
-import liquibase.statement.SqlStatement;
-import liquibase.change.AbstractChange;
-import liquibase.change.ChangeMetaData;
-import liquibase.change.Change;
 
 import java.util.ArrayList;
 import java.util.Arrays;

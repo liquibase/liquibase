@@ -1,15 +1,15 @@
 package liquibase.sqlgenerator.core;
 
-import liquibase.database.*;
+import liquibase.database.Database;
 import liquibase.database.core.*;
-import liquibase.exception.JDBCException;
+import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
-import liquibase.statement.core.DropDefaultValueStatement;
 import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
+import liquibase.statement.core.DropDefaultValueStatement;
 
 public class DropDefaultValueGenerator implements SqlGenerator<DropDefaultValueStatement> {
     public int getPriority() {
@@ -39,7 +39,7 @@ public class DropDefaultValueGenerator implements SqlGenerator<DropDefaultValueS
              String productVersion = null;
              try {
                  productVersion = database.getDatabaseProductVersion();
-             } catch (JDBCException e) {
+             } catch (DatabaseException e) {
                  throw new UnexpectedLiquibaseException(e);
              }
              if(productVersion.startsWith("9")) { // SQL Server 2005

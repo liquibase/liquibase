@@ -1,7 +1,7 @@
 package liquibase.precondition;
 
-import liquibase.util.plugin.ClassPathScanner;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.util.plugin.ClassPathScanner;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -1,11 +1,11 @@
 package liquibase.change.core;
 
-import liquibase.database.Database;
-import liquibase.database.core.OracleDatabase;
-import liquibase.statement.core.RawSqlStatement;
-import liquibase.statement.SqlStatement;
 import liquibase.change.AbstractChange;
 import liquibase.change.ChangeMetaData;
+import liquibase.database.Database;
+import liquibase.database.core.OracleDatabase;
+import liquibase.statement.SqlStatement;
+import liquibase.statement.core.RawSqlStatement;
 
 public class CreateProcedureChange extends AbstractChange {
     private String comments;

@@ -1,24 +1,17 @@
 package liquibase.sqlgenerator.core;
 
-import liquibase.statement.core.ModifyColumnsStatement;
-import liquibase.statement.core.RawSqlStatement;
-import liquibase.statement.core.ReorganizeTableStatement;
-import liquibase.statement.SqlStatement;
-import liquibase.sqlgenerator.SqlGenerator;
-import liquibase.sqlgenerator.SqlGeneratorChain;
-import liquibase.sqlgenerator.SqlGeneratorFactory;
+import liquibase.change.ColumnConfig;
 import liquibase.database.Database;
-import liquibase.database.structure.Index;
 import liquibase.database.core.*;
 import liquibase.exception.ValidationErrors;
-import liquibase.exception.StatementNotSupportedOnDatabaseException;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
-import liquibase.change.ColumnConfig;
+import liquibase.sqlgenerator.SqlGenerator;
+import liquibase.sqlgenerator.SqlGeneratorChain;
+import liquibase.statement.core.ModifyColumnsStatement;
 
-import java.util.List;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.List;
 
 public class ModifyColumnsGenerator implements SqlGenerator<ModifyColumnsStatement> {
     public int getPriority() {

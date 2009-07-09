@@ -1,22 +1,18 @@
 package liquibase.database.core;
 
-import liquibase.database.structure.DatabaseSnapshot;
-import liquibase.database.structure.HsqlDatabaseSnapshot;
 import liquibase.database.AbstractDatabase;
 import liquibase.database.DataType;
-import liquibase.diff.DiffStatusListener;
+import liquibase.database.DatabaseConnection;
+import liquibase.exception.DatabaseException;
 import liquibase.exception.DateParseException;
-import liquibase.exception.JDBCException;
 import liquibase.util.ISODateFormat;
 
-import java.sql.Connection;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 
 public class HsqlDatabase extends AbstractDatabase {
     private static String START_CONCAT = "CONCAT(";
@@ -30,7 +26,7 @@ public class HsqlDatabase extends AbstractDatabase {
     private static final DataType DATETIME_TYPE = new DataType("DATETIME", false);
 
 
-    public boolean isCorrectDatabaseImplementation(Connection conn) throws JDBCException {
+    public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
         return "HSQL Database Engine".equalsIgnoreCase(getDatabaseProductName(conn));
     }
 
@@ -56,7 +52,7 @@ public class HsqlDatabase extends AbstractDatabase {
     }
 
     @Override
-    protected String getDefaultDatabaseSchemaName() throws JDBCException {
+    protected String getDefaultDatabaseSchemaName() throws DatabaseException {
         return "PUBLIC";
     }
 
@@ -152,21 +148,9 @@ public class HsqlDatabase extends AbstractDatabase {
         return false;
     }
 
-
     @Override
-    public void setConnection(Connection conn) {
-        super.setConnection(new HsqlConnectionDelegate(conn));
-    }
-
-
-    @Override
-    public String convertRequestedSchemaToSchema(String requestedSchema) throws JDBCException {
+    public String convertRequestedSchemaToSchema(String requestedSchema) throws DatabaseException {
         return super.convertRequestedSchemaToSchema(requestedSchema).toUpperCase();
-    }
-
-    @Override
-    public DatabaseSnapshot createDatabaseSnapshot(String schema, Set<DiffStatusListener> statusListeners) throws JDBCException {
-        return new HsqlDatabaseSnapshot(this, statusListeners, schema);
     }
 
     @Override

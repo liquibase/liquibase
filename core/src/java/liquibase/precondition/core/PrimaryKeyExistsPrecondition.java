@@ -2,12 +2,13 @@ package liquibase.precondition.core;
 
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.database.Database;
-import liquibase.database.structure.DatabaseSnapshot;
-import liquibase.exception.JDBCException;
+import liquibase.exception.DatabaseException;
 import liquibase.exception.PreconditionErrorException;
 import liquibase.exception.PreconditionFailedException;
-import liquibase.util.StringUtils;
 import liquibase.precondition.Precondition;
+import liquibase.snapshot.DatabaseSnapshot;
+import liquibase.snapshot.DatabaseSnapshotGeneratorFactory;
+import liquibase.util.StringUtils;
 
 public class PrimaryKeyExistsPrecondition implements Precondition {
     private String schemaName;
@@ -39,18 +40,18 @@ public class PrimaryKeyExistsPrecondition implements Precondition {
     }
 
     public void check(Database database, DatabaseChangeLog changeLog) throws PreconditionFailedException, PreconditionErrorException {
-        DatabaseSnapshot databaseSnapshot;
+        DatabaseSnapshot snapshot;
         try {
-            databaseSnapshot = database.createDatabaseSnapshot(getSchemaName(), null);
-        } catch (JDBCException e) {
+            snapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database, getSchemaName(), null);
+        } catch (DatabaseException e) {
             throw new PreconditionErrorException(e, changeLog, this);
         }
         if (tableName != null) {
-            if (databaseSnapshot.getPrimaryKeyForTable(getTableName()) == null) {
+            if (snapshot.getPrimaryKeyForTable(getTableName()) == null) {
                 throw new PreconditionFailedException("Primary Key does not exist on "+database.escapeStringForDatabase(getTableName()), changeLog, this);
             }
         } else if (primaryKeyName != null) {
-            if (databaseSnapshot.getPrimaryKey(getPrimaryKeyName()) == null) {
+            if (snapshot.getPrimaryKey(getPrimaryKeyName()) == null) {
                 throw new PreconditionFailedException("Primary Key "+database.escapeStringForDatabase(getPrimaryKeyName())+" does not exist", changeLog, this);
             }
         } else {

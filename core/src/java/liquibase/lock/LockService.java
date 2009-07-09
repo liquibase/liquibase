@@ -1,19 +1,22 @@
 package liquibase.lock;
 
 import liquibase.database.Database;
-import liquibase.exception.JDBCException;
+import liquibase.exception.DatabaseException;
 import liquibase.exception.LockException;
-import liquibase.sql.visitor.SqlVisitor;
-import liquibase.statement.*;
-import liquibase.statement.core.SelectFromDatabaseChangeLogLockStatement;
-import liquibase.statement.core.UnlockDatabaseChangeLogStatement;
-import liquibase.statement.core.LockDatabaseChangeLogStatement;
-import liquibase.util.log.LogFactory;
 import liquibase.executor.ExecutorService;
 import liquibase.executor.WriteExecutor;
+import liquibase.sql.visitor.SqlVisitor;
+import liquibase.statement.SqlStatement;
+import liquibase.statement.core.LockDatabaseChangeLogStatement;
+import liquibase.statement.core.SelectFromDatabaseChangeLogLockStatement;
+import liquibase.statement.core.UnlockDatabaseChangeLogStatement;
+import liquibase.util.log.LogFactory;
 
 import java.text.DateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class LockService {
@@ -93,7 +96,7 @@ public class LockService {
             Boolean locked;
             try {
                 locked = (Boolean) ExecutorService.getInstance().getReadExecutor(database).queryForObject(new SelectFromDatabaseChangeLogLockStatement("locked"), Boolean.class, new ArrayList<SqlVisitor>());
-            } catch (JDBCException e) {
+            } catch (DatabaseException e) {
                 if (!writeExecutor.executesStatements()) {
                     //expected
                     locked = false;
@@ -125,7 +128,7 @@ public class LockService {
         } finally {
             try {
                 database.rollback();
-            } catch (JDBCException e) {
+            } catch (DatabaseException e) {
                 ;
             }
         }
@@ -156,7 +159,7 @@ public class LockService {
         } finally {
             try {
                 database.rollback();
-            } catch (JDBCException e) {
+            } catch (DatabaseException e) {
                 ;
             }
         }
@@ -192,7 +195,7 @@ public class LockService {
     /**
      * Releases whatever locks are on the database change log table
      */
-    public void forceReleaseLock() throws LockException, JDBCException {
+    public void forceReleaseLock() throws LockException, DatabaseException {
         database.checkDatabaseChangeLogLockTable();
 
         releaseLock();

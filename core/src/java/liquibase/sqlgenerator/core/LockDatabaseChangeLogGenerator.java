@@ -4,12 +4,12 @@ import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
-import liquibase.statement.core.UpdateStatement;
-import liquibase.statement.core.LockDatabaseChangeLogStatement;
-import liquibase.util.NetUtil;
 import liquibase.sqlgenerator.SqlGenerator;
-import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.sqlgenerator.SqlGeneratorChain;
+import liquibase.sqlgenerator.SqlGeneratorFactory;
+import liquibase.statement.core.LockDatabaseChangeLogStatement;
+import liquibase.statement.core.UpdateStatement;
+import liquibase.util.NetUtil;
 
 import java.net.InetAddress;
 import java.sql.Timestamp;

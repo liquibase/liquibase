@@ -1,16 +1,11 @@
 package liquibase.database.core;
 
 
-import liquibase.database.structure.DatabaseSnapshot;
-import liquibase.database.structure.MaxDBDatabaseSnapshot;
 import liquibase.database.AbstractDatabase;
 import liquibase.database.DataType;
-import liquibase.diff.DiffStatusListener;
-import liquibase.exception.JDBCException;
-import liquibase.statement.core.RawSqlStatement;
-import liquibase.statement.SqlStatement;
+import liquibase.database.DatabaseConnection;
+import liquibase.exception.DatabaseException;
 
-import java.sql.Connection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -147,7 +142,7 @@ public class MaxDBDatabase extends AbstractDatabase {
         return TIME_TYPE;
     }
 
-    public boolean isCorrectDatabaseImplementation(Connection conn) throws JDBCException {
+    public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
         return PRODUCT_NAME.equalsIgnoreCase(getDatabaseProductName(conn));
     }
 
@@ -173,7 +168,7 @@ public class MaxDBDatabase extends AbstractDatabase {
     }
 
     @Override
-    protected String getDefaultDatabaseSchemaName() throws JDBCException {//NOPMD
+    protected String getDefaultDatabaseSchemaName() throws DatabaseException {//NOPMD
         return super.getDefaultDatabaseSchemaName().toUpperCase();
     }
 
@@ -229,10 +224,5 @@ public class MaxDBDatabase extends AbstractDatabase {
         } else {
             return super.convertJavaObjectToString(value);
         }
-    }
-
-    @Override
-    public DatabaseSnapshot createDatabaseSnapshot(String schema, Set<DiffStatusListener> statusListeners) throws JDBCException {
-        return new MaxDBDatabaseSnapshot(this, statusListeners, schema);
     }
 }

@@ -1,15 +1,10 @@
 package liquibase.database.core;
 
-import liquibase.database.structure.DatabaseSnapshot;
-import liquibase.database.structure.MSSQLDatabaseSnapshot;
 import liquibase.database.AbstractDatabase;
 import liquibase.database.DataType;
 import liquibase.database.DatabaseConnection;
-import liquibase.diff.DiffStatusListener;
-import liquibase.exception.JDBCException;
+import liquibase.exception.DatabaseException;
 
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.HashSet;
 import java.util.Set;
@@ -73,7 +68,7 @@ public class MSSQLDatabase extends AbstractDatabase {
         return false;
     }
 
-    public boolean isCorrectDatabaseImplementation(Connection conn) throws JDBCException {
+    public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
         return PRODUCT_NAME.equalsIgnoreCase(getDatabaseProductName(conn));
     }
 
@@ -136,17 +131,13 @@ public class MSSQLDatabase extends AbstractDatabase {
         return "IDENTITY";
     }
     @Override
-    protected String getDefaultDatabaseSchemaName() throws JDBCException {
+    protected String getDefaultDatabaseSchemaName() throws DatabaseException {
         return null;
     }
 
     @Override
-    public String getDefaultCatalogName() throws JDBCException {
-        try {
+    public String getDefaultCatalogName() throws DatabaseException {
             return getConnection().getCatalog();
-        } catch (SQLException e) {
-            throw new JDBCException(e);
-        }
     }
 
     @Override
@@ -169,7 +160,7 @@ public class MSSQLDatabase extends AbstractDatabase {
         return returnString.toString().replaceFirst(" \\+ $", "");
     }
 
-//    protected void dropForeignKeys(Connection conn) throws JDBCException {
+//    protected void dropForeignKeys(Connection conn) throws DatabaseException {
 //        Statement dropStatement = null;
 //        PreparedStatement fkStatement = null;
 //        ResultSet rs = null;
@@ -187,11 +178,11 @@ public class MSSQLDatabase extends AbstractDatabase {
 //                try {
 //                    dropStatement.execute(dropFK.generateStatements(this)[0]);
 //                } catch (UnsupportedChangeException e) {
-//                    throw new JDBCException(e.getMessage());
+//                    throw new DatabaseException(e.getMessage());
 //                }
 //            }
 //        } catch (SQLException e) {
-//            throw new JDBCException(e);
+//            throw new DatabaseException(e);
 //        } finally {
 //            try {
 //                if (dropStatement != null) {
@@ -204,7 +195,7 @@ public class MSSQLDatabase extends AbstractDatabase {
 //                    rs.close();
 //                }
 //            } catch (SQLException e) {
-//                throw new JDBCException(e);
+//                throw new DatabaseException(e);
 //            }
 //        }
 //
@@ -255,12 +246,12 @@ public class MSSQLDatabase extends AbstractDatabase {
     }
 
     @Override
-    public String convertRequestedSchemaToCatalog(String requestedSchema) throws JDBCException {
+    public String convertRequestedSchemaToCatalog(String requestedSchema) throws DatabaseException {
         return getDefaultCatalogName();
     }
 
     @Override
-    public String convertRequestedSchemaToSchema(String requestedSchema) throws JDBCException {
+    public String convertRequestedSchemaToSchema(String requestedSchema) throws DatabaseException {
         if (requestedSchema == null && getConnection() != null) {
             return getDefaultCatalogName();
         }
@@ -281,11 +272,6 @@ public class MSSQLDatabase extends AbstractDatabase {
         return super.getDateLiteral(isoDate).replace(' ', 'T');
     }
 
-    @Override
-    public DatabaseSnapshot createDatabaseSnapshot(String schema, Set<DiffStatusListener> statusListeners) throws JDBCException {
-        return new MSSQLDatabaseSnapshot(this, statusListeners, schema);
-    }
-
 	@Override
     public boolean supportsRestrictForeignKeys() {
         return false;
@@ -296,7 +282,7 @@ public class MSSQLDatabase extends AbstractDatabase {
         try {
         	DatabaseConnection connection = getConnection();
             return connection == null ? null: connection.getCatalog();
-        } catch (SQLException e) {
+        } catch (DatabaseException e) {
             log.severe(e.getMessage());
             e.printStackTrace();
             return null;

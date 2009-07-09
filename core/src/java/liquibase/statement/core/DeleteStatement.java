@@ -3,8 +3,8 @@ package liquibase.statement.core;
 import liquibase.statement.SqlStatement;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Arrays;
+import java.util.List;
 
 public class DeleteStatement implements SqlStatement {
     private String schemaName;

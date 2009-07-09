@@ -6,13 +6,14 @@ import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.filter.*;
 import liquibase.changelog.visitor.*;
 import liquibase.database.Database;
+import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
-import liquibase.executor.LoggingExecutor;
-import liquibase.executor.WriteExecutor;
-import liquibase.executor.*;
-import liquibase.exception.JDBCException;
+import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.LockException;
+import liquibase.executor.ExecutorService;
+import liquibase.executor.LoggingExecutor;
+import liquibase.executor.WriteExecutor;
 import liquibase.lock.DatabaseChangeLogLock;
 import liquibase.lock.LockService;
 import liquibase.parser.ChangeLogParserFactory;
@@ -27,7 +28,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.Writer;
-import java.sql.Connection;
 import java.text.DateFormat;
 import java.util.*;
 import java.util.logging.Level;
@@ -49,7 +49,7 @@ public class Liquibase {
 
     private Map<String, Object> changeLogParameters = new HashMap<String, Object>();
 
-    public Liquibase(String changeLogFile, ResourceAccessor resourceAccessor, Connection conn) throws JDBCException {
+    public Liquibase(String changeLogFile, ResourceAccessor resourceAccessor, DatabaseConnection conn) throws DatabaseException {
         this(changeLogFile, resourceAccessor, DatabaseFactory.getInstance().findCorrectDatabaseImplementation(conn));
     }
 
@@ -185,14 +185,14 @@ public class Liquibase {
         ExecutorService.getInstance().setWriteExecutor(database, oldTemplate);
     }
 
-    private void outputHeader(String message) throws JDBCException {
+    private void outputHeader(String message) throws DatabaseException {
         WriteExecutor writeExecutor = ExecutorService.getInstance().getWriteExecutor(database);
         writeExecutor.comment("*********************************************************************");
         writeExecutor.comment(message);
         writeExecutor.comment("*********************************************************************");
         writeExecutor.comment("Change Log: " + changeLogFile);
         writeExecutor.comment("Ran at: " + DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(new Date()));
-        writeExecutor.comment("Against: " + getDatabase().getConnectionUsername() + "@" + getDatabase().getConnectionURL());
+        writeExecutor.comment("Against: " + getDatabase().getConnection().getConnectionUserName() + "@" + getDatabase().getConnection().getURL());
         writeExecutor.comment("LiquiBase version: " + LiquibaseUtil.getBuildVersion());
         writeExecutor.comment("*********************************************************************" + StreamUtil.getLineSeparator());
     }
@@ -432,14 +432,14 @@ public class Liquibase {
     /**
      * Drops all database objects owned by the current user.
      */
-    public final void dropAll() throws JDBCException, LockException {
+    public final void dropAll() throws DatabaseException, LockException {
         dropAll(getDatabase().getDefaultSchemaName());
     }
 
     /**
      * Drops all database objects owned by the current user.
      */
-    public final void dropAll(String... schemas) throws JDBCException {
+    public final void dropAll(String... schemas) throws DatabaseException {
         try {
             LockService.getInstance(database).waitForLock();
 
@@ -450,10 +450,10 @@ public class Liquibase {
                 checkDatabaseChangeLogTable();
                 log.finest("Objects dropped successfully");
             }
-        } catch (JDBCException e) {
+        } catch (DatabaseException e) {
             throw e;
         } catch (Exception e) {
-            throw new JDBCException(e);
+            throw new DatabaseException(e);
         } finally {
             try {
                 LockService.getInstance(database).releaseLock();
@@ -466,12 +466,12 @@ public class Liquibase {
     /**
      * 'Tags' the database for future rollback
      */
-    public void tag(String tagString) throws JDBCException {
+    public void tag(String tagString) throws DatabaseException {
         getDatabase().tag(tagString);
     }
 
 
-    public void checkDatabaseChangeLogTable() throws JDBCException {
+    public void checkDatabaseChangeLogTable() throws DatabaseException {
         getDatabase().checkDatabaseChangeLogTable();
         getDatabase().checkDatabaseChangeLogLockTable();
     }
@@ -482,22 +482,22 @@ public class Liquibase {
      * It is fine to run LiquiBase against a "non-safe" database, the method is mainly used to determine if the user
      * should be prompted before continuing.
      */
-    public boolean isSafeToRunMigration() throws JDBCException {
+    public boolean isSafeToRunMigration() throws DatabaseException {
         return !ExecutorService.getInstance().getWriteExecutor(database).executesStatements() || getDatabase().isLocalDatabase();
     }
 
     /**
      * Display change log lock information.
      */
-    public DatabaseChangeLogLock[] listLocks() throws JDBCException, IOException, LockException {
+    public DatabaseChangeLogLock[] listLocks() throws DatabaseException, IOException, LockException {
         checkDatabaseChangeLogTable();
 
         return LockService.getInstance(getDatabase()).listLocks();
     }
 
-    public void reportLocks(PrintStream out) throws LockException, IOException, JDBCException {
+    public void reportLocks(PrintStream out) throws LockException, IOException, DatabaseException {
         DatabaseChangeLogLock[] locks = listLocks();
-        out.println("Database change log locks for " + getDatabase().getConnectionUsername() + "@" + getDatabase().getConnectionURL());
+        out.println("Database change log locks for " + getDatabase().getConnection().getConnectionUserName() + "@" + getDatabase().getConnection().getURL());
         if (locks.length == 0) {
             out.println(" - No locks");
         }
@@ -507,7 +507,7 @@ public class Liquibase {
 
     }
 
-    public void forceReleaseLocks() throws LockException, IOException, JDBCException {
+    public void forceReleaseLocks() throws LockException, IOException, DatabaseException {
         checkDatabaseChangeLogTable();
 
         LockService.getInstance(getDatabase()).forceReleaseLock();
@@ -541,9 +541,9 @@ public class Liquibase {
             List<ChangeSet> unrunChangeSets = listUnrunChangeSets(contexts);
             out.append(String.valueOf(unrunChangeSets.size()));
             out.append(" change sets have not been applied to ");
-            out.append(getDatabase().getConnectionUsername());
+            out.append(getDatabase().getConnection().getConnectionUserName());
             out.append("@");
-            out.append(getDatabase().getConnectionURL());
+            out.append(getDatabase().getConnection().getURL());
             out.append(StreamUtil.getLineSeparator());
             if (verbose) {
                 for (ChangeSet changeSet : unrunChangeSets) {

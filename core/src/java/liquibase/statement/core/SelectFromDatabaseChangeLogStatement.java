@@ -39,6 +39,10 @@ public class SelectFromDatabaseChangeLogStatement implements SqlStatement {
 
     }
 
+    public static class ByNotNullCheckSum implements WhereClause {
+
+    }
+
     public static class ByTag implements WhereClause {
 
         private String tagName;

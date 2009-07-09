@@ -1,13 +1,13 @@
 package liquibase.sqlgenerator.core;
 
-import liquibase.database.*;
+import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
-import liquibase.statement.core.RenameColumnStatement;
 import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
+import liquibase.statement.core.RenameColumnStatement;
 
 public class RenameColumnGenerator implements SqlGenerator<RenameColumnStatement> {
     public int getPriority() {

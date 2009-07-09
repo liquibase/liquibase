@@ -2,19 +2,21 @@ package liquibase.database.core;
 
 import liquibase.change.ColumnConfig;
 import liquibase.change.core.CreateTableChange;
-import liquibase.database.structure.*;
 import liquibase.database.AbstractDatabase;
 import liquibase.database.DataType;
 import liquibase.database.Database;
-import liquibase.diff.DiffStatusListener;
-import liquibase.exception.JDBCException;
+import liquibase.database.DatabaseConnection;
+import liquibase.database.structure.Column;
+import liquibase.database.structure.Index;
+import liquibase.database.structure.Table;
+import liquibase.exception.DatabaseException;
 import liquibase.exception.UnsupportedChangeException;
-import liquibase.statement.*;
+import liquibase.snapshot.DatabaseSnapshot;
+import liquibase.snapshot.DatabaseSnapshotGeneratorFactory;
+import liquibase.statement.SqlStatement;
 import liquibase.statement.core.*;
 import liquibase.util.ISODateFormat;
 
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.*;
 
 public class SQLiteDatabase extends AbstractDatabase {
@@ -71,8 +73,8 @@ public class SQLiteDatabase extends AbstractDatabase {
         return DATETIME_TYPE;
     }
 
-    public boolean isCorrectDatabaseImplementation(Connection conn)
-            throws JDBCException {
+    public boolean isCorrectDatabaseImplementation(DatabaseConnection conn)
+            throws DatabaseException {
         return "SQLite".equalsIgnoreCase(getDatabaseProductName(conn));
     }
 
@@ -85,7 +87,7 @@ public class SQLiteDatabase extends AbstractDatabase {
     }
 
     @Override
-    public String getViewDefinition(String schemaName, String viewName) throws JDBCException {
+    public String getViewDefinition(String schemaName, String viewName) throws DatabaseException {
         return null;
     }
 
@@ -156,11 +158,11 @@ public class SQLiteDatabase extends AbstractDatabase {
     public static List<SqlStatement> getAlterTableStatements(
             AlterTableVisitor alterTableVisitor,
             Database database, String schemaName, String tableName)
-            throws UnsupportedChangeException, JDBCException {
+            throws UnsupportedChangeException, DatabaseException {
 
         List<SqlStatement> statements = new ArrayList<SqlStatement>();
 
-        DatabaseSnapshot snapshot = new SQLiteDatabaseSnapshot(database);
+        DatabaseSnapshot snapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database, null, null);
         Table table = snapshot.getTable(tableName);
 
         List<ColumnConfig> createColumns = new Vector<ColumnConfig>();
@@ -226,20 +228,7 @@ public class SQLiteDatabase extends AbstractDatabase {
 
         return statements;
     }
-
-    @Override
-    public String getConnectionUsername() throws JDBCException {
-        try {
-            String username = getConnection().getMetaData().getUserName();
-            if (username == null) {
-                username = "liquibase";
-            }
-            return username;
-        } catch (SQLException e) {
-            throw new JDBCException(e);
-        }
-    }
-
+    
     @Override
     protected Set<String> getSystemTablesAndViews() {
         return systemTables;
@@ -259,11 +248,6 @@ public class SQLiteDatabase extends AbstractDatabase {
         public boolean createThisColumn(ColumnConfig column);
 
         public boolean createThisIndex(Index index);
-    }
-
-    @Override
-    public DatabaseSnapshot createDatabaseSnapshot(String schema, Set<DiffStatusListener> statusListeners) throws JDBCException {
-        return new SQLiteDatabaseSnapshot(this);
     }
 
 }

@@ -1,13 +1,13 @@
 package liquibase.sqlgenerator.core;
 
-import liquibase.database.*;
+import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
-import liquibase.statement.core.CreateSequenceStatement;
 import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
+import liquibase.statement.core.CreateSequenceStatement;
 
 public class CreateSequenceGenerator implements SqlGenerator<CreateSequenceStatement> {
     public int getPriority() {

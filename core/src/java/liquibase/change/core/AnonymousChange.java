@@ -1,14 +1,14 @@
 package liquibase.change.core;
 
-import liquibase.statement.SqlStatement;
-import liquibase.database.Database;
 import liquibase.change.AbstractChange;
 import liquibase.change.ChangeMetaData;
 import liquibase.change.ChangeProperty;
+import liquibase.database.Database;
+import liquibase.statement.SqlStatement;
 
-import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class AnonymousChange extends AbstractChange {
 

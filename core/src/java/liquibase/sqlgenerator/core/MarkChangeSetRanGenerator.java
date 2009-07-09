@@ -1,21 +1,21 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.changelog.ChangeSet;
+import liquibase.database.Database;
+import liquibase.exception.LiquibaseException;
+import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.exception.ValidationErrors;
+import liquibase.sql.Sql;
 import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
-import liquibase.statement.core.MarkChangeSetRanStatement;
-import liquibase.statement.core.InsertStatement;
-import liquibase.statement.core.UpdateStatement;
 import liquibase.statement.ComputedDateValue;
 import liquibase.statement.SqlStatement;
-import liquibase.database.Database;
-import liquibase.exception.ValidationErrors;
-import liquibase.exception.LiquibaseException;
-import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.sql.Sql;
-import liquibase.util.StringUtils;
+import liquibase.statement.core.InsertStatement;
+import liquibase.statement.core.MarkChangeSetRanStatement;
+import liquibase.statement.core.UpdateStatement;
 import liquibase.util.LiquibaseUtil;
-import liquibase.changelog.ChangeSet;
+import liquibase.util.StringUtils;
 
 public class MarkChangeSetRanGenerator implements SqlGenerator<MarkChangeSetRanStatement> {
     public int getPriority() {

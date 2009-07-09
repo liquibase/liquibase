@@ -5,11 +5,11 @@ import liquibase.database.core.MySQLDatabase;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
+import liquibase.sqlgenerator.SqlGenerator;
+import liquibase.sqlgenerator.SqlGeneratorChain;
+import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.core.TagDatabaseStatement;
 import liquibase.statement.core.UpdateStatement;
-import liquibase.sqlgenerator.SqlGenerator;
-import liquibase.sqlgenerator.SqlGeneratorFactory;
-import liquibase.sqlgenerator.SqlGeneratorChain;
 
 public class TagDatabaseGenerator implements SqlGenerator<TagDatabaseStatement> {
     public int getPriority() {

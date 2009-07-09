@@ -1,13 +1,13 @@
 package liquibase.change.core;
 
+import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.resource.ResourceAccessor;
-import liquibase.statement.core.InsertStatement;
 import liquibase.statement.SqlStatement;
+import liquibase.statement.core.InsertStatement;
 import liquibase.util.StringUtils;
 import liquibase.util.csv.CSVReader;
-import liquibase.change.*;
 
 import java.io.IOException;
 import java.io.InputStream;

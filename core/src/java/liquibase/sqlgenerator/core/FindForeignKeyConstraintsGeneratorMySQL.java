@@ -2,13 +2,14 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
 import liquibase.database.core.MySQLDatabase;
-import liquibase.exception.ValidationErrors;
+import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
-import liquibase.statement.core.FindForeignKeyConstraintsStatement;
 import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
+import liquibase.statement.core.FindForeignKeyConstraintsStatement;
 
 public class FindForeignKeyConstraintsGeneratorMySQL implements SqlGenerator<FindForeignKeyConstraintsStatement> {
     public int getPriority() {
@@ -42,7 +43,7 @@ public class FindForeignKeyConstraintsGeneratorMySQL implements SqlGenerator<Fin
         sb.append("AND RC.TABLE_NAME = '").append(statement.getBaseTableName()).append("' ");
         try {
             sb.append("AND RC.CONSTRAINT_SCHEMA = '").append(database.convertRequestedSchemaToSchema(null)).append("'");
-        } catch (liquibase.exception.JDBCException e) {
+        } catch (DatabaseException e) {
             throw new UnexpectedLiquibaseException(e);
         }
         sb.append("LIMIT 1");

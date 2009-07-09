@@ -12,22 +12,6 @@
         <property name="env.JAVA_HOME" value="\Program Files\Java\jdk1.5.0_16" />
       </properties>
     </buildFile>
-    <buildFile url="file://$PROJECT_DIR$/core/src/samples/build-sample.xml">
-      <additionalClassPath />
-      <antReference projectDefault="true" />
-      <customJdkName value="" />
-      <maximumHeapSize value="128" />
-      <maximumStackSize value="32" />
-      <properties />
-    </buildFile>
-    <buildFile url="file://$PROJECT_DIR$/ide/intellij/src/build.xml">
-      <additionalClassPath />
-      <antReference projectDefault="true" />
-      <customJdkName value="1.6" />
-      <maximumHeapSize value="128" />
-      <maximumStackSize value="32" />
-      <properties />
-    </buildFile>
   </component>
   <component name="BuildJarProjectSettings">
     <option name="BUILD_JARS_ON_MAKE" value="false" />
@@ -139,7 +123,6 @@
     <option name="outputChangeLogFile" />
     <option name="rootChangeLogFile" />
   </component>
-  <component name="NewModuleRootManager" />
   <component name="Palette2">
     <group name="Swing">
       <item class="com.intellij.uiDesigner.HSpacer" tooltip-text="Horizontal Spacer" icon="/com/intellij/uiDesigner/icons/hspacer.png" removable="false" auto-create-binding="false" can-attach-label="false">
@@ -270,12 +253,8 @@
   </component>
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/eclipse.common.iml" filepath="$PROJECT_DIR$/eclipse.common.iml" />
-      <module fileurl="file://$PROJECT_DIR$/eclipse.plugin.iml" filepath="$PROJECT_DIR$/eclipse.plugin.iml" />
-      <module fileurl="file://$PROJECT_DIR$/eclipse.rcp.iml" filepath="$PROJECT_DIR$/eclipse.rcp.iml" />
-      <module fileurl="file://$PROJECT_DIR$/ide.common.iml" filepath="$PROJECT_DIR$/ide.common.iml" />
-      <module fileurl="file://$PROJECT_DIR$/intellij.plugin.iml" filepath="$PROJECT_DIR$/intellij.plugin.iml" />
-      <module fileurl="file://$PROJECT_DIR$/liquibase.iml" filepath="$PROJECT_DIR$/liquibase.iml" />
+      <module fileurl="file://$PROJECT_DIR$/liquibase.core.iml" filepath="$PROJECT_DIR$/liquibase.core.iml" />
+      <module fileurl="file://$PROJECT_DIR$/liquibase.jvm.iml" filepath="$PROJECT_DIR$/liquibase.jvm.iml" />
       <module fileurl="file://$PROJECT_DIR$/liquibase.maven.iml" filepath="$PROJECT_DIR$/liquibase.maven.iml" />
     </modules>
   </component>
@@ -284,7 +263,7 @@
   </component>
   <component name="ProjectRunConfigurationManager">
     <configuration default="false" name="All in liquibase (no database access)" type="JUnit" factoryName="JUnit" enabled="true" merge="false" sample_coverage="true" runner="emma">
-      <module name="liquibase" />
+      <module name="liquibase.core" />
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
       <option name="ALTERNATIVE_JRE_PATH" value="" />
       <option name="PACKAGE_NAME" value="" />
@@ -314,7 +293,7 @@
       </method>
     </configuration>
     <configuration default="false" name="All in liquibase (H2)" type="JUnit" factoryName="JUnit" enabled="false" merge="false" sample_coverage="true" runner="emma">
-      <module name="liquibase" />
+      <module name="liquibase.core" />
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
       <option name="ALTERNATIVE_JRE_PATH" value="" />
       <option name="PACKAGE_NAME" value="" />
@@ -469,11 +448,7 @@
   <component name="VcsDirectoryMappings">
     <mapping directory="" vcs="" />
     <mapping directory="$PROJECT_DIR$/core" vcs="svn" />
-    <mapping directory="$PROJECT_DIR$/ide/common" vcs="svn" />
-    <mapping directory="$PROJECT_DIR$/ide/eclipse/common" vcs="svn" />
-    <mapping directory="$PROJECT_DIR$/ide/eclipse/plugin" vcs="svn" />
-    <mapping directory="$PROJECT_DIR$/ide/eclipse/rcp" vcs="svn" />
-    <mapping directory="$PROJECT_DIR$/ide/intellij" vcs="svn" />
+    <mapping directory="$PROJECT_DIR$/core-jvm" vcs="svn" />
     <mapping directory="$PROJECT_DIR$/maven" vcs="svn" />
   </component>
   <component name="WebServicesPlugin" addRequiredLibraries="true" />

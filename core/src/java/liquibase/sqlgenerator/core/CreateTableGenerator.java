@@ -1,17 +1,17 @@
 package liquibase.sqlgenerator.core;
 
-import liquibase.database.*;
+import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
-import liquibase.statement.core.CreateTableStatement;
-import liquibase.statement.ForeignKeyConstraint;
-import liquibase.statement.UniqueConstraint;
-import liquibase.util.StringUtils;
-import liquibase.util.log.LogFactory;
 import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
+import liquibase.statement.ForeignKeyConstraint;
+import liquibase.statement.UniqueConstraint;
+import liquibase.statement.core.CreateTableStatement;
+import liquibase.util.StringUtils;
+import liquibase.util.log.LogFactory;
 
 import java.util.Iterator;
 import java.util.logging.Level;

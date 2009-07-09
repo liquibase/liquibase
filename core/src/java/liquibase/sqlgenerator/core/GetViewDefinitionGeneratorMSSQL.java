@@ -1,13 +1,13 @@
 package liquibase.sqlgenerator.core;
 
-import liquibase.statement.core.GetViewDefinitionStatement;
 import liquibase.database.Database;
 import liquibase.database.core.MSSQLDatabase;
+import liquibase.exception.DatabaseException;
+import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
-import liquibase.exception.JDBCException;
-import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.sqlgenerator.SqlGeneratorChain;
+import liquibase.statement.core.GetViewDefinitionStatement;
 
 public class GetViewDefinitionGeneratorMSSQL extends GetViewDefinitionGenerator {
     @Override
@@ -34,7 +34,7 @@ public class GetViewDefinitionGeneratorMSSQL extends GetViewDefinitionGenerator 
             return new Sql[]{
                     new UnparsedSql(sql)
             };
-        } catch (JDBCException e) {
+        } catch (DatabaseException e) {
             throw new UnexpectedLiquibaseException(e);
         }
     }

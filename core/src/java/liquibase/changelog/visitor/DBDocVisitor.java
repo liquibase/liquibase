@@ -5,13 +5,14 @@ import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.database.structure.Column;
 import liquibase.database.structure.DatabaseObject;
-import liquibase.database.structure.DatabaseSnapshot;
 import liquibase.database.structure.Table;
 import liquibase.dbdoc.*;
+import liquibase.exception.DatabaseException;
 import liquibase.exception.DatabaseHistoryException;
-import liquibase.exception.JDBCException;
 import liquibase.exception.LiquibaseException;
 import liquibase.resource.ResourceAccessor;
+import liquibase.snapshot.DatabaseSnapshot;
+import liquibase.snapshot.DatabaseSnapshotGeneratorFactory;
 import liquibase.util.StreamUtil;
 
 import java.io.File;
@@ -104,7 +105,7 @@ public class DBDocVisitor implements ChangeSetVisitor {
         }
     }
 
-    public void writeHTML(File rootOutputDir, ResourceAccessor resourceAccessor) throws IOException, JDBCException, DatabaseHistoryException {
+    public void writeHTML(File rootOutputDir, ResourceAccessor resourceAccessor) throws IOException, DatabaseException, DatabaseHistoryException {
         ChangeLogWriter changeLogWriter = new ChangeLogWriter(resourceAccessor, rootOutputDir);
         HTMLWriter authorWriter = new AuthorWriter(rootOutputDir, database);
         HTMLWriter tableWriter = new TableWriter(rootOutputDir, database);
@@ -118,7 +119,7 @@ public class DBDocVisitor implements ChangeSetVisitor {
         copyFile("liquibase/dbdoc/globalnav.html", rootOutputDir);
         copyFile("liquibase/dbdoc/overview-summary.html", rootOutputDir);
 
-        DatabaseSnapshot snapshot = database.createDatabaseSnapshot(null, null);
+        DatabaseSnapshot snapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database, null, null);
 
         new ChangeLogListWriter(rootOutputDir).writeHTML(changeLogs);
         new TableListWriter(rootOutputDir).writeHTML(new TreeSet<Object>(snapshot.getTables()));

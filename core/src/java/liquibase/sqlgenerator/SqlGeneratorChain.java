@@ -1,9 +1,9 @@
 package liquibase.sqlgenerator;
 
 import liquibase.database.Database;
+import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.statement.SqlStatement;
-import liquibase.exception.ValidationErrors;
 
 import java.util.Iterator;
 import java.util.SortedSet;

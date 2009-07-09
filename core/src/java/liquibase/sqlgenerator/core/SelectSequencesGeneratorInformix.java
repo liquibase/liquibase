@@ -1,6 +1,5 @@
 package liquibase.sqlgenerator.core;
 
-import liquibase.statement.core.SelectSequencesStatement;
 import liquibase.database.Database;
 import liquibase.database.core.InformixDatabase;
 import liquibase.exception.ValidationErrors;
@@ -8,6 +7,7 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
+import liquibase.statement.core.SelectSequencesStatement;
 
 public class SelectSequencesGeneratorInformix implements SqlGenerator<SelectSequencesStatement> {
     public int getPriority() {

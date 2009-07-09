@@ -1,16 +1,16 @@
 package liquibase.change.core;
 
-import liquibase.database.Database;
-import liquibase.executor.ExecutorService;
-import liquibase.executor.ReadExecutor;
-import liquibase.exception.JDBCException;
-import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.sql.visitor.SqlVisitor;
-import liquibase.statement.core.FindForeignKeyConstraintsStatement;
-import liquibase.statement.SqlStatement;
 import liquibase.change.AbstractChange;
 import liquibase.change.ChangeMetaData;
 import liquibase.change.ChangeProperty;
+import liquibase.database.Database;
+import liquibase.exception.DatabaseException;
+import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.executor.ExecutorService;
+import liquibase.executor.ReadExecutor;
+import liquibase.sql.visitor.SqlVisitor;
+import liquibase.statement.SqlStatement;
+import liquibase.statement.core.FindForeignKeyConstraintsStatement;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -101,7 +101,7 @@ public class DropAllForeignKeyConstraintsChange extends AbstractChange {
                     }
                 }
             }
-        } catch (JDBCException e) {
+        } catch (DatabaseException e) {
             throw new UnexpectedLiquibaseException("Failed to find foreign keys for table: " + getBaseTableName(), e);
         }
     }

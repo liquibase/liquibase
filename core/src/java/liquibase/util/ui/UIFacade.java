@@ -1,9 +1,9 @@
 package liquibase.util.ui;
 
 import liquibase.database.Database;
-import liquibase.exception.JDBCException;
+import liquibase.exception.DatabaseException;
 
 public interface UIFacade {
 
-    boolean promptForNonLocalDatabase(Database database) throws JDBCException;
+    boolean promptForNonLocalDatabase(Database database) throws DatabaseException;
 }

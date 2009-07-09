@@ -1,11 +1,11 @@
 package liquibase.database.core;
 
-import liquibase.exception.DateParseException;
-import liquibase.exception.JDBCException;
-import liquibase.util.StringUtils;
 import liquibase.database.DataType;
+import liquibase.database.DatabaseConnection;
+import liquibase.exception.DatabaseException;
+import liquibase.exception.DateParseException;
+import liquibase.util.StringUtils;
 
-import java.sql.Connection;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -28,11 +28,11 @@ public class H2Database extends HsqlDatabase {
 
 
     @Override
-    public boolean isCorrectDatabaseImplementation(Connection conn) throws JDBCException {
+    public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
         return "H2".equals(getDatabaseProductName(conn));
     }
 
-    //    public void dropDatabaseObjects(String schema) throws JDBCException {
+    //    public void dropDatabaseObjects(String schema) throws DatabaseException {
 //        DatabaseConnection conn = getConnection();
 //        Statement dropStatement = null;
 //        try {
@@ -43,7 +43,7 @@ public class H2Database extends HsqlDatabase {
 //            changeLogCreateAttempted = false;
 //            changeLogLockCreateAttempted = false;
 //        } catch (SQLException e) {
-//            throw new JDBCException(e);
+//            throw new DatabaseException(e);
 //        } finally {
 //            try {
 //                if (dropStatement != null) {
@@ -63,7 +63,7 @@ public class H2Database extends HsqlDatabase {
     }
 
     @Override
-    public String getViewDefinition(String schemaName, String name) throws JDBCException {
+    public String getViewDefinition(String schemaName, String name) throws DatabaseException {
         return super.getViewDefinition(schemaName, name).replaceFirst(".*?\n", ""); //h2 returns "create view....as\nselect
     }
 
@@ -103,8 +103,8 @@ public class H2Database extends HsqlDatabase {
     }
 
     @Override
-    public boolean isLocalDatabase() throws JDBCException {
-        String url = getConnectionURL();
+    public boolean isLocalDatabase() throws DatabaseException {
+        String url = getConnection().getURL();
         boolean isLocalURL = (
                 super.isLocalDatabase()
                         || url.startsWith("jdbc:h2:file:")
@@ -116,7 +116,7 @@ public class H2Database extends HsqlDatabase {
     }
 
 //    @Override
-//    public String convertRequestedSchemaToSchema(String requestedSchema) throws JDBCException {
+//    public String convertRequestedSchemaToSchema(String requestedSchema) throws DatabaseException {
 //        return super.convertRequestedSchemaToSchema(requestedSchema).toLowerCase();
 //    }
 

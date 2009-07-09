@@ -1,14 +1,14 @@
 package liquibase.sqlgenerator.core;
 
-import liquibase.database.*;
+import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
-import liquibase.statement.core.DropTableStatement;
-import liquibase.util.log.LogFactory;
 import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
+import liquibase.statement.core.DropTableStatement;
+import liquibase.util.log.LogFactory;
 
 public class DropTableGenerator implements SqlGenerator<DropTableStatement> {
     public int getPriority() {

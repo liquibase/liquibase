@@ -1,13 +1,11 @@
 package liquibase.sqlgenerator.core;
 
-import liquibase.statement.core.GetViewDefinitionStatement;
 import liquibase.database.Database;
-import liquibase.database.core.*;
+import liquibase.database.core.SybaseASADatabase;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
-import liquibase.exception.JDBCException;
-import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.sqlgenerator.SqlGeneratorChain;
+import liquibase.statement.core.GetViewDefinitionStatement;
 
 public class GetViewDefinitionGeneratorSybaseASA extends GetViewDefinitionGenerator {
     @Override

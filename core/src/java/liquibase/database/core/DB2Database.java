@@ -1,17 +1,14 @@
 package liquibase.database.core;
 
-import liquibase.database.structure.DB2DatabaseSnapshot;
-import liquibase.database.structure.DatabaseSnapshot;
 import liquibase.database.AbstractDatabase;
 import liquibase.database.DataType;
-import liquibase.diff.DiffStatusListener;
+import liquibase.database.DatabaseConnection;
+import liquibase.exception.DatabaseException;
 import liquibase.exception.DateParseException;
-import liquibase.exception.JDBCException;
 
-import java.sql.*;
+import java.sql.Types;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Set;
 
 public class DB2Database extends AbstractDatabase {
     private static final DataType BOOLEAN_TYPE = new DataType("SMALLINT", true);
@@ -21,7 +18,7 @@ public class DB2Database extends AbstractDatabase {
     private static final DataType BLOB_TYPE = new DataType("BLOB", true);
     private static final DataType DATETIME_TYPE = new DataType("TIMESTAMP", false);
 
-    public boolean isCorrectDatabaseImplementation(Connection conn) throws JDBCException {
+    public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
         return getDatabaseProductName(conn).startsWith("DB2");
     }
 
@@ -37,7 +34,7 @@ public class DB2Database extends AbstractDatabase {
     }
 
     @Override
-    protected String getDefaultDatabaseSchemaName() throws JDBCException {//NOPMD
+    protected String getDefaultDatabaseSchemaName() throws DatabaseException {//NOPMD
         return super.getDefaultDatabaseSchemaName().toUpperCase();
     }
 
@@ -140,7 +137,7 @@ public class DB2Database extends AbstractDatabase {
     }
 
     @Override
-    public String getViewDefinition(String schemaName, String name) throws JDBCException {
+    public String getViewDefinition(String schemaName, String name) throws DatabaseException {
         return super.getViewDefinition(schemaName, name).replaceFirst("CREATE VIEW \\w+ AS ", ""); //db2 returns "create view....as select
     }
 
@@ -181,7 +178,7 @@ public class DB2Database extends AbstractDatabase {
     }
 
     @Override
-    public String convertRequestedSchemaToSchema(String requestedSchema) throws JDBCException {
+    public String convertRequestedSchemaToSchema(String requestedSchema) throws DatabaseException {
         if (requestedSchema == null) {
             return getDefaultDatabaseSchemaName();
         } else {
@@ -190,7 +187,7 @@ public class DB2Database extends AbstractDatabase {
     }
 
     @Override
-    public String convertRequestedSchemaToCatalog(String requestedSchema) throws JDBCException {
+    public String convertRequestedSchemaToCatalog(String requestedSchema) throws DatabaseException {
         return null;
     }
 
@@ -201,40 +198,5 @@ public class DB2Database extends AbstractDatabase {
             pkName = pkName.substring(0, 17);
         }
         return pkName;
-    }
-
-    @Override
-    public boolean isColumnAutoIncrement(String schemaName, String tableName, String columnName) throws SQLException, JDBCException {
-        boolean autoIncrement = false;
-
-        PreparedStatement stmt = null;
-        try {
-            stmt = getConnection().prepareStatement("SELECT IDENTITY FROM SYSCAT.COLUMNS WHERE TABSCHEMA = ? AND TABNAME = ? AND COLNAME = ? AND HIDDEN != 'S'");
-            stmt.setString(1, convertRequestedSchemaToSchema(schemaName));
-            stmt.setString(2, tableName);
-            stmt.setString(3, columnName);
-
-            ResultSet rs = stmt.executeQuery();
-
-            while (rs.next()) {
-                String identity = rs.getString("IDENTITY");
-                if (identity.equalsIgnoreCase("Y")) {
-                    autoIncrement = true;
-                }
-            }
-            rs.close();
-        } finally {
-            if (stmt != null)
-            {
-                stmt.close();
-            }
-        }
-
-        return autoIncrement;
-    }
-
-    @Override
-    public DatabaseSnapshot createDatabaseSnapshot(String schema, Set<DiffStatusListener> statusListeners) throws JDBCException {
-        return new DB2DatabaseSnapshot(this, statusListeners, schema);
     }
 }

@@ -1,14 +1,14 @@
 package liquibase.change.core;
 
-import liquibase.database.core.DB2Database;
+import liquibase.change.*;
 import liquibase.database.Database;
+import liquibase.database.core.DB2Database;
+import liquibase.exception.ValidationErrors;
 import liquibase.statement.*;
 import liquibase.statement.core.AddColumnStatement;
-import liquibase.statement.core.UpdateStatement;
 import liquibase.statement.core.ReorganizeTableStatement;
+import liquibase.statement.core.UpdateStatement;
 import liquibase.util.StringUtils;
-import liquibase.change.*;
-import liquibase.exception.ValidationErrors;
 
 import java.util.ArrayList;
 import java.util.HashSet;

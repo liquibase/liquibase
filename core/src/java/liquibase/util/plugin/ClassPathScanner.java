@@ -1,10 +1,10 @@
 package liquibase.util.plugin;
 
-import liquibase.util.log.LogFactory;
-import liquibase.util.StringUtils;
-import liquibase.resource.ResourceAccessor;
-import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.resource.ClassLoaderResourceAccessor;
+import liquibase.resource.ResourceAccessor;
+import liquibase.util.StringUtils;
+import liquibase.util.log.LogFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,10 +12,9 @@ import java.io.InputStream;
 import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.util.*;
-import java.util.jar.JarFile;
 import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 import java.util.jar.Manifest;
-import java.util.jar.Attributes;
 
 public class ClassPathScanner {
 

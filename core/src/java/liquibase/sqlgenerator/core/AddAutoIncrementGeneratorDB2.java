@@ -1,13 +1,13 @@
 package liquibase.sqlgenerator.core;
 
-import liquibase.database.core.DB2Database;
 import liquibase.database.Database;
+import liquibase.database.core.DB2Database;
 import liquibase.database.structure.Column;
 import liquibase.database.structure.Table;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
-import liquibase.statement.core.AddAutoIncrementStatement;
 import liquibase.sqlgenerator.SqlGeneratorChain;
+import liquibase.statement.core.AddAutoIncrementStatement;
 
 public class AddAutoIncrementGeneratorDB2 extends AddAutoIncrementGenerator {
 

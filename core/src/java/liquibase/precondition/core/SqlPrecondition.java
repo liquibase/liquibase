@@ -3,13 +3,12 @@ package liquibase.precondition.core;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
+import liquibase.exception.DatabaseException;
 import liquibase.exception.PreconditionErrorException;
 import liquibase.exception.PreconditionFailedException;
+import liquibase.executor.ExecutorService;
 import liquibase.precondition.Precondition;
-
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import liquibase.statement.core.RawSqlStatement;
 
 public class SqlPrecondition implements Precondition {
 
@@ -34,41 +33,19 @@ public class SqlPrecondition implements Precondition {
     }
 
     public void check(Database database, DatabaseChangeLog changeLog) throws PreconditionFailedException, PreconditionErrorException {
-        Statement statement = null;
-        ResultSet resultSet = null;
         DatabaseConnection connection = database.getConnection();
         try {
-            statement = connection.createStatement();
-            resultSet = statement.executeQuery(getSql());
-            if (!resultSet.next()) {
+            String result = (String) ExecutorService.getInstance().getReadExecutor(database).queryForObject(new RawSqlStatement(getSql()), String.class);
+            if (result == null) {
                 throw new PreconditionFailedException("No rows returned from SQL Precondition", changeLog, this);
             }
-            String returnString = resultSet.getString(1);
-            if (resultSet.next()) {
-                throw new PreconditionFailedException("Too Many rows returned from SQL Precondition", changeLog, this);
+
+            if (!expectedResult.equals(result)) {
+                throw new PreconditionFailedException("SQL Precondition failed.  Expected '"+expectedResult+"' got '"+result+"'", changeLog, this);
             }
 
-            if (!expectedResult.equals(returnString)) {
-                throw new PreconditionFailedException("SQL Precondition failed.  Expected '"+expectedResult+"' got '"+returnString+"'", changeLog, this);
-            }
-
-        } catch (SQLException e) {
+        } catch (DatabaseException e) {
             throw new PreconditionErrorException(e, changeLog, this);
-        } finally {
-            try {
-                if (resultSet != null) {
-                    resultSet.close();
-                }
-            } catch (SQLException e) {
-                ;
-            }
-            try {
-                if (statement != null) {
-                    statement.close();
-                }
-            } catch (SQLException e) {
-                ;
-            }
         }
     }
 

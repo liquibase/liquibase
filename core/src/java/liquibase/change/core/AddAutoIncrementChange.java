@@ -1,15 +1,15 @@
 package liquibase.change.core;
 
-import liquibase.database.Database;
-import liquibase.database.core.PostgresDatabase;
-import liquibase.statement.*;
-import liquibase.statement.core.SetNullableStatement;
-import liquibase.statement.core.CreateSequenceStatement;
-import liquibase.statement.core.AddAutoIncrementStatement;
-import liquibase.statement.core.AddDefaultValueStatement;
-import liquibase.util.StringUtils;
 import liquibase.change.AbstractChange;
 import liquibase.change.ChangeMetaData;
+import liquibase.database.Database;
+import liquibase.database.core.PostgresDatabase;
+import liquibase.statement.SqlStatement;
+import liquibase.statement.core.AddAutoIncrementStatement;
+import liquibase.statement.core.AddDefaultValueStatement;
+import liquibase.statement.core.CreateSequenceStatement;
+import liquibase.statement.core.SetNullableStatement;
+import liquibase.util.StringUtils;
 
 /**
  * Makes an existing column into an auto-increment column.
