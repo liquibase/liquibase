@@ -2,7 +2,9 @@ package liquibase.diff;
 
 import liquibase.database.Database;
 import liquibase.database.structure.*;
-import liquibase.exception.JDBCException;
+import liquibase.exception.DatabaseException;
+import liquibase.snapshot.DatabaseSnapshot;
+import liquibase.snapshot.DatabaseSnapshotGeneratorFactory;
 import liquibase.util.StringUtils;
 
 import java.util.Arrays;
@@ -36,15 +38,15 @@ public class Diff {
         this.targetDatabase = targetDatabase;
     }
 
-    public Diff(Database originalDatabase, String schema) throws JDBCException {
+    public Diff(Database originalDatabase, String schema) throws DatabaseException {
         targetDatabase = null;
 
         baseDatabase = originalDatabase;
         baseDatabase.setDefaultSchemaName(schema);
     }
 
-    public Diff(DatabaseSnapshot baseDatabaseSnapshot, DatabaseSnapshot targetDatabaseSnapshot) {
-        this.baseSnapshot = baseDatabaseSnapshot;
+    public Diff(DatabaseSnapshot baseSnapshot, DatabaseSnapshot targetDatabaseSnapshot) {
+        this.baseSnapshot = baseSnapshot;
 
         this.targetSnapshot = targetDatabaseSnapshot;
     }
@@ -57,16 +59,16 @@ public class Diff {
         statusListeners.remove(listener);
     }
 
-    public DiffResult compare() throws JDBCException {
+    public DiffResult compare() throws DatabaseException {
         if (baseSnapshot == null) {
-            baseSnapshot = baseDatabase.createDatabaseSnapshot(null, statusListeners);
+            baseSnapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(baseDatabase, null, statusListeners);
         }
 
         if (targetSnapshot == null) {
             if (targetDatabase == null) {
-                targetSnapshot = new UnsupportedDatabaseSnapshot();
+                targetSnapshot = null;
             } else {
-                targetSnapshot = targetDatabase.createDatabaseSnapshot(null, statusListeners);
+                targetSnapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(targetDatabase, null, statusListeners);
             }
         }
 
@@ -190,7 +192,7 @@ public class Diff {
       this.diffUniqueConstraints = diffUniqueConstraints;
     }
 
-    private void checkVersionInfo(DiffResult diffResult) throws JDBCException {
+    private void checkVersionInfo(DiffResult diffResult) throws DatabaseException {
 
         if (targetDatabase != null) {
             diffResult.setProductName(new DiffComparison(baseDatabase.getDatabaseProductName(), targetDatabase.getDatabaseProductName()));

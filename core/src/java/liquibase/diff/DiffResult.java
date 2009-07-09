@@ -1,16 +1,17 @@
 package liquibase.diff;
 
-import liquibase.change.*;
+import liquibase.change.Change;
+import liquibase.change.ColumnConfig;
+import liquibase.change.ConstraintsConfig;
 import liquibase.change.core.*;
 import liquibase.database.Database;
 import liquibase.database.structure.*;
-import liquibase.exception.JDBCException;
-import liquibase.parser.xml.LiquibaseSchemaResolver;
-import liquibase.parser.xml.XMLChangeLogSAXParser;
-import liquibase.serializer.xml.XMLChangeLogSerializer;
-import liquibase.util.SqlUtil;
+import liquibase.exception.DatabaseException;
+import liquibase.parser.core.xml.XMLChangeLogSAXParser;
+import liquibase.parser.core.xml.LiquibaseSchemaResolver;
+import liquibase.serializer.core.xml.XMLChangeLogSerializer;
+import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.util.StringUtils;
-import liquibase.util.csv.CSVWriter;
 import liquibase.util.log.LogFactory;
 import liquibase.util.xml.DefaultXmlWriter;
 import liquibase.util.xml.XmlWriter;
@@ -21,10 +22,6 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.Statement;
-import java.sql.Types;
 import java.util.*;
 
 public class DiffResult {
@@ -71,12 +68,12 @@ public class DiffResult {
     private String changeSetContext;
     private String changeSetAuthor;
 
-    public DiffResult(DatabaseSnapshot baseDatabase, DatabaseSnapshot targetDatabase) {
-        this.baseDatabase = baseDatabase.getDatabase();
-        this.targetDatabase = targetDatabase.getDatabase();
+    public DiffResult(DatabaseSnapshot baseDatabaseSnapshot, DatabaseSnapshot targetDatabaseSnapshot) {
+        this.baseDatabase = baseDatabaseSnapshot.getDatabase();
+        this.targetDatabase = targetDatabaseSnapshot.getDatabase();
 
-        this.baseSnapshot = baseDatabase;
-        this.targetSnapshot = targetDatabase;
+        this.baseSnapshot = baseDatabaseSnapshot;
+        this.targetSnapshot = targetDatabaseSnapshot;
     }
 
     public DiffComparison getProductName() {
@@ -255,9 +252,9 @@ public class DiffResult {
         this.changeSetContext = changeSetContext;
     }
 
-    public void printResult(PrintStream out) throws JDBCException {
-        out.println("Base Database: " + targetDatabase.getConnectionUsername() + " " + targetDatabase.getConnectionURL());
-        out.println("Target Database: " + baseDatabase.getConnectionUsername() + " " + baseDatabase.getConnectionURL());
+    public void printResult(PrintStream out) throws DatabaseException {
+        out.println("Base Database: " + targetDatabase.getConnection().getConnectionUserName() + " " + targetDatabase.getConnection().getURL());
+        out.println("Target Database: " + baseDatabase.getConnection().getConnectionUserName() + " " + baseDatabase.getConnection().getURL());
 
         printComparision("Product Name", productName, out);
         printComparision("Product Version", productVersion, out);
@@ -300,13 +297,13 @@ public class DiffResult {
             out.println();
             for (Column column : changedColumns) {
                 out.println("     " + column);
-                Column baseColumn = baseSnapshot.getColumn(column);
+                Column baseColumn = baseSnapshot.getColumn(column.getTable().getName(), column.getName());
                 if (baseColumn != null) {
                     if (baseColumn.isDataTypeDifferent(column)) {
-                        out.println("           from " + baseColumn.getDataTypeString(baseDatabase) + " to " + targetSnapshot.getColumn(column).getDataTypeString(targetDatabase));
+                        out.println("           from " + baseColumn.getDataTypeString(baseDatabase) + " to " + targetSnapshot.getColumn(column.getTable().getName(), column.getName()).getDataTypeString(targetDatabase));
                     }
                     if (baseColumn.isNullabilityDifferent(column)) {
-                        Boolean nowNullable = targetSnapshot.getColumn(column).isNullable();
+                        Boolean nowNullable = targetSnapshot.getColumn(column.getTable().getName(), column.getName()).isNullable();
                         if (nowNullable == null) {
                             nowNullable = Boolean.TRUE;
                         }
@@ -333,15 +330,15 @@ public class DiffResult {
 
     }
 
-    public void printChangeLog(String changeLogFile, Database targetDatabase) throws ParserConfigurationException, IOException, JDBCException {
+    public void printChangeLog(String changeLogFile, Database targetDatabase) throws ParserConfigurationException, IOException, DatabaseException {
         this.printChangeLog(changeLogFile, targetDatabase, new DefaultXmlWriter());
     }
 
-    public void printChangeLog(PrintStream out, Database targetDatabase) throws ParserConfigurationException, IOException, JDBCException {
+    public void printChangeLog(PrintStream out, Database targetDatabase) throws ParserConfigurationException, IOException, DatabaseException {
         this.printChangeLog(out, targetDatabase, new DefaultXmlWriter());
     }
 
-    public void printChangeLog(String changeLogFile, Database targetDatabase, XmlWriter xmlWriter) throws ParserConfigurationException, IOException, JDBCException {
+    public void printChangeLog(String changeLogFile, Database targetDatabase, XmlWriter xmlWriter) throws ParserConfigurationException, IOException, DatabaseException {
         File file = new File(changeLogFile);
         if (!file.exists()) {
             LogFactory.getLogger().info(file + " does not exist, creating");
@@ -395,7 +392,7 @@ public class DiffResult {
     /**
      * Prints changeLog that would bring the base database to be the same as the target database
      */
-    public void printChangeLog(PrintStream out, Database targetDatabase, XmlWriter xmlWriter) throws ParserConfigurationException, IOException, JDBCException {
+    public void printChangeLog(PrintStream out, Database targetDatabase, XmlWriter xmlWriter) throws ParserConfigurationException, IOException, DatabaseException {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder documentBuilder = factory.newDocumentBuilder();
         documentBuilder.setEntityResolver(new LiquibaseSchemaResolver());
@@ -598,7 +595,7 @@ public class DiffResult {
             DropSequenceChange change = new DropSequenceChange();
             change.setSequenceName(sequence.getName());
             change.setSchemaName(sequence.getSchema());
-            
+
             changes.add(change);
         }
     }
@@ -609,7 +606,7 @@ public class DiffResult {
             CreateSequenceChange change = new CreateSequenceChange();
             change.setSequenceName(sequence.getName());
             change.setSchemaName(sequence.getSchema());
-            
+
             changes.add(change);
         }
     }
@@ -652,7 +649,7 @@ public class DiffResult {
             }
 
             boolean foundDifference = false;
-            Column baseColumn = baseSnapshot.getColumn(column);
+            Column baseColumn = baseSnapshot.getColumn(column.getTable().getName(), column.getName());
             if (column.isDataTypeDifferent(baseColumn)) {
                 ColumnConfig columnConfig = new ColumnConfig();
                 columnConfig.setName(column.getName());
@@ -843,120 +840,120 @@ public class DiffResult {
         }
     }
 
-    private void addInsertDataChanges(List<Change> changes, String dataDir) throws JDBCException, IOException {
-        try {
-            String schema = baseSnapshot.getSchema();
-            Statement stmt = baseSnapshot.getDatabase().getConnection().createStatement();
-            for (Table table : baseSnapshot.getTables()) {
-                ResultSet rs = stmt.executeQuery("SELECT * FROM " + baseSnapshot.getDatabase().escapeTableName(schema, table.getName()));
-
-                ResultSetMetaData columnData = rs.getMetaData();
-                int columnCount = columnData.getColumnCount();
-
-                // if dataDir is not null, print out a csv file and use loadData tag
-                if (dataDir != null) {
-                    String fileName = table.getName() + ".csv";
-                    if (dataDir != null) {
-                        fileName = dataDir + "/" + fileName;
-                    }
-
-                    File parentDir = new File(dataDir);
-                    if (!parentDir.exists()) {
-                        parentDir.mkdirs();
-                    }
-                    if (!parentDir.isDirectory()) {
-                        throw new RuntimeException(parentDir + " is not a directory");
-                    }
-
-                    CSVWriter outputFile = new CSVWriter(new FileWriter(fileName));
-                    outputFile.writeAll(rs, true);
-                    outputFile.flush();
-                    outputFile.close();
-
-                    LoadDataChange change = new LoadDataChange();
-                    change.setFile(fileName);
-                    change.setEncoding("UTF-8");
-                    change.setSchemaName(schema);
-                    change.setTableName(table.getName());
-
-                    for (int col = 1; col <= columnCount; col++) {
-                        String colName = columnData.getColumnName(col);
-                        int dataType = columnData.getColumnType(col);
-                        String typeString = "STRING";
-                        if (SqlUtil.isNumeric(dataType)) {
-                            typeString = "NUMERIC";
-                        } else if (SqlUtil.isBoolean(dataType)) {
-                            typeString = "BOOLEAN";
-                        } else if (SqlUtil.isDate(dataType)) {
-                            typeString = "DATE";
-                        }
-
-                        LoadDataColumnConfig columnConfig = new LoadDataColumnConfig();
-                        columnConfig.setHeader(colName);
-                        columnConfig.setType(typeString);
-
-                        change.addColumn(columnConfig);
-                    }
-
-                    changes.add(change);
-                } else { // if dataDir is null, build and use insert tags
-
-
-                    // loop over all rows
-                    while (rs.next()) {
-                        InsertDataChange change = new InsertDataChange();
-                        change.setSchemaName(schema);
-                        change.setTableName(table.getName());
-
-                        // loop over all columns for this row
-                        for (int col = 1; col <= columnCount; col++) {
-                            ColumnConfig column = new ColumnConfig();
-                            column.setName(columnData.getColumnName(col));
-
-                            // set the value for this column
-                            int dataType = columnData.getColumnType(col);
-                            if (SqlUtil.isNumeric(dataType)) {
-                                String columnValue = rs.getString(col);
-                                if (columnValue == null) {
-                                    column.setValueNumeric((Number) null);
-                                } else {
-                                    // its some sort of non-null number
-                                    if (dataType == Types.DOUBLE ||
-                                            dataType == Types.NUMERIC ||
-                                            dataType == Types.DECIMAL) {
-                                        column.setValueNumeric(new Double(columnValue));
-                                    } else if (dataType == Types.FLOAT ||
-                                            dataType == Types.REAL) {
-                                        column.setValueNumeric(new Float(columnValue));
-                                    } else {
-                                        // its an integer type of column
-                                        column.setValueNumeric(new Integer(columnValue));
-                                    }
-
-                                }
-
-                            } else if (SqlUtil.isBoolean(dataType)) {
-                                column.setValueBoolean(rs.getBoolean(col));
-                            } else if (SqlUtil.isDate(dataType)) {
-                                column.setValueDate(rs.getDate(col));
-                            } else { //string
-                                column.setValue(rs.getString(col));
-                            }
-
-                            change.addColumn(column);
-
-                        }
-
-                        // for each row, add a new change
-                        // (there will be one group per table)
-                        changes.add(change);
-                    }
-
-                }
-            }
-
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+    private void addInsertDataChanges(List<Change> changes, String dataDir) throws DatabaseException, IOException {
+//todo        try {
+//            String schema = baseSnapshot.getSchema();
+//            Statement stmt = baseSnapshot.getDatabase().getConnection().createStatement();
+//            for (Table table : baseSnapshot.getTables()) {
+//                ResultSet rs = stmt.executeQuery("SELECT * FROM " + baseSnapshot.getDatabase().escapeTableName(schema, table.getName()));
+//
+//                ResultSetMetaData columnData = rs.getMetaData();
+//                int columnCount = columnData.getColumnCount();
+//
+//                // if dataDir is not null, print out a csv file and use loadData tag
+//                if (dataDir != null) {
+//                    String fileName = table.getName() + ".csv";
+//                    if (dataDir != null) {
+//                        fileName = dataDir + "/" + fileName;
+//                    }
+//
+//                    File parentDir = new File(dataDir);
+//                    if (!parentDir.exists()) {
+//                        parentDir.mkdirs();
+//                    }
+//                    if (!parentDir.isDirectory()) {
+//                        throw new RuntimeException(parentDir + " is not a directory");
+//                    }
+//
+//                    CSVWriter outputFile = new CSVWriter(new FileWriter(fileName));
+//                    outputFile.writeAll(rs, true);
+//                    outputFile.flush();
+//                    outputFile.close();
+//
+//                    LoadDataChange change = new LoadDataChange();
+//                    change.setFile(fileName);
+//                    change.setEncoding("UTF-8");
+//                    change.setSchemaName(schema);
+//                    change.setTableName(table.getName());
+//
+//                    for (int col = 1; col <= columnCount; col++) {
+//                        String colName = columnData.getColumnName(col);
+//                        int dataType = columnData.getColumnType(col);
+//                        String typeString = "STRING";
+//                        if (SqlUtil.isNumeric(dataType)) {
+//                            typeString = "NUMERIC";
+//                        } else if (SqlUtil.isBoolean(dataType)) {
+//                            typeString = "BOOLEAN";
+//                        } else if (SqlUtil.isDate(dataType)) {
+//                            typeString = "DATE";
+//                        }
+//
+//                        LoadDataColumnConfig columnConfig = new LoadDataColumnConfig();
+//                        columnConfig.setHeader(colName);
+//                        columnConfig.setType(typeString);
+//
+//                        change.addColumn(columnConfig);
+//                    }
+//
+//                    changes.add(change);
+//                } else { // if dataDir is null, build and use insert tags
+//
+//
+//                    // loop over all rows
+//                    while (rs.next()) {
+//                        InsertDataChange change = new InsertDataChange();
+//                        change.setSchemaName(schema);
+//                        change.setTableName(table.getName());
+//
+//                        // loop over all columns for this row
+//                        for (int col = 1; col <= columnCount; col++) {
+//                            ColumnConfig column = new ColumnConfig();
+//                            column.setName(columnData.getColumnName(col));
+//
+//                            // set the value for this column
+//                            int dataType = columnData.getColumnType(col);
+//                            if (SqlUtil.isNumeric(dataType)) {
+//                                String columnValue = rs.getString(col);
+//                                if (columnValue == null) {
+//                                    column.setValueNumeric((Number) null);
+//                                } else {
+//                                    // its some sort of non-null number
+//                                    if (dataType == Types.DOUBLE ||
+//                                            dataType == Types.NUMERIC ||
+//                                            dataType == Types.DECIMAL) {
+//                                        column.setValueNumeric(new Double(columnValue));
+//                                    } else if (dataType == Types.FLOAT ||
+//                                            dataType == Types.REAL) {
+//                                        column.setValueNumeric(new Float(columnValue));
+//                                    } else {
+//                                        // its an integer type of column
+//                                        column.setValueNumeric(new Integer(columnValue));
+//                                    }
+//
+//                                }
+//
+//                            } else if (SqlUtil.isBoolean(dataType)) {
+//                                column.setValueBoolean(rs.getBoolean(col));
+//                            } else if (SqlUtil.isDate(dataType)) {
+//                                column.setValueDate(rs.getDate(col));
+//                            } else { //string
+//                                column.setValue(rs.getString(col));
+//                            }
+//
+//                            change.addColumn(column);
+//
+//                        }
+//
+//                        // for each row, add a new change
+//                        // (there will be one group per table)
+//                        changes.add(change);
+//                    }
+//
+//                }
+//            }
+//
+//        } catch (Exception e) {
+//            throw new RuntimeException(e);
+//        }
     }
 }

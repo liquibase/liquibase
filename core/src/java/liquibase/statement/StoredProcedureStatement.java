@@ -1,11 +1,5 @@
 package liquibase.statement;
 
-import liquibase.database.Database;
-import liquibase.statement.SqlStatement;
-import liquibase.statement.CallableSqlStatement;
-
-import java.sql.CallableStatement;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -35,36 +29,13 @@ public class StoredProcedureStatement implements SqlStatement, CallableSqlStatem
         types.add(type);
     }
 
-
-    public CallableStatement createCallableStatement(Database database) throws SQLException {
-        StringBuffer sql = new StringBuffer("{call " + getProcedureName());
-
-        if (parameters.size() > 0) {
-            sql.append("(");
-            //noinspection UnusedDeclaration
-            for (Object param : parameters) {
-                sql.append("?,");
-            }
-            sql.deleteCharAt(sql.lastIndexOf(","));
-            sql.append(")");
-        }
-
-        sql.append("}");
-
-        CallableStatement pstmt = database.getConnection().prepareCall(sql.toString());
-
-        for (int i = 0; i < parameters.size(); i++) {
-            Object param = parameters.get(i);
-            int type = database.getDatabaseType(types.get(i));
-
-            if (param == null) {
-                pstmt.setNull(i + 1, type);
-            } else {
-                pstmt.setObject(i + 1, param, type);
+    public int getParameterType(String param) {
+        for  (int i=0; i<parameters.size(); i++) {
+            if (parameters.get(i).equals(param)) {
+                return types.get(i);
             }
         }
-
-        return pstmt;
+        return -1;
     }
 
 }

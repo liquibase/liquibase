@@ -3,7 +3,6 @@ package liquibase.exception;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.lang.reflect.Array;
 
 public class ValidationErrors {
 

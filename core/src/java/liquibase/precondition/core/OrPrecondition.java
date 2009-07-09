@@ -4,8 +4,8 @@ import liquibase.changelog.DatabaseChangeLog;
 import liquibase.database.Database;
 import liquibase.exception.PreconditionErrorException;
 import liquibase.exception.PreconditionFailedException;
-import liquibase.precondition.PreconditionLogic;
 import liquibase.precondition.Precondition;
+import liquibase.precondition.PreconditionLogic;
 
 import java.util.ArrayList;
 import java.util.List;

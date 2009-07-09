@@ -1,10 +1,10 @@
 package liquibase.change.core;
 
+import liquibase.change.AbstractChange;
+import liquibase.change.ChangeMetaData;
 import liquibase.database.Database;
 import liquibase.statement.SqlStatement;
 import liquibase.util.StringUtils;
-import liquibase.change.AbstractChange;
-import liquibase.change.ChangeMetaData;
 
 public class StopChange extends AbstractChange {
 

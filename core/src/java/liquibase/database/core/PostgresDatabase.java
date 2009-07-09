@@ -1,17 +1,14 @@
 package liquibase.database.core;
 
-import liquibase.database.structure.DatabaseSnapshot;
-import liquibase.database.structure.PostgresDatabaseSnapshot;
 import liquibase.database.AbstractDatabase;
 import liquibase.database.DataType;
 import liquibase.database.DatabaseConnection;
-import liquibase.diff.DiffStatusListener;
-import liquibase.exception.JDBCException;
+import liquibase.exception.DatabaseException;
+import liquibase.executor.ExecutorService;
 import liquibase.statement.core.RawSqlStatement;
-import liquibase.statement.SqlStatement;
 import liquibase.util.StringUtils;
 
-import java.sql.*;
+import java.sql.Types;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -99,7 +96,7 @@ public class PostgresDatabase extends AbstractDatabase {
         return true;
     }
 
-    public boolean isCorrectDatabaseImplementation(Connection conn) throws JDBCException {
+    public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
         return PRODUCT_NAME.equalsIgnoreCase(getDatabaseProductName(conn));
     }
 
@@ -144,7 +141,7 @@ public class PostgresDatabase extends AbstractDatabase {
     }
 
     @Override
-    protected String getDefaultDatabaseSchemaName() throws JDBCException {
+    protected String getDefaultDatabaseSchemaName() throws DatabaseException {
 
         if (defaultDatabaseSchemaName == null) {
             try {
@@ -154,11 +151,11 @@ public class PostgresDatabase extends AbstractDatabase {
                         if (searchPath != null && searchPath.length() > 0) {
                             defaultDatabaseSchemaName = searchPath;
 
-                            if (defaultDatabaseSchemaName.equals("$user") && getConnectionUsername() != null) {
-                                if (! schemaExists(getConnectionUsername())) {
+                            if (defaultDatabaseSchemaName.equals("$user") && getConnection().getConnectionUserName() != null) {
+                                if (!schemaExists(getConnection().getConnectionUserName())) {
                                     defaultDatabaseSchemaName = null;
                                 } else {
-                                    defaultDatabaseSchemaName = getConnectionUsername();
+                                    defaultDatabaseSchemaName = getConnection().getConnectionUserName();
                                 }
                             }
 
@@ -178,7 +175,7 @@ public class PostgresDatabase extends AbstractDatabase {
     }
 
     @Override
-    public String getDefaultCatalogName() throws JDBCException {
+    public String getDefaultCatalogName() throws DatabaseException {
         return "public";
     }
 
@@ -192,7 +189,7 @@ public class PostgresDatabase extends AbstractDatabase {
         return super.getDatabaseChangeLogLockTableName().toLowerCase();
     }
 
-//    public void dropDatabaseObjects(String schema) throws JDBCException {
+//    public void dropDatabaseObjects(String schema) throws DatabaseException {
 //        try {
 //            if (schema == null) {
 //                schema = getConnectionUsername();
@@ -207,7 +204,7 @@ public class PostgresDatabase extends AbstractDatabase {
 //            changeLogLockCreateAttempted = false;
 //
 //        } catch (SQLException e) {
-//            throw new JDBCException(e);
+//            throw new DatabaseException(e);
 //        }
 //    }
 
@@ -284,7 +281,7 @@ public class PostgresDatabase extends AbstractDatabase {
     }
 
     @Override
-    public String convertRequestedSchemaToSchema(String requestedSchema) throws JDBCException {
+    public String convertRequestedSchemaToSchema(String requestedSchema) throws DatabaseException {
         if (requestedSchema == null) {
             // Return the catalog name instead..
             return getDefaultCatalogName();
@@ -294,7 +291,7 @@ public class PostgresDatabase extends AbstractDatabase {
     }
 
     @Override
-    public String convertRequestedSchemaToCatalog(String requestedSchema) throws JDBCException {
+    public String convertRequestedSchemaToCatalog(String requestedSchema) throws DatabaseException {
         return super.convertRequestedSchemaToCatalog(requestedSchema);
     }
 
@@ -346,27 +343,20 @@ public class PostgresDatabase extends AbstractDatabase {
             DatabaseConnection con = getConnection();
 
             if (con != null) {
-                Statement stmt = con.createStatement(
-                        ResultSet.TYPE_SCROLL_INSENSITIVE,
-                        ResultSet.CONCUR_READ_ONLY);
+                String searchPathResult = (String) ExecutorService.getInstance().getReadExecutor(this).queryForObject(new RawSqlStatement("SHOW search_path"), String.class);
 
-                ResultSet searchPathQry = stmt.executeQuery("SHOW search_path");
+                if (searchPathResult != null) {
+                    String dirtySearchPaths[] = searchPathResult.split("\\,");
+                    searchPaths = new ArrayList<String>();
+                    for (String searchPath : dirtySearchPaths) {
+                        searchPath = searchPath.trim();
 
-                if (searchPathQry.next()) {
-                    String searchPathResult = searchPathQry.getString(1);
-                    if (searchPathResult != null) {
-                        String dirtySearchPaths[] = searchPathResult.split("\\,");
-                        searchPaths = new ArrayList<String>();
-                        for (String searchPath : dirtySearchPaths) {
-                            searchPath = searchPath.trim();
-
-                            // Ensure there is consistency ..
-                            if (searchPath.equals("\"$user\"")) {
-                                searchPath = "$user";
-                            }
-
-                            searchPaths.add(searchPath);
+                        // Ensure there is consistency ..
+                        if (searchPath.equals("\"$user\"")) {
+                            searchPath = "$user";
                         }
+
+                        searchPaths.add(searchPath);
                     }
                 }
 
@@ -381,7 +371,7 @@ public class PostgresDatabase extends AbstractDatabase {
     }
 
 
-    private boolean catalogExists(String catalogName) throws SQLException {
+    private boolean catalogExists(String catalogName) throws DatabaseException {
         if (catalogName != null) {
             return runExistsQuery("select count(*) from information_schema.schemata where catalog_name='" + catalogName + "'");
         } else {
@@ -389,39 +379,15 @@ public class PostgresDatabase extends AbstractDatabase {
         }
     }
 
-    private boolean schemaExists(String schemaName) throws SQLException {
-        if (schemaName != null) {
-            return runExistsQuery("select count(*) from information_schema.schemata where schema_name='" + schemaName + "'");
-        } else {
-            return false;
-        }
+    private boolean schemaExists(String schemaName) throws DatabaseException {
+        return schemaName != null && runExistsQuery("select count(*) from information_schema.schemata where schema_name='" + schemaName + "'");
     }
 
-    private boolean runExistsQuery(String query) throws SQLException {
-        DatabaseConnection con = getConnection();
+    private boolean runExistsQuery(String query) throws DatabaseException {
+        Long count = ExecutorService.getInstance().getReadExecutor(this).queryForLong(new RawSqlStatement(query));
 
-        Statement stmt = con.createStatement(
-                ResultSet.TYPE_SCROLL_INSENSITIVE,
-                ResultSet.CONCUR_READ_ONLY);
-
-        ResultSet existsQry = stmt.executeQuery(query);
-
-        if (existsQry.next()) {
-            Integer count = existsQry.getInt(1);
-
-            if (count != null && count > 0) {
-                return true;
-            }
-        }
-
-        return false;
+        return count != null && count > 0;
     }
-
-    @Override
-    public DatabaseSnapshot createDatabaseSnapshot(String schema, Set<DiffStatusListener> statusListeners) throws JDBCException {
-        return new PostgresDatabaseSnapshot(this, statusListeners, schema);
-    }
-
 
     @Override
     protected Object convertToCorrectJavaType(String value, int dataType, int columnSize, int decimalDigits) throws ParseException {

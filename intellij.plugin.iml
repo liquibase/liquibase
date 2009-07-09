@@ -9,13 +9,11 @@
       <sourceFolder url="file://$MODULE_DIR$/ide/intellij/src/java" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/ide/intellij/release" />
     </content>
-    <orderEntry type="jdk" jdkName="IDEA 7941" jdkType="IDEA JDK" />
+    <orderEntry type="jdk" jdkName="IDEA 9732" jdkType="IDEA JDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="Groovy from GroovyJ 0.1.9 (Demetra)" level="application" />
     <orderEntry type="module" module-name="liquibase" />
     <orderEntry type="module" module-name="ide.common" />
   </component>
-  <component name="ProjectKey" />
-  <component name="ProjectRunConfigurationManager" />
 </module>
 

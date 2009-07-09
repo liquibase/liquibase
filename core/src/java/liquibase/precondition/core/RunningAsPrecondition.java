@@ -6,8 +6,6 @@ import liquibase.exception.PreconditionErrorException;
 import liquibase.exception.PreconditionFailedException;
 import liquibase.precondition.Precondition;
 
-import java.sql.SQLException;
-
 /**
  * Precondition that checks the name of the user executing the change log.
  */
@@ -29,16 +27,12 @@ public class RunningAsPrecondition implements Precondition {
 
 
     public void check(Database database, DatabaseChangeLog changeLog) throws PreconditionFailedException, PreconditionErrorException {
-        try {
-            String loggedusername = database.getConnection().getMetaData().getUserName();
-            if (loggedusername.indexOf('@') >= 0) {
-                loggedusername = loggedusername.substring(0, loggedusername.indexOf('@'));
-            }
-            if (!username.equalsIgnoreCase(loggedusername)) {
-                throw new PreconditionFailedException("RunningAs Precondition failed: expected "+username+", was "+loggedusername, changeLog, this);
-            }
-        } catch (SQLException e) {
-            throw new PreconditionErrorException(e, changeLog, this);
+        String loggedusername = database.getConnection().getConnectionUserName();
+        if (loggedusername.indexOf('@') >= 0) {
+            loggedusername = loggedusername.substring(0, loggedusername.indexOf('@'));
+        }
+        if (!username.equalsIgnoreCase(loggedusername)) {
+            throw new PreconditionFailedException("RunningAs Precondition failed: expected "+username+", was "+loggedusername, changeLog, this);
         }
     }
 

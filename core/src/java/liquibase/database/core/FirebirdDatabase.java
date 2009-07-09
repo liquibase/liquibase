@@ -1,14 +1,9 @@
 package liquibase.database.core;
 
-import liquibase.database.structure.DatabaseSnapshot;
-import liquibase.database.structure.FirebirdDatabaseSnapshot;
 import liquibase.database.AbstractDatabase;
 import liquibase.database.DataType;
-import liquibase.diff.DiffStatusListener;
-import liquibase.exception.JDBCException;
-
-import java.sql.Connection;
-import java.util.Set;
+import liquibase.database.DatabaseConnection;
+import liquibase.exception.DatabaseException;
 
 /**
  * Firebird database implementation.
@@ -22,7 +17,7 @@ public class FirebirdDatabase extends AbstractDatabase {
     private static final DataType BLOB_TYPE = new DataType("BLOB", false);
     private static final DataType DATETIME_TYPE = new DataType("TIMESTAMP", false);
 
-    public boolean isCorrectDatabaseImplementation(Connection conn) throws JDBCException {
+    public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
         return getDatabaseProductName(conn).startsWith("Firebird");
     }
 
@@ -114,7 +109,7 @@ public class FirebirdDatabase extends AbstractDatabase {
     }
 
     @Override
-    public String convertRequestedSchemaToSchema(String requestedSchema) throws JDBCException {
+    public String convertRequestedSchemaToSchema(String requestedSchema) throws DatabaseException {
         if (requestedSchema == null) {
             return getDefaultDatabaseSchemaName();
         } else {
@@ -132,8 +127,4 @@ public class FirebirdDatabase extends AbstractDatabase {
         }
     }
 
-    @Override
-    public DatabaseSnapshot createDatabaseSnapshot(String schema, Set<DiffStatusListener> statusListeners) throws JDBCException {
-        return new FirebirdDatabaseSnapshot(this, statusListeners, schema);
-    }
 }

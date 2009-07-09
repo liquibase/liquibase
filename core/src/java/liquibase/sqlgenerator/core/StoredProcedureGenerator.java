@@ -4,9 +4,9 @@ import liquibase.database.Database;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
-import liquibase.statement.StoredProcedureStatement;
 import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
+import liquibase.statement.StoredProcedureStatement;
 
 public class StoredProcedureGenerator implements SqlGenerator<StoredProcedureStatement> {
     public int getPriority() {

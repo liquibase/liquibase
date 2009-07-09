@@ -1,10 +1,13 @@
 package liquibase.changelog;
 
-import liquibase.change.*;
-import liquibase.change.core.RawSQLChange;
+import liquibase.change.Change;
+import liquibase.change.CheckSum;
 import liquibase.change.core.EmptyChange;
+import liquibase.change.core.RawSQLChange;
 import liquibase.database.Database;
 import liquibase.exception.*;
+import liquibase.executor.ExecutorService;
+import liquibase.executor.WriteExecutor;
 import liquibase.precondition.core.ErrorPrecondition;
 import liquibase.precondition.core.FailedPrecondition;
 import liquibase.precondition.core.PreconditionContainer;
@@ -13,8 +16,6 @@ import liquibase.statement.SqlStatement;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
 import liquibase.util.log.LogFactory;
-import liquibase.executor.ExecutorService;
-import liquibase.executor.WriteExecutor;
 
 import java.util.*;
 import java.util.logging.Level;
@@ -238,7 +239,7 @@ public class ChangeSet {
             if (!runInTransaction && !database.getAutoCommitMode()) {
                 try {
                     database.setAutoCommit(false);
-                } catch (JDBCException e) {
+                } catch (DatabaseException e) {
                     throw new MigrationFailedException(this, "Could not reset autocommit");
                 }
             }
@@ -255,7 +256,7 @@ public class ChangeSet {
                     for (SqlStatement statement : rollback.generateStatements(database)) {
                         try {
                             writeExecutor.execute(statement, sqlVisitors);
-                        } catch (JDBCException e) {
+                        } catch (DatabaseException e) {
                             throw new RollbackFailedException("Error executing custom SQL [" + statement + "]", e);
                         }
                     }
@@ -275,7 +276,7 @@ public class ChangeSet {
         } catch (Exception e) {
             try {
                 database.rollback();
-            } catch (JDBCException e1) {
+            } catch (DatabaseException e1) {
                 ;
             }
             throw new RollbackFailedException(e);

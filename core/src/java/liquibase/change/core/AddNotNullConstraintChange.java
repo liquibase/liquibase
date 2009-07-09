@@ -1,19 +1,19 @@
 package liquibase.change.core;
 
-import liquibase.database.core.DB2Database;
-import liquibase.database.core.SQLiteDatabase;
-import liquibase.database.Database;
-import liquibase.database.core.SQLiteDatabase.AlterTableVisitor;
-import liquibase.database.structure.Index;
-import liquibase.statement.core.ReorganizeTableStatement;
-import liquibase.statement.core.SetNullableStatement;
-import liquibase.statement.SqlStatement;
-import liquibase.statement.core.UpdateStatement;
-import liquibase.util.StringUtils;
 import liquibase.change.AbstractChange;
+import liquibase.change.Change;
 import liquibase.change.ChangeMetaData;
 import liquibase.change.ColumnConfig;
-import liquibase.change.Change;
+import liquibase.database.Database;
+import liquibase.database.core.DB2Database;
+import liquibase.database.core.SQLiteDatabase;
+import liquibase.database.core.SQLiteDatabase.AlterTableVisitor;
+import liquibase.database.structure.Index;
+import liquibase.statement.SqlStatement;
+import liquibase.statement.core.ReorganizeTableStatement;
+import liquibase.statement.core.SetNullableStatement;
+import liquibase.statement.core.UpdateStatement;
+import liquibase.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -121,7 +121,7 @@ public class AddNotNullConstraintChange extends AbstractChange {
 //						"SELECT * FROM `"+
 //						database.escapeTableName(getSchemaName(), getTableName())+
 //						"` WHERE `"+getColumnName()+"` IS NULL;"));
-//			} catch (JDBCException e) {
+//			} catch (DatabaseException e) {
 //				e.printStackTrace();
 //			}
 //    		if (null_rows.size()>0) {

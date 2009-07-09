@@ -5,8 +5,6 @@ import liquibase.database.core.InformixDatabase;
 import liquibase.database.structure.Column;
 import liquibase.statement.ComputedDateValue;
 import liquibase.statement.ComputedNumericValue;
-import liquibase.statement.ColumnConstraint;
-import liquibase.statement.PrimaryKeyConstraint;
 import liquibase.util.ISODateFormat;
 
 import java.text.NumberFormat;

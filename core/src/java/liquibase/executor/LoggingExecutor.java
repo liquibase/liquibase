@@ -2,7 +2,7 @@ package liquibase.executor;
 
 import liquibase.database.Database;
 import liquibase.database.core.MSSQLDatabase;
-import liquibase.exception.JDBCException;
+import liquibase.exception.DatabaseException;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.statement.CallableSqlStatement;
 import liquibase.statement.SqlStatement;
@@ -10,6 +10,7 @@ import liquibase.util.StreamUtil;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -20,62 +21,53 @@ public class LoggingExecutor extends AbstractExecutor implements WriteExecutor {
     private boolean alreadyCreatedChangeTable;
 
     public LoggingExecutor(Writer output, Database database) {
-        super(database);
         this.output = output;
+        setDatabase(database);
     }
 
     public boolean executesStatements() {
         return false;
     }
 
-    public void execute(SqlStatement sql) throws JDBCException {
+    public void execute(SqlStatement sql) throws DatabaseException {
         outputStatement(sql);
     }
 
-    public int update(SqlStatement sql) throws JDBCException {
+    public int update(SqlStatement sql) throws DatabaseException {
         outputStatement(sql);
 
         return 0;
     }
 
-    public Object execute(StatementCallback action, List<SqlVisitor> sqlVisitors) throws JDBCException {
-        outputStatement(action.getStatement(), sqlVisitors);
-        return null;
-    }
-
-    public void execute(SqlStatement sql, List<SqlVisitor> sqlVisitors) throws JDBCException {
+    public void execute(SqlStatement sql, List<SqlVisitor> sqlVisitors) throws DatabaseException {
         outputStatement(sql, sqlVisitors);
     }
 
-    public int update(SqlStatement sql, List<SqlVisitor> sqlVisitors) throws JDBCException {
+    public int update(SqlStatement sql, List<SqlVisitor> sqlVisitors) throws DatabaseException {
         outputStatement(sql, sqlVisitors);
         return 0;
     }
 
-    public Object execute(CallableSqlStatement csc, CallableStatementCallback action, List<SqlVisitor> sqlVisitors) throws JDBCException {
-        throw new JDBCException("Do not know how to output callable statement");
+    public Map call(CallableSqlStatement csc, List declaredParameters, List<SqlVisitor> sqlVisitors) throws DatabaseException {
+        throw new DatabaseException("Do not know how to output callable statement");
     }
 
-    public Map call(CallableSqlStatement csc, List declaredParameters, List<SqlVisitor> sqlVisitors) throws JDBCException {
-        throw new JDBCException("Do not know how to output callable statement");
-    }
-
-    public void comment(String message) throws JDBCException {
+    public void comment(String message) throws DatabaseException {
         try {
             output.write(database.getLineComment());
             output.write(" ");
             output.write(message);
             output.write(StreamUtil.getLineSeparator());
         } catch (IOException e) {
-            throw new JDBCException(e);
+            throw new DatabaseException(e);
         }
     }
 
-    private void outputStatement(SqlStatement sql) throws JDBCException {
-
+    private void outputStatement(SqlStatement sql) throws DatabaseException {
+        outputStatement(sql, new ArrayList<SqlVisitor>());
     }
 
-    private void outputStatement(SqlStatement sql, List<SqlVisitor> sqlVisitors) throws JDBCException {
+    private void outputStatement(SqlStatement sql, List<SqlVisitor> sqlVisitors) throws DatabaseException {
         try {
             for (String statement : applyVisitors(sql, sqlVisitors)) {
                 output.write(statement);
@@ -96,7 +88,7 @@ public class LoggingExecutor extends AbstractExecutor implements WriteExecutor {
                 output.write(StreamUtil.getLineSeparator());
             }
         } catch (IOException e) {
-            throw new JDBCException(e);
+            throw new DatabaseException(e);
         }
     }
 

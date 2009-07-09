@@ -3,17 +3,11 @@
  */
 package liquibase.database.core;
 
-import liquibase.database.structure.DatabaseSnapshot;
-import liquibase.database.structure.SybaseASADatabaseSnapshot;
 import liquibase.database.AbstractDatabase;
 import liquibase.database.DataType;
-import liquibase.diff.DiffStatusListener;
-import liquibase.exception.JDBCException;
-import liquibase.statement.core.RawSqlStatement;
-import liquibase.statement.SqlStatement;
+import liquibase.database.DatabaseConnection;
+import liquibase.exception.DatabaseException;
 
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -133,19 +127,6 @@ public class SybaseASADatabase extends AbstractDatabase {
 		super();
 	}
 
-	/* (non-Javadoc)
-	 * @see liquibase.database.AbstractDatabase#createDatabaseSnapshot(java.lang.String, java.util.Set)
-	 */
-	@Override
-	public DatabaseSnapshot createDatabaseSnapshot(String schema,
-			Set<DiffStatusListener> statusListeners) throws JDBCException {
-		
-		return new SybaseASADatabaseSnapshot(this, statusListeners, schema);
-	}
-
-	/* (non-Javadoc)
-	 * @see liquibase.database.Database#getBlobType()
-	 */
 	public DataType getBlobType() {
 		
 		return BLOB_TYPE;
@@ -216,28 +197,24 @@ public class SybaseASADatabase extends AbstractDatabase {
 	/* (non-Javadoc)
 	 * @see liquibase.database.Database#isCorrectDatabaseImplementation(java.sql.Connection)
 	 */
-	public boolean isCorrectDatabaseImplementation(Connection conn) throws JDBCException {
+	public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
 		return "Adaptive Server Anywhere".equalsIgnoreCase(getDatabaseProductName(conn))
                 || "SQL Anywhere".equalsIgnoreCase(getDatabaseProductName(conn));
 	}
 
 	@Override
-	public String getDefaultCatalogName() throws JDBCException {
-        try {
+	public String getDefaultCatalogName() throws DatabaseException {
             return getConnection().getCatalog();
-        } catch (SQLException e) {
-            throw new JDBCException(e);
-        }
 	}
 
 	@Override
-	protected String getDefaultDatabaseSchemaName() throws JDBCException {
+	protected String getDefaultDatabaseSchemaName() throws DatabaseException {
 		return null;
 	}
 
 	@Override
 	public String convertRequestedSchemaToSchema(String requestedSchema)
-			throws JDBCException {
+			throws DatabaseException {
         if (requestedSchema == null) {
             return "DBA";
         }
@@ -252,7 +229,7 @@ public class SybaseASADatabase extends AbstractDatabase {
 
 	@Override
 	public String getViewDefinition(String schemaName, String viewName)
-			throws JDBCException {
+			throws DatabaseException {
 		// TODO Auto-generated method stub
 		return super.getViewDefinition(schemaName, viewName);
 	}
@@ -273,7 +250,7 @@ public class SybaseASADatabase extends AbstractDatabase {
 
 	@Override
 	public String convertRequestedSchemaToCatalog(String requestedSchema)
-			throws JDBCException {
+			throws DatabaseException {
 		// like in MS SQL
         return getDefaultCatalogName();
         
@@ -308,7 +285,7 @@ public class SybaseASADatabase extends AbstractDatabase {
 	}
 	
 	@Override
-	public void setAutoCommit(boolean b) throws JDBCException {
+	public void setAutoCommit(boolean b) throws DatabaseException {
 		// workaround for strange Sybase bug.
 		// In some circumstances tds-driver thrown exception 
 		// JZ016: The AutoCommit option is already set to false.

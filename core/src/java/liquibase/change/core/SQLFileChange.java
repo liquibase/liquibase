@@ -1,13 +1,13 @@
 package liquibase.change.core;
 
+import liquibase.change.AbstractSQLChange;
+import liquibase.change.ChangeMetaData;
+import liquibase.change.ChangeProperty;
+import liquibase.change.CheckSum;
 import liquibase.exception.SetupException;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StreamUtil;
 import liquibase.util.log.LogFactory;
-import liquibase.change.AbstractSQLChange;
-import liquibase.change.ChangeProperty;
-import liquibase.change.ChangeMetaData;
-import liquibase.change.CheckSum;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;

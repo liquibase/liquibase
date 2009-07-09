@@ -3,7 +3,7 @@ package liquibase.exception;
 import liquibase.database.Database;
 import liquibase.statement.SqlStatement;
 
-public class StatementNotSupportedOnDatabaseException extends JDBCException {
+public class StatementNotSupportedOnDatabaseException extends DatabaseException {
     private String reason;
 
     public StatementNotSupportedOnDatabaseException(SqlStatement statement, Database database) {

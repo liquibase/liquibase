@@ -1,16 +1,10 @@
 package liquibase.database.core;
 
-import liquibase.database.structure.DatabaseSnapshot;
-import liquibase.database.structure.MSSQLDatabaseSnapshot;
 import liquibase.database.AbstractDatabase;
 import liquibase.database.DataType;
-import liquibase.diff.DiffStatusListener;
-import liquibase.exception.JDBCException;
-import liquibase.statement.core.RawSqlStatement;
-import liquibase.statement.SqlStatement;
+import liquibase.database.DatabaseConnection;
+import liquibase.exception.DatabaseException;
 
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.HashSet;
 import java.util.Set;
@@ -89,17 +83,13 @@ public class SybaseDatabase extends AbstractDatabase {
     }
 
     @Override
-    protected String getDefaultDatabaseSchemaName() throws JDBCException {
+    protected String getDefaultDatabaseSchemaName() throws DatabaseException {
         return null;
     }
 
     @Override
-    public String getDefaultCatalogName() throws JDBCException {
-        try {
-            return getConnection().getCatalog();
-        } catch (SQLException e) {
-            throw new JDBCException(e);
-        }
+    public String getDefaultCatalogName() throws DatabaseException {
+        return getConnection().getCatalog();
     }
 
     @Override
@@ -122,7 +112,7 @@ public class SybaseDatabase extends AbstractDatabase {
         return returnString.toString().replaceFirst(" \\+ $", "");
     }
 
-//    protected void dropForeignKeys(Connection conn) throws JDBCException {
+//    protected void dropForeignKeys(Connection conn) throws DatabaseException {
 //        Statement dropStatement = null;
 //        PreparedStatement fkStatement = null;
 //        ResultSet rs = null;
@@ -140,11 +130,11 @@ public class SybaseDatabase extends AbstractDatabase {
 //                try {
 //                    dropStatement.execute(dropFK.generateStatements(this)[0]);
 //                } catch (UnsupportedChangeException e) {
-//                    throw new JDBCException(e.getMessage());
+//                    throw new DatabaseException(e.getMessage());
 //                }
 //            }
 //        } catch (SQLException e) {
-//            throw new JDBCException(e);
+//            throw new DatabaseException(e);
 //        } finally {
 //            try {
 //                if (dropStatement != null) {
@@ -157,7 +147,7 @@ public class SybaseDatabase extends AbstractDatabase {
 //                    rs.close();
 //                }
 //            } catch (SQLException e) {
-//                throw new JDBCException(e);
+//                throw new DatabaseException(e);
 //            }
 //        }
 //
@@ -204,12 +194,12 @@ public class SybaseDatabase extends AbstractDatabase {
     }
 
     @Override
-    public String convertRequestedSchemaToCatalog(String requestedSchema) throws JDBCException {
+    public String convertRequestedSchemaToCatalog(String requestedSchema) throws DatabaseException {
         return getDefaultCatalogName();
     }
 
     @Override
-    public String convertRequestedSchemaToSchema(String requestedSchema) throws JDBCException {
+    public String convertRequestedSchemaToSchema(String requestedSchema) throws DatabaseException {
         if (requestedSchema == null) {
             return "dbo";
         }
@@ -228,11 +218,6 @@ public class SybaseDatabase extends AbstractDatabase {
     @Override
     public String getDateLiteral(String isoDate) {
         return super.getDateLiteral(isoDate).replace(' ', 'T');
-    }
-
-    @Override
-    public DatabaseSnapshot createDatabaseSnapshot(String schema, Set<DiffStatusListener> statusListeners) throws JDBCException {
-        return new MSSQLDatabaseSnapshot(this, statusListeners, schema);
     }
 
     @Override
@@ -270,11 +255,6 @@ public class SybaseDatabase extends AbstractDatabase {
         return "sybase";
     }
 
-    @Override
-    public void setConnection(Connection connection) {
-        super.setConnection(new SybaseConnectionDelegate(connection));
-    }
-
     public String getDefaultDriver(String url) {
         if (url.startsWith("jdbc:sybase")) {
             return "com.sybase.jdbc3.jdbc.SybDriver";
@@ -301,7 +281,7 @@ public class SybaseDatabase extends AbstractDatabase {
      * Unfortunately it appears to be a problem with the Drivers, see the JTDS driver page.
      * http://sourceforge.net/tracker/index.php?func=detail&aid=1471425&group_id=33291&atid=407762
      */
-//    public void dropDatabaseObjects(String schema) throws JDBCException {
+//    public void dropDatabaseObjects(String schema) throws DatabaseException {
 //        DatabaseConnection conn = getConnection();
 //        try {
 //            //dropForeignKeys(conn);
@@ -321,7 +301,7 @@ public class SybaseDatabase extends AbstractDatabase {
 //            }
 //        }
 //    }
-    public boolean isCorrectDatabaseImplementation(Connection conn) throws JDBCException {
+    public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
         String dbProductName = getDatabaseProductName(conn);
         return
                 "Sybase SQL Server".equals(dbProductName) ||

@@ -1,15 +1,15 @@
 package liquibase.sqlgenerator.core;
 
-import liquibase.statement.core.SelectSequencesStatement;
 import liquibase.database.Database;
 import liquibase.database.core.PostgresDatabase;
-import liquibase.exception.ValidationErrors;
-import liquibase.exception.JDBCException;
+import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
+import liquibase.statement.core.SelectSequencesStatement;
 
 public class SelectSequencesGeneratorPostgres implements SqlGenerator<SelectSequencesStatement> {
     public int getPriority() {
@@ -37,7 +37,7 @@ public class SelectSequencesGeneratorPostgres implements SqlGenerator<SelectSequ
                 "AND 'nextval(''" + (schema == null ? "" : schema + ".") + "\"'||relname||'\"''::regclass)' not in (select adsrc from pg_attrdef where adsrc is not null) " +
                 "AND 'nextval('''||relname||'''::regclass)' not in (select adsrc from pg_attrdef where adsrc is not null)")
             };
-        } catch (JDBCException e) {
+        } catch (DatabaseException e) {
             throw new UnexpectedLiquibaseException(e);
         }
     }

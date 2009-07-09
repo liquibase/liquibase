@@ -1,14 +1,14 @@
 package liquibase.change.core;
 
+import liquibase.change.AbstractChange;
+import liquibase.change.Change;
+import liquibase.change.ChangeMetaData;
 import liquibase.database.Database;
 import liquibase.database.core.SQLiteDatabase;
+import liquibase.statement.SqlStatement;
 import liquibase.statement.core.CreateViewStatement;
 import liquibase.statement.core.DropViewStatement;
-import liquibase.statement.SqlStatement;
 import liquibase.util.StringUtils;
-import liquibase.change.AbstractChange;
-import liquibase.change.ChangeMetaData;
-import liquibase.change.Change;
 
 import java.util.ArrayList;
 import java.util.List;

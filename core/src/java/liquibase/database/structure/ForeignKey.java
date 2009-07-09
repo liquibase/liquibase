@@ -14,8 +14,8 @@ public class ForeignKey implements DatabaseObject, Comparable<ForeignKey> {
     private boolean deferrable;
     private boolean initiallyDeferred;
 
-    private Integer updateRule;
-    private Integer deleteRule;
+    private ForeignKeyConstraintType updateRule;
+    private ForeignKeyConstraintType deleteRule;
 
     public DatabaseObject[] getContainingObjects() {
         return new DatabaseObject[] {
@@ -113,19 +113,19 @@ public class ForeignKey implements DatabaseObject, Comparable<ForeignKey> {
         this.initiallyDeferred = initiallyDeferred;
     }
 
-    public void setUpdateRule(Integer rule) {
+    public void setUpdateRule(ForeignKeyConstraintType rule) {
         this.updateRule = rule;
     }
 
-    public Integer getUpdateRule() {
+    public ForeignKeyConstraintType getUpdateRule() {
         return this.updateRule;
     }
 
-    public void setDeleteRule(Integer rule) {
+    public void setDeleteRule(ForeignKeyConstraintType rule) {
         this.deleteRule = rule;
     }
 
-    public Integer getDeleteRule() {
+    public ForeignKeyConstraintType getDeleteRule() {
         return this.deleteRule;
     }
 

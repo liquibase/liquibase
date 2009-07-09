@@ -4,14 +4,14 @@ import liquibase.change.ColumnConfig;
 import liquibase.database.Database;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.database.structure.Index;
-import liquibase.exception.JDBCException;
+import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.UnsupportedChangeException;
 import liquibase.sql.Sql;
-import liquibase.statement.core.AddAutoIncrementStatement;
-import liquibase.statement.SqlStatement;
-import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.sqlgenerator.SqlGeneratorChain;
+import liquibase.sqlgenerator.SqlGeneratorFactory;
+import liquibase.statement.SqlStatement;
+import liquibase.statement.core.AddAutoIncrementStatement;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -66,7 +66,7 @@ public class AddAutoIncrementGeneratorSQLite extends AddAutoIncrementGenerator {
             for (SqlStatement generatedStatement : SQLiteDatabase.getAlterTableStatements(rename_alter_visitor,database, statement.getSchemaName(), statement.getTableName())) {
                     statements.addAll(Arrays.asList(SqlGeneratorFactory.getInstance().generateSql(generatedStatement, database)));
             }
-        } catch (JDBCException e) {
+        } catch (DatabaseException e) {
             e.printStackTrace();
         } catch (UnsupportedChangeException e) {
             throw new UnexpectedLiquibaseException(e);

@@ -1,10 +1,10 @@
 package liquibase.change.core;
 
-import liquibase.database.Database;
-import liquibase.statement.core.CreateIndexStatement;
-import liquibase.statement.SqlStatement;
-import liquibase.util.StringUtils;
 import liquibase.change.*;
+import liquibase.database.Database;
+import liquibase.statement.SqlStatement;
+import liquibase.statement.core.CreateIndexStatement;
+import liquibase.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,17 +1,17 @@
 package liquibase.change.core;
 
-import liquibase.database.core.DB2Database;
-import liquibase.database.Database;
-import liquibase.database.core.SQLiteDatabase;
-import liquibase.database.core.SQLiteDatabase.AlterTableVisitor;
-import liquibase.database.structure.Index;
-import liquibase.statement.core.DropColumnStatement;
-import liquibase.statement.core.ReorganizeTableStatement;
-import liquibase.statement.SqlStatement;
-import liquibase.util.StringUtils;
 import liquibase.change.AbstractChange;
 import liquibase.change.ChangeMetaData;
 import liquibase.change.ColumnConfig;
+import liquibase.database.Database;
+import liquibase.database.core.DB2Database;
+import liquibase.database.core.SQLiteDatabase;
+import liquibase.database.core.SQLiteDatabase.AlterTableVisitor;
+import liquibase.database.structure.Index;
+import liquibase.statement.SqlStatement;
+import liquibase.statement.core.DropColumnStatement;
+import liquibase.statement.core.ReorganizeTableStatement;
+import liquibase.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;

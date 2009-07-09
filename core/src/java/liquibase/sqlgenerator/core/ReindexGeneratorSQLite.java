@@ -5,9 +5,9 @@ import liquibase.database.core.SQLiteDatabase;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
-import liquibase.statement.core.ReindexStatement;
 import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
+import liquibase.statement.core.ReindexStatement;
 
 public class ReindexGeneratorSQLite implements SqlGenerator<ReindexStatement> {
     public int getPriority() {

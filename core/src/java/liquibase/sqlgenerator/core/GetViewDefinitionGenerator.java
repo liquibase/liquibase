@@ -1,14 +1,14 @@
 package liquibase.sqlgenerator.core;
 
-import liquibase.statement.core.GetViewDefinitionStatement;
 import liquibase.database.Database;
-import liquibase.exception.ValidationErrors;
-import liquibase.exception.JDBCException;
+import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
+import liquibase.statement.core.GetViewDefinitionStatement;
 
 public class GetViewDefinitionGenerator implements SqlGenerator<GetViewDefinitionStatement> {
     public int getPriority() {
@@ -37,7 +37,7 @@ public class GetViewDefinitionGenerator implements SqlGenerator<GetViewDefinitio
             return new Sql[] {
                     new UnparsedSql(sql)
             };
-        } catch (JDBCException e) {
+        } catch (DatabaseException e) {
             throw new UnexpectedLiquibaseException(e);
         }
     }

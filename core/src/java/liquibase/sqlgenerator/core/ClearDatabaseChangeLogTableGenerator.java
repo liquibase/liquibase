@@ -1,14 +1,14 @@
 package liquibase.sqlgenerator.core;
 
-import liquibase.statement.core.ClearDatabaseChangeLogTableStatement;
 import liquibase.database.Database;
-import liquibase.exception.ValidationErrors;
-import liquibase.exception.JDBCException;
+import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
+import liquibase.statement.core.ClearDatabaseChangeLogTableStatement;
 
 public class ClearDatabaseChangeLogTableGenerator implements SqlGenerator<ClearDatabaseChangeLogTableStatement> {
     public int getPriority() {
@@ -34,7 +34,7 @@ public class ClearDatabaseChangeLogTableGenerator implements SqlGenerator<ClearD
             return new Sql[] {
                     new UnparsedSql("DELETE FROM " + database.escapeTableName(schemaName, database.getDatabaseChangeLogTableName()))
             };
-        } catch (JDBCException e) {
+        } catch (DatabaseException e) {
             throw new UnexpectedLiquibaseException(e);
         }
     }

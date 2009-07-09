@@ -4,8 +4,8 @@ import liquibase.database.Database;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
-import liquibase.statement.core.AddColumnStatement;
 import liquibase.sqlgenerator.SqlGeneratorChain;
+import liquibase.statement.core.AddColumnStatement;
 
 public class AddColumnGeneratorSQLite extends AddColumnGenerator {
      @Override
@@ -51,7 +51,7 @@ public class AddColumnGeneratorSQLite extends AddColumnGenerator {
 //        try {
 //            // alter table
 //            statements.addAll(SQLiteDatabase.getAlterTableStatements(rename_alter_visitor, database,statement.getSchemaName(),statement.getTableName()));
-//        } catch (JDBCException e) {
+//        } catch (DatabaseException e) {
 //            System.err.println(e);
 //            e.printStackTrace();
 //        }

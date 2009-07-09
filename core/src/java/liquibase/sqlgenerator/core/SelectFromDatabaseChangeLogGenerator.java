@@ -1,14 +1,14 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
-import liquibase.exception.ValidationErrors;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
-import liquibase.statement.core.SelectFromDatabaseChangeLogStatement;
-import liquibase.util.StringUtils;
 import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
+import liquibase.statement.core.SelectFromDatabaseChangeLogStatement;
+import liquibase.util.StringUtils;
 
 public class SelectFromDatabaseChangeLogGenerator implements SqlGenerator<SelectFromDatabaseChangeLogStatement> {
     public int getPriority() {
@@ -34,6 +34,8 @@ public class SelectFromDatabaseChangeLogGenerator implements SqlGenerator<Select
         if (whereClause != null) {
             if (whereClause instanceof SelectFromDatabaseChangeLogStatement.ByTag) {
                 sql += " WHERE tag='" + ((SelectFromDatabaseChangeLogStatement.ByTag) whereClause).getTagName() + "'";
+            } else if (whereClause instanceof SelectFromDatabaseChangeLogStatement.ByNotNullCheckSum) {
+                    sql += " WHERE MD5SUM IS NOT NULL";
             } else {
                 throw new UnexpectedLiquibaseException("Unknown where clause type: " + whereClause.getClass().getName());
             }

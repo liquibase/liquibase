@@ -1,7 +1,6 @@
 package liquibase.precondition.core;
 
 import liquibase.util.StringUtils;
-import liquibase.precondition.core.AndPrecondition;
 
 import java.util.ArrayList;
 import java.util.List;

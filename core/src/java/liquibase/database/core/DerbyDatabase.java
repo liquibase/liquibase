@@ -1,16 +1,12 @@
 package liquibase.database.core;
 
-import liquibase.database.structure.DatabaseSnapshot;
-import liquibase.database.structure.DerbyDatabaseSnapshot;
 import liquibase.database.AbstractDatabase;
 import liquibase.database.DataType;
-import liquibase.diff.DiffStatusListener;
-import liquibase.exception.JDBCException;
+import liquibase.database.DatabaseConnection;
+import liquibase.exception.DatabaseException;
 
-import java.sql.Connection;
 import java.sql.Types;
 import java.text.ParseException;
-import java.util.Set;
 
 public class DerbyDatabase extends AbstractDatabase {
     private static final DataType BOOLEAN_TYPE = new DataType("SMALLINT", false);
@@ -20,7 +16,7 @@ public class DerbyDatabase extends AbstractDatabase {
     private static final DataType BLOB_TYPE = new DataType("BLOB", true);
     private static final DataType TIMESTAMP_TYPE = new DataType("TIMESTAMP", false);
 
-    public boolean isCorrectDatabaseImplementation(Connection conn) throws JDBCException {
+    public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
         return "Apache Derby".equalsIgnoreCase(getDatabaseProductName(conn));
     }
 
@@ -36,7 +32,7 @@ public class DerbyDatabase extends AbstractDatabase {
     }
 
     @Override
-    protected String getDefaultDatabaseSchemaName() throws JDBCException {//NOPMD
+    protected String getDefaultDatabaseSchemaName() throws DatabaseException {//NOPMD
         return super.getDefaultDatabaseSchemaName().toUpperCase();
     }
 
@@ -115,13 +111,8 @@ public class DerbyDatabase extends AbstractDatabase {
     }
 
     @Override
-    public String getViewDefinition(String schemaName, String name) throws JDBCException {
+    public String getViewDefinition(String schemaName, String name) throws DatabaseException {
         return super.getViewDefinition(schemaName, name).replaceFirst("CREATE VIEW \\w+ AS ", "");
-    }
-
-    @Override
-    public void setConnection(Connection conn) {
-        super.setConnection(new DerbyConnectionDelegate(conn));
     }
 
     @Override
@@ -136,10 +127,5 @@ public class DerbyDatabase extends AbstractDatabase {
             }
         }
         return super.convertDatabaseValueToJavaObject(defaultValue, dataType, columnSize, decimalDigits);
-    }
-
-    @Override
-    public DatabaseSnapshot createDatabaseSnapshot(String schema, Set<DiffStatusListener> statusListeners) throws JDBCException {
-        return new DerbyDatabaseSnapshot(this, statusListeners, schema);
     }
 }

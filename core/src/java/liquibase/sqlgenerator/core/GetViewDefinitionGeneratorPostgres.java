@@ -1,16 +1,13 @@
 package liquibase.sqlgenerator.core;
 
-import liquibase.statement.core.GetViewDefinitionStatement;
 import liquibase.database.Database;
-import liquibase.database.core.H2Database;
-import liquibase.database.core.MaxDBDatabase;
-import liquibase.database.core.OracleDatabase;
 import liquibase.database.core.PostgresDatabase;
+import liquibase.exception.DatabaseException;
+import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
-import liquibase.exception.JDBCException;
-import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.sqlgenerator.SqlGeneratorChain;
+import liquibase.statement.core.GetViewDefinitionStatement;
 
 public class GetViewDefinitionGeneratorPostgres extends GetViewDefinitionGenerator {
     @Override
@@ -29,7 +26,7 @@ public class GetViewDefinitionGeneratorPostgres extends GetViewDefinitionGenerat
             return new Sql[] {
                     new UnparsedSql("select definition from pg_views where viewname='" + statement.getViewName() + "' AND schemaname='" + database.convertRequestedSchemaToSchema(statement.getSchemaName()) + "'" )
             };
-        } catch (JDBCException e) {
+        } catch (DatabaseException e) {
             throw new UnexpectedLiquibaseException(e);
         }
     }

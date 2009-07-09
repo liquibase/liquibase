@@ -4,9 +4,9 @@ import liquibase.database.Database;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.SingleLineComment;
 import liquibase.sql.Sql;
-import liquibase.statement.core.CommentStatement;
 import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
+import liquibase.statement.core.CommentStatement;
 
 public class CommentGenerator implements SqlGenerator<CommentStatement> {
 

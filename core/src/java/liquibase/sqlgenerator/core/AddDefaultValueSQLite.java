@@ -3,9 +3,9 @@ package liquibase.sqlgenerator.core;
 import liquibase.database.Database;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.sql.Sql;
-import liquibase.statement.core.AddDefaultValueStatement;
 import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
+import liquibase.statement.core.AddDefaultValueStatement;
 
 public class AddDefaultValueSQLite extends AddDefaultValueGenerator {
     @Override
@@ -65,7 +65,7 @@ public class AddDefaultValueSQLite extends AddDefaultValueGenerator {
 //			statements.addAll(SQLiteDatabase.getAlterTableStatements(
 //					rename_alter_visitor,
 //					database,getSchemaName(),getTableName()));
-//    	} catch (JDBCException e) {
+//    	} catch (DatabaseException e) {
 //			e.printStackTrace();
 //		}
 //

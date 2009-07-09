@@ -1,17 +1,17 @@
 package liquibase.change.core;
 
+import liquibase.change.AbstractChange;
+import liquibase.change.ChangeMetaData;
 import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.executor.LoggingExecutor;
 import liquibase.executor.WriteExecutor;
-import liquibase.statement.core.CommentStatement;
 import liquibase.statement.SqlStatement;
+import liquibase.statement.core.CommentStatement;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
 import liquibase.util.log.LogFactory;
-import liquibase.change.AbstractChange;
-import liquibase.change.ChangeMetaData;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

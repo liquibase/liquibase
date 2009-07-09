@@ -1,6 +1,8 @@
 package liquibase.executor;
 
 import liquibase.database.Database;
+import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.util.plugin.ClassPathScanner;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -22,14 +24,26 @@ public class ExecutorService {
 
     public WriteExecutor getWriteExecutor(Database database) {
         if (!writeExecutors.containsKey(database)) {
-            writeExecutors.put(database, new DefaultExecutor(database));
+            try {
+                WriteExecutor writeExecutor = (WriteExecutor) ClassPathScanner.getInstance().getClasses(WriteExecutor.class)[0].newInstance();
+                writeExecutor.setDatabase(database);
+                writeExecutors.put(database, writeExecutor);
+            } catch (Exception e) {
+                throw new UnexpectedLiquibaseException(e);
+            }
         }
         return writeExecutors.get(database);
     }
 
     public ReadExecutor getReadExecutor(Database database) {
         if (!readExecutors.containsKey(database)) {
-            readExecutors.put(database, new DefaultExecutor(database));
+            try {
+                ReadExecutor readExecutor = (ReadExecutor) ClassPathScanner.getInstance().getClasses(ReadExecutor.class)[0].newInstance();
+                readExecutor.setDatabase(database);
+                readExecutors.put(database, readExecutor);
+            } catch (Exception e) {
+                throw new UnexpectedLiquibaseException(e);
+            }
         }
         return readExecutors.get(database);
     }

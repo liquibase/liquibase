@@ -5,9 +5,9 @@ import liquibase.database.core.PostgresDatabase;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
-import liquibase.statement.core.DropSequenceStatement;
 import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
+import liquibase.statement.core.DropSequenceStatement;
 
 public class DropSequenceGenerator implements SqlGenerator<DropSequenceStatement> {
     public int getPriority() {

@@ -1,16 +1,16 @@
 package liquibase.change.core;
 
+import liquibase.change.AbstractChange;
+import liquibase.change.Change;
+import liquibase.change.ChangeMetaData;
+import liquibase.change.ColumnConfig;
 import liquibase.database.Database;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.database.core.SQLiteDatabase.AlterTableVisitor;
 import liquibase.database.structure.Index;
-import liquibase.statement.core.SetNullableStatement;
 import liquibase.statement.SqlStatement;
+import liquibase.statement.core.SetNullableStatement;
 import liquibase.util.StringUtils;
-import liquibase.change.AbstractChange;
-import liquibase.change.ChangeMetaData;
-import liquibase.change.ColumnConfig;
-import liquibase.change.Change;
 
 import java.util.ArrayList;
 import java.util.List;

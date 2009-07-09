@@ -6,9 +6,9 @@ import liquibase.database.core.SQLiteDatabase;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
-import liquibase.statement.core.CopyRowsStatement;
 import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
+import liquibase.statement.core.CopyRowsStatement;
 
 public class CopyRowsGenerator implements SqlGenerator<CopyRowsStatement> {
     public int getPriority() {

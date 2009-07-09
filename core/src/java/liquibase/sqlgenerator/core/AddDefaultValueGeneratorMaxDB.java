@@ -6,9 +6,9 @@ import liquibase.database.structure.Column;
 import liquibase.database.structure.Table;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
-import liquibase.statement.core.AddDefaultValueStatement;
 import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
+import liquibase.statement.core.AddDefaultValueStatement;
 
 public class AddDefaultValueGeneratorMaxDB extends AddDefaultValueGenerator {
     @Override

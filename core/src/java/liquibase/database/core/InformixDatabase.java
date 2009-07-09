@@ -1,16 +1,14 @@
 package liquibase.database.core;
 
-import liquibase.database.structure.DatabaseSnapshot;
-import liquibase.database.structure.InformixDatabaseSnapshot;
 import liquibase.database.AbstractDatabase;
 import liquibase.database.DataType;
-import liquibase.diff.DiffStatusListener;
-import liquibase.exception.JDBCException;
+import liquibase.database.DatabaseConnection;
+import liquibase.exception.DatabaseException;
+import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.statement.core.GetViewDefinitionStatement;
+import liquibase.statement.core.RawSqlStatement;
 
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -111,18 +109,12 @@ public class InformixDatabase extends AbstractDatabase {
 	}
 
 	@Override
-	public DatabaseSnapshot createDatabaseSnapshot(String schema,
-			Set<DiffStatusListener> statusListeners) throws JDBCException {
-		return new InformixDatabaseSnapshot(this, statusListeners, schema);
-	}
-
-	@Override
 	protected Set<String> getSystemTablesAndViews() {
 		return systemTablesAndViews;
 	}
 	
 	@Override
-    public void setConnection(Connection connection) {
+    public void setConnection(DatabaseConnection connection) {
         super.setConnection(connection);
         try {
         	/* 
@@ -130,9 +122,9 @@ public class InformixDatabase extends AbstractDatabase {
         	 * For each session this statement has to be executed,
         	 * to allow newlines in quoted strings
         	 */
-			connection.createStatement().execute("EXECUTE PROCEDURE IFX_ALLOW_NEWLINE('T');");
-		} catch (SQLException e) {
-			new RuntimeException("Could not allow newline characters in quoted strings with IFX_ALLOW_NEWLINE");
+			ExecutorService.getInstance().getWriteExecutor(this).execute(new RawSqlStatement("EXECUTE PROCEDURE IFX_ALLOW_NEWLINE('T');"));
+		} catch (Exception e) {
+			new UnexpectedLiquibaseException("Could not allow newline characters in quoted strings with IFX_ALLOW_NEWLINE");
 		}
     }
 	
@@ -185,8 +177,8 @@ public class InformixDatabase extends AbstractDatabase {
 		return UUID_TYPE;
 	}
 
-	public boolean isCorrectDatabaseImplementation(Connection conn)
-			throws JDBCException {
+	public boolean isCorrectDatabaseImplementation(DatabaseConnection conn)
+			throws DatabaseException {
 		return PRODUCT_NAME.equals(getDatabaseProductName(conn));
 	}
 
@@ -211,7 +203,7 @@ public class InformixDatabase extends AbstractDatabase {
 
 	@Override
 	public String getViewDefinition(String schemaName, String viewName)
-			throws JDBCException {
+			throws DatabaseException {
 		List<Map> retList = ExecutorService.getInstance().getReadExecutor(this).queryForList(new GetViewDefinitionStatement(schemaName, viewName));
 		// building the view definition from the multiple rows
 		StringBuilder sb = new StringBuilder();

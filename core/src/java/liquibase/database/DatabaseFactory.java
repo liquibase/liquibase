@@ -1,30 +1,32 @@
 package liquibase.database;
 
-import liquibase.exception.JDBCException;
+import liquibase.exception.DatabaseException;
 import liquibase.util.log.LogFactory;
 import liquibase.util.plugin.ClassPathScanner;
-import liquibase.database.core.*;
 
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
-public class DatabaseFactory {
-
-    private static DatabaseFactory instance = new DatabaseFactory();
-
-    private static final Logger log = LogFactory.getLogger();
-
+public abstract class DatabaseFactory {
+    private static DatabaseFactory instance;
+    protected static final Logger log = LogFactory.getLogger();
     private List<Database> implementedDatabases = new ArrayList<Database>();
 
-    private DatabaseFactory() {
+    static {
+        try {
+            instance = (DatabaseFactory) ClassPathScanner.getInstance().getClasses(DatabaseFactory.class)[0].newInstance();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    protected DatabaseFactory() {
         try {
             Class[] classes = ClassPathScanner.getInstance().getClasses(Database.class);
 
             for (Class<? extends Database> clazz : classes) {
-                register((Database) clazz.getConstructor().newInstance());
+                register(clazz.getConstructor().newInstance());
             }
 
         } catch (Exception e) {
@@ -48,41 +50,7 @@ public class DatabaseFactory {
         implementedDatabases.add(0, database);
     }
 
-    public Database findCorrectDatabaseImplementation(Connection connection) throws JDBCException {
-        Database database = null;
-
-        boolean foundImplementation = false;
-
-        for (Database implementedDatabase : getImplementedDatabases()) {
-            database = implementedDatabase;
-            if (database.isCorrectDatabaseImplementation(connection)) {
-                foundImplementation = true;
-                break;
-            }
-        }
-
-        if (!foundImplementation) {
-            try {
-                log.warning("Unknown database: " + connection.getMetaData().getDatabaseProductName());
-            } catch (SQLException e) {
-                throw new JDBCException(e);
-            }
-            database = new UnsupportedDatabase();
-        }
-
-        Database returnDatabase;
-        try {
-            returnDatabase = database.getClass().newInstance();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-        returnDatabase.setConnection(connection);
-        return returnDatabase;
-    }
-
-    public Database findCorrectDatabaseImplementation(DatabaseConnection connection) throws JDBCException {
-        return findCorrectDatabaseImplementation(connection.getUnderlyingConnection());
-    }
+    public abstract Database findCorrectDatabaseImplementation(DatabaseConnection connection) throws DatabaseException;
 
     public String findDefaultDriver(String url) {
         for (Database database : this.getImplementedDatabases()) {
@@ -94,6 +62,4 @@ public class DatabaseFactory {
 
         return null;
     }
-
-
 }

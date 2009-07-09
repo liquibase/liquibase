@@ -1,11 +1,11 @@
 package liquibase.change.core;
 
-import liquibase.database.Database;
-import liquibase.statement.core.DeleteStatement;
-import liquibase.statement.SqlStatement;
-import liquibase.util.StringUtils;
 import liquibase.change.AbstractChange;
 import liquibase.change.ChangeMetaData;
+import liquibase.database.Database;
+import liquibase.statement.SqlStatement;
+import liquibase.statement.core.DeleteStatement;
+import liquibase.util.StringUtils;
 
 public class DeleteDataChange extends AbstractChange {
 

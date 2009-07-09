@@ -1,16 +1,16 @@
 package liquibase.sqlgenerator.core;
 
-import liquibase.statement.core.SelectSequencesStatement;
-import liquibase.database.*;
+import liquibase.database.Database;
 import liquibase.database.core.H2Database;
 import liquibase.database.core.HsqlDatabase;
-import liquibase.exception.ValidationErrors;
-import liquibase.exception.JDBCException;
+import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
+import liquibase.statement.core.SelectSequencesStatement;
 
 public class SelectSequencesGeneratorHsql implements SqlGenerator<SelectSequencesStatement> {
     public int getPriority() {
@@ -30,7 +30,7 @@ public class SelectSequencesGeneratorHsql implements SqlGenerator<SelectSequence
             return new Sql[] {
                     new UnparsedSql("SELECT SEQUENCE_NAME FROM INFORMATION_SCHEMA.SYSTEM_SEQUENCES WHERE SEQUENCE_SCHEMA = '" + database.convertRequestedSchemaToSchema(statement.getSchemaName()) + "'")
             };
-        } catch (JDBCException e) {
+        } catch (DatabaseException e) {
             throw new UnexpectedLiquibaseException(e);
         }
     }

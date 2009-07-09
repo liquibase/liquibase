@@ -4,18 +4,15 @@ import liquibase.change.Change;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.RanChangeSet;
 import liquibase.database.structure.DatabaseObject;
-import liquibase.database.structure.DatabaseSnapshot;
-import liquibase.diff.DiffStatusListener;
 import liquibase.exception.*;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.statement.SqlStatement;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.text.ParseException;
-import java.util.*;
+import java.util.Date;
+import java.util.List;
 
 public interface Database extends DatabaseObject {
 
@@ -25,7 +22,7 @@ public interface Database extends DatabaseObject {
 	/**
      * Is this AbstractDatabase subclass the correct one to use for the given connection.
      */
-    boolean isCorrectDatabaseImplementation(Connection conn) throws JDBCException;
+    boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException;
 
     /**
      * If this database understands the given url, return the default driver class name.  Otherwise return null.
@@ -34,8 +31,6 @@ public interface Database extends DatabaseObject {
 
     DatabaseConnection getConnection();
 
-    void setConnection(Connection conn);
-    
     void setConnection(DatabaseConnection conn);
     
     /**
@@ -52,11 +47,11 @@ public interface Database extends DatabaseObject {
 
     String getDatabaseProductName();
 
-    String getDatabaseProductVersion() throws JDBCException;
+    String getDatabaseProductVersion() throws DatabaseException;
 
-     int getDatabaseMajorVersion() throws JDBCException;
+     int getDatabaseMajorVersion() throws DatabaseException;
 
-    int getDatabaseMinorVersion() throws JDBCException;
+    int getDatabaseMinorVersion() throws DatabaseException;
 
     /**
      * Returns an all-lower-case short name of the product.  Used for end-user selecting of database type
@@ -64,13 +59,7 @@ public interface Database extends DatabaseObject {
      */
     String getTypeName();
 
-    String getDriverName() throws JDBCException;
-
-    String getConnectionURL() throws JDBCException;
-
-    String getConnectionUsername() throws JDBCException;
-
-    String getDefaultCatalogName() throws JDBCException;
+    String getDefaultCatalogName() throws DatabaseException;
 
     String getDefaultSchemaName();
 
@@ -78,7 +67,7 @@ public interface Database extends DatabaseObject {
     
     boolean isPeculiarLiquibaseSchema(); 
     	
-    void setDefaultSchemaName(String schemaName) throws JDBCException;
+    void setDefaultSchemaName(String schemaName) throws DatabaseException;
 
     /**
      * Returns whether this database support initially deferrable columns.
@@ -132,19 +121,19 @@ public interface Database extends DatabaseObject {
      */
     String getConcatSql(String ... values);
 
-    boolean doesChangeLogTableExist() throws JDBCException;
+    boolean doesChangeLogTableExist() throws DatabaseException;
 
-    boolean doesChangeLogLockTableExist() throws JDBCException;
+    boolean doesChangeLogLockTableExist() throws DatabaseException;
 
-    void checkDatabaseChangeLogTable() throws JDBCException;
+    void checkDatabaseChangeLogTable() throws DatabaseException;
 
-    void checkDatabaseChangeLogLockTable() throws JDBCException;
+    void checkDatabaseChangeLogLockTable() throws DatabaseException;
 
-    void dropDatabaseObjects(String schema) throws JDBCException;
+    void dropDatabaseObjects(String schema) throws DatabaseException;
 
-    void tag(String tagString) throws JDBCException;
+    void tag(String tagString) throws DatabaseException;
 
-    boolean doesTagExist(String tag) throws JDBCException;
+    boolean doesTagExist(String tag) throws DatabaseException;
 
     boolean isSystemTable(String catalogName, String schemaName, String tableName);
 
@@ -154,11 +143,11 @@ public interface Database extends DatabaseObject {
 
     boolean supportsTablespaces();
 
-    String getViewDefinition(String schemaName, String name) throws JDBCException;
+    String getViewDefinition(String schemaName, String name) throws DatabaseException;
 
     int getDatabaseType(int type);
 
-    String getDatabaseProductName(Connection conn) throws JDBCException;
+    String getDatabaseProductName(DatabaseConnection conn) throws DatabaseException;
 
     /**
      * Returns the actual database-specific data type to use for a "char" column.
@@ -279,11 +268,11 @@ public interface Database extends DatabaseObject {
      */
     String escapeColumnNameList(String columnNames);
 
-//    Set<UniqueConstraint> findUniqueConstraints(String schema) throws JDBCException;
+//    Set<UniqueConstraint> findUniqueConstraints(String schema) throws DatabaseException;
 
-    String convertRequestedSchemaToSchema(String requestedSchema) throws JDBCException;
+    String convertRequestedSchemaToSchema(String requestedSchema) throws DatabaseException;
 
-    String convertRequestedSchemaToCatalog(String requestedSchema) throws JDBCException;
+    String convertRequestedSchemaToCatalog(String requestedSchema) throws DatabaseException;
 
     boolean supportsSchemas();
 
@@ -293,48 +282,44 @@ public interface Database extends DatabaseObject {
 
     String escapeViewName(String schemaName, String viewName);
 
-    boolean isColumnAutoIncrement(String schemaName, String tableName, String columnName) throws SQLException, JDBCException;
+    ChangeSet.RunStatus getRunStatus(ChangeSet changeSet) throws DatabaseException, DatabaseHistoryException;
 
-    ChangeSet.RunStatus getRunStatus(ChangeSet changeSet) throws JDBCException, DatabaseHistoryException;
+    RanChangeSet getRanChangeSet(ChangeSet changeSet) throws DatabaseException, DatabaseHistoryException;
 
-    RanChangeSet getRanChangeSet(ChangeSet changeSet) throws JDBCException, DatabaseHistoryException;
+    void markChangeSetAsRan(ChangeSet changeSet) throws DatabaseException;
 
-    void markChangeSetAsRan(ChangeSet changeSet) throws JDBCException;
+    void markChangeSetAsReRan(ChangeSet changeSet) throws DatabaseException;
 
-    void markChangeSetAsReRan(ChangeSet changeSet) throws JDBCException;
+    List<RanChangeSet> getRanChangeSetList() throws DatabaseException;
 
-    List<RanChangeSet> getRanChangeSetList() throws JDBCException;
+    Date getRanDate(ChangeSet changeSet) throws DatabaseException, DatabaseHistoryException;
 
-    Date getRanDate(ChangeSet changeSet) throws JDBCException, DatabaseHistoryException;
+    void removeRanStatus(ChangeSet changeSet) throws DatabaseException;
 
-    void removeRanStatus(ChangeSet changeSet) throws JDBCException;
+    void commit() throws DatabaseException;
 
-    void commit() throws JDBCException;
-
-    void rollback() throws JDBCException;
+    void rollback() throws DatabaseException;
 
     String escapeStringForDatabase(String string);
 
-    void close() throws JDBCException;
-
-    DatabaseSnapshot createDatabaseSnapshot(String schema, Set<DiffStatusListener> statusListeners) throws JDBCException;
+    void close() throws DatabaseException;
 
     boolean supportsRestrictForeignKeys();
 
     String escapeConstraintName(String constraintName);
 
-    boolean isAutoCommit() throws JDBCException;
+    boolean isAutoCommit() throws DatabaseException;
 
-    void setAutoCommit(boolean b) throws JDBCException;
+    void setAutoCommit(boolean b) throws DatabaseException;
     
-    boolean isLocalDatabase() throws JDBCException;
+    boolean isLocalDatabase() throws DatabaseException;
 
     void executeStatements(Change change, List<SqlVisitor> sqlVisitors) throws LiquibaseException, UnsupportedChangeException;/*
      * Executes the statements passed as argument to a target {@link Database}
      *
      * @param statements an array containing the SQL statements to be issued
      * @param database the target {@link Database}
-     * @throws JDBCException if there were problems issuing the statements
+     * @throws DatabaseException if there were problems issuing the statements
      */
 
     void execute(SqlStatement[] statements, List<SqlVisitor> sqlVisitors) throws LiquibaseException;

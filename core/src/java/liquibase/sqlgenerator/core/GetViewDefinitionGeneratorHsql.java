@@ -1,14 +1,14 @@
 package liquibase.sqlgenerator.core;
 
-import liquibase.statement.core.GetViewDefinitionStatement;
-import liquibase.database.*;
+import liquibase.database.Database;
 import liquibase.database.core.H2Database;
 import liquibase.database.core.HsqlDatabase;
+import liquibase.exception.DatabaseException;
+import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
-import liquibase.exception.JDBCException;
-import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.sqlgenerator.SqlGeneratorChain;
+import liquibase.statement.core.GetViewDefinitionStatement;
 
 public class GetViewDefinitionGeneratorHsql extends GetViewDefinitionGenerator {
     @Override
@@ -27,7 +27,7 @@ public class GetViewDefinitionGeneratorHsql extends GetViewDefinitionGenerator {
             return new Sql[] {
                     new UnparsedSql("SELECT VIEW_DEFINITION FROM INFORMATION_SCHEMA.SYSTEM_VIEWS WHERE TABLE_NAME = '" + statement.getViewName() + "' AND TABLE_SCHEMA='" + database.convertRequestedSchemaToSchema(statement.getSchemaName()) + "'")
             };
-        } catch (JDBCException e) {
+        } catch (DatabaseException e) {
             throw new UnexpectedLiquibaseException(e);
         }
     }

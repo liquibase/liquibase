@@ -1,20 +1,19 @@
 package liquibase.sqlgenerator.core;
 
-import liquibase.statement.core.CreateDatabaseChangeLogLockTableStatement;
-import liquibase.statement.core.CreateTableStatement;
-import liquibase.statement.core.InsertStatement;
-import liquibase.statement.NotNullConstraint;
 import liquibase.database.Database;
-import liquibase.database.core.MSSQLDatabase;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.SqlGenerator;
-import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.sqlgenerator.SqlGeneratorChain;
+import liquibase.sqlgenerator.SqlGeneratorFactory;
+import liquibase.statement.NotNullConstraint;
+import liquibase.statement.core.CreateDatabaseChangeLogLockTableStatement;
+import liquibase.statement.core.CreateTableStatement;
+import liquibase.statement.core.InsertStatement;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Arrays;
+import java.util.List;
 
 public class CreateDatabaseChangeLogLockTableGenerator implements SqlGenerator<CreateDatabaseChangeLogLockTableStatement> {
     public int getPriority() {

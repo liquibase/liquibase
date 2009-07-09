@@ -2,13 +2,14 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
 import liquibase.database.core.OracleDatabase;
-import liquibase.exception.ValidationErrors;
+import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
-import liquibase.statement.core.FindForeignKeyConstraintsStatement;
 import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
+import liquibase.statement.core.FindForeignKeyConstraintsStatement;
 
 public class FindForeignKeyConstraintsGeneratorOracle implements SqlGenerator<FindForeignKeyConstraintsStatement> {
     public int getPriority() {
@@ -48,7 +49,7 @@ public class FindForeignKeyConstraintsGeneratorOracle implements SqlGenerator<Fi
         sb.append("AND BASE.CONSTRAINT_TYPE = 'R' ");
         try {
             sb.append("AND BASE.OWNER = '").append(database.convertRequestedSchemaToSchema(null)).append("'");
-        } catch (liquibase.exception.JDBCException e) {
+        } catch (DatabaseException e) {
             throw new UnexpectedLiquibaseException(e);
         }
         sb.append("AND ROWNUM <= 1");

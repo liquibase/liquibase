@@ -1,13 +1,13 @@
 package liquibase.sqlgenerator.core;
 
-import liquibase.statement.core.UnlockDatabaseChangeLogStatement;
-import liquibase.statement.core.UpdateStatement;
 import liquibase.database.Database;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.SqlGenerator;
-import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.sqlgenerator.SqlGeneratorChain;
+import liquibase.sqlgenerator.SqlGeneratorFactory;
+import liquibase.statement.core.UnlockDatabaseChangeLogStatement;
+import liquibase.statement.core.UpdateStatement;
 
 public class UnlockDatabaseChangeLogGenerator implements SqlGenerator<UnlockDatabaseChangeLogStatement> {
     public int getPriority() {
