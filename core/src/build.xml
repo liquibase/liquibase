@@ -234,23 +234,6 @@ The available targets at the current stage:
     <!-- target: SITE -->
     <target name="site" depends="prepare">
 
-        <copy todir="${release.site.dir}" filtering="true">
-            <fileset dir="${src.dir}/site">
-                <include name="**/*.html"/>
-                <include name="**/*.htm"/>
-            </fileset>
-            <filterset id="site.filter.set">
-                <filter token="BUILD.VERSION" value="${build.version}"/>
-            </filterset>
-        </copy>
-
-        <copy todir="${release.site.dir}">
-            <fileset dir="${src.dir}/site">
-                <exclude name="**/*.html"/>
-                <exclude name="**/*.wnk"/>
-                <exclude name="**/*.swf"/>
-            </fileset>
-        </copy>
         <copy todir="${release.site.dir}/xml/ns/dbchangelog">
             <fileset dir="${src.dir}/java/liquibase/">
                 <include name="*.xsd"/>
@@ -494,7 +477,7 @@ The available targets at the current stage:
         </deploy>
 
         <!--TODO automate the coping the html files into the site... -->
-        <copy todir="${src.dir}/site/phpincludes">
+        <copy todir="${release.site.dir}/phpincludes">
           <fileset dir="${maven.build.dir}/site">
             <include name="*-mojo.html"/>
           </fileset>
@@ -556,7 +539,7 @@ The available targets at the current stage:
         </deploy>
 
         <!--TODO automate the coping the html files into the site... -->
-        <copy todir="${src.dir}/site/phpincludes">
+        <copy todir="${release.site.dir}/phpincludes">
           <fileset dir="${maven.build.dir}/site">
             <include name="*-mojo.html"/>
           </fileset>
