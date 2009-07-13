@@ -172,7 +172,7 @@ The available targets at the current stage:
 
     <!-- target: PACKAGE -->
     <target name="package" depends="compile">
-        <jar destfile="${release.dir}/liquibase-SNAPSHOT.jar" manifest="${src.dir}/java/META-INF/MANIFEST.MF">
+        <jar destfile="${release.dir}/liquibase-SNAPSHOT.jar" manifest="${basedir}/../../core-jvm/src/java/META-INF/MANIFEST.MF">
             <zipfileset dir="${build.dir}"/>
         </jar>
 
@@ -229,9 +229,6 @@ The available targets at the current stage:
             <tarfileset dir="${package.dir}/liquibase-${build.version}-src" prefix="liquibase-${build.version}"
                         includes="liquibase" mode="755"/>
         </tar>
-
-        <zip destfile="${release.dir}/liquibase-intellij-${build.version}-src.zip" basedir="${intellij.basedir}"
-                excludes="build/**,build-test/**"/>
     </target>
 
     <!-- target: SITE -->
@@ -260,7 +257,7 @@ The available targets at the current stage:
             </fileset>
         </copy>
         <copy todir="${release.site.dir}/samples/">
-            <fileset dir="${src.dir}/samples"/>
+            <fileset dir="${basedir}/../../core-jvm/src/samples"/>
         </copy>
         <copy todir="${release.site.dir}/api">
             <fileset dir="${reports.dir}/api"/>
@@ -606,5 +603,20 @@ The available targets at the current stage:
                 </fileset>
             </libClasspath>
         </crap4j>
+    </target>
+
+    <target name="ikvmc" depends="package">
+        <taskdef name="ikvmc" classname="net.ikvm.ant.IkvmcTask" classpathref="classpath"/>
+
+        <property name="ikvm.home" location="c:/ikvm-0.40.0.1"/>
+
+        <ikvmc target="library" out="${release.dir}/liquibase-core.dll" home="${ikvm.home}" version="0.0.0.1" debug="true" verbose="true" srcpath="${src.dir}/java">
+             <fileset dir="${release.dir}">
+                <include name="liquibase-SNAPSHOT.jar"/>
+            </fileset>
+        </ikvmc>
+        <copy file="${release.dir}/liquibase-core.dll" tofile="${basedir}/../../core-clr/lib-deps/liquibase-core.dll" overwrite="true"/>
+
+
     </target>
 </project>

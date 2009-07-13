@@ -27,7 +27,7 @@ public class HsqlDatabase extends AbstractDatabase {
 
 
     public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
-        return "HSQL Database Engine".equalsIgnoreCase(getDatabaseProductName(conn));
+        return "HSQL Database Engine".equalsIgnoreCase(conn.getDatabaseProductName());
     }
 
     public String getDefaultDriver(String url) {

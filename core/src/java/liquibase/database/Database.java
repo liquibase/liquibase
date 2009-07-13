@@ -147,8 +147,6 @@ public interface Database extends DatabaseObject {
 
     int getDatabaseType(int type);
 
-    String getDatabaseProductName(DatabaseConnection conn) throws DatabaseException;
-
     /**
      * Returns the actual database-specific data type to use for a "char" column.
      */

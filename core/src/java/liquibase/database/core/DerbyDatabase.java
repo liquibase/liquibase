@@ -17,7 +17,7 @@ public class DerbyDatabase extends AbstractDatabase {
     private static final DataType TIMESTAMP_TYPE = new DataType("TIMESTAMP", false);
 
     public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
-        return "Apache Derby".equalsIgnoreCase(getDatabaseProductName(conn));
+        return "Apache Derby".equalsIgnoreCase(conn.getDatabaseProductName());
     }
 
     public String getDefaultDriver(String url) {

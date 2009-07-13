@@ -18,7 +18,7 @@ public class FirebirdDatabase extends AbstractDatabase {
     private static final DataType DATETIME_TYPE = new DataType("TIMESTAMP", false);
 
     public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
-        return getDatabaseProductName(conn).startsWith("Firebird");
+        return conn.getDatabaseProductName().startsWith("Firebird");
     }
 
     public String getDefaultDriver(String url) {

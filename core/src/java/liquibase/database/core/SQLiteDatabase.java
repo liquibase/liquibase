@@ -75,7 +75,7 @@ public class SQLiteDatabase extends AbstractDatabase {
 
     public boolean isCorrectDatabaseImplementation(DatabaseConnection conn)
             throws DatabaseException {
-        return "SQLite".equalsIgnoreCase(getDatabaseProductName(conn));
+        return "SQLite".equalsIgnoreCase(conn.getDatabaseProductName());
     }
 
     public boolean supportsInitiallyDeferrableColumns() {

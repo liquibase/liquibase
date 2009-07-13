@@ -11,14 +11,13 @@ import liquibase.database.DatabaseConnection;
 import liquibase.database.DataType;
 import liquibase.diff.DiffStatusListener;
 import liquibase.exception.*;
-import liquibase.lock.DatabaseChangeLogLock;
+import liquibase.lockservice.DatabaseChangeLogLock;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.statement.SqlStatement;
 
 import java.io.IOException;
 import java.io.Writer;
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.*;

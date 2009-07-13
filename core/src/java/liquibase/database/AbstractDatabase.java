@@ -115,14 +115,6 @@ public abstract class AbstractDatabase implements Database {
         }
     }
 
-    public String getDatabaseProductName(DatabaseConnection conn) throws DatabaseException {
-        try {
-            return conn.getDatabaseProductName();
-        } catch (DatabaseException e) {
-            throw new DatabaseException(e);
-        }
-    }
-
 
     public String getDatabaseProductVersion() throws DatabaseException {
         try {

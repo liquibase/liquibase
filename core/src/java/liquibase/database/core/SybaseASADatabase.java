@@ -198,8 +198,8 @@ public class SybaseASADatabase extends AbstractDatabase {
 	 * @see liquibase.database.Database#isCorrectDatabaseImplementation(java.sql.Connection)
 	 */
 	public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
-		return "Adaptive Server Anywhere".equalsIgnoreCase(getDatabaseProductName(conn))
-                || "SQL Anywhere".equalsIgnoreCase(getDatabaseProductName(conn));
+		return "Adaptive Server Anywhere".equalsIgnoreCase(conn.getDatabaseProductName())
+                || "SQL Anywhere".equalsIgnoreCase(conn.getDatabaseProductName());
 	}
 
 	@Override
