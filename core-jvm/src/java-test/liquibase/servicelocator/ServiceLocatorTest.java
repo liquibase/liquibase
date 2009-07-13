@@ -1,4 +1,4 @@
-package liquibase.util.plugin;
+package liquibase.servicelocator;
 
 import org.junit.Test;
 import org.junit.After;
@@ -9,13 +9,14 @@ import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.test.TestContext;
+import liquibase.servicelocator.ServiceLocator;
 
 import java.net.URLClassLoader;
 import java.net.URL;
 import java.io.File;
 
-public class ClassPathScannerTest {
-    private ClassPathScanner classPathScanner;
+public class ServiceLocatorTest {
+    private ServiceLocator serviceLocator;
 
     @Before
     public void setup() throws Exception{
@@ -26,33 +27,33 @@ public class ClassPathScannerTest {
                 sample2.toURL()
         })));
         
-        classPathScanner = ClassPathScanner.getInstance();
-        classPathScanner.setResourceAccessor(resourceAccessor);
+        serviceLocator = ServiceLocator.getInstance();
+        serviceLocator.setResourceAccessor(resourceAccessor);
     }
 
     @After
     public void teardown() {
-        ClassPathScanner.reset();
+        ServiceLocator.reset();
     }
     
     @Test
      public void reset() {
-         ClassPathScanner instance1 = ClassPathScanner.getInstance();
-         ClassPathScanner.reset();
-         assertFalse(instance1 == ClassPathScanner.getInstance());
+         ServiceLocator instance1 = ServiceLocator.getInstance();
+         ServiceLocator.reset();
+         assertFalse(instance1 == ServiceLocator.getInstance());
      }
 
 
     @Test
     public void getClasses() throws Exception {
-        Class[] classes = classPathScanner.getClasses(ChangeLogParser.class);
+        Class[] classes = serviceLocator.getClasses(ChangeLogParser.class);
         assertTrue(classes.length > 0);
     }
 
 
     @Test
     public void getClasses_sampleJar() throws Exception {
-        Class[] classes = ClassPathScanner.getInstance().getClasses(SqlGenerator.class);
+        Class[] classes = ServiceLocator.getInstance().getClasses(SqlGenerator.class);
         for (Class clazz : classes) {
             if (clazz.getName().equals("liquibase.sqlgenerator.ext.sample1.Sample1UpdateGenerator")) {
                 return;

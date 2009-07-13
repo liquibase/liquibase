@@ -3,7 +3,7 @@ package liquibase.database;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.util.log.LogFactory;
-import liquibase.util.plugin.ClassPathScanner;
+import liquibase.servicelocator.ServiceLocator;
 import liquibase.database.core.UnsupportedDatabase;
 
 import java.util.ArrayList;
@@ -17,7 +17,7 @@ public class DatabaseFactory {
 
     protected DatabaseFactory() {
         try {
-            Class[] classes = ClassPathScanner.getInstance().getClasses(Database.class);
+            Class[] classes = ServiceLocator.getInstance().getClasses(Database.class);
 
             for (Class<? extends Database> clazz : classes) {
                 register(clazz.getConstructor().newInstance());

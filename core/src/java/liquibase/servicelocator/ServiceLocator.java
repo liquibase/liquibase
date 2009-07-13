@@ -1,4 +1,4 @@
-package liquibase.util.plugin;
+package liquibase.servicelocator;
 
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.resource.ClassLoaderResourceAccessor;
@@ -16,18 +16,16 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 
-public class ClassPathScanner {
+public class ServiceLocator {
 
-    private static ClassPathScanner instance;
+    private static ServiceLocator instance;
 
     static {
         try {
-            Class<?> scanner = Class.forName("LiquiBase.ClrClassPathScanner, liquibase-clr");
-            System.out.println("Founds scanner");
-            instance = (ClassPathScanner) scanner.newInstance();
+            Class<?> scanner = Class.forName("LiquiBase.ServiceLocator.ClrServiceLocator, LiquiBase");
+            instance = (ServiceLocator) scanner.newInstance();
         } catch (Exception e) {
-            System.out.println("Java scanner");
-            instance = new ClassPathScanner();
+            instance = new ServiceLocator();
         }
     }
 
@@ -36,15 +34,15 @@ public class ClassPathScanner {
     private Map<Class, List<Class>> classesBySuperclass;
     private List<String> packagesToScan;
 
-    protected ClassPathScanner() {
+    protected ServiceLocator() {
         setResourceAccessor(new ClassLoaderResourceAccessor());
     }
 
-    protected ClassPathScanner(ResourceAccessor accessor) {
+    protected ServiceLocator(ResourceAccessor accessor) {
         
     }
 
-    public static ClassPathScanner getInstance() {
+    public static ServiceLocator getInstance() {
         return instance;
     }
 
@@ -79,17 +77,17 @@ public class ClassPathScanner {
 
     public Class[] getClasses(Class requiredInterface) throws Exception {
 //        Class.forName(requiredInterface.getName());
-        System.out.println("Getting classes...");
+//        System.out.println("Getting classes...");
 
         if (!classesBySuperclass.containsKey(requiredInterface)) {
             classesBySuperclass.put(requiredInterface, new ArrayList<Class>());
 
             for (String packageName : packagesToScan) {
-                System.out.println("scanning "+packageName);
+//                System.out.println("scanning "+packageName);
                 String path = packageName.replace('.', '/');
                 Enumeration<URL> resources = resourceAccessor.getResources(path);
                 while (resources.hasMoreElements()) {
-                    System.out.println("Found resource");
+//                    System.out.println("Found resource");
                     classesBySuperclass.get(requiredInterface).addAll(findClasses(resources.nextElement(), packageName, requiredInterface));
                 }
             }
@@ -100,7 +98,7 @@ public class ClassPathScanner {
     }
 
     private List<Class> findClasses(URL resource, String packageName, Class requiredInterface) throws Exception {
-        System.out.println("-----find "+packageName+" classes in "+resource.toExternalForm()+" matching interface "+requiredInterface.getName());
+//        System.out.println("-----find "+packageName+" classes in "+resource.toExternalForm()+" matching interface "+requiredInterface.getName());
         List<Class> classes = new ArrayList<Class>();
 //        if (directory.toURI().toString().startsWith("jar:")) {
 //            System.out.println("have a jar: "+directory.toString());
@@ -121,7 +119,7 @@ public class ClassPathScanner {
             File directory = new File(resource.getFile().replace("%20", " "));
 
             if (!directory.exists()) {
-                System.out.println(directory + " does not exist");
+//                System.out.println(directory + " does not exist");
                 return classes;
             }
 
@@ -139,19 +137,19 @@ public class ClassPathScanner {
         }
 
         for (String potentialClassName : potentialClassNames) {
-            System.out.println("Potential class: "+potentialClassName);
+//            System.out.println("Potential class: "+potentialClassName);
             Class<?> clazz = null;
             try {
                 clazz = Class.forName(potentialClassName, true, resourceAccessor.toClassLoader());
             } catch (NoClassDefFoundError e) {
-                System.out.println("NoClassDefFoundError: "+potentialClassName);
+//                System.out.println("NoClassDefFoundError: "+potentialClassName);
                 LogFactory.getLogger().warning("Could not configure extension class "+potentialClassName+": Missing dependency "+e.getMessage());
                 continue;
             }
             if (!clazz.isInterface()
                     && !Modifier.isAbstract(clazz.getModifiers())
                     && isCorrectType(clazz, requiredInterface)) {
-                System.out.println(potentialClassName+" matches");
+//                System.out.println(potentialClassName+" matches");
                 try {
                     clazz.getConstructor();
                     classes.add(clazz);
@@ -161,8 +159,8 @@ public class ClassPathScanner {
                         LogFactory.getLogger().warning("Class " + clazz.getName() + " does not have a public no-arg constructor, so it can't be used as a " + requiredInterface.getName() + " plug-in");
                     }
                 }
-            } else {
-                System.out.println(potentialClassName+" does not match");
+//            } else {
+//                System.out.println(potentialClassName+" does not match");
             }
 
         }
@@ -175,6 +173,6 @@ public class ClassPathScanner {
     }
 
     public static void reset() {
-        instance = new ClassPathScanner();
+        instance = new ServiceLocator();
     }
 }

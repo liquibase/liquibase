@@ -1,7 +1,7 @@
 package liquibase.serializer;
 
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.util.plugin.ClassPathScanner;
+import liquibase.servicelocator.ServiceLocator;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,7 +25,7 @@ public class ChangeLogSerializerFactory {
     private ChangeLogSerializerFactory() {
         Class<? extends ChangeLogSerializer>[] classes;
         try {
-            classes = ClassPathScanner.getInstance().getClasses(ChangeLogSerializer.class);
+            classes = ServiceLocator.getInstance().getClasses(ChangeLogSerializer.class);
 
             for (Class<? extends ChangeLogSerializer> clazz : classes) {
                     register((ChangeLogSerializer) clazz.getConstructor().newInstance());

@@ -5,14 +5,16 @@ import liquibase.database.example.ExampleCustomDatabase;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.database.core.MockDatabase;
 import liquibase.exception.DatabaseException;
+import liquibase.resource.CompositeResourceAccessor;
+import liquibase.resource.ClassLoaderResourceAccessor;
+import liquibase.resource.ResourceAccessor;
 
 import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.SQLException;
 import java.util.*;
 import java.io.File;
-import java.net.URISyntaxException;
-import java.net.URI;
+import java.net.*;
 
 /**
  * Controls the database connections for running tests.
@@ -50,6 +52,7 @@ public class TestContext {
     public static final String ALT_SCHEMA = "LIQUIBASEB";
     public static final String ALT_TABLESPACE = "LIQUIBASE2";
     private static final String TEST_DATABASES_PROPERTY = "test.databases";
+    private ResourceAccessor resourceAccessor;
 
     private DatabaseConnection openConnection(final String url) throws Exception {
         if (connectionsAttempted.containsKey(url)) {
@@ -247,5 +250,21 @@ public class TestContext {
     public File findCoreProjectRoot() throws URISyntaxException {
         return new File(findCoreJvmProjectRoot().getParentFile().getParentFile().getParentFile().getParentFile(), "core");
     }
+
+    public ResourceAccessor getTestResourceAccessor() throws URISyntaxException, MalformedURLException {
+        if (resourceAccessor == null) {
+            File samples1 = new File(TestContext.getInstance().findCoreJvmProjectRoot(), "/lib-test/liquibase-sample1.jar");
+            File samples2 = new File(TestContext.getInstance().findCoreJvmProjectRoot(), "/lib-test/liquibase-sample2.jar");
+            resourceAccessor = new CompositeResourceAccessor(new ClassLoaderResourceAccessor(), new ClassLoaderResourceAccessor(new URLClassLoader(new URL[]{
+                    samples1.toURL(),
+                    samples2.toURL(),
+                    new File(TestContext.getInstance().findCoreJvmProjectRoot(), "/build").toURL(),
+                    new File(TestContext.getInstance().findCoreProjectRoot(), "/build").toURL()
+            })));
+        }
+
+        return resourceAccessor;
+    }
+
 
 }
