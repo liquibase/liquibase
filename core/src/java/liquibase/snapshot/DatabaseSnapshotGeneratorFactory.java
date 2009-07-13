@@ -4,7 +4,7 @@ import liquibase.database.Database;
 import liquibase.diff.DiffStatusListener;
 import liquibase.exception.DatabaseException;
 import liquibase.util.log.LogFactory;
-import liquibase.util.plugin.ClassPathScanner;
+import liquibase.servicelocator.ServiceLocator;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -19,7 +19,7 @@ public class DatabaseSnapshotGeneratorFactory {
 
     private DatabaseSnapshotGeneratorFactory() {
         try {
-            Class[] classes = ClassPathScanner.getInstance().getClasses(DatabaseSnapshotGenerator.class);
+            Class[] classes = ServiceLocator.getInstance().getClasses(DatabaseSnapshotGenerator.class);
 
             for (Class<? extends DatabaseSnapshotGenerator> clazz : classes) {
                 register(clazz.getConstructor().newInstance());

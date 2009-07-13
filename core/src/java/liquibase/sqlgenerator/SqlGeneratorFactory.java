@@ -5,7 +5,7 @@ import liquibase.database.structure.DatabaseObject;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.statement.SqlStatement;
-import liquibase.util.plugin.ClassPathScanner;
+import liquibase.servicelocator.ServiceLocator;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -25,7 +25,7 @@ public class SqlGeneratorFactory {
     private SqlGeneratorFactory() {
         Class[] classes;
         try {
-            classes = ClassPathScanner.getInstance().getClasses(SqlGenerator.class);
+            classes = ServiceLocator.getInstance().getClasses(SqlGenerator.class);
 
             for (Class clazz : classes) {
                 register((SqlGenerator) clazz.getConstructor().newInstance());
@@ -79,7 +79,13 @@ public class SqlGeneratorFactory {
         for (SqlGenerator generator : getGenerators()) {
             Class clazz = generator.getClass();
             while (clazz != null) {
-                for (Type type : clazz.getGenericInterfaces()) {
+                Type[] interfaces = new Type[0];
+                try {
+                    interfaces = clazz.getGenericInterfaces();
+                } catch (Exception e) {
+                    System.out.println("No interfaces for "+clazz+": "+e.getMessage());
+                }
+                for (Type type : interfaces) {
                     if (type instanceof ParameterizedType
                             && Arrays.asList(((ParameterizedType) type).getActualTypeArguments()).contains(statement.getClass())) {
                         //noinspection unchecked

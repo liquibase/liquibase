@@ -2,6 +2,7 @@ package liquibase.dbtest;
 
 import junit.framework.TestCase;
 import liquibase.Liquibase;
+import liquibase.servicelocator.ServiceLocator;
 import liquibase.snapshot.DatabaseSnapshotGeneratorFactory;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.executor.ExecutorService;
@@ -17,20 +18,16 @@ import liquibase.exception.ValidationFailedException;
 import liquibase.lockservice.LockService;
 import liquibase.resource.ResourceAccessor;
 import liquibase.resource.FileSystemResourceAccessor;
-import liquibase.resource.CompositeResourceAccessor;
-import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.statement.core.DropTableStatement;
 import liquibase.test.JUnitResourceAccessor;
 import liquibase.test.TestContext;
 import liquibase.util.log.LogFactory;
-import liquibase.util.plugin.ClassPathScanner;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.io.StringWriter;
 import java.net.URL;
-import java.net.URLClassLoader;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.List;
@@ -64,6 +61,8 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
+
+        ServiceLocator.getInstance().setResourceAccessor(TestContext.getInstance().getTestResourceAccessor());
 
         if (database != null) {
             if (!database.getConnection().getAutoCommit()) {
@@ -554,16 +553,6 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
             return;
         }
 
-        File samples1 = new File(TestContext.getInstance().findCoreJvmProjectRoot(), "/lib-test/liquibase-sample1.jar");
-        File samples2 = new File(TestContext.getInstance().findCoreJvmProjectRoot(), "/lib-test/liquibase-sample2.jar");
-        CompositeResourceAccessor resourceAccessor = new CompositeResourceAccessor(new ClassLoaderResourceAccessor(), new ClassLoaderResourceAccessor(new URLClassLoader(new URL[]{
-                samples1.toURL(),
-                samples2.toURL(),
-        })));
-        ;
-
-        ClassPathScanner.getInstance().setResourceAccessor(resourceAccessor);
-
         try {
             String extChangelog = "changelogs/common/ext.changelog.xml";
             Liquibase liquibase = createLiquibase(extChangelog);
@@ -578,7 +567,7 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
                 throw e;
             }
         } finally {
-            ClassPathScanner.reset();
+            ServiceLocator.reset();
         }
     }
 }

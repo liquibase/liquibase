@@ -1,7 +1,7 @@
 package liquibase.change;
 
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.util.plugin.ClassPathScanner;
+import liquibase.servicelocator.ServiceLocator;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -22,7 +22,7 @@ public class ChangeFactory {
     private ChangeFactory() {
         Class<? extends Change>[] classes;
         try {
-            classes = ClassPathScanner.getInstance().getClasses(Change.class);
+            classes = ServiceLocator.getInstance().getClasses(Change.class);
 
             for (Class<? extends Change> clazz : classes) {
                 //noinspection unchecked

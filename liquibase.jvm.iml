@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module relativePaths="true" type="JAVA_MODULE" version="4">
-  <component name="NewModuleRootManager" inherit-compiler-output="true">
+  <component name="NewModuleRootManager" inherit-compiler-output="false">
+    <output url="file://$MODULE_DIR$/core-jvm/build" />
+    <output-test url="file://$MODULE_DIR$/core-jvm/build-test" />
     <exclude-output />
     <content url="file://$MODULE_DIR$/core-jvm">
       <sourceFolder url="file://$MODULE_DIR$/core-jvm/src/java" isTestSource="false" />
@@ -32,16 +34,6 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="file://$MODULE_DIR$/core-jvm/lib-test" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-        <jarDirectory url="file://$MODULE_DIR$/core-jvm/lib-test" recursive="false" />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
           <root url="file://$MODULE_DIR$/core-jvm/lib-compile" />
         </CLASSES>
         <JAVADOC />
@@ -49,7 +41,7 @@
         <jarDirectory url="file://$MODULE_DIR$/core-jvm/lib-compile" recursive="false" />
       </library>
     </orderEntry>
-    <orderEntry type="module" module-name="liquibase.core" />
+    <orderEntry type="module" module-name="liquibase.core" exported="" />
   </component>
 </module>
 

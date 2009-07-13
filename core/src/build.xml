@@ -46,9 +46,13 @@ The available targets at the current stage:
               <equals arg1="${ant.java.version}" arg2="${target.java.version}"/>
         </condition>
 
-        <mkdir dir="${build.dir}"/>
-        <mkdir dir="${build.test.dir}"/>
-        <mkdir dir="${build.db.test.dir}"/>
+        <mkdir dir="${core.build.dir}"/>
+        <mkdir dir="${core.build.test.dir}"/>
+        <mkdir dir="${core.build.db.test.dir}"/>
+
+        <mkdir dir="${jvm.build.dir}"/>
+        <mkdir dir="${jvm.build.test.dir}"/>
+        <mkdir dir="${jvm.build.db.test.dir}"/>
 
         <mkdir dir="${package.dir}/liquibase-${build.version}"/>
         <mkdir dir="${package.dir}/liquibase-${build.version}-src"/>
@@ -59,18 +63,29 @@ The available targets at the current stage:
         <mkdir dir="${reports.dir}/api"/>
 
         <!-- Build classpath -->
-        <path id="classpath">
-            <fileset dir="${lib.dir}">
+        <path id="core.classpath">
+            <fileset dir="${core.lib.dir}">
                 <include name="**/*.jar"/>
             </fileset>
-            <fileset dir="${lib.compile.dir}">
+            <fileset dir="${core.lib.compile.dir}">
                 <include name="**/*.jar"/>
             </fileset>
-            <pathelement location="${build.dir}"/>
-            <pathelement path="${user.home}/.IntelliJIdea50/config/plugins/clover-idea5.jar"/>
+            <pathelement location="${core.build.dir}"/>
             <fileset dir="${release.dir}">
                 <include name="**/*.jar"/>
             </fileset>
+        </path>
+
+        <path id="jvm.classpath">
+            <path refid="core.classpath"/>
+
+            <fileset dir="${jvm.lib.dir}">
+                <include name="**/*.jar"/>
+            </fileset>
+            <fileset dir="${jvm.lib.compile.dir}">
+                <include name="**/*.jar"/>
+            </fileset>
+            <pathelement location="${jvm.build.dir}"/>
         </path>
 
     </target>
@@ -83,61 +98,92 @@ The available targets at the current stage:
     <target name="clean">
         <property file="build.properties"/>
 
-        <delete dir="${build.dir}"/>
-        <delete dir="${build.test.dir}"/>
-        <delete dir="${build.db.test.dir}"/>
+        <delete dir="${core.build.dir}"/>
+        <delete dir="${core.build.test.dir}"/>
+        <delete dir="${core.build.db.test.dir}"/>
+
+        <delete dir="${jvm.build.dir}"/>
+        <delete dir="${jvm.build.test.dir}"/>
+        <delete dir="${jvm.build.db.test.dir}"/>
 
         <delete dir="${release.dir}"/>
         <delete dir="${lib.deps.dir}"/>
         <delete dir="${reports.dir}"/>
         <delete dir="${package.dir}"/>
         <delete dir="${coverage.build.dir}"/>
+
+        <delete dir="${maven.build.dir}"/>
     </target>
 
     <!-- target: COMPILE -->
     <target name="compile" depends="prepare, check-jvm">
-        <copy todir="${build.dir}" filtering="true">
+        <copy todir="${core.build.dir}" filtering="true">
             <filterset>
                 <filter token="BUILD.VERSION" value="${build.version}"/>
             </filterset>
-            <fileset dir="${src.dir}/java"
+            <fileset dir="${core.src.dir}/java"
                      includes="**/*.properties, **/*.xml, **/*.config, **/*.txt, **/*.jdo, **/*.tld, **/*.xsd, **/*.css, **/*.html"/>
         </copy>
-        <copy todir="${build.dir}">
-            <fileset dir="${src.dir}/java" includes="**/*.jpg, **/*.png, **/*.gif"/>
+
+        <copy todir="${core.build.dir}">
+            <fileset dir="${core.src.dir}/java" includes="**/*.jpg, **/*.png, **/*.gif"/>
         </copy>
-        <copy todir="${build.dir}">
-            <fileset dir="${src.dir}/java" includes="**/help/**"/>
+        <copy todir="${core.build.dir}">
+            <fileset dir="${core.src.dir}/java" includes="**/help/**"/>
         </copy>
-        <copy todir="${build.dir}/liquibase/">
-            <fileset dir="${src.dir}" includes="buildinfo.properties"/>
+        <copy todir="${core.build.dir}/liquibase/">
+            <fileset dir="${core.src.dir}" includes="buildinfo.properties"/>
         </copy>
 
-        <javac srcdir="${src.dir}/java" destdir="${build.dir}" deprecation="${deprecation}" debug="${debug}"
+        <javac srcdir="${core.src.dir}/java" destdir="${core.build.dir}" deprecation="${deprecation}" debug="${debug}"
                optimize="${optimize}" source="1.5">
-            <classpath refid="classpath"/>
+            <classpath refid="core.classpath"/>
         </javac>
 
-        <mkdir dir="${build.test.dir}"/>
-        <javac srcdir="${src.dir}/java-test" destdir="${build.test.dir}" deprecation="${deprecation}"
-               debug="${debug}" optimize="${optimize}" source="1.5">
-            <classpath refid="classpath"/>
+        <javac srcdir="${jvm.src.dir}/java" destdir="${jvm.build.dir}" deprecation="${deprecation}" debug="${debug}"
+               optimize="${optimize}" source="1.5">
+            <classpath refid="jvm.classpath"/>
         </javac>
-        <copy todir="${build.test.dir}">
-            <fileset dir="${src.dir}/java-test"
+
+        <mkdir dir="${core.build.test.dir}"/>
+        <mkdir dir="${jvm.build.test.dir}"/>
+
+        <javac srcdir="${core.src.dir}/java-test" destdir="${core.build.test.dir}" deprecation="${deprecation}"
+               debug="${debug}" optimize="${optimize}" source="1.5">
+            <classpath refid="core.classpath"/>
+        </javac>
+        <copy todir="${core.build.test.dir}">
+            <fileset dir="${core.src.dir}/java-test"
                      includes="**/*.properties, **/*.xml, **/*.txt, **/*.config, **/*.tld, **/*.xsd,**/*.sql,**/*.css,**/*.html"/>
         </copy>
 
-        <javac srcdir="${src.dir}/java-dbtest" destdir="${build.db.test.dir}" deprecation="${deprecation}"
+        <javac srcdir="${jvm.src.dir}/java-test" destdir="${jvm.build.test.dir}" deprecation="${deprecation}"
+               debug="${debug}" optimize="${optimize}" source="1.5">
+            <classpath refid="jvm.classpath"/>
+        </javac>
+        <copy todir="${jvm.build.test.dir}">
+            <fileset dir="${jvm.src.dir}/java-test"
+                     includes="**/*.properties, **/*.xml, **/*.txt, **/*.config, **/*.tld, **/*.xsd,**/*.sql,**/*.css,**/*.html"/>
+        </copy>
+
+        <javac srcdir="${core.src.dir}/java-dbtest" destdir="${core.build.db.test.dir}" deprecation="${deprecation}"
                debug="${debug}" optimize="${optimize}" source="1.5">
             <classpath>
-                <pathelement path="${build.dir}"/>
-                <pathelement path="${build.test.dir}"/>
-                <path refid="classpath"/>
+                <pathelement path="${core.build.dir}"/>
+                <pathelement path="${core.build.test.dir}"/>
+                <path refid="core.classpath"/>
+            </classpath>
+        </javac>
+        <javac srcdir="${jvm.src.dir}/java-dbtest" destdir="${jvm.build.db.test.dir}" deprecation="${deprecation}"
+               debug="${debug}" optimize="${optimize}" source="1.5">
+            <classpath>
+                <pathelement path="${jvm.build.dir}"/>
+                <pathelement path="${jvm.build.test.dir}"/>
+                <path refid="jvm.classpath"/>
             </classpath>
         </javac>
 
-        <propertyfile file="${build.dir}/buildinfo.properties">
+        <propertyfile file="${core.build.dir}/buildinfo.properties">
             <entry key="build.version" value="${build.version}"/>
             <entry key="build.timestamp"
                    type="date"
@@ -154,13 +200,13 @@ The available targets at the current stage:
             <javac srcdir="${src.dir}/samples/ext/@{sample}/java" destdir="${src.dir}/samples/ext/@{sample}/build" deprecation="${deprecation}" debug="${debug}"
                    optimize="${optimize}" source="1.5">
                 <classpath>
-                    <pathelement path="${build.dir}"/>
-                    <pathelement path="${build.test.dir}"/>
-                    <path refid="classpath"/>
+                    <pathelement path="${core.build.dir}"/>
+                    <pathelement path="${core.build.test.dir}"/>
+                    <path refid="core.classpath"/>
                 </classpath>
             </javac>
 
-            <jar basedir="${src.dir}/samples/ext/@{sample}/build" destfile="${src.dir}/../lib-test/liquibase-@{sample}.jar"/>
+            <jar basedir="${core.src.dir}/samples/ext/@{sample}/build" destfile="${src.dir}/../lib-test/liquibase-@{sample}.jar"/>
             </sequential>
 
         </macrodef>
@@ -172,16 +218,21 @@ The available targets at the current stage:
 
     <!-- target: PACKAGE -->
     <target name="package" depends="compile">
+        <jar destfile="${release.dir}/liquibase-core-SNAPSHOT.jar" manifest="${basedir}/../../core-jvm/src/java/META-INF/MANIFEST.MF">
+            <zipfileset dir="${core.build.dir}"/>
+        </jar>
+
         <jar destfile="${release.dir}/liquibase-SNAPSHOT.jar" manifest="${basedir}/../../core-jvm/src/java/META-INF/MANIFEST.MF">
-            <zipfileset dir="${build.dir}"/>
+            <zipfileset dir="${core.build.dir}"/>
+            <zipfileset dir="${jvm.build.dir}"/>
         </jar>
 
         <copy tofile="${package.dir}/liquibase-${build.version}/liquibase-${build.version}.jar"
               file="${release.dir}/liquibase-SNAPSHOT.jar"/>
         <copy todir="${package.dir}/liquibase-${build.version}">
-            <fileset file="${src.dir}/changelog.txt"/>
-            <fileset file="${src.dir}/lgpl.txt"/>
-            <fileset dir="${src.dir}/zip"/>
+            <fileset file="${core.src.dir}/changelog.txt"/>
+            <fileset file="${core.src.dir}/lgpl.txt"/>
+            <fileset dir="${core.src.dir}/zip"/>
             <fileset dir="${release.dir}/.." includes="samples/**"/>
             <fileset dir="${release.site.dir}" includes="samples/**"/>
         </copy>
@@ -206,7 +257,13 @@ The available targets at the current stage:
             </fileset>
         </copy>
         <copy todir="${package.dir}/liquibase-${build.version}-src/src">
-            <fileset dir="${src.dir}">
+            <fileset dir="${core.src.dir}">
+                <include name="java/**"/>
+                <include name="java-test/**"/>
+                <include name="build.xml"/>
+                <include name="build.properties"/>
+            </fileset>
+            <fileset dir="${jvm.src.dir}">
                 <include name="java/**"/>
                 <include name="java-test/**"/>
                 <include name="build.xml"/>
@@ -214,10 +271,12 @@ The available targets at the current stage:
             </fileset>
         </copy>
         <copy todir="${package.dir}/liquibase-${build.version}-src/lib">
-            <fileset dir="${src.dir}/../lib"/>
+            <fileset dir="${core.src.dir}/../lib"/>
+            <fileset dir="${jvm.src.dir}/../lib"/>
         </copy>
         <copy todir="${package.dir}/liquibase-${build.version}-src/lib-compile">
-            <fileset dir="${src.dir}/../lib-compile"/>
+            <fileset dir="${core.src.dir}/../lib-compile"/>
+            <fileset dir="${jvm.src.dir}/../lib-compile"/>
         </copy>
         <chmod file="${package.dir}/liquibase-${build.version}-src/liquibase" perm="a+x"/>
 
@@ -235,7 +294,7 @@ The available targets at the current stage:
     <target name="site" depends="prepare">
 
         <copy todir="${release.site.dir}/xml/ns/dbchangelog">
-            <fileset dir="${src.dir}/java/liquibase/">
+            <fileset dir="${core.src.dir}/java/liquibase/">
                 <include name="*.xsd"/>
             </fileset>
         </copy>
@@ -264,12 +323,16 @@ The available targets at the current stage:
                 useexternalfile="yes"
                 breakiterator="yes">
 
-            <fileset dir="${src.dir}/java" defaultexcludes="yes">
+            <fileset dir="${core.src.dir}/java" defaultexcludes="yes">
                 <include name="**/*.java"/>
             </fileset>
-            <classpath refid="classpath"/>
+            <fileset dir="${jvm.src.dir}/java" defaultexcludes="yes">
+                <include name="**/*.java"/>
+            </fileset>
+            <classpath refid="core.classpath"/>
+            <classpath refid="core.classpath"/>
             <!--<bottom><![CDATA[-->
-            <!--<i>Copyright &#169; 2006-2007 Sundog. All Rights Reserved.</i>-->
+            <!--<i>Copyright &#169; 2006-2009 Nathan Voxland. All Rights Reserved.</i>-->
             <!--<script src="http://www.google-analytics.com/urchin.js" type="text/javascript">-->
             <!--</script>-->
             <!--<script type="text/javascript">-->
@@ -291,15 +354,23 @@ The available targets at the current stage:
             <env key="JAVA_HOME" path="${env.JAVA_HOME}"/>
             <classpath>
                 <pathelement location="${coverage.build.dir}"/>
-                <pathelement path="${build.dir}"/>
-                <pathelement path="${build.test.dir}"/>
-                <path refid="classpath"/>
+                <pathelement path="${core.build.dir}"/>
+                <pathelement path="${jvm.build.dir}"/>
+                <pathelement path="${core.build.test.dir}"/>
+                <pathelement path="${jvm.build.test.dir}"/>
+                <path refid="jvm.classpath"/>
             </classpath>
             <jvmarg value="-Demma.coverage.out.file=${coverage.output.dir}/coverage.emma"/>
             <formatter type="brief" usefile="false"/>
             <formatter type="xml"/>
             <batchtest todir="${reports.dir}/junit/${ant.project.name}">
-                <fileset dir="${build.test.dir}">
+                <fileset dir="${core.build.test.dir}">
+                    <include name="**/*Test.class"/>
+                    <exclude name="**/Base*"/>
+                    <exclude name="**/Abstract*"/>
+                    <exclude name="liquibase/test/*"/>
+                </fileset>
+                <fileset dir="${jvm.build.test.dir}">
                     <include name="**/*Test.class"/>
                     <exclude name="**/Base*"/>
                     <exclude name="**/Abstract*"/>
@@ -328,14 +399,22 @@ The available targets at the current stage:
                jvm="${java.home}/bin/java">
             <env key="JAVA_HOME" path="${env.JAVA_HOME}"/>
             <classpath>
-                <pathelement path="${build.dir}"/>
-                <pathelement path="${build.test.dir}"/>
-                <pathelement path="${build.db.test.dir}"/>
-                <path refid="classpath"/>
+                <pathelement path="${core.build.dir}"/>
+                <pathelement path="${core.build.test.dir}"/>
+                <pathelement path="${core.build.db.test.dir}"/>
+                <pathelement path="${jvm.build.dir}"/>
+                <pathelement path="${jvm.build.test.dir}"/>
+                <pathelement path="${jvm.build.db.test.dir}"/>
+                <path refid="jvm.classpath"/>
             </classpath>
             <formatter type="xml"/>
             <batchtest todir="${reports.dir}/junit/${ant.project.name}">
-                <fileset dir="${build.db.test.dir}">
+                <fileset dir="${core.build.db.test.dir}">
+                    <include name="**/*Test.class"/>
+                    <exclude name="**/Base*"/>
+                    <exclude name="**/Abstract*"/>
+                </fileset>
+                <fileset dir="${jvm.build.db.test.dir}">
                     <include name="**/*Test.class"/>
                     <exclude name="**/Base*"/>
                     <exclude name="**/Abstract*"/>
@@ -365,15 +444,23 @@ The available targets at the current stage:
                jvm="${java.home}/bin/java">
             <env key="JAVA_HOME" path="${env.JAVA_HOME}"/>
             <classpath>
-                <pathelement path="${build.dir}"/>
-                <pathelement path="${build.test.dir}"/>
-                <pathelement path="${build.db.test.dir}"/>
-                <path refid="classpath"/>
+                <pathelement path="${core.build.dir}"/>
+                <pathelement path="${core.build.test.dir}"/>
+                <pathelement path="${core.build.db.test.dir}"/>
+                <pathelement path="${jvm.build.dir}"/>
+                <pathelement path="${jvm.build.test.dir}"/>
+                <pathelement path="${jvm.build.db.test.dir}"/>
+                <path refid="jvm.classpath"/>
             </classpath>
             <formatter type="brief" usefile="false"/>
             <formatter type="xml"/>
             <batchtest todir="${reports.dir}/junit/${ant.project.name}">
-                <fileset dir="${build.db.test.dir}">
+                <fileset dir="${core.build.db.test.dir}">
+                    <include name="**/DerbySampleChangeLogRunnerTest.class"/>
+                    <include name="**/H2SampleChangeLogRunnerTest.class"/>
+                    <include name="**/HsqlSampleChangeLogRunnerTest.class"/>
+                </fileset>
+                <fileset dir="${jvm.build.db.test.dir}">
                     <include name="**/DerbySampleChangeLogRunnerTest.class"/>
                     <include name="**/H2SampleChangeLogRunnerTest.class"/>
                     <include name="**/HsqlSampleChangeLogRunnerTest.class"/>
@@ -385,12 +472,12 @@ The available targets at the current stage:
     <target name="-coverage-post-compile" depends="compile">
         <taskdef resource="emma_ant.properties">
             <classpath>
-                <pathelement location="${lib.compile.dir}/emma.jar"/>
-                <pathelement location="${lib.compile.dir}/emma_ant.jar"/>
+                <pathelement location="${core.lib.compile.dir}/emma.jar"/>
+                <pathelement location="${core.lib.compile.dir}/emma_ant.jar"/>
             </classpath>
         </taskdef>
         <path id="build.path">
-            <pathelement path="${build.dir}"/>
+            <pathelement path="${core.build.dir}"/>
         </path>
         <emma enabled="true">
             <instr
@@ -406,7 +493,7 @@ The available targets at the current stage:
             depends="-coverage-post-compile,test" description="Generates code coverage reports for the unit tests">
 
         <emma enabled="true">
-            <report sourcepath="${src.dir}/java">
+            <report sourcepath="${core.src.dir}/java">
                 <fileset dir="${coverage.output.dir}">
                     <include name="*.emma"/>
                 </fileset>
@@ -557,45 +644,14 @@ The available targets at the current stage:
         <antcall target="package" inheritAll="true" inheritRefs="true"/>
     </target>
 
-    <target name="crap4j" depends="prepare">
-
-        <echo>${CRAP4J_HOME}</echo>
-        <taskdef name="crap4j" classname="org.crap4j.anttask.Crap4jAntTask">
-            <classpath>
-                <fileset dir="/crap4j/lib">
-                    <include name="**/*.jar"/>
-                </fileset>
-            </classpath>
-        </taskdef>
-
-        <crap4j projectdir="${basedir}/.."
-                outputDir="reports/crap4j"
-                dontTest="false" debug="false">
-            <classes>
-                <pathElement location="../build"/>
-            </classes>
-            <srces>
-                <pathElement location="../src/java"/>
-            </srces>
-            <testClasses>
-                <pathElement location="../build-test"/>
-            </testClasses>
-            <libClasspath>
-                <fileset dir="../lib">
-                    <include name="**/*.jar"/>
-                </fileset>
-            </libClasspath>
-        </crap4j>
-    </target>
-
     <target name="ikvmc" depends="package">
-        <taskdef name="ikvmc" classname="net.ikvm.ant.IkvmcTask" classpathref="classpath"/>
+        <taskdef name="ikvmc" classname="net.ikvm.ant.IkvmcTask" classpathref="core.classpath"/>
 
         <property name="ikvm.home" location="c:/ikvm-0.40.0.1"/>
 
         <ikvmc target="library" out="${release.dir}/liquibase-core.dll" home="${ikvm.home}" version="0.0.0.1" debug="true" verbose="true" srcpath="${src.dir}/java">
              <fileset dir="${release.dir}">
-                <include name="liquibase-SNAPSHOT.jar"/>
+                <include name="liquibase-core-SNAPSHOT.jar"/>
             </fileset>
         </ikvmc>
         <copy file="${release.dir}/liquibase-core.dll" tofile="${basedir}/../../core-clr/lib-deps/liquibase-core.dll" overwrite="true"/>
