@@ -1,25 +1,19 @@
 package liquibase.database;
 
 import liquibase.exception.DatabaseException;
+import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.util.log.LogFactory;
 import liquibase.util.plugin.ClassPathScanner;
+import liquibase.database.core.UnsupportedDatabase;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
-public abstract class DatabaseFactory {
-    private static DatabaseFactory instance;
+public class DatabaseFactory {
+    private static DatabaseFactory instance = new DatabaseFactory();
     protected static final Logger log = LogFactory.getLogger();
     private List<Database> implementedDatabases = new ArrayList<Database>();
-
-    static {
-        try {
-            instance = (DatabaseFactory) ClassPathScanner.getInstance().getClasses(DatabaseFactory.class)[0].newInstance();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
 
     protected DatabaseFactory() {
         try {
@@ -50,7 +44,34 @@ public abstract class DatabaseFactory {
         implementedDatabases.add(0, database);
     }
 
-    public abstract Database findCorrectDatabaseImplementation(DatabaseConnection connection) throws DatabaseException;
+    public Database findCorrectDatabaseImplementation(DatabaseConnection connection) throws DatabaseException {
+        Database database = null;
+
+        boolean foundImplementation = false;
+
+        for (Database implementedDatabase : getImplementedDatabases()) {
+            database = implementedDatabase;
+            if (database.isCorrectDatabaseImplementation(connection)) {
+                foundImplementation = true;
+                break;
+            }
+        }
+
+        if (!foundImplementation) {
+            log.warning("Unknown database: " + connection.getDatabaseProductName());
+            database = new UnsupportedDatabase();
+        }
+
+        Database returnDatabase;
+        try {
+            returnDatabase = database.getClass().newInstance();
+        } catch (Exception e) {
+            throw new UnexpectedLiquibaseException(e);
+        }
+
+        returnDatabase.setConnection(connection);
+        return returnDatabase;
+    }
 
     public String findDefaultDriver(String url) {
         for (Database database : this.getImplementedDatabases()) {

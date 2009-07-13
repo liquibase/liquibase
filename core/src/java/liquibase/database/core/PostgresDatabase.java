@@ -97,7 +97,7 @@ public class PostgresDatabase extends AbstractDatabase {
     }
 
     public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
-        return PRODUCT_NAME.equalsIgnoreCase(getDatabaseProductName(conn));
+        return PRODUCT_NAME.equalsIgnoreCase(conn.getDatabaseProductName());
     }
 
     public String getDefaultDriver(String url) {

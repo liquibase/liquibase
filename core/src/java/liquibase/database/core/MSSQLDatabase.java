@@ -69,7 +69,9 @@ public class MSSQLDatabase extends AbstractDatabase {
     }
 
     public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
-        return PRODUCT_NAME.equalsIgnoreCase(getDatabaseProductName(conn));
+        String databaseProductName = conn.getDatabaseProductName();
+        return PRODUCT_NAME.equalsIgnoreCase(databaseProductName)
+                || "SQLOLEDB".equalsIgnoreCase(databaseProductName);
     }
 
     public String getDefaultDriver(String url) {

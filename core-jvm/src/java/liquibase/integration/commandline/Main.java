@@ -5,7 +5,7 @@ import liquibase.database.Database;
 import liquibase.exception.CommandLineParsingException;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.ValidationFailedException;
-import liquibase.lock.LockService;
+import liquibase.lockservice.LockService;
 import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.util.LiquibaseUtil;

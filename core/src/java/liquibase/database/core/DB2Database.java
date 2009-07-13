@@ -19,7 +19,7 @@ public class DB2Database extends AbstractDatabase {
     private static final DataType DATETIME_TYPE = new DataType("TIMESTAMP", false);
 
     public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
-        return getDatabaseProductName(conn).startsWith("DB2");
+        return conn.getDatabaseProductName().startsWith("DB2");
     }
 
     public String getDefaultDriver(String url) {

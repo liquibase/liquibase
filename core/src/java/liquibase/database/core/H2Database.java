@@ -29,7 +29,7 @@ public class H2Database extends HsqlDatabase {
 
     @Override
     public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
-        return "H2".equals(getDatabaseProductName(conn));
+        return "H2".equals(conn.getDatabaseProductName());
     }
 
     //    public void dropDatabaseObjects(String schema) throws DatabaseException {

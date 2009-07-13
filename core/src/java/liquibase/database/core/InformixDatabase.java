@@ -179,7 +179,7 @@ public class InformixDatabase extends AbstractDatabase {
 
 	public boolean isCorrectDatabaseImplementation(DatabaseConnection conn)
 			throws DatabaseException {
-		return PRODUCT_NAME.equals(getDatabaseProductName(conn));
+		return PRODUCT_NAME.equals(conn.getDatabaseProductName());
 	}
 
 	public boolean supportsInitiallyDeferrableColumns() {
