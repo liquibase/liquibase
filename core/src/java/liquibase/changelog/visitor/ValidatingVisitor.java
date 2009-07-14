@@ -11,6 +11,7 @@ import liquibase.exception.SetupException;
 import liquibase.precondition.core.AndPrecondition;
 import liquibase.precondition.core.ErrorPrecondition;
 import liquibase.precondition.core.FailedPrecondition;
+import liquibase.precondition.core.PreconditionContainer;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -36,7 +37,7 @@ public class ValidatingVisitor implements ChangeSetVisitor {
 
     public void validate(Database database, DatabaseChangeLog changeLog) {
         try {
-            AndPrecondition precondition = changeLog.getPreconditions();
+            PreconditionContainer precondition = changeLog.getPreconditions();
             if (precondition == null) {
                 return;
             }
