@@ -66,7 +66,7 @@ public class Diff {
 
         if (targetSnapshot == null) {
             if (targetDatabase == null) {
-                targetSnapshot = null;
+                targetSnapshot = new DatabaseSnapshot(baseDatabase, null);
             } else {
                 targetSnapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(targetDatabase, null, statusListeners);
             }

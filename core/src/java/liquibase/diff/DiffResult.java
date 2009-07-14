@@ -29,9 +29,6 @@ public class DiffResult {
     private Long baseId = new Date().getTime();
     private int changeNumber = 1;
 
-    private Database baseDatabase;
-    private Database targetDatabase;
-
     private DatabaseSnapshot baseSnapshot;
     private DatabaseSnapshot targetSnapshot;
 
@@ -69,10 +66,11 @@ public class DiffResult {
     private String changeSetAuthor;
 
     public DiffResult(DatabaseSnapshot baseDatabaseSnapshot, DatabaseSnapshot targetDatabaseSnapshot) {
-        this.baseDatabase = baseDatabaseSnapshot.getDatabase();
-        this.targetDatabase = targetDatabaseSnapshot.getDatabase();
-
         this.baseSnapshot = baseDatabaseSnapshot;
+
+        if (targetDatabaseSnapshot == null) {
+            targetDatabaseSnapshot = new DatabaseSnapshot(baseDatabaseSnapshot.getDatabase(), null);
+        }
         this.targetSnapshot = targetDatabaseSnapshot;
     }
 
@@ -253,8 +251,8 @@ public class DiffResult {
     }
 
     public void printResult(PrintStream out) throws DatabaseException {
-        out.println("Base Database: " + targetDatabase.getConnection().getConnectionUserName() + " " + targetDatabase.getConnection().getURL());
-        out.println("Target Database: " + baseDatabase.getConnection().getConnectionUserName() + " " + baseDatabase.getConnection().getURL());
+        out.println("Base Database: " + targetSnapshot.getDatabase());
+        out.println("Target Database: " + baseSnapshot.getDatabase());
 
         printComparision("Product Name", productName, out);
         printComparision("Product Version", productVersion, out);
@@ -300,7 +298,7 @@ public class DiffResult {
                 Column baseColumn = baseSnapshot.getColumn(column.getTable().getName(), column.getName());
                 if (baseColumn != null) {
                     if (baseColumn.isDataTypeDifferent(column)) {
-                        out.println("           from " + baseColumn.getDataTypeString(baseDatabase) + " to " + targetSnapshot.getColumn(column.getTable().getName(), column.getName()).getDataTypeString(targetDatabase));
+                        out.println("           from " + baseColumn.getDataTypeString(baseSnapshot.getDatabase()) + " to " + targetSnapshot.getColumn(column.getTable().getName(), column.getName()).getDataTypeString(targetSnapshot.getDatabase()));
                     }
                     if (baseColumn.isNullabilityDifferent(column)) {
                         Boolean nowNullable = targetSnapshot.getColumn(column.getTable().getName(), column.getName()).isNullable();
@@ -400,9 +398,9 @@ public class DiffResult {
         Document doc = documentBuilder.newDocument();
 
         Element changeLogElement = doc.createElement("databaseChangeLog");
-        changeLogElement.setAttribute("xmlns", "http://www.liquibase.org/xml/ns/dbchangelog/" + XMLChangeLogSAXParser.getSchemaVersion());
+        changeLogElement.setAttribute("xmlns", "http://www.liquibase.org/xml/ns/dbchangelog");
         changeLogElement.setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
-        changeLogElement.setAttribute("xsi:schemaLocation", "http://www.liquibase.org/xml/ns/dbchangelog/" + XMLChangeLogSAXParser.getSchemaVersion() + " http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-" + XMLChangeLogSAXParser.getSchemaVersion() + ".xsd");
+        changeLogElement.setAttribute("xsi:schemaLocation", "http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-" + XMLChangeLogSAXParser.getSchemaVersion() + ".xsd");
 
         doc.appendChild(changeLogElement);
 
@@ -653,7 +651,7 @@ public class DiffResult {
             if (column.isDataTypeDifferent(baseColumn)) {
                 ColumnConfig columnConfig = new ColumnConfig();
                 columnConfig.setName(column.getName());
-                columnConfig.setType(baseColumn.getDataTypeString(targetDatabase));
+                columnConfig.setType(baseColumn.getDataTypeString(targetSnapshot.getDatabase()));
 
                 ModifyColumnChange change = new ModifyColumnChange();
                 change.setTableName(column.getTable().getName());
@@ -669,7 +667,7 @@ public class DiffResult {
                     change.setTableName(column.getTable().getName());
                     change.setSchemaName(column.getTable().getSchema());
                     change.setColumnName(column.getName());
-                    change.setColumnDataType(baseColumn.getDataTypeString(targetDatabase));
+                    change.setColumnDataType(baseColumn.getDataTypeString(targetSnapshot.getDatabase()));
 
                     changes.add(change);
                     foundDifference = true;
@@ -678,7 +676,7 @@ public class DiffResult {
                     change.setTableName(column.getTable().getName());
                     change.setSchemaName(column.getTable().getSchema());
                     change.setColumnName(column.getName());
-                    change.setColumnDataType(baseColumn.getDataTypeString(targetDatabase));
+                    change.setColumnDataType(baseColumn.getDataTypeString(targetSnapshot.getDatabase()));
 
                     changes.add(change);
                     foundDifference = true;
@@ -693,7 +691,7 @@ public class DiffResult {
 
     private boolean shouldModifyColumn(Column column) {
         return column.getView() == null
-                && !baseDatabase.isLiquibaseTable(column.getTable().getName());
+                && !baseSnapshot.getDatabase().isLiquibaseTable(column.getTable().getName());
 
     }
 
@@ -753,7 +751,7 @@ public class DiffResult {
 
     private void addMissingTableChanges(List<Change> changes, Database database) {
         for (Table missingTable : getMissingTables()) {
-            if (baseDatabase.isLiquibaseTable(missingTable.getName())) {
+            if (baseSnapshot.getDatabase().isLiquibaseTable(missingTable.getName())) {
                 continue;
             }
 

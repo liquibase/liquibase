@@ -10,4 +10,9 @@ public class MySQLSampleChangeLogRunnerTest extends AbstractSimpleChangeLogRunne
     public MySQLSampleChangeLogRunnerTest() throws Exception {
         super("mysql", "jdbc:mysql://localhost/liquibase");
     }
+
+    @Override
+    public void testTagEmptyDatabase() throws Exception {
+        super.testTagEmptyDatabase();    //To change body of overridden methods use File | Settings | File Templates.
+    }
 }
