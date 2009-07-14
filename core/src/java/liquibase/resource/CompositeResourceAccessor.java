@@ -3,6 +3,7 @@ package liquibase.resource;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.*;
 
 /**
@@ -65,12 +66,22 @@ public class CompositeResourceAccessor implements ResourceAccessor {
     }
 
     public ClassLoader toClassLoader() {
-        List<ClassLoader> classLoaders = new ArrayList<ClassLoader>();
+        List<URL> urls = new ArrayList<URL>();
+        List<ClassLoader> unknownClassLoaders = new ArrayList<ClassLoader>();
         for (ResourceAccessor fo: openers) {
-            classLoaders.add(fo.toClassLoader());
+            ClassLoader classLoader = fo.toClassLoader();
+            if (classLoader instanceof URLClassLoader) {
+                urls.addAll(Arrays.asList(((URLClassLoader) classLoader).getURLs()));
+            } else {
+                System.out.println("Unknown classloader type: "+classLoader.getClass().getName());
+                unknownClassLoaders.add(fo.toClassLoader());
+            }
+
         }
 
-        return new CompositeClassLoader(classLoaders.toArray(new ClassLoader[classLoaders.size()]));
+        unknownClassLoaders.add(0, new URLClassLoader(urls.toArray(new URL[urls.size()])));
+
+        return new CompositeClassLoader(unknownClassLoaders.toArray(new ClassLoader[unknownClassLoaders.size()]));
     }
 
     //based on code from http://fisheye.codehaus.org/browse/xstream/trunk/xstream/src/java/com/thoughtworks/xstream/core/util/CompositeClassLoader.java?r=root

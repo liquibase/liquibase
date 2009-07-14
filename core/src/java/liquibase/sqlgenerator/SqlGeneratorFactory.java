@@ -79,13 +79,7 @@ public class SqlGeneratorFactory {
         for (SqlGenerator generator : getGenerators()) {
             Class clazz = generator.getClass();
             while (clazz != null) {
-                Type[] interfaces = new Type[0];
-                try {
-                    interfaces = clazz.getGenericInterfaces();
-                } catch (Exception e) {
-                    System.out.println("No interfaces for "+clazz+": "+e.getMessage());
-                }
-                for (Type type : interfaces) {
+                for (Type type : clazz.getGenericInterfaces()) {
                     if (type instanceof ParameterizedType
                             && Arrays.asList(((ParameterizedType) type).getActualTypeArguments()).contains(statement.getClass())) {
                         //noinspection unchecked

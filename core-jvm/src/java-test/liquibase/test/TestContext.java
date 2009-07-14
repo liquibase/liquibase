@@ -255,8 +255,11 @@ public class TestContext {
         if (resourceAccessor == null) {
             File samples1 = new File(TestContext.getInstance().findCoreJvmProjectRoot(), "/lib-test/liquibase-sample1.jar");
             File samples2 = new File(TestContext.getInstance().findCoreJvmProjectRoot(), "/lib-test/liquibase-sample2.jar");
+            if (!samples2.exists()) {
+                throw new RuntimeException("Could not find "+samples2.getAbsolutePath());
+            }
             resourceAccessor = new CompositeResourceAccessor(new ClassLoaderResourceAccessor(), new ClassLoaderResourceAccessor(new URLClassLoader(new URL[]{
-                    samples1.toURL(),
+// sample1 does not actually run                    samples1.toURL(),
                     samples2.toURL(),
                     new File(TestContext.getInstance().findCoreJvmProjectRoot(), "/build").toURL(),
                     new File(TestContext.getInstance().findCoreProjectRoot(), "/build").toURL()
