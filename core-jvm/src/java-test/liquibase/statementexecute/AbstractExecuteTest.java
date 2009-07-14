@@ -153,7 +153,11 @@ public abstract class AbstractExecuteTest {
         int lastIndex = 0;
         while ((lastIndex = convertedSql.indexOf("[", lastIndex)) >= 0) {
             String objectName = convertedSql.substring(lastIndex + 1, convertedSql.indexOf("]", lastIndex));
-            convertedSql = convertedSql.replace("[" + objectName + "]", database.escapeDatabaseObject(objectName));
+            try {
+                convertedSql = convertedSql.replace("[" + objectName + "]", database.escapeDatabaseObject(objectName));
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
             lastIndex++;
         }
 

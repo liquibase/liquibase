@@ -446,11 +446,12 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
 
         liquibase = createLiquibase(completeChangeLog);
         liquibase.checkDatabaseChangeLogTable();
-        try {
-            liquibase.tag("empty");
-        } catch (DatabaseException e) {
-            assertEquals("liquibase.exception.DatabaseException: Cannot tag an empty database", e.getMessage());
-        }
+        liquibase.tag("empty");
+        
+        liquibase = createLiquibase(rollbackChangeLog);
+        liquibase.update(null);
+
+        liquibase.rollback("empty", null);
 
     }
 

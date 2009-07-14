@@ -23,7 +23,7 @@ public class Sample1UpdateGenerator implements SqlGenerator<UpdateStatement> {
 
     public Sql[] generateSql(UpdateStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         return new Sql[] {
-                new UnparsedSql("select * from "+statement.getTableName())
+                new UnparsedSql("statement from sample1")
         };
     }
 }

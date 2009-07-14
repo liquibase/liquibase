@@ -779,7 +779,8 @@ public abstract class AbstractDatabase implements Database {
         try {
             int totalRows = ExecutorService.getInstance().getReadExecutor(this).queryForInt(new SelectFromDatabaseChangeLogStatement("COUNT(*)"), new ArrayList<SqlVisitor>());
             if (totalRows == 0) {
-                throw new DatabaseException("Cannot tag an empty database");
+                ChangeSet emptyChangeSet = new ChangeSet(String.valueOf(new Date().getTime()), "liquibase", false, false, "liquibase-internal", "liquibase-internal", null, null);
+                this.markChangeSetAsRan(emptyChangeSet);
             }
 
 //            Timestamp lastExecutedDate = (Timestamp) this.getWriteExecutor().queryForObject(createChangeToTagSQL(), Timestamp.class);
@@ -788,6 +789,8 @@ public abstract class AbstractDatabase implements Database {
                 throw new DatabaseException("Did not tag database change log correctly");
             }
             this.commit();
+
+            ranChangeSetList.get(ranChangeSetList.size()-1).setTag(tagString);
         } catch (Exception e) {
             throw new DatabaseException(e);
         }
