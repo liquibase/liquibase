@@ -11,7 +11,7 @@ import liquibase.statement.ForeignKeyConstraint;
 import liquibase.statement.UniqueConstraint;
 import liquibase.statement.core.CreateTableStatement;
 import liquibase.util.StringUtils;
-import liquibase.util.log.LogFactory;
+import liquibase.logging.LogFactory;
 
 import java.util.Iterator;
 import java.util.logging.Level;
@@ -72,7 +72,7 @@ public class CreateTableGenerator implements SqlGenerator<CreateTableStatement> 
                 if (database.supportsAutoIncrement()) {
                     buffer.append(" ").append(database.getAutoIncrementClause()).append(" ");
                 } else {
-                    LogFactory.getLogger().log(Level.WARNING, database.getTypeName()+" does not support autoincrement columns as request for "+(database.escapeTableName(statement.getSchemaName(), statement.getTableName())));
+                    LogFactory.getLogger().warning(database.getTypeName()+" does not support autoincrement columns as request for "+(database.escapeTableName(statement.getSchemaName(), statement.getTableName())));
                 }
             }
 

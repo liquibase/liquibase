@@ -12,7 +12,7 @@ import liquibase.parser.core.xml.LiquibaseSchemaResolver;
 import liquibase.serializer.core.xml.XMLChangeLogSerializer;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.util.StringUtils;
-import liquibase.util.log.LogFactory;
+import liquibase.logging.LogFactory;
 import liquibase.util.xml.DefaultXmlWriter;
 import liquibase.util.xml.XmlWriter;
 import org.w3c.dom.Document;

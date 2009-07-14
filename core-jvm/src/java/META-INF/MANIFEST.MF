@@ -35,4 +35,5 @@ LiquiBase-Package: liquibase.change,
  liquibase.sqlgenerator,
  liquibase.executor,
  liquibase.snapshot,
+ liquibase.logging,
  liquibase.ext

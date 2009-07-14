@@ -10,7 +10,7 @@ import liquibase.statement.SqlStatement;
 import liquibase.statement.core.LockDatabaseChangeLogStatement;
 import liquibase.statement.core.SelectFromDatabaseChangeLogLockStatement;
 import liquibase.statement.core.UnlockDatabaseChangeLogStatement;
-import liquibase.util.log.LogFactory;
+import liquibase.logging.LogFactory;
 
 import java.text.DateFormat;
 import java.util.ArrayList;

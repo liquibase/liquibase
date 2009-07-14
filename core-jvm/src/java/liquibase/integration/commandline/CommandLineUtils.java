@@ -10,7 +10,7 @@ import liquibase.diff.DiffStatusListener;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.MigrationFailedException;
 import liquibase.util.StringUtils;
-import liquibase.util.log.LogFactory;
+import liquibase.logging.LogFactory;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
@@ -148,92 +148,11 @@ public class CommandLineUtils {
 
     private static class OutDiffStatusListener implements DiffStatusListener {
 
-        /**
-         * Custom formatter object
-         */
-        private Formatter customFormatter = new Formatter() {
-            @Override
-            public String format(LogRecord rec) {
-                return rec.getMessage() + "\n";
-            }
-        };
-
-        /**
-         * Logger handlers
-         */
-        private ArrayList<Handler> handList = new ArrayList<Handler>();
-
-
-        /**
-         * Method prepares handler list and cache it in priv var
-         *
-         * @return void
-         * @author Daniel Bargiel <danielbargiel@googlemail.com>
-         */
-        private void prepareHandlers() {
-
-            if (handList.size() > 0) {
-                return;
-            }
-
-            for (Handler h : LogFactory.getLogger().getParent().getHandlers()) {
-                handList.add(h);
-            }
-
-            for (Handler h : LogFactory.getLogger().getHandlers()) {
-                handList.add(h);
-            }
-
-        } // end of method prepareHandlers
-
-        /**
-         * Method sets custom formatter for cached Logger handlers
-         *
-         * @return void
-         * @author Daniel Bargiel <danielbargiel@googlemail.com>
-         */
-        private void setCustomFormatter() {
-            Object[] arrHandlers = handList.toArray();
-            for (int i = 0; i < arrHandlers.length; i++) {
-                Handler h = (Handler) arrHandlers[i];
-                h.setFormatter(customFormatter);
-            }
-        } // end of method setCustomFormatter()
-
-        /**
-         * Method restores SimpleForramter so rest of logging can be formatted as usual
-         *
-         * @return void
-         * @author Daniel Bargiel <danielbargiel@googlemail.com>
-         */
-        private void restoreSimpleFormatter() {
-            Object[] arrHandlers = handList.toArray();
-            for (int i = 0; i < arrHandlers.length; i++) {
-                Handler h = (Handler) arrHandlers[i];
-                h.setFormatter(new SimpleFormatter());
-            }
-        } // end of method restoreSimpleFormatter()
-
-        /**
-         * Method report message to output facility using current Logger object
-         *
-         * @return void
-         * @author Daniel Bargiel <danielbargiel@googlemail.com>
-         */
         public void statusUpdate(String message) {
-
-            // Prepare
-            prepareHandlers();
-            setCustomFormatter();
-
-            // Log message
             LogFactory.getLogger().info(message);
 
-            // Cleanup
-            restoreSimpleFormatter();
+        }
 
-        } // end of method statusUpdate
-
-    } // end of class OutDiffStatusListener
+    }
 
 }

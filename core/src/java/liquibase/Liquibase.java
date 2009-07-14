@@ -22,7 +22,7 @@ import liquibase.sql.visitor.SqlVisitor;
 import liquibase.statement.core.UpdateStatement;
 import liquibase.util.LiquibaseUtil;
 import liquibase.util.StreamUtil;
-import liquibase.util.log.LogFactory;
+import liquibase.logging.LogFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,7 +31,7 @@ import java.io.Writer;
 import java.text.DateFormat;
 import java.util.*;
 import java.util.logging.Level;
-import java.util.logging.Logger;
+import liquibase.logging.Logger;
 
 /**
  * Core LiquiBase facade.
@@ -115,7 +115,7 @@ public class Liquibase {
             try {
                 lockService.releaseLock();
             } catch (LockException e) {
-                log.log(Level.SEVERE, "Could not release lock", e);
+                log.severe("Could not release lock", e);
             }
         }
     }
@@ -234,7 +234,7 @@ public class Liquibase {
             try {
                 lockService.releaseLock();
             } catch (LockException e) {
-                log.log(Level.SEVERE, "Error releasing lock", e);
+                log.severe("Error releasing lock", e);
             }
         }
     }
@@ -448,7 +448,7 @@ public class Liquibase {
                 checkDatabaseChangeLogTable();
                 getDatabase().dropDatabaseObjects(schema);
                 checkDatabaseChangeLogTable();
-                log.finest("Objects dropped successfully");
+                log.debug("Objects dropped successfully");
             }
         } catch (DatabaseException e) {
             throw e;

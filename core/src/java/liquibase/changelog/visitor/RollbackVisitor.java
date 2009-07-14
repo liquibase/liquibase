@@ -3,7 +3,7 @@ package liquibase.changelog.visitor;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
-import liquibase.util.log.LogFactory;
+import liquibase.logging.LogFactory;
 
 public class RollbackVisitor implements ChangeSetVisitor {
 

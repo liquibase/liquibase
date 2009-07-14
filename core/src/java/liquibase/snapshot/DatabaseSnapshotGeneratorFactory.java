@@ -3,11 +3,11 @@ package liquibase.snapshot;
 import liquibase.database.Database;
 import liquibase.diff.DiffStatusListener;
 import liquibase.exception.DatabaseException;
-import liquibase.util.log.LogFactory;
+import liquibase.logging.LogFactory;
 import liquibase.servicelocator.ServiceLocator;
 
 import java.util.*;
-import java.util.logging.Logger;
+import liquibase.logging.Logger;
 
 public class DatabaseSnapshotGeneratorFactory {
 

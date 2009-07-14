@@ -4,7 +4,7 @@ import liquibase.changelog.DatabaseChangeLog;
 import liquibase.exception.ChangeLogParseException;
 import liquibase.parser.ChangeLogParser;
 import liquibase.resource.ResourceAccessor;
-import liquibase.util.log.LogFactory;
+import liquibase.logging.LogFactory;
 import org.xml.sax.*;
 
 import javax.xml.parsers.SAXParser;

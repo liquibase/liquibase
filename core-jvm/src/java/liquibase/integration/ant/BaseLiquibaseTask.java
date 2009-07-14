@@ -9,7 +9,7 @@ import liquibase.exception.DatabaseException;
 import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import liquibase.resource.FileSystemResourceAccessor;
-import liquibase.util.log.LogFactory;
+import liquibase.logging.LogFactory;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.Task;
 import org.apache.tools.ant.types.Path;
@@ -26,7 +26,9 @@ import java.util.*;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
-import java.util.logging.Logger;
+
+import liquibase.logging.Logger;
+import liquibase.logging.JavaUtilLogger;
 
 /**
  * Base class for all Ant LiquiBase tasks.  This class sets up LiquiBase and defines parameters
@@ -47,8 +49,8 @@ public class BaseLiquibaseTask extends Task {
     private String databaseClass;
     private String databaseChangeLogTableName;
     private String databaseChangeLogLockTableName;
-    
-    
+
+
     private Map<String, Object> changeLogProperties = new HashMap<String, Object>();
 
     public BaseLiquibaseTask() {
@@ -161,8 +163,8 @@ public class BaseLiquibaseTask extends Task {
         ResourceAccessor antFO = new AntResourceAccessor(getProject(), classpath);
         ResourceAccessor fsFO = new FileSystemResourceAccessor();
 
-        Database database = createDatabaseObject(getDriver(), getUrl(), getUsername(), getPassword(), getDefaultSchemaName(),getDatabaseClass());
-        
+        Database database = createDatabaseObject(getDriver(), getUrl(), getUsername(), getPassword(), getDefaultSchemaName(), getDatabaseClass());
+
         String changeLogFile = null;
         if (getChangeLogFile() != null) {
             changeLogFile = getChangeLogFile().trim();
@@ -177,11 +179,11 @@ public class BaseLiquibaseTask extends Task {
     }
 
     protected Database createDatabaseObject(String driverClassName,
-    										String databaseUrl,
-    										String username,
-    										String password,
-    										String defaultSchemaName,
-    										String databaseClass) throws Exception {
+                                            String databaseUrl,
+                                            String username,
+                                            String password,
+                                            String defaultSchemaName,
+                                            String databaseClass) throws Exception {
         String[] strings = classpath.list();
 
         final List<URL> taskClassPath = new ArrayList<URL>();
@@ -195,49 +197,49 @@ public class BaseLiquibaseTask extends Task {
                 return new URLClassLoader(taskClassPath.toArray(new URL[taskClassPath.size()]));
             }
         });
-        
+
         Database database;
-        
+
         if (databaseUrl.startsWith("hibernate:")) {
             database = new HibernateDatabase(databaseUrl.substring("hibernate:".length()));
         } else {
-	        if (databaseClass != null) {
-	        	  try {
-	        		  DatabaseFactory.getInstance().register((Database) Class.forName(databaseClass, true, loader).newInstance());
-	        	  } catch (ClassCastException e) { //fails in Ant in particular
-	        		  DatabaseFactory.getInstance().register((Database) Class.forName(databaseClass).newInstance());
-	        	  }
-	        }
-	
-	        if (driverClassName == null) {
-	            driverClassName = DatabaseFactory.getInstance().findDefaultDriver(databaseUrl);
-	        }
-	
-	        if (driverClassName == null) {
-	            throw new DatabaseException("driver not specified and no default could be found for "+databaseUrl);
-	        }
-	
-	        Driver driver = (Driver) Class.forName(driverClassName, true, loader).newInstance();
-	
-	        Properties info = new Properties();
-	        info.put("user", username);
-	        info.put("password", password);
-	        Connection connection = driver.connect(databaseUrl, info);
-	
-	        if (connection == null) {
-	            throw new DatabaseException("Connection could not be created to " + databaseUrl + " with driver " + driver.getClass().getName() + ".  Possibly the wrong driver for the given database URL");
-	        }
-	
-	        database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(connection));
-	        database.setDefaultSchemaName(defaultSchemaName);
+            if (databaseClass != null) {
+                try {
+                    DatabaseFactory.getInstance().register((Database) Class.forName(databaseClass, true, loader).newInstance());
+                } catch (ClassCastException e) { //fails in Ant in particular
+                    DatabaseFactory.getInstance().register((Database) Class.forName(databaseClass).newInstance());
+                }
+            }
+
+            if (driverClassName == null) {
+                driverClassName = DatabaseFactory.getInstance().findDefaultDriver(databaseUrl);
+            }
+
+            if (driverClassName == null) {
+                throw new DatabaseException("driver not specified and no default could be found for " + databaseUrl);
+            }
+
+            Driver driver = (Driver) Class.forName(driverClassName, true, loader).newInstance();
+
+            Properties info = new Properties();
+            info.put("user", username);
+            info.put("password", password);
+            Connection connection = driver.connect(databaseUrl, info);
+
+            if (connection == null) {
+                throw new DatabaseException("Connection could not be created to " + databaseUrl + " with driver " + driver.getClass().getName() + ".  Possibly the wrong driver for the given database URL");
+            }
+
+            database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(connection));
+            database.setDefaultSchemaName(defaultSchemaName);
         }
-        
+
         if (getDatabaseChangeLogTableName() != null)
-        	database.setDatabaseChangeLogTableName(getDatabaseChangeLogTableName());
-        
+            database.setDatabaseChangeLogTableName(getDatabaseChangeLogTableName());
+
         if (getDatabaseChangeLogLockTableName() != null)
-        	database.setDatabaseChangeLogLockTableName(getDatabaseChangeLogLockTableName());
-        
+            database.setDatabaseChangeLogLockTableName(getDatabaseChangeLogLockTableName());
+
         return database;
     }
 
@@ -273,11 +275,13 @@ public class BaseLiquibaseTask extends Task {
 
         protected void registerHandler(Handler theHandler) {
             Logger logger = LogFactory.getLogger();
-            for (Handler handler : logger.getHandlers()) {
-                logger.removeHandler(handler);
+            if (logger instanceof JavaUtilLogger) {
+                for (Handler handler : ((JavaUtilLogger) logger).getHandlers()) {
+                    ((JavaUtilLogger) logger).removeHandler(handler);
+                }
+                ((JavaUtilLogger) logger).addHandler(theHandler);
+                ((JavaUtilLogger) logger).setUseParentHandlers(false);
             }
-            logger.addHandler(theHandler);
-            logger.setUseParentHandlers(false);
         }
 
 
@@ -328,40 +332,40 @@ public class BaseLiquibaseTask extends Task {
             try {
                 liquibase.getDatabase().close();
             } catch (DatabaseException e) {
-                log("Error closing database: "+e.getMessage());
+                log("Error closing database: " + e.getMessage());
             }
         }
     }
 
-	public String getDatabaseClass() {
-		return databaseClass;
-	}
+    public String getDatabaseClass() {
+        return databaseClass;
+    }
 
-	public void setDatabaseClass(String databaseClass) {
-		this.databaseClass = databaseClass;
-	}
-	
+    public void setDatabaseClass(String databaseClass) {
+        this.databaseClass = databaseClass;
+    }
+
     public String getDatabaseChangeLogTableName() {
-    	return databaseChangeLogTableName;
+        return databaseChangeLogTableName;
     }
 
-	
+
     public void setDatabaseChangeLogTableName(String tableName) {
-    	this.databaseChangeLogTableName = tableName;
+        this.databaseChangeLogTableName = tableName;
     }
 
-	
+
     public String getDatabaseChangeLogLockTableName() {
-    	return databaseChangeLogLockTableName;
+        return databaseChangeLogLockTableName;
     }
 
-	
+
     public void setDatabaseChangeLogLockTableName(String tableName) {
-    	this.databaseChangeLogLockTableName = tableName;
+        this.databaseChangeLogLockTableName = tableName;
     }
 
 
-	public static class ChangeLogProperty  {
+    public static class ChangeLogProperty {
         private String name;
         private String value;
 

@@ -167,7 +167,7 @@ public class PostgresDatabase extends AbstractDatabase {
             } catch (Exception e) {
                 // TODO: throw?
                 e.printStackTrace();
-                log.log(Level.SEVERE, "Failed to get default catalog name from postgres", e);
+                log.severe("Failed to get default catalog name from postgres", e);
             }
         }
 
@@ -364,7 +364,7 @@ public class PostgresDatabase extends AbstractDatabase {
         } catch (Exception e) {
             // TODO: Something?
             e.printStackTrace();
-            log.log(Level.SEVERE, "Failed to get default catalog name from postgres", e);
+            log.severe("Failed to get default catalog name from postgres", e);
         }
 
         return searchPaths;

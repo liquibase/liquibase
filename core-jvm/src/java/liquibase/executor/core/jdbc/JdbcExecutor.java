@@ -10,7 +10,7 @@ import liquibase.statement.SqlStatement;
 import liquibase.statement.StoredProcedureStatement;
 import liquibase.util.JdbcUtils;
 import liquibase.util.StringUtils;
-import liquibase.util.log.LogFactory;
+import liquibase.logging.LogFactory;
 import liquibase.executor.AbstractExecutor;
 import liquibase.executor.WriteExecutor;
 import liquibase.executor.ReadExecutor;

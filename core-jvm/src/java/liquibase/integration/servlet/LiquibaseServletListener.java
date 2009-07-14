@@ -7,7 +7,7 @@ import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import liquibase.resource.*;
 import liquibase.util.NetUtil;
-import liquibase.util.log.LogFactory;
+import liquibase.logging.LogFactory;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -57,20 +57,6 @@ public class LiquibaseServletListener implements ServletContextListener {
     }
 
     public void contextInitialized(ServletContextEvent servletContextEvent) {
-        LogFactory.getLogger().addHandler(new Handler() {
-            @Override
-            public synchronized void publish(LogRecord record) {
-                LiquibaseStatusServlet.logMessage(record);
-            }
-
-            @Override
-            public void flush() {
-            }
-
-            @Override
-            public void close() throws SecurityException {
-            }
-        });
         String hostName;
         try {
             hostName = NetUtil.getLocalHost().getHostName();

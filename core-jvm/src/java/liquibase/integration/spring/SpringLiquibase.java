@@ -22,7 +22,8 @@ import java.sql.SQLException;
 import java.util.Enumeration;
 import java.util.Vector;
 import java.util.logging.Level;
-import java.util.logging.Logger;
+import liquibase.logging.Logger;
+import liquibase.logging.LogFactory;
 
 /**
  * A Spring-ified wrapper for Liquibase.
@@ -115,7 +116,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 
     private DataSource dataSource;
 
-    private Logger log = Logger.getLogger(SpringLiquibase.class.getName());
+    private Logger log = LogFactory.getLogger(SpringLiquibase.class.getName());
 
     private String changeLog;
 
@@ -144,7 +145,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
                     }
                     connection.close();
                 } catch (Exception e) {
-                    log.log(Level.WARNING, "problem closing connection", e);
+                    log.warning("problem closing connection", e);
                 }
             }
         }
