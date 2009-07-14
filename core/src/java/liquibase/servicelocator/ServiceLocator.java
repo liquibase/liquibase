@@ -76,10 +76,11 @@ public class ServiceLocator {
     }
 
     public Class[] getClasses(Class requiredInterface) throws Exception {
-//        Class.forName(requiredInterface.getName());
+        Class.forName(requiredInterface.getName());
 //        System.out.println("Getting classes...");
 
         if (!classesBySuperclass.containsKey(requiredInterface)) {
+//            System.out.println("Need to look up "+requiredInterface);
             classesBySuperclass.put(requiredInterface, new ArrayList<Class>());
 
             for (String packageName : packagesToScan) {
@@ -137,7 +138,6 @@ public class ServiceLocator {
         }
 
         for (String potentialClassName : potentialClassNames) {
-//            System.out.println("Potential class: "+potentialClassName);
             Class<?> clazz = null;
             try {
                 clazz = Class.forName(potentialClassName, true, resourceAccessor.toClassLoader());

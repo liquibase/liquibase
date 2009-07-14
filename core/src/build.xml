@@ -195,9 +195,9 @@ The available targets at the current stage:
     <macrodef name="build-sample-jars">
         <attribute name="sample"/>
         <sequential>
-            <delete dir="${src.dir}/samples/ext/@{sample}/build"/>
-            <mkdir dir="${src.dir}/samples/ext/@{sample}/build"/>
-            <javac srcdir="${src.dir}/samples/ext/@{sample}/java" destdir="${src.dir}/samples/ext/@{sample}/build" deprecation="${deprecation}" debug="${debug}"
+            <delete dir="${jvm.src.dir}/samples/ext/@{sample}/build"/>
+            <mkdir dir="${jvm.src.dir}/samples/ext/@{sample}/build"/>
+            <javac srcdir="${jvm.src.dir}/samples/ext/@{sample}/java" destdir="${jvm.src.dir}/samples/ext/@{sample}/build" deprecation="${deprecation}" debug="${debug}"
                    optimize="${optimize}" source="1.5">
                 <classpath>
                     <pathelement path="${core.build.dir}"/>
@@ -206,7 +206,7 @@ The available targets at the current stage:
                 </classpath>
             </javac>
 
-            <jar basedir="${core.src.dir}/samples/ext/@{sample}/build" destfile="${src.dir}/../lib-test/liquibase-@{sample}.jar"/>
+            <jar basedir="${jvm.src.dir}/samples/ext/@{sample}/build" destfile="${jvm.src.dir}/../lib-test/liquibase-@{sample}.jar"/>
             </sequential>
 
         </macrodef>
@@ -217,7 +217,7 @@ The available targets at the current stage:
     </target>
 
     <!-- target: PACKAGE -->
-    <target name="package" depends="compile">
+    <target name="package" depends="compile, build-sample-jars">
         <jar destfile="${release.dir}/liquibase-core-SNAPSHOT.jar" manifest="${basedir}/../../core-jvm/src/java/META-INF/MANIFEST.MF">
             <zipfileset dir="${core.build.dir}"/>
         </jar>

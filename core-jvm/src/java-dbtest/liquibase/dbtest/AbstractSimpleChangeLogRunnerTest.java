@@ -50,6 +50,8 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
 
         this.url = url;
 
+        ServiceLocator.getInstance().setResourceAccessor(TestContext.getInstance().getTestResourceAccessor());
+        
         DatabaseConnection connection = TestContext.getInstance().getConnection(url);
 
         LogFactory.getLogger().setLevel(Level.FINER);
@@ -61,8 +63,6 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-
-        ServiceLocator.getInstance().setResourceAccessor(TestContext.getInstance().getTestResourceAccessor());
 
         if (database != null) {
             if (!database.getConnection().getAutoCommit()) {
