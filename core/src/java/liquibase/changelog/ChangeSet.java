@@ -11,6 +11,7 @@ import liquibase.executor.WriteExecutor;
 import liquibase.precondition.core.ErrorPrecondition;
 import liquibase.precondition.core.FailedPrecondition;
 import liquibase.precondition.core.PreconditionContainer;
+import liquibase.precondition.Conditional;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.statement.SqlStatement;
 import liquibase.util.StreamUtil;
@@ -24,7 +25,7 @@ import java.util.logging.Logger;
 /**
  * Encapsulates a changeSet and all its associated changes.
  */
-public class ChangeSet {
+public class ChangeSet implements Conditional {
 
     public enum RunStatus {
         NOT_RAN, ALREADY_RAN, RUN_AGAIN, INVALID_MD5SUM
@@ -48,7 +49,7 @@ public class ChangeSet {
 
     private String comments;
 
-    private PreconditionContainer rootPrecondition;
+    private PreconditionContainer preconditions;
 
     private List<SqlVisitor> sqlVisitors = new ArrayList<SqlVisitor>();
 
@@ -139,9 +140,9 @@ public class ChangeSet {
                 writeExecutor.comment(StringUtils.join(Arrays.asList(lines), "\n"));
             }
 
-            if (writeExecutor.executesStatements() && rootPrecondition != null) {
+            if (writeExecutor.executesStatements() && preconditions != null) {
                 try {
-                    rootPrecondition.check(database, null);
+                    preconditions.check(database, null);
                 } catch (PreconditionFailedException e) {
                     StringBuffer message = new StringBuffer();
                     message.append(StreamUtil.getLineSeparator());
@@ -150,22 +151,22 @@ public class ChangeSet {
                         message.append(StreamUtil.getLineSeparator());
                     }
 
-                    if (rootPrecondition.getOnFail().equals(PreconditionContainer.FailOption.HALT)) {
+                    if (preconditions.getOnFail().equals(PreconditionContainer.FailOption.HALT)) {
                         e.printStackTrace();
                         throw new MigrationFailedException(this, message.toString());
-                    } else if (rootPrecondition.getOnFail().equals(PreconditionContainer.FailOption.CONTINUE)) {
+                    } else if (preconditions.getOnFail().equals(PreconditionContainer.FailOption.CONTINUE)) {
                         skipChange = true;
                         markRan = false;
 
                         log.log(Level.INFO, "Continuing past ChangeSet: " + toString() + " due to precondition failure: " + message);
-                    } else if (rootPrecondition.getOnFail().equals(PreconditionContainer.FailOption.MARK_RAN)) {
+                    } else if (preconditions.getOnFail().equals(PreconditionContainer.FailOption.MARK_RAN)) {
                         skipChange = true;
 
                         log.log(Level.INFO, "Marking ChangeSet: " + toString() + " ran due to precondition failure: " + message);
-                    } else if (rootPrecondition.getOnFail().equals(PreconditionContainer.FailOption.WARN)) {
+                    } else if (preconditions.getOnFail().equals(PreconditionContainer.FailOption.WARN)) {
                         log.log(Level.WARNING, "Running change set despite failed precondition.  ChangeSet: " + toString() + ": " + message);
                     } else {
-                        throw new MigrationFailedException(this, "Unexpected precondition onFail attribute: " + rootPrecondition.getOnFail());
+                        throw new MigrationFailedException(this, "Unexpected precondition onFail attribute: " + preconditions.getOnFail());
                     }
                 } catch (PreconditionErrorException e) {
                     StringBuffer message = new StringBuffer();
@@ -175,22 +176,22 @@ public class ChangeSet {
                         message.append(StreamUtil.getLineSeparator());
                     }
 
-                    if (rootPrecondition.getOnError().equals(PreconditionContainer.ErrorOption.HALT)) {
+                    if (preconditions.getOnError().equals(PreconditionContainer.ErrorOption.HALT)) {
                         throw new MigrationFailedException(this, message.toString());
-                    } else if (rootPrecondition.getOnError().equals(PreconditionContainer.ErrorOption.CONTINUE)) {
+                    } else if (preconditions.getOnError().equals(PreconditionContainer.ErrorOption.CONTINUE)) {
                         skipChange = true;
                         markRan = false;
 
                         log.log(Level.INFO, "Continuing past ChangeSet: " + toString() + " due to precondition error: " + message);
-                    } else if (rootPrecondition.getOnError().equals(PreconditionContainer.ErrorOption.MARK_RAN)) {
+                    } else if (preconditions.getOnError().equals(PreconditionContainer.ErrorOption.MARK_RAN)) {
                         skipChange = true;
                         markRan = true;
 
                         log.log(Level.INFO, "Marking ChangeSet: " + toString() + " due ran to precondition error: " + message);
-                    } else if (rootPrecondition.getOnError().equals(PreconditionContainer.ErrorOption.WARN)) {
+                    } else if (preconditions.getOnError().equals(PreconditionContainer.ErrorOption.WARN)) {
                         log.log(Level.WARNING, "Running change set despite errored precondition.  ChangeSet: " + toString() + ": " + message);
                     } else {
-                        throw new MigrationFailedException(this, "Unexpected precondition onError attribute: " + rootPrecondition.getOnError());
+                        throw new MigrationFailedException(this, "Unexpected precondition onError attribute: " + preconditions.getOnError());
                     }
 
                     database.rollback();
@@ -437,12 +438,12 @@ public class ChangeSet {
         return false;
     }
 
-    public PreconditionContainer getPrecondition() {
-        return rootPrecondition;
+    public PreconditionContainer getPreconditions() {
+        return preconditions;
     }
 
     public void setPreconditions(PreconditionContainer preconditionContainer) {
-        this.rootPrecondition = preconditionContainer;
+        this.preconditions = preconditionContainer;
     }
 
     public void addSqlVisitor(SqlVisitor sqlVisitor) {
