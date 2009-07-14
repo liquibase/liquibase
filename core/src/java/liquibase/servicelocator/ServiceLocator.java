@@ -1,10 +1,11 @@
 package liquibase.servicelocator;
 
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.exception.ServiceNotFoundException;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StringUtils;
-import liquibase.util.log.LogFactory;
+import liquibase.logging.LogFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -75,27 +76,44 @@ public class ServiceLocator {
         packagesToScan.add(packageName);
     }
 
-    public Class[] getClasses(Class requiredInterface) throws Exception {
-        Class.forName(requiredInterface.getName());
+    public Class[] getClasses(Class requiredInterface) throws ServiceNotFoundException {
+        try {
+            Class.forName(requiredInterface.getName());
 //        System.out.println("Getting classes...");
 
-        if (!classesBySuperclass.containsKey(requiredInterface)) {
-//            System.out.println("Need to look up "+requiredInterface);
-            classesBySuperclass.put(requiredInterface, new ArrayList<Class>());
+            if (!classesBySuperclass.containsKey(requiredInterface)) {
+    //            System.out.println("Need to look up "+requiredInterface);
+                classesBySuperclass.put(requiredInterface, new ArrayList<Class>());
 
-            for (String packageName : packagesToScan) {
-//                System.out.println("scanning "+packageName);
-                String path = packageName.replace('.', '/');
-                Enumeration<URL> resources = resourceAccessor.getResources(path);
-                while (resources.hasMoreElements()) {
-//                    System.out.println("Found resource");
-                    classesBySuperclass.get(requiredInterface).addAll(findClasses(resources.nextElement(), packageName, requiredInterface));
+                for (String packageName : packagesToScan) {
+    //                System.out.println("scanning "+packageName);
+                    String path = packageName.replace('.', '/');
+                    Enumeration<URL> resources = resourceAccessor.getResources(path);
+                    while (resources.hasMoreElements()) {
+    //                    System.out.println("Found resource");
+                        classesBySuperclass.get(requiredInterface).addAll(findClasses(resources.nextElement(), packageName, requiredInterface));
+                    }
                 }
             }
+        } catch (Exception e) {
+            throw new ServiceNotFoundException(e);
         }
 
         List<Class> classes = classesBySuperclass.get(requiredInterface);
         return classes.toArray(new Class[classes.size()]);
+    }
+
+    public Object createInstance(Class requiredInterface ) throws ServiceNotFoundException {
+        Class[] classes = getClasses(requiredInterface);
+        if (classes.length != 1) {
+            throw new ServiceNotFoundException("Expected 1 implementation of "+requiredInterface.getName()+", got "+classes.length);
+        }
+
+        try {
+            return classes[0].newInstance();
+        } catch (Exception e) {
+            throw new ServiceNotFoundException(e);
+        }
     }
 
     private List<Class> findClasses(URL resource, String packageName, Class requiredInterface) throws Exception {
@@ -144,6 +162,9 @@ public class ServiceLocator {
             } catch (NoClassDefFoundError e) {
 //                System.out.println("NoClassDefFoundError: "+potentialClassName);
                 LogFactory.getLogger().warning("Could not configure extension class "+potentialClassName+": Missing dependency "+e.getMessage());
+                continue;
+            } catch (Throwable e) {
+                LogFactory.getLogger().warning("Could not configure extension class "+potentialClassName+": "+e.getMessage());
                 continue;
             }
             if (!clazz.isInterface()

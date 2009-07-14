@@ -12,14 +12,14 @@ import liquibase.sql.visitor.SqlVisitor;
 import liquibase.statement.core.GetViewDefinitionStatement;
 import liquibase.statement.core.SelectSequencesStatement;
 import liquibase.util.StringUtils;
-import liquibase.util.log.LogFactory;
+import liquibase.logging.LogFactory;
 import liquibase.snapshot.DatabaseSnapshotGenerator;
 import liquibase.snapshot.DatabaseSnapshot;
 
 import java.sql.*;
 import java.text.ParseException;
 import java.util.*;
-import java.util.logging.Logger;
+import liquibase.logging.Logger;
 
 public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotGenerator {
 
@@ -538,7 +538,7 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
         if (this.statusListeners == null) {
             return;
         }
-        log.finest(message);
+        log.debug(message);
         for (DiffStatusListener listener : this.statusListeners) {
             listener.statusUpdate(message);
         }

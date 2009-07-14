@@ -21,7 +21,8 @@ import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.statement.core.DropTableStatement;
 import liquibase.test.JUnitResourceAccessor;
 import liquibase.test.TestContext;
-import liquibase.util.log.LogFactory;
+import liquibase.logging.LogFactory;
+import liquibase.logging.LogLevel;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -54,7 +55,7 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
         
         DatabaseConnection connection = TestContext.getInstance().getConnection(url);
 
-        LogFactory.getLogger().setLevel(Level.FINER);
+        LogFactory.getLogger().setLogLevel(LogLevel.DEBUG);
         if (connection != null) {
             database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(connection);
         }

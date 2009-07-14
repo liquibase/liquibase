@@ -17,7 +17,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import java.util.logging.Logger;
+import liquibase.logging.Logger;
 
 import liquibase.change.Change;
 import liquibase.change.ChangeFactory;

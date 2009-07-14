@@ -11,7 +11,7 @@ import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.util.LiquibaseUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
-import liquibase.util.log.LogFactory;
+import liquibase.logging.LogFactory;
 
 import java.io.*;
 import java.lang.reflect.Field;
@@ -26,7 +26,8 @@ import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.logging.Level;
-import java.util.logging.Logger;
+import liquibase.logging.Logger;
+import liquibase.logging.LogLevel;
 
 /**
  * Class for executing LiquiBase via the command line.
@@ -114,7 +115,7 @@ public class Main {
                     ((ValidationFailedException) e.getCause()).printDescriptiveError(System.out);
                 } else {
                     System.out.println("Migration Failed: " + message + generateLogLevelWarningMessage());
-                    LogFactory.getLogger().log(Level.SEVERE, message, e);
+                    LogFactory.getLogger().severe(message, e);
                 }
                 System.exit(-1);
             }
@@ -127,14 +128,14 @@ public class Main {
         } catch (Throwable e) {
             String message = "Unexpected error running LiquiBase: " + e.getMessage();
             System.out.println(message);
-            LogFactory.getLogger().log(Level.SEVERE, message, e);
+            LogFactory.getLogger().severe(message, e);
             System.exit(-3);
         }
     }
 
     private static String generateLogLevelWarningMessage() {
         Logger logger = LogFactory.getLogger();
-        if (logger == null || logger.getLevel() == null || (logger.getLevel().equals(Level.OFF))) {
+        if (logger == null || logger.getLogLevel() == null || (logger.getLogLevel().equals(LogLevel.OFF))) {
             return "";
         } else {
             return ".  For more information, use the --logLevel flag)";
@@ -341,7 +342,7 @@ public class Main {
         stream.println("                                            databases (default: false)");
         stream.println(" --logLevel=<level>                         Execution log level");
         stream.println(" --logFile=<file>                           Log file");
-        stream.println("                                            (finest, finer, fine, info,");
+        stream.println("                                            (finest, finer, debug, info,");
         stream.println("                                            warning, severe)");
         stream.println(" --currentDateTimeFunction=<value>          Overrides current date time function");
         stream.println("                                            used in SQL.");
@@ -571,9 +572,9 @@ public class Main {
 
         try {
             if (null != logFile) {
-                LogFactory.setLoggingLevel(logLevel, logFile);
+                LogFactory.getLogger().setLogLevel(logLevel, logFile);
             } else {
-                LogFactory.setLoggingLevel(logLevel);
+                LogFactory.getLogger().setLogLevel(logLevel);
             }
         } catch (IllegalArgumentException e) {
             throw new CommandLineParsingException(e.getMessage(), e);
@@ -710,7 +711,7 @@ public class Main {
                 database.rollback();
                 database.close();
             } catch (DatabaseException e) {
-                LogFactory.getLogger().log(Level.WARNING, "problem closing connection", e);
+                LogFactory.getLogger().warning("problem closing connection", e);
             }
         }
     }

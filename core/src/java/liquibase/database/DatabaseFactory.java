@@ -2,13 +2,13 @@ package liquibase.database;
 
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.util.log.LogFactory;
+import liquibase.logging.LogFactory;
 import liquibase.servicelocator.ServiceLocator;
 import liquibase.database.core.UnsupportedDatabase;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Logger;
+import liquibase.logging.Logger;
 
 public class DatabaseFactory {
     private static DatabaseFactory instance = new DatabaseFactory();

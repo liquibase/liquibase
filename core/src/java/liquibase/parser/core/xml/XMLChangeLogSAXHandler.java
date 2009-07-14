@@ -14,7 +14,6 @@ import liquibase.precondition.CustomPreconditionWrapper;
 import liquibase.precondition.Precondition;
 import liquibase.precondition.PreconditionFactory;
 import liquibase.precondition.PreconditionLogic;
-import liquibase.precondition.core.AndPrecondition;
 import liquibase.precondition.core.PreconditionContainer;
 import liquibase.precondition.core.SqlPrecondition;
 import liquibase.resource.ResourceAccessor;
@@ -22,7 +21,7 @@ import liquibase.sql.visitor.SqlVisitor;
 import liquibase.sql.visitor.SqlVisitorFactory;
 import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtils;
-import liquibase.util.log.LogFactory;
+import liquibase.logging.LogFactory;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
@@ -33,7 +32,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.util.*;
 import java.util.logging.Level;
-import java.util.logging.Logger;
+import liquibase.logging.Logger;
 
 class XMLChangeLogSAXHandler extends DefaultHandler {
 
@@ -101,8 +100,8 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
                 if (!(pathName.endsWith("/") || pathName.endsWith("\\"))) {
                     pathName = pathName+"/";
                 }
-                log.finest("includeAll for "+pathName);
-                log.finest("Using file opener for includeAll: "+ resourceAccessor.getClass().getName());
+                log.debug("includeAll for "+pathName);
+                log.debug("Using file opener for includeAll: "+ resourceAccessor.getClass().getName());
                 Enumeration<URL> resources = resourceAccessor.getResources(pathName);
 
                 boolean foundResource = false;
@@ -110,16 +109,16 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
                 while (resources.hasMoreElements()) {
                     URL fileUrl = resources.nextElement();
                     if (!fileUrl.toExternalForm().startsWith("file:")) {
-                        log.finest(fileUrl.toExternalForm()+" is not a file path");
+                        log.debug(fileUrl.toExternalForm()+" is not a file path");
                         continue;
                     }
                     File file = new File(fileUrl.toURI());
-                    log.finest("includeAll using path "+file.getCanonicalPath());
+                    log.debug("includeAll using path "+file.getCanonicalPath());
                     if (!file.exists()) {
                         throw new SAXException("includeAll path " + pathName + " could not be found.  Tried in " + file.toString());
                     }
                     if (file.isDirectory()) {
-                        log.finest(file.getCanonicalPath()+" is a directory");
+                        log.debug(file.getCanonicalPath()+" is a directory");
                         for (File childFile : file.listFiles()) {
                             if (handleIncludedChangeLog(pathName + childFile.getName(), false, databaseChangeLog.getPhysicalFilePath())) {
                                 foundResource = true;
@@ -306,7 +305,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
                 throw new MigrationFailedException(changeSet, "Unexpected tag: " + qName);
             }
         } catch (Exception e) {
-            log.log(Level.SEVERE, "Error thrown as a SAXException: " + e.getMessage(), e);
+            log.severe("Error thrown as a SAXException: " + e.getMessage(), e);
             e.printStackTrace();
             throw new SAXException(e);
         }
@@ -314,7 +313,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 
     protected boolean handleIncludedChangeLog(String fileName, boolean isRelativePath, String relativeBaseFileName) throws LiquibaseException {
         if (!(fileName.endsWith(".xml") || fileName.endsWith(".sql"))) {
-            log.finest(relativeBaseFileName+"/"+fileName+" is not a recognized file type");
+            log.debug(relativeBaseFileName+"/"+fileName+" is not a recognized file type");
             return false;
         }
 
@@ -463,7 +462,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
                 modifySqlDbmsList = null;
             }
         } catch (Exception e) {
-            log.log(Level.SEVERE, "Error thrown as a SAXException: " + e.getMessage(), e);
+            log.severe("Error thrown as a SAXException: " + e.getMessage(), e);
             throw new SAXException(databaseChangeLog.getPhysicalFilePath() + ": " + e.getMessage(), e);
         }
     }

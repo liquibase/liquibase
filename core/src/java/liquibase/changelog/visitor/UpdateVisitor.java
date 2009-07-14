@@ -3,9 +3,9 @@ package liquibase.changelog.visitor;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
-import liquibase.util.log.LogFactory;
+import liquibase.logging.LogFactory;
 
-import java.util.logging.Logger;
+import liquibase.logging.Logger;
 
 public class UpdateVisitor implements ChangeSetVisitor {
 
@@ -22,7 +22,7 @@ public class UpdateVisitor implements ChangeSetVisitor {
     }
     
     public void visit(ChangeSet changeSet, Database database) throws LiquibaseException {
-        log.finer("Running Changeset:" + changeSet);
+        log.debug("Running Changeset:" + changeSet);
         if (changeSet.execute(this.database)) {
             if (this.database.getRunStatus(changeSet).equals(ChangeSet.RunStatus.NOT_RAN)) {
                 this.database.markChangeSetAsRan(changeSet);

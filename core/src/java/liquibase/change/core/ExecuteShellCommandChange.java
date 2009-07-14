@@ -11,7 +11,7 @@ import liquibase.statement.SqlStatement;
 import liquibase.statement.core.CommentStatement;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
-import liquibase.util.log.LogFactory;
+import liquibase.logging.LogFactory;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

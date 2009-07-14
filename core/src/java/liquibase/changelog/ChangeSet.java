@@ -16,11 +16,11 @@ import liquibase.sql.visitor.SqlVisitor;
 import liquibase.statement.SqlStatement;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
-import liquibase.util.log.LogFactory;
+import liquibase.logging.LogFactory;
 
 import java.util.*;
 import java.util.logging.Level;
-import java.util.logging.Logger;
+import liquibase.logging.Logger;
 
 /**
  * Encapsulates a changeSet and all its associated changes.
@@ -158,13 +158,13 @@ public class ChangeSet implements Conditional {
                         skipChange = true;
                         markRan = false;
 
-                        log.log(Level.INFO, "Continuing past ChangeSet: " + toString() + " due to precondition failure: " + message);
+                        log.info("Continuing past ChangeSet: " + toString() + " due to precondition failure: " + message);
                     } else if (preconditions.getOnFail().equals(PreconditionContainer.FailOption.MARK_RAN)) {
                         skipChange = true;
 
-                        log.log(Level.INFO, "Marking ChangeSet: " + toString() + " ran due to precondition failure: " + message);
+                        log.info("Marking ChangeSet: " + toString() + " ran due to precondition failure: " + message);
                     } else if (preconditions.getOnFail().equals(PreconditionContainer.FailOption.WARN)) {
-                        log.log(Level.WARNING, "Running change set despite failed precondition.  ChangeSet: " + toString() + ": " + message);
+                        log.warning("Running change set despite failed precondition.  ChangeSet: " + toString() + ": " + message);
                     } else {
                         throw new MigrationFailedException(this, "Unexpected precondition onFail attribute: " + preconditions.getOnFail());
                     }
@@ -182,14 +182,14 @@ public class ChangeSet implements Conditional {
                         skipChange = true;
                         markRan = false;
 
-                        log.log(Level.INFO, "Continuing past ChangeSet: " + toString() + " due to precondition error: " + message);
+                        log.info("Continuing past ChangeSet: " + toString() + " due to precondition error: " + message);
                     } else if (preconditions.getOnError().equals(PreconditionContainer.ErrorOption.MARK_RAN)) {
                         skipChange = true;
                         markRan = true;
 
-                        log.log(Level.INFO, "Marking ChangeSet: " + toString() + " due ran to precondition error: " + message);
+                        log.info("Marking ChangeSet: " + toString() + " due ran to precondition error: " + message);
                     } else if (preconditions.getOnError().equals(PreconditionContainer.ErrorOption.WARN)) {
-                        log.log(Level.WARNING, "Running change set despite errored precondition.  ChangeSet: " + toString() + ": " + message);
+                        log.warning("Running change set despite errored precondition.  ChangeSet: " + toString() + ": " + message);
                     } else {
                         throw new MigrationFailedException(this, "Unexpected precondition onError attribute: " + preconditions.getOnError());
                     }
@@ -207,18 +207,18 @@ public class ChangeSet implements Conditional {
                     }
                 }
 
-                log.finest("Reading ChangeSet: " + toString());
+                log.debug("Reading ChangeSet: " + toString());
                 for (Change change : getChanges()) {
                     database.executeStatements(change, sqlVisitors);
-                    log.finest(change.getConfirmationMessage());
+                    log.debug(change.getConfirmationMessage());
                 }
 
                 if (runInTransaction) {
                     database.commit();
                 }
-                log.finest("ChangeSet " + toString() + " has been successfully run.");
+                log.debug("ChangeSet " + toString() + " has been successfully run.");
             } else {
-                log.finest("Skipping ChangeSet: " + toString());
+                log.debug("Skipping ChangeSet: " + toString());
             }
 
         } catch (Exception e) {
@@ -228,7 +228,7 @@ public class ChangeSet implements Conditional {
                 throw new MigrationFailedException(this, e);
             }
             if (getFailOnError() != null && !getFailOnError()) {
-                log.log(Level.INFO, "Change set " + toString(false) + " failed, but failOnError was false", e);
+                log.info("Change set " + toString(false) + " failed, but failOnError was false", e);
             } else {
                 if (e instanceof MigrationFailedException) {
                     throw ((MigrationFailedException) e);
@@ -268,12 +268,12 @@ public class ChangeSet implements Conditional {
                 for (int i = changes.size() - 1; i >= 0; i--) {
                     Change change = changes.get(i);
                     database.executeRollbackStatements(change, sqlVisitors);
-                    log.finest(change.getConfirmationMessage());
+                    log.debug(change.getConfirmationMessage());
                 }
             }
 
             database.commit();
-            log.finest("ChangeSet " + toString() + " has been successfully rolled back.");
+            log.debug("ChangeSet " + toString() + " has been successfully rolled back.");
         } catch (Exception e) {
             try {
                 database.rollback();

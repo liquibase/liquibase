@@ -6,7 +6,7 @@ import liquibase.database.core.HibernateDatabase;
 import liquibase.database.core.HibernateGenericDialect;
 import liquibase.exception.DatabaseException;
 import liquibase.util.StringUtils;
-import liquibase.util.log.LogFactory;
+import liquibase.logging.LogFactory;
 import liquibase.snapshot.DatabaseSnapshotGenerator;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.diff.DiffStatusListener;
@@ -15,7 +15,7 @@ import org.hibernate.dialect.Dialect;
 import org.hibernate.engine.Mapping;
 
 import java.util.*;
-import java.util.logging.Logger;
+import liquibase.logging.Logger;
 
 public class HibernateDatabaseSnapshotGenerator implements DatabaseSnapshotGenerator {
     private HibernateDatabase database;

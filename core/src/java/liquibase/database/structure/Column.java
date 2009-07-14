@@ -3,7 +3,7 @@ package liquibase.database.structure;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.util.SqlUtil;
-import liquibase.util.log.LogFactory;
+import liquibase.logging.LogFactory;
 
 import java.sql.Types;
 import java.util.Arrays;

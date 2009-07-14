@@ -7,13 +7,13 @@ import liquibase.change.CheckSum;
 import liquibase.exception.SetupException;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StreamUtil;
-import liquibase.util.log.LogFactory;
+import liquibase.logging.LogFactory;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.logging.Logger;
+import liquibase.logging.Logger;
 
 /**
  * Represents a Change for custom SQL stored in a File.
@@ -74,7 +74,7 @@ public class SQLFileChange extends AbstractSQLChange {
         if (path == null) {
             throw new SetupException("<sqlfile> - No path specified");
         }
-        log.fine("SQLFile file:" + path);
+        log.debug("SQLFile file:" + path);
         boolean loaded = loadFromClasspath(path);
         if(!loaded) {
             loaded = loadFromFileSystem(path);
@@ -83,7 +83,7 @@ public class SQLFileChange extends AbstractSQLChange {
         if (!loaded) {
             throw new SetupException("<sqlfile path="+ path +"> - Could not find file");
         }
-        log.finer("SQLFile file contents is:" + getSql());
+        log.debug("SQLFile file contents is:" + getSql());
     }
 
     /**

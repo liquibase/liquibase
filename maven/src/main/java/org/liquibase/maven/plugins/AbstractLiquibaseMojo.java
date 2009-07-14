@@ -6,13 +6,13 @@ import java.lang.reflect.Field;
 import java.net.MalformedURLException;
 import java.util.*;
 import liquibase.*;
+import liquibase.logging.LogFactory;
 import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.integration.commandline.CommandLineUtils;
 import liquibase.database.Database;
 import liquibase.exception.*;
-import liquibase.util.log.LogFactory;
 import liquibase.util.ui.UIFactory;
 import org.apache.maven.plugin.*;
 import org.apache.maven.project.MavenProject;
@@ -142,7 +142,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     getLog().info(MavenUtils.LOG_SEPARATOR);
 
     String shouldRunProperty = System.getProperty(Liquibase.SHOULD_RUN_SYSTEM_PROPERTY);
-    if (shouldRunProperty != null && !Boolean.valueOf(shouldRunProperty).booleanValue()) {
+    if (shouldRunProperty != null && !Boolean.valueOf(shouldRunProperty)) {
       getLog().warn("LiquiBase did not run because '" + Liquibase.SHOULD_RUN_SYSTEM_PROPERTY
                     + "' system property was set to false");
       return;

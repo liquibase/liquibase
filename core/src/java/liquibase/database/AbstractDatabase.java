@@ -23,7 +23,7 @@ import liquibase.statement.core.*;
 import liquibase.util.ISODateFormat;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
-import liquibase.util.log.LogFactory;
+import liquibase.logging.LogFactory;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -32,7 +32,7 @@ import java.sql.Types;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.logging.Logger;
+import liquibase.logging.Logger;
 import java.util.regex.Pattern;
 
 /**
@@ -667,7 +667,7 @@ public abstract class AbstractDatabase implements Database {
             writeExecutor.comment("Create Database Lock Table");
             writeExecutor.execute(new CreateDatabaseChangeLogLockTableStatement(), new ArrayList<SqlVisitor>());
             this.commit();
-            log.finest("Created database lock table with name: " + escapeTableName(getLiquibaseSchemaName(), getDatabaseChangeLogLockTableName()));
+            log.debug("Created database lock table with name: " + escapeTableName(getLiquibaseSchemaName(), getDatabaseChangeLogLockTableName()));
         }
     }
 
@@ -1270,7 +1270,7 @@ public abstract class AbstractDatabase implements Database {
      */
     public void execute(SqlStatement[] statements, List<SqlVisitor> sqlVisitors) throws LiquibaseException {
         for (SqlStatement statement : statements) {
-            LogFactory.getLogger().finest("Executing Statement: " + statement);
+            LogFactory.getLogger().debug("Executing Statement: " + statement);
             ExecutorService.getInstance().getWriteExecutor(this).execute(statement, sqlVisitors);
         }
     }
