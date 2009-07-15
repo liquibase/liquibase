@@ -40,7 +40,7 @@ public class CsvToBean {
             List list = new ArrayList();
             while(null != (line = csv.readNext())) {
                 Object obj = processLine(mapper, line);
-                list.add(obj); // TODO: (Kyle) null check object
+                list.add(obj); 
             }
             return list;
         } catch (Exception e) {

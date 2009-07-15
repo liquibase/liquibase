@@ -45,7 +45,7 @@ public class HeaderColumnNameMappingStrategy implements MappingStrategy {
         if (null == descriptors) descriptors = loadDescriptors(getType()); //lazy load descriptors
         for (int i = 0; i < descriptors.length; i++) {
             PropertyDescriptor desc = descriptors[i];
-            if (matches(name, desc)) return desc; // TODO: (Kyle) do null/blank check
+            if (matches(name, desc)) return desc; 
         }
         return null;
     }
