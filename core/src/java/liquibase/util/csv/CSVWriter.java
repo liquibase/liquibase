@@ -65,7 +65,7 @@ public class CSVWriter extends liquibase.util.csv.opencsv.CSVWriter {
             return "NULL";
         }
 
-        if (value instanceof java.sql.Date) {  // TODO: DHS Fix this for oracle.sql.TIMESTAMP
+        if (value instanceof java.sql.Date) {
             return ISO_DATE_FORMAT.format((java.sql.Date) value);
         } else if (value instanceof java.sql.Time) {
             return ISO_DATE_FORMAT.format((java.sql.Time) value);

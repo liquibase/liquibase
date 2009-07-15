@@ -198,7 +198,7 @@
     </changeSet>
 
     <!-- 
-    TODO: This test does not work on Sybase because it results in no action.
+    This test does not work on Sybase because it results in no action.
     Since its not possible to create an int column which is nullable this statement
     wont work if the constraint is used above in the CreateTable (ID=25). As such
     I removed this test.

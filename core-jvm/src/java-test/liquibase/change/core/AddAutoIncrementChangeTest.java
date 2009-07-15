@@ -46,7 +46,6 @@ public class AddAutoIncrementChangeTest extends AbstractChangeTest {
             public void validate(SqlStatement[] sqlStatements, Database database) {
 
                 assertEquals(3, sqlStatements.length);
-                //todo: improve test as statements are no longer raw statements
                 assertTrue(sqlStatements[0] instanceof CreateSequenceStatement);
                 assertTrue(sqlStatements[1] instanceof SetNullableStatement);
                 assertTrue(sqlStatements[2] instanceof AddDefaultValueStatement);

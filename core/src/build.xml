@@ -391,7 +391,6 @@ The available targets at the current stage:
 
     <!-- target: TEST-INT -->
     <target name="test-int" depends="prepare, compile">
-        <!-- TODO: we could use a property to choose the target database to be testes on execution time -->
         <mkdir dir="${reports.dir}/junit/"/>
         <mkdir dir="${reports.dir}/junit/${ant.project.name}/"/>
         <junit printsummary="yes" haltonfailure="no" fork="yes" forkmode="once" reloading="false"
@@ -563,7 +562,6 @@ The available targets at the current stage:
             <pom refid="plugin.maven.project"/>
         </deploy>
 
-        <!--TODO automate the coping the html files into the site... -->
         <copy todir="${release.site.dir}/phpincludes">
           <fileset dir="${maven.build.dir}/site">
             <include name="*-mojo.html"/>
@@ -625,7 +623,6 @@ The available targets at the current stage:
             <pom refid="plugin.maven.project"/>
         </deploy>
 
-        <!--TODO automate the coping the html files into the site... -->
         <copy todir="${release.site.dir}/phpincludes">
           <fileset dir="${maven.build.dir}/site">
             <include name="*-mojo.html"/>
