@@ -566,4 +566,11 @@
         </createTable>
     </changeSet>
 
+    <changeSet id="comma'Ttest" author="n'voxland">
+        <comment>We are testing that 's are being escaped correctly</comment>
+        <createTable tableName="commatest" remarks="Some 'ing remarks go here">
+            <column name="id" type="int"/>
+        </createTable>
+    </changeSet>
+
 </databaseChangeLog>
