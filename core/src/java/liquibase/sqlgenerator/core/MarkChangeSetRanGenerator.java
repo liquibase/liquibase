@@ -48,7 +48,7 @@ public class MarkChangeSetRanGenerator implements SqlGenerator<MarkChangeSetRanS
                         .addWhereParameters(changeSet.getId(), changeSet.getAuthor(), changeSet.getFilePath());
             } else {
                 runStatement = new InsertStatement(database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())
-                        .addColumnValue("ID", database.escapeStringForDatabase(changeSet.getId()))
+                        .addColumnValue("ID", changeSet.getId())
                         .addColumnValue("AUTHOR", changeSet.getAuthor())
                         .addColumnValue("FILENAME", changeSet.getFilePath())
                         .addColumnValue("DATEEXECUTED", new ComputedDateValue(dateValue))
