@@ -6,6 +6,9 @@ import liquibase.exception.DatabaseException;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.statement.CallableSqlStatement;
 import liquibase.statement.SqlStatement;
+import liquibase.statement.core.SelectFromDatabaseChangeLogLockStatement;
+import liquibase.statement.core.LockDatabaseChangeLogStatement;
+import liquibase.statement.core.GetNextChangeSetSequenceValueStatement;
 import liquibase.util.StreamUtil;
 
 import java.io.IOException;
@@ -14,19 +17,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class LoggingExecutor extends AbstractExecutor implements WriteExecutor {
+public class LoggingExecutor extends AbstractExecutor implements Executor {
 
     private Writer output;
-    private boolean alreadyCreatedChangeLockTable;
-    private boolean alreadyCreatedChangeTable;
+    private Executor delegatedReadExecutor;
 
-    public LoggingExecutor(Writer output, Database database) {
+    public LoggingExecutor(Executor delegatedExecutor, Writer output, Database database) {
         this.output = output;
+        this.delegatedReadExecutor = delegatedExecutor;
         setDatabase(database);
-    }
-
-    public boolean executesStatements() {
-        return false;
     }
 
     public void execute(SqlStatement sql) throws DatabaseException {
@@ -45,6 +44,9 @@ public class LoggingExecutor extends AbstractExecutor implements WriteExecutor {
 
     public int update(SqlStatement sql, List<SqlVisitor> sqlVisitors) throws DatabaseException {
         outputStatement(sql, sqlVisitors);
+        if (sql instanceof LockDatabaseChangeLogStatement) {
+            return 1;
+        }
         return 0;
     }
 
@@ -92,19 +94,53 @@ public class LoggingExecutor extends AbstractExecutor implements WriteExecutor {
         }
     }
 
-    public boolean alreadyCreatedChangeLockTable() {
-        return alreadyCreatedChangeLockTable;
+    public Object queryForObject(SqlStatement sql, Class requiredType) throws DatabaseException {
+        return delegatedReadExecutor.queryForObject(sql, requiredType);
     }
 
-    public void setAlreadyCreatedChangeLockTable(boolean alreadyCreatedChangeLockTable) {
-        this.alreadyCreatedChangeLockTable = alreadyCreatedChangeLockTable;
+    public Object queryForObject(SqlStatement sql, Class requiredType, List<SqlVisitor> sqlVisitors) throws DatabaseException {
+        if (sql instanceof SelectFromDatabaseChangeLogLockStatement) {
+            return false;
+        }
+        return delegatedReadExecutor.queryForObject(sql, requiredType, sqlVisitors);
     }
 
-    public boolean alreadyCreatedChangeTable() {
-        return alreadyCreatedChangeTable;
+    public long queryForLong(SqlStatement sql) throws DatabaseException {
+        return delegatedReadExecutor.queryForLong(sql);
     }
 
-    public void setAlreadyCreatedChangeTable(boolean alreadyCreatedChangeTable) {
-        this.alreadyCreatedChangeTable = alreadyCreatedChangeTable;
+    public long queryForLong(SqlStatement sql, List<SqlVisitor> sqlVisitors) throws DatabaseException {
+        return delegatedReadExecutor.queryForLong(sql, sqlVisitors);
+    }
+
+    public int queryForInt(SqlStatement sql) throws DatabaseException {
+        try {
+            return delegatedReadExecutor.queryForInt(sql);
+        } catch (DatabaseException e) {
+            if (sql instanceof GetNextChangeSetSequenceValueStatement) { //table probably does not exist
+                return 1;
+            }
+            throw e;
+        }
+    }
+
+    public int queryForInt(SqlStatement sql, List<SqlVisitor> sqlVisitors) throws DatabaseException {
+        return delegatedReadExecutor.queryForInt(sql, sqlVisitors);
+    }
+
+    public List queryForList(SqlStatement sql, Class elementType) throws DatabaseException {
+        return delegatedReadExecutor.queryForList(sql, elementType);
+    }
+
+    public List queryForList(SqlStatement sql, Class elementType, List<SqlVisitor> sqlVisitors) throws DatabaseException {
+        return delegatedReadExecutor.queryForList(sql, elementType, sqlVisitors);
+    }
+
+    public List<Map> queryForList(SqlStatement sql) throws DatabaseException {
+        return delegatedReadExecutor.queryForList(sql);
+    }
+
+    public List<Map> queryForList(SqlStatement sql, List<SqlVisitor> sqlVisitors) throws DatabaseException {
+        return delegatedReadExecutor.queryForList(sql, sqlVisitors);
     }
 }

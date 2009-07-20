@@ -7,7 +7,7 @@ import liquibase.change.core.RawSQLChange;
 import liquibase.database.Database;
 import liquibase.exception.*;
 import liquibase.executor.ExecutorService;
-import liquibase.executor.WriteExecutor;
+import liquibase.executor.Executor;
 import liquibase.precondition.core.ErrorPrecondition;
 import liquibase.precondition.core.FailedPrecondition;
 import liquibase.precondition.core.PreconditionContainer;
@@ -19,7 +19,7 @@ import liquibase.util.StringUtils;
 import liquibase.logging.LogFactory;
 
 import java.util.*;
-import java.util.logging.Level;
+
 import liquibase.logging.Logger;
 
 /**
@@ -123,12 +123,12 @@ public class ChangeSet implements Conditional {
         boolean skipChange = false;
         boolean markRan = true;
 
-        WriteExecutor writeExecutor = ExecutorService.getInstance().getWriteExecutor(database);
+        Executor executor = ExecutorService.getInstance().getExecutor(database);
         try {
             database.setAutoCommit(!runInTransaction);
 
 
-            writeExecutor.comment("Changeset " + toString());
+            executor.comment("Changeset " + toString());
             if (StringUtils.trimToNull(getComments()) != null) {
                 String comments = getComments();
                 String[] lines = comments.split("\n");
@@ -137,10 +137,10 @@ public class ChangeSet implements Conditional {
                         lines[i] = database.getLineComment() + " " + lines[i];
                     }
                 }
-                writeExecutor.comment(StringUtils.join(Arrays.asList(lines), "\n"));
+                executor.comment(StringUtils.join(Arrays.asList(lines), "\n"));
             }
 
-            if (writeExecutor.executesStatements() && preconditions != null) {
+            if (preconditions != null) {
                 try {
                     preconditions.check(database, null);
                 } catch (PreconditionFailedException e) {
@@ -177,7 +177,7 @@ public class ChangeSet implements Conditional {
                     }
 
                     if (preconditions.getOnError().equals(PreconditionContainer.ErrorOption.HALT)) {
-                        throw new MigrationFailedException(this, message.toString());
+                        throw new MigrationFailedException(this, message.toString(), e);
                     } else if (preconditions.getOnError().equals(PreconditionContainer.ErrorOption.CONTINUE)) {
                         skipChange = true;
                         markRan = false;
@@ -250,13 +250,13 @@ public class ChangeSet implements Conditional {
 
     public void rolback(Database database) throws RollbackFailedException {
         try {
-            WriteExecutor writeExecutor = ExecutorService.getInstance().getWriteExecutor(database);
-            writeExecutor.comment("Rolling Back ChangeSet: " + toString());
+            Executor executor = ExecutorService.getInstance().getExecutor(database);
+            executor.comment("Rolling Back ChangeSet: " + toString());
             if (rollBackChanges != null && rollBackChanges.size() > 0) {
                 for (Change rollback : rollBackChanges) {
                     for (SqlStatement statement : rollback.generateStatements(database)) {
                         try {
-                            writeExecutor.execute(statement, sqlVisitors);
+                            executor.execute(statement, sqlVisitors);
                         } catch (DatabaseException e) {
                             throw new RollbackFailedException("Error executing custom SQL [" + statement + "]", e);
                         }

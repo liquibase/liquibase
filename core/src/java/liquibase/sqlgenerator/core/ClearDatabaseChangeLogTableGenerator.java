@@ -11,6 +11,7 @@ import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.ClearDatabaseChangeLogTableStatement;
 
 public class ClearDatabaseChangeLogTableGenerator implements SqlGenerator<ClearDatabaseChangeLogTableStatement> {
+
     public int getPriority() {
         return PRIORITY_DEFAULT;
     }
@@ -24,18 +25,8 @@ public class ClearDatabaseChangeLogTableGenerator implements SqlGenerator<ClearD
     }
 
     public Sql[] generateSql(ClearDatabaseChangeLogTableStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        try {
-        	String schemaName = null;
-        	if (database.isPeculiarLiquibaseSchema()) {
-        		schemaName = database.getLiquibaseSchemaName();
-        	} else {
-        		schemaName = database.convertRequestedSchemaToSchema(null);
-        	}
             return new Sql[] {
-                    new UnparsedSql("DELETE FROM " + database.escapeTableName(schemaName, database.getDatabaseChangeLogTableName()))
+                    new UnparsedSql("DELETE FROM " + database.escapeTableName(database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName()))
             };
-        } catch (DatabaseException e) {
-            throw new UnexpectedLiquibaseException(e);
-        }
     }
 }

@@ -4,7 +4,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 /**
- * General callback interface used by the {@link liquibase.executor.WriteExecutor} class.
+ * General callback interface used by the {@link liquibase.executor.Executor} class.
  * <p/>
  * <p>This interface sets values on a {@link java.sql.PreparedStatement} provided
  * by the JdbcTemplate class, for each of a number of updates in a batch using the

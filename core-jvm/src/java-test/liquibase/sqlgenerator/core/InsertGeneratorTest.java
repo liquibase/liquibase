@@ -11,11 +11,11 @@ public class InsertGeneratorTest {
 //                    private int oldCount;
 //
 //                    protected void preExecuteAssert(DatabaseSnapshotGenerator snapshot) throws Exception {
-//                        oldCount = new WriteExecutor(snapshot.getDatabase()).queryForInt(new RawSqlStatement("select count(*) from " + TABLE_NAME));
+//                        oldCount = new Executor(snapshot.getDatabase()).queryForInt(new RawSqlStatement("select count(*) from " + TABLE_NAME));
 //                    }
 //
 //                    protected void postExecuteAssert(DatabaseSnapshotGenerator snapshot) throws Exception {
-//                        int newCount = new WriteExecutor(snapshot.getDatabase()).queryForInt(new RawSqlStatement("select count(*) from " + TABLE_NAME));
+//                        int newCount = new Executor(snapshot.getDatabase()).queryForInt(new RawSqlStatement("select count(*) from " + TABLE_NAME));
 //                        assertEquals(oldCount + 1, newCount);
 //                    }
 //
@@ -36,11 +36,11 @@ public class InsertGeneratorTest {
 //                    }
 //
 //                    protected void preExecuteAssert(DatabaseSnapshotGenerator snapshot) throws Exception {
-//                        oldCount = new WriteExecutor(snapshot.getDatabase()).queryForInt(new RawSqlStatement("select count(*) from " + TestContext.ALT_SCHEMA + "." + TABLE_NAME));
+//                        oldCount = new Executor(snapshot.getDatabase()).queryForInt(new RawSqlStatement("select count(*) from " + TestContext.ALT_SCHEMA + "." + TABLE_NAME));
 //                    }
 //
 //                    protected void postExecuteAssert(DatabaseSnapshotGenerator snapshot) throws Exception {
-//                        int newCount = new WriteExecutor(snapshot.getDatabase()).queryForInt(new RawSqlStatement("select count(*) from " + TestContext.ALT_SCHEMA + "." + TABLE_NAME));
+//                        int newCount = new Executor(snapshot.getDatabase()).queryForInt(new RawSqlStatement("select count(*) from " + TestContext.ALT_SCHEMA + "." + TABLE_NAME));
 //                        assertEquals(oldCount + 1, newCount);
 //                    }
 //
@@ -60,11 +60,11 @@ public class InsertGeneratorTest {
 //                    private int oldCount;
 //
 //                    protected void preExecuteAssert(DatabaseSnapshotGenerator snapshot) throws Exception {
-//                        oldCount = new WriteExecutor(snapshot.getDatabase()).queryForInt(new RawSqlStatement("select count(*) from " + TABLE_NAME));
+//                        oldCount = new Executor(snapshot.getDatabase()).queryForInt(new RawSqlStatement("select count(*) from " + TABLE_NAME));
 //                    }
 //
 //                    protected void postExecuteAssert(DatabaseSnapshotGenerator snapshot) throws Exception {
-//                        int newCount = new WriteExecutor(snapshot.getDatabase()).queryForInt(new RawSqlStatement("select count(*) from " + TABLE_NAME));
+//                        int newCount = new Executor(snapshot.getDatabase()).queryForInt(new RawSqlStatement("select count(*) from " + TABLE_NAME));
 //                        assertEquals(oldCount + 1, newCount);
 //                    }
 //

@@ -35,7 +35,7 @@ public class SqlPrecondition implements Precondition {
     public void check(Database database, DatabaseChangeLog changeLog) throws PreconditionFailedException, PreconditionErrorException {
         DatabaseConnection connection = database.getConnection();
         try {
-            String result = (String) ExecutorService.getInstance().getReadExecutor(database).queryForObject(new RawSqlStatement(getSql()), String.class);
+            String result = (String) ExecutorService.getInstance().getExecutor(database).queryForObject(new RawSqlStatement(getSql()), String.class);
             if (result == null) {
                 throw new PreconditionFailedException("No rows returned from SQL Precondition", changeLog, this);
             }

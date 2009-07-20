@@ -37,7 +37,7 @@ public class ShouldRunChangeSetFilter implements ChangeSetFilter {
                     md5sumUpdateStatement.addWhereParameter(changeSet.getFilePath());
 
                     try {
-                        ExecutorService.getInstance().getWriteExecutor(database).update(md5sumUpdateStatement, new ArrayList<SqlVisitor>());
+                        ExecutorService.getInstance().getExecutor(database).update(md5sumUpdateStatement, new ArrayList<SqlVisitor>());
                     } catch (DatabaseException e) {
                         throw new RuntimeException(e);
                     }

@@ -142,7 +142,7 @@ public class CreateTableGeneratorTest {
 //                        .addColumn("parent_id", "int", new ForeignKeyConstraint(foreignKeyName, FK_TABLE_NAME + "(id)").setDeleteCascade(true))) {
 //
 //                    protected void setup(Database database) throws Exception {
-//                        new WriteExecutor(database).execute(new CreateTableStatement(null, FK_TABLE_NAME)
+//                        new Executor(database).execute(new CreateTableStatement(null, FK_TABLE_NAME)
 //                        .addPrimaryKeyColumn("id", "int",null,  null)
 //                        .addColumn("name", "varchar(255)"));
 //                        super.setup(database);

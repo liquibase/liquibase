@@ -12,8 +12,7 @@ import liquibase.util.JdbcUtils;
 import liquibase.util.StringUtils;
 import liquibase.logging.LogFactory;
 import liquibase.executor.AbstractExecutor;
-import liquibase.executor.WriteExecutor;
-import liquibase.executor.ReadExecutor;
+import liquibase.executor.Executor;
 
 import java.sql.CallableStatement;
 import java.sql.ResultSet;
@@ -30,12 +29,8 @@ import java.util.Map;
  * <b>Note: This class is currently intended for LiquiBase-internal use only and may change without notice in the future</b>
  */
 @SuppressWarnings({"unchecked"})
-public class JdbcExecutor extends AbstractExecutor implements WriteExecutor, ReadExecutor {
+public class JdbcExecutor extends AbstractExecutor implements Executor {
 
-    public boolean executesStatements() {
-        return true;
-    }
-    
     //-------------------------------------------------------------------------
     // Methods dealing with static SQL (java.sql.Statement)
     //-------------------------------------------------------------------------

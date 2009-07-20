@@ -32,7 +32,7 @@ import java.util.List;
  *
  * @author Spring Framework
  * @see RowMapper
- * @see liquibase.executor.WriteExecutor
+ * @see liquibase.executor.Executor
  */
 @SuppressWarnings({"unchecked"})
 class RowMapperResultSetExtractor implements ResultSetExtractor {

@@ -6,11 +6,12 @@ import liquibase.servicelocator.ServiceLocator;
 import liquibase.snapshot.DatabaseSnapshotGeneratorFactory;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.executor.ExecutorService;
-import liquibase.executor.WriteExecutor;
+import liquibase.executor.Executor;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
+import liquibase.database.JdbcConnection;
 import liquibase.diff.Diff;
 import liquibase.diff.DiffResult;
 import liquibase.exception.DatabaseException;
@@ -33,7 +34,6 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Properties;
-import java.util.logging.Level;
 
 public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
 
@@ -104,6 +104,7 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
     }
 
     private Liquibase createLiquibase(String changeLogFile, ResourceAccessor resourceAccessor) throws DatabaseException {
+        ExecutorService.getInstance().clearExecutor(database);
         return new Liquibase(changeLogFile, resourceAccessor, database);
     }
 
@@ -117,7 +118,7 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
 
     private void runCompleteChangeLog() throws Exception {
         Liquibase liquibase = createLiquibase(completeChangeLog);
-        liquibase.dropAll(getSchemasToDrop());
+        clearDatabase(liquibase);
 
         //run again to test changelog testing logic
         liquibase = createLiquibase(completeChangeLog);
@@ -143,7 +144,7 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
 
         StringWriter output = new StringWriter();
         Liquibase liquibase = createLiquibase(completeChangeLog);
-        liquibase.dropAll(getSchemasToDrop());
+        clearDatabase(liquibase);
 
         liquibase = createLiquibase(completeChangeLog);
         liquibase.update(this.contexts, output);
@@ -151,11 +152,25 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
         String outputResult = output.getBuffer().toString();
         assertNotNull(outputResult);
         assertTrue(outputResult.length() > 100); //should be pretty big
+//        System.out.println(outputResult);
+        assertTrue("create databasechangelog command not found", outputResult.contains("CREATE TABLE DATABASECHANGELOG"));
 
         DatabaseSnapshot snapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database, null, null);
         assertEquals(0, snapshot.getTables().size());
+    }
 
-//        System.out.println();
+    private void clearDatabase(Liquibase liquibase) throws DatabaseException {
+        liquibase.dropAll(getSchemasToDrop());
+        try {
+            ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement().execute("drop table "+database.getDatabaseChangeLogTableName());
+        } catch (Exception e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
+        try {
+            ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement().execute("drop table "+database.getDatabaseChangeLogLockTableName());
+        } catch (Exception e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
     }
 
     public void testUpdateTwice() throws Exception {
@@ -164,7 +179,7 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
         }
 
         Liquibase liquibase = createLiquibase(completeChangeLog);
-        liquibase.dropAll(getSchemasToDrop());
+        clearDatabase(liquibase);
 
         liquibase = createLiquibase(completeChangeLog);
         liquibase.update(this.contexts);
@@ -177,7 +192,7 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
         }
 
         Liquibase liquibase = createLiquibase(rollbackChangeLog);
-        liquibase.dropAll(getSchemasToDrop());
+        clearDatabase(liquibase);
 
         liquibase = createLiquibase(rollbackChangeLog);
         liquibase.update(this.contexts);
@@ -198,7 +213,7 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
         }
 
         Liquibase liquibase = createLiquibase(rollbackChangeLog);
-        liquibase.dropAll(getSchemasToDrop());
+        clearDatabase(liquibase);
 
         liquibase = createLiquibase(rollbackChangeLog);
         liquibase.update(this.contexts);
@@ -219,7 +234,7 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
         StringWriter writer = new StringWriter();
 
         Liquibase liquibase = createLiquibase(rollbackChangeLog);
-        liquibase.dropAll(getSchemasToDrop());
+        clearDatabase(liquibase);
 
         liquibase = createLiquibase(rollbackChangeLog);
         liquibase.futureRollbackSQL(this.contexts, writer);
@@ -233,7 +248,7 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
         }
 
         Liquibase liquibase = createLiquibase(completeChangeLog);
-        liquibase.dropAll(getSchemasToDrop());
+        clearDatabase(liquibase);
 
         liquibase = createLiquibase(completeChangeLog);
         liquibase.update(this.contexts);
@@ -293,7 +308,7 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
         }
 
         Liquibase liquibase = createLiquibase(tempFile.getName());
-        liquibase.dropAll(getSchemasToDrop());
+        clearDatabase(liquibase);
 
         DatabaseSnapshot emptySnapshot= DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database, null, null);
 
@@ -354,7 +369,7 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
         }
 
         Liquibase liquibase = createLiquibase(includedChangeLog);
-        liquibase.dropAll(getSchemasToDrop());
+        clearDatabase(liquibase);
 
         database.setDefaultSchemaName("liquibaseb");
 
@@ -378,13 +393,13 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
         }
 
         liquibase = createLiquibase(tempFile.getName());
-        liquibase.dropAll(getSchemasToDrop());
+        clearDatabase(liquibase);
 
         //run again to test changelog testing logic
-        WriteExecutor writeExecutor = ExecutorService.getInstance().getWriteExecutor(database);
+        Executor executor = ExecutorService.getInstance().getExecutor(database);
         if (!database.isPeculiarLiquibaseSchema()) {
-            writeExecutor.execute(new DropTableStatement("liquibaseb", database.getDatabaseChangeLogTableName(), false));
-            writeExecutor.execute(new DropTableStatement("liquibaseb", database.getDatabaseChangeLogLockTableName(), false));
+            executor.execute(new DropTableStatement("liquibaseb", database.getDatabaseChangeLogTableName(), false));
+            executor.execute(new DropTableStatement("liquibaseb", database.getDatabaseChangeLogLockTableName(), false));
             database.commit();
         }
 
@@ -426,10 +441,10 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
         }
 
         Liquibase liquibase = createLiquibase(completeChangeLog);
-        liquibase.dropAll(getSchemasToDrop());
+        clearDatabase(liquibase);
 
         liquibase = createLiquibase(completeChangeLog);
-        liquibase.dropAll(getSchemasToDrop());
+        clearDatabase(liquibase);
 
         liquibase = createLiquibase(completeChangeLog);
         liquibase.update(this.contexts);
@@ -443,7 +458,7 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
         }
 
         Liquibase liquibase = createLiquibase(completeChangeLog);
-        liquibase.dropAll(getSchemasToDrop());
+        clearDatabase(liquibase);
 
         liquibase = createLiquibase(completeChangeLog);
         liquibase.checkDatabaseChangeLogTable();
@@ -462,7 +477,7 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
         }
 
         Liquibase liquibase = createLiquibase(completeChangeLog);
-        liquibase.dropAll(getSchemasToDrop());
+        clearDatabase(liquibase);
 
         liquibase = createLiquibase(completeChangeLog);
         List<ChangeSet> list = liquibase.listUnrunChangeSets(this.contexts);
@@ -488,13 +503,13 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
             absolutePathOfChangeLog = "/" + absolutePathOfChangeLog;
         }
         Liquibase liquibase = createLiquibase(absolutePathOfChangeLog, new FileSystemResourceAccessor());
-        liquibase.dropAll(getSchemasToDrop());
+        clearDatabase(liquibase);
 
         liquibase.update(this.contexts);
 
         liquibase.update(this.contexts); //try again, make sure there are no errors
 
-        liquibase.dropAll(getSchemasToDrop());
+        clearDatabase(liquibase);
     }
 
 
@@ -544,7 +559,7 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
 
     private void dropDatabaseChangeLogTable(String schema, Database database) {
         try {
-            ExecutorService.getInstance().getWriteExecutor(database).execute(new DropTableStatement(schema, database.getDatabaseChangeLogTableName(), false));
+            ExecutorService.getInstance().getExecutor(database).execute(new DropTableStatement(schema, database.getDatabaseChangeLogTableName(), false));
         } catch (DatabaseException e) {
             ; //ok
         }
@@ -558,7 +573,7 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
         try {
             String extChangelog = "changelogs/common/ext.changelog.xml";
             Liquibase liquibase = createLiquibase(extChangelog);
-            liquibase.dropAll(getSchemasToDrop());
+            clearDatabase(liquibase);
 
             //run again to test changelog testing logic
             liquibase = createLiquibase(extChangelog);

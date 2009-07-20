@@ -4,7 +4,7 @@ import liquibase.changelog.ChangeSet;
 import liquibase.changelog.RanChangeSet;
 import liquibase.database.Database;
 import liquibase.executor.ExecutorService;
-import liquibase.executor.WriteExecutor;
+import liquibase.executor.Executor;
 import liquibase.exception.DatabaseException;
 import liquibase.statement.core.UpdateStatement;
 import liquibase.change.CheckSum;
@@ -41,14 +41,14 @@ public class ShouldRunChangeSetFilterTest  {
         expect(database.getDatabaseChangeLogTableName()).andReturn("DATABASECHANGELOG").anyTimes();
         expect(database.getDefaultSchemaName()).andReturn(null).anyTimes();
 
-        WriteExecutor template = createMock(WriteExecutor.class);
+        Executor template = createMock(Executor.class);
         expect(template.update(isA(UpdateStatement.class), isA(List.class))).andReturn(1).anyTimes();
 //        template.comment("Lock Database");
 //        expectLastCall();
 
         replay(database);
         replay(template);
-        ExecutorService.getInstance().setWriteExecutor(database, template);
+        ExecutorService.getInstance().setExecutor(database, template);
 
         ShouldRunChangeSetFilter filter = new ShouldRunChangeSetFilter(database);
 
