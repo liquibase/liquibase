@@ -122,7 +122,7 @@ public class InformixDatabase extends AbstractDatabase {
         	 * For each session this statement has to be executed,
         	 * to allow newlines in quoted strings
         	 */
-			ExecutorService.getInstance().getWriteExecutor(this).execute(new RawSqlStatement("EXECUTE PROCEDURE IFX_ALLOW_NEWLINE('T');"));
+			ExecutorService.getInstance().getExecutor(this).execute(new RawSqlStatement("EXECUTE PROCEDURE IFX_ALLOW_NEWLINE('T');"));
 		} catch (Exception e) {
 			new UnexpectedLiquibaseException("Could not allow newline characters in quoted strings with IFX_ALLOW_NEWLINE");
 		}
@@ -204,7 +204,7 @@ public class InformixDatabase extends AbstractDatabase {
 	@Override
 	public String getViewDefinition(String schemaName, String viewName)
 			throws DatabaseException {
-		List<Map> retList = ExecutorService.getInstance().getReadExecutor(this).queryForList(new GetViewDefinitionStatement(schemaName, viewName));
+		List<Map> retList = ExecutorService.getInstance().getExecutor(this).queryForList(new GetViewDefinitionStatement(schemaName, viewName));
 		// building the view definition from the multiple rows
 		StringBuilder sb = new StringBuilder();
 		for (Map rowMap : retList) {

@@ -7,7 +7,7 @@ import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.ExecutorService;
-import liquibase.executor.ReadExecutor;
+import liquibase.executor.Executor;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.FindForeignKeyConstraintsStatement;
@@ -70,7 +70,7 @@ public class DropAllForeignKeyConstraintsChange extends AbstractChange {
         // Make a new list
         childDropChanges = new ArrayList<DropForeignKeyConstraintChange>();
 
-        ReadExecutor readExecutor = ExecutorService.getInstance().getReadExecutor(database);
+        Executor executor = ExecutorService.getInstance().getExecutor(database);
 
         FindForeignKeyConstraintsStatement sql = new FindForeignKeyConstraintsStatement(
                 getBaseTableSchemaName(),
@@ -78,7 +78,7 @@ public class DropAllForeignKeyConstraintsChange extends AbstractChange {
         );
 
         try {
-            List<Map> results = readExecutor.queryForList(sql, new ArrayList<SqlVisitor>());
+            List<Map> results = executor.queryForList(sql, new ArrayList<SqlVisitor>());
 
             if (results != null && results.size() > 0) {
                 for (Map result : results) {

@@ -4,7 +4,7 @@ import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.DatabaseConnection;
 import liquibase.executor.LoggingExecutor;
-import liquibase.executor.WriteExecutor;
+import liquibase.executor.Executor;
 import liquibase.executor.*;
 import liquibase.exception.DatabaseException;
 import liquibase.sql.visitor.SqlVisitor;
@@ -72,16 +72,16 @@ public class LockServiceExecuteTest {
                 new DatabaseTest() {
 
                     public void performTest(Database database) throws Exception {
-                        WriteExecutor writeExecutor = ExecutorService.getInstance().getWriteExecutor(database);
+                        Executor executor = ExecutorService.getInstance().getExecutor(database);
                         try {
                             LockService.getInstance(database).reset();
 
-                            writeExecutor.execute(new DropTableStatement(null, database.getDatabaseChangeLogTableName(), false), new ArrayList<SqlVisitor>());
+                            executor.execute(new DropTableStatement(null, database.getDatabaseChangeLogTableName(), false), new ArrayList<SqlVisitor>());
                         } catch (DatabaseException e) {
                             ; //must not be there
                         }
                         try {
-                            writeExecutor.execute(new DropTableStatement(null, database.getDatabaseChangeLogLockTableName(), false), new ArrayList<SqlVisitor>());
+                            executor.execute(new DropTableStatement(null, database.getDatabaseChangeLogLockTableName(), false), new ArrayList<SqlVisitor>());
                         } catch (DatabaseException e) {
                             ; //must not be there
                         }
@@ -105,21 +105,21 @@ public class LockServiceExecuteTest {
 
                         LockService.getInstance(database).reset();
 
-                        WriteExecutor writeExecutor = ExecutorService.getInstance().getWriteExecutor(database);
+                        Executor executor = ExecutorService.getInstance().getExecutor(database);
                         try {
-                            writeExecutor.execute(new DropTableStatement(null, database.getDatabaseChangeLogTableName(), false), new ArrayList<SqlVisitor>());
+                            executor.execute(new DropTableStatement(null, database.getDatabaseChangeLogTableName(), false), new ArrayList<SqlVisitor>());
                         } catch (DatabaseException e) {
                             ; //must not be there
                         }
                         try {
-                            writeExecutor.execute(new DropTableStatement(null, database.getDatabaseChangeLogLockTableName(), false), new ArrayList<SqlVisitor>());
+                            executor.execute(new DropTableStatement(null, database.getDatabaseChangeLogLockTableName(), false), new ArrayList<SqlVisitor>());
                         } catch (DatabaseException e) {
                             ; //must not be there
                         }
 
                         database.commit();
 
-                        ExecutorService.getInstance().setWriteExecutor(database, (new LoggingExecutor(new StringWriter(), database)));
+                        ExecutorService.getInstance().setExecutor(database, (new LoggingExecutor(ExecutorService.getInstance().getExecutor(database), new StringWriter(), database)));
 
                         LockService lockManager = LockService.getInstance(database);
                         lockManager.waitForLock();
@@ -138,12 +138,12 @@ public class LockServiceExecuteTest {
                         LockService.getInstance(database).reset();
 
                         try {
-                            ExecutorService.getInstance().getWriteExecutor(database).execute(new DropTableStatement(null, database.getDatabaseChangeLogTableName(), false), new ArrayList<SqlVisitor>());
+                            ExecutorService.getInstance().getExecutor(database).execute(new DropTableStatement(null, database.getDatabaseChangeLogTableName(), false), new ArrayList<SqlVisitor>());
                         } catch (DatabaseException e) {
                             ; //must not be there
                         }
                         try {
-                            ExecutorService.getInstance().getWriteExecutor(database).execute(new DropTableStatement(null, database.getDatabaseChangeLogLockTableName(), false), new ArrayList<SqlVisitor>());
+                            ExecutorService.getInstance().getExecutor(database).execute(new DropTableStatement(null, database.getDatabaseChangeLogLockTableName(), false), new ArrayList<SqlVisitor>());
                         } catch (DatabaseException e) {
                             ; //must not be there
                         }
@@ -153,13 +153,13 @@ public class LockServiceExecuteTest {
 //                        Database clearDatabase = database.getClass().newInstance();
 //                        clearDatabase.setConnection(database.getConnection());
 
-                        WriteExecutor originalTemplate = ExecutorService.getInstance().getWriteExecutor(database);
-                        ExecutorService.getInstance().setWriteExecutor(database, new LoggingExecutor(new StringWriter(), database));
+                        Executor originalTemplate = ExecutorService.getInstance().getExecutor(database);
+                        ExecutorService.getInstance().setExecutor(database, new LoggingExecutor(originalTemplate, new StringWriter(), database));
 
                         LockService lockManager = LockService.getInstance(database);
                         lockManager.waitForLock();
 
-                        ExecutorService.getInstance().setWriteExecutor(database, originalTemplate);
+                        ExecutorService.getInstance().setExecutor(database, originalTemplate);
                         lockManager.waitForLock();
 
 //                        database.getWriteExecutor().execute(database.getSelectChangeLogLockSQL());

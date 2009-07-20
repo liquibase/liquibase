@@ -82,15 +82,15 @@ public class ServiceLocator {
 //        System.out.println("Getting classes...");
 
             if (!classesBySuperclass.containsKey(requiredInterface)) {
-    //            System.out.println("Need to look up "+requiredInterface);
+//                System.out.println("Need to look up "+requiredInterface);
                 classesBySuperclass.put(requiredInterface, new ArrayList<Class>());
 
                 for (String packageName : packagesToScan) {
-    //                System.out.println("scanning "+packageName);
+//                    System.out.println("scanning "+packageName+" with resoureAccessor "+resourceAccessor);
                     String path = packageName.replace('.', '/');
                     Enumeration<URL> resources = resourceAccessor.getResources(path);
                     while (resources.hasMoreElements()) {
-    //                    System.out.println("Found resource");
+//                        System.out.println("Found resource");
                         classesBySuperclass.get(requiredInterface).addAll(findClasses(resources.nextElement(), packageName, requiredInterface));
                     }
                 }

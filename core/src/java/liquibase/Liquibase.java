@@ -13,7 +13,7 @@ import liquibase.exception.LiquibaseException;
 import liquibase.exception.LockException;
 import liquibase.executor.ExecutorService;
 import liquibase.executor.LoggingExecutor;
-import liquibase.executor.WriteExecutor;
+import liquibase.executor.Executor;
 import liquibase.lockservice.DatabaseChangeLogLock;
 import liquibase.lockservice.LockService;
 import liquibase.parser.ChangeLogParserFactory;
@@ -30,7 +30,7 @@ import java.io.PrintStream;
 import java.io.Writer;
 import java.text.DateFormat;
 import java.util.*;
-import java.util.logging.Level;
+
 import liquibase.logging.Logger;
 
 /**
@@ -121,9 +121,9 @@ public class Liquibase {
     }
 
     public void update(String contexts, Writer output) throws LiquibaseException {
-        WriteExecutor oldTemplate = ExecutorService.getInstance().getWriteExecutor(database);
-        LoggingExecutor loggingExecutor = new LoggingExecutor(output, database);
-        ExecutorService.getInstance().setWriteExecutor(database, loggingExecutor);
+        Executor oldTemplate = ExecutorService.getInstance().getExecutor(database);
+        LoggingExecutor loggingExecutor = new LoggingExecutor(ExecutorService.getInstance().getExecutor(database), output, database);
+        ExecutorService.getInstance().setExecutor(database, loggingExecutor);
 
         outputHeader("Update Database Script");
 
@@ -141,7 +141,7 @@ public class Liquibase {
             lockService.releaseLock();
         }
 
-        ExecutorService.getInstance().setWriteExecutor(database, oldTemplate);
+        ExecutorService.getInstance().setExecutor(database, oldTemplate);
     }
 
     public void update(int changesToApply, String contexts) throws LiquibaseException {
@@ -168,9 +168,9 @@ public class Liquibase {
     }
 
     public void update(int changesToApply, String contexts, Writer output) throws LiquibaseException {
-        WriteExecutor oldTemplate = ExecutorService.getInstance().getWriteExecutor(database);
-        LoggingExecutor loggingExecutor = new LoggingExecutor(output, database);
-        ExecutorService.getInstance().setWriteExecutor(database, loggingExecutor);
+        Executor oldTemplate = ExecutorService.getInstance().getExecutor(database);
+        LoggingExecutor loggingExecutor = new LoggingExecutor(ExecutorService.getInstance().getExecutor(database), output, database);
+        ExecutorService.getInstance().setExecutor(database, loggingExecutor);
 
         outputHeader("Update " + changesToApply + " Change Sets Database Script");
 
@@ -182,24 +182,24 @@ public class Liquibase {
             throw new LiquibaseException(e);
         }
 
-        ExecutorService.getInstance().setWriteExecutor(database, oldTemplate);
+        ExecutorService.getInstance().setExecutor(database, oldTemplate);
     }
 
     private void outputHeader(String message) throws DatabaseException {
-        WriteExecutor writeExecutor = ExecutorService.getInstance().getWriteExecutor(database);
-        writeExecutor.comment("*********************************************************************");
-        writeExecutor.comment(message);
-        writeExecutor.comment("*********************************************************************");
-        writeExecutor.comment("Change Log: " + changeLogFile);
-        writeExecutor.comment("Ran at: " + DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(new Date()));
-        writeExecutor.comment("Against: " + getDatabase().getConnection().getConnectionUserName() + "@" + getDatabase().getConnection().getURL());
-        writeExecutor.comment("LiquiBase version: " + LiquibaseUtil.getBuildVersion());
-        writeExecutor.comment("*********************************************************************" + StreamUtil.getLineSeparator());
+        Executor executor = ExecutorService.getInstance().getExecutor(database);
+        executor.comment("*********************************************************************");
+        executor.comment(message);
+        executor.comment("*********************************************************************");
+        executor.comment("Change Log: " + changeLogFile);
+        executor.comment("Ran at: " + DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(new Date()));
+        executor.comment("Against: " + getDatabase().getConnection().getConnectionUserName() + "@" + getDatabase().getConnection().getURL());
+        executor.comment("LiquiBase version: " + LiquibaseUtil.getBuildVersion());
+        executor.comment("*********************************************************************" + StreamUtil.getLineSeparator());
     }
 
     public void rollback(int changesToRollback, String contexts, Writer output) throws LiquibaseException {
-        WriteExecutor oldTemplate = ExecutorService.getInstance().getWriteExecutor(database);
-        ExecutorService.getInstance().setWriteExecutor(database, new LoggingExecutor(output, database));
+        Executor oldTemplate = ExecutorService.getInstance().getExecutor(database);
+        ExecutorService.getInstance().setExecutor(database, new LoggingExecutor(ExecutorService.getInstance().getExecutor(database), output, database));
 
         outputHeader("Rollback " + changesToRollback + " Change(s) Script");
 
@@ -210,7 +210,7 @@ public class Liquibase {
         } catch (IOException e) {
             throw new LiquibaseException(e);
         }
-        ExecutorService.getInstance().setWriteExecutor(database, oldTemplate);
+        ExecutorService.getInstance().setExecutor(database, oldTemplate);
     }
 
     public void rollback(int changesToRollback, String contexts) throws LiquibaseException {
@@ -240,8 +240,8 @@ public class Liquibase {
     }
 
     public void rollback(String tagToRollBackTo, String contexts, Writer output) throws LiquibaseException {
-        WriteExecutor oldTemplate = ExecutorService.getInstance().getWriteExecutor(database);
-        ExecutorService.getInstance().setWriteExecutor(database, new LoggingExecutor(output, database));
+        Executor oldTemplate = ExecutorService.getInstance().getExecutor(database);
+        ExecutorService.getInstance().setExecutor(database, new LoggingExecutor(ExecutorService.getInstance().getExecutor(database), output, database));
 
         outputHeader("Rollback to '" + tagToRollBackTo + "' Script");
 
@@ -252,7 +252,7 @@ public class Liquibase {
         } catch (IOException e) {
             throw new LiquibaseException(e);
         }
-        ExecutorService.getInstance().setWriteExecutor(database, oldTemplate);
+        ExecutorService.getInstance().setExecutor(database, oldTemplate);
     }
 
     public void rollback(String tagToRollBackTo, String contexts) throws LiquibaseException {
@@ -277,8 +277,8 @@ public class Liquibase {
     }
 
     public void rollback(Date dateToRollBackTo, String contexts, Writer output) throws LiquibaseException {
-        WriteExecutor oldTemplate = ExecutorService.getInstance().getWriteExecutor(database);
-        ExecutorService.getInstance().setWriteExecutor(database, new LoggingExecutor(output, database));
+        Executor oldTemplate = ExecutorService.getInstance().getExecutor(database);
+        ExecutorService.getInstance().setExecutor(database, new LoggingExecutor(ExecutorService.getInstance().getExecutor(database), output, database));
 
         outputHeader("Rollback to " + dateToRollBackTo + " Script");
 
@@ -289,7 +289,7 @@ public class Liquibase {
         } catch (IOException e) {
             throw new LiquibaseException(e);
         }
-        ExecutorService.getInstance().setWriteExecutor(database, oldTemplate);
+        ExecutorService.getInstance().setExecutor(database, oldTemplate);
     }
 
     public void rollback(Date dateToRollBackTo, String contexts) throws LiquibaseException {
@@ -315,9 +315,9 @@ public class Liquibase {
 
     public void changeLogSync(String contexts, Writer output) throws LiquibaseException {
 
-        LoggingExecutor outputTemplate = new LoggingExecutor(output, database);
-        WriteExecutor oldTemplate = ExecutorService.getInstance().getWriteExecutor(database);
-        ExecutorService.getInstance().setWriteExecutor(database, outputTemplate);
+        LoggingExecutor outputTemplate = new LoggingExecutor(ExecutorService.getInstance().getExecutor(database), output, database);
+        Executor oldTemplate = ExecutorService.getInstance().getExecutor(database);
+        ExecutorService.getInstance().setExecutor(database, outputTemplate);
 
         outputHeader("SQL to add all changesets to database history table");
 
@@ -329,7 +329,7 @@ public class Liquibase {
             throw new LiquibaseException(e);
         }
 
-        ExecutorService.getInstance().setWriteExecutor(database, oldTemplate);
+        ExecutorService.getInstance().setExecutor(database, oldTemplate);
     }
 
     public void changeLogSync(String contexts) throws LiquibaseException {
@@ -355,9 +355,9 @@ public class Liquibase {
 
     public void markNextChangeSetRan(String contexts, Writer output) throws LiquibaseException {
 
-        LoggingExecutor outputTemplate = new LoggingExecutor(output, database);
-        WriteExecutor oldTemplate = ExecutorService.getInstance().getWriteExecutor(database);
-        ExecutorService.getInstance().setWriteExecutor(database, outputTemplate);
+        LoggingExecutor outputTemplate = new LoggingExecutor(ExecutorService.getInstance().getExecutor(database), output, database);
+        Executor oldTemplate = ExecutorService.getInstance().getExecutor(database);
+        ExecutorService.getInstance().setExecutor(database, outputTemplate);
 
         outputHeader("SQL to add all changesets to database history table");
 
@@ -369,7 +369,7 @@ public class Liquibase {
             throw new LiquibaseException(e);
         }
 
-        ExecutorService.getInstance().setWriteExecutor(database, oldTemplate);
+        ExecutorService.getInstance().setExecutor(database, oldTemplate);
     }
 
     public void markNextChangeSetRan(String contexts) throws LiquibaseException {
@@ -395,9 +395,9 @@ public class Liquibase {
     }
 
     public void futureRollbackSQL(String contexts, Writer output) throws LiquibaseException {
-        LoggingExecutor outputTemplate = new LoggingExecutor(output, database);
-        WriteExecutor oldTemplate = ExecutorService.getInstance().getWriteExecutor(database);
-        ExecutorService.getInstance().setWriteExecutor(database, outputTemplate);
+        LoggingExecutor outputTemplate = new LoggingExecutor(ExecutorService.getInstance().getExecutor(database), output, database);
+        Executor oldTemplate = ExecutorService.getInstance().getExecutor(database);
+        ExecutorService.getInstance().setExecutor(database, outputTemplate);
 
         outputHeader("SQL to roll back currently unexecuted changes");
 
@@ -417,7 +417,7 @@ public class Liquibase {
 
             logIterator.run(new RollbackVisitor(database), database);
         } finally {
-            ExecutorService.getInstance().setWriteExecutor(database, oldTemplate);
+            ExecutorService.getInstance().setExecutor(database, oldTemplate);
             lockService.releaseLock();
         }
 
@@ -483,7 +483,7 @@ public class Liquibase {
      * should be prompted before continuing.
      */
     public boolean isSafeToRunMigration() throws DatabaseException {
-        return !ExecutorService.getInstance().getWriteExecutor(database).executesStatements() || getDatabase().isLocalDatabase();
+        return !getDatabase().isLocalDatabase();
     }
 
     /**
@@ -571,7 +571,7 @@ public class Liquibase {
 
             UpdateStatement updateStatement = new UpdateStatement(getDatabase().getLiquibaseSchemaName(), getDatabase().getDatabaseChangeLogTableName());
             updateStatement.addNewColumnValue("MD5SUM", null);
-            ExecutorService.getInstance().getWriteExecutor(database).execute(updateStatement, new ArrayList<SqlVisitor>());
+            ExecutorService.getInstance().getExecutor(database).execute(updateStatement, new ArrayList<SqlVisitor>());
             getDatabase().commit();
         } finally {
             lockService.releaseLock();
@@ -603,7 +603,7 @@ public class Liquibase {
         }
 
 //        try {
-//            if (!LockService.getWriteExecutor(database).waitForLock()) {
+//            if (!LockService.getExecutor(database).waitForLock()) {
 //                return;
 //            }
 //

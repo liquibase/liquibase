@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.logging.Level;
 
 /**
  * Encapsulates PostgreSQL database support.
@@ -194,7 +193,7 @@ public class PostgresDatabase extends AbstractDatabase {
 //            if (schema == null) {
 //                schema = getConnectionUsername();
 //            }
-//            new WriteExecutor(this).execute(new RawSqlStatement("DROP OWNED BY " + schema));
+//            new Executor(this).execute(new RawSqlStatement("DROP OWNED BY " + schema));
 //
 //            getConnection().commit();
 //
@@ -343,7 +342,7 @@ public class PostgresDatabase extends AbstractDatabase {
             DatabaseConnection con = getConnection();
 
             if (con != null) {
-                String searchPathResult = (String) ExecutorService.getInstance().getReadExecutor(this).queryForObject(new RawSqlStatement("SHOW search_path"), String.class);
+                String searchPathResult = (String) ExecutorService.getInstance().getExecutor(this).queryForObject(new RawSqlStatement("SHOW search_path"), String.class);
 
                 if (searchPathResult != null) {
                     String dirtySearchPaths[] = searchPathResult.split("\\,");
@@ -384,7 +383,7 @@ public class PostgresDatabase extends AbstractDatabase {
     }
 
     private boolean runExistsQuery(String query) throws DatabaseException {
-        Long count = ExecutorService.getInstance().getReadExecutor(this).queryForLong(new RawSqlStatement(query));
+        Long count = ExecutorService.getInstance().getExecutor(this).queryForLong(new RawSqlStatement(query));
 
         return count != null && count > 0;
     }

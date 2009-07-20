@@ -6,7 +6,7 @@ import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.executor.LoggingExecutor;
-import liquibase.executor.WriteExecutor;
+import liquibase.executor.Executor;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.CommentStatement;
 import liquibase.util.StreamUtil;
@@ -61,8 +61,8 @@ public class ExecuteShellCommandChange extends AbstractChange {
 
     	// check if running under not-executed mode (logging output)
         boolean nonExecutedMode = false;
-        WriteExecutor writeExecutor = ExecutorService.getInstance().getWriteExecutor(database);
-        if (writeExecutor instanceof LoggingExecutor) {
+        Executor executor = ExecutorService.getInstance().getExecutor(database);
+        if (executor instanceof LoggingExecutor) {
         	nonExecutedMode = true;
         }
         

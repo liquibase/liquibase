@@ -6,14 +6,14 @@ public class AddDefaultValueGeneratorTest {
 //        new DatabaseTestTemplate().testOnAvailableDatabases(new DatabaseTest() {
 //
 //            public void performTest(Database database) throws Exception {
-//                new WriteExecutor(database).execute(new CreateTableStatement(null, TABLE_NAME)
+//                new Executor(database).execute(new CreateTableStatement(null, TABLE_NAME)
 //                        .addColumn("id", "int")
 //                        .addColumn(COLUMN_NAME, "varchar(50)"));
 //
 //                DatabaseSnapshotGenerator snapshot = database.createDatabaseSnapshot(null, null);
 //                assertNull(snapshot.getTable(TABLE_NAME).getColumn(COLUMN_NAME).getDefaultValue());
 //
-//                new WriteExecutor(database).execute(new AddDefaultValueStatement(null, TABLE_NAME, COLUMN_NAME, null, "New Default Value"));
+//                new Executor(database).execute(new AddDefaultValueStatement(null, TABLE_NAME, COLUMN_NAME, null, "New Default Value"));
 //
 //                snapshot = database.createDatabaseSnapshot(null, null);
 //                assertEquals("New Default Value", snapshot.getTable(TABLE_NAME).getColumn(COLUMN_NAME).getDefaultValue());
@@ -27,7 +27,7 @@ public class AddDefaultValueGeneratorTest {
 //                new SqlStatementDatabaseTest(null, new AddDefaultValueStatement(null, TABLE_NAME, COLUMN_NAME, null, Boolean.TRUE)) {
 //
 //                    protected void setup(Database database) throws Exception {
-//                        new WriteExecutor(database).execute(new CreateTableStatement(null, TABLE_NAME)
+//                        new Executor(database).execute(new CreateTableStatement(null, TABLE_NAME)
 //                                .addColumn("id", "int")
 //                                .addColumn(COLUMN_NAME, database.getBooleanType().getDataTypeName()));
 //                        super.setup(database);
@@ -57,7 +57,7 @@ public class AddDefaultValueGeneratorTest {
 //                new SqlStatementDatabaseTest(null, new AddDefaultValueStatement(null, TABLE_NAME, COLUMN_NAME, null, 42)) {
 //
 //                    protected void setup(Database database) throws Exception {
-//                        new WriteExecutor(database).execute(new CreateTableStatement(null, TABLE_NAME)
+//                        new Executor(database).execute(new CreateTableStatement(null, TABLE_NAME)
 //                                .addColumn("id", "int")
 //                                .addColumn(COLUMN_NAME, "int"));
 //                        super.setup(database);
@@ -80,7 +80,7 @@ public class AddDefaultValueGeneratorTest {
 //                new SqlStatementDatabaseTest(null, new AddDefaultValueStatement(null, TABLE_NAME, COLUMN_NAME, null, 42.56)) {
 //
 //                    protected void setup(Database database) throws Exception {
-//                        new WriteExecutor(database).execute(new CreateTableStatement(null, TABLE_NAME)
+//                        new Executor(database).execute(new CreateTableStatement(null, TABLE_NAME)
 //                                .addColumn("id", "int")
 //                                .addColumn(COLUMN_NAME, "float"));
 //                        super.setup(database);    //To change body of overridden methods use File | Settings | File Templates.
@@ -105,7 +105,7 @@ public class AddDefaultValueGeneratorTest {
 //                new SqlStatementDatabaseTest(null, new AddDefaultValueStatement(null, TABLE_NAME, COLUMN_NAME, null, date)) {
 //
 //                    protected void setup(Database database) throws DatabaseException {
-//                        new WriteExecutor(database).execute(new CreateTableStatement(null, TABLE_NAME)
+//                        new Executor(database).execute(new CreateTableStatement(null, TABLE_NAME)
 //                                .addColumn("id", "int")
 //                                .addColumn(COLUMN_NAME, database.getDateTimeType().getDataTypeName()));
 //                    }
@@ -128,7 +128,7 @@ public class AddDefaultValueGeneratorTest {
 //                new SqlStatementDatabaseTest(null, new AddDefaultValueStatement(null, TABLE_NAME, COLUMN_NAME, null, date)) {
 //
 //                    protected void setup(Database database) throws Exception {
-//                        new WriteExecutor(database).execute(new CreateTableStatement(null, TABLE_NAME)
+//                        new Executor(database).execute(new CreateTableStatement(null, TABLE_NAME)
 //                                .addColumn("id", "int")
 //                                .addColumn(COLUMN_NAME, database.getDateType().getDataTypeName()));
 //
@@ -164,7 +164,7 @@ public class AddDefaultValueGeneratorTest {
 //                new SqlStatementDatabaseTest(null, new AddDefaultValueStatement(null, TABLE_NAME, COLUMN_NAME, null, time)) {
 //
 //                    protected void setup(Database database) throws Exception {
-//                        new WriteExecutor(database).execute(new CreateTableStatement(null, TABLE_NAME)
+//                        new Executor(database).execute(new CreateTableStatement(null, TABLE_NAME)
 //                                .addColumn("id", "int")
 //                                .addColumn(COLUMN_NAME, database.getTimeType().getDataTypeName()));
 //                        super.setup(database);

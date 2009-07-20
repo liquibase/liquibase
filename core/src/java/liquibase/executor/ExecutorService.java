@@ -11,8 +11,7 @@ public class ExecutorService {
 
     private static ExecutorService instance = new ExecutorService();
 
-    private Map<Database, ReadExecutor> readExecutors = new ConcurrentHashMap<Database, ReadExecutor>();
-    private Map<Database, WriteExecutor> writeExecutors = new ConcurrentHashMap<Database, WriteExecutor>();
+    private Map<Database, Executor> executors = new ConcurrentHashMap<Database, Executor>();
 
 
     private ExecutorService() {
@@ -22,37 +21,24 @@ public class ExecutorService {
         return instance;
     }
 
-    public WriteExecutor getWriteExecutor(Database database) {
-        if (!writeExecutors.containsKey(database)) {
+    public Executor getExecutor(Database database) {
+        if (!executors.containsKey(database)) {
             try {
-                WriteExecutor writeExecutor = (WriteExecutor) ServiceLocator.getInstance().getClasses(WriteExecutor.class)[0].newInstance();
-                writeExecutor.setDatabase(database);
-                writeExecutors.put(database, writeExecutor);
+                Executor executor = (Executor) ServiceLocator.getInstance().getClasses(Executor.class)[0].newInstance();
+                executor.setDatabase(database);
+                executors.put(database, executor);
             } catch (Exception e) {
                 throw new UnexpectedLiquibaseException(e);
             }
         }
-        return writeExecutors.get(database);
+        return executors.get(database);
     }
 
-    public ReadExecutor getReadExecutor(Database database) {
-        if (!readExecutors.containsKey(database)) {
-            try {
-                ReadExecutor readExecutor = (ReadExecutor) ServiceLocator.getInstance().getClasses(ReadExecutor.class)[0].newInstance();
-                readExecutor.setDatabase(database);
-                readExecutors.put(database, readExecutor);
-            } catch (Exception e) {
-                throw new UnexpectedLiquibaseException(e);
-            }
-        }
-        return readExecutors.get(database);
+    public void setExecutor(Database database, Executor executor) {
+        executors.put(database, executor);
     }
 
-    public void setWriteExecutor(Database database, WriteExecutor writeExecutor) {
-        writeExecutors.put(database, writeExecutor);
-    }
-
-    public void setReadExecutor(Database database, ReadExecutor readExecutor) {
-        readExecutors.put(database, readExecutor);
+    public void clearExecutor(Database database) {
+        executors.remove(database);
     }
 }

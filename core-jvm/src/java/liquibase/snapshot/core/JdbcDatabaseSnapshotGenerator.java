@@ -501,7 +501,7 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
 //        updateListeners("Reading unique constraints for " + database.toString() + " ...");
 //
 //        //noinspection unchecked
-//        List<String> sequenceNamess = (List<String>) new WriteExecutor(database).queryForList(database.findUniqueConstraints(schema), String.class);
+//        List<String> sequenceNamess = (List<String>) new Executor(database).queryForList(database.findUniqueConstraints(schema), String.class);
 //
 //        for (String sequenceName : sequenceNamess) {
 //            Sequence seq = new Sequence();
@@ -519,7 +519,7 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
 
         if (database.supportsSequences()) {
             //noinspection unchecked
-            List<String> sequenceNames = (List<String>) ExecutorService.getInstance().getReadExecutor(database).queryForList(new SelectSequencesStatement(schema), String.class, new ArrayList<SqlVisitor>());
+            List<String> sequenceNames = (List<String>) ExecutorService.getInstance().getExecutor(database).queryForList(new SelectSequencesStatement(schema), String.class, new ArrayList<SqlVisitor>());
 
 
             if (sequenceNames != null) {

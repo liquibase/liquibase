@@ -62,7 +62,7 @@ public abstract class SqlStatementDatabaseTest implements DatabaseTest {
 //        preExecuteAssert(snapshot);
 //
 //        try {
-//            new WriteExecutor(database).execute(statement);
+//            new Executor(database).execute(statement);
 //            database.getConnection().commit();
 //        } catch (DatabaseException e) {
 //            boolean expectsException = expectedException(database, e);

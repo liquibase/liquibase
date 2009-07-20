@@ -31,20 +31,15 @@ public class ExecutorServiceTest {
             }
         };
 
-        assertNotNull(ExecutorService.getInstance().getWriteExecutor(oracle1));
-        assertNotNull(ExecutorService.getInstance().getWriteExecutor(oracle2));
-        assertNotNull(ExecutorService.getInstance().getWriteExecutor(mysql));
+        assertNotNull(ExecutorService.getInstance().getExecutor(oracle1));
+        assertNotNull(ExecutorService.getInstance().getExecutor(oracle2));
+        assertNotNull(ExecutorService.getInstance().getExecutor(mysql));
 
-        assertTrue(ExecutorService.getInstance().getWriteExecutor(oracle1) == ExecutorService.getInstance().getWriteExecutor(oracle1));
-        assertTrue(ExecutorService.getInstance().getWriteExecutor(oracle2) == ExecutorService.getInstance().getWriteExecutor(oracle2));
-        assertTrue(ExecutorService.getInstance().getWriteExecutor(mysql) == ExecutorService.getInstance().getWriteExecutor(mysql));
+        assertTrue(ExecutorService.getInstance().getExecutor(oracle1) == ExecutorService.getInstance().getExecutor(oracle1));
+        assertTrue(ExecutorService.getInstance().getExecutor(oracle2) == ExecutorService.getInstance().getExecutor(oracle2));
+        assertTrue(ExecutorService.getInstance().getExecutor(mysql) == ExecutorService.getInstance().getExecutor(mysql));
 
-        assertTrue(ExecutorService.getInstance().getWriteExecutor(oracle1) != ExecutorService.getInstance().getWriteExecutor(oracle2));
-        assertTrue(ExecutorService.getInstance().getWriteExecutor(oracle1) != ExecutorService.getInstance().getWriteExecutor(mysql));
-    }
-
-    @Test
-    public void executingByDefault() {
-        assertTrue(ExecutorService.getInstance().getWriteExecutor(new OracleDatabase()).executesStatements());
+        assertTrue(ExecutorService.getInstance().getExecutor(oracle1) != ExecutorService.getInstance().getExecutor(oracle2));
+        assertTrue(ExecutorService.getInstance().getExecutor(oracle1) != ExecutorService.getInstance().getExecutor(mysql));
     }
 }
