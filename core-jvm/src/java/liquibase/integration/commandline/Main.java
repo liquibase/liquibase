@@ -1,6 +1,7 @@
 package liquibase.integration.commandline;
 
 import liquibase.Liquibase;
+import liquibase.servicelocator.ServiceLocator;
 import liquibase.database.Database;
 import liquibase.exception.CommandLineParsingException;
 import liquibase.exception.DatabaseException;
@@ -8,6 +9,7 @@ import liquibase.exception.ValidationFailedException;
 import liquibase.lockservice.LockService;
 import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.FileSystemResourceAccessor;
+import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.util.LiquibaseUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
@@ -510,6 +512,8 @@ public class Main {
                 }
             });
         }
+
+        ServiceLocator.getInstance().setResourceAccessor(new ClassLoaderResourceAccessor(classLoader));        
     }
 
     private void addWarFileClasspathEntries(File classPathFile, List<URL> urls) throws IOException {
