@@ -140,7 +140,7 @@ public class ChangeSet implements Conditional {
                 executor.comment(StringUtils.join(Arrays.asList(lines), "\n"));
             }
 
-            if (preconditions != null) {
+            if (preconditions != null && executor.updatesDatabase()) {
                 try {
                     preconditions.check(database, null);
                 } catch (PreconditionFailedException e) {

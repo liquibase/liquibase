@@ -30,6 +30,9 @@ import java.util.Map;
  */
 @SuppressWarnings({"unchecked"})
 public class JdbcExecutor extends AbstractExecutor implements Executor {
+    public boolean updatesDatabase() {
+        return true;
+    }
 
     //-------------------------------------------------------------------------
     // Methods dealing with static SQL (java.sql.Statement)

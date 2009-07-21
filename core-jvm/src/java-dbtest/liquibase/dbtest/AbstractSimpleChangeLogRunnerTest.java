@@ -89,6 +89,7 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
             if (shouldRollBack()) {
                 database.rollback();
             }
+            ExecutorService.getInstance().clearExecutor(database);
             database.setDefaultSchemaName(null);
         }
         super.tearDown();

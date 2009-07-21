@@ -52,4 +52,6 @@ public interface Executor {
      * @throws liquibase.exception.DatabaseException
      */
     void comment(String message) throws DatabaseException;
+
+    boolean updatesDatabase();
 }
