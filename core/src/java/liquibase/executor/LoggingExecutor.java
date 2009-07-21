@@ -143,4 +143,8 @@ public class LoggingExecutor extends AbstractExecutor implements Executor {
     public List<Map> queryForList(SqlStatement sql, List<SqlVisitor> sqlVisitors) throws DatabaseException {
         return delegatedReadExecutor.queryForList(sql, sqlVisitors);
     }
+
+    public boolean updatesDatabase() {
+        return false;
+    }
 }

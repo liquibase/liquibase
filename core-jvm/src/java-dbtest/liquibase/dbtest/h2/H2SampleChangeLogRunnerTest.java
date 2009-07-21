@@ -18,4 +18,9 @@ public class H2SampleChangeLogRunnerTest extends AbstractSimpleChangeLogRunnerTe
     protected void tearDown() throws Exception {
         super.tearDown();
     }
+
+    @Override
+    public void testOutputChangeLog() throws Exception {
+        super.testOutputChangeLog();    //To change body of overridden methods use File | Settings | File Templates.
+    }
 }
