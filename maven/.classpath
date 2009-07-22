@@ -5,5 +5,7 @@
 	<classpathentry excluding="**" kind="src" output="target/test-classes" path="src/test/resources"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/J2SE-1.5"/>
 	<classpathentry kind="con" path="org.maven.ide.eclipse.MAVEN2_CLASSPATH_CONTAINER"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/liquibase-core"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/liquibase-jvm"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
