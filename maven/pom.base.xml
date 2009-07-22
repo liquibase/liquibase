@@ -13,11 +13,11 @@
   <url>http://www.liquibase.org</url>
 
   <issueManagement>
-    <url>http://sourceforge.net/tracker/?group_id=187970</url>
+    <url>http://liquibase.jira.com/browse/CORE/</url>
   </issueManagement>
 
   <scm>
-    <url>http://liquibase.svn.sourceforge.net/viewvc/liquibase/</url>
+    <url>http://liquibase.jira.com/svn/CORE/</url>
   </scm>
 
   <dependencies>
