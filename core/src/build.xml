@@ -330,7 +330,7 @@ The available targets at the current stage:
                 <include name="**/*.java"/>
             </fileset>
             <classpath refid="core.classpath"/>
-            <classpath refid="core.classpath"/>
+            <classpath refid="jvm.classpath"/>
             <!--<bottom><![CDATA[-->
             <!--<i>Copyright &#169; 2006-2009 Nathan Voxland. All Rights Reserved.</i>-->
             <!--<script src="http://www.google-analytics.com/urchin.js" type="text/javascript">-->
@@ -530,7 +530,7 @@ The available targets at the current stage:
 
         <typedef resource="org/apache/maven/artifact/ant/antlib.xml">
             <classpath>
-                <fileset dir="${lib.compile.dir}">
+                <fileset dir="${jvm.lib.compile.dir}">
                     <include name="*.jar"/>
                 </fileset>
                 <fileset dir="${maven.basedir}/lib">
