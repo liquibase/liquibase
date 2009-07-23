@@ -217,7 +217,7 @@ The available targets at the current stage:
     </target>
 
     <!-- target: PACKAGE -->
-    <target name="package" depends="compile, build-sample-jars">
+    <target name="package" depends="compile">
         <jar destfile="${release.dir}/liquibase-core-SNAPSHOT.jar" manifest="${basedir}/../../core-jvm/src/java/META-INF/MANIFEST.MF">
             <zipfileset dir="${core.build.dir}"/>
         </jar>
@@ -644,9 +644,7 @@ The available targets at the current stage:
     <target name="ikvmc" depends="package">
         <taskdef name="ikvmc" classname="net.ikvm.ant.IkvmcTask" classpathref="core.classpath"/>
 
-        <property name="ikvm.home" location="c:/ikvm-0.40.0.1"/>
-
-        <ikvmc target="library" out="${release.dir}/liquibase-core.dll" home="${ikvm.home}" version="0.0.0.1" debug="true" verbose="true" srcpath="${src.dir}/java">
+        <ikvmc target="library" out="${release.dir}/liquibase-core.dll" home="${ikvm.home}" version="0.0.0.1" debug="true" verbose="true" srcpath="${core.src.dir}/java">
              <fileset dir="${release.dir}">
                 <include name="liquibase-core-SNAPSHOT.jar"/>
             </fileset>

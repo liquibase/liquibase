@@ -8,9 +8,7 @@
       <customJdkName value="" />
       <maximumHeapSize value="128" />
       <maximumStackSize value="32" />
-      <properties>
-        <property name="env.JAVA_HOME" value="\Program Files\Java\jdk1.5.0_16" />
-      </properties>
+      <properties />
     </buildFile>
   </component>
   <component name="BuildJarProjectSettings">
@@ -350,18 +348,6 @@
   <component name="SvnBranchConfigurationManager">
     <option name="myConfigurationMap">
       <map>
-        <entry key="C:/othersvn/grails-liquibase">
-          <value>
-            <SvnBranchConfiguration>
-              <option name="branchUrls">
-                <list>
-                  <option value="https://svn.codehaus.org/grails-plugins/grails-liquibase/tags" />
-                </list>
-              </option>
-              <option name="trunkUrl" value="https://svn.codehaus.org/grails-plugins/grails-liquibase/trunk" />
-            </SvnBranchConfiguration>
-          </value>
-        </entry>
         <entry key="$PROJECT_DIR$/core">
           <value>
             <SvnBranchConfiguration>
