@@ -6,8 +6,8 @@
     <exclude-output />
     <content url="file://$MODULE_DIR$/core-jvm">
       <sourceFolder url="file://$MODULE_DIR$/core-jvm/src/java" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/core-jvm/src/java-dbtest" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/core-jvm/src/java-test" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/core-jvm/src/java-dbtest" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/core-jvm/src/java-test" isTestSource="true" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

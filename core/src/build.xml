@@ -591,7 +591,7 @@ The available targets at the current stage:
 
         <typedef resource="org/apache/maven/artifact/ant/antlib.xml">
             <classpath>
-                <fileset dir="${lib.compile.dir}">
+                <fileset dir="${jvm.lib.compile.dir}">
                     <include name="*.jar"/>
                 </fileset>
                 <fileset dir="${maven.basedir}/lib">
