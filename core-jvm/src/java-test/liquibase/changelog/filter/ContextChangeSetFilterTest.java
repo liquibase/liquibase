@@ -19,7 +19,7 @@ public class ContextChangeSetFilterTest {
 
     @Test
     public void nullContexts() {
-        ContextChangeSetFilter filter = new ContextChangeSetFilter(null);
+        ContextChangeSetFilter filter = new ContextChangeSetFilter();
 
         assertTrue(filter.accepts(new ChangeSet(null, null, false, false, null, null, "test1", null)));
         assertTrue(filter.accepts(new ChangeSet(null, null, false, false, null, null, "test2", null)));
@@ -29,7 +29,7 @@ public class ContextChangeSetFilterTest {
 
     @Test
     public void nullListContexts() {
-        ContextChangeSetFilter filter = new ContextChangeSetFilter(new String[] {null});
+        ContextChangeSetFilter filter = new ContextChangeSetFilter();
 
         assertTrue(filter.accepts(new ChangeSet(null, null, false, false, null, null, "test1", null)));
         assertTrue(filter.accepts(new ChangeSet(null, null, false, false, null, null, "test2", null)));
