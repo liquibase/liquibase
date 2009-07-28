@@ -162,6 +162,9 @@ public class XMLChangeLogSerializerTest {
         change.setColumnNames("COL_HERE");
         change.setConstraintName("PK_NAME");
         change.setTablespace("TABLESPACE_NAME");
+        change.setDeferrable(true);
+        change.setInitiallyDeferred(true);
+        change.setDisabled(true);
 
         Element node = new XMLChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(change);
         assertEquals("addUniqueConstraint", node.getTagName());
@@ -170,6 +173,9 @@ public class XMLChangeLogSerializerTest {
         assertEquals("COL_HERE", node.getAttribute("columnNames"));
         assertEquals("PK_NAME", node.getAttribute("constraintName"));
         assertEquals("TABLESPACE_NAME", node.getAttribute("tablespace"));
+        assertEquals("TABLESPACE_NAME", node.getAttribute("tablespace"));
+        assertEquals("true", node.getAttribute("deferrable"));
+        assertEquals("true", node.getAttribute("initiallyDeferred"));
     }
 
     @Test

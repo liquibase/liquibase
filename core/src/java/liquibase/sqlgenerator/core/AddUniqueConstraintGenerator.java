@@ -32,7 +32,7 @@ public class AddUniqueConstraintGenerator implements SqlGenerator<AddUniqueConst
     }
 
     public Sql[] generateSql(AddUniqueConstraintStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-		
+
 		String sql = null;
 		if (statement.getConstraintName() == null) {
 			sql = String.format("ALTER TABLE %s ADD UNIQUE (%s)"
@@ -45,6 +45,20 @@ public class AddUniqueConstraintGenerator implements SqlGenerator<AddUniqueConst
 					, database.escapeConstraintName(statement.getConstraintName())
 					, database.escapeColumnNameList(statement.getColumnNames())
 			);
+		}
+		if(database instanceof OracleDatabase) {
+	        if (statement.isDeferrable() || statement.isInitiallyDeferred()) {
+	            if (statement.isDeferrable()) {
+	            	sql += " DEFERRABLE";
+	            }
+
+	            if (statement.isInitiallyDeferred()) {
+	            	sql +=" INITIALLY DEFERRED";
+	            }
+	        }
+            if (statement.isDisabled()) {
+                sql +=" DISABLE";
+            }
 		}
 
         if (StringUtils.trimToNull(statement.getTablespace()) != null && database.supportsTablespaces()) {

@@ -547,7 +547,9 @@ public class DiffResult {
             change.setSchemaName(uc.getTable().getSchema());
             change.setConstraintName(uc.getName());
             change.setColumnNames(uc.getColumnNames());
-
+            change.setDeferrable(uc.isDeferrable());
+            change.setInitiallyDeferred(uc.isInitiallyDeferred());
+            change.setDisabled(uc.isDisabled());
             changes.add(change);
         }
     }
