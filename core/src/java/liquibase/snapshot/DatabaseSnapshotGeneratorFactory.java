@@ -35,10 +35,17 @@ public class DatabaseSnapshotGeneratorFactory {
         return instance;
     }
 
+    /**
+     * Get generators supporting database, sorted from highest priority to
+     * lowest.
+     *
+     * @param database
+     * @return
+     */
     public SortedSet<DatabaseSnapshotGenerator> getGenerators(final Database database) {
         SortedSet<DatabaseSnapshotGenerator> generators = new TreeSet<DatabaseSnapshotGenerator>(new Comparator<DatabaseSnapshotGenerator>() {
             public int compare(DatabaseSnapshotGenerator o1, DatabaseSnapshotGenerator o2) {
-                return Integer.valueOf(o1.getPriority(database)).compareTo(o2.getPriority(database));
+                return Integer.valueOf(o2.getPriority(database)).compareTo(o1.getPriority(database));
             }
         });
 
@@ -51,6 +58,9 @@ public class DatabaseSnapshotGeneratorFactory {
         return generators;
     }
 
+    /**
+     * Get generator for database with highest priority.
+     */
     public DatabaseSnapshot createSnapshot(Database database, String schema, Set<DiffStatusListener> listeners) throws DatabaseException {
         return getGenerators(database).iterator().next().createSnapshot(database, schema, listeners);
     }
