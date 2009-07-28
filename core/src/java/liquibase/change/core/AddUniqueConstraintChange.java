@@ -26,6 +26,10 @@ public class AddUniqueConstraintChange extends AbstractChange {
     private String constraintName;
     private String tablespace;
 
+    private Boolean deferrable;
+    private Boolean initiallyDeferred;
+    private Boolean disabled;
+
     public AddUniqueConstraintChange() {
         super("addUniqueConstraint", "Add Unique Constraint", ChangeMetaData.PRIORITY_DEFAULT);
     }
@@ -71,27 +75,68 @@ public class AddUniqueConstraintChange extends AbstractChange {
         this.tablespace = tablespace;
     }
 
+    public Boolean getDeferrable() {
+        return deferrable;
+    }
+
+    public void setDeferrable(Boolean deferrable) {
+        this.deferrable = deferrable;
+    }
+
+    public Boolean getInitiallyDeferred() {
+        return initiallyDeferred;
+    }
+
+    public void setInitiallyDeferred(Boolean initiallyDeferred) {
+        this.initiallyDeferred = initiallyDeferred;
+    }
+
+    public Boolean getDisabled() {
+        return disabled;
+    }
+
+    public void setDisabled(Boolean disabled) {
+        this.disabled = disabled;
+    }
+
     public SqlStatement[] generateStatements(Database database) {
-        
+
 //todo    	if (database instanceof SQLiteDatabase) {
 //    		// return special statements for SQLite databases
 //    		return generateStatementsForSQLiteDatabase(database);
 //        }
-    	
+
+        boolean deferrable = false;
+        if (getDeferrable() != null) {
+            deferrable = getDeferrable();
+        }
+
+        boolean initiallyDeferred = false;
+        if (getInitiallyDeferred() != null) {
+            initiallyDeferred = getInitiallyDeferred();
+        }
+        boolean disabled = false;
+        if (getDisabled() != null) {
+            disabled = getDisabled();
+        }
+
     	AddUniqueConstraintStatement statement = new AddUniqueConstraintStatement(getSchemaName() == null?database.getDefaultSchemaName():getSchemaName(), getTableName(), getColumnNames(), getConstraintName());
-        statement.setTablespace(getTablespace());
+        statement.setTablespace(getTablespace())
+                        .setDeferrable(deferrable)
+                        .setInitiallyDeferred(initiallyDeferred)
+                        .setDisabled(disabled);
 
         return new SqlStatement[] { statement };
     }
-    
+
     private SqlStatement[] generateStatementsForSQLiteDatabase(Database database) {
-    	
+
     	// SQLite does not support this ALTER TABLE operation until now.
 		// For more information see: http://www.sqlite.org/omitted.html.
 		// This is a small work around...
-    	
+
     	List<SqlStatement> statements = new ArrayList<SqlStatement>();
-    	
+
 		// define alter table logic
 		AlterTableVisitor rename_alter_visitor = new AlterTableVisitor() {
 			public ColumnConfig[] getColumnsToAdd() {
@@ -104,7 +149,7 @@ public class AddUniqueConstraintChange extends AbstractChange {
 				String[] split_columns = getColumnNames().split("[ ]*,[ ]*");
 				for (String split_column:split_columns) {
 					if (column.getName().equals(split_column)) {
-    					column.getConstraints().setUnique(true);            					
+    					column.getConstraints().setUnique(true);
     				}
 				}
 				return true;
@@ -113,7 +158,7 @@ public class AddUniqueConstraintChange extends AbstractChange {
 				return true;
 			}
 		};
-    		
+
     	try {
     		// alter table
 			statements.addAll(SQLiteDatabase.getAlterTableStatements(
@@ -122,7 +167,7 @@ public class AddUniqueConstraintChange extends AbstractChange {
     	} catch (Exception e) {
 			e.printStackTrace();
 		}
-    	
+
     	return statements.toArray(new SqlStatement[statements.size()]);
     }
 

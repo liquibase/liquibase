@@ -26,6 +26,7 @@ import liquibase.change.ColumnConfig;
 import liquibase.change.ConstraintsConfig;
 import liquibase.change.core.AddColumnChange;
 import liquibase.change.core.AddForeignKeyConstraintChange;
+import liquibase.change.core.AddUniqueConstraintChange;
 import liquibase.change.core.LoadDataColumnConfig;
 import liquibase.change.core.SQLFileChange;
 import liquibase.change.custom.CustomChangeWrapper;
@@ -154,7 +155,33 @@ public class StringChangeLogSerializerTest {
                 "]", new StringChangeLogSerializer().serialize(change));
 
     }
+    @Test
+    public void serialized_AddUniqueKeyConstraint() {
+    	AddUniqueConstraintChange change = new AddUniqueConstraintChange();
 
+        assertEquals("addUniqueConstraint:[]", new StringChangeLogSerializer().serialize(change));
+
+        change.setTableName("TABLE_NAME");
+        change.setColumnNames("COL1, COL2");
+        change.setSchemaName("BASE_SCHEM");
+        change.setConstraintName("FK_TEST");
+        change.setDeferrable(true);
+        change.setInitiallyDeferred(true);
+        change.setDisabled(true);
+        change.setTablespace("TABLESPACE1");
+
+        assertEquals("addUniqueConstraint:[\n" +
+                "    columnNames=\"COL1, COL2\"\n" +
+                "    constraintName=\"FK_TEST\"\n" +
+                "    deferrable=\"true\"\n" +
+                "    disabled=\"true\"\n" +
+                "    initiallyDeferred=\"true\"\n" +
+                "    schemaName=\"BASE_SCHEM\"\n" +
+                "    tableName=\"TABLE_NAME\"\n" +
+                "    tablespace=\"TABLESPACE1\"\n" +
+                "]", new StringChangeLogSerializer().serialize(change));
+
+    }
 //    @Test
 //    public void serialized_changeSet() {
 //        ChangeSet changeSet = new ChangeSet("1", "ted", true, false, "com/example/test.xml", "c:/com/exmple/test", "context1, context2", "mysql, oracle");
@@ -210,7 +237,7 @@ public class StringChangeLogSerializerTest {
         Class clazz = object.getClass();
         for (Field field : clazz.getDeclaredFields()) {
             if (field.getAnnotation(ChangeProperty.class) != null && !field.getAnnotation(ChangeProperty.class).includeInSerialization()) {
-                continue;                
+                continue;
             }
             field.setAccessible(true);
             if (field.getType().getName().equals("[[Z")) {
@@ -304,7 +331,7 @@ public class StringChangeLogSerializerTest {
     }
 
     private BigInteger createBigInteger() {
-    	
+
         return new BigInteger(20, new Random());
     }
 
