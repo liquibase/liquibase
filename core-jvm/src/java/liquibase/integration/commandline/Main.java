@@ -312,9 +312,9 @@ public class Main {
         stream.println(" changelogSync             Mark all changes as executed in the database");
         stream.println(" changelogSyncSQL          Writes SQL to mark all changes as executed ");
         stream.println("                           in the database to STDOUT");
-        stream.println(" markNextNextChangeLogRan  Mark the next change changes as executed ");
+        stream.println(" markNextChangeSetRan      Mark the next change changes as executed ");
         stream.println("                           in the database");
-        stream.println(" markNextNextChangeLogRanSQL Writes SQL to mark the next change ");
+        stream.println(" markNextChangeSetRanSQL   Writes SQL to mark the next change ");
         stream.println("                           as executed in the database to STDOUT");
         stream.println(" listLocks                 Lists who currently has locks on the");
         stream.println("                           database changelog");
@@ -513,7 +513,7 @@ public class Main {
             });
         }
 
-        ServiceLocator.getInstance().setResourceAccessor(new ClassLoaderResourceAccessor(classLoader));        
+        ServiceLocator.getInstance().setResourceAccessor(new ClassLoaderResourceAccessor(classLoader));
     }
 
     private void addWarFileClasspathEntries(File classPathFile, List<URL> urls) throws IOException {
