@@ -573,4 +573,15 @@
         </createTable>
     </changeSet>
 
+    <changeSet id="CORE-381" author="ssantoro" dbms="msql">
+        <createTable tableName="SimpleTable">
+            <column name="GUID" type="uniqueidentifier" defaultValueNumeric="newsequentialid()">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="PK_AssignSet"/>
+            </column>
+            <column name="ChangeNumber" type="int" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="Value" type="varchar(256)"/>
+        </createTable>
+    </changeSet>
 </databaseChangeLog>

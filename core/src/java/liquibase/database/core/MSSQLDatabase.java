@@ -281,20 +281,7 @@ public class MSSQLDatabase extends AbstractDatabase {
 
 	@Override
 	public String getDefaultSchemaName() {
-        try {
-        	DatabaseConnection connection = getConnection();
-            return connection == null ? null: connection.getCatalog();
-        } catch (DatabaseException e) {
-            log.severe(e.getMessage());
-            e.printStackTrace();
-            return null;
-        }
-	}
-
-
-	@Override
-	public String getLiquibaseSchemaName() {
-		return "dbo";
+        return "dbo";
 	}
 
 	@Override
