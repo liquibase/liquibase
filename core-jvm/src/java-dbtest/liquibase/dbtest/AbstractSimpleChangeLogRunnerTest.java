@@ -588,4 +588,27 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
             ServiceLocator.reset();
         }
     }
+
+    public void testRollbackToChange() throws Exception {
+        if (database == null) {
+            return;
+        }
+
+        Liquibase liquibase = createLiquibase(rollbackChangeLog);
+        liquibase.dropAll(getSchemasToDrop());
+
+        liquibase = createLiquibase(rollbackChangeLog);
+        liquibase.update(this.contexts);
+
+        liquibase = createLiquibase(rollbackChangeLog);
+        liquibase.rollback(8, this.contexts);
+
+        liquibase.tag("testRollbackToChange");
+
+        liquibase = createLiquibase(rollbackChangeLog);
+        liquibase.update(this.contexts);
+
+        liquibase = createLiquibase(rollbackChangeLog);
+        liquibase.rollback("testRollbackToChange", this.contexts);
+    }
 }

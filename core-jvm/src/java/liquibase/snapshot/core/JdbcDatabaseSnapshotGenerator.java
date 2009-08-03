@@ -267,13 +267,13 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
                 //Simple (non-composite) keys have KEY_SEQ=1, so create the ForeignKey.
                 //In case of subsequent parts of composite keys (KEY_SEQ>1) don't create new instance, just reuse the one from previous call.
                 //According to #getExportedKeys() contract, the result set rows are properly sorted, so the reuse of previous FK instance is safe.
-                if (keySeq == 1) {
+//                if (keySeq == 1) {
                     fkInfo = new ForeignKey();
-                }
+//                }
 
-                if (fkInfo == null || ( (fkInfo != null) && ( fkInfo.getPrimaryKeyTable().getName() != pkTableName ))) {
-                    fkInfo = new ForeignKey();
-                }
+//                if (fkInfo == null || ( (fkInfo.getPrimaryKeyTable() != null) && (!fkInfo.getPrimaryKeyTable().getName().equals(pkTableName)))) {
+//                    fkInfo = new ForeignKey();
+//                }
 
                 fkInfo.setPrimaryKeyTable(pkTable);
                 fkInfo.addPrimaryKeyColumn(pkColumn);

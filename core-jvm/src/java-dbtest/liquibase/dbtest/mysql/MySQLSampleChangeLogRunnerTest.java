@@ -12,7 +12,8 @@ public class MySQLSampleChangeLogRunnerTest extends AbstractSimpleChangeLogRunne
     }
 
     @Override
-    public void testTagEmptyDatabase() throws Exception {
-        super.testTagEmptyDatabase();    //To change body of overridden methods use File | Settings | File Templates.
+    public void testRollbackToChange() throws Exception {
+        super.testRollbackToChange();
     }
+
 }
