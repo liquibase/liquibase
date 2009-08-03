@@ -1,17 +1,19 @@
 package liquibase.database.core;
 
+import liquibase.exception.DatabaseException;
 import liquibase.database.AbstractDatabase;
 import liquibase.database.DataType;
 import liquibase.database.DatabaseConnection;
-import liquibase.exception.DatabaseException;
 
 import java.text.ParseException;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * Encapsulates Sybase ASE database support.
+ */
 public class SybaseDatabase extends AbstractDatabase {
-
-
+    public static final String PRODUCT_NAME = "Adaptive Server Enterprise";
     protected Set<String> systemTablesAndViews = new HashSet<String>();
     private static final DataType DATETIME_TYPE = new DataType("DATETIME", false);
     private static final DataType DATE_TYPE = new DataType("SMALLDATETIME", false);
@@ -21,6 +23,52 @@ public class SybaseDatabase extends AbstractDatabase {
     private static final DataType CLOB_TYPE = new DataType("TEXT", true);
     private static final DataType BLOB_TYPE = new DataType("IMAGE", true);
 
+    public String getProductName() {
+        return "Sybase SQL Server";
+    }
+
+    public String getTypeName() {
+        return "sybase";
+    }
+
+    public SybaseDatabase() {
+        systemTablesAndViews.add("syscolumns");
+        systemTablesAndViews.add("syscomments");
+        systemTablesAndViews.add("sysdepends");
+        systemTablesAndViews.add("sysfilegroups");
+        systemTablesAndViews.add("sysfiles");
+        systemTablesAndViews.add("sysfiles1");
+        systemTablesAndViews.add("sysforeignkeys");
+        systemTablesAndViews.add("sysfulltextcatalogs");
+        systemTablesAndViews.add("sysfulltextnotify");
+        systemTablesAndViews.add("sysindexes");
+        systemTablesAndViews.add("sysindexkeys");
+        systemTablesAndViews.add("sysmembers");
+        systemTablesAndViews.add("sysobjects");
+        systemTablesAndViews.add("syspermissions");
+        systemTablesAndViews.add("sysproperties");
+        systemTablesAndViews.add("sysprotects");
+        systemTablesAndViews.add("sysreferences");
+        systemTablesAndViews.add("systypes");
+        systemTablesAndViews.add("sysusers");
+        systemTablesAndViews.add("sysquerymetrics");
+        systemTablesAndViews.add("syssegments");
+        systemTablesAndViews.add("sysconstraints");
+    }
+
+/*    public void setConnection(Connection connection) {
+        super.setConnection(new SybaseConnectionDelegate(connection));
+    }
+    */
+
+    /**
+     * Sybase does not support DDL and meta data in transactions properly,
+     * as such we turn off the commit and turn on auto commit.
+     */
+    @Override
+    public boolean supportsDDLInTransaction() {
+    	return false;
+    }
 
     @Override
     public Set<String> getSystemTablesAndViews() {
@@ -36,6 +84,21 @@ public class SybaseDatabase extends AbstractDatabase {
         return false;
     }
 
+    public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
+        String dbProductName = conn.getDatabaseProductName();
+        return
+                "Sybase SQL Server".equals(dbProductName) ||
+                        "sql server".equals(dbProductName);
+    }
+
+    public String getDefaultDriver(String url) {
+        if (url.startsWith("jdbc:sybase")) {
+            return "com.sybase.jdbc3.jdbc.SybDriver";
+        } else if (url.startsWith("jdbc:jtds:sybase")) {
+            return "net.sourceforge.jtds.jdbc.Driver";
+        }
+        return null;
+    }
 
     public DataType getDateTimeType() {
         return DATETIME_TYPE;
@@ -112,7 +175,7 @@ public class SybaseDatabase extends AbstractDatabase {
         return returnString.toString().replaceFirst(" \\+ $", "");
     }
 
-//    protected void dropForeignKeys(Connection conn) throws DatabaseException {
+//    protected void dropForeignKeys(Connection conn) throws JDBCException {
 //        Statement dropStatement = null;
 //        PreparedStatement fkStatement = null;
 //        ResultSet rs = null;
@@ -130,11 +193,11 @@ public class SybaseDatabase extends AbstractDatabase {
 //                try {
 //                    dropStatement.execute(dropFK.generateStatements(this)[0]);
 //                } catch (UnsupportedChangeException e) {
-//                    throw new DatabaseException(e.getMessage());
+//                    throw new JDBCException(e.getMessage());
 //                }
 //            }
 //        } catch (SQLException e) {
-//            throw new DatabaseException(e);
+//            throw new JDBCException(e);
 //        } finally {
 //            try {
 //                if (dropStatement != null) {
@@ -147,11 +210,15 @@ public class SybaseDatabase extends AbstractDatabase {
 //                    rs.close();
 //                }
 //            } catch (SQLException e) {
-//                throw new DatabaseException(e);
+//                throw new JDBCException(e);
 //            }
 //        }
 //
 //    }
+
+    public boolean supportsTablespaces() {
+        return true;
+    }
 
 
     @Override
@@ -189,9 +256,22 @@ public class SybaseDatabase extends AbstractDatabase {
     }
 
     @Override
-    public String escapeDatabaseObject(String objectName) {
-        return "["+objectName+"]";
+    public String escapeTableName(String schemaName, String tableName) {
+        if (schemaName == null) {
+            return "[" + tableName + "]";
+        } else {
+            return "[" + schemaName + "].[" + tableName + "]";
+        }
     }
+
+    @Override
+    public String escapeConstraintName(String constraintName) {
+        if (constraintName == null) {
+            return null;
+        }
+        return "[" + constraintName + "]";
+    }
+
 
     @Override
     public String convertRequestedSchemaToCatalog(String requestedSchema) throws DatabaseException {
@@ -206,6 +286,7 @@ public class SybaseDatabase extends AbstractDatabase {
         return requestedSchema;
     }
 
+
     @Override
     public String getColumnType(String columnType, Boolean autoIncrement) {
         String type = super.getColumnType(columnType, autoIncrement);
@@ -216,100 +297,13 @@ public class SybaseDatabase extends AbstractDatabase {
     }
 
     @Override
-    public String getDateLiteral(String isoDate) {
-        return super.getDateLiteral(isoDate).replace(' ', 'T');
-    }
-
-    @Override
     public boolean supportsRestrictForeignKeys() {
         return false;
     }
 
-    public SybaseDatabase() {
-        systemTablesAndViews.add("syscolumns");
-        systemTablesAndViews.add("syscomments");
-        systemTablesAndViews.add("sysdepends");
-        systemTablesAndViews.add("sysfilegroups");
-        systemTablesAndViews.add("sysfiles");
-        systemTablesAndViews.add("sysfiles1");
-        systemTablesAndViews.add("sysforeignkeys");
-        systemTablesAndViews.add("sysfulltextcatalogs");
-        systemTablesAndViews.add("sysfulltextnotify");
-        systemTablesAndViews.add("sysindexes");
-        systemTablesAndViews.add("sysindexkeys");
-        systemTablesAndViews.add("sysmembers");
-        systemTablesAndViews.add("sysobjects");
-        systemTablesAndViews.add("syspermissions");
-        systemTablesAndViews.add("sysproperties");
-        systemTablesAndViews.add("sysprotects");
-        systemTablesAndViews.add("sysreferences");
-        systemTablesAndViews.add("systypes");
-        systemTablesAndViews.add("sysusers");
-
-        systemTablesAndViews.add("syssegments");
-        systemTablesAndViews.add("sysconstraints");
-        systemTablesAndViews.add("sysquerymetrics");
-    }
-
-    public String getTypeName() {
-        return "sybase";
-    }
-
-    public String getDefaultDriver(String url) {
-        if (url.startsWith("jdbc:sybase")) {
-            return "com.sybase.jdbc3.jdbc.SybDriver";
-        } else if (url.startsWith("jdbc:jtds:sybase")) {
-            return "net.sourceforge.jtds.jdbc.Driver";
-        }
-        return null;
-    }
-
-    /**
-     * Sybase does not support DDL and meta data in transactions properly,
-     * as such we turn off the commit and turn on auto commit.
-     */
     @Override
-    public boolean supportsDDLInTransaction() {
-        return false;
-    }
-
-    /**
-     * Drops all objects owned by the connected user.
-     * <p/>
-     * The Sybase functionality overrides this and does not remove the Foreign Keys.
-     * <p/>
-     * Unfortunately it appears to be a problem with the Drivers, see the JTDS driver page.
-     * http://sourceforge.net/tracker/index.php?func=detail&aid=1471425&group_id=33291&atid=407762
-     */
-//    public void dropDatabaseObjects(String schema) throws DatabaseException {
-//        DatabaseConnection conn = getConnection();
-//        try {
-//            //dropForeignKeys(conn);
-//            dropViews(schema, conn);
-//            dropTables(schema, conn);
-//
-//            if (this.supportsSequences()) {
-//                dropSequences(schema, conn);
-//            }
-//
-//            changeLogTableExists = false;
-//        } finally {
-//            try {
-//                conn.commit();
-//            } catch (SQLException e) {
-//                ;
-//            }
-//        }
-//    }
-    public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
-        String dbProductName = conn.getDatabaseProductName();
-        return
-                "Sybase SQL Server".equals(dbProductName) ||
-                        "sql server".equals(dbProductName);
-    }
-
-    public boolean supportsTablespaces() {
-        return true;
+    public String escapeColumnName(String schemaName, String tableName, String columnName) {
+        return "["+columnName+"]";
     }
 
 }
