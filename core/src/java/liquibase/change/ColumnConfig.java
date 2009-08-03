@@ -215,7 +215,11 @@ public class ColumnConfig {
             } else {
                 defaultValueNumeric = defaultValueNumeric.replaceFirst("^\\(", "");
                 defaultValueNumeric = defaultValueNumeric.replaceFirst("\\)$", "");
-                this.defaultValueNumeric = NumberFormat.getInstance(Locale.US).parse(defaultValueNumeric);
+                try {
+                    this.defaultValueNumeric = NumberFormat.getInstance(Locale.US).parse(defaultValueNumeric);
+                } catch (ParseException e) {
+                    this.defaultValueNumeric  = new ComputedNumericValue(defaultValueNumeric);
+                }
             }
         }
 
