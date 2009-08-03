@@ -85,12 +85,19 @@ public abstract class SqlDatabaseSnapshot implements DatabaseSnapshot {
             this.databaseMetaData = database.getConnection().getMetaData();
             this.statusListeners = statusListeners;
 
+            log.finest("Reading table and views ....");
             readTablesAndViews(requestedSchema);
+            log.finest("Reading foreign keys ....");
             readForeignKeyInformation(requestedSchema);
+            log.finest("Reading primary keys ....");
             readPrimaryKeys(requestedSchema);
+            log.finest("Reading columns ....");
             readColumns(requestedSchema);
+            log.finest("Reading unique constraints ....");
             readUniqueConstraints(requestedSchema);
+            log.finest("Reading indexes ....");
             readIndexes(requestedSchema);
+            log.finest("Reading sequences ....");
             readSequences(requestedSchema);
 
             this.tables = new HashSet<Table>(tablesMap.values());
@@ -261,10 +268,12 @@ public abstract class SqlDatabaseSnapshot implements DatabaseSnapshot {
                     continue;
                 } else {
                     columnInfo.setView(view);
+	            columnInfo.setAutoIncrement(false);
                     view.getColumns().add(columnInfo);
                 }
             } else {
                 columnInfo.setTable(table);
+                columnInfo.setAutoIncrement(database.isColumnAutoIncrement(schema, tableName, columnName));
                 table.getColumns().add(columnInfo);
             }
 
@@ -282,11 +291,8 @@ public abstract class SqlDatabaseSnapshot implements DatabaseSnapshot {
 
             columnInfo.setPrimaryKey(isPrimaryKey(columnInfo));
 
-            columnInfo.setAutoIncrement(database.isColumnAutoIncrement(schema, tableName, columnName));
-
             getColumnTypeAndDefValue(columnInfo, rs, database);
             columnInfo.setRemarks(remarks);
-
             columnsMap.put(tableName + "." + columnName, columnInfo);
         }
         rs.close();
@@ -355,7 +361,11 @@ public abstract class SqlDatabaseSnapshot implements DatabaseSnapshot {
                 //Simple (non-composite) keys have KEY_SEQ=1, so create the ForeignKey.
                 //In case of subsequent parts of composite keys (KEY_SEQ>1) don't create new instance, just reuse the one from previous call.
                 //According to #getExportedKeys() contract, the result set rows are properly sorted, so the reuse of previous FK instance is safe.
-                if (keySeq == 1) {
+        /*        if (keySeq == 1) {
+                    fkInfo = new ForeignKey();
+                } */
+
+                if (fkInfo == null || ( (fkInfo != null) && ( fkInfo.getPrimaryKeyTable().getName() != pkTableName ))) {
                     fkInfo = new ForeignKey();
                 }
 
@@ -402,7 +412,7 @@ public abstract class SqlDatabaseSnapshot implements DatabaseSnapshot {
                     }
                 }
 
-                //Add only if the key was created in this iteration (updating the instance values changes hashCode so it cannot be re-inserted into set) 
+                //Add only if the key was created in this iteration (updating the instance values changes hashCode so it cannot be re-inserted into set)
                 if (keySeq == 1) {
                     foreignKeys.add(fkInfo);
                 }
@@ -419,7 +429,7 @@ public abstract class SqlDatabaseSnapshot implements DatabaseSnapshot {
             ResultSet rs;
             Statement statement = null;
             if (database instanceof OracleDatabase) {
-                //oracle getIndexInfo is buggy and slow.  See Issue 1824548 and http://forums.oracle.com/forums/thread.jspa?messageID=578383&#578383  
+                //oracle getIndexInfo is buggy and slow.  See Issue 1824548 and http://forums.oracle.com/forums/thread.jspa?messageID=578383&#578383
                 statement = database.getConnection().createStatement();
                 String sql = "SELECT INDEX_NAME, 3 AS TYPE, TABLE_NAME, COLUMN_NAME, COLUMN_POSITION AS ORDINAL_POSITION, null AS FILTER_CONDITION FROM ALL_IND_COLUMNS WHERE TABLE_OWNER='" + database.convertRequestedSchemaToSchema(schema) + "' AND TABLE_NAME='" + table.getName() + "' ORDER BY INDEX_NAME, ORDINAL_POSITION";
                 rs = statement.executeQuery(sql);
