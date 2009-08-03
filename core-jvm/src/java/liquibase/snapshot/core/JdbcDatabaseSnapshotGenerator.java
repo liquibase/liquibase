@@ -189,10 +189,12 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
                     continue;
                 } else {
                     columnInfo.setView(view);
+                    columnInfo.setAutoIncrement(false);
                     view.getColumns().add(columnInfo);
                 }
             } else {
                 columnInfo.setTable(table);
+                columnInfo.setAutoIncrement(isColumnAutoIncrement(database, schema, tableName, columnName));
                 table.getColumns().add(columnInfo);
             }
 
@@ -209,8 +211,6 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
             }
 
             columnInfo.setPrimaryKey(snapshot.isPrimaryKey(columnInfo));
-
-            columnInfo.setAutoIncrement(isColumnAutoIncrement(database, schema, tableName, columnName));
 
             getColumnTypeAndDefValue(columnInfo, rs, database);
             columnInfo.setRemarks(remarks);
@@ -268,6 +268,10 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
                 //In case of subsequent parts of composite keys (KEY_SEQ>1) don't create new instance, just reuse the one from previous call.
                 //According to #getExportedKeys() contract, the result set rows are properly sorted, so the reuse of previous FK instance is safe.
                 if (keySeq == 1) {
+                    fkInfo = new ForeignKey();
+                }
+
+                if (fkInfo == null || ( (fkInfo != null) && ( fkInfo.getPrimaryKeyTable().getName() != pkTableName ))) {
                     fkInfo = new ForeignKey();
                 }
 
