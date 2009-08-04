@@ -10,14 +10,14 @@ public class PreconditionFactory {
     @SuppressWarnings("unchecked")
     private final Map<String, Class<? extends Precondition>> preconditions;
 
-    private static PreconditionFactory instance = new PreconditionFactory();
+    private static PreconditionFactory instance;
 
     @SuppressWarnings("unchecked")
     private PreconditionFactory() {
         preconditions = new HashMap<String, Class<? extends Precondition>>();
         Class[] classes;
         try {
-            classes = ServiceLocator.getInstance().getClasses(Precondition.class);
+            classes = ServiceLocator.getInstance().findClasses(Precondition.class);
 
             for (Class<? extends Precondition> clazz : classes) {
                     register(clazz);
@@ -28,6 +28,9 @@ public class PreconditionFactory {
     }
 
     public static PreconditionFactory getInstance() {
+        if (instance == null) {
+             instance = new PreconditionFactory();
+        }
         return instance;
     }
 

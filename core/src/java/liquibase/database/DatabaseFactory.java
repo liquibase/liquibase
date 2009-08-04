@@ -11,13 +11,12 @@ import java.util.List;
 import liquibase.logging.Logger;
 
 public class DatabaseFactory {
-    private static DatabaseFactory instance = new DatabaseFactory();
-    protected static final Logger log = LogFactory.getLogger();
+    private static DatabaseFactory instance;
     private List<Database> implementedDatabases = new ArrayList<Database>();
 
     protected DatabaseFactory() {
         try {
-            Class[] classes = ServiceLocator.getInstance().getClasses(Database.class);
+            Class[] classes = ServiceLocator.getInstance().findClasses(Database.class);
 
             for (Class<? extends Database> clazz : classes) {
                 register(clazz.getConstructor().newInstance());
@@ -30,6 +29,9 @@ public class DatabaseFactory {
     }
 
     public static DatabaseFactory getInstance() {
+        if (instance == null) {
+             instance = new DatabaseFactory();
+        }
         return instance;
     }
 
@@ -58,7 +60,7 @@ public class DatabaseFactory {
         }
 
         if (!foundImplementation) {
-            log.warning("Unknown database: " + connection.getDatabaseProductName());
+            LogFactory.getLogger().warning("Unknown database: " + connection.getDatabaseProductName());
             database = new UnsupportedDatabase();
         }
 

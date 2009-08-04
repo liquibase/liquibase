@@ -25,8 +25,6 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
 
     private Set<DiffStatusListener> statusListeners;
 
-    protected static final Logger log = LogFactory.getLogger();
-
     public DatabaseSnapshot createSnapshot(Database database, String requestedSchema, Set<DiffStatusListener> listeners) throws DatabaseException {
 
 
@@ -185,7 +183,7 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
             if (table == null) {
                 View view = snapshot.getView(tableName);
                 if (view == null) {
-                    log.info("Could not find table or view " + tableName + " for column " + columnName);
+                    LogFactory.getLogger().info("Could not find table or view " + tableName + " for column " + columnName);
                     continue;
                 } else {
                     columnInfo.setView(view);
@@ -260,7 +258,7 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
                 Table pkTable = snapshot.getTable(pkTableName);
                 if (pkTable == null) {
                     //Ok, no idea what to do with this one . . . should always be there
-                    log.warning("Foreign key " + fkName + " references table " + pkTableName + ", which we cannot find.  Ignoring.");
+                    LogFactory.getLogger().warning("Foreign key " + fkName + " references table " + pkTableName + ", which we cannot find.  Ignoring.");
                     continue;
                 }
                 int keySeq = rs.getInt("KEY_SEQ");
@@ -286,7 +284,7 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
                     fkTable = new Table(fkTableName);
                     fkTable.setDatabase(database);
                     fkTable.setSchema(fkSchema);
-                    log.warning("Foreign key " + fkName + " is in table " + fkTableName + ", which is in a different schema.  Retaining FK in diff, but table will not be diffed.");
+                    LogFactory.getLogger().warning("Foreign key " + fkName + " is in table " + fkTableName + ", which is in a different schema.  Retaining FK in diff, but table will not be diffed.");
                 }
                 fkInfo.setForeignKeyTable(fkTable);
                 fkInfo.addForeignKeyColumn(fkColumn);
@@ -542,7 +540,7 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
         if (this.statusListeners == null) {
             return;
         }
-        log.debug(message);
+        LogFactory.getLogger().debug(message);
         for (DiffStatusListener listener : this.statusListeners) {
             listener.statusUpdate(message);
         }

@@ -44,8 +44,6 @@ public abstract class AbstractDatabase implements Database {
     private DatabaseConnection connection;
     private String defaultSchemaName;
 
-    static final protected Logger log = LogFactory.getLogger();
-
     protected String currentDateTimeFunction;
 
     private List<RanChangeSet> ranChangeSetList;
@@ -85,7 +83,7 @@ public abstract class AbstractDatabase implements Database {
         try {
             connection.setAutoCommit(getAutoCommitMode());
         } catch (DatabaseException sqle) {
-            log.warning("Can not set auto commit to " + getAutoCommitMode() + " on connection");
+            LogFactory.getLogger().warning("Can not set auto commit to " + getAutoCommitMode() + " on connection");
         }
     }
 
@@ -610,7 +608,7 @@ public abstract class AbstractDatabase implements Database {
             }
             // If there is no table in the database for recording change history create one.
             statementsToExecute.add(createTableStatement);
-            log.info("Creating database history table with name: " + escapeTableName(getDefaultSchemaName(), getDatabaseChangeLogTableName()));
+            LogFactory.getLogger().info("Creating database history table with name: " + escapeTableName(getDefaultSchemaName(), getDatabaseChangeLogTableName()));
 //                }
         }
 
@@ -650,7 +648,7 @@ public abstract class AbstractDatabase implements Database {
             executor.comment("Create Database Lock Table");
             executor.execute(new CreateDatabaseChangeLogLockTableStatement(), new ArrayList<SqlVisitor>());
             this.commit();
-            log.debug("Created database lock table with name: " + escapeTableName(getLiquibaseSchemaName(), getDatabaseChangeLogLockTableName()));
+            LogFactory.getLogger().debug("Created database lock table with name: " + escapeTableName(getLiquibaseSchemaName(), getDatabaseChangeLogLockTableName()));
         }
     }
 
@@ -897,7 +895,7 @@ public abstract class AbstractDatabase implements Database {
             } else if (dataType == Types.BLOB) {
                 return "!!!!!! LIQUIBASE CANNOT OUTPUT BLOB VALUES !!!!!!";
             } else {
-                log.warning("Do not know how to convert type " + dataType);
+                LogFactory.getLogger().warning("Do not know how to convert type " + dataType);
                 return value;
             }
         } catch (DateParseException e) {
@@ -1054,7 +1052,7 @@ public abstract class AbstractDatabase implements Database {
         } else {
             if (foundRan.getLastCheckSum() == null) {
                 try {
-                    log.info("Updating NULL md5sum for " + changeSet.toString());
+                    LogFactory.getLogger().info("Updating NULL md5sum for " + changeSet.toString());
                     ExecutorService.getInstance().getExecutor(this).execute(new RawSqlStatement("UPDATE " + escapeTableName(getLiquibaseSchemaName(), getDatabaseChangeLogTableName()) + " SET MD5SUM='"+changeSet.generateCheckSum().toString()+"' WHERE ID='"+changeSet.getId()+"' AND AUTHOR='"+changeSet.getAuthor()+"' AND FILENAME='"+changeSet.getFilePath()+"'"));
 
                     this.commit();
@@ -1104,7 +1102,7 @@ public abstract class AbstractDatabase implements Database {
         String databaseChangeLogTableName = escapeTableName(getLiquibaseSchemaName(), getDatabaseChangeLogTableName());
         ranChangeSetList = new ArrayList<RanChangeSet>();
         if (doesChangeLogTableExist()) {
-            log.info("Reading from " + databaseChangeLogTableName);
+            LogFactory.getLogger().info("Reading from " + databaseChangeLogTableName);
             SqlStatement select = new SelectFromDatabaseChangeLogStatement("FILENAME", "AUTHOR", "ID", "MD5SUM", "DATEEXECUTED", "ORDEREXECUTED", "TAG").setOrderBy("DATEEXECUTED ASC", "ORDEREXECUTED ASC");
             List<Map> results = ExecutorService.getInstance().getExecutor(this).queryForList(select);
             for (Map rs : results) {

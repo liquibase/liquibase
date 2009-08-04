@@ -11,15 +11,13 @@ import liquibase.logging.Logger;
 
 public class DatabaseSnapshotGeneratorFactory {
 
-    private static DatabaseSnapshotGeneratorFactory instance = new DatabaseSnapshotGeneratorFactory();
-
-    private static final Logger log = LogFactory.getLogger();
+    private static DatabaseSnapshotGeneratorFactory instance;
 
     private List<DatabaseSnapshotGenerator> registry = new ArrayList<DatabaseSnapshotGenerator>();
 
     private DatabaseSnapshotGeneratorFactory() {
         try {
-            Class[] classes = ServiceLocator.getInstance().getClasses(DatabaseSnapshotGenerator.class);
+            Class[] classes = ServiceLocator.getInstance().findClasses(DatabaseSnapshotGenerator.class);
 
             for (Class<? extends DatabaseSnapshotGenerator> clazz : classes) {
                 register(clazz.getConstructor().newInstance());
@@ -32,6 +30,9 @@ public class DatabaseSnapshotGeneratorFactory {
     }
 
     public static DatabaseSnapshotGeneratorFactory getInstance() {
+        if (instance == null) {
+             instance = new DatabaseSnapshotGeneratorFactory();
+        }
         return instance;
     }
 

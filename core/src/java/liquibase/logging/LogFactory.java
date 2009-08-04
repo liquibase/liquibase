@@ -12,9 +12,9 @@ public class LogFactory {
 
     public static Logger getLogger(String name) {
         if (!loggers.containsKey(name)) {
-            Logger value = null;
+            Logger value;
             try {
-                value = (Logger) Class.forName("liquibase.logging.JavaUtilLogger").newInstance();
+                value = (Logger) ServiceLocator.getInstance().createInstance(Logger.class);
             } catch (Exception e) {
                 throw new ServiceNotFoundException(e);
             }

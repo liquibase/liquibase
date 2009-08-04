@@ -28,9 +28,6 @@ import liquibase.logging.Logger;
  */
 public class SQLFileChange extends AbstractSQLChange {
 
-    @ChangeProperty(includeInSerialization = false)
-    private static final Logger log = LogFactory.getLogger();
-
     private String path;
     private String encoding = null;
 
@@ -74,7 +71,7 @@ public class SQLFileChange extends AbstractSQLChange {
         if (path == null) {
             throw new SetupException("<sqlfile> - No path specified");
         }
-        log.debug("SQLFile file:" + path);
+        LogFactory.getLogger().debug("SQLFile file:" + path);
         boolean loaded = loadFromClasspath(path);
         if(!loaded) {
             loaded = loadFromFileSystem(path);
@@ -83,7 +80,7 @@ public class SQLFileChange extends AbstractSQLChange {
         if (!loaded) {
             throw new SetupException("<sqlfile path="+ path +"> - Could not find file");
         }
-        log.debug("SQLFile file contents is:" + getSql());
+        LogFactory.getLogger().debug("SQLFile file contents is:" + getSql());
     }
 
     /**
