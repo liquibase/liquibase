@@ -12,6 +12,7 @@ import liquibase.statement.core.SelectSequencesStatement;
 import liquibase.util.StringUtils;
 import liquibase.snapshot.core.JdbcDatabaseSnapshotGenerator;
 import liquibase.snapshot.DatabaseSnapshot;
+import liquibase.logging.LogFactory;
 
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -198,7 +199,7 @@ public class SQLiteDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
         if (table == null) {
             View view = snapshot.getView(tableName);
             if (view == null) {
-                log.info("Could not find table or view " + tableName + " for column " + columnName);
+                LogFactory.getLogger().info("Could not find table or view " + tableName + " for column " + columnName);
                 return null;
             } else {
                 columnInfo.setView(view);

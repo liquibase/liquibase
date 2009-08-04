@@ -7,6 +7,7 @@ import liquibase.exception.DatabaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.util.StringUtils;
+import liquibase.logging.LogFactory;
 
 import java.sql.Types;
 import java.text.ParseException;
@@ -166,7 +167,7 @@ public class PostgresDatabase extends AbstractDatabase {
             } catch (Exception e) {
                 // TODO: throw?
                 e.printStackTrace();
-                log.severe("Failed to get default catalog name from postgres", e);
+                LogFactory.getLogger().severe("Failed to get default catalog name from postgres", e);
             }
         }
 
@@ -363,7 +364,7 @@ public class PostgresDatabase extends AbstractDatabase {
         } catch (Exception e) {
             // TODO: Something?
             e.printStackTrace();
-            log.severe("Failed to get default catalog name from postgres", e);
+            LogFactory.getLogger().severe("Failed to get default catalog name from postgres", e);
         }
 
         return searchPaths;

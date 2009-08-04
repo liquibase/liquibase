@@ -18,14 +18,14 @@ import java.util.*;
  */
 public class SqlGeneratorFactory {
 
-    private static SqlGeneratorFactory instance = new SqlGeneratorFactory();
+    private static SqlGeneratorFactory instance;
 
     private List<SqlGenerator> generators = new ArrayList<SqlGenerator>();
 
     private SqlGeneratorFactory() {
         Class[] classes;
         try {
-            classes = ServiceLocator.getInstance().getClasses(SqlGenerator.class);
+            classes = ServiceLocator.getInstance().findClasses(SqlGenerator.class);
 
             for (Class clazz : classes) {
                 register((SqlGenerator) clazz.getConstructor().newInstance());
@@ -41,6 +41,9 @@ public class SqlGeneratorFactory {
      * Return singleton SqlGeneratorFactory
      */
     public static SqlGeneratorFactory getInstance() {
+        if (instance == null) {
+            instance = new SqlGeneratorFactory();
+        }
         return instance;
     }
 

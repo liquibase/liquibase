@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 public class ChangeLogSerializerFactory {
-    private static ChangeLogSerializerFactory instance = new ChangeLogSerializerFactory();
+    private static ChangeLogSerializerFactory instance;
 
     private Map<String, ChangeLogSerializer> serializers = new HashMap<String, ChangeLogSerializer>();
 
@@ -19,13 +19,17 @@ public class ChangeLogSerializerFactory {
     }
 
     public static ChangeLogSerializerFactory getInstance() {
+        if (instance == null) {
+             instance = new ChangeLogSerializerFactory();
+        }
+
         return instance;
     }
 
     private ChangeLogSerializerFactory() {
         Class<? extends ChangeLogSerializer>[] classes;
         try {
-            classes = ServiceLocator.getInstance().getClasses(ChangeLogSerializer.class);
+            classes = ServiceLocator.getInstance().findClasses(ChangeLogSerializer.class);
 
             for (Class<? extends ChangeLogSerializer> clazz : classes) {
                     register((ChangeLogSerializer) clazz.getConstructor().newInstance());

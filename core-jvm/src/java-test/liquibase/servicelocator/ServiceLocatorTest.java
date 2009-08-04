@@ -46,14 +46,14 @@ public class ServiceLocatorTest {
 
     @Test
     public void getClasses() throws Exception {
-        Class[] classes = serviceLocator.getClasses(ChangeLogParser.class);
+        Class[] classes = serviceLocator.findClasses(ChangeLogParser.class);
         assertTrue(classes.length > 0);
     }
 
 
     @Test
     public void getClasses_sampleJar() throws Exception {
-        Class[] classes = ServiceLocator.getInstance().getClasses(SqlGenerator.class);
+        Class[] classes = ServiceLocator.getInstance().findClasses(SqlGenerator.class);
         for (Class clazz : classes) {
             if (clazz.getName().equals("liquibase.sqlgenerator.ext.sample1.Sample1UpdateGenerator")) {
                 return;

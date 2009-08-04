@@ -20,8 +20,6 @@ import liquibase.logging.Logger;
 public class HibernateDatabaseSnapshotGenerator implements DatabaseSnapshotGenerator {
     private HibernateDatabase database;
 
-    private static final Logger log = LogFactory.getLogger();
-
     public HibernateDatabaseSnapshotGenerator() {
     }
 

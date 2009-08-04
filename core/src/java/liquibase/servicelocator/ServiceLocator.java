@@ -40,7 +40,7 @@ public class ServiceLocator {
     }
 
     protected ServiceLocator(ResourceAccessor accessor) {
-        
+        setResourceAccessor(accessor);
     }
 
     public static ServiceLocator getInstance() {
@@ -76,48 +76,54 @@ public class ServiceLocator {
         packagesToScan.add(packageName);
     }
 
-    public Class[] getClasses(Class requiredInterface) throws ServiceNotFoundException {
-        try {
-            Class.forName(requiredInterface.getName());
+    public Class findClass(Class requiredInterface) throws ServiceNotFoundException {
+        Class[] classes = findClasses(requiredInterface);
+        if (classes.length != 1) {
+            throw new ServiceNotFoundException("Could not find unique implementation of " + requiredInterface.getName() + ".  Found " + classes.length + " implementations");
+        }
+
+        return classes[0];
+    }
+
+    public Class[] findClasses(Class requiredInterface) throws ServiceNotFoundException {
+//        System.out.println("findClasses for "+requiredInterface.getName());
+
+            try {
+                Class.forName(requiredInterface.getName());
 //        System.out.println("Getting classes...");
 
-            if (!classesBySuperclass.containsKey(requiredInterface)) {
+                if (!classesBySuperclass.containsKey(requiredInterface)) {
 //                System.out.println("Need to look up "+requiredInterface);
-                classesBySuperclass.put(requiredInterface, new ArrayList<Class>());
+                    classesBySuperclass.put(requiredInterface, new ArrayList<Class>());
 
-                for (String packageName : packagesToScan) {
+                    for (String packageName : packagesToScan) {
 //                    System.out.println("scanning "+packageName+" with resoureAccessor "+resourceAccessor);
-                    String path = packageName.replace('.', '/');
-                    Enumeration<URL> resources = resourceAccessor.getResources(path);
-                    while (resources.hasMoreElements()) {
+                        String path = packageName.replace('.', '/');
+                        Enumeration<URL> resources = resourceAccessor.getResources(path);
+                        while (resources.hasMoreElements()) {
 //                        System.out.println("Found resource");
-                        classesBySuperclass.get(requiredInterface).addAll(findClasses(resources.nextElement(), packageName, requiredInterface));
+                            classesBySuperclass.get(requiredInterface).addAll(findClasses(resources.nextElement(), packageName, requiredInterface));
+                        }
                     }
                 }
+            } catch (Exception e) {
+                throw new ServiceNotFoundException(e);
             }
-        } catch (Exception e) {
-            throw new ServiceNotFoundException(e);
-        }
 
         List<Class> classes = classesBySuperclass.get(requiredInterface);
         return classes.toArray(new Class[classes.size()]);
     }
 
-    public Object createInstance(Class requiredInterface ) throws ServiceNotFoundException {
-        Class[] classes = getClasses(requiredInterface);
-        if (classes.length != 1) {
-            throw new ServiceNotFoundException("Expected 1 implementation of "+requiredInterface.getName()+", got "+classes.length);
-        }
-
+    public Object createInstance(Class requiredInterface) throws ServiceNotFoundException {
         try {
-            return classes[0].newInstance();
+            return findClass(requiredInterface).newInstance();
         } catch (Exception e) {
             throw new ServiceNotFoundException(e);
         }
     }
 
     private List<Class> findClasses(URL resource, String packageName, Class requiredInterface) throws Exception {
-//        System.out.println("-----find "+packageName+" classes in "+resource.toExternalForm()+" matching interface "+requiredInterface.getName());
+//        System.out.println("-----find " + packageName + " classes in " + resource.toExternalForm() + " matching interface " + requiredInterface.getName());
         List<Class> classes = new ArrayList<Class>();
 //        if (directory.toURI().toString().startsWith("jar:")) {
 //            System.out.println("have a jar: "+directory.toString());
@@ -160,17 +166,17 @@ public class ServiceLocator {
             try {
                 clazz = Class.forName(potentialClassName, true, resourceAccessor.toClassLoader());
             } catch (NoClassDefFoundError e) {
-//                System.out.println("NoClassDefFoundError: "+potentialClassName);
-                LogFactory.getLogger().warning("Could not configure extension class "+potentialClassName+": Missing dependency "+e.getMessage());
+//                System.out.println("NoClassDefFoundError: " + potentialClassName);
+                LogFactory.getLogger().warning("Could not configure extension class " + potentialClassName + ": Missing dependency " + e.getMessage());
                 continue;
             } catch (Throwable e) {
-                LogFactory.getLogger().warning("Could not configure extension class "+potentialClassName+": "+e.getMessage());
+                LogFactory.getLogger().warning("Could not configure extension class " + potentialClassName + ": " + e.getMessage());
                 continue;
             }
             if (!clazz.isInterface()
                     && !Modifier.isAbstract(clazz.getModifiers())
                     && isCorrectType(clazz, requiredInterface)) {
-//                System.out.println(potentialClassName+" matches");
+//                System.out.println(potentialClassName + " matches");
                 try {
                     clazz.getConstructor();
                     classes.add(clazz);
@@ -183,7 +189,7 @@ public class ServiceLocator {
                     }
                 }
 //            } else {
-//                System.out.println(potentialClassName+" does not match");
+//                System.out.println(potentialClassName + " does not match");
             }
 
         }

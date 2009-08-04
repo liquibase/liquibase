@@ -15,14 +15,14 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class ChangeFactory {
 
-    private static ChangeFactory instance = new ChangeFactory();
+    private static ChangeFactory instance;
 
     private Map<String, Class<? extends Change>> registry = new ConcurrentHashMap<String, Class<? extends Change>>();
 
     private ChangeFactory() {
         Class<? extends Change>[] classes;
         try {
-            classes = ServiceLocator.getInstance().getClasses(Change.class);
+            classes = ServiceLocator.getInstance().findClasses(Change.class);
 
             for (Class<? extends Change> clazz : classes) {
                 //noinspection unchecked
@@ -39,6 +39,9 @@ public class ChangeFactory {
      * Return singleton SqlGeneratorFactory
      */
     public static ChangeFactory getInstance() {
+        if (instance == null) {
+             instance = new ChangeFactory();
+        }
         return instance;
     }
 

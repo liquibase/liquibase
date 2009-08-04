@@ -10,7 +10,7 @@ import java.util.Map;
 
 public class ChangeLogParserFactory {
 
-    private static ChangeLogParserFactory instance = new ChangeLogParserFactory();
+    private static ChangeLogParserFactory instance;
 
     private Map<String, ChangeLogParser> parsers = new HashMap<String, ChangeLogParser>();
 
@@ -20,13 +20,16 @@ public class ChangeLogParserFactory {
     }
 
     public static ChangeLogParserFactory getInstance() {
+        if (instance == null) {
+             instance = new ChangeLogParserFactory();
+        }
         return instance;
     }
 
     private ChangeLogParserFactory() {
         Class<? extends ChangeLogParser>[] classes;
         try {
-            classes = ServiceLocator.getInstance().getClasses(ChangeLogParser.class);
+            classes = ServiceLocator.getInstance().findClasses(ChangeLogParser.class);
 
             for (Class<? extends ChangeLogParser> clazz : classes) {
                     register((ChangeLogParser) clazz.getConstructor().newInstance());

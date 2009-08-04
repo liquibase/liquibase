@@ -4,6 +4,7 @@ import liquibase.database.AbstractDatabase;
 import liquibase.database.DataType;
 import liquibase.database.DatabaseConnection;
 import liquibase.exception.DatabaseException;
+import liquibase.logging.LogFactory;
 
 import java.lang.reflect.Method;
 import java.sql.Types;
@@ -30,7 +31,7 @@ public class OracleDatabase extends AbstractDatabase {
             method.setAccessible(true);
             method.invoke(conn, true);
         } catch (Exception e) {
-            log.info("Could not set remarks reporting on OracleDatabase: "+e.getMessage());
+            LogFactory.getLogger().info("Could not set remarks reporting on OracleDatabase: "+e.getMessage());
             ; //cannot set it. That is OK
         }
         super.setConnection(conn);

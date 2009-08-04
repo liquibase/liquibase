@@ -24,7 +24,7 @@ public class ExecutorService {
     public Executor getExecutor(Database database) {
         if (!executors.containsKey(database)) {
             try {
-                Executor executor = (Executor) ServiceLocator.getInstance().getClasses(Executor.class)[0].newInstance();
+                Executor executor = (Executor) ServiceLocator.getInstance().findClasses(Executor.class)[0].newInstance();
                 executor.setDatabase(database);
                 executors.put(database, executor);
             } catch (Exception e) {
