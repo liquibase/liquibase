@@ -1286,7 +1286,11 @@ public abstract class AbstractDatabase implements Database {
 
     public int getNextChangeSetSequenceValue() throws LiquibaseException {
         if (lastChangeSetSequenceValue == null) {
-            lastChangeSetSequenceValue = ExecutorService.getInstance().getExecutor(this).queryForInt(new GetNextChangeSetSequenceValueStatement());
+            if (getConnection() == null) {
+                lastChangeSetSequenceValue = 0;
+            } else {
+                lastChangeSetSequenceValue = ExecutorService.getInstance().getExecutor(this).queryForInt(new GetNextChangeSetSequenceValueStatement());
+            }
         }
 
         return ++lastChangeSetSequenceValue;

@@ -42,7 +42,7 @@ public class MarkChangeSetRanGenerator implements SqlGenerator<MarkChangeSetRanS
         try {
             if (statement.isRanBefore()) {
                 runStatement = new UpdateStatement(database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())
-                        .addNewColumnValue("DATEEXECUTED", dateValue)
+                        .addNewColumnValue("DATEEXECUTED", new ComputedDateValue(dateValue))
                         .addNewColumnValue("MD5SUM", changeSet.generateCheckSum().toString())
                         .setWhereClause("ID=? AND AUTHOR=? AND FILENAME=?")
                         .addWhereParameters(changeSet.getId(), changeSet.getAuthor(), changeSet.getFilePath());

@@ -70,6 +70,11 @@ public abstract class AbstractExecuteTest {
                 if (shouldTestDatabase(database, includeDatabases, excludeDatabases)) {
                     testedDatabases.add(database.getClass());
 
+                    if (database.getConnection() != null) {
+                        database.checkDatabaseChangeLogTable();
+                        database.checkDatabaseChangeLogLockTable();
+                    }
+
                     Sql[] sql = SqlGeneratorFactory.getInstance().generateSql(statementUnderTest, database);
 
                     assertNotNull("Null SQL for " + database, sql);
@@ -111,6 +116,7 @@ public abstract class AbstractExecuteTest {
 
         convertedSql = convertedSql.replaceAll("FALSE", database.getFalseBooleanValue());
         convertedSql = convertedSql.replaceAll("TRUE", database.getFalseBooleanValue());
+        convertedSql = convertedSql.replaceAll("NOW\\(\\)", database.getCurrentDateTimeFunction());
 
         return convertedSql;
     }
