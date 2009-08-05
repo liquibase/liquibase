@@ -256,24 +256,6 @@ public class SybaseDatabase extends AbstractDatabase {
     }
 
     @Override
-    public String escapeTableName(String schemaName, String tableName) {
-        if (schemaName == null) {
-            return "[" + tableName + "]";
-        } else {
-            return "[" + schemaName + "].[" + tableName + "]";
-        }
-    }
-
-    @Override
-    public String escapeConstraintName(String constraintName) {
-        if (constraintName == null) {
-            return null;
-        }
-        return "[" + constraintName + "]";
-    }
-
-
-    @Override
     public String convertRequestedSchemaToCatalog(String requestedSchema) throws DatabaseException {
         return getDefaultCatalogName();
     }
@@ -302,8 +284,7 @@ public class SybaseDatabase extends AbstractDatabase {
     }
 
     @Override
-    public String escapeColumnName(String schemaName, String tableName, String columnName) {
-        return "["+columnName+"]";
+    public String escapeDatabaseObject(String objectName) {
+        return "\""+objectName+"\"";
     }
-
 }
