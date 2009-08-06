@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.liquibase</groupId>
+  <artifactId>liquibase</artifactId>
+  <version>2.0-SNAPSHOT</version>
+  <packaging>pom</packaging>
+  <name>Liquibase</name>
+  <description>LiquiBase is a tool for managing and executing database changes.</description>
+  <url>http://www.liquibase.org</url>
+
+  <organization>
+    <name>Liquibase.org</name>
+    <url>http://www.liquibase.org</url>
+  </organization>
+
+  <licenses>
+    <license>
+      <url>http://www.gnu.org/licenses/lgpl-2.1.txt</url>
+      <name>GNU LESSER GENERAL PUBLIC LICENSE</name>
+    </license>
+  </licenses>
+
+  <issueManagement>
+    <url>http://liquibase.jira.com/browse/CORE</url>
+  </issueManagement>
+
+  <scm>
+    <url>http://liquibase.jira.com/svn/CORE</url>
+  </scm>
+
+
+  <prerequisites>
+    <maven>2.1.0-M1</maven>
+  </prerequisites>
+
+  <!-- 2.1.0-M1 and up, hence prerequisites -->
+  <properties>
+    <maven.build.timestamp.format>E MMM dd hh:mm:ss zzz yyyy</maven.build.timestamp.format>
+    <build.timestamp>${maven.build.timestamp}</build.timestamp>
+  </properties>  
+
+  <modules>
+    <module>liquibase-core</module>
+    <module>liquibase-core-jvm</module>
+    <module>liquibase-maven-plugin</module>
+    <module>liquibase-dist</module>
+  </modules>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>junit</groupId>
+        <artifactId>junit</artifactId>
+        <version>4.1</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.easymock</groupId>
+        <artifactId>easymockclassextension</artifactId>
+        <version>2.2</version>
+        <scope>test</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>ant</groupId>
+        <artifactId>ant</artifactId>
+        <version>1.6.5</version>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.hibernate</groupId>
+        <artifactId>hibernate-annotations</artifactId>
+        <version>3.3.1.GA</version>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.hibernate</groupId>
+        <artifactId>hibernate</artifactId>
+        <version>3.2.6.ga</version>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>javax.servlet</groupId>
+        <artifactId>servlet-api</artifactId>
+        <version>2.4</version>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring</artifactId>
+        <version>2.0.6</version>
+        <scope>provided</scope>
+      </dependency>
+
+    </dependencies>
+  </dependencyManagement>
+
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <artifactId>maven-resources-plugin</artifactId>
+          <configuration>
+            <encoding>UTF-8</encoding>
+          </configuration>
+        </plugin>
+        <plugin>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <configuration>
+            <source>1.5</source>
+            <target>1.5</target>
+            <optimize>true</optimize>
+            <debug>true</debug>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+
+<!--
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>api</id>
+            <phase>prepare-package</phase>
+            <goals>
+              <goal>aggregate</goal>
+            </goals>
+            <configuration>
+              <excludePackageNames>org.liquibase.maven.plugins</excludePackageNames>
+              <encoding>UTF-8</encoding>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+-->
+  </build>
+
+  <reporting>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-project-info-reports-plugin</artifactId>
+        <version>2.1.2</version>
+        <configuration>
+          <dependencyLocationEnabled>false</dependencyLocationEnabled>
+          <dependencyDetailsEnabled>false</dependencyDetailsEnabled>
+        </configuration>
+      </plugin>
+    </plugins>
+  </reporting>
+
+  <distributionManagement>
+    <repository>
+      <id>releases</id>
+      <name>Nexus Releases</name>
+      <url>http://localhost:8081/nexus/content/repositories/releases</url>
+    </repository>
+    <snapshotRepository>
+     <id>snapshots</id>
+      <name>Nexus Snapshots</name>
+      <url>http://localhost:8081/nexus/content/repositories/snapshots</url>
+      <uniqueVersion>false</uniqueVersion>
+    </snapshotRepository>
+  </distributionManagement>
+
+</project>

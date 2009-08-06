@@ -1,3 +1,0 @@
-<FindBugsFilter>
-     <Match classregex=".*Id$" />
-</FindBugsFilter>
