@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry excluding="**/.svn" kind="src" output="build" path="src/java"/>
+	<classpathentry excluding="**/.svn" kind="src" output="build-test" path="src/java-test"/>
+	<classpathentry excluding="**/.svn" kind="src" output="build-dbtest" path="src/java-dbtest"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
+	<classpathentry kind="lib" path="lib/cglib-nodep-2.1_3.jar"/>
+	<classpathentry kind="lib" path="lib/easymock-2.2.jar"/>
+	<classpathentry kind="lib" path="lib/easymockclassextension-2.2.jar"/>
+	<classpathentry kind="lib" path="lib/junit-4.1.jar"/>
+	<classpathentry kind="lib" path="lib-compile/ant-ikvmc.0.5.jar"/>
+	<classpathentry kind="lib" path="lib-compile/emma_ant.jar"/>
+	<classpathentry kind="lib" path="lib-compile/emma.jar"/>
+	<classpathentry kind="output" path="build"/>
+</classpath>
