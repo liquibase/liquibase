@@ -1,0 +1,11 @@
+<atlassian-ide-plugin>
+  <project-configuration>
+    <servers>
+      <jira>
+        <server-id>6e2c3276-373d-4132-83df-d0717fb3dbf5</server-id>
+        <name>liquibase.jira.com</name>
+        <url>http://liquibase.jira.com</url>
+      </jira>
+    </servers>
+  </project-configuration>
+</atlassian-ide-plugin>
