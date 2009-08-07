@@ -15,6 +15,7 @@ import liquibase.database.structure.Schema;
 import liquibase.database.structure.Table;
 import liquibase.statement.core.AddAutoIncrementStatement;
 import liquibase.test.TestContext;
+import liquibase.test.DatabaseTestContext;
 import liquibase.sqlgenerator.core.AddAutoIncrementGenerator;
 import liquibase.sqlgenerator.AbstractSqlGeneratorTest;
 import liquibase.sqlgenerator.SqlGenerator;
@@ -56,7 +57,7 @@ public class AddAutoIncrementGeneratorTest extends AbstractSqlGeneratorTest<AddA
 
     @Test
     public void getAffectedDatabaseObjects() throws Exception {
-        for (Database database : TestContext.getInstance().getAvailableDatabases()) {
+        for (Database database : DatabaseTestContext.getInstance().getAvailableDatabases()) {
             AddAutoIncrementChange change = new AddAutoIncrementChange();
             change.setSchemaName("SCHEMA_NAME");
             change.setTableName("TABLE_NAME");

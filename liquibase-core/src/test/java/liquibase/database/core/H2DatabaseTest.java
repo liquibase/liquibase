@@ -3,29 +3,26 @@ package liquibase.database.core;
 import static org.junit.Assert.*;
 import org.junit.Test;
 import org.junit.Assert;
-import liquibase.database.core.MySQLDatabase;
+import liquibase.database.core.H2Database;
 import liquibase.database.AbstractDatabaseTest;
 import liquibase.database.DataType;
 import liquibase.database.Database;
 
-/**
- * Tests for {@link MySQLDatabase}
- */
-public class MySQLDatabaseTest extends AbstractDatabaseTest {
+public class H2DatabaseTest extends AbstractDatabaseTest {
 
-    public MySQLDatabaseTest() throws Exception {
-        super(new MySQLDatabase());
+    public H2DatabaseTest() throws Exception {
+        super(new H2Database());
     }
 
     @Override
     protected String getProductNameString() {
-      return "MySQL";
+        return "H2";
     }
 
     @Override
     @Test
     public void getBlobType() {
-        Assert.assertEquals(new DataType("BLOB", true), getDatabase().getBlobType());
+        Assert.assertEquals(new DataType("LONGVARBINARY", true), getDatabase().getBlobType());
     }
 
     @Override
@@ -37,50 +34,50 @@ public class MySQLDatabaseTest extends AbstractDatabaseTest {
     @Override
     @Test
     public void getBooleanType() {
-        assertEquals(new DataType("TINYINT(1)", false), getDatabase().getBooleanType());
+        Assert.assertEquals(new DataType("BOOLEAN", false), getDatabase().getBooleanType());
     }
 
     @Override
     @Test
     public void getCurrencyType() {
-        assertEquals(new DataType("DECIMAL", true), getDatabase().getCurrencyType());
+        Assert.assertEquals(new DataType("DECIMAL", true), getDatabase().getCurrencyType());
     }
 
     @Override
     @Test
     public void getUUIDType() {
-        assertEquals(new DataType("CHAR(36)", false), getDatabase().getUUIDType());
+        Assert.assertEquals(new DataType("VARCHAR(36)", false), getDatabase().getUUIDType());
     }
 
     @Override
     @Test
     public void getClobType() {
-        assertEquals(new DataType("TEXT", true), getDatabase().getClobType());
+        Assert.assertEquals(new DataType("LONGVARCHAR", true), getDatabase().getClobType());
     }
 
     @Override
     @Test
     public void getDateType() {
-        assertEquals(new DataType("DATE", false), getDatabase().getDateType());
+        Assert.assertEquals(new DataType("DATE", false), getDatabase().getDateType());
     }
 
     @Override
     @Test
     public void getDateTimeType() {
-        assertEquals(new DataType("DATETIME", false), getDatabase().getDateTimeType());
+        Assert.assertEquals(new DataType("TIMESTAMP", false), getDatabase().getDateTimeType());
     }
-
 
     @Override
     @Test
     public void getCurrentDateTimeFunction() {
-        assertEquals("NOW()", getDatabase().getCurrentDateTimeFunction());
+        Assert.assertEquals("NOW()", getDatabase().getCurrentDateTimeFunction());
     }
 
+    @Test
     public void testGetDefaultDriver() {
-        Database database = new MySQLDatabase();
+        Database database = getDatabase();
 
-        assertEquals("com.mysql.jdbc.Driver", database.getDefaultDriver("jdbc:mysql://localhost/liquibase"));
+        assertEquals("org.h2.Driver", database.getDefaultDriver("jdbc:h2:mem:liquibase"));
 
         assertNull(database.getDefaultDriver("jdbc:db2://localhost;databaseName=liquibase"));
     }
@@ -89,14 +86,13 @@ public class MySQLDatabaseTest extends AbstractDatabaseTest {
     @Test
     public void escapeTableName_noSchema() {
         Database database = getDatabase();
-        assertEquals("`tableName`", database.escapeTableName(null, "tableName"));
+        assertEquals("tableName", database.escapeTableName(null, "tableName"));
     }
 
     @Override
     @Test
     public void escapeTableName_withSchema() {
         Database database = getDatabase();
-        assertEquals("`schemaName`.`tableName`", database.escapeTableName("schemaName", "tableName"));
-    }
-
+        assertEquals("schemaName.tableName", database.escapeTableName("schemaName", "tableName"));
+    }    
 }

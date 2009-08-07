@@ -21,6 +21,7 @@ import liquibase.sql.Sql;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.test.TestContext;
+import liquibase.test.DatabaseTestContext;
 
 import org.junit.After;
 
@@ -94,7 +95,7 @@ public abstract class AbstractExecuteTest {
         }
 
         resetAvailableDatabases();
-        for (Database availableDatabase : TestContext.getInstance().getAvailableDatabases()) {
+        for (Database availableDatabase : DatabaseTestContext.getInstance().getAvailableDatabases()) {
             Statement statement = ((JdbcConnection) availableDatabase.getConnection()).getUnderlyingConnection().createStatement();
             if (shouldTestDatabase(availableDatabase, includeDatabases, excludeDatabases)) {
                 String sqlToRun = SqlGeneratorFactory.getInstance().generateSql(statementUnderTest, availableDatabase)[0].toSql();
@@ -171,16 +172,16 @@ public abstract class AbstractExecuteTest {
     }
 
     public void resetAvailableDatabases() throws Exception {
-        for (Database database : TestContext.getInstance().getAvailableDatabases()) {
+        for (Database database : DatabaseTestContext.getInstance().getAvailableDatabases()) {
             DatabaseConnection connection = database.getConnection();
             Statement connectionStatement = ((JdbcConnection) connection).getUnderlyingConnection().createStatement();
 
             if (database.supportsSchemas()) {
-                database.dropDatabaseObjects(TestContext.ALT_SCHEMA);
+                database.dropDatabaseObjects(DatabaseTestContext.ALT_SCHEMA);
                 connection.commit();
                 if (!database.isPeculiarLiquibaseSchema()) {
                     try {
-                        connectionStatement.executeUpdate("drop table " + database.escapeTableName(TestContext.ALT_SCHEMA, database.getDatabaseChangeLogLockTableName()));
+                        connectionStatement.executeUpdate("drop table " + database.escapeTableName(DatabaseTestContext.ALT_SCHEMA, database.getDatabaseChangeLogLockTableName()));
                     } catch (SQLException e) {
                         ;
                     }
@@ -188,7 +189,7 @@ public abstract class AbstractExecuteTest {
                 }
                 if (!database.isPeculiarLiquibaseSchema()) {
                     try {
-                        connectionStatement.executeUpdate("drop table " + database.escapeTableName(TestContext.ALT_SCHEMA, database.getDatabaseChangeLogTableName()));
+                        connectionStatement.executeUpdate("drop table " + database.escapeTableName(DatabaseTestContext.ALT_SCHEMA, database.getDatabaseChangeLogTableName()));
                     } catch (SQLException e) {
                         ;
                     }

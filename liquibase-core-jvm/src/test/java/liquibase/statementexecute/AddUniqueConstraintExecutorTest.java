@@ -3,6 +3,7 @@ package liquibase.statementexecute;
 import liquibase.database.*;
 import liquibase.database.core.*;
 import liquibase.test.TestContext;
+import liquibase.test.DatabaseTestContext;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.CreateTableStatement;
 import liquibase.statement.NotNullConstraint;
@@ -30,7 +31,7 @@ public class AddUniqueConstraintExecutorTest extends AbstractExecuteTest {
         statements.add(table);
 
         if (database.supportsSchemas()) {
-            table = new CreateTableStatement(TestContext.ALT_SCHEMA, TABLE_NAME);
+            table = new CreateTableStatement(DatabaseTestContext.ALT_SCHEMA, TABLE_NAME);
             table
                     .addColumn("id", "int", new NotNullConstraint())
                     .addColumn(COLUMN_NAME, "int", new NotNullConstraint());
@@ -122,7 +123,7 @@ public class AddUniqueConstraintExecutorTest extends AbstractExecuteTest {
     @SuppressWarnings("unchecked")
     @Test
     public void execute_withSchema() throws Exception {
-        statementUnderTest = new AddUniqueConstraintStatement(TestContext.ALT_SCHEMA, TABLE_NAME, COLUMN_NAME, CONSTRAINT_NAME);
+        statementUnderTest = new AddUniqueConstraintStatement(DatabaseTestContext.ALT_SCHEMA, TABLE_NAME, COLUMN_NAME, CONSTRAINT_NAME);
 
         // FIXME Syntax for mysql is correct, but exception "Table 'liquibaseb.adduqtest' doesn't exist" is thrown
 // 		assertCorrect("alter table `liquibaseb`.`adduqtest` add constraint `uq_test` unique (`coltomakeuq`)", MySQLDatabase.class);

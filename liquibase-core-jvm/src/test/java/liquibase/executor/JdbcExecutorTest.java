@@ -7,7 +7,7 @@ import liquibase.database.Database;
 import liquibase.database.core.OracleDatabase;
 import liquibase.database.core.MySQLDatabase;
 
-public class ExecutorServiceTest {
+public class JdbcExecutorTest {
 
     @Test
     public void getInstance() {

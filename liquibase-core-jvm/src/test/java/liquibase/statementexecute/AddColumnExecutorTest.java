@@ -11,6 +11,7 @@ import liquibase.database.core.SybaseDatabase;
 import liquibase.database.core.CacheDatabase;
 import liquibase.database.core.*;
 import liquibase.test.TestContext;
+import liquibase.test.DatabaseTestContext;
 import liquibase.statement.*;
 import liquibase.statement.core.AddColumnStatement;
 import liquibase.statement.core.CreateTableStatement;
@@ -32,7 +33,7 @@ public class AddColumnExecutorTest extends AbstractExecuteTest {
         statements.add(table);
 
         if (database.supportsSchemas()) {
-            table = new CreateTableStatement(TestContext.ALT_SCHEMA, TABLE_NAME);
+            table = new CreateTableStatement(DatabaseTestContext.ALT_SCHEMA, TABLE_NAME);
             table.addColumn("id", "int", new NotNullConstraint());
             statements.add(table);
         }

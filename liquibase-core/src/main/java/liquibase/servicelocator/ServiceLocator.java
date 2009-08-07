@@ -116,7 +116,7 @@ public class ServiceLocator {
         return classes.toArray(new Class[classes.size()]);
     }
 
-    public Object createInstance(Class requiredInterface) throws ServiceNotFoundException {
+    public Object newInstance(Class requiredInterface) throws ServiceNotFoundException {
         try {
             return findClass(requiredInterface).newInstance();
         } catch (Exception e) {
