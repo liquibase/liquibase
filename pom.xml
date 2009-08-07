@@ -47,6 +47,7 @@
     <module>liquibase-core-jvm</module>
     <module>liquibase-maven-plugin</module>
     <module>liquibase-dist</module>
+      <module>liquibase-integration-tests</module>
   </modules>
 
   <dependencyManagement>

@@ -6,6 +6,8 @@ import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StringUtils;
 import liquibase.logging.LogFactory;
+import liquibase.logging.Logger;
+import liquibase.logging.core.DefaultLogger;
 
 import java.io.File;
 import java.io.IOException;
@@ -34,6 +36,7 @@ public class ServiceLocator {
 
     private Map<Class, List<Class>> classesBySuperclass;
     private List<String> packagesToScan;
+    private Logger logger = new DefaultLogger(); //cannot look up regular logger because you get a stackoverflow since we are in the servicelocator
 
     protected ServiceLocator() {
         setResourceAccessor(new ClassLoaderResourceAccessor());
@@ -86,23 +89,22 @@ public class ServiceLocator {
     }
 
     public Class[] findClasses(Class requiredInterface) throws ServiceNotFoundException {
-//        System.out.println("findClasses for "+requiredInterface.getName());
+        logger.debug("ServiceLocator.findClasses for "+requiredInterface.getName());
 
             try {
                 Class.forName(requiredInterface.getName());
-//        System.out.println("Getting classes...");
 
                 if (!classesBySuperclass.containsKey(requiredInterface)) {
-//                System.out.println("Need to look up "+requiredInterface);
                     classesBySuperclass.put(requiredInterface, new ArrayList<Class>());
 
                     for (String packageName : packagesToScan) {
-//                    System.out.println("scanning "+packageName+" with resoureAccessor "+resourceAccessor);
+                        logger.debug("ServiceLocator scanning "+packageName+" with resoureAccessor "+resourceAccessor.getClass().getName());
                         String path = packageName.replace('.', '/');
                         Enumeration<URL> resources = resourceAccessor.getResources(path);
                         while (resources.hasMoreElements()) {
-//                        System.out.println("Found resource");
-                            classesBySuperclass.get(requiredInterface).addAll(findClasses(resources.nextElement(), packageName, requiredInterface));
+                            URL resource = resources.nextElement();
+                            logger.debug("Found "+packageName+" in "+resource.toExternalForm());
+                            classesBySuperclass.get(requiredInterface).addAll(findClasses(resource, packageName, requiredInterface));
                         }
                     }
                 }
@@ -123,7 +125,7 @@ public class ServiceLocator {
     }
 
     private List<Class> findClasses(URL resource, String packageName, Class requiredInterface) throws Exception {
-//        System.out.println("-----find " + packageName + " classes in " + resource.toExternalForm() + " matching interface " + requiredInterface.getName());
+        logger.debug("ServiceLocator finding " + packageName + " classes in " + resource.toExternalForm() + " matching interface " + requiredInterface.getName());
         List<Class> classes = new ArrayList<Class>();
 //        if (directory.toURI().toString().startsWith("jar:")) {
 //            System.out.println("have a jar: "+directory.toString());
@@ -166,17 +168,16 @@ public class ServiceLocator {
             try {
                 clazz = Class.forName(potentialClassName, true, resourceAccessor.toClassLoader());
             } catch (NoClassDefFoundError e) {
-//                System.out.println("NoClassDefFoundError: " + potentialClassName);
-                LogFactory.getLogger().warning("Could not configure extension class " + potentialClassName + ": Missing dependency " + e.getMessage());
+                logger.warning("Could not configure extension class " + potentialClassName + ": Missing dependency " + e.getMessage());
                 continue;
             } catch (Throwable e) {
-                LogFactory.getLogger().warning("Could not configure extension class " + potentialClassName + ": " + e.getMessage());
+                logger.warning("Could not configure extension class " + potentialClassName + ": " + e.getMessage());
                 continue;
             }
             if (!clazz.isInterface()
                     && !Modifier.isAbstract(clazz.getModifiers())
                     && isCorrectType(clazz, requiredInterface)) {
-//                System.out.println(potentialClassName + " matches");
+                logger.debug(potentialClassName + " matches "+requiredInterface.getName());
                 try {
                     clazz.getConstructor();
                     classes.add(clazz);
@@ -185,7 +186,7 @@ public class ServiceLocator {
                     if (!clazz.getName().equals("liquibase.database.core.HibernateDatabase")
                             && !clazz.getName().equals("liquibase.executor.LoggingExecutor")
                             && (classAsUrl != null && !classAsUrl.toExternalForm().contains("build-test/liquibase/"))) { //keeps the logs down
-                        LogFactory.getLogger().warning("Class " + clazz.getName() + " does not have a public no-arg constructor, so it can't be used as a " + requiredInterface.getName() + " service");
+                        logger.warning("Class " + clazz.getName() + " does not have a public no-arg constructor, so it can't be used as a " + requiredInterface.getName() + " service");
                     }
                 }
 //            } else {

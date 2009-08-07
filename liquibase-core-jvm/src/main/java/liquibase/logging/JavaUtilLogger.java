@@ -1,6 +1,7 @@
 package liquibase.logging;
 
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.logging.core.AbstractLogger;
 
 import java.util.logging.Level;
 import java.util.logging.Handler;
@@ -8,35 +9,19 @@ import java.util.logging.FileHandler;
 import java.util.logging.SimpleFormatter;
 import java.io.IOException;
 
-public class JavaUtilLogger implements Logger {
+public class JavaUtilLogger extends AbstractLogger {
 
     private java.util.logging.Logger logger;
-    private LogLevel logLevel;
+
+    public int getPriority() {
+        return 5;
+    }
 
     public void setName(String name) {
         logger = java.util.logging.Logger.getLogger(name);
     }
 
-    public LogLevel getLogLevel() {
-        return logLevel;
-    }
-
-    public void setLogLevel(String logLevel) {
-        if ("debug".equalsIgnoreCase(logLevel)) {
-            setLogLevel(LogLevel.DEBUG);
-        } else if ("info".equalsIgnoreCase(logLevel)) {
-            setLogLevel(LogLevel.INFO);
-        } else if ("warning".equalsIgnoreCase(logLevel)) {
-            setLogLevel(LogLevel.WARNING);
-        } else if ("severe".equalsIgnoreCase(logLevel)) {
-            setLogLevel(LogLevel.SEVERE);
-        } else if ("off".equalsIgnoreCase(logLevel)) {
-            setLogLevel(LogLevel.OFF);
-        } else {
-            throw new UnexpectedLiquibaseException("Unknown log level: " + logLevel);
-        }
-    }
-
+    @Override
     public void setLogLevel(LogLevel logLevel) {
         if (logLevel == LogLevel.DEBUG) {
             logger.setLevel(Level.FINEST);
@@ -51,7 +36,7 @@ public class JavaUtilLogger implements Logger {
         } else {
             throw new UnexpectedLiquibaseException("Unknown log level: " + logLevel);
         }
-        this.logLevel = logLevel;
+        super.setLogLevel(logLevel);
     }
 
 

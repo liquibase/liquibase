@@ -1,0 +1,35 @@
+package liquibase.logging.core;
+
+import liquibase.logging.Logger;
+import liquibase.logging.LogLevel;
+import liquibase.exception.UnexpectedLiquibaseException;
+
+import java.util.logging.Level;
+
+public abstract class AbstractLogger  implements Logger {
+    private LogLevel logLevel;
+
+    public LogLevel getLogLevel() {
+        return logLevel;
+    }
+
+    public void setLogLevel(String logLevel) {
+        if ("debug".equalsIgnoreCase(logLevel)) {
+            setLogLevel(LogLevel.DEBUG);
+        } else if ("info".equalsIgnoreCase(logLevel)) {
+            setLogLevel(LogLevel.INFO);
+        } else if ("warning".equalsIgnoreCase(logLevel)) {
+            setLogLevel(LogLevel.WARNING);
+        } else if ("severe".equalsIgnoreCase(logLevel)) {
+            setLogLevel(LogLevel.SEVERE);
+        } else if ("off".equalsIgnoreCase(logLevel)) {
+            setLogLevel(LogLevel.OFF);
+        } else {
+            throw new UnexpectedLiquibaseException("Unknown log level: " + logLevel);
+        }
+    }
+
+    public void setLogLevel(LogLevel level) {
+        this.logLevel = level;
+    }
+}
