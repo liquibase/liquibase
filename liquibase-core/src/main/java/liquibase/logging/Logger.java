@@ -1,9 +1,9 @@
 package liquibase.logging;
 
-public interface Logger {
+import liquibase.servicelocator.PrioritizedService;
 
-    int getPriority();
-    
+public interface Logger extends PrioritizedService {
+
     void setName(String name);
     
     void setLogLevel(String level);

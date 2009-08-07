@@ -1,6 +1,8 @@
 package liquibase.change;
 
-public class ChangeMetaData {
+import liquibase.servicelocator.PrioritizedService;
+
+public class ChangeMetaData implements PrioritizedService {
     public static final int PRIORITY_DEFAULT = 1;
 
     private String name;

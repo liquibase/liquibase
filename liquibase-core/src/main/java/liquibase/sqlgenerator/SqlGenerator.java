@@ -4,6 +4,7 @@ import liquibase.database.Database;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.statement.SqlStatement;
+import liquibase.servicelocator.PrioritizedService;
 
 /**
  * SqlGenerator implementations take a database-independent SqlStatement interface and create a database-specific Sql object.
@@ -32,7 +33,7 @@ import liquibase.statement.SqlStatement;
  * @see liquibase.statement.SqlStatement
  * @see liquibase.sql.Sql
  */
-public interface SqlGenerator<StatementType extends SqlStatement> {
+public interface SqlGenerator<StatementType extends SqlStatement> extends PrioritizedService {
 
     public static final int PRIORITY_DEFAULT = 1;
     public static final int PRIORITY_DATABASE = 5;
