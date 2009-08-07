@@ -1,7 +1,6 @@
 package liquibase.statement.core;
 
 import org.junit.Test;
-import liquibase.statement.core.AddAutoIncrementStatement;
 
 public class AddAutoIncrementStatementTest extends AbstractSqStatementTest<AddAutoIncrementStatement> {
     

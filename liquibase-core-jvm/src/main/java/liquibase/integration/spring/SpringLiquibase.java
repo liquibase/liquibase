@@ -6,6 +6,8 @@ import liquibase.database.DatabaseFactory;
 import liquibase.database.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
+import liquibase.logging.LogFactory;
+import liquibase.logging.Logger;
 import liquibase.resource.ResourceAccessor;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.InitializingBean;
@@ -21,9 +23,6 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Enumeration;
 import java.util.Vector;
-import java.util.logging.Level;
-import liquibase.logging.Logger;
-import liquibase.logging.LogFactory;
 
 /**
  * A Spring-ified wrapper for Liquibase.

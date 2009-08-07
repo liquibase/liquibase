@@ -2,8 +2,7 @@ package liquibase.changelog.filter;
 
 import liquibase.changelog.ChangeSet;
 import liquibase.database.core.MySQLDatabase;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import org.junit.Test;
 
 public class DbmsChangeSetFilterTest  {

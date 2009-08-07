@@ -1,42 +1,21 @@
 package liquibase.serializer.core.string;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import liquibase.change.*;
+import liquibase.change.core.*;
+import liquibase.change.custom.CustomChangeWrapper;
+import liquibase.change.custom.CustomSqlChange;
+import liquibase.change.custom.ExampleCustomSqlChange;
+import liquibase.logging.Logger;
+import liquibase.resource.ResourceAccessor;
+import liquibase.test.JUnitResourceAccessor;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.SortedSet;
-import java.util.TreeSet;
-import liquibase.logging.Logger;
-
-import liquibase.change.Change;
-import liquibase.change.ChangeFactory;
-import liquibase.change.ChangeProperty;
-import liquibase.change.ColumnConfig;
-import liquibase.change.ConstraintsConfig;
-import liquibase.change.core.AddColumnChange;
-import liquibase.change.core.AddForeignKeyConstraintChange;
-import liquibase.change.core.AddUniqueConstraintChange;
-import liquibase.change.core.LoadDataColumnConfig;
-import liquibase.change.core.SQLFileChange;
-import liquibase.change.custom.CustomChangeWrapper;
-import liquibase.change.custom.CustomSqlChange;
-import liquibase.change.custom.ExampleCustomSqlChange;
-import liquibase.resource.ResourceAccessor;
-import liquibase.test.JUnitResourceAccessor;
-import liquibase.serializer.core.string.StringChangeLogSerializer;
-
-import org.junit.Test;
+import java.util.*;
 
 public class StringChangeLogSerializerTest {
 

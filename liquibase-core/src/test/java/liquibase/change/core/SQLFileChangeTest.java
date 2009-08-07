@@ -1,10 +1,9 @@
 package liquibase.change.core;
 
+import liquibase.change.AbstractChangeTest;
 import liquibase.database.core.OracleDatabase;
 import liquibase.exception.SetupException;
 import liquibase.resource.ClassLoaderResourceAccessor;
-import liquibase.change.core.SQLFileChange;
-import liquibase.change.AbstractChangeTest;
 import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;

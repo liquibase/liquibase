@@ -1,14 +1,12 @@
 package liquibase.change.core;
 
+import liquibase.change.AbstractChangeTest;
 import liquibase.database.Database;
 import liquibase.database.core.MockDatabase;
 import liquibase.database.core.SQLiteDatabase;
-import liquibase.statement.core.DropUniqueConstraintStatement;
 import liquibase.statement.SqlStatement;
-import liquibase.change.core.DropUniqueConstraintChange;
-import liquibase.change.AbstractChangeTest;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import liquibase.statement.core.DropUniqueConstraintStatement;
+import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 

@@ -1,13 +1,11 @@
 package liquibase.change.core;
 
-import liquibase.database.*;
-import liquibase.database.core.*;
-import liquibase.statement.core.RenameViewStatement;
-import liquibase.statement.SqlStatement;
-import liquibase.change.core.RenameViewChange;
 import liquibase.change.AbstractChangeTest;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import liquibase.database.Database;
+import liquibase.database.core.*;
+import liquibase.statement.SqlStatement;
+import liquibase.statement.core.RenameViewStatement;
+import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 

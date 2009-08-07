@@ -5,11 +5,13 @@ import liquibase.database.JdbcConnection;
 import liquibase.database.core.PostgresDatabase;
 import liquibase.database.structure.UniqueConstraint;
 import liquibase.exception.DatabaseException;
-import liquibase.snapshot.core.JdbcDatabaseSnapshotGenerator;
 import liquibase.snapshot.DatabaseSnapshot;
 
 import java.sql.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.StringTokenizer;
 
 public class PostgresDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerator {
 

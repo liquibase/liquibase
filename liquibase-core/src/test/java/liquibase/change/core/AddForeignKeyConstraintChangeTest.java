@@ -1,13 +1,12 @@
 package liquibase.change.core;
 
+import liquibase.change.AbstractChangeTest;
 import liquibase.database.Database;
 import liquibase.database.core.MockDatabase;
 import liquibase.database.core.SQLiteDatabase;
-import liquibase.statement.core.AddForeignKeyConstraintStatement;
 import liquibase.statement.SqlStatement;
-import liquibase.change.core.AddForeignKeyConstraintChange;
-import liquibase.change.AbstractChangeTest;
-import static org.junit.Assert.assertEquals;
+import liquibase.statement.core.AddForeignKeyConstraintStatement;
+import static org.junit.Assert.*;
 import org.junit.Test;
 
 public class AddForeignKeyConstraintChangeTest  extends AbstractChangeTest {

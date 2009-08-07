@@ -1,19 +1,14 @@
 package liquibase.servicelocator;
 
-import org.junit.Test;
-import org.junit.After;
-import org.junit.Before;
-import static org.junit.Assert.*;
 import liquibase.parser.ChangeLogParser;
-import liquibase.sqlgenerator.SqlGenerator;
-import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.ClassLoaderResourceAccessor;
+import liquibase.resource.CompositeResourceAccessor;
+import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.test.TestContext;
-import liquibase.servicelocator.ServiceLocator;
-
-import java.net.URLClassLoader;
-import java.net.URL;
-import java.io.File;
+import org.junit.After;
+import static org.junit.Assert.*;
+import org.junit.Before;
+import org.junit.Test;
 
 public class ServiceLocatorTest {
     private ServiceLocator serviceLocator;

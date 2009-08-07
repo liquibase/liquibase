@@ -1,9 +1,8 @@
 package liquibase.change.core;
 
-import static org.junit.Assert.assertEquals;
-import org.junit.Test;
-import liquibase.change.core.CreateProcedureChange;
 import liquibase.change.AbstractChangeTest;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 public abstract class CreateProcedureChangeTest extends AbstractChangeTest {
 

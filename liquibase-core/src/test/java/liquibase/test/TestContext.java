@@ -1,19 +1,18 @@
 package liquibase.test;
 
-import liquibase.database.*;
-import liquibase.database.core.SQLiteDatabase;
+import liquibase.database.Database;
+import liquibase.database.DatabaseFactory;
 import liquibase.database.core.MockDatabase;
-import liquibase.exception.DatabaseException;
-import liquibase.resource.CompositeResourceAccessor;
+import liquibase.database.core.SQLiteDatabase;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 
-import java.sql.Connection;
-import java.sql.Driver;
-import java.sql.SQLException;
-import java.util.*;
 import java.io.File;
 import java.net.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Controls the database connections for running tests.

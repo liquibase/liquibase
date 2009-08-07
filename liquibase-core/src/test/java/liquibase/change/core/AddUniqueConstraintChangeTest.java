@@ -1,13 +1,9 @@
 package liquibase.change.core;
 
+import liquibase.change.AbstractChangeTest;
 import liquibase.database.Database;
 import liquibase.database.core.SQLiteDatabase;
-import liquibase.statement.core.AddUniqueConstraintStatement;
-import liquibase.statement.SqlStatement;
-import liquibase.change.core.AddUniqueConstraintChange;
-import liquibase.change.AbstractChangeTest;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import org.junit.Test;
 
 public class AddUniqueConstraintChangeTest extends AbstractChangeTest {

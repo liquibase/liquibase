@@ -8,18 +8,17 @@ import liquibase.database.structure.*;
 import liquibase.diff.DiffStatusListener;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.ExecutorService;
+import liquibase.logging.LogFactory;
+import liquibase.snapshot.DatabaseSnapshot;
+import liquibase.snapshot.DatabaseSnapshotGenerator;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.statement.core.GetViewDefinitionStatement;
 import liquibase.statement.core.SelectSequencesStatement;
 import liquibase.util.StringUtils;
-import liquibase.logging.LogFactory;
-import liquibase.snapshot.DatabaseSnapshotGenerator;
-import liquibase.snapshot.DatabaseSnapshot;
 
 import java.sql.*;
 import java.text.ParseException;
 import java.util.*;
-import liquibase.logging.Logger;
 
 public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotGenerator {
 

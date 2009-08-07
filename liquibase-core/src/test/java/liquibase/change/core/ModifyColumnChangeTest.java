@@ -1,11 +1,10 @@
 package liquibase.change.core;
 
-import static org.junit.Assert.assertEquals;
-import org.junit.Before;
-import org.junit.Test;
-import liquibase.change.core.ModifyColumnChange;
 import liquibase.change.AbstractChangeTest;
 import liquibase.change.ColumnConfig;
+import static org.junit.Assert.*;
+import org.junit.Before;
+import org.junit.Test;
 
 /**
  * Tests for {@link ModifyColumnChange}

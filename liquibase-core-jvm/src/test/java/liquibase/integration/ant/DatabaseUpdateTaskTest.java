@@ -1,7 +1,7 @@
 package liquibase.integration.ant;
 
 import org.apache.tools.ant.Project;
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 import org.junit.Test;
 
 /**

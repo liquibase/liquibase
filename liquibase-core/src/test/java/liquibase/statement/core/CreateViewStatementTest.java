@@ -1,7 +1,5 @@
 package liquibase.statement.core;
 
-import liquibase.statement.core.CreateViewStatement;
-
 public class CreateViewStatementTest extends AbstractSqStatementTest<CreateViewStatement> {
 
     @Override

@@ -7,7 +7,7 @@ import liquibase.servicelocator.PrioritizedService;
 
 import java.util.Set;
 
-public interface DatabaseSnapshotGenerator extends PrioritizedService {
+public interface DatabaseSnapshotGenerator {
     /**
      * Default generator, lower priority.
      */

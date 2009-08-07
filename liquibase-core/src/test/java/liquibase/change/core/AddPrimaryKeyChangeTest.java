@@ -1,15 +1,9 @@
 package liquibase.change.core;
 
-import liquibase.database.core.DB2Database;
+import liquibase.change.AbstractChangeTest;
 import liquibase.database.Database;
 import liquibase.database.core.SQLiteDatabase;
-import liquibase.statement.core.AddPrimaryKeyStatement;
-import liquibase.statement.core.ReorganizeTableStatement;
-import liquibase.statement.SqlStatement;
-import liquibase.change.core.AddPrimaryKeyChange;
-import liquibase.change.AbstractChangeTest;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import org.junit.Test;
 
 public class AddPrimaryKeyChangeTest extends AbstractChangeTest {

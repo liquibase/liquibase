@@ -1,7 +1,6 @@
 package liquibase.database.core;
 
 import junit.framework.TestCase;
-import liquibase.database.core.DerbyDatabase;
 import liquibase.database.Database;
 
 public class DerbyDatabaseTest extends TestCase {

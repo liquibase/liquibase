@@ -9,8 +9,8 @@ import liquibase.diff.DiffResult;
 import liquibase.diff.DiffStatusListener;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.MigrationFailedException;
-import liquibase.util.StringUtils;
 import liquibase.logging.LogFactory;
+import liquibase.util.StringUtils;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
@@ -19,12 +19,7 @@ import java.io.PrintStream;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
 import java.sql.Driver;
-import java.util.ArrayList;
 import java.util.Properties;
-import java.util.logging.Formatter;
-import java.util.logging.Handler;
-import java.util.logging.LogRecord;
-import java.util.logging.SimpleFormatter;
 
 /**
  * Common Utilitiy methods used in the CommandLine application and the Maven plugin.

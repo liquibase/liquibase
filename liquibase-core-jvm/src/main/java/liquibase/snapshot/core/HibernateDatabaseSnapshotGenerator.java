@@ -1,21 +1,22 @@
 package liquibase.snapshot.core;
 
 import liquibase.database.Database;
-import liquibase.database.structure.*;
 import liquibase.database.core.HibernateDatabase;
 import liquibase.database.core.HibernateGenericDialect;
-import liquibase.exception.DatabaseException;
-import liquibase.util.StringUtils;
-import liquibase.logging.LogFactory;
-import liquibase.snapshot.DatabaseSnapshotGenerator;
-import liquibase.snapshot.DatabaseSnapshot;
+import liquibase.database.structure.*;
 import liquibase.diff.DiffStatusListener;
+import liquibase.exception.DatabaseException;
+import liquibase.snapshot.DatabaseSnapshot;
+import liquibase.snapshot.DatabaseSnapshotGenerator;
+import liquibase.util.StringUtils;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.dialect.Dialect;
 import org.hibernate.engine.Mapping;
 
-import java.util.*;
-import liquibase.logging.Logger;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 
 public class HibernateDatabaseSnapshotGenerator implements DatabaseSnapshotGenerator {
     private HibernateDatabase database;

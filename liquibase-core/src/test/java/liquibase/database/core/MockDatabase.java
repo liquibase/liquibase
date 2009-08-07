@@ -4,14 +4,14 @@ import liquibase.Liquibase;
 import liquibase.change.Change;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.RanChangeSet;
-import liquibase.database.structure.DatabaseObject;
-import liquibase.snapshot.DatabaseSnapshotGenerator;
+import liquibase.database.DataType;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
-import liquibase.database.DataType;
+import liquibase.database.structure.DatabaseObject;
 import liquibase.diff.DiffStatusListener;
 import liquibase.exception.*;
 import liquibase.lockservice.DatabaseChangeLogLock;
+import liquibase.snapshot.DatabaseSnapshotGenerator;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.statement.SqlStatement;
 
@@ -20,7 +20,9 @@ import java.io.Writer;
 import java.sql.Connection;
 import java.sql.Time;
 import java.sql.Timestamp;
-import java.util.*;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
 
 public class MockDatabase implements Database {
 

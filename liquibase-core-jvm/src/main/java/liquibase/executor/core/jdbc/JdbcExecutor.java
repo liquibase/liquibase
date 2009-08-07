@@ -4,15 +4,15 @@ import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.JdbcConnection;
 import liquibase.exception.DatabaseException;
+import liquibase.executor.AbstractExecutor;
+import liquibase.executor.Executor;
+import liquibase.logging.LogFactory;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.statement.CallableSqlStatement;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.StoredProcedureStatement;
 import liquibase.util.JdbcUtils;
 import liquibase.util.StringUtils;
-import liquibase.logging.LogFactory;
-import liquibase.executor.AbstractExecutor;
-import liquibase.executor.Executor;
 
 import java.sql.CallableStatement;
 import java.sql.ResultSet;

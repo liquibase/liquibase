@@ -1,9 +1,9 @@
 package liquibase.changelog.filter;
 
+import liquibase.change.CheckSum;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.RanChangeSet;
 import liquibase.exception.RollbackFailedException;
-import liquibase.change.CheckSum;
 import static org.junit.Assert.*;
 import org.junit.Test;
 

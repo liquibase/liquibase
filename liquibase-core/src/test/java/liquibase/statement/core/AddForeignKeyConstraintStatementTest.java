@@ -1,7 +1,5 @@
 package liquibase.statement.core;
 
-import liquibase.statement.core.AddForeignKeyConstraintStatement;
-
 public class AddForeignKeyConstraintStatementTest extends AbstractSqStatementTest<AddForeignKeyConstraintStatement> {
 
     @Override

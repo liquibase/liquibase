@@ -2,7 +2,7 @@ package liquibase.integration.commandline;
 
 import liquibase.resource.AbstractFileOpenerTest;
 import liquibase.resource.ResourceAccessor;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 import org.junit.Test;
 
 import java.io.IOException;

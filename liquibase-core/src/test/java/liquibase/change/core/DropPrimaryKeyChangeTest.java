@@ -1,14 +1,12 @@
 package liquibase.change.core;
 
+import liquibase.change.AbstractChangeTest;
 import liquibase.database.Database;
 import liquibase.database.core.MockDatabase;
 import liquibase.database.core.SQLiteDatabase;
-import liquibase.statement.core.DropPrimaryKeyStatement;
 import liquibase.statement.SqlStatement;
-import liquibase.change.core.DropPrimaryKeyChange;
-import liquibase.change.AbstractChangeTest;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import liquibase.statement.core.DropPrimaryKeyStatement;
+import static org.junit.Assert.*;
 import org.junit.Test;
 
 public class DropPrimaryKeyChangeTest extends AbstractChangeTest {

@@ -1,14 +1,14 @@
 package liquibase.sqlgenerator;
 
-import liquibase.statement.SqlStatement;
 import liquibase.database.Database;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
+import liquibase.statement.SqlStatement;
 
-import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class MockSqlGenerator implements SqlGenerator {
     private int priority;

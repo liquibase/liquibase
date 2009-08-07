@@ -1,7 +1,5 @@
 package liquibase.statement.core;
 
-import liquibase.statement.core.DropTableStatement;
-
 public class DropTableStatementTest extends AbstractSqStatementTest<DropTableStatement> {
 
     @Override

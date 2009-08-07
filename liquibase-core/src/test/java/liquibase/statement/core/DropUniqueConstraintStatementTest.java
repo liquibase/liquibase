@@ -1,7 +1,5 @@
 package liquibase.statement.core;
 
-import liquibase.statement.core.DropUniqueConstraintStatement;
-
 public class DropUniqueConstraintStatementTest extends AbstractSqStatementTest<DropUniqueConstraintStatement> {
 
 

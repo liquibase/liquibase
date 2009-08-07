@@ -1,7 +1,5 @@
 package liquibase.statement.core;
 
-import liquibase.statement.core.ReindexStatement;
-
 public class ReindexStatementTest extends AbstractSqStatementTest<ReindexStatement> {
     @Override
     protected ReindexStatement createStatementUnderTest() {

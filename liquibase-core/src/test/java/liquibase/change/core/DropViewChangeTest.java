@@ -1,12 +1,10 @@
 package liquibase.change.core;
 
-import liquibase.database.core.MockDatabase;
-import liquibase.statement.core.DropViewStatement;
-import liquibase.statement.SqlStatement;
-import liquibase.change.core.DropViewChange;
 import liquibase.change.AbstractChangeTest;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import liquibase.database.core.MockDatabase;
+import liquibase.statement.SqlStatement;
+import liquibase.statement.core.DropViewStatement;
+import static org.junit.Assert.*;
 import org.junit.Test;
 
 public class DropViewChangeTest  extends AbstractChangeTest {

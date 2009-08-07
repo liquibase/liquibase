@@ -1,12 +1,11 @@
 package liquibase.database.core;
 
-import static org.junit.Assert.*;
-import org.junit.Test;
-import org.junit.Assert;
-import liquibase.database.core.H2Database;
 import liquibase.database.AbstractDatabaseTest;
 import liquibase.database.DataType;
 import liquibase.database.Database;
+import org.junit.Assert;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 public class H2DatabaseTest extends AbstractDatabaseTest {
 

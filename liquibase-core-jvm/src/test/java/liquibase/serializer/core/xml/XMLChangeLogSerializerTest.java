@@ -1,9 +1,9 @@
 package liquibase.serializer.core.xml;
 
-import liquibase.change.*;
+import liquibase.change.ColumnConfig;
+import liquibase.change.ConstraintsConfig;
 import liquibase.change.core.*;
 import liquibase.resource.ClassLoaderResourceAccessor;
-import liquibase.serializer.core.xml.XMLChangeLogSerializer;
 import static org.junit.Assert.*;
 import org.junit.Test;
 import org.w3c.dom.Element;

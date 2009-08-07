@@ -1,9 +1,9 @@
 package liquibase.parser.core.xml;
 
 import liquibase.change.Change;
-import liquibase.change.core.RawSQLChange;
 import liquibase.change.core.AddColumnChange;
 import liquibase.change.core.CreateTableChange;
+import liquibase.change.core.RawSQLChange;
 import liquibase.change.custom.CustomChangeWrapper;
 import liquibase.change.custom.ExampleCustomSqlChange;
 import liquibase.changelog.ChangeSet;
@@ -12,7 +12,6 @@ import liquibase.exception.ChangeLogParseException;
 import liquibase.precondition.core.OrPrecondition;
 import liquibase.precondition.core.PreconditionContainer;
 import liquibase.test.JUnitResourceAccessor;
-import liquibase.parser.core.xml.XMLChangeLogSAXParser;
 import static org.junit.Assert.*;
 import org.junit.Test;
 

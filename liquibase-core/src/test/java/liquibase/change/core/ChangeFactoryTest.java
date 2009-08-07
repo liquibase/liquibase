@@ -1,13 +1,10 @@
 package liquibase.change.core;
 
+import liquibase.change.Change;
+import liquibase.change.ChangeFactory;
 import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
-import liquibase.change.core.AddAutoIncrementChange;
-import liquibase.change.core.CreateTableChange;
-import liquibase.change.core.DropTableChange;
-import liquibase.change.ChangeFactory;
-import liquibase.change.Change;
 
 /**
  * Tests for {@link liquibase.change.ChangeFactory}

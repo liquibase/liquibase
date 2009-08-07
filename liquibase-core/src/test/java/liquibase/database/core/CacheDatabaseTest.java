@@ -1,12 +1,10 @@
 package liquibase.database.core;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import org.junit.Test;
-import org.junit.Assert;
-import liquibase.database.core.CacheDatabase;
 import liquibase.database.AbstractDatabaseTest;
 import liquibase.database.DataType;
+import org.junit.Assert;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 public class CacheDatabaseTest extends AbstractDatabaseTest {
 

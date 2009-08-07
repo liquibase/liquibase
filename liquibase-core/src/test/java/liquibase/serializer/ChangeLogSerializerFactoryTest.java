@@ -1,7 +1,7 @@
 package liquibase.serializer;
 
-import liquibase.serializer.core.xml.XMLChangeLogSerializer;
 import liquibase.serializer.core.string.StringChangeLogSerializer;
+import liquibase.serializer.core.xml.XMLChangeLogSerializer;
 import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;

@@ -1,19 +1,21 @@
 package liquibase.integration.commandline;
 
 import liquibase.Liquibase;
-import liquibase.servicelocator.ServiceLocator;
 import liquibase.database.Database;
 import liquibase.exception.CommandLineParsingException;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.ValidationFailedException;
 import liquibase.lockservice.LockService;
+import liquibase.logging.LogFactory;
+import liquibase.logging.LogLevel;
+import liquibase.logging.Logger;
+import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.FileSystemResourceAccessor;
-import liquibase.resource.ClassLoaderResourceAccessor;
+import liquibase.servicelocator.ServiceLocator;
 import liquibase.util.LiquibaseUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
-import liquibase.logging.LogFactory;
 
 import java.io.*;
 import java.lang.reflect.Field;
@@ -27,9 +29,6 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
-import java.util.logging.Level;
-import liquibase.logging.Logger;
-import liquibase.logging.LogLevel;
 
 /**
  * Class for executing LiquiBase via the command line.

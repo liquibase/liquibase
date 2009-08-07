@@ -1,14 +1,13 @@
 package liquibase.snapshot.core;
 
+import liquibase.database.Database;
+import liquibase.database.core.DB2Database;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.statement.core.RawSqlStatement;
-import liquibase.database.Database;
-import liquibase.database.core.DB2Database;
-import liquibase.snapshot.DatabaseSnapshot;
 
-import java.util.Map;
 import java.util.List;
+import java.util.Map;
 
 public class DB2DatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerator {
     public boolean supports(Database database) {
