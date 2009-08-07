@@ -2,6 +2,8 @@ package liquibase.logging;
 
 public interface Logger {
 
+    int getPriority();
+    
     void setName(String name);
     
     void setLogLevel(String level);

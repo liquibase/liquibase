@@ -124,6 +124,7 @@
     <option name="originalFiles">
       <list>
         <option value="$PROJECT_DIR$/pom.xml" />
+        <option value="$PROJECT_DIR$/liquibase-integration-tests/pom.xml" />
       </list>
     </option>
   </component>
@@ -261,6 +262,7 @@
       <module fileurl="file://$PROJECT_DIR$/liquibase-core/liquibase-core.iml" filepath="$PROJECT_DIR$/liquibase-core/liquibase-core.iml" />
       <module fileurl="file://$PROJECT_DIR$/liquibase-core-jvm/liquibase-core-jvm.iml" filepath="$PROJECT_DIR$/liquibase-core-jvm/liquibase-core-jvm.iml" />
       <module fileurl="file://$PROJECT_DIR$/liquibase-dist/liquibase-dist.iml" filepath="$PROJECT_DIR$/liquibase-dist/liquibase-dist.iml" />
+      <module fileurl="file://$PROJECT_DIR$/liquibase-integration-tests/liquibase-integration-tests.iml" filepath="$PROJECT_DIR$/liquibase-integration-tests/liquibase-integration-tests.iml" />
       <module fileurl="file://$PROJECT_DIR$/liquibase-maven-plugin/liquibase-maven-plugin.iml" filepath="$PROJECT_DIR$/liquibase-maven-plugin/liquibase-maven-plugin.iml" />
     </modules>
   </component>
@@ -275,6 +277,159 @@
     <option name="ADDITIONAL_OPTIONS_STRING" value="" />
   </component>
   <component name="SvnBranchConfigurationManager">
+    <option name="myConfigurationMap">
+      <map>
+        <entry key="$PROJECT_DIR$">
+          <value>
+            <SvnBranchConfiguration>
+              <option name="branchMap">
+                <map>
+                  <entry key="http://liquibase.jira.com/svn/CORE/branches">
+                    <value>
+                      <list>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1249321257238" />
+                          <option name="revision" value="1036" />
+                          <option name="url" value="http://liquibase.jira.com/svn/CORE/branches/1_9" />
+                        </SvnBranchItem>
+                      </list>
+                    </value>
+                  </entry>
+                  <entry key="http://liquibase.jira.com/svn/CORE/tags">
+                    <value>
+                      <list>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1239604599333" />
+                          <option name="revision" value="855" />
+                          <option name="url" value="http://liquibase.jira.com/svn/CORE/tags/1_9_3" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1239041301112" />
+                          <option name="revision" value="851" />
+                          <option name="url" value="http://liquibase.jira.com/svn/CORE/tags/1_9_2" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1235156714741" />
+                          <option name="revision" value="842" />
+                          <option name="url" value="http://liquibase.jira.com/svn/CORE/tags/1_9_1" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1231359745384" />
+                          <option name="revision" value="813" />
+                          <option name="url" value="http://liquibase.jira.com/svn/CORE/tags/1_9_0" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1221671682335" />
+                          <option name="revision" value="741" />
+                          <option name="url" value="http://liquibase.jira.com/svn/CORE/tags/1_8_0" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1219268819342" />
+                          <option name="revision" value="697" />
+                          <option name="url" value="http://liquibase.jira.com/svn/CORE/tags/1_7_0" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1208980918613" />
+                          <option name="revision" value="651" />
+                          <option name="url" value="http://liquibase.jira.com/svn/CORE/tags/1_6_1" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1206633837864" />
+                          <option name="revision" value="632" />
+                          <option name="url" value="http://liquibase.jira.com/svn/CORE/tags/1_6_0" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1202405110120" />
+                          <option name="revision" value="585" />
+                          <option name="url" value="http://liquibase.jira.com/svn/CORE/tags/1_5_2" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1201890541101" />
+                          <option name="revision" value="574" />
+                          <option name="url" value="http://liquibase.jira.com/svn/CORE/tags/1_5_1" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1201633875507" />
+                          <option name="revision" value="566" />
+                          <option name="url" value="http://liquibase.jira.com/svn/CORE/tags/1_5_0" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1200687799728" />
+                          <option name="revision" value="523" />
+                          <option name="url" value="http://liquibase.jira.com/svn/CORE/tags/before-refactoring" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1195500087127" />
+                          <option name="revision" value="469" />
+                          <option name="url" value="http://liquibase.jira.com/svn/CORE/tags/1_4_0" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1190923512544" />
+                          <option name="revision" value="381" />
+                          <option name="url" value="http://liquibase.jira.com/svn/CORE/tags/1_3_0" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1188331836844" />
+                          <option name="revision" value="290" />
+                          <option name="url" value="http://liquibase.jira.com/svn/CORE/tags/1_2" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1185309332190" />
+                          <option name="revision" value="211" />
+                          <option name="url" value="http://liquibase.jira.com/svn/CORE/tags/1_1_1" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1185221566774" />
+                          <option name="revision" value="207" />
+                          <option name="url" value="http://liquibase.jira.com/svn/CORE/tags/1_1" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1183737924186" />
+                          <option name="revision" value="176" />
+                          <option name="url" value="http://liquibase.jira.com/svn/CORE/tags/1_0_1" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1182281978694" />
+                          <option name="revision" value="153" />
+                          <option name="url" value="http://liquibase.jira.com/svn/CORE/tags/1_0_RC2" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1181321290688" />
+                          <option name="revision" value="126" />
+                          <option name="url" value="http://liquibase.jira.com/svn/CORE/tags/1_0_RC1" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1179426159225" />
+                          <option name="revision" value="79" />
+                          <option name="url" value="http://liquibase.jira.com/svn/CORE/tags/0_9_0" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1177596784642" />
+                          <option name="revision" value="45" />
+                          <option name="url" value="http://liquibase.jira.com/svn/CORE/tags/0_8_1" />
+                        </SvnBranchItem>
+                        <SvnBranchItem>
+                          <option name="creationDateMillis" value="1177217159190" />
+                          <option name="revision" value="30" />
+                          <option name="url" value="http://liquibase.jira.com/svn/CORE/tags/0_8_0" />
+                        </SvnBranchItem>
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+              <option name="branchUrls">
+                <list>
+                  <option value="http://liquibase.jira.com/svn/CORE/branches" />
+                  <option value="http://liquibase.jira.com/svn/CORE/tags" />
+                </list>
+              </option>
+              <option name="trunkUrl" value="http://liquibase.jira.com/svn/CORE/trunk" />
+            </SvnBranchConfiguration>
+          </value>
+        </entry>
+      </map>
+    </option>
     <option name="mySupportsUserInfoFilter" value="true" />
   </component>
   <component name="ToggleTest">
