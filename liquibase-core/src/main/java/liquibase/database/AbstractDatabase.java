@@ -9,8 +9,9 @@ import liquibase.changelog.RanChangeSet;
 import liquibase.database.structure.*;
 import liquibase.diff.DiffStatusListener;
 import liquibase.exception.*;
-import liquibase.executor.ExecutorService;
 import liquibase.executor.Executor;
+import liquibase.executor.ExecutorService;
+import liquibase.logging.LogFactory;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.DatabaseSnapshotGeneratorFactory;
 import liquibase.sql.Sql;
@@ -22,7 +23,6 @@ import liquibase.statement.core.*;
 import liquibase.util.ISODateFormat;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
-import liquibase.logging.LogFactory;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -31,7 +31,6 @@ import java.sql.Types;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import liquibase.logging.Logger;
 import java.util.regex.Pattern;
 
 /**

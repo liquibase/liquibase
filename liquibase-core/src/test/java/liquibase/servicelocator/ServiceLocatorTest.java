@@ -20,12 +20,7 @@ public class ServiceLocatorTest {
 
     @Before
     public void setup() throws Exception{
-        File sample1 = new File(TestContext.getInstance().findCoreJvmProjectRoot(), "/lib-test/liquibase-sample1.jar");
-        File sample2 = new File(TestContext.getInstance().findCoreJvmProjectRoot(), "/lib-test/liquibase-sample2.jar");
-        CompositeResourceAccessor resourceAccessor = new CompositeResourceAccessor(new ClassLoaderResourceAccessor(), new ClassLoaderResourceAccessor(new URLClassLoader(new URL[]{
-                sample1.toURL(),
-                sample2.toURL()
-        })));
+        CompositeResourceAccessor resourceAccessor = new CompositeResourceAccessor(new ClassLoaderResourceAccessor(), TestContext.getInstance().getTestResourceAccessor());
         
         serviceLocator = ServiceLocator.getInstance();
         serviceLocator.setResourceAccessor(resourceAccessor);

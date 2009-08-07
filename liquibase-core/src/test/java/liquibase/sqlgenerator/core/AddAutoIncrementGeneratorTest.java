@@ -15,7 +15,6 @@ import liquibase.database.structure.Schema;
 import liquibase.database.structure.Table;
 import liquibase.statement.core.AddAutoIncrementStatement;
 import liquibase.test.TestContext;
-import liquibase.test.DatabaseTestContext;
 import liquibase.sqlgenerator.core.AddAutoIncrementGenerator;
 import liquibase.sqlgenerator.AbstractSqlGeneratorTest;
 import liquibase.sqlgenerator.SqlGenerator;
@@ -55,33 +54,33 @@ public class AddAutoIncrementGeneratorTest extends AbstractSqlGeneratorTest<AddA
         && !(database instanceof HsqlDatabase);
     }
 
-    @Test
-    public void getAffectedDatabaseObjects() throws Exception {
-        for (Database database : DatabaseTestContext.getInstance().getAvailableDatabases()) {
-            AddAutoIncrementChange change = new AddAutoIncrementChange();
-            change.setSchemaName("SCHEMA_NAME");
-            change.setTableName("TABLE_NAME");
-            change.setColumnName("COLUMN_NAME");
-            change.setColumnDataType("INT");
-
-            Set<DatabaseObject> affectedDatabaseObjects = change.getAffectedDatabaseObjects(database);
-            if (affectedDatabaseObjects.size() > 0) {
-                assertEquals(3, affectedDatabaseObjects.size());
-            }
-
-            for (DatabaseObject databaseObject : affectedDatabaseObjects) {
-                if (databaseObject instanceof Schema) {
-                    assertEquals("SCHEMA_NAME", ((Schema) databaseObject).getName());
-                } else if (databaseObject instanceof Table) {
-                        assertEquals("SCHEMA_NAME", ((Table) databaseObject).getSchema());
-                        assertEquals("TABLE_NAME", ((Table) databaseObject).getName());
-                } else {
-                    assertEquals("COLUMN_NAME", ((Column) databaseObject).getName());
-                    assertEquals("TABLE_NAME", ((Column) databaseObject).getTable().getName());
-                }
-            }
-        }
-    }
+//    @Test
+//    public void getAffectedDatabaseObjects() throws Exception {
+//        for (Database database : DatabaseTestContext.getInstance().getAvailableDatabases()) {
+//            AddAutoIncrementChange change = new AddAutoIncrementChange();
+//            change.setSchemaName("SCHEMA_NAME");
+//            change.setTableName("TABLE_NAME");
+//            change.setColumnName("COLUMN_NAME");
+//            change.setColumnDataType("INT");
+//
+//            Set<DatabaseObject> affectedDatabaseObjects = change.getAffectedDatabaseObjects(database);
+//            if (affectedDatabaseObjects.size() > 0) {
+//                assertEquals(3, affectedDatabaseObjects.size());
+//            }
+//
+//            for (DatabaseObject databaseObject : affectedDatabaseObjects) {
+//                if (databaseObject instanceof Schema) {
+//                    assertEquals("SCHEMA_NAME", ((Schema) databaseObject).getName());
+//                } else if (databaseObject instanceof Table) {
+//                        assertEquals("SCHEMA_NAME", ((Table) databaseObject).getSchema());
+//                        assertEquals("TABLE_NAME", ((Table) databaseObject).getName());
+//                } else {
+//                    assertEquals("COLUMN_NAME", ((Column) databaseObject).getName());
+//                    assertEquals("TABLE_NAME", ((Column) databaseObject).getTable().getName());
+//                }
+//            }
+//        }
+//    }
 
 //      @Test
 //    public void execute_stringDefault() throws Exception {

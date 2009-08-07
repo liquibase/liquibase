@@ -63,17 +63,20 @@ public class TestContext {
 
     public ResourceAccessor getTestResourceAccessor() throws URISyntaxException, MalformedURLException {
         if (resourceAccessor == null) {
-            File samples1 = new File(TestContext.getInstance().findCoreJvmProjectRoot(), "/lib-test/liquibase-sample1.jar");
-            File samples2 = new File(TestContext.getInstance().findCoreJvmProjectRoot(), "/lib-test/liquibase-sample2.jar");
+            File integrationJarsDir = new File(TestContext.getInstance().findIntegrationTestProjectRoot(), "src/test/resources/ext/jars");
+
+            File samples1 = new File(integrationJarsDir, "liquibase-sample1.jar");
+            File samples2 = new File(integrationJarsDir, "liquibase-sample2.jar");
+
             if (!samples2.exists()) {
                 throw new RuntimeException("Could not find "+samples2.getAbsolutePath());
             }
-            resourceAccessor = new CompositeResourceAccessor(new ClassLoaderResourceAccessor(), new ClassLoaderResourceAccessor(new URLClassLoader(new URL[]{
-// sample1 does not actually run                    samples1.toURL(),
+            resourceAccessor = new ClassLoaderResourceAccessor(new URLClassLoader(new URL[]{
+                    samples1.toURL(),
                     samples2.toURL(),
-                    new File(TestContext.getInstance().findCoreJvmProjectRoot(), "/build").toURL(),
-                    new File(TestContext.getInstance().findCoreProjectRoot(), "/build").toURL()
-            })));
+                    new File(TestContext.getInstance().findCoreJvmProjectRoot(), "/target/classe").toURL(),
+                    new File(TestContext.getInstance().findCoreProjectRoot(), "/target/classe").toURL()
+            }));
         }
 
         return resourceAccessor;

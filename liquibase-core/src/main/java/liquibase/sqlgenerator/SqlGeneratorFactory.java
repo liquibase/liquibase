@@ -3,9 +3,9 @@ package liquibase.sqlgenerator;
 import liquibase.database.Database;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.exception.ValidationErrors;
+import liquibase.servicelocator.ServiceLocator;
 import liquibase.sql.Sql;
 import liquibase.statement.SqlStatement;
-import liquibase.servicelocator.ServiceLocator;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;

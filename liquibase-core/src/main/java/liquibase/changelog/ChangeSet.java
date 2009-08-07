@@ -6,21 +6,20 @@ import liquibase.change.core.EmptyChange;
 import liquibase.change.core.RawSQLChange;
 import liquibase.database.Database;
 import liquibase.exception.*;
-import liquibase.executor.ExecutorService;
 import liquibase.executor.Executor;
+import liquibase.executor.ExecutorService;
+import liquibase.logging.LogFactory;
+import liquibase.logging.Logger;
+import liquibase.precondition.Conditional;
 import liquibase.precondition.core.ErrorPrecondition;
 import liquibase.precondition.core.FailedPrecondition;
 import liquibase.precondition.core.PreconditionContainer;
-import liquibase.precondition.Conditional;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.statement.SqlStatement;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
-import liquibase.logging.LogFactory;
 
 import java.util.*;
-
-import liquibase.logging.Logger;
 
 /**
  * Encapsulates a changeSet and all its associated changes.

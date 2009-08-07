@@ -1,10 +1,8 @@
 package liquibase.logging.core;
 
-import liquibase.logging.Logger;
-import liquibase.logging.LogLevel;
 import liquibase.exception.UnexpectedLiquibaseException;
-
-import java.util.logging.Level;
+import liquibase.logging.LogLevel;
+import liquibase.logging.Logger;
 
 public abstract class AbstractLogger  implements Logger {
     private LogLevel logLevel;

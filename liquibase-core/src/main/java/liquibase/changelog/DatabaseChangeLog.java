@@ -5,8 +5,8 @@ import liquibase.changelog.visitor.ValidatingVisitor;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.ValidationFailedException;
-import liquibase.precondition.core.PreconditionContainer;
 import liquibase.precondition.Conditional;
+import liquibase.precondition.core.PreconditionContainer;
 
 import java.util.ArrayList;
 import java.util.List;

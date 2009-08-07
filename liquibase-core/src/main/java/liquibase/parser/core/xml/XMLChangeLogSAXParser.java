@@ -2,9 +2,9 @@ package liquibase.parser.core.xml;
 
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.exception.ChangeLogParseException;
+import liquibase.logging.LogFactory;
 import liquibase.parser.ChangeLogParser;
 import liquibase.resource.ResourceAccessor;
-import liquibase.logging.LogFactory;
 import org.xml.sax.*;
 
 import javax.xml.parsers.SAXParser;

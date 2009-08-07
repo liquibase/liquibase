@@ -3,9 +3,9 @@ package liquibase.snapshot;
 import liquibase.database.Database;
 import liquibase.database.structure.*;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.Collection;
 
 public class DatabaseSnapshot {
 

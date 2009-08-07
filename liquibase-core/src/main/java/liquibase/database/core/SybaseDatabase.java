@@ -1,9 +1,9 @@
 package liquibase.database.core;
 
-import liquibase.exception.DatabaseException;
 import liquibase.database.AbstractDatabase;
 import liquibase.database.DataType;
 import liquibase.database.DatabaseConnection;
+import liquibase.exception.DatabaseException;
 
 import java.text.ParseException;
 import java.util.HashSet;

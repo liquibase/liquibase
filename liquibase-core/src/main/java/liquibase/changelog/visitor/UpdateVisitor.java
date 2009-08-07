@@ -4,7 +4,6 @@ import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
 import liquibase.logging.LogFactory;
-
 import liquibase.logging.Logger;
 
 public class UpdateVisitor implements ChangeSetVisitor {
