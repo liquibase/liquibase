@@ -80,6 +80,27 @@ public class ServiceLocator {
 
     public Class findClass(Class requiredInterface) throws ServiceNotFoundException {
         Class[] classes = findClasses(requiredInterface);
+        if (PrioritizedService.class.isAssignableFrom(requiredInterface)) {
+            PrioritizedService returnObject = null;
+            for (Class clazz : classes) {
+                PrioritizedService newInstance;
+                try {
+                    newInstance = (PrioritizedService) clazz.newInstance();
+                } catch (Exception e) {
+                    throw new UnexpectedLiquibaseException(e);
+                }
+
+                if (returnObject == null || newInstance.getPriority() > returnObject.getPriority()) {
+                    returnObject = newInstance;
+                }
+            }
+
+            if (returnObject == null) {
+                throw new ServiceNotFoundException("Could not find implementation of " + requiredInterface.getName());
+            }
+            return returnObject.getClass();
+        }
+
         if (classes.length != 1) {
             throw new ServiceNotFoundException("Could not find unique implementation of " + requiredInterface.getName() + ".  Found " + classes.length + " implementations");
         }

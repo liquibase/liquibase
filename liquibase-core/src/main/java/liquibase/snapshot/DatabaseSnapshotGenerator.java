@@ -3,10 +3,11 @@ package liquibase.snapshot;
 import liquibase.database.Database;
 import liquibase.diff.DiffStatusListener;
 import liquibase.exception.DatabaseException;
+import liquibase.servicelocator.PrioritizedService;
 
 import java.util.Set;
 
-public interface DatabaseSnapshotGenerator {
+public interface DatabaseSnapshotGenerator extends PrioritizedService {
     /**
      * Default generator, lower priority.
      */
