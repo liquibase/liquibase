@@ -11,18 +11,19 @@ import liquibase.database.DatabaseFactory;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.LockException;
+import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.executor.LoggingExecutor;
-import liquibase.executor.Executor;
 import liquibase.lockservice.DatabaseChangeLogLock;
 import liquibase.lockservice.LockService;
+import liquibase.logging.LogFactory;
+import liquibase.logging.Logger;
 import liquibase.parser.ChangeLogParserFactory;
 import liquibase.resource.ResourceAccessor;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.statement.core.UpdateStatement;
 import liquibase.util.LiquibaseUtil;
 import liquibase.util.StreamUtil;
-import liquibase.logging.LogFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -30,8 +31,6 @@ import java.io.PrintStream;
 import java.io.Writer;
 import java.text.DateFormat;
 import java.util.*;
-
-import liquibase.logging.Logger;
 
 /**
  * Core LiquiBase facade.

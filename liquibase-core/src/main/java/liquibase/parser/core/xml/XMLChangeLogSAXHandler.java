@@ -9,6 +9,8 @@ import liquibase.changelog.ExpressionExpander;
 import liquibase.exception.CustomChangeException;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.MigrationFailedException;
+import liquibase.logging.LogFactory;
+import liquibase.logging.Logger;
 import liquibase.parser.ChangeLogParserFactory;
 import liquibase.precondition.CustomPreconditionWrapper;
 import liquibase.precondition.Precondition;
@@ -21,7 +23,6 @@ import liquibase.sql.visitor.SqlVisitor;
 import liquibase.sql.visitor.SqlVisitorFactory;
 import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtils;
-import liquibase.logging.LogFactory;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
@@ -31,8 +32,6 @@ import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.util.*;
-import java.util.logging.Level;
-import liquibase.logging.Logger;
 
 class XMLChangeLogSAXHandler extends DefaultHandler {
 

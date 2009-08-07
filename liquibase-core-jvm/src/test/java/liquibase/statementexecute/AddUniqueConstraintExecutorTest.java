@@ -2,7 +2,6 @@ package liquibase.statementexecute;
 
 import liquibase.database.*;
 import liquibase.database.core.*;
-import liquibase.test.TestContext;
 import liquibase.test.DatabaseTestContext;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.CreateTableStatement;

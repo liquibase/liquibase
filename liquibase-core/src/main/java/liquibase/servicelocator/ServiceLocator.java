@@ -1,13 +1,12 @@
 package liquibase.servicelocator;
 
-import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ServiceNotFoundException;
+import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.logging.Logger;
+import liquibase.logging.core.DefaultLogger;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StringUtils;
-import liquibase.logging.LogFactory;
-import liquibase.logging.Logger;
-import liquibase.logging.core.DefaultLogger;
 
 import java.io.File;
 import java.io.IOException;

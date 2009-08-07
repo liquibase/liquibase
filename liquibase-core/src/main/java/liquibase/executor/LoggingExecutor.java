@@ -6,9 +6,9 @@ import liquibase.exception.DatabaseException;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.statement.CallableSqlStatement;
 import liquibase.statement.SqlStatement;
-import liquibase.statement.core.SelectFromDatabaseChangeLogLockStatement;
-import liquibase.statement.core.LockDatabaseChangeLogStatement;
 import liquibase.statement.core.GetNextChangeSetSequenceValueStatement;
+import liquibase.statement.core.LockDatabaseChangeLogStatement;
+import liquibase.statement.core.SelectFromDatabaseChangeLogLockStatement;
 import liquibase.util.StreamUtil;
 
 import java.io.IOException;

@@ -5,9 +5,9 @@ import liquibase.database.DataType;
 import liquibase.database.DatabaseConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.ExecutorService;
+import liquibase.logging.LogFactory;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.util.StringUtils;
-import liquibase.logging.LogFactory;
 
 import java.sql.Types;
 import java.text.ParseException;

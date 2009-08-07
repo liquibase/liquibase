@@ -3,14 +3,14 @@ package liquibase.lockservice;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LockException;
-import liquibase.executor.ExecutorService;
 import liquibase.executor.Executor;
+import liquibase.executor.ExecutorService;
+import liquibase.logging.LogFactory;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.LockDatabaseChangeLogStatement;
 import liquibase.statement.core.SelectFromDatabaseChangeLogLockStatement;
 import liquibase.statement.core.UnlockDatabaseChangeLogStatement;
-import liquibase.logging.LogFactory;
 
 import java.text.DateFormat;
 import java.util.ArrayList;

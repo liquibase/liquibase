@@ -2,18 +2,16 @@ package liquibase.change.core;
 
 import liquibase.change.AbstractSQLChange;
 import liquibase.change.ChangeMetaData;
-import liquibase.change.ChangeProperty;
 import liquibase.change.CheckSum;
 import liquibase.exception.SetupException;
+import liquibase.logging.LogFactory;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StreamUtil;
-import liquibase.logging.LogFactory;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import liquibase.logging.Logger;
 
 /**
  * Represents a Change for custom SQL stored in a File.

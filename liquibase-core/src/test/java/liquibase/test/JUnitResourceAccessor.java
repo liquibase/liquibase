@@ -17,11 +17,10 @@ public class JUnitResourceAccessor implements ResourceAccessor {
     public JUnitResourceAccessor() throws Exception {
         File srcDir = new File(TestContext.getInstance().findCoreProjectRoot(), "src");
         File integrationClassesDir = new File(TestContext.getInstance().findIntegrationTestProjectRoot(), "target/classes");
-        classLoader = new URLClassLoader(new URL[]{
+         classLoader = new URLClassLoader(new URL[]{
                 integrationClassesDir.toURL(),
                 new File(srcDir, "test/java").toURL(),
                 new File(System.getProperty("java.io.tmpdir")).toURL(),
-
         });
 
     }

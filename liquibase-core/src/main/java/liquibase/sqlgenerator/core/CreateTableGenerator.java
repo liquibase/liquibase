@@ -3,6 +3,7 @@ package liquibase.sqlgenerator.core;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.exception.ValidationErrors;
+import liquibase.logging.LogFactory;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGenerator;
@@ -11,10 +12,8 @@ import liquibase.statement.ForeignKeyConstraint;
 import liquibase.statement.UniqueConstraint;
 import liquibase.statement.core.CreateTableStatement;
 import liquibase.util.StringUtils;
-import liquibase.logging.LogFactory;
 
 import java.util.Iterator;
-import java.util.logging.Level;
 
 public class CreateTableGenerator implements SqlGenerator<CreateTableStatement> {
     public int getPriority() {
