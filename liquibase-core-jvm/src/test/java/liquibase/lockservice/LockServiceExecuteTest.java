@@ -12,6 +12,7 @@ import liquibase.statement.core.DropTableStatement;
 import liquibase.test.DatabaseTest;
 import liquibase.test.DatabaseTestTemplate;
 import liquibase.test.TestContext;
+import liquibase.test.DatabaseTestContext;
 import org.junit.After;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -35,9 +36,9 @@ public class LockServiceExecuteTest {
 //                    return;
 //                }
                 
-                String url = TestContext.getInstance().getTestUrl(database);
+                String url = DatabaseTestContext.getInstance().getTestUrl(database);
                 System.out.println(url);
-                DatabaseConnection connection2 = TestContext.getInstance().openDatabaseConnection(url);
+                DatabaseConnection connection2 = DatabaseTestContext.getInstance().openDatabaseConnection(url);
                 Database database2 = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(connection2);
 
                 assertTrue(LockService.getInstance(database).acquireLock());

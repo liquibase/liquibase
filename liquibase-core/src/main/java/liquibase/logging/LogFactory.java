@@ -14,7 +14,7 @@ public class LogFactory {
         if (!loggers.containsKey(name)) {
             Logger value;
             try {
-                value = (Logger) ServiceLocator.getInstance().createInstance(Logger.class);
+                value = (Logger) ServiceLocator.getInstance().newInstance(Logger.class);
             } catch (Exception e) {
                 throw new ServiceNotFoundException(e);
             }

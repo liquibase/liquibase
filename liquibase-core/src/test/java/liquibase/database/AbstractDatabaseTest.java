@@ -1,8 +1,6 @@
 package liquibase.database;
 
 import liquibase.change.ColumnConfig;
-import liquibase.test.TestContext;
-import liquibase.exception.DatabaseException;
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -21,11 +19,6 @@ public abstract class AbstractDatabaseTest {
 
     protected AbstractDatabaseTest(AbstractDatabase database) throws Exception {
         this.database = database;
-        TestContext context = TestContext.getInstance();
-        DatabaseConnection connection = context.getConnection(context.getTestUrl(database));
-        if (connection != null) {
-            database.setConnection(connection);
-        }
     }
 
     public AbstractDatabase getDatabase() {
@@ -116,15 +109,15 @@ public abstract class AbstractDatabaseTest {
         assertEquals("schemaName.tableName", database.escapeTableName("schemaName", "tableName"));
     }
 
-    @Test
-    public void getColumnType_javaTypes() throws SQLException {
-        Database database = getDatabase();
-        DatabaseConnection connection = database.getConnection();
-        if (connection != null) {
-            ((JdbcConnection) connection).getUnderlyingConnection().rollback();
-            assertEquals(database.getDateType().getDataTypeName().toUpperCase(), database.getColumnType("java.sql.Types.DATE", false).toUpperCase());
-            assertEquals(database.getBooleanType().getDataTypeName().toUpperCase(), database.getColumnType("java.sql.Types.BOOLEAN", false).toUpperCase());
-            assertEquals("VARCHAR(255)", database.getColumnType("java.sql.Types.VARCHAR(255)", false).toUpperCase().replaceAll("VARCHAR2", "VARCHAR"));
-        }
-    }
+//    @Test
+//    public void getColumnType_javaTypes() throws SQLException {
+//        Database database = getDatabase();
+//        DatabaseConnection connection = database.getConnection();
+//        if (connection != null) {
+//            ((JdbcConnection) connection).getUnderlyingConnection().rollback();
+//            assertEquals(database.getDateType().getDataTypeName().toUpperCase(), database.getColumnType("java.sql.Types.DATE", false).toUpperCase());
+//            assertEquals(database.getBooleanType().getDataTypeName().toUpperCase(), database.getColumnType("java.sql.Types.BOOLEAN", false).toUpperCase());
+//            assertEquals("VARCHAR(255)", database.getColumnType("java.sql.Types.VARCHAR(255)", false).toUpperCase().replaceAll("VARCHAR2", "VARCHAR"));
+//        }
+//    }
 }

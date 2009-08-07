@@ -12,7 +12,7 @@ import java.util.Set;
 
 public class DatabaseTestTemplate {
     public void testOnAvailableDatabases(DatabaseTest test) throws Exception {
-        test(test, TestContext.getInstance().getAvailableDatabases());
+        test(test, DatabaseTestContext.getInstance().getAvailableDatabases());
     }
 
     public void testOnAllDatabases(DatabaseTest test) throws Exception {

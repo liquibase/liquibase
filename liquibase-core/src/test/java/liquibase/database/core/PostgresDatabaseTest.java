@@ -37,43 +37,43 @@ public class PostgresDatabaseTest extends AbstractDatabaseTest {
     @Override
     @Test
     public void getBooleanType() {
-        assertEquals(new DataType("BOOLEAN", false), getDatabase().getBooleanType());
+        Assert.assertEquals(new DataType("BOOLEAN", false), getDatabase().getBooleanType());
     }
 
     @Override
     @Test
     public void getCurrencyType() {
-        assertEquals(new DataType("DECIMAL", true), getDatabase().getCurrencyType());
+        Assert.assertEquals(new DataType("DECIMAL", true), getDatabase().getCurrencyType());
     }
 
     @Override
     @Test
     public void getUUIDType() {
-        assertEquals(new DataType("CHAR(36)", false), getDatabase().getUUIDType());
+        Assert.assertEquals(new DataType("CHAR(36)", false), getDatabase().getUUIDType());
     }
 
     @Override
     @Test
     public void getClobType() {
-        assertEquals(new DataType("TEXT", true), getDatabase().getClobType());
+        Assert.assertEquals(new DataType("TEXT", true), getDatabase().getClobType());
     }
 
     @Override
     @Test
     public void getDateType() {
-        assertEquals(new DataType("DATE", false), getDatabase().getDateType());
+        Assert.assertEquals(new DataType("DATE", false), getDatabase().getDateType());
     }
 
     @Override
     @Test
     public void getDateTimeType() {
-        assertEquals(new DataType("TIMESTAMP WITH TIME ZONE", false), getDatabase().getDateTimeType());
+        Assert.assertEquals(new DataType("TIMESTAMP WITH TIME ZONE", false), getDatabase().getDateTimeType());
     }
 
     @Override
     @Test
     public void getCurrentDateTimeFunction() {
-        assertEquals("NOW()", getDatabase().getCurrentDateTimeFunction());
+        Assert.assertEquals("NOW()", getDatabase().getCurrentDateTimeFunction());
     }
 
     @Test
@@ -96,12 +96,12 @@ public class PostgresDatabaseTest extends AbstractDatabaseTest {
 
     @Test
     public void getColumnType_BigSerial_AutoIncrement() {
-        assertEquals("bigserial", getDatabase().getColumnType("bigserial", Boolean.TRUE));
+        Assert.assertEquals("bigserial", getDatabase().getColumnType("bigserial", Boolean.TRUE));
     }
 
     @Test
     public void getColumnType_BigInt_AutoIncrement() {
-        assertEquals("bigserial", getDatabase().getColumnType("bigint", Boolean.TRUE));
+        Assert.assertEquals("bigserial", getDatabase().getColumnType("bigint", Boolean.TRUE));
     }
 
     @Override

@@ -37,43 +37,43 @@ public class OracleDatabaseTest extends AbstractDatabaseTest {
     @Override
     @Test
     public void getBooleanType() {
-        assertEquals(new DataType("NUMBER(1)", false), getDatabase().getBooleanType());
+        Assert.assertEquals(new DataType("NUMBER(1)", false), getDatabase().getBooleanType());
     }
 
     @Override
     @Test
     public void getCurrencyType() {
-        assertEquals(new DataType("NUMBER(15, 2)", false), getDatabase().getCurrencyType());
+        Assert.assertEquals(new DataType("NUMBER(15, 2)", false), getDatabase().getCurrencyType());
     }
 
     @Override
     @Test
     public void getUUIDType() {
-        assertEquals(new DataType("RAW(16)", false), getDatabase().getUUIDType());
+        Assert.assertEquals(new DataType("RAW(16)", false), getDatabase().getUUIDType());
     }
 
     @Override
     @Test
     public void getClobType() {
-        assertEquals(new DataType("CLOB", false), getDatabase().getClobType());
+        Assert.assertEquals(new DataType("CLOB", false), getDatabase().getClobType());
     }
 
     @Override
     @Test
     public void getDateType() {
-        assertEquals(new DataType("DATE", false), getDatabase().getDateType());
+        Assert.assertEquals(new DataType("DATE", false), getDatabase().getDateType());
     }
 
     @Override
     @Test
     public void getDateTimeType() {
-        assertEquals(new DataType("TIMESTAMP", true), getDatabase().getDateTimeType());
+        Assert.assertEquals(new DataType("TIMESTAMP", true), getDatabase().getDateTimeType());
     }
 
     @Override
     @Test
     public void getCurrentDateTimeFunction() {
-        assertEquals("SYSDATE", getDatabase().getCurrentDateTimeFunction());
+        Assert.assertEquals("SYSDATE", getDatabase().getCurrentDateTimeFunction());
     }
 
     public void testGetDefaultDriver() {

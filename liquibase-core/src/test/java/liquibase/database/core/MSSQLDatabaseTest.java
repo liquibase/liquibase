@@ -37,43 +37,43 @@ public class MSSQLDatabaseTest extends AbstractDatabaseTest {
     @Override
     @Test
     public void getBooleanType() {
-        assertEquals(new DataType("BIT", false), getDatabase().getBooleanType());
+        Assert.assertEquals(new DataType("BIT", false), getDatabase().getBooleanType());
     }
 
     @Override
     @Test
     public void getCurrencyType() {
-        assertEquals(new DataType("MONEY", false), getDatabase().getCurrencyType());
+        Assert.assertEquals(new DataType("MONEY", false), getDatabase().getCurrencyType());
     }
 
     @Override
     @Test
     public void getUUIDType() {
-        assertEquals(new DataType("UNIQUEIDENTIFIER", false), getDatabase().getUUIDType());
+        Assert.assertEquals(new DataType("UNIQUEIDENTIFIER", false), getDatabase().getUUIDType());
     }
 
     @Override
     @Test
     public void getClobType() {
-        assertEquals(new DataType("TEXT", true), getDatabase().getClobType());
+        Assert.assertEquals(new DataType("TEXT", true), getDatabase().getClobType());
     }
 
     @Override
     @Test
     public void getDateType() {
-        assertEquals(new DataType("SMALLDATETIME", false), getDatabase().getDateType());
+        Assert.assertEquals(new DataType("SMALLDATETIME", false), getDatabase().getDateType());
     }
 
     @Override
     @Test
     public void getDateTimeType() {
-        assertEquals(new DataType("DATETIME", false), getDatabase().getDateTimeType());
+        Assert.assertEquals(new DataType("DATETIME", false), getDatabase().getDateTimeType());
     }
 
     @Override
     @Test
     public void getCurrentDateTimeFunction() {
-        assertEquals("GETDATE()", getDatabase().getCurrentDateTimeFunction());
+        Assert.assertEquals("GETDATE()", getDatabase().getCurrentDateTimeFunction());
     }
 
     @Test
@@ -89,7 +89,7 @@ public class MSSQLDatabaseTest extends AbstractDatabaseTest {
     @Test
     public void escapeTableName_noSchema() {
         Database database = new MSSQLDatabase();
-        assertEquals("[tableName]", database.escapeTableName(null, "tableName"));
+        assertEquals("[dbo].[tableName]", database.escapeTableName(null, "tableName"));
     }
 
     @Override

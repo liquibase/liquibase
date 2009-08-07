@@ -26,28 +26,28 @@ public class CacheDatabaseTest extends AbstractDatabaseTest {
 
 	@Test
 	public void getFalseBooleanValue() {
-		assertEquals("0", database.getFalseBooleanValue());
+		Assert.assertEquals("0", database.getFalseBooleanValue());
 	}
 
 	@Test
 	public void getTrueBooleanValue() {
-		assertEquals("1", database.getTrueBooleanValue());
+		Assert.assertEquals("1", database.getTrueBooleanValue());
 	}
 
 	@Test
 	public void getLineComment() {
-		assertEquals("--", database.getLineComment());
+		Assert.assertEquals("--", database.getLineComment());
 	}
 
 	@Test
 	public void getDefaultDriver() {
-		assertEquals("com.intersys.jdbc.CacheDriver", 
+		Assert.assertEquals("com.intersys.jdbc.CacheDriver",
 				database.getDefaultDriver("jdbc:Cache://127.0.0.1:56773/TESTMIGRATE"));
 	}
 
 	@Test
 	public void getTypeName() {
-		assertEquals("cache", database.getTypeName());
+		Assert.assertEquals("cache", database.getTypeName());
 	}
 
 	@Override
@@ -59,43 +59,43 @@ public class CacheDatabaseTest extends AbstractDatabaseTest {
 	@Override
     @Test
 	public void getBlobType() {
-		assertEquals(new DataType("LONGVARBINARY", true), database.getBlobType());
+		Assert.assertEquals(new DataType("LONGVARBINARY", true), database.getBlobType());
 	}
 
 	@Override
     @Test
 	public void getBooleanType() {
-		assertEquals(new DataType("INTEGER", true), database.getBooleanType());
+		Assert.assertEquals(new DataType("INTEGER", true), database.getBooleanType());
 	}
 
 	@Override
     @Test
 	public void getClobType() {
-		assertEquals(new DataType("LONGVARCHAR", true), database.getClobType());
+		Assert.assertEquals(new DataType("LONGVARCHAR", true), database.getClobType());
 	}
 
 	@Override
     @Test
 	public void getCurrencyType() {
-		assertEquals(new DataType("MONEY", true), database.getCurrencyType());
+		Assert.assertEquals(new DataType("MONEY", true), database.getCurrencyType());
 	}
 
 	@Override
     @Test
 	public void getCurrentDateTimeFunction() {
-		assertEquals("SYSDATE", database.getCurrentDateTimeFunction());
+		Assert.assertEquals("SYSDATE", database.getCurrentDateTimeFunction());
 	}
 
 	@Override
     @Test
 	public void getDateTimeType() {
-		assertEquals(new DataType("DATETIME", false), database.getDateTimeType());
+		Assert.assertEquals(new DataType("DATETIME", false), database.getDateTimeType());
 	}
 
 	@Override
     @Test
 	public void getUUIDType() {
-		assertEquals(new DataType("CHAR(36)", false), database.getUUIDType());
+		Assert.assertEquals(new DataType("CHAR(36)", false), database.getUUIDType());
 	}
 
 	@Override
