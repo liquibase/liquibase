@@ -119,27 +119,6 @@
       </plugins>
     </pluginManagement>
 
-<!--
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-javadoc-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>api</id>
-            <phase>prepare-package</phase>
-            <goals>
-              <goal>aggregate</goal>
-            </goals>
-            <configuration>
-              <excludePackageNames>org.liquibase.maven.plugins</excludePackageNames>
-              <encoding>UTF-8</encoding>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-    </plugins>
--->
   </build>
 
   <reporting>
@@ -149,25 +128,15 @@
         <artifactId>maven-project-info-reports-plugin</artifactId>
         <version>2.1.2</version>
         <configuration>
-          <dependencyLocationEnabled>false</dependencyLocationEnabled>
+          <dependencyLocationsEnabled>false</dependencyLocationsEnabled>
           <dependencyDetailsEnabled>false</dependencyDetailsEnabled>
         </configuration>
       </plugin>
     </plugins>
   </reporting>
 
-  <distributionManagement>
-    <repository>
-      <id>releases</id>
-      <name>Nexus Releases</name>
-      <url>http://localhost:8081/nexus/content/repositories/releases</url>
-    </repository>
-    <snapshotRepository>
-     <id>snapshots</id>
-      <name>Nexus Snapshots</name>
-      <url>http://localhost:8081/nexus/content/repositories/snapshots</url>
-      <uniqueVersion>false</uniqueVersion>
-    </snapshotRepository>
-  </distributionManagement>
+  <!--
+      TODO: add distributionManagement element for deployment of releases to maven repo?
+   -->
 
 </project>
