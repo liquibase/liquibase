@@ -1,7 +1,5 @@
 package liquibase.statement.core;
 
-import liquibase.statement.core.DropSequenceStatement;
-
 public class DropSequenceStatementTest extends AbstractSqStatementTest<DropSequenceStatement> {
 
     @Override

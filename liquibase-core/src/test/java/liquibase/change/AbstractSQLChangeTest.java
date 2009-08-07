@@ -1,9 +1,9 @@
 package liquibase.change;
 
-import static org.junit.Assert.assertEquals;
+import liquibase.change.core.RawSQLChange;
+import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
-import liquibase.change.core.RawSQLChange;
 
 public class AbstractSQLChangeTest extends AbstractChangeTest {
 

@@ -1,12 +1,11 @@
 package liquibase.database.core;
 
-import static org.junit.Assert.*;
-import org.junit.Test;
-import org.junit.Assert;
-import liquibase.database.core.OracleDatabase;
 import liquibase.database.AbstractDatabaseTest;
 import liquibase.database.DataType;
 import liquibase.database.Database;
+import org.junit.Assert;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
  * Tests for {@link liquibase.database.core.OracleDatabase}.

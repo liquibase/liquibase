@@ -1,7 +1,5 @@
 package liquibase.statement.core;
 
-import liquibase.statement.core.CreateTableStatement;
-
 public class CreateTableStatementTest extends AbstractSqStatementTest<CreateTableStatement> {
 
     @Override

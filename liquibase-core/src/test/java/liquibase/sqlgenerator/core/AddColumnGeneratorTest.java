@@ -1,19 +1,13 @@
 package liquibase.sqlgenerator.core;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import liquibase.database.core.MySQLDatabase;
-import liquibase.database.core.OracleDatabase;
-import liquibase.database.core.SQLiteDatabase;
-import liquibase.database.core.CacheDatabase;
 import liquibase.database.core.*;
-import liquibase.statement.core.AddColumnStatement;
+import liquibase.sqlgenerator.AbstractSqlGeneratorTest;
+import liquibase.sqlgenerator.MockSqlGeneratorChain;
+import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.statement.AutoIncrementConstraint;
 import liquibase.statement.PrimaryKeyConstraint;
-import liquibase.sqlgenerator.core.AddColumnGenerator;
-import liquibase.sqlgenerator.AbstractSqlGeneratorTest;
-import liquibase.sqlgenerator.SqlGenerator;
-import liquibase.sqlgenerator.MockSqlGeneratorChain;
+import liquibase.statement.core.AddColumnStatement;
+import static org.junit.Assert.*;
 
 public class AddColumnGeneratorTest extends AbstractSqlGeneratorTest<AddColumnStatement> {
 

@@ -1,7 +1,7 @@
 package liquibase.change;
 
-import org.junit.Test;
 import static org.junit.Assert.*;
+import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
 

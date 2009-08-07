@@ -3,15 +3,12 @@ package liquibase.snapshot.core;
 import liquibase.database.Database;
 import liquibase.database.core.InformixDatabase;
 import liquibase.database.structure.Column;
-import liquibase.diff.DiffStatusListener;
 import liquibase.exception.DatabaseException;
-import liquibase.snapshot.core.JdbcDatabaseSnapshotGenerator;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 public class InformixDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerator {
     

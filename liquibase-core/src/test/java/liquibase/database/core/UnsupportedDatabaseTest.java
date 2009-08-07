@@ -1,7 +1,6 @@
 package liquibase.database.core;
 
 import junit.framework.TestCase;
-import liquibase.database.core.UnsupportedDatabase;
 import liquibase.database.Database;
 
 public class UnsupportedDatabaseTest extends TestCase {

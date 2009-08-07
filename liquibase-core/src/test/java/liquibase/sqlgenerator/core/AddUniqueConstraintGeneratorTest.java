@@ -1,15 +1,10 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
-import liquibase.database.core.InformixDatabase;
-import liquibase.database.core.MSSQLDatabase;
-import liquibase.database.core.SQLiteDatabase;
-import liquibase.database.core.SybaseASADatabase;
-import liquibase.database.core.SybaseDatabase;
-import liquibase.statement.core.AddUniqueConstraintStatement;
-import liquibase.sqlgenerator.core.AddUniqueConstraintGenerator;
+import liquibase.database.core.*;
 import liquibase.sqlgenerator.AbstractSqlGeneratorTest;
 import liquibase.sqlgenerator.SqlGenerator;
+import liquibase.statement.core.AddUniqueConstraintStatement;
 
 public class AddUniqueConstraintGeneratorTest extends AbstractSqlGeneratorTest<AddUniqueConstraintStatement> {
     protected static final String TABLE_NAME = "AddUQTest";

@@ -1,25 +1,12 @@
 package liquibase.sqlgenerator.core;
 
-import static org.junit.Assert.assertEquals;
-
-import java.util.Set;
-
-import liquibase.change.core.AddAutoIncrementChange;
 import liquibase.database.Database;
 import liquibase.database.core.DerbyDatabase;
 import liquibase.database.core.HsqlDatabase;
 import liquibase.database.core.MSSQLDatabase;
-import liquibase.database.structure.Column;
-import liquibase.database.structure.DatabaseObject;
-import liquibase.database.structure.Schema;
-import liquibase.database.structure.Table;
-import liquibase.statement.core.AddAutoIncrementStatement;
-import liquibase.test.TestContext;
-import liquibase.sqlgenerator.core.AddAutoIncrementGenerator;
 import liquibase.sqlgenerator.AbstractSqlGeneratorTest;
 import liquibase.sqlgenerator.SqlGenerator;
-
-import org.junit.Test;
+import liquibase.statement.core.AddAutoIncrementStatement;
 
 public class AddAutoIncrementGeneratorTest extends AbstractSqlGeneratorTest<AddAutoIncrementStatement> {
 

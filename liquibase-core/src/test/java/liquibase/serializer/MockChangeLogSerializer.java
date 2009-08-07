@@ -1,9 +1,9 @@
 package liquibase.serializer;
 
-import liquibase.changelog.DatabaseChangeLog;
-import liquibase.changelog.ChangeSet;
 import liquibase.change.Change;
 import liquibase.change.ColumnConfig;
+import liquibase.changelog.ChangeSet;
+import liquibase.changelog.DatabaseChangeLog;
 
 public class MockChangeLogSerializer implements ChangeLogSerializer {
 

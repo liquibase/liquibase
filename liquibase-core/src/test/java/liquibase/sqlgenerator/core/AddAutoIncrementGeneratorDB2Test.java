@@ -1,8 +1,7 @@
 package liquibase.sqlgenerator.core;
 
-import liquibase.database.core.DB2Database;
 import liquibase.database.Database;
-import liquibase.sqlgenerator.core.AddAutoIncrementGeneratorDB2;
+import liquibase.database.core.DB2Database;
 
 public class AddAutoIncrementGeneratorDB2Test extends AddAutoIncrementGeneratorTest {
 

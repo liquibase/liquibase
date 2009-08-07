@@ -6,13 +6,12 @@ import liquibase.database.core.SQLiteDatabase;
 import liquibase.database.structure.*;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.ExecutorService;
+import liquibase.logging.LogFactory;
+import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.statement.core.GetViewDefinitionStatement;
 import liquibase.statement.core.SelectSequencesStatement;
 import liquibase.util.StringUtils;
-import liquibase.snapshot.core.JdbcDatabaseSnapshotGenerator;
-import liquibase.snapshot.DatabaseSnapshot;
-import liquibase.logging.LogFactory;
 
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;

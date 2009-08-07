@@ -3,11 +3,12 @@ package liquibase.integration.servlet;
 import liquibase.Liquibase;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.JdbcConnection;
-import liquibase.resource.CompositeResourceAccessor;
-import liquibase.resource.ResourceAccessor;
-import liquibase.resource.*;
-import liquibase.util.NetUtil;
 import liquibase.logging.LogFactory;
+import liquibase.resource.ClassLoaderResourceAccessor;
+import liquibase.resource.CompositeResourceAccessor;
+import liquibase.resource.FileSystemResourceAccessor;
+import liquibase.resource.ResourceAccessor;
+import liquibase.util.NetUtil;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -15,8 +16,6 @@ import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.sql.DataSource;
 import java.sql.Connection;
-import java.util.logging.Handler;
-import java.util.logging.LogRecord;
 
 /**
  * Servlet listener than can be added to web.xml to allow LiquiBase to run on every application server startup.

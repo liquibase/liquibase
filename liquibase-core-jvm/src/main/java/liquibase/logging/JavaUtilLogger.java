@@ -3,11 +3,11 @@ package liquibase.logging;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.logging.core.AbstractLogger;
 
-import java.util.logging.Level;
-import java.util.logging.Handler;
-import java.util.logging.FileHandler;
-import java.util.logging.SimpleFormatter;
 import java.io.IOException;
+import java.util.logging.FileHandler;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.SimpleFormatter;
 
 public class JavaUtilLogger extends AbstractLogger {
 

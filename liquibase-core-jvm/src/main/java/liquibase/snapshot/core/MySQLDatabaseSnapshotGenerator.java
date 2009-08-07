@@ -4,15 +4,16 @@ import liquibase.database.Database;
 import liquibase.database.JdbcConnection;
 import liquibase.database.core.MySQLDatabase;
 import liquibase.database.structure.Column;
-import liquibase.diff.DiffStatusListener;
 import liquibase.exception.DatabaseException;
-import liquibase.snapshot.core.JdbcDatabaseSnapshotGenerator;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.ParseException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class MySQLDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerator {
 	

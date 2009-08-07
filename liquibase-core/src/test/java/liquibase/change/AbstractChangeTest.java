@@ -1,20 +1,13 @@
 package liquibase.change;
 
 import liquibase.database.Database;
-import liquibase.database.core.OracleDatabase;
 import liquibase.exception.ValidationErrors;
 import liquibase.serializer.core.string.StringChangeLogSerializer;
-import liquibase.sql.visitor.SqlVisitor;
-import liquibase.statement.core.RawSqlStatement;
 import liquibase.statement.SqlStatement;
 import liquibase.test.TestContext;
-import liquibase.util.StreamUtil;
-import static org.easymock.classextension.EasyMock.createMock;
-import static org.easymock.classextension.EasyMock.replay;
 import static org.junit.Assert.*;
 import org.junit.Test;
 
-import java.io.StringWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.math.BigInteger;

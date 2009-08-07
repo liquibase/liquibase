@@ -2,9 +2,9 @@ package liquibase.statement.core;
 
 import liquibase.database.Database;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
-import liquibase.test.TestContext;
 import liquibase.statement.SqlStatement;
-import static org.junit.Assert.fail;
+import liquibase.test.TestContext;
+import static org.junit.Assert.*;
 import org.junit.Test;
 
 public abstract class AbstractSqStatementTest<SqlStatementUnderTest extends SqlStatement> {

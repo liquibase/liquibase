@@ -1,12 +1,7 @@
 package liquibase.change.core;
 
-import liquibase.database.Database;
-import liquibase.statement.core.CreateViewStatement;
-import liquibase.statement.SqlStatement;
-import liquibase.change.core.CreateViewChange;
 import liquibase.change.AbstractChangeTest;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import org.junit.Test;
 
 public class CreateViewChangeTest extends AbstractChangeTest {

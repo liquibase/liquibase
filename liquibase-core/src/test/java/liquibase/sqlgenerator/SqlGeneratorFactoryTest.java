@@ -4,18 +4,18 @@ import liquibase.database.Database;
 import liquibase.database.core.H2Database;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
-import liquibase.statement.core.AddAutoIncrementStatement;
-import liquibase.statement.SqlStatement;
-import liquibase.sqlgenerator.core.AddColumnGenerator;
 import liquibase.sqlgenerator.core.AddAutoIncrementGenerator;
-import liquibase.sqlgenerator.core.AddAutoIncrementGeneratorHsql;
 import liquibase.sqlgenerator.core.AddAutoIncrementGeneratorDB2;
+import liquibase.sqlgenerator.core.AddAutoIncrementGeneratorHsql;
+import liquibase.sqlgenerator.core.AddColumnGenerator;
+import liquibase.statement.SqlStatement;
+import liquibase.statement.core.AddAutoIncrementStatement;
+import org.junit.After;
 import static org.junit.Assert.*;
 import org.junit.Test;
-import org.junit.After;
 
-import java.util.SortedSet;
 import java.util.Collection;
+import java.util.SortedSet;
 
 public class SqlGeneratorFactoryTest {
 

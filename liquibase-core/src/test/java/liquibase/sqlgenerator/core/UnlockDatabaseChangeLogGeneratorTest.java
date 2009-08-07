@@ -1,8 +1,7 @@
 package liquibase.sqlgenerator.core;
 
-import liquibase.statement.core.UnlockDatabaseChangeLogStatement;
-import liquibase.sqlgenerator.core.UnlockDatabaseChangeLogGenerator;
 import liquibase.sqlgenerator.AbstractSqlGeneratorTest;
+import liquibase.statement.core.UnlockDatabaseChangeLogStatement;
 
 public class UnlockDatabaseChangeLogGeneratorTest extends AbstractSqlGeneratorTest<UnlockDatabaseChangeLogStatement> {
 

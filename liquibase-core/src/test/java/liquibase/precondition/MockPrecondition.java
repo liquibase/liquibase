@@ -1,9 +1,9 @@
 package liquibase.precondition;
 
-import liquibase.database.Database;
 import liquibase.changelog.DatabaseChangeLog;
-import liquibase.exception.PreconditionFailedException;
+import liquibase.database.Database;
 import liquibase.exception.PreconditionErrorException;
+import liquibase.exception.PreconditionFailedException;
 
 public class MockPrecondition implements Precondition {
     public String getName() {

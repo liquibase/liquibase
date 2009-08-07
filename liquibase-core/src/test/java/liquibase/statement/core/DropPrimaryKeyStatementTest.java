@@ -1,7 +1,5 @@
 package liquibase.statement.core;
 
-import liquibase.statement.core.DropPrimaryKeyStatement;
-
 public class DropPrimaryKeyStatementTest extends AbstractSqStatementTest<DropPrimaryKeyStatement> {
 
     @Override

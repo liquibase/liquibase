@@ -5,20 +5,13 @@ import liquibase.database.JdbcConnection;
 import liquibase.database.core.OracleDatabase;
 import liquibase.database.structure.Column;
 import liquibase.database.structure.Table;
-import liquibase.diff.DiffStatusListener;
+import liquibase.database.structure.UniqueConstraint;
 import liquibase.exception.DatabaseException;
 import liquibase.snapshot.DatabaseSnapshot;
-import liquibase.snapshot.core.JdbcDatabaseSnapshotGenerator;
-import liquibase.database.structure.UniqueConstraint;
 
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 public class OracleDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerator {
     public boolean supports(Database database) {

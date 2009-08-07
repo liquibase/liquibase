@@ -1,16 +1,14 @@
 package liquibase.change.core;
 
-import liquibase.database.*;
+import liquibase.change.AbstractChangeTest;
+import liquibase.database.Database;
 import liquibase.database.core.*;
-import liquibase.statement.*;
-import liquibase.statement.core.SetNullableStatement;
-import liquibase.statement.core.CreateSequenceStatement;
+import liquibase.statement.SqlStatement;
 import liquibase.statement.core.AddAutoIncrementStatement;
 import liquibase.statement.core.AddDefaultValueStatement;
-import liquibase.change.core.AddAutoIncrementChange;
-import liquibase.change.AbstractChangeTest;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import liquibase.statement.core.CreateSequenceStatement;
+import liquibase.statement.core.SetNullableStatement;
+import static org.junit.Assert.*;
 import org.junit.Test;
 
 public class AddAutoIncrementChangeTest extends AbstractChangeTest {

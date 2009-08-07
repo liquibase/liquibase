@@ -1,11 +1,11 @@
 package liquibase;
 
-import liquibase.database.*;
-import liquibase.database.core.PostgresDatabase;
+import liquibase.database.Database;
+import liquibase.database.DatabaseConnection;
+import liquibase.database.DatabaseFactory;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.OracleDatabase;
-import liquibase.executor.LoggingExecutor;
-import liquibase.executor.ExecutorService;
+import liquibase.database.core.PostgresDatabase;
 import liquibase.exception.DatabaseException;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.ResourceAccessor;
@@ -17,7 +17,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.InputStream;
-import java.io.PrintWriter;
 import java.net.URL;
 import java.sql.DatabaseMetaData;
 import java.util.Enumeration;

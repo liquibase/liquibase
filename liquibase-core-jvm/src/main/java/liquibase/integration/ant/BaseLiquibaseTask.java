@@ -6,10 +6,12 @@ import liquibase.database.DatabaseFactory;
 import liquibase.database.JdbcConnection;
 import liquibase.database.core.HibernateDatabase;
 import liquibase.exception.DatabaseException;
-import liquibase.resource.CompositeResourceAccessor;
-import liquibase.resource.ResourceAccessor;
-import liquibase.resource.FileSystemResourceAccessor;
+import liquibase.logging.JavaUtilLogger;
 import liquibase.logging.LogFactory;
+import liquibase.logging.Logger;
+import liquibase.resource.CompositeResourceAccessor;
+import liquibase.resource.FileSystemResourceAccessor;
+import liquibase.resource.ResourceAccessor;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.Task;
 import org.apache.tools.ant.types.Path;
@@ -26,9 +28,6 @@ import java.util.*;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
-
-import liquibase.logging.Logger;
-import liquibase.logging.JavaUtilLogger;
 
 /**
  * Base class for all Ant LiquiBase tasks.  This class sets up LiquiBase and defines parameters

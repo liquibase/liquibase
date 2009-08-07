@@ -1,8 +1,8 @@
 package liquibase.parser;
 
 import liquibase.changelog.DatabaseChangeLog;
-import liquibase.resource.ResourceAccessor;
 import liquibase.exception.ChangeLogParseException;
+import liquibase.resource.ResourceAccessor;
 
 import java.util.Map;
 

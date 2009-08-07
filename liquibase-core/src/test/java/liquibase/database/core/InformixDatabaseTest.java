@@ -1,7 +1,6 @@
 package liquibase.database.core;
 
 import junit.framework.TestCase;
-import liquibase.database.core.InformixDatabase;
 
 public class InformixDatabaseTest extends TestCase {
 	

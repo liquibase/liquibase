@@ -1,10 +1,9 @@
 package liquibase.change.core;
 
-import liquibase.database.core.MockDatabase;
-import liquibase.statement.core.DropTableStatement;
-import liquibase.statement.SqlStatement;
-import liquibase.change.core.DropTableChange;
 import liquibase.change.AbstractChangeTest;
+import liquibase.database.core.MockDatabase;
+import liquibase.statement.SqlStatement;
+import liquibase.statement.core.DropTableStatement;
 import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;

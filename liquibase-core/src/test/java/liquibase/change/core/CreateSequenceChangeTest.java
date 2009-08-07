@@ -1,15 +1,9 @@
 package liquibase.change.core;
 
-import liquibase.database.Database;
-import liquibase.statement.core.CreateSequenceStatement;
-import liquibase.statement.SqlStatement;
-import liquibase.change.core.CreateSequenceChange;
 import liquibase.change.AbstractChangeTest;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import liquibase.database.Database;
+import static org.junit.Assert.*;
 import org.junit.Test;
-
-import java.math.BigInteger;
 
 /**
  * Tests for {@link CreateSequenceChange}

@@ -1,24 +1,14 @@
 package liquibase.change.core;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
-import java.math.BigInteger;
-
 import liquibase.change.AbstractChangeTest;
 import liquibase.database.Database;
-import liquibase.database.core.CacheDatabase;
-import liquibase.database.core.DerbyDatabase;
-import liquibase.database.core.MSSQLDatabase;
-import liquibase.database.core.MockDatabase;
-import liquibase.database.core.MySQLDatabase;
-import liquibase.database.core.SQLiteDatabase;
-import liquibase.database.core.SybaseASADatabase;
-import liquibase.database.core.SybaseDatabase;
+import liquibase.database.core.*;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.AlterSequenceStatement;
-
+import static org.junit.Assert.*;
 import org.junit.Test;
+
+import java.math.BigInteger;
 
 /**
  * Tests for {@link AlterSequenceChange}

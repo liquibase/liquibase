@@ -7,21 +7,20 @@ import liquibase.database.DataType;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.structure.DatabaseObject;
-import liquibase.snapshot.DatabaseSnapshotGenerator;
-import liquibase.diff.DiffStatusListener;
 import liquibase.exception.*;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.statement.SqlStatement;
-import liquibase.snapshot.core.HibernateDatabaseSnapshotGenerator;
 import org.hibernate.cfg.AnnotationConfiguration;
 import org.hibernate.cfg.Configuration;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.Date;
+import java.sql.Time;
+import java.sql.Timestamp;
 import java.text.ParseException;
 import java.util.List;
-import java.util.Set;
 
 public class HibernateDatabase implements Database {
 

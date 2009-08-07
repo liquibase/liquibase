@@ -1,12 +1,10 @@
 package liquibase.sqlgenerator.core;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import liquibase.database.Database;
 import liquibase.database.core.InformixDatabase;
-import liquibase.statement.core.AddAutoIncrementStatement;
-import liquibase.sqlgenerator.core.AddAutoIncrementGeneratorInformix;
 import liquibase.sqlgenerator.MockSqlGeneratorChain;
+import liquibase.statement.core.AddAutoIncrementStatement;
+import static org.junit.Assert.*;
 
 public class AddAutoIncrementGeneratorInformixTest extends AddAutoIncrementGeneratorTest {
 

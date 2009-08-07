@@ -1,16 +1,15 @@
 package liquibase.changelog.filter;
 
+import liquibase.change.CheckSum;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.RanChangeSet;
 import liquibase.database.Database;
-import liquibase.executor.ExecutorService;
-import liquibase.executor.Executor;
 import liquibase.exception.DatabaseException;
+import liquibase.executor.Executor;
+import liquibase.executor.ExecutorService;
 import liquibase.statement.core.UpdateStatement;
-import liquibase.change.CheckSum;
 import static org.easymock.classextension.EasyMock.*;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import org.junit.Test;
 
 import java.util.ArrayList;

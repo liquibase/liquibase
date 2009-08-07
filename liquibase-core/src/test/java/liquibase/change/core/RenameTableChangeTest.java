@@ -1,15 +1,13 @@
 package liquibase.change.core;
 
-import liquibase.database.core.CacheDatabase;
+import liquibase.change.AbstractChangeTest;
 import liquibase.database.Database;
+import liquibase.database.core.CacheDatabase;
 import liquibase.database.core.FirebirdDatabase;
 import liquibase.database.core.MockDatabase;
-import liquibase.statement.core.RenameTableStatement;
 import liquibase.statement.SqlStatement;
-import liquibase.change.core.RenameTableChange;
-import liquibase.change.AbstractChangeTest;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import liquibase.statement.core.RenameTableStatement;
+import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 

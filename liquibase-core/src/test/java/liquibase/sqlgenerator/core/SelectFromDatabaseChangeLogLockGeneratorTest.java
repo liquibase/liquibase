@@ -1,8 +1,7 @@
 package liquibase.sqlgenerator.core;
 
-import liquibase.statement.core.SelectFromDatabaseChangeLogLockStatement;
-import liquibase.sqlgenerator.core.SelectFromDatabaseChangeLogLockGenerator;
 import liquibase.sqlgenerator.AbstractSqlGeneratorTest;
+import liquibase.statement.core.SelectFromDatabaseChangeLogLockStatement;
 
 public class SelectFromDatabaseChangeLogLockGeneratorTest extends AbstractSqlGeneratorTest<SelectFromDatabaseChangeLogLockStatement> {
     public SelectFromDatabaseChangeLogLockGeneratorTest() throws Exception {

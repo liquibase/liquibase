@@ -1,7 +1,5 @@
 package liquibase.statement.core;
 
-import liquibase.statement.core.RenameColumnStatement;
-
 public class RenameColumnStatementTest extends AbstractSqStatementTest<RenameColumnStatement> {
 
     @Override

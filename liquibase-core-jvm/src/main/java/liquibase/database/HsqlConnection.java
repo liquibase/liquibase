@@ -1,6 +1,5 @@
 package liquibase.database;
 
-import liquibase.database.JdbcConnection;
 import liquibase.exception.DatabaseException;
 
 import java.sql.Connection;

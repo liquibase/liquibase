@@ -1,10 +1,10 @@
 package liquibase.sqlgenerator;
 
 import liquibase.database.Database;
-import liquibase.executor.ExecutorService;
 import liquibase.exception.DatabaseException;
-import liquibase.statement.core.CreateTableStatement;
+import liquibase.executor.ExecutorService;
 import liquibase.statement.SqlStatement;
+import liquibase.statement.core.CreateTableStatement;
 import liquibase.test.TestContext;
 import static org.junit.Assert.*;
 import org.junit.Test;

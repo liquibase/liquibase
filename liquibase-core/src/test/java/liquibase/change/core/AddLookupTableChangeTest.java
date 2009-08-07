@@ -1,13 +1,11 @@
 package liquibase.change.core;
 
+import liquibase.change.AbstractChangeTest;
 import liquibase.database.Database;
 import liquibase.database.core.FirebirdDatabase;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.statement.SqlStatement;
-import liquibase.change.core.AddLookupTableChange;
-import liquibase.change.AbstractChangeTest;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class AddLookupTableChangeTest extends AbstractChangeTest {
 

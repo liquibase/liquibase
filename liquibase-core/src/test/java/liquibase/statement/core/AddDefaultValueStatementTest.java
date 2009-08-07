@@ -1,7 +1,5 @@
 package liquibase.statement.core;
 
-import liquibase.statement.core.AddDefaultValueStatement;
-
 public class AddDefaultValueStatementTest extends AbstractSqStatementTest<AddDefaultValueStatement> {
 
     @Override
