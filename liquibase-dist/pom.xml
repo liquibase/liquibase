@@ -101,7 +101,7 @@
                 <descriptor>src/main/resources/assembly/bin.xml</descriptor>
               </descriptors>
               <archive>
-                <manifestFile>../liquibase-core-jvm/src/main/resources/META-INF/MANIFEST.MF</manifestFile>
+                <manifestFile>../liquibase-core/src/main/resources/META-INF/MANIFEST.MF</manifestFile>
               </archive>
             </configuration>
           </execution>
