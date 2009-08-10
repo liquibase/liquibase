@@ -42,6 +42,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 
     private DatabaseChangeLog databaseChangeLog;
     private Change change;
+    private Stack changeSubObjects = new Stack();
     private Object nestedChangeObject;
     private StringBuffer text;
     private PreconditionContainer rootPrecondition;
@@ -304,18 +305,27 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
                 ((ExecuteShellCommandChange) change).addArg(atts.getValue("value"));
             } else if (change != null){
                 String creatorMethod = "create"+localName.substring(0,1).toUpperCase()+localName.substring(1);
+
+                Object objectToCreateFrom;
+                if (changeSubObjects.size() == 0) {
+                    objectToCreateFrom = change;
+                } else {
+                    objectToCreateFrom = changeSubObjects.peek();
+                }
+
                 Method method;
                 try {
-                    method = change.getClass().getMethod(creatorMethod);
+                    method = objectToCreateFrom.getClass().getMethod(creatorMethod);
                 } catch (NoSuchMethodException e) {
                     throw new MigrationFailedException(changeSet, "Could not find creator method "+creatorMethod+" for tag: " + qName);
                 }
-                Object subObject = method.invoke(change);
+                Object subObject = method.invoke(objectToCreateFrom);
                 for (int i = 0; i < atts.getLength(); i++) {
                     String attributeName = atts.getQName(i);
                     String attributeValue = atts.getValue(i);
                     setProperty(subObject, attributeName, attributeValue);
                 }
+                changeSubObjects.push(subObject);
 
             } else {
                 throw new MigrationFailedException(changeSet, "Unexpected tag: " + qName);
@@ -384,7 +394,9 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
         }
 
         try {
-            if (rootPrecondition != null) {
+            if (changeSubObjects.size() > 0) {
+                changeSubObjects.pop();
+            } else if (rootPrecondition != null) {
                 if ("preConditions".equals(qName)) {
                     if (changeSet == null) {
                         databaseChangeLog.setPreconditions(rootPrecondition);

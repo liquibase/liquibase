@@ -347,16 +347,16 @@ public class XMLChangeLogSAXParserTest {
 
         assertEquals("changelogs/common/ext.changelog.xml", changeLog.getLogicalFilePath());
 
-        assertEquals(2, changeLog.getChangeSets().size());
+        assertEquals(4, changeLog.getChangeSets().size());
 
-        ChangeSet changeSet = changeLog.getChangeSets().get(0);
+        ChangeSet changeSet = changeLog.getChangeSets().get(1);
         assertEquals("nvoxland", changeSet.getAuthor());
-        assertEquals("1", changeSet.getId());
+        assertEquals("2", changeSet.getId());
         assertEquals(1, changeSet.getChanges().size());
         Change change = changeSet.getChanges().get(0);
         assertEquals("sample2", change.getChangeMetaData().getName());
 
-        changeSet = changeLog.getChangeSets().get(1); 
+        changeSet = changeLog.getChangeSets().get(2);
         change = changeSet.getChanges().get(0);
         assertEquals(1, changeSet.getChanges().size());
         assertEquals("sample3", change.getChangeMetaData().getName());
