@@ -4,19 +4,35 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd
         http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+
     <changeSet id="1" author="nvoxland">
-        <ext:sample2/>
+        <createTable tableName="extTest1">
+            <column name="id" type="int"/>
+        </createTable>
     </changeSet>
 
     <changeSet id="2" author="nvoxland">
+        <ext:sample2/>
+    </changeSet>
+
+    <changeSet id="3" author="nvoxland">
         <ext:sample3 name="bob">
             <ext:sample3Sub name="standard">
-                <!--<ext:sample3Grand columnName="asdf"/>-->
+                <ext:sample3Grand columnName="asdf"/>
             </ext:sample3Sub>
             <ext:sample3Sub2 name="second">
-                <!--<ext:sample3Grand columnName="asdf"/>-->
+                <ext:sample3Grand columnName="asdf2">
+                    <ext:greatGrandChild name="greatGrandChild"/>
+                </ext:sample3Grand>
             </ext:sample3Sub2>
         </ext:sample3>
     </changeSet>
+
+    <changeSet id="4" author="nvoxland">
+        <createTable tableName="extTest2">
+            <column name="id" type="int"/>
+        </createTable>
+    </changeSet>
+
 
 </databaseChangeLog>
