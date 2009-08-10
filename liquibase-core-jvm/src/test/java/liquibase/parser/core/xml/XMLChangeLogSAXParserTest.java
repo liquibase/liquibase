@@ -1,6 +1,7 @@
 package liquibase.parser.core.xml;
 
 import liquibase.change.Change;
+import liquibase.change.ChangeFactory;
 import liquibase.change.core.AddColumnChange;
 import liquibase.change.core.CreateTableChange;
 import liquibase.change.core.RawSQLChange;
@@ -15,6 +16,7 @@ import liquibase.test.JUnitResourceAccessor;
 import liquibase.test.ExtensionResourceAccessor;
 import liquibase.resource.CompositeResourceAccessor;
 import liquibase.servicelocator.ServiceLocator;
+import liquibase.logging.Logger;
 import static org.junit.Assert.*;
 import org.junit.Test;
 
@@ -337,7 +339,9 @@ public class XMLChangeLogSAXParserTest {
     @Test
     public void extChangeLog() throws Exception {
         CompositeResourceAccessor compositeResourceAccessor = new CompositeResourceAccessor(new JUnitResourceAccessor(), new ExtensionResourceAccessor());
+        ServiceLocator.reset();
         ServiceLocator.getInstance().setResourceAccessor(compositeResourceAccessor);
+        ChangeFactory.reset();
 
         DatabaseChangeLog changeLog = new XMLChangeLogSAXParser().parse("changelogs/common/ext.changelog.xml", new HashMap<String, Object>(), compositeResourceAccessor);
 
@@ -366,5 +370,6 @@ public class XMLChangeLogSAXParserTest {
         assertEquals("second", child1.getClass().getMethod("getName").invoke(child2));
 
         ServiceLocator.reset();
+        ChangeFactory.reset();
     }
 }
