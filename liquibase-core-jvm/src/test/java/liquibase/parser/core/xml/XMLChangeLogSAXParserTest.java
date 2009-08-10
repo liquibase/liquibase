@@ -12,6 +12,9 @@ import liquibase.exception.ChangeLogParseException;
 import liquibase.precondition.core.OrPrecondition;
 import liquibase.precondition.core.PreconditionContainer;
 import liquibase.test.JUnitResourceAccessor;
+import liquibase.test.ExtensionResourceAccessor;
+import liquibase.resource.CompositeResourceAccessor;
+import liquibase.servicelocator.ServiceLocator;
 import static org.junit.Assert.*;
 import org.junit.Test;
 
@@ -329,5 +332,39 @@ public class XMLChangeLogSAXParserTest {
         new XMLChangeLogSAXParser().parse("changelogs/sybase/complete/root.changelog.xml", new HashMap<String, Object>(), new JUnitResourceAccessor());
         new XMLChangeLogSAXParser().parse("changelogs/asany/complete/root.changelog.xml", new HashMap<String, Object>(), new JUnitResourceAccessor());
         new XMLChangeLogSAXParser().parse("changelogs/unsupported/complete/root.changelog.xml", new HashMap<String, Object>(), new JUnitResourceAccessor());
+    }
+
+    @Test
+    public void extChangeLog() throws Exception {
+        CompositeResourceAccessor compositeResourceAccessor = new CompositeResourceAccessor(new JUnitResourceAccessor(), new ExtensionResourceAccessor());
+        ServiceLocator.getInstance().setResourceAccessor(compositeResourceAccessor);
+
+        DatabaseChangeLog changeLog = new XMLChangeLogSAXParser().parse("changelogs/common/ext.changelog.xml", new HashMap<String, Object>(), compositeResourceAccessor);
+
+        assertEquals("changelogs/common/ext.changelog.xml", changeLog.getLogicalFilePath());
+
+        assertEquals(2, changeLog.getChangeSets().size());
+
+        ChangeSet changeSet = changeLog.getChangeSets().get(0);
+        assertEquals("nvoxland", changeSet.getAuthor());
+        assertEquals("1", changeSet.getId());
+        assertEquals(1, changeSet.getChanges().size());
+        Change change = changeSet.getChanges().get(0);
+        assertEquals("sample2", change.getChangeMetaData().getName());
+
+        changeSet = changeLog.getChangeSets().get(1); 
+        change = changeSet.getChanges().get(0);
+        assertEquals(1, changeSet.getChanges().size());
+        assertEquals("sample3", change.getChangeMetaData().getName());
+
+        Object child1 = change.getClass().getMethod("getChild").invoke(change);
+        assertNotNull(child1);
+        assertEquals("standard", child1.getClass().getMethod("getName").invoke(child1));
+
+        Object child2 = change.getClass().getMethod("getChild2").invoke(change);
+        assertNotNull(child2);
+        assertEquals("second", child1.getClass().getMethod("getName").invoke(child2));
+
+        ServiceLocator.reset();
     }
 }

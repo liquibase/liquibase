@@ -125,6 +125,7 @@
       <list>
         <option value="$PROJECT_DIR$/pom.xml" />
         <option value="$PROJECT_DIR$/liquibase-integration-tests/pom.xml" />
+        <option value="$PROJECT_DIR$/samples/liquibase-ext-sample3/pom.xml" />
       </list>
     </option>
   </component>
@@ -262,6 +263,7 @@
       <module fileurl="file://$PROJECT_DIR$/liquibase-core/liquibase-core.iml" filepath="$PROJECT_DIR$/liquibase-core/liquibase-core.iml" />
       <module fileurl="file://$PROJECT_DIR$/liquibase-core-jvm/liquibase-core-jvm.iml" filepath="$PROJECT_DIR$/liquibase-core-jvm/liquibase-core-jvm.iml" />
       <module fileurl="file://$PROJECT_DIR$/liquibase-dist/liquibase-dist.iml" filepath="$PROJECT_DIR$/liquibase-dist/liquibase-dist.iml" />
+      <module fileurl="file://$PROJECT_DIR$/samples/liquibase-ext-sample3/liquibase-ext-sample3.iml" filepath="$PROJECT_DIR$/samples/liquibase-ext-sample3/liquibase-ext-sample3.iml" />
       <module fileurl="file://$PROJECT_DIR$/liquibase-integration-tests/liquibase-integration-tests.iml" filepath="$PROJECT_DIR$/liquibase-integration-tests/liquibase-integration-tests.iml" />
       <module fileurl="file://$PROJECT_DIR$/liquibase-maven-plugin/liquibase-maven-plugin.iml" filepath="$PROJECT_DIR$/liquibase-maven-plugin/liquibase-maven-plugin.iml" />
     </modules>
