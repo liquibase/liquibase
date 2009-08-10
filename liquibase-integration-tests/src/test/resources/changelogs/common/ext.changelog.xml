@@ -8,4 +8,15 @@
         <ext:sample2/>
     </changeSet>
 
+    <changeSet id="2" author="nvoxland">
+        <ext:sample3 name="bob">
+            <ext:sample3Sub name="standard">
+                <!--<ext:sample3Grand columnName="asdf"/>-->
+            </ext:sample3Sub>
+            <ext:sample3Sub2 name="second">
+                <!--<ext:sample3Grand columnName="asdf"/>-->
+            </ext:sample3Sub2>
+        </ext:sample3>
+    </changeSet>
+
 </databaseChangeLog>

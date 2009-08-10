@@ -30,6 +30,7 @@ import org.xml.sax.helpers.DefaultHandler;
 import java.io.File;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.*;
 
@@ -41,6 +42,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 
     private DatabaseChangeLog databaseChangeLog;
     private Change change;
+    private Object nestedChangeObject;
     private StringBuffer text;
     private PreconditionContainer rootPrecondition;
     private Stack<PreconditionLogic> preconditionLogicStack = new Stack<PreconditionLogic>();
@@ -300,6 +302,21 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
                 }
             } else if (change instanceof ExecuteShellCommandChange && "arg".equals(qName)) {
                 ((ExecuteShellCommandChange) change).addArg(atts.getValue("value"));
+            } else if (change != null){
+                String creatorMethod = "create"+localName.substring(0,1).toUpperCase()+localName.substring(1);
+                Method method;
+                try {
+                    method = change.getClass().getMethod(creatorMethod);
+                } catch (NoSuchMethodException e) {
+                    throw new MigrationFailedException(changeSet, "Could not find creator method "+creatorMethod+" for tag: " + qName);
+                }
+                Object subObject = method.invoke(change);
+                for (int i = 0; i < atts.getLength(); i++) {
+                    String attributeName = atts.getQName(i);
+                    String attributeValue = atts.getValue(i);
+                    setProperty(subObject, attributeName, attributeValue);
+                }
+
             } else {
                 throw new MigrationFailedException(changeSet, "Unexpected tag: " + qName);
             }

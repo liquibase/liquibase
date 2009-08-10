@@ -9,18 +9,21 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Enumeration;
 
-public class JUnitResourceAccessor implements ResourceAccessor {
+public class ExtensionResourceAccessor implements ResourceAccessor {
     private URLClassLoader classLoader;
 
-    public JUnitResourceAccessor() throws Exception {
-        File srcDir = new File(TestContext.getInstance().findCoreProjectRoot(), "src");
-        File integrationClassesDir = new File(TestContext.getInstance().findIntegrationTestProjectRoot(), "target/classes");
-        File integrationTestClassesDir = new File(TestContext.getInstance().findIntegrationTestProjectRoot(), "target/test-classes");
+    public ExtensionResourceAccessor() throws Exception {
+        File integrationProjectRoot = TestContext.getInstance().findIntegrationTestProjectRoot();
+        File integrationJarsDir = new File(integrationProjectRoot, "src/test/resources/ext/jars");
+
+        File samples1 = new File(integrationJarsDir, "liquibase-sample1.jar");
+        File samples2 = new File(integrationJarsDir, "liquibase-sample2.jar");
+        File samples3 = new File(integrationProjectRoot.getParentFile(), "samples/liquibase-ext-sample3/target/classes/");
+
          classLoader = new URLClassLoader(new URL[]{
-                integrationClassesDir.toURL(),
-                 integrationTestClassesDir.toURL(),
-                new File(srcDir, "test/java").toURL(),
-                new File(System.getProperty("java.io.tmpdir")).toURL(),
+                samples1.toURL(),
+                samples2.toURL(),
+                samples3.toURL(),
         });
 
     }
