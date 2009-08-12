@@ -1,28 +1,22 @@
 package liquibase.database.typeconversion.core;
 
-import liquibase.database.typeconversion.DataType;
 import liquibase.database.Database;
+import liquibase.database.structure.type.BigIntType;
+import liquibase.database.structure.type.CurrencyType;
+import liquibase.database.structure.type.DateTimeType;
+import liquibase.database.structure.type.TimeType;
 
 import java.util.regex.Pattern;
 
 public class InformixTypeConverter extends DefaultTypeConverter {
 
     private static final Pattern INTEGER_PATTERN = Pattern.compile("^(int(eger)?)$", Pattern.CASE_INSENSITIVE);
-    private static final Pattern INTEGER8_PATTERN =  Pattern.compile("^(int(eger)?8)$", Pattern.CASE_INSENSITIVE);
+    private static final Pattern INTEGER8_PATTERN = Pattern.compile("^(int(eger)?8)$", Pattern.CASE_INSENSITIVE);
     private static final Pattern SERIAL_PATTERN = Pattern.compile("^(serial)(\\s*\\(\\d+\\)|)$", Pattern.CASE_INSENSITIVE);
     private static final Pattern SERIAL8_PATTERN = Pattern.compile("^(serial8)(\\s*\\(\\d+\\)|)$", Pattern.CASE_INSENSITIVE);
 
     private static final String INTERVAL_FIELD_QUALIFIER = "HOUR TO FRACTION(5)";
     private static final String DATETIME_FIELD_QUALIFIER = "YEAR TO FRACTION(5)";
-    
-    private static final DataType UUID_TYPE = new DataType("VARCHAR(36)", false);
-    private static final DataType CURRENCY_TYPE = new DataType("MONEY", true);
-    private static final DataType CLOB_TYPE = new DataType("CLOB", false);
-    private static final DataType BOOLEAN_TYPE = new DataType("BOOLEAN", false);
-    private static final DataType BLOB_TYPE = new DataType("BLOB", false);
-    private static final DataType BIGINT_TYPE = new DataType("INT8", false);
-    private static final DataType TIME_TYPE = new DataType("INTERVAL " + INTERVAL_FIELD_QUALIFIER, false);
-    private static final DataType DATETIME_TYPE = new DataType("DATETIME " + DATETIME_FIELD_QUALIFIER, false);
 
     @Override
     public String getColumnType(String columnType, Boolean autoIncrement) {
@@ -40,17 +34,17 @@ public class InformixTypeConverter extends DefaultTypeConverter {
     }
 
     @Override
-public String convertJavaObjectToString(Object value, Database database) {
-    if (value != null && value instanceof Boolean) {
-        if (((Boolean) value)) {
-            return getTrueBooleanValue();
-        } else {
-            return getFalseBooleanValue();
+    public String convertJavaObjectToString(Object value, Database database) {
+        if (value != null && value instanceof Boolean) {
+            if (((Boolean) value)) {
+                return getTrueBooleanValue();
+            } else {
+                return getFalseBooleanValue();
+            }
         }
+        return super.convertJavaObjectToString(value, database);
     }
-    return super.convertJavaObjectToString(value, database);
-}
-    
+
 
     private boolean isSerial(String type) {
         return INTEGER_PATTERN.matcher(type).matches()
@@ -74,45 +68,42 @@ public String convertJavaObjectToString(Object value, Database database) {
     }
 
     @Override
-    public DataType getBigIntType() {
-        return BIGINT_TYPE;
+    public BigIntType getBigIntType() {
+        return new BigIntType() {
+            @Override
+            public String getDataTypeName() {
+                return "INT8";
+            }
+        };
     }
 
     @Override
-    public DataType getBlobType() {
-        return BLOB_TYPE;
+    public CurrencyType getCurrencyType() {
+        return new CurrencyType() {
+            @Override
+            public String getDataTypeName() {
+                return "MONEY";
+            }
+        };
     }
 
     @Override
-    public DataType getBooleanType() {
-        return BOOLEAN_TYPE;
+    public DateTimeType getDateTimeType() {
+        return new DateTimeType() {
+            @Override
+            public String getDataTypeName() {
+                return "DATETIME " + DATETIME_FIELD_QUALIFIER;
+            }
+        };
     }
 
     @Override
-    public DataType getClobType() {
-        return CLOB_TYPE;
+    public TimeType getTimeType() {
+        return new TimeType() {
+            @Override
+            public String getDataTypeName() {
+                return "INTERVAL " + INTERVAL_FIELD_QUALIFIER;
+            }
+        };
     }
-
-    @Override
-    public DataType getCurrencyType() {
-        return CURRENCY_TYPE;
-    }
-
-    @Override
-    public DataType getDateTimeType() {
-        return DATETIME_TYPE;
-    }
-
-    @Override
-    public DataType getTimeType() {
-        return TIME_TYPE;
-    }
-
-    @Override
-    public DataType getUUIDType() {
-        return UUID_TYPE;
-    }
-
-    
-
 }

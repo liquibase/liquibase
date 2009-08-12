@@ -1,21 +1,12 @@
 package liquibase.database.typeconversion.core;
 
-import liquibase.database.typeconversion.DataType;
 import liquibase.database.Database;
+import liquibase.database.structure.type.*;
 
 import java.text.ParseException;
 import java.sql.Types;
 
 public class OracleTypeConverter extends DefaultTypeConverter {
-
-    private static final DataType BOOLEAN_TYPE = new DataType("NUMBER(1)", false);
-    private static final DataType CURRENCY_TYPE = new DataType("NUMBER(15, 2)", false);
-    private static final DataType UUID_TYPE = new DataType("RAW(16)", false);
-    private static final DataType CLOB_TYPE = new DataType("CLOB", false);
-    private static final DataType BLOB_TYPE = new DataType("BLOB", false);
-    private static final DataType DATETIME_TYPE = new DataType("TIMESTAMP", true);
-    private static final DataType DATE_TYPE = new DataType("DATE", false);
-    private static final DataType BIGINT_TYPE = new DataType("NUMBER(19,0)", false);
 
     @Override
     public Object convertDatabaseValueToJavaObject(Object defaultValue, int dataType, int columnSize, int decimalDigits, Database database) throws ParseException {
@@ -47,49 +38,53 @@ public class OracleTypeConverter extends DefaultTypeConverter {
     }
 
     @Override
-    public DataType getBooleanType() {
-        return BOOLEAN_TYPE;
+    public BooleanType getBooleanType() {
+        return new BooleanType() {
+            @Override
+            public String getDataTypeName() {
+                return "NUMBER(1)";
+            }
+        };
     }
 
     @Override
-    public DataType getCurrencyType() {
-        return CURRENCY_TYPE;
+    public CurrencyType getCurrencyType() {
+        return new CurrencyType() {
+            @Override
+            public String getDataTypeName() {
+                return "NUMBER(15, 2)";
+            }
+        };
     }
 
     @Override
-    public DataType getUUIDType() {
-        return UUID_TYPE;
+    public UUIDType getUUIDType() {
+        return new UUIDType() {
+            @Override
+            public String getDataTypeName() {
+                return "RAW(16)";
+            }
+        };
     }
 
     @Override
-    public DataType getClobType() {
-        return CLOB_TYPE;
+    public DateTimeType getDateTimeType() {
+        return new DateTimeType() {
+            @Override
+            public String getDataTypeName() {
+                return "TIMESTAMP";
+            }
+        };
     }
 
     @Override
-    public DataType getBlobType() {
-        return BLOB_TYPE;
+    public BigIntType getBigIntType() {
+        return new BigIntType() {;
+
+            @Override
+            public String getDataTypeName() {
+                return "NUMBER(19,0)";
+            }
+        };
     }
-
-    @Override
-    public DataType getDateTimeType() {
-        return DATETIME_TYPE;
-    }
-
-
-    @Override
-    public DataType getDateType() {
-        return DATE_TYPE;
-    }
-
-    @Override
-    public DataType getTimeType() {
-        return DATE_TYPE;
-    }
-
-    @Override
-    public DataType getBigIntType() {
-        return BIGINT_TYPE;
-    }
-
 }

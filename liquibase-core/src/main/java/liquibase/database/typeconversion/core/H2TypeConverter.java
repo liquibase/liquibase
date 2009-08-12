@@ -1,13 +1,13 @@
 package liquibase.database.typeconversion.core;
 
-import liquibase.database.typeconversion.DataType;
+import liquibase.database.structure.type.DateTimeType;
+import liquibase.database.structure.type.UUIDType;
 import liquibase.database.Database;
 import liquibase.util.StringUtils;
 
 import java.text.ParseException;
 
 public class H2TypeConverter extends HsqlTypeConverter {
-    private static final DataType DATETIME_TYPE = new DataType("TIMESTAMP", false);
 
     @Override
     public Object convertDatabaseValueToJavaObject(Object defaultValue, int dataType, int columnSize, int decimalDigits, Database database) throws ParseException {
@@ -23,9 +23,22 @@ public class H2TypeConverter extends HsqlTypeConverter {
     }
 
     @Override
-    public DataType getDateTimeType() {
-        return DATETIME_TYPE;
+    public DateTimeType getDateTimeType() {
+        return new DateTimeType() {
+            @Override
+            public String getDataTypeName() {
+                return "TIMESTAMP";
+            }
+        };
     }
 
-    
+    @Override
+    public UUIDType getUUIDType() {
+        return new UUIDType() {
+            @Override
+            public String getDataTypeName() {
+                return "VARCHAR(36)";
+            }
+        };
+    }
 }

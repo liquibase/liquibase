@@ -1,50 +1,50 @@
 package liquibase.database.typeconversion.core;
 
-import org.junit.Test;
+import liquibase.database.structure.type.UnknownType;
 import org.junit.Assert;
-import liquibase.database.typeconversion.DataType;
+import org.junit.Test;
 
 public class MySQLTypeConverterTest extends DefaultTypeConverterTest {
     
     @Test
     public void getBlobType() {
-        Assert.assertEquals(new DataType("BLOB", true), new MySQLTypeConverter().getBlobType());
+        assertTypesEqual(new UnknownType("BLOB", true), new MySQLTypeConverter().getBlobType());
     }
 
     
     @Test
     public void getBooleanType() {
-        Assert.assertEquals(new DataType("TINYINT(1)", false), new MySQLTypeConverter().getBooleanType());
+        assertTypesEqual(new UnknownType("TINYINT(1)", false), new MySQLTypeConverter().getBooleanType());
     }
 
     
     @Test
     public void getCurrencyType() {
-        Assert.assertEquals(new DataType("DECIMAL", true), new MySQLTypeConverter().getCurrencyType());
+        assertTypesEqual(new UnknownType("DECIMAL", true), new MySQLTypeConverter().getCurrencyType());
     }
 
     
     @Test
     public void getUUIDType() {
-        Assert.assertEquals(new DataType("CHAR(36)", false), new MySQLTypeConverter().getUUIDType());
+        assertTypesEqual(new UnknownType("CHAR(36)", false), new MySQLTypeConverter().getUUIDType());
     }
 
     
     @Test
     public void getClobType() {
-        Assert.assertEquals(new DataType("TEXT", true), new MySQLTypeConverter().getClobType());
+        assertTypesEqual(new UnknownType("TEXT", true), new MySQLTypeConverter().getClobType());
     }
 
     
     @Test
     public void getDateType() {
-        Assert.assertEquals(new DataType("DATE", false), new MySQLTypeConverter().getDateType());
+        assertTypesEqual(new UnknownType("DATE", false), new MySQLTypeConverter().getDateType());
     }
 
     
     @Test
     public void getDateTimeType() {
-        Assert.assertEquals(new DataType("DATETIME", false), new MySQLTypeConverter().getDateTimeType());
+        assertTypesEqual(new UnknownType("DATETIME", false), new MySQLTypeConverter().getDateTimeType());
     }
     
 }
