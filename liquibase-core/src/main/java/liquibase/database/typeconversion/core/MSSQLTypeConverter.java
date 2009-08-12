@@ -1,20 +1,11 @@
 package liquibase.database.typeconversion.core;
 
-import liquibase.database.typeconversion.DataType;
 import liquibase.database.Database;
+import liquibase.database.structure.type.*;
 
 import java.text.ParseException;
 
 public class MSSQLTypeConverter extends DefaultTypeConverter {
-
-    private static final DataType DATETIME_TYPE = new DataType("DATETIME", false);
-    private static final DataType DATE_TYPE = new DataType("SMALLDATETIME", false);
-    private static final DataType NUMBER_TYPE = new DataType("NUMERIC", false);
-    private static final DataType BOOLEAN_TYPE = new DataType("BIT", false);
-    private static final DataType CURRENCY_TYPE = new DataType("MONEY", false);
-    private static final DataType UUID_TYPE = new DataType("UNIQUEIDENTIFIER", false);
-    private static final DataType CLOB_TYPE = new DataType("TEXT", true);
-    private static final DataType BLOB_TYPE = new DataType("IMAGE", true);
 
     @Override
     public Object convertDatabaseValueToJavaObject(Object defaultValue, int dataType, int columnSize, int decimalDigits, Database database) throws ParseException {
@@ -56,50 +47,63 @@ public class MSSQLTypeConverter extends DefaultTypeConverter {
     }
 
     @Override
-    public DataType getDateTimeType() {
-        return DATETIME_TYPE;
-    }
-
-
-    @Override
-    public DataType getTimeType() {
-        return DATETIME_TYPE;
-    }
-
-
-    @Override
-    public DataType getDateType() {
-        return DATE_TYPE;
+    public DateType getDateType() {
+        return new DateType() {
+            @Override
+            public String getDataTypeName() {
+                return "SMALLDATETIME";
+            }
+        };
     }
 
     @Override
-    public DataType getBooleanType() {
-        return BOOLEAN_TYPE;
+    public BooleanType getBooleanType() {
+        return new BooleanType() {
+            @Override
+            public String getDataTypeName() {
+                return "BIT";
+            }
+        };
     }
 
     @Override
-    public DataType getCurrencyType() {
-        return CURRENCY_TYPE;
+    public CurrencyType getCurrencyType() {
+        return new CurrencyType() {
+            @Override
+            public String getDataTypeName() {
+                return "MONEY";
+            }
+        };
     }
 
     @Override
-    public DataType getUUIDType() {
-        return UUID_TYPE;
+    public UUIDType getUUIDType() {
+        return new UUIDType() {
+            @Override
+            public String getDataTypeName() {
+                return "UNIQUEIDENTIFIER";
+            }
+        };
     }
 
     @Override
-    public DataType getClobType() {
-        return CLOB_TYPE;
+    public ClobType getClobType() {
+        return new ClobType() {
+            @Override
+            public String getDataTypeName() {
+                return "TEXT";
+            }
+        };
     }
 
     @Override
-    public DataType getNumberType() {
-        return NUMBER_TYPE;
-    }
-
-    @Override
-    public DataType getBlobType() {
-        return BLOB_TYPE;
+    public BlobType getBlobType() {
+        return new BlobType() {
+            @Override
+            public String getDataTypeName() {
+                return "IMAGE";
+            }
+        };
     }
     
 

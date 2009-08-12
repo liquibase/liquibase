@@ -3,6 +3,7 @@ package liquibase.database.typeconversion.core;
 import org.junit.Test;
 import liquibase.change.ColumnConfig;
 import liquibase.database.typeconversion.TypeConverter;
+import liquibase.database.structure.type.DataType;
 import static org.junit.Assert.*;
 
 public class DefaultTypeConverterTest {
@@ -40,5 +41,9 @@ public class DefaultTypeConverterTest {
 
         column.setType("SomethingElse");
         assertEquals("SomethingElse", typeConverter.getColumnType(column));
+    }
+
+    public void assertTypesEqual(DataType type1, DataType type2) {
+        assertEquals(type1.getDataTypeName(), type2.getDataTypeName());
     }
 }

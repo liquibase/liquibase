@@ -2,48 +2,49 @@ package liquibase.database.typeconversion.core;
 
 import org.junit.Test;
 import org.junit.Assert;
-import liquibase.database.typeconversion.DataType;
+import liquibase.database.structure.type.DataType;
+import liquibase.database.structure.type.UnknownType;
 
 public class MSSQLTypeConverterTest extends DefaultTypeConverterTest{
     
     @Test
     public void getBlobType() {
-        Assert.assertEquals(new DataType("IMAGE", true), new MSSQLTypeConverter().getBlobType());
+        assertTypesEqual(new UnknownType("IMAGE", true), new MSSQLTypeConverter().getBlobType());
     }
     
     @Test
     public void getBooleanType() {
-        Assert.assertEquals(new DataType("BIT", false), new MSSQLTypeConverter().getBooleanType());
+        assertTypesEqual(new UnknownType("BIT", false), new MSSQLTypeConverter().getBooleanType());
     }
 
     
     @Test
     public void getCurrencyType() {
-        Assert.assertEquals(new DataType("MONEY", false), new MSSQLTypeConverter().getCurrencyType());
+        assertTypesEqual(new UnknownType("MONEY", false), new MSSQLTypeConverter().getCurrencyType());
     }
 
     
     @Test
     public void getUUIDType() {
-        Assert.assertEquals(new DataType("UNIQUEIDENTIFIER", false), new MSSQLTypeConverter().getUUIDType());
+        assertTypesEqual(new UnknownType("UNIQUEIDENTIFIER", false), new MSSQLTypeConverter().getUUIDType());
     }
 
     
     @Test
     public void getClobType() {
-        Assert.assertEquals(new DataType("TEXT", true), new MSSQLTypeConverter().getClobType());
+        assertTypesEqual(new UnknownType("TEXT", true), new MSSQLTypeConverter().getClobType());
     }
 
     
     @Test
     public void getDateType() {
-        Assert.assertEquals(new DataType("SMALLDATETIME", false), new MSSQLTypeConverter().getDateType());
+        assertTypesEqual(new UnknownType("SMALLDATETIME", false), new MSSQLTypeConverter().getDateType());
     }
 
     
     @Test
     public void getDateTimeType() {
-        Assert.assertEquals(new DataType("DATETIME", false), new MSSQLTypeConverter().getDateTimeType());
+        assertTypesEqual(new UnknownType("DATETIME", false), new MSSQLTypeConverter().getDateTimeType());
     }
 
     

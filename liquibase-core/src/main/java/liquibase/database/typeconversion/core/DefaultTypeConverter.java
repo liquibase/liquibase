@@ -1,8 +1,8 @@
 package liquibase.database.typeconversion.core;
 
-import liquibase.database.typeconversion.DataType;
 import liquibase.database.Database;
-import liquibase.database.typeconversion.TypeConverter;
+import liquibase.database.structure.type.*;
+import liquibase.database.typeconversion.*;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.DateParseException;
 import liquibase.statement.ComputedDateValue;
@@ -17,23 +17,6 @@ import java.math.BigInteger;
 
 public class DefaultTypeConverter implements TypeConverter {
 
-    private static final DataType DATE_TYPE = new DataType("DATE", false);
-    private static final DataType DATETIME_TYPE = new DataType("DATETIME", false);
-    private static final DataType TIME_TYPE = new DataType("TIME", false);
-    private static final DataType BIGINT_TYPE = new DataType("BIGINT", true);
-    private static final DataType NUMBER_TYPE = new DataType("NUMBER", true);
-    private static final DataType CHAR_TYPE = new DataType("CHAR", true);
-    private static final DataType VARCHAR_TYPE = new DataType("VARCHAR", true);
-    private static final DataType FLOAT_TYPE = new DataType("FLOAT", true);
-    private static final DataType DOUBLE_TYPE = new DataType("DOUBLE", true);
-    private static final DataType INT_TYPE = new DataType("INT", true);
-    private static final DataType TINYINT_TYPE = new DataType("TINYINT", true);
-    private static final DataType CURRENCY_TYPE = new DataType("DECIMAL", true);
-    private static final DataType UUID_TYPE = new DataType("CHAR(36)", false);
-    private static final DataType CLOB_TYPE = new DataType("CLOB", false);
-    private static final DataType BLOB_TYPE = new DataType("BLOB", false);
-    private static final DataType BOOLEAN_TYPE = new DataType("BOOLEAN", false);
-
     public int getDatabaseType(int type) {
         int returnType = type;
         if (returnType == java.sql.Types.BOOLEAN) {
@@ -45,7 +28,7 @@ public class DefaultTypeConverter implements TypeConverter {
 
         return returnType;
     }
-    
+
     public Object convertDatabaseValueToJavaObject(Object defaultValue, int dataType, int columnSize, int decimalDigits, Database database) throws ParseException {
         if (defaultValue == null) {
             return null;
@@ -92,9 +75,9 @@ public class DefaultTypeConverter implements TypeConverter {
             return null;
         }
     }
-    
 
-        protected Object convertToCorrectJavaType(String value, int dataType, int columnSize, int decimalDigits, Database database) throws ParseException {
+
+    protected Object convertToCorrectJavaType(String value, int dataType, int columnSize, int decimalDigits, Database database) throws ParseException {
         if (value == null) {
             return null;
         }
@@ -170,7 +153,7 @@ public class DefaultTypeConverter implements TypeConverter {
         }
     }
 
-      /**
+    /**
      * Returns the database-specific datatype for the given column configuration.
      * This method will convert some generic column types (e.g. boolean, currency) to the correct type
      * for the current database.
@@ -257,9 +240,10 @@ public class DefaultTypeConverter implements TypeConverter {
         }
     }
 
-        // Get the type from the Connection MetaData (use the MetaData to translate from java.sql.Types to DB-specific type)
+    // Get the type from the Connection MetaData (use the MetaData to translate from java.sql.Types to DB-specific type)
     private DataType getTypeFromMetaData(final String dataTypeName) {
-        return new DataType(dataTypeName, false);
+        return null;
+//        return new DataType(dataTypeName, false);
 //todo: reintroduce        ResultSet resultSet = null;
 //        try {
 //            Integer requestedType = (Integer) Class.forName("java.sql.Types").getDeclaredField(dataTypeName).get(null);
@@ -313,44 +297,40 @@ public class DefaultTypeConverter implements TypeConverter {
         return "1";
     }
 
-        /**
+    /**
      * Returns the actual database-specific data type to use a "date" (no time information) column.
      */
-    public DataType getDateType() {
-        return DATE_TYPE;
+    public DateType getDateType() {
+        return new DateType();
     }
 
     /**
      * Returns the actual database-specific data type to use a "time" column.
      */
-    public DataType getTimeType() {
-        return TIME_TYPE;
+    public TimeType getTimeType() {
+        return new TimeType();
     }
 
-    public DataType getDateTimeType() {
-        return DATETIME_TYPE;
+    public DateTimeType getDateTimeType() {
+        return new DateTimeType();
     }
 
-    public DataType getBigIntType() {
-        return BIGINT_TYPE;
-    }
-
-    public DataType getNumberType() {
-        return NUMBER_TYPE;
+    public BigIntType getBigIntType() {
+        return new BigIntType();
     }
 
     /**
      * Returns the actual database-specific data type to use for a "char" column.
      */
-    public DataType getCharType() {
-        return CHAR_TYPE;
+    public CharType getCharType() {
+        return new CharType();
     }
 
     /**
      * Returns the actual database-specific data type to use for a "varchar" column.
      */
-    public DataType getVarcharType() {
-        return VARCHAR_TYPE;
+    public VarcharType getVarcharType() {
+        return new VarcharType();
     }
 
     /**
@@ -358,8 +338,8 @@ public class DefaultTypeConverter implements TypeConverter {
      *
      * @return database-specific type for float
      */
-    public DataType getFloatType() {
-        return FLOAT_TYPE;
+    public FloatType getFloatType() {
+        return new FloatType();
     }
 
     /**
@@ -367,8 +347,8 @@ public class DefaultTypeConverter implements TypeConverter {
      *
      * @return database-specific type for double
      */
-    public DataType getDoubleType() {
-        return DOUBLE_TYPE;
+    public DoubleType getDoubleType() {
+        return new DoubleType();
     }
 
     /**
@@ -376,8 +356,8 @@ public class DefaultTypeConverter implements TypeConverter {
      *
      * @return database-specific type for int
      */
-    public DataType getIntType() {
-        return INT_TYPE;
+    public IntType getIntType() {
+        return new IntType();
     }
 
     /**
@@ -385,28 +365,32 @@ public class DefaultTypeConverter implements TypeConverter {
      *
      * @return database-specific type for tinyint
      */
-    public DataType getTinyIntType() {
-        return TINYINT_TYPE;
+    public TinyIntType getTinyIntType() {
+        return new TinyIntType();
     }
 
-    public DataType getBooleanType() {
-        return BOOLEAN_TYPE;
+    public BooleanType getBooleanType() {
+        return new BooleanType();
     }
 
-    public DataType getCurrencyType() {
-        return CURRENCY_TYPE;
+    public NumberType getNumberType() {
+        return new NumberType();
     }
 
-    public DataType getUUIDType() {
-        return UUID_TYPE;
+    public CurrencyType getCurrencyType() {
+        return new CurrencyType();
     }
 
-    public DataType getClobType() {
-        return CLOB_TYPE;
+    public UUIDType getUUIDType() {
+        return new UUIDType();
     }
 
-    public DataType getBlobType() {
-        return BLOB_TYPE;
+    public ClobType getClobType() {
+        return new ClobType();
+    }
+
+    public BlobType getBlobType() {
+        return new BlobType();
     }
 
 }

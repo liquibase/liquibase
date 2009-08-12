@@ -1,7 +1,7 @@
 package liquibase.database.typeconversion;
 
-import liquibase.database.typeconversion.DataType;
 import liquibase.database.Database;
+import liquibase.database.structure.type.*;
 import liquibase.change.ColumnConfig;
 
 import java.text.ParseException;
@@ -22,34 +22,34 @@ public interface TypeConverter {
 
     String getTrueBooleanValue();
 
-    DataType getCharType();
+    CharType getCharType();
 
-    DataType getVarcharType();
+    VarcharType getVarcharType();
 
-    DataType getBooleanType();
+    BooleanType getBooleanType();
 
-    DataType getCurrencyType();
+    CurrencyType getCurrencyType();
 
-    DataType getUUIDType();
+    UUIDType getUUIDType();
 
-    DataType getClobType();
+    ClobType getClobType();
 
-    DataType getBlobType();
+    BlobType getBlobType();
 
-    DataType getDateType();
+    DateType getDateType();
 
-    DataType getFloatType();
+    FloatType getFloatType();
 
-    DataType getDoubleType();
+    DoubleType getDoubleType();
 
-    DataType getIntType();
+    IntType getIntType();
 
-    DataType getTinyIntType();
+    TinyIntType getTinyIntType();
 
-    DataType getDateTimeType();
+    DateTimeType getDateTimeType();
 
-    DataType getTimeType();
+    TimeType getTimeType();
 
-    DataType getBigIntType();
+    BigIntType getBigIntType();
 
 }

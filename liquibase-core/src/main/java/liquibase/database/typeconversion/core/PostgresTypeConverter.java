@@ -1,19 +1,14 @@
 package liquibase.database.typeconversion.core;
 
-import liquibase.database.typeconversion.DataType;
 import liquibase.database.Database;
+import liquibase.database.structure.type.BlobType;
+import liquibase.database.structure.type.ClobType;
+import liquibase.database.structure.type.DateTimeType;
 
 import java.text.ParseException;
 import java.sql.Types;
 
 public class PostgresTypeConverter extends DefaultTypeConverter {
-
-    private static final DataType BOOLEAN_TYPE = new DataType("BOOLEAN", false);
-    private static final DataType CURRENCY_TYPE = new DataType("DECIMAL", true);
-    private static final DataType UUID_TYPE = new DataType("CHAR(36)", false);
-    private static final DataType CLOB_TYPE = new DataType("TEXT", true);
-    private static final DataType BLOB_TYPE = new DataType("BYTEA", false);
-    private static final DataType DATETIME_TYPE = new DataType("TIMESTAMP WITH TIME ZONE", false);
 
     @Override
     public Object convertDatabaseValueToJavaObject(Object defaultValue, int dataType, int columnSize, int decimalDigits, Database database) throws ParseException {
@@ -75,33 +70,33 @@ public class PostgresTypeConverter extends DefaultTypeConverter {
     }
 
     @Override
-    public DataType getBooleanType() {
-        return BOOLEAN_TYPE;
+    public ClobType getClobType() {
+        return new ClobType() {
+            @Override
+            public String getDataTypeName() {
+                return "TEXT";
+            }
+        };
     }
 
     @Override
-    public DataType getCurrencyType() {
-        return CURRENCY_TYPE;
+    public BlobType getBlobType() {
+        return new BlobType() {
+            @Override
+            public String getDataTypeName() {
+                return "BYTEA";
+            }
+        };
     }
 
     @Override
-    public DataType getUUIDType() {
-        return UUID_TYPE;
-    }
-
-    @Override
-    public DataType getClobType() {
-        return CLOB_TYPE;
-    }
-
-    @Override
-    public DataType getBlobType() {
-        return BLOB_TYPE;
-    }
-
-    @Override
-    public DataType getDateTimeType() {
-        return DATETIME_TYPE;
+    public DateTimeType getDateTimeType() {
+        return new DateTimeType() {
+            @Override
+            public String getDataTypeName() {
+                return "TIMESTAMP WITH TIME ZONE";
+            }
+        };
     }
     
     

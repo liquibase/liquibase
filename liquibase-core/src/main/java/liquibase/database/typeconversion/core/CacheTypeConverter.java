@@ -1,18 +1,14 @@
 package liquibase.database.typeconversion.core;
 
-import liquibase.database.typeconversion.DataType;
 import liquibase.database.Database;
+import liquibase.database.structure.type.BlobType;
+import liquibase.database.structure.type.BooleanType;
+import liquibase.database.structure.type.ClobType;
+import liquibase.database.structure.type.CurrencyType;
 
 import java.text.ParseException;
 
 public class CacheTypeConverter extends DefaultTypeConverter {
-
-    private static final DataType BLOB_TYPE = new DataType("LONGVARBINARY", true);
-    private static final DataType BOOLEAN_TYPE = new DataType("INTEGER", true);
-    private static final DataType CLOB_TYPE = new DataType("LONGVARCHAR", true);
-    private static final DataType CURRENCY_TYPE = new DataType("MONEY", true);
-    private static final DataType DATETIME_TYPE = new DataType("DATETIME", false);
-    private static final DataType UUID_TYPE = new DataType("CHAR(36)", false);
 
     @Override
     public Object convertDatabaseValueToJavaObject(Object defaultValue, int dataType, int columnSize, int decimalDigits, Database database) throws ParseException {
@@ -40,28 +36,44 @@ public class CacheTypeConverter extends DefaultTypeConverter {
         return "1";
     }
 
-    public DataType getBlobType() {
-        return BLOB_TYPE;
+    @Override
+    public BlobType getBlobType() {
+        return new BlobType() {
+            @Override
+            public String getDataTypeName() {
+                return "LONGVARBINARY";
+            }
+        };
     }
 
-    public DataType getBooleanType() {
-        return BOOLEAN_TYPE;
+    @Override
+    public BooleanType getBooleanType() {
+        return new BooleanType() {
+            @Override
+            public String getDataTypeName() {
+                return "INTEGER";
+            }
+        };
     }
 
-    public DataType getClobType() {
-        return CLOB_TYPE;
+    @Override
+    public ClobType getClobType() {
+        return new ClobType() {
+            @Override
+            public String getDataTypeName() {
+                return "LONGVARCHAR";
+            }
+
+        };
     }
 
-    public DataType getCurrencyType() {
-        return CURRENCY_TYPE;
+    @Override
+    public CurrencyType getCurrencyType() {
+        return new CurrencyType() {
+            @Override
+            public String getDataTypeName() {
+                return "MONEY";
+            }
+        };
     }
-
-    public DataType getDateTimeType() {
-        return DATETIME_TYPE;
-    }
-
-    public DataType getUUIDType() {
-        return UUID_TYPE;
-    }
-
 }
