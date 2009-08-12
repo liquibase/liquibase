@@ -34,6 +34,11 @@ public class DatabaseSnapshotGeneratorFactory {
         return instance;
     }
 
+    public DatabaseSnapshotGenerator getGenerator(Database database) {
+        return getGenerators(database).iterator().next();
+    }
+
+
     /**
      * Get generators supporting database, sorted from highest priority to
      * lowest.
@@ -61,7 +66,7 @@ public class DatabaseSnapshotGeneratorFactory {
      * Get generator for database with highest priority.
      */
     public DatabaseSnapshot createSnapshot(Database database, String schema, Set<DiffStatusListener> listeners) throws DatabaseException {
-        return getGenerators(database).iterator().next().createSnapshot(database, schema, listeners);
+        return getGenerator(database).createSnapshot(database, schema, listeners);
     }
 
     /**

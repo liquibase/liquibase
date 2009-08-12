@@ -12,8 +12,6 @@ public interface TypeConverter {
 
     String convertJavaObjectToString(Object value, Database database);
 
-    int getDatabaseType(int type);
-    
     String getColumnType(String columnType, Boolean autoIncrement);
 
     String getColumnType(ColumnConfig columnConfig);

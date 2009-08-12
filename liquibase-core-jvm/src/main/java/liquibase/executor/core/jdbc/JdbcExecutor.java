@@ -14,6 +14,8 @@ import liquibase.statement.SqlStatement;
 import liquibase.statement.StoredProcedureStatement;
 import liquibase.util.JdbcUtils;
 import liquibase.util.StringUtils;
+import liquibase.snapshot.DatabaseSnapshotGeneratorFactory;
+import liquibase.snapshot.core.JdbcDatabaseSnapshotGenerator;
 
 import java.sql.CallableStatement;
 import java.sql.ResultSet;
@@ -247,7 +249,7 @@ public class JdbcExecutor extends AbstractExecutor implements Executor {
 
         for (int i = 0; i < parameters.size(); i++) {
             String param = parameters.get(i);
-            int type = TypeConverterFactory.getInstance().findTypeConverter(database).getDatabaseType(statement.getParameterType(param));
+            int type = ((JdbcDatabaseSnapshotGenerator) DatabaseSnapshotGeneratorFactory.getInstance().getGenerator(database)).getDatabaseType(statement.getParameterType(param), database);
 
             if (param == null) {
                 pstmt.setNull(i + 1, type);
