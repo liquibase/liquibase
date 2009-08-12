@@ -567,4 +567,16 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
         return autoIncrement;
     }
 
+    public int getDatabaseType(int type, Database database) {
+        int returnType = type;
+        if (returnType == java.sql.Types.BOOLEAN) {
+            String booleanType = TypeConverterFactory.getInstance().findTypeConverter(database).getBooleanType().getDataTypeName();
+            if (!booleanType.equalsIgnoreCase("boolean")) {
+                returnType = java.sql.Types.TINYINT;
+            }
+        }
+
+        return returnType;
+    }
+
 }

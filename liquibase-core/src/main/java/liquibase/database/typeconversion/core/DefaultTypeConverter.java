@@ -17,18 +17,6 @@ import java.math.BigInteger;
 
 public class DefaultTypeConverter implements TypeConverter {
 
-    public int getDatabaseType(int type) {
-        int returnType = type;
-        if (returnType == java.sql.Types.BOOLEAN) {
-            String booleanType = getBooleanType().getDataTypeName();
-            if (!booleanType.equalsIgnoreCase("boolean")) {
-                returnType = java.sql.Types.TINYINT;
-            }
-        }
-
-        return returnType;
-    }
-
     public Object convertDatabaseValueToJavaObject(Object defaultValue, int dataType, int columnSize, int decimalDigits, Database database) throws ParseException {
         if (defaultValue == null) {
             return null;
