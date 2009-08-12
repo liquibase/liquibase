@@ -1,7 +1,6 @@
 package liquibase.database.core;
 
 import liquibase.database.AbstractDatabase;
-import liquibase.database.DataType;
 import liquibase.database.DatabaseConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.DateParseException;
@@ -18,12 +17,6 @@ public class HsqlDatabase extends AbstractDatabase {
     private static String START_CONCAT = "CONCAT(";
     private static String END_CONCAT = ")";
     private static String SEP_CONCAT = ", ";
-    private static final DataType BOOLEAN_TYPE = new DataType("BOOLEAN", false);
-    private static final DataType CURRENCY_TYPE = new DataType("DECIMAL", true);
-    private static final DataType UUID_TYPE = new DataType("VARCHAR(36)", false);
-    private static final DataType CLOB_TYPE = new DataType("LONGVARCHAR", true);
-    private static final DataType BLOB_TYPE = new DataType("LONGVARBINARY", true);
-    private static final DataType DATETIME_TYPE = new DataType("DATETIME", false);
 
 
     public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
@@ -54,30 +47,6 @@ public class HsqlDatabase extends AbstractDatabase {
     @Override
     protected String getDefaultDatabaseSchemaName() throws DatabaseException {
         return "PUBLIC";
-    }
-
-    public DataType getBooleanType() {
-        return BOOLEAN_TYPE;
-    }
-
-    public DataType getCurrencyType() {
-        return CURRENCY_TYPE;
-    }
-
-    public DataType getUUIDType() {
-        return UUID_TYPE;
-    }
-
-    public DataType getClobType() {
-        return CLOB_TYPE;
-    }
-
-    public DataType getBlobType() {
-        return BLOB_TYPE;
-    }
-
-    public DataType getDateTimeType() {
-        return DATETIME_TYPE;
     }
 
     public String getCurrentDateTimeFunction() {
@@ -128,7 +97,7 @@ public class HsqlDatabase extends AbstractDatabase {
     }
 
     @Override
-    protected Date parseDate(String dateAsString) throws DateParseException {
+    public Date parseDate(String dateAsString) throws DateParseException {
         try {
             if (dateAsString.indexOf(" ") > 0) {
                 return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S").parse(dateAsString);

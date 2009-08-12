@@ -1,6 +1,7 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
+import liquibase.database.typeconversion.TypeConverterFactory;
 import liquibase.database.core.DerbyDatabase;
 import liquibase.database.core.HsqlDatabase;
 import liquibase.database.core.MSSQLDatabase;
@@ -12,6 +13,7 @@ import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.AddAutoIncrementStatement;
+import liquibase.servicelocator.ServiceLocator;
 
 public class AddAutoIncrementGenerator implements SqlGenerator<AddAutoIncrementStatement> {
 
@@ -39,7 +41,7 @@ public class AddAutoIncrementGenerator implements SqlGenerator<AddAutoIncrementS
         String sql = "ALTER TABLE "
                 + database.escapeTableName(statement.getSchemaName(), statement.getTableName())
                 + " MODIFY " + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(), statement.getColumnName())
-                + " " + database.getColumnType(statement.getColumnDataType(), true)
+                + " " + TypeConverterFactory.getInstance().findTypeConverter(database).getColumnType(statement.getColumnDataType(), true)
                 + " AUTO_INCREMENT";
 
         return new Sql[]{

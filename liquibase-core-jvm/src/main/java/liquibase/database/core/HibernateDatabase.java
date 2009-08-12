@@ -3,7 +3,6 @@ package liquibase.database.core;
 import liquibase.change.Change;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.RanChangeSet;
-import liquibase.database.DataType;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.structure.DatabaseObject;
@@ -19,7 +18,6 @@ import java.sql.Connection;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
-import java.text.ParseException;
 import java.util.List;
 
 public class HibernateDatabase implements Database {
@@ -131,18 +129,6 @@ public class HibernateDatabase implements Database {
         return false;
     }
 
-    public String getColumnType(String columnType, Boolean autoIncrement) {
-        return null;
-    }
-
-    public String getFalseBooleanValue() {
-        return null;
-    }
-
-    public String getTrueBooleanValue() {
-        return null;
-    }
-
     public String getDateLiteral(String isoDate) {
         return null;
     }
@@ -237,84 +223,7 @@ public class HibernateDatabase implements Database {
         return null;
     }
 
-    public int getDatabaseType(int type) {
-        return 0;
-    }
-
     public String getDatabaseProductName(DatabaseConnection conn) throws DatabaseException {
-        return null;
-    }
-
-    public DataType getBooleanType() {
-        return null;
-    }
-
-    public DataType getCurrencyType() {
-        return null;
-    }
-
-    public DataType getUUIDType() {
-        return null;
-    }
-
-    public DataType getCharType()
-    {
-        return null;
-    }
-
-    public DataType getVarcharType() {
-        return null;
-    }
-    
-    public DataType getClobType() {
-        return null;
-    }
-
-    public DataType getBlobType() {
-        return null;
-    }
-
-    public DataType getDateType() {
-        return null;
-    }
-
-    public DataType getDateTimeType() {
-        return null;
-    }
-
-    public DataType getTimeType() {
-        return null;
-    }
-
-    public DataType getBigIntType() {
-        return null;
-    }
-
-    public DataType getFloatType()
-    {
-        return null;
-    }
-
-    public DataType getDoubleType()
-    {
-        return null;
-    }
-
-    public DataType getIntType()
-    {
-        return null;
-    }
-
-    public DataType getTinyIntType()
-    {
-        return null;
-    }
-
-    public Object convertDatabaseValueToJavaObject(Object defaultValue, int dataType, int columnSize, int decimalDigits) throws ParseException {
-        return null;
-    }
-
-    public String convertJavaObjectToString(Object value) {
         return null;
     }
 
@@ -475,5 +384,9 @@ public class HibernateDatabase implements Database {
 
     public int getNextChangeSetSequenceValue() throws LiquibaseException {
         return 1;
+    }
+
+    public java.util.Date parseDate(String dateAsString) throws DateParseException {
+        return new java.util.Date();
     }
 }

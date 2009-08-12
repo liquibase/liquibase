@@ -1,6 +1,7 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
+import liquibase.database.typeconversion.TypeConverterFactory;
 import liquibase.database.core.SybaseDatabase;
 import liquibase.database.structure.Column;
 import liquibase.database.structure.Table;
@@ -34,7 +35,7 @@ public class AddDefaultValueGeneratorInformix extends AddDefaultValueGenerator {
     public Sql[] generateSql(AddDefaultValueStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
 
         return new Sql[]{
-                new UnparsedSql("ALTER TABLE " + database.escapeTableName(statement.getSchemaName(), statement.getTableName()) + " MODIFY (" + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " " + database.getColumnType(statement.getColumnDataType(), false) + " DEFAULT " + database.convertJavaObjectToString(statement.getDefaultValue()) + ")",
+                new UnparsedSql("ALTER TABLE " + database.escapeTableName(statement.getSchemaName(), statement.getTableName()) + " MODIFY (" + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " " + TypeConverterFactory.getInstance().findTypeConverter(database).getColumnType(statement.getColumnDataType(), false) + " DEFAULT " + TypeConverterFactory.getInstance().findTypeConverter(database).convertJavaObjectToString(statement.getDefaultValue(), database) + ")",
                         new Column()
                                 .setTable(new Table(statement.getTableName()).setSchema(statement.getSchemaName()))
                                 .setName(statement.getColumnName()))

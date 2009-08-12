@@ -1,7 +1,6 @@
 package liquibase.database.core;
 
 import liquibase.database.AbstractDatabase;
-import liquibase.database.DataType;
 import liquibase.database.DatabaseConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
@@ -16,31 +15,16 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 public class InformixDatabase extends AbstractDatabase {
-
-	private static final String INTERVAL_FIELD_QUALIFIER = "HOUR TO FRACTION(5)";
-	private static final String DATETIME_FIELD_QUALIFIER = "YEAR TO FRACTION(5)";
 	
-	private static final DataType UUID_TYPE = new DataType("VARCHAR(36)", false);
-	private static final DataType CURRENCY_TYPE = new DataType("MONEY", true);
-	private static final DataType CLOB_TYPE = new DataType("CLOB", false);
-	private static final DataType BOOLEAN_TYPE = new DataType("BOOLEAN", false);
-	private static final DataType BLOB_TYPE = new DataType("BLOB", false);
-	private static final DataType BIGINT_TYPE = new DataType("INT8", false);
-	private static final DataType TIME_TYPE = new DataType("INTERVAL " + INTERVAL_FIELD_QUALIFIER, false);
-	private static final DataType DATETIME_TYPE = new DataType("DATETIME " + DATETIME_FIELD_QUALIFIER, false);
-
 	private static final String PRODUCT_NAME = "Informix Dynamic Server";
-	
+    private static final String INTERVAL_FIELD_QUALIFIER = "HOUR TO FRACTION(5)";
+    private static final String DATETIME_FIELD_QUALIFIER = "YEAR TO FRACTION(5)";
+
 	private Set<String> systemTablesAndViews = new HashSet<String>();
 
     private static final Pattern CREATE_VIEW_AS_PATTERN = Pattern.compile("^CREATE\\s+.*?VIEW\\s+.*?AS\\s+",
     		Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
-    
-	private static final Pattern INTEGER_PATTERN = Pattern.compile("^(int(eger)?)$", Pattern.CASE_INSENSITIVE);
-	private static final Pattern INTEGER8_PATTERN =  Pattern.compile("^(int(eger)?8)$", Pattern.CASE_INSENSITIVE);
-	private static final Pattern SERIAL_PATTERN = Pattern.compile("^(serial)(\\s*\\(\\d+\\)|)$", Pattern.CASE_INSENSITIVE);
-	private static final Pattern SERIAL8_PATTERN = Pattern.compile("^(serial8)(\\s*\\(\\d+\\)|)$", Pattern.CASE_INSENSITIVE);
-	
+
 	public InformixDatabase() {
 		super();
 		systemTablesAndViews.add("systables");
@@ -128,40 +112,10 @@ public class InformixDatabase extends AbstractDatabase {
 		}
     }
 	
-	@Override
-	public DataType getBigIntType() {
-		return BIGINT_TYPE; 
-	}
-
-	public DataType getBlobType() {
-		return BLOB_TYPE;
-	}
-
-	public DataType getBooleanType() {
-		return BOOLEAN_TYPE;
-	}
-
-	public DataType getClobType() {
-		return CLOB_TYPE;
-	}
-
-	public DataType getCurrencyType() {
-		return CURRENCY_TYPE;
-	}
-
 	public String getCurrentDateTimeFunction() {
 		return "CURRENT " + DATETIME_FIELD_QUALIFIER;
 	}
 
-	public DataType getDateTimeType() {
-		return DATETIME_TYPE;
-	}
-	
-	@Override
-	public DataType getTimeType() {
-		return TIME_TYPE;
-	}
-	
 	public String getDefaultDriver(String url) {
 		if (url.startsWith("jdbc:informix-sqli")) {
 			return "com.informix.jdbc.IfxDriver";
@@ -171,10 +125,6 @@ public class InformixDatabase extends AbstractDatabase {
 
 	public String getTypeName() {
 		return "informix";
-	}
-
-	public DataType getUUIDType() {
-		return UUID_TYPE;
 	}
 
 	public boolean isCorrectDatabaseImplementation(DatabaseConnection conn)
@@ -189,16 +139,6 @@ public class InformixDatabase extends AbstractDatabase {
 
 	public boolean supportsTablespaces() {
 		return true;
-	}
-
-	@Override
-	public String getTrueBooleanValue() {
-		return "'t'";
-	}
-
-	@Override
-	public String getFalseBooleanValue() {
-		return "'f'";
 	}
 
 	@Override
@@ -219,43 +159,6 @@ public class InformixDatabase extends AbstractDatabase {
 		return "";
 	}
 
-	@Override
-	public String getColumnType(String columnType, Boolean autoIncrement) {
-		String type = super.getColumnType(columnType, autoIncrement);
-        if (autoIncrement != null && autoIncrement) {
-            if (isSerial(type)) {
-                return "SERIAL";
-            } else if (isSerial8(type)) {
-                return "SERIAL8";
-            } else {
-            	throw new IllegalArgumentException("Unknown autoincrement type: " + columnType);
-            }
-        }
-        return type;
-	}
-
-	private boolean isSerial(String type) {
-		return INTEGER_PATTERN.matcher(type).matches()
-			|| SERIAL_PATTERN.matcher(type).matches();
-	}
-
-	private boolean isSerial8(String type) {
-		return INTEGER8_PATTERN.matcher(type).matches()
-			|| SERIAL8_PATTERN.matcher(type).matches()
-			|| "BIGINT".equals(type.toUpperCase());
-	}
-	
-	@Override
-	public String convertJavaObjectToString(Object value) {
-		if (value != null && value instanceof Boolean) {
-            if (((Boolean) value)) {
-                return getTrueBooleanValue();
-            } else {
-                return getFalseBooleanValue();
-            }
-        }
-		return super.convertJavaObjectToString(value);
-	}
 	
 	@Override
     public String getDateLiteral(String isoDate) {

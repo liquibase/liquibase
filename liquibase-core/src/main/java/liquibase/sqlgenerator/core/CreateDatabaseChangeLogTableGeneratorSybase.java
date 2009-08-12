@@ -1,6 +1,7 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
+import liquibase.database.typeconversion.TypeConverterFactory;
 import liquibase.database.core.SybaseDatabase;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
@@ -27,7 +28,7 @@ public class CreateDatabaseChangeLogTableGeneratorSybase implements SqlGenerator
                 new UnparsedSql("CREATE TABLE " + database.escapeTableName(database.getDefaultSchemaName(), database.getDatabaseChangeLogTableName()) + " (ID VARCHAR(150) NOT NULL, " +
                 "AUTHOR VARCHAR(150) NOT NULL, " +
                 "FILENAME VARCHAR(255) NOT NULL, " +
-                "DATEEXECUTED " + database.getDateTimeType() + " NOT NULL, " +
+                "DATEEXECUTED " + TypeConverterFactory.getInstance().findTypeConverter(database).getDateTimeType() + " NOT NULL, " +
                 "ORDEREXECUTED NOT NULL UNIQUE, " +
                 "MD5SUM VARCHAR(32) NULL, " +
                 "DESCRIPTION VARCHAR(255) NULL, " +

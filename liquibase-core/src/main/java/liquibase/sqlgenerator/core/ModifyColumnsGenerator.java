@@ -2,6 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.change.ColumnConfig;
 import liquibase.database.Database;
+import liquibase.database.typeconversion.TypeConverterFactory;
 import liquibase.database.core.*;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
@@ -59,7 +60,7 @@ public class ModifyColumnsGenerator implements SqlGenerator<ModifyColumnsStateme
             alterTable += getPreDataTypeString(database); // adds a space if nothing else
 
             // add column type
-            alterTable += database.getColumnType(column.getType(), false);
+            alterTable += TypeConverterFactory.getInstance().findTypeConverter(database).getColumnType(column.getType(), false);
 
             if (supportsExtraMetaData(database)) {
                 if (!column.isNullable()) {
@@ -211,7 +212,7 @@ public class ModifyColumnsGenerator implements SqlGenerator<ModifyColumnsStateme
         String clause = "";
         if (column.getDefaultValue() != null) {
             if (database instanceof MySQLDatabase) {
-                clause += " DEFAULT " + database.convertJavaObjectToString(column.getDefaultValue());
+                clause += " DEFAULT " + TypeConverterFactory.getInstance().findTypeConverter(database).convertJavaObjectToString(column.getDefaultValue(), database);
             }
         }
         return clause;

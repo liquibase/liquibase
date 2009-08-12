@@ -13,6 +13,7 @@ import java.util.Set;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.JdbcConnection;
+import liquibase.database.typeconversion.TypeConverterFactory;
 import liquibase.database.example.ExampleCustomDatabase;
 import liquibase.database.core.MockDatabase;
 import liquibase.database.core.UnsupportedDatabase;
@@ -115,16 +116,16 @@ public abstract class AbstractExecuteTest {
         convertedSql = replaceType("datetime", convertedSql, database);
         convertedSql = replaceType("boolean", convertedSql, database);
 
-        convertedSql = convertedSql.replaceAll("FALSE", database.getFalseBooleanValue());
-        convertedSql = convertedSql.replaceAll("TRUE", database.getFalseBooleanValue());
+        convertedSql = convertedSql.replaceAll("FALSE", TypeConverterFactory.getInstance().findTypeConverter(database).getFalseBooleanValue());
+        convertedSql = convertedSql.replaceAll("TRUE", TypeConverterFactory.getInstance().findTypeConverter(database).getFalseBooleanValue());
         convertedSql = convertedSql.replaceAll("NOW\\(\\)", database.getCurrentDateTimeFunction());
 
         return convertedSql;
     }
 
     private String replaceType(String type, String baseString, Database database) {
-        return baseString.replaceAll(" " + type + " ", " " + database.getColumnType(type, false) + " ")
-                .replaceAll(" " + type + ",", " " + database.getColumnType(type, false) + ",");
+        return baseString.replaceAll(" " + type + " ", " " + TypeConverterFactory.getInstance().findTypeConverter(database).getColumnType(type, false) + " ")
+                .replaceAll(" " + type + ",", " " + TypeConverterFactory.getInstance().findTypeConverter(database).getColumnType(type, false) + ",");
     }
 
     private String replaceDatabaseClauses(String convertedSql, Database database) {

@@ -5,6 +5,7 @@ import liquibase.change.Change;
 import liquibase.change.ColumnConfig;
 import liquibase.change.ConstraintsConfig;
 import liquibase.database.core.MockDatabase;
+import liquibase.database.typeconversion.core.DefaultTypeConverter;
 import liquibase.statement.ForeignKeyConstraint;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.UniqueConstraint;
@@ -52,6 +53,7 @@ public class CreateTableChangeTest extends AbstractChangeTest {
 
         ColumnConfig column3 = new ColumnConfig();
         column3.setName("state_id");
+        column3.setType("int");
         ConstraintsConfig column3constraints = new ConstraintsConfig();
         column3constraints.setNullable(false);
         column3constraints.setInitiallyDeferred(true);
@@ -117,6 +119,7 @@ public class CreateTableChangeTest extends AbstractChangeTest {
         CreateTableChange change = new CreateTableChange();
         ColumnConfig columnConfig = new ColumnConfig();
         columnConfig.setName("id");
+        columnConfig.setType("int");
         change.addColumn(columnConfig);
 
         CreateTableStatement statement = (CreateTableStatement) change.generateStatements(new MockDatabase())[0];
@@ -128,6 +131,7 @@ public class CreateTableChangeTest extends AbstractChangeTest {
         CreateTableChange change = new CreateTableChange();
         ColumnConfig columnConfig = new ColumnConfig();
         columnConfig.setName("id");
+        columnConfig.setType("int");
         columnConfig.setDefaultValue("DEFAULTVALUE");
         change.addColumn(columnConfig);
 
@@ -140,11 +144,12 @@ public class CreateTableChangeTest extends AbstractChangeTest {
         CreateTableChange change = new CreateTableChange();
         ColumnConfig columnConfig = new ColumnConfig();
         columnConfig.setName("id");
+        columnConfig.setType("boolean");
         columnConfig.setDefaultValueBoolean(Boolean.TRUE);
         change.addColumn(columnConfig);
 
         CreateTableStatement statement = (CreateTableStatement) change.generateStatements(new MockDatabase())[0];
-        assertEquals("'"+new MockDatabase().getTrueBooleanValue()+"'", statement.getDefaultValue("id"));
+        assertEquals(new DefaultTypeConverter().getTrueBooleanValue(), statement.getDefaultValue("id"));
     }
 
     @Test
@@ -152,6 +157,7 @@ public class CreateTableChangeTest extends AbstractChangeTest {
         CreateTableChange change = new CreateTableChange();
         ColumnConfig columnConfig = new ColumnConfig();
         columnConfig.setName("id");
+        columnConfig.setType("int");
         columnConfig.setDefaultValueNumeric("42");
         change.addColumn(columnConfig);
 
@@ -164,6 +170,7 @@ public class CreateTableChangeTest extends AbstractChangeTest {
         CreateTableChange change = new CreateTableChange();
         ColumnConfig columnConfig = new ColumnConfig();
         columnConfig.setName("id");
+        columnConfig.setType("date");
         columnConfig.setDefaultValueDate("2007-01-02");
         change.addColumn(columnConfig);
 
@@ -204,6 +211,7 @@ public class CreateTableChangeTest extends AbstractChangeTest {
         CreateTableChange change = new CreateTableChange();
         ColumnConfig columnConfig = new ColumnConfig();
         columnConfig.setName("id");
+        columnConfig.setType("int");
         ConstraintsConfig constraints = new ConstraintsConfig();
         constraints.setForeignKeyName("fk_test");
         constraints.setReferences("test(id)");
@@ -223,6 +231,7 @@ public class CreateTableChangeTest extends AbstractChangeTest {
         CreateTableChange change = new CreateTableChange();
         ColumnConfig columnConfig = new ColumnConfig();
         columnConfig.setName("id");
+        columnConfig.setType("int");
         ConstraintsConfig constraints = new ConstraintsConfig();
         constraints.setForeignKeyName("fk_test");
         constraints.setReferences("test(id)");
@@ -242,6 +251,7 @@ public class CreateTableChangeTest extends AbstractChangeTest {
         CreateTableChange change = new CreateTableChange();
         ColumnConfig columnConfig = new ColumnConfig();
         columnConfig.setName("id");
+        columnConfig.setType("int");
         ConstraintsConfig constraints = new ConstraintsConfig();
         constraints.setReferences("test(id)");
         constraints.setForeignKeyName("fk_test");

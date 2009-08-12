@@ -2,6 +2,7 @@ package liquibase.snapshot.core;
 
 import liquibase.database.Database;
 import liquibase.database.JdbcConnection;
+import liquibase.database.typeconversion.TypeConverterFactory;
 import liquibase.database.core.InformixDatabase;
 import liquibase.database.core.OracleDatabase;
 import liquibase.database.structure.*;
@@ -232,11 +233,11 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
     protected void getColumnTypeAndDefValue(Column columnInfo, ResultSet rs, Database database) throws SQLException, DatabaseException {
         Object defaultValue = rs.getObject("COLUMN_DEF");
         try {
-            columnInfo.setDefaultValue(database.convertDatabaseValueToJavaObject(defaultValue, columnInfo.getDataType(), columnInfo.getColumnSize(), columnInfo.getDecimalDigits()));
+            columnInfo.setDefaultValue(TypeConverterFactory.getInstance().findTypeConverter(database).convertDatabaseValueToJavaObject(defaultValue, columnInfo.getDataType(), columnInfo.getColumnSize(), columnInfo.getDecimalDigits(), database));
         } catch (ParseException e) {
             throw new DatabaseException(e);
         }
-        columnInfo.setTypeName(database.getColumnType(rs.getString("TYPE_NAME"), columnInfo.isAutoIncrement()));
+        columnInfo.setTypeName(TypeConverterFactory.getInstance().findTypeConverter(database).getColumnType(rs.getString("TYPE_NAME"), columnInfo.isAutoIncrement()));
 
     } // end of method getColumnTypeAndDefValue()
 

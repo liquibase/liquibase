@@ -78,12 +78,6 @@ public interface Database extends DatabaseObject {
 
     public boolean supportsAutoIncrement();
 
-    String getColumnType(String columnType, Boolean autoIncrement);
-
-    String getFalseBooleanValue();
-
-    String getTrueBooleanValue();
-
     String getDateLiteral(String isoDate);
 
     /**
@@ -144,86 +138,6 @@ public interface Database extends DatabaseObject {
     boolean supportsTablespaces();
 
     String getViewDefinition(String schemaName, String name) throws DatabaseException;
-
-    int getDatabaseType(int type);
-
-    /**
-     * Returns the actual database-specific data type to use for a "char" column.
-     */
-    DataType getCharType();
-
-    /**
-     * Returns the actual database-specific data type to use for a "varchar" column.
-     */
-    DataType getVarcharType();
-
-    /**
-     * Returns the actual database-specific data type to use a "boolean" column.
-     */
-    DataType getBooleanType();
-
-    /**
-     * Returns the actual database-specific data type to use a "currency" column.
-     */
-    DataType getCurrencyType();
-
-    /**
-     * Returns the actual database-specific data type to use a "UUID" column.
-     */
-    DataType getUUIDType();
-
-    /**
-     * Returns the actual database-specific data type to use a "CLOB" column.
-     */
-    DataType getClobType();
-
-    /**
-     * Returns the actual database-specific data type to use a "BLOB" column.
-     */
-    DataType getBlobType();
-
-    DataType getDateType();
-
-    /**
-     * Returns the actual database-specific data type to use for a "float" column.
-     *
-     * @return database-specific type for float
-     */
-    DataType getFloatType();
-
-    /**
-     * Returns the actual database-specific data type to use for a "double" column.
-     *
-     * @return database-specific type for double
-     */
-    DataType getDoubleType();
-
-    /**
-     * Returns the actual database-specific data type to use for a "int" column.
-     *
-     * @return database-specific type for int
-     */
-    DataType getIntType();
-
-    /**
-     * Returns the actual database-specific data type to use for a "tinyint" column.
-     *
-     * @return database-specific type for tinyint
-     */
-    DataType getTinyIntType();
-
-    /**
-     * Returns the actual database-specific data type to use a "datetime" column.
-     */
-    DataType getDateTimeType();
-
-    DataType getTimeType();
-
-    DataType getBigIntType();
-
-    Object convertDatabaseValueToJavaObject(Object defaultValue, int dataType, int columnSize, int decimalDigits) throws ParseException;
-
-    String convertJavaObjectToString(Object value);
 
     boolean isSystemView(String catalogName, String schemaName, String name);
 
@@ -329,4 +243,6 @@ public interface Database extends DatabaseObject {
     void saveRollbackStatement(Change change, List<SqlVisitor> sqlVisitors, Writer writer) throws IOException, UnsupportedChangeException, RollbackImpossibleException, StatementNotSupportedOnDatabaseException, LiquibaseException;
 
     int getNextChangeSetSequenceValue() throws LiquibaseException;
+
+    public Date parseDate(String dateAsString) throws DateParseException;
 }

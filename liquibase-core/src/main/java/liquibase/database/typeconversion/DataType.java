@@ -1,4 +1,4 @@
-package liquibase.database;
+package liquibase.database.typeconversion;
 
 /**
  * Object representing a data type, instead of a plain string. It will be returned by

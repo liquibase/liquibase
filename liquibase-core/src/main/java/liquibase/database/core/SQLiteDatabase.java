@@ -3,7 +3,6 @@ package liquibase.database.core;
 import liquibase.change.ColumnConfig;
 import liquibase.change.core.CreateTableChange;
 import liquibase.database.AbstractDatabase;
-import liquibase.database.DataType;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.structure.Column;
@@ -28,35 +27,11 @@ public class SQLiteDatabase extends AbstractDatabase {
     }
 
     public static final String PRODUCT_NAME = "SQLite";
-    private static final DataType BLOB_TYPE = new DataType("BLOB", false);
-    private static final DataType BOOLEAN_TYPE = new DataType("BOOLEAN", false);
-    private static final DataType CLOB_TYPE = new DataType("TEXT", true);
-    private static final DataType CURRENCY_TYPE = new DataType("REAL", false);
-    private static final DataType DATETIME_TYPE = new DataType("TEXT", false);
-
-    public DataType getBlobType() {
-        return BLOB_TYPE;
-    }
-
-    public DataType getBooleanType() {
-        return BOOLEAN_TYPE;
-    }
-
-    public DataType getClobType() {
-        return CLOB_TYPE;
-    }
-
-    public DataType getCurrencyType() {
-        return CURRENCY_TYPE;
-    }
 
     public String getCurrentDateTimeFunction() {
         return "CURRENT_TIMESTAMP";
     }
 
-    public DataType getDateTimeType() {
-        return DATETIME_TYPE;
-    }
 
     public String getDefaultDriver(String url) {
         if (url.startsWith("jdbc:sqlite:")) {
@@ -67,10 +42,6 @@ public class SQLiteDatabase extends AbstractDatabase {
 
     public String getTypeName() {
         return "sqlite";
-    }
-
-    public DataType getUUIDType() {
-        return DATETIME_TYPE;
     }
 
     public boolean isCorrectDatabaseImplementation(DatabaseConnection conn)
@@ -101,16 +72,6 @@ public class SQLiteDatabase extends AbstractDatabase {
         return false;
     }
 
-    @Override
-    public String getFalseBooleanValue() {
-        return "0";
-    }
-
-    @Override
-    public String getTrueBooleanValue() {
-        return "1";
-    }
-
     public String getTrigger(String table, String column) {
         return "CREATE TRIGGER insert_" + table + "_timeEnter AFTER  INSERT ON " + table + " BEGIN" +
                 " UPDATE " + table + " SET " + column + " = DATETIME('NOW')" +
@@ -122,38 +83,6 @@ public class SQLiteDatabase extends AbstractDatabase {
         return "AUTOINCREMENT";
     }
 
-    @Override
-    public String getColumnType(String columnType, Boolean autoIncrement) {
-        String type;
-        if (columnType.equals("INTEGER") ||
-                columnType.toLowerCase(Locale.ENGLISH).contains("int") ||
-                columnType.toLowerCase(Locale.ENGLISH).contains("bit")) {
-            type = "INTEGER";
-        } else if (columnType.equals("TEXT") ||
-                columnType.toLowerCase(Locale.ENGLISH).contains("uuid") ||
-                columnType.toLowerCase(Locale.ENGLISH).contains("uniqueidentifier") ||
-
-                columnType.toLowerCase(Locale.ENGLISH).equals("uniqueidentifier") ||
-                columnType.toLowerCase(Locale.ENGLISH).equals("datetime") ||
-                columnType.toLowerCase(Locale.ENGLISH).contains("timestamp") ||
-                columnType.toLowerCase(Locale.ENGLISH).contains("char") ||
-                columnType.toLowerCase(Locale.ENGLISH).contains("clob") ||
-                columnType.toLowerCase(Locale.ENGLISH).contains("text")) {
-            type = "TEXT";
-        } else if (columnType.equals("REAL") ||
-                columnType.toLowerCase(Locale.ENGLISH).contains("float")) {
-            type = "REAL";
-        } else if (columnType.toLowerCase(Locale.ENGLISH).contains("blob") ||
-                columnType.toLowerCase(Locale.ENGLISH).contains("binary")) {
-            type = "BLOB";
-        } else if (columnType.toLowerCase(Locale.ENGLISH).contains("boolean") ||
-                columnType.toLowerCase(Locale.ENGLISH).contains("binary")) {
-            type = "BOOLEAN";
-        } else {
-            type = super.getColumnType(columnType, autoIncrement);
-        }
-        return type;
-    }
 
     public static List<SqlStatement> getAlterTableStatements(
             AlterTableVisitor alterTableVisitor,

@@ -1,17 +1,14 @@
 package liquibase.database.core;
 
-import liquibase.database.DataType;
 import liquibase.database.DatabaseConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.DateParseException;
-import liquibase.util.StringUtils;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class H2Database extends HsqlDatabase {
-    private static final DataType DATETIME_TYPE = new DataType("TIMESTAMP", false);
 
     @Override
     public String getTypeName() {
@@ -67,21 +64,9 @@ public class H2Database extends HsqlDatabase {
         return super.getViewDefinition(schemaName, name).replaceFirst(".*?\n", ""); //h2 returns "create view....as\nselect
     }
 
-    @Override
-    public Object convertDatabaseValueToJavaObject(Object defaultValue, int dataType, int columnSize, int decimalDigits) throws ParseException {
-        if (defaultValue != null && defaultValue instanceof String) {
-            if (StringUtils.trimToEmpty(((String) defaultValue)).startsWith("(NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_")) {
-                return null;
-            }
-            if (StringUtils.trimToNull(((String) defaultValue)) == null) {
-                return null;
-            }
-        }
-        return super.convertDatabaseValueToJavaObject(defaultValue, dataType, columnSize, decimalDigits);
-    }
 
     @Override
-    protected Date parseDate(String dateAsString) throws DateParseException {
+    public Date parseDate(String dateAsString) throws DateParseException {
         try {
             if (dateAsString.indexOf(' ') > 0) {
                 return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSSSSSSS").parse(dateAsString);
@@ -95,11 +80,6 @@ public class H2Database extends HsqlDatabase {
         } catch (ParseException e) {
             throw new DateParseException(dateAsString);
         }
-    }
-
-    @Override
-    public DataType getDateTimeType() {
-        return DATETIME_TYPE;
     }
 
     @Override

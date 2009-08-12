@@ -1,23 +1,14 @@
 package liquibase.database.core;
 
 import liquibase.database.AbstractDatabase;
-import liquibase.database.DataType;
 import liquibase.database.DatabaseConnection;
 import liquibase.exception.DatabaseException;
 
 public class UnsupportedDatabase extends AbstractDatabase {
-    private String dateTimeType;
-    private static final DataType BOOLEAN_TYPE = new DataType("INT", false);
-    private static final DataType CURRENCY_TYPE = new DataType("DECIMAL", true);
-    private static final DataType UUID_TYPE = new DataType("CHAR(36)", false);
-    private static final DataType CLOB_TYPE = new DataType("CLOB", false);
-    private static final DataType BLOB_TYPE = new DataType("BLOB", false);
-
 
     @Override
     public void setConnection(DatabaseConnection conn) {
         super.setConnection(conn);
-        dateTimeType = findDateTypeType();
         if (currentDateTimeFunction == null) {
             currentDateTimeFunction = findCurrentDateTimeFunction();
         }
@@ -37,64 +28,6 @@ public class UnsupportedDatabase extends AbstractDatabase {
     @Override
     protected String getDefaultDatabaseSchemaName() throws DatabaseException {
         return null;
-    }
-
-    public DataType getBooleanType() {
-        return BOOLEAN_TYPE;
-    }
-
-
-    @Override
-    public String getFalseBooleanValue() {
-        return "0";
-    }
-
-    @Override
-    public String getTrueBooleanValue() {
-        return "1";
-    }
-
-    public DataType getCurrencyType() {
-        return CURRENCY_TYPE;
-    }
-
-    public DataType getUUIDType() {
-        return UUID_TYPE;
-    }
-
-    public DataType getClobType() {
-        return CLOB_TYPE;
-    }
-
-    public DataType getBlobType() {
-        return BLOB_TYPE;
-    }
-
-    public DataType getDateTimeType() {
-        return new DataType(dateTimeType, false);
-    }
-
-    private String findDateTypeType() {
-//todo: reintroduce        ResultSet typeInfo = null;
-//        try {
-//            typeInfo = getConnection().getMetaData().getTypeInfo();
-//            while (typeInfo.next()) {
-//                if (typeInfo.getInt("DATA_TYPE") == Types.TIMESTAMP) {
-//                    return typeInfo.getString("TYPE_NAME");
-//                }
-//            }
-//        } catch (SQLException e) {
-//            throw new RuntimeException(e);
-//        } finally {
-//            if (typeInfo != null) {
-//                try {
-//                    typeInfo.close();
-//                } catch (SQLException e) {
-//                    ;
-//                }
-//            }
-//        }
-        return "DATETIME";
     }
 
     public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {

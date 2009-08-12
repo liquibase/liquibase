@@ -22,57 +22,11 @@ public abstract class AbstractDatabaseTest {
 
     protected abstract String getProductNameString();
 
-    public abstract void getBlobType();
-
     public abstract void supportsInitiallyDeferrableColumns();
-
-    public abstract void getBooleanType();
-
-    public abstract void getCurrencyType();
-
-    public abstract void getUUIDType();
-
-    public abstract void getClobType();
-
-    public abstract void getDateType();
-
-    public abstract void getDateTimeType();
 
     public abstract void getCurrentDateTimeFunction();
 
-    @Test
-    public void getColumnType() {
-        ColumnConfig column = new ColumnConfig();
 
-        column.setType("boolean");
-        assertEquals(database.getBooleanType().getDataTypeName(), database.getColumnType(column));
-        column.setType("BooLean");
-        assertEquals(database.getBooleanType().getDataTypeName(), database.getColumnType(column));
-
-
-        column.setType("currency");
-        assertEquals(database.getCurrencyType().getDataTypeName(), database.getColumnType(column));
-        column.setType("currEncy");
-        assertEquals(database.getCurrencyType().getDataTypeName(), database.getColumnType(column));
-
-        column.setType("uuid");
-        assertEquals(database.getUUIDType().getDataTypeName(), database.getColumnType(column));
-        column.setType("UUID");
-        assertEquals(database.getUUIDType().getDataTypeName(), database.getColumnType(column));
-
-        column.setType("blob");
-        assertEquals(database.getBlobType().getDataTypeName(), database.getColumnType(column));
-        column.setType("BLOB");
-        assertEquals(database.getBlobType().getDataTypeName(), database.getColumnType(column));
-
-        column.setType("clob");
-        assertEquals(database.getClobType().getDataTypeName(), database.getColumnType(column));
-        column.setType("CLOB");
-        assertEquals(database.getClobType().getDataTypeName(), database.getColumnType(column));
-
-        column.setType("SomethingElse");
-        assertEquals("SomethingElse", database.getColumnType(column));
-    }
 
     @Test
     public void isCorrectDatabaseImplementation() throws Exception {

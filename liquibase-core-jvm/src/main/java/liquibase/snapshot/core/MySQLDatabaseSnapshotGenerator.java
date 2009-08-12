@@ -2,6 +2,7 @@ package liquibase.snapshot.core;
 
 import liquibase.database.Database;
 import liquibase.database.JdbcConnection;
+import liquibase.database.typeconversion.TypeConverterFactory;
 import liquibase.database.core.MySQLDatabase;
 import liquibase.database.structure.Column;
 import liquibase.exception.DatabaseException;
@@ -68,7 +69,7 @@ public class MySQLDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerato
 
         	columnInfo.setTypeName(tableSchema.get(columnName).get(0));
         	try {
-        		String tmpDefaultValue = (String)database.convertDatabaseValueToJavaObject(tableSchema.get(columnName).get(1), columnInfo.getDataType(), columnInfo.getColumnSize(), columnInfo.getDecimalDigits());
+        		String tmpDefaultValue = (String) TypeConverterFactory.getInstance().findTypeConverter(database).convertDatabaseValueToJavaObject(tableSchema.get(columnName).get(1), columnInfo.getDataType(), columnInfo.getColumnSize(), columnInfo.getDecimalDigits(), database);
         		if ("".equals(tmpDefaultValue)) {
         			columnInfo.setDefaultValue(null);
         		} else {

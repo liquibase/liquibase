@@ -1,6 +1,7 @@
 package liquibase.change;
 
 import liquibase.database.Database;
+import liquibase.database.typeconversion.TypeConverterFactory;
 import liquibase.database.core.InformixDatabase;
 import liquibase.database.structure.Column;
 import liquibase.statement.ComputedDateValue;
@@ -316,9 +317,9 @@ public class ColumnConfig {
         } else if (this.getDefaultValueBoolean() != null) {
             String returnValue;
             if (this.getDefaultValueBoolean()) {
-                returnValue = database.getTrueBooleanValue();
+                returnValue = TypeConverterFactory.getInstance().findTypeConverter(database).getTrueBooleanValue();
             } else {
-                returnValue = database.getFalseBooleanValue();
+                returnValue = TypeConverterFactory.getInstance().findTypeConverter(database).getFalseBooleanValue();
             }
 
             if (returnValue.matches("\\d+")) {

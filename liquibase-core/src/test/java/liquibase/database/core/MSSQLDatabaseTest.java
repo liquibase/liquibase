@@ -1,7 +1,6 @@
 package liquibase.database.core;
 
 import liquibase.database.AbstractDatabaseTest;
-import liquibase.database.DataType;
 import liquibase.database.Database;
 import org.junit.Assert;
 import static org.junit.Assert.*;
@@ -21,52 +20,11 @@ public class MSSQLDatabaseTest extends AbstractDatabaseTest {
         return "Microsoft SQL Server";
     }
 
-    @Override
-    @Test
-    public void getBlobType() {
-        Assert.assertEquals(new DataType("IMAGE", true), getDatabase().getBlobType());
-    }
 
     @Override
     @Test
     public void supportsInitiallyDeferrableColumns() {
         assertFalse(getDatabase().supportsInitiallyDeferrableColumns());
-    }
-
-    @Override
-    @Test
-    public void getBooleanType() {
-        Assert.assertEquals(new DataType("BIT", false), getDatabase().getBooleanType());
-    }
-
-    @Override
-    @Test
-    public void getCurrencyType() {
-        Assert.assertEquals(new DataType("MONEY", false), getDatabase().getCurrencyType());
-    }
-
-    @Override
-    @Test
-    public void getUUIDType() {
-        Assert.assertEquals(new DataType("UNIQUEIDENTIFIER", false), getDatabase().getUUIDType());
-    }
-
-    @Override
-    @Test
-    public void getClobType() {
-        Assert.assertEquals(new DataType("TEXT", true), getDatabase().getClobType());
-    }
-
-    @Override
-    @Test
-    public void getDateType() {
-        Assert.assertEquals(new DataType("SMALLDATETIME", false), getDatabase().getDateType());
-    }
-
-    @Override
-    @Test
-    public void getDateTimeType() {
-        Assert.assertEquals(new DataType("DATETIME", false), getDatabase().getDateTimeType());
     }
 
     @Override
