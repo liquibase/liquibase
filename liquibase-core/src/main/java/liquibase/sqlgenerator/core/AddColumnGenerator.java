@@ -1,6 +1,7 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
+import liquibase.database.typeconversion.TypeConverterFactory;
 import liquibase.database.core.*;
 import liquibase.database.structure.Column;
 import liquibase.database.structure.Table;
@@ -44,7 +45,7 @@ public class AddColumnGenerator implements SqlGenerator<AddColumnStatement> {
 
     public Sql[] generateSql(AddColumnStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
 
-        String alterTable = "ALTER TABLE " + database.escapeTableName(statement.getSchemaName(), statement.getTableName()) + " ADD " + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " " + database.getColumnType(statement.getColumnType(), statement.isAutoIncrement());
+        String alterTable = "ALTER TABLE " + database.escapeTableName(statement.getSchemaName(), statement.getTableName()) + " ADD " + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " " + TypeConverterFactory.getInstance().findTypeConverter(database).getColumnType(statement.getColumnType(), statement.isAutoIncrement());
 
         if (statement.isAutoIncrement()) {
             alterTable += " " + database.getAutoIncrementClause();
@@ -77,7 +78,7 @@ public class AddColumnGenerator implements SqlGenerator<AddColumnStatement> {
             if (database instanceof MSSQLDatabase) {
                 clause += " CONSTRAINT " + ((MSSQLDatabase) database).generateDefaultConstraintName(statement.getTableName(), statement.getColumnName());
             }
-            clause += " DEFAULT " + database.convertJavaObjectToString(statement.getDefaultValue());
+            clause += " DEFAULT " + TypeConverterFactory.getInstance().findTypeConverter(database).convertJavaObjectToString(statement.getDefaultValue(), database);
         }
         return clause;
     }

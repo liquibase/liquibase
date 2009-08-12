@@ -2,6 +2,7 @@ package liquibase.change.core;
 
 import liquibase.change.*;
 import liquibase.database.Database;
+import liquibase.database.typeconversion.TypeConverterFactory;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.*;
@@ -44,11 +45,11 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
 
             if (constraints != null && constraints.isPrimaryKey() != null && constraints.isPrimaryKey()) {
 
-                statement.addPrimaryKeyColumn(column.getName(), database.getColumnType(column.getType(), isAutoIncrement), defaultValue, constraints.getPrimaryKeyName());
+                statement.addPrimaryKeyColumn(column.getName(), TypeConverterFactory.getInstance().findTypeConverter(database).getColumnType(column.getType(), isAutoIncrement), defaultValue, constraints.getPrimaryKeyName());
 
             } else {
                 statement.addColumn(column.getName(),
-                        database == null ? column.getType() : database.getColumnType(column.getType(), column.isAutoIncrement()),
+                        database == null ? column.getType() : TypeConverterFactory.getInstance().findTypeConverter(database).getColumnType(column.getType(), column.isAutoIncrement()),
                         defaultValue);
             }
 

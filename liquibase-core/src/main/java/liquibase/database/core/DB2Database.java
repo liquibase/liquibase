@@ -1,22 +1,14 @@
 package liquibase.database.core;
 
 import liquibase.database.AbstractDatabase;
-import liquibase.database.DataType;
 import liquibase.database.DatabaseConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.DateParseException;
 
-import java.sql.Types;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
 public class DB2Database extends AbstractDatabase {
-    private static final DataType BOOLEAN_TYPE = new DataType("SMALLINT", true);
-    private static final DataType CURRENCY_TYPE = new DataType("DECIMAL(19,4)", false);
-    private static final DataType UUID_TYPE = new DataType("VARCHAR(36)", false);
-    private static final DataType CLOB_TYPE = new DataType("CLOB", true);
-    private static final DataType BLOB_TYPE = new DataType("BLOB", true);
-    private static final DataType DATETIME_TYPE = new DataType("TIMESTAMP", false);
 
     public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
         return conn.getDatabaseProductName().startsWith("DB2");
@@ -49,20 +41,6 @@ public class DB2Database extends AbstractDatabase {
 
     public String getCurrentDateTimeFunction() {
         return "CURRENT TIMESTAMP";
-    }
-
-    public DataType getBooleanType() {
-        return BOOLEAN_TYPE;
-    }
-
-    @Override
-    public String getTrueBooleanValue() {
-        return "1";
-    }
-
-    @Override
-    public String getFalseBooleanValue() {
-        return "0";
     }
 
     /**
@@ -105,26 +83,6 @@ public class DB2Database extends AbstractDatabase {
         }
     }
 
-    public DataType getCurrencyType() {
-        return CURRENCY_TYPE;
-    }
-
-    public DataType getUUIDType() {
-        return UUID_TYPE;
-    }
-
-    public DataType getClobType() {
-        return CLOB_TYPE;
-    }
-
-    public DataType getBlobType() {
-        return BLOB_TYPE;
-    }
-
-    public DataType getDateTimeType() {
-        return DATETIME_TYPE;
-    }
-
     @Override
     public boolean shouldQuoteValue(String value) {
         return super.shouldQuoteValue(value)
@@ -141,22 +99,9 @@ public class DB2Database extends AbstractDatabase {
         return super.getViewDefinition(schemaName, name).replaceFirst("CREATE VIEW \\w+ AS ", ""); //db2 returns "create view....as select
     }
 
-    @Override
-    public Object convertDatabaseValueToJavaObject(Object defaultValue, int dataType, int columnSize, int decimalDigits) throws ParseException {
-        if (defaultValue != null && defaultValue instanceof String) {
-            if (dataType == Types.TIMESTAMP) {
-                defaultValue = ((String) defaultValue).replaceFirst("^\"SYSIBM\".\"TIMESTAMP\"\\('", "").replaceFirst("'\\)", "");
-            } else if (dataType == Types.TIME) {
-                defaultValue = ((String) defaultValue).replaceFirst("^\"SYSIBM\".\"TIME\"\\('", "").replaceFirst("'\\)", "");
-            } else if (dataType == Types.DATE) {
-                defaultValue = ((String) defaultValue).replaceFirst("^\"SYSIBM\".\"DATE\"\\('", "").replaceFirst("'\\)", "");
-            }
-        }
-        return super.convertDatabaseValueToJavaObject(defaultValue, dataType, columnSize, decimalDigits);
-    }
 
     @Override
-    protected java.util.Date parseDate(String dateAsString) throws DateParseException {
+    public java.util.Date parseDate(String dateAsString) throws DateParseException {
         try {
             if (dateAsString.indexOf(' ') > 0) {
                 return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(dateAsString);

@@ -5,6 +5,7 @@ import liquibase.change.ColumnConfig;
 import liquibase.change.ConstraintsConfig;
 import liquibase.change.core.*;
 import liquibase.database.Database;
+import liquibase.database.typeconversion.TypeConverterFactory;
 import liquibase.database.structure.*;
 import liquibase.exception.DatabaseException;
 import liquibase.logging.LogFactory;
@@ -727,7 +728,7 @@ public class DiffResult {
 
             columnConfig.setType(dataType);
 
-            String defaultValueString = database.convertJavaObjectToString(column.getDefaultValue());
+            String defaultValueString = TypeConverterFactory.getInstance().findTypeConverter(database).convertJavaObjectToString(column.getDefaultValue(), database);
             if(defaultValueString !=null) {
               defaultValueString  = defaultValueString.replaceFirst("'","").replaceAll("'$", "");
             }

@@ -1,6 +1,7 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
+import liquibase.database.typeconversion.TypeConverterFactory;
 import liquibase.database.core.*;
 import liquibase.exception.ValidationErrors;
 import liquibase.logging.LogFactory;
@@ -41,7 +42,7 @@ public class CreateTableGenerator implements SqlGenerator<CreateTableStatement> 
             boolean isAutoIncrement = statement.getAutoIncrementColumns().contains(column);
 
             buffer.append(database.escapeColumnName(statement.getSchemaName(), statement.getTableName(), column));
-            buffer.append(" ").append(database.getColumnType(statement.getColumnTypes().get(column), isAutoIncrement));
+            buffer.append(" ").append(TypeConverterFactory.getInstance().findTypeConverter(database).getColumnType(statement.getColumnTypes().get(column), isAutoIncrement));
 
             if ((database instanceof SQLiteDatabase) &&
 					(statement.getPrimaryKeyConstraint()!=null) &&

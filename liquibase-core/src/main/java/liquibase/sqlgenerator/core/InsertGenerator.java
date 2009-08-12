@@ -1,6 +1,7 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
+import liquibase.database.typeconversion.TypeConverterFactory;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
@@ -51,9 +52,9 @@ public class InsertGenerator implements SqlGenerator<InsertStatement> {
                 sql.append(database.getDateLiteral(((Date) newValue)));
             } else if (newValue instanceof Boolean) {
                 if (((Boolean) newValue)) {
-                    sql.append(database.getTrueBooleanValue());
+                    sql.append(TypeConverterFactory.getInstance().findTypeConverter(database).getTrueBooleanValue());
                 } else {
-                    sql.append(database.getFalseBooleanValue());
+                    sql.append(TypeConverterFactory.getInstance().findTypeConverter(database).getFalseBooleanValue());
                 }
             } else {
                 sql.append(newValue);

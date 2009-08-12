@@ -1,7 +1,6 @@
 package liquibase.database.core;
 
 import liquibase.database.AbstractDatabaseTest;
-import liquibase.database.DataType;
 import liquibase.database.Database;
 import org.junit.Assert;
 import static org.junit.Assert.*;
@@ -18,52 +17,11 @@ public class H2DatabaseTest extends AbstractDatabaseTest {
         return "H2";
     }
 
-    @Override
-    @Test
-    public void getBlobType() {
-        Assert.assertEquals(new DataType("LONGVARBINARY", true), getDatabase().getBlobType());
-    }
 
     @Override
     @Test
     public void supportsInitiallyDeferrableColumns() {
         assertFalse(getDatabase().supportsInitiallyDeferrableColumns());
-    }
-
-    @Override
-    @Test
-    public void getBooleanType() {
-        Assert.assertEquals(new DataType("BOOLEAN", false), getDatabase().getBooleanType());
-    }
-
-    @Override
-    @Test
-    public void getCurrencyType() {
-        Assert.assertEquals(new DataType("DECIMAL", true), getDatabase().getCurrencyType());
-    }
-
-    @Override
-    @Test
-    public void getUUIDType() {
-        Assert.assertEquals(new DataType("VARCHAR(36)", false), getDatabase().getUUIDType());
-    }
-
-    @Override
-    @Test
-    public void getClobType() {
-        Assert.assertEquals(new DataType("LONGVARCHAR", true), getDatabase().getClobType());
-    }
-
-    @Override
-    @Test
-    public void getDateType() {
-        Assert.assertEquals(new DataType("DATE", false), getDatabase().getDateType());
-    }
-
-    @Override
-    @Test
-    public void getDateTimeType() {
-        Assert.assertEquals(new DataType("TIMESTAMP", false), getDatabase().getDateTimeType());
     }
 
     @Override

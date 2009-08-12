@@ -2,6 +2,7 @@ package liquibase.snapshot.core;
 
 import liquibase.database.Database;
 import liquibase.database.JdbcConnection;
+import liquibase.database.typeconversion.TypeConverterFactory;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.database.structure.*;
 import liquibase.exception.DatabaseException;
@@ -215,7 +216,7 @@ public class SQLiteDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
         columnInfo.setDecimalDigits(rs.getInt("DECIMAL_POINTS"));
         Object defaultValue = rs.getObject("COLUMN_DEF");
         try {
-            columnInfo.setDefaultValue(database.convertDatabaseValueToJavaObject(defaultValue, columnInfo.getDataType(), columnInfo.getColumnSize(), columnInfo.getDecimalDigits()));
+            columnInfo.setDefaultValue(TypeConverterFactory.getInstance().findTypeConverter(database).convertDatabaseValueToJavaObject(defaultValue, columnInfo.getDataType(), columnInfo.getColumnSize(), columnInfo.getDecimalDigits(), database));
         } catch (ParseException e) {
             throw new DatabaseException(e);
         }
@@ -229,7 +230,7 @@ public class SQLiteDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
 
         columnInfo.setPrimaryKey(snapshot.isPrimaryKey(columnInfo));
         columnInfo.setAutoIncrement(isColumnAutoIncrement(database,  schema, tableName, columnName));
-        columnInfo.setTypeName(database.getColumnType(rs.getString("TYPE_NAME"), columnInfo.isAutoIncrement()));            
+        columnInfo.setTypeName(TypeConverterFactory.getInstance().findTypeConverter(database).getColumnType(rs.getString("TYPE_NAME"), columnInfo.isAutoIncrement()));            
             	
         return columnInfo;
     }

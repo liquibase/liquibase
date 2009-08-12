@@ -3,6 +3,7 @@ package liquibase.executor.core.jdbc;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.JdbcConnection;
+import liquibase.database.typeconversion.TypeConverterFactory;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.AbstractExecutor;
 import liquibase.executor.Executor;
@@ -246,7 +247,7 @@ public class JdbcExecutor extends AbstractExecutor implements Executor {
 
         for (int i = 0; i < parameters.size(); i++) {
             String param = parameters.get(i);
-            int type = database.getDatabaseType(statement.getParameterType(param));
+            int type = TypeConverterFactory.getInstance().findTypeConverter(database).getDatabaseType(statement.getParameterType(param));
 
             if (param == null) {
                 pstmt.setNull(i + 1, type);

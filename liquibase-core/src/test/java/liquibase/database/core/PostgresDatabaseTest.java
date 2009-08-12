@@ -1,7 +1,6 @@
 package liquibase.database.core;
 
 import liquibase.database.AbstractDatabaseTest;
-import liquibase.database.DataType;
 import liquibase.database.Database;
 import org.junit.Assert;
 import static org.junit.Assert.*;
@@ -23,51 +22,11 @@ public class PostgresDatabaseTest extends AbstractDatabaseTest {
 
     @Override
     @Test
-    public void getBlobType() {
-        Assert.assertEquals(new DataType("BYTEA", false), getDatabase().getBlobType());
-    }
-
-    @Override
-    @Test
     public void supportsInitiallyDeferrableColumns() {
         assertTrue(getDatabase().supportsInitiallyDeferrableColumns());
     }
 
-    @Override
-    @Test
-    public void getBooleanType() {
-        Assert.assertEquals(new DataType("BOOLEAN", false), getDatabase().getBooleanType());
-    }
 
-    @Override
-    @Test
-    public void getCurrencyType() {
-        Assert.assertEquals(new DataType("DECIMAL", true), getDatabase().getCurrencyType());
-    }
-
-    @Override
-    @Test
-    public void getUUIDType() {
-        Assert.assertEquals(new DataType("CHAR(36)", false), getDatabase().getUUIDType());
-    }
-
-    @Override
-    @Test
-    public void getClobType() {
-        Assert.assertEquals(new DataType("TEXT", true), getDatabase().getClobType());
-    }
-
-    @Override
-    @Test
-    public void getDateType() {
-        Assert.assertEquals(new DataType("DATE", false), getDatabase().getDateType());
-    }
-
-    @Override
-    @Test
-    public void getDateTimeType() {
-        Assert.assertEquals(new DataType("TIMESTAMP WITH TIME ZONE", false), getDatabase().getDateTimeType());
-    }
 
     @Override
     @Test
@@ -93,15 +52,7 @@ public class PostgresDatabaseTest extends AbstractDatabaseTest {
         assertNull(database.getDefaultDriver("jdbc:db2://localhost;databaseName=liquibase"));
     }
 
-    @Test
-    public void getColumnType_BigSerial_AutoIncrement() {
-        Assert.assertEquals("bigserial", getDatabase().getColumnType("bigserial", Boolean.TRUE));
-    }
-
-    @Test
-    public void getColumnType_BigInt_AutoIncrement() {
-        Assert.assertEquals("bigserial", getDatabase().getColumnType("bigint", Boolean.TRUE));
-    }
+ 
 
     @Override
     @Test

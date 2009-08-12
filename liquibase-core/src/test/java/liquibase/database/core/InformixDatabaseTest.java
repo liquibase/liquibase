@@ -11,44 +11,7 @@ public class InformixDatabaseTest extends TestCase {
 		database = new InformixDatabase();
 	}
 	
-	public void testGetColumnType() {
-		String type;
-		
-		type = database.getColumnType("int", true);
-		assertEquals("SERIAL", type);
 
-		type = database.getColumnType("INT", true);
-		assertEquals("SERIAL", type);
-		
-		type = database.getColumnType("integer", true);
-		assertEquals("SERIAL", type);
-
-		type = database.getColumnType("INTEGER", true);
-		assertEquals("SERIAL", type);
-		
-		type = database.getColumnType("BIGINT", true);
-		assertEquals("SERIAL8", type);
-		
-		type = database.getColumnType("bigint", true);
-		assertEquals("SERIAL8", type);
-
-		type = database.getColumnType("int8", true);
-		assertEquals("SERIAL8", type);
-
-		try {
-			type = database.getColumnType("integ", true);
-			fail();
-		} catch (IllegalArgumentException e) {
-			assertEquals("Unknown autoincrement type: integ", e.getMessage());
-		}
-		
-		try {
-			type = database.getColumnType("varchar(10)", true);
-			fail();
-		} catch (IllegalArgumentException e) {
-			assertEquals("Unknown autoincrement type: varchar(10)", e.getMessage());
-		}
-	}
 	
 	public void testGetDateLiteral() {
 		String d;
@@ -63,16 +26,7 @@ public class InformixDatabaseTest extends TestCase {
 		assertEquals("INTERVAL (13:14:15) HOUR TO FRACTION(5)", d);
 	}
 
-	public void testConvertJavaObjectToStringWithBoolean() {
-		String s;
-		
-		s = database.convertJavaObjectToString(Boolean.TRUE);
-		assertEquals("'t'", s);
-		
-		s = database.convertJavaObjectToString(Boolean.FALSE);
-		assertEquals("'f'", s);
-	}
-	
+
 	public void testGetDefaultDriver() {
 		assertEquals("com.informix.jdbc.IfxDriver",
 				database.getDefaultDriver("jdbc:informix-sqli://localhost:9088/liquibase:informixserver=ol_ids_1150_1"));

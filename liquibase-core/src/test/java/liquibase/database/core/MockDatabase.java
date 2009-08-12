@@ -4,7 +4,6 @@ import liquibase.Liquibase;
 import liquibase.change.Change;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.RanChangeSet;
-import liquibase.database.DataType;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.structure.DatabaseObject;
@@ -120,18 +119,6 @@ public class MockDatabase implements Database {
 
     public boolean supportsAutoIncrement() {
         return true;
-    }
-
-    public String getColumnType(String columnType, Boolean autoIncrement) {
-        return columnType;
-    }
-
-    public String getFalseBooleanValue() {
-        return "FALSE";
-    }
-
-    public String getTrueBooleanValue() {
-        return "TRUE";
     }
 
     public String getDateLiteral(String isoDate) {
@@ -264,86 +251,8 @@ public class MockDatabase implements Database {
         return null;
     }
 
-    public int getDatabaseType(int type) {
-        return type;
-    }
-
     public String getDatabaseProductName(DatabaseConnection conn) throws DatabaseException {
         return "Mock Database";
-    }
-
-    public DataType getBooleanType() {
-        return new DataType("BOOLEAN", false);
-    }
-
-    public DataType getCurrencyType() {
-        return new DataType("CURRENCY", true);
-    }
-
-    public DataType getUUIDType() {
-        return new DataType("UUID", false);
-    }
-
-    public DataType getClobType() {
-        return new DataType("CLOB", true);
-    }
-
-    public DataType getCharType()
-    {
-        return new DataType("CHAR", true);
-    }
-
-    public DataType getVarcharType()
-    {
-        return new DataType("VARCHAR", true);
-    }
-
-    public DataType getFloatType()
-    {
-        return new DataType("FLOAT", true);
-    }
-
-    public DataType getDoubleType()
-    {
-        return new DataType("DOUBLE", true);
-    }
-
-    public DataType getIntType()
-    {
-        return new DataType("INT", true);
-    }
-
-    public DataType getTinyIntType()
-    {
-        return new DataType("TINYINT", true);
-    }
-
-    public DataType getBlobType() {
-        return new DataType("BLOB", true);
-    }
-
-    public DataType getDateType() {
-        return new DataType("DATE", false);
-    }
-
-    public DataType getDateTimeType() {
-        return new DataType("DATETIME", false);
-    }
-
-    public DataType getTimeType() {
-        return new DataType("TIME", false);
-    }
-
-    public DataType getBigIntType() {
-        return new DataType("BIGINT", true);
-    }
-
-    public Object convertDatabaseValueToJavaObject(Object defaultValue, int dataType, int columnSize, int decimalDigits) {
-        return defaultValue;
-    }
-
-    public String convertJavaObjectToString(Object value) {
-        return value.toString();
     }
 
     public String getDateLiteral(Date defaultDateValue) {
@@ -508,5 +417,9 @@ public class MockDatabase implements Database {
 
     public int getNextChangeSetSequenceValue() throws LiquibaseException {
         return 1;
+    }
+
+    public Date parseDate(String dateAsString) throws DateParseException {
+        return new Date();
     }
 }

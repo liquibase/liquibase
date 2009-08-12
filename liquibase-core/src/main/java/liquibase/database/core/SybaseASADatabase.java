@@ -4,7 +4,6 @@
 package liquibase.database.core;
 
 import liquibase.database.AbstractDatabase;
-import liquibase.database.DataType;
 import liquibase.database.DatabaseConnection;
 import liquibase.exception.DatabaseException;
 
@@ -18,12 +17,6 @@ import java.util.Set;
 public class SybaseASADatabase extends AbstractDatabase {
 
     private static final Set<String> systemTablesAndViews;
-    private static final DataType BLOB_TYPE = new DataType("LONG BINARY", false);
-    private static final DataType BOOLEAN_TYPE = new DataType("BIT", false);
-    private static final DataType CLOB_TYPE = new DataType("LONG VARCHAR", false);
-    private static final DataType CURRENCY_TYPE = new DataType("MONEY", false);
-    private static final DataType DATETIME_TYPE = new DataType("DATETIME", false);
-    private static final DataType UUID_TYPE = new DataType("UNIQUEIDENTIFIER", false);
 
     static {
     	systemTablesAndViews = new HashSet<String>();
@@ -127,45 +120,11 @@ public class SybaseASADatabase extends AbstractDatabase {
 		super();
 	}
 
-	public DataType getBlobType() {
-		
-		return BLOB_TYPE;
-	}
-
-	/* (non-Javadoc)
-	 * @see liquibase.database.Database#getBooleanType()
-	 */
-	public DataType getBooleanType() {
-		
-		return BOOLEAN_TYPE;
-	}
-
-	/* (non-Javadoc)
-	 * @see liquibase.database.Database#getClobType()
-	 */
-	public DataType getClobType() {
-		return CLOB_TYPE;
-	}
-
-	/* (non-Javadoc)
-	 * @see liquibase.database.Database#getCurrencyType()
-	 */
-	public DataType getCurrencyType() {
-		return CURRENCY_TYPE;
-	}
-
 	/* (non-Javadoc)
 	 * @see liquibase.database.Database#getCurrentDateTimeFunction()
 	 */
 	public String getCurrentDateTimeFunction() {
 		return "now()";
-	}
-
-	/* (non-Javadoc)
-	 * @see liquibase.database.Database#getDateTimeType()
-	 */
-	public DataType getDateTimeType() {
-		return DATETIME_TYPE;
 	}
 
 	/* (non-Javadoc)
@@ -185,13 +144,6 @@ public class SybaseASADatabase extends AbstractDatabase {
 	public String getTypeName() {
 		
 		return "asany";
-	}
-
-	/* (non-Javadoc)
-	 * @see liquibase.database.Database#getUUIDType()
-	 */
-	public DataType getUUIDType() {
-        return UUID_TYPE;
 	}
 
 	/* (non-Javadoc)
@@ -259,16 +211,6 @@ public class SybaseASADatabase extends AbstractDatabase {
 	@Override
     public Set<String> getSystemTablesAndViews() {
         return systemTablesAndViews;
-    }
-
-	@Override
-    public String getTrueBooleanValue() {
-        return "1";
-    }
-
-	@Override
-    public String getFalseBooleanValue() {
-        return "0";
     }
 
     @Override

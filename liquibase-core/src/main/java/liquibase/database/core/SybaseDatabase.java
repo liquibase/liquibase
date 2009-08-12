@@ -1,11 +1,9 @@
 package liquibase.database.core;
 
 import liquibase.database.AbstractDatabase;
-import liquibase.database.DataType;
 import liquibase.database.DatabaseConnection;
 import liquibase.exception.DatabaseException;
 
-import java.text.ParseException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -15,13 +13,6 @@ import java.util.Set;
 public class SybaseDatabase extends AbstractDatabase {
     public static final String PRODUCT_NAME = "Adaptive Server Enterprise";
     protected Set<String> systemTablesAndViews = new HashSet<String>();
-    private static final DataType DATETIME_TYPE = new DataType("DATETIME", false);
-    private static final DataType DATE_TYPE = new DataType("SMALLDATETIME", false);
-    private static final DataType BOOLEAN_TYPE = new DataType("BIT", false);
-    private static final DataType CURRENCY_TYPE = new DataType("MONEY", false);
-    private static final DataType UUID_TYPE = new DataType("UNIQUEIDENTIFIER", false);
-    private static final DataType CLOB_TYPE = new DataType("TEXT", true);
-    private static final DataType BLOB_TYPE = new DataType("IMAGE", true);
 
     public String getProductName() {
         return "Sybase SQL Server";
@@ -100,42 +91,6 @@ public class SybaseDatabase extends AbstractDatabase {
         return null;
     }
 
-    public DataType getDateTimeType() {
-        return DATETIME_TYPE;
-    }
-
-
-    @Override
-    public DataType getTimeType() {
-        return DATETIME_TYPE;
-    }
-
-
-    @Override
-    public DataType getDateType() {
-        return DATE_TYPE;
-    }
-
-    public DataType getBooleanType() {
-        return BOOLEAN_TYPE;
-    }
-
-    public DataType getCurrencyType() {
-        return CURRENCY_TYPE;
-    }
-
-    public DataType getUUIDType() {
-        return UUID_TYPE;
-    }
-
-    public DataType getClobType() {
-        return CLOB_TYPE;
-    }
-
-    public DataType getBlobType() {
-        return BLOB_TYPE;
-    }
-
     public String getCurrentDateTimeFunction() {
         return "GETDATE()";
     }
@@ -155,15 +110,6 @@ public class SybaseDatabase extends AbstractDatabase {
         return getConnection().getCatalog();
     }
 
-    @Override
-    public String getTrueBooleanValue() {
-        return "1";
-    }
-
-    @Override
-    public String getFalseBooleanValue() {
-        return "0";
-    }
 
     @Override
     public String getConcatSql(String... values) {
@@ -237,25 +183,6 @@ public class SybaseDatabase extends AbstractDatabase {
 
 
     @Override
-    public Object convertDatabaseValueToJavaObject(Object defaultValue, int dataType, int columnSize, int decimalDigits) throws ParseException {
-        if (defaultValue == null) {
-            return null;
-        }
-
-        if (defaultValue instanceof String) {
-            if (((String) defaultValue).startsWith("('")) {
-                defaultValue = ((String) defaultValue).replaceFirst("^\\('", "").replaceFirst("'\\)$", "");
-            } else if (((String) defaultValue).startsWith("((")) {
-                defaultValue = ((String) defaultValue).replaceFirst("^\\(\\(", "").replaceFirst("\\)\\)$", "");
-            }
-        }
-
-        defaultValue = super.convertDatabaseValueToJavaObject(defaultValue, dataType, columnSize, decimalDigits);
-
-        return defaultValue;
-    }
-
-    @Override
     public String convertRequestedSchemaToCatalog(String requestedSchema) throws DatabaseException {
         return getDefaultCatalogName();
     }
@@ -266,16 +193,6 @@ public class SybaseDatabase extends AbstractDatabase {
             return "dbo";
         }
         return requestedSchema;
-    }
-
-
-    @Override
-    public String getColumnType(String columnType, Boolean autoIncrement) {
-        String type = super.getColumnType(columnType, autoIncrement);
-        if (autoIncrement != null && autoIncrement) {
-            type = type.replaceFirst(" identity$", "");
-        }
-        return type;
     }
 
     @Override
