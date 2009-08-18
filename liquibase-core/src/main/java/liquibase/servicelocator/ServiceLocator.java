@@ -17,6 +17,7 @@ import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
+import java.util.zip.ZipException;
 
 public class ServiceLocator {
 
@@ -155,13 +156,18 @@ public class ServiceLocator {
         List<String> potentialClassNames = new ArrayList<String>();
         if (resource.getProtocol().equals("jar")) {
             File zipfile = new File(resource.getFile().split("!")[0].replaceFirst("file:\\/", ""));
-            JarFile jarFile = new JarFile(zipfile);
-            Enumeration<JarEntry> entries = jarFile.entries();
-            while (entries.hasMoreElements()) {
-                JarEntry entry = entries.nextElement();
-                if (entry.getName().startsWith(packageName.replaceAll("\\.", "/")) && entry.getName().endsWith(".class")) {
-                    potentialClassNames.add(entry.getName().replaceAll("\\/", ".").substring(0, entry.getName().length() - ".class".length()));
+            try {
+                JarFile jarFile = new JarFile(zipfile);
+                Enumeration<JarEntry> entries = jarFile.entries();
+                while (entries.hasMoreElements()) {
+                    JarEntry entry = entries.nextElement();
+                    if (entry.getName().startsWith(packageName.replaceAll("\\.", "/")) && entry.getName().endsWith(".class")) {
+                        potentialClassNames.add(entry.getName().replaceAll("\\/", ".").substring(0, entry.getName().length() - ".class".length()));
+                    }
                 }
+            }
+            catch(ZipException e) {
+                throw (ZipException) new ZipException(e.getMessage() + " for " + zipfile).initCause(e);
             }
         } else if (resource.getProtocol().equals("file")) {
             File directory = new File(resource.getFile().replace("%20", " "));
