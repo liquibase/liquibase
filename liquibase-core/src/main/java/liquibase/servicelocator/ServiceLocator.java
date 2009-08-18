@@ -133,7 +133,8 @@ public class ServiceLocator {
             }
 
         List<Class> classes = classesBySuperclass.get(requiredInterface);
-        return classes.toArray(new Class[classes.size()]);
+        HashSet<Class> uniqueClasses = new HashSet<Class>(classes);
+        return uniqueClasses.toArray(new Class[uniqueClasses.size()]);
     }
 
     public Object newInstance(Class requiredInterface) throws ServiceNotFoundException {
