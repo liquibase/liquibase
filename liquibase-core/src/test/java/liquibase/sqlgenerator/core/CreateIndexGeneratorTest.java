@@ -1,6 +1,6 @@
 package liquibase.sqlgenerator.core;
 
-public class CreateIndexGeneratorTest {
+public abstract class CreateIndexGeneratorTest {
 //    @Test
 //    public void execute_singleColumnDefaultSchema() throws Exception {
 //        new DatabaseTestTemplate().testOnAvailableDatabases(

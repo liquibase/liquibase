@@ -1,6 +1,6 @@
 package liquibase.sqlgenerator.core;
 
-public class TagDatabaseGeneratorTest {
+public abstract class TagDatabaseGeneratorTest {
 ////    @Test
 ////    public void supports() throws Exception {
 ////        new DatabaseTestTemplate().testOnAllDatabases(new DatabaseTest() {

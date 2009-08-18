@@ -1,6 +1,6 @@
 package liquibase.sqlgenerator.core;
 
-public class AddDefaultValueGeneratorTest {
+public abstract class AddDefaultValueGeneratorTest {
 //        @Test
 //    public void execute_stringDefaultValue() throws Exception {
 //        new DatabaseTestTemplate().testOnAvailableDatabases(new DatabaseTest() {

@@ -1,6 +1,6 @@
 package liquibase.sqlgenerator.core;
 
-public class DropUniqueConstraintGeneratorTest {
+public abstract class DropUniqueConstraintGeneratorTest {
 //    @Test
 //    public void execute_defaultSchema() throws Exception {
 //        new DatabaseTestTemplate().testOnAvailableDatabases(

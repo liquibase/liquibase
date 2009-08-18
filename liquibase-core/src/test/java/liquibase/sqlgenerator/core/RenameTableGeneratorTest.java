@@ -1,6 +1,6 @@
 package liquibase.sqlgenerator.core;
 
-public class RenameTableGeneratorTest {
+public abstract class RenameTableGeneratorTest {
 //    @Test
 //    public void execute_defaultSchema() throws Exception {
 //        new DatabaseTestTemplate().testOnAvailableDatabases(

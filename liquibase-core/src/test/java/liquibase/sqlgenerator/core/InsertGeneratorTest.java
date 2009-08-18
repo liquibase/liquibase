@@ -1,6 +1,6 @@
 package liquibase.sqlgenerator.core;
 
-public class InsertGeneratorTest {
+public abstract class InsertGeneratorTest {
 //    @Test
 //    public void execute_defaultSchema() throws Exception {
 //        new DatabaseTestTemplate().testOnAvailableDatabases(

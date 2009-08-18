@@ -1,6 +1,6 @@
 package liquibase.sqlgenerator.core;
 
-public class DropPrimaryKeyGeneratorTest {
+public abstract class DropPrimaryKeyGeneratorTest {
 //    @Test
 //    public void execute_defaultSchema() throws Exception {
 //        new DatabaseTestTemplate().testOnAvailableDatabases(

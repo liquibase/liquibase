@@ -1,6 +1,6 @@
 package liquibase.sqlgenerator.core;
 
-public class DropSequenceGeneratorTest {
+public abstract class DropSequenceGeneratorTest {
 //    private static final String SEQ_NAME = "DROPTEST_SEQ";
 //
 //    protected void setupDatabase(Database database) throws Exception {

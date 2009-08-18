@@ -1,6 +1,6 @@
 package liquibase.sqlgenerator.core;
 
-public class RenameColumnGeneratorTest {
+public abstract class RenameColumnGeneratorTest {
 ////    @Test
 ////    public void supports() throws Exception {
 ////        new DatabaseTestTemplate().testOnAllDatabases(new DatabaseTest() {

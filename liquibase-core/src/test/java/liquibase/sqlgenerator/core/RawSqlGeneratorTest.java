@@ -1,6 +1,6 @@
 package liquibase.sqlgenerator.core;
 
-public class RawSqlGeneratorTest {
+public abstract class RawSqlGeneratorTest {
 //    @Test
 //    public void constructorWithNoDelimiterPassed() throws Exception {
 //        new DatabaseTestTemplate().testOnAllDatabases(new DatabaseTest() {

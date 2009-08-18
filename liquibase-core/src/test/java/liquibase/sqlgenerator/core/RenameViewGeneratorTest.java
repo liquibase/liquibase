@@ -1,6 +1,6 @@
 package liquibase.sqlgenerator.core;
 
-public class RenameViewGeneratorTest {
+public abstract class RenameViewGeneratorTest {
 ////    @Test
 ////    public void supports() throws Exception {
 ////        new DatabaseTestTemplate().testOnAllDatabases(new DatabaseTest() {
