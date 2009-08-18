@@ -1,6 +1,6 @@
 package liquibase.sqlgenerator.core;
 
-public class ReorganizeTableGeneratorTest {
+public abstract class ReorganizeTableGeneratorTest {
 ////    @Test
 ////    public void supports() throws Exception {
 ////        new DatabaseTestTemplate().testOnAllDatabases(new DatabaseTest() {

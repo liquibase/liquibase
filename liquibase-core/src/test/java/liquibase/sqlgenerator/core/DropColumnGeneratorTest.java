@@ -1,6 +1,6 @@
 package liquibase.sqlgenerator.core;
 
-public class DropColumnGeneratorTest {
+public abstract class DropColumnGeneratorTest {
 ////    @Test
 ////    public void supports() throws Exception {
 ////        new DatabaseTestTemplate().testOnAllDatabases(new DatabaseTest() {

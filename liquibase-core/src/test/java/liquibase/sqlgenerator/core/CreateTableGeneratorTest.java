@@ -1,6 +1,6 @@
 package liquibase.sqlgenerator.core;
 
-public class CreateTableGeneratorTest {
+public abstract class CreateTableGeneratorTest {
 //    @Test
 //    public void createTable_standard() throws Exception {
 //        new DatabaseTestTemplate().testOnAvailableDatabases(

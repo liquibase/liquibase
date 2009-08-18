@@ -1,6 +1,6 @@
 package liquibase.sqlgenerator.core;
 
-public class CreateViewGeneratorTest {
+public abstract class CreateViewGeneratorTest {
 //    @Test
 //    public void execute_defaultSchema() throws Exception {
 //        final String definition = "SELECT * FROM " + TABLE_NAME;

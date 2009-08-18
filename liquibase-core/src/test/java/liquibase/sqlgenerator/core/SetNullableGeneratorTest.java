@@ -1,6 +1,6 @@
 package liquibase.sqlgenerator.core;
 
-public class SetNullableGeneratorTest {
+public abstract class SetNullableGeneratorTest {
 ////    @Test
 ////    public void supports() throws Exception {
 ////        new DatabaseTestTemplate().testOnAllDatabases(new DatabaseTest() {

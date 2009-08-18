@@ -1,6 +1,6 @@
 package liquibase.sqlgenerator.core;
 
-public class UpdateGeneratorTest {
+public abstract class UpdateGeneratorTest {
 ////    @Test
 ////    public void addNewColumnValue_nullValue() throws Exception {
 ////        new DatabaseTestTemplate().testOnAllDatabases(new DatabaseTest() {

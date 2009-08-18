@@ -1,6 +1,6 @@
 package liquibase.sqlgenerator.core;
 
-public class CreateSequenceGeneratorTest {
+public abstract class CreateSequenceGeneratorTest {
 //    //    @Test
 ////    public void supports() throws Exception {
 ////        new DatabaseTestTemplate().testOnAvailableDatabases(new DatabaseTest() {

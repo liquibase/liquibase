@@ -1,6 +1,6 @@
 package liquibase.sqlgenerator.core;
 
-public class AddForeignKeyConstraintGeneratorTest {
+public abstract class AddForeignKeyConstraintGeneratorTest {
 //    @Test
 //    public void execute() throws Exception {
 //        new DatabaseTestTemplate().testOnAvailableDatabases(
