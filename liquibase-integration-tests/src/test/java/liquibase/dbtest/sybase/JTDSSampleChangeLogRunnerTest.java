@@ -1,7 +1,7 @@
 package liquibase.dbtest.sybase;
 
 @SuppressWarnings({"JUnitTestCaseWithNoTests"})
-public class JTDSSampleChangeLogRunnerTest { // extends AbstractSimpleChangeLogRunnerTest {
+public abstract class JTDSSampleChangeLogRunnerTest { // extends AbstractSimpleChangeLogRunnerTest {
 
 //    public JTDSSampleChangeLogRunnerTest() throws Exception {
 //        super("sybase", "net.sourceforge.jtds.jdbc.Driver", "jdbc:jtds:sybase://localhost/nathan:5000");
@@ -15,5 +15,5 @@ public class JTDSSampleChangeLogRunnerTest { // extends AbstractSimpleChangeLogR
     protected boolean shouldRollBack() {
         return false;
     }
-    
+
 }
