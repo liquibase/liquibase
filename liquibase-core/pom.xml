@@ -44,8 +44,37 @@
             <manifestFile>src/main/resources/META-INF/MANIFEST.MF</manifestFile>
           </archive>
         </configuration>
-      </plugin>            
-    </plugins>
-  </build>  
+      </plugin>
+
+      <plugin>
+       <groupId>org.apache.maven.plugins</groupId>
+       <artifactId>maven-jar-plugin</artifactId>
+       <executions>
+         <execution>
+           <goals>
+             <goal>test-jar</goal>
+           </goals>
+         </execution>
+       </executions>
+     </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <excludes>
+            <exclude>**/TestContext.java</exclude>
+          </excludes>
+          <systemProperties>
+            <property>
+              <name>liquibase.default.logger.level</name>
+              <value>debug</value>
+            </property>
+          </systemProperties>          
+        </configuration>
+      </plugin>
+
+      </plugins>
+  </build>
 
 </project>
