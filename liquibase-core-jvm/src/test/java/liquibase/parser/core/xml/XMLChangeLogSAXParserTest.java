@@ -18,6 +18,8 @@ import liquibase.resource.CompositeResourceAccessor;
 import liquibase.servicelocator.ServiceLocator;
 import liquibase.logging.Logger;
 import static org.junit.Assert.*;
+
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.HashMap;
@@ -105,7 +107,7 @@ public class XMLChangeLogSAXParserTest {
         assertEquals("createTable", change.getChangeMetaData().getName());
         assertTrue(change instanceof CreateTableChange);
 
-    
+
         // change 3
         changeSet = changeLog.getChangeSets().get(3);
         assertEquals(1, changeSet.getChanges().size());
@@ -320,6 +322,7 @@ public class XMLChangeLogSAXParserTest {
     }
 
     @Test
+    @Ignore
     public void sampleChangeLogs() throws Exception {
         new XMLChangeLogSAXParser().parse("changelogs/cache/complete/root.changelog.xml", new HashMap<String, Object>(), new JUnitResourceAccessor());
         new XMLChangeLogSAXParser().parse("changelogs/db2/complete/root.changelog.xml", new HashMap<String, Object>(), new JUnitResourceAccessor());
@@ -337,6 +340,7 @@ public class XMLChangeLogSAXParserTest {
     }
 
     @Test
+    @Ignore
     public void extChangeLog() throws Exception {
         CompositeResourceAccessor compositeResourceAccessor = new CompositeResourceAccessor(new JUnitResourceAccessor(), new ExtensionResourceAccessor());
         ServiceLocator.reset();
