@@ -155,7 +155,13 @@ public class ServiceLocator {
 
         List<String> potentialClassNames = new ArrayList<String>();
         if (resource.getProtocol().equals("jar")) {
-            File zipfile = new File(resource.getFile().split("!")[0].replaceFirst("file:\\/", ""));
+            String path = resource.getFile().split("!")[0];
+            if(path.matches("file:\\/[A-Za-z]:\\/.*")) {
+                path = path.replaceFirst("file:\\/", "");
+            }else {
+                path = path.replaceFirst("file:", "");
+            }
+            File zipfile = new File(path);
             try {
                 JarFile jarFile = new JarFile(zipfile);
                 Enumeration<JarEntry> entries = jarFile.entries();
