@@ -1,5 +1,9 @@
 package liquibase.servicelocator;
 
+import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
+
 import liquibase.parser.ChangeLogParser;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.CompositeResourceAccessor;
@@ -16,7 +20,7 @@ public class ServiceLocatorTest {
     @Before
     public void setup() throws Exception{
         CompositeResourceAccessor resourceAccessor = new CompositeResourceAccessor(new ClassLoaderResourceAccessor(), TestContext.getInstance().getTestResourceAccessor());
-        
+
         serviceLocator = ServiceLocator.getInstance();
         serviceLocator.setResourceAccessor(resourceAccessor);
     }
@@ -25,7 +29,7 @@ public class ServiceLocatorTest {
     public void teardown() {
         ServiceLocator.reset();
     }
-    
+
     @Test
      public void reset() {
          ServiceLocator instance1 = ServiceLocator.getInstance();
@@ -50,5 +54,13 @@ public class ServiceLocatorTest {
             }
         }
         fail("Did not find Sample1UpdateGenerator");
+    }
+
+    @Test
+    public void extractZipFile() throws MalformedURLException {
+        File zipFile = ServiceLocator.extractZipFile(new URL("jar:file:/C:/Projects/liquibase2/liquibase-integration-tests/src/test/resources/ext/jars/liquibase-sample1.jar!/liquibase/sqlgenerator"));
+        assertEquals("C:/Projects/liquibase2/liquibase-integration-tests/src/test/resources/ext/jars/liquibase-sample1.jar",zipFile.toString().replace('\\','/'));
+         zipFile = ServiceLocator.extractZipFile(new URL("jar:file:/home/myuser/liquibase2/liquibase-integration-tests/src/test/resources/ext/jars/liquibase-sample1.jar!/liquibase/sqlgenerator"));
+        assertEquals("/home/myuser/liquibase2/liquibase-integration-tests/src/test/resources/ext/jars/liquibase-sample1.jar",zipFile.toString().replace('\\','/'));
     }
 }

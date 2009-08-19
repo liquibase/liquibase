@@ -155,13 +155,7 @@ public class ServiceLocator {
 
         List<String> potentialClassNames = new ArrayList<String>();
         if (resource.getProtocol().equals("jar")) {
-            String path = resource.getFile().split("!")[0];
-            if(path.matches("file:\\/[A-Za-z]:\\/.*")) {
-                path = path.replaceFirst("file:\\/", "");
-            }else {
-                path = path.replaceFirst("file:", "");
-            }
-            File zipfile = new File(path);
+            File zipfile = extractZipFile(resource);
             try {
                 JarFile jarFile = new JarFile(zipfile);
                 Enumeration<JarEntry> entries = jarFile.entries();
@@ -229,6 +223,18 @@ public class ServiceLocator {
         }
 
         return classes;
+    }
+
+    static File extractZipFile(URL resource) {
+        String file = resource.getFile();
+        String path = file.split("!")[0];
+        if(path.matches("file:\\/[A-Za-z]:\\/.*")) {
+            path = path.replaceFirst("file:\\/", "");
+        }else {
+            path = path.replaceFirst("file:", "");
+        }
+        File zipfile = new File(path);
+        return zipfile;
     }
 
     private boolean isCorrectType(Class<?> clazz, Class requiredInterface) {
