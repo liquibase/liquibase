@@ -32,9 +32,9 @@
   </scm>
 
 
-  <prerequisites>
+<!--  <prerequisites>
     <maven>2.1.0-M1</maven>
-  </prerequisites>
+  </prerequisites>-->
 
   <!-- 2.1.0-M1 and up, hence prerequisites -->
   <properties>
