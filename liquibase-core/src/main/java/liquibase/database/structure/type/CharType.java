@@ -6,4 +6,7 @@ public class CharType extends DataType {
         return "CHAR";
     }
 
+    public boolean getSupportsPrecision() {
+        return true;
+    }
 }

@@ -6,5 +6,7 @@ public class VarcharType extends DataType {
     public String getDataTypeName() {
         return "VARCHAR";
     }
-
+    public boolean getSupportsPrecision() {
+        return true;
+    }
 }
