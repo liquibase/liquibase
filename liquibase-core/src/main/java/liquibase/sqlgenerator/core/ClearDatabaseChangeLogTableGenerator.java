@@ -23,8 +23,10 @@ public class ClearDatabaseChangeLogTableGenerator implements SqlGenerator<ClearD
     }
 
     public Sql[] generateSql(ClearDatabaseChangeLogTableStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-            return new Sql[] {
-                    new UnparsedSql("DELETE FROM " + database.escapeTableName(database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName()))
-            };
+        String schemaName = statement.getSchemaName();
+        if (schemaName == null) {
+            schemaName = database.getLiquibaseSchemaName();
+        }
+        return new Sql[] { new UnparsedSql("DELETE FROM " + database.escapeTableName(schemaName, database.getDatabaseChangeLogTableName())) };
     }
 }
