@@ -66,7 +66,15 @@ public class OracleTypeConverter extends DefaultTypeConverter {
             }
         };
     }
-
+    @Override
+    public TimeType getTimeType() {
+        return new TimeType(){
+            @Override
+            public String getDataTypeName() {
+                return "DATE";
+            }
+        };
+    }
     @Override
     public DateTimeType getDateTimeType() {
         return new DateTimeType() {
@@ -86,5 +94,15 @@ public class OracleTypeConverter extends DefaultTypeConverter {
                 return "NUMBER(19,0)";
             }
         };
+    }
+
+    public VarcharType getVarcharType() {
+        return new VarcharType(){;
+
+        @Override
+        public String getDataTypeName() {
+            return "VARCHAR2";
+        }
+    };
     }
 }
