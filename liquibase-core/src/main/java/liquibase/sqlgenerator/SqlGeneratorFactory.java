@@ -112,7 +112,11 @@ public class SqlGeneratorFactory {
     }
 
     public Sql[] generateSql(SqlStatement statement, Database database) {
-        return createGeneratorChain(statement, database).generateSql(statement, database);
+        SqlGeneratorChain generatorChain = createGeneratorChain(statement, database);
+        if (generatorChain == null) {
+            throw new IllegalStateException("Cannot find generators for database " + database.getClass() + ", statement: " + statement);
+        }
+        return generatorChain.generateSql(statement, database);
     }
 
     public boolean supports(SqlStatement statement, Database database) {
