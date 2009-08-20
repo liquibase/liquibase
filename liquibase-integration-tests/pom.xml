@@ -62,8 +62,32 @@
           <type>test-jar</type>
           <scope>test</scope>
         </dependency>
+        <dependency>
+          <groupId>hsqldb</groupId>
+          <artifactId>hsqldb</artifactId>
+          <version>1.8.0.7</version>
+          <scope>test</scope>
+        </dependency>
+        <dependency>
+          <groupId>org.apache.derby</groupId>
+          <artifactId>derby</artifactId>
+          <version>10.2.2.0</version>
+          <scope>test</scope>
+        </dependency>
     </dependencies>
-
+	<profiles>
+		<profile>
+			<id>oracle</id>
+			<dependencies>
+				<dependency>
+					<groupId>oracle</groupId>
+					<artifactId>oracle-ojdbc14</artifactId>
+					<version>10.2.0.2</version>
+					<scope>test</scope>
+				</dependency>
+			</dependencies>
+		</profile>
+	</profiles>
   <build>
     <plugins>
       <plugin>
@@ -75,10 +99,10 @@
               <name>liquibase.default.logger.level</name>
               <value>debug</value>
             </property>
-          </systemProperties>          
+          </systemProperties>
         </configuration>
       </plugin>
-    </plugins>   
-  </build>  
+    </plugins>
+  </build>
 
 </project>
