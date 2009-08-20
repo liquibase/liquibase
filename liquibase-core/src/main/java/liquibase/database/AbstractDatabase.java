@@ -488,7 +488,7 @@ public abstract class AbstractDatabase implements Database {
 
 
             if (snapshot.hasDatabaseChangeLogTable()) {
-                dropChanges.add(new AnonymousChange(new ClearDatabaseChangeLogTableStatement()));
+                dropChanges.add(new AnonymousChange(new ClearDatabaseChangeLogTableStatement(schema)));
             }
 
             for (Change change : dropChanges) {
