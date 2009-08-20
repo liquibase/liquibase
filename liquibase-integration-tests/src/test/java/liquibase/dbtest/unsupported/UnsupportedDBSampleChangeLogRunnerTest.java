@@ -5,7 +5,7 @@ package liquibase.dbtest.unsupported;
  * Use to test using Derby, but changing the reported type so LiquiBase doesn't recognize it.
  */
 @SuppressWarnings({"all"})
-public class UnsupportedDBSampleChangeLogRunnerTest { // extends AbstractSimpleChangeLogRunnerTest {
+public abstract class UnsupportedDBSampleChangeLogRunnerTest { // extends AbstractSimpleChangeLogRunnerTest {
 
 //    public UnsupportedDBSampleChangeLogRunnerTest() throws Exception {
 //        super("unsupported", "org.apache.derby.jdbc.EmbeddedDriver", "jdbc:derby:liquibase;create=true");
