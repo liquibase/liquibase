@@ -221,6 +221,10 @@ public class DefaultTypeConverter implements TypeConverter {
         }
 
         // Return type and precision, if any
+        if (precision != null && !returnTypeName.getSupportsPrecision()) {
+            throw new UnexpectedLiquibaseException("Type "+returnTypeName.getClass()+" doesn't support precision but precision was specified: "+columnType);
+        }
+
         if (precision != null && returnTypeName.getSupportsPrecision()) {
             return returnTypeName.getDataTypeName() + "(" + precision + ")";
         } else {

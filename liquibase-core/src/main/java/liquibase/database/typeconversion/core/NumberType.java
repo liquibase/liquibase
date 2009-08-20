@@ -8,4 +8,7 @@ public class NumberType extends DataType {
         return "NUMBER";
     }
 
+    public boolean getSupportsPrecision() {
+        return true;
+    }
 }

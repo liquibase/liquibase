@@ -5,5 +5,7 @@ public class DateTimeType extends DataType {
     public String getDataTypeName() {
         return "DATETIME";
     }
-
+    public boolean getSupportsPrecision() {
+        return true;
+    }
 }
