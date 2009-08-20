@@ -28,10 +28,11 @@ public class SetTableRemarksGenerator implements SqlGenerator<SetTableRemarksSta
 
     public Sql[] generateSql(SetTableRemarksStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         String sql;
+        String remarks = database.escapeStringForDatabase(statement.getRemarks());
         if (database instanceof OracleDatabase) {
-            sql = "COMMENT ON TABLE "+database.escapeTableName(statement.getSchemaName(), statement.getTableName())+" IS '"+statement.getRemarks()+"'";
+            sql = "COMMENT ON TABLE "+database.escapeTableName(statement.getSchemaName(), statement.getTableName())+" IS '"+remarks+"'";
         } else {
-            sql = "ALTER TABLE "+database.escapeTableName(statement.getSchemaName(), statement.getTableName())+" COMMENT = '"+statement.getRemarks()+"'";
+            sql = "ALTER TABLE "+database.escapeTableName(statement.getSchemaName(), statement.getTableName())+" COMMENT = '"+remarks+"'";
         }
 
         return new Sql[] {
