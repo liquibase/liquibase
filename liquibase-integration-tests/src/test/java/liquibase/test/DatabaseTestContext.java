@@ -136,7 +136,13 @@ public class DatabaseTestContext {
 
 
         JUnitJDBCDriverClassLoader jdbcDriverLoader = JUnitJDBCDriverClassLoader.getInstance();
-        final Driver driver = (Driver) Class.forName(DatabaseFactory.getInstance().findDefaultDriver(url), true, jdbcDriverLoader).newInstance();
+        final Driver driver;
+        try {
+            driver = (Driver) Class.forName(DatabaseFactory.getInstance().findDefaultDriver(url), true, jdbcDriverLoader).newInstance();
+        } catch (ClassNotFoundException e) {
+            System.out.println("Could not connect to " + url + ": Will not test against.  " + e.getMessage());
+            return null; //could not connect
+        }
 
         Properties info = new Properties();
         info.put("user", username);
