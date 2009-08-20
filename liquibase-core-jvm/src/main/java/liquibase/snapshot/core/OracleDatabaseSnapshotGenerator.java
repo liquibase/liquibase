@@ -53,7 +53,7 @@ public class OracleDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
         ResultSet rs = null;
         try {
             statement = jdbcConnection.prepareStatement("select constraint_name, table_name, status, deferrable, deferred "
-                    + "from user_constraints where constraint_type='U'");
+                    + "from all_constraints where constraint_type='U' and owner='"+schema+"'");
             rs = statement.executeQuery();
             while (rs.next()) {
                 String constraintName = rs.getString("constraint_name");
@@ -63,15 +63,20 @@ public class OracleDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
                 String deferred = rs.getString("deferred");
                 UniqueConstraint constraintInformation = new UniqueConstraint();
                 constraintInformation.setName(constraintName);
-                Table table = snapshot.getTable(tableName);
-                constraintInformation.setTable(table);
-                constraintInformation.setDisabled("DISABLED".equals(status));
-                if ("DEFERRABLE".equals(deferrable)) {
-                    constraintInformation.setDeferrable(true);
-                    constraintInformation.setInitiallyDeferred("DEFERRED".equals(deferred));
+                if(!database.isSystemTable(null, schema, tableName)&&!database.isLiquibaseTable(tableName)) {
+                    Table table = snapshot.getTable(tableName);
+                    if (table == null) {
+                        throw new IllegalStateException("Cannot find table for " + tableName);
+                    }
+                    constraintInformation.setTable(table);
+                    constraintInformation.setDisabled("DISABLED".equals(status));
+                    if ("DEFERRABLE".equals(deferrable)) {
+                        constraintInformation.setDeferrable(true);
+                        constraintInformation.setInitiallyDeferred("DEFERRED".equals(deferred));
+                    }
+                    getColumnsForUniqueConstraint(jdbcConnection, constraintInformation);
+                    foundUC.add(constraintInformation);
                 }
-                getColumnsForUniqueConstraint(jdbcConnection, constraintInformation);
-                foundUC.add(constraintInformation);
             }
             snapshot.getUniqueConstraints().addAll(foundUC);
         } finally {
