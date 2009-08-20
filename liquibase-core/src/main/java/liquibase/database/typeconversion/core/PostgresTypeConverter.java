@@ -98,6 +98,13 @@ public class PostgresTypeConverter extends DefaultTypeConverter {
             }
         };
     }
-    
-    
+
+
+    public String getFalseBooleanValue() {
+        return "FALSE";
+    }
+
+    public String getTrueBooleanValue() {
+        return "TRUE";
+    }
 }

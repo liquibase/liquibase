@@ -35,4 +35,14 @@ public class HsqlTypeConverter extends DefaultTypeConverter {
             }
         };
     }
+
+    @Override
+    public String getTrueBooleanValue() {
+        return "TRUE";
+    }
+
+    @Override
+    public String getFalseBooleanValue() {
+        return "FALSE";
+    }
 }
