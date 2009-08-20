@@ -6,6 +6,7 @@ import liquibase.change.custom.CustomChangeWrapper;
 import liquibase.change.custom.CustomSqlChange;
 import liquibase.change.custom.ExampleCustomSqlChange;
 import liquibase.logging.Logger;
+import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import liquibase.test.JUnitResourceAccessor;
 import static org.junit.Assert.*;
@@ -32,8 +33,10 @@ public class StringChangeLogSerializerTest {
                 "]";
 
         CustomChangeWrapper wrapper = new CustomChangeWrapper();
-        wrapper.setFileOpener(new JUnitResourceAccessor());
-        wrapper.setClassLoader(new JUnitResourceAccessor().toClassLoader());
+        wrapper.setFileOpener(new ClassLoaderResourceAccessor());
+        //wrapper.setFileOpener(new JUnitResourceAccessor());
+        //wrapper.setClassLoader(new JUnitResourceAccessor().toClassLoader());
+        wrapper.setClassLoader(getClass().getClassLoader());
         wrapper.setClass("liquibase.change.custom.ExampleCustomSqlChange");
         wrapper.setParam("columnName", "column_name");
         wrapper.setParam("newValue", "new_value");

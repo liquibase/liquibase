@@ -2,6 +2,7 @@ package liquibase.change.core;
 
 import liquibase.change.AbstractChangeTest;
 import liquibase.database.core.MockDatabase;
+import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.InsertStatement;
 import liquibase.test.JUnitResourceAccessor;
@@ -26,7 +27,8 @@ public class LoadDataChangeTest extends AbstractChangeTest {
         refactoring.setSchemaName("SCHEMA_NAME");
         refactoring.setTableName("TABLE_NAME");
         refactoring.setFile("liquibase/change/core/sample.data1.csv");
-        refactoring.setFileOpener(new JUnitResourceAccessor());
+        //refactoring.setFileOpener(new JUnitResourceAccessor());
+        refactoring.setFileOpener(new ClassLoaderResourceAccessor());
 
         SqlStatement[] sqlStatements = refactoring.generateStatements(new MockDatabase());
 
@@ -51,7 +53,8 @@ public class LoadDataChangeTest extends AbstractChangeTest {
         refactoring.setSchemaName("SCHEMA_NAME");
         refactoring.setTableName("TABLE_NAME");
         refactoring.setFile("liquibase/change/core/sample.data1-excel.csv");
-        refactoring.setFileOpener(new JUnitResourceAccessor());
+        refactoring.setFileOpener(new ClassLoaderResourceAccessor());
+        //refactoring.setFileOpener(new JUnitResourceAccessor());
 
         LoadDataColumnConfig ageConfig = new LoadDataColumnConfig();
         ageConfig.setHeader("age");
@@ -93,7 +96,7 @@ public class LoadDataChangeTest extends AbstractChangeTest {
 
         assertEquals("Data loaded from FILE_NAME into TABLE_NAME", refactoring.getConfirmationMessage());
     }
-    
+
     @Override
     @Test
     public void generateCheckSum() throws Exception {
@@ -101,7 +104,8 @@ public class LoadDataChangeTest extends AbstractChangeTest {
         refactoring.setSchemaName("SCHEMA_NAME");
         refactoring.setTableName("TABLE_NAME");
         refactoring.setFile("liquibase/change/core/sample.data1.csv");
-        refactoring.setFileOpener(new JUnitResourceAccessor());
+        refactoring.setFileOpener(new ClassLoaderResourceAccessor());
+        //refactoring.setFileOpener(new JUnitResourceAccessor());
 
         String md5sum1 = refactoring.generateCheckSum().toString();
 
