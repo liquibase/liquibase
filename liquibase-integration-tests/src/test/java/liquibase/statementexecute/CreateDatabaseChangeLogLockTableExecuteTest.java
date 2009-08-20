@@ -25,7 +25,7 @@ public class CreateDatabaseChangeLogLockTableExecuteTest extends AbstractExecute
                 "[lockgranted] datetime, " +
                 "[lockedby] text, " +
                 "constraint [pk_databasechangeloglock] primary key ([id]))",
-                "insert into [databasechangeloglock] ([locked], [id]) values (0, 1)"}, SQLiteDatabase.class);
+                "insert into [databasechangeloglock] ([id], [locked]) values (1, 0)"}, SQLiteDatabase.class);
 
         assertCorrect(new String[]{"create table [databasechangeloglock] (" +
                 "[id] int not null, " +
@@ -33,14 +33,14 @@ public class CreateDatabaseChangeLogLockTableExecuteTest extends AbstractExecute
                 "[lockgranted] datetime null, " +
                 "[lockedby] varchar(255) null, " +
                 "constraint [pk_databasechangeloglock] primary key ([id]))",
-                "insert into [databasechangeloglock] ([locked], [id]) values (0, 1)"}, SybaseDatabase.class, SybaseASADatabase.class);
+                "insert into [databasechangeloglock] ([id], [locked]) values (1, 0)"}, SybaseDatabase.class, SybaseASADatabase.class);
 
         assertCorrect(new String[]{"create table [databasechangeloglock] (" +
                 "[id] int not null primary key, " +
                 "[locked] boolean not null, " +
                 "[lockgranted] datetime, " +
                 "[lockedby] varchar(255))",
-                "insert into [databasechangeloglock] ([locked], [id]) values ('f', 1)"}, InformixDatabase.class);
+                "insert into [databasechangeloglock] ([id], [locked]) values (1, 'f')"}, InformixDatabase.class);
 
         assertCorrect(new String[]{"create table [dbo].[databasechangeloglock] (" +
                 "[id] int not null, " +
@@ -48,7 +48,7 @@ public class CreateDatabaseChangeLogLockTableExecuteTest extends AbstractExecute
                 "[lockgranted] datetime, " +
                 "[lockedby] varchar(255), " +
                 "constraint [pk_databasechangeloglock] primary key ([id]))",
-                "insert into [dbo].[databasechangeloglock] ([locked], [id]) values (0, 1)"}, MSSQLDatabase.class);
+                "insert into [dbo].[databasechangeloglock] ([id], [locked]) values (1, 0)"}, MSSQLDatabase.class);
 
         assertCorrect(new String[]{"create table [databasechangeloglock] (" +
                 "[id] int not null, " +
@@ -56,7 +56,15 @@ public class CreateDatabaseChangeLogLockTableExecuteTest extends AbstractExecute
                 "[lockgranted] timestamp, " +
                 "[lockedby] varchar(255), " +
                 "constraint [pk_databasechange] primary key ([id]))",
-                "insert into [databasechangeloglock] ([locked], [id]) values (0, 1)"}, DB2Database.class);
+                "insert into [databasechangeloglock] ([id], [locked]) values (1, 0)"}, DB2Database.class);
+
+        assertCorrect(new String[]{"create table [databasechangeloglock] (" +
+                "[id] int not null, " +
+                "[locked] number(1) not null, " +
+                "[lockgranted] timestamp, " +
+                "[lockedby] varchar2(255), " +
+                "constraint [pk_databasechangeloglock] primary key ([id]))",
+                "insert into [databasechangeloglock] ([id], [locked]) values (1, 0)"}, OracleDatabase.class);
 
         assertCorrect(new String[]{"create table [databasechangeloglock] (" +
                 "[id] int not null, " +
@@ -64,7 +72,7 @@ public class CreateDatabaseChangeLogLockTableExecuteTest extends AbstractExecute
                 "[lockgranted] datetime, " +
                 "[lockedby] varchar(255), " +
                 "constraint [pk_databasechangeloglock] primary key ([id]))",
-                "insert into [databasechangeloglock] ([locked], [id]) values (FALSE, 1)"});
+                "insert into [databasechangeloglock] ([id], [locked]) values (1, FALSE)"});
 
     }
 }
