@@ -74,7 +74,7 @@ public class AddAutoIncrementChangeTest extends AbstractChangeTest {
         return !database.supportsAutoIncrement()
                 || database instanceof MSSQLDatabase
                 || database instanceof DerbyDatabase
-                || (database instanceof HsqlDatabase && !(database instanceof H2Database));
+                ;//|| (database instanceof HsqlDatabase && !(database instanceof H2Database));
     }
 
 }

@@ -2,6 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
 import liquibase.database.core.H2Database;
+import liquibase.database.core.HsqlDatabase;
 
 public class AddAutoIncrementGeneratorHsqlTest extends AddAutoIncrementGeneratorTest {
 
@@ -11,6 +12,6 @@ public class AddAutoIncrementGeneratorHsqlTest extends AddAutoIncrementGenerator
 
     @Override
     protected boolean shouldBeImplementation(Database database) {
-        return database instanceof H2Database;
+        return database instanceof HsqlDatabase;
     }
 }
