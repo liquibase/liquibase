@@ -18,6 +18,7 @@
     <module>sample1</module>
     <module>sample2</module>
     <module>liquibase-ext-sample3</module>
+    <module>liquibase-ext-test</module>
   </modules>
 
 </project>
