@@ -9,6 +9,13 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Enumeration;
 
+/**
+ * @deprecated This class should be removed. If you want to test extensions
+ *             place test in liquibase-ext-tests
+ *
+ *
+ */
+@Deprecated
 public class ExtensionResourceAccessor implements ResourceAccessor {
     private URLClassLoader classLoader;
 

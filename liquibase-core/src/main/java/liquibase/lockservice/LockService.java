@@ -182,8 +182,13 @@ public class LockService {
      */
     public void forceReleaseLock() throws LockException, DatabaseException {
         database.checkDatabaseChangeLogLockTable();
-
-        releaseLock();
+            releaseLock();
+        /*try {
+            releaseLock();
+        } catch (LockException e) {
+            // ignore ?
+            LogFactory.getLogger().info("Ignored exception in forceReleaseLock: " + e.getMessage());
+        }*/
     }
 
     /**
