@@ -99,11 +99,16 @@ public class PostgresTypeConverter extends DefaultTypeConverter {
         };
     }
 
-
+    /**
+     * @see http://www.postgresql.org/docs/8.4/static/datatype-boolean.html
+     */
     public String getFalseBooleanValue() {
         return "FALSE";
     }
 
+    /**
+     * @see http://www.postgresql.org/docs/8.4/static/datatype-boolean.html
+     */
     public String getTrueBooleanValue() {
         return "TRUE";
     }
