@@ -9,9 +9,9 @@
 
   <modelVersion>4.0.0</modelVersion>
     <groupId>org.liquibase.samples</groupId>
-    <artifactId>liquibase-ext-sample3</artifactId>
+    <artifactId>liquibase-ext-test</artifactId>
     <version>2.0-SNAPSHOT</version>
-    <name>Liquibase extension sample 3</name>
+    <name>Liquibase extension test</name>
 
     <dependencies>
         <dependency>
@@ -36,6 +36,24 @@
             <groupId>org.easymock</groupId>
             <artifactId>easymockclassextension</artifactId>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.liquibase.samples</groupId>
+            <artifactId>sample1</artifactId>
+            <scope>test</scope>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.liquibase.samples</groupId>
+            <artifactId>sample2</artifactId>
+            <scope>test</scope>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.liquibase.samples</groupId>
+            <artifactId>liquibase-ext-sample3</artifactId>
+            <scope>test</scope>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 

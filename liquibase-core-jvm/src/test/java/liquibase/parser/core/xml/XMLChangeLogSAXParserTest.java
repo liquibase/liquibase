@@ -339,41 +339,4 @@ public class XMLChangeLogSAXParserTest {
         new XMLChangeLogSAXParser().parse("changelogs/unsupported/complete/root.changelog.xml", new HashMap<String, Object>(), new JUnitResourceAccessor());
     }
 
-    @Test
-    @Ignore
-    public void extChangeLog() throws Exception {
-        CompositeResourceAccessor compositeResourceAccessor = new CompositeResourceAccessor(new JUnitResourceAccessor(), new ExtensionResourceAccessor());
-        ServiceLocator.reset();
-        ServiceLocator.getInstance().setResourceAccessor(compositeResourceAccessor);
-        ChangeFactory.reset();
-
-        DatabaseChangeLog changeLog = new XMLChangeLogSAXParser().parse("changelogs/common/ext.changelog.xml", new HashMap<String, Object>(), compositeResourceAccessor);
-
-        assertEquals("changelogs/common/ext.changelog.xml", changeLog.getLogicalFilePath());
-
-        assertEquals(4, changeLog.getChangeSets().size());
-
-        ChangeSet changeSet = changeLog.getChangeSets().get(1);
-        assertEquals("nvoxland", changeSet.getAuthor());
-        assertEquals("2", changeSet.getId());
-        assertEquals(1, changeSet.getChanges().size());
-        Change change = changeSet.getChanges().get(0);
-        assertEquals("sample2", change.getChangeMetaData().getName());
-
-        changeSet = changeLog.getChangeSets().get(2);
-        change = changeSet.getChanges().get(0);
-        assertEquals(1, changeSet.getChanges().size());
-        assertEquals("sample3", change.getChangeMetaData().getName());
-
-        Object child1 = change.getClass().getMethod("getChild").invoke(change);
-        assertNotNull(child1);
-        assertEquals("standard", child1.getClass().getMethod("getName").invoke(child1));
-
-        Object child2 = change.getClass().getMethod("getChild2").invoke(change);
-        assertNotNull(child2);
-        assertEquals("second", child1.getClass().getMethod("getName").invoke(child2));
-
-        ServiceLocator.reset();
-        ChangeFactory.reset();
-    }
 }
