@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Modifier;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
@@ -179,7 +180,9 @@ public class ServiceLocator {
 
             for (File file : directory.listFiles()) {
                 if (file.isDirectory()) {
-                    assert !file.getName().contains(".");
+                    if(file.getName().contains(".")) {
+                        throw new IllegalStateException("Find . in directory name: "+file);
+                    }
                     classes.addAll(findClasses(file.toURL(), packageName + "." + file.getName(), requiredInterface));
                 } else if (file.getName().endsWith(".class")) {
                     potentialClassNames.add(packageName + '.' + file.getName().substring(0, file.getName().length() - ".class".length()));
@@ -233,6 +236,7 @@ public class ServiceLocator {
         }else {
             path = path.replaceFirst("file:", "");
         }
+        path = URLDecoder.decode(path);
         File zipfile = new File(path);
         return zipfile;
     }

@@ -60,9 +60,13 @@ public class ServiceLocatorTest {
 
     @Test
     public void extractZipFile() throws MalformedURLException {
-        File zipFile = ServiceLocator.extractZipFile(new URL("jar:file:/C:/Projects/liquibase2/liquibase-integration-tests/src/test/resources/ext/jars/liquibase-sample1.jar!/liquibase/sqlgenerator"));
-        assertEquals("C:/Projects/liquibase2/liquibase-integration-tests/src/test/resources/ext/jars/liquibase-sample1.jar",zipFile.toString().replace('\\','/'));
-         zipFile = ServiceLocator.extractZipFile(new URL("jar:file:/home/myuser/liquibase2/liquibase-integration-tests/src/test/resources/ext/jars/liquibase-sample1.jar!/liquibase/sqlgenerator"));
-        assertEquals("/home/myuser/liquibase2/liquibase-integration-tests/src/test/resources/ext/jars/liquibase-sample1.jar",zipFile.toString().replace('\\','/'));
+        File zipFile = ServiceLocator.extractZipFile(new URL(
+                "jar:file:/C:/My%20Projects/liquibase2/liquibase-integration-tests/src/test/resources/ext/jars/liquibase-sample1.jar!/liquibase/sqlgenerator"));
+        assertEquals("C:/My Projects/liquibase2/liquibase-integration-tests/src/test/resources/ext/jars/liquibase-sample1.jar", zipFile.toString().replace(
+                '\\', '/'));
+        zipFile = ServiceLocator.extractZipFile(new URL(
+                "jar:file:/home/myuser/liquibase2/liquibase-integration-tests/src/test/resources/ext/jars/liquibase-sample1.jar!/liquibase/sqlgenerator"));
+        assertEquals("/home/myuser/liquibase2/liquibase-integration-tests/src/test/resources/ext/jars/liquibase-sample1.jar", zipFile.toString().replace('\\',
+                '/'));
     }
 }
