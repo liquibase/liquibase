@@ -47,18 +47,6 @@ public class ServiceLocatorTest {
 
 
     @Test
-    @Ignore
-    public void getClasses_sampleJar() throws Exception {
-        Class[] classes = ServiceLocator.getInstance().findClasses(SqlGenerator.class);
-        for (Class clazz : classes) {
-            if (clazz.getName().equals("liquibase.sqlgenerator.ext.sample1.Sample1UpdateGenerator")) {
-                return;
-            }
-        }
-        fail("Did not find Sample1UpdateGenerator");
-    }
-
-    @Test
     public void extractZipFile() throws MalformedURLException {
         File zipFile = ServiceLocator.extractZipFile(new URL(
                 "jar:file:/C:/My%20Projects/liquibase2/liquibase-integration-tests/src/test/resources/ext/jars/liquibase-sample1.jar!/liquibase/sqlgenerator"));
