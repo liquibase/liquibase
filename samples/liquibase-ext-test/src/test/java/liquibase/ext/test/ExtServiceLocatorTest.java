@@ -3,6 +3,7 @@ package liquibase.ext.test;
 import static org.junit.Assert.fail;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.CompositeResourceAccessor;
+import liquibase.resource.ResourceAccessor;
 import liquibase.servicelocator.ServiceLocator;
 import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.test.TestContext;
@@ -16,7 +17,7 @@ public class ExtServiceLocatorTest {
 
     @Before
     public void setup() throws Exception{
-        CompositeResourceAccessor resourceAccessor = new CompositeResourceAccessor(new ClassLoaderResourceAccessor(), TestContext.getInstance().getTestResourceAccessor());
+        ResourceAccessor resourceAccessor = new ClassLoaderResourceAccessor();
 
         serviceLocator = ServiceLocator.getInstance();
         serviceLocator.setResourceAccessor(resourceAccessor);
