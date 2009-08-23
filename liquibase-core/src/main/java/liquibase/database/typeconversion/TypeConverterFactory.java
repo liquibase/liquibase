@@ -32,6 +32,12 @@ import liquibase.database.typeconversion.core.PostgresTypeConverter;
 import liquibase.database.typeconversion.core.SQLiteTypeConverter;
 import liquibase.database.typeconversion.core.SybaseASATypeConverter;
 import liquibase.database.typeconversion.core.SybaseTypeConverter;
+import liquibase.servicelocator.ServiceLocator;
+import liquibase.exception.UnexpectedLiquibaseException;
+
+import java.util.SortedSet;
+import java.util.TreeSet;
+import java.util.Comparator;
 
 public class TypeConverterFactory {
     private static TypeConverterFactory instance;
@@ -44,51 +50,24 @@ public class TypeConverterFactory {
     }
 
     public TypeConverter findTypeConverter(Database database) {
-        if(database instanceof CacheDatabase) {
-            return new CacheTypeConverter();
+        SortedSet<TypeConverter> converters = new TreeSet<TypeConverter>(new Comparator<TypeConverter>() {
+            public int compare(TypeConverter o1, TypeConverter o2) {
+                return Integer.valueOf(o1.getPriority()).compareTo(o2.getPriority());
+            }
+        });
+
+        //noinspection unchecked
+        for (Class<TypeConverter> converterClass : ServiceLocator.getInstance().findClasses(TypeConverter.class)) {
+            try {
+                TypeConverter converter = converterClass.newInstance();
+                if (converter.supports(database)) {
+                    converters.add(converter);
+                }
+            } catch (Exception e) {
+                throw new UnexpectedLiquibaseException(e);
+            }
         }
-        if(database instanceof DB2Database) {
-            return new DB2TypeConverter();
-        }
-        if(database instanceof DerbyDatabase) {
-            return new DerbyTypeConverter();
-        }
-        if(database instanceof FirebirdDatabase) {
-            return new FirebirdTypeConverter();
-        }
-        if(database instanceof HsqlDatabase) {
-            return new HsqlTypeConverter();
-        }
-        if(database instanceof H2Database) {
-            return new H2TypeConverter();
-        }
-        if(database instanceof InformixDatabase) {
-            return new InformixTypeConverter();
-        }
-        if(database instanceof MaxDBDatabase) {
-            return new MaxDBTypeConverter();
-        }
-        if(database instanceof MSSQLDatabase) {
-            return new MSSQLTypeConverter();
-        }
-        if(database instanceof MySQLDatabase) {
-            return new MySQLTypeConverter();
-        }
-        if(database instanceof OracleDatabase) {
-            return new OracleTypeConverter();
-        }
-        if(database instanceof PostgresDatabase) {
-            return new PostgresTypeConverter();
-        }
-        if(database instanceof SQLiteDatabase) {
-            return new SQLiteTypeConverter();
-        }
-        if(database instanceof SybaseASADatabase) {
-            return new SybaseASATypeConverter();
-        }
-        if(database instanceof SybaseDatabase) {
-            return new SybaseTypeConverter();
-        }
-        return new DefaultTypeConverter();
+
+        return converters.last();
     }
 }

@@ -1,14 +1,24 @@
 package liquibase.database.typeconversion.core;
 
 import liquibase.database.Database;
+import liquibase.database.core.SybaseDatabase;
 import liquibase.database.structure.type.*;
 
 import java.text.ParseException;
 
-public class SybaseTypeConverter extends DefaultTypeConverter {
+public class SybaseTypeConverter extends AbstractTypeConverter {
+
+    public int getPriority() {
+        return PRIORITY_DATABASE;
+    }
+
+    public boolean supports(Database database) {
+        return database instanceof SybaseDatabase;
+    }
+
 
     @Override
-    public Object convertDatabaseValueToJavaObject(Object defaultValue, int dataType, int columnSize, int decimalDigits, Database database) throws ParseException {
+    public Object convertDatabaseValueToObject(Object defaultValue, int dataType, int columnSize, int decimalDigits, Database database) throws ParseException {
         if (defaultValue == null) {
             return null;
         }
@@ -21,7 +31,7 @@ public class SybaseTypeConverter extends DefaultTypeConverter {
             }
         }
 
-        defaultValue = super.convertDatabaseValueToJavaObject(defaultValue, dataType, columnSize, decimalDigits, database);
+        defaultValue = super.convertDatabaseValueToObject(defaultValue, dataType, columnSize, decimalDigits, database);
 
         return defaultValue;
     }

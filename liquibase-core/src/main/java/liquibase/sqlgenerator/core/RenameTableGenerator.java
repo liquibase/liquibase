@@ -38,7 +38,7 @@ public class RenameTableGenerator implements SqlGenerator<RenameTableStatement> 
             sql = "ALTER TABLE " + database.escapeTableName(statement.getSchemaName(), statement.getOldTableName()) + " RENAME " + database.escapeTableName(null, statement.getNewTableName());
         } else if ((database instanceof DerbyDatabase) || (database instanceof MaxDBDatabase) || (database instanceof InformixDatabase)) {
             sql = "RENAME TABLE " + database.escapeTableName(statement.getSchemaName(), statement.getOldTableName()) + " TO " + database.escapeTableName(null, statement.getNewTableName());
-        } else if (database instanceof HsqlDatabase) {
+        } else if (database instanceof HsqlDatabase || database  instanceof H2Database) {
             sql = "ALTER TABLE " + database.escapeTableName(statement.getSchemaName(), statement.getOldTableName()) + " RENAME TO " + database.escapeTableName(null, statement.getNewTableName());
         } else if (database instanceof OracleDatabase) {
             sql = "ALTER TABLE " + database.escapeTableName(statement.getSchemaName(), statement.getOldTableName()) + " RENAME TO " + database.escapeTableName(null, statement.getNewTableName());

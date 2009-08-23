@@ -1,14 +1,24 @@
 package liquibase.database.typeconversion.core;
 
 import liquibase.database.Database;
+import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.structure.type.*;
 
 import java.text.ParseException;
 
-public class MSSQLTypeConverter extends DefaultTypeConverter {
+public class MSSQLTypeConverter extends AbstractTypeConverter {
+
+    public int getPriority() {
+        return PRIORITY_DATABASE;
+    }
+
+    public boolean supports(Database database) {
+        return database instanceof MSSQLDatabase;
+    }
+
 
     @Override
-    public Object convertDatabaseValueToJavaObject(Object defaultValue, int dataType, int columnSize, int decimalDigits, Database database) throws ParseException {
+    public Object convertDatabaseValueToObject(Object defaultValue, int dataType, int columnSize, int decimalDigits, Database database) throws ParseException {
         if (defaultValue == null) {
             return null;
         }
@@ -21,7 +31,7 @@ public class MSSQLTypeConverter extends DefaultTypeConverter {
             }
         }
 
-        defaultValue = super.convertDatabaseValueToJavaObject(defaultValue, dataType, columnSize, decimalDigits, database);
+        defaultValue = super.convertDatabaseValueToObject(defaultValue, dataType, columnSize, decimalDigits, database);
 
         return defaultValue;
     }
@@ -105,6 +115,6 @@ public class MSSQLTypeConverter extends DefaultTypeConverter {
             }
         };
     }
-    
+
 
 }

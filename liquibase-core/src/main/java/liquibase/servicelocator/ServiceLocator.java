@@ -180,7 +180,9 @@ public class ServiceLocator {
 
             for (File file : directory.listFiles()) {
                 if (file.isDirectory()) {
-                    if(file.getName().contains(".")) {
+                    if (file.getName().startsWith(".")) {
+                        continue;
+                    } else if(file.getName().contains(".")) {
                         throw new IllegalStateException("Find . in directory name: "+file);
                     }
                     classes.addAll(findClasses(file.toURL(), packageName + "." + file.getName(), requiredInterface));

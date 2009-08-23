@@ -233,7 +233,7 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
     protected void getColumnTypeAndDefValue(Column columnInfo, ResultSet rs, Database database) throws SQLException, DatabaseException {
         Object defaultValue = rs.getObject("COLUMN_DEF");
         try {
-            columnInfo.setDefaultValue(TypeConverterFactory.getInstance().findTypeConverter(database).convertDatabaseValueToJavaObject(defaultValue, columnInfo.getDataType(), columnInfo.getColumnSize(), columnInfo.getDecimalDigits(), database));
+            columnInfo.setDefaultValue(TypeConverterFactory.getInstance().findTypeConverter(database).convertDatabaseValueToObject(defaultValue, columnInfo.getDataType(), columnInfo.getColumnSize(), columnInfo.getDecimalDigits(), database));
         } catch (ParseException e) {
             throw new DatabaseException(e);
         }

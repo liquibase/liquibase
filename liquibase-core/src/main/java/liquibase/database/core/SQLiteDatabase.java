@@ -164,7 +164,7 @@ public class SQLiteDatabase extends AbstractDatabase {
     }
 
     @Override
-    public String getDateLiteral(java.sql.Timestamp date) {
+    public String getDateTimeLiteral(java.sql.Timestamp date) {
         return getDateLiteral(new ISODateFormat().format(date).replaceFirst("^'", "").replaceFirst("'$", ""));
     }
 

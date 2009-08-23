@@ -143,9 +143,9 @@ public interface Database extends DatabaseObject {
 
     String getDateLiteral(java.sql.Date date);
 
-    String getDateLiteral(java.sql.Time time);
+    String getTimeLiteral(java.sql.Time time);
 
-    String getDateLiteral(java.sql.Timestamp timeStamp);
+    String getDateTimeLiteral(java.sql.Timestamp timeStamp);
 
     String getDateLiteral(Date defaultDateValue);
 

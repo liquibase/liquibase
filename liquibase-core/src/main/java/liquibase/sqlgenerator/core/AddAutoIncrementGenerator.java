@@ -5,6 +5,7 @@ import liquibase.database.typeconversion.TypeConverterFactory;
 import liquibase.database.core.DerbyDatabase;
 import liquibase.database.core.HsqlDatabase;
 import liquibase.database.core.MSSQLDatabase;
+import liquibase.database.core.H2Database;
 import liquibase.database.structure.Column;
 import liquibase.database.structure.Table;
 import liquibase.exception.ValidationErrors;
@@ -25,7 +26,8 @@ public class AddAutoIncrementGenerator implements SqlGenerator<AddAutoIncrementS
         return (database.supportsAutoIncrement()
                 && !(database instanceof DerbyDatabase)
                 && !(database instanceof MSSQLDatabase)
-                && !(database instanceof HsqlDatabase));
+                && !(database instanceof HsqlDatabase)
+                && !(database instanceof H2Database));
     }
 
     public ValidationErrors validate(AddAutoIncrementStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {

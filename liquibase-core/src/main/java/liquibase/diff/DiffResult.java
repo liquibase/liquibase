@@ -728,7 +728,8 @@ public class DiffResult {
 
             columnConfig.setType(dataType);
 
-            String defaultValueString = TypeConverterFactory.getInstance().findTypeConverter(database).convertJavaObjectToString(column.getDefaultValue(), database);
+            Object defaultValue = column.getDefaultValue();
+            String defaultValueString = TypeConverterFactory.getInstance().findTypeConverter(database).getDataType(defaultValue).convertObjectToString(defaultValue, database);
             if(defaultValueString !=null) {
               defaultValueString  = defaultValueString.replaceFirst("'","").replaceAll("'$", "");
             }

@@ -18,7 +18,7 @@ public class GetViewDefinitionGeneratorHsql extends GetViewDefinitionGenerator {
 
     @Override
     public boolean supports(GetViewDefinitionStatement statement, Database database) {
-        return database instanceof HsqlDatabase && !(database instanceof H2Database);
+        return database instanceof HsqlDatabase;
     }
 
     @Override

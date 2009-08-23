@@ -74,11 +74,12 @@ public class AddColumnGenerator implements SqlGenerator<AddColumnStatement> {
 
     private String getDefaultClause(AddColumnStatement statement, Database database) {
         String clause = "";
-        if (statement.getDefaultValue() != null) {
+        Object defaultValue = statement.getDefaultValue();
+        if (defaultValue != null) {
             if (database instanceof MSSQLDatabase) {
                 clause += " CONSTRAINT " + ((MSSQLDatabase) database).generateDefaultConstraintName(statement.getTableName(), statement.getColumnName());
             }
-            clause += " DEFAULT " + TypeConverterFactory.getInstance().findTypeConverter(database).convertJavaObjectToString(statement.getDefaultValue(), database);
+            clause += " DEFAULT " + TypeConverterFactory.getInstance().findTypeConverter(database).getDataType(defaultValue).convertObjectToString(defaultValue, database);
         }
         return clause;
     }

@@ -6,7 +6,7 @@ import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.core.AddAutoIncrementGenerator;
 import liquibase.sqlgenerator.core.AddAutoIncrementGeneratorDB2;
-import liquibase.sqlgenerator.core.AddAutoIncrementGeneratorHsql;
+import liquibase.sqlgenerator.core.AddAutoIncrementGeneratorHsqlH2l;
 import liquibase.sqlgenerator.core.AddColumnGenerator;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.AddAutoIncrementStatement;
@@ -50,8 +50,8 @@ public class SqlGeneratorFactoryTest {
 
         assertEquals(0, factory.getGenerators().size());
 
-        AddAutoIncrementGeneratorHsql sqlGenerator 
-        	= new AddAutoIncrementGeneratorHsql();
+        AddAutoIncrementGeneratorHsqlH2l sqlGenerator
+        	= new AddAutoIncrementGeneratorHsqlH2l();
 
         factory.register(new AddAutoIncrementGenerator());
         factory.register(sqlGenerator);
@@ -71,8 +71,8 @@ public class SqlGeneratorFactoryTest {
 
         assertEquals(0, factory.getGenerators().size());
 
-        AddAutoIncrementGeneratorHsql sqlGenerator 
-        			= new AddAutoIncrementGeneratorHsql();
+        AddAutoIncrementGeneratorHsqlH2l sqlGenerator
+        			= new AddAutoIncrementGeneratorHsqlH2l();
 
         factory.register(new AddAutoIncrementGenerator());
         factory.register(sqlGenerator);
@@ -80,7 +80,7 @@ public class SqlGeneratorFactoryTest {
 
         assertEquals(3, factory.getGenerators().size());
 
-        factory.unregister(AddAutoIncrementGeneratorHsql.class);
+        factory.unregister(AddAutoIncrementGeneratorHsqlH2l.class);
         assertEquals(2, factory.getGenerators().size());
     }
 
@@ -93,7 +93,7 @@ public class SqlGeneratorFactoryTest {
         assertEquals(0, factory.getGenerators().size());
 
         factory.register(new AddAutoIncrementGenerator());
-        factory.register(new AddAutoIncrementGeneratorHsql());
+        factory.register(new AddAutoIncrementGeneratorHsqlH2l());
         factory.register(new AddAutoIncrementGeneratorDB2());
 
         assertEquals(3, factory.getGenerators().size());

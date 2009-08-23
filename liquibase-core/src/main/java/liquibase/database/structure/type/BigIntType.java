@@ -6,4 +6,5 @@ public class BigIntType extends DataType {
     public String getDataTypeName() {
         return "BIGINT";
     }
+
 }

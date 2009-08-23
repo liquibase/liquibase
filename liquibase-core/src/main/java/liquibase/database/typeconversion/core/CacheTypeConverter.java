@@ -1,6 +1,7 @@
 package liquibase.database.typeconversion.core;
 
 import liquibase.database.Database;
+import liquibase.database.core.CacheDatabase;
 import liquibase.database.structure.type.BlobType;
 import liquibase.database.structure.type.BooleanType;
 import liquibase.database.structure.type.ClobType;
@@ -8,10 +9,18 @@ import liquibase.database.structure.type.CurrencyType;
 
 import java.text.ParseException;
 
-public class CacheTypeConverter extends DefaultTypeConverter {
+public class CacheTypeConverter extends AbstractTypeConverter {
+
+    public int getPriority() {
+        return PRIORITY_DATABASE;
+    }
+
+    public boolean supports(Database database) {
+        return database instanceof CacheDatabase;
+    }
 
     @Override
-    public Object convertDatabaseValueToJavaObject(Object defaultValue, int dataType, int columnSize, int decimalDigits, Database database) throws ParseException {
+    public Object convertDatabaseValueToObject(Object defaultValue, int dataType, int columnSize, int decimalDigits, Database database) throws ParseException {
         if (defaultValue != null) {
             if (defaultValue instanceof String) {
                 String stringDefaultValue = (String) defaultValue;
@@ -22,7 +31,7 @@ public class CacheTypeConverter extends DefaultTypeConverter {
                 }
             }
         }
-        return super.convertDatabaseValueToJavaObject(defaultValue, dataType, columnSize, decimalDigits, database);
+        return super.convertDatabaseValueToObject(defaultValue, dataType, columnSize, decimalDigits, database);
 
     }
 

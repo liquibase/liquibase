@@ -17,7 +17,7 @@ public abstract class AlterSequenceGeneratorTest {
 //        new DatabaseTestTemplate().testOnAvailableDatabases(
 //                new SqlStatementDatabaseTest(null, new AlterSequenceStatement(null, SEQ_NAME).setIncrementBy(5)) {
 //                    protected boolean expectedException(Database database, DatabaseException exception) {
-//                        return database instanceof FirebirdDatabase || database instanceof HsqlDatabase;
+//                        return database instanceof FirebirdDatabase || database instanceof HsqlDatabase || database  instanceof H2Database;
 //                    }
 //
 //                    protected void preExecuteAssert(DatabaseSnapshotGenerator snapshot) {
@@ -54,7 +54,7 @@ public abstract class AlterSequenceGeneratorTest {
 //                new SqlStatementDatabaseTest(null, new AlterSequenceStatement(null, SEQ_NAME).setMaxValue(50)) {
 //
 //                    protected boolean expectedException(Database database, DatabaseException exception) {
-//                        return database instanceof FirebirdDatabase || database instanceof HsqlDatabase;
+//                        return database instanceof FirebirdDatabase || database instanceof HsqlDatabase || database  instanceof H2Database;
 //                    }
 //
 //                    protected void preExecuteAssert(DatabaseSnapshotGenerator snapshot) {
@@ -95,7 +95,7 @@ public abstract class AlterSequenceGeneratorTest {
 //        new DatabaseTestTemplate().testOnAvailableDatabases(
 //                new SqlStatementDatabaseTest(TestContext.ALT_SCHEMA, new AlterSequenceStatement(TestContext.ALT_SCHEMA, SEQ_NAME).setIncrementBy(5)) {
 //                    protected boolean expectedException(Database database, DatabaseException exception) {
-//                        return database instanceof FirebirdDatabase || database instanceof HsqlDatabase;
+//                        return database instanceof FirebirdDatabase || database instanceof HsqlDatabase || database  instanceof H2Database;
 //                    }
 //
 //                    protected void preExecuteAssert(DatabaseSnapshotGenerator snapshot) {

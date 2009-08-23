@@ -1,12 +1,9 @@
 package liquibase.database.structure.type;
 
-public class VarcharType extends DataType {
+public class VarcharType extends CharType {
 
     @Override
     public String getDataTypeName() {
         return "VARCHAR";
-    }
-    public boolean getSupportsPrecision() {
-        return true;
     }
 }

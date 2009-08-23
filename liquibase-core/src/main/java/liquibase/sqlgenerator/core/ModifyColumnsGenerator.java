@@ -157,6 +157,7 @@ public class ModifyColumnsGenerator implements SqlGenerator<ModifyColumnsStateme
      */
     private String getModifyString(Database database) {
         if (database instanceof HsqlDatabase
+                 || database  instanceof H2Database
                 || database instanceof DerbyDatabase
                 || database instanceof DB2Database
                 || database instanceof MSSQLDatabase
@@ -187,6 +188,7 @@ public class ModifyColumnsGenerator implements SqlGenerator<ModifyColumnsStateme
                 || database instanceof MSSQLDatabase
                 || database instanceof MySQLDatabase
                 || database instanceof HsqlDatabase
+                 || database  instanceof H2Database
                 || database instanceof CacheDatabase
                 || database instanceof OracleDatabase
                 || database instanceof MaxDBDatabase) {
@@ -210,9 +212,10 @@ public class ModifyColumnsGenerator implements SqlGenerator<ModifyColumnsStateme
 
     private String getDefaultClause(ColumnConfig column, Database database) {
         String clause = "";
-        if (column.getDefaultValue() != null) {
+        String defaultValue = column.getDefaultValue();
+        if (defaultValue != null) {
             if (database instanceof MySQLDatabase) {
-                clause += " DEFAULT " + TypeConverterFactory.getInstance().findTypeConverter(database).convertJavaObjectToString(column.getDefaultValue(), database);
+                clause += " DEFAULT " + TypeConverterFactory.getInstance().findTypeConverter(database).getDataType(defaultValue).convertObjectToString(defaultValue, database);
             }
         }
         return clause;

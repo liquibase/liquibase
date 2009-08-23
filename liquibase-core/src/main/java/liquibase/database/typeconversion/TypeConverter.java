@@ -3,14 +3,19 @@ package liquibase.database.typeconversion;
 import liquibase.database.Database;
 import liquibase.database.structure.type.*;
 import liquibase.change.ColumnConfig;
+import liquibase.servicelocator.PrioritizedService;
 
 import java.text.ParseException;
 
-public interface TypeConverter {
+public interface TypeConverter extends PrioritizedService {
 
-    Object convertDatabaseValueToJavaObject(Object defaultValue, int dataType, int columnSize, int decimalDigits, Database database) throws ParseException;
+    int getPriority();
 
-    String convertJavaObjectToString(Object value, Database database);
+    boolean supports(Database database);
+
+    Object convertDatabaseValueToObject(Object defaultValue, int dataType, int columnSize, int decimalDigits, Database database) throws ParseException;
+
+    DataType getDataType(Object object);
 
     String getColumnType(String columnType, Boolean autoIncrement);
 

@@ -4,6 +4,7 @@ import liquibase.database.Database;
 import liquibase.database.core.DerbyDatabase;
 import liquibase.database.core.HsqlDatabase;
 import liquibase.database.core.MSSQLDatabase;
+import liquibase.database.core.H2Database;
 import liquibase.sqlgenerator.AbstractSqlGeneratorTest;
 import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.statement.core.AddAutoIncrementStatement;
@@ -38,7 +39,8 @@ public class AddAutoIncrementGeneratorTest extends AbstractSqlGeneratorTest<AddA
         return database.supportsAutoIncrement() 
         && !(database instanceof DerbyDatabase)
         && !(database instanceof MSSQLDatabase) 
-        && !(database instanceof HsqlDatabase);
+        && !(database instanceof HsqlDatabase)
+        && !(database instanceof H2Database);
     }
 
 //    @Test

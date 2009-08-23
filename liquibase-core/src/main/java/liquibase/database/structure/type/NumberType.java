@@ -1,4 +1,4 @@
-package liquibase.database.typeconversion.core;
+package liquibase.database.structure.type;
 
 import liquibase.database.structure.type.DataType;
 
@@ -8,6 +8,7 @@ public class NumberType extends DataType {
         return "NUMBER";
     }
 
+    @Override
     public boolean getSupportsPrecision() {
         return true;
     }

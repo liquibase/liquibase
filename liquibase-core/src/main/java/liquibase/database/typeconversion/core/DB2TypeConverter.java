@@ -1,6 +1,7 @@
 package liquibase.database.typeconversion.core;
 
 import liquibase.database.Database;
+import liquibase.database.core.DB2Database;
 import liquibase.database.structure.type.BooleanType;
 import liquibase.database.structure.type.CurrencyType;
 import liquibase.database.structure.type.DateTimeType;
@@ -8,10 +9,18 @@ import liquibase.database.structure.type.DateTimeType;
 import java.text.ParseException;
 import java.sql.Types;
 
-public class DB2TypeConverter extends DefaultTypeConverter {
+public class DB2TypeConverter  extends AbstractTypeConverter {
+
+    public int getPriority() {
+        return PRIORITY_DATABASE;
+    }
+
+    public boolean supports(Database database) {
+        return database instanceof DB2Database;
+    }
 
     @Override
-    public Object convertDatabaseValueToJavaObject(Object defaultValue, int dataType, int columnSize, int decimalDigits, Database database) throws ParseException {
+    public Object convertDatabaseValueToObject(Object defaultValue, int dataType, int columnSize, int decimalDigits, Database database) throws ParseException {
         if (defaultValue != null && defaultValue instanceof String) {
             if (dataType == Types.TIMESTAMP) {
                 defaultValue = ((String) defaultValue).replaceFirst("^\"SYSIBM\".\"TIMESTAMP\"\\('", "").replaceFirst("'\\)", "");
@@ -21,7 +30,7 @@ public class DB2TypeConverter extends DefaultTypeConverter {
                 defaultValue = ((String) defaultValue).replaceFirst("^\"SYSIBM\".\"DATE\"\\('", "").replaceFirst("'\\)", "");
             }
         }
-        return super.convertDatabaseValueToJavaObject(defaultValue, dataType, columnSize, decimalDigits, database);
+        return super.convertDatabaseValueToObject(defaultValue, dataType, columnSize, decimalDigits, database);
     }
 
     @Override

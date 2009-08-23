@@ -1,26 +1,22 @@
 package liquibase.database.typeconversion.core;
 
 import liquibase.database.Database;
+import liquibase.database.core.MaxDBDatabase;
 import liquibase.database.structure.type.BlobType;
 import liquibase.database.structure.type.ClobType;
 import liquibase.database.structure.type.CurrencyType;
 import liquibase.database.structure.type.DateTimeType;
 
-public class MaxDBTypeConverter extends DefaultTypeConverter {
+public class MaxDBTypeConverter extends AbstractTypeConverter {
 
-    @Override
-    public String convertJavaObjectToString(Object value, Database database) {
-        if (value instanceof Boolean) {
-            if (((Boolean) value)) {
-                return this.getTrueBooleanValue();
-            } else {
-                return this.getFalseBooleanValue();
-            }
-        } else {
-            return super.convertJavaObjectToString(value, database);
-        }
+    public int getPriority() {
+        return PRIORITY_DATABASE;
     }
-    
+
+    public boolean supports(Database database) {
+        return database instanceof MaxDBDatabase;
+    }
+
     @Override
     public String getTrueBooleanValue() {
         return "TRUE";

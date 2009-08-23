@@ -1,6 +1,7 @@
 package liquibase.database.typeconversion.core;
 
 import liquibase.database.Database;
+import liquibase.database.core.InformixDatabase;
 import liquibase.database.structure.type.BigIntType;
 import liquibase.database.structure.type.CurrencyType;
 import liquibase.database.structure.type.DateTimeType;
@@ -8,7 +9,16 @@ import liquibase.database.structure.type.TimeType;
 
 import java.util.regex.Pattern;
 
-public class InformixTypeConverter extends DefaultTypeConverter {
+public class InformixTypeConverter extends AbstractTypeConverter {
+
+    public int getPriority() {
+        return PRIORITY_DATABASE;
+    }
+
+    public boolean supports(Database database) {
+        return database instanceof InformixDatabase;
+    }
+
 
     private static final Pattern INTEGER_PATTERN = Pattern.compile("^(int(eger)?)$", Pattern.CASE_INSENSITIVE);
     private static final Pattern INTEGER8_PATTERN = Pattern.compile("^(int(eger)?8)$", Pattern.CASE_INSENSITIVE);
@@ -32,19 +42,6 @@ public class InformixTypeConverter extends DefaultTypeConverter {
         }
         return type;
     }
-
-    @Override
-    public String convertJavaObjectToString(Object value, Database database) {
-        if (value != null && value instanceof Boolean) {
-            if (((Boolean) value)) {
-                return getTrueBooleanValue();
-            } else {
-                return getFalseBooleanValue();
-            }
-        }
-        return super.convertJavaObjectToString(value, database);
-    }
-
 
     private boolean isSerial(String type) {
         return INTEGER_PATTERN.matcher(type).matches()

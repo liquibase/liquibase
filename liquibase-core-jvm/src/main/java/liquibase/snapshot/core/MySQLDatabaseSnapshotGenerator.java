@@ -69,7 +69,7 @@ public class MySQLDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerato
 
         	columnInfo.setTypeName(tableSchema.get(columnName).get(0));
         	try {
-        		String tmpDefaultValue = (String) TypeConverterFactory.getInstance().findTypeConverter(database).convertDatabaseValueToJavaObject(tableSchema.get(columnName).get(1), columnInfo.getDataType(), columnInfo.getColumnSize(), columnInfo.getDecimalDigits(), database);
+        		String tmpDefaultValue = (String) TypeConverterFactory.getInstance().findTypeConverter(database).convertDatabaseValueToObject(tableSchema.get(columnName).get(1), columnInfo.getDataType(), columnInfo.getColumnSize(), columnInfo.getDecimalDigits(), database);
         		if ("".equals(tmpDefaultValue)) {
         			columnInfo.setDefaultValue(null);
         		} else {
@@ -84,7 +84,7 @@ public class MySQLDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerato
         	columnInfo.setTypeName(columnTypeName);
         	columnInfo.setDefaultValue(null);
         	
-        // Parsing TIMESTAMP database.convertDatabaseValueToJavaObject() produces incorrect results
+        // Parsing TIMESTAMP database.convertDatabaseValueToObject() produces incorrect results
         // eg. for default value 0000-00-00 00:00:00 we have 0002-11-30T00:00:00.0 as parsing result
         } else if (columnTypeName.toLowerCase().equals("timestamp") && !"CURRENT_TIMESTAMP".equals(tableSchema.get(columnName).get(1))) {
         	columnInfo.setTypeName(columnTypeName);

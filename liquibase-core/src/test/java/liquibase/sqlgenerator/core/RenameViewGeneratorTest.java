@@ -7,7 +7,7 @@ public abstract class RenameViewGeneratorTest {
 ////            public void performTest(Database database) throws Exception {
 ////
 ////                if (database instanceof DerbyDatabase
-////                        || database instanceof HsqlDatabase
+////                        || database instanceof HsqlDatabase || database  instanceof H2Database
 ////                        || database instanceof DB2Database
 ////                        || database instanceof CacheDatabase
 ////                        || database instanceof FirebirdDatabase) {

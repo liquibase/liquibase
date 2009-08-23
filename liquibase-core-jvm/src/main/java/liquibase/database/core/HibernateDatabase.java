@@ -235,11 +235,11 @@ public class HibernateDatabase implements Database {
         return null;
     }
 
-    public String getDateLiteral(Time time) {
+    public String getTimeLiteral(Time time) {
         return null;
     }
 
-    public String getDateLiteral(Timestamp timeStamp) {
+    public String getDateTimeLiteral(Timestamp timeStamp) {
         return null;
     }
 

@@ -130,11 +130,11 @@ public class MockDatabase implements Database {
         return date.toString();
     }
 
-    public String getDateLiteral(Time time) {
+    public String getTimeLiteral(Time time) {
         return time.toString();
     }
 
-    public String getDateLiteral(Timestamp timeStamp) {
+    public String getDateTimeLiteral(Timestamp timeStamp) {
         return timeStamp.toString();
     }
 
