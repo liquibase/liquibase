@@ -9,6 +9,7 @@ import liquibase.statement.SqlStatement;
 import liquibase.statement.core.GetNextChangeSetSequenceValueStatement;
 import liquibase.statement.core.LockDatabaseChangeLogStatement;
 import liquibase.statement.core.SelectFromDatabaseChangeLogLockStatement;
+import liquibase.statement.core.UnlockDatabaseChangeLogStatement;
 import liquibase.util.StreamUtil;
 
 import java.io.IOException;
@@ -45,6 +46,8 @@ public class LoggingExecutor extends AbstractExecutor implements Executor {
     public int update(SqlStatement sql, List<SqlVisitor> sqlVisitors) throws DatabaseException {
         outputStatement(sql, sqlVisitors);
         if (sql instanceof LockDatabaseChangeLogStatement) {
+            return 1;
+        } else if (sql instanceof UnlockDatabaseChangeLogStatement) {
             return 1;
         }
         return 0;

@@ -28,6 +28,7 @@
       <entry name="?*.dtd" />
       <entry name="?*.tld" />
       <entry name="?*.ftl" />
+      <entry name="?*.jar" />
     </wildcardResourcePatterns>
   </component>
   <component name="CopyrightManager" default="">

@@ -1,16 +1,25 @@
 package liquibase.database.typeconversion.core;
 
 import liquibase.database.Database;
+import liquibase.database.core.DerbyDatabase;
 import liquibase.database.structure.type.BooleanType;
 import liquibase.database.structure.type.DateTimeType;
 
 import java.text.ParseException;
 import java.sql.Types;
 
-public class DerbyTypeConverter extends DefaultTypeConverter {
+public class DerbyTypeConverter  extends AbstractTypeConverter {
+
+    public int getPriority() {
+        return PRIORITY_DATABASE;
+    }
+
+    public boolean supports(Database database) {
+        return database instanceof DerbyDatabase;
+    }
 
     @Override
-    public Object convertDatabaseValueToJavaObject(Object defaultValue, int dataType, int columnSize, int decimalDigits, Database database) throws ParseException {
+    public Object convertDatabaseValueToObject(Object defaultValue, int dataType, int columnSize, int decimalDigits, Database database) throws ParseException {
         if (defaultValue != null && defaultValue instanceof String) {
             if (dataType == Types.TIMESTAMP) {
                 defaultValue = ((String) defaultValue).replaceFirst("^TIMESTAMP\\('", "").replaceFirst("'\\)", "");
@@ -20,7 +29,7 @@ public class DerbyTypeConverter extends DefaultTypeConverter {
                 defaultValue = ((String) defaultValue).replaceFirst("^TIME\\('", "").replaceFirst("'\\)", "");
             }
         }
-        return super.convertDatabaseValueToJavaObject(defaultValue, dataType, columnSize, decimalDigits, database);
+        return super.convertDatabaseValueToObject(defaultValue, dataType, columnSize, decimalDigits, database);
     }
 
     @Override

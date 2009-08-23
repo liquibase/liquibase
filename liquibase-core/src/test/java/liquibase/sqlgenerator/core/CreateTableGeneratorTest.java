@@ -178,7 +178,7 @@ public abstract class CreateTableGeneratorTest {
 //                        .addColumn("username", "int", new UniqueConstraint("UQ_TESTCT_ID"), new NotNullConstraint())) {
 //
 //                    protected boolean expectedException(Database database) {
-//                        return !(database instanceof HsqlDatabase);
+//                        return !(database instanceof HsqlDatabase) || database  instanceof H2Database;
 //                    }
 //
 //                    protected void preExecuteAssert(DatabaseSnapshotGenerator snapshot) {

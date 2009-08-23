@@ -1,15 +1,25 @@
 package liquibase.database.typeconversion.core;
 
 import liquibase.database.Database;
+import liquibase.database.core.OracleDatabase;
 import liquibase.database.structure.type.*;
 
 import java.text.ParseException;
 import java.sql.Types;
 
-public class OracleTypeConverter extends DefaultTypeConverter {
+public class OracleTypeConverter extends AbstractTypeConverter {
+
+    public int getPriority() {
+        return PRIORITY_DATABASE;
+    }
+
+    public boolean supports(Database database) {
+        return database instanceof OracleDatabase;
+    }
+
 
     @Override
-    public Object convertDatabaseValueToJavaObject(Object defaultValue, int dataType, int columnSize, int decimalDigits, Database database) throws ParseException {
+    public Object convertDatabaseValueToObject(Object defaultValue, int dataType, int columnSize, int decimalDigits, Database database) throws ParseException {
         if (defaultValue != null) {
             if (defaultValue instanceof String) {
                 if (dataType == Types.DATE || dataType == Types.TIME || dataType == Types.TIMESTAMP) {
@@ -24,7 +34,7 @@ public class OracleTypeConverter extends DefaultTypeConverter {
                 defaultValue = ((String) defaultValue).replaceFirst("'\\s*$", "'"); //sometimes oracle adds an extra space after the trailing ' (see http://sourceforge.net/tracker/index.php?func=detail&aid=1824663&group_id=187970&atid=923443).
             }
         }
-        return super.convertDatabaseValueToJavaObject(defaultValue, dataType, columnSize, decimalDigits, database);
+        return super.convertDatabaseValueToObject(defaultValue, dataType, columnSize, decimalDigits, database);
     }
 
     @Override

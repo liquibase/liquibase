@@ -21,7 +21,7 @@ public class AlterSequenceGenerator implements SqlGenerator<AlterSequenceStateme
     public ValidationErrors validate(AlterSequenceStatement alterSequenceStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
 
-        if (database instanceof FirebirdDatabase || database instanceof HsqlDatabase) {
+        if (database instanceof FirebirdDatabase || database instanceof HsqlDatabase || database instanceof H2Database) {
             validationErrors.checkDisallowedField("incrementBy", alterSequenceStatement.getIncrementBy());
             validationErrors.checkDisallowedField("maxValue", alterSequenceStatement.getMaxValue());
             validationErrors.checkDisallowedField("minValue", alterSequenceStatement.getMinValue());
@@ -46,7 +46,7 @@ public class AlterSequenceGenerator implements SqlGenerator<AlterSequenceStateme
         }
 
         if (statement.getMinValue() != null) {
-            if (database instanceof FirebirdDatabase || database instanceof HsqlDatabase) {
+            if (database instanceof FirebirdDatabase || database instanceof HsqlDatabase || database instanceof H2Database) {
                 buffer.append(" RESTART WITH ").append(statement.getMinValue());
             } else {
                 buffer.append(" MINVALUE ").append(statement.getMinValue());

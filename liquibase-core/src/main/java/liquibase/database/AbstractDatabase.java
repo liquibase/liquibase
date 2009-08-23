@@ -26,8 +26,6 @@ import liquibase.util.StringUtils;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.math.BigInteger;
-import java.sql.Types;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -202,7 +200,7 @@ public abstract class AbstractDatabase implements Database {
     }
 
 
-    public String getDateLiteral(java.sql.Timestamp date) {
+    public String getDateTimeLiteral(java.sql.Timestamp date) {
         return getDateLiteral(new ISODateFormat().format(date).replaceFirst("^'", "").replaceFirst("'$", ""));
     }
 
@@ -210,7 +208,7 @@ public abstract class AbstractDatabase implements Database {
         return getDateLiteral(new ISODateFormat().format(date).replaceFirst("^'", "").replaceFirst("'$", ""));
     }
 
-    public String getDateLiteral(java.sql.Time date) {
+    public String getTimeLiteral(java.sql.Time date) {
         return getDateLiteral(new ISODateFormat().format(date).replaceFirst("^'", "").replaceFirst("'$", ""));
     }
 
@@ -218,9 +216,9 @@ public abstract class AbstractDatabase implements Database {
         if (date instanceof java.sql.Date) {
             return getDateLiteral(((java.sql.Date) date));
         } else if (date instanceof java.sql.Time) {
-            return getDateLiteral(((java.sql.Time) date));
+            return getTimeLiteral(((java.sql.Time) date));
         } else if (date instanceof java.sql.Timestamp) {
-            return getDateLiteral(((java.sql.Timestamp) date));
+            return getDateTimeLiteral(((java.sql.Timestamp) date));
         } else if (date instanceof ComputedDateValue) {
             return date.toString();
         } else {

@@ -45,18 +45,4 @@ public class InformixTypeConverterTest extends DefaultTypeConverterTest {
             assertEquals("Unknown autoincrement type: varchar(10)", e.getMessage());
         }
     }
-
-    public void testConvertJavaObjectToStringWithBoolean() {
-        String s;
-
-        TypeConverter typeConverter = new InformixTypeConverter();
-
-
-        s = typeConverter.convertJavaObjectToString(Boolean.TRUE, new InformixDatabase());
-        assertEquals("'t'", s);
-
-        s = typeConverter.convertJavaObjectToString(Boolean.FALSE, new InformixDatabase());
-        assertEquals("'f'", s);
-    }
-
 }

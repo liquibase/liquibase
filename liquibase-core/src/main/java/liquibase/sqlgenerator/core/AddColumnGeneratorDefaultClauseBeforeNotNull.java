@@ -21,6 +21,7 @@ public class AddColumnGeneratorDefaultClauseBeforeNotNull extends AddColumnGener
     public boolean supports(AddColumnStatement statement, Database database) {
         return database instanceof OracleDatabase
                 || database instanceof HsqlDatabase
+                || database instanceof H2Database
                 || database instanceof DerbyDatabase
                 || database instanceof DB2Database
                 || database instanceof FirebirdDatabase
@@ -72,8 +73,9 @@ public class AddColumnGeneratorDefaultClauseBeforeNotNull extends AddColumnGener
 
     private String getDefaultClause(AddColumnStatement statement, Database database) {
         String clause = "";
-        if (statement.getDefaultValue() != null) {
-            clause += " DEFAULT " + TypeConverterFactory.getInstance().findTypeConverter(database).convertJavaObjectToString(statement.getDefaultValue(), database);
+        Object defaultValue = statement.getDefaultValue();
+        if (defaultValue != null) {
+            clause += " DEFAULT " + TypeConverterFactory.getInstance().findTypeConverter(database).getDataType(defaultValue).convertObjectToString(defaultValue, database);
         }
         return clause;
     }

@@ -28,12 +28,12 @@ public class CreateSequenceGenerator implements SqlGenerator<CreateSequenceState
             validationErrors.checkDisallowedField("incrementBy", statement.getIncrementBy());
         }
 
-        if (database instanceof FirebirdDatabase || database instanceof HsqlDatabase) {
+        if (database instanceof FirebirdDatabase || database instanceof HsqlDatabase || database  instanceof H2Database) {
             validationErrors.checkDisallowedField("minValue", statement.getMinValue());
             validationErrors.checkDisallowedField("maxValue", statement.getMaxValue());
         }
 
-        if (database instanceof FirebirdDatabase || database instanceof HsqlDatabase) {
+        if (database instanceof FirebirdDatabase || database instanceof HsqlDatabase || database  instanceof H2Database) {
             validationErrors.addError("Database does not support creating sequences with maxValue");
         }
 

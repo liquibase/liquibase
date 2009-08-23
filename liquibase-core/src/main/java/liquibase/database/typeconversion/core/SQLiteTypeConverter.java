@@ -3,10 +3,22 @@ package liquibase.database.typeconversion.core;
 import liquibase.database.structure.type.ClobType;
 import liquibase.database.structure.type.CurrencyType;
 import liquibase.database.structure.type.DateTimeType;
+import liquibase.database.Database;
+import liquibase.database.core.H2Database;
+import liquibase.database.core.SQLiteDatabase;
 
 import java.util.Locale;
 
-public class SQLiteTypeConverter extends DefaultTypeConverter {
+public class SQLiteTypeConverter extends AbstractTypeConverter {
+
+    public int getPriority() {
+        return PRIORITY_DATABASE;
+    }
+
+    public boolean supports(Database database) {
+        return database instanceof SQLiteDatabase;
+    }
+
 
     @Override
     public String getColumnType(String columnType, Boolean autoIncrement) {

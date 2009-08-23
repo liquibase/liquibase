@@ -4,8 +4,19 @@ import liquibase.database.structure.type.BooleanType;
 import liquibase.database.structure.type.ClobType;
 import liquibase.database.structure.type.CurrencyType;
 import liquibase.database.structure.type.DateTimeType;
+import liquibase.database.Database;
+import liquibase.database.core.CacheDatabase;
+import liquibase.database.core.FirebirdDatabase;
 
-public class FirebirdTypeConverter extends DefaultTypeConverter {
+public class FirebirdTypeConverter  extends AbstractTypeConverter {
+
+    public int getPriority() {
+        return PRIORITY_DATABASE;
+    }
+
+    public boolean supports(Database database) {
+        return database instanceof FirebirdDatabase;
+    }
 
     @Override
     public String getColumnType(String columnType, Boolean autoIncrement) {

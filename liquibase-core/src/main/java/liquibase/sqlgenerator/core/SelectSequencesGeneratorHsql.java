@@ -18,7 +18,7 @@ public class SelectSequencesGeneratorHsql implements SqlGenerator<SelectSequence
     }
 
     public boolean supports(SelectSequencesStatement statement, Database database) {
-        return database instanceof HsqlDatabase && !(database instanceof H2Database);
+        return database instanceof HsqlDatabase;
     }
 
     public ValidationErrors validate(SelectSequencesStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {

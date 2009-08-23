@@ -89,7 +89,7 @@ public abstract class CreateSequenceGeneratorTest {
 //                new SqlStatementDatabaseTest(null, new CreateSequenceStatement(null, SEQ_NAME).setMinValue(15)) {
 //
 //                    protected boolean expectedException(Database database, DatabaseException exception) {
-//                        return database instanceof FirebirdDatabase || database instanceof HsqlDatabase;
+//                        return database instanceof FirebirdDatabase || database instanceof HsqlDatabase || database  instanceof H2Database;
 //                    }
 //
 //                    protected void preExecuteAssert(DatabaseSnapshotGenerator snapshot) {
@@ -108,7 +108,7 @@ public abstract class CreateSequenceGeneratorTest {
 //        new DatabaseTestTemplate().testOnAvailableDatabases(new SqlStatementDatabaseTest(null, new CreateSequenceStatement(null, SEQ_NAME).setMaxValue(50)) {
 //
 //            protected boolean expectedException(Database database, DatabaseException exception) {
-//                return database instanceof FirebirdDatabase || database instanceof HsqlDatabase;
+//                return database instanceof FirebirdDatabase || database instanceof HsqlDatabase || database  instanceof H2Database;
 //            }
 //
 //            protected void preExecuteAssert(DatabaseSnapshotGenerator snapshot) {

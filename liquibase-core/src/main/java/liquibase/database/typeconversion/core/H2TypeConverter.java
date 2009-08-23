@@ -2,15 +2,26 @@ package liquibase.database.typeconversion.core;
 
 import liquibase.database.structure.type.DateTimeType;
 import liquibase.database.structure.type.UUIDType;
+import liquibase.database.structure.type.ClobType;
+import liquibase.database.structure.type.BlobType;
 import liquibase.database.Database;
+import liquibase.database.core.H2Database;
 import liquibase.util.StringUtils;
 
 import java.text.ParseException;
 
-public class H2TypeConverter extends HsqlTypeConverter {
+public class H2TypeConverter extends AbstractTypeConverter {
+
+    public int getPriority() {
+        return PRIORITY_DATABASE;
+    }
+
+    public boolean supports(Database database) {
+        return database instanceof H2Database;
+    }
 
     @Override
-    public Object convertDatabaseValueToJavaObject(Object defaultValue, int dataType, int columnSize, int decimalDigits, Database database) throws ParseException {
+    public Object convertDatabaseValueToObject(Object defaultValue, int dataType, int columnSize, int decimalDigits, Database database) throws ParseException {
         if (defaultValue != null && defaultValue instanceof String) {
             if (StringUtils.trimToEmpty(((String) defaultValue)).startsWith("(NEXT VALUE FOR PUBLIC.SYSTEM_SEQUENCE_")) {
                 return null;
@@ -19,7 +30,7 @@ public class H2TypeConverter extends HsqlTypeConverter {
                 return null;
             }
         }
-        return super.convertDatabaseValueToJavaObject(defaultValue, dataType, columnSize, decimalDigits, database);
+        return super.convertDatabaseValueToObject(defaultValue, dataType, columnSize, decimalDigits, database);
     }
 
     @Override
@@ -40,5 +51,35 @@ public class H2TypeConverter extends HsqlTypeConverter {
                 return "VARCHAR(36)";
             }
         };
+    }
+
+    @Override
+    public ClobType getClobType() {
+        return new ClobType() {
+            @Override
+            public String getDataTypeName() {
+                return "LONGVARCHAR";
+            }
+        };
+    }
+
+    @Override
+    public BlobType getBlobType() {
+        return new BlobType() {
+            @Override
+            public String getDataTypeName() {
+                return "LONGVARBINARY";
+            }
+        };
+    }
+
+    @Override
+    public String getTrueBooleanValue() {
+        return "TRUE";
+    }
+
+    @Override
+    public String getFalseBooleanValue() {
+        return "FALSE";
     }
 }

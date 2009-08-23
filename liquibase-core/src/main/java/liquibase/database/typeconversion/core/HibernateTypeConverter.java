@@ -1,17 +1,14 @@
 package liquibase.database.typeconversion.core;
 
-public class HibernateTypeConverter {
+import liquibase.database.Database;
 
-    public String getColumnType(String columnType, Boolean autoIncrement) {
-        return null;
+public class HibernateTypeConverter extends AbstractTypeConverter {
+
+    public int getPriority() {
+        return PRIORITY_DATABASE;
     }
 
-    public String getFalseBooleanValue() {
-        return null;
+    public boolean supports(Database database) {
+        return database instanceof HibernateTypeConverter;
     }
-
-    public String getTrueBooleanValue() {
-        return null;
-    }
-
 }

@@ -16,4 +16,8 @@ public class MySQLSampleChangeLogRunnerTest extends AbstractSimpleChangeLogRunne
         super.testRollbackToChange();
     }
 
+    @Override
+    public void testRollbackableChangeLogScriptOnExistingDatabase() throws Exception {
+        super.testRollbackableChangeLogScriptOnExistingDatabase();    //To change body of overridden methods use File | Settings | File Templates.
+    }
 }

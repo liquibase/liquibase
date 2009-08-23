@@ -36,7 +36,10 @@ public class JUnitJDBCDriverClassLoader extends URLClassLoader {
 
             File thisClassFile = new File(new URI(Thread.currentThread().getContextClassLoader().getResource("liquibase/test/JUnitJDBCDriverClassLoader.class")
                     .toExternalForm()));
-            File jdbcLib = new File(thisClassFile.getParentFile().getParentFile().getParentFile().getParentFile().getParent(), "lib-jdbc");
+            File jdbcLib = new File(thisClassFile.getParentFile().getParentFile().getParentFile(), "jdbc-drivers");
+            if (!jdbcLib.exists()) {
+                throw new RuntimeException("JDBC driver directory "+jdbcLib.getAbsolutePath()+" does not exist");
+            }
             File[] files = jdbcLib.listFiles(new FileFilter() {
                 public boolean accept(File pathname) {
                     return pathname.isDirectory();

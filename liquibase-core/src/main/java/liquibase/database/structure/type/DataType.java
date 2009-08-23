@@ -1,5 +1,7 @@
 package liquibase.database.structure.type;
 
+import liquibase.database.Database;
+
 /**
  * Object representing a data type, instead of a plain string. It will be returned by
  * the getXXXType in the Database interface.
@@ -9,6 +11,13 @@ package liquibase.database.structure.type;
 public abstract class DataType
 {
     public abstract String getDataTypeName();
+
+    public String convertObjectToString(Object value, Database database) {
+        if (value == null) {
+            return null;
+        }
+        return value.toString();
+    }
 
     @Override
     public boolean equals(final Object o)
