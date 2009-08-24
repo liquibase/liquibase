@@ -47,10 +47,13 @@ LiquiBase-Package: liquibase.change,\
  liquibase.database,\
  liquibase.diff,\
  liquibase.executor,\
+ liquibase.ext,\
  liquibase.integration,\
  liquibase.logging,\
  liquibase.parser,\
+ liquibase.precondition,\
  liquibase.serializer,\
- liquibase.snapshot
-
+ liquibase.snapshot,\
+ liquibase.sqlgenerator
+ 
 Main-Class: liquibase.integration.commandline.Main

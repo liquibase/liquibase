@@ -12,9 +12,6 @@
   <artifactId>liquibase-core</artifactId>
   <packaging>jar</packaging>
   <name>Liquibase Core</name>
-  <properties>
-    <bundle.namespace>liquibase.*</bundle.namespace>
-  </properties>
 
   <dependencies>
     <dependency>
@@ -39,40 +36,6 @@
     </resources>
 
     <plugins>
-      <plugin>
-        <groupId>org.apache.felix</groupId>
-        <artifactId>maven-bundle-plugin</artifactId>
-        <extensions>true</extensions>
-        <configuration>
-            <instructions>
-              <_include>-osgi.bnd</_include>
-            </instructions>
-        </configuration>
-
-
-
-
-
-       <executions>
-          <execution>
-            <id>bundle-manifest</id>
-            <phase>process-classes</phase>
-            <goals>    
-              <goal>manifest</goal>
-            </goals>   
-          </execution>
-        </executions>        
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-jar-plugin</artifactId>
-        <configuration>
-          <archive>
-            <manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
-          </archive>
-        </configuration>
-      </plugin>
-
       <plugin>
        <groupId>org.apache.maven.plugins</groupId>
        <artifactId>maven-jar-plugin</artifactId>

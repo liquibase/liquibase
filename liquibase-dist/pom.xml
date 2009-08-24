@@ -13,6 +13,10 @@
   <packaging>pom</packaging>
   <name>Liquibase Distribution</name>
 
+  <properties>
+    <bundle.namespace>liquibase.*</bundle.namespace>
+  </properties>
+
   <!-- javadoc classpath -->
   <dependencies>
     <dependency>
@@ -83,7 +87,81 @@
           </execution>
         </executions>
       </plugin>
+      
+      <!-- merge liquibase-core and liquibase-core-jvm into one jar -->
+      <plugin>
+          <artifactId>maven-dependency-plugin</artifactId>
+          <configuration>
+            <artifactItems>
+              <artifactItem>
+                <groupId>${pom.groupId}</groupId>
+                <artifactId>liquibase-core</artifactId>
+                <version>${pom.version}</version>
+              </artifactItem>
+              <artifactItem>
+                <groupId>${pom.groupId}</groupId>
+                <artifactId>liquibase-core-jvm</artifactId>
+                <version>${pom.version}</version>
+              </artifactItem>
+            </artifactItems>
+          </configuration>
+          <executions>
+            <execution>
+              <id>unpack-jar</id>
+              <phase>generate-resources</phase>
+              <goals>
+                <goal>unpack</goal>
+              </goals>
+              <configuration>
+                <outputDirectory>${project.build.directory}/jar-with-deps</outputDirectory>
+                <excludeTransitive>true</excludeTransitive>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
 
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <extensions>true</extensions>
+        <configuration>
+            <instructions>
+              <_include>-osgi.bnd</_include>
+            </instructions>
+            <manifestLocation>${project.build.directory}/jar-with-deps/META-INF</manifestLocation>
+        </configuration>
+       <executions>
+          <execution>
+            <id>bundle-manifest</id>
+            <phase>process-classes</phase>
+            <goals>    
+              <goal>manifest</goal>
+            </goals>   
+          </execution>
+        </executions>        
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>create-jar-with-deps</id>
+            <phase>package</phase>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <classesDirectory>${project.build.directory}/jar-with-deps</classesDirectory>
+          <archive>
+            <manifestFile>${project.build.directory}/jar-with-deps/META-INF/MANIFEST.MF</manifestFile>
+          </archive>
+          <finalName>${project.build.finalName}-jar-with-deps</finalName>
+        </configuration>
+      </plugin>
+        
       <plugin>
         <artifactId>maven-assembly-plugin</artifactId>
         <executions>
@@ -95,14 +173,12 @@
             </goals>
             <configuration>
               <descriptors>
-                <!-- merge liquibase-core and liquibase-core-jvm into one jar -->
-                <descriptor>src/main/resources/assembly/jar-with-deps.xml</descriptor>
                 <!-- create the distribution archives -->
                 <descriptor>src/main/resources/assembly/bin.xml</descriptor>
               </descriptors>
-              <archive>
+              <!--<archive>
                 <manifestFile>../liquibase-core/src/main/resources/META-INF/MANIFEST.MF</manifestFile>
-              </archive>
+              </archive>-->
             </configuration>
           </execution>
         </executions>
