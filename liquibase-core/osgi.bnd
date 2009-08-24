@@ -46,6 +46,7 @@ Bundle-RequiredExecutionEnvironment: J2SE-1.5
 LiquiBase-Package: liquibase.change,\
  liquibase.database,\
  liquibase.executor,\
+ liquibase.ext,\
  liquibase.logging,\
  liquibase.parser,\
  liquibase.precondition,\
