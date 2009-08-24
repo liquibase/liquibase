@@ -7,7 +7,7 @@ import liquibase.database.core.H2Database;
 public class AddAutoIncrementGeneratorHsqlH2Test extends AddAutoIncrementGeneratorTest {
 
     public AddAutoIncrementGeneratorHsqlH2Test() throws Exception {
-    	super(new AddAutoIncrementGeneratorHsqlH2l());
+    	super(new AddAutoIncrementGeneratorHsqlH2());
     }
 
     @Override

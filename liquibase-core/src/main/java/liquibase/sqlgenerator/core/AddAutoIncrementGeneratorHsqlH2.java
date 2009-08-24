@@ -10,7 +10,7 @@ import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.AddAutoIncrementStatement;
 
-public class AddAutoIncrementGeneratorHsqlH2l extends AddAutoIncrementGenerator {
+public class AddAutoIncrementGeneratorHsqlH2 extends AddAutoIncrementGenerator {
 
     @Override
     public int getPriority() {
