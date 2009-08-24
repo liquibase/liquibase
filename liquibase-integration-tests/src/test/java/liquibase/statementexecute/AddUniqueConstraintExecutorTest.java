@@ -94,7 +94,7 @@ public class AddUniqueConstraintExecutorTest extends AbstractExecuteTest {
     public void execute_noSchema() throws Exception {
         this.statementUnderTest = new AddUniqueConstraintStatement(null, TABLE_NAME, COLUMN_NAME, CONSTRAINT_NAME);
         assertCorrect("alter table [adduqtest] add constraint [uq_test] unique ([coltomakeuq])", SybaseDatabase.class);
-        assertCorrect("alter table [adduqtest] add constraint [uq_test] unique ([coltomakeuq])", MSSQLDatabase.class);
+        assertCorrect("alter table [dbo].[adduqtest] add constraint [uq_test] unique ([coltomakeuq])", MSSQLDatabase.class);
         assertCorrect("alter table [adduqtest] add constraint [uq_test] unique ([coltomakeuq])", SybaseASADatabase.class);
         assertCorrect("alter table `adduqtest` add constraint `uq_test` unique (`coltomakeuq`)", MySQLDatabase.class);
         assertCorrect("alter table adduqtest add constraint unique (coltomakeuq) constraint uq_test", InformixDatabase.class);
@@ -114,7 +114,7 @@ public class AddUniqueConstraintExecutorTest extends AbstractExecuteTest {
 		assertCorrect("alter table \"adduqtest\" add unique (\"coltomakeuq\")", PostgresDatabase.class);
 		assertCorrect("alter table adduqtest add unique (coltomakeuq)", DerbyDatabase.class);
         assertCorrect("alter table [adduqtest] add unique ([coltomakeuq])", SybaseASADatabase.class, SybaseDatabase.class);
-        assertCorrect("alter table [adduqtest] add unique ([coltomakeuq])", MSSQLDatabase.class);
+        assertCorrect("alter table [dbo].[adduqtest] add unique ([coltomakeuq])", MSSQLDatabase.class);
 
 		assertCorrect("alter table [adduqtest] add unique ([coltomakeuq])");
     }
@@ -141,7 +141,8 @@ public class AddUniqueConstraintExecutorTest extends AbstractExecuteTest {
 	@Test
 	public void execute_withTablespace() throws Exception {
 		statementUnderTest = new AddUniqueConstraintStatement(null, TABLE_NAME, COLUMN_NAME, CONSTRAINT_NAME).setTablespace(TABLESPACE_NAME);
-		assertCorrect("alter table [adduqtest] add constraint [uq_test] unique ([coltomakeuq])", SybaseASADatabase.class, SybaseDatabase.class, MSSQLDatabase.class);
+        assertCorrect("alter table [adduqtest] add constraint [uq_test] unique ([coltomakeuq])", SybaseASADatabase.class, SybaseDatabase.class);
+        assertCorrect("alter table [dbo].[adduqtest] add constraint [uq_test] unique ([coltomakeuq])", MSSQLDatabase.class);
         assertCorrect("alter table adduqtest add constraint unique (coltomakeuq) constraint uq_test", InformixDatabase.class);
         assertCorrect("alter table \"adduqtest\" add constraint uq_test unique (\"coltomakeuq\") USING INDEX TABLESPACE " + TABLESPACE_NAME, PostgresDatabase.class);
         assertCorrect("alter table `adduqtest` add constraint `uq_test` unique (`coltomakeuq`)", MySQLDatabase.class);
@@ -154,7 +155,7 @@ public class AddUniqueConstraintExecutorTest extends AbstractExecuteTest {
 	public void execute_withDefferedAndDisabled() throws Exception {
 		statementUnderTest = new AddUniqueConstraintStatement(null, TABLE_NAME, COLUMN_NAME, CONSTRAINT_NAME).setDeferrable(true).setInitiallyDeferred(true).setDisabled(true);
         assertCorrect("alter table [adduqtest] add constraint [uq_test] unique ([coltomakeuq])", SybaseDatabase.class);
-        assertCorrect("alter table [adduqtest] add constraint [uq_test] unique ([coltomakeuq])", MSSQLDatabase.class);
+        assertCorrect("alter table [dbo].[adduqtest] add constraint [uq_test] unique ([coltomakeuq])", MSSQLDatabase.class);
         assertCorrect("alter table [adduqtest] add constraint [uq_test] unique ([coltomakeuq])", SybaseASADatabase.class);
         assertCorrect("alter table `adduqtest` add constraint `uq_test` unique (`coltomakeuq`)", MySQLDatabase.class);
         assertCorrect("alter table adduqtest add constraint unique (coltomakeuq) constraint uq_test", InformixDatabase.class);
