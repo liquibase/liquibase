@@ -59,9 +59,9 @@ public class UpdateGenerator implements SqlGenerator<UpdateStatement> {
             sqlString = database.getDateLiteral(((Date) newValue));
         } else if (newValue instanceof Boolean) {
             if (((Boolean) newValue)) {
-                sqlString = TypeConverterFactory.getInstance().findTypeConverter(database).getTrueBooleanValue();
+                sqlString = TypeConverterFactory.getInstance().findTypeConverter(database).getBooleanType().getTrueBooleanValue();
             } else {
-                sqlString = TypeConverterFactory.getInstance().findTypeConverter(database).getFalseBooleanValue();
+                sqlString = TypeConverterFactory.getInstance().findTypeConverter(database).getBooleanType().getFalseBooleanValue();
             }
         } else {
             sqlString = newValue.toString();

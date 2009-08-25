@@ -9,12 +9,12 @@ import liquibase.database.structure.type.UnknownType;
 public class CacheTypeConverterTest extends DefaultTypeConverterTest {
     @Test
     public void getFalseBooleanValue() {
-        assertEquals("0", new CacheTypeConverter().getFalseBooleanValue());
+        assertEquals("0", new CacheTypeConverter().getBooleanType().getFalseBooleanValue());
     }
 
     @Test
     public void getTrueBooleanValue() {
-        assertEquals("1", new CacheTypeConverter().getTrueBooleanValue());
+        assertEquals("1", new CacheTypeConverter().getBooleanType().getTrueBooleanValue());
     }
     
     @Test
@@ -29,7 +29,7 @@ public class CacheTypeConverterTest extends DefaultTypeConverterTest {
 
     @Test
 	public void getBooleanType() {
-		assertTypesEqual(new UnknownType("INTEGER", true), new CacheTypeConverter().getBooleanType());
+		assertTypesEqual(new UnknownType("INT", true), new CacheTypeConverter().getBooleanType());
 	}
 
     @Test

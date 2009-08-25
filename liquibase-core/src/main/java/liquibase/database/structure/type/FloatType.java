@@ -1,9 +1,12 @@
 package liquibase.database.structure.type;
 
 public class FloatType  extends DataType {
-    @Override
-    public String getDataTypeName() {
-        return "FLOAT";
+    public FloatType() {
+        super("FLOAT");
+    }
+
+    public FloatType(String dataTypeName) {
+        super(dataTypeName);
     }
 
 }

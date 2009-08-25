@@ -4,10 +4,14 @@ import liquibase.statement.ComputedDateValue;
 import liquibase.database.Database;
 
 public class DateTimeType extends DataType {
-    @Override
-    public String getDataTypeName() {
-        return "DATETIME";
+    public DateTimeType() {
+        super("DATETIME");
     }
+
+    public DateTimeType(String dataTypeName) {
+        super(dataTypeName);
+    }
+
     @Override
     public boolean getSupportsPrecision() {
         return true;

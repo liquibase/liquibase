@@ -265,20 +265,6 @@ public abstract class AbstractTypeConverter implements TypeConverter {
     }
 
     /**
-     * The database-specific value to use for "false" "boolean" columns.
-     */
-    public String getFalseBooleanValue() {
-        return "0";
-    }
-
-    /**
-     * The database-specific value to use for "true" "boolean" columns.
-     */
-    public String getTrueBooleanValue() {
-        return "1";
-    }
-
-    /**
      * Returns the actual database-specific data type to use a "date" (no time information) column.
      */
     public DateType getDateType() {

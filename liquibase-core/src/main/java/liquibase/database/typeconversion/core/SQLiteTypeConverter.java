@@ -3,6 +3,7 @@ package liquibase.database.typeconversion.core;
 import liquibase.database.structure.type.ClobType;
 import liquibase.database.structure.type.CurrencyType;
 import liquibase.database.structure.type.DateTimeType;
+import liquibase.database.structure.type.BooleanType;
 import liquibase.database.Database;
 import liquibase.database.core.H2Database;
 import liquibase.database.core.SQLiteDatabase;
@@ -54,42 +55,32 @@ public class SQLiteTypeConverter extends AbstractTypeConverter {
     }
 
     @Override
-    public String getFalseBooleanValue() {
-        return "0";
-    }
+    public BooleanType getBooleanType() {
+        return new BooleanType() {
+            @Override
+            public String getFalseBooleanValue() {
+                return "0";
+            }
 
-    @Override
-    public String getTrueBooleanValue() {
-        return "1";
+            @Override
+            public String getTrueBooleanValue() {
+                return "1";
+            }
+        };
     }
 
     @Override
     public ClobType getClobType() {
-        return new ClobType() {
-            @Override
-            public String getDataTypeName() {
-                return "TEXT";
-            }
-        };
+        return new ClobType("TEXT");
     }
 
     @Override
     public CurrencyType getCurrencyType() {
-        return new CurrencyType() {
-            @Override
-            public String getDataTypeName() {
-                return "REAL";
-            }
-        };
+        return new CurrencyType("REAL");
     }
 
     @Override
     public DateTimeType getDateTimeType() {
-        return new DateTimeType() {
-            @Override
-            public String getDataTypeName() {
-                return "TEXT";
-            }
-        };
+        return new DateTimeType("TEXT");
     }
 }

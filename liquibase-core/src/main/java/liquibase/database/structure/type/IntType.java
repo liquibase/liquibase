@@ -1,9 +1,12 @@
 package liquibase.database.structure.type;
 
 public class IntType  extends DataType {
-    @Override
-    public String getDataTypeName() {
-        return "INT";
+    public IntType() {
+        super("INT");
+    }
+
+    public IntType(String dataTypeName) {
+        super(dataTypeName);
     }
 
 }

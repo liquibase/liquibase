@@ -1,9 +1,12 @@
 package liquibase.database.structure.type;
 
 public class ClobType extends DataType {
-    @Override
-    public String getDataTypeName() {
-        return "CLOB";
+
+    public ClobType() {
+        super("CLOB");
     }
 
+    public ClobType(String dataTypeName) {
+        super(dataTypeName);
+    }
 }

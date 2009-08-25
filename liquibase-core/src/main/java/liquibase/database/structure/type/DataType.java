@@ -8,9 +8,17 @@ import liquibase.database.Database;
  *
  * @author dsmith
  */
-public abstract class DataType
-{
-    public abstract String getDataTypeName();
+public abstract class DataType {
+
+    private String dataTypeName;
+
+    protected DataType(String dataTypeName) {
+        this.dataTypeName = dataTypeName;
+    }
+
+    public String getDataTypeName() {
+        return dataTypeName;
+    };
 
     public String convertObjectToString(Object value, Database database) {
         if (value == null) {

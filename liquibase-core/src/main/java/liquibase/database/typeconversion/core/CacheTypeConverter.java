@@ -36,53 +36,23 @@ public class CacheTypeConverter extends AbstractTypeConverter {
     }
 
     @Override
-    public String getFalseBooleanValue() {
-        return "0";
-    }
-
-    @Override
-    public String getTrueBooleanValue() {
-        return "1";
-    }
-
-    @Override
     public BlobType getBlobType() {
-        return new BlobType() {
-            @Override
-            public String getDataTypeName() {
-                return "LONGVARBINARY";
-            }
-        };
+        return new BlobType("LONGVARBINARY");
     }
 
     @Override
     public BooleanType getBooleanType() {
-        return new BooleanType() {
-            @Override
-            public String getDataTypeName() {
-                return "INTEGER";
-            }
-        };
+        return new BooleanType.NumericBooleanType();
     }
 
     @Override
     public ClobType getClobType() {
-        return new ClobType() {
-            @Override
-            public String getDataTypeName() {
-                return "LONGVARCHAR";
-            }
-
-        };
+        return new ClobType("LONGVARCHAR");
     }
 
     @Override
     public CurrencyType getCurrencyType() {
-        return new CurrencyType() {
-            @Override
-            public String getDataTypeName() {
-                return "MONEY";
-            }
-        };
+        return new CurrencyType("MONEY");
     }
+
 }

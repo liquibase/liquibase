@@ -317,25 +317,12 @@ public class ColumnConfig {
         } else if (this.getDefaultValueBoolean() != null) {
             String returnValue;
             if (this.getDefaultValueBoolean()) {
-                returnValue = TypeConverterFactory.getInstance().findTypeConverter(database).getTrueBooleanValue();
+                returnValue = TypeConverterFactory.getInstance().findTypeConverter(database).getBooleanType().getTrueBooleanValue();
             } else {
-                returnValue = TypeConverterFactory.getInstance().findTypeConverter(database).getFalseBooleanValue();
+                returnValue = TypeConverterFactory.getInstance().findTypeConverter(database).getBooleanType().getFalseBooleanValue();
             }
 
-            if (returnValue.matches("\\d+")) {
-                return returnValue;
-            } else {
-                // removing the ' from the getTrueBooleanValue
-                // of InformixDatabase makes troubles elsewhere
-                // e.g. when creating the databasechangeloglock
-                // table.
-            	// getTrueBooleanValue of Informix is "'t'",
-            	// no need to add another ''
-            	if (database instanceof InformixDatabase) {
-            		return returnValue;
-            	}
-                return "'" + returnValue + "'";
-            }
+            return returnValue;
         } else if (this.getDefaultValueDate() != null) {
             Date defaultDateValue = this.getDefaultValueDate();
             return database.getDateLiteral(defaultDateValue);

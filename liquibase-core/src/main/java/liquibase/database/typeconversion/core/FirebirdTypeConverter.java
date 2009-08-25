@@ -5,7 +5,6 @@ import liquibase.database.structure.type.ClobType;
 import liquibase.database.structure.type.CurrencyType;
 import liquibase.database.structure.type.DateTimeType;
 import liquibase.database.Database;
-import liquibase.database.core.CacheDatabase;
 import liquibase.database.core.FirebirdDatabase;
 
 public class FirebirdTypeConverter  extends AbstractTypeConverter {
@@ -29,52 +28,22 @@ public class FirebirdTypeConverter  extends AbstractTypeConverter {
     }
 
     @Override
-    public String getTrueBooleanValue() {
-        return "1";
-    }
-
-    @Override
-    public String getFalseBooleanValue() {
-        return "0";
-    }
-
-    @Override
     public BooleanType getBooleanType() {
-        return new BooleanType() {
-            @Override
-            public String getDataTypeName() {
-                return "SMALLINT";
-            }
-        };
+        return new BooleanType.NumericBooleanType("SMALLINT");
     }
 
     @Override
     public CurrencyType getCurrencyType() {
-        return new CurrencyType() {
-            @Override
-            public String getDataTypeName() {
-                return "DECIMAL(18, 4)";
-            }
-        };
+        return new CurrencyType("DECIMAL(18, 4)");
     }
 
     @Override
     public ClobType getClobType() {
-        return new ClobType() {
-            @Override
-            public String getDataTypeName() {
-                return "BLOB SUB_TYPE TEXT";
-            }
-        };
+        return new ClobType("BLOB SUB_TYPE TEXT");
     }
 
     @Override
     public DateTimeType getDateTimeType() {
-        return new DateTimeType() {
-            @Override
-            public String getDataTypeName() {
-                return "TIMESTAMP";
-            }
-        };
+        return new DateTimeType("TIMESTAMP");
     }
 }

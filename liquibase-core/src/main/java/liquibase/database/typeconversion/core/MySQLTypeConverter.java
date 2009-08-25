@@ -18,32 +18,12 @@ public class MySQLTypeConverter extends AbstractTypeConverter {
 
 
     @Override
-    public String getFalseBooleanValue() {
-        return "0";
-    }
-
-    @Override
-    public String getTrueBooleanValue() {
-        return "1";
-    }
-
-    @Override
     public BooleanType getBooleanType() {
-        return new BooleanType() {
-            @Override
-            public String getDataTypeName() {
-                return "TINYINT(1)";
-            }
-        };
+        return new BooleanType.NumericBooleanType("TINYINT(1)");
     }
 
     @Override
     public ClobType getClobType() {
-        return new ClobType() {
-            @Override
-            public String getDataTypeName() {
-                return "TEXT";
-            }
-        };
+        return new ClobType("TEXT");
     }
 }
