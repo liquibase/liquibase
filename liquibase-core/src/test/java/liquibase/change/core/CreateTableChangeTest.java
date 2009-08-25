@@ -149,7 +149,7 @@ public class CreateTableChangeTest extends AbstractChangeTest {
         change.addColumn(columnConfig);
 
         CreateTableStatement statement = (CreateTableStatement) change.generateStatements(new MockDatabase())[0];
-        assertEquals(new DefaultTypeConverter().getTrueBooleanValue(), statement.getDefaultValue("id"));
+        assertEquals(new DefaultTypeConverter().getBooleanType().getTrueBooleanValue(), statement.getDefaultValue("id"));
     }
 
     @Test

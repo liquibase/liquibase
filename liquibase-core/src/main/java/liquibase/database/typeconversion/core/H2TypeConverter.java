@@ -35,51 +35,21 @@ public class H2TypeConverter extends AbstractTypeConverter {
 
     @Override
     public DateTimeType getDateTimeType() {
-        return new DateTimeType() {
-            @Override
-            public String getDataTypeName() {
-                return "TIMESTAMP";
-            }
-        };
+        return new DateTimeType("TIMESTAMP");
     }
 
     @Override
     public UUIDType getUUIDType() {
-        return new UUIDType() {
-            @Override
-            public String getDataTypeName() {
-                return "VARCHAR(36)";
-            }
-        };
+        return new UUIDType("VARCHAR(36)");
     }
 
     @Override
     public ClobType getClobType() {
-        return new ClobType() {
-            @Override
-            public String getDataTypeName() {
-                return "LONGVARCHAR";
-            }
-        };
+        return new ClobType("LONGVARCHAR");
     }
 
     @Override
     public BlobType getBlobType() {
-        return new BlobType() {
-            @Override
-            public String getDataTypeName() {
-                return "LONGVARBINARY";
-            }
-        };
-    }
-
-    @Override
-    public String getTrueBooleanValue() {
-        return "TRUE";
-    }
-
-    @Override
-    public String getFalseBooleanValue() {
-        return "FALSE";
+        return new BlobType("LONGVARBINARY");
     }
 }

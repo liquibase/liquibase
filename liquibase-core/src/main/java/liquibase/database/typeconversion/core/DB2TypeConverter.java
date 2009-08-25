@@ -34,43 +34,18 @@ public class DB2TypeConverter  extends AbstractTypeConverter {
     }
 
     @Override
-    public String getTrueBooleanValue() {
-        return "1";
-    }
-
-    @Override
-    public String getFalseBooleanValue() {
-        return "0";
-    }
-
-    @Override
     public BooleanType getBooleanType() {
-        return new BooleanType() {
-            @Override
-            public String getDataTypeName() {
-                return "SMALLINT";
-            }
-        };
+        return new BooleanType.NumericBooleanType("SMALLINT");
     }
 
     @Override
     public CurrencyType getCurrencyType() {
-        return new CurrencyType() {
-            @Override
-            public String getDataTypeName() {
-                return "DECIMAL(19,4)";
-            }
-        };
+        return new CurrencyType("DECIMAL(19,4)");
     }
 
     @Override
     public DateTimeType getDateTimeType() {
-        return new DateTimeType() {
-            @Override
-            public String getDataTypeName() {
-                return "TIMESTAMP";
-            }
-        };
+        return new DateTimeType("TIMESTAMP");
     }
 
 }

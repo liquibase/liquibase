@@ -1,9 +1,12 @@
 package liquibase.database.structure.type;
 
 public class DecimalType  extends DataType {
-    @Override
-    public String getDataTypeName() {
-        return "DECIMAL";
+    public DecimalType() {
+        super("DECIMAL");
+    }
+
+    public DecimalType(String dataTypeName) {
+        super(dataTypeName);
     }
 
 }

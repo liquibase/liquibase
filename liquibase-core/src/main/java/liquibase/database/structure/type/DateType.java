@@ -5,9 +5,12 @@ import liquibase.database.Database;
 
 public class DateType extends DataType {
 
-    @Override
-    public String getDataTypeName() {
-        return "DATE";
+    public DateType() {
+        super("DATE");
+    }
+
+    public DateType(String dataTypeName) {
+        super(dataTypeName);
     }
 
     @Override

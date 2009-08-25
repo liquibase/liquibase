@@ -13,17 +13,13 @@ public interface TypeConverter extends PrioritizedService {
 
     boolean supports(Database database);
 
-    Object convertDatabaseValueToObject(Object defaultValue, int dataType, int columnSize, int decimalDigits, Database database) throws ParseException;
+    Object convertDatabaseValueToObject(Object defaultValue, int dataType, int firstParameter, int secondParameter, Database database) throws ParseException;
 
     DataType getDataType(Object object);
 
     String getColumnType(String columnType, Boolean autoIncrement);
 
     String getColumnType(ColumnConfig columnConfig);
-
-    String getFalseBooleanValue();
-
-    String getTrueBooleanValue();
 
     CharType getCharType();
 

@@ -33,32 +33,12 @@ public class DerbyTypeConverter  extends AbstractTypeConverter {
     }
 
     @Override
-    public String getFalseBooleanValue() {
-        return "0";
-    }
-
-    @Override
-    public String getTrueBooleanValue() {
-        return "1";
-    }
-
-    @Override
     public BooleanType getBooleanType() {
-        return new BooleanType() {
-            @Override
-            public String getDataTypeName() {
-                return "SMALLINT";
-            }
-        };
+        return new BooleanType.NumericBooleanType("SMALLINT");
     }
 
     @Override
     public DateTimeType getDateTimeType() {
-        return new DateTimeType() {
-            @Override
-            public String getDataTypeName() {
-                return "TIMESTAMP";
-            }
-        };
+        return new DateTimeType("TIMESTAMP");
     }
 }

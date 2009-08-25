@@ -38,81 +38,35 @@ public class OracleTypeConverter extends AbstractTypeConverter {
     }
 
     @Override
-    public String getTrueBooleanValue() {
-        return "1";
-    }
-
-    @Override
-    public String getFalseBooleanValue() {
-        return "0";
-    }
-
-    @Override
     public BooleanType getBooleanType() {
-        return new BooleanType() {
-            @Override
-            public String getDataTypeName() {
-                return "NUMBER(1)";
-            }
-        };
+        return new BooleanType.NumericBooleanType("NUMBER(1)");
     }
 
     @Override
     public CurrencyType getCurrencyType() {
-        return new CurrencyType() {
-            @Override
-            public String getDataTypeName() {
-                return "NUMBER(15, 2)";
-            }
-        };
+        return new CurrencyType("NUMBER(15, 2)");
     }
 
     @Override
     public UUIDType getUUIDType() {
-        return new UUIDType() {
-            @Override
-            public String getDataTypeName() {
-                return "RAW(16)";
-            }
-        };
+        return new UUIDType("RAW(16)");
     }
     @Override
     public TimeType getTimeType() {
-        return new TimeType(){
-            @Override
-            public String getDataTypeName() {
-                return "DATE";
-            }
-        };
+        return new TimeType("DATE");
     }
     @Override
     public DateTimeType getDateTimeType() {
-        return new DateTimeType() {
-            @Override
-            public String getDataTypeName() {
-                return "TIMESTAMP";
-            }
-        };
+        return new DateTimeType("TIMESTAMP");
     }
 
     @Override
     public BigIntType getBigIntType() {
-        return new BigIntType() {;
-
-            @Override
-            public String getDataTypeName() {
-                return "NUMBER(19,0)";
-            }
-        };
+        return new BigIntType("NUMBER(19,0)");
     }
 
+    @Override
     public VarcharType getVarcharType() {
-        return new VarcharType(){;
-
-        @Override
-        public String getDataTypeName() {
-            return "VARCHAR2";
-        }
-    };
+        return new VarcharType("VARCHAR2");
     }
 }

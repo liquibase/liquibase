@@ -4,6 +4,14 @@ import liquibase.database.Database;
 
 public class CharType extends DataType {
 
+    public CharType() {
+        super("CHAR");
+    }
+
+    public CharType(String dataTypeName) {
+        super(dataTypeName);
+    }
+
     @Override
     public String convertObjectToString(Object value, Database database) {
         if (value == null) {
@@ -13,11 +21,6 @@ public class CharType extends DataType {
             return null;
         }
         return "'" + ((String) value).replaceAll("'", "''") + "'";
-    }
-
-    @Override
-    public String getDataTypeName() {
-        return "CHAR";
     }
 
     @Override

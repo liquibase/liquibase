@@ -52,9 +52,9 @@ public class InsertGenerator implements SqlGenerator<InsertStatement> {
                 sql.append(database.getDateLiteral(((Date) newValue)));
             } else if (newValue instanceof Boolean) {
                 if (((Boolean) newValue)) {
-                    sql.append(TypeConverterFactory.getInstance().findTypeConverter(database).getTrueBooleanValue());
+                    sql.append(TypeConverterFactory.getInstance().findTypeConverter(database).getBooleanType().getTrueBooleanValue());
                 } else {
-                    sql.append(TypeConverterFactory.getInstance().findTypeConverter(database).getFalseBooleanValue());
+                    sql.append(TypeConverterFactory.getInstance().findTypeConverter(database).getBooleanType().getFalseBooleanValue());
                 }
             } else {
                 sql.append(newValue);

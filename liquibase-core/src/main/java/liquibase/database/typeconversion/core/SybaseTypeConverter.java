@@ -46,73 +46,33 @@ public class SybaseTypeConverter extends AbstractTypeConverter {
     }
 
     @Override
-    public String getTrueBooleanValue() {
-        return "1";
-    }
-
-    @Override
-    public String getFalseBooleanValue() {
-        return "0";
-    }
-
-    @Override
     public DateType getDateType() {
-        return new DateType() {
-            @Override
-            public String getDataTypeName() {
-                return "SMALLDATETIME";
-            }
-        };
+        return new DateType("SMALLDATETIME");
     }
 
     @Override
     public BooleanType getBooleanType() {
-        return new BooleanType() {
-            @Override
-            public String getDataTypeName() {
-                return "BIT";
-            }
-        };
+        return new BooleanType.NumericBooleanType("BIT");
     }
 
     @Override
     public CurrencyType getCurrencyType() {
-        return new CurrencyType() {
-            @Override
-            public String getDataTypeName() {
-                return "MONEY";
-            }
-        };
+        return new CurrencyType("MONEY");
     }
 
     @Override
     public UUIDType getUUIDType() {
-        return new UUIDType() {
-            @Override
-            public String getDataTypeName() {
-                return "UNIQUEIDENTIFIER";
-            }
-        };
+        return new UUIDType("UNIQUEIDENTIFIER");
     }
 
     @Override
     public ClobType getClobType() {
-        return new ClobType() {
-            @Override
-            public String getDataTypeName() {
-                return "TEXT";
-            }
-        };
+        return new ClobType("TEXT");
     }
 
     @Override
     public BlobType getBlobType() {
-        return new BlobType() {
-            @Override
-            public String getDataTypeName() {
-                return "IMAGE";
-            }
-        };
+        return new BlobType("IMAGE");
     }
 
 }

@@ -81,45 +81,16 @@ public class PostgresTypeConverter extends AbstractTypeConverter {
 
     @Override
     public ClobType getClobType() {
-        return new ClobType() {
-            @Override
-            public String getDataTypeName() {
-                return "TEXT";
-            }
-        };
+        return new ClobType("TEXT");
     }
 
     @Override
     public BlobType getBlobType() {
-        return new BlobType() {
-            @Override
-            public String getDataTypeName() {
-                return "BYTEA";
-            }
-        };
+        return new BlobType("BYTEA");
     }
 
     @Override
     public DateTimeType getDateTimeType() {
-        return new DateTimeType() {
-            @Override
-            public String getDataTypeName() {
-                return "TIMESTAMP WITH TIME ZONE";
-            }
-        };
-    }
-
-    /**
-     * @see http://www.postgresql.org/docs/8.4/static/datatype-boolean.html
-     */
-    public String getFalseBooleanValue() {
-        return "FALSE";
-    }
-
-    /**
-     * @see http://www.postgresql.org/docs/8.4/static/datatype-boolean.html
-     */
-    public String getTrueBooleanValue() {
-        return "TRUE";
+        return new DateTimeType("TIMESTAMP WITH TIME ZONE");
     }
 }

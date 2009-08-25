@@ -4,9 +4,13 @@ import liquibase.statement.ComputedDateValue;
 import liquibase.database.Database;
 
 public class TimeType  extends DataType {
-    @Override
-    public String getDataTypeName() {
-        return "TIME";
+
+    public TimeType() {
+        super("TIME");
+    }
+
+    public TimeType(String dataTypeName) {
+        super(dataTypeName);
     }
 
     @Override

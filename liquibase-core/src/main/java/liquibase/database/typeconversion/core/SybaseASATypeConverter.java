@@ -17,40 +17,14 @@ public class SybaseASATypeConverter extends AbstractTypeConverter {
 
 
     @Override
-    public String getTrueBooleanValue() {
-        return "1";
-    }
-
-    @Override
-    public String getFalseBooleanValue() {
-        return "0";
-    }
-
-    /* (non-Javadoc)
-     * @see liquibase.database.Database#getBooleanType()
-     */
-    @Override
     public BooleanType getBooleanType() {
 
-        return new BooleanType() {
-            @Override
-            public String getDataTypeName() {
-                return "BIT";
-            }
-        };
+        return new BooleanType.NumericBooleanType("BIT");
     }
 
-    /* (non-Javadoc)
-     * @see liquibase.database.Database#getClobType()
-     */
     @Override
     public ClobType getClobType() {
-        return new ClobType() {
-            @Override
-            public String getDataTypeName() {
-                return "LONG VARCHAR";
-            }
-        };
+        return new ClobType("LONG VARCHAR");
     }
 
     /* (non-Javadoc)
@@ -58,33 +32,18 @@ public class SybaseASATypeConverter extends AbstractTypeConverter {
      */
     @Override
     public CurrencyType getCurrencyType() {
-        return new CurrencyType() {
-            @Override
-            public String getDataTypeName() {
-                return "MONEY";
-            }
-        };
+        return new CurrencyType("MONEY");
 
     }
 
     @Override
     public UUIDType getUUIDType() {
-        return new UUIDType() {
-            @Override
-            public String getDataTypeName() {
-                return "UNIQUEIDENTIFIER";
-            }
-        };
+        return new UUIDType("UNIQUEIDENTIFIER");
     }
     
     @Override
     public BlobType getBlobType() {
-        return new BlobType() {
-            @Override
-            public String getDataTypeName() {
-                return "LONG BINARY";
-            }
-        };
+        return new BlobType("LONG BINARY");
     }
 
 

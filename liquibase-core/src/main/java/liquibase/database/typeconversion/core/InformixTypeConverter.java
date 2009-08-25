@@ -2,10 +2,7 @@ package liquibase.database.typeconversion.core;
 
 import liquibase.database.Database;
 import liquibase.database.core.InformixDatabase;
-import liquibase.database.structure.type.BigIntType;
-import liquibase.database.structure.type.CurrencyType;
-import liquibase.database.structure.type.DateTimeType;
-import liquibase.database.structure.type.TimeType;
+import liquibase.database.structure.type.*;
 
 import java.util.regex.Pattern;
 
@@ -55,52 +52,37 @@ public class InformixTypeConverter extends AbstractTypeConverter {
     }
 
     @Override
-    public String getTrueBooleanValue() {
-        return "'t'";
-    }
+    public BooleanType getBooleanType() {
+        return new BooleanType() {
+            @Override
+            public String getTrueBooleanValue() {
+                return "'t'";
+            }
 
-    @Override
-    public String getFalseBooleanValue() {
-        return "'f'";
+            @Override
+            public String getFalseBooleanValue() {
+                return "'f'";
+            }
+        };
     }
 
     @Override
     public BigIntType getBigIntType() {
-        return new BigIntType() {
-            @Override
-            public String getDataTypeName() {
-                return "INT8";
-            }
-        };
+        return new BigIntType("INT8");
     }
 
     @Override
     public CurrencyType getCurrencyType() {
-        return new CurrencyType() {
-            @Override
-            public String getDataTypeName() {
-                return "MONEY";
-            }
-        };
+        return new CurrencyType("MONEY");
     }
 
     @Override
     public DateTimeType getDateTimeType() {
-        return new DateTimeType() {
-            @Override
-            public String getDataTypeName() {
-                return "DATETIME " + DATETIME_FIELD_QUALIFIER;
-            }
-        };
+        return new DateTimeType("DATETIME " + DATETIME_FIELD_QUALIFIER);
     }
 
     @Override
     public TimeType getTimeType() {
-        return new TimeType() {
-            @Override
-            public String getDataTypeName() {
-                return "INTERVAL " + INTERVAL_FIELD_QUALIFIER;
-            }
-        };
+        return new TimeType("INTERVAL " + INTERVAL_FIELD_QUALIFIER);
     }
 }
