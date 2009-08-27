@@ -26,29 +26,29 @@ public class InformixTypeConverter extends AbstractTypeConverter {
     private static final String DATETIME_FIELD_QUALIFIER = "YEAR TO FRACTION(5)";
 
     @Override
-    public String getColumnType(String columnType, Boolean autoIncrement) {
-        String type = super.getColumnType(columnType, autoIncrement);
+    public DataType getDataType(String columnTypeString, Boolean autoIncrement) {
+        DataType type = super.getDataType(columnTypeString, autoIncrement);
         if (autoIncrement != null && autoIncrement) {
             if (isSerial(type)) {
-                return "SERIAL";
+                return new CustomType("SERIAL",0,0);
             } else if (isSerial8(type)) {
-                return "SERIAL8";
+                return new CustomType("SERIAL8",0,0);
             } else {
-                throw new IllegalArgumentException("Unknown autoincrement type: " + columnType);
+                throw new IllegalArgumentException("Unknown autoincrement type: " + columnTypeString);
             }
         }
         return type;
     }
 
-    private boolean isSerial(String type) {
-        return INTEGER_PATTERN.matcher(type).matches()
-                || SERIAL_PATTERN.matcher(type).matches();
+    private boolean isSerial(DataType type) {
+        return INTEGER_PATTERN.matcher(type.getDataTypeName()).matches()
+                || SERIAL_PATTERN.matcher(type.getDataTypeName()).matches();
     }
 
-    private boolean isSerial8(String type) {
-        return INTEGER8_PATTERN.matcher(type).matches()
-                || SERIAL8_PATTERN.matcher(type).matches()
-                || "BIGINT".equals(type.toUpperCase());
+    private boolean isSerial8(DataType type) {
+        return INTEGER8_PATTERN.matcher(type.getDataTypeName()).matches()
+                || SERIAL8_PATTERN.matcher(type.getDataTypeName()).matches()
+                || "BIGINT".equalsIgnoreCase(type.getDataTypeName());
     }
 
     @Override

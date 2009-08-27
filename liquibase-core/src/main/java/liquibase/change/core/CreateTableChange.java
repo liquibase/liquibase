@@ -45,11 +45,11 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
 
             if (constraints != null && constraints.isPrimaryKey() != null && constraints.isPrimaryKey()) {
 
-                statement.addPrimaryKeyColumn(column.getName(), TypeConverterFactory.getInstance().findTypeConverter(database).getColumnType(column.getType(), isAutoIncrement), defaultValue, constraints.getPrimaryKeyName());
+                statement.addPrimaryKeyColumn(column.getName(), TypeConverterFactory.getInstance().findTypeConverter(database).getDataType(column.getType(), isAutoIncrement).toString(), defaultValue, constraints.getPrimaryKeyName());
 
             } else {
                 statement.addColumn(column.getName(),
-                        database == null ? column.getType() : TypeConverterFactory.getInstance().findTypeConverter(database).getColumnType(column.getType(), column.isAutoIncrement()),
+                        database == null ? column.getType() : TypeConverterFactory.getInstance().findTypeConverter(database).getDataType(column.getType(), column.isAutoIncrement()).toString(),
                         defaultValue);
             }
 

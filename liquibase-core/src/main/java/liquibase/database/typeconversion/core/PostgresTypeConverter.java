@@ -5,6 +5,7 @@ import liquibase.database.core.PostgresDatabase;
 import liquibase.database.structure.type.BlobType;
 import liquibase.database.structure.type.ClobType;
 import liquibase.database.structure.type.DateTimeType;
+import liquibase.database.structure.type.DataType;
 
 import java.text.ParseException;
 import java.sql.Types;
@@ -37,30 +38,26 @@ public class PostgresTypeConverter extends AbstractTypeConverter {
     }
 
     @Override
-    public String getColumnType(String columnType, Boolean autoIncrement) {
-        if (columnType.startsWith("java.sql.Types.VARCHAR")) { //returns "name" for type
-            return columnType.replace("java.sql.Types.", "");
-        }
+    public DataType getDataType(String columnTypeString, Boolean autoIncrement) {
+        DataType type = super.getDataType(columnTypeString, autoIncrement);
 
-        String type = super.getColumnType(columnType, autoIncrement);
-
-        if (type.startsWith("TEXT(")) {
-            return getClobType().getDataTypeName();
-        } else if (type.toLowerCase().startsWith("float8")) {
-            return "FLOAT8";
-        } else if (type.toLowerCase().startsWith("float4")) {
-            return "FLOAT4";
+        if (type.getDataTypeName().startsWith("TEXT(")) {
+            type = getClobType();
+        } else if (type.getDataTypeName().toLowerCase().startsWith("float8")) {
+            type.setDataTypeName("FLOAT8");
+        } else if (type.getDataTypeName().toLowerCase().startsWith("float4")) {
+            type.setDataTypeName("FLOAT4");
         }
 
 
         if (autoIncrement != null && autoIncrement) {
-            if ("integer".equals(type.toLowerCase())) {
-                return "serial";
-            } else if ("bigint".equals(type.toLowerCase()) || "bigserial".equals(type.toLowerCase())) {
-                return "bigserial";
+            if ("integer".equals(type.getDataTypeName().toLowerCase())) {
+                type.setDataTypeName("serial");
+            } else if ("bigint".equals(type.getDataTypeName().toLowerCase()) || "bigserial".equals(type.getDataTypeName().toLowerCase())) {
+                type.setDataTypeName("bigserial");
             } else {
                 // Unknown integer type, default to "serial"
-                return "serial";
+                type.setDataTypeName("serial");
             }
         }
 

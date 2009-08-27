@@ -1,6 +1,5 @@
 package liquibase.database;
 
-import liquibase.change.ColumnConfig;
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 import org.junit.Test;
@@ -64,9 +63,9 @@ public abstract class AbstractDatabaseTest {
 //        DatabaseConnection connection = database.getConnection();
 //        if (connection != null) {
 //            ((JdbcConnection) connection).getUnderlyingConnection().rollback();
-//            assertEquals(database.getDateType().getDataTypeName().toUpperCase(), database.getColumnType("java.sql.Types.DATE", false).toUpperCase());
-//            assertEquals(database.getBooleanType().getDataTypeName().toUpperCase(), database.getColumnType("java.sql.Types.BOOLEAN", false).toUpperCase());
-//            assertEquals("VARCHAR(255)", database.getColumnType("java.sql.Types.VARCHAR(255)", false).toUpperCase().replaceAll("VARCHAR2", "VARCHAR"));
+//            assertEquals(database.getDateType().getDataTypeName().toUpperCase(), database.getDataType("java.sql.Types.DATE", false).toUpperCase());
+//            assertEquals(database.getBooleanType().getDataTypeName().toUpperCase(), database.getDataType("java.sql.Types.BOOLEAN", false).toUpperCase());
+//            assertEquals("VARCHAR(255)", database.getDataType("java.sql.Types.VARCHAR(255)", false).toUpperCase().replaceAll("VARCHAR2", "VARCHAR"));
 //        }
 //    }
 }

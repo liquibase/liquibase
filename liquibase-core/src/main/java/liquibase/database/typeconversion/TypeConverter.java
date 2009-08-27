@@ -17,9 +17,9 @@ public interface TypeConverter extends PrioritizedService {
 
     DataType getDataType(Object object);
 
-    String getColumnType(String columnType, Boolean autoIncrement);
+    DataType getDataType(String columnTypeString, Boolean autoIncrement);
 
-    String getColumnType(ColumnConfig columnConfig);
+    DataType getDataType(ColumnConfig columnConfig);
 
     CharType getCharType();
 

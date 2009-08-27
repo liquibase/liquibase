@@ -5,11 +5,11 @@ import liquibase.database.Database;
 
 public class DateTimeType extends DataType {
     public DateTimeType() {
-        super("DATETIME");
+        super("DATETIME",0,0);
     }
 
     public DateTimeType(String dataTypeName) {
-        super(dataTypeName);
+        super(dataTypeName,0,0);
     }
 
     @Override

@@ -6,11 +6,11 @@ import liquibase.database.Database;
 public class DateType extends DataType {
 
     public DateType() {
-        super("DATE");
+        super("DATE",0,0);
     }
 
     public DateType(String dataTypeName) {
-        super(dataTypeName);
+        super(dataTypeName,0,0);
     }
 
     @Override

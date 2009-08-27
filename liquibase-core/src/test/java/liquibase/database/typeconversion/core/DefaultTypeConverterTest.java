@@ -14,36 +14,32 @@ public class DefaultTypeConverterTest {
 
         TypeConverter typeConverter = new  DefaultTypeConverter();
         column.setType("boolean");
-        assertEquals(typeConverter.getBooleanType().getDataTypeName(), typeConverter.getColumnType(column));
+        assertEquals(typeConverter.getBooleanType().getDataTypeName(), typeConverter.getDataType(column).toString());
         column.setType("BooLean");
-        assertEquals(typeConverter.getBooleanType().getDataTypeName(), typeConverter.getColumnType(column));
+        assertEquals(typeConverter.getBooleanType().getDataTypeName(), typeConverter.getDataType(column).toString());
 
 
         column.setType("currency");
-        assertEquals(typeConverter.getCurrencyType().getDataTypeName(), typeConverter.getColumnType(column));
+        assertEquals(typeConverter.getCurrencyType().getDataTypeName(), typeConverter.getDataType(column).toString());
         column.setType("currEncy");
-        assertEquals(typeConverter.getCurrencyType().getDataTypeName(), typeConverter.getColumnType(column));
+        assertEquals(typeConverter.getCurrencyType().getDataTypeName(), typeConverter.getDataType(column).toString());
 
         column.setType("uuid");
-        assertEquals(typeConverter.getUUIDType().getDataTypeName(), typeConverter.getColumnType(column));
+        assertEquals(typeConverter.getUUIDType().getDataTypeName(), typeConverter.getDataType(column).toString());
         column.setType("UUID");
-        assertEquals(typeConverter.getUUIDType().getDataTypeName(), typeConverter.getColumnType(column));
+        assertEquals(typeConverter.getUUIDType().getDataTypeName(), typeConverter.getDataType(column).toString());
 
         column.setType("blob");
-        assertEquals(typeConverter.getBlobType().getDataTypeName(), typeConverter.getColumnType(column));
+        assertEquals(typeConverter.getBlobType().getDataTypeName(), typeConverter.getDataType(column).toString());
         column.setType("BLOB");
-        assertEquals(typeConverter.getBlobType().getDataTypeName(), typeConverter.getColumnType(column));
+        assertEquals(typeConverter.getBlobType().getDataTypeName(), typeConverter.getDataType(column).toString());
 
         column.setType("clob");
-        assertEquals(typeConverter.getClobType().getDataTypeName(), typeConverter.getColumnType(column));
+        assertEquals(typeConverter.getClobType().getDataTypeName(), typeConverter.getDataType(column).toString());
         column.setType("CLOB");
-        assertEquals(typeConverter.getClobType().getDataTypeName(), typeConverter.getColumnType(column));
+        assertEquals(typeConverter.getClobType().getDataTypeName(), typeConverter.getDataType(column).toString());
 
         column.setType("SomethingElse");
-        assertEquals("SomethingElse", typeConverter.getColumnType(column));
-    }
-
-    public void assertTypesEqual(DataType type1, DataType type2) {
-        assertEquals(type1.getDataTypeName(), type2.getDataTypeName());
+        assertEquals("SomethingElse", typeConverter.getDataType(column).toString());
     }
 }

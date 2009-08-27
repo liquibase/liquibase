@@ -33,7 +33,7 @@ public class AddColumnGeneratorSQLite extends AddColumnGenerator {
 //                return new ColumnConfig[] {
 //                    new ColumnConfig()
 //                            .setName(statement.getColumnName())
-//                        .setType(statement.getColumnType())
+//                        .setType(statement.getDataType())
 //                        .setAutoIncrement(statement.isAutoIncrement())
 //                };
 //            }

@@ -124,8 +124,8 @@ public abstract class AbstractExecuteTest {
     }
 
     private String replaceType(String type, String baseString, Database database) {
-        return baseString.replaceAll(" " + type + " ", " " + TypeConverterFactory.getInstance().findTypeConverter(database).getColumnType(type, false) + " ")
-                .replaceAll(" " + type + ",", " " + TypeConverterFactory.getInstance().findTypeConverter(database).getColumnType(type, false) + ",");
+        return baseString.replaceAll(" " + type + " ", " " + TypeConverterFactory.getInstance().findTypeConverter(database).getDataType(type, false) + " ")
+                .replaceAll(" " + type + ",", " " + TypeConverterFactory.getInstance().findTypeConverter(database).getDataType(type, false) + ",");
     }
 
     private String replaceDatabaseClauses(String convertedSql, Database database) {

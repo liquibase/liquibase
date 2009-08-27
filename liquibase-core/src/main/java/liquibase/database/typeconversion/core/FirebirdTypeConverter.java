@@ -1,9 +1,6 @@
 package liquibase.database.typeconversion.core;
 
-import liquibase.database.structure.type.BooleanType;
-import liquibase.database.structure.type.ClobType;
-import liquibase.database.structure.type.CurrencyType;
-import liquibase.database.structure.type.DateTimeType;
+import liquibase.database.structure.type.*;
 import liquibase.database.Database;
 import liquibase.database.core.FirebirdDatabase;
 
@@ -18,10 +15,10 @@ public class FirebirdTypeConverter  extends AbstractTypeConverter {
     }
 
     @Override
-    public String getColumnType(String columnType, Boolean autoIncrement) {
-        String type = super.getColumnType(columnType, autoIncrement);
-        if (type.startsWith("BLOB SUB_TYPE <0")) {
-            return getBlobType().getDataTypeName();
+    public DataType getDataType(String columnTypeString, Boolean autoIncrement) {
+        DataType type = super.getDataType(columnTypeString, autoIncrement);
+        if (type.getDataTypeName().startsWith("BLOB SUB_TYPE <0")) {
+            return getBlobType();
         } else {
             return type;
         }
