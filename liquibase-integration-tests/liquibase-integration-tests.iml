@@ -34,6 +34,11 @@
     <orderEntry type="library" name="Maven: org.springframework:spring:2.0.6" level="project" />
     <orderEntry type="module" module-name="liquibase-core-jvm" exported="" />
     <orderEntry type="module" module-name="liquibase-core" exported="" />
+    <orderEntry type="module" module-name="liquibase-core" />
+    <orderEntry type="module" module-name="liquibase-ext-change" />
+    <orderEntry type="module" module-name="liquibase-ext-changewithnestedtags" />
+    <orderEntry type="library" name="Maven: hsqldb:hsqldb:1.8.0.7" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.derby:derby:10.2.2.0" level="project" />
   </component>
 </module>
 

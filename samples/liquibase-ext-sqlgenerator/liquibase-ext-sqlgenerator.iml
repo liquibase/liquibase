@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module relativePaths="true" MavenProjectsManager.isMavenModule="true" type="JAVA_MODULE" version="4">
+  <component name="NewModuleRootManager" inherit-compiler-output="false">
+    <output url="file://$MODULE_DIR$/target/classes" />
+    <output-test url="file://$MODULE_DIR$/target/test-classes" />
+    <content url="file://$MODULE_DIR$">
+      <sourceFolder url="file://$MODULE_DIR$/src/main/java" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/test/java" isTestSource="true" />
+      <excludeFolder url="file://$MODULE_DIR$/target" />
+    </content>
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="module" module-name="liquibase-core-jvm" exported="" />
+    <orderEntry type="module" module-name="liquibase-core" exported="" />
+    <orderEntry type="module" module-name="liquibase-core" />
+    <orderEntry type="library" name="Maven: junit:junit:4.1" level="project" />
+    <orderEntry type="library" name="Maven: org.easymock:easymockclassextension:2.2" level="project" />
+    <orderEntry type="library" name="Maven: org.easymock:easymock:2.2" level="project" />
+    <orderEntry type="library" name="Maven: cglib:cglib-nodep:2.1_3" level="project" />
+  </component>
+</module>
+
