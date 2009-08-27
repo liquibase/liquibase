@@ -1,11 +1,7 @@
 package liquibase.database.typeconversion.core;
 
-import liquibase.database.structure.type.ClobType;
-import liquibase.database.structure.type.CurrencyType;
-import liquibase.database.structure.type.DateTimeType;
-import liquibase.database.structure.type.BooleanType;
+import liquibase.database.structure.type.*;
 import liquibase.database.Database;
-import liquibase.database.core.H2Database;
 import liquibase.database.core.SQLiteDatabase;
 
 import java.util.Locale;
@@ -22,34 +18,33 @@ public class SQLiteTypeConverter extends AbstractTypeConverter {
 
 
     @Override
-    public String getColumnType(String columnType, Boolean autoIncrement) {
-        String type;
-        if (columnType.equals("INTEGER") ||
-                columnType.toLowerCase(Locale.ENGLISH).contains("int") ||
-                columnType.toLowerCase(Locale.ENGLISH).contains("bit")) {
-            type = "INTEGER";
-        } else if (columnType.equals("TEXT") ||
-                columnType.toLowerCase(Locale.ENGLISH).contains("uuid") ||
-                columnType.toLowerCase(Locale.ENGLISH).contains("uniqueidentifier") ||
-
-                columnType.toLowerCase(Locale.ENGLISH).equals("uniqueidentifier") ||
-                columnType.toLowerCase(Locale.ENGLISH).equals("datetime") ||
-                columnType.toLowerCase(Locale.ENGLISH).contains("timestamp") ||
-                columnType.toLowerCase(Locale.ENGLISH).contains("char") ||
-                columnType.toLowerCase(Locale.ENGLISH).contains("clob") ||
-                columnType.toLowerCase(Locale.ENGLISH).contains("text")) {
-            type = "TEXT";
-        } else if (columnType.equals("REAL") ||
-                columnType.toLowerCase(Locale.ENGLISH).contains("float")) {
-            type = "REAL";
-        } else if (columnType.toLowerCase(Locale.ENGLISH).contains("blob") ||
-                columnType.toLowerCase(Locale.ENGLISH).contains("binary")) {
-            type = "BLOB";
-        } else if (columnType.toLowerCase(Locale.ENGLISH).contains("boolean") ||
-                columnType.toLowerCase(Locale.ENGLISH).contains("binary")) {
-            type = "BOOLEAN";
+    public DataType getDataType(String columnTypeString, Boolean autoIncrement) {
+        DataType type;
+        if (columnTypeString.equals("INTEGER") ||
+                columnTypeString.toLowerCase(Locale.ENGLISH).contains("int") ||
+                columnTypeString.toLowerCase(Locale.ENGLISH).contains("bit")) {
+            type = new IntType("INTEGER");
+        } else if (columnTypeString.equals("TEXT") ||
+                columnTypeString.toLowerCase(Locale.ENGLISH).contains("uuid") ||
+                columnTypeString.toLowerCase(Locale.ENGLISH).contains("uniqueidentifier") ||
+                columnTypeString.toLowerCase(Locale.ENGLISH).equals("uniqueidentifier") ||
+                columnTypeString.toLowerCase(Locale.ENGLISH).equals("datetime") ||
+                columnTypeString.toLowerCase(Locale.ENGLISH).contains("timestamp") ||
+                columnTypeString.toLowerCase(Locale.ENGLISH).contains("char") ||
+                columnTypeString.toLowerCase(Locale.ENGLISH).contains("clob") ||
+                columnTypeString.toLowerCase(Locale.ENGLISH).contains("text")) {
+            type = new CustomType("TEXT",0,0);
+        } else if (columnTypeString.equals("REAL") ||
+                columnTypeString.toLowerCase(Locale.ENGLISH).contains("float")) {
+            type = new FloatType("REAL");
+        } else if (columnTypeString.toLowerCase(Locale.ENGLISH).contains("blob") ||
+                columnTypeString.toLowerCase(Locale.ENGLISH).contains("binary")) {
+            type = new BlobType("BLOB");
+        } else if (columnTypeString.toLowerCase(Locale.ENGLISH).contains("boolean") ||
+                columnTypeString.toLowerCase(Locale.ENGLISH).contains("binary")) {
+            type = new BooleanType("BOOLEAN");
         } else {
-            type = super.getColumnType(columnType, autoIncrement);
+            type = super.getDataType(columnTypeString, autoIncrement);
         }
         return type;
     }

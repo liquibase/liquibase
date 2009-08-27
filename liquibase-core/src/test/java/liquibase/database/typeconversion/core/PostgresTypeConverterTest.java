@@ -2,8 +2,7 @@ package liquibase.database.typeconversion.core;
 
 import org.junit.Test;
 import static org.junit.Assert.*;
-import liquibase.database.structure.type.DataType;
-import liquibase.database.structure.type.UnknownType;
+import liquibase.database.structure.type.CustomType;
 
 public class PostgresTypeConverterTest extends DefaultTypeConverterTest {
     @Test
@@ -18,46 +17,46 @@ public class PostgresTypeConverterTest extends DefaultTypeConverterTest {
 
     @Test
     public void getBlobType() {
-        assertTypesEqual(new UnknownType("BYTEA", false), new PostgresTypeConverter().getBlobType());
+        assertEquals("BYTEA", new PostgresTypeConverter().getBlobType().toString());
     }
 
     @Test
     public void getBooleanType() {
-        assertTypesEqual(new UnknownType("BOOLEAN", false), new PostgresTypeConverter().getBooleanType());
+        assertEquals("BOOLEAN", new PostgresTypeConverter().getBooleanType().toString());
     }
 
     @Test
     public void getCurrencyType() {
-        assertTypesEqual(new UnknownType("DECIMAL", true), new PostgresTypeConverter().getCurrencyType());
+        assertEquals("DECIMAL", new PostgresTypeConverter().getCurrencyType().toString());
     }
 
     @Test
     public void getUUIDType() {
-        assertTypesEqual(new UnknownType("CHAR(36)", false), new PostgresTypeConverter().getUUIDType());
+        assertEquals("CHAR(36)", new PostgresTypeConverter().getUUIDType().toString());
     }
 
     @Test
     public void getClobType() {
-        assertTypesEqual(new UnknownType("TEXT", true), new PostgresTypeConverter().getClobType());
+        assertEquals("TEXT", new PostgresTypeConverter().getClobType().toString());
     }
 
     @Test
     public void getDateType() {
-        assertTypesEqual(new UnknownType("DATE", false), new PostgresTypeConverter().getDateType());
+        assertEquals("DATE", new PostgresTypeConverter().getDateType().toString());
     }
 
     @Test
     public void getDateTimeType() {
-        assertTypesEqual(new UnknownType("TIMESTAMP WITH TIME ZONE", false), new PostgresTypeConverter().getDateTimeType());
+        assertEquals("TIMESTAMP WITH TIME ZONE", new PostgresTypeConverter().getDateTimeType().toString());
     }
 
        @Test
     public void getColumnType_BigSerial_AutoIncrement() {
-        assertEquals("bigserial", new PostgresTypeConverter().getColumnType("bigserial", Boolean.TRUE));
+        assertEquals("bigserial", new PostgresTypeConverter().getDataType("bigserial", true).toString());
     }
 
     @Test
     public void getColumnType_BigInt_AutoIncrement() {
-        assertEquals("bigserial", new PostgresTypeConverter().getColumnType("bigint", Boolean.TRUE));
+        assertEquals("bigserial", new PostgresTypeConverter().getDataType("bigint", true).toString());
     }
 }

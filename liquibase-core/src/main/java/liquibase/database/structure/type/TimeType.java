@@ -6,11 +6,11 @@ import liquibase.database.Database;
 public class TimeType  extends DataType {
 
     public TimeType() {
-        super("TIME");
+        super("TIME",0,0);
     }
 
     public TimeType(String dataTypeName) {
-        super(dataTypeName);
+        super(dataTypeName,0,0);
     }
 
     @Override

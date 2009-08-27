@@ -14,7 +14,6 @@ import liquibase.change.ColumnConfig;
 import java.text.ParseException;
 import java.sql.Types;
 import java.math.BigInteger;
-import java.util.Date;
 
 public abstract class AbstractTypeConverter implements TypeConverter {
 
@@ -137,21 +136,21 @@ public abstract class AbstractTypeConverter implements TypeConverter {
      * This method will convert some generic column types (e.g. boolean, currency) to the correct type
      * for the current database.
      */
-    public String getColumnType(String columnType, Boolean autoIncrement) {
+    public DataType getDataType(String columnTypeString, Boolean autoIncrement) {
         // Parse out data type and precision
         // Example cases: "CLOB", "java.sql.Types.CLOB", "CLOB(10000)", "java.sql.Types.CLOB(10000)
         String dataTypeName = null;
         String precision = null;
-        if (columnType.startsWith("java.sql.Types") && columnType.contains("(")) {
-            precision = columnType.substring(columnType.indexOf("(") + 1, columnType.indexOf(")"));
-            dataTypeName = columnType.substring(columnType.lastIndexOf(".") + 1, columnType.indexOf("("));
-        } else if (columnType.startsWith("java.sql.Types")) {
-            dataTypeName = columnType.substring(columnType.lastIndexOf(".") + 1);
-        } else if (columnType.contains("(")) {
-            precision = columnType.substring(columnType.indexOf("(") + 1, columnType.indexOf(")"));
-            dataTypeName = columnType.substring(0, columnType.indexOf("("));
+        if (columnTypeString.startsWith("java.sql.Types") && columnTypeString.contains("(")) {
+            precision = columnTypeString.substring(columnTypeString.indexOf("(") + 1, columnTypeString.indexOf(")"));
+            dataTypeName = columnTypeString.substring(columnTypeString.lastIndexOf(".") + 1, columnTypeString.indexOf("("));
+        } else if (columnTypeString.startsWith("java.sql.Types")) {
+            dataTypeName = columnTypeString.substring(columnTypeString.lastIndexOf(".") + 1);
+        } else if (columnTypeString.contains("(")) {
+            precision = columnTypeString.substring(columnTypeString.indexOf("(") + 1, columnTypeString.indexOf(")"));
+            dataTypeName = columnTypeString.substring(0, columnTypeString.indexOf("("));
         } else {
-            dataTypeName = columnType;
+            dataTypeName = columnTypeString;
         }
 
         // Translate type to database-specific type, if possible
@@ -199,11 +198,11 @@ public abstract class AbstractTypeConverter implements TypeConverter {
         } else if (dataTypeName.equalsIgnoreCase("VARCHAR")) {
             returnTypeName = getVarcharType();
         } else {
-            if (columnType.startsWith("java.sql.Types")) {
+            if (columnTypeString.startsWith("java.sql.Types")) {
                 returnTypeName = getTypeFromMetaData(dataTypeName);
             } else {
                 // Don't know what it is, just return it
-                return columnType;
+                return new CustomType(columnTypeString,0,2);
             }
         }
 
@@ -211,17 +210,14 @@ public abstract class AbstractTypeConverter implements TypeConverter {
             throw new UnexpectedLiquibaseException("Could not determine " + dataTypeName + " for " + this.getClass().getName());
         }
 
-        // Return type and precision, if any
-        if (precision != null && !returnTypeName.getSupportsPrecision()) {
-            throw new UnexpectedLiquibaseException("Type "+returnTypeName.getClass()+" doesn't support precision but precision was specified: "+columnType);
+        if (precision != null) {
+            returnTypeName.setFirstParameter(Integer.parseInt(precision));
         }
 
-        if (precision != null && returnTypeName.getSupportsPrecision()) {
-            return returnTypeName.getDataTypeName() + "(" + precision + ")";
-        } else {
-            return returnTypeName.getDataTypeName();
-        }
-    }// Get the type from the Connection MetaData (use the MetaData to translate from java.sql.Types to DB-specific type)
+         return returnTypeName;
+    }
+
+    // Get the type from the Connection MetaData (use the MetaData to translate from java.sql.Types to DB-specific type)
     private DataType getTypeFromMetaData(final String dataTypeName) {
         return null;
 //        return new DataType(dataTypeName, false);
@@ -260,8 +256,8 @@ public abstract class AbstractTypeConverter implements TypeConverter {
 //        }
     }
 
-    public String getColumnType(ColumnConfig columnConfig) {
-        return getColumnType(columnConfig.getType(), columnConfig.isAutoIncrement());
+    public DataType getDataType(ColumnConfig columnConfig) {
+        return getDataType(columnConfig.getType(), columnConfig.isAutoIncrement());
     }
 
     /**

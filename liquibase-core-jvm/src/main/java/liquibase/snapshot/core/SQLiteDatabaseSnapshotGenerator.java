@@ -230,7 +230,7 @@ public class SQLiteDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
 
         columnInfo.setPrimaryKey(snapshot.isPrimaryKey(columnInfo));
         columnInfo.setAutoIncrement(isColumnAutoIncrement(database,  schema, tableName, columnName));
-        columnInfo.setTypeName(TypeConverterFactory.getInstance().findTypeConverter(database).getColumnType(rs.getString("TYPE_NAME"), columnInfo.isAutoIncrement()));            
+        columnInfo.setTypeName(TypeConverterFactory.getInstance().findTypeConverter(database).getDataType(rs.getString("TYPE_NAME"), columnInfo.isAutoIncrement()).toString());
             	
         return columnInfo;
     }

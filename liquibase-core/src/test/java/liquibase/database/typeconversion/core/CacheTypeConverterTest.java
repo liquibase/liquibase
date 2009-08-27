@@ -1,10 +1,8 @@
 package liquibase.database.typeconversion.core;
 
 import org.junit.Test;
-import org.junit.Assert;
 import static org.junit.Assert.assertEquals;
-import liquibase.database.structure.type.DataType;
-import liquibase.database.structure.type.UnknownType;
+import liquibase.database.structure.type.CustomType;
 
 public class CacheTypeConverterTest extends DefaultTypeConverterTest {
     @Test
@@ -19,37 +17,37 @@ public class CacheTypeConverterTest extends DefaultTypeConverterTest {
     
     @Test
 	public void getDateType() {
-		assertTypesEqual(new UnknownType("DATE", false), new CacheTypeConverter().getDateType());
+		assertEquals("DATE", new CacheTypeConverter().getDateType().toString());
 	}
 
     @Test
 	public void getBlobType() {
-		assertTypesEqual(new UnknownType("LONGVARBINARY", true), new CacheTypeConverter().getBlobType());
+		assertEquals("LONGVARBINARY", new CacheTypeConverter().getBlobType().toString());
 	}
 
     @Test
 	public void getBooleanType() {
-		assertTypesEqual(new UnknownType("INT", true), new CacheTypeConverter().getBooleanType());
+		assertEquals("INT", new CacheTypeConverter().getBooleanType().toString());
 	}
 
     @Test
 	public void getClobType() {
-		assertTypesEqual(new UnknownType("LONGVARCHAR", true), new CacheTypeConverter().getClobType());
+		assertEquals("LONGVARCHAR", new CacheTypeConverter().getClobType().toString());
 	}
 
     @Test
 	public void getCurrencyType() {
-		assertTypesEqual(new UnknownType("MONEY", true), new CacheTypeConverter().getCurrencyType());
+		assertEquals("MONEY", new CacheTypeConverter().getCurrencyType().toString());
 	}
 
     @Test
     public void getDateTimeType() {
-        assertTypesEqual(new UnknownType("DATETIME", false), new CacheTypeConverter().getDateTimeType());
+        assertEquals("DATETIME", new CacheTypeConverter().getDateTimeType().toString());
     }
 
     @Test
     public void getUUIDType() {
-        assertTypesEqual(new UnknownType("CHAR(36)", false), new CacheTypeConverter().getUUIDType());
+        assertEquals("CHAR(36)", new CacheTypeConverter().getUUIDType().toString());
     }
 
 }

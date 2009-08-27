@@ -2,11 +2,11 @@ package liquibase.database.structure.type;
 
 public class BlobType extends DataType {
     public BlobType() {
-        super("BLOB");
+        super("BLOB",0,0);
     }
 
     public BlobType(String dataTypeName) {
-        super(dataTypeName);
+        super(dataTypeName,0,0);
     }
 
 }

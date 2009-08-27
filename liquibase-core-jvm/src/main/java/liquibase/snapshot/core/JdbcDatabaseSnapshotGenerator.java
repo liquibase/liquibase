@@ -237,7 +237,7 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
         } catch (ParseException e) {
             throw new DatabaseException(e);
         }
-        columnInfo.setTypeName(TypeConverterFactory.getInstance().findTypeConverter(database).getColumnType(rs.getString("TYPE_NAME"), columnInfo.isAutoIncrement()));
+        columnInfo.setTypeName(TypeConverterFactory.getInstance().findTypeConverter(database).getDataType(rs.getString("TYPE_NAME"), columnInfo.isAutoIncrement()).toString());
 
     } // end of method getColumnTypeAndDefValue()
 

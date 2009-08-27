@@ -1,50 +1,50 @@
 package liquibase.database.typeconversion.core;
 
-import liquibase.database.structure.type.UnknownType;
-import org.junit.Assert;
+import liquibase.database.structure.type.CustomType;
 import org.junit.Test;
+import static org.junit.Assert.*;
 
 public class MySQLTypeConverterTest extends DefaultTypeConverterTest {
     
     @Test
     public void getBlobType() {
-        assertTypesEqual(new UnknownType("BLOB", true), new MySQLTypeConverter().getBlobType());
+        assertEquals("BLOB", new MySQLTypeConverter().getBlobType().toString());
     }
 
     
     @Test
     public void getBooleanType() {
-        assertTypesEqual(new UnknownType("TINYINT(1)", false), new MySQLTypeConverter().getBooleanType());
+        assertEquals("TINYINT(1)", new MySQLTypeConverter().getBooleanType().toString());
     }
 
     
     @Test
     public void getCurrencyType() {
-        assertTypesEqual(new UnknownType("DECIMAL", true), new MySQLTypeConverter().getCurrencyType());
+        assertEquals("DECIMAL", new MySQLTypeConverter().getCurrencyType().toString());
     }
 
     
     @Test
     public void getUUIDType() {
-        assertTypesEqual(new UnknownType("CHAR(36)", false), new MySQLTypeConverter().getUUIDType());
+        assertEquals("CHAR(36)", new MySQLTypeConverter().getUUIDType().toString());
     }
 
     
     @Test
     public void getClobType() {
-        assertTypesEqual(new UnknownType("TEXT", true), new MySQLTypeConverter().getClobType());
+        assertEquals("TEXT", new MySQLTypeConverter().getClobType().toString());
     }
 
     
     @Test
     public void getDateType() {
-        assertTypesEqual(new UnknownType("DATE", false), new MySQLTypeConverter().getDateType());
+        assertEquals("DATE", new MySQLTypeConverter().getDateType().toString());
     }
 
     
     @Test
     public void getDateTimeType() {
-        assertTypesEqual(new UnknownType("DATETIME", false), new MySQLTypeConverter().getDateTimeType());
+        assertEquals("DATETIME", new MySQLTypeConverter().getDateTimeType().toString());
     }
     
 }

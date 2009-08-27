@@ -1,52 +1,51 @@
 package liquibase.database.typeconversion.core;
 
 import org.junit.Test;
-import org.junit.Assert;
-import liquibase.database.structure.type.DataType;
-import liquibase.database.structure.type.UnknownType;
+import static org.junit.Assert.*;
+import liquibase.database.structure.type.CustomType;
 
 public class H2TypeConverterTest extends DefaultTypeConverterTest {
     
     
     @Test
     public void getBlobType() {
-        assertTypesEqual(new UnknownType("LONGVARBINARY", true), new H2TypeConverter().getBlobType());
+        assertEquals("LONGVARBINARY", new H2TypeConverter().getBlobType().toString());
     }
 
     
     @Test
     public void getBooleanType() {
-        assertTypesEqual(new UnknownType("BOOLEAN", false), new H2TypeConverter().getBooleanType());
+        assertEquals("BOOLEAN", new H2TypeConverter().getBooleanType().toString());
     }
 
     
     @Test
     public void getCurrencyType() {
-        assertTypesEqual(new UnknownType("DECIMAL", true), new H2TypeConverter().getCurrencyType());
+        assertEquals("DECIMAL", new H2TypeConverter().getCurrencyType().toString());
     }
 
     
     @Test
     public void getUUIDType() {
-        assertTypesEqual(new UnknownType("VARCHAR(36)", false), new H2TypeConverter().getUUIDType());
+        assertEquals("VARCHAR(36)", new H2TypeConverter().getUUIDType().toString());
     }
 
     
     @Test
     public void getClobType() {
-        assertTypesEqual(new UnknownType("LONGVARCHAR", true), new H2TypeConverter().getClobType());
+        assertEquals("LONGVARCHAR", new H2TypeConverter().getClobType().toString());
     }
 
     
     @Test
     public void getDateType() {
-        assertTypesEqual(new UnknownType("DATE", false), new H2TypeConverter().getDateType());
+        assertEquals("DATE", new H2TypeConverter().getDateType().toString());
     }
 
     
     @Test
     public void getDateTimeType() {
-        assertTypesEqual(new UnknownType("TIMESTAMP", false), new H2TypeConverter().getDateTimeType());
+        assertEquals("TIMESTAMP", new H2TypeConverter().getDateTimeType().toString());
     }
 
     

@@ -880,7 +880,7 @@ public class DiffResult {
 //
 //                    for (int col = 1; col <= columnCount; col++) {
 //                        String colName = columnData.getColumnName(col);
-//                        int dataType = columnData.getColumnType(col);
+//                        int dataType = columnData.getDataType(col);
 //                        String typeString = "STRING";
 //                        if (SqlUtil.isNumeric(dataType)) {
 //                            typeString = "NUMERIC";
@@ -913,7 +913,7 @@ public class DiffResult {
 //                            column.setName(columnData.getColumnName(col));
 //
 //                            // set the value for this column
-//                            int dataType = columnData.getColumnType(col);
+//                            int dataType = columnData.getDataType(col);
 //                            if (SqlUtil.isNumeric(dataType)) {
 //                                String columnValue = rs.getString(col);
 //                                if (columnValue == null) {

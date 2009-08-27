@@ -36,7 +36,7 @@ public class AddDefaultValueGeneratorInformix extends AddDefaultValueGenerator {
 
         Object defaultValue = statement.getDefaultValue();
         return new Sql[]{
-                new UnparsedSql("ALTER TABLE " + database.escapeTableName(statement.getSchemaName(), statement.getTableName()) + " MODIFY (" + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " " + TypeConverterFactory.getInstance().findTypeConverter(database).getColumnType(statement.getColumnDataType(), false) + " DEFAULT " + TypeConverterFactory.getInstance().findTypeConverter(database).getDataType(defaultValue).convertObjectToString(defaultValue, database) + ")",
+                new UnparsedSql("ALTER TABLE " + database.escapeTableName(statement.getSchemaName(), statement.getTableName()) + " MODIFY (" + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " " + TypeConverterFactory.getInstance().findTypeConverter(database).getDataType(statement.getColumnDataType(), false) + " DEFAULT " + TypeConverterFactory.getInstance().findTypeConverter(database).getDataType(defaultValue).convertObjectToString(defaultValue, database) + ")",
                         new Column()
                                 .setTable(new Table(statement.getTableName()).setSchema(statement.getSchemaName()))
                                 .setName(statement.getColumnName()))

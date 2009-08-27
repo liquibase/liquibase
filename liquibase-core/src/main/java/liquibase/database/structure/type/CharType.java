@@ -5,11 +5,11 @@ import liquibase.database.Database;
 public class CharType extends DataType {
 
     public CharType() {
-        super("CHAR");
+        super("CHAR",0,1);
     }
 
     public CharType(String dataTypeName) {
-        super(dataTypeName);
+        super(dataTypeName,0,1);
     }
 
     @Override

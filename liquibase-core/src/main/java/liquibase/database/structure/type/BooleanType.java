@@ -7,11 +7,11 @@ import liquibase.database.typeconversion.TypeConverter;
 public class BooleanType extends DataType {
 
     public BooleanType() {
-        super("BOOLEAN");
+        super("BOOLEAN",0,0);
     }
 
     public BooleanType(String dataTypeName) {
-        super(dataTypeName);
+        super(dataTypeName,0,0);
     }
 
     @Override

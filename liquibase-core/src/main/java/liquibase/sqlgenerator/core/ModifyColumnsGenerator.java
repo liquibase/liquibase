@@ -60,7 +60,7 @@ public class ModifyColumnsGenerator implements SqlGenerator<ModifyColumnsStateme
             alterTable += getPreDataTypeString(database); // adds a space if nothing else
 
             // add column type
-            alterTable += TypeConverterFactory.getInstance().findTypeConverter(database).getColumnType(column.getType(), false);
+            alterTable += TypeConverterFactory.getInstance().findTypeConverter(database).getDataType(column.getType(), false);
 
             if (supportsExtraMetaData(database)) {
                 if (!column.isNullable()) {

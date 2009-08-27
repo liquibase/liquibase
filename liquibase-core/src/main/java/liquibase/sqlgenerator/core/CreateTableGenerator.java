@@ -42,7 +42,7 @@ public class CreateTableGenerator implements SqlGenerator<CreateTableStatement> 
             boolean isAutoIncrement = statement.getAutoIncrementColumns().contains(column);
 
             buffer.append(database.escapeColumnName(statement.getSchemaName(), statement.getTableName(), column));
-            buffer.append(" ").append(TypeConverterFactory.getInstance().findTypeConverter(database).getColumnType(statement.getColumnTypes().get(column), isAutoIncrement));
+            buffer.append(" ").append(TypeConverterFactory.getInstance().findTypeConverter(database).getDataType(statement.getColumnTypes().get(column), isAutoIncrement));
 
             if ((database instanceof SQLiteDatabase) &&
 					(statement.getPrimaryKeyConstraint()!=null) &&
