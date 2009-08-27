@@ -16,16 +16,16 @@
     </changeSet>
 
     <changeSet id="3" author="nvoxland">
-        <ext:sample3 name="bob">
-            <ext:sample3Sub name="standard">
-                <ext:sample3Grand columnName="asdf"/>
-            </ext:sample3Sub>
-            <ext:sample3Sub2 name="second">
-                <ext:sample3Grand columnName="asdf2">
+        <ext:changeWithNestedTags name="bob">
+            <ext:sampleValue name="standard">
+                <ext:farNested columnName="asdf"/>
+            </ext:sampleValue>
+            <ext:otherSampleValue name="second">
+                <ext:otherSampleValue columnName="asdf2">
                     <ext:greatGrandChild name="greatGrandChild"/>
-                </ext:sample3Grand>
-            </ext:sample3Sub2>
-        </ext:sample3>
+                </ext:otherSampleValue>
+            </ext:otherSampleValue>
+        </ext:changeWithNestedTags>
     </changeSet>
 
     <changeSet id="4" author="nvoxland">

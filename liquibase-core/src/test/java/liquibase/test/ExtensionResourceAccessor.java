@@ -23,9 +23,9 @@ public class ExtensionResourceAccessor implements ResourceAccessor {
         File integrationProjectRoot = TestContext.getInstance().findIntegrationTestProjectRoot();
         File integrationJarsDir = new File(integrationProjectRoot, "src/test/resources/ext/jars");
 
-        File samples1 = new File(integrationJarsDir, "liquibase-sample1.jar");
+        File samples1 = new File(integrationJarsDir, "liquibase-samplesqlgenerator.jar");
         File samples2 = new File(integrationJarsDir, "liquibase-sample2.jar");
-        File samples3 = new File(integrationProjectRoot.getParentFile(), "samples/liquibase-ext-sample3/target/classes/");
+        File samples3 = new File(integrationProjectRoot.getParentFile(), "samples/liquibase-ext-changewithnestedtags/target/classes/");
 
          classLoader = new URLClassLoader(new URL[]{
                 samples1.toURL(),

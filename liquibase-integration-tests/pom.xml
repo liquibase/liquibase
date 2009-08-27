@@ -65,7 +65,13 @@
         <!-- sample extensions -->
         <dependency>
           <groupId>org.liquibase.samples</groupId>
-          <artifactId>liquibase-ext-sample3</artifactId>
+          <artifactId>liquibase-ext-change</artifactId>
+          <version>${project.version}</version>
+          <scope>test</scope>
+        </dependency>
+        <dependency>
+          <groupId>org.liquibase.samples</groupId>
+          <artifactId>liquibase-ext-changewithnestedtags</artifactId>
           <version>${project.version}</version>
           <scope>test</scope>
         </dependency>

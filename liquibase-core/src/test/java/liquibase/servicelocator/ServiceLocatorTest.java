@@ -7,12 +7,10 @@ import java.net.URL;
 import liquibase.parser.ChangeLogParser;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.CompositeResourceAccessor;
-import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.test.TestContext;
 import org.junit.After;
 import static org.junit.Assert.*;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class ServiceLocatorTest {
@@ -49,12 +47,12 @@ public class ServiceLocatorTest {
     @Test
     public void extractZipFile() throws MalformedURLException {
         File zipFile = ServiceLocator.extractZipFile(new URL(
-                "jar:file:/C:/My%20Projects/liquibase2/liquibase-integration-tests/src/test/resources/ext/jars/liquibase-sample1.jar!/liquibase/sqlgenerator"));
-        assertEquals("C:/My Projects/liquibase2/liquibase-integration-tests/src/test/resources/ext/jars/liquibase-sample1.jar", zipFile.toString().replace(
+                "jar:file:/C:/My%20Projects/liquibase2/liquibase-integration-tests/src/test/resources/ext/jars/liquibase-samplesqlgenerator.jar!/liquibase/sqlgenerator"));
+        assertEquals("C:/My Projects/liquibase2/liquibase-integration-tests/src/test/resources/ext/jars/liquibase-samplesqlgenerator.jar", zipFile.toString().replace(
                 '\\', '/'));
         zipFile = ServiceLocator.extractZipFile(new URL(
-                "jar:file:/home/myuser/liquibase2/liquibase-integration-tests/src/test/resources/ext/jars/liquibase-sample1.jar!/liquibase/sqlgenerator"));
-        assertEquals("/home/myuser/liquibase2/liquibase-integration-tests/src/test/resources/ext/jars/liquibase-sample1.jar", zipFile.toString().replace('\\',
+                "jar:file:/home/myuser/liquibase2/liquibase-integration-tests/src/test/resources/ext/jars/liquibase-samplesqlgenerator.jar!/liquibase/sqlgenerator"));
+        assertEquals("/home/myuser/liquibase2/liquibase-integration-tests/src/test/resources/ext/jars/liquibase-samplesqlgenerator.jar", zipFile.toString().replace('\\',
                 '/'));
     }
 }

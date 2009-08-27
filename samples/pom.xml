@@ -15,9 +15,9 @@
   <name>Liquibase Samples</name>
 
   <modules>
-    <module>sample1</module>
-    <module>sample2</module>
-    <module>liquibase-ext-sample3</module>
+    <module>liquibase-ext-change</module>
+    <module>liquibase-ext-changewithnestedtags</module>
+    <module>liquibase-ext-sqlgenerator</module>
     <module>liquibase-ext-test</module>
   </modules>
 
