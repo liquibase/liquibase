@@ -18,7 +18,6 @@
     <module>liquibase-ext-change</module>
     <module>liquibase-ext-changewithnestedtags</module>
     <module>liquibase-ext-sqlgenerator</module>
-    <module>liquibase-ext-test</module>
   </modules>
 
 </project>

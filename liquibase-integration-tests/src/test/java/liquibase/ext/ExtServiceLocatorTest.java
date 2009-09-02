@@ -1,4 +1,4 @@
-package liquibase.ext.test;
+package liquibase.ext;
 
 import static org.junit.Assert.fail;
 import liquibase.resource.ClassLoaderResourceAccessor;

@@ -79,7 +79,7 @@ public class TestContext {
             File integrationJarsDir = new File(TestContext.getInstance().findIntegrationTestProjectRoot(), "src/test/resources/ext/jars");
 
             /*File samples1 = new File(integrationJarsDir, "liquibase-samplesqlgenerator.jar");
-            File samples2 = new File(integrationJarsDir, "liquibase-sample2.jar");
+            File samples2 = new File(integrationJarsDir, "liquibase-changesample.jar");
 
             if (!samples2.exists()) {
                 throw new RuntimeException("Could not find "+samples2.getAbsolutePath());

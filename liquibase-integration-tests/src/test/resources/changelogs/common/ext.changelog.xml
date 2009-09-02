@@ -12,18 +12,18 @@
     </changeSet>
 
     <changeSet id="2" author="nvoxland">
-        <ext:sample2/>
+        <ext:sampleChange/>
     </changeSet>
 
     <changeSet id="3" author="nvoxland">
         <ext:changeWithNestedTags name="bob">
-            <ext:sampleValue name="standard">
+            <ext:sampleSubValue name="standard">
                 <ext:farNested columnName="asdf"/>
-            </ext:sampleValue>
+            </ext:sampleSubValue>
             <ext:otherSampleValue name="second">
-                <ext:otherSampleValue columnName="asdf2">
+                <ext:farNested columnName="asdf2">
                     <ext:greatGrandChild name="greatGrandChild"/>
-                </ext:otherSampleValue>
+                </ext:farNested>
             </ext:otherSampleValue>
         </ext:changeWithNestedTags>
     </changeSet>

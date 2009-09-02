@@ -46,6 +46,8 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
     private String url;
 
     protected AbstractSimpleChangeLogRunnerTest(String changelogDir, String url) throws Exception {
+        LogFactory.setLoggingLevel("severe");
+
         this.completeChangeLog = "changelogs/" + changelogDir + "/complete/root.changelog.xml";
         this.rollbackChangeLog = "changelogs/" + changelogDir + "/rollback/rollbackable.changelog.xml";
         this.includedChangeLog = "changelogs/" + changelogDir + "/complete/included.changelog.xml";

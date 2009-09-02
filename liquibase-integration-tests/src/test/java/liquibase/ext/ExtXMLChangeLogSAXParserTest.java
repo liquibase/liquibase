@@ -1,27 +1,14 @@
-package liquibase.ext.test;
+package liquibase.ext;
 
 import liquibase.change.Change;
 import liquibase.change.ChangeFactory;
-import liquibase.change.core.AddColumnChange;
-import liquibase.change.core.CreateTableChange;
-import liquibase.change.core.RawSQLChange;
-import liquibase.change.custom.CustomChangeWrapper;
-import liquibase.change.custom.ExampleCustomSqlChange;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
-import liquibase.exception.ChangeLogParseException;
 import liquibase.parser.core.xml.XMLChangeLogSAXParser;
-import liquibase.precondition.core.OrPrecondition;
-import liquibase.precondition.core.PreconditionContainer;
-import liquibase.test.JUnitResourceAccessor;
-import liquibase.test.ExtensionResourceAccessor;
 import liquibase.resource.ClassLoaderResourceAccessor;
-import liquibase.resource.CompositeResourceAccessor;
 import liquibase.servicelocator.ServiceLocator;
-import liquibase.logging.Logger;
 import static org.junit.Assert.*;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.HashMap;
@@ -47,7 +34,7 @@ public class ExtXMLChangeLogSAXParserTest {
         assertEquals("2", changeSet.getId());
         assertEquals(1, changeSet.getChanges().size());
         Change change = changeSet.getChanges().get(0);
-        assertEquals("sample2", change.getChangeMetaData().getName());
+        assertEquals("changesample", change.getChangeMetaData().getName());
 
         changeSet = changeLog.getChangeSets().get(2);
         change = changeSet.getChanges().get(0);
