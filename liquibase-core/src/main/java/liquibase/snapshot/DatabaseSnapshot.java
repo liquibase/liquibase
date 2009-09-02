@@ -138,30 +138,6 @@ public class DatabaseSnapshot {
         return schema;
     }
 
-    public boolean hasDatabaseChangeLogTable() {
-        return databaseChangeLogTable != null;
-    }
-
-    public Table getDatabaseChangeLogTable() {
-        return databaseChangeLogTable;
-    }
-
-    public void setDatabaseChangeLogTable(Table databaseChangeLogTable) {
-        this.databaseChangeLogTable = databaseChangeLogTable;
-    }
-
-    public boolean hasDatabaseChangeLogLockTable() {
-        return databaseChangeLogLockTable != null;
-    }
-
-    public Table getDatabaseChangeLogLockTable() {
-        return databaseChangeLogLockTable;
-    }
-
-    public void setDatabaseChangeLogLockTable(Table databaseChangeLogLockTable) {
-        this.databaseChangeLogLockTable = databaseChangeLogLockTable;
-    }
-
     public boolean isPrimaryKey(Column columnInfo) {
         for (PrimaryKey pk : getPrimaryKeys()) {
             if (columnInfo.getTable() == null) {
@@ -198,5 +174,25 @@ public class DatabaseSnapshot {
             }
         }
         return null;
+    }
+
+    public boolean hasDatabaseChangeLogTable() {
+        return databaseChangeLogTable != null;
+    }
+
+    public Table getDatabaseChangeLogTable() {
+        return databaseChangeLogTable;
+    }
+
+    public void setDatabaseChangeLogTable(Table table) {
+        this.databaseChangeLogTable = table;
+    }
+
+    public Table getDatabaseChangeLogLockTable() {
+        return databaseChangeLogLockTable;
+    }
+
+    public void setDatabaseChangeLogLockTable(Table table) {
+        this.databaseChangeLogLockTable = table;
     }
 }

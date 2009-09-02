@@ -26,24 +26,33 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
 
     private Set<DiffStatusListener> statusListeners;
 
-    public boolean hasDatabaseChangeLogTable(Database database) throws DatabaseException {
-        return getTable(database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName(), database) != null;
+    public Table getDatabaseChangeLogTable(Database database) throws DatabaseException {
+        return getTable(database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName(), database);
     }
 
-    public boolean hasDatabaseChangeLogLockTable(Database database) throws DatabaseException {
-        return getTable(database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName(), database) != null;
+    public Table getDatabaseChangeLogLockTable(Database database) throws DatabaseException {
+        return getTable(database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName(), database);
     }
 
     public Table getTable(String schemaName, String tableName, Database database) throws DatabaseException {
         ResultSet rs = null;
         try {
-            rs = getMetaData(database).getTables(database.convertRequestedSchemaToCatalog(schemaName), database.convertRequestedSchemaToSchema(schemaName), tableName, new String[]{"TABLE"});
+            DatabaseMetaData metaData = getMetaData(database);
+            rs = metaData.getTables(database.convertRequestedSchemaToCatalog(schemaName), database.convertRequestedSchemaToSchema(schemaName), tableName, new String[]{"TABLE"});
 
             if (!rs.next()) {
                 return null;
             }
 
-            return readTable(rs, database);
+            Table table = readTable(rs, database);
+            rs.close();
+
+            rs = metaData.getColumns(database.convertRequestedSchemaToCatalog(schemaName), database.convertRequestedSchemaToSchema(schemaName), tableName, null);
+            while (rs.next()) {
+                table.getColumns().add(readColumn(rs, database));
+            }
+
+            return table;
         } catch (Exception e) {
             throw new DatabaseException(e);
         } finally {
@@ -265,7 +274,7 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
                 } else if (tempTable.getName().equalsIgnoreCase(database.getDatabaseChangeLogLockTableName())) {
                     table = snapshot.getDatabaseChangeLogLockTable();
                 } else {
-                    throw new UnexpectedLiquibaseException("Unknown liquibase table: "+tempTable.getName());
+                    throw new UnexpectedLiquibaseException("Unknown liquibase table: " + tempTable.getName());
                 }
             } else {
                 table = snapshot.getTable(tempTable.getName());
@@ -299,7 +308,6 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
      * database engine vendors to convert native DB types to java objects.
      * During conversion some metadata information are being lost or reported incorrectly via DatabaseMetaData objects.
      * This method, if necessary, must be overriden. It must go below DatabaseMetaData implementation and talk directly to database to get correct metadata information.
-     *
      */
     protected void getColumnTypeAndDefValue(Column columnInfo, ResultSet rs, Database database) throws SQLException, DatabaseException {
         Object defaultValue = rs.getObject("COLUMN_DEF");
@@ -317,46 +325,76 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
         updateListeners("Reading foreign keys for " + database.toString() + " ...");
 
         for (Table table : snapshot.getTables()) {
-            String dbCatalog = database.convertRequestedSchemaToCatalog(schema);
-            String dbSchema = database.convertRequestedSchemaToSchema(schema);
-            ResultSet rs = databaseMetaData.getExportedKeys(dbCatalog, dbSchema, table.getName());
-            ForeignKey fkInfo = null;
+            for (ForeignKey fk : getForeignKeys(schema, table.getName(), snapshot.getDatabase())) {
+
+                Table tempPKTable = fk.getPrimaryKeyTable();
+                Table pkTable = snapshot.getTable(tempPKTable.getName());
+                if (pkTable == null) {
+                    LogFactory.getLogger().warning("Foreign key " + fk.getName() + " references table " + tempPKTable + ", which we cannot find.  Ignoring.");
+                    continue;
+                }
+
+                Table tempFkTable = fk.getForeignKeyTable();
+                Table fkTable = snapshot.getTable(tempFkTable.getName());
+                if (fkTable == null) {
+                    LogFactory.getLogger().warning("Foreign key " + fk.getName() + " is in table " + tempFkTable + ", which is in a different schema.  Retaining FK in diff, but table will not be diffed.");
+                }
+
+                snapshot.getForeignKeys().add(fk);
+            }
+        }
+    }
+
+    public ForeignKey getForeignKeyByForeignKeyTable(String schemaName, String foreignKeyTableName, String fkName, Database database) throws DatabaseException {
+        for (ForeignKey fk : getForeignKeys(schemaName, foreignKeyTableName, database)) {
+            if (fk.getName().equalsIgnoreCase(fkName)) {
+                return fk;
+            }
+        }
+
+        return null;
+    }
+
+    public List<ForeignKey> getForeignKeys(String schemaName, String foreignKeyTableName, Database database) throws DatabaseException {
+        List<ForeignKey> fkList = new ArrayList<ForeignKey>();
+        try {
+            String dbCatalog = database.convertRequestedSchemaToCatalog(schemaName);
+            String dbSchema = database.convertRequestedSchemaToSchema(schemaName);
+            ResultSet rs = getMetaData(database).getImportedKeys(dbCatalog, dbSchema, foreignKeyTableName);
+
             while (rs.next()) {
                 String fkName = convertFromDatabaseName(rs.getString("FK_NAME"));
 
                 String pkTableName = convertFromDatabaseName(rs.getString("PKTABLE_NAME"));
                 String pkColumn = convertFromDatabaseName(rs.getString("PKCOLUMN_NAME"));
-                Table pkTable = snapshot.getTable(pkTableName);
-                if (pkTable == null) {
-                    //Ok, no idea what to do with this one . . . should always be there
-                    LogFactory.getLogger().warning("Foreign key " + fkName + " references table " + pkTableName + ", which we cannot find.  Ignoring.");
-                    continue;
-                }
+
+
                 int keySeq = rs.getInt("KEY_SEQ");
                 //Simple (non-composite) keys have KEY_SEQ=1, so create the ForeignKey.
                 //In case of subsequent parts of composite keys (KEY_SEQ>1) don't create new instance, just reuse the one from previous call.
                 //According to #getExportedKeys() contract, the result set rows are properly sorted, so the reuse of previous FK instance is safe.
-//                if (keySeq == 1) {
-                fkInfo = new ForeignKey();
-//                }
+                ForeignKey fkInfo = null;
+                if (keySeq == 1) {
+                    fkInfo = new ForeignKey();
+                } else {
+                    for (ForeignKey foundFK : fkList) {
+                        if (foundFK.getName().equalsIgnoreCase(fkName)) {
+                            fkInfo = foundFK;
+                        }
+                    }
+                    if (fkInfo == null) {
+                        throw new DatabaseException("Database returned out of sequence foreign key column for "+fkInfo.getName());
+                    }
+                }
 
-//                if (fkInfo == null || ( (fkInfo.getPrimaryKeyTable() != null) && (!fkInfo.getPrimaryKeyTable().getName().equals(pkTableName)))) {
-//                    fkInfo = new ForeignKey();
-//                }
-
-                fkInfo.setPrimaryKeyTable(pkTable);
+                fkInfo.setPrimaryKeyTable(new Table(pkTableName));
                 fkInfo.addPrimaryKeyColumn(pkColumn);
 
                 String fkTableName = convertFromDatabaseName(rs.getString("FKTABLE_NAME"));
                 String fkSchema = convertFromDatabaseName(rs.getString("FKTABLE_SCHEM"));
                 String fkColumn = convertFromDatabaseName(rs.getString("FKCOLUMN_NAME"));
-                Table fkTable = snapshot.getTable(fkTableName);
-                if (fkTable == null) {
-                    fkTable = new Table(fkTableName);
-                    fkTable.setDatabase(database);
-                    fkTable.setSchema(fkSchema);
-                    LogFactory.getLogger().warning("Foreign key " + fkName + " is in table " + fkTableName + ", which is in a different schema.  Retaining FK in diff, but table will not be diffed.");
-                }
+                Table fkTable = new Table(fkTableName);
+                fkTable.setSchema(fkSchema);
                 fkInfo.setForeignKeyTable(fkTable);
                 fkInfo.addForeignKeyColumn(fkColumn);
 
@@ -364,8 +402,9 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
 
                 ForeignKeyConstraintType updateRule, deleteRule;
                 updateRule = convertToForeignKeyConstraintType(rs.getInt("UPDATE_RULE"));
-                if (rs.wasNull())
+                if (rs.wasNull()) {
                     updateRule = null;
+                }
                 deleteRule = convertToForeignKeyConstraintType(rs.getInt("DELETE_RULE"));
                 if (rs.wasNull()) {
                     deleteRule = null;
@@ -387,15 +426,20 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
                     }
                 }
 
-                //Add only if the key was created in this iteration (updating the instance values changes hashCode so it cannot be re-inserted into set) 
-                if (keySeq == 1) {
-                    snapshot.getForeignKeys().add(fkInfo);
-                }
+                fkList.add(fkInfo);
             }
 
+
             rs.close();
+
+            return fkList;
+
+        } catch (Exception e) {
+            throw new DatabaseException(e);
         }
+
     }
+
 
     protected ForeignKeyConstraintType convertToForeignKeyConstraintType(int jdbcType) throws DatabaseException {
         if (jdbcType == DatabaseMetaData.importedKeyCascade) {

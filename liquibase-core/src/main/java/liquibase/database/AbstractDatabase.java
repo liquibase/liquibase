@@ -319,13 +319,12 @@ public abstract class AbstractDatabase implements Database {
     public void checkDatabaseChangeLogTable() throws DatabaseException {
         Executor executor = ExecutorService.getInstance().getExecutor(this);
 
-        DatabaseSnapshot snapShot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(this, getLiquibaseSchemaName(), null);
-        Table changeLogTable = snapShot.getDatabaseChangeLogTable();
+        Table changeLogTable = DatabaseSnapshotGeneratorFactory.getInstance().getGenerator(this).getDatabaseChangeLogTable(this);
 
         List<SqlStatement> statementsToExecute = new ArrayList<SqlStatement>();
 
         boolean changeLogCreateAttempted = false;
-        if (snapShot.hasDatabaseChangeLogTable()) {
+        if (changeLogTable != null) {
             boolean hasDescription = changeLogTable.getColumn("DESCRIPTION") != null;
             boolean hasComments = changeLogTable.getColumn("COMMENTS") != null;
             boolean hasTag = changeLogTable.getColumn("TAG") != null;
@@ -398,11 +397,11 @@ public abstract class AbstractDatabase implements Database {
     }
 
     public boolean doesChangeLogTableExist() throws DatabaseException {
-        return DatabaseSnapshotGeneratorFactory.getInstance().getGenerator(this).hasDatabaseChangeLogTable(this);
+        return DatabaseSnapshotGeneratorFactory.getInstance().getGenerator(this).getDatabaseChangeLogTable(this) != null;
     }
 
     public boolean doesChangeLogLockTableExist() throws DatabaseException {
-        return DatabaseSnapshotGeneratorFactory.getInstance().getGenerator(this).hasDatabaseChangeLogLockTable(this);
+        return DatabaseSnapshotGeneratorFactory.getInstance().getGenerator(this).getDatabaseChangeLogLockTable(this) != null;
     }
 
     public String getLiquibaseSchemaName() {
