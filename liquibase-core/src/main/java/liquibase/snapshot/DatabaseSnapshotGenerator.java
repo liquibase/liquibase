@@ -1,6 +1,8 @@
 package liquibase.snapshot;
 
 import liquibase.database.Database;
+import liquibase.database.structure.Table;
+import liquibase.database.structure.Column;
 import liquibase.diff.DiffStatusListener;
 import liquibase.exception.DatabaseException;
 import liquibase.servicelocator.PrioritizedService;
@@ -23,4 +25,12 @@ public interface DatabaseSnapshotGenerator {
     int getPriority(Database database);
 
     DatabaseSnapshot createSnapshot(Database database, String schema, Set<DiffStatusListener> listeners) throws DatabaseException;
+
+    boolean hasDatabaseChangeLogTable(Database database) throws DatabaseException;
+
+    boolean hasDatabaseChangeLogLockTable(Database database) throws DatabaseException;
+
+    Table getTable(String schemaName, String tableName, Database database) throws DatabaseException;
+
+    Column getColumn(String schemaName, String tableName, String columnName, Database database) throws DatabaseException;
 }

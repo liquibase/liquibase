@@ -398,11 +398,11 @@ public abstract class AbstractDatabase implements Database {
     }
 
     public boolean doesChangeLogTableExist() throws DatabaseException {
-        return DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(this, getLiquibaseSchemaName(), null).hasDatabaseChangeLogTable();
+        return DatabaseSnapshotGeneratorFactory.getInstance().getGenerator(this).hasDatabaseChangeLogTable(this);
     }
 
     public boolean doesChangeLogLockTableExist() throws DatabaseException {
-        return DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(this, getLiquibaseSchemaName(), null).hasDatabaseChangeLogLockTable();
+        return DatabaseSnapshotGeneratorFactory.getInstance().getGenerator(this).hasDatabaseChangeLogLockTable(this);
     }
 
     public String getLiquibaseSchemaName() {
@@ -919,10 +919,6 @@ public abstract class AbstractDatabase implements Database {
         }
     }
 
-    public boolean isPeculiarLiquibaseSchema() {
-        return false;
-    }
-
     public int getNextChangeSetSequenceValue() throws LiquibaseException {
         if (lastChangeSetSequenceValue == null) {
             if (getConnection() == null) {
@@ -933,5 +929,9 @@ public abstract class AbstractDatabase implements Database {
         }
 
         return ++lastChangeSetSequenceValue;
+    }
+
+    public Table getTable(String schemaName, String tableName) throws DatabaseException {
+        return DatabaseSnapshotGeneratorFactory.getInstance().getGenerator(this).getTable(schemaName, tableName, this);
     }
 }

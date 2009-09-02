@@ -13,6 +13,9 @@ public class Table implements DatabaseObject, Comparable<Table> {
     private String schema;
     private List<Column> columns = new ArrayList<Column>();
 
+    private String rawCatalogName;
+    private String rawSchemaName;
+
     public Table(String name) {
         this.name = name;
     }
@@ -114,4 +117,20 @@ public class Table implements DatabaseObject, Comparable<Table> {
 
         return this;
 	}
+
+    public String getRawCatalogName() {
+        return rawCatalogName;
+    }
+
+    public void setRawCatalogName(String rawCatalogName) {
+        this.rawCatalogName = rawCatalogName;
+    }
+
+    public String getRawSchemaName() {
+        return rawSchemaName;
+    }
+
+    public void setRawSchemaName(String rawSchemaName) {
+        this.rawSchemaName = rawSchemaName;
+    }
 }

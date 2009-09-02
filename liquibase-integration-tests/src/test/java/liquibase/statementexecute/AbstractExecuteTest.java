@@ -48,12 +48,12 @@ public abstract class AbstractExecuteTest {
     }
 
     protected void assertCorrect(String expectedSql, Class<? extends Database>... includeDatabases) throws Exception {
-        assertCorrect(new String[] {expectedSql}, includeDatabases);
+        assertCorrect(new String[]{expectedSql}, includeDatabases);
     }
 
     protected void assertCorrect(String[] expectedSql, Class<? extends Database>... includeDatabases) throws Exception {
         assertNotNull(statementUnderTest);
-        
+
         test(expectedSql, includeDatabases, null);
     }
 
@@ -62,7 +62,7 @@ public abstract class AbstractExecuteTest {
     }
 
     private void test(String expectedSql, Class<? extends Database>[] includeDatabases, Class<? extends Database>[] excludeDatabases) throws Exception {
-        test(new String[] {expectedSql}, includeDatabases, excludeDatabases);
+        test(new String[]{expectedSql}, includeDatabases, excludeDatabases);
     }
 
     private void test(String[] expectedSql, Class<? extends Database>[] includeDatabases, Class<? extends Database>[] excludeDatabases) throws Exception {
@@ -180,22 +180,11 @@ public abstract class AbstractExecuteTest {
             if (database.supportsSchemas()) {
                 database.dropDatabaseObjects(DatabaseTestContext.ALT_SCHEMA);
                 connection.commit();
-                if (!database.isPeculiarLiquibaseSchema()) {
-                    try {
-                        connectionStatement.executeUpdate("drop table " + database.escapeTableName(DatabaseTestContext.ALT_SCHEMA, database.getDatabaseChangeLogLockTableName()));
-                    } catch (SQLException e) {
-                        ;
-                    }
-                    connection.commit();
-                }
-                if (!database.isPeculiarLiquibaseSchema()) {
-                    try {
-                        connectionStatement.executeUpdate("drop table " + database.escapeTableName(DatabaseTestContext.ALT_SCHEMA, database.getDatabaseChangeLogTableName()));
-                    } catch (SQLException e) {
-                        ;
-                    }
-                    connection.commit();
-                }
+
+                connectionStatement.executeUpdate("drop table " + database.escapeTableName(DatabaseTestContext.ALT_SCHEMA, database.getDatabaseChangeLogLockTableName()));
+                connection.commit();
+                connectionStatement.executeUpdate("drop table " + database.escapeTableName(DatabaseTestContext.ALT_SCHEMA, database.getDatabaseChangeLogTableName()));
+                connection.commit();
             }
             database.dropDatabaseObjects(database.convertRequestedSchemaToSchema(null));
             try {

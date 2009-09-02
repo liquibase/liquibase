@@ -411,10 +411,6 @@ public class MockDatabase implements Database {
 		return null;
 	}
 
-	public boolean isPeculiarLiquibaseSchema() {
-		return false;
-	}
-
     public int getNextChangeSetSequenceValue() throws LiquibaseException {
         return 1;
     }

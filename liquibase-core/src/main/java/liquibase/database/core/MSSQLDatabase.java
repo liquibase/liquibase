@@ -195,10 +195,4 @@ public class MSSQLDatabase extends AbstractDatabase {
 	public String getDefaultSchemaName() {
         return "dbo";
 	}
-
-	@Override
-	public boolean isPeculiarLiquibaseSchema() {
-		return true;
-	}
-
 }
