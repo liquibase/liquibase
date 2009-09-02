@@ -1,4 +1,4 @@
-package liquibase.ext.sample2;
+package liquibase.ext.changesample;
 
 import liquibase.change.AbstractChange;
 import liquibase.database.Database;

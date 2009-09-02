@@ -265,7 +265,6 @@
       <module fileurl="file://$PROJECT_DIR$/samples/liquibase-ext-change/liquibase-ext-change.iml" filepath="$PROJECT_DIR$/samples/liquibase-ext-change/liquibase-ext-change.iml" />
       <module fileurl="file://$PROJECT_DIR$/samples/liquibase-ext-changewithnestedtags/liquibase-ext-changewithnestedtags.iml" filepath="$PROJECT_DIR$/samples/liquibase-ext-changewithnestedtags/liquibase-ext-changewithnestedtags.iml" />
       <module fileurl="file://$PROJECT_DIR$/samples/liquibase-ext-sqlgenerator/liquibase-ext-sqlgenerator.iml" filepath="$PROJECT_DIR$/samples/liquibase-ext-sqlgenerator/liquibase-ext-sqlgenerator.iml" />
-      <module fileurl="file://$PROJECT_DIR$/samples/liquibase-ext-test/liquibase-ext-test.iml" filepath="$PROJECT_DIR$/samples/liquibase-ext-test/liquibase-ext-test.iml" />
       <module fileurl="file://$PROJECT_DIR$/liquibase-integration-tests/liquibase-integration-tests.iml" filepath="$PROJECT_DIR$/liquibase-integration-tests/liquibase-integration-tests.iml" />
       <module fileurl="file://$PROJECT_DIR$/liquibase-maven-plugin/liquibase-maven-plugin.iml" filepath="$PROJECT_DIR$/liquibase-maven-plugin/liquibase-maven-plugin.iml" />
       <module fileurl="file://$PROJECT_DIR$/samples/samples.iml" filepath="$PROJECT_DIR$/samples/samples.iml" />
@@ -621,17 +620,6 @@
         <root url="jar://$MAVEN_REPOSITORY$/org/springframework/spring/2.0.6/spring-2.0.6-sources.jar!/" />
       </SOURCES>
     </library>
-    <library name="Maven: org.liquibase.samples:liquibase-ext-sample3:2.0-SNAPSHOT">
-      <CLASSES>
-        <root url="jar://$MAVEN_REPOSITORY$/org/liquibase/samples/liquibase-ext-sample3/2.0-SNAPSHOT/liquibase-ext-sample3-2.0-SNAPSHOT.jar!/" />
-      </CLASSES>
-      <JAVADOC>
-        <root url="jar://$MAVEN_REPOSITORY$/org/liquibase/samples/liquibase-ext-sample3/2.0-SNAPSHOT/liquibase-ext-sample3-2.0-SNAPSHOT-javadoc.jar!/" />
-      </JAVADOC>
-      <SOURCES>
-        <root url="jar://$MAVEN_REPOSITORY$/org/liquibase/samples/liquibase-ext-sample3/2.0-SNAPSHOT/liquibase-ext-sample3-2.0-SNAPSHOT-sources.jar!/" />
-      </SOURCES>
-    </library>
     <library name="Maven: hsqldb:hsqldb:1.8.0.7">
       <CLASSES>
         <root url="jar://$MAVEN_REPOSITORY$/hsqldb/hsqldb/1.8.0.7/hsqldb-1.8.0.7.jar!/" />
@@ -960,28 +948,6 @@
       </JAVADOC>
       <SOURCES>
         <root url="jar://$MAVEN_REPOSITORY$/org/codehaus/plexus/plexus-archiver/1.0-alpha-7/plexus-archiver-1.0-alpha-7-sources.jar!/" />
-      </SOURCES>
-    </library>
-    <library name="Maven: org.liquibase.samples:sample1:2.0-SNAPSHOT">
-      <CLASSES>
-        <root url="jar://$MAVEN_REPOSITORY$/org/liquibase/samples/sample1/2.0-SNAPSHOT/sample1-2.0-SNAPSHOT.jar!/" />
-      </CLASSES>
-      <JAVADOC>
-        <root url="jar://$MAVEN_REPOSITORY$/org/liquibase/samples/sample1/2.0-SNAPSHOT/sample1-2.0-SNAPSHOT-javadoc.jar!/" />
-      </JAVADOC>
-      <SOURCES>
-        <root url="jar://$MAVEN_REPOSITORY$/org/liquibase/samples/sample1/2.0-SNAPSHOT/sample1-2.0-SNAPSHOT-sources.jar!/" />
-      </SOURCES>
-    </library>
-    <library name="Maven: org.liquibase.samples:sample2:2.0-SNAPSHOT">
-      <CLASSES>
-        <root url="jar://$MAVEN_REPOSITORY$/org/liquibase/samples/sample2/2.0-SNAPSHOT/sample2-2.0-SNAPSHOT.jar!/" />
-      </CLASSES>
-      <JAVADOC>
-        <root url="jar://$MAVEN_REPOSITORY$/org/liquibase/samples/sample2/2.0-SNAPSHOT/sample2-2.0-SNAPSHOT-javadoc.jar!/" />
-      </JAVADOC>
-      <SOURCES>
-        <root url="jar://$MAVEN_REPOSITORY$/org/liquibase/samples/sample2/2.0-SNAPSHOT/sample2-2.0-SNAPSHOT-sources.jar!/" />
       </SOURCES>
     </library>
   </component>
