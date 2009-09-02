@@ -435,6 +435,7 @@
     <xsd:element name="foreignKeyConstraintExists">
         <xsd:complexType>
             <xsd:attribute name="schemaName" type="xsd:string"/>
+            <xsd:attribute name="foreignKeyTableName" type="xsd:string"/>
             <xsd:attribute name="foreignKeyName" type="xsd:string" use="required"/>
         </xsd:complexType>
     </xsd:element>

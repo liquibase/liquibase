@@ -395,7 +395,7 @@
     </changeSet>
 
     <changeSet id="createTableNamedPKRef" author="nvoxland">
-        <createTable tableName="createTableNamedPKRef">
+        <createTable tableName="createtablenamedpkref">
             <column name="id" type="int">
                 <constraints primaryKey="true"/>
             </column>
@@ -499,7 +499,7 @@
 
     <changeSet id="fkExistsPrecondition" author="nvoxland">
         <preConditions>
-            <foreignKeyConstraintExists foreignKeyName="fk_reftest"/>
+            <foreignKeyConstraintExists foreignKeyTableName="createtablenamedpkref" foreignKeyName="fk_reftest"/>
         </preConditions>
     </changeSet>
 

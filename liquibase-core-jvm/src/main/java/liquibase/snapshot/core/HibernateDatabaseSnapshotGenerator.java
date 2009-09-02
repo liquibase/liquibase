@@ -24,12 +24,12 @@ public class HibernateDatabaseSnapshotGenerator implements DatabaseSnapshotGener
     public HibernateDatabaseSnapshotGenerator() {
     }
 
-    public boolean hasDatabaseChangeLogTable(Database database) throws DatabaseException {
-        return false;
+    public Table getDatabaseChangeLogTable(Database database) throws DatabaseException {
+        return null;
     }
 
-    public boolean hasDatabaseChangeLogLockTable(Database database) throws DatabaseException {
-        return false;
+    public Table getDatabaseChangeLogLockTable(Database database) throws DatabaseException {
+        return null;
     }
 
     public Table getTable(String schemaName, String tableName, Database database) throws DatabaseException {
@@ -38,6 +38,14 @@ public class HibernateDatabaseSnapshotGenerator implements DatabaseSnapshotGener
 
     public Column getColumn(String schemaName, String tableName, String columnName, Database database) throws DatabaseException {
         return null;
+    }
+
+    public ForeignKey getForeignKeyByForeignKeyTable(String schemaName, String tableName, String fkName, Database database) throws DatabaseException {
+        return null;
+    }
+
+    public List<ForeignKey> getForeignKeys(String schemaName, String tableName, Database database) throws DatabaseException {
+        return new ArrayList<ForeignKey>();
     }
 
     public DatabaseSnapshot createSnapshot(Database passed, String schema, Set<DiffStatusListener> listeners) throws DatabaseException {
