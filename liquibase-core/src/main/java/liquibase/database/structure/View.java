@@ -12,6 +12,8 @@ public class View implements DatabaseObject, Comparable<View> {
     private List<Column> columns = new ArrayList<Column>();
     private String definition;
 
+    private String rawCatalogName;
+    private String rawSchemaName;
 
     public View(String name) {
         this.name = name;
@@ -111,5 +113,20 @@ public class View implements DatabaseObject, Comparable<View> {
 	public void setSchema (String schema) {
 		this.schema = schema;
 	}
-    
+
+    public String getRawCatalogName() {
+        return rawCatalogName;
+    }
+
+    public void setRawCatalogName(String rawCatalogName) {
+        this.rawCatalogName = rawCatalogName;
+    }
+
+    public String getRawSchemaName() {
+        return rawSchemaName;
+    }
+
+    public void setRawSchemaName(String rawSchemaName) {
+        this.rawSchemaName = rawSchemaName;
+    }
 }

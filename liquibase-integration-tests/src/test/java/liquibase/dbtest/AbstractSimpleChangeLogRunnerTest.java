@@ -55,7 +55,7 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
         this.url = url;
 
         ServiceLocator.getInstance().setResourceAccessor(TestContext.getInstance().getTestResourceAccessor());
-        
+
         DatabaseConnection connection = DatabaseTestContext.getInstance().getConnection(url);
 
         LogFactory.getLogger().setLogLevel(LogLevel.DEBUG);
@@ -166,12 +166,12 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
     private void clearDatabase(Liquibase liquibase) throws DatabaseException {
         liquibase.dropAll(getSchemasToDrop());
         try {
-            ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement().execute("drop table "+database.getDatabaseChangeLogTableName());
+            ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement().execute("drop table " + database.getDatabaseChangeLogTableName());
         } catch (Exception e) {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }
         try {
-            ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement().execute("drop table "+database.getDatabaseChangeLogLockTableName());
+            ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement().execute("drop table " + database.getDatabaseChangeLogLockTableName());
         } catch (Exception e) {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }
@@ -314,7 +314,7 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
         Liquibase liquibase = createLiquibase(tempFile.getName());
         clearDatabase(liquibase);
 
-        DatabaseSnapshot emptySnapshot= DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database, null, null);
+        DatabaseSnapshot emptySnapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database, null, null);
 
         //run again to test changelog testing logic
         liquibase = createLiquibase(tempFile.getName());
@@ -327,7 +327,7 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
 
         tempFile.deleteOnExit();
 
-        DatabaseSnapshot migratedSnapshot= DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database, null, null);
+        DatabaseSnapshot migratedSnapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database, null, null);
 
         DiffResult finalDiffResult = new Diff(originalSnapshot, migratedSnapshot).compare();
         assertEquals(0, finalDiffResult.getMissingColumns().size());
@@ -401,11 +401,9 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
 
         //run again to test changelog testing logic
         Executor executor = ExecutorService.getInstance().getExecutor(database);
-        if (!database.isPeculiarLiquibaseSchema()) {
-            executor.execute(new DropTableStatement("liquibaseb", database.getDatabaseChangeLogTableName(), false));
-            executor.execute(new DropTableStatement("liquibaseb", database.getDatabaseChangeLogLockTableName(), false));
-            database.commit();
-        }
+        executor.execute(new DropTableStatement("liquibaseb", database.getDatabaseChangeLogTableName(), false));
+        executor.execute(new DropTableStatement("liquibaseb", database.getDatabaseChangeLogLockTableName(), false));
+        database.commit();
 
         DatabaseConnection connection = DatabaseTestContext.getInstance().getConnection(url);
         database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(connection);
@@ -467,7 +465,7 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
         liquibase = createLiquibase(completeChangeLog);
         liquibase.checkDatabaseChangeLogTable();
         liquibase.tag("empty");
-        
+
         liquibase = createLiquibase(rollbackChangeLog);
         liquibase.update(null);
 

@@ -65,8 +65,6 @@ public interface Database extends DatabaseObject {
 
     String getLiquibaseSchemaName();
     
-    boolean isPeculiarLiquibaseSchema(); 
-    	
     void setDefaultSchemaName(String schemaName) throws DatabaseException;
 
     /**

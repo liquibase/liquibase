@@ -24,6 +24,22 @@ public class HibernateDatabaseSnapshotGenerator implements DatabaseSnapshotGener
     public HibernateDatabaseSnapshotGenerator() {
     }
 
+    public boolean hasDatabaseChangeLogTable(Database database) throws DatabaseException {
+        return false;
+    }
+
+    public boolean hasDatabaseChangeLogLockTable(Database database) throws DatabaseException {
+        return false;
+    }
+
+    public Table getTable(String schemaName, String tableName, Database database) throws DatabaseException {
+        return null;
+    }
+
+    public Column getColumn(String schemaName, String tableName, String columnName, Database database) throws DatabaseException {
+        return null;
+    }
+
     public DatabaseSnapshot createSnapshot(Database passed, String schema, Set<DiffStatusListener> listeners) throws DatabaseException {
         HibernateDatabase database = (HibernateDatabase) passed;
         try {

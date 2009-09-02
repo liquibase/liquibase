@@ -37,11 +37,8 @@ public class SQLiteDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
         return PRIORITY_DATABASE;
     }
 
-    /**
-     * SQLite specific implementation
-     */	
 	@Override
-	protected void readTablesAndViews(DatabaseSnapshot snapshot, String schema, DatabaseMetaData databaseMetaData) throws SQLException, DatabaseException {
+	protected void readTables(DatabaseSnapshot snapshot, String schema, DatabaseMetaData databaseMetaData) throws SQLException, DatabaseException {
 
         Database database = snapshot.getDatabase();
 
@@ -87,7 +84,55 @@ public class SQLiteDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
         }
         rs.close();
 	}
-	
+
+    @Override
+    protected void readViews(DatabaseSnapshot snapshot, String schema, DatabaseMetaData databaseMetaData) throws SQLException, DatabaseException {
+
+        Database database = snapshot.getDatabase();
+
+        updateListeners("Reading tables for " + database.toString() + " ...");
+        ResultSet rs = databaseMetaData.getTables(
+                database.convertRequestedSchemaToCatalog(schema),
+                database.convertRequestedSchemaToSchema(schema),
+                null,
+                new String[]{"TABLE", "VIEW"});
+
+        while (rs.next()) {
+            String type = rs.getString("TABLE_TYPE");
+            String name = rs.getString("TABLE_NAME");
+            String schemaName = rs.getString("TABLE_SCHEM");
+            String catalogName = rs.getString("TABLE_CAT");
+            String remarks = rs.getString("REMARKS");
+
+            if (database.isSystemTable(catalogName, schemaName, name) ||
+                    database.isLiquibaseTable(name) ||
+                    database.isSystemView(catalogName, schemaName, name)) {
+                continue;
+            }
+
+            if ("TABLE".equals(type)) {
+                Table table = new Table(name);
+                table.setRemarks(StringUtils.trimToNull(remarks));
+                table.setDatabase(database);
+                table.setSchema(schemaName);
+                snapshot.getTables().add(table);
+            } else if ("VIEW".equals(type)) {
+                View view = new View();
+                view.setName(name);
+                view.setSchema(schemaName);
+                try {
+                    view.setDefinition(database.
+                            getViewDefinition(schema, name));
+                } catch (DatabaseException e) {
+                    System.out.println("Error getting view with " + new GetViewDefinitionStatement(schema, name));
+                    throw e;
+                }
+                snapshot.getViews().add(view);
+            }
+        }
+        rs.close();
+    }
+
 	/**
      * SQLite specific implementation
      */	

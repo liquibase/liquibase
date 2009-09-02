@@ -8,6 +8,7 @@ import liquibase.database.core.OracleDatabase;
 import liquibase.database.structure.*;
 import liquibase.diff.DiffStatusListener;
 import liquibase.exception.DatabaseException;
+import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
 import liquibase.snapshot.DatabaseSnapshot;
@@ -25,8 +26,129 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
 
     private Set<DiffStatusListener> statusListeners;
 
-    public DatabaseSnapshot createSnapshot(Database database, String requestedSchema, Set<DiffStatusListener> listeners) throws DatabaseException {
+    public boolean hasDatabaseChangeLogTable(Database database) throws DatabaseException {
+        return getTable(database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName(), database) != null;
+    }
 
+    public boolean hasDatabaseChangeLogLockTable(Database database) throws DatabaseException {
+        return getTable(database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName(), database) != null;
+    }
+
+    public Table getTable(String schemaName, String tableName, Database database) throws DatabaseException {
+        ResultSet rs = null;
+        try {
+            rs = getMetaData(database).getTables(database.convertRequestedSchemaToCatalog(schemaName), database.convertRequestedSchemaToSchema(schemaName), tableName, new String[]{"TABLE"});
+
+            if (!rs.next()) {
+                return null;
+            }
+
+            return readTable(rs, database);
+        } catch (Exception e) {
+            throw new DatabaseException(e);
+        } finally {
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException e) {
+                    //ok
+                }
+            }
+        }
+    }
+
+    public Column getColumn(String schemaName, String tableName, String columnName, Database database) throws DatabaseException {
+        ResultSet rs = null;
+        try {
+            rs = getMetaData(database).getColumns(database.convertRequestedSchemaToCatalog(schemaName), database.convertRequestedSchemaToSchema(schemaName), tableName, columnName);
+
+            if (!rs.next()) {
+                return null;
+            }
+
+            return readColumn(rs, database);
+        } catch (Exception e) {
+            throw new DatabaseException(e);
+        } finally {
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException e) {
+                    //ok
+                }
+            }
+        }
+    }
+
+    private Table readTable(ResultSet rs, Database database) throws SQLException {
+        String name = convertFromDatabaseName(rs.getString("TABLE_NAME"));
+        String schemaName = convertFromDatabaseName(rs.getString("TABLE_SCHEM"));
+        String remarks = rs.getString("REMARKS");
+
+        Table table = new Table(name);
+        table.setRemarks(StringUtils.trimToNull(remarks));
+        table.setDatabase(database);
+        table.setSchema(schemaName);
+        table.setRawSchemaName(rs.getString("TABLE_SCHEM"));
+        table.setRawCatalogName(rs.getString("TABLE_CAT"));
+
+        return table;
+    }
+
+    private View readView(ResultSet rs, Database database) throws SQLException, DatabaseException {
+        String name = convertFromDatabaseName(rs.getString("TABLE_NAME"));
+        String schemaName = convertFromDatabaseName(rs.getString("TABLE_SCHEM"));
+
+        View view = new View();
+        view.setName(name);
+        view.setSchema(schemaName);
+        view.setRawSchemaName(rs.getString("TABLE_SCHEM"));
+        view.setRawCatalogName(rs.getString("TABLE_CAT"));
+        try {
+            view.setDefinition(database.getViewDefinition(rs.getString("TABLE_SCHEM"), name));
+        } catch (DatabaseException e) {
+            throw new DatabaseException("Error getting " + database.getConnection().getURL() + " view with " + new GetViewDefinitionStatement(view.getSchema(), name), e);
+        }
+
+        return view;
+    }
+
+    private Column readColumn(ResultSet rs, Database database) throws SQLException, DatabaseException {
+        Column column = new Column();
+
+        String tableName = convertFromDatabaseName(rs.getString("TABLE_NAME"));
+        String columnName = convertFromDatabaseName(rs.getString("COLUMN_NAME"));
+        String schemaName = convertFromDatabaseName(rs.getString("TABLE_SCHEM"));
+        String catalogName = convertFromDatabaseName(rs.getString("TABLE_CAT"));
+        String remarks = rs.getString("REMARKS");
+
+        if (database.isSystemTable(catalogName, schemaName, tableName) || database.isSystemView(catalogName, schemaName, tableName)) {
+            return null;
+        }
+
+        column.setName(columnName);
+        column.setDataType(rs.getInt("DATA_TYPE"));
+        column.setColumnSize(rs.getInt("COLUMN_SIZE"));
+        column.setDecimalDigits(rs.getInt("DECIMAL_DIGITS"));
+
+        int nullable = rs.getInt("NULLABLE");
+        if (nullable == DatabaseMetaData.columnNoNulls) {
+            column.setNullable(false);
+        } else if (nullable == DatabaseMetaData.columnNullable) {
+            column.setNullable(true);
+        }
+
+        Table table = new Table(tableName);
+        table.setSchema(schemaName);
+        column.setTable(table);
+
+        getColumnTypeAndDefValue(column, rs, database);
+        column.setRemarks(remarks);
+
+        return column;
+    }
+
+    public DatabaseSnapshot createSnapshot(Database database, String requestedSchema, Set<DiffStatusListener> listeners) throws DatabaseException {
 
         if (requestedSchema == null) {
             requestedSchema = database.getDefaultSchemaName();
@@ -34,15 +156,13 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
 
         try {
 
-            DatabaseMetaData databaseMetaData = null;
-            if (database.getConnection() != null) {
-                databaseMetaData = ((JdbcConnection) database.getConnection()).getUnderlyingConnection().getMetaData();
-            }
+            DatabaseMetaData databaseMetaData = getMetaData(database);
             this.statusListeners = listeners;
 
             DatabaseSnapshot snapshot = new DatabaseSnapshot(database, requestedSchema);
 
-            readTablesAndViews(snapshot, requestedSchema, databaseMetaData);
+            readTables(snapshot, requestedSchema, databaseMetaData);
+            readViews(snapshot, requestedSchema, databaseMetaData);
             readForeignKeyInformation(snapshot, requestedSchema, databaseMetaData);
             readPrimaryKeys(snapshot, requestedSchema, databaseMetaData);
             readColumns(snapshot, requestedSchema, databaseMetaData);
@@ -56,94 +176,62 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
         }
     }
 
+    protected DatabaseMetaData getMetaData(Database database) throws SQLException {
+        DatabaseMetaData databaseMetaData = null;
+        if (database.getConnection() != null) {
+            databaseMetaData = ((JdbcConnection) database.getConnection()).getUnderlyingConnection().getMetaData();
+        }
+        return databaseMetaData;
+    }
 
-    protected void readTablesAndViews(DatabaseSnapshot snapshot, String schema, DatabaseMetaData databaseMetaData) throws SQLException, DatabaseException {
+
+    protected void readTables(DatabaseSnapshot snapshot, String schema, DatabaseMetaData databaseMetaData) throws SQLException, DatabaseException {
         Database database = snapshot.getDatabase();
         updateListeners("Reading tables for " + database.toString() + " ...");
-        // try to switch off auto detection of the liquibase's system table.
-        if (database.isPeculiarLiquibaseSchema()) {
-            ResultSet rs = databaseMetaData.getTables(database.convertRequestedSchemaToCatalog(database.getLiquibaseSchemaName()), database.convertRequestedSchemaToSchema(database.getLiquibaseSchemaName()), Database.databaseChangeLogTableName, new String[]{"TABLE"});
+
+        ResultSet rs = databaseMetaData.getTables(database.convertRequestedSchemaToCatalog(schema), database.convertRequestedSchemaToSchema(schema), null, new String[]{"TABLE", "ALIAS"});
+        try {
             while (rs.next()) {
-                String name = convertFromDatabaseName(rs.getString("TABLE_NAME"));
-                if (name.equalsIgnoreCase(database.getDatabaseChangeLogTableName())) {
-                    snapshot.setDatabaseChangeLogTable(new Table(name).setSchema(database.getLiquibaseSchemaName()));
+                Table table = readTable(rs, database);
+                if (database.isLiquibaseTable(table.getName())) {
+                    if (table.getName().equalsIgnoreCase(database.getDatabaseChangeLogTableName())) {
+                        snapshot.setDatabaseChangeLogTable(table);
+                        continue;
+                    }
+
+                    if (table.getName().equalsIgnoreCase(database.getDatabaseChangeLogLockTableName())) {
+                        snapshot.setDatabaseChangeLogLockTable(table);
+                        continue;
+                    }
+                }
+                if (database.isSystemTable(table.getRawCatalogName(), table.getRawSchemaName(), table.getName()) || database.isSystemView(table.getRawCatalogName(), table.getRawSchemaName(), table.getName())) {
+                    continue;
                 }
 
-                if (name.equalsIgnoreCase(database.getDatabaseChangeLogLockTableName())) {
-                    snapshot.setDatabaseChangeLogLockTable(new Table(name).setSchema(database.getLiquibaseSchemaName()));
-                }
+                snapshot.getTables().add(table);
             }
+        } finally {
             rs.close();
         }
+    }
 
-        ResultSet rs = databaseMetaData.getTables(database.convertRequestedSchemaToCatalog(schema), database.convertRequestedSchemaToSchema(schema), null, new String[]{"TABLE", "VIEW", "ALIAS"});
-        while (rs.next()) {
-            String type = rs.getString("TABLE_TYPE");
-            String name = convertFromDatabaseName(rs.getString("TABLE_NAME"));
-            String schemaName = convertFromDatabaseName(rs.getString("TABLE_SCHEM"));
-            String catalogName = convertFromDatabaseName(rs.getString("TABLE_CAT"));
-            String remarks = rs.getString("REMARKS");
+    protected void readViews(DatabaseSnapshot snapshot, String schema, DatabaseMetaData databaseMetaData) throws SQLException, DatabaseException {
+        Database database = snapshot.getDatabase();
+        updateListeners("Reading views for " + database.toString() + " ...");
 
-            if (database.isSystemTable(catalogName, schemaName, name) || database.isLiquibaseTable(name) || database.isSystemView(catalogName, schemaName, name)) {
-                if (name.equalsIgnoreCase(database.getDatabaseChangeLogTableName()) && !database.isPeculiarLiquibaseSchema()) {
-                    snapshot.setDatabaseChangeLogTable(new Table(name).setSchema(schemaName));
+        ResultSet rs = databaseMetaData.getTables(database.convertRequestedSchemaToCatalog(schema), database.convertRequestedSchemaToSchema(schema), null, new String[]{"VIEW"});
+        try {
+            while (rs.next()) {
+                View view = readView(rs, database);
+                if (database.isSystemView(view.getRawCatalogName(), view.getRawSchemaName(), view.getName())) {
+                    continue;
                 }
 
-                if (name.equalsIgnoreCase(database.getDatabaseChangeLogLockTableName())) {
-                    snapshot.setDatabaseChangeLogLockTable(new Table(name).setSchema(schemaName));
-
-                }
-                continue;
-            }
-
-            if ("TABLE".equals(type) || "ALIAS".equals(type)) {
-                Table table = new Table(name);
-                table.setRemarks(StringUtils.trimToNull(remarks));
-                table.setDatabase(database);
-                table.setSchema(schemaName);
-                snapshot.getTables().add(table);
-            } else if ("VIEW".equals(type)) {
-                View view = new View();
-                view.setName(name);
-                view.setSchema(schemaName);
-                try {
-                    view.setDefinition(database.getViewDefinition(schema, name));
-                } catch (DatabaseException e) {
-                    System.out.println("Error getting " + database.getConnection().getURL() + " view with " + new GetViewDefinitionStatement(schema, name));
-                    throw e;
-                }
                 snapshot.getViews().add(view);
             }
+        } finally {
+            rs.close();
         }
-        rs.close();
-
-        /* useful for troubleshooting table reading */
-//        if (tablesMap.size() == 0) {
-//            System.out.println("No tables found, all tables:");
-//
-//            String convertedCatalog = database.convertRequestedSchemaToCatalog(schema);
-//            String convertedSchema = database.convertRequestedSchemaToSchema(schema);
-//
-//            System.out.println("Tried: "+convertedCatalog+"."+convertedSchema);
-//            convertedCatalog = null;
-//            convertedSchema = null;
-//
-//            rs = databaseMetaData.getTables(convertedCatalog, convertedSchema, null, new String[]{"TABLE", "VIEW"});
-//            while (rs.next()) {
-//                String type = rs.getString("TABLE_TYPE");
-//                String name = rs.getString("TABLE_NAME");
-//                String schemaName = rs.getString("TABLE_SCHEM");
-//                String catalogName = rs.getString("TABLE_CAT");
-//
-//                if (database.isSystemTable(catalogName, schemaName, name) || database.isLiquibaseTable(name) || database.isSystemView(catalogName, schemaName, name)) {
-//                    continue;
-//                }
-//
-//                System.out.println(catalogName+"."+schemaName+"."+name+":"+type);
-//
-//            }
-//            rs.close();
-//        }
     }
 
     protected String convertFromDatabaseName(String objectName) {
@@ -160,58 +248,45 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
         Statement selectStatement = ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement();
         ResultSet rs = databaseMetaData.getColumns(database.convertRequestedSchemaToCatalog(schema), database.convertRequestedSchemaToSchema(schema), null, null);
         while (rs.next()) {
-            Column columnInfo = new Column();
+            Column column = readColumn(rs, database);
 
-            String tableName = convertFromDatabaseName(rs.getString("TABLE_NAME"));
-            String columnName = convertFromDatabaseName(rs.getString("COLUMN_NAME"));
-            String schemaName = convertFromDatabaseName(rs.getString("TABLE_SCHEM"));
-            String catalogName = convertFromDatabaseName(rs.getString("TABLE_CAT"));
-            String remarks = rs.getString("REMARKS");
+            if (column == null) {
+                continue;
+            }
+
+            //replace temp table in column with real table
+            Table tempTable = column.getTable();
+            column.setTable(null);
 
             Table table;
-            if (database.isSystemTable(catalogName, schemaName, tableName) || database.isLiquibaseTable(tableName)) {
-                if (tableName.equalsIgnoreCase(database.getDatabaseChangeLogTableName())) {
+            if (database.isLiquibaseTable(tempTable.getName())) {
+                if (tempTable.getName().equalsIgnoreCase(database.getDatabaseChangeLogTableName())) {
                     table = snapshot.getDatabaseChangeLogTable();
-                } else if (tableName.equalsIgnoreCase(database.getDatabaseChangeLogLockTableName())) {
+                } else if (tempTable.getName().equalsIgnoreCase(database.getDatabaseChangeLogLockTableName())) {
                     table = snapshot.getDatabaseChangeLogLockTable();
                 } else {
-                    continue;
+                    throw new UnexpectedLiquibaseException("Unknown liquibase table: "+tempTable.getName());
                 }
             } else {
-                table = snapshot.getTable(tableName);
+                table = snapshot.getTable(tempTable.getName());
             }
             if (table == null) {
-                View view = snapshot.getView(tableName);
+                View view = snapshot.getView(tempTable.getName());
                 if (view == null) {
-                    LogFactory.getLogger().info("Could not find table or view " + tableName + " for column " + columnName);
+                    LogFactory.getLogger().info("Could not find table or view " + tempTable.getName() + " for column " + column.getName());
                     continue;
                 } else {
-                    columnInfo.setView(view);
-                    columnInfo.setAutoIncrement(false);
-                    view.getColumns().add(columnInfo);
+                    column.setView(view);
+                    column.setAutoIncrement(false);
+                    view.getColumns().add(column);
                 }
             } else {
-                columnInfo.setTable(table);
-                columnInfo.setAutoIncrement(isColumnAutoIncrement(database, schema, tableName, columnName));
-                table.getColumns().add(columnInfo);
+                column.setTable(table);
+                column.setAutoIncrement(isColumnAutoIncrement(database, schema, table.getName(), column.getName()));
+                table.getColumns().add(column);
             }
 
-            columnInfo.setName(columnName);
-            columnInfo.setDataType(rs.getInt("DATA_TYPE"));
-            columnInfo.setColumnSize(rs.getInt("COLUMN_SIZE"));
-            columnInfo.setDecimalDigits(rs.getInt("DECIMAL_DIGITS"));
-
-            int nullable = rs.getInt("NULLABLE");
-            if (nullable == DatabaseMetaData.columnNoNulls) {
-                columnInfo.setNullable(false);
-            } else if (nullable == DatabaseMetaData.columnNullable) {
-                columnInfo.setNullable(true);
-            }
-
-            columnInfo.setPrimaryKey(snapshot.isPrimaryKey(columnInfo));
-
-            getColumnTypeAndDefValue(columnInfo, rs, database);
-            columnInfo.setRemarks(remarks);
+            column.setPrimaryKey(snapshot.isPrimaryKey(column));
         }
         rs.close();
         selectStatement.close();
@@ -225,10 +300,6 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
      * During conversion some metadata information are being lost or reported incorrectly via DatabaseMetaData objects.
      * This method, if necessary, must be overriden. It must go below DatabaseMetaData implementation and talk directly to database to get correct metadata information.
      *
-     * @param rs
-     * @return void
-     * @throws SQLException
-     * @author Daniel Bargiel <danielbargiel@googlemail.com>
      */
     protected void getColumnTypeAndDefValue(Column columnInfo, ResultSet rs, Database database) throws SQLException, DatabaseException {
         Object defaultValue = rs.getObject("COLUMN_DEF");
@@ -266,7 +337,7 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
                 //In case of subsequent parts of composite keys (KEY_SEQ>1) don't create new instance, just reuse the one from previous call.
                 //According to #getExportedKeys() contract, the result set rows are properly sorted, so the reuse of previous FK instance is safe.
 //                if (keySeq == 1) {
-                    fkInfo = new ForeignKey();
+                fkInfo = new ForeignKey();
 //                }
 
 //                if (fkInfo == null || ( (fkInfo.getPrimaryKeyTable() != null) && (!fkInfo.getPrimaryKeyTable().getName().equals(pkTableName)))) {
@@ -338,7 +409,7 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
         } else if (jdbcType == DatabaseMetaData.importedKeySetNull) {
             return ForeignKeyConstraintType.importedKeySetNull;
         } else {
-            throw new DatabaseException("Unknown constraint type: "+jdbcType);
+            throw new DatabaseException("Unknown constraint type: " + jdbcType);
         }
     }
 

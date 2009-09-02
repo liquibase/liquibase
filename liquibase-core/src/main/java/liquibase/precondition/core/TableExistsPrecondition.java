@@ -31,14 +31,12 @@ public class TableExistsPrecondition implements Precondition {
     }
 
     public void check(Database database, DatabaseChangeLog changeLog) throws PreconditionFailedException, PreconditionErrorException {
-        DatabaseSnapshot snapshot = null;
         try {
-            snapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database, getSchemaName(), null);
+            if (DatabaseSnapshotGeneratorFactory.getInstance().getGenerator(database).getTable(getSchemaName(), getTableName(), database) == null) {
+                throw new PreconditionFailedException("Table "+database.escapeTableName(getSchemaName(), getTableName())+" does not exist", changeLog, this);
+            }
         } catch (DatabaseException e) {
             throw new PreconditionErrorException(e, changeLog, this);
-        }
-        if (snapshot.getTable(getTableName()) == null) {
-            throw new PreconditionFailedException("Table "+database.escapeTableName(getSchemaName(), getTableName())+" does not exist", changeLog, this);
         }
     }
 
