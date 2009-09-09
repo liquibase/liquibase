@@ -69,4 +69,14 @@ public class OracleTypeConverter extends AbstractTypeConverter {
     public VarcharType getVarcharType() {
         return new VarcharType("VARCHAR2");
     }
+
+    @Override
+    public DoubleType getDoubleType() {
+        return new DoubleType("NUMBER");
+    }
+
+    @Override
+    public TinyIntType getTinyIntType() {
+        return new TinyIntType("NUMBER(3)");
+    }
 }
