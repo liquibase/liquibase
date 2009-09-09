@@ -1,5 +1,15 @@
 package liquibase.integration.spring;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.Enumeration;
+import java.util.Vector;
+
+import javax.sql.DataSource;
+
 import liquibase.Liquibase;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
@@ -9,20 +19,12 @@ import liquibase.exception.LiquibaseException;
 import liquibase.logging.LogFactory;
 import liquibase.logging.Logger;
 import liquibase.resource.ResourceAccessor;
+
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
-
-import javax.sql.DataSource;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.Enumeration;
-import java.util.Vector;
 
 /**
  * A Spring-ified wrapper for Liquibase.
@@ -224,8 +226,26 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 
     }
 
-    private Liquibase createLiquibase(Connection c) throws DatabaseException {
-        return new Liquibase(getChangeLog(), new SpringResourceOpener(getChangeLog()), DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(c)));
+    protected Liquibase createLiquibase(Connection c) throws DatabaseException {
+        return new Liquibase(getChangeLog(), createResourceOpener(), createDatabase(c));
+    }
+
+    /**
+     * Subclasses may override this method add change some database settings such as
+     * default schema before returning the database object.
+     * @param c
+     * @return a Database implementation retrieved from the {@link DatabaseFactory}.
+     * @throws DatabaseException
+     */
+    protected Database createDatabase(Connection c) throws DatabaseException {
+        return DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(c) );
+    }
+
+    /**
+     * Create a new resourceOpener.
+     */
+    protected SpringResourceOpener createResourceOpener() {
+        return new SpringResourceOpener(getChangeLog());
     }
 
     /**
