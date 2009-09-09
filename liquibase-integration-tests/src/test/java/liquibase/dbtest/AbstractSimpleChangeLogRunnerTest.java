@@ -2,6 +2,7 @@ package liquibase.dbtest;
 
 import junit.framework.TestCase;
 import liquibase.Liquibase;
+import liquibase.sql.visitor.SqlVisitor;
 import liquibase.servicelocator.ServiceLocator;
 import liquibase.snapshot.DatabaseSnapshotGeneratorFactory;
 import liquibase.snapshot.DatabaseSnapshot;
@@ -20,6 +21,7 @@ import liquibase.lockservice.LockService;
 import liquibase.resource.ResourceAccessor;
 import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.statement.core.DropTableStatement;
+import liquibase.statement.SqlStatement;
 import liquibase.test.JUnitResourceAccessor;
 import liquibase.test.TestContext;
 import liquibase.test.DatabaseTestContext;
@@ -31,12 +33,14 @@ import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.io.StringWriter;
 import java.net.URL;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 
-public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
+import org.junit.Before;
+import org.junit.After;
+import org.junit.Test;
+import static org.junit.Assert.*;
+
+public abstract class AbstractSimpleChangeLogRunnerTest {
 
     protected String completeChangeLog;
     private String rollbackChangeLog;
@@ -64,9 +68,8 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
         }
     }
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
+    @Before
+    public void setUp() throws Exception {
 
         if (database != null) {
             if (!database.getConnection().getAutoCommit()) {
@@ -86,8 +89,8 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
         return new Properties();
     }
 
-    @Override
-    protected void tearDown() throws Exception {
+    @After
+    public void tearDown() throws Exception {
         if (database != null) {
             if (shouldRollBack()) {
                 database.rollback();
@@ -95,7 +98,6 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
             ExecutorService.getInstance().clearExecutor(database);
             database.setDefaultSchemaName(null);
         }
-        super.tearDown();
     }
 
     protected boolean shouldRollBack() {
@@ -112,6 +114,7 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
         return new Liquibase(changeLogFile, resourceAccessor, database);
     }
 
+    @Test
     public void testRunChangeLog() throws Exception {
         if (database == null) {
             return;
@@ -141,6 +144,7 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
         };
     }
 
+    @Test
     public void testOutputChangeLog() throws Exception {
         if (database == null) {
             return;
@@ -166,17 +170,18 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
     private void clearDatabase(Liquibase liquibase) throws DatabaseException {
         liquibase.dropAll(getSchemasToDrop());
         try {
-            ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement().execute("drop table " + database.getDatabaseChangeLogTableName());
+            ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement().execute("drop table " + database.escapeTableName(database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName()));
         } catch (Exception e) {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }
         try {
-            ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement().execute("drop table " + database.getDatabaseChangeLogLockTableName());
+            ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement().execute("drop table " + database.escapeTableName(database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName()));
         } catch (Exception e) {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }
     }
 
+    @Test
     public void testUpdateTwice() throws Exception {
         if (database == null) {
             return;
@@ -190,6 +195,7 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
         liquibase.update(this.contexts);
     }
 
+    @Test
     public void testRollbackableChangeLog() throws Exception {
         if (database == null) {
             return;
@@ -211,6 +217,7 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
         liquibase.rollback(new Date(0), this.contexts);
     }
 
+    @Test
     public void testRollbackableChangeLogScriptOnExistingDatabase() throws Exception {
         if (database == null) {
             return;
@@ -230,6 +237,7 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
 //        System.out.println("Rollback SQL for "+driverName+StreamUtil.getLineSeparator()+StreamUtil.getLineSeparator()+writer.toString());
     }
 
+    @Test
     public void testRollbackableChangeLogScriptOnFutureDatabase() throws Exception {
         if (database == null) {
             return;
@@ -246,6 +254,7 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
 //        System.out.println("Rollback SQL for future "+driverName+"\n\n"+writer.toString());
     }
 
+    @Test
     public void testTag() throws Exception {
         if (database == null) {
             return;
@@ -260,6 +269,7 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
         liquibase.tag("Test Tag");
     }
 
+    @Test
     public void testDiff() throws Exception {
         if (database == null) {
             return;
@@ -289,6 +299,7 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
         assertEquals(0, diffResult.getUnexpectedViews().size());
     }
 
+    @Test
     public void testRerunDiffChangeLog() throws Exception {
         if (database == null) {
             return;
@@ -364,6 +375,7 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
         assertEquals(0, emptyAgainSnapshot.getViews().size());
     }
 
+    @Test
     public void testRerunDiffChangeLogAltSchema() throws Exception {
         if (database == null) {
             return;
@@ -437,6 +449,7 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
         assertEquals(0, finalDiffResult.getUnexpectedViews().size());
     }
 
+    @Test
     public void testClearChecksums() throws Exception {
         if (database == null) {
             return;
@@ -454,6 +467,7 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
         liquibase.clearCheckSums();
     }
 
+    @Test
     public void testTagEmptyDatabase() throws Exception {
         if (database == null) {
             return;
@@ -473,6 +487,7 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
 
     }
 
+    @Test
     public void testUnrunChangeSetsEmptyDatabase() throws Exception {
         if (database == null) {
             return;
@@ -488,6 +503,7 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
 
     }
 
+    @Test
     public void testAbsolutePathChangeLog() throws Exception {
         if (database == null) {
             return;
@@ -515,6 +531,7 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
     }
 
 
+//    @Test
 //    public void testRerunChangeLogOnDifferentSchema() throws Exception {
 //        if (database == null) {
 //            return;
@@ -567,6 +584,7 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
         }
     }
 
+    @Test
     public void testExecuteExtChangelog() throws Exception {
         if (database == null) {
             return;
@@ -590,6 +608,7 @@ public abstract class AbstractSimpleChangeLogRunnerTest extends TestCase {
         }
     }
 
+    @Test
     public void testRollbackToChange() throws Exception {
         if (database == null) {
             return;

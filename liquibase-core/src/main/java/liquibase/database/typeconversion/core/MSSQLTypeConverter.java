@@ -52,6 +52,11 @@ public class MSSQLTypeConverter extends AbstractTypeConverter {
     }
 
     @Override
+    public TimeType getTimeType() {
+        return new TimeType("DATETIME");
+    }
+
+    @Override
     public BooleanType getBooleanType() {
         return new BooleanType.NumericBooleanType("BIT");
     }

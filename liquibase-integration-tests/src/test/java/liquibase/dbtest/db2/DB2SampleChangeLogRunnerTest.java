@@ -4,7 +4,6 @@ import liquibase.dbtest.AbstractSimpleChangeLogRunnerTest;
 
 import java.util.Properties;
 
-@SuppressWarnings({"JUnitTestCaseWithNoTests"})
 public class DB2SampleChangeLogRunnerTest extends AbstractSimpleChangeLogRunnerTest {
 
     public DB2SampleChangeLogRunnerTest() throws Exception {

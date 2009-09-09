@@ -10,7 +10,6 @@ import liquibase.dbtest.AbstractSimpleChangeLogRunnerTest;
 /**
  * create tablespace liquibase2 datafile 'C:\ORACLEXE\ORADATA\XE\LIQUIBASE2.DBF' SIZE 5M autoextend on next 5M
  */
-@SuppressWarnings({"JUnitTestCaseWithNoTests"})
 public class MaxDbSampleChangeLogRunnerTest  extends AbstractSimpleChangeLogRunnerTest {
 
   public MaxDbSampleChangeLogRunnerTest() throws Exception {

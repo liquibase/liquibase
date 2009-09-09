@@ -174,8 +174,8 @@ public class MSSQLDatabase extends AbstractDatabase {
 
     @Override
     public String convertRequestedSchemaToSchema(String requestedSchema) throws DatabaseException {
-        if (requestedSchema == null && getConnection() != null) {
-            return getDefaultCatalogName();
+        if (requestedSchema == null) {
+            return "dbo";
         }
         return requestedSchema;
     }

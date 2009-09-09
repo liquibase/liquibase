@@ -1,6 +1,5 @@
 package liquibase.dbtest.sybase;
 
-@SuppressWarnings({"JUnitTestCaseWithNoTests"})
 public abstract class SybaseSampleChangeLogRunnerTest { //extends AbstractSimpleChangeLogRunnerTest {
 
 //    public SybaseSampleChangeLogRunnerTest() throws Exception {

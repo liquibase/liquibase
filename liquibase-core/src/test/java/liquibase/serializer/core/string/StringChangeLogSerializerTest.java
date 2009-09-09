@@ -209,14 +209,18 @@ public class StringChangeLogSerializerTest {
             setFields(change);
 
             String string = new StringChangeLogSerializer().serialize(change);
-            System.out.println(string);
-            System.out.println("-------------");
+//            System.out.println(string);
+//            System.out.println("-------------");
             assertTrue("@ in string.  Probably poorly serialzed object reference." + string, string.indexOf("@") < 0);
         }
     }
 
     private void setFields(Object object) throws Exception {
         Class clazz = object.getClass();
+        if (clazz.getName().indexOf(".ext.") > 0) {
+            return; //don't worry about ext samples
+        }
+        
         for (Field field : clazz.getDeclaredFields()) {
             if (field.getAnnotation(ChangeProperty.class) != null && !field.getAnnotation(ChangeProperty.class).includeInSerialization()) {
                 continue;
