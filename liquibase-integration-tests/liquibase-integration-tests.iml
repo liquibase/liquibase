@@ -37,6 +37,7 @@
     <orderEntry type="module" module-name="liquibase-core" />
     <orderEntry type="module" module-name="liquibase-ext-change" />
     <orderEntry type="module" module-name="liquibase-ext-changewithnestedtags" />
+    <orderEntry type="module" module-name="liquibase-ext-sqlgenerator" />
     <orderEntry type="library" name="Maven: hsqldb:hsqldb:1.8.0.7" level="project" />
     <orderEntry type="library" name="Maven: org.apache.derby:derby:10.2.2.0" level="project" />
   </component>

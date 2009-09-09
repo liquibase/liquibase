@@ -31,13 +31,14 @@ public class ExtServiceLocatorTest {
 
     @Test
     public void getClasses_sampleJar() throws Exception {
-        Class[] classes = ServiceLocator.getInstance().findClasses(SqlGenerator.class);
+        ServiceLocator instance = ServiceLocator.getInstance();
+        Class[] classes = instance.findClasses(SqlGenerator.class);
         for (Class clazz : classes) {
-            if (clazz.getName().equals("liquibase.sqlgenerator.ext.sample1.Sample1UpdateGenerator")) {
+            if (clazz.getName().equals("liquibase.ext.samplesqlgenerator.SampleUpdateGenerator")) {
                 return;
             }
         }
-        fail("Did not find Sample1UpdateGenerator");
+        fail("Did not find SampleUpdateGenerator");
     }
 
 }

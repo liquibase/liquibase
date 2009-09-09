@@ -1,7 +1,6 @@
 package liquibase.parser.core.xml;
 
 import liquibase.change.Change;
-import liquibase.change.ChangeFactory;
 import liquibase.change.core.AddColumnChange;
 import liquibase.change.core.CreateTableChange;
 import liquibase.change.core.RawSQLChange;
@@ -13,13 +12,8 @@ import liquibase.exception.ChangeLogParseException;
 import liquibase.precondition.core.OrPrecondition;
 import liquibase.precondition.core.PreconditionContainer;
 import liquibase.test.JUnitResourceAccessor;
-import liquibase.test.ExtensionResourceAccessor;
-import liquibase.resource.CompositeResourceAccessor;
-import liquibase.servicelocator.ServiceLocator;
-import liquibase.logging.Logger;
 import static org.junit.Assert.*;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.HashMap;

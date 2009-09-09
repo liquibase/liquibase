@@ -11,7 +11,6 @@ import liquibase.exception.DatabaseException;
  * connecting later:
  * connect '\firebird\liquibase.fdb' USER 'liquibase' PASSWORD 'liquibase';
  */
-@SuppressWarnings({"JUnitTestCaseWithNoTests"})
 public class FirebirdSampleChangeLogRunnerTest extends AbstractSimpleChangeLogRunnerTest {
 
     public FirebirdSampleChangeLogRunnerTest() throws Exception {

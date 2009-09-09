@@ -23,9 +23,9 @@ public class ExtXMLChangeLogSAXParserTest {
         ServiceLocator.getInstance().setResourceAccessor(resourceAccessor);
         ChangeFactory.reset();
 
-        DatabaseChangeLog changeLog = new XMLChangeLogSAXParser().parse("liquibase/ext/test/ext.changelog.xml", new HashMap<String, Object>(), resourceAccessor);
+        DatabaseChangeLog changeLog = new XMLChangeLogSAXParser().parse("changelogs/common/ext.changelog.xml", new HashMap<String, Object>(), resourceAccessor);
 
-        assertEquals("liquibase/ext/test/ext.changelog.xml", changeLog.getLogicalFilePath());
+        assertEquals("changelogs/common/ext.changelog.xml", changeLog.getLogicalFilePath());
 
         assertEquals(4, changeLog.getChangeSets().size());
 
@@ -34,12 +34,12 @@ public class ExtXMLChangeLogSAXParserTest {
         assertEquals("2", changeSet.getId());
         assertEquals(1, changeSet.getChanges().size());
         Change change = changeSet.getChanges().get(0);
-        assertEquals("changesample", change.getChangeMetaData().getName());
+        assertEquals("sampleChange", change.getChangeMetaData().getName());
 
         changeSet = changeLog.getChangeSets().get(2);
         change = changeSet.getChanges().get(0);
         assertEquals(1, changeSet.getChanges().size());
-        assertEquals("sample3", change.getChangeMetaData().getName());
+        assertEquals("changeWithNestedTags", change.getChangeMetaData().getName());
 
         Object child1 = change.getClass().getMethod("getChild").invoke(change);
         assertNotNull(child1);

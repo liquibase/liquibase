@@ -487,13 +487,13 @@
 
     <changeSet id="tableExistsPrecondition" author="nvoxland">
         <preConditions>
-            <tableExists tableName="CSVDATA"/>
+            <tableExists tableName="csvdata"/>
         </preConditions>
     </changeSet>
 
     <changeSet id="columnExistsPrecondition" author="nvoxland">
         <preConditions>
-            <columnExists tableName="CSVDATA" columnName="name"/>
+            <columnExists tableName="csvdata" columnName="name"/>
         </preConditions>
     </changeSet>
 

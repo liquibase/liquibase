@@ -42,7 +42,7 @@ public class ColumnExistsPrecondition implements Precondition {
     public void check(Database database, DatabaseChangeLog changeLog) throws PreconditionFailedException, PreconditionErrorException {
         try {
             if (DatabaseSnapshotGeneratorFactory.getInstance().getGenerator(database).getColumn(getSchemaName(), getTableName(), getColumnName(), database) == null) {
-                throw new PreconditionFailedException("Column "+database.escapeColumnName(getSchemaName(), getTableName(), getColumnName())+" does not exist", changeLog, this);
+                throw new PreconditionFailedException("Column '"+database.escapeColumnName(getSchemaName(), getTableName(), getColumnName())+"' does not exist", changeLog, this);
             }
         } catch (DatabaseException e) {
             throw new PreconditionErrorException(e, changeLog, this);

@@ -1,14 +1,15 @@
 package liquibase.dbtest.informix;
 
 import liquibase.dbtest.AbstractSimpleChangeLogRunnerTest;
+import org.junit.Test;
 
-@SuppressWarnings({"JUnitTestCaseWithNoTests"})
 public class InformixSampleChangeLogRunnerTest extends AbstractSimpleChangeLogRunnerTest {
 
     public InformixSampleChangeLogRunnerTest() throws Exception {
         super("informix", "jdbc:informix-sqli://localhost:9088/liquibase:informixserver=ol_ids_1150_1");
     }
-    
+
+    @Test
     @Override
     public void testRerunDiffChangeLogAltSchema() throws Exception {
     	/*

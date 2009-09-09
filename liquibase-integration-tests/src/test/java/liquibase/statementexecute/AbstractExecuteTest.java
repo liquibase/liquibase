@@ -181,9 +181,17 @@ public abstract class AbstractExecuteTest {
                 database.dropDatabaseObjects(DatabaseTestContext.ALT_SCHEMA);
                 connection.commit();
 
-                connectionStatement.executeUpdate("drop table " + database.escapeTableName(DatabaseTestContext.ALT_SCHEMA, database.getDatabaseChangeLogLockTableName()));
+                try {
+                    connectionStatement.executeUpdate("drop table " + database.escapeTableName(DatabaseTestContext.ALT_SCHEMA, database.getDatabaseChangeLogLockTableName()));
+                } catch (SQLException e) {
+                    //ok
+                }
                 connection.commit();
-                connectionStatement.executeUpdate("drop table " + database.escapeTableName(DatabaseTestContext.ALT_SCHEMA, database.getDatabaseChangeLogTableName()));
+                try {
+                    connectionStatement.executeUpdate("drop table " + database.escapeTableName(DatabaseTestContext.ALT_SCHEMA, database.getDatabaseChangeLogTableName()));
+                } catch (SQLException e) {
+                    //ok
+                }
                 connection.commit();
             }
             database.dropDatabaseObjects(database.convertRequestedSchemaToSchema(null));
