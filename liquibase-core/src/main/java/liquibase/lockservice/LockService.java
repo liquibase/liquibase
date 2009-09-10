@@ -11,6 +11,7 @@ import liquibase.statement.SqlStatement;
 import liquibase.statement.core.LockDatabaseChangeLogStatement;
 import liquibase.statement.core.SelectFromDatabaseChangeLogLockStatement;
 import liquibase.statement.core.UnlockDatabaseChangeLogStatement;
+import liquibase.statement.core.RawSqlStatement;
 
 import java.text.DateFormat;
 import java.util.ArrayList;
@@ -130,7 +131,7 @@ public class LockService {
                 database.rollback();
                 int updatedRows = executor.update(new UnlockDatabaseChangeLogStatement(), new ArrayList<SqlVisitor>());
                 if (updatedRows != 1) {
-                    throw new LockException("Did not update change log lock correctly.\n\n" + updatedRows + " rows were updated instead of the expected 1 row using executor "+executor.getClass().getName());
+                    throw new LockException("Did not update change log lock correctly.\n\n" + updatedRows + " rows were updated instead of the expected 1 row using executor " + executor.getClass().getName()+" there was "+executor.queryForInt(new RawSqlStatement("select count(*) from "+database.getDatabaseChangeLogLockTableName())));
                 }
                 database.commit();
                 hasChangeLogLock = false;
@@ -182,7 +183,7 @@ public class LockService {
      */
     public void forceReleaseLock() throws LockException, DatabaseException {
         database.checkDatabaseChangeLogLockTable();
-            releaseLock();
+        releaseLock();
         /*try {
             releaseLock();
         } catch (LockException e) {

@@ -165,7 +165,8 @@ public abstract class AbstractSimpleChangeLogRunnerTest {
         assertNotNull(outputResult);
         assertTrue(outputResult.length() > 100); //should be pretty big
 //        System.out.println(outputResult);
-        assertTrue("create databasechangelog command not found in: \n" + outputResult, outputResult.contains("CREATE TABLE DATABASECHANGELOG"));
+        assertTrue("create databasechangelog command not found in: \n" + outputResult, outputResult.contains("CREATE TABLE "+database.escapeTableName(database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())));
+        assertTrue("create databasechangeloglock command not found in: \n" + outputResult, outputResult.contains("CREATE TABLE "+database.escapeTableName(database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName())));
 
         DatabaseSnapshot snapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database, null, null);
         assertEquals(0, snapshot.getTables().size());
