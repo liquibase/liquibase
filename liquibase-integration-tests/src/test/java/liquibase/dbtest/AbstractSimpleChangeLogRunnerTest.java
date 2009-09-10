@@ -80,6 +80,8 @@ public abstract class AbstractSimpleChangeLogRunnerTest {
 
             ExecutorService.getInstance().reset();
             LockService.resetAll();
+
+            database.checkDatabaseChangeLogLockTable();
             
             LockService.getInstance(database).forceReleaseLock();
             if (database.supportsSchemas()) {
@@ -88,7 +90,6 @@ public abstract class AbstractSimpleChangeLogRunnerTest {
             database.dropDatabaseObjects(null);
             database.commit();
 
-            database.checkDatabaseChangeLogLockTable();
         }
     }
 
