@@ -27,6 +27,7 @@ public class LockServiceExecuteTest {
     @Before
     public void setUp() {
         ExecutorService.getInstance().reset();
+        LockService.resetAll();
     }
 
     @After
