@@ -67,7 +67,7 @@
 					<systemProperties>
 						<property>
 							<name>liquibase.default.logger.level</name>
-							<value>debug</value>
+							<value>severe</value>
 						</property>
 					</systemProperties>
 				</configuration>

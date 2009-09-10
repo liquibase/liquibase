@@ -13,6 +13,7 @@ import static org.easymock.classextension.EasyMock.*;
 import org.junit.After;
 import static org.junit.Assert.*;
 import org.junit.Test;
+import org.junit.Before;
 
 import java.lang.reflect.Field;
 import java.text.DateFormat;
@@ -20,6 +21,11 @@ import java.util.*;
 
 @SuppressWarnings({"EqualsWhichDoesntCheckParameterClass"})
 public class LockServiceTest {
+
+    @Before
+    public void before() {
+        LockService.resetAll();
+    }
 
     @After
     public void after() {
