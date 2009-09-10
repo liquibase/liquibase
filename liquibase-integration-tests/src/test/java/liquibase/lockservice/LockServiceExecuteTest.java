@@ -17,12 +17,18 @@ import org.junit.After;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
+import org.junit.Before;
 
 import java.io.StringWriter;
 import java.util.ArrayList;
 
 public class LockServiceExecuteTest {
 
+    @Before
+    public void setUp() {
+        ExecutorService.getInstance().reset();
+    }
+    
     @After
     public void tearDown() {
         LockService.resetAll();
