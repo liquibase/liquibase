@@ -87,6 +87,8 @@ public abstract class AbstractSimpleChangeLogRunnerTest {
             }
             database.dropDatabaseObjects(null);
             database.commit();
+
+            database.checkDatabaseChangeLogLockTable();
         }
     }
 
