@@ -131,7 +131,7 @@ public class LockService {
                 database.rollback();
                 int updatedRows = executor.update(new UnlockDatabaseChangeLogStatement(), new ArrayList<SqlVisitor>());
                 if (updatedRows != 1) {
-                    throw new LockException("Did not update change log lock correctly.\n\n" + updatedRows + " rows were updated instead of the expected 1 row using executor " + executor.getClass().getName()+" there was "+executor.queryForInt(new RawSqlStatement("select count(*) from "+database.getDatabaseChangeLogLockTableName())));
+                    throw new LockException("Did not update change log lock correctly.\n\n" + updatedRows + " rows were updated instead of the expected 1 row using executor " + executor.getClass().getName()+" there are "+executor.queryForInt(new RawSqlStatement("select count(*) from "+database.getDatabaseChangeLogLockTableName()))+" rows in the table");
                 }
                 database.commit();
                 hasChangeLogLock = false;
