@@ -86,6 +86,7 @@ public abstract class AbstractSimpleChangeLogRunnerTest {
             database.commit();
         }
         ExecutorService.getInstance().reset();
+        LockService.resetAll();
     }
 
     protected Properties createProperties() {
