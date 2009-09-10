@@ -130,7 +130,7 @@ public class LockService {
                 database.rollback();
                 int updatedRows = executor.update(new UnlockDatabaseChangeLogStatement(), new ArrayList<SqlVisitor>());
                 if (updatedRows != 1) {
-                    throw new LockException("Did not update change log lock correctly.\n\n" + updatedRows + " rows were updated instead of the expected 1 row.");
+                    throw new LockException("Did not update change log lock correctly.\n\n" + updatedRows + " rows were updated instead of the expected 1 row using executor "+executor.getClass().getName());
                 }
                 database.commit();
                 hasChangeLogLock = false;
