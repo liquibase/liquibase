@@ -41,4 +41,8 @@ public class ExecutorService {
     public void clearExecutor(Database database) {
         executors.remove(database);
     }
+
+    public void reset() {
+        executors.clear();
+    }
 }
