@@ -78,6 +78,9 @@ public abstract class AbstractSimpleChangeLogRunnerTest {
                 database.rollback();
             }
 
+            ExecutorService.getInstance().reset();
+            LockService.resetAll();
+            
             LockService.getInstance(database).forceReleaseLock();
             if (database.supportsSchemas()) {
                 database.dropDatabaseObjects(DatabaseTestContext.ALT_SCHEMA);
@@ -85,8 +88,6 @@ public abstract class AbstractSimpleChangeLogRunnerTest {
             database.dropDatabaseObjects(null);
             database.commit();
         }
-        ExecutorService.getInstance().reset();
-        LockService.resetAll();
     }
 
     protected Properties createProperties() {
