@@ -3,6 +3,7 @@ package liquibase.snapshot.core;
 import liquibase.database.Database;
 import liquibase.database.structure.Column;
 import liquibase.database.structure.ForeignKey;
+import liquibase.database.structure.Table;
 import liquibase.database.core.DB2Database;
 import liquibase.database.core.H2Database;
 import liquibase.exception.DatabaseException;
@@ -22,8 +23,13 @@ public class H2DatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerator {
     }
 
     @Override
+    public Table getTable(String schemaName, String tableName, Database database) throws DatabaseException {
+        return super.getTable(schemaName, tableName.toUpperCase(), database);
+    }
+    
+    @Override
     public Column getColumn(String schemaName, String tableName, String columnName, Database database) throws DatabaseException {
-        return super.getColumn(schemaName, tableName, columnName.toUpperCase(),database);
+        return super.getColumn(schemaName, tableName.toUpperCase(), columnName.toUpperCase(),database);
     }
 
     @Override

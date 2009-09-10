@@ -34,6 +34,8 @@ import java.io.PrintStream;
 import java.io.StringWriter;
 import java.net.URL;
 import java.util.*;
+import java.sql.Statement;
+import java.sql.SQLException;
 
 import org.junit.Before;
 import org.junit.After;
@@ -161,7 +163,7 @@ public abstract class AbstractSimpleChangeLogRunnerTest {
         assertNotNull(outputResult);
         assertTrue(outputResult.length() > 100); //should be pretty big
 //        System.out.println(outputResult);
-        assertTrue("create databasechangelog command not found", outputResult.contains("CREATE TABLE DATABASECHANGELOG"));
+        assertTrue("create databasechangelog command not found in: \n" + outputResult, outputResult.contains("CREATE TABLE DATABASECHANGELOG"));
 
         DatabaseSnapshot snapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database, null, null);
         assertEquals(0, snapshot.getTables().size());
@@ -169,16 +171,25 @@ public abstract class AbstractSimpleChangeLogRunnerTest {
 
     private void clearDatabase(Liquibase liquibase) throws DatabaseException {
         liquibase.dropAll(getSchemasToDrop());
+        Statement statement = null;
         try {
-            ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement().execute("drop table " + database.escapeTableName(database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName()));
-        } catch (Exception e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            statement = ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement();
+            try {
+                statement.execute("drop table " + database.escapeTableName(database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName()));
+            } catch (Exception e) {
+                //ok
+            }
+            try {
+                statement.execute("drop table " + database.escapeTableName(database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName()));
+            } catch (Exception e) {
+                //ok
+            }
+            statement.close();
+            database.commit();
+        } catch (SQLException e) {
+            throw new DatabaseException(e);
         }
-        try {
-            ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement().execute("drop table " + database.escapeTableName(database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName()));
-        } catch (Exception e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-        }
+
     }
 
     @Test
@@ -413,8 +424,16 @@ public abstract class AbstractSimpleChangeLogRunnerTest {
 
         //run again to test changelog testing logic
         Executor executor = ExecutorService.getInstance().getExecutor(database);
-        executor.execute(new DropTableStatement("liquibaseb", database.getDatabaseChangeLogTableName(), false));
-        executor.execute(new DropTableStatement("liquibaseb", database.getDatabaseChangeLogLockTableName(), false));
+        try {
+            executor.execute(new DropTableStatement("liquibaseb", database.getDatabaseChangeLogTableName(), false));
+        } catch (DatabaseException e) {
+            //ok
+        }
+        try {
+            executor.execute(new DropTableStatement("liquibaseb", database.getDatabaseChangeLogLockTableName(), false));
+        } catch (DatabaseException e) {
+            //ok
+        }
         database.commit();
 
         DatabaseConnection connection = DatabaseTestContext.getInstance().getConnection(url);
