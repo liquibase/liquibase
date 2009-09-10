@@ -6,7 +6,7 @@ import liquibase.database.structure.ForeignKey;
 import liquibase.database.structure.Table;
 import liquibase.database.core.DB2Database;
 import liquibase.database.core.H2Database;
-import liquibase.database.core.HsqlDatabase;
+import liquibase.database.core.DerbyDatabase;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.statement.core.RawSqlStatement;
@@ -14,9 +14,9 @@ import liquibase.statement.core.RawSqlStatement;
 import java.util.List;
 import java.util.Map;
 
-public class HsqlDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerator {
+public class DerbyDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerator {
     public boolean supports(Database database) {
-        return database instanceof HsqlDatabase;
+        return database instanceof DerbyDatabase;
     }
 
     public int getPriority(Database database) {
@@ -33,7 +33,7 @@ public class HsqlDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerator
         return super.getColumn(schemaName, tableName.toUpperCase(), columnName.toUpperCase(),database);
     }
 
-   @Override
+    @Override
     public List<ForeignKey> getForeignKeys(String schemaName, String tableName, Database database) throws DatabaseException {
         return super.getForeignKeys(schemaName, tableName.toUpperCase(), database);
     }

@@ -36,6 +36,9 @@
     </changeSet>
 
     <changeSet id="defaultValueTest-1" author="nvoxland">
+        <preConditions onFail="MARK_RAN">
+            <not><dbms type="derby"/></not>
+        </preConditions>
         <createTable tableName="defaultValueTest">
             <column name="id" type="int"/>
             <column name="intA" type="int"/>
