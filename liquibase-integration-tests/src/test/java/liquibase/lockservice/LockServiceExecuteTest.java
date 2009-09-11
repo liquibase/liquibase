@@ -32,6 +32,10 @@ public class LockServiceExecuteTest {
         ExecutorService.getInstance().reset();
         LockService.resetAll();
 
+        fixupLockTables();
+    }
+
+    private void fixupLockTables() throws DatabaseException, LockException {
         for (Database database : TestContext.getInstance().getAllDatabases()) {
             if (database.getConnection() != null) {
                 database.checkDatabaseChangeLogLockTable();
@@ -51,8 +55,10 @@ public class LockServiceExecuteTest {
     }
 
     @After
-    public void tearDown() {
+    public void tearDown() throws LockException, DatabaseException {
         LockService.resetAll();
+
+        fixupLockTables();
     }
 
     @Test
