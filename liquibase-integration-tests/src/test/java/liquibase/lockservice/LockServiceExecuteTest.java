@@ -19,6 +19,7 @@ import liquibase.test.DatabaseTestContext;
 import liquibase.sqlgenerator.core.InsertGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.sqlgenerator.SqlGenerator;
+import liquibase.logging.LogFactory;
 import org.junit.After;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -57,12 +58,12 @@ public class LockServiceExecuteTest {
                     ResultSet rs = connection.createStatement().executeQuery("select count(*) from " + database.getDatabaseChangeLogLockTableName());
                     rs.next();
                     int count = rs.getInt(1);
-                    System.out.println("There are " + count + " rows in databasechangeloglock for " + database.getTypeName());
+                    LogFactory.getLogger().severe("There are " + count + " rows in databasechangeloglock for " + database.getTypeName());
                     if (count == 0) {
                         connection.createStatement().executeUpdate(new InsertGenerator().generateSql(new InsertStatement(database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName())
                                 .addColumnValue("ID", 1)
                                 .addColumnValue("LOCKED", Boolean.FALSE), database, new SqlGeneratorChain(new TreeSet<SqlGenerator>()))[0].toSql());
-                        
+                        LogFactory.getLogger().severe("Added row for "+database.getTypeName());                        
                     }
                 } catch (SQLException e) {
                     //ok
