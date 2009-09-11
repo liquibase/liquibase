@@ -11,10 +11,14 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.LockException;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.statement.core.DropTableStatement;
+import liquibase.statement.core.InsertStatement;
 import liquibase.test.DatabaseTest;
 import liquibase.test.DatabaseTestTemplate;
 import liquibase.test.TestContext;
 import liquibase.test.DatabaseTestContext;
+import liquibase.sqlgenerator.core.InsertGenerator;
+import liquibase.sqlgenerator.SqlGeneratorChain;
+import liquibase.sqlgenerator.SqlGenerator;
 import org.junit.After;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -23,7 +27,10 @@ import org.junit.Before;
 
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.TreeSet;
 import java.sql.SQLException;
+import java.sql.Connection;
+import java.sql.ResultSet;
 
 public class LockServiceExecuteTest {
 
@@ -41,15 +48,27 @@ public class LockServiceExecuteTest {
                 database.checkDatabaseChangeLogLockTable();
 
                 try {
-                    if (database.getConnection() != null) {
-                        ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement().executeUpdate("drop table "+database.getDatabaseChangeLogLockTableName());
-                        database.commit();
+                    Connection connection = ((JdbcConnection) database.getConnection()).getUnderlyingConnection();
+                    connection.createStatement().executeUpdate("drop table " + database.getDatabaseChangeLogLockTableName());
+                    database.commit();
+
+                    LockService.getInstance(database).forceReleaseLock();
+
+                    ResultSet rs = connection.createStatement().executeQuery("select count(*) from " + database.getDatabaseChangeLogLockTableName());
+                    rs.next();
+                    int count = rs.getInt(1);
+                    System.out.println("There are " + count + " rows in databasechangeloglock for " + database.getTypeName());
+                    if (count == 0) {
+                        connection.createStatement().executeUpdate(new InsertGenerator().generateSql(new InsertStatement(database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName())
+                                .addColumnValue("ID", 1)
+                                .addColumnValue("LOCKED", Boolean.FALSE), database, new SqlGeneratorChain(new TreeSet<SqlGenerator>()))[0].toSql());
+                        
                     }
                 } catch (SQLException e) {
                     //ok
                 }
 
-                LockService.getInstance(database).forceReleaseLock();
+
             }
         }
     }
