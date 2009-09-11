@@ -416,7 +416,6 @@ public abstract class AbstractDatabase implements Database {
     public void checkDatabaseChangeLogLockTable() throws DatabaseException {
 
         Executor executor = ExecutorService.getInstance().getExecutor(this);
-        System.out.println("Checking DatabaseChangeLogLock table with executor "+executor);
         if (!doesChangeLogLockTableExist()) {
 
             executor.comment("Create Database Lock Table");

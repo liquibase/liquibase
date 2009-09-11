@@ -82,6 +82,11 @@ public abstract class AbstractSimpleChangeLogRunnerTest {
             LockService.resetAll();
 
             database.checkDatabaseChangeLogLockTable();
+
+            if (database.getConnection() != null) {
+                ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement().executeUpdate("drop table "+database.getDatabaseChangeLogLockTableName());
+                database.commit();
+            }
             
             LockService.getInstance(database).forceReleaseLock();
             if (database.supportsSchemas()) {

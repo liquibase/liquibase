@@ -3,10 +3,12 @@ package liquibase.lockservice;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.DatabaseConnection;
+import liquibase.database.JdbcConnection;
 import liquibase.executor.LoggingExecutor;
 import liquibase.executor.Executor;
 import liquibase.executor.*;
 import liquibase.exception.DatabaseException;
+import liquibase.exception.LockException;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.statement.core.DropTableStatement;
 import liquibase.test.DatabaseTest;
@@ -21,13 +23,31 @@ import org.junit.Before;
 
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.sql.SQLException;
 
 public class LockServiceExecuteTest {
 
     @Before
-    public void setUp() {
+    public void setUp() throws DatabaseException, LockException {
         ExecutorService.getInstance().reset();
         LockService.resetAll();
+
+        for (Database database : TestContext.getInstance().getAllDatabases()) {
+            if (database.getConnection() != null) {
+                database.checkDatabaseChangeLogLockTable();
+
+                try {
+                    if (database.getConnection() != null) {
+                        ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement().executeUpdate("drop table "+database.getDatabaseChangeLogLockTableName());
+                        database.commit();
+                    }
+                } catch (SQLException e) {
+                    //ok
+                }
+
+                LockService.getInstance(database).forceReleaseLock();
+            }
+        }
     }
 
     @After
