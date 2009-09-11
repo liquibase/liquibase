@@ -23,6 +23,7 @@ import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.test.TestContext;
 import liquibase.test.DatabaseTestContext;
+import liquibase.exception.DatabaseException;
 
 import org.junit.After;
 
@@ -33,6 +34,15 @@ public abstract class AbstractExecuteTest {
 
     @After
     public void reset() {
+        for (Database database : TestContext.getInstance().getAllDatabases()) {
+            if (database.getConnection() != null) {
+                try {
+                    database.rollback();
+                } catch (DatabaseException e) {
+                    //ok
+                }
+            }
+        }
         testedDatabases = new HashSet<Class<? extends Database>>();
         this.statementUnderTest = null;
     }
