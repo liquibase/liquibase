@@ -76,6 +76,12 @@ public class LockServiceExecuteTest {
         fixupLockTables();
     }
 
+
+    @Test
+    public void nothing() {
+
+    }
+
     //todo: failing on build server: re-enable
 //    @Test
 //    public void waitForLock_twoConnections() throws Exception {
