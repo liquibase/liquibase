@@ -32,6 +32,7 @@ import java.util.TreeSet;
 import java.sql.SQLException;
 import java.sql.Connection;
 import java.sql.ResultSet;
+import java.sql.Statement;
 
 public class LockServiceExecuteTest {
 
@@ -46,30 +47,24 @@ public class LockServiceExecuteTest {
     private void fixupLockTables() throws DatabaseException, LockException {
         for (Database database : TestContext.getInstance().getAllDatabases()) {
             if (database.getConnection() != null) {
-                database.checkDatabaseChangeLogLockTable();
-
+                Statement statement = null;
                 try {
-                    Connection connection = ((JdbcConnection) database.getConnection()).getUnderlyingConnection();
-                    connection.createStatement().executeUpdate("drop table " + database.getDatabaseChangeLogLockTableName());
-                    database.commit();
-
-                    LockService.getInstance(database).forceReleaseLock();
-
-                    ResultSet rs = connection.createStatement().executeQuery("select count(*) from " + database.getDatabaseChangeLogLockTableName());
-                    rs.next();
-                    int count = rs.getInt(1);
-                    LogFactory.getLogger().severe("There are " + count + " rows in databasechangeloglock for " + database.getTypeName());
-                    if (count == 0) {
-                        connection.createStatement().executeUpdate(new InsertGenerator().generateSql(new InsertStatement(database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName())
-                                .addColumnValue("ID", 1)
-                                .addColumnValue("LOCKED", Boolean.FALSE), database, new SqlGeneratorChain(new TreeSet<SqlGenerator>()))[0].toSql());
-                        LogFactory.getLogger().severe("Added row for "+database.getTypeName());                        
+                    statement = ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement();
+                    try {
+                        statement.execute("drop table " + database.escapeTableName(database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName()));
+                    } catch (Exception e) {
+                        //ok
                     }
+                    try {
+                        statement.execute("drop table " + database.escapeTableName(database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName()));
+                    } catch (Exception e) {
+                        //ok
+                    }
+                    statement.close();
+                    database.commit();
                 } catch (SQLException e) {
-                    //ok
+                    throw new DatabaseException(e);
                 }
-
-
             }
         }
     }
