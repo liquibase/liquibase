@@ -27,8 +27,6 @@
     <orderEntry type="library" name="Maven: org.hibernate:ejb3-persistence:1.0.1.GA" level="project" />
     <orderEntry type="library" name="Maven: javax.servlet:servlet-api:2.4" level="project" />
     <orderEntry type="library" name="Maven: org.springframework:spring:2.0.6" level="project" />
-    <orderEntry type="module" module-name="liquibase-core" />
-    <orderEntry type="module" module-name="liquibase-core-jvm" />
   </component>
 </module>
 
