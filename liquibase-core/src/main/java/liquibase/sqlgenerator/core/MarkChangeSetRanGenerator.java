@@ -56,7 +56,7 @@ public class MarkChangeSetRanGenerator implements SqlGenerator<MarkChangeSetRanS
                         .addColumnValue("MD5SUM", changeSet.generateCheckSum().toString())
                         .addColumnValue("DESCRIPTION", limitSize(changeSet.getDescription()))
                         .addColumnValue("COMMENTS", limitSize(StringUtils.trimToEmpty(changeSet.getComments())))
-                        .addColumnValue("LIQUIBASE", LiquibaseUtil.getBuildVersion().replaceAll("SNAPSHOT", "SNPSHT"));
+                        .addColumnValue("LIQUIBASE", LiquibaseUtil.getBuildVersion().replaceAll("SNAPSHOT", "SNP"));
             }
         } catch (LiquibaseException e) {
             throw new UnexpectedLiquibaseException(e);
