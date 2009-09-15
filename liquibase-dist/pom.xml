@@ -49,13 +49,13 @@
         <groupId>org.liquibase</groupId>
         <artifactId>liquibase-core</artifactId>
         <version>${project.version}</version>
-        <scope>compile</scope>
+        <scope>import</scope>
     </dependency>
     <dependency>
         <groupId>org.liquibase</groupId>
         <artifactId>liquibase-core-jvm</artifactId>
         <version>${project.version}</version>
-        <scope>compile</scope>
+        <scope>import</scope>
     </dependency>
   </dependencies>
                
