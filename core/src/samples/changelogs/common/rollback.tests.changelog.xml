@@ -47,4 +47,11 @@
         <rollback/>
     </changeSet>
 
+    <changeSet author="ruby" id="1">
+        <sqlFile stripComments="true" path="changelogs/common/includesql.sql"/>
+        <rollback>
+            <sqlFile stripComments="true" path="changelogs/common/includesql-rollback.sql"/>
+        </rollback>
+    </changeSet>
+
 </databaseChangeLog>

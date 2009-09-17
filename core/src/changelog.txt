@@ -1,6 +1,10 @@
 LiquiBase Core Changelog
 ==========================================
 
+Changes in version 1.9.5 (2009.9.16)
+----------------------
+- Bug fixes
+
 Changes in version 1.9.4 (2009.6.23)
 ----------------------
 - DB2 for iSeries support
