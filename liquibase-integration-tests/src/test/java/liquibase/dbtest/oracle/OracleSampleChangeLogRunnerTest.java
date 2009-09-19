@@ -8,6 +8,6 @@ import liquibase.dbtest.AbstractSimpleChangeLogRunnerTest;
 public class OracleSampleChangeLogRunnerTest extends AbstractSimpleChangeLogRunnerTest {
 
     public OracleSampleChangeLogRunnerTest() throws Exception {
-        super("oracle", "jdbc:oracle:thin:@localhost/XE");
+        super("oracle", "jdbc:oracle:thin:@"+DATABASE_SERVER_HOSTNAME+"/XE");
     }
 }

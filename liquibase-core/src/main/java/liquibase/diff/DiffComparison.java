@@ -11,7 +11,7 @@ public class DiffComparison {
     }
 
 
-    public String getBaseVersion() {
+    public String getReferenceVersion() {
         return baseVersion;
     }
 

@@ -7,7 +7,7 @@ import java.util.Properties;
 public class DB2SampleChangeLogRunnerTest extends AbstractSimpleChangeLogRunnerTest {
 
     public DB2SampleChangeLogRunnerTest() throws Exception {
-        super("db2", "jdbc:db2://localhost:50000/liquibas");
+        super("db2", "jdbc:db2://"+DATABASE_SERVER_HOSTNAME+":50000/liquibas");
     }
 
     @Override

@@ -97,8 +97,8 @@ public class CommandLineUtils {
         return (Database) Class.forName(HibernateDatabase.class.getName(), true, classLoader).getConstructor(String.class).newInstance(url.substring("hibernate:".length()));
     }
 
-    public static void doDiff(Database baseDatabase, Database targetDatabase) throws DatabaseException {
-        Diff diff = new Diff(baseDatabase, targetDatabase);
+    public static void doDiff(Database referenceDatabase, Database targetDatabase) throws DatabaseException {
+        Diff diff = new Diff(referenceDatabase, targetDatabase);
         diff.addStatusListener(new OutDiffStatusListener());
         DiffResult diffResult = diff.compare();
 
@@ -108,10 +108,10 @@ public class CommandLineUtils {
     }
 
     public static void doDiffToChangeLog(String changeLogFile,
-                                         Database baseDatabase,
+                                         Database referenceDatabase,
                                          Database targetDatabase)
             throws DatabaseException, IOException, ParserConfigurationException {
-        Diff diff = new Diff(baseDatabase, targetDatabase);
+        Diff diff = new Diff(referenceDatabase, targetDatabase);
         diff.addStatusListener(new OutDiffStatusListener());
         DiffResult diffResult = diff.compare();
 

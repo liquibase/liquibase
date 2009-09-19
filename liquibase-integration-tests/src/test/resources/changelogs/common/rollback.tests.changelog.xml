@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <databaseChangeLog
-        xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.7"
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.7 http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.7.xsd">
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
 
     <changeSet id="multiRollbackTest" author="rs" failOnError="false">
         <createTable tableName="multiRollback1">
@@ -45,6 +45,26 @@
     <changeSet id="noRollback" author="nvoxland">
         <sql>insert into multiRollback3 (id) values (1)</sql>
         <rollback/>
+    </changeSet>
+
+    <changeSet id="applyToRollback-false" author="nvoxland">
+        <createTable tableName="applytorollback">
+            <column name="id" type="int">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <modifySql applyToRollback="false">
+            <append value="; alter table applytorollback add primary key(id)"/>
+        </modifySql>
+    </changeSet>
+
+    <changeSet id="applyToRollback-true" author="nvoxland">
+        <createTable tableName="applytorollbackREPLACE">
+            <column name="id" type="int"/>
+        </createTable>
+        <modifySql applyToRollback="true">
+            <replace replace="REPLACE" with="true"/>
+        </modifySql>
     </changeSet>
 
 </databaseChangeLog>

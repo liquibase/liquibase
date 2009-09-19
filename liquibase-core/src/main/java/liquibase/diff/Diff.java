@@ -13,10 +13,10 @@ import java.util.Set;
 
 public class Diff {
 
-    private Database baseDatabase;
+    private Database referenceDatabase;
     private Database targetDatabase;
 
-    private DatabaseSnapshot baseSnapshot;
+    private DatabaseSnapshot referenceSnapshot;
     private DatabaseSnapshot targetSnapshot;
 
     private Set<DiffStatusListener> statusListeners = new HashSet<DiffStatusListener>();
@@ -32,8 +32,8 @@ public class Diff {
     private boolean diffData = false;
 
 
-    public Diff(Database baseDatabase, Database targetDatabase) {
-        this.baseDatabase = baseDatabase;
+    public Diff(Database referenceDatabase, Database targetDatabase) {
+        this.referenceDatabase = referenceDatabase;
 
         this.targetDatabase = targetDatabase;
     }
@@ -41,12 +41,12 @@ public class Diff {
     public Diff(Database originalDatabase, String schema) throws DatabaseException {
         targetDatabase = null;
 
-        baseDatabase = originalDatabase;
-        baseDatabase.setDefaultSchemaName(schema);
+        referenceDatabase = originalDatabase;
+        referenceDatabase.setDefaultSchemaName(schema);
     }
 
-    public Diff(DatabaseSnapshot baseSnapshot, DatabaseSnapshot targetDatabaseSnapshot) {
-        this.baseSnapshot = baseSnapshot;
+    public Diff(DatabaseSnapshot referenceSnapshot, DatabaseSnapshot targetDatabaseSnapshot) {
+        this.referenceSnapshot = referenceSnapshot;
 
         this.targetSnapshot = targetDatabaseSnapshot;
     }
@@ -60,19 +60,19 @@ public class Diff {
     }
 
     public DiffResult compare() throws DatabaseException {
-        if (baseSnapshot == null) {
-            baseSnapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(baseDatabase, null, statusListeners);
+        if (referenceSnapshot == null) {
+            referenceSnapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(referenceDatabase, null, statusListeners);
         }
 
         if (targetSnapshot == null) {
             if (targetDatabase == null) {
-                targetSnapshot = new DatabaseSnapshot(baseDatabase, null);
+                targetSnapshot = new DatabaseSnapshot(referenceDatabase, null);
             } else {
                 targetSnapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(targetDatabase, null, statusListeners);
             }
         }
 
-        DiffResult diffResult = new DiffResult(baseSnapshot, targetSnapshot);
+        DiffResult diffResult = new DiffResult(referenceSnapshot, targetSnapshot);
         checkVersionInfo(diffResult);
         if (shouldDiffTables()) {
             checkTables(diffResult);
@@ -195,42 +195,42 @@ public class Diff {
     private void checkVersionInfo(DiffResult diffResult) throws DatabaseException {
 
         if (targetDatabase != null) {
-            diffResult.setProductName(new DiffComparison(baseDatabase.getDatabaseProductName(), targetDatabase.getDatabaseProductName()));
-            diffResult.setProductVersion(new DiffComparison(baseDatabase.getDatabaseProductVersion(), targetDatabase.getDatabaseProductVersion()));
+            diffResult.setProductName(new DiffComparison(referenceDatabase.getDatabaseProductName(), targetDatabase.getDatabaseProductName()));
+            diffResult.setProductVersion(new DiffComparison(referenceDatabase.getDatabaseProductVersion(), targetDatabase.getDatabaseProductVersion()));
         }
 
     }
 
     private void checkTables(DiffResult diffResult) {
-        for (Table baseTable : baseSnapshot.getTables()) {
+        for (Table baseTable : referenceSnapshot.getTables()) {
             if (!targetSnapshot.getTables().contains(baseTable)) {
                 diffResult.addMissingTable(baseTable);
             }
         }
 
         for (Table targetTable : targetSnapshot.getTables()) {
-            if (!baseSnapshot.getTables().contains(targetTable)) {
+            if (!referenceSnapshot.getTables().contains(targetTable)) {
                 diffResult.addUnexpectedTable(targetTable);
             }
         }
     }
 
     private void checkViews(DiffResult diffResult) {
-        for (View baseView : baseSnapshot.getViews()) {
+        for (View baseView : referenceSnapshot.getViews()) {
             if (!targetSnapshot.getViews().contains(baseView)) {
                 diffResult.addMissingView(baseView);
             }
         }
 
         for (View targetView : targetSnapshot.getViews()) {
-            if (!baseSnapshot.getViews().contains(targetView)) {
+            if (!referenceSnapshot.getViews().contains(targetView)) {
                 diffResult.addUnexpectedView(targetView);
             }
         }
     }
 
     private void checkColumns(DiffResult diffResult) {
-        for (Column baseColumn : baseSnapshot.getColumns()) {
+        for (Column baseColumn : referenceSnapshot.getColumns()) {
             if (!targetSnapshot.getColumns().contains(baseColumn)
                     && (baseColumn.getTable() == null || !diffResult.getMissingTables().contains(baseColumn.getTable()))
                     && (baseColumn.getView() == null || !diffResult.getMissingViews().contains(baseColumn.getView()))
@@ -240,14 +240,14 @@ public class Diff {
         }
 
         for (Column targetColumn : targetSnapshot.getColumns()) {
-            if (!baseSnapshot.getColumns().contains(targetColumn)
+            if (!referenceSnapshot.getColumns().contains(targetColumn)
                     && (targetColumn.getTable() == null || !diffResult.getUnexpectedTables().contains(targetColumn.getTable()))
                     && (targetColumn.getView() == null || !diffResult.getUnexpectedViews().contains(targetColumn.getView()))
                     ) {
                 diffResult.addUnexpectedColumn(targetColumn);
             } else
             if (targetColumn.getTable() != null && !diffResult.getUnexpectedTables().contains(targetColumn.getTable())) {
-                Column baseColumn = baseSnapshot.getColumn(targetColumn.getTable().getName(), targetColumn.getName());
+                Column baseColumn = referenceSnapshot.getColumn(targetColumn.getTable().getName(), targetColumn.getName());
 
                 if (baseColumn == null || targetColumn.isDifferent(baseColumn)) {
                     diffResult.addChangedColumn(targetColumn);
@@ -257,28 +257,28 @@ public class Diff {
     }
 
     private void checkForeignKeys(DiffResult diffResult) {
-        for (ForeignKey baseFK : baseSnapshot.getForeignKeys()) {
+        for (ForeignKey baseFK : referenceSnapshot.getForeignKeys()) {
             if (!targetSnapshot.getForeignKeys().contains(baseFK)) {
                 diffResult.addMissingForeignKey(baseFK);
             }
         }
 
         for (ForeignKey targetFK : targetSnapshot.getForeignKeys()) {
-            if (!baseSnapshot.getForeignKeys().contains(targetFK)) {
+            if (!referenceSnapshot.getForeignKeys().contains(targetFK)) {
                 diffResult.addUnexpectedForeignKey(targetFK);
             }
         }
     }
 
     private void checkUniqueConstraints (DiffResult diffResult) {
-      for (UniqueConstraint baseIndex : baseSnapshot.getUniqueConstraints()) {
+      for (UniqueConstraint baseIndex : referenceSnapshot.getUniqueConstraints()) {
         if (!targetSnapshot.getUniqueConstraints().contains(baseIndex)) {
           diffResult.addMissingUniqueConstraint(baseIndex);
         }
       }
 
       for (UniqueConstraint targetIndex : targetSnapshot.getUniqueConstraints()) {
-        if (!baseSnapshot.getUniqueConstraints().contains(targetIndex)) {
+        if (!referenceSnapshot.getUniqueConstraints().contains(targetIndex)) {
           diffResult.addUnexpectedUniqueConstraint(targetIndex);
         }
       }
@@ -286,42 +286,42 @@ public class Diff {
     
     
     private void checkIndexes(DiffResult diffResult) {
-        for (Index baseIndex : baseSnapshot.getIndexes()) {
+        for (Index baseIndex : referenceSnapshot.getIndexes()) {
             if (!targetSnapshot.getIndexes().contains(baseIndex)) {
                 diffResult.addMissingIndex(baseIndex);
             }
         }
 
         for (Index targetIndex : targetSnapshot.getIndexes()) {
-            if (!baseSnapshot.getIndexes().contains(targetIndex)) {
+            if (!referenceSnapshot.getIndexes().contains(targetIndex)) {
                 diffResult.addUnexpectedIndex(targetIndex);
             }
         }
     }
 
     private void checkPrimaryKeys(DiffResult diffResult) {
-        for (PrimaryKey basePrimaryKey : baseSnapshot.getPrimaryKeys()) {
+        for (PrimaryKey basePrimaryKey : referenceSnapshot.getPrimaryKeys()) {
             if (!targetSnapshot.getPrimaryKeys().contains(basePrimaryKey)) {
                 diffResult.addMissingPrimaryKey(basePrimaryKey);
             }
         }
 
         for (PrimaryKey targetPrimaryKey : targetSnapshot.getPrimaryKeys()) {
-            if (!baseSnapshot.getPrimaryKeys().contains(targetPrimaryKey)) {
+            if (!referenceSnapshot.getPrimaryKeys().contains(targetPrimaryKey)) {
                 diffResult.addUnexpectedPrimaryKey(targetPrimaryKey);
             }
         }
     }
 
     private void checkSequences(DiffResult diffResult) {
-        for (Sequence baseSequence : baseSnapshot.getSequences()) {
+        for (Sequence baseSequence : referenceSnapshot.getSequences()) {
             if (!targetSnapshot.getSequences().contains(baseSequence)) {
                 diffResult.addMissingSequence(baseSequence);
             }
         }
 
         for (Sequence targetSequence : targetSnapshot.getSequences()) {
-            if (!baseSnapshot.getSequences().contains(targetSequence)) {
+            if (!referenceSnapshot.getSequences().contains(targetSequence)) {
                 diffResult.addUnexpectedSequence(targetSequence);
             }
         }

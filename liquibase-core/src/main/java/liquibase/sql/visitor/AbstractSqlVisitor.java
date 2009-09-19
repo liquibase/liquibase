@@ -6,7 +6,7 @@ import java.util.Collection;
 
 public abstract class AbstractSqlVisitor implements SqlVisitor {
     private Collection applicableDbms;
-    private boolean appliedOnRollback;
+    private boolean applyToRollback;
 
     public Collection getApplicableDbms() {
         return applicableDbms;
@@ -21,11 +21,11 @@ public abstract class AbstractSqlVisitor implements SqlVisitor {
 
     }
 
-    public boolean isAppliedOnRollback() {
-        return appliedOnRollback;
+    public boolean isApplyToRollback() {
+        return applyToRollback;
     }
 
-    public void setAppliedOnRollback(boolean appliedOnRollback) {
-        this.appliedOnRollback = appliedOnRollback;
+    public void setApplyToRollback(boolean applyToRollback) {
+        this.applyToRollback = applyToRollback;
     }
 }

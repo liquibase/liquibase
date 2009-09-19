@@ -7,6 +7,6 @@ import liquibase.Liquibase;
 public class MySQLSampleChangeLogRunnerTest extends AbstractSimpleChangeLogRunnerTest {
 
     public MySQLSampleChangeLogRunnerTest() throws Exception {
-        super("mysql", "jdbc:mysql://192.168.1.4/liquibase");
+        super("mysql", "jdbc:mysql://"+DATABASE_SERVER_HOSTNAME+"/liquibase");
     }
 }

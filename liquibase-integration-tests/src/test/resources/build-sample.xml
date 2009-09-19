@@ -109,10 +109,10 @@
                 promptOnNonLocalDatabase="${prompt.user.if.not.local.database}"
                 classpathref="classpath"
 
-                baseUrl="${database.url}"
-                baseUsername="${database.username}"
-                basePassword="${database.password}"
-                baseDefaultSchemaName="liquibaseb"
+                referenceUrl="${database.url}"
+                referenceUsername="${database.username}"
+                referencePassword="${database.password}"
+                referenceDefaultSchemaName="liquibaseb"
 
                 outputFile="/tmp/diff.txt"
                 >

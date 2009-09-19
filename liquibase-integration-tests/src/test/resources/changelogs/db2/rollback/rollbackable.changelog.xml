@@ -18,7 +18,7 @@
             </column>
 
         </createTable>
-        <modifySql dbms="db2" appliedOnRollback="false">
+        <modifySql dbms="db2" applyToRollback="false">
             <append
                     value=" in userspace1 index in userspace1"/>
         </modifySql>

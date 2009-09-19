@@ -6,7 +6,7 @@ import org.junit.Test;
 public class InformixSampleChangeLogRunnerTest extends AbstractSimpleChangeLogRunnerTest {
 
     public InformixSampleChangeLogRunnerTest() throws Exception {
-        super("informix", "jdbc:informix-sqli://localhost:9088/liquibase:informixserver=ol_ids_1150_1");
+        super("informix", "jdbc:informix-sqli://"+DATABASE_SERVER_HOSTNAME+":9088/liquibase:informixserver=ol_ids_1150_1");
     }
 
     @Test

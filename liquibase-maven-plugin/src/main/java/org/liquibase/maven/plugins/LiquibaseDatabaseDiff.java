@@ -19,40 +19,40 @@ import org.apache.maven.plugin.MojoExecutionException;
 public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
 
   /**
-   * The fully qualified name of the driver class to use to connect to the base database.
+   * The fully qualified name of the driver class to use to connect to the reference database.
    * If this is not specified, then the {@link #driver} will be used instead.
-   * @parameter expression="${liquibase.baseDriver}"
+   * @parameter expression="${liquibase.referenceDriver}"
    */
-  protected String baseDriver;
+  protected String referenceDriver;
 
   /**
-   * The base database URL to connect to for executing Liquibase. If performing a diff
+   * The reference database URL to connect to for executing Liquibase. If performing a diff
    * against a Hibernate config xml file, then use <b>"hibernate:PATH_TO_CONFIG_XML"</b>
    * as the URL. The path to the hibernate configuration file can be relative to the test
    * classpath for the Maven project.
-   * @parameter expression="${liquibase.baseUrl}"
+   * @parameter expression="${liquibase.referenceUrl}"
    */
-  protected String baseUrl;
+  protected String referenceUrl;
 
   /**
-   * The base database username to use to connect to the specified database.
-   * @parameter expression="${liquibase.baseUsername}"
+   * The reference database username to use to connect to the specified database.
+   * @parameter expression="${liquibase.referenceUsername}"
    */
-  protected String baseUsername;
+  protected String referenceUsername;
 
   /**
-   * The base database password to use to connect to the specified database. If this is
+   * The reference database password to use to connect to the specified database. If this is
    * null then an empty password will be used. 
-   * @parameter expression="${liquibase.basePassword}"
+   * @parameter expression="${liquibase.referencePassword}"
    */
-  protected String basePassword;
+  protected String referencePassword;
 
   /**
-   * The base database password to use to connect to the specified database. If this is
+   * The reference database password to use to connect to the specified database. If this is
    * null then an empty password will be used.
-   * @parameter expression="${liquibase.baseDefaultSchemaName}"
+   * @parameter expression="${liquibase.referenceDefaultSchemaName}"
    */
-  protected String baseDefaultSchemaName;
+  protected String referenceDefaultSchemaName;
 
   /**
    * The diff change log file to output the differences to. If this is null then the
@@ -61,7 +61,7 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
    */
   protected String diffChangeLogFile;
 
-  @Override
+    @Override
   protected void performLiquibaseTask(Liquibase liquibase) throws LiquibaseException {
     ClassLoader cl = null;
     try {
@@ -72,12 +72,12 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
     }
 
     Database db = liquibase.getDatabase();
-    Database baseDatabase = CommandLineUtils.createDatabaseObject(cl, baseUrl, baseUsername, basePassword, baseDriver, baseDefaultSchemaName, null);
+    Database referenceDatabase = CommandLineUtils.createDatabaseObject(cl, referenceUrl, referenceUsername, referencePassword, referenceDriver, referenceDefaultSchemaName, null);
 
     getLog().info("Performing Diff on database " + db.toString());
     if (diffChangeLogFile != null) {
       try {
-        CommandLineUtils.doDiffToChangeLog(diffChangeLogFile, baseDatabase, db);
+        CommandLineUtils.doDiffToChangeLog(diffChangeLogFile, referenceDatabase, db);
         getLog().info("Differences written to Change Log File, " + diffChangeLogFile);
       }
       catch (IOException e) {
@@ -87,18 +87,18 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
         throw new LiquibaseException(e);
       }
     } else {
-      CommandLineUtils.doDiff(baseDatabase, db);
+      CommandLineUtils.doDiff(referenceDatabase, db);
     }
   }
 
   @Override
   protected void printSettings(String indent) {
     super.printSettings(indent);
-    getLog().info(indent + "baseDriver: " + baseDriver);
-    getLog().info(indent + "baseUrl: " + baseUrl);
-    getLog().info(indent + "baseUsername: " + baseUsername);
-    getLog().info(indent + "basePassword: " + basePassword);
-    getLog().info(indent + "baseDefaultSchema: " + baseDefaultSchemaName);
+    getLog().info(indent + "referenceDriver: " + referenceDriver);
+    getLog().info(indent + "referenceUrl: " + referenceUrl);
+    getLog().info(indent + "referenceUsername: " + referenceUsername);
+    getLog().info(indent + "referencePassword: " + referencePassword);
+    getLog().info(indent + "referenceDefaultSchema: " + referenceDefaultSchemaName);
     getLog().info(indent + "diffChangeLogFile: " + diffChangeLogFile);
   }
 
@@ -106,20 +106,20 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
   protected void checkRequiredParametersAreSpecified() throws MojoFailureException {
     super.checkRequiredParametersAreSpecified();
 
-    if (baseUrl == null) {
-      throw new MojoFailureException("A base database or hibernate configuration file "
+    if (referenceUrl == null) {
+      throw new MojoFailureException("A reference database or hibernate configuration file "
                                      + "must be provided to perform a diff.");
     }
 
-    if (baseUrl.startsWith("hibernate:")) {
+    if (referenceUrl.startsWith("hibernate:")) {
 
     } else {
-      if (baseUsername == null) {
-        throw new MojoFailureException("The username cannot be null for the base "
+      if (referenceUsername == null) {
+        throw new MojoFailureException("The username cannot be null for the reference "
                                        + "database when not using hibernate.");
       }
-      if (basePassword == null) {
-        basePassword = "";
+      if (referencePassword == null) {
+        referencePassword = "";
       }
     }
   }

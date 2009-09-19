@@ -5,7 +5,7 @@ import liquibase.dbtest.AbstractSimpleChangeLogRunnerTest;
 public class SybaseASASampleChangeLogRunnerTest extends AbstractSimpleChangeLogRunnerTest {
 
     public SybaseASASampleChangeLogRunnerTest() throws Exception {
-        super( "asany", "jdbc:sybase:Tds:localhost:9810/servicename=prior");
+        super( "asany", "jdbc:sybase:Tds:"+DATABASE_SERVER_HOSTNAME+":9810/servicename=prior");
     }
 
 
