@@ -13,4 +13,8 @@ public interface SqlVisitor {
     void setApplicableDbms(Collection modifySqlDbmsList);
 
     boolean isApplicable(Database database);
+
+    void setAppliedOnRollback(boolean applyOnRollback);
+
+    boolean isAppliedOnRollback();
 }
