@@ -257,7 +257,6 @@ public abstract class AbstractDatabase implements Database {
     }
 
 
-
     /**
      * Returns database-specific line comment string.
      */
@@ -544,7 +543,7 @@ public abstract class AbstractDatabase implements Database {
             }
             this.commit();
 
-            ranChangeSetList.get(ranChangeSetList.size()-1).setTag(tagString);
+            ranChangeSetList.get(ranChangeSetList.size() - 1).setTag(tagString);
         } catch (Exception e) {
             throw new DatabaseException(e);
         }
@@ -691,7 +690,7 @@ public abstract class AbstractDatabase implements Database {
             if (foundRan.getLastCheckSum() == null) {
                 try {
                     LogFactory.getLogger().info("Updating NULL md5sum for " + changeSet.toString());
-                    ExecutorService.getInstance().getExecutor(this).execute(new RawSqlStatement("UPDATE " + escapeTableName(getLiquibaseSchemaName(), getDatabaseChangeLogTableName()) + " SET MD5SUM='"+changeSet.generateCheckSum().toString()+"' WHERE ID='"+changeSet.getId()+"' AND AUTHOR='"+changeSet.getAuthor()+"' AND FILENAME='"+changeSet.getFilePath()+"'"));
+                    ExecutorService.getInstance().getExecutor(this).execute(new RawSqlStatement("UPDATE " + escapeTableName(getLiquibaseSchemaName(), getDatabaseChangeLogTableName()) + " SET MD5SUM='" + changeSet.generateCheckSum().toString() + "' WHERE ID='" + changeSet.getId() + "' AND AUTHOR='" + changeSet.getAuthor() + "' AND FILENAME='" + changeSet.getFilePath() + "'"));
 
                     this.commit();
                 } catch (DatabaseException e) {
@@ -906,7 +905,15 @@ public abstract class AbstractDatabase implements Database {
 
     public void executeRollbackStatements(Change change, List<SqlVisitor> sqlVisitors) throws LiquibaseException, UnsupportedChangeException, RollbackImpossibleException {
         SqlStatement[] statements = change.generateRollbackStatements(this);
-        execute(statements, sqlVisitors);
+        List<SqlVisitor> rollbackVisitors = new ArrayList<SqlVisitor>();
+        if (sqlVisitors != null) {
+            for (SqlVisitor visitor : sqlVisitors) {
+                if (visitor.isAppliedOnRollback()) {
+                    rollbackVisitors.add(visitor);
+                }
+            }
+        }
+        execute(statements, rollbackVisitors);
     }
 
     public void saveRollbackStatement(Change change, List<SqlVisitor> sqlVisitors, Writer writer) throws IOException, UnsupportedChangeException, RollbackImpossibleException, StatementNotSupportedOnDatabaseException, LiquibaseException {

@@ -57,6 +57,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 
     private boolean inModifySql = false;
     private Collection modifySqlDbmsList;
+    private boolean modifySqlAppliedOnRollback = false;
 
 
     protected XMLChangeLogSAXHandler(String physicalChangeLogLocation, ResourceAccessor resourceAccessor, Map<String, Object> properties) {
@@ -205,6 +206,9 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
                 if (StringUtils.trimToNull(atts.getValue("dbms")) != null) {
                     modifySqlDbmsList = StringUtils.splitAndTrim(atts.getValue("dbms"), ",");
                 }
+                if (StringUtils.trimToNull(atts.getValue("appliedOnRollback")) != null) {
+                    modifySqlAppliedOnRollback = Boolean.valueOf(atts.getValue("appliedOnRollback"));
+                }
             } else if (inModifySql) {
                 SqlVisitor sqlVisitor = SqlVisitorFactory.getInstance().create(qName);
                 for (int i = 0; i < atts.getLength(); i++) {
@@ -213,6 +217,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
                     setProperty(sqlVisitor, attributeName, attributeValue);
                 }
                 sqlVisitor.setApplicableDbms(modifySqlDbmsList);
+                sqlVisitor.setAppliedOnRollback(modifySqlAppliedOnRollback);
 
                 changeSet.addSqlVisitor(sqlVisitor);
             } else if (changeSet != null && change == null) {
