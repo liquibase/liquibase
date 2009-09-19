@@ -11,65 +11,65 @@ import java.io.PrintStream;
 
 public class DiffDatabaseTask extends BaseLiquibaseTask {
 
-    private String baseDriver;
-    private String baseUrl;
-    private String baseUsername;
-    private String basePassword;
-    private String baseDefaultSchemaName;
+    private String referenceDriver;
+    private String referenceUrl;
+    private String referenceUsername;
+    private String referencePassword;
+    private String referenceDefaultSchemaName;
 
-    public String getBaseDriver() {
-        if (baseDriver == null) {
+    public String getReferenceDriver() {
+        if (referenceDriver == null) {
             return getDriver();
         }
-        return baseDriver;
+        return referenceDriver;
     }
 
-    public void setBaseDriver(String baseDriver) {
-        this.baseDriver = baseDriver;
+    public void setReferenceDriver(String referenceDriver) {
+        this.referenceDriver = referenceDriver;
     }
 
-    public String getBaseUrl() {
-        return baseUrl;
+    public String getReferenceUrl() {
+        return referenceUrl;
     }
 
-    public void setBaseUrl(String baseUrl) {
-        this.baseUrl = baseUrl;
+    public void setReferenceUrl(String referenceUrl) {
+        this.referenceUrl = referenceUrl;
     }
 
-    public String getBaseUsername() {
-        return baseUsername;
+    public String getReferenceUsername() {
+        return referenceUsername;
     }
 
-    public void setBaseUsername(String baseUsername) {
-        this.baseUsername = baseUsername;
+    public void setReferenceUsername(String referenceUsername) {
+        this.referenceUsername = referenceUsername;
     }
 
-    public String getBasePassword() {
-        return basePassword;
+    public String getReferencePassword() {
+        return referencePassword;
     }
 
-    public void setBasePassword(String basePassword) {
-        this.basePassword = basePassword;
+    public void setReferencePassword(String referencePassword) {
+        this.referencePassword = referencePassword;
     }
 
-    public String getBaseDefaultSchemaName() {
-        return baseDefaultSchemaName;
+    public String getReferenceDefaultSchemaName() {
+        return referenceDefaultSchemaName;
     }
 
-    public void setBaseDefaultSchemaName(String baseDefaultSchemaName) {
-        this.baseDefaultSchemaName = baseDefaultSchemaName;
+    public void setReferenceDefaultSchemaName(String referenceDefaultSchemaName) {
+        this.referenceDefaultSchemaName = referenceDefaultSchemaName;
     }
 
     @Override
     public void execute() throws BuildException {
-        if (StringUtils.trimToNull(getBaseUrl()) == null) {
-            throw new BuildException("diffDatabase requires baseUrl to be set");
+        if (StringUtils.trimToNull(getReferenceUrl()) == null) {
+            throw new BuildException("diffDatabase requires referenceUrl to be set");
         }
-        if (!(getBaseUrl().startsWith("hibernate")) && StringUtils.trimToNull(getBaseUsername()) == null) {
-            throw new BuildException("diffDatabase requires baseUsername to be set");
+        if (!(getReferenceUrl().startsWith("hibernate")) && StringUtils.trimToNull(getReferenceUsername()) == null) {
+            throw new BuildException("diffDatabase requires referenceUsername to be set");
         }
-        if (!(getBaseUrl().startsWith("hibernate")) && StringUtils.trimToNull(getBasePassword()) == null) {
-            throw new BuildException("diffDatabase requires basePassword to be set");
+        if (!(getReferenceUrl().startsWith("hibernate")) && StringUtils.trimToNull(getReferencePassword()) == null) {
+            throw new BuildException("diffDatabase requires referencePassword to be set");
         }
         
         Liquibase liquibase = null;
@@ -81,10 +81,10 @@ public class DiffDatabaseTask extends BaseLiquibaseTask {
 
             liquibase = createLiquibase();
 
-            Database baseDatabase = createDatabaseObject(getBaseDriver(), getBaseUrl(), getBaseUsername(), getBasePassword(), getBaseDefaultSchemaName(), getDatabaseClass());
+            Database referenceDatabase = createDatabaseObject(getReferenceDriver(), getReferenceUrl(), getReferenceUsername(), getReferencePassword(), getReferenceDefaultSchemaName(), getDatabaseClass());
 
 
-            Diff diff = new Diff(baseDatabase, liquibase.getDatabase());
+            Diff diff = new Diff(referenceDatabase, liquibase.getDatabase());
 //            diff.addStatusListener(new OutDiffStatusListener());
             DiffResult diffResult = diff.compare();
 

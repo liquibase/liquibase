@@ -908,7 +908,7 @@ public abstract class AbstractDatabase implements Database {
         List<SqlVisitor> rollbackVisitors = new ArrayList<SqlVisitor>();
         if (sqlVisitors != null) {
             for (SqlVisitor visitor : sqlVisitors) {
-                if (visitor.isAppliedOnRollback()) {
+                if (visitor.isApplyToRollback()) {
                     rollbackVisitors.add(visitor);
                 }
             }

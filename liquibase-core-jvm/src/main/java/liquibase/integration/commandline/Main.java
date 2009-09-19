@@ -295,8 +295,8 @@ public class Main {
         stream.println(" diff [diff parameters]          Writes description of differences");
         stream.println("                                 to standard out");
         stream.println(" diffChangeLog [diff parameters] Writes Change Log XML to update");
-        stream.println("                                 the base database");
-        stream.println("                                 to the target database to standard out");
+        stream.println("                                 the database");
+        stream.println("                                 to the reference database to standard out");
         stream.println("");
         stream.println("Documentation Commands");
         stream.println(" dbDoc <outputDirectory>         Generates Javadoc-like documentation");
@@ -352,12 +352,12 @@ public class Main {
         stream.println(" --version                                  Prints this version information");
         stream.println("");
         stream.println("Required Diff Parameters:");
-        stream.println(" --baseUsername=<value>                     Base Database username");
-        stream.println(" --basePassword=<value>                     Base Database password");
-        stream.println(" --baseUrl=<value>                          Base Database URL");
+        stream.println(" --referenceUsername=<value>                Reference Database username");
+        stream.println(" --referencePassword=<value>                Reference Database password");
+        stream.println(" --referenceUrl=<value>                     Reference Database URL");
         stream.println("");
         stream.println("Optional Diff Parameters:");
-        stream.println(" --baseDriver=<jdbc.driver.ClassName>       Base Database driver class name");
+        stream.println(" --referenceDriver=<jdbc.driver.ClassName>  Reference Database driver class name");
         stream.println("");
         stream.println("Change Log Properties:");
         stream.println(" -D<property.name>=<property.value>         Pass a name/value pair for");
@@ -592,10 +592,10 @@ public class Main {
             CompositeResourceAccessor fileOpener = new CompositeResourceAccessor(fsOpener, clOpener);
 
             if ("diff".equalsIgnoreCase(command)) {
-                CommandLineUtils.doDiff(database, createDatabaseFromCommandParams(commandParams));
+                CommandLineUtils.doDiff(createReferenceDatabaseFromCommandParams(commandParams), database);
                 return;
             } else if ("diffChangeLog".equalsIgnoreCase(command)) {
-                CommandLineUtils.doDiffToChangeLog(changeLogFile, database, createDatabaseFromCommandParams(commandParams));
+                CommandLineUtils.doDiffToChangeLog(changeLogFile, createReferenceDatabaseFromCommandParams(commandParams), database);
                 return;
             } else if ("generateChangeLog".equalsIgnoreCase(command)) {
                 CommandLineUtils.doGenerateChangeLog(changeLogFile, database, defaultSchemaName, StringUtils.trimToNull(diffTypes), StringUtils.trimToNull(changeSetAuthor), StringUtils.trimToNull(changeSetContext), StringUtils.trimToNull(dataDir));
@@ -733,7 +733,7 @@ public class Main {
         return null;
     }
 
-    private Database createDatabaseFromCommandParams(Set<String> commandParams) throws CommandLineParsingException, DatabaseException {
+    private Database createReferenceDatabaseFromCommandParams(Set<String> commandParams) throws CommandLineParsingException, DatabaseException {
         String driver = null;
         String url = null;
         String username = null;
@@ -745,15 +745,15 @@ public class Main {
 
             String attributeName = splitArg[0];
             String value = splitArg[1];
-            if ("baseDriver".equalsIgnoreCase(attributeName)) {
+            if ("referenceDriver".equalsIgnoreCase(attributeName)) {
                 driver = value;
-            } else if ("baseUrl".equalsIgnoreCase(attributeName)) {
+            } else if ("referenceUrl".equalsIgnoreCase(attributeName)) {
                 url = value;
-            } else if ("baseUsername".equalsIgnoreCase(attributeName)) {
+            } else if ("referenceUsername".equalsIgnoreCase(attributeName)) {
                 username = value;
-            } else if ("basePassword".equalsIgnoreCase(attributeName)) {
+            } else if ("referencePassword".equalsIgnoreCase(attributeName)) {
                 password = value;
-            } else if ("baseDefaultSchemaName".equalsIgnoreCase(attributeName)) {
+            } else if ("referenceDefaultSchemaName".equalsIgnoreCase(attributeName)) {
                 defaultSchemaName = value;
             }
         }

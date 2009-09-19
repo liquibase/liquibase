@@ -27,10 +27,10 @@ import java.util.*;
 
 public class DiffResult {
 
-    private Long baseId = new Date().getTime();
+    private Long idRoot = new Date().getTime();
     private int changeNumber = 1;
 
-    private DatabaseSnapshot baseSnapshot;
+    private DatabaseSnapshot referenceSnapshot;
     private DatabaseSnapshot targetSnapshot;
 
     private DiffComparison productName;
@@ -66,11 +66,11 @@ public class DiffResult {
     private String changeSetContext;
     private String changeSetAuthor;
 
-    public DiffResult(DatabaseSnapshot baseDatabaseSnapshot, DatabaseSnapshot targetDatabaseSnapshot) {
-        this.baseSnapshot = baseDatabaseSnapshot;
+    public DiffResult(DatabaseSnapshot referenceDatabaseSnapshot, DatabaseSnapshot targetDatabaseSnapshot) {
+        this.referenceSnapshot = referenceDatabaseSnapshot;
 
         if (targetDatabaseSnapshot == null) {
-            targetDatabaseSnapshot = new DatabaseSnapshot(baseDatabaseSnapshot.getDatabase(), null);
+            targetDatabaseSnapshot = new DatabaseSnapshot(referenceDatabaseSnapshot.getDatabase(), null);
         }
         this.targetSnapshot = targetDatabaseSnapshot;
     }
@@ -252,8 +252,8 @@ public class DiffResult {
     }
 
     public void printResult(PrintStream out) throws DatabaseException {
-        out.println("Base Database: " + targetSnapshot.getDatabase());
-        out.println("Target Database: " + baseSnapshot.getDatabase());
+        out.println("Reference Database: " + referenceSnapshot.getDatabase());
+        out.println("Target Database: " + targetSnapshot.getDatabase());
 
         printComparision("Product Name", productName, out);
         printComparision("Product Version", productVersion, out);
@@ -296,10 +296,10 @@ public class DiffResult {
             out.println();
             for (Column column : changedColumns) {
                 out.println("     " + column);
-                Column baseColumn = baseSnapshot.getColumn(column.getTable().getName(), column.getName());
+                Column baseColumn = referenceSnapshot.getColumn(column.getTable().getName(), column.getName());
                 if (baseColumn != null) {
                     if (baseColumn.isDataTypeDifferent(column)) {
-                        out.println("           from " + baseColumn.getDataTypeString(baseSnapshot.getDatabase()) + " to " + targetSnapshot.getColumn(column.getTable().getName(), column.getName()).getDataTypeString(targetSnapshot.getDatabase()));
+                        out.println("           from " + baseColumn.getDataTypeString(referenceSnapshot.getDatabase()) + " to " + targetSnapshot.getColumn(column.getTable().getName(), column.getName()).getDataTypeString(targetSnapshot.getDatabase()));
                     }
                     if (baseColumn.isNullabilityDifferent(column)) {
                         Boolean nowNullable = targetSnapshot.getColumn(column.getTable().getName(), column.getName()).isNullable();
@@ -323,7 +323,7 @@ public class DiffResult {
             out.println(" EQUAL");
         } else {
             out.println();
-            out.println("     Base:   '" + comparison.getBaseVersion() + "'");
+            out.println("     Reference:   '" + comparison.getReferenceVersion() + "'");
             out.println("     Target: '" + comparison.getTargetVersion() + "'");
         }
 
@@ -389,7 +389,7 @@ public class DiffResult {
     }
 
     /**
-     * Prints changeLog that would bring the base database to be the same as the target database
+     * Prints changeLog that would bring the target database to be the same as the reference database
      */
     public void printChangeLog(PrintStream out, Database targetDatabase, XmlWriter xmlWriter) throws ParserConfigurationException, IOException, DatabaseException {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -466,7 +466,7 @@ public class DiffResult {
     }
 
     private String generateId() {
-        return baseId.toString() + "-" + changeNumber++;
+        return idRoot.toString() + "-" + changeNumber++;
     }
 
     private void addUnexpectedIndexChanges(List<Change> changes) {
@@ -650,11 +650,11 @@ public class DiffResult {
             }
 
             boolean foundDifference = false;
-            Column baseColumn = baseSnapshot.getColumn(column.getTable().getName(), column.getName());
-            if (column.isDataTypeDifferent(baseColumn)) {
+            Column referenceColumn = referenceSnapshot.getColumn(column.getTable().getName(), column.getName());
+            if (column.isDataTypeDifferent(referenceColumn)) {
                 ColumnConfig columnConfig = new ColumnConfig();
                 columnConfig.setName(column.getName());
-                columnConfig.setType(baseColumn.getDataTypeString(targetSnapshot.getDatabase()));
+                columnConfig.setType(referenceColumn.getDataTypeString(targetSnapshot.getDatabase()));
 
                 ModifyColumnChange change = new ModifyColumnChange();
                 change.setTableName(column.getTable().getName());
@@ -664,13 +664,13 @@ public class DiffResult {
                 changes.add(change);
                 foundDifference = true;
             }
-            if (column.isNullabilityDifferent(baseColumn)) {
-                if (baseColumn.isNullable() == null || baseColumn.isNullable()) {
+            if (column.isNullabilityDifferent(referenceColumn)) {
+                if (referenceColumn.isNullable() == null || referenceColumn.isNullable()) {
                     DropNotNullConstraintChange change = new DropNotNullConstraintChange();
                     change.setTableName(column.getTable().getName());
                     change.setSchemaName(column.getTable().getSchema());
                     change.setColumnName(column.getName());
-                    change.setColumnDataType(baseColumn.getDataTypeString(targetSnapshot.getDatabase()));
+                    change.setColumnDataType(referenceColumn.getDataTypeString(targetSnapshot.getDatabase()));
 
                     changes.add(change);
                     foundDifference = true;
@@ -679,7 +679,7 @@ public class DiffResult {
                     change.setTableName(column.getTable().getName());
                     change.setSchemaName(column.getTable().getSchema());
                     change.setColumnName(column.getName());
-                    change.setColumnDataType(baseColumn.getDataTypeString(targetSnapshot.getDatabase()));
+                    change.setColumnDataType(referenceColumn.getDataTypeString(targetSnapshot.getDatabase()));
 
                     changes.add(change);
                     foundDifference = true;
@@ -694,7 +694,7 @@ public class DiffResult {
 
     private boolean shouldModifyColumn(Column column) {
         return column.getView() == null
-                && !baseSnapshot.getDatabase().isLiquibaseTable(column.getTable().getName());
+                && !referenceSnapshot.getDatabase().isLiquibaseTable(column.getTable().getName());
 
     }
 
@@ -755,7 +755,7 @@ public class DiffResult {
 
     private void addMissingTableChanges(List<Change> changes, Database database) {
         for (Table missingTable : getMissingTables()) {
-            if (baseSnapshot.getDatabase().isLiquibaseTable(missingTable.getName())) {
+            if (referenceSnapshot.getDatabase().isLiquibaseTable(missingTable.getName())) {
                 continue;
             }
 
@@ -844,10 +844,10 @@ public class DiffResult {
 
     private void addInsertDataChanges(List<Change> changes, String dataDir) throws DatabaseException, IOException {
 //todo        try {
-//            String schema = baseSnapshot.getSchema();
-//            Statement stmt = baseSnapshot.getDatabase().getConnection().createStatement();
-//            for (Table table : baseSnapshot.getTables()) {
-//                ResultSet rs = stmt.executeQuery("SELECT * FROM " + baseSnapshot.getDatabase().escapeTableName(schema, table.getName()));
+//            String schema = referenceSnapshot.getSchema();
+//            Statement stmt = referenceSnapshot.getDatabase().getConnection().createStatement();
+//            for (Table table : referenceSnapshot.getTables()) {
+//                ResultSet rs = stmt.executeQuery("SELECT * FROM " + referenceSnapshot.getDatabase().escapeTableName(schema, table.getName()));
 //
 //                ResultSetMetaData columnData = rs.getMetaData();
 //                int columnCount = columnData.getColumnCount();

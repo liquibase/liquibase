@@ -13,7 +13,7 @@ import liquibase.dbtest.AbstractSimpleChangeLogRunnerTest;
 public class MaxDbSampleChangeLogRunnerTest  extends AbstractSimpleChangeLogRunnerTest {
 
   public MaxDbSampleChangeLogRunnerTest() throws Exception {
-      super("maxdb", "jdbc:sapdb://localhost/liquibas");
+      super("maxdb", "jdbc:sapdb://"+DATABASE_SERVER_HOSTNAME+"/liquibas");
   }
 
 }

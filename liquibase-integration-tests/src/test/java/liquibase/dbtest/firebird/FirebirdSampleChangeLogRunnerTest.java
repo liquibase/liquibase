@@ -14,7 +14,7 @@ import liquibase.exception.DatabaseException;
 public class FirebirdSampleChangeLogRunnerTest extends AbstractSimpleChangeLogRunnerTest {
 
     public FirebirdSampleChangeLogRunnerTest() throws Exception {
-        super("firebird", "jdbc:firebirdsql:localhost/3050:c:\\firebird\\liquibase.fdb");
+        super("firebird", "jdbc:firebirdsql:"+DATABASE_SERVER_HOSTNAME+"/3050:c:\\firebird\\liquibase.fdb");
     }
 
     @Override
