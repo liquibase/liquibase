@@ -26,6 +26,14 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
 
     private Set<DiffStatusListener> statusListeners;
 
+    protected String convertTableNameToDatabaseTableName(String tableName) {
+        return tableName;
+    }
+
+    protected String convertColumnNameToDatabaseTableName(String columnName) {
+        return columnName;
+    }
+
     public Table getDatabaseChangeLogTable(Database database) throws DatabaseException {
         return getTable(database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName(), database);
     }
@@ -34,11 +42,32 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
         return getTable(database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName(), database);
     }
 
+    public boolean hasDatabaseChangeLogTable(Database database) {
+        return hasTable(database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName(), database);
+    }
+
+    public boolean hasDatabaseChangeLogLockTable(Database database) {
+        return hasTable(database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName(), database);
+    }
+
+    public boolean hasTable(String schemaName, String tableName, Database database) {
+        try {
+            ResultSet rs = getMetaData(database).getTables(database.convertRequestedSchemaToCatalog(schemaName), database.convertRequestedSchemaToSchema(schemaName), convertTableNameToDatabaseTableName(tableName), new String[]{"TABLE"});
+            try {
+                return rs.next();
+            } finally {
+                rs.close();
+            }
+        } catch (Exception e) {
+            throw new UnexpectedLiquibaseException(e);
+        }
+    }
+
     public Table getTable(String schemaName, String tableName, Database database) throws DatabaseException {
         ResultSet rs = null;
         try {
             DatabaseMetaData metaData = getMetaData(database);
-            rs = metaData.getTables(database.convertRequestedSchemaToCatalog(schemaName), database.convertRequestedSchemaToSchema(schemaName), tableName, new String[]{"TABLE"});
+            rs = metaData.getTables(database.convertRequestedSchemaToCatalog(schemaName), database.convertRequestedSchemaToSchema(schemaName), convertTableNameToDatabaseTableName(tableName), new String[]{"TABLE"});
 
             if (!rs.next()) {
                 return null;
@@ -47,7 +76,7 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
             Table table = readTable(rs, database);
             rs.close();
 
-            rs = metaData.getColumns(database.convertRequestedSchemaToCatalog(schemaName), database.convertRequestedSchemaToSchema(schemaName), tableName, null);
+            rs = metaData.getColumns(database.convertRequestedSchemaToCatalog(schemaName), database.convertRequestedSchemaToSchema(schemaName), convertTableNameToDatabaseTableName(tableName), null);
             while (rs.next()) {
                 table.getColumns().add(readColumn(rs, database));
             }
@@ -69,7 +98,7 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
     public Column getColumn(String schemaName, String tableName, String columnName, Database database) throws DatabaseException {
         ResultSet rs = null;
         try {
-            rs = getMetaData(database).getColumns(database.convertRequestedSchemaToCatalog(schemaName), database.convertRequestedSchemaToSchema(schemaName), tableName, columnName);
+            rs = getMetaData(database).getColumns(database.convertRequestedSchemaToCatalog(schemaName), database.convertRequestedSchemaToSchema(schemaName), convertTableNameToDatabaseTableName(tableName), convertColumnNameToDatabaseTableName(columnName));
 
             if (!rs.next()) {
                 return null;
@@ -345,6 +374,10 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
         }
     }
 
+    public boolean hasIndex(String schemaName, String indexName, Database database) throws DatabaseException {
+        return createSnapshot(database, schemaName, null).getIndex(indexName) != null;
+    }
+
     public ForeignKey getForeignKeyByForeignKeyTable(String schemaName, String foreignKeyTableName, String fkName, Database database) throws DatabaseException {
         for (ForeignKey fk : getForeignKeys(schemaName, foreignKeyTableName, database)) {
             if (fk.getName().equalsIgnoreCase(fkName)) {
@@ -360,7 +393,7 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
         try {
             String dbCatalog = database.convertRequestedSchemaToCatalog(schemaName);
             String dbSchema = database.convertRequestedSchemaToSchema(schemaName);
-            ResultSet rs = getMetaData(database).getImportedKeys(dbCatalog, dbSchema, foreignKeyTableName);
+            ResultSet rs = getMetaData(database).getImportedKeys(dbCatalog, dbSchema, convertTableNameToDatabaseTableName(foreignKeyTableName));
 
             while (rs.next()) {
                 String fkName = convertFromDatabaseName(rs.getString("FK_NAME"));

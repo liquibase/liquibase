@@ -28,20 +28,20 @@ public class DerbyConnection extends JdbcConnection {
     }
 
     private void checkPoint() throws DatabaseException {
-        Statement st = null;
-        try {
-            st = createStatement();            
-            st.execute("CALL SYSCS_UTIL.SYSCS_CHECKPOINT_DATABASE()");
-        } catch (SQLException e) {
-            throw new DatabaseException(e);
-        } finally {
-            if (st != null) {
-                try {
-                    st.close();
-                } catch (SQLException e) {
-                    ;
-                }
-            }
-        }
+//        Statement st = null;
+//        try {
+//            st = createStatement();
+//            st.execute("CALL SYSCS_UTIL.SYSCS_CHECKPOINT_DATABASE()");
+//        } catch (SQLException e) {
+//            throw new DatabaseException(e);
+//        } finally {
+//            if (st != null) {
+//                try {
+//                    st.close();
+//                } catch (SQLException e) {
+//                    ;
+//                }
+//            }
+//        }
     }
 }

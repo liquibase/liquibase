@@ -32,10 +32,12 @@ public class TableExistsPrecondition implements Precondition {
 
     public void check(Database database, DatabaseChangeLog changeLog) throws PreconditionFailedException, PreconditionErrorException {
         try {
-            if (DatabaseSnapshotGeneratorFactory.getInstance().getGenerator(database).getTable(getSchemaName(), getTableName(), database) == null) {
+            if (!DatabaseSnapshotGeneratorFactory.getInstance().getGenerator(database).hasTable(getSchemaName(), getTableName(), database)) {
                 throw new PreconditionFailedException("Table "+database.escapeTableName(getSchemaName(), getTableName())+" does not exist", changeLog, this);
             }
-        } catch (DatabaseException e) {
+        } catch (PreconditionFailedException e) {
+            throw e;
+        } catch (Exception e) {
             throw new PreconditionErrorException(e, changeLog, this);
         }
     }
