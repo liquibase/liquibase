@@ -26,6 +26,9 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
 
     private Set<DiffStatusListener> statusListeners;
 
+    private boolean hasDatabaseChangeLogTable = false;
+    private boolean hasDatabaseChangeLogLockTable = false;
+
     protected String convertTableNameToDatabaseTableName(String tableName) {
         return tableName;
     }
@@ -43,11 +46,19 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
     }
 
     public boolean hasDatabaseChangeLogTable(Database database) {
-        return hasTable(database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName(), database);
+        if (hasDatabaseChangeLogTable) {
+            return true;
+        }
+        hasDatabaseChangeLogTable = hasTable(database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName(), database);
+        return hasDatabaseChangeLogTable;
     }
 
     public boolean hasDatabaseChangeLogLockTable(Database database) {
-        return hasTable(database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName(), database);
+        if (hasDatabaseChangeLogLockTable) {
+            return true;
+        }
+        hasDatabaseChangeLogLockTable = hasTable(database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName(), database);
+        return hasDatabaseChangeLogLockTable;
     }
 
     public boolean hasTable(String schemaName, String tableName, Database database) {

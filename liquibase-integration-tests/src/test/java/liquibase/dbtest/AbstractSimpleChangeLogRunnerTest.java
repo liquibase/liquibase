@@ -1,8 +1,6 @@
 package liquibase.dbtest;
 
-import junit.framework.TestCase;
 import liquibase.Liquibase;
-import liquibase.sql.visitor.SqlVisitor;
 import liquibase.servicelocator.ServiceLocator;
 import liquibase.snapshot.DatabaseSnapshotGeneratorFactory;
 import liquibase.snapshot.DatabaseSnapshot;
@@ -21,7 +19,6 @@ import liquibase.lockservice.LockService;
 import liquibase.resource.ResourceAccessor;
 import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.statement.core.DropTableStatement;
-import liquibase.statement.SqlStatement;
 import liquibase.test.JUnitResourceAccessor;
 import liquibase.test.TestContext;
 import liquibase.test.DatabaseTestContext;
@@ -80,6 +77,7 @@ public abstract class AbstractSimpleChangeLogRunnerTest {
                 database.rollback();
             }
 
+            DatabaseSnapshotGeneratorFactory.resetAll();            
             ExecutorService.getInstance().reset();
             LockService.resetAll();
 
@@ -90,13 +88,15 @@ public abstract class AbstractSimpleChangeLogRunnerTest {
                 database.commit();
             }
             
+            DatabaseSnapshotGeneratorFactory.resetAll();
             LockService.getInstance(database).forceReleaseLock();
             if (database.supportsSchemas()) {
                 database.dropDatabaseObjects(DatabaseTestContext.ALT_SCHEMA);
             }
             database.dropDatabaseObjects(null);
             database.commit();
-
+            DatabaseSnapshotGeneratorFactory.resetAll();
+            
         }
     }
 
@@ -113,6 +113,8 @@ public abstract class AbstractSimpleChangeLogRunnerTest {
             ExecutorService.getInstance().clearExecutor(database);
             database.setDefaultSchemaName(null);
         }
+
+        DatabaseSnapshotGeneratorFactory.resetAll();
     }
 
     protected boolean shouldRollBack() {
@@ -204,6 +206,7 @@ public abstract class AbstractSimpleChangeLogRunnerTest {
             throw new DatabaseException(e);
         }
 
+        DatabaseSnapshotGeneratorFactory.resetAll();
     }
 
     @Test

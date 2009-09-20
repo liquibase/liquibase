@@ -80,4 +80,7 @@ public class DatabaseSnapshotGeneratorFactory {
         registry.add(0, snapshotGenerator);
     }
 
+    public static void resetAll() {
+        instance = null;
+    }
 }
