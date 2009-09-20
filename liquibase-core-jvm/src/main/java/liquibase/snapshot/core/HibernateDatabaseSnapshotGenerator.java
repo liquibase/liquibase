@@ -40,6 +40,22 @@ public class HibernateDatabaseSnapshotGenerator implements DatabaseSnapshotGener
         return null;
     }
 
+    public boolean hasIndex(String schemaName, String indexName, Database database) throws DatabaseException {
+        return false;
+    }
+
+    public boolean hasDatabaseChangeLogTable(Database database) {
+        return false;
+    }
+
+    public boolean hasDatabaseChangeLogLockTable(Database database) {
+        return false;
+    }
+
+    public boolean hasTable(String schemaName, String tableName, Database database) {
+        return false;
+    }
+
     public ForeignKey getForeignKeyByForeignKeyTable(String schemaName, String tableName, String fkName, Database database) throws DatabaseException {
         return null;
     }

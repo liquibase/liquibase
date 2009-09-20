@@ -396,11 +396,11 @@ public abstract class AbstractDatabase implements Database {
     }
 
     public boolean doesChangeLogTableExist() throws DatabaseException {
-        return DatabaseSnapshotGeneratorFactory.getInstance().getGenerator(this).getDatabaseChangeLogTable(this) != null;
+        return DatabaseSnapshotGeneratorFactory.getInstance().getGenerator(this).hasDatabaseChangeLogTable(this);
     }
 
     public boolean doesChangeLogLockTableExist() throws DatabaseException {
-        return DatabaseSnapshotGeneratorFactory.getInstance().getGenerator(this).getDatabaseChangeLogLockTable(this) != null;
+        return DatabaseSnapshotGeneratorFactory.getInstance().getGenerator(this).hasDatabaseChangeLogLockTable(this);
     }
 
     public String getLiquibaseSchemaName() {

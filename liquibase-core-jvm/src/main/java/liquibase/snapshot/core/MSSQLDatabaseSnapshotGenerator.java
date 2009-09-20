@@ -24,17 +24,13 @@ public class MSSQLDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerato
     }
 
     @Override
-    public Table getTable(String schemaName, String tableName, Database database) throws DatabaseException {
-        return super.getTable(schemaName, tableName.toLowerCase(), database);
+    protected String convertTableNameToDatabaseTableName(String tableName) {
+        return tableName.toLowerCase();
     }
 
     @Override
-    public Column getColumn(String schemaName, String tableName, String columnName, Database database) throws DatabaseException {
-        return super.getColumn(schemaName, tableName, columnName.toUpperCase(),database);
+    protected String convertColumnNameToDatabaseTableName(String columnName) {
+        return columnName.toLowerCase();
     }
 
-    @Override
-    public List<ForeignKey> getForeignKeys(String schemaName, String tableName, Database database) throws DatabaseException {
-        return super.getForeignKeys(schemaName, tableName.toUpperCase(), database);
-    }
 }

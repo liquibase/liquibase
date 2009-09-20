@@ -1,6 +1,7 @@
 package liquibase.snapshot;
 
 import liquibase.database.Database;
+import liquibase.database.AbstractDatabase;
 import liquibase.database.structure.Table;
 import liquibase.database.structure.Column;
 import liquibase.database.structure.ForeignKey;
@@ -39,4 +40,12 @@ public interface DatabaseSnapshotGenerator {
     ForeignKey getForeignKeyByForeignKeyTable(String schemaName, String tableName, String fkName, Database database) throws DatabaseException;
 
     List<ForeignKey> getForeignKeys(String schemaName, String tableName, Database database) throws DatabaseException;
+
+    boolean hasIndex(String schemaName, String indexName, Database database) throws DatabaseException;
+
+    boolean hasDatabaseChangeLogTable(Database database);
+
+    boolean hasDatabaseChangeLogLockTable(Database database);
+
+    public boolean hasTable(String schemaName, String tableName, Database database);
 }
