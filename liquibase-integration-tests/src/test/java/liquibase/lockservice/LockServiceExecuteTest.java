@@ -1,37 +1,18 @@
 package liquibase.lockservice;
 
 import liquibase.database.Database;
-import liquibase.database.DatabaseFactory;
-import liquibase.database.DatabaseConnection;
 import liquibase.database.JdbcConnection;
-import liquibase.executor.LoggingExecutor;
-import liquibase.executor.Executor;
 import liquibase.executor.*;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LockException;
-import liquibase.sql.visitor.SqlVisitor;
-import liquibase.statement.core.DropTableStatement;
-import liquibase.statement.core.InsertStatement;
-import liquibase.test.DatabaseTest;
-import liquibase.test.DatabaseTestTemplate;
 import liquibase.test.TestContext;
-import liquibase.test.DatabaseTestContext;
-import liquibase.sqlgenerator.core.InsertGenerator;
-import liquibase.sqlgenerator.SqlGeneratorChain;
-import liquibase.sqlgenerator.SqlGenerator;
-import liquibase.logging.LogFactory;
 import org.junit.After;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 import org.junit.Before;
 
-import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.TreeSet;
 import java.sql.SQLException;
-import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.Statement;
 
 public class LockServiceExecuteTest {
@@ -130,7 +111,7 @@ public class LockServiceExecuteTest {
 //                    public void performTest(Database database) throws Exception {
 //                        Executor executor = ExecutorService.getInstance().getExecutor(database);
 //                        try {
-//                            LockService.getInstance(database).reset();
+//                            LockService.getInstance(database).resetAll();
 //
 //                            executor.execute(new DropTableStatement(null, database.getDatabaseChangeLogTableName(), false), new ArrayList<SqlVisitor>());
 //                        } catch (DatabaseException e) {
@@ -159,7 +140,7 @@ public class LockServiceExecuteTest {
 //
 //                    public void performTest(Database database) throws Exception {
 //
-//                        LockService.getInstance(database).reset();
+//                        LockService.getInstance(database).resetAll();
 //
 //                        Executor executor = ExecutorService.getInstance().getExecutor(database);
 //                        try {
@@ -191,7 +172,7 @@ public class LockServiceExecuteTest {
 //
 //                    public void performTest(Database database) throws Exception {
 //
-//                        LockService.getInstance(database).reset();
+//                        LockService.getInstance(database).resetAll();
 //
 //                        try {
 //                            ExecutorService.getInstance().getExecutor(database).execute(new DropTableStatement(null, database.getDatabaseChangeLogTableName(), false), new ArrayList<SqlVisitor>());

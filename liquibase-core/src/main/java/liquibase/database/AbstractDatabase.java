@@ -51,7 +51,7 @@ public abstract class AbstractDatabase implements Database {
     private String databaseChangeLogLockTableName = System.getProperty("liquibase.databaseChangeLogLockTableName") == null ? "DatabaseChangeLogLock".toUpperCase() : System.getProperty("liquibase.databaseChangeLogLockTableName");
 
     private Integer lastChangeSetSequenceValue;
-
+    
     protected AbstractDatabase() {
     }
 

@@ -24,6 +24,7 @@ import liquibase.statement.SqlStatement;
 import liquibase.test.TestContext;
 import liquibase.test.DatabaseTestContext;
 import liquibase.exception.DatabaseException;
+import liquibase.snapshot.DatabaseSnapshotGeneratorFactory;
 
 import org.junit.After;
 
@@ -45,6 +46,8 @@ public abstract class AbstractExecuteTest {
         }
         testedDatabases = new HashSet<Class<? extends Database>>();
         this.statementUnderTest = null;
+
+        DatabaseSnapshotGeneratorFactory.resetAll();
     }
 
     protected abstract List<? extends SqlStatement> setupStatements(Database database);
