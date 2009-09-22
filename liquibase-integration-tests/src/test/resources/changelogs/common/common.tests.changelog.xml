@@ -19,6 +19,7 @@
             <column name="dateCol" type="date"/>
             <column name="timeCol" type="time"/>
             <column name="dateTimeCol" type="dateTime"/>
+            <column name="bigintcol" type="bigint"/>
         </createTable>
     </changeSet>
 
@@ -32,6 +33,7 @@
             <column name="dateCol" valueDate="2007-08-09"/>
             <column name="timeCol" valueDate="13:14:15"/>
             <column name="dateTimeCol" valueDate="2007-08-09T13:14:15"/>
+            <column name="bigintcol" valueNumeric="2"/>
         </insert>
     </changeSet>
 
