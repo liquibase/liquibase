@@ -30,6 +30,8 @@
                         <xsd:choice>
                             <xsd:group ref="PreConditionChildren" maxOccurs="unbounded"/>
                         </xsd:choice>
+                        <xsd:attribute name="onFailMessage" type="xsd:string"/>
+                        <xsd:attribute name="onErrorMessage" type="xsd:string"/>
                         <xsd:attribute name="onFail" type="onChangeLogPreconditionErrorOrFail"/>
                         <xsd:attribute name="onError" type="onChangeLogPreconditionErrorOrFail"/>
                     </xsd:complexType>
@@ -59,6 +61,8 @@
                                         <xsd:choice>
                                             <xsd:group ref="PreConditionChildren" maxOccurs="unbounded"/>
                                         </xsd:choice>
+                                        <xsd:attribute name="onFailMessage" type="xsd:string"/>
+                                        <xsd:attribute name="onErrorMessage" type="xsd:string"/>
                                         <xsd:attribute name="onFail" type="onChangeSetPreconditionErrorOrFail"/>
                                         <xsd:attribute name="onError" type="onChangeSetPreconditionErrorOrFail"/>
                                     </xsd:complexType>

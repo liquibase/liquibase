@@ -1,6 +1,10 @@
 package liquibase.precondition.core;
 
 import liquibase.util.StringUtils;
+import liquibase.database.Database;
+import liquibase.changelog.DatabaseChangeLog;
+import liquibase.exception.PreconditionFailedException;
+import liquibase.exception.PreconditionErrorException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,6 +49,8 @@ public class PreconditionContainer extends AndPrecondition {
 
     private FailOption onFail = FailOption.HALT;
     private ErrorOption onError = ErrorOption.HALT;
+    private String onFailMessage;
+    private String onErrorMessage;
 
     public FailOption getOnFail() {
         return onFail;
@@ -87,6 +93,42 @@ public class PreconditionContainer extends AndPrecondition {
                 possibleOptions.add(option.key);
             }
             throw new RuntimeException("Unknown onError attribute value '"+onError+"'.  Possible values: " + StringUtils.join(possibleOptions, ", "));
+        }
+    }
+
+    public String getOnFailMessage() {
+        return onFailMessage;
+    }
+
+    public void setOnFailMessage(String onFailMessage) {
+        this.onFailMessage = onFailMessage;
+    }
+
+    public String getOnErrorMessage() {
+        return onErrorMessage;
+    }
+
+    public void setOnErrorMessage(String onErrorMessage) {
+        this.onErrorMessage = onErrorMessage;
+    }
+
+    @Override
+    public void check(Database database, DatabaseChangeLog changeLog) throws PreconditionFailedException, PreconditionErrorException {
+        try {
+            super.check(database, changeLog);
+        } catch (PreconditionFailedException e) {
+            if (getOnFailMessage() == null) {
+                throw e;
+            } else {
+                throw new PreconditionFailedException(getOnFailMessage(), changeLog, this);
+            }
+        } catch (PreconditionErrorException e) {
+            if (getOnErrorMessage() == null) {
+                throw e;
+            } else {
+                throw new PreconditionErrorException(getOnErrorMessage(), e.getErrorPreconditions());
+            }
+
         }
     }
 }

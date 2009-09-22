@@ -62,7 +62,7 @@ public class CustomPreconditionWrapper implements Precondition {
             try {
                 ObjectUtil.setProperty(customPrecondition, param, paramValues.get(param));
             } catch (Exception e) {
-                throw new PreconditionFailedException("error setting parameter "+param+" on custom precondition "+className, changeLog, this);
+                throw new PreconditionFailedException("Error setting parameter "+param+" on custom precondition "+className, changeLog, this);
             }
         }
 
