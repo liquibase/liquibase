@@ -181,6 +181,8 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
                 rootPrecondition = new PreconditionContainer();
                 rootPrecondition.setOnFail(StringUtils.trimToNull(atts.getValue("onFail")));
                 rootPrecondition.setOnError(StringUtils.trimToNull(atts.getValue("onError")));
+                rootPrecondition.setOnFailMessage(StringUtils.trimToNull(atts.getValue("onFailMessage")));
+                rootPrecondition.setOnErrorMessage(StringUtils.trimToNull(atts.getValue("onErrorMessage")));
                 preconditionLogicStack.push(rootPrecondition);
             } else if (currentPrecondition != null && currentPrecondition instanceof CustomPreconditionWrapper && qName.equals("param")) {
                 ((CustomPreconditionWrapper) currentPrecondition).setParam(atts.getValue("name"), atts.getValue("value"));

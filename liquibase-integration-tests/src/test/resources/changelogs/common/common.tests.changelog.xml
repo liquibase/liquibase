@@ -601,8 +601,9 @@
     </changeSet>
 
     <changeSet id="addColWithFK-check" author="nvoxland">
-        <preConditions>
+        <preConditions onFailMessage="I couldn't find the FK set in addColWithFK">
             <foreignKeyConstraintExists foreignKeyName="fk_test_fk" foreignKeyTableName="commatest"/>
         </preConditions>
     </changeSet>
+
 </databaseChangeLog>
