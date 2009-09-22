@@ -41,7 +41,7 @@ import static org.junit.Assert.*;
 
 public abstract class AbstractSimpleChangeLogRunnerTest {
 
-    public static final String DATABASE_SERVER_HOSTNAME = "localhost"; //"192.168.1.6";
+    public static final String DATABASE_SERVER_HOSTNAME = "192.168.1.3";
 
     protected String completeChangeLog;
     private String rollbackChangeLog;

@@ -3,6 +3,7 @@ package liquibase.sqlgenerator.core;
 import liquibase.database.Database;
 import liquibase.database.core.InformixDatabase;
 import liquibase.database.core.SQLiteDatabase;
+import liquibase.database.core.OracleDatabase;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
@@ -52,11 +53,19 @@ public class AddForeignKeyConstraintGenerator implements SqlGenerator<AddForeign
         	.append(")");
 
         if (statement.getOnUpdate() != null) {
-            sb.append(" ON UPDATE ").append(statement.getOnUpdate());
+            if ((database instanceof OracleDatabase) && statement.getOnUpdate().equalsIgnoreCase("RESTRICT")) {
+                //don't use
+            } else {
+                sb.append(" ON UPDATE ").append(statement.getOnUpdate());
+            }
         }
 
         if (statement.getOnDelete() != null) {
-            sb.append(" ON DELETE ").append(statement.getOnDelete());
+            if ((database instanceof OracleDatabase) && statement.getOnDelete().equalsIgnoreCase("RESTRICT")) {
+                //don't use
+            } else {
+                sb.append(" ON DELETE ").append(statement.getOnDelete());
+            }
         }
 
         if (statement.isDeferrable() || statement.isInitiallyDeferred()) {

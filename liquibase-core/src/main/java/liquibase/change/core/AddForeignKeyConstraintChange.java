@@ -132,7 +132,9 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
     }
 
     public void setOnDelete(ForeignKeyConstraintType rule) {
-        if (rule == ForeignKeyConstraintType.importedKeyCascade) {
+        if (rule == null) {
+            //nothing
+        } else if (rule == ForeignKeyConstraintType.importedKeyCascade) {
             setOnDelete("CASCADE");
         } else if (rule == ForeignKeyConstraintType.importedKeySetNull) {
             setOnDelete("SET NULL");
@@ -148,7 +150,9 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
     }
 
     public void setOnUpdate(ForeignKeyConstraintType rule) {
-        if (rule == ForeignKeyConstraintType.importedKeyCascade) {
+        if (rule == null) {
+            //nothing
+        } else if (rule == ForeignKeyConstraintType.importedKeyCascade) {
             setOnUpdate("CASCADE");
         } else  if (rule == ForeignKeyConstraintType.importedKeySetNull) {
             setOnUpdate("SET NULL");

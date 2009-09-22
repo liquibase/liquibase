@@ -211,7 +211,11 @@ public abstract class AbstractTypeConverter implements TypeConverter {
         }
 
         if (precision != null) {
-            returnTypeName.setFirstParameter(Integer.parseInt(precision));
+            String[] params = precision.split(",");
+            returnTypeName.setFirstParameter(Integer.parseInt(params[0].trim()));
+            if (params.length > 1) {
+                returnTypeName.setSecondParameter(Integer.parseInt(params[1].trim()));
+            }
         }
 
          return returnTypeName;

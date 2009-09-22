@@ -304,7 +304,7 @@ public class JdbcConnection implements DatabaseConnection {
 
     public void rollback() throws DatabaseException {
         try {
-            if (!con.getAutoCommit()) {
+            if (!con.getAutoCommit() && !con.isClosed()) {
                 con.rollback();
             }
         } catch (SQLException e) {

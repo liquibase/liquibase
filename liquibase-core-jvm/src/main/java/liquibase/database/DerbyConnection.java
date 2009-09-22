@@ -39,7 +39,7 @@ public class DerbyConnection extends JdbcConnection {
                 try {
                     st.close();
                 } catch (SQLException e) {
-                    ;
+                    //ok
                 }
             }
         }

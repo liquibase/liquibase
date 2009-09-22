@@ -22,6 +22,16 @@ public class OracleDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
         return PRIORITY_DATABASE;
     }
 
+    @Override
+    protected String convertTableNameToDatabaseTableName(String tableName) {
+        return tableName.toUpperCase();
+    }
+
+    @Override
+    protected String convertColumnNameToDatabaseTableName(String columnName) {
+        return columnName.toUpperCase();
+    }
+
     /**
      * Oracle specific implementation
      */
