@@ -5,7 +5,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.liquibase</groupId>
   <artifactId>liquibase</artifactId>
-  <version>2.0-b3-SNAPSHOT</version>
+  <version>2.0-b4-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>Liquibase</name>
   <description>LiquiBase is a tool for managing and executing database changes.</description>
@@ -71,30 +71,35 @@
         <artifactId>ant</artifactId>
         <version>1.6.5</version>
         <scope>provided</scope>
+        <optional>true</optional>
       </dependency>
       <dependency>
         <groupId>org.hibernate</groupId>
         <artifactId>hibernate-annotations</artifactId>
         <version>3.3.1.GA</version>
         <scope>provided</scope>
+        <optional>true</optional>
       </dependency>
       <dependency>
         <groupId>org.hibernate</groupId>
         <artifactId>hibernate</artifactId>
         <version>3.2.6.ga</version>
         <scope>provided</scope>
+        <optional>true</optional>
       </dependency>
       <dependency>
         <groupId>javax.servlet</groupId>
         <artifactId>servlet-api</artifactId>
         <version>2.4</version>
         <scope>provided</scope>
+        <optional>true</optional>
       </dependency>
       <dependency>
         <groupId>org.springframework</groupId>
         <artifactId>spring</artifactId>
         <version>2.0.6</version>
         <scope>provided</scope>
+        <optional>true</optional>
       </dependency>
 
     </dependencies>
