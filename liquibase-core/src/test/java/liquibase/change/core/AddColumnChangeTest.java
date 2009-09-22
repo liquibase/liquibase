@@ -7,6 +7,8 @@ import liquibase.change.ConstraintsConfig;
 import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
 import liquibase.statement.SqlStatement;
+import liquibase.statement.ColumnConstraint;
+import liquibase.statement.ForeignKeyConstraint;
 import liquibase.statement.core.AddColumnStatement;
 import liquibase.statement.core.ReorganizeTableStatement;
 import liquibase.statement.core.UpdateStatement;
@@ -251,6 +253,48 @@ public class AddColumnChangeTest extends AbstractChangeTest {
                 }
 
                 assertTrue(((AddColumnStatement) sqlStatements[0]).isPrimaryKey());
+            }
+        });
+    }
+
+    @Test
+    public void generateStatement_foreignKey() throws Exception {
+        AddColumnChange refactoring = new AddColumnChange();
+        refactoring.setSchemaName("SCHEMA");
+        refactoring.setTableName("TAB");
+        ColumnConfig column = new ColumnConfig();
+        column.setName("NEWCOL");
+        column.setType("TYP");
+
+        ConstraintsConfig constraints = new ConstraintsConfig();
+        constraints.setNullable(Boolean.FALSE);
+        constraints.setPrimaryKey(Boolean.TRUE);
+        constraints.setForeignKeyName("fk_name");
+        constraints.setReferences("ref_table(id)");
+
+        column.setConstraints(constraints);
+
+        refactoring.addColumn(column);
+
+        testChangeOnAll(refactoring, new GenerateAllValidator() {
+            public void validate(SqlStatement[] sqlStatements, Database database) {
+                if (database instanceof DB2Database) {
+                    assertEquals(2, sqlStatements.length);
+                    assertTrue(sqlStatements[0] instanceof AddColumnStatement);
+                    assertTrue(sqlStatements[1] instanceof ReorganizeTableStatement);
+                } else {
+                    assertEquals(1, sqlStatements.length);
+                    assertTrue(sqlStatements[0] instanceof AddColumnStatement);
+                }
+
+                assertTrue(((AddColumnStatement) sqlStatements[0]).isPrimaryKey());
+                boolean foundFkInfo = false;
+                for (ColumnConstraint constraint : ((AddColumnStatement) sqlStatements[0]).getConstraints()) {
+                    if (constraint instanceof ForeignKeyConstraint) {
+                        foundFkInfo = true;
+                    }
+                }
+                assertTrue("Did not find foreign key info", foundFkInfo);
             }
         });
     }

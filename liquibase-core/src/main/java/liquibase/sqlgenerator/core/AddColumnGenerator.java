@@ -6,11 +6,23 @@ import liquibase.database.core.*;
 import liquibase.database.structure.Column;
 import liquibase.database.structure.Table;
 import liquibase.exception.ValidationErrors;
+import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
+import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.core.AddColumnStatement;
+import liquibase.statement.core.AddForeignKeyConstraintStatement;
+import liquibase.statement.ColumnConstraint;
+import liquibase.statement.ForeignKeyConstraint;
+
+import javax.swing.*;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class AddColumnGenerator implements SqlGenerator<AddColumnStatement> {
     
@@ -65,11 +77,36 @@ public class AddColumnGenerator implements SqlGenerator<AddColumnStatement> {
 
         alterTable += getDefaultClause(statement, database);
 
-        return new Sql[]{
-                new UnparsedSql(alterTable, new Column()
+        List<Sql> returnSql = new ArrayList<Sql>();
+        returnSql.add(new UnparsedSql(alterTable, new Column()
                         .setTable(new Table(statement.getTableName()).setSchema(statement.getSchemaName()))
-                        .setName(statement.getColumnName()))
-        };
+                        .setName(statement.getColumnName())));
+
+        addForeignKeyStatements(statement, database, returnSql);
+
+        return returnSql.toArray(new Sql[returnSql.size()]);
+    }
+
+    protected void addForeignKeyStatements(AddColumnStatement statement, Database database, List<Sql> returnSql) {
+        for (ColumnConstraint constraint : statement.getConstraints()) {
+            if (constraint instanceof ForeignKeyConstraint) {
+                ForeignKeyConstraint fkConstraint = (ForeignKeyConstraint) constraint;
+                Matcher referencesMatcher = Pattern.compile("([\\w\\._]+)\\(([\\w_]+)\\)").matcher(fkConstraint.getReferences());
+                if (!referencesMatcher.matches()) {
+                    throw new UnexpectedLiquibaseException("Don't know how to find table and column names from "+fkConstraint.getReferences());
+                }
+                String refSchemaName = null;
+                String refTableName = referencesMatcher.group(1);
+                if (refTableName.indexOf(".") > 0) {
+                    refSchemaName = refTableName.split(".")[0];
+                    refTableName = refTableName.split(".")[0];
+                }
+                String refColName = referencesMatcher.group(2);
+
+                AddForeignKeyConstraintStatement addForeignKeyConstraintStatement = new AddForeignKeyConstraintStatement(fkConstraint.getForeignKeyName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName(), refSchemaName, refTableName, refColName);
+                returnSql.addAll(Arrays.asList(SqlGeneratorFactory.getInstance().generateSql(addForeignKeyConstraintStatement, database)));
+            }
+        }
     }
 
     private String getDefaultClause(AddColumnStatement statement, Database database) {

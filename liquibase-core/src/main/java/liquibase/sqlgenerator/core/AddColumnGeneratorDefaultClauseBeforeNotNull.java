@@ -11,6 +11,9 @@ import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.AddColumnStatement;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class AddColumnGeneratorDefaultClauseBeforeNotNull extends AddColumnGenerator {
     @Override
     public int getPriority() {
@@ -63,11 +66,14 @@ public class AddColumnGeneratorDefaultClauseBeforeNotNull extends AddColumnGener
             }
         }
 
-        return new Sql[]{
-                new UnparsedSql(alterTable, new Column()
+        List<Sql> returnSql = new ArrayList<Sql>();
+        returnSql.add(new UnparsedSql(alterTable, new Column()
                         .setTable(new Table(statement.getTableName()).setSchema(statement.getSchemaName()))
-                        .setName(statement.getColumnName()))
-        };
+                        .setName(statement.getColumnName())));
+
+        addForeignKeyStatements(statement, database, returnSql);
+
+        return returnSql.toArray(new Sql[returnSql.size()]);
     }
 
 
