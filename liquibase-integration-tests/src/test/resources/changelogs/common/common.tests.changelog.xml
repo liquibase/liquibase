@@ -574,7 +574,9 @@
     <changeSet id="comma'Ttest" author="n'voxland">
         <comment>We are testing that 's are being escaped correctly</comment>
         <createTable tableName="commatest" remarks="Some 'ing remarks go here">
-            <column name="id" type="int"/>
+            <column name="id" type="int">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
         </createTable>
     </changeSet>
 
@@ -588,5 +590,19 @@
             </column>
             <column name="Value" type="varchar(256)"/>
         </createTable>
+    </changeSet>
+
+    <changeSet id="addColWithFK" author="nvoxland">
+        <addColumn tableName="commatest">
+            <column name="fk_test" type="int">
+                <constraints foreignKeyName="fk_test_fk" references="commatest(id)"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="addColWithFK-check" author="nvoxland">
+        <preConditions>
+            <foreignKeyConstraintExists foreignKeyName="fk_test_fk" foreignKeyTableName="commatest"/>
+        </preConditions>
     </changeSet>
 </databaseChangeLog>

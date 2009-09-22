@@ -69,7 +69,7 @@
     <changeSet id="7a" author="nvoxland">
         <addColumn tableName="employee">
             <column name="company_id" type="int">
-                <constraints nullable="true" foreignKeyName="fk_employee_company" references="company(id)"/>
+                <constraints nullable="true" foreignKeyName="fk_employee_company" references="employee(id)"/>
             </column>
         </addColumn>
     </changeSet>
