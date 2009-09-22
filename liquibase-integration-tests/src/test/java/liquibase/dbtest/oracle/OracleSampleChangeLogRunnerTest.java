@@ -10,4 +10,9 @@ public class OracleSampleChangeLogRunnerTest extends AbstractSimpleChangeLogRunn
     public OracleSampleChangeLogRunnerTest() throws Exception {
         super("oracle", "jdbc:oracle:thin:@"+DATABASE_SERVER_HOSTNAME+"/XE");
     }
+
+    @Override
+    public void testRerunDiffChangeLog() throws Exception {
+        super.testRerunDiffChangeLog();    //To change body of overridden methods use File | Settings | File Templates.
+    }
 }

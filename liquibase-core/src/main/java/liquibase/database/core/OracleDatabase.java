@@ -59,6 +59,11 @@ public class OracleDatabase extends AbstractDatabase {
         return super.getDefaultDatabaseSchemaName().toUpperCase();
     }
 
+    @Override
+    public String escapeIndexName(String schemaName, String indexName) {
+        return indexName;
+    }
+
     /**
      * Return an Oracle date literal with the same value as a string formatted using ISO 8601.
      * <p/>
