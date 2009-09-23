@@ -1,12 +1,12 @@
 package liquibase.dbtest.informix;
 
-import liquibase.dbtest.AbstractSimpleChangeLogRunnerTest;
+import liquibase.dbtest.AbstractIntegrationTest;
 import org.junit.Test;
 
-public class InformixSampleChangeLogRunnerTest extends AbstractSimpleChangeLogRunnerTest {
+public class InformixIntegrationTest extends AbstractIntegrationTest {
 
-    public InformixSampleChangeLogRunnerTest() throws Exception {
-        super("informix", "jdbc:informix-sqli://"+DATABASE_SERVER_HOSTNAME+":9088/liquibase:informixserver=ol_ids_1150_1");
+    public InformixIntegrationTest() throws Exception {
+        super("informix", "jdbc:informix-sqli://"+ getDatabaseServerHostname() +":9088/liquibase:informixserver=ol_ids_1150_1");
     }
 
     @Test

@@ -1,6 +1,6 @@
 package liquibase.dbtest.firebird;
 
-import liquibase.dbtest.AbstractSimpleChangeLogRunnerTest;
+import liquibase.dbtest.AbstractIntegrationTest;
 import liquibase.exception.DatabaseException;
 
 /**
@@ -11,10 +11,10 @@ import liquibase.exception.DatabaseException;
  * connecting later:
  * connect '\firebird\liquibase.fdb' USER 'liquibase' PASSWORD 'liquibase';
  */
-public class FirebirdSampleChangeLogRunnerTest extends AbstractSimpleChangeLogRunnerTest {
+public class FirebirdIntegrationTest extends AbstractIntegrationTest {
 
-    public FirebirdSampleChangeLogRunnerTest() throws Exception {
-        super("firebird", "jdbc:firebirdsql:"+DATABASE_SERVER_HOSTNAME+"/3050:c:\\firebird\\liquibase.fdb");
+    public FirebirdIntegrationTest() throws Exception {
+        super("firebird", "jdbc:firebirdsql:"+ getDatabaseServerHostname() +"/3050:c:\\firebird\\liquibase.fdb");
     }
 
     @Override

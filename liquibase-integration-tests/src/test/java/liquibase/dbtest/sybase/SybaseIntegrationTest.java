@@ -1,8 +1,8 @@
 package liquibase.dbtest.sybase;
 
-public abstract class SybaseSampleChangeLogRunnerTest { //extends AbstractSimpleChangeLogRunnerTest {
+public abstract class SybaseIntegrationTest { //extends AbstractIntegrationTest {
 
-//    public SybaseSampleChangeLogRunnerTest() throws Exception {
+//    public SybaseIntegrationTest() throws Exception {
 //        super("sybase", "com.sybase.jdbc3.jdbc.SybDriver", "jdbc:sybase:Tds:"+ InetAddress.getLocalHost().getHostName()+":5000/liquibase");
 //    }
 //

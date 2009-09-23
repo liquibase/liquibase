@@ -1,6 +1,6 @@
 package liquibase.dbtest.hibernate;
 
-public abstract class HibernateTest {
+public abstract class HibernateIntegrationTest {
     private static final String HIBERNATE_CONFIG_FILE = "Hibernate.cfg.xml";
 
 //    @Test
