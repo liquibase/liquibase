@@ -5,15 +5,15 @@
  */
 package liquibase.dbtest.maxdb;
 
-import liquibase.dbtest.AbstractSimpleChangeLogRunnerTest;
+import liquibase.dbtest.AbstractIntegrationTest;
 
 /**
  * create tablespace liquibase2 datafile 'C:\ORACLEXE\ORADATA\XE\LIQUIBASE2.DBF' SIZE 5M autoextend on next 5M
  */
-public class MaxDbSampleChangeLogRunnerTest  extends AbstractSimpleChangeLogRunnerTest {
+public class MaxDbIntegrationTest extends AbstractIntegrationTest {
 
-  public MaxDbSampleChangeLogRunnerTest() throws Exception {
-      super("maxdb", "jdbc:sapdb://"+DATABASE_SERVER_HOSTNAME+"/liquibas");
+  public MaxDbIntegrationTest() throws Exception {
+      super("maxdb", "jdbc:sapdb://"+ getDatabaseServerHostname() +"/liquibas");
   }
 
 }

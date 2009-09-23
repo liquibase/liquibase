@@ -1,8 +1,8 @@
 package liquibase.dbtest.sybase;
 
-public abstract class JTDSSampleChangeLogRunnerTest { // extends AbstractSimpleChangeLogRunnerTest {
+public abstract class SybaseJtdsIntegrationTest { // extends AbstractIntegrationTest {
 
-//    public JTDSSampleChangeLogRunnerTest() throws Exception {
+//    public MssqlJtdsIntegrationTest() throws Exception {
 //        super("sybase", "net.sourceforge.jtds.jdbc.Driver", "jdbc:jtds:sybase://localhost/nathan:5000");
 //    }
 //

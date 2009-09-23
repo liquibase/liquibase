@@ -1,13 +1,13 @@
 package liquibase.dbtest.db2;
 
-import liquibase.dbtest.AbstractSimpleChangeLogRunnerTest;
+import liquibase.dbtest.AbstractIntegrationTest;
 
 import java.util.Properties;
 
-public class DB2SampleChangeLogRunnerTest extends AbstractSimpleChangeLogRunnerTest {
+public class DB2IntegrationTest extends AbstractIntegrationTest {
 
-    public DB2SampleChangeLogRunnerTest() throws Exception {
-        super("db2", "jdbc:db2://"+DATABASE_SERVER_HOSTNAME+":50000/liquibas");
+    public DB2IntegrationTest() throws Exception {
+        super("db2", "jdbc:db2://"+ getDatabaseServerHostname() +":50000/liquibas");
     }
 
     @Override

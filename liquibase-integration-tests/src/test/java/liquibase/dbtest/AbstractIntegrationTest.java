@@ -39,9 +39,12 @@ import org.junit.After;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
-public abstract class AbstractSimpleChangeLogRunnerTest {
-
-    public static final String DATABASE_SERVER_HOSTNAME = "192.168.1.3";
+/**
+ * Base class for all database integration tests.  There is an AbstractIntegrationTest subclass for each supported database.
+ * The database is assumed to exist at the host returned by getDatabaseServerHostname.  Currently this is hardcoded to an integration test server
+ * at liquibase world headquarters.  Feel free to change the return value, but don't check it in.  We are going to improve the config of this at some point. 
+ */
+public abstract class AbstractIntegrationTest {
 
     protected String completeChangeLog;
     private String rollbackChangeLog;
@@ -50,7 +53,7 @@ public abstract class AbstractSimpleChangeLogRunnerTest {
     private Database database;
     private String url;
 
-    protected AbstractSimpleChangeLogRunnerTest(String changelogDir, String url) throws Exception {
+    protected AbstractIntegrationTest(String changelogDir, String url) throws Exception {
         LogFactory.setLoggingLevel("severe");
 
         this.completeChangeLog = "changelogs/" + changelogDir + "/complete/root.changelog.xml";
@@ -666,5 +669,9 @@ public abstract class AbstractSimpleChangeLogRunnerTest {
 
         liquibase = createLiquibase(rollbackChangeLog);
         liquibase.rollback("testRollbackToChange", this.contexts);
+    }
+
+    public static String getDatabaseServerHostname() {
+        return "192.168.1.3";
     }
 }
