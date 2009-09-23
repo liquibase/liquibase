@@ -9,6 +9,7 @@ import liquibase.logging.Logger;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import liquibase.test.JUnitResourceAccessor;
+import liquibase.statement.DatabaseFunction;
 import static org.junit.Assert.*;
 import org.junit.Test;
 
@@ -252,6 +253,8 @@ public class StringChangeLogSerializerTest {
                 field.set(object, createBoolean());
             } else if (field.getType().equals(ColumnConfig.class)) {
                 field.set(object, createColumnConfig());
+            } else if (field.getType().equals(DatabaseFunction.class)) {
+                field.set(object, createDatabaseFunction());
             } else if (field.getType().equals(ConstraintsConfig.class)) {
                 field.set(object, createConstraintsConfig());
             } else if (field.getType().getName().equals("liquibase.change.custom.CustomChange")) {
@@ -341,6 +344,12 @@ public class StringChangeLogSerializerTest {
         ColumnConfig config = new ColumnConfig();
         setFields(config);
         return config;
+    }
+
+    private DatabaseFunction createDatabaseFunction() throws Exception {
+        DatabaseFunction function = new DatabaseFunction("FUNCTION_HERE");
+        setFields(function);
+        return function;
     }
 
     private ConstraintsConfig createConstraintsConfig() throws Exception {

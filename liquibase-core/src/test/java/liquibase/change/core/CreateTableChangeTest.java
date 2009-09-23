@@ -136,7 +136,7 @@ public class CreateTableChangeTest extends AbstractChangeTest {
         change.addColumn(columnConfig);
 
         CreateTableStatement statement = (CreateTableStatement) change.generateStatements(new MockDatabase())[0];
-        assertEquals("'DEFAULTVALUE'", statement.getDefaultValue("id"));
+        assertEquals("DEFAULTVALUE", statement.getDefaultValue("id"));
     }
 
     @Test
@@ -149,7 +149,7 @@ public class CreateTableChangeTest extends AbstractChangeTest {
         change.addColumn(columnConfig);
 
         CreateTableStatement statement = (CreateTableStatement) change.generateStatements(new MockDatabase())[0];
-        assertEquals(new DefaultTypeConverter().getBooleanType().getTrueBooleanValue(), statement.getDefaultValue("id"));
+        assertEquals(true, statement.getDefaultValue("id"));
     }
 
     @Test
@@ -162,7 +162,7 @@ public class CreateTableChangeTest extends AbstractChangeTest {
         change.addColumn(columnConfig);
 
         CreateTableStatement statement = (CreateTableStatement) change.generateStatements(new MockDatabase())[0];
-        assertEquals("42", statement.getDefaultValue("id"));
+        assertEquals(42L, statement.getDefaultValue("id"));
     }
 
     @Test
@@ -175,7 +175,7 @@ public class CreateTableChangeTest extends AbstractChangeTest {
         change.addColumn(columnConfig);
 
         CreateTableStatement statement = (CreateTableStatement) change.generateStatements(new MockDatabase())[0];
-        assertEquals("2007-01-02", statement.getDefaultValue("id"));
+        assertEquals(columnConfig.getDefaultValueDate(), statement.getDefaultValue("id"));
     }
 
     @Test

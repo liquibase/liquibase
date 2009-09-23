@@ -1,7 +1,5 @@
 package liquibase.util;
 
-import liquibase.statement.ComputedDateValue;
-
 import java.sql.Time;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -32,9 +30,7 @@ public class ISODateFormat {
     }
 
     public String format(Date date) {
-        if (date instanceof ComputedDateValue) {
-            return date.toString();
-        } else if (date instanceof java.sql.Date) {
+        if (date instanceof java.sql.Date) {
             return format(((java.sql.Date) date));
         } else if (date instanceof Time) {
             return format(((java.sql.Time) date));

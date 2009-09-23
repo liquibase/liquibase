@@ -25,15 +25,15 @@ public class AddUniqueConstraintExecutorTest extends AbstractExecuteTest {
         List<CreateTableStatement> statements = new ArrayList<CreateTableStatement>();
         CreateTableStatement table = new CreateTableStatement(null, TABLE_NAME);
         table
-                .addColumn("id", "int", new NotNullConstraint())
-                .addColumn(COLUMN_NAME, "int", new NotNullConstraint());
+                .addColumn("id", "int", null, new NotNullConstraint())
+                .addColumn(COLUMN_NAME, "int", null, new NotNullConstraint());
         statements.add(table);
 
         if (database.supportsSchemas()) {
             table = new CreateTableStatement(DatabaseTestContext.ALT_SCHEMA, TABLE_NAME);
             table
-                    .addColumn("id", "int", new NotNullConstraint())
-                    .addColumn(COLUMN_NAME, "int", new NotNullConstraint());
+                    .addColumn("id", "int", null, new NotNullConstraint())
+                    .addColumn(COLUMN_NAME, "int", null, new NotNullConstraint());
             statements.add(table);
         }
         return statements;

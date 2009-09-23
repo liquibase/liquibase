@@ -1,5 +1,7 @@
 package liquibase.util;
 
+import liquibase.statement.DatabaseFunction;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigInteger;
@@ -42,10 +44,13 @@ public class ObjectUtil {
                     } else if (parameterType.equals(BigInteger.class)) {
                         method.invoke(object, new BigInteger(propertyValue));
                         return;
+                    } else if (parameterType.equals(DatabaseFunction.class)) {
+                        method.invoke(object, new DatabaseFunction(propertyValue));
+                        return;
                     }
                 }
             }
         }
-        throw new RuntimeException("Property not found: " + propertyName);
+        throw new RuntimeException("Property '" + propertyName+"' not found on object type "+object.getClass().getName());
     }
 }

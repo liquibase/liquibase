@@ -1,6 +1,6 @@
 package liquibase.database.structure.type;
 
-import liquibase.statement.ComputedDateValue;
+import liquibase.statement.DatabaseFunction;
 import liquibase.database.Database;
 
 public class TimeType  extends DataType {
@@ -17,8 +17,8 @@ public class TimeType  extends DataType {
     public String convertObjectToString(Object value, Database database) {
         if (value == null) {
             return null;
-        }  else if (value instanceof ComputedDateValue) {
-            return ((ComputedDateValue) value).getValue();
+        }  else if (value instanceof DatabaseFunction) {
+            return ((DatabaseFunction) value).getValue();
         }        
         return database.getTimeLiteral(((java.sql.Time) value));
     }

@@ -180,7 +180,7 @@ public abstract class AbstractIntegrationTest {
         String outputResult = output.getBuffer().toString();
         assertNotNull(outputResult);
         assertTrue(outputResult.length() > 100); //should be pretty big
-//        System.out.println(outputResult);
+        System.out.println(outputResult);
         assertTrue("create databasechangelog command not found in: \n" + outputResult, outputResult.contains("CREATE TABLE "+database.escapeTableName(database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())));
         assertTrue("create databasechangeloglock command not found in: \n" + outputResult, outputResult.contains("CREATE TABLE "+database.escapeTableName(database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName())));
 

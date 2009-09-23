@@ -3,8 +3,7 @@ package liquibase.database.typeconversion.core;
 import liquibase.database.typeconversion.TypeConverter;
 import liquibase.database.Database;
 import liquibase.database.structure.type.*;
-import liquibase.statement.ComputedDateValue;
-import liquibase.statement.ComputedNumericValue;
+import liquibase.statement.DatabaseFunction;
 import liquibase.util.StringUtils;
 import liquibase.logging.LogFactory;
 import liquibase.exception.DateParseException;
@@ -50,6 +49,8 @@ public abstract class AbstractTypeConverter implements TypeConverter {
             return getIntType();
         } else if (object instanceof Long) {
             return getBigIntType();
+        } else if (object instanceof DatabaseFunction) {
+            return new DatabaseFunctionType();
         } else {
             throw new UnexpectedLiquibaseException("Unknown object type "+object.getClass().getName());
         }
@@ -125,9 +126,9 @@ public abstract class AbstractTypeConverter implements TypeConverter {
                 return value;
             }
         } catch (DateParseException e) {
-            return new ComputedDateValue(value);
+            return new DatabaseFunction(value);
         } catch (NumberFormatException e) {
-            return new ComputedNumericValue(value);
+            return new DatabaseFunction(value);
         }
     }
 
