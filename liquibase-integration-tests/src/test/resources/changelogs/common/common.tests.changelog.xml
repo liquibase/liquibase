@@ -567,7 +567,9 @@
 
     <changeSet id="remarksTest" author="nvoxland">
         <createTable tableName="remarkstest" remarks="Some remarks go here">
-            <column name="id" type="int"/>
+            <column name="id" type="int">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
         </createTable>
     </changeSet>
 
@@ -595,7 +597,7 @@
     <changeSet id="addColWithFK" author="nvoxland">
         <addColumn tableName="commatest">
             <column name="fk_test" type="int">
-                <constraints foreignKeyName="fk_test_fk" references="commatest(id)"/>
+                <constraints foreignKeyName="fk_test_fk" references="remarkstest(id)"/>
             </column>
         </addColumn>
     </changeSet>
