@@ -9,8 +9,8 @@ import liquibase.sql.Sql;
 import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
-import liquibase.statement.ComputedDateValue;
 import liquibase.statement.SqlStatement;
+import liquibase.statement.DatabaseFunction;
 import liquibase.statement.core.InsertStatement;
 import liquibase.statement.core.MarkChangeSetRanStatement;
 import liquibase.statement.core.UpdateStatement;
@@ -42,7 +42,7 @@ public class MarkChangeSetRanGenerator implements SqlGenerator<MarkChangeSetRanS
         try {
             if (statement.isRanBefore()) {
                 runStatement = new UpdateStatement(database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())
-                        .addNewColumnValue("DATEEXECUTED", new ComputedDateValue(dateValue))
+                        .addNewColumnValue("DATEEXECUTED", new DatabaseFunction(dateValue))
                         .addNewColumnValue("MD5SUM", changeSet.generateCheckSum().toString())
                         .setWhereClause("ID=? AND AUTHOR=? AND FILENAME=?")
                         .addWhereParameters(changeSet.getId(), changeSet.getAuthor(), changeSet.getFilePath());
@@ -51,7 +51,7 @@ public class MarkChangeSetRanGenerator implements SqlGenerator<MarkChangeSetRanS
                         .addColumnValue("ID", changeSet.getId())
                         .addColumnValue("AUTHOR", changeSet.getAuthor())
                         .addColumnValue("FILENAME", changeSet.getFilePath())
-                        .addColumnValue("DATEEXECUTED", new ComputedDateValue(dateValue))
+                        .addColumnValue("DATEEXECUTED", new DatabaseFunction(dateValue))
                         .addColumnValue("ORDEREXECUTED", database.getNextChangeSetSequenceValue())
                         .addColumnValue("MD5SUM", changeSet.generateCheckSum().toString())
                         .addColumnValue("DESCRIPTION", limitSize(changeSet.getDescription()))

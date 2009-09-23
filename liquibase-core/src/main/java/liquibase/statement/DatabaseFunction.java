@@ -1,23 +1,17 @@
 package liquibase.statement;
 
-import java.util.Date;
+import liquibase.database.Database;
 
-public class ComputedDateValue extends Date {
+public class DatabaseFunction {
 
     private String value;
 
-    public ComputedDateValue(String value) {
+    public DatabaseFunction(String value) {
         this.value = value;
     }
 
     public String getValue() {
         return value;
-    }
-
-
-    @Override
-    public long getTime() {
-        throw new RuntimeException("Date computed by database");
     }
 
     @Override
@@ -27,7 +21,7 @@ public class ComputedDateValue extends Date {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof ComputedDateValue) {
+        if (obj instanceof DatabaseFunction) {
             return this.toString().equals(obj.toString());
         } else {
             return super.equals(obj);

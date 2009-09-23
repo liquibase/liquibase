@@ -11,7 +11,7 @@ public class CreateTableStatement implements SqlStatement {
     private List<String> columns = new ArrayList<String>();
     private Set<String> autoIncrementColumns = new HashSet<String>();
     private Map<String, String> columnTypes = new HashMap<String, String>();
-    private Map<String, String> defaultValues = new HashMap<String, String>();
+    private Map<String, Object> defaultValues = new HashMap<String, Object>();
 
     private PrimaryKeyConstraint primaryKeyConstraint;
     private Set<String> notNullColumns = new HashSet<String>();
@@ -63,7 +63,7 @@ public class CreateTableStatement implements SqlStatement {
         return notNullColumns;
     }
 
-    public CreateTableStatement addPrimaryKeyColumn(String columnName, String columnType, String defaultValue, String keyName, ColumnConstraint... constraints) {
+    public CreateTableStatement addPrimaryKeyColumn(String columnName, String columnType, Object defaultValue, String keyName, ColumnConstraint... constraints) {
 //        String pkName = "PK_" + getTableName().toUpperCase();
 ////        if (pkName.length() > 18) {
 ////            pkName = pkName.substring(0, 17);
@@ -86,7 +86,10 @@ public class CreateTableStatement implements SqlStatement {
         return addColumn(columnName, columnType, null, new ColumnConstraint[0]);
     }
 
-    public CreateTableStatement addColumn(String columnName, String columnType, String defaultValue) {
+    public CreateTableStatement addColumn(String columnName, String columnType, Object defaultValue) {
+        if (defaultValue instanceof ColumnConstraint) {
+            return addColumn(columnName,  columnType, null, (ColumnConstraint) defaultValue);
+        }
         return addColumn(columnName, columnType, defaultValue, new ColumnConstraint[0]);
     }
 
@@ -94,7 +97,7 @@ public class CreateTableStatement implements SqlStatement {
         return addColumn(columnName, columnType, null, constraints);
     }
 
-    public CreateTableStatement addColumn(String columnName, String columnType, String defaultValue, ColumnConstraint... constraints) {
+    public CreateTableStatement addColumn(String columnName, String columnType, Object defaultValue, ColumnConstraint... constraints) {
         this.getColumns().add(columnName);
         this.columnTypes.put(columnName, columnType);
         if (defaultValue != null) {
@@ -102,6 +105,10 @@ public class CreateTableStatement implements SqlStatement {
         }
         if (constraints != null) {
             for (ColumnConstraint constraint : constraints) {
+                if (constraint == null) {
+                    continue;
+                }
+
                 if (constraint instanceof PrimaryKeyConstraint) {
                     if (this.getPrimaryKeyConstraint() == null) {
                         this.primaryKeyConstraint = (PrimaryKeyConstraint) constraint;
@@ -130,7 +137,7 @@ public class CreateTableStatement implements SqlStatement {
         return this;
     }
 
-    public String getDefaultValue(String column) {
+    public Object getDefaultValue(String column) {
         return defaultValues.get(column);
     }
 
@@ -162,7 +169,7 @@ public class CreateTableStatement implements SqlStatement {
         return columnTypes;
     }
 
-    public Map<String, String> getDefaultValues() {
+    public Map<String, Object> getDefaultValues() {
         return defaultValues;
     }
 

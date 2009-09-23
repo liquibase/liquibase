@@ -25,14 +25,14 @@ public class AddAutoIncrementExecuteTest extends AbstractExecuteTest {
         if (database instanceof MySQLDatabase) {
             table.addPrimaryKeyColumn("id", "int", null, "pk_");
         } else {
-            table.addColumn("id", "int", new NotNullConstraint());
+            table.addColumn("id", "int", null, new NotNullConstraint());
         }
         statements.add(table);
 
         if (database.supportsSchemas()) {
             table = new CreateTableStatement(DatabaseTestContext.ALT_SCHEMA, TABLE_NAME);
             table
-                    .addColumn("id", "int", new NotNullConstraint());
+                    .addColumn("id", "int", null, new NotNullConstraint());
             statements.add(table);
         }
         return statements;

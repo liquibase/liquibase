@@ -31,7 +31,7 @@ public class CreateDatabaseChangeLogLockTableGenerator implements SqlGenerator<C
     public Sql[] generateSql(CreateDatabaseChangeLogLockTableStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         CreateTableStatement createTableStatement = new CreateTableStatement(database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName())
                 .addPrimaryKeyColumn("ID", "INT", null, null, new NotNullConstraint())
-                .addColumn("LOCKED", "BOOLEAN", new NotNullConstraint())
+                .addColumn("LOCKED", "BOOLEAN", null, new NotNullConstraint())
                 .addColumn("LOCKGRANTED", "DATETIME")
                 .addColumn("LOCKEDBY", "VARCHAR(255)");
 

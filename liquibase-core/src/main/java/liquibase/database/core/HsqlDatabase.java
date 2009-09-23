@@ -50,7 +50,7 @@ public class HsqlDatabase extends AbstractDatabase {
     }
 
     public String getCurrentDateTimeFunction() {
-        return "NOW()";
+        return "NOW";
     }
 
     @Override

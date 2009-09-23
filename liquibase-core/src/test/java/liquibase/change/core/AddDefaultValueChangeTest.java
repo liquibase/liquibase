@@ -2,9 +2,8 @@ package liquibase.change.core;
 
 import liquibase.change.AbstractChangeTest;
 import liquibase.database.core.MockDatabase;
-import liquibase.statement.ComputedDateValue;
-import liquibase.statement.ComputedNumericValue;
 import liquibase.statement.SqlStatement;
+import liquibase.statement.DatabaseFunction;
 import liquibase.statement.core.AddDefaultValueStatement;
 import static org.junit.Assert.*;
 import org.junit.Test;
@@ -81,7 +80,7 @@ public class AddDefaultValueChangeTest extends AbstractChangeTest {
 
         assertEquals("TABLE_NAME", statement.getTableName());
         assertEquals("COLUMN_NAME", statement.getColumnName());
-        assertTrue(statement.getDefaultValue() instanceof ComputedNumericValue);
+        assertTrue(statement.getDefaultValue() instanceof DatabaseFunction);
         assertEquals("Math.random()", statement.getDefaultValue().toString());
     }
 
@@ -99,7 +98,7 @@ public class AddDefaultValueChangeTest extends AbstractChangeTest {
 
         assertEquals("TABLE_NAME", statement.getTableName());
         assertEquals("COLUMN_NAME", statement.getColumnName());
-        assertTrue(statement.getDefaultValue() instanceof ComputedDateValue);
+        assertTrue(statement.getDefaultValue() instanceof DatabaseFunction);
         assertEquals("NOW()", statement.getDefaultValue().toString());
     }
 

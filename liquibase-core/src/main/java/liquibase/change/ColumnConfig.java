@@ -2,10 +2,8 @@ package liquibase.change;
 
 import liquibase.database.Database;
 import liquibase.database.typeconversion.TypeConverterFactory;
-import liquibase.database.core.InformixDatabase;
 import liquibase.database.structure.Column;
-import liquibase.statement.ComputedDateValue;
-import liquibase.statement.ComputedNumericValue;
+import liquibase.statement.DatabaseFunction;
 import liquibase.util.ISODateFormat;
 
 import java.text.NumberFormat;
@@ -25,11 +23,13 @@ public class ColumnConfig {
     private Number valueNumeric;
     private Date valueDate;
     private Boolean valueBoolean;
+    private DatabaseFunction valueComputed;
 
     private String defaultValue;
     private Number defaultValueNumeric;
     private Date defaultValueDate;
     private Boolean defaultValueBoolean;
+    private DatabaseFunction defaultValueComputed;
 
     private ConstraintsConfig constraints;
     private Boolean autoIncrement;
@@ -125,7 +125,7 @@ public class ColumnConfig {
                     throw new RuntimeException(e);
                 }
             } else {
-                this.valueNumeric = new ComputedNumericValue(valueNumeric);
+                this.valueComputed = new DatabaseFunction(valueNumeric);
             }
         }
 
@@ -148,6 +148,16 @@ public class ColumnConfig {
         return this;
     }
 
+    public DatabaseFunction getValueComputed() {
+        return valueComputed;
+    }
+
+    public ColumnConfig setValueComputed(DatabaseFunction valueComputed) {
+        this.valueComputed = valueComputed;
+
+        return this;
+    }
+
     public Date getValueDate() {
         return valueDate;
     }
@@ -166,7 +176,7 @@ public class ColumnConfig {
             this.valueDate = new ISODateFormat().parse(valueDate);
         } catch (ParseException e) {
             //probably a function
-            this.valueDate = new ComputedDateValue(valueDate);
+            this.valueComputed = new DatabaseFunction(valueDate);
         }
 
         return this;
@@ -181,6 +191,8 @@ public class ColumnConfig {
             return getValueNumeric();
         } else if (getValueDate() != null) {
             return getValueDate();
+        } else if (getValueComputed() != null) {
+            return getValueComputed();
         }
         return null;
     }
@@ -219,7 +231,7 @@ public class ColumnConfig {
                 try {
                     this.defaultValueNumeric = NumberFormat.getInstance(Locale.US).parse(defaultValueNumeric);
                 } catch (ParseException e) {
-                    this.defaultValueNumeric  = new ComputedNumericValue(defaultValueNumeric);
+                    this.defaultValueComputed  = new DatabaseFunction(defaultValueNumeric);
                 }
             }
         }
@@ -239,7 +251,7 @@ public class ColumnConfig {
             this.defaultValueDate = new ISODateFormat().parse(defaultValueDate);
         } catch (ParseException e) {
             //probably a computed date
-            this.defaultValueDate = new ComputedDateValue(defaultValueDate);
+            this.defaultValueComputed = new DatabaseFunction(defaultValueDate);
         }
 
         return this;
@@ -261,6 +273,16 @@ public class ColumnConfig {
         return this;
     }
 
+    public DatabaseFunction getDefaultValueComputed() {
+        return defaultValueComputed;
+    }
+
+    public ColumnConfig setDefaultValueComputed(DatabaseFunction defaultValueComputed) {
+        this.defaultValueComputed = defaultValueComputed;
+
+        return this;
+    }
+
     public Object getDefaultValueObject() {
         if (getDefaultValue() != null) {
             return getDefaultValue();
@@ -270,6 +292,8 @@ public class ColumnConfig {
             return getDefaultValueNumeric();
         } else if (getDefaultValueDate() != null) {
             return getDefaultValueDate();
+        } else if (getDefaultValueComputed() != null) {
+            return getDefaultValueComputed();
         }
         return null;
     }
@@ -302,40 +326,12 @@ public class ColumnConfig {
         return getConstraints() == null || getConstraints().isNullable();
     }
 
-    public String getDefaultColumnValue(Database database) {
-        if (this.getDefaultValue() != null) {
-            if ("null".equalsIgnoreCase(this.getDefaultValue())) {
-                return "NULL";
-            }
-            if (!database.shouldQuoteValue(this.getDefaultValue())) {
-                return this.getDefaultValue();
-            } else {
-                return "'" + this.getDefaultValue().replaceAll("'", "''") + "'";
-            }
-        } else if (this.getDefaultValueNumeric() != null) {
-            return this.getDefaultValueNumeric().toString();
-        } else if (this.getDefaultValueBoolean() != null) {
-            String returnValue;
-            if (this.getDefaultValueBoolean()) {
-                returnValue = TypeConverterFactory.getInstance().findTypeConverter(database).getBooleanType().getTrueBooleanValue();
-            } else {
-                returnValue = TypeConverterFactory.getInstance().findTypeConverter(database).getBooleanType().getFalseBooleanValue();
-            }
-
-            return returnValue;
-        } else if (this.getDefaultValueDate() != null) {
-            Date defaultDateValue = this.getDefaultValueDate();
-            return database.getDateLiteral(defaultDateValue);
-        } else {
-            return "NULL";
-        }
-    }
-
     public boolean hasDefaultValue() {
         return this.getDefaultValue() != null
                 || this.getDefaultValueBoolean() != null
                 || this.getDefaultValueDate() != null
-                || this.getDefaultValueNumeric() != null;
+                || this.getDefaultValueNumeric() != null
+                || this.getDefaultValueComputed() != null;
     }
 
     public String getRemarks() {

@@ -113,8 +113,10 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns 
                                 valueConfig.setValueDate(value.toString());
                             } else if (columnConfig.getType().equalsIgnoreCase("STRING")) {
                                 valueConfig.setValue(value.toString());
+                            } else if (columnConfig.getType().equalsIgnoreCase("COMPUTED")) {
+                                valueConfig.setValue(value.toString());
                             } else {
-                                throw new UnexpectedLiquibaseException("loadData type of "+columnConfig.getType()+" is not supported.  Please use BOOLEAN, NUMERIC, DATE, or STRING");
+                                throw new UnexpectedLiquibaseException("loadData type of "+columnConfig.getType()+" is not supported.  Please use BOOLEAN, NUMERIC, DATE, STRING, or COMPUTED");
                             }
                             value = valueConfig.getValueObject();
                         }

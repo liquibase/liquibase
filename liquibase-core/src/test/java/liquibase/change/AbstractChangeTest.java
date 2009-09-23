@@ -4,6 +4,7 @@ import liquibase.database.Database;
 import liquibase.exception.ValidationErrors;
 import liquibase.serializer.core.string.StringChangeLogSerializer;
 import liquibase.statement.SqlStatement;
+import liquibase.statement.DatabaseFunction;
 import liquibase.test.TestContext;
 import static org.junit.Assert.*;
 import org.junit.Test;
@@ -58,6 +59,11 @@ public abstract class AbstractChangeTest {
                 field.set(change, 6532);
                 checkThatChecksumIsNew(change, seenCheckSums, field);
                 field.set(change, -52352);
+                checkThatChecksumIsNew(change, seenCheckSums, field);
+            } else if (DatabaseFunction.class.isAssignableFrom(field.getType())) {
+                field.set(change, new DatabaseFunction("FUNC1"));
+                checkThatChecksumIsNew(change, seenCheckSums, field);
+                field.set(change, new DatabaseFunction("FUNC 2"));
                 checkThatChecksumIsNew(change, seenCheckSums, field);
             } else if (BigInteger.class.isAssignableFrom(field.getType())) {
                 field.set(change, new BigInteger("6532"));
