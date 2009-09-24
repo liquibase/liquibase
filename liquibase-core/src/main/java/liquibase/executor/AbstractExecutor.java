@@ -9,6 +9,7 @@ import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
 
 import java.util.List;
+import java.util.Set;
 
 public abstract class AbstractExecutor {
     protected Database database;
@@ -17,7 +18,7 @@ public abstract class AbstractExecutor {
         this.database = database;
     }
 
-    protected String[] applyVisitors(SqlStatement statement, List<SqlVisitor> sqlVisitors) throws StatementNotSupportedOnDatabaseException, DatabaseException {
+    protected String[] applyVisitors(SqlStatement statement, List<SqlVisitor> sqlVisitors) throws DatabaseException {
         Sql[] sql = SqlGeneratorFactory.getInstance().generateSql(statement, database);
         if (sql == null) {
             return new String[0];
@@ -27,9 +28,7 @@ public abstract class AbstractExecutor {
         for (int i=0; i<sql.length; i++) {
             returnSql[i] = sql[i].toSql();
             for (SqlVisitor visitor : sqlVisitors) {
-                if (visitor.isApplicable(database)) {
-                    returnSql[i] = visitor.modifySql(returnSql[i], database);
-                }
+                returnSql[i] = visitor.modifySql(returnSql[i], database);
             }
 
         }

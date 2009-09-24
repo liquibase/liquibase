@@ -383,7 +383,7 @@ public abstract class AbstractDatabase implements Database {
         }
 
         for (SqlStatement sql : statementsToExecute) {
-            executor.execute(sql, new ArrayList<SqlVisitor>());
+            executor.execute(sql);
             this.commit();
         }
     }
@@ -416,7 +416,7 @@ public abstract class AbstractDatabase implements Database {
         if (!doesChangeLogLockTableExist()) {
 
             executor.comment("Create Database Lock Table");
-            executor.execute(new CreateDatabaseChangeLogLockTableStatement(), new ArrayList<SqlVisitor>());
+            executor.execute(new CreateDatabaseChangeLogLockTableStatement());
             this.commit();
             LogFactory.getLogger().debug("Created database lock table with name: " + escapeTableName(getLiquibaseSchemaName(), getDatabaseChangeLogLockTableName()));
         }
@@ -487,7 +487,7 @@ public abstract class AbstractDatabase implements Database {
 
             for (Change change : dropChanges) {
                 for (SqlStatement statement : change.generateStatements(this)) {
-                    ExecutorService.getInstance().getExecutor(this).execute(statement, new ArrayList<SqlVisitor>());
+                    ExecutorService.getInstance().getExecutor(this).execute(statement);
                 }
             }
 
@@ -528,14 +528,14 @@ public abstract class AbstractDatabase implements Database {
     public void tag(String tagString) throws DatabaseException {
         Executor executor = ExecutorService.getInstance().getExecutor(this);
         try {
-            int totalRows = ExecutorService.getInstance().getExecutor(this).queryForInt(new SelectFromDatabaseChangeLogStatement("COUNT(*)"), new ArrayList<SqlVisitor>());
+            int totalRows = ExecutorService.getInstance().getExecutor(this).queryForInt(new SelectFromDatabaseChangeLogStatement("COUNT(*)"));
             if (totalRows == 0) {
                 ChangeSet emptyChangeSet = new ChangeSet(String.valueOf(new Date().getTime()), "liquibase", false, false, "liquibase-internal", "liquibase-internal", null, null);
                 this.markChangeSetAsRan(emptyChangeSet);
             }
 
 //            Timestamp lastExecutedDate = (Timestamp) this.getExecutor().queryForObject(createChangeToTagSQL(), Timestamp.class);
-            int rowsUpdated = executor.update(new TagDatabaseStatement(tagString), new ArrayList<SqlVisitor>());
+            int rowsUpdated = executor.update(new TagDatabaseStatement(tagString));
             if (rowsUpdated == 0) {
                 throw new DatabaseException("Did not tag database change log correctly");
             }
@@ -548,7 +548,7 @@ public abstract class AbstractDatabase implements Database {
     }
 
     public boolean doesTagExist(String tag) throws DatabaseException {
-        int count = ExecutorService.getInstance().getExecutor(this).queryForInt(new SelectFromDatabaseChangeLogStatement(new SelectFromDatabaseChangeLogStatement.ByTag("tag"), "COUNT(*)"), new ArrayList<SqlVisitor>());
+        int count = ExecutorService.getInstance().getExecutor(this).queryForInt(new SelectFromDatabaseChangeLogStatement(new SelectFromDatabaseChangeLogStatement.ByTag("tag"), "COUNT(*)"));
         return count > 0;
     }
 
@@ -570,7 +570,7 @@ public abstract class AbstractDatabase implements Database {
         if (schemaName == null) {
             schemaName = convertRequestedSchemaToSchema(null);
         }
-        String definition = (String) ExecutorService.getInstance().getExecutor(this).queryForObject(new GetViewDefinitionStatement(schemaName, viewName), String.class, new ArrayList<SqlVisitor>());
+        String definition = (String) ExecutorService.getInstance().getExecutor(this).queryForObject(new GetViewDefinitionStatement(schemaName, viewName), String.class);
         if (definition == null) {
             return null;
         }
@@ -770,20 +770,20 @@ public abstract class AbstractDatabase implements Database {
     public void markChangeSetAsRan(ChangeSet changeSet) throws DatabaseException {
 
 
-        ExecutorService.getInstance().getExecutor(this).execute(new MarkChangeSetRanStatement(changeSet, false), new ArrayList<SqlVisitor>());
+        ExecutorService.getInstance().getExecutor(this).execute(new MarkChangeSetRanStatement(changeSet, false));
 
         getRanChangeSetList().add(new RanChangeSet(changeSet));
     }
 
     public void markChangeSetAsReRan(ChangeSet changeSet) throws DatabaseException {
 
-        ExecutorService.getInstance().getExecutor(this).execute(new MarkChangeSetRanStatement(changeSet, true), new ArrayList<SqlVisitor>());
+        ExecutorService.getInstance().getExecutor(this).execute(new MarkChangeSetRanStatement(changeSet, true));
         this.commit();
     }
 
     public void removeRanStatus(ChangeSet changeSet) throws DatabaseException {
 
-        ExecutorService.getInstance().getExecutor(this).execute(new RemoveChangeSetRanStatusStatement(changeSet), new ArrayList<SqlVisitor>());
+        ExecutorService.getInstance().getExecutor(this).execute(new RemoveChangeSetRanStatusStatement(changeSet));
         commit();
 
         getRanChangeSetList().remove(new RanChangeSet(changeSet));

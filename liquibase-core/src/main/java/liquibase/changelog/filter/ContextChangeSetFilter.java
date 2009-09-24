@@ -2,10 +2,9 @@ package liquibase.changelog.filter;
 
 import liquibase.changelog.ChangeSet;
 import liquibase.util.StringUtils;
+import liquibase.sql.visitor.SqlVisitor;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 public class ContextChangeSetFilter implements ChangeSetFilter {
     private Set<String> contexts;
@@ -34,6 +33,22 @@ public class ContextChangeSetFilter implements ChangeSetFilter {
     }
 
     public boolean accepts(ChangeSet changeSet) {
+        List<SqlVisitor> visitorsToRemove = new ArrayList<SqlVisitor>();
+        for (SqlVisitor visitor : changeSet.getSqlVisitors()) {
+            if (visitor.getContexts() != null && visitor.getContexts().size() > 0) {
+                boolean shouldRemove = true;
+                for (String context : contexts) {
+                    if (visitor.getContexts().contains(context.toLowerCase())) {
+                        shouldRemove = false;
+                    }
+                }
+                if (shouldRemove) {
+                    visitorsToRemove.add(visitor);
+                }
+            }
+        }
+        changeSet.getSqlVisitors().removeAll(visitorsToRemove);
+
         if (contexts == null || contexts.size() == 0) {
             return true;
         }

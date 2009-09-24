@@ -78,6 +78,7 @@
                                             <xsd:group ref="modifySqlChildren" minOccurs="1" maxOccurs="unbounded"/>
                                         </xsd:choice>
                                         <xsd:attribute name="dbms" type="xsd:string"/>
+                                        <xsd:attribute name="context" type="xsd:string"/>
                                         <xsd:attribute name="applyToRollback" type="xsd:boolean"/>
                                     </xsd:complexType>
                                 </xsd:element>

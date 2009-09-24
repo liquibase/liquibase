@@ -56,7 +56,8 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
     private boolean inRollback = false;
 
     private boolean inModifySql = false;
-    private Collection modifySqlDbmsList;
+    private Set<String> modifySqlDbmsList;
+    private Set<String> modifySqlContexts;
     private boolean modifySqlAppliedOnRollback = false;
 
 
@@ -206,7 +207,10 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
             } else if ("modifySql".equals(qName)) {
                 inModifySql = true;
                 if (StringUtils.trimToNull(atts.getValue("dbms")) != null) {
-                    modifySqlDbmsList = StringUtils.splitAndTrim(atts.getValue("dbms"), ",");
+                    modifySqlDbmsList = new HashSet<String>(StringUtils.splitAndTrim(atts.getValue("dbms"), ","));
+                }
+                if (StringUtils.trimToNull(atts.getValue("context")) != null) {
+                    modifySqlContexts = new HashSet<String>(StringUtils.splitAndTrim(atts.getValue("context"), ","));
                 }
                 if (StringUtils.trimToNull(atts.getValue("applyToRollback")) != null) {
                     modifySqlAppliedOnRollback = Boolean.valueOf(atts.getValue("applyToRollback"));
@@ -220,6 +224,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
                 }
                 sqlVisitor.setApplicableDbms(modifySqlDbmsList);
                 sqlVisitor.setApplyToRollback(modifySqlAppliedOnRollback);
+                sqlVisitor.setContexts(modifySqlContexts);
 
                 changeSet.addSqlVisitor(sqlVisitor);
             } else if (changeSet != null && change == null) {
@@ -495,6 +500,8 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
             } else if ("modifySql".equals(qName)) {
                 inModifySql = false;
                 modifySqlDbmsList = null;
+                modifySqlContexts = null;
+                modifySqlAppliedOnRollback = true;
             }
         } catch (Exception e) {
             log.severe("Error thrown as a SAXException: " + e.getMessage(), e);

@@ -610,19 +610,41 @@
         </preConditions>
     </changeSet>
 
+     <changeSet id="modifySqlContextTest" author="nvoxland">
+        <createTable tableName="changemodifysqltest">
+            <column name="id" type="int"/>
+        </createTable>
+        <createTable tableName="keepmodifysqltest">
+            <column name="id" type="int"/>
+        </createTable>
+        <modifySql context="test">
+            <replace replace="change" with="newchange"/>
+        </modifySql>
+        <modifySql context="not-context">
+            <replace replace="keep" with="newkeep"/>
+        </modifySql>
+    </changeSet>
+
+    <changeSet id="modifySqlContextTest1-keep" author="nvoxland">
+        <preConditions>
+            <tableExists tableName="newchangemodifysqltest"/>
+            <tableExists tableName="keepmodifysqltest"/>
+        </preConditions>
+    </changeSet>
+    
     <changeSet id="createTableWithDefault" author="nvoxland">
         <createTable tableName="default_val_computed">
             <column name="id" type="int"/>
-            <column name="testcol" type="date" defaultValueComputed="CURRENT_TIMESTAMP()">
+            <column name="testcol" type="datetime" defaultValueComputed="CURRENT_TIMESTAMP()">
                 <constraints nullable="false"/>
             </column>
-            <column name="added_col" type="date"/>
+            <column name="added_col" type="datetime"/>
         </createTable>
 
         <sql>insert into default_val_computed (id) values (1);</sql>
     </changeSet>
 
-    <changeSet id="createTableWithDefault-check" author="nvoxland">
+    <changeSet id="createTableWithDefault-check" author="nvoxland" dbms="h2,hsql,oracle,db2,mysql,postgresql,mssql"> <!-- not derby -->
         <addDefaultValue tableName="default_val_computed" columnName="added_col" defaultValueComputed="CURRENT_TIMESTAMP()"/>
     </changeSet>
 </databaseChangeLog>
