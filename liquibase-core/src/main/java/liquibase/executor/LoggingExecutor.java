@@ -34,6 +34,12 @@ public class LoggingExecutor extends AbstractExecutor implements Executor {
     }
 
     public int update(SqlStatement sql) throws DatabaseException {
+        if (sql instanceof LockDatabaseChangeLogStatement) {
+            return 1;
+        } else if (sql instanceof UnlockDatabaseChangeLogStatement) {
+            return 1;
+        }
+
         outputStatement(sql);
 
         return 0;
@@ -45,11 +51,6 @@ public class LoggingExecutor extends AbstractExecutor implements Executor {
 
     public int update(SqlStatement sql, List<SqlVisitor> sqlVisitors) throws DatabaseException {
         outputStatement(sql, sqlVisitors);
-        if (sql instanceof LockDatabaseChangeLogStatement) {
-            return 1;
-        } else if (sql instanceof UnlockDatabaseChangeLogStatement) {
-            return 1;
-        }
         return 0;
     }
 
@@ -98,13 +99,13 @@ public class LoggingExecutor extends AbstractExecutor implements Executor {
     }
 
     public Object queryForObject(SqlStatement sql, Class requiredType) throws DatabaseException {
+        if (sql instanceof SelectFromDatabaseChangeLogLockStatement) {
+            return false;
+        }
         return delegatedReadExecutor.queryForObject(sql, requiredType);
     }
 
     public Object queryForObject(SqlStatement sql, Class requiredType, List<SqlVisitor> sqlVisitors) throws DatabaseException {
-        if (sql instanceof SelectFromDatabaseChangeLogLockStatement) {
-            return false;
-        }
         return delegatedReadExecutor.queryForObject(sql, requiredType, sqlVisitors);
     }
 

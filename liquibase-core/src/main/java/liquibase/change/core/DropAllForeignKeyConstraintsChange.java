@@ -78,7 +78,7 @@ public class DropAllForeignKeyConstraintsChange extends AbstractChange {
         );
 
         try {
-            List<Map> results = executor.queryForList(sql, new ArrayList<SqlVisitor>());
+            List<Map> results = executor.queryForList(sql);
 
             if (results != null && results.size() > 0) {
                 for (Map result : results) {

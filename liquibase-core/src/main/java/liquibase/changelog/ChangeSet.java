@@ -448,4 +448,8 @@ public class ChangeSet implements Conditional {
     public void addSqlVisitor(SqlVisitor sqlVisitor) {
         sqlVisitors.add(sqlVisitor);
     }
+
+    public List<SqlVisitor> getSqlVisitors() {
+        return sqlVisitors;
+    }        
 }

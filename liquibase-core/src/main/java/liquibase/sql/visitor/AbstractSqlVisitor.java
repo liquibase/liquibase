@@ -3,22 +3,19 @@ package liquibase.sql.visitor;
 import liquibase.database.Database;
 
 import java.util.Collection;
+import java.util.Set;
 
 public abstract class AbstractSqlVisitor implements SqlVisitor {
-    private Collection applicableDbms;
+    private Set<String> applicableDbms;
     private boolean applyToRollback;
+    private Set<String> contexts;
 
-    public Collection getApplicableDbms() {
+    public Set<String> getApplicableDbms() {
         return applicableDbms;
     }
 
-    public void setApplicableDbms(Collection applicableDbms) {
+    public void setApplicableDbms(Set<String> applicableDbms) {
         this.applicableDbms = applicableDbms;
-    }
-
-    public boolean isApplicable(Database database) {
-        return applicableDbms == null || applicableDbms.contains(database.getTypeName());
-
     }
 
     public boolean isApplyToRollback() {
@@ -27,5 +24,13 @@ public abstract class AbstractSqlVisitor implements SqlVisitor {
 
     public void setApplyToRollback(boolean applyToRollback) {
         this.applyToRollback = applyToRollback;
+    }
+
+    public Set<String> getContexts() {
+        return contexts;
+    }
+
+    public void setContexts(Set<String> contexts) {
+        this.contexts = contexts;
     }
 }

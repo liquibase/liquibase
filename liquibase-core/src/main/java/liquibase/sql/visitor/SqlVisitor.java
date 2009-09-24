@@ -3,6 +3,7 @@ package liquibase.sql.visitor;
 import liquibase.database.Database;
 
 import java.util.Collection;
+import java.util.Set;
 
 public interface SqlVisitor {
 
@@ -10,11 +11,16 @@ public interface SqlVisitor {
 
     String getTagName();
 
-    void setApplicableDbms(Collection modifySqlDbmsList);
+    Set<String> getApplicableDbms();
 
-    boolean isApplicable(Database database);
+    void setApplicableDbms(Set<String> modifySqlDbmsList);
 
     void setApplyToRollback(boolean applyOnRollback);
 
     boolean isApplyToRollback();
+
+    Set<String> getContexts();
+
+    void setContexts(Set<String> contexts);
+
 }

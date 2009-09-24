@@ -680,7 +680,7 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
 
         if (database.supportsSequences()) {
             //noinspection unchecked
-            List<String> sequenceNames = (List<String>) ExecutorService.getInstance().getExecutor(database).queryForList(new SelectSequencesStatement(schema), String.class, new ArrayList<SqlVisitor>());
+            List<String> sequenceNames = (List<String>) ExecutorService.getInstance().getExecutor(database).queryForList(new SelectSequencesStatement(schema), String.class);
 
 
             if (sequenceNames != null) {

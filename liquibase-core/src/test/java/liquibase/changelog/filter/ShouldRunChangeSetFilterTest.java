@@ -15,6 +15,7 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 public class ShouldRunChangeSetFilterTest  {
 
@@ -41,7 +42,7 @@ public class ShouldRunChangeSetFilterTest  {
         expect(database.getDefaultSchemaName()).andReturn(null).anyTimes();
 
         Executor template = createMock(Executor.class);
-        expect(template.update(isA(UpdateStatement.class), isA(List.class))).andReturn(1).anyTimes();
+        expect(template.update(isA(UpdateStatement.class))).andReturn(1).anyTimes();
 //        template.comment("Lock Database");
 //        expectLastCall();
 
