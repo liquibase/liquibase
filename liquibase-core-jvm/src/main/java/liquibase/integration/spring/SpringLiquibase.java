@@ -1,5 +1,6 @@
 package liquibase.integration.spring;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -79,9 +80,13 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 
 
         public InputStream getResourceAsStream(String file) throws IOException {
-            Resource resource = getResource(file);
-
-            return resource.getInputStream();
+            try {
+                Resource resource = getResource(file);
+                return resource.getInputStream();
+            }
+            catch ( FileNotFoundException ex ) {
+                return null;
+            }
         }
 
         public Enumeration<URL> getResources(String packageName) throws IOException {
