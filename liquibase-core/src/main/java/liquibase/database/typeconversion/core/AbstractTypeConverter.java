@@ -154,6 +154,10 @@ public abstract class AbstractTypeConverter implements TypeConverter {
             dataTypeName = columnTypeString;
         }
 
+        return getDataType(columnTypeString, autoIncrement, dataTypeName, precision);
+    }
+
+    protected DataType getDataType(String columnTypeString, Boolean autoIncrement, String dataTypeName, String precision) {
         // Translate type to database-specific type, if possible
         DataType returnTypeName = null;
         if (dataTypeName.equalsIgnoreCase("BIGINT")) {
