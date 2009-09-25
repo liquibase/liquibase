@@ -36,7 +36,7 @@ public class MarkChangeSetRanExecuteTest extends AbstractExecuteTest {
     @Test
     public void generateSql_insert() throws Exception {
         this.statementUnderTest = new MarkChangeSetRanStatement(new ChangeSet("a", "b", false, false, "c", "d", "e", "f"), false);
-        String version = "2.0-b4-snp";
+        String version = "2.0-b5-snp";
         assertCorrect("insert into [dbo].[databasechangelog] ([author], [comments], [dateexecuted], [description], [filename], [id], [liquibase], [md5sum], [orderexecuted]) values ('b', '', getdate(), 'empty', 'c', 'a', '" + version + "', '2:d41d8cd98f00b204e9800998ecf8427e', 1)", MSSQLDatabase.class);
         assertCorrect("insert into [databasechangelog] ([author], [comments], [dateexecuted], [description], [filename], [id], [liquibase], [md5sum], [orderexecuted]) values ('b', '', timestamp, 'empty', 'c', 'a', '" + version + "', '2:d41d8cd98f00b204e9800998ecf8427e', 1)",MaxDBDatabase.class);
         assertCorrect("insert into [databasechangelog] ([author], [comments], [dateexecuted], [description], [filename], [id], [liquibase], [md5sum], [orderexecuted]) values ('b', '', sysdate, 'empty', 'c', 'a', '" + version + "', '2:d41d8cd98f00b204e9800998ecf8427e', 1)",OracleDatabase.class, CacheDatabase.class);
