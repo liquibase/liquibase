@@ -17,7 +17,6 @@
         <bundle.namespace>liquibase.*</bundle.namespace>
     </properties>
 
-    <!-- javadoc classpath -->
     <dependencies>
         <dependency>
             <groupId>ant</groupId>
