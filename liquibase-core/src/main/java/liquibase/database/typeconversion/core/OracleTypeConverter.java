@@ -62,7 +62,12 @@ public class OracleTypeConverter extends AbstractTypeConverter {
 
     @Override
     public BigIntType getBigIntType() {
-        return new BigIntType("NUMBER(19,0)");
+        return new BigIntType("NUMBER(38,0)");
+    }
+
+    @Override
+    public IntType getIntType() {
+        return new IntType("NUMBER(10,0)");
     }
 
     @Override
@@ -72,7 +77,7 @@ public class OracleTypeConverter extends AbstractTypeConverter {
 
     @Override
     public DoubleType getDoubleType() {
-        return new DoubleType("NUMBER");
+        return new DoubleType("FLOAT(24)");
     }
 
     @Override
