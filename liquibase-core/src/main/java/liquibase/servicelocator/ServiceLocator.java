@@ -111,7 +111,7 @@ public class ServiceLocator {
     }
 
     public Class[] findClasses(Class requiredInterface) throws ServiceNotFoundException {
-        System.out.println("ServiceLocator.findClasses for "+requiredInterface.getName());
+        logger.debug("ServiceLocator.findClasses for "+requiredInterface.getName());
 
             try {
                 Class.forName(requiredInterface.getName());
@@ -120,12 +120,12 @@ public class ServiceLocator {
                     classesBySuperclass.put(requiredInterface, new ArrayList<Class>());
 
                     for (String packageName : packagesToScan) {
-                        System.out.println("ServiceLocator scanning "+packageName+" with resoureAccessor "+resourceAccessor.getClass().getName());
+                        logger.debug("ServiceLocator scanning "+packageName+" with resoureAccessor "+resourceAccessor.getClass().getName());
                         String path = packageName.replace('.', '/');
                         Enumeration<URL> resources = resourceAccessor.getResources(path);
                         while (resources.hasMoreElements()) {
                             URL resource = resources.nextElement();
-                            System.out.println("Found "+packageName+" in "+resource.toExternalForm());
+                            logger.debug("Found "+packageName+" in "+resource.toExternalForm());
                             classesBySuperclass.get(requiredInterface).addAll(findClasses(resource, packageName, requiredInterface));
                         }
                     }
@@ -148,10 +148,10 @@ public class ServiceLocator {
     }
 
     private List<Class> findClasses(URL resource, String packageName, Class requiredInterface) throws Exception {
-        System.out.println("ServiceLocator finding " + packageName + " classes in " + resource.toExternalForm() + " matching interface " + requiredInterface.getName());
+        logger.debug("ServiceLocator finding " + packageName + " classes in " + resource.toExternalForm() + " matching interface " + requiredInterface.getName());
         List<Class> classes = new ArrayList<Class>();
 //        if (directory.toURI().toString().startsWith("jar:")) {
-//            System.out.println("have a jar: "+directory.toString());
+//            logger.debug("have a jar: "+directory.toString());
 //        }
 
         List<String> potentialClassNames = new ArrayList<String>();
@@ -174,7 +174,7 @@ public class ServiceLocator {
             File directory = new File(resource.getFile().replace("%20", " "));
 
             if (!directory.exists()) {
-//                System.out.println(directory + " does not exist");
+//                logger.debug(directory + " does not exist");
                 return classes;
             }
 
@@ -209,7 +209,7 @@ public class ServiceLocator {
             if (!clazz.isInterface()
                     && !Modifier.isAbstract(clazz.getModifiers())
                     && isCorrectType(clazz, requiredInterface)) {
-                System.out.println(potentialClassName + " matches "+requiredInterface.getName());
+                logger.debug(potentialClassName + " matches "+requiredInterface.getName());
                 try {
                     clazz.getConstructor();
                     classes.add(clazz);
@@ -222,7 +222,7 @@ public class ServiceLocator {
                     }
                 }
 //            } else {
-//                System.out.println(potentialClassName + " does not match");
+//                logger.debug(potentialClassName + " does not match");
             }
 
         }
