@@ -139,62 +139,62 @@ public class ChangeSet implements Conditional {
                 executor.comment(StringUtils.join(Arrays.asList(lines), "\n"));
             }
 
-            if (preconditions != null && executor.updatesDatabase()) {
-                try {
+            try {
+                if (preconditions != null) {
                     preconditions.check(database, null);
-                } catch (PreconditionFailedException e) {
-                    StringBuffer message = new StringBuffer();
-                    message.append(StreamUtil.getLineSeparator());
-                    for (FailedPrecondition invalid : e.getFailedPreconditions()) {
-                        message.append("          ").append(invalid.toString());
-                        message.append(StreamUtil.getLineSeparator());
-                    }
-
-                    if (preconditions.getOnFail().equals(PreconditionContainer.FailOption.HALT)) {
-                        e.printStackTrace();
-                        throw new MigrationFailedException(this, message.toString());
-                    } else if (preconditions.getOnFail().equals(PreconditionContainer.FailOption.CONTINUE)) {
-                        skipChange = true;
-                        markRan = false;
-
-                        log.info("Continuing past ChangeSet: " + toString() + " due to precondition failure: " + message);
-                    } else if (preconditions.getOnFail().equals(PreconditionContainer.FailOption.MARK_RAN)) {
-                        skipChange = true;
-
-                        log.info("Marking ChangeSet: " + toString() + " ran due to precondition failure: " + message);
-                    } else if (preconditions.getOnFail().equals(PreconditionContainer.FailOption.WARN)) {
-                        log.warning("Running change set despite failed precondition.  ChangeSet: " + toString() + ": " + message);
-                    } else {
-                        throw new MigrationFailedException(this, "Unexpected precondition onFail attribute: " + preconditions.getOnFail());
-                    }
-                } catch (PreconditionErrorException e) {
-                    StringBuffer message = new StringBuffer();
-                    message.append(StreamUtil.getLineSeparator());
-                    for (ErrorPrecondition invalid : e.getErrorPreconditions()) {
-                        message.append("          ").append(invalid.toString());
-                        message.append(StreamUtil.getLineSeparator());
-                    }
-
-                    if (preconditions.getOnError().equals(PreconditionContainer.ErrorOption.HALT)) {
-                        throw new MigrationFailedException(this, message.toString(), e);
-                    } else if (preconditions.getOnError().equals(PreconditionContainer.ErrorOption.CONTINUE)) {
-                        skipChange = true;
-                        markRan = false;
-
-                        log.info("Continuing past ChangeSet: " + toString() + " due to precondition error: " + message);
-                    } else if (preconditions.getOnError().equals(PreconditionContainer.ErrorOption.MARK_RAN)) {
-                        skipChange = true;
-                        markRan = true;
-
-                        log.info("Marking ChangeSet: " + toString() + " due ran to precondition error: " + message);
-                    } else if (preconditions.getOnError().equals(PreconditionContainer.ErrorOption.WARN)) {
-                        log.warning("Running change set despite errored precondition.  ChangeSet: " + toString() + ": " + message);
-                    } else {
-                        throw new MigrationFailedException(this, "Unexpected precondition onError attribute: " + preconditions.getOnError());
-                    }
-
-                    database.rollback();
                 }
+            } catch (PreconditionFailedException e) {
+                StringBuffer message = new StringBuffer();
+                message.append(StreamUtil.getLineSeparator());
+                for (FailedPrecondition invalid : e.getFailedPreconditions()) {
+                    message.append("          ").append(invalid.toString());
+                    message.append(StreamUtil.getLineSeparator());
+                }
+
+                if (preconditions.getOnFail().equals(PreconditionContainer.FailOption.HALT)) {
+                    e.printStackTrace();
+                    throw new MigrationFailedException(this, message.toString(), e);
+                } else if (preconditions.getOnFail().equals(PreconditionContainer.FailOption.CONTINUE)) {
+                    skipChange = true;
+                    markRan = false;
+
+                    log.info("Continuing past ChangeSet: " + toString() + " due to precondition failure: " + message);
+                } else if (preconditions.getOnFail().equals(PreconditionContainer.FailOption.MARK_RAN)) {
+                    skipChange = true;
+
+                    log.info("Marking ChangeSet: " + toString() + " ran due to precondition failure: " + message);
+                } else if (preconditions.getOnFail().equals(PreconditionContainer.FailOption.WARN)) {
+                    log.warning("Running change set despite failed precondition.  ChangeSet: " + toString() + ": " + message);
+                } else {
+                    throw new MigrationFailedException(this, "Unexpected precondition onFail attribute: " + preconditions.getOnFail(), e);
+                }
+            } catch (PreconditionErrorException e) {
+                StringBuffer message = new StringBuffer();
+                message.append(StreamUtil.getLineSeparator());
+                for (ErrorPrecondition invalid : e.getErrorPreconditions()) {
+                    message.append("          ").append(invalid.toString());
+                    message.append(StreamUtil.getLineSeparator());
+                }
+
+                if (preconditions.getOnError().equals(PreconditionContainer.ErrorOption.HALT)) {
+                    throw new MigrationFailedException(this, message.toString(), e);
+                } else if (preconditions.getOnError().equals(PreconditionContainer.ErrorOption.CONTINUE)) {
+                    skipChange = true;
+                    markRan = false;
+
+                    log.info("Continuing past ChangeSet: " + toString() + " due to precondition error: " + message);
+                } else if (preconditions.getOnError().equals(PreconditionContainer.ErrorOption.MARK_RAN)) {
+                    skipChange = true;
+                    markRan = true;
+
+                    log.info("Marking ChangeSet: " + toString() + " due ran to precondition error: " + message);
+                } else if (preconditions.getOnError().equals(PreconditionContainer.ErrorOption.WARN)) {
+                    log.warning("Running change set despite errored precondition.  ChangeSet: " + toString() + ": " + message);
+                } else {
+                    throw new MigrationFailedException(this, "Unexpected precondition onError attribute: " + preconditions.getOnError(), e);
+                }
+
+                database.rollback();
             }
 
             if (!skipChange) {
@@ -240,7 +240,7 @@ public class ChangeSet implements Conditional {
                 try {
                     database.setAutoCommit(false);
                 } catch (DatabaseException e) {
-                    throw new MigrationFailedException(this, "Could not reset autocommit");
+                    throw new MigrationFailedException(this, "Could not reset autocommit", e);
                 }
             }
         }
@@ -277,7 +277,7 @@ public class ChangeSet implements Conditional {
             try {
                 database.rollback();
             } catch (DatabaseException e1) {
-                ;
+                //ok
             }
             throw new RollbackFailedException(e);
         }
