@@ -5,12 +5,16 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
 
-    <preConditions>
+    <preConditions onSqlOutput="IGNORE">
             <dbms type="h2"/>
             <runningAs username="liquibase"/>
     </preConditions>
 
     <changeSet id="1" author="nvoxland">
+        <preConditions onSqlOutput="TEST">
+                <dbms type="h2"/>
+                <runningAs username="liquibase"/>
+        </preConditions>
         <comment>
             You can add comments to changeSets.
             They can even be multiple lines if you would like.
