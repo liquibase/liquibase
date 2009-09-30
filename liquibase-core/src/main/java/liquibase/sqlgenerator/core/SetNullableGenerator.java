@@ -7,7 +7,13 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
+import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.core.SetNullableStatement;
+import liquibase.statement.core.ReorganizeTableStatement;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Arrays;
 
 public class SetNullableGenerator implements SqlGenerator<SetNullableStatement> {
     public int getPriority() {
@@ -66,8 +72,13 @@ public class SetNullableGenerator implements SqlGenerator<SetNullableStatement> 
             sql = "ALTER TABLE " + database.escapeTableName(statement.getSchemaName(), statement.getTableName()) + " ALTER COLUMN  " + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + (statement.isNullable() ? " DROP NOT NULL" : " SET NOT NULL");
         }
 
-        return new Sql[] {
-                new UnparsedSql(sql)
-        };
+        List<Sql> returnList = new ArrayList<Sql>();
+        returnList.add(new UnparsedSql(sql));
+
+        if (database instanceof DB2Database) {
+            returnList.addAll(Arrays.asList(SqlGeneratorFactory.getInstance().generateSql(new ReorganizeTableStatement(statement.getSchemaName(), statement.getTableName()), database)));
+        }
+
+        return returnList.toArray(new Sql[returnList.size()]);
     }
 }
