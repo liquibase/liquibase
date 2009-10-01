@@ -1,6 +1,7 @@
 package liquibase.precondition;
 
 import liquibase.changelog.DatabaseChangeLog;
+import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.exception.CustomPreconditionErrorException;
 import liquibase.exception.CustomPreconditionFailedException;
@@ -45,7 +46,7 @@ public class CustomPreconditionWrapper implements Precondition {
     }
 
 
-    public void check(Database database, DatabaseChangeLog changeLog) throws PreconditionFailedException, PreconditionErrorException {
+    public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet) throws PreconditionFailedException, PreconditionErrorException {
         CustomPrecondition customPrecondition;
         try {
 //            System.out.println(classLoader.toString());

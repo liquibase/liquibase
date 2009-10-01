@@ -38,16 +38,16 @@ public class ChangeSetExecutedPrecondition implements Precondition {
         this.author = author;
     }
 
-    public void check(Database database, DatabaseChangeLog changeLog) throws PreconditionFailedException, PreconditionErrorException {
-        ChangeSet changeSet = new ChangeSet(getId(), getAuthor(), false, false, getChangeLogFile(), getChangeLogFile(), null, null, false);
+    public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet) throws PreconditionFailedException, PreconditionErrorException {
+        ChangeSet interestedChangeSet = new ChangeSet(getId(), getAuthor(), false, false, getChangeLogFile(), getChangeLogFile(), null, null, false);
         RanChangeSet ranChangeSet;
         try {
-            ranChangeSet = database.getRanChangeSet(changeSet);
+            ranChangeSet = database.getRanChangeSet(interestedChangeSet);
         } catch (Exception e) {
             throw new PreconditionErrorException(e, changeLog, this);
         }
         if (ranChangeSet == null) {
-            throw new PreconditionFailedException("Change Set '"+changeSet.toString(false)+"' has not been run", changeLog, this);
+            throw new PreconditionFailedException("Change Set '"+interestedChangeSet.toString(false)+"' has not been run", changeLog, this);
         }
     }
 

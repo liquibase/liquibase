@@ -141,7 +141,7 @@ public class ChangeSet implements Conditional {
 
             try {
                 if (preconditions != null) {
-                    preconditions.check(database, null);
+                    preconditions.check(database, null, this);
                 }
             } catch (PreconditionFailedException e) {
                 StringBuffer message = new StringBuffer();
@@ -152,21 +152,18 @@ public class ChangeSet implements Conditional {
                 }
 
                 if (preconditions.getOnFail().equals(PreconditionContainer.FailOption.HALT)) {
-                    e.printStackTrace();
                     throw new MigrationFailedException(this, message.toString(), e);
                 } else if (preconditions.getOnFail().equals(PreconditionContainer.FailOption.CONTINUE)) {
                     skipChange = true;
                     markRan = false;
-
-                    log.info("Continuing past ChangeSet: " + toString() + " due to precondition failure: " + message);
                 } else if (preconditions.getOnFail().equals(PreconditionContainer.FailOption.MARK_RAN)) {
                     skipChange = true;
 
-                    log.info("Marking ChangeSet: " + toString() + " ran due to precondition failure: " + message);
+                    log.info("Marking ChangeSet: " + toString() + " ran despite precondition failure: " + message);
                 } else if (preconditions.getOnFail().equals(PreconditionContainer.FailOption.WARN)) {
-                    log.warning("Running change set despite failed precondition.  ChangeSet: " + toString() + ": " + message);
+                    //already warned
                 } else {
-                    throw new MigrationFailedException(this, "Unexpected precondition onFail attribute: " + preconditions.getOnFail(), e);
+                    throw new UnexpectedLiquibaseException("Unexpected precondition onFail attribute: " + preconditions.getOnFail(), e);
                 }
             } catch (PreconditionErrorException e) {
                 StringBuffer message = new StringBuffer();
@@ -182,16 +179,15 @@ public class ChangeSet implements Conditional {
                     skipChange = true;
                     markRan = false;
 
-                    log.info("Continuing past ChangeSet: " + toString() + " due to precondition error: " + message);
                 } else if (preconditions.getOnError().equals(PreconditionContainer.ErrorOption.MARK_RAN)) {
                     skipChange = true;
                     markRan = true;
 
-                    log.info("Marking ChangeSet: " + toString() + " due ran to precondition error: " + message);
+                    log.info("Marking ChangeSet: " + toString() + " ran despite precondition error: " + message);
                 } else if (preconditions.getOnError().equals(PreconditionContainer.ErrorOption.WARN)) {
-                    log.warning("Running change set despite errored precondition.  ChangeSet: " + toString() + ": " + message);
+                    //already logged
                 } else {
-                    throw new MigrationFailedException(this, "Unexpected precondition onError attribute: " + preconditions.getOnError(), e);
+                    throw new UnexpectedLiquibaseException("Unexpected precondition onError attribute: " + preconditions.getOnError(), e);
                 }
 
                 database.rollback();
