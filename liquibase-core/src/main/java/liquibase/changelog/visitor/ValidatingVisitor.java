@@ -8,6 +8,7 @@ import liquibase.database.Database;
 import liquibase.exception.PreconditionErrorException;
 import liquibase.exception.PreconditionFailedException;
 import liquibase.exception.SetupException;
+import liquibase.exception.ValidationErrors;
 import liquibase.precondition.core.ErrorPrecondition;
 import liquibase.precondition.core.FailedPrecondition;
 import liquibase.precondition.core.PreconditionContainer;
@@ -25,6 +26,7 @@ public class ValidatingVisitor implements ChangeSetVisitor {
     private Set<ChangeSet> duplicateChangeSets = new HashSet<ChangeSet>();
     private List<SetupException> setupExceptions = new ArrayList<SetupException>();
     private List<Throwable> changeValidationExceptions = new ArrayList<Throwable>();
+    private ValidationErrors validationErrors = new ValidationErrors();
 
     private Set<String> seenChangeSets = new HashSet<String>();
 
@@ -61,7 +63,7 @@ public class ValidatingVisitor implements ChangeSetVisitor {
             }
 
             try {
-                change.validate(database);
+                validationErrors.addAll(change.validate(database), changeSet);
             } catch (Throwable e) {
                 changeValidationExceptions.add(e);
             }
@@ -113,13 +115,18 @@ public class ValidatingVisitor implements ChangeSetVisitor {
         return changeValidationExceptions;
     }
 
+    public ValidationErrors getValidationErrors() {
+        return validationErrors;
+    }
+
     public boolean validationPassed() {
         return invalidMD5Sums.size() == 0
                 && failedPreconditions.size() == 0
                 && errorPreconditions.size() == 0
                 && duplicateChangeSets.size() == 0
                 && changeValidationExceptions.size() == 0
-                && setupExceptions.size() == 0;
+                && setupExceptions.size() == 0
+                && !validationErrors.hasErrors();
     }
 
 }

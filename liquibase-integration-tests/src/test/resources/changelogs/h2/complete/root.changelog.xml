@@ -155,7 +155,7 @@
     </changeSet>
 
     <changeSet id="17" author="nvoxland">
-        <alterSequence sequenceName="seq_test" minValue="100"/>
+        <alterSequence sequenceName="seq_test"/>
     </changeSet>
 
     <changeSet id="18a" author="nvoxland">

@@ -24,17 +24,8 @@ public class CreateViewGenerator implements SqlGenerator<CreateViewStatement> {
         validationErrors.checkRequiredField("viewName", createViewStatement.getViewName());
         validationErrors.checkRequiredField("selectQuery", createViewStatement.getSelectQuery());
 
-        if (database instanceof HsqlDatabase
-                 || database  instanceof H2Database
-                || database instanceof DB2Database
-                || database instanceof CacheDatabase
-                || database instanceof MSSQLDatabase
-                || database instanceof DerbyDatabase
-                || database instanceof SybaseASADatabase
-                || database instanceof InformixDatabase) {
-            if (createViewStatement.isReplaceIfExists()) {
-                validationErrors.checkDisallowedField("replaceIfExists", createViewStatement.isReplaceIfExists());
-            }
+        if (createViewStatement.isReplaceIfExists()) {
+            validationErrors.checkDisallowedField("replaceIfExists", createViewStatement.isReplaceIfExists(), database, HsqlDatabase.class, H2Database.class, DB2Database.class, CacheDatabase.class, MSSQLDatabase.class, DerbyDatabase.class, SybaseASADatabase.class, InformixDatabase.class);
         }
 
         return validationErrors;

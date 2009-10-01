@@ -20,7 +20,6 @@ public class RenameTableGenerator implements SqlGenerator<RenameTableStatement> 
 
     public ValidationErrors validate(RenameTableStatement renameTableStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
-        validationErrors.checkRequiredField("schemaName", renameTableStatement.getSchemaName());
         validationErrors.checkRequiredField("newTableName", renameTableStatement.getNewTableName());
         validationErrors.checkRequiredField("oldTableName", renameTableStatement.getOldTableName());
         return validationErrors;

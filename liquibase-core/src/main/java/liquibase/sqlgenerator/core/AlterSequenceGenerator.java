@@ -21,15 +21,10 @@ public class AlterSequenceGenerator implements SqlGenerator<AlterSequenceStateme
     public ValidationErrors validate(AlterSequenceStatement alterSequenceStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
 
-        if (database instanceof FirebirdDatabase || database instanceof HsqlDatabase || database instanceof H2Database) {
-            validationErrors.checkDisallowedField("incrementBy", alterSequenceStatement.getIncrementBy());
-            validationErrors.checkDisallowedField("maxValue", alterSequenceStatement.getMaxValue());
-            validationErrors.checkDisallowedField("minValue", alterSequenceStatement.getMinValue());
-        }
-
-        if (!(database instanceof OracleDatabase || database instanceof DB2Database || database instanceof MaxDBDatabase)) {
-            validationErrors.checkDisallowedField("ordered", alterSequenceStatement.getOrdered());
-        }
+        validationErrors.checkDisallowedField("incrementBy", alterSequenceStatement.getIncrementBy(), database, HsqlDatabase.class, H2Database.class);
+        validationErrors.checkDisallowedField("maxValue", alterSequenceStatement.getMaxValue(), database, HsqlDatabase.class, H2Database.class);
+        validationErrors.checkDisallowedField("minValue", alterSequenceStatement.getMinValue(), database, H2Database.class);
+        validationErrors.checkDisallowedField("ordered", alterSequenceStatement.getOrdered(), database, MaxDBDatabase.class, DB2Database.class);
 
         validationErrors.checkRequiredField("sequenceName", alterSequenceStatement.getSequenceName());
 

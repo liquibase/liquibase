@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <databaseChangeLog
-        xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.7"
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.7 http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.7.xsd">
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
     <preConditions>
             <dbms type="postgresql"/>
             <runningAs username="liquibase"/>
@@ -27,6 +27,9 @@
     </changeSet>
     <changeSet id="1.1" author="nvoxland">
         <createSequence sequenceName="seq_person"/>
+    </changeSet>
+    <changeSet id="1.2" author="nvoxland">
+        <alterSequence sequenceName="seq_person" minValue="100" maxValue="1000" incrementBy="5"/>
     </changeSet>
     <changeSet id="2" author="nvoxland">
         <comment>Add a username column so we can use "person" for authentication</comment>
