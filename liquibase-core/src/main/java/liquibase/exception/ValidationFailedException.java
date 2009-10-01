@@ -18,6 +18,7 @@ public class ValidationFailedException extends MigrationFailedException {
     private Set<ChangeSet> duplicateChangeSets;
     private List<SetupException> setupExceptions;
     private List<Throwable> changeValidationExceptions;
+    private ValidationErrors validationErrors;
 
     public ValidationFailedException(ValidatingVisitor changeLogHandler) {
         this.invalidMD5Sums = changeLogHandler.getInvalidMD5Sums();
@@ -26,6 +27,7 @@ public class ValidationFailedException extends MigrationFailedException {
         this.duplicateChangeSets = changeLogHandler.getDuplicateChangeSets();
         this.setupExceptions = changeLogHandler.getSetupExceptions();
         this.changeValidationExceptions = changeLogHandler.getChangeValidationExceptions();
+        this.validationErrors = changeLogHandler.getValidationErrors();
     }
 
 
@@ -73,9 +75,16 @@ public class ValidationFailedException extends MigrationFailedException {
             }
         }
         if(changeValidationExceptions.size() >0){
-            message.append("     ").append(changeValidationExceptions.size()).append(" changes have validation failures").append(StreamUtil.getLineSeparator());
+            message.append("     ").append(changeValidationExceptions.size()).append(" changes have validation errors").append(StreamUtil.getLineSeparator());
             for (Throwable invalid : changeValidationExceptions) {
                 message.append("          ").append(invalid.toString());
+                message.append(StreamUtil.getLineSeparator());
+            }
+        }
+        if(validationErrors.hasErrors()){
+            message.append("     ").append(validationErrors.getErrorMessages().size()).append(" changes have validation failures").append(StreamUtil.getLineSeparator());
+            for (String invalid : validationErrors.getErrorMessages()) {
+                message.append("          ").append(invalid);
                 message.append(StreamUtil.getLineSeparator());
             }
         }

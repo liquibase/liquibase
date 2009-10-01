@@ -23,23 +23,13 @@ public class CreateSequenceGenerator implements SqlGenerator<CreateSequenceState
 
         validationErrors.checkRequiredField("sequenceName", statement.getSequenceName());
 
-        if (database instanceof FirebirdDatabase) {
-            validationErrors.checkDisallowedField("startValue", statement.getStartValue());
-            validationErrors.checkDisallowedField("incrementBy", statement.getIncrementBy());
-        }
+        validationErrors.checkDisallowedField("startValue", statement.getStartValue(), database, FirebirdDatabase.class);
+        validationErrors.checkDisallowedField("incrementBy", statement.getIncrementBy(), database, FirebirdDatabase.class);
 
-        if (database instanceof FirebirdDatabase || database instanceof HsqlDatabase || database  instanceof H2Database) {
-            validationErrors.checkDisallowedField("minValue", statement.getMinValue());
-            validationErrors.checkDisallowedField("maxValue", statement.getMaxValue());
-        }
+        validationErrors.checkDisallowedField("minValue", statement.getMinValue(), database, FirebirdDatabase.class, H2Database.class, HsqlDatabase.class);
+        validationErrors.checkDisallowedField("maxValue", statement.getMaxValue(), database, FirebirdDatabase.class, H2Database.class, HsqlDatabase.class);
 
-        if (database instanceof FirebirdDatabase || database instanceof HsqlDatabase || database  instanceof H2Database) {
-            validationErrors.addError("Database does not support creating sequences with maxValue");
-        }
-
-        if (statement.getOrdered() != null && !(database instanceof OracleDatabase || database instanceof DB2Database || database instanceof MaxDBDatabase)) {
-            validationErrors.checkDisallowedField("ordered", statement.getOrdered());
-        }
+        validationErrors.checkDisallowedField("ordered", statement.getOrdered(), database, OracleDatabase.class, DB2Database.class, MaxDBDatabase.class);
 
 
         return validationErrors;
