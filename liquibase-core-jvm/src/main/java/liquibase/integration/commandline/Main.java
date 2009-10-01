@@ -290,7 +290,8 @@ public class Main {
         stream.println("                                current state after the changes in the ");
         stream.println("                                changeslog have been applied");
         stream.println(" updateTestingRollback          Updates database, then rolls back changes before");
-        stream.println("                                updating again. Useful for testing rollback support");
+        stream.println("                                updating again. Useful for testing");
+        stream.println("                                rollback support");
         stream.println(" generateChangeLog              Writes Change Log XML to copy the current state");
         stream.println("                                of the database to standard out");
         stream.println("");
