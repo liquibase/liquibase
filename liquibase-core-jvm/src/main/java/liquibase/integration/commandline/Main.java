@@ -84,7 +84,7 @@ public class Main {
             try {
                 main.parseOptions(args);
             } catch (CommandLineParsingException e) {
-                main.printHelp(System.out);
+                main.printHelp(Arrays.asList(e.getMessage()), System.out);
                 System.exit(-2);
             }
 
@@ -205,6 +205,7 @@ public class Main {
                 || "rollbackToDateSQL".equalsIgnoreCase(arg)
                 || "rollbackCountSQL".equalsIgnoreCase(arg)
                 || "futureRollbackSQL".equalsIgnoreCase(arg)
+                || "updateTestingRollback".equalsIgnoreCase(arg)
                 || "tag".equalsIgnoreCase(arg)
                 || "listLocks".equalsIgnoreCase(arg)
                 || "dropAll".equalsIgnoreCase(arg)
@@ -288,6 +289,8 @@ public class Main {
         stream.println(" futureRollbackSQL              Writes SQL to roll back the database to the ");
         stream.println("                                current state after the changes in the ");
         stream.println("                                changeslog have been applied");
+        stream.println(" updateTestingRollback          Updates database, then rolls back changes before");
+        stream.println("                                updating again. Useful for testing rollback support");
         stream.println(" generateChangeLog              Writes Change Log XML to copy the current state");
         stream.println("                                of the database to standard out");
         stream.println("");
@@ -703,6 +706,8 @@ public class Main {
                     liquibase.rollback(Integer.parseInt(commandParams.iterator().next()), contexts, getOutputWriter());
                 } else if ("futureRollbackSQL".equalsIgnoreCase(command)) {
                     liquibase.futureRollbackSQL(contexts, getOutputWriter());
+                } else if ("updateTestingRollback".equalsIgnoreCase(command)) {
+                    liquibase.updateTestingRollback(contexts);
                 } else {
                     throw new CommandLineParsingException("Unknown command: " + command);
                 }
