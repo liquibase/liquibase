@@ -5,6 +5,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.HashMap;
+import java.util.ArrayList;
+
+import liquibase.changelog.ChangeLogParameter;
 
 
 public class XMLChangeLogSAXHandlerTest {
@@ -12,14 +15,14 @@ public class XMLChangeLogSAXHandlerTest {
 
     @Before
     public void setup() {
-        handler = new XMLChangeLogSAXHandler(null, null, new HashMap<String, Object>());
+        handler = new XMLChangeLogSAXHandler(null, null, new ArrayList<ChangeLogParameter>());
     }
 
 
     @Test
     public void setParameterValue_doubleSet() {
-        handler.setParameterValue("doubleSet", "originalValue");
-        handler.setParameterValue("doubleSet", "newValue");
+        handler.setParameter("doubleSet", "originalValue", null);
+        handler.setParameter("doubleSet", "newValue", null);
 
         assertEquals("re-setting a param should not overwrite the value (like how ant works)", "originalValue", handler.getParameterValue("doubleSet"));
     }

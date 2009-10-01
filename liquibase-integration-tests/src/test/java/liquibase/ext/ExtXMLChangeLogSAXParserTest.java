@@ -4,6 +4,7 @@ import liquibase.change.Change;
 import liquibase.change.ChangeFactory;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
+import liquibase.changelog.ChangeLogParameter;
 import liquibase.parser.core.xml.XMLChangeLogSAXParser;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.servicelocator.ServiceLocator;
@@ -12,6 +13,7 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 
 import java.util.HashMap;
+import java.util.ArrayList;
 
 public class ExtXMLChangeLogSAXParserTest {
 
@@ -23,7 +25,7 @@ public class ExtXMLChangeLogSAXParserTest {
         ServiceLocator.getInstance().setResourceAccessor(resourceAccessor);
         ChangeFactory.reset();
 
-        DatabaseChangeLog changeLog = new XMLChangeLogSAXParser().parse("changelogs/common/ext.changelog.xml", new HashMap<String, Object>(), resourceAccessor);
+        DatabaseChangeLog changeLog = new XMLChangeLogSAXParser().parse("changelogs/common/ext.changelog.xml", new ArrayList<ChangeLogParameter>(), resourceAccessor);
 
         assertEquals("changelogs/common/ext.changelog.xml", changeLog.getLogicalFilePath());
 

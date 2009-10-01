@@ -3,6 +3,7 @@ package liquibase;
 import liquibase.changelog.ChangeLogIterator;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
+import liquibase.changelog.ChangeLogParameter;
 import liquibase.changelog.filter.*;
 import liquibase.changelog.visitor.*;
 import liquibase.database.Database;
@@ -46,7 +47,7 @@ public class Liquibase {
     protected Database database;
     private Logger log;
 
-    private Map<String, Object> changeLogParameters = new HashMap<String, Object>();
+    private List<ChangeLogParameter> changeLogParameters = new ArrayList<ChangeLogParameter>();
 
     public Liquibase(String changeLogFile, ResourceAccessor resourceAccessor, DatabaseConnection conn) throws DatabaseException {
         this(changeLogFile, resourceAccessor, DatabaseFactory.getInstance().findCorrectDatabaseImplementation(conn));
@@ -84,14 +85,17 @@ public class Liquibase {
         }
     }
 
-    public Object getChangeLogParameterValue(String paramter) {
-        return changeLogParameters.get(paramter);
+    public Object getChangeLogParameterValue(String key) {
+        for (ChangeLogParameter param : changeLogParameters) {
+            if (param.getKey().equalsIgnoreCase(key)) {
+                return param.getValue();
+            }
+        }
+        return null;
     }
 
     public void setChangeLogParameterValue(String paramter, Object value) {
-        if (!changeLogParameters.containsKey(paramter)) {
-            changeLogParameters.put(paramter, value);
-        }
+        changeLogParameters.add(new ChangeLogParameter(paramter, value));
     }
 
     public void update(String contexts) throws LiquibaseException {

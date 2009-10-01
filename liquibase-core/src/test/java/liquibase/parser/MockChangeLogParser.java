@@ -1,10 +1,12 @@
 package liquibase.parser;
 
 import liquibase.changelog.DatabaseChangeLog;
+import liquibase.changelog.ChangeLogParameter;
 import liquibase.exception.ChangeLogParseException;
 import liquibase.resource.ResourceAccessor;
 
 import java.util.Map;
+import java.util.List;
 
 public class MockChangeLogParser implements ChangeLogParser {
 
@@ -18,7 +20,7 @@ public class MockChangeLogParser implements ChangeLogParser {
         return validExtensions;
     }
 
-    public DatabaseChangeLog parse(String physicalChangeLogLocation, Map<String, Object> changeLogParameters, ResourceAccessor resourceAccessor) throws ChangeLogParseException {
+    public DatabaseChangeLog parse(String physicalChangeLogLocation, List<ChangeLogParameter> changeLogParameters, ResourceAccessor resourceAccessor) throws ChangeLogParseException {
         return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 }

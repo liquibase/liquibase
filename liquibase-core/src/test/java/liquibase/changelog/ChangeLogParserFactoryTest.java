@@ -11,6 +11,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Map;
+import java.util.List;
 
 public class ChangeLogParserFactoryTest {
     @Before
@@ -116,7 +117,7 @@ public class ChangeLogParserFactoryTest {
 
     private static class MockChangeLogParser implements ChangeLogParser {
 
-        public DatabaseChangeLog parse(String physicalChangeLogLocation, Map<String, Object> changeLogParameters, ResourceAccessor resourceAccessor) throws ChangeLogParseException {
+        public DatabaseChangeLog parse(String physicalChangeLogLocation, List<ChangeLogParameter> changeLogParameters, ResourceAccessor resourceAccessor) throws ChangeLogParseException {
             return null;
         }
 
