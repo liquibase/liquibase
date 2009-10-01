@@ -470,6 +470,13 @@ public class Liquibase {
     }
 
 
+    public void updateTestingRollback(String contexts) throws LiquibaseException {
+        Date baseDate = new Date();
+        update(contexts);
+        rollback(baseDate, contexts);
+        update(contexts);
+    }
+
     public void checkDatabaseChangeLogTable() throws DatabaseException {
         getDatabase().checkDatabaseChangeLogTable();
         getDatabase().checkDatabaseChangeLogLockTable();
