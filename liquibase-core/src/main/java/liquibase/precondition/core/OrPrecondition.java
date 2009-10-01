@@ -24,6 +24,7 @@ public class OrPrecondition extends PreconditionLogic {
             try {
                 precondition.check(database, changeLog, changeSet);
                 onePassed = true;
+                break;
             } catch (PreconditionFailedException e) {
                 failures.addAll(e.getFailedPreconditions());
             }
