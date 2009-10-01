@@ -1,13 +1,14 @@
 package liquibase.changelog;
 
 import java.util.Map;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class ExpressionExpander {
-    private Map<String, Object> changeLogParameters;
+    private List<ChangeLogParameter> changeLogParameters;
 
-    public ExpressionExpander(Map<String, Object> changeLogParameters) {
+    public ExpressionExpander(List<ChangeLogParameter> changeLogParameters) {
         this.changeLogParameters = changeLogParameters;
     }
 
@@ -23,23 +24,26 @@ public class ExpressionExpander {
             String valueTolookup = expressionString.replaceFirst("\\$\\{", "").replaceFirst("\\}$", "");
 
             int dotIndex = valueTolookup.indexOf('.');
-            Object value = getParameterValue(valueTolookup);
+            ChangeLogParameter value = getParameterValue(valueTolookup);
 
             if (value != null) {
-                text = text.replace(expressionString, value.toString());
+                text = text.replace(expressionString, value.getValue().toString());
             }
         }
         return text;
     }
 
-    public Object getParameterValue(String paramter) {
-        return changeLogParameters.get(paramter);
+    public ChangeLogParameter getParameterValue(String key) {
+        for (ChangeLogParameter param : changeLogParameters) {
+            if (param.getKey().equalsIgnoreCase(key)) {
+                return param;
+            }
+        }
+        return null;
     }
 
-    public void setParameterValue(String paramter, Object value) {
-        if (!changeLogParameters.containsKey(paramter)) {
-            changeLogParameters.put(paramter, value);
-        }
+    public void addParameter(ChangeLogParameter value) {
+        changeLogParameters.add(value);
     }
 
 }

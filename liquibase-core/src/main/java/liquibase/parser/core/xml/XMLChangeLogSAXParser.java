@@ -1,6 +1,7 @@
 package liquibase.parser.core.xml;
 
 import liquibase.changelog.DatabaseChangeLog;
+import liquibase.changelog.ChangeLogParameter;
 import liquibase.exception.ChangeLogParseException;
 import liquibase.logging.LogFactory;
 import liquibase.parser.ChangeLogParser;
@@ -12,6 +13,7 @@ import javax.xml.parsers.SAXParserFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
+import java.util.List;
 
 public class XMLChangeLogSAXParser implements ChangeLogParser {
     private SAXParserFactory saxParserFactory;
@@ -38,7 +40,7 @@ public class XMLChangeLogSAXParser implements ChangeLogParser {
         };
     }
 
-    public DatabaseChangeLog parse(String physicalChangeLogLocation, Map<String, Object> changeLogParameters, ResourceAccessor resourceAccessor) throws ChangeLogParseException {
+    public DatabaseChangeLog parse(String physicalChangeLogLocation, List<ChangeLogParameter> changeLogParameters, ResourceAccessor resourceAccessor) throws ChangeLogParseException {
 
         InputStream inputStream = null;
         try {

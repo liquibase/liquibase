@@ -6,6 +6,7 @@ import liquibase.change.custom.CustomChangeWrapper;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.ExpressionExpander;
+import liquibase.changelog.ChangeLogParameter;
 import liquibase.exception.CustomChangeException;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.MigrationFailedException;
@@ -43,7 +44,6 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
     private DatabaseChangeLog databaseChangeLog;
     private Change change;
     private Stack changeSubObjects = new Stack();
-    private Object nestedChangeObject;
     private StringBuffer text;
     private PreconditionContainer rootPrecondition;
     private Stack<PreconditionLogic> preconditionLogicStack = new Stack<PreconditionLogic>();
@@ -52,7 +52,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
     private ResourceAccessor resourceAccessor;
     private Precondition currentPrecondition;
 
-    private Map<String, Object> changeLogParameters = new HashMap<String, Object>();
+    private List<ChangeLogParameter> changeLogParameters = new ArrayList<ChangeLogParameter>();
     private boolean inRollback = false;
 
     private boolean inModifySql = false;
@@ -61,7 +61,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
     private boolean modifySqlAppliedOnRollback = false;
 
 
-    protected XMLChangeLogSAXHandler(String physicalChangeLogLocation, ResourceAccessor resourceAccessor, Map<String, Object> properties) {
+    protected XMLChangeLogSAXHandler(String physicalChangeLogLocation, ResourceAccessor resourceAccessor, List<ChangeLogParameter> properties) {
         log = LogFactory.getLogger();
         this.resourceAccessor = resourceAccessor;
 
@@ -69,12 +69,10 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
         databaseChangeLog.setPhysicalFilePath(physicalChangeLogLocation);
 
         for (Map.Entry entry : System.getProperties().entrySet()) {
-            changeLogParameters.put(entry.getKey().toString(), entry.getValue());
+            changeLogParameters.add(new ChangeLogParameter(entry.getKey().toString(), entry.getValue()));
         }
 
-        for (Map.Entry entry : properties.entrySet()) {
-            changeLogParameters.put(entry.getKey().toString(), entry.getValue());
-        }
+        changeLogParameters.addAll(properties);
     }
 
     public DatabaseChangeLog getDatabaseChangeLog() {
@@ -102,10 +100,10 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
             } else if ("includeAll".equals(qName)) {
                 String pathName = atts.getValue("path");
                 if (!(pathName.endsWith("/") || pathName.endsWith("\\"))) {
-                    pathName = pathName+"/";
+                    pathName = pathName + "/";
                 }
-                log.debug("includeAll for "+pathName);
-                log.debug("Using file opener for includeAll: "+ resourceAccessor.getClass().getName());
+                log.debug("includeAll for " + pathName);
+                log.debug("Using file opener for includeAll: " + resourceAccessor.getClass().getName());
                 Enumeration<URL> resources = resourceAccessor.getResources(pathName);
 
                 boolean foundResource = false;
@@ -113,16 +111,16 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
                 while (resources.hasMoreElements()) {
                     URL fileUrl = resources.nextElement();
                     if (!fileUrl.toExternalForm().startsWith("file:")) {
-                        log.debug(fileUrl.toExternalForm()+" is not a file path");
+                        log.debug(fileUrl.toExternalForm() + " is not a file path");
                         continue;
                     }
                     File file = new File(fileUrl.toURI());
-                    log.debug("includeAll using path "+file.getCanonicalPath());
+                    log.debug("includeAll using path " + file.getCanonicalPath());
                     if (!file.exists()) {
                         throw new SAXException("includeAll path " + pathName + " could not be found.  Tried in " + file.toString());
                     }
                     if (file.isDirectory()) {
-                        log.debug(file.getCanonicalPath()+" is a directory");
+                        log.debug(file.getCanonicalPath() + " is a directory");
                         for (File childFile : file.listFiles()) {
                             if (handleIncludedChangeLog(pathName + childFile.getName(), false, databaseChangeLog.getPhysicalFilePath())) {
                                 foundResource = true;
@@ -136,7 +134,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
                 }
 
                 if (!foundResource) {
-                    throw new SAXException("Could not find directory "+pathName);
+                    throw new SAXException("Could not find directory " + pathName);
                 }
             } else if (changeSet == null && "changeSet".equals(qName)) {
                 boolean alwaysRun = false;
@@ -231,7 +229,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
             } else if (changeSet != null && change == null) {
                 change = ChangeFactory.getInstance().create(localName);
                 if (change == null) {
-                    throw new SAXException("Unknown LiquiBase extension: "+localName+".  Are you missing a jar from your classpath?");
+                    throw new SAXException("Unknown LiquiBase extension: " + localName + ".  Are you missing a jar from your classpath?");
                 }
                 change.setChangeSet(changeSet);
                 text = new StringBuffer();
@@ -299,8 +297,9 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
             } else if ("where".equals(qName)) {
                 text = new StringBuffer();
             } else if ("property".equals(qName)) {
+                String dbms = StringUtils.trimToNull(atts.getValue("dbms"));
                 if (StringUtils.trimToNull(atts.getValue("file")) == null) {
-                    this.setParameterValue(atts.getValue("name"), atts.getValue("value"));
+                    this.setParameter(atts.getValue("name"), atts.getValue("value"), dbms);
                 } else {
                     Properties props = new Properties();
                     InputStream propertiesStream = resourceAccessor.getResourceAsStream(atts.getValue("file"));
@@ -310,14 +309,14 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
                         props.load(propertiesStream);
 
                         for (Map.Entry entry : props.entrySet()) {
-                            this.setParameterValue(entry.getKey().toString(), entry.getValue().toString());
+                            this.setParameter(entry.getKey().toString(), entry.getValue().toString(), dbms);
                         }
                     }
                 }
             } else if (change instanceof ExecuteShellCommandChange && "arg".equals(qName)) {
                 ((ExecuteShellCommandChange) change).addArg(atts.getValue("value"));
-            } else if (change != null){
-                String creatorMethod = "create"+localName.substring(0,1).toUpperCase()+localName.substring(1);
+            } else if (change != null) {
+                String creatorMethod = "create" + localName.substring(0, 1).toUpperCase() + localName.substring(1);
 
                 Object objectToCreateFrom;
                 if (changeSubObjects.size() == 0) {
@@ -330,7 +329,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
                 try {
                     method = objectToCreateFrom.getClass().getMethod(creatorMethod);
                 } catch (NoSuchMethodException e) {
-                    throw new MigrationFailedException(changeSet, "Could not find creator method "+creatorMethod+" for tag: " + qName);
+                    throw new MigrationFailedException(changeSet, "Could not find creator method " + creatorMethod + " for tag: " + qName);
                 }
                 Object subObject = method.invoke(objectToCreateFrom);
                 for (int i = 0; i < atts.getLength(); i++) {
@@ -352,7 +351,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 
     protected boolean handleIncludedChangeLog(String fileName, boolean isRelativePath, String relativeBaseFileName) throws LiquibaseException {
         if (!(fileName.endsWith(".xml") || fileName.endsWith(".sql"))) {
-            log.debug(relativeBaseFileName+"/"+fileName+" is not a recognized file type");
+            log.debug(relativeBaseFileName + "/" + fileName + " is not a recognized file type");
             return false;
         }
 
@@ -471,7 +470,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
                     List<ColumnConfig> columns = ((UpdateDataChange) change).getColumns();
                     columns.get(columns.size() - 1).setValue(textString);
                 } else {
-                    throw new RuntimeException("Unexpected column with text: "+textString);
+                    throw new RuntimeException("Unexpected column with text: " + textString);
                 }
                 this.text = new StringBuffer();
             } else if (change != null && localName.equals(change.getChangeMetaData().getName())) {
@@ -525,14 +524,17 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
         }
     }
 
-    public Object getParameterValue(String paramter) {
-        return changeLogParameters.get(paramter);
+    public Object getParameterValue(String key) {
+        for (ChangeLogParameter param : changeLogParameters) {
+            if (param.getKey().equalsIgnoreCase(key)) {
+                return param.getValue();
+            }
+        }
+        return null;
     }
 
-    public void setParameterValue(String paramter, Object value) {
-        if (!changeLogParameters.containsKey(paramter)) {
-            changeLogParameters.put(paramter, value);
-        }
+    public void setParameter(String paramter, Object value, String databases) {
+        changeLogParameters.add(new ChangeLogParameter(paramter, value, databases));
     }
 
     /**

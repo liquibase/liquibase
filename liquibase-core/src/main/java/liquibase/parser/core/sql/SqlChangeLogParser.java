@@ -3,6 +3,7 @@ package liquibase.parser.core.sql;
 import liquibase.change.core.RawSQLChange;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
+import liquibase.changelog.ChangeLogParameter;
 import liquibase.exception.ChangeLogParseException;
 import liquibase.parser.ChangeLogParser;
 import liquibase.resource.ResourceAccessor;
@@ -11,6 +12,7 @@ import liquibase.util.StreamUtil;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
+import java.util.List;
 
 public class SqlChangeLogParser implements ChangeLogParser {
     public String[] getValidFileExtensions() {
@@ -19,7 +21,7 @@ public class SqlChangeLogParser implements ChangeLogParser {
         };
     }
 
-    public DatabaseChangeLog parse(String physicalChangeLogLocation, Map<String, Object> changeLogParameters, ResourceAccessor resourceAccessor) throws ChangeLogParseException {
+    public DatabaseChangeLog parse(String physicalChangeLogLocation, List<ChangeLogParameter> changeLogParameters, ResourceAccessor resourceAccessor) throws ChangeLogParseException {
 
         RawSQLChange change = new RawSQLChange();
 

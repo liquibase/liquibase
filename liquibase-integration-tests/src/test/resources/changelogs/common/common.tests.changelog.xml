@@ -9,13 +9,14 @@
     <property file="changelogs/common/dynamic.parameters.properties"/>
     <property name="column1.name" value="updated-columnA"/>
     <property name="column2.name" value="columnB"/>
+    <property name="real.int.type" value="int"/>
 
     <include file="changelogs/common/included.failingprecondition.changelog.xml"/> 
 
     <changeSet id="datatypetest-1" author="nvoxland">
         <validCheckSum>e5b7b29ce3a75640858cd022501852d2</validCheckSum>
         <createTable tableName="dataTypeTest" schemaName="">
-            <column name="id" type="integer">
+            <column name="id" type="${real.int.type}">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="dateCol" type="date"/>
