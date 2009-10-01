@@ -1,6 +1,7 @@
 package liquibase.precondition.core;
 
 import liquibase.changelog.DatabaseChangeLog;
+import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.PreconditionErrorException;
@@ -39,7 +40,7 @@ public class PrimaryKeyExistsPrecondition implements Precondition {
         this.tableName = tableName;
     }
 
-    public void check(Database database, DatabaseChangeLog changeLog) throws PreconditionFailedException, PreconditionErrorException {
+    public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet) throws PreconditionFailedException, PreconditionErrorException {
         DatabaseSnapshot snapshot;
         try {
             snapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database, getSchemaName(), null);

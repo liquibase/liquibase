@@ -8,8 +8,4 @@ public class H2IntegrationTest extends AbstractIntegrationTest {
         super("h2", "jdbc:h2:mem:liquibase");
     }
 
-    @Override
-    public void testOutputChangeLog() throws Exception {
-        super.testOutputChangeLog();    //To change body of overridden methods use File | Settings | File Templates.
-    }
 }

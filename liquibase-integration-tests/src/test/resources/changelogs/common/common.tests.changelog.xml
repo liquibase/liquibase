@@ -10,6 +10,8 @@
     <property name="column1.name" value="updated-columnA"/>
     <property name="column2.name" value="columnB"/>
 
+    <include file="changelogs/common/included.failingprecondition.changelog.xml"/> 
+
     <changeSet id="datatypetest-1" author="nvoxland">
         <validCheckSum>e5b7b29ce3a75640858cd022501852d2</validCheckSum>
         <createTable tableName="dataTypeTest" schemaName="">

@@ -1,6 +1,7 @@
 package liquibase.precondition.core;
 
 import liquibase.changelog.DatabaseChangeLog;
+import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.exception.PreconditionErrorException;
 import liquibase.exception.PreconditionFailedException;
@@ -13,11 +14,11 @@ import liquibase.precondition.PreconditionLogic;
 public class NotPrecondition extends PreconditionLogic {
 
 
-    public void check(Database database, DatabaseChangeLog changeLog) throws PreconditionFailedException, PreconditionErrorException {
+    public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet) throws PreconditionFailedException, PreconditionErrorException {
         for (Precondition precondition : getNestedPreconditions()) {
             boolean threwException = false;
             try {
-                precondition.check(database, changeLog);
+                precondition.check(database, changeLog, changeSet);
             } catch (PreconditionFailedException e) {
                 ; //that's what we want with a Not precondition
                 threwException = true;

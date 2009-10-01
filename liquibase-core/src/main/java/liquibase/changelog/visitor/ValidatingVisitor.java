@@ -5,13 +5,11 @@ import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.RanChangeSet;
 import liquibase.database.Database;
-import liquibase.exception.PreconditionErrorException;
-import liquibase.exception.PreconditionFailedException;
-import liquibase.exception.SetupException;
-import liquibase.exception.ValidationErrors;
+import liquibase.exception.*;
 import liquibase.precondition.core.ErrorPrecondition;
 import liquibase.precondition.core.FailedPrecondition;
 import liquibase.precondition.core.PreconditionContainer;
+import liquibase.logging.LogFactory;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -37,12 +35,12 @@ public class ValidatingVisitor implements ChangeSetVisitor {
     }
 
     public void validate(Database database, DatabaseChangeLog changeLog) {
+        PreconditionContainer preconditions = changeLog.getPreconditions();
         try {
-            PreconditionContainer precondition = changeLog.getPreconditions();
-            if (precondition == null) {
+            if (preconditions == null) {
                 return;
             }
-            precondition.check(database, changeLog);
+            preconditions.check(database, changeLog, null);
         } catch (PreconditionFailedException e) {
             failedPreconditions.addAll(e.getFailedPreconditions());
         } catch (PreconditionErrorException e) {

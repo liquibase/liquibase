@@ -1,14 +1,17 @@
 package liquibase.precondition.core;
 
 import liquibase.util.StringUtils;
+import liquibase.util.StreamUtil;
 import liquibase.database.Database;
 import liquibase.changelog.DatabaseChangeLog;
+import liquibase.changelog.ChangeSet;
 import liquibase.exception.PreconditionFailedException;
 import liquibase.exception.PreconditionErrorException;
-import liquibase.exception.MigrationFailedException;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.exception.ValidationFailedException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
+import liquibase.logging.LogFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -63,6 +66,7 @@ public class PreconditionContainer extends AndPrecondition {
             this.key = key;
         }
 
+        @Override
         public String toString() {
             return key;
         }
@@ -166,7 +170,12 @@ public class PreconditionContainer extends AndPrecondition {
     }
 
     @Override
-    public void check(Database database, DatabaseChangeLog changeLog) throws PreconditionFailedException, PreconditionErrorException {
+    public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet) throws PreconditionFailedException, PreconditionErrorException {
+        String ranOn = String.valueOf(changeLog);
+        if (changeSet != null) {
+            ranOn = String.valueOf(changeSet);
+        }
+
         Executor executor = ExecutorService.getInstance().getExecutor(database);
         try {
             // Three cases for preConditions onUpdateSQL:
@@ -187,21 +196,49 @@ public class PreconditionContainer extends AndPrecondition {
                 }
 
             if (testPrecondition) {
-                super.check(database, changeLog);
+                super.check(database, changeLog, changeSet);
             }
         } catch (PreconditionFailedException e) {
-            if (getOnFailMessage() == null) {
-                throw e;
-            } else {
-                throw new PreconditionFailedException(getOnFailMessage(), changeLog, this);
-            }
-        } catch (PreconditionErrorException e) {
-            if (getOnErrorMessage() == null) {
-                throw e;
-            } else {
-                throw new PreconditionErrorException(getOnErrorMessage(), e.getErrorPreconditions());
+            StringBuffer message = new StringBuffer();
+            message.append("     ").append(e.getFailedPreconditions().size()).append(" preconditions failed").append(StreamUtil.getLineSeparator());
+            for (FailedPrecondition invalid : e.getFailedPreconditions()) {
+                message.append("     ").append(invalid.toString());
+                message.append(StreamUtil.getLineSeparator());
             }
 
+            if (getOnFailMessage() != null) {
+                message = new StringBuffer(getOnFailMessage());
+            }
+            if (this.getOnFail().equals(PreconditionContainer.FailOption.CONTINUE)) {
+                LogFactory.getLogger().info("Continuing past: " + ranOn + " despite precondition failure:\n " + message);
+            } else if (this.getOnFail().equals(PreconditionContainer.FailOption.WARN)) {
+                LogFactory.getLogger().warning("Continuing past: " + ranOn + " despite precondition failure:\n " + message);
+            } else {
+                if (getOnFailMessage() == null) {
+                    throw e;
+                } else {
+                    throw new PreconditionFailedException(getOnFailMessage(), changeLog, this);
+                }
+            }
+        } catch (PreconditionErrorException e) {
+            StringBuffer message = new StringBuffer();
+            message.append("     ").append(e.getErrorPreconditions().size()).append(" preconditions failed").append(StreamUtil.getLineSeparator());
+            for (ErrorPrecondition invalid : e.getErrorPreconditions()) {
+                message.append("     ").append(invalid.toString());
+                message.append(StreamUtil.getLineSeparator());
+            }
+
+            if (this.getOnError().equals(PreconditionContainer.ErrorOption.CONTINUE)) {
+                LogFactory.getLogger().info("Continuing past: " + toString() + " despite precondition error:\n " + message);
+            } else if (this.getOnError().equals(PreconditionContainer.ErrorOption.WARN)) {
+                LogFactory.getLogger().warning("Continuing past: " + toString() + " despite precondition error:\n " + message);
+            } else {
+                if (getOnErrorMessage() == null) {
+                    throw e;
+                } else {
+                    throw new PreconditionErrorException(getOnErrorMessage(), e.getErrorPreconditions());
+                }                
+            }
         }
     }
 }

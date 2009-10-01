@@ -1,6 +1,7 @@
 package liquibase.precondition.core;
 
 import liquibase.changelog.DatabaseChangeLog;
+import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.exception.PreconditionErrorException;
 import liquibase.exception.PreconditionFailedException;
@@ -16,12 +17,12 @@ import java.util.List;
 public class OrPrecondition extends PreconditionLogic {
 
 
-    public void check(Database database, DatabaseChangeLog changeLog) throws PreconditionFailedException, PreconditionErrorException {
+    public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet) throws PreconditionFailedException, PreconditionErrorException {
         boolean onePassed = false;
         List<FailedPrecondition> failures = new ArrayList<FailedPrecondition>();
         for (Precondition precondition : getNestedPreconditions()) {
             try {
-                precondition.check(database, changeLog);
+                precondition.check(database, changeLog, changeSet);
                 onePassed = true;
             } catch (PreconditionFailedException e) {
                 failures.addAll(e.getFailedPreconditions());
