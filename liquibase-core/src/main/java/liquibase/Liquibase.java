@@ -549,15 +549,23 @@ public class Liquibase {
     public void reportStatus(boolean verbose, String contexts, Writer out) throws LiquibaseException {
         try {
             List<ChangeSet> unrunChangeSets = listUnrunChangeSets(contexts);
-            out.append(String.valueOf(unrunChangeSets.size()));
-            out.append(" change sets have not been applied to ");
-            out.append(getDatabase().getConnection().getConnectionUserName());
-            out.append("@");
-            out.append(getDatabase().getConnection().getURL());
-            out.append(StreamUtil.getLineSeparator());
-            if (verbose) {
-                for (ChangeSet changeSet : unrunChangeSets) {
-                    out.append("     ").append(changeSet.toString(false)).append(StreamUtil.getLineSeparator());
+            if (unrunChangeSets.size() == 0) {
+                out.append(getDatabase().getConnection().getConnectionUserName());
+                out.append("@");
+                out.append(getDatabase().getConnection().getURL());
+                out.append(" is up to date");
+                out.append(StreamUtil.getLineSeparator());
+            } else {
+                out.append(String.valueOf(unrunChangeSets.size()));
+                out.append(" change sets have not been applied to ");
+                out.append(getDatabase().getConnection().getConnectionUserName());
+                out.append("@");
+                out.append(getDatabase().getConnection().getURL());
+                out.append(StreamUtil.getLineSeparator());
+                if (verbose) {
+                    for (ChangeSet changeSet : unrunChangeSets) {
+                        out.append("     ").append(changeSet.toString(false)).append(StreamUtil.getLineSeparator());
+                    }
                 }
             }
 
