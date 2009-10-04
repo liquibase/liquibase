@@ -299,6 +299,16 @@
         </xsd:complexType>
     </xsd:element>
 
+    <xsd:element name="modifyDataType">
+        <xsd:complexType>
+            <xsd:attribute name="schemaName" type="xsd:string"/>
+            <xsd:attribute name="tableName" type="xsd:string" use="required"/>
+            <xsd:attribute name="columnName" type="xsd:string" use="required"/>
+            <xsd:attribute name="newDataType" type="xsd:string" use="required"/>
+            <xsd:attribute name="nullable" type="xsd:boolean"/>
+        </xsd:complexType>
+    </xsd:element>
+
     <xsd:element name="addLookupTable">
         <xsd:complexType>
             <xsd:attribute name="existingTableSchemaName" type="xsd:string"/>
@@ -758,15 +768,6 @@
         </xsd:complexType>
     </xsd:element>
 
-    <xsd:element name="modifyColumn">
-        <xsd:complexType>
-            <xsd:sequence>
-                <xsd:element ref="column" maxOccurs="unbounded"/>
-            </xsd:sequence>
-            <xsd:attributeGroup ref="tableNameAttribute"/>
-        </xsd:complexType>
-    </xsd:element>
-
     <xsd:element name="mergeColumns">
         <xsd:complexType>
             <xsd:attributeGroup ref="tableNameAttribute"/>
@@ -851,8 +852,8 @@
             <xsd:element ref="renameTable" maxOccurs="unbounded"/>
             <xsd:element ref="renameColumn" maxOccurs="unbounded"/>
             <xsd:element ref="dropColumn" maxOccurs="unbounded"/>
-            <xsd:element ref="modifyColumn" maxOccurs="unbounded"/>
             <xsd:element ref="mergeColumns" maxOccurs="unbounded"/>
+            <xsd:element ref="modifyDataType" maxOccurs="unbounded"/>
             <xsd:element ref="createSequence" maxOccurs="unbounded"/>
             <xsd:element ref="alterSequence" maxOccurs="unbounded"/>
             <xsd:element ref="dropSequence" maxOccurs="unbounded"/>

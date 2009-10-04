@@ -284,9 +284,7 @@
     </changeSet>
 
     <changeSet id="50" author="nvoxland">
-        <modifyColumn tableName="address">
-            <column name="postalcode" type="varchar(20)"/>
-        </modifyColumn>
+        <modifyDataType tableName="address" columnName="postalcode" newDataType="varchar(20)"/>
     </changeSet>
     
     <include file="changelogs/hsqldb/complete/included.changelog.xml"/>
