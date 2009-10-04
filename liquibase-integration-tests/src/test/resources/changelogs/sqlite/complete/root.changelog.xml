@@ -288,9 +288,7 @@
     </changeSet>
 
     <changeSet id="50" author="nvoxland">
-        <modifyColumn tableName="address">
-            <column name="postalcode" type="int"/>
-        </modifyColumn>
+        <modifyDataType tableName="address" columnName="postalcode" newDataType="varchar(20)"/>
     </changeSet>
 	
 	<!--

@@ -679,28 +679,6 @@ public class XMLChangeLogSerializerTest {
     }
 
     @Test
-    public void createNode_ModifyColumnChange() throws Exception {
-        ModifyColumnChange change = new ModifyColumnChange();
-        change.setTableName("TABLE_NAME");
-
-        ColumnConfig col1 = new ColumnConfig();
-        col1.setName("NAME");
-        col1.setType("integer(3)");
-
-        change.addColumn(col1);
-
-        Element node = new XMLChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(change);
-        assertEquals("modifyColumn", node.getTagName());
-        assertEquals("TABLE_NAME", node.getAttribute("tableName"));
-
-        NodeList columns = node.getElementsByTagName("column");
-        assertEquals(1, columns.getLength());
-        assertEquals("column", ((Element) columns.item(0)).getTagName());
-        assertEquals("NAME", ((Element) columns.item(0)).getAttribute("name"));
-        assertEquals("integer(3)", ((Element) columns.item(0)).getAttribute("type"));
-    }
-
-    @Test
     public void createNode_RawSQLChange() throws Exception {
         RawSQLChange refactoring = new RawSQLChange();
         refactoring.setSql("SOME SQL HERE");

@@ -652,15 +652,12 @@ public class DiffResult {
             boolean foundDifference = false;
             Column referenceColumn = referenceSnapshot.getColumn(column.getTable().getName(), column.getName());
             if (column.isDataTypeDifferent(referenceColumn)) {
-                ColumnConfig columnConfig = new ColumnConfig();
-                columnConfig.setName(column.getName());
-                columnConfig.setType(referenceColumn.getDataTypeString(targetSnapshot.getDatabase()));
-
-                ModifyColumnChange change = new ModifyColumnChange();
+                ModifyDataTypeChange change = new ModifyDataTypeChange();
                 change.setTableName(column.getTable().getName());
                 change.setSchemaName(column.getTable().getSchema());
-                change.addColumn(columnConfig);
-
+                change.setColumnName(column.getName());
+                change.setNewDataType(referenceColumn.getDataTypeString(targetSnapshot.getDatabase()));
+                change.setNullable(column.isNullable());
                 changes.add(change);
                 foundDifference = true;
             }

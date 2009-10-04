@@ -2,7 +2,6 @@ package liquibase.database;
 
 import liquibase.change.Change;
 import liquibase.change.CheckSum;
-import liquibase.change.ColumnConfig;
 import liquibase.change.core.*;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.RanChangeSet;
@@ -352,10 +351,7 @@ public abstract class AbstractDatabase implements Database {
             if (checksumNotRightSize) {
                 executor.comment("Modifying size of databasechangelog.md5sum column");
 
-                ColumnConfig checksumColumn = new ColumnConfig();
-                checksumColumn.setName("MD5SUM");
-                checksumColumn.setType("VARCHAR(35)");
-                statementsToExecute.add(new ModifyColumnsStatement(getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), checksumColumn));
+                statementsToExecute.add(new ModifyDataTypeStatement(getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "MD5SUM", "VARCHAR(35)", true));
             }
 
             List<Map> md5sumRS = ExecutorService.getInstance().getExecutor(this).queryForList(new SelectFromDatabaseChangeLogStatement(new SelectFromDatabaseChangeLogStatement.ByNotNullCheckSum(), "MD5SUM"));
