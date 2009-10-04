@@ -559,6 +559,8 @@
 
     <includeAll path="changelogs/common/pathincluded/"/>
 
+    <include file="includerelative/pathinclude1.changelog.xml" relativeToChangelogFile="true"/>
+
     <changeSet id="autocommitTest" author="nvoxland" runInTransaction="false">
         <createTable tableName="autocommittest">
             <column name="id" type="int"/>
