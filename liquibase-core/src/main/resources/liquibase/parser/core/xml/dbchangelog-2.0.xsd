@@ -51,6 +51,8 @@
                         <xsd:attribute name="file" type="xsd:string"/>
                         <xsd:attribute name="name" type="xsd:string"/>
                         <xsd:attribute name="value" type="xsd:string"/>
+                        <xsd:attribute name="dbms" type="xsd:string"/>
+                        <xsd:attribute name="context" type="xsd:string"/>
                     </xsd:complexType>
                 </xsd:element>
 

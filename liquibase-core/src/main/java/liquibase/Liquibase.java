@@ -1,9 +1,6 @@
 package liquibase;
 
-import liquibase.changelog.ChangeLogIterator;
-import liquibase.changelog.ChangeSet;
-import liquibase.changelog.DatabaseChangeLog;
-import liquibase.changelog.ChangeLogParameter;
+import liquibase.changelog.*;
 import liquibase.changelog.filter.*;
 import liquibase.changelog.visitor.*;
 import liquibase.database.Database;
@@ -21,10 +18,10 @@ import liquibase.logging.LogFactory;
 import liquibase.logging.Logger;
 import liquibase.parser.ChangeLogParserFactory;
 import liquibase.resource.ResourceAccessor;
-import liquibase.sql.visitor.SqlVisitor;
 import liquibase.statement.core.UpdateStatement;
 import liquibase.util.LiquibaseUtil;
 import liquibase.util.StreamUtil;
+import liquibase.util.StringUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -47,7 +44,7 @@ public class Liquibase {
     protected Database database;
     private Logger log;
 
-    private List<ChangeLogParameter> changeLogParameters = new ArrayList<ChangeLogParameter>();
+    private ChangeLogParameters changeLogParameters;
 
     public Liquibase(String changeLogFile, ResourceAccessor resourceAccessor, DatabaseConnection conn) throws DatabaseException {
         this(changeLogFile, resourceAccessor, DatabaseFactory.getInstance().findCorrectDatabaseImplementation(conn));
@@ -62,6 +59,7 @@ public class Liquibase {
         this.resourceAccessor = resourceAccessor;
 
         this.database = database;
+        changeLogParameters = new ChangeLogParameters(database);
     }
 
     public Database getDatabase() {
@@ -85,23 +83,12 @@ public class Liquibase {
         }
     }
 
-    public Object getChangeLogParameterValue(String key) {
-        for (ChangeLogParameter param : changeLogParameters) {
-            if (param.getKey().equalsIgnoreCase(key)) {
-                return param.getValue();
-            }
-        }
-        return null;
-    }
-
-    public void setChangeLogParameterValue(String paramter, Object value) {
-        changeLogParameters.add(new ChangeLogParameter(paramter, value));
-    }
-
     public void update(String contexts) throws LiquibaseException {
 
         LockService lockService = LockService.getInstance(database);
         lockService.waitForLock();
+
+        changeLogParameters.setContexts(StringUtils.splitAndTrim(contexts, ","));
 
         try {
             database.checkDatabaseChangeLogTable();
@@ -124,6 +111,8 @@ public class Liquibase {
     }
 
     public void update(String contexts, Writer output) throws LiquibaseException {
+        changeLogParameters.setContexts(StringUtils.splitAndTrim(contexts, ","));
+
         Executor oldTemplate = ExecutorService.getInstance().getExecutor(database);
         LoggingExecutor loggingExecutor = new LoggingExecutor(ExecutorService.getInstance().getExecutor(database), output, database);
         ExecutorService.getInstance().setExecutor(database, loggingExecutor);
@@ -149,6 +138,8 @@ public class Liquibase {
 
     public void update(int changesToApply, String contexts) throws LiquibaseException {
 
+        changeLogParameters.setContexts(StringUtils.splitAndTrim(contexts, ","));
+
         LockService lockService = LockService.getInstance(database);
         lockService.waitForLock();
 
@@ -171,6 +162,8 @@ public class Liquibase {
     }
 
     public void update(int changesToApply, String contexts, Writer output) throws LiquibaseException {
+        changeLogParameters.setContexts(StringUtils.splitAndTrim(contexts, ","));
+
         Executor oldTemplate = ExecutorService.getInstance().getExecutor(database);
         LoggingExecutor loggingExecutor = new LoggingExecutor(ExecutorService.getInstance().getExecutor(database), output, database);
         ExecutorService.getInstance().setExecutor(database, loggingExecutor);
@@ -201,6 +194,8 @@ public class Liquibase {
     }
 
     public void rollback(int changesToRollback, String contexts, Writer output) throws LiquibaseException {
+        changeLogParameters.setContexts(StringUtils.splitAndTrim(contexts, ","));
+
         Executor oldTemplate = ExecutorService.getInstance().getExecutor(database);
         ExecutorService.getInstance().setExecutor(database, new LoggingExecutor(ExecutorService.getInstance().getExecutor(database), output, database));
 
@@ -217,6 +212,8 @@ public class Liquibase {
     }
 
     public void rollback(int changesToRollback, String contexts) throws LiquibaseException {
+        changeLogParameters.setContexts(StringUtils.splitAndTrim(contexts, ","));
+
         LockService lockService = LockService.getInstance(database);
         lockService.waitForLock();
 
@@ -243,6 +240,8 @@ public class Liquibase {
     }
 
     public void rollback(String tagToRollBackTo, String contexts, Writer output) throws LiquibaseException {
+        changeLogParameters.setContexts(StringUtils.splitAndTrim(contexts, ","));
+
         Executor oldTemplate = ExecutorService.getInstance().getExecutor(database);
         ExecutorService.getInstance().setExecutor(database, new LoggingExecutor(ExecutorService.getInstance().getExecutor(database), output, database));
 
@@ -259,6 +258,8 @@ public class Liquibase {
     }
 
     public void rollback(String tagToRollBackTo, String contexts) throws LiquibaseException {
+        changeLogParameters.setContexts(StringUtils.splitAndTrim(contexts, ","));
+
         LockService lockService = LockService.getInstance(database);
         lockService.waitForLock();
 
@@ -280,6 +281,8 @@ public class Liquibase {
     }
 
     public void rollback(Date dateToRollBackTo, String contexts, Writer output) throws LiquibaseException {
+        changeLogParameters.setContexts(StringUtils.splitAndTrim(contexts, ","));
+
         Executor oldTemplate = ExecutorService.getInstance().getExecutor(database);
         ExecutorService.getInstance().setExecutor(database, new LoggingExecutor(ExecutorService.getInstance().getExecutor(database), output, database));
 
@@ -296,6 +299,8 @@ public class Liquibase {
     }
 
     public void rollback(Date dateToRollBackTo, String contexts) throws LiquibaseException {
+        changeLogParameters.setContexts(StringUtils.splitAndTrim(contexts, ","));
+
         LockService lockService = LockService.getInstance(database);
         lockService.waitForLock();
 
@@ -317,6 +322,7 @@ public class Liquibase {
     }
 
     public void changeLogSync(String contexts, Writer output) throws LiquibaseException {
+        changeLogParameters.setContexts(StringUtils.splitAndTrim(contexts, ","));
 
         LoggingExecutor outputTemplate = new LoggingExecutor(ExecutorService.getInstance().getExecutor(database), output, database);
         Executor oldTemplate = ExecutorService.getInstance().getExecutor(database);
@@ -336,6 +342,8 @@ public class Liquibase {
     }
 
     public void changeLogSync(String contexts) throws LiquibaseException {
+        changeLogParameters.setContexts(StringUtils.splitAndTrim(contexts, ","));
+
         LockService lockService = LockService.getInstance(database);
         lockService.waitForLock();
 
@@ -357,6 +365,8 @@ public class Liquibase {
     }
 
     public void markNextChangeSetRan(String contexts, Writer output) throws LiquibaseException {
+        changeLogParameters.setContexts(StringUtils.splitAndTrim(contexts, ","));
+
 
         LoggingExecutor outputTemplate = new LoggingExecutor(ExecutorService.getInstance().getExecutor(database), output, database);
         Executor oldTemplate = ExecutorService.getInstance().getExecutor(database);
@@ -376,6 +386,8 @@ public class Liquibase {
     }
 
     public void markNextChangeSetRan(String contexts) throws LiquibaseException {
+        changeLogParameters.setContexts(StringUtils.splitAndTrim(contexts, ","));
+
         LockService lockService = LockService.getInstance(database);
         lockService.waitForLock();
 
@@ -398,6 +410,8 @@ public class Liquibase {
     }
 
     public void futureRollbackSQL(String contexts, Writer output) throws LiquibaseException {
+        changeLogParameters.setContexts(StringUtils.splitAndTrim(contexts, ","));
+
         LoggingExecutor outputTemplate = new LoggingExecutor(ExecutorService.getInstance().getExecutor(database), output, database);
         Executor oldTemplate = ExecutorService.getInstance().getExecutor(database);
         ExecutorService.getInstance().setExecutor(database, outputTemplate);
@@ -475,6 +489,8 @@ public class Liquibase {
 
 
     public void updateTestingRollback(String contexts) throws LiquibaseException {
+        changeLogParameters.setContexts(StringUtils.splitAndTrim(contexts, ","));
+
         Date baseDate = new Date();
         update(contexts);
         rollback(baseDate, contexts);
@@ -524,6 +540,8 @@ public class Liquibase {
     }
 
     public List<ChangeSet> listUnrunChangeSets(String contexts) throws LiquibaseException {
+        changeLogParameters.setContexts(StringUtils.splitAndTrim(contexts, ","));
+
         LockService lockService = LockService.getInstance(database);
         lockService.waitForLock();
 
@@ -547,6 +565,8 @@ public class Liquibase {
     }
 
     public void reportStatus(boolean verbose, String contexts, Writer out) throws LiquibaseException {
+        changeLogParameters.setContexts(StringUtils.splitAndTrim(contexts, ","));
+
         try {
             List<ChangeSet> unrunChangeSets = listUnrunChangeSets(contexts);
             if (unrunChangeSets.size() == 0) {
@@ -641,5 +661,9 @@ public class Liquibase {
 
         DatabaseChangeLog changeLog = ChangeLogParserFactory.getInstance().getParser(changeLogFile).parse(changeLogFile, changeLogParameters, resourceAccessor);
         changeLog.validate(database);
+    }
+
+    public void setChangeLogParameter(String key, Object value) {
+        this.changeLogParameters.set(key, value);
     }
 }

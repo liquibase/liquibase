@@ -609,7 +609,7 @@ public class Main {
 
             Liquibase liquibase = new Liquibase(changeLogFile, fileOpener, database);
             for (Map.Entry<String, Object> entry : changeLogParameters.entrySet()) {
-                liquibase.setChangeLogParameterValue(entry.getKey(), entry.getValue());
+                liquibase.setChangeLogParameter(entry.getKey(), entry.getValue());
             }
 
             if ("listLocks".equalsIgnoreCase(command)) {

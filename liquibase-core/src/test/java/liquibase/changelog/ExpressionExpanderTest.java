@@ -4,16 +4,15 @@ import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.HashMap;
-import java.util.ArrayList;
-
 public class ExpressionExpanderTest {
     
-    private ExpressionExpander handler;
+    private ChangeLogParameters.ExpressionExpander handler;
+    private ChangeLogParameters changeLogParameters;
 
     @Before
     public void setup() {
-        this.handler = new ExpressionExpander(new ArrayList<ChangeLogParameter>());
+        changeLogParameters = new ChangeLogParameters();
+        this.handler = new ChangeLogParameters.ExpressionExpander(changeLogParameters);
     }
 
     @Test
@@ -33,14 +32,14 @@ public class ExpressionExpanderTest {
 
     @Test
     public void expandExpressions_singleObjectExpression() {
-        handler.addParameter(new ChangeLogParameter("here", 4));
+        changeLogParameters.set("here", 4);
         assertEquals("A string with one expression 4 set", handler.expandExpressions("A string with one expression ${here} set"));
     }
 
     @Test
     public void expandExpressions_doubleObjectExpression() {
-        handler.addParameter(new ChangeLogParameter("here", 4));
-        handler.addParameter(new ChangeLogParameter("there", 15));
+        changeLogParameters.set("here", 4);
+        changeLogParameters.set("there", 15);
         assertEquals("A string with two expressions 4 and 15 set", handler.expandExpressions("A string with two expressions ${here} and ${there} set"));
     }
 
