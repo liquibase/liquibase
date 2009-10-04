@@ -3,10 +3,7 @@ package liquibase.parser.core.xml;
 import liquibase.change.*;
 import liquibase.change.core.*;
 import liquibase.change.custom.CustomChangeWrapper;
-import liquibase.changelog.ChangeSet;
-import liquibase.changelog.DatabaseChangeLog;
-import liquibase.changelog.ExpressionExpander;
-import liquibase.changelog.ChangeLogParameter;
+import liquibase.changelog.*;
 import liquibase.exception.CustomChangeException;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.MigrationFailedException;
@@ -52,7 +49,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
     private ResourceAccessor resourceAccessor;
     private Precondition currentPrecondition;
 
-    private List<ChangeLogParameter> changeLogParameters = new ArrayList<ChangeLogParameter>();
+    private ChangeLogParameters changeLogParameters;
     private boolean inRollback = false;
 
     private boolean inModifySql = false;
@@ -61,18 +58,14 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
     private boolean modifySqlAppliedOnRollback = false;
 
 
-    protected XMLChangeLogSAXHandler(String physicalChangeLogLocation, ResourceAccessor resourceAccessor, List<ChangeLogParameter> properties) {
+    protected XMLChangeLogSAXHandler(String physicalChangeLogLocation, ResourceAccessor resourceAccessor, ChangeLogParameters changeLogParameters) {
         log = LogFactory.getLogger();
         this.resourceAccessor = resourceAccessor;
 
         databaseChangeLog = new DatabaseChangeLog(physicalChangeLogLocation);
         databaseChangeLog.setPhysicalFilePath(physicalChangeLogLocation);
 
-        for (Map.Entry entry : System.getProperties().entrySet()) {
-            changeLogParameters.add(new ChangeLogParameter(entry.getKey().toString(), entry.getValue()));
-        }
-
-        changeLogParameters.addAll(properties);
+        this.changeLogParameters = changeLogParameters;
     }
 
     public DatabaseChangeLog getDatabaseChangeLog() {
@@ -297,9 +290,10 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
             } else if ("where".equals(qName)) {
                 text = new StringBuffer();
             } else if ("property".equals(qName)) {
+                String context = StringUtils.trimToNull(atts.getValue("context"));
                 String dbms = StringUtils.trimToNull(atts.getValue("dbms"));
                 if (StringUtils.trimToNull(atts.getValue("file")) == null) {
-                    this.setParameter(atts.getValue("name"), atts.getValue("value"), dbms);
+                    this.changeLogParameters.set(atts.getValue("name"), atts.getValue("value"), context, dbms);
                 } else {
                     Properties props = new Properties();
                     InputStream propertiesStream = resourceAccessor.getResourceAsStream(atts.getValue("file"));
@@ -309,7 +303,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
                         props.load(propertiesStream);
 
                         for (Map.Entry entry : props.entrySet()) {
-                            this.setParameter(entry.getKey().toString(), entry.getValue().toString(), dbms);
+                            this.changeLogParameters.set(entry.getKey().toString(), entry.getValue().toString(), context, dbms);
                         }
                     }
                 }
@@ -386,15 +380,14 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
     }
 
     private void setProperty(Object object, String attributeName, String attributeValue) throws IllegalAccessException, InvocationTargetException, CustomChangeException {
-        ExpressionExpander expressionExpander = new ExpressionExpander(changeLogParameters);
         if (object instanceof CustomChangeWrapper) {
             if (attributeName.equals("class")) {
-                ((CustomChangeWrapper) object).setClass(expressionExpander.expandExpressions(attributeValue));
+                ((CustomChangeWrapper) object).setClass(changeLogParameters.expandExpressions(attributeValue));
             } else {
-                ((CustomChangeWrapper) object).setParam(attributeName, expressionExpander.expandExpressions(attributeValue));
+                ((CustomChangeWrapper) object).setParam(attributeName, changeLogParameters.expandExpressions(attributeValue));
             }
         } else {
-            ObjectUtil.setProperty(object, attributeName, expressionExpander.expandExpressions(attributeValue));
+            ObjectUtil.setProperty(object, attributeName, changeLogParameters.expandExpressions(attributeValue));
         }
     }
 
@@ -402,7 +395,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
     public void endElement(String uri, String localName, String qName) throws SAXException {
         String textString = null;
         if (text != null && text.length() > 0) {
-            textString = new ExpressionExpander(changeLogParameters).expandExpressions(StringUtils.trimToNull(text.toString()));
+            textString = changeLogParameters.expandExpressions(StringUtils.trimToNull(text.toString()));
         }
 
         try {
@@ -524,19 +517,6 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
         }
     }
 
-    public Object getParameterValue(String key) {
-        for (ChangeLogParameter param : changeLogParameters) {
-            if (param.getKey().equalsIgnoreCase(key)) {
-                return param.getValue();
-            }
-        }
-        return null;
-    }
-
-    public void setParameter(String paramter, Object value, String databases) {
-        changeLogParameters.add(new ChangeLogParameter(paramter, value, databases));
-    }
-
     /**
      * Wrapper for Attributes that expands the value as needed
      */
@@ -588,11 +568,11 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
         }
 
         public String getValue(String uri, String localName) {
-            return new ExpressionExpander(changeLogParameters).expandExpressions(attributes.getValue(uri, localName));
+            return changeLogParameters.expandExpressions(attributes.getValue(uri, localName));
         }
 
         public String getValue(String qName) {
-            return new ExpressionExpander(changeLogParameters).expandExpressions(attributes.getValue(qName));
+            return changeLogParameters.expandExpressions(attributes.getValue(qName));
         }
     }
 }
