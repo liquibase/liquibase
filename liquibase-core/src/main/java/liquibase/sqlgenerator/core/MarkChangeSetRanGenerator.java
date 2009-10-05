@@ -40,10 +40,13 @@ public class MarkChangeSetRanGenerator implements SqlGenerator<MarkChangeSetRanS
 
         SqlStatement runStatement;
         try {
-            if (statement.isRanBefore()) {
+            if (statement.getExecType().equals(ChangeSet.ExecType.FAILED) || statement.getExecType().equals(ChangeSet.ExecType.SKIPPED)) {
+                return new Sql[0]; //don't mark
+            } else  if (statement.getExecType().ranBefore) {
                 runStatement = new UpdateStatement(database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())
                         .addNewColumnValue("DATEEXECUTED", new DatabaseFunction(dateValue))
                         .addNewColumnValue("MD5SUM", changeSet.generateCheckSum().toString())
+                        .addNewColumnValue("EXECTYPE", statement.getExecType().value)
                         .setWhereClause("ID=? AND AUTHOR=? AND FILENAME=?")
                         .addWhereParameters(changeSet.getId(), changeSet.getAuthor(), changeSet.getFilePath());
             } else {
@@ -56,6 +59,7 @@ public class MarkChangeSetRanGenerator implements SqlGenerator<MarkChangeSetRanS
                         .addColumnValue("MD5SUM", changeSet.generateCheckSum().toString())
                         .addColumnValue("DESCRIPTION", limitSize(changeSet.getDescription()))
                         .addColumnValue("COMMENTS", limitSize(StringUtils.trimToEmpty(changeSet.getComments())))
+                        .addColumnValue("EXECTYPE", statement.getExecType().value)
                         .addColumnValue("LIQUIBASE", LiquibaseUtil.getBuildVersion().replaceAll("SNAPSHOT", "SNP"));
             }
         } catch (LiquibaseException e) {

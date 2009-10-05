@@ -21,6 +21,7 @@ import liquibase.database.core.PostgresDatabase;
 import liquibase.database.core.SybaseASADatabase;
 import liquibase.database.core.SybaseDatabase;
 import liquibase.changelog.ChangeSet;
+import liquibase.util.LiquibaseUtil;
 
 import java.util.List;
 import java.util.Arrays;
@@ -35,8 +36,8 @@ public class MarkChangeSetRanExecuteTest extends AbstractExecuteTest {
 
     @Test
     public void generateSql_insert() throws Exception {
-        this.statementUnderTest = new MarkChangeSetRanStatement(new ChangeSet("a", "b", false, false, "c", "d", "e", "f"), false);
-        String version = "2.0-b5-snp";
+        this.statementUnderTest = new MarkChangeSetRanStatement(new ChangeSet("a", "b", false, false, "c", "d", "e", "f"), ChangeSet.ExecType.EXECUTED);
+        String version = LiquibaseUtil.getBuildVersion().replaceAll("SNAPSHOT", "SNP");
         assertCorrect("insert into [dbo].[databasechangelog] ([author], [comments], [dateexecuted], [description], [filename], [id], [liquibase], [md5sum], [orderexecuted]) values ('b', '', getdate(), 'empty', 'c', 'a', '" + version + "', '2:d41d8cd98f00b204e9800998ecf8427e', 1)", MSSQLDatabase.class);
         assertCorrect("insert into [databasechangelog] ([author], [comments], [dateexecuted], [description], [filename], [id], [liquibase], [md5sum], [orderexecuted]) values ('b', '', timestamp, 'empty', 'c', 'a', '" + version + "', '2:d41d8cd98f00b204e9800998ecf8427e', 1)",MaxDBDatabase.class);
         assertCorrect("insert into [databasechangelog] ([author], [comments], [dateexecuted], [description], [filename], [id], [liquibase], [md5sum], [orderexecuted]) values ('b', '', sysdate, 'empty', 'c', 'a', '" + version + "', '2:d41d8cd98f00b204e9800998ecf8427e', 1)",OracleDatabase.class, CacheDatabase.class);
@@ -51,7 +52,7 @@ public class MarkChangeSetRanExecuteTest extends AbstractExecuteTest {
 
     @Test
     public void generateSql_update() throws Exception {
-        this.statementUnderTest = new MarkChangeSetRanStatement(new ChangeSet("a", "b", false, false, "c", "d", "e", "f"), true);
+        this.statementUnderTest = new MarkChangeSetRanStatement(new ChangeSet("a", "b", false, false, "c", "d", "e", "f"), ChangeSet.ExecType.EXECUTED);
         assertCorrect("update [dbo].[databasechangelog] set [dateexecuted] = NOW(), [md5sum] = '2:d41d8cd98f00b204e9800998ecf8427e' where id='a' and author='b' and filename='c'", MSSQLDatabase.class);
         assertCorrect("update [databasechangelog] set [dateexecuted] = timestamp, [md5sum] = '2:d41d8cd98f00b204e9800998ecf8427e' where id='a' and author='b' and filename='c'", MaxDBDatabase.class);
         assertCorrect("update [databasechangelog] set [dateexecuted] = sysdate, [md5sum] = '2:d41d8cd98f00b204e9800998ecf8427e' where id='a' and author='b' and filename='c'", OracleDatabase.class,CacheDatabase.class);

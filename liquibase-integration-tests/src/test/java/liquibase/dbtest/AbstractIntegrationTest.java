@@ -165,6 +165,31 @@ public abstract class AbstractIntegrationTest {
     }
 
     @Test
+    public void runUpdateOnOldChangelogTableFormat() throws Exception {
+        if (database == null) {
+            return;
+        }
+        Liquibase liquibase = createLiquibase(completeChangeLog);
+        clearDatabase(liquibase);
+
+
+        ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement().execute("CREATE TABLE DATABASECHANGELOG (id varchar(150) NOT NULL,\n" +
+                "author varchar(150) NOT NULL,\n" +
+                "filename varchar(255) NOT NULL,\n" +
+                "dateExecuted datetime NOT NULL,\n" +
+                "md5sum varchar(32),\n" +
+                "description varchar(255),\n" +
+                "comments varchar(255),\n" +
+                "tag varchar(255),\n" +
+                "liquibase varchar(10),\n" +
+                "PRIMARY KEY(id, author, filename))");
+
+        liquibase = createLiquibase(completeChangeLog);
+        liquibase.update(this.contexts);
+        
+    }
+
+    @Test
     public void testOutputChangeLog() throws Exception {
         if (database == null) {
             return;

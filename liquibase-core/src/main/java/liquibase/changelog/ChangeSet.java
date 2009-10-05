@@ -27,7 +27,23 @@ import java.util.*;
 public class ChangeSet implements Conditional {
 
     public enum RunStatus {
-        NOT_RAN, ALREADY_RAN, RUN_AGAIN, INVALID_MD5SUM
+        NOT_RAN, ALREADY_RAN, RUN_AGAIN, MARK_RAN, INVALID_MD5SUM
+    }
+
+    public enum ExecType {
+        EXECUTED("EXECUTED", false),
+        FAILED("EXECUTED", false),
+        SKIPPED("SKIPPED", false),
+        RERAN("RERAN", true),
+        MARK_RAN("MARK_RAN", false);
+
+        ExecType(String value, boolean ranBefore) {
+            this.value = value;
+            this.ranBefore = ranBefore;
+        }
+
+        public String value;
+        public boolean ranBefore;
     }
 
     private List<Change> changes;
@@ -117,10 +133,11 @@ public class ChangeSet implements Conditional {
      *
      * @return should change set be marked as ran
      */
-    public boolean execute(Database database) throws MigrationFailedException {
+    public ExecType execute(Database database) throws MigrationFailedException {
+
+        ExecType execType = null;
 
         boolean skipChange = false;
-        boolean markRan = true;
 
         Executor executor = ExecutorService.getInstance().getExecutor(database);
         try {
@@ -155,13 +172,14 @@ public class ChangeSet implements Conditional {
                     throw new MigrationFailedException(this, message.toString(), e);
                 } else if (preconditions.getOnFail().equals(PreconditionContainer.FailOption.CONTINUE)) {
                     skipChange = true;
-                    markRan = false;
+                    execType = ExecType.SKIPPED;
                 } else if (preconditions.getOnFail().equals(PreconditionContainer.FailOption.MARK_RAN)) {
+                    execType = ExecType.MARK_RAN;
                     skipChange = true;
 
                     log.info("Marking ChangeSet: " + toString() + " ran despite precondition failure: " + message);
                 } else if (preconditions.getOnFail().equals(PreconditionContainer.FailOption.WARN)) {
-                    //already warned
+                    execType = null; //already warned
                 } else {
                     throw new UnexpectedLiquibaseException("Unexpected precondition onFail attribute: " + preconditions.getOnFail(), e);
                 }
@@ -177,15 +195,15 @@ public class ChangeSet implements Conditional {
                     throw new MigrationFailedException(this, message.toString(), e);
                 } else if (preconditions.getOnError().equals(PreconditionContainer.ErrorOption.CONTINUE)) {
                     skipChange = true;
-                    markRan = false;
+                    execType = ExecType.SKIPPED;
 
                 } else if (preconditions.getOnError().equals(PreconditionContainer.ErrorOption.MARK_RAN)) {
+                    execType = ExecType.MARK_RAN;
                     skipChange = true;
-                    markRan = true;
 
                     log.info("Marking ChangeSet: " + toString() + " ran despite precondition error: " + message);
                 } else if (preconditions.getOnError().equals(PreconditionContainer.ErrorOption.WARN)) {
-                    //already logged
+                    execType = null; //already logged
                 } else {
                     throw new UnexpectedLiquibaseException("Unexpected precondition onError attribute: " + preconditions.getOnError(), e);
                 }
@@ -212,8 +230,12 @@ public class ChangeSet implements Conditional {
                     database.commit();
                 }
                 log.debug("ChangeSet " + toString() + " has been successfully run.");
+                if (execType == null) {
+                    execType = ExecType.EXECUTED;
+                }
             } else {
                 log.debug("Skipping ChangeSet: " + toString());
+                execType = ExecType.SKIPPED;
             }
 
         } catch (Exception e) {
@@ -224,6 +246,7 @@ public class ChangeSet implements Conditional {
             }
             if (getFailOnError() != null && !getFailOnError()) {
                 log.info("Change set " + toString(false) + " failed, but failOnError was false", e);
+                execType = ExecType.FAILED;
             } else {
                 if (e instanceof MigrationFailedException) {
                     throw ((MigrationFailedException) e);
@@ -240,7 +263,10 @@ public class ChangeSet implements Conditional {
                 }
             }
         }
-        return markRan;
+        if (execType == null) {
+            System.out.println("asdf");
+        }
+        return execType;
     }
 
     public void rolback(Database database) throws RollbackFailedException {

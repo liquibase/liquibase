@@ -4,20 +4,21 @@ import liquibase.changelog.ChangeSet;
 import liquibase.statement.SqlStatement;
 
 public class MarkChangeSetRanStatement implements SqlStatement {
+
     private ChangeSet changeSet;
 
-    private boolean ranBefore = false;
+    private ChangeSet.ExecType execType;
 
-    public MarkChangeSetRanStatement(ChangeSet changeSet, boolean ranBefore) {
+    public MarkChangeSetRanStatement(ChangeSet changeSet, ChangeSet.ExecType execType) {
         this.changeSet = changeSet;
-        this.ranBefore = ranBefore;
+        this.execType = execType;
     }
 
     public ChangeSet getChangeSet() {
         return changeSet;
     }
 
-    public boolean isRanBefore() {
-        return ranBefore;
+    public ChangeSet.ExecType getExecType() {
+        return execType;
     }
 }

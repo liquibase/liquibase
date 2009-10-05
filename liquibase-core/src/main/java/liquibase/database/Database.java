@@ -196,9 +196,7 @@ public interface Database extends DatabaseObject {
 
     RanChangeSet getRanChangeSet(ChangeSet changeSet) throws DatabaseException, DatabaseHistoryException;
 
-    void markChangeSetAsRan(ChangeSet changeSet) throws DatabaseException;
-
-    void markChangeSetAsReRan(ChangeSet changeSet) throws DatabaseException;
+    void markChangeSetExecStatus(ChangeSet changeSet, ChangeSet.ExecType execType) throws DatabaseException;
 
     List<RanChangeSet> getRanChangeSetList() throws DatabaseException;
 

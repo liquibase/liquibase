@@ -17,6 +17,6 @@ public class ChangeLogSyncVisitor implements ChangeSetVisitor {
     }
 
     public void visit(ChangeSet changeSet, Database database) throws LiquibaseException {
-        this.database.markChangeSetAsRan(changeSet);
+        this.database.markChangeSetExecStatus(changeSet, ChangeSet.ExecType.EXECUTED);
     }
 }
