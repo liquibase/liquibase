@@ -327,6 +327,7 @@ public abstract class AbstractDatabase implements Database {
             boolean hasLiquibase = changeLogTable.getColumn("LIQUIBASE") != null;
             boolean hasOrderExecuted = changeLogTable.getColumn("ORDEREXECUTED") != null;
             boolean checksumNotRightSize = changeLogTable.getColumn("MD5SUM").getColumnSize() != 35;
+            boolean hasExecTypeColumn = changeLogTable.getColumn("EXECTYPE") != null;
 
             if (!hasDescription) {
                 executor.comment("Adding missing databasechangelog.description column");
@@ -352,6 +353,12 @@ public abstract class AbstractDatabase implements Database {
                 executor.comment("Modifying size of databasechangelog.md5sum column");
 
                 statementsToExecute.add(new ModifyDataTypeStatement(getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "MD5SUM", "VARCHAR(35)", true));
+            }
+            if (!hasExecTypeColumn) {
+                executor.comment("Adding missing databasechangelog.exectype column");
+                statementsToExecute.add(new AddColumnStatement(getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "EXECTYPE", "VARCHAR(10)", null, new NotNullConstraint(), new UniqueConstraint()));
+                statementsToExecute.add(new UpdateStatement(getLiquibaseSchemaName(), getDatabaseChangeLogTableName()).addNewColumnValue("EXECTYPE", "EXECUTED"));
+                statementsToExecute.add(new SetNullableStatement(getLiquibaseSchemaName(),  getDatabaseChangeLogTableName(), "EXECTYPE", "VARCHAR(10)", false));
             }
 
             List<Map> md5sumRS = ExecutorService.getInstance().getExecutor(this).queryForList(new SelectFromDatabaseChangeLogStatement(new SelectFromDatabaseChangeLogStatement.ByNotNullCheckSum(), "MD5SUM"));
@@ -527,7 +534,7 @@ public abstract class AbstractDatabase implements Database {
             int totalRows = ExecutorService.getInstance().getExecutor(this).queryForInt(new SelectFromDatabaseChangeLogStatement("COUNT(*)"));
             if (totalRows == 0) {
                 ChangeSet emptyChangeSet = new ChangeSet(String.valueOf(new Date().getTime()), "liquibase", false, false, "liquibase-internal", "liquibase-internal", null, null);
-                this.markChangeSetAsRan(emptyChangeSet);
+                this.markChangeSetExecStatus(emptyChangeSet, ChangeSet.ExecType.EXECUTED);
             }
 
 //            Timestamp lastExecutedDate = (Timestamp) this.getExecutor().queryForObject(createChangeToTagSQL(), Timestamp.class);
@@ -763,18 +770,12 @@ public abstract class AbstractDatabase implements Database {
      * After the change set has been ran against the database this method will update the change log table
      * with the information.
      */
-    public void markChangeSetAsRan(ChangeSet changeSet) throws DatabaseException {
+    public void markChangeSetExecStatus(ChangeSet changeSet, ChangeSet.ExecType execType) throws DatabaseException {
 
 
-        ExecutorService.getInstance().getExecutor(this).execute(new MarkChangeSetRanStatement(changeSet, false));
+        ExecutorService.getInstance().getExecutor(this).execute(new MarkChangeSetRanStatement(changeSet, execType));
 
         getRanChangeSetList().add(new RanChangeSet(changeSet));
-    }
-
-    public void markChangeSetAsReRan(ChangeSet changeSet) throws DatabaseException {
-
-        ExecutorService.getInstance().getExecutor(this).execute(new MarkChangeSetRanStatement(changeSet, true));
-        this.commit();
     }
 
     public void removeRanStatus(ChangeSet changeSet) throws DatabaseException {

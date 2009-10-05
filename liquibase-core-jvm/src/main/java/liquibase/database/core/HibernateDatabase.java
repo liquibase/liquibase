@@ -299,11 +299,7 @@ public class HibernateDatabase implements Database {
         return null;
     }
 
-    public void markChangeSetAsRan(ChangeSet changeSet) throws DatabaseException {
-
-    }
-
-    public void markChangeSetAsReRan(ChangeSet changeSet) throws DatabaseException {
+    public void markChangeSetExecStatus(ChangeSet changeSet, ChangeSet.ExecType execType) throws DatabaseException {
 
     }
 
