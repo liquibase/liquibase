@@ -12,7 +12,7 @@
     <property name="real.int.type" value="int"/>
     <property name="real.int.type" value="already-set-int"/>
 
-    <include file="changelogs/common/included.failingprecondition.changelog.xml"/> 
+    <include file="changelogs/common/included.failingprecondition.changelog.xml"/>
 
     <changeSet id="datatypetest-1" author="nvoxland">
         <validCheckSum>e5b7b29ce3a75640858cd022501852d2</validCheckSum>
