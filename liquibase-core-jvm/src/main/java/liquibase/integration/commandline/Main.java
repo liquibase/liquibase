@@ -136,7 +136,7 @@ public class Main {
 
     private static String generateLogLevelWarningMessage() {
         Logger logger = LogFactory.getLogger();
-        if (logger == null || logger.getLogLevel() == null || (logger.getLogLevel().equals(LogLevel.OFF))) {
+        if (logger == null || logger.getLogLevel() == null || (logger.getLogLevel().equals(LogLevel.DEBUG))) {
             return "";
         } else {
             return ".  For more information, use the --logLevel flag)";

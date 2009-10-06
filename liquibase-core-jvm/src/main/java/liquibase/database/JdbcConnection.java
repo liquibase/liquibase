@@ -13,7 +13,7 @@ import java.util.Map;
  * @author <a href="mailto:csuml@yahoo.co.uk">Paul Keeble</a>
  */
 public class JdbcConnection implements DatabaseConnection {
-    java.sql.Connection con;
+    private java.sql.Connection con;
 
     public JdbcConnection(java.sql.Connection connection) {
         this.con = connection;
@@ -397,17 +397,8 @@ public class JdbcConnection implements DatabaseConnection {
 
     @Override
     public boolean equals(Object obj) {
-        if (!(obj instanceof JdbcConnection)) {
-            return false;
-        }
+        return obj instanceof JdbcConnection && this.getUnderlyingConnection().equals(((JdbcConnection) obj).getUnderlyingConnection());
 
-        JdbcConnection otherObj = (JdbcConnection) obj;
-        try {
-            return this.getUnderlyingConnection().getMetaData().getURL().equals(otherObj.getUnderlyingConnection().getMetaData().getURL())
-                    && this.getUnderlyingConnection().getMetaData().getUserName().equals(otherObj.getUnderlyingConnection().getMetaData().getUserName());
-        } catch (SQLException e) {
-            throw new UnexpectedLiquibaseException(e);
-        }
     }
 
     @Override
