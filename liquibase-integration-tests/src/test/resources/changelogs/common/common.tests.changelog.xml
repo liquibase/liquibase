@@ -44,6 +44,7 @@
     <changeSet id="defaultValueTest-1" author="nvoxland">
         <preConditions onFail="MARK_RAN">
             <not><dbms type="derby"/></not>
+            <not><dbms type="mysql"/></not> <!-- fails on set default now() -->
         </preConditions>
         <createTable tableName="defaultValueTest">
             <column name="id" type="int"/>
@@ -639,6 +640,9 @@
     </changeSet>
     
     <changeSet id="createTableWithDefault" author="nvoxland">
+        <preConditions onFail="MARK_RAN">
+            <not><dbms type="mysql"/></not> <!-- doesn't support default values as function -->
+        </preConditions>
         <createTable tableName="default_val_computed">
             <column name="id" type="int"/>
             <column name="testcol" type="datetime" defaultValueComputed="CURRENT_TIMESTAMP()">
@@ -651,6 +655,9 @@
     </changeSet>
 
     <changeSet id="createTableWithDefault-check" author="nvoxland" dbms="h2,hsql,oracle,db2,mysql,postgresql,mssql"> <!-- not derby -->
+        <preConditions onFail="MARK_RAN">
+            <not><dbms type="mysql"/></not> <!-- doesn't support default values as function -->
+        </preConditions>
         <addDefaultValue tableName="default_val_computed" columnName="added_col" defaultValueComputed="CURRENT_TIMESTAMP()"/>
     </changeSet>
 </databaseChangeLog>
