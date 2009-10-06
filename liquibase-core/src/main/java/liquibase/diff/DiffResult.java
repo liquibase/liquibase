@@ -414,8 +414,6 @@ public class DiffResult {
         addUnexpectedPrimaryKeyChanges(changes);
         addMissingUniqueConstraintChanges(changes);
         addUnexpectedUniqueConstraintChanges(changes);
-        addMissingIndexChanges(changes);
-        addUnexpectedIndexChanges(changes);
 
         if (diffData) {
             addInsertDataChanges(changes, dataDir);
@@ -423,6 +421,8 @@ public class DiffResult {
 
         addMissingForeignKeyChanges(changes);
         addUnexpectedForeignKeyChanges(changes);
+        addMissingIndexChanges(changes);
+        addUnexpectedIndexChanges(changes);
         addUnexpectedColumnChanges(changes);
         addMissingSequenceChanges(changes);
         addUnexpectedSequenceChanges(changes);
