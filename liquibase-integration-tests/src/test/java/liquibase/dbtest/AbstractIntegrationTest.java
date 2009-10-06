@@ -11,6 +11,8 @@ import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.JdbcConnection;
+import liquibase.database.typeconversion.TypeConverterFactory;
+import liquibase.database.structure.type.DateTimeType;
 import liquibase.diff.Diff;
 import liquibase.diff.DiffResult;
 import liquibase.exception.DatabaseException;
@@ -173,15 +175,15 @@ public abstract class AbstractIntegrationTest {
         clearDatabase(liquibase);
 
 
-        ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement().execute("CREATE TABLE DATABASECHANGELOG (id varchar(150) NOT NULL,\n" +
-                "author varchar(150) NOT NULL,\n" +
-                "filename varchar(255) NOT NULL,\n" +
-                "dateExecuted datetime NOT NULL,\n" +
-                "md5sum varchar(32),\n" +
-                "description varchar(255),\n" +
-                "comments varchar(255),\n" +
-                "tag varchar(255),\n" +
-                "liquibase varchar(10),\n" +
+        ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement().execute("CREATE TABLE DATABASECHANGELOG (id varchar(150) NOT NULL, " +
+                "author varchar(150) NOT NULL, " +
+                "filename varchar(255) NOT NULL, " +
+                "dateExecuted "+ TypeConverterFactory.getInstance().findTypeConverter(database).getDateTimeType() +" NOT NULL, " +
+                "md5sum varchar(32), " +
+                "description varchar(255), " +
+                "comments varchar(255), " +
+                "tag varchar(255), " +
+                "liquibase varchar(10), " +
                 "PRIMARY KEY(id, author, filename))");
 
         liquibase = createLiquibase(completeChangeLog);
