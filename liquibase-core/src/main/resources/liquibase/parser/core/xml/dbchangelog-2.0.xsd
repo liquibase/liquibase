@@ -479,7 +479,7 @@
         </xsd:complexType>
     </xsd:element>
 
-    <xsd:element name="changeLogProperty">
+    <xsd:element name="changeLogPropertyDefined">
         <xsd:complexType>
             <xsd:attribute name="property" type="xsd:string" use="required"/>
             <xsd:attribute name="value" type="xsd:string"/>
@@ -908,7 +908,7 @@
                 <xsd:element ref="primaryKeyExists" maxOccurs="unbounded"/>
                 <xsd:element ref="viewExists" maxOccurs="unbounded"/>
                 <xsd:element ref="sqlCheck" maxOccurs="unbounded"/>
-                <xsd:element ref="changeLogProperty" maxOccurs="unbounded"/>
+                <xsd:element ref="changeLogPropertyDefined" maxOccurs="unbounded"/>
                 <xsd:element ref="customPrecondition" maxOccurs="unbounded"/>
             </xsd:choice>
         </xsd:sequence>
