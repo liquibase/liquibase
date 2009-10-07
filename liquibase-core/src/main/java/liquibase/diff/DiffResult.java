@@ -20,6 +20,7 @@ import liquibase.util.xml.DefaultXmlWriter;
 import liquibase.util.xml.XmlWriter;
 import liquibase.executor.ExecutorService;
 import liquibase.statement.core.RawSqlStatement;
+import liquibase.changelog.ChangeSet;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -412,48 +413,51 @@ public class DiffResult {
 
         doc.appendChild(changeLogElement);
 
-        List<Change> changes = new ArrayList<Change>();
-        addUnexpectedViewChanges(changes);
-        addMissingTableChanges(changes, targetDatabase);
-        addMissingColumnChanges(changes, targetDatabase);
-        addChangedColumnChanges(changes);
-        addMissingPrimaryKeyChanges(changes);
-        addUnexpectedPrimaryKeyChanges(changes);
-        addMissingUniqueConstraintChanges(changes);
-        addUnexpectedUniqueConstraintChanges(changes);
+        List<ChangeSet> changeSets = new ArrayList<ChangeSet>();
+        addUnexpectedViewChanges(changeSets);
+        addMissingTableChanges(changeSets, targetDatabase);
+        addMissingColumnChanges(changeSets, targetDatabase);
+        addChangedColumnChanges(changeSets);
+        addMissingPrimaryKeyChanges(changeSets);
+        addUnexpectedPrimaryKeyChanges(changeSets);
+        addMissingUniqueConstraintChanges(changeSets);
+        addUnexpectedUniqueConstraintChanges(changeSets);
 
         if (diffData) {
-            addInsertDataChanges(changes, dataDir);
+            addInsertDataChanges(changeSets, dataDir);
         }
 
-        addMissingForeignKeyChanges(changes);
-        addUnexpectedForeignKeyChanges(changes);
-        addMissingIndexChanges(changes);
-        addUnexpectedIndexChanges(changes);
-        addUnexpectedColumnChanges(changes);
-        addMissingSequenceChanges(changes);
-        addUnexpectedSequenceChanges(changes);
-        addMissingViewChanges(changes);
-        addUnexpectedTableChanges(changes);
+        addMissingForeignKeyChanges(changeSets);
+        addUnexpectedForeignKeyChanges(changeSets);
+        addMissingIndexChanges(changeSets);
+        addUnexpectedIndexChanges(changeSets);
+        addUnexpectedColumnChanges(changeSets);
+        addMissingSequenceChanges(changeSets);
+        addUnexpectedSequenceChanges(changeSets);
+        addMissingViewChanges(changeSets);
+        addUnexpectedTableChanges(changeSets);
 
         XMLChangeLogSerializer changeLogSerializer = new XMLChangeLogSerializer();
         changeLogSerializer.setCurrentChangeLogFileDOM(doc);
-        for (Change change : changes) {
-            Element changeSet = doc.createElement("changeSet");
-            changeSet.setAttribute("author", getChangeSetAuthor());
-            changeSet.setAttribute("id", generateId());
-            if (getChangeSetContext() != null) {
-                changeSet.setAttribute("context", getChangeSetContext());
-            }
-
-            changeSet.appendChild(changeLogSerializer.createNode(change));
-            doc.getDocumentElement().appendChild(changeSet);
+        for (ChangeSet changeSet : changeSets) {
+            doc.getDocumentElement().appendChild(changeLogSerializer.createNode(changeSet));
         }
 
 
         xmlWriter.write(doc, out);
 
         out.flush();
+    }
+
+    private ChangeSet generateChangeSet(Change change) {
+        ChangeSet changeSet = generateChangeSet();
+        changeSet.addChange(change);
+
+        return changeSet;
+    }
+    
+    private ChangeSet generateChangeSet() {
+        return new ChangeSet(getChangeSetAuthor(), generateId(), false, false, null, null, getChangeSetContext(), null);
     }
 
     private String getChangeSetAuthor() {
@@ -476,7 +480,7 @@ public class DiffResult {
         return idRoot.toString() + "-" + changeNumber++;
     }
 
-    private void addUnexpectedIndexChanges(List<Change> changes) {
+    private void addUnexpectedIndexChanges(List<ChangeSet> changes) {
         for (Index index : getUnexpectedIndexes()) {
 
             DropIndexChange change = new DropIndexChange();
@@ -484,11 +488,11 @@ public class DiffResult {
             change.setSchemaName(index.getTable().getSchema());
             change.setIndexName(index.getName());
 
-            changes.add(change);
+            changes.add(generateChangeSet(change));
         }
     }
 
-    private void addMissingIndexChanges(List<Change> changes) {
+    private void addMissingIndexChanges(List<ChangeSet> changes) {
         for (Index index : getMissingIndexes()) {
 
             CreateIndexChange change = new CreateIndexChange();
@@ -502,11 +506,11 @@ public class DiffResult {
                 column.setName(columnName);
                 change.addColumn(column);
             }
-            changes.add(change);
+            changes.add(generateChangeSet(change));
         }
     }
 
-    private void addUnexpectedPrimaryKeyChanges(List<Change> changes) {
+    private void addUnexpectedPrimaryKeyChanges(List<ChangeSet> changes) {
         for (PrimaryKey pk : getUnexpectedPrimaryKeys()) {
 
             if (!getUnexpectedTables().contains(pk.getTable())) {
@@ -515,12 +519,12 @@ public class DiffResult {
                 change.setSchemaName(pk.getTable().getSchema());
                 change.setConstraintName(pk.getName());
 
-                changes.add(change);
+                changes.add(generateChangeSet(change));
             }
         }
     }
 
-    private void addMissingPrimaryKeyChanges(List<Change> changes) {
+    private void addMissingPrimaryKeyChanges(List<ChangeSet> changes) {
         for (PrimaryKey pk : getMissingPrimaryKeys()) {
 
             AddPrimaryKeyChange change = new AddPrimaryKeyChange();
@@ -529,11 +533,11 @@ public class DiffResult {
             change.setConstraintName(pk.getName());
             change.setColumnNames(pk.getColumnNames());
 
-            changes.add(change);
+            changes.add(generateChangeSet(change));
         }
     }
 
-    private void addUnexpectedUniqueConstraintChanges(List<Change> changes) {
+    private void addUnexpectedUniqueConstraintChanges(List<ChangeSet> changes) {
         for (UniqueConstraint uc : getUnexpectedUniqueConstraints()) {
 
             if (!getUnexpectedTables().contains(uc.getTable())) {
@@ -542,12 +546,12 @@ public class DiffResult {
                 change.setSchemaName(uc.getTable().getSchema());
                 change.setConstraintName(uc.getName());
 
-                changes.add(change);
+                changes.add(generateChangeSet(change));
             }
         }
     }
 
-    private void addMissingUniqueConstraintChanges(List<Change> changes) {
+    private void addMissingUniqueConstraintChanges(List<ChangeSet> changes) {
         for (UniqueConstraint uc : getMissingUniqueConstraints()) {
 
             AddUniqueConstraintChange change = new AddUniqueConstraintChange();
@@ -558,11 +562,11 @@ public class DiffResult {
             change.setDeferrable(uc.isDeferrable());
             change.setInitiallyDeferred(uc.isInitiallyDeferred());
             change.setDisabled(uc.isDisabled());
-            changes.add(change);
+            changes.add(generateChangeSet(change));
         }
     }
 
-    private void addUnexpectedForeignKeyChanges(List<Change> changes) {
+    private void addUnexpectedForeignKeyChanges(List<ChangeSet> changes) {
         for (ForeignKey fk : getUnexpectedForeignKeys()) {
 
             DropForeignKeyConstraintChange change = new DropForeignKeyConstraintChange();
@@ -570,11 +574,11 @@ public class DiffResult {
             change.setBaseTableName(fk.getForeignKeyTable().getName());
             change.setBaseTableSchemaName(fk.getForeignKeyTable().getSchema());
 
-            changes.add(change);
+            changes.add(generateChangeSet(change));
         }
     }
 
-    private void addMissingForeignKeyChanges(List<Change> changes) {
+    private void addMissingForeignKeyChanges(List<ChangeSet> changes) {
         for (ForeignKey fk : getMissingForeignKeys()) {
 
             AddForeignKeyConstraintChange change = new AddForeignKeyConstraintChange();
@@ -593,33 +597,33 @@ public class DiffResult {
             change.setOnUpdate(fk.getUpdateRule());
             change.setOnDelete(fk.getDeleteRule());
 
-            changes.add(change);
+            changes.add(generateChangeSet(change));
         }
     }
 
-    private void addUnexpectedSequenceChanges(List<Change> changes) {
+    private void addUnexpectedSequenceChanges(List<ChangeSet> changes) {
         for (Sequence sequence : getUnexpectedSequences()) {
 
             DropSequenceChange change = new DropSequenceChange();
             change.setSequenceName(sequence.getName());
             change.setSchemaName(sequence.getSchema());
 
-            changes.add(change);
+            changes.add(generateChangeSet(change));
         }
     }
 
-    private void addMissingSequenceChanges(List<Change> changes) {
+    private void addMissingSequenceChanges(List<ChangeSet> changes) {
         for (Sequence sequence : getMissingSequences()) {
 
             CreateSequenceChange change = new CreateSequenceChange();
             change.setSequenceName(sequence.getName());
             change.setSchemaName(sequence.getSchema());
 
-            changes.add(change);
+            changes.add(generateChangeSet(change));
         }
     }
 
-    private void addUnexpectedColumnChanges(List<Change> changes) {
+    private void addUnexpectedColumnChanges(List<ChangeSet> changes) {
         for (Column column : getUnexpectedColumns()) {
             if (!shouldModifyColumn(column)) {
                 continue;
@@ -630,11 +634,11 @@ public class DiffResult {
             change.setSchemaName(column.getTable().getSchema());
             change.setColumnName(column.getName());
 
-            changes.add(change);
+            changes.add(generateChangeSet(change));
         }
     }
 
-    private void addMissingViewChanges(List<Change> changes) {
+    private void addMissingViewChanges(List<ChangeSet> changes) {
         for (View view : getMissingViews()) {
 
             CreateViewChange change = new CreateViewChange();
@@ -646,11 +650,11 @@ public class DiffResult {
             }
             change.setSelectQuery(selectQuery);
 
-            changes.add(change);
+            changes.add(generateChangeSet(change));
         }
     }
 
-    private void addChangedColumnChanges(List<Change> changes) {
+    private void addChangedColumnChanges(List<ChangeSet> changes) {
         for (Column column : getChangedColumns()) {
             if (!shouldModifyColumn(column)) {
                 continue;
@@ -665,7 +669,7 @@ public class DiffResult {
                 change.setColumnName(column.getName());
                 change.setNewDataType(referenceColumn.getDataTypeString(targetSnapshot.getDatabase()));
                 change.setNullable(column.isNullable());
-                changes.add(change);
+                changes.add(generateChangeSet(change));
                 foundDifference = true;
             }
             if (column.isNullabilityDifferent(referenceColumn)) {
@@ -676,7 +680,7 @@ public class DiffResult {
                     change.setColumnName(column.getName());
                     change.setColumnDataType(referenceColumn.getDataTypeString(targetSnapshot.getDatabase()));
 
-                    changes.add(change);
+                    changes.add(generateChangeSet(change));
                     foundDifference = true;
                 } else {
                     AddNotNullConstraintChange change = new AddNotNullConstraintChange();
@@ -685,7 +689,7 @@ public class DiffResult {
                     change.setColumnName(column.getName());
                     change.setColumnDataType(referenceColumn.getDataTypeString(targetSnapshot.getDatabase()));
 
-                    changes.add(change);
+                    changes.add(generateChangeSet(change));
                     foundDifference = true;
                 }
 
@@ -702,19 +706,19 @@ public class DiffResult {
 
     }
 
-    private void addUnexpectedViewChanges(List<Change> changes) {
+    private void addUnexpectedViewChanges(List<ChangeSet> changes) {
         for (View view : getUnexpectedViews()) {
 
             DropViewChange change = new DropViewChange();
             change.setViewName(view.getName());
             change.setSchemaName(view.getSchema());
 
-            changes.add(change);
+            changes.add(generateChangeSet(change));
         }
     }
 
 
-    private void addMissingColumnChanges(List<Change> changes, Database database) {
+    private void addMissingColumnChanges(List<ChangeSet> changes, Database database) {
         for (Column column : getMissingColumns()) {
             if (!shouldModifyColumn(column)) {
                 continue;
@@ -753,11 +757,11 @@ public class DiffResult {
 
             change.addColumn(columnConfig);
 
-            changes.add(change);
+            changes.add(generateChangeSet(change));
         }
     }
 
-    private void addMissingTableChanges(List<Change> changes, Database database) {
+    private void addMissingTableChanges(List<ChangeSet> changes, Database database) {
         for (Table missingTable : getMissingTables()) {
             if (referenceSnapshot.getDatabase().isLiquibaseTable(missingTable.getName())) {
                 continue;
@@ -832,24 +836,25 @@ public class DiffResult {
                 change.addColumn(columnConfig);
             }
 
-            changes.add(change);
+            changes.add(generateChangeSet(change));
         }
     }
 
-    private void addUnexpectedTableChanges(List<Change> changes) {
+    private void addUnexpectedTableChanges(List<ChangeSet> changes) {
         for (Table unexpectedTable : getUnexpectedTables()) {
             DropTableChange change = new DropTableChange();
             change.setTableName(unexpectedTable.getName());
             change.setSchemaName(unexpectedTable.getSchema());
 
-            changes.add(change);
+            changes.add(generateChangeSet(change));
         }
     }
 
-    private void addInsertDataChanges(List<Change> changes, String dataDir) throws DatabaseException, IOException {
+    private void addInsertDataChanges(List<ChangeSet> changeSets, String dataDir) throws DatabaseException, IOException {
         try {
             String schema = referenceSnapshot.getSchema();
             for (Table table : referenceSnapshot.getTables()) {
+                List<Change> changes = new ArrayList<Change>();
                 List<Map> rs = ExecutorService.getInstance().getExecutor(referenceSnapshot.getDatabase()).queryForList(new RawSqlStatement("SELECT * FROM " + referenceSnapshot.getDatabase().escapeTableName(schema, table.getName())));
 
                 if (rs.size() == 0) {
@@ -958,6 +963,13 @@ public class DiffResult {
                         changes.add(change);
                     }
 
+                }
+                if (changes.size() > 0) {
+                    ChangeSet changeSet = generateChangeSet();
+                    for (Change change : changes) {
+                        changeSet.addChange(change);
+                    }
+                    changeSets.add(changeSet);
                 }
             }
 

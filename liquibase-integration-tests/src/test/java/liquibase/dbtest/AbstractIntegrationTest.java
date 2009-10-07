@@ -365,7 +365,7 @@ public abstract class AbstractIntegrationTest {
         }
 
         for (int run=0; run < 2; run++) { //run once outputting data as insert, once as csv
-            boolean outputCsv = run == 0;
+            boolean outputCsv = run == 1;
             runCompleteChangeLog();
 
             DatabaseSnapshot originalSnapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database, null, null);
