@@ -78,7 +78,7 @@ public class ChangeLogIteratorTest {
             return ChangeSetVisitor.Direction.FORWARD;
         }
 
-        public void visit(ChangeSet changeSet, Database database) {
+        public void visit(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database) {
             visitedChangeSets.add(changeSet);
         }
     }

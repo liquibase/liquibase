@@ -64,6 +64,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 
         databaseChangeLog = new DatabaseChangeLog(physicalChangeLogLocation);
         databaseChangeLog.setPhysicalFilePath(physicalChangeLogLocation);
+        databaseChangeLog.setChangeLogParameters(changeLogParameters);
 
         this.changeLogParameters = changeLogParameters;
     }

@@ -4,6 +4,7 @@ import liquibase.change.ColumnConfig;
 import liquibase.change.core.CreateTableChange;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.RanChangeSet;
+import liquibase.changelog.DatabaseChangeLog;
 import liquibase.exception.SetupException;
 import static org.junit.Assert.*;
 import org.junit.Before;
@@ -43,8 +44,8 @@ public class ValidatingVisitorTest {
         changeSet2.addChange(change2);
 
         ValidatingVisitor handler = new ValidatingVisitor(new ArrayList<RanChangeSet>());
-        handler.visit(changeSet1, null);
-        handler.visit(changeSet2, null);
+        handler.visit(changeSet1, new DatabaseChangeLog("test"), null);
+        handler.visit(changeSet2, new DatabaseChangeLog("test"), null);
 
         assertTrue(handler.validationPassed());
 
@@ -60,7 +61,7 @@ public class ValidatingVisitorTest {
         });
 
         ValidatingVisitor handler = new ValidatingVisitor(new ArrayList<RanChangeSet>());
-        handler.visit(changeSet1, null);
+        handler.visit(changeSet1, new DatabaseChangeLog("test"), null);
 
         assertEquals(1, handler.getSetupExceptions().size());
         assertEquals("Test message", handler.getSetupExceptions().get(0).getMessage());
@@ -72,8 +73,8 @@ public class ValidatingVisitorTest {
     public void visit_duplicate() {
 
         ValidatingVisitor handler = new ValidatingVisitor(new ArrayList<RanChangeSet>());
-        handler.visit(changeSet1, null);
-        handler.visit(changeSet1, null);
+        handler.visit(changeSet1, new DatabaseChangeLog("test"), null);
+        handler.visit(changeSet1, new DatabaseChangeLog("test"), null);
 
         assertEquals(1, handler.getDuplicateChangeSets().size());
 

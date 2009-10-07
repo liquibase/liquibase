@@ -3,6 +3,7 @@ package liquibase.dbdoc;
 import liquibase.Liquibase;
 import liquibase.change.Change;
 import liquibase.changelog.ChangeSet;
+import liquibase.changelog.DatabaseChangeLog;
 import liquibase.database.Database;
 import liquibase.exception.MigrationFailedException;
 
@@ -22,7 +23,7 @@ public class PendingSQLWriter extends HTMLWriter {
         return "Pending SQL";
     }
 
-    protected void writeBody(FileWriter fileWriter, Object object, List<Change> ranChanges, List<Change> changesToRun, Liquibase liquibase) throws IOException{
+    protected void writeBody(FileWriter fileWriter, Object object, List<Change> ranChanges, List<Change> changesToRun, DatabaseChangeLog databaseChangeLog, Liquibase liquibase) throws IOException{
         if (changesToRun.size() == 0) {
             fileWriter.append("<b>NONE</b>");
         }
@@ -40,7 +41,7 @@ public class PendingSQLWriter extends HTMLWriter {
             String anchor = thisChangeSet.toString(false).replaceAll("\\W","_");
             fileWriter.append("<a name='").append(anchor).append("'/>");
             try {
-                thisChangeSet.execute(liquibase.getDatabase());
+                thisChangeSet.execute(databaseChangeLog, liquibase.getDatabase());
             } catch (MigrationFailedException e) {
                 fileWriter.append("EXECUTION ERROR: ").append(change.getChangeMetaData().getDescription()).append(": ").append(e.getMessage()).append("\n\n");
             }
