@@ -8,13 +8,13 @@ import liquibase.changelog.ChangeLogParameters;
 import liquibase.exception.PreconditionFailedException;
 import liquibase.exception.PreconditionErrorException;
 
-public class ChangeLogPropertyPrecondition implements Precondition {
+public class ChangeLogPropertyDefinedPrecondition implements Precondition {
 
     private String property;
     private String value;
 
     public String getName() {
-        return "changeLogProperty";
+        return "changeLogPropertyDefined";
     }
 
     public String getProperty() {

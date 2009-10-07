@@ -13,16 +13,16 @@
     <property name="real.int.type" value="already-set-int"/>
 
     <preConditions>
-        <changeLogProperty property="real.int.type"/>
-        <changeLogProperty property="real.int.type" value="int"/>
+        <changeLogPropertyDefined property="real.int.type"/>
+        <changeLogPropertyDefined property="real.int.type" value="int"/>
     </preConditions>
     <include file="changelogs/common/included.failingprecondition.changelog.xml"/>
 
     <changeSet id="datatypetest-1" author="nvoxland">
         <validCheckSum>e5b7b29ce3a75640858cd022501852d2</validCheckSum>
         <preConditions>
-            <changeLogProperty property="real.int.type"/>
-            <changeLogProperty property="real.int.type" value="int"/>
+            <changeLogPropertyDefined property="real.int.type"/>
+            <changeLogPropertyDefined property="real.int.type" value="int"/>
         </preConditions>
         <createTable tableName="dataTypeTest" schemaName="">
             <column name="id" type="${real.int.type}">
