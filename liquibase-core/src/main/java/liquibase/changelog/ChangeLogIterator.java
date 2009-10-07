@@ -36,7 +36,7 @@ public class ChangeLogIterator {
             }
 
             if (shouldVisit) {
-                visitor.visit(changeSet, database);
+                visitor.visit(changeSet, databaseChangeLog, database);
             }
         }
     }

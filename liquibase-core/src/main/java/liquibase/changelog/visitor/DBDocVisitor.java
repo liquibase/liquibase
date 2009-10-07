@@ -2,6 +2,7 @@ package liquibase.changelog.visitor;
 
 import liquibase.change.Change;
 import liquibase.changelog.ChangeSet;
+import liquibase.changelog.DatabaseChangeLog;
 import liquibase.database.Database;
 import liquibase.database.structure.Column;
 import liquibase.database.structure.DatabaseObject;
@@ -55,7 +56,7 @@ public class DBDocVisitor implements ChangeSetVisitor {
         return ChangeSetVisitor.Direction.FORWARD;
     }
 
-    public void visit(ChangeSet changeSet, Database database) throws LiquibaseException {
+    public void visit(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database) throws LiquibaseException {
         ChangeSet.RunStatus runStatus = this.database.getRunStatus(changeSet);
         if (rootChangeLog == null) {
             rootChangeLog = changeSet.getFilePath();

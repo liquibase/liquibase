@@ -1,6 +1,7 @@
 package liquibase.changelog.visitor;
 
 import liquibase.changelog.ChangeSet;
+import liquibase.changelog.DatabaseChangeLog;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
 
@@ -19,7 +20,7 @@ public class ListVisitor implements ChangeSetVisitor {
         return ChangeSetVisitor.Direction.FORWARD;
     }
 
-    public void visit(ChangeSet changeSet, Database database) throws LiquibaseException {
+    public void visit(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database) throws LiquibaseException {
         seenChangeSets.add(changeSet);
     }
 }

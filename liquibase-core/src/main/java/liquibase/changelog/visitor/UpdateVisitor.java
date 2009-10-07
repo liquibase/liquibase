@@ -1,6 +1,7 @@
 package liquibase.changelog.visitor;
 
 import liquibase.changelog.ChangeSet;
+import liquibase.changelog.DatabaseChangeLog;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
 import liquibase.logging.LogFactory;
@@ -20,9 +21,9 @@ public class UpdateVisitor implements ChangeSetVisitor {
         return ChangeSetVisitor.Direction.FORWARD;
     }
     
-    public void visit(ChangeSet changeSet, Database database) throws LiquibaseException {
+    public void visit(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database) throws LiquibaseException {
         log.debug("Running Changeset:" + changeSet);
-        ChangeSet.ExecType execType = changeSet.execute(this.database);
+        ChangeSet.ExecType execType = changeSet.execute(databaseChangeLog, this.database);
         if (!this.database.getRunStatus(changeSet).equals(ChangeSet.RunStatus.NOT_RAN)) {
             execType =ChangeSet.ExecType.RERAN;
         }

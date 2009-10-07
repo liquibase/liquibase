@@ -133,7 +133,7 @@ public class ChangeSet implements Conditional {
      *
      * @return should change set be marked as ran
      */
-    public ExecType execute(Database database) throws MigrationFailedException {
+    public ExecType execute(DatabaseChangeLog databaseChangeLog, Database database) throws MigrationFailedException {
 
         ExecType execType = null;
 
@@ -158,7 +158,7 @@ public class ChangeSet implements Conditional {
 
             try {
                 if (preconditions != null) {
-                    preconditions.check(database, null, this);
+                    preconditions.check(database, databaseChangeLog, this);
                 }
             } catch (PreconditionFailedException e) {
                 StringBuffer message = new StringBuffer();

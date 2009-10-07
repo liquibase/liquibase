@@ -20,6 +20,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     private String logicalFilePath;
 
     private List<ChangeSet> changeSets = new ArrayList<ChangeSet>();
+    private ChangeLogParameters changeLogParameters;
 
     public DatabaseChangeLog(String physicalFilePath) {
         this.physicalFilePath = physicalFilePath;
@@ -31,6 +32,15 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
 
     public void setPreconditions(PreconditionContainer precond) {
         preconditionContainer = precond;
+    }
+
+
+    public ChangeLogParameters getChangeLogParameters() {
+        return changeLogParameters;
+    }
+
+    public void setChangeLogParameters(ChangeLogParameters changeLogParameters) {
+        this.changeLogParameters = changeLogParameters;
     }
 
     public String getPhysicalFilePath() {

@@ -33,6 +33,16 @@
     <xsd:element name="databaseChangeLog">
         <xsd:complexType>
             <xsd:sequence>
+                <xsd:element name="property" minOccurs="0" maxOccurs="unbounded">
+                    <xsd:complexType>
+                        <xsd:attribute name="file" type="xsd:string"/>
+                        <xsd:attribute name="name" type="xsd:string"/>
+                        <xsd:attribute name="value" type="xsd:string"/>
+                        <xsd:attribute name="dbms" type="xsd:string"/>
+                        <xsd:attribute name="context" type="xsd:string"/>
+                    </xsd:complexType>
+                </xsd:element>
+                
                 <xsd:element name="preConditions" minOccurs="0" maxOccurs="1">
                     <xsd:complexType>
                         <xsd:choice>
@@ -43,16 +53,6 @@
                         <xsd:attribute name="onFail" type="onChangeLogPreconditionErrorOrFail"/>
                         <xsd:attribute name="onError" type="onChangeLogPreconditionErrorOrFail"/>
                             <xsd:attribute name="onSqlOutput" type="onChangeLogPreconditionOnSqlOutput"/>
-                    </xsd:complexType>
-                </xsd:element>
-
-                <xsd:element name="property" minOccurs="0" maxOccurs="unbounded">
-                    <xsd:complexType>
-                        <xsd:attribute name="file" type="xsd:string"/>
-                        <xsd:attribute name="name" type="xsd:string"/>
-                        <xsd:attribute name="value" type="xsd:string"/>
-                        <xsd:attribute name="dbms" type="xsd:string"/>
-                        <xsd:attribute name="context" type="xsd:string"/>
                     </xsd:complexType>
                 </xsd:element>
 
@@ -479,6 +479,13 @@
         </xsd:complexType>
     </xsd:element>
 
+    <xsd:element name="changeLogProperty">
+        <xsd:complexType>
+            <xsd:attribute name="property" type="xsd:string" use="required"/>
+            <xsd:attribute name="value" type="xsd:string"/>
+        </xsd:complexType>
+    </xsd:element>
+
     <xsd:element name="primaryKeyExists">
         <xsd:complexType>
             <xsd:attribute name="schemaName" type="xsd:string"/>
@@ -901,6 +908,7 @@
                 <xsd:element ref="primaryKeyExists" maxOccurs="unbounded"/>
                 <xsd:element ref="viewExists" maxOccurs="unbounded"/>
                 <xsd:element ref="sqlCheck" maxOccurs="unbounded"/>
+                <xsd:element ref="changeLogProperty" maxOccurs="unbounded"/>
                 <xsd:element ref="customPrecondition" maxOccurs="unbounded"/>
             </xsd:choice>
         </xsd:sequence>
