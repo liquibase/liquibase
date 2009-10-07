@@ -20,6 +20,7 @@ import liquibase.exception.ValidationFailedException;
 import liquibase.lockservice.LockService;
 import liquibase.resource.ResourceAccessor;
 import liquibase.resource.FileSystemResourceAccessor;
+import liquibase.resource.CompositeResourceAccessor;
 import liquibase.statement.core.DropTableStatement;
 import liquibase.test.JUnitResourceAccessor;
 import liquibase.test.TestContext;
@@ -127,7 +128,7 @@ public abstract class AbstractIntegrationTest {
     }
 
     protected Liquibase createLiquibase(String changeLogFile) throws Exception {
-        JUnitResourceAccessor fileOpener = new JUnitResourceAccessor();
+        CompositeResourceAccessor fileOpener = new CompositeResourceAccessor(new JUnitResourceAccessor(), new FileSystemResourceAccessor());
         return createLiquibase(changeLogFile, fileOpener);
     }
 
@@ -363,74 +364,81 @@ public abstract class AbstractIntegrationTest {
             return;
         }
 
-        runCompleteChangeLog();
+        for (int run=0; run < 2; run++) { //run once outputting data as insert, once as csv
+            boolean outputCsv = run == 0;
+            runCompleteChangeLog();
 
-        DatabaseSnapshot originalSnapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database, null, null);
+            DatabaseSnapshot originalSnapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database, null, null);
 
-        Diff diff = new Diff(database, (String) null);
-        DiffResult diffResult = diff.compare();
+            Diff diff = new Diff(database, (String) null);
+            diff.setDiffData(true);
+            DiffResult diffResult = diff.compare();
 
-        File tempFile = File.createTempFile("liquibase-test", ".xml");
+            File tempFile = File.createTempFile("liquibase-test", ".xml");
 
-        FileOutputStream output = new FileOutputStream(tempFile);
-        try {
-            diffResult.printChangeLog(new PrintStream(output), database);
-            output.flush();
-        } finally {
-            output.close();
-        }
+            FileOutputStream output = new FileOutputStream(tempFile);
+            try {
+                if (outputCsv) {
+                    diffResult.setDataDir(new File(tempFile.getParentFile(), "liquibase-data").getCanonicalPath().replaceFirst("\\w:",""));
+                }
+                diffResult.printChangeLog(new PrintStream(output), database);
+                output.flush();
+            } finally {
+                output.close();
+            }
 
-        Liquibase liquibase = createLiquibase(tempFile.getName());
-        clearDatabase(liquibase);
+            Liquibase liquibase = createLiquibase(tempFile.getName());
+            clearDatabase(liquibase);
 
-        DatabaseSnapshot emptySnapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database, null, null);
+            DatabaseSnapshot emptySnapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database, null, null);
 
-        //run again to test changelog testing logic
-        liquibase = createLiquibase(tempFile.getName());
-        try {
+            //run again to test changelog testing logic
+            liquibase = createLiquibase(tempFile.getName());
+            try {
+                liquibase.update(this.contexts);
+            } catch (ValidationFailedException e) {
+                e.printDescriptiveError(System.out);
+                throw e;
+            }
+
+            tempFile.deleteOnExit();
+
+            DatabaseSnapshot migratedSnapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database, null, null);
+
+            DiffResult finalDiffResult = new Diff(originalSnapshot, migratedSnapshot).compare();
+            assertEquals(0, finalDiffResult.getMissingColumns().size());
+            assertEquals(0, finalDiffResult.getMissingForeignKeys().size());
+            assertEquals(0, finalDiffResult.getMissingIndexes().size());
+            assertEquals(0, finalDiffResult.getMissingPrimaryKeys().size());
+            assertEquals(0, finalDiffResult.getMissingSequences().size());
+            assertEquals(0, finalDiffResult.getMissingTables().size());
+            assertEquals(0, finalDiffResult.getMissingViews().size());
+            assertEquals(0, finalDiffResult.getUnexpectedColumns().size());
+            assertEquals(0, finalDiffResult.getUnexpectedForeignKeys().size());
+            assertEquals(0, finalDiffResult.getUnexpectedIndexes().size());
+            assertEquals(0, finalDiffResult.getUnexpectedPrimaryKeys().size());
+            assertEquals(0, finalDiffResult.getUnexpectedSequences().size());
+            assertEquals(0, finalDiffResult.getUnexpectedTables().size());
+            assertEquals(0, finalDiffResult.getUnexpectedViews().size());
+
+            //diff to empty and drop all
+            Diff emptyDiff = new Diff(emptySnapshot, migratedSnapshot);
+            DiffResult emptyDiffResult = emptyDiff.compare();
+            output = new FileOutputStream(tempFile);
+            try {
+                emptyDiffResult.printChangeLog(new PrintStream(output), database);
+                output.flush();
+            } finally {
+                output.close();
+            }
+
+            liquibase = createLiquibase(tempFile.getName());
             liquibase.update(this.contexts);
-        } catch (ValidationFailedException e) {
-            e.printDescriptiveError(System.out);
-            throw e;
+
+            DatabaseSnapshot emptyAgainSnapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database, null, null);
+            assertEquals(0, emptyAgainSnapshot.getTables().size());
+            assertEquals(0, emptyAgainSnapshot.getViews().size());
         }
-
-        tempFile.deleteOnExit();
-
-        DatabaseSnapshot migratedSnapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database, null, null);
-
-        DiffResult finalDiffResult = new Diff(originalSnapshot, migratedSnapshot).compare();
-        assertEquals(0, finalDiffResult.getMissingColumns().size());
-        assertEquals(0, finalDiffResult.getMissingForeignKeys().size());
-        assertEquals(0, finalDiffResult.getMissingIndexes().size());
-        assertEquals(0, finalDiffResult.getMissingPrimaryKeys().size());
-        assertEquals(0, finalDiffResult.getMissingSequences().size());
-        assertEquals(0, finalDiffResult.getMissingTables().size());
-        assertEquals(0, finalDiffResult.getMissingViews().size());
-        assertEquals(0, finalDiffResult.getUnexpectedColumns().size());
-        assertEquals(0, finalDiffResult.getUnexpectedForeignKeys().size());
-        assertEquals(0, finalDiffResult.getUnexpectedIndexes().size());
-        assertEquals(0, finalDiffResult.getUnexpectedPrimaryKeys().size());
-        assertEquals(0, finalDiffResult.getUnexpectedSequences().size());
-        assertEquals(0, finalDiffResult.getUnexpectedTables().size());
-        assertEquals(0, finalDiffResult.getUnexpectedViews().size());
-
-        //diff to empty and drop all
-        Diff emptyDiff = new Diff(emptySnapshot, migratedSnapshot);
-        DiffResult emptyDiffResult = emptyDiff.compare();
-        output = new FileOutputStream(tempFile);
-        try {
-            emptyDiffResult.printChangeLog(new PrintStream(output), database);
-            output.flush();
-        } finally {
-            output.close();
-        }
-
-        liquibase = createLiquibase(tempFile.getName());
-        liquibase.update(this.contexts);
-
-        DatabaseSnapshot emptyAgainSnapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database, null, null);
-        assertEquals(0, emptyAgainSnapshot.getTables().size());
-        assertEquals(0, emptyAgainSnapshot.getViews().size());
     }
 
     @Test
