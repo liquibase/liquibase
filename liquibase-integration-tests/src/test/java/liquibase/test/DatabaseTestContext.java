@@ -55,9 +55,12 @@ public class DatabaseTestContext {
     private DatabaseConnection openConnection(final String url) throws Exception {
         if (connectionsAttempted.containsKey(url)) {
             JdbcConnection connection = (JdbcConnection) connectionsByUrl.get(url);
-            if (!connection.getUnderlyingConnection().isClosed()) {
-                return connectionsByUrl.get(url);
+            if (connection == null) {
+                return null;
+            } else if (connection.getUnderlyingConnection().isClosed()){
+                connectionsByUrl.put(url, openDatabaseConnection(url));
             }
+            return connectionsByUrl.get(url);
         }
         connectionsAttempted.put(url, Boolean.TRUE);
 
