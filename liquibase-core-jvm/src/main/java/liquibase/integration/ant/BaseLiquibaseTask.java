@@ -6,7 +6,6 @@ import liquibase.database.DatabaseFactory;
 import liquibase.database.JdbcConnection;
 import liquibase.database.core.HibernateDatabase;
 import liquibase.exception.DatabaseException;
-import liquibase.logging.JavaUtilLogger;
 import liquibase.logging.LogFactory;
 import liquibase.logging.Logger;
 import liquibase.resource.CompositeResourceAccessor;
@@ -274,13 +273,6 @@ public class BaseLiquibaseTask extends Task {
 
         protected void registerHandler(Handler theHandler) {
             Logger logger = LogFactory.getLogger();
-            if (logger instanceof JavaUtilLogger) {
-                for (Handler handler : ((JavaUtilLogger) logger).getHandlers()) {
-                    ((JavaUtilLogger) logger).removeHandler(handler);
-                }
-                ((JavaUtilLogger) logger).addHandler(theHandler);
-                ((JavaUtilLogger) logger).setUseParentHandlers(false);
-            }
         }
 
 
