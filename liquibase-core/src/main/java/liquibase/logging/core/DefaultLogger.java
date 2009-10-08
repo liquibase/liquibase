@@ -37,7 +37,7 @@ public class DefaultLogger extends AbstractLogger {
     }
 
     private void print(LogLevel logLevel, String message) {
-        System.out.println(logLevel+" "+DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(new Date())+ ":"+name + ": " + message);
+        System.err.println(logLevel+" "+DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(new Date())+ ":"+name + ": " + message);
     }
 
     public void severe(String message, Throwable e) {
