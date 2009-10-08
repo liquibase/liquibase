@@ -329,6 +329,7 @@ public abstract class AbstractDatabase implements Database {
             boolean hasComments = changeLogTable.getColumn("COMMENTS") != null;
             boolean hasTag = changeLogTable.getColumn("TAG") != null;
             boolean hasLiquibase = changeLogTable.getColumn("LIQUIBASE") != null;
+            boolean liquibaseColumnNotRightSize = changeLogTable.getColumn("LIQUIBASE").getColumnSize() != 20;
             boolean hasOrderExecuted = changeLogTable.getColumn("ORDEREXECUTED") != null;
             boolean checksumNotRightSize = changeLogTable.getColumn("MD5SUM").getColumnSize() != 35;
             boolean hasExecTypeColumn = changeLogTable.getColumn("EXECTYPE") != null;
@@ -357,6 +358,11 @@ public abstract class AbstractDatabase implements Database {
                 executor.comment("Modifying size of databasechangelog.md5sum column");
 
                 statementsToExecute.add(new ModifyDataTypeStatement(getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "MD5SUM", "VARCHAR(35)", true));
+            }
+            if (liquibaseColumnNotRightSize) {
+                executor.comment("Modifying size of databasechangelog.liquibase column");
+
+                statementsToExecute.add(new ModifyDataTypeStatement(getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "LIQUIBASE", "VARCHAR(20)", true));
             }
             if (!hasExecTypeColumn) {
                 executor.comment("Adding missing databasechangelog.exectype column");
