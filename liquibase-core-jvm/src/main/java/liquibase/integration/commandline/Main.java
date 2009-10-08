@@ -115,16 +115,16 @@ public class Main {
                 if (e.getCause() instanceof ValidationFailedException) {
                     ((ValidationFailedException) e.getCause()).printDescriptiveError(System.out);
                 } else {
-                    System.out.println("Migration Failed: " + message + generateLogLevelWarningMessage());
+                    System.out.println("LiquiBase Update Failed: " + message + generateLogLevelWarningMessage());
                     LogFactory.getLogger().severe(message, e);
                 }
                 System.exit(-1);
             }
 
             if ("update".equals(main.command)) {
-                System.out.println("Migration successful");
+                System.out.println("LiquiBase Update Successful");
             } else if (main.command.startsWith("rollback") && !main.command.endsWith("SQL")) {
-                System.out.println("Rollback successful");
+                System.out.println("LiquiBase Rollback Successful");
             }
         } catch (Throwable e) {
             String message = "Unexpected error running LiquiBase: " + e.getMessage();
