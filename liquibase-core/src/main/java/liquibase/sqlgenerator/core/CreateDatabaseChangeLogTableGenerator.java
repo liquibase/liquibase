@@ -39,7 +39,7 @@ public class CreateDatabaseChangeLogTableGenerator implements SqlGenerator<Creat
                 .addColumn("DESCRIPTION", "VARCHAR(255)")
                 .addColumn("COMMENTS", "VARCHAR(255)")
                 .addColumn("TAG", "VARCHAR(255)")
-                .addColumn("LIQUIBASE", "VARCHAR(10)");
+                .addColumn("LIQUIBASE", "VARCHAR(20)");
 
         if (database instanceof MSSQLDatabase) {
             createTableStatement.setSchemaName("dbo");            
