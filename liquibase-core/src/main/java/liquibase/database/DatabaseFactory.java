@@ -34,6 +34,10 @@ public class DatabaseFactory {
         return instance;
     }
 
+    public static void reset() {
+        instance = new DatabaseFactory();
+    }
+
     /**
      * Returns instances of all implemented database types.
      */

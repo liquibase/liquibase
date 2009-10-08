@@ -2,7 +2,11 @@ package liquibase.database.core;
 
 import liquibase.database.AbstractDatabase;
 import liquibase.database.DatabaseConnection;
+import liquibase.database.DatabaseFactory;
 import liquibase.exception.DatabaseException;
+import liquibase.logging.LogFactory;
+
+import java.sql.Driver;
 
 public class DerbyDatabase extends AbstractDatabase {
 
@@ -72,4 +76,24 @@ public class DerbyDatabase extends AbstractDatabase {
         return super.getViewDefinition(schemaName, name).replaceFirst("CREATE VIEW \\w+ AS ", "");
     }
 
+    @Override
+    public void close() throws DatabaseException {
+        String url = getConnection().getURL();
+        String driverName = getDefaultDriver(url);
+        super.close();
+        if (driverName.toLowerCase().contains("embedded")) {
+            try {
+                if (url.contains(";")) {
+                    url = url.substring(0, url.indexOf(";")) + ";shutdown=true";
+                } else {
+                    url += ";shutdown=true";
+                }
+                LogFactory.getLogger().info("Shutting down derby connection: " + url);
+                // this cleans up the lock files in the embedded derby database folder
+                ((Driver) Class.forName(driverName).newInstance()).connect(url, null);
+            } catch (Exception e) {
+                //ok
+            }
+        }
+    }
 }

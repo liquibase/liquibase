@@ -35,7 +35,7 @@ public class DropTableGenerator implements SqlGenerator<DropTableStatement> {
                     || database instanceof FirebirdDatabase
                     || database instanceof SQLiteDatabase
                     || database instanceof SybaseASADatabase) {
-                LogFactory.getLogger().info("Database does not support drop with cascade");
+                LogFactory.getLogger().debug("Database does not support drop with cascade");
             } else if (database instanceof OracleDatabase) {
                 buffer.append(" CASCADE CONSTRAINTS");
             } else {
