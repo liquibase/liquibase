@@ -11,7 +11,7 @@ public class JavaUtilLogger extends AbstractLogger {
     private java.util.logging.Logger logger;
 
     public int getPriority() {
-        return -1;
+        return 5;
     }
 
     public void setName(String name) {
