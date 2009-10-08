@@ -451,7 +451,7 @@ public class Main {
             this.promptForNonLocalDatabase = Boolean.FALSE;
         }
         if (this.logLevel == null) {
-            this.logLevel = "off";
+            this.logLevel = "info";
         }
         if (this.includeSystemClasspath == null) {
             this.includeSystemClasspath = Boolean.TRUE;
