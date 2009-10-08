@@ -53,7 +53,7 @@
                 <constraints nullable="false"/>
             </column>
         </createTable>
-        <modifySql applyToRollback="false">
+        <modifySql applyToRollback="false" dbms="h2,derby,hsql">
             <append value="; alter table applytorollback add primary key(id)"/>
         </modifySql>
     </changeSet>

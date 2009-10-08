@@ -6,7 +6,6 @@ import liquibase.exception.LockException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
-import liquibase.sql.visitor.SqlVisitor;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.LockDatabaseChangeLogStatement;
 import liquibase.statement.core.SelectFromDatabaseChangeLogLockStatement;
@@ -109,6 +108,8 @@ public class LockService {
                 LogFactory.getLogger().info("Successfully acquired change log lock");
 
                 hasChangeLogLock = true;
+
+                database.setCanCacheLiquibaseTableInfo(true);
                 return true;
             }
         } catch (Exception e) {
@@ -126,7 +127,7 @@ public class LockService {
     public void releaseLock() throws LockException {
         Executor executor = ExecutorService.getInstance().getExecutor(database);
         try {
-            if (database.doesChangeLogLockTableExist()) {
+            if (database.hasDatabaseChangeLogLockTable()) {
                 executor.comment("Release Database Lock");
                 database.rollback();
                 int updatedRows = executor.update(new UnlockDatabaseChangeLogStatement());
@@ -137,6 +138,8 @@ public class LockService {
                 hasChangeLogLock = false;
 
                 instances.remove(this.database);
+
+                database.setCanCacheLiquibaseTableInfo(false);
 
                 LogFactory.getLogger().info("Successfully released change log lock");
             }
@@ -153,7 +156,7 @@ public class LockService {
 
     public DatabaseChangeLogLock[] listLocks() throws LockException {
         try {
-            if (!database.doesChangeLogLockTableExist()) {
+            if (!database.hasDatabaseChangeLogLockTable()) {
                 return new DatabaseChangeLogLock[0];
             }
 

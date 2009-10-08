@@ -50,7 +50,11 @@ public abstract class AbstractDatabase implements Database {
     private String databaseChangeLogLockTableName = System.getProperty("liquibase.databaseChangeLogLockTableName") == null ? "DatabaseChangeLogLock".toUpperCase() : System.getProperty("liquibase.databaseChangeLogLockTableName");
 
     private Integer lastChangeSetSequenceValue;
-    
+
+    private boolean canCacheLiquibaseTableInfo = false;
+    private boolean hasDatabaseChangeLogTable = false;
+    private boolean hasDatabaseChangeLogLockTable = false;
+
     protected AbstractDatabase() {
     }
 
@@ -396,12 +400,32 @@ public abstract class AbstractDatabase implements Database {
         return true;
     }
 
-    public boolean doesChangeLogTableExist() throws DatabaseException {
-        return DatabaseSnapshotGeneratorFactory.getInstance().getGenerator(this).hasDatabaseChangeLogTable(this);
+    public void setCanCacheLiquibaseTableInfo(boolean canCacheLiquibaseTableInfo) {
+        this.canCacheLiquibaseTableInfo = canCacheLiquibaseTableInfo;
+        hasDatabaseChangeLogTable = false;
+        hasDatabaseChangeLogLockTable = false;
     }
 
-    public boolean doesChangeLogLockTableExist() throws DatabaseException {
-        return DatabaseSnapshotGeneratorFactory.getInstance().getGenerator(this).hasDatabaseChangeLogLockTable(this);
+    public boolean hasDatabaseChangeLogTable() throws DatabaseException {
+        if (hasDatabaseChangeLogTable) {
+            return true;
+        }
+        boolean hasTable = DatabaseSnapshotGeneratorFactory.getInstance().getGenerator(this).hasDatabaseChangeLogTable(this);
+        if (canCacheLiquibaseTableInfo) {
+            hasDatabaseChangeLogTable = hasTable;
+        }
+        return hasTable;
+    }
+
+    public boolean hasDatabaseChangeLogLockTable() throws DatabaseException {
+        if (hasDatabaseChangeLogLockTable) {
+            return true;
+        }
+        boolean hasTable = DatabaseSnapshotGeneratorFactory.getInstance().getGenerator(this).hasDatabaseChangeLogLockTable(this);
+        if (canCacheLiquibaseTableInfo) {
+            hasDatabaseChangeLogLockTable = hasTable;
+        }
+        return hasTable;
     }
 
     public String getLiquibaseSchemaName() {
@@ -416,7 +440,7 @@ public abstract class AbstractDatabase implements Database {
     public void checkDatabaseChangeLogLockTable() throws DatabaseException {
 
         Executor executor = ExecutorService.getInstance().getExecutor(this);
-        if (!doesChangeLogLockTableExist()) {
+        if (!hasDatabaseChangeLogLockTable()) {
 
             executor.comment("Create Database Lock Table");
             executor.execute(new CreateDatabaseChangeLogLockTableStatement());
@@ -679,7 +703,7 @@ public abstract class AbstractDatabase implements Database {
      * Returns the run status for the given ChangeSet
      */
     public ChangeSet.RunStatus getRunStatus(ChangeSet changeSet) throws DatabaseException, DatabaseHistoryException {
-        if (!doesChangeLogTableExist()) {
+        if (!hasDatabaseChangeLogTable()) {
             return ChangeSet.RunStatus.NOT_RAN;
         }
 
@@ -715,7 +739,7 @@ public abstract class AbstractDatabase implements Database {
     }
 
     public RanChangeSet getRanChangeSet(ChangeSet changeSet) throws DatabaseException, DatabaseHistoryException {
-        if (!doesChangeLogTableExist()) {
+        if (!hasDatabaseChangeLogTable()) {
             throw new DatabaseHistoryException("Database change table does not exist");
         }
 
@@ -739,7 +763,7 @@ public abstract class AbstractDatabase implements Database {
 
         String databaseChangeLogTableName = escapeTableName(getLiquibaseSchemaName(), getDatabaseChangeLogTableName());
         ranChangeSetList = new ArrayList<RanChangeSet>();
-        if (doesChangeLogTableExist()) {
+        if (hasDatabaseChangeLogTable()) {
             LogFactory.getLogger().info("Reading from " + databaseChangeLogTableName);
             SqlStatement select = new SelectFromDatabaseChangeLogStatement("FILENAME", "AUTHOR", "ID", "MD5SUM", "DATEEXECUTED", "ORDEREXECUTED", "TAG").setOrderBy("DATEEXECUTED ASC", "ORDEREXECUTED ASC");
             List<Map> results = ExecutorService.getInstance().getExecutor(this).queryForList(select);

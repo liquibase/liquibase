@@ -30,6 +30,10 @@ public class MockDatabase implements Database {
         return null;
     }
 
+    public void setCanCacheLiquibaseTableInfo(boolean canCacheLiquibaseTableInfo) {
+        //
+    }
+
     public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
         return false;
     }
@@ -202,11 +206,11 @@ public class MockDatabase implements Database {
         return new DatabaseChangeLogLock[0];
     }
 
-    public boolean doesChangeLogTableExist() {
+    public boolean hasDatabaseChangeLogTable() {
         return false;
     }
 
-    public boolean doesChangeLogLockTableExist() {
+    public boolean hasDatabaseChangeLogLockTable() {
         return false;
     }
 
