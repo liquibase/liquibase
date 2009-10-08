@@ -12,7 +12,7 @@ public class DefaultLogger extends AbstractLogger {
     public DefaultLogger() {
         String passedLevel = System.getProperty("liquibase.default.logger.level");
         if (passedLevel == null) {
-            setLogLevel(LogLevel.SEVERE);
+            setLogLevel(LogLevel.INFO);
         } else {
             setLogLevel(passedLevel);
         }
@@ -32,56 +32,56 @@ public class DefaultLogger extends AbstractLogger {
 
     public void severe(String message) {
         if (getLogLevel().compareTo(LogLevel.SEVERE) <=0) {
-            print(message);
+            print(LogLevel.SEVERE, message);
         }
     }
 
-    private void print(String message) {
-        System.out.println(name + ":" + DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(new Date()) + ":" + message);
+    private void print(LogLevel logLevel, String message) {
+        System.out.println(logLevel+" "+DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(new Date())+ ":"+name + ": " + message);
     }
 
     public void severe(String message, Throwable e) {
         if (getLogLevel().compareTo(LogLevel.SEVERE) <=0) {
-            print(message);
+            print(LogLevel.SEVERE, message);
             e.printStackTrace();
         }
     }
 
     public void warning(String message) {
         if (getLogLevel().compareTo(LogLevel.WARNING) <=0) {
-            print(message);
+            print(LogLevel.WARNING, message);
         }
     }
 
     public void warning(String message, Throwable e) {
         if (getLogLevel().compareTo(LogLevel.WARNING) <=0) {
-            print(message);
+            print(LogLevel.WARNING, message);
             e.printStackTrace();
         }
     }
 
     public void info(String message) {
         if (getLogLevel().compareTo(LogLevel.INFO) <=0) {
-            print(message);
+            print(LogLevel.INFO, message);
         }
     }
 
     public void info(String message, Throwable e) {
         if (getLogLevel().compareTo(LogLevel.INFO) <=0) {
-            print(message);
+            print(LogLevel.INFO, message);
             e.printStackTrace();
         }
     }
 
     public void debug(String message) {
         if (getLogLevel().compareTo(LogLevel.DEBUG) <=0) {
-            print(message);
+            print(LogLevel.DEBUG, message);
         }
     }
 
     public void debug(String message, Throwable e) {
         if (getLogLevel().compareTo(LogLevel.DEBUG) <=0) {
-            print(message);
+            print(LogLevel.DEBUG, message);
             e.printStackTrace();
         }
 

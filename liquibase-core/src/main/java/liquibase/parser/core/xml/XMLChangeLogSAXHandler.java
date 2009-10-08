@@ -23,14 +23,18 @@ import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtils;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
+import org.xml.sax.InputSource;
 import org.xml.sax.helpers.DefaultHandler;
 
 import java.io.File;
 import java.io.InputStream;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.*;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 class XMLChangeLogSAXHandler extends DefaultHandler {
 
@@ -82,9 +86,15 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
             } else if ("validCheckSum".equals(qName)) {
                 text = new StringBuffer();
             } else if ("databaseChangeLog".equals(qName)) {
-                String version = uri.substring(uri.lastIndexOf("/") + 1);
-                if (!version.equals(XMLChangeLogSAXParser.getSchemaVersion())) {
-                    log.warning(databaseChangeLog.getPhysicalFilePath() + " is using schema version " + version + " rather than version " + XMLChangeLogSAXParser.getSchemaVersion());
+                String schemaLocation = atts.getValue("xsi:schemaLocation");
+                if (schemaLocation != null) {
+                    Matcher matcher = Pattern.compile(".*dbchangelog-(\\d+\\.\\d+).xsd").matcher(schemaLocation);
+                    if (matcher.matches()) {
+                        String version = matcher.group(1);
+                        if (!version.equals(XMLChangeLogSAXParser.getSchemaVersion())) {
+                            log.warning(databaseChangeLog.getPhysicalFilePath() + " is using schema version " + version + " rather than version " + XMLChangeLogSAXParser.getSchemaVersion());
+                        }
+                    }
                 }
                 databaseChangeLog.setLogicalFilePath(atts.getValue("logicalFilePath"));
             } else if ("include".equals(qName)) {

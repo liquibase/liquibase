@@ -57,7 +57,7 @@ public abstract class AbstractIntegrationTest {
     private String url;
 
     protected AbstractIntegrationTest(String changelogDir, String url) throws Exception {
-        LogFactory.setLoggingLevel("severe");
+        LogFactory.setLoggingLevel("info");
 
         this.completeChangeLog = "changelogs/" + changelogDir + "/complete/root.changelog.xml";
         this.rollbackChangeLog = "changelogs/" + changelogDir + "/rollback/rollbackable.changelog.xml";
@@ -69,7 +69,6 @@ public abstract class AbstractIntegrationTest {
 
         DatabaseConnection connection = DatabaseTestContext.getInstance().getConnection(url);
 
-        LogFactory.getLogger().setLogLevel(LogLevel.DEBUG);
         if (connection != null) {
             database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(connection);
         }

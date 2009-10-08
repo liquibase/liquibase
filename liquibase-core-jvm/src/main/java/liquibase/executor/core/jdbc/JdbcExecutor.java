@@ -301,7 +301,7 @@ public class JdbcExecutor extends AbstractExecutor implements Executor {
     }
 
     public void comment(String message) throws DatabaseException {
-        LogFactory.getLogger().info(message);
+        LogFactory.getLogger().debug(message);
     }
 
     /**

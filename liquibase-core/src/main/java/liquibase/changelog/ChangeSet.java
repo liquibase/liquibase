@@ -135,6 +135,8 @@ public class ChangeSet implements Conditional {
      */
     public ExecType execute(DatabaseChangeLog databaseChangeLog, Database database) throws MigrationFailedException {
 
+        long startTime = new Date().getTime();
+
         ExecType execType = null;
 
         boolean skipChange = false;
@@ -229,7 +231,7 @@ public class ChangeSet implements Conditional {
                 if (runInTransaction) {
                     database.commit();
                 }
-                log.debug("ChangeSet " + toString() + " has been successfully run.");
+                log.info("ChangeSet " + toString(false) + " ran successfully in "+(new Date().getTime()-startTime+"ms"));
                 if (execType == null) {
                     execType = ExecType.EXECUTED;
                 }
@@ -262,9 +264,6 @@ public class ChangeSet implements Conditional {
                     throw new MigrationFailedException(this, "Could not reset autocommit", e);
                 }
             }
-        }
-        if (execType == null) {
-            System.out.println("asdf");
         }
         return execType;
     }
@@ -335,7 +334,7 @@ public class ChangeSet implements Conditional {
     }
 
     public String toString(boolean includeMD5Sum) {
-        return filePath + "::" + getId() + "::" + getAuthor() + (includeMD5Sum ? ("::(MD5Sum: " + generateCheckSum() + ")") : "");
+        return filePath + "::" + getId() + "::" + getAuthor() + (includeMD5Sum ? ("::(Checksum: " + generateCheckSum() + ")") : "");
     }
 
     @Override

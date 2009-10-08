@@ -4,17 +4,14 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.logging.core.AbstractLogger;
 
 import java.io.IOException;
-import java.util.logging.FileHandler;
-import java.util.logging.Handler;
-import java.util.logging.Level;
-import java.util.logging.SimpleFormatter;
+import java.util.logging.*;
 
 public class JavaUtilLogger extends AbstractLogger {
 
     private java.util.logging.Logger logger;
 
     public int getPriority() {
-        return 5;
+        return -1;
     }
 
     public void setName(String name) {
@@ -53,7 +50,11 @@ public class JavaUtilLogger extends AbstractLogger {
             throw new IllegalArgumentException("Cannot open log file " + logFile + ". Reason: " + e.getMessage());
         }
 
-        fH.setFormatter(new SimpleFormatter());
+        fH.setFormatter(new Formatter(){
+            public String format(LogRecord record) {
+                return record.getLoggerName()+":"+record.getLevel().getName()+": "+record.getMessage();
+            }
+        });
         logger.addHandler(fH);
         logger.setUseParentHandlers(false);
         setLogLevel(logLevel);
