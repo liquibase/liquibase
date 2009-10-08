@@ -138,7 +138,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
                 }
 
                 if (!foundResource) {
-                    throw new SAXException("Could not find directory " + pathName);
+                    throw new SAXException("Could not find directory or directory was empty for includeAll '" + pathName+"'");
                 }
             } else if (changeSet == null && "changeSet".equals(qName)) {
                 boolean alwaysRun = false;

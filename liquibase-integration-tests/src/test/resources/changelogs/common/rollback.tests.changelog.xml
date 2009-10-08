@@ -67,4 +67,10 @@
         </modifySql>
     </changeSet>
 
+    <changeSet id="sqlfiletest" author="nvoxland">
+        <sqlFile stripComments="true" path="changelogs/common/rollbackinclude/createTables.sql"/>
+        <rollback>
+            <sqlFile stripComments="true" path="changelogs/common/rollbackinclude/rollbackTables.sql"/>
+        </rollback>
+    </changeSet>
 </databaseChangeLog>
