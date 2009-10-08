@@ -96,6 +96,9 @@ public class LockServiceTest {
         database.rollback();
         expectLastCall().anyTimes();
 
+        database.setCanCacheLiquibaseTableInfo(true);
+        expectLastCall();
+
         expect(executor.queryForObject(isA(SelectFromDatabaseChangeLogLockStatement.class), eq(Boolean.class))).andReturn(false);
 
         executor.comment("Lock Database");
@@ -149,6 +152,9 @@ public class LockServiceTest {
         database.checkDatabaseChangeLogLockTable();
         expectLastCall();
 
+        database.setCanCacheLiquibaseTableInfo(true);
+        expectLastCall();
+
         database.rollback();
         expectLastCall().anyTimes();
 
@@ -180,6 +186,9 @@ public class LockServiceTest {
 
         database.checkDatabaseChangeLogLockTable();
         expectLastCall().anyTimes();
+
+        database.setCanCacheLiquibaseTableInfo(true);
+        expectLastCall();
 
         expect(executor.queryForObject(isA(SelectFromDatabaseChangeLogLockStatement.class), eq(Boolean.class))).andReturn(true);
         expect(executor.queryForObject(isA(SelectFromDatabaseChangeLogLockStatement.class), eq(Boolean.class))).andReturn(true);
@@ -261,6 +270,9 @@ public class LockServiceTest {
         expect(database.hasDatabaseChangeLogLockTable()).andReturn(true);
         database.commit();
         expectLastCall().atLeastOnce();
+
+        database.setCanCacheLiquibaseTableInfo(false);
+        expectLastCall();
 
         executor.comment("Release Database Lock");
         expectLastCall().anyTimes();
