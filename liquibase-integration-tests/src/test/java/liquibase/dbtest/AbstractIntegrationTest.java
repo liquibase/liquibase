@@ -121,11 +121,11 @@ public abstract class AbstractIntegrationTest {
             }
             ExecutorService.getInstance().clearExecutor(database);
             database.setDefaultSchemaName(null);
-            database.close();
+//            database.close();
         }
-        ServiceLocator.reset();
+//        ServiceLocator.reset();
         DatabaseSnapshotGeneratorFactory.resetAll();
-        DatabaseFactory.reset();
+//        DatabaseFactory.reset();
     }
 
     protected boolean shouldRollBack() {
