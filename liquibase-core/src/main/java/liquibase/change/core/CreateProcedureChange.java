@@ -4,6 +4,7 @@ import liquibase.change.AbstractChange;
 import liquibase.change.ChangeMetaData;
 import liquibase.database.Database;
 import liquibase.database.core.OracleDatabase;
+import liquibase.database.core.DB2Database;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RawSqlStatement;
 
@@ -35,7 +36,10 @@ public class CreateProcedureChange extends AbstractChange {
         String endDelimiter = ";";
         if (database instanceof OracleDatabase) {
             endDelimiter = "\n/";
+        } else if (database instanceof DB2Database) {
+            endDelimiter = "";
         }
+        
         return new SqlStatement[] {
                 new RawSqlStatement(getProcedureBody(), endDelimiter),
         };
