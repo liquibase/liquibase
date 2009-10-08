@@ -66,7 +66,9 @@ public abstract class AbstractIntegrationTest {
         this.url = url;
 
         ServiceLocator.getInstance().setResourceAccessor(TestContext.getInstance().getTestResourceAccessor());
+    }
 
+    private void openConnection(String url) throws Exception {
         DatabaseConnection connection = DatabaseTestContext.getInstance().getConnection(url);
 
         if (connection != null) {
@@ -76,6 +78,8 @@ public abstract class AbstractIntegrationTest {
 
     @Before
     public void setUp() throws Exception {
+
+        openConnection(url);
 
         if (database != null) {
             if (!database.getConnection().getAutoCommit()) {
@@ -117,9 +121,11 @@ public abstract class AbstractIntegrationTest {
             }
             ExecutorService.getInstance().clearExecutor(database);
             database.setDefaultSchemaName(null);
+            database.close();
         }
-
+        ServiceLocator.reset();
         DatabaseSnapshotGeneratorFactory.resetAll();
+        DatabaseFactory.reset();
     }
 
     protected boolean shouldRollBack() {
