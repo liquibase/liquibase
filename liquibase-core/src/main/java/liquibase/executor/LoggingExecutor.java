@@ -76,6 +76,9 @@ public class LoggingExecutor extends AbstractExecutor implements Executor {
     private void outputStatement(SqlStatement sql, List<SqlVisitor> sqlVisitors) throws DatabaseException {
         try {
             for (String statement : applyVisitors(sql, sqlVisitors)) {
+                if (statement == null) {
+                    continue;
+                }
                 output.write(statement);
 
 
