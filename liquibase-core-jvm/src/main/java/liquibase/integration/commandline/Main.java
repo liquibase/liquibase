@@ -768,6 +768,10 @@ public class Main {
 //            driver = DatabaseFactory.getWriteExecutor().findDefaultDriver(url);
 //        }
 
+        if (url == null) {
+            throw new CommandLineParsingException("referenceUrl parameter missing");
+        }
+
         return CommandLineUtils.createDatabaseObject(classLoader, url, username, password, driver, defaultSchemaName, null);
 //        Driver driverObject;
 //        try {
