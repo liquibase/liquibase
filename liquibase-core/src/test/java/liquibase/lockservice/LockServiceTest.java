@@ -218,7 +218,7 @@ public class LockServiceTest {
         expectLastCall().anyTimes();
 
         expect(executor.queryForObject(isA(SelectFromDatabaseChangeLogLockStatement.class), eq(Boolean.class))).andReturn(true).anyTimes();
-        expect(database.doesChangeLogLockTableExist()).andReturn(true);
+        expect(database.hasDatabaseChangeLogLockTable()).andReturn(true);
 
         List<Map> resultList = new ArrayList<Map>();
         Map<String, Object> result = new HashMap<String, Object>();
@@ -258,7 +258,7 @@ public class LockServiceTest {
         Executor executor = createMock(Executor.class);
 
         expect(executor.update(isA(UnlockDatabaseChangeLogStatement.class))).andReturn(1);
-        expect(database.doesChangeLogLockTableExist()).andReturn(true);
+        expect(database.hasDatabaseChangeLogLockTable()).andReturn(true);
         database.commit();
         expectLastCall().atLeastOnce();
 
@@ -287,7 +287,7 @@ public class LockServiceTest {
         expectLastCall().anyTimes();
 
         expect(executor.queryForObject(isA(SelectFromDatabaseChangeLogLockStatement.class), eq(Boolean.class))).andReturn(true).anyTimes();
-        expect(database.doesChangeLogLockTableExist()).andReturn(true);
+        expect(database.hasDatabaseChangeLogLockTable()).andReturn(true);
 
         List<Map> resultList = new ArrayList<Map>();
         Map<String, Object> result = new HashMap<String, Object>();
@@ -323,7 +323,7 @@ public class LockServiceTest {
         expectLastCall().anyTimes();
 
         expect(executor.queryForObject(isA(SelectFromDatabaseChangeLogLockStatement.class), eq(Boolean.class))).andReturn(true).anyTimes();
-        expect(database.doesChangeLogLockTableExist()).andReturn(true);
+        expect(database.hasDatabaseChangeLogLockTable()).andReturn(true);
 
         List<Map> resultList = new ArrayList<Map>();
 
@@ -344,7 +344,7 @@ public class LockServiceTest {
     public void listLocks_tableDoesNotExists() throws Exception {
         Database database = createMock(Database.class);
 
-        expect(database.doesChangeLogLockTableExist()).andReturn(false);
+        expect(database.hasDatabaseChangeLogLockTable()).andReturn(false);
 
         replay(database);
 

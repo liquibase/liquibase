@@ -113,9 +113,11 @@ public interface Database extends DatabaseObject {
      */
     String getConcatSql(String ... values);
 
-    boolean doesChangeLogTableExist() throws DatabaseException;
+    boolean hasDatabaseChangeLogTable() throws DatabaseException;
 
-    boolean doesChangeLogLockTableExist() throws DatabaseException;
+    public void setCanCacheLiquibaseTableInfo(boolean canCacheLiquibaseTableInfo);
+    
+    boolean hasDatabaseChangeLogLockTable() throws DatabaseException;
 
     void checkDatabaseChangeLogTable() throws DatabaseException;
 

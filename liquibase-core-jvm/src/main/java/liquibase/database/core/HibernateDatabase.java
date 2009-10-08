@@ -175,11 +175,15 @@ public class HibernateDatabase implements Database {
         return null;
     }
 
-    public boolean doesChangeLogTableExist() {
+    public void setCanCacheLiquibaseTableInfo(boolean canCacheLiquibaseTableInfo) {
+        //
+    }
+
+    public boolean hasDatabaseChangeLogTable() {
         return false;
     }
 
-    public boolean doesChangeLogLockTableExist() {
+    public boolean hasDatabaseChangeLogLockTable() {
         return false;
     }
 
