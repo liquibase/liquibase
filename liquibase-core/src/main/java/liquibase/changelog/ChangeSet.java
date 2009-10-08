@@ -247,7 +247,8 @@ public class ChangeSet implements Conditional {
                 throw new MigrationFailedException(this, e);
             }
             if (getFailOnError() != null && !getFailOnError()) {
-                log.info("Change set " + toString(false) + " failed, but failOnError was false", e);
+                log.info("Change set " + toString(false) + " failed, but failOnError was false.  Error: "+e.getMessage());
+                log.debug("Failure Stacktrace", e);
                 execType = ExecType.FAILED;
             } else {
                 if (e instanceof MigrationFailedException) {
