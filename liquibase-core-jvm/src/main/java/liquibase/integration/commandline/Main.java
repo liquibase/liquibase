@@ -677,12 +677,12 @@ public class Main {
                 } else if ("updateSQL".equalsIgnoreCase(command)) {
                     liquibase.update(contexts, getOutputWriter());
                 } else if ("rollback".equalsIgnoreCase(command)) {
-                    if (commandParams == null) {
+                    if (commandParams == null || commandParams.size() == 0) {
                         throw new CommandLineParsingException("rollback requires a rollback tag");
                     }
                     liquibase.rollback(commandParams.iterator().next(), contexts);
                 } else if ("rollbackToDate".equalsIgnoreCase(command)) {
-                    if (commandParams == null) {
+                    if (commandParams == null || commandParams.size() == 0) {
                         throw new CommandLineParsingException("rollback requires a rollback date");
                     }
                     liquibase.rollback(dateFormat.parse(commandParams.iterator().next()), contexts);
@@ -690,17 +690,17 @@ public class Main {
                     liquibase.rollback(Integer.parseInt(commandParams.iterator().next()), contexts);
 
                 } else if ("rollbackSQL".equalsIgnoreCase(command)) {
-                    if (commandParams == null) {
+                    if (commandParams == null || commandParams.size() == 0) {
                         throw new CommandLineParsingException("rollbackSQL requires a rollback tag");
                     }
                     liquibase.rollback(commandParams.iterator().next(), contexts, getOutputWriter());
                 } else if ("rollbackToDateSQL".equalsIgnoreCase(command)) {
-                    if (commandParams == null) {
+                    if (commandParams == null || commandParams.size() == 0) {
                         throw new CommandLineParsingException("rollbackToDateSQL requires a rollback date");
                     }
                     liquibase.rollback(dateFormat.parse(commandParams.iterator().next()), contexts, getOutputWriter());
                 } else if ("rollbackCountSQL".equalsIgnoreCase(command)) {
-                    if (commandParams == null) {
+                    if (commandParams == null || commandParams.size() == 0) {
                         throw new CommandLineParsingException("rollbackCountSQL requires a rollback tag");
                     }
 
