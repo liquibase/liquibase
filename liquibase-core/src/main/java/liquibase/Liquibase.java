@@ -483,8 +483,16 @@ public class Liquibase {
     /**
      * 'Tags' the database for future rollback
      */
-    public void tag(String tagString) throws DatabaseException {
-        getDatabase().tag(tagString);
+    public void tag(String tagString) throws DatabaseException, LockException {
+        LockService lockService = LockService.getInstance(database);
+        lockService.waitForLock();
+
+        try {
+            database.checkDatabaseChangeLogTable();
+            getDatabase().tag(tagString);
+        } finally {
+            lockService.releaseLock();
+        }
     }
 
 

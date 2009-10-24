@@ -143,10 +143,10 @@
     </changeSet>
 
     <changeSet id="16" author="nvoxland">
-        <createSequence sequenceName="seq_test" startValue="1000" incrementBy="2" minValue="50" maxValue="100000" ordered="true"/>
+        <createSequence sequenceName="seq_test" startValue="1000" incrementBy="2" minValue="50" maxValue="100000"/>
     </changeSet>
     <changeSet id="17" author="nvoxland">
-        <alterSequence sequenceName="seq_test" incrementBy="2" minValue="50" maxValue="100000" ordered="true"/>
+        <alterSequence sequenceName="seq_test" incrementBy="2" minValue="50" maxValue="100000"/>
     </changeSet>
     <changeSet id="18" author="nvoxland">
         <dropSequence sequenceName="seq_test"/>

@@ -737,11 +737,13 @@ public class DiffResult {
             columnConfig.setType(dataType);
 
             Object defaultValue = column.getDefaultValue();
-            String defaultValueString = TypeConverterFactory.getInstance().findTypeConverter(database).getDataType(defaultValue).convertObjectToString(defaultValue, database);
-            if(defaultValueString !=null) {
-              defaultValueString  = defaultValueString.replaceFirst("'","").replaceAll("'$", "");
+            if (defaultValue != null) {
+                String defaultValueString = TypeConverterFactory.getInstance().findTypeConverter(database).getDataType(defaultValue).convertObjectToString(defaultValue, database);
+                if(defaultValueString !=null) {
+                  defaultValueString  = defaultValueString.replaceFirst("'","").replaceAll("'$", "");
+                }
+                columnConfig.setDefaultValue(defaultValueString);
             }
-            columnConfig.setDefaultValue(defaultValueString);
 
             if (column.getRemarks() != null) {
                 columnConfig.setRemarks(column.getRemarks());

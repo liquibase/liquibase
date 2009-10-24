@@ -252,7 +252,11 @@
   <component name="ProjectDetails">
     <option name="projectName" value="liquibase" />
   </component>
-  <component name="ProjectFileVersion" converted="true" />
+  <component name="ProjectFileVersion" converted="true">
+    <converter id="javaee-modules" />
+    <converter id="ror-modules" />
+    <converter id="SelenaRunConfToDiana" />
+  </component>
   <component name="ProjectKey">
     <option name="state" value="http://liquibase.jira.com/svn/CORE/trunk/liquibase.ipr" />
   </component>

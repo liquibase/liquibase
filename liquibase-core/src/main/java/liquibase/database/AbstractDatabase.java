@@ -366,7 +366,7 @@ public abstract class AbstractDatabase implements Database {
             }
             if (!hasExecTypeColumn) {
                 executor.comment("Adding missing databasechangelog.exectype column");
-                statementsToExecute.add(new AddColumnStatement(getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "EXECTYPE", "VARCHAR(10)", null, new NotNullConstraint(), new UniqueConstraint()));
+                statementsToExecute.add(new AddColumnStatement(getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "EXECTYPE", "VARCHAR(10)", null, new UniqueConstraint()));
                 statementsToExecute.add(new UpdateStatement(getLiquibaseSchemaName(), getDatabaseChangeLogTableName()).addNewColumnValue("EXECTYPE", "EXECUTED"));
                 statementsToExecute.add(new SetNullableStatement(getLiquibaseSchemaName(),  getDatabaseChangeLogTableName(), "EXECTYPE", "VARCHAR(10)", false));
             }
@@ -574,7 +574,7 @@ public abstract class AbstractDatabase implements Database {
             }
             this.commit();
 
-            ranChangeSetList.get(ranChangeSetList.size() - 1).setTag(tagString);
+            getRanChangeSetList().get(getRanChangeSetList().size() - 1).setTag(tagString);
         } catch (Exception e) {
             throw new DatabaseException(e);
         }
