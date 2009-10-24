@@ -1,4 +1,5 @@
 Manifest-Version: 1.0
+Main-Class: liquibase.integration.commandline.Main
 LiquiBase-Package: liquibase.change,
  liquibase.database,
  liquibase.parser,
