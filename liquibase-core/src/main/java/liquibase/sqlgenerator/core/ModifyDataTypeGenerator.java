@@ -61,20 +61,13 @@ public class ModifyDataTypeGenerator implements SqlGenerator<ModifyDataTypeState
      * @return either "MODIFY" or "ALTER COLUMN" depending on the current db
      */
     private String getModifyString(Database database) {
-        if (database instanceof HsqlDatabase
-                || database instanceof H2Database
-                || database instanceof DerbyDatabase
-                || database instanceof DB2Database
-                || database instanceof MSSQLDatabase
-                || database instanceof CacheDatabase) {
-            return "ALTER COLUMN";
-        } else if (database instanceof SybaseASADatabase
+        if (database instanceof SybaseASADatabase
                 || database instanceof SybaseDatabase
-                || database instanceof MySQLDatabase) {
+                || database instanceof MySQLDatabase
+                || database instanceof OracleDatabase
+                || database instanceof MaxDBDatabase
+                ) {
             return "MODIFY";
-        } else if (database instanceof OracleDatabase
-                || database instanceof MaxDBDatabase) {
-            return "MODIFY (";
         } else {
             return "ALTER COLUMN";
         }

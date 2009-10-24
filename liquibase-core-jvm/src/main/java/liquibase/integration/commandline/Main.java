@@ -116,7 +116,7 @@ public class Main {
                     ((ValidationFailedException) e.getCause()).printDescriptiveError(System.out);
                 } else {
                     System.out.println("LiquiBase Update Failed: " + message + generateLogLevelWarningMessage());
-                    LogFactory.getLogger().severe(message, e);
+                    LogFactory.getLogger().info(message, e);
                 }
                 System.exit(-1);
             }
