@@ -84,6 +84,15 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
 
   private boolean includeArtifactDefault = true;
 
+   /**
+   * Allows for the maven test output directory to be included in the class loader for
+   * obtaining the Liquibase property and DatabaseChangeLog files.
+   * @parameter expression="${liquibase.includeTestOutputDirectory}" default-value="true"
+   */
+  protected boolean includeTestOutputDirectory;
+
+  private boolean includeTestOutputDirectoryDefault = true;
+
   /**
    * Controls the verbosity of the output from invoking the plugin.
    * @parameter expression="${liquibase.verbose}" default-value="false"
@@ -251,6 +260,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     try {
       return MavenUtils.getArtifactClassloader(project,
                                                includeArtifact,
+                                               includeTestOutputDirectory,
                                                getClass(),
                                                getLog(),
                                                verbose);

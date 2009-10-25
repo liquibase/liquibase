@@ -32,6 +32,7 @@ public class MavenUtils {
    */
   public static ClassLoader getArtifactClassloader(MavenProject project,
                                                    boolean includeArtifact,
+                                                   boolean includeTestOutputDirectory,
                                                    Class clazz,
                                                    Log log,
                                                    boolean verbose)
@@ -63,6 +64,9 @@ public class MavenUtils {
       } else {
         addFile(urls, new File(project.getBuild().getOutputDirectory()), log, verbose);
       }
+    }
+     if (includeTestOutputDirectory) {
+        addFile(urls, new File(project.getBuild().getTestOutputDirectory()), log, verbose);
     }
     if (verbose) {
       log.info(LOG_SEPARATOR);

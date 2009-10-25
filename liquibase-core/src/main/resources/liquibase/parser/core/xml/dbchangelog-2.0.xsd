@@ -172,6 +172,7 @@
         <xsd:attribute name="runAlways" type="xsd:boolean"/>
         <xsd:attribute name="failOnError" type="xsd:boolean"/>
         <xsd:attribute name="runInTransaction" type="xsd:boolean" default="true"/>
+        <xsd:attribute name="movedFromPath" type="xsd:string"/>        
     </xsd:attributeGroup>
 
     <!-- Attributes for constraints -->
