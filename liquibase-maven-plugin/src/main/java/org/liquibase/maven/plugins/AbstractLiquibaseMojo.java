@@ -144,10 +144,22 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
    */
   protected MavenProject project;
 
-  /** The {@link Liquibase} object used modify the database. */ 
+  /** The {@link Liquibase} object used modify the database. */
   private Liquibase liquibase;
 
-  public void execute() throws MojoExecutionException, MojoFailureException {
+  /**
+   * Array to put a expression variable to maven plugin.
+   * @parameter
+   */
+  private Properties expressionVars;
+
+  /**
+   * Array to put a expression variable to maven plugin.
+   * @parameter
+   */
+  private Map expressionVariables;
+
+    public void execute() throws MojoExecutionException, MojoFailureException {
     getLog().info(MavenUtils.LOG_SEPARATOR);
 
     String shouldRunProperty = System.getProperty(Liquibase.SHOULD_RUN_SYSTEM_PROPERTY);
@@ -185,6 +197,25 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                                                        defaultSchemaName,
                                                        null);
       liquibase = createLiquibase(getFileOpener(artifactClassLoader), database);
+
+      getLog().debug("expressionVars = " + String.valueOf(expressionVars));
+
+      if (expressionVars != null) {
+      	for (Map.Entry<Object, Object> var: expressionVars.entrySet()) {
+      		this.liquibase.setChangeLogParameter(var.getKey().toString(), var.getValue());
+      	}
+      }
+
+      getLog().debug("expressionVariables = " + String.valueOf(expressionVariables));
+      if (expressionVariables != null )
+      {
+      	for (Map.Entry var: (Set<Map.Entry>)expressionVariables.entrySet()) {
+            if(var.getValue() != null) {
+      		this.liquibase.setChangeLogParameter(var.getKey().toString(), var.getValue());
+      	    }
+      	}
+      }
+
       if (clearCheckSums) {
         getLog().info("Clearing the Liquibase Checksums on the database");
         liquibase.clearCheckSums();
