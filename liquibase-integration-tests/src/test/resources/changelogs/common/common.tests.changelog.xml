@@ -35,6 +35,12 @@
         </createTable>
     </changeSet>
 
+    <changeSet id="authortest" author="nvoxland">
+        <preConditions>
+            <sqlCheck expectedResult="1">select count(*) from DATABASECHANGELOG where AUTHOR='nvoxland' and ID='datatypetest-1'</sqlCheck>
+        </preConditions>
+    </changeSet>
+
     <changeSet id="tagTest" author="nvoxland">
         <tagDatabase tag="testTag"/>
     </changeSet>
@@ -107,6 +113,13 @@
             </column>
             <column name="name" type="varchar(255)"/>
         </createTable>
+    </changeSet>
+
+    <changeSet id="nullable-1" author="nvoxland">
+        <addNotNullConstraint tableName="compoundPKTest" columnName="name"/>
+    </changeSet>
+    <changeSet id="nullable-2" author="nvoxland">
+        <dropNotNullConstraint tableName="compoundPKTest" columnName="name"/>
     </changeSet>
 
 
