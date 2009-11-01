@@ -27,13 +27,13 @@ public class SelectFromDatabaseChangeLogGenerator implements SqlGenerator<Select
     }
 
     public Sql[] generateSql(SelectFromDatabaseChangeLogStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        String sql = "SELECT " + StringUtils.join(statement.getColumnsToSelect(), ",") + " FROM " +
+        String sql = "SELECT " + StringUtils.join(statement.getColumnsToSelect(), ",").toUpperCase() + " FROM " +
                 database.escapeTableName(database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName());
 
         SelectFromDatabaseChangeLogStatement.WhereClause whereClause = statement.getWhereClause();
         if (whereClause != null) {
             if (whereClause instanceof SelectFromDatabaseChangeLogStatement.ByTag) {
-                sql += " WHERE tag='" + ((SelectFromDatabaseChangeLogStatement.ByTag) whereClause).getTagName() + "'";
+                sql += " WHERE TAG='" + ((SelectFromDatabaseChangeLogStatement.ByTag) whereClause).getTagName() + "'";
             } else if (whereClause instanceof SelectFromDatabaseChangeLogStatement.ByNotNullCheckSum) {
                     sql += " WHERE MD5SUM IS NOT NULL";
             } else {
@@ -42,7 +42,7 @@ public class SelectFromDatabaseChangeLogGenerator implements SqlGenerator<Select
         }
 
         if (statement.getOrderByColumns() != null && statement.getOrderByColumns().length > 0) {
-            sql += " ORDER BY "+StringUtils.join(statement.getOrderByColumns(), ", ");
+            sql += " ORDER BY "+StringUtils.join(statement.getOrderByColumns(), ", ").toUpperCase();
         }
 
         return new Sql[]{

@@ -7,7 +7,6 @@
         <url>http://ci.ops4j.org</url>
         <use-favourites>false</use-favourites>
         <bamboo2>true</bamboo2>
-        <isBamboo2M9>false</isBamboo2M9>
         <plans>
           <plan key="LQB-DEF" />
         </plans>
@@ -16,9 +15,7 @@
         <server-id>60a0e27e-d694-4644-95e1-4367c3f8efbf</server-id>
         <name>LiquiBase Jira</name>
         <url>http://liquibase.jira.com</url>
-        <dontUseBasicAuth>false</dontUseBasicAuth>
       </jira>
     </servers>
-    <default-jira-server>60a0e27e-d694-4644-95e1-4367c3f8efbf</default-jira-server>
   </project-configuration>
 </atlassian-ide-plugin>
