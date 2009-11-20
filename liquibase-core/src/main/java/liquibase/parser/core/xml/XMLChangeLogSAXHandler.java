@@ -23,12 +23,10 @@ import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtils;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
-import org.xml.sax.InputSource;
 import org.xml.sax.helpers.DefaultHandler;
 
 import java.io.File;
 import java.io.InputStream;
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
@@ -108,6 +106,15 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
                 }
                 log.debug("includeAll for " + pathName);
                 log.debug("Using file opener for includeAll: " + resourceAccessor.getClass().getName());
+                File pathFile = new File(pathName);
+                if (!pathFile.isAbsolute()) {
+                    File changeLogFile = new File(databaseChangeLog.getPhysicalFilePath());
+                    File resourceBase = new File(changeLogFile.getParent(), pathName);
+                    if (!resourceBase.exists()) {
+                        throw new SAXException("Resource directory for includeAll does not exist [" + resourceBase.getAbsolutePath() + "]");
+                    }
+                    pathName = resourceBase.getAbsolutePath() + "/";
+                }
                 Enumeration<URL> resources = resourceAccessor.getResources(pathName);
 
                 boolean foundResource = false;
