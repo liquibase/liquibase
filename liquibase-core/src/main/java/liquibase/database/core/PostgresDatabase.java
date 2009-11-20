@@ -223,7 +223,7 @@ public class PostgresDatabase extends AbstractDatabase {
         if (objectName == null) {
             return null;
         }
-        if (hasCaseProblems(objectName) || isReservedWord(objectName)) {
+        if (objectName.contains("-") || hasCaseProblems(objectName) || isReservedWord(objectName)) {
             return "\"" + objectName + "\"";
         } else {
             return super.escapeDatabaseObject(objectName);
