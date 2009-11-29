@@ -116,10 +116,10 @@
     </changeSet>
 
     <changeSet id="nullable-1" author="nvoxland">
-        <addNotNullConstraint tableName="compoundPKTest" columnName="name"/>
+        <addNotNullConstraint tableName="compoundPKTest" columnName="name" columnDataType="varchar(255)"/>
     </changeSet>
     <changeSet id="nullable-2" author="nvoxland">
-        <dropNotNullConstraint tableName="compoundPKTest" columnName="name"/>
+        <dropNotNullConstraint tableName="compoundPKTest" columnName="name" columnDataType="varchar(255)"/>
     </changeSet>
 
 

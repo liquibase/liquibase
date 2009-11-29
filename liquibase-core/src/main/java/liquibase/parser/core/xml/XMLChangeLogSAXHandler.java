@@ -106,8 +106,9 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
                 }
                 log.debug("includeAll for " + pathName);
                 log.debug("Using file opener for includeAll: " + resourceAccessor.getClass().getName());
-                File pathFile = new File(pathName);
-                if (!pathFile.isAbsolute()) {
+                boolean isRelativeToChangelogFile = Boolean.parseBoolean(atts.getValue("relativeToChangelogFile"));
+
+                if (isRelativeToChangelogFile) {
                     File changeLogFile = new File(databaseChangeLog.getPhysicalFilePath());
                     File resourceBase = new File(changeLogFile.getParent(), pathName);
                     if (!resourceBase.exists()) {
