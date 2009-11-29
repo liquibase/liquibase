@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+inc<?xml version="1.0" encoding="UTF-8"?>
 
 <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
             targetNamespace="http://www.liquibase.org/xml/ns/dbchangelog"
@@ -110,6 +110,7 @@
                     <xsd:element name="includeAll" minOccurs="0" maxOccurs="unbounded">
                         <xsd:complexType>
                             <xsd:attribute name="path" type="xsd:string" use="required"/>
+                            <xsd:attribute name="relativeToChangelogFile" type="xsd:boolean"/>
                         </xsd:complexType>
                     </xsd:element>
                 </xsd:choice>

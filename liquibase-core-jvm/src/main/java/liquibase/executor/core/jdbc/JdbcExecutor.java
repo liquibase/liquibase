@@ -55,7 +55,7 @@ public class JdbcExecutor extends AbstractExecutor implements Executor {
             // in the case when the exception translator hasn't been initialized yet.
             JdbcUtils.closeStatement(stmt);
             stmt = null;
-            throw new DatabaseException("Error executing SQL " + StringUtils.join(applyVisitors(action.getStatement(), sqlVisitors), ", "), ex);
+            throw new DatabaseException("Error executing SQL " + StringUtils.join(applyVisitors(action.getStatement(), sqlVisitors), "; "), ex);
         }
         finally {
             JdbcUtils.closeStatement(stmt);
