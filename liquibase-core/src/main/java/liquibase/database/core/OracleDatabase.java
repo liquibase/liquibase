@@ -61,7 +61,12 @@ public class OracleDatabase extends AbstractDatabase {
 
     @Override
     public String escapeIndexName(String schemaName, String indexName) {
-        return indexName;
+        String escapedIndexName = indexName;
+        if (schemaName != null)
+        {
+            escapedIndexName = schemaName + "." + escapedIndexName;
+        }
+        return escapedIndexName;
     }
 
     /**
