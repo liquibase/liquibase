@@ -221,7 +221,7 @@ public abstract class AbstractIntegrationTest {
         assertEquals(0, snapshot.getTables().size());
     }
 
-    private void clearDatabase(Liquibase liquibase) throws DatabaseException {
+    protected void clearDatabase(Liquibase liquibase) throws DatabaseException {
         liquibase.dropAll(getSchemasToDrop());
         Statement statement = null;
         try {
@@ -713,5 +713,9 @@ public abstract class AbstractIntegrationTest {
 
     public static String getDatabaseServerHostname() {
         return "localhost";
+    }
+
+    protected Database getDatabase(){
+        return database;
     }
 }
