@@ -91,6 +91,7 @@ public class CreateViewChange extends AbstractChange {
     protected Change[] createInverses() {
         DropViewChange inverse = new DropViewChange();
         inverse.setViewName(getViewName());
+        inverse.setSchemaName(getSchemaName());
 
         return new Change[]{
                 inverse
