@@ -10,6 +10,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.sql.Statement;
 import java.sql.ResultSet;
+import java.util.Date;
 
 /**
  * create tablespace liquibase2 datafile 'C:\ORACLEXE\ORADATA\XE\LIQUIBASE2.DBF' SIZE 5M autoextend on next 5M
@@ -45,6 +46,13 @@ public class OracleIntegrationTest extends AbstractIntegrationTest {
 
         assertEquals("LIQUIBASEB",owner);
 
+        // check that the automatically rollback now works too
+        try {
+            liquibase.rollback( new Date(0),this.contexts);
+        } catch (ValidationFailedException e) {
+            e.printDescriptiveError(System.out);
+            throw e;
+        }
 
 
 
