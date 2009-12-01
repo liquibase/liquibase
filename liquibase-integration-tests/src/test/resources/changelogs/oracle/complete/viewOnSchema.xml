@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd"
+        logicalFilePath="changelogs/oracle/complete/indexOnSchema.xml">
+    <preConditions>
+            <dbms type="oracle"/>
+    </preConditions>
+
+    <changeSet id="2" author="tbassett">
+        <createTable tableName="BOOK2" schemaName="LIQUIBASEB">
+            <column name="id" type="int"/>
+            <column name="title" type="varchar(50)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="3" author="tbassett">
+        <createView viewName="V_BOOK2" schemaName="LIQUIBASEB" replaceIfExists="true">
+            SELECT * FROM book2
+        </createView>
+    </changeSet>
+</databaseChangeLog>
