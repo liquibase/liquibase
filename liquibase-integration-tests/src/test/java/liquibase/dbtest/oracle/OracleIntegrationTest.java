@@ -26,6 +26,10 @@ public class OracleIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     public void indexCreatedOnCorrectSchema() throws Exception {
+         if (this.getDatabase() == null) {
+            return;
+        }
+
         Liquibase liquibase = createLiquibase(this.indexOnSchemaChangeLog);
         clearDatabase(liquibase);
 
