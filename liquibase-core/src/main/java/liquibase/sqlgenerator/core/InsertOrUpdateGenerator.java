@@ -13,7 +13,7 @@ import liquibase.statement.core.InsertOrUpdateStatement;
 public abstract class InsertOrUpdateGenerator implements SqlGenerator<InsertOrUpdateStatement> {
 
     public int getPriority() {
-        return PRIORITY_DEFAULT;  //To change body of implemented methods use File | Settings | File Templates.
+        return PRIORITY_DATABASE;  //To change body of implemented methods use File | Settings | File Templates.
     }
 
 }
