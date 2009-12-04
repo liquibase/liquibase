@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+
+    <changeSet id="bassett" author="7">
+        <createTable tableName="books">
+            <column name="isbn" type="NUMBER(22,0)">
+                <constraints primaryKey="true" nullable="false" />
+            </column>
+            <column name="author_id" type="NUMBER(22,0)" />
+            <column name="title" type="VARCHAR(100)" />
+        </createTable>
+    </changeSet>
+
+    <changeSet id="bassett" author="6" runAlways="true">
+        <loadUpdateData tableName="books" primaryKey="ISBN" file="C:\projects\liquibase\trunk\liquibase-integration-tests\src\test\resources\changelogs\oracle\complete\smartLoadData.books.csv" />
+    </changeSet>
+
+    <changeSet id="bassett" author="8" runAlways="true">
+        <loadUpdateData tableName="books" primaryKey="ISBN" file="C:\projects\liquibase\trunk\liquibase-integration-tests\src\test\resources\changelogs\oracle\complete\smartLoadData.books2.csv" />
+    </changeSet>
+
+    <changeSet id="bassett" author="9">
+        <createTable tableName="books2">
+            <column name="isbn" type="NUMBER(22,0)">
+                <constraints primaryKey="true" nullable="false" />
+            </column>
+            <column name="author_id" type="NUMBER(22,0)">
+                <constraints primaryKey="true" nullable="false" />
+            </column>
+            <column name="title" type="VARCHAR(100)" />
+        </createTable>
+    </changeSet>
+
+    <changeSet id="bassett" author="10" runAlways="true">
+        <loadUpdateData tableName="books2" primaryKey="ISBN,AUTHOR_ID" file="C:\projects\liquibase\trunk\liquibase-integration-tests\src\test\resources\changelogs\oracle\complete\smartLoadData.books.csv" />
+    </changeSet>
+
+    <changeSet id="bassett" author="11" runAlways="true">
+        <loadUpdateData tableName="books2" primaryKey="ISBN,AUTHOR_ID" file="C:\projects\liquibase\trunk\liquibase-integration-tests\src\test\resources\changelogs\oracle\complete\smartLoadData.books2.csv" />
+    </changeSet>
+
+    <changeSet id="sampleCSVData-table" author="nvoxland">
+        <createTable tableName="csvdata">
+            <column name="name" type="varchar(50)">
+                <constraints primaryKey="true" />
+            </column>
+            <column name="username" type="varchar(50)"/>
+            <column name="security_level" type="int"/>
+            <column name="last_login" type="datetime"/>
+            <column name="locked" type="boolean"/>
+        </createTable>
+    </changeSet>
+
+
+    <changeSet id="sampleCSVData2" author="nvoxland">
+        <loadUpdateData tableName="csvdata" file="changelogs/sample.data2.csv" primaryKey="name">
+            <column header="locked" type="BOOLEAN"/>
+            <column header="last_login" type="DATE"/>
+            <column header="security_level" type="NUMERIC"/>
+        </loadUpdateData>
+    </changeSet>
+
+    <changeSet id="sampleCSVData3" author="nvoxland">
+        <loadUpdateData tableName="csvdata" file="changelogs/sample.data3.csv" primaryKey="name">
+            <column index="0" name="name" type="STRING"/>
+            <column header="last seen" name="last_login" type="DATE"/>
+            <column header="locked" type="BOOLEAN"/>
+            <column header="security_level" type="NUMERIC"/>
+        </loadUpdateData>
+    </changeSet>
+
+
+</databaseChangeLog>

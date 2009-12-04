@@ -29,6 +29,11 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns 
         super("loadData", "Load Data", ChangeMetaData.PRIORITY_DEFAULT);
     }
 
+    protected LoadDataChange(String changeName, String changeDescription)
+    {
+        super(changeName,changeDescription,ChangeMetaData.PRIORITY_DEFAULT);
+    }
+
     public String getSchemaName() {
         return schemaName;
     }
@@ -67,23 +72,8 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns 
 
     public SqlStatement[] generateStatements(Database database) {
         try {
-            ResourceAccessor opener = getFileOpener();
-            if (opener == null) {
-                throw new UnexpectedLiquibaseException("No file opener specified for "+getFile());
-            }
-            InputStream stream = opener.getResourceAsStream(getFile());
-            if (stream == null) {
-                throw new UnexpectedLiquibaseException("Data file "+getFile()+" was not found");
-            }
+            CSVReader reader = getCSVReader();
 
-            InputStreamReader streamReader;
-            if (getEncoding() == null) {
-                streamReader = new InputStreamReader(stream);
-            } else {
-                streamReader = new InputStreamReader(stream, getEncoding());
-            }
-            
-            CSVReader reader = new CSVReader(streamReader);
             String[] headers = reader.readNext();
             if (headers == null) {
                 throw new UnexpectedLiquibaseException("Data file "+getFile()+" was empty");
@@ -92,7 +82,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns 
             List<SqlStatement> statements = new ArrayList<SqlStatement>();
             String[] line = null;
             while ((line = reader.readNext()) != null) {
-                InsertStatement insertStatement = new InsertStatement(getSchemaName(), getTableName());
+                InsertStatement insertStatement = this.createStatement(getSchemaName(), getTableName());
                 for (int i=0; i<headers.length; i++) {
                     String columnName = null;
                     Object value = line[i];
@@ -138,7 +128,32 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns 
         }
     }
 
-    private ColumnConfig getColumnConfig(int index, String header) {
+    protected CSVReader getCSVReader() throws IOException {
+        ResourceAccessor opener = getFileOpener();
+        if (opener == null) {
+            throw new UnexpectedLiquibaseException("No file opener specified for "+getFile());
+        }
+        InputStream stream = opener.getResourceAsStream(getFile());
+        if (stream == null) {
+            throw new UnexpectedLiquibaseException("Data file "+getFile()+" was not found");
+        }
+
+        InputStreamReader streamReader;
+        if (getEncoding() == null) {
+            streamReader = new InputStreamReader(stream);
+        } else {
+            streamReader = new InputStreamReader(stream, getEncoding());
+        }
+
+        CSVReader reader = new CSVReader(streamReader);
+        return reader;
+    }
+
+    protected InsertStatement createStatement(String schemaName, String tableName){
+        return new InsertStatement(schemaName,tableName);
+    }
+
+    protected ColumnConfig getColumnConfig(int index, String header) {
         for (LoadDataColumnConfig config : columns) {
             if (config.getIndex() != null && config.getIndex().equals(index)) {
                 return config;
