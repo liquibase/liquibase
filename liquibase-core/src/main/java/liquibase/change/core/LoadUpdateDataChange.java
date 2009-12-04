@@ -1,10 +1,10 @@
 package liquibase.change.core;
 
-import com.sun.javaws.exceptions.InvalidArgumentException;
 import liquibase.database.Database;
 import liquibase.database.typeconversion.TypeConverterFactory;
 import liquibase.exception.RollbackImpossibleException;
 import liquibase.exception.UnsupportedChangeException;
+import liquibase.exception.LiquibaseException;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DeleteStatement;
 import liquibase.statement.core.InsertOrUpdateStatement;
@@ -34,9 +34,9 @@ public class LoadUpdateDataChange extends LoadDataChange {
     }
 
 
-    public void setPrimaryKey(String primaryKey) throws InvalidArgumentException {
+    public void setPrimaryKey(String primaryKey) throws LiquibaseException {
         if (primaryKey == null) {
-            throw new InvalidArgumentException(new String[]{"primaryKey cannot be null."});
+            throw new LiquibaseException("primaryKey cannot be null.");
         }
         this.primaryKey = primaryKey;
     }
