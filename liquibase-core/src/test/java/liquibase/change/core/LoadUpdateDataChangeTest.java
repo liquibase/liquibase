@@ -1,12 +1,12 @@
 package liquibase.change.core;
 
-import com.sun.javaws.exceptions.InvalidArgumentException;
 import junit.framework.Assert;
 import static junit.framework.Assert.fail;
 import liquibase.change.AbstractChangeTest;
 import liquibase.database.core.MockDatabase;
 import liquibase.exception.RollbackImpossibleException;
 import liquibase.exception.UnsupportedChangeException;
+import liquibase.exception.LiquibaseException;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DeleteStatement;
@@ -107,7 +107,7 @@ public class LoadUpdateDataChangeTest extends AbstractChangeTest {
     }
 
     @Test
-    public void primaryKey() throws InvalidArgumentException {
+    public void primaryKey() throws LiquibaseException {
         LoadUpdateDataChange change = new LoadUpdateDataChange();
         String primaryKey = "myPrimaryKey";
         change.setPrimaryKey(primaryKey);
@@ -123,14 +123,14 @@ public class LoadUpdateDataChangeTest extends AbstractChangeTest {
             change.setPrimaryKey(null);
             fail("setPrimaryKey did not throw InvalidArgumentException as expected.");
         }
-        catch(InvalidArgumentException e)
+        catch(LiquibaseException e)
         {
         }
     }
 
 
     @Test
-    public void getWhereClause() throws InvalidArgumentException {
+    public void getWhereClause() throws LiquibaseException {
         MockDatabase database = new MockDatabase();
         LoadUpdateDataChange change = new LoadUpdateDataChange();
 
@@ -155,7 +155,7 @@ public class LoadUpdateDataChangeTest extends AbstractChangeTest {
     }
 
     @Test
-    public void generateRollbacksForData1CSV() throws UnsupportedChangeException, RollbackImpossibleException, InvalidArgumentException {
+    public void generateRollbacksForData1CSV() throws UnsupportedChangeException, RollbackImpossibleException, LiquibaseException {
         MockDatabase database = new MockDatabase();
 
         LoadUpdateDataChange change = new LoadUpdateDataChange();
