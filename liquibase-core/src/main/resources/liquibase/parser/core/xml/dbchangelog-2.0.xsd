@@ -380,6 +380,31 @@
         </xsd:complexType>
     </xsd:element>
 
+    <xsd:element name="loadUpdateData">
+        <xsd:complexType mixed="true">
+            <xsd:sequence>
+                <xsd:element name="column" minOccurs="0" maxOccurs="unbounded">
+                    <xsd:complexType>
+                        <xsd:attribute name="index" type="xsd:integer"/>
+                        <xsd:attribute name="header" type="xsd:string"/>
+                        <xsd:attribute name="name" type="xsd:string"/>
+                        <xsd:attribute name="type" type="xsd:string"/>
+                        <xsd:attribute name="defaultValue" type="xsd:string"/>
+                        <xsd:attribute name="defaultValueNumeric" type="xsd:string"/>
+                        <xsd:attribute name="defaultValueDate" type="xsd:string"/>
+                        <xsd:attribute name="defaultValueBoolean" type="xsd:boolean"/>
+                        <xsd:attribute name="defaultValueComputed" type="xsd:string"/>
+                    </xsd:complexType>
+                </xsd:element>
+            </xsd:sequence>
+            <xsd:attribute name="schemaName" type="xsd:string"/>
+            <xsd:attribute name="tableName" type="xsd:string" use="required"/>
+            <xsd:attribute name="file" type="xsd:string"/>
+            <xsd:attribute name="encoding" type="xsd:string"/>
+            <xsd:attribute name="primaryKey" type="xsd:string" use="required"/>
+        </xsd:complexType>
+    </xsd:element>
+
     <xsd:simpleType name="fkCascadeActionOptions">
         <xsd:restriction base="xsd:token">
             <xsd:enumeration value="CASCADE"></xsd:enumeration>
