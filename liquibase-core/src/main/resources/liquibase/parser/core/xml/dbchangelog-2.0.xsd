@@ -910,6 +910,7 @@
             <xsd:element ref="update" maxOccurs="unbounded"/>
             <xsd:element ref="delete" maxOccurs="unbounded"/>
             <xsd:element ref="loadData" maxOccurs="unbounded"/>
+            <xsd:element ref="loadUpdateData" maxOccurs="unbounded"/>
             <xsd:element ref="executeCommand" maxOccurs="unbounded"/>
             <xsd:element ref="stop" maxOccurs="unbounded"/>
             <xsd:element ref="rollback" maxOccurs="1"/>
