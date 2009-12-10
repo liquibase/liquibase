@@ -14,13 +14,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-/**
- * Created by IntelliJ IDEA.
- * User: bassettt
- * Date: Dec 1, 2009
- * Time: 9:03:14 PM
- * To change this template use File | Settings | File Templates.
- */
 public class LoadUpdateDataChange extends LoadDataChange {
     private String primaryKey;
 
