@@ -12,13 +12,6 @@ import liquibase.statement.core.UpdateStatement;
 
 import java.util.Date;
 
-/**
- * Created by IntelliJ IDEA.
- * User: bassettt
- * Date: Dec 2, 2009
- * Time: 12:09:45 AM
- * To change this template use File | Settings | File Templates.
- */
 public class InsertOrUpdateGeneratorOracle extends InsertOrUpdateGenerator {
     public boolean supports(InsertOrUpdateStatement statement, Database database) {
         return database instanceof OracleDatabase;
