@@ -78,8 +78,9 @@ public class SybaseDatabase extends AbstractDatabase {
     public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
         String dbProductName = conn.getDatabaseProductName();
         return
-                "Sybase SQL Server".equals(dbProductName) ||
-                        "sql server".equals(dbProductName);
+                "Sybase SQL Server".equals(dbProductName)
+                || "sql server".equals(dbProductName)
+                || "ASE".equals(dbProductName);
     }
 
     public String getDefaultDriver(String url) {
