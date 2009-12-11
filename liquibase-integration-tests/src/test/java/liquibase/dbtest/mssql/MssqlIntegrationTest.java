@@ -20,9 +20,9 @@ public class MssqlIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     public void smartDataLoad() throws Exception {
-//         if (this.getDatabase() == null) {
-//            return;
-//        }
+         if (this.getDatabase() == null) {
+            return;
+        }
 
         Liquibase liquibase = createLiquibase("changelogs/common/smartDataLoad.changelog.xml");
         clearDatabase(liquibase);
