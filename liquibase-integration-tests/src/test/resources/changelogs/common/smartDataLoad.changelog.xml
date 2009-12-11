@@ -6,28 +6,28 @@
 
     <changeSet id="bassett" author="7">
         <createTable tableName="books">
-            <column name="isbn" type="NUMBER(22,0)">
+            <column name="isbn" type="int">
                 <constraints primaryKey="true" nullable="false" />
             </column>
-            <column name="author_id" type="NUMBER(22,0)" />
+            <column name="author_id" type="int" />
             <column name="title" type="VARCHAR(100)" />
         </createTable>
     </changeSet>
 
     <changeSet id="bassett" author="6" runAlways="true">
-        <loadUpdateData tableName="books" primaryKey="ISBN" file="C:\projects\liquibase\trunk\liquibase-integration-tests\src\test\resources\changelogs\oracle\complete\smartLoadData.books.csv" />
+        <loadUpdateData tableName="books" primaryKey="ISBN" file="changelogs/smartLoadData.books.csv" />
     </changeSet>
 
     <changeSet id="bassett" author="8" runAlways="true">
-        <loadUpdateData tableName="books" primaryKey="ISBN" file="C:\projects\liquibase\trunk\liquibase-integration-tests\src\test\resources\changelogs\oracle\complete\smartLoadData.books2.csv" />
+        <loadUpdateData tableName="books" primaryKey="ISBN" file="changelogs/smartLoadData.books2.csv" />
     </changeSet>
 
     <changeSet id="bassett" author="9">
         <createTable tableName="books2">
-            <column name="isbn" type="NUMBER(22,0)">
+            <column name="isbn" type="int">
                 <constraints primaryKey="true" nullable="false" />
             </column>
-            <column name="author_id" type="NUMBER(22,0)">
+            <column name="author_id" type="int">
                 <constraints primaryKey="true" nullable="false" />
             </column>
             <column name="title" type="VARCHAR(100)" />
@@ -35,11 +35,11 @@
     </changeSet>
 
     <changeSet id="bassett" author="10" runAlways="true">
-        <loadUpdateData tableName="books2" primaryKey="ISBN,AUTHOR_ID" file="C:\projects\liquibase\trunk\liquibase-integration-tests\src\test\resources\changelogs\oracle\complete\smartLoadData.books.csv" />
+        <loadUpdateData tableName="books2" primaryKey="ISBN,AUTHOR_ID" file="changelogs/smartLoadData.books.csv" />
     </changeSet>
 
     <changeSet id="bassett" author="11" runAlways="true">
-        <loadUpdateData tableName="books2" primaryKey="ISBN,AUTHOR_ID" file="C:\projects\liquibase\trunk\liquibase-integration-tests\src\test\resources\changelogs\oracle\complete\smartLoadData.books2.csv" />
+        <loadUpdateData tableName="books2" primaryKey="ISBN,AUTHOR_ID" file="changelogs/smartLoadData.books2.csv" />
     </changeSet>
 
     <changeSet id="sampleCSVData-table" author="nvoxland">
