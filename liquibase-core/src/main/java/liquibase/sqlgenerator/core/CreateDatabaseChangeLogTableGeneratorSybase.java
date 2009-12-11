@@ -29,8 +29,8 @@ public class CreateDatabaseChangeLogTableGeneratorSybase implements SqlGenerator
                 "AUTHOR VARCHAR(150) NOT NULL, " +
                 "FILENAME VARCHAR(255) NOT NULL, " +
                 "DATEEXECUTED " + TypeConverterFactory.getInstance().findTypeConverter(database).getDateTimeType() + " NOT NULL, " +
-                "ORDEREXECUTED NOT NULL UNIQUE, " +
-                "EXECTYPE NOT NULL, " +
+                "ORDEREXECUTED INT NOT NULL UNIQUE, " +
+                "EXECTYPE VARCHAR(10) NOT NULL, " +
                 "MD5SUM VARCHAR(32) NULL, " +
                 "DESCRIPTION VARCHAR(255) NULL, " +
                 "COMMENTS VARCHAR(255) NULL, " +
