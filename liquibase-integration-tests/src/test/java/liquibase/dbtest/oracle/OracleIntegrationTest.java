@@ -102,11 +102,11 @@ public class OracleIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     public void smartDataLoad() throws Exception {
-         if (this.getDatabase() == null) {
+        if (this.getDatabase() == null) {
             return;
         }
 
-        Liquibase liquibase = createLiquibase("changelogs/oracle/complete/smartDataLoad.changelog.xml");
+        Liquibase liquibase = createLiquibase("changelogs/common/smartDataLoad.changelog.xml");
         clearDatabase(liquibase);
 
         try {

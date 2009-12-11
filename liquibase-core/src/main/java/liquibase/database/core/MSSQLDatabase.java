@@ -101,7 +101,13 @@ public class MSSQLDatabase extends AbstractDatabase {
         return returnString.toString().replaceFirst(" \\+ $", "");
     }
 
-//    protected void dropForeignKeys(Connection conn) throws DatabaseException {
+    @Override
+    public String escapeIndexName(String schemaName, String indexName) {
+        // MSSQL server does not support the schema name for the index -
+        return super.escapeIndexName(null, indexName);
+    }
+
+    //    protected void dropForeignKeys(Connection conn) throws DatabaseException {
 //        Statement dropStatement = null;
 //        PreparedStatement fkStatement = null;
 //        ResultSet rs = null;
