@@ -10,6 +10,7 @@ import liquibase.exception.DateParseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.change.ColumnConfig;
 
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.sql.Types;
 import java.math.BigInteger;
@@ -104,9 +105,9 @@ public abstract class AbstractTypeConverter implements TypeConverter {
                 if (decimalDigits == 0) {
                     return new Integer(value);
                 }
-                return new Double(value);
+                return new BigDecimal(value);
             } else if (dataType == Types.DOUBLE || dataType == Types.NUMERIC) {
-                return new Double(value);
+                return new BigDecimal(value);
             } else if (dataType == Types.FLOAT) {
                 return new Float(value);
             } else if (dataType == Types.INTEGER) {
