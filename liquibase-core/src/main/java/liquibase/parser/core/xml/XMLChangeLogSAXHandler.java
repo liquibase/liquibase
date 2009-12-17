@@ -157,7 +157,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
                 if ("true".equalsIgnoreCase(atts.getValue("runOnChange"))) {
                     runOnChange = true;
                 }
-                String filePath = atts.getValue("movedFromPath");
+                String filePath = atts.getValue("logicalFilePath");
                 if (filePath == null || "".equals(filePath)) {
                     filePath = databaseChangeLog.getFilePath();
                 }
