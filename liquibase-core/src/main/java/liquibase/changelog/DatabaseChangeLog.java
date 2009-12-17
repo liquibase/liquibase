@@ -52,10 +52,11 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     }
 
     public String getLogicalFilePath() {
+        String returnPath = logicalFilePath;
         if (logicalFilePath == null) {
-            return physicalFilePath;
+            returnPath = physicalFilePath;
         }
-        return logicalFilePath;
+        return returnPath.replaceAll("\\\\","/");
     }
 
     public void setLogicalFilePath(String logicalFilePath) {
