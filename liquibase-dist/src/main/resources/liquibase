@@ -17,16 +17,35 @@ LIQUIBASE_HOME=`dirname "$PRG"`
 # make it fully qualified
 LIQUIBASE_HOME=`cd "$LIQUIBASE_HOME" && pwd`
 
+# OS specific support
+cygwin=false
+case "`uname`" in
+  CYGWIN*) cygwin=true ;;
+esac
+ 
 # build classpath from all jars in lib
-CP=.
-for i in "$LIQUIBASE_HOME"/liquibase*.jar; do
-  CP="$CP":"$i"
-done
-for i in "$LIQUIBASE_HOME"/lib/*.jar; do
-  CP="$CP":"$i"
-done
+if $cygwin ; then
+  CP=.
+  for i in "$LIQUIBASE_HOME"/liquibase*.jar; do
+    i=`cygpath --windows "$i"`
+    CP="$CP;$i"
+  done
+  for i in "$LIQUIBASE_HOME"/lib/*.jar; do
+    i=`cygpath --windows "$i"`
+    CP="$CP;$i"
+  done
+else
+  CP=.
+  for i in "$LIQUIBASE_HOME"/liquibase*.jar; do
+    CP="$CP":"$i"
+  done
+  for i in "$LIQUIBASE_HOME"/lib/*.jar; do
+    CP="$CP":"$i"
+  done
+fi
 
 # add any JVM options here
 JAVA_OPTS=
 
-java -cp $CP $JAVA_OPTS liquibase.integration.commandline.Main $@
+java -cp "$CP" $JAVA_OPTS liquibase.integration.commandline.Main $@
+
