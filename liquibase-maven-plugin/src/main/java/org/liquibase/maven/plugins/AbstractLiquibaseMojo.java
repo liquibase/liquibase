@@ -154,6 +154,13 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
 
     private boolean clearCheckSumsDefault = false;
 
+    /**                                                                                                                                                                          
+     * List of system properties to pass to the database.                                                                                                                        
+     *                                                                                                                                                                           
+     * @parameter                                                                                                                                                                
+     */                                                                                                                                                                          
+    protected Properties systemProperties;
+
     /**
      * The Maven project that plugin is running under.
      *
@@ -205,6 +212,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
             return;
         }
 
+        processSystemProperties();
 
         ClassLoader artifactClassLoader = getMavenArtifactClassLoader();
         configureFieldsAndValues(getFileOpener(artifactClassLoader));
@@ -505,4 +513,20 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
             field.set(this, value);
         }
     }
+    
+    @SuppressWarnings("unchecked")
+    private void processSystemProperties() {
+        if (systemProperties == null)
+        {
+            systemProperties = new Properties();
+        }
+        // Add all system properties configured by the user
+        Iterator iter = systemProperties.keySet().iterator();
+        while (iter.hasNext()) {
+            String key = (String) iter.next();
+            String value = systemProperties.getProperty(key);
+            System.setProperty(key, value);
+        }
+    }
+
 }
