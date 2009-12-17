@@ -686,7 +686,7 @@
         <sqlFile path="changelogs/common/rollbackinclude/createTables.sql"/>
     </changeSet>
 
-    <changeSet id="movedFromTest" author="nvoxland" movedFromPath="/where/it/was.xml">
+    <changeSet id="movedFromTest" author="nvoxland" logicalFilePath="/where/it/was.xml">
         <createTable tableName="movedFromTest">
             <column name="id" type="int"/>
         </createTable>
