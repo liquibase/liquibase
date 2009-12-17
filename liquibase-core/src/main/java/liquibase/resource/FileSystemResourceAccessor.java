@@ -71,7 +71,7 @@ public class FileSystemResourceAccessor implements ResourceAccessor {
         List<URL> results = new ArrayList<URL>();
 
         for (File f : files) {
-            results.add(new URL("file://" + f.getCanonicalPath()));
+            results.add(f.toURI().toURL());
         }
 
         final Iterator<URL> it = results.iterator();

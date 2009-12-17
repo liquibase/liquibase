@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<module relativePaths="true" MavenProjectsManager.isMavenModule="true" type="JAVA_MODULE" version="4">
+<module MavenProjectsManager.isMavenModule="true" org.jetbrains.idea.maven.project.MavenProjectsManager.isMavenModule="true" relativePaths="true" type="JAVA_MODULE" version="4">
   <component name="NewModuleRootManager" inherit-compiler-output="false">
     <output url="file://$MODULE_DIR$/target/classes" />
     <output-test url="file://$MODULE_DIR$/target/test-classes" />
@@ -12,6 +12,12 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="module" module-name="liquibase-core-jvm" exported="" />
+    <orderEntry type="module" module-name="liquibase-core" exported="" />
+    <orderEntry type="module" module-name="liquibase-core" />
+    <orderEntry type="module" module-name="liquibase-ext-change" />
+    <orderEntry type="module" module-name="liquibase-ext-changewithnestedtags" />
+    <orderEntry type="module" module-name="liquibase-ext-sqlgenerator" />
     <orderEntry type="library" name="Maven: junit:junit:4.1" level="project" />
     <orderEntry type="library" name="Maven: org.easymock:easymockclassextension:2.2" level="project" />
     <orderEntry type="library" name="Maven: org.easymock:easymock:2.2" level="project" />

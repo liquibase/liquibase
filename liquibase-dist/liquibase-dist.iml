@@ -1,5 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<module relativePaths="true" MavenProjectsManager.isMavenModule="true" type="JAVA_MODULE" version="4">
+<module MavenProjectsManager.isMavenModule="true" org.jetbrains.idea.maven.project.MavenProjectsManager.isMavenModule="true" relativePaths="true" type="JAVA_MODULE" version="4">
+  <component name="FacetManager">
+    <facet type="Osmorc" name="OSGi">
+      <configuration osmorcControlsManifest="true" manifestLocation="" jarfileLocation="$MODULE_DIR$/target/liquibase-dist.jar" useBndFile="false" bndFileLocation="" bundleActivator="" bundleSymbolicName="org.liquibase.liquibase-dist" bundleVersion="2.0-rc2-SNAPSHOT" ignoreFilePattern="" useProjectDefaultManifestFileLocation="true" alwaysRebuildBundleJAR="false">
+        <additionalProperties>
+          <property key="_include" value="-osgi.bnd" />
+        </additionalProperties>
+        <additionalJARContents />
+      </configuration>
+    </facet>
+  </component>
   <component name="NewModuleRootManager" inherit-compiler-output="false">
     <output url="file://$MODULE_DIR$/target/classes" />
     <output-test url="file://$MODULE_DIR$/target/test-classes" />
@@ -11,6 +21,8 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="module" module-name="liquibase-core-jvm" exported="" />
+    <orderEntry type="module" module-name="liquibase-core" exported="" />
     <orderEntry type="library" name="Maven: ant:ant:1.6.5" level="project" />
     <orderEntry type="library" name="Maven: org.hibernate:hibernate-annotations:3.3.1.GA" level="project" />
     <orderEntry type="library" name="Maven: org.hibernate:hibernate:3.2.6.ga" level="project" />
