@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://va33-build01/dbchangelog-2.0.xsd"
+	logicalFilePath="oracle.setup.xml">
+
+  <changeSet author="tbassett" id="12-18-2009-02" runOnChange="true">
+    <sql>CREATE USER liquibase IDENTIFIED BY liquibase</sql>
+    <sql>GRANT "DBA" TO liquibase</sql>
+    <rollback>
+      <sql>DROP USER liquibase CASCADE</sql>
+    </rollback>
+  </changeSet>
+
+  <changeSet author="tbassett" id="12-18-2009-03" runOnChange="true">
+    <sql>CREATE USER liquibaseb IDENTIFIED BY liquibaseb</sql>
+    <sql>GRANT "DBA" TO liquibaseb</sql>
+    <rollback>
+      <sql>DROP USER liquibaseb CASCADE</sql>
+    </rollback>
+  </changeSet>
+</databaseChangeLog>
