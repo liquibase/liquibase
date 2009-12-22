@@ -1,0 +1,111 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+
+<project default="oracle.help" name="liquibase-integration-test-setup-oracle">
+
+  <taskdef resource="net/sf/antcontrib/antlib.xml" />
+
+  <property name="temp.dir" value="c:\temp" />
+  <property name="installs.dir" value="${temp.dir}" />
+
+  <property name="oracle.express.installer.file.name" value="OracleXEUniv.exe"/>
+  <property name="oracle.express.installer.file.path" value="${installs.dir}\${oracle.express.installer.file.name}"/>
+  <property name="oracle.express.installer.answer.file.name" value="OracleXE-install.iss"/>
+  <property name="oracle.express.installer.answer.file.path" value="${basedir}\Oracle\${oracle.express.installer.answer.file.name}"/>
+  <property name="oracle.express.installer.log.file.dir" value="${temp.dir}"/>
+  <property name="oracle.express.installer.log.file.path" value="${oracle.express.installer.log.file.dir}\OracleXE-install.log"/>
+  <property name="oracle.jdbc.jar.file.name" value="ojdbc14.jar" />
+  <property name="oracle.jdbc.jar.file.dir" value="${installs.dir}" />
+  <property name="oracle.jdbc.jar.file.path" value="${oracle.jdbc.jar.file.dir}\${oracle.jdbc.jar.file.name}" />
+  
+  <property name="liquibase.jar.file.dir" value="C:\Tools\liquibase\2.0-123" />
+  <property name="liquibase.jar.file.name" value="liquibase.jar" />
+  <property name="liquibase.jar.file.path" value="${liquibase.jar.file.dir}\liquibase.jar" />
+
+  <taskdef resource="liquibasetasks.properties">
+    <classpath location="${liquibase.jar.file.path}" />
+  </taskdef>
+
+  <path id="jdbc">
+    <pathelement location="${oracle.jdbc.jar.file.path}" />
+  </path>
+
+  <target name="oracle.help">
+    <echo>
+      To install OracleXE:
+
+      1. Download OracleXE
+      http://download.oracle.com/otn/nt/oracle10g/xe/10201/OracleXE.exe
+      to ${oracle.jdbc.jar.file.dir}
+
+      2. Download an Oracle JDBC driver ojdbc14.jar
+      http://www.oracle.com/technology/software/tech/java/sqlj_jdbc/htdocs/jdbc101040.html
+      to ${oracle.jdbc.jar.file.dir}
+
+      3. Call build file in "setup" with "install" as the target.
+
+      General Arguments:
+      -Dtemp.dir=${temp.dir}
+      -Dinstalls.dir=${installs.dir}
+
+      Download Arguments:
+      -Doracle.express.installer.file.name=${oracle.express.installer.file.name}
+      -Doracle.express.installer.file.path=${oracle.express.installer.file.path}
+      -Doracle.express.installer.answer.file.name=${oracle.express.installer.answer.file.name}
+      -Doracle.express.installer.answer.file.path=${oracle.express.installer.answer.file.path}
+      -Doracle.express.installer.log.file.dir=${oracle.express.installer.log.file.dir}
+      -Doracle.jdbc.jar.file.dir=${oracle.jdbc.jar.file.dir}
+      -Doracle.jdbc.jar.file.name=${oracle.jdbc.jar.file.name}
+
+      Liquibase Arguments:
+      -Dliquibase.jar.file.dir=${liquibase.jar.file.dir}
+      -Dliquibase.jar.file.name=${liquibase.jar.file.name}
+    </echo>
+  </target>
+
+  <target name="oracle.install">
+    <antcall target="oracle.check" />
+    <echo>Installing OracleXE from: '${oracle.express.installer.file.path}'</echo>
+    <echo>Using answer file: '${oracle.express.installer.answer.file.path}'</echo>
+    <echo>Writing log file to: '${oracle.express.installer.log.file.path}'</echo>
+    <exec executable="${oracle.express.installer.file.path}" dir="${installs.dir}" failOnError="true">
+      <arg line='/s' />
+      <arg line='/f1"${oracle.express.installer.answer.file.path}"' />
+      <arg line='/f2"${oracle.express.installer.log.file.path}"' />
+    </exec>
+    <echo>Done Installing OracleXE.</echo>
+    <antcall target='oracle.createUsers' />
+  </target>
+
+  <target name="oracle.createUsers">
+    <echo>Creating users...</echo>
+    <updateDatabase changelogfile="${basedir}\oracle\oracle.install.changelog.xml"
+                    username="sys as sysdba"
+                    password="oracle"
+                    driver="oracle.jdbc.OracleDriver"
+                    url="jdbc:oracle:thin:@localhost:1521:xe"
+                    classpathref="jdbc">
+    </updateDatabase>
+    <echo>Done creating users.</echo>
+  </target>
+
+  <target name="oracle.check">
+    <echo>Checking for needed files (Oracle).</echo>
+    <if>
+      <not>
+        <available file="${oracle.express.installer.file.path}" />
+      </not>
+      <then>
+        <fail message="Cannot find '${oracle.express.installer.file.path}'." />
+      </then>
+    </if>
+    <if>
+      <not>
+        <available file="${oracle.jdbc.jar.file.path}" />
+      </not>
+      <then>
+        <fail message="Cannot find '${oracle.jdbc.jar.file.path}'." />
+      </then>
+    </if>
+    <echo>All needed files found (Oracle).</echo>
+  </target>
+</project>

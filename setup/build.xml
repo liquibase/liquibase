@@ -1,0 +1,70 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+
+<project basedir="." default="help" name="liquibase-integration-test-setup">
+
+  <taskdef resource="net/sf/antcontrib/antlib.xml" />
+
+  <property name="temp.dir" value="c:\temp" />
+  <property name="installs.dir" value="${temp.dir}" />
+
+  <property name="liquibase.jar.file.dir" value="C:\Tools\liquibase\2.0-123" />
+  <property name="liquibase.jar.file.name" value="liquibase.jar" />
+  <property name="liquibase.jar.file.path" value="${liquibase.jar.file.dir}\liquibase.jar" />
+
+  <property name="oracle.install" value="true" />
+
+  <taskdef resource="liquibasetasks.properties">
+    <classpath location="${liquibase.jar.file.path}" />
+  </taskdef>
+
+  <import file="${basedir}\oracle\build.xml" />
+
+  <target name="help">
+    <echo>
+      To install the supported datbases for integration testing:
+
+      1. Call this ant build file with "install" as the target.
+
+      General Arguments:
+      -Dtemp.dir=${temp.dir}
+      -Dinstalls.dir=${installs.dir}
+
+      RDBMes:
+      -Doracle.install=true (default) | -Doracle.install=false
+
+      Liquibase Arguments:
+      -Dliquibase.jar.file.dir=${liquibase.jar.file.dir}
+      -Dliquibase.jar.file.name=${liquibase.jar.file.name}
+    </echo>
+    <antcall target="oracle.help" />
+  </target>
+
+  <target name="install">
+    <if>
+      <equals arg1="${oracle.install}" arg2="true" />
+      <then>
+        <antcall target="oracle.install" />
+      </then>
+    </if>
+  </target>
+
+  <target name="check">
+    <echo>Checking for needed files (common).</echo>
+    <if>
+      <not>
+        <available file="${liquibase.jar.file.path}" />
+      </not>
+      <then>
+        <fail message="Cannot find '${liquibase.jar.file.path}'." />
+      </then>
+    </if>
+    <if>
+      <equals arg1="${oracle.install}" arg2="true" />
+      <then>
+        <antcall target="oracle.check" />
+      </then>
+    </if>
+    <echo>All needed files found (common).</echo>
+  </target>
+
+</project>
