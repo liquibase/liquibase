@@ -77,7 +77,7 @@ public class ChangeSet implements Conditional {
     }
 
     public ChangeSet(String id, String author, boolean alwaysRun, boolean runOnChange, String filePath, String physicalFilePath, String contextList, String dbmsList) {
-        this(id, author, alwaysRun, runOnChange, filePath, physicalFilePath, contextList, dbmsList, false);
+        this(id, author, alwaysRun, runOnChange, filePath, physicalFilePath, contextList, dbmsList, true);
     }
 
     public ChangeSet(String id, String author, boolean alwaysRun, boolean runOnChange, String filePath, String physicalFilePath, String contextList, String dbmsList, boolean runInTransaction) {
@@ -224,7 +224,7 @@ public class ChangeSet implements Conditional {
 
                 log.debug("Reading ChangeSet: " + toString());
                 for (Change change : getChanges()) {
-                    database.executeStatements(change, sqlVisitors);
+                    database.executeStatements(change, databaseChangeLog, sqlVisitors);
                     log.debug(change.getConfirmationMessage());
                 }
 

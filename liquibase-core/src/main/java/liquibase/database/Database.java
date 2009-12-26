@@ -1,7 +1,9 @@
 package liquibase.database;
 
 import liquibase.change.Change;
+import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.ChangeSet;
+import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.RanChangeSet;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.exception.*;
@@ -224,7 +226,7 @@ public interface Database extends DatabaseObject {
     
     boolean isLocalDatabase() throws DatabaseException;
 
-    void executeStatements(Change change, List<SqlVisitor> sqlVisitors) throws LiquibaseException, UnsupportedChangeException;/*
+    void executeStatements(Change change, DatabaseChangeLog changeLog, List<SqlVisitor> sqlVisitors) throws LiquibaseException, UnsupportedChangeException;/*
      * Executes the statements passed as argument to a target {@link Database}
      *
      * @param statements an array containing the SQL statements to be issued

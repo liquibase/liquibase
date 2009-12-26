@@ -4,6 +4,7 @@ import liquibase.change.Change;
 import liquibase.change.CheckSum;
 import liquibase.change.core.*;
 import liquibase.changelog.ChangeSet;
+import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.RanChangeSet;
 import liquibase.database.structure.*;
 import liquibase.diff.DiffStatusListener;
@@ -900,7 +901,7 @@ public abstract class AbstractDatabase implements Database {
         return (url.indexOf("localhost") >= 0) || (url.indexOf("127.0.0.1") >= 0);
     }
 
-    public void executeStatements(Change change, List<SqlVisitor> sqlVisitors) throws LiquibaseException, UnsupportedChangeException {
+    public void executeStatements(Change change, DatabaseChangeLog changeLog, List<SqlVisitor> sqlVisitors) throws LiquibaseException, UnsupportedChangeException {
         SqlStatement[] statements = change.generateStatements(this);
 
         execute(statements, sqlVisitors);
