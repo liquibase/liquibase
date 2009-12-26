@@ -12,13 +12,6 @@ import liquibase.sql.UnparsedSql;
 
 import java.util.Date;
 
-/**
- * Created by IntelliJ IDEA.
- * User: bassettt
- * Date: Dec 2, 2009
- * Time: 12:15:34 AM
- * To change this template use File | Settings | File Templates.
- */
 public abstract class InsertOrUpdateGenerator implements SqlGenerator<InsertOrUpdateStatement> {
 
     protected abstract String getRecordCheck(InsertOrUpdateStatement insertOrUpdateStatement, Database database, String whereClause);
@@ -30,7 +23,7 @@ public abstract class InsertOrUpdateGenerator implements SqlGenerator<InsertOrUp
     }
 
     public int getPriority() {
-        return PRIORITY_DATABASE;  //To change body of implemented methods use File | Settings | File Templates.
+        return PRIORITY_DATABASE;
     }
 
     public ValidationErrors validate(InsertOrUpdateStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
@@ -49,7 +42,7 @@ public abstract class InsertOrUpdateGenerator implements SqlGenerator<InsertOrUp
 
         for(String thisPkColumn:pkColumns)
         {
-            where.append(database.escapeColumnName(insertOrUpdateStatement.getSchemaName(), insertOrUpdateStatement.getTableName(), thisPkColumn)  + " = " );
+            where.append(database.escapeColumnName(insertOrUpdateStatement.getSchemaName(), insertOrUpdateStatement.getTableName(), thisPkColumn)).append(" = ");
             Object newValue = insertOrUpdateStatement.getColumnValues().get(thisPkColumn);
             if (newValue == null || newValue.toString().equals("NULL")) {
                 where.append("NULL");
