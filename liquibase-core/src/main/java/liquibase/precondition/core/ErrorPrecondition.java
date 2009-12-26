@@ -27,10 +27,16 @@ public class ErrorPrecondition {
 
     @Override
     public String toString() {
+        Throwable cause = this.cause;
+        while (cause.getCause() != null) {
+            cause = cause.getCause();
+        }
+
+        String causeMessage = cause.getMessage();
         if (changeLog == null) {
-            return cause.getMessage();
+            return causeMessage;
         } else {
-            return changeLog.toString()+" : "+getCause().getMessage();
+            return changeLog.toString()+" : "+ causeMessage;
         }
     }
 }
