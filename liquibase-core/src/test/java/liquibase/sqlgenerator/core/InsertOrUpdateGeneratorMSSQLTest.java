@@ -11,13 +11,6 @@ import junit.framework.Assert;
 import java.lang.reflect.Method;
 import java.lang.reflect.InvocationTargetException;
 
-/**
- * Created by IntelliJ IDEA.
- * User: bassettt
- * Date: Dec 7, 2009
- * Time: 8:24:15 PM
- * To change this template use File | Settings | File Templates.
- */
 public class InsertOrUpdateGeneratorMSSQLTest {
 
     

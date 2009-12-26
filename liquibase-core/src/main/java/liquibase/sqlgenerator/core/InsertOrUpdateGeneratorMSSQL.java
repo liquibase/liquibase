@@ -6,13 +6,6 @@ import liquibase.sql.Sql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.InsertOrUpdateStatement;
 
-/**
- * Created by IntelliJ IDEA.
- * User: bassettt
- * Date: Dec 7, 2009
- * Time: 9:37:51 AM
- * To change this template use File | Settings | File Templates.
- */
 public class InsertOrUpdateGeneratorMSSQL extends InsertOrUpdateGenerator {
     public boolean supports(InsertOrUpdateStatement statement, Database database) {
          return database instanceof MSSQLDatabase;

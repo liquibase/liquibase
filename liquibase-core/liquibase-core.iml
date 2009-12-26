@@ -12,10 +12,10 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="Maven: junit:junit:4.1" level="project" />
-    <orderEntry type="library" name="Maven: org.easymock:easymockclassextension:2.2" level="project" />
-    <orderEntry type="library" name="Maven: org.easymock:easymock:2.2" level="project" />
-    <orderEntry type="library" name="Maven: cglib:cglib-nodep:2.1_3" level="project" />
+    <orderEntry type="library" scope="TEST" name="Maven: junit:junit:4.1" level="project" />
+    <orderEntry type="library" scope="TEST" name="Maven: org.easymock:easymockclassextension:2.2" level="project" />
+    <orderEntry type="library" scope="TEST" name="Maven: org.easymock:easymock:2.2" level="project" />
+    <orderEntry type="library" scope="TEST" name="Maven: cglib:cglib-nodep:2.1_3" level="project" />
   </component>
 </module>
 
