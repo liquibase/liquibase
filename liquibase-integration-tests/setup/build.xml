@@ -12,12 +12,14 @@
   <property name="liquibase.jar.file.path" value="${liquibase.jar.file.dir}\liquibase.jar" />
 
   <property name="oracle.install" value="true" />
+  <property name="install.sqlexpress2005" value="true" />
 
   <taskdef resource="liquibasetasks.properties">
     <classpath location="${liquibase.jar.file.path}" />
   </taskdef>
 
   <import file="${basedir}\oracle\build.xml" />
+  <import file="${basedir}\sqlexpress2005\build.xml" />
 
   <target name="help">
     <echo>
@@ -31,12 +33,14 @@
 
       RDBMes:
       -Doracle.install=true (default) | -Doracle.install=false
+      -Dinstall.sqlexpress2005=true (default) | -Dinstall.sqlexpress2005=false
 
       Liquibase Arguments:
       -Dliquibase.jar.file.dir=${liquibase.jar.file.dir}
       -Dliquibase.jar.file.name=${liquibase.jar.file.name}
     </echo>
     <antcall target="oracle.help" />
+    <antcall target="sqlexpress2005.help" />
   </target>
 
   <target name="install">
@@ -44,6 +48,12 @@
       <equals arg1="${oracle.install}" arg2="true" />
       <then>
         <antcall target="oracle.install" />
+      </then>
+    </if>
+    <if>
+      <equals arg1="${install.sqlexpress2005}" arg2="true" />
+      <then>
+        <antcall target="sqlexpress2005.install" />
       </then>
     </if>
   </target>
