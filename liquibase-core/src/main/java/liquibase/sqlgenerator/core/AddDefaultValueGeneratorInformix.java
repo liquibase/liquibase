@@ -1,6 +1,7 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
+import liquibase.database.core.InformixDatabase;
 import liquibase.database.typeconversion.TypeConverterFactory;
 import liquibase.database.core.SybaseDatabase;
 import liquibase.database.structure.Column;
@@ -19,7 +20,7 @@ public class AddDefaultValueGeneratorInformix extends AddDefaultValueGenerator {
 
     @Override
     public boolean supports(AddDefaultValueStatement statement, Database database) {
-        return database instanceof SybaseDatabase;
+        return database instanceof InformixDatabase;
     }
 
     @Override
