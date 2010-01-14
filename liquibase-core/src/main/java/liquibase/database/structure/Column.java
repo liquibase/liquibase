@@ -1,13 +1,20 @@
 package liquibase.database.structure;
 
-import liquibase.database.Database;
-import liquibase.database.core.*;
-import liquibase.logging.LogFactory;
-import liquibase.util.SqlUtil;
-
 import java.sql.Types;
 import java.util.Arrays;
 import java.util.List;
+
+import liquibase.database.Database;
+import liquibase.database.core.DerbyDatabase;
+import liquibase.database.core.H2Database;
+import liquibase.database.core.HsqlDatabase;
+import liquibase.database.core.InformixDatabase;
+import liquibase.database.core.MSSQLDatabase;
+import liquibase.database.core.MySQLDatabase;
+import liquibase.database.core.OracleDatabase;
+import liquibase.database.core.PostgresDatabase;
+import liquibase.logging.LogFactory;
+import liquibase.util.SqlUtil;
 
 public class Column implements DatabaseObject, Comparable<Column> {
     private Table table;
@@ -267,7 +274,7 @@ public class Column implements DatabaseObject, Comparable<Column> {
         if (noParens.contains(this.getDataType())) {
             dataType = translatedTypeName;
         } else if (oneParam.contains(this.getDataType())) {
-            if (database instanceof PostgresDatabase && translatedTypeName.equals("text")) {
+            if (database instanceof PostgresDatabase && translatedTypeName.equals("TEXT")) {
                 return translatedTypeName;
             } else if (database instanceof MSSQLDatabase && translatedTypeName.equals("uniqueidentifier")) {
                 return translatedTypeName;
