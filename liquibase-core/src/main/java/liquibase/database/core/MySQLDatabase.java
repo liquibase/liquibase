@@ -89,4 +89,9 @@ public class MySQLDatabase extends AbstractDatabase {
     public String escapeDatabaseObject(String objectName) {
         return "`"+objectName+"`";
     }
+
+    @Override
+    public String escapeIndexName(String schemaName, String indexName) {
+        return escapeDatabaseObject(indexName);
+    }
 }
