@@ -237,7 +237,6 @@ public class ChangeSet implements Conditional {
                 }
             } else {
                 log.debug("Skipping ChangeSet: " + toString());
-                execType = ExecType.SKIPPED;
             }
 
         } catch (Exception e) {
