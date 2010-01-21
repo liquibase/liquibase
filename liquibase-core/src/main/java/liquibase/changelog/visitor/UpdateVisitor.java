@@ -20,12 +20,13 @@ public class UpdateVisitor implements ChangeSetVisitor {
     public Direction getDirection() {
         return ChangeSetVisitor.Direction.FORWARD;
     }
-    
+
     public void visit(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database) throws LiquibaseException {
+        ChangeSet.RunStatus runStatus = this.database.getRunStatus(changeSet);
         log.debug("Running Changeset:" + changeSet);
         ChangeSet.ExecType execType = changeSet.execute(databaseChangeLog, this.database);
-        if (!this.database.getRunStatus(changeSet).equals(ChangeSet.RunStatus.NOT_RAN)) {
-            execType =ChangeSet.ExecType.RERAN;
+        if (!runStatus.equals(ChangeSet.RunStatus.NOT_RAN)) {
+            execType = ChangeSet.ExecType.RERAN;
         }
 
         this.database.markChangeSetExecStatus(changeSet, execType);
