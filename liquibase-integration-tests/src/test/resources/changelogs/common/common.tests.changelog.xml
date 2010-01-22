@@ -11,6 +11,7 @@
     <property name="column2.name" value="columnB"/>
     <property name="real.int.type" value="int"/>
     <property name="real.int.type" value="already-set-int"/>
+    <property name="true.boolean" value="${true}"/>
 
     <preConditions>
         <changeLogPropertyDefined property="real.int.type"/>
@@ -26,7 +27,7 @@
         </preConditions>
         <createTable tableName="dataTypeTest" schemaName="">
             <column name="id" type="${real.int.type}">
-                <constraints primaryKey="true" nullable="false"/>
+                <constraints primaryKey="${true.boolean}" nullable="false"/>
             </column>
             <column name="dateCol" type="date"/>
             <column name="timeCol" type="time"/>
