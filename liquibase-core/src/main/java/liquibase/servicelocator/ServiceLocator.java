@@ -215,8 +215,7 @@ public class ServiceLocator {
                     classes.add(clazz);
                 } catch (NoSuchMethodException e) {
                     URL classAsUrl = resourceAccessor.toClassLoader().getResource(clazz.getName().replaceAll("\\.", "/") + ".class");
-                    if (!clazz.getName().equals("liquibase.database.core.HibernateDatabase")
-                            && !clazz.getName().equals("liquibase.executor.LoggingExecutor")
+                    if (!clazz.getName().equals("liquibase.executor.LoggingExecutor")
                             && (classAsUrl != null && !classAsUrl.toExternalForm().contains("build-test/liquibase/"))) { //keeps the logs down
                         logger.warning("Class " + clazz.getName() + " does not have a public no-arg constructor, so it can't be used as a " + requiredInterface.getName() + " service");
                     }

@@ -3,7 +3,6 @@ package liquibase.integration.commandline;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.JdbcConnection;
-import liquibase.database.core.HibernateDatabase;
 import liquibase.diff.Diff;
 import liquibase.diff.DiffResult;
 import liquibase.diff.DiffStatusListener;
@@ -41,18 +40,6 @@ public class CommandLineUtils {
         }
 
         try {
-            if (url.startsWith("hibernate:")) {
-                try {
-                    return createHibernateDatabase(classLoader, url);
-                } catch (NoClassDefFoundError e) {
-                    try {
-                        return createHibernateDatabase(Thread.currentThread().getContextClassLoader(), url);
-                    } catch (NoClassDefFoundError e1) {
-                        throw new MigrationFailedException(null, "Class " + e1.getMessage() + " not found.  Make sure all required Hibernate and JDBC libraries are in your classpath");
-                    }
-                }
-            }
-
             Driver driverObject;
             DatabaseFactory databaseFactory = DatabaseFactory.getInstance();
             if (databaseClass != null) {
@@ -91,10 +78,6 @@ public class CommandLineUtils {
         } catch (Exception e) {
             throw new DatabaseException(e);
         }
-    }
-
-    private static Database createHibernateDatabase(ClassLoader classLoader, String url) throws InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException, ClassNotFoundException {
-        return (Database) Class.forName(HibernateDatabase.class.getName(), true, classLoader).getConstructor(String.class).newInstance(url.substring("hibernate:".length()));
     }
 
     public static void doDiff(Database referenceDatabase, Database targetDatabase) throws DatabaseException {

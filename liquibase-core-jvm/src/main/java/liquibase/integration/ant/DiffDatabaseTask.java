@@ -65,13 +65,7 @@ public class DiffDatabaseTask extends BaseLiquibaseTask {
         if (StringUtils.trimToNull(getReferenceUrl()) == null) {
             throw new BuildException("diffDatabase requires referenceUrl to be set");
         }
-        if (!(getReferenceUrl().startsWith("hibernate")) && StringUtils.trimToNull(getReferenceUsername()) == null) {
-            throw new BuildException("diffDatabase requires referenceUsername to be set");
-        }
-        if (!(getReferenceUrl().startsWith("hibernate")) && StringUtils.trimToNull(getReferencePassword()) == null) {
-            throw new BuildException("diffDatabase requires referencePassword to be set");
-        }
-        
+
         Liquibase liquibase = null;
         try {
             PrintStream writer = createPrintStream();

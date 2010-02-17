@@ -35,6 +35,14 @@ public class MockDatabase implements Database {
         //
     }
 
+    public boolean requiresUsername() {
+        return false;
+    }
+
+    public boolean requiresPassword() {
+        return false;
+    }
+
     public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
         return false;
     }
