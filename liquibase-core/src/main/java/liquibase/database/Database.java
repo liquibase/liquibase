@@ -34,6 +34,10 @@ public interface Database extends DatabaseObject {
     DatabaseConnection getConnection();
 
     void setConnection(DatabaseConnection conn);
+
+    boolean requiresUsername();
+
+    boolean requiresPassword();
     
     /**
      * Auto-commit mode to run in

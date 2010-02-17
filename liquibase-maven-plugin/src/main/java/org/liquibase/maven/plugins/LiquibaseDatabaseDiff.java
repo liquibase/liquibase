@@ -111,17 +111,9 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
                                      + "must be provided to perform a diff.");
     }
 
-    if (referenceUrl.startsWith("hibernate:")) {
-
-    } else {
-      if (referenceUsername == null) {
-        throw new MojoFailureException("The username cannot be null for the reference "
-                                       + "database when not using hibernate.");
-      }
       if (referencePassword == null) {
         referencePassword = "";
       }
-    }
   }
 
   @Override

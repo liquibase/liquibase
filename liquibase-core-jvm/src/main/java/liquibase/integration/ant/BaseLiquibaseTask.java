@@ -4,7 +4,6 @@ import liquibase.Liquibase;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.JdbcConnection;
-import liquibase.database.core.HibernateDatabase;
 import liquibase.exception.DatabaseException;
 import liquibase.logging.LogFactory;
 import liquibase.logging.Logger;
@@ -198,39 +197,36 @@ public class BaseLiquibaseTask extends Task {
 
         Database database;
 
-        if (databaseUrl.startsWith("hibernate:")) {
-            database = new HibernateDatabase(databaseUrl.substring("hibernate:".length()));
-        } else {
-            if (databaseClass != null) {
-                try {
-                    DatabaseFactory.getInstance().register((Database) Class.forName(databaseClass, true, loader).newInstance());
-                } catch (ClassCastException e) { //fails in Ant in particular
-                    DatabaseFactory.getInstance().register((Database) Class.forName(databaseClass).newInstance());
-                }
+
+        if (databaseClass != null) {
+            try {
+                DatabaseFactory.getInstance().register((Database) Class.forName(databaseClass, true, loader).newInstance());
+            } catch (ClassCastException e) { //fails in Ant in particular
+                DatabaseFactory.getInstance().register((Database) Class.forName(databaseClass).newInstance());
             }
-
-            if (driverClassName == null) {
-                driverClassName = DatabaseFactory.getInstance().findDefaultDriver(databaseUrl);
-            }
-
-            if (driverClassName == null) {
-                throw new DatabaseException("driver not specified and no default could be found for " + databaseUrl);
-            }
-
-            Driver driver = (Driver) Class.forName(driverClassName, true, loader).newInstance();
-
-            Properties info = new Properties();
-            info.put("user", username);
-            info.put("password", password);
-            Connection connection = driver.connect(databaseUrl, info);
-
-            if (connection == null) {
-                throw new DatabaseException("Connection could not be created to " + databaseUrl + " with driver " + driver.getClass().getName() + ".  Possibly the wrong driver for the given database URL");
-            }
-
-            database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(connection));
-            database.setDefaultSchemaName(defaultSchemaName);
         }
+
+        if (driverClassName == null) {
+            driverClassName = DatabaseFactory.getInstance().findDefaultDriver(databaseUrl);
+        }
+
+        if (driverClassName == null) {
+            throw new DatabaseException("driver not specified and no default could be found for " + databaseUrl);
+        }
+
+        Driver driver = (Driver) Class.forName(driverClassName, true, loader).newInstance();
+
+        Properties info = new Properties();
+        info.put("user", username);
+        info.put("password", password);
+        Connection connection = driver.connect(databaseUrl, info);
+
+        if (connection == null) {
+            throw new DatabaseException("Connection could not be created to " + databaseUrl + " with driver " + driver.getClass().getName() + ".  Possibly the wrong driver for the given database URL");
+        }
+
+        database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(connection));
+        database.setDefaultSchemaName(defaultSchemaName);
 
         if (getDatabaseChangeLogTableName() != null)
             database.setDatabaseChangeLogTableName(getDatabaseChangeLogTableName());

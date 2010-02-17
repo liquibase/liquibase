@@ -59,6 +59,14 @@ public abstract class AbstractDatabase implements Database {
     protected AbstractDatabase() {
     }
 
+    public boolean requiresPassword() {
+        return true;
+    }
+
+    public boolean requiresUsername() {
+        return true;
+    }
+
     public DatabaseObject[] getContainingObjects() {
         return null;
     }
