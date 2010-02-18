@@ -13,6 +13,10 @@ import java.lang.reflect.Method;
 public class OracleDatabase extends AbstractDatabase {
     public static final String PRODUCT_NAME = "oracle";
 
+    public int getPriority() {
+        return PRIORITY_DEFAULT;
+    }
+    
     @Override
     public void setConnection(DatabaseConnection conn) {
         try {
@@ -119,6 +123,8 @@ public class OracleDatabase extends AbstractDatabase {
         } else if (tableName.startsWith("AQ$")) { //oracle AQ tables
             return true;
         } else if (tableName.startsWith("DR$")) { //oracle index tables
+            return true;
+        } else if (tableName.startsWith("SYS_")) { //oracle system table
             return true;
         }
         return false;
