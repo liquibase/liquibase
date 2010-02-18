@@ -16,6 +16,24 @@ public class DiffDatabaseTask extends BaseLiquibaseTask {
     private String referenceUsername;
     private String referencePassword;
     private String referenceDefaultSchemaName;
+    private String diffTypes;
+    private String dataDir;
+
+    public String getDiffTypes() {
+        return diffTypes;
+    }
+
+    public void setDiffTypes(String diffTypes) {
+        this.diffTypes = diffTypes;
+    }
+
+    public String getDataDir() {
+        return dataDir;
+    }
+
+    public void setDataDir(String dataDir) {
+        this.dataDir = dataDir;
+    }
 
     public String getReferenceDriver() {
         if (referenceDriver == null) {
@@ -79,8 +97,14 @@ public class DiffDatabaseTask extends BaseLiquibaseTask {
 
 
             Diff diff = new Diff(referenceDatabase, liquibase.getDatabase());
+            if (getDiffTypes() != null) {
+                diff.setDiffTypes(getDiffTypes());
+            }
 //            diff.addStatusListener(new OutDiffStatusListener());
             DiffResult diffResult = diff.compare();
+            if (getDataDir() != null) {
+                diffResult.setDataDir(getDataDir());
+            }
 
             outputDiff(writer, diffResult, liquibase.getDatabase());
 
