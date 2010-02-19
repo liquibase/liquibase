@@ -49,7 +49,7 @@ public class DatabaseSnapshotGeneratorFactory {
     public SortedSet<DatabaseSnapshotGenerator> getGenerators(final Database database) {
         SortedSet<DatabaseSnapshotGenerator> generators = new TreeSet<DatabaseSnapshotGenerator>(new Comparator<DatabaseSnapshotGenerator>() {
             public int compare(DatabaseSnapshotGenerator o1, DatabaseSnapshotGenerator o2) {
-                return Integer.valueOf(o2.getPriority(database)).compareTo(o1.getPriority(database));
+                return -1 * Integer.valueOf(o1.getPriority(database)).compareTo(o2.getPriority(database));
             }
         });
 

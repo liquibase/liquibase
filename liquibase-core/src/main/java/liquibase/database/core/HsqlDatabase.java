@@ -31,6 +31,10 @@ public class HsqlDatabase extends AbstractDatabase {
     }
 
 
+    public int getPriority() {
+        return PRIORITY_DEFAULT;
+    }
+
     public String getTypeName() {
         return "hsqldb";
     }

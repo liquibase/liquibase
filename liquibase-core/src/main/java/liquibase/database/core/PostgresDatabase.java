@@ -83,6 +83,10 @@ public class PostgresDatabase extends AbstractDatabase {
         return systemTablesAndViews;
     }
 
+    public int getPriority() {
+        return PRIORITY_DEFAULT;
+    }
+
     public boolean supportsInitiallyDeferrableColumns() {
         return true;
     }

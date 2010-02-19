@@ -20,6 +20,11 @@ public class MySQLDatabase extends AbstractDatabase {
 //        return super.getConnection().getConnectionUserName().replaceAll("\\@.*", "");
 //    }
 
+
+    public int getPriority() {
+        return PRIORITY_DEFAULT;
+    }
+
     public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
         return PRODUCT_NAME.equalsIgnoreCase(conn.getDatabaseProductName());
     }

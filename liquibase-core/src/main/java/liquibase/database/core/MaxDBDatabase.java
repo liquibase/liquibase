@@ -81,6 +81,10 @@ public class MaxDBDatabase extends AbstractDatabase {
         systemTablesAndViews.add("VERSION");
     }
 
+    public int getPriority() {
+        return PRIORITY_DEFAULT;
+    }
+
     @Override
     public Set<String> getSystemTablesAndViews() {
         return systemTablesAndViews;

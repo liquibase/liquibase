@@ -20,6 +20,11 @@ public class CacheDatabase extends AbstractDatabase {
         return null;
     }
 
+    public int getPriority() {
+        return PRIORITY_DEFAULT;
+    }
+    
+
     public String getTypeName() {
         return "cache";
     }

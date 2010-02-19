@@ -3,7 +3,7 @@ package liquibase.change;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.servicelocator.ServiceLocator;
 
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -17,7 +17,7 @@ public class ChangeFactory {
 
     private static ChangeFactory instance;
 
-    private Map<String, Class<? extends Change>> registry = new ConcurrentHashMap<String, Class<? extends Change>>();
+    private Map<String, SortedSet<Class<? extends Change>>> registry = new ConcurrentHashMap<String, SortedSet<Class<? extends Change>>>();
 
     private ChangeFactory() {
         Class<? extends Change>[] classes;
@@ -52,7 +52,19 @@ public class ChangeFactory {
 
     public void register(Class<? extends Change> changeClass) {
         try {
-            registry.put(changeClass.newInstance().getChangeMetaData().getName(), changeClass);
+            String name = changeClass.newInstance().getChangeMetaData().getName();
+            if (registry.get(name) == null) {
+                registry.put(name, new TreeSet<Class<? extends Change>>(new Comparator<Class<? extends Change>>() {
+                    public int compare(Class<? extends Change> o1, Class<? extends Change> o2) {
+                        try {
+                            return -1 * new Integer(o1.newInstance().getChangeMetaData().getPriority()).compareTo(o2.newInstance().getChangeMetaData().getPriority());
+                        } catch (Exception e) {
+                            throw new UnexpectedLiquibaseException(e);
+                        }
+                    }
+                }));
+            }
+            registry.get(name).add(changeClass);
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);
         }
@@ -62,19 +74,19 @@ public class ChangeFactory {
         registry.remove(name);
     }
 
-    public Map<String, Class<? extends Change>> getRegistry() {
+    public Map<String, SortedSet<Class<? extends Change>>> getRegistry() {
         return registry;
     }
 
     public Change create(String name) {
-        Class<? extends Change> aClass = registry.get(name);
+        SortedSet<Class <? extends Change>> classes = registry.get(name);
 
-        if (aClass == null) {
+        if (classes == null) {
             return null;
         }
 
         try {
-            return aClass.newInstance();
+            return classes.iterator().next().newInstance();
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);
         }

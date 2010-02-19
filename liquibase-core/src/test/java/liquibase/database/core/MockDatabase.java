@@ -26,6 +26,9 @@ import java.util.Set;
 
 public class MockDatabase implements Database {
 
+    public int getPriority() {
+        return PRIORITY_DEFAULT;
+    }
 
     public DatabaseObject[] getContainingObjects() {
         return null;
