@@ -13,9 +13,9 @@ import java.lang.reflect.Method;
 public class OracleDatabase extends AbstractDatabase {
     public static final String PRODUCT_NAME = "oracle";
 
-    public int getPriority() {
-        return PRIORITY_DEFAULT;
-    }
+//    public int getPriority() {
+//        return PRIORITY_DEFAULT;
+//    }
     
     @Override
     public void setConnection(DatabaseConnection conn) {
