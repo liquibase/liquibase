@@ -3,6 +3,7 @@ package liquibase.snapshot.core;
 import liquibase.database.Database;
 import liquibase.database.JdbcConnection;
 import liquibase.database.core.PostgresDatabase;
+import liquibase.database.structure.Table;
 import liquibase.database.structure.UniqueConstraint;
 import liquibase.exception.DatabaseException;
 import liquibase.snapshot.DatabaseSnapshot;
@@ -51,9 +52,15 @@ public class PostgresDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGener
                 String tableName = rs.getString("relname");
                 UniqueConstraint constraintInformation = new UniqueConstraint();
                 constraintInformation.setName(constraintName);
-                constraintInformation.setTable(snapshot.getTable(tableName));
-                getColumnsForUniqueConstraint(database, conrelid, keys, constraintInformation);
-                foundUC.add(constraintInformation);
+                if(!database.isSystemTable(null, schema, tableName)&&!database.isLiquibaseTable(tableName)) {
+                    Table table = snapshot.getTable(tableName);
+                    if (table == null) {
+                        throw new IllegalStateException("Cannot find table for " + tableName);
+                    }
+	                constraintInformation.setTable(table);
+	                getColumnsForUniqueConstraint(database, conrelid, keys, constraintInformation);
+	                foundUC.add(constraintInformation);
+                }
             }
             snapshot.getUniqueConstraints().addAll(foundUC);
         }
