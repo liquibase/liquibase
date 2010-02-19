@@ -30,6 +30,9 @@ public class H2Database extends AbstractDatabase {
         return null;
     }
 
+    public int getPriority() {
+        return PRIORITY_DEFAULT;
+    }
 
     public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
         return "H2".equals(conn.getDatabaseProductName());

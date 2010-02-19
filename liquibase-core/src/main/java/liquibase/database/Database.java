@@ -7,6 +7,7 @@ import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.RanChangeSet;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.exception.*;
+import liquibase.servicelocator.PrioritizedService;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.statement.SqlStatement;
 
@@ -16,7 +17,7 @@ import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
 
-public interface Database extends DatabaseObject {
+public interface Database extends DatabaseObject, PrioritizedService {
 
 	String databaseChangeLogTableName = "DatabaseChangeLog".toUpperCase();
 	String databaseChangeLogLockTableName = "DatabaseChangeLogLock".toUpperCase();

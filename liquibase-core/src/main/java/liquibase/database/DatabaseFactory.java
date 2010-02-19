@@ -6,8 +6,7 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.logging.LogFactory;
 import liquibase.servicelocator.ServiceLocator;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class DatabaseFactory {
     private static DatabaseFactory instance;
@@ -17,6 +16,7 @@ public class DatabaseFactory {
         try {
             Class[] classes = ServiceLocator.getInstance().findClasses(Database.class);
 
+            //noinspection unchecked
             for (Class<? extends Database> clazz : classes) {
                 register(clazz.getConstructor().newInstance());
             }
@@ -50,26 +50,27 @@ public class DatabaseFactory {
     }
 
     public Database findCorrectDatabaseImplementation(DatabaseConnection connection) throws DatabaseException {
-        Database database = null;
 
-        boolean foundImplementation = false;
+        SortedSet<Database> foundDatabases = new TreeSet<Database>(new Comparator<Database>() {
+            public int compare(Database o1, Database o2) {
+                return -1 * new Integer(o1.getPriority()).compareTo(o2.getPriority());
+            }
+        });
 
         for (Database implementedDatabase : getImplementedDatabases()) {
-            database = implementedDatabase;
-            if (database.isCorrectDatabaseImplementation(connection)) {
-                foundImplementation = true;
-                break;
+            if (implementedDatabase.isCorrectDatabaseImplementation(connection)) {
+                foundDatabases.add(implementedDatabase);
             }
         }
 
-        if (!foundImplementation) {
+        if (foundDatabases.size() == 0) {
             LogFactory.getLogger().warning("Unknown database: " + connection.getDatabaseProductName());
-            database = new UnsupportedDatabase();
+            return new UnsupportedDatabase();
         }
 
         Database returnDatabase;
         try {
-            returnDatabase = database.getClass().newInstance();
+            returnDatabase = foundDatabases.iterator().next().getClass().newInstance();
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);
         }

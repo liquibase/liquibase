@@ -204,8 +204,8 @@ public class StringChangeLogSerializerTest {
 
     @Test
     public void tryAllChanges() throws Exception {
-        for (Class<? extends Change> changeClass : ChangeFactory.getInstance().getRegistry().values()) {
-            Change change = changeClass.getConstructor().newInstance();
+        for (SortedSet<Class<? extends Change>> changeClassSet : ChangeFactory.getInstance().getRegistry().values()) {
+            Change change = changeClassSet.iterator().next().getConstructor().newInstance();
 
             setFields(change);
 

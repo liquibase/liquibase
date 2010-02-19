@@ -261,7 +261,7 @@
   </component>
   <component name="ProjectRunConfigurationManager">
     <configuration default="false" name="All in liquibase-core" type="JUnit" factoryName="JUnit">
-      <extension name="coverage" enabled="false" merge="false" runner="emma" />
+      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="emma" />
       <extension name="snapshooter" />
       <module name="liquibase-core" />
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
@@ -276,7 +276,7 @@
       <option name="ENV_VARIABLES" />
       <option name="PASS_PARENT_ENVS" value="true" />
       <option name="TEST_SEARCH_SCOPE">
-        <value defaultName="moduleWithDependencies" />
+        <value defaultName="singleModule" />
       </option>
       <envs />
       <RunnerSettings RunnerId="Debug">
@@ -285,7 +285,7 @@
         <option name="LOCAL" value="true" />
       </RunnerSettings>
       <RunnerSettings RunnerId="Profile ">
-        <option name="myExternalizedOptions" value="&#13;&#10;additional-options=&#13;&#10;snapshots-dir=&#13;&#10;" />
+        <option name="myExternalizedOptions" value="&#13;&#10;snapshots-dir=&#13;&#10;additional-options2=onexit\=snapshot&#13;&#10;" />
       </RunnerSettings>
       <RunnerSettings RunnerId="Run" />
       <ConfigurationWrapper RunnerId="Debug" />
@@ -293,7 +293,7 @@
       <method />
     </configuration>
     <configuration default="false" name="All in liquibase-core-jvm" type="JUnit" factoryName="JUnit">
-      <extension name="coverage" enabled="false" merge="false" runner="emma" />
+      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="emma" />
       <extension name="snapshooter" />
       <module name="liquibase-core-jvm" />
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
@@ -308,11 +308,11 @@
       <option name="ENV_VARIABLES" />
       <option name="PASS_PARENT_ENVS" value="true" />
       <option name="TEST_SEARCH_SCOPE">
-        <value defaultName="moduleWithDependencies" />
+        <value defaultName="singleModule" />
       </option>
       <envs />
       <RunnerSettings RunnerId="Profile ">
-        <option name="myExternalizedOptions" value="&#13;&#10;additional-options=&#13;&#10;snapshots-dir=&#13;&#10;" />
+        <option name="myExternalizedOptions" value="&#13;&#10;snapshots-dir=&#13;&#10;additional-options2=onexit\=snapshot&#13;&#10;" />
       </RunnerSettings>
       <RunnerSettings RunnerId="Run" />
       <ConfigurationWrapper RunnerId="Run" />

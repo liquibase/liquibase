@@ -44,6 +44,10 @@ public class MSSQLDatabase extends AbstractDatabase {
     }
 
 
+    public int getPriority() {
+        return PRIORITY_DEFAULT;
+    }
+    
     @Override
     public Set<String> getSystemTablesAndViews() {
         return systemTablesAndViews;

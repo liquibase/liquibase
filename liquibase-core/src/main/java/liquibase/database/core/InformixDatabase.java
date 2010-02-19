@@ -96,7 +96,11 @@ public class InformixDatabase extends AbstractDatabase {
 	protected Set<String> getSystemTablesAndViews() {
 		return systemTablesAndViews;
 	}
-	
+
+    public int getPriority() {
+        return PRIORITY_DEFAULT;
+    }
+    
 	@Override
     public void setConnection(DatabaseConnection connection) {
         super.setConnection(connection);

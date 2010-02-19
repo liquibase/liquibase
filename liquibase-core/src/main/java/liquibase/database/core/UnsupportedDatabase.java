@@ -6,6 +6,10 @@ import liquibase.exception.DatabaseException;
 
 public class UnsupportedDatabase extends AbstractDatabase {
 
+    public int getPriority() {
+        return -1;
+    }
+
     @Override
     public void setConnection(DatabaseConnection conn) {
         super.setConnection(conn);

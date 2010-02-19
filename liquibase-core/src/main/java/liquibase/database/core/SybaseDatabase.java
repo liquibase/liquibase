@@ -52,6 +52,10 @@ public class SybaseDatabase extends AbstractDatabase {
     }
     */
 
+    public int getPriority() {
+        return PRIORITY_DEFAULT;
+    }
+    
     /**
      * Sybase does not support DDL and meta data in transactions properly,
      * as such we turn off the commit and turn on auto commit.

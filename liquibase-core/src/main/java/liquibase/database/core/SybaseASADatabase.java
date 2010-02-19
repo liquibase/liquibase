@@ -120,6 +120,10 @@ public class SybaseASADatabase extends AbstractDatabase {
 		super();
 	}
 
+    public int getPriority() {
+        return PRIORITY_DEFAULT;
+    }
+    
 	/* (non-Javadoc)
 	 * @see liquibase.database.Database#getCurrentDateTimeFunction()
 	 */
