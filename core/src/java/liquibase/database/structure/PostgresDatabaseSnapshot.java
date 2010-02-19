@@ -43,7 +43,7 @@ public class PostgresDatabaseSnapshot extends SqlDatabaseSnapshot {
   }
 
   /**
-   * 
+   *
    */
   protected void readUniqueConstraints (String schema) throws JDBCException, SQLException {
     updateListeners("Reading unique constraints for " + database.toString() + " ...");
@@ -61,9 +61,15 @@ public class PostgresDatabaseSnapshot extends SqlDatabaseSnapshot {
         String tableName = rs.getString("relname");
         UniqueConstraint constraintInformation = new UniqueConstraint();
         constraintInformation.setName(constraintName);
-        constraintInformation.setTable(tablesMap.get(tableName));
-        getColumnsForUniqueConstraint(conrelid, keys, constraintInformation);
-        foundUC.add(constraintInformation);
+          if (!database.isSystemTable(null, schema, tableName) && !database.isLiquibaseTable(tableName)) {
+              Table table = tablesMap.get(tableName);
+              if (table == null) {
+                  throw new IllegalStateException("Cannot find table for " + tableName);
+              }
+              constraintInformation.setTable(table);
+              getColumnsForUniqueConstraint(conrelid, keys, constraintInformation);
+              foundUC.add(constraintInformation);
+          }
       }
       this.uniqueConstraints.addAll(foundUC);
     }
