@@ -124,7 +124,7 @@ public class OracleDatabase extends AbstractDatabase {
             return true;
         } else if (tableName.startsWith("DR$")) { //oracle index tables
             return true;
-        } else if (tableName.startsWith("SYS_")) { //oracle system table
+        } else if (tableName.startsWith("SYS_IOT_OVER")) { //oracle system table
             return true;
         }
         return false;
