@@ -273,7 +273,7 @@ public abstract class SqlDatabaseSnapshot implements DatabaseSnapshot {
                 }
             } else {
                 columnInfo.setTable(table);
-                columnInfo.setAutoIncrement(database.isColumnAutoIncrement(schema, tableName, columnName));
+                columnInfo.setAutoIncrement(database.isColumnAutoIncrement(schemaName, tableName, columnName));
                 table.getColumns().add(columnInfo);
             }
 
