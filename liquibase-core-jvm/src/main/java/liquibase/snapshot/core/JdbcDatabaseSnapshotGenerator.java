@@ -320,7 +320,7 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
                 }
             } else {
                 column.setTable(table);
-                column.setAutoIncrement(isColumnAutoIncrement(database, schema, table.getName(), column.getName()));
+                column.setAutoIncrement(isColumnAutoIncrement(database, table.getSchema(), table.getName(), column.getName()));
                 table.getColumns().add(column);
             }
 
