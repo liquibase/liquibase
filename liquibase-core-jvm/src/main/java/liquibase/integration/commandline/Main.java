@@ -517,6 +517,7 @@ public class Main {
         }
 
         ServiceLocator.getInstance().setResourceAccessor(new ClassLoaderResourceAccessor(classLoader));
+        Thread.currentThread().setContextClassLoader(classLoader);
     }
 
     private void addWarFileClasspathEntries(File classPathFile, List<URL> urls) throws IOException {
