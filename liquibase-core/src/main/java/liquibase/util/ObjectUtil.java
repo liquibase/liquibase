@@ -32,9 +32,6 @@ public class ObjectUtil {
                     } else if (parameterType.equals(String.class)) {
                         method.invoke(object, propertyValue);
                         return;
-                    } else if (parameterType.equals(String.class)) {
-                        method.invoke(object, propertyValue);
-                        return;
                     } else if (parameterType.equals(Integer.class)) {
                         method.invoke(object, Integer.valueOf(propertyValue));
                         return;
