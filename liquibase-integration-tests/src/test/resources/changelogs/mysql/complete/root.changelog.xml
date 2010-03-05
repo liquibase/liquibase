@@ -356,4 +356,8 @@
             </column>
         </createTable>
     </changeSet>
+
+    <changeSet id="casetest" author="nvoxland" runAlways="true" >
+        <sql>select * from bit_test</sql>
+    </changeSet>
 </databaseChangeLog>

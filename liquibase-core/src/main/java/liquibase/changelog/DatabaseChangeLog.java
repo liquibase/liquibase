@@ -83,9 +83,9 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
 
     public ChangeSet getChangeSet(String path, String author, String id) {
         for (ChangeSet changeSet : changeSets) {
-            if (changeSet.getFilePath().equals(path)
-                    && changeSet.getAuthor().equals(author)
-                    && changeSet.getId().equals(id)) {
+            if (changeSet.getFilePath().equalsIgnoreCase(path)
+                    && changeSet.getAuthor().equalsIgnoreCase(author)
+                    && changeSet.getId().equalsIgnoreCase(id)) {
                 return changeSet;
             }
         }

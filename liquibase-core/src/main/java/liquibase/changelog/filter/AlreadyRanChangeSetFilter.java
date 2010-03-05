@@ -16,9 +16,9 @@ public class AlreadyRanChangeSetFilter implements ChangeSetFilter {
     @SuppressWarnings({"RedundantIfStatement"})
     public boolean accepts(ChangeSet changeSet) {
         for (RanChangeSet ranChangeSet : ranChangeSets) {
-            if (ranChangeSet.getId().equals(changeSet.getId())
-                    && ranChangeSet.getAuthor().equals(changeSet.getAuthor())
-                    && ranChangeSet.getChangeLog().equals(changeSet.getFilePath())) {
+            if (ranChangeSet.getId().equalsIgnoreCase(changeSet.getId())
+                    && ranChangeSet.getAuthor().equalsIgnoreCase(changeSet.getAuthor())
+                    && ranChangeSet.getChangeLog().equalsIgnoreCase(changeSet.getFilePath())) {
                 return true;
             }
         }
