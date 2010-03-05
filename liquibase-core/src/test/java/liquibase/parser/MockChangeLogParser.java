@@ -13,6 +13,11 @@ public class MockChangeLogParser implements ChangeLogParser {
         this.validExtensions = validExtensions;
     }
 
+    public int getPriority() {
+        return PRIORITY_DEFAULT;
+    }
+    
+
     public String[] getValidFileExtensions() {
         return validExtensions;
     }

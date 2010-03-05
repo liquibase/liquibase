@@ -28,6 +28,10 @@ public class XMLChangeLogSAXParser implements ChangeLogParser {
         }
     }
 
+    public int getPriority() {
+        return PRIORITY_DEFAULT;
+    }
+
     public static String getSchemaVersion() {
         return "2.0";
     }
