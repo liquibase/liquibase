@@ -7,6 +7,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Map;
+import java.util.SortedSet;
 
 public class ChangeLogParserFactoryTest {
 
@@ -50,7 +51,7 @@ public class ChangeLogParserFactoryTest {
         assertEquals(2, factory.getParsers().size());
 
         factory.unregister(changeLogParser);
-        assertEquals(1, factory.getParsers().size());
+        assertEquals(0, factory.getParsers().get(changeLogParser.getValidFileExtensions()[0]).size());
     }
 
     @Test
@@ -63,7 +64,7 @@ public class ChangeLogParserFactoryTest {
     @SuppressWarnings("unchecked")
 	@Test
     public void builtInGeneratorsAreFound() {
-        Map<String, ChangeLogParser> generators = ChangeLogParserFactory.getInstance().getParsers();
+        Map<String, SortedSet<ChangeLogParser>> generators = ChangeLogParserFactory.getInstance().getParsers();
         assertEquals(2, generators.size());
     }
 
@@ -75,5 +76,28 @@ public class ChangeLogParserFactoryTest {
         assertTrue(parser instanceof XMLChangeLogSAXParser);
     }
 
+    @Test
+    public void getExtensionParser() {
+        ChangeLogParserFactory parserFactory = ChangeLogParserFactory.getInstance();
+        ChangeLogParser defaultParser = parserFactory.getParser("xml");
+
+        assertNotNull(defaultParser);
+        assertTrue(defaultParser instanceof XMLChangeLogSAXParser);
+
+        ChangeLogParser otherXmlParser = new XMLChangeLogSAXParser() {
+            @Override
+            public int getPriority() {
+                return 100;
+            }
+        };
+        parserFactory.register(otherXmlParser);
+
+        try {
+            assertTrue(otherXmlParser == parserFactory.getParser("xml"));
+            assertFalse(defaultParser == parserFactory.getParser("xml"));
+        } finally {
+            parserFactory.unregister(otherXmlParser);
+        }
+    }
 
 }

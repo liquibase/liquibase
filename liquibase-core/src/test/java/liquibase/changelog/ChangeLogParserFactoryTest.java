@@ -125,5 +125,9 @@ public class ChangeLogParserFactoryTest {
                     "test"
             };
         }
+
+        public int getPriority() {
+            return PRIORITY_DEFAULT;
+        }        
     }
 }

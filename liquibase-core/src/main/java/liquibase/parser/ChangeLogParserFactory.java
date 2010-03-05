@@ -3,16 +3,13 @@ package liquibase.parser;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.servicelocator.ServiceLocator;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class ChangeLogParserFactory {
 
     private static ChangeLogParserFactory instance;
 
-    private Map<String, ChangeLogParser> parsers = new HashMap<String, ChangeLogParser>();
+    private Map<String, SortedSet<ChangeLogParser>> parsers = new HashMap<String, SortedSet<ChangeLogParser>>();
 
 
     public static void reset() {
@@ -40,32 +37,36 @@ public class ChangeLogParserFactory {
 
     }
 
-    public Map<String, ChangeLogParser> getParsers() {
+    public Map<String, SortedSet<ChangeLogParser>> getParsers() {
         return parsers;
     }
 
     public ChangeLogParser getParser(String fileNameOrExtension) {
         fileNameOrExtension = fileNameOrExtension.replaceAll(".*\\.", ""); //just need the extension
-        return parsers.get(fileNameOrExtension);
+        SortedSet<ChangeLogParser> parseres = parsers.get(fileNameOrExtension);
+        if (parseres.size() == 0) {
+            return null;
+        }
+        return parseres.iterator().next();
     }
 
     public void register(ChangeLogParser changeLogParser) {
         for (String extension : changeLogParser.getValidFileExtensions()) {
-            parsers.put(extension, changeLogParser);
+            if (!parsers.containsKey(extension)) {
+                parsers.put(extension, new TreeSet<ChangeLogParser>(new Comparator<ChangeLogParser>() {
+                    public int compare(ChangeLogParser o1, ChangeLogParser o2) {
+                        return Integer.valueOf(o2.getPriority()).compareTo(o1.getPriority());
+                    }
+                }));
+            }
+            parsers.get(extension).add(changeLogParser);
         }
     }
 
     public void unregister(ChangeLogParser changeLogParser) {
         List<Map.Entry<String, ChangeLogParser>> entrysToRemove = new ArrayList<Map.Entry<String, ChangeLogParser>>();
-        for (Map.Entry<String, ChangeLogParser> entry : parsers.entrySet()) {
-            if (entry.getValue().equals(changeLogParser)) {
-                entrysToRemove.add(entry);
-            }
+        for (Map.Entry<String, SortedSet<ChangeLogParser>> entry : parsers.entrySet()) {
+           entry.getValue().remove(changeLogParser);
         }
-
-        for (Map.Entry<String, ChangeLogParser> entry : entrysToRemove) {
-            parsers.remove(entry.getKey());
-        }
-
     }
 }

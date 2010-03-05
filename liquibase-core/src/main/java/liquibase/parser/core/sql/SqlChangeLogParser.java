@@ -19,6 +19,10 @@ public class SqlChangeLogParser implements ChangeLogParser {
         };
     }
 
+    public int getPriority() {
+        return PRIORITY_DEFAULT;
+    }
+    
     public DatabaseChangeLog parse(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters, ResourceAccessor resourceAccessor) throws ChangeLogParseException {
 
         RawSQLChange change = new RawSQLChange();
