@@ -59,7 +59,7 @@ public class ShouldRunChangeSetFilter implements ChangeSetFilter {
         if (System.getProperty("os.name").toLowerCase().startsWith("win")) {
             return ranChangeSet.getChangeLog().equalsIgnoreCase(changeSet.getFilePath());
         } else {
-            return ranChangeSet.getChangeLog().equals(changeSet.getFilePath());
+            return ranChangeSet.getChangeLog().equalsIgnoreCase(changeSet.getFilePath());
         }
 
     }

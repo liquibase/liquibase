@@ -93,8 +93,8 @@ public class RanChangeSet {
     }
 
     public boolean isSameAs(ChangeSet changeSet) {
-        return this.getChangeLog().replace('\\', '/').equals(changeSet.getFilePath().replace('\\', '/'))
-                && this.getId().equals(changeSet.getId())
-                && this.getAuthor().equals(changeSet.getAuthor());
+        return this.getChangeLog().replace('\\', '/').equalsIgnoreCase(changeSet.getFilePath().replace('\\', '/'))
+                && this.getId().equalsIgnoreCase(changeSet.getId())
+                && this.getAuthor().equalsIgnoreCase(changeSet.getAuthor());
     }
 }
