@@ -45,6 +45,10 @@ public abstract class AbstractChange implements Change {
         return changeMetaData;
     }
 
+    protected void setPriority(int newPriority) {
+        this.changeMetaData.setPriority(newPriority);
+    }
+
     public ChangeSet getChangeSet() {
         return changeSet;
     }
