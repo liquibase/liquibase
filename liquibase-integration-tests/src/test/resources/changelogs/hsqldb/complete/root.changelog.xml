@@ -324,5 +324,18 @@
             <column name="user" type="int"/>
         </createTable>
     </changeSet>
-    
+
+    <!-- from http://liquibase.org/forum/index.php?topic=376.msg1260#msg1260 -->
+    <changeSet id="company" author="bob">
+        <createTable tableName="companyidentity">
+            <column name="id" type="int" autoIncrement="true" >
+                <constraints primaryKey="true" nullable="false" />
+            </column>
+            <column name="version" type="int"/>
+            <column name="name" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+
+        </createTable>
+    </changeSet>
 </databaseChangeLog>
