@@ -125,7 +125,7 @@ public class LoggingExecutor extends AbstractExecutor implements Executor {
             return delegatedReadExecutor.queryForInt(sql);
         } catch (DatabaseException e) {
             if (sql instanceof GetNextChangeSetSequenceValueStatement) { //table probably does not exist
-                return 1;
+                return 0;
             }
             throw e;
         }
