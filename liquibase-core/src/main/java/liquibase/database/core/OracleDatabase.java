@@ -4,8 +4,10 @@ import liquibase.database.AbstractDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.logging.LogFactory;
+import liquibase.statement.DatabaseFunction;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 
 /**
  * Encapsulates Oracle database support.
@@ -13,7 +15,14 @@ import java.lang.reflect.Method;
 public class OracleDatabase extends AbstractDatabase {
     public static final String PRODUCT_NAME = "oracle";
 
-    public int getPriority() {
+	public OracleDatabase() {
+		// Setting list of Oracle's native functions
+		databaseFunctions = new ArrayList<DatabaseFunction>();
+		databaseFunctions.add(new DatabaseFunction("SYSDATE"));
+		databaseFunctions.add(new DatabaseFunction("SYSTIMESTAMP"));
+	}
+
+	public int getPriority() {
         return PRIORITY_DEFAULT;
     }
     

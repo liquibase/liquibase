@@ -14,6 +14,7 @@ import liquibase.lockservice.DatabaseChangeLogLock;
 import liquibase.snapshot.DatabaseSnapshotGenerator;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.statement.SqlStatement;
+import liquibase.statement.DatabaseFunction;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -430,4 +431,8 @@ public class MockDatabase implements Database {
     public Date parseDate(String dateAsString) throws DateParseException {
         return new Date();
     }
+
+	public List<DatabaseFunction> getDatabaseFunctions() {
+		return null;
+	}
 }

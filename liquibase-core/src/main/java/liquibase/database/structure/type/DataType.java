@@ -15,6 +15,9 @@ public abstract class DataType {
     private int minParameters;
     private int maxParameters;
 
+	// Unit of data-type precision (i.e. BYTE, CHAR for Oracle)
+	private String unit;
+
     private Integer firstParameter;
     private Integer secondParameter;
 
@@ -64,7 +67,15 @@ public abstract class DataType {
         this.secondParameter = secondParameter;
     }
 
-    public String convertObjectToString(Object value, Database database) {
+	public String getUnit() {
+		return unit;
+	}
+
+	public void setUnit(String unit) {
+		this.unit = unit;
+	}
+
+	public String convertObjectToString(Object value, Database database) {
         if (value == null) {
             return null;
         }
@@ -80,6 +91,10 @@ public abstract class DataType {
             if (getSecondParameter() != null) {
                 returnString+=","+getSecondParameter();
             }
+
+	        if (getUnit() != null) {
+		        returnString+=" " + getUnit();
+	        }
 
             returnString+= ")";
         }

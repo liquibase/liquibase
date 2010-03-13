@@ -43,6 +43,9 @@ public abstract class AbstractDatabase implements Database {
 
     protected String currentDateTimeFunction;
 
+	// List of Database native functions.
+	protected List<DatabaseFunction> databaseFunctions;
+
     private List<RanChangeSet> ranChangeSetList;
 
     private static Pattern CREATE_VIEW_AS_PATTERN = Pattern.compile("^CREATE\\s+.*?VIEW\\s+.*?AS\\s+", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
@@ -976,4 +979,12 @@ public abstract class AbstractDatabase implements Database {
     public Table getTable(String schemaName, String tableName) throws DatabaseException {
         return DatabaseSnapshotGeneratorFactory.getInstance().getGenerator(this).getTable(schemaName, tableName, this);
     }
+
+	public List<DatabaseFunction> getDatabaseFunctions() {
+		return databaseFunctions;
+	}
+
+	public void setDatabaseFunctions(List<DatabaseFunction> databaseFunctions) {
+		this.databaseFunctions = databaseFunctions;
+	}
 }

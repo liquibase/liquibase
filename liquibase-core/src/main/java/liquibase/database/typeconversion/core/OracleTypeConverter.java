@@ -17,6 +17,30 @@ public class OracleTypeConverter extends AbstractTypeConverter {
 		return database instanceof OracleDatabase;
 	}
 
+	/**
+	 * Extension of super.getDataType(String columnTypeString, Boolean autoIncrement, String dataTypeName, String precision)<br>
+	 * Contains definition of Oracle's data-types
+	 * */
+	@Override
+	protected DataType getDataType(String columnTypeString, Boolean autoIncrement, String dataTypeName, String precision) {
+		// Try to define data type by searching of common standard types
+		DataType returnTypeName = super.getDataType(columnTypeString, autoIncrement, dataTypeName, precision);
+		// If we found CustomType (it means - nothing compatible) then search for oracle types
+		if (returnTypeName instanceof CustomType) {
+			if (columnTypeString.startsWith("VARCHAR2")) {
+				// Varchar2 type pattern: VARCHAR2(50 BYTE) | VARCHAR2(50 CHAR)
+				returnTypeName = getVarcharType();
+				if (precision != null) {
+					String[] typeParams = precision.split(" ");
+					returnTypeName.setFirstParameter(Integer.parseInt(typeParams[0].trim()));
+					if (typeParams.length > 1) {
+						returnTypeName.setUnit(typeParams[1]);
+					}
+				}
+			}
+		}
+		return returnTypeName;
+	}
 
 	@Override
 	public Object convertDatabaseValueToObject(Object defaultValue, int dataType, int columnSize, int decimalDigits, Database database) throws ParseException {
