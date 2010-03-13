@@ -1,7 +1,6 @@
 package liquibase.database;
 
 import liquibase.change.Change;
-import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.RanChangeSet;
@@ -10,10 +9,10 @@ import liquibase.exception.*;
 import liquibase.servicelocator.PrioritizedService;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.statement.SqlStatement;
+import liquibase.statement.DatabaseFunction;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
 
@@ -250,4 +249,9 @@ public interface Database extends DatabaseObject, PrioritizedService {
     int getNextChangeSetSequenceValue() throws LiquibaseException;
 
     public Date parseDate(String dateAsString) throws DateParseException;
+
+	/**
+	 * Returns list of database native functions
+	 * */
+	public List<DatabaseFunction> getDatabaseFunctions();
 }

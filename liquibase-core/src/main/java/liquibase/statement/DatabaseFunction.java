@@ -1,7 +1,5 @@
 package liquibase.statement;
 
-import liquibase.database.Database;
-
 public class DatabaseFunction {
 
     private String value;

@@ -64,7 +64,7 @@ public class CreateTableGenerator implements SqlGenerator<CreateTableStatement> 
                     buffer.append(" CONSTRAINT ").append(((MSSQLDatabase) database).generateDefaultConstraintName(statement.getTableName(), column));
                 }
                 buffer.append(" DEFAULT ");
-                buffer.append(TypeConverterFactory.getInstance().findTypeConverter(database).getDataType(defaultValue).convertObjectToString(defaultValue, database));
+                buffer.append(TypeConverterFactory.getInstance().findTypeConverter(database).getDataType(statement.getColumnTypes().get(column), isAutoIncrement).convertObjectToString(defaultValue, database));
             }
 
             if (isAutoIncrement &&
