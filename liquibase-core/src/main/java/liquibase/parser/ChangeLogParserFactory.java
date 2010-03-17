@@ -44,7 +44,7 @@ public class ChangeLogParserFactory {
     public ChangeLogParser getParser(String fileNameOrExtension) {
         fileNameOrExtension = fileNameOrExtension.replaceAll(".*\\.", ""); //just need the extension
         SortedSet<ChangeLogParser> parseres = parsers.get(fileNameOrExtension);
-        if (parseres.size() == 0) {
+        if (parseres == null || parseres.size() == 0) {
             return null;
         }
         return parseres.iterator().next();
