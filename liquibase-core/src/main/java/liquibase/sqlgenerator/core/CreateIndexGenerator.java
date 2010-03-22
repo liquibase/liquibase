@@ -41,7 +41,10 @@ public class CreateIndexGenerator implements SqlGenerator<CreateIndexStatement> 
         }
         buffer.append("INDEX ");
 
-        buffer.append(statement.getIndexName()).append(" ON ");
+        if (statement.getIndexName() != null) {
+            buffer.append(statement.getIndexName()).append(" ");
+        }
+        buffer.append("ON ");
         buffer.append(database.escapeTableName(statement.getTableSchemaName(), statement.getTableName())).append("(");
         Iterator<String> iterator = Arrays.asList(statement.getColumns()).iterator();
         while (iterator.hasNext()) {
