@@ -117,7 +117,10 @@ public class CreateTableGenerator implements SqlGenerator<CreateTableStatement> 
 	        	if (!(database instanceof InformixDatabase)) {
 		            String pkName = StringUtils.trimToNull(statement.getPrimaryKeyConstraint().getConstraintName());
 		            if (pkName == null) {
-		                pkName = database.generatePrimaryKeyName(statement.getTableName());
+		                // TODO ORA-00972: identifier is too long
+			            // If tableName lenght is more then 28 symbols
+			            // then generated pkName will be incorrect
+			            pkName = database.generatePrimaryKeyName(statement.getTableName());
 		            }
 		            buffer.append(" CONSTRAINT ");
 		            buffer.append(database.escapeConstraintName(pkName));
