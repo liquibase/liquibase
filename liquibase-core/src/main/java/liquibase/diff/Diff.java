@@ -114,10 +114,10 @@ public class Diff {
 			diffTables = types.contains("tables");
 			diffColumns = types.contains("columns");
 			diffViews = types.contains("views");
-			diffPrimaryKeys = types.contains("primaryKeys");
-			diffUniqueConstraints = types.contains("uniqueConstraints");
+			diffPrimaryKeys = types.contains("primaryKeys".toLowerCase());
+			diffUniqueConstraints = types.contains("uniqueConstraints".toLowerCase());
 			diffIndexes = types.contains("indexes");
-			diffForeignKeys = types.contains("foreignKeys");
+			diffForeignKeys = types.contains("foreignKeys".toLowerCase());
 			diffSequences = types.contains("sequences");
 			diffData = types.contains("data");
 		}
