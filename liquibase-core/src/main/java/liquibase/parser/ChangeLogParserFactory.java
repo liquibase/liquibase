@@ -64,9 +64,12 @@ public class ChangeLogParserFactory {
     }
 
     public void unregister(ChangeLogParser changeLogParser) {
-        List<Map.Entry<String, ChangeLogParser>> entrysToRemove = new ArrayList<Map.Entry<String, ChangeLogParser>>();
-        for (Map.Entry<String, SortedSet<ChangeLogParser>> entry : parsers.entrySet()) {
-           entry.getValue().remove(changeLogParser);
+        for (Iterator<Map.Entry<String, SortedSet<ChangeLogParser>>> i = parsers.entrySet().iterator(); i.hasNext(); ) {
+            Map.Entry<String, SortedSet<ChangeLogParser>> entry = i.next();
+            if (entry.getValue().first().equals(changeLogParser)) {
+                i.remove();
+                break;
+            }
         }
     }
 }
