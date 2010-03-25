@@ -51,7 +51,7 @@ public class ChangeLogParserFactoryTest {
         assertEquals(2, factory.getParsers().size());
 
         factory.unregister(changeLogParser);
-        assertEquals(0, factory.getParsers().get(changeLogParser.getValidFileExtensions()[0]).size());
+        assertEquals(1, factory.getParsers().size());
     }
 
     @Test

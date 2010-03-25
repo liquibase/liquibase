@@ -64,12 +64,18 @@ public class ChangeLogParserFactory {
     }
 
     public void unregister(ChangeLogParser changeLogParser) {
-        for (Iterator<Map.Entry<String, SortedSet<ChangeLogParser>>> i = parsers.entrySet().iterator(); i.hasNext(); ) {
-            Map.Entry<String, SortedSet<ChangeLogParser>> entry = i.next();
-            if (entry.getValue().first().equals(changeLogParser)) {
-                i.remove();
-                break;
-            }
-        }
+    	for (String extension : changeLogParser.getValidFileExtensions()) {
+    		if (parsers.containsKey(extension)) {
+    			Iterator<ChangeLogParser> iterator = parsers.get(extension).iterator();
+    			while (iterator.hasNext()) {
+    				ChangeLogParser changeLogParserElem = iterator.next();
+    				if (changeLogParser.equals(changeLogParserElem))
+    					iterator.remove();
+    			}
+    			// Remove entry if it's empty
+    			if (parsers.get(extension).isEmpty())
+    				parsers.remove(extension);
+    		}
+    	}
     }
 }
