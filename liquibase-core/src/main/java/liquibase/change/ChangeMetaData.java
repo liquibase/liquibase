@@ -29,6 +29,6 @@ public class ChangeMetaData implements PrioritizedService {
     }
 
     public void setPriority(int newPriority) {
-        this.priority = priority;
+        this.priority = newPriority;
     }
 }
