@@ -137,8 +137,6 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 						databaseChangeLog.getPhysicalFilePath());
 			} else if ("includeAll".equals(qName)) {
 				String pathName = atts.getValue("path");
-				String resourceBasePath = null;
-				
 				pathName = pathName.replace('\\', '/');
 				
 				if (!(pathName.endsWith("/"))) {
@@ -162,9 +160,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 					}
 					pathName = resourceBase.getPath() + '/';
 					pathName = pathName.replace('\\', '/');
-					resourceBasePath = resourceBase.getAbsolutePath();
-				} else
-					resourceBasePath = pathName;
+				}
 
 				Enumeration<URL> resources = resourceAccessor
 						.getResources(pathName);
@@ -187,14 +183,12 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 								+ file.toString());
 					}
 					if (file.isDirectory()) {
-						if (!file.getAbsolutePath().equals(resourceBasePath)) {
-							log.debug(file.getCanonicalPath() + " is a directory");
-							for (File childFile : file.listFiles()) {
-								if (handleIncludedChangeLog(pathName + file.getName() + "/"
-										+ childFile.getName(), false,
-										databaseChangeLog.getPhysicalFilePath())) {
-									foundResource = true;
-								}
+						log.debug(file.getCanonicalPath() + " is a directory");
+						for (File childFile : file.listFiles()) {
+							if (handleIncludedChangeLog(pathName
+									+ childFile.getName(), false,
+									databaseChangeLog.getPhysicalFilePath())) {
+								foundResource = true;
 							}
 						}
 					} else {

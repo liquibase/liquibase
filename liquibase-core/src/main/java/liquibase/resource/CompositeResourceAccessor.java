@@ -59,8 +59,10 @@ public class CompositeResourceAccessor implements ResourceAccessor {
         for (ResourceAccessor o : openers) {
             Enumeration<URL> e = o.getResources(packageName);
             while (e.hasMoreElements()) {
-                urls.add(e.nextElement());
+           		urls.add(e.nextElement());
             }
+            if (!urls.isEmpty())
+            	break;
         }
         return urls.elements();
     }

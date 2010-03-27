@@ -77,8 +77,8 @@ public class CompositeFileOpenerTest {
     @Test
     public void resourcesFirstHas() throws IOException {
         expect(first.getResources("file")).andReturn(hasElements);
+        //expect(second.getResources("file")).andReturn(empty);
         replay(first);
-        expect(second.getResources("file")).andReturn(empty);
         replay(second);
         Enumeration<URL> urls = composite.getResources("file");
 //        assertEquals(hasElements,urls);
