@@ -17,16 +17,24 @@ public class DateTimeType extends DataType {
         return true;
     }
 
-    @Override
-    public String convertObjectToString(Object value, Database database) {
-        if (value == null) {
-            return null;
-        } else if (value instanceof DatabaseFunction) {
-            return ((DatabaseFunction) value).getValue();
-        } else if (database.getDatabaseFunctions() != null && database.getDatabaseFunctions().contains(new DatabaseFunction(value.toString()))) {
-            return value.toString();
+	@Override
+	public String convertObjectToString(Object value, Database database) {
+		if (value == null) {
+			return null;
+        } else if (value.toString().equals("CURRENT_TIMESTAMP()")) {
+              return database.getCurrentDateTimeFunction();
+  		} else if (value instanceof DatabaseFunction) {
+			return ((DatabaseFunction) value).getValue();
+		} else if (database.getDatabaseFunctions().contains(new DatabaseFunction(value.toString()))) {
+			return value.toString();
+  		} else if (value instanceof String) {
+            return (String) value;
         }
 
-        return database.getDateTimeLiteral(((java.sql.Timestamp) value));
+        try {
+            return database.getDateTimeLiteral(((java.sql.Timestamp) value));
+        } catch (Exception e) {
+            throw new RuntimeException();
+        }
     }
 }

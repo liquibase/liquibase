@@ -138,6 +138,12 @@
         </createIndex>
     </changeSet>
 
+    <changeSet id="hasIndexPrecondition" author="nvoxland">
+        <preConditions>
+            <indexExists indexName="idx_compoundtest"/>
+        </preConditions>
+    </changeSet>
+
     <changeSet id="commentTest" author="nvoxland">
         <comment>Creates a table and updates a value with actual SQL. Mainly for testing the comment tags</comment>
         <createTable tableName="commenttest">

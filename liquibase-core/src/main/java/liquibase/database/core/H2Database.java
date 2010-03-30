@@ -4,6 +4,7 @@ import liquibase.database.DatabaseConnection;
 import liquibase.database.AbstractDatabase;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.DateParseException;
+import liquibase.statement.DatabaseFunction;
 import liquibase.util.ISODateFormat;
 
 import java.text.ParseException;
@@ -18,6 +19,10 @@ public class H2Database extends AbstractDatabase {
     private static String START_CONCAT = "CONCAT(";
     private static String END_CONCAT = ")";
     private static String SEP_CONCAT = ", ";
+
+    public H2Database() {
+        this.databaseFunctions.add(new DatabaseFunction("CURRENT_TIMESTAMP()"));
+    }
 
     public String getTypeName() {
         return "h2";

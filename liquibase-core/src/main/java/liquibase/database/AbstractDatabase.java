@@ -44,7 +44,7 @@ public abstract class AbstractDatabase implements Database {
     protected String currentDateTimeFunction;
 
 	// List of Database native functions.
-	protected List<DatabaseFunction> databaseFunctions;
+	protected List<DatabaseFunction> databaseFunctions = new ArrayList<DatabaseFunction>();
 
     private List<RanChangeSet> ranChangeSetList;
 
@@ -982,9 +982,5 @@ public abstract class AbstractDatabase implements Database {
 
 	public List<DatabaseFunction> getDatabaseFunctions() {
 		return databaseFunctions;
-	}
-
-	public void setDatabaseFunctions(List<DatabaseFunction> databaseFunctions) {
-		this.databaseFunctions = databaseFunctions;
 	}
 }
