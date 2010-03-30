@@ -63,6 +63,7 @@ import liquibase.parser.core.xml.LiquibaseSchemaResolver;
 import liquibase.parser.core.xml.XMLChangeLogSAXParser;
 import liquibase.serializer.core.xml.XMLChangeLogSerializer;
 import liquibase.snapshot.DatabaseSnapshot;
+import liquibase.statement.DatabaseFunction;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.util.StringUtils;
 import liquibase.util.csv.CSVWriter;
@@ -952,11 +953,11 @@ public class DiffResult {
 				} else if (defaultValue instanceof Date) {
 					columnConfig.setDefaultValueDate((Date) defaultValue);
 				} else if (defaultValue instanceof Boolean) {
-					columnConfig
-							.setDefaultValueBoolean(((Boolean) defaultValue));
+					columnConfig.setDefaultValueBoolean(((Boolean) defaultValue));
 				} else if (defaultValue instanceof Number) {
-					columnConfig
-							.setDefaultValueNumeric(((Number) defaultValue));
+					columnConfig.setDefaultValueNumeric(((Number) defaultValue));
+				} else if (defaultValue instanceof DatabaseFunction) {
+				    columnConfig.setDefaultValueComputed((DatabaseFunction) defaultValue);
 				} else {
 					columnConfig.setDefaultValue(defaultValue.toString());
 				}
