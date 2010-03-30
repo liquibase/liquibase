@@ -192,6 +192,8 @@ public abstract class AbstractTypeConverter implements TypeConverter {
             returnTypeName = getBlobType();
         } else if (dataTypeName.equalsIgnoreCase("LONGVARCHAR")) {
             returnTypeName = getClobType();
+        } else if (dataTypeName.equalsIgnoreCase("SMALLINT")) {
+            returnTypeName = getSmallIntType();
         } else if (dataTypeName.equalsIgnoreCase("TEXT")) {
             returnTypeName = getClobType();
         } else if (dataTypeName.equalsIgnoreCase("TIME")) {
@@ -342,7 +344,10 @@ public abstract class AbstractTypeConverter implements TypeConverter {
     public TinyIntType getTinyIntType() {
         return new TinyIntType();
     }
-    
+    public SmallIntType getSmallIntType() {
+    	return new SmallIntType();
+    }
+
     public BooleanType getBooleanType() {
         return new BooleanType();
     }
