@@ -18,7 +18,6 @@ public class OracleDatabase extends AbstractDatabase {
 
 	public OracleDatabase() {
 		// Setting list of Oracle's native functions
-		databaseFunctions = new ArrayList<DatabaseFunction>();
 		databaseFunctions.add(new DatabaseFunction("SYSDATE"));
 		databaseFunctions.add(new DatabaseFunction("SYSTIMESTAMP"));
 	}

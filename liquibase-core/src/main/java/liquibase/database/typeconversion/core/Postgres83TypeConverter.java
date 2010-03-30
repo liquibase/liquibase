@@ -13,6 +13,9 @@ public class Postgres83TypeConverter extends PostgresTypeConverter {
 
     @Override
     public boolean supports(Database database) {
+        if (database.getConnection() == null) {
+            return false;
+        }
         try {
             return super.supports(database) && database.getDatabaseMajorVersion() >= 8 && database.getDatabaseMinorVersion() >= 3;
         } catch (DatabaseException e) {

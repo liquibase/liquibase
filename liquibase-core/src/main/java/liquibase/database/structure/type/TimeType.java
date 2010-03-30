@@ -19,8 +19,11 @@ public class TimeType  extends DataType {
             return null;
         }  else if (value instanceof DatabaseFunction) {
             return ((DatabaseFunction) value).getValue();
-        }        
-        return database.getTimeLiteral(((java.sql.Time) value));
+        } else if (value.toString().equals("CURRENT_TIMESTAMP()")) {
+              return database.getCurrentDateTimeFunction();
+        }
+        
+          return database.getTimeLiteral(((java.sql.Time) value));
     }
 
 

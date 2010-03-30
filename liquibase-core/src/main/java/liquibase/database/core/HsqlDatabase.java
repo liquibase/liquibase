@@ -4,6 +4,7 @@ import liquibase.database.AbstractDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.DateParseException;
+import liquibase.statement.DatabaseFunction;
 import liquibase.util.ISODateFormat;
 
 import java.text.DateFormat;

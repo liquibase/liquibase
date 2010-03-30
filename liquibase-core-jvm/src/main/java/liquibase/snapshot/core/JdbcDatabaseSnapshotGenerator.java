@@ -231,6 +231,7 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
         try {
             while (rs.next()) {
                 Table table = readTable(rs, database);
+                table.setSchema(schema); //not always set for some reason
                 if (database.isLiquibaseTable(table.getName())) {
                     if (table.getName().equalsIgnoreCase(database.getDatabaseChangeLogTableName())) {
                         snapshot.setDatabaseChangeLogTable(table);
