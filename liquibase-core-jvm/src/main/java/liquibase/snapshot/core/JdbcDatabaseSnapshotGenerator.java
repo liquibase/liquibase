@@ -13,7 +13,6 @@ import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.DatabaseSnapshotGenerator;
-import liquibase.sql.visitor.SqlVisitor;
 import liquibase.statement.core.GetViewDefinitionStatement;
 import liquibase.statement.core.SelectSequencesStatement;
 import liquibase.util.StringUtils;
@@ -417,7 +416,7 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
                         }
                     }
                     if (fkInfo == null) {
-                        throw new DatabaseException("Database returned out of sequence foreign key column for "+fkInfo.getName());
+                        throw new DatabaseException("Database returned out of sequence foreign key column for "+fkName);
                     }
                 }
 

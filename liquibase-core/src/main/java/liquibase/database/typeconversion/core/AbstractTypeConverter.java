@@ -12,6 +12,7 @@ import liquibase.change.ColumnConfig;
 
 import java.math.BigDecimal;
 import java.text.ParseException;
+import java.util.List;
 import java.sql.Types;
 import java.math.BigInteger;
 
@@ -341,7 +342,7 @@ public abstract class AbstractTypeConverter implements TypeConverter {
     public TinyIntType getTinyIntType() {
         return new TinyIntType();
     }
-
+    
     public BooleanType getBooleanType() {
         return new BooleanType();
     }
