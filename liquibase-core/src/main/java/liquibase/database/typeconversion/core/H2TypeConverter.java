@@ -40,7 +40,7 @@ public class H2TypeConverter extends AbstractTypeConverter {
 
     @Override
     public UUIDType getUUIDType() {
-        return new UUIDType("VARCHAR(36)");
+        return new UUIDType("UUID");
     }
 
     @Override
