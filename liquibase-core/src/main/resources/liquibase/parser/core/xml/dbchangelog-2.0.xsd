@@ -112,6 +112,11 @@
 								</xsd:element>
 								<xsd:element name="preConditions" minOccurs="0"
 									maxOccurs="1">
+                                    <xsd:annotation>
+                                        <xsd:appinfo>
+                                            <xsd:documentation>onChangeLogPreconditionOnSqlOutput determines what should happen when evaluating this precondition in updateSQL mode.  TEST: Run precondition, FAIL: Fail precondition, IGNORE: Skip precondition check [DEFAULT]</xsd:documentation>
+                                        </xsd:appinfo>
+                                    </xsd:annotation>
 									<xsd:complexType>
 										<xsd:choice>
 											<xsd:group ref="PreConditionChildren" maxOccurs="unbounded" />
@@ -578,6 +583,7 @@
 		<xsd:complexType>
 			<xsd:attribute name="schemaName" type="xsd:string" />
 			<xsd:attribute name="indexName" type="xsd:string" use="required" />
+            <xsd:attribute name="tableName" type="xsd:string" />
 		</xsd:complexType>
 	</xsd:element>
 

@@ -138,9 +138,10 @@
         </createIndex>
     </changeSet>
 
-    <changeSet id="hasIndexPrecondition" author="nvoxland">
+    <changeSet id="hasIndexPrecondition" author="nvoxland"> <!-- can check with or without table name -->
         <preConditions>
             <indexExists indexName="idx_compoundtest"/>
+            <indexExists tableName="compoundIndexTest" indexName="idx_compoundtest"/>
         </preConditions>
     </changeSet>
 

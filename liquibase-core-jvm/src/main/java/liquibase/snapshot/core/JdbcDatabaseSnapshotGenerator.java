@@ -374,7 +374,7 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
         }
     }
 
-    public boolean hasIndex(String schemaName, String indexName, Database database) throws DatabaseException {
+    public boolean hasIndex(String schemaName, String tableName, String indexName, Database database) throws DatabaseException {
         return createSnapshot(database, schemaName, null).getIndex(indexName) != null;
     }
 

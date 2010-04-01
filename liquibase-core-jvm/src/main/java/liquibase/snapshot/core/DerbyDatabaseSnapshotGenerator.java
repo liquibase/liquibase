@@ -10,6 +10,7 @@ import liquibase.database.core.DerbyDatabase;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.statement.core.RawSqlStatement;
+import liquibase.util.StringUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -34,7 +35,11 @@ public class DerbyDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerato
     protected String convertColumnNameToDatabaseTableName(String columnName) {
         return columnName.toUpperCase();
     }
-    public boolean hasIndex(String schemaName, String indexName, Database database) throws DatabaseException {
+
+    /**
+     * Derby seems to have troubles
+     */
+    public boolean hasIndex(String schemaName, String tableName, String indexName, Database database) throws DatabaseException {
         try {
             ResultSet rs = getMetaData(database).getIndexInfo(database.convertRequestedSchemaToCatalog(schemaName), database.convertRequestedSchemaToSchema(schemaName), "%", false, true);
             while (rs.next()) {
