@@ -2,17 +2,27 @@ package liquibase.database.structure;
 
 import liquibase.util.StringUtils;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class Index implements DatabaseObject, Comparable<Index> {
+
+	/** Marks Index as associated with Primary Key [PK] */
+	public final static String MARK_PRIMARY_KEY = "primaryKey";
+	/** Marks Index as associated with Foreign Key [FK] */
+	public final static String MARK_FOREIGN_KEY = "foreignKey";
+	/** Marks Index as associated with Unique Constraint [UC] */
+	public final static String MARK_UNIQUE_CONSTRAINT = "uniqueConstraint";
+
     private String name;
     private Table table;
     private Boolean unique;
     private List<String> columns = new ArrayList<String>();
     private String filterCondition;
+	// Contain associations of index
+	// for example: foreignKey, primaryKey or uniqueConstraint
+	private Set<String> associatedWith = new HashSet<String>();
 
-    public DatabaseObject[] getContainingObjects() {
+	public DatabaseObject[] getContainingObjects() {
         return new DatabaseObject[] {
                 table
         };        
@@ -58,7 +68,23 @@ public class Index implements DatabaseObject, Comparable<Index> {
         return this.unique;
     }
 
-    @Override
+	public Set<String> getAssociatedWith() {
+		return associatedWith;
+	}
+
+	public String getAssociatedWithAsString() {
+		return StringUtils.join(associatedWith, ",");
+	}
+
+	public void addAssociatedWith(String item) {
+		associatedWith.add(item);
+	}
+
+	public boolean isAssociatedWith(String keyword) {
+		return associatedWith.contains(keyword);
+	}
+
+	@Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;

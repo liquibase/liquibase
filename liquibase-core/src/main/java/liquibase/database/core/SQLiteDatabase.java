@@ -156,6 +156,7 @@ public class SQLiteDatabase extends AbstractDatabase {
                     index_config.getName(),
                     schemaName, tableName,
                     index_config.isUnique(),
+		            index_config.getAssociatedWithAsString(),
                     index_config.getColumns().
                             toArray(new String[index_config.getColumns().size()])));
         }

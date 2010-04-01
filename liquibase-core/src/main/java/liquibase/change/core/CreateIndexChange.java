@@ -20,6 +20,9 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
     private Boolean unique;
     private String tablespace;
     private List<ColumnConfig> columns;
+	// Contain associations of index
+	// for example: foreignKey, primaryKey or uniqueConstraint
+	private String associatedWith;
 
 
     public CreateIndexChange() {
@@ -78,9 +81,16 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
             columns.add(column.getName());
         }
 
-        return new SqlStatement[]{
-                new CreateIndexStatement(getIndexName(), getSchemaName() == null ? database.getDefaultSchemaName() : getSchemaName(), getTableName(), this.isUnique(), columns.toArray(new String[getColumns().size()])).setTablespace(getTablespace())
-        };
+	    return new SqlStatement[]{
+			    new CreateIndexStatement(
+					    getIndexName(),
+					    getSchemaName() == null ? database.getDefaultSchemaName() : getSchemaName(),
+					    getTableName(),
+					    this.isUnique(),
+					    getAssociatedWith(),
+					    columns.toArray(new String[getColumns().size()]))
+					    .setTablespace(getTablespace())
+	    };
     }
 
     @Override
@@ -113,4 +123,18 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
         return this.unique;
     }
 
+	/**
+	 * @return Index associations. Valid values:<br>
+	 * <li>primaryKey</li>
+	 * <li>foreignKey</li>
+	 * <li>uniqueConstraint</li>
+	 * <li>none</li>
+	 * */
+	public String getAssociatedWith() {
+		return associatedWith;
+	}
+
+	public void setAssociatedWith(String associatedWith) {
+		this.associatedWith = associatedWith;
+	}
 }

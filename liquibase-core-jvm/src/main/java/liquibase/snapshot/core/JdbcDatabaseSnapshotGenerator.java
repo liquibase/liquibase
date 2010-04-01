@@ -2,10 +2,10 @@ package liquibase.snapshot.core;
 
 import liquibase.database.Database;
 import liquibase.database.JdbcConnection;
-import liquibase.database.typeconversion.TypeConverterFactory;
 import liquibase.database.core.InformixDatabase;
 import liquibase.database.core.OracleDatabase;
 import liquibase.database.structure.*;
+import liquibase.database.typeconversion.TypeConverterFactory;
 import liquibase.diff.DiffStatusListener;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
@@ -163,10 +163,16 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
             return null;
         }
 
-        column.setName(columnName);
-        column.setDataType(rs.getInt("DATA_TYPE"));
-        column.setColumnSize(rs.getInt("COLUMN_SIZE"));
-        column.setDecimalDigits(rs.getInt("DECIMAL_DIGITS"));
+	    column.setName(columnName);
+	    column.setDataType(rs.getInt("DATA_TYPE"));
+	    column.setColumnSize(rs.getInt("COLUMN_SIZE"));
+	    column.setDecimalDigits(rs.getInt("DECIMAL_DIGITS"));
+
+	    column.setInitPrecision(
+			    !((column.getDataType() == Types.DECIMAL ||
+			       column.getDataType() == Types.NUMERIC ||
+			       column.getDataType() == Types.REAL) && rs.getString("DECIMAL_DIGITS") == null)
+	    );
 
         int nullable = rs.getInt("NULLABLE");
         if (nullable == DatabaseMetaData.columnNoNulls) {
@@ -498,7 +504,7 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
             ResultSet rs;
             Statement statement = null;
             if (database instanceof OracleDatabase) {
-                //oracle getIndexInfo is buggy and slow.  See Issue 1824548 and http://forums.oracle.com/forums/thread.jspa?messageID=578383&#578383  
+                //oracle getIndexInfo is buggy and slow.  See Issue 1824548 and http://forums.oracle.com/forums/thread.jspa?messageID=578383&#578383
                 statement = ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement();
                 String sql = "SELECT INDEX_NAME, 3 AS TYPE, TABLE_NAME, COLUMN_NAME, COLUMN_POSITION AS ORDINAL_POSITION, null AS FILTER_CONDITION FROM ALL_IND_COLUMNS WHERE TABLE_OWNER='" + database.convertRequestedSchemaToSchema(schema) + "' AND TABLE_NAME='" + table.getName() + "' ORDER BY INDEX_NAME, ORDINAL_POSITION";
                 rs = statement.executeQuery(sql);
@@ -576,21 +582,29 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
         }
 
         Set<Index> indexesToRemove = new HashSet<Index>();
-        //remove PK indexes
+
+	    /*
+	    * marks indexes as "associated with" instead of "remove it"
+	    * Index should have associations with:
+	    * foreignKey, primaryKey or uniqueConstraint
+	    * */
         for (Index index : snapshot.getIndexes()) {
             for (PrimaryKey pk : snapshot.getPrimaryKeys()) {
                 if (index.getTable().getName().equalsIgnoreCase(pk.getTable().getName()) && index.getColumnNames().equals(pk.getColumnNames())) {
-                    indexesToRemove.add(index);
+                    index.addAssociatedWith(Index.MARK_PRIMARY_KEY);
+//	                indexesToRemove.add(index);
                 }
             }
             for (ForeignKey fk : snapshot.getForeignKeys()) {
                 if (index.getTable().getName().equalsIgnoreCase(fk.getForeignKeyTable().getName()) && index.getColumnNames().equals(fk.getForeignKeyColumns())) {
-                    indexesToRemove.add(index);
+	                index.addAssociatedWith(Index.MARK_FOREIGN_KEY);
+//                    indexesToRemove.add(index);
                 }
             }
             for (UniqueConstraint uc : snapshot.getUniqueConstraints()) {
                 if (index.getTable().getName().equalsIgnoreCase(uc.getTable().getName()) && index.getColumnNames().equals(uc.getColumnNames())) {
-                    indexesToRemove.add(index);
+	                index.addAssociatedWith(Index.MARK_UNIQUE_CONSTRAINT);
+//                    indexesToRemove.add(index);
                 }
             }
 

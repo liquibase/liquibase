@@ -1,20 +1,13 @@
 package liquibase.database.structure;
 
+import liquibase.database.Database;
+import liquibase.database.core.*;
+import liquibase.logging.LogFactory;
+import liquibase.util.SqlUtil;
+
 import java.sql.Types;
 import java.util.Arrays;
 import java.util.List;
-
-import liquibase.database.Database;
-import liquibase.database.core.DerbyDatabase;
-import liquibase.database.core.H2Database;
-import liquibase.database.core.HsqlDatabase;
-import liquibase.database.core.InformixDatabase;
-import liquibase.database.core.MSSQLDatabase;
-import liquibase.database.core.MySQLDatabase;
-import liquibase.database.core.OracleDatabase;
-import liquibase.database.core.PostgresDatabase;
-import liquibase.logging.LogFactory;
-import liquibase.util.SqlUtil;
 
 public class Column implements DatabaseObject, Comparable<Column> {
     private Table table;
@@ -30,6 +23,9 @@ public class Column implements DatabaseObject, Comparable<Column> {
     private boolean autoIncrement = false;
     private boolean primaryKey = false;
     private boolean unique = false;
+	// indicates that data type need to initialize precision and scale
+	// i.e. NUMBER vs NUMBER(22,0)
+	private boolean initPrecision = true;
 
     private boolean certainDataType = true;
     private String remarks;
@@ -292,7 +288,10 @@ public class Column implements DatabaseObject, Comparable<Column> {
             } else if (database instanceof MSSQLDatabase && translatedTypeName.toLowerCase().contains("money")) {
                 dataType = translatedTypeName.toUpperCase();
             } else {
-                dataType = translatedTypeName+"("+this.getColumnSize()+","+this.getDecimalDigits()+")";
+	            dataType = translatedTypeName;
+	            if (initPrecision) {
+		            dataType += "(" + this.getColumnSize() + "," + this.getDecimalDigits() + ")";
+	            }
             }
         } else {
             LogFactory.getLogger().warning("Unknown Data Type: "+this.getDataType()+" ("+this.getTypeName()+").  Assuming it does not take parameters");
@@ -385,7 +384,15 @@ public class Column implements DatabaseObject, Comparable<Column> {
         return this;
     }
 
-    public LengthSemantics getLengthSemantics() {
+	public boolean isInitPrecision() {
+		return initPrecision;
+	}
+
+	public void setInitPrecision(boolean initPrecision) {
+		this.initPrecision = initPrecision;
+	}
+
+	public LengthSemantics getLengthSemantics() {
       return lengthSemantics;
     }
 

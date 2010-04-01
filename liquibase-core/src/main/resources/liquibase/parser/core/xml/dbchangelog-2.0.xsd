@@ -322,6 +322,7 @@
 	<xsd:attributeGroup name="createIndex">
 		<xsd:attributeGroup ref="tableNameAttribute" />
 		<xsd:attributeGroup ref="indexName" />
+		<xsd:attribute name="associatedWith" type="xsd:string" use="optional" />
 		<xsd:attribute name="unique" type="booleanExp" />
 	</xsd:attributeGroup>
 
