@@ -27,7 +27,7 @@ public class H2TypeConverterTest extends DefaultTypeConverterTest {
     
     @Test
     public void getUUIDType() {
-        assertEquals("VARCHAR(36)", new H2TypeConverter().getUUIDType().toString());
+        assertEquals("UUID", new H2TypeConverter().getUUIDType().toString());
     }
 
     
