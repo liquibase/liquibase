@@ -12,6 +12,7 @@ import liquibase.util.StringUtils;
 
 public class IndexExistsPrecondition implements Precondition {
     private String schemaName;
+    private String tableName;
     private String indexName;
 
     public String getSchemaName() {
@@ -20,6 +21,14 @@ public class IndexExistsPrecondition implements Precondition {
 
     public void setSchemaName(String schemaName) {
         this.schemaName = StringUtils.trimToNull(schemaName);
+    }
+
+    public String getTableName() {
+        return tableName;
+    }
+
+    public void setTableName(String tableName) {
+        this.tableName = tableName;
     }
 
     public String getIndexName() {
@@ -32,8 +41,13 @@ public class IndexExistsPrecondition implements Precondition {
 
     public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet) throws PreconditionFailedException, PreconditionErrorException {
         try {
-            if (!DatabaseSnapshotGeneratorFactory.getInstance().getGenerator(database).hasIndex(getSchemaName(), getIndexName(), database)) {
-                throw new PreconditionFailedException("Index "+database.escapeStringForDatabase(getIndexName())+" does not exist", changeLog, this);
+            if (!DatabaseSnapshotGeneratorFactory.getInstance().getGenerator(database).hasIndex(getSchemaName(), getTableName(), getIndexName(), database)) {
+                String name = "";
+                if (StringUtils.trimToNull(getTableName()) != null) {
+                    name += database.escapeStringForDatabase(getTableName())+".";
+                }
+                name += database.escapeStringForDatabase(getIndexName());
+                throw new PreconditionFailedException("Index "+ name +" does not exist", changeLog, this);
             }
         } catch (DatabaseException e) {
             throw new PreconditionErrorException(e, changeLog, this);
