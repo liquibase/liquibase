@@ -1,60 +1,12 @@
 package liquibase.diff;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.io.RandomAccessFile;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.SortedSet;
-import java.util.TreeSet;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-
 import liquibase.change.Change;
 import liquibase.change.ColumnConfig;
 import liquibase.change.ConstraintsConfig;
-import liquibase.change.core.AddColumnChange;
-import liquibase.change.core.AddForeignKeyConstraintChange;
-import liquibase.change.core.AddNotNullConstraintChange;
-import liquibase.change.core.AddPrimaryKeyChange;
-import liquibase.change.core.AddUniqueConstraintChange;
-import liquibase.change.core.CreateIndexChange;
-import liquibase.change.core.CreateSequenceChange;
-import liquibase.change.core.CreateTableChange;
-import liquibase.change.core.CreateViewChange;
-import liquibase.change.core.DropColumnChange;
-import liquibase.change.core.DropForeignKeyConstraintChange;
-import liquibase.change.core.DropIndexChange;
-import liquibase.change.core.DropNotNullConstraintChange;
-import liquibase.change.core.DropPrimaryKeyChange;
-import liquibase.change.core.DropSequenceChange;
-import liquibase.change.core.DropTableChange;
-import liquibase.change.core.DropUniqueConstraintChange;
-import liquibase.change.core.DropViewChange;
-import liquibase.change.core.InsertDataChange;
-import liquibase.change.core.LoadDataChange;
-import liquibase.change.core.LoadDataColumnConfig;
-import liquibase.change.core.ModifyDataTypeChange;
+import liquibase.change.core.*;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
-import liquibase.database.structure.Column;
-import liquibase.database.structure.ForeignKey;
-import liquibase.database.structure.Index;
-import liquibase.database.structure.PrimaryKey;
-import liquibase.database.structure.Sequence;
-import liquibase.database.structure.Table;
-import liquibase.database.structure.UniqueConstraint;
-import liquibase.database.structure.View;
+import liquibase.database.structure.*;
 import liquibase.database.typeconversion.TypeConverterFactory;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.ExecutorService;
@@ -69,9 +21,14 @@ import liquibase.util.StringUtils;
 import liquibase.util.csv.CSVWriter;
 import liquibase.util.xml.DefaultXmlWriter;
 import liquibase.util.xml.XmlWriter;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.*;
+import java.util.*;
 
 public class DiffResult {
 
@@ -590,6 +547,7 @@ public class DiffResult {
 			change.setSchemaName(index.getTable().getSchema());
 			change.setIndexName(index.getName());
 			change.setUnique(index.isUnique());
+			change.setAssociatedWith(index.getAssociatedWithAsString());
 
 			for (String columnName : index.getColumns()) {
 				ColumnConfig column = new ColumnConfig();
