@@ -1,10 +1,7 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
-import liquibase.database.core.DerbyDatabase;
-import liquibase.database.core.MSSQLDatabase;
-import liquibase.database.core.MySQLDatabase;
-import liquibase.database.core.OracleDatabase;
+import liquibase.database.core.*;
 import liquibase.database.structure.Index;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
@@ -37,7 +34,7 @@ public class DropIndexGenerator implements SqlGenerator<DropIndexStatement> {
     }
 
     public Sql[] generateSql(DropIndexStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        if (database instanceof DerbyDatabase) {
+        if (database instanceof DerbyDatabase || database instanceof H2Database || database instanceof HsqlDatabase) {
             List<String> associatedWith = StringUtils.splitAndTrim(statement.getAssociatedWith(), ",");
             if (associatedWith != null && (associatedWith.contains(Index.MARK_PRIMARY_KEY) || associatedWith.contains(Index.MARK_FOREIGN_KEY))) {
                 return new Sql[0];

@@ -406,7 +406,7 @@ public abstract class AbstractIntegrationTest {
                 throw e;
             }
 
-//            tempFile.deleteOnExit();
+            tempFile.deleteOnExit();
 
             DatabaseSnapshot migratedSnapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database, null, null);
 
