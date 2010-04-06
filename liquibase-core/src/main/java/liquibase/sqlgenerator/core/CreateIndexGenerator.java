@@ -44,9 +44,9 @@ public class CreateIndexGenerator implements SqlGenerator<CreateIndexStatement> 
 		    // Default filter of index creation:
 		    // creation of all indexes with associations are switched off.
 		    List<String> associatedWith = StringUtils.splitAndTrim(statement.getAssociatedWith(), ",");
-		    if (associatedWith.contains(Index.MARK_PRIMARY_KEY) ||
+		    if (associatedWith != null && (associatedWith.contains(Index.MARK_PRIMARY_KEY) ||
 		        associatedWith.contains(Index.MARK_UNIQUE_CONSTRAINT) ||
-				associatedWith.contains(Index.MARK_FOREIGN_KEY)) {
+				associatedWith.contains(Index.MARK_FOREIGN_KEY))) {
 			    return new Sql[0];
 		    }
 	    }

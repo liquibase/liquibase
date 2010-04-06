@@ -4,7 +4,7 @@ public class DropIndexStatementTest extends AbstractSqStatementTest<DropIndexSta
 
     @Override
     protected DropIndexStatement createStatementUnderTest() {
-        return new DropIndexStatement(null, null, null);
+        return new DropIndexStatement(null, null, null, null);
     }
 
 }

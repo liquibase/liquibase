@@ -15,6 +15,7 @@ public class DropIndexChange extends AbstractChange {
     private String schemaName;
     private String indexName;
     private String tableName;
+    private String associatedWith;
 
     public DropIndexChange() {
         super("dropIndex", "Drop Index", ChangeMetaData.PRIORITY_DEFAULT);
@@ -46,11 +47,19 @@ public class DropIndexChange extends AbstractChange {
 
     public SqlStatement[] generateStatements(Database database) {
         return new SqlStatement[] {
-            new DropIndexStatement(getIndexName(), getSchemaName() == null?database.getDefaultSchemaName():getSchemaName(), getTableName())
+            new DropIndexStatement(getIndexName(), getSchemaName() == null?database.getDefaultSchemaName():getSchemaName(), getTableName(), getAssociatedWith())
         };
     }
 
     public String getConfirmationMessage() {
         return "Index " + getIndexName() + " dropped from table " + getTableName();
+    }
+
+    public String getAssociatedWith() {
+        return associatedWith;
+    }
+
+    public void setAssociatedWith(String associatedWith) {
+        this.associatedWith = associatedWith;
     }
 }

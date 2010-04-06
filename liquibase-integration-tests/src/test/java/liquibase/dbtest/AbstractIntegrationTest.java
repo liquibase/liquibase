@@ -406,7 +406,7 @@ public abstract class AbstractIntegrationTest {
                 throw e;
             }
 
-            tempFile.deleteOnExit();
+//            tempFile.deleteOnExit();
 
             DatabaseSnapshot migratedSnapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database, null, null);
 
@@ -438,6 +438,7 @@ public abstract class AbstractIntegrationTest {
             }
 
             liquibase = createLiquibase(tempFile.getName());
+            System.out.println("updating from "+tempFile.getCanonicalPath());
             liquibase.update(this.contexts);
 
             DatabaseSnapshot emptyAgainSnapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database, null, null);

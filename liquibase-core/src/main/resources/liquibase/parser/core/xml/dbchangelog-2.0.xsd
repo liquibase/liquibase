@@ -944,6 +944,7 @@
 		<xsd:complexType>
 			<xsd:attributeGroup ref="tableNameAttribute" />
 			<xsd:attributeGroup ref="indexName" />
+            <xsd:attribute name="associatedWith" type="xsd:string" use="optional" />            
 		</xsd:complexType>
 	</xsd:element>
 

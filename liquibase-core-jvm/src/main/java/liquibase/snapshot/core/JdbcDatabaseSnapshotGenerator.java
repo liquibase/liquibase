@@ -603,19 +603,16 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
             for (PrimaryKey pk : snapshot.getPrimaryKeys()) {
                 if (index.getTable().getName().equalsIgnoreCase(pk.getTable().getName()) && index.getColumnNames().equals(pk.getColumnNames())) {
                     index.addAssociatedWith(Index.MARK_PRIMARY_KEY);
-//	                indexesToRemove.add(index);
                 }
             }
             for (ForeignKey fk : snapshot.getForeignKeys()) {
                 if (index.getTable().getName().equalsIgnoreCase(fk.getForeignKeyTable().getName()) && index.getColumnNames().equals(fk.getForeignKeyColumns())) {
 	                index.addAssociatedWith(Index.MARK_FOREIGN_KEY);
-//                    indexesToRemove.add(index);
                 }
             }
             for (UniqueConstraint uc : snapshot.getUniqueConstraints()) {
                 if (index.getTable().getName().equalsIgnoreCase(uc.getTable().getName()) && index.getColumnNames().equals(uc.getColumnNames())) {
 	                index.addAssociatedWith(Index.MARK_UNIQUE_CONSTRAINT);
-//                    indexesToRemove.add(index);
                 }
             }
 
