@@ -164,26 +164,19 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
         }
 
 	    column.setName(columnName);
-	    column.setDataType(rs.getInt("DATA_TYPE"));
-	    column.setColumnSize(rs.getInt("COLUMN_SIZE"));
-	    column.setDecimalDigits(rs.getInt("DECIMAL_DIGITS"));
 
-	    column.setInitPrecision(
-			    !((column.getDataType() == Types.DECIMAL ||
-			       column.getDataType() == Types.NUMERIC ||
-			       column.getDataType() == Types.REAL) && rs.getString("DECIMAL_DIGITS") == null)
-	    );
+	    Table table = new Table(tableName);
+        table.setSchema(schemaName);
+        column.setTable(table);
 
-        int nullable = rs.getInt("NULLABLE");
+	    configureColumnType(column, rs);
+
+	    int nullable = rs.getInt("NULLABLE");
         if (nullable == DatabaseMetaData.columnNoNulls) {
             column.setNullable(false);
         } else if (nullable == DatabaseMetaData.columnNullable) {
             column.setNullable(true);
         }
-
-        Table table = new Table(tableName);
-        table.setSchema(schemaName);
-        column.setTable(table);
 
         getColumnTypeAndDefValue(column, rs, database);
         column.setRemarks(remarks);
@@ -191,7 +184,26 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
         return column;
     }
 
-    public DatabaseSnapshot createSnapshot(Database database, String requestedSchema, Set<DiffStatusListener> listeners) throws DatabaseException {
+	/**
+	 * Configuration of column's type.
+	 * @param column Column to configure
+	 * @param rs Result set, used as a property resource.
+	 * @throws java.sql.SQLException wrong Result Set content 
+	 * */
+	protected void configureColumnType(Column column, ResultSet rs) throws SQLException {
+		column.setDataType(rs.getInt("DATA_TYPE"));
+		column.setColumnSize(rs.getInt("COLUMN_SIZE"));
+		column.setDecimalDigits(rs.getInt("DECIMAL_DIGITS"));
+
+		// Set true, if precision should be initialize
+		column.setInitPrecision(
+				!((column.getDataType() == Types.DECIMAL ||
+				   column.getDataType() == Types.NUMERIC ||
+				   column.getDataType() == Types.REAL) && rs.getString("DECIMAL_DIGITS") == null)
+		);
+	}
+
+	public DatabaseSnapshot createSnapshot(Database database, String requestedSchema, Set<DiffStatusListener> listeners) throws DatabaseException {
 
         if (requestedSchema == null) {
             requestedSchema = database.getDefaultSchemaName();
@@ -289,8 +301,8 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
         Database database = snapshot.getDatabase();
         updateListeners("Reading columns for " + database.toString() + " ...");
 
-        Statement selectStatement = ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement();
-        ResultSet rs = databaseMetaData.getColumns(database.convertRequestedSchemaToCatalog(schema), database.convertRequestedSchemaToSchema(schema), null, null);
+	    Statement selectStatement = ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement();
+	    ResultSet rs = databaseMetaData.getColumns(database.convertRequestedSchemaToCatalog(schema), database.convertRequestedSchemaToSchema(schema), null, null);
         while (rs.next()) {
             Column column = readColumn(rs, database);
 
@@ -352,7 +364,6 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
             throw new DatabaseException(e);
         }
         columnInfo.setTypeName(TypeConverterFactory.getInstance().findTypeConverter(database).getDataType(rs.getString("TYPE_NAME"), columnInfo.isAutoIncrement()).toString());
-
     } // end of method getColumnTypeAndDefValue()
 
     protected void readForeignKeyInformation(DatabaseSnapshot snapshot, String schema, DatabaseMetaData databaseMetaData) throws DatabaseException, SQLException {

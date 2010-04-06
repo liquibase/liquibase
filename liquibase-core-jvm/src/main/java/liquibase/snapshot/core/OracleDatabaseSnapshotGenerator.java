@@ -8,12 +8,16 @@ import liquibase.database.structure.Table;
 import liquibase.database.structure.UniqueConstraint;
 import liquibase.exception.DatabaseException;
 import liquibase.snapshot.DatabaseSnapshot;
+import liquibase.util.JdbcUtils;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class OracleDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerator {
+
+	private List<String> integerList = new ArrayList<String>();
+
 	public boolean supports(Database database) {
 		return database instanceof OracleDatabase;
 	}
@@ -36,6 +40,13 @@ public class OracleDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
 	@Override
 	protected void getColumnTypeAndDefValue(Column columnInfo, ResultSet rs, Database database) throws SQLException, DatabaseException {
 		super.getColumnTypeAndDefValue(columnInfo, rs, database);
+
+		// Exclusive setting for oracle INTEGER type
+		// Details:
+		// INTEGER means NUMBER type with 'data_precision IS NULL and scale = 0' 
+		if (columnInfo.getDataType() == Types.INTEGER) {
+			columnInfo.setTypeName("INTEGER");
+		}
 
 		String columnTypeName = rs.getString("TYPE_NAME");
 		if ("VARCHAR2".equals(columnTypeName)) {
@@ -117,5 +128,50 @@ public class OracleDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
 			if (stmt != null)
 				stmt.close();
 		}
+	}
+
+	protected void readColumns(DatabaseSnapshot snapshot, String schema, DatabaseMetaData databaseMetaData) throws SQLException, DatabaseException {
+		findIntegerColumns(snapshot);
+		super.readColumns(snapshot, schema, databaseMetaData);
+	}
+
+	/**
+	*  Method finds all INTEGER columns in snapshot's database
+	*
+	 * @param snapshot current database snapshot
+	 * @throws java.sql.SQLException execute statement error
+	 * @return String list with names of all INTEGER columns
+	 * */
+	private List<String> findIntegerColumns(DatabaseSnapshot snapshot) throws SQLException {
+		Database database = snapshot.getDatabase();
+		Statement statement = ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement();
+
+		// Finding all columns created as 'INTEGER'
+		ResultSet integerListRS = statement.executeQuery("select * from user_tab_columns where data_precision is null and data_scale = 0 and data_type = 'NUMBER'");
+		while (integerListRS.next()) {
+			integerList.add(integerListRS.getString("TABLE_NAME") + "." + integerListRS.getString("COLUMN_NAME"));
+		}
+
+		JdbcUtils.closeResultSet(integerListRS);
+		JdbcUtils.closeStatement(statement);
+
+		return integerList;
+	}
+
+	protected void configureColumnType(Column column, ResultSet rs) throws SQLException {
+		if (integerList.contains(column.getTable().getName() + "." + column.getName())) {
+		    column.setDataType(Types.INTEGER);
+	    } else {
+		    column.setDataType(rs.getInt("DATA_TYPE"));
+	    }
+		column.setColumnSize(rs.getInt("COLUMN_SIZE"));
+		column.setDecimalDigits(rs.getInt("DECIMAL_DIGITS"));
+
+		// Set true, if precision should be initialize
+		column.setInitPrecision(
+				!((column.getDataType() == Types.DECIMAL ||
+				   column.getDataType() == Types.NUMERIC ||
+				   column.getDataType() == Types.REAL) && rs.getString("DECIMAL_DIGITS") == null)
+		);
 	}
 }
