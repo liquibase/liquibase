@@ -1,20 +1,19 @@
 package liquibase.database.typeconversion.core;
 
-import liquibase.database.typeconversion.TypeConverter;
+import liquibase.change.ColumnConfig;
 import liquibase.database.Database;
 import liquibase.database.structure.type.*;
-import liquibase.statement.DatabaseFunction;
-import liquibase.util.StringUtils;
-import liquibase.logging.LogFactory;
+import liquibase.database.typeconversion.TypeConverter;
 import liquibase.exception.DateParseException;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.change.ColumnConfig;
+import liquibase.logging.LogFactory;
+import liquibase.statement.DatabaseFunction;
+import liquibase.util.StringUtils;
 
 import java.math.BigDecimal;
-import java.text.ParseException;
-import java.util.List;
-import java.sql.Types;
 import java.math.BigInteger;
+import java.sql.Types;
+import java.text.ParseException;
 
 public abstract class AbstractTypeConverter implements TypeConverter {
 
@@ -230,7 +229,7 @@ public abstract class AbstractTypeConverter implements TypeConverter {
          return returnTypeName;
     }
 
-    // Get the type from the Connection MetaData (use the MetaData to translate from java.sql.Types to DB-specific type)
+	// Get the type from the Connection MetaData (use the MetaData to translate from java.sql.Types to DB-specific type)
     private DataType getTypeFromMetaData(final String dataTypeName) {
         return null;
 //        return new DataType(dataTypeName, false);

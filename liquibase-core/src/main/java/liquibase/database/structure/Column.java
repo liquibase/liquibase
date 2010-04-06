@@ -268,7 +268,7 @@ public class Column implements DatabaseObject, Comparable<Column> {
 
         String dataType;
         if (noParens.contains(this.getDataType())) {
-            dataType = translatedTypeName;
+	        dataType = translatedTypeName;
         } else if (oneParam.contains(this.getDataType())) {
             if (database instanceof PostgresDatabase && translatedTypeName.equalsIgnoreCase("TEXT")) {
                 return translatedTypeName;
