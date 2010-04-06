@@ -7,11 +7,13 @@ public class DropIndexStatement implements SqlStatement {
     private String indexName;
     private String tableSchemaName;
     private String tableName;
+    private String associatedWith;
 
-    public DropIndexStatement(String indexName, String tableSchemaName, String tableName) {
+    public DropIndexStatement(String indexName, String tableSchemaName, String tableName, String associatedWith) {
         this.tableSchemaName = tableSchemaName;
         this.indexName = indexName;
         this.tableName = tableName;
+        this.associatedWith = associatedWith;
     }
 
     public String getTableSchemaName() {
@@ -24,5 +26,13 @@ public class DropIndexStatement implements SqlStatement {
 
     public String getTableName() {
         return tableName;
+    }
+
+    public String getAssociatedWith() {
+        return associatedWith;
+    }
+
+    public void setAssociatedWith(String associatedWith) {
+        this.associatedWith = associatedWith;
     }
 }

@@ -534,6 +534,7 @@ public class DiffResult {
 			change.setTableName(index.getTable().getName());
 			change.setSchemaName(index.getTable().getSchema());
 			change.setIndexName(index.getName());
+            change.setAssociatedWith(index.getAssociatedWithAsString());
 
 			changes.add(generateChangeSet(change));
 		}
