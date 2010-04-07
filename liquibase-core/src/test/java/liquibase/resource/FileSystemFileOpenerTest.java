@@ -46,4 +46,21 @@ public class FileSystemFileOpenerTest {
         }
         assertTrue(found);
     }
+    
+    @Test
+    public void ahphabeticalOrderTest() throws IOException {
+    	Enumeration<URL> files = opener.getResources(".");
+    	boolean correct = false;
+    	String lastFile = null;
+        while(files.hasMoreElements()) {
+            URL u = files.nextElement();
+            String currentFile = u.getFile().substring(u.getFile().lastIndexOf("/") + 1);
+            if (lastFile != null) {
+            	correct |= lastFile.compareTo(currentFile) < 0;
+            }
+            lastFile = currentFile;
+        }
+        
+    	assertTrue(correct);
+    }
 }
