@@ -264,11 +264,11 @@ public abstract class SqlDatabaseSnapshot implements DatabaseSnapshot {
             if (table == null) {
                 View view = viewsMap.get(tableName);
                 if (view == null) {
-                    log.info("Could not find table or view " + tableName + " for column " + columnName);
+                    // Not a table or view column. It's probably an index or primary key column, so ignore it.
                     continue;
                 } else {
                     columnInfo.setView(view);
-	            columnInfo.setAutoIncrement(false);
+                    columnInfo.setAutoIncrement(false);
                     view.getColumns().add(columnInfo);
                 }
             } else {
