@@ -67,7 +67,10 @@ public class OracleDatabase extends AbstractDatabase {
     }
 
     public String getCurrentDateTimeFunction() {
-        return "SYSDATE";
+        if (currentDateTimeFunction != null) {
+            return currentDateTimeFunction;
+        }
+        return "CURRENT_TIMESTAMP";
     }
 
     @Override

@@ -29,6 +29,10 @@ public class SQLiteDatabase extends AbstractDatabase {
     public static final String PRODUCT_NAME = "SQLite";
 
     public String getCurrentDateTimeFunction() {
+        if (currentDateTimeFunction != null) {
+            return currentDateTimeFunction;
+        }
+        
         return "CURRENT_TIMESTAMP";
     }
 
