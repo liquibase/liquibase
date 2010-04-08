@@ -10,6 +10,10 @@ public class CacheDatabase extends AbstractDatabase {
 
 
     public String getCurrentDateTimeFunction() {
+        if (currentDateTimeFunction != null) {
+            return currentDateTimeFunction;
+        }
+
         return "SYSDATE";
     }
 

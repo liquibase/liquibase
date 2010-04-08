@@ -97,6 +97,10 @@ public class SybaseDatabase extends AbstractDatabase {
     }
 
     public String getCurrentDateTimeFunction() {
+        if (currentDateTimeFunction != null) {
+            return currentDateTimeFunction;
+        }
+        
         return "GETDATE()";
     }
 

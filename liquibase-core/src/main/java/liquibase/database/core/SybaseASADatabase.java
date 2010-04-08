@@ -128,6 +128,10 @@ public class SybaseASADatabase extends AbstractDatabase {
 	 * @see liquibase.database.Database#getCurrentDateTimeFunction()
 	 */
 	public String getCurrentDateTimeFunction() {
+        if (currentDateTimeFunction != null) {
+            return currentDateTimeFunction;
+        }
+        
 		return "now()";
 	}
 

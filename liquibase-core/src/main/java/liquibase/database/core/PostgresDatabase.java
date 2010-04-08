@@ -108,6 +108,10 @@ public class PostgresDatabase extends AbstractDatabase {
     }
 
     public String getCurrentDateTimeFunction() {
+        if (currentDateTimeFunction != null) {
+            return currentDateTimeFunction;
+        }
+        
         return "NOW()";
     }
 

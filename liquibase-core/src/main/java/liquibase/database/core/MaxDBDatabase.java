@@ -115,6 +115,10 @@ public class MaxDBDatabase extends AbstractDatabase {
     }
 
     public String getCurrentDateTimeFunction() {
+        if (currentDateTimeFunction != null) {
+            return currentDateTimeFunction;
+        }
+        
         return "TIMESTAMP";
     }
 

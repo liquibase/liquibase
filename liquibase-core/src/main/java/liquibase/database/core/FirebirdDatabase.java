@@ -40,6 +40,10 @@ public class FirebirdDatabase extends AbstractDatabase {
     }
 
     public String getCurrentDateTimeFunction() {
+        if (currentDateTimeFunction != null) {
+            return currentDateTimeFunction;
+        }
+
         return "CURRENT_TIMESTAMP";
     }
 
