@@ -4,8 +4,8 @@ import liquibase.database.Database;
 import liquibase.database.core.OracleDatabase;
 import liquibase.database.structure.type.*;
 
-import java.text.ParseException;
 import java.sql.Types;
+import java.text.ParseException;
 
 public class OracleTypeConverter extends AbstractTypeConverter {
 
@@ -79,6 +79,18 @@ public class OracleTypeConverter extends AbstractTypeConverter {
 		return super.convertDatabaseValueToObject(defaultValue, dataType, columnSize, decimalDigits, database);
 	}
 
+	protected Object convertToCorrectObjectType(String value, int dataType, int columnSize, int decimalDigits, Database database) throws ParseException {
+		Object returnValue = super.convertToCorrectObjectType(value, dataType, columnSize, decimalDigits, database);
+		// I'll do it lately.
+		// It needs to design and create Database Function Dictionary first.
+		/*if (dataType == Types.BLOB || dataType == Types.TIMESTAMP) {
+			if (database.containsDatabaseFunction(value)) {
+				returnValue = value;
+			}
+		}*/
+		return returnValue;
+	}
+
 	@Override
 	public BooleanType getBooleanType() {
 		return new BooleanType.NumericBooleanType("NUMBER(1)");
@@ -111,7 +123,7 @@ public class OracleTypeConverter extends AbstractTypeConverter {
 
 	@Override
 	public IntType getIntType() {
-		return new IntType("NUMBER(10,0)");
+		return new IntType("INTEGER");
 	}
 
 	@Override
