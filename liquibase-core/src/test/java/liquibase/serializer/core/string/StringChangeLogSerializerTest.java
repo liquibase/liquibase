@@ -8,7 +8,6 @@ import liquibase.change.custom.ExampleCustomSqlChange;
 import liquibase.logging.Logger;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.ResourceAccessor;
-import liquibase.test.JUnitResourceAccessor;
 import liquibase.statement.DatabaseFunction;
 import static org.junit.Assert.*;
 import org.junit.Test;
@@ -116,6 +115,7 @@ public class StringChangeLogSerializerTest {
         change.setConstraintName("FK_TEST");
         change.setDeferrable(true);
         change.setInitiallyDeferred(true);
+	    change.setReferencedToPrimary(true);
         change.setDeleteCascade(true);
         change.setOnDelete("SET NULL");
         change.setOnUpdate("NO ACTION");
@@ -135,6 +135,7 @@ public class StringChangeLogSerializerTest {
                 "    referencedColumnNames=\"COLA, COLB\"\n" +
                 "    referencedTableName=\"REF_TABLE\"\n" +
                 "    referencedTableSchemaName=\"REF_SCHEM\"\n" +
+                "    referencedToPrimary=\"true\"\n" +
                 "]", new StringChangeLogSerializer().serialize(change));
 
     }

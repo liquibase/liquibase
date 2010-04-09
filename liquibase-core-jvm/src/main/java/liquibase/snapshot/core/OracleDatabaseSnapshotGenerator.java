@@ -3,9 +3,7 @@ package liquibase.snapshot.core;
 import liquibase.database.Database;
 import liquibase.database.JdbcConnection;
 import liquibase.database.core.OracleDatabase;
-import liquibase.database.structure.Column;
-import liquibase.database.structure.Table;
-import liquibase.database.structure.UniqueConstraint;
+import liquibase.database.structure.*;
 import liquibase.exception.DatabaseException;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.util.JdbcUtils;
@@ -173,5 +171,41 @@ public class OracleDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
 				   column.getDataType() == Types.NUMERIC ||
 				   column.getDataType() == Types.REAL) && rs.getString("DECIMAL_DIGITS") == null)
 		);
+	}
+
+	public List<ForeignKey> getAdditionalForeignKeys(String schemaName, Database database) throws DatabaseException {
+		List<ForeignKey> foreignKeys = super.getAdditionalForeignKeys(schemaName, database);
+
+		// Create SQL statement to select all FKs in database which referenced to unique columns
+		String query = "select uc_fk.constraint_name FK_NAME,uc_fk.owner FKTABLE_SCHEM,ucc_fk.table_name FKTABLE_NAME,ucc_fk.column_name FKCOLUMN_NAME,decode(uc_fk.deferrable, 'DEFERRABLE', 5 ,'NOT DEFERRABLE', 7 , 'DEFERRED', 6 ) DEFERRABILITY, decode(uc_fk.delete_rule, 'CASCADE', 0,'NO ACTION', 3) DELETE_RULE,ucc_rf.table_name PKTABLE_NAME,ucc_rf.column_name PKCOLUMN_NAME from user_cons_columns ucc_fk,user_constraints uc_fk,user_cons_columns ucc_rf,user_constraints uc_rf where uc_fk.CONSTRAINT_NAME = ucc_fk.CONSTRAINT_NAME and uc_fk.constraint_type='R' and uc_fk.r_constraint_name=ucc_rf.CONSTRAINT_NAME and uc_rf.constraint_name = ucc_rf.constraint_name and uc_rf.constraint_type = 'U'";
+		try {
+			Statement statement = ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement();
+			ResultSet rs = statement.executeQuery(query);
+			while (rs.next()) {
+				ForeignKeyInfo fkInfo = new ForeignKeyInfo();
+				// marks FK as referenced on unique column
+				fkInfo.setReferencedToPrimary(false);
+				fkInfo.setFkName(convertFromDatabaseName(rs.getString("FK_NAME")));
+				fkInfo.setFkSchema(convertFromDatabaseName(rs.getString("FKTABLE_SCHEM")));
+				fkInfo.setFkTableName(convertFromDatabaseName(rs.getString("FKTABLE_NAME")));
+				fkInfo.setFkColumn(convertFromDatabaseName(rs.getString("FKCOLUMN_NAME")));
+
+				fkInfo.setPkTableName(convertFromDatabaseName(rs.getString("PKTABLE_NAME")));
+				fkInfo.setPkColumn(convertFromDatabaseName(rs.getString("PKCOLUMN_NAME")));
+
+				fkInfo.setDeferrablility(rs.getShort("DEFERRABILITY"));
+				ForeignKeyConstraintType deleteRule = convertToForeignKeyConstraintType(rs.getInt("DELETE_RULE"));
+	            if (rs.wasNull()) {
+		            deleteRule = null;
+	            }
+				fkInfo.setDeleteRule(deleteRule);
+				foreignKeys.add(generateForeignKey(fkInfo, database, foreignKeys));
+			}
+			JdbcUtils.closeResultSet(rs);
+			JdbcUtils.closeStatement(statement);
+		} catch (SQLException e) {
+			throw new DatabaseException("Can't execute selection query to generate list of foreign keys", e);
+		}
+		return foreignKeys;
 	}
 }
