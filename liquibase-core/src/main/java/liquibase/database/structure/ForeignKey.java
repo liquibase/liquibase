@@ -14,6 +14,10 @@ public class ForeignKey implements DatabaseObject, Comparable<ForeignKey> {
     private boolean deferrable;
     private boolean initiallyDeferred;
 
+	// Some databases supports creation of FK with referention to column marked as unique, not primary
+	// If FK referenced to such unique column this option should be set to false
+	private boolean referencedToPrimary = true;
+
     private ForeignKeyConstraintType updateRule;
     private ForeignKeyConstraintType deleteRule;
 
@@ -129,6 +133,14 @@ public class ForeignKey implements DatabaseObject, Comparable<ForeignKey> {
         return this.deleteRule;
     }
 
+	public boolean isReferencedToPrimary() {
+		return referencedToPrimary;
+	}
+
+	public void setReferencedToPrimary(boolean referencedToPrimary) {
+		this.referencedToPrimary = referencedToPrimary;
+	}
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -143,8 +155,8 @@ public class ForeignKey implements DatabaseObject, Comparable<ForeignKey> {
         return getForeignKeyColumns().equalsIgnoreCase(that.getForeignKeyColumns())
                 && foreignKeyTable.equals(that.foreignKeyTable)
                 && getPrimaryKeyColumns().equalsIgnoreCase(that.getPrimaryKeyColumns())
-                && primaryKeyTable.equals(that.primaryKeyTable);
-
+                && primaryKeyTable.equals(that.primaryKeyTable)
+		        && referencedToPrimary == that.isReferencedToPrimary();
     }
 
     @Override

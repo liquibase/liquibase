@@ -370,24 +370,30 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
         Database database = snapshot.getDatabase();
         updateListeners("Reading foreign keys for " + database.toString() + " ...");
 
-        for (Table table : snapshot.getTables()) {
-            for (ForeignKey fk : getForeignKeys(schema, table.getName(), snapshot.getDatabase())) {
+	    String dbSchema = database.convertRequestedSchemaToSchema(schema);
+	    // First we try to find all database-specific FKs.
+	    // TODO: there are some filters bellow in for loop. Are they needed here too?
+	    snapshot.getForeignKeys().addAll(getAdditionalForeignKeys(dbSchema, database));
 
-                Table tempPKTable = fk.getPrimaryKeyTable();
-                Table pkTable = snapshot.getTable(tempPKTable.getName());
-                if (pkTable == null) {
-                    LogFactory.getLogger().warning("Foreign key " + fk.getName() + " references table " + tempPKTable + ", which we cannot find.  Ignoring.");
-                    continue;
-                }
+        // Then tries to find all other standard FKs
+	    for (Table table : snapshot.getTables()) {
+	        for (ForeignKey fk : getForeignKeys(schema, table.getName(), snapshot.getDatabase())) {
 
-                Table tempFkTable = fk.getForeignKeyTable();
-                Table fkTable = snapshot.getTable(tempFkTable.getName());
-                if (fkTable == null) {
-                    LogFactory.getLogger().warning("Foreign key " + fk.getName() + " is in table " + tempFkTable + ", which is in a different schema.  Retaining FK in diff, but table will not be diffed.");
-                }
+		        Table tempPKTable = fk.getPrimaryKeyTable();
+		        Table pkTable = snapshot.getTable(tempPKTable.getName());
+		        if (pkTable == null) {
+			        LogFactory.getLogger().warning("Foreign key " + fk.getName() + " references table " + tempPKTable + ", which we cannot find.  Ignoring.");
+			        continue;
+		        }
 
-                snapshot.getForeignKeys().add(fk);
-            }
+		        Table tempFkTable = fk.getForeignKeyTable();
+		        Table fkTable = snapshot.getTable(tempFkTable.getName());
+		        if (fkTable == null) {
+			        LogFactory.getLogger().warning("Foreign key " + fk.getName() + " is in table " + tempFkTable + ", which is in a different schema.  Retaining FK in diff, but table will not be diffed.");
+		        }
+
+		        snapshot.getForeignKeys().add(fk);
+	        }
         }
     }
 
@@ -405,80 +411,114 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
         return null;
     }
 
-    public List<ForeignKey> getForeignKeys(String schemaName, String foreignKeyTableName, Database database) throws DatabaseException {
+	/**
+	 * Generation of Foreign Key based on information about it.
+	 *
+	 * @param fkInfo contains all needed properties of FK
+	 * @param database current database
+	 * @param fkList list of already generated keys
+	 * @return generated Foreing Key
+	 * @throws liquibase.exception.DatabaseException Database Exception
+	 * */
+	public ForeignKey generateForeignKey(ForeignKeyInfo fkInfo, Database database, List<ForeignKey> fkList) throws DatabaseException {
+		//Simple (non-composite) keys have KEY_SEQ=1, so create the ForeignKey.
+		//In case of subsequent parts of composite keys (KEY_SEQ>1) don't create new instance, just reuse the one from previous call.
+		//According to #getExportedKeys() contract, the result set rows are properly sorted, so the reuse of previous FK instance is safe.
+		ForeignKey foreignKey = null;
+
+		if (fkInfo.getKeySeq() == 1 || (!fkInfo.isReferencedToPrimary() && fkInfo.getKeySeq() == 0)) {
+			foreignKey = new ForeignKey();
+		} else {
+			for (ForeignKey foundFK : fkList) {
+				if (foundFK.getName().equalsIgnoreCase(fkInfo.getFkName())) {
+					foreignKey = foundFK;
+				}
+			}
+			if (foreignKey == null) {
+				throw new DatabaseException("Database returned out of sequence foreign key column for " + fkInfo.getFkName());
+			}
+		}
+
+		foreignKey.setName(fkInfo.getFkName());
+
+		foreignKey.setPrimaryKeyTable(new Table(fkInfo.getPkTableName()));
+		foreignKey.addPrimaryKeyColumn(fkInfo.getPkColumn());
+
+		Table fkTable = new Table(fkInfo.getFkTableName());
+		fkTable.setSchema(fkInfo.getFkSchema());
+		foreignKey.setForeignKeyTable(fkTable);
+		foreignKey.addForeignKeyColumn(fkInfo.getFkColumn());
+
+		foreignKey.setUpdateRule(fkInfo.getUpdateRule());
+		foreignKey.setDeleteRule(fkInfo.getDeleteRule());
+
+		foreignKey.setReferencedToPrimary(fkInfo.isReferencedToPrimary());
+
+		if (database.supportsInitiallyDeferrableColumns()) {
+
+			if (fkInfo.getDeferrablility() == DatabaseMetaData.importedKeyInitiallyDeferred) {
+				foreignKey.setDeferrable(Boolean.TRUE);
+				foreignKey.setInitiallyDeferred(Boolean.TRUE);
+			} else if (fkInfo.getDeferrablility() == DatabaseMetaData.importedKeyInitiallyImmediate) {
+				foreignKey.setDeferrable(Boolean.TRUE);
+				foreignKey.setInitiallyDeferred(Boolean.FALSE);
+			} else if (fkInfo.getDeferrablility() == DatabaseMetaData.importedKeyNotDeferrable) {
+				foreignKey.setDeferrable(Boolean.FALSE);
+				foreignKey.setInitiallyDeferred(Boolean.FALSE);
+			}
+		}
+
+		return foreignKey;
+	}
+
+	/**
+	 * It finds <u>only</u> all database-specific Foreign Keys.
+	 * By default it returns an empty ArrayList.
+	 * @param schemaName current shemaName
+	 * @param database current database
+	 * @return list of database-specific Foreing Keys
+	 * @throws liquibase.exception.DatabaseException any kinds of SQLException errors
+	 * */
+	public List<ForeignKey> getAdditionalForeignKeys(String schemaName, Database database) throws DatabaseException{
+		return new ArrayList<ForeignKey>();
+	}
+
+	public List<ForeignKey> getForeignKeys(String schemaName, String foreignKeyTableName, Database database) throws DatabaseException {
         List<ForeignKey> fkList = new ArrayList<ForeignKey>();
-        try {
+		try {
             String dbCatalog = database.convertRequestedSchemaToCatalog(schemaName);
             String dbSchema = database.convertRequestedSchemaToSchema(schemaName);
             ResultSet rs = getMetaData(database).getImportedKeys(dbCatalog, dbSchema, convertTableNameToDatabaseTableName(foreignKeyTableName));
 
             while (rs.next()) {
-                String fkName = convertFromDatabaseName(rs.getString("FK_NAME"));
+	            ForeignKeyInfo fkInfo = new ForeignKeyInfo();
 
-                String pkTableName = convertFromDatabaseName(rs.getString("PKTABLE_NAME"));
-                String pkColumn = convertFromDatabaseName(rs.getString("PKCOLUMN_NAME"));
+	            fkInfo.setFkName(convertFromDatabaseName(rs.getString("FK_NAME")));
+	            fkInfo.setFkSchema(convertFromDatabaseName(rs.getString("FKTABLE_SCHEM")));
+	            fkInfo.setFkTableName(convertFromDatabaseName(rs.getString("FKTABLE_NAME")));
+	            fkInfo.setFkColumn(convertFromDatabaseName(rs.getString("FKCOLUMN_NAME")));
 
+                fkInfo.setPkTableName(convertFromDatabaseName(rs.getString("PKTABLE_NAME")));
+                fkInfo.setPkColumn(convertFromDatabaseName(rs.getString("PKCOLUMN_NAME")));
 
-                int keySeq = rs.getInt("KEY_SEQ");
-                //Simple (non-composite) keys have KEY_SEQ=1, so create the ForeignKey.
-                //In case of subsequent parts of composite keys (KEY_SEQ>1) don't create new instance, just reuse the one from previous call.
-                //According to #getExportedKeys() contract, the result set rows are properly sorted, so the reuse of previous FK instance is safe.
-                ForeignKey fkInfo = null;
-                if (keySeq == 1) {
-                    fkInfo = new ForeignKey();
-                } else {
-                    for (ForeignKey foundFK : fkList) {
-                        if (foundFK.getName().equalsIgnoreCase(fkName)) {
-                            fkInfo = foundFK;
-                        }
-                    }
-                    if (fkInfo == null) {
-                        throw new DatabaseException("Database returned out of sequence foreign key column for "+fkName);
-                    }
-                }
+                fkInfo.setKeySeq(rs.getInt("KEY_SEQ"));
 
-                fkInfo.setPrimaryKeyTable(new Table(pkTableName));
-                fkInfo.addPrimaryKeyColumn(pkColumn);
+                ForeignKeyConstraintType updateRule = convertToForeignKeyConstraintType(rs.getInt("UPDATE_RULE"));
+	            if (rs.wasNull()) {
+		            updateRule = null;
+	            }
+	            fkInfo.setUpdateRule(updateRule);
 
-                String fkTableName = convertFromDatabaseName(rs.getString("FKTABLE_NAME"));
-                String fkSchema = convertFromDatabaseName(rs.getString("FKTABLE_SCHEM"));
-                String fkColumn = convertFromDatabaseName(rs.getString("FKCOLUMN_NAME"));
-                Table fkTable = new Table(fkTableName);
-                fkTable.setSchema(fkSchema);
-                fkInfo.setForeignKeyTable(fkTable);
-                fkInfo.addForeignKeyColumn(fkColumn);
+	            ForeignKeyConstraintType deleteRule = convertToForeignKeyConstraintType(rs.getInt("DELETE_RULE"));
+	            if (rs.wasNull()) {
+		            deleteRule = null;
+	            }
+	            fkInfo.setDeleteRule(deleteRule);
 
-                fkInfo.setName(fkName);
+	            fkInfo.setDeferrablility(rs.getShort("DEFERRABILITY"));
 
-                ForeignKeyConstraintType updateRule, deleteRule;
-                updateRule = convertToForeignKeyConstraintType(rs.getInt("UPDATE_RULE"));
-                if (rs.wasNull()) {
-                    updateRule = null;
-                }
-                deleteRule = convertToForeignKeyConstraintType(rs.getInt("DELETE_RULE"));
-                if (rs.wasNull()) {
-                    deleteRule = null;
-                }
-                fkInfo.setUpdateRule(updateRule);
-                fkInfo.setDeleteRule(deleteRule);
-
-                if (database.supportsInitiallyDeferrableColumns()) {
-                    short deferrablility = rs.getShort("DEFERRABILITY");
-                    if (deferrablility == DatabaseMetaData.importedKeyInitiallyDeferred) {
-                        fkInfo.setDeferrable(Boolean.TRUE);
-                        fkInfo.setInitiallyDeferred(Boolean.TRUE);
-                    } else if (deferrablility == DatabaseMetaData.importedKeyInitiallyImmediate) {
-                        fkInfo.setDeferrable(Boolean.TRUE);
-                        fkInfo.setInitiallyDeferred(Boolean.FALSE);
-                    } else if (deferrablility == DatabaseMetaData.importedKeyNotDeferrable) {
-                        fkInfo.setDeferrable(Boolean.FALSE);
-                        fkInfo.setInitiallyDeferred(Boolean.FALSE);
-                    }
-                }
-
-                fkList.add(fkInfo);
+                fkList.add(generateForeignKey(fkInfo, database, fkList));
             }
-
 
             rs.close();
 
@@ -487,7 +527,6 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
         } catch (Exception e) {
             throw new DatabaseException(e);
         }
-
     }
 
 
@@ -748,5 +787,4 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
 
         return returnType;
     }
-
 }

@@ -37,54 +37,59 @@ public class AddForeignKeyConstraintGenerator implements SqlGenerator<AddForeign
     }
 
     public Sql[] generateSql(AddForeignKeyConstraintStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("ALTER TABLE ")
-        	.append(database.escapeTableName(statement.getBaseTableSchemaName(), statement.getBaseTableName()))
-        	.append(" ADD CONSTRAINT ");
-        if (!(database instanceof InformixDatabase)) {
-        	sb.append(database.escapeConstraintName(statement.getConstraintName()));
-        }
-        sb.append(" FOREIGN KEY (")
-        	.append(database.escapeColumnNameList(statement.getBaseColumnNames()))
-        	.append(") REFERENCES ")
-        	.append(database.escapeTableName(statement.getReferencedTableSchemaName(), statement.getReferencedTableName()))
-        	.append("(")
-        	.append(database.escapeColumnNameList(statement.getReferencedColumnNames()))
-        	.append(")");
+	    // If database doesn't support FK referenced on unique columns - skip FK statement generation
+	    if (!statement.isReferencedToPrimary() && !(database instanceof OracleDatabase)) {
+		    return new Sql[0];
+	    }
 
-        if (statement.getOnUpdate() != null) {
-            if ((database instanceof OracleDatabase) && statement.getOnUpdate().equalsIgnoreCase("RESTRICT")) {
-                //don't use
-            } else {
-                sb.append(" ON UPDATE ").append(statement.getOnUpdate());
-            }
-        }
+	    StringBuilder sb = new StringBuilder();
+	    sb.append("ALTER TABLE ")
+			    .append(database.escapeTableName(statement.getBaseTableSchemaName(), statement.getBaseTableName()))
+			    .append(" ADD CONSTRAINT ");
+	    if (!(database instanceof InformixDatabase)) {
+		    sb.append(database.escapeConstraintName(statement.getConstraintName()));
+	    }
+	    sb.append(" FOREIGN KEY (")
+			    .append(database.escapeColumnNameList(statement.getBaseColumnNames()))
+			    .append(") REFERENCES ")
+			    .append(database.escapeTableName(statement.getReferencedTableSchemaName(), statement.getReferencedTableName()))
+			    .append("(")
+			    .append(database.escapeColumnNameList(statement.getReferencedColumnNames()))
+			    .append(")");
 
-        if (statement.getOnDelete() != null) {
-            if ((database instanceof OracleDatabase) && statement.getOnDelete().equalsIgnoreCase("RESTRICT")) {
-                //don't use
-            } else {
-                sb.append(" ON DELETE ").append(statement.getOnDelete());
-            }
-        }
+	    if (statement.getOnUpdate() != null) {
+		    if ((database instanceof OracleDatabase) && statement.getOnUpdate().equalsIgnoreCase("RESTRICT")) {
+			    //don't use
+		    } else {
+			    sb.append(" ON UPDATE ").append(statement.getOnUpdate());
+		    }
+	    }
 
-        if (statement.isDeferrable() || statement.isInitiallyDeferred()) {
-            if (statement.isDeferrable()) {
-            	sb.append(" DEFERRABLE");
-            }
+	    if (statement.getOnDelete() != null) {
+		    if ((database instanceof OracleDatabase) && (statement.getOnDelete().equalsIgnoreCase("RESTRICT") || statement.getOnDelete().equalsIgnoreCase("NO ACTION"))) {
+			    //don't use
+		    } else {
+			    sb.append(" ON DELETE ").append(statement.getOnDelete());
+		    }
+	    }
 
-            if (statement.isInitiallyDeferred()) {
-            	sb.append(" INITIALLY DEFERRED");
-            }
-        }
+	    if (statement.isDeferrable() || statement.isInitiallyDeferred()) {
+		    if (statement.isDeferrable()) {
+			    sb.append(" DEFERRABLE");
+		    }
 
-        if (database instanceof InformixDatabase) {
-        	sb.append(" CONSTRAINT ");
-        	sb.append(database.escapeConstraintName(statement.getConstraintName()));
-        }
+		    if (statement.isInitiallyDeferred()) {
+			    sb.append(" INITIALLY DEFERRED");
+		    }
+	    }
 
-        return new Sql[] {
-                new UnparsedSql(sb.toString())
-        };
+	    if (database instanceof InformixDatabase) {
+		    sb.append(" CONSTRAINT ");
+		    sb.append(database.escapeConstraintName(statement.getConstraintName()));
+	    }
+
+	    return new Sql[]{
+			    new UnparsedSql(sb.toString())
+	    };
     }
 }
