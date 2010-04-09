@@ -31,7 +31,7 @@ public class OracleDatabaseTest extends AbstractDatabaseTest {
     @Override
     @Test
     public void getCurrentDateTimeFunction() {
-        Assert.assertEquals("SYSDATE", getDatabase().getCurrentDateTimeFunction());
+        Assert.assertEquals("CURRENT_TIMESTAMP", getDatabase().getCurrentDateTimeFunction());
     }
 
     public void testGetDefaultDriver() {
