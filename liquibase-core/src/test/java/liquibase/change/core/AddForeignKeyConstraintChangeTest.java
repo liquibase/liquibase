@@ -48,7 +48,7 @@ public class AddForeignKeyConstraintChangeTest  extends AbstractChangeTest {
 
         assertEquals(true, statement.isDeferrable());
         assertEquals(true, statement.isInitiallyDeferred());
-        assertEquals(true, statement.isReferencedToPrimary());
+        assertEquals(true, statement.isReferencedToPrimaryKey());
         assertEquals("CASCADE", statement.getOnDelete());
     }
 
