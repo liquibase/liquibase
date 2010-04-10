@@ -203,7 +203,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
                         .setInitiallyDeferred(initiallyDeferred)
                         .setOnUpdate(getOnUpdate())
                         .setOnDelete(getOnDelete())
-		                .setReferencedToPrimary(getReferencedToPrimary())
+		                .setReferencedToPrimaryKey(getReferencedToPrimary())
         };
     }
 
