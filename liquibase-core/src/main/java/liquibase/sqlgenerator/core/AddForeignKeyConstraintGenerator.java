@@ -38,7 +38,7 @@ public class AddForeignKeyConstraintGenerator implements SqlGenerator<AddForeign
 
     public Sql[] generateSql(AddForeignKeyConstraintStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
 	    // If database doesn't support FK referenced on unique columns - skip FK statement generation
-	    if (!statement.isReferencedToPrimary() && !(database instanceof OracleDatabase)) {
+	    if (statement.isReferencedToPrimary() == null || (!statement.isReferencedToPrimary() && !(database instanceof OracleDatabase))) {
 		    return new Sql[0];
 	    }
 
