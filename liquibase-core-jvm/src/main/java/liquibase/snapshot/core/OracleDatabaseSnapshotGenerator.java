@@ -173,7 +173,8 @@ public class OracleDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
 		);
 	}
 
-	public List<ForeignKey> getAdditionalForeignKeys(String schemaName, Database database) throws DatabaseException {
+	@Override
+    public List<ForeignKey> getAdditionalForeignKeys(String schemaName, Database database) throws DatabaseException {
 		List<ForeignKey> foreignKeys = super.getAdditionalForeignKeys(schemaName, database);
 
 		// Create SQL statement to select all FKs in database which referenced to unique columns
@@ -183,8 +184,7 @@ public class OracleDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
 			ResultSet rs = statement.executeQuery(query);
 			while (rs.next()) {
 				ForeignKeyInfo fkInfo = new ForeignKeyInfo();
-				// marks FK as referenced on unique column
-				fkInfo.setReferencedToPrimary(false);
+				fkInfo.setReferencesUniqueColumn(true);
 				fkInfo.setFkName(convertFromDatabaseName(rs.getString("FK_NAME")));
 				fkInfo.setFkSchema(convertFromDatabaseName(rs.getString("FKTABLE_SCHEM")));
 				fkInfo.setFkTableName(convertFromDatabaseName(rs.getString("FKTABLE_NAME")));

@@ -29,7 +29,7 @@ public class AddForeignKeyConstraintChangeTest  extends AbstractChangeTest {
         change.setDeferrable(true);
         change.setDeleteCascade(true);
         change.setInitiallyDeferred(true);
-        change.setReferencesPrimaryKey(true);
+        change.setReferencesUniqueColumn(false);
 
         SqlStatement[] statements = change.generateStatements(new MockDatabase());
         assertEquals(1, statements.length);
@@ -48,7 +48,7 @@ public class AddForeignKeyConstraintChangeTest  extends AbstractChangeTest {
 
         assertEquals(true, statement.isDeferrable());
         assertEquals(true, statement.isInitiallyDeferred());
-        assertEquals(true, statement.isReferencesPrimaryKey());
+        assertEquals(true, statement.getReferencesUniqueColumn());
         assertEquals("CASCADE", statement.getOnDelete());
     }
 

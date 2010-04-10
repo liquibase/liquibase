@@ -115,7 +115,7 @@ public class StringChangeLogSerializerTest {
         change.setConstraintName("FK_TEST");
         change.setDeferrable(true);
         change.setInitiallyDeferred(true);
-	    change.setReferencesPrimaryKey(true);
+	    change.setReferencesUniqueColumn(false);
         change.setDeleteCascade(true);
         change.setOnDelete("SET NULL");
         change.setOnUpdate("NO ACTION");

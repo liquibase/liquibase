@@ -17,7 +17,7 @@ public class AddForeignKeyConstraintGenerator implements SqlGenerator<AddForeign
     }
 
     public boolean supports(AddForeignKeyConstraintStatement statement, Database database) {
-        if (!statement.isReferencesPrimaryKey() && !(database instanceof OracleDatabase)) {
+        if (statement.getReferencesUniqueColumn() && !(database instanceof OracleDatabase)) {
             return false;
 
         }
