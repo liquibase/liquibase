@@ -22,7 +22,7 @@ public class AddForeignKeyConstraintStatement implements SqlStatement {
 
 	// Some databases supports creation of FK with referention to column marked as unique, not primary
 	// If FK referenced to such unique column this option should be set to false
-	private boolean referencedToPrimaryKey = true;
+	private boolean referencesPrimaryKey = true;
 
     public AddForeignKeyConstraintStatement(String constraintName, String baseTableSchemaName, String baseTableName, String baseColumnNames, String referencedTableSchemaName, String referencedTableName, String referencedColumnNames) {
         this.baseTableSchemaName = baseTableSchemaName;
@@ -98,13 +98,13 @@ public class AddForeignKeyConstraintStatement implements SqlStatement {
         return this;
     }
 
-	public boolean isReferencedToPrimaryKey() {
-		return referencedToPrimaryKey;
+	public boolean isReferencesPrimaryKey() {
+		return referencesPrimaryKey;
 	}
 
-	public AddForeignKeyConstraintStatement setReferencedToPrimaryKey(Boolean referencedToPrimaryKey) {
-        if (referencedToPrimaryKey != null) {
-            this.referencedToPrimaryKey = referencedToPrimaryKey;
+	public AddForeignKeyConstraintStatement setReferencesPrimaryKey(Boolean referencesPrimaryKey) {
+        if (referencesPrimaryKey != null) {
+            this.referencesPrimaryKey = referencesPrimaryKey;
         }
         return this;
 	}

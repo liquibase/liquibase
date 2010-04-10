@@ -506,7 +506,7 @@
 		<xsd:attribute name="deleteCascade" type="booleanExp" />
 		<xsd:attribute name="onDelete" type="fkCascadeActionOptions" />
 		<xsd:attribute name="onUpdate" type="fkCascadeActionOptions" />
-		<xsd:attribute name="referencedToPrimary" type="booleanExp" />
+		<xsd:attribute name="referencesPrimaryKey" type="booleanExp" />
 	</xsd:attributeGroup>
 
 	<xsd:attributeGroup name="addNotNullConstraintAttrib">

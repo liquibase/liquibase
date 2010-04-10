@@ -31,7 +31,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
 
 	// Some databases supports creation of FK with referention to column marked as unique, not primary
 	// If FK referenced to such unique column this option should be set to false
-	private Boolean referencedToPrimary;
+	private Boolean referencesPrimaryKey;
 
     public AddForeignKeyConstraintChange() {
         super("addForeignKeyConstraint", "Add Foreign Key Constraint", ChangeMetaData.PRIORITY_DEFAULT);
@@ -135,12 +135,12 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
         return this.onDelete;
     }
 
-	public Boolean getReferencedToPrimary() {
-		return referencedToPrimary;
+	public Boolean getReferencesPrimaryKey() {
+		return referencesPrimaryKey;
 	}
 
-	public void setReferencedToPrimary(Boolean referencedToPrimary) {
-		this.referencedToPrimary = referencedToPrimary;
+	public void setReferencesPrimaryKey(Boolean referencesPrimaryKey) {
+		this.referencesPrimaryKey = referencesPrimaryKey;
 	}
 
 	public void setOnDelete(ForeignKeyConstraintType rule) {
@@ -203,7 +203,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
                         .setInitiallyDeferred(initiallyDeferred)
                         .setOnUpdate(getOnUpdate())
                         .setOnDelete(getOnDelete())
-		                .setReferencedToPrimaryKey(getReferencedToPrimary())
+		                .setReferencesPrimaryKey(getReferencesPrimaryKey())
         };
     }
 
