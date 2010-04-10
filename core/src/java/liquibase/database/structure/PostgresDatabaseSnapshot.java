@@ -64,7 +64,8 @@ public class PostgresDatabaseSnapshot extends SqlDatabaseSnapshot {
           if (!database.isSystemTable(null, schema, tableName) && !database.isLiquibaseTable(tableName)) {
               Table table = tablesMap.get(tableName);
               if (table == null) {
-                  throw new IllegalStateException("Cannot find table for " + tableName);
+                  // SKip it -- the query above pulls back more then the query for tables & views in the super class
+                  continue;
               }
               constraintInformation.setTable(table);
               getColumnsForUniqueConstraint(conrelid, keys, constraintInformation);
