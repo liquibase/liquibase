@@ -25,10 +25,10 @@ public class ForeignKeyInfo {
 
 	// Some databases supports creation of FK with referention to column marked as unique, not primary
 	// If FK referenced to such unique column this option should be set to false
-	private boolean referencedToPrimary = true;
+	private boolean referencesUniqueColumn = false;
 
 
-	public String getFkName() {
+    public String getFkName() {
 		return fkName;
 	}
 
@@ -108,11 +108,11 @@ public class ForeignKeyInfo {
 		this.deferrablility = deferrablility;
 	}
 
-	public boolean isReferencedToPrimary() {
-		return referencedToPrimary;
+	public boolean getReferencesUniqueColumn() {
+		return referencesUniqueColumn;
 	}
 
-	public void setReferencedToPrimary(boolean referencedToPrimary) {
-		this.referencedToPrimary = referencedToPrimary;
+	public void setReferencesUniqueColumn(boolean referencesUniqueColumn) {
+		this.referencesUniqueColumn = referencesUniqueColumn;
 	}
 }

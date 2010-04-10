@@ -105,7 +105,7 @@ public class XMLChangeLogSerializerTest {
         change.setOnDelete("CASCADE");
         change.setOnUpdate("CASCADE");
         change.setInitiallyDeferred(true);
-        change.setReferencesPrimaryKey(true);
+        change.setReferencesUniqueColumn(false);
 
         Element node = new XMLChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(change);
         assertEquals("addForeignKeyConstraint", node.getTagName());

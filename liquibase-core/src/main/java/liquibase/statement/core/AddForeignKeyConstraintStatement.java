@@ -22,7 +22,7 @@ public class AddForeignKeyConstraintStatement implements SqlStatement {
 
 	// Some databases supports creation of FK with referention to column marked as unique, not primary
 	// If FK referenced to such unique column this option should be set to false
-	private boolean referencesPrimaryKey = true;
+	private boolean referencesUniqueColumn = false;
 
     public AddForeignKeyConstraintStatement(String constraintName, String baseTableSchemaName, String baseTableName, String baseColumnNames, String referencedTableSchemaName, String referencedTableName, String referencedColumnNames) {
         this.baseTableSchemaName = baseTableSchemaName;
@@ -93,18 +93,18 @@ public class AddForeignKeyConstraintStatement implements SqlStatement {
         return this;
     }
 
-    public AddForeignKeyConstraintStatement setOnDe lete(String deleteRule) {
+    public AddForeignKeyConstraintStatement setOnDelete(String deleteRule) {
         this.onDelete = deleteRule;
         return this;
     }
 
-	public boolean isReferencesPrimaryKey() {
-		return referencesPrimaryKey;
+	public boolean getReferencesUniqueColumn() {
+		return referencesUniqueColumn;
 	}
 
-	public AddForeignKeyConstraintStatement setReferencesPrimaryKey(Boolean referencesPrimaryKey) {
-        if (referencesPrimaryKey != null) {
-            this.referencesPrimaryKey = referencesPrimaryKey;
+	public AddForeignKeyConstraintStatement setReferencesUniqueColumn(Boolean referencesUniqueColumn) {
+        if (referencesUniqueColumn != null) {
+            this.referencesUniqueColumn = referencesUniqueColumn;
         }
         return this;
 	}

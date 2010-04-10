@@ -426,7 +426,7 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
 		//According to #getExportedKeys() contract, the result set rows are properly sorted, so the reuse of previous FK instance is safe.
 		ForeignKey foreignKey = null;
 
-		if (fkInfo.getKeySeq() == 1 || (!fkInfo.isReferencedToPrimary() && fkInfo.getKeySeq() == 0)) {
+		if (fkInfo.getKeySeq() == 1 || (fkInfo.getReferencesUniqueColumn() && fkInfo.getKeySeq() == 0)) {
 			foreignKey = new ForeignKey();
 		} else {
 			for (ForeignKey foundFK : fkList) {
@@ -452,7 +452,7 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
 		foreignKey.setUpdateRule(fkInfo.getUpdateRule());
 		foreignKey.setDeleteRule(fkInfo.getDeleteRule());
 
-		foreignKey.setReferencesPrimaryKey(fkInfo.isReferencedToPrimary());
+		foreignKey.setReferencesUniqueColumn(fkInfo.getReferencesUniqueColumn());
 
 		if (database.supportsInitiallyDeferrableColumns()) {
 
