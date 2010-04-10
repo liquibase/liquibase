@@ -654,7 +654,7 @@ public class DiffResult {
 			change.setOnUpdate(fk.getUpdateRule());
 			change.setOnDelete(fk.getDeleteRule());
 
-			change.setReferencedToPrimary(fk.isReferencedToPrimary());
+			change.setReferencesPrimaryKey(fk.isReferencesPrimaryKey());
 
 			changes.add(generateChangeSet(change));
 		}

@@ -452,7 +452,7 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
 		foreignKey.setUpdateRule(fkInfo.getUpdateRule());
 		foreignKey.setDeleteRule(fkInfo.getDeleteRule());
 
-		foreignKey.setReferencedToPrimary(fkInfo.isReferencedToPrimary());
+		foreignKey.setReferencesPrimaryKey(fkInfo.isReferencedToPrimary());
 
 		if (database.supportsInitiallyDeferrableColumns()) {
 

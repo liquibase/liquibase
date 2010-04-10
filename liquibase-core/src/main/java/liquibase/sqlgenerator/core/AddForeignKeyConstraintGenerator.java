@@ -17,6 +17,10 @@ public class AddForeignKeyConstraintGenerator implements SqlGenerator<AddForeign
     }
 
     public boolean supports(AddForeignKeyConstraintStatement statement, Database database) {
+        if (!statement.isReferencesPrimaryKey() && !(database instanceof OracleDatabase)) {
+            return false;
+
+        }
         return (!(database instanceof SQLiteDatabase));
     }
 
@@ -37,11 +41,6 @@ public class AddForeignKeyConstraintGenerator implements SqlGenerator<AddForeign
     }
 
     public Sql[] generateSql(AddForeignKeyConstraintStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-	    // If database doesn't support FK referenced on unique columns - skip FK statement generation
-	    if (!statement.isReferencedToPrimaryKey() && !(database instanceof OracleDatabase)) {
-		    return new Sql[0];
-	    }
-
 	    StringBuilder sb = new StringBuilder();
 	    sb.append("ALTER TABLE ")
 			    .append(database.escapeTableName(statement.getBaseTableSchemaName(), statement.getBaseTableName()))
