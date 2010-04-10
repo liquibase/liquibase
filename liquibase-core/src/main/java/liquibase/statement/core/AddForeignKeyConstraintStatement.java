@@ -93,7 +93,7 @@ public class AddForeignKeyConstraintStatement implements SqlStatement {
         return this;
     }
 
-    public AddForeignKeyConstraintStatement setOnDelete(String deleteRule) {
+    public AddForeignKeyConstraintStatement setOnDe lete(String deleteRule) {
         this.onDelete = deleteRule;
         return this;
     }
