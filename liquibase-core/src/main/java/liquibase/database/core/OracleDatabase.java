@@ -71,7 +71,7 @@ public class OracleDatabase extends AbstractDatabase {
         if (currentDateTimeFunction != null) {
             return currentDateTimeFunction;
         }
-        return "CURRENT_TIMESTAMP";
+        return "SYSTIMESTAMP";
     }
 
     @Override
