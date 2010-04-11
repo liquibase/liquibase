@@ -118,7 +118,7 @@ public class XMLChangeLogSerializerTest {
         assertEquals("REF_COL_NAME", node.getAttribute("referencedColumnNames"));
         assertEquals("true", node.getAttribute("deferrable"));
         assertEquals("true", node.getAttribute("initiallyDeferred"));
-        assertEquals("true", node.getAttribute("referencedToPrimary"));
+        assertEquals("false", node.getAttribute("referencesUniqueColumn"));
         assertEquals("CASCADE", node.getAttribute("onDelete"));
         assertEquals("CASCADE", node.getAttribute("onUpdate"));
 
