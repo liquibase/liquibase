@@ -135,7 +135,7 @@ public class StringChangeLogSerializerTest {
                 "    referencedColumnNames=\"COLA, COLB\"\n" +
                 "    referencedTableName=\"REF_TABLE\"\n" +
                 "    referencedTableSchemaName=\"REF_SCHEM\"\n" +
-                "    referencesUniqueColumn=\"true\"\n" +
+                "    referencesUniqueColumn=\"false\"\n" +
                 "]", new StringChangeLogSerializer().serialize(change));
 
     }
