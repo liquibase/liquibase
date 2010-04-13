@@ -11,6 +11,8 @@ import liquibase.util.JdbcUtils;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 public class OracleDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerator {
 
@@ -217,6 +219,7 @@ public class OracleDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
 		Statement statement = ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement();
 		ResultSet rs = statement.executeQuery(query);
 
+		Map<String, Index> indexMap = new HashMap<String, Index>();
 		while (rs.next()) {
 			String indexName = convertFromDatabaseName(rs.getString("INDEX_NAME"));
 			String tableName = rs.getString("TABLE_NAME");
@@ -242,23 +245,29 @@ public class OracleDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
 			}
 
 			Index index;
-			index = new Index();
-			// TODO Is it really need to use table instead of tableName?
-			index.setTable(snapshot.getTable(tableName));
-			index.setTablespace(tableSpace);
-			index.setName(indexName);
-			index.setUnique(!nonUnique);
-			index.setFilterCondition(filterCondition);
+			if (indexMap.containsKey(indexName)) {
+				index = indexMap.get(indexName);
+			} else {
+				index = new Index();
+				index.setTable(snapshot.getTable(tableName));
+				index.setTablespace(tableSpace);
+				index.setName(indexName);
+				index.setUnique(!nonUnique);
+				index.setFilterCondition(filterCondition);
+				indexMap.put(indexName, index);
+			}
 
 			for (int i = index.getColumns().size(); i < position; i++) {
 				index.getColumns().add(null);
 			}
 			index.getColumns().set(position - 1, columnName);
-
-			snapshot.getIndexes().add(index);
 		}
 		JdbcUtils.closeResultSet(rs);
 		JdbcUtils.closeStatement(statement);
+
+		for (Map.Entry<String, Index> entry : indexMap.entrySet()) {
+			snapshot.getIndexes().add(entry.getValue());
+		}
 
 		/*
 		* marks indexes as "associated with" instead of "remove it"
@@ -282,5 +291,46 @@ public class OracleDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
 				}
 			}
 		}
+	}
+
+	protected void readPrimaryKeys(DatabaseSnapshot snapshot, String schema, DatabaseMetaData databaseMetaData) throws DatabaseException, SQLException {
+		Database database = snapshot.getDatabase();
+		updateListeners("Reading primary keys for " + database.toString() + " ...");
+
+		//we can't add directly to the this.primaryKeys hashSet because adding columns to an exising PK changes the hashCode and .contains() fails
+		List<PrimaryKey> foundPKs = new ArrayList<PrimaryKey>();
+		String query = "select uc.table_name TABLE_NAME,ucc.column_name COLUMN_NAME,ucc.position KEY_SEQ,uc.constraint_name PK_NAME,ui.tablespace_name TABLESPACE from user_constraints uc,user_indexes ui,user_cons_columns ucc where uc.constraint_type = 'P' and uc.index_name = ui.index_name and uc.constraint_name = ucc.constraint_name";
+		Statement statement = ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement();
+		ResultSet rs = statement.executeQuery(query);
+
+		while (rs.next()) {
+			String tableName = convertFromDatabaseName(rs.getString("TABLE_NAME"));
+			String tablespace = convertFromDatabaseName(rs.getString("TABLESPACE"));
+			String columnName = convertFromDatabaseName(rs.getString("COLUMN_NAME"));
+			short position = rs.getShort("KEY_SEQ");
+
+			boolean foundExistingPK = false;
+			for (PrimaryKey pk : foundPKs) {
+				if (pk.getTable().getName().equals(tableName)) {
+					pk.addColumnName(position - 1, columnName);
+
+					foundExistingPK = true;
+				}
+			}
+
+			if (!foundExistingPK) {
+				PrimaryKey primaryKey = new PrimaryKey();
+				primaryKey.setTablespace(tablespace);
+				primaryKey.setTable(snapshot.getTable(tableName));
+				primaryKey.addColumnName(position - 1, columnName);
+				primaryKey.setName(convertPrimaryKeyName(rs.getString("PK_NAME")));
+
+				foundPKs.add(primaryKey);
+			}
+		}
+		JdbcUtils.closeResultSet(rs);
+		JdbcUtils.closeStatement(statement);
+
+		snapshot.getPrimaryKeys().addAll(foundPKs);
 	}
 }

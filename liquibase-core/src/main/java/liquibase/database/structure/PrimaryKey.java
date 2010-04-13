@@ -10,6 +10,7 @@ public class PrimaryKey implements DatabaseObject, Comparable<PrimaryKey> {
     private List<String> columnNames = new ArrayList<String>();
     private Table table;
     private boolean certainName = true;
+	private String tablespace;
 
     public DatabaseObject[] getContainingObjects() {
         return new DatabaseObject[] {
@@ -95,4 +96,12 @@ public class PrimaryKey implements DatabaseObject, Comparable<PrimaryKey> {
     public void setCertainName(boolean certainName) {
         this.certainName = certainName;
     }
+
+	public String getTablespace() {
+		return tablespace;
+	}
+
+	public void setTablespace(String tablespace) {
+		this.tablespace = tablespace;
+	}
 }
