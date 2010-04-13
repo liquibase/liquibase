@@ -545,6 +545,7 @@ public class DiffResult {
 
 			CreateIndexChange change = new CreateIndexChange();
 			change.setTableName(index.getTable().getName());
+			change.setTablespace(index.getTablespace());
 			change.setSchemaName(index.getTable().getSchema());
 			change.setIndexName(index.getName());
 			change.setUnique(index.isUnique());

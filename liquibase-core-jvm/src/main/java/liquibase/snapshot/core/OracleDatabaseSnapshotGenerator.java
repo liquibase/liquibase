@@ -208,4 +208,79 @@ public class OracleDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
 		}
 		return foreignKeys;
 	}
+
+	protected void readIndexes(DatabaseSnapshot snapshot, String schema, DatabaseMetaData databaseMetaData) throws DatabaseException, SQLException {
+		Database database = snapshot.getDatabase();
+		updateListeners("Reading indexes for " + database.toString() + " ...");
+
+		String query = "select aic.index_name, 3 AS TYPE, aic.table_name, aic.column_name, aic.column_position AS ORDINAL_POSITION, null AS FILTER_CONDITION, ai.tablespace_name AS TABLESPACE FROM all_ind_columns aic, all_indexes ai WHERE aic.table_owner='" + database.convertRequestedSchemaToSchema(schema) + "' and aic.index_name = ai.index_name ORDER BY INDEX_NAME, ORDINAL_POSITION";
+		Statement statement = ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement();
+		ResultSet rs = statement.executeQuery(query);
+
+		while (rs.next()) {
+			String indexName = convertFromDatabaseName(rs.getString("INDEX_NAME"));
+			String tableName = rs.getString("TABLE_NAME");
+			String tableSpace = rs.getString("TABLESPACE");
+			String columnName = convertFromDatabaseName(rs.getString("COLUMN_NAME"));
+			if (columnName == null) {
+				//nothing to index, not sure why these come through sometimes
+				continue;
+			}
+			short type = rs.getShort("TYPE");
+			boolean nonUnique = true;
+			try {
+				nonUnique = rs.getBoolean("NON_UNIQUE");
+			} catch (SQLException e) {
+				//doesn't exist in all databases
+			}
+
+			short position = rs.getShort("ORDINAL_POSITION");
+			String filterCondition = rs.getString("FILTER_CONDITION");
+
+			if (type == DatabaseMetaData.tableIndexStatistic) {
+				continue;
+			}
+
+			Index index;
+			index = new Index();
+			// TODO Is it really need to use table instead of tableName?
+			index.setTable(snapshot.getTable(tableName));
+			index.setTablespace(tableSpace);
+			index.setName(indexName);
+			index.setUnique(!nonUnique);
+			index.setFilterCondition(filterCondition);
+
+			for (int i = index.getColumns().size(); i < position; i++) {
+				index.getColumns().add(null);
+			}
+			index.getColumns().set(position - 1, columnName);
+
+			snapshot.getIndexes().add(index);
+		}
+		JdbcUtils.closeResultSet(rs);
+		JdbcUtils.closeStatement(statement);
+
+		/*
+		* marks indexes as "associated with" instead of "remove it"
+		* Index should have associations with:
+		* foreignKey, primaryKey or uniqueConstraint
+		* */
+		for (Index index : snapshot.getIndexes()) {
+			for (PrimaryKey pk : snapshot.getPrimaryKeys()) {
+				if (index.getTable().getName().equalsIgnoreCase(pk.getTable().getName()) && index.getColumnNames().equals(pk.getColumnNames())) {
+					index.addAssociatedWith(Index.MARK_PRIMARY_KEY);
+				}
+			}
+			for (ForeignKey fk : snapshot.getForeignKeys()) {
+				if (index.getTable().getName().equalsIgnoreCase(fk.getForeignKeyTable().getName()) && index.getColumnNames().equals(fk.getForeignKeyColumns())) {
+					index.addAssociatedWith(Index.MARK_FOREIGN_KEY);
+				}
+			}
+			for (UniqueConstraint uc : snapshot.getUniqueConstraints()) {
+				if (index.getTable().getName().equalsIgnoreCase(uc.getTable().getName()) && index.getColumnNames().equals(uc.getColumnNames())) {
+					index.addAssociatedWith(Index.MARK_UNIQUE_CONSTRAINT);
+				}
+			}
+		}
+	}
 }
