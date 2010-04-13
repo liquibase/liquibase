@@ -15,6 +15,7 @@ public class Index implements DatabaseObject, Comparable<Index> {
 
     private String name;
     private Table table;
+	private String tablespace;
     private Boolean unique;
     private List<String> columns = new ArrayList<String>();
     private String filterCondition;
@@ -43,6 +44,14 @@ public class Index implements DatabaseObject, Comparable<Index> {
     public void setTable(Table table) {
         this.table = table;
     }
+
+	public String getTablespace() {
+		return tablespace;
+	}
+
+	public void setTablespace(String tablespace) {
+		this.tablespace = tablespace;
+	}
 
     public List<String> getColumns() {
         return columns;
@@ -151,5 +160,4 @@ public class Index implements DatabaseObject, Comparable<Index> {
         stringBuffer.append(")");
         return stringBuffer.toString();
     }
-
 }
