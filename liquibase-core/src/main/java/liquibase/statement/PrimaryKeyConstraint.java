@@ -8,6 +8,9 @@ import java.util.List;
 public class PrimaryKeyConstraint implements ColumnConstraint {
 
     private String constraintName;
+
+	// used for PK's index configuration
+	private String tablespace;
     
     private List<String> columns = new ArrayList<String>();
 
@@ -23,7 +26,15 @@ public class PrimaryKeyConstraint implements ColumnConstraint {
         return constraintName;
     }
 
-    public List<String> getColumns() {
+	public String getTablespace() {
+		return tablespace;
+	}
+
+	public void setTablespace(String tablespace) {
+		this.tablespace = tablespace;
+	}
+
+	public List<String> getColumns() {
         return Collections.unmodifiableList(columns);
     }
 

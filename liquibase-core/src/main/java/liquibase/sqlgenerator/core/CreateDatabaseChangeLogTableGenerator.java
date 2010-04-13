@@ -1,9 +1,8 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
-import liquibase.database.typeconversion.TypeConverterFactory;
-import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.SybaseDatabase;
+import liquibase.database.typeconversion.TypeConverterFactory;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.SqlGenerator;
@@ -29,9 +28,9 @@ public class CreateDatabaseChangeLogTableGenerator implements SqlGenerator<Creat
 
     public Sql[] generateSql(CreateDatabaseChangeLogTableStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         CreateTableStatement createTableStatement = new CreateTableStatement(database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())
-                .addPrimaryKeyColumn("ID", "VARCHAR(63)", null, null, new NotNullConstraint())
-                .addPrimaryKeyColumn("AUTHOR", "VARCHAR(63)", null, null, new NotNullConstraint())
-                .addPrimaryKeyColumn("FILENAME", "VARCHAR(200)", null, null, new NotNullConstraint())
+                .addPrimaryKeyColumn("ID", "VARCHAR(63)", null, null, null,new NotNullConstraint())
+                .addPrimaryKeyColumn("AUTHOR", "VARCHAR(63)", null, null, null,new NotNullConstraint())
+                .addPrimaryKeyColumn("FILENAME", "VARCHAR(200)", null, null, null,new NotNullConstraint())
                 .addColumn("DATEEXECUTED", TypeConverterFactory.getInstance().findTypeConverter(database).getDateTimeType().getDataTypeName(), null, new NotNullConstraint())
                 .addColumn("ORDEREXECUTED", "INT", new NotNullConstraint(), new UniqueConstraint("UQ_DBCL_ORDEREXEC"))
                 .addColumn("EXECTYPE", "VARCHAR(10)", new NotNullConstraint())

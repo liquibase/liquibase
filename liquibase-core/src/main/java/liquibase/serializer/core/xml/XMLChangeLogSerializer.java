@@ -193,6 +193,10 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
             if (constraints.getPrimaryKeyName() != null) {
                 constraintsElement.setAttribute("primaryKeyName", constraints.getPrimaryKeyName());
             }
+
+	        if (constraints.getTablespace() != null) {
+                constraintsElement.setAttribute("tablespace", constraints.getTablespace());
+            }
             element.appendChild(constraintsElement);
         }
 

@@ -133,6 +133,21 @@ public class OracleDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
 	protected void readColumns(DatabaseSnapshot snapshot, String schema, DatabaseMetaData databaseMetaData) throws SQLException, DatabaseException {
 		findIntegerColumns(snapshot);
 		super.readColumns(snapshot, schema, databaseMetaData);
+
+		/*
+		* Code Description:
+		* Finding all 'tablespace' attributes of column's PKs
+		* */
+		Database database = snapshot.getDatabase();
+		Statement statement = ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement();
+		String query = "select ui.tablespace_name TABLESPACE, ucc.table_name TABLE_NAME, ucc.column_name COLUMN_NAME FROM user_indexes ui , user_constraints uc , user_cons_columns ucc where uc.constraint_type = 'P' and ucc.constraint_name = uc.constraint_name and uc.index_name = ui.index_name";
+		ResultSet rs = statement.executeQuery(query);
+
+		while (rs.next()) {
+			Column column = snapshot.getColumn(rs.getString("TABLE_NAME"), rs.getString("COLUMN_NAME"));
+			// setting up tablespace property to column, to configure it's PK-index
+			column.setTablespace(rs.getString("TABLESPACE"));
+		}
 	}
 
 	/**

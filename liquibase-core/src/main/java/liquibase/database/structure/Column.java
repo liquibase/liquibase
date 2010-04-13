@@ -30,6 +30,8 @@ public class Column implements DatabaseObject, Comparable<Column> {
     private boolean certainDataType = true;
     private String remarks;
 
+	// used for PK's index configuration
+	private String tablespace;
 
     public Table getTable() {
         return table;
@@ -58,7 +60,16 @@ public class Column implements DatabaseObject, Comparable<Column> {
         return this;
     }
 
-    public String getName() {
+	public String getTablespace() {
+		return tablespace;
+	}
+
+	public Column setTablespace(String tablespace) {
+		this.tablespace = tablespace;
+		return  this;
+	}
+
+	public String getName() {
         return name;
     }
 

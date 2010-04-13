@@ -1,7 +1,5 @@
 package liquibase.change;
 
-import liquibase.database.Database;
-import liquibase.database.typeconversion.TypeConverterFactory;
 import liquibase.database.structure.Column;
 import liquibase.statement.DatabaseFunction;
 import liquibase.util.ISODateFormat;
@@ -59,6 +57,7 @@ public class ColumnConfig {
 			ConstraintsConfig constraints = new ConstraintsConfig(); 
 			constraints.setNullable(column.getConstraints().isNullable());
 			constraints.setPrimaryKey(column.getConstraints().isPrimaryKey());
+			constraints.setTablespace(column.getConstraints().getTablespace());
 			constraints.setUnique(column.getConstraints().isUnique());
 		}
 		setConstraints(constraints);
