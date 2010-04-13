@@ -1,12 +1,12 @@
 package liquibase.statementexecute;
 
-import liquibase.database.*;
+import liquibase.database.Database;
 import liquibase.database.core.*;
-import liquibase.test.DatabaseTestContext;
-import liquibase.statement.*;
-import liquibase.statement.core.AddColumnStatement;
+import liquibase.statement.NotNullConstraint;
+import liquibase.statement.SqlStatement;
 import liquibase.statement.core.CreateTableStatement;
 import liquibase.statement.core.RenameColumnStatement;
+import liquibase.test.DatabaseTestContext;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -23,7 +23,7 @@ public class RenameColumnExecuteTest extends AbstractExecuteTest {
         ArrayList<CreateTableStatement> statements = new ArrayList<CreateTableStatement>();
         CreateTableStatement table = new CreateTableStatement(null, TABLE_NAME);
         if (database instanceof MySQLDatabase) {
-            table.addPrimaryKeyColumn("id", "int", null, "pk_");
+            table.addPrimaryKeyColumn("id", "int", null, "pk_", null);
         } else {
             table.addColumn("id", "int", null, new NotNullConstraint());
         }

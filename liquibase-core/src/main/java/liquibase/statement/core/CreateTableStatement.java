@@ -63,13 +63,14 @@ public class CreateTableStatement implements SqlStatement {
         return notNullColumns;
     }
 
-    public CreateTableStatement addPrimaryKeyColumn(String columnName, String columnType, Object defaultValue, String keyName, ColumnConstraint... constraints) {
+    public CreateTableStatement addPrimaryKeyColumn(String columnName, String columnType, Object defaultValue, String keyName, String tablespace, ColumnConstraint... constraints) {
 //        String pkName = "PK_" + getTableName().toUpperCase();
 ////        if (pkName.length() > 18) {
 ////            pkName = pkName.substring(0, 17);
 ////        }
         PrimaryKeyConstraint pkConstraint = new PrimaryKeyConstraint(keyName);
         pkConstraint.addColumns(columnName);
+	    pkConstraint.setTablespace(tablespace);
 
         List<ColumnConstraint> allConstraints = new ArrayList<ColumnConstraint>();
         allConstraints.addAll(Arrays.asList(constraints));

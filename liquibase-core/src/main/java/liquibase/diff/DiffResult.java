@@ -875,20 +875,18 @@ public class DiffResult {
 				if (column.isPrimaryKey()) {
 					PrimaryKey primaryKey = null;
 					for (PrimaryKey pk : getMissingPrimaryKeys()) {
-						if (pk.getTable().getName().equalsIgnoreCase(
-								missingTable.getName())) {
+						if (pk.getTable().getName().equalsIgnoreCase(missingTable.getName())) {
 							primaryKey = pk;
 						}
 					}
 
-					if (primaryKey == null
-							|| primaryKey.getColumnNamesAsList().size() == 1) {
+					if (primaryKey == null || primaryKey.getColumnNamesAsList().size() == 1) {
 						constraintsConfig = new ConstraintsConfig();
 						constraintsConfig.setPrimaryKey(true);
+						constraintsConfig.setTablespace(column.getTablespace());
 
 						if (primaryKey != null) {
-							constraintsConfig.setPrimaryKeyName(primaryKey
-									.getName());
+							constraintsConfig.setPrimaryKeyName(primaryKey.getName());
 							getMissingPrimaryKeys().remove(primaryKey);
 						}
 					}

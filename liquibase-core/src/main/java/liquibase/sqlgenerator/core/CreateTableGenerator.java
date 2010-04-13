@@ -128,6 +128,12 @@ public class CreateTableGenerator implements SqlGenerator<CreateTableStatement> 
 	            buffer.append(" PRIMARY KEY (");
 	            buffer.append(database.escapeColumnNameList(StringUtils.join(statement.getPrimaryKeyConstraint().getColumns(), ", ")));
 	            buffer.append(")");
+		        // Setting up table space for PK's index if it exist
+		        if (database instanceof OracleDatabase &&
+		            statement.getPrimaryKeyConstraint().getTablespace() != null) {
+			        buffer.append(" USING INDEX TABLESPACE ");
+			        buffer.append(statement.getPrimaryKeyConstraint().getTablespace());
+		        }
 	            buffer.append(",");
 	        }
         }

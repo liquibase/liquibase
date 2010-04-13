@@ -23,7 +23,7 @@ public class AddAutoIncrementExecuteTest extends AbstractExecuteTest {
         ArrayList<CreateTableStatement> statements = new ArrayList<CreateTableStatement>();
         CreateTableStatement table = new CreateTableStatement(null, TABLE_NAME);
         if (database instanceof MySQLDatabase) {
-            table.addPrimaryKeyColumn("id", "int", null, "pk_");
+            table.addPrimaryKeyColumn("id", "int", null, "pk_", null);
         } else {
             table.addColumn("id", "int", null, new NotNullConstraint());
         }
