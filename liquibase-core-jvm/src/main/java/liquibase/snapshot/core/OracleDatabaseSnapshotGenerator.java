@@ -76,8 +76,8 @@ public class OracleDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
 			schema = database.convertRequestedSchemaToSchema(schema);
 
 		try {
-			statement = jdbcConnection.prepareStatement("select constraint_name, table_name, status, deferrable, deferred "
-			                                            + "from all_constraints where constraint_type='U' and owner='" + schema + "'");
+			String query = "select uc.constraint_name,uc.table_name,uc.status,uc.deferrable,uc.deferred,ui.tablespace_name from user_constraints uc, user_cons_columns ucc, user_indexes ui where uc.constraint_type='U' and uc.index_name = ui.index_name and uc.constraint_name = ucc.constraint_name";
+			statement = jdbcConnection.prepareStatement(query);
 			rs = statement.executeQuery();
 			while (rs.next()) {
 				String constraintName = rs.getString("constraint_name");
@@ -85,8 +85,10 @@ public class OracleDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
 				String status = rs.getString("status");
 				String deferrable = rs.getString("deferrable");
 				String deferred = rs.getString("deferred");
+				String tablespace = rs.getString("tablespace_name");
 				UniqueConstraint constraintInformation = new UniqueConstraint();
 				constraintInformation.setName(constraintName);
+				constraintInformation.setTablespace(tablespace);
 				if (!database.isSystemTable(null, schema, tableName) && !database.isLiquibaseTable(tableName)) {
 					Table table = snapshot.getTable(tableName);
 					if (table == null) {

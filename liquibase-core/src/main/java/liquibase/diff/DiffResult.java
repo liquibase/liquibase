@@ -614,6 +614,7 @@ public class DiffResult {
 				if (null != uc.getTable()) {
 					AddUniqueConstraintChange change = new AddUniqueConstraintChange();
 					change.setTableName(uc.getTable().getName());
+					change.setTablespace(uc.getTablespace());
 					change.setSchemaName(uc.getTable().getSchema());
 					change.setConstraintName(uc.getName());
 					change.setColumnNames(uc.getColumnNames());

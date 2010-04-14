@@ -1,9 +1,9 @@
 package liquibase.database.structure;
 
+import liquibase.util.StringUtils;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import liquibase.util.StringUtils;
 
 public class UniqueConstraint implements DatabaseObject,
 		Comparable<UniqueConstraint> {
@@ -14,6 +14,8 @@ public class UniqueConstraint implements DatabaseObject,
 	private boolean deferrable;
 	private boolean initiallyDeferred;
 	private boolean disabled;
+	// Setting tablespace attribute for UC's index.
+	private String tablespace;
 
 	public DatabaseObject[] getContainingObjects() {
 		List<DatabaseObject> columns = new ArrayList<DatabaseObject>();
@@ -70,6 +72,14 @@ public class UniqueConstraint implements DatabaseObject,
 
 	public boolean isDisabled() {
 		return disabled;
+	}
+
+	public String getTablespace() {
+		return tablespace;
+	}
+
+	public void setTablespace(String tablespace) {
+		this.tablespace = tablespace;
 	}
 
 	@Override
