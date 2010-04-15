@@ -244,7 +244,7 @@ public class SQLiteDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
         if (table == null) {
             View view = snapshot.getView(tableName);
             if (view == null) {
-                LogFactory.getLogger().info("Could not find table or view " + tableName + " for column " + columnName);
+                LogFactory.getLogger().debug("Could not find table or view " + tableName + " for column " + columnName);
                 return null;
             } else {
                 columnInfo.setView(view);

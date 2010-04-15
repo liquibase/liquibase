@@ -329,7 +329,7 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
             if (table == null) {
                 View view = snapshot.getView(tempTable.getName());
                 if (view == null) {
-                    LogFactory.getLogger().info("Could not find table or view " + tempTable.getName() + " for column " + column.getName());
+                    LogFactory.getLogger().debug("Could not find table or view " + tempTable.getName() + " for column " + column.getName());
                     continue;
                 } else {
                     column.setView(view);
