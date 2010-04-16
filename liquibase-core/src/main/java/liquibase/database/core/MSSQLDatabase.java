@@ -204,9 +204,4 @@ public class MSSQLDatabase extends AbstractDatabase {
     public boolean supportsRestrictForeignKeys() {
         return false;
     }
-
-	@Override
-	public String getDefaultSchemaName() {
-        return "dbo";
-	}
 }
