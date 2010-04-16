@@ -2,6 +2,7 @@ package liquibase.database.core;
 
 import liquibase.database.AbstractDatabaseTest;
 import liquibase.database.Database;
+import liquibase.exception.DatabaseException;
 import org.junit.Assert;
 import static org.junit.Assert.*;
 import org.junit.Test;
@@ -54,5 +55,14 @@ public class MSSQLDatabaseTest extends AbstractDatabaseTest {
     public void escapeTableName_withSchema() {
         Database database = new MSSQLDatabase();
         assertEquals("[schemaName].[tableName]", database.escapeTableName("schemaName", "tableName"));
+    }
+
+    @Test
+    public void changeDefaultSchema() throws DatabaseException {
+        Database database = new MSSQLDatabase();
+        assertEquals("dbo", database.getDefaultSchemaName());
+
+        database.setDefaultSchemaName("myschema");
+        assertEquals("myschema", database.getDefaultSchemaName());
     }
 }
