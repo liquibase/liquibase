@@ -9,6 +9,7 @@ public class ConstraintsConfig {
     private Boolean nullable;
     private Boolean primaryKey;
     private String primaryKeyName;
+    private String primaryKeyTablespace;
     private String references;
     private Boolean unique;
     private String uniqueConstraintName;
@@ -17,8 +18,6 @@ public class ConstraintsConfig {
     private String foreignKeyName;
     private Boolean initiallyDeferred;
     private Boolean deferrable;
-	// used for PK's index configuration
-	private String tablespace;
 
     public Boolean isNullable() {
         return nullable;
@@ -108,11 +107,11 @@ public class ConstraintsConfig {
         this.deferrable = deferrable;
     }
 
-	public String getTablespace() {
-		return tablespace;
+	public String getPrimaryKeyTablespace() {
+		return primaryKeyTablespace;
 	}
 
-	public void setTablespace(String tablespace) {
-		this.tablespace = tablespace;
+	public void setPrimaryKeyTablespace(String primaryKeyTablespace) {
+		this.primaryKeyTablespace = primaryKeyTablespace;
 	}
 }
