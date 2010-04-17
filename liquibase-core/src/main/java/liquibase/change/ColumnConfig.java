@@ -57,7 +57,7 @@ public class ColumnConfig {
 			ConstraintsConfig constraints = new ConstraintsConfig(); 
 			constraints.setNullable(column.getConstraints().isNullable());
 			constraints.setPrimaryKey(column.getConstraints().isPrimaryKey());
-			constraints.setTablespace(column.getConstraints().getTablespace());
+			constraints.setPrimaryKeyTablespace(column.getConstraints().getPrimaryKeyTablespace());
 			constraints.setUnique(column.getConstraints().isUnique());
 		}
 		setConstraints(constraints);

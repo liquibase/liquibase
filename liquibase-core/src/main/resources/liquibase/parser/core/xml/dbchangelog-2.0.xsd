@@ -238,6 +238,7 @@
 		<xsd:attribute name="nullable" type="booleanExp" />
 		<xsd:attribute name="primaryKey" type="booleanExp" />
 		<xsd:attribute name="primaryKeyName" type="xsd:string" />
+        <xsd:attribute name="primaryKeyTablespace" type="xsd:string" />
 		<xsd:attribute name="unique" type="booleanExp" />
 		<xsd:attribute name="uniqueConstraintName" type="xsd:string" />
 		<xsd:attribute name="references" type="xsd:string" />
@@ -245,7 +246,6 @@
 		<xsd:attribute name="deleteCascade" type="booleanExp" />
 		<xsd:attribute name="deferrable" type="booleanExp" />
 		<xsd:attribute name="initiallyDeferred" type="booleanExp" />
-		<xsd:attribute name="tablespace" type="xsd:string" />
 	</xsd:attributeGroup>
 
 	<xsd:attributeGroup name="column">
