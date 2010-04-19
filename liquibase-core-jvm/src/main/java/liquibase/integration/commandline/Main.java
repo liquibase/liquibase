@@ -233,16 +233,19 @@ public class Main {
                 if (entry.getKey().equals("promptOnNonLocalDatabase")) {
                     continue;
                 }
+                if (((String) entry.getKey()).startsWith("parameter.")) {
+                    changeLogParameters.put(((String) entry.getKey()).replaceFirst("^parameter.", ""), entry.getValue());
+                } else {
+                    Field field = getClass().getDeclaredField((String) entry.getKey());
+                    Object currentValue = field.get(this);
 
-                Field field = getClass().getDeclaredField((String) entry.getKey());
-                Object currentValue = field.get(this);
-
-                if (currentValue == null) {
-                    String value = entry.getValue().toString().trim();
-                    if (field.getType().equals(Boolean.class)) {
-                        field.set(this, Boolean.valueOf(value));
-                    } else {
-                        field.set(this, value);
+                    if (currentValue == null) {
+                        String value = entry.getValue().toString().trim();
+                        if (field.getType().equals(Boolean.class)) {
+                            field.set(this, Boolean.valueOf(value));
+                        } else {
+                            field.set(this, value);
+                        }
                     }
                 }
             } catch (Exception e) {
