@@ -37,9 +37,10 @@ public class CreateIndexGenerator implements SqlGenerator<CreateIndexStatement> 
 		    // Oracle don't create index when creates foreignKey
 		    // It means that all indexes associated with foreignKey should be created manualy
 		    List<String> associatedWith = StringUtils.splitAndTrim(statement.getAssociatedWith(), ",");
-		    if (associatedWith.contains(Index.MARK_PRIMARY_KEY) || associatedWith.contains(Index.MARK_UNIQUE_CONSTRAINT)) {
-			    return new Sql[0];
+		    if (associatedWith != null && (associatedWith.contains(Index.MARK_PRIMARY_KEY) || associatedWith.contains(Index.MARK_UNIQUE_CONSTRAINT))) {
+		    	return new Sql[0];
 		    }
+
 	    } else {
 		    // Default filter of index creation:
 		    // creation of all indexes with associations are switched off.
