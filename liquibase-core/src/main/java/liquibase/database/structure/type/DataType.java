@@ -79,12 +79,12 @@ public abstract class DataType {
 	public String convertObjectToString(Object value, Database database) {
         if (value == null) {
             return null;
-    } else if (value.toString().equals("CURRENT_TIMESTAMP()")) {
-          return database.getCurrentDateTimeFunction();
+        } else if (value.toString().equals("CURRENT_TIMESTAMP()")) {
+            return database.getCurrentDateTimeFunction();
         } else if (value.equals(Boolean.TRUE)) {
-              return TypeConverterFactory.getInstance().findTypeConverter(database).getBooleanType().getTrueBooleanValue();
+            return TypeConverterFactory.getInstance().findTypeConverter(database).getBooleanType().getTrueBooleanValue();
         } else if (value.equals(Boolean.FALSE)) {
-            return TypeConverterFactory.getInstance().findTypeConverter(database).getBooleanType().getTrueBooleanValue();              
+            return TypeConverterFactory.getInstance().findTypeConverter(database).getBooleanType().getTrueBooleanValue();
         }
         return value.toString();
     }

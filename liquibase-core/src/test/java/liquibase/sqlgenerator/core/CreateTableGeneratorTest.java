@@ -1,7 +1,44 @@
 package liquibase.sqlgenerator.core;
 
-public abstract class CreateTableGeneratorTest {
+import liquibase.database.Database;
+import liquibase.sqlgenerator.AbstractSqlGeneratorTest;
+import liquibase.sqlgenerator.SqlGenerator;
+import liquibase.statement.core.CreateTableStatement;
+import liquibase.statement.core.SelectFromDatabaseChangeLogStatement;
+import liquibase.test.TestContext;
+import org.junit.Test;
+import static org.junit.Assert.*;
+
+public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTableStatement> {
+
+    protected static final String TABLE_NAME = "TABLE_NAME";
+    protected static final String SCHEMA_NAME = "SCHEMA_NAME";
+
+    protected static final String COLUMN_NAME1 = "COLUMN1_NAME";
+
+    public CreateTableGeneratorTest() throws Exception {
+        super(new CreateTableGenerator());
+    }
+
+    @Override
+    protected CreateTableStatement createSampleSqlStatement() {
+        CreateTableStatement statement = new CreateTableStatement(SCHEMA_NAME, TABLE_NAME);
+        statement.addColumn(COLUMN_NAME1, "int");
+        return statement;
+    }
+
 //    @Test
+//    public void testWithColumnWithDefaultValue() {
+//        CreateTableStatement statement = new CreateTableStatement(SCHEMA_NAME, TABLE_NAME);
+//        statement.addColumn(COLUMN_NAME1, "text", "America/Los_Angeles");
+//        for (Database database : TestContext.getInstance().getAllDatabases()) {
+//            if (shouldBeImplementation(database)) {
+//                assertEquals("CREATE TABLE SCHEMA_NAME.TABLE_NAME (COLUMN1_NAME CLOB DEFAULT 'America/Los_Angeles')", this.generatorUnderTest.generateSql(statement, database, null)[0].toSql());
+//            }
+//        }
+//    }
+
+    //    @Test
 //    public void createTable_standard() throws Exception {
 //        new DatabaseTestTemplate().testOnAvailableDatabases(
 //                new SqlStatementDatabaseTest(null, new CreateTableStatement(null, TABLE_NAME)
