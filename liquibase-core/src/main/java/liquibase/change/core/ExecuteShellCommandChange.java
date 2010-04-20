@@ -8,8 +8,10 @@ import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.executor.LoggingExecutor;
 import liquibase.logging.LogFactory;
+import liquibase.sql.Sql;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.CommentStatement;
+import liquibase.statement.core.RuntimeStatement;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
 
@@ -49,7 +51,7 @@ public class ExecuteShellCommandChange extends AbstractChange {
         this.os = StringUtils.splitAndTrim(os, ",");
     }
 
-    public SqlStatement[] generateStatements(Database database) {
+    public SqlStatement[] generateStatements(final Database database) {
         boolean shouldRun = true;
         if (os != null && os.size() > 0) {
             String currentOS = System.getProperty("os.name");
@@ -67,38 +69,45 @@ public class ExecuteShellCommandChange extends AbstractChange {
         }
         
         if (shouldRun && !nonExecutedMode) {
-        	
-        	
-            List<String> commandArray = new ArrayList<String>();
-            commandArray.add(executable);
-            commandArray.addAll(args);
 
-            try {
-                ProcessBuilder pb = new ProcessBuilder(commandArray);
-                pb.redirectErrorStream(true);
-                Process p = pb.start();
-                int returnCode = 0;
-                try {
-                    returnCode = p.waitFor();
-                } catch (InterruptedException e) {
-                    ;
+
+            return new SqlStatement[]{new RuntimeStatement() {
+
+                @Override
+                public Sql[] generate(Database database) {
+                    List<String> commandArray = new ArrayList<String>();
+                    commandArray.add(executable);
+                    commandArray.addAll(args);
+
+                    try {
+                        ProcessBuilder pb = new ProcessBuilder(commandArray);
+                        pb.redirectErrorStream(true);
+                        Process p = pb.start();
+                        int returnCode = 0;
+                        try {
+                            returnCode = p.waitFor();
+                        } catch (InterruptedException e) {
+                            ;
+                        }
+
+                        ByteArrayOutputStream errorStream = new ByteArrayOutputStream();
+                        ByteArrayOutputStream inputStream = new ByteArrayOutputStream();
+                        StreamUtil.copy(p.getErrorStream(), errorStream);
+                        StreamUtil.copy(p.getInputStream(), inputStream);
+
+                        LogFactory.getLogger().severe(errorStream.toString());
+                        LogFactory.getLogger().info(inputStream.toString());
+
+                        if (returnCode != 0) {
+                            throw new RuntimeException(getCommandString() + " returned an code of " + returnCode);
+                        }
+                    } catch (IOException e) {
+                        throw new UnexpectedLiquibaseException("Error executing command: " + e);
+                    }
+
+                    return null;
                 }
-
-                ByteArrayOutputStream errorStream = new ByteArrayOutputStream();
-                ByteArrayOutputStream inputStream = new ByteArrayOutputStream();
-                StreamUtil.copy(p.getErrorStream(), errorStream);
-                StreamUtil.copy(p.getInputStream(), inputStream);
-
-                LogFactory.getLogger().info(errorStream.toString());
-                LogFactory.getLogger().info(inputStream.toString());
-
-                if (returnCode != 0) {
-                    throw new RuntimeException(getCommandString()+" returned an code of "+returnCode);
-                }
-            } catch (IOException e) {
-                throw new UnexpectedLiquibaseException("Error executing command: " + e);
-            }
-
+            }};
         }
         
         if (nonExecutedMode) {
