@@ -1,10 +1,12 @@
 package liquibase.parser.core.xml;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.List;
@@ -12,6 +14,8 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.Stack;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -170,9 +174,14 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 				while (resources.hasMoreElements()) {
 					URL fileUrl = resources.nextElement();
 					if (!fileUrl.toExternalForm().startsWith("file:")) {
-						log.debug(fileUrl.toExternalForm()
-								+ " is not a file path");
-						continue;
+                        if (fileUrl.toExternalForm().startsWith("jar:file:")) {
+                            File zipFileDir = extractZipFile(fileUrl);
+                            fileUrl = new File(zipFileDir, pathName).toURL();
+                        } else {
+                            log.debug(fileUrl.toExternalForm()
+                                    + " is not a file path");
+                            continue;
+                        }
 					}
 					File file = new File(fileUrl.toURI());
 					log.debug("includeAll using path "
@@ -726,4 +735,31 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 					.getValue(qName));
 		}
 	}
+
+    static File extractZipFile(URL resource) throws IOException {
+        String file = resource.getFile();
+        String path = file.split("!")[0];
+        if(path.matches("file:\\/[A-Za-z]:\\/.*")) {
+            path = path.replaceFirst("file:\\/", "");
+        }else {
+            path = path.replaceFirst("file:", "");
+        }
+        path = URLDecoder.decode(path);
+        File zipfile = new File(path);
+
+        File tempDir = File.createTempFile("liquibase-sax", ".dir");
+        tempDir.delete();
+        tempDir.mkdir();
+//        tempDir.deleteOnExit();
+
+        JarFile jarFile = new JarFile(zipfile);
+        Enumeration<JarEntry> entries = jarFile.entries();
+        while (entries.hasMoreElements()) {
+            JarEntry entry = entries.nextElement();
+            File entryFile = new File(tempDir, entry.getName());
+            entryFile.mkdirs();
+        }
+
+        return tempDir;
+    }
 }
