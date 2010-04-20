@@ -699,4 +699,13 @@
             <column name="id" type="int"/>
         </createTable>
     </changeSet>
+
+    <changeSet id="modifySqlWithContext" author="nvoxland">
+        <createTable tableName="INVALID TABLE NAME">
+            <column name="id" type="int"/>
+        </createTable>
+        <modifySql context="test">
+            <replace replace="INVALID TABLE NAME" with="validTableName"/>
+        </modifySql>
+    </changeSet>
 </databaseChangeLog>
