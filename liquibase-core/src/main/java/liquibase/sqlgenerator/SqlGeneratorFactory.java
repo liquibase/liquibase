@@ -83,12 +83,15 @@ public class SqlGeneratorFactory {
             Class clazz = generator.getClass();
             while (clazz != null) {
                 for (Type type : clazz.getGenericInterfaces()) {
-                    if (type instanceof ParameterizedType
-                            && Arrays.asList(((ParameterizedType) type).getActualTypeArguments()).contains(statement.getClass())) {
-                        //noinspection unchecked
-                        if (generator.supports(statement, database)) {
-                            validGenerators.add(generator);
-                        }
+                    if (type instanceof ParameterizedType) {
+                            for (Type typeClass : ((ParameterizedType) type).getActualTypeArguments()) {
+                                if (((Class) typeClass).isAssignableFrom(statement.getClass())) {
+                                    //noinspection unchecked
+                                    if (generator.supports(statement, database)) {
+                                        validGenerators.add(generator);
+                                    }
+                                }
+                            }
                     } else if (type.equals(SqlGenerator.class)) {
                         //noinspection unchecked
                         if (generator.supports(statement, database)) {
