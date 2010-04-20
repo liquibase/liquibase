@@ -785,7 +785,7 @@ public abstract class AbstractDatabase implements Database {
         ranChangeSetList = new ArrayList<RanChangeSet>();
         if (hasDatabaseChangeLogTable()) {
             LogFactory.getLogger().info("Reading from " + databaseChangeLogTableName);
-            SqlStatement select = new SelectFromDatabaseChangeLogStatement("FILENAME", "AUTHOR", "ID", "MD5SUM", "DATEEXECUTED", "ORDEREXECUTED", "TAG").setOrderBy("DATEEXECUTED ASC", "ORDEREXECUTED ASC");
+            SqlStatement select = new SelectFromDatabaseChangeLogStatement("FILENAME", "AUTHOR", "ID", "MD5SUM", "DATEEXECUTED", "ORDEREXECUTED", "TAG", "EXECTYPE").setOrderBy("DATEEXECUTED ASC", "ORDEREXECUTED ASC");
             List<Map> results = ExecutorService.getInstance().getExecutor(this).queryForList(select);
             for (Map rs : results) {
                 String fileName = rs.get("FILENAME").toString();
@@ -794,7 +794,8 @@ public abstract class AbstractDatabase implements Database {
                 String md5sum = rs.get("MD5SUM") == null ? null : rs.get("MD5SUM").toString();
                 Date dateExecuted = (Date) rs.get("DATEEXECUTED");
                 String tag = rs.get("TAG") == null ? null : rs.get("TAG").toString();
-                RanChangeSet ranChangeSet = new RanChangeSet(fileName, id, author, CheckSum.parse(md5sum), dateExecuted, tag);
+                String execType = rs.get("EXECTYPE") == null ? null : rs.get("EXECTYPE").toString();
+                RanChangeSet ranChangeSet = new RanChangeSet(fileName, id, author, CheckSum.parse(md5sum), dateExecuted, tag, ChangeSet.ExecType.valueOf(execType));
                 ranChangeSetList.add(ranChangeSet);
             }
         }

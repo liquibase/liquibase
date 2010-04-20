@@ -224,7 +224,7 @@ public class Liquibase {
             changeLog.validate(database);
 
             ChangeLogIterator logIterator = new ChangeLogIterator(changeLog,
-                    new AlreadyRanChangeSetFilter(database.getRanChangeSetList()),
+                    new ActuallyExecutedChangeSetFilter(database.getRanChangeSetList()),
                     new ContextChangeSetFilter(contexts),
                     new DbmsChangeSetFilter(database),
                     new CountChangeSetFilter(changesToRollback));
@@ -269,8 +269,10 @@ public class Liquibase {
             DatabaseChangeLog changeLog = ChangeLogParserFactory.getInstance().getParser(changeLogFile).parse(changeLogFile, changeLogParameters, resourceAccessor);
             changeLog.validate(database);
 
+            List<RanChangeSet> ranChangeSetList = database.getRanChangeSetList();
             ChangeLogIterator logIterator = new ChangeLogIterator(changeLog,
-                    new AfterTagChangeSetFilter(tagToRollBackTo, database.getRanChangeSetList()),
+                    new AfterTagChangeSetFilter(tagToRollBackTo, ranChangeSetList),
+                    new ActuallyExecutedChangeSetFilter(ranChangeSetList),
                     new ContextChangeSetFilter(contexts),
                     new DbmsChangeSetFilter(database));
 
@@ -310,8 +312,10 @@ public class Liquibase {
             DatabaseChangeLog changeLog = ChangeLogParserFactory.getInstance().getParser(changeLogFile).parse(changeLogFile, changeLogParameters, resourceAccessor);
             changeLog.validate(database);
 
+            List<RanChangeSet> ranChangeSetList = database.getRanChangeSetList();
             ChangeLogIterator logIterator = new ChangeLogIterator(changeLog,
-                    new ExecutedAfterChangeSetFilter(dateToRollBackTo, database.getRanChangeSetList()),
+                    new ExecutedAfterChangeSetFilter(dateToRollBackTo, ranChangeSetList),
+                    new ActuallyExecutedChangeSetFilter(ranChangeSetList),                    
                     new ContextChangeSetFilter(contexts),
                     new DbmsChangeSetFilter(database));
 

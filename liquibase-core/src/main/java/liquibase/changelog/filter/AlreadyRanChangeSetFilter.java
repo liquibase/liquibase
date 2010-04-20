@@ -5,23 +5,14 @@ import liquibase.changelog.RanChangeSet;
 
 import java.util.List;
 
-public class AlreadyRanChangeSetFilter implements ChangeSetFilter {
-
-    public List<RanChangeSet> ranChangeSets;
+public class AlreadyRanChangeSetFilter extends RanChangeSetFilter {
 
     public AlreadyRanChangeSetFilter(List<RanChangeSet> ranChangeSets) {
-        this.ranChangeSets = ranChangeSets;
+        super(ranChangeSets);
     }
 
-    @SuppressWarnings({"RedundantIfStatement"})
     public boolean accepts(ChangeSet changeSet) {
-        for (RanChangeSet ranChangeSet : ranChangeSets) {
-            if (ranChangeSet.getId().equalsIgnoreCase(changeSet.getId())
-                    && ranChangeSet.getAuthor().equalsIgnoreCase(changeSet.getAuthor())
-                    && ranChangeSet.getChangeLog().equalsIgnoreCase(changeSet.getFilePath())) {
-                return true;
-            }
-        }
-        return false;
+        return getRanChangeSet(changeSet) != null;
     }
+
 }
