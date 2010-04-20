@@ -109,8 +109,8 @@ public class Diff {
 
 	public void setDiffTypes(String diffTypes) {
 		if (StringUtils.trimToNull(diffTypes) != null) {
-			Set<String> types = new HashSet<String>(Arrays.asList(diffTypes
-					.toLowerCase().split("\\s*,\\s*")));
+			Set<String> types = new HashSet<String>(Arrays.asList(diffTypes.toLowerCase().split("\\s*,\\s*")));
+            
 			diffTables = types.contains("tables");
 			diffColumns = types.contains("columns");
 			diffViews = types.contains("views");
