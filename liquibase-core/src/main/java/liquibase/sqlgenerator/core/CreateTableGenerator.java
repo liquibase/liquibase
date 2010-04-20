@@ -143,10 +143,14 @@ public class CreateTableGenerator implements SqlGenerator<CreateTableStatement> 
         		buffer.append(" CONSTRAINT ");
                 buffer.append(database.escapeConstraintName(fkConstraint.getForeignKeyName()));
         	}
+            String referencesString = fkConstraint.getReferences();
+            if (!referencesString.contains(".") && database.getDefaultSchemaName() != null) {
+                referencesString = referencesString+"."+database.getDefaultSchemaName();
+            }
             buffer.append(" FOREIGN KEY (")
                     .append(database.escapeColumnName(statement.getSchemaName(), statement.getTableName(), fkConstraint.getColumn()))
                     .append(") REFERENCES ")
-                    .append(fkConstraint.getReferences());
+                    .append(referencesString);
 
             if (fkConstraint.isDeleteCascade()) {
                 buffer.append(" ON DELETE CASCADE");
