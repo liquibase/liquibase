@@ -34,9 +34,9 @@ public class DropIndexGenerator implements SqlGenerator<DropIndexStatement> {
     }
 
     public Sql[] generateSql(DropIndexStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        if (database instanceof DerbyDatabase || database instanceof H2Database || database instanceof HsqlDatabase) {
+        if (true) { //is there any databases where we should drop PK/FK indexes separately?
             List<String> associatedWith = StringUtils.splitAndTrim(statement.getAssociatedWith(), ",");
-            if (associatedWith != null && (associatedWith.contains(Index.MARK_PRIMARY_KEY) || associatedWith.contains(Index.MARK_FOREIGN_KEY))) {
+            if (associatedWith != null && (associatedWith.contains(Index.MARK_PRIMARY_KEY) || associatedWith.contains(Index.MARK_FOREIGN_KEY) || associatedWith.contains(Index.MARK_UNIQUE_CONSTRAINT))) {
                 return new Sql[0];
             }
         }

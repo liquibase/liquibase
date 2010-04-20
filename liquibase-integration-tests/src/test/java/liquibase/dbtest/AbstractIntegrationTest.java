@@ -1,6 +1,7 @@
 package liquibase.dbtest;
 
 import liquibase.Liquibase;
+import liquibase.exception.LiquibaseException;
 import liquibase.servicelocator.ServiceLocator;
 import liquibase.snapshot.DatabaseSnapshotGeneratorFactory;
 import liquibase.snapshot.DatabaseSnapshot;
@@ -439,7 +440,11 @@ public abstract class AbstractIntegrationTest {
 
             liquibase = createLiquibase(tempFile.getName());
             System.out.println("updating from "+tempFile.getCanonicalPath());
-            liquibase.update(this.contexts);
+            try {
+                liquibase.update(this.contexts);
+            } catch (LiquibaseException e) {
+                throw e;
+            }
 
             DatabaseSnapshot emptyAgainSnapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database, null, null);
             assertEquals(0, emptyAgainSnapshot.getTables().size());
@@ -713,7 +718,7 @@ public abstract class AbstractIntegrationTest {
     }
 
     public static String getDatabaseServerHostname() {
-        return "localhost";
+        return "192.168.1.5";
     }
 
     protected Database getDatabase(){
