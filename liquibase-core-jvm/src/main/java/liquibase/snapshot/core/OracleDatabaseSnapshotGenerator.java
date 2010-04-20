@@ -92,7 +92,7 @@ public class OracleDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
 				if (!database.isSystemTable(null, schema, tableName) && !database.isLiquibaseTable(tableName)) {
 					Table table = snapshot.getTable(tableName);
 					if (table == null) {
-						throw new IllegalStateException("Cannot find table for " + tableName);
+						continue; //probably different schema
 					}
 					constraintInformation.setTable(table);
 					constraintInformation.setDisabled("DISABLED".equals(status));
@@ -132,7 +132,8 @@ public class OracleDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
 		}
 	}
 
-	protected void readColumns(DatabaseSnapshot snapshot, String schema, DatabaseMetaData databaseMetaData) throws SQLException, DatabaseException {
+	@Override
+    protected void readColumns(DatabaseSnapshot snapshot, String schema, DatabaseMetaData databaseMetaData) throws SQLException, DatabaseException {
 		findIntegerColumns(snapshot);
 		super.readColumns(snapshot, schema, databaseMetaData);
 
@@ -148,8 +149,11 @@ public class OracleDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
 		while (rs.next()) {
 			Column column = snapshot.getColumn(rs.getString("TABLE_NAME"), rs.getString("COLUMN_NAME"));
 			// setting up tablespace property to column, to configure it's PK-index
-			column.setTablespace(rs.getString("TABLESPACE"));
-		}
+            if (column == null) {
+                continue; //probably a different schema
+            }
+            column.setTablespace(rs.getString("TABLESPACE"));
+        }
 	}
 
 	/**
@@ -175,7 +179,8 @@ public class OracleDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
 		return integerList;
 	}
 
-	protected void configureColumnType(Column column, ResultSet rs) throws SQLException {
+	@Override
+    protected void configureColumnType(Column column, ResultSet rs) throws SQLException {
 		if (integerList.contains(column.getTable().getName() + "." + column.getName())) {
 		    column.setDataType(Types.INTEGER);
 	    } else {
@@ -228,7 +233,8 @@ public class OracleDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
 		return foreignKeys;
 	}
 
-	protected void readIndexes(DatabaseSnapshot snapshot, String schema, DatabaseMetaData databaseMetaData) throws DatabaseException, SQLException {
+	@Override
+    protected void readIndexes(DatabaseSnapshot snapshot, String schema, DatabaseMetaData databaseMetaData) throws DatabaseException, SQLException {
 		Database database = snapshot.getDatabase();
 		updateListeners("Reading indexes for " + database.toString() + " ...");
 
@@ -266,7 +272,11 @@ public class OracleDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
 				index = indexMap.get(indexName);
 			} else {
 				index = new Index();
-				index.setTable(snapshot.getTable(tableName));
+                Table table = snapshot.getTable(tableName);
+                if (table == null) {
+                    continue; //probably different schema
+                }
+                index.setTable(table);
 				index.setTablespace(tableSpace);
 				index.setName(indexName);
 				index.setUnique(!nonUnique);
@@ -310,7 +320,8 @@ public class OracleDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
 		}
 	}
 
-	protected void readPrimaryKeys(DatabaseSnapshot snapshot, String schema, DatabaseMetaData databaseMetaData) throws DatabaseException, SQLException {
+	@Override
+    protected void readPrimaryKeys(DatabaseSnapshot snapshot, String schema, DatabaseMetaData databaseMetaData) throws DatabaseException, SQLException {
 		Database database = snapshot.getDatabase();
 		updateListeners("Reading primary keys for " + database.toString() + " ...");
 
@@ -335,10 +346,14 @@ public class OracleDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
 				}
 			}
 
-			if (!foundExistingPK) {
+			if (!foundExistingPK && !database.isLiquibaseTable(tableName)) {
 				PrimaryKey primaryKey = new PrimaryKey();
 				primaryKey.setTablespace(tablespace);
-				primaryKey.setTable(snapshot.getTable(tableName));
+                Table table = snapshot.getTable(tableName);
+                if (table == null) {
+                    continue; //probably a different schema
+                }
+                primaryKey.setTable(table);
 				primaryKey.addColumnName(position - 1, columnName);
 				primaryKey.setName(convertPrimaryKeyName(rs.getString("PK_NAME")));
 

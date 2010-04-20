@@ -7,7 +7,6 @@
     <preConditions>
             <dbms type="oracle"/>
             <runningAs username="liquibase"/>
-            <changeLogPropertyDefined property="inttype"/>
     </preConditions>
 
     <changeSet id="1" author="nvoxland">
@@ -17,7 +16,7 @@
             They aren't used to compute the changeSet MD5Sum, so you can update them whenever you want without causing problems.
         </comment>        
         <createTable tableName="person">
-            <column name="id" type="${inttype}">
+            <column name="id" type="int">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="firstname" type="varchar(50)"/>

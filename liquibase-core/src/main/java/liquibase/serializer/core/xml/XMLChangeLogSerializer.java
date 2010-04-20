@@ -195,7 +195,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
             }
 
 	        if (constraints.getPrimaryKeyTablespace() != null) {
-                constraintsElement.setAttribute("tablespace", constraints.getPrimaryKeyTablespace());
+                constraintsElement.setAttribute("primaryKeyTablespace", constraints.getPrimaryKeyTablespace());
             }
             element.appendChild(constraintsElement);
         }

@@ -38,9 +38,8 @@ public class CreateIndexGenerator implements SqlGenerator<CreateIndexStatement> 
 		    // It means that all indexes associated with foreignKey should be created manualy
 		    List<String> associatedWith = StringUtils.splitAndTrim(statement.getAssociatedWith(), ",");
 		    if (associatedWith != null && (associatedWith.contains(Index.MARK_PRIMARY_KEY) || associatedWith.contains(Index.MARK_UNIQUE_CONSTRAINT))) {
-		    	return new Sql[0];
+			    return new Sql[0];
 		    }
-
 	    } else {
 		    // Default filter of index creation:
 		    // creation of all indexes with associations are switched off.
@@ -61,7 +60,7 @@ public class CreateIndexGenerator implements SqlGenerator<CreateIndexStatement> 
 	    buffer.append("INDEX ");
 
 	    if (statement.getIndexName() != null) {
-		    buffer.append(statement.getIndexName()).append(" ");
+		    buffer.append(database.escapeIndexName(statement.getTableSchemaName(), statement.getIndexName())).append(" ");
 	    }
 	    buffer.append("ON ");
 	    buffer.append(database.escapeTableName(statement.getTableSchemaName(), statement.getTableName())).append("(");
