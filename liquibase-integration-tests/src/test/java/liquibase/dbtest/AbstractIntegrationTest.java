@@ -718,7 +718,7 @@ public abstract class AbstractIntegrationTest {
     }
 
     public static String getDatabaseServerHostname() {
-        return "192.168.1.5";
+        return "localhost";
     }
 
     protected Database getDatabase(){

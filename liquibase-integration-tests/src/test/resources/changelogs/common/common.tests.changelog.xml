@@ -708,4 +708,6 @@
             <replace replace="INVALID TABLE NAME" with="validTableName"/>
         </modifySql>
     </changeSet>
+
+    <includeAll path="com/example/packaged"/>
 </databaseChangeLog>
