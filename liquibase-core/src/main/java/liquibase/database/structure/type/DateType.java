@@ -21,8 +21,17 @@ public class DateType extends DataType {
             return ((DatabaseFunction) value).getValue();
         } else if (value.toString().equals("CURRENT_TIMESTAMP()")) {
               return database.getCurrentDateTimeFunction();
-        }        
-        return database.getDateLiteral(((java.sql.Date) value));
+        }
+        if (value instanceof java.sql.Timestamp) {
+            return database.getDateLiteral(((java.sql.Timestamp) value));
+        } else if (value instanceof java.sql.Date) {
+            return database.getDateLiteral(((java.sql.Date) value));
+        } else if (value instanceof java.sql.Time) {
+            return database.getDateLiteral(((java.sql.Time) value));
+        } else {
+            return database.getDateLiteral(((java.util.Date) value));
+
+        }
     }
 
 
