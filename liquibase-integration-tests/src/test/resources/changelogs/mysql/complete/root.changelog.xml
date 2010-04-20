@@ -360,4 +360,16 @@
     <!--<changeSet id="casetest" author="nvoxland" runAlways="true" >-->
         <!--<sql>select * from bit_test</sql>-->
     <!--</changeSet>-->
+
+    <!-- ensure that changes skipped by failed preconditions do not attempt to roll back --> 
+    <changeSet author="GATEKEEPER" id="1.5.0-oracle-1">
+        <preConditions onFail="MARK_RAN">
+            <dbms type="oracle"/>
+        </preConditions>
+        <sql>create sequence gk_action_gk_id_seq</sql>
+        <rollback>
+            <sql>drop sequence gk_action_gk_id_seq</sql>
+        </rollback>
+    </changeSet>
+
 </databaseChangeLog>
