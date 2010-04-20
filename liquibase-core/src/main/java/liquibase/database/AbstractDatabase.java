@@ -819,7 +819,7 @@ public abstract class AbstractDatabase implements Database {
 
 
         ExecutorService.getInstance().getExecutor(this).execute(new MarkChangeSetRanStatement(changeSet, execType));
-
+        commit();
         getRanChangeSetList().add(new RanChangeSet(changeSet));
     }
 
