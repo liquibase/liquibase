@@ -132,6 +132,7 @@ public class Main {
             LogFactory.getLogger().severe(message, e);
             System.exit(-3);
         }
+        System.exit(0);
     }
 
     private static String generateLogLevelWarningMessage() {
