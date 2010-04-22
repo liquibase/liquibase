@@ -33,7 +33,7 @@ public class TableWriter extends HTMLWriter {
 
         for (Column column : table.getColumns()) {
             cells.add(Arrays.asList(column.getDataTypeString(database),
-                    "<A HREF=\"../columns/" + table.getName() + "." + column.getName() + ".html" + "\">" + column.getName() + "</A>"));
+                    "<A HREF=\"../columns/" + table.getName().toLowerCase() + "." + column.getName().toLowerCase() + ".html" + "\">" + column.getName() + "</A>"));
             //todo: add foreign key info to columns?
         }
 
