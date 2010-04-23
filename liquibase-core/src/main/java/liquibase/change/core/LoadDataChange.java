@@ -99,7 +99,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns 
                                 valueConfig.setValueBoolean(Boolean.parseBoolean(value.toString().toLowerCase()));
                             } else if (columnConfig.getType().equalsIgnoreCase("NUMERIC")) {
                                 valueConfig.setValueNumeric(value.toString());
-                            } else if (columnConfig.getType().equalsIgnoreCase("DATE")) {
+                            } else if (columnConfig.getType().toLowerCase().contains("date") ||columnConfig.getType().toLowerCase().contains("time")) {
                                 valueConfig.setValueDate(value.toString());
                             } else if (columnConfig.getType().equalsIgnoreCase("STRING")) {
                                 valueConfig.setValue(value.toString());
@@ -158,7 +158,11 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns 
             if (config.getIndex() != null && config.getIndex().equals(index)) {
                 return config;
             }
-            if (config.getHeader() != null && config.getHeader().equals(header)) {
+            if (config.getHeader() != null && config.getHeader().equalsIgnoreCase(header)) {
+                return config;
+            }
+
+            if (config.getName() != null && config.getName().equalsIgnoreCase(header)) {
                 return config;
             }
         }

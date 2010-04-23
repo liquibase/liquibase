@@ -254,4 +254,6 @@ public interface Database extends DatabaseObject, PrioritizedService {
 	 * Returns list of database native functions
 	 * */
 	public List<DatabaseFunction> getDatabaseFunctions();
+
+    void reset();
 }
