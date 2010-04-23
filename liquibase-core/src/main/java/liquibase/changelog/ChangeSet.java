@@ -46,6 +46,22 @@ public class ChangeSet implements Conditional {
         public boolean ranBefore;
     }
 
+     public enum ValidationFailOption {
+        HALT("HALT"),
+        MARK_RAN("MARK_RAN");
+
+        String key;
+
+        ValidationFailOption(String key) {
+            this.key = key;
+        }
+
+        @Override
+        public String toString() {
+            return key;
+        }
+    }
+
     private List<Change> changes;
     private String id;
     private String author;
@@ -59,6 +75,8 @@ public class ChangeSet implements Conditional {
     private Boolean failOnError;
     private Set<CheckSum> validCheckSums = new HashSet<CheckSum>();
     private boolean runInTransaction;
+    private ValidationFailOption onValidationFail = ValidationFailOption.HALT;
+    private boolean validationFailed;
 
     private List<Change> rollBackChanges = new ArrayList<Change>();
 
@@ -134,6 +152,9 @@ public class ChangeSet implements Conditional {
      * @return should change set be marked as ran
      */
     public ExecType execute(DatabaseChangeLog databaseChangeLog, Database database) throws MigrationFailedException {
+        if (validationFailed) {
+            return ExecType.MARK_RAN;
+        }
 
         long startTime = new Date().getTime();
 
@@ -432,6 +453,18 @@ public class ChangeSet implements Conditional {
 
     public void setFailOnError(Boolean failOnError) {
         this.failOnError = failOnError;
+    }
+
+    public ValidationFailOption getOnValidationFail() {
+        return onValidationFail;
+    }
+
+    public void setOnValidationFail(ValidationFailOption onValidationFail) {
+        this.onValidationFail = onValidationFail;
+    }
+
+    public void setValidationFailed(boolean validationFailed) {
+        this.validationFailed = validationFailed;
     }
 
     public void addValidCheckSum(String text) {

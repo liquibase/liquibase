@@ -372,4 +372,8 @@
         </rollback>
     </changeSet>
 
+    <changeSet id="failingPrecondition" author="pcleto" onValidationFail="MARK_RAN">
+        <createSequence sequenceName="liquidbase_applicationuserSQ" startValue="1"/>
+    </changeSet>
+
 </databaseChangeLog>
