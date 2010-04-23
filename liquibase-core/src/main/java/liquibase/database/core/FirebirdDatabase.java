@@ -54,7 +54,7 @@ public class FirebirdDatabase extends AbstractDatabase {
 
     @Override
     public boolean supportsDDLInTransaction() {
-        return false;
+        return true;
     }
 
     @Override
