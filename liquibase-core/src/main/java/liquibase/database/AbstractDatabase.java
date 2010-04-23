@@ -984,4 +984,8 @@ public abstract class AbstractDatabase implements Database {
 	public List<DatabaseFunction> getDatabaseFunctions() {
 		return databaseFunctions;
 	}
+
+    public void reset() {
+        this.ranChangeSetList = null;
+    }
 }

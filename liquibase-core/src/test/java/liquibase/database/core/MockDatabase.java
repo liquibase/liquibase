@@ -435,4 +435,8 @@ public class MockDatabase implements Database {
 	public List<DatabaseFunction> getDatabaseFunctions() {
 		return null;
 	}
+
+    public void reset() {
+        
+    }
 }

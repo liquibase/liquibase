@@ -140,6 +140,7 @@ public abstract class AbstractIntegrationTest {
 
     private Liquibase createLiquibase(String changeLogFile, ResourceAccessor resourceAccessor) throws DatabaseException {
         ExecutorService.getInstance().clearExecutor(database);
+        database.reset();
         return new Liquibase(changeLogFile, resourceAccessor, database);
     }
 
@@ -244,6 +245,7 @@ public abstract class AbstractIntegrationTest {
         }
 
         DatabaseSnapshotGeneratorFactory.resetAll();
+        DatabaseFactory.reset();
     }
 
     @Test

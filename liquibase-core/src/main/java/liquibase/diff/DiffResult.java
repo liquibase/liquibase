@@ -17,6 +17,7 @@ import liquibase.serializer.core.xml.XMLChangeLogSerializer;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.core.RawSqlStatement;
+import liquibase.util.ISODateFormat;
 import liquibase.util.StringUtils;
 import liquibase.util.csv.CSVWriter;
 import liquibase.util.xml.DefaultXmlWriter;
@@ -1011,8 +1012,12 @@ public class DiffResult {
 							if (value == null) {
 								line[i] = "NULL";
 							} else {
-								line[i] = value.toString();
-							}
+                                if (value instanceof Date) {
+                                    line[i] = new ISODateFormat().format(((Date) value));
+                                } else {
+                                    line[i] = value.toString();
+                                }
+                            }
 						}
 						outputFile.writeNext(line);
 					}
