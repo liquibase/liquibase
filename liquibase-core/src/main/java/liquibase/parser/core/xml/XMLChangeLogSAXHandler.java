@@ -227,15 +227,15 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 					filePath = databaseChangeLog.getFilePath();
 				}
 
-				changeSet = new ChangeSet(atts.getValue("id"), atts
-						.getValue("author"), alwaysRun, runOnChange, filePath,
-						databaseChangeLog.getPhysicalFilePath(), atts
-								.getValue("context"), atts.getValue("dbms"),
+				changeSet = new ChangeSet(atts.getValue("id"), atts.getValue("author"), alwaysRun, runOnChange, filePath,
+						databaseChangeLog.getPhysicalFilePath(), atts.getValue("context"), atts.getValue("dbms"),
 						Boolean.valueOf(atts.getValue("runInTransaction")));
 				if (StringUtils.trimToNull(atts.getValue("failOnError")) != null) {
-					changeSet.setFailOnError(Boolean.parseBoolean(atts
-							.getValue("failOnError")));
+					changeSet.setFailOnError(Boolean.parseBoolean(atts.getValue("failOnError")));
 				}
+                if (StringUtils.trimToNull(atts.getValue("onValidationFail")) != null) {
+                    changeSet.setOnValidationFail(ChangeSet.ValidationFailOption.valueOf(atts.getValue("onValidationFail")));
+                }
 			} else if (changeSet != null && "rollback".equals(qName)) {
 				text = new StringBuffer();
 				String id = atts.getValue("changeSetId");

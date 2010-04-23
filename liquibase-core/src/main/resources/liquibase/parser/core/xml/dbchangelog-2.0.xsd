@@ -66,6 +66,13 @@
 		</xsd:restriction>
 	</xsd:simpleType>
 
+    <xsd:simpleType name="onChangeSetValidationFail">
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="HALT" />
+            <xsd:enumeration value="MARK_RAN" />
+        </xsd:restriction>
+    </xsd:simpleType>
+
 	<!-- This is the main (root) part of the xsd -->
 	<xsd:element name="databaseChangeLog">
 		<xsd:complexType>
@@ -228,8 +235,8 @@
 		<xsd:attribute name="runOnChange" type="booleanExp" />
 		<xsd:attribute name="runAlways" type="booleanExp" />
 		<xsd:attribute name="failOnError" type="booleanExp" />
-		<xsd:attribute name="runInTransaction" type="booleanExp"
-			default="true" />
+        <xsd:attribute name="onValidationFail" type="onChangeSetValidationFail" />
+		<xsd:attribute name="runInTransaction" type="booleanExp" default="true" />
 		<xsd:attribute name="logicalFilePath" type="xsd:string" />
 	</xsd:attributeGroup>
 

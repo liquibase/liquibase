@@ -6,10 +6,12 @@ import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.RanChangeSet;
 import liquibase.database.Database;
 import liquibase.exception.*;
+import liquibase.precondition.core.DBMSPrecondition;
 import liquibase.precondition.core.ErrorPrecondition;
 import liquibase.precondition.core.FailedPrecondition;
 import liquibase.precondition.core.PreconditionContainer;
 import liquibase.logging.LogFactory;
+import liquibase.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -63,7 +65,15 @@ public class ValidatingVisitor implements ChangeSetVisitor {
             }
 
             try {
-                validationErrors.addAll(change.validate(database), changeSet);
+                ValidationErrors foundErrors = change.validate(database);
+                if (foundErrors.hasErrors()) {
+                    if (changeSet.getOnValidationFail().equals(ChangeSet.ValidationFailOption.MARK_RAN)) {
+                        LogFactory.getLogger().info("Skipping changeSet "+changeSet+" due to validation error(s): "+ StringUtils.join(foundErrors.getErrorMessages(), ", "));
+                        changeSet.setValidationFailed(true);
+                    } else {
+                        validationErrors.addAll(foundErrors, changeSet);
+                    }
+                }
             } catch (Throwable e) {
                 changeValidationExceptions.add(e);
             }
