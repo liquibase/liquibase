@@ -267,7 +267,7 @@
 
 
     <changeSet id="31.1" author="nvoxland">
-        <addNotNullConstraint tableName="pkTest" columnName="id"/>
+        <addNotNullConstraint tableName="pkTest" columnName="id" columnDataType="varchar(50)"/>
     </changeSet>
 
     <changeSet id="31.2" author="nvoxland">
@@ -332,6 +332,13 @@
         <executeCommand executable="\cygwin\bin\echo" os="Windows 7">
             <arg value="command executed here"/>
         </executeCommand>
+    </changeSet>
+
+    <changeSet id="failingPrecondition" author="pcleto">
+      <preConditions onFail="MARK_RAN" onError="WARN">
+         <dbms type="oracle"/>
+      </preConditions>
+      <createSequence sequenceName="liquidbase_applicationuserSQ" startValue="1" />
     </changeSet>
 
 </databaseChangeLog>

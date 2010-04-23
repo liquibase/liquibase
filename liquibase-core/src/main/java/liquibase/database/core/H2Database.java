@@ -74,7 +74,13 @@ public class H2Database extends AbstractDatabase {
 
     @Override
     public String getViewDefinition(String schemaName, String name) throws DatabaseException {
-        return super.getViewDefinition(schemaName, name).replaceFirst(".*?\n", ""); //h2 returns "create view....as\nselect
+        String definition = super.getViewDefinition(schemaName, name);
+        if (!definition.startsWith("SELECT")) {
+            definition = definition.replaceFirst(".*?\n", ""); //some h2 versions return "create view....as\nselect
+        }
+
+        definition = definition.replaceFirst("/\\*.*",""); //sometimes includes comments at the end
+        return definition;
     }
 
 

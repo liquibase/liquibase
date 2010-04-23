@@ -31,7 +31,7 @@ public class SetNullableGenerator implements SqlGenerator<SetNullableStatement> 
         validationErrors.checkRequiredField("tableName", setNullableStatement.getTableName());
         validationErrors.checkRequiredField("columnName", setNullableStatement.getColumnName());
 
-        if (database instanceof MSSQLDatabase || database instanceof MySQLDatabase || database instanceof InformixDatabase) {
+        if (database instanceof MSSQLDatabase || database instanceof MySQLDatabase || database instanceof InformixDatabase || database instanceof H2Database) {
             validationErrors.checkRequiredField("columnDataType", setNullableStatement.getColumnDataType());
         }
         return validationErrors;
