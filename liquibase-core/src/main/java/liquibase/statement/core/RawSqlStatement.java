@@ -22,7 +22,7 @@ public class RawSqlStatement implements SqlStatement {
     }
 
     public String getEndDelimiter() {
-        return endDelimiter;
+        return endDelimiter.replace("\\r","\r").replace("\\n","\n");
     }
 
     @Override

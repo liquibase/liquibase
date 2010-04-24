@@ -6,10 +6,7 @@ import liquibase.exception.DatabaseException;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.statement.CallableSqlStatement;
 import liquibase.statement.SqlStatement;
-import liquibase.statement.core.GetNextChangeSetSequenceValueStatement;
-import liquibase.statement.core.LockDatabaseChangeLogStatement;
-import liquibase.statement.core.SelectFromDatabaseChangeLogLockStatement;
-import liquibase.statement.core.UnlockDatabaseChangeLogStatement;
+import liquibase.statement.core.*;
 import liquibase.util.StreamUtil;
 
 import java.io.IOException;
@@ -89,8 +86,12 @@ public class LoggingExecutor extends AbstractExecutor implements Executor {
     //                output.write(StreamUtil.getLineSeparator());
     //                output.write("/");
                 } else {
-                    if (!statement.endsWith(";")) {
-                        output.write(";");
+                    String endDelimiter = ";";
+                    if (sql instanceof RawSqlStatement) {
+                        endDelimiter = ((RawSqlStatement) sql).getEndDelimiter();
+                    }
+                    if (!statement.endsWith(endDelimiter)) {
+                        output.write(endDelimiter);
                     }
                 }
                 output.write(StreamUtil.getLineSeparator());

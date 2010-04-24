@@ -326,7 +326,7 @@
         </executeCommand>
     </changeSet>
     <changeSet id="t1.1" author="nvoxland">
-        <sql splitStatements="false" stripComments="false">
+        <sql splitStatements="false" stripComments="false" endDelimiter="\n/">
 CREATE OR REPLACE PROCEDURE testSP
 IS
 BEGIN
@@ -368,5 +368,36 @@ END testSP;
             bdtestcol binary_double,
             bftestcol binary_float)
         </sql>
+    </changeSet>
+
+    <changeSet author="mdeeks" id="Create add_all_synonyms procedure" runAlways="true">
+        <createProcedure>
+            CREATE OR REPLACE
+            PROCEDURE add_all_synonyms (towner IN VARCHAR2) AUTHID CURRENT_USER
+            AS
+            CURSOR ix
+            IS
+            SELECT *
+            FROM all_objects
+            WHERE object_type IN ('TABLE', 'SEQUENCE')
+            AND owner = towner
+            AND object_name NOT IN
+            (SELECT object_name FROM user_objects WHERE object_type = 'SYNONYM');
+            BEGIN
+            FOR x IN ix
+            LOOP
+            EXECUTE immediate 'create synonym '||x.object_name||' for '||x.owner||'.'||x.object_name;
+            END LOOP;
+            END;
+        </createProcedure>
+        <rollback/>
+    </changeSet>
+    <changeSet author="mdeeks" id="Update synonyms" runAlways="true">
+        <createProcedure>
+            BEGIN
+            add_all_synonyms('SomeUser');
+            add_all_synonyms('OtherUser');
+            END;
+        </createProcedure>
     </changeSet>
 </databaseChangeLog>
