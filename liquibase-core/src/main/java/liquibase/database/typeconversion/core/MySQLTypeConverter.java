@@ -5,6 +5,8 @@ import liquibase.database.structure.type.ClobType;
 import liquibase.database.Database;
 import liquibase.database.core.H2Database;
 import liquibase.database.core.MySQLDatabase;
+import liquibase.database.structure.type.DataType;
+import liquibase.database.structure.type.DateTimeType;
 
 public class MySQLTypeConverter extends AbstractTypeConverter {
 
@@ -25,5 +27,13 @@ public class MySQLTypeConverter extends AbstractTypeConverter {
     @Override
     public ClobType getClobType() {
         return new ClobType("TEXT");
+    }
+
+    @Override
+    protected DataType getDataType(String columnTypeString, Boolean autoIncrement, String dataTypeName, String precision) {
+        if (columnTypeString.equalsIgnoreCase("timestamp")) {
+            return new DateTimeType("TIMESTAMP");
+        }
+        return super.getDataType(columnTypeString, autoIncrement, dataTypeName, precision);
     }
 }

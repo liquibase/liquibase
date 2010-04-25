@@ -376,4 +376,21 @@
         <createSequence sequenceName="liquidbase_applicationuserSQ" startValue="1"/>
     </changeSet>
 
+    <changeSet id="correct-mysql-timestamp" author="nvoxland">
+        <createTable tableName="timestampusage">
+            <column name="id" type="int"/>
+            <column name="test" type="timestamp"/>
+        </createTable>
+        <insert tableName="timestampusage">
+            <column name="id" valueNumeric="1"/>
+        </insert>
+    </changeSet>
+    <changeSet id="correct-mysql-timestamp-check" author="nvoxland">
+        <preConditions>
+            <sqlCheck expectedResult="1">select count(*) from timestampusage where test is not null</sqlCheck>
+        </preConditions>
+    </changeSet>
+
+
+
 </databaseChangeLog>
