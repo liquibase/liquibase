@@ -10,6 +10,7 @@ import liquibase.database.core.SybaseASADatabase;
 import liquibase.database.core.SybaseDatabase;
 import liquibase.database.core.CacheDatabase;
 import liquibase.database.core.*;
+import liquibase.database.typeconversion.TypeConverterFactory;
 import liquibase.test.TestContext;
 import liquibase.test.DatabaseTestContext;
 import liquibase.statement.*;
@@ -31,12 +32,12 @@ public class AddColumnExecutorTest extends AbstractExecuteTest {
     protected List<? extends SqlStatement> setupStatements(Database database) {
         ArrayList<CreateTableStatement> statements = new ArrayList<CreateTableStatement>();
         CreateTableStatement table = new CreateTableStatement(null, TABLE_NAME);
-        table.addColumn("id", "int", null, new NotNullConstraint());
+        table.addColumn("id", TypeConverterFactory.getInstance().findTypeConverter(database).getDataType("int", false), null, new NotNullConstraint());
         statements.add(table);
 
         if (database.supportsSchemas()) {
             table = new CreateTableStatement(DatabaseTestContext.ALT_SCHEMA, TABLE_NAME);
-            table.addColumn("id", "int", null, new NotNullConstraint());
+            table.addColumn("id", TypeConverterFactory.getInstance().findTypeConverter(database).getDataType("int", false), null, new NotNullConstraint());
             statements.add(table);
         }
         return statements;

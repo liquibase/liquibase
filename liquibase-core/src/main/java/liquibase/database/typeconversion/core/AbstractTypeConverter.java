@@ -175,9 +175,9 @@ public abstract class AbstractTypeConverter implements TypeConverter {
             returnTypeName = getClobType();
         } else if (dataTypeName.equalsIgnoreCase("CURRENCY")) {
             returnTypeName = getCurrencyType();
-        } else if (dataTypeName.equalsIgnoreCase("DATE")) {
+        } else if (dataTypeName.equalsIgnoreCase("DATE") || dataTypeName.equalsIgnoreCase(getDateType().getDataTypeName())) {
             returnTypeName = getDateType();
-        } else if (dataTypeName.equalsIgnoreCase("DATETIME")) {
+        } else if (dataTypeName.equalsIgnoreCase("DATETIME") || dataTypeName.equalsIgnoreCase(getDateTimeType().getDataTypeName())) {
             returnTypeName = getDateTimeType();
         } else if (dataTypeName.equalsIgnoreCase("DOUBLE")) {
             returnTypeName = getDoubleType();
@@ -195,7 +195,7 @@ public abstract class AbstractTypeConverter implements TypeConverter {
             returnTypeName = getSmallIntType();
         } else if (dataTypeName.equalsIgnoreCase("TEXT")) {
             returnTypeName = getClobType();
-        } else if (dataTypeName.equalsIgnoreCase("TIME")) {
+        } else if (dataTypeName.equalsIgnoreCase("TIME") || dataTypeName.equalsIgnoreCase(getTimeType().getDataTypeName())) {
             returnTypeName = getTimeType();
         } else if (dataTypeName.toUpperCase().contains("TIMESTAMP")) {
             returnTypeName = getDateTimeType();

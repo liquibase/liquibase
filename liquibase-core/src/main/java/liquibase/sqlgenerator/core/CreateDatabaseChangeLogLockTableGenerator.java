@@ -1,6 +1,7 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
+import liquibase.database.typeconversion.TypeConverterFactory;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.SqlGenerator;
@@ -30,10 +31,10 @@ public class CreateDatabaseChangeLogLockTableGenerator implements SqlGenerator<C
 
     public Sql[] generateSql(CreateDatabaseChangeLogLockTableStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         CreateTableStatement createTableStatement = new CreateTableStatement(database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName())
-                .addPrimaryKeyColumn("ID", "INT", null, null, null, new NotNullConstraint())
-                .addColumn("LOCKED", "BOOLEAN", null, new NotNullConstraint())
-                .addColumn("LOCKGRANTED", "DATETIME")
-                .addColumn("LOCKEDBY", "VARCHAR(255)");
+                .addPrimaryKeyColumn("ID", TypeConverterFactory.getInstance().findTypeConverter(database).getDataType("INT", false), null, null, null, new NotNullConstraint())
+                .addColumn("LOCKED", TypeConverterFactory.getInstance().findTypeConverter(database).getDataType("BOOLEAN", false), null, new NotNullConstraint())
+                .addColumn("LOCKGRANTED", TypeConverterFactory.getInstance().findTypeConverter(database).getDataType("DATETIME", false))
+                .addColumn("LOCKEDBY", TypeConverterFactory.getInstance().findTypeConverter(database).getDataType("VARCHAR(255)", false));
 
         InsertStatement insertStatement = new InsertStatement(database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName())
                 .addColumnValue("ID", 1)

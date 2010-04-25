@@ -2,6 +2,7 @@ package liquibase.statementexecute;
 
 import liquibase.database.Database;
 import liquibase.database.core.*;
+import liquibase.database.typeconversion.TypeConverterFactory;
 import liquibase.statement.NotNullConstraint;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.CreateTableStatement;
@@ -23,17 +24,17 @@ public class RenameColumnExecuteTest extends AbstractExecuteTest {
         ArrayList<CreateTableStatement> statements = new ArrayList<CreateTableStatement>();
         CreateTableStatement table = new CreateTableStatement(null, TABLE_NAME);
         if (database instanceof MySQLDatabase) {
-            table.addPrimaryKeyColumn("id", "int", null, "pk_", null);
+            table.addPrimaryKeyColumn("id", TypeConverterFactory.getInstance().findTypeConverter(database).getDataType("int", false), null, "pk_", null);
         } else {
-            table.addColumn("id", "int", null, new NotNullConstraint());
+            table.addColumn("id", TypeConverterFactory.getInstance().findTypeConverter(database).getDataType("int", false), null, new NotNullConstraint());
         }
-        table.addColumn(COLUMN_NAME, "int");
+        table.addColumn(COLUMN_NAME, TypeConverterFactory.getInstance().findTypeConverter(database).getDataType("int", false));
         statements.add(table);
 
         if (database.supportsSchemas()) {
             table = new CreateTableStatement(DatabaseTestContext.ALT_SCHEMA, TABLE_NAME);
             table
-                    .addColumn("id", "int", null, new NotNullConstraint());
+                    .addColumn("id", TypeConverterFactory.getInstance().findTypeConverter(database).getDataType("int", false), null, new NotNullConstraint());
             statements.add(table);
         }
         return statements;

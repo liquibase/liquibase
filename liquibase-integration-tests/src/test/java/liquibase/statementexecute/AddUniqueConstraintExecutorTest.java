@@ -2,6 +2,7 @@ package liquibase.statementexecute;
 
 import liquibase.database.*;
 import liquibase.database.core.*;
+import liquibase.database.typeconversion.TypeConverterFactory;
 import liquibase.test.DatabaseTestContext;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.CreateTableStatement;
@@ -25,15 +26,15 @@ public class AddUniqueConstraintExecutorTest extends AbstractExecuteTest {
         List<CreateTableStatement> statements = new ArrayList<CreateTableStatement>();
         CreateTableStatement table = new CreateTableStatement(null, TABLE_NAME);
         table
-                .addColumn("id", "int", null, new NotNullConstraint())
-                .addColumn(COLUMN_NAME, "int", null, new NotNullConstraint());
+                .addColumn("id", TypeConverterFactory.getInstance().findTypeConverter(database).getDataType("int", false), null, new NotNullConstraint())
+                .addColumn(COLUMN_NAME, TypeConverterFactory.getInstance().findTypeConverter(database).getDataType("int", false), null, new NotNullConstraint());
         statements.add(table);
 
         if (database.supportsSchemas()) {
             table = new CreateTableStatement(DatabaseTestContext.ALT_SCHEMA, TABLE_NAME);
             table
-                    .addColumn("id", "int", null, new NotNullConstraint())
-                    .addColumn(COLUMN_NAME, "int", null, new NotNullConstraint());
+                    .addColumn("id", TypeConverterFactory.getInstance().findTypeConverter(database).getDataType("int", false), null, new NotNullConstraint())
+                    .addColumn(COLUMN_NAME, TypeConverterFactory.getInstance().findTypeConverter(database).getDataType("int", false), null, new NotNullConstraint());
             statements.add(table);
         }
         return statements;
