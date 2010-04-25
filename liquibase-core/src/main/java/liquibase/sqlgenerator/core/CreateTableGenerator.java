@@ -42,7 +42,7 @@ public class CreateTableGenerator implements SqlGenerator<CreateTableStatement> 
             boolean isAutoIncrement = statement.getAutoIncrementColumns().contains(column);
 
             buffer.append(database.escapeColumnName(statement.getSchemaName(), statement.getTableName(), column));
-            buffer.append(" ").append(TypeConverterFactory.getInstance().findTypeConverter(database).getDataType(statement.getColumnTypes().get(column), isAutoIncrement));
+            buffer.append(" ").append(statement.getColumnTypes().get(column));
 
             if ((database instanceof SQLiteDatabase) &&
 					(statement.getPrimaryKeyConstraint()!=null) &&
@@ -64,7 +64,7 @@ public class CreateTableGenerator implements SqlGenerator<CreateTableStatement> 
                     buffer.append(" CONSTRAINT ").append(((MSSQLDatabase) database).generateDefaultConstraintName(statement.getTableName(), column));
                 }
                 buffer.append(" DEFAULT ");
-                buffer.append(TypeConverterFactory.getInstance().findTypeConverter(database).getDataType(statement.getColumnTypes().get(column), isAutoIncrement).convertObjectToString(defaultValue, database));
+                buffer.append(statement.getColumnTypes().get(column).convertObjectToString(defaultValue, database));
             }
 
             if (isAutoIncrement &&
@@ -145,7 +145,7 @@ public class CreateTableGenerator implements SqlGenerator<CreateTableStatement> 
         	}
             String referencesString = fkConstraint.getReferences();
             if (!referencesString.contains(".") && database.getDefaultSchemaName() != null) {
-                referencesString = referencesString+"."+database.getDefaultSchemaName();
+                referencesString = database.getDefaultSchemaName()+"."+referencesString;
             }
             buffer.append(" FOREIGN KEY (")
                     .append(database.escapeColumnName(statement.getSchemaName(), statement.getTableName(), fkConstraint.getColumn()))

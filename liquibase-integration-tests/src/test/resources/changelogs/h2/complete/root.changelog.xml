@@ -328,11 +328,11 @@
         <customChange class="liquibase.change.custom.ExampleCustomTaskChange" helloTo="world"/>
     </changeSet>
 
-    <changeSet id="60" author="nvoxland">
-        <executeCommand executable="\cygwin\bin\echo" os="Windows 7">
-            <arg value="command executed here"/>
-        </executeCommand>
-    </changeSet>
+    <!--<changeSet id="60" author="nvoxland">-->
+        <!--<executeCommand executable="\cygwin\bin\echo" os="Windows 7">-->
+            <!--<arg value="command executed here"/>-->
+        <!--</executeCommand>-->
+    <!--</changeSet>-->
 
     <changeSet id="failingPrecondition" author="pcleto">
       <preConditions onFail="MARK_RAN" onError="WARN">

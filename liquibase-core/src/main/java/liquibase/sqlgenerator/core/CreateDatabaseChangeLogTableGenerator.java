@@ -2,6 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
 import liquibase.database.core.SybaseDatabase;
+import liquibase.database.typeconversion.TypeConverter;
 import liquibase.database.typeconversion.TypeConverterFactory;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
@@ -27,18 +28,19 @@ public class CreateDatabaseChangeLogTableGenerator implements SqlGenerator<Creat
     }
 
     public Sql[] generateSql(CreateDatabaseChangeLogTableStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+        TypeConverter typeConverter = TypeConverterFactory.getInstance().findTypeConverter(database);
         CreateTableStatement createTableStatement = new CreateTableStatement(database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())
-                .addPrimaryKeyColumn("ID", "VARCHAR(63)", null, null, null,new NotNullConstraint())
-                .addPrimaryKeyColumn("AUTHOR", "VARCHAR(63)", null, null, null,new NotNullConstraint())
-                .addPrimaryKeyColumn("FILENAME", "VARCHAR(200)", null, null, null,new NotNullConstraint())
-                .addColumn("DATEEXECUTED", TypeConverterFactory.getInstance().findTypeConverter(database).getDateTimeType().getDataTypeName(), null, new NotNullConstraint())
-                .addColumn("ORDEREXECUTED", "INT", new NotNullConstraint(), new UniqueConstraint("UQ_DBCL_ORDEREXEC"))
-                .addColumn("EXECTYPE", "VARCHAR(10)", new NotNullConstraint())
-                .addColumn("MD5SUM", "VARCHAR(35)")
-                .addColumn("DESCRIPTION", "VARCHAR(255)")
-                .addColumn("COMMENTS", "VARCHAR(255)")
-                .addColumn("TAG", "VARCHAR(255)")
-                .addColumn("LIQUIBASE", "VARCHAR(20)");
+                .addPrimaryKeyColumn("ID", typeConverter.getDataType("VARCHAR(63)", false), null, null, null,new NotNullConstraint())
+                .addPrimaryKeyColumn("AUTHOR", typeConverter.getDataType("VARCHAR(63)", false), null, null, null,new NotNullConstraint())
+                .addPrimaryKeyColumn("FILENAME", typeConverter.getDataType("VARCHAR(200)", false), null, null, null,new NotNullConstraint())
+                .addColumn("DATEEXECUTED", typeConverter.getDateTimeType(), null, new NotNullConstraint())
+                .addColumn("ORDEREXECUTED", typeConverter.getDataType("INT", false), new NotNullConstraint(), new UniqueConstraint("UQ_DBCL_ORDEREXEC"))
+                .addColumn("EXECTYPE", typeConverter.getDataType("VARCHAR(10)", false), new NotNullConstraint())
+                .addColumn("MD5SUM", typeConverter.getDataType("VARCHAR(35)", false))
+                .addColumn("DESCRIPTION", typeConverter.getDataType("VARCHAR(255)", false))
+                .addColumn("COMMENTS", typeConverter.getDataType("VARCHAR(255)", false))
+                .addColumn("TAG", typeConverter.getDataType("VARCHAR(255)", false))
+                .addColumn("LIQUIBASE", typeConverter.getDataType("VARCHAR(20)", false));
 
         return SqlGeneratorFactory.getInstance().generateSql(createTableStatement, database);
     }

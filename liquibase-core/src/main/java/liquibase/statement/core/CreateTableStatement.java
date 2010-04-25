@@ -1,5 +1,6 @@
 package liquibase.statement.core;
 
+import liquibase.database.structure.type.DataType;
 import liquibase.statement.*;
 
 import java.util.*;
@@ -10,7 +11,7 @@ public class CreateTableStatement implements SqlStatement {
     private String tablespace;
     private List<String> columns = new ArrayList<String>();
     private Set<String> autoIncrementColumns = new HashSet<String>();
-    private Map<String, String> columnTypes = new HashMap<String, String>();
+    private Map<String, DataType> columnTypes = new HashMap<String, DataType>();
     private Map<String, Object> defaultValues = new HashMap<String, Object>();
 
     private PrimaryKeyConstraint primaryKeyConstraint;
@@ -63,7 +64,7 @@ public class CreateTableStatement implements SqlStatement {
         return notNullColumns;
     }
 
-    public CreateTableStatement addPrimaryKeyColumn(String columnName, String columnType, Object defaultValue, String keyName, String tablespace, ColumnConstraint... constraints) {
+    public CreateTableStatement addPrimaryKeyColumn(String columnName, DataType columnType, Object defaultValue, String keyName, String tablespace, ColumnConstraint... constraints) {
 //        String pkName = "PK_" + getTableName().toUpperCase();
 ////        if (pkName.length() > 18) {
 ////            pkName = pkName.substring(0, 17);
@@ -83,22 +84,22 @@ public class CreateTableStatement implements SqlStatement {
         return this;
     }
 
-    public CreateTableStatement addColumn(String columnName, String columnType) {
+    public CreateTableStatement addColumn(String columnName, DataType columnType) {
         return addColumn(columnName, columnType, null, new ColumnConstraint[0]);
     }
 
-    public CreateTableStatement addColumn(String columnName, String columnType, Object defaultValue) {
+    public CreateTableStatement addColumn(String columnName, DataType columnType, Object defaultValue) {
         if (defaultValue instanceof ColumnConstraint) {
             return addColumn(columnName,  columnType, null, (ColumnConstraint) defaultValue);
         }
         return addColumn(columnName, columnType, defaultValue, new ColumnConstraint[0]);
     }
 
-    public CreateTableStatement addColumn(String columnName, String columnType, ColumnConstraint... constraints) {
+    public CreateTableStatement addColumn(String columnName, DataType columnType, ColumnConstraint... constraints) {
         return addColumn(columnName, columnType, null, constraints);
     }
 
-    public CreateTableStatement addColumn(String columnName, String columnType, Object defaultValue, ColumnConstraint... constraints) {
+    public CreateTableStatement addColumn(String columnName, DataType columnType, Object defaultValue, ColumnConstraint... constraints) {
         this.getColumns().add(columnName);
         this.columnTypes.put(columnName, columnType);
         if (defaultValue != null) {
@@ -166,7 +167,7 @@ public class CreateTableStatement implements SqlStatement {
         return autoIncrementColumns;
     }
 
-    public Map<String, String> getColumnTypes() {
+    public Map<String, DataType> getColumnTypes() {
         return columnTypes;
     }
 

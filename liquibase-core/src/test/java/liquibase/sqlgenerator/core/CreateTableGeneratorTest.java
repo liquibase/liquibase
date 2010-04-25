@@ -1,6 +1,8 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
+import liquibase.database.structure.type.IntType;
+import liquibase.database.typeconversion.TypeConverterFactory;
 import liquibase.sqlgenerator.AbstractSqlGeneratorTest;
 import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.statement.core.CreateTableStatement;
@@ -23,7 +25,7 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
     @Override
     protected CreateTableStatement createSampleSqlStatement() {
         CreateTableStatement statement = new CreateTableStatement(SCHEMA_NAME, TABLE_NAME);
-        statement.addColumn(COLUMN_NAME1, "int");
+        statement.addColumn(COLUMN_NAME1, new IntType());
         return statement;
     }
 
