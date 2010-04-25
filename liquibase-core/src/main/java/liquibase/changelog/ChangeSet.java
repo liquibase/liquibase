@@ -232,6 +232,8 @@ public class ChangeSet implements Conditional {
                 }
 
                 database.rollback();
+            } finally {
+                database.rollback();
             }
 
             if (!skipChange) {

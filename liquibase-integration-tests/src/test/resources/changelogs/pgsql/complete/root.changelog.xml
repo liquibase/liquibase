@@ -26,7 +26,7 @@
         </createTable>
     </changeSet>
     <changeSet id="1.1" author="nvoxland">
-        <createSequence sequenceName="seq_person"/>
+        <createSequence sequenceName="seq_person" startValue="150"/>
     </changeSet>
     <changeSet id="1.2" author="nvoxland">
         <alterSequence sequenceName="seq_person" minValue="100" maxValue="1000" incrementBy="5"/>

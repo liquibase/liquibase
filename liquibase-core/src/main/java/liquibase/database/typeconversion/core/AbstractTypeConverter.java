@@ -197,7 +197,7 @@ public abstract class AbstractTypeConverter implements TypeConverter {
             returnTypeName = getClobType();
         } else if (dataTypeName.equalsIgnoreCase("TIME")) {
             returnTypeName = getTimeType();
-        } else if (dataTypeName.equalsIgnoreCase("TIMESTAMP")) {
+        } else if (dataTypeName.toUpperCase().contains("TIMESTAMP")) {
             returnTypeName = getDateTimeType();
         } else if (dataTypeName.equalsIgnoreCase("TINYINT")) {
             returnTypeName = getTinyIntType();

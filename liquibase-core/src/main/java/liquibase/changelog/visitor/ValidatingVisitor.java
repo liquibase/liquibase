@@ -6,6 +6,7 @@ import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.RanChangeSet;
 import liquibase.database.Database;
 import liquibase.exception.*;
+import liquibase.logging.Logger;
 import liquibase.precondition.core.DBMSPrecondition;
 import liquibase.precondition.core.ErrorPrecondition;
 import liquibase.precondition.core.FailedPrecondition;
@@ -49,6 +50,12 @@ public class ValidatingVisitor implements ChangeSetVisitor {
         } catch (PreconditionErrorException e) {
             LogFactory.getLogger().debug("Precondition Error: "+e.getMessage(), e);
             errorPreconditions.addAll(e.getErrorPreconditions());
+        } finally {
+            try {
+                database.rollback();
+            } catch (DatabaseException e) {
+                LogFactory.getLogger().warning("Error rolling back after precondition check", e);
+            }
         }
     }
 

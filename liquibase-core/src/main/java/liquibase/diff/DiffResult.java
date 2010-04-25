@@ -964,8 +964,10 @@ public class DiffResult {
 					continue;
 				}
 
-				List<String> columnNames = new ArrayList(rs.iterator().next()
-						.keySet());
+                List<String> columnNames = new ArrayList<String>();
+                for (Column column : table.getColumns()) {
+                    columnNames.add(column.getName());
+                }
 
 				// if dataDir is not null, print out a csv file and use loadData
 				// tag
@@ -997,7 +999,7 @@ public class DiffResult {
 						line = new String[columnNames.size()];
 
 						for (int i = 0; i < columnNames.size(); i++) {
-							Object value = row.get(columnNames.get(i));
+							Object value = row.get(columnNames.get(i).toUpperCase());
 							if (dataTypes[i] == null && value != null) {
 								if (value instanceof Number) {
 									dataTypes[i] = "NUMERIC";
@@ -1052,7 +1054,7 @@ public class DiffResult {
 							ColumnConfig column = new ColumnConfig();
 							column.setName(columnNames.get(i));
 
-							Object value = row.get(columnNames.get(i));
+							Object value = row.get(columnNames.get(i).toUpperCase());
 							if (value == null) {
 								column.setValue(null);
 							} else if (value instanceof Number) {
