@@ -22,7 +22,9 @@ public class DropPrimaryKeyGenerator implements SqlGenerator<DropPrimaryKeyState
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", dropPrimaryKeyStatement.getTableName());
 
-        validationErrors.checkDisallowedField("constraintName", dropPrimaryKeyStatement.getConstraintName(), database, PostgresDatabase.class, FirebirdDatabase.class);
+        if (database instanceof PostgresDatabase || database instanceof MSSQLDatabase || database instanceof FirebirdDatabase || database instanceof InformixDatabase) {
+            validationErrors.checkRequiredField("constraintName", dropPrimaryKeyStatement.getConstraintName());
+        }
 
         return validationErrors;
     }
