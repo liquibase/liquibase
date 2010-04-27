@@ -710,4 +710,16 @@
     </changeSet>
 
     <includeAll path="com/example/packaged"/>
+
+    <changeSet id="datatable" author="nvoxland">
+        <createTable tableName="datatable">
+            <column name="col" type="varchar(255)"/>
+        </createTable>
+    </changeSet>
+    <changeSet id="badSplitTest" author="nvoxland">
+        <sql endDelimiter="X">
+            insert into datatable (col) values ('a value with a ;') X
+            insert into datatable (col) values ('another value with a ;') X
+        </sql>
+    </changeSet>
 </databaseChangeLog>
