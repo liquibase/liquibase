@@ -100,7 +100,7 @@ public abstract class AbstractSQLChange extends AbstractChange {
         processedSQL = processedSQL.replaceAll("\r\n", "\n").replaceAll("\r", "\n");
         
         if(isSplittingStatements()) {
-            String[] statements = StringUtils.splitSQL(processedSQL);
+            String[] statements = StringUtils.splitSQL(processedSQL, getEndDelimiter());
             for (String statement : statements) {
                 returnStatements.add(new RawSqlStatement(statement, getEndDelimiter()));
             }

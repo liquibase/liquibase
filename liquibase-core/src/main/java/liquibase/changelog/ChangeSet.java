@@ -395,7 +395,7 @@ public class ChangeSet implements Conditional {
             return;
         }
 
-        for (String statment : StringUtils.splitSQL(sql)) {
+        for (String statment : StringUtils.splitSQL(sql, null)) {
             rollBackChanges.add(new RawSQLChange(statment.trim()));
         }
     }

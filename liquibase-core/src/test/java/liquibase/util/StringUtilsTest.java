@@ -93,7 +93,7 @@ public class StringUtilsTest {
         String sql = "some sql";
         String comment = "/*Some text\nmore text*/" ;
         String total = sql + comment + sql;
-        String[] result = StringUtils.processMutliLineSQL(total,true);
+        String[] result = StringUtils.processMutliLineSQL(total,true, null);
         assertEquals(1,result.length);
         assertEquals(sql+"\n"+sql,result[0]);
     }
@@ -103,7 +103,7 @@ public class StringUtilsTest {
         String sql = "some sql";
         String comment = "/*Some text\nmore text*/" ;
         String total = sql + comment + sql;
-        String[] result = StringUtils.processMutliLineSQL(total,false);
+        String[] result = StringUtils.processMutliLineSQL(total,false, null);
         assertEquals(1,result.length);
         assertEquals(total,result[0]);
     }
@@ -111,7 +111,7 @@ public class StringUtilsTest {
     @Test
     public void splitOngo() {
         String sql = "some sql\ngo\nmore sql";
-        String[] result = StringUtils.splitSQL(sql);
+        String[] result = StringUtils.splitSQL(sql, null);
         assertEquals(2,result.length);
         assertEquals("some sql",result[0]);
         assertEquals("more sql",result[1]);
@@ -120,7 +120,7 @@ public class StringUtilsTest {
     @Test
     public void splitOnGO() {
         String sql = "some sql\nGO\nmore sql";
-        String[] result = StringUtils.splitSQL(sql);
+        String[] result = StringUtils.splitSQL(sql, null);
         assertEquals(2,result.length);
         assertEquals("some sql",result[0]);
         assertEquals("more sql",result[1]);
