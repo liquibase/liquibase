@@ -13,7 +13,7 @@ public class Postgres83TypeConverter extends PostgresTypeConverter {
 
     @Override
     public boolean supports(Database database) {
-        if (database.getConnection() == null) {
+        if (database==null || database.getConnection() == null) {
             return false;
         }
         try {
