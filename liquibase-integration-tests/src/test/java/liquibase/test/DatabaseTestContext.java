@@ -155,6 +155,8 @@ public class DatabaseTestContext {
         if (password != null) {
             info.put("password", password);
         }
+        info.put("retrieveMessagesFromServerOnGetMessage", "true"); //for db2
+
 
         Connection connection;
         try {
