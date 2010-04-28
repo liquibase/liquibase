@@ -38,7 +38,7 @@
 
     <changeSet id="authortest" author="nvoxland">
         <preConditions>
-            <sqlCheck expectedResult="1">select count(*) from DATABASECHANGELOG where AUTHOR='nvoxland' and ID='datatypetest-1'</sqlCheck>
+            <sqlCheck expectedResult="1">select count(*) from DATABASECHANGELOG where AUTHOR='nvoxland' and ID='datatypetest-1';</sqlCheck>
         </preConditions>
     </changeSet>
 
@@ -181,10 +181,10 @@
                 <constraints nullable="false"/>
             </column>
         </createTable>
-        <createIndex indexName="tablespace_index_test" tableName="TABLESPACE_TEST_TABLE" tablespace="liquibase2">
-            <column name="id"/>
-        </createIndex>
-        <dropIndex indexName="tablespace_index_test" tableName="TABLESPACE_TEST_TABLE"/>
+        <!--<createIndex indexName="tablespace_index_test" tableName="TABLESPACE_TEST_TABLE" tablespace="liquibase2">-->
+            <!--<column name="id"/>-->
+        <!--</createIndex>-->
+        <!--<dropIndex indexName="tablespace_index_test" tableName="TABLESPACE_TEST_TABLE"/>-->
         <addPrimaryKey tableName="TABLESPACE_TEST_TABLE" columnNames="id" constraintName="pk_tablespacetest"
                        tablespace="liquibase2"/>
         <addUniqueConstraint tableName="TABLESPACE_TEST_TABLE" columnNames="username" constraintName="uq_tbsptest_usern"

@@ -19,6 +19,16 @@ public class DB2DatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerator 
     }
 
     @Override
+    protected String convertTableNameToDatabaseTableName(String tableName) {
+        return tableName.toUpperCase();
+    }
+
+    @Override
+    protected String convertColumnNameToDatabaseTableName(String columnName) {
+        return columnName.toUpperCase();
+    }
+
+    @Override
     public boolean isColumnAutoIncrement(Database database, String schemaName, String tableName, String columnName) throws DatabaseException {
         boolean autoIncrement = false;
 

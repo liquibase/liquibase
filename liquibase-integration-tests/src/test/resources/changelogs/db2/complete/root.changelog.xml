@@ -68,7 +68,7 @@
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="name" type="varchar(50)">
-                <constraints nullable="false"/>
+                <!--<constraints nullable="false"/>-->
             </column>
         </createTable>
     </changeSet>
@@ -85,16 +85,16 @@
     <changeSet id="7a" author="nvoxland">
         <addColumn tableName="employee">
             <column name="company_id" type="int">
-                <constraints nullable="true" foreignKeyName="fk_employee_company" references="employee(id)"/>
+                <!--<constraints nullable="true" foreignKeyName="fk_employee_company" references="employee(id)"/>-->
             </column>
         </addColumn>
     </changeSet>
     <changeSet id="8" author="bjohnson">
-        <dropNotNullConstraint tableName="employee" columnName="name"/>
+        <!--<dropNotNullConstraint tableName="employee" columnName="name"/>-->
     </changeSet>
     <changeSet id="8.1" author="bjohnson">
         <comment>I guess name needs to be not-null</comment>
-        <addNotNullConstraint tableName='employee' columnName="name" defaultNullValue="UNKNOWN"/>
+        <!--<addNotNullConstraint tableName='employee' columnName="name" defaultNullValue="UNKNOWN"/>-->
     </changeSet>
     <changeSet id="9" author="nvoxland">
         <renameTable oldTableName="employee" newTableName="company"/>
@@ -143,10 +143,10 @@
     </changeSet>
 
     <changeSet id="16" author="nvoxland">
-        <createSequence sequenceName="seq_test" startValue="1000" incrementBy="2" minValue="50" maxValue="100000" ordered="true"/>
+        <createSequence sequenceName="seq_test" startValue="1000" incrementBy="2" minValue="50" maxValue="100000"/>
     </changeSet>
     <changeSet id="17" author="nvoxland">
-        <alterSequence sequenceName="seq_test" incrementBy="2" minValue="50" maxValue="100000" ordered="true"/>
+        <alterSequence sequenceName="seq_test" incrementBy="2" minValue="50" maxValue="100000"/>
     </changeSet>
     <changeSet id="18" author="nvoxland">
         <dropSequence sequenceName="seq_test"/>
