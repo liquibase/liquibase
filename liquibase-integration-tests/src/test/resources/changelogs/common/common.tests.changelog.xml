@@ -589,7 +589,7 @@
 
     <includeAll path="changelogs/common/pathincluded/"/>
 
-    <include file="includerelative/pathinclude1.changelog.xml" relativeToChangelogFile="true"/>
+    <include file="includerelative\pathinclude1.changelog.xml" relativeToChangelogFile="true"/> <!-- try with dos style path -->
 
     <changeSet id="autocommitTest" author="nvoxland" runInTransaction="false">
         <createTable tableName="autocommittest">

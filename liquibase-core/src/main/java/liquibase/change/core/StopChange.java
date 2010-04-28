@@ -3,12 +3,14 @@ package liquibase.change.core;
 import liquibase.change.AbstractChange;
 import liquibase.change.ChangeMetaData;
 import liquibase.database.Database;
+import liquibase.sql.Sql;
 import liquibase.statement.SqlStatement;
+import liquibase.statement.core.RuntimeStatement;
 import liquibase.util.StringUtils;
 
 public class StopChange extends AbstractChange {
 
-    private String message;
+    private String message ="Stop command in changelog file";
 
     public StopChange() {
         super("stop", "Stop Execution", ChangeMetaData.PRIORITY_DEFAULT);
@@ -23,7 +25,13 @@ public class StopChange extends AbstractChange {
     }
 
     public SqlStatement[] generateStatements(Database database) {
-        throw new StopChangeException(getMessage());
+        return new SqlStatement[] { new RuntimeStatement() {
+            @Override
+            public Sql[] generate(Database database) {
+                throw new StopChangeException(getMessage());
+            }
+        }};
+
     }
 
     public String getConfirmationMessage() {
