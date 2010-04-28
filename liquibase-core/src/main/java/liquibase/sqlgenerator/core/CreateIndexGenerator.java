@@ -60,7 +60,8 @@ public class CreateIndexGenerator implements SqlGenerator<CreateIndexStatement> 
 	    buffer.append("INDEX ");
 
 	    if (statement.getIndexName() != null) {
-		    buffer.append(database.escapeIndexName(statement.getTableSchemaName(), statement.getIndexName())).append(" ");
+            String indexSchema = statement.getTableSchemaName();
+            buffer.append(database.escapeIndexName(indexSchema, statement.getIndexName())).append(" ");
 	    }
 	    buffer.append("ON ");
 	    buffer.append(database.escapeTableName(statement.getTableSchemaName(), statement.getTableName())).append("(");
