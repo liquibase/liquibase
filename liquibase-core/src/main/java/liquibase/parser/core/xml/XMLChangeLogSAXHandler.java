@@ -478,6 +478,10 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 			return false;
 		}
 
+        if (fileName.equalsIgnoreCase(".svn") || fileName.equalsIgnoreCase("cvs")) {
+            return false;
+        }
+
 		if (isRelativePath) {
 			String path = searchPath(relativeBaseFileName);
 			fileName = new StringBuilder(path).append(fileName).toString();
