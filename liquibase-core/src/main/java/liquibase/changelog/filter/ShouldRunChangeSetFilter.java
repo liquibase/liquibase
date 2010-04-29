@@ -27,23 +27,7 @@ public class ShouldRunChangeSetFilter implements ChangeSetFilter {
             if (ranChangeSet.getId().equals(changeSet.getId())
                     && ranChangeSet.getAuthor().equals(changeSet.getAuthor())
                     && isPathEquals(changeSet, ranChangeSet)) {
-
-                if (!changeSet.generateCheckSum().equals(ranChangeSet.getLastCheckSum())) {
-                    UpdateStatement md5sumUpdateStatement = new UpdateStatement(database.getDefaultSchemaName(), database.getDatabaseChangeLogTableName());
-                    md5sumUpdateStatement.addNewColumnValue("MD5SUM", changeSet.generateCheckSum().toString());
-                    md5sumUpdateStatement.setWhereClause("ID = ? AND AUTHOR = ? AND FILENAME = ?");
-                    md5sumUpdateStatement.addWhereParameter(changeSet.getId());
-                    md5sumUpdateStatement.addWhereParameter(changeSet.getAuthor());
-                    md5sumUpdateStatement.addWhereParameter(changeSet.getFilePath());
-
-                    try {
-                        ExecutorService.getInstance().getExecutor(database).update(md5sumUpdateStatement);
-                    } catch (DatabaseException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
-
-                if (changeSet.shouldAlwaysRun()) {
+                if (changeSet.shouldAlwaysRun() && ranChangeSet.getLastCheckSum() != null) {
                     return true;
                 } else if (changeSet.shouldRunOnChange() && !changeSet.generateCheckSum().equals(ranChangeSet.getLastCheckSum())) {
                     return true;
