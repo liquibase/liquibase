@@ -59,8 +59,7 @@ public class FileSystemResourceAccessor implements ResourceAccessor {
     }
 
     public Enumeration<URL> getResources(String packageName) throws IOException {
-        String directoryPath = (new File(packageName).isAbsolute() || baseDirectory == null)
-                ? packageName : baseDirectory + File.separator + packageName;
+        String directoryPath = (new File(packageName).isAbsolute() || baseDirectory == null) ? packageName : baseDirectory + File.separator + packageName;
 
         File directoryFile = new File(directoryPath);
         if (!directoryFile.exists()) {
@@ -98,5 +97,14 @@ public class FileSystemResourceAccessor implements ResourceAccessor {
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public String toString() {
+        String dir = baseDirectory;
+        if (dir == null) {
+            dir = new File(".").getAbsolutePath();
+        }
+        return getClass().getName()+"("+ dir +")";
     }
 }

@@ -3,9 +3,13 @@ package org.liquibase.maven.plugins;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.net.URLClassLoader;
+import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.List;
 
 import liquibase.resource.ResourceAccessor;
+import liquibase.util.StringUtils;
 
 /**
  * Implementation of liquibase.FileOpener for Maven which will use a default or user
@@ -47,5 +51,20 @@ public class MavenResourceAccessor implements ResourceAccessor {
 
     public ClassLoader toClassLoader() {
         return _loader;
+    }
+
+    @Override
+    public String toString() {
+        String description;
+        if (_loader instanceof URLClassLoader) {
+            List<String> urls = new ArrayList<String>();
+            for (URL url : ((URLClassLoader) _loader ).getURLs()) {
+                urls.add(url.toExternalForm());
+            }
+            description = StringUtils.join(urls, ",");
+        } else {
+            description = _loader .getClass().getName();
+        }
+        return getClass().getName()+"("+ description +")";
     }
 }

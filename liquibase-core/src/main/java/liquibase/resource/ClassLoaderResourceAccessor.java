@@ -1,9 +1,14 @@
 package liquibase.resource;
 
+import liquibase.util.StringUtils;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.net.URLClassLoader;
+import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.List;
 
 /**
  * An implementation of liquibase.FileOpener that opens file from the class loader.
@@ -31,5 +36,21 @@ public class ClassLoaderResourceAccessor implements ResourceAccessor {
 
     public ClassLoader toClassLoader() {
         return classLoader;
+    }
+
+    @Override
+    public String toString() {
+        String description;
+        if (classLoader instanceof URLClassLoader) {
+            List<String> urls = new ArrayList<String>();
+            for (URL url : ((URLClassLoader) classLoader).getURLs()) {
+                urls.add(url.toExternalForm());
+            }
+            description = StringUtils.join(urls, ",");
+        } else {
+            description = classLoader.getClass().getName();
+        }
+        return getClass().getName()+"("+ description +")";
+
     }
 }
