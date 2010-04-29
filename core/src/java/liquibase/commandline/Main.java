@@ -143,7 +143,7 @@ public class Main {
 
         for (int i = 0; i < args.length; i++) {
             String arg = args[i];
-            if (arg.startsWith("--") && !arg.contains("=")) {
+            if ((arg.startsWith("--") || arg.startsWith("-D")) && !arg.contains("=")) {
                 String nextArg = null;
                 if (i + 1 < args.length) {
                     nextArg = args[i + 1];
