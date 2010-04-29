@@ -603,7 +603,7 @@
         </insert>
     </changeSet>
 
-    <changeSet id="remarksTest" author="nvoxland">
+    <changeSet id="remarksTest" author="nvoxland" runOnChange="true">
         <createTable tableName="remarkstest" remarks="Some remarks go here">
             <column name="id" type="int">
                 <constraints primaryKey="true" nullable="false"/>

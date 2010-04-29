@@ -426,6 +426,7 @@ public abstract class AbstractDatabase implements Database {
                 }
             }
             commit();
+            this.ranChangeSetList = null;
         }
     }
 
