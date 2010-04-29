@@ -400,13 +400,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
             try {
                 getLiquibase().forceReleaseLocks();
             }
-            catch (LockException e) {
-                getLog().error(e.getMessage(), e);
-            }
-            catch (IOException e) {
-                getLog().error(e.getMessage(), e);
-            }
-            catch (DatabaseException e) {
+            catch (LiquibaseException e) {
                 getLog().error(e.getMessage(), e);
             }
         }

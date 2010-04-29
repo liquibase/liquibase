@@ -133,4 +133,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         }
     }
 
+    public ChangeSet getChangeSet(RanChangeSet ranChangeSet) {
+        return getChangeSet(ranChangeSet.getChangeLog(), ranChangeSet.getAuthor(), ranChangeSet.getId());
+    }
 }

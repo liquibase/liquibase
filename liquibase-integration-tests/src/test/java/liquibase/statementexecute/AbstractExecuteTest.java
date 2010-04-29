@@ -86,7 +86,7 @@ public abstract class AbstractExecuteTest {
                     testedDatabases.add(database.getClass());
 
                     if (database.getConnection() != null) {
-                        database.checkDatabaseChangeLogTable();
+                        database.checkDatabaseChangeLogTable(false, null);
                         database.checkDatabaseChangeLogLockTable();
                     }
 

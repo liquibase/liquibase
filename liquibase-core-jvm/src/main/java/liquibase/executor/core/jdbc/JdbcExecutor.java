@@ -8,6 +8,7 @@ import liquibase.exception.DatabaseException;
 import liquibase.executor.AbstractExecutor;
 import liquibase.executor.Executor;
 import liquibase.logging.LogFactory;
+import liquibase.logging.Logger;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.statement.CallableSqlStatement;
 import liquibase.statement.SqlStatement;
@@ -33,6 +34,9 @@ import java.util.Map;
  */
 @SuppressWarnings({"unchecked"})
 public class JdbcExecutor extends AbstractExecutor implements Executor {
+
+    private Logger log = LogFactory.getLogger();
+
     public boolean updatesDatabase() {
         return true;
     }
@@ -76,6 +80,7 @@ public class JdbcExecutor extends AbstractExecutor implements Executor {
         class ExecuteStatementCallback implements StatementCallback {
             public Object doInStatement(Statement stmt) throws SQLException, DatabaseException {
                 for (String statement : applyVisitors(sql, sqlVisitors)) {
+                    log.debug("Executing EXECUTE database command: "+statement);
                     stmt.execute(statement);
                 }
                 return null;
@@ -107,6 +112,8 @@ public class JdbcExecutor extends AbstractExecutor implements Executor {
                     if (sqlToExecute.length != 1) {
                         throw new DatabaseException("Can only query with statements that return one sql statement");
                     }
+                    log.debug("Executing QUERY database command: "+sqlToExecute[0]);
+
                     rs = stmt.executeQuery(sqlToExecute[0]);
                     ResultSet rsToUse = rs;
                     return rse.extractData(rsToUse);
@@ -199,6 +206,7 @@ public class JdbcExecutor extends AbstractExecutor implements Executor {
                 if (sqlToExecute.length != 1) {
                     throw new DatabaseException("Cannot call update on Statement that returns back multiple Sql objects");
                 }
+                log.debug("Executing UPDATE database command: "+sqlToExecute[0]);                
                 return stmt.executeUpdate(sqlToExecute[0]);
             }
 

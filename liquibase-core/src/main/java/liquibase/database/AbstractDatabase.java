@@ -327,8 +327,9 @@ public abstract class AbstractDatabase implements Database {
      * This method will check the database ChangeLog table used to keep track of
      * the changes in the file. If the table does not exist it will create one
      * otherwise it will not do anything besides outputting a log message.
+     * @param updateExistingNullChecksums
      */
-    public void checkDatabaseChangeLogTable() throws DatabaseException {
+    public void checkDatabaseChangeLogTable(boolean updateExistingNullChecksums, DatabaseChangeLog databaseChangeLog) throws DatabaseException {
         Executor executor = ExecutorService.getInstance().getExecutor(this);
 
         Table changeLogTable = DatabaseSnapshotGeneratorFactory.getInstance().getGenerator(this).getDatabaseChangeLogTable(this);
@@ -412,6 +413,19 @@ public abstract class AbstractDatabase implements Database {
         for (SqlStatement sql : statementsToExecute) {
             executor.execute(sql);
             this.commit();
+        }
+
+        if (updateExistingNullChecksums) {
+            for (RanChangeSet ranChangeSet  : this.getRanChangeSetList()) {
+                if (ranChangeSet.getLastCheckSum() == null) {
+                    ChangeSet changeSet = databaseChangeLog.getChangeSet(ranChangeSet);
+                    if (changeSet != null) {
+                        LogFactory.getLogger().info("Setting null checksum on changeSet "+changeSet+" to correct value");
+                        executor.execute(new UpdateChangeSetChecksumStatement(changeSet));
+                    }
+                }
+            }
+            commit();
         }
     }
 
