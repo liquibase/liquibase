@@ -48,7 +48,11 @@ public class StringUtils {
         if (endDelimiter == null) {
             endDelimiter = ";\\s*\n|;$|\n[gG][oO]\\s*\n|\n[Gg][oO]$";
         }
-        return multiLineSQL.split(endDelimiter);
+        String[] strings = multiLineSQL.split(endDelimiter);
+        for (int i=0; i<strings.length; i++) {
+            strings[i] = strings[i].trim();
+        }
+        return strings;
     }
     
     /**

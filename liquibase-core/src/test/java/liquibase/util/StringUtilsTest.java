@@ -125,4 +125,19 @@ public class StringUtilsTest {
         assertEquals("some sql",result[0]);
         assertEquals("more sql",result[1]);
     }
+
+    @Test
+    public void multilineComment() {
+        String sql = "/*\n" +
+                "This is a test comment of SQL script\n" +
+                "*/\n" +
+                "\n" +
+                "Select * from Test;\n" +
+                "Update Test set field = 1";
+        String[] result = StringUtils.processMutliLineSQL(sql,true, null);
+        assertEquals(2,result.length);
+        assertEquals("Select * from Test",result[0]);
+        assertEquals("Update Test set field = 1",result[1]);
+
+    }
 }
