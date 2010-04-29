@@ -1,6 +1,7 @@
 package liquibase.integration.servlet;
 
 import liquibase.Liquibase;
+import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.JdbcConnection;
 import liquibase.logging.LogFactory;
@@ -9,6 +10,7 @@ import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.NetUtil;
+import liquibase.util.StringUtils;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -29,6 +31,7 @@ public class LiquibaseServletListener implements ServletContextListener {
     private String changeLogFile;
     private String dataSource;
     private String contexts;
+    private String defaultSchema;
 
 
     public String getChangeLogFile() {
@@ -103,6 +106,7 @@ public class LiquibaseServletListener implements ServletContextListener {
         setDataSource(servletContextEvent.getServletContext().getInitParameter("LIQUIBASE_DATA_SOURCE"));
         setChangeLogFile(servletContextEvent.getServletContext().getInitParameter("LIQUIBASE_CHANGELOG"));
         setContexts(servletContextEvent.getServletContext().getInitParameter("LIQUIBASE_CONTEXTS"));
+        this.defaultSchema = StringUtils.trimToNull(servletContextEvent.getServletContext().getInitParameter("LIQUIBASE_DEFAULT_SCHEMA"));
         if (getChangeLogFile() == null) {
             throw new RuntimeException("Cannot run LiquiBase, LIQUIBASE_CHANGELOG is not set");
         }
@@ -123,7 +127,9 @@ public class LiquibaseServletListener implements ServletContextListener {
                 ResourceAccessor fsFO = new FileSystemResourceAccessor();
 
 
-                Liquibase liquibase = new Liquibase(getChangeLogFile(), new CompositeResourceAccessor(clFO,fsFO), DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(connection)));
+                Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(connection));
+                database.setDefaultSchemaName(this.defaultSchema);
+                Liquibase liquibase = new Liquibase(getChangeLogFile(), new CompositeResourceAccessor(clFO,fsFO), database);
                 liquibase.update(getContexts());
             } finally {
                 if (ic != null) {
