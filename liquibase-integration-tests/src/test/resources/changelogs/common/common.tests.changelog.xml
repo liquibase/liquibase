@@ -606,7 +606,7 @@
     <changeSet id="remarksTest" author="nvoxland">
         <createTable tableName="remarkstest" remarks="Some remarks go here">
             <column name="id" type="int">
-                <constraints nullable="false" primaryKey="true"/>
+                <constraints primaryKey="true" nullable="false"/>
             </column>
         </createTable>
     </changeSet>
@@ -635,14 +635,14 @@
     <changeSet id="addColWithFK" author="nvoxland">
         <addColumn tableName="commatest">
             <column name="fk_test" type="int">
-                <constraints foreignKeyName="fk_test_fk" references="remarkstest(id)"/>
+                <constraints foreignKeyName="fk_test_fk_addCol" references="remarkstest(id)"/>
             </column>
         </addColumn>
     </changeSet>
 
     <changeSet id="addColWithFK-check" author="nvoxland">
         <preConditions onFailMessage="I couldn't find the FK set in addColWithFK">
-            <foreignKeyConstraintExists foreignKeyName="fk_test_fk" foreignKeyTableName="commatest"/>
+            <foreignKeyConstraintExists foreignKeyName="fk_test_fk_addCol" foreignKeyTableName="commatest"/>
         </preConditions>
     </changeSet>
 

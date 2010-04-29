@@ -125,7 +125,7 @@ public interface Database extends DatabaseObject, PrioritizedService {
     
     boolean hasDatabaseChangeLogLockTable() throws DatabaseException;
 
-    void checkDatabaseChangeLogTable() throws DatabaseException;
+    void checkDatabaseChangeLogTable(boolean updateExistingNullChecksums, DatabaseChangeLog databaseChangeLog) throws DatabaseException;
 
     void checkDatabaseChangeLogLockTable() throws DatabaseException;
 

@@ -328,7 +328,7 @@ public class MockDatabase implements Database {
         return false;
     }
 
-    public void checkDatabaseChangeLogTable() throws DatabaseException {
+    public void checkDatabaseChangeLogTable(boolean updateExistingNullChecksums, DatabaseChangeLog databaseChangeLog) throws DatabaseException {
         ;
     }
 
@@ -439,8 +439,8 @@ public class MockDatabase implements Database {
     public void reset() {
         
     }
-
-    public boolean supportsForeignKeyDisable() {
+    
+        public boolean supportsForeignKeyDisable() {
         return false;
     }
 
@@ -449,6 +449,10 @@ public class MockDatabase implements Database {
     }
 
     public void enableForeignKeyChecks() throws DatabaseException {
+        
+    }
+
+    public void updateChecksum(ChangeSet changeSet) throws DatabaseException {
         
     }
 }
