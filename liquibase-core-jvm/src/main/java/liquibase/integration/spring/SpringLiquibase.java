@@ -276,4 +276,9 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
     public ResourceLoader getResourceLoader() {
         return resourceLoader;
     }
+
+    @Override
+    public String toString() {
+        return getClass().getName()+"("+this.getResourceLoader().toString()+")";
+    }
 }

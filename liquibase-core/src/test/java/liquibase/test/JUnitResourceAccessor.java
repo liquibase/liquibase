@@ -1,13 +1,16 @@
 package liquibase.test;
 
 import liquibase.resource.ResourceAccessor;
+import liquibase.util.StringUtils;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.List;
 
 public class JUnitResourceAccessor implements ResourceAccessor {
     private URLClassLoader classLoader;
@@ -36,5 +39,15 @@ public class JUnitResourceAccessor implements ResourceAccessor {
 
     public ClassLoader toClassLoader() {
         return classLoader;
+    }
+
+    @Override
+    public String toString() {
+        List<String> urls = new ArrayList<String>();
+        for (URL url : classLoader.getURLs()) {
+            urls.add(url.toExternalForm());
+        }
+        
+        return getClass().getName() + "(" + StringUtils.join(urls, ",") + ")";
     }
 }

@@ -147,8 +147,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 					pathName = pathName + '/';
 				}
 				log.debug("includeAll for " + pathName);
-				log.debug("Using file opener for includeAll: "
-						+ resourceAccessor.getClass().getName());
+				log.debug("Using file opener for includeAll: " + resourceAccessor.toString());
 				boolean isRelativeToChangelogFile = Boolean.parseBoolean(atts
 						.getValue("relativeToChangelogFile"));
 

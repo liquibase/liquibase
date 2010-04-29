@@ -41,4 +41,9 @@ public class AntResourceAccessor implements ResourceAccessor {
     public ClassLoader toClassLoader() {
         return loader;
     }
+
+    @Override
+    public String toString() {
+        return getClass().getName()+"("+loader.getClasspath()+")";
+    }
 }
