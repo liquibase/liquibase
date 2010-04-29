@@ -490,13 +490,15 @@ public abstract class AbstractDatabase implements Database {
                 dropChanges.add(dropChange);
             }
 
-            for (ForeignKey fk : snapshot.getForeignKeys()) {
-                DropForeignKeyConstraintChange dropFK = new DropForeignKeyConstraintChange();
-                dropFK.setBaseTableSchemaName(schema);
-                dropFK.setBaseTableName(fk.getForeignKeyTable().getName());
-                dropFK.setConstraintName(fk.getName());
+            if (!supportsForeignKeyDisable()) {
+                for (ForeignKey fk : snapshot.getForeignKeys()) {
+                    DropForeignKeyConstraintChange dropFK = new DropForeignKeyConstraintChange();
+                    dropFK.setBaseTableSchemaName(schema);
+                    dropFK.setBaseTableName(fk.getForeignKeyTable().getName());
+                    dropFK.setConstraintName(fk.getName());
 
-                dropChanges.add(dropFK);
+                    dropChanges.add(dropFK);
+                }
             }
 
 //            for (Index index : snapshotGenerator.getIndexes()) {
@@ -532,9 +534,16 @@ public abstract class AbstractDatabase implements Database {
                 dropChanges.add(new AnonymousChange(new ClearDatabaseChangeLogTableStatement(schema)));
             }
 
-            for (Change change : dropChanges) {
-                for (SqlStatement statement : change.generateStatements(this)) {
-                    ExecutorService.getInstance().getExecutor(this).execute(statement);
+            final boolean reEnableFK = supportsForeignKeyDisable() && disableForeignKeyChecks();
+            try {
+                for (Change change : dropChanges) {
+                    for (SqlStatement statement : change.generateStatements(this)) {
+                        ExecutorService.getInstance().getExecutor(this).execute(statement);
+                    }
+                }
+            } finally {
+                if (reEnableFK) {
+                    enableForeignKeyChecks();
                 }
             }
 
@@ -987,5 +996,17 @@ public abstract class AbstractDatabase implements Database {
 
     public void reset() {
         this.ranChangeSetList = null;
+    }
+
+    public boolean supportsForeignKeyDisable() {
+        return false;
+    }
+
+    public boolean disableForeignKeyChecks() throws DatabaseException {
+        throw new DatabaseException("ForeignKeyChecks Management not supported");
+    }
+
+    public void enableForeignKeyChecks() throws DatabaseException {
+        throw new DatabaseException("ForeignKeyChecks Management not supported");
     }
 }

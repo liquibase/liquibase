@@ -439,4 +439,16 @@ public class MockDatabase implements Database {
     public void reset() {
         
     }
+
+    public boolean supportsForeignKeyDisable() {
+        return false;
+    }
+
+    public boolean disableForeignKeyChecks() throws DatabaseException {
+        return false;
+    }
+
+    public void enableForeignKeyChecks() throws DatabaseException {
+        
+    }
 }

@@ -3,6 +3,8 @@ package liquibase.database.core;
 import liquibase.database.AbstractDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.exception.DatabaseException;
+import liquibase.executor.ExecutorService;
+import liquibase.statement.core.RawSqlStatement;
 
 /**
  * Encapsulates MySQL database support.
@@ -102,5 +104,23 @@ public class MySQLDatabase extends AbstractDatabase {
     @Override
     public String escapeIndexName(String schemaName, String indexName) {
         return escapeDatabaseObject(indexName);
+    }
+
+    
+    @Override
+    public boolean supportsForeignKeyDisable() {
+        return true;
+    }
+
+    @Override
+    public boolean disableForeignKeyChecks() throws DatabaseException {
+        boolean enabled = ExecutorService.getInstance().getExecutor(this).queryForInt(new RawSqlStatement("SELECT @@FOREIGN_KEY_CHECKS")) == 1;
+        ExecutorService.getInstance().getExecutor(this).execute(new RawSqlStatement("SET FOREIGN_KEY_CHECKS=0"));
+        return enabled;
+    }
+
+    @Override
+    public void enableForeignKeyChecks() throws DatabaseException {
+        ExecutorService.getInstance().getExecutor(this).execute(new RawSqlStatement("SET FOREIGN_KEY_CHECKS=1"));
     }
 }
