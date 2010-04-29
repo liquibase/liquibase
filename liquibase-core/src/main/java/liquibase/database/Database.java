@@ -256,4 +256,11 @@ public interface Database extends DatabaseObject, PrioritizedService {
 	public List<DatabaseFunction> getDatabaseFunctions();
 
     void reset();
+
+    boolean supportsForeignKeyDisable();
+
+    boolean disableForeignKeyChecks() throws DatabaseException;
+
+    void enableForeignKeyChecks() throws DatabaseException;
+
 }
