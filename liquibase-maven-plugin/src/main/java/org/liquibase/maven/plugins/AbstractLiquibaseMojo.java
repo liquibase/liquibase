@@ -22,7 +22,7 @@ import org.apache.maven.project.MavenProject;
  * A base class for providing Liquibase {@link liquibase.Liquibase} functionality.
  *
  * @author Peter Murray
- * @requiresDependencyResolution test
+ * @requiresDependencyResolution compile
  */
 public abstract class AbstractLiquibaseMojo extends AbstractMojo {
 

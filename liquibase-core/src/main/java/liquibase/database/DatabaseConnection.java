@@ -35,4 +35,6 @@ public interface DatabaseConnection {
     String getURL();
 
     String getConnectionUserName();
+
+    boolean isClosed() throws DatabaseException;
 }
