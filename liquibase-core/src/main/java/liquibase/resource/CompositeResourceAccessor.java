@@ -70,22 +70,13 @@ public class CompositeResourceAccessor implements ResourceAccessor {
     }
 
     public ClassLoader toClassLoader() {
-        List<URL> urls = new ArrayList<URL>();
-        List<ClassLoader> unknownClassLoaders = new ArrayList<ClassLoader>();
+        ClassLoader[] loaders=new ClassLoader[openers.size()];
+        int i=0;
         for (ResourceAccessor fo: openers) {
-            ClassLoader classLoader = fo.toClassLoader();
-            if (classLoader instanceof URLClassLoader) {
-                urls.addAll(Arrays.asList(((URLClassLoader) classLoader).getURLs()));
-            } else {
-                System.out.println("Unknown classloader type: "+classLoader.getClass().getName());
-                unknownClassLoaders.add(fo.toClassLoader());
-            }
-
+           loaders[i++]=fo.toClassLoader();
         }
 
-        unknownClassLoaders.add(0, new URLClassLoader(urls.toArray(new URL[urls.size()])));
-
-        return new CompositeClassLoader(unknownClassLoaders.toArray(new ClassLoader[unknownClassLoaders.size()]));
+        return new CompositeClassLoader(loaders);
     }
 
     //based on code from http://fisheye.codehaus.org/browse/xstream/trunk/xstream/src/java/com/thoughtworks/xstream/core/util/CompositeClassLoader.java?r=root
@@ -98,11 +89,14 @@ public class CompositeResourceAccessor implements ResourceAccessor {
         }
 
         @Override
-        public Class loadClass(String name) throws ClassNotFoundException {
+        public Class loadClass(String name,boolean resolve) throws ClassNotFoundException {
             for (Object classLoader1 : classLoaders) {
                 ClassLoader classLoader = (ClassLoader) classLoader1;
                 try {
-                    return classLoader.loadClass(name);
+                    Class classe=classLoader.loadClass(name);
+                    if(resolve)
+                        resolveClass(classe);
+                    return classe;
                 } catch (ClassNotFoundException notFound) {
                     // ok.. try another one
                 }
@@ -113,13 +107,18 @@ public class CompositeResourceAccessor implements ResourceAccessor {
             // liquibase is potentially different to thread that uses it.
             ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
             if (contextClassLoader != null) {
-                return contextClassLoader.loadClass(name);
+                Class classe=contextClassLoader.loadClass(name);
+                if(resolve)
+                    resolveClass(classe);
+                return classe;
             } else {
                 throw new ClassNotFoundException(name);
             }
 
 
         }
+
+        
 
  	}
 

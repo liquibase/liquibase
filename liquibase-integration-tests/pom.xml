@@ -55,6 +55,12 @@
           <type>test-jar</type>
           <scope>test</scope>
         </dependency>
+        <dependency>
+          <groupId>org.liquibase</groupId>
+          <artifactId>liquibase-maven-plugin</artifactId>
+          <version>${project.version}</version>
+          <scope>test</scope>
+        </dependency>
         <!-- sample extensions -->
         <dependency>
           <groupId>org.liquibase.samples</groupId>
@@ -85,6 +91,12 @@
           <groupId>org.apache.derby</groupId>
           <artifactId>derby</artifactId>
           <version>10.2.2.0</version>
+          <scope>test</scope>
+        </dependency>
+        <dependency>
+          <groupId>org.apache.maven.shared</groupId>
+          <artifactId>maven-verifier</artifactId>
+          <version>1.2</version>
           <scope>test</scope>
         </dependency>
     </dependencies>

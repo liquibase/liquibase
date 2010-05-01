@@ -8,20 +8,16 @@ import liquibase.database.example.ExampleCustomDatabase;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.database.core.MockDatabase;
 import liquibase.resource.ResourceAccessor;
-import liquibase.resource.CompositeResourceAccessor;
-import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.exception.DatabaseException;
 
 import java.util.*;
 import java.sql.SQLException;
 import java.sql.Driver;
 import java.sql.Connection;
-import java.io.File;
-import java.net.*;
 
 public class DatabaseTestContext {
     private static DatabaseTestContext instance = new DatabaseTestContext();
-
+    
     private Set<Database> availableDatabases = new HashSet<Database>();
     private Set<Database> allDatabases;
     private Set<DatabaseConnection> availableConnections;
@@ -217,9 +213,18 @@ public class DatabaseTestContext {
     public Set<Database> getAvailableDatabases() throws Exception {
         if (availableDatabases.size() == 0) {
             for (DatabaseConnection conn : getAvailableConnections()) {
-                availableDatabases.add(DatabaseFactory.getInstance().findCorrectDatabaseImplementation(conn));
+                    availableDatabases.add(DatabaseFactory.getInstance().findCorrectDatabaseImplementation(conn));
             }
         }
+        //Check to don't return closed databases
+        Iterator<Database> iter=availableDatabases.iterator();
+        while(iter.hasNext()) {
+            Database database=iter.next();
+            if(database.getConnection().isClosed())
+                iter.remove();
+        }
+
+
         return availableDatabases;
     }
 
@@ -236,6 +241,14 @@ public class DatabaseTestContext {
                     availableConnections.add(connection);
                 }
             }
+        }
+
+        //Check to don't return closed connections
+        Iterator<DatabaseConnection> iter=availableConnections.iterator();
+        while(iter.hasNext()) {
+            DatabaseConnection connection=iter.next();
+            if(connection.isClosed())
+                iter.remove();
         }
 
         return availableConnections;
