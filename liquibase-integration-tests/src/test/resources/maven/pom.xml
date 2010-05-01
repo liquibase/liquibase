@@ -30,8 +30,8 @@
 				<!--TODO: Version not hardcoded-->
                 <version>2.0-rc2-SNAPSHOT</version>
                 <executions>
-                    <execution>
-                        <phase>compile</phase>
+                    <execution>						
+                        <phase>test</phase>
                         <configuration>
                             <changeLogFile>src/main/resources/liquibase/maven/integration/changelog.xml</changeLogFile>
                             <driver>org.apache.derby.jdbc.EmbeddedDriver</driver>
@@ -43,7 +43,7 @@
                         <goals>
                             <goal>update</goal>
                         </goals>
-                    </execution>
+                    </execution>					
                 </executions>
             </plugin>
         </plugins>

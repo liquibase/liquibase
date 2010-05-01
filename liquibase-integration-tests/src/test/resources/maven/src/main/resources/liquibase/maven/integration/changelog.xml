@@ -23,4 +23,7 @@
 	
 	<!-- Include from project classpath-->
 	<include file="liquibase/maven/integration/classpathchangelog.xml"/>
+	<!-- Include from project test classpath-->
+	<include file="liquibase/maven/integration/testclasspathchangelog.xml"/>	
+	
 </databaseChangeLog>
