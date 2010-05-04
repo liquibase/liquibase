@@ -13,7 +13,6 @@ import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.JdbcConnection;
 import liquibase.database.typeconversion.TypeConverterFactory;
-import liquibase.database.structure.type.DateTimeType;
 import liquibase.diff.Diff;
 import liquibase.diff.DiffResult;
 import liquibase.exception.DatabaseException;
@@ -27,10 +26,10 @@ import liquibase.test.JUnitResourceAccessor;
 import liquibase.test.TestContext;
 import liquibase.test.DatabaseTestContext;
 import liquibase.logging.LogFactory;
-import liquibase.logging.LogLevel;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.io.PrintStream;
 import java.io.StringWriter;
 import java.net.URL;
@@ -62,7 +61,7 @@ public abstract class AbstractIntegrationTest {
 
         this.completeChangeLog = "changelogs/" + changelogDir + "/complete/root.changelog.xml";
         this.rollbackChangeLog = "changelogs/" + changelogDir + "/rollback/rollbackable.changelog.xml";
-        this.includedChangeLog = "changelogs/" + changelogDir + "/complete/included.changelog.xml";
+        this.includedChangeLog = "changelogs/" + changelogDir + "/complete/included.changelog.xml";  
 
         this.url = url;
 
@@ -105,8 +104,8 @@ public abstract class AbstractIntegrationTest {
             }
             database.dropDatabaseObjects(null);
             database.commit();
-            DatabaseSnapshotGeneratorFactory.resetAll();
-            
+            DatabaseSnapshotGeneratorFactory.resetAll();            
+
         }
     }
 
@@ -743,8 +742,10 @@ public abstract class AbstractIntegrationTest {
     public static String getDatabaseServerHostname() throws Exception {
         Properties integrationTestProperties;
         integrationTestProperties = new Properties();
-        integrationTestProperties.load(Thread.currentThread().getContextClassLoader().getResourceAsStream("liquibase.integrationtest.properties"));
-        integrationTestProperties.load(Thread.currentThread().getContextClassLoader().getResourceAsStream("liquibase.integrationtest.local.properties"));
+        integrationTestProperties.load(Thread.currentThread().getContextClassLoader().getResourceAsStream("liquibase/liquibase.integrationtest.properties"));
+        InputStream localProperties=Thread.currentThread().getContextClassLoader().getResourceAsStream("liquibase/liquibase.integrationtest.local.properties");
+        if(localProperties!=null)
+            integrationTestProperties.load(localProperties);
 
         return integrationTestProperties.getProperty("integration.test.hostname");
     }
