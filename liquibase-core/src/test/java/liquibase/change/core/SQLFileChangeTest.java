@@ -1,10 +1,15 @@
 package liquibase.change.core;
 
 import liquibase.change.AbstractChangeTest;
+import liquibase.change.AbstractSQLChange;
+import liquibase.database.Database;
+import liquibase.database.core.MockDatabase;
 import liquibase.database.core.OracleDatabase;
 import liquibase.exception.SetupException;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import static org.junit.Assert.*;
+
+import liquibase.statement.SqlStatement;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -15,10 +20,10 @@ import org.junit.Test;
  * @author <a href="mailto:csuml@yahoo.co.uk">Paul Keeble</a>
  *
  */
-public abstract class SQLFileChangeTest extends AbstractChangeTest {
+public class SQLFileChangeTest extends AbstractChangeTest {
 	
-	SQLFileChange change;
-	String fileName;
+	private SQLFileChange change;
+	private String fileName;
 	
 	@Before
     public void setUp() throws Exception {
@@ -30,8 +35,13 @@ public abstract class SQLFileChangeTest extends AbstractChangeTest {
         change.setPath(fileName);
         change.init();
     }
-	
-	@Test
+
+    @Override
+    public void generateStatement() throws Exception {
+
+    }
+
+    @Test
 	public void setFileOpener() {
 	    assertNotNull(change.getFileOpener());
 	}
@@ -143,4 +153,15 @@ public abstract class SQLFileChangeTest extends AbstractChangeTest {
 
 	}
 
+    @Test
+    public void testStatementsWithSemicolons() {
+        AbstractSQLChange change2 = new SQLFileChange();
+        String insertWithSemicolon = "insert into table ( col ) values (' value with; semicolon ');";
+        change2.setSql(insertWithSemicolon);
+        Database database = new MockDatabase();
+        SqlStatement[] statements = change2.generateStatements(database);
+        assertEquals("Unexpected amount of statements returned",1, statements.length);
+        String insertWithoutTrailingSemicolon = insertWithSemicolon.substring(0, insertWithSemicolon.length() - 1);
+        assertEquals("unexpected SQL statement returned", insertWithoutTrailingSemicolon, statements[0].toString());
+    }
 }

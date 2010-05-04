@@ -140,4 +140,13 @@ public class StringUtilsTest {
         assertEquals("Update Test set field = 1",result[1]);
 
     }
+
+     @Test
+    public void testSplitWithSemicolon() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("select * from simple_select_statement;\n");
+        sb.append("insert into table ( col ) values (' value with; semicolon ');");
+        String[] result = StringUtils.processMutliLineSQL(sb.toString(), true, null);
+        assertEquals("Unexpected amount of statements returned",2, result.length);
+    }
 }
