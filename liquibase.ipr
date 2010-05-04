@@ -853,6 +853,17 @@
         <root url="jar://$MAVEN_REPOSITORY$/org/apache/derby/derby/10.2.2.0/derby-10.2.2.0-sources.jar!/" />
       </SOURCES>
     </library>
+    <library name="Maven: org.apache.maven.shared:maven-verifier:1.2">
+      <CLASSES>
+        <root url="jar://$MAVEN_REPOSITORY$/org/apache/maven/shared/maven-verifier/1.2/maven-verifier-1.2.jar!/" />
+      </CLASSES>
+      <JAVADOC>
+        <root url="jar://$MAVEN_REPOSITORY$/org/apache/maven/shared/maven-verifier/1.2/maven-verifier-1.2-javadoc.jar!/" />
+      </JAVADOC>
+      <SOURCES>
+        <root url="jar://$MAVEN_REPOSITORY$/org/apache/maven/shared/maven-verifier/1.2/maven-verifier-1.2-sources.jar!/" />
+      </SOURCES>
+    </library>
   </component>
 </project>
 

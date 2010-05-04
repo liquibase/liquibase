@@ -719,8 +719,34 @@ public abstract class AbstractIntegrationTest {
         liquibase.rollback("testRollbackToChange", this.contexts);
     }
 
-    public static String getDatabaseServerHostname() {
-        return "192.168.1.5";
+    @Test
+    public void testDbDoc() throws Exception {
+        if (database == null) {
+            return;
+        }
+
+        Liquibase liquibase = createLiquibase(completeChangeLog);
+        liquibase.dropAll(getSchemasToDrop());
+
+        liquibase = createLiquibase(completeChangeLog);
+        liquibase.update(this.contexts);
+
+        File outputDir = File.createTempFile("liquibase-dbdoctest", "dir");
+        outputDir.delete();
+        outputDir.mkdir();
+        outputDir.deleteOnExit();
+
+        liquibase = createLiquibase(completeChangeLog);
+        liquibase.generateDocumentation(outputDir.getAbsolutePath());
+    }
+
+    public static String getDatabaseServerHostname() throws Exception {
+        Properties integrationTestProperties;
+        integrationTestProperties = new Properties();
+        integrationTestProperties.load(Thread.currentThread().getContextClassLoader().getResourceAsStream("liquibase.integrationtest.properties"));
+        integrationTestProperties.load(Thread.currentThread().getContextClassLoader().getResourceAsStream("liquibase.integrationtest.local.properties"));
+
+        return integrationTestProperties.getProperty("integration.test.hostname");
     }
 
     protected Database getDatabase(){
