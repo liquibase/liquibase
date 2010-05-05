@@ -2,6 +2,7 @@ package liquibase.change.core;
 
 import liquibase.change.AbstractChangeTest;
 import liquibase.change.AbstractSQLChange;
+import liquibase.change.Change;
 import liquibase.database.Database;
 import liquibase.database.core.MockDatabase;
 import liquibase.database.core.OracleDatabase;
@@ -12,6 +13,9 @@ import static org.junit.Assert.*;
 import liquibase.statement.SqlStatement;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.lang.reflect.Field;
+import java.util.Map;
 
 /**
  * Tests the SQL File with a simple text file. No real SQL is used with the
@@ -30,6 +34,7 @@ public class SQLFileChangeTest extends AbstractChangeTest {
 	    //file contains contents "TESTDATA"
     	fileName= "liquibase/change/core/SQLFileTestData.sql";
         change = new SQLFileChange();
+        change.setSql("select * from tablename");
         ClassLoaderResourceAccessor opener = new ClassLoaderResourceAccessor();
         change.setFileOpener(opener);
         change.setPath(fileName);
@@ -163,5 +168,10 @@ public class SQLFileChangeTest extends AbstractChangeTest {
         assertEquals("Unexpected amount of statements returned",1, statements.length);
         String insertWithoutTrailingSemicolon = insertWithSemicolon.substring(0, insertWithSemicolon.length() - 1);
         assertEquals("unexpected SQL statement returned", insertWithoutTrailingSemicolon, statements[0].toString());
+    }
+
+    @Override
+    protected void checkThatChecksumIsNew(Change change, Map<String, String> seenCheckSums, Field field) {
+        //always ok
     }
 }

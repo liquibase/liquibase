@@ -335,4 +335,12 @@
         </createTable>
     </changeSet>
 
+    <changeSet id="CORE-593" author="nvoxland">
+        <createTable tableName="core593">
+            <column name="expired_at" type="timestamp" defaultValue="2199-12-31 23:59:59">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
 </databaseChangeLog>

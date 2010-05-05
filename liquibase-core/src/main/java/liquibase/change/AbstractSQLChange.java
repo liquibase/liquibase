@@ -27,7 +27,11 @@ public abstract class AbstractSQLChange extends AbstractChange {
         super(tagName, changeName, priority);
         stripComments= false;
         splitStatements =true;
-        endDelimiter =  ";";
+    }
+
+    @Override
+    public boolean supports(Database database) {
+        return true;
     }
 
     /**
@@ -96,9 +100,14 @@ public abstract class AbstractSQLChange extends AbstractChange {
 
         List<SqlStatement> returnStatements = new ArrayList<SqlStatement>();
 
+        if (StringUtils.trimToNull(getSql()) == null) {
+            return new SqlStatement[0];
+        }
+
         String processedSQL = isStrippingComments() ? StringUtils.stripComments(getSql()) : getSql();
         processedSQL = processedSQL.replaceAll("\r\n", "\n").replaceAll("\r", "\n");
-        
+
+
         if(isSplittingStatements()) {
             String[] statements = StringUtils.splitSQL(processedSQL, getEndDelimiter());
             for (String statement : statements) {
