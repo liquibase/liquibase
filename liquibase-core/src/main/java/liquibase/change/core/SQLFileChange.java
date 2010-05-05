@@ -3,10 +3,13 @@ package liquibase.change.core;
 import liquibase.change.AbstractSQLChange;
 import liquibase.change.ChangeMetaData;
 import liquibase.change.CheckSum;
+import liquibase.database.Database;
 import liquibase.exception.SetupException;
+import liquibase.exception.ValidationErrors;
 import liquibase.logging.LogFactory;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StreamUtil;
+import liquibase.util.StringUtils;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -81,7 +84,18 @@ public class SQLFileChange extends AbstractSQLChange {
         LogFactory.getLogger().debug("SQLFile file contents is:" + getSql());
     }
 
+    @Override
+    public ValidationErrors validate(Database database) {
+        ValidationErrors validationErrors = super.validate(database);
+        if (StringUtils.trimToNull(getPath()) == null) {
+            validationErrors.addError("'path' is required");
+        }
+        return validationErrors;
+    }
+
     /**
+     *
+     *
      * Tries to load the file from the file system.
      * 
      * @param file The name of the file to search for
@@ -153,7 +167,11 @@ public class SQLFileChange extends AbstractSQLChange {
      */
     @Override
     public CheckSum generateCheckSum() {
-        return CheckSum.compute(getSql());
+        String sql = getSql();
+        if (sql == null) {
+            sql = "";
+        }
+        return CheckSum.compute(sql);
     }
 
     public String getConfirmationMessage() {

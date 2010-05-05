@@ -101,7 +101,7 @@ public abstract class AbstractChangeTest {
         return (Change) Class.forName(className).getConstructor().newInstance();
     }
 
-    private void checkThatChecksumIsNew(Change change, Map<String, String> seenCheckSums, Field field) {
+    protected void checkThatChecksumIsNew(Change change, Map<String, String> seenCheckSums, Field field) {
         String serialized = new StringChangeLogSerializer().serialize(change);
 
         CheckSum newCheckSum = change.generateCheckSum();
