@@ -40,20 +40,26 @@
     </dependency>
   </dependencies>
 
-  <!--<build>-->
-    <!--<plugins>-->
-      <!--
-        Use a customized Velocity template so we can reuse the Maven plugin
-        documentation in the Liquibase site documentation.
-      -->
-<!--      <plugin>
-        <artifactId>maven-site-plugin</artifactId>
-        <configuration>
-          <templateFile>src/site/liquibase-site.vm</templateFile>
-        </configuration>
-      </plugin>
-    </plugins>-->
-  <!--</build>-->
+  <build>
+    <plugins>
+        <plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifestFile>src/main/resources/META-INF/MANIFEST.MF</manifestFile>
+                    </archive>
+                </configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>test-jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+    </plugins>
+  </build>
 
     <!-- The repositories that we will distribute the jar files to. -->
     <!--<distributionManagement>-->
