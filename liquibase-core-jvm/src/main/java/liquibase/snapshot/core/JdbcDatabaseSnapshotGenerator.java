@@ -441,10 +441,13 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
 
 		foreignKey.setName(fkInfo.getFkName());
 
-		foreignKey.setPrimaryKeyTable(new Table(fkInfo.getPkTableName()));
+                final Table pkTable = new Table(fkInfo.getPkTableName());
+                pkTable.setSchema(fkInfo.getPkTableSchema());
+		foreignKey.setPrimaryKeyTable(pkTable);
 		foreignKey.addPrimaryKeyColumn(fkInfo.getPkColumn());
 
-		Table fkTable = new Table(fkInfo.getFkTableName());
+                final String fkTableName = fkInfo.getFkTableName();
+		Table fkTable = new Table(fkTableName);
 		fkTable.setSchema(fkInfo.getFkSchema());
 		foreignKey.setForeignKeyTable(fkTable);
 		foreignKey.addForeignKeyColumn(fkInfo.getFkColumn());
@@ -493,12 +496,13 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
             while (rs.next()) {
 	            ForeignKeyInfo fkInfo = new ForeignKeyInfo();
 
-	            fkInfo.setFkName(convertFromDatabaseName(rs.getString("FK_NAME")));
-	            fkInfo.setFkSchema(convertFromDatabaseName(rs.getString("FKTABLE_SCHEM")));
-	            fkInfo.setFkTableName(convertFromDatabaseName(rs.getString("FKTABLE_NAME")));
-	            fkInfo.setFkColumn(convertFromDatabaseName(rs.getString("FKCOLUMN_NAME")));
+                fkInfo.setFkName(convertFromDatabaseName(rs.getString("FK_NAME")));
+                fkInfo.setFkSchema(convertFromDatabaseName(rs.getString("FKTABLE_SCHEM")));
+                fkInfo.setFkTableName(convertFromDatabaseName(rs.getString("FKTABLE_NAME")));
+                fkInfo.setFkColumn(convertFromDatabaseName(rs.getString("FKCOLUMN_NAME")));
 
-                fkInfo.setPkTableName(convertFromDatabaseName(rs.getString("PKTABLE_NAME")));
+                fkInfo.setPkTableSchema(rs.getString("PKTABLE_SCHEM"));
+                fkInfo.setPkTableName(convertFromDatabaseName(rs.getString("PKTABLE_NAME"))); 
                 fkInfo.setPkColumn(convertFromDatabaseName(rs.getString("PKCOLUMN_NAME")));
 
                 fkInfo.setKeySeq(rs.getInt("KEY_SEQ"));
