@@ -170,7 +170,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 
 				boolean foundResource = false;
 
-                Set<URL> seenUrls = new HashSet<URL>();
+                Set<String> seenPaths = new HashSet<String>();
 				while (resources.hasMoreElements()) {
 					URL fileUrl = resources.nextElement();
 					if (!fileUrl.toExternalForm().startsWith("file:")) {
@@ -183,9 +183,6 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
                             continue;
                         }
 					}
-                    if (!seenUrls.add(fileUrl)) {
-                        continue; //already saw this URL
-                    }
 					File file = new File(fileUrl.toURI());
 					log.debug("includeAll using path "
 							+ file.getCanonicalPath());
@@ -197,24 +194,30 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 					if (file.isDirectory()) {
 						log.debug(file.getCanonicalPath() + " is a directory");
 						for (File childFile : file.listFiles()) {
-							if (handleIncludedChangeLog(pathName
-									+ childFile.getName(), false,
-									databaseChangeLog.getPhysicalFilePath())) {
+                            String path = pathName+ childFile.getName();
+                            if (!seenPaths.add(path)) {
+                                log.debug("already included "+path);
+                                continue;
+                            }
+
+                            if (handleIncludedChangeLog(path, false, databaseChangeLog.getPhysicalFilePath())) {
 								foundResource = true;
 							}
 						}
 					} else {
-						if (handleIncludedChangeLog(pathName + file.getName(),
-								false, databaseChangeLog.getPhysicalFilePath())) {
+                        String path = pathName + file.getName();
+                        if (!seenPaths.add(path)) {
+                            log.debug("already included "+path);
+                            continue;
+                        }
+                        if (handleIncludedChangeLog(path, false, databaseChangeLog.getPhysicalFilePath())) {
 							foundResource = true;
 						}
 					}
 				}
 
 				if (!foundResource) {
-					throw new SAXException(
-							"Could not find directory or directory was empty for includeAll '"
-									+ pathName + "'");
+					throw new SAXException( "Could not find directory or directory was empty for includeAll '" + pathName + "'");
 				}
 			} else if (changeSet == null && "changeSet".equals(qName)) {
 				boolean alwaysRun = false;
