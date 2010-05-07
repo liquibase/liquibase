@@ -170,6 +170,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 
 				boolean foundResource = false;
 
+                Set<URL> seenUrls = new HashSet<URL>();
 				while (resources.hasMoreElements()) {
 					URL fileUrl = resources.nextElement();
 					if (!fileUrl.toExternalForm().startsWith("file:")) {
@@ -182,6 +183,9 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
                             continue;
                         }
 					}
+                    if (!seenUrls.add(fileUrl)) {
+                        continue; //already saw this URL
+                    }
 					File file = new File(fileUrl.toURI());
 					log.debug("includeAll using path "
 							+ file.getCanonicalPath());
