@@ -15,6 +15,7 @@ public class ForeignKeyInfo {
 	private String fkTableName;
 	private String fkColumn;
 
+        private String pkTableSchema;
 	private String pkTableName;
 	private String pkColumn;
 
@@ -115,4 +116,12 @@ public class ForeignKeyInfo {
 	public void setReferencesUniqueColumn(boolean referencesUniqueColumn) {
 		this.referencesUniqueColumn = referencesUniqueColumn;
 	}
+
+        public String getPkTableSchema() {
+            return pkTableSchema;
+        }
+
+        public void setPkTableSchema(String pkTableSchema) {
+            this.pkTableSchema = pkTableSchema;
+        }
 }
