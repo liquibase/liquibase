@@ -2,6 +2,7 @@ package liquibase.snapshot.core;
 
 import liquibase.database.Database;
 import liquibase.database.JdbcConnection;
+import liquibase.database.structure.ForeignKeyInfo;
 import liquibase.database.typeconversion.TypeConverterFactory;
 import liquibase.database.core.MySQLDatabase;
 import liquibase.database.structure.Column;
@@ -102,4 +103,15 @@ public class MySQLDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerato
             return pkName;
         }
     }
+
+    @Override
+    protected ForeignKeyInfo fillForeignKeyInfo(ResultSet rs) throws DatabaseException, SQLException {
+        ForeignKeyInfo fkinfo= super.fillForeignKeyInfo(rs);
+        //MySQL in reality doesn't has schemas. It has databases that can have relations like schemas.
+        fkinfo.setPkTableSchema(convertFromDatabaseName(rs.getString("PKTABLE_CAT")));
+        fkinfo.setFkSchema(convertFromDatabaseName(rs.getString("FKTABLE_CAT")));
+        return fkinfo;
+    }
+
+
 }

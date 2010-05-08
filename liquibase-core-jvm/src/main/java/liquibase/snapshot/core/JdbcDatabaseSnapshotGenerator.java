@@ -382,14 +382,14 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
 		        Table tempPKTable = fk.getPrimaryKeyTable();
 		        Table pkTable = snapshot.getTable(tempPKTable.getName());
 		        if (pkTable == null) {
-			        LogFactory.getLogger().warning("Foreign key " + fk.getName() + " references table " + tempPKTable + ", which we cannot find.  Ignoring.");
-			        continue;
+                              LogFactory.getLogger().warning("Foreign key " + fk.getName() + " references table " + tempPKTable + ", which is in a different schema. Retaining FK in diff, but table will not be diffed.");
 		        }
 
 		        Table tempFkTable = fk.getForeignKeyTable();
 		        Table fkTable = snapshot.getTable(tempFkTable.getName());
 		        if (fkTable == null) {
-			        LogFactory.getLogger().warning("Foreign key " + fk.getName() + " is in table " + tempFkTable + ", which is in a different schema.  Retaining FK in diff, but table will not be diffed.");
+                            LogFactory.getLogger().warning("Foreign key " + fk.getName() + " is in table " + tempFkTable + ", which we cannot find. Ignoring.");
+                            continue;
 		        }
 
 		        snapshot.getForeignKeys().add(fk);
@@ -494,32 +494,7 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
             ResultSet rs = getMetaData(database).getImportedKeys(dbCatalog, dbSchema, convertTableNameToDatabaseTableName(foreignKeyTableName));
 
             while (rs.next()) {
-	            ForeignKeyInfo fkInfo = new ForeignKeyInfo();
-
-                fkInfo.setFkName(convertFromDatabaseName(rs.getString("FK_NAME")));
-                fkInfo.setFkSchema(convertFromDatabaseName(rs.getString("FKTABLE_SCHEM")));
-                fkInfo.setFkTableName(convertFromDatabaseName(rs.getString("FKTABLE_NAME")));
-                fkInfo.setFkColumn(convertFromDatabaseName(rs.getString("FKCOLUMN_NAME")));
-
-                fkInfo.setPkTableSchema(rs.getString("PKTABLE_SCHEM"));
-                fkInfo.setPkTableName(convertFromDatabaseName(rs.getString("PKTABLE_NAME"))); 
-                fkInfo.setPkColumn(convertFromDatabaseName(rs.getString("PKCOLUMN_NAME")));
-
-                fkInfo.setKeySeq(rs.getInt("KEY_SEQ"));
-
-                ForeignKeyConstraintType updateRule = convertToForeignKeyConstraintType(rs.getInt("UPDATE_RULE"));
-	            if (rs.wasNull()) {
-		            updateRule = null;
-	            }
-	            fkInfo.setUpdateRule(updateRule);
-
-	            ForeignKeyConstraintType deleteRule = convertToForeignKeyConstraintType(rs.getInt("DELETE_RULE"));
-	            if (rs.wasNull()) {
-		            deleteRule = null;
-	            }
-	            fkInfo.setDeleteRule(deleteRule);
-
-	            fkInfo.setDeferrablility(rs.getShort("DEFERRABILITY"));
+                ForeignKeyInfo fkInfo = fillForeignKeyInfo(rs);
 
                 fkList.add(generateForeignKey(fkInfo, database, fkList));
             }
@@ -533,7 +508,36 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
         }
     }
 
+    /**
+     * Fill foreign key information from the current register of a getImportedKeys resultset
+     * @param rs The resultset returned by getImportedKeys
+     * @return Foreign key information 
+     */
+    protected ForeignKeyInfo fillForeignKeyInfo(ResultSet rs) throws DatabaseException, SQLException {
+        ForeignKeyInfo fkInfo = new ForeignKeyInfo();
+        fkInfo.setFkName(convertFromDatabaseName(rs.getString("FK_NAME")));
+        fkInfo.setFkSchema(convertFromDatabaseName(rs.getString("FKTABLE_SCHEM")));
+        fkInfo.setFkTableName(convertFromDatabaseName(rs.getString("FKTABLE_NAME")));
+        fkInfo.setFkColumn(convertFromDatabaseName(rs.getString("FKCOLUMN_NAME")));
+        fkInfo.setPkTableSchema(rs.getString("PKTABLE_SCHEM"));
+        fkInfo.setPkTableName(convertFromDatabaseName(rs.getString("PKTABLE_NAME")));
+        fkInfo.setPkColumn(convertFromDatabaseName(rs.getString("PKCOLUMN_NAME")));
+        fkInfo.setKeySeq(rs.getInt("KEY_SEQ"));
+        ForeignKeyConstraintType updateRule = convertToForeignKeyConstraintType(rs.getInt("UPDATE_RULE"));
+        if (rs.wasNull()) {
+            updateRule = null;
+        }
+        fkInfo.setUpdateRule(updateRule);
+        ForeignKeyConstraintType deleteRule = convertToForeignKeyConstraintType(rs.getInt("DELETE_RULE"));
+        if (rs.wasNull()) {
+            deleteRule = null;
+        }
+        fkInfo.setDeleteRule(deleteRule);
+        fkInfo.setDeferrablility(rs.getShort("DEFERRABILITY"));
+        return fkInfo;
+    }        
 
+  
     protected ForeignKeyConstraintType convertToForeignKeyConstraintType(int jdbcType) throws DatabaseException {
         if (jdbcType == DatabaseMetaData.importedKeyCascade) {
             return ForeignKeyConstraintType.importedKeyCascade;
