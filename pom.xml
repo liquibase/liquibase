@@ -40,6 +40,7 @@
   <properties>
     <maven.build.timestamp.format>E MMM dd hh:mm:ss zzz yyyy</maven.build.timestamp.format>
     <build.timestamp>${maven.build.timestamp}</build.timestamp>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>  
 
   <modules>
@@ -109,6 +110,13 @@
             <debug>true</debug>
           </configuration>
         </plugin>
+        <plugin>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <configuration>
+                <redirectTestOutputToFile>true</redirectTestOutputToFile>
+                <reportFormat>plain</reportFormat>
+            </configuration>
+        </plugin>
       </plugins>
     </pluginManagement>
 
@@ -125,6 +133,13 @@
           <dependencyDetailsEnabled>false</dependencyDetailsEnabled>
         </configuration>
       </plugin>
+      <!--
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>findbugs-maven-plugin</artifactId>
+        <version>2.3</version>
+      </plugin>
+      -->
     </plugins>
   </reporting>
 
