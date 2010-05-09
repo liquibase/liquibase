@@ -101,19 +101,31 @@
           <scope>test</scope>
         </dependency>
     </dependencies>
-	<profiles>
-		<profile>
-			<id>oracle</id>
-			<dependencies>
-				<dependency>
-					<groupId>oracle</groupId>
-					<artifactId>oracle-ojdbc14</artifactId>
-					<version>10.2.0.2</version>
-					<scope>test</scope>
-				</dependency>
-			</dependencies>
-		</profile>
-	</profiles>
+    <profiles>
+            <profile>
+                <id>oracle</id>
+                <dependencies>
+                        <dependency>
+                                <groupId>oracle</groupId>
+                                <artifactId>oracle-ojdbc14</artifactId>
+                                <version>10.2.0.2</version>
+                                <scope>test</scope>
+                        </dependency>
+                </dependencies>
+            </profile>
+            <profile>
+                <id>buildServer</id>
+                <activation>
+                    <property>
+                        <name>liquibase.buildServer</name>
+                        <value>true</value>
+                    </property>
+                </activation>
+              <properties>
+                <liquibase.excludedTests>**/MavenIntegrationTest.java</liquibase.excludedTests>
+              </properties>
+            </profile>
+    </profiles>
   <build>
     <plugins>
       <plugin>
@@ -126,6 +138,9 @@
               <value>severe</value>
             </property>
           </systemProperties>
+          <excludes>
+            <exclude>${liquibase.excludedTests}</exclude>
+          </excludes>
         </configuration>
       </plugin>
 
