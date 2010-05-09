@@ -268,6 +268,34 @@ public class DiffResult {
 		this.changeSetContext = changeSetContext;
 	}
 
+        public boolean differencesFound() throws DatabaseException,IOException{
+            boolean differencesInData=false;
+            if(shouldDiffData()) {
+                List<ChangeSet> changeSets = new ArrayList<ChangeSet>();
+                addInsertDataChanges(changeSets, dataDir);
+                differencesInData=!changeSets.isEmpty();
+            }
+
+            return getMissingColumns().size()>0 ||
+                    getMissingForeignKeys().size()>0 ||
+                    getMissingIndexes().size()>0 ||
+                    getMissingPrimaryKeys().size()>0 ||
+                    getMissingSequences().size()>0 ||
+                    getMissingTables().size()>0 ||
+                    getMissingUniqueConstraints().size()>0 ||
+                    getMissingViews().size()>0 ||
+                    getUnexpectedColumns().size()>0 ||
+                    getUnexpectedForeignKeys().size()>0 ||
+                    getUnexpectedIndexes().size()>0 ||
+                    getUnexpectedPrimaryKeys().size()>0 ||
+                    getUnexpectedSequences().size()>0 ||
+                    getUnexpectedTables().size()>0 ||
+                    getUnexpectedUniqueConstraints().size()>0 ||
+                    getUnexpectedViews().size()>0 ||
+                    differencesInData;
+        }
+
+
 	public void printResult(PrintStream out) throws DatabaseException {
 		out.println("Reference Database: " + referenceSnapshot.getDatabase());
 		out.println("Target Database: " + targetSnapshot.getDatabase());

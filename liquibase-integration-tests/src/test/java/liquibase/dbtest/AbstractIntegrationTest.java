@@ -28,6 +28,7 @@ import liquibase.test.DatabaseTestContext;
 import liquibase.logging.LogFactory;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.PrintStream;
@@ -36,6 +37,8 @@ import java.net.URL;
 import java.util.*;
 import java.sql.Statement;
 import java.sql.SQLException;
+import liquibase.util.RegexMatcher;
+import liquibase.util.StreamUtil;
 
 import org.junit.Before;
 import org.junit.After;
@@ -45,13 +48,14 @@ import static org.junit.Assert.*;
 /**
  * Base class for all database integration tests.  There is an AbstractIntegrationTest subclass for each supported database.
  * The database is assumed to exist at the host returned by getDatabaseServerHostname.  Currently this is hardcoded to an integration test server
- * at liquibase world headquarters.  Feel free to change the return value, but don't check it in.  We are going to improve the config of this at some point. 
+ * at liquibase world headquarters.  Feel free to change the return value, but don't check it in.  We are going to improve the config of this at some point.
  */
 public abstract class AbstractIntegrationTest {
 
     protected String completeChangeLog;
     private String rollbackChangeLog;
     private String includedChangeLog;
+    private String encodingChangeLog;
     protected String contexts = "test, context-b";
     private Database database;
     private String url;
@@ -61,8 +65,8 @@ public abstract class AbstractIntegrationTest {
 
         this.completeChangeLog = "changelogs/" + changelogDir + "/complete/root.changelog.xml";
         this.rollbackChangeLog = "changelogs/" + changelogDir + "/rollback/rollbackable.changelog.xml";
-        this.includedChangeLog = "changelogs/" + changelogDir + "/complete/included.changelog.xml";  
-
+        this.includedChangeLog = "changelogs/" + changelogDir + "/complete/included.changelog.xml";
+        this.encodingChangeLog = "changelogs/common/encoding.changelog.xml";
         this.url = url;
 
         ServiceLocator.getInstance().setResourceAccessor(TestContext.getInstance().getTestResourceAccessor());
@@ -86,7 +90,7 @@ public abstract class AbstractIntegrationTest {
                 database.rollback();
             }
 
-            DatabaseSnapshotGeneratorFactory.resetAll();            
+            DatabaseSnapshotGeneratorFactory.resetAll();
             ExecutorService.getInstance().reset();
             LockService.resetAll();
 
@@ -96,7 +100,7 @@ public abstract class AbstractIntegrationTest {
                 ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement().executeUpdate("drop table "+database.getDatabaseChangeLogLockTableName());
                 database.commit();
             }
-            
+
             DatabaseSnapshotGeneratorFactory.resetAll();
             LockService.getInstance(database).forceReleaseLock();
             if (database.supportsSchemas()) {
@@ -104,7 +108,7 @@ public abstract class AbstractIntegrationTest {
             }
             database.dropDatabaseObjects(null);
             database.commit();
-            DatabaseSnapshotGeneratorFactory.resetAll();            
+            DatabaseSnapshotGeneratorFactory.resetAll();
 
         }
     }
@@ -195,7 +199,7 @@ public abstract class AbstractIntegrationTest {
 
         liquibase = createLiquibase(completeChangeLog);
         liquibase.update(this.contexts);
-        
+
     }
 
     @Test
@@ -346,23 +350,7 @@ public abstract class AbstractIntegrationTest {
         Diff diff = new Diff(database, database);
         DiffResult diffResult = diff.compare();
 
-        assertEquals(0, diffResult.getMissingColumns().size());
-        assertEquals(0, diffResult.getMissingForeignKeys().size());
-        assertEquals(0, diffResult.getMissingIndexes().size());
-        assertEquals(0, diffResult.getMissingPrimaryKeys().size());
-        assertEquals(0, diffResult.getMissingSequences().size());
-        assertEquals(0, diffResult.getMissingColumns().size());
-        assertEquals(0, diffResult.getMissingTables().size());
-        assertEquals(0, diffResult.getMissingViews().size());
-
-        assertEquals(0, diffResult.getUnexpectedColumns().size());
-        assertEquals(0, diffResult.getUnexpectedForeignKeys().size());
-        assertEquals(0, diffResult.getUnexpectedIndexes().size());
-        assertEquals(0, diffResult.getUnexpectedPrimaryKeys().size());
-        assertEquals(0, diffResult.getUnexpectedSequences().size());
-        assertEquals(0, diffResult.getUnexpectedColumns().size());
-        assertEquals(0, diffResult.getUnexpectedTables().size());
-        assertEquals(0, diffResult.getUnexpectedViews().size());
+        assertFalse(diffResult.differencesFound());
     }
 
     @Test
@@ -413,20 +401,7 @@ public abstract class AbstractIntegrationTest {
             DatabaseSnapshot migratedSnapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database, null, null);
 
             DiffResult finalDiffResult = new Diff(originalSnapshot, migratedSnapshot).compare();
-            assertEquals(0, finalDiffResult.getMissingColumns().size());
-            assertEquals(0, finalDiffResult.getMissingForeignKeys().size());
-            assertEquals(0, finalDiffResult.getMissingIndexes().size());
-            assertEquals(0, finalDiffResult.getMissingPrimaryKeys().size());
-            assertEquals(0, finalDiffResult.getMissingSequences().size());
-            assertEquals(0, finalDiffResult.getMissingTables().size());
-            assertEquals(0, finalDiffResult.getMissingViews().size());
-            assertEquals(0, finalDiffResult.getUnexpectedColumns().size());
-            assertEquals(0, finalDiffResult.getUnexpectedForeignKeys().size());
-            assertEquals(0, finalDiffResult.getUnexpectedIndexes().size());
-            assertEquals(0, finalDiffResult.getUnexpectedPrimaryKeys().size());
-            assertEquals(0, finalDiffResult.getUnexpectedSequences().size());
-            assertEquals(0, finalDiffResult.getUnexpectedTables().size());
-            assertEquals(0, finalDiffResult.getUnexpectedViews().size());
+            assertFalse(finalDiffResult.differencesFound());
 
             //diff to empty and drop all
             Diff emptyDiff = new Diff(emptySnapshot, migratedSnapshot);
@@ -519,20 +494,7 @@ public abstract class AbstractIntegrationTest {
         DatabaseSnapshot finalSnapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database, null, null);
 
         DiffResult finalDiffResult = new Diff(originalSnapshot, finalSnapshot).compare();
-        assertEquals(0, finalDiffResult.getMissingColumns().size());
-        assertEquals(0, finalDiffResult.getMissingForeignKeys().size());
-        assertEquals(0, finalDiffResult.getMissingIndexes().size());
-        assertEquals(0, finalDiffResult.getMissingPrimaryKeys().size());
-        assertEquals(0, finalDiffResult.getMissingSequences().size());
-        assertEquals(0, finalDiffResult.getMissingTables().size());
-        assertEquals(0, finalDiffResult.getMissingViews().size());
-        assertEquals(0, finalDiffResult.getUnexpectedColumns().size());
-        assertEquals(0, finalDiffResult.getUnexpectedForeignKeys().size());
-        assertEquals(0, finalDiffResult.getUnexpectedIndexes().size());
-        assertEquals(0, finalDiffResult.getUnexpectedPrimaryKeys().size());
-        assertEquals(0, finalDiffResult.getUnexpectedSequences().size());
-        assertEquals(0, finalDiffResult.getUnexpectedTables().size());
-        assertEquals(0, finalDiffResult.getUnexpectedViews().size());
+        assertFalse(finalDiffResult.differencesFound());
     }
 
     @Test
@@ -737,6 +699,72 @@ public abstract class AbstractIntegrationTest {
 
         liquibase = createLiquibase(completeChangeLog);
         liquibase.generateDocumentation(outputDir.getAbsolutePath());
+    }
+
+
+    @Test
+    public void testEncodingUpdating2SQL() throws Exception {
+        if (database == null) {
+            return;
+        }
+
+        Liquibase liquibase = createLiquibase(encodingChangeLog);
+
+        StringWriter writer=new StringWriter();
+        liquibase.update(this.contexts,writer);
+        assertTrue("Update to SQL preserves encoding",
+            new RegexMatcher(writer.toString(), new String[] {
+                //For the UTF-8 encoded cvs
+                "^.*INSERT.*VALUES.*‡ËÏÚ˘·ÈÌÛ˙¿»Ã“Ÿ¡…Õ”⁄‚ÍÓÙ˚‰ÎÔˆ¸.*$",
+                "ÁÒÆ",
+                //For the latin1 one
+                "^.*INSERT.*VALUES.*‡ËÏÚ˘·ÈÌÛ˙¿»Ã“Ÿ¡…Õ”⁄‚ÍÓÙ˚‰ÎÔˆ¸.*$",
+                "ÁÒÆ"
+            }).allMatchedInSequentialOrder());
+    }
+
+    @Test
+    public void testEncondingUpdatingDatabase() throws Exception {
+        if (database == null) {
+            return;
+        }
+        
+        Liquibase liquibase = createLiquibase(encodingChangeLog);
+
+        liquibase.update(this.contexts);
+
+        //The changelog puts the same data using utf8 to default schema and latin1 to liquibaseb
+        //Then if there are no difference we can be pretty sure that the update is correct
+        DatabaseSnapshot utf8Snapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database, null, null);
+        DatabaseSnapshot iso88951Snapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database,DatabaseTestContext.ALT_SCHEMA, null);
+
+        //TODO: We need better data diff support to be able to do that
+        //Diff diff = new Diff(utf8Snapshot,iso88951Snapshot);
+        //diff.setDiffData(true);
+        //assertFalse("There are no differences setting the same data in utf-8 and iso-8895-1 "
+        //        ,diff.compare().differencesFound());
+
+        //For now we do an approach reading diff data
+        Diff[] diffs=new Diff[2];
+        diffs[0]= new Diff(utf8Snapshot,iso88951Snapshot);
+        diffs[0].setDiffData(true);
+        diffs[1]= new Diff(iso88951Snapshot,utf8Snapshot);
+        diffs[1].setDiffData(true);
+        for(Diff diff:diffs) {
+            File tempFile = File.createTempFile("liquibase-test", ".xml");
+            tempFile.deleteOnExit();
+            FileOutputStream output=new FileOutputStream(tempFile);
+            diff.compare().printChangeLog(new PrintStream(output,false,"UTF-8"),database);
+            output.close();
+            String diffOutput=StreamUtil.getStreamContents(new FileInputStream(tempFile),"UTF-8");
+            assertTrue("Update to SQL preserves encoding",
+                new RegexMatcher(diffOutput, new String[] {
+                    //For the UTF-8 encoded cvs
+                    "value=\"‡ËÏÚ˘·ÈÌÛ˙¿»Ã“Ÿ¡…Õ”⁄‚ÍÓÙ˚‰ÎÔˆ¸\"",
+                    "value=\"ÁÒÆ\""
+                }).allMatchedInSequentialOrder());
+        }
+
     }
 
     public static String getDatabaseServerHostname() throws Exception {
