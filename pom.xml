@@ -108,6 +108,7 @@
             <target>1.5</target>
             <optimize>true</optimize>
             <debug>true</debug>
+            <encoding>${project.build.sourceEncoding}</encoding>
           </configuration>
         </plugin>
         <plugin>
