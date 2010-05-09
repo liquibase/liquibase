@@ -715,11 +715,11 @@ public abstract class AbstractIntegrationTest {
         assertTrue("Update to SQL preserves encoding",
             new RegexMatcher(writer.toString(), new String[] {
                 //For the UTF-8 encoded cvs
-                "^.*INSERT.*VALUES.*ΰθμςωαινσϊΐΘΜÒΩΑΙΝΣΪβκξτϋδλοφό.*$",
-                "ηρ®",
+                "^.*INSERT.*VALUES.*Γ Γ¨Γ¬Γ²ΓΉΓ΅Γ©Γ­Γ³ΓΊΓ€ΓΓΓ’Γ™ΓΓ‰ΓΓ“ΓΓΆΓªΓ®Γ΄Γ»Γ¤Γ«Γ―Γ¶ΓΌ.*$",
+                "Γ§Γ±Β®",
                 //For the latin1 one
-                "^.*INSERT.*VALUES.*ΰθμςωαινσϊΐΘΜÒΩΑΙΝΣΪβκξτϋδλοφό.*$",
-                "ηρ®"
+                "^.*INSERT.*VALUES.*Γ Γ¨Γ¬Γ²ΓΉΓ΅Γ©Γ­Γ³ΓΊΓ€ΓΓΓ’Γ™ΓΓ‰ΓΓ“ΓΓΆΓªΓ®Γ΄Γ»Γ¤Γ«Γ―Γ¶ΓΌ.*$",
+                "Γ§Γ±Β®"
             }).allMatchedInSequentialOrder());
     }
 
@@ -760,8 +760,8 @@ public abstract class AbstractIntegrationTest {
             assertTrue("Update to SQL preserves encoding",
                 new RegexMatcher(diffOutput, new String[] {
                     //For the UTF-8 encoded cvs
-                    "value=\"ΰθμςωαινσϊΐΘΜÒΩΑΙΝΣΪβκξτϋδλοφό\"",
-                    "value=\"ηρ®\""
+                    "value=\"Γ Γ¨Γ¬Γ²ΓΉΓ΅Γ©Γ­Γ³ΓΊΓ€ΓΓΓ’Γ™ΓΓ‰ΓΓ“ΓΓΆΓªΓ®Γ΄Γ»Γ¤Γ«Γ―Γ¶ΓΌ\"",
+                    "value=\"Γ§Γ±Β®\""
                 }).allMatchedInSequentialOrder());
         }
 
