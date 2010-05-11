@@ -28,7 +28,7 @@ public class DateTimeType extends DataType {
         } else if (database.getDatabaseFunctions().contains(new DatabaseFunction(value.toString()))) {
             return value.toString();
         } else if (value instanceof String) {
-            return (String) value;
+            return "'"+((String) value).replaceAll("'","''")+"'";
         }
         return database.getDateTimeLiteral(((java.sql.Timestamp) value));
     }
