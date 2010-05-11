@@ -39,39 +39,43 @@ public class StringChangeLogSerializer implements ChangeLogSerializer {
             buffer.append("[");
 
             SortedSet<String> values = new TreeSet<String>();
-            for (Field field : objectToSerialize.getClass().getDeclaredFields()) {
-                field.setAccessible(true);
-                ChangeProperty changePropertyAnnotation = field.getAnnotation(ChangeProperty.class);
-                if (changePropertyAnnotation != null && !changePropertyAnnotation.includeInSerialization()) {
-                    continue;
-                }
-                if (field.getName().equals("serialVersionUID")) {
-                    continue;
-                }
-                if (field.getName().equals("$VRc")) { //from emma
-                    continue;
-                }
+            Class<? extends Object> classToCheck = objectToSerialize.getClass();
+            while (!classToCheck.equals(Object.class)) {
+                for (Field field : classToCheck.getDeclaredFields()) {
+                    field.setAccessible(true);
+                    ChangeProperty changePropertyAnnotation = field.getAnnotation(ChangeProperty.class);
+                    if (changePropertyAnnotation != null && !changePropertyAnnotation.includeInSerialization()) {
+                        continue;
+                    }
+                    if (field.getName().equals("serialVersionUID")) {
+                        continue;
+                    }
+                    if (field.getName().equals("$VRc")) { //from emma
+                        continue;
+                    }
 
-                String propertyName = field.getName();
+                    String propertyName = field.getName();
 
-                Object value = field.get(objectToSerialize);
-                if (value instanceof ColumnConfig) {
-                    values.add(indent(indent) + serializeColumnConfig((ColumnConfig) field.get(objectToSerialize), indent + 1));
-                } else if (value instanceof ConstraintsConfig) {
-                    values.add(indent(indent) + serializeConstraintsConfig((ConstraintsConfig) field.get(objectToSerialize), indent + 1));
-                } else if (value instanceof CustomChange) {
-                    values.add(indent(indent) + serializeCustomChange((CustomChange) field.get(objectToSerialize), indent + 1));
-                } else {
-                    if (value != null) {
-                        if (value instanceof Map) {
-                            values.add(indent(indent) + propertyName + "=" + serializeObject((Map) value, indent + 1));
-                        } else if (value instanceof Collection) {
-                            values.add(indent(indent) + propertyName + "=" + serializeObject((Collection) value, indent + 1));
-                        } else {
-                            values.add(indent(indent) + propertyName + "=\"" + value.toString() + "\"");
+                    Object value = field.get(objectToSerialize);
+                    if (value instanceof ColumnConfig) {
+                        values.add(indent(indent) + serializeColumnConfig((ColumnConfig) field.get(objectToSerialize), indent + 1));
+                    } else if (value instanceof ConstraintsConfig) {
+                        values.add(indent(indent) + serializeConstraintsConfig((ConstraintsConfig) field.get(objectToSerialize), indent + 1));
+                    } else if (value instanceof CustomChange) {
+                        values.add(indent(indent) + serializeCustomChange((CustomChange) field.get(objectToSerialize), indent + 1));
+                    } else {
+                        if (value != null) {
+                            if (value instanceof Map) {
+                                values.add(indent(indent) + propertyName + "=" + serializeObject((Map) value, indent + 1));
+                            } else if (value instanceof Collection) {
+                                values.add(indent(indent) + propertyName + "=" + serializeObject((Collection) value, indent + 1));
+                            } else {
+                                values.add(indent(indent) + propertyName + "=\"" + value.toString() + "\"");
+                            }
                         }
                     }
                 }
+                classToCheck = classToCheck.getSuperclass();
             }
 
             if (values.size() > 0) {

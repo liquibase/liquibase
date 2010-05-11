@@ -81,6 +81,7 @@ public abstract class AbstractDatabase implements Database {
     }
 
     public void setConnection(DatabaseConnection conn) {
+        LogFactory.getLogger().debug("Connected to "+conn.getConnectionUserName()+"@"+conn.getURL());
         this.connection = conn;
         try {
             connection.setAutoCommit(getAutoCommitMode());
