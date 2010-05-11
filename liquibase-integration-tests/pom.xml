@@ -117,7 +117,7 @@
                 <id>buildServer</id>
                 <activation>
                     <property>
-                        <name>liquibase.buildServer</name>
+                        <name>liquibase.buildserver</name>
                         <value>true</value>
                     </property>
                 </activation>
@@ -137,9 +137,6 @@
               <name>liquibase.default.logger.level</name>
               <value>severe</value>
             </property>
-              <systemPropertyVariables>
-                  <propertyName>liquibase.buildserver</propertyName>
-              </systemPropertyVariables>
           </systemProperties>
           <excludes>
             <exclude>${liquibase.excludedTests}</exclude>
