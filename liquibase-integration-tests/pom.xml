@@ -137,6 +137,9 @@
               <name>liquibase.default.logger.level</name>
               <value>severe</value>
             </property>
+              <systemPropertyVariables>
+                  <propertyName>liquibase.buildserver</propertyName>
+              </systemPropertyVariables>
           </systemProperties>
           <excludes>
             <exclude>${liquibase.excludedTests}</exclude>

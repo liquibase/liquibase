@@ -1,6 +1,8 @@
 package liquibase.maven;
 
 import java.io.File;
+
+import liquibase.util.StringUtils;
 import org.apache.maven.it.Verifier;
 import org.apache.maven.it.util.ResourceExtractor;
 import org.junit.Test;
@@ -32,6 +34,10 @@ public class MavenIntegrationTest {
 
     @Test
     public void testUpdate() throws Exception{
+        if (StringUtils.trimToEmpty(System.getProperty("liquibase.buildserver")).equalsIgnoreCase("true")) {
+            return;
+        }
+        
         File testDir = ResourceExtractor.simpleExtractResources( getClass(), "/maven" );
 
         Verifier verifier;
