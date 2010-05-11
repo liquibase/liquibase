@@ -37,6 +37,7 @@ import java.net.URL;
 import java.util.*;
 import java.sql.Statement;
 import java.sql.SQLException;
+import liquibase.assertions.DiffResultAssert;
 import liquibase.util.RegexMatcher;
 import liquibase.util.StreamUtil;
 
@@ -56,6 +57,7 @@ public abstract class AbstractIntegrationTest {
     private String rollbackChangeLog;
     private String includedChangeLog;
     private String encodingChangeLog;
+    private String externalfkInitChangeLog;
     protected String contexts = "test, context-b";
     private Database database;
     private String url;
@@ -67,6 +69,8 @@ public abstract class AbstractIntegrationTest {
         this.rollbackChangeLog = "changelogs/" + changelogDir + "/rollback/rollbackable.changelog.xml";
         this.includedChangeLog = "changelogs/" + changelogDir + "/complete/included.changelog.xml";
         this.encodingChangeLog = "changelogs/common/encoding.changelog.xml";
+        this.externalfkInitChangeLog= "changelogs/common/externalfk.init.changelog.xml";
+
         this.url = url;
 
         ServiceLocator.getInstance().setResourceAccessor(TestContext.getInstance().getTestResourceAccessor());
@@ -765,6 +769,22 @@ public abstract class AbstractIntegrationTest {
                 }).allMatchedInSequentialOrder());
         }
 
+    }
+
+    @Test
+    /**
+     * Test that diff is capable to detect foreign keys to external schemas that doesn't appear in the changelog
+     */
+    public void testDiffExternalForeignKeys() throws Exception {
+        if (database == null) {
+            return;
+        }
+        Liquibase liquibase = createLiquibase(externalfkInitChangeLog);
+        liquibase.update(contexts);
+
+        Diff diff=new Diff(database,(String)null);
+        DiffResult diffResult=diff.compare();
+        DiffResultAssert.assertThat(diffResult).containsMissingForeignKeyWithName("fk_person_country");
     }
 
     public static String getDatabaseServerHostname() throws Exception {
