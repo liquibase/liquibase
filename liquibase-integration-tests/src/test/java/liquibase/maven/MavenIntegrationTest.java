@@ -34,7 +34,7 @@ public class MavenIntegrationTest {
 
     @Test
     public void testUpdate() throws Exception{
-        if (StringUtils.trimToEmpty(System.getProperty("liquibase.buildserver")).equalsIgnoreCase("true")) {
+        if (!StringUtils.trimToEmpty(System.getProperty("liquibase.buildserver")).equalsIgnoreCase("false")) {
             return;
         }
         
