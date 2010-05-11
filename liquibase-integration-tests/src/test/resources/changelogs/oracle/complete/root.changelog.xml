@@ -26,7 +26,7 @@
         </createTable>
     </changeSet>
     <changeSet id="1.1" author="nvoxland">
-        <createSequence sequenceName="seq_person"/>
+        <createSequence sequenceName="seq_person" ordered="true"/>
     </changeSet>
     <changeSet id="2" author="nvoxland">
         <comment>Add a username column so we can use "person" for authentication</comment>
