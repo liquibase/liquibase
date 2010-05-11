@@ -117,7 +117,7 @@
                 <id>buildServer</id>
                 <activation>
                     <property>
-                        <name>liquibase.buildserver</name>
+                        <name>env.liquibase.buildserver</name>
                         <value>true</value>
                     </property>
                 </activation>

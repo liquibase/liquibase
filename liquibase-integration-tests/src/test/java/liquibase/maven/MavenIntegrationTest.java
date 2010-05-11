@@ -33,11 +33,7 @@ public class MavenIntegrationTest {
     }
 
     @Test
-    public void testUpdate() throws Exception{
-        if (!StringUtils.trimToEmpty(System.getProperty("liquibase.buildserver")).equalsIgnoreCase("false")) {
-            return;
-        }
-        
+    public void testUpdate() throws Exception{        
         File testDir = ResourceExtractor.simpleExtractResources( getClass(), "/maven" );
 
         Verifier verifier;
