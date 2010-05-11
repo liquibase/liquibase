@@ -193,15 +193,35 @@ public class StringChangeLogSerializerTest {
     public void serialized_SQLFileChange() {
         SQLFileChange change = new SQLFileChange();
 
-        assertEquals("sqlFile:[]", new StringChangeLogSerializer().serialize(change));
+        assertEquals("sqlFile:[\n" +
+                "    splitStatements=\"true\"\n" +
+                "    stripComments=\"false\"\n]", new StringChangeLogSerializer().serialize(change));
 
         change.setPath("PATH/TO/File.txt");
 
         assertEquals("sqlFile:[\n" +
                 "    path=\"PATH/TO/File.txt\"\n" +
+                "    splitStatements=\"true\"\n" +
+                "    stripComments=\"false\"\n" +
                 "]", new StringChangeLogSerializer().serialize(change));
     }
 
+    @Test
+    public void serialized_rawSql() {
+        RawSQLChange change = new RawSQLChange();
+
+        assertEquals("sql:[\n" +
+                "    splitStatements=\"true\"\n" +
+                "    stripComments=\"false\"\n]", new StringChangeLogSerializer().serialize(change));
+
+        change.setSql("some SQL Here");
+
+        assertEquals("sql:[\n" +
+                "    splitStatements=\"true\"\n" +
+                "    sql=\"some SQL Here\"\n" +
+                "    stripComments=\"false\"\n" +
+                "]", new StringChangeLogSerializer().serialize(change));
+    }
 
     @Test
     public void tryAllChanges() throws Exception {
