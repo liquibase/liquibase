@@ -97,9 +97,12 @@ public class ChangeLogParserFactoryTest {
         ChangeLogParserFactory.getInstance().register(xmlChangeLogParser);
         ChangeLogParserFactory.getInstance().register(new SqlChangeLogParser());
 
-        ChangeLogParser parser = ChangeLogParserFactory.getInstance().getParser("badextension", new JUnitResourceAccessor());
-
-        assertNull(parser);
+        try {
+            ChangeLogParserFactory.getInstance().getParser("badextension", new JUnitResourceAccessor());
+            fail("Did not throw an exception");
+        } catch (Exception e) {
+            //what we want
+        }
     }
 
     @Test
