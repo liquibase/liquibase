@@ -36,10 +36,8 @@ public class XMLChangeLogSAXParser implements ChangeLogParser {
         return "2.0";
     }
 
-    public String[] getValidFileExtensions() {
-        return new String[] {
-            "xml"
-        };
+    public boolean supports(String changeLogFile, ResourceAccessor resourceAccessor) {
+        return changeLogFile.endsWith("xml");
     }
 
     public DatabaseChangeLog parse(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters, ResourceAccessor resourceAccessor) throws ChangeLogParseException {

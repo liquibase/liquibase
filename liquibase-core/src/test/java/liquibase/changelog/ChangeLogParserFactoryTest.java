@@ -7,10 +7,12 @@ import liquibase.parser.core.sql.SqlChangeLogParser;
 import liquibase.parser.core.xml.XMLChangeLogSAXParser;
 import liquibase.resource.ResourceAccessor;
 import static org.junit.Assert.*;
+
+import liquibase.test.JUnitResourceAccessor;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.Map;
+import java.util.List;
 
 public class ChangeLogParserFactoryTest {
     @Before
@@ -58,35 +60,35 @@ public class ChangeLogParserFactoryTest {
     }
 
     @Test
-    public void getParser_byExtension() {
+    public void getParser_byExtension() throws Exception {
         ChangeLogParserFactory.getInstance().getParsers().clear();
 
         XMLChangeLogSAXParser xmlChangeLogParser = new XMLChangeLogSAXParser();
         ChangeLogParserFactory.getInstance().register(xmlChangeLogParser);
         ChangeLogParserFactory.getInstance().register(new SqlChangeLogParser());
 
-        ChangeLogParser parser = ChangeLogParserFactory.getInstance().getParser("xml");
+        ChangeLogParser parser = ChangeLogParserFactory.getInstance().getParser("xml", new JUnitResourceAccessor());
 
         assertNotNull(parser);
         assertTrue(xmlChangeLogParser == parser);
     }
 
     @Test
-    public void getParser_byFile() {
+    public void getParser_byFile() throws Exception {
         ChangeLogParserFactory.getInstance().getParsers().clear();
 
         XMLChangeLogSAXParser xmlChangeLogParser = new XMLChangeLogSAXParser();
         ChangeLogParserFactory.getInstance().register(xmlChangeLogParser);
         ChangeLogParserFactory.getInstance().register(new SqlChangeLogParser());
 
-        ChangeLogParser parser = ChangeLogParserFactory.getInstance().getParser("path/to/a/file.xml");
+        ChangeLogParser parser = ChangeLogParserFactory.getInstance().getParser("path/to/a/file.xml", new JUnitResourceAccessor());
 
         assertNotNull(parser);
         assertTrue(xmlChangeLogParser == parser);
     }
 
     @Test
-    public void getParser_noneMatching() {
+    public void getParser_noneMatching() throws Exception {
         ChangeLogParserFactory.getInstance().getParsers().clear();
 
         ChangeLogParserFactory.getInstance().getParsers().clear();
@@ -95,7 +97,7 @@ public class ChangeLogParserFactoryTest {
         ChangeLogParserFactory.getInstance().register(xmlChangeLogParser);
         ChangeLogParserFactory.getInstance().register(new SqlChangeLogParser());
 
-        ChangeLogParser parser = ChangeLogParserFactory.getInstance().getParser("badextension");
+        ChangeLogParser parser = ChangeLogParserFactory.getInstance().getParser("badextension", new JUnitResourceAccessor());
 
         assertNull(parser);
     }
@@ -110,7 +112,7 @@ public class ChangeLogParserFactoryTest {
     @SuppressWarnings("unchecked")
 	@Test
     public void builtInGeneratorsAreFound() {
-        Map parsers = ChangeLogParserFactory.getInstance().getParsers();
+        List parsers = ChangeLogParserFactory.getInstance().getParsers();
         assertTrue(parsers.size() > 0);
     }
 
@@ -120,10 +122,8 @@ public class ChangeLogParserFactoryTest {
             return null;
         }
 
-        public String[] getValidFileExtensions() {
-            return new String[] {
-                    "test"
-            };
+        public boolean supports(String changeLogFile, ResourceAccessor resourceAccessor) {
+            return changeLogFile.endsWith(".test");
         }
 
         public int getPriority() {

@@ -492,8 +492,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 			String path = searchPath(relativeBaseFileName);
 			fileName = new StringBuilder(path).append(fileName).toString();
 		}
-		DatabaseChangeLog changeLog = ChangeLogParserFactory.getInstance()
-				.getParser(fileName).parse(fileName, changeLogParameters,
+		DatabaseChangeLog changeLog = ChangeLogParserFactory.getInstance().getParser(fileName, resourceAccessor).parse(fileName, changeLogParameters,
 						resourceAccessor);
 		PreconditionContainer preconditions = changeLog.getPreconditions();
 		if (preconditions != null) {
