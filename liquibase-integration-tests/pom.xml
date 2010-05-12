@@ -55,12 +55,6 @@
           <type>test-jar</type>
           <scope>test</scope>
         </dependency>
-        <dependency>
-          <groupId>org.liquibase</groupId>
-          <artifactId>liquibase-maven-plugin</artifactId>
-          <version>${project.version}</version>
-          <scope>test</scope>
-        </dependency>
         <!-- sample extensions -->
         <dependency>
           <groupId>org.liquibase.samples</groupId>
