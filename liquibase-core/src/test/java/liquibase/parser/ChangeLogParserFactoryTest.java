@@ -1,13 +1,15 @@
 package liquibase.parser;
 
+import liquibase.exception.LiquibaseException;
 import liquibase.parser.core.sql.SqlChangeLogParser;
 import liquibase.parser.core.xml.XMLChangeLogSAXParser;
 import static org.junit.Assert.*;
+
+import liquibase.test.JUnitResourceAccessor;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.Map;
-import java.util.SortedSet;
+import java.util.List;
 
 public class ChangeLogParserFactoryTest {
 
@@ -64,22 +66,22 @@ public class ChangeLogParserFactoryTest {
     @SuppressWarnings("unchecked")
 	@Test
     public void builtInGeneratorsAreFound() {
-        Map<String, SortedSet<ChangeLogParser>> generators = ChangeLogParserFactory.getInstance().getParsers();
+        List<ChangeLogParser> generators = ChangeLogParserFactory.getInstance().getParsers();
         assertEquals(2, generators.size());
     }
 
     @Test
-    public void getParsers() {
-        ChangeLogParser parser = ChangeLogParserFactory.getInstance().getParser("xml");
+    public void getParsers() throws Exception {
+        ChangeLogParser parser = ChangeLogParserFactory.getInstance().getParser("asdf.xml", new JUnitResourceAccessor());
 
         assertNotNull(parser);
         assertTrue(parser instanceof XMLChangeLogSAXParser);
     }
 
     @Test
-    public void getExtensionParser() {
+    public void getExtensionParser() throws Exception {
         ChangeLogParserFactory parserFactory = ChangeLogParserFactory.getInstance();
-        ChangeLogParser defaultParser = parserFactory.getParser("xml");
+        ChangeLogParser defaultParser = parserFactory.getParser("asdf.xml", new JUnitResourceAccessor());
 
         assertNotNull(defaultParser);
         assertTrue(defaultParser instanceof XMLChangeLogSAXParser);
@@ -93,8 +95,8 @@ public class ChangeLogParserFactoryTest {
         parserFactory.register(otherXmlParser);
 
         try {
-            assertTrue(otherXmlParser == parserFactory.getParser("xml"));
-            assertFalse(defaultParser == parserFactory.getParser("xml"));
+            assertTrue(otherXmlParser == parserFactory.getParser("asdf.xml", new JUnitResourceAccessor()));
+            assertFalse(defaultParser == parserFactory.getParser("asdf.xml", new JUnitResourceAccessor()));
         } finally {
             parserFactory.unregister(otherXmlParser);
         }

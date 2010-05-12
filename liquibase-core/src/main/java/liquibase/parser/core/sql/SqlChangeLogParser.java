@@ -13,10 +13,9 @@ import java.io.IOException;
 import java.io.InputStream;
 
 public class SqlChangeLogParser implements ChangeLogParser {
-    public String[] getValidFileExtensions() {
-        return new String [] {
-                "sql"
-        };
+
+    public boolean supports(String changeLogFile, ResourceAccessor resourceAccessor) {
+        return changeLogFile.endsWith(".sql");
     }
 
     public int getPriority() {
@@ -38,7 +37,7 @@ public class SqlChangeLogParser implements ChangeLogParser {
         change.setSplitStatements(false);
         change.setStripComments(false);
 
-        ChangeSet changeSet = new ChangeSet("raw", "includeAll", false, false, physicalChangeLogLocation, physicalChangeLogLocation, null, null, false);
+        ChangeSet changeSet = new ChangeSet("raw", "includeAll", false, false, physicalChangeLogLocation, physicalChangeLogLocation, null, null, true);
         changeSet.addChange(change);
 
         DatabaseChangeLog changeLog = new DatabaseChangeLog(physicalChangeLogLocation);

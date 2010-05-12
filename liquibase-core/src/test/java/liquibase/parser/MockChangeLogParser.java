@@ -16,10 +16,13 @@ public class MockChangeLogParser implements ChangeLogParser {
     public int getPriority() {
         return PRIORITY_DEFAULT;
     }
-    
-
-    public String[] getValidFileExtensions() {
-        return validExtensions;
+    public boolean supports(String changeLogFile, ResourceAccessor resourceAccessor) {
+        for (String ext : validExtensions) {
+            if (changeLogFile.endsWith("."+validExtensions)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public DatabaseChangeLog parse(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters, ResourceAccessor resourceAccessor) throws ChangeLogParseException {

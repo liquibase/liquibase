@@ -91,7 +91,7 @@ public class Liquibase {
         changeLogParameters.setContexts(StringUtils.splitAndTrim(contexts, ","));
 
         try {
-            DatabaseChangeLog changeLog = ChangeLogParserFactory.getInstance().getParser(changeLogFile).parse(changeLogFile, changeLogParameters, resourceAccessor);
+            DatabaseChangeLog changeLog = ChangeLogParserFactory.getInstance().getParser(changeLogFile, resourceAccessor).parse(changeLogFile, changeLogParameters, resourceAccessor);
 
             checkDatabaseChangeLogTable(true, changeLog);
 
@@ -146,7 +146,7 @@ public class Liquibase {
 
         try {
 
-            DatabaseChangeLog changeLog = ChangeLogParserFactory.getInstance().getParser(changeLogFile).parse(changeLogFile, changeLogParameters, resourceAccessor);
+            DatabaseChangeLog changeLog = ChangeLogParserFactory.getInstance().getParser(changeLogFile, resourceAccessor).parse(changeLogFile, changeLogParameters, resourceAccessor);
 
             checkDatabaseChangeLogTable(true, changeLog);
             changeLog.validate(database);
@@ -220,7 +220,7 @@ public class Liquibase {
         lockService.waitForLock();
 
         try {
-            DatabaseChangeLog changeLog = ChangeLogParserFactory.getInstance().getParser(changeLogFile).parse(changeLogFile, changeLogParameters, resourceAccessor);
+            DatabaseChangeLog changeLog = ChangeLogParserFactory.getInstance().getParser(changeLogFile, resourceAccessor).parse(changeLogFile, changeLogParameters, resourceAccessor);
             checkDatabaseChangeLogTable(false, changeLog);
 
             changeLog.validate(database);
@@ -267,7 +267,7 @@ public class Liquibase {
 
         try {
 
-            DatabaseChangeLog changeLog = ChangeLogParserFactory.getInstance().getParser(changeLogFile).parse(changeLogFile, changeLogParameters, resourceAccessor);
+            DatabaseChangeLog changeLog = ChangeLogParserFactory.getInstance().getParser(changeLogFile, resourceAccessor).parse(changeLogFile, changeLogParameters, resourceAccessor);
             checkDatabaseChangeLogTable(false, changeLog);
 
             changeLog.validate(database);
@@ -310,7 +310,7 @@ public class Liquibase {
         lockService.waitForLock();
 
         try {
-            DatabaseChangeLog changeLog = ChangeLogParserFactory.getInstance().getParser(changeLogFile).parse(changeLogFile, changeLogParameters, resourceAccessor);
+            DatabaseChangeLog changeLog = ChangeLogParserFactory.getInstance().getParser(changeLogFile, resourceAccessor).parse(changeLogFile, changeLogParameters, resourceAccessor);
             checkDatabaseChangeLogTable(false, changeLog);
             changeLog.validate(database);
 
@@ -354,7 +354,7 @@ public class Liquibase {
         lockService.waitForLock();
 
         try {
-            DatabaseChangeLog changeLog = ChangeLogParserFactory.getInstance().getParser(changeLogFile).parse(changeLogFile, changeLogParameters, resourceAccessor);
+            DatabaseChangeLog changeLog = ChangeLogParserFactory.getInstance().getParser(changeLogFile, resourceAccessor).parse(changeLogFile, changeLogParameters, resourceAccessor);
             checkDatabaseChangeLogTable(true, changeLog);
             changeLog.validate(database);
 
@@ -397,7 +397,7 @@ public class Liquibase {
         lockService.waitForLock();
 
         try {
-            DatabaseChangeLog changeLog = ChangeLogParserFactory.getInstance().getParser(changeLogFile).parse(changeLogFile, changeLogParameters, resourceAccessor);
+            DatabaseChangeLog changeLog = ChangeLogParserFactory.getInstance().getParser(changeLogFile, resourceAccessor).parse(changeLogFile, changeLogParameters, resourceAccessor);
             checkDatabaseChangeLogTable(false, changeLog);
             changeLog.validate(database);
 
@@ -426,7 +426,7 @@ public class Liquibase {
         lockService.waitForLock();
 
         try {
-            DatabaseChangeLog changeLog = ChangeLogParserFactory.getInstance().getParser(changeLogFile).parse(changeLogFile, changeLogParameters, resourceAccessor);
+            DatabaseChangeLog changeLog = ChangeLogParserFactory.getInstance().getParser(changeLogFile, resourceAccessor).parse(changeLogFile, changeLogParameters, resourceAccessor);
             checkDatabaseChangeLogTable(false, changeLog);
             changeLog.validate(database);
 
@@ -560,7 +560,7 @@ public class Liquibase {
         lockService.waitForLock();
 
         try {
-            DatabaseChangeLog changeLog = ChangeLogParserFactory.getInstance().getParser(changeLogFile).parse(changeLogFile, changeLogParameters, resourceAccessor);
+            DatabaseChangeLog changeLog = ChangeLogParserFactory.getInstance().getParser(changeLogFile, resourceAccessor).parse(changeLogFile, changeLogParameters, resourceAccessor);
 
             checkDatabaseChangeLogTable(false, changeLog);
 
@@ -637,7 +637,7 @@ public class Liquibase {
         lockService.waitForLock();
 
         try {
-            DatabaseChangeLog changeLog = ChangeLogParserFactory.getInstance().getParser(changeLogFile).parse(changeLogFile, changeLogParameters, resourceAccessor);
+            DatabaseChangeLog changeLog = ChangeLogParserFactory.getInstance().getParser(changeLogFile, resourceAccessor).parse(changeLogFile, changeLogParameters, resourceAccessor);
             checkDatabaseChangeLogTable(false, changeLog);
 
             changeLog.validate(database);
@@ -674,7 +674,7 @@ public class Liquibase {
      */
     public void validate() throws LiquibaseException {
 
-        DatabaseChangeLog changeLog = ChangeLogParserFactory.getInstance().getParser(changeLogFile).parse(changeLogFile, changeLogParameters, resourceAccessor);
+        DatabaseChangeLog changeLog = ChangeLogParserFactory.getInstance().getParser(changeLogFile, resourceAccessor).parse(changeLogFile, changeLogParameters, resourceAccessor);
         changeLog.validate(database);
     }
 

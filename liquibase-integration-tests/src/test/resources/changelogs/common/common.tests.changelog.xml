@@ -722,4 +722,6 @@
             insert into datatable (col) values ('another value with a ;') X
         </sql>
     </changeSet>
+
+    <include file="changelogs/common/sqlstyle/formatted.changelog.sql"/>
 </databaseChangeLog>

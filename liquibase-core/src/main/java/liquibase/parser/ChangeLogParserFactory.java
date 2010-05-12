@@ -1,6 +1,8 @@
 package liquibase.parser;
 
+import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.resource.ResourceAccessor;
 import liquibase.servicelocator.ServiceLocator;
 
 import java.util.*;
@@ -9,7 +11,8 @@ public class ChangeLogParserFactory {
 
     private static ChangeLogParserFactory instance;
 
-    private Map<String, SortedSet<ChangeLogParser>> parsers = new HashMap<String, SortedSet<ChangeLogParser>>();
+    private List<ChangeLogParser> parsers;
+    private Comparator<ChangeLogParser> changelogParserComparator;
 
 
     public static void reset() {
@@ -25,6 +28,13 @@ public class ChangeLogParserFactory {
 
     private ChangeLogParserFactory() {
         Class<? extends ChangeLogParser>[] classes;
+        changelogParserComparator = new Comparator<ChangeLogParser>() {
+            public int compare(ChangeLogParser o1, ChangeLogParser o2) {
+                return Integer.valueOf(o2.getPriority()).compareTo(o1.getPriority());
+            }
+        };
+
+        parsers = new ArrayList<ChangeLogParser>();
         try {
             classes = ServiceLocator.getInstance().findClasses(ChangeLogParser.class);
 
@@ -37,45 +47,26 @@ public class ChangeLogParserFactory {
 
     }
 
-    public Map<String, SortedSet<ChangeLogParser>> getParsers() {
+    public List<ChangeLogParser> getParsers() {
         return parsers;
     }
 
-    public ChangeLogParser getParser(String fileNameOrExtension) {
-        fileNameOrExtension = fileNameOrExtension.replaceAll(".*\\.", ""); //just need the extension
-        SortedSet<ChangeLogParser> parseres = parsers.get(fileNameOrExtension);
-        if (parseres == null || parseres.size() == 0) {
-            return null;
+    public ChangeLogParser getParser(String fileNameOrExtension, ResourceAccessor resourceAccessor) throws LiquibaseException {
+        for (ChangeLogParser parser : parsers) {
+            if (parser.supports(fileNameOrExtension, resourceAccessor)) {
+                return parser;
+            }
         }
-        return parseres.iterator().next();
+
+        throw new LiquibaseException("Cannot find parser that supports "+fileNameOrExtension);
     }
 
     public void register(ChangeLogParser changeLogParser) {
-        for (String extension : changeLogParser.getValidFileExtensions()) {
-            if (!parsers.containsKey(extension)) {
-                parsers.put(extension, new TreeSet<ChangeLogParser>(new Comparator<ChangeLogParser>() {
-                    public int compare(ChangeLogParser o1, ChangeLogParser o2) {
-                        return Integer.valueOf(o2.getPriority()).compareTo(o1.getPriority());
-                    }
-                }));
-            }
-            parsers.get(extension).add(changeLogParser);
-        }
+        parsers.add(changeLogParser);
+        Collections.sort(parsers, changelogParserComparator);
     }
 
     public void unregister(ChangeLogParser changeLogParser) {
-    	for (String extension : changeLogParser.getValidFileExtensions()) {
-    		if (parsers.containsKey(extension)) {
-    			Iterator<ChangeLogParser> iterator = parsers.get(extension).iterator();
-    			while (iterator.hasNext()) {
-    				ChangeLogParser changeLogParserElem = iterator.next();
-    				if (changeLogParser.equals(changeLogParserElem))
-    					iterator.remove();
-    			}
-    			// Remove entry if it's empty
-    			if (parsers.get(extension).isEmpty())
-    				parsers.remove(extension);
-    		}
-    	}
+        parsers.remove(changeLogParser);
     }
 }

@@ -10,6 +10,5 @@ public interface ChangeLogParser extends PrioritizedService {
 
     public DatabaseChangeLog parse(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters, ResourceAccessor resourceAccessor) throws ChangeLogParseException;
 
-    public String[] getValidFileExtensions();
-
+    boolean supports(String changeLogFile, ResourceAccessor resourceAccessor);
 }
