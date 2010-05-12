@@ -59,18 +59,67 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
             StringBuffer currentSql = new StringBuffer();
 
             ChangeSet changeSet = null;
-            Pattern pattern = Pattern.compile("--changeset (\\w+):(\\w+)", Pattern.CASE_INSENSITIVE);
+            RawSQLChange change = null;
+            Pattern changeSetPattern = Pattern.compile("--changeset (\\w+):(\\w+).*", Pattern.CASE_INSENSITIVE);
+            Pattern stripCommentsPattern = Pattern.compile(".*stripComments:(\\w+).*", Pattern.CASE_INSENSITIVE);
+            Pattern splitStatementsPattern = Pattern.compile(".*splitStatements:(\\w+).*", Pattern.CASE_INSENSITIVE);
+            Pattern endDelimiterPattern = Pattern.compile(".*endDelimiter:(\\w+).*", Pattern.CASE_INSENSITIVE);
+
+            Pattern runOnChangePattern = Pattern.compile(".*runOnChange:(\\w+).*", Pattern.CASE_INSENSITIVE);
+            Pattern runAlwaysPattern = Pattern.compile(".*runAlways:(\\w+).*", Pattern.CASE_INSENSITIVE);
+            Pattern contextPattern = Pattern.compile(".*context:(\\w+).*", Pattern.CASE_INSENSITIVE);
+            Pattern runInTransactionPattern = Pattern.compile(".*runInTransaction:(\\w+).*", Pattern.CASE_INSENSITIVE);
+            Pattern dbmsPattern = Pattern.compile(".*dbms:(\\w+).*", Pattern.CASE_INSENSITIVE);
+            Pattern failOnErrorPattern = Pattern.compile(".*failOnError:(\\w+).*", Pattern.CASE_INSENSITIVE);
+
             String line;
             while ((line = reader.readLine()) != null) {
-                Matcher matcher = pattern.matcher(line);
-                if (matcher.matches()) {
+                Matcher changeSetPatternMatcher = changeSetPattern.matcher(line);
+                if (changeSetPatternMatcher.matches()) {
                     String finalCurrentSql = StringUtils.trimToNull(currentSql.toString());
                     if (changeSet != null) {
-                        changeSet.addChange(createChange(finalCurrentSql, changeSet, resourceAccessor));
-                        changeLog.addChangeSet(changeSet);
+
+                        if (finalCurrentSql == null) {
+                            throw new ChangeLogParseException("No SQL for changeset " + changeSet.toString(false));
+                        }
+
+                        change.setSql(finalCurrentSql);
                     }
 
-                    changeSet = new ChangeSet(matcher.group(2), matcher.group(1), false, false, physicalChangeLogLocation, physicalChangeLogLocation, null, null, true);
+                    Matcher stripCommentsPatternMatcher = stripCommentsPattern.matcher(line);
+                    Matcher splitStatementsPatternMatcher = splitStatementsPattern.matcher(line);
+                    Matcher endDelimiterPatternMatcher = endDelimiterPattern.matcher(line);
+
+                    Matcher runOnChangePatternMatcher = runOnChangePattern.matcher(line);
+                    Matcher runAlwaysPatternMatcher = runAlwaysPattern.matcher(line);
+                    Matcher contextPatternMatcher = contextPattern.matcher(line);
+                    Matcher runInTransactionPatternMatcher = runInTransactionPattern.matcher(line);
+                    Matcher dbmsPatternMatcher = dbmsPattern.matcher(line);
+                    Matcher failOnErrorPatternMatcher = failOnErrorPattern.matcher(line);
+
+                    boolean stripComments = parseBoolean(stripCommentsPatternMatcher, changeSet, true);
+                    boolean splitStatements = parseBoolean(splitStatementsPatternMatcher, changeSet, true);
+                    boolean runOnChange = parseBoolean(runOnChangePatternMatcher, changeSet, false);
+                    boolean runAlways = parseBoolean(runAlwaysPatternMatcher, changeSet, false);
+                    boolean runInTransaction = parseBoolean(runInTransactionPatternMatcher, changeSet, true);
+                    boolean failOnError = parseBoolean(failOnErrorPatternMatcher, changeSet, true);
+
+                    String endDelimiter = parseString(endDelimiterPatternMatcher);
+                    String context = parseString(contextPatternMatcher);
+                    String dbms = parseString(dbmsPatternMatcher);
+
+                    changeSet = new ChangeSet(changeSetPatternMatcher.group(2), changeSetPatternMatcher.group(1), runAlways, runOnChange, physicalChangeLogLocation, physicalChangeLogLocation, context, dbms, runInTransaction);
+                    changeSet.setFailOnError(failOnError);
+                    changeLog.addChangeSet(changeSet);
+
+                    change = new RawSQLChange();
+                    change.setSql(finalCurrentSql);
+                    change.setFileOpener(resourceAccessor);
+                    change.setSplitStatements(splitStatements);
+                    change.setStripComments(stripComments);
+                    change.setEndDelimiter(endDelimiter);
+                    changeSet.addChange(change);
+
                     currentSql = new StringBuffer();
                 } else {
                     if (changeSet != null) {
@@ -80,8 +129,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
             }
 
             if (changeSet != null) {
-                changeSet.addChange(createChange(StringUtils.trimToNull(currentSql.toString()), changeSet, resourceAccessor));
-                changeLog.addChangeSet(changeSet);
+                change.setSql(StringUtils.trimToNull(currentSql.toString()));
             }
 
         } catch (IOException e) {
@@ -91,17 +139,24 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
         return changeLog;
     }
 
-    private Change createChange(String finalCurrentSql, ChangeSet changeSet, ResourceAccessor resourceAccessor) throws ChangeLogParseException {
-        if (finalCurrentSql == null) {
-            throw new ChangeLogParseException("No SQL for changeset " + changeSet.toString(false));
+    private String parseString(Matcher matcher) {
+        String endDelimiter = null;
+        if (matcher.matches()) {
+            endDelimiter = matcher.group(1);
         }
-        RawSQLChange change = new RawSQLChange();
-        change.setSql(finalCurrentSql);
-        change.setFileOpener(resourceAccessor);
-        change.setSplitStatements(true);
-        change.setStripComments(true);
+        return endDelimiter;
+    }
 
-        return change;
+    private boolean parseBoolean(Matcher matcher, ChangeSet changeSet, boolean defaultValue) throws ChangeLogParseException {
+        boolean stripComments = defaultValue;
+        if (matcher.matches()) {
+            try {
+                stripComments = Boolean.parseBoolean(matcher.group(1));
+            } catch (Exception e) {
+                throw new ChangeLogParseException("Cannot parse "+changeSet+" "+matcher.toString().replaceAll("\\.*","")+" as a boolean");
+            }
+        }
+        return stripComments;
     }
 
     protected InputStream openChangeLogFile(String physicalChangeLogLocation, ResourceAccessor resourceAccessor) throws IOException {

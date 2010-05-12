@@ -6,6 +6,7 @@ import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.resource.ResourceAccessor;
 import liquibase.test.JUnitResourceAccessor;
+import liquibase.util.StringUtils;
 import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
@@ -20,12 +21,12 @@ public class FormattedSqlChangeLogParserTest {
             "--changeset nvoxland:1\n" +
             "select * from table1;\n" +
             "\n" +
-            "--changeset nvoxland:2\n" +
+            "--changeset nvoxland:2 (stripComments:false splitStatements:false endDelimiter:X runOnChange:true runAlways:true context:y dbms:mysql runInTransaction:false failOnError:false)\n" +
             "create table table1 (\n" +
             "  id int primary key\n" +
             ");\n" +
             "\n" +
-            "--changeset nvoxland:3\n" +
+            "--ChangeSet nvoxland:3\n" +
             "create table table2 (\n" +
             "  id int primary key\n" +
             ");\n" +
@@ -53,6 +54,15 @@ public class FormattedSqlChangeLogParserTest {
         assertEquals("1", changeLog.getChangeSets().get(0).getId());
         assertEquals(1, changeLog.getChangeSets().get(0).getChanges().size());
         assertEquals("select * from table1;", ((RawSQLChange) changeLog.getChangeSets().get(0).getChanges().get(0)).getSql());
+        assertNull(((RawSQLChange) changeLog.getChangeSets().get(0).getChanges().get(0)).getEndDelimiter());
+        assertTrue(((RawSQLChange) changeLog.getChangeSets().get(0).getChanges().get(0)).isSplittingStatements());
+        assertTrue(((RawSQLChange) changeLog.getChangeSets().get(0).getChanges().get(0)).isStrippingComments());
+        assertFalse(changeLog.getChangeSets().get(0).isAlwaysRun());
+        assertFalse(changeLog.getChangeSets().get(0).isRunOnChange());
+        assertTrue(changeLog.getChangeSets().get(0).isRunInTransaction());
+        assertNull(changeLog.getChangeSets().get(0).getContexts());
+        assertNull(changeLog.getChangeSets().get(0).getDbmsSet());
+
 
         assertEquals("nvoxland", changeLog.getChangeSets().get(1).getAuthor());
         assertEquals("2", changeLog.getChangeSets().get(1).getId());
@@ -60,6 +70,18 @@ public class FormattedSqlChangeLogParserTest {
         assertEquals("create table table1 (\n" +
                 "  id int primary key\n" +
                 ");", ((RawSQLChange) changeLog.getChangeSets().get(1).getChanges().get(0)).getSql());
+        assertEquals("X", ((RawSQLChange) changeLog.getChangeSets().get(1).getChanges().get(0)).getEndDelimiter());
+        assertFalse(((RawSQLChange) changeLog.getChangeSets().get(1).getChanges().get(0)).isSplittingStatements());
+        assertFalse(((RawSQLChange) changeLog.getChangeSets().get(1).getChanges().get(0)).isStrippingComments());
+        assertEquals("X", ((RawSQLChange) changeLog.getChangeSets().get(1).getChanges().get(0)).getEndDelimiter());
+        assertFalse(((RawSQLChange) changeLog.getChangeSets().get(1).getChanges().get(0)).isSplittingStatements());
+        assertFalse(((RawSQLChange) changeLog.getChangeSets().get(1).getChanges().get(0)).isStrippingComments());
+        assertTrue(changeLog.getChangeSets().get(1).isAlwaysRun());
+        assertTrue(changeLog.getChangeSets().get(1).isRunOnChange());
+        assertFalse(changeLog.getChangeSets().get(1).isRunInTransaction());
+        assertEquals("y", StringUtils.join(changeLog.getChangeSets().get(1).getContexts(), ","));
+        assertEquals("mysql", StringUtils.join(changeLog.getChangeSets().get(1).getDbmsSet(), ","));
+
 
         assertEquals("nvoxland", changeLog.getChangeSets().get(2).getAuthor());
         assertEquals("3", changeLog.getChangeSets().get(2).getId());
@@ -70,6 +92,10 @@ public class FormattedSqlChangeLogParserTest {
                 "create table table3 (\n" +
                 "  id int primary key\n" +
                 ");", ((RawSQLChange) changeLog.getChangeSets().get(2).getChanges().get(0)).getSql());
+        assertNull(((RawSQLChange) changeLog.getChangeSets().get(2).getChanges().get(0)).getEndDelimiter());
+        assertTrue(((RawSQLChange) changeLog.getChangeSets().get(2).getChanges().get(0)).isSplittingStatements());
+        assertTrue(((RawSQLChange) changeLog.getChangeSets().get(2).getChanges().get(0)).isStrippingComments());
+
     }
 
     private static class MockFormattedSqlChangeLogParser extends FormattedSqlChangeLogParser {
