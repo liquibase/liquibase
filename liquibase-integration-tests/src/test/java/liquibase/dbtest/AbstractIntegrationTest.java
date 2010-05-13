@@ -107,10 +107,10 @@ public abstract class AbstractIntegrationTest {
 
             DatabaseSnapshotGeneratorFactory.resetAll();
             LockService.getInstance(database).forceReleaseLock();
+            database.dropDatabaseObjects(null);
             if (database.supportsSchemas()) {
                 database.dropDatabaseObjects(DatabaseTestContext.ALT_SCHEMA);
             }
-            database.dropDatabaseObjects(null);
             database.commit();
             DatabaseSnapshotGeneratorFactory.resetAll();
 
