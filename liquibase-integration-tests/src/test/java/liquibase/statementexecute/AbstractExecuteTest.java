@@ -190,6 +190,20 @@ public abstract class AbstractExecuteTest {
             DatabaseConnection connection = database.getConnection();
             Statement connectionStatement = ((JdbcConnection) connection).getUnderlyingConnection().createStatement();
 
+            database.dropDatabaseObjects(database.convertRequestedSchemaToSchema(null));
+            try {
+                connectionStatement.executeUpdate("drop table " + database.escapeTableName(database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName()));
+            } catch (SQLException e) {
+                ;
+            }
+            connection.commit();
+            try {
+                connectionStatement.executeUpdate("drop table " + database.escapeTableName(database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName()));
+            } catch (SQLException e) {
+                ;
+            }
+            connection.commit();
+
             if (database.supportsSchemas()) {
                 database.dropDatabaseObjects(DatabaseTestContext.ALT_SCHEMA);
                 connection.commit();
@@ -207,19 +221,6 @@ public abstract class AbstractExecuteTest {
                 }
                 connection.commit();
             }
-            database.dropDatabaseObjects(database.convertRequestedSchemaToSchema(null));
-            try {
-                connectionStatement.executeUpdate("drop table " + database.escapeTableName(database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName()));
-            } catch (SQLException e) {
-                ;
-            }
-            connection.commit();
-            try {
-                connectionStatement.executeUpdate("drop table " + database.escapeTableName(database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName()));
-            } catch (SQLException e) {
-                ;
-            }
-            connection.commit();
 
             List<? extends SqlStatement> setupStatements = setupStatements(database);
             if (setupStatements != null) {
