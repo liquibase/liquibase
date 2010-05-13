@@ -774,18 +774,18 @@ public abstract class AbstractIntegrationTest {
     /**
      * Test that diff is capable to detect foreign keys to external schemas that doesn't appear in the changelog
      */
-//todo: re-enable after successful build    @Test
-//    public void testDiffExternalForeignKeys() throws Exception {
-//        if (database == null) {
-//            return;
-//        }
-//        Liquibase liquibase = createLiquibase(externalfkInitChangeLog);
-//        liquibase.update(contexts);
-//
-//        Diff diff=new Diff(database,(String)null);
-//        DiffResult diffResult=diff.compare();
-//        DiffResultAssert.assertThat(diffResult).containsMissingForeignKeyWithName("fk_person_country");
-//    }
+   @Test
+   public void testDiffExternalForeignKeys() throws Exception {
+       if (database == null) {
+           return;
+       }
+       Liquibase liquibase = createLiquibase(externalfkInitChangeLog);
+       liquibase.update(contexts);
+
+       Diff diff=new Diff(database,(String)null);
+       DiffResult diffResult=diff.compare();
+       DiffResultAssert.assertThat(diffResult).containsMissingForeignKeyWithName("fk_person_country");
+   }
 
     public static String getDatabaseServerHostname() throws Exception {
         Properties integrationTestProperties;
