@@ -15,9 +15,9 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.apache.derby</groupId>
-            <artifactId>derby</artifactId>
-            <version>10.2.2.0</version>
+          <groupId>hsqldb</groupId>
+          <artifactId>hsqldb</artifactId>
+          <version>1.8.0.7</version>
         </dependency>
     </dependencies>
 
@@ -27,17 +27,19 @@
                 <groupId>org.liquibase</groupId>
                 <artifactId>liquibase-maven-plugin</artifactId>
                 <version>${project.version}</version>
+                <configuration>
+                    <changeLogFile>src/main/resources/liquibase/maven/integration/changelog.xml</changeLogFile>
+                    <driver>org.hsqldb.jdbcDriver</driver>
+                    <url>jdbc:hsqldb:file:liquibase;shutdown=true</url>
+                    <logging>debug</logging>
+                    <verbose>true</verbose>
+                    <promptOnNonLocalDatabase>false</promptOnNonLocalDatabase>
+                    <tag>v5</tag>
+                    <rollbackTag>v5</rollbackTag>
+                </configuration>
                 <executions>
                     <execution>						
                         <phase>test</phase>
-                        <configuration>
-                            <changeLogFile>src/main/resources/liquibase/maven/integration/changelog.xml</changeLogFile>
-                            <driver>org.apache.derby.jdbc.EmbeddedDriver</driver>
-                            <url>jdbc:derby:liquibase;create=true</url>
-                            <logging>debug</logging>
-                            <verbose>true</verbose>
-                            <promptOnNonLocalDatabase>false</promptOnNonLocalDatabase>
-                        </configuration>
                         <goals>
                             <goal>update</goal>
                         </goals>

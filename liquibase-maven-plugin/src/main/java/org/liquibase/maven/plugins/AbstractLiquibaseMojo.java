@@ -22,7 +22,10 @@ import org.apache.maven.project.MavenProject;
  * A base class for providing Liquibase {@link liquibase.Liquibase} functionality.
  *
  * @author Peter Murray
- * @requiresDependencyResolution compile
+ *
+ * Test dependency is used because when you run a goal outside the build phases you want to have the same dependencies
+ * that it would had if it was ran inside test phase 
+ * @requiresDependencyResolution test
  */
 public abstract class AbstractLiquibaseMojo extends AbstractMojo {
 
