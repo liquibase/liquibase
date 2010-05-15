@@ -1,7 +1,8 @@
 package liquibase.maven;
 
-import liquibase.util.StringUtils;
+import java.io.IOException;
 import java.io.File;
+import org.apache.maven.it.VerificationException;
 
 import org.apache.maven.it.Verifier;
 import org.apache.maven.it.util.ResourceExtractor;
@@ -18,36 +19,21 @@ import static org.junit.Assert.*;
  * @author lujop
  */
 public class MavenIntegrationTest {
-    //TODO: Not hardcoded here
-    private static final String URL="jdbc:derby:liquibase;create=true";
-
+    private static final String URL="jdbc:hsqldb:file:target/test-classes/maven/liquibase;shutdown=true";
 
     @Before
     public void cleanDatabase() throws Exception {
          DatabaseConnection connection = DatabaseTestContext.getInstance().getConnection(URL);
          assertNotNull(connection);
          Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(connection);
-         database.dropDatabaseObjects("liquibase");
+         database.dropDatabaseObjects(null);
          database.close();
          DatabaseFactory.reset();
     }
 
     @Test
     public void testUpdate() throws Exception{        
-        File testDir = ResourceExtractor.simpleExtractResources( getClass(), "/maven" );
-
-        Verifier verifier;
-
-        //Clear any artifact created by the test project to avoid unstable test results
-        verifier = new Verifier( testDir.getAbsolutePath() );
-        //TODO: Remove hardcoded version
-        verifier.deleteArtifact( "org.liquibase", "liquibase-maven-integration-tests", "1.0-SNAPSHOT", "jar" );
-
-
-        //If needed options:
-        //List cliOptions = new ArrayList();
-        //cliOptions.add( "-N" );
-        //verifier.setCliOptions(cliOptions);
+        Verifier verifier=createVerifier();
 
         verifier.executeGoal( "clean" );
         verifier.executeGoal( "install" );
@@ -58,4 +44,34 @@ public class MavenIntegrationTest {
         //Reset the streams before executing the verifier
         verifier.resetStreams();
     }
+    
+    @Test
+    public void testRollbackTag() throws Exception {
+        Verifier verifier= createVerifier();
+
+
+        verifier.executeGoal("clean");
+        verifier.executeGoal("liquibase:tag");
+        verifier.executeGoal("package"); //runs update that is bound to test phase
+        verifier.executeGoal("liquibase:rollback");
+        //If we can reupdate rollback has succeded
+        verifier.executeGoal("liquibase:update");
+
+        //Verify everithing has gone well.
+        verifier.verifyErrorFreeLog();
+
+        //Reset the streams before executing the verifier
+        verifier.resetStreams();
+    }
+
+   private Verifier createVerifier() throws IOException, VerificationException {
+        File testDir = ResourceExtractor.simpleExtractResources( getClass(), "/maven" );
+
+        //Clear any artifact created by the test project to avoid unstable test results
+        Verifier verifier = new Verifier(testDir.getAbsolutePath());
+        verifier.setAutoclean(false); //Don't do clean automatically in each executeGoal
+        verifier.deleteArtifact("org.liquibase", "liquibase-maven-integration-tests", "1.0-SNAPSHOT", "jar");
+        return verifier;
+    }
+    
 }

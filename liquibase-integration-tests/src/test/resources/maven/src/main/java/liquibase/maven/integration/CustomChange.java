@@ -1,20 +1,24 @@
 package liquibase.maven.integration;
 
 import liquibase.change.custom.CustomSqlChange;
+import liquibase.change.custom.CustomSqlRollback;
 import liquibase.database.Database;
 import liquibase.exception.CustomChangeException;
+import liquibase.exception.RollbackImpossibleException;
 import liquibase.exception.SetupException;
+import liquibase.exception.UnsupportedChangeException;
 import liquibase.exception.ValidationErrors;
 import liquibase.resource.ResourceAccessor;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
+import liquibase.statement.core.DeleteStatement;
 import liquibase.statement.core.InsertStatement;
 
 /**
  *
  * @author lujop
  */
-public class CustomChange implements CustomSqlChange{
+public class CustomChange implements CustomSqlChange,CustomSqlRollback{
 
     public SqlStatement[] generateStatements(Database database) throws CustomChangeException {
         SqlStatement st[]=new SqlStatement[1];
@@ -41,5 +45,15 @@ public class CustomChange implements CustomSqlChange{
     public ValidationErrors validate(Database database) {
         return new ValidationErrors();
     }
+
+    public SqlStatement[] generateRollbackStatements(Database database) throws CustomChangeException, UnsupportedChangeException, RollbackImpossibleException {
+        SqlStatement st[]=new SqlStatement[1];
+        DeleteStatement ds=new DeleteStatement(null,"persons");
+        ds.setWhereClause("id=1");
+        st[0]=ds;
+        return st;
+    }
+
+
 
 }
