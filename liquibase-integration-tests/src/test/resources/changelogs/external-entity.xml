@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<changeSet id="1" author="lujop">
+    <createTable tableName="text-external" schemaName="liquibase">
+        <column name="id" type="int">
+            <constraints primaryKey="true" nullable="false"/>
+        </column>
+    </createTable>
+</changeSet>
