@@ -38,6 +38,7 @@ import java.util.*;
 import java.sql.Statement;
 import java.sql.SQLException;
 import liquibase.assertions.DiffResultAssert;
+import liquibase.exception.ChangeLogParseException;
 import liquibase.util.RegexMatcher;
 import liquibase.util.StreamUtil;
 
@@ -58,6 +59,9 @@ public abstract class AbstractIntegrationTest {
     private String includedChangeLog;
     private String encodingChangeLog;
     private String externalfkInitChangeLog;
+    private String externalEntityChangeLog;
+    private String externalEntityChangeLog2;
+
     protected String contexts = "test, context-b";
     private Database database;
     private String url;
@@ -70,6 +74,8 @@ public abstract class AbstractIntegrationTest {
         this.includedChangeLog = "changelogs/" + changelogDir + "/complete/included.changelog.xml";
         this.encodingChangeLog = "changelogs/common/encoding.changelog.xml";
         this.externalfkInitChangeLog= "changelogs/common/externalfk.init.changelog.xml";
+        this.externalEntityChangeLog= "changelogs/common/externalEntity.changelog.xml";
+        this.externalEntityChangeLog2= "com/example/packaged/externalEntity.changelog.xml";
 
         this.url = url;
 
@@ -785,6 +791,21 @@ public abstract class AbstractIntegrationTest {
        Diff diff=new Diff(database,(String)null);
        DiffResult diffResult=diff.compare();
        DiffResultAssert.assertThat(diffResult).containsMissingForeignKeyWithName("fk_person_country");
+   }
+
+   //FIXME: Test that external entities aren't working correctly by now (CORE 609)
+   @Test(expected=ChangeLogParseException.class)
+   public void testXMLInclude() throws Exception{
+       if (database == null) {
+           return;
+       }
+       //Test external entity with a standard class loaded resource
+       Liquibase liquibase = createLiquibase(externalEntityChangeLog);
+       liquibase.update(contexts);
+
+       //Test with a packaged one
+       liquibase = createLiquibase(externalEntityChangeLog2);
+       liquibase.update(contexts);
    }
 
     public static String getDatabaseServerHostname() throws Exception {
