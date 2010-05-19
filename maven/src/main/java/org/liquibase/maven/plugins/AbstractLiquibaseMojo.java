@@ -9,6 +9,8 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import liquibase.CompositeFileOpener;
@@ -154,8 +156,14 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
    * @parameter 
    */
   private Properties expressionVars;
-  
-  public void execute() throws MojoExecutionException, MojoFailureException {
+
+  /**
+   * Array to put a expression variable to maven plugin.
+   * @parameter
+   */
+  private Map expressionVariables;
+
+    public void execute() throws MojoExecutionException, MojoFailureException {
     getLog().info(MavenUtils.LOG_SEPARATOR);
 
     String shouldRunProperty = System.getProperty(Liquibase.SHOULD_RUN_SYSTEM_PROPERTY);
@@ -196,13 +204,24 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
 
       liquibase = createLiquibase(getFileOpener(artifactClassLoader), database);
 
-//      getLog().debug("expressionVars = " + expressionVars.toString());
+      getLog().debug("expressionVars = " + String.valueOf(expressionVars));
+
       if (expressionVars != null) {
       	for (Entry<Object, Object> var: expressionVars.entrySet()) {
       		this.liquibase.setChangeLogParameterValue(var.getKey().toString(), var.getValue());
       	}
       }
-      
+
+      getLog().debug("expressionVariables = " + String.valueOf(expressionVariables));
+      if (expressionVariables != null )
+      {
+      	for (Entry var: (Set<Entry>)expressionVariables.entrySet()) {
+            if(var.getValue() != null) {
+      		this.liquibase.setChangeLogParameterValue(var.getKey().toString(), var.getValue());
+      	    }
+      	}
+      }
+
       if (clearCheckSums) {
         getLog().info("Clearing the Liquibase Checksums on the database");
         liquibase.clearCheckSums();

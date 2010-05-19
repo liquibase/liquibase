@@ -80,16 +80,20 @@ public class AddColumnStatement implements SqlStatement {
             }
         }
 
+        if (isUnique()) {
+        	alterTable += " UNIQUE ";
+        }
+
         if (!primaryKeyBeforeNotNull(database)) {
             if (isPrimaryKey()) {
                 alterTable += " PRIMARY KEY";
             }
         }
-        
+
         if (!defaultClauseBeforeNotNull(database)) {
             alterTable += getDefaultClause(database);
         }
-        
+
         return alterTable;
     }
 
@@ -152,6 +156,15 @@ public class AddColumnStatement implements SqlStatement {
             }
         }
         return true;
+    }
+
+    public boolean isUnique() {
+    	for (ColumnConstraint constraint : getConstraints()) {
+    		if (constraint instanceof UniqueConstraint) {
+    			return true;
+    		}
+    	}
+    	return false;
     }
 
     public Object getDefaultValue() {

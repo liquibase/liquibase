@@ -168,4 +168,21 @@ public class MySQLDatabase extends AbstractDatabase {
     public DatabaseSnapshot createDatabaseSnapshot(String schema, Set<DiffStatusListener> statusListeners) throws JDBCException {
         return new MySqlDatabaseSnapshot(this, statusListeners, schema);
     }
+
+    @Override
+    public boolean supportForeignKeyChecksManagement() {
+        return true;
+    }
+
+    @Override
+    public boolean disableForeignKeyChecks() throws JDBCException {
+        final boolean enabled = getJdbcTemplate().queryForInt(new RawSqlStatement("SELECT @@FOREIGN_KEY_CHECKS")) == 1;
+        getJdbcTemplate().execute(new RawSqlStatement("SET FOREIGN_KEY_CHECKS=0"));
+        return enabled;
+    }
+
+    @Override
+    public void enableForeignKeyChecks() throws JDBCException {
+        getJdbcTemplate().execute(new RawSqlStatement("SET FOREIGN_KEY_CHECKS=1"));
+    }
 }

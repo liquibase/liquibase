@@ -84,12 +84,12 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
     }
 
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
-    	
+
 //    	if (database instanceof SQLiteDatabase) {
 //    		// return special statements for SQLite databases
 //    		return generateStatementsForSQLiteDatabase(database);
 //        }
-    	
+
         List<SqlStatement> sql = new ArrayList<SqlStatement>();
 
         String schemaName = getSchemaName() == null?database.getDefaultSchemaName():getSchemaName();
@@ -98,6 +98,9 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
             if (aColumn.getConstraints() != null) {
                 if (aColumn.getConstraints().isNullable() != null && !aColumn.getConstraints().isNullable()) {
                     constraints.add(new NotNullConstraint());
+                }
+                if (aColumn.getConstraints().isUnique() != null && aColumn.getConstraints().isUnique()) {
+                	constraints.add(new UniqueConstraint());
                 }
                 if (aColumn.getConstraints().isPrimaryKey() != null && aColumn.getConstraints().isPrimaryKey()) {
                     constraints.add(new PrimaryKeyConstraint(aColumn.getConstraints().getPrimaryKeyName()));
@@ -142,18 +145,18 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
 
         return sql.toArray(new SqlStatement[sql.size()]);
     }
-    
-    private SqlStatement[] generateStatementsForSQLiteDatabase(Database database) 
+
+    private SqlStatement[] generateStatementsForSQLiteDatabase(Database database)
 			throws UnsupportedChangeException {
 
 		// SQLite does not support this ALTER TABLE operation until now.
 		// For more information see: http://www.sqlite.org/omitted.html.
 		// This is a small work around...
-    	
+
     	List<SqlStatement> statements = new ArrayList<SqlStatement>();
-    	
+
     	// define alter table logic
-		AlterTableVisitor rename_alter_visitor = 
+		AlterTableVisitor rename_alter_visitor =
 		new AlterTableVisitor() {
 			public ColumnConfig[] getColumnsToAdd() {
 				ColumnConfig[] columnsToAdd = new ColumnConfig[columns.size()];
@@ -172,7 +175,7 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
 				return true;
 			}
 		};
-    		
+
     	try {
     		// alter table
 			statements.addAll(SQLiteDatabase.getAlterTableStatements(
@@ -182,9 +185,9 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
 			System.err.println(e);
 			e.printStackTrace();
 		}
-    	
+
     	return statements.toArray(new SqlStatement[statements.size()]);
-    	
+
     }
 
     protected Change[] createInverses() {

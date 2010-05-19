@@ -796,13 +796,15 @@ public abstract class AbstractDatabase implements Database {
                 dropChanges.add(dropChange);
             }
 
-            for (ForeignKey fk : snapshot.getForeignKeys()) {
-                DropForeignKeyConstraintChange dropFK = new DropForeignKeyConstraintChange();
-                dropFK.setBaseTableSchemaName(schema);
-                dropFK.setBaseTableName(fk.getForeignKeyTable().getName());
-                dropFK.setConstraintName(fk.getName());
+            if (!supportForeignKeyChecksManagement()) {
+                for (ForeignKey fk : snapshot.getForeignKeys()) {
+                    DropForeignKeyConstraintChange dropFK = new DropForeignKeyConstraintChange();
+                    dropFK.setBaseTableSchemaName(schema);
+                    dropFK.setBaseTableName(fk.getForeignKeyTable().getName());
+                    dropFK.setConstraintName(fk.getName());
 
-                dropChanges.add(dropFK);
+                    dropChanges.add(dropFK);
+                }
             }
 
 //            for (Index index : snapshot.getIndexes()) {
@@ -841,9 +843,16 @@ public abstract class AbstractDatabase implements Database {
             }
 
             try {
-                for (Change change : dropChanges) {
-                    for (SqlStatement statement : change.generateStatements(this)) {
-                        this.getJdbcTemplate().execute(statement, new ArrayList<SqlVisitor>());
+                final boolean reEnableFK = supportForeignKeyChecksManagement() && disableForeignKeyChecks();
+                try {
+                    for (Change change : dropChanges) {
+                        for (SqlStatement statement : change.generateStatements(this)) {
+                            this.getJdbcTemplate().execute(statement, new ArrayList<SqlVisitor>());
+                        }
+                    }
+                } finally {
+                    if (reEnableFK) {
+                        enableForeignKeyChecks();
                     }
                 }
             } catch (UnsupportedChangeException e) {
@@ -1429,5 +1438,17 @@ public abstract class AbstractDatabase implements Database {
     public boolean isLocalDatabase() throws JDBCException {
     	String url = getConnectionURL();
     	return (url.indexOf("localhost") >= 0) || (url.indexOf("127.0.0.1") >= 0);
+    }
+
+    protected boolean supportForeignKeyChecksManagement() {
+        return false;
+    }
+
+    protected boolean disableForeignKeyChecks() throws JDBCException {
+        throw new IllegalStateException("ForeignKeyChecks Management not supported");
+    }
+
+    protected void enableForeignKeyChecks() throws JDBCException {
+        throw new IllegalStateException("ForeignKeyChecks Management not supported");
     }
 }
