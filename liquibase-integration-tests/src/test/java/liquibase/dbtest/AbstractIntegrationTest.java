@@ -75,7 +75,7 @@ public abstract class AbstractIntegrationTest {
         this.encodingChangeLog = "changelogs/common/encoding.changelog.xml";
         this.externalfkInitChangeLog= "changelogs/common/externalfk.init.changelog.xml";
         this.externalEntityChangeLog= "changelogs/common/externalEntity.changelog.xml";
-        this.externalEntityChangeLog2= "com/example/packaged/externalEntity.changelog.xml";
+        this.externalEntityChangeLog2= "com/example/nonIncluded/externalEntity.changelog.xml";
 
         this.url = url;
 
@@ -797,7 +797,7 @@ public abstract class AbstractIntegrationTest {
    @Test(expected=ChangeLogParseException.class)
    public void testXMLInclude() throws Exception{
        if (database == null) {
-           return;
+           throw new ChangeLogParseException("Database not present");
        }
        //Test external entity with a standard class loaded resource
        Liquibase liquibase = createLiquibase(externalEntityChangeLog);
