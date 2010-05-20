@@ -57,6 +57,7 @@ import liquibase.sql.visitor.SqlVisitor;
 import liquibase.sql.visitor.SqlVisitorFactory;
 import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtils;
+import liquibase.util.file.FilenameUtils;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
@@ -489,8 +490,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
         }
 
 		if (isRelativePath) {
-			String path = searchPath(relativeBaseFileName);
-			fileName = new StringBuilder(path).append(fileName).toString();
+			fileName = FilenameUtils.concat(FilenameUtils.getFullPath(relativeBaseFileName), fileName);
 		}
 		DatabaseChangeLog changeLog = ChangeLogParserFactory.getInstance().getParser(fileName, resourceAccessor).parse(fileName, changeLogParameters,
 						resourceAccessor);
@@ -507,18 +507,6 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 		}
 
 		return true;
-	}
-
-	private String searchPath(String relativeBaseFileName) {
-		if (relativeBaseFileName == null) {
-			return null;
-		}
-		int lastSeparatePosition = relativeBaseFileName
-				.lastIndexOf(LIQUIBASE_FILE_SEPARATOR);
-		if (lastSeparatePosition >= 0) {
-			return relativeBaseFileName.substring(0, lastSeparatePosition + 1);
-		}
-		return relativeBaseFileName;
 	}
 
 	private void setProperty(Object object, String attributeName,

@@ -11,7 +11,7 @@ import liquibase.database.typeconversion.TypeConverterFactory;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
-import liquibase.parser.core.xml.LiquibaseSchemaResolver;
+import liquibase.parser.core.xml.LiquibaseEntityResolver;
 import liquibase.parser.core.xml.XMLChangeLogSAXParser;
 import liquibase.serializer.core.xml.XMLChangeLogSerializer;
 import liquibase.snapshot.DatabaseSnapshot;
@@ -469,7 +469,7 @@ public class DiffResult {
 			IOException, DatabaseException {
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder documentBuilder = factory.newDocumentBuilder();
-		documentBuilder.setEntityResolver(new LiquibaseSchemaResolver());
+		documentBuilder.setEntityResolver(new LiquibaseEntityResolver());
 
 		Document doc = documentBuilder.newDocument();
 
