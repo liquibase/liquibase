@@ -12,6 +12,7 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import java.io.IOException;
 import java.io.InputStream;
+import liquibase.util.file.FilenameUtils;
 
 public class XMLChangeLogSAXParser implements ChangeLogParser {
     private SAXParserFactory saxParserFactory;
@@ -54,7 +55,9 @@ public class XMLChangeLogSAXParser implements ChangeLogParser {
             }
 
             XMLReader xmlReader = parser.getXMLReader();
-            xmlReader.setEntityResolver(new LiquibaseSchemaResolver());
+            LiquibaseEntityResolver resolver=new LiquibaseEntityResolver();
+            resolver.useResoureAccessor(resourceAccessor,FilenameUtils.getFullPath(physicalChangeLogLocation));
+            xmlReader.setEntityResolver(resolver);
             xmlReader.setErrorHandler(new ErrorHandler() {
                 public void warning(SAXParseException exception) throws SAXException {
                     LogFactory.getLogger().warning(exception.getMessage());

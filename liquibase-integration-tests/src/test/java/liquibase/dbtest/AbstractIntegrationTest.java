@@ -794,10 +794,10 @@ public abstract class AbstractIntegrationTest {
    }
 
    //FIXME: Test that external entities aren't working correctly by now (CORE 609)
-   @Test(expected=ChangeLogParseException.class)
+   @Test
    public void testXMLInclude() throws Exception{
        if (database == null) {
-           throw new ChangeLogParseException("Database not present");
+            return;
        }
        //Test external entity with a standard class loaded resource
        Liquibase liquibase = createLiquibase(externalEntityChangeLog);
