@@ -35,7 +35,7 @@ public class CreateDatabaseChangeLogTableGeneratorSybase implements SqlGenerator
                 "DESCRIPTION VARCHAR(255) NULL, " +
                 "COMMENTS VARCHAR(255) NULL, " +
                 "TAG VARCHAR(255) NULL, " +
-                "LIQUIBASE VARCHAR(10) NULL, " +
+                "LIQUIBASE VARCHAR(20) NULL, " +
                 "PRIMARY KEY(ID, AUTHOR, FILENAME))")
         };  //To change body of implemented methods use File | Settings | File Templates.
     }
