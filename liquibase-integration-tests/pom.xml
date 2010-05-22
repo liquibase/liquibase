@@ -128,7 +128,7 @@
           <systemProperties>
             <property>
               <name>liquibase.default.logger.level</name>
-              <value>severe</value>
+              <value>debug</value>
             </property>
           </systemProperties>
           <excludes>
