@@ -1,12 +1,19 @@
 package liquibase.database.core;
 
+import static java.util.Arrays.*;
+import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
+
+import liquibase.database.Database;
+import liquibase.exception.DatabaseException;
+import liquibase.executor.Executor;
+import liquibase.executor.ExecutorService;
+import liquibase.statement.SqlStatement;
 
 import org.junit.Test;
 
 public class SybaseDatabaseTest {
 
-	
 	@Test
 	public void testIsSybaseProductName() {
 		SybaseDatabase database = new SybaseDatabase();
@@ -14,6 +21,49 @@ public class SybaseDatabaseTest {
 		assertTrue("sql server is a valid product name", database.isSybaseProductName("sql server"));
 		assertTrue("ASE is a valid product name", database.isSybaseProductName("ASE"));
 		assertTrue("Adaptive Server Enterprise is a valid product name", database.isSybaseProductName("Adaptive Server Enterprise"));
+	}
+	
+	/**
+	 * Configure the {@code Executor} associated with the provided {@code Database}
+	 * to return the specified rows.
+	 * @param database the database for which to configure an {@code Executor}
+	 * @param viewInfoRows the rows to be returned by the {@code Executor}
+	 */
+	private void configureExecutor(Database database, String... viewInfoRows) {
+		Executor executor = createNiceMock(Executor.class);
+		try {
+			@SuppressWarnings("unchecked")
+			Class<String> stringClassMatcher = (Class<String>)anyObject();
+			expect(executor.queryForList((SqlStatement)anyObject(), stringClassMatcher)).andReturn(asList(viewInfoRows));
+		} catch (DatabaseException e) {
+			throw new RuntimeException(e);
+		}
+		replay(executor);
+		ExecutorService.getInstance().setExecutor(database, executor);
+	}
+	
+	@Test
+	public void testGetViewDefinitionWhenNoRows() throws Exception {
+		SybaseDatabase database = new SybaseDatabase();
+		configureExecutor(database);
+		
+		assertEquals("", database.getViewDefinition("dbo", "view_name"));
+	}
+	
+	@Test
+	public void testGetViewDefinitionWhenSingleRow() throws Exception {
+		SybaseDatabase database = new SybaseDatabase();
+		configureExecutor(database, "foo");
+		
+		assertEquals("foo", database.getViewDefinition("dbo", "view_name"));
+	}
+	
+	@Test
+	public void testGetViewDefinitionWhenMultipleRows() throws Exception {
+		SybaseDatabase database = new SybaseDatabase();
+		configureExecutor(database, "foo", " bar", " bat");
+		
+		assertEquals("foo bar bat", database.getViewDefinition("dbo", "view_name"));
 	}
 
 }
