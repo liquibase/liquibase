@@ -27,7 +27,7 @@ fi
 
  
 # build classpath from all jars in lib
-if $cygwin ; then
+if [ -f /usr/bin/cygpath ]; then
   CP=.
   for i in "$LIQUIBASE_HOME"/liquibase*.jar; do
     i=`cygpath --windows "$i"`
