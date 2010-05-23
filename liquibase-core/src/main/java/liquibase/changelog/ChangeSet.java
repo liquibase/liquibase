@@ -164,8 +164,10 @@ public class ChangeSet implements Conditional {
 
         Executor executor = ExecutorService.getInstance().getExecutor(database);
         try {
-            database.setAutoCommit(!runInTransaction);
-
+        	// set auto-commit based on runInTransaction if database supports DDL in transactions
+        	if(database.supportsDDLInTransaction()) {
+        		database.setAutoCommit(!runInTransaction);
+        	}
 
             executor.comment("Changeset " + toString());
             if (StringUtils.trimToNull(getComments()) != null) {
@@ -280,7 +282,9 @@ public class ChangeSet implements Conditional {
                 }
             }
         } finally {
-            if (!runInTransaction && !database.getAutoCommitMode()) {
+        	// restore auto-commit to false if this ChangeSet was not run in a transaction,
+        	// but only if the database supports DDL in transactions
+            if (!runInTransaction && database.supportsDDLInTransaction()) {
                 try {
                     database.setAutoCommit(false);
                 } catch (DatabaseException e) {
