@@ -3,8 +3,12 @@ package liquibase.database.core;
 import liquibase.database.AbstractDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.exception.DatabaseException;
+import liquibase.executor.Executor;
+import liquibase.executor.ExecutorService;
+import liquibase.statement.core.GetViewDefinitionStatement;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -125,7 +129,6 @@ public class SybaseDatabase extends AbstractDatabase {
         return getConnection().getCatalog();
     }
 
-
     @Override
     public String getConcatSql(String... values) {
         StringBuffer returnString = new StringBuffer();
@@ -219,4 +222,18 @@ public class SybaseDatabase extends AbstractDatabase {
     public String escapeDatabaseObject(String objectName) {
         return "\""+objectName+"\"";
     }
+
+	@Override
+	public String getViewDefinition(String schemaName, String viewName) throws DatabaseException {
+        GetViewDefinitionStatement statement = new GetViewDefinitionStatement(convertRequestedSchemaToSchema(schemaName), viewName);
+        Executor executor = ExecutorService.getInstance().getExecutor(this);
+        @SuppressWarnings("unchecked")
+        List<String> definitionRows = (List<String>) executor.queryForList(statement, String.class);
+        StringBuilder definition = new StringBuilder();
+        for (String d : definitionRows) {
+        	definition.append(d);
+        }
+        return definition.toString();
+	}
+    
 }
