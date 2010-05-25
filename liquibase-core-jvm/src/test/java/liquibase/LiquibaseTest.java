@@ -97,7 +97,7 @@ public class LiquibaseTest {
         //private Database database;
         private InputStream inputStream;
 
-        public TestLiquibase() {
+        public TestLiquibase() throws DatabaseException {
             super("liquibase/test.xml", new ClassLoaderResourceAccessor(), ((Database) null));
             inputStream = createMock(InputStream.class);
             replay(inputStream);

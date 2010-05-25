@@ -5,6 +5,8 @@ import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.net.MalformedURLException;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import liquibase.*;
 import liquibase.logging.LogFactory;
@@ -310,7 +312,11 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     }
 
     protected Liquibase createLiquibase(ResourceAccessor fo, Database db) throws MojoExecutionException {
-        return new Liquibase("", fo, db);
+        try {
+            return new Liquibase("", fo, db);
+        } catch (DatabaseException ex) {
+            throw new MojoExecutionException("Error creating liquibase: "+ex.getMessage(),ex);
+        }
     }
 
     public void configureFieldsAndValues(ResourceAccessor fo)

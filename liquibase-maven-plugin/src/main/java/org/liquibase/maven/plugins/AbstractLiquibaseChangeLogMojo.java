@@ -2,7 +2,10 @@
 // Copyright: Copyright(c) 2007 Trace Financial Limited
 package org.liquibase.maven.plugins;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import liquibase.*;
+import liquibase.exception.DatabaseException;
 import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import liquibase.resource.FileSystemResourceAccessor;
@@ -80,7 +83,11 @@ public abstract class AbstractLiquibaseChangeLogMojo extends AbstractLiquibaseMo
 
   @Override
   protected Liquibase createLiquibase(ResourceAccessor fo, Database db) throws MojoExecutionException {
-      String changeLog = changeLogFile == null ? "" : changeLogFile.trim();
-      return new Liquibase(changeLog, fo, db);
+        try {
+            String changeLog = changeLogFile == null ? "" : changeLogFile.trim();
+            return new Liquibase(changeLog, fo, db);
+        } catch (DatabaseException ex) {
+            throw new MojoExecutionException("Error creating liquibase: "+ex.getMessage(), ex);
+        }
   }
 }

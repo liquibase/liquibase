@@ -5,9 +5,10 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
 
-    <preConditions onSqlOutput="IGNORE">
+    <preConditions onSqlOutput="IGNORE" >
             <dbms type="h2"/>
             <runningAs username="liquibase"/>
+            <changeLogPropertyDefined property="database.databaseProductName" value="H2"/>
     </preConditions>
 
     <changeSet id="1" author="nvoxland">

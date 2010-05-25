@@ -1,5 +1,6 @@
 package liquibase;
 
+import java.util.logging.Level;
 import liquibase.changelog.*;
 import liquibase.changelog.filter.*;
 import liquibase.changelog.visitor.*;
@@ -50,7 +51,7 @@ public class Liquibase {
         this(changeLogFile, resourceAccessor, DatabaseFactory.getInstance().findCorrectDatabaseImplementation(conn));
     }
 
-    public Liquibase(String changeLogFile, ResourceAccessor resourceAccessor, Database database) {
+    public Liquibase(String changeLogFile, ResourceAccessor resourceAccessor, Database database) throws DatabaseException {
         log = LogFactory.getLogger();
 
         if (changeLogFile != null) {
@@ -58,12 +59,19 @@ public class Liquibase {
         }
         this.resourceAccessor = resourceAccessor;
 
-        this.database = database;
         changeLogParameters = new ChangeLogParameters(database);
+        setDatabase(database);
+        
     }
 
     public Database getDatabase() {
         return database;
+    }
+
+    private void setDatabase(Database database) throws DatabaseException {
+        this.database=database;
+        if(database!=null) //Some tests use a null database
+            setDatabasePropertiesAsChangelogParameters(database);
     }
 
     /**
@@ -680,5 +688,36 @@ public class Liquibase {
 
     public void setChangeLogParameter(String key, Object value) {
         this.changeLogParameters.set(key, value);
+    }
+
+    /**
+     * Add safe database properties as changelog parameters.<br/>
+     * Safe properties are the ones that doesn't have side effects in liquibase state and also don't change in during the liquibase execution
+     * @param database Database which propeties are put in the changelog
+     * @throws DatabaseException
+     */
+    private void setDatabasePropertiesAsChangelogParameters(Database database) throws DatabaseException {            
+            setChangeLogParameter("database.autoIncrementClause", database.getAutoIncrementClause());
+            setChangeLogParameter("database.currentDateTimeFunction", database.getCurrentDateTimeFunction());
+            setChangeLogParameter("database.databaseChangeLogLockTableName", database.getDatabaseChangeLogLockTableName());
+            setChangeLogParameter("database.databaseChangeLogTableName", database.getDatabaseChangeLogTableName());
+            setChangeLogParameter("database.databaseMajorVersion", database.getDatabaseMajorVersion());
+            setChangeLogParameter("database.databaseMinorVersion", database.getDatabaseMinorVersion());
+            setChangeLogParameter("database.databaseProductName", database.getDatabaseProductName());
+            setChangeLogParameter("database.databaseProductVersion", database.getDatabaseProductVersion());
+            setChangeLogParameter("database.defaultCatalogName", database.getDefaultCatalogName());
+            setChangeLogParameter("database.defaultSchemaName", database.getDefaultSchemaName());
+            setChangeLogParameter("database.lineComment", database.getLineComment());
+            setChangeLogParameter("database.liquibaseSchemaName", database.getLiquibaseSchemaName());
+            setChangeLogParameter("database.typeName", database.getTypeName());
+            setChangeLogParameter("database.localDatabase", database.isLocalDatabase());
+            setChangeLogParameter("database.requiresPassword", database.requiresPassword());
+            setChangeLogParameter("database.requiresUsername", database.requiresUsername());
+            setChangeLogParameter("database.supportsForeignKeyDisable", database.supportsForeignKeyDisable());
+            setChangeLogParameter("database.supportsInitiallyDeferrableColumns", database.supportsInitiallyDeferrableColumns());
+            setChangeLogParameter("database.supportsRestrictForeignKeys", database.supportsRestrictForeignKeys());
+            setChangeLogParameter("database.supportsSchemas", database.supportsSchemas());
+            setChangeLogParameter("database.supportsSequences", database.supportsSequences());
+            setChangeLogParameter("database.supportsTablespaces", database.supportsTablespaces());
     }
 }

@@ -49,13 +49,29 @@ public class ChangeLogParameters {
         changeLogParameters.add(new ChangeLogParameter(key, value, contexts, databases));
     }
 
+    /**
+     * Return the value of a parameter
+     * @param key Name of the parameter
+     * @return The parameter value or null if not found. (Note that null can also be return if it is the parameter value. For
+     * strict parameter existence use {@link #hasValue(String)))
+     *
+     */
     public Object getValue(String key) {
+        ChangeLogParameter parameter=findParameter(key);
+        return parameter!=null?parameter.getValue():null;
+    }
+
+    private ChangeLogParameter findParameter(String key) {
         for (ChangeLogParameter param : changeLogParameters) {
             if (param.getKey().equalsIgnoreCase(key) && param.isValid()) {
-                return param.getValue();
+                return param;
             }
         }
         return null;
+    }
+
+    public boolean hasValue(String key) {
+        return findParameter(key)!=null;
     }
 
     public String expandExpressions(String string) {
