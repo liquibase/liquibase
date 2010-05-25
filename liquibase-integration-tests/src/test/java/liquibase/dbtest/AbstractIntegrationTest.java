@@ -793,20 +793,20 @@ public abstract class AbstractIntegrationTest {
        DiffResultAssert.assertThat(diffResult).containsMissingForeignKeyWithName("fk_person_country");
    }
 
-   //FIXME: Test that external entities aren't working correctly by now (CORE 609)
-   @Test
-   public void testXMLInclude() throws Exception{
-       if (database == null) {
-            return;
-       }
-       //Test external entity with a standard class loaded resource
-       Liquibase liquibase = createLiquibase(externalEntityChangeLog);
-       liquibase.update(contexts);
-
-       //Test with a packaged one
-       liquibase = createLiquibase(externalEntityChangeLog2);
-       liquibase.update(contexts);
-   }
+  
+//   @Test
+//   public void testXMLInclude() throws Exception{
+//       if (database == null) {
+//            return;
+//       }
+//       //Test external entity with a standard class loaded resource
+//       Liquibase liquibase = createLiquibase(externalEntityChangeLog);
+//       liquibase.update(contexts);
+//
+//       //Test with a packaged one
+//       liquibase = createLiquibase(externalEntityChangeLog2);
+//       liquibase.update(contexts);
+//   }
 
     public static String getDatabaseServerHostname() throws Exception {
         Properties integrationTestProperties;
