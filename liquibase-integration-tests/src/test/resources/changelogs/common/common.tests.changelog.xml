@@ -16,6 +16,30 @@
     <preConditions>
         <changeLogPropertyDefined property="real.int.type"/>
         <changeLogPropertyDefined property="real.int.type" value="int"/>
+        
+        <!--Check for database properties-->
+        <changeLogPropertyDefined property="database.autoIncrementClause"/>
+        <changeLogPropertyDefined property="database.currentDateTimeFunction"/>
+        <changeLogPropertyDefined property="database.databaseChangeLogLockTableName"/>
+        <changeLogPropertyDefined property="database.databaseChangeLogTableName"/>
+        <changeLogPropertyDefined property="database.databaseMajorVersion"/>
+        <changeLogPropertyDefined property="database.databaseMinorVersion"/>
+        <changeLogPropertyDefined property="database.databaseProductName"/>
+        <changeLogPropertyDefined property="database.databaseProductVersion"/>
+        <changeLogPropertyDefined property="database.defaultCatalogName"/>
+        <changeLogPropertyDefined property="database.defaultSchemaName"/>
+        <changeLogPropertyDefined property="database.lineComment"/>
+        <changeLogPropertyDefined property="database.liquibaseSchemaName"/>
+        <changeLogPropertyDefined property="database.typeName"/>
+        <changeLogPropertyDefined property="database.localDatabase"/>
+        <changeLogPropertyDefined property="database.requiresPassword"/>
+        <changeLogPropertyDefined property="database.requiresUsername"/>
+        <changeLogPropertyDefined property="database.supportsForeignKeyDisable"/>
+        <changeLogPropertyDefined property="database.supportsInitiallyDeferrableColumns"/>
+        <changeLogPropertyDefined property="database.supportsRestrictForeignKeys"/>
+        <changeLogPropertyDefined property="database.supportsSchemas"/>
+        <changeLogPropertyDefined property="database.supportsSequences"/>
+        <changeLogPropertyDefined property="database.supportsTablespaces"/>
     </preConditions>
     <include file="changelogs/common/included.failingprecondition.changelog.xml"/>
 
