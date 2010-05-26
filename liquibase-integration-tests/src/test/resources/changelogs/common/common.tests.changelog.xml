@@ -17,7 +17,7 @@
         <changeLogPropertyDefined property="real.int.type"/>
         <changeLogPropertyDefined property="real.int.type" value="int"/>
         
-        <!--Check for database properties-->
+        <!--Check for some database properties-->
         <changeLogPropertyDefined property="database.autoIncrementClause"/>
         <changeLogPropertyDefined property="database.currentDateTimeFunction"/>
         <changeLogPropertyDefined property="database.databaseChangeLogLockTableName"/>
@@ -25,11 +25,8 @@
         <changeLogPropertyDefined property="database.databaseMajorVersion"/>
         <changeLogPropertyDefined property="database.databaseMinorVersion"/>
         <changeLogPropertyDefined property="database.databaseProductName"/>
-        <changeLogPropertyDefined property="database.databaseProductVersion"/>
-        <changeLogPropertyDefined property="database.defaultCatalogName"/>
-        <changeLogPropertyDefined property="database.defaultSchemaName"/>
-        <changeLogPropertyDefined property="database.lineComment"/>
-        <changeLogPropertyDefined property="database.liquibaseSchemaName"/>
+        <changeLogPropertyDefined property="database.databaseProductVersion"/>        
+        <changeLogPropertyDefined property="database.lineComment"/>        
         <changeLogPropertyDefined property="database.typeName"/>
         <changeLogPropertyDefined property="database.isLocalDatabase"/>
         <changeLogPropertyDefined property="database.requiresPassword"/>
