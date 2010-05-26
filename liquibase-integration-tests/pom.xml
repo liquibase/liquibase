@@ -11,7 +11,7 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>liquibase-integration-tests</artifactId>
     <name>Liquibase Integration Tests</name>
-
+    
     <dependencies>
         <dependency>
             <groupId>junit</groupId>

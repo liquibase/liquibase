@@ -47,11 +47,11 @@ public class Liquibase {
 
     private ChangeLogParameters changeLogParameters;
 
-    public Liquibase(String changeLogFile, ResourceAccessor resourceAccessor, DatabaseConnection conn) throws DatabaseException {
+    public Liquibase(String changeLogFile, ResourceAccessor resourceAccessor, DatabaseConnection conn) throws LiquibaseException {
         this(changeLogFile, resourceAccessor, DatabaseFactory.getInstance().findCorrectDatabaseImplementation(conn));
     }
 
-    public Liquibase(String changeLogFile, ResourceAccessor resourceAccessor, Database database) throws DatabaseException {
+    public Liquibase(String changeLogFile, ResourceAccessor resourceAccessor, Database database) throws LiquibaseException {
         log = LogFactory.getLogger();
 
         if (changeLogFile != null) {
@@ -710,7 +710,7 @@ public class Liquibase {
             setChangeLogParameter("database.lineComment", database.getLineComment());
             setChangeLogParameter("database.liquibaseSchemaName", database.getLiquibaseSchemaName());
             setChangeLogParameter("database.typeName", database.getTypeName());
-            setChangeLogParameter("database.localDatabase", database.isLocalDatabase());
+            setChangeLogParameter("database.isLocalDatabase", database.isLocalDatabase());
             setChangeLogParameter("database.requiresPassword", database.requiresPassword());
             setChangeLogParameter("database.requiresUsername", database.requiresUsername());
             setChangeLogParameter("database.supportsForeignKeyDisable", database.supportsForeignKeyDisable());

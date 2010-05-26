@@ -65,6 +65,11 @@ public class AddColumnGeneratorDefaultClauseBeforeNotNull extends AddColumnGener
                 alterTable += " PRIMARY KEY";
             }
         }
+        if (statement.isUnique()) {
+            alterTable += " UNIQUE ";
+        }
+
+        alterTable += getDefaultClause(statement, database);        
 
         List<Sql> returnSql = new ArrayList<Sql>();
         returnSql.add(new UnparsedSql(alterTable, new Column()

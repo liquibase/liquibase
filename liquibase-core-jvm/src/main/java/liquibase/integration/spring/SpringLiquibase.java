@@ -231,7 +231,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 
     }
 
-    protected Liquibase createLiquibase(Connection c) throws DatabaseException {
+    protected Liquibase createLiquibase(Connection c) throws LiquibaseException {
         return new Liquibase(getChangeLog(), createResourceOpener(), createDatabase(c));
     }
 

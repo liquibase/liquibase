@@ -76,6 +76,15 @@ public class AddColumnStatement implements SqlStatement {
         return true;
     }
 
+    public boolean isUnique() {
+        for (ColumnConstraint constraint : getConstraints()) {
+            if (constraint instanceof UniqueConstraint) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public Object getDefaultValue() {
         return defaultValue;
     }

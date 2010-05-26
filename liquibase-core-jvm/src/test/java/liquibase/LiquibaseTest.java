@@ -7,6 +7,7 @@ import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.OracleDatabase;
 import liquibase.database.core.PostgresDatabase;
 import liquibase.exception.DatabaseException;
+import liquibase.exception.LiquibaseException;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import static org.easymock.EasyMock.expect;
@@ -97,7 +98,7 @@ public class LiquibaseTest {
         //private Database database;
         private InputStream inputStream;
 
-        public TestLiquibase() throws DatabaseException {
+        public TestLiquibase() throws LiquibaseException {
             super("liquibase/test.xml", new ClassLoaderResourceAccessor(), ((Database) null));
             inputStream = createMock(InputStream.class);
             replay(inputStream);

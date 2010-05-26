@@ -25,7 +25,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class AddColumnGenerator implements SqlGenerator<AddColumnStatement> {
-    
+
     public int getPriority() {
         return PRIORITY_DEFAULT;
     }
@@ -40,7 +40,7 @@ public class AddColumnGenerator implements SqlGenerator<AddColumnStatement> {
         validationErrors.checkRequiredField("columnName", statement.getColumnName());
         validationErrors.checkRequiredField("columnType", statement.getColumnType());
         validationErrors.checkRequiredField("tableName", statement.getTableName());
-        
+
         if (statement.isPrimaryKey() && (database instanceof CacheDatabase
                 || database instanceof H2Database
                 || database instanceof DB2Database
@@ -75,12 +75,16 @@ public class AddColumnGenerator implements SqlGenerator<AddColumnStatement> {
             alterTable += " PRIMARY KEY";
         }
 
+        if (statement.isUnique()) {
+            alterTable += " UNIQUE ";
+        }
+
         alterTable += getDefaultClause(statement, database);
 
         List<Sql> returnSql = new ArrayList<Sql>();
         returnSql.add(new UnparsedSql(alterTable, new Column()
-                        .setTable(new Table(statement.getTableName()).setSchema(statement.getSchemaName()))
-                        .setName(statement.getColumnName())));
+                .setTable(new Table(statement.getTableName()).setSchema(statement.getSchemaName()))
+                .setName(statement.getColumnName())));
 
         addForeignKeyStatements(statement, database, returnSql);
 
@@ -93,7 +97,7 @@ public class AddColumnGenerator implements SqlGenerator<AddColumnStatement> {
                 ForeignKeyConstraint fkConstraint = (ForeignKeyConstraint) constraint;
                 Matcher referencesMatcher = Pattern.compile("([\\w\\._]+)\\(([\\w_]+)\\)").matcher(fkConstraint.getReferences());
                 if (!referencesMatcher.matches()) {
-                    throw new UnexpectedLiquibaseException("Don't know how to find table and column names from "+fkConstraint.getReferences());
+                    throw new UnexpectedLiquibaseException("Don't know how to find table and column names from " + fkConstraint.getReferences());
                 }
                 String refSchemaName = null;
                 String refTableName = referencesMatcher.group(1);

@@ -151,7 +151,7 @@ public abstract class AbstractIntegrationTest {
         return createLiquibase(changeLogFile, fileOpener);
     }
 
-    private Liquibase createLiquibase(String changeLogFile, ResourceAccessor resourceAccessor) throws DatabaseException {
+    private Liquibase createLiquibase(String changeLogFile, ResourceAccessor resourceAccessor) throws LiquibaseException {
         ExecutorService.getInstance().clearExecutor(database);
         database.reset();
         return new Liquibase(changeLogFile, resourceAccessor, database);

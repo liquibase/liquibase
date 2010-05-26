@@ -3,9 +3,6 @@ package liquibase.parser.core.xml;
 import static org.junit.Assert.*;
 import org.junit.Test;
 
-/**
- * Tests for {@link liquibase.parser.core.xml.LiquibaseSchemaResolver}
- */
 public class LiquibaseEntityResolverTest {
 
     @Test

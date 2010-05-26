@@ -31,7 +31,7 @@
         <changeLogPropertyDefined property="database.lineComment"/>
         <changeLogPropertyDefined property="database.liquibaseSchemaName"/>
         <changeLogPropertyDefined property="database.typeName"/>
-        <changeLogPropertyDefined property="database.localDatabase"/>
+        <changeLogPropertyDefined property="database.isLocalDatabase"/>
         <changeLogPropertyDefined property="database.requiresPassword"/>
         <changeLogPropertyDefined property="database.requiresUsername"/>
         <changeLogPropertyDefined property="database.supportsForeignKeyDisable"/>
@@ -189,7 +189,7 @@
         </createTable>
         <addColumn tableName="ADD_COLUMN_TEST_TABLE">
             <column name="A_NEW_COLUMN" type="int" defaultValueNumeric="1">
-                <constraints nullable="false"/>
+                <constraints nullable="false" unique="true" uniqueConstraintName="uq_addcoltest1"/>
             </column>
         </addColumn>
     </changeSet>
