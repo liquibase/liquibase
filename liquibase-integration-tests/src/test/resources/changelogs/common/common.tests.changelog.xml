@@ -180,6 +180,11 @@
     </changeSet>
 
     <changeSet id="add-column-test1" author="alan">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <dbms type="h2"/>
+            </not>
+        </preConditions>
         <comment>Testing bug reported on mailing list</comment>
         <createTable tableName="ADD_COLUMN_TEST_TABLE">
             <column name="id" type="int"/>

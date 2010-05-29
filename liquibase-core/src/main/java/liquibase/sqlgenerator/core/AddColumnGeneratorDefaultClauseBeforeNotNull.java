@@ -69,8 +69,6 @@ public class AddColumnGeneratorDefaultClauseBeforeNotNull extends AddColumnGener
             alterTable += " UNIQUE ";
         }
 
-        alterTable += getDefaultClause(statement, database);        
-
         List<Sql> returnSql = new ArrayList<Sql>();
         returnSql.add(new UnparsedSql(alterTable, new Column()
                         .setTable(new Table(statement.getTableName()).setSchema(statement.getSchemaName()))

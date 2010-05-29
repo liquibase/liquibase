@@ -366,7 +366,8 @@ public abstract class AbstractDatabase implements Database {
             }
             if (!hasOrderExecuted) {
                 executor.comment("Adding missing databasechangelog.orderexecuted column");
-                statementsToExecute.add(new AddColumnStatement(getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "ORDEREXECUTED", "INT", null, new UniqueConstraint()));
+                statementsToExecute.add(new AddColumnStatement(getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "ORDEREXECUTED", "INT", null));
+                statementsToExecute.add(new AddUniqueConstraintStatement(getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "ORDEREXECUTED", "UQ_LB_ORDEREXEC"));
                 statementsToExecute.add(new UpdateStatement(getLiquibaseSchemaName(), getDatabaseChangeLogTableName()).addNewColumnValue("ORDEREXECUTED", -1));
                 statementsToExecute.add(new SetNullableStatement(getLiquibaseSchemaName(),  getDatabaseChangeLogTableName(), "ORDEREXECUTED", "INT", false));
             }
@@ -382,8 +383,7 @@ public abstract class AbstractDatabase implements Database {
             }
             if (!hasExecTypeColumn) {
                 executor.comment("Adding missing databasechangelog.exectype column");
-                statementsToExecute.add(new AddColumnStatement(getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "EXECTYPE", "VARCHAR(10)", null, new UniqueConstraint()));
-                statementsToExecute.add(new UpdateStatement(getLiquibaseSchemaName(), getDatabaseChangeLogTableName()).addNewColumnValue("EXECTYPE", "EXECUTED"));
+                statementsToExecute.add(new AddColumnStatement(getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "EXECTYPE", "VARCHAR(10)", null));
                 statementsToExecute.add(new SetNullableStatement(getLiquibaseSchemaName(),  getDatabaseChangeLogTableName(), "EXECTYPE", "VARCHAR(10)", false));
             }
 

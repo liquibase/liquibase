@@ -1,12 +1,10 @@
 package liquibase.test;
 
-import liquibase.database.Database;
-import liquibase.database.DatabaseConnection;
-import liquibase.database.DatabaseFactory;
-import liquibase.database.JdbcConnection;
+import liquibase.database.*;
 import liquibase.database.example.ExampleCustomDatabase;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.database.core.MockDatabase;
+import liquibase.dbtest.AbstractIntegrationTest;
 import liquibase.resource.ResourceAccessor;
 import liquibase.exception.DatabaseException;
 
@@ -23,8 +21,8 @@ public class DatabaseTestContext {
     private Set<DatabaseConnection> availableConnections;
 
     private final String[] DEFAULT_TEST_URLS = new String[]{
-            "jdbc:Cache://127.0.0.1:1972/liquibase",
-            "jdbc:db2://localhost:50000/liquibas",
+            "jdbc:Cache://localhost:1972/liquibase",
+            "jdbc:db2://127.0.0.1:50000/liquibas",
             "jdbc:derby:liquibase;create=true",
             "jdbc:firebirdsql:localhost/3050:c:\\firebird\\liquibase.fdb",
             "jdbc:h2:mem:liquibase",
@@ -33,7 +31,7 @@ public class DatabaseTestContext {
 //            "jdbc:sqlserver://localhost;databaseName=liquibase",
             "jdbc:mysql://localhost/liquibase",
             "jdbc:oracle:thin:@localhost/XE",
-            "jdbc:postgresql://localhost/liquibase",
+            "jdbc:127.0.0.1://localhost/liquibase",
 //            "jdbc:jtds:sybase://localhost/nathan:5000",
 //            "jdbc:sybase:Tds:"+ InetAddress.getLocalHost().getHostName()+":5000/liquibase",
             "jdbc:sapdb://localhost/liquibas",
@@ -141,7 +139,7 @@ public class DatabaseTestContext {
         final Driver driver;
         try {
             driver = (Driver) Class.forName(DatabaseFactory.getInstance().findDefaultDriver(url), true, jdbcDriverLoader).newInstance();
-        } catch (ClassNotFoundException e) {
+        } catch (Exception e) {
             System.out.println("Could not connect to " + url + ": Will not test against.  " + e.getMessage());
             return null; //could not connect
         }
@@ -236,7 +234,7 @@ public class DatabaseTestContext {
 //                if (url.indexOf("jtds") >= 0) {
 //                    continue;
 //                }
-                DatabaseConnection connection = openConnection(url);
+                DatabaseConnection connection = openConnection(url.replaceAll("localhost", AbstractIntegrationTest.getDatabaseServerHostname()));
                 if (connection != null) {
                     availableConnections.add(connection);
                 }
