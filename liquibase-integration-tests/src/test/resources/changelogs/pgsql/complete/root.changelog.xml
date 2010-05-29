@@ -343,4 +343,19 @@
         </createTable>
     </changeSet>
 
+    <changeSet id="2" author="renaud">
+        <createTable tableName="cp1_table">
+            <column name="id" type="int">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="data" type="varchar(64)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="4" author="renaud">
+        <comment>Auto increment the primary keys</comment>
+        <addAutoIncrement tableName="cp1_table" columnName="id" columnDataType="int"/>
+    </changeSet>
 </databaseChangeLog>
