@@ -3,10 +3,7 @@ package liquibase.change;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.database.structure.DatabaseObject;
-import liquibase.exception.RollbackImpossibleException;
-import liquibase.exception.SetupException;
-import liquibase.exception.UnsupportedChangeException;
-import liquibase.exception.ValidationErrors;
+import liquibase.exception.*;
 import liquibase.resource.ResourceAccessor;
 import liquibase.statement.SqlStatement;
 
@@ -71,6 +68,8 @@ public interface Change {
     public void init() throws SetupException;
 
     boolean supports(Database database);
+
+    public Warnings warn(Database database);
 
     public ValidationErrors validate(Database database);
 

@@ -5,6 +5,7 @@ import liquibase.changelog.visitor.ValidatingVisitor;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.ValidationFailedException;
+import liquibase.logging.LogFactory;
 import liquibase.precondition.Conditional;
 import liquibase.precondition.core.PreconditionContainer;
 
@@ -128,6 +129,10 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         validatingVisitor.validate(database, this);
         logIterator.run(validatingVisitor, database);
 
+        for (String message : validatingVisitor.getWarnings().getMessages()) {
+            LogFactory.getLogger().warning(message);
+        }
+        
         if (!validatingVisitor.validationPassed()) {
             throw new ValidationFailedException(validatingVisitor);
         }

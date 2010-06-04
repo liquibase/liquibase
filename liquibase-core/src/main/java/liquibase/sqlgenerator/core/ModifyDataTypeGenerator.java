@@ -1,5 +1,6 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.exception.Warnings;
 import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.ModifyDataTypeStatement;
@@ -11,6 +12,21 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 
 public class ModifyDataTypeGenerator extends AbstractSqlGenerator<ModifyDataTypeStatement> {
+
+    @Override
+    public Warnings warn(ModifyDataTypeStatement modifyDataTypeStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+        Warnings warnings = super.warn(modifyDataTypeStatement, database, sqlGeneratorChain);
+
+        if (modifyDataTypeStatement.getAutoIncrement() == null && !modifyDataTypeStatement.getNewDataType().toLowerCase().contains("varchar")) {
+            warnings.addWarning("modifyDataType will lose settings for some databases.  Use the autoIncrement=true|false parameter to ensure that the information is updated correctly");
+        }
+
+        if (modifyDataTypeStatement.isNullable() == null) {
+            warnings.addWarning("modifyDataType will lose settings for some databases.  Use the nullable=true|false parameter to ensure that the information is updated correctly");
+        }
+
+        return warnings;
+    }
 
     public ValidationErrors validate(ModifyDataTypeStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
@@ -44,6 +60,13 @@ public class ModifyDataTypeGenerator extends AbstractSqlGenerator<ModifyDataType
                 alterTable += " NOT NULL";
             }
 
+        }
+
+        if (statement.getPrimaryKey() != null && statement.getPrimaryKey()) {
+            alterTable += " PRIMARY KEY";
+        }
+        if (statement.getAutoIncrement() != null && statement.getAutoIncrement() && database.supportsAutoIncrement()) {
+            alterTable += " "+database.getAutoIncrementClause();
         }
 
 

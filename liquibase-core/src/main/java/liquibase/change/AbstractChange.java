@@ -3,10 +3,7 @@ package liquibase.change;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.database.structure.DatabaseObject;
-import liquibase.exception.RollbackImpossibleException;
-import liquibase.exception.SetupException;
-import liquibase.exception.UnsupportedChangeException;
-import liquibase.exception.ValidationErrors;
+import liquibase.exception.*;
 import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.core.string.StringChangeLogSerializer;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
@@ -75,6 +72,17 @@ public abstract class AbstractChange implements Change {
         return true;
     }
 
+    public Warnings warn(Database database) {
+        Warnings warnings = new Warnings();
+        for (SqlStatement statement : generateStatements(database)) {
+            if (SqlGeneratorFactory.getInstance().supports(statement, database)) {
+                warnings.addAll(SqlGeneratorFactory.getInstance().warn(statement, database));
+            }
+        }
+
+        return warnings;
+    }
+
     public ValidationErrors validate(Database database) {
         ValidationErrors changeValidationErrors = new ValidationErrors();
         for (SqlStatement statement : generateStatements(database)) {
@@ -87,7 +95,6 @@ public abstract class AbstractChange implements Change {
 
         return changeValidationErrors;
     }
-
 
     /*
     * Skipped by this skeletal implementation

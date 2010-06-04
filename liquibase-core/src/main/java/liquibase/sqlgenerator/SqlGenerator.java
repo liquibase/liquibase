@@ -2,6 +2,7 @@ package liquibase.sqlgenerator;
 
 import liquibase.database.Database;
 import liquibase.exception.ValidationErrors;
+import liquibase.exception.Warnings;
 import liquibase.servicelocator.PrioritizedService;
 import liquibase.sql.Sql;
 import liquibase.statement.SqlStatement;
@@ -59,6 +60,8 @@ public interface SqlGenerator<StatementType extends SqlStatement> extends Priori
      * LiquiBase will inspect the ValidationErrors result before attempting to call generateSql.
      */
     public ValidationErrors validate(StatementType statement, Database database, SqlGeneratorChain sqlGeneratorChain);
+
+    public Warnings warn(StatementType statementType, Database database, SqlGeneratorChain sqlGeneratorChain);
 
     /**
      * Generate the actual Sql for the given statement and database.

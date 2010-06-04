@@ -3,6 +3,7 @@ package liquibase.sqlgenerator;
 import liquibase.database.Database;
 import liquibase.database.core.H2Database;
 import liquibase.exception.ValidationErrors;
+import liquibase.exception.Warnings;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.core.AddAutoIncrementGenerator;
 import liquibase.sqlgenerator.core.AddAutoIncrementGeneratorDB2;
@@ -133,6 +134,10 @@ public class SqlGeneratorFactoryTest {
 
             public boolean requiresUpdatedDatabaseMetadata(Database database) {
                 return false;
+            }
+
+            public Warnings warn(SqlStatement sqlStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+                return new Warnings();
             }
 
             public ValidationErrors validate(SqlStatement sqlStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {

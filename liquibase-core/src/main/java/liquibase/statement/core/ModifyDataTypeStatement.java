@@ -8,13 +8,17 @@ public class ModifyDataTypeStatement implements SqlStatement {
     private String columnName;
     private String newDataType;
     private Boolean nullable;
+    private Boolean autoIncrement;
+    private Boolean primaryKey;
 
-    public ModifyDataTypeStatement(String schemaName, String tableName, String columnName, String newDataType, Boolean nullable) {
+    public ModifyDataTypeStatement(String schemaName, String tableName, String columnName, String newDataType, Boolean nullable, Boolean primaryKey, Boolean autoIncrement) {
         this.schemaName = schemaName;
         this.tableName = tableName;
         this.columnName = columnName;
         this.newDataType = newDataType;
         this.nullable = nullable;
+        this.primaryKey = primaryKey;
+        this.autoIncrement = autoIncrement;
     }
 
     public String getSchemaName() {
@@ -55,5 +59,21 @@ public class ModifyDataTypeStatement implements SqlStatement {
 
     public void setNullable(Boolean nullable) {
         this.nullable = nullable;
+    }
+
+    public Boolean getAutoIncrement() {
+        return autoIncrement;
+    }
+
+    public void setAutoIncrement(Boolean autoIncrement) {
+        this.autoIncrement = autoIncrement;
+    }
+
+    public Boolean getPrimaryKey() {
+        return primaryKey;
+    }
+
+    public void setPrimaryKey(Boolean primaryKey) {
+        this.primaryKey = primaryKey;
     }
 }

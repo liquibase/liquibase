@@ -754,25 +754,24 @@
 
     <include file="changelogs/common/sqlstyle/formatted.changelog.sql"/>
 
-    <!--
-    <changeSet id="ai1" author="lujop">
-        <createTable tableName="autoIncrementPreserving">
-            <column name="id" type="int">
-                <constraints primaryKey="true" nullable="false"/>
-            </column>
-            <column name="description" type="varchar(50)"/>
-        </createTable>
-    </changeSet>
+    <!-- databases have too many limitations on modifying primary key columns to successfully test -->
+    <!--<changeSet id="ai1" author="lujop">-->
+        <!--<createTable tableName="autoIncrementPreserving">-->
+            <!--<column name="id" type="int">-->
+                <!--<constraints primaryKey="true" nullable="false"/>-->
+            <!--</column>-->
+            <!--<column name="description" type="varchar(50)"/>-->
+        <!--</createTable>-->
+    <!--</changeSet>-->
 
-    <changeSet id="ai2" author="lujop">
-        <modifyDataType tableName="autoIncrementPreserving" columnName="id" newDataType="bigint"/>
-    </changeSet>
+    <!--<changeSet id="ai2" author="lujop">-->
+        <!--<modifyDataType tableName="autoIncrementPreserving" columnName="id" newDataType="bigint"/>-->
+    <!--</changeSet>-->
 
-    <changeSet id="ai3" author="lujop">
-        <insert tableName="autoIncrementPreserving" >
-             <!-If we can add with only description is that autoincrement is preserved in last modifyType->
-            <column name="description" value="prova"/>
-        </insert>
-    </changeSet>
-    -->
+    <!--<changeSet id="ai3" author="lujop">-->
+        <!--<insert tableName="autoIncrementPreserving" >-->
+             <!--&lt;!&ndash;If we can add with only description is that autoincrement is preserved in last modifyType&ndash;&gt;-->
+            <!--<column name="description" value="prova"/>-->
+        <!--</insert>-->
+    <!--</changeSet>-->
 </databaseChangeLog>
