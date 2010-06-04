@@ -15,11 +15,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Arrays;
 
-public class SetNullableGenerator implements SqlGenerator<SetNullableStatement> {
-    public int getPriority() {
-        return PRIORITY_DEFAULT;
-    }
+public class SetNullableGenerator extends AbstractSqlGenerator<SetNullableStatement> {
 
+    @Override
     public boolean supports(SetNullableStatement statement, Database database) {
         return !(database instanceof FirebirdDatabase ||
                 database instanceof SQLiteDatabase);

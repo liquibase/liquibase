@@ -105,4 +105,9 @@ public class DropAllForeignKeyConstraintsChange extends AbstractChange {
             throw new UnexpectedLiquibaseException("Failed to find foreign keys for table: " + getBaseTableName(), e);
         }
     }
+
+    @Override
+    public boolean requiresUpdatedDatabaseMetadata(Database database) {
+        return true;
+    }
 }

@@ -19,6 +19,7 @@ public class InsertOrUpdateGeneratorOracle extends InsertOrUpdateGenerator {
         return database instanceof OracleDatabase;
     }
 
+    @Override
     protected String getRecordCheck(InsertOrUpdateStatement insertOrUpdateStatement, Database database, String whereClause) {
 
         StringBuffer recordCheckSql = new StringBuffer();
@@ -36,10 +37,12 @@ public class InsertOrUpdateGeneratorOracle extends InsertOrUpdateGenerator {
         return recordCheckSql.toString();
     }
 
+    @Override
     protected String getElse(Database database){
                return "\tELSIF v_reccount = 1 THEN\n";
     }
 
+    @Override
     protected String getPostUpdateStatements(){
         StringBuffer endStatements = new StringBuffer();
         endStatements.append("END IF;\n");

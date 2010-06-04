@@ -11,11 +11,9 @@ import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.AddForeignKeyConstraintStatement;
 
-public class AddForeignKeyConstraintGenerator implements SqlGenerator<AddForeignKeyConstraintStatement> {
-    public int getPriority() {
-        return PRIORITY_DEFAULT;
-    }
+public class AddForeignKeyConstraintGenerator extends AbstractSqlGenerator<AddForeignKeyConstraintStatement> {
 
+    @Override
     @SuppressWarnings({"SimplifiableIfStatement"})
     public boolean supports(AddForeignKeyConstraintStatement statement, Database database) {
         if (statement.getReferencesUniqueColumn() && !(database instanceof OracleDatabase)) {

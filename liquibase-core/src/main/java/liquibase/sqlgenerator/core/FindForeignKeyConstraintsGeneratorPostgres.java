@@ -9,11 +9,13 @@ import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.FindForeignKeyConstraintsStatement;
 
-public class FindForeignKeyConstraintsGeneratorPostgres implements SqlGenerator<FindForeignKeyConstraintsStatement> {
+public class FindForeignKeyConstraintsGeneratorPostgres extends AbstractSqlGenerator<FindForeignKeyConstraintsStatement> {
+    @Override
     public int getPriority() {
         return PRIORITY_DATABASE;
     }
 
+    @Override
     public boolean supports(FindForeignKeyConstraintsStatement statement, Database database) {
         return database instanceof PostgresDatabase;
     }

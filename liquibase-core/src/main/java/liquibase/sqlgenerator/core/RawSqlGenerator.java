@@ -8,14 +8,7 @@ import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.RawSqlStatement;
 
-public class RawSqlGenerator implements SqlGenerator<RawSqlStatement> {
-    public int getPriority() {
-        return PRIORITY_DEFAULT;
-    }
-
-    public boolean supports(RawSqlStatement statement, Database database) {
-        return true;
-    }
+public class RawSqlGenerator extends AbstractSqlGenerator<RawSqlStatement> {
 
     public ValidationErrors validate(RawSqlStatement rawSqlStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();

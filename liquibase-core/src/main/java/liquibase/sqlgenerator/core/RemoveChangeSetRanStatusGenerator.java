@@ -10,14 +10,7 @@ import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.core.DeleteStatement;
 import liquibase.statement.core.RemoveChangeSetRanStatusStatement;
 
-public class RemoveChangeSetRanStatusGenerator implements SqlGenerator<RemoveChangeSetRanStatusStatement> {
-    public int getPriority() {
-        return PRIORITY_DEFAULT;
-    }
-
-    public boolean supports(RemoveChangeSetRanStatusStatement statement, Database database) {
-        return true;
-    }
+public class RemoveChangeSetRanStatusGenerator extends AbstractSqlGenerator<RemoveChangeSetRanStatusStatement> {
 
     public ValidationErrors validate(RemoveChangeSetRanStatusStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors errors = new ValidationErrors();

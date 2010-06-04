@@ -9,11 +9,9 @@ import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.RenameColumnStatement;
 
-public class RenameColumnGenerator implements SqlGenerator<RenameColumnStatement> {
-    public int getPriority() {
-        return PRIORITY_DEFAULT;
-    }
+public class RenameColumnGenerator extends AbstractSqlGenerator<RenameColumnStatement> {
 
+    @Override
     public boolean supports(RenameColumnStatement statement, Database database) {
         return !(database instanceof DB2Database
                 || database instanceof CacheDatabase

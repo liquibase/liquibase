@@ -9,11 +9,9 @@ import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.RenameTableStatement;
 
-public class RenameTableGenerator implements SqlGenerator<RenameTableStatement> {
-    public int getPriority() {
-        return PRIORITY_DEFAULT;
-    }
+public class RenameTableGenerator extends AbstractSqlGenerator<RenameTableStatement> {
 
+    @Override
     public boolean supports(RenameTableStatement statement, Database database) {
         return !(database instanceof CacheDatabase || database instanceof FirebirdDatabase);
     }

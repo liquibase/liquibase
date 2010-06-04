@@ -9,14 +9,7 @@ import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.core.UnlockDatabaseChangeLogStatement;
 import liquibase.statement.core.UpdateStatement;
 
-public class UnlockDatabaseChangeLogGenerator implements SqlGenerator<UnlockDatabaseChangeLogStatement> {
-    public int getPriority() {
-        return PRIORITY_DEFAULT;
-    }
-
-    public boolean supports(UnlockDatabaseChangeLogStatement statement, Database database) {
-        return true;
-    }
+public class UnlockDatabaseChangeLogGenerator extends AbstractSqlGenerator<UnlockDatabaseChangeLogStatement> {
 
     public ValidationErrors validate(UnlockDatabaseChangeLogStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         return new ValidationErrors();

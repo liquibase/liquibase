@@ -13,14 +13,7 @@ import liquibase.util.StringUtils;
 
 import java.util.List;
 
-public class DropIndexGenerator implements SqlGenerator<DropIndexStatement> {
-    public int getPriority() {
-        return PRIORITY_DEFAULT;
-    }
-
-    public boolean supports(DropIndexStatement statement, Database database) {
-        return true;
-    }
+public class DropIndexGenerator extends AbstractSqlGenerator<DropIndexStatement> {
 
     public ValidationErrors validate(DropIndexStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();

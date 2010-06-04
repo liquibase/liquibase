@@ -9,11 +9,9 @@ import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.DropPrimaryKeyStatement;
 
-public class DropPrimaryKeyGenerator implements SqlGenerator<DropPrimaryKeyStatement> {
-    public int getPriority() {
-        return PRIORITY_DEFAULT;
-    }
+public class DropPrimaryKeyGenerator extends AbstractSqlGenerator<DropPrimaryKeyStatement> {
 
+    @Override
     public boolean supports(DropPrimaryKeyStatement statement, Database database) {
         return (!(database instanceof SQLiteDatabase));
     }

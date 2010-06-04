@@ -9,14 +9,7 @@ import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.CreateViewStatement;
 
-public class CreateViewGenerator implements SqlGenerator<CreateViewStatement> {
-    public int getPriority() {
-        return PRIORITY_DEFAULT;
-    }
-
-    public boolean supports(CreateViewStatement statement, Database database) {
-        return true;
-    }
+public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatement> {
 
     public ValidationErrors validate(CreateViewStatement createViewStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();

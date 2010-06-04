@@ -10,11 +10,9 @@ import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.SetTableRemarksStatement;
 
-public class SetTableRemarksGenerator implements SqlGenerator<SetTableRemarksStatement> {
-    public int getPriority() {
-        return PRIORITY_DEFAULT;
-    }
+public class SetTableRemarksGenerator extends AbstractSqlGenerator<SetTableRemarksStatement> {
 
+    @Override
     public boolean supports(SetTableRemarksStatement statement, Database database) {
         return database instanceof MySQLDatabase || database instanceof OracleDatabase;
     }

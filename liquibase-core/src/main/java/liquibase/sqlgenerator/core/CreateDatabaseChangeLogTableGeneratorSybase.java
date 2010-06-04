@@ -10,11 +10,13 @@ import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.CreateDatabaseChangeLogTableStatement;
 
-public class CreateDatabaseChangeLogTableGeneratorSybase implements SqlGenerator<CreateDatabaseChangeLogTableStatement> {
+public class CreateDatabaseChangeLogTableGeneratorSybase extends AbstractSqlGenerator<CreateDatabaseChangeLogTableStatement> {
+    @Override
     public int getPriority() {
         return PRIORITY_DATABASE;
     }
 
+    @Override
     public boolean supports(CreateDatabaseChangeLogTableStatement statement, Database database) {
         return database instanceof SybaseDatabase;
     }

@@ -14,14 +14,7 @@ import liquibase.util.NetUtil;
 import java.net.InetAddress;
 import java.sql.Timestamp;
 
-public class LockDatabaseChangeLogGenerator implements SqlGenerator<LockDatabaseChangeLogStatement> {
-    public int getPriority() {
-        return PRIORITY_DEFAULT;
-    }
-
-    public boolean supports(LockDatabaseChangeLogStatement statement, Database database) {
-        return true;
-    }
+public class LockDatabaseChangeLogGenerator extends AbstractSqlGenerator<LockDatabaseChangeLogStatement> {
 
     public ValidationErrors validate(LockDatabaseChangeLogStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         return new ValidationErrors();

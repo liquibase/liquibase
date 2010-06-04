@@ -8,20 +8,12 @@ import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.CommentStatement;
 
-public class CommentGenerator implements SqlGenerator<CommentStatement> {
+public class CommentGenerator extends AbstractSqlGenerator<CommentStatement> {
 
 	public Sql[] generateSql(CommentStatement comment, Database database, SqlGeneratorChain sqlGeneratorChain) {
         return new Sql[] {
                 new SingleLineComment(comment.getText(), database.getLineComment())     
 		};
-	}
-
-	public int getPriority() {
-		return PRIORITY_DEFAULT;
-	}
-
-	public boolean supports(CommentStatement statement, Database database) {
-		return true;
 	}
 
 	public ValidationErrors validate(CommentStatement comment,

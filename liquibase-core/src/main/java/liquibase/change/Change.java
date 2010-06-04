@@ -112,4 +112,8 @@ public interface Change {
      */
     public SqlStatement[] generateRollbackStatements(Database database) throws UnsupportedChangeException, RollbackImpossibleException;
 
+    /**
+     * Does this change require access to the database metadata?  If true, the change cannot be used in an updateSql-style command.
+     */
+    public boolean requiresUpdatedDatabaseMetadata(Database database);
 }

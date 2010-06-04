@@ -9,11 +9,9 @@ import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.DropSequenceStatement;
 
-public class DropSequenceGenerator implements SqlGenerator<DropSequenceStatement> {
-    public int getPriority() {
-        return PRIORITY_DEFAULT;
-    }
+public class DropSequenceGenerator extends AbstractSqlGenerator<DropSequenceStatement> {
 
+    @Override
     public boolean supports(DropSequenceStatement statement, Database database) {
         return database.supportsSequences();
     }

@@ -9,11 +9,13 @@ import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.SetColumnRemarksStatement;
 
-public class SetColumnRemarksGeneratorOracle implements SqlGenerator<SetColumnRemarksStatement> {
+public class SetColumnRemarksGeneratorOracle extends AbstractSqlGenerator<SetColumnRemarksStatement> {
+    @Override
     public int getPriority() {
         return PRIORITY_DATABASE;
     }
 
+    @Override
     public boolean supports(SetColumnRemarksStatement statement, Database database) {
         return database instanceof OracleDatabase;
     }

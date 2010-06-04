@@ -11,14 +11,7 @@ import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.core.TagDatabaseStatement;
 import liquibase.statement.core.UpdateStatement;
 
-public class TagDatabaseGenerator implements SqlGenerator<TagDatabaseStatement> {
-    public int getPriority() {
-        return PRIORITY_DEFAULT;
-    }
-
-    public boolean supports(TagDatabaseStatement statement, Database database) {
-        return true;
-    }
+public class TagDatabaseGenerator extends AbstractSqlGenerator<TagDatabaseStatement> {
 
     public ValidationErrors validate(TagDatabaseStatement tagDatabaseStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();

@@ -34,6 +34,10 @@ public class MockSqlGenerator implements SqlGenerator {
         return supports;
     }
 
+    public boolean requiresUpdatedDatabaseMetadata(Database database) {
+        return false;
+    }
+
     public MockSqlGenerator addValidationError(String message) {
         errors.addError(message);
 

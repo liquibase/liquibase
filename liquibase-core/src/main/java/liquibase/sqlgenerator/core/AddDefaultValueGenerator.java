@@ -11,14 +11,7 @@ import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.AddDefaultValueStatement;
 
-public class AddDefaultValueGenerator implements SqlGenerator<AddDefaultValueStatement> {
-    public int getPriority() {
-        return PRIORITY_DEFAULT;
-    }
-
-    public boolean supports(AddDefaultValueStatement statement, Database database) {
-        return true;
-    }
+public class AddDefaultValueGenerator extends AbstractSqlGenerator<AddDefaultValueStatement> {
 
     public ValidationErrors validate(AddDefaultValueStatement addDefaultValueStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();

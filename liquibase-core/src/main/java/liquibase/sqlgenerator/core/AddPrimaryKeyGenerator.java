@@ -10,11 +10,9 @@ import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.AddPrimaryKeyStatement;
 import liquibase.util.StringUtils;
 
-public class AddPrimaryKeyGenerator implements SqlGenerator<AddPrimaryKeyStatement> {
-    public int getPriority() {
-        return PRIORITY_DEFAULT;
-    }
+public class AddPrimaryKeyGenerator extends AbstractSqlGenerator<AddPrimaryKeyStatement> {
 
+    @Override
     public boolean supports(AddPrimaryKeyStatement statement, Database database) {
         return (!(database instanceof SQLiteDatabase));
     }

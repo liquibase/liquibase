@@ -8,14 +8,7 @@ import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.DropViewStatement;
 
-public class DropViewGenerator implements SqlGenerator<DropViewStatement> {
-    public int getPriority() {
-        return PRIORITY_DEFAULT;
-    }
-
-    public boolean supports(DropViewStatement statement, Database database) {
-        return true;
-    }
+public class DropViewGenerator extends AbstractSqlGenerator<DropViewStatement> {
 
     public ValidationErrors validate(DropViewStatement dropViewStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
