@@ -36,14 +36,17 @@ public class DatabaseUpdateTask extends BaseLiquibaseTask {
                 throw new BuildException("Chose not to run against non-production database");
             }
 
-            if (isDropFirst()) {
-                liquibase.dropAll();
-            }
-
             Writer writer = createOutputWriter();
             if (writer == null) {
+                if (isDropFirst()) {
+                    liquibase.dropAll();
+                }
+
                 liquibase.update(getContexts());
             } else {
+                if (isDropFirst()) {
+                    throw new BuildException("Cannot dropFirst when outputting update SQL");
+                }
                 liquibase.update(getContexts(), writer);
                 writer.flush();
                 writer.close();
