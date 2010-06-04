@@ -3,6 +3,7 @@ package liquibase.sqlgenerator;
 import liquibase.database.Database;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.exception.ValidationErrors;
+import liquibase.exception.Warnings;
 import liquibase.servicelocator.ServiceLocator;
 import liquibase.sql.Sql;
 import liquibase.statement.SqlStatement;
@@ -152,6 +153,11 @@ public class SqlGeneratorFactory {
     public ValidationErrors validate(SqlStatement statement, Database database) {
         //noinspection unchecked
         return createGeneratorChain(statement, database).validate(statement, database);
+    }
+
+    public Warnings warn(SqlStatement statement, Database database) {
+        //noinspection unchecked
+        return createGeneratorChain(statement, database).warn(statement, database);
     }
 
     public Set<DatabaseObject> getAffectedDatabaseObjects(SqlStatement statement, Database database) {

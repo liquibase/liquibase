@@ -28,6 +28,7 @@ public class ValidatingVisitor implements ChangeSetVisitor {
     private List<SetupException> setupExceptions = new ArrayList<SetupException>();
     private List<Throwable> changeValidationExceptions = new ArrayList<Throwable>();
     private ValidationErrors validationErrors = new ValidationErrors();
+    private Warnings warnings = new Warnings();
 
     private Set<String> seenChangeSets = new HashSet<String>();
 
@@ -70,6 +71,8 @@ public class ValidatingVisitor implements ChangeSetVisitor {
             } catch (SetupException se) {
                 setupExceptions.add(se);
             }
+
+            warnings.addAll(change.warn(database));
 
             try {
                 ValidationErrors foundErrors = change.validate(database);
@@ -134,6 +137,10 @@ public class ValidatingVisitor implements ChangeSetVisitor {
 
     public ValidationErrors getValidationErrors() {
         return validationErrors;
+    }
+
+    public Warnings getWarnings() {
+        return warnings;
     }
 
     public boolean validationPassed() {

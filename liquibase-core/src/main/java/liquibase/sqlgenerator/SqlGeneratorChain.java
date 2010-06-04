@@ -2,6 +2,7 @@ package liquibase.sqlgenerator;
 
 import liquibase.database.Database;
 import liquibase.exception.ValidationErrors;
+import liquibase.exception.Warnings;
 import liquibase.sql.Sql;
 import liquibase.statement.SqlStatement;
 
@@ -27,6 +28,14 @@ public class SqlGeneratorChain {
         }
 
         return sqlGenerators.next().generateSql(statement, database, this);
+    }
+
+    public Warnings warn(SqlStatement statement, Database database) {
+        if (sqlGenerators == null || !sqlGenerators.hasNext()) {
+            return new Warnings();
+        }
+
+        return sqlGenerators.next().warn(statement, database, this);
     }
 
     public ValidationErrors validate(SqlStatement statement, Database database) {

@@ -2,6 +2,7 @@ package liquibase.sqlgenerator;
 
 import liquibase.database.Database;
 import liquibase.exception.ValidationErrors;
+import liquibase.exception.Warnings;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.statement.SqlStatement;
@@ -44,6 +45,10 @@ public class MockSqlGenerator implements SqlGenerator {
         return this;
     }
 
+    public Warnings warn(SqlStatement sqlStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+        return new Warnings();
+    }
+    
     public ValidationErrors validate(SqlStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = sqlGeneratorChain.validate(statement, database);
         validationErrors.addAll(errors);
