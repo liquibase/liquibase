@@ -35,7 +35,8 @@ public class DBDocVisitor implements ChangeSetVisitor {
     private List<Change> changesToRun;
     private List<Change> recentChanges;
 
-    private String rootChangeLog;
+    private String rootChangeLogName;
+    private DatabaseChangeLog rootChangeLog;
 
     private static final int MAX_RECENT_CHANGE = 50;
 
@@ -58,8 +59,12 @@ public class DBDocVisitor implements ChangeSetVisitor {
 
     public void visit(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database) throws LiquibaseException {
         ChangeSet.RunStatus runStatus = this.database.getRunStatus(changeSet);
+        if (rootChangeLogName == null) {
+            rootChangeLogName = changeSet.getFilePath();
+        }
+
         if (rootChangeLog == null) {
-            rootChangeLog = changeSet.getFilePath();
+            this.rootChangeLog = databaseChangeLog;
         }
 
         if (!changesByAuthor.containsKey(changeSet.getAuthor())) {
@@ -113,7 +118,7 @@ public class DBDocVisitor implements ChangeSetVisitor {
         HTMLWriter columnWriter = new ColumnWriter(rootOutputDir, database);
         HTMLWriter pendingChangesWriter = new PendingChangesWriter(rootOutputDir, database);
         HTMLWriter recentChangesWriter = new RecentChangesWriter(rootOutputDir, database);
-        HTMLWriter pendingSQLWriter = new PendingSQLWriter(rootOutputDir, database);
+        HTMLWriter pendingSQLWriter = new PendingSQLWriter(rootOutputDir, database, rootChangeLog);
 
         copyFile("liquibase/dbdoc/stylesheet.css", rootOutputDir);
         copyFile("liquibase/dbdoc/index.html", rootOutputDir);
@@ -127,28 +132,28 @@ public class DBDocVisitor implements ChangeSetVisitor {
         new AuthorListWriter(rootOutputDir).writeHTML(new TreeSet<Object>(changesByAuthor.keySet()));
 
         for (String author : changesByAuthor.keySet()) {
-            authorWriter.writeHTML(author, changesByAuthor.get(author), changesToRunByAuthor.get(author), rootChangeLog);
+            authorWriter.writeHTML(author, changesByAuthor.get(author), changesToRunByAuthor.get(author), rootChangeLogName);
         }
 
         for (Table table : snapshot.getTables()) {
-            tableWriter.writeHTML(table, changesByObject.get(table), changesToRunByObject.get(table), rootChangeLog);
+            tableWriter.writeHTML(table, changesByObject.get(table), changesToRunByObject.get(table), rootChangeLogName);
         }
 
         for (Column column : snapshot.getColumns()) {
-            columnWriter.writeHTML(column, changesByObject.get(column), changesToRunByObject.get(column), rootChangeLog);
+            columnWriter.writeHTML(column, changesByObject.get(column), changesToRunByObject.get(column), rootChangeLogName);
         }
 
         for (ChangeLogInfo changeLog : changeLogs) {
             changeLogWriter.writeChangeLog(changeLog.logicalPath, changeLog.physicalPath);
         }
 
-        pendingChangesWriter.writeHTML("index", null, changesToRun, rootChangeLog);
-        pendingSQLWriter.writeHTML("sql", null, changesToRun, rootChangeLog);
+        pendingChangesWriter.writeHTML("index", null, changesToRun, rootChangeLogName);
+        pendingSQLWriter.writeHTML("sql", null, changesToRun, rootChangeLogName);
 
         if (recentChanges.size() > MAX_RECENT_CHANGE) {
             recentChanges = recentChanges.subList(0, MAX_RECENT_CHANGE);
         }
-        recentChangesWriter.writeHTML("index", recentChanges, null, rootChangeLog);
+        recentChangesWriter.writeHTML("index", recentChanges, null, rootChangeLogName);
 
     }
 
