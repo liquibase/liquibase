@@ -5,6 +5,8 @@ import liquibase.change.Change;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.database.Database;
+import liquibase.exception.DatabaseException;
+import liquibase.exception.DatabaseHistoryException;
 import liquibase.exception.MigrationFailedException;
 
 import java.io.File;
@@ -14,8 +16,11 @@ import java.util.List;
 
 public class PendingSQLWriter extends HTMLWriter {
 
-    public PendingSQLWriter(File rootOutputDir, Database database) {
+    private DatabaseChangeLog databaseChangeLog;
+
+    public PendingSQLWriter(File rootOutputDir, Database database, DatabaseChangeLog databaseChangeLog) {
         super(new File(rootOutputDir, "pending"), database);
+        this.databaseChangeLog = databaseChangeLog;
     }
 
     @Override
@@ -23,7 +28,8 @@ public class PendingSQLWriter extends HTMLWriter {
         return "Pending SQL";
     }
 
-    protected void writeBody(FileWriter fileWriter, Object object, List<Change> ranChanges, List<Change> changesToRun, DatabaseChangeLog databaseChangeLog, Liquibase liquibase) throws IOException{
+    @Override
+    protected void writeBody(FileWriter fileWriter, Object object, List<Change> ranChanges, List<Change> changesToRun) throws IOException, DatabaseHistoryException, DatabaseException {
         if (changesToRun.size() == 0) {
             fileWriter.append("<b>NONE</b>");
         }
@@ -41,7 +47,7 @@ public class PendingSQLWriter extends HTMLWriter {
             String anchor = thisChangeSet.toString(false).replaceAll("\\W","_");
             fileWriter.append("<a name='").append(anchor).append("'/>");
             try {
-                thisChangeSet.execute(databaseChangeLog, liquibase.getDatabase());
+                thisChangeSet.execute(databaseChangeLog, this.database);
             } catch (MigrationFailedException e) {
                 fileWriter.append("EXECUTION ERROR: ").append(change.getChangeMetaData().getDescription()).append(": ").append(e.getMessage()).append("\n\n");
             }
