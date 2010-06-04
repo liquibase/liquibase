@@ -11,14 +11,7 @@ import liquibase.statement.core.UpdateStatement;
 
 import java.util.Date;
 
-public class UpdateGenerator implements SqlGenerator<UpdateStatement> {
-    public int getPriority() {
-        return PRIORITY_DEFAULT;
-    }
-
-    public boolean supports(UpdateStatement statement, Database database) {
-        return true;
-    }
+public class UpdateGenerator extends AbstractSqlGenerator<UpdateStatement> {
 
     public ValidationErrors validate(UpdateStatement updateStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();

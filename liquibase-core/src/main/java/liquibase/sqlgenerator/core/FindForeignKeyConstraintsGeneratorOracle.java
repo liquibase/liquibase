@@ -11,11 +11,13 @@ import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.FindForeignKeyConstraintsStatement;
 
-public class FindForeignKeyConstraintsGeneratorOracle implements SqlGenerator<FindForeignKeyConstraintsStatement> {
+public class FindForeignKeyConstraintsGeneratorOracle extends AbstractSqlGenerator<FindForeignKeyConstraintsStatement> {
+    @Override
     public int getPriority() {
         return PRIORITY_DATABASE;
     }
 
+    @Override
     public boolean supports(FindForeignKeyConstraintsStatement statement, Database database) {
         return database instanceof OracleDatabase;
     }

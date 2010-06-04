@@ -9,11 +9,9 @@ import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.DropUniqueConstraintStatement;
 
-public class DropUniqueConstraintGenerator implements SqlGenerator<DropUniqueConstraintStatement> {
-    public int getPriority() {
-        return PRIORITY_DEFAULT;
-    }
+public class DropUniqueConstraintGenerator extends AbstractSqlGenerator<DropUniqueConstraintStatement> {
 
+    @Override
     public boolean supports(DropUniqueConstraintStatement statement, Database database) {
         return !(database instanceof SQLiteDatabase);
     }

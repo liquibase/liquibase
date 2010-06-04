@@ -12,7 +12,7 @@ import liquibase.sql.UnparsedSql;
 
 import java.util.Date;
 
-public abstract class InsertOrUpdateGenerator implements SqlGenerator<InsertOrUpdateStatement> {
+public abstract class InsertOrUpdateGenerator extends AbstractSqlGenerator<InsertOrUpdateStatement> {
 
     protected abstract String getRecordCheck(InsertOrUpdateStatement insertOrUpdateStatement, Database database, String whereClause);
 
@@ -22,6 +22,7 @@ public abstract class InsertOrUpdateGenerator implements SqlGenerator<InsertOrUp
         return "";
     }
 
+    @Override
     public int getPriority() {
         return PRIORITY_DATABASE;
     }

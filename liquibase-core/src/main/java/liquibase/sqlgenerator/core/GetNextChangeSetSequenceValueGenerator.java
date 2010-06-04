@@ -9,14 +9,7 @@ import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.core.GetNextChangeSetSequenceValueStatement;
 import liquibase.statement.core.SelectFromDatabaseChangeLogStatement;
 
-public class GetNextChangeSetSequenceValueGenerator implements SqlGenerator<GetNextChangeSetSequenceValueStatement> {
-    public int getPriority() {
-        return PRIORITY_DEFAULT;
-    }
-
-    public boolean supports(GetNextChangeSetSequenceValueStatement statement, Database database) {
-        return true;
-    }
+public class GetNextChangeSetSequenceValueGenerator extends AbstractSqlGenerator<GetNextChangeSetSequenceValueStatement> {
 
     public ValidationErrors validate(GetNextChangeSetSequenceValueStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         return new ValidationErrors();

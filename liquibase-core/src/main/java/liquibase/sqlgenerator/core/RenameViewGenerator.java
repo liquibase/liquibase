@@ -9,11 +9,9 @@ import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.RenameViewStatement;
 
-public class RenameViewGenerator implements SqlGenerator<RenameViewStatement> {
-    public int getPriority() {
-        return PRIORITY_DEFAULT;
-    }
+public class RenameViewGenerator extends AbstractSqlGenerator<RenameViewStatement> {
 
+    @Override
     public boolean supports(RenameViewStatement statement, Database database) {
         return !(database instanceof DerbyDatabase
                 || database instanceof HsqlDatabase

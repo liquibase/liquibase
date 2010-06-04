@@ -15,12 +15,14 @@ import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.AddAutoIncrementStatement;
 
-public class AddAutoIncrementGenerator implements SqlGenerator<AddAutoIncrementStatement> {
+public class AddAutoIncrementGenerator extends AbstractSqlGenerator<AddAutoIncrementStatement> {
 
+    @Override
     public int getPriority() {
         return PRIORITY_DEFAULT;
     }
 
+    @Override
     public boolean supports(AddAutoIncrementStatement statement, Database database) {
         return (database.supportsAutoIncrement()
                 && !(database instanceof DerbyDatabase)

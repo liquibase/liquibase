@@ -16,14 +16,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class CreateDatabaseChangeLogLockTableGenerator implements SqlGenerator<CreateDatabaseChangeLogLockTableStatement> {
-    public int getPriority() {
-        return PRIORITY_DEFAULT;
-    }
-
-    public boolean supports(CreateDatabaseChangeLogLockTableStatement statement, Database database) {
-        return true;
-    }
+public class CreateDatabaseChangeLogLockTableGenerator extends AbstractSqlGenerator<CreateDatabaseChangeLogLockTableStatement> {
 
     public ValidationErrors validate(CreateDatabaseChangeLogLockTableStatement createDatabaseChangeLogLockTableStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         return new ValidationErrors();

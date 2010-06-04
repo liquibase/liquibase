@@ -131,6 +131,10 @@ public class SqlGeneratorFactoryTest {
                 return level;
             }
 
+            public boolean requiresUpdatedDatabaseMetadata(Database database) {
+                return false;
+            }
+
             public ValidationErrors validate(SqlStatement sqlStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
                 return new ValidationErrors();
             }

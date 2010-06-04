@@ -9,11 +9,9 @@ import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.AlterSequenceStatement;
 
-public class AlterSequenceGenerator implements SqlGenerator<AlterSequenceStatement> {
-    public int getPriority() {
-        return PRIORITY_DEFAULT;
-    }
+public class AlterSequenceGenerator extends AbstractSqlGenerator<AlterSequenceStatement> {
 
+    @Override
     public boolean supports(AlterSequenceStatement statement, Database database) {
         return database.supportsSequences();
     }

@@ -14,11 +14,9 @@ import liquibase.statement.UniqueConstraint;
 import liquibase.statement.core.CreateDatabaseChangeLogTableStatement;
 import liquibase.statement.core.CreateTableStatement;
 
-public class CreateDatabaseChangeLogTableGenerator implements SqlGenerator<CreateDatabaseChangeLogTableStatement> {
-    public int getPriority() {
-        return PRIORITY_DEFAULT;
-    }
+public class CreateDatabaseChangeLogTableGenerator extends AbstractSqlGenerator<CreateDatabaseChangeLogTableStatement> {
 
+    @Override
     public boolean supports(CreateDatabaseChangeLogTableStatement statement, Database database) {
         return (!(database instanceof SybaseDatabase));
     }

@@ -16,14 +16,7 @@ import liquibase.util.StringUtils;
 
 import java.util.Iterator;
 
-public class CreateTableGenerator implements SqlGenerator<CreateTableStatement> {
-    public int getPriority() {
-        return PRIORITY_DEFAULT;
-    }
-
-    public boolean supports(CreateTableStatement statement, Database database) {
-        return true;
-    }
+public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatement> {
 
     public ValidationErrors validate(CreateTableStatement createTableStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();

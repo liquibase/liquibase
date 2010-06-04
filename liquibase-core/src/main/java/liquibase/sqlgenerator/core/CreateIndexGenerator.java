@@ -15,14 +15,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-public class CreateIndexGenerator implements SqlGenerator<CreateIndexStatement> {
-    public int getPriority() {
-        return PRIORITY_DEFAULT;
-    }
-
-    public boolean supports(CreateIndexStatement statement, Database database) {
-        return true;
-    }
+public class CreateIndexGenerator extends AbstractSqlGenerator<CreateIndexStatement> {
 
     public ValidationErrors validate(CreateIndexStatement createIndexStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();

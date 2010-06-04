@@ -12,11 +12,13 @@ import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.SelectSequencesStatement;
 
-public class SelectSequencesGeneratorHsql implements SqlGenerator<SelectSequencesStatement> {
+public class SelectSequencesGeneratorHsql extends AbstractSqlGenerator<SelectSequencesStatement> {
+    @Override
     public int getPriority() {
         return PRIORITY_DATABASE;
     }
 
+    @Override
     public boolean supports(SelectSequencesStatement statement, Database database) {
         return database instanceof HsqlDatabase;
     }

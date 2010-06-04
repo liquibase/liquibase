@@ -17,14 +17,7 @@ import liquibase.statement.core.UpdateStatement;
 import liquibase.util.LiquibaseUtil;
 import liquibase.util.StringUtils;
 
-public class MarkChangeSetRanGenerator implements SqlGenerator<MarkChangeSetRanStatement> {
-    public int getPriority() {
-        return PRIORITY_DEFAULT;
-    }
-
-    public boolean supports(MarkChangeSetRanStatement statement, Database database) {
-        return true;
-    }
+public class MarkChangeSetRanGenerator extends AbstractSqlGenerator<MarkChangeSetRanStatement> {
 
     public ValidationErrors validate(MarkChangeSetRanStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();

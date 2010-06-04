@@ -9,6 +9,7 @@ import liquibase.statement.SqlStatement;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
 import java.util.*;
 
 /**
@@ -81,17 +82,15 @@ public class SqlGeneratorFactory {
 
         for (SqlGenerator generator : getGenerators()) {
             Class clazz = generator.getClass();
+            Type classType = null;
             while (clazz != null) {
+                if (classType instanceof ParameterizedType) {
+                    checkType(classType, statement, generator, database, validGenerators);
+                }
+
                 for (Type type : clazz.getGenericInterfaces()) {
                     if (type instanceof ParameterizedType) {
-                            for (Type typeClass : ((ParameterizedType) type).getActualTypeArguments()) {
-                                if (((Class) typeClass).isAssignableFrom(statement.getClass())) {
-                                    //noinspection unchecked
-                                    if (generator.supports(statement, database)) {
-                                        validGenerators.add(generator);
-                                    }
-                                }
-                            }
+                        checkType(type, statement, generator, database, validGenerators);
                     } else if (type.equals(SqlGenerator.class)) {
                         //noinspection unchecked
                         if (generator.supports(statement, database)) {
@@ -99,10 +98,25 @@ public class SqlGeneratorFactory {
                         }
                     }
                 }
+                classType = clazz.getGenericSuperclass();
                 clazz = clazz.getSuperclass();
             }
         }
         return validGenerators;
+    }
+
+    private void checkType(Type type, SqlStatement statement, SqlGenerator generator, Database database, SortedSet<SqlGenerator> validGenerators) {
+        for (Type typeClass : ((ParameterizedType) type).getActualTypeArguments()) {
+            if (typeClass instanceof TypeVariable) {
+                typeClass = ((TypeVariable) typeClass).getBounds()[0];
+            }
+            if (((Class) typeClass).equals(statement.getClass())) {
+                if (generator.supports(statement, database)) {
+                    validGenerators.add(generator);
+                }
+            }
+        }
+
     }
 
     private SqlGeneratorChain createGeneratorChain(SqlStatement statement, Database database) {
@@ -120,6 +134,15 @@ public class SqlGeneratorFactory {
             throw new IllegalStateException("Cannot find generators for database " + database.getClass() + ", statement: " + statement);
         }
         return generatorChain.generateSql(statement, database);
+    }
+
+    public boolean requiresCurrentDatabaseMetadata(SqlStatement statement, Database database) {
+        for (SqlGenerator generator : getGenerators(statement, database)) {
+            if (generator.requiresUpdatedDatabaseMetadata(database)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public boolean supports(SqlStatement statement, Database database) {

@@ -12,15 +12,7 @@ import liquibase.statement.SqlStatement;
 import liquibase.statement.core.UpdateChangeSetChecksumStatement;
 import liquibase.statement.core.UpdateStatement;
 
-public class UpdateChangeSetChecksumGenerator implements SqlGenerator<UpdateChangeSetChecksumStatement> {
-    public int getPriority() {
-        return PRIORITY_DEFAULT;
-    }
-
-    public boolean supports(UpdateChangeSetChecksumStatement statement, Database database) {
-        return true;
-    }
-
+public class UpdateChangeSetChecksumGenerator extends AbstractSqlGenerator<UpdateChangeSetChecksumStatement> {
     public ValidationErrors validate(UpdateChangeSetChecksumStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("changeSet", statement.getChangeSet());

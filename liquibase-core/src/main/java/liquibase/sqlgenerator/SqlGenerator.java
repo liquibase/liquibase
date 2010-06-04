@@ -50,6 +50,11 @@ public interface SqlGenerator<StatementType extends SqlStatement> extends Priori
     public boolean supports(StatementType statement, Database database);
 
     /**
+     * Does this change require access to the database metadata?  If true, the change cannot be used in an updateSql-style command.
+     */
+    public boolean requiresUpdatedDatabaseMetadata(Database database);
+
+    /**
      * Validate the data contained in the SqlStatement.  If there are no errors, return an empty ValidationErrors object, not a null value.
      * LiquiBase will inspect the ValidationErrors result before attempting to call generateSql.
      */

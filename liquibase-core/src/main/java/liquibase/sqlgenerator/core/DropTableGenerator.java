@@ -10,14 +10,7 @@ import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.DropTableStatement;
 
-public class DropTableGenerator implements SqlGenerator<DropTableStatement> {
-    public int getPriority() {
-        return PRIORITY_DEFAULT;
-    }
-
-    public boolean supports(DropTableStatement statement, Database database) {
-        return true;
-    }
+public class DropTableGenerator extends AbstractSqlGenerator<DropTableStatement> {
 
     public ValidationErrors validate(DropTableStatement dropTableStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();

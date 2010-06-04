@@ -6,17 +6,20 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
+import liquibase.sqlgenerator.core.AbstractSqlGenerator;
 import liquibase.statement.core.UpdateStatement;
 
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class SampleUpdateGenerator implements SqlGenerator<UpdateStatement> {
+public class SampleUpdateGenerator extends AbstractSqlGenerator<UpdateStatement> {
+    @Override
     public int getPriority() {
         return 15;
     }
 
+    @Override
     public boolean supports(UpdateStatement statement, Database database) {
         return false; //normally would want true, but we don't want to have this called in all our tests
     }

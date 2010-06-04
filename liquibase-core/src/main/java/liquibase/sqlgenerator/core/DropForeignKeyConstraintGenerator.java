@@ -12,11 +12,9 @@ import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.DropForeignKeyConstraintStatement;
 
-public class DropForeignKeyConstraintGenerator implements SqlGenerator<DropForeignKeyConstraintStatement> {
-    public int getPriority() {
-        return PRIORITY_DEFAULT;
-    }
+public class DropForeignKeyConstraintGenerator extends AbstractSqlGenerator<DropForeignKeyConstraintStatement> {
 
+    @Override
     public boolean supports(DropForeignKeyConstraintStatement statement, Database database) {
         return (!(database instanceof SQLiteDatabase));
     }

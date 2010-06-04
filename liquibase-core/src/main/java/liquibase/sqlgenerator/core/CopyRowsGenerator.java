@@ -10,11 +10,9 @@ import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.CopyRowsStatement;
 
-public class CopyRowsGenerator implements SqlGenerator<CopyRowsStatement> {
-    public int getPriority() {
-        return PRIORITY_DEFAULT;
-    }
+public class CopyRowsGenerator extends AbstractSqlGenerator<CopyRowsStatement> {
 
+    @Override
     public boolean supports(CopyRowsStatement statement, Database database) {
         return (database instanceof SQLiteDatabase);
     }

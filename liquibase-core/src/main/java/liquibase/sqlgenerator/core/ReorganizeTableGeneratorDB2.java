@@ -10,11 +10,13 @@ import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.ReorganizeTableStatement;
 
-public class ReorganizeTableGeneratorDB2 implements SqlGenerator<ReorganizeTableStatement> {
+public class ReorganizeTableGeneratorDB2 extends AbstractSqlGenerator<ReorganizeTableStatement> {
+    @Override
     public int getPriority() {
         return PRIORITY_DATABASE;
     }
 
+    @Override
     public boolean supports(ReorganizeTableStatement statement, Database database) {
         return database instanceof DB2Database;
     }

@@ -12,11 +12,9 @@ import liquibase.statement.core.DeleteStatement;
 
 import java.util.Date;
 
-public class DeleteGenerator implements SqlGenerator<DeleteStatement> {
-    public int getPriority() {
-        return PRIORITY_DEFAULT;
-    }
+public class DeleteGenerator extends AbstractSqlGenerator<DeleteStatement> {
 
+    @Override
     public boolean supports(DeleteStatement statement, Database database) {
         return !(database instanceof SQLiteDatabase);
     }

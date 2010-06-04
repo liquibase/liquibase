@@ -8,14 +8,7 @@ import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.StoredProcedureStatement;
 
-public class StoredProcedureGenerator implements SqlGenerator<StoredProcedureStatement> {
-    public int getPriority() {
-        return PRIORITY_DEFAULT;
-    }
-
-    public boolean supports(StoredProcedureStatement statement, Database database) {
-        return true;
-    }
+public class StoredProcedureGenerator extends AbstractSqlGenerator<StoredProcedureStatement> {
 
     public ValidationErrors validate(StoredProcedureStatement storedProcedureStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();

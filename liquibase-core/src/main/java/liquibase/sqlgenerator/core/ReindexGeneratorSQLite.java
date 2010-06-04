@@ -9,11 +9,13 @@ import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.ReindexStatement;
 
-public class ReindexGeneratorSQLite implements SqlGenerator<ReindexStatement> {
+public class ReindexGeneratorSQLite extends AbstractSqlGenerator<ReindexStatement> {
+    @Override
     public int getPriority() {
         return PRIORITY_DATABASE;
     }
 
+    @Override
     public boolean supports(ReindexStatement statement, Database database) {
         return (database instanceof SQLiteDatabase);
     }

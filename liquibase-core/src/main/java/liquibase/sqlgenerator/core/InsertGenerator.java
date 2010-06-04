@@ -11,14 +11,7 @@ import liquibase.statement.core.InsertStatement;
 
 import java.util.Date;
 
-public class InsertGenerator implements SqlGenerator<InsertStatement> {
-    public int getPriority() {
-        return PRIORITY_DEFAULT;
-    }
-
-    public boolean supports(InsertStatement statement, Database database) {
-        return true;
-    }
+public class InsertGenerator extends AbstractSqlGenerator<InsertStatement> {
 
     public ValidationErrors validate(InsertStatement insertStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();

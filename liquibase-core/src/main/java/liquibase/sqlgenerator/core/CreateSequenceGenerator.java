@@ -9,11 +9,9 @@ import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.CreateSequenceStatement;
 
-public class CreateSequenceGenerator implements SqlGenerator<CreateSequenceStatement> {
-    public int getPriority() {
-        return PRIORITY_DEFAULT;
-    }
+public class CreateSequenceGenerator extends AbstractSqlGenerator<CreateSequenceStatement> {
 
+    @Override
     public boolean supports(CreateSequenceStatement statement, Database database) {
         return database.supportsSequences();
     }

@@ -7,14 +7,7 @@ import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.RuntimeStatement;
 
-public class RuntimeGenerator implements SqlGenerator<RuntimeStatement> {
-    public int getPriority() {
-        return PRIORITY_DEFAULT;
-    }
-
-    public boolean supports(RuntimeStatement statement, Database database) {
-        return true;
-    }
+public class RuntimeGenerator extends AbstractSqlGenerator<RuntimeStatement> {
 
     public ValidationErrors validate(RuntimeStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         return new ValidationErrors();

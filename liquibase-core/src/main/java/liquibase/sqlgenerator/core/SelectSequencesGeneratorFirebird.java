@@ -9,11 +9,13 @@ import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.SelectSequencesStatement;
 
-public class SelectSequencesGeneratorFirebird implements SqlGenerator<SelectSequencesStatement> {
+public class SelectSequencesGeneratorFirebird extends AbstractSqlGenerator<SelectSequencesStatement> {
+    @Override
     public int getPriority() {
         return PRIORITY_DATABASE;
     }
 
+    @Override
     public boolean supports(SelectSequencesStatement statement, Database database) {
         return database instanceof FirebirdDatabase;
     }

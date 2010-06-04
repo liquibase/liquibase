@@ -24,15 +24,7 @@ import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class AddColumnGenerator implements SqlGenerator<AddColumnStatement> {
-
-    public int getPriority() {
-        return PRIORITY_DEFAULT;
-    }
-
-    public boolean supports(AddColumnStatement statement, Database database) {
-        return true;
-    }
+public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement> {
 
     public ValidationErrors validate(AddColumnStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();

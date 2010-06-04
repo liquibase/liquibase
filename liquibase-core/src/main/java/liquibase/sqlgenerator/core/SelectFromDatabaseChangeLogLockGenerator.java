@@ -10,14 +10,7 @@ import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.SelectFromDatabaseChangeLogLockStatement;
 import liquibase.util.StringUtils;
 
-public class SelectFromDatabaseChangeLogLockGenerator implements SqlGenerator<SelectFromDatabaseChangeLogLockStatement> {
-    public int getPriority() {
-        return PRIORITY_DEFAULT;
-    }
-
-    public boolean supports(SelectFromDatabaseChangeLogLockStatement statement, Database database) {
-        return true;
-    }
+public class SelectFromDatabaseChangeLogLockGenerator extends AbstractSqlGenerator<SelectFromDatabaseChangeLogLockStatement> {
 
     public ValidationErrors validate(SelectFromDatabaseChangeLogLockStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors errors = new ValidationErrors();

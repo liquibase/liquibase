@@ -10,11 +10,9 @@ import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.AddUniqueConstraintStatement;
 import liquibase.util.StringUtils;
 
-public class AddUniqueConstraintGenerator implements SqlGenerator<AddUniqueConstraintStatement> {
-    public int getPriority() {
-        return PRIORITY_DEFAULT;
-    }
+public class AddUniqueConstraintGenerator extends AbstractSqlGenerator<AddUniqueConstraintStatement> {
 
+    @Override
     public boolean supports(AddUniqueConstraintStatement statement, Database database) {
         return !(database instanceof SQLiteDatabase)
         		&& !(database instanceof MSSQLDatabase)
