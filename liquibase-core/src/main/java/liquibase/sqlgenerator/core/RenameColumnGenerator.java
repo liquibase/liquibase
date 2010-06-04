@@ -47,6 +47,8 @@ public class RenameColumnGenerator extends AbstractSqlGenerator<RenameColumnStat
                 || (database instanceof DerbyDatabase)
                 || (database instanceof InformixDatabase)) {
           sql = "RENAME COLUMN " + database.escapeTableName(statement.getSchemaName(), statement.getTableName()) + "." + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(), statement.getOldColumnName()) + " TO " + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(), statement.getNewColumnName());
+        } else if (database instanceof SybaseASADatabase) {
+            sql = "ALTER TABLE " + database.escapeTableName(statement.getSchemaName(), statement.getTableName()) + " RENAME " + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(), statement.getOldColumnName()) + " TO " + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(), statement.getNewColumnName());
         } else {
             sql = "ALTER TABLE " + database.escapeTableName(statement.getSchemaName(), statement.getTableName()) + " RENAME COLUMN " + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(), statement.getOldColumnName()) + " TO " + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(), statement.getNewColumnName());
         }
