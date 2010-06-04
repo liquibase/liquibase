@@ -12,12 +12,31 @@ import liquibase.Liquibase;
  */
 public class LiquibaseUpdate extends AbstractLiquibaseUpdateMojo {
 
+    /**
+     * Whether or not to perform a drop on the database before executing the change.
+     * @parameter expression="${liquibase.dropFirst}" default-value="false"
+     */
+    protected boolean dropFirst;
+
+    private boolean dropFirstDefault = false;
+
   @Override
   protected void doUpdate(Liquibase liquibase) throws LiquibaseException {
+      if (dropFirst) {
+        liquibase.dropAll();
+      }
+
     if (changesToApply > 0) {
       liquibase.update(changesToApply, contexts);
     } else {
       liquibase.update(contexts);
     }
   }
+
+    @Override
+    protected void printSettings(String indent) {
+        super.printSettings(indent);
+        getLog().info(indent + "drop first? " + dropFirst);
+
+    }
 }

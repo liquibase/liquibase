@@ -27,13 +27,6 @@ public abstract class AbstractLiquibaseChangeLogMojo extends AbstractLiquibaseMo
    */
   protected String changeLogFile;
 
-  /**
-   * Whether or not to perform a drop on the database before executing the change.
-   * @parameter expression="${liquibase.dropFirst}" default-value="false"
-   */
-  protected boolean dropFirst;
-
-  private boolean dropFirstDefault = false;
 
   /**
    * The Liquibase contexts to execute, which can be "," separated if multiple contexts
@@ -61,16 +54,12 @@ public abstract class AbstractLiquibaseChangeLogMojo extends AbstractLiquibaseMo
    */
   @Override
   protected void performLiquibaseTask(Liquibase liquibase) throws LiquibaseException {
-    if (dropFirst) {
-      liquibase.dropAll();
-    }
   }
 
   @Override
   protected void printSettings(String indent) {
     super.printSettings(indent);
     getLog().info(indent + "changeLogFile: " + changeLogFile);
-    getLog().info(indent + "drop first? " + dropFirst);
     getLog().info(indent + "context(s): " + contexts);
   }
 
