@@ -20,24 +20,25 @@ public class DatabaseTestContext {
     private Set<Database> allDatabases;
     private Set<DatabaseConnection> availableConnections;
 
-    private final String[] DEFAULT_TEST_URLS = new String[]{
-            "jdbc:Cache://localhost:1972/liquibase",
-            "jdbc:db2://127.0.0.1:50000/liquibas",
-            "jdbc:derby:liquibase;create=true",
-            "jdbc:firebirdsql:localhost/3050:c:\\firebird\\liquibase.fdb",
-            "jdbc:h2:mem:liquibase",
-            "jdbc:hsqldb:mem:liquibase",
-            "jdbc:jtds:sqlserver://localhost;databaseName=liquibase",
+    private final DatabaseTestURL[] DEFAULT_TEST_DATABASES = new DatabaseTestURL[]{
+            new DatabaseTestURL("Cache","jdbc:Cache://localhost:1972/liquibase"),
+            new DatabaseTestURL("DB2","jdbc:db2://127.0.0.1:50000/liquibas"),
+            new DatabaseTestURL("Derby","jdbc:derby:liquibase;create=true"),
+            new DatabaseTestURL("FireBird","jdbc:firebirdsql:localhost/3050:c:\\firebird\\liquibase.fdb"),
+            new DatabaseTestURL("H2","jdbc:h2:mem:liquibase"),
+            new DatabaseTestURL("Hsql","jdbc:hsqldb:mem:liquibase"),
+            new DatabaseTestURL("MssqlJtds","jdbc:jtds:sqlserver://localhost;databaseName=liquibase"),
 //            "jdbc:sqlserver://localhost;databaseName=liquibase",
-            "jdbc:mysql://localhost/liquibase",
-            "jdbc:oracle:thin:@localhost/XE",
-            "jdbc:127.0.0.1://localhost/liquibase",
+            new DatabaseTestURL("MySQL","jdbc:mysql://localhost/liquibase"),
+            new DatabaseTestURL("Oracle","jdbc:oracle:thin:@localhost/XE"),
+            new DatabaseTestURL("","jdbc:127.0.0.1://localhost/liquibase"),
 //            "jdbc:jtds:sybase://localhost/nathan:5000",
 //            "jdbc:sybase:Tds:"+ InetAddress.getLocalHost().getHostName()+":5000/liquibase",
-            "jdbc:sapdb://localhost/liquibas",
-            "jdbc:sqlite:/liquibase.db",
-            "jdbc:sybase:Tds:localhost:9810/servicename=prior",
+            new DatabaseTestURL("SAPDB","jdbc:sapdb://localhost/liquibas"),
+            new DatabaseTestURL("SQLite","jdbc:sqlite:/liquibase.db"),
+            new DatabaseTestURL("SybaseJtds","jdbc:sybase:Tds:localhost:9810/servicename=prior")
     };
+
 
     private Map<String, DatabaseConnection> connectionsByUrl = new HashMap<String, DatabaseConnection>();
     private Map<String, Boolean> connectionsAttempted = new HashMap<String, Boolean>();
@@ -185,8 +186,8 @@ public class DatabaseTestContext {
     }
 
 
-    public String[] getTestUrls() {
-        return DEFAULT_TEST_URLS;
+    public DatabaseTestURL[] getTestUrls() {
+        return DEFAULT_TEST_DATABASES;
     }
 
     public Set<Database> getAllDatabases() {
@@ -230,11 +231,11 @@ public class DatabaseTestContext {
     public Set<DatabaseConnection> getAvailableConnections() throws Exception {
         if (availableConnections == null) {
             availableConnections = new HashSet<DatabaseConnection>();
-            for (String url : getTestUrls()) {
+            for (DatabaseTestURL url : getTestUrls()) {
 //                if (url.indexOf("jtds") >= 0) {
 //                    continue;
 //                }
-                DatabaseConnection connection = openConnection(url.replaceAll("localhost", AbstractIntegrationTest.getDatabaseServerHostname()));
+                DatabaseConnection connection = openConnection(adaptTestURLWithConfiguredHost(url));
                 if (connection != null) {
                     availableConnections.add(connection);
                 }
@@ -252,12 +253,17 @@ public class DatabaseTestContext {
         return availableConnections;
     }
 
+    protected String adaptTestURLWithConfiguredHost(DatabaseTestURL url) throws Exception {
+        return url.getUrl().replaceAll("localhost", AbstractIntegrationTest.getDatabaseServerHostname(url.getDatabaseManager()));
+    }
+
     public DatabaseConnection getConnection(String url) throws Exception {
         return openConnection(url);
     }
 
-    public String getTestUrl(Database database) {
-        for (String url : getTestUrls()) {
+    public String getTestUrl(Database database) throws Exception {
+        for (DatabaseTestURL turl : getTestUrls()) {
+            String url=adaptTestURLWithConfiguredHost(turl);
             if (database.getDefaultDriver(url) != null) {
                 return url;
             }

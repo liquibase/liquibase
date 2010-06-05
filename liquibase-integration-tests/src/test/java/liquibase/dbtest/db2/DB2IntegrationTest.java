@@ -7,7 +7,7 @@ import java.util.Properties;
 public class DB2IntegrationTest extends AbstractIntegrationTest {
 
     public DB2IntegrationTest() throws Exception {
-        super("db2", "jdbc:db2://"+ getDatabaseServerHostname() +":50000/lqbase");
+        super("db2", "jdbc:db2://"+ getDatabaseServerHostname("DB2") +":50000/lqbase");
     }
 
     @Override

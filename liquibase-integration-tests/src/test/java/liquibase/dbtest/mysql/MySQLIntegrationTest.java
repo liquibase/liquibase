@@ -5,6 +5,6 @@ import liquibase.dbtest.AbstractIntegrationTest;
 public class MySQLIntegrationTest extends AbstractIntegrationTest {
 
     public MySQLIntegrationTest() throws Exception {
-        super("mysql", "jdbc:mysql://"+ getDatabaseServerHostname() +"/liquibase");
+        super("mysql", "jdbc:mysql://"+ getDatabaseServerHostname("MySQL") +"/liquibase");
     }
 }
