@@ -10,18 +10,21 @@
     
     <changeSet id="1" author="nvoxland">
         <createTable tableName="news">
-            <column name="id" type="int" autoIncrement="true">
+            <column name="id" type="int">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
             <column name="title" type="varchar(50)"/>            
         </createTable>
     </changeSet>
 
+
     <changeSet id="2" author="nvoxland" context="test">
         <insert tableName="news">
+            <column name="id" value="1"/>
             <column name="title" value="Liquibase 0.8 Released"/>
         </insert>
         <insert tableName="news">
+            <column name="id" value="2"/>
             <column name="title" value="Liquibase 0.9 Released"/>
         </insert>
     </changeSet>

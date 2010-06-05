@@ -1,10 +1,8 @@
 package liquibase.dbtest.mssql;
 
-import liquibase.dbtest.AbstractIntegrationTest;
-
-public class MssqlJtdsIntegrationTest extends AbstractIntegrationTest {
+public class MssqlJtdsIntegrationTest extends AbstractMssqlIntegrationTest {
 
     public MssqlJtdsIntegrationTest() throws Exception {
-        super("mssql", "jdbc:jtds:sqlserver://"+ getDatabaseServerHostname() +";databaseName=liquibase");
+        super("Mssql", "jdbc:jtds:sqlserver://"+ getDatabaseServerHostname("mssqlJtds") +";databaseName=liquibase");
     }
 }

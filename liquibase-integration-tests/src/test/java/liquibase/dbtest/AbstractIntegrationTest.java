@@ -808,7 +808,7 @@ public abstract class AbstractIntegrationTest {
 //       liquibase.update(contexts);
 //   }
 
-    public static String getDatabaseServerHostname() throws Exception {
+    public static String getDatabaseServerHostname(String databaseManager) throws Exception {
         Properties integrationTestProperties;
         integrationTestProperties = new Properties();
         integrationTestProperties.load(Thread.currentThread().getContextClassLoader().getResourceAsStream("liquibase/liquibase.integrationtest.properties"));
@@ -816,7 +816,10 @@ public abstract class AbstractIntegrationTest {
         if(localProperties!=null)
             integrationTestProperties.load(localProperties);
 
-        return integrationTestProperties.getProperty("integration.test.hostname");
+        String host=integrationTestProperties.getProperty("integration.test."+databaseManager+".hostname");
+        if(host==null)
+            host=integrationTestProperties.getProperty("integration.test.hostname");
+        return host;
     }
 
     protected Database getDatabase(){

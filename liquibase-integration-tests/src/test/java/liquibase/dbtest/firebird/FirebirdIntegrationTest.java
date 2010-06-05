@@ -14,7 +14,7 @@ import liquibase.exception.DatabaseException;
 public class FirebirdIntegrationTest extends AbstractIntegrationTest {
 
     public FirebirdIntegrationTest() throws Exception {
-        super("firebird", "jdbc:firebirdsql:"+ getDatabaseServerHostname() +"/3050:c:\\firebird\\liquibase.fdb");
+        super("firebird", "jdbc:firebirdsql:"+ getDatabaseServerHostname("Firebird") +"/3050:c:\\firebird\\liquibase.fdb");
     }
 
     @Override

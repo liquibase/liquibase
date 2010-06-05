@@ -13,7 +13,7 @@ import liquibase.dbtest.AbstractIntegrationTest;
 public class MaxDbIntegrationTest extends AbstractIntegrationTest {
 
   public MaxDbIntegrationTest() throws Exception {
-      super("maxdb", "jdbc:sapdb://"+ getDatabaseServerHostname() +"/liquibas");
+      super("maxdb", "jdbc:sapdb://"+ getDatabaseServerHostname("MaxDB") +"/liquibas");
   }
 
 }

@@ -6,7 +6,7 @@ import org.junit.Test;
 public class InformixIntegrationTest extends AbstractIntegrationTest {
 
     public InformixIntegrationTest() throws Exception {
-        super("informix", "jdbc:informix-sqli://"+ getDatabaseServerHostname() +":9088/liquibase:informixserver=ol_ids_1150_1");
+        super("informix", "jdbc:informix-sqli://"+ getDatabaseServerHostname("Informix") +":9088/liquibase:informixserver=ol_ids_1150_1");
     }
 
     @Test
