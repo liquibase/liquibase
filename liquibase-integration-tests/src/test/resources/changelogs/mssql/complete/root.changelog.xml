@@ -312,4 +312,16 @@
         <sqlFile path="changelogs/mssql/complete/person_view.sql"/>
     </changeSet>
 
+    <changeSet author="lujop" id="nvarcharDefaultValue">
+        <createTable tableName="TestChange2">
+            <column name="id" type="java.sql.Types.BIGINT" defaultValue="NULL"/>
+            <column defaultValue="" name="name" type="nvarchar(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column defaultValue="" name="name2" type="nchar(32)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
 </databaseChangeLog>
