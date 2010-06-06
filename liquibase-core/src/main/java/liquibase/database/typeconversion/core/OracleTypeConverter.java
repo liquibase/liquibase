@@ -27,7 +27,7 @@ public class OracleTypeConverter extends AbstractTypeConverter {
 		DataType returnTypeName = super.getDataType(columnTypeString, autoIncrement, dataTypeName, precision);
 		// If we found CustomType (it means - nothing compatible) then search for oracle types
 		if (returnTypeName instanceof CustomType) {
-			if (columnTypeString.startsWith("VARCHAR2")) {
+			if (columnTypeString.toUpperCase().startsWith("VARCHAR2")) {
 				// Varchar2 type pattern: VARCHAR2(50 BYTE) | VARCHAR2(50 CHAR)
 				returnTypeName = getVarcharType();
 				if (precision != null) {

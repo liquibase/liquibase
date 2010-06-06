@@ -217,7 +217,12 @@ public abstract class AbstractTypeConverter implements TypeConverter {
         if (returnTypeName == null) {
             throw new UnexpectedLiquibaseException("Could not determine " + dataTypeName + " for " + this.getClass().getName());
         }
+        addPrecisionToType(precision, returnTypeName);
 
+         return returnTypeName;
+    }
+
+    protected void addPrecisionToType(String precision, DataType returnTypeName) throws NumberFormatException {
         if (precision != null) {
             String[] params = precision.split(",");
             returnTypeName.setFirstParameter(Integer.parseInt(params[0].trim()));
@@ -225,8 +230,6 @@ public abstract class AbstractTypeConverter implements TypeConverter {
                 returnTypeName.setSecondParameter(Integer.parseInt(params[1].trim()));
             }
         }
-
-         return returnTypeName;
     }
 
 	// Get the type from the Connection MetaData (use the MetaData to translate from java.sql.Types to DB-specific type)

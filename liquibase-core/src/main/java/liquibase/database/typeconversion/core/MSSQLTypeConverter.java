@@ -46,6 +46,32 @@ public class MSSQLTypeConverter extends AbstractTypeConverter {
         return type;
     }
 
+    /**
+     * Extension of super.getDataType(String columnTypeString, Boolean autoIncrement, String dataTypeName, String precision)<br>
+     * Contains definition of Oracle's data-types
+     * */
+    @Override
+    protected DataType getDataType(String columnTypeString, Boolean autoIncrement, String dataTypeName, String precision) {
+        // Try to define data type by searching of common standard types
+        DataType returnTypeName = super.getDataType(columnTypeString, autoIncrement, dataTypeName, precision);
+        // If we found CustomType (it means - nothing compatible) then search for oracle types
+        if (returnTypeName instanceof CustomType) {
+            boolean returnTypeChanged=false;
+            if (columnTypeString.toUpperCase().startsWith("NVARCHAR")) {
+                returnTypeName = new VarcharType("NVARCHAR");
+                returnTypeChanged=true;
+            } else if(columnTypeString.toUpperCase().startsWith("NCHAR")) {
+                returnTypeName= new CharType("NCHAR");
+                returnTypeChanged=true;
+            }
+
+            if(returnTypeChanged)
+                addPrecisionToType(precision, returnTypeName);
+        }
+        
+        return returnTypeName;
+    }
+
     @Override
     public DateType getDateType() {
         return new DateType("SMALLDATETIME");
