@@ -1,31 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
-	<parent>
-		<artifactId>liquibase-all</artifactId>
-		<groupId>org.liquibase</groupId>
-		<version>2.0-rc2-SNAPSHOT</version>
-	</parent>
+    <parent>
+        <artifactId>liquibase-all</artifactId>
+        <groupId>org.liquibase</groupId>
+        <version>2.0-rc2-SNAPSHOT</version>
+    </parent>
 
-	<modelVersion>4.0.0</modelVersion>
-	<artifactId>liquibase</artifactId>
-	<packaging>jar</packaging>
-	<name>LiquiBase Library</name>
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>liquibase</artifactId>
+    <packaging>jar</packaging>
+    <name>LiquiBase Library</name>
 
-	<dependencies>
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.easymock</groupId>
-			<artifactId>easymockclassextension</artifactId>
-			<scope>test</scope>
-		</dependency>
+    <properties>
+        <bundle.namespace>liquibase.*</bundle.namespace>
+    </properties>
 
-                <dependency>
+    <dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.easymock</groupId>
+            <artifactId>easymockclassextension</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
             <groupId>ant</groupId>
             <artifactId>ant</artifactId>
             <scope>provided</scope>
@@ -44,51 +48,127 @@
             <optional>true</optional>
         </dependency>
 
-	</dependencies>
+    </dependencies>
 
-	<build>
-		<resources>
-			<resource>
-				<directory>src/main/resources</directory>
-				<filtering>true</filtering>
-			</resource>
-		</resources>
+    <build>
+        <finalName>liquibase-${version}</finalName>
 
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-jar-plugin</artifactId>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
+
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
                 <configuration>
                     <archive>
                         <manifestFile>src/main/resources/META-INF/MANIFEST.MF</manifestFile>
                     </archive>
                 </configuration>
-				<executions>
-					<execution>
-						<goals>
-							<goal>test-jar</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
+            </plugin>
 
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<configuration>
-					<excludes>
-						<exclude>**/TestContext.java</exclude>
-					</excludes>
-					<systemProperties>
-						<property>
-							<name>liquibase.default.logger.level</name>
-							<value>severe</value>
-						</property>
-					</systemProperties>
-				</configuration>
-			</plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>**/TestContext.java</exclude>
+                    </excludes>
+                    <systemProperties>
+                        <property>
+                            <name>liquibase.default.logger.level</name>
+                            <value>severe</value>
+                        </property>
+                    </systemProperties>
+                </configuration>
+            </plugin>
 
-		</plugins>
-	</build>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>1.4</version>
+                <executions>
+                    <execution>
+                        <id>add-source</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>../liquibase-core/src/main/java</source>
+                            </sources>
+                        </configuration>
+                        
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>api</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>javadoc</goal>
+                        </goals>
+                        <configuration>
+                            <sourcepath>../liquibase-core/src/main/java;../liquibase-core-jvm/src/main/java</sourcepath>
+                            <encoding>UTF-8</encoding>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!--<plugin>-->
+                <!--<groupId>org.apache.felix</groupId>-->
+                <!--<artifactId>maven-bundle-plugin</artifactId>-->
+                <!--<extensions>true</extensions>-->
+                <!--<configuration>-->
+                    <!--<instructions>-->
+                        <!--<_include>-osgi.bnd</_include>-->
+                    <!--</instructions>-->
+                    <!--<manifestLocation>${project.build.directory}/jar-with-deps/META-INF</manifestLocation>-->
+                <!--</configuration>-->
+                <!--<executions>-->
+                    <!--<execution>-->
+                        <!--<id>bundle-manifest</id>-->
+                        <!--<phase>process-classes</phase>-->
+                        <!--<goals>-->
+                            <!--<goal>manifest</goal>-->
+                        <!--</goals>-->
+                    <!--</execution>-->
+                <!--</executions>-->
+            <!--</plugin>-->
+
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>distro</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+                            <descriptors>
+                                <!-- create the distribution archives -->
+                                <descriptor>src/main/resources/assembly/bin.xml</descriptor>
+                            </descriptors>
+                            <!--<archive>
+                              <manifestFile>../liquibase-core/src/main/resources/META-INF/MANIFEST.MF</manifestFile>
+                            </archive>-->
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>
