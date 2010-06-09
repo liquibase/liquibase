@@ -53,6 +53,7 @@ import static org.junit.Assert.*;
  */
 public abstract class AbstractIntegrationTest {
 
+
     protected String completeChangeLog;
     private String rollbackChangeLog;
     private String includedChangeLog;
