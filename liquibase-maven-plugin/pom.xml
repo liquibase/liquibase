@@ -29,7 +29,7 @@
     </dependency>
     <dependency>
       <groupId>org.liquibase</groupId>
-      <artifactId>liquibase-core-jvm</artifactId>
+      <artifactId>liquibase-core</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>

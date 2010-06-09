@@ -24,7 +24,6 @@
     <orderEntry type="library" exported="" name="Maven: org.apache.maven:maven-repository-metadata:2.0" level="project" />
     <orderEntry type="library" exported="" name="Maven: org.apache.maven:maven-artifact:2.0" level="project" />
     <orderEntry type="library" exported="" name="Maven: org.apache.maven.wagon:wagon-provider-api:1.0-alpha-5" level="project" />
-    <orderEntry type="module" module-name="liquibase-core-jvm" exported="" />
     <orderEntry type="module" module-name="liquibase-core" exported="" />
     <orderEntry type="library" scope="TEST" name="Maven: org.apache.maven.shared:maven-plugin-testing-harness:1.1" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.apache.maven:maven-core:2.0" level="project" />

@@ -1,0 +1,21 @@
+package liquibase.jvm.integration.ant;
+
+import liquibase.jvm.integration.ant.DatabaseUpdateTask;
+import org.apache.tools.ant.Project;
+import static org.junit.Assert.*;
+import org.junit.Test;
+
+/**
+ * Tests for {@link DatabaseUpdateTask}
+ */
+public class DatabaseUpdateTaskTest {
+
+    @Test
+    public void createClasspath() throws Exception {
+        DatabaseUpdateTask databaseUpdateTask = new DatabaseUpdateTask();
+        Project project = new Project();
+        databaseUpdateTask.setProject(project);
+
+        assertEquals(project, databaseUpdateTask.createClasspath().getProject());
+    }
+}

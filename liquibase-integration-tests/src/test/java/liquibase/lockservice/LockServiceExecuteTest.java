@@ -1,7 +1,7 @@
 package liquibase.lockservice;
 
 import liquibase.database.Database;
-import liquibase.database.JdbcConnection;
+import liquibase.database.jvm.JdbcConnection;
 import liquibase.executor.*;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LockException;

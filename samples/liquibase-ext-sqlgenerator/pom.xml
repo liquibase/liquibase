@@ -14,17 +14,9 @@
 
      <dependencies>
         <dependency>
-            <groupId>org.liquibase</groupId>
-            <artifactId>liquibase-core-jvm</artifactId>
-            <scope>compile</scope>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
           <groupId>org.liquibase</groupId>
           <artifactId>liquibase-core</artifactId>
           <version>${project.version}</version>
-          <type>test-jar</type>
-          <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>junit</groupId>

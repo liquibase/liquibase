@@ -38,12 +38,6 @@
         </dependency>
 
         <dependency>
-            <groupId>org.liquibase</groupId>
-            <artifactId>liquibase-core-jvm</artifactId>
-            <version>${project.version}</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
           <groupId>org.liquibase</groupId>
           <artifactId>liquibase-core</artifactId>
           <version>${project.version}</version>
@@ -71,7 +65,6 @@
                         <configuration>
                             <sources>
                                 <source>../liquibase-core/src/main/java</source>
-                                <source>../liquibase-core-jvm/src/main/java</source>
                             </sources>
                         </configuration>
                     </execution>
@@ -104,11 +97,6 @@
                         <artifactItem>
                             <groupId>${pom.groupId}</groupId>
                             <artifactId>liquibase-core</artifactId>
-                            <version>${pom.version}</version>
-                        </artifactItem>
-                        <artifactItem>
-                            <groupId>${pom.groupId}</groupId>
-                            <artifactId>liquibase-core-jvm</artifactId>
                             <version>${pom.version}</version>
                         </artifactItem>
                     </artifactItems>
