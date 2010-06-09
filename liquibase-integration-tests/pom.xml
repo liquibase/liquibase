@@ -3,7 +3,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <parent>
-        <artifactId>liquibase</artifactId>
+        <artifactId>liquibase-all</artifactId>
         <groupId>org.liquibase</groupId>
         <version>2.0-rc2-SNAPSHOT</version>
     </parent>
@@ -44,7 +44,7 @@
 
         <dependency>
           <groupId>org.liquibase</groupId>
-          <artifactId>liquibase-core</artifactId>
+          <artifactId>liquibase</artifactId>
           <version>${project.version}</version>
           <type>test-jar</type>
           <scope>test</scope>

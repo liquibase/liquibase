@@ -25,12 +25,6 @@
   </fileSets>
   <files>
     <file>
-      <source>${project.build.directory}/${project.build.finalName}-jar-with-deps.jar</source>
-      <outputDirectory>/</outputDirectory>
-      <destName>liquibase.jar</destName>
-      <fileMode>0644</fileMode>
-    </file>
-    <file>
       <source>src/main/resources/liquibase</source>
       <outputDirectory>/</outputDirectory>
       <fileMode>0777</fileMode>
