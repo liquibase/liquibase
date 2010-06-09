@@ -12,7 +12,7 @@ import java.util.Set;
 
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
-import liquibase.database.JdbcConnection;
+import liquibase.database.jvm.JdbcConnection;
 import liquibase.database.typeconversion.TypeConverterFactory;
 import liquibase.database.example.ExampleCustomDatabase;
 import liquibase.database.core.MockDatabase;

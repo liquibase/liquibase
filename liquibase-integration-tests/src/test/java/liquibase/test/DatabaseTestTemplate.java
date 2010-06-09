@@ -3,7 +3,7 @@ package liquibase.test;
 import liquibase.database.Database;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.executor.ExecutorService;
-import liquibase.executor.core.jdbc.JdbcExecutor;
+import liquibase.executor.jvm.JdbcExecutor;
 import liquibase.exception.MigrationFailedException;
 import liquibase.lockservice.LockService;
 import org.junit.ComparisonFailure;

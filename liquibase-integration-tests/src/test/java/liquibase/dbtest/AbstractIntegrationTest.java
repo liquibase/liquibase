@@ -1,6 +1,7 @@
 package liquibase.dbtest;
 
 import liquibase.Liquibase;
+import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.LiquibaseException;
 import liquibase.servicelocator.ServiceLocator;
 import liquibase.snapshot.DatabaseSnapshotGeneratorFactory;
@@ -11,7 +12,6 @@ import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
-import liquibase.database.JdbcConnection;
 import liquibase.database.typeconversion.TypeConverterFactory;
 import liquibase.diff.Diff;
 import liquibase.diff.DiffResult;
@@ -38,7 +38,6 @@ import java.util.*;
 import java.sql.Statement;
 import java.sql.SQLException;
 import liquibase.assertions.DiffResultAssert;
-import liquibase.exception.ChangeLogParseException;
 import liquibase.util.RegexMatcher;
 import liquibase.util.StreamUtil;
 

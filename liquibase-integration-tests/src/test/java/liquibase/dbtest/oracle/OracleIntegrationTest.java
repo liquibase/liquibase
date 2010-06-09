@@ -1,8 +1,8 @@
 package liquibase.dbtest.oracle;
 
+import liquibase.database.jvm.JdbcConnection;
 import liquibase.dbtest.AbstractIntegrationTest;
 import liquibase.Liquibase;
-import liquibase.database.JdbcConnection;
 import liquibase.exception.ValidationFailedException;
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;

@@ -48,7 +48,7 @@ public class TestContext {
     }
 
     public File findCoreJvmProjectRoot() throws URISyntaxException {
-        return new File(findCoreProjectRoot().getParentFile(), "liquibase-core-jvm");
+        return new File(findCoreProjectRoot().getParentFile(), "liquibase-core");
     }
 
     public File findIntegrationTestProjectRoot() throws URISyntaxException {

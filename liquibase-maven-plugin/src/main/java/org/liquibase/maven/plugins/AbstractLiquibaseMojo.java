@@ -5,15 +5,13 @@ import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.net.MalformedURLException;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import liquibase.*;
+import liquibase.jvm.integration.commandline.CommandLineUtils;
 import liquibase.logging.LogFactory;
 import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import liquibase.resource.FileSystemResourceAccessor;
-import liquibase.integration.commandline.CommandLineUtils;
 import liquibase.database.Database;
 import liquibase.exception.*;
 import liquibase.util.ui.UIFactory;

@@ -4,6 +4,7 @@ import liquibase.database.*;
 import liquibase.database.example.ExampleCustomDatabase;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.database.core.MockDatabase;
+import liquibase.database.jvm.JdbcConnection;
 import liquibase.dbtest.AbstractIntegrationTest;
 import liquibase.resource.ResourceAccessor;
 import liquibase.exception.DatabaseException;
