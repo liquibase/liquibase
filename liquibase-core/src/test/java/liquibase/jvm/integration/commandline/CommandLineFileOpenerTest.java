@@ -26,7 +26,7 @@ public class CommandLineFileOpenerTest extends AbstractFileOpenerTest {
 
     @Test
     public void getResourceAsStream() throws Exception {
-      InputStream inputStream = resourceAccessor.getResourceAsStream("liquibase/integration/ant/AntFileOpenerTest.class");
+      InputStream inputStream = resourceAccessor.getResourceAsStream("liquibase/jvm/integration/ant/AntFileOpenerTest.class");
       assertNotNull(inputStream);
     }
 

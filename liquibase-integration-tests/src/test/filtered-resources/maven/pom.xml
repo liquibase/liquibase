@@ -11,7 +11,7 @@
     <dependencies>
         <dependency>
             <groupId>org.liquibase</groupId>
-            <artifactId>liquibase-core</artifactId>
+            <artifactId>liquibase</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -25,7 +25,7 @@
         <plugins>
             <plugin>
                 <groupId>org.liquibase</groupId>
-                <artifactId>liquibase-maven-plugin</artifactId>
+                <artifactId>liquibase-maven</artifactId>
                 <version>${project.version}</version>
                 <configuration>
                     <changeLogFile>src/main/resources/liquibase/maven/integration/changelog.xml</changeLogFile>

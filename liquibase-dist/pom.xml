@@ -3,7 +3,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <parent>
-        <artifactId>liquibase</artifactId>
+        <artifactId>liquibase-all</artifactId>
         <groupId>org.liquibase</groupId>
         <version>2.0-rc2-SNAPSHOT</version>
     </parent>
@@ -39,7 +39,7 @@
 
         <dependency>
           <groupId>org.liquibase</groupId>
-          <artifactId>liquibase-core</artifactId>
+          <artifactId>liquibase</artifactId>
           <version>${project.version}</version>
           <scope>compile</scope>
         </dependency>
@@ -71,47 +71,19 @@
                 </executions>
             </plugin>
 
-            <!--<plugin>-->
-                <!--<groupId>org.apache.maven.plugins</groupId>-->
-                <!--<artifactId>maven-javadoc-plugin</artifactId>-->
-                <!--<executions>-->
-                    <!--<execution>-->
-                        <!--<id>api</id>-->
-                        <!--<phase>prepare-package</phase>-->
-                        <!--<goals>-->
-                            <!--<goal>javadoc</goal>-->
-                        <!--</goals>-->
-                        <!--<configuration>-->
-                            <!--<sourcepath>../liquibase-core/src/main/java;../liquibase-core-jvm/src/main/java</sourcepath>-->
-                            <!--<encoding>UTF-8</encoding>-->
-                        <!--</configuration>-->
-                    <!--</execution>-->
-                <!--</executions>-->
-            <!--</plugin>-->
-
-            <!-- merge liquibase-core and liquibase-core-jvm into one jar -->
             <plugin>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <configuration>
-                    <artifactItems>
-                        <artifactItem>
-                            <groupId>${pom.groupId}</groupId>
-                            <artifactId>liquibase-core</artifactId>
-                            <version>${pom.version}</version>
-                        </artifactItem>
-                    </artifactItems>
-                </configuration>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>unpack-jar</id>
-                        <phase>generate-resources</phase>
+                        <id>api</id>
+                        <phase>prepare-package</phase>
                         <goals>
-                            <goal>unpack-dependencies</goal>
+                            <goal>javadoc</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>${project.build.directory}/jar-with-deps</outputDirectory>
-                            <excludeTransitive>true</excludeTransitive>
-                            <includeGroupIds>org.liquibase</includeGroupIds>
+                            <sourcepath>../liquibase-core/src/main/java;../liquibase-core-jvm/src/main/java</sourcepath>
+                            <encoding>UTF-8</encoding>
                         </configuration>
                     </execution>
                 </executions>
@@ -138,26 +110,26 @@
                 </executions>
             </plugin>
 
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>create-jar-with-deps</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <classesDirectory>${project.build.directory}/jar-with-deps</classesDirectory>
-                    <archive>
-                        <manifestFile>${project.build.directory}/jar-with-deps/META-INF/MANIFEST.MF</manifestFile>
-                    </archive>
-                    <finalName>${project.build.finalName}-jar-with-deps</finalName>
-                </configuration>
-            </plugin>
+            <!--<plugin>-->
+                <!--<groupId>org.apache.maven.plugins</groupId>-->
+                <!--<artifactId>maven-jar-plugin</artifactId>-->
+                <!--<executions>-->
+                    <!--<execution>-->
+                        <!--<id>create-jar-with-deps</id>-->
+                        <!--<phase>package</phase>-->
+                        <!--<goals>-->
+                            <!--<goal>jar</goal>-->
+                        <!--</goals>-->
+                    <!--</execution>-->
+                <!--</executions>-->
+                <!--<configuration>-->
+                    <!--<classesDirectory>${project.build.directory}/jar-with-deps</classesDirectory>-->
+                    <!--<archive>-->
+                        <!--<manifestFile>${project.build.directory}/jar-with-deps/META-INF/MANIFEST.MF</manifestFile>-->
+                    <!--</archive>-->
+                    <!--<finalName>${project.build.finalName}-jar-with-deps</finalName>-->
+                <!--</configuration>-->
+            <!--</plugin>-->
 
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
