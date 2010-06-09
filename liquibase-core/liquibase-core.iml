@@ -1,5 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module MavenProjectsManager.isMavenModule="true" org.jetbrains.idea.maven.project.MavenProjectsManager.isMavenModule="true" relativePaths="true" type="JAVA_MODULE" version="4">
+  <component name="FacetManager">
+    <facet type="Osmorc" name="OSGi">
+      <configuration osmorcControlsManifest="true" manifestLocation="" jarfileLocation="$MODULE_DIR$/target/liquibase-core.jar" useBndFile="false" bndFileLocation="" bundleActivator="" bundleSymbolicName="org.liquibase.liquibase" bundleVersion="2.0-rc2-SNAPSHOT" ignoreFilePattern="" useProjectDefaultManifestFileLocation="true" alwaysRebuildBundleJAR="false">
+        <additionalProperties>
+          <property key="_include" value="-osgi.bnd" />
+        </additionalProperties>
+        <additionalJARContents />
+      </configuration>
+    </facet>
+  </component>
   <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_5" inherit-compiler-output="false">
     <output url="file://$MODULE_DIR$/target/classes" />
     <output-test url="file://$MODULE_DIR$/target/test-classes" />
@@ -8,6 +18,7 @@
       <sourceFolder url="file://$MODULE_DIR$/src/main/resources" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/test/java" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/src/test/resources" isTestSource="true" />
+      <excludeFolder url="file://$MODULE_DIR$/.settings" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
     </content>
     <orderEntry type="inheritedJdk" />

@@ -1,1 +1,0 @@
-Store any database driver files in this directory and they'll be automatically included when you run liquibase.

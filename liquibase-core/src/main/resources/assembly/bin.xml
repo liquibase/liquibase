@@ -2,13 +2,12 @@
   <id>bin</id>
   <formats>
     <format>tar.gz</format>
-    <format>tar.bz2</format>
     <format>zip</format>
   </formats>
   <includeBaseDirectory>false</includeBaseDirectory>
   <fileSets>
     <fileSet>
-      <directory>src/main/resources</directory>
+      <directory>src/main/resources/dist</directory>
       <outputDirectory>/</outputDirectory>
       <excludes>
         <exclude>**/assembly/</exclude>
@@ -25,9 +24,15 @@
   </fileSets>
   <files>
     <file>
-      <source>src/main/resources/liquibase</source>
+      <source>${project.build.directory}/${project.build.finalName}.jar</source>
       <outputDirectory>/</outputDirectory>
-      <fileMode>0777</fileMode>
+      <destName>liquibase.jar</destName>
+      <fileMode>0644</fileMode>
     </file>
+    <!--<file>-->
+      <!--<source>src/main/resources/liquibase</source>-->
+      <!--<outputDirectory>/</outputDirectory>-->
+      <!--<fileMode>0777</fileMode>-->
+    <!--</file>-->
   </files>
 </assembly>

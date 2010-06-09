@@ -51,6 +51,7 @@
       <facet-type id="Osmorc">
         <modules>
           <module name="liquibase-dist" />
+          <module name="liquibase-core" />
         </modules>
       </facet-type>
     </autodetection-disabled>
@@ -273,7 +274,6 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/liquibase.iml" filepath="$PROJECT_DIR$/liquibase.iml" />
       <module fileurl="file://$PROJECT_DIR$/liquibase-core/liquibase-core.iml" filepath="$PROJECT_DIR$/liquibase-core/liquibase-core.iml" />
-      <module fileurl="file://$PROJECT_DIR$/liquibase-dist/liquibase-dist.iml" filepath="$PROJECT_DIR$/liquibase-dist/liquibase-dist.iml" />
       <module fileurl="file://$PROJECT_DIR$/samples/liquibase-ext-change/liquibase-ext-change.iml" filepath="$PROJECT_DIR$/samples/liquibase-ext-change/liquibase-ext-change.iml" />
       <module fileurl="file://$PROJECT_DIR$/samples/liquibase-ext-changewithnestedtags/liquibase-ext-changewithnestedtags.iml" filepath="$PROJECT_DIR$/samples/liquibase-ext-changewithnestedtags/liquibase-ext-changewithnestedtags.iml" />
       <module fileurl="file://$PROJECT_DIR$/samples/liquibase-ext-sqlgenerator/liquibase-ext-sqlgenerator.iml" filepath="$PROJECT_DIR$/samples/liquibase-ext-sqlgenerator/liquibase-ext-sqlgenerator.iml" />
