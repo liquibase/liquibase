@@ -28,7 +28,6 @@
     <orderEntry type="library" scope="PROVIDED" name="Maven: avalon-framework:avalon-framework:4.1.3" level="project" />
     <orderEntry type="module" module-name="liquibase-core" scope="TEST" />
     <orderEntry type="module" module-name="liquibase-ext-change" scope="TEST" />
-    <orderEntry type="module" module-name="liquibase-core" scope="TEST" />
     <orderEntry type="module" module-name="liquibase-ext-changewithnestedtags" scope="TEST" />
     <orderEntry type="module" module-name="liquibase-ext-sqlgenerator" scope="TEST" />
     <orderEntry type="library" scope="TEST" name="Maven: hsqldb:hsqldb:1.8.0.7" level="project" />
