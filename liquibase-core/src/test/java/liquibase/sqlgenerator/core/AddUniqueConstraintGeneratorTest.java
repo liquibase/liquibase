@@ -15,7 +15,7 @@ public class AddUniqueConstraintGeneratorTest extends AbstractSqlGeneratorTest<A
         this(new AddUniqueConstraintGenerator());
     }
 
-    public AddUniqueConstraintGeneratorTest(SqlGenerator<AddUniqueConstraintStatement> generatorUnderTest) throws Exception {
+    protected AddUniqueConstraintGeneratorTest(SqlGenerator<AddUniqueConstraintStatement> generatorUnderTest) throws Exception {
         super(generatorUnderTest);
     }
 

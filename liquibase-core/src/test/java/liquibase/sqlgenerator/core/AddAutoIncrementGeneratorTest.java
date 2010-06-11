@@ -16,10 +16,10 @@ public class AddAutoIncrementGeneratorTest extends AbstractSqlGeneratorTest<AddA
 	protected static final String SCHEMA_NAME = "SCHEMA_NAME";
 
     public AddAutoIncrementGeneratorTest() throws Exception {
-    	super(new AddAutoIncrementGenerator());
+    	this(new AddAutoIncrementGenerator());
     }
 
-    public AddAutoIncrementGeneratorTest(SqlGenerator<AddAutoIncrementStatement> addAutoIncrementGenerator) throws Exception {
+    protected AddAutoIncrementGeneratorTest(SqlGenerator<AddAutoIncrementStatement> addAutoIncrementGenerator) throws Exception {
         super(addAutoIncrementGenerator);
     }
 

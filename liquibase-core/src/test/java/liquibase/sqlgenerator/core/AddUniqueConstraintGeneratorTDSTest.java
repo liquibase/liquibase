@@ -9,11 +9,7 @@ public class AddUniqueConstraintGeneratorTDSTest extends
 		AddUniqueConstraintGeneratorTest {
 
 	public AddUniqueConstraintGeneratorTDSTest() throws Exception {
-		this(new AddUniqueConstraintGeneratorTDS());
-	}
-
-	public AddUniqueConstraintGeneratorTDSTest(AddUniqueConstraintGeneratorTDS generatorUnderTest) throws Exception {
-		super(generatorUnderTest);
+		super(new AddUniqueConstraintGeneratorTDS());
 	}
 
 	@Override
