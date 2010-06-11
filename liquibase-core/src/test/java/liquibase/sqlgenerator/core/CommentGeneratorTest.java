@@ -6,10 +6,7 @@ import liquibase.statement.core.CommentStatement;
 public class CommentGeneratorTest extends AbstractSqlGeneratorTest<CommentStatement> {
 
 	public CommentGeneratorTest() throws Exception {
-		this(new CommentGenerator());
-	}
-	public CommentGeneratorTest(CommentGenerator generatorUnderTest) throws Exception {
-		super(generatorUnderTest);
+		super(new CommentGenerator());
 	}
 
 	@Override

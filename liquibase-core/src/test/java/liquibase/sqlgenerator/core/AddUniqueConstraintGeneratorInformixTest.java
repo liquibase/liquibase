@@ -7,11 +7,7 @@ public class AddUniqueConstraintGeneratorInformixTest extends
 		AddUniqueConstraintGeneratorTest {
 
 	public AddUniqueConstraintGeneratorInformixTest() throws Exception {
-		this(new AddUniqueConstraintGeneratorInformix());
-	}
-
-	public AddUniqueConstraintGeneratorInformixTest(AddUniqueConstraintGeneratorInformix generatorUnderTest) throws Exception {
-		super(generatorUnderTest);
+		super(new AddUniqueConstraintGeneratorInformix());
 	}
 
 	@Override

@@ -417,17 +417,6 @@
         <root url="jar://$MAVEN_REPOSITORY$/org/liquibase/liquibase-core/2.0-SNAPSHOT/liquibase-core-2.0-SNAPSHOT-tests-sources.jar!/" />
       </SOURCES>
     </library>
-    <library name="Maven: junit:junit:4.1">
-      <CLASSES>
-        <root url="jar://$MAVEN_REPOSITORY$/junit/junit/4.1/junit-4.1.jar!/" />
-      </CLASSES>
-      <JAVADOC>
-        <root url="jar://$MAVEN_REPOSITORY$/junit/junit/4.1/junit-4.1-javadoc.jar!/" />
-      </JAVADOC>
-      <SOURCES>
-        <root url="jar://$MAVEN_REPOSITORY$/junit/junit/4.1/junit-4.1-sources.jar!/" />
-      </SOURCES>
-    </library>
     <library name="Maven: org.easymock:easymockclassextension:2.2">
       <CLASSES>
         <root url="jar://$MAVEN_REPOSITORY$/org/easymock/easymockclassextension/2.2/easymockclassextension-2.2.jar!/" />
@@ -877,6 +866,17 @@
       </JAVADOC>
       <SOURCES>
         <root url="jar://$MAVEN_REPOSITORY$/org/apache/maven/shared/maven-verifier/1.2/maven-verifier-1.2-sources.jar!/" />
+      </SOURCES>
+    </library>
+    <library name="Maven: junit:junit:4.8.1">
+      <CLASSES>
+        <root url="jar://$MAVEN_REPOSITORY$/junit/junit/4.8.1/junit-4.8.1.jar!/" />
+      </CLASSES>
+      <JAVADOC>
+        <root url="jar://$MAVEN_REPOSITORY$/junit/junit/4.8.1/junit-4.8.1-javadoc.jar!/" />
+      </JAVADOC>
+      <SOURCES>
+        <root url="jar://$MAVEN_REPOSITORY$/junit/junit/4.8.1/junit-4.8.1-sources.jar!/" />
       </SOURCES>
     </library>
   </component>
