@@ -18,7 +18,10 @@ public class BooleanType extends DataType {
     public String convertObjectToString(Object value, Database database) {
         if (value == null) {
             return null;
+        } else if (value.toString().equalsIgnoreCase("null")) {
+            return "null";
         }
+
         String returnValue;
         TypeConverter converter = TypeConverterFactory.getInstance().findTypeConverter(database);
         if (((Boolean) value)) {

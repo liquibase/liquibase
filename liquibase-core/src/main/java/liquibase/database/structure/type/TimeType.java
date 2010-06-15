@@ -17,6 +17,8 @@ public class TimeType  extends DataType {
     public String convertObjectToString(Object value, Database database) {
         if (value == null) {
             return null;
+        } else if (value.toString().equalsIgnoreCase("null")) {
+            return "null";            
         }  else if (value instanceof DatabaseFunction) {
             return ((DatabaseFunction) value).getValue();
         } else if (value.toString().equals("CURRENT_TIMESTAMP()")) {
