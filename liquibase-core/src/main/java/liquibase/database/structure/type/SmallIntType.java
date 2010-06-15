@@ -16,6 +16,8 @@ public class SmallIntType extends DataType {
     public String convertObjectToString(Object value, Database database) {
         if (value == null) {
             return null;
+        } else if (value.toString().equalsIgnoreCase("null")) {
+            return "null";
         }
         if (value instanceof Boolean)
             return Boolean.TRUE.equals(value) ? "1" : "0";

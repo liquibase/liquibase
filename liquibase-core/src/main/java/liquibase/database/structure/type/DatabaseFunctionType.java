@@ -11,7 +11,10 @@ public class DatabaseFunctionType extends DataType {
     public String convertObjectToString(Object value, Database database) {
         if (value.toString().equals("CURRENT_TIMESTAMP()")) {
             return database.getCurrentDateTimeFunction();
+        } else if (value.toString().equalsIgnoreCase("null")) {
+            return "null";
         }
+
 
         return value.toString();
     }
