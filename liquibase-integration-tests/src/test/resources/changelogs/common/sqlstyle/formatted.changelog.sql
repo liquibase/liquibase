@@ -2,7 +2,7 @@
 
 --changeset nvoxland:1
 create table test1 (
-  id int primary key,
+  id int not null primary key,
   name varchar(255)
 );
 
