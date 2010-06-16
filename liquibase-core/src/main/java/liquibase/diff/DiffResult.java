@@ -779,7 +779,6 @@ public class DiffResult {
 				change.setColumnName(column.getName());
 				change.setNewDataType(referenceColumn
 						.getDataTypeString(targetSnapshot.getDatabase()));
-				change.setNullable(column.isNullable());
 				changes.add(generateChangeSet(change));
 				foundDifference = true;
 			}

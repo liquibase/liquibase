@@ -383,9 +383,6 @@
 			<xsd:attribute name="tableName" type="xsd:string" use="required" />
 			<xsd:attribute name="columnName" type="xsd:string" use="required" />
 			<xsd:attribute name="newDataType" type="xsd:string" use="required" />
-			<xsd:attribute name="nullable" type="booleanExp" />
-            <xsd:attribute name="autoIncrement" type="booleanExp"/>
-            <xsd:attribute name="primaryKey" type="booleanExp"/>
 		</xsd:complexType>
 	</xsd:element>
 
