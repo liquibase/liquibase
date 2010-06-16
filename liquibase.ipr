@@ -117,7 +117,7 @@
     <version value="1.0" />
   </component>
   <component name="JavacSettings">
-    <option name="ADDITIONAL_OPTIONS_STRING" value="-target 1.5" />
+    <option name="ADDITIONAL_OPTIONS_STRING" value="-target 1.5 -encoding utf8" />
   </component>
   <component name="JavadocGenerationManager">
     <option name="OUTPUT_DIRECTORY" />
