@@ -12,10 +12,7 @@ public class ModifyDataTypeChange extends AbstractChange {
     private String tableName;
     private String columnName;
     private String newDataType;
-    private Boolean nullable;
-    private Boolean autoIncrement;
-    private Boolean primaryKey;
-    
+
     public ModifyDataTypeChange() {
         super("modifyDataType", "Modify data type", ChangeMetaData.PRIORITY_DEFAULT);
     }
@@ -25,7 +22,7 @@ public class ModifyDataTypeChange extends AbstractChange {
     }
 
     public SqlStatement[] generateStatements(Database database) {
-        return new SqlStatement[] {new ModifyDataTypeStatement(getSchemaName(), getTableName(), getColumnName(), getNewDataType(), isNullable(), getPrimaryKey(), getAutoIncrement())};
+        return new SqlStatement[] {new ModifyDataTypeStatement(getSchemaName(), getTableName(), getColumnName(), getNewDataType())};
     }
 
     public String getSchemaName() {
@@ -58,29 +55,5 @@ public class ModifyDataTypeChange extends AbstractChange {
 
     public void setNewDataType(String newDataType) {
         this.newDataType = newDataType;
-    }
-
-    public Boolean isNullable() {
-        return nullable;
-    }
-
-    public void setNullable(Boolean nullable) {
-        this.nullable = nullable;
-    }
-
-    public Boolean getPrimaryKey() {
-        return primaryKey;
-    }
-
-    public void setPrimaryKey(Boolean primaryKey) {
-        this.primaryKey = primaryKey;
-    }
-
-    public Boolean getAutoIncrement() {
-        return autoIncrement;
-    }
-
-    public void setAutoIncrement(Boolean autoIncrement) {
-        this.autoIncrement = autoIncrement;
     }
 }

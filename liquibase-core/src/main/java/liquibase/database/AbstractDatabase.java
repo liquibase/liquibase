@@ -374,12 +374,12 @@ public abstract class AbstractDatabase implements Database {
             if (checksumNotRightSize) {
                 executor.comment("Modifying size of databasechangelog.md5sum column");
 
-                statementsToExecute.add(new ModifyDataTypeStatement(getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "MD5SUM", "VARCHAR(35)", true, false, false));
+                statementsToExecute.add(new ModifyDataTypeStatement(getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "MD5SUM", "VARCHAR(35)"));
             }
             if (liquibaseColumnNotRightSize) {
                 executor.comment("Modifying size of databasechangelog.liquibase column");
 
-                statementsToExecute.add(new ModifyDataTypeStatement(getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "LIQUIBASE", "VARCHAR(20)", true, false, false));
+                statementsToExecute.add(new ModifyDataTypeStatement(getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "LIQUIBASE", "VARCHAR(20)"));
             }
             if (!hasExecTypeColumn) {
                 executor.comment("Adding missing databasechangelog.exectype column");

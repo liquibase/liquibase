@@ -17,12 +17,8 @@ public class ModifyDataTypeGenerator extends AbstractSqlGenerator<ModifyDataType
     public Warnings warn(ModifyDataTypeStatement modifyDataTypeStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         Warnings warnings = super.warn(modifyDataTypeStatement, database, sqlGeneratorChain);
 
-        if (modifyDataTypeStatement.getAutoIncrement() == null && !modifyDataTypeStatement.getNewDataType().toLowerCase().contains("varchar")) {
-            warnings.addWarning("modifyDataType will lose settings for some databases.  Use the autoIncrement=true|false parameter to ensure that the information is updated correctly");
-        }
-
-        if (modifyDataTypeStatement.isNullable() == null) {
-            warnings.addWarning("modifyDataType will lose settings for some databases.  Use the nullable=true|false parameter to ensure that the information is updated correctly");
+        if (database instanceof MySQLDatabase && !modifyDataTypeStatement.getNewDataType().toLowerCase().contains("varchar")) {
+            warnings.addWarning("modifyDataType will lose primary key/autoincrement/not null settings for mysql.  Use <sql> and re-specify all configuration if this is the case");
         }
 
         return warnings;
@@ -50,25 +46,6 @@ public class ModifyDataTypeGenerator extends AbstractSqlGenerator<ModifyDataType
 
         // add column type
         alterTable += TypeConverterFactory.getInstance().findTypeConverter(database).getDataType(statement.getNewDataType(), false);
-
-        if (statement.isNullable() != null) {
-            if (statement.isNullable()) {
-                if (database instanceof SybaseDatabase || database instanceof SybaseASADatabase) {
-                    alterTable += " NULL";
-                }
-            } else {
-                alterTable += " NOT NULL";
-            }
-
-        }
-
-        if (statement.getPrimaryKey() != null && statement.getPrimaryKey()) {
-            alterTable += " PRIMARY KEY";
-        }
-        if (statement.getAutoIncrement() != null && statement.getAutoIncrement() && database.supportsAutoIncrement()) {
-            alterTable += " "+database.getAutoIncrementClause();
-        }
-
 
         return new Sql[]{new UnparsedSql(alterTable)};
     }
