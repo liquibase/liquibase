@@ -79,6 +79,13 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     protected String defaultSchemaName;
 
     /**
+     * The class to use as the database object.
+     *
+     * @parameter expression="${liquibase.databaseClass}"
+     */
+    protected String databaseClass;
+
+    /**
      * Controls the prompting of users as to whether or not they really want to run the
      * changes on a database that is not local to the machine that the user is current
      * executing the plugin on.
@@ -243,7 +250,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                     dbPassword,
                     driver,
                     defaultSchemaName,
-                    null);
+                    databaseClass);
             liquibase = createLiquibase(getFileOpener(artifactClassLoader), database);
 
             getLog().debug("expressionVars = " + String.valueOf(expressionVars));
