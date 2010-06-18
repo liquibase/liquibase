@@ -5,6 +5,7 @@ import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 
 import liquibase.database.Database;
+import liquibase.database.DatabaseConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
@@ -64,6 +65,54 @@ public class SybaseDatabaseTest {
 		configureExecutor(database, "foo", " bar", " bat");
 		
 		assertEquals("foo bar bat", database.getViewDefinition("dbo", "view_name"));
+	}
+
+	@Test
+	public void testGetDatabaseMajorVersionWhenImplemented() throws Exception {
+		DatabaseConnection connection = createNiceMock(DatabaseConnection.class);
+		expect(connection.getDatabaseMajorVersion()).andReturn(15);
+		replay(connection);
+		
+		SybaseDatabase database = new SybaseDatabase();
+		database.setConnection(connection);
+		
+		assertEquals(15, database.getDatabaseMajorVersion());
+	}
+	
+	@Test
+	public void testGetDatabaseMinorVersionWhenImplemented() throws Exception {
+		DatabaseConnection connection = createNiceMock(DatabaseConnection.class);
+		expect(connection.getDatabaseMinorVersion()).andReturn(5);
+		replay(connection);
+		
+		SybaseDatabase database = new SybaseDatabase();
+		database.setConnection(connection);
+		
+		assertEquals(5, database.getDatabaseMinorVersion());
+	}
+	
+	@Test
+	public void testGetDatabaseMajorVersionWhenNotImplemented() throws Exception {
+		DatabaseConnection connection = createNiceMock(DatabaseConnection.class);
+		expect(connection.getDatabaseMajorVersion()).andThrow(new UnsupportedOperationException());
+		replay(connection);
+		
+		SybaseDatabase database = new SybaseDatabase();
+		database.setConnection(connection);
+		
+		assertEquals(-1, database.getDatabaseMajorVersion());
+	}
+	
+	@Test
+	public void testGetDatabaseMinorVersionWhenNotImplemented() throws Exception {
+		DatabaseConnection connection = createNiceMock(DatabaseConnection.class);
+		expect(connection.getDatabaseMinorVersion()).andThrow(new UnsupportedOperationException());
+		replay(connection);
+		
+		SybaseDatabase database = new SybaseDatabase();
+		database.setConnection(connection);
+		
+		assertEquals(-1, database.getDatabaseMinorVersion());
 	}
 
 }

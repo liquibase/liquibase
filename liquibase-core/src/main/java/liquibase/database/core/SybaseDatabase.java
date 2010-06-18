@@ -5,6 +5,7 @@ import liquibase.database.DatabaseConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
+import liquibase.logging.LogFactory;
 import liquibase.statement.core.GetViewDefinitionStatement;
 
 import java.util.HashSet;
@@ -235,5 +236,35 @@ public class SybaseDatabase extends AbstractDatabase {
         }
         return definition.toString();
 	}
+	
+	/** 
+	 * @return the major version if supported, otherwise -1
+	 * @see liquibase.database.AbstractDatabase#getDatabaseMajorVersion()
+	 */
+	@Override
+    public int getDatabaseMajorVersion() throws DatabaseException {
+        try {
+            return getConnection().getDatabaseMajorVersion();
+        } catch (UnsupportedOperationException e) {
+        	LogFactory.getLogger()
+        		.warning("Your JDBC driver does not support getDatabaseMajorVersion(). Consider upgrading it.");
+            return -1;
+        }
+    }
+
+	/**
+	 * @return the minor version if supported, otherwise -1
+	 * @see liquibase.database.AbstractDatabase#getDatabaseMinorVersion()
+	 */
+	@Override
+    public int getDatabaseMinorVersion() throws DatabaseException {
+        try {
+            return getConnection().getDatabaseMinorVersion();
+        } catch (UnsupportedOperationException e) {
+        	LogFactory.getLogger()
+    			.warning("Your JDBC driver does not support getDatabaseMajorVersion(). Consider upgrading it.");
+            return -1;
+        }
+    }
     
 }
