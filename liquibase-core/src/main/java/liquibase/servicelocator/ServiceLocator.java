@@ -26,7 +26,7 @@ public class ServiceLocator {
 
     static {
         try {
-            Class<?> scanner = Class.forName("LiquiBase.ServiceLocator.ClrServiceLocator, LiquiBase");
+            Class<?> scanner = Class.forName("Liquibase.ServiceLocator.ClrServiceLocator, Liquibase");
             instance = (ServiceLocator) scanner.newInstance();
         } catch (Exception e) {
             instance = new ServiceLocator();
@@ -63,7 +63,7 @@ public class ServiceLocator {
                 URL url = manifests.nextElement();
                 InputStream is = url.openStream();
                 Manifest manifest = new Manifest(is);
-                String attributes = StringUtils.trimToNull(manifest.getMainAttributes().getValue("LiquiBase-Package"));
+                String attributes = StringUtils.trimToNull(manifest.getMainAttributes().getValue("Liquibase-Package"));
                 if (attributes != null) {
                     for (Object value : attributes.split(",")) {
                         addPackageToScan(value.toString());

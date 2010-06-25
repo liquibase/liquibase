@@ -4,9 +4,7 @@ import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
-import liquibase.exception.DatabaseException;
-import liquibase.exception.PreconditionErrorException;
-import liquibase.exception.PreconditionFailedException;
+import liquibase.exception.*;
 import liquibase.executor.ExecutorService;
 import liquibase.precondition.Precondition;
 import liquibase.statement.core.RawSqlStatement;
@@ -31,6 +29,14 @@ public class SqlPrecondition implements Precondition {
 
     public void setSql(String sql) {
         this.sql = sql;
+    }
+
+    public Warnings warn(Database database) {
+        return new Warnings();
+    }
+
+    public ValidationErrors validate(Database database) {
+        return new ValidationErrors();
     }
 
     public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet) throws PreconditionFailedException, PreconditionErrorException {

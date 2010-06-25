@@ -6,6 +6,8 @@ import liquibase.changelog.RanChangeSet;
 import liquibase.database.Database;
 import liquibase.exception.PreconditionErrorException;
 import liquibase.exception.PreconditionFailedException;
+import liquibase.exception.ValidationErrors;
+import liquibase.exception.Warnings;
 import liquibase.precondition.Precondition;
 
 public class ChangeSetExecutedPrecondition implements Precondition {
@@ -38,6 +40,14 @@ public class ChangeSetExecutedPrecondition implements Precondition {
         this.author = author;
     }
 
+    public Warnings warn(Database database) {
+        return new Warnings();
+    }
+
+    public ValidationErrors validate(Database database) {
+        return new ValidationErrors();
+    }
+    
     public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet) throws PreconditionFailedException, PreconditionErrorException {
         ChangeSet interestedChangeSet = new ChangeSet(getId(), getAuthor(), false, false, getChangeLogFile(), getChangeLogFile(), null, null, false);
         RanChangeSet ranChangeSet;

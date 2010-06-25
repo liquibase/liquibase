@@ -1,4 +1,4 @@
-LiquiBase core is currently built using Ant.
+Liquibase core is currently built using Ant.
 
 The main end-builder Ant targets are:
 

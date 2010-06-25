@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Main-Class: liquibase.jvm.integration.commandline.Main
-LiquiBase-Package: liquibase.change,
+Liquibase-Package: liquibase.change,
  liquibase.database,
  liquibase.parser,
  liquibase.precondition,

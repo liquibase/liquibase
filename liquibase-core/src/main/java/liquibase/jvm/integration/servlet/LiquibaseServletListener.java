@@ -20,10 +20,10 @@ import javax.sql.DataSource;
 import java.sql.Connection;
 
 /**
- * Servlet listener than can be added to web.xml to allow LiquiBase to run on every application server startup.
+ * Servlet listener than can be added to web.xml to allow Liquibase to run on every application server startup.
  * Using this listener allows users to know that they always have the most up to date database, although it will
  * slow down application server startup slightly.
- * See the <a href="http://www.liquibase.org/manual/latest/servlet_listener_migrator.html">LiquiBase documentation</a> for
+ * See the <a href="http://www.liquibase.org/manual/latest/servlet_listener_migrator.html">Liquibase documentation</a> for
  * more information.
  */
 public class LiquibaseServletListener implements ServletContextListener {
@@ -69,7 +69,7 @@ public class LiquibaseServletListener implements ServletContextListener {
 
         String shouldRunProperty = System.getProperty(Liquibase.SHOULD_RUN_SYSTEM_PROPERTY);
         if (shouldRunProperty != null && !Boolean.valueOf(shouldRunProperty)) {
-            LogFactory.getLogger().info("LiquiBase did not run on " + hostName + " because '" + Liquibase.SHOULD_RUN_SYSTEM_PROPERTY + "' system property was set to false");
+            LogFactory.getLogger().info("Liquibase did not run on " + hostName + " because '" + Liquibase.SHOULD_RUN_SYSTEM_PROPERTY + "' system property was set to false");
             return;
         }
 
@@ -108,10 +108,10 @@ public class LiquibaseServletListener implements ServletContextListener {
         setContexts(servletContextEvent.getServletContext().getInitParameter("LIQUIBASE_CONTEXTS"));
         this.defaultSchema = StringUtils.trimToNull(servletContextEvent.getServletContext().getInitParameter("LIQUIBASE_DEFAULT_SCHEMA"));
         if (getChangeLogFile() == null) {
-            throw new RuntimeException("Cannot run LiquiBase, LIQUIBASE_CHANGELOG is not set");
+            throw new RuntimeException("Cannot run Liquibase, LIQUIBASE_CHANGELOG is not set");
         }
         if (getDataSource() == null) {
-            throw new RuntimeException("Cannot run LiquiBase, LIQUIBASE_DATA_SOURCE is not set");
+            throw new RuntimeException("Cannot run Liquibase, LIQUIBASE_DATA_SOURCE is not set");
         }
 
         try {

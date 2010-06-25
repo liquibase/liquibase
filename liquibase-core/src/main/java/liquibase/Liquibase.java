@@ -32,8 +32,8 @@ import java.text.DateFormat;
 import java.util.*;
 
 /**
- * Core LiquiBase facade.
- * Although there are several ways of executing LiquiBase (Ant, command line, etc.) they are all wrappers around this class.
+ * Core Liquibase facade.
+ * Although there are several ways of executing Liquibase (Ant, command line, etc.) they are all wrappers around this class.
  */
 public class Liquibase {
 
@@ -199,7 +199,7 @@ public class Liquibase {
         executor.comment("Change Log: " + changeLogFile);
         executor.comment("Ran at: " + DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(new Date()));
         executor.comment("Against: " + getDatabase().getConnection().getConnectionUserName() + "@" + getDatabase().getConnection().getURL());
-        executor.comment("LiquiBase version: " + LiquibaseUtil.getBuildVersion());
+        executor.comment("Liquibase version: " + LiquibaseUtil.getBuildVersion());
         executor.comment("*********************************************************************" + StreamUtil.getLineSeparator());
     }
 
@@ -527,7 +527,7 @@ public class Liquibase {
     /**
      * Returns true if it is "save" to migrate the database.
      * Currently, "safe" is defined as running in an output-sql mode or against a database on localhost.
-     * It is fine to run LiquiBase against a "non-safe" database, the method is mainly used to determine if the user
+     * It is fine to run Liquibase against a "non-safe" database, the method is mainly used to determine if the user
      * should be prompted before continuing.
      */
     public boolean isSafeToRunMigration() throws DatabaseException {

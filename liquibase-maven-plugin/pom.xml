@@ -16,6 +16,26 @@
   <name>Liquibase Maven Plugin</name>
   <description>A Maven plugin wraps up some of the functionality of Liquibase</description>
 
+    <organization>
+      <name>Liquibase.org</name>
+      <url>http://www.liquibase.org</url>
+    </organization>
+
+    <licenses>
+      <license>
+        <url>http://www.apache.org/licenses/LICENSE-2.0</url>
+        <name>Apache License, Version 2.0 </name>
+      </license>
+    </licenses>
+
+    <issueManagement>
+      <url>http://liquibase.jira.com/browse/CORE</url>
+    </issueManagement>
+
+    <scm>
+      <url>http://liquibase.jira.com/svn/CORE</url>
+    </scm>
+    
   <dependencies>
       <dependency>
       <groupId>org.apache.maven</groupId>

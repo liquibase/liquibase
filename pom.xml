@@ -8,30 +8,9 @@
   <version>2.0-rc2-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>Liquibase Parent Project</name>
-  <description>LiquiBase is a tool for managing and executing database changes.</description>
+  <description>Liquibase is a tool for managing and executing database changes.</description>
   <url>http://www.liquibase.org</url>
-
-  <organization>
-    <name>Liquibase.org</name>
-    <url>http://www.liquibase.org</url>
-  </organization>
-
-  <licenses>
-    <license>
-      <url>http://www.gnu.org/licenses/lgpl-2.1.txt</url>
-      <name>GNU LESSER GENERAL PUBLIC LICENSE</name>
-    </license>
-  </licenses>
-
-  <issueManagement>
-    <url>http://liquibase.jira.com/browse/CORE</url>
-  </issueManagement>
-
-  <scm>
-    <url>http://liquibase.jira.com/svn/CORE</url>
-  </scm>
-
-
+    
 <!--  <prerequisites>
     <maven>2.1.0-M1</maven>
   </prerequisites>-->
@@ -52,40 +31,6 @@
 
   <dependencyManagement>
     <dependencies>
-      <dependency>
-        <groupId>junit</groupId>
-        <artifactId>junit</artifactId>
-        <version>4.8.1</version>
-        <scope>test</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.easymock</groupId>
-        <artifactId>easymockclassextension</artifactId>
-        <version>2.2</version>
-        <scope>test</scope>
-      </dependency>
-
-      <dependency>
-        <groupId>ant</groupId>
-        <artifactId>ant</artifactId>
-        <version>1.6.5</version>
-        <scope>provided</scope>
-        <optional>true</optional>
-      </dependency>
-      <dependency>
-        <groupId>javax.servlet</groupId>
-        <artifactId>servlet-api</artifactId>
-        <version>2.4</version>
-        <scope>provided</scope>
-        <optional>true</optional>
-      </dependency>
-      <dependency>
-        <groupId>org.springframework</groupId>
-        <artifactId>spring</artifactId>
-        <version>2.0.6</version>
-        <scope>provided</scope>
-        <optional>true</optional>
-      </dependency>
 
     </dependencies>
   </dependencyManagement>

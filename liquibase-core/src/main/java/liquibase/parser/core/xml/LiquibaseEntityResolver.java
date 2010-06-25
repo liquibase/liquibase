@@ -12,7 +12,7 @@ import org.xml.sax.SAXException;
 import org.xml.sax.ext.EntityResolver2;
 
 /**
- * Finds the LiquiBase schema from the classpath rather than fetching it over the Internet.
+ * Finds the Liquibase schema from the classpath rather than fetching it over the Internet.
  * Also resolve external entities using a resourceAccessor if it's provided
  */
 public class LiquibaseEntityResolver implements EntityResolver2 {
