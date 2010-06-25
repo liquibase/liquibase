@@ -334,7 +334,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 			} else if (changeSet != null && change == null) {
 				change = ChangeFactory.getInstance().create(localName);
 				if (change == null) {
-					throw new SAXException("Unknown LiquiBase extension: "
+					throw new SAXException("Unknown Liquibase extension: "
 							+ localName
 							+ ".  Are you missing a jar from your classpath?");
 				}

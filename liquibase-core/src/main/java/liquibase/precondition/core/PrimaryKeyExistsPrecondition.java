@@ -3,9 +3,7 @@ package liquibase.precondition.core;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
-import liquibase.exception.DatabaseException;
-import liquibase.exception.PreconditionErrorException;
-import liquibase.exception.PreconditionFailedException;
+import liquibase.exception.*;
 import liquibase.precondition.Precondition;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.DatabaseSnapshotGeneratorFactory;
@@ -38,6 +36,14 @@ public class PrimaryKeyExistsPrecondition implements Precondition {
 
     public void setTableName(String tableName) {
         this.tableName = tableName;
+    }
+
+    public Warnings warn(Database database) {
+        return new Warnings();
+    }
+
+    public ValidationErrors validate(Database database) {
+        return new ValidationErrors();
     }
 
     public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet) throws PreconditionFailedException, PreconditionErrorException {

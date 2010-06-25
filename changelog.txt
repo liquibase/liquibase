@@ -1,4 +1,4 @@
-LiquiBase Core Changelog
+Liquibase Core Changelog
 ==========================================
 
 Change in version 2.0.M1 (2009.6.24)
@@ -287,7 +287,7 @@ Changes in version 0.7.0 (2007.3.16)
 -------------------------------------
 - Changed MD5Sum logic.  !! Need to run 'update databasechangelog set md5sum=null' !!
 - Added support for autoIncrement columns in createTableChange
-- Switched to LiquiBase name, including all package structures
+- Switched to Liquibase name, including all package structures
 - Moved code to SourceForge
 
 

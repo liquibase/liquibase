@@ -233,7 +233,7 @@
             <column name="postalcode" value="01235"/>
         </insert>
         <insert tableName="address">
-            <column name="line1" value="One LiquiBase Way"/>
+            <column name="line1" value="One Liquibase Way"/>
             <column name="city" value="Fargo"/>
             <column name="state" value="ND"/>
             <column name="postalcode" value="58103"/>

@@ -1,7 +1,7 @@
 package liquibase.exception;
 
 /**
- * Base class for all LiquiBase exceptions.
+ * Base class for all Liquibase exceptions.
  */
 public class LiquibaseException extends Exception{
 

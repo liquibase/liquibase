@@ -24,8 +24,8 @@ import liquibase.statement.SqlStatement;
  * <li>Instance of SqlGenerator subclass is created when registered with SqlGeneratorFactory</li>
  * <li>For each SqlStatement to execute, SqlGeneratorFactory calls supports() to determine if the given SqlGenerator will work for the current SqlStatement/Database combination</li>
  * <li>SqlGeneratorFactory calls getPriority to determine which of all the SqlGenerators that support a given SqlStatement/Database combination is the best to use.</li>
- * <li>LiquiBase calls validate() on the best SqlGenerator to determine if the data contained in the SqlStatement is correct and complete for the given Database</li>
- * <li>If validate returns a no-error ValidationErrors object, LiquiBase will call the generateSql() method and execute the resuling SQL against the database.</li>
+ * <li>Liquibase calls validate() on the best SqlGenerator to determine if the data contained in the SqlStatement is correct and complete for the given Database</li>
+ * <li>If validate returns a no-error ValidationErrors object, Liquibase will call the generateSql() method and execute the resuling SQL against the database.</li>
  * </ol>
  * @param <StatementType> Used to specify which type of SqlStatement this generator supports.
  * If it supports multiple SqlStatement types, pass SqlStatement.  The SqlGeneratorFactory will use this paramter to augment the response from the supports() method
@@ -57,7 +57,7 @@ public interface SqlGenerator<StatementType extends SqlStatement> extends Priori
 
     /**
      * Validate the data contained in the SqlStatement.  If there are no errors, return an empty ValidationErrors object, not a null value.
-     * LiquiBase will inspect the ValidationErrors result before attempting to call generateSql.
+     * Liquibase will inspect the ValidationErrors result before attempting to call generateSql.
      */
     public ValidationErrors validate(StatementType statement, Database database, SqlGeneratorChain sqlGeneratorChain);
 

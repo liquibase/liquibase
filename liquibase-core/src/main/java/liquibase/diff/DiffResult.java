@@ -980,12 +980,7 @@ public class DiffResult {
 			String schema = referenceSnapshot.getSchema();
 			for (Table table : referenceSnapshot.getTables()) {
 				List<Change> changes = new ArrayList<Change>();
-				List<Map> rs = ExecutorService.getInstance().getExecutor(
-						referenceSnapshot.getDatabase()).queryForList(
-						new RawSqlStatement("SELECT * FROM "
-								+ referenceSnapshot.getDatabase()
-										.escapeTableName(schema,
-												table.getName())));
+				List<Map> rs = ExecutorService.getInstance().getExecutor(referenceSnapshot.getDatabase()).queryForList(new RawSqlStatement("SELECT * FROM "+ referenceSnapshot.getDatabase().escapeTableName(schema,table.getName())));
 
 				if (rs.size() == 0) {
 					continue;

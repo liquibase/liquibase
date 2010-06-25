@@ -5,6 +5,8 @@ import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.exception.PreconditionErrorException;
 import liquibase.exception.PreconditionFailedException;
+import liquibase.exception.ValidationErrors;
+import liquibase.exception.Warnings;
 import liquibase.precondition.Precondition;
 
 /**
@@ -27,6 +29,14 @@ public class DBMSPrecondition implements Precondition {
     }
 
 
+    public Warnings warn(Database database) {
+        return new Warnings();
+    }
+
+    public ValidationErrors validate(Database database) {
+        return new ValidationErrors();
+    }
+    
     public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet) throws PreconditionFailedException, PreconditionErrorException {
         try {
             String dbType = database.getTypeName();

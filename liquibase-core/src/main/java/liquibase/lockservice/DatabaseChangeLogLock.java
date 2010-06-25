@@ -3,7 +3,7 @@ package liquibase.lockservice;
 import java.util.Date;
 
 /**
- * Information about the database changelog lock which allows only one instance of LiquiBase to attempt to
+ * Information about the database changelog lock which allows only one instance of Liquibase to attempt to
  * update a database at a time. Immutable class
  */
 public class DatabaseChangeLogLock {

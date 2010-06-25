@@ -1,5 +1,7 @@
 package liquibase.precondition.core;
 
+import liquibase.exception.ValidationErrors;
+import liquibase.exception.Warnings;
 import liquibase.precondition.Precondition;
 import liquibase.database.Database;
 import liquibase.changelog.DatabaseChangeLog;
@@ -31,6 +33,14 @@ public class ChangeLogPropertyDefinedPrecondition implements Precondition {
 
     public void setValue(String value) {
         this.value = value;
+    }
+    
+    public Warnings warn(Database database) {
+        return new Warnings();
+    }
+
+    public ValidationErrors validate(Database database) {
+        return new ValidationErrors();
     }
 
     public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet) throws PreconditionFailedException, PreconditionErrorException {

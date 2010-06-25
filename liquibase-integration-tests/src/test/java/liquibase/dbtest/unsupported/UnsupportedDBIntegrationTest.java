@@ -2,7 +2,7 @@ package liquibase.dbtest.unsupported;
 
 /**
  * TODO: find a good way to implement that doesn't require wrapping the connection object.
- * Use to test using Derby, but changing the reported type so LiquiBase doesn't recognize it.
+ * Use to test using Derby, but changing the reported type so Liquibase doesn't recognize it.
  */
 @SuppressWarnings({"all"})
 public abstract class UnsupportedDBIntegrationTest { // extends AbstractIntegrationTest {

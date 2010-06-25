@@ -29,7 +29,7 @@ import java.util.Map;
 /**
  * Class to simplify execution of SqlStatements.  Based heavily on <a href="http://static.springframework.org/spring/docs/2.0.x/reference/jdbc.html">Spring's JdbcTemplate</a>.
  * <br><br>
- * <b>Note: This class is currently intended for LiquiBase-internal use only and may change without notice in the future</b>
+ * <b>Note: This class is currently intended for Liquibase-internal use only and may change without notice in the future</b>
  */
 @SuppressWarnings({"unchecked"})
 public class JdbcExecutor extends AbstractExecutor implements Executor {

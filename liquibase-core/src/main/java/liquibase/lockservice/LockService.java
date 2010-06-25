@@ -196,7 +196,7 @@ public class LockService {
     }
 
     /**
-     * Clears information the lock handler knows about the tables.  Should only be called by LiquiBase internal calls
+     * Clears information the lock handler knows about the tables.  Should only be called by Liquibase internal calls
      */
     public void reset() {
         hasChangeLogLock = false;

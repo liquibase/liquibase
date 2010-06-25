@@ -3,10 +3,7 @@ package liquibase.precondition;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
-import liquibase.exception.CustomPreconditionErrorException;
-import liquibase.exception.CustomPreconditionFailedException;
-import liquibase.exception.PreconditionErrorException;
-import liquibase.exception.PreconditionFailedException;
+import liquibase.exception.*;
 import liquibase.precondition.core.ErrorPrecondition;
 import liquibase.precondition.core.FailedPrecondition;
 import liquibase.util.ObjectUtil;
@@ -45,7 +42,14 @@ public class CustomPreconditionWrapper implements Precondition {
         this.paramValues.put(name, value);
     }
 
+    public Warnings warn(Database database) {
+        return new Warnings();
+    }
 
+    public ValidationErrors validate(Database database) {
+        return new ValidationErrors();
+    }
+    
     public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet) throws PreconditionFailedException, PreconditionErrorException {
         CustomPrecondition customPrecondition;
         try {

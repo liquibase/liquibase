@@ -14,7 +14,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 /**
- * Adapts CustomChange implementations to the standard change system used by LiquiBase.
+ * Adapts CustomChange implementations to the standard change system used by Liquibase.
  * Custom change implementations should implement CustomSqlChange or CustomTaskChange
  *
  * @see liquibase.change.custom.CustomSqlChange

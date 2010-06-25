@@ -31,7 +31,7 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 /**
- * Class for executing LiquiBase via the command line.
+ * Class for executing Liquibase via the command line.
  */
 public class Main {
     protected ClassLoader classLoader;
@@ -68,7 +68,7 @@ public class Main {
         try {
             String shouldRunProperty = System.getProperty(Liquibase.SHOULD_RUN_SYSTEM_PROPERTY);
             if (shouldRunProperty != null && !Boolean.valueOf(shouldRunProperty)) {
-                System.out.println("LiquiBase did not run because '" + Liquibase.SHOULD_RUN_SYSTEM_PROPERTY + "' system property was set to false");
+                System.out.println("Liquibase did not run because '" + Liquibase.SHOULD_RUN_SYSTEM_PROPERTY + "' system property was set to false");
                 return;
             }
 
@@ -77,7 +77,7 @@ public class Main {
                 main.printHelp(System.out);
                 return;
             } else if (args.length == 1 && "--version".equals(args[0])) {
-                System.out.println("LiquiBase Version: " + LiquibaseUtil.getBuildVersion() + StreamUtil.getLineSeparator());
+                System.out.println("Liquibase Version: " + LiquibaseUtil.getBuildVersion() + StreamUtil.getLineSeparator());
                 return;
             }
 
@@ -115,19 +115,19 @@ public class Main {
                 if (e.getCause() instanceof ValidationFailedException) {
                     ((ValidationFailedException) e.getCause()).printDescriptiveError(System.out);
                 } else {
-                    System.out.println("LiquiBase Update Failed: " + message + generateLogLevelWarningMessage());
+                    System.out.println("Liquibase Update Failed: " + message + generateLogLevelWarningMessage());
                     LogFactory.getLogger().info(message, e);
                 }
                 System.exit(-1);
             }
 
             if ("update".equals(main.command)) {
-                System.out.println("LiquiBase Update Successful");
+                System.out.println("Liquibase Update Successful");
             } else if (main.command.startsWith("rollback") && !main.command.endsWith("SQL")) {
-                System.out.println("LiquiBase Rollback Successful");
+                System.out.println("Liquibase Rollback Successful");
             }
         } catch (Throwable e) {
-            String message = "Unexpected error running LiquiBase: " + e.getMessage();
+            String message = "Unexpected error running Liquibase: " + e.getMessage();
             System.out.println(message);
             LogFactory.getLogger().severe(message, e);
             System.exit(-3);
@@ -345,7 +345,7 @@ public class Main {
         stream.println(" --defaultsFile=</path/to/file.properties>  File with default option values");
         stream.println("                                            (default: ./liquibase.properties)");
         stream.println(" --includeSystemClasspath=<true|false>      Include the system classpath");
-        stream.println("                                            in the LiquiBase classpath");
+        stream.println("                                            in the Liquibase classpath");
         stream.println("                                            (default: true)");
         stream.println(" --promptForNonLocalDatabase=<true|false>   Prompt if non-localhost");
         stream.println("                                            databases (default: false)");
@@ -366,6 +366,7 @@ public class Main {
         stream.println("");
         stream.println("Optional Diff Parameters:");
         stream.println(" --referenceDriver=<jdbc.driver.ClassName>  Reference Database driver class name");
+        stream.println(" --dataOutputDirectory=DIR                  Output data as CSV in the given directory");
         stream.println("");
         stream.println("Change Log Properties:");
         stream.println(" -D<property.name>=<property.value>         Pass a name/value pair for");
@@ -767,6 +768,8 @@ public class Main {
                 password = value;
             } else if ("referenceDefaultSchemaName".equalsIgnoreCase(attributeName)) {
                 defaultSchemaName = value;
+            } else if ("dataOutputDirectory".equalsIgnoreCase(attributeName)) {
+                dataDir = value;
             }
         }
 

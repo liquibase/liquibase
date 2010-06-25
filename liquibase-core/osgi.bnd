@@ -43,7 +43,7 @@ Export-Package:\
 #  Embed-Transitive
 
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
-LiquiBase-Package: liquibase.change,\
+Liquibase-Package: liquibase.change,\
  liquibase.database,\
  liquibase.diff,\
  liquibase.executor,\

@@ -149,4 +149,26 @@ public class StringUtilsTest {
         String[] result = StringUtils.processMutliLineSQL(sb.toString(), true, null);
         assertEquals("Unexpected amount of statements returned",2, result.length);
     }
+
+    @Test
+    public void splitWithGo() {
+        String testString = "SELECT *\n" +
+                "                                FROM sys.objects\n" +
+                "                                WHERE object_id = OBJECT_ID(N'[test].[currval]')\n" +
+                "                                AND type in (N'FN', N'IF', N'TF', N'FS', N'FT')\n" +
+                "                        )\n" +
+                "                        DROP FUNCTION [test].[currval]\n" +
+                "go\n" +
+                "                        IF EXISTS\n" +
+                "                        (\n" +
+                "                        SELECT *\n" +
+                "                        FROM sys.objects\n" +
+                "                        WHERE object_id = OBJECT_ID(N'[test].[nextval]')\n" +
+                "                        AND type in (N'P', N'PC')\n" +
+                "                        )\n" +
+                "                        DROP PROCEDURE [test].[nextval]:";
+
+        String[] strings = StringUtils.splitSQL(testString, null);
+        assertEquals(2, strings.length);
+    }
 }

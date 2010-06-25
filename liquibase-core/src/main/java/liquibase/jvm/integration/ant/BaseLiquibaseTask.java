@@ -28,7 +28,7 @@ import java.util.logging.Level;
 import java.util.logging.LogRecord;
 
 /**
- * Base class for all Ant LiquiBase tasks.  This class sets up LiquiBase and defines parameters
+ * Base class for all Ant Liquibase tasks.  This class sets up Liquibase and defines parameters
  * that are common to all tasks.
  */
 public class BaseLiquibaseTask extends Task {
@@ -308,7 +308,7 @@ public class BaseLiquibaseTask extends Task {
     protected boolean shouldRun() {
         String shouldRunProperty = System.getProperty(Liquibase.SHOULD_RUN_SYSTEM_PROPERTY);
         if (shouldRunProperty != null && !Boolean.valueOf(shouldRunProperty)) {
-            log("LiquiBase did not run because '" + Liquibase.SHOULD_RUN_SYSTEM_PROPERTY + "' system property was set to false");
+            log("Liquibase did not run because '" + Liquibase.SHOULD_RUN_SYSTEM_PROPERTY + "' system property was set to false");
             return false;
         }
         return true;
