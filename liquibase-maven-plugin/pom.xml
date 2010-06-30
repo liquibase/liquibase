@@ -1,62 +1,41 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <artifactId>liquibase-maven</artifactId>
+  <packaging>maven-plugin</packaging>
+
+  <name>Liquibase Maven Plugin</name>
+  <description>A Maven plugin wraps up some of the functionality of Liquibase</description>
 
   <parent>
     <artifactId>liquibase-all</artifactId>
     <groupId>org.liquibase</groupId>
     <version>2.0-rc2-SNAPSHOT</version>
+    <relativePath>../pom.xml</relativePath>
   </parent>
 
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>org.liquibase</groupId>
-  <artifactId>liquibase-maven</artifactId>
-  <version>${parent.version}</version>
-  <packaging>maven-plugin</packaging>
-  <name>Liquibase Maven Plugin</name>
-  <description>A Maven plugin wraps up some of the functionality of Liquibase</description>
-
-    <organization>
-      <name>Liquibase.org</name>
-      <url>http://www.liquibase.org</url>
-    </organization>
-
-    <licenses>
-      <license>
-        <url>http://www.apache.org/licenses/LICENSE-2.0</url>
-        <name>Apache License, Version 2.0 </name>
-      </license>
-    </licenses>
-
-    <issueManagement>
-      <url>http://liquibase.jira.com/browse/CORE</url>
-    </issueManagement>
-
-    <scm>
-      <url>http://liquibase.jira.com/svn/CORE</url>
-    </scm>
-    
   <dependencies>
-      <dependency>
+    <dependency>
       <groupId>org.apache.maven</groupId>
       <artifactId>maven-plugin-api</artifactId>
-      <version>2.0</version>
     </dependency>
+
     <dependency>
       <groupId>org.apache.maven</groupId>
       <artifactId>maven-project</artifactId>
-      <version>2.0</version>
     </dependency>
+
     <dependency>
       <groupId>org.liquibase</groupId>
       <artifactId>liquibase</artifactId>
       <version>${project.version}</version>
     </dependency>
+
     <dependency>
       <groupId>org.apache.maven.shared</groupId>
       <artifactId>maven-plugin-testing-harness</artifactId>
-      <version>1.1</version>
-      <scope>test</scope>
     </dependency>
   </dependencies>
 
