@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-
   <modelVersion>4.0.0</modelVersion>
+
   <groupId>org.liquibase</groupId>
   <artifactId>liquibase-all</artifactId>
   <version>2.0-rc2-SNAPSHOT</version>
   <packaging>pom</packaging>
+
   <name>Liquibase Parent Project</name>
   <description>Liquibase is a tool for managing and executing database changes.</description>
   <url>http://www.liquibase.org</url>
@@ -16,6 +17,26 @@
     <maven>2.1.0-M1</maven>
   </prerequisites>
   -->
+
+  <organization>
+    <name>Liquibase.org</name>
+    <url>http://www.liquibase.org</url>
+  </organization>
+
+  <licenses>
+    <license>
+      <url>http://www.apache.org/licenses/LICENSE-2.0</url>
+      <name>Apache License, Version 2.0 </name>
+    </license>
+  </licenses>
+
+  <issueManagement>
+    <url>http://liquibase.jira.com/browse/CORE</url>
+  </issueManagement>
+  
+  <scm>
+    <url>http://liquibase.jira.com/svn/CORE</url>
+  </scm>
 
   <!-- 2.1.0-M1 and up, hence prerequisites -->
   <properties>
@@ -33,6 +54,85 @@
 
   <dependencyManagement>
     <dependencies>
+
+      <dependency>
+        <groupId>org.apache.maven</groupId>
+        <artifactId>maven-plugin-api</artifactId>
+        <version>2.0</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.maven</groupId>
+        <artifactId>maven-project</artifactId>
+        <version>2.0</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.maven.shared</groupId>
+        <artifactId>maven-plugin-testing-harness</artifactId>
+        <version>1.1</version>
+        <scope>test</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>junit</groupId>
+        <artifactId>junit</artifactId>
+        <version>4.8.1</version>
+        <scope>test</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>org.easymock</groupId>
+        <artifactId>easymockclassextension</artifactId>
+        <version>2.2</version>
+        <scope>test</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>ant</groupId>
+        <artifactId>ant</artifactId>
+        <version>1.6.5</version>
+        <scope>provided</scope>
+        <optional>true</optional>
+      </dependency>
+
+      <dependency>
+        <groupId>javax.servlet</groupId>
+        <artifactId>servlet-api</artifactId>
+        <version>2.4</version>
+        <scope>provided</scope>
+        <optional>true</optional>
+      </dependency>
+
+      <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring</artifactId>
+        <version>2.0.6</version>
+        <scope>provided</scope>
+        <optional>true</optional>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.maven.shared</groupId>
+        <artifactId>maven-verifier</artifactId>
+        <version>1.2</version>
+        <scope>test</scope>
+      </dependency>
+
+      <!-- JDBC drivers -->
+      <dependency>
+        <groupId>hsqldb</groupId>
+        <artifactId>hsqldb</artifactId>
+        <version>1.8.0.7</version>
+        <scope>test</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.derby</groupId>
+        <artifactId>derby</artifactId>
+        <version>10.2.2.0</version>
+        <scope>test</scope>
+      </dependency>
 
     </dependencies>
   </dependencyManagement>
@@ -59,31 +159,35 @@
         <plugin>
             <artifactId>maven-surefire-plugin</artifactId>
             <configuration>
-                <redirectTestOutputToFile>true</redirectTestOutputToFile>
-                <reportFormat>plain</reportFormat>
+              <redirectTestOutputToFile>true</redirectTestOutputToFile>
+              <reportFormat>plain</reportFormat>
             </configuration>
         </plugin>
-
-               <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-enforcer-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>enforce-java</id>
-                        <phase>compile</phase>
-                        <goals>
-                            <goal>enforce</goal>
-                        </goals>
-                        <configuration>
-                            <rules>
-                                <requireJavaVersion>
-                                    <version>1.5</version>
-                                </requireJavaVersion>
-                            </rules>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-enforcer-plugin</artifactId>
+          <executions>
+            <execution>
+              <id>enforce-java</id>
+              <phase>compile</phase>
+              <goals>
+                <goal>enforce</goal>
+              </goals>
+              <configuration>
+                <rules>
+                  <requireJavaVersion>
+                    <version>1.5</version>
+                  </requireJavaVersion>
+                </rules>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>build-helper-maven-plugin</artifactId>
+          <version>1.4</version>
+        </plugin>
       </plugins>
     </pluginManagement>
 
