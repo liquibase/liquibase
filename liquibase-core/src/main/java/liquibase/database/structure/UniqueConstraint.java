@@ -103,7 +103,7 @@ public class UniqueConstraint implements DatabaseObject,
 		if (result) {
 			if (null == this.getTable()) {
 				result = null == that.getTable();
-			} else if (null == this.getTable()) {
+			} else if (null == that.getTable()) {
 				result = false;
 			} else {
 				result = this.getTable().getName().equals(
