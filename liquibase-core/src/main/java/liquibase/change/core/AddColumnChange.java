@@ -49,10 +49,6 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
         return columns;
     }
 
-    public ColumnConfig getLastColumn() {
-        return (columns.size() > 0) ? columns.get(columns.size() - 1) : null;
-    }
-
     public void addColumn(ColumnConfig column) {
         columns.add(column);
     }
