@@ -70,6 +70,10 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns 
       	columns.add((LoadDataColumnConfig) column);
     }
 
+    public List<ColumnConfig> getColumns() {
+        return (List<ColumnConfig>) (List) columns;
+    }
+
     public SqlStatement[] generateStatements(Database database) {
         try {
             CSVReader reader = getCSVReader();

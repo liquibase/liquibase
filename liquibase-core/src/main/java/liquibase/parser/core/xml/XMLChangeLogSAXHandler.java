@@ -380,18 +380,19 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 					String attributeValue = atts.getValue(i);
 					setProperty(constraints, attributeName, attributeValue);
 				}
-				ColumnConfig lastColumn;
-				if (change instanceof AddColumnChange) {
-					lastColumn = ((AddColumnChange) change).getLastColumn();
-				} else if (change instanceof CreateTableChange) {
-					lastColumn = ((CreateTableChange) change).getColumns()
-							.get(
-									((CreateTableChange) change).getColumns()
-											.size() - 1);
-				} else {
+				ColumnConfig lastColumn = null;
+                if (change instanceof ChangeWithColumns) {
+                    List<ColumnConfig> columns = ((ChangeWithColumns) change).getColumns();
+                    if (columns != null && columns.size() > 0) {
+                        lastColumn = columns.get(columns.size() - 1);
+                    }
+                } else {
 					throw new RuntimeException("Unexpected change: "
 							+ change.getClass().getName());
 				}
+                if (lastColumn == null) {
+                    throw new RuntimeException("Could not determine column to add constraint to");
+                }
 				lastColumn.setConstraints(constraints);
 			} else if ("param".equals(qName)) {
 				if (change instanceof CustomChangeWrapper) {

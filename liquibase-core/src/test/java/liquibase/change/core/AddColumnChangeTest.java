@@ -66,25 +66,6 @@ public class AddColumnChangeTest extends AbstractChangeTest {
         assertEquals(0, change.getColumns().size());
     }
 
-    @Test
-    public void getLastColumn() {
-        ColumnConfig columnA = new ColumnConfig().setName("a");
-        ColumnConfig columnB = new ColumnConfig().setName("b");
-
-        AddColumnChange change = new AddColumnChange();
-        assertEquals(0, change.getColumns().size());
-        assertNull(change.getLastColumn());
-
-        change.addColumn(columnA);
-        assertEquals(1, change.getColumns().size());
-        assertEquals(columnA, change.getLastColumn());
-
-        change.addColumn(columnB);
-        assertEquals(2, change.getColumns().size());
-        assertEquals(columnB, change.getLastColumn());
-
-    }
-
     @Override
     @Test
     public void generateStatement() throws Exception {
