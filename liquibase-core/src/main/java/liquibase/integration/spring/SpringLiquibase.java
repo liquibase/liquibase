@@ -1,4 +1,4 @@
-package liquibase.jvm.integration.spring;
+package liquibase.integration.spring;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;

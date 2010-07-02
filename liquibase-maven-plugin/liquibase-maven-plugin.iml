@@ -19,7 +19,7 @@
     <orderEntry type="library" exported="" name="Maven: org.apache.maven:maven-model:2.0" level="project" />
     <orderEntry type="library" exported="" name="Maven: org.codehaus.plexus:plexus-utils:1.0.4" level="project" />
     <orderEntry type="library" exported="" name="Maven: org.codehaus.plexus:plexus-container-default:1.0-alpha-8" level="project" />
-    <orderEntry type="library" exported="" name="Maven: junit:junit:3.8.1" level="project" />
+    <orderEntry type="library" scope="TEST" name="Maven: junit:junit:4.8.1" level="project" />
     <orderEntry type="library" exported="" name="Maven: classworlds:classworlds:1.1-alpha-2" level="project" />
     <orderEntry type="library" exported="" name="Maven: org.apache.maven:maven-artifact-manager:2.0" level="project" />
     <orderEntry type="library" exported="" name="Maven: org.apache.maven:maven-repository-metadata:2.0" level="project" />
