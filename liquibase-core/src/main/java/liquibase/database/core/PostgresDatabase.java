@@ -212,6 +212,9 @@ public class PostgresDatabase extends AbstractDatabase {
 
     @Override
     public String convertRequestedSchemaToSchema(String requestedSchema) throws DatabaseException {
+        if (requestedSchema == null)
+            requestedSchema = getDefaultSchemaName();
+
         if (requestedSchema == null) {
             // Return the catalog name instead..
             return getDefaultCatalogName();
