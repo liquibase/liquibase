@@ -879,39 +879,6 @@
         <root url="jar://$MAVEN_REPOSITORY$/junit/junit/4.8.1/junit-4.8.1-sources.jar!/" />
       </SOURCES>
     </library>
-    <library name="Maven: org.liquibase.samples:liquibase-ext-change:2.0-rc2-SNAPSHOT">
-      <CLASSES>
-        <root url="jar://$MAVEN_REPOSITORY$/org/liquibase/samples/liquibase-ext-change/2.0-rc2-SNAPSHOT/liquibase-ext-change-2.0-rc2-SNAPSHOT.jar!/" />
-      </CLASSES>
-      <JAVADOC>
-        <root url="jar://$MAVEN_REPOSITORY$/org/liquibase/samples/liquibase-ext-change/2.0-rc2-SNAPSHOT/liquibase-ext-change-2.0-rc2-SNAPSHOT-javadoc.jar!/" />
-      </JAVADOC>
-      <SOURCES>
-        <root url="jar://$MAVEN_REPOSITORY$/org/liquibase/samples/liquibase-ext-change/2.0-rc2-SNAPSHOT/liquibase-ext-change-2.0-rc2-SNAPSHOT-sources.jar!/" />
-      </SOURCES>
-    </library>
-    <library name="Maven: org.liquibase.samples:liquibase-ext-changewithnestedtags:2.0-rc2-SNAPSHOT">
-      <CLASSES>
-        <root url="jar://$MAVEN_REPOSITORY$/org/liquibase/samples/liquibase-ext-changewithnestedtags/2.0-rc2-SNAPSHOT/liquibase-ext-changewithnestedtags-2.0-rc2-SNAPSHOT.jar!/" />
-      </CLASSES>
-      <JAVADOC>
-        <root url="jar://$MAVEN_REPOSITORY$/org/liquibase/samples/liquibase-ext-changewithnestedtags/2.0-rc2-SNAPSHOT/liquibase-ext-changewithnestedtags-2.0-rc2-SNAPSHOT-javadoc.jar!/" />
-      </JAVADOC>
-      <SOURCES>
-        <root url="jar://$MAVEN_REPOSITORY$/org/liquibase/samples/liquibase-ext-changewithnestedtags/2.0-rc2-SNAPSHOT/liquibase-ext-changewithnestedtags-2.0-rc2-SNAPSHOT-sources.jar!/" />
-      </SOURCES>
-    </library>
-    <library name="Maven: org.liquibase.samples:liquibase-ext-sqlgenerator:2.0-rc2-SNAPSHOT">
-      <CLASSES>
-        <root url="jar://$MAVEN_REPOSITORY$/org/liquibase/samples/liquibase-ext-sqlgenerator/2.0-rc2-SNAPSHOT/liquibase-ext-sqlgenerator-2.0-rc2-SNAPSHOT.jar!/" />
-      </CLASSES>
-      <JAVADOC>
-        <root url="jar://$MAVEN_REPOSITORY$/org/liquibase/samples/liquibase-ext-sqlgenerator/2.0-rc2-SNAPSHOT/liquibase-ext-sqlgenerator-2.0-rc2-SNAPSHOT-javadoc.jar!/" />
-      </JAVADOC>
-      <SOURCES>
-        <root url="jar://$MAVEN_REPOSITORY$/org/liquibase/samples/liquibase-ext-sqlgenerator/2.0-rc2-SNAPSHOT/liquibase-ext-sqlgenerator-2.0-rc2-SNAPSHOT-sources.jar!/" />
-      </SOURCES>
-    </library>
   </component>
 </project>
 
