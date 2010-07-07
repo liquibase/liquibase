@@ -366,7 +366,8 @@ public class Main {
         stream.println("");
         stream.println("Optional Diff Parameters:");
         stream.println(" --referenceDriver=<jdbc.driver.ClassName>  Reference Database driver class name");
-        stream.println(" --dataOutputDirectory=DIR                  Output data as CSV in the given directory");
+        stream.println(" --dataOutputDirectory=DIR                  Output data as CSV in the given ");
+        stream.println("                                            directory");
         stream.println("");
         stream.println("Change Log Properties:");
         stream.println(" -D<property.name>=<property.value>         Pass a name/value pair for");
