@@ -647,7 +647,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 				inModifySql = false;
 				modifySqlDbmsList = null;
 				modifySqlContexts = null;
-				modifySqlAppliedOnRollback = true;
+				modifySqlAppliedOnRollback = false;
 			}
 		} catch (Exception e) {
 			log.severe("Error thrown as a SAXException: " + e.getMessage(), e);
