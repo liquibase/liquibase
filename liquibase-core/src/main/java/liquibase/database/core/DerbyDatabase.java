@@ -2,13 +2,23 @@ package liquibase.database.core;
 
 import liquibase.database.AbstractDatabase;
 import liquibase.database.DatabaseConnection;
-import liquibase.database.DatabaseFactory;
 import liquibase.exception.DatabaseException;
 import liquibase.logging.LogFactory;
+import liquibase.logging.Logger;
 
+import java.lang.reflect.Method;
 import java.sql.Driver;
 
 public class DerbyDatabase extends AbstractDatabase {
+
+    private Logger log = LogFactory.getLogger();
+
+    protected int driverVersionMajor;
+    protected int driverVersionMinor;
+
+    public DerbyDatabase() {
+        determineDriverVersion();
+    }
 
     public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
         return "Apache Derby".equalsIgnoreCase(conn.getDatabaseProductName());
@@ -37,7 +47,10 @@ public class DerbyDatabase extends AbstractDatabase {
 
     @Override
     public boolean supportsSequences() {
-        return false;
+        if (driverVersionMajor >= 10 && driverVersionMinor >= 6)
+            return true;
+        else
+            return false;
     }
 
     public boolean supportsInitiallyDeferrableColumns() {
@@ -103,6 +116,32 @@ public class DerbyDatabase extends AbstractDatabase {
             } catch (Exception e) {
                 //ok
             }
+        }
+    }
+
+    /**
+     * Determine Apache Derby driver major/minor version.
+     */
+    @SuppressWarnings({ "static-access", "unchecked" })
+    protected void determineDriverVersion() {
+        try {
+            // Locate the Derby sysinfo class and query its version info
+            final Class sysinfoClass = getClass().forName(
+                    "org.apache.derby.tools.sysinfo");
+            final Method majorVersionGetter = sysinfoClass.getMethod(
+                    "getMajorVersion");
+            final Method minorVersionGetter = sysinfoClass.getMethod(
+                    "getMinorVersion");
+            driverVersionMajor = ((Integer) majorVersionGetter.invoke(
+                    null)).intValue();
+            driverVersionMinor = ((Integer) minorVersionGetter.invoke(
+                    null)).intValue();
+        } catch (Exception e) {
+            log.warning("Unable to load/access Apache Derby driver class " +
+                    "org.apache.derby.tools.sysinfo to check version: " +
+                    e.getMessage());
+            driverVersionMajor = -1;
+            driverVersionMinor = -1;
         }
     }
 }
