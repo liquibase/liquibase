@@ -152,12 +152,17 @@ public class Index implements DatabaseObject, Comparable<Index> {
         if (this.unique != null && !this.unique) {
             stringBuffer.append(" unique ");
         }
-        stringBuffer.append(" on ").append(table.getName()).append("(");
-        for (String column : columns) {
-            stringBuffer.append(column).append(", ");
+        if (table != null && columns != null) {
+            stringBuffer.append(" on ").append(table.getName());
+            if (columns != null) {
+                stringBuffer.append("(");
+                for (String column : columns) {
+                    stringBuffer.append(column).append(", ");
+                }
+                stringBuffer.delete(stringBuffer.length() - 2, stringBuffer.length());
+                stringBuffer.append(")");
+            }
         }
-        stringBuffer.delete(stringBuffer.length() - 2, stringBuffer.length());
-        stringBuffer.append(")");
         return stringBuffer.toString();
     }
 }
