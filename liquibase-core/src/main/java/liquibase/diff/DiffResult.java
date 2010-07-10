@@ -7,6 +7,7 @@ import liquibase.change.core.*;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.database.structure.*;
+import liquibase.database.typeconversion.TypeConverter;
 import liquibase.database.typeconversion.TypeConverterFactory;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.ExecutorService;
@@ -354,14 +355,9 @@ public class DiffResult {
 				if (baseColumn != null) {
 					if (baseColumn.isDataTypeDifferent(column)) {
 						out.println("           from "
-								+ baseColumn
-										.getDataTypeString(referenceSnapshot
-												.getDatabase())
+								+ TypeConverterFactory.getInstance().findTypeConverter(referenceSnapshot.getDatabase()).convertToDatabaseTypeString(baseColumn, referenceSnapshot.getDatabase())
 								+ " to "
-								+ targetSnapshot.getColumn(
-										column.getTable().getName(),
-										column.getName()).getDataTypeString(
-										targetSnapshot.getDatabase()));
+								+ TypeConverterFactory.getInstance().findTypeConverter(targetSnapshot.getDatabase()).convertToDatabaseTypeString(targetSnapshot.getColumn(column.getTable().getName(), column.getName()), targetSnapshot.getDatabase()));
 					}
 					if (baseColumn.isNullabilityDifferent(column)) {
 						Boolean nowNullable = targetSnapshot.getColumn(
@@ -769,16 +765,15 @@ public class DiffResult {
 				continue;
 			}
 
+            TypeConverter targetTypeConverter = TypeConverterFactory.getInstance().findTypeConverter(targetSnapshot.getDatabase());
 			boolean foundDifference = false;
-			Column referenceColumn = referenceSnapshot.getColumn(column
-					.getTable().getName(), column.getName());
+			Column referenceColumn = referenceSnapshot.getColumn(column.getTable().getName(), column.getName());
 			if (column.isDataTypeDifferent(referenceColumn)) {
 				ModifyDataTypeChange change = new ModifyDataTypeChange();
 				change.setTableName(column.getTable().getName());
 				change.setSchemaName(column.getTable().getSchema());
 				change.setColumnName(column.getName());
-				change.setNewDataType(referenceColumn
-						.getDataTypeString(targetSnapshot.getDatabase()));
+                change.setNewDataType(targetTypeConverter.convertToDatabaseTypeString(referenceColumn, targetSnapshot.getDatabase()));
 				changes.add(generateChangeSet(change));
 				foundDifference = true;
 			}
@@ -789,8 +784,7 @@ public class DiffResult {
 					change.setTableName(column.getTable().getName());
 					change.setSchemaName(column.getTable().getSchema());
 					change.setColumnName(column.getName());
-					change.setColumnDataType(referenceColumn
-							.getDataTypeString(targetSnapshot.getDatabase()));
+					change.setColumnDataType(targetTypeConverter.convertToDatabaseTypeString(referenceColumn, targetSnapshot.getDatabase()));
 
 					changes.add(generateChangeSet(change));
 					foundDifference = true;
@@ -799,8 +793,7 @@ public class DiffResult {
 					change.setTableName(column.getTable().getName());
 					change.setSchemaName(column.getTable().getSchema());
 					change.setColumnName(column.getName());
-					change.setColumnDataType(referenceColumn
-							.getDataTypeString(targetSnapshot.getDatabase()));
+					change.setColumnDataType(targetTypeConverter.convertToDatabaseTypeString(referenceColumn, targetSnapshot.getDatabase()));
 
 					changes.add(generateChangeSet(change));
 					foundDifference = true;
@@ -845,7 +838,7 @@ public class DiffResult {
 			ColumnConfig columnConfig = new ColumnConfig();
 			columnConfig.setName(column.getName());
 
-			String dataType = column.getDataTypeString(database);
+			String dataType = TypeConverterFactory.getInstance().findTypeConverter(database).convertToDatabaseTypeString(column, database);
 
 			columnConfig.setType(dataType);
 
@@ -898,7 +891,7 @@ public class DiffResult {
 			for (Column column : missingTable.getColumns()) {
 				ColumnConfig columnConfig = new ColumnConfig();
 				columnConfig.setName(column.getName());
-				columnConfig.setType(column.getDataTypeString(database));
+				columnConfig.setType(TypeConverterFactory.getInstance().findTypeConverter(database).convertToDatabaseTypeString(column, database));
 
 				ConstraintsConfig constraintsConfig = null;
 				if (column.isPrimaryKey()) {
