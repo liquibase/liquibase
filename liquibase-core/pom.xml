@@ -4,7 +4,7 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>liquibase</artifactId>
+    <artifactId>liquibase-core</artifactId>
     <name>Liquibase Library</name>
 
     <parent>
