@@ -402,9 +402,11 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
         if (databaseSnapshot.getIndex(indexName) != null) {
             return true;
         }
-        for (Index index : databaseSnapshot.getIndexes()) {
-            if (index.getColumnNames().replaceAll("\\s+","").equalsIgnoreCase(columnNames)) {
-                return true;
+        if (tableName != null && columnNames != null) {
+            for (Index index : databaseSnapshot.getIndexes()) {
+                if (index.getColumnNames().replaceAll("\\s+","").equalsIgnoreCase(columnNames.replaceAll("\\s+",""))) {
+                    return true;
+                }
             }
         }
         return false;

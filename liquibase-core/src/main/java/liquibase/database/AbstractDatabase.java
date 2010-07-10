@@ -857,6 +857,9 @@ public abstract class AbstractDatabase implements Database {
     }
 
     public String escapeStringForDatabase(String string) {
+        if (string == null) {
+            return null;
+        }
         return string.replaceAll("'", "''");
     }
 

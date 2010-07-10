@@ -51,17 +51,29 @@ public class IndexExistsPrecondition implements Precondition {
     }
 
     public ValidationErrors validate(Database database) {
-        return new ValidationErrors();
+        ValidationErrors validationErrors = new ValidationErrors();
+        if (getIndexName() == null && getTableName() == null && getColumnNames() == null) {
+            validationErrors.addError("indexName OR tableName and columnNames is required");
+        }
+        return validationErrors;
     }
 
     public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet) throws PreconditionFailedException, PreconditionErrorException {
         try {
             if (!DatabaseSnapshotGeneratorFactory.getInstance().getGenerator(database).hasIndex(getSchemaName(), getTableName(), getIndexName(), database, getColumnNames())) {
                 String name = "";
-                if (StringUtils.trimToNull(getTableName()) != null) {
-                    name += database.escapeStringForDatabase(getTableName())+".";
+
+                if (getIndexName() != null) {
+                    name += database.escapeStringForDatabase(getIndexName());
                 }
-                name += database.escapeStringForDatabase(getIndexName());
+
+                if (StringUtils.trimToNull(getTableName()) != null) {
+                    name += " on "+database.escapeStringForDatabase(getTableName());
+
+                    if (StringUtils.trimToNull(getColumnNames()) != null) {
+                        name += " columns "+getColumnNames();
+                    }
+                }
                 throw new PreconditionFailedException("Index "+ name +" does not exist", changeLog, this);
             }
         } catch (DatabaseException e) {
