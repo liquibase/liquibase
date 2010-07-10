@@ -18,6 +18,7 @@ import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.sql.DataSource;
 import java.sql.Connection;
+import java.util.Enumeration;
 
 /**
  * Servlet listener than can be added to web.xml to allow Liquibase to run on every application server startup.
@@ -73,9 +74,9 @@ public class LiquibaseServletListener implements ServletContextListener {
             return;
         }
 
-        String machineIncludes = servletContextEvent.getServletContext().getInitParameter("LIQUIBASE_HOST_INCLUDES");
-        String machineExcludes = servletContextEvent.getServletContext().getInitParameter("LIQUIBASE_HOST_EXCLUDES");
-        String failOnError = servletContextEvent.getServletContext().getInitParameter("LIQUIBASE_FAIL_ON_ERROR");
+        String machineIncludes = servletContextEvent.getServletContext().getInitParameter("liquibase.host.includes");
+        String machineExcludes = servletContextEvent.getServletContext().getInitParameter("liquibase.host.excludes");
+        String failOnError = servletContextEvent.getServletContext().getInitParameter("liquibase.onerror.fail");
 
         boolean shouldRun = false;
         if (machineIncludes == null && machineExcludes == null) {
@@ -98,20 +99,20 @@ public class LiquibaseServletListener implements ServletContextListener {
         }
 
         if (!shouldRun) {
-            servletContextEvent.getServletContext().log("LiquibaseServletListener did not run due to LIQUIBASE_HOST_INCLUDES and/or LIQUIBASE_HOST_EXCLUDES");
+            servletContextEvent.getServletContext().log("LiquibaseServletListener did not run due to liquibase.host.includes and/or liquibase.host.excludes");
             return;
         }
 
 
-        setDataSource(servletContextEvent.getServletContext().getInitParameter("LIQUIBASE_DATA_SOURCE"));
-        setChangeLogFile(servletContextEvent.getServletContext().getInitParameter("LIQUIBASE_CHANGELOG"));
-        setContexts(servletContextEvent.getServletContext().getInitParameter("LIQUIBASE_CONTEXTS"));
-        this.defaultSchema = StringUtils.trimToNull(servletContextEvent.getServletContext().getInitParameter("LIQUIBASE_DEFAULT_SCHEMA"));
+        setDataSource(servletContextEvent.getServletContext().getInitParameter("liquibase.datasource"));
+        setChangeLogFile(servletContextEvent.getServletContext().getInitParameter("liquibase.changelog"));
+        setContexts(servletContextEvent.getServletContext().getInitParameter("liquibase.contexts"));
+        this.defaultSchema = StringUtils.trimToNull(servletContextEvent.getServletContext().getInitParameter("liquibase.schema.default"));
         if (getChangeLogFile() == null) {
-            throw new RuntimeException("Cannot run Liquibase, LIQUIBASE_CHANGELOG is not set");
+            throw new RuntimeException("Cannot run Liquibase, liquibase.changelog is not set");
         }
         if (getDataSource() == null) {
-            throw new RuntimeException("Cannot run Liquibase, LIQUIBASE_DATA_SOURCE is not set");
+            throw new RuntimeException("Cannot run Liquibase, liquibase.datasource is not set");
         }
 
         try {
@@ -130,6 +131,15 @@ public class LiquibaseServletListener implements ServletContextListener {
                 Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(connection));
                 database.setDefaultSchemaName(this.defaultSchema);
                 Liquibase liquibase = new Liquibase(getChangeLogFile(), new CompositeResourceAccessor(clFO,fsFO), database);
+
+                Enumeration<String> initParameters = servletContextEvent.getServletContext().getInitParameterNames();
+                while (initParameters.hasMoreElements()) {
+                    String name = initParameters.nextElement().trim();
+                    if (name.startsWith("liquibase.parameter.")) {
+                        liquibase.setChangeLogParameter(name.substring("liquibase.parameter".length()), servletContextEvent.getServletContext().getInitParameter(name));
+                    }
+                }
+
                 liquibase.update(getContexts());
             } finally {
                 if (ic != null) {
