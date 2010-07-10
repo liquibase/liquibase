@@ -29,7 +29,7 @@ public class DerbyDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerato
     /**
      * Derby seems to have troubles
      */
-    public boolean hasIndex(String schemaName, String tableName, String indexName, Database database) throws DatabaseException {
+    public boolean hasIndex(String schemaName, String tableName, String indexName, Database database, String columnNames) throws DatabaseException {
         try {
             ResultSet rs = getMetaData(database).getIndexInfo(database.convertRequestedSchemaToCatalog(schemaName), database.convertRequestedSchemaToSchema(schemaName), "%", false, true);
             while (rs.next()) {

@@ -397,8 +397,17 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
         }
     }
 
-    public boolean hasIndex(String schemaName, String tableName, String indexName, Database database) throws DatabaseException {
-        return createSnapshot(database, schemaName, null).getIndex(indexName) != null;
+    public boolean hasIndex(String schemaName, String tableName, String indexName, Database database, String columnNames) throws DatabaseException {
+        DatabaseSnapshot databaseSnapshot = createSnapshot(database, schemaName, null);
+        if (databaseSnapshot.getIndex(indexName) != null) {
+            return true;
+        }
+        for (Index index : databaseSnapshot.getIndexes()) {
+            if (index.getColumnNames().replaceAll("\\s+","").equalsIgnoreCase(columnNames)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public ForeignKey getForeignKeyByForeignKeyTable(String schemaName, String foreignKeyTableName, String fkName, Database database) throws DatabaseException {

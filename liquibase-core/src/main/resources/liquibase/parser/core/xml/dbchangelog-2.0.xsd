@@ -592,6 +592,7 @@
 			<xsd:attribute name="schemaName" type="xsd:string" />
 			<xsd:attribute name="indexName" type="xsd:string" use="required" />
             <xsd:attribute name="tableName" type="xsd:string" />
+            <xsd:attribute name="columnNames" type="xsd:string" />
 		</xsd:complexType>
 	</xsd:element>
 
