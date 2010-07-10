@@ -1,4 +1,4 @@
-package liquibase.jvm.integration.ant;
+package liquibase.integration.ant;
 
 import liquibase.Liquibase;
 import org.apache.tools.ant.BuildException;

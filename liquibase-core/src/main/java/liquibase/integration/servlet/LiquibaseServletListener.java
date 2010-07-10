@@ -1,4 +1,4 @@
-package liquibase.jvm.integration.servlet;
+package liquibase.integration.servlet;
 
 import liquibase.Liquibase;
 import liquibase.database.Database;

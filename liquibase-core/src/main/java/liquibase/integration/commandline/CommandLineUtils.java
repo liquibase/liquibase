@@ -1,4 +1,4 @@
-package liquibase.jvm.integration.commandline;
+package liquibase.integration.commandline;
 
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;

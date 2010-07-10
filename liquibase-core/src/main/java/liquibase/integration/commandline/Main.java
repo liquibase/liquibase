@@ -1,4 +1,4 @@
-package liquibase.jvm.integration.commandline;
+package liquibase.integration.commandline;
 
 import liquibase.Liquibase;
 import liquibase.database.Database;
@@ -666,7 +666,7 @@ public class Main {
                 return;
             }
 
-            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
             try {
                 if ("update".equalsIgnoreCase(command)) {
                     liquibase.update(contexts);
@@ -721,7 +721,7 @@ public class Main {
                     throw new CommandLineParsingException("Unknown command: " + command);
                 }
             } catch (ParseException e) {
-                throw new CommandLineParsingException("Unexpected date/time format.  Use 'yyyy-MM-dd HH:mm:ss'");
+                throw new CommandLineParsingException("Unexpected date/time format.  Use 'yyyy-MM-dd'T'HH:mm:ss'");
             }
         } finally {
             try {

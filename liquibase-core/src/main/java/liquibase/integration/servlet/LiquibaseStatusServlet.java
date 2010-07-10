@@ -1,4 +1,4 @@
-package liquibase.jvm.integration.servlet;
+package liquibase.integration.servlet;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;

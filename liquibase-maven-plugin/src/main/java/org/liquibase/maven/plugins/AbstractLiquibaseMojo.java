@@ -7,7 +7,7 @@ import java.net.MalformedURLException;
 import java.util.*;
 
 import liquibase.*;
-import liquibase.jvm.integration.commandline.CommandLineUtils;
+import liquibase.integration.commandline.CommandLineUtils;
 import liquibase.logging.LogFactory;
 import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.ResourceAccessor;
