@@ -5,7 +5,7 @@ package org.liquibase.maven.plugins;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import liquibase.Liquibase;
-import liquibase.jvm.integration.commandline.CommandLineUtils;
+import liquibase.integration.commandline.CommandLineUtils;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
 import org.apache.maven.plugin.MojoFailureException;

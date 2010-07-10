@@ -1,27 +1,29 @@
-package liquibase.jvm.integration.commandline;
+package liquibase.integration.ant;
 
-import liquibase.jvm.integration.commandline.CommandLineResourceAccessor;
+import liquibase.integration.ant.AntResourceAccessor;
 import liquibase.resource.AbstractFileOpenerTest;
 import liquibase.resource.ResourceAccessor;
+import org.apache.tools.ant.Project;
+import org.apache.tools.ant.types.Path;
 import static org.junit.Assert.*;
 import org.junit.Test;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Enumeration;
 
 /**
- * Tests for {@link liquibase.jvm.integration.commandline.CommandLineResourceAccessor}
+ * Tests for {@link liquibase.integration.ant.AntResourceAccessor}
  */
-public class CommandLineFileOpenerTest extends AbstractFileOpenerTest {
+public class AntFileOpenerTest extends AbstractFileOpenerTest {
 
     /**
      * @see liquibase.resource.AbstractFileOpenerTest#createFileOpener()
      */
     @Override
     protected ResourceAccessor createFileOpener() {
-        return new CommandLineResourceAccessor(Thread.currentThread().getContextClassLoader());
+        Project project = new Project();
+        return new AntResourceAccessor(project, new Path(project));
     }
 
     @Test
@@ -30,9 +32,9 @@ public class CommandLineFileOpenerTest extends AbstractFileOpenerTest {
       assertNotNull(inputStream);
     }
 
-    @Test(expected = IOException.class)
+    @Test
     public void getResourceAsStreamNonExistantFile() throws Exception {
-      resourceAccessor.getResourceAsStream("non/existant/file.txt");
+      assertNull(resourceAccessor.getResourceAsStream("non/existant/file.txt"));
     }
 
     @Test

@@ -384,6 +384,9 @@
         <insert tableName="timestampusage">
             <column name="id" valueNumeric="1"/>
         </insert>
+        <rollback>
+            <dropTable tableName="timestampusage"/>
+        </rollback>
     </changeSet>
     <changeSet id="correct-mysql-timestamp-check" author="nvoxland">
         <preConditions>

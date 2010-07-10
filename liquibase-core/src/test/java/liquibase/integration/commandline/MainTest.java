@@ -1,7 +1,7 @@
-package liquibase.jvm.integration.commandline;
+package liquibase.integration.commandline;
 
 import liquibase.exception.CommandLineParsingException;
-import liquibase.jvm.integration.commandline.Main;
+import liquibase.integration.commandline.Main;
 import liquibase.util.StringUtils;
 import static org.junit.Assert.*;
 import org.junit.Test;

@@ -1,4 +1,4 @@
-package liquibase.jvm.integration.ant;
+package liquibase.integration.ant;
 
 import liquibase.resource.ResourceAccessor;
 import org.apache.tools.ant.AntClassLoader;
