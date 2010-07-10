@@ -205,6 +205,8 @@ public abstract class AbstractTypeConverter implements TypeConverter {
             returnTypeName = getUUIDType();
         } else if (dataTypeName.equalsIgnoreCase("VARCHAR")) {
             returnTypeName = getVarcharType();
+        } else if (dataTypeName.equalsIgnoreCase("NVARCHAR")) {
+            returnTypeName = getNVarcharType();
         } else {
             if (columnTypeString.startsWith("java.sql.Types")) {
                 returnTypeName = getTypeFromMetaData(dataTypeName);
@@ -309,6 +311,13 @@ public abstract class AbstractTypeConverter implements TypeConverter {
      */
     public VarcharType getVarcharType() {
         return new VarcharType();
+    }
+
+    /**
+     * Returns the actual database-specific data type to use for a "varchar" column.
+     */
+    public NVarcharType getNVarcharType() {
+        return new NVarcharType();
     }
 
     /**
