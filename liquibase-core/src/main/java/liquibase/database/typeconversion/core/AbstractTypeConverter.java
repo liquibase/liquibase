@@ -2,6 +2,8 @@ package liquibase.database.typeconversion.core;
 
 import liquibase.change.ColumnConfig;
 import liquibase.database.Database;
+import liquibase.database.core.*;
+import liquibase.database.structure.Column;
 import liquibase.database.structure.type.*;
 import liquibase.database.typeconversion.TypeConverter;
 import liquibase.exception.DateParseException;
@@ -14,6 +16,8 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.Types;
 import java.text.ParseException;
+import java.util.Arrays;
+import java.util.List;
 
 public abstract class AbstractTypeConverter implements TypeConverter {
 
@@ -381,5 +385,108 @@ public abstract class AbstractTypeConverter implements TypeConverter {
 
     public BlobType getBlobType() {
         return new BlobType();
+    }
+
+    public String convertToDatabaseTypeString(Column referenceColumn, Database database) {
+
+        List<Integer> noParens = Arrays.asList(
+                Types.ARRAY,
+                Types.BIGINT,
+                Types.BINARY,
+                Types.BIT,
+                Types.BLOB,
+                Types.BOOLEAN,
+                Types.CLOB,
+                Types.DATALINK,
+                Types.DATE,
+                Types.DISTINCT,
+                Types.INTEGER,
+                Types.JAVA_OBJECT,
+                Types.LONGVARBINARY,
+                Types.NULL,
+                Types.OTHER,
+                Types.REF,
+                Types.SMALLINT,
+                Types.STRUCT,
+                Types.TIME,
+                Types.TIMESTAMP,
+                Types.TINYINT,
+                Types.LONGVARCHAR);
+
+        List<Integer> oneParam = Arrays.asList(
+                Types.CHAR,
+                Types.VARCHAR,
+                Types.VARBINARY,
+                Types.DOUBLE,
+                Types.FLOAT
+        );
+
+        List<Integer> twoParams = Arrays.asList(
+                Types.DECIMAL,
+                Types.NUMERIC,
+                Types.REAL
+        );
+
+        String translatedTypeName = referenceColumn.getTypeName();
+        if (database instanceof PostgresDatabase) {
+            if ("bpchar".equals(translatedTypeName)) {
+                translatedTypeName = "char";
+            }
+        }
+
+        if (database instanceof HsqlDatabase || database instanceof H2Database || database instanceof DerbyDatabase || database instanceof DB2Database) {
+            if (referenceColumn.getDataType() == Types.FLOAT || referenceColumn.getDataType() == Types.DOUBLE) {
+                return "float";
+            }
+        }
+
+        if (database instanceof InformixDatabase) {
+            /*
+             * rs.getInt("DATA_TYPE") returns 1 (Types.CHAR) for
+             * interval types (bug in JDBC driver?)
+             * So if you comment this out, the the columnsize will be appended
+             * and the type becomes: "INTERVAL HOUR TO FRACTION(3)(2413)"
+             */
+        	if (translatedTypeName.toUpperCase().startsWith("INTERVAL")) {
+        		return translatedTypeName;
+        	}
+        	if (referenceColumn.getDataType() == Types.REAL) {
+        		return "SMALLFLOAT";
+        	}
+        }
+
+        String dataType;
+        if (noParens.contains(referenceColumn.getDataType())) {
+	        dataType = translatedTypeName;
+        } else if (oneParam.contains(referenceColumn.getDataType())) {
+            if (database instanceof PostgresDatabase && translatedTypeName.equalsIgnoreCase("TEXT")) {
+                return translatedTypeName;
+            } else if (database instanceof MSSQLDatabase && translatedTypeName.equals("uniqueidentifier")) {
+                return translatedTypeName;
+            } else if (database instanceof MySQLDatabase && (translatedTypeName.startsWith("enum(") || translatedTypeName.startsWith("set("))                   ) {
+              return translatedTypeName;
+            } else if (database instanceof OracleDatabase && (translatedTypeName.equals("VARCHAR2"))                   ) {
+              return translatedTypeName+"("+referenceColumn.getColumnSize()+" "+referenceColumn.getLengthSemantics()+")";
+            } else if (database instanceof MySQLDatabase && translatedTypeName.equalsIgnoreCase("DOUBLE")) {
+              return translatedTypeName;
+            }
+            dataType = translatedTypeName+"("+referenceColumn.getColumnSize()+")";
+        } else if (twoParams.contains(referenceColumn.getDataType())) {
+            if (database instanceof PostgresDatabase && referenceColumn.getColumnSize() == 131089 ) {
+                dataType = "DECIMAL";
+            } else if (database instanceof MSSQLDatabase && translatedTypeName.toLowerCase().contains("money")) {
+                dataType = translatedTypeName.toUpperCase();
+            } else {
+	            dataType = translatedTypeName;
+	            if (referenceColumn.isInitPrecision()) {
+		            dataType += "(" + referenceColumn.getColumnSize() + "," + referenceColumn.getDecimalDigits() + ")";
+	            }
+            }
+        } else {
+            LogFactory.getLogger().warning("Unknown Data Type: "+referenceColumn.getDataType()+" ("+referenceColumn.getTypeName()+").  Assuming it does not take parameters");
+            dataType = referenceColumn.getTypeName();
+        }
+        return dataType;
+
     }
 }

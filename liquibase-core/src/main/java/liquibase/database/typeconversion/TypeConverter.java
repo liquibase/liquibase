@@ -1,6 +1,7 @@
 package liquibase.database.typeconversion;
 
 import liquibase.database.Database;
+import liquibase.database.structure.Column;
 import liquibase.database.structure.type.*;
 import liquibase.change.ColumnConfig;
 import liquibase.servicelocator.PrioritizedService;
@@ -15,6 +16,8 @@ public interface TypeConverter extends PrioritizedService {
 
     Object convertDatabaseValueToObject(Object defaultValue, int dataType, int firstParameter, int secondParameter, Database database) throws ParseException;
 
+    String convertToDatabaseTypeString(Column referenceColumn, Database database);
+    
     DataType getDataType(Object object);
 
     DataType getDataType(String columnTypeString, Boolean autoIncrement);
