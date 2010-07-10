@@ -165,7 +165,7 @@
         <preConditions>
             <indexExists indexName="idx_compoundtest"/>
             <indexExists tableName="compoundIndexTest" indexName="idx_compoundtest"/>
-            <indexExists tableName="compoundIndexTest" columnNames="firstname,lastname"/>
+            <indexExists tableName="compoundIndexTest" columnNames="firstname, lastname"/>
         </preConditions>
     </changeSet>
 
