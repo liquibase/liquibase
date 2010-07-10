@@ -321,15 +321,6 @@
 		<xsd:attribute name="maxValue" type="xsd:string" />
 		<xsd:attribute name="minValue" type="xsd:string" />
 		<xsd:attribute name="ordered" type="booleanExp" />
-        <xsd:attribute name="cycle" type="booleanExp" default="false">
-            <xsd:annotation>
-                <xsd:documentation>
-                    true for a cycling sequence, false for a non-cycling sequence.
-                    Default is false.
-                </xsd:documentation>
-            </xsd:annotation>
-        </xsd:attribute>
-        
 	</xsd:attributeGroup>
 
 	<xsd:attributeGroup name="indexName">
@@ -932,6 +923,14 @@
 	<xsd:element name="createSequence">
 		<xsd:complexType>
 			<xsd:attributeGroup ref="sequenceAttributes" />
+            <xsd:attribute name="cycle" type="booleanExp">
+                <xsd:annotation>
+                    <xsd:documentation>
+                        true for a cycling sequence, false for a non-cycling sequence.
+                        Default is false.
+                    </xsd:documentation>
+                </xsd:annotation>
+            </xsd:attribute>            
 		</xsd:complexType>
 	</xsd:element>
 

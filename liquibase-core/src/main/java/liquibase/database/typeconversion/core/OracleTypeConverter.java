@@ -79,7 +79,8 @@ public class OracleTypeConverter extends AbstractTypeConverter {
 		return super.convertDatabaseValueToObject(defaultValue, dataType, columnSize, decimalDigits, database);
 	}
 
-	protected Object convertToCorrectObjectType(String value, int dataType, int columnSize, int decimalDigits, Database database) throws ParseException {
+	@Override
+    protected Object convertToCorrectObjectType(String value, int dataType, int columnSize, int decimalDigits, Database database) throws ParseException {
 		Object returnValue = super.convertToCorrectObjectType(value, dataType, columnSize, decimalDigits, database);
 		// I'll do it lately.
 		// It needs to design and create Database Function Dictionary first.
@@ -131,7 +132,12 @@ public class OracleTypeConverter extends AbstractTypeConverter {
 		return new VarcharType("VARCHAR2");
 	}
 
-	@Override
+    @Override
+    public NVarcharType getNVarcharType() {
+        return new NVarcharType("NVARCHAR2");
+    }
+
+    @Override
 	public DoubleType getDoubleType() {
 		return new DoubleType("FLOAT(24)");
 	}

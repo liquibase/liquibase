@@ -754,6 +754,12 @@
         </sql>
     </changeSet>
 
+    <changeSet id="nvarchartest" author="nvoxland">
+        <createTable tableName="nvarchartest">
+            <column name="col1" type="nvarchar(10)"/>
+            <column name="col2" type="java.sql.Types.NVARCHAR(10)"/>
+        </createTable>
+    </changeSet>
     <!--<changeSet id="modColTest" author="nvoxland">-->
         <!--<ext:modifyColumn tableName="datatable">-->
             <!--<column name="col" type="varchar(300)"/>-->
