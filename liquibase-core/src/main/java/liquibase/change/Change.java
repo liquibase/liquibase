@@ -56,7 +56,7 @@ public interface Change {
      * Sets the fileOpener that should be used for any file loading and resource
      * finding for files that are provided by the user.
      */
-    public void setFileOpener(ResourceAccessor resourceAccessor);
+    public void setResourceAccessor(ResourceAccessor resourceAccessor);
 
 
     /**

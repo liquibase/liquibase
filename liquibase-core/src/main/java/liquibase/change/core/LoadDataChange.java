@@ -133,7 +133,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns 
     }
 
     protected CSVReader getCSVReader() throws IOException {
-        ResourceAccessor opener = getFileOpener();
+        ResourceAccessor opener = getResourceAccessor();
         if (opener == null) {
             throw new UnexpectedLiquibaseException("No file opener specified for "+getFile());
         }
@@ -181,7 +181,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns 
     public CheckSum generateCheckSum() {
         InputStream stream = null;
         try {
-            stream = getFileOpener().getResourceAsStream(getFile());
+            stream = getResourceAccessor().getResourceAsStream(getFile());
             if (stream == null) {
                 throw new RuntimeException(getFile() + " could not be found");
             }

@@ -1,17 +1,13 @@
 package liquibase.parser.core.formattedsql;
 
-import liquibase.change.Change;
 import liquibase.change.core.RawSQLChange;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.exception.ChangeLogParseException;
-import liquibase.exception.LiquibaseException;
 import liquibase.logging.LogFactory;
 import liquibase.parser.ChangeLogParser;
-import liquibase.parser.core.sql.SqlChangeLogParser;
 import liquibase.resource.ResourceAccessor;
-import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
 
 import java.io.*;
@@ -114,7 +110,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
 
                     change = new RawSQLChange();
                     change.setSql(finalCurrentSql);
-                    change.setFileOpener(resourceAccessor);
+                    change.setResourceAccessor(resourceAccessor);
                     change.setSplitStatements(splitStatements);
                     change.setStripComments(stripComments);
                     change.setEndDelimiter(endDelimiter);

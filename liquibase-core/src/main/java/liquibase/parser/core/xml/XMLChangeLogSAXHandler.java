@@ -24,9 +24,7 @@ import liquibase.change.ChangeFactory;
 import liquibase.change.ChangeWithColumns;
 import liquibase.change.ColumnConfig;
 import liquibase.change.ConstraintsConfig;
-import liquibase.change.core.AddColumnChange;
 import liquibase.change.core.CreateProcedureChange;
-import liquibase.change.core.CreateTableChange;
 import liquibase.change.core.CreateViewChange;
 import liquibase.change.core.DeleteDataChange;
 import liquibase.change.core.ExecuteShellCommandChange;
@@ -278,11 +276,8 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 				rootPrecondition.setOnSqlOutput(StringUtils.trimToNull(atts
 						.getValue("onSqlOutput")));
 				preconditionLogicStack.push(rootPrecondition);
-			} else if (currentPrecondition != null
-					&& currentPrecondition instanceof CustomPreconditionWrapper
-					&& qName.equals("param")) {
-				((CustomPreconditionWrapper) currentPrecondition).setParam(atts
-						.getValue("name"), atts.getValue("value"));
+			} else if (currentPrecondition != null && currentPrecondition instanceof CustomPreconditionWrapper && qName.equals("param")) {
+				((CustomPreconditionWrapper) currentPrecondition).setParam(atts.getValue("name"), atts.getValue("value"));
 			} else if (rootPrecondition != null) {
 				currentPrecondition = PreconditionFactory.getInstance().create(
 						qName);
@@ -344,7 +339,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 					throw new MigrationFailedException(changeSet,
 							"Unknown change: " + localName);
 				}
-				change.setFileOpener(resourceAccessor);
+				change.setResourceAccessor(resourceAccessor);
 				if (change instanceof CustomChangeWrapper) {
 					((CustomChangeWrapper) change)
 							.setClassLoader(resourceAccessor.toClassLoader());
@@ -410,16 +405,13 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 			} else if ("where".equals(qName)) {
 				text = new StringBuffer();
 			} else if ("property".equals(qName)) {
-				String context = StringUtils.trimToNull(atts
-						.getValue("context"));
+				String context = StringUtils.trimToNull(atts.getValue("context"));
 				String dbms = StringUtils.trimToNull(atts.getValue("dbms"));
 				if (StringUtils.trimToNull(atts.getValue("file")) == null) {
-					this.changeLogParameters.set(atts.getValue("name"), atts
-							.getValue("value"), context, dbms);
+					this.changeLogParameters.set(atts.getValue("name"), atts.getValue("value"), context, dbms);
 				} else {
 					Properties props = new Properties();
-					InputStream propertiesStream = resourceAccessor
-							.getResourceAsStream(atts.getValue("file"));
+					InputStream propertiesStream = resourceAccessor.getResourceAsStream(atts.getValue("file"));
 					if (propertiesStream == null) {
 						log.info("Could not open properties file "
 								+ atts.getValue("file"));
@@ -427,9 +419,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 						props.load(propertiesStream);
 
 						for (Map.Entry entry : props.entrySet()) {
-							this.changeLogParameters.set(entry.getKey()
-									.toString(), entry.getValue().toString(),
-									context, dbms);
+							this.changeLogParameters.set(entry.getKey().toString(), entry.getValue().toString(), context, dbms);
 						}
 					}
 				}
@@ -561,8 +551,8 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 					((SqlPrecondition) currentPrecondition).setSql(textString);
 					currentPrecondition = null;
 				} else if (qName.equals("customPrecondition")) {
-					((CustomPreconditionWrapper) currentPrecondition)
-							.setClassLoader(resourceAccessor.toClassLoader());
+					((CustomPreconditionWrapper) currentPrecondition).setClassLoader(resourceAccessor.toClassLoader());
+                    currentPrecondition = null;
 				}
 
 			} else if (changeSet != null && "rollback".equals(qName)) {

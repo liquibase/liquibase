@@ -33,7 +33,7 @@ public class SqlChangeLogParser implements ChangeLogParser {
         } catch (IOException e) {
             throw new ChangeLogParseException(e);
         }
-        change.setFileOpener(resourceAccessor);
+        change.setResourceAccessor(resourceAccessor);
         change.setSplitStatements(false);
         change.setStripComments(false);
 

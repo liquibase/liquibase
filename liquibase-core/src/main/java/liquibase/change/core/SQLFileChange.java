@@ -136,7 +136,7 @@ public class SQLFileChange extends AbstractSQLChange {
     private boolean loadFromClasspath(String file) throws SetupException {
         InputStream in = null;
         try {
-            ResourceAccessor fo = getFileOpener();
+            ResourceAccessor fo = getResourceAccessor();
             if(fo== null) {
                 return false;
             }
