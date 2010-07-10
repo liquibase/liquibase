@@ -36,9 +36,6 @@ public class DiffDatabaseTask extends BaseLiquibaseTask {
     }
 
     public String getReferenceDriver() {
-        if (referenceDriver == null) {
-            return getDriver();
-        }
         return referenceDriver;
     }
 
