@@ -3,7 +3,9 @@
 <databaseChangeLog
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+        xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd
+        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
 
     <property name="table.name" value="paramter_table"/>
     <property file="changelogs/common/dynamic.parameters.properties"/>
@@ -751,6 +753,12 @@
             insert into datatable (col) values ('another value with a ;') X
         </sql>
     </changeSet>
+
+    <!--<changeSet id="modColTest" author="nvoxland">-->
+        <!--<ext:modifyColumn tableName="datatable">-->
+            <!--<column name="col" type="varchar(300)"/>-->
+        <!--</ext:modifyColumn>-->
+    <!--</changeSet>-->
 
     <include file="changelogs/common/sqlstyle/formatted.changelog.sql"/>
 
