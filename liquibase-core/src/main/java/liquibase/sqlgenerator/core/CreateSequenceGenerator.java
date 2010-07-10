@@ -55,6 +55,11 @@ public class CreateSequenceGenerator extends AbstractSqlGenerator<CreateSequence
                 buffer.append(" ORDER");
             }
         }
+        if (statement.getCycle() != null) {
+            if (statement.getCycle()) {
+                buffer.append(" CYCLE");
+            }
+        }
 
         return new Sql[]{new UnparsedSql(buffer.toString())};
     }

@@ -22,7 +22,7 @@ public class CreateSequenceChange extends AbstractChange {
     private BigInteger maxValue;
     private BigInteger minValue;
     private Boolean ordered;
-
+    private Boolean cycle;
 
     public CreateSequenceChange() {
         super("createSequence", "Create Sequence", ChangeMetaData.PRIORITY_DEFAULT);
@@ -84,6 +84,14 @@ public class CreateSequenceChange extends AbstractChange {
         this.ordered = ordered;
     }
 
+    public Boolean getCycle() {
+        return cycle;
+    }
+
+    public void setCycle(Boolean cycle) {
+        this.cycle = cycle;
+    }
+
     public SqlStatement[] generateStatements(Database database) {
         return new SqlStatement[] {
                 new CreateSequenceStatement(getSchemaName() == null?database.getDefaultSchemaName():getSchemaName(), getSequenceName())
@@ -92,6 +100,7 @@ public class CreateSequenceChange extends AbstractChange {
                 .setMinValue(getMinValue())
                 .setOrdered(isOrdered())
                 .setStartValue(getStartValue())
+                .setCycle(getCycle())
         };
     }
 
