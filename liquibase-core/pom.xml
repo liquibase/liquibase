@@ -117,7 +117,7 @@
                             <goal>javadoc</goal>
                         </goals>
                         <configuration>
-                            <sourcepath>../liquibase-core/src/main/java;../liquibase-core-jvm/src/main/java</sourcepath>
+                            <sourcepath>../liquibase-core/src/main/java</sourcepath>
                             <encoding>UTF-8</encoding>
                         </configuration>
                     </execution>

@@ -217,8 +217,12 @@ public class BaseLiquibaseTask extends Task {
         Driver driver = (Driver) Class.forName(driverClassName, true, loader).newInstance();
 
         Properties info = new Properties();
-        info.put("user", username);
-        info.put("password", password);
+        if (username != null) {
+            info.put("user", username);
+        }
+        if (password != null) {
+            info.put("password", password);
+        }
         Connection connection = driver.connect(databaseUrl, info);
 
         if (connection == null) {

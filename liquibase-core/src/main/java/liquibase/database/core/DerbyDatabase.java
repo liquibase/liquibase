@@ -137,7 +137,7 @@ public class DerbyDatabase extends AbstractDatabase {
             driverVersionMinor = ((Integer) minorVersionGetter.invoke(
                     null)).intValue();
         } catch (Exception e) {
-            log.warning("Unable to load/access Apache Derby driver class " +
+            log.debug("Unable to load/access Apache Derby driver class " +
                     "org.apache.derby.tools.sysinfo to check version: " +
                     e.getMessage());
             driverVersionMajor = -1;
