@@ -36,7 +36,7 @@ public class SQLFileChangeTest extends AbstractChangeTest {
         change = new SQLFileChange();
         change.setSql("select * from tablename");
         ClassLoaderResourceAccessor opener = new ClassLoaderResourceAccessor();
-        change.setFileOpener(opener);
+        change.setResourceAccessor(opener);
         change.setPath(fileName);
         change.init();
     }
@@ -48,7 +48,7 @@ public class SQLFileChangeTest extends AbstractChangeTest {
 
     @Test
 	public void setFileOpener() {
-	    assertNotNull(change.getFileOpener());
+	    assertNotNull(change.getResourceAccessor());
 	}
     
 //    @Test

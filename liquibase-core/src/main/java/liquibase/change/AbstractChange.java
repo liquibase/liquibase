@@ -163,7 +163,7 @@ public abstract class AbstractChange implements Change {
      * Default implementation that stores the file opener provided when the
      * Change was created.
      */
-    public void setFileOpener(ResourceAccessor resourceAccessor) {
+    public void setResourceAccessor(ResourceAccessor resourceAccessor) {
         this.resourceAccessor = resourceAccessor;
     }
 
@@ -172,7 +172,7 @@ public abstract class AbstractChange implements Change {
      *
      * @return The file opener
      */
-    public ResourceAccessor getFileOpener() {
+    public ResourceAccessor getResourceAccessor() {
         return resourceAccessor;
     }
 

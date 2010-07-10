@@ -17,7 +17,7 @@
     <dependencies>
         <dependency>
             <groupId>org.liquibase</groupId>
-            <artifactId>liquibase</artifactId>
+            <artifactId>liquibase-core</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

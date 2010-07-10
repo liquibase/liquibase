@@ -48,7 +48,7 @@ public class LoadUpdateDataChangeTest extends AbstractChangeTest {
         change.setTableName("TABLE_NAME");
         change.setPrimaryKey("name");
         change.setFile("liquibase/change/core/sample.data1.csv");
-        change.setFileOpener(new ClassLoaderResourceAccessor());
+        change.setResourceAccessor(new ClassLoaderResourceAccessor());
 
         SqlStatement[] statements = change.generateStatements(database);
 
@@ -80,7 +80,7 @@ public class LoadUpdateDataChangeTest extends AbstractChangeTest {
         change.setSchemaName("SCHEMA_NAME");
         change.setTableName("TABLE_NAME");
         change.setFile("liquibase/change/core/sample.data1.csv");
-        change.setFileOpener(new ClassLoaderResourceAccessor());
+        change.setResourceAccessor(new ClassLoaderResourceAccessor());
 
         SqlStatement[] statements = change.generateStatements(database);
 
@@ -97,7 +97,7 @@ public class LoadUpdateDataChangeTest extends AbstractChangeTest {
         change.setSchemaName("SCHEMA_NAME");
         change.setTableName("TABLE_NAME");
         change.setFile("liquibase/change/core/sample.data1.csv");
-        change.setFileOpener(new ClassLoaderResourceAccessor());
+        change.setResourceAccessor(new ClassLoaderResourceAccessor());
 
         SqlStatement[] statements = change.generateStatements(database);
 
@@ -137,7 +137,7 @@ public class LoadUpdateDataChangeTest extends AbstractChangeTest {
         change.setSchemaName("SCHEMA_NAME");
         change.setTableName("TABLE_NAME");
         change.setFile("liquibase/change/core/sample.data1.csv");
-        change.setFileOpener(new ClassLoaderResourceAccessor());
+        change.setResourceAccessor(new ClassLoaderResourceAccessor());
         change.setPrimaryKey("name");
         SqlStatement[] statements = change.generateStatements(database);
 
@@ -163,7 +163,7 @@ public class LoadUpdateDataChangeTest extends AbstractChangeTest {
         change.setSchemaName("SCHEMA_NAME");
         change.setTableName("TABLE_NAME");
         change.setFile("liquibase/change/core/sample.data1.csv");
-        change.setFileOpener(new ClassLoaderResourceAccessor());
+        change.setResourceAccessor(new ClassLoaderResourceAccessor());
         change.setPrimaryKey("name");
 
         SqlStatement[] statements = change.generateRollbackStatements(database);
@@ -187,7 +187,7 @@ public class LoadUpdateDataChangeTest extends AbstractChangeTest {
         refactoring.setSchemaName("SCHEMA_NAME");
         refactoring.setTableName("TABLE_NAME");
         refactoring.setFile("liquibase/change/core/sample.data1.csv");
-        refactoring.setFileOpener(new ClassLoaderResourceAccessor());
+        refactoring.setResourceAccessor(new ClassLoaderResourceAccessor());
 
         String md5sum1 = refactoring.generateCheckSum().toString();
 

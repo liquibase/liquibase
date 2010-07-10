@@ -76,7 +76,7 @@ public class ValidatingVisitor implements ChangeSetVisitor {
 
             try {
                 ValidationErrors foundErrors = change.validate(database);
-                if (foundErrors.hasErrors()) {
+                if (foundErrors != null && foundErrors.hasErrors()) {
                     if (changeSet.getOnValidationFail().equals(ChangeSet.ValidationFailOption.MARK_RAN)) {
                         LogFactory.getLogger().info("Skipping changeSet "+changeSet+" due to validation error(s): "+ StringUtils.join(foundErrors.getErrorMessages(), ", "));
                         changeSet.setValidationFailed(true);

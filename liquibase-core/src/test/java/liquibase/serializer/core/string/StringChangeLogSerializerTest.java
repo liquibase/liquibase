@@ -33,7 +33,7 @@ public class StringChangeLogSerializerTest {
                 "]";
 
         CustomChangeWrapper wrapper = new CustomChangeWrapper();
-        wrapper.setFileOpener(new ClassLoaderResourceAccessor());
+        wrapper.setResourceAccessor(new ClassLoaderResourceAccessor());
         //wrapper.setFileOpener(new JUnitResourceAccessor());
         //wrapper.setClassLoader(new JUnitResourceAccessor().toClassLoader());
         wrapper.setClassLoader(getClass().getClassLoader());
