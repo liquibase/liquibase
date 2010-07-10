@@ -13,6 +13,7 @@ public class CreateSequenceStatement implements SqlStatement {
     private BigInteger maxValue;
     private BigInteger minValue;
     private Boolean ordered;
+    private Boolean cycle;
 
     public CreateSequenceStatement(String schemaName, String sequenceName) {
         this.schemaName = schemaName;
@@ -69,6 +70,15 @@ public class CreateSequenceStatement implements SqlStatement {
 
     public CreateSequenceStatement setOrdered(Boolean ordered) {
         this.ordered = ordered;
+        return this;
+    }
+
+    public Boolean getCycle() {
+        return cycle;
+    }
+
+    public CreateSequenceStatement setCycle(Boolean cycle) {
+        this.cycle = cycle;
         return this;
     }
 }

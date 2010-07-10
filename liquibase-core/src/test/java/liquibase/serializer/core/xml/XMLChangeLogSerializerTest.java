@@ -303,12 +303,14 @@ public class XMLChangeLogSerializerTest {
         assertFalse(node.hasAttribute("minValue"));
         assertFalse(node.hasAttribute("ordered"));
         assertFalse(node.hasAttribute("startValue"));
+        assertFalse(node.hasAttribute("cycle"));
 
         change.setIncrementBy(new BigInteger("1"));
         change.setMaxValue(new BigInteger("2"));
         change.setMinValue(new BigInteger("3"));
         change.setOrdered(true);
         change.setStartValue(new BigInteger("4"));
+        change.setCycle(true);
 
         node = new XMLChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(change);
         assertEquals("createSequence", node.getNodeName());
@@ -318,6 +320,7 @@ public class XMLChangeLogSerializerTest {
         assertEquals("3", node.getAttribute("minValue"));
         assertEquals("true", node.getAttribute("ordered"));
         assertEquals("4", node.getAttribute("startValue"));
+        assertEquals("true", node.getAttribute("cycle"));
     }
 
     @Test
