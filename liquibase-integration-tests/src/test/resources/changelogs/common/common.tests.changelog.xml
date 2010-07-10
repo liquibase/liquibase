@@ -299,6 +299,14 @@
         </createTable>
     </changeSet>
 
+    <changeSet id="makeNotnulltest" author="nvoxland">
+        <addNotNullConstraint tableName="commonTypesTest" columnName="intColumn" columnDataType="int"/>
+    </changeSet>
+
+    <changeSet id="makenulltest" author="nvoxland">
+        <dropNotNullConstraint tableName="commonTypesTest" columnName="intColumn" columnDataType="int"/>
+    </changeSet>
+
     <changeSet id="addColumnWithInitialValue-test" author="nvoxland">
         <createTable tableName="tableWithInitialValue">
             <column name="id" type="int"/>
@@ -754,7 +762,7 @@
         </sql>
     </changeSet>
 
-    <changeSet id="nvarchartest" author="nvoxland">
+    <changeSet id="nvarchartest" author="nvoxland" dbms="oracle,mssql">
         <createTable tableName="nvarchartest">
             <column name="col1" type="nvarchar(10)"/>
             <column name="col2" type="java.sql.Types.NVARCHAR(10)"/>
