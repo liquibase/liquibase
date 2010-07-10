@@ -46,7 +46,7 @@ public class StringUtils {
      */
     public static String[] splitSQL(String multiLineSQL, String endDelimiter) {
         if (endDelimiter == null) {
-            endDelimiter = ";\\s*\n|;$|\n[gG][oO]\\s*\n|\n[Gg][oO]$";
+            endDelimiter = ";\\s*\n|;$|\n[gG][oO]\\s*\n|\n[Gg][oO]\\s*$";
         }
         String[] strings = multiLineSQL.split(endDelimiter);
         for (int i=0; i<strings.length; i++) {
