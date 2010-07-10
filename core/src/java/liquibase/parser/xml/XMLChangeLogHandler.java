@@ -385,6 +385,7 @@ class XMLChangeLogHandler extends DefaultHandler {
                     currentPrecondition = null;
                 } else if (qName.equals("customPrecondition")) {
                     ((CustomPreconditionWrapper) currentPrecondition).setClassLoader(fileOpener.toClassLoader());
+                    currentPrecondition = null;
                 }
 
             } else if (changeSet != null && "rollback".equals(qName)) {
