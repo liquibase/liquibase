@@ -161,7 +161,7 @@
         </createIndex>
     </changeSet>
 
-    <changeSet id="hasIndexPrecondition" author="nvoxland"> <!-- can check with or without table name -->
+    <changeSet id="hasIndexPrecondition" author="nvoxland" dbms="oracle,mssql,mysql,h2,hsql,pgsql"> <!-- can check with or without table name, derby doesn't work with just column names -->
         <preConditions>
             <indexExists indexName="idx_compoundtest"/>
             <indexExists tableName="compoundIndexTest" indexName="idx_compoundtest"/>
