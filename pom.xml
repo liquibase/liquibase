@@ -1,223 +1,252 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
+    <modelVersion>4.0.0</modelVersion>
 
-  <groupId>org.liquibase</groupId>
-  <artifactId>liquibase-all</artifactId>
-  <version>2.0-rc2-SNAPSHOT</version>
-  <packaging>pom</packaging>
+    <groupId>org.liquibase</groupId>
+    <artifactId>liquibase-all</artifactId>
+    <version>2.0-rc2-SNAPSHOT</version>
+    <packaging>pom</packaging>
 
-  <name>Liquibase Parent Project</name>
-  <description>Liquibase is a tool for managing and executing database changes.</description>
-  <url>http://www.liquibase.org</url>
-    
-  <!--
-  <prerequisites>
-    <maven>2.1.0-M1</maven>
-  </prerequisites>
-  -->
-
-  <organization>
-    <name>Liquibase.org</name>
+    <name>Liquibase Parent Project</name>
+    <description>Liquibase is a tool for managing and executing database changes.</description>
     <url>http://www.liquibase.org</url>
-  </organization>
 
-  <licenses>
-    <license>
-      <url>http://www.apache.org/licenses/LICENSE-2.0</url>
-      <name>Apache License, Version 2.0 </name>
-    </license>
-  </licenses>
+    <!--
+    <prerequisites>
+      <maven>2.1.0-M1</maven>
+    </prerequisites>
+    -->
 
-  <issueManagement>
-    <url>http://liquibase.jira.com/browse/CORE</url>
-  </issueManagement>
-  
-  <scm>
-    <url>http://liquibase.jira.com/svn/CORE</url>
-  </scm>
+    <organization>
+        <name>Liquibase.org</name>
+        <url>http://www.liquibase.org</url>
+    </organization>
 
-  <!-- 2.1.0-M1 and up, hence prerequisites -->
-  <properties>
-    <maven.build.timestamp.format>E MMM dd hh:mm:ss zzz yyyy</maven.build.timestamp.format>
-    <build.timestamp>${maven.build.timestamp}</build.timestamp>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-  </properties>  
+    <licenses>
+        <license>
+            <url>http://www.apache.org/licenses/LICENSE-2.0</url>
+            <name>Apache License, Version 2.0</name>
+        </license>
+    </licenses>
 
-  <modules>
-    <module>liquibase-core</module>
-    <module>liquibase-maven-plugin</module>
-    <module>samples/liquibase-ext-change</module>
-      <module>samples/liquibase-ext-changewithnestedtags</module>
-      <module>samples/liquibase-ext-sqlgenerator</module>
-    <module>liquibase-integration-tests</module>
-  </modules>
+    <issueManagement>
+        <url>http://liquibase.jira.com/browse/CORE</url>
+    </issueManagement>
 
-  <dependencyManagement>
-    <dependencies>
+    <scm>
+        <url>http://liquibase.jira.com/svn/CORE</url>
+        <developerConnection>scm:svn:http://liquibase.jira.com/svn/CORE</developerConnection>
+    </scm>
 
-      <dependency>
-        <groupId>org.apache.maven</groupId>
-        <artifactId>maven-plugin-api</artifactId>
-        <version>2.0</version>
-      </dependency>
+    <!-- 2.1.0-M1 and up, hence prerequisites -->
+    <properties>
+        <maven.build.timestamp.format>E MMM dd hh:mm:ss zzz yyyy</maven.build.timestamp.format>
+        <build.timestamp>${maven.build.timestamp}</build.timestamp>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
 
-      <dependency>
-        <groupId>org.apache.maven</groupId>
-        <artifactId>maven-project</artifactId>
-        <version>2.0</version>
-      </dependency>
+    <modules>
+        <module>liquibase-core</module>
+        <module>liquibase-maven-plugin</module>
+        <module>samples/liquibase-ext-change</module>
+        <module>samples/liquibase-ext-changewithnestedtags</module>
+        <module>samples/liquibase-ext-sqlgenerator</module>
+        <module>liquibase-integration-tests</module>
+    </modules>
 
-      <dependency>
-        <groupId>org.apache.maven.shared</groupId>
-        <artifactId>maven-plugin-testing-harness</artifactId>
-        <version>1.1</version>
-        <scope>test</scope>
-      </dependency>
+    <dependencyManagement>
+        <dependencies>
 
-      <dependency>
-        <groupId>junit</groupId>
-        <artifactId>junit</artifactId>
-        <version>4.8.1</version>
-        <scope>test</scope>
-      </dependency>
+            <dependency>
+                <groupId>org.apache.maven</groupId>
+                <artifactId>maven-plugin-api</artifactId>
+                <version>2.0</version>
+            </dependency>
 
-      <dependency>
-        <groupId>org.easymock</groupId>
-        <artifactId>easymockclassextension</artifactId>
-        <version>2.2</version>
-        <scope>test</scope>
-      </dependency>
+            <dependency>
+                <groupId>org.apache.maven</groupId>
+                <artifactId>maven-project</artifactId>
+                <version>2.0</version>
+            </dependency>
 
-      <dependency>
-        <groupId>ant</groupId>
-        <artifactId>ant</artifactId>
-        <version>1.6.5</version>
-        <scope>provided</scope>
-        <optional>true</optional>
-      </dependency>
+            <dependency>
+                <groupId>org.apache.maven.shared</groupId>
+                <artifactId>maven-plugin-testing-harness</artifactId>
+                <version>1.1</version>
+                <scope>test</scope>
+            </dependency>
 
-      <dependency>
-        <groupId>javax.servlet</groupId>
-        <artifactId>servlet-api</artifactId>
-        <version>2.4</version>
-        <scope>provided</scope>
-        <optional>true</optional>
-      </dependency>
+            <dependency>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <version>4.8.1</version>
+                <scope>test</scope>
+            </dependency>
 
-      <dependency>
-        <groupId>org.springframework</groupId>
-        <artifactId>spring</artifactId>
-        <version>2.0.6</version>
-        <scope>provided</scope>
-        <optional>true</optional>
-      </dependency>
+            <dependency>
+                <groupId>org.easymock</groupId>
+                <artifactId>easymockclassextension</artifactId>
+                <version>2.2</version>
+                <scope>test</scope>
+            </dependency>
 
-      <dependency>
-        <groupId>org.apache.maven.shared</groupId>
-        <artifactId>maven-verifier</artifactId>
-        <version>1.2</version>
-        <scope>test</scope>
-      </dependency>
+            <dependency>
+                <groupId>ant</groupId>
+                <artifactId>ant</artifactId>
+                <version>1.6.5</version>
+                <scope>provided</scope>
+                <optional>true</optional>
+            </dependency>
 
-      <!-- JDBC drivers -->
-      <dependency>
-        <groupId>hsqldb</groupId>
-        <artifactId>hsqldb</artifactId>
-        <version>1.8.0.7</version>
-        <scope>test</scope>
-      </dependency>
+            <dependency>
+                <groupId>javax.servlet</groupId>
+                <artifactId>servlet-api</artifactId>
+                <version>2.4</version>
+                <scope>provided</scope>
+                <optional>true</optional>
+            </dependency>
 
-      <dependency>
-        <groupId>org.apache.derby</groupId>
-        <artifactId>derby</artifactId>
-        <version>10.2.2.0</version>
-        <scope>test</scope>
-      </dependency>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring</artifactId>
+                <version>2.0.6</version>
+                <scope>provided</scope>
+                <optional>true</optional>
+            </dependency>
 
-    </dependencies>
-  </dependencyManagement>
+            <dependency>
+                <groupId>org.apache.maven.shared</groupId>
+                <artifactId>maven-verifier</artifactId>
+                <version>1.2</version>
+                <scope>test</scope>
+            </dependency>
 
-  <build>
-    <pluginManagement>
-      <plugins>
-        <plugin>
-          <artifactId>maven-resources-plugin</artifactId>
-          <configuration>
-            <encoding>UTF-8</encoding>
-          </configuration>
-        </plugin>
-        <plugin>
-          <artifactId>maven-compiler-plugin</artifactId>
-          <configuration>
-            <source>1.5</source>
-            <target>1.5</target>
-            <optimize>true</optimize>
-            <debug>true</debug>
-            <encoding>${project.build.sourceEncoding}</encoding>
-          </configuration>
-        </plugin>
-        <plugin>
-            <artifactId>maven-surefire-plugin</artifactId>
-            <configuration>
-              <redirectTestOutputToFile>true</redirectTestOutputToFile>
-              <reportFormat>plain</reportFormat>
-            </configuration>
-        </plugin>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-enforcer-plugin</artifactId>
-          <executions>
-            <execution>
-              <id>enforce-java</id>
-              <phase>compile</phase>
-              <goals>
-                <goal>enforce</goal>
-              </goals>
-              <configuration>
-                <rules>
-                  <requireJavaVersion>
-                    <version>1.5</version>
-                  </requireJavaVersion>
-                </rules>
-              </configuration>
-            </execution>
-          </executions>
-        </plugin>
-        <plugin>
-          <groupId>org.codehaus.mojo</groupId>
-          <artifactId>build-helper-maven-plugin</artifactId>
-          <version>1.4</version>
-        </plugin>
-      </plugins>
-    </pluginManagement>
+            <!-- JDBC drivers -->
+            <dependency>
+                <groupId>hsqldb</groupId>
+                <artifactId>hsqldb</artifactId>
+                <version>1.8.0.7</version>
+                <scope>test</scope>
+            </dependency>
 
-  </build>
+            <dependency>
+                <groupId>org.apache.derby</groupId>
+                <artifactId>derby</artifactId>
+                <version>10.2.2.0</version>
+                <scope>test</scope>
+            </dependency>
 
-  <reporting>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-project-info-reports-plugin</artifactId>
-        <version>2.1.2</version>
-        <configuration>
-          <dependencyLocationsEnabled>false</dependencyLocationsEnabled>
-          <dependencyDetailsEnabled>false</dependencyDetailsEnabled>
-        </configuration>
-      </plugin>
-      <!--
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>findbugs-maven-plugin</artifactId>
-        <version>2.3</version>
-      </plugin>
-      -->
-    </plugins>
-  </reporting>
+        </dependencies>
+    </dependencyManagement>
 
-  <!--
-      TODO: add distributionManagement element for deployment of releases to maven repo?
-   -->
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <artifactId>maven-resources-plugin</artifactId>
+                    <configuration>
+                        <encoding>UTF-8</encoding>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <configuration>
+                        <source>1.5</source>
+                        <target>1.5</target>
+                        <optimize>true</optimize>
+                        <debug>true</debug>
+                        <encoding>${project.build.sourceEncoding}</encoding>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <configuration>
+                        <redirectTestOutputToFile>true</redirectTestOutputToFile>
+                        <reportFormat>plain</reportFormat>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-enforcer-plugin</artifactId>
+                    <executions>
+                        <execution>
+                            <id>enforce-java</id>
+                            <phase>compile</phase>
+                            <goals>
+                                <goal>enforce</goal>
+                            </goals>
+                            <configuration>
+                                <rules>
+                                    <requireJavaVersion>
+                                        <version>1.5</version>
+                                    </requireJavaVersion>
+                                </rules>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>build-helper-maven-plugin</artifactId>
+                    <version>1.4</version>
+                </plugin>
+
+
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-release-plugin</artifactId>
+                    <version>2.0</version>
+                </plugin>
+
+            </plugins>
+        </pluginManagement>
+
+    </build>
+
+    <reporting>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-project-info-reports-plugin</artifactId>
+                <version>2.1.2</version>
+                <configuration>
+                    <dependencyLocationsEnabled>false</dependencyLocationsEnabled>
+                    <dependencyDetailsEnabled>false</dependencyDetailsEnabled>
+                </configuration>
+            </plugin>
+            <!--
+            <plugin>
+              <groupId>org.codehaus.mojo</groupId>
+              <artifactId>findbugs-maven-plugin</artifactId>
+              <version>2.3</version>
+            </plugin>
+            -->
+        </plugins>
+    </reporting>
+
+    <distributionManagement>
+        <repository>
+            <uniqueVersion>false</uniqueVersion>
+            <id>liquibase</id>
+            <name>Liquibase Production Repository</name>
+            <url>scp://repo1/maven2</url>
+            <layout>default</layout>
+        </repository>
+        <snapshotRepository>
+            <uniqueVersion>true</uniqueVersion>
+            <id>liquibaseSnapshot</id>
+            <name>Liquibase Snapshot Repository</name>
+            <url>sftp://propellers.net/maven</url>
+            <layout>legacy</layout>
+        </snapshotRepository>
+
+        <!--<site>-->
+            <!--<id>qifcon.sf.net</id>-->
+            <!--<url>scp://shell.sourceforge.net/home/groups/l/li/liquibase/htdocs/maventest</url>-->
+        <!--</site>-->
+        <!--<downloadUrl>http://repo1.maven.org/maven2/org/liquibase/</downloadUrl>-->
+        <!--<status>deployed</status>-->
+    </distributionManagement>
 
 </project>
