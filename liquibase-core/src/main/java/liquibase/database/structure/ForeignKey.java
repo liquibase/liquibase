@@ -176,11 +176,6 @@ public class ForeignKey implements DatabaseObject, Comparable<ForeignKey> {
         if (foreignKeyColumns != null) {
             result = 31 * result + foreignKeyColumns.toUpperCase().hashCode();
         }
-        if (this.updateRule != null)
-            result = 31 * result + this.updateRule.hashCode();
-        if (this.deleteRule != null)
-            result = 31 * result + this.deleteRule.hashCode();
-
 
         return result;
     }
