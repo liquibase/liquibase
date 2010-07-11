@@ -176,6 +176,10 @@ public class SybaseASADatabase extends AbstractDatabase {
 	public String convertRequestedSchemaToSchema(String requestedSchema)
 			throws DatabaseException {
         if (requestedSchema == null) {
+            requestedSchema = getDefaultDatabaseSchemaName();
+        }
+
+        if (requestedSchema == null) {
             return "DBA";
         }
         return requestedSchema;
