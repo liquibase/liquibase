@@ -35,8 +35,8 @@
     </issueManagement>
 
     <scm>
-        <url>http://liquibase.jira.com/svn/CORE</url>
-        <developerConnection>scm:svn:http://liquibase.jira.com/svn/CORE</developerConnection>
+        <url>https://liquibase.jira.com/svn/CORE</url>
+        <developerConnection>scm:svn:https://liquibase.jira.com/svn/CORE</developerConnection>
     </scm>
 
     <!-- 2.1.0-M1 and up, hence prerequisites -->
