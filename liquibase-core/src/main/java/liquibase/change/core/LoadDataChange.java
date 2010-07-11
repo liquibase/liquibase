@@ -86,6 +86,9 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns 
             List<SqlStatement> statements = new ArrayList<SqlStatement>();
             String[] line = null;
             while ((line = reader.readNext()) != null) {
+                if (line.length == 0 || (line.length == 1 && StringUtils.trimToNull(line[0]) == null)) {
+                    continue; //nothing on this line
+                }
                 InsertStatement insertStatement = this.createStatement(getSchemaName(), getTableName());
                 for (int i=0; i<headers.length; i++) {
                     String columnName = null;
