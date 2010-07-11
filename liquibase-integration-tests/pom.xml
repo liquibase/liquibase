@@ -7,7 +7,7 @@
     <name>Liquibase Integration Tests</name>
 
     <parent>
-        <artifactId>liquibase-all</artifactId>
+        <artifactId>liquibase</artifactId>
         <groupId>org.liquibase</groupId>
         <version>2.0-rc2-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
