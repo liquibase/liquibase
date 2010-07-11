@@ -35,8 +35,8 @@
     </issueManagement>
 
     <scm>
-        <url>https://liquibase.jira.com/svn/CORE/trunk</url>
-        <developerConnection>scm:svn:https://liquibase.jira.com/svn/CORE/trunk</developerConnection>
+        <url>https://liquibase.jira.com/svn/CORE</url>
+        <developerConnection>scm:svn:https://liquibase.jira.com/svn/CORE</developerConnection>
     </scm>
 
     <!-- 2.1.0-M1 and up, hence prerequisites -->
@@ -197,9 +197,6 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-release-plugin</artifactId>
                     <version>2.0</version>
-                    <configuration>
-                        <stagingRepository>/tmp/maven-stage</stagingRepository>
-                    </configuration>
                 </plugin>
 
 
