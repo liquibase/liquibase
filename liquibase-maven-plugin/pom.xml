@@ -1,62 +1,57 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
+    <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>liquibase-maven-plugin</artifactId>
-  <packaging>maven-plugin</packaging>
+    <artifactId>liquibase-maven-plugin</artifactId>
+    <packaging>maven-plugin</packaging>
 
-  <name>Liquibase Maven Plugin</name>
-  <description>A Maven plugin wraps up some of the functionality of Liquibase</description>
+    <name>Liquibase Maven Plugin</name>
+    <description>A Maven plugin wraps up some of the functionality of Liquibase</description>
 
-  <parent>
-    <artifactId>liquibase</artifactId>
-    <groupId>org.liquibase</groupId>
-    <version>2.0-rc2-SNAPSHOT</version>
-    <relativePath>../pom.xml</relativePath>
-  </parent>
+    <parent>
+        <artifactId>liquibase</artifactId>
+        <groupId>org.liquibase</groupId>
+        <version>2.0-rc2-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
 
-  <dependencies>
-    <dependency>
-      <groupId>org.apache.maven</groupId>
-      <artifactId>maven-plugin-api</artifactId>
-    </dependency>
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.maven</groupId>
+            <artifactId>maven-plugin-api</artifactId>
+        </dependency>
 
-    <dependency>
-      <groupId>org.apache.maven</groupId>
-      <artifactId>maven-project</artifactId>
-    </dependency>
+        <dependency>
+            <groupId>org.apache.maven</groupId>
+            <artifactId>maven-project</artifactId>
+        </dependency>
 
-    <dependency>
-      <groupId>org.liquibase</groupId>
-      <artifactId>liquibase-core</artifactId>
-      <version>${project.version}</version>
-    </dependency>
+        <dependency>
+            <groupId>org.liquibase</groupId>
+            <artifactId>liquibase-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
-    <dependency>
-      <groupId>org.apache.maven.shared</groupId>
-      <artifactId>maven-plugin-testing-harness</artifactId>
-    </dependency>
-  </dependencies>
+        <dependency>
+            <groupId>org.apache.maven.shared</groupId>
+            <artifactId>maven-plugin-testing-harness</artifactId>
+        </dependency>
+    </dependencies>
 
-    <!-- The repositories that we will distribute the jar files to. -->
-    <!--<distributionManagement>-->
-      <!--<repository>-->
-        <!--<id>local-repository</id>-->
-        <!--<url>file:../core/maven-repository</url>-->
-      <!--</repository>-->
-      <!--<snapshotRepository>-->
-        <!--<id>local-repository</id>-->
-        <!--<url>file://./maven-repository/release</url>-->
-      <!--</snapshotRepository>-->
-        <!--<repository>-->
-          <!--<id>quark-ssh</id>-->
-          <!--<url>scp://quark//maven/inhouse</url>-->
-        <!--</repository>-->
-        <!--<snapshotRepository>-->
-          <!--<id>quark-ssh</id>-->
-          <!--<url>scp://quark/maven/inhouse-snapshot</url>-->
-        <!--</snapshotRepository>-->
-    <!--</distributionManagement>-->
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <artifactId>maven-deploy-plugin</artifactId>
+                    <configuration>
+                        <skip>false</skip>
+                    </configuration>
+                </plugin>
+            </plugins>
+
+        </pluginManagement>
+
+    </build>
 </project>
         
