@@ -214,14 +214,14 @@
 
     <reporting>
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-project-info-reports-plugin</artifactId>
-                <configuration>
-                    <dependencyLocationsEnabled>false</dependencyLocationsEnabled>
-                    <dependencyDetailsEnabled>false</dependencyDetailsEnabled>
-                </configuration>
-            </plugin>
+            <!--<plugin>-->
+                <!--<groupId>org.apache.maven.plugins</groupId>-->
+                <!--<artifactId>maven-project-info-reports-plugin</artifactId>-->
+                <!--<configuration>-->
+                    <!--<dependencyLocationsEnabled>false</dependencyLocationsEnabled>-->
+                    <!--<dependencyDetailsEnabled>false</dependencyDetailsEnabled>-->
+                <!--</configuration>-->
+            <!--</plugin>-->
             <!--
             <plugin>
               <groupId>org.codehaus.mojo</groupId>
