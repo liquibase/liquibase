@@ -8,7 +8,7 @@
     <version>2.0-rc2-SNAPSHOT</version>
     <packaging>pom</packaging>
 
-    <name>Liquibase Parent Project</name>
+    <name>Liquibase</name>
     <description>Liquibase is a tool for managing and executing database changes.</description>
     <url>http://www.liquibase.org</url>
 
@@ -199,7 +199,15 @@
                     <version>2.0</version>
                 </plugin>
 
+
+                <plugin>
+                    <artifactId>maven-deploy-plugin</artifactId>
+                    <configuration>
+                        <skip>true</skip>
+                    </configuration>
+                </plugin>
             </plugins>
+
         </pluginManagement>
 
     </build>
@@ -209,7 +217,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-project-info-reports-plugin</artifactId>
-                <version>2.1.2</version>
                 <configuration>
                     <dependencyLocationsEnabled>false</dependencyLocationsEnabled>
                     <dependencyDetailsEnabled>false</dependencyDetailsEnabled>
@@ -222,6 +229,8 @@
               <version>2.3</version>
             </plugin>
             -->
+
+
         </plugins>
     </reporting>
 
@@ -242,8 +251,8 @@
         </snapshotRepository>
 
         <!--<site>-->
-            <!--<id>qifcon.sf.net</id>-->
-            <!--<url>scp://shell.sourceforge.net/home/groups/l/li/liquibase/htdocs/maventest</url>-->
+        <!--<id>qifcon.sf.net</id>-->
+        <!--<url>scp://shell.sourceforge.net/home/groups/l/li/liquibase/htdocs/maventest</url>-->
         <!--</site>-->
         <!--<downloadUrl>http://repo1.maven.org/maven2/org/liquibase/</downloadUrl>-->
         <!--<status>deployed</status>-->
