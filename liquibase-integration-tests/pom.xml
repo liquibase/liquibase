@@ -107,9 +107,9 @@
                         <value>true</value>
                     </property>
                 </activation>
-              <properties>
-                <liquibase.excludedTests>**/MavenIntegrationTest.java</liquibase.excludedTests>
-              </properties>
+                <!--<properties>-->
+                <!--<liquibase.excludedTests>**/MavenIntegrationTest.java</liquibase.excludedTests>-->
+                <!--</properties>-->
             </profile>
     </profiles>
   <build>
@@ -124,7 +124,7 @@
             </property>
           </systemProperties>
           <excludes>
-            <exclude>${liquibase.excludedTests}</exclude>
+            <exclude>**/MavenIntegrationTest*.java</exclude>
           </excludes>
         </configuration>
       </plugin>
