@@ -377,9 +377,14 @@ public class DiffResult {
 		}
 	}
 
-	private void printComparision(String title, DiffComparison comparison,
-			PrintStream out) {
+	private void printComparision(String title, DiffComparison comparison, PrintStream out) {
 		out.print(title + ":");
+
+        if (comparison == null) {
+            out.print("NULL");
+            return;
+        }
+
 		if (comparison.areTheSame()) {
 			out.println(" EQUAL");
 		} else {

@@ -27,12 +27,7 @@ import liquibase.test.TestContext;
 import liquibase.test.DatabaseTestContext;
 import liquibase.logging.LogFactory;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.PrintStream;
-import java.io.StringWriter;
+import java.io.*;
 import java.net.URL;
 import java.util.*;
 import java.sql.Statement;
@@ -411,7 +406,12 @@ public abstract class AbstractIntegrationTest {
             DatabaseSnapshot migratedSnapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database, null, null);
 
             DiffResult finalDiffResult = new Diff(originalSnapshot, migratedSnapshot).compare();
-            assertFalse(finalDiffResult.differencesFound());
+            try {
+                assertFalse(finalDiffResult.differencesFound());
+            } catch (AssertionError e) {
+                finalDiffResult.printResult(System.out);
+                throw e;
+            }
 
             //diff to empty and drop all
             Diff emptyDiff = new Diff(emptySnapshot, migratedSnapshot);
