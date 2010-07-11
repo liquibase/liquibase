@@ -15,143 +15,150 @@
 
     <dependencies>
         <dependency>
-          <groupId>junit</groupId>
-          <artifactId>junit</artifactId>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
         </dependency>
         <dependency>
-          <groupId>org.easymock</groupId>
-          <artifactId>easymockclassextension</artifactId>
-        </dependency>
-
-        <dependency>
-          <groupId>ant</groupId>
-          <artifactId>ant</artifactId>
-        </dependency>
-        <dependency>
-          <groupId>javax.servlet</groupId>
-          <artifactId>servlet-api</artifactId>
-        </dependency>
-        <dependency>
-          <groupId>org.springframework</groupId>
-          <artifactId>spring</artifactId>
+            <groupId>org.easymock</groupId>
+            <artifactId>easymockclassextension</artifactId>
         </dependency>
 
         <dependency>
-          <groupId>org.liquibase</groupId>
-          <artifactId>liquibase-core</artifactId>
-          <version>${project.version}</version>
+            <groupId>ant</groupId>
+            <artifactId>ant</artifactId>
         </dependency>
         <dependency>
-          <groupId>org.liquibase</groupId>
-          <artifactId>liquibase-core</artifactId>
-          <version>${project.version}</version>
-          <type>test-jar</type>
-          <scope>test</scope>
+            <groupId>javax.servlet</groupId>
+            <artifactId>servlet-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.liquibase</groupId>
+            <artifactId>liquibase-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.liquibase</groupId>
+            <artifactId>liquibase-core</artifactId>
+            <version>${project.version}</version>
+            <type>test-jar</type>
+            <scope>test</scope>
         </dependency>
 
         <!--<dependency>-->
-            <!--<groupId>org.liquibase.ext</groupId>-->
-            <!--<artifactId>modify-column</artifactId>-->
-            <!--<version>2.0-SNAPSHOT</version>-->
+        <!--<groupId>org.liquibase.ext</groupId>-->
+        <!--<artifactId>modify-column</artifactId>-->
+        <!--<version>2.0-SNAPSHOT</version>-->
         <!--</dependency>-->
         <!-- sample extensions -->
         <dependency>
-          <groupId>org.liquibase.samples</groupId>
-          <artifactId>liquibase-ext-change</artifactId>
-          <version>${project.version}</version>
-          <scope>test</scope>
+            <groupId>org.liquibase.samples</groupId>
+            <artifactId>liquibase-ext-change</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
-          <groupId>org.liquibase.samples</groupId>
-          <artifactId>liquibase-ext-changewithnestedtags</artifactId>
-          <version>${project.version}</version>
-          <scope>test</scope>
+            <groupId>org.liquibase.samples</groupId>
+            <artifactId>liquibase-ext-changewithnestedtags</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
-          <groupId>org.liquibase.samples</groupId>
-          <artifactId>liquibase-ext-sqlgenerator</artifactId>
-          <version>${project.version}</version>
-          <scope>test</scope>
+            <groupId>org.liquibase.samples</groupId>
+            <artifactId>liquibase-ext-sqlgenerator</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
         </dependency>
         <!-- JDBC drivers -->
         <dependency>
-          <groupId>hsqldb</groupId>
-          <artifactId>hsqldb</artifactId>
+            <groupId>hsqldb</groupId>
+            <artifactId>hsqldb</artifactId>
         </dependency>
         <dependency>
-          <groupId>org.apache.derby</groupId>
-          <artifactId>derby</artifactId>
+            <groupId>org.apache.derby</groupId>
+            <artifactId>derby</artifactId>
         </dependency>
         <dependency>
-          <groupId>org.apache.maven.shared</groupId>
-          <artifactId>maven-verifier</artifactId>
+            <groupId>org.apache.maven.shared</groupId>
+            <artifactId>maven-verifier</artifactId>
         </dependency>
     </dependencies>
     <profiles>
-            <profile>
-                <id>oracle</id>
-                <dependencies>
-                        <dependency>
-                                <groupId>oracle</groupId>
-                                <artifactId>oracle-ojdbc14</artifactId>
-                                <version>10.2.0.2</version>
-                                <scope>test</scope>
-                        </dependency>
-                </dependencies>
-            </profile>
-            <profile>
-                <id>buildServer</id>
-                <activation>
-                    <property>
-                        <name>env.liquibase.buildserver</name>
-                        <value>true</value>
-                    </property>
-                </activation>
-                <!--<properties>-->
-                <!--<liquibase.excludedTests>**/MavenIntegrationTest.java</liquibase.excludedTests>-->
-                <!--</properties>-->
-            </profile>
+        <profile>
+            <id>oracle</id>
+            <dependencies>
+                <dependency>
+                    <groupId>oracle</groupId>
+                    <artifactId>oracle-ojdbc14</artifactId>
+                    <version>10.2.0.2</version>
+                    <scope>test</scope>
+                </dependency>
+            </dependencies>
+        </profile>
+        <profile>
+            <id>buildServer</id>
+            <activation>
+                <property>
+                    <name>env.liquibase.buildserver</name>
+                    <value>true</value>
+                </property>
+            </activation>
+            <!--<properties>-->
+            <!--<liquibase.excludedTests>**/MavenIntegrationTest.java</liquibase.excludedTests>-->
+            <!--</properties>-->
+        </profile>
     </profiles>
-  <build>
-    <plugins>
-      <plugin>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <configuration>
-          <systemProperties>
-            <property>
-              <name>liquibase.default.logger.level</name>
-              <value>debug</value>
-            </property>
-          </systemProperties>
-          <excludes>
-            <exclude>**/MavenIntegrationTest*.java</exclude>
-          </excludes>
-        </configuration>
-      </plugin>
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <systemProperties>
+                        <property>
+                            <name>liquibase.default.logger.level</name>
+                            <value>debug</value>
+                        </property>
+                    </systemProperties>
+                    <excludes>
+                        <exclude>**/MavenIntegrationTest*.java</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
 
-      <plugin>
-       <artifactId>maven-jar-plugin</artifactId>
-       <executions>
-         <execution>
-           <goals>
-             <goal>test-jar</goal>
-           </goals>
-         </execution>
-       </executions>
-     </plugin>
-   </plugins>
+            <plugin>
+                <artifactId>maven-jar-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>test-jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
+            </plugin>
 
-   <testResources>
-     <testResource>
-        <directory>src/test/resources</directory>
-        <filtering>false</filtering>
-     </testResource>
-     <testResource>
-        <directory>src/test/filtered-resources</directory>
-        <filtering>true</filtering>
-     </testResource>
-   </testResources>
-  </build>
+        </plugins>
+
+        <testResources>
+            <testResource>
+                <directory>src/test/resources</directory>
+                <filtering>false</filtering>
+            </testResource>
+            <testResource>
+                <directory>src/test/filtered-resources</directory>
+                <filtering>true</filtering>
+            </testResource>
+        </testResources>
+    </build>
 
 
 </project>
