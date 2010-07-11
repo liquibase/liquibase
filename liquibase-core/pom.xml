@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>liquibase-core</artifactId>
-    <name>Liquibase Library</name>
+    <name>Liquibase Core</name>
 
     <parent>
       <groupId>org.liquibase</groupId>
