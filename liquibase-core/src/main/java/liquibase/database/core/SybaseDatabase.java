@@ -266,5 +266,10 @@ public class SybaseDatabase extends AbstractDatabase {
             return -1;
         }
     }
-    
+
+    @Override
+    public String escapeIndexName(String schemaName, String indexName) {
+        return super.escapeIndexName(null, indexName);
+    }
+
 }

@@ -27,8 +27,9 @@ public class DropTableGenerator extends AbstractSqlGenerator<DropTableStatement>
                     || database instanceof MSSQLDatabase
                     || database instanceof FirebirdDatabase
                     || database instanceof SQLiteDatabase
+                    || database instanceof SybaseDatabase
                     || database instanceof SybaseASADatabase) {
-                LogFactory.getLogger().debug("Database does not support drop with cascade");
+                LogFactory.getLogger().warning("Database does not support drop with cascade");
             } else if (database instanceof OracleDatabase) {
                 buffer.append(" CASCADE CONSTRAINTS");
             } else {
