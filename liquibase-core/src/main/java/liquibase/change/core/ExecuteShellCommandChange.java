@@ -4,6 +4,7 @@ import liquibase.change.AbstractChange;
 import liquibase.change.ChangeMetaData;
 import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.exception.ValidationErrors;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.executor.LoggingExecutor;
@@ -49,6 +50,11 @@ public class ExecuteShellCommandChange extends AbstractChange {
 
     public void setOs(String os) {
         this.os = StringUtils.splitAndTrim(os, ",");
+    }
+
+    @Override
+    public ValidationErrors validate(Database database) {
+        return new ValidationErrors();
     }
 
     public SqlStatement[] generateStatements(final Database database) {
