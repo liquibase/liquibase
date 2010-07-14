@@ -1,9 +1,9 @@
 package liquibase.sqlgenerator.core;
 
+import java.util.Arrays;
 import liquibase.database.Database;
 import liquibase.database.typeconversion.TypeConverterFactory;
 import liquibase.exception.ValidationErrors;
-import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.InsertOrUpdateStatement;
 import liquibase.statement.core.UpdateStatement;
@@ -11,6 +11,7 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 
 import java.util.Date;
+import java.util.HashSet;
 
 public abstract class InsertOrUpdateGenerator extends AbstractSqlGenerator<InsertOrUpdateStatement> {
 
@@ -92,10 +93,13 @@ public abstract class InsertOrUpdateGenerator extends AbstractSqlGenerator<Inser
         UpdateStatement updateStatement = new UpdateStatement(insertOrUpdateStatement.getSchemaName(),insertOrUpdateStatement.getTableName());
         updateStatement.setWhereClause(whereClause + ";\n");
 
-
+        String[] pkFields=insertOrUpdateStatement.getPrimaryKey().split(",");
+        HashSet<String> hashPkFields = new HashSet<String>(Arrays.asList(pkFields));
         for(String columnKey:insertOrUpdateStatement.getColumnValues().keySet())
         {
-            updateStatement.addNewColumnValue(columnKey,insertOrUpdateStatement.getColumnValue(columnKey));
+            if (!hashPkFields.contains(columnKey)) {
+                updateStatement.addNewColumnValue(columnKey,insertOrUpdateStatement.getColumnValue(columnKey));
+            }
         }
 
         Sql[] updateSql = update.generateSql(updateStatement, database, sqlGeneratorChain);

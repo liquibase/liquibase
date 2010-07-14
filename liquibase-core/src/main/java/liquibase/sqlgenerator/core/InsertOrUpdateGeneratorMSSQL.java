@@ -2,7 +2,6 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
 import liquibase.database.core.MSSQLDatabase;
-import liquibase.sql.Sql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.InsertOrUpdateStatement;
 
@@ -13,13 +12,13 @@ public class InsertOrUpdateGeneratorMSSQL extends InsertOrUpdateGenerator {
 
     protected String getRecordCheck(InsertOrUpdateStatement insertOrUpdateStatement, Database database, String whereClause) {
         StringBuffer recordCheck = new StringBuffer();
-        recordCheck.append("DECLARE @@reccount integer\n");
-        recordCheck.append("SELECT @@reccount = count(*) FROM ");
+        recordCheck.append("DECLARE @reccount integer\n");
+        recordCheck.append("SELECT @reccount = count(*) FROM ");
         recordCheck.append(database.escapeTableName(insertOrUpdateStatement.getSchemaName(),insertOrUpdateStatement.getTableName()));
         recordCheck.append(" WHERE ");
         recordCheck.append(whereClause);
         recordCheck.append("\n");
-        recordCheck.append("IF @@reccount = 0\n");
+        recordCheck.append("IF @reccount = 0\n");
 
         return recordCheck.toString();
     }
