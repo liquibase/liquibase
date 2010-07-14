@@ -44,7 +44,7 @@ public class InsertOrUpdateGeneratorOracleTest {
         lineToCheck++;
         assertEquals("ELSIF v_reccount = 1 THEN",sqlLines[lineToCheck].trim());
         lineToCheck++;
-        assertEquals("UPDATE myschema.mytable SET col2 = 'value2', pk_col1 = 'value1' WHERE pk_col1 = 'value1';",sqlLines[lineToCheck].trim());
+        assertEquals("UPDATE myschema.mytable SET col2 = 'value2' WHERE pk_col1 = 'value1';",sqlLines[lineToCheck].trim());
         lineToCheck++;
         assertEquals("END IF;",sqlLines[lineToCheck].trim());
         lineToCheck++;
