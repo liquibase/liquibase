@@ -6,6 +6,7 @@ import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
 import liquibase.servicelocator.ServiceLocator;
 import liquibase.sql.Sql;
+import liquibase.sqlgenerator.core.AbstractSqlGenerator;
 import liquibase.statement.SqlStatement;
 
 import java.lang.reflect.ParameterizedType;
@@ -111,7 +112,11 @@ public class SqlGeneratorFactory {
             if (typeClass instanceof TypeVariable) {
                 typeClass = ((TypeVariable) typeClass).getBounds()[0];
             }
-            if (((Class) typeClass).equals(statement.getClass())) {
+            if (typeClass.equals(SqlStatement.class)) {
+                return;
+            }
+            
+            if (((Class) typeClass).isAssignableFrom(statement.getClass())) {
                 if (generator.supports(statement, database)) {
                     validGenerators.add(generator);
                 }
@@ -166,8 +171,11 @@ public class SqlGeneratorFactory {
         SqlGeneratorChain sqlGeneratorChain = createGeneratorChain(statement, database);
         if (sqlGeneratorChain != null) {
             //noinspection unchecked
-            for (Sql sql : sqlGeneratorChain.generateSql(statement, database)) {
-                affectedObjects.addAll(sql.getAffectedDatabaseObjects());
+            Sql[] sqls = sqlGeneratorChain.generateSql(statement, database);
+            if (sqls != null) {
+                for (Sql sql : sqls) {
+                    affectedObjects.addAll(sql.getAffectedDatabaseObjects());
+                }
             }
         }
 

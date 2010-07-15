@@ -797,4 +797,10 @@
             <!--<column name="description" value="prova"/>-->
         <!--</insert>-->
     <!--</changeSet>-->
+
+    <!--<changeSet id="executeComandTest" author="nvoxland">-->
+        <!--<executeCommand executable="/cygwin/bin/echo.exe">-->
+            <!--<arg value="hello from cygwin"/>-->
+        <!--</executeCommand>-->
+    <!--</changeSet>-->
 </databaseChangeLog>
