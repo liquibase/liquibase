@@ -234,7 +234,7 @@ public class PostgresDatabase extends AbstractDatabase {
         if (objectName == null) {
             return null;
         }
-        if (objectName.contains("-") || hasCaseProblems(objectName) || isReservedWord(objectName)) {
+        if (objectName.contains("-") || hasCaseProblems(objectName) || startsWithNumeric(objectName) || isReservedWord(objectName)) {
             return "\"" + objectName + "\"";
         } else {
             return super.escapeDatabaseObject(objectName);
@@ -248,6 +248,15 @@ public class PostgresDatabase extends AbstractDatabase {
     */
     private boolean hasCaseProblems(String tableName) {
         return tableName.matches(".*[A-Z].*") && tableName.matches(".*[a-z].*");
+
+    }
+
+    /*
+    * Check if given string starts with numeric values that may cause problems and should be escaped.
+    */
+    private boolean startsWithNumeric(String tableName) {
+        return tableName.matches("^[0-9].*");
+
     }
 
     /*
