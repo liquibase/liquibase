@@ -26,7 +26,7 @@ public class SQLFileChange extends AbstractSQLChange {
 
     private String path;
     private String encoding = null;
-    private boolean relativeToChangelogFile = false;
+    private Boolean relativeToChangelogFile;
 
 
     public SQLFileChange() {
@@ -104,7 +104,7 @@ public class SQLFileChange extends AbstractSQLChange {
      * @return True if the file was found, false otherwise.
      */
     private boolean loadFromFileSystem(String file) throws SetupException {
-        if (relativeToChangelogFile) {
+        if (relativeToChangelogFile != null && relativeToChangelogFile) {
             file = getChangeSet().getFilePath().replaceFirst("/[^/]*$","")+"/"+file;
         }
 
