@@ -170,29 +170,30 @@ public class ServiceLocator {
             catch(ZipException e) {
                 throw (ZipException) new ZipException(e.getMessage() + " for " + zipfile).initCause(e);
             }
-        } else if (resource.getProtocol().equals("file")) {
-            File directory = new File(resource.getFile().replace("%20", " "));
-
-            if (!directory.exists()) {
-//                logger.debug(directory + " does not exist");
-                return classes;
-            }
-
-            for (File file : directory.listFiles()) {
-                if (file.isDirectory()) {
-                    if (file.getName().startsWith(".")) {
-                        continue;
-                    } else if(file.getName().contains(".")) {
-                        throw new IllegalStateException("Find . in directory name: "+file);
-                    }
-                    classes.addAll(findClasses(file.toURL(), packageName + "." + file.getName(), requiredInterface));
-                } else if (file.getName().endsWith(".class")) {
-                    potentialClassNames.add(packageName + '.' + file.getName().substring(0, file.getName().length() - ".class".length()));
-                }
-            }
-
         } else {
-            throw new UnexpectedLiquibaseException("Cannot read plugin classes from protocol " + resource.getProtocol());
+            try {
+                File directory = new File(resource.getFile().replace("%20", " "));
+
+                if (!directory.exists()) {
+    //                logger.debug(directory + " does not exist");
+                    return classes;
+                }
+
+                for (File file : directory.listFiles()) {
+                    if (file.isDirectory()) {
+                        if (file.getName().startsWith(".")) {
+                            continue;
+                        } else if(file.getName().contains(".")) {
+                            throw new IllegalStateException("Find . in directory name: "+file);
+                        }
+                        classes.addAll(findClasses(file.toURL(), packageName + "." + file.getName(), requiredInterface));
+                    } else if (file.getName().endsWith(".class")) {
+                        potentialClassNames.add(packageName + '.' + file.getName().substring(0, file.getName().length() - ".class".length()));
+                    }
+                }
+            } catch (Exception e) {
+                throw new UnexpectedLiquibaseException("Cannot read plugin classes from "+resource.toExternalForm(), e);
+            }
         }
 
         for (String potentialClassName : potentialClassNames) {

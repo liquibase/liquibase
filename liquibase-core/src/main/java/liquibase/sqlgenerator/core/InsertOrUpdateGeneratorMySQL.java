@@ -38,8 +38,6 @@ public class InsertOrUpdateGeneratorMySQL extends InsertOrUpdateGenerator {
         }
         sql.deleteCharAt(sql.lastIndexOf(","));
 
-        System.out.println("SQL :" + sql.toString());
-
         return sql.toString();
     }
 
