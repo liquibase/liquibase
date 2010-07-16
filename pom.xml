@@ -54,7 +54,7 @@
         <module>samples/liquibase-ext-sqlgenerator</module>
         <module>liquibase-integration-tests</module>
     </modules>
-
+    
     <dependencyManagement>
         <dependencies>
 
@@ -240,17 +240,15 @@
     <distributionManagement>
         <repository>
             <uniqueVersion>false</uniqueVersion>
-            <id>liquibase</id>
-            <name>Liquibase Production Repository</name>
-            <url>scp://repo1/maven2</url>
-            <layout>default</layout>
+            <id>sonatype-nexus-stagings</id>
+            <name>Sonatype Production Repository</name>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
         </repository>
         <snapshotRepository>
             <uniqueVersion>true</uniqueVersion>
-            <id>liquibaseSnapshot</id>
-            <name>Liquibase Snapshot Repository</name>
-            <url>sftp://propellers.net/maven</url>
-            <layout>legacy</layout>
+            <id>sonatype-nexus-snapshots</id>
+            <name>Sontatype Snapshot Repository</name>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
         </snapshotRepository>
 
         <!--<site>-->
