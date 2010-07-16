@@ -879,6 +879,28 @@
         <root url="jar://$MAVEN_REPOSITORY$/org/codehaus/plexus/plexus-archiver/1.0-alpha-7/plexus-archiver-1.0-alpha-7-sources.jar!/" />
       </SOURCES>
     </library>
+    <library name="Maven: org.liquibase:liquibase-core:2.0-rc3-SNAPSHOT">
+      <CLASSES>
+        <root url="jar://$MAVEN_REPOSITORY$/org/liquibase/liquibase-core/2.0-rc3-SNAPSHOT/liquibase-core-2.0-rc3-SNAPSHOT.jar!/" />
+      </CLASSES>
+      <JAVADOC>
+        <root url="jar://$MAVEN_REPOSITORY$/org/liquibase/liquibase-core/2.0-rc3-SNAPSHOT/liquibase-core-2.0-rc3-SNAPSHOT-javadoc.jar!/" />
+      </JAVADOC>
+      <SOURCES>
+        <root url="jar://$MAVEN_REPOSITORY$/org/liquibase/liquibase-core/2.0-rc3-SNAPSHOT/liquibase-core-2.0-rc3-SNAPSHOT-sources.jar!/" />
+      </SOURCES>
+    </library>
+    <library name="Maven: org.liquibase:liquibase-core:test-jar:tests:2.0-rc3-SNAPSHOT">
+      <CLASSES>
+        <root url="jar://$MAVEN_REPOSITORY$/org/liquibase/liquibase-core/2.0-rc3-SNAPSHOT/liquibase-core-2.0-rc3-SNAPSHOT-tests.jar!/" />
+      </CLASSES>
+      <JAVADOC>
+        <root url="jar://$MAVEN_REPOSITORY$/org/liquibase/liquibase-core/2.0-rc3-SNAPSHOT/liquibase-core-2.0-rc3-SNAPSHOT-test-javadoc.jar!/" />
+      </JAVADOC>
+      <SOURCES>
+        <root url="jar://$MAVEN_REPOSITORY$/org/liquibase/liquibase-core/2.0-rc3-SNAPSHOT/liquibase-core-2.0-rc3-SNAPSHOT-test-sources.jar!/" />
+      </SOURCES>
+    </library>
   </component>
 </project>
 
