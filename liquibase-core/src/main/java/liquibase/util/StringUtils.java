@@ -65,7 +65,7 @@ public class StringUtils {
      */
     public static String stripComments(String multiLineSQL) {
         String strippedSingleLines = multiLineSQL.replaceAll("\\s--\\s.*", "");
-        return strippedSingleLines.replaceAll("/\\*[\n\\S\\s]*\\*/", "\n");
+        return strippedSingleLines.replaceAll("/\\*[\n\\S\\s]*?\\*/", "\n");
     }
 
     public static String join(String[] array, String delimiter) {
