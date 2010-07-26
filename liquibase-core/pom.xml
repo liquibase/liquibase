@@ -5,6 +5,7 @@
 
     <artifactId>liquibase-core</artifactId>
     <name>Liquibase Core</name>
+    <packaging>jar</packaging>
 
     <parent>
       <groupId>org.liquibase</groupId>
