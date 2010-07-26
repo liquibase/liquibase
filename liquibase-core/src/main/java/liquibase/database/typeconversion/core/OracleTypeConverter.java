@@ -32,7 +32,7 @@ public class OracleTypeConverter extends AbstractTypeConverter {
 				returnTypeName = getVarcharType();
 				if (precision != null) {
 					String[] typeParams = precision.split(" ");
-					returnTypeName.setFirstParameter(Integer.parseInt(typeParams[0].trim()));
+					returnTypeName.setFirstParameter(typeParams[0].trim());
 					if (typeParams.length > 1) {
 						returnTypeName.setUnit(typeParams[1]);
 					}

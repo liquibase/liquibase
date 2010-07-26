@@ -117,18 +117,7 @@ public class ServiceLocator {
                 Class.forName(requiredInterface.getName());
 
                 if (!classesBySuperclass.containsKey(requiredInterface)) {
-                    classesBySuperclass.put(requiredInterface, new ArrayList<Class>());
-
-                    for (String packageName : packagesToScan) {
-                        logger.debug("ServiceLocator scanning "+packageName+" with resoureAccessor "+resourceAccessor.getClass().getName());
-                        String path = packageName.replace('.', '/');
-                        Enumeration<URL> resources = resourceAccessor.getResources(path);
-                        while (resources.hasMoreElements()) {
-                            URL resource = resources.nextElement();
-                            logger.debug("Found "+packageName+" in "+resource.toExternalForm());
-                            classesBySuperclass.get(requiredInterface).addAll(findClasses(resource, packageName, requiredInterface));
-                        }
-                    }
+                    classesBySuperclass.put(requiredInterface, findClassesImpl(requiredInterface));
                 }
             } catch (Exception e) {
                 throw new ServiceNotFoundException(e);
@@ -147,104 +136,27 @@ public class ServiceLocator {
         }
     }
 
-    private List<Class> findClasses(URL resource, String packageName, Class requiredInterface) throws Exception {
-        logger.debug("ServiceLocator finding " + packageName + " classes in " + resource.toExternalForm() + " matching interface " + requiredInterface.getName());
+    private List<Class> findClassesImpl(Class requiredInterface) throws Exception {
+        logger.debug("ServiceLocator finding classes matching interface " + requiredInterface.getName());
+
         List<Class> classes = new ArrayList<Class>();
-//        if (directory.toURI().toString().startsWith("jar:")) {
-//            logger.debug("have a jar: "+directory.toString());
-//        }
 
-        List<String> potentialClassNames = new ArrayList<String>();
-        if (resource.getProtocol().equals("jar")) {
-            File zipfile = extractZipFile(resource);
-            try {
-                JarFile jarFile = new JarFile(zipfile);
-                Enumeration<JarEntry> entries = jarFile.entries();
-                while (entries.hasMoreElements()) {
-                    JarEntry entry = entries.nextElement();
-                    if (entry.getName().startsWith(packageName.replaceAll("\\.", "/")) && entry.getName().endsWith(".class")) {
-                        potentialClassNames.add(entry.getName().replaceAll("\\/", ".").substring(0, entry.getName().length() - ".class".length()));
-                    }
-                }
-            }
-            catch(ZipException e) {
-                throw (ZipException) new ZipException(e.getMessage() + " for " + zipfile).initCause(e);
-            }
-        } else {
-            try {
-                File directory = new File(resource.getFile().replace("%20", " "));
-
-                if (!directory.exists()) {
-    //                logger.debug(directory + " does not exist");
-                    return classes;
-                }
-
-                for (File file : directory.listFiles()) {
-                    if (file.isDirectory()) {
-                        if (file.getName().startsWith(".")) {
-                            continue;
-                        } else if(file.getName().contains(".")) {
-                            throw new IllegalStateException("Find . in directory name: "+file);
-                        }
-                        classes.addAll(findClasses(file.toURL(), packageName + "." + file.getName(), requiredInterface));
-                    } else if (file.getName().endsWith(".class")) {
-                        potentialClassNames.add(packageName + '.' + file.getName().substring(0, file.getName().length() - ".class".length()));
-                    }
-                }
-            } catch (Exception e) {
-                throw new UnexpectedLiquibaseException("Cannot read plugin classes from "+resource.toExternalForm(), e);
-            }
-        }
-
-        for (String potentialClassName : potentialClassNames) {
-            Class<?> clazz = null;
-            try {
-                clazz = Class.forName(potentialClassName, true, resourceAccessor.toClassLoader());
-            } catch (NoClassDefFoundError e) {
-                logger.warning("Could not configure extension class " + potentialClassName + ": Missing dependency " + e.getMessage());
-                continue;
-            } catch (Throwable e) {
-                logger.warning("Could not configure extension class " + potentialClassName + ": " + e.getMessage());
-                continue;
-            }
-            if (!clazz.isInterface()
-                    && !Modifier.isAbstract(clazz.getModifiers())
-                    && isCorrectType(clazz, requiredInterface)) {
-                logger.debug(potentialClassName + " matches "+requiredInterface.getName());
+        ResolverUtil resolverUtil = new ResolverUtil();
+        resolverUtil.setClassLoader(resourceAccessor.toClassLoader());          
+        for (Class clazz : (Set<Class>) resolverUtil.findImplementations(requiredInterface, packagesToScan.toArray(new String[packagesToScan.size()])).getClasses()) {
+            if (!Modifier.isAbstract(clazz.getModifiers()) && !Modifier.isInterface(clazz.getModifiers()) && Modifier.isPublic(clazz.getModifiers())) {
                 try {
                     clazz.getConstructor();
+                    logger.debug(clazz.getName() + " matches "+requiredInterface.getName());
+
                     classes.add(clazz);
                 } catch (NoSuchMethodException e) {
-                    URL classAsUrl = resourceAccessor.toClassLoader().getResource(clazz.getName().replaceAll("\\.", "/") + ".class");
-                    if (!clazz.getName().equals("liquibase.executor.LoggingExecutor")
-                            && (classAsUrl != null && !classAsUrl.toExternalForm().contains("build-test/liquibase/"))) { //keeps the logs down
-                        logger.warning("Class " + clazz.getName() + " does not have a public no-arg constructor, so it can't be used as a " + requiredInterface.getName() + " service");
-                    }
+                    logger.info("Can not use "+clazz+" as a Liquibase service because it does not have a default constructor" );
                 }
-//            } else {
-//                logger.debug(potentialClassName + " does not match");
             }
-
         }
 
         return classes;
-    }
-
-    static File extractZipFile(URL resource) {
-        String file = resource.getFile();
-        String path = file.split("!")[0];
-        if(path.matches("file:\\/[A-Za-z]:\\/.*")) {
-            path = path.replaceFirst("file:\\/", "");
-        }else {
-            path = path.replaceFirst("file:", "");
-        }
-        path = URLDecoder.decode(path);
-        File zipfile = new File(path);
-        return zipfile;
-    }
-
-    private boolean isCorrectType(Class<?> clazz, Class requiredInterface) {
-        return !clazz.equals(Object.class) && (requiredInterface.isAssignableFrom(clazz) || isCorrectType(clazz.getSuperclass(), requiredInterface));
     }
 
     public static void reset() {

@@ -231,9 +231,9 @@ public abstract class AbstractTypeConverter implements TypeConverter {
     protected void addPrecisionToType(String precision, DataType returnTypeName) throws NumberFormatException {
         if (precision != null) {
             String[] params = precision.split(",");
-            returnTypeName.setFirstParameter(Integer.parseInt(params[0].trim()));
+            returnTypeName.setFirstParameter(params[0].trim());
             if (params.length > 1) {
-                returnTypeName.setSecondParameter(Integer.parseInt(params[1].trim()));
+                returnTypeName.setSecondParameter(params[1].trim());
             }
         }
     }
