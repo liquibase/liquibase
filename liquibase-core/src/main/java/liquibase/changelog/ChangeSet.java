@@ -46,7 +46,7 @@ public class ChangeSet implements Conditional {
         public boolean ranBefore;
     }
 
-     public enum ValidationFailOption {
+    public enum ValidationFailOption {
         HALT("HALT"),
         MARK_RAN("MARK_RAN");
 
@@ -137,12 +137,17 @@ public class ChangeSet implements Conditional {
     }
 
     public CheckSum generateCheckSum() {
-            StringBuffer stringToMD5 = new StringBuffer();
-            for (Change change : getChanges()) {
-                stringToMD5.append(change.generateCheckSum()).append(":");
-            }
+        StringBuffer stringToMD5 = new StringBuffer();
+        for (Change change : getChanges()) {
+            stringToMD5.append(change.generateCheckSum()).append(":");
+        }
 
-            return CheckSum.compute(stringToMD5.toString());
+        for (SqlVisitor visitor : this.getSqlVisitors()) {
+             stringToMD5.append(visitor.generateCheckSum()).append(";");            
+        }
+
+
+        return CheckSum.compute(stringToMD5.toString());
     }
 
     /**
@@ -164,10 +169,10 @@ public class ChangeSet implements Conditional {
 
         Executor executor = ExecutorService.getInstance().getExecutor(database);
         try {
-        	// set auto-commit based on runInTransaction if database supports DDL in transactions
-        	if(database.supportsDDLInTransaction()) {
-        		database.setAutoCommit(!runInTransaction);
-        	}
+            // set auto-commit based on runInTransaction if database supports DDL in transactions
+            if (database.supportsDDLInTransaction()) {
+                database.setAutoCommit(!runInTransaction);
+            }
 
             executor.comment("Changeset " + toString());
             if (StringUtils.trimToNull(getComments()) != null) {
@@ -256,7 +261,7 @@ public class ChangeSet implements Conditional {
                 if (runInTransaction) {
                     database.commit();
                 }
-                log.info("ChangeSet " + toString(false) + " ran successfully in "+(new Date().getTime()-startTime+"ms"));
+                log.info("ChangeSet " + toString(false) + " ran successfully in " + (new Date().getTime() - startTime + "ms"));
                 if (execType == null) {
                     execType = ExecType.EXECUTED;
                 }
@@ -271,7 +276,7 @@ public class ChangeSet implements Conditional {
                 throw new MigrationFailedException(this, e);
             }
             if (getFailOnError() != null && !getFailOnError()) {
-                log.info("Change set " + toString(false) + " failed, but failOnError was false.  Error: "+e.getMessage());
+                log.info("Change set " + toString(false) + " failed, but failOnError was false.  Error: " + e.getMessage());
                 log.debug("Failure Stacktrace", e);
                 execType = ExecType.FAILED;
             } else {
@@ -282,8 +287,8 @@ public class ChangeSet implements Conditional {
                 }
             }
         } finally {
-        	// restore auto-commit to false if this ChangeSet was not run in a transaction,
-        	// but only if the database supports DDL in transactions
+            // restore auto-commit to false if this ChangeSet was not run in a transaction,
+            // but only if the database supports DDL in transactions
             if (!runInTransaction && database.supportsDDLInTransaction()) {
                 try {
                     database.setAutoCommit(false);
@@ -511,5 +516,5 @@ public class ChangeSet implements Conditional {
 
     public List<SqlVisitor> getSqlVisitors() {
         return sqlVisitors;
-    }        
+    }
 }

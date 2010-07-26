@@ -1,5 +1,6 @@
 package liquibase.sql.visitor;
 
+import liquibase.change.CheckSum;
 import liquibase.database.Database;
 
 import java.util.Collection;
@@ -9,7 +10,7 @@ public interface SqlVisitor {
 
     String modifySql(String sql, Database database);
 
-    String getTagName();
+    String getName();
 
     Set<String> getApplicableDbms();
 
@@ -22,5 +23,7 @@ public interface SqlVisitor {
     Set<String> getContexts();
 
     void setContexts(Set<String> contexts);
+
+    CheckSum generateCheckSum();
 
 }

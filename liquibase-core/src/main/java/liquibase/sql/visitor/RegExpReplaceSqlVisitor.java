@@ -7,7 +7,7 @@ public class RegExpReplaceSqlVisitor extends AbstractSqlVisitor {
     private String replace;
     private String with;
 
-    public String getTagName() {
+    public String getName() {
         return "regExpReplace";
     }
 

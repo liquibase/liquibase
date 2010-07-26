@@ -9,6 +9,7 @@ import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.serializer.ChangeLogSerializer;
+import liquibase.sql.visitor.SqlVisitor;
 import liquibase.util.StringUtils;
 
 import java.lang.reflect.Field;
@@ -33,6 +34,10 @@ public class StringChangeLogSerializer implements ChangeLogSerializer {
         return change.getChangeMetaData().getName() + ":" + serializeObject(change, 1);
     }
 
+    public String serialize(SqlVisitor visitor) {
+        return visitor.getName() + ":" + serializeObject(visitor, 1);
+    }
+
     private String serializeObject(Object objectToSerialize, int indent) {
         try {
             StringBuffer buffer = new StringBuffer();
@@ -51,6 +56,9 @@ public class StringChangeLogSerializer implements ChangeLogSerializer {
                         continue;
                     }
                     if (field.getName().equals("$VRc")) { //from emma
+                        continue;
+                    }
+                    if (field.getName().equals("serialVersionUID")) {
                         continue;
                     }
 

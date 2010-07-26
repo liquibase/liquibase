@@ -23,7 +23,7 @@ public class SqlVisitorFactory {
         try {
             for (Class<SqlVisitor> visitorClass : visitors) {
                 SqlVisitor visitor = visitorClass.newInstance();
-                tagToClassMap.put(visitor.getTagName(), visitorClass);
+                tagToClassMap.put(visitor.getName(), visitorClass);
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
