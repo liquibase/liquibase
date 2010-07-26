@@ -4,6 +4,7 @@ import liquibase.change.Change;
 import liquibase.change.ColumnConfig;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
+import liquibase.sql.visitor.SqlVisitor;
 
 public interface ChangeLogSerializer {
 
@@ -14,6 +15,8 @@ public interface ChangeLogSerializer {
     String serialize(ChangeSet changeSet);
     
     String serialize(Change change);
+
+    String serialize(SqlVisitor visitor);
 
     String serialize(ColumnConfig columnConfig);
 

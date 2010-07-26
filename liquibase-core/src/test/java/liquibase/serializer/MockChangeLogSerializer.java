@@ -4,6 +4,7 @@ import liquibase.change.Change;
 import liquibase.change.ColumnConfig;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
+import liquibase.sql.visitor.SqlVisitor;
 
 public class MockChangeLogSerializer implements ChangeLogSerializer {
 
@@ -31,5 +32,9 @@ public class MockChangeLogSerializer implements ChangeLogSerializer {
 
     public String serialize(ColumnConfig columnConfig) {
         return null;
+    }
+
+    public String serialize(SqlVisitor visitor) {
+        return null;  
     }
 }

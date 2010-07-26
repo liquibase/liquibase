@@ -6,7 +6,7 @@ public class AppendSqlVisitor extends AbstractSqlVisitor{
     private String value;
 
 
-    public String getTagName() {
+    public String getName() {
         return "append";
     }
 

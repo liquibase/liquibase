@@ -9,6 +9,7 @@ import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.serializer.ChangeLogSerializer;
+import liquibase.sql.visitor.SqlVisitor;
 import liquibase.util.ISODateFormat;
 import liquibase.util.StringUtils;
 import liquibase.util.XMLUtil;
@@ -47,6 +48,12 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
         return buffer.toString();
     }
 
+    public String serialize(SqlVisitor visitor) {
+        StringBuffer buffer = new StringBuffer();
+        nodeToStringBuffer(createNode(visitor), buffer);
+        return buffer.toString();
+    }
+
     public String serialize(ColumnConfig columnConfig) {
         StringBuffer buffer = new StringBuffer();
         nodeToStringBuffer(createNode(columnConfig), buffer);
@@ -58,6 +65,43 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
         nodeToStringBuffer(createNode(changeSet), buffer);
         return buffer.toString();
 
+    }
+
+    public Element createNode(SqlVisitor visitor) {
+        Element node = currentChangeLogFileDOM.createElement(visitor.getName());
+        try {
+            List<Field> allFields = new ArrayList<Field>();
+            Class classToExtractFieldsFrom = visitor.getClass();
+            while (!classToExtractFieldsFrom.equals(Object.class)) {
+                allFields.addAll(Arrays.asList(classToExtractFieldsFrom.getDeclaredFields()));
+                classToExtractFieldsFrom = classToExtractFieldsFrom.getSuperclass();
+            }
+
+            for (Field field : allFields) {
+                field.setAccessible(true);
+                ChangeProperty changePropertyAnnotation = field.getAnnotation(ChangeProperty.class);
+                if (changePropertyAnnotation != null && !changePropertyAnnotation.includeInSerialization()) {
+                    continue;
+                }
+                if (field.getName().equals("serialVersionUID")) {
+                    continue;
+                }
+                if (field.getName().equals("$VRc")) { //from emma
+                    continue;
+                }
+
+
+                String propertyName = field.getName();
+                Object value = field.get(visitor);
+                if (value != null) {
+                    node.setAttribute(propertyName, value.toString());
+                }
+            }
+        } catch (Exception e) {
+            throw new UnexpectedLiquibaseException(e);
+        }
+
+        return node;
     }
 
     public Element createNode(Change change) {
