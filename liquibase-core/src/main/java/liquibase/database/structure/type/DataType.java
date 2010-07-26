@@ -19,8 +19,8 @@ public abstract class DataType {
 	// Unit of data-type precision (i.e. BYTE, CHAR for Oracle)
 	private String unit;
 
-    private Integer firstParameter;
-    private Integer secondParameter;
+    private String firstParameter;
+    private String secondParameter;
 
     protected DataType(String dataTypeName, int minParameters, int maxParameters) {
         this.dataTypeName = dataTypeName;
@@ -44,23 +44,23 @@ public abstract class DataType {
         return maxParameters;
     }
 
-    public Integer getFirstParameter() {
+    public String getFirstParameter() {
         return firstParameter;
     }
 
-    public void setFirstParameter(Integer firstParameter) {
+    public void setFirstParameter(String firstParameter) {
         if (maxParameters < 1) {
             throw new UnexpectedLiquibaseException("Type "+getClass()+" doesn't support precision but precision was specified");
         }
         this.firstParameter = firstParameter;
     }
 
-    public Integer getSecondParameter() {
+    public String getSecondParameter() {
         return secondParameter;
     }
 
 
-    public void setSecondParameter(Integer secondParameter) {
+    public void setSecondParameter(String secondParameter) {
         if (maxParameters <2 ) {
             throw new UnexpectedLiquibaseException("Type "+getClass()+" doesn't support second parameters but one was specified");
         }

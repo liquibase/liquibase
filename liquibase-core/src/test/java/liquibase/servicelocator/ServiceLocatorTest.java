@@ -1,9 +1,11 @@
 package liquibase.servicelocator;
 
 import java.io.File;
+import java.lang.reflect.Modifier;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import liquibase.database.Database;
 import liquibase.parser.ChangeLogParser;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.CompositeResourceAccessor;
@@ -43,16 +45,26 @@ public class ServiceLocatorTest {
         assertTrue(classes.length > 0);
     }
 
-
     @Test
-    public void extractZipFile() throws MalformedURLException {
-        File zipFile = ServiceLocator.extractZipFile(new URL(
-                "jar:file:/C:/My%20Projects/liquibase2/liquibase-integration-tests/src/test/resources/ext/jars/liquibase-samplesqlgenerator.jar!/liquibase/sqlgenerator"));
-        assertEquals("C:/My Projects/liquibase2/liquibase-integration-tests/src/test/resources/ext/jars/liquibase-samplesqlgenerator.jar", zipFile.toString().replace(
-                '\\', '/'));
-        zipFile = ServiceLocator.extractZipFile(new URL(
-                "jar:file:/home/myuser/liquibase2/liquibase-integration-tests/src/test/resources/ext/jars/liquibase-samplesqlgenerator.jar!/liquibase/sqlgenerator"));
-        assertEquals("/home/myuser/liquibase2/liquibase-integration-tests/src/test/resources/ext/jars/liquibase-samplesqlgenerator.jar", zipFile.toString().replace('\\',
-                '/'));
+    public void findClass() throws Exception {
+        Class[] classes = serviceLocator.findClasses(Database.class);
+        for (Class clazz : classes) {
+            assertFalse(clazz.getName()+" is abstract", Modifier.isAbstract(clazz.getModifiers()));                    
+            assertFalse(clazz.getName()+" is an interface", Modifier.isInterface(clazz.getModifiers()));
+            assertNotNull(clazz.getConstructors());
+        }
+        assertTrue(classes.length > 0);
     }
+
+//    @Test
+//    public void extractZipFile() throws MalformedURLException {
+//        File zipFile = ServiceLocator.extractZipFile(new URL(
+//                "jar:file:/C:/My%20Projects/liquibase2/liquibase-integration-tests/src/test/resources/ext/jars/liquibase-samplesqlgenerator.jar!/liquibase/sqlgenerator"));
+//        assertEquals("C:/My Projects/liquibase2/liquibase-integration-tests/src/test/resources/ext/jars/liquibase-samplesqlgenerator.jar", zipFile.toString().replace(
+//                '\\', '/'));
+//        zipFile = ServiceLocator.extractZipFile(new URL(
+//                "jar:file:/home/myuser/liquibase2/liquibase-integration-tests/src/test/resources/ext/jars/liquibase-samplesqlgenerator.jar!/liquibase/sqlgenerator"));
+//        assertEquals("/home/myuser/liquibase2/liquibase-integration-tests/src/test/resources/ext/jars/liquibase-samplesqlgenerator.jar", zipFile.toString().replace('\\',
+//                '/'));
+//    }
 }
