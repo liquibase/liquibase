@@ -598,7 +598,6 @@ public class DiffResult {
 				change.setTableName(pk.getTable().getName());
 				change.setSchemaName(pk.getTable().getSchema());
 				change.setConstraintName(pk.getName());
-				change.setTableName(pk.getTablespace());
 
 				changes.add(generateChangeSet(change));
 			}
