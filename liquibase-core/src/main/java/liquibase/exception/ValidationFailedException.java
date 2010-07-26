@@ -1,7 +1,10 @@
 package liquibase.exception;
 
+import liquibase.change.CheckSum;
 import liquibase.changelog.ChangeSet;
+import liquibase.changelog.RanChangeSet;
 import liquibase.changelog.visitor.ValidatingVisitor;
+import liquibase.database.Database;
 import liquibase.precondition.core.ErrorPrecondition;
 import liquibase.precondition.core.FailedPrecondition;
 import liquibase.util.StreamUtil;
@@ -19,6 +22,7 @@ public class ValidationFailedException extends MigrationFailedException {
     private List<SetupException> setupExceptions;
     private List<Throwable> changeValidationExceptions;
     private ValidationErrors validationErrors;
+    private Database database;
 
     public ValidationFailedException(ValidatingVisitor changeLogHandler) {
         this.invalidMD5Sums = changeLogHandler.getInvalidMD5Sums();
@@ -28,6 +32,7 @@ public class ValidationFailedException extends MigrationFailedException {
         this.setupExceptions = changeLogHandler.getSetupExceptions();
         this.changeValidationExceptions = changeLogHandler.getChangeValidationExceptions();
         this.validationErrors = changeLogHandler.getValidationErrors();
+        this.database = changeLogHandler.getDatabase();
     }
 
 
@@ -42,7 +47,13 @@ public class ValidationFailedException extends MigrationFailedException {
                     break;
                 }
                 ChangeSet invalid = invalidMD5Sums.get(i);
-                message.append("          ").append(invalid.toString(true));
+                String oldChecksum = null;
+                try {
+                    oldChecksum = database.getRanChangeSet(invalid).getLastCheckSum().toString();
+                } catch (Exception e) {
+                    oldChecksum = "UNKNOWN";
+                }
+                message.append("          ").append(invalid.toString(false)).append(" was ").append(oldChecksum).append(" now: ").append(invalid.generateCheckSum());
                 message.append(StreamUtil.getLineSeparator());
             }
         }

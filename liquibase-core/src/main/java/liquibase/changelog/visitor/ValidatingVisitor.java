@@ -33,12 +33,14 @@ public class ValidatingVisitor implements ChangeSetVisitor {
     private Set<String> seenChangeSets = new HashSet<String>();
 
     private List<RanChangeSet> ranChangeSets;
+    private Database database;
 
     public ValidatingVisitor(List<RanChangeSet> ranChangeSets) {
         this.ranChangeSets = ranChangeSets;
     }
 
     public void validate(Database database, DatabaseChangeLog changeLog) {
+        this.database = database;
         PreconditionContainer preconditions = changeLog.getPreconditions();
         try {
             if (preconditions == null) {
@@ -153,4 +155,7 @@ public class ValidatingVisitor implements ChangeSetVisitor {
                 && !validationErrors.hasErrors();
     }
 
+    public Database getDatabase() {
+        return database;
+    }
 }
