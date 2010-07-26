@@ -142,6 +142,10 @@ public class SQLFileChange extends AbstractSQLChange {
      * @return True if the file was found and loaded, false otherwise.
      */
     private boolean loadFromClasspath(String file) throws SetupException {
+        if (relativeToChangelogFile != null && relativeToChangelogFile) {
+            file = getChangeSet().getFilePath().replaceFirst("/[^/]*$","")+"/"+file;
+        }
+
         InputStream in = null;
         try {
             ResourceAccessor fo = getResourceAccessor();
@@ -156,7 +160,7 @@ public class SQLFileChange extends AbstractSQLChange {
             setSql(StreamUtil.getStreamContents(in, encoding));
             return true;
         } catch (IOException ioe) {
-            throw new SetupException("<sqlfile path=" + file + "> -Unable to read file", ioe);
+            return false;
         } finally {
             if (in != null) {
                 try {
