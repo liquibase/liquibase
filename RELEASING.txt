@@ -14,9 +14,7 @@ run core/build.xml maven
 this updates src/site.  run build.xml site to re-build the site with the new maven pages (if there was a change). 
 
 MAVEN SNAPSHOT:
-run core/build.xml all
-run core/buid.xml maven-snapshot
-upload core/maven-repository-snapshot to live
+mvn clean deploy
 
 GRAILS:
 - copy new core jar to grails-liquibase/lib and remove old jar (including svn delete/add)
