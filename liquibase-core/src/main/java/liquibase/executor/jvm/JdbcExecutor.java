@@ -2,6 +2,7 @@ package liquibase.executor.jvm;
 
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
+import liquibase.database.core.OracleDatabase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.AbstractExecutor;
@@ -79,6 +80,10 @@ public class JdbcExecutor extends AbstractExecutor implements Executor {
         class ExecuteStatementCallback implements StatementCallback {
             public Object doInStatement(Statement stmt) throws SQLException, DatabaseException {
                 for (String statement : applyVisitors(sql, sqlVisitors)) {
+                    if (database instanceof OracleDatabase) {
+                        statement = statement.replaceFirst("/\\s*/\\s*$", ""); //remove duplicated /'s
+                    }
+
                     log.debug("Executing EXECUTE database command: "+statement);
                     stmt.execute(statement);
                 }
