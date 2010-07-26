@@ -143,7 +143,7 @@ public class ChangeSet implements Conditional {
         }
 
         for (SqlVisitor visitor : this.getSqlVisitors()) {
-             stringToMD5.append(visitor.generateCheckSum()).append(";");            
+            stringToMD5.append(visitor.generateCheckSum()).append(";");
         }
 
 

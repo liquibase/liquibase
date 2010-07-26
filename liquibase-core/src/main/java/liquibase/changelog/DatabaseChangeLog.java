@@ -121,9 +121,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     /**
      * Checks changelogs for bad MD5Sums and preconditions before attempting a migration
      */
-    public void validate(Database database) throws LiquibaseException {
-
-        ChangeLogIterator logIterator = new ChangeLogIterator(this, new DbmsChangeSetFilter(database));
+    public void validate(ChangeLogIterator logIterator, Database database) throws LiquibaseException {
 
         ValidatingVisitor validatingVisitor = new ValidatingVisitor(database.getRanChangeSetList());
         validatingVisitor.validate(database, this);
