@@ -211,15 +211,17 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
         }
 
         Connection c = null;
-        Liquibase liquibase = createLiquibase(c);
+        Liquibase liquibase = null;
         try {
             c = getDataSource().getConnection();
-
+            liquibase = createLiquibase(c);
             liquibase.update(getContexts());
         } catch (SQLException e) {
             throw new DatabaseException(e);
         } finally {
-            liquibase.forceReleaseLocks();
+            if (liquibase != null) {
+                liquibase.forceReleaseLocks();
+            }
             if (c != null) {
                 try {
                     c.rollback();
