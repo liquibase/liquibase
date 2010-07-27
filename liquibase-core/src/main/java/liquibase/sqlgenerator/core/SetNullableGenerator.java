@@ -2,6 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
 import liquibase.database.core.*;
+import liquibase.exception.DatabaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
@@ -31,6 +32,14 @@ public class SetNullableGenerator extends AbstractSqlGenerator<SetNullableStatem
 
         if (database instanceof MSSQLDatabase || database instanceof MySQLDatabase || database instanceof InformixDatabase || database instanceof H2Database) {
             validationErrors.checkRequiredField("columnDataType", setNullableStatement.getColumnDataType());
+        }
+
+        try {
+            if ((database instanceof DB2Database) && (database.getDatabaseMajorVersion() >= 9)) {
+                validationErrors.addError("DB2 versions less than 9 do not support modifying null constraints");
+            }
+        } catch (DatabaseException ignore) {
+            //cannot check
         }
         return validationErrors;
     }
