@@ -89,4 +89,11 @@ public class DatabaseFactory {
 
         return null;
     }
+
+    /**
+     * Removes all registered databases, even built in ones.  Useful for forcing a particular database implementation
+     */
+    public void clearRegistry() {
+        implementedDatabases.clear();
+    }
 }
