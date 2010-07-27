@@ -1,22 +1,32 @@
 package liquibase.integration.commandline;
 
+import liquibase.change.Change;
+import liquibase.changelog.ChangeSet;
+import liquibase.changelog.DatabaseChangeLog;
+import liquibase.changelog.RanChangeSet;
 import liquibase.database.Database;
+import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.jvm.JdbcConnection;
+import liquibase.database.structure.DatabaseObject;
 import liquibase.diff.Diff;
 import liquibase.diff.DiffResult;
 import liquibase.diff.DiffStatusListener;
-import liquibase.exception.DatabaseException;
+import liquibase.exception.*;
 import liquibase.logging.LogFactory;
+import liquibase.sql.visitor.SqlVisitor;
+import liquibase.statement.DatabaseFunction;
+import liquibase.statement.SqlStatement;
 import liquibase.util.StringUtils;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.sql.Connection;
-import java.sql.Driver;
-import java.util.Properties;
+import java.io.Writer;
+import java.sql.*;
+import java.sql.Date;
+import java.util.*;
 
 /**
  * Common Utilitiy methods used in the CommandLine application and the Maven plugin.
@@ -41,6 +51,7 @@ public class CommandLineUtils {
             Driver driverObject;
             DatabaseFactory databaseFactory = DatabaseFactory.getInstance();
             if (databaseClass != null) {
+                databaseFactory.clearRegistry();
                 databaseFactory.register((Database) Class.forName(databaseClass, true, classLoader).newInstance());
             }
 
