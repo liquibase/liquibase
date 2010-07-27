@@ -4,7 +4,7 @@
 
     <groupId>org.liquibase</groupId>
     <artifactId>liquibase</artifactId>
-    <version>2.0-rc4-SNAPSHOT</version>
+    <version>2.0-rc3-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>Liquibase</name>
@@ -258,6 +258,7 @@
             <id>sonatype-nexus-staging</id>
             <name>Sonatype Production Repository</name>
             <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
+            
         </repository>
         <snapshotRepository>
             <uniqueVersion>false</uniqueVersion>
@@ -274,4 +275,22 @@
         <!--<status>deployed</status>-->
     </distributionManagement>
 
+
+    <profiles>
+        <profile>
+            <id>default</id>
+            <repositories>
+                <repository>
+                    <id>sonatype-repositories</id>
+                    <releases>
+                        <checksumPolicy>fail</checksumPolicy>
+                      </releases>
+                      <snapshots>
+                        <checksumPolicy>fail</checksumPolicy>
+                      </snapshots>
+                </repository>
+            </repositories>
+        </profile>
+
+    </profiles>
 </project>
