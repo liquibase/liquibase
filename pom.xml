@@ -198,6 +198,7 @@
                     <version>2.0</version>
                     <configuration>
                         <stagingRepository>/tmp/maven-snapshot</stagingRepository>
+                        <mavenExecutorId>forked-path</mavenExecutorId>                        
                     </configuration>
                 </plugin>
 
