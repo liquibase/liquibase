@@ -266,31 +266,6 @@
             <name>Sontatype Snapshot Repository</name>
             <url>https://oss.sonatype.org/content/repositories/snapshots</url>
         </snapshotRepository>
-
-        <!--<site>-->
-        <!--<id>qifcon.sf.net</id>-->
-        <!--<url>scp://shell.sourceforge.net/home/groups/l/li/liquibase/htdocs/maventest</url>-->
-        <!--</site>-->
-        <!--<downloadUrl>http://repo1.maven.org/maven2/org/liquibase/</downloadUrl>-->
-        <!--<status>deployed</status>-->
     </distributionManagement>
 
-
-    <!--<profiles>-->
-        <!--<profile>-->
-            <!--<id>liquibase-release</id>-->
-            <!--<repositories>-->
-                <!--<repository>-->
-                    <!--<id>sonatype-repositories</id>-->
-                    <!--<releases>-->
-                        <!--<checksumPolicy>fail</checksumPolicy>-->
-                      <!--</releases>-->
-                      <!--<snapshots>-->
-                        <!--<checksumPolicy>fail</checksumPolicy>-->
-                      <!--</snapshots>-->
-                <!--</repository>-->
-            <!--</repositories>-->
-        <!--</profile>-->
-
-    <!--</profiles>-->
 </project>
