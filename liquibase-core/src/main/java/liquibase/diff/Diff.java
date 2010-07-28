@@ -228,12 +228,10 @@ public class Diff {
 			if (!targetSnapshot.getViews().contains(baseView)) {
 				diffResult.addMissingView(baseView);
 			} else {
-				View targetView = null;
-				for (View view : targetSnapshot.getViews()) {
-					if (view.getName().equals(baseView.getName())) {
-						if (!view.getDefinition().equals(
-								baseView.getDefinition())) {
-							diffResult.addChangedView(view);
+				for (View targetView : targetSnapshot.getViews()) {
+					if (targetView.getName().equals(baseView.getName())) {
+						if (!targetView.getDefinition().equals(baseView.getDefinition())) {
+							diffResult.addChangedView(targetView);
 						}
 					}
 				}
@@ -244,11 +242,10 @@ public class Diff {
 			if (!referenceSnapshot.getViews().contains(targetView)) {
 				diffResult.addUnexpectedView(targetView);
 			} else {
-				for (View view : targetSnapshot.getViews()) {
-					if (view.getName().equals(targetView.getName())) {
-						if (!view.getDefinition().equals(
-								targetView.getDefinition())) {
-							diffResult.addChangedView(view);
+				for (View referenceView : referenceSnapshot.getViews()) {
+					if (referenceView.getName().equals(targetView.getName())) {
+						if (!referenceView.getDefinition().equals(targetView.getDefinition())) {
+							diffResult.addChangedView(referenceView);
 						}
 					}
 				}
