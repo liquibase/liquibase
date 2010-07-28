@@ -227,14 +227,6 @@ public class Diff {
 		for (View baseView : referenceSnapshot.getViews()) {
 			if (!targetSnapshot.getViews().contains(baseView)) {
 				diffResult.addMissingView(baseView);
-			} else {
-				for (View targetView : targetSnapshot.getViews()) {
-					if (targetView.getName().equals(baseView.getName())) {
-						if (!targetView.getDefinition().equals(baseView.getDefinition())) {
-							diffResult.addChangedView(targetView);
-						}
-					}
-				}
 			}
 		}
 
