@@ -108,6 +108,10 @@ public abstract class AbstractDatabase implements Database {
      * Returns the name of the database product according to the underlying database.
      */
     public String getDatabaseProductName() {
+        if (connection == null) {
+            return null;
+        }
+
         try {
             return connection.getDatabaseProductName();
         } catch (DatabaseException e) {
@@ -117,6 +121,10 @@ public abstract class AbstractDatabase implements Database {
 
 
     public String getDatabaseProductVersion() throws DatabaseException {
+        if (connection == null) {
+            return null;
+        }
+
         try {
             return connection.getDatabaseProductVersion();
         } catch (DatabaseException e) {
@@ -125,6 +133,9 @@ public abstract class AbstractDatabase implements Database {
     }
 
     public int getDatabaseMajorVersion() throws DatabaseException {
+        if (connection == null) {
+            return -1;
+        }
         try {
             return connection.getDatabaseMajorVersion();
         } catch (DatabaseException e) {
@@ -133,6 +144,9 @@ public abstract class AbstractDatabase implements Database {
     }
 
     public int getDatabaseMinorVersion() throws DatabaseException {
+        if (connection == null) {
+            return -1;
+        }
         try {
             return connection.getDatabaseMinorVersion();
         } catch (DatabaseException e) {
@@ -886,13 +900,20 @@ public abstract class AbstractDatabase implements Database {
 
         AbstractDatabase that = (AbstractDatabase) o;
 
-        return !(connection != null ? !connection.equals(that.connection) : that.connection != null);
-
+        if (connection == null) {
+            if (that.connection == null) {
+                return this == that;
+            } else {
+                return false;
+            }
+        } else {
+            return connection.equals(that.connection);
+        }
     }
 
     @Override
     public int hashCode() {
-        return (connection != null ? connection.hashCode() : 0);
+        return (connection != null ? connection.hashCode() : super.hashCode());
     }
 
     public void close() throws DatabaseException {
