@@ -276,21 +276,21 @@
     </distributionManagement>
 
 
-    <profiles>
-        <profile>
-            <id>default</id>
-            <repositories>
-                <repository>
-                    <id>sonatype-repositories</id>
-                    <releases>
-                        <checksumPolicy>fail</checksumPolicy>
-                      </releases>
-                      <snapshots>
-                        <checksumPolicy>fail</checksumPolicy>
-                      </snapshots>
-                </repository>
-            </repositories>
-        </profile>
+    <!--<profiles>-->
+        <!--<profile>-->
+            <!--<id>liquibase-release</id>-->
+            <!--<repositories>-->
+                <!--<repository>-->
+                    <!--<id>sonatype-repositories</id>-->
+                    <!--<releases>-->
+                        <!--<checksumPolicy>fail</checksumPolicy>-->
+                      <!--</releases>-->
+                      <!--<snapshots>-->
+                        <!--<checksumPolicy>fail</checksumPolicy>-->
+                      <!--</snapshots>-->
+                <!--</repository>-->
+            <!--</repositories>-->
+        <!--</profile>-->
 
-    </profiles>
+    <!--</profiles>-->
 </project>
