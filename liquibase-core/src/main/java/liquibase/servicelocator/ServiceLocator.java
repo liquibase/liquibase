@@ -77,6 +77,9 @@ public class ServiceLocator {
     }
 
     public void addPackageToScan(String packageName) {
+        if (!packageName.endsWith(".")) {
+            packageName = packageName+"."; //possible fix for websphere 6.1.  From http://www.stripesframework.org/jira/browse/STS-666 
+        }
         packagesToScan.add(packageName);
     }
 
