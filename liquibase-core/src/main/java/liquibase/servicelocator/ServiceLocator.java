@@ -38,6 +38,7 @@ public class ServiceLocator {
     private Map<Class, List<Class>> classesBySuperclass;
     private List<String> packagesToScan;
     private Logger logger = new DefaultLogger(); //cannot look up regular logger because you get a stackoverflow since we are in the servicelocator
+    private PackageScanClassResolver classResolver;
 
     protected ServiceLocator() {
         setResourceAccessor(new ClassLoaderResourceAccessor());
@@ -54,6 +55,13 @@ public class ServiceLocator {
     public void setResourceAccessor(ResourceAccessor resourceAccessor) {
         this.resourceAccessor = resourceAccessor;
         this.classesBySuperclass = new HashMap<Class, List<Class>>();
+
+        if (WebSpherePackageScanClassResolver.isWebSphereClassLoader(this.getClass().getClassLoader())) {
+            logger.debug("Using WebSphere Specific Class Resolver");
+            this.classResolver = new WebSpherePackageScanClassResolver("liquibase/parser/core/xml/dbchangelog-2.0.xsd");
+        } else {
+            this.classResolver = new DefaultPackageScanClassResolver();
+        }
 
         packagesToScan = new ArrayList<String>();
         Enumeration<URL> manifests = null;
@@ -77,9 +85,6 @@ public class ServiceLocator {
     }
 
     public void addPackageToScan(String packageName) {
-        if (!packageName.endsWith(".")) {
-            packageName = packageName+"."; //possible fix for websphere 6.1.  From http://www.stripesframework.org/jira/browse/STS-666 
-        }
         packagesToScan.add(packageName);
     }
 
@@ -144,9 +149,8 @@ public class ServiceLocator {
 
         List<Class> classes = new ArrayList<Class>();
 
-        ResolverUtil resolverUtil = new ResolverUtil();
-        resolverUtil.setClassLoader(resourceAccessor.toClassLoader());          
-        for (Class clazz : (Set<Class>) resolverUtil.findImplementations(requiredInterface, packagesToScan.toArray(new String[packagesToScan.size()])).getClasses()) {
+        classResolver.addClassLoader(resourceAccessor.toClassLoader());
+        for (Class clazz : classResolver.findImplementations(requiredInterface, packagesToScan.toArray(new String[packagesToScan.size()]))) {
             if (!Modifier.isAbstract(clazz.getModifiers()) && !Modifier.isInterface(clazz.getModifiers()) && Modifier.isPublic(clazz.getModifiers())) {
                 try {
                     clazz.getConstructor();
