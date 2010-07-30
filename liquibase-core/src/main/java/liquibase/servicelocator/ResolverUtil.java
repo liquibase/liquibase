@@ -3,18 +3,15 @@ package liquibase.servicelocator;
 import liquibase.logging.LogFactory;
 import liquibase.logging.Logger;
 import liquibase.logging.core.DefaultLogger;
+import org.apache.commons.lang.StringUtils;
 
 import java.io.*;
 import java.lang.annotation.Annotation;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLDecoder;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 import java.util.regex.Pattern;
@@ -61,6 +58,9 @@ public class ResolverUtil<T> {
     /** Regular expression that matches a Java identifier. */
     private static final Pattern JAVA_IDENTIFIER_PATTERN = Pattern
             .compile("\\p{javaJavaIdentifierStart}\\p{javaJavaIdentifierPart}*");
+
+    private static final Map<String, Class<?>> loadedClassesByName = new HashMap<String, Class<?>>();
+    private static final Map<URL, List<String>> pathsByUrl = new HashMap<URL, List<String>>();
 
     /**
      * A simple interface that specifies how to test classes to determine if they
@@ -232,6 +232,10 @@ public class ResolverUtil<T> {
      * @throws IOException
      */
     protected List<String> listClassResources(URL url, String path) throws IOException {
+        if (pathsByUrl.containsKey(url)) {
+            return pathsByUrl.get(url);
+        }
+
         log.debug("Listing classes in "+url);
 
         InputStream is = null;
@@ -314,6 +318,8 @@ public class ResolverUtil<T> {
                     }
                 }
             }
+
+            pathsByUrl.put(url, resources);
 
             return resources;
         }
@@ -514,7 +520,11 @@ public class ResolverUtil<T> {
             ClassLoader loader = getClassLoader();
             log.debug("Checking to see if class "+externalName+" matches criteria ["+test+"]");
 
-            Class type = loader.loadClass(externalName);
+            if (!loadedClassesByName.containsKey(externalName)) {
+                loadedClassesByName.put(externalName, loader.loadClass(externalName));
+            }
+            Class type = loadedClassesByName.get(externalName);
+
             if (test.matches(type) ) {
                 matches.add( (Class<T>) type);
             }
