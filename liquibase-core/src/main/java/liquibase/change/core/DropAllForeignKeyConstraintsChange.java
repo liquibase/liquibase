@@ -86,7 +86,7 @@ public class DropAllForeignKeyConstraintsChange extends AbstractChange {
                             (String) result.get(FindForeignKeyConstraintsStatement.RESULT_COLUMN_BASE_TABLE_NAME);
                     String constraintName =
                             (String) result.get(FindForeignKeyConstraintsStatement.RESULT_COLUMN_CONSTRAINT_NAME);
-                    if (getBaseTableName().equals(baseTableName)) {
+                    if (getBaseTableName().equalsIgnoreCase(baseTableName)) {
                         DropForeignKeyConstraintChange dropForeignKeyConstraintChange =
                                 new DropForeignKeyConstraintChange();
 
