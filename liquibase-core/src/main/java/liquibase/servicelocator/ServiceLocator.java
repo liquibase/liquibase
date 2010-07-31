@@ -64,23 +64,31 @@ public class ServiceLocator {
         }
 
         packagesToScan = new ArrayList<String>();
-        Enumeration<URL> manifests = null;
-        try {
-            manifests = resourceAccessor.getResources("META-INF/MANIFEST.MF");
-            while (manifests.hasMoreElements()) {
-                URL url = manifests.nextElement();
-                InputStream is = url.openStream();
-                Manifest manifest = new Manifest(is);
-                String attributes = StringUtils.trimToNull(manifest.getMainAttributes().getValue("Liquibase-Package"));
-                if (attributes != null) {
-                    for (Object value : attributes.split(",")) {
-                        addPackageToScan(value.toString());
-                    }
-                }
-                is.close();
-            }
-        } catch (IOException e) {
-            throw new UnexpectedLiquibaseException(e);
+        String packagesToScanSystemProp = System.getProperty("liquibase.scan.packages");
+        if ((packagesToScanSystemProp != null) &&
+        	((packagesToScanSystemProp = StringUtils.trimToNull(packagesToScanSystemProp)) != null)) {
+        	for (String value : packagesToScanSystemProp.split(",")) {
+        		addPackageToScan(value);
+        	}
+        } else {
+	        Enumeration<URL> manifests = null;
+	        try {
+	            manifests = resourceAccessor.getResources("META-INF/MANIFEST.MF");
+	            while (manifests.hasMoreElements()) {
+	                URL url = manifests.nextElement();
+	                InputStream is = url.openStream();
+	                Manifest manifest = new Manifest(is);
+	                String attributes = StringUtils.trimToNull(manifest.getMainAttributes().getValue("Liquibase-Package"));
+	                if (attributes != null) {
+	                    for (Object value : attributes.split(",")) {
+	                        addPackageToScan(value.toString());
+	                    }
+	                }
+	                is.close();
+	            }
+	        } catch (IOException e) {
+	            throw new UnexpectedLiquibaseException(e);
+	        }
         }
     }
 
