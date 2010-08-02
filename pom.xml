@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.liquibase</groupId>
-    <artifactId>liquibase</artifactId>
+    <artifactId>liquibase-parent</artifactId>
     <version>2.0-rc4-SNAPSHOT</version>
     <packaging>pom</packaging>
 
@@ -46,7 +47,7 @@
         <module>samples/liquibase-ext-sqlgenerator</module>
         <module>liquibase-integration-tests</module>
     </modules>
-    
+
     <dependencyManagement>
         <dependencies>
 
@@ -191,7 +192,7 @@
                     <version>2.0</version>
                     <configuration>
                         <stagingRepository>/tmp/maven-snapshot</stagingRepository>
-                        <mavenExecutorId>forked-path</mavenExecutorId>                        
+                        <mavenExecutorId>forked-path</mavenExecutorId>
                     </configuration>
                 </plugin>
 
@@ -211,12 +212,12 @@
     <reporting>
         <plugins>
             <!--<plugin>-->
-                <!--<groupId>org.apache.maven.plugins</groupId>-->
-                <!--<artifactId>maven-project-info-reports-plugin</artifactId>-->
-                <!--<configuration>-->
-                    <!--<dependencyLocationsEnabled>false</dependencyLocationsEnabled>-->
-                    <!--<dependencyDetailsEnabled>false</dependencyDetailsEnabled>-->
-                <!--</configuration>-->
+            <!--<groupId>org.apache.maven.plugins</groupId>-->
+            <!--<artifactId>maven-project-info-reports-plugin</artifactId>-->
+            <!--<configuration>-->
+            <!--<dependencyLocationsEnabled>false</dependencyLocationsEnabled>-->
+            <!--<dependencyDetailsEnabled>false</dependencyDetailsEnabled>-->
+            <!--</configuration>-->
             <!--</plugin>-->
             <!--
             <plugin>
@@ -236,7 +237,7 @@
             <id>sonatype-nexus-staging</id>
             <name>Sonatype Production Repository</name>
             <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
-            
+
         </repository>
         <snapshotRepository>
             <uniqueVersion>false</uniqueVersion>
@@ -245,5 +246,34 @@
             <url>https://oss.sonatype.org/content/repositories/snapshots</url>
         </snapshotRepository>
     </distributionManagement>
+
+    <profiles>
+        <profile>
+            <id>release-sign-artifacts</id>
+            <activation>
+                <property>
+                    <name>performRelease</name>
+                    <value>true</value>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
 </project>
