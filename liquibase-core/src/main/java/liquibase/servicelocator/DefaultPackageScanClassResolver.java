@@ -29,7 +29,7 @@ import java.util.jar.JarInputStream;
  */
 public class DefaultPackageScanClassResolver implements PackageScanClassResolver {
 
-    protected final transient Logger log = new DefaultLogger(); //cannot look up regular logger because you get a stackoverflow since we are in the servicelocator;
+    protected final transient Logger log = ServiceLocator.getInstance().getLogger();
     private Set<ClassLoader> classLoaders;
     private Set<PackageScanFilter> scanFilters;
 
