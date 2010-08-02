@@ -4,7 +4,7 @@
 
     <groupId>org.liquibase</groupId>
     <artifactId>liquibase-parent</artifactId>
-    <version>2.0-rc5-SNAPSHOT</version>
+    <version>2.0-rc4-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>Liquibase Parent Configuration</name>
@@ -31,6 +31,21 @@
         <url>https://liquibase.jira.com/svn/CORE/trunk</url>
         <developerConnection>scm:svn:https://liquibase.jira.com/svn/CORE/trunk</developerConnection>
     </scm>
+
+    <developers>
+       <developer>
+         <id>nvoxland</id>
+         <name>Nathan Voxland</name>
+         <email>nathan@voxland.net</email>
+         <url>http://eric.propellors.net</url>
+         <organizationUrl>http://nathan.voxland.net/</organizationUrl>
+         <roles>
+           <role>architect</role>
+           <role>developer</role>
+         </roles>
+         <timezone>-6</timezone>
+       </developer>
+     </developers>
 
     <properties>
         <maven.build.timestamp.format>E MMM dd hh:mm:ss zzz yyyy</maven.build.timestamp.format>
