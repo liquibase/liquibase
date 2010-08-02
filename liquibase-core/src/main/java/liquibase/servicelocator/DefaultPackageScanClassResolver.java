@@ -15,12 +15,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLDecoder;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 
@@ -29,13 +24,28 @@ import java.util.jar.JarInputStream;
  */
 public class DefaultPackageScanClassResolver implements PackageScanClassResolver {
 
-    protected final transient Logger log = ServiceLocator.getInstance().getLogger();
+    private static Map<String, Set<String>> classesByJarUrl = new HashMap<String, Set<String>>();
+
+    protected final transient Logger log = new DefaultLogger();
     private Set<ClassLoader> classLoaders;
     private Set<PackageScanFilter> scanFilters;
 
     public DefaultPackageScanClassResolver() {
-//        log.setLogLevel(LogLevel.DEBUG);
+        setLogLevel();
     }
+
+    private void setLogLevel() {
+        String logLevel = System.getProperty("liquibase.serviceLocator.loglevel");
+        if (logLevel == null) {
+            logLevel = "WARNING";
+        }
+        if (logLevel.equals("WARN")) {
+            logLevel = "WARNING";
+        }
+
+        log.setLogLevel(LogLevel.valueOf(logLevel));
+    }
+
 
     public void addClassLoader(ClassLoader classLoader) {
         try {
@@ -292,27 +302,40 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
      * @param stream  the inputstream of the jar file to be examined for classes
      * @param urlPath the url of the jar file to be examined for classes
      */
-    private void loadImplementationsInJar(PackageScanFilter test, String parent, InputStream stream, String urlPath, Set<Class<?>> classes) {
+    protected void loadImplementationsInJar(PackageScanFilter test, String parent, InputStream stream, String urlPath, Set<Class<?>> classes) {
         JarInputStream jarStream = null;
         try {
-            jarStream = new JarInputStream(stream);
 
-            JarEntry entry;
-            while ((entry = jarStream.getNextJarEntry()) != null) {
-                String name = entry.getName();
-                if (name != null) {
-                    name = name.trim();
-                    if (!entry.isDirectory() && name.startsWith(parent) && name.endsWith(".class")) {
-                        addIfMatching(test, name, classes);
+            if (!classesByJarUrl.containsKey(urlPath)) {
+                Set<String> names = new HashSet<String>();
+
+                jarStream = new JarInputStream(stream);
+
+                JarEntry entry;
+                while ((entry = jarStream.getNextJarEntry()) != null) {
+                    String name = entry.getName();
+                    if (name != null) {
+                        name = name.trim();
+                        if (!entry.isDirectory() && name.startsWith(parent) && name.endsWith(".class")) {
+                            names.add(name);
+                        }
                     }
                 }
+
+                classesByJarUrl.put(urlPath, names);
+            }
+
+            for (String name : classesByJarUrl.get(urlPath)) {
+                addIfMatching(test, name, classes);
             }
         } catch (IOException ioe) {
             log.warning("Cannot search jar file '" + urlPath + "' for classes matching criteria: " + test
                     + " due to an IOException: " + ioe.getMessage(), ioe);
         } finally {
             try {
-                jarStream.close();
+                if (jarStream != null) {
+                    jarStream.close();
+                }
             } catch (IOException ignore) {
             }
         }
