@@ -94,6 +94,12 @@ public class CustomChangeWrapper extends AbstractChange {
         }
     }
 
+    @Override
+    public Warnings warn(Database database) {
+        //does not support warns
+        return new Warnings();
+    }
+
     public SqlStatement[] generateStatements(Database database) {
         SqlStatement[] statements = null;
         try {
