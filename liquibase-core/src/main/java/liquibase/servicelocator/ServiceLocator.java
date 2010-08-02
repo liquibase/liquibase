@@ -2,6 +2,7 @@ package liquibase.servicelocator;
 
 import liquibase.exception.ServiceNotFoundException;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.logging.LogLevel;
 import liquibase.logging.Logger;
 import liquibase.logging.core.DefaultLogger;
 import liquibase.resource.ClassLoaderResourceAccessor;
@@ -40,11 +41,25 @@ public class ServiceLocator {
     private Logger logger = new DefaultLogger(); //cannot look up regular logger because you get a stackoverflow since we are in the servicelocator
     private PackageScanClassResolver classResolver;
 
-    protected ServiceLocator() {
+    private ServiceLocator() {
+        setLogLevel();
         setResourceAccessor(new ClassLoaderResourceAccessor());
     }
 
-    protected ServiceLocator(ResourceAccessor accessor) {
+    private void setLogLevel() {
+        String logLevel = System.getProperty("liquibase.serviceLocator.loglevel");
+        if (logLevel == null) {
+            logLevel = "WARNING";
+        }
+        if (logLevel.equals("WARN")) {
+            logLevel = "WARNING";
+        }
+
+        logger.setLogLevel(LogLevel.valueOf(logLevel));
+    }
+
+    private ServiceLocator(ResourceAccessor accessor) {
+        setLogLevel();
         setResourceAccessor(accessor);
     }
 
@@ -176,5 +191,9 @@ public class ServiceLocator {
 
     public static void reset() {
         instance = new ServiceLocator();
+    }
+
+    protected Logger getLogger() {
+        return logger;
     }
 }

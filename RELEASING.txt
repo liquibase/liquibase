@@ -9,12 +9,10 @@ upload new version of site to server
 update version info on /download
 
 MAVEN:
-run core/build.xml all
-run core/build.xml maven
-this updates src/site.  run build.xml site to re-build the site with the new maven pages (if there was a change). 
+mvn release:prepare -DperformRelease
 
 MAVEN SNAPSHOT:
-mvn clean deploy
+mvn deploy -DperformRelease
 
 GRAILS:
 - copy new core jar to grails-liquibase/lib and remove old jar (including svn delete/add)

@@ -11,12 +11,6 @@
     <description>Liquibase is a tool for managing and executing database changes.</description>
     <url>http://www.liquibase.org</url>
 
-    <!--
-    <prerequisites>
-      <maven>2.1.0-M1</maven>
-    </prerequisites>
-    -->
-
     <organization>
         <name>Liquibase.org</name>
         <url>http://www.liquibase.org</url>
@@ -38,7 +32,6 @@
         <developerConnection>scm:svn:https://liquibase.jira.com/svn/CORE/trunk</developerConnection>
     </scm>
 
-    <!-- 2.1.0-M1 and up, hence prerequisites -->
     <properties>
         <maven.build.timestamp.format>E MMM dd hh:mm:ss zzz yyyy</maven.build.timestamp.format>
         <build.timestamp>${maven.build.timestamp}</build.timestamp>
@@ -206,24 +199,9 @@
                 <plugin>
                     <artifactId>maven-deploy-plugin</artifactId>
                     <configuration>
-                        <skip>true</skip>
+                        <skip>false</skip>
                     </configuration>
                 </plugin>
-<!--
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-gpg-plugin</artifactId>
-                    <executions>
-                        <execution>
-                            <id>sign-artifacts</id>
-                            <phase>verify</phase>
-                            <goals>
-                                <goal>sign</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                </plugin>
--->
             </plugins>
 
         </pluginManagement>
