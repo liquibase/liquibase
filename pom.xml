@@ -4,7 +4,7 @@
 
     <groupId>org.liquibase</groupId>
     <artifactId>liquibase-parent</artifactId>
-    <version>2.0-rc4</version>
+    <version>2.0-rc5-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>Liquibase Parent Configuration</name>
@@ -28,8 +28,8 @@
     </issueManagement>
 
     <scm>
-        <url>https://liquibase.jira.com/svn/CORE/tags/liquibase-parent-2.0-rc4</url>
-        <developerConnection>scm:svn:https://liquibase.jira.com/svn/CORE/tags/liquibase-parent-2.0-rc4</developerConnection>
+        <url>https://liquibase.jira.com/svn/CORE/trunk</url>
+        <developerConnection>scm:svn:https://liquibase.jira.com/svn/CORE/trunk</developerConnection>
     </scm>
 
     <developers>
