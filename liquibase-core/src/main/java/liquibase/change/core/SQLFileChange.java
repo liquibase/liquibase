@@ -6,6 +6,7 @@ import liquibase.change.CheckSum;
 import liquibase.database.Database;
 import liquibase.exception.SetupException;
 import liquibase.exception.ValidationErrors;
+import liquibase.exception.Warnings;
 import liquibase.logging.LogFactory;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StreamUtil;
@@ -90,11 +91,16 @@ public class SQLFileChange extends AbstractSQLChange {
 
     @Override
     public ValidationErrors validate(Database database) {
-        ValidationErrors validationErrors = super.validate(database);
+        ValidationErrors validationErrors = new ValidationErrors();
         if (StringUtils.trimToNull(getPath()) == null) {
             validationErrors.addError("'path' is required");
         }
         return validationErrors;
+    }
+
+    @Override
+    public Warnings warn(Database database) {
+        return new Warnings();
     }
 
     /**

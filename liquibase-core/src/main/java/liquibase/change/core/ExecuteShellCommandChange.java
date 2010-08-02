@@ -5,6 +5,7 @@ import liquibase.change.ChangeMetaData;
 import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
+import liquibase.exception.Warnings;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.executor.LoggingExecutor;
@@ -55,6 +56,12 @@ public class ExecuteShellCommandChange extends AbstractChange {
     @Override
     public ValidationErrors validate(Database database) {
         return new ValidationErrors();
+    }
+
+
+    @Override
+    public Warnings warn(Database database) {
+        return new Warnings();
     }
 
     public SqlStatement[] generateStatements(final Database database) {
