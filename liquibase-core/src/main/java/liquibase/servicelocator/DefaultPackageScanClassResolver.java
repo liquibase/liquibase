@@ -30,23 +30,6 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
     private Set<ClassLoader> classLoaders;
     private Set<PackageScanFilter> scanFilters;
 
-    public DefaultPackageScanClassResolver() {
-        setLogLevel();
-    }
-
-    private void setLogLevel() {
-        String logLevel = System.getProperty("liquibase.serviceLocator.loglevel");
-        if (logLevel == null) {
-            logLevel = "WARNING";
-        }
-        if (logLevel.equals("WARN")) {
-            logLevel = "WARNING";
-        }
-
-        log.setLogLevel(LogLevel.valueOf(logLevel));
-    }
-
-
     public void addClassLoader(ClassLoader classLoader) {
         try {
             getClassLoaders().add(classLoader);
@@ -316,7 +299,7 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
                     String name = entry.getName();
                     if (name != null) {
                         name = name.trim();
-                        if (!entry.isDirectory() && name.startsWith(parent) && name.endsWith(".class")) {
+                        if (!entry.isDirectory() && name.endsWith(".class")) {
                             names.add(name);
                         }
                     }
@@ -326,7 +309,9 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
             }
 
             for (String name : classesByJarUrl.get(urlPath)) {
-                addIfMatching(test, name, classes);
+                if (name.startsWith(parent)) {
+                    addIfMatching(test, name, classes);
+                }
             }
         } catch (IOException ioe) {
             log.warning("Cannot search jar file '" + urlPath + "' for classes matching criteria: " + test
@@ -355,7 +340,7 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
             Set<ClassLoader> set = getClassLoaders();
             boolean found = false;
             for (ClassLoader classLoader : set) {
-                log.debug("Testing for class " + externalName + " matches criteria [" + test + "] using classloader:" + classLoader);
+                log.debug("Testing that class " + externalName + " matches criteria [" + test + "] using classloader:" + classLoader);
                 try {
                     Class<?> type = classLoader.loadClass(externalName);
                     log.debug("Loaded the class: " + type + " in classloader: " + classLoader);

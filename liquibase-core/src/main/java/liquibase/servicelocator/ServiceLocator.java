@@ -42,24 +42,10 @@ public class ServiceLocator {
     private PackageScanClassResolver classResolver;
 
     private ServiceLocator() {
-        setLogLevel();
         setResourceAccessor(new ClassLoaderResourceAccessor());
     }
 
-    private void setLogLevel() {
-        String logLevel = System.getProperty("liquibase.serviceLocator.loglevel");
-        if (logLevel == null) {
-            logLevel = "WARNING";
-        }
-        if (logLevel.equals("WARN")) {
-            logLevel = "WARNING";
-        }
-
-        logger.setLogLevel(LogLevel.valueOf(logLevel));
-    }
-
     private ServiceLocator(ResourceAccessor accessor) {
-        setLogLevel();
         setResourceAccessor(accessor);
     }
 
@@ -77,6 +63,7 @@ public class ServiceLocator {
         } else {
             this.classResolver = new DefaultPackageScanClassResolver();
         }
+        this.classResolver.setClassLoaders(new HashSet<ClassLoader>(Arrays.asList(new ClassLoader[] {resourceAccessor.toClassLoader()})));
 
         packagesToScan = new ArrayList<String>();
         String packagesToScanSystemProp = System.getProperty("liquibase.scan.packages");

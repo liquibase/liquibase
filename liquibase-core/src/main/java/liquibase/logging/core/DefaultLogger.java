@@ -11,7 +11,7 @@ public class DefaultLogger extends AbstractLogger {
     private String name = "liquibase";
 
     public DefaultLogger() {
-        String passedLevel = System.getProperty("liquibase.default.logger.level");
+        String passedLevel = System.getProperty("liquibase.defaultlogger.level");
         if (passedLevel == null) {
             setLogLevel(LogLevel.INFO);
         } else {
