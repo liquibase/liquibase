@@ -7,13 +7,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLDecoder;
-import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-import java.util.Stack;
+import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.regex.Matcher;
@@ -164,14 +158,20 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 					pathName = pathName.replace('\\', '/');
 				}
 
-				Enumeration<URL> resources = resourceAccessor
-						.getResources(pathName);
+				Enumeration<URL> resourcesEnum = resourceAccessor.getResources(pathName);
+                SortedSet<URL> resources = new TreeSet<URL>(new Comparator<URL>() {
+                    public int compare(URL o1, URL o2) {
+                        return o1.toString().compareTo(o2.toString());
+                    }
+                });
+                while (resourcesEnum.hasMoreElements()) {
+                    resources.add(resourcesEnum.nextElement());
+                }
 
 				boolean foundResource = false;
 
                 Set<String> seenPaths = new HashSet<String>();
-				while (resources.hasMoreElements()) {
-					URL fileUrl = resources.nextElement();
+				for (URL fileUrl : resources) {
 					if (!fileUrl.toExternalForm().startsWith("file:")) {
                         if (fileUrl.toExternalForm().startsWith("jar:file:")) {
                             File zipFileDir = extractZipFile(fileUrl);

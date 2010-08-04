@@ -67,11 +67,7 @@ public class FileSystemResourceAccessor implements ResourceAccessor {
         }
         File[] files = directoryFile.listFiles();
         
-        SortedSet<URL> results = new TreeSet<URL>(new Comparator<URL>() {
-        	public int compare(URL o1, URL o2) {
-        		return o1.toString().compareTo(o2.toString());
-        	}
-		});
+        List<URL> results = new ArrayList<URL>();
 
         for (File f : files) {
         	if (!f.isDirectory())
@@ -107,4 +103,5 @@ public class FileSystemResourceAccessor implements ResourceAccessor {
         }
         return getClass().getName()+"("+ dir +")";
     }
+
 }
