@@ -192,7 +192,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 					}
 					if (file.isDirectory()) {
 						log.debug(file.getCanonicalPath() + " is a directory");
-						for (File childFile : file.listFiles()) {
+						for (File childFile : new TreeSet<File>(Arrays.asList(file.listFiles()))) {
                             String path = pathName+ childFile.getName();
                             if (!seenPaths.add(path)) {
                                 log.debug("already included "+path);
