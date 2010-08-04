@@ -1,5 +1,6 @@
 package liquibase.changelog;
 
+import liquibase.changelog.filter.ContextChangeSetFilter;
 import liquibase.changelog.filter.DbmsChangeSetFilter;
 import liquibase.changelog.visitor.ValidatingVisitor;
 import liquibase.database.Database;
@@ -121,7 +122,9 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     /**
      * Checks changelogs for bad MD5Sums and preconditions before attempting a migration
      */
-    public void validate(ChangeLogIterator logIterator, Database database) throws LiquibaseException {
+    public void validate(Database database, String... contexts) throws LiquibaseException {
+
+        ChangeLogIterator logIterator = new ChangeLogIterator(this, new DbmsChangeSetFilter(database), new ContextChangeSetFilter(contexts));
 
         ValidatingVisitor validatingVisitor = new ValidatingVisitor(database.getRanChangeSetList());
         validatingVisitor.validate(database, this);
