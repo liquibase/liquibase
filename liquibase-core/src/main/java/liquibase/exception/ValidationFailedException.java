@@ -47,13 +47,8 @@ public class ValidationFailedException extends MigrationFailedException {
                     break;
                 }
                 ChangeSet invalid = invalidMD5Sums.get(i);
-                String oldChecksum = null;
-                try {
-                    oldChecksum = database.getRanChangeSet(invalid).getLastCheckSum().toString();
-                } catch (Exception e) {
-                    oldChecksum = "UNKNOWN";
-                }
-                message.append("          ").append(invalid.toString(false)).append(" was ").append(oldChecksum).append(" now: ").append(invalid.generateCheckSum());
+
+                message.append("          ").append(invalid.toString(false)).append(" is now: ").append(invalid.generateCheckSum());
                 message.append(StreamUtil.getLineSeparator());
             }
         }
