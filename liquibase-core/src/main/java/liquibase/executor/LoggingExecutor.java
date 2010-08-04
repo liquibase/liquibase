@@ -3,6 +3,7 @@ package liquibase.executor;
 import liquibase.database.Database;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.exception.DatabaseException;
+import liquibase.servicelocator.LiquibaseService;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.CallableSqlStatement;
@@ -16,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+@LiquibaseService(skip = true)
 public class LoggingExecutor extends AbstractExecutor implements Executor {
 
     private Writer output;
