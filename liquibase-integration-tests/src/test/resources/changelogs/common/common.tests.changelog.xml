@@ -730,7 +730,7 @@
         <addDefaultValue tableName="default_val_computed" columnName="added_col" defaultValueComputed="CURRENT_TIMESTAMP()"/>
     </changeSet>
 
-    <changeSet id="sqlFileTest" author="nvoxland">
+    <changeSet id="sqlFileTest" author="nvoxland"  runOnChange="true">
         <sqlFile path="rollbackinclude/createTables.sql" relativeToChangelogFile="true"/>
     </changeSet>
 
