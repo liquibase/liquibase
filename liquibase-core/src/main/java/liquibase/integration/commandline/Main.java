@@ -89,10 +89,15 @@ public class Main {
             }
 
             File propertiesFile = new File(main.defaultsFile);
+            File localPropertiesFile = new File(main.defaultsFile.replaceFirst("(\\.[^\\.]+)$", ".local$1"));
 
+            if (localPropertiesFile.exists()) {
+                main.parsePropertiesFile(new FileInputStream(localPropertiesFile));
+            }
             if (propertiesFile.exists()) {
                 main.parsePropertiesFile(new FileInputStream(propertiesFile));
             }
+
             List<String> setupMessages = main.checkSetup();
             if (setupMessages.size() > 0) {
                 main.printHelp(setupMessages, System.out);
