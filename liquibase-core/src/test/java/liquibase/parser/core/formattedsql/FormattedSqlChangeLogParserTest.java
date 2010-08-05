@@ -26,13 +26,19 @@ public class FormattedSqlChangeLogParserTest {
             "  id int primary key\n" +
             ");\n" +
             "\n" +
+            "--rollback changeSet\n"+
+            "delete from table1;\n"+
+            "drop table table1;\n"+
+            "\n" +
             "--ChangeSet nvoxland:3\n" +
             "create table table2 (\n" +
             "  id int primary key\n" +
             ");\n" +
             "create table table3 (\n" +
             "  id int primary key\n" +
-            ");\n";
+            ");\n"+
+            "--rollback changeSet\n"+
+            "drop table table2;\n";
 
     private static final String INVALID_CHANGELOG = "select * from table1";
 
@@ -81,6 +87,7 @@ public class FormattedSqlChangeLogParserTest {
         assertFalse(changeLog.getChangeSets().get(1).isRunInTransaction());
         assertEquals("y", StringUtils.join(changeLog.getChangeSets().get(1).getContexts(), ","));
         assertEquals("mysql", StringUtils.join(changeLog.getChangeSets().get(1).getDbmsSet(), ","));
+        assertEquals(1, changeLog.getChangeSets().get(1).getRollBackChanges().length);
 
 
         assertEquals("nvoxland", changeLog.getChangeSets().get(2).getAuthor());
@@ -95,6 +102,7 @@ public class FormattedSqlChangeLogParserTest {
         assertNull(((RawSQLChange) changeLog.getChangeSets().get(2).getChanges().get(0)).getEndDelimiter());
         assertTrue(((RawSQLChange) changeLog.getChangeSets().get(2).getChanges().get(0)).isSplittingStatements());
         assertTrue(((RawSQLChange) changeLog.getChangeSets().get(2).getChanges().get(0)).isStrippingComments());
+        assertEquals(1, changeLog.getChangeSets().get(2).getRollBackChanges().length);
 
     }
 

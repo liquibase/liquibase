@@ -803,4 +803,17 @@
             <!--<arg value="hello from cygwin"/>-->
         <!--</executeCommand>-->
     <!--</changeSet>-->
+
+    <changeSet id="commentTest2" author="nvoxland">
+        <sql>
+            create table test_table (id int, name varchar(10));
+        </sql>
+        <sqlFile path="changelogs/common/commentTest.sql"/>
+
+    </changeSet>
+    <changeSet id="commentTest2-test" author="nvoxland">
+        <preConditions>
+            <sqlCheck expectedResult="3">select count(*) from test_table</sqlCheck>
+        </preConditions>
+    </changeSet>
 </databaseChangeLog>
