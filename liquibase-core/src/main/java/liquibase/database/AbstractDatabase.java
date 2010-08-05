@@ -6,6 +6,7 @@ import liquibase.change.core.*;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.RanChangeSet;
+import liquibase.changelog.filter.ContextChangeSetFilter;
 import liquibase.database.structure.*;
 import liquibase.diff.DiffStatusListener;
 import liquibase.exception.*;
@@ -18,7 +19,6 @@ import liquibase.sql.Sql;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.*;
-import liquibase.statement.UniqueConstraint;
 import liquibase.statement.core.*;
 import liquibase.util.ISODateFormat;
 import liquibase.util.StreamUtil;
@@ -343,8 +343,9 @@ public abstract class AbstractDatabase implements Database {
      * the changes in the file. If the table does not exist it will create one
      * otherwise it will not do anything besides outputting a log message.
      * @param updateExistingNullChecksums
+     * @param contexts
      */
-    public void checkDatabaseChangeLogTable(boolean updateExistingNullChecksums, DatabaseChangeLog databaseChangeLog) throws DatabaseException {
+    public void checkDatabaseChangeLogTable(boolean updateExistingNullChecksums, DatabaseChangeLog databaseChangeLog, String[] contexts) throws DatabaseException {
         Executor executor = ExecutorService.getInstance().getExecutor(this);
 
         Table changeLogTable = DatabaseSnapshotGeneratorFactory.getInstance().getGenerator(this).getDatabaseChangeLogTable(this);
@@ -434,7 +435,7 @@ public abstract class AbstractDatabase implements Database {
             for (RanChangeSet ranChangeSet  : this.getRanChangeSetList()) {
                 if (ranChangeSet.getLastCheckSum() == null) {
                     ChangeSet changeSet = databaseChangeLog.getChangeSet(ranChangeSet);
-                    if (changeSet != null) {
+                    if (changeSet != null && new ContextChangeSetFilter(contexts).accepts(changeSet)) {
                         LogFactory.getLogger().info("Setting null checksum on changeSet "+changeSet+" to correct value");
                         executor.execute(new UpdateChangeSetChecksumStatement(changeSet));
                     }

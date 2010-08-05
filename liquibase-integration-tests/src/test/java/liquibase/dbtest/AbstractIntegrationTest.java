@@ -535,7 +535,7 @@ public abstract class AbstractIntegrationTest {
         clearDatabase(liquibase);
 
         liquibase = createLiquibase(completeChangeLog);
-        liquibase.checkDatabaseChangeLogTable(false, null);
+        liquibase.checkDatabaseChangeLogTable(false, null, null);
         liquibase.tag("empty");
 
         liquibase = createLiquibase(rollbackChangeLog);

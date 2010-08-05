@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.regex.Pattern;
 
 /**
  * Various utility methods for working with strings.
@@ -64,8 +65,8 @@ public class StringUtils {
      * @return The String without the comments in
      */
     public static String stripComments(String multiLineSQL) {
-        String strippedSingleLines = multiLineSQL.replaceAll("\\s--\\s.*", "");
-        return strippedSingleLines.replaceAll("/\\*[\n\\S\\s]*?\\*/", "\n");
+        String strippedSingleLines = Pattern.compile("--.*").matcher(multiLineSQL).replaceAll("");
+        return Pattern.compile("/\\*.*?\\*/", Pattern.MULTILINE).matcher(strippedSingleLines).replaceAll("");
     }
 
     public static String join(String[] array, String delimiter) {
