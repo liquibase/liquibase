@@ -58,8 +58,8 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
 
             ChangeSet changeSet = null;
             RawSQLChange change = null;
-            Pattern changeSetPattern = Pattern.compile("--changeset (\\w+):(\\w+).*", Pattern.CASE_INSENSITIVE);
-            Pattern rollbackPattern = Pattern.compile("--rollback changeSet.*", Pattern.CASE_INSENSITIVE);
+            Pattern changeSetPattern = Pattern.compile("\\-\\-changeset (\\w+):(\\w+).*", Pattern.CASE_INSENSITIVE);
+            Pattern rollbackPattern = Pattern.compile("\\s*\\-\\-rollback (.*)", Pattern.CASE_INSENSITIVE);
             Pattern stripCommentsPattern = Pattern.compile(".*stripComments:(\\w+).*", Pattern.CASE_INSENSITIVE);
             Pattern splitStatementsPattern = Pattern.compile(".*splitStatements:(\\w+).*", Pattern.CASE_INSENSITIVE);
             Pattern endDelimiterPattern = Pattern.compile(".*endDelimiter:(\\w+).*", Pattern.CASE_INSENSITIVE);
@@ -72,7 +72,6 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
             Pattern failOnErrorPattern = Pattern.compile(".*failOnError:(\\w+).*", Pattern.CASE_INSENSITIVE);
 
             String line;
-            boolean inRollback = false;
             while ((line = reader.readLine()) != null) {
                 Matcher changeSetPatternMatcher = changeSetPattern.matcher(line);
                 if (changeSetPatternMatcher.matches()) {
@@ -132,13 +131,13 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
 
                     currentSql = new StringBuffer();
                     currentRollbackSql = new StringBuffer();
-                    inRollback = false;
-                } else if (rollbackPattern.matcher(line).matches()) {
-                    inRollback = true;
                 } else {
                     if (changeSet != null) {
-                        if (inRollback) {
-                            currentRollbackSql.append(line).append("\n");
+                        Matcher rollbackMatcher = rollbackPattern.matcher(line);
+                        if (rollbackMatcher.matches()) {
+                            if (rollbackMatcher.groupCount() == 1) {
+                                currentRollbackSql.append(rollbackMatcher.group(1)).append("\n");
+                            }
                         } else {
                             currentSql.append(line).append("\n");
                         }
