@@ -350,9 +350,8 @@ public class Main {
         stream.println(" --promptForNonLocalDatabase=<true|false>   Prompt if non-localhost");
         stream.println("                                            databases (default: false)");
         stream.println(" --logLevel=<level>                         Execution log level");
+        stream.println("                                            (debug, info, warning, severe, off");
         stream.println(" --logFile=<file>                           Log file");
-        stream.println("                                            (finest, finer, debug, info,");
-        stream.println("                                            warning, severe)");
         stream.println(" --currentDateTimeFunction=<value>          Overrides current date time function");
         stream.println("                                            used in SQL.");
         stream.println("                                            Useful for unsupported databases");
