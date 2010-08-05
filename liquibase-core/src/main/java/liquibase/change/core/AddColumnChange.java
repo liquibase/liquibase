@@ -134,6 +134,15 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
         List<Change> inverses = new ArrayList<Change>();
 
         for (ColumnConfig aColumn : columns) {
+            if (aColumn.hasDefaultValue()) {
+                DropDefaultValueChange dropChange = new DropDefaultValueChange();
+                dropChange.setTableName(getTableName());
+                dropChange.setColumnName(aColumn.getName());
+
+                inverses.add(dropChange);
+            }
+
+
             DropColumnChange inverse = new DropColumnChange();
             inverse.setSchemaName(getSchemaName());
             inverse.setColumnName(aColumn.getName());
