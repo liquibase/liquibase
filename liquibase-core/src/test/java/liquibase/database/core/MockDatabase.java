@@ -328,7 +328,7 @@ public class MockDatabase implements Database {
         return false;
     }
 
-    public void checkDatabaseChangeLogTable(boolean updateExistingNullChecksums, DatabaseChangeLog databaseChangeLog) throws DatabaseException {
+    public void checkDatabaseChangeLogTable(boolean updateExistingNullChecksums, DatabaseChangeLog databaseChangeLog, String[] contexts) throws DatabaseException {
         ;
     }
 
