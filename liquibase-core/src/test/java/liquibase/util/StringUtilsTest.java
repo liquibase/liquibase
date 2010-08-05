@@ -10,7 +10,7 @@ public class StringUtilsTest {
     public void noComments() {
         String noComments=" Some text but no comments";
         String result = StringUtils.stripComments(noComments);
-        assertEquals(noComments,result);
+        assertEquals(noComments.trim(),result);
     }
     
     @Test
@@ -30,7 +30,7 @@ public class StringUtilsTest {
         String totalLine=sql + comment ;
         String result = StringUtils.stripComments(totalLine);
         
-        assertEquals(sql+"\n",result);
+        assertEquals(sql.trim(),result);
     }
     
     @Test
@@ -58,7 +58,7 @@ public class StringUtilsTest {
         String sql = "/*Some text\nmore text*/" ;
         
         String result = StringUtils.stripComments(sql);
-        assertEquals("\n",result);
+        assertEquals("",result);
     }
     
     @Test
@@ -67,7 +67,7 @@ public class StringUtilsTest {
         String comment = "/*Some text\nmore text*/" ;
         String total = sql + comment;
         String result = StringUtils.stripComments(total);
-        assertEquals(sql+"\n",result);
+        assertEquals(sql.trim(),result);
     }
     
     @Test
@@ -76,7 +76,7 @@ public class StringUtilsTest {
         String comment = "/*Some text\nmore text*/" ;
         String total = comment + sql;
         String result = StringUtils.stripComments(total);
-        assertEquals("\n"+sql,result);
+        assertEquals(sql.trim(),result);
     }
     
     @Test
@@ -85,7 +85,7 @@ public class StringUtilsTest {
         String comment = "/*Some text\nmore text*/" ;
         String total = sql + comment + sql;
         String result = StringUtils.stripComments(total);
-        assertEquals(sql + "\n" + sql,result);
+        assertEquals(sql.trim() + sql,result);
     }
     
     @Test
@@ -95,7 +95,7 @@ public class StringUtilsTest {
         String total = sql + comment + sql;
         String[] result = StringUtils.processMutliLineSQL(total,true, null);
         assertEquals(1,result.length);
-        assertEquals(sql+"\n"+sql,result[0]);
+        assertEquals(sql+sql,result[0]);
     }
     
     @Test
