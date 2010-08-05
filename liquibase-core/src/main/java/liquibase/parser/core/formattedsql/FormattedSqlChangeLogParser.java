@@ -5,6 +5,7 @@ import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.exception.ChangeLogParseException;
+import liquibase.exception.UnsupportedChangeException;
 import liquibase.logging.LogFactory;
 import liquibase.parser.ChangeLogParser;
 import liquibase.resource.ResourceAccessor;
@@ -53,10 +54,12 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
         try {
             reader = new BufferedReader(new InputStreamReader(openChangeLogFile(physicalChangeLogLocation, resourceAccessor)));
             StringBuffer currentSql = new StringBuffer();
+            StringBuffer currentRollbackSql = new StringBuffer();
 
             ChangeSet changeSet = null;
             RawSQLChange change = null;
             Pattern changeSetPattern = Pattern.compile("--changeset (\\w+):(\\w+).*", Pattern.CASE_INSENSITIVE);
+            Pattern rollbackPattern = Pattern.compile("--rollback changeSet.*", Pattern.CASE_INSENSITIVE);
             Pattern stripCommentsPattern = Pattern.compile(".*stripComments:(\\w+).*", Pattern.CASE_INSENSITIVE);
             Pattern splitStatementsPattern = Pattern.compile(".*splitStatements:(\\w+).*", Pattern.CASE_INSENSITIVE);
             Pattern endDelimiterPattern = Pattern.compile(".*endDelimiter:(\\w+).*", Pattern.CASE_INSENSITIVE);
@@ -69,6 +72,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
             Pattern failOnErrorPattern = Pattern.compile(".*failOnError:(\\w+).*", Pattern.CASE_INSENSITIVE);
 
             String line;
+            boolean inRollback = false;
             while ((line = reader.readLine()) != null) {
                 Matcher changeSetPatternMatcher = changeSetPattern.matcher(line);
                 if (changeSetPatternMatcher.matches()) {
@@ -80,6 +84,16 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                         }
 
                         change.setSql(finalCurrentSql);
+
+                        if (StringUtils.trimToNull(currentRollbackSql.toString()) != null) {
+                            RawSQLChange rollbackChange = new RawSQLChange();
+                            rollbackChange.setSql(currentRollbackSql.toString());
+                            try {
+                                changeSet.addRollbackChange(rollbackChange);
+                            } catch (UnsupportedChangeException e) {
+                                throw new RuntimeException(e);
+                            }
+                        }
                     }
 
                     Matcher stripCommentsPatternMatcher = stripCommentsPattern.matcher(line);
@@ -117,15 +131,33 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                     changeSet.addChange(change);
 
                     currentSql = new StringBuffer();
+                    currentRollbackSql = new StringBuffer();
+                    inRollback = false;
+                } else if (rollbackPattern.matcher(line).matches()) {
+                    inRollback = true;
                 } else {
                     if (changeSet != null) {
-                        currentSql.append(line).append("\n");
+                        if (inRollback) {
+                            currentRollbackSql.append(line).append("\n");
+                        } else {
+                            currentSql.append(line).append("\n");
+                        }
                     }
                 }
             }
 
             if (changeSet != null) {
                 change.setSql(StringUtils.trimToNull(currentSql.toString()));
+
+                if (StringUtils.trimToNull(currentRollbackSql.toString()) != null) {
+                    RawSQLChange rollbackChange = new RawSQLChange();
+                    rollbackChange.setSql(currentRollbackSql.toString());
+                    try {
+                        changeSet.addRollbackChange(rollbackChange);
+                    } catch (UnsupportedChangeException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
             }
 
         } catch (IOException e) {
