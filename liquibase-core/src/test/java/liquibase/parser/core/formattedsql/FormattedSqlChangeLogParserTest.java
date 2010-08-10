@@ -1,6 +1,7 @@
 package liquibase.parser.core.formattedsql;
 
 import liquibase.change.Change;
+import liquibase.change.core.EmptyChange;
 import liquibase.change.core.RawSQLChange;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.DatabaseChangeLog;
@@ -36,7 +37,11 @@ public class FormattedSqlChangeLogParserTest {
             "create table table3 (\n" +
             "  id int primary key\n" +
             ");\n"+
-            "--rollback drop table table2;\n";
+            "--rollback drop table table2;\n"+
+            "--ChangeSet nvoxland:4\n" +
+            "select (*) from table2;\n" +
+            "--rollback not required\n"
+            ;
 
     private static final String INVALID_CHANGELOG = "select * from table1";
 
@@ -52,7 +57,7 @@ public class FormattedSqlChangeLogParserTest {
 
         assertEquals("asdf.sql", changeLog.getLogicalFilePath());
 
-        assertEquals(3, changeLog.getChangeSets().size());
+        assertEquals(4, changeLog.getChangeSets().size());
 
         assertEquals("nvoxland", changeLog.getChangeSets().get(0).getAuthor());
         assertEquals("1", changeLog.getChangeSets().get(0).getId());
@@ -103,8 +108,13 @@ public class FormattedSqlChangeLogParserTest {
         assertTrue(((RawSQLChange) changeLog.getChangeSets().get(2).getChanges().get(0)).isSplittingStatements());
         assertTrue(((RawSQLChange) changeLog.getChangeSets().get(2).getChanges().get(0)).isStrippingComments());
         assertEquals(1, changeLog.getChangeSets().get(2).getRollBackChanges().length);
+        assertTrue(changeLog.getChangeSets().get(2).getRollBackChanges()[0] instanceof RawSQLChange);
         assertEquals("drop table table2;", ((RawSQLChange) changeLog.getChangeSets().get(2).getRollBackChanges()[0]).getSql());
 
+        assertEquals("nvoxland", changeLog.getChangeSets().get(3).getAuthor());
+        assertEquals("4", changeLog.getChangeSets().get(3).getId());
+        assertEquals(1, changeLog.getChangeSets().get(3).getRollBackChanges().length);
+        assertTrue(changeLog.getChangeSets().get(3).getRollBackChanges()[0] instanceof EmptyChange);
     }
 
     private static class MockFormattedSqlChangeLogParser extends FormattedSqlChangeLogParser {

@@ -1,5 +1,6 @@
 package liquibase.parser.core.formattedsql;
 
+import liquibase.change.core.EmptyChange;
 import liquibase.change.core.RawSQLChange;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.ChangeSet;
@@ -149,10 +150,14 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                 change.setSql(StringUtils.trimToNull(currentSql.toString()));
 
                 if (StringUtils.trimToNull(currentRollbackSql.toString()) != null) {
-                    RawSQLChange rollbackChange = new RawSQLChange();
-                    rollbackChange.setSql(currentRollbackSql.toString());
                     try {
-                        changeSet.addRollbackChange(rollbackChange);
+                        if (currentRollbackSql.toString().trim().toLowerCase().matches("^not required.*")) {
+                            changeSet.addRollbackChange(new EmptyChange());
+                        } else {
+                            RawSQLChange rollbackChange = new RawSQLChange();
+                            rollbackChange.setSql(currentRollbackSql.toString());
+                            changeSet.addRollbackChange(rollbackChange);
+                        }
                     } catch (UnsupportedChangeException e) {
                         throw new RuntimeException(e);
                     }
