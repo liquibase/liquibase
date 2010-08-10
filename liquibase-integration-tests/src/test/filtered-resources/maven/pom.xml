@@ -14,19 +14,21 @@
             <artifactId>liquibase-core</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
-          <groupId>hsqldb</groupId>
-          <artifactId>hsqldb</artifactId>
-          <version>1.8.0.7</version>
-        </dependency>
     </dependencies>
 
     <build>
         <plugins>
             <plugin>
                 <groupId>org.liquibase</groupId>
-                <artifactId>liquibase-maven</artifactId>
+                <artifactId>liquibase-maven-plugin</artifactId>
                 <version>${project.version}</version>
+				<dependencies>
+			        <dependency>
+  			            <groupId>hsqldb</groupId>
+			            <artifactId>hsqldb</artifactId>
+			            <version>1.8.0.7</version>
+			        </dependency>
+				</dependencies>
                 <configuration>
                     <changeLogFile>src/main/resources/liquibase/maven/integration/changelog.xml</changeLogFile>
                     <driver>org.hsqldb.jdbcDriver</driver>
