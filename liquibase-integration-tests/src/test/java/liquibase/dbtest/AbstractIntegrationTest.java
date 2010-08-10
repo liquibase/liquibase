@@ -708,7 +708,7 @@ public abstract class AbstractIntegrationTest {
         outputDir.deleteOnExit();
 
         liquibase = createLiquibase(completeChangeLog);
-        liquibase.generateDocumentation(outputDir.getAbsolutePath());
+        liquibase.generateDocumentation(outputDir.getAbsolutePath(), this.contexts);
     }
 
 

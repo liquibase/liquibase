@@ -644,7 +644,13 @@ public class Liquibase {
     }
 
     public void generateDocumentation(String outputDirectory) throws LiquibaseException {
+    	// call without context
+    	generateDocumentation(outputDirectory);
+    }
+    
+    public void generateDocumentation(String outputDirectory, String contexts) throws LiquibaseException {
         log.info("Generating Database Documentation");
+        changeLogParameters.setContexts(StringUtils.splitAndTrim(contexts, ","));
         LockService lockService = LockService.getInstance(database);
         lockService.waitForLock();
 
@@ -652,7 +658,11 @@ public class Liquibase {
             DatabaseChangeLog changeLog = ChangeLogParserFactory.getInstance().getParser(changeLogFile, resourceAccessor).parse(changeLogFile, changeLogParameters, resourceAccessor);
             checkDatabaseChangeLogTable(false, changeLog, null);
 
-            changeLog.validate(database);
+            String[] splitContexts = null;
+            if (StringUtils.trimToNull(contexts) != null) {
+                splitContexts = contexts.split(",");
+            }
+            changeLog.validate(database, splitContexts);
 
             ChangeLogIterator logIterator = new ChangeLogIterator(changeLog,
                     new DbmsChangeSetFilter(database));
