@@ -37,10 +37,10 @@ public class InsertGenerator extends AbstractSqlGenerator<InsertStatement> {
 
         for (String column : statement.getColumnValues().keySet()) {
             Object newValue = statement.getColumnValues().get(column);
-            if (newValue == null || newValue.toString().equals("") || newValue.toString().equalsIgnoreCase("NULL")) {
-                sql.append("NULL");
-            } else if (newValue instanceof String && database.shouldQuoteValue(((String) newValue))) {
+            if (newValue instanceof String && database.shouldQuoteValue(((String) newValue)) && !newValue.toString().equalsIgnoreCase("NULL") ) {
                 sql.append("'").append(database.escapeStringForDatabase((String) newValue)).append("'");
+            } else if (newValue == null || newValue.toString().equals("")) {
+                sql.append("NULL");
             } else if (newValue instanceof Date) {
                 sql.append(database.getDateLiteral(((Date) newValue)));
             } else if (newValue instanceof Boolean) {
