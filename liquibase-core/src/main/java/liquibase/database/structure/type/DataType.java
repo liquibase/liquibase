@@ -84,7 +84,7 @@ public abstract class DataType {
         } else if (value.equals(Boolean.TRUE)) {
             return TypeConverterFactory.getInstance().findTypeConverter(database).getBooleanType().getTrueBooleanValue();
         } else if (value.equals(Boolean.FALSE)) {
-            return TypeConverterFactory.getInstance().findTypeConverter(database).getBooleanType().getTrueBooleanValue();
+            return TypeConverterFactory.getInstance().findTypeConverter(database).getBooleanType().getFalseBooleanValue();
         }
         return value.toString();
     }
