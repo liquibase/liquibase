@@ -394,6 +394,18 @@
         </preConditions>
     </changeSet>
 
-
+    <changeSet id="248fdeca-6cab-4ab9-9d9a-3f97f19c7b1e" author="ma.eberhard">
+		<createTable tableName="RM_Benutzer">
+			<column name="BenutzerId" type="int" autoIncrement="true">
+				<constraints nullable="false" primaryKey="true"/>
+			</column>
+			<column name="BenutzerName" type="varchar(255)">
+				<constraints nullable="false" unique="true"/>
+			</column>
+			<column name="PasswordDoesNotExpire" type="bit" defaultValueBoolean="false">
+				<constraints nullable="false"/>
+			</column>
+		</createTable>
+</changeSet>
 
 </databaseChangeLog>
