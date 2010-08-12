@@ -32,7 +32,7 @@ public class ChangeSet implements Conditional {
 
     public enum ExecType {
         EXECUTED("EXECUTED", false),
-        FAILED("EXECUTED", false),
+        FAILED("FAILED", false),
         SKIPPED("SKIPPED", false),
         RERAN("RERAN", true),
         MARK_RAN("MARK_RAN", false);
@@ -304,7 +304,10 @@ public class ChangeSet implements Conditional {
         try {
             Executor executor = ExecutorService.getInstance().getExecutor(database);
             executor.comment("Rolling Back ChangeSet: " + toString());
-            if (rollBackChanges != null && rollBackChanges.size() > 0) {
+            RanChangeSet ranChangeSet = database.getRanChangeSet(this);
+            if (!ranChangeSet.getExecType().equals(ExecType.EXECUTED)) {
+                executor.comment("Did not actually execute.  ExecType is "+ranChangeSet+".  Not rolling back");
+            } else if (rollBackChanges != null && rollBackChanges.size() > 0) {
                 for (Change rollback : rollBackChanges) {
                     for (SqlStatement statement : rollback.generateStatements(database)) {
                         try {
