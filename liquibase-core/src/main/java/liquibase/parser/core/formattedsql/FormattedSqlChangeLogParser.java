@@ -86,10 +86,14 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                         change.setSql(finalCurrentSql);
 
                         if (StringUtils.trimToNull(currentRollbackSql.toString()) != null) {
-                            RawSQLChange rollbackChange = new RawSQLChange();
-                            rollbackChange.setSql(currentRollbackSql.toString());
-                            try {
-                                changeSet.addRollbackChange(rollbackChange);
+                        	try {
+                        		if (currentRollbackSql.toString().trim().toLowerCase().matches("^not required.*")) {
+                        			changeSet.addRollbackChange(new EmptyChange());
+                        		} else {
+                        			RawSQLChange rollbackChange = new RawSQLChange();
+                        			rollbackChange.setSql(currentRollbackSql.toString());
+                        			changeSet.addRollbackChange(rollbackChange);
+                        		}
                             } catch (UnsupportedChangeException e) {
                                 throw new RuntimeException(e);
                             }

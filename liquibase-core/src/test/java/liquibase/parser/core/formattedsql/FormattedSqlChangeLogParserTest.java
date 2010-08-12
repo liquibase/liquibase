@@ -38,7 +38,10 @@ public class FormattedSqlChangeLogParserTest {
             "  id int primary key\n" +
             ");\n"+
             "--rollback drop table table2;\n"+
-            "--ChangeSet nvoxland:4\n" +
+            "--ChangeSet alwyn:4\n" +
+            "select (*) from table2;\n" +
+            "--rollback not required\n" +
+            "--ChangeSet nvoxland:5\n" +
             "select (*) from table2;\n" +
             "--rollback not required\n"
             ;
@@ -57,7 +60,7 @@ public class FormattedSqlChangeLogParserTest {
 
         assertEquals("asdf.sql", changeLog.getLogicalFilePath());
 
-        assertEquals(4, changeLog.getChangeSets().size());
+        assertEquals(5, changeLog.getChangeSets().size());
 
         assertEquals("nvoxland", changeLog.getChangeSets().get(0).getAuthor());
         assertEquals("1", changeLog.getChangeSets().get(0).getId());
@@ -111,10 +114,15 @@ public class FormattedSqlChangeLogParserTest {
         assertTrue(changeLog.getChangeSets().get(2).getRollBackChanges()[0] instanceof RawSQLChange);
         assertEquals("drop table table2;", ((RawSQLChange) changeLog.getChangeSets().get(2).getRollBackChanges()[0]).getSql());
 
-        assertEquals("nvoxland", changeLog.getChangeSets().get(3).getAuthor());
+        assertEquals("alwyn", changeLog.getChangeSets().get(3).getAuthor());
         assertEquals("4", changeLog.getChangeSets().get(3).getId());
         assertEquals(1, changeLog.getChangeSets().get(3).getRollBackChanges().length);
         assertTrue(changeLog.getChangeSets().get(3).getRollBackChanges()[0] instanceof EmptyChange);
+        
+        assertEquals("nvoxland", changeLog.getChangeSets().get(4).getAuthor());
+        assertEquals("5", changeLog.getChangeSets().get(4).getId());
+        assertEquals(1, changeLog.getChangeSets().get(4).getRollBackChanges().length);
+        assertTrue(changeLog.getChangeSets().get(4).getRollBackChanges()[0] instanceof EmptyChange);
     }
 
     private static class MockFormattedSqlChangeLogParser extends FormattedSqlChangeLogParser {
