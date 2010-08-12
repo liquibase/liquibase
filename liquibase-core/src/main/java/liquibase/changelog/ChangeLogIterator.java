@@ -1,10 +1,11 @@
 package liquibase.changelog;
 
-import liquibase.changelog.filter.ChangeSetFilter;
+import liquibase.changelog.filter.*;
 import liquibase.changelog.visitor.ChangeSetVisitor;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -15,6 +16,21 @@ public class ChangeLogIterator {
 
     public ChangeLogIterator(DatabaseChangeLog databaseChangeLog, ChangeSetFilter... changeSetFilters) {
         this.databaseChangeLog = databaseChangeLog;
+        this.changeSetFilters = Arrays.asList(changeSetFilters);
+    }
+
+    public ChangeLogIterator(List<RanChangeSet> changeSetList, DatabaseChangeLog changeLog, ChangeSetFilter... changeSetFilters) {
+        final List<ChangeSet> changeSets = new ArrayList<ChangeSet>();
+        for (RanChangeSet ranChangeSet : changeSetList) {
+            changeSets.add(changeLog.getChangeSet(ranChangeSet)) ;
+        }
+        this.databaseChangeLog = (new DatabaseChangeLog(null) {
+            @Override
+            public List<ChangeSet> getChangeSets() {
+                return changeSets;
+            }
+        });
+
         this.changeSetFilters = Arrays.asList(changeSetFilters);
     }
 

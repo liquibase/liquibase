@@ -236,8 +236,8 @@ public class Liquibase {
 
             changeLog.validate(database, contexts);
 
-            ChangeLogIterator logIterator = new ChangeLogIterator(changeLog,
-                    new ActuallyExecutedChangeSetFilter(database.getRanChangeSetList()),
+            ChangeLogIterator logIterator = new ChangeLogIterator(database.getRanChangeSetList(), changeLog,
+                    new AlreadyRanChangeSetFilter(database.getRanChangeSetList()),
                     new ContextChangeSetFilter(contexts),
                     new DbmsChangeSetFilter(database),
                     new CountChangeSetFilter(changesToRollback));
@@ -284,9 +284,9 @@ public class Liquibase {
             changeLog.validate(database, contexts);
 
             List<RanChangeSet> ranChangeSetList = database.getRanChangeSetList();
-            ChangeLogIterator logIterator = new ChangeLogIterator(changeLog,
+            ChangeLogIterator logIterator = new ChangeLogIterator(ranChangeSetList, changeLog,
                     new AfterTagChangeSetFilter(tagToRollBackTo, ranChangeSetList),
-                    new ActuallyExecutedChangeSetFilter(ranChangeSetList),
+                    new AlreadyRanChangeSetFilter(ranChangeSetList),
                     new ContextChangeSetFilter(contexts),
                     new DbmsChangeSetFilter(database));
 
@@ -326,9 +326,9 @@ public class Liquibase {
             changeLog.validate(database, contexts);
 
             List<RanChangeSet> ranChangeSetList = database.getRanChangeSetList();
-            ChangeLogIterator logIterator = new ChangeLogIterator(changeLog,
+            ChangeLogIterator logIterator = new ChangeLogIterator(ranChangeSetList, changeLog,
                     new ExecutedAfterChangeSetFilter(dateToRollBackTo, ranChangeSetList),
-                    new ActuallyExecutedChangeSetFilter(ranChangeSetList),                    
+                    new AlreadyRanChangeSetFilter(ranChangeSetList),
                     new ContextChangeSetFilter(contexts),
                     new DbmsChangeSetFilter(database));
 

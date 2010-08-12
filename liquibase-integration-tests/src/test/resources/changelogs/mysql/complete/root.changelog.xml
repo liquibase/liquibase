@@ -408,4 +408,15 @@
 		</createTable>
 </changeSet>
 
+       <changeSet id="test-mark-run" author="alexis">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="RM_Benutzer" />
+            </not>
+        </preConditions>
+        <createTable tableName="RM_Benutzer">
+            <column name="key" type="number" />
+            <column name="value" type="varchar2(50)"/>
+        </createTable>
+    </changeSet>
 </databaseChangeLog>
