@@ -97,6 +97,18 @@ public class StringUtilsTest {
         assertEquals(1,result.length);
         assertEquals(sql+sql,result[0]);
     }
+
+    @Test
+    public void stripComments2() {
+        String sql = "insert into test_table values(1, 'hello');\n" +
+                "insert into test_table values(2, 'hello');\n" +
+                "--insert into test_table values(3, 'hello');\n" +
+                "insert into test_table values(4, 'hello');";
+
+        String[] result = StringUtils.processMutliLineSQL(sql, true, ";");
+        assertEquals(3, result.length);
+    }
+
     
     @Test
     public void shouldNotStripComments() {

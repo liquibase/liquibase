@@ -104,19 +104,11 @@ public abstract class AbstractSQLChange extends AbstractChange {
             return new SqlStatement[0];
         }
 
-        String processedSQL = isStrippingComments() ? StringUtils.stripComments(getSql()) : getSql();
-        processedSQL = processedSQL.replaceAll("\r\n", "\n").replaceAll("\r", "\n");
-
-
-        if(isSplittingStatements()) {
-            String[] statements = StringUtils.splitSQL(processedSQL, getEndDelimiter());
-            for (String statement : statements) {
-                returnStatements.add(new RawSqlStatement(statement, getEndDelimiter()));
-            }
-        } else {
-            returnStatements.add(new RawSqlStatement(processedSQL, getEndDelimiter()));
+        String processedSQL = getSql().replaceAll("\r\n", "\n").replaceAll("\r", "\n");
+        for (String statement : StringUtils.processMutliLineSQL(processedSQL, isStrippingComments(), getEndDelimiter())) {
+            returnStatements.add(new RawSqlStatement(statement, getEndDelimiter()));
         }
-        
+
         return returnStatements.toArray(new SqlStatement[returnStatements.size()]);
     }
 }
