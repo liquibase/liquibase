@@ -254,11 +254,12 @@ public class OracleDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
 			}
 			short type = rs.getShort("TYPE");
 			boolean nonUnique = true;
-			try {
-				nonUnique = rs.getBoolean("NON_UNIQUE");
-			} catch (SQLException e) {
-				//doesn't exist in all databases
-			}
+//          no check currently in oracle
+// 			try {
+//				nonUnique = rs.getBoolean("NON_UNIQUE");
+//			} catch (SQLException e) {
+//				//doesn't exist in all databases
+//			}
 
 			short position = rs.getShort("ORDINAL_POSITION");
 			String filterCondition = rs.getString("FILTER_CONDITION");
