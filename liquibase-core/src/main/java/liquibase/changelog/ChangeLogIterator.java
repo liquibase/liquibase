@@ -22,7 +22,10 @@ public class ChangeLogIterator {
     public ChangeLogIterator(List<RanChangeSet> changeSetList, DatabaseChangeLog changeLog, ChangeSetFilter... changeSetFilters) {
         final List<ChangeSet> changeSets = new ArrayList<ChangeSet>();
         for (RanChangeSet ranChangeSet : changeSetList) {
-            changeSets.add(changeLog.getChangeSet(ranChangeSet)) ;
+        	ChangeSet changeSet = changeLog.getChangeSet(ranChangeSet);
+        	if (changeSet != null) {
+        		changeSets.add(changeSet);
+        	}
         }
         this.databaseChangeLog = (new DatabaseChangeLog(null) {
             @Override
