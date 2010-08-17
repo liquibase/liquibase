@@ -5,6 +5,7 @@ import liquibase.changelog.ChangeSet;
 import liquibase.changelog.RanChangeSet;
 import liquibase.changelog.visitor.ValidatingVisitor;
 import liquibase.database.Database;
+import liquibase.logging.LogFactory;
 import liquibase.precondition.core.ErrorPrecondition;
 import liquibase.precondition.core.FailedPrecondition;
 import liquibase.util.StreamUtil;
@@ -83,6 +84,7 @@ public class ValidationFailedException extends MigrationFailedException {
         if(changeValidationExceptions.size() >0){
             message.append("     ").append(changeValidationExceptions.size()).append(" changes have validation errors").append(StreamUtil.getLineSeparator());
             for (Throwable invalid : changeValidationExceptions) {
+                LogFactory.getLogger().debug("validation exception", invalid);
                 message.append("          ").append(invalid.toString());
                 message.append(StreamUtil.getLineSeparator());
             }
