@@ -318,7 +318,7 @@ public class ColumnConfig {
     }
 
     public boolean isPrimaryKey() {
-        return getConstraints() != null && getConstraints().isPrimaryKey();
+        return getConstraints() != null && getConstraints().isPrimaryKey() != null && getConstraints().isPrimaryKey();
     }
 
     public boolean isNullable() {

@@ -32,7 +32,7 @@ public class CreateDatabaseChangeLogTableGenerator extends AbstractSqlGenerator<
                 .addPrimaryKeyColumn("AUTHOR", typeConverter.getDataType("VARCHAR(63)", false), null, null, null,new NotNullConstraint())
                 .addPrimaryKeyColumn("FILENAME", typeConverter.getDataType("VARCHAR(200)", false), null, null, null,new NotNullConstraint())
                 .addColumn("DATEEXECUTED", typeConverter.getDateTimeType(), null, new NotNullConstraint())
-                .addColumn("ORDEREXECUTED", typeConverter.getDataType("INT", false), new NotNullConstraint(), new UniqueConstraint("UQ_DBCL_ORDEREXEC"))
+                .addColumn("ORDEREXECUTED", typeConverter.getDataType("INT", false), new NotNullConstraint())
                 .addColumn("EXECTYPE", typeConverter.getDataType("VARCHAR(10)", false), new NotNullConstraint())
                 .addColumn("MD5SUM", typeConverter.getDataType("VARCHAR(35)", false))
                 .addColumn("DESCRIPTION", typeConverter.getDataType("VARCHAR(255)", false))
