@@ -80,7 +80,7 @@
                     </excludes>
                     <systemProperties>
                         <property>
-                            <name>liquibase.default.logger.level</name>
+                            <name>liquibase.defaultlogger.level</name>
                             <value>severe</value>
                         </property>
                     </systemProperties>

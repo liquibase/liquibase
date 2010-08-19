@@ -118,7 +118,7 @@
                 <configuration>
                     <systemProperties>
                         <property>
-                            <name>liquibase.default.logger.level</name>
+                            <name>liquibase.defaultlogger.level</name>
                             <value>debug</value>
                         </property>
                     </systemProperties>
