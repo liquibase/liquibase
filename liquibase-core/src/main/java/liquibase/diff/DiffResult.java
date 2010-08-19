@@ -623,14 +623,12 @@ public class DiffResult {
 			// Need check for nulls here due to NullPointerException using Postgres
 			if (null != uc) {
 				if (null != uc.getTable()) {
-					if (!getUnexpectedTables().contains(uc.getTable())) {
-						DropUniqueConstraintChange change = new DropUniqueConstraintChange();
-						change.setTableName(uc.getTable().getName());
-						change.setSchemaName(uc.getTable().getSchema());
-						change.setConstraintName(uc.getName());
+                    DropUniqueConstraintChange change = new DropUniqueConstraintChange();
+                    change.setTableName(uc.getTable().getName());
+                    change.setSchemaName(uc.getTable().getSchema());
+                    change.setConstraintName(uc.getName());
 
-						changes.add(generateChangeSet(change));
-					}
+                    changes.add(generateChangeSet(change));
 				}
 			}
 		}
