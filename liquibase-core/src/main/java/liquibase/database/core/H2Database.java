@@ -36,7 +36,7 @@ public class H2Database extends AbstractDatabase {
     }
 
     public int getPriority() {
-        return PRIORITY_DEFAULT;
+        return PRIORITY_DATABASE;
     }
 
     public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {

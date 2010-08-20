@@ -7,9 +7,7 @@ import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.DatabaseSnapshotGeneratorFactory;
 import liquibase.util.StringUtils;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 public class Diff {
 
@@ -104,6 +102,13 @@ public class Diff {
 		}
 		diffResult.setDiffData(shouldDiffData());
 
+        // Hack:  Sometimes Indexes or Unique Constraints with multiple columns get added twice (1 for each column),
+		// so we're combining them back to a single Index or Unique Constraint here.
+		removeDuplicateIndexes( diffResult.getMissingIndexes() );
+		removeDuplicateIndexes( diffResult.getUnexpectedIndexes() );
+		removeDuplicateUniqueConstraints( diffResult.getMissingUniqueConstraints() );
+		removeDuplicateUniqueConstraints( diffResult.getUnexpectedUniqueConstraints() );
+        
 		return diffResult;
 	}
 
@@ -348,5 +353,112 @@ public class Diff {
 				diffResult.addUnexpectedSequence(targetSequence);
 			}
 		}
+	}
+
+    /**
+	 * Removes duplicate Indexes from the DiffResult object.
+	 *
+	 * @param indexes [IN/OUT] - A set of Indexes to be updated.
+	 */
+	private void removeDuplicateIndexes( SortedSet<Index> indexes )
+	{
+		SortedSet<Index> combinedIndexes = new TreeSet<Index>();
+		SortedSet<Index> indexesToRemove = new TreeSet<Index>();
+
+		// Find Indexes with the same name, copy their columns into the first one,
+		// then remove the duplicate Indexes.
+		for ( Index idx1 : indexes )
+		{
+			if ( !combinedIndexes.contains( idx1 ) )
+			{
+				for ( Index idx2 : indexes.tailSet( idx1 ) )
+				{
+					if ( idx1 == idx2 ) {
+						continue;
+					}
+
+					if ( idx1.getName().equalsIgnoreCase( idx2.getName() )
+							&& idx1.getTable().getName().equalsIgnoreCase( idx2.getTable().getName() ) )
+					{
+						for ( String column : idx2.getColumns() )
+						{
+							if ( !idx1.getColumns().contains( column ) ) {
+								idx1.getColumns().add( column );
+							}
+						}
+
+						indexesToRemove.add( idx2 );
+					}
+				}
+
+				combinedIndexes.add( idx1 );
+			}
+		}
+
+		// Sort the columns.
+		Set<String> sortedColumns = new TreeSet<String>();
+		for ( Index idx : combinedIndexes )
+		{
+			List<String> columns = idx.getColumns();
+			sortedColumns.clear();
+			sortedColumns.addAll( columns );
+			columns.clear();
+			columns.addAll( sortedColumns );
+		}
+
+		indexes.removeAll( indexesToRemove );
+	}
+
+	/**
+	 * Removes duplicate Unique Constraints from the DiffResult object.
+	 *
+	 * @param uniqueConstraints [IN/OUT] - A set of Unique Constraints to be updated.
+	 */
+	private void removeDuplicateUniqueConstraints( SortedSet<UniqueConstraint> uniqueConstraints ) {
+		SortedSet<UniqueConstraint> combinedConstraints = new TreeSet<UniqueConstraint>();
+		SortedSet<UniqueConstraint> constraintsToRemove = new TreeSet<UniqueConstraint>();
+
+		// Find UniqueConstraints with the same name, copy their columns into the first one,
+		// then remove the duplicate UniqueConstraints.
+		for ( UniqueConstraint uc1 : uniqueConstraints )
+		{
+			if ( !combinedConstraints.contains( uc1 ) )
+			{
+				for ( UniqueConstraint uc2 : uniqueConstraints.tailSet( uc1 ) )
+				{
+					if ( uc1 == uc2 ) {
+						continue;
+					}
+
+					if ( uc1.getName().equalsIgnoreCase( uc2.getName() )
+							&& uc1.getTable().getName().equalsIgnoreCase( uc2.getTable().getName() ) )
+					{
+						for ( String column : uc2.getColumns() )
+						{
+							if ( !uc1.getColumns().contains( column ) ) {
+								uc1.getColumns().add( column );
+							}
+						}
+
+						constraintsToRemove.add( uc2 );
+					}
+				}
+
+				combinedConstraints.add( uc1 );
+			}
+		}
+
+		// Sort the columns.
+		Set<String> sortedColumns = new TreeSet<String>();
+		for ( UniqueConstraint uc : combinedConstraints )
+		{
+			List<String> columns = uc.getColumns();
+			sortedColumns.clear();
+			sortedColumns.addAll( columns );
+			columns.clear();
+			columns.addAll( sortedColumns );
+		}
+
+		uniqueConstraints.removeAll( constraintsToRemove );
 	}
 }
