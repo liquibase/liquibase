@@ -645,7 +645,7 @@ public class Liquibase {
 
     public void generateDocumentation(String outputDirectory) throws LiquibaseException {
     	// call without context
-    	generateDocumentation(outputDirectory);
+    	generateDocumentation(outputDirectory, null);
     }
     
     public void generateDocumentation(String outputDirectory, String contexts) throws LiquibaseException {
