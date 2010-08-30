@@ -68,6 +68,13 @@ public class LiquibaseTest {
 //
 //    }
 
+/*    
+    @Test
+    public void testBlosDocumentation() throws Exception {
+    	testLiquibase.generateDocumentation(".");
+    }
+*/    
+
     @Test
     public void getImplementedDatabases() throws Exception {
         List<Database> databases = DatabaseFactory.getInstance().getImplementedDatabases();
@@ -119,7 +126,8 @@ public class LiquibaseTest {
         }
 
 
-        public Database[] getImplementedDatabases() {
+        @SuppressWarnings("unused")
+		public Database[] getImplementedDatabases() {
             Database mockDatabase = createMock(Database.class);
             try {
 
