@@ -2,6 +2,7 @@ package liquibase.database.sql;
 
 import liquibase.database.Database;
 import liquibase.database.OracleDatabase;
+import liquibase.database.PostgresDatabase;
 import liquibase.exception.StatementNotSupportedOnDatabaseException;
 
 public class SetColumnRemarksStatement implements SqlStatement {
@@ -19,7 +20,7 @@ public class SetColumnRemarksStatement implements SqlStatement {
     }
 
     public String getSqlStatement(Database database) throws StatementNotSupportedOnDatabaseException {
-        return "COMMENT ON COLUMN "+database.escapeTableName(schemaName, tableName)+"."+database.escapeColumnName(schemaName, tableName, columnName)+" IS '"+remarks+"'";
+        return "COMMENT ON COLUMN "+database.escapeTableName(schemaName, tableName)+"."+database.escapeColumnName(schemaName, tableName, columnName)+" IS '"+remarks.replace("'", "''")+"'";
     }
 
     public String getEndDelimiter(Database database) {
@@ -27,6 +28,6 @@ public class SetColumnRemarksStatement implements SqlStatement {
     }
 
     public boolean supportsDatabase(Database database) {
-        return database instanceof OracleDatabase;
+        return database instanceof OracleDatabase || database instanceof PostgresDatabase;
     }
 }
