@@ -3,6 +3,7 @@ package liquibase.database.sql;
 import liquibase.database.Database;
 import liquibase.database.OracleDatabase;
 import liquibase.database.MySQLDatabase;
+import liquibase.database.PostgresDatabase;
 import liquibase.exception.StatementNotSupportedOnDatabaseException;
 
 public class SetTableRemarksStatement implements SqlStatement {
@@ -18,7 +19,7 @@ public class SetTableRemarksStatement implements SqlStatement {
     }
 
     public String getSqlStatement(Database database) throws StatementNotSupportedOnDatabaseException {
-        if (database instanceof OracleDatabase) {
+        if (database instanceof OracleDatabase || database instanceof PostgresDatabase) {
             return "COMMENT ON TABLE "+database.escapeTableName(schemaName, tableName)+" IS '"+remarks+"'";
         } else {
             return "ALTER TABLE "+database.escapeTableName(schemaName, tableName)+" COMMENT = '"+remarks+"'";
@@ -30,6 +31,6 @@ public class SetTableRemarksStatement implements SqlStatement {
     }
 
     public boolean supportsDatabase(Database database) {
-        return database instanceof MySQLDatabase || database instanceof OracleDatabase;
+        return database instanceof MySQLDatabase || database instanceof OracleDatabase || database instanceof PostgresDatabase;
     }
 }
