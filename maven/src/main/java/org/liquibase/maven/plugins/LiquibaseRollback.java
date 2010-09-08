@@ -52,15 +52,15 @@ public class LiquibaseRollback extends AbstractLiquibaseChangeLogMojo {
                                      + "or rollbackDate");
     }
 
-    if (rollbackCount <= 0) {
-      throw new MojoFailureException("A rollback count of " + rollbackCount + " is meaningless, please "
-                                     + "select a value greater than 0");
-    }
 
     String message = "Cannot specify multiple rollbackXXX options, please select only"
                      + " one of rollbackTag, rollbackCount, rollbackDate.";
 
-    if (rollbackCount > 0) {
+    if (rollbackCount != -1) {
+    	if (rollbackCount <= 0) {
+    		throw new MojoFailureException("A rollback count of " + rollbackCount + " is meaningless, please "
+    				+ "select a value greater than 0");
+    	}
       if (rollbackDate != null || rollbackTag != null) {
         throw new MojoFailureException(message);
       }
