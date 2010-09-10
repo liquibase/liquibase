@@ -1,13 +1,13 @@
 package liquibase.preconditions;
 
-import liquibase.database.Database;
-import liquibase.DatabaseChangeLog;
 import liquibase.ChangeSet;
+import liquibase.DatabaseChangeLog;
 import liquibase.RanChangeSet;
-import liquibase.exception.PreconditionFailedException;
-import liquibase.exception.PreconditionErrorException;
-import liquibase.exception.JDBCException;
+import liquibase.database.Database;
 import liquibase.exception.DatabaseHistoryException;
+import liquibase.exception.PreconditionErrorException;
+import liquibase.exception.PreconditionFailedException;
+import liquibase.exception.JDBCException;
 
 public class ChangeSetExecutedPrecondition implements Precondition {
 
@@ -44,6 +44,17 @@ public class ChangeSetExecutedPrecondition implements Precondition {
         RanChangeSet ranChangeSet;
         try {
             ranChangeSet = database.getRanChangeSet(changeSet);
+        } catch (DatabaseHistoryException dhe) {
+            // If the databasechangelog table doesn't exist, the changeset obviously was not ran
+            try {
+                if (!database.doesChangeLogTableExist()) {
+                    ranChangeSet = null;
+                } else {
+                    throw new PreconditionErrorException(dhe, changeLog, this);
+                }
+            } catch (JDBCException e) {
+                throw new PreconditionErrorException(e, changeLog, this);
+            }
         } catch (Exception e) {
             throw new PreconditionErrorException(e, changeLog, this);
         }
