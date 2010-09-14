@@ -1,6 +1,7 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
+import liquibase.database.core.InformixDatabase;
 import liquibase.database.core.MySQLDatabase;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
@@ -8,6 +9,7 @@ import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
+import liquibase.statement.SqlStatement;
 import liquibase.statement.core.TagDatabaseStatement;
 import liquibase.statement.core.UpdateStatement;
 
@@ -38,6 +40,11 @@ public class TagDatabaseGenerator extends AbstractSqlGenerator<TagDatabaseStatem
                 ; //assume it is version 5
             }
             updateStatement.setWhereClause("DATEEXECUTED = (SELECT MAX(DATEEXECUTED) FROM (SELECT DATEEXECUTED FROM " + database.escapeTableName(liquibaseSchema, database.getDatabaseChangeLogTableName()) + ") AS X)");
+        } else if (database instanceof InformixDatabase) {
+            return new Sql[] {
+                    new UnparsedSql("SELECT MAX(dateexecuted) max_date FROM "+database.escapeTableName(liquibaseSchema, database.getDatabaseChangeLogTableName())+" INTO TEMP max_date_temp WITH NO LOG"),
+                            new UnparsedSql("UPDATE "+database.escapeTableName(liquibaseSchema, database.getDatabaseChangeLogTableName())+" SET TAG = '"+statement.getTag()+"' WHERE DATEEXECUTED = (SELECT max_date FROM max_date_temp);")
+            };
         } else {
             updateStatement.setWhereClause("DATEEXECUTED = (SELECT MAX(DATEEXECUTED) FROM " + database.escapeTableName(liquibaseSchema, database.getDatabaseChangeLogTableName()) + ")");
         }
