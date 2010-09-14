@@ -394,7 +394,6 @@ public class HsqlDatabase extends AbstractDatabase {
             "MINUS",
             "NEXT",
             "OPENBRACKET",
-            "PASSWORD",
             "PLAN",
             "PROPERTY",
             "READONLY",
