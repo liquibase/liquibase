@@ -52,6 +52,11 @@ public class OracleDatabase extends AbstractDatabase {
     }
 
     @Override
+    public String escapeDatabaseObject(String objectName) {
+        return "\""+objectName+"\"";
+    }
+
+    @Override
     public boolean supportsSequences() {
         return true;
     }
