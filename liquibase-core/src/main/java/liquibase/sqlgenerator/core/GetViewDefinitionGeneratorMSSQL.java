@@ -23,11 +23,8 @@ public class GetViewDefinitionGeneratorMSSQL extends GetViewDefinitionGenerator 
     @Override
     public Sql[] generateSql(GetViewDefinitionStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         try {
-            String sql = "select view_definition from INFORMATION_SCHEMA.VIEWS where upper(table_name)='" + statement.getViewName().toUpperCase() + "'";
-//        if (StringUtils.trimToNull(schemaName) != null) {
-            sql += " and table_schema='" + database.convertRequestedSchemaToSchema(statement.getSchemaName()) + "'";
-            sql += " and table_catalog='" + database.getDefaultCatalogName() + "'";
-//        }
+            String sql = "select object_definition(object_id) from sys.objects where type='v' and upper(name)='" + statement.getViewName().toUpperCase() + "'";
+            sql += " and schema_id='" + database.convertRequestedSchemaToSchema(statement.getSchemaName()) + "'";
 
 //        log.info("GetViewDefinitionSQL: "+sql);
 
