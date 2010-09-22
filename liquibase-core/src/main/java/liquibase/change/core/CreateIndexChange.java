@@ -22,6 +22,7 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
     private List<ColumnConfig> columns;
 	// Contain associations of index
 	// for example: foreignKey, primaryKey or uniqueConstraint
+    @ChangeProperty(includeInSerialization = false)
 	private String associatedWith;
 
 

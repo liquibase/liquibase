@@ -2,6 +2,7 @@ package liquibase.change.core;
 
 import liquibase.change.AbstractChange;
 import liquibase.change.ChangeMetaData;
+import liquibase.change.ChangeProperty;
 import liquibase.database.Database;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DropIndexStatement;
@@ -15,6 +16,8 @@ public class DropIndexChange extends AbstractChange {
     private String schemaName;
     private String indexName;
     private String tableName;
+
+    @ChangeProperty(includeInSerialization = false)
     private String associatedWith;
 
     public DropIndexChange() {
