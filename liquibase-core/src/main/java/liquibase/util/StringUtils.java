@@ -36,10 +36,14 @@ public class StringUtils {
      * @param multiLineSQL A String containing all the SQL statements
      * @param stripComments If true then comments will be stripped, if false then they will be left in the code
      */
-    public static String[] processMutliLineSQL(String multiLineSQL,boolean stripComments, String endDelimiter) {
+    public static String[] processMutliLineSQL(String multiLineSQL,boolean stripComments, boolean splitStatements, String endDelimiter) {
         
         String stripped = stripComments ? stripComments(multiLineSQL) : multiLineSQL;
-        return splitSQL(stripped, endDelimiter);
+	if (splitStatements) {
+	    return splitSQL(stripped, endDelimiter);
+	} else {
+	    return new String[]{stripped};
+	}
     }
 
     /**
