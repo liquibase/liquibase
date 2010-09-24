@@ -105,7 +105,7 @@ public abstract class AbstractSQLChange extends AbstractChange {
         }
 
         String processedSQL = getSql().replaceAll("\r\n", "\n").replaceAll("\r", "\n");
-        for (String statement : StringUtils.processMutliLineSQL(processedSQL, isStrippingComments(), getEndDelimiter())) {
+        for (String statement : StringUtils.processMutliLineSQL(processedSQL, isStrippingComments(), isSplittingStatements(), getEndDelimiter())) {
             returnStatements.add(new RawSqlStatement(statement, getEndDelimiter()));
         }
 

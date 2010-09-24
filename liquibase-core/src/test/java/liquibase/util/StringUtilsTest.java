@@ -93,7 +93,7 @@ public class StringUtilsTest {
         String sql = "some sql";
         String comment = "/*Some text\nmore text*/" ;
         String total = sql + comment + sql;
-        String[] result = StringUtils.processMutliLineSQL(total,true, null);
+        String[] result = StringUtils.processMutliLineSQL(total,true, false, null);
         assertEquals(1,result.length);
         assertEquals(sql+sql,result[0]);
     }
@@ -105,7 +105,7 @@ public class StringUtilsTest {
                 "--insert into test_table values(3, 'hello');\n" +
                 "insert into test_table values(4, 'hello');";
 
-        String[] result = StringUtils.processMutliLineSQL(sql, true, ";");
+        String[] result = StringUtils.processMutliLineSQL(sql, true, true, ";");
         assertEquals(3, result.length);
     }
 
@@ -115,7 +115,7 @@ public class StringUtilsTest {
         String sql = "some sql";
         String comment = "/*Some text\nmore text*/" ;
         String total = sql + comment + sql;
-        String[] result = StringUtils.processMutliLineSQL(total,false, null);
+        String[] result = StringUtils.processMutliLineSQL(total,false, false, null);
         assertEquals(1,result.length);
         assertEquals(total,result[0]);
     }
@@ -146,7 +146,7 @@ public class StringUtilsTest {
                 "\n" +
                 "Select * from Test;\n" +
                 "Update Test set field = 1";
-        String[] result = StringUtils.processMutliLineSQL(sql,true, null);
+        String[] result = StringUtils.processMutliLineSQL(sql,true, true, null);
         assertEquals(2,result.length);
         assertEquals("Select * from Test",result[0]);
         assertEquals("Update Test set field = 1",result[1]);
@@ -158,7 +158,7 @@ public class StringUtilsTest {
         StringBuilder sb = new StringBuilder();
         sb.append("select * from simple_select_statement;\n");
         sb.append("insert into table ( col ) values (' value with; semicolon ');");
-        String[] result = StringUtils.processMutliLineSQL(sb.toString(), true, null);
+        String[] result = StringUtils.processMutliLineSQL(sb.toString(), true, true, null);
         assertEquals("Unexpected amount of statements returned",2, result.length);
     }
 
