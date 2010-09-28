@@ -4,6 +4,7 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.logging.core.AbstractLogger;
 import liquibase.logging.LogLevel;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.logging.*;
 
@@ -54,7 +55,7 @@ public class JavaUtilLogger extends AbstractLogger {
         fH.setFormatter(new Formatter(){
             @Override
             public String format(LogRecord record) {
-                return record.getLoggerName()+":"+record.getLevel().getName()+": "+record.getMessage();
+                return record.getLoggerName()+":"+record.getLevel().getName()+": "+record.getMessage()+ System.getProperty("line.separator");
             }
         });
         logger.addHandler(fH);
