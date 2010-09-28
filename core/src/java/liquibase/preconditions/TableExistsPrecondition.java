@@ -5,14 +5,11 @@ import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import liquibase.database.Database;
-import liquibase.database.DatabaseConnection;
-import liquibase.database.structure.DatabaseSnapshot;
 import liquibase.DatabaseChangeLog;
-import liquibase.util.StringUtils;
-import liquibase.exception.PreconditionFailedException;
+import liquibase.database.Database;
 import liquibase.exception.PreconditionErrorException;
-import liquibase.exception.JDBCException;
+import liquibase.exception.PreconditionFailedException;
+import liquibase.util.StringUtils;
 
 public class TableExistsPrecondition implements Precondition {
     private String schemaName;
