@@ -85,6 +85,19 @@ public class ServiceLocator {
 	        } catch (IOException e) {
 	            throw new UnexpectedLiquibaseException(e);
 	        }
+
+            if (packagesToScan.size() == 0) {
+                addPackageToScan("liquibase.change");
+                addPackageToScan("liquibase.database");
+                addPackageToScan("liquibase.parser");
+                addPackageToScan("liquibase.precondition");
+                addPackageToScan("liquibase.serializer");
+                addPackageToScan("liquibase.sqlgenerator");
+                addPackageToScan("liquibase.executor");
+                addPackageToScan("liquibase.snapshot");
+                addPackageToScan("liquibase.logging");
+                addPackageToScan("liquibase.ext");
+            }
         }
     }
 
