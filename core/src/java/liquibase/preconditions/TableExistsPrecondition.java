@@ -1,6 +1,12 @@
 package liquibase.preconditions;
 
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
 import liquibase.database.Database;
+import liquibase.database.DatabaseConnection;
 import liquibase.database.structure.DatabaseSnapshot;
 import liquibase.DatabaseChangeLog;
 import liquibase.util.StringUtils;
@@ -29,14 +35,15 @@ public class TableExistsPrecondition implements Precondition {
     }
 
     public void check(Database database, DatabaseChangeLog changeLog) throws PreconditionFailedException, PreconditionErrorException {
-        DatabaseSnapshot databaseSnapshot = null;
+        Connection conn = database.getConnection().getUnderlyingConnection();
         try {
-            databaseSnapshot = database.createDatabaseSnapshot(getSchemaName(), null);
-        } catch (JDBCException e) {
-            throw new PreconditionErrorException(e, changeLog, this);
-        }
-        if (databaseSnapshot.getTable(getTableName()) == null) {
-            throw new PreconditionFailedException("Table "+database.escapeTableName(getSchemaName(), getTableName())+" does not exist", changeLog, this);
+            DatabaseMetaData dbm = conn.getMetaData();
+            ResultSet tables = dbm.getTables(null, schemaName, database.escapeTableName(getSchemaName(), getTableName()), null);
+            if (!tables.next()) {
+                throw new PreconditionFailedException("Table "+database.escapeTableName(getSchemaName(), getTableName())+" does not exist", changeLog, this);
+            }
+        } catch (SQLException se) {
+            throw new PreconditionErrorException(se, changeLog, this);
         }
     }
 
