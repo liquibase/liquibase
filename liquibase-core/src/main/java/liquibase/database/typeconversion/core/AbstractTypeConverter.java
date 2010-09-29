@@ -415,7 +415,9 @@ public abstract class AbstractTypeConverter implements TypeConverter {
 
         List<Integer> oneParam = Arrays.asList(
                 Types.CHAR,
+                Types.NCHAR,
                 Types.VARCHAR,
+                Types.NVARCHAR,
                 Types.VARBINARY,
                 Types.DOUBLE,
                 Types.FLOAT
