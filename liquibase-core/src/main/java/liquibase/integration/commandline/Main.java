@@ -134,7 +134,11 @@ public class Main {
         } catch (Throwable e) {
             String message = "Unexpected error running Liquibase: " + e.getMessage();
             System.out.println(message);
-            LogFactory.getLogger().severe(message, e);
+            try {
+                LogFactory.getLogger().severe(message, e);
+            } catch (Exception e1) {
+                e.printStackTrace();
+            }
             System.exit(-3);
         }
         System.exit(0);
