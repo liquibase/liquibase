@@ -2,6 +2,8 @@ package liquibase.executor;
 
 import liquibase.database.Database;
 import liquibase.database.core.MSSQLDatabase;
+import liquibase.database.core.SybaseASADatabase;
+import liquibase.database.core.SybaseDatabase;
 import liquibase.exception.DatabaseException;
 import liquibase.servicelocator.LiquibaseService;
 import liquibase.sql.visitor.SqlVisitor;
@@ -85,7 +87,7 @@ public class LoggingExecutor extends AbstractExecutor implements Executor {
                 output.write(statement);
 
 
-                if (database instanceof MSSQLDatabase) {
+                if (database instanceof MSSQLDatabase || database instanceof SybaseDatabase || database instanceof SybaseASADatabase) {
                     output.write(StreamUtil.getLineSeparator());
                     output.write("GO");
     //            } else if (database instanceof OracleDatabase) {
