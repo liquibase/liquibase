@@ -39,11 +39,11 @@ public class MSSQLTypeConverter extends AbstractTypeConverter {
 
     @Override
     public DataType getDataType(String columnTypeString, Boolean autoIncrement) {
-        DataType type = super.getDataType(columnTypeString, autoIncrement);
-        if (autoIncrement != null && autoIncrement) {
-            type.setDataTypeName(type.getDataTypeName().replaceFirst(" identity$", ""));
+        if (columnTypeString.endsWith(" identity")) {
+            columnTypeString = columnTypeString.replaceFirst(" identity$", "");
+            autoIncrement = true;
         }
-        return type;
+        return super.getDataType(columnTypeString, autoIncrement);
     }
 
     /**
