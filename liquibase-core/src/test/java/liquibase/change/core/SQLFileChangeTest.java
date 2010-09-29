@@ -11,9 +11,11 @@ import liquibase.resource.ClassLoaderResourceAccessor;
 import static org.junit.Assert.*;
 
 import liquibase.statement.SqlStatement;
+import liquibase.util.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.File;
 import java.lang.reflect.Field;
 import java.util.Map;
 
@@ -45,6 +47,23 @@ public class SQLFileChangeTest extends AbstractChangeTest {
     public void generateStatement() throws Exception {
 
     }
+
+
+    @Test
+    public void multilineComment2() {
+        String original = "--\r\n"+
+                "-- This is a comment\r\n" +
+                "UPDATE tablename SET column = 1;\r\n" +
+                "GO";
+        SQLFileChange change = new SQLFileChange();
+        change.setSql(original);
+        change.setSplitStatements(true);                 
+        change.setStripComments(true);
+        SqlStatement[] out = change.generateStatements(new MockDatabase());
+        assertEquals(2, out.length);
+        assertEquals("UPDATE tablename SET column = 1;", out[0]);
+    }
+
 
     @Test
 	public void setFileOpener() {

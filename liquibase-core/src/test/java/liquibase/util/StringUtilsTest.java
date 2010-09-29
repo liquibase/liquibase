@@ -5,7 +5,7 @@ import org.junit.Test;
 
 
 public class StringUtilsTest {
-    
+
     @Test
     public void noComments() {
         String noComments=" Some text but no comments";
