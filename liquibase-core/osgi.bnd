@@ -14,11 +14,6 @@ Import-Package:\
   javax.swing;resolution:=optional,\
   org.apache.tools.ant;resolution:=optional,\
   org.apache.tools.ant.types;resolution:=optional,\
-  org.hibernate;resolution:=optional,\
-  org.hibernate.cfg;resolution:=optional,\
-  org.hibernate.dialect;resolution:=optional,\
-  org.hibernate.engine;resolution:=optional,\
-  org.hibernate.mapping;resolution:=optional,\
   org.springframework.beans.factory;resolution:=optional,\
   org.springframework.context;resolution:=optional,\
   org.springframework.core.io;resolution:=optional,\
@@ -44,16 +39,23 @@ Export-Package:\
 
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Liquibase-Package: liquibase.change,\
+ liquibase.changelog,\
  liquibase.database,\
+ liquibase.dbdoc,\
  liquibase.diff,\
  liquibase.executor,\
- liquibase.ext,\
  liquibase.integration,\
  liquibase.logging,\
  liquibase.parser,\
  liquibase.precondition,\
+ liquibase.resource,\
  liquibase.serializer,\
+ liquibase.servicelocator,\
  liquibase.snapshot,\
+ liquibase.sql
  liquibase.sqlgenerator
- 
+ liquibase.statement
+ liquibase.util
+ liquibase
+
 Main-Class: liquibase.integration.commandline.Main
