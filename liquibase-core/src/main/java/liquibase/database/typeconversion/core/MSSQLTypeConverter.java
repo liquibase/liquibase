@@ -58,7 +58,7 @@ public class MSSQLTypeConverter extends AbstractTypeConverter {
         if (returnTypeName instanceof CustomType) {
             boolean returnTypeChanged=false;
             if (columnTypeString.toUpperCase().startsWith("NVARCHAR")) {
-                returnTypeName = new VarcharType("NVARCHAR");
+                returnTypeName = new NVarcharType();
                 returnTypeChanged=true;
             } else if(columnTypeString.toUpperCase().startsWith("NCHAR")) {
                 returnTypeName= new CharType("NCHAR");
