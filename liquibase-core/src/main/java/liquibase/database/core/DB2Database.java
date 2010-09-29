@@ -152,4 +152,11 @@ public class DB2Database extends AbstractDatabase {
         }
         return pkName;
     }
+
+    @Override
+    public String escapeIndexName(String schemaName, String indexName) {
+        // does not support the schema name for the index -
+        return super.escapeIndexName(null, indexName);
+    }
+
 }
