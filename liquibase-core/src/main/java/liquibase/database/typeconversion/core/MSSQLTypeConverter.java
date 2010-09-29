@@ -4,6 +4,7 @@ import liquibase.database.Database;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.structure.type.*;
 
+import java.math.BigInteger;
 import java.text.ParseException;
 
 public class MSSQLTypeConverter extends AbstractTypeConverter {
@@ -43,15 +44,22 @@ public class MSSQLTypeConverter extends AbstractTypeConverter {
             columnTypeString = columnTypeString.replaceFirst(" identity$", "");
             autoIncrement = true;
         }
+        if (columnTypeString.equalsIgnoreCase("varbinary(2147483647)")){
+            columnTypeString = "varbinary(max)";
+        }
         return super.getDataType(columnTypeString, autoIncrement);
     }
 
-    /**
-     * Extension of super.getDataType(String columnTypeString, Boolean autoIncrement, String dataTypeName, String precision)<br>
-     * Contains definition of Oracle's data-types
-     * */
     @Override
     protected DataType getDataType(String columnTypeString, Boolean autoIncrement, String dataTypeName, String precision) {
+        if (columnTypeString.endsWith(" identity")) {
+            columnTypeString = columnTypeString.replaceFirst(" identity$", "");
+            autoIncrement = true;
+        }
+        if (columnTypeString.equalsIgnoreCase("varbinary") && Long.valueOf(precision) > 8000) {
+            precision = "max";
+        }
+
         // Try to define data type by searching of common standard types
         DataType returnTypeName = super.getDataType(columnTypeString, autoIncrement, dataTypeName, precision);
         // If we found CustomType (it means - nothing compatible) then search for oracle types
