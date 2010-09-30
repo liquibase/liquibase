@@ -34,7 +34,7 @@ import java.util.*;
 
 public class DiffResult {
 
-	private Long idRoot = new Date().getTime();
+	private String idRoot = String.valueOf(new Date().getTime());
 	private int changeNumber = 1;
 
 	private DatabaseSnapshot referenceSnapshot;
@@ -553,8 +553,12 @@ public class DiffResult {
 		this.changeSetAuthor = changeSetAuthor;
 	}
 
-	private String generateId() {
-		return idRoot.toString() + "-" + changeNumber++;
+    public void setIdRoot(String idRoot) {
+        this.idRoot = idRoot;
+    }
+
+    protected String generateId() {
+		return idRoot + "-" + changeNumber++;
 	}
 
 	private void addUnexpectedIndexChanges(List<ChangeSet> changes) {
