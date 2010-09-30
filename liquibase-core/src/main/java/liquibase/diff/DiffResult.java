@@ -1085,7 +1085,7 @@ public class DiffResult {
 							} else if (value instanceof Date) {
 								column.setValueDate((Date) value);
 							} else { // string
-								column.setValue(value.toString());
+								column.setValue(value.toString().replace("\\","\\\\"));
 							}
 
 							change.addColumn(column);
