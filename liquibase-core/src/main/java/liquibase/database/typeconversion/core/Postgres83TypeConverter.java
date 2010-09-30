@@ -17,7 +17,7 @@ public class Postgres83TypeConverter extends PostgresTypeConverter {
             return false;
         }
         try {
-            return super.supports(database) && database.getDatabaseMajorVersion() >= 8 && database.getDatabaseMinorVersion() >= 3;
+            return super.supports(database) && (database.getDatabaseMajorVersion() * 10 + database.getDatabaseMinorVersion() >= 83);
         } catch (DatabaseException e) {
             return false;
         }
