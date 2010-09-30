@@ -494,8 +494,9 @@ public class DiffResult {
 		addChangedColumnChanges(changeSets);
 		addMissingPrimaryKeyChanges(changeSets);
 		addUnexpectedPrimaryKeyChanges(changeSets);
-		addMissingUniqueConstraintChanges(changeSets);
         addUnexpectedForeignKeyChanges(changeSets);
+		addMissingUniqueConstraintChanges(changeSets);
+        addMissingIndexChanges(changeSets);
 		addUnexpectedUniqueConstraintChanges(changeSets);
 
 		if (diffData) {
@@ -503,7 +504,6 @@ public class DiffResult {
 		}
 
 		addMissingForeignKeyChanges(changeSets);
-		addMissingIndexChanges(changeSets);
 		addUnexpectedIndexChanges(changeSets);
 		addUnexpectedColumnChanges(changeSets);
 		addMissingSequenceChanges(changeSets);
