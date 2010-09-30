@@ -28,6 +28,8 @@ public class AddColumnGeneratorDefaultClauseBeforeNotNull extends AddColumnGener
                 || database instanceof DerbyDatabase
                 || database instanceof DB2Database
                 || database instanceof FirebirdDatabase
+                || database instanceof SybaseDatabase
+                || database instanceof SybaseASADatabase
                 || database instanceof InformixDatabase;
     }
 
