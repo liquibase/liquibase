@@ -63,6 +63,10 @@ public class Liquibase {
         
     }
 
+    public ChangeLogParameters getChangeLogParameters() {
+        return changeLogParameters;
+    }
+
     public Database getDatabase() {
         return database;
     }
