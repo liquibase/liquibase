@@ -253,7 +253,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
         node.setAttribute("author", changeSet.getAuthor());
 
         if (changeSet.isAlwaysRun()) {
-            node.setAttribute("alwaysRun", "true");
+            node.setAttribute("runAlways", "true");
         }
 
         if (changeSet.isRunOnChange()) {
