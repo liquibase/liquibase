@@ -2,6 +2,7 @@ package liquibase.database.typeconversion.core;
 
 import liquibase.database.Database;
 import liquibase.database.core.OracleDatabase;
+import liquibase.database.structure.Column;
 import liquibase.database.structure.type.*;
 
 import java.sql.Types;
@@ -41,6 +42,19 @@ public class OracleTypeConverter extends AbstractTypeConverter {
 		}
 		return returnTypeName;
 	}
+
+    @Override
+    public String convertToDatabaseTypeString(Column referenceColumn, Database database) {
+        String translatedTypeName = referenceColumn.getTypeName();
+        if ("NVARCHAR2".equals(translatedTypeName)) {
+            translatedTypeName = translatedTypeName+ "(" + referenceColumn.getColumnSize() + ")";
+        } else if ("BINARY_FLOAT".equals(translatedTypeName) || "BINARY_DOUBLE".equals(translatedTypeName)) {
+            // nothing to do
+        } else {
+            translatedTypeName = super.convertToDatabaseTypeString(referenceColumn, database);
+        }
+        return translatedTypeName;
+    }
 
 	@Override
 	public Object convertDatabaseValueToObject(Object defaultValue, int dataType, int columnSize, int decimalDigits, Database database) throws ParseException {
