@@ -95,7 +95,7 @@ abstract class StatementCreatorUtils {
         } else {  // inValue != null
             if (inValue instanceof SqlTypeValue) {
                 ((SqlTypeValue) inValue).setTypeValue(ps, paramIndex, sqlType, typeName);
-            } else if (sqlType == Types.VARCHAR || sqlType == Types.NVARCHAR) {
+            } else if (sqlType == Types.VARCHAR || sqlType == -9 ) { //-9 is Types.NVARCHAR in java 1.6
                 ps.setString(paramIndex, inValue.toString());
             } else if (sqlType == Types.DECIMAL || sqlType == Types.NUMERIC) {
                 if (inValue instanceof BigDecimal) {
