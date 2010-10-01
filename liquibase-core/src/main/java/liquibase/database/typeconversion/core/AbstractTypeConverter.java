@@ -415,9 +415,9 @@ public abstract class AbstractTypeConverter implements TypeConverter {
 
         List<Integer> oneParam = Arrays.asList(
                 Types.CHAR,
-                Types.NCHAR,
+                -15, // Types.NCHAR in java 1.6,
                 Types.VARCHAR,
-                Types.NVARCHAR,
+                -9, //Types.NVARCHAR in java 1.6,
                 Types.VARBINARY,
                 Types.DOUBLE,
                 Types.FLOAT
