@@ -8,13 +8,6 @@ import liquibase.sql.Sql;
 import static junit.framework.Assert.assertTrue;
 
 
-/**
- * Created by IntelliJ IDEA.
- * User: bassettt
- * Date: Dec 2, 2009
- * Time: 12:28:05 AM
- * To change this template use File | Settings | File Templates.
- */
 public class InsertOrUpdateGeneratorOracleTest {
 
     @Test
@@ -26,8 +19,8 @@ public class InsertOrUpdateGeneratorOracleTest {
         statement.addColumnValue("col2","value2");
         Sql[] sql = generator.generateSql( statement, database,  null);
         String theSql = sql[0].toSql();
-        assertTrue(theSql.contains("INSERT INTO myschema.mytable (col2, pk_col1) VALUES ('value2', 'value1');"));
-        assertTrue(theSql.contains("UPDATE myschema.mytable"));
+        assertTrue(theSql.contains("INSERT INTO \"myschema\".\"mytable\" (\"col2\", \"pk_col1\") VALUES ('value2', 'value1');"));
+        assertTrue(theSql.contains("UPDATE \"myschema\".\"mytable\""));
         String[] sqlLines = theSql.split("\n");
         int lineToCheck = 0;
         assertEquals("DECLARE",sqlLines[lineToCheck].trim());
@@ -36,15 +29,15 @@ public class InsertOrUpdateGeneratorOracleTest {
         lineToCheck++;
         assertEquals("BEGIN",sqlLines[lineToCheck].trim());
         lineToCheck++;
-        assertEquals("SELECT COUNT(*) INTO v_reccount FROM myschema.mytable WHERE pk_col1 = 'value1';",sqlLines[lineToCheck].trim());
+        assertEquals("SELECT COUNT(*) INTO v_reccount FROM \"myschema\".\"mytable\" WHERE \"pk_col1\" = 'value1';",sqlLines[lineToCheck].trim());
         lineToCheck++;
         assertEquals("IF v_reccount = 0 THEN",sqlLines[lineToCheck].trim());
         lineToCheck++;
-        assertEquals("INSERT INTO myschema.mytable (col2, pk_col1) VALUES ('value2', 'value1');",sqlLines[lineToCheck]);
+        assertEquals("INSERT INTO \"myschema\".\"mytable\" (\"col2\", \"pk_col1\") VALUES ('value2', 'value1');",sqlLines[lineToCheck]);
         lineToCheck++;
         assertEquals("ELSIF v_reccount = 1 THEN",sqlLines[lineToCheck].trim());
         lineToCheck++;
-        assertEquals("UPDATE myschema.mytable SET col2 = 'value2' WHERE pk_col1 = 'value1';",sqlLines[lineToCheck].trim());
+        assertEquals("UPDATE \"myschema\".\"mytable\" SET \"col2\" = 'value2' WHERE \"pk_col1\" = 'value1';",sqlLines[lineToCheck].trim());
         lineToCheck++;
         assertEquals("END IF;",sqlLines[lineToCheck].trim());
         lineToCheck++;

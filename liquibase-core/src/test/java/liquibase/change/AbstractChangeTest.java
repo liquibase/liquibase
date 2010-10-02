@@ -45,6 +45,8 @@ public abstract class AbstractChangeTest {
             field.setAccessible(true);
             if (field.getName().startsWith("$VR") || field.getName().equals("serialVersionUID")) {
                 //code coverage related
+            } else if (field.getName().equals("associatedWith")) {
+                //currently not used
             } else  if (String.class.isAssignableFrom(field.getType())) {
                 field.set(change, "asdghasdgasdg");
                 checkThatChecksumIsNew(change, seenCheckSums, field);

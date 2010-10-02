@@ -36,11 +36,11 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
     public void testWithColumnWithDefaultValue() {
         for (Database database : TestContext.getInstance().getAllDatabases()) {
             if (database instanceof OracleDatabase) {
-            CreateTableStatement statement = new CreateTableStatement(SCHEMA_NAME, TABLE_NAME);
-            statement.addColumn(COLUMN_NAME1, TypeConverterFactory.getInstance().findTypeConverter(database).getDataType("java.sql.Types.TIMESTAMP", false), new ColumnConfig().setDefaultValue("null").getDefaultValueObject());
-            if (shouldBeImplementation(database)) {
-                assertEquals("CREATE TABLE SCHEMA_NAME.TABLE_NAME (COLUMN1_NAME TIMESTAMP DEFAULT null)", this.generatorUnderTest.generateSql(statement, database, null)[0].toSql());
-            }
+                CreateTableStatement statement = new CreateTableStatement(SCHEMA_NAME, TABLE_NAME);
+                statement.addColumn(COLUMN_NAME1, TypeConverterFactory.getInstance().findTypeConverter(database).getDataType("java.sql.Types.TIMESTAMP", false), new ColumnConfig().setDefaultValue("null").getDefaultValueObject());
+                if (shouldBeImplementation(database)) {
+                    assertEquals("CREATE TABLE \"SCHEMA_NAME\".\"TABLE_NAME\" (\"COLUMN1_NAME\" TIMESTAMP DEFAULT null)", this.generatorUnderTest.generateSql(statement, database, null)[0].toSql());
+                }
             }
         }
     }
