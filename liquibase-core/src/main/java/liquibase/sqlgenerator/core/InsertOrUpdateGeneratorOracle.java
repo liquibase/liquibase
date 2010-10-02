@@ -15,6 +15,7 @@ import java.util.Date;
 public class InsertOrUpdateGeneratorOracle extends InsertOrUpdateGenerator {
 
 
+    @Override
     public boolean supports(InsertOrUpdateStatement statement, Database database) {
         return database instanceof OracleDatabase;
     }

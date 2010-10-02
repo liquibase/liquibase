@@ -20,6 +20,19 @@ public class OracleDatabaseTest extends AbstractDatabaseTest {
         return "Oracle";
     }
 
+     @Override
+     @Test
+    public void escapeTableName_noSchema() {
+        Database database = getDatabase();
+        assertEquals("\"tableName\"", database.escapeTableName(null, "tableName"));
+    }
+
+    @Override
+    @Test
+    public void escapeTableName_withSchema() {
+        Database database = getDatabase();
+        assertEquals("\"schemaName\".\"tableName\"", database.escapeTableName("schemaName", "tableName"));
+    }
 
     @Override
     @Test

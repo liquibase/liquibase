@@ -61,7 +61,7 @@ public class SQLFileChangeTest extends AbstractChangeTest {
         change.setStripComments(true);
         SqlStatement[] out = change.generateStatements(new MockDatabase());
         assertEquals(2, out.length);
-        assertEquals("UPDATE tablename SET column = 1;", out[0]);
+        assertEquals("UPDATE tablename SET column = 1", out[0].toString());
     }
 
 
