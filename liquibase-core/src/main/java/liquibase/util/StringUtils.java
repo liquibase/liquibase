@@ -53,13 +53,18 @@ public class StringUtils {
         if (endDelimiter == null) {
             endDelimiter = ";\\s*\n|;$|\n[gG][oO]\\s*\n|\n[Gg][oO]\\s*$";
         }
-        String[] strings = multiLineSQL.split(endDelimiter);
-        for (int i=0; i<strings.length; i++) {
-            strings[i] = strings[i].trim();
+        String[] initialSplit = multiLineSQL.split(endDelimiter);
+        List<String> strings = new ArrayList<String>();
+        for (String anInitialSplit : initialSplit) {
+            String singleLineSQL = anInitialSplit.trim();
+            if (singleLineSQL.length() > 0) {
+                strings.add(singleLineSQL);
+            }
         }
-        return strings;
+
+        return strings.toArray(new String[strings.size()]);
     }
-    
+
     /**
      * Searches through a String which contains SQL code and strips out
      * any comments that are between \/**\/ or anything that matches
