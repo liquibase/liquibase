@@ -802,11 +802,15 @@ public class DiffResult {
 					change.setColumnDataType(targetTypeConverter.convertToDatabaseTypeString(referenceColumn, targetSnapshot.getDatabase()));
 
                     Object defaultValue = column.getDefaultValue();
-                    String defaultValueString = targetTypeConverter.getDataType(defaultValue).convertObjectToString(defaultValue, targetSnapshot.getDatabase());
+                    String defaultValueString;
+                    if (defaultValue != null) {
+                        defaultValueString = targetTypeConverter.getDataType(defaultValue).convertObjectToString(defaultValue, targetSnapshot.getDatabase());
 
-                    if (defaultValueString != null) {
-                        change.setDefaultNullValue(defaultValueString);
+                        if (defaultValueString != null) {
+                            change.setDefaultNullValue(defaultValueString);
+                        }
                     }
+
 
                     changes.add(generateChangeSet(change));
 					foundDifference = true;
