@@ -801,7 +801,7 @@ public abstract class AbstractDatabase implements Database {
 
     public RanChangeSet getRanChangeSet(ChangeSet changeSet) throws DatabaseException, DatabaseHistoryException {
         if (!hasDatabaseChangeLogTable()) {
-            throw new DatabaseHistoryException("Database change table does not exist");
+            return null;
         }
 
         RanChangeSet foundRan = null;

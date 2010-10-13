@@ -564,7 +564,11 @@ public class DiffResult {
 	private void addUnexpectedIndexChanges(List<ChangeSet> changes) {
 		for (Index index : getUnexpectedIndexes()) {
 
-			DropIndexChange change = new DropIndexChange();
+            if (index.getAssociatedWith().contains(Index.MARK_PRIMARY_KEY) || index.getAssociatedWith().contains(Index.MARK_FOREIGN_KEY) || index.getAssociatedWith().contains(Index.MARK_UNIQUE_CONSTRAINT)) {
+                continue;
+            }
+
+            DropIndexChange change = new DropIndexChange();
 			change.setTableName(index.getTable().getName());
 			change.setSchemaName(index.getTable().getSchema());
 			change.setIndexName(index.getName());
@@ -584,6 +588,10 @@ public class DiffResult {
 			change.setIndexName(index.getName());
 			change.setUnique(index.isUnique());
 			change.setAssociatedWith(index.getAssociatedWithAsString());
+
+            if (index.getAssociatedWith().contains(Index.MARK_PRIMARY_KEY) || index.getAssociatedWith().contains(Index.MARK_FOREIGN_KEY) || index.getAssociatedWith().contains(Index.MARK_UNIQUE_CONSTRAINT)) {
+                continue;
+            }
 
 			for (String columnName : index.getColumns()) {
 				ColumnConfig column = new ColumnConfig();
