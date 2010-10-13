@@ -305,9 +305,7 @@ public class ChangeSet implements Conditional {
             Executor executor = ExecutorService.getInstance().getExecutor(database);
             executor.comment("Rolling Back ChangeSet: " + toString());
             RanChangeSet ranChangeSet = database.getRanChangeSet(this);
-            if (!(ranChangeSet.getExecType().equals(ExecType.EXECUTED) || ranChangeSet.getExecType().equals(ExecType.RERAN))) {
-                executor.comment("Did not actually execute.  ExecType is "+ranChangeSet+".  Not rolling back");
-            } else if (rollBackChanges != null && rollBackChanges.size() > 0) {
+            if (rollBackChanges != null && rollBackChanges.size() > 0) {
                 for (Change rollback : rollBackChanges) {
                     for (SqlStatement statement : rollback.generateStatements(database)) {
                         try {

@@ -108,7 +108,6 @@
             </value>
           </option>
           <option name="ADD_EJB_TO_ENTRIES" value="true" />
-          <option name="ADD_TESTNG_TO_ENTRIES" value="true" />
           <option name="ADD_JUNIT_TO_ENTRIES" value="true" />
         </inspection_tool>
       </profile>
