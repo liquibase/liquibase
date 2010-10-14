@@ -107,12 +107,12 @@ public class MSSQLTypeConverter extends AbstractTypeConverter {
 
     @Override
     public ClobType getClobType() {
-        return new ClobType("TEXT");
+        return new ClobType("NVARCHAR(MAX)");
     }
 
     @Override
     public BlobType getBlobType() {
-        return new BlobType("IMAGE");
+        return new BlobType("VARBINARY(MAX)");
     }
 
 
