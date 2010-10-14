@@ -731,7 +731,7 @@
     </changeSet>
 
     <changeSet id="sqlFileTest" author="nvoxland"  runOnChange="true">
-        <sqlFile path="rollbackinclude/createTables.sql" relativeToChangelogFile="true"/>
+        <sqlFile path="rollbackinclude/createTables.sql" relativeToChangelogFile="true" stripComments="true"/>
     </changeSet>
 
     <changeSet id="movedFromTest" author="nvoxland" logicalFilePath="/where/it/was.xml">

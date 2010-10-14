@@ -7,6 +7,23 @@ import org.junit.Test;
 public class StringUtilsTest {
 
     @Test
+    public void multipleComments() {
+        String raw = "/**\n" +
+                "Some comments go here\n" +
+                "**/\n" +
+                "create table sqlfilerollback (id int);\n" +
+                "\n" +
+                "/**\n" +
+                "Some morecomments go here\n" +
+                "**/\n" +
+                "create table sqlfilerollback2 (id int);";
+        String[] strings = StringUtils.processMutliLineSQL(raw, true, true, null);
+        assertEquals(2, strings.length);
+        assertEquals("create table sqlfilerollback (id int)", strings[0]);
+        assertEquals("create table sqlfilerollback2 (id int)", strings[1]);
+    }
+
+    @Test
     public void noComments() {
         String noComments=" Some text but no comments";
         String result = StringUtils.stripComments(noComments);
