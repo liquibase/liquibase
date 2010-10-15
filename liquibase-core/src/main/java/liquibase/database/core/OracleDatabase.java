@@ -53,7 +53,11 @@ public class OracleDatabase extends AbstractDatabase {
 
     @Override
     public String escapeDatabaseObject(String objectName) {
-        return "\""+objectName+"\"";
+	if (objectName != null && objectName.matches("^[\\d\\W]")) {
+	    return "\""+objectName+"\"";
+	} else {
+	    return objectName;
+	}
     }
 
     @Override
