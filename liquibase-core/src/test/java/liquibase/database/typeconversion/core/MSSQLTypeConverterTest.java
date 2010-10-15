@@ -8,7 +8,7 @@ public class MSSQLTypeConverterTest extends DefaultTypeConverterTest{
     
     @Test
     public void getBlobType() {
-        assertEquals("IMAGE", new MSSQLTypeConverter().getBlobType().toString());
+        assertEquals("VARBINARY(MAX)", new MSSQLTypeConverter().getBlobType().toString());
     }
     
     @Test
@@ -31,7 +31,7 @@ public class MSSQLTypeConverterTest extends DefaultTypeConverterTest{
     
     @Test
     public void getClobType() {
-        assertEquals("TEXT", new MSSQLTypeConverter().getClobType().toString());
+        assertEquals("NVARCHAR(MAX)", new MSSQLTypeConverter().getClobType().toString());
     }
 
     
