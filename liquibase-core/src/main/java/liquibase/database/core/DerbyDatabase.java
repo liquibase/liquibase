@@ -47,10 +47,13 @@ public class DerbyDatabase extends AbstractDatabase {
 
     @Override
     public boolean supportsSequences() {
-        if (driverVersionMajor >= 10 && driverVersionMinor >= 6)
+        if ((driverVersionMajor == 10 && driverVersionMinor >= 6) ||
+                driverVersionMajor >= 11)
+        {
             return true;
-        else
+        } else {
             return false;
+        }
     }
 
     public boolean supportsInitiallyDeferrableColumns() {
@@ -126,7 +129,8 @@ public class DerbyDatabase extends AbstractDatabase {
     protected void determineDriverVersion() {
         try {
             // Locate the Derby sysinfo class and query its version info
-            final Class sysinfoClass = getClass().forName(
+            @SuppressWarnings("rawtypes")
+			final Class sysinfoClass = getClass().forName(
                     "org.apache.derby.tools.sysinfo");
             final Method majorVersionGetter = sysinfoClass.getMethod(
                     "getMajorVersion");
