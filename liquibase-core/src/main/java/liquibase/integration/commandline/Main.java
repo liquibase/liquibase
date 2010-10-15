@@ -54,6 +54,11 @@ public class Main {
     protected String changeSetContext;
     protected String dataDir;
 
+    protected String referenceDriver;
+    protected String referenceUrl;
+    protected String referenceUsername;
+    protected String referencePassword;
+
     protected String currentDateTimeFunction;
 
     protected String command;
@@ -756,10 +761,10 @@ public class Main {
     }
 
     private Database createReferenceDatabaseFromCommandParams(Set<String> commandParams) throws CommandLineParsingException, DatabaseException {
-        String driver = null;
-        String url = null;
-        String username = null;
-        String password = null;
+        String driver = referenceDriver;
+        String url = referenceUrl;
+        String username = referenceUsername;
+        String password = referencePassword;
         String defaultSchemaName = this.defaultSchemaName;
 
         for (String param : commandParams) {
