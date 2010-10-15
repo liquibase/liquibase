@@ -56,7 +56,7 @@ public class MSSQLTypeConverter extends AbstractTypeConverter {
             columnTypeString = columnTypeString.replaceFirst(" identity$", "");
             autoIncrement = true;
         }
-        if (columnTypeString.equalsIgnoreCase("varbinary") && Long.valueOf(precision) > 8000) {
+        if (columnTypeString.equalsIgnoreCase("varbinary") && (precision==null || Long.valueOf(precision) > 8000)) {
             precision = "max";
         }
 
