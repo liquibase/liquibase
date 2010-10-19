@@ -4,6 +4,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.logging.Logger;
+import java.util.HashMap;
 
 import liquibase.DatabaseChangeLog;
 import liquibase.database.Database;
@@ -45,24 +46,42 @@ public class ColumnExistsPrecondition implements Precondition {
     }
 
     public void check(Database database, DatabaseChangeLog changeLog) throws PreconditionFailedException, PreconditionErrorException {
+        HashMap tableColumnNames = new HashMap(3);
+        tableColumnNames.put(getTableName(), getColumnName());
+        tableColumnNames.put(getTableName().toLowerCase(), getColumnName().toLowerCase());
+        tableColumnNames.put(getTableName().toUpperCase(), getColumnName().toUpperCase());
+
+        for (Object tableName : tableColumnNames.keySet()) {
+            String columnName = (String) tableColumnNames.get(tableName);
+            try {
+                if (columnExists(database, database.convertRequestedSchemaToCatalog(getSchemaName()), (String) tableName, columnName)) {
+                    return;
+                }
+            } catch (JDBCException e) {
+                throw new PreconditionErrorException(e, changeLog, this);
+            } catch (SQLException e) {
+                throw new PreconditionErrorException(e, changeLog, this);
+            }
+        }
+
+        // If we got this far, the table doesn't exist, so throw PreconditionFailedException
+        throw new PreconditionFailedException("View "+database.escapeStringForDatabase(getColumnName())+" does not exist", changeLog, this);
+    }
+
+    private boolean columnExists(final Database database, final String schemaName, final String tableName, final String columnName)
+            throws SQLException {
         // Use DatabaseMetaData to query db's data dictionary
         DatabaseConnection conn = database.getConnection();
         ResultSet columns = null;
         try {
             DatabaseMetaData dbm = conn.getMetaData();
             columns = dbm.getColumns(
-                    database.convertRequestedSchemaToCatalog(getSchemaName()),
-                    database.convertRequestedSchemaToSchema(getSchemaName()),
-                    getTableName(),
-                    getColumnName()
+                    schemaName,
+                    schemaName,
+                    tableName,
+                    columnName
             );
-            if (!columns.next()) {
-                throw new PreconditionFailedException("Column "+database.escapeColumnName(getSchemaName(), getTableName(), getColumnName())+" does not exist", changeLog, this);
-            }
-        } catch (JDBCException je) {
-            throw new PreconditionErrorException(je, changeLog, this);
-        } catch (SQLException se) {
-            throw new PreconditionErrorException(se, changeLog, this);
+            return columns.next();
         } finally {
             if (columns != null) {
                 try {

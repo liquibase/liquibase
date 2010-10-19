@@ -37,24 +37,40 @@ public class TableExistsPrecondition implements Precondition {
     }
 
     public void check(Database database, DatabaseChangeLog changeLog) throws PreconditionFailedException, PreconditionErrorException {
+        String[] tableNames = new String[3];
+        tableNames[0] = getTableName();
+        tableNames[1] = getTableName().toLowerCase();
+        tableNames[2] = getTableName().toUpperCase();
+
+        for (String tableName : tableNames) {
+            try {
+                if (tableExists(database, database.convertRequestedSchemaToCatalog(getSchemaName()), tableName)) {
+                    return;
+                }
+            } catch (JDBCException e) {
+                throw new PreconditionErrorException(e, changeLog, this);
+            } catch (SQLException e) {
+                throw new PreconditionErrorException(e, changeLog, this);
+            }
+        }
+
+        // If we got this far, the table doesn't exist, so throw PreconditionFailedException
+        throw new PreconditionFailedException("Table "+database.escapeTableName(getSchemaName(), getTableName())+" does not exist", changeLog, this);
+    }
+
+    private boolean tableExists(final Database database, final String schemaName, final String tableName) throws SQLException {
         // Use DatabaseMetaData to query db's data dictionary
         DatabaseConnection conn = database.getConnection();
         ResultSet tables = null;
         try {
             DatabaseMetaData dbm = conn.getMetaData();
             tables = dbm.getTables(
-                    database.convertRequestedSchemaToCatalog(getSchemaName()),
-                    database.convertRequestedSchemaToSchema(getSchemaName()),
-                    getTableName(),
+                    schemaName,
+                    schemaName,
+                    tableName,
                     new String[]{"TABLE"}
             );
-            if (!tables.next()) {
-                throw new PreconditionFailedException("Table "+database.escapeTableName(getSchemaName(), getTableName())+" does not exist", changeLog, this);
-            }
-        } catch (JDBCException je) {
-            throw new PreconditionErrorException(je, changeLog, this);
-        } catch (SQLException se) {
-            throw new PreconditionErrorException(se, changeLog, this);
+            return tables.next();
         } finally {
             if (tables != null) {
                 try {

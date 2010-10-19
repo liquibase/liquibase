@@ -37,24 +37,40 @@ public class ViewExistsPrecondition implements Precondition {
     }
 
     public void check(Database database, DatabaseChangeLog changeLog) throws PreconditionFailedException, PreconditionErrorException {
+        String[] viewNames = new String[3];
+        viewNames[0] = getViewName();
+        viewNames[1] = getViewName().toLowerCase();
+        viewNames[2] = getViewName().toUpperCase();
+
+        for (String viewName : viewNames) {
+            try {
+                if (viewExists(database, database.convertRequestedSchemaToCatalog(getSchemaName()), viewName)) {
+                    return;
+                }
+            } catch (JDBCException e) {
+                throw new PreconditionErrorException(e, changeLog, this);
+            } catch (SQLException e) {
+                throw new PreconditionErrorException(e, changeLog, this);
+            }
+        }
+
+        // If we got this far, the table doesn't exist, so throw PreconditionFailedException
+        throw new PreconditionFailedException("View "+database.escapeStringForDatabase(getViewName())+" does not exist", changeLog, this);
+    }
+
+    private boolean viewExists(final Database database, final String schemaName, final String viewName) throws SQLException {
         // Use DatabaseMetaData to query db's data dictionary
         DatabaseConnection conn = database.getConnection();
         ResultSet views = null;
         try {
             DatabaseMetaData dbm = conn.getMetaData();
             views = dbm.getTables(
-                    database.convertRequestedSchemaToCatalog(getSchemaName()),
-                    database.convertRequestedSchemaToSchema(getSchemaName()),
-                    getViewName(),
+                    schemaName,
+                    schemaName,
+                    viewName,
                     new String[]{"VIEW"}
             );
-            if (!views.next()) {
-                throw new PreconditionFailedException("View "+database.escapeStringForDatabase(getViewName())+" does not exist", changeLog, this);
-            }
-        } catch (JDBCException je) {
-            throw new PreconditionErrorException(je, changeLog, this);
-        } catch (SQLException se) {
-            throw new PreconditionErrorException(se, changeLog, this);
+            return views.next();
         } finally {
             if (views != null) {
                 try {
