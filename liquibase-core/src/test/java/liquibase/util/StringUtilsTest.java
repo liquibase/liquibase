@@ -200,4 +200,15 @@ public class StringUtilsTest {
         String[] strings = StringUtils.splitSQL(testString, null);
         assertEquals(2, strings.length);
     }
+
+     @Test
+    public void splitWithX() {
+        String testString =  "insert into datatable (col) values ('a value with a ;') X\n"+
+            "insert into datatable (col) values ('another value with a ;') X";
+
+        String[] strings = StringUtils.splitSQL(testString, "X");
+        assertEquals(2, strings.length);
+         assertEquals("insert into datatable (col) values ('a value with a ;')", strings[0]);
+         assertEquals("insert into datatable (col) values ('another value with a ;')", strings[1]);
+    }
 }
