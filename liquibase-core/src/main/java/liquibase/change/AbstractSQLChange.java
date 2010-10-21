@@ -106,12 +106,11 @@ public abstract class AbstractSQLChange extends AbstractChange {
         }
 
         String processedSQL = getSql().replaceAll("\r\n", "\n").replaceAll("\r", "\n");
-
-        if (database instanceof MSSQLDatabase) {
-            endDelimiter = "\r\n"; processedSQL = processedSQL.replaceAll("\n", "\r\n");
-        }
-
         for (String statement : StringUtils.processMutliLineSQL(processedSQL, isStrippingComments(), isSplittingStatements(), getEndDelimiter())) {
+            if (database instanceof MSSQLDatabase) {
+                 statement = statement.replaceAll("\n", "\r\n");
+             }
+
             returnStatements.add(new RawSqlStatement(statement, getEndDelimiter()));
         }
 
