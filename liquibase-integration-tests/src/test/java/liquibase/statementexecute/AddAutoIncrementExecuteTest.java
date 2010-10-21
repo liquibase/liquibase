@@ -59,12 +59,12 @@ public class AddAutoIncrementExecuteTest extends AbstractExecuteTest {
         this.statementUnderTest = new AddColumnStatement(null, "table_name", TABLE_NAME, COLUMN_NAME, 42);
 
 
-        assertCorrect("alter table [table_name] add [table_name] column_name null default 42", SybaseDatabase.class);
+        assertCorrect("alter table [table_name] add [table_name] column_name default 42 null", SybaseDatabase.class);
         assertCorrect("alter table [dbo].[table_name] add [table_name] column_name constraint df_table_name_table_name default 42", MSSQLDatabase.class);
 //        assertCorrect("alter table [table_name] add [column_name] integer default 42", SQLiteDatabase.class);
         assertCorrect("not supported. fixme!!", SQLiteDatabase.class);
         assertCorrect("alter table table_name add table_name column_name default 42", PostgresDatabase.class, InformixDatabase.class, OracleDatabase.class, DerbyDatabase.class, HsqlDatabase.class, DB2Database.class, H2Database.class, CacheDatabase.class, FirebirdDatabase.class, MaxDBDatabase.class);
-        assertCorrect("alter table [table_name] add [table_name] column_name null default 42", SybaseASADatabase.class);
+        assertCorrect("alter table [table_name] add [table_name] column_name default 42 null", SybaseASADatabase.class);
         assertCorrect("alter table `table_name` add `table_name` column_name default 42", MySQLDatabase.class);
         assertCorrectOnRest("ALTER TABLE [table_name] ADD [column_name] int DEFAULT 42");
     }
@@ -87,7 +87,7 @@ public class AddAutoIncrementExecuteTest extends AbstractExecuteTest {
     public void notNull() throws Exception {
         this.statementUnderTest = new AddColumnStatement(null, TABLE_NAME, COLUMN_NAME, "int", 42, new NotNullConstraint());
 
-        assertCorrect("ALTER TABLE [table_name] ADD [column_name] int NOT NULL DEFAULT 42", SybaseASADatabase.class);
+        assertCorrect("ALTER TABLE [table_name] ADD [column_name] int DEFAULT 42 NOT NULL", SybaseASADatabase.class, SybaseDatabase.class);
         assertCorrect("alter table table_name add column_name int default 42 not null", InformixDatabase.class);
         assertCorrect("alter table [dbo].[table_name] add [column_name] int not null constraint df_table_name_column_name default 42", MSSQLDatabase.class);
         assertCorrect("alter table table_name add column_name int default 42 not null", OracleDatabase.class, DerbyDatabase.class, HsqlDatabase.class, DB2Database.class, H2Database.class, FirebirdDatabase.class);
@@ -102,7 +102,7 @@ public class AddAutoIncrementExecuteTest extends AbstractExecuteTest {
 //      TODO	sqlserver (at least 2000) does not allows add not null column.
 //      this type or refactoring should include adding nullable column, updating it to some default value, and final adding primary constraint.
 //        assertCorrect(null, MSSQLDatabase.class);
-        assertCorrect("ALTER TABLE [table_name] ADD [column_name] int primary key not null", InformixDatabase.class, OracleDatabase.class, FirebirdDatabase.class);
+        assertCorrect("ALTER TABLE [table_name] ADD [column_name] int primary key not null", InformixDatabase.class, OracleDatabase.class, FirebirdDatabase.class, SybaseASADatabase.class, SybaseDatabase.class);
         assertCorrect("ALTER TABLE [dbo].[table_name] ADD [column_name] int NOT NULL PRIMARY KEY", MSSQLDatabase.class);
         assertCorrectOnRest("ALTER TABLE [table_name] ADD [column_name] int NOT NULL PRIMARY KEY");
 

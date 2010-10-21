@@ -808,18 +808,22 @@ public abstract class AbstractIntegrationTest {
 //       liquibase.update(contexts);
 //   }
 
-    public static String getDatabaseServerHostname(String databaseManager) throws Exception {
-        Properties integrationTestProperties;
-        integrationTestProperties = new Properties();
-        integrationTestProperties.load(Thread.currentThread().getContextClassLoader().getResourceAsStream("liquibase/liquibase.integrationtest.properties"));
-        InputStream localProperties=Thread.currentThread().getContextClassLoader().getResourceAsStream("liquibase/liquibase.integrationtest.local.properties");
-        if(localProperties!=null)
-            integrationTestProperties.load(localProperties);
+    public static String getDatabaseServerHostname(String databaseManager)  {
+        try {
+            Properties integrationTestProperties;
+            integrationTestProperties = new Properties();
+            integrationTestProperties.load(Thread.currentThread().getContextClassLoader().getResourceAsStream("liquibase/liquibase.integrationtest.properties"));
+            InputStream localProperties=Thread.currentThread().getContextClassLoader().getResourceAsStream("liquibase/liquibase.integrationtest.local.properties");
+            if(localProperties!=null)
+                integrationTestProperties.load(localProperties);
 
-        String host=integrationTestProperties.getProperty("integration.test."+databaseManager+".hostname");
-        if(host==null)
-            host=integrationTestProperties.getProperty("integration.test.hostname");
-        return host;
+            String host=integrationTestProperties.getProperty("integration.test."+databaseManager+".hostname");
+            if(host==null)
+                host=integrationTestProperties.getProperty("integration.test.hostname");
+            return host;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     protected Database getDatabase(){
