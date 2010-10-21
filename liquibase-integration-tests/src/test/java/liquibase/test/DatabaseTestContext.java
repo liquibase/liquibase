@@ -1,6 +1,7 @@
 package liquibase.test;
 
 import liquibase.database.*;
+import liquibase.database.core.DB2Database;
 import liquibase.database.example.ExampleCustomDatabase;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.database.core.MockDatabase;
@@ -22,22 +23,21 @@ public class DatabaseTestContext {
     private Set<DatabaseConnection> availableConnections;
 
     private final DatabaseTestURL[] DEFAULT_TEST_DATABASES = new DatabaseTestURL[]{
-            new DatabaseTestURL("Cache","jdbc:Cache://localhost:1972/liquibase"),
-            new DatabaseTestURL("DB2","jdbc:db2://127.0.0.1:50000/liquibas"),
+            new DatabaseTestURL("Cache","jdbc:Cache://"+AbstractIntegrationTest.getDatabaseServerHostname("Cache")+":1972/liquibase"),
+            new DatabaseTestURL("DB2","jdbc:db2://"+AbstractIntegrationTest.getDatabaseServerHostname("DB2")+":50000/liquibas"),
             new DatabaseTestURL("Derby","jdbc:derby:liquibase;create=true"),
-            new DatabaseTestURL("FireBird","jdbc:firebirdsql:localhost/3050:c:\\firebird\\liquibase.fdb"),
+            new DatabaseTestURL("FireBird","jdbc:firebirdsql:"+AbstractIntegrationTest.getDatabaseServerHostname("Firebird")+"/3050:c:\\firebird\\liquibase.fdb"),
             new DatabaseTestURL("H2","jdbc:h2:mem:liquibase"),
             new DatabaseTestURL("Hsql","jdbc:hsqldb:mem:liquibase"),
-            new DatabaseTestURL("MssqlJtds","jdbc:jtds:sqlserver://localhost;databaseName=liquibase"),
+            new DatabaseTestURL("MssqlJtds","jdbc:jtds:sqlserver://"+AbstractIntegrationTest.getDatabaseServerHostname("MSSQL")+";databaseName=liquibase"),
 //            "jdbc:sqlserver://localhost;databaseName=liquibase",
-            new DatabaseTestURL("MySQL","jdbc:mysql://localhost/liquibase"),
-            new DatabaseTestURL("Oracle","jdbc:oracle:thin:@localhost/XE"),
-            new DatabaseTestURL("","jdbc:127.0.0.1://localhost/liquibase"),
+            new DatabaseTestURL("MySQL","jdbc:mysql://"+AbstractIntegrationTest.getDatabaseServerHostname("mysql")+"/liquibase"),
+            new DatabaseTestURL("Oracle","jdbc:oracle:thin:@"+AbstractIntegrationTest.getDatabaseServerHostname("oracle")+"/XE"),
 //            "jdbc:jtds:sybase://localhost/nathan:5000",
 //            "jdbc:sybase:Tds:"+ InetAddress.getLocalHost().getHostName()+":5000/liquibase",
-            new DatabaseTestURL("SAPDB","jdbc:sapdb://localhost/liquibas"),
+            new DatabaseTestURL("SAPDB","jdbc:sapdb://"+AbstractIntegrationTest.getDatabaseServerHostname("sapdb")+"/liquibas"),
             new DatabaseTestURL("SQLite","jdbc:sqlite:/liquibase.db"),
-            new DatabaseTestURL("SybaseJtds","jdbc:sybase:Tds:localhost:9810/servicename=prior")
+            new DatabaseTestURL("SybaseJtds","jdbc:sybase:Tds:"+AbstractIntegrationTest.getDatabaseServerHostname("sybase")+":9810/servicename=prior")
     };
 
 
@@ -103,7 +103,15 @@ public class DatabaseTestContext {
 //            e.printStackTrace();
             ; //schema already exists
         } finally {
-            databaseConnection.rollback();
+            try {
+                databaseConnection.rollback();
+            } catch (DatabaseException e) {
+                if (database instanceof DB2Database) {
+//                    expected, there is a problem with it
+                } else {
+                    throw e;
+                }
+            }
         }
 
         connectionsByUrl.put(url, databaseConnection);

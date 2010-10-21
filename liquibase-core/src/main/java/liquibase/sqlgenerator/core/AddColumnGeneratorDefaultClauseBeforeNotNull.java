@@ -60,6 +60,8 @@ public class AddColumnGeneratorDefaultClauseBeforeNotNull extends AddColumnGener
 
         if (!statement.isNullable()) {
             alterTable += " NOT NULL";
+        } else if (database instanceof SybaseDatabase || database instanceof SybaseASADatabase) {
+            alterTable += " NULL";
         }
 
         if (!primaryKeyBeforeNotNull(database)) {

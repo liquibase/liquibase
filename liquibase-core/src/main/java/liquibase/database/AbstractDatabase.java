@@ -706,6 +706,10 @@ public abstract class AbstractDatabase implements Database {
     }
 
     public String escapeColumnName(String schemaName, String tableName, String columnName) {
+        if (columnName.contains("(")) {
+            return columnName;
+        }
+        
         if (schemaName == null) {
             schemaName = getDefaultSchemaName();
         }
