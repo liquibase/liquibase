@@ -164,6 +164,8 @@ public class PostgresDatabase extends AbstractDatabase {
         return super.getDatabaseChangeLogLockTableName().toLowerCase();
     }
 
+    
+
 //    public void dropDatabaseObjects(String schema) throws DatabaseException {
 //        try {
 //            if (schema == null) {
