@@ -498,6 +498,7 @@ public abstract class AbstractDatabase implements Database {
             executor.execute(new CreateDatabaseChangeLogLockTableStatement());
             this.commit();
             LogFactory.getLogger().debug("Created database lock table with name: " + escapeTableName(getLiquibaseSchemaName(), getDatabaseChangeLogLockTableName()));
+            this.hasDatabaseChangeLogLockTable = true;
         }
     }
 
