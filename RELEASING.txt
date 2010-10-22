@@ -11,6 +11,11 @@ update version info on /download
 MAVEN:
 mvn release:prepare -DperformRelease
 
+set java home
+set path=%path%;gpg
+mvn release:prepare
+mvn release:perform
+
 MAVEN SNAPSHOT:
 mvn deploy -DperformRelease
 
