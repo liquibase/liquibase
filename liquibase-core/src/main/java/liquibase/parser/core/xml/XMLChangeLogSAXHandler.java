@@ -481,7 +481,13 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
         }
 
 		if (isRelativePath) {
-			fileName = FilenameUtils.concat(FilenameUtils.getFullPath(relativeBaseFileName), fileName);
+			// workaround for FilenameUtils.normalize() returning null for relative paths like ../conf/liquibase.xml
+			String tempFile = FilenameUtils.concat(FilenameUtils.getFullPath(relativeBaseFileName), fileName);
+			if(tempFile != null && new File(tempFile).exists() == true) {
+				fileName = tempFile;
+			} else {
+				fileName = FilenameUtils.getFullPath(relativeBaseFileName) + fileName;
+			}
 		}
 		DatabaseChangeLog changeLog = ChangeLogParserFactory.getInstance().getParser(fileName, resourceAccessor).parse(fileName, changeLogParameters,
 						resourceAccessor);
