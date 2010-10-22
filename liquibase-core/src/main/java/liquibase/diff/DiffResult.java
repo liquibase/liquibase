@@ -882,14 +882,21 @@ public class DiffResult {
 			if (column.getRemarks() != null) {
 				columnConfig.setRemarks(column.getRemarks());
 			}
+            ConstraintsConfig constraintsConfig = columnConfig.getConstraints();
 			if (column.isNullable() != null && !column.isNullable()) {
-				ConstraintsConfig constraintsConfig = columnConfig
-						.getConstraints();
 				if (constraintsConfig == null) {
 					constraintsConfig = new ConstraintsConfig();
-					columnConfig.setConstraints(constraintsConfig);
 				}
 				constraintsConfig.setNullable(false);
+			}
+            if (column.isUnique()) {
+				if (constraintsConfig == null) {
+					constraintsConfig = new ConstraintsConfig();
+				}
+				constraintsConfig.setUnique(true);
+			}
+			if (constraintsConfig != null) {
+				columnConfig.setConstraints(constraintsConfig);
 			}
 
 			change.addColumn(columnConfig);
@@ -949,6 +956,12 @@ public class DiffResult {
 					}
 
 					constraintsConfig.setNullable(false);
+				}
+                if (column.isUnique()) {
+					if (constraintsConfig == null) {
+						constraintsConfig = new ConstraintsConfig();
+					}
+					constraintsConfig.setUnique(true);
 				}
 				if (constraintsConfig != null) {
 					columnConfig.setConstraints(constraintsConfig);
