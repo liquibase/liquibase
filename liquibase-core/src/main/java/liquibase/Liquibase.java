@@ -532,7 +532,9 @@ public class Liquibase {
             splitContexts = contexts.split(",");
         }
         getDatabase().checkDatabaseChangeLogTable(updateExistingNullChecksums, databaseChangeLog, splitContexts);
-        getDatabase().checkDatabaseChangeLogLockTable();
+        if (!LockService.getInstance(database).hasChangeLogLock()) {
+            getDatabase().checkDatabaseChangeLogLockTable();
+        }
     }
 
     /**
