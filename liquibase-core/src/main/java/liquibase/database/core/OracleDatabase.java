@@ -8,7 +8,7 @@ import liquibase.statement.DatabaseFunction;
 
 import java.lang.reflect.Method;
 import java.sql.Connection;
-import java.util.ArrayList;
+import java.util.regex.Pattern;
 
 /**
  * Encapsulates Oracle database support.
@@ -53,11 +53,12 @@ public class OracleDatabase extends AbstractDatabase {
 
     @Override
     public String escapeDatabaseObject(String objectName) {
-	if (objectName != null && objectName.matches("^[\\d\\W]")) {
-	    return "\""+objectName+"\"";
-	} else {
-	    return objectName;
-	}
+        // escape the object name if it contains any non-word characters
+        if (objectName != null && Pattern.compile("\\W").matcher(objectName).find()) {
+            return "\"" + objectName + "\"";
+        } else {
+            return objectName;
+        }
     }
 
     @Override
