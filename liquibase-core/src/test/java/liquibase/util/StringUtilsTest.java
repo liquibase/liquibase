@@ -7,6 +7,20 @@ import org.junit.Test;
 public class StringUtilsTest {
 
     @Test
+     public void windowsDelimiter() {
+         String sql = "/*\n" +
+                 "This is a test comment of MS-SQL script\n" +
+                 "*/\n" +
+                 "\n" +
+                 "Select * from Test;\n" +
+                 "Update Test set field = 1";
+         String[] result = StringUtils.processMutliLineSQL(sql,true, true, ";");
+         assertEquals(2,result.length);
+         assertEquals("Select * from Test",result[0]);
+         assertEquals("Update Test set field = 1",result[1]);
+     }
+
+    @Test
     public void multipleComments() {
         String raw = "/**\n" +
                 "Some comments go here\n" +
