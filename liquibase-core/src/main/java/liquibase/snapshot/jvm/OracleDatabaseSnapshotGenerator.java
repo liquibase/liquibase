@@ -269,15 +269,18 @@ private List<String> findIntegerColumns(DatabaseSnapshot snapshot, String schema
 				continue;
 			}
 			short type = rs.getShort("TYPE");
-			boolean nonUnique = true;
-//          no check currently in oracle
-// 			try {
-//				nonUnique = rs.getBoolean("NON_UNIQUE");
-//			} catch (SQLException e) {
-//				//doesn't exist in all databases
-//			}
 
-			short position = rs.getShort("ORDINAL_POSITION");
+            boolean nonUnique;
+
+		    String uniqueness = rs.getString("UNIQUENESS");
+
+		    if( "UNIQUE".equals(uniqueness)) {
+		        nonUnique = false;
+		    } else {
+		        nonUnique = true;
+		    }
+
+            short position = rs.getShort("ORDINAL_POSITION");
 			String filterCondition = rs.getString("FILTER_CONDITION");
 
 			if (type == DatabaseMetaData.tableIndexStatistic) {
