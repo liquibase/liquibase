@@ -740,7 +740,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="modifySqlWithContext" author="nvoxland">
+    <changeSet id="modifySqlWithContext" author="nvoxland" dbms="h2,mysql"> <!-- oracle has problems with this due to quoting from the original table name-->
         <createTable tableName="INVALID TABLE NAME">
             <column name="id" type="int"/>
         </createTable>

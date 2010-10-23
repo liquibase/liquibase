@@ -1043,6 +1043,7 @@ public abstract class AbstractDatabase implements Database {
 
     public void reset() {
         this.ranChangeSetList = null;
+        this.hasDatabaseChangeLogLockTable = false;
     }
 
     public boolean supportsForeignKeyDisable() {

@@ -76,7 +76,7 @@ public class OracleDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
 			schema = database.convertRequestedSchemaToSchema(schema);
 
 		try {
-			String query = "select uc.constraint_name,uc.table_name,uc.status,uc.deferrable,uc.deferred,ui.tablespace_name from user_constraints uc, user_cons_columns ucc, user_indexes ui where uc.constraint_type='U' and uc.index_name = ui.index_name and uc.constraint_name = ucc.constraint_name";
+			String query = "select uc.constraint_name,uc.table_name,uc.status,uc.deferrable,uc.deferred,ui.tablespace_name from all_constraints uc, all_cons_columns ucc, all_indexes ui where uc.constraint_type='U' and uc.index_name = ui.index_name and uc.constraint_name = ucc.constraint_name and uc.owner = '" + schema + "' and ui.table_owner = '" + schema + "' and ucc.owner = '" + schema + "'";
 			statement = jdbcConnection.prepareStatement(query);
 			rs = statement.executeQuery();
 			while (rs.next()) {
@@ -100,7 +100,7 @@ public class OracleDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
 						constraintInformation.setDeferrable(true);
 						constraintInformation.setInitiallyDeferred("DEFERRED".equals(deferred));
 					}
-					getColumnsForUniqueConstraint(jdbcConnection, constraintInformation);
+					getColumnsForUniqueConstraint(jdbcConnection, constraintInformation, schema);
 					foundUC.add(constraintInformation);
 				}
 			}
@@ -114,12 +114,13 @@ public class OracleDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
 		}
 	}
 
-	protected void getColumnsForUniqueConstraint(Connection jdbcConnection, UniqueConstraint constraint) throws SQLException {
+	protected void getColumnsForUniqueConstraint(Connection jdbcConnection, UniqueConstraint constraint, String schema) throws SQLException {
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		try {
-			stmt = jdbcConnection.prepareStatement("select column_name from user_cons_columns where constraint_name=? order by position");
+			stmt  = jdbcConnection.prepareStatement("select ucc.column_name from all_cons_columns ucc where ucc.constraint_name=? and ucc.owner=? order by ucc.position");
 			stmt.setString(1, constraint.getName());
+            stmt.setString(2, schema);
 			rs = stmt.executeQuery();
 			while (rs.next()) {
 				String columnName = rs.getString("column_name");
@@ -134,7 +135,7 @@ public class OracleDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
 
 	@Override
     protected void readColumns(DatabaseSnapshot snapshot, String schema, DatabaseMetaData databaseMetaData) throws SQLException, DatabaseException {
-		findIntegerColumns(snapshot);
+		findIntegerColumns(snapshot, schema);
 		super.readColumns(snapshot, schema, databaseMetaData);
 
 		/*
@@ -143,7 +144,12 @@ public class OracleDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
 		* */
 		Database database = snapshot.getDatabase();
 		Statement statement = ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement();
-		String query = "select ui.tablespace_name TABLESPACE, ucc.table_name TABLE_NAME, ucc.column_name COLUMN_NAME FROM user_indexes ui , user_constraints uc , user_cons_columns ucc where uc.constraint_type = 'P' and ucc.constraint_name = uc.constraint_name and uc.index_name = ui.index_name";
+
+        // Setting default schema name. Needed for correct statement generation
+        if (schema == null)
+            schema = database.convertRequestedSchemaToSchema(schema);
+
+        String query = "select ui.tablespace_name TABLESPACE, ucc.table_name TABLE_NAME, ucc.column_name COLUMN_NAME FROM all_indexes ui , all_constraints uc , all_cons_columns ucc where uc.constraint_type = 'P' and ucc.constraint_name = uc.constraint_name and uc.index_name = ui.index_name and uc.owner = '" + schema + "' and ui.table_owner = '" + schema + "' and ucc.owner = '" + schema + "'";
 		ResultSet rs = statement.executeQuery(query);
 
 		while (rs.next()) {
@@ -163,12 +169,17 @@ public class OracleDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
 	 * @throws java.sql.SQLException execute statement error
 	 * @return String list with names of all INTEGER columns
 	 * */
-	private List<String> findIntegerColumns(DatabaseSnapshot snapshot) throws SQLException {
-		Database database = snapshot.getDatabase();
+private List<String> findIntegerColumns(DatabaseSnapshot snapshot, String schema) throws SQLException, DatabaseException {
+
+	    Database database = snapshot.getDatabase();
+        // Setting default schema name. Needed for correct statement generation
+        if (schema == null) {
+            schema = database.convertRequestedSchemaToSchema(schema);
+        }
 		Statement statement = ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement();
 
 		// Finding all columns created as 'INTEGER'
-		ResultSet integerListRS = statement.executeQuery("select * from user_tab_columns where data_precision is null and data_scale = 0 and data_type = 'NUMBER'");
+		ResultSet integerListRS = statement.executeQuery("select TABLE_NAME, COLUMN_NAME from all_tab_columns where data_precision is null and data_scale = 0 and data_type = 'NUMBER' and owner = '" + schema + "'");
 		while (integerListRS.next()) {
 			integerList.add(integerListRS.getString("TABLE_NAME") + "." + integerListRS.getString("COLUMN_NAME"));
 		}
@@ -201,8 +212,13 @@ public class OracleDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
     public List<ForeignKey> getAdditionalForeignKeys(String schemaName, Database database) throws DatabaseException {
 		List<ForeignKey> foreignKeys = super.getAdditionalForeignKeys(schemaName, database);
 
+            // Setting default schema name. Needed for correct statement generation
+        if (schemaName == null) {
+            schemaName = database.convertRequestedSchemaToSchema(schemaName);
+        }
+
 		// Create SQL statement to select all FKs in database which referenced to unique columns
-		String query = "select uc_fk.constraint_name FK_NAME,uc_fk.owner FKTABLE_SCHEM,ucc_fk.table_name FKTABLE_NAME,ucc_fk.column_name FKCOLUMN_NAME,decode(uc_fk.deferrable, 'DEFERRABLE', 5 ,'NOT DEFERRABLE', 7 , 'DEFERRED', 6 ) DEFERRABILITY, decode(uc_fk.delete_rule, 'CASCADE', 0,'NO ACTION', 3) DELETE_RULE,ucc_rf.table_name PKTABLE_NAME,ucc_rf.column_name PKCOLUMN_NAME from user_cons_columns ucc_fk,user_constraints uc_fk,user_cons_columns ucc_rf,user_constraints uc_rf where uc_fk.CONSTRAINT_NAME = ucc_fk.CONSTRAINT_NAME and uc_fk.constraint_type='R' and uc_fk.r_constraint_name=ucc_rf.CONSTRAINT_NAME and uc_rf.constraint_name = ucc_rf.constraint_name and uc_rf.constraint_type = 'U'";
+		String query = "select uc_fk.constraint_name FK_NAME,uc_fk.owner FKTABLE_SCHEM,ucc_fk.table_name FKTABLE_NAME,ucc_fk.column_name FKCOLUMN_NAME,decode(uc_fk.deferrable, 'DEFERRABLE', 5 ,'NOT DEFERRABLE', 7 , 'DEFERRED', 6 ) DEFERRABILITY, decode(uc_fk.delete_rule, 'CASCADE', 0,'NO ACTION', 3) DELETE_RULE,ucc_rf.table_name PKTABLE_NAME,ucc_rf.column_name PKCOLUMN_NAME from all_cons_columns ucc_fk,all_constraints uc_fk,all_cons_columns ucc_rf,all_constraints uc_rf where uc_fk.CONSTRAINT_NAME = ucc_fk.CONSTRAINT_NAME and uc_fk.constraint_type='R' and uc_fk.r_constraint_name=ucc_rf.CONSTRAINT_NAME and uc_rf.constraint_name = ucc_rf.constraint_name and uc_rf.constraint_type = 'U' and uc_fk.owner = '" + schemaName + "' and ucc_fk.owner = '" + schemaName + "' and uc_rf.owner = '" + schemaName + "' and ucc_rf.owner = '" + schemaName + "'";
 		try {
 			Statement statement = ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement();
 			ResultSet rs = statement.executeQuery(query);
@@ -238,7 +254,7 @@ public class OracleDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
 		Database database = snapshot.getDatabase();
 		updateListeners("Reading indexes for " + database.toString() + " ...");
 
-		String query = "select aic.index_name, 3 AS TYPE, aic.table_name, aic.column_name, aic.column_position AS ORDINAL_POSITION, null AS FILTER_CONDITION, ai.tablespace_name AS TABLESPACE FROM all_ind_columns aic, all_indexes ai WHERE aic.table_owner='" + database.convertRequestedSchemaToSchema(schema) + "' and aic.index_name = ai.index_name ORDER BY INDEX_NAME, ORDINAL_POSITION";
+		String query = "select aic.index_name, 3 AS TYPE, aic.table_name, aic.column_name, aic.column_position AS ORDINAL_POSITION, null AS FILTER_CONDITION, ai.tablespace_name AS TABLESPACE, ai.uniqueness FROM all_ind_columns aic, all_indexes ai WHERE aic.table_owner='" + database.convertRequestedSchemaToSchema(schema) + "' and aic.index_name = ai.index_name ORDER BY INDEX_NAME, ORDINAL_POSITION";
 		Statement statement = ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement();
 		ResultSet rs = statement.executeQuery(query);
 
@@ -328,7 +344,11 @@ public class OracleDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
 
 		//we can't add directly to the this.primaryKeys hashSet because adding columns to an exising PK changes the hashCode and .contains() fails
 		List<PrimaryKey> foundPKs = new ArrayList<PrimaryKey>();
-		String query = "select uc.table_name TABLE_NAME,ucc.column_name COLUMN_NAME,ucc.position KEY_SEQ,uc.constraint_name PK_NAME,ui.tablespace_name TABLESPACE from user_constraints uc,user_indexes ui,user_cons_columns ucc where uc.constraint_type = 'P' and uc.index_name = ui.index_name and uc.constraint_name = ucc.constraint_name";
+        // Setting default schema name. Needed for correct statement generation
+        if (schema == null)
+            schema = database.convertRequestedSchemaToSchema(schema);
+
+        String query = "select uc.table_name TABLE_NAME,ucc.column_name COLUMN_NAME,ucc.position KEY_SEQ,uc.constraint_name PK_NAME,ui.tablespace_name TABLESPACE from all_constraints uc,all_indexes ui,all_cons_columns ucc where uc.constraint_type = 'P' and uc.index_name = ui.index_name and uc.constraint_name = ucc.constraint_name and uc.owner = '" + schema + "' and ui.table_owner = '" + schema + "' and ucc.owner = '" + schema + "'";
 		Statement statement = ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement();
 		ResultSet rs = statement.executeQuery(query);
 
