@@ -613,8 +613,8 @@ public class OracleDatabase extends AbstractDatabase {
             "STRUCTURE",
             "SUCCESSFUL",
             "SWITCH",
-            "SYS_OP_ENFORCE_NOT_NULL", $
-            "SYS_OP_NTCIMG", $
+            "SYS_OP_ENFORCE_NOT_NULL",
+            "SYS_OP_NTCIMG", 
             "SYNONYM",
             "SYSDATE",
             "SYSDBA",
