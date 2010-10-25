@@ -4,6 +4,7 @@ import liquibase.change.AbstractChange;
 import liquibase.change.ChangeMetaData;
 import liquibase.change.ChangeWithColumns;
 import liquibase.change.ColumnConfig;
+import liquibase.change.TextNode;
 import liquibase.database.Database;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.UpdateStatement;
@@ -17,6 +18,8 @@ public class UpdateDataChange extends AbstractChange implements ChangeWithColumn
     private String schemaName;
     private String tableName;
     private List<ColumnConfig> columns;
+
+    @TextNode(nodeName="where")
     private String whereClause;
 
     public UpdateDataChange() {

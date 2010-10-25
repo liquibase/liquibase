@@ -2,6 +2,7 @@ package liquibase.change.core;
 
 import liquibase.change.AbstractChange;
 import liquibase.change.ChangeMetaData;
+import liquibase.change.TextNode;
 import liquibase.database.Database;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DeleteStatement;
@@ -11,6 +12,8 @@ public class DeleteDataChange extends AbstractChange {
 
     private String schemaName;
     private String tableName;
+
+    @TextNode(nodeName="where")
     private String whereClause;
 
     public DeleteDataChange() {
