@@ -47,4 +47,8 @@ public class MSSQLTypeConverterTest extends DefaultTypeConverterTest{
     }
 
     
+    @Test
+    public void getNumberType() {
+        assertEquals("NUMERIC", new MSSQLTypeConverter().getNumberType().toString());
+    }
 }
