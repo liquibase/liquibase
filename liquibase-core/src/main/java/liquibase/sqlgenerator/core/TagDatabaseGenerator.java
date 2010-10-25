@@ -41,9 +41,9 @@ public class TagDatabaseGenerator extends AbstractSqlGenerator<TagDatabaseStatem
             }
             updateStatement.setWhereClause("DATEEXECUTED = (SELECT MAX(DATEEXECUTED) FROM (SELECT DATEEXECUTED FROM " + database.escapeTableName(liquibaseSchema, database.getDatabaseChangeLogTableName()) + ") AS X)");
         } else if (database instanceof InformixDatabase) {
-            return new Sql[] {
-                    new UnparsedSql("SELECT MAX(dateexecuted) max_date FROM "+database.escapeTableName(liquibaseSchema, database.getDatabaseChangeLogTableName())+" INTO TEMP max_date_temp WITH NO LOG"),
-                            new UnparsedSql("UPDATE "+database.escapeTableName(liquibaseSchema, database.getDatabaseChangeLogTableName())+" SET TAG = '"+statement.getTag()+"' WHERE DATEEXECUTED = (SELECT max_date FROM max_date_temp);")
+            return new Sql[]{
+                    new UnparsedSql("SELECT MAX(dateexecuted) max_date FROM " + database.escapeTableName(liquibaseSchema, database.getDatabaseChangeLogTableName()) + " INTO TEMP max_date_temp WITH NO LOG"),
+                    new UnparsedSql("UPDATE "+database.escapeTableName(liquibaseSchema, database.getDatabaseChangeLogTableName())+" SET TAG = '"+statement.getTag()+"' WHERE DATEEXECUTED = (SELECT max_date FROM max_date_temp);")
             };
         } else {
             updateStatement.setWhereClause("DATEEXECUTED = (SELECT MAX(DATEEXECUTED) FROM " + database.escapeTableName(liquibaseSchema, database.getDatabaseChangeLogTableName()) + ")");
