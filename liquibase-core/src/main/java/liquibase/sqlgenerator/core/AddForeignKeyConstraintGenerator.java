@@ -2,6 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
 import liquibase.database.core.InformixDatabase;
+import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.database.core.OracleDatabase;
 import liquibase.exception.ValidationErrors;
@@ -63,8 +64,10 @@ public class AddForeignKeyConstraintGenerator extends AbstractSqlGenerator<AddFo
 	    }
 
 	    if (statement.getOnDelete() != null) {
-		    if ((database instanceof OracleDatabase) && (statement.getOnDelete().equalsIgnoreCase("RESTRICT") || statement.getOnDelete().equalsIgnoreCase("NO ACTION"))) {
-			    //don't use
+            if ((database instanceof OracleDatabase) && (statement.getOnDelete().equalsIgnoreCase("RESTRICT") || statement.getOnDelete().equalsIgnoreCase("NO ACTION"))) {
+                //don't use
+            } else if ((database instanceof MSSQLDatabase) && statement.getOnDelete().equalsIgnoreCase("RESTRICT")) {
+                //don't use                        
 		    } else {
 			    sb.append(" ON DELETE ").append(statement.getOnDelete());
 		    }
