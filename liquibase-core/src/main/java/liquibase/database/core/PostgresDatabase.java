@@ -221,7 +221,8 @@ public class PostgresDatabase extends AbstractDatabase {
             // Return the catalog name instead..
             return getDefaultCatalogName();
         } else {
-            return StringUtils.trimToNull(requestedSchema).toLowerCase();
+            String schema = StringUtils.trimToNull(requestedSchema);
+            return (schema != null) ? schema.toLowerCase() : schema;
         }
     }
 
