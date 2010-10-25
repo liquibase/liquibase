@@ -8,6 +8,7 @@ import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.RanChangeSet;
 import liquibase.changelog.filter.ContextChangeSetFilter;
 import liquibase.changelog.filter.DbmsChangeSetFilter;
+import liquibase.database.core.*;
 import liquibase.database.structure.*;
 import liquibase.diff.DiffStatusListener;
 import liquibase.exception.*;
@@ -547,7 +548,9 @@ public abstract class AbstractDatabase implements Database {
                 DropTableChange dropChange = new DropTableChange();
                 dropChange.setSchemaName(schema);
                 dropChange.setTableName(table.getName());
-                dropChange.setCascadeConstraints(true);
+                if (supportsDropTableCascadeConstraints()) {
+                    dropChange.setCascadeConstraints(true);
+                }
 
                 dropChanges.add(dropChange);
             }
@@ -583,6 +586,16 @@ public abstract class AbstractDatabase implements Database {
         } finally {
             this.commit();
         }
+    }
+
+    public boolean supportsDropTableCascadeConstraints() {
+         return (this instanceof DerbyDatabase
+                 || this instanceof DB2Database
+                 || this instanceof MSSQLDatabase
+                 || this instanceof FirebirdDatabase
+                 || this instanceof SQLiteDatabase
+                 || this instanceof SybaseDatabase
+                 || this instanceof SybaseASADatabase);
     }
 
     public boolean isSystemTable(String catalogName, String schemaName, String tableName) {

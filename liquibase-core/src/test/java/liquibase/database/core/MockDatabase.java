@@ -134,6 +134,10 @@ public class MockDatabase implements Database {
         return true;
     }
 
+    public boolean supportsDropTableCascadeConstraints() {
+        return false;
+    }
+
     public boolean supportsAutoIncrement() {
         return true;
     }
