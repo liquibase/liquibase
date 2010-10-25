@@ -13,7 +13,7 @@ public class RollbackVisitorTest {
         Database database = createMock(Database.class);
 
         ChangeSet changeSet = createMock(ChangeSet.class);
-        changeSet.rolback(database);
+        changeSet.rollback(database);
         expectLastCall();
 
 
