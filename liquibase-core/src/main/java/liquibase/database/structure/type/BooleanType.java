@@ -34,6 +34,12 @@ public class BooleanType extends DataType {
             } else {
                 throw new UnexpectedLiquibaseException("Unknown boolean value: "+value);
             }
+        } else if (value instanceof Long) {
+            if (Long.valueOf(1).equals(value)) {
+                returnValue = booleanType.getTrueBooleanValue();
+            } else {
+                returnValue = booleanType.getFalseBooleanValue();
+            }
         } else if (((Boolean) value)) {
             returnValue = booleanType.getTrueBooleanValue();
         } else {
