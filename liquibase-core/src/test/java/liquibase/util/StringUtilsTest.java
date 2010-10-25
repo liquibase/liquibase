@@ -225,4 +225,19 @@ public class StringUtilsTest {
          assertEquals("insert into datatable (col) values ('a value with a ;')", strings[0]);
          assertEquals("insert into datatable (col) values ('another value with a ;')", strings[1]);
     }
+
+    @Test
+    public void commentRemoval() {
+        String testString = "--\n" +
+                "-- Create the blog table.\n" +
+                "--\n" +
+                "CREATE TABLE blog\n" +
+                "(\n" +
+                "    ID                         NUMBER(15)    NOT NULL\n" +
+                ")";
+
+        String[] strings = StringUtils.processMutliLineSQL(testString, true, false, null);
+        assertEquals(1, strings.length);
+        assertTrue(strings[0].startsWith("CREATE TABLE blog"));
+    }
 }
