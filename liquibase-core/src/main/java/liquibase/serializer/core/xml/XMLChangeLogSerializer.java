@@ -4,6 +4,7 @@ import liquibase.change.Change;
 import liquibase.change.ChangeProperty;
 import liquibase.change.ColumnConfig;
 import liquibase.change.ConstraintsConfig;
+import liquibase.change.TextNode;
 import liquibase.change.custom.CustomChangeWrapper;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
@@ -127,6 +128,13 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
                     continue;
                 }
                 
+                // String properties annotated with @TextNode are serialized as a child node
+                TextNode textNodeAnnotation = field.getAnnotation(TextNode.class);
+                if (textNodeAnnotation != null) {
+                    String textNodeContent = (String) field.get(change);
+                    node.appendChild(createNode(textNodeAnnotation.nodeName(), textNodeContent));
+                    continue;
+                }
                 
                 String propertyName = field.getName();
                 if (field.getType().equals(ColumnConfig.class)) {
@@ -157,6 +165,13 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
         return node;
     }
 
+    // create a XML node with nodeName and simple text content
+    public Element createNode(String nodeName, String nodeContent) {
+        Element element = currentChangeLogFileDOM.createElement(nodeName);
+        element.setTextContent(nodeContent);
+        return element;
+    }
+    
     public Element createNode(ColumnConfig columnConfig) {
         Element element = currentChangeLogFileDOM.createElement("column");
         if (columnConfig.getName() != null) {
