@@ -4,6 +4,7 @@ import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.exception.*;
+import liquibase.logging.LogFactory;
 import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.core.string.StringChangeLogSerializer;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
@@ -86,8 +87,13 @@ public abstract class AbstractChange implements Change {
     public ValidationErrors validate(Database database) {
         ValidationErrors changeValidationErrors = new ValidationErrors();
         for (SqlStatement statement : generateStatements(database)) {
-            if (!SqlGeneratorFactory.getInstance().supports(statement, database)) {
-                changeValidationErrors.addError(getChangeMetaData().getName()+" is not supported on "+database.getTypeName());
+            boolean supported = SqlGeneratorFactory.getInstance().supports(statement, database);
+            if (!supported) {
+                if (statement.skipOnUnsupported()) {
+                    LogFactory.getLogger().info(getChangeMetaData().getName()+" is not supported on "+database.getTypeName()+" but will continue");
+                } else {
+                    changeValidationErrors.addError(getChangeMetaData().getName()+" is not supported on "+database.getTypeName());
+                }
             } else {
                 changeValidationErrors.addAll(SqlGeneratorFactory.getInstance().validate(statement, database));
             }

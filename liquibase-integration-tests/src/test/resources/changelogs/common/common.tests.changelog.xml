@@ -828,4 +828,9 @@
             <column name="value" type="varchar2(50)"/>
         </createTable>
     </changeSet>
+
+    <changeSet id="seq-test" author="nvoxland">
+        <comment>Database that don't support sequences will just continue on</comment>
+        <createSequence sequenceName="seqtestonall"/>
+    </changeSet>
 </databaseChangeLog>

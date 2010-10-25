@@ -1,8 +1,8 @@
 package liquibase.statement.core;
 
-import liquibase.statement.SqlStatement;
+import liquibase.statement.AbstractSqlStatement;
 
-public class ModifyDataTypeStatement implements SqlStatement {
+public class ModifyDataTypeStatement extends AbstractSqlStatement {
     private String schemaName;
     private String tableName;
     private String columnName;

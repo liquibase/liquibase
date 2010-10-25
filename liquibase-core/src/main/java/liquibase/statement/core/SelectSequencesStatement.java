@@ -1,8 +1,8 @@
 package liquibase.statement.core;
 
-import liquibase.statement.SqlStatement;
+import liquibase.statement.AbstractSqlStatement;
 
-public class SelectSequencesStatement implements SqlStatement {
+public class SelectSequencesStatement extends AbstractSqlStatement {
     private String schemaName;
 
     public SelectSequencesStatement(String schemaName) {

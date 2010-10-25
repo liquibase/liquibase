@@ -1,8 +1,8 @@
 package liquibase.statement.core;
 
-import liquibase.statement.SqlStatement;
+import liquibase.statement.AbstractSqlStatement;
 
-public class DropSequenceStatement implements SqlStatement {
+public class DropSequenceStatement extends AbstractSqlStatement {
 
     private String schemaName;
     private String sequenceName;
@@ -11,6 +11,11 @@ public class DropSequenceStatement implements SqlStatement {
         this.schemaName = schemaName;
         this.sequenceName = sequenceName;
     }
+
+    @Override
+    public boolean skipOnUnsupported() {
+        return true;
+    }    
 
     public String getSchemaName() {
         return schemaName;

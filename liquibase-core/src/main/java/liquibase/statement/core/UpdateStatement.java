@@ -1,10 +1,10 @@
 package liquibase.statement.core;
 
-import liquibase.statement.SqlStatement;
+import liquibase.statement.AbstractSqlStatement;
 
 import java.util.*;
 
-public class UpdateStatement implements SqlStatement {
+public class UpdateStatement extends AbstractSqlStatement {
     private String schemaName;
     private String tableName;
     private SortedMap<String, Object> newColumnValues = new TreeMap<String, Object>();

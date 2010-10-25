@@ -1,9 +1,9 @@
 package liquibase.statement.core;
 
 import liquibase.changelog.ChangeSet;
-import liquibase.statement.SqlStatement;
+import liquibase.statement.AbstractSqlStatement;
 
-public class RemoveChangeSetRanStatusStatement implements SqlStatement {
+public class RemoveChangeSetRanStatusStatement extends AbstractSqlStatement {
     private ChangeSet changeSet;
 
     public RemoveChangeSetRanStatusStatement(ChangeSet changeSet) {

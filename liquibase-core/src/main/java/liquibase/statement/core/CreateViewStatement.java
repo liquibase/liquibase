@@ -1,8 +1,8 @@
 package liquibase.statement.core;
 
-import liquibase.statement.SqlStatement;
+import liquibase.statement.AbstractSqlStatement;
 
-public class CreateViewStatement implements SqlStatement {
+public class CreateViewStatement extends AbstractSqlStatement {
 
     private String schemaName;
     private String viewName;

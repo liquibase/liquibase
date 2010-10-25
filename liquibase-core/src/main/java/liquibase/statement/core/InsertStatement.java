@@ -1,14 +1,12 @@
 package liquibase.statement.core;
 
-import liquibase.statement.SqlStatement;
+import liquibase.statement.AbstractSqlStatement;
 
-import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-public class InsertStatement implements SqlStatement {
+public class InsertStatement extends AbstractSqlStatement {
     private String schemaName;
     private String tableName;
     private SortedMap<String, Object> columnValues = new TreeMap<String, Object>();

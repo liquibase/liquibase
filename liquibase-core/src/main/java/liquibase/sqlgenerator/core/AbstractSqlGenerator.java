@@ -8,6 +8,7 @@ import liquibase.statement.SqlStatement;
 import liquibase.statement.core.CreateViewStatement;
 
 public abstract class AbstractSqlGenerator<StatementType extends SqlStatement> implements SqlGenerator<StatementType> {
+
     public int getPriority() {
         return PRIORITY_DEFAULT;
     }

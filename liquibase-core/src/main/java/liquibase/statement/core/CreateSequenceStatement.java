@@ -1,10 +1,10 @@
 package liquibase.statement.core;
 
-import liquibase.statement.SqlStatement;
+import liquibase.statement.AbstractSqlStatement;
 
 import java.math.BigInteger;
 
-public class CreateSequenceStatement implements SqlStatement {
+public class CreateSequenceStatement extends AbstractSqlStatement {
 
     private String schemaName;
     private String sequenceName;
@@ -18,6 +18,11 @@ public class CreateSequenceStatement implements SqlStatement {
     public CreateSequenceStatement(String schemaName, String sequenceName) {
         this.schemaName = schemaName;
         this.sequenceName = sequenceName;
+    }
+
+    @Override
+    public boolean skipOnUnsupported() {
+        return true;
     }
 
     public String getSchemaName() {

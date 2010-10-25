@@ -1,8 +1,8 @@
 package liquibase.statement.core;
 
-import liquibase.statement.SqlStatement;
+import liquibase.statement.AbstractSqlStatement;
 
-public class AddDefaultValueStatement implements SqlStatement {
+public class AddDefaultValueStatement extends AbstractSqlStatement {
     private String schemaName;
     private String tableName;
     private String columnName;

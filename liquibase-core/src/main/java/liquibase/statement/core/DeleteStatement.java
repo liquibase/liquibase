@@ -1,12 +1,12 @@
 package liquibase.statement.core;
 
-import liquibase.statement.SqlStatement;
+import liquibase.statement.AbstractSqlStatement;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class DeleteStatement implements SqlStatement {
+public class DeleteStatement extends AbstractSqlStatement {
     private String schemaName;
     private String tableName;
     private String whereClause;

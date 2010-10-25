@@ -997,6 +997,9 @@ public abstract class AbstractDatabase implements Database {
      */
     public void execute(SqlStatement[] statements, List<SqlVisitor> sqlVisitors) throws LiquibaseException {
         for (SqlStatement statement : statements) {
+            if (statement.skipOnUnsupported() && !SqlGeneratorFactory.getInstance().supports(statement, this)) {
+                continue;
+            }
             LogFactory.getLogger().debug("Executing Statement: " + statement);
             ExecutorService.getInstance().getExecutor(this).execute(statement, sqlVisitors);
         }

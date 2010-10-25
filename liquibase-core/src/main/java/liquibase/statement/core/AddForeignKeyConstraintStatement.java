@@ -1,8 +1,8 @@
 package liquibase.statement.core;
 
-import liquibase.statement.SqlStatement;
+import liquibase.statement.AbstractSqlStatement;
 
-public class AddForeignKeyConstraintStatement implements SqlStatement {
+public class AddForeignKeyConstraintStatement extends AbstractSqlStatement {
 
     private String baseTableSchemaName;
     private String baseTableName;
