@@ -300,7 +300,7 @@ public class ChangeSet implements Conditional {
         return execType;
     }
 
-    public void rolback(Database database) throws RollbackFailedException {
+    public void rollback(Database database) throws RollbackFailedException {
         try {
             Executor executor = ExecutorService.getInstance().getExecutor(database);
             executor.comment("Rolling Back ChangeSet: " + toString());

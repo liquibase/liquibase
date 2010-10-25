@@ -20,7 +20,7 @@ public class RollbackVisitor implements ChangeSetVisitor {
 
     public void visit(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database) throws LiquibaseException {
         LogFactory.getLogger().info("Rolling Back Changeset:" + changeSet);
-        changeSet.rolback(this.database);
+        changeSet.rollback(this.database);
         this.database.removeRanStatus(changeSet);
 
         this.database.commit();
