@@ -1,6 +1,6 @@
 package liquibase.statement.core;
 
-import liquibase.statement.SqlStatement;
+import liquibase.statement.AbstractSqlStatement;
 
-public class CreateDatabaseChangeLogLockTableStatement implements SqlStatement {
+public class CreateDatabaseChangeLogLockTableStatement extends AbstractSqlStatement {
 }

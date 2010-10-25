@@ -6,7 +6,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-public class AddColumnStatement implements SqlStatement {
+public class AddColumnStatement extends AbstractSqlStatement {
 
     private String schemaName;
     private String tableName;

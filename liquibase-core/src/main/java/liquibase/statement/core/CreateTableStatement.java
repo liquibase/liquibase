@@ -5,7 +5,7 @@ import liquibase.statement.*;
 
 import java.util.*;
 
-public class CreateTableStatement implements SqlStatement {
+public class CreateTableStatement extends AbstractSqlStatement {
     private String schemaName;
     private String tableName;
     private String tablespace;

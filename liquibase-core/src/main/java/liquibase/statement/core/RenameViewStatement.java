@@ -1,8 +1,8 @@
 package liquibase.statement.core;
 
-import liquibase.statement.SqlStatement;
+import liquibase.statement.AbstractSqlStatement;
 
-public class RenameViewStatement implements SqlStatement {
+public class RenameViewStatement extends AbstractSqlStatement {
 
     private String schemaName;
     private String oldViewName;

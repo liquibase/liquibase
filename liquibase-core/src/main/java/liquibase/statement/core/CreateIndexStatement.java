@@ -1,8 +1,8 @@
 package liquibase.statement.core;
 
-import liquibase.statement.SqlStatement;
+import liquibase.statement.AbstractSqlStatement;
 
-public class CreateIndexStatement implements SqlStatement {
+public class CreateIndexStatement extends AbstractSqlStatement {
 
     private String tableSchemaName;
     private String indexName;

@@ -2,9 +2,9 @@ package liquibase.statement.core;
 
 import liquibase.database.Database;
 import liquibase.sql.Sql;
-import liquibase.statement.SqlStatement;
+import liquibase.statement.AbstractSqlStatement;
 
-public class RuntimeStatement implements SqlStatement {
+public class RuntimeStatement extends AbstractSqlStatement {
     public Sql[] generate(Database database) {
         return new Sql[0];
     }

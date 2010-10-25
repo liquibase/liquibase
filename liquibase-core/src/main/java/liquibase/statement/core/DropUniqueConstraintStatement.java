@@ -1,8 +1,8 @@
 package liquibase.statement.core;
 
-import liquibase.statement.SqlStatement;
+import liquibase.statement.AbstractSqlStatement;
 
-public class DropUniqueConstraintStatement implements SqlStatement {
+public class DropUniqueConstraintStatement extends AbstractSqlStatement {
 
     private String schemaName;
     private String tableName;
