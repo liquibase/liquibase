@@ -80,6 +80,8 @@ public interface Database extends DatabaseObject, PrioritizedService {
 
     public boolean supportsSequences();
 
+    public boolean supportsDropTableCascadeConstraints();
+    
     public boolean supportsAutoIncrement();
 
     String getDateLiteral(String isoDate);
