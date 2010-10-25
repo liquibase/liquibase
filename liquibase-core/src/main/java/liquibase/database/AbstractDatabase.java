@@ -637,10 +637,7 @@ public abstract class AbstractDatabase implements Database {
             }
 
 //            Timestamp lastExecutedDate = (Timestamp) this.getExecutor().queryForObject(createChangeToTagSQL(), Timestamp.class);
-            int rowsUpdated = executor.update(new TagDatabaseStatement(tagString));
-            if (rowsUpdated == 0) {
-                throw new DatabaseException("Did not tag database change log correctly");
-            }
+            executor.execute(new TagDatabaseStatement(tagString));
             this.commit();
 
             getRanChangeSetList().get(getRanChangeSetList().size() - 1).setTag(tagString);
