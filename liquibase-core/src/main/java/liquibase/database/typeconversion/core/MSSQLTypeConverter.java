@@ -115,5 +115,9 @@ public class MSSQLTypeConverter extends AbstractTypeConverter {
         return new BlobType("VARBINARY(MAX)");
     }
 
-
+    @Override
+    public NumberType getNumberType() {
+      return new NumberType("NUMERIC");
+    }
+    
 }
