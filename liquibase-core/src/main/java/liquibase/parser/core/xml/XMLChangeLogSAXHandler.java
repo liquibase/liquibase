@@ -173,7 +173,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
                 Set<String> seenPaths = new HashSet<String>();
 				for (URL fileUrl : resources) {
 					if (!fileUrl.toExternalForm().startsWith("file:")) {
-                        if (fileUrl.toExternalForm().startsWith("jar:file:") || fileUrl.toExternalForm().startsWith("wsjar:file:")) {
+                        if (fileUrl.toExternalForm().startsWith("jar:file:") || fileUrl.toExternalForm().startsWith("wsjar:file:") || fileUrl.toExternalForm().startsWith("zip:")) {
                             File zipFileDir = extractZipFile(fileUrl);
                             fileUrl = new File(zipFileDir, pathName).toURL();
                         } else {
