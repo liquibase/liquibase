@@ -307,7 +307,11 @@ public class ChangeSet implements Conditional {
             RanChangeSet ranChangeSet = database.getRanChangeSet(this);
             if (rollBackChanges != null && rollBackChanges.size() > 0) {
                 for (Change rollback : rollBackChanges) {
-                    for (SqlStatement statement : rollback.generateStatements(database)) {
+                    SqlStatement[] statements = rollback.generateStatements(database);
+                    if (statements == null) {
+                        continue;
+                    }
+                    for (SqlStatement statement : statements) {
                         try {
                             executor.execute(statement, sqlVisitors);
                         } catch (DatabaseException e) {
