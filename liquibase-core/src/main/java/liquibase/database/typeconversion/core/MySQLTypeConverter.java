@@ -1,5 +1,6 @@
 package liquibase.database.typeconversion.core;
 
+import liquibase.database.structure.type.BlobType;
 import liquibase.database.structure.type.BooleanType;
 import liquibase.database.structure.type.ClobType;
 import liquibase.database.Database;
@@ -27,6 +28,11 @@ public class MySQLTypeConverter extends AbstractTypeConverter {
     @Override
     public ClobType getClobType() {
         return new ClobType("TEXT");
+    }
+
+    @Override
+    public BlobType getLongBlobType() {
+    	return new BlobType("LONGBLOB");
     }
 
     @Override
