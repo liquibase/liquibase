@@ -191,6 +191,8 @@ public abstract class AbstractTypeConverter implements TypeConverter {
             returnTypeName = getIntType();
         } else if (dataTypeName.equalsIgnoreCase("INTEGER")) {
             returnTypeName = getIntType();
+        } else if (dataTypeName.equalsIgnoreCase("LONGBLOB")) {
+            returnTypeName = getLongBlobType();
         } else if (dataTypeName.equalsIgnoreCase("LONGVARBINARY")) {
             returnTypeName = getBlobType();
         } else if (dataTypeName.equalsIgnoreCase("LONGVARCHAR")) {
@@ -385,6 +387,10 @@ public abstract class AbstractTypeConverter implements TypeConverter {
 
     public BlobType getBlobType() {
         return new BlobType();
+    }
+    
+    public BlobType getLongBlobType() {
+    	return getBlobType();
     }
 
     public String convertToDatabaseTypeString(Column referenceColumn, Database database) {

@@ -37,6 +37,8 @@ public interface TypeConverter extends PrioritizedService {
     ClobType getClobType();
 
     BlobType getBlobType();
+    
+    BlobType getLongBlobType();
 
     DateType getDateType();
 
