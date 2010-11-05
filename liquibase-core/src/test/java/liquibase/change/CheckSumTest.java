@@ -10,7 +10,7 @@ public class CheckSumTest {
     public void testCompute_String() {
         String valueToHash = "asdf";
         CheckSum checkSum = CheckSum.compute(valueToHash);
-        assertEquals(2, checkSum.getVersion());
+        assertEquals(CheckSum.getCurrentVersion(), checkSum.getVersion());
         assertFalse(checkSum.toString().equals(valueToHash));
     }
 
@@ -18,7 +18,7 @@ public class CheckSumTest {
     public void testCompute_Stream() {
         String valueToHash = "asdf";
         CheckSum checkSum = CheckSum.compute(new ByteArrayInputStream(valueToHash.getBytes()));
-        assertEquals(2, checkSum.getVersion());
+        assertEquals(CheckSum.getCurrentVersion(), checkSum.getVersion());
         assertFalse(checkSum.toString().equals(valueToHash));
         assertEquals(CheckSum.compute(valueToHash).toString(), checkSum.toString());
     }

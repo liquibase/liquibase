@@ -17,8 +17,8 @@ public class CheckSum {
         if (checksumValue == null) {
             return null;
         }
-        if (checksumValue.startsWith(CheckSum.getCurrentVersion()+":")) {
-            return new CheckSum(checksumValue.substring(2), getCurrentVersion());
+        if (checksumValue.matches("^\\d:.*")) {
+            return new CheckSum(checksumValue.substring(2), Integer.valueOf(checksumValue.substring(0,1)));
         } else {
             return new CheckSum(checksumValue, 1);
         }
