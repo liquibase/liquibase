@@ -37,7 +37,7 @@ public abstract class AbstractChangeTest {
 
         CheckSum checkSum = change.generateCheckSum();
         assertNotNull(checkSum);
-        assertEquals(2, checkSum.getVersion());
+        assertEquals(CheckSum.getCurrentVersion(), checkSum.getVersion());
         assertTrue(checkSum.toString().startsWith("2:"));
 
         Map<String, String> seenCheckSums = new HashMap<String, String>();
