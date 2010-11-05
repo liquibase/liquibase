@@ -119,9 +119,6 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         return getFilePath().hashCode();
     }
 
-    /**
-     * Checks changelogs for bad MD5Sums and preconditions before attempting a migration
-     */
     public void validate(Database database, String... contexts) throws LiquibaseException {
 
         ChangeLogIterator logIterator = new ChangeLogIterator(this, new DbmsChangeSetFilter(database), new ContextChangeSetFilter(contexts));

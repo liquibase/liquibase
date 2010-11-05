@@ -471,7 +471,7 @@ public abstract class AbstractDatabase implements Database {
     }
 
     public boolean hasDatabaseChangeLogLockTable() throws DatabaseException {
-        if (hasDatabaseChangeLogLockTable) {
+        if (canCacheLiquibaseTableInfo && hasDatabaseChangeLogLockTable) {
             return true;
         }
         boolean hasTable = DatabaseSnapshotGeneratorFactory.getInstance().getGenerator(this).hasDatabaseChangeLogLockTable(this);
