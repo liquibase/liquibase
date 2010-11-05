@@ -92,7 +92,7 @@ public class StringChangeLogSerializer implements ChangeLogSerializer {
                 buffer.append("\n");
             }
             buffer.append(indent(indent - 1)).append("]");
-            return buffer.toString();
+            return buffer.toString().replace("\r\n", "\n").replace("\r", "\n"); //standardize all newline chars
 
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);
