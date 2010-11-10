@@ -53,6 +53,10 @@ public class ExecuteShellCommandChange extends AbstractChange {
         this.os = StringUtils.splitAndTrim(os, ",");
     }
 
+    public List<String> getOs() {
+        return os;
+    }
+
     @Override
     public ValidationErrors validate(Database database) {
         return new ValidationErrors();
