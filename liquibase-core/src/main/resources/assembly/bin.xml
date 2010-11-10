@@ -9,10 +9,6 @@
     <fileSet>
       <directory>src/main/resources/dist</directory>
       <outputDirectory>/</outputDirectory>
-      <excludes>
-        <exclude>**/assembly/</exclude>
-        <exclude>**/liquibase</exclude>
-      </excludes>
     </fileSet>
     <fileSet>
       <directory>${project.build.directory}/site/apidocs</directory>
