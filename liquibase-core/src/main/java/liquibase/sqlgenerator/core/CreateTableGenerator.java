@@ -46,9 +46,11 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
 	            if (pkName == null) {
 	                pkName = database.generatePrimaryKeyName(statement.getTableName());
 	            }
-	            buffer.append(" CONSTRAINT ");
-	            buffer.append(database.escapeConstraintName(pkName));
-				buffer.append(" PRIMARY KEY AUTOINCREMENT");
+                if (pkName != null) {
+                    buffer.append(" CONSTRAINT ");
+                    buffer.append(database.escapeConstraintName(pkName));
+                }
+                buffer.append(" PRIMARY KEY AUTOINCREMENT");
 			}
 
             if (statement.getDefaultValue(column) != null) {
@@ -115,9 +117,11 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
 			            // then generated pkName will be incorrect
 			            pkName = database.generatePrimaryKeyName(statement.getTableName());
 		            }
-		            buffer.append(" CONSTRAINT ");
-		            buffer.append(database.escapeConstraintName(pkName));
-	        	}
+                    if (pkName != null) {
+                        buffer.append(" CONSTRAINT ");
+                        buffer.append(database.escapeConstraintName(pkName));
+                    }
+                }
 	            buffer.append(" PRIMARY KEY (");
 	            buffer.append(database.escapeColumnNameList(StringUtils.join(statement.getPrimaryKeyConstraint().getColumns(), ", ")));
 	            buffer.append(")");
