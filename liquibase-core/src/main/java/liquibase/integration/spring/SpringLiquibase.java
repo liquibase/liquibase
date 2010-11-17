@@ -7,6 +7,7 @@ import java.net.URL;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Enumeration;
+import java.util.Map;
 import java.util.Vector;
 
 import javax.sql.DataSource;
@@ -128,6 +129,8 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 
     private String contexts;
 
+     private Map<String, String> parameters;
+
     public SpringLiquibase() {
         super();
     }
@@ -235,7 +238,11 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
     }
 
     protected Liquibase createLiquibase(Connection c) throws LiquibaseException {
-        return new Liquibase(getChangeLog(), createResourceOpener(), createDatabase(c));
+        Liquibase liquibase = new Liquibase(getChangeLog(), createResourceOpener(), createDatabase(c));
+        for(Map.Entry<String, String> entry: parameters.entrySet()) {
+            liquibase.setChangeLogParameter(entry.getKey(), entry.getValue());
+        }
+        return liquibase;
     }
 
     /**
@@ -247,6 +254,10 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
      */
     protected Database createDatabase(Connection c) throws DatabaseException {
         return DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(c) );
+    }
+
+    public void setChangeLogParameters(Map<String, String> parameters) {
+        this.parameters = parameters;
     }
 
     /**
