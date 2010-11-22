@@ -781,14 +781,19 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
 
         boolean autoIncrement = false;
 
+        Statement statement = null;
         ResultSet selectRS = null;
         try {
-            selectRS = ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement().executeQuery("SELECT " + database.escapeColumnName(schemaName, tableName, columnName) + " FROM " + database.escapeTableName(schemaName, tableName) + " WHERE 1 = 0");
+            statement = ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement();
+            selectRS = statement.executeQuery("SELECT " + database.escapeColumnName(schemaName, tableName, columnName) + " FROM " + database.escapeTableName(schemaName, tableName) + " WHERE 1 = 0");
             ResultSetMetaData meta = selectRS.getMetaData();
             autoIncrement = meta.isAutoIncrement(1);
         } finally {
             if (selectRS != null) {
                 selectRS.close();
+            }
+            if (statement != null) {
+                statement.close();
             }
         }
 
