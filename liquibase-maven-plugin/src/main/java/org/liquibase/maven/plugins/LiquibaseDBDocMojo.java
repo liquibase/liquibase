@@ -15,8 +15,7 @@ import liquibase.exception.LiquibaseException;
  *
  * @goal dbDoc
  */
-public class LiquibaseDBDocMojo extends AbstractLiquibaseMojo
-{
+public class LiquibaseDBDocMojo extends AbstractLiquibaseChangeLogMojo {
 
     /**
      * @parameter
