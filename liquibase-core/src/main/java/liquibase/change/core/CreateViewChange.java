@@ -4,6 +4,7 @@ import liquibase.change.AbstractChange;
 import liquibase.change.Change;
 import liquibase.change.ChangeMetaData;
 import liquibase.database.Database;
+import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.CreateViewStatement;
@@ -99,7 +100,8 @@ public class CreateViewChange extends AbstractChange {
 	}
 
 	private boolean supportsReplaceIfExistsOption(Database database) {
-		return !(database instanceof SQLiteDatabase);
+		return !(database instanceof SQLiteDatabase
+		    || database instanceof MSSQLDatabase);
 	}
 
 }
