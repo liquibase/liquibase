@@ -355,6 +355,13 @@ public class BaseLiquibaseTask extends Task {
         this.databaseChangeLogLockTableName = tableName;
     }
 
+    public String getLogLevel() {
+        return LogFactory.getLogger().getLogLevel().name();
+    }
+
+    public void setLogLevel(String level) {
+        LogFactory.getLogger().setLogLevel(level);
+    }
 
     public static class ChangeLogProperty {
         private String name;
