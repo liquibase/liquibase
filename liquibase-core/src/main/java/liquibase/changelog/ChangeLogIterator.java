@@ -27,7 +27,7 @@ public class ChangeLogIterator {
         		changeSets.add(changeSet);
         	}
         }
-        this.databaseChangeLog = (new DatabaseChangeLog(null) {
+        this.databaseChangeLog = (new DatabaseChangeLog() {
             @Override
             public List<ChangeSet> getChangeSets() {
                 return changeSets;

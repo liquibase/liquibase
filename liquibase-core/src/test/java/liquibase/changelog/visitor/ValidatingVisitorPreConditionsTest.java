@@ -38,7 +38,7 @@ public class ValidatingVisitorPreConditionsTest {
      */
     @Before
     public void setUp() {
-        changeLog = new DatabaseChangeLog(null);
+        changeLog = new DatabaseChangeLog();
 
         changeSet1 = new ChangeSet("1", "testAuthor", false, false, "path/changelog", null, null, null);
         changeLog.addChangeSet(changeSet1);

@@ -44,8 +44,8 @@ public class ValidatingVisitorTest {
         changeSet2.addChange(change2);
 
         ValidatingVisitor handler = new ValidatingVisitor(new ArrayList<RanChangeSet>());
-        handler.visit(changeSet1, new DatabaseChangeLog("test"), null);
-        handler.visit(changeSet2, new DatabaseChangeLog("test"), null);
+        handler.visit(changeSet1, new DatabaseChangeLog(), null);
+        handler.visit(changeSet2, new DatabaseChangeLog(), null);
 
         assertTrue(handler.validationPassed());
 
@@ -61,7 +61,7 @@ public class ValidatingVisitorTest {
         });
 
         ValidatingVisitor handler = new ValidatingVisitor(new ArrayList<RanChangeSet>());
-        handler.visit(changeSet1, new DatabaseChangeLog("test"), null);
+        handler.visit(changeSet1, new DatabaseChangeLog(), null);
 
         assertEquals(1, handler.getSetupExceptions().size());
         assertEquals("Test message", handler.getSetupExceptions().get(0).getMessage());
@@ -73,8 +73,8 @@ public class ValidatingVisitorTest {
     public void visit_duplicate() {
 
         ValidatingVisitor handler = new ValidatingVisitor(new ArrayList<RanChangeSet>());
-        handler.visit(changeSet1, new DatabaseChangeLog("test"), null);
-        handler.visit(changeSet1, new DatabaseChangeLog("test"), null);
+        handler.visit(changeSet1, new DatabaseChangeLog(), null);
+        handler.visit(changeSet1, new DatabaseChangeLog(), null);
 
         assertEquals(1, handler.getDuplicateChangeSets().size());
 

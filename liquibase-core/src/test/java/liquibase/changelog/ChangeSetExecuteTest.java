@@ -78,7 +78,7 @@ public class ChangeSetExecuteTest {
     	replay(database);
     	
     	ChangeSet changeSet = createTestChangeSet(true);
-    	changeSet.execute(new DatabaseChangeLog("test.xml"), database);
+    	changeSet.execute(new DatabaseChangeLog(), database);
     	
     	verify(database);
     }
@@ -96,7 +96,7 @@ public class ChangeSetExecuteTest {
     	replay(database);
     	
     	ChangeSet changeSet = createTestChangeSet(false);
-    	changeSet.execute(new DatabaseChangeLog("test.xml"), database);
+    	changeSet.execute(new DatabaseChangeLog(), database);
     	
     	verify(database);
     }
@@ -110,7 +110,7 @@ public class ChangeSetExecuteTest {
     	replay(database);
     	
     	ChangeSet changeSet = createTestChangeSet(true);
-    	changeSet.execute(new DatabaseChangeLog("test.xml"), database);
+    	changeSet.execute(new DatabaseChangeLog(), database);
     	
     	verify(database);
     }
@@ -124,7 +124,7 @@ public class ChangeSetExecuteTest {
     	replay(database);
     	
     	ChangeSet changeSet = createTestChangeSet(false);
-    	changeSet.execute(new DatabaseChangeLog("test.xml"), database);
+    	changeSet.execute(new DatabaseChangeLog(), database);
     	
     	verify(database);
     }

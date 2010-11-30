@@ -179,7 +179,7 @@ public class ServiceLocator {
 
                     classes.add(clazz);
                 } catch (NoSuchMethodException e) {
-                    logger.info("Can not use "+clazz+" as a Liquibase service because it does not have a default constructor" );
+                    logger.info("Can not use "+clazz+" as a Liquibase service because it does not have a no-argument constructor" );
                 }
             }
         }

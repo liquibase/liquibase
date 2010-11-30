@@ -48,7 +48,8 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
 
     public DatabaseChangeLog parse(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters, ResourceAccessor resourceAccessor) throws ChangeLogParseException {
 
-        DatabaseChangeLog changeLog = new DatabaseChangeLog(physicalChangeLogLocation);
+        DatabaseChangeLog changeLog = new DatabaseChangeLog();
+        changeLog.setPhysicalFilePath(physicalChangeLogLocation);
 
         BufferedReader reader = null;
 
