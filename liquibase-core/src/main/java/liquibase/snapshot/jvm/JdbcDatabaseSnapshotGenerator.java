@@ -26,7 +26,7 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
     private Set<DiffStatusListener> statusListeners;
 
     protected String convertTableNameToDatabaseTableName(String tableName) {
-        return tableName.toUpperCase();
+        return tableName;
     }
 
     protected String convertColumnNameToDatabaseTableName(String columnName) {
