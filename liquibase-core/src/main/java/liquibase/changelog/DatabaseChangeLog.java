@@ -24,6 +24,13 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     private List<ChangeSet> changeSets = new ArrayList<ChangeSet>();
     private ChangeLogParameters changeLogParameters;
 
+    public DatabaseChangeLog() {
+    }
+
+    public DatabaseChangeLog(String physicalFilePath) {
+        this.physicalFilePath = physicalFilePath;
+    }
+
     public PreconditionContainer getPreconditions() {
         return preconditionContainer;
     }
