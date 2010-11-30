@@ -40,7 +40,8 @@ public class SqlChangeLogParser implements ChangeLogParser {
         ChangeSet changeSet = new ChangeSet("raw", "includeAll", false, false, physicalChangeLogLocation, physicalChangeLogLocation, null, null, true);
         changeSet.addChange(change);
 
-        DatabaseChangeLog changeLog = new DatabaseChangeLog(physicalChangeLogLocation);
+        DatabaseChangeLog changeLog = new DatabaseChangeLog();
+        changeLog.setPhysicalFilePath(physicalChangeLogLocation);
         changeLog.addChangeSet(changeSet);
 
         return changeLog;

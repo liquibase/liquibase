@@ -10,6 +10,9 @@ import org.xml.sax.*;
 
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
+import javax.xml.stream.XMLEventReader;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.transform.Source;
 import java.io.IOException;
 import java.io.InputStream;
 import liquibase.util.file.FilenameUtils;

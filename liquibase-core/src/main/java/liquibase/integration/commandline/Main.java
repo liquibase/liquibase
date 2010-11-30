@@ -125,8 +125,9 @@ public class Main {
                 if (e.getCause() instanceof ValidationFailedException) {
                     ((ValidationFailedException) e.getCause()).printDescriptiveError(System.out);
                 } else {
-                    System.out.println("Liquibase Update Failed: " + message + generateLogLevelWarningMessage());
-                    LogFactory.getLogger().info(message, e);
+                    System.out.println("Liquibase Update Failed: " + message);
+                    LogFactory.getLogger().severe(message, e);
+                    System.out.println(generateLogLevelWarningMessage());
                 }
                 System.exit(-1);
             }
@@ -154,7 +155,7 @@ public class Main {
         if (logger == null || logger.getLogLevel() == null || (logger.getLogLevel().equals(LogLevel.DEBUG))) {
             return "";
         } else {
-            return ".  For more information, use the --logLevel flag)";
+            return "\n\nFor more information, use the --logLevel flag)";
         }
     }
 

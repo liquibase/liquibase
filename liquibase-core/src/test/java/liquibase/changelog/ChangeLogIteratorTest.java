@@ -17,7 +17,7 @@ public class ChangeLogIteratorTest {
 
     @Before
     public void setUp() {
-        changeLog = new DatabaseChangeLog("path/to/changelog");
+        changeLog = new DatabaseChangeLog();
         changeLog.addChangeSet(new ChangeSet("1", "nvoxland", false, false, "/path/to/changelog", null, "test1", "mysql"));
         changeLog.addChangeSet(new ChangeSet("2", "nvoxland", false, false, "/path/to/changelog",null,  "test1", "oracle"));
         changeLog.addChangeSet(new ChangeSet("3", "nvoxland", false, false, "/path/to/changelog",null,  "test2", "mysql"));
