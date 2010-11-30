@@ -9,6 +9,7 @@ import liquibase.change.custom.CustomChangeWrapper;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.parser.core.xml.XMLChangeLogSAXParser;
 import liquibase.serializer.ChangeLogSerializer;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.util.ISODateFormat;
@@ -69,7 +70,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
     }
 
     public Element createNode(SqlVisitor visitor) {
-        Element node = currentChangeLogFileDOM.createElement(visitor.getName());
+        Element node = currentChangeLogFileDOM.createElementNS(XMLChangeLogSAXParser.getDatabaseChangeLogNameSpace(), visitor.getName());
         try {
             List<Field> allFields = new ArrayList<Field>();
             Class classToExtractFieldsFrom = visitor.getClass();
@@ -106,7 +107,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
     }
 
     public Element createNode(Change change) {
-        Element node = currentChangeLogFileDOM.createElement(change.getChangeMetaData().getName());
+        Element node = currentChangeLogFileDOM.createElementNS(XMLChangeLogSAXParser.getDatabaseChangeLogNameSpace(), change.getChangeMetaData().getName());
         try {
             List<Field> allFields = new ArrayList<Field>();
             Class classToExtractFieldsFrom = change.getClass();
@@ -167,13 +168,13 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
 
     // create a XML node with nodeName and simple text content
     public Element createNode(String nodeName, String nodeContent) {
-        Element element = currentChangeLogFileDOM.createElement(nodeName);
+        Element element = currentChangeLogFileDOM.createElementNS(XMLChangeLogSAXParser.getDatabaseChangeLogNameSpace(), nodeName);
         element.setTextContent(nodeContent);
         return element;
     }
     
     public Element createNode(ColumnConfig columnConfig) {
-        Element element = currentChangeLogFileDOM.createElement("column");
+        Element element = currentChangeLogFileDOM.createElementNS(XMLChangeLogSAXParser.getDatabaseChangeLogNameSpace(), "column");
         if (columnConfig.getName() != null) {
             element.setAttribute("name", columnConfig.getName());
         }
@@ -216,7 +217,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
 
         ConstraintsConfig constraints = columnConfig.getConstraints();
         if (constraints != null) {
-            Element constraintsElement = currentChangeLogFileDOM.createElement("constraints");
+            Element constraintsElement = currentChangeLogFileDOM.createElementNS(XMLChangeLogSAXParser.getDatabaseChangeLogNameSpace(), "constraints");
             if (constraints.getCheck() != null) {
                 constraintsElement.setAttribute("check", constraints.getCheck());
             }
@@ -263,7 +264,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
     }
 
     public Element createNode(ChangeSet changeSet) {
-        Element node = currentChangeLogFileDOM.createElement("changeSet");
+        Element node = currentChangeLogFileDOM.createElementNS(XMLChangeLogSAXParser.getDatabaseChangeLogNameSpace(), "changeSet");
         node.setAttribute("id", changeSet.getId());
         node.setAttribute("author", changeSet.getAuthor());
 
@@ -296,7 +297,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
         }
 
         if (StringUtils.trimToNull(changeSet.getComments()) != null) {
-            Element commentsElement = currentChangeLogFileDOM.createElement("comment");
+            Element commentsElement = currentChangeLogFileDOM.createElementNS(XMLChangeLogSAXParser.getDatabaseChangeLogNameSpace(), "comment");
             Text commentsText = currentChangeLogFileDOM.createTextNode(changeSet.getComments());
             commentsElement.appendChild(commentsText);
             node.appendChild(commentsElement);
@@ -311,11 +312,11 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
 
 
     public Element createNode(CustomChangeWrapper change) {
-        Element customElement = currentChangeLogFileDOM.createElement("custom");
+        Element customElement = currentChangeLogFileDOM.createElementNS(XMLChangeLogSAXParser.getDatabaseChangeLogNameSpace(), "custom");
         customElement.setAttribute("class", change.getClassName());
 
         for (String param : change.getParams()) {
-            Element paramElement = currentChangeLogFileDOM.createElement("param");
+            Element paramElement = currentChangeLogFileDOM.createElementNS(XMLChangeLogSAXParser.getDatabaseChangeLogNameSpace(), "param");
             paramElement.setAttribute("name", param);
             paramElement.setAttribute("value", change.getParamValues().get(param));
 
