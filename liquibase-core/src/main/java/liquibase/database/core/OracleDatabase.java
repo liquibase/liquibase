@@ -622,8 +622,6 @@ public class OracleDatabase extends AbstractDatabase {
             "SYSTEM",
             "TABLE",
             "TABLES",
-            "TABLESPACE",
-            "TABLESPACE_NO",
             "TABNO",
             "TEMPORARY",
             "THAN",
