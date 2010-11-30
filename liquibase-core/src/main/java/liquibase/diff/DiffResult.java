@@ -474,17 +474,10 @@ public class DiffResult {
 
 		Document doc = documentBuilder.newDocument();
 
-		Element changeLogElement = doc.createElement("databaseChangeLog");
-		changeLogElement.setAttribute("xmlns",
-				"http://www.liquibase.org/xml/ns/dbchangelog");
-		changeLogElement.setAttribute("xmlns:xsi",
-				"http://www.w3.org/2001/XMLSchema-instance");
-		changeLogElement
-				.setAttribute(
-						"xsi:schemaLocation",
-						"http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-"
-								+ XMLChangeLogSAXParser.getSchemaVersion()
-								+ ".xsd");
+		Element changeLogElement = doc.createElementNS(XMLChangeLogSAXParser.getDatabaseChangeLogNameSpace(), "databaseChangeLog");
+		changeLogElement.setAttribute("xmlns", XMLChangeLogSAXParser.getDatabaseChangeLogNameSpace());
+		changeLogElement.setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
+		changeLogElement.setAttribute("xsi:schemaLocation", "http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-"+ XMLChangeLogSAXParser.getSchemaVersion()+ ".xsd");
 
 		doc.appendChild(changeLogElement);
 

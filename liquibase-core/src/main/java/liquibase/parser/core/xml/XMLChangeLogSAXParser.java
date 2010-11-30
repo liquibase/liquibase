@@ -18,6 +18,7 @@ import java.io.InputStream;
 import liquibase.util.file.FilenameUtils;
 
 public class XMLChangeLogSAXParser implements ChangeLogParser {
+
     private SAXParserFactory saxParserFactory;
 
     public XMLChangeLogSAXParser() {
@@ -38,6 +39,10 @@ public class XMLChangeLogSAXParser implements ChangeLogParser {
 
     public static String getSchemaVersion() {
         return "2.0";
+    }
+
+    public static String getDatabaseChangeLogNameSpace() {
+        return "http://www.liquibase.org/xml/ns/dbchangelog";
     }
 
     public boolean supports(String changeLogFile, ResourceAccessor resourceAccessor) {
