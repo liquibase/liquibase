@@ -70,7 +70,8 @@
     </changeSet>
 
     <changeSet id="datatypetest-2" author="nvoxland">
-        <insert tableName="dataTypeTest">
+        <validCheckSum>ANY</validCheckSum>
+        <insert tableName="dataTypeTest3">
             <column name="id" valueNumeric="1"/>
             <column name="dateCol" valueDate="2007-08-09"/>
             <column name="timeCol" valueDate="13:14:15"/>

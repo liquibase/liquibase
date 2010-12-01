@@ -27,7 +27,7 @@ public class ShouldRunChangeSetFilterTest  {
 
         ShouldRunChangeSetFilter filter = new ShouldRunChangeSetFilter(database);
 
-        assertTrue(filter.accepts(new ChangeSet("1", "testAuthor", false, false, "path/changelog",null,  null, null)));
+        assertTrue(filter.accepts(new ChangeSet("1", "testAuthor", false, false, "path/changelog",  null, null)));
     }
 
     @Test
@@ -53,21 +53,21 @@ public class ShouldRunChangeSetFilterTest  {
         ShouldRunChangeSetFilter filter = new ShouldRunChangeSetFilter(database);
 
         //everything same
-        assertFalse(filter.accepts(new ChangeSet("1", "testAuthor", false, false, "path/changelog",null,  null, null)));
+        assertFalse(filter.accepts(new ChangeSet("1", "testAuthor", false, false, "path/changelog",  null, null)));
 
         //alwaysRun
-        assertTrue(filter.accepts(new ChangeSet("1", "testAuthor", true, false, "path/changelog", null, null, null)));
+        assertTrue(filter.accepts(new ChangeSet("1", "testAuthor", true, false, "path/changelog", null, null)));
 
         //run on change
-        assertTrue(filter.accepts(new ChangeSet("1", "testAuthor", false, true, "path/changelog", null, null, null)));
+        assertTrue(filter.accepts(new ChangeSet("1", "testAuthor", false, true, "path/changelog", null, null)));
 
         //different id
-        assertTrue(filter.accepts(new ChangeSet("3", "testAuthor", false, false, "path/changelog",null,  null, null)));
+        assertTrue(filter.accepts(new ChangeSet("3", "testAuthor", false, false, "path/changelog",  null, null)));
 
         //different author
-        assertTrue(filter.accepts(new ChangeSet("1", "otherAuthor", false, false, "path/changelog", null, null, null)));
+        assertTrue(filter.accepts(new ChangeSet("1", "otherAuthor", false, false, "path/changelog", null, null)));
 
         //different path
-        assertTrue(filter.accepts(new ChangeSet("1", "testAuthor", false, false, "other/changelog", null, null, null)));
+        assertTrue(filter.accepts(new ChangeSet("1", "testAuthor", false, false, "other/changelog", null, null)));
     }
 }

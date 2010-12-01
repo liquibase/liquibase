@@ -15,7 +15,7 @@ public class AlreadyRanChangeSetFilterTest {
     public void accepts_noneRun() {
         AlreadyRanChangeSetFilter filter = new AlreadyRanChangeSetFilter(new ArrayList<RanChangeSet>());
 
-        assertFalse(filter.accepts(new ChangeSet("1", "testAuthor", false, false, "path/changelog",null,  null, null)));
+        assertFalse(filter.accepts(new ChangeSet("1", "testAuthor", false, false, "path/changelog",null, null)));
     }
 
     @Test
@@ -26,21 +26,21 @@ public class AlreadyRanChangeSetFilterTest {
         AlreadyRanChangeSetFilter filter = new AlreadyRanChangeSetFilter(ranChanges);
 
         //everything same
-        assertTrue(filter.accepts(new ChangeSet("1", "testAuthor", false, false, "path/changelog",null,  null, null)));
+        assertTrue(filter.accepts(new ChangeSet("1", "testAuthor", false, false, "path/changelog",  null, null)));
 
         //alwaysRun
-        assertTrue(filter.accepts(new ChangeSet("1", "testAuthor", true, false, "path/changelog",null,  null, null)));
+        assertTrue(filter.accepts(new ChangeSet("1", "testAuthor", true, false, "path/changelog",  null, null)));
 
         //run on change
-        assertTrue(filter.accepts(new ChangeSet("1", "testAuthor", false, true, "path/changelog", null, null, null)));
+        assertTrue(filter.accepts(new ChangeSet("1", "testAuthor", false, true, "path/changelog", null, null)));
 
         //different id
-        assertFalse(filter.accepts(new ChangeSet("3", "testAuthor", false, false, "path/changelog", null, null, null)));
+        assertFalse(filter.accepts(new ChangeSet("3", "testAuthor", false, false, "path/changelog", null, null)));
 
         //different author
-        assertFalse(filter.accepts(new ChangeSet("1", "otherAuthor", false, false, "path/changelog", null, null, null)));
+        assertFalse(filter.accepts(new ChangeSet("1", "otherAuthor", false, false, "path/changelog", null, null)));
 
         //different path
-        assertFalse(filter.accepts(new ChangeSet("1", "testAuthor", false, false, "other/changelog", null, null, null)));
+        assertFalse(filter.accepts(new ChangeSet("1", "testAuthor", false, false, "other/changelog", null, null)));
     }
 }
