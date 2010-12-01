@@ -180,11 +180,16 @@ public class H2Database extends AbstractDatabase {
     @Override
     public String escapeDatabaseObject(String objectName) {
     	if (objectName != null) {
-            if (keywords.contains(objectName.toUpperCase())) {
+            if (isReservedWord(objectName)) {
                 return "\""+objectName+"\"";
             }
     	}
         return objectName;
+    }
+
+    @Override
+    public boolean isReservedWord(String objectName) {
+        return keywords.contains(objectName.toUpperCase());
     }
 
     private static List keywords = Arrays.asList(

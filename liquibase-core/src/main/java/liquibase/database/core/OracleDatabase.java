@@ -57,12 +57,16 @@ public class OracleDatabase extends AbstractDatabase {
     public String escapeDatabaseObject(String objectName) {
         // escape the object name if it contains any non-word characters
         if (objectName != null &&
-                (Pattern.compile("\\W").matcher(objectName).find()
-                        || reservedWords.contains(objectName.toUpperCase()))) {
+                (Pattern.compile("\\W").matcher(objectName).find() || isReservedWord(objectName))) {
             return "\"" + objectName + "\"";
         } else {
             return objectName;
         }
+    }
+
+    @Override
+    public boolean isReservedWord(String objectName) {
+        return reservedWords.contains(objectName.toUpperCase());
     }
 
     @Override
