@@ -233,7 +233,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 				}
 
 				changeSet = new ChangeSet(atts.getValue("id"), atts.getValue("author"), alwaysRun, runOnChange, filePath,
-						databaseChangeLog.getPhysicalFilePath(), atts.getValue("context"), atts.getValue("dbms"),
+						atts.getValue("context"), atts.getValue("dbms"),
 						Boolean.valueOf(atts.getValue("runInTransaction")));
 				if (StringUtils.trimToNull(atts.getValue("failOnError")) != null) {
 					changeSet.setFailOnError(Boolean.parseBoolean(atts.getValue("failOnError")));

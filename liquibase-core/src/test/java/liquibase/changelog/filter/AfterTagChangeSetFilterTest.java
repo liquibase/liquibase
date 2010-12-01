@@ -30,9 +30,9 @@ public class AfterTagChangeSetFilterTest {
         ranChanges.add(new RanChangeSet("path/changelog", "3", "testAuthor", CheckSum.parse("12345"), new Date(), null, null));
         AfterTagChangeSetFilter filter = new AfterTagChangeSetFilter("tag1", ranChanges);
 
-        assertFalse(filter.accepts(new ChangeSet("1", "testAuthor", false, false, "path/changelog", null, null, null)));
-        assertFalse(filter.accepts(new ChangeSet("2", "testAuthor", false, false, "path/changelog", null, null, null)));
-        assertTrue(filter.accepts(new ChangeSet("3", "testAuthor", false, false, "path/changelog", null, null, null)));
+        assertFalse(filter.accepts(new ChangeSet("1", "testAuthor", false, false, "path/changelog", null, null)));
+        assertFalse(filter.accepts(new ChangeSet("2", "testAuthor", false, false, "path/changelog", null, null)));
+        assertTrue(filter.accepts(new ChangeSet("3", "testAuthor", false, false, "path/changelog", null, null)));
 
     }
 }

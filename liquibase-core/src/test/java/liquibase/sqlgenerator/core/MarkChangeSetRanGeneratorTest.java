@@ -10,6 +10,6 @@ public class MarkChangeSetRanGeneratorTest extends AbstractSqlGeneratorTest<Mark
     }
 
     protected MarkChangeSetRanStatement createSampleSqlStatement() {
-        return new MarkChangeSetRanStatement(new ChangeSet("1", "a", false, false, "c", "d", null, null), ChangeSet.ExecType.EXECUTED);
+        return new MarkChangeSetRanStatement(new ChangeSet("1", "a", false, false, "c", null, null), ChangeSet.ExecType.EXECUTED);
     }
 }

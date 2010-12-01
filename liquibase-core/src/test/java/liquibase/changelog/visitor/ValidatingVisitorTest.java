@@ -19,8 +19,8 @@ public class ValidatingVisitorTest {
 
     @Before
     public void setup() {
-        changeSet1 = new ChangeSet("1", "testAuthor", false, false, "path/changelog", null, null, null);
-        changeSet2 = new ChangeSet("2", "testAuthor", false, false, "path/changelog", null, null, null);
+        changeSet1 = new ChangeSet("1", "testAuthor", false, false, "path/changelog", null, null);
+        changeSet2 = new ChangeSet("2", "testAuthor", false, false, "path/changelog", null, null);
     }
 
 

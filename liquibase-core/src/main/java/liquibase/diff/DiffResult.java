@@ -527,7 +527,7 @@ public class DiffResult {
 
 	private ChangeSet generateChangeSet() {
 		return new ChangeSet(generateId(), getChangeSetAuthor(), false, false,
-				null, null, getChangeSetContext(), null);
+				null, getChangeSetContext(), null);
 	}
 
 	private String getChangeSetAuthor() {
