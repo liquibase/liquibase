@@ -500,6 +500,9 @@ public class ChangeSet implements Conditional {
         }
 
         for (CheckSum validCheckSum : validCheckSums) {
+            if (validCheckSum.toString().equalsIgnoreCase("1:any")) {
+                return true;
+            }
             if (currentMd5Sum.equals(validCheckSum)) {
                 return true;
             }
