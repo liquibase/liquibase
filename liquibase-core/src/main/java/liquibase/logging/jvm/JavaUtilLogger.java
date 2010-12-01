@@ -6,6 +6,8 @@ import liquibase.logging.LogLevel;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.DateFormat;
+import java.util.Date;
 import java.util.logging.*;
 
 public class JavaUtilLogger extends AbstractLogger {
@@ -22,6 +24,13 @@ public class JavaUtilLogger extends AbstractLogger {
 
     @Override
     public void setLogLevel(LogLevel logLevel) {
+        if (logger.getHandlers().length == 0) {
+            ConsoleHandler consoleHandler = new ConsoleHandler();
+            consoleHandler.setFormatter(getFormatter());
+            logger.addHandler(consoleHandler);
+            logger.setUseParentHandlers(false);
+        }
+        
         if (logLevel == LogLevel.DEBUG) {
             logger.setLevel(Level.FINEST);
         } else if (logLevel == LogLevel.INFO) {
@@ -52,16 +61,20 @@ public class JavaUtilLogger extends AbstractLogger {
             throw new IllegalArgumentException("Cannot open log file " + logFile + ". Reason: " + e.getMessage());
         }
 
-        fH.setFormatter(new Formatter(){
-            @Override
-            public String format(LogRecord record) {
-                return record.getLoggerName()+":"+record.getLevel().getName()+": "+record.getMessage()+ System.getProperty("line.separator");
-            }
-        });
+        fH.setFormatter(getFormatter());
         logger.addHandler(fH);
         logger.setUseParentHandlers(false);
         setLogLevel(logLevel);
 
+    }
+
+    private Formatter getFormatter() {
+        return new Formatter(){
+            @Override
+            public String format(LogRecord record) {
+                return DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(new Date(record.getMillis()))+" "+record.getLoggerName()+":"+record.getLevel().getName()+": "+record.getMessage()+ System.getProperty("line.separator");
+            }
+        };
     }
 
     public void severe(String message) {
