@@ -209,10 +209,8 @@ public class PreconditionContainer extends AndPrecondition {
             if (getOnFailMessage() != null) {
                 message = new StringBuffer(getOnFailMessage());
             }
-            if (this.getOnFail().equals(PreconditionContainer.FailOption.CONTINUE)) {
-                LogFactory.getLogger().info("Continuing past: " + ranOn + " despite precondition failure:\n " + message);
-            } else if (this.getOnFail().equals(PreconditionContainer.FailOption.WARN)) {
-                LogFactory.getLogger().warning("Continuing past: " + ranOn + " despite precondition failure:\n " + message);
+            if (this.getOnFail().equals(PreconditionContainer.FailOption.WARN)) {
+                LogFactory.getLogger().info("Executing: " + ranOn + " despite precondition failure due to onFail='WARN':\n " + message);
             } else {
                 if (getOnFailMessage() == null) {
                     throw e;

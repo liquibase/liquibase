@@ -259,11 +259,13 @@ public class ChangeSet implements Conditional {
                 } else if (preconditions.getOnFail().equals(PreconditionContainer.FailOption.CONTINUE)) {
                     skipChange = true;
                     execType = ExecType.SKIPPED;
+
+                    LogFactory.getLogger().info("Continuing past: " + toString() + " despite precondition failure due to onFail='CONTINUE': " + message);
                 } else if (preconditions.getOnFail().equals(PreconditionContainer.FailOption.MARK_RAN)) {
                     execType = ExecType.MARK_RAN;
                     skipChange = true;
 
-                    log.info("Marking ChangeSet: " + toString() + " ran despite precondition failure: " + message);
+                    log.info("Marking ChangeSet: " + toString() + " ran despite precondition failure due to onFail='MARK_RAN': " + message);
                 } else if (preconditions.getOnFail().equals(PreconditionContainer.FailOption.WARN)) {
                     execType = null; //already warned
                 } else {
