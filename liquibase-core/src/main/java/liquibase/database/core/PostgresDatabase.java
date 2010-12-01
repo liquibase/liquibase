@@ -262,10 +262,8 @@ public class PostgresDatabase extends AbstractDatabase {
 
     }
 
-    /*
-    * Check if given string is reserved word.
-    */
-    private boolean isReservedWord(String tableName) {
+    @Override
+    public boolean isReservedWord(String tableName) {
         for (int i = 0; i != this.reservedWords.length; i++)
             if (this.reservedWords[i].toLowerCase().equalsIgnoreCase(tableName))
                 return true;

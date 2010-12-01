@@ -503,6 +503,10 @@ public abstract class AbstractDatabase implements Database {
         }
     }
 
+    public boolean isReservedWord(String string) {
+        return false;
+    }
+
 // ------- DATABASE OBJECT DROPPING METHODS ---- //
 
     /**

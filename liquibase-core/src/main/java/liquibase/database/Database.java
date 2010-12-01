@@ -265,4 +265,5 @@ public interface Database extends DatabaseObject, PrioritizedService {
 
     void enableForeignKeyChecks() throws DatabaseException;
 
+    public boolean isReservedWord(String string);
 }

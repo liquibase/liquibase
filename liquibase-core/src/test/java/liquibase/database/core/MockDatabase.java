@@ -459,4 +459,8 @@ public class MockDatabase implements Database {
     public void updateChecksum(ChangeSet changeSet) throws DatabaseException {
         
     }
+
+    public boolean isReservedWord(String string) {
+        return false;
+    }
 }
