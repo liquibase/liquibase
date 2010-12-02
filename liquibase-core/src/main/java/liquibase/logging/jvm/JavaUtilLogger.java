@@ -4,7 +4,6 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.logging.core.AbstractLogger;
 import liquibase.logging.LogLevel;
 
-import java.io.File;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.util.Date;
@@ -24,12 +23,7 @@ public class JavaUtilLogger extends AbstractLogger {
 
     @Override
     public void setLogLevel(LogLevel logLevel) {
-        if (logger.getHandlers().length == 0) {
-            ConsoleHandler consoleHandler = new ConsoleHandler();
-            consoleHandler.setFormatter(getFormatter());
-            logger.addHandler(consoleHandler);
-            logger.setUseParentHandlers(false);
-        }
+        assignHandler();
         
         if (logLevel == LogLevel.DEBUG) {
             logger.setLevel(Level.FINEST);
@@ -47,6 +41,22 @@ public class JavaUtilLogger extends AbstractLogger {
         super.setLogLevel(logLevel);
     }
 
+    protected void assignHandler() {
+        boolean shouldSetHandler;
+        Logger loggerToCheckForHandlers = logger;
+        do {
+            shouldSetHandler = loggerToCheckForHandlers.getHandlers().length == 0;
+            loggerToCheckForHandlers = loggerToCheckForHandlers.getParent();
+        } while (!shouldSetHandler && loggerToCheckForHandlers != null);
+
+        if (shouldSetHandler) {
+            ConsoleHandler consoleHandler = new ConsoleHandler();
+            consoleHandler.setFormatter(createFormatter());
+            logger.addHandler(consoleHandler);
+            logger.setUseParentHandlers(false);
+        }
+    }
+
 
     /**
      * @param logLevel
@@ -61,14 +71,14 @@ public class JavaUtilLogger extends AbstractLogger {
             throw new IllegalArgumentException("Cannot open log file " + logFile + ". Reason: " + e.getMessage());
         }
 
-        fH.setFormatter(getFormatter());
+        fH.setFormatter(createFormatter());
         logger.addHandler(fH);
         logger.setUseParentHandlers(false);
         setLogLevel(logLevel);
 
     }
 
-    private Formatter getFormatter() {
+    protected Formatter createFormatter() {
         return new Formatter(){
             @Override
             public String format(LogRecord record) {
