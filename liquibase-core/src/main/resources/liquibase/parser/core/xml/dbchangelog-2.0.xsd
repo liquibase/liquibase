@@ -295,7 +295,6 @@
 	<xsd:attributeGroup name="tableNameAttribute">
 		<xsd:attribute name="schemaName" type="xsd:string" />
 		<xsd:attribute name="tableName" type="xsd:string" use="required" />
-		<xsd:attribute name="tablespace" type="xsd:string" />
 	</xsd:attributeGroup>
 
 	<xsd:attributeGroup name="renameColumnAttributes">
@@ -332,6 +331,7 @@
 		<xsd:attributeGroup ref="indexName" />
 		<xsd:attribute name="associatedWith" type="xsd:string" use="optional" />
 		<xsd:attribute name="unique" type="booleanExp" />
+        <xsd:attribute name="tablespace" type="xsd:string" />
 	</xsd:attributeGroup>
 
 
@@ -734,6 +734,7 @@
 				<xsd:element ref="column" minOccurs="1" maxOccurs="unbounded" />
 			</xsd:sequence>
 			<xsd:attributeGroup ref="tableNameAttribute" />
+            <xsd:attribute name="tablespace" type="xsd:string" />            
 			<xsd:attribute name="remarks" type="xsd:string" />
 		</xsd:complexType>
 	</xsd:element>
