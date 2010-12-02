@@ -307,6 +307,14 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
         for (Change change : changeSet.getChanges()) {
             node.appendChild(createNode(change));
         }
+        if (changeSet.getRollBackChanges()!=null) {
+            Element rollback = currentChangeLogFileDOM.createElement("rollback");
+            for (Change change : changeSet.getRollBackChanges()) {
+                rollback.appendChild(createNode(change));
+            }
+            node.appendChild( rollback );
+        }
+        
         return node;
     }
 
