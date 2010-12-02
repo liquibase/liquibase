@@ -101,8 +101,13 @@ public class LockService {
 
                 executor.comment("Lock Database");
                 int rowsUpdated = executor.update(new LockDatabaseChangeLogStatement());
-                if (rowsUpdated != 1) {
+                if (rowsUpdated > 1) {
                     throw new LockException("Did not update change log lock correctly");
+                }
+                if (rowsUpdated == 0)
+                {
+                    // another node was faster
+                    return false;
                 }
                 database.commit();
                 LogFactory.getLogger().info("Successfully acquired change log lock");
