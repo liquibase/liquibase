@@ -456,6 +456,9 @@
     <changeSet id="sampleCSVData" author="nvoxland">
         <loadData tableName="csvdata" file="changelogs/sample.data1.csv"/>
     </changeSet>
+    <changeSet id="sampleCSVData" author="nvoxland">
+        <loadData tableName="csvdata" file="changelogs/sample.data1.tsv" separator="&#9;"/>
+    </changeSet>
     <changeSet id="sampleCSVData2" author="nvoxland">
         <loadData tableName="csvdata" file="changelogs/sample.data2.csv">
             <column header="locked" type="BOOLEAN"/>

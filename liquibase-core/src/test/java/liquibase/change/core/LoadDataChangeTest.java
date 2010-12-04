@@ -20,19 +20,42 @@ public class LoadDataChangeTest extends AbstractChangeTest {
         assertEquals("Load Data", new LoadDataChange().getChangeMetaData().getDescription());
     }
 
-    @Override
+    
     @Test
-    public void generateStatement() throws Exception {
+    public void loadDataTsv() throws Exception {
         LoadDataChange refactoring = new LoadDataChange();
         refactoring.setSchemaName("SCHEMA_NAME");
         refactoring.setTableName("TABLE_NAME");
-        refactoring.setFile("liquibase/change/core/sample.data1.csv");
-        //refactoring.setFileOpener(new JUnitResourceAccessor());
+        refactoring.setFile("liquibase/change/core/sample.data1.tsv");
+        refactoring.setSeparator("\t");
+        
         refactoring.setResourceAccessor(new ClassLoaderResourceAccessor());
 
         SqlStatement[] sqlStatements = refactoring.generateStatements(new MockDatabase());
 
-        assertEquals(2, sqlStatements.length);
+        stdAssertOfLoaded(sqlStatements);
+    }
+
+    @Test
+    public void loadDataCsvQuotChar() throws Exception {
+        LoadDataChange refactoring = new LoadDataChange();
+        refactoring.setSchemaName("SCHEMA_NAME");
+        refactoring.setTableName("TABLE_NAME");
+        refactoring.setFile("liquibase/change/core/sample.quotchar.tsv");
+        refactoring.setSeparator("\t");
+        refactoring.setQuotchar("\'");
+        
+        refactoring.setResourceAccessor(new ClassLoaderResourceAccessor());
+
+        SqlStatement[] sqlStatements = refactoring.generateStatements(new MockDatabase());
+
+        stdAssertOfLoaded(sqlStatements);
+    }
+
+
+
+	private void stdAssertOfLoaded(SqlStatement[] sqlStatements) {
+		assertEquals(2, sqlStatements.length);
         assertTrue(sqlStatements[0] instanceof InsertStatement);
         assertTrue(sqlStatements[1] instanceof InsertStatement);
 
@@ -45,6 +68,22 @@ public class LoadDataChangeTest extends AbstractChangeTest {
         assertEquals("TABLE_NAME", ((InsertStatement) sqlStatements[1]).getTableName());
         assertEquals("John Doe", ((InsertStatement) sqlStatements[1]).getColumnValue("name"));
         assertEquals("jdoe", ((InsertStatement) sqlStatements[1]).getColumnValue("username"));
+	}
+    
+    
+    @Override
+    @Test
+    public void generateStatement() throws Exception {
+        LoadDataChange refactoring = new LoadDataChange();
+        refactoring.setSchemaName("SCHEMA_NAME");
+        refactoring.setTableName("TABLE_NAME");
+        refactoring.setFile("liquibase/change/core/sample.data1.csv");
+        //refactoring.setFileOpener(new JUnitResourceAccessor());
+        refactoring.setResourceAccessor(new ClassLoaderResourceAccessor());
+
+        SqlStatement[] sqlStatements = refactoring.generateStatements(new MockDatabase());
+
+        stdAssertOfLoaded(sqlStatements);
     }
 
     @Test

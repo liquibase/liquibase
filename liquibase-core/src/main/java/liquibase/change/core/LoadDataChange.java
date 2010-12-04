@@ -22,6 +22,10 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns 
     private String tableName;
     private String file;
     private String encoding = null;
+    private String separator = liquibase.util.csv.opencsv.CSVReader.DEFAULT_SEPARATOR + "";
+	private String quotchar = liquibase.util.csv.opencsv.CSVReader.DEFAULT_QUOTE_CHARACTER + "";
+
+	
     private List<LoadDataColumnConfig> columns = new ArrayList<LoadDataColumnConfig>();
 
 
@@ -66,7 +70,23 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns 
         this.encoding = encoding;
     }
 
-    public void addColumn(ColumnConfig column) {
+    public String getSeparator() {
+		return separator;
+	}
+
+	public void setSeparator(String separator) {
+		this.separator = separator;
+	}
+
+	public String getQuotchar() {
+		return quotchar;
+	}
+
+	public void setQuotchar(String quotchar) {
+		this.quotchar = quotchar;
+	}
+
+	public void addColumn(ColumnConfig column) {
       	columns.add((LoadDataColumnConfig) column);
     }
 
@@ -151,8 +171,17 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns 
         } else {
             streamReader = new InputStreamReader(stream, getEncoding());
         }
-
-        CSVReader reader = new CSVReader(streamReader);
+    	
+        char quotchar;
+        if (0 == this.quotchar.length() ) {
+        	// hope this is impossible to have a field surrounded with non ascii char 0x01 
+        	quotchar = '\1';
+        } else {
+        	quotchar = this.quotchar.charAt(0);
+        }
+        	
+        CSVReader reader = new CSVReader(streamReader, separator.charAt(0), quotchar );
+        
         return reader;
     }
 
