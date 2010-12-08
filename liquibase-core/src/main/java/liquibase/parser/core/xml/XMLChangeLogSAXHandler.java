@@ -500,7 +500,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 					preconditions);
 		}
 		for (ChangeSet changeSet : changeLog.getChangeSets()) {
-			databaseChangeLog.addChangeSet(changeSet);
+			handleChangeSet(changeSet);
 		}
 
 		return true;
