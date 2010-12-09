@@ -456,7 +456,7 @@
     <changeSet id="sampleCSVData" author="nvoxland">
         <loadData tableName="csvdata" file="changelogs/sample.data1.csv"/>
     </changeSet>
-    <changeSet id="sampleCSVData" author="nvoxland">
+    <changeSet id="sampleTSVData" author="nvoxland">
         <loadData tableName="csvdata" file="changelogs/sample.data1.tsv" separator="&#9;"/>
     </changeSet>
     <changeSet id="sampleCSVData2" author="nvoxland">
@@ -469,7 +469,7 @@
 
     <changeSet id="sampleCSVData3" author="nvoxland">
         <preConditions>
-            <sqlCheck expectedResult="4">select count(*) from csvdata</sqlCheck>
+            <sqlCheck expectedResult="6">select count(*) from csvdata</sqlCheck>
         </preConditions>
         <loadData tableName="csvdata" file="changelogs/sample.data3.csv">
             <column index="0" name="name" type="STRING"/>

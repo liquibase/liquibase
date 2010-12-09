@@ -298,6 +298,9 @@ public abstract class AbstractDatabase implements Database {
      * Returns database-specific auto-increment DDL clause.
      */
     public String getAutoIncrementClause() {
+        if (!supportsAutoIncrement()) {
+            return "";
+        }
         return "AUTO_INCREMENT";
     }
 
@@ -347,7 +350,7 @@ public abstract class AbstractDatabase implements Database {
      * @param updateExistingNullChecksums
      * @param contexts
      */
-    public void checkDatabaseChangeLogTable(boolean updateExistingNullChecksums, DatabaseChangeLog databaseChangeLog, String[] contexts) throws DatabaseException {
+    public void checkDatabaseChangeLogTable(boolean updateExistingNullChecksums, DatabaseChangeLog databaseChangeLog, String... contexts) throws DatabaseException {
         Executor executor = ExecutorService.getInstance().getExecutor(this);
 
         Table changeLogTable = DatabaseSnapshotGeneratorFactory.getInstance().getGenerator(this).getDatabaseChangeLogTable(this);
