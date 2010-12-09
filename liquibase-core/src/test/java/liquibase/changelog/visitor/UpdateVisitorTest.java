@@ -13,7 +13,7 @@ public class UpdateVisitorTest {
         Database database = createMock(Database.class);
 
         ChangeSet changeSet = createMock(ChangeSet.class);
-        expect(changeSet.execute(new DatabaseChangeLog(), database)).andReturn(ChangeSet.ExecType.EXECUTED);
+        expect(changeSet.execute(new DatabaseChangeLog("test.xml"), database)).andReturn(ChangeSet.ExecType.EXECUTED);
 
 
         expect(database.getRunStatus(changeSet)).andReturn(ChangeSet.RunStatus.NOT_RAN);
@@ -30,7 +30,7 @@ public class UpdateVisitorTest {
         replay(database);
 
         UpdateVisitor visitor = new UpdateVisitor(database);
-        visitor.visit(changeSet, new DatabaseChangeLog(), database);
+        visitor.visit(changeSet, new DatabaseChangeLog("test.xml"), database);
 
         verify(database);
         verify(changeSet);
