@@ -170,12 +170,13 @@ public class ColumnConfig {
     public ColumnConfig setValueDate(String valueDate) {
         if (valueDate == null || valueDate.equalsIgnoreCase("null")) {
             this.valueDate = null;
-        }
-        try {
-            this.valueDate = new ISODateFormat().parse(valueDate);
-        } catch (ParseException e) {
-            //probably a function
-            this.valueComputed = new DatabaseFunction(valueDate);
+        } else {
+            try {
+                this.valueDate = new ISODateFormat().parse(valueDate);
+            } catch (ParseException e) {
+                //probably a function
+                this.valueComputed = new DatabaseFunction(valueDate);
+            }
         }
 
         return this;
@@ -245,12 +246,13 @@ public class ColumnConfig {
     public ColumnConfig setDefaultValueDate(String defaultValueDate) {
         if (defaultValueDate == null || defaultValueDate.equalsIgnoreCase("null")) {
             this.defaultValueDate = null;
-        }
-        try {
-            this.defaultValueDate = new ISODateFormat().parse(defaultValueDate);
-        } catch (ParseException e) {
-            //probably a computed date
-            this.defaultValueComputed = new DatabaseFunction(defaultValueDate);
+        } else {
+            try {
+                this.defaultValueDate = new ISODateFormat().parse(defaultValueDate);
+            } catch (ParseException e) {
+                //probably a computed date
+                this.defaultValueComputed = new DatabaseFunction(defaultValueDate);
+            }
         }
 
         return this;

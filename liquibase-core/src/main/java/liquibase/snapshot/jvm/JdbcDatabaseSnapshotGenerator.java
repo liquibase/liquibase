@@ -55,7 +55,9 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
             try {
                 return rs.next();
             } finally {
-                rs.close();
+                try {
+                    rs.close();
+                } catch (SQLException ignore) { }
             }
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);
@@ -68,16 +70,24 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
             DatabaseMetaData metaData = getMetaData(database);
             rs = metaData.getTables(database.convertRequestedSchemaToCatalog(schemaName), database.convertRequestedSchemaToSchema(schemaName), convertTableNameToDatabaseTableName(tableName), new String[]{"TABLE"});
 
-            if (!rs.next()) {
-                return null;
+            Table table;
+            try {
+                if (!rs.next()) {
+                    return null;
+                }
+
+                table = readTable(rs, database);
+            } finally {
+                rs.close();
             }
 
-            Table table = readTable(rs, database);
-            rs.close();
-
             rs = metaData.getColumns(database.convertRequestedSchemaToCatalog(schemaName), database.convertRequestedSchemaToSchema(schemaName), convertTableNameToDatabaseTableName(tableName), null);
-            while (rs.next()) {
-                table.getColumns().add(readColumn(rs, database));
+            try {
+                while (rs.next()) {
+                    table.getColumns().add(readColumn(rs, database));
+                }
+            } finally {
+                rs.close();
             }
 
             return table;
@@ -87,9 +97,7 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
             if (rs != null) {
                 try {
                     rs.close();
-                } catch (SQLException e) {
-                    //ok
-                }
+                } catch (SQLException ignore) { }
             }
         }
     }
@@ -110,9 +118,7 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
             if (rs != null) {
                 try {
                     rs.close();
-                } catch (SQLException e) {
-                    //ok
-                }
+                } catch (SQLException ignore) { }
             }
         }
     }
@@ -267,7 +273,9 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
                 snapshot.getTables().add(table);
             }
         } finally {
-            rs.close();
+            try {
+                rs.close();
+            } catch (SQLException ignore) { }
         }
     }
 
@@ -286,7 +294,9 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
                 snapshot.getViews().add(view);
             }
         } finally {
-            rs.close();
+            try {
+                rs.close();
+            } catch (SQLException ignore) { }
         }
     }
 
@@ -301,51 +311,64 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
         Database database = snapshot.getDatabase();
         updateListeners("Reading columns for " + database.toString() + " ...");
 
-	    Statement selectStatement = ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement();
-	    ResultSet rs = databaseMetaData.getColumns(database.convertRequestedSchemaToCatalog(schema), database.convertRequestedSchemaToSchema(schema), null, null);
-        while (rs.next()) {
-            Column column = readColumn(rs, database);
+        Statement selectStatement = null;
+        ResultSet rs = null;
+        try {
+            selectStatement = ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement();
+            rs = databaseMetaData.getColumns(database.convertRequestedSchemaToCatalog(schema), database.convertRequestedSchemaToSchema(schema), null, null);
+            while (rs.next()) {
+                Column column = readColumn(rs, database);
 
-            if (column == null) {
-                continue;
-            }
-
-            //replace temp table in column with real table
-            Table tempTable = column.getTable();
-            column.setTable(null);
-
-            Table table;
-            if (database.isLiquibaseTable(tempTable.getName())) {
-                if (tempTable.getName().equalsIgnoreCase(database.getDatabaseChangeLogTableName())) {
-                    table = snapshot.getDatabaseChangeLogTable();
-                } else if (tempTable.getName().equalsIgnoreCase(database.getDatabaseChangeLogLockTableName())) {
-                    table = snapshot.getDatabaseChangeLogLockTable();
-                } else {
-                    throw new UnexpectedLiquibaseException("Unknown liquibase table: " + tempTable.getName());
-                }
-            } else {
-                table = snapshot.getTable(tempTable.getName());
-            }
-            if (table == null) {
-                View view = snapshot.getView(tempTable.getName());
-                if (view == null) {
-                    LogFactory.getLogger().debug("Could not find table or view " + tempTable.getName() + " for column " + column.getName());
+                if (column == null) {
                     continue;
-                } else {
-                    column.setView(view);
-                    column.setAutoIncrement(false);
-                    view.getColumns().add(column);
                 }
-            } else {
-                column.setTable(table);
-                column.setAutoIncrement(isColumnAutoIncrement(database, table.getSchema(), table.getName(), column.getName()));
-                table.getColumns().add(column);
-            }
 
-            column.setPrimaryKey(snapshot.isPrimaryKey(column));
+                //replace temp table in column with real table
+                Table tempTable = column.getTable();
+                column.setTable(null);
+
+                Table table;
+                if (database.isLiquibaseTable(tempTable.getName())) {
+                    if (tempTable.getName().equalsIgnoreCase(database.getDatabaseChangeLogTableName())) {
+                        table = snapshot.getDatabaseChangeLogTable();
+                    } else if (tempTable.getName().equalsIgnoreCase(database.getDatabaseChangeLogLockTableName())) {
+                        table = snapshot.getDatabaseChangeLogLockTable();
+                    } else {
+                        throw new UnexpectedLiquibaseException("Unknown liquibase table: " + tempTable.getName());
+                    }
+                } else {
+                    table = snapshot.getTable(tempTable.getName());
+                }
+                if (table == null) {
+                    View view = snapshot.getView(tempTable.getName());
+                    if (view == null) {
+                        LogFactory.getLogger().debug("Could not find table or view " + tempTable.getName() + " for column " + column.getName());
+                        continue;
+                    } else {
+                        column.setView(view);
+                        column.setAutoIncrement(false);
+                        view.getColumns().add(column);
+                    }
+                } else {
+                    column.setTable(table);
+                    column.setAutoIncrement(isColumnAutoIncrement(database, table.getSchema(), table.getName(), column.getName()));
+                    table.getColumns().add(column);
+                }
+
+                column.setPrimaryKey(snapshot.isPrimaryKey(column));
+            }
+        } finally {
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ignored) { }
+            }
+            if (selectStatement != null) {
+                try {
+                    selectStatement.close();
+                } catch (SQLException ignored) { }
+            }
         }
-        rs.close();
-        selectStatement.close();
     }
 
     /**
@@ -504,13 +527,15 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
             String dbSchema = database.convertRequestedSchemaToSchema(schemaName);
             ResultSet rs = getMetaData(database).getImportedKeys(dbCatalog, dbSchema, convertTableNameToDatabaseTableName(foreignKeyTableName));
 
-            while (rs.next()) {
-                ForeignKeyInfo fkInfo = fillForeignKeyInfo(rs);
+            try {
+                while (rs.next()) {
+                    ForeignKeyInfo fkInfo = fillForeignKeyInfo(rs);
 
-                fkList.add(generateForeignKey(fkInfo, database, fkList));
+                    fkList.add(generateForeignKey(fkInfo, database, fkList));
+                }
+            } finally {
+                rs.close();
             }
-
-            rs.close();
 
             return fkList;
 
@@ -570,83 +595,92 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
         updateListeners("Reading indexes for " + database.toString() + " ...");
 
         for (Table table : snapshot.getTables()) {
-            ResultSet rs;
+            ResultSet rs = null;
             Statement statement = null;
-            if (database instanceof OracleDatabase) {
-                //oracle getIndexInfo is buggy and slow.  See Issue 1824548 and http://forums.oracle.com/forums/thread.jspa?messageID=578383&#578383
-                statement = ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement();
-                String sql = "SELECT INDEX_NAME, 3 AS TYPE, TABLE_NAME, COLUMN_NAME, COLUMN_POSITION AS ORDINAL_POSITION, null AS FILTER_CONDITION FROM ALL_IND_COLUMNS WHERE TABLE_OWNER='" + database.convertRequestedSchemaToSchema(schema) + "' AND TABLE_NAME='" + table.getName() + "' ORDER BY INDEX_NAME, ORDINAL_POSITION";
-                rs = statement.executeQuery(sql);
-            } else {
-                rs = databaseMetaData.getIndexInfo(database.convertRequestedSchemaToCatalog(schema), database.convertRequestedSchemaToSchema(schema), table.getName(), false, true);
-            }
-            Map<String, Index> indexMap = new HashMap<String, Index>();
-            while (rs.next()) {
-                String indexName = convertFromDatabaseName(rs.getString("INDEX_NAME"));
-                /*
-                 * TODO Informix generates indexnames with a leading blank if no name given.
-                 * An identifier with a leading blank is not allowed.
-                 * So here is it replaced.
-                 */
-                if (database instanceof InformixDatabase && indexName.startsWith(" ")) {
-                    indexName = "_generated_index_" + indexName.substring(1);
-                }
-                short type = rs.getShort("TYPE");
-//                String tableName = rs.getString("TABLE_NAME");
-                boolean nonUnique = true;
-                try {
-                    nonUnique = rs.getBoolean("NON_UNIQUE");
-                } catch (SQLException e) {
-                    //doesn't exist in all databases
-                }
-                String columnName = convertFromDatabaseName(rs.getString("COLUMN_NAME"));
-                short position = rs.getShort("ORDINAL_POSITION");
-                /*
-                 * TODO maybe bug in jdbc driver? Need to investigate.
-                 * If this "if" is commented out ArrayOutOfBoundsException is thrown
-                 * because it tries to access an element -1 of a List (position-1)
-                 */
-                if (database instanceof InformixDatabase
-                        && type != DatabaseMetaData.tableIndexStatistic
-                        && position == 0) {
-                    System.out.println(this.getClass().getName() + ": corrected position to " + ++position);
-                }
-                String filterCondition = rs.getString("FILTER_CONDITION");
-
-                if (type == DatabaseMetaData.tableIndexStatistic) {
-                    continue;
-                }
-//                if (type == DatabaseMetaData.tableIndexOther) {
-//                    continue;
-//                }
-
-                if (columnName == null) {
-                    //nothing to index, not sure why these come through sometimes
-                    continue;
-                }
-                Index indexInformation;
-                if (indexMap.containsKey(indexName)) {
-                    indexInformation = indexMap.get(indexName);
+            try {
+                if (database instanceof OracleDatabase) {
+                    //oracle getIndexInfo is buggy and slow.  See Issue 1824548 and http://forums.oracle.com/forums/thread.jspa?messageID=578383&#578383
+                    statement = ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement();
+                    String sql = "SELECT INDEX_NAME, 3 AS TYPE, TABLE_NAME, COLUMN_NAME, COLUMN_POSITION AS ORDINAL_POSITION, null AS FILTER_CONDITION FROM ALL_IND_COLUMNS WHERE TABLE_OWNER='" + database.convertRequestedSchemaToSchema(schema) + "' AND TABLE_NAME='" + table.getName() + "' ORDER BY INDEX_NAME, ORDINAL_POSITION";
+                    rs = statement.executeQuery(sql);
                 } else {
-                    indexInformation = new Index();
-                    indexInformation.setTable(table);
-                    indexInformation.setName(indexName);
-                    indexInformation.setUnique(!nonUnique);
-                    indexInformation.setFilterCondition(filterCondition);
-                    indexMap.put(indexName, indexInformation);
+                    rs = databaseMetaData.getIndexInfo(database.convertRequestedSchemaToCatalog(schema), database.convertRequestedSchemaToSchema(schema), table.getName(), false, true);
                 }
+                Map<String, Index> indexMap = new HashMap<String, Index>();
+                while (rs.next()) {
+                    String indexName = convertFromDatabaseName(rs.getString("INDEX_NAME"));
+                    /*
+                     * TODO Informix generates indexnames with a leading blank if no name given.
+                     * An identifier with a leading blank is not allowed.
+                     * So here is it replaced.
+                     */
+                    if (database instanceof InformixDatabase && indexName.startsWith(" ")) {
+                        indexName = "_generated_index_" + indexName.substring(1);
+                    }
+                    short type = rs.getShort("TYPE");
+    //                String tableName = rs.getString("TABLE_NAME");
+                    boolean nonUnique = true;
+                    try {
+                        nonUnique = rs.getBoolean("NON_UNIQUE");
+                    } catch (SQLException e) {
+                        //doesn't exist in all databases
+                    }
+                    String columnName = convertFromDatabaseName(rs.getString("COLUMN_NAME"));
+                    short position = rs.getShort("ORDINAL_POSITION");
+                    /*
+                     * TODO maybe bug in jdbc driver? Need to investigate.
+                     * If this "if" is commented out ArrayOutOfBoundsException is thrown
+                     * because it tries to access an element -1 of a List (position-1)
+                     */
+                    if (database instanceof InformixDatabase
+                            && type != DatabaseMetaData.tableIndexStatistic
+                            && position == 0) {
+                        System.out.println(this.getClass().getName() + ": corrected position to " + ++position);
+                    }
+                    String filterCondition = rs.getString("FILTER_CONDITION");
 
-                for (int i = indexInformation.getColumns().size(); i < position; i++) {
-                    indexInformation.getColumns().add(null);
+                    if (type == DatabaseMetaData.tableIndexStatistic) {
+                        continue;
+                    }
+    //                if (type == DatabaseMetaData.tableIndexOther) {
+    //                    continue;
+    //                }
+
+                    if (columnName == null) {
+                        //nothing to index, not sure why these come through sometimes
+                        continue;
+                    }
+                    Index indexInformation;
+                    if (indexMap.containsKey(indexName)) {
+                        indexInformation = indexMap.get(indexName);
+                    } else {
+                        indexInformation = new Index();
+                        indexInformation.setTable(table);
+                        indexInformation.setName(indexName);
+                        indexInformation.setUnique(!nonUnique);
+                        indexInformation.setFilterCondition(filterCondition);
+                        indexMap.put(indexName, indexInformation);
+                    }
+
+                    for (int i = indexInformation.getColumns().size(); i < position; i++) {
+                        indexInformation.getColumns().add(null);
+                    }
+                    indexInformation.getColumns().set(position - 1, columnName);
                 }
-                indexInformation.getColumns().set(position - 1, columnName);
-            }
-            for (Map.Entry<String, Index> entry : indexMap.entrySet()) {
-                snapshot.getIndexes().add(entry.getValue());
-            }
-            rs.close();
-            if (statement != null) {
-                statement.close();
+                for (Map.Entry<String, Index> entry : indexMap.entrySet()) {
+                    snapshot.getIndexes().add(entry.getValue());
+                }
+            } finally {
+                if (rs != null) {
+                    try {
+                        rs.close();
+                    } catch (SQLException ignored) { }
+                }
+                if (statement != null) {
+                    try {
+                        statement.close();
+                    } catch (SQLException ignored) { }
+                }
             }
         }
 
@@ -688,31 +722,34 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
         for (Table table : snapshot.getTables()) {
             ResultSet rs = databaseMetaData.getPrimaryKeys(database.convertRequestedSchemaToCatalog(schema), database.convertRequestedSchemaToSchema(schema), table.getName());
 
-            while (rs.next()) {
-                String tableName = convertFromDatabaseName(rs.getString("TABLE_NAME"));
-                String columnName = convertFromDatabaseName(rs.getString("COLUMN_NAME"));
-                short position = rs.getShort("KEY_SEQ");
+            try {
+                while (rs.next()) {
+                    String tableName = convertFromDatabaseName(rs.getString("TABLE_NAME"));
+                    String columnName = convertFromDatabaseName(rs.getString("COLUMN_NAME"));
+                    short position = rs.getShort("KEY_SEQ");
 
-                boolean foundExistingPK = false;
-                for (PrimaryKey pk : foundPKs) {
-                    if (pk.getTable().getName().equals(tableName)) {
-                        pk.addColumnName(position - 1, columnName);
+                    boolean foundExistingPK = false;
+                    for (PrimaryKey pk : foundPKs) {
+                        if (pk.getTable().getName().equals(tableName)) {
+                            pk.addColumnName(position - 1, columnName);
 
-                        foundExistingPK = true;
+                            foundExistingPK = true;
+                        }
+                    }
+
+                    if (!foundExistingPK) {
+                        PrimaryKey primaryKey = new PrimaryKey();
+                        primaryKey.setTable(table);
+                        primaryKey.addColumnName(position - 1, columnName);
+                        primaryKey.setName(convertPrimaryKeyName(rs.getString("PK_NAME")));
+
+                        foundPKs.add(primaryKey);
                     }
                 }
-
-                if (!foundExistingPK) {
-                    PrimaryKey primaryKey = new PrimaryKey();
-                    primaryKey.setTable(table);
-                    primaryKey.addColumnName(position - 1, columnName);
-                    primaryKey.setName(convertPrimaryKeyName(rs.getString("PK_NAME")));
-
-                    foundPKs.add(primaryKey);
-                }
+            } finally {
+                rs.close();
             }
 
-            rs.close();
         }
 
         snapshot.getPrimaryKeys().addAll(foundPKs);
@@ -790,10 +827,14 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
             autoIncrement = meta.isAutoIncrement(1);
         } finally {
             if (selectRS != null) {
-                selectRS.close();
+                try {
+                    selectRS.close();
+                } catch (SQLException ignored) { }
             }
             if (statement != null) {
-                statement.close();
+                try {
+                    statement.close();
+                } catch (SQLException ignored) { }
             }
         }
 

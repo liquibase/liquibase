@@ -81,7 +81,11 @@ public class PostgresDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGener
             snapshot.getUniqueConstraints().addAll(foundUC);
         }
         finally {
-            rs.close();
+            try {
+                if (rs != null) {
+                    rs.close();
+                }
+            } catch (SQLException ignored) { }
             if (statement != null) {
                 statement.close();
             }
@@ -107,7 +111,11 @@ public class PostgresDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGener
             }
         }
         finally {
-            rs.close();
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ignored) { }
+            }
             if (stmt != null)
                 stmt.close();
         }
