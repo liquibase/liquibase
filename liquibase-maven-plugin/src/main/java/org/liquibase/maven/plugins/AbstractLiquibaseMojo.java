@@ -15,8 +15,10 @@ import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.database.Database;
 import liquibase.exception.*;
 import liquibase.util.ui.UIFactory;
+import org.apache.maven.artifact.manager.WagonManager;
 import org.apache.maven.plugin.*;
 import org.apache.maven.project.MavenProject;
+import org.apache.maven.wagon.authentication.AuthenticationInfo;
 
 /**
  * A base class for providing Liquibase {@link liquibase.Liquibase} functionality.
@@ -47,6 +49,21 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      * @parameter expression="${liquibase.url}"
      */
     protected String url;
+
+    /**
+
+     The Maven Wagon manager to use when obtaining server authentication details.
+     @component role="org.apache.maven.artifact.manager.WagonManager"
+     @required
+     @readonly
+     */
+    private WagonManager wagonManager;
+    /**
+     * The server id in settings.xml to use when authenticating with.
+     *
+     * @parameter expression="${liquibase.server}"
+     */
+    private String server;
 
     /**
      * The database username to use to connect to the specified database.
@@ -209,6 +226,12 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
 
     public void execute() throws MojoExecutionException, MojoFailureException {
         getLog().info(MavenUtils.LOG_SEPARATOR);
+
+        AuthenticationInfo info = wagonManager.getAuthenticationInfo( server );
+        if ( info != null ) {
+            username = info.getUserName();
+            password = info.getPassword();
+        }
 
         String shouldRunProperty = System.getProperty(Liquibase.SHOULD_RUN_SYSTEM_PROPERTY);
         if (shouldRunProperty != null && !Boolean.valueOf(shouldRunProperty)) {
