@@ -171,6 +171,12 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
 
         } catch (IOException e) {
             throw new ChangeLogParseException(e);
+        } finally {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (IOException ignore) { }
+            }
         }
 
         return changeLog;

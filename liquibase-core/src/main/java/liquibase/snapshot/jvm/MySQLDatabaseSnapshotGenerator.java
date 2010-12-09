@@ -46,19 +46,33 @@ public class MySQLDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerato
         Map<String, List<String>> tableSchema = new HashMap<String, List<String>>();
         
         if (!schemaCache.containsKey(tableName)) {
-        	
-        	Statement selectStatement = ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement();
-            ResultSet rsColumnType = selectStatement.executeQuery("DESC "+database.escapeTableName(schemaName, tableName));
-            
-            while(rsColumnType.next()) {
-            	List<String> colSchema = new ArrayList<String>();
-            	colSchema.add(rsColumnType.getString("Type"));
-            	colSchema.add(rsColumnType.getString("Default"));
-            	tableSchema.put(rsColumnType.getString("Field"), colSchema);
+
+            Statement selectStatement = null;
+            ResultSet rsColumnType = null;
+            try {
+                selectStatement = ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement();
+                rsColumnType = selectStatement.executeQuery("DESC "+database.escapeTableName(schemaName, tableName));
+
+                while(rsColumnType.next()) {
+                    List<String> colSchema = new ArrayList<String>();
+                    colSchema.add(rsColumnType.getString("Type"));
+                    colSchema.add(rsColumnType.getString("Default"));
+                    tableSchema.put(rsColumnType.getString("Field"), colSchema);
+                }
+            } finally {
+                if (rsColumnType != null) {
+                    try {
+                        rsColumnType.close();
+                    } catch (SQLException ignore) { }
+                }
+                if (selectStatement != null) {
+                    try {
+                        selectStatement.close();
+                    } catch (SQLException ignore) { }
+                }
             }
-            
-            rsColumnType.close();
-            
+
+
             schemaCache.put(tableName, tableSchema);
         	
         }

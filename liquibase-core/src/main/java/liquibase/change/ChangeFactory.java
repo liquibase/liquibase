@@ -38,7 +38,7 @@ public class ChangeFactory {
     /**
      * Return singleton SqlGeneratorFactory
      */
-    public static ChangeFactory getInstance() {
+    public static synchronized ChangeFactory getInstance() {
         if (instance == null) {
              instance = new ChangeFactory();
         }
