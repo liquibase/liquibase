@@ -20,7 +20,7 @@ public class DropPrimaryKeyGenerator extends AbstractSqlGenerator<DropPrimaryKey
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", dropPrimaryKeyStatement.getTableName());
 
-        if (database instanceof PostgresDatabase || database instanceof FirebirdDatabase || database instanceof InformixDatabase) {
+        if (database instanceof FirebirdDatabase || database instanceof InformixDatabase) {
             validationErrors.checkRequiredField("constraintName", dropPrimaryKeyStatement.getConstraintName());
         }
 		
@@ -53,7 +53,28 @@ public class DropPrimaryKeyGenerator extends AbstractSqlGenerator<DropPrimaryKey
 				sql = "ALTER TABLE " + database.escapeTableName(statement.getSchemaName(), statement.getTableName()) + " DROP CONSTRAINT " + database.escapeConstraintName(statement.getConstraintName());
 			}
         } else if (database instanceof PostgresDatabase) {
-            sql = "ALTER TABLE " + database.escapeTableName(statement.getSchemaName(), statement.getTableName()) + " DROP CONSTRAINT " + database.escapeConstraintName(statement.getConstraintName());
+			if (statement.getConstraintName() == null) {
+				StringBuilder query = new StringBuilder();
+				query.append("create or replace function __liquibase_drop_pk(tableName text) returns void as $$");
+				query.append(" declare");
+				query.append(" pkname text;");
+				query.append(" sql text;");
+				query.append(" begin");
+				query.append(" pkname = c.conname");
+				query.append(" from pg_class r, pg_constraint c");
+				query.append(" where r.oid = c.conrelid");
+				query.append(" and contype = 'p'");
+				query.append(" and relname ilike tableName;");
+				query.append(" sql = 'alter table ' || tableName || ' drop constraint ' || pkname;");
+				query.append(" execute sql;");
+				query.append(" end;");
+				query.append(" $$ language plpgsql;");
+				query.append(" select __liquibase_drop_pk('").append(statement.getTableName()).append("');");
+				query.append(" drop function __liquibase_drop_pk(tableName text);");
+				sql = query.toString();			
+			} else {
+				sql = "ALTER TABLE " + database.escapeTableName(statement.getSchemaName(), statement.getTableName()) + " DROP CONSTRAINT " + database.escapeConstraintName(statement.getConstraintName());
+			}
         } else if (database instanceof FirebirdDatabase) {
             sql = "ALTER TABLE " + database.escapeTableName(statement.getSchemaName(), statement.getTableName()) + " DROP CONSTRAINT "+database.escapeConstraintName(statement.getConstraintName());
         } else if (database instanceof OracleDatabase) {
