@@ -119,5 +119,9 @@ public class MSSQLTypeConverter extends AbstractTypeConverter {
     public NumberType getNumberType() {
       return new NumberType("NUMERIC");
     }
-    
+
+    @Override
+    public DoubleType getDoubleType() {
+        return new DoubleType("FLOAT");
+    }
 }
