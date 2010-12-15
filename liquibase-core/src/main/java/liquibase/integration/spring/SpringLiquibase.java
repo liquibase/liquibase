@@ -131,6 +131,8 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 
      private Map<String, String> parameters;
 
+    private String defaultSchema;
+
     public SpringLiquibase() {
         super();
     }
@@ -203,6 +205,14 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
         this.contexts = contexts;
     }
 
+    public String getDefaultSchema() {
+        return defaultSchema;
+    }
+
+    public void setDefaultSchema(String defaultSchema) {
+        this.defaultSchema = defaultSchema;
+    }
+
     /**
      * Executed automatically when the bean is initialized.
      */
@@ -242,6 +252,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
         for(Map.Entry<String, String> entry: parameters.entrySet()) {
             liquibase.setChangeLogParameter(entry.getKey(), entry.getValue());
         }
+
         return liquibase;
     }
 
@@ -253,7 +264,11 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
      * @throws DatabaseException
      */
     protected Database createDatabase(Connection c) throws DatabaseException {
-        return DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(c) );
+        Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(c));
+        if (this.defaultSchema != null) {
+            database.setDefaultSchemaName(this.defaultSchema);
+        }
+        return database;
     }
 
     public void setChangeLogParameters(Map<String, String> parameters) {
