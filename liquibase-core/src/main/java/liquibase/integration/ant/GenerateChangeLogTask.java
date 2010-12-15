@@ -22,6 +22,8 @@ public class GenerateChangeLogTask extends BaseLiquibaseTask {
 
 	@Override
 	public void execute() throws BuildException {
+        super.execute();
+        
 		Liquibase liquibase = null;
 		try {
 			PrintStream writer = createPrintStream();

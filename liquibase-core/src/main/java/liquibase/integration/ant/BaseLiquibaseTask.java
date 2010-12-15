@@ -10,6 +10,8 @@ import liquibase.logging.Logger;
 import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.resource.ResourceAccessor;
+import org.apache.tools.ant.AntClassLoader;
+import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.Task;
 import org.apache.tools.ant.types.Path;
@@ -53,6 +55,16 @@ public class BaseLiquibaseTask extends Task {
     public BaseLiquibaseTask() {
         super();
         new LogRedirector(this).redirectLogger();
+    }
+
+    @Override
+    public void execute() throws BuildException {
+        super.execute();
+
+        AntClassLoader loader = getProject().createClassLoader(classpath);
+        loader.setParent(this.getClass().getClassLoader());
+        loader.setThreadContextLoader();
+
     }
 
     public boolean isPromptOnNonLocalDatabase() {

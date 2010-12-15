@@ -19,7 +19,7 @@ public class DatabaseRollbackTask extends BaseLiquibaseTask {
         if (rollbackDate == null) {
             return null;
         }
-        
+
         return (Date) rollbackDate.clone();
     }
 
@@ -50,6 +50,13 @@ public class DatabaseRollbackTask extends BaseLiquibaseTask {
         if (getRollbackDate() == null && getRollbackCount() == null && getRollbackTag() == null) {
             throw new BuildException("rollbackDatabase requires rollbackTag, rollbackDate, or rollbackCount to be set");
         }
+
+        if (!shouldRun()) {
+            return;
+        }
+
+        super.execute();
+
         Liquibase liquibase = null;
         try {
             liquibase = createLiquibase();

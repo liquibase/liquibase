@@ -10,6 +10,12 @@ public class MarkNextChangeSetRanTask extends BaseLiquibaseTask {
     @Override
     public void execute() throws BuildException {
 
+        super.execute();
+
+        if (!shouldRun()) {
+            return;
+        }
+
         Liquibase liquibase = null;
         try {
             liquibase = createLiquibase();
