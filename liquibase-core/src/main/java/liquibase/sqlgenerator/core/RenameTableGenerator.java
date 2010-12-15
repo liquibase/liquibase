@@ -40,7 +40,7 @@ public class RenameTableGenerator extends AbstractSqlGenerator<RenameTableStatem
         } else if (database instanceof OracleDatabase) {
             sql = "ALTER TABLE " + database.escapeTableName(statement.getSchemaName(), statement.getOldTableName()) + " RENAME TO " + database.escapeTableName(null, statement.getNewTableName());
         } else if (database instanceof DB2Database) {
-            sql = "RENAME " + database.escapeTableName(statement.getSchemaName(), statement.getOldTableName()) + " TO " + database.escapeTableName(null, statement.getNewTableName());//db2 doesn't allow specifying new schema name
+            sql = "RENAME " + database.escapeTableName(statement.getSchemaName(), statement.getOldTableName()) + " TO " + database.escapeDatabaseObject(statement.getNewTableName());//db2 doesn't allow specifying new schema name
         } else if (database instanceof SQLiteDatabase) {
             sql = "ALTER TABLE " + database.escapeTableName(statement.getSchemaName(), statement.getOldTableName()) + " RENAME TO " + database.escapeTableName(null, statement.getNewTableName());
         } else {
