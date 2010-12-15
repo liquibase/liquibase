@@ -6,6 +6,7 @@ import liquibase.changelog.visitor.*;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
+import liquibase.diff.Diff;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.LockException;
@@ -544,7 +545,7 @@ public class Liquibase {
      * should be prompted before continuing.
      */
     public boolean isSafeToRunMigration() throws DatabaseException {
-        return !getDatabase().isLocalDatabase();
+        return getDatabase().isLocalDatabase();
     }
 
     /**
@@ -695,6 +696,10 @@ public class Liquibase {
 //        } finally {
 //            releaseLock();
 //        }
+    }
+
+    public Diff diff(Database referenceDatabase, Database targetDatabase) {
+        return new Diff(referenceDatabase, targetDatabase);
     }
 
     /**
