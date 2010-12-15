@@ -22,6 +22,12 @@ public class TagDatabaseTask extends BaseLiquibaseTask {
             throw new BuildException("tagDatabase requires tag parameter to be set");
         }
 
+          if (!shouldRun()) {
+            return;
+        }
+        
+        super.execute();
+
         Liquibase liquibase = null;
         try {
             liquibase = createLiquibase();

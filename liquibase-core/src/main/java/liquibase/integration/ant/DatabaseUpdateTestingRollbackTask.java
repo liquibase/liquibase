@@ -24,6 +24,8 @@ public class DatabaseUpdateTestingRollbackTask extends BaseLiquibaseTask {
             return;
         }
 
+        super.execute();
+
         Liquibase liquibase = null;
         try {
             liquibase = createLiquibase();

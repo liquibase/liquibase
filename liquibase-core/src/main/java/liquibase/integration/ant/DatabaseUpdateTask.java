@@ -26,6 +26,8 @@ public class DatabaseUpdateTask extends BaseLiquibaseTask {
             return;
         }
 
+        super.execute();
+
         Liquibase liquibase = null;
         try {
             liquibase = createLiquibase();

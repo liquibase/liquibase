@@ -81,6 +81,8 @@ public class DiffDatabaseTask extends BaseLiquibaseTask {
             throw new BuildException("diffDatabase requires referenceUrl to be set");
         }
 
+        super.execute();    
+
         Liquibase liquibase = null;
         try {
             PrintStream writer = createPrintStream();
