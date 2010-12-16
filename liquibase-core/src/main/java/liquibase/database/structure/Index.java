@@ -133,7 +133,9 @@ public class Index implements DatabaseObject, Comparable<Index> {
         int returnValue = this.table.getName().compareTo(o.table.getName());
 
         if (returnValue == 0) {
-            returnValue = this.getName().compareTo(o.getName());
+            String thisName = StringUtils.trimToEmpty(this.getName());
+            String oName = StringUtils.trimToEmpty(o.getName());
+            returnValue = thisName.compareTo(oName);
         }
 
         //We should not have two indexes that have the same name and tablename

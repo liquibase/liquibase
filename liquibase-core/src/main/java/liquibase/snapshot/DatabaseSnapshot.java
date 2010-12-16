@@ -2,6 +2,7 @@ package liquibase.snapshot;
 
 import liquibase.database.Database;
 import liquibase.database.structure.*;
+import liquibase.util.StringUtils;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -91,7 +92,7 @@ public class DatabaseSnapshot {
 
     public Index getIndex(String indexName) {
         for (Index index : getIndexes()) {
-            if (index.getName().equalsIgnoreCase(indexName)) {
+            if (StringUtils.trimToEmpty(index.getName()).equalsIgnoreCase(indexName)) {
                 return index;
             }
         }
