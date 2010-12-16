@@ -4,7 +4,6 @@ import liquibase.database.structure.type.BlobType;
 import liquibase.database.structure.type.BooleanType;
 import liquibase.database.structure.type.ClobType;
 import liquibase.database.Database;
-import liquibase.database.core.H2Database;
 import liquibase.database.core.MySQLDatabase;
 import liquibase.database.structure.type.DataType;
 import liquibase.database.structure.type.DateTimeType;
@@ -36,10 +35,10 @@ public class MySQLTypeConverter extends AbstractTypeConverter {
     }
 
     @Override
-    protected DataType getDataType(String columnTypeString, Boolean autoIncrement, String dataTypeName, String precision) {
+    protected DataType getDataType(String columnTypeString, Boolean autoIncrement, String dataTypeName, String precision, String additionalInformation) {
         if (columnTypeString.equalsIgnoreCase("timestamp")) {
             return new DateTimeType("TIMESTAMP");
         }
-        return super.getDataType(columnTypeString, autoIncrement, dataTypeName, precision);
+        return super.getDataType(columnTypeString, autoIncrement, dataTypeName, precision, additionalInformation);
     }
 }

@@ -23,9 +23,9 @@ public class OracleTypeConverter extends AbstractTypeConverter {
 	 * Contains definition of Oracle's data-types
 	 * */
 	@Override
-	protected DataType getDataType(String columnTypeString, Boolean autoIncrement, String dataTypeName, String precision) {
+	protected DataType getDataType(String columnTypeString, Boolean autoIncrement, String dataTypeName, String precision, String additionalInformation) {
 		// Try to define data type by searching of common standard types
-		DataType returnTypeName = super.getDataType(columnTypeString, autoIncrement, dataTypeName, precision);
+		DataType returnTypeName = super.getDataType(columnTypeString, autoIncrement, dataTypeName, precision, additionalInformation);
 		// If we found CustomType (it means - nothing compatible) then search for oracle types
 		if (returnTypeName instanceof CustomType) {
 			if (columnTypeString.toUpperCase().startsWith("VARCHAR2")) {

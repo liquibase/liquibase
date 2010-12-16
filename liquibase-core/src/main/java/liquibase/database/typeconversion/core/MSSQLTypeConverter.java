@@ -4,7 +4,6 @@ import liquibase.database.Database;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.structure.type.*;
 
-import java.math.BigInteger;
 import java.text.ParseException;
 
 public class MSSQLTypeConverter extends AbstractTypeConverter {
@@ -51,7 +50,7 @@ public class MSSQLTypeConverter extends AbstractTypeConverter {
     }
 
     @Override
-    protected DataType getDataType(String columnTypeString, Boolean autoIncrement, String dataTypeName, String precision) {
+    protected DataType getDataType(String columnTypeString, Boolean autoIncrement, String dataTypeName, String precision, String additionalInformation) {
         if (columnTypeString.endsWith(" identity")) {
             columnTypeString = columnTypeString.replaceFirst(" identity$", "");
             autoIncrement = true;
@@ -61,7 +60,7 @@ public class MSSQLTypeConverter extends AbstractTypeConverter {
         }
 
         // Try to define data type by searching of common standard types
-        DataType returnTypeName = super.getDataType(columnTypeString, autoIncrement, dataTypeName, precision);
+        DataType returnTypeName = super.getDataType(columnTypeString, autoIncrement, dataTypeName, precision, additionalInformation);
         // If we found CustomType (it means - nothing compatible) then search for oracle types
         if (returnTypeName instanceof CustomType) {
             boolean returnTypeChanged=false;

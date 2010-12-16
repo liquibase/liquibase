@@ -3,6 +3,7 @@ package liquibase.database.structure.type;
 import liquibase.database.Database;
 import liquibase.database.typeconversion.TypeConverterFactory;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.util.StringUtils;
 
 /**
  * Object representing a data type, instead of a plain string. It will be returned by
@@ -21,6 +22,8 @@ public abstract class DataType {
 
     private String firstParameter;
     private String secondParameter;
+
+    private String additionalInformation;
 
     protected DataType(String dataTypeName, int minParameters, int maxParameters) {
         this.dataTypeName = dataTypeName;
@@ -76,7 +79,15 @@ public abstract class DataType {
 		this.unit = unit;
 	}
 
-	public String convertObjectToString(Object value, Database database) {
+    public String getAdditionalInformation() {
+        return additionalInformation;
+    }
+
+    public void setAdditionalInformation(String additionalInformation) {
+        this.additionalInformation = additionalInformation;
+    }
+
+    public String convertObjectToString(Object value, Database database) {
         if (value == null) {
             return null;
         } else if (value.toString().equals("CURRENT_TIMESTAMP()")) {
@@ -106,7 +117,9 @@ public abstract class DataType {
             returnString+= ")";
         }
 
-        return returnString;
+        returnString += " "+ StringUtils.trimToEmpty(additionalInformation);
+
+        return returnString.trim();
     }
 
     @Override
