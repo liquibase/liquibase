@@ -2,6 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.change.ColumnConfig;
 import liquibase.database.Database;
+import liquibase.database.core.MySQLDatabase;
 import liquibase.database.core.OracleDatabase;
 import liquibase.database.structure.Column;
 import liquibase.database.structure.type.IntType;
@@ -41,6 +42,18 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
                 if (shouldBeImplementation(database)) {
                     assertEquals("CREATE TABLE SCHEMA_NAME.TABLE_NAME (COLUMN1_NAME TIMESTAMP DEFAULT null)", this.generatorUnderTest.generateSql(statement, database, null)[0].toSql());
                 }
+            }
+        }
+    }
+
+    @Test
+    public void testWithColumnSpecificIntType() {
+        for (Database database : TestContext.getInstance().getAllDatabases()) {
+                CreateTableStatement statement = new CreateTableStatement(SCHEMA_NAME, TABLE_NAME);
+                statement.addColumn(COLUMN_NAME1, TypeConverterFactory.getInstance().findTypeConverter(database).getDataType("int(11) unsigned", false));
+
+            if (database instanceof MySQLDatabase) {
+                assertEquals("CREATE TABLE `SCHEMA_NAME`.`TABLE_NAME` (`COLUMN1_NAME` INT(11) unsigned)", this.generatorUnderTest.generateSql(statement, database, null)[0].toSql());
             }
         }
     }

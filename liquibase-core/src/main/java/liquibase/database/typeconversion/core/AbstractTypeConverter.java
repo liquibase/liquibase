@@ -147,6 +147,7 @@ public abstract class AbstractTypeConverter implements TypeConverter {
         // Example cases: "CLOB", "java.sql.Types.CLOB", "CLOB(10000)", "java.sql.Types.CLOB(10000)
         String dataTypeName = null;
         String precision = null;
+        String additionalInformation = null;
         if (columnTypeString.startsWith("java.sql.Types") && columnTypeString.contains("(")) {
             precision = columnTypeString.substring(columnTypeString.indexOf("(") + 1, columnTypeString.indexOf(")"));
             dataTypeName = columnTypeString.substring(columnTypeString.lastIndexOf(".") + 1, columnTypeString.indexOf("("));
@@ -158,11 +159,12 @@ public abstract class AbstractTypeConverter implements TypeConverter {
         } else {
             dataTypeName = columnTypeString;
         }
+        additionalInformation = StringUtils.trimToNull(columnTypeString.replaceFirst(".*\\)", ""));
 
-        return getDataType(columnTypeString, autoIncrement, dataTypeName, precision);
+        return getDataType(columnTypeString, autoIncrement, dataTypeName, precision, additionalInformation);
     }
 
-    protected DataType getDataType(String columnTypeString, Boolean autoIncrement, String dataTypeName, String precision) {
+    protected DataType getDataType(String columnTypeString, Boolean autoIncrement, String dataTypeName, String precision, String additionalInformation) {
         // Translate type to database-specific type, if possible
         DataType returnTypeName = null;
         if (dataTypeName.equalsIgnoreCase("BIGINT")) {
@@ -226,6 +228,7 @@ public abstract class AbstractTypeConverter implements TypeConverter {
             throw new UnexpectedLiquibaseException("Could not determine " + dataTypeName + " for " + this.getClass().getName());
         }
         addPrecisionToType(precision, returnTypeName);
+        returnTypeName.setAdditionalInformation(additionalInformation);
 
          return returnTypeName;
     }
