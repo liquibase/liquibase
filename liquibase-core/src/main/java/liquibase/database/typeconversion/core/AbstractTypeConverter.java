@@ -159,7 +159,9 @@ public abstract class AbstractTypeConverter implements TypeConverter {
         } else {
             dataTypeName = columnTypeString;
         }
-        additionalInformation = StringUtils.trimToNull(columnTypeString.replaceFirst(".*\\)", ""));
+        if (columnTypeString.contains(")")) {
+            additionalInformation = StringUtils.trimToNull(columnTypeString.replaceFirst(".*\\)", ""));
+        }
 
         return getDataType(columnTypeString, autoIncrement, dataTypeName, precision, additionalInformation);
     }
