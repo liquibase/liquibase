@@ -578,24 +578,15 @@ public class Liquibase {
     public List<ChangeSet> listUnrunChangeSets(String contexts) throws LiquibaseException {
         changeLogParameters.setContexts(StringUtils.splitAndTrim(contexts, ","));
 
-        LockService lockService = LockService.getInstance(database);
-        lockService.waitForLock();
+        DatabaseChangeLog changeLog = ChangeLogParserFactory.getInstance().getParser(changeLogFile, resourceAccessor).parse(changeLogFile, changeLogParameters, resourceAccessor);
 
-        try {
-            DatabaseChangeLog changeLog = ChangeLogParserFactory.getInstance().getParser(changeLogFile, resourceAccessor).parse(changeLogFile, changeLogParameters, resourceAccessor);
+        changeLog.validate(database, contexts);
 
-            checkDatabaseChangeLogTable(false, changeLog, null);
+        ChangeLogIterator logIterator = getStandardChangelogIterator(contexts, changeLog);
 
-            changeLog.validate(database, contexts);
-
-            ChangeLogIterator logIterator = getStandardChangelogIterator(contexts, changeLog);
-
-            ListVisitor visitor = new ListVisitor();
-            logIterator.run(visitor, database);
-            return visitor.getSeenChangeSets();
-        } finally {
-            lockService.releaseLock();
-        }
+        ListVisitor visitor = new ListVisitor();
+        logIterator.run(visitor, database);
+        return visitor.getSeenChangeSets();
     }
 
     public void reportStatus(boolean verbose, String contexts, Writer out) throws LiquibaseException {
