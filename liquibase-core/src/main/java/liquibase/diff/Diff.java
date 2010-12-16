@@ -377,7 +377,9 @@ public class Diff {
 						continue;
 					}
 
-					if ( idx1.getName().equalsIgnoreCase( idx2.getName() )
+                    String index1Name = StringUtils.trimToEmpty(idx1.getName());
+                    String index2Name = StringUtils.trimToEmpty(idx2.getName());
+                    if ( index1Name.equalsIgnoreCase(index2Name)
 							&& idx1.getTable().getName().equalsIgnoreCase( idx2.getTable().getName() ) )
 					{
 						for ( String column : idx2.getColumns() )
