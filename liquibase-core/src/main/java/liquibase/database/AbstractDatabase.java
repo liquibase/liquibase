@@ -983,7 +983,7 @@ public abstract class AbstractDatabase implements Database {
             return true;
         }
         String url = connection.getURL();
-        return (url.indexOf("localhost") >= 0) || (url.indexOf("127.0.0.1") >= 0);
+        return (url.contains("localhost")) || (url.contains("127.0.0.1"));
     }
 
     public void executeStatements(Change change, DatabaseChangeLog changeLog, List<SqlVisitor> sqlVisitors) throws LiquibaseException, UnsupportedChangeException {
