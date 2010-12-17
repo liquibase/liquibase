@@ -139,6 +139,11 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
 
                 String urlPath = url.getFile();
                 urlPath = URLDecoder.decode(urlPath, "UTF-8");
+
+                if (url.getProtocol().equals("vfs") && !urlPath.startsWith("vfs")) {
+                    urlPath = "vfs:"+urlPath;
+                }
+
                 log.debug("Decoded urlPath: " + urlPath + " with protocol: " + url.getProtocol());
 
                 // If it's a file in a directory, trim the stupid file: spec
@@ -165,6 +170,10 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
                 }
 
                 // Else it's in a JAR, grab the path to the jar
+                if (urlPath.contains(".jar/")) {
+                    urlPath = urlPath.replace(".jar/", ".jar!/");
+                }
+
                 if (urlPath.indexOf('!') > 0) {
                     urlPath = urlPath.substring(0, urlPath.indexOf('!'));
                 }
@@ -178,11 +187,11 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
                 } else {
                     InputStream stream;
                     if (urlPath.startsWith("http:") || urlPath.startsWith("https:")
-                            || urlPath.startsWith("sonicfs:")) {
+                            || urlPath.startsWith("sonicfs:") || urlPath.startsWith("vfs:")) {
                         // load resources using http/https
                         // sonic ESB requires to be loaded using a regular URLConnection
-                        log.debug("Loading from jar using http/https: " + urlPath);
                         URL urlStream = new URL(urlPath);
+                        log.debug("Loading from jar using "+urlStream.getProtocol()+": " + urlPath);
                         URLConnection con = urlStream.openConnection();
                         // disable cache mainly to avoid jar file locking on Windows
                         con.setUseCaches(false);
@@ -292,7 +301,11 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
             if (!classesByJarUrl.containsKey(urlPath)) {
                 Set<String> names = new HashSet<String>();
 
-                jarStream = new JarInputStream(stream);
+                if (stream instanceof JarInputStream) {
+                    jarStream = (JarInputStream) stream;
+                } else {
+                    jarStream = new JarInputStream(stream);
+                }
 
                 JarEntry entry;
                 while ((entry = jarStream.getNextJarEntry()) != null) {
