@@ -57,7 +57,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      @required
      @readonly
      */
-    private WagonManager wagonManager;
+    protected WagonManager wagonManager;
     /**
      * The server id in settings.xml to use when authenticating with.
      *

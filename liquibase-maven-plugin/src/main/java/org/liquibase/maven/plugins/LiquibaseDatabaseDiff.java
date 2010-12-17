@@ -64,20 +64,11 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
     protected String referenceDefaultSchemaName;
 
     /**
-     * The Maven Wagon manager to use when obtaining server authentication details.
-     *
-     * @component role="org.apache.maven.artifact.manager.WagonManager"
-     * @required
-     * @readonly
-     */
-    private WagonManager wagonManager;
-
-    /**
      * The server id in settings.xml to use when authenticating with.
      *
-     * @parameter expression="${liquibase.server}"
+     * @parameter expression="${liquibase.referenceServer}"
      */
-    private String server;
+    private String referenceServer;
 
 
     /**
@@ -90,10 +81,10 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
-        AuthenticationInfo info = wagonManager.getAuthenticationInfo(server);
-        if (info != null) {
-            username = info.getUserName();
-            password = info.getPassword();
+        AuthenticationInfo referenceInfo = wagonManager.getAuthenticationInfo(referenceServer);
+        if (referenceInfo != null) {
+            referenceUsername = referenceInfo.getUserName();
+            referencePassword = referenceInfo.getPassword();
         }
         
         super.execute();
