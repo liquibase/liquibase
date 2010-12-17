@@ -101,7 +101,7 @@ public abstract class AbstractExecuteTest {
                         convertedSql = replaceDatabaseClauses(convertedSql, database);
                         convertedSql = replaceStandardTypes(convertedSql, database);
 
-                        assertEquals("Incorrect SQL for " + database.getClass().getName(), convertedSql.toLowerCase(), sql[index].toSql().toLowerCase());
+                        assertEquals("Incorrect SQL for " + database.getClass().getName(), convertedSql.toLowerCase().trim(), sql[index].toSql().toLowerCase());
                         index++;
                     }
                 }
