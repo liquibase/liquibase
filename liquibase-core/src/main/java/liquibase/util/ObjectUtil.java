@@ -1,14 +1,18 @@
 package liquibase.util;
 
-import liquibase.statement.DatabaseFunction;
-
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigInteger;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
+
+import liquibase.statement.DatabaseFunction;
 
 public class ObjectUtil {
 
+	private static Map<Class<?>,Method[]>methodCache = new HashMap<Class<?>, Method[]>();
+	
     public static Object getProperty(Object object, String propertyName) throws IllegalAccessException, InvocationTargetException {
         String methodName = "get" + propertyName.substring(0, 1).toUpperCase(Locale.ENGLISH) + propertyName.substring(1);
         Method[] methods = object.getClass().getMethods();
@@ -22,7 +26,15 @@ public class ObjectUtil {
 
     public static void setProperty(Object object, String propertyName, String propertyValue) throws IllegalAccessException, InvocationTargetException {
         String methodName = "set" + propertyName.substring(0, 1).toUpperCase(Locale.ENGLISH) + propertyName.substring(1);
-        Method[] methods = object.getClass().getMethods();
+        Method[] methods;
+        
+        methods = methodCache.get(object.getClass());
+        
+        if (methods == null) {
+        	methods = object.getClass().getMethods();
+        	methodCache.put(object.getClass(), methods);
+        }
+        
         for (Method method : methods) {
             if (method.getName().equals(methodName)) {
                 Class<?> parameterType = method.getParameterTypes()[0];
