@@ -7,7 +7,7 @@
 %define mssql        0
 %define sqlite       0
 # Liquibase Package
-%define lqver        1.9.5
+%define lqver        2.0.0
 %define buildnum     1
 ## MySQL Jar
 %define mysqljar     mysql-connector-java-5.1.10.jar

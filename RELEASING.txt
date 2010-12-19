@@ -3,6 +3,7 @@ update changelog.txt
 tag repository (after everything is sucessfully released)
 
 CORE:
+fix version in spec file
 run core/build.xml all
 create core release on sourceforge
 upload new version of site to server
