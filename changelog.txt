@@ -1,10 +1,9 @@
 Liquibase Core Changelog
 ===========================================
 
-Change in version 2.0.M1 (2009.6.24)
+Change in version 2.0.0 (2010.12.19)
 ----------------------
-- Initial release of the 2.0 codebase, focusing on extension/integration APIs
-- Changed CheckSum generation logic
+- Major change to codebase, focusing on extension/integration APIs
 
 Changes in version 1.9.3 (2009.4.3)
 ----------------------
