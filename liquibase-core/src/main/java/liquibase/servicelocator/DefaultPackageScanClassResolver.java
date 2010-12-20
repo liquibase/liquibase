@@ -143,6 +143,9 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
                 if (url.getProtocol().equals("vfs") && !urlPath.startsWith("vfs")) {
                     urlPath = "vfs:"+urlPath;
                 }
+                if (url.getProtocol().equals("vfszip") && !urlPath.startsWith("vfszip")) {
+                    urlPath = "vfszip:"+urlPath;
+                }
 
                 log.debug("Decoded urlPath: " + urlPath + " with protocol: " + url.getProtocol());
 
@@ -187,7 +190,7 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
                 } else {
                     InputStream stream;
                     if (urlPath.startsWith("http:") || urlPath.startsWith("https:")
-                            || urlPath.startsWith("sonicfs:") || urlPath.startsWith("vfs:")) {
+                            || urlPath.startsWith("sonicfs:") || urlPath.startsWith("vfs:") || urlPath.startsWith("vfszip:")) {
                         // load resources using http/https
                         // sonic ESB requires to be loaded using a regular URLConnection
                         URL urlStream = new URL(urlPath);
