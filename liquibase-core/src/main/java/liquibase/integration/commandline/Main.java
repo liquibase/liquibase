@@ -45,6 +45,7 @@ public class Main {
     protected String changeLogFile;
     protected String classpath;
     protected String contexts;
+    protected String driverPropertiesFile;
     protected Boolean promptForNonLocalDatabase = null;
     protected Boolean includeSystemClasspath;
     protected String defaultsFile = "liquibase.properties";
@@ -359,6 +360,9 @@ public class Main {
         stream.println(" --contexts=<value>                         ChangeSet contexts to execute");
         stream.println(" --defaultsFile=</path/to/file.properties>  File with default option values");
         stream.println("                                            (default: ./liquibase.properties)");
+        stream.println(" --driverPropertiesFile=</path/to/file.properties>  File with custom properties");
+        stream.println("                                            to be set on the JDBC connection");
+        stream.println("                                            to be created");
         stream.println(" --includeSystemClasspath=<true|false>      Include the system classpath");
         stream.println("                                            in the Liquibase classpath");
         stream.println("                                            (default: true)");
@@ -610,7 +614,9 @@ public class Main {
 
         FileSystemResourceAccessor fsOpener = new FileSystemResourceAccessor();
         CommandLineResourceAccessor clOpener = new CommandLineResourceAccessor(classLoader);
-        Database database = CommandLineUtils.createDatabaseObject(classLoader, this.url, this.username, this.password, this.driver, this.defaultSchemaName, this.databaseClass);
+        Database database = CommandLineUtils.createDatabaseObject(classLoader, this.url, 
+            this.username, this.password, this.driver, this.defaultSchemaName, 
+            this.databaseClass, this.driverPropertiesFile);
         try {
 
 
@@ -796,7 +802,7 @@ public class Main {
             throw new CommandLineParsingException("referenceUrl parameter missing");
         }
 
-        return CommandLineUtils.createDatabaseObject(classLoader, url, username, password, driver, defaultSchemaName, null);
+        return CommandLineUtils.createDatabaseObject(classLoader, url, username, password, driver, defaultSchemaName, null, null);
 //        Driver driverObject;
 //        try {
 //            driverObject = (Driver) Class.forName(driver, true, classLoader).newInstance();
