@@ -249,8 +249,10 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 
     protected Liquibase createLiquibase(Connection c) throws LiquibaseException {
         Liquibase liquibase = new Liquibase(getChangeLog(), createResourceOpener(), createDatabase(c));
-        for(Map.Entry<String, String> entry: parameters.entrySet()) {
-            liquibase.setChangeLogParameter(entry.getKey(), entry.getValue());
+        if (parameters != null) {
+            for(Map.Entry<String, String> entry: parameters.entrySet()) {
+                liquibase.setChangeLogParameter(entry.getKey(), entry.getValue());
+            }
         }
 
         return liquibase;
