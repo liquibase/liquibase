@@ -20,7 +20,7 @@ import liquibase.statement.SqlStatement;
 import liquibase.util.StringUtils;
 
 import javax.xml.parsers.ParserConfigurationException;
-import java.io.File;
+import java.io.*;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.Writer;
@@ -42,7 +42,8 @@ public class CommandLineUtils {
                                                 String password,
                                                 String driver,
                                                 String defaultSchemaName,
-                                                String databaseClass) throws DatabaseException {
+                                                String databaseClass,
+                                                String driverPropertiesFile) throws DatabaseException {
         if (driver == null) {
             driver = DatabaseFactory.getInstance().findDefaultDriver(url);
         }
@@ -68,17 +69,39 @@ public class CommandLineUtils {
             } catch (Exception e) {
                 throw new RuntimeException("Cannot find database driver: " + e.getMessage());
             }
-            Properties info = new Properties();
+
+
+            Properties driverProperties = new Properties();
+
             if (username != null) {
-                info.put("user", username);
+                driverProperties.put("user", username);
             }
             if (password != null) {
-                info.put("password", password);
+                driverProperties.put("password", password);
+            }
+            if (null != driverPropertiesFile) {
+                File propertiesFile = new File(driverPropertiesFile);
+                if (propertiesFile.exists()) {
+//                    System.out.println("Loading properties from the file:'" + driverPropertiesFile + "'");
+                    driverProperties.load(new FileInputStream(propertiesFile));
+                } else {
+                  throw new RuntimeException("Can't open JDBC Driver specific properties from the file: '"
+                      + driverPropertiesFile + "'");
+                }
             }
 
-            Connection connection = driverObject.connect(url, info);
+
+//            System.out.println("Properties:");
+//            for (Map.Entry entry : driverProperties.entrySet()) {
+//                System.out.println("Key:'"+entry.getKey().toString()+"' Value:'"+entry.getValue().toString()+"'");
+//            }
+            
+
+//            System.out.println("Connecting to the URL:'"+url+"' using driver:'"+driverObject.getClass().getName()+"'");
+            Connection connection = driverObject.connect(url, driverProperties);
+//            System.out.println("Connection has been created");
             if (connection == null) {
-                throw new DatabaseException("Connection could not be created to " + url + " with driver " + driver.getClass().getName() + ".  Possibly the wrong driver for the given database URL");
+                throw new DatabaseException("Connection could not be created to " + url + " with driver " + driverObject.getClass().getName() + ".  Possibly the wrong driver for the given database URL");
             }
 
             Database database = databaseFactory.findCorrectDatabaseImplementation(new JdbcConnection(connection));
