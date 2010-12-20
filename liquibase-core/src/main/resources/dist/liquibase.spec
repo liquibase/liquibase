@@ -30,7 +30,7 @@ Name: liquibase
 Summary: Liquibase Database Refactoring Tool
 Version: %{lqver}
 Release: %{buildnum}%{?dist}
-License: LGPL
+License: Apache 2.0
 Group: Applications/Databases
 Source0: %{name}-%{version}.tar.gz
 Source1: %{mysqljar}
@@ -55,7 +55,7 @@ Vendor: LiquiBase (http://www.liquibase.org)
 Provides: liquibase = %{version}-%{release}
 
 %description
-LiquiBase is an open source (LGPL), database-independent library for tracking, 
+LiquiBase is an open source (Apache 2.0 License), database-independent library for tracking,
 managing and applying database changes. It is built on a simple premise: All 
 database changes are stored in a human readable yet trackable form and checked 
 into source control.
@@ -182,7 +182,7 @@ EOF
 %files
 %defattr(-,root,root)
 %attr(0755,root,root) %{_sysconfdir}/profile.d/%{name}.sh
-%doc docs/* samples changelog.txt lgpl.txt 
+%doc docs/* samples changelog.txt LICENSE.txt
 %{_libdir}/%{name}
 %{_bindir}/%{name}
 
