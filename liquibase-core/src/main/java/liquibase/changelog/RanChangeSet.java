@@ -17,13 +17,17 @@ public class RanChangeSet {
     private ChangeSet.ExecType execType;
 
     public RanChangeSet(ChangeSet changeSet) {
+        this(changeSet, null);
+    }
+
+    public RanChangeSet(ChangeSet changeSet, ChangeSet.ExecType execType) {
         this(changeSet.getFilePath(),
              changeSet.getId(),
              changeSet.getAuthor(),
              changeSet.generateCheckSum(),
              new Date(),
              null,
-             null);
+             execType);
     }
 
     public RanChangeSet(String changeLog, String id, String author, CheckSum lastCheckSum, Date dateExecuted, String tag, ChangeSet.ExecType execType) {

@@ -883,7 +883,7 @@ public abstract class AbstractDatabase implements Database {
 
         ExecutorService.getInstance().getExecutor(this).execute(new MarkChangeSetRanStatement(changeSet, execType));
         commit();
-        getRanChangeSetList().add(new RanChangeSet(changeSet));
+        getRanChangeSetList().add(new RanChangeSet(changeSet, execType));
     }
 
     public void removeRanStatus(ChangeSet changeSet) throws DatabaseException {
