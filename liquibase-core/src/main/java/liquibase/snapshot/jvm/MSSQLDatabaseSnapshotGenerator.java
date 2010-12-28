@@ -16,12 +16,12 @@ public class MSSQLDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerato
 
     @Override
     protected String convertTableNameToDatabaseTableName(String tableName) {
-        return tableName.toLowerCase();
+        return tableName;
     }
 
     @Override
     protected String convertColumnNameToDatabaseTableName(String columnName) {
-        return columnName.toLowerCase();
+        return columnName;
     }
 
     /**

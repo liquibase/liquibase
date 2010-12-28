@@ -15,11 +15,11 @@
     </changeSet>
 
     <changeSet id="bassett" author="6" runAlways="true">
-        <loadUpdateData tableName="books" primaryKey="ISBN" file="changelogs/smartLoadData.books.csv" />
+        <loadUpdateData tableName="books" primaryKey="isbn" file="changelogs/smartLoadData.books.csv" />
     </changeSet>
 
     <changeSet id="bassett" author="8" runAlways="true">
-        <loadUpdateData tableName="books" primaryKey="ISBN" file="changelogs/smartLoadData.books2.csv" />
+        <loadUpdateData tableName="books" primaryKey="isbn" file="changelogs/smartLoadData.books2.csv" />
     </changeSet>
 
     <changeSet id="bassett" author="9">
@@ -35,11 +35,11 @@
     </changeSet>
 
     <changeSet id="bassett" author="10" runAlways="true">
-        <loadUpdateData tableName="books2" primaryKey="ISBN,AUTHOR_ID" file="changelogs/smartLoadData.books.csv" />
+        <loadUpdateData tableName="books2" primaryKey="isbn,author_id" file="changelogs/smartLoadData.books.csv" />
     </changeSet>
 
     <changeSet id="bassett" author="11" runAlways="true">
-        <loadUpdateData tableName="books2" primaryKey="ISBN,AUTHOR_ID" file="changelogs/smartLoadData.books2.csv" />
+        <loadUpdateData tableName="books2" primaryKey="isbn,author_id" file="changelogs/smartLoadData.books2.csv" />
     </changeSet>
 
     <changeSet id="sampleCSVData-table" author="nvoxland">

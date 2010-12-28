@@ -1,5 +1,5 @@
 CREATE VIEW [LIQUIBASEB].[PERSON_VIEW]
 AS
 SELECT     *
-FROM       PERSON
+FROM       person
 GO
