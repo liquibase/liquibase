@@ -305,8 +305,7 @@
     <changeSet id="1" author="colin" runOnChange="true">
         <preConditions onFail="MARK_RAN">
             <not>
-                <viewExists schemaName="LIQUIBASEB" viewName="
-                PERSON_VIEW"/>
+                <viewExists schemaName="LIQUIBASEB" viewName="PERSON_VIEW"/>
             </not>
         </preConditions>
         <comment>Checking if person_view present, and adding if not</comment>
