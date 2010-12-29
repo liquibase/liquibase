@@ -49,7 +49,7 @@ public class InsertOrUpdateGeneratorMSSQL extends InsertOrUpdateGenerator {
 
     @Override
     public Sql[] generateSql(InsertOrUpdateStatement insertOrUpdateStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        System.out.println("gemnerating");
+        System.out.println("generating");
 
         return super.generateSql(insertOrUpdateStatement, database, sqlGeneratorChain);    //To change body of overridden methods use File | Settings | File Templates.
     }
