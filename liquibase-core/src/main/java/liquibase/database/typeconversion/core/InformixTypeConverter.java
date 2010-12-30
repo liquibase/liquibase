@@ -56,12 +56,12 @@ public class InformixTypeConverter extends AbstractTypeConverter {
         return new BooleanType() {
             @Override
             public String getTrueBooleanValue() {
-                return "'t'";
+                return "t";
             }
 
             @Override
             public String getFalseBooleanValue() {
-                return "'f'";
+                return "f";
             }
         };
     }
