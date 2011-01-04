@@ -192,18 +192,4 @@ public class InformixDatabase extends AbstractDatabase {
 	public boolean supportsSchemas() {
 		return true;
 	}
-	
-	@Override
-	public String getDefaultSchemaName() {
-        DatabaseConnection connection = getConnection();
-        if (connection != null) {
-            try {
-                return connection.getCatalog();
-            } catch (DatabaseException e) {
-                LogFactory.getLogger().info("Error getting connection catalog.  Using default value", e);
-            }
-        }
-        return super.getDefaultSchemaName();
-    }
-
 }
